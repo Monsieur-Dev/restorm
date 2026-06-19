@@ -39,9 +39,27 @@
 #   scripts/ship.sh --base <branch> # ship onto a different base (e.g. an epic)
 #   scripts/ship.sh --no-merge      # rebase → push (e2e) → wait CI, but STOP
 #                                   # before merge (hand back to a human)
+#   scripts/ship.sh --auto          # single-invocation mode: push → auto-create
+#                                   # PR if missing → watch CI → merge on green.
+#                                   # Default (no --auto) stops at the no-PR
+#                                   # step so the lead can open the PR manually.
+#
+# --auto safety contract:
+#   • PR is created with `gh pr create --base <BASE> --fill` (title+body from
+#     branch name + RESTORM_COMMIT_AGENT). Falls through into the normal
+#     CI-watch + merge path — no second invocation needed.
+#   • Merge is STRICTLY GREEN-ONLY: every required check must conclude
+#     "success". On failure / cancelled / timed_out / action_required the script
+#     exits non-zero, does NOT merge, and prints the failing check(s) + run URL.
+#   • A transient "no checks reported yet" right after PR creation is treated as
+#     "keep waiting" (poll loop) — never as "bail early".
+#   • All existing safeguards still apply: flock one-at-a-time, NEVER
+#     --no-verify, merge-commit only (no ff/squash/rebase), no --delete-branch.
 #
 # Exit codes:
 #   0    shipped (or already merged / merge skipped with --no-merge after green)
+#   1    CI not green or merge refused — details printed to stderr
+#   2    bad arguments
 #   124  the push step hit the 20-min timeout — investigate flakiness
 #   *    the failing step's exit code (rebase conflict, e2e fail, CI red, …)
 
@@ -52,11 +70,13 @@ START_TS=$(date +%s)
 # ── Args ───────────────────────────────────────────────────────────────
 BASE="main"
 DO_MERGE=1
+AUTO=0
 while [ $# -gt 0 ]; do
   case "$1" in
     --base) BASE="${2:?--base needs a branch}"; shift 2 ;;
     --no-merge) DO_MERGE=0; shift ;;
-    -h|--help) sed -n '2,40p' "$0"; exit 0 ;;
+    --auto) AUTO=1; shift ;;
+    -h|--help) sed -n '2,56p' "$0"; exit 0 ;;
     *) echo "ship.sh: unknown argument: $1" >&2; exit 2 ;;
   esac
 done
@@ -201,21 +221,113 @@ if [ "${PUSH_CODE}" -ne 0 ]; then
 fi
 echo "✅ Pushed (e2e gate passed)."
 
-# ── 3. Wait for CI to go green on the PR ───────────────────────────────
-# `gh pr checks --watch` blocks until every required check finishes, then
-# exits non-zero if any failed. It needs a PR to exist; the agent opens the
-# PR (AGENT_WORKFLOW) before ship. If none exists yet, stop with a clear ask
-# rather than merging an unreviewed branch.
-if ! gh pr view "${BRANCH}" --json number >/dev/null 2>&1; then
-  die "no PR found for ${BRANCH}. Open it first (gh pr create --base ${BASE}), then re-run ship.sh."
+# ── 3. Ensure a PR exists; auto-create it when --auto is set ───────────
+# Default (no --auto): stop with a clear ask so the lead can open the PR and
+# review it before ship resumes. This preserves the existing "human in the
+# loop" checkpoint.
+# With --auto: create the PR from branch+RESTORM_COMMIT_AGENT metadata and
+# fall through directly into the CI-watch + merge path — no second invocation.
+#
+# A CLOSED (not merged) PR is treated as absent under --auto: gh would resolve
+# it via "number" but it can't be merged. We read both number and state so the
+# message is unambiguous and a new OPEN PR is created instead.
+PR_NUMBER="$(gh pr view "${BRANCH}" --json number,state --jq .number 2>/dev/null || true)"
+PR_STATE_CUR="$(gh pr view "${BRANCH}" --json number,state --jq .state 2>/dev/null || true)"
+# Treat a CLOSED PR as absent for the purpose of this check: it can't be
+# merged, so under --auto we need to open a fresh one.
+if [ "${PR_STATE_CUR}" = "CLOSED" ]; then
+  if [ "${AUTO}" -ne 1 ]; then
+    die "PR for ${BRANCH} is CLOSED (not merged). Reopen or create a new one, then re-run ship.sh."
+  fi
+  echo "📋 Existing PR for ${BRANCH} is CLOSED — creating a fresh one (--auto)…"
+  PR_NUMBER=""
 fi
-echo "⏳ Waiting for CI to go green…"
-if ! gh pr checks "${BRANCH}" --watch --interval 30; then
-  die "CI is not green for ${BRANCH} — not merging. Inspect 'gh pr checks ${BRANCH}', fix, re-push, re-run ship.sh."
+if [ -z "${PR_NUMBER}" ]; then
+  if [ "${AUTO}" -ne 1 ]; then
+    die "no PR found for ${BRANCH}. Open it first (gh pr create --base ${BASE}), then re-run ship.sh."
+  fi
+  echo "📋 No open PR found for ${BRANCH} — creating one (--auto)…"
+  # --fill derives title + body from the branch's commits. The RESTORM_COMMIT_AGENT
+  # value (set by the lead before calling ship.sh) is already baked into those
+  # commit messages, so --fill captures it without extra plumbing.
+  if ! gh pr create --base "${BASE}" --fill; then
+    die "gh pr create failed — check 'gh auth status' and branch-protection rules."
+  fi
+  PR_NUMBER="$(gh pr view "${BRANCH}" --json number --jq .number 2>/dev/null || true)"
+  [ -n "${PR_NUMBER}" ] || die "PR was created but could not be resolved — inspect 'gh pr view ${BRANCH}'."
+  echo "✅ PR #${PR_NUMBER} created."
 fi
-echo "✅ CI green."
 
-# ── 4. Merge (real merge commit) + delete the branch ───────────────────
+# ── 4. Wait for CI to go green (strictly success-only) ─────────────────
+# gh pr checks --watch blocks until every required check finishes, then exits
+# non-zero when any check is not passing. That covers the common cases, but the
+# exit code alone doesn't distinguish "still pending" from "failed" right after
+# PR creation (checks may not have registered yet). We add an explicit
+# conclusion-validation loop:
+#   • poll until at least one check has been registered (up to ~5 min)
+#   • then hand off to `gh pr checks --watch` for the blocking wait
+#   • after --watch exits 0, re-query every check's conclusion and reject any
+#     that is not "SUCCESS" — this is the strictly-green-only gate
+#
+# The poll-until-registered guard prevents the old "bail on zero checks" bug
+# that --auto exposed: a fresh PR has no checks for the first ~10–30 s; the
+# original code would reach the CI-wait line with no checks and `--watch` exits
+# immediately with 0 (nothing to wait for) → the merge gate would silently pass
+# with no evidence of CI. The guard below holds the script in a tight loop until
+# GitHub registers at least one check (or we timeout, in which case we bail).
+echo "⏳ Waiting for CI checks to register on PR #${PR_NUMBER}…"
+CHECKS_WAIT_MAX=300   # 5 minutes max for checks to appear
+CHECKS_WAIT_INTERVAL=10
+CHECKS_WAITED=0
+while true; do
+  CHECK_COUNT="$(gh pr checks "${BRANCH}" --json name 2>/dev/null | \
+    python3 -c 'import json,sys; d=json.load(sys.stdin); print(len(d))' 2>/dev/null || echo 0)"
+  if [ "${CHECK_COUNT}" -gt 0 ]; then
+    echo "  ${CHECK_COUNT} check(s) registered — proceeding to watch."
+    break
+  fi
+  if [ "${CHECKS_WAITED}" -ge "${CHECKS_WAIT_MAX}" ]; then
+    die "CI checks never appeared on PR #${PR_NUMBER} after ${CHECKS_WAIT_MAX}s — inspect 'gh pr checks ${BRANCH}', re-push, re-run ship.sh."
+  fi
+  sleep "${CHECKS_WAIT_INTERVAL}"
+  CHECKS_WAITED=$(( CHECKS_WAITED + CHECKS_WAIT_INTERVAL ))
+done
+
+echo "⏳ Waiting for all CI checks to finish…"
+if ! gh pr checks "${BRANCH}" --watch --interval 30; then
+  # --watch exited non-zero: at least one check did not pass. Print detail.
+  echo "ship.sh: CI check(s) not green on ${BRANCH} — check details below." >&2
+  gh pr checks "${BRANCH}" >&2 || true
+  die "CI is not green for ${BRANCH} — not merging. Fix, re-push, re-run ship.sh."
+fi
+
+# Strict conclusion validation: `gh pr checks --watch` exits 0 when all checks
+# *completed*, but it may exit 0 for checks in "neutral" or other edge-case
+# states. Re-query every check's bucket+state and reject any that is not "pass".
+# The `bucket` field from `gh pr checks --json` categorises the check's outcome:
+#   pass / fail / pending / skipping / cancel
+# Only "pass" is acceptable here — any other bucket is non-success.
+echo "🔍 Verifying all check conclusions are pass…"
+FAILING_CHECKS="$(gh pr checks "${BRANCH}" --json name,bucket,state,link 2>/dev/null | \
+  python3 -c '
+import json, sys
+checks = json.load(sys.stdin)
+if not checks:
+    print("  FAIL: no checks reported — cannot verify CI is green")
+    sys.exit(1)
+bad = [c for c in checks if c.get("bucket","") != "pass"]
+for c in bad:
+    print("  FAIL: {} — state: {} (bucket: {}) — {}".format(
+        c.get("name","?"), c.get("state","?"), c.get("bucket","?"), c.get("link","(no URL)")))
+sys.exit(0 if not bad else 1)
+' 2>/dev/null)" || {
+  # Print the failing lines already assembled by the python script before dying
+  printf '%s\n' "${FAILING_CHECKS}" >&2
+  die "one or more CI checks did not pass — not merging. See URLs above."
+}
+echo "✅ CI green (all checks passed)."
+
+# ── 5. Merge (real merge commit) + delete the branch ───────────────────
 if [ "${DO_MERGE}" -ne 1 ]; then
   trap - EXIT
   journal "PASS at $(date -Is) — SHIP/no-merge (e2e+CI green, merge skipped) — agent ${AGENT} — branch ${BRANCH} → ${BASE} — worktree ${WORKTREE} — took $(elapsed)"
