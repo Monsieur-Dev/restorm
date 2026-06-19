@@ -52,6 +52,19 @@ export interface FirewallConfig {
 	 * makes no assumption that such traffic exists.
 	 */
 	internalRequestPredicate?: ((args: unknown[]) => boolean) | null
+	/**
+	 * When `true`, `installHardenInterceptor` runs a development-only
+	 * assertion that the firewall installed itself FIRST: every slot it is
+	 * about to lock down (`http.request`, `globalThis.fetch`,
+	 * `net.Socket.prototype.connect`, …) must still be the firewall's own
+	 * patched function, not one a later-loading dependency replaced. A
+	 * mismatch logs a warning (never throws — a platform that pre-freezes a
+	 * slot must not crash the app). Host apps set this from their own
+	 * dev/packaged flag (e.g. `!app.isPackaged`); defaults `false` so a
+	 * packaged build pays nothing. The lockdown freeze itself runs
+	 * regardless of this flag.
+	 */
+	devAssertOrdering?: boolean
 }
 
 interface ResolvedFirewallConfig {
@@ -59,13 +72,15 @@ interface ResolvedFirewallConfig {
 	e2eBypass: boolean
 	workerBootstrapPrefix: string
 	internalRequestPredicate: ((args: unknown[]) => boolean) | null
+	devAssertOrdering: boolean
 }
 
 const DEFAULT_CONFIG: ResolvedFirewallConfig = {
 	internalEndpointProvider: null,
 	e2eBypass: false,
 	workerBootstrapPrefix: 'ecui-firewall-bootstrap',
-	internalRequestPredicate: null
+	internalRequestPredicate: null,
+	devAssertOrdering: false
 }
 
 let current: ResolvedFirewallConfig = { ...DEFAULT_CONFIG }
@@ -88,6 +103,7 @@ export function configureFirewall(config: FirewallConfig): void {
 	if ('internalRequestPredicate' in config) {
 		current.internalRequestPredicate = config.internalRequestPredicate ?? null
 	}
+	if (config.devAssertOrdering !== undefined) current.devAssertOrdering = config.devAssertOrdering
 }
 
 /** Reset to defaults. Test-only convenience. */
@@ -101,6 +117,10 @@ export function isFirewallE2EBypass(): boolean {
 
 export function getWorkerBootstrapPrefix(): string {
 	return current.workerBootstrapPrefix
+}
+
+export function isDevAssertOrdering(): boolean {
+	return current.devAssertOrdering
 }
 
 /**

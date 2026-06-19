@@ -10,6 +10,7 @@ import { BufferingClientRequest } from './BufferingClientRequest'
 import { captureOriginHint } from './stackOrigin'
 import { detectWireProtocol } from './protocolDetect'
 import { isInternalEndpoint, isInternalRequest } from './firewallConfig'
+import { markFirewallPatch } from './patchMarker'
 import type {
 	RequestRecord,
 	RequestRecordProtocol,
@@ -164,8 +165,8 @@ function patchHttpModule(mod: HttpLikeModule, source: RequestRecordSource): void
 		return dispatch(args as unknown[], (a) => originalGet(...(a as Parameters<HttpGetFn>)))
 	}) as HttpGetFn
 
-	mod.request = patchedRequest
-	mod.get = patchedGet
+	mod.request = markFirewallPatch(patchedRequest)
+	mod.get = markFirewallPatch(patchedGet)
 }
 
 function makeDenied(record: RequestRecord): DeniedClientRequest {
@@ -393,7 +394,7 @@ function patchFetch(): void {
 		return originalFetch(input, init)
 	}
 
-	globalThis.fetch = patched
+	globalThis.fetch = markFirewallPatch(patched)
 }
 
 function makeFetchDenyError(record: RequestRecord): Error {

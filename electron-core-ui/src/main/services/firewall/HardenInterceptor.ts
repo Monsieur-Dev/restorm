@@ -7,6 +7,9 @@ import { randomUUID } from 'node:crypto'
 import { logger } from '../LoggerService'
 import { firewallService } from './FirewallService'
 import { permissionService } from './PermissionService'
+import { isFirewallBypassed } from './firewallBypass'
+import { isDevAssertOrdering } from './firewallConfig'
+import { markFirewallPatch, isFirewallPatch } from './patchMarker'
 import type { RequestRecord } from '../../../types/firewall'
 
 /**
@@ -82,6 +85,25 @@ function lockdownPatchedGlobals(): void {
 		{ obj: dns, key: 'resolve', label: 'dns.resolve' },
 		{ obj: dgram.Socket.prototype, key: 'send', label: 'dgram.Socket.prototype.send' }
 	]
+	// Dev-only ordering assertion: before freezing, confirm every slot
+	// is still the firewall's OWN wrapper. A slot that lost its patch marker
+	// means either the interceptor didn't install first or a later-loading
+	// dependency replaced our wrapper — in which case we'd freeze the
+	// adversary's function and silently fall out of the call path. Warn (never
+	// throw — a platform that pre-froze a slot must not crash the app); the
+	// freeze still runs. Off in packaged builds (the host injects the flag).
+	if (isDevAssertOrdering()) {
+		for (const { obj, key, label } of targets) {
+			const value = (obj as Record<string, unknown>)[key]
+			if (typeof value !== 'function') continue
+			if (!isFirewallPatch(value)) {
+				logger.warn(
+					'FirewallService: lockdown ordering assertion — slot is NOT the firewall wrapper (interceptor ran late, or a dependency replaced it)',
+					{ slot: label }
+				)
+			}
+		}
+	}
 	for (const { obj, key, label } of targets) {
 		try {
 			const value = (obj as Record<string, unknown>)[key]
@@ -114,6 +136,18 @@ function patchNetSocketConnect(): void {
 	const patched = function patchedConnect(this: NetSocket, ...args: RawConnectArgs): NetSocket {
 		const target = parseConnectArgs(args)
 		if (target !== null) {
+			// User-initiated outbound (a request the user clicked Connect /
+			// Run on) is pre-authorised via `withFirewallBypass` — same
+			// trust tier as the HTTP request runner. Mirror
+			// `MainProcessInterceptor`: emit an `allow` record for audit,
+			// then forward without a verdict roundtrip. Without this a
+			// socket.io polling / raw-socket connect to a user-typed host
+			// the project never declared would be classified (→ pending)
+			// instead of allowed.
+			if (isFirewallBypassed()) {
+				firewallService.emit(makeRecord(target, 'allow'))
+				return original.call(this, ...args)
+			}
 			const verdict = permissionService.classify({
 				scheme: target.protocol,
 				host: target.host,
@@ -139,7 +173,7 @@ function patchNetSocketConnect(): void {
 		}
 		return original.call(this, ...args)
 	}
-	;(proto as unknown as { connect: typeof patched }).connect = patched
+	;(proto as unknown as { connect: typeof patched }).connect = markFirewallPatch(patched)
 }
 
 /**
@@ -153,7 +187,7 @@ function patchNetSocketConnect(): void {
  * Returns `null` for unix-socket / unknown shapes (we let those
  * pass without firewall checking — they're not outbound network).
  */
-function parseConnectArgs(args: RawConnectArgs): ConnectTarget | null {
+export function parseConnectArgs(args: RawConnectArgs): ConnectTarget | null {
 	if (args.length === 0) return null
 	const first = args[0]
 	if (typeof first === 'number') {
@@ -211,7 +245,7 @@ function patchDnsLookup(): void {
 		// overloaded; cast through `unknown` so TS accepts the spread.
 		;(original as unknown as (...a: unknown[]) => void)(hostname, options, callback)
 	}
-	;(dns as unknown as { lookup: typeof patched }).lookup = patched
+	;(dns as unknown as { lookup: typeof patched }).lookup = markFirewallPatch(patched)
 }
 
 function patchDnsResolve(): void {
@@ -233,7 +267,7 @@ function patchDnsResolve(): void {
 		}
 		;(original as unknown as (...a: unknown[]) => void)(hostname, rrtypeOrCallback, callback)
 	}
-	;(dns as unknown as { resolve: typeof patched }).resolve = patched
+	;(dns as unknown as { resolve: typeof patched }).resolve = markFirewallPatch(patched)
 }
 
 /**
@@ -246,7 +280,7 @@ function patchDnsResolve(): void {
  * so a hostname-only check NEVER allows past a prompt — it just
  * decides "deny outright OR keep going with the connect".
  */
-function checkHostnameOnly(hostname: string, source: string): 'allow' | 'deny' {
+export function checkHostnameOnly(hostname: string, source: string): 'allow' | 'deny' {
 	if (typeof hostname !== 'string' || hostname.length === 0) return 'allow'
 	const lower = hostname.toLowerCase()
 	const blacklist = permissionService.listBlacklist()
@@ -274,6 +308,15 @@ function patchDgramSend(): void {
 	const patched = function patchedSend(this: DgramSocket, ...args: DgramSendArgs): void {
 		const target = parseDgramSendArgs(args)
 		if (target !== null) {
+			// User-initiated outbound is pre-authorised via the bypass —
+			// see `patchNetSocketConnect` for the rationale.
+			if (isFirewallBypassed()) {
+				const allowed = makeRecord({ ...target, protocol: 'internal' }, 'allow')
+				allowed.method = 'UDP'
+				firewallService.emit(allowed)
+				original.call(this, ...args)
+				return
+			}
 			const verdict = permissionService.classify({
 				scheme: 'udp',
 				host: target.host,
@@ -299,7 +342,7 @@ function patchDgramSend(): void {
 		}
 		original.call(this, ...args)
 	}
-	;(proto as unknown as { send: typeof patched }).send = patched
+	;(proto as unknown as { send: typeof patched }).send = markFirewallPatch(patched)
 }
 
 /**
@@ -308,7 +351,7 @@ function patchDgramSend(): void {
  * after it. Returns `null` if we can't tell — better to skip
  * than misfire.
  */
-function parseDgramSendArgs(args: DgramSendArgs): { host: string; port: number } | null {
+export function parseDgramSendArgs(args: DgramSendArgs): { host: string; port: number } | null {
 	for (let i = 0; i < args.length; i += 1) {
 		if (typeof args[i] === 'number' && i + 1 < args.length && typeof args[i + 1] === 'string') {
 			const port = args[i] as number

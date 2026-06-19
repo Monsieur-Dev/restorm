@@ -16,7 +16,7 @@ import { createServer as createTcpServer, type Server as TcpServer } from 'node:
 import { Aedes } from 'aedes'
 import type { AedesPublishPacket } from 'aedes'
 import { BrowserWindow } from 'electron'
-import { logger } from 'electron-core-ui/main'
+import { logger, withFirewallBypassSync } from 'electron-core-ui/main'
 import { contextService } from './ContextService'
 import { responseHistoryService } from './ResponseHistoryService'
 import { secretHydrationService } from './secrets/SecretHydrationService'
@@ -1144,12 +1144,18 @@ class WebSocketExecutionService {
 
       let socket: Socket
       try {
-        socket = io(resolved.resolvedUrl, {
+        // User-initiated connect (the user defined this target in their
+        // request) — pre-authorise it so the firewall interceptor sees the
+        // raw-socket connect as `allow`, mirroring the HTTP request runner.
+        // Wrap the synchronous `io(...)` itself (the socket connect fires
+        // inside it); a wrap around the public method would have unwound
+        // before this `await`-resumed continuation runs.
+        socket = withFirewallBypassSync(() => io(resolved.resolvedUrl, {
           extraHeaders: Object.keys(resolved.headers).length > 0 ? resolved.headers : undefined,
           forceNew: true,
           reconnection: false,
           timeout: resolved.timeout
-        })
+        }))
       } catch (err) {
         fireClose((err as Error).message || 'Connection failed')
         return
@@ -1250,7 +1256,8 @@ class WebSocketExecutionService {
 
       let ws: WebSocket
       try {
-        ws = new WebSocket(resolved.resolvedUrl, { headers: resolved.headers })
+        // User-initiated connect — pre-authorise (see the socket.io path).
+        ws = withFirewallBypassSync(() => new WebSocket(resolved.resolvedUrl, { headers: resolved.headers }))
       } catch (err) {
         fireClose((err as Error).message || 'Connection failed')
         return
@@ -1357,7 +1364,8 @@ class WebSocketExecutionService {
           ...(cfg.keepalive !== undefined ? { keepalive: cfg.keepalive } : {}),
           ...(cfg.will ? { will: { topic: cfg.will.topic, payload: Buffer.from(cfg.will.payload), qos: cfg.will.qos, retain: cfg.will.retain } } : {})
         }
-        const client = mqtt.connect(resolved.resolvedUrl, opts)
+        // User-initiated connect — pre-authorise (see the socket.io path).
+        const client = withFirewallBypassSync(() => mqtt.connect(resolved.resolvedUrl, opts))
 
         const connection: ActiveConnection = {
           requestId, kind: 'mqtt', mqttClient: client, startTime: resolved.startTime, messages: [],
@@ -1650,7 +1658,8 @@ class WebSocketExecutionService {
       let connected = false
 
       try {
-        const ws = new WebSocket(resolvedUrl, { headers })
+        // User-initiated connect — pre-authorise (see the socket.io path).
+        const ws = withFirewallBypassSync(() => new WebSocket(resolvedUrl, { headers }))
 
         const connection: ActiveConnection = { requestId, kind: 'websocket', ws, startTime, messages }
         this.activeConnections.set(requestId, connection)
@@ -1757,7 +1766,8 @@ class WebSocketExecutionService {
 
       let socket: Socket
       try {
-        socket = io(resolvedUrl, {
+        // User-initiated connect — pre-authorise (see the streaming path).
+        socket = withFirewallBypassSync(() => io(resolvedUrl, {
           // Default transports (polling → upgrade to websocket). Forcing
           // websocket-only breaks the engine.io handshake in the Electron main
           // process ("socket hang up") where a global WebSocket shadows `ws`.
@@ -1765,7 +1775,7 @@ class WebSocketExecutionService {
           forceNew: true,
           reconnection: false,
           timeout
-        })
+        }))
       } catch (err) {
         const durationMs = Date.now() - startTime
         this.broadcastProgress(requestId, 'error')
@@ -1902,7 +1912,8 @@ class WebSocketExecutionService {
           ...(cfg.keepalive !== undefined ? { keepalive: cfg.keepalive } : {}),
           ...(cfg.will ? { will: { topic: cfg.will.topic, payload: Buffer.from(cfg.will.payload), qos: cfg.will.qos, retain: cfg.will.retain } } : {})
         }
-        const c = mqtt.connect(resolvedUrl, opts)
+        // User-initiated connect — pre-authorise (see the streaming path).
+        const c = withFirewallBypassSync(() => mqtt.connect(resolvedUrl, opts))
         client = c
 
         const connection: ActiveConnection = {
