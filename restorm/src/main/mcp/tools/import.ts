@@ -138,11 +138,13 @@ export function registerImportTools(mcp: McpService): void {
       const argRecord = args
       const url = typeof argRecord['url'] === 'string' ? argRecord['url'] : ''
       if (!url) return errorReply('url is required')
-      // SSRF guard: the URL comes from a semi-trusted agent over
-      // loopback and the import fetch bypasses the firewall, so reject
-      // loopback / link-local / private targets up front.
+      // SSRF guard. This is the EXPLICIT top-level import URL the agent
+      // typed, so loopback/private hosts are allowed (importing a spec from
+      // a local dev server is legitimate) — but link-local / cloud-metadata
+      // is still blocked. Redirects + spec-embedded sub-fetches stay strict
+      // downstream (the real SSRF vectors).
       try {
-        assertSafeFetchUrl(url)
+        assertSafeFetchUrl(url, { allowPrivateHosts: true })
       } catch (error) {
         return errorReply(error instanceof Error ? error.message : String(error))
       }
