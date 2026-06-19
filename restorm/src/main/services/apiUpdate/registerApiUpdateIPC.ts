@@ -131,9 +131,13 @@ export function registerApiUpdateIPC(deps: ApiUpdateIPCDeps): void {
         // resolve auth here, not in the renderer.
         const dynamicHeaders = await resolveAuthHeadersForFolder(env, config.authenticationRequestId, variables)
         const headers = { ...dynamicHeaders, ...staticHeaders }
-        // SSRF guard: the spec URL ultimately comes from a stored
-        // (user-supplied) config and this fetch is not firewall-gated.
-        assertSafeFetchUrl(url)
+        // SSRF guard: the spec URL is the stored, user-supplied import
+        // source — the same EXPLICIT top-level URL the initial import
+        // used, so loopback/private hosts (a local dev API server) are a
+        // legitimate refresh target and opt in via `allowPrivateHosts`.
+        // Link-local / cloud-metadata stays blocked; this fetch is not
+        // firewall-gated.
+        assertSafeFetchUrl(url, { allowPrivateHosts: true })
         const response = await fetch(url, Object.keys(headers).length === 0 ? {} : { headers })
         if (!response.ok) {
           return { ok: false, error: `HTTP ${String(response.status)}: ${response.statusText}` }

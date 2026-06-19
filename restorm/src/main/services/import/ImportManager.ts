@@ -516,10 +516,12 @@ export async function tryAllImports(
   try {
     if (isUrl) {
       source = input
-      // Same firewall bypass rationale as `importFromUrl` above —
-      // user typed / dropped the URL, that's the authorisation
-      // signal. The SSRF guard still applies (bypass ≠ unrestricted).
-      assertSafeFetchUrl(input)
+      // Same firewall bypass rationale as `importFrom` above — user
+      // typed / dropped the URL, that's the authorisation signal, and
+      // it's an EXPLICIT top-level import URL so loopback/private hosts
+      // (a local dev API server) are a legitimate target. The SSRF guard
+      // still blocks link-local / cloud-metadata (bypass ≠ unrestricted).
+      assertSafeFetchUrl(input, { allowPrivateHosts: true })
       const response = await withFirewallBypass(() => fetch(input))
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`)

@@ -331,12 +331,14 @@ class HTTPExecutionService {
 
       return {
         requestId,
-        // A response WAS received, so this is NOT an error-port outcome
-        // (the catch below owns transport/throw failures). `success`
-        // reflects the HTTP status per the status-routing design: a
-        // 4xx/5xx is a successful round-trip with success:false, NOT an
-        // error. (cf docs/contributing/adding-a-protocol.md.)
-        success: result.statusCode < 400,
+        // A response WAS received, so the round-trip SUCCEEDED — the
+        // catch below owns transport/throw failures. `success` here means
+        // "we got a response"; the HTTP status (incl. 4xx/5xx) is carried
+        // on `statusCode` for the renderer's response pane + the auth /
+        // status-routing layers to interpret. Folding the status into
+        // `success` made a 401 render as a transport failure ("Status
+        // Code 0 Error") and mis-fire the auth-failure path.
+        success: true,
         statusCode: result.statusCode,
         statusText: result.statusText,
         headers: result.headers,

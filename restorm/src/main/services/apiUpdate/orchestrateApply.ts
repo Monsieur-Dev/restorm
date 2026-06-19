@@ -258,9 +258,14 @@ export async function runApiUpdateApply(folderId: string, selection?: ApiUpdateA
 }
 
 async function fetchText(url: string, headers: Record<string, string>): Promise<string> {
-  // SSRF guard: the spec URL ultimately comes from a stored
-  // (user-supplied) config and this fetch is not firewall-gated.
-  assertSafeFetchUrl(url)
+  // SSRF guard: the spec URL is the stored, user-supplied import source
+  // — the same EXPLICIT top-level URL the initial import / `importFrom`
+  // above uses (which opts into `allowPrivateHosts`), so a local dev API
+  // server is a legitimate refresh-apply target. Keeping this strict
+  // while `importFrom` allows private hosts would also be internally
+  // inconsistent. Link-local / cloud-metadata stays blocked; not
+  // firewall-gated.
+  assertSafeFetchUrl(url, { allowPrivateHosts: true })
   const response = await fetch(url, Object.keys(headers).length === 0 ? {} : { headers })
   if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`)
   return response.text()
