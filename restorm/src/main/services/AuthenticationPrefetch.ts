@@ -113,18 +113,25 @@ export function resolveProducedHeaders(
   for (const kv of producedHeaders) {
     if (!kv.key) continue
     if (kv.enabled === false) continue
-    const rendered = safeRender(kv.value, parsed)
+    const rendered = safeRender(kv.value, parsed, kv.key)
     if (rendered !== '') out[kv.key] = rendered
   }
   return out
 }
 
-function safeRender(template: string, context: unknown): string {
+function safeRender(template: string, context: unknown, headerKey?: string): string {
   if (!template.includes('{{')) return template
   try {
     const compiled = Handlebars.compile(template, { noEscape: true })
     return compiled(context)
-  } catch {
+  } catch (err) {
+    // Surface the failure: silently returning '' drops the produced header and
+    // the auth request fails downstream with no clue why. Log the header name
+    // (not the template — it can reference secrets) + the error.
+    logger.warn('[AuthenticationPrefetch] produced-header template failed to render', {
+      header: headerKey,
+      error: err instanceof Error ? err.message : String(err)
+    })
     return ''
   }
 }

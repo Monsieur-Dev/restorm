@@ -2,6 +2,15 @@ import type { ValueSourceResolver } from '../../../shared/secrets/ValueSource'
 import { extractSubKey } from '../../../shared/secrets/ValueSource'
 import { SecretValue } from '../../../shared/types/valueTypes/SecretValue'
 import { getResolver as defaultGetResolver } from './mainSourceRegistry'
+import { logger } from 'electron-core-ui/main'
+
+/**
+ * Bound the resolved-plaintext cache so a long-lived process (or a churn of
+ * preview scopes) can't accumulate secrets without limit. Entries are evicted
+ * oldest-first per scope (insertion-ordered Map); the scope map itself is
+ * cleared on scope close via `clearScope`.
+ */
+const MAX_ENTRIES_PER_SCOPE = 256
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -153,11 +162,21 @@ export class SecretHydrationService {
         // Share a concurrent fetch of the SAME credential (any scope) so a slow
         // secret shown in both the env table AND its cell preview resolves once.
         payload = await this.resolveDeduped(sv.source, sv.params, hash, scopeId, signal)
-        scopeCache.set(hash, payload)
+        this.cacheSet(scopeCache, hash, payload)
       }
 
       const path = typeof sv.params.path === 'string' ? sv.params.path : undefined
-      sv.resolved = extractSubKey(payload, path)
+      // Isolate per value: a bad sub-key path on ONE secret must not throw out of
+      // the loop and strand the remaining (unrelated) secrets unresolved.
+      try {
+        sv.resolved = extractSubKey(payload, path)
+      } catch (err) {
+        logger.warn('[SecretHydrationService] failed to extract sub-key from a resolved secret', {
+          source: sv.source,
+          error: err instanceof Error ? err.message : String(err)
+        })
+        sv.resolved = undefined
+      }
     }
   }
 
@@ -201,16 +220,37 @@ export class SecretHydrationService {
     if (!this.isScopeIndependent(source)) {
       if (scopeId === undefined) return undefined
       const scopeCache = this.cache.get(scopeId)
-      if (scopeCache?.has(hash)) return extractSubKey(scopeCache.get(hash), path)
+      if (scopeCache?.has(hash)) return this.safeExtract(scopeCache.get(hash), path)
       return undefined
     }
 
     for (const scopeCache of this.cache.values()) {
       if (scopeCache.has(hash)) {
-        return extractSubKey(scopeCache.get(hash), path)
+        return this.safeExtract(scopeCache.get(hash), path)
       }
     }
     return undefined
+  }
+
+  /**
+   * Insert into a scope cache, evicting the oldest entry once the per-scope
+   * cap is reached so resolved plaintext can't grow without bound.
+   */
+  private cacheSet(scopeCache: Map<string, unknown>, hash: string, payload: unknown): void {
+    if (!scopeCache.has(hash) && scopeCache.size >= MAX_ENTRIES_PER_SCOPE) {
+      const oldest = scopeCache.keys().next().value
+      if (oldest !== undefined) scopeCache.delete(oldest)
+    }
+    scopeCache.set(hash, payload)
+  }
+
+  /** extractSubKey, but a bad path yields `undefined` instead of throwing. */
+  private safeExtract(payload: unknown, path: string | undefined): string | undefined {
+    try {
+      return extractSubKey(payload, path)
+    } catch {
+      return undefined
+    }
   }
 
   /**

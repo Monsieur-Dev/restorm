@@ -110,16 +110,56 @@ function normalizeAddress(url: string): { address: string; secure: boolean } {
   return { address: address.replace(/\/+$/, ''), secure }
 }
 
-/** Parse a user-typed message into a JS object for the wire (defaults to {}). */
+/**
+ * Parse a user-typed message into a JS object for the wire. An empty message
+ * is the valid empty request `{}`, but malformed JSON throws so the caller can
+ * surface the error — silently sending `{}` would hide the user's mistake and
+ * make the server reject a request the user thought they'd typed correctly.
+ */
 function parseMessage(raw: string): object {
   const trimmed = raw.trim()
   if (!trimmed) return {}
+  let parsed: unknown
   try {
-    const parsed: unknown = JSON.parse(trimmed)
-    return typeof parsed === 'object' && parsed !== null ? parsed : {}
-  } catch {
-    return {}
+    parsed = JSON.parse(trimmed)
+  } catch (err) {
+    const detail = err instanceof Error ? err.message : String(err)
+    throw new Error(`Invalid request message: not valid JSON (${detail})`)
   }
+  if (typeof parsed !== 'object' || parsed === null) {
+    throw new Error('Invalid request message: expected a JSON object')
+  }
+  return parsed
+}
+
+/** The call type implied by a method's streaming flags in the proto. */
+function callTypeFromStreaming(requestStream: boolean, responseStream: boolean): GrpcCallType {
+  if (requestStream && responseStream) return 'bidirectional-stream'
+  if (requestStream) return 'client-stream'
+  if (responseStream) return 'server-stream'
+  return 'unary'
+}
+
+/**
+ * Reconcile the (user-supplied, hence untrusted) callType with the streaming
+ * flags the proto actually declares for the method. The proto is ground truth:
+ * dispatching a unary call down a streaming path (or vice versa) crashes deep
+ * in grpc-js with an opaque error. Return the proto's call type, logging when
+ * it disagrees with the request so a stale saved callType self-heals.
+ */
+function reconcileCallType(
+  requested: GrpcCallType,
+  requestStream: boolean,
+  responseStream: boolean
+): GrpcCallType {
+  const actual = callTypeFromStreaming(requestStream, responseStream)
+  if (actual !== requested) {
+    logger.warn('[GRPCExecutionService] callType mismatch; using the proto-declared type', {
+      requested,
+      actual
+    })
+  }
+  return actual
 }
 
 /** Close a gRPC client (releasing its channel + sockets); best-effort. Each
@@ -313,7 +353,14 @@ class GRPCExecutionService {
       }
 
       const messages: GrpcMessage[] = []
-      const reqObj = parseMessage(resolvedMessage)
+      let reqObj: object
+      try {
+        reqObj = parseMessage(resolvedMessage)
+      } catch (err) {
+        this.broadcastProgress(requestId, 'error')
+        finish(this.failure(requestId, (err as Error).message, resolved))
+        return
+      }
       const sent: GrpcMessage = { direction: 'sent', data: resolvedMessage, timestamp: new Date().toISOString() }
       messages.push(sent)
       this.broadcastMessage(requestId, sent)
@@ -384,10 +431,15 @@ class GRPCExecutionService {
         resolve(result)
       }
 
-      const { requestId, service, method, address, metadata, resolvedMessage, protoSource, secure, callType } = resolved
+      const { requestId, service, method, address, metadata, resolvedMessage, protoSource, secure, callType: requestedCallType } = resolved
       let client: ReturnType<typeof resolveGrpcMethod>['client']
+      let callType = requestedCallType
       try {
-        client = resolveGrpcMethod(protoSource, address, service, method, this.credentials(secure)).client
+        const resolvedMethod = resolveGrpcMethod(protoSource, address, service, method, this.credentials(secure))
+        client = resolvedMethod.client
+        // Trust the proto's streaming flags over the request's (possibly stale)
+        // callType, so a unary method never gets dispatched down a stream path.
+        callType = reconcileCallType(requestedCallType, resolvedMethod.requestStream, resolvedMethod.responseStream)
         activeClient = client
       } catch (err) {
         errorMsg = (err as Error).message
@@ -412,7 +464,15 @@ class GRPCExecutionService {
         finish()
       }
 
-      const reqObj = parseMessage(resolvedMessage)
+      let reqObj: object
+      try {
+        reqObj = parseMessage(resolvedMessage)
+      } catch (err) {
+        errorMsg = (err as Error).message
+        statusCode = grpc.status.INVALID_ARGUMENT
+        finish()
+        return
+      }
 
       if (callType === 'server-stream') {
         recordSent(resolvedMessage)
@@ -547,7 +607,14 @@ class GRPCExecutionService {
       const { method, metadata, callType } = resolved
       let stream: ActiveCall['stream']
       if (callType === 'server-stream') {
-        const reqObj = parseMessage(resolved.resolvedMessage)
+        let reqObj: object
+        try {
+          reqObj = parseMessage(resolved.resolvedMessage)
+        } catch (err) {
+          this.broadcastProgress(requestId, 'error')
+          fireClose((err as Error).message)
+          return
+        }
         // Record the request message sent at open so the chat + history show the
         // outgoing frame (server-stream sends exactly one request on connect).
         recordSent(resolved.resolvedMessage)
@@ -593,8 +660,18 @@ class GRPCExecutionService {
     const call = this.activeCalls.get(requestId)
     if (!call?.open) return false
     if (call.callType === 'server-stream') return false
+    let payload: object
     try {
-      ;(call.stream as ClientWritableStream<object> | ClientDuplexStream<object, object>).write(parseMessage(message))
+      payload = parseMessage(message)
+    } catch (err) {
+      logger.warn('[GRPCExecutionService] dropping unparseable streamed message', {
+        requestId,
+        error: (err as Error).message
+      })
+      return false
+    }
+    try {
+      ;(call.stream as ClientWritableStream<object> | ClientDuplexStream<object, object>).write(payload)
     } catch {
       return false
     }

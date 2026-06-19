@@ -387,6 +387,13 @@ class WebSocketExecutionService {
           finish(false, (err as Error).message || `Failed to listen on port ${port}`)
           return
         }
+        // The await above yields the event loop: a concurrent closeAll/disconnect
+        // could have torn this port host down in the meantime. Re-fetch and bail
+        // if it's gone, so we never attach a route to a dead server.
+        if (this.portHosts.get(port) !== host) {
+          finish(false, `Port ${port} was torn down before the route could attach`)
+          return
+        }
         // Route collision: the same namespace is already hosted on this port.
         if (host.sioRoutes.has(namespace)) {
           finish(false, this.routeBusyMessage('Socket.IO', port, namespace))
@@ -444,6 +451,12 @@ class WebSocketExecutionService {
           host = await this.acquirePortHost(port)
         } catch (err) {
           finish(false, (err as Error).message || `Failed to listen on port ${port}`)
+          return
+        }
+        // See the Socket.IO path: re-fetch after the await so a concurrent
+        // teardown doesn't leave us attaching to a dead server.
+        if (this.portHosts.get(port) !== host) {
+          finish(false, `Port ${port} was torn down before the route could attach`)
           return
         }
         if (host.wsRoutes.has(path)) {
@@ -622,6 +635,12 @@ class WebSocketExecutionService {
       } catch (err) {
         try { broker.close() } catch { /* not started */ }
         return { ok: false, error: (err as Error).message || `Failed to listen on port ${port}` }
+      }
+      // Re-fetch after the await: a concurrent teardown must not leave us
+      // bridging onto a dead host.
+      if (this.portHosts.get(port) !== host) {
+        try { broker.close() } catch { /* not started */ }
+        return { ok: false, error: `Port ${port} was torn down before the broker could attach` }
       }
       const path = topicFilterToWsPath(resolvedUrl)
       this.ensureWss(host)
@@ -1501,6 +1520,12 @@ class WebSocketExecutionService {
         fireClose()
         return
       }
+      // A concurrent closeAll/disconnect (not via stopped()) may have torn the
+      // host down during the await — re-fetch and bail if it's no longer live.
+      if (this.portHosts.get(port) !== host) {
+        fireClose(`Port ${port} was torn down before the route could attach`)
+        return
+      }
       if (host.sioRoutes.has(namespace)) {
         fireClose(this.routeBusyMessage('Socket.IO', port, namespace))
         return
@@ -1587,6 +1612,12 @@ class WebSocketExecutionService {
       if (stopped()) {
         this.closePortHostIfIdle(port)
         fireClose()
+        return
+      }
+      // A concurrent closeAll/disconnect may have torn the host down during the
+      // await — re-fetch and bail if it's no longer live.
+      if (this.portHosts.get(port) !== host) {
+        fireClose(`Port ${port} was torn down before the route could attach`)
         return
       }
       if (host.wsRoutes.has(path)) {
