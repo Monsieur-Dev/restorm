@@ -831,11 +831,22 @@ export const TypedValueField: React.FC<TypedValueFieldProps> = ({
   const hideTypeButton = !lockType && typeLeaves.length <= 1
   // With exactly one option, force the value onto it (so the left widget already
   // shows the right type — e.g. a boolean-only slot renders its toggle).
+  // Guarded by a ref so a menuItems rebuild TRIGGERED by this onClick (which can
+  // re-run the effect before `checked` reflects) can't re-fire into a loop —
+  // we only auto-force once per value identity.
+  const forcedSingleForValueRef = useRef<unknown>(undefined)
   useEffect(() => {
-    if (typeLeaves.length !== 1) return
+    if (typeLeaves.length !== 1) {
+      forcedSingleForValueRef.current = undefined
+      return
+    }
+    if (forcedSingleForValueRef.current === value) return
     const only = typeLeaves[0]
-    if (only && only.checked !== true && only.onClick) only.onClick()
-  }, [typeLeaves])
+    if (only && only.checked !== true && only.onClick) {
+      forcedSingleForValueRef.current = value
+      only.onClick()
+    }
+  }, [typeLeaves, value])
 
   const widget = ((): React.ReactNode => {
     if (value instanceof SecretValue) {

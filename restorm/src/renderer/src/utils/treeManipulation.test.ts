@@ -26,7 +26,7 @@ function makeScenario(): Scenario {
     tags: [],
     params: [],
     nodes: [
-      { id: 'node-1', kind: 'httpRequest', config: { requestId: 'req-child' }, inputs: [], outputs: [], position: { x: 0, y: 0 } },
+      { id: 'node-1', kind: 'httpRequest', config: { requestId: 'req-child', note: 'see req-child docs' }, inputs: [], outputs: [], position: { x: 0, y: 0 } },
       { id: 'node-2', kind: 'log', config: {}, inputs: [], outputs: [], position: { x: 10, y: 10 } }
     ],
     edges: [
@@ -66,6 +66,16 @@ describe('deepCloneItem', () => {
     expect(boundId).toBe(newChildId)
     // Original is untouched.
     expect((original.nodes[0]?.config as { requestId?: string }).requestId).toBe('req-child')
+  })
+
+  it('does NOT rewrite a free-text field that merely contains a remapped id', () => {
+    const original = makeScenario()
+    const clone = deepCloneItem(original as unknown as FolderItem) as unknown as Scenario
+    // `requestId` (a reference field) follows the clone, but `note` (free text)
+    // must stay verbatim even though it contains the old child id.
+    const cfg = clone.nodes[0]?.config as { requestId?: string; note?: string }
+    expect(cfg.requestId).toBe(clone.items?.[0]?.id)
+    expect(cfg.note).toBe('see req-child docs')
   })
 
   it('leaves scenario-scoped node/edge ids intact (edges still point at their nodes)', () => {

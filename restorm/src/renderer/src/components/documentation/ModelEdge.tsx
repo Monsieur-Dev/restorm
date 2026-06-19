@@ -45,7 +45,7 @@ const STROKES: Record<ModelEdgeRelation, string> = {
  * optional). The legend shipped under the graph mirrors this
  * mapping.
  */
-export const ModelEdge: React.FC<EdgeProps> = ({ id, sourceX, sourceY, targetX, targetY, data, markerEnd }) => {
+const ModelEdgeImpl: React.FC<EdgeProps> = ({ id, sourceX, sourceY, targetX, targetY, data, markerEnd }) => {
   const edgeData = data as ModelEdgeData | undefined
   const path = edgeData && edgeData.bendPoints.length > 0
     ? buildPathFromBendPoints(edgeData.bendPoints)
@@ -66,3 +66,7 @@ export const ModelEdge: React.FC<EdgeProps> = ({ id, sourceX, sourceY, targetX, 
     />
   )
 }
+
+// Memoised: React Flow re-renders edges every viewport tick; without memo this
+// recomputes the path on each frame.
+export const ModelEdge = React.memo(ModelEdgeImpl)

@@ -55,7 +55,13 @@ export function AvailableVariablesProvider({ children }: AvailableVariablesProvi
       }
     })
 
-    return unsubscribe
+    return () => {
+      unsubscribe()
+      // Clear any deferred-flush timers so they don't fire into subscribers
+      // after unmount.
+      for (const timer of pendingFlushTimers.values()) clearTimeout(timer)
+      pendingFlushTimers.clear()
+    }
   }, [])
 
   const getVariables = useCallback((variableId: string): VariableDefinition[] => {

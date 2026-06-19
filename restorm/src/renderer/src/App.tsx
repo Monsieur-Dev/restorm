@@ -1065,12 +1065,18 @@ const App: React.FC = () => {
     const idxMatch = /^(folder|env-folder|request|scenario)-idx:([0-9]+(?:\.[0-9]+)*)$/.exec(tabId)
     if (idxMatch?.[2]) {
       const indexPath = idxMatch[2].split('.').map((n) => Number(n))
-      let cursor: unknown = rootItems[indexPath[0] ?? 0]
+      // Don't default a bad/missing segment to index 0 — that silently resolves
+      // the FIRST root/child for a malformed tab id. A non-finite segment = no match.
+      const root = indexPath[0]
+      if (root === undefined || !Number.isFinite(root)) return null
+      let cursor: unknown = rootItems[root]
       for (let i = 1; i < indexPath.length; i += 1) {
         if (!cursor || typeof cursor !== 'object' || !('items' in cursor)) return null
         const items = (cursor as { items?: unknown[] }).items
         if (!Array.isArray(items)) return null
-        cursor = items[indexPath[i] ?? 0]
+        const seg = indexPath[i]
+        if (seg === undefined || !Number.isFinite(seg)) return null
+        cursor = items[seg]
       }
       if (cursor && typeof cursor === 'object' && 'id' in cursor) {
         const id = (cursor as { id?: unknown }).id

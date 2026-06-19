@@ -2,7 +2,7 @@
  * SaveOptionsModal - Modal for selecting save mode and format
  */
 
-import React, { useState, useCallback } from 'react'
+import React, { useState, useCallback, useMemo } from 'react'
 import {
   Modal,
   Button,
@@ -69,7 +69,9 @@ export function SaveOptionsModal({
     onClose()
   }, [mode, format, onSave, onClose])
 
-  const generatePreview = useCallback((): string[] => {
+  // useMemo (not useCallback-then-call-every-render, which defeated the memo):
+  // recompute the preview only when its inputs change.
+  const previewLines = useMemo<string[]>(() => {
     if (mode !== 'folder' || !rootFolder) return []
 
     const preview: string[] = []
@@ -102,8 +104,6 @@ export function SaveOptionsModal({
     generateStructure(rootFolder, 0, 0)
     return preview
   }, [mode, rootFolder, format])
-
-  const previewLines = generatePreview()
 
   return (
     <Modal

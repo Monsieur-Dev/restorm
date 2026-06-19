@@ -496,12 +496,14 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({
   }, [buildGrpcResponseView, request.id])
   
   // Call-type options for the selector (order = unary → server → client → bidi).
-  const callTypeOptions: { value: GrpcCallType; label: string }[] = [
+  // Memoised on `t` so it isn't rebuilt (+ handed a fresh array to SelectBox)
+  // on every render during an active stream.
+  const callTypeOptions = useMemo<{ value: GrpcCallType; label: string }[]>(() => [
     { value: 'unary', label: t('grpc.callType.unary', 'Unary') },
     { value: 'server-stream', label: t('grpc.callType.serverStream', 'Server streaming') },
     { value: 'client-stream', label: t('grpc.callType.clientStream', 'Client streaming') },
     { value: 'bidirectional-stream', label: t('grpc.callType.bidi', 'Bidirectional streaming') }
-  ]
+  ], [t])
   const callTypeIndex = Math.max(0, callTypeOptions.findIndex((o) => o.value === callType))
 
   // URL section
