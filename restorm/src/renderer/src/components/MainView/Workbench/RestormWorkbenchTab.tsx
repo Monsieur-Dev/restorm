@@ -143,6 +143,13 @@ export const RestormWorkbenchTab: React.FC<RestormWorkbenchTabProps> = ({
        * bookmark ribbon, so the ribbon's variable width never collides
        * with them. Anchored where the ribbon used to sit. */}
       <div className="restorm-workbench-tab-top-right">
+        {/* Delimited background band drawn BEHIND the whole action cluster
+         * (this group plus the scenario-usage button + favourite star that
+         * anchor further right). A pure backdrop — absolutely positioned,
+         * pointer-events:none, z-index:-1 — so it groups the controls
+         * visually without shifting any of them. See restormWorkbenchTab.css
+         * (`.restorm-workbench-tab-action-zone`). */}
+        <div className="restorm-workbench-tab-action-zone" aria-hidden="true" />
         {headerActions ? (
           <div className="restorm-workbench-tab-header-actions" data-testid={`${testIdPrefix}-header-actions`}>
             {headerActions}
