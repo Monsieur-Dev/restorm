@@ -2092,16 +2092,18 @@ const App: React.FC = () => {
     [rootItems]
   )
 
-  // Stable lookup callbacks — avoids re-render cascade through
-  // RestormWorkbench → EditorGroupView. Read the tree via `rootItemsRef`
-  // (kept current by the effect above) with EMPTY deps so the callback
-  // identities never change on a tree edit; the `[rootItems]` deps made
-  // them rebuild on every mutation, which is the cascade this comment
-  // was always meant to prevent.
-  const getRequestByIdCb = useCallback((id: string) => findRequestById(rootItemsRef.current, id), [])
-  const getFolderByIdCb = useCallback((id: string) => findFolderById(rootItemsRef.current, id), [])
-  const getScenarioByIdCb = useCallback((id: string) => findScenarioById(rootItemsRef.current, id), [])
-  const getEnvironmentFolderByIdCb = useCallback((id: string) => findEnvironmentFolderById(rootItemsRef.current, id), [])
+  // Lookup callbacks passed down to RestormWorkbench → EditorGroupView,
+  // which resolve a tab's request/folder/scenario by id and RENDER it.
+  // Keyed on `[rootItems]` (state) ON PURPOSE: a consumer that holds these
+  // must re-resolve when the tree changes (e.g. a freshly-imported request
+  // a tab is opening, or a renamed/deleted item) — making them stable
+  // (ref + [] deps) stopped that re-resolution and left a just-opened
+  // request tab blank (hidden send button). Correctness over the
+  // re-render micro-optimisation.
+  const getRequestByIdCb = useCallback((id: string) => findRequestById(rootItems, id), [rootItems])
+  const getFolderByIdCb = useCallback((id: string) => findFolderById(rootItems, id), [rootItems])
+  const getScenarioByIdCb = useCallback((id: string) => findScenarioById(rootItems, id), [rootItems])
+  const getEnvironmentFolderByIdCb = useCallback((id: string) => findEnvironmentFolderById(rootItems, id), [rootItems])
 
   // Send-time hook: request tab views call this to resolve their
   // `authenticationRequestId` back to the AuthenticationRequest
