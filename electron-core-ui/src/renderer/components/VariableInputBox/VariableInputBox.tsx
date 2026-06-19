@@ -21,7 +21,10 @@ interface ProviderState {
   languageConfigured: boolean
   completionProviderDisposable: monacoEditor.IDisposable | null
   hoverProviderDisposable: monacoEditor.IDisposable | null
-  cancellationHandlerRegistered: boolean
+  /** Ref-count of mounted inputs holding the global unhandledrejection handler. */
+  cancellationHandlerRefs: number
+  /** The registered handler, kept so it can be removed once refs hit zero. */
+  cancellationHandler: ((event: PromiseRejectionEvent) => void) | null
   modelDataMap: WeakMap<monacoEditor.editor.ITextModel, ModelData>
 }
 
@@ -31,7 +34,8 @@ function getProviderState(): ProviderState {
     languageConfigured: false,
     completionProviderDisposable: null,
     hoverProviderDisposable: null,
-    cancellationHandlerRegistered: false,
+    cancellationHandlerRefs: 0,
+    cancellationHandler: null,
     modelDataMap: new WeakMap()
   }
   return win[globalKey]
@@ -138,17 +142,30 @@ const VariableInputBox: React.FC<VariableInputBoxProps> = (props) => {
   }, [variables, editorMounted, disableDefaultProviders, effectiveLanguageId])
 
   useEffect(() => {
+    if (typeof window === 'undefined') return
     const state = getProviderState()
-    if (typeof window === 'undefined' || state.cancellationHandlerRegistered) return
+    // Ref-count the global handler so it's added on the first mounted input and
+    // REMOVED when the last unmounts — otherwise it leaked for the app's
+    // lifetime, permanently swallowing every 'Canceled' rejection app-wide.
+    if (state.cancellationHandlerRefs === 0) {
+      const handler = (event: PromiseRejectionEvent): void => {
+        if (isMonacoCancellationError(event.reason)) {
+          event.preventDefault()
+        }
+      }
+      window.addEventListener('unhandledrejection', handler)
+      state.cancellationHandler = handler
+    }
+    state.cancellationHandlerRefs += 1
 
-    const handler = (event: PromiseRejectionEvent): void => {
-      if (isMonacoCancellationError(event.reason)) {
-        event.preventDefault()
+    return () => {
+      state.cancellationHandlerRefs -= 1
+      if (state.cancellationHandlerRefs <= 0 && state.cancellationHandler) {
+        window.removeEventListener('unhandledrejection', state.cancellationHandler)
+        state.cancellationHandler = null
+        state.cancellationHandlerRefs = 0
       }
     }
-
-    window.addEventListener('unhandledrejection', handler)
-    state.cancellationHandlerRegistered = true
   }, [])
 
   const editorOptions = useMemo(

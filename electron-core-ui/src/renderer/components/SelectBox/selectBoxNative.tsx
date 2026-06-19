@@ -105,7 +105,7 @@ const SelectBoxNative: React.FC<SelectBoxNativeProps> = ({
       >
         {options.map((option, index) => (
           <option
-            key={index}
+            key={`${option.text}::${index}`}
             value={option.text}
             disabled={option.isDisabled}
           >

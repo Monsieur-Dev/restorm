@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import './scrollbars.css';
 import type { ScrollableElementProps } from './types';
 import { defaultScrollableElementStyles } from './types';
@@ -46,8 +46,11 @@ const ScrollableElementInner: React.FC<ScrollableElementProps> = ({
   const [dragStartScrollLeft, setDragStartScrollLeft] = useState(0);
   const [stickyHeaderBackgroundHeight, setStickyHeaderBackgroundHeight] = useState(0);
 
-  // Merged options with defaults
-  const mergedOptions = {
+  // Merged options/styles, memoised on `options` so a parent re-render doesn't
+  // hand every downstream effect a fresh object identity each tick.
+  // (IScrollableElementOptions extends IScrollableElementStyles, so `options`
+  // legitimately also carries the style keys mergedStyles reads.)
+  const mergedOptions = useMemo(() => ({
     useShadows: true,
     handleMouseWheel: true,
     mouseWheelSmoothScroll: true,
@@ -61,12 +64,12 @@ const ScrollableElementInner: React.FC<ScrollableElementProps> = ({
     arrowSize: 11,
     scrollByPage: false,
     ...options
-  };
+  }), [options]);
 
-  const mergedStyles = {
+  const mergedStyles = useMemo(() => ({
     ...defaultScrollableElementStyles,
     ...options
-  };
+  }), [options]);
 
   // Calculate scrollbar visibility
   const needsVerticalScrollbar = contentHeight > containerHeight;
@@ -757,7 +760,10 @@ const ScrollableElementInner: React.FC<ScrollableElementProps> = ({
     };
   }, [updateDimensions]);
 
-  // Update dimensions when children change (e.g., when switching tabs)
+  // Update dimensions when children change (e.g., when switching tabs).
+  // NOT keyed on scrollTop — re-running this rAF + scrollWidth/Height read on
+  // every scroll tick was pure layout thrash; size changes are already covered
+  // by the ResizeObserver above (observing both container and content).
   useEffect(() => {
     // Use requestAnimationFrame to allow DOM to update before recalculating dimensions
     const frameId = requestAnimationFrame(() => {
@@ -767,7 +773,7 @@ const ScrollableElementInner: React.FC<ScrollableElementProps> = ({
     return () => {
       cancelAnimationFrame(frameId);
     };
-  }, [children, updateDimensions, scrollTop]);
+  }, [children, updateDimensions]);
 
   // Container classes
   const containerClasses = [
