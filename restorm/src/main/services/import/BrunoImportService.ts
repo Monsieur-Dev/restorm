@@ -36,6 +36,8 @@ import {
 } from './transformers/brunoToApiDocumentation'
 import { workflowToScenario, type WorkflowRequestStep } from './workflowToScenario'
 import type { Scenario } from '../../../shared/types/scenario'
+import { stableImportId as generateId } from './stableImportId'
+import { logger } from 'electron-core-ui/main'
 
 // ============================================================================
 // Bruno Types
@@ -363,21 +365,6 @@ function parseBruFile(content: string): BrunoRequest {
 // Helper Functions
 // ============================================================================
 
-/** Generate a deterministic ID from a seed string */
-function generateId(seed?: string): string {
-  if (!seed) {
-    return crypto.randomUUID()
-  }
-  let hash = 0
-  for (let i = 0; i < seed.length; i++) {
-    const char = seed.charCodeAt(i)
-    hash = ((hash << 5) - hash) + char
-    hash = hash & hash
-  }
-  const hex = Math.abs(hash).toString(16).padStart(8, '0')
-  return `${hex}-${seed.length.toString(16).padStart(4, '0')}-4000-8000-${hex}${hex.slice(0, 4)}`
-}
-
 /** Convert Bruno body to HTTPRequestBody */
 function parseBody(body: BrunoBody): HTTPRequestBody | undefined {
   switch (body.type) {
@@ -637,8 +624,13 @@ export function importBruno(
     try {
       const request = parseBruFile(file.content)
       requests.push({ path: file.path, request })
-    } catch {
-      // Skip invalid files
+    } catch (err: unknown) {
+      // Skip the invalid file but record which one and why.
+      const detail = err instanceof Error ? err.message : String(err)
+      logger.warn('[BrunoImportService] Skipping unparseable .bru file', {
+        path: file.path,
+        message: detail
+      })
     }
   }
 

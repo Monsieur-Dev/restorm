@@ -13,6 +13,15 @@ describe('collectHandlebarsReferences', () => {
   it('extracts dotted variable references', () => {
     expect(collectHandlebarsReferences('Bearer {{data.token}} {{x}}')).toEqual(['data.token', 'x'])
   })
+
+  it('extracts bracket / quoted-segment references', () => {
+    expect(collectHandlebarsReferences('{{tokens.[0].value}}')).toEqual(['tokens.0.value'])
+    expect(collectHandlebarsReferences("{{data.['x-token']}}")).toEqual(['data.x-token'])
+  })
+
+  it('extracts the field path out of a helper call', () => {
+    expect(collectHandlebarsReferences('{{json access_token}}')).toEqual(['access_token'])
+  })
 })
 
 describe('redactTokensFromBody', () => {
@@ -29,6 +38,24 @@ describe('redactTokensFromBody', () => {
   it('leaves a non-JSON body without known values untouched', () => {
     const out = redactTokensFromBody('plain text', produced)
     expect(out).toBe('plain text')
+  })
+
+  it('redacts a token nested in an array element', () => {
+    const headers = [{ key: 'Authorization', value: 'Bearer {{tokens.[0].access_token}}' }]
+    const out = redactTokensFromBody('{"tokens":[{"access_token":"abc123secret"}]}', headers)
+    expect(JSON.parse(out)).toEqual({ tokens: [{ access_token: '***' }] })
+  })
+
+  it('descends every array element when the path crosses an array', () => {
+    const headers = [{ key: 'Authorization', value: 'Bearer {{items.token}}' }]
+    const out = redactTokensFromBody('{"items":[{"token":"aaaa1111"},{"token":"bbbb2222"}]}', headers)
+    expect(JSON.parse(out)).toEqual({ items: [{ token: '***' }, { token: '***' }] })
+  })
+
+  it('fails safe (whole-body redaction) when a reference is an unmodellable expression', () => {
+    const headers = [{ key: 'Authorization', value: 'Bearer {{json (lookup tokens "access")}}' }]
+    const out = redactTokensFromBody('{"tokens":{"access":"abc123secret"},"keep":"x"}', headers)
+    expect(JSON.parse(out)).toBe('***')
   })
 })
 

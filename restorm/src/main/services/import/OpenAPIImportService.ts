@@ -38,6 +38,7 @@ import { openapi3ToApiDocumentation, type OAS3Spec, type OAS3Server, type OAS3Se
 import { openapi31ToApiDocumentation, type OAS31Spec } from './transformers/openapi31ToApiDocumentation'
 import { rewriteUrlTemplate, resolveJsonPointer, type CommonSchema } from './transformers/_shared'
 import { CURRENT_FILE_FORMAT_VERSION } from '../../../shared/config/fileFormatVersion'
+import { stableImportId as generateId } from './stableImportId'
 
 // ────────────────────────────────────────────────────────────────────────────
 // Types — minimal surface we read from a parsed OAS3 spec.
@@ -93,21 +94,9 @@ const HTTP_METHODS = ['get', 'post', 'put', 'delete', 'patch', 'head', 'options'
 // ID + KeyValue utilities — local to this service, mirrors SwaggerImportService
 // ────────────────────────────────────────────────────────────────────────────
 
-function generateId(seed?: string): string {
-  if (!seed) return crypto.randomUUID()
-  let hash = 0
-  for (let i = 0; i < seed.length; i++) {
-    const char = seed.charCodeAt(i)
-    hash = ((hash << 5) - hash) + char
-    hash = hash & hash
-  }
-  const hex = Math.abs(hash).toString(16).padStart(8, '0')
-  return `${hex}-${seed.length.toString(16).padStart(4, '0')}-4000-8000-${hex}${hex.slice(0, 4)}`
-}
-
 function kvOfType(key: string, value: ValueType, description?: string): KeyValue {
   return new KeyValue({
-    id: generateId(`kv:${key}:${Math.random().toString(36).slice(2, 8)}`),
+    id: generateId(`kv:${key}:${String(value)}`),
     key,
     value,
     description: description ?? '',

@@ -30,6 +30,7 @@ import { SecretValue } from '../../../shared/types/valueTypes/SecretValue'
 import { toHTTPMethod } from './httpMethodValidator'
 import { swaggerToApiDocumentation } from './transformers/swaggerToApiDocumentation'
 import { CURRENT_FILE_FORMAT_VERSION } from '../../../shared/config/fileFormatVersion'
+import { stableImportId as generateId } from './stableImportId'
 
 // ============================================================================
 // Swagger Types
@@ -161,7 +162,7 @@ interface SwaggerSpec {
 /** Build a KeyValue with an explicitly-typed value and a runtime id. */
 function kvOfType(key: string, value: ValueType, description?: string): KeyValue {
   return new KeyValue({
-    id: generateId(`kv:${key}:${Math.random().toString(36).slice(2, 8)}`),
+    id: generateId(`kv:${key}:${String(value)}`),
     key,
     value,
     description: description ?? '',
@@ -421,23 +422,6 @@ function schemaToSample(
       return ''
     }
   }
-}
-
-/** Generate a deterministic ID from a seed string using a simple hash */
-function generateId(seed?: string): string {
-  if (!seed) {
-    return crypto.randomUUID()
-  }
-  // Simple hash function to create deterministic ID from seed
-  let hash = 0
-  for (let i = 0; i < seed.length; i++) {
-    const char = seed.charCodeAt(i)
-    hash = ((hash << 5) - hash) + char
-    hash = hash & hash // Convert to 32bit integer
-  }
-  // Convert to hex and pad to ensure consistent format
-  const hex = Math.abs(hash).toString(16).padStart(8, '0')
-  return `${hex}-${seed.length.toString(16).padStart(4, '0')}-4000-8000-${hex}${hex.slice(0, 4)}`
 }
 
 /** Extract body from Swagger parameters */

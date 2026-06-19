@@ -124,14 +124,17 @@ function buildModels(spec: SwaggerSpecLike): NormalizedModel[] {
 function buildEnums(spec: SwaggerSpecLike): NormalizedEnum[] {
   const out: NormalizedEnum[] = []
   const seen = new Set<string>()
-  const visit = (schema: SwaggerSchemaLike, name: string): void => {
+  const visit = (schema: SwaggerSchemaLike, name: string, depth = 0): void => {
+    // Depth fuse — a hostile/cyclic spec (self-referential nested objects)
+    // could otherwise recurse without bound and overflow the stack.
+    if (depth > 64) return
     if (schema.enum && schema.enum.length > 0 && !seen.has(name)) {
       out.push({ name, values: schema.enum.slice(), deprecated: schema.deprecated === true })
       seen.add(name)
     }
     if (schema.properties) {
       for (const [propName, propSchema] of Object.entries(schema.properties)) {
-        visit(propSchema, `${name} ${propName}`)
+        visit(propSchema, `${name} ${propName}`, depth + 1)
       }
     }
   }

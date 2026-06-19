@@ -12,28 +12,80 @@
  * the auth request doesn't explicitly consume is left alone.
  */
 
-const HANDLEBARS_VAR = /\{\{\s*([A-Za-z_][A-Za-z0-9_]*(?:\.[A-Za-z0-9_]+)*)\s*\}\}/g
+// Any `{{ ... }}` mustache. We grab the whole inner expression and then
+// pull the field path out of it, so helper-wrapped refs (`{{json a.b}}`),
+// bracket/quoted segments (`{{a.[0].b}}`, `{{token.['x-y']}}`) and plain
+// dot-paths are all recognised — the old expression only matched bare
+// dot-paths and silently let the other forms slip past redaction.
+const HANDLEBARS_BLOCK = /\{\{\{?([^}]*?)\}?\}\}/g
+
+/**
+ * Extract the field path from a single mustache's inner expression.
+ * Returns `undefined` when no concrete dotted path can be recovered (a
+ * bare helper call, a subexpression, etc.) so the caller can fall back to
+ * a fail-safe whole-body redaction rather than leaving a token in clear.
+ */
+function pathFromExpression(expr: string): string | undefined {
+  let inner = expr.trim()
+  if (!inner) return undefined
+  // Strip a leading block/helper marker (`#if`, `/each`, `>partial`, `!`).
+  if (/^[#/>!^&]/.test(inner)) return undefined
+  // Drop a leading helper name + take its FIRST argument, e.g.
+  // `json access_token` → `access_token`. A quoted/literal arg isn't a path.
+  const tokens = inner.split(/\s+/)
+  if (tokens.length > 1) inner = tokens[1]
+  if (!inner || /^["'(]/.test(inner)) return undefined
+  // Normalise bracket segments to dot segments: `a.[0].b` / `a['x']` → `a.0.b`/`a.x`.
+  const normalised = inner
+    .replace(/\[\s*'([^']*)'\s*\]/g, '.$1')
+    .replace(/\[\s*"([^"]*)"\s*\]/g, '.$1')
+    .replace(/\[\s*([^\]]+?)\s*\]/g, '.$1')
+    .replace(/^\./, '')
+    .replace(/\.\.+/g, '.')
+  // Only accept identifier/index/JSON-key segments (letters, digits, _, $, -).
+  // Anything else (an operator, a path expression we don't understand) is not
+  // a safe field path → caller fails safe.
+  if (!/^[A-Za-z0-9_$-]+(?:\.[A-Za-z0-9_$-]+)*$/.test(normalised)) return undefined
+  return normalised
+}
 
 /** Parse every handlebars variable reference out of a template. */
 export function collectHandlebarsReferences(template: string): string[] {
+  return collectReferences(template).paths
+}
+
+/**
+ * Pull field paths out of a template along with a flag telling the caller
+ * whether some mustache referenced a value we could NOT resolve to a
+ * concrete path — in which case redaction must fail safe.
+ */
+function collectReferences(template: string): { paths: string[]; hasUnresolved: boolean } {
   const out: string[] = []
+  let hasUnresolved = false
   let match: RegExpExecArray | null
-  while ((match = HANDLEBARS_VAR.exec(template)) !== null) {
-    const captured = match[1]
-    if (captured) out.push(captured)
+  HANDLEBARS_BLOCK.lastIndex = 0
+  while ((match = HANDLEBARS_BLOCK.exec(template)) !== null) {
+    const expr = match[1] ?? ''
+    if (!expr.trim()) continue
+    const path = pathFromExpression(expr)
+    if (path) out.push(path)
+    else hasUnresolved = true
   }
-  return out
+  return { paths: out, hasUnresolved }
 }
 
 const REDACTED = '***'
 
 function referencedPaths(
   producedHeaders: readonly { key: string; value: string; enabled?: boolean }[]
-): Set<string> {
+): { paths: Set<string>; hasUnresolved: boolean } {
   const paths = new Set<string>()
+  let hasUnresolved = false
   for (const kv of producedHeaders) {
     if (kv.enabled === false) continue
-    for (const ref of collectHandlebarsReferences(kv.value)) {
+    const { paths: refs, hasUnresolved: unresolved } = collectReferences(kv.value)
+    if (unresolved) hasUnresolved = true
+    for (const ref of refs) {
       // Skip the synthetic `body` reference the cache service uses
       // for non-JSON bodies — there's nothing to redact in a flat
       // string context.
@@ -41,7 +93,7 @@ function referencedPaths(
       paths.add(ref)
     }
   }
-  return paths
+  return { paths, hasUnresolved }
 }
 
 /** Read the string value at `a.b.c` in a parsed JSON object, or undefined. */
@@ -81,7 +133,13 @@ export function redactTokensFromBody(
     return redactSecretSubstrings(rawBody, extraSecretValues)
   }
 
-  const paths = referencedPaths(producedHeaders)
+  const { paths, hasUnresolved } = referencedPaths(producedHeaders)
+
+  // Fail safe: an auth template referenced a value we couldn't resolve to a
+  // concrete field path (a helper/subexpression we don't model). Rather than
+  // risk leaving a token in clear, redact the whole JSON body.
+  if (hasUnresolved) return JSON.stringify(REDACTED)
+
   if (paths.size === 0) return redactSecretSubstrings(rawBody, extraSecretValues)
 
   for (const path of paths) {
@@ -110,7 +168,7 @@ export function collectTokenValues(
     return []
   }
   const out: string[] = []
-  for (const path of referencedPaths(producedHeaders)) {
+  for (const path of referencedPaths(producedHeaders).paths) {
     const v = valueAtPath(parsed, path.split('.'))
     if (v && v.length >= 4) out.push(v)
   }
@@ -142,12 +200,40 @@ export function redactTokensFromHeaders<T extends { key: string; value: string }
 function redactPath(target: unknown, segments: readonly string[]): void {
   if (segments.length === 0) return
   if (target === null || typeof target !== 'object') return
+
+  // Array: a path can land on (or pass through) a list. Apply the remaining
+  // segments to every element so tokens nested in arrays still get redacted —
+  // unless the segment is an explicit numeric index into the array.
+  if (Array.isArray(target)) {
+    const [maybeIndex] = segments
+    if (maybeIndex !== undefined && /^\d+$/.test(maybeIndex)) {
+      const idx = Number(maybeIndex)
+      const rest = segments.slice(1)
+      if (idx < target.length) {
+        if (rest.length === 0) {
+          if (typeof target[idx] === 'string') target[idx] = '***'
+        } else {
+          redactPath(target[idx], rest)
+        }
+      }
+      return
+    }
+    for (const item of target) redactPath(item, segments)
+    return
+  }
+
   const [head, ...rest] = segments
   if (!head) return
   const obj = target as Record<string, unknown>
   if (!(head in obj)) return
   if (rest.length === 0) {
-    obj[head] = '***'
+    const cur = obj[head]
+    if (Array.isArray(cur)) {
+      // Leaf is an array of (presumably) token strings — redact each.
+      obj[head] = (cur as unknown[]).map((el) => (typeof el === 'string' ? '***' : el))
+    } else {
+      obj[head] = '***'
+    }
     return
   }
   redactPath(obj[head], rest)
