@@ -123,6 +123,8 @@ export const contextRegisterRequestArgs = z.tuple([
 
 export const contextUnregisterRequestArgs = z.tuple([requestIdArg])
 
+export const contextGetEnvironmentContextArgs = z.tuple([z.string()])
+
 export const contextSetRequestEnvironmentArgs = z.tuple([
   requestIdArg,
   z.string().nullable()

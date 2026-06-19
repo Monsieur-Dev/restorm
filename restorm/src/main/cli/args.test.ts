@@ -37,14 +37,14 @@ describe('resolveMcpSessionName', () => {
     expect(resolveMcpSessionName('flag-session', undefined)).toBe('flag-session')
   })
 
-  it('derives a name from the open target basename (extension stripped)', () => {
+  it('derives a name from the open target basename (extension stripped), pid-suffixed for uniqueness', () => {
     delete process.env['RESTORM_MCP_SESSION_NAME']
-    expect(resolveMcpSessionName(undefined, '/home/me/Projects/petstore.restorm')).toBe('restorm:petstore')
+    expect(resolveMcpSessionName(undefined, '/home/me/Projects/petstore.restorm')).toBe(`restorm:petstore (${String(process.pid)})`)
   })
 
   it('handles an open target with a trailing slash (a folder)', () => {
     delete process.env['RESTORM_MCP_SESSION_NAME']
-    expect(resolveMcpSessionName(undefined, '/home/me/Projects/MyApi/')).toBe('restorm:MyApi')
+    expect(resolveMcpSessionName(undefined, '/home/me/Projects/MyApi/')).toBe(`restorm:MyApi (${String(process.pid)})`)
   })
 
   it('falls back to a stable pid-derived id when nothing else is available', () => {

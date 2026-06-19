@@ -71,6 +71,10 @@ export class KeyValue extends BaseKeyValue {
         }
         case 'secret': {
           const p = plain as { source?: unknown; params?: unknown }
+          // PRESERVE the secret's identity. A `type: 'secret'` discriminant must
+          // always reify to a SecretValue (never degrade to StringValue, which
+          // would drop source/params and break resolution on the next load) —
+          // keep whatever source/params are present, even if partial.
           value = new SecretValue(
             typeof p.source === 'string' ? p.source : '',
             isRecord(p.params) ? p.params : {}

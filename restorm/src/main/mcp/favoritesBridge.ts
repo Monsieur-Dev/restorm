@@ -11,7 +11,12 @@ import { ipcMain } from 'electron'
 export interface FavoriteItem { id: string; name: string; type: string }
 interface FavoritesSnapshot { projectUuid: string | null; favorites: FavoriteItem[] }
 
-let snapshot: FavoritesSnapshot = { projectUuid: null, favorites: [] }
+// Favorites are cached PER project so a push from one project can't clobber
+// another's cached list (the old single-snapshot model lost the previous
+// project's favorites on every project switch / interleaved push). The most
+// recently pushed project is the "active" one `getFavoritesSnapshot` returns.
+const byProject = new Map<string, FavoriteItem[]>()
+let activeProjectUuid: string | null = null
 let registered = false
 
 /** Wire the renderer→main favorites push. Idempotent. */
@@ -31,11 +36,13 @@ export function registerFavoritesBridge(): void {
       if (!id) continue
       favorites.push({ id, name: typeof r['name'] === 'string' ? r['name'] : '', type: typeof r['type'] === 'string' ? r['type'] : '' })
     }
-    snapshot = { projectUuid, favorites }
+    activeProjectUuid = projectUuid
+    if (projectUuid !== null) byProject.set(projectUuid, favorites)
   })
 }
 
 /** The latest favorites snapshot pushed by the renderer (active project). */
 export function getFavoritesSnapshot(): FavoritesSnapshot {
-  return { projectUuid: snapshot.projectUuid, favorites: [...snapshot.favorites] }
+  const favorites = activeProjectUuid !== null ? byProject.get(activeProjectUuid) ?? [] : []
+  return { projectUuid: activeProjectUuid, favorites: [...favorites] }
 }

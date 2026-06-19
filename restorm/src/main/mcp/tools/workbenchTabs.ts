@@ -11,11 +11,26 @@
 
 import { z } from 'zod'
 import { BrowserWindow } from 'electron'
-import { McpService, permissionService } from 'electron-core-ui'
+import { McpService, permissionService, logger } from 'electron-core-ui'
 import type { FirewallOrigin } from 'electron-core-ui'
 
 function jsonReply(value: unknown): { content: { type: 'text'; text: string }[] } {
   return { content: [{ type: 'text', text: JSON.stringify(value, null, 2) }] }
+}
+
+/**
+ * Audit an agent-driven firewall change. An MCP client (not the user) just
+ * mutated the firewall, so leave a trail: a stamped log line AND a renderer
+ * broadcast so the UI can surface that an agent — not a human click — added the
+ * rule. Silent agent whitelisting is exactly what the firewall guards against.
+ */
+function auditAgentFirewallChange(action: string, detail: Record<string, unknown>): void {
+  logger.warn(`[firewall][audit] MCP agent ${action}`, { ...detail, source: 'mcp-agent' })
+  for (const win of BrowserWindow.getAllWindows()) {
+    try {
+      win.webContents.send('firewall:agent-rule-changed', { action, ...detail, at: new Date().toISOString() })
+    } catch { /* window torn down */ }
+  }
 }
 
 function errorReply(message: string): { content: { type: 'text'; text: string }[]; isError: true } {
@@ -114,6 +129,7 @@ export function registerWorkbenchTabTools(mcp: McpService): void {
       const parsed = parseOriginString(raw)
       if (!parsed) return errorReply(`origin could not be parsed: ${raw}`)
       permissionService.addToWhitelist(parsed)
+      auditAgentFirewallChange('allowed origin', { origin: parsed })
       return jsonReply({ added: parsed, list: 'whitelist' })
     }
   )
@@ -138,6 +154,7 @@ export function registerWorkbenchTabTools(mcp: McpService): void {
       const parsed = parseOriginString(raw)
       if (!parsed) return errorReply(`origin could not be parsed: ${raw}`)
       permissionService.addToBlacklist(parsed)
+      auditAgentFirewallChange('denied origin', { origin: parsed })
       return jsonReply({ added: parsed, list: 'blacklist' })
     }
   )
@@ -182,6 +199,7 @@ export function registerWorkbenchTabTools(mcp: McpService): void {
       if (!promptId) return errorReply('promptId is required')
       if (verdict !== 'allow' && verdict !== 'deny') return errorReply('verdict must be "allow" or "deny"')
       permissionService.resolvePrompt(promptId, verdict)
+      auditAgentFirewallChange('resolved prompt', { promptId, verdict })
       return jsonReply({ resolved: promptId, verdict })
     }
   )

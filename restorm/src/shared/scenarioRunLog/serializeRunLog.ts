@@ -79,7 +79,15 @@ export function serializeRunLogEntries(entries: readonly ScenarioRunLogLike[]): 
 /** Serialize ONE entry to YAML (the inspector per-row "copy entry" output).
  * The streamed-per-entry form for the CLI uses {@link serializeRunLogEntries}
  * with a single-element array so the leading `- ` + indentation match the
- * batch copy exactly. */
+ * batch copy exactly. On a stringify failure, fall back to the entry's bare
+ * message rather than an empty string, so the log line doesn't vanish entirely. */
 export function serializeRunLogEntry(entry: ScenarioRunLogLike): string {
-  try { return yamlStringify(toYamlEntry(entry), YAML_OPTS) } catch { return '' }
+  try {
+    return yamlStringify(toYamlEntry(entry), YAML_OPTS)
+  } catch {
+    const msg = typeof (entry as { message?: unknown }).message === 'string'
+      ? (entry as { message: string }).message
+      : ''
+    return msg !== '' ? `- message: ${msg}\n` : ''
+  }
 }

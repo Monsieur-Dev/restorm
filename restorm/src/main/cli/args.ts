@@ -214,7 +214,10 @@ export function resolveMcpSessionName(flagValue: string | undefined, openTarget:
     const base = open.replace(/[\\/]+$/, '').split(/[\\/]/).pop() ?? ''
     const withoutExt = base.replace(/\.[^.]+$/, '')
     const cleaned = (withoutExt || base).trim()
-    if (cleaned !== '') return `restorm:${cleaned}`
+    // Append the pid so two instances opening the SAME file still get distinct,
+    // verbatim-matchable names (an explicit --mcp-session-name / env overrides
+    // this entirely when the user wants a fixed readable name).
+    if (cleaned !== '') return `restorm:${cleaned} (${String(process.pid)})`
   }
   // No project to name after — fall back to a short pid-derived id so two
   // anonymous instances still get distinct, stable names.

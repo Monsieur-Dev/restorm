@@ -53,7 +53,14 @@ vi.mock('../../services/CollectionStore', () => ({
 vi.mock('../../services', () => ({
   responseHistoryService: {
     list: (id: string) => mockState.list(id),
-    getDetail: (guid: string) => mockState.getDetail(guid)
+    getDetail: (guid: string) => mockState.getDetail(guid),
+    // Mirror the real first-check: a freshly-stored entry is already present in
+    // the mocked `list`, so this resolves it immediately; otherwise null (the
+    // tests drive `list` to return either a new top guid or the baseline).
+    waitForNewEntry: async (id: string, baselineGuid: string | null) => {
+      const top = (await mockState.list(id))[0]
+      return top !== undefined && top.guid !== baselineGuid ? { guid: top.guid } : null
+    }
   }
 }))
 

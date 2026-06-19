@@ -92,6 +92,53 @@ function outcomeToSuccess(outcome: ResponseHistoryOutcome): boolean {
 class ResponseHistoryService {
   private subscriptions: Subscription[] = []
   private initialized = false
+  /** Per-request listeners woken when a new history entry is stored, so callers
+   * (e.g. the MCP `run_request` flow) can await the new entry instead of
+   * busy-polling `list()` (disk/IPC) on a fixed interval. */
+  private readonly storeWaiters = new Map<string, Set<(guid: string) => void>>()
+
+  /**
+   * Resolve once a NEW history entry (guid !== baselineGuid) lands for
+   * `requestId`, or to `null` after `timeoutMs`. Checks the current top first
+   * (the entry may already exist), then waits on a store notification — no
+   * polling loop.
+   */
+  async waitForNewEntry(requestId: string, baselineGuid: string | null, timeoutMs: number): Promise<{ guid: string } | null> {
+    const top = (await this.list(requestId))[0]
+    if (top !== undefined && top.guid !== baselineGuid) return { guid: top.guid }
+
+    return new Promise((resolve) => {
+      let settled = false
+      const set = this.storeWaiters.get(requestId) ?? new Set()
+      const listener = (guid: string): void => {
+        if (settled || guid === baselineGuid) return
+        settled = true
+        cleanup()
+        resolve({ guid })
+      }
+      const cleanup = (): void => {
+        clearTimeout(timer)
+        set.delete(listener)
+        if (set.size === 0) this.storeWaiters.delete(requestId)
+      }
+      const timer = setTimeout(() => {
+        if (settled) return
+        settled = true
+        cleanup()
+        resolve(null)
+      }, timeoutMs)
+      set.add(listener)
+      this.storeWaiters.set(requestId, set)
+    })
+  }
+
+  private notifyStored(requestId: string, guid: string): void {
+    const set = this.storeWaiters.get(requestId)
+    if (!set) return
+    for (const listener of [...set]) {
+      try { listener(guid) } catch { /* listener errors must not derail a store */ }
+    }
+  }
 
   initialize(): void {
     if (this.initialized) return
@@ -153,6 +200,7 @@ class ResponseHistoryService {
 
         nextEntriesData.set(this.getDetailEntryName(guid), JSON.stringify(detail))
         await writeHistoryArchive(archivePath, updatedIndex, nextEntriesData)
+        this.notifyStored(requestId, guid)
       })
     } catch (error) {
       logger.error('[ResponseHistoryService] Failed to store response history', {

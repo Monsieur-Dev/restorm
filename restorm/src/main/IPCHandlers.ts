@@ -29,7 +29,7 @@ import {
   secretsReadArgs, secretsWriteArgs, secretsInvalidateArgs, secretsResolveArgs, secretsRefreshArgs,
   openPathArgs,
   projectReadFileArgs,
-  contextRegisterRequestArgs, contextUnregisterRequestArgs,
+  contextRegisterRequestArgs, contextUnregisterRequestArgs, contextGetEnvironmentContextArgs,
   contextSetRequestEnvironmentArgs, contextSetAvailableEnvironmentsArgs,
   contextUpdateRequestKeyValuesArgs,
   contextUpdateFullRequestDataArgs, contextGetResolvedUrlArgs,
@@ -682,7 +682,7 @@ export function registerRestormIPC(deps: {
     return contextService.getAllVariableTransformResults()
   })
 
-  ipcMain.handle('context:get-environment-context', (_event, environmentId: string) => {
+  validatedHandle('context:get-environment-context', contextGetEnvironmentContextArgs, (_event, [environmentId]) => {
     return contextService.getContext(environmentId) ?? {}
   })
 

@@ -402,18 +402,37 @@ export function registerScenarioTools(mcp: McpService): void {
       const nodeId = typeof args['nodeId'] === 'string' ? args['nodeId'] : ''
       const node = scenario.nodes.find((n) => n.id === nodeId)
       if (!node) return errorReply(`No node ${nodeId} in scenario ${id}`)
-      if (args['config'] && typeof args['config'] === 'object' && !Array.isArray(args['config'])) {
-        for (const [k, v] of Object.entries(args['config'] as Record<string, unknown>)) {
-          if (v === null) Reflect.deleteProperty(node.config, k)
-          else node.config[k] = v
-        }
+      // Snapshot the mutable fields so a failure mid-update (or in the broadcast)
+      // doesn't leave the shared node half-mutated with no way back.
+      const before = {
+        config: { ...node.config },
+        note: node.note,
+        color: node.color,
+        collapsed: node.collapsed,
+        position: { ...node.position }
       }
-      if (typeof args['note'] === 'string') { if (args['note'] === '') delete node.note; else node.note = args['note'] }
-      if (typeof args['color'] === 'string') { if (args['color'] === '') delete node.color; else node.color = args['color'] }
-      if (typeof args['collapsed'] === 'boolean') { if (args['collapsed']) node.collapsed = true; else delete node.collapsed }
-      if (typeof args['x'] === 'number') node.position.x = args['x']
-      if (typeof args['y'] === 'number') node.position.y = args['y']
-      broadcastScenario(scenario)
+      try {
+        if (args['config'] && typeof args['config'] === 'object' && !Array.isArray(args['config'])) {
+          for (const [k, v] of Object.entries(args['config'] as Record<string, unknown>)) {
+            if (v === null) Reflect.deleteProperty(node.config, k)
+            else node.config[k] = v
+          }
+        }
+        if (typeof args['note'] === 'string') { if (args['note'] === '') delete node.note; else node.note = args['note'] }
+        if (typeof args['color'] === 'string') { if (args['color'] === '') delete node.color; else node.color = args['color'] }
+        if (typeof args['collapsed'] === 'boolean') { if (args['collapsed']) node.collapsed = true; else delete node.collapsed }
+        if (typeof args['x'] === 'number') node.position.x = args['x']
+        if (typeof args['y'] === 'number') node.position.y = args['y']
+        broadcastScenario(scenario)
+      } catch (err) {
+        // Roll the node back to its pre-update state.
+        node.config = before.config
+        if (before.note === undefined) delete node.note; else node.note = before.note
+        if (before.color === undefined) delete node.color; else node.color = before.color
+        if (before.collapsed === undefined) delete node.collapsed; else node.collapsed = before.collapsed
+        node.position = before.position
+        return errorReply(`Failed to update node ${nodeId}: ${err instanceof Error ? err.message : String(err)}`)
+      }
       return jsonReply(nodeView(node))
     }
   )

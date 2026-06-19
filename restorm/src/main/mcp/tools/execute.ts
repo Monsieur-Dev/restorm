@@ -266,15 +266,10 @@ function broadcastOpenTab(itemId: string): void {
   }
 }
 
-async function waitForNewHistoryEntry(requestId: string, baselineGuid: string | null, timeoutMs: number): Promise<{ guid: string } | null> {
-  const deadline = Date.now() + timeoutMs
-  while (Date.now() < deadline) {
-    const entries = await responseHistoryService.list(requestId)
-    const top = entries[0]
-    if (top !== undefined && top.guid !== baselineGuid) return { guid: top.guid }
-    await new Promise<void>((resolve) => setTimeout(resolve, 200))
-  }
-  return null
+function waitForNewHistoryEntry(requestId: string, baselineGuid: string | null, timeoutMs: number): Promise<{ guid: string } | null> {
+  // Event-driven: ResponseHistoryService wakes us when the new entry is stored,
+  // so we don't busy-poll list() (disk/IPC) every 200ms for up to 120s.
+  return responseHistoryService.waitForNewEntry(requestId, baselineGuid, timeoutMs)
 }
 
 function delay(ms: number): Promise<void> {
