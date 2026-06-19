@@ -90,3 +90,26 @@ describe('runScenarioNode kind dispatch', () => {
     expect(executeMock).not.toHaveBeenCalled()
   })
 })
+
+describe('waitMs — persisted wait-node duration', () => {
+  function node(config: Record<string, unknown>): { id: string; kind: string; config: Record<string, unknown> } {
+    return { id: 'w', kind: 'wait', config }
+  }
+
+  it('reads durationMs from the node config', async () => {
+    const { waitMs } = await import('./scenarioRun')
+    expect(waitMs(node({ durationMs: 2500 }) as never)).toBe(2500)
+  })
+
+  it('falls back to `duration` when durationMs is absent', async () => {
+    const { waitMs } = await import('./scenarioRun')
+    expect(waitMs(node({ duration: 400 }) as never)).toBe(400)
+  })
+
+  it('defaults to 1000ms (engine parity), not the old 5000ms demo value', async () => {
+    const { waitMs } = await import('./scenarioRun')
+    expect(waitMs(node({}) as never)).toBe(1000)
+    expect(waitMs(node({ durationMs: 0 }) as never)).toBe(1000)
+    expect(waitMs(node({ durationMs: -5 }) as never)).toBe(1000)
+  })
+})

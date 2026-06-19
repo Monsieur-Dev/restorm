@@ -76,18 +76,35 @@ interface ActiveRun {
 const recentRuns = new Map<RuntimeId, ActiveRun>()
 let captureInstalled = false
 
-/** Cap on the run history kept here (mirrors the engine archive's bound). Past
- * this, the oldest FINISHED runs are evicted in insertion order; in-flight runs
- * are never evicted, so a status poll always finds a live run. */
+/** Soft cap on the run history kept here (mirrors the engine archive's bound).
+ * Past this, the oldest FINISHED runs are evicted in insertion order; in-flight
+ * runs are normally never evicted, so a status poll always finds a live run. */
 const MAX_RECENT_RUNS = 100
 
-/** Evict the oldest finished runs once `recentRuns` grows past the cap. */
+/** Hard ceiling. If finished-only eviction can't bring the map under this (e.g.
+ * a pathological flood of never-settling live runs would otherwise grow the map
+ * without bound), the oldest entries are dropped REGARDLESS of state so the map
+ * can never grow unbounded. */
+const HARD_MAX_RECENT_RUNS = 1000
+
+/** Evict the oldest finished runs once `recentRuns` grows past the soft cap;
+ * past the hard ceiling, evict the oldest entries regardless of state so a
+ * flood of live/stuck runs can't grow the map without bound. */
 function pruneRecentRuns(): void {
   if (recentRuns.size <= MAX_RECENT_RUNS) return
+  // Pass 1: drop the oldest FINISHED runs down toward the soft cap.
   for (const [id, entry] of recentRuns) {
     if (recentRuns.size <= MAX_RECENT_RUNS) break
     if (entry.state === 'running' || entry.state === 'paused') continue
     recentRuns.delete(id)
+  }
+  // Pass 2: if still over the HARD ceiling (only finished-immune live runs
+  // left), drop the oldest entries regardless of state — bounded over correct.
+  if (recentRuns.size > HARD_MAX_RECENT_RUNS) {
+    for (const id of recentRuns.keys()) {
+      if (recentRuns.size <= HARD_MAX_RECENT_RUNS) break
+      recentRuns.delete(id)
+    }
   }
 }
 
