@@ -366,6 +366,9 @@
     "openConsole": "Åbn konsollen",
     "consoleClear": "Ryd konsollen",
     "setTabMaximized": "Maksimer/gendan fanen",
-    "listInstances": "Liste MCP-instanser"
+    "listInstances": "Liste MCP-instanser",
+    "listThemes": "Vis tilgængelige temaer",
+    "getCurrentTheme": "Vis aktuelt tema",
+    "switchTheme": "Skift aktivt tema"
   }
 }

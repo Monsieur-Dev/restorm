@@ -366,6 +366,9 @@
     "openConsole": "Deschide consola",
     "consoleClear": "Golește consola",
     "setTabMaximized": "Maximizează/restaurează fila",
-    "listInstances": "Listare instanțe MCP"
+    "listInstances": "Listare instanțe MCP",
+    "listThemes": "Lista teme disponibile",
+    "getCurrentTheme": "Obține tema curentă",
+    "switchTheme": "Schimbă tema activă"
   }
 }

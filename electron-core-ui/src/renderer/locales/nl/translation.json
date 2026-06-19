@@ -366,6 +366,9 @@
     "openConsole": "De console openen",
     "consoleClear": "De console wissen",
     "setTabMaximized": "Tabblad maximaliseren/herstellen",
-    "listInstances": "MCP-instanties weergeven"
+    "listInstances": "MCP-instanties weergeven",
+    "listThemes": "Beschikbare thema's weergeven",
+    "getCurrentTheme": "Huidig thema ophalen",
+    "switchTheme": "Actief thema wisselen"
   }
 }

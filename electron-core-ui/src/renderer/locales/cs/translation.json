@@ -366,6 +366,9 @@
     "openConsole": "Otevřít konzoli",
     "consoleClear": "Vymazat konzoli",
     "setTabMaximized": "Maximalizovat/obnovit kartu",
-    "listInstances": "Vypsat instance MCP"
+    "listInstances": "Vypsat instance MCP",
+    "listThemes": "Vypsat dostupná témata",
+    "getCurrentTheme": "Zobrazit aktuální téma",
+    "switchTheme": "Přepnout aktivní téma"
   }
 }

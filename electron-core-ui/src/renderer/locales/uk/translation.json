@@ -366,6 +366,9 @@
     "openConsole": "Відкрити консоль",
     "consoleClear": "Очистити консоль",
     "setTabMaximized": "Розгорнути/відновити вкладку",
-    "listInstances": "Список екземплярів MCP"
+    "listInstances": "Список екземплярів MCP",
+    "listThemes": "Список доступних тем",
+    "getCurrentTheme": "Отримати поточну тему",
+    "switchTheme": "Змінити активну тему"
   }
 }

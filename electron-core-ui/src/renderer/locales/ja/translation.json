@@ -366,6 +366,9 @@
     "openConsole": "コンソールを開く",
     "consoleClear": "コンソールをクリア",
     "setTabMaximized": "タブを最大化/元に戻す",
-    "listInstances": "MCPインスタンスを一覧表示"
+    "listInstances": "MCPインスタンスを一覧表示",
+    "listThemes": "利用可能なテーマを一覧表示",
+    "getCurrentTheme": "現在のテーマを取得",
+    "switchTheme": "アクティブなテーマを切り替え"
   }
 }

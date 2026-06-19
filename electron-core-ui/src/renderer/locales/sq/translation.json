@@ -366,6 +366,9 @@
     "openConsole": "Hap konsolën",
     "consoleClear": "Pastro konsolën",
     "setTabMaximized": "Maksimizo/rikthe skedën",
-    "listInstances": "Listo instancat MCP"
+    "listInstances": "Listo instancat MCP",
+    "listThemes": "Lista e temave të disponueshme",
+    "getCurrentTheme": "Merr temën aktuale",
+    "switchTheme": "Ndrysho temën aktive"
   }
 }

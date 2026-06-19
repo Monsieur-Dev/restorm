@@ -579,6 +579,45 @@ Broadcasts `CONSOLE_OPEN_CHANNEL` to open / focus the host app's Console panel (
 
 Broadcasts `CONSOLE_CLEAR_CHANNEL` to wipe the renderer-side Console feed buffer — same effect as the toolbar's Clear button. The host wires it to `clearConsoleFeed()`. Useful to reset the log before a focused experiment. No parameters.
 
+### `list_themes`
+
+Returns the list of color themes available in the app. Reads from `ThemeService` (must be initialised by the host). Returns an error when the service is uninitialised.
+
+```jsonc
+// No parameters
+// Reply:
+{
+  "themes": [
+    { "id": "dark/Default Dark+", "name": "Default Dark+", "family": "dark" },
+    { "id": "light/Default Light+", "name": "Default Light+", "family": "light" }
+  ]
+}
+```
+
+`family` maps `ThemeInfo.type`: `dark` | `light` | `hcDark` | `hcLight`.
+
+### `get_current_theme`
+
+Returns the `id`, `name`, and `family` of the currently active color theme. Reads the persisted selection from `StorageService` (key `currentTheme`) and resolves it against the available themes from `ThemeService`. Falls back to the first dark theme (or first available theme) when the stored id is absent or unrecognised. Returns an error when `ThemeService` is uninitialised.
+
+```jsonc
+// No parameters
+// Reply:
+{ "id": "dark/Default Dark+", "name": "Default Dark+", "family": "dark" }
+```
+
+### `switch_theme`
+
+Changes the app color theme to the one identified by `themeId`. Validates the id against `ThemeService.listThemes()`, persists the selection to `StorageService`, and broadcasts `theme:changed` to all renderer windows so the new palette is applied live — the same path the UI uses. Returns an error when `themeId` is unknown or `ThemeService` is uninitialised.
+
+```jsonc
+{ "themeId": "light/Default Light+" }
+// Reply:
+{ "id": "light/Default Light+", "name": "Default Light+", "family": "light", "changed": true }
+```
+
+`changed: false` is returned (without broadcasting) when the requested theme is already active.
+
 ### `set_tab_maximized`
 
 Broadcasts `SET_TAB_MAXIMIZED_CHANNEL` to open a workbench tab fullscreen (in the same modal a double-click on the tab opens) or restore it back to its split-pane slot. The maximized and normal views share one React instance, so no edits / responses / scroll state are lost in either direction. Requires the host to wire `EditorWorkbench`'s `setFullscreenTabId` imperative handle to the channel — see the [Workbench doc](../Workbench/README.md).

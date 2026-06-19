@@ -366,6 +366,9 @@
     "openConsole": "Άνοιγμα κονσόλας",
     "consoleClear": "Εκκαθάριση κονσόλας",
     "setTabMaximized": "Μεγιστοποίηση/επαναφορά καρτέλας",
-    "listInstances": "Λίστα παρουσιών MCP"
+    "listInstances": "Λίστα παρουσιών MCP",
+    "listThemes": "Λίστα διαθέσιμων θεμάτων",
+    "getCurrentTheme": "Εμφάνιση τρέχοντος θέματος",
+    "switchTheme": "Αλλαγή ενεργού θέματος"
   }
 }

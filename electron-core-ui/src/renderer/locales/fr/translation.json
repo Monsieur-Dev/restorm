@@ -366,6 +366,9 @@
     "openConsole": "Ouvrir la console",
     "consoleClear": "Effacer la console",
     "setTabMaximized": "Agrandir/restaurer l'onglet",
-    "listInstances": "Lister les instances MCP"
+    "listInstances": "Lister les instances MCP",
+    "listThemes": "Lister les thèmes disponibles",
+    "getCurrentTheme": "Obtenir le thème actuel",
+    "switchTheme": "Changer le thème actif"
   }
 }

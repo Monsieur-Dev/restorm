@@ -366,6 +366,9 @@
     "openConsole": "打开控制台",
     "consoleClear": "清空控制台",
     "setTabMaximized": "最大化/还原标签页",
-    "listInstances": "列出 MCP 实例"
+    "listInstances": "列出 MCP 实例",
+    "listThemes": "列出可用主题",
+    "getCurrentTheme": "获取当前主题",
+    "switchTheme": "切换活跃主题"
   }
 }
