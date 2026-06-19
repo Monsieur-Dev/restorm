@@ -365,6 +365,7 @@
     "miniBrowserExecute": "Uruchom kod w miniprzeglądarce",
     "openConsole": "Otwórz konsolę",
     "consoleClear": "Wyczyść konsolę",
-    "setTabMaximized": "Maksymalizuj/przywróć kartę"
+    "setTabMaximized": "Maksymalizuj/przywróć kartę",
+    "listInstances": "List MCP instances"
   }
 }

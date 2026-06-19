@@ -365,6 +365,7 @@
     "miniBrowserExecute": "ミニブラウザーでコードを実行",
     "openConsole": "コンソールを開く",
     "consoleClear": "コンソールをクリア",
-    "setTabMaximized": "タブを最大化/元に戻す"
+    "setTabMaximized": "タブを最大化/元に戻す",
+    "listInstances": "List MCP instances"
   }
 }

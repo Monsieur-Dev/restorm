@@ -365,6 +365,7 @@
     "miniBrowserExecute": "在迷你浏览器中运行代码",
     "openConsole": "打开控制台",
     "consoleClear": "清空控制台",
-    "setTabMaximized": "最大化/还原标签页"
+    "setTabMaximized": "最大化/还原标签页",
+    "listInstances": "List MCP instances"
   }
 }

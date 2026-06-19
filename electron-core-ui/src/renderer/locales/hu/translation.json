@@ -365,6 +365,7 @@
     "miniBrowserExecute": "Kód futtatása a miniböngészőben",
     "openConsole": "Konzol megnyitása",
     "consoleClear": "Konzol törlése",
-    "setTabMaximized": "Lap teljes méret/visszaállítás"
+    "setTabMaximized": "Lap teljes méret/visszaállítás",
+    "listInstances": "List MCP instances"
   }
 }

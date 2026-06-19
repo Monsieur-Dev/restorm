@@ -365,6 +365,7 @@
     "miniBrowserExecute": "Mini tarayıcıda kod çalıştır",
     "openConsole": "Konsolu aç",
     "consoleClear": "Konsolu temizle",
-    "setTabMaximized": "Sekmeyi büyüt/geri yükle"
+    "setTabMaximized": "Sekmeyi büyüt/geri yükle",
+    "listInstances": "List MCP instances"
   }
 }

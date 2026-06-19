@@ -218,6 +218,102 @@ export function findLiveSessionByName(dir: string, name: string): McpDiscoveryEn
 }
 
 /**
+ * Read all parseable lockfiles in `dir`, filter to entries whose pid is
+ * alive, and return the full {@link McpDiscoveryEntry} objects (including
+ * the bearer token). Does NOT do an HTTP liveness probe — the faster
+ * synchronous pid check is enough to prune stale entries here; the caller
+ * (the `list-instances` tool) runs the async probe in a second pass.
+ *
+ * The token is included so the caller can use it for the HTTP probe.
+ * Callers MUST NOT expose the token in any user-visible output — strip
+ * it before returning a response (the `list-instances` handler does so).
+ *
+ * Returns an empty array when `dir` does not exist or is unreadable.
+ */
+export function readAllLiveEntries(dir: string): McpDiscoveryEntry[] {
+  let dirents: import('fs').Dirent[]
+  try {
+    dirents = readdirSync(dir, { withFileTypes: true })
+  } catch {
+    return []
+  }
+  const out: McpDiscoveryEntry[] = []
+  for (const e of dirents) {
+    if (!e.isFile() || !e.name.endsWith('.json')) continue
+    let parsed: Partial<McpDiscoveryEntry>
+    try {
+      parsed = JSON.parse(readFileSync(join(dir, e.name), 'utf8')) as Partial<McpDiscoveryEntry>
+    } catch {
+      continue
+    }
+    const pid = Number(parsed.pid)
+    const port = Number(parsed.port)
+    if (!Number.isInteger(pid) || !Number.isInteger(port) || port <= 0) continue
+    if (typeof parsed.token !== 'string') continue
+    if (typeof parsed.name !== 'string') continue
+    if (!isPidAlive(pid)) continue
+    out.push({
+      pid,
+      port,
+      token: parsed.token,
+      name: parsed.name,
+      projectPath: typeof parsed.projectPath === 'string' ? parsed.projectPath : null,
+      startedAt: typeof parsed.startedAt === 'string' ? parsed.startedAt : ''
+    })
+  }
+  return out
+}
+
+/**
+ * Confirm that a given `(port, token)` pair points at a live MCP
+ * endpoint by sending a minimal JSON-RPC `initialize` POST. Returns
+ * `true` on a 2xx response, `false` on any other status, network error,
+ * or timeout. Bounded by `timeoutMs` (default 800 ms — same cap used by
+ * the external launcher) so a wedged peer can't stall the probe loop.
+ *
+ * Used by the `list-instances` tool to confirm each pid-alive candidate
+ * actually has a reachable HTTP endpoint (e.g. filters out pid-reuse
+ * after a crash where the port was taken by an unrelated process).
+ */
+export function probeMcpEndpoint(port: number, token: string, timeoutMs = 800): Promise<boolean> {
+  return new Promise((resolve) => {
+    if (!Number.isInteger(port) || port <= 0) { resolve(false); return }
+    const payload = JSON.stringify({
+      jsonrpc: '2.0',
+      id: 'ecui-probe',
+      method: 'initialize',
+      params: {
+        protocolVersion: '2024-11-05',
+        capabilities: {},
+        clientInfo: { name: 'ecui-list-instances', version: '0.0.0' }
+      }
+    })
+    const headers: Record<string, string | number> = {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json, text/event-stream',
+      'Content-Length': Buffer.byteLength(payload),
+      'Authorization': `Bearer ${token}`
+    }
+    let settled = false
+    const settle = (ok: boolean): void => { if (!settled) { settled = true; resolve(ok) } }
+    const req = httpRequest(
+      { host: '127.0.0.1', port, path: '/', method: 'POST', headers },
+      (res) => {
+        const ok = typeof res.statusCode === 'number' && res.statusCode >= 200 && res.statusCode < 300
+        // Drain so the socket can close cleanly; we only care about the status.
+        res.on('data', () => { /* drain */ })
+        res.on('end', () => { settle(ok) })
+        res.on('error', () => { settle(false) })
+      }
+    )
+    req.setTimeout(timeoutMs, () => { req.destroy(); settle(false) })
+    req.on('error', () => { settle(false) })
+    req.write(payload)
+    req.end()
+  })
+}
+
+/**
  * Forward a raw JSON-RPC payload to a named live instance discovered in `dir`,
  * over its loopback MCP endpoint: POST `/` with `Authorization: Bearer
  * <token>` and the streamable-HTTP `Accept`, returning the raw

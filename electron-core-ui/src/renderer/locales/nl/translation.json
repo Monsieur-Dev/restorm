@@ -365,6 +365,7 @@
     "miniBrowserExecute": "Code uitvoeren in de minibrowser",
     "openConsole": "De console openen",
     "consoleClear": "De console wissen",
-    "setTabMaximized": "Tabblad maximaliseren/herstellen"
+    "setTabMaximized": "Tabblad maximaliseren/herstellen",
+    "listInstances": "List MCP instances"
   }
 }

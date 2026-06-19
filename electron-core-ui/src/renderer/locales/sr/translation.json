@@ -365,6 +365,7 @@
     "miniBrowserExecute": "Покрени код у мини прегледачу",
     "openConsole": "Отвори конзолу",
     "consoleClear": "Очисти конзолу",
-    "setTabMaximized": "Увећај/врати картицу"
+    "setTabMaximized": "Увећај/врати картицу",
+    "listInstances": "List MCP instances"
   }
 }

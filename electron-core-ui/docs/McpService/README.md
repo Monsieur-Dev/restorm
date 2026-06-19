@@ -622,6 +622,36 @@ Returns every active `BrowserWindow` with its `id` (= `webContents.id`), `title`
 
 Pair with the `windowId` parameter that every renderer-facing tool now accepts (`screenshot`, `refresh`, `dom-query`, `console-logs`, `dispatch-event`, `type-text`, `evaluate`, `wait-for`, `keyboard-shortcut`, `devtools`, `window-info`, `storage`, `scroll-into-view`, `inject-css`, `get-computed-style`, `drag-drop`, `mouse-input`) to target a specific window. When `windowId` is omitted those tools fall back to the focused / first-visible window.
 
+### `list-instances`
+
+Return every running instance of this app that has an active MCP endpoint. Only instances whose endpoint actually answers an authenticated `initialize` probe are reported — stale lockfiles from crashed runs are silently skipped. The bearer token is never included in the output.
+
+Requires `McpServiceOptions.discoveryDir` to be set (restorm wires this from the `RESTORM_MCP_DIR` env var / the conventional default). Returns an empty list when the option is absent or the directory is empty.
+
+```jsonc
+{
+  "count": 2,
+  "instances": [
+    {
+      "pid": 12345,
+      "name": "my-project — feature/add-widget",
+      "projectPath": "/home/user/projects/my-project.restorm",
+      "endpoint": "127.0.0.1:39271",
+      "startedAt": "2026-06-19T08:00:00.000Z"
+    },
+    {
+      "pid": 12399,
+      "name": "restorm",
+      "projectPath": null,
+      "endpoint": "127.0.0.1:41003",
+      "startedAt": "2026-06-19T07:45:00.000Z"
+    }
+  ]
+}
+```
+
+Use `__session: "<name>"` on any subsequent `tools/call` to target a specific instance (see [Cross-instance bridge](#cross-instance-bridge) above). The `name` comes from `--mcp-session-name` or `RESTORM_MCP_SESSION_NAME` set at launch time.
+
 ### `drag-drop`
 
 Simulates a full HTML5 drag-and-drop from a source element to a target element. Fires the canonical event sequence with a fresh `DataTransfer` that the source's own `dragstart` handler can stamp data on:

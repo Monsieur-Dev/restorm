@@ -365,6 +365,7 @@
     "miniBrowserExecute": "Run code in the mini browser",
     "openConsole": "Open the console",
     "consoleClear": "Clear the console",
-    "setTabMaximized": "Maximize/restore the tab"
+    "setTabMaximized": "Maximize/restore the tab",
+    "listInstances": "List MCP instances"
   }
 }

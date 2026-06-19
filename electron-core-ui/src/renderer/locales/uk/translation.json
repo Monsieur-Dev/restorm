@@ -365,6 +365,7 @@
     "miniBrowserExecute": "Виконати код у міні-браузері",
     "openConsole": "Відкрити консоль",
     "consoleClear": "Очистити консоль",
-    "setTabMaximized": "Розгорнути/відновити вкладку"
+    "setTabMaximized": "Розгорнути/відновити вкладку",
+    "listInstances": "List MCP instances"
   }
 }

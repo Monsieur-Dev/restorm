@@ -365,6 +365,7 @@
     "miniBrowserExecute": "Ejecutar código en el mininavegador",
     "openConsole": "Abrir la consola",
     "consoleClear": "Borrar la consola",
-    "setTabMaximized": "Maximizar/restaurar la pestaña"
+    "setTabMaximized": "Maximizar/restaurar la pestaña",
+    "listInstances": "List MCP instances"
   }
 }

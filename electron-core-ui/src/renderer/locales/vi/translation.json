@@ -365,6 +365,7 @@
     "miniBrowserExecute": "Chạy mã trong trình duyệt mini",
     "openConsole": "Mở bảng điều khiển",
     "consoleClear": "Xóa bảng điều khiển",
-    "setTabMaximized": "Phóng to/khôi phục tab"
+    "setTabMaximized": "Phóng to/khôi phục tab",
+    "listInstances": "List MCP instances"
   }
 }
