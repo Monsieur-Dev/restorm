@@ -61,8 +61,8 @@ export const arithmeticExecutor: NodeExecutor = (act, ctx) => {
   // A MISSING/empty operator defaults to ADD — that was the historical default,
   // so scenarios persisted with an operator-less arithmetic node (legacy data)
   // keep working across upgrades. But a PRESENT-but-unrecognised operator is a
-  // corrupt node and still THROWS, so the run-log surfaces it (the AC #18 goal)
-  // instead of silently computing addition.
+  // corrupt node and still THROWS, so the run-log surfaces it instead of
+  // silently computing addition.
   const hasOp = typeof rawOp === 'string' && rawOp !== ''
   const op = hasOp ? ARITH_OP_ALIASES[rawOp] : 'add'
   let value: number
