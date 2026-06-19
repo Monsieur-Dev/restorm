@@ -211,6 +211,18 @@ declare global {
           callback: (map: Record<string, { count: number; lastRunAt: string; history: string[] }>) => void
         ) => () => void
       }
+      // API-update / refresh pipeline (mirrors the preload `apiUpdate`
+      // surface). Keep in sync with src/main/preload/index.ts.
+      apiUpdate: {
+        setSettings: (folderId: string, config: unknown) => Promise<void>
+        apply: (folderId: string, selection?: { include: string[]; skip: string[] }) => Promise<{ updatedFolder: unknown }>
+        refreshFetch: (folderId: string) => Promise<
+          | { ok: true; checksum: string; payload: string; items: unknown[]; format: string | null }
+          | { ok: false; error: string }
+        >
+        syncCollections: (collections: unknown[]) => Promise<void>
+        updateFolderCustomValueLists: (folderId: string, lists: unknown[]) => Promise<void>
+      }
     }
   }
 }

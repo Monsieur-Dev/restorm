@@ -80,10 +80,8 @@ export const CustomValueListsPanel: React.FC<CustomValueListsPanelProps> = ({ fo
     // resolver substitutes the new entry values. The reactive mutation
     // above stays in-renderer (in-place edits skip the sync memo), so
     // without this targeted IPC main keeps resolving the stale snapshot.
-    const api = (window as unknown as {
-      restorm?: { apiUpdate?: { updateFolderCustomValueLists?: (folderId: string, lists: unknown[]) => Promise<void> } }
-    }).restorm?.apiUpdate
-    void api?.updateFolderCustomValueLists?.(folder.id, next as unknown as unknown[])
+    const api = window.restorm?.apiUpdate
+    void api?.updateFolderCustomValueLists(folder.id, next as unknown as unknown[])
   }, [folder, onFolderChange])
 
   // Persist: update local state + write the folder. Per-keystroke text edits
