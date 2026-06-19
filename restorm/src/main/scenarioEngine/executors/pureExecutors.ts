@@ -58,10 +58,13 @@ export const arithmeticExecutor: NodeExecutor = (act, ctx) => {
   const a = toNumber(ra)
   const b = toNumber(rb)
   const rawOp = cfg.operator ?? cfg.op
-  // No silent `?? 'add'` fallback: an unknown / unset persisted
-  // operator used to compute ADDITION, masking a corrupt node. Throw
-  // instead so the run-log surfaces the bad operator.
-  const op = rawOp !== undefined ? ARITH_OP_ALIASES[rawOp] : undefined
+  // A MISSING/empty operator defaults to ADD — that was the historical default,
+  // so scenarios persisted with an operator-less arithmetic node (legacy data)
+  // keep working across upgrades. But a PRESENT-but-unrecognised operator is a
+  // corrupt node and still THROWS, so the run-log surfaces it (the AC #18 goal)
+  // instead of silently computing addition.
+  const hasOp = typeof rawOp === 'string' && rawOp !== ''
+  const op = hasOp ? ARITH_OP_ALIASES[rawOp] : 'add'
   let value: number
   switch (op) {
     case 'add': value = a + b; break
