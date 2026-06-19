@@ -925,6 +925,7 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
         <InputBox
           value={filterText}
           onChange={setFilter}
+          changeDebounceMs={0}
           options={{ placeholder: t('odataRequestTab.filterPlaceholder', "Name eq 'Alice' and Age gt 21") }}
           data-testid="odata-request-filter"
         />
@@ -935,6 +936,7 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
         <InputBox
           value={selectText}
           onChange={setSelect}
+          changeDebounceMs={0}
           options={{ placeholder: t('odataRequestTab.selectPlaceholder', 'Id, Name, Email (comma-separated)') }}
           data-testid="odata-request-select"
         />
@@ -951,6 +953,7 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
           <InputBox
             value={topText}
             onChange={setTop}
+            changeDebounceMs={0}
             options={{
               type: 'number',
               min: 0,
@@ -965,6 +968,7 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
           <InputBox
             value={skipText}
             onChange={setSkip}
+            changeDebounceMs={0}
             options={{
               type: 'number',
               min: 0,
@@ -1017,6 +1021,7 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
           <InputBox
             value={searchText}
             onChange={setSearch}
+            changeDebounceMs={0}
               options={{ placeholder: t('odataRequestTab.searchPlaceholder', 'puppy') }}
             data-testid="odata-request-search"
           />
@@ -1026,6 +1031,7 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
           <InputBox
             value={formatText}
             onChange={setFormat}
+            changeDebounceMs={0}
               options={{ placeholder: t('odataRequestTab.formatPlaceholder', 'json') }}
             data-testid="odata-request-format"
           />
@@ -1037,6 +1043,7 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
         <InputBox
           value={applyText}
           onChange={setApply}
+          changeDebounceMs={0}
           options={{ placeholder: t('odataRequestTab.applyPlaceholder', 'groupby((Status),aggregate($count as Total))') }}
           data-testid="odata-request-apply"
         />
