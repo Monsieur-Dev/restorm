@@ -2,7 +2,7 @@ import http from 'node:http'
 import https from 'node:https'
 import net, { type Socket as NetSocket } from 'node:net'
 import dns, { type LookupAddress, type LookupOptions } from 'node:dns'
-import dgram, { type Socket as DgramSocket, type RemoteInfo } from 'node:dgram'
+import dgram, { type Socket as DgramSocket } from 'node:dgram'
 import { randomUUID } from 'node:crypto'
 import { logger } from '../LoggerService'
 import { firewallService } from './FirewallService'
@@ -347,8 +347,3 @@ function makeRecord(target: { host: string; port: number; protocol: 'http' | 'ht
 		verdict
 	}
 }
-
-// Suppress an unused-import warning when nothing in this module
-// references `RemoteInfo` directly (kept for future expansion of
-// the dgram patch to inbound `message` event observability).
-export type _DgramRemoteInfo = RemoteInfo

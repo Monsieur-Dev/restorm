@@ -1,4 +1,5 @@
 import { writeFileSync, unlinkSync } from 'node:fs'
+import { randomBytes } from 'node:crypto'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import * as nodeWorkerThreads from 'node:worker_threads'
@@ -94,8 +95,13 @@ const BOOTSTRAP_CODE = String.raw`
  */
 function ensureBootstrapPath(): string {
 	if (bootstrapPath !== null) return bootstrapPath
-	const path = join(tmpdir(), `${getWorkerBootstrapPrefix()}-${String(process.pid)}.cjs`)
-	writeFileSync(path, BOOTSTRAP_CODE, 'utf8')
+	// Unpredictable filename + create-exclusive write so an attacker can't
+	// pre-create / symlink the bootstrap path (a predictable
+	// `prefix-<pid>.cjs` is a TOCTOU foot-gun — `--require` would then load
+	// attacker-controlled code into every worker / fork). `wx` fails if the
+	// file already exists; mode 0o600 keeps it owner-only.
+	const path = join(tmpdir(), `${getWorkerBootstrapPrefix()}-${String(process.pid)}-${randomBytes(8).toString('hex')}.cjs`)
+	writeFileSync(path, BOOTSTRAP_CODE, { encoding: 'utf8', flag: 'wx', mode: 0o600 })
 	bootstrapPath = path
 	app.on('before-quit', () => {
 		try { unlinkSync(path) } catch { /* file already gone — ignore */ }
