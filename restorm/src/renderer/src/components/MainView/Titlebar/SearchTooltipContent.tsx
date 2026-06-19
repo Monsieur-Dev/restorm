@@ -252,7 +252,7 @@ export const SearchTooltipContent: React.FC<SearchTooltipContentProps> = ({ resu
       {breadcrumb.length > 0 && (
         <div className="search-tooltip-breadcrumb">
           {breadcrumb.map((item, index) => (
-            <React.Fragment key={index}>
+            <React.Fragment key={`${item}-${index}`}>
               {index > 0 && <span className="breadcrumb-separator">/</span>}
               <span className="breadcrumb-item">{item}</span>
             </React.Fragment>

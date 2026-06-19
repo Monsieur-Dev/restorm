@@ -489,10 +489,9 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
       )
     }
 
-    // OData request tab
-    // TODO: branch on `operationKind` ('entity-set' | 'function' |
-    // 'action') once the discriminator is introduced, so functions /
-    // actions get their own badges instead of the shared 'ODATA' one.
+    // OData request tab. All OData operations share the 'ODATA' badge today;
+    // once an `operationKind` discriminator ('entity-set' | 'function' |
+    // 'action') exists, functions / actions could get their own badges.
     if (isODataRequestTab(restormTab)) {
       return (
         <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>

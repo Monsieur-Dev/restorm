@@ -311,7 +311,6 @@ if (typeof window !== 'undefined') {
           
           // Wait for App to register its callback and expose test helpers
           // Try multiple times with increasing delays
-          let helpersFound = false
           for (let attempt = 0; attempt < 10; attempt++) {
             await new Promise(resolve => setTimeout(resolve, 500))
             
@@ -325,14 +324,12 @@ if (typeof window !== 'undefined') {
             
             if (windowWithRestormHelpers.__restormTestHelpers?.setRootFolders) {
               windowWithRestormHelpers.__restormTestHelpers.setRootFolders(reactiveFolders)
-              helpersFound = true
               break
             }
             
             // Try Approach 2: Use App's loadFile helper
             if (windowWithRestormHelpers.__restormTestHelpers?.loadFile) {
               windowWithRestormHelpers.__restormTestHelpers.loadFile(fileState)
-              helpersFound = true
               break
             }
             
@@ -343,22 +340,16 @@ if (typeof window !== 'undefined') {
             
             if (windowWithTestHelpers.__webFileTestHelpers) {
               windowWithTestHelpers.__webFileTestHelpers.triggerFileOpened(fileState)
-              helpersFound = true
               break
             }
             
             // Try Approach 4: Use eventBus emitLocal
             try {
               await electronCoreUiModule.eventBus.emitLocal('restorm:test:file-opened', fileState)
-              helpersFound = true
               break
             } catch {
               // Continue trying
             }
-          }
-          
-          if (!helpersFound) {
-            // Test helpers not found after 5 seconds - file loading may fail
           }
           
           // Index folders for search (will be done again by App, but do it here too for safety)

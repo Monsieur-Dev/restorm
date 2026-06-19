@@ -334,14 +334,9 @@ export const ResponseHistoryTab: React.FC<ResponseHistoryTabProps> = ({
     return JSON.stringify(jsonData, null, 2)
   }, [jsonData])
 
-  const handleResponseTabChange = useCallback((tabId: string) => {
-    void tabId
-  }, [])
-
   const handleTabChange = useCallback((tabId: string) => {
     setActiveTabId(tabId)
-    handleResponseTabChange(tabId)
-  }, [handleResponseTabChange])
+  }, [])
 
   const responseTabs: Tab[] = useMemo(() => {
     if (!selectedDetail) {
