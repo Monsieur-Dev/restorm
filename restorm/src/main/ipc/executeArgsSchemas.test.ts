@@ -9,8 +9,8 @@ import {
 } from './schemas'
 
 // Dropping `.loose()` makes zod's default object behaviour STRIP unknown
-// keys (parse succeeds, the extra field is removed) — which is the #22
-// goal: an arbitrary renderer-supplied field never reaches the executor.
+// keys (parse succeeds, the extra field is removed) — the intended goal:
+// an arbitrary renderer-supplied field never reaches the executor.
 describe('execute-args schemas — tightened (no more .loose())', () => {
   it('httpExecuteArgs accepts the real fields incl. authRequest/rawBody/urlOverride', () => {
     const r = httpExecuteArgs.safeParse([{
@@ -52,16 +52,23 @@ describe('execute-args schemas — tightened (no more .loose())', () => {
   })
 })
 
-describe('collectionsSyncArgs — node shape validation (#21)', () => {
-  it('accepts objects carrying a string id (extra fields pass through via loose)', () => {
+describe('collectionsSyncArgs — node shape validation', () => {
+  it('accepts collection nodes that are objects (extra fields pass through via loose)', () => {
     const r = collectionsSyncArgs.safeParse([[{ id: 'f1', name: 'F', items: [] }, { id: 'r1', type: 'http' }]])
     expect(r.success).toBe(true)
   })
 
-  it('rejects primitives / null / id-less entries (was bare z.unknown())', () => {
+  it('accepts an id-less object node (the tree carries many node shapes; reify owns rich validation)', () => {
+    // The real renderer tree (env-folders, reactive clones) doesn't always
+    // expose a top-level string `id` to this boundary, so requiring one here
+    // silently rejected the legitimate mirror and emptied the main store.
+    expect(collectionsSyncArgs.safeParse([[{ name: 'no top-level id' }]]).success).toBe(true)
+  })
+
+  it('rejects primitives / null / arrays (was a bare z.unknown())', () => {
     expect(collectionsSyncArgs.safeParse([['not-an-object']]).success).toBe(false)
     expect(collectionsSyncArgs.safeParse([[null]]).success).toBe(false)
-    expect(collectionsSyncArgs.safeParse([[{ name: 'no id' }]]).success).toBe(false)
+    expect(collectionsSyncArgs.safeParse([[42]]).success).toBe(false)
   })
 
   it('accepts an empty collection array', () => {
