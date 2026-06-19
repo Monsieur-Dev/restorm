@@ -1,54 +1,79 @@
 name: Build and Test
 
+# Toggle for the redundant-with-local checks (lint / typecheck / depcheck):
+#
+#   DEFAULT (unset or 'false'): LIGHT CI — only install, build, and tests run.
+#     This is sufficient for normal pushes because the pre-commit hook already
+#     enforces lint + typecheck + depcheck locally before any commit lands.
+#
+#   FULL CI: set the repository variable CI_FULL_CHECKS=true
+#     (Settings → Variables → Actions → CI_FULL_CHECKS) to re-enable all steps
+#     on every push.  Alternatively, trigger a manual run via
+#     Actions → "Build and Test" → Run workflow → check "Run full checks".
+#
+# Always-on (never gated): install, build, unit tests, integration tests.
+# These catch lockfile drift, uncommitted artefacts, and env issues that local
+# hooks cannot — they are the green signal that ship.sh --auto merges on.
+
 on:
   pull_request:
   push:
     branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      full_checks:
+        description: 'Run full checks (lint, typecheck, depcheck) — same as CI_FULL_CHECKS=true'
+        required: false
+        default: false
+        type: boolean
 
 jobs:
   build:
     name: Build and Test
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '25'
-      
+
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
           version: 10
-      
+
       - name: Install electron-core-ui dependencies
         run: |
           cd electron-core-ui
           pnpm install --frozen-lockfile
-      
+
       - name: Check electron-core-ui unused dependencies
+        if: ${{ vars.CI_FULL_CHECKS == 'true' || inputs.full_checks == true }}
         run: |
           cd electron-core-ui
           npx depcheck
-      
+
       - name: Run electron-core-ui linter (ESLint + Stylelint)
+        if: ${{ vars.CI_FULL_CHECKS == 'true' || inputs.full_checks == true }}
         run: |
           cd electron-core-ui
           NODE_OPTIONS="--max-old-space-size=4096" pnpm run lint
-      
+
       - name: Run electron-core-ui type check
+        if: ${{ vars.CI_FULL_CHECKS == 'true' || inputs.full_checks == true }}
         run: |
           cd electron-core-ui
           NODE_OPTIONS="--max-old-space-size=4096" pnpm run typecheck
-      
+
       - name: Validate theme contrast ratios
         run: |
           cd electron-core-ui
           pnpm run validate:contrast
-      
+
       - name: Build electron-core-ui
         run: |
           cd electron-core-ui
@@ -60,16 +85,19 @@ jobs:
           pnpm install --frozen-lockfile
 
       - name: Check restorm unused dependencies
+        if: ${{ vars.CI_FULL_CHECKS == 'true' || inputs.full_checks == true }}
         run: |
           cd restorm
           npx depcheck
 
       - name: Run restorm linter
+        if: ${{ vars.CI_FULL_CHECKS == 'true' || inputs.full_checks == true }}
         run: |
           cd restorm
           NODE_OPTIONS="--max-old-space-size=4096" pnpm run lint
 
       - name: Run restorm type check
+        if: ${{ vars.CI_FULL_CHECKS == 'true' || inputs.full_checks == true }}
         run: |
           cd restorm
           NODE_OPTIONS="--max-old-space-size=4096" pnpm run typecheck
@@ -88,7 +116,7 @@ jobs:
     name: Integration Tests
     runs-on: ubuntu-latest
     needs: build
-    
+
     services:
       petstore:
         image: swaggerapi/petstore
@@ -116,7 +144,7 @@ jobs:
         ports:
           - 9000:9000
           - 9002:9001
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
