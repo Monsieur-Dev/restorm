@@ -2520,7 +2520,7 @@ const App: React.FC = () => {
     // `rootItems` is intentionally NOT a dep: the handlers read the live
     // tree via `rootItemsRef.current`, so this 15-subscription effect
     // mounts ONCE per file/project instead of tearing down + re-subscribing
-    // on every tree keystroke (audit #92). `environmentFolderCollections`
+    // on every tree keystroke. `environmentFolderCollections`
     // isn't read in the effect body at all, so it's dropped too.
   }, [updateTabDirtyChecksum, filePath, projectUuid])
 
