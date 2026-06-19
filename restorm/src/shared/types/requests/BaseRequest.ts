@@ -53,4 +53,12 @@ export interface BaseRequest {
    * spec version.
    */
   removed?: boolean
+  /**
+   * Serialise to a plain object (drops class identity / reactive
+   * proxies). Present on the model-CLASS instances (every request class
+   * implements it); OPTIONAL here because a request can also be a plain
+   * deserialised object over IPC / from disk that has no methods —
+   * callers must guard with `?.()` and fall back to the value itself.
+   */
+  toPlainObject?(): Record<string, unknown>
 }

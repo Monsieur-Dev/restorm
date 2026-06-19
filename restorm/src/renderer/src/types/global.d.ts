@@ -500,6 +500,23 @@ export interface FullRequestData {
   lwtPayload?: string | undefined
   lwtQos?: number | undefined
   lwtRetain?: boolean | undefined
+  // OData specific (requestType === 'odata'). The main ContextService
+  // appends the system query options ($filter / $select / …) to the
+  // resolved URL. Mirrors the main-side ContextServiceTypes shape.
+  odataVersion?: 'v2' | 'v3' | 'v4' | undefined
+  odataOperationKind?: 'entity-set' | 'function' | 'action' | 'batch' | undefined
+  odataQueryOptions?: {
+    filter?: string | undefined
+    select?: string[] | undefined
+    top?: string | undefined
+    skip?: string | undefined
+    count?: boolean | undefined
+    expand?: string | undefined
+    orderby?: string | undefined
+    search?: string | undefined
+    format?: string | undefined
+    apply?: string | undefined
+  } | undefined
 }
 
 export {}

@@ -595,7 +595,7 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
       odataVersion: request.odataVersion,
       odataOperationKind: request.operationKind,
       odataQueryOptions: { ...request.queryOptions }
-    } as unknown as Parameters<typeof window.restorm.context.updateFullRequestData>[1], sourceIdRef.current)
+    }, sourceIdRef.current)
   }, [request])
 
   useEffect(() => {
@@ -691,10 +691,10 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
       contentTypeOverride = serialized.contentType
     }
     const dispatchedMethod = method
-    const authAttachedId = (request as { authenticationRequestId?: string }).authenticationRequestId
+    const authAttachedId = request.authenticationRequestId
     const attachedAuth = authAttachedId ? resolveAuthRequest(authAttachedId) : null
     const authPlain = attachedAuth
-      ? (attachedAuth as unknown as { toPlainObject?: () => unknown }).toPlainObject?.() ?? attachedAuth
+      ? attachedAuth.toPlainObject?.() ?? attachedAuth
       : undefined
     // JSON round-trip flattens any residual class instances
     // (`StringValue`, `SecretValue`, reactive Proxy wrappers) —
@@ -1088,10 +1088,10 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
     if (!api) return
     setIsSending(true)
     try {
-      const nextLinkAuthId = (request as { authenticationRequestId?: string }).authenticationRequestId
+      const nextLinkAuthId = request.authenticationRequestId
       const nextLinkAuth = nextLinkAuthId ? resolveAuthRequest(nextLinkAuthId) : null
       const nextLinkPlain = nextLinkAuth
-        ? (nextLinkAuth as unknown as { toPlainObject?: () => unknown }).toPlainObject?.() ?? nextLinkAuth
+        ? nextLinkAuth.toPlainObject?.() ?? nextLinkAuth
         : undefined
       const nextLinkAuthPayload = nextLinkPlain !== undefined
         ? JSON.parse(JSON.stringify(nextLinkPlain)) as unknown
