@@ -193,7 +193,6 @@ import type {
   Folder,
   FolderItem,
   EnvironmentFolder,
-  Request,
   ScenarioNode,
   ScenarioEdge
 } from '../../shared/types/collections'
@@ -2339,9 +2338,14 @@ const App: React.FC = () => {
         return null
       }
 
+      // NOTE: the `JSON.parse(JSON.stringify(folder))` SNAPSHOTS the folder at
+      // schedule time on purpose — the deferred checksum must reflect the state
+      // when the env event fired, not a later live mutation (passing the live
+      // object instead raced the dirty-baseline and flipped folder-mode
+      // dirty-state). Keep the snapshot.
       for (const rootFolder of rootItemsRef.current) {
         if (rootFolder.id === parentFolderId) {
-          scheduleChecksumUpdate(parentFolderId, () => computeChecksum(JSON.parse(JSON.stringify(rootFolder)) as EnvironmentFolder | Folder | Request))
+          scheduleChecksumUpdate(parentFolderId, () => computeChecksum(JSON.parse(JSON.stringify(rootFolder)) as EnvironmentFolder | Folder))
           return
         }
         // Only search in folders, not Requests

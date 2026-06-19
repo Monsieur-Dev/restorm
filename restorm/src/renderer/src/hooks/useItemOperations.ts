@@ -619,6 +619,13 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
     }
     setRootItems((prev) => [...prev, newFolder])
     setSelectedItemId(newFolder.id)
+    // Announce the creation so the save-unit registry learns about the new root
+    // folder (crash-recovery draft) — child folders emit this; root ones didn't.
+    eventBus.emitSync(DocumentEvents.FOLDER_CREATED, {
+      id: newFolder.id,
+      type: 'folder',
+      document: cloneForEventBus(newFolder)
+    } as DocumentChangedPayload)
     const breadcrumbs = [{ id: newFolder.id, label: newFolder.name, icon: getFolderIcon(newFolder) }]
     openFolderTab(newFolder, breadcrumbs)
     setTimeout(() => {
@@ -639,6 +646,14 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
     }
     setRootItems((prev) => [...prev, newFolder])
     setSelectedItemId(newFolder.id)
+    // Announce the creation (FOLDER_CREATED — the main-side handler keys on
+    // type:'folder'; an EnvironmentFolder is a folder with folderType:'environment')
+    // so the save-unit registry learns about the new root env-folder.
+    eventBus.emitSync(DocumentEvents.FOLDER_CREATED, {
+      id: newFolder.id,
+      type: 'folder',
+      document: cloneForEventBus(newFolder)
+    } as DocumentChangedPayload)
     const breadcrumbs = [{ id: newFolder.id, label: newFolder.name, icon: getFolderIcon(newFolder) }]
     openEnvironmentFolderTab(newFolder, breadcrumbs)
     setTimeout(() => {
