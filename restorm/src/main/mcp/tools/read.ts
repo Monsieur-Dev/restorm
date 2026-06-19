@@ -1,8 +1,8 @@
 /**
  * Read-only MCP tools — they let an MCP client (Claude Code, Cursor)
- * inspect the open project without mutating anything. Mutation happens
- * in OYO-213 / 214 (write + execution tools); navigation that focuses
- * the UI on a specific item happens in `./navigation.ts`.
+ * inspect the open project without mutating anything. Mutation lives in
+ * the write + execution tools; navigation that focuses the UI on a
+ * specific item happens in `./navigation.ts`.
  *
  * Tool registration runs through ECUI's `McpService.registerTool`;
  * tools are stored in a registry and re-instantiated on every HTTP
