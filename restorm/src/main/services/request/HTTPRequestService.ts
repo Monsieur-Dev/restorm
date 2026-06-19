@@ -15,6 +15,7 @@ import { StringValue } from '../../../shared/types/collections'
 import { DEFAULT_REQUEST_TIMEOUT_MS } from '../../../shared/config/constants'
 import type { VariableContext } from './types'
 import { resolveTemplate } from './resolveTemplate'
+import { resolveKeyValues, generateResponseId } from './keyValueResolution'
 
 /** Input for URL resolution */
 export interface URLResolutionInput {
@@ -62,18 +63,6 @@ export interface HTTPRequestInput {
   filePath?: string
   /** Variable context from environments */
   variableContext: VariableContext
-}
-
-/**
- * Resolve all KeyValue pairs using the variable context
- */
-function resolveKeyValues(keyValues: KeyValue[], context: VariableContext): KeyValue[] {
-  return keyValues.map((kv) => ({
-    key: resolveTemplate(kv.key, context),
-    value: new StringValue(resolveTemplate(kv.value.toString(), context)),
-    description: kv.description,
-    enabled: kv.enabled
-  }))
 }
 
 /**
@@ -129,15 +118,6 @@ export function resolveRequestURL(input: URLResolutionInput): ResolvedURLResult 
     baseUrl,
     queryString
   }
-}
-
-/**
- * Generate a unique ID for the response
- */
-function generateResponseId(): string {
-  // crypto.randomUUID is collision-free; the old Date.now()+Math.random() suffix
-  // could collide for two responses generated in the same millisecond.
-  return `resp_${crypto.randomUUID()}`
 }
 
 /**
