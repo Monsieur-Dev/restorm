@@ -57,7 +57,7 @@ import { runScenarioExecutor } from './runScenarioExecutor'
 import { socketioConnectExecutor, socketioSendExecutor, socketioCloseExecutor, websocketConnectExecutor, websocketSendExecutor, websocketCloseExecutor, mqttConnectExecutor, mqttSendExecutor, mqttCloseExecutor, grpcConnectExecutor, grpcSendExecutor, grpcCloseExecutor } from './socketioExecutors'
 import { concreteValue } from '../../../shared/utils/scenarioStaticPreview'
 import { coerceCliParamValue } from '../../../shared/scenarioCliParams'
-import { readInputParams } from '../../../shared/scenarioInputParams'
+import { readInputParams, inputParamName } from '../../../shared/scenarioInputParams'
 import { readOutputDecls } from '../../../shared/scenarioOutputDecls'
 
 /** An `input` node either: (a) seeded at run start with the user's
@@ -95,7 +95,7 @@ export const inputExecutor: NodeExecutor = async (act, ctx) => {
   const wired = act.inputs['value']
   const wiredObj = wired !== null && typeof wired === 'object' ? wired as Record<string, unknown> : null
   const entries = await Promise.all(params.map(async (param) => {
-    const name = param.name.trim() !== '' ? param.name.trim() : 'value'
+    const name = inputParamName(param)
     const configuredDefault = param.valueType !== undefined && param.valueType !== null
       ? concreteValue(param.valueType)
       : undefined

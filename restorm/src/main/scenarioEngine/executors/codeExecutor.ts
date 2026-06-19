@@ -7,6 +7,9 @@ import { collectionStore } from '../../services/CollectionStore'
 import { isHTTPRequest } from '../../../shared/types/collections'
 import { resolveRequestByName } from './resolveRequestByName'
 
+/** Hard cap on a code node's run time, regardless of the configured timeout. */
+const CODE_MAX_TIMEOUT_MS = 60_000
+
 /** Resolve a Bruno `bru.runRequest(target)` reference (id / name / `folder/req`
  * path) to a concrete request in the open project. Matches the most specific
  * name-form first rather than blindly splitting on `/` — so a request whose
@@ -126,7 +129,23 @@ export const codeExecutor: NodeExecutor = async (act, ctx) => {
   // Postman/Bruno scripts are always JavaScript.
   const language = scriptMode ? 'javascript' : (typeof cfg.language === 'string' ? cfg.language : 'typescript')
   const timeoutSec = typeof cfg.timeout === 'number' && cfg.timeout > 0 ? cfg.timeout : 5
-  const variables = Object.fromEntries(ctx.variables.entries())
+  const timeoutMs = Math.min(timeoutSec * 1000, CODE_MAX_TIMEOUT_MS)
+  if (timeoutSec * 1000 > CODE_MAX_TIMEOUT_MS) {
+    // Surface the clamp: a configured timeout above the cap silently ran for
+    // less than requested before.
+    ctx.log({
+      level: 'warn',
+      source: 'engine',
+      nodeId: act.nodeId,
+      scope: act.scope,
+      message: `code timeout ${timeoutSec}s exceeds the ${CODE_MAX_TIMEOUT_MS / 1000}s cap; clamped to ${CODE_MAX_TIMEOUT_MS / 1000}s`
+    })
+  }
+  // `__`-prefixed keys are the engine's reserved namespace (e.g. `__rng:<node>`
+  // for seeded-random sequence state) — keep them out of the user's variable view.
+  const variables = Object.fromEntries(
+    [...ctx.variables.entries()].filter(([k]) => !k.startsWith('__'))
+  )
 
   const { ensureCodeRuntimes, getCodeRuntime } = await import('../codeRuntimes')
   ensureCodeRuntimes()
@@ -176,7 +195,7 @@ export const codeExecutor: NodeExecutor = async (act, ctx) => {
   const { result, logs, postman } = await runtime.run(code, {
     input,
     variables,
-    timeoutMs: Math.min(timeoutSec * 1000, 60_000),
+    timeoutMs,
     // `fetch` / `pm.sendRequest` route through the firewall (codeNetworkBridge)
     // for runtimes that support it (JS); others ignore it.
     network: codeNetworkBridge,

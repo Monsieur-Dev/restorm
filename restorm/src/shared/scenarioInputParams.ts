@@ -26,6 +26,16 @@ function isInputParam(p: unknown): p is InputParam {
     && typeof (p as { name?: unknown }).name === 'string'
 }
 
+/**
+ * The key an input param emits under (and the `param:<name>` port name on a
+ * parent `runScenario`). A blank name falls back to `'value'`. Centralised so
+ * the start-time seed path and the mid-run executor can't drift on this rule.
+ */
+export function inputParamName(param: { name: string }): string {
+  const trimmed = param.name.trim()
+  return trimmed !== '' ? trimmed : 'value'
+}
+
 /** The input node's params, migrating the legacy single-param config on read. */
 export function readInputParams(config: Record<string, unknown>): InputParam[] {
   const raw = config['params']

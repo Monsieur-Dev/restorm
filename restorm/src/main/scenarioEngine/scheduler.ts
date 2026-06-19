@@ -38,7 +38,7 @@ import { ScopeRegistry, scopeKey } from './scopeRegistry'
 import { InputBuffer, type PortSpec } from './inputBuffer'
 import { resolveSelectorPath, concreteValue } from '../../shared/utils/scenarioStaticPreview'
 import { coerceCliParamValue } from '../../shared/scenarioCliParams'
-import { readInputParams } from '../../shared/scenarioInputParams'
+import { readInputParams, inputParamName } from '../../shared/scenarioInputParams'
 import { evaluateCondition, resolveOperand } from './conditionEval'
 import { CronExpressionParser } from 'cron-parser'
 import { collectConfigSecrets } from '../services/secrets/collectConfigSecrets'
@@ -186,6 +186,8 @@ export class Scheduler {
   private readonly variables = new Map<string, unknown>()
   private readonly abortCtl = new AbortController()
   private readonly outgoingByPort = new Map<string, { edgeId: string; toNodeId: string; toPort: string; selector?: string }[]>()
+  /** Lazily-built forward adjacency for `reachableForward`; see `forwardAdjacency`. */
+  private forwardAdjacencyCache?: Map<string, string[]>
   private readonly runSubScenario?: SchedulerInit['runSubScenario']
   private readonly socketioConnectBridge?: SchedulerInit['socketioConnect']
   /** Live Socket.IO connections opened by `socketioConnect` nodes, keyed by the
@@ -536,11 +538,16 @@ export class Scheduler {
     const ctx: ExecContext = {
       signal: this.abortCtl.signal,
       log: (entry) => {
+        // Snapshot `data` the same way engine logs do (see the `start`/`done`
+        // logs): a user log node passes its payload by reference, so without a
+        // clone a later in-place mutation by another executor would rewrite the
+        // already-logged value.
         this.pushLog({
           ts: now(),
           runId: this.runId,
           source: entry.source ?? 'user',
-          ...entry
+          ...entry,
+          ...(entry.data !== undefined ? { data: logData(entry.data) } : {})
         } as RunLogEntry)
       },
       variables: this.variables,
@@ -894,8 +901,29 @@ export class Scheduler {
     const node = this.findNode(act.nodeId)
     let iter = 0
 
+    // KNOWN LIMITATION: `act.inputs` is the snapshot latched when the loop first
+    // fired, so a condition operand WIRED from a body output is re-evaluated
+    // against its first-iteration value, not the value the body produced this
+    // lap. Conditions driven by scenario VARIABLES (which the body mutates and
+    // `this.variables` reads live) DO update per iteration — prefer those for a
+    // body-driven loop until the buffer exposes a per-iteration condition re-pull.
     const evalCond = (): boolean => {
-      try { return evaluateCondition(node.config, act.inputs, this.variables) } catch { return false }
+      try {
+        return evaluateCondition(node.config, act.inputs, this.variables)
+      } catch (err) {
+        // Don't silently exit the loop on a malformed condition — surface it in
+        // the run log so a bad comparison is visible, then treat it as false.
+        this.pushLog({
+          ts: now(),
+          runId: this.runId,
+          level: 'error',
+          source: 'engine',
+          nodeId: act.nodeId,
+          scope: act.scope,
+          message: `${mode} condition failed to evaluate: ${err instanceof Error ? err.message : String(err)}`
+        })
+        return false
+      }
     }
 
     const fireExit = (): void => {
@@ -978,15 +1006,17 @@ export class Scheduler {
     return undefined
   }
 
-  /** Record an httpRequest response's status against the enclosing retry attempt
-   * (the `response` output carries `{ response: { status } }`). */
+  /** Record an httpRequest response's status against the enclosing retry attempt.
+   * The canonical shape is `{ response: { status } }`, but an edge selector can
+   * reshape the output (e.g. lifting `status` to the top level), so look for a
+   * numeric status at the common locations rather than only the canonical path —
+   * otherwise retryOnStatus / retryOnFailure silently no-op on a reshaped output. */
   private recordRetryStatus(act: InternalActivation, result: ExecResult): void {
     const key = this.enclosingRetryKey(act.scope)
     if (key === undefined) return
     for (const out of result.outputs) {
-      const v = out.value as { response?: { status?: unknown } } | undefined
-      const status = v?.response?.status
-      if (typeof status === 'number') {
+      const status = extractStatus(out.value)
+      if (status !== undefined) {
         const st = this.retryScopes.get(key)
         if (st) st.lastStatus = status
       }
@@ -1107,7 +1137,22 @@ export class Scheduler {
     // next fire time from the start + interval (so body duration can't drift it).
     let cronIt: { next: () => { toDate: () => Date } } | undefined
     if (action.cron !== undefined) {
-      try { cronIt = CronExpressionParser.parse(action.cron, { currentDate: new Date(start) }) } catch { cronIt = undefined }
+      try {
+        cronIt = CronExpressionParser.parse(action.cron, { currentDate: new Date(start) })
+      } catch (err) {
+        // A malformed cron silently fell back to interval mode before; log it so
+        // the user can see WHY the timer isn't firing on their schedule.
+        cronIt = undefined
+        this.pushLog({
+          ts: now(),
+          runId: this.runId,
+          level: 'warn',
+          source: 'engine',
+          nodeId: act.nodeId,
+          scope: act.scope,
+          message: `invalid cron expression "${action.cron}" (${err instanceof Error ? err.message : String(err)}); timer will not fire`
+        })
+      }
     }
     const nextFireAt = (): number | undefined => {
       if (action.cron !== undefined) {
@@ -1345,7 +1390,7 @@ export class Scheduler {
         // (the shape the static preview + executor model) so a wired selector
         // resolves identically.
         const inputParams = readInputParams(node.config)
-        const paramName = (p: { name: string }): string => (p.name.trim() !== '' ? p.name.trim() : 'value')
+        const paramName = inputParamName
         // Resolve one declared param: a runScenario-wired value (`ownParams`,
         // already a real typed value) wins; else a run-tree-wide CLI `--param`
         // (a raw argv string) cast to the param's declared type; else not
@@ -1562,13 +1607,24 @@ export class Scheduler {
 
   /** Is `to` reachable from `from` by following edges forward (BFS over
    * the node adjacency)? Used to spot loop-back edges. */
-  private reachableForward(from: string, to: string): boolean {
-    const adj = new Map<string, string[]>()
-    for (const e of this.scenario.edges) {
-      const arr = adj.get(e.from.nodeId) ?? []
-      arr.push(e.to.nodeId)
-      adj.set(e.from.nodeId, arr)
+  /** Forward node adjacency (`from.nodeId → [to.nodeId]`), built once on first
+   * use. The edge set is immutable for the run, so there's no need to rebuild it
+   * on every `reachableForward` call. */
+  private forwardAdjacency(): Map<string, string[]> {
+    if (this.forwardAdjacencyCache === undefined) {
+      const adj = new Map<string, string[]>()
+      for (const e of this.scenario.edges) {
+        const arr = adj.get(e.from.nodeId) ?? []
+        arr.push(e.to.nodeId)
+        adj.set(e.from.nodeId, arr)
+      }
+      this.forwardAdjacencyCache = adj
     }
+    return this.forwardAdjacencyCache
+  }
+
+  private reachableForward(from: string, to: string): boolean {
+    const adj = this.forwardAdjacency()
     const seen = new Set<string>()
     const stack = [from]
     while (stack.length > 0) {
@@ -1719,9 +1775,34 @@ function randomId(): string {
   return `run-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`
 }
 
+/** Pull an HTTP status code out of an httpRequest output value. Accepts the
+ * canonical `{ response: { status } }` and a top-level `{ status }` / `{ statusCode }`
+ * so an edge-selector-reshaped output still records its status for retry policy. */
+function extractStatus(value: unknown): number | undefined {
+  if (value === null || typeof value !== 'object') return undefined
+  const o = value as { response?: { status?: unknown }; status?: unknown; statusCode?: unknown }
+  const candidates = [o.response?.status, o.status, o.statusCode]
+  for (const c of candidates) {
+    if (typeof c === 'number') return c
+  }
+  return undefined
+}
+
 function deepClone<T>(v: T): T {
   if (v === undefined) return v
-  return structuredClone(v)
+  try {
+    return structuredClone(v)
+  } catch {
+    // A non-cloneable value (function, circular ref, host object) must not
+    // crash the dispatch. Fall back to a JSON round-trip, and if even that
+    // fails (circular), hand back the original reference — losing copy-on-write
+    // isolation for that one value is far better than aborting the run.
+    try {
+      return JSON.parse(JSON.stringify(v)) as T
+    } catch {
+      return v
+    }
+  }
 }
 
 /** Snapshot a value for a log entry's `data` (so the inspector can render
