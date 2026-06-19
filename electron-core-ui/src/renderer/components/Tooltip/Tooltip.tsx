@@ -249,26 +249,34 @@ const Tooltip: React.FC<TooltipProps> = ({
 
     if (show && (showChanged || keyChanged)) {
       // Reset positioning state when becoming visible or reposition key changes
-      // Use requestAnimationFrame to defer setState
-      const rafId = requestAnimationFrame(() => {
+      // Use requestAnimationFrame to defer setState. Every deferred callback's
+      // id is tracked so the cleanup cancels the WHOLE chain — otherwise the
+      // second-rAF + the two nested setTimeouts kept calling updatePosition()
+      // (which setStates) after unmount.
+      const rafIds: number[] = []
+      const timeoutIds: ReturnType<typeof setTimeout>[] = []
+      rafIds.push(requestAnimationFrame(() => {
         setIsPositioned(false)
         setPosition({ top: -9999, left: -9999, beakLeftPercent: 50, beakTopPercent: undefined })
-      })
+      }))
       // Wait for next frame to ensure tooltip is rendered and has dimensions
-      requestAnimationFrame(() => {
+      rafIds.push(requestAnimationFrame(() => {
         // Double RAF to ensure layout is complete
-        requestAnimationFrame(() => {
+        rafIds.push(requestAnimationFrame(() => {
           updatePosition()
           // Recalculate multiple times to ensure final width is set
-          setTimeout(() => {
+          timeoutIds.push(setTimeout(() => {
             updatePosition()
-            setTimeout(() => {
+            timeoutIds.push(setTimeout(() => {
               updatePosition()
-            }, 10)
-          }, 10)
-        })
-      })
-      return () => { cancelAnimationFrame(rafId) }
+            }, 10))
+          }, 10))
+        }))
+      }))
+      return () => {
+        for (const id of rafIds) cancelAnimationFrame(id)
+        for (const id of timeoutIds) clearTimeout(id)
+      }
     } else if (!show && showChanged) {
       const rafId = requestAnimationFrame(() => {
         setIsPositioned(false)

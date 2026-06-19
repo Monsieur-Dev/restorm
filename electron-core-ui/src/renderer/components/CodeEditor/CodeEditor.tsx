@@ -154,14 +154,18 @@ export const CodeEditor = forwardRef<CodeEditorRef, CodeEditorProps>(function Co
     onMount,
     onEditorMount,
     onGoToDefinition,
-    goToDefinitionLabel = 'Go to Definition',
+    goToDefinitionLabel,
     'data-testid': dataTestId,
     ...props
   },
   ref
 ) {
   const { t } = useTranslation()
-  const resolvedLabel = goToDefinitionLabel === 'Go to Definition' ? t('codeEditor.goToDefinition') : goToDefinitionLabel
+  // Fall back to the built-in translation only when the host didn't pass a
+  // label. The previous magic-string check (`=== 'Go to Definition'`) silently
+  // ignored a host label that happened to equal the English default and broke
+  // the moment that default string was reworded.
+  const resolvedLabel = goToDefinitionLabel ?? t('codeEditor.goToDefinition')
   // Auto-detected theme (only used when theme prop is undefined)
   const [autoDetectedTheme, setAutoDetectedTheme] = useState<string>(getMonacoTheme)
   const [editorInstance, setEditorInstance] = useState<monacoEditor.editor.IStandaloneCodeEditor | null>(null)

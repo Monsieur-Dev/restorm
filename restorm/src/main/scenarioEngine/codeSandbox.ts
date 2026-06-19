@@ -834,9 +834,10 @@ export async function runCodeInSandbox(opts: RunCodeOptions): Promise<RunCodeRes
     //     `__vars` (P0) + the network shim, then — for Bruno — the `bru`/`req`/
     //     `res` surface on top of the shared pm state. Requires the variable bridge.
     if (scriptCtx) {
-      const pmCtx = ctx.evalCode(`globalThis.__pmContext = ${safeJson(scriptCtx)};`)
-      if (pmCtx.error) { const e: unknown = ctx.dump(pmCtx.error); pmCtx.error.dispose(); throw new Error(`sandbox script context failed: ${stringifyErr(e)}`) }
-      pmCtx.value.dispose()
+      // Cross the (attacker-influenceable) request/response context as VM string
+      // data parsed by the VM's JSON.parse — never compiled into source — so a
+      // crafted response body can't break out of a string literal.
+      defineJsonGlobal(ctx, '__pmContext', scriptCtx)
       const pmShim = ctx.evalCode(SANDBOX_POSTMAN_SHIM)
       if (pmShim.error) { const e: unknown = ctx.dump(pmShim.error); pmShim.error.dispose(); throw new Error(`sandbox pm shim failed: ${stringifyErr(e)}`) }
       pmShim.value.dispose()
@@ -847,11 +848,11 @@ export async function runCodeInSandbox(opts: RunCodeOptions): Promise<RunCodeRes
       }
     }
 
-    // 3. Inject input + variables as JSON (data only — no functions/dates).
-    const injected = `globalThis.input = ${safeJson(input)}; globalThis.vars = ${safeJson(variables)};`
-    const inj = ctx.evalCode(injected)
-    if (inj.error) { const e: unknown = ctx.dump(inj.error); inj.error.dispose(); throw new Error(`sandbox input injection failed: ${stringifyErr(e)}`) }
-    inj.value.dispose()
+    // 3. Inject input + variables as JSON DATA (no functions/dates), crossed as
+    //    VM strings and parsed in-VM rather than interpolated into source — so an
+    //    attacker-influenced value can't escape its string literal.
+    defineJsonGlobal(ctx, 'input', input)
+    defineJsonGlobal(ctx, 'vars', variables)
 
     // 4. Run the user code as an ASYNC function body so it may `await`. Arm the
     //    interrupt deadline HERE — bounding ONLY the user code — so the trusted
@@ -923,6 +924,37 @@ async function settlePromise(ctx: QuickJSContext, promiseHandle: QuickJSHandle, 
 function safeJson(v: unknown): string {
   if (v === undefined) return 'undefined'
   try { const s = JSON.stringify(v); return typeof s === 'string' ? s : 'undefined' } catch { return 'undefined' }
+}
+
+/**
+ * Assign `globalThis[propName] = <value>` inside the VM WITHOUT compiling the
+ * value into source. The value's JSON crosses the boundary as VM *string data*
+ * and is parsed by the VM's own `JSON.parse`, so an attacker-influenced string
+ * (a response body, an imported script context) can never break out of a
+ * source-level string literal — closing the U+2028/U+2029 and string-literal
+ * escape gaps that `evalCode(\`x = ${json}\`)` left open. `undefined` is set
+ * directly (no JSON round-trip). Throws on a VM-side failure.
+ */
+function defineJsonGlobal(ctx: QuickJSContext, propName: string, value: unknown): void {
+  if (value === undefined) {
+    ctx.setProp(ctx.global, propName, ctx.undefined)
+    return
+  }
+  const json = safeJson(value)
+  const jsonHandle = ctx.newString(json)
+  const parseFn = ctx.getProp(ctx.global, 'JSON').consume((jsonObj) => ctx.getProp(jsonObj, 'parse'))
+  try {
+    const parsed = ctx.callFunction(parseFn, ctx.undefined, jsonHandle)
+    if (parsed.error) {
+      const e: unknown = ctx.dump(parsed.error); parsed.error.dispose()
+      throw new Error(`sandbox JSON injection failed for "${propName}": ${stringifyErr(e)}`)
+    }
+    ctx.setProp(ctx.global, propName, parsed.value)
+    parsed.value.dispose()
+  } finally {
+    parseFn.dispose()
+    jsonHandle.dispose()
+  }
 }
 
 /** Render a dumped QuickJS error (object with name/message or a primitive). */

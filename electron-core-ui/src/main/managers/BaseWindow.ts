@@ -1,6 +1,8 @@
 import { BrowserWindow, screen, BrowserWindowConstructorOptions, ipcMain, nativeImage, Menu } from "electron"
 import { join } from "path"
 import { getStorageService, logger } from "../services"
+import { validatedOn } from "../ipc/validate"
+import { setWindowTitleArgs, registerInterceptedShortcutsArgs } from "../ipc/schemas"
 import { WindowConfiguration, WindowState, isDevToolsEnabled, isInactiveRevealRequested } from "./WindowManager"
 
 /**
@@ -227,13 +229,13 @@ export abstract class BaseWindow {
 
       // Register window title handler (only once)
       if (!BaseWindow.windowTitleHandlerRegistered) {
-        ipcMain.on('set-window-title', (event: Electron.IpcMainEvent, title: string) => {
+        validatedOn('set-window-title', setWindowTitleArgs, (event, [title]) => {
           const wnd = BrowserWindow.fromWebContents(event.sender)
-        if (!wnd || wnd.isDestroyed()) {
-          return
-        }
-        wnd.setTitle(title)
-      })
+          if (!wnd || wnd.isDestroyed()) {
+            return
+          }
+          wnd.setTitle(title)
+        })
         BaseWindow.windowTitleHandlerRegistered = true
       }
 
@@ -278,7 +280,7 @@ export abstract class BaseWindow {
 
       // Register intercepted shortcuts handler (only once)
       if (!BaseWindow.interceptedShortcutsHandlerRegistered) {
-        ipcMain.on('register-intercepted-shortcuts', (event: Electron.IpcMainEvent, shortcuts: string[]) => {
+        validatedOn('register-intercepted-shortcuts', registerInterceptedShortcutsArgs, (event, [shortcuts]) => {
           if (event.sender.isDestroyed()) {
             return
           }

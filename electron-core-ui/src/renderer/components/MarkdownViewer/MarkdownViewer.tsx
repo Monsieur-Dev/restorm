@@ -29,6 +29,11 @@ interface CodeBlockProps {
 
 const CodeBlock: React.FC<CodeBlockProps> = ({ children, copyText, dataTestId }) => {
   const [copied, setCopied] = useState(false)
+  // Track the copy-reset timer so it can be cleared on unmount (or before a
+  // re-arm) — an untracked setTimeout fired setCopied() after unmount when the
+  // block was removed within the 2s window.
+  const resetTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  useEffect(() => () => { if (resetTimerRef.current) clearTimeout(resetTimerRef.current) }, [])
 
   const handleCopy = useCallback(() => {
     const copyToClipboard = async (): Promise<void> => {
@@ -39,7 +44,8 @@ const CodeBlock: React.FC<CodeBlockProps> = ({ children, copyText, dataTestId })
         // We still update UI state to reflect the user intent.
       }
       setCopied(true)
-      setTimeout(() => { setCopied(false) }, 2000)
+      if (resetTimerRef.current) clearTimeout(resetTimerRef.current)
+      resetTimerRef.current = setTimeout(() => { setCopied(false) }, 2000)
     }
     void copyToClipboard()
   }, [copyText])

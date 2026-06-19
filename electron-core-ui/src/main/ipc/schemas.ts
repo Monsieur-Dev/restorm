@@ -10,6 +10,12 @@ export const themeUpdateWcoArgs = z.tuple([
 ])
 
 // ==========================================================================
+// Window controls (fire-and-forget ipcMain.on payloads)
+// ==========================================================================
+export const setWindowTitleArgs = z.tuple([z.string()])
+export const registerInterceptedShortcutsArgs = z.tuple([z.array(z.string())])
+
+// ==========================================================================
 // I18n
 // ==========================================================================
 export const i18nSetLanguageArgs = z.tuple([z.string()])

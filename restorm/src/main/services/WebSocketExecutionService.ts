@@ -53,6 +53,31 @@ export function makeReconnectBudget(max: number): { onReconnect: () => boolean; 
   }
 }
 
+/**
+ * Extract the numeric port from a `host:port` authority, defaulting when the
+ * port is absent or invalid. Handles a bracketed IPv6 literal (`[::1]:1883`):
+ * a naive `split(':')[1]` would return an address segment, not the port. The
+ * port is whatever follows the LAST `:` that is not inside the brackets; a
+ * bare (unbracketed) IPv6 address has several colons and no port. Extracted as
+ * a pure unit so the IPv6 boundary is testable without standing up the service.
+ */
+export function extractPortFromAuthority(hostPort: string, defaultPort: number): number {
+  let portStr = ''
+  if (hostPort.startsWith('[')) {
+    const close = hostPort.indexOf(']')
+    if (close >= 0 && hostPort[close + 1] === ':') {
+      portStr = hostPort.slice(close + 2)
+    }
+  } else {
+    const colon = hostPort.lastIndexOf(':')
+    if (colon >= 0 && hostPort.indexOf(':') === colon) {
+      portStr = hostPort.slice(colon + 1)
+    }
+  }
+  const port = Number.parseInt(portStr, 10)
+  return Number.isFinite(port) && port > 0 ? port : defaultPort
+}
+
 /** WebSocket request execution input */
 export interface WebSocketExecutionInput {
   requestId: string
@@ -723,10 +748,9 @@ class WebSocketExecutionService {
     const stripped = resolvedUrl.replace(/^[a-z]+:\/\//i, '')
     const slash = stripped.indexOf('/')
     const hostPort = slash >= 0 ? stripped.slice(0, slash) : stripped
-    const portStr = hostPort.split(':')[1] ?? ''
-    const port = Number.parseInt(portStr, 10)
+    const port = extractPortFromAuthority(hostPort, 1883)
     const topicFilter = event && event.length > 0 ? event : '#'
-    return { port: Number.isFinite(port) && port > 0 ? port : 1883, topicFilter, transport }
+    return { port, topicFilter, transport }
   }
 
   /** Stop hosting an MQTT broker: close the aedes engine + its raw-TCP listener
@@ -1037,9 +1061,8 @@ class WebSocketExecutionService {
     // otherwise a `localhost:3002/chat?x=1` server never matches a `/chat` upgrade.
     const rawNamespace = slash >= 0 ? stripped.slice(slash) : '/'
     const namespace = this.parsePathname(rawNamespace)
-    const portStr = hostPort.split(':')[1] ?? ''
-    const port = Number.parseInt(portStr, 10)
-    return { port: Number.isFinite(port) && port > 0 ? port : 3001, namespace: namespace || '/' }
+    const port = extractPortFromAuthority(hostPort, 3001)
+    return { port, namespace: namespace || '/' }
   }
 
   /**

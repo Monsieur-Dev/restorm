@@ -91,10 +91,12 @@ export function SettingsProvider({ children }: SettingsProviderProps): React.Rea
     }
   }, [i18n.language, loadData])
 
-  // Search filtering
+  // Search filtering — runs the search IPC ONLY when the query changes.
+  // Kept off `settingsList` so an optimistic settings update (every
+  // setSetting mirrors the new value into settingsList) doesn't re-fire the
+  // search IPC on each keystroke-independent change.
   useEffect(() => {
     if (!searchQuery.trim()) {
-      setFilteredSettings(settingsList)
       return
     }
 
@@ -106,6 +108,15 @@ export function SettingsProvider({ children }: SettingsProviderProps): React.Rea
     })
 
     return () => { cancelled = true }
+  }, [searchQuery])
+
+  // With no active query, the filtered view simply mirrors the full list, so
+  // it must track settingsList (incl. optimistic updates). This is a cheap
+  // local assignment — no IPC — unlike the search effect above.
+  useEffect(() => {
+    if (!searchQuery.trim()) {
+      setFilteredSettings(settingsList)
+    }
   }, [searchQuery, settingsList])
 
   const getSetting = useCallback(

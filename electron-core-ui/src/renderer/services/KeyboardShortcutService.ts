@@ -113,9 +113,12 @@ export function matchesShortcut(event: KeyboardEvent, parsed: ParsedShortcut): b
   return eventKey === parsed.key
 }
 
+/** Removes a previously-registered IPC listener. */
+type Disposer = () => void
+
 /** Type for the electronAPI exposed by preload */
 interface ElectronAPI {
-  onKeyboardShortcut?: (cb: (shortcut: string) => void) => void
+  onKeyboardShortcut?: (cb: (shortcut: string) => void) => Disposer | undefined
   registerInterceptedShortcuts?: (shortcuts: string[]) => void
   isDevMode?: () => Promise<boolean>
 }
@@ -133,6 +136,11 @@ class KeyboardShortcutService {
   private isListening: boolean
   private boundHandler: (event: KeyboardEvent) => void
   private ipcListenerRegistered: boolean
+  /** Disposer for the main-process keyboard-shortcut IPC subscription, kept
+   * so stopListening can remove it and reset the registered latch. Without
+   * this, stopListening left ipcListenerRegistered true, so a later
+   * startListening re-subscribed and every IPC shortcut fired N times. */
+  private ipcListenerDisposer: (() => void) | null
   private devModeInitialized: boolean
   /** Disposer for the dev-mode refresh shortcut, kept so clearAll can
    * unregister it + re-init cleanly (the latch used to leave it
@@ -143,6 +151,7 @@ class KeyboardShortcutService {
     this.shortcuts = new Map()
     this.isListening = false
     this.ipcListenerRegistered = false
+    this.ipcListenerDisposer = null
     this.devModeInitialized = false
     this.devModeDisposer = null
     this.boundHandler = this.handleKeyDown.bind(this)
@@ -206,9 +215,10 @@ class KeyboardShortcutService {
     
     const electronAPI = getElectronAPI()
     if (electronAPI?.onKeyboardShortcut) {
-      electronAPI.onKeyboardShortcut((shortcut: string) => {
+      const disposer = electronAPI.onKeyboardShortcut((shortcut: string) => {
         this.triggerShortcut(shortcut)
       })
+      this.ipcListenerDisposer = typeof disposer === 'function' ? disposer : null
       this.ipcListenerRegistered = true
     }
   }
@@ -218,8 +228,18 @@ class KeyboardShortcutService {
    */
   stopListening(): void {
     if (!this.isListening) return
-    
+
     document.removeEventListener('keydown', this.boundHandler, { capture: true })
+
+    // Tear down the IPC subscription and reset the latch, so a later
+    // startListening re-subscribes exactly once instead of stacking a second
+    // listener (which made each IPC shortcut fire twice, then thrice, …).
+    if (this.ipcListenerDisposer) {
+      this.ipcListenerDisposer()
+      this.ipcListenerDisposer = null
+    }
+    this.ipcListenerRegistered = false
+
     this.isListening = false
   }
 

@@ -44,21 +44,27 @@ const CustomWCO: React.FC<CustomWCOProps> = ({
   const currentPlatform = platform ?? asyncPlatform
 
   useEffect(() => {
-    // Get platform from electronAPI if not provided as prop
+    // Get platform from electronAPI if not provided as prop. Capture the
+    // disposer and remove the listener on cleanup so a remount doesn't stack
+    // duplicate 'platform' subscriptions.
     if (!platform && window.electronAPI?.onPlatform) {
-      window.electronAPI.onPlatform((detectedPlatform: string) => {
+      const dispose = window.electronAPI.onPlatform((detectedPlatform: string) => {
         setAsyncPlatform(detectedPlatform)
       })
+      return dispose
     }
+    return undefined
   }, [platform])
 
   useEffect(() => {
-    // Listen for window state changes
+    // Listen for window state changes; remove the listener on cleanup.
     if (window.electronAPI?.onWindowState) {
-      window.electronAPI.onWindowState((state: string) => {
+      const dispose = window.electronAPI.onWindowState((state: string) => {
         setIsMaximized(state === 'maximized')
       })
+      return dispose
     }
+    return undefined
   }, [])
 
   // Calculate WCO width from native API if available
