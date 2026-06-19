@@ -366,6 +366,6 @@
     "openConsole": "Apri la console",
     "consoleClear": "Cancella la console",
     "setTabMaximized": "Ingrandisci/ripristina la scheda",
-    "listInstances": "List MCP instances"
+    "listInstances": "Elenca istanze MCP"
   }
 }

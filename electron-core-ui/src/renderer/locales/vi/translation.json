@@ -366,6 +366,6 @@
     "openConsole": "Mở bảng điều khiển",
     "consoleClear": "Xóa bảng điều khiển",
     "setTabMaximized": "Phóng to/khôi phục tab",
-    "listInstances": "List MCP instances"
+    "listInstances": "Liệt kê các phiên bản MCP"
   }
 }

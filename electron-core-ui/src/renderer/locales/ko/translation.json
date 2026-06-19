@@ -366,6 +366,6 @@
     "openConsole": "콘솔 열기",
     "consoleClear": "콘솔 지우기",
     "setTabMaximized": "탭 최대화/복원",
-    "listInstances": "List MCP instances"
+    "listInstances": "MCP 인스턴스 목록"
   }
 }

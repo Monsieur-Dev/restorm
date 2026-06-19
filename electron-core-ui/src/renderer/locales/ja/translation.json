@@ -366,6 +366,6 @@
     "openConsole": "コンソールを開く",
     "consoleClear": "コンソールをクリア",
     "setTabMaximized": "タブを最大化/元に戻す",
-    "listInstances": "List MCP instances"
+    "listInstances": "MCPインスタンスを一覧表示"
   }
 }

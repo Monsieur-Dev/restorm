@@ -366,6 +366,6 @@
     "openConsole": "Abrir la consola",
     "consoleClear": "Borrar la consola",
     "setTabMaximized": "Maximizar/restaurar la pestaña",
-    "listInstances": "List MCP instances"
+    "listInstances": "Listar instancias MCP"
   }
 }

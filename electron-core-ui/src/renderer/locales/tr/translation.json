@@ -366,6 +366,6 @@
     "openConsole": "Konsolu aç",
     "consoleClear": "Konsolu temizle",
     "setTabMaximized": "Sekmeyi büyüt/geri yükle",
-    "listInstances": "List MCP instances"
+    "listInstances": "MCP örneklerini listele"
   }
 }

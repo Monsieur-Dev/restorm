@@ -366,6 +366,6 @@
     "openConsole": "Avaa konsoli",
     "consoleClear": "Tyhjennä konsoli",
     "setTabMaximized": "Suurenna/palauta välilehti",
-    "listInstances": "List MCP instances"
+    "listInstances": "Listaa MCP-instanssit"
   }
 }

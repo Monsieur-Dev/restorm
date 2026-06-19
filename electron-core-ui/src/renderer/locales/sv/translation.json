@@ -366,6 +366,6 @@
     "openConsole": "Öppna konsolen",
     "consoleClear": "Rensa konsolen",
     "setTabMaximized": "Maximera/återställ fliken",
-    "listInstances": "List MCP instances"
+    "listInstances": "Lista MCP-instanser"
   }
 }

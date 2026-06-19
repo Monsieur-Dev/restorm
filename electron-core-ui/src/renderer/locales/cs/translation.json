@@ -366,6 +366,6 @@
     "openConsole": "Otevřít konzoli",
     "consoleClear": "Vymazat konzoli",
     "setTabMaximized": "Maximalizovat/obnovit kartu",
-    "listInstances": "List MCP instances"
+    "listInstances": "Vypsat instance MCP"
   }
 }
