@@ -17,6 +17,35 @@
   background-color: var(--editor-background);
 }
 
+/* Themed background for the top-right action zone (the delimited band
+ * behind the header action buttons). There is no VS Code theme token for
+ * it — the runtime --* colour vars are injected from external theme JSON,
+ * so we can't add one across the 100+ shipped themes — so it follows the
+ * app's own themed-colour convention: a default value on `:root` plus a
+ * `[data-theme]` override for the light / high-contrast-light polarity
+ * (the same pattern ImportFormatShowcase.css uses for its glow/shadow).
+ *
+ * The value is a subtle overlay on the editor background so it tracks
+ * every theme within a polarity while staying "close to the base bg but
+ * clearly distinguishable": a faint LIGHTEN on dark themes, a faint
+ * DARKEN on light themes. */
+:root {
+  --workbench-tab-action-zone-background: color-mix(
+    in srgb,
+    var(--editor-background, #1e1e1e) 92%,
+    #ffffff 8%
+  );
+}
+
+[data-theme='light'],
+[data-theme='hcLight'] {
+  --workbench-tab-action-zone-background: color-mix(
+    in srgb,
+    var(--editor-background, #ffffff) 94%,
+    #000000 6%
+  );
+}
+
 /* Top-right cluster: [header actions] + [bookmark ribbon] flow in a
  * single flex row so the ribbon's variable width can never collide with
  * the header buttons. Anchored where the ribbon used to sit (8px above
@@ -30,6 +59,49 @@
   display: flex;
   align-items: flex-start;
   gap: 8px;
+}
+
+/* Delimited action zone — a themed background BAND drawn BEHIND the whole
+ * top-right action cluster (env selector + history + bookmark ribbon + the
+ * auth-route key, plus the scenario-usage button and favourite star that
+ * anchor further right).
+ *
+ * It is a pure backdrop: an absolutely-positioned child of the cluster, so
+ * adding it causes ZERO positional shift of any control (they keep their
+ * exact anchors). The cluster auto-sizes to its content, so the band's
+ * left edge tracks the content and the band GROWS IN WIDTH with the items;
+ * the band extends rightward past the cluster (negative `right`) to sit
+ * under the usage button + star, reaching the tab's right inset. Height is
+ * FIXED (contains the 32px star) and the band keeps the cluster's
+ * `overflow: visible`, so an expanding bookmark ribbon overflows BELOW the
+ * band without ever growing its height. Only the inner bottom-LEFT corner
+ * is rounded — the band is flush against the tab's top-right, so the other
+ * three corners are square / off-screen. `z-index: -1` keeps the backdrop
+ * behind the sibling controls it groups. */
+.restorm-workbench-tab-action-zone {
+  position: absolute;
+  top: 0;
+  /* 24px of breathing room to the left of the cluster content. */
+  left: -24px;
+  /* Measured live: the visible right edge of the tab/pane is the
+   * .editor-group-content-panel blue border, ~7px PAST .restorm-workbench-tab's
+   * own rect.right. The zone must be flush with THAT border (not the inner tab
+   * element), so it reaches the visible edge with no dark gap. */
+  right: -50px;
+  /* 44px: 32px covers the star height, +12px bottom breathing room. */
+  height: 44px;
+  z-index: -1;
+  pointer-events: none;
+  background: var(--workbench-tab-action-zone-background);
+  border-radius: 0 0 0 8px;
+}
+
+/* When the "used in scenarios" button is present, the cluster shifts left
+ * from right:44 to right:80 (~35px further left) — add that delta to the base
+ * flush offset: -50 - 36 = -86px (reaches the same .editor-group-content-panel
+ * border as the base case). */
+.restorm-workbench-tab:has(> .request-scenario-usage-button) .restorm-workbench-tab-action-zone {
+  right: -86px;
 }
 
 /* When the "used in scenarios" button is present, the whole cluster
@@ -217,19 +289,21 @@
 
 /* Star toggle anchored top-right of the workbench tab, immediately to
  * the right of the bookmark ribbon stack. Keeps the H1 title flush-left
- * with the breadcrumb row above and the URL bar below. */
+ * with the breadcrumb row above and the URL bar below.
+ * top: -5px nudges the star 3px lower than the original -8px. */
 .restorm-workbench-tab-favorite-star {
   position: absolute;
-  top: -8px;
+  top: -5px;
   right: 4px;
   z-index: 3;
 }
 
 /* "Used in scenarios" reverse-nav button — between the bookmark ribbon and the
- * favourite star (star at right:4 is 32×32, so anchor at right:40). */
+ * favourite star (star at right:4 is 32×32, so anchor at right:40).
+ * top: -5px matches the favourite star offset. */
 .request-scenario-usage-button {
   position: absolute;
-  top: -8px;
+  top: -5px;
   right: 40px;
   z-index: 3;
   width: 32px;
