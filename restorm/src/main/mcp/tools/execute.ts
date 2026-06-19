@@ -279,21 +279,27 @@ function delay(ms: number): Promise<void> {
 }
 
 /**
- * Continuation token format for `read_stream`. We embed the request id
- * + the next-frame cursor into a single opaque string so the AI doesn't
+ * Continuation token format for `read_stream`. We embed the next-frame
+ * cursor + the request id into a single opaque string so the AI doesn't
  * need to track its own state. Plain text by design — there's nothing
  * sensitive in a cursor index.
+ *
+ * The cursor goes FIRST (it is always a `#`-free non-negative integer) and
+ * the request id is everything after the first `#`. That makes the split
+ * unambiguous even if a request id ever contains a `#` — decode uses
+ * `indexOf` on the leading numeric segment, so the request id is recovered
+ * verbatim regardless of its contents.
  */
 function encodeStreamToken(requestId: string, cursor: number): string {
-  return `${requestId}#${cursor}`
+  return `${cursor}#${requestId}`
 }
 
 function decodeStreamToken(token: string): { requestId: string; cursor: number } | null {
-  const idx = token.lastIndexOf('#')
+  const idx = token.indexOf('#')
   if (idx <= 0 || idx >= token.length - 1) return null
-  const requestId = token.slice(0, idx)
-  const cursor = Number(token.slice(idx + 1))
-  if (!Number.isFinite(cursor) || cursor < 0) return null
+  const cursor = Number(token.slice(0, idx))
+  const requestId = token.slice(idx + 1)
+  if (!Number.isInteger(cursor) || cursor < 0) return null
   return { requestId, cursor }
 }
 

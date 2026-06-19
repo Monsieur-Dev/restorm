@@ -11,6 +11,7 @@
 
 import { z } from 'zod'
 import { promises as fs } from 'node:fs'
+import { isAbsolute, dirname } from 'node:path'
 import { McpService, getFileService, isFileServiceInitialized } from 'electron-core-ui/main'
 import { BrowserWindow } from 'electron'
 
@@ -60,7 +61,7 @@ export function registerProjectTools(mcp: McpService): void {
         'sidebar — the user sees the empty project appear immediately.',
       inputSchema: {
         filePath: z.string().min(1).describe(
-          'Absolute path to the new .restorm file. Parent directory must exist; the .restorm extension is added if missing.'
+          'Absolute path to the new .restorm file. The parent directory must already exist; the .restorm extension is added if missing. Fails if a file already exists at the path (it is never overwritten).'
         ),
         format: z.enum(['yaml', 'json', 'json5']).optional().describe(
           'Serialisation format. Default `yaml` (most readable).'
@@ -72,16 +73,34 @@ export function registerProjectTools(mcp: McpService): void {
       const rawPath = typeof argRecord['filePath'] === 'string' ? argRecord['filePath'] : ''
       if (!rawPath) return errorReply('filePath is required')
       const filePath = rawPath.endsWith('.restorm') ? rawPath : `${rawPath}.restorm`
+      // Require an absolute path so the file lands where the caller expects,
+      // not relative to the main process's (unspecified) cwd.
+      if (!isAbsolute(filePath)) return errorReply(`filePath must be an absolute path: ${filePath}`)
       if (!isFileServiceInitialized()) return errorReply('FileService not initialised')
+      // The parent directory must already exist as a directory — we create the
+      // project file, not the tree above it.
+      const parentDir = dirname(filePath)
+      try {
+        const parentStat = await fs.stat(parentDir)
+        if (!parentStat.isDirectory()) return errorReply(`Parent path is not a directory: ${parentDir}`)
+      } catch {
+        return errorReply(`Parent directory does not exist: ${parentDir}`)
+      }
       try {
         // Empty document body. FileService.open will stamp `_projectUuid`
         // for us via `ensureFileUuid` so the renderer's preferences key
         // off it from the very first `file:opened` broadcast.
-        await fs.writeFile(filePath, '{}', 'utf8')
+        // `wx` creates the file atomically and FAILS if it already exists —
+        // this both refuses to clobber an existing project (data loss) and
+        // closes the exists-check/write TOCTOU window.
+        await fs.writeFile(filePath, '{}', { encoding: 'utf8', flag: 'wx' })
         const result = await getFileService().open(filePath)
         if (!result.success) return errorReply(`FileService.open failed for ${filePath}`)
         return jsonReply({ filePath, opened: true })
       } catch (err) {
+        if (err instanceof Error && (err as NodeJS.ErrnoException).code === 'EEXIST') {
+          return errorReply(`A file already exists at ${filePath} — refusing to overwrite it. Choose a new path or open the existing project.`)
+        }
         return errorReply(`create_project failed: ${err instanceof Error ? err.message : String(err)}`)
       }
     }

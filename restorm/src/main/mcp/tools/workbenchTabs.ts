@@ -37,7 +37,10 @@ function broadcast(channel: string, payload: unknown = {}): void {
  * Rejects anything that doesn't yield a non-empty host or a valid
  * 1-65535 port.
  */
-function parseOriginString(raw: string): FirewallOrigin | null {
+/** Parse a user/agent-supplied origin string into a firewall origin tuple, or
+ * `null` when it isn't a usable origin. Exported for unit-test coverage; the
+ * production call sites stay inside this module (firewall_allow / firewall_deny). */
+export function parseOriginString(raw: string): FirewallOrigin | null {
   let candidate = raw.trim()
   if (candidate.length === 0) return null
   if (!candidate.includes('://')) candidate = `https://${candidate}`
@@ -49,7 +52,9 @@ function parseOriginString(raw: string): FirewallOrigin | null {
   if (host === '') return null
   const defaultPort = scheme === 'https' || scheme === 'wss' ? 443 : 80
   const port = parsed.port !== '' ? Number(parsed.port) : defaultPort
-  if (!Number.isFinite(port) || port < 0 || port > 65535) return null
+  // Port 0 is not a real listening port, so a rule keyed on it can never match
+  // an actual connection — reject it rather than persist a dead rule.
+  if (!Number.isFinite(port) || port < 1 || port > 65535) return null
   return { scheme, host, port }
 }
 
