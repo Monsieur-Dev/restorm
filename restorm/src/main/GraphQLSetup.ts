@@ -1,7 +1,17 @@
-import { ipcMain } from 'electron'
-import { logger } from 'electron-core-ui'
+import { z } from 'zod'
+import { logger, validatedHandle } from 'electron-core-ui'
 import { graphQLService } from 'electron-core-ui/main'
 import { typeDefs, resolvers, pubsub } from './graphql'
+
+/** Args schema for the `graphql:query` IPC — a single { query, variables? }
+ * object. Validated rather than trusted so a malformed renderer payload can't
+ * feed a non-string into the GraphQL POST body. */
+const graphqlQueryArgs = z.tuple([
+  z.object({
+    query: z.string(),
+    variables: z.record(z.string(), z.unknown()).optional()
+  })
+])
 
 /**
  * Initialize and start the GraphQL service, and register the graphql:query IPC handler.
@@ -26,7 +36,7 @@ export function setupGraphQL(): void {
     logger.error('Failed to start GraphQL Service', { error: String(error) })
   })
 
-  ipcMain.handle('graphql:query', async (_event, input: { query: string; variables?: Record<string, unknown> }) => {
+  validatedHandle('graphql:query', graphqlQueryArgs, async (_event, [input]) => {
     const response = await fetch(graphQLService.getEndpoint(), {
       method: 'POST',
       headers: {
