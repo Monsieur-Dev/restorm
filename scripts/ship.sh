@@ -227,12 +227,26 @@ echo "✅ Pushed (e2e gate passed)."
 # loop" checkpoint.
 # With --auto: create the PR from branch+RESTORM_COMMIT_AGENT metadata and
 # fall through directly into the CI-watch + merge path — no second invocation.
-PR_NUMBER="$(gh pr view "${BRANCH}" --json number --jq .number 2>/dev/null || true)"
+#
+# A CLOSED (not merged) PR is treated as absent under --auto: gh would resolve
+# it via "number" but it can't be merged. We read both number and state so the
+# message is unambiguous and a new OPEN PR is created instead.
+PR_NUMBER="$(gh pr view "${BRANCH}" --json number,state --jq .number 2>/dev/null || true)"
+PR_STATE_CUR="$(gh pr view "${BRANCH}" --json number,state --jq .state 2>/dev/null || true)"
+# Treat a CLOSED PR as absent for the purpose of this check: it can't be
+# merged, so under --auto we need to open a fresh one.
+if [ "${PR_STATE_CUR}" = "CLOSED" ]; then
+  if [ "${AUTO}" -ne 1 ]; then
+    die "PR for ${BRANCH} is CLOSED (not merged). Reopen or create a new one, then re-run ship.sh."
+  fi
+  echo "📋 Existing PR for ${BRANCH} is CLOSED — creating a fresh one (--auto)…"
+  PR_NUMBER=""
+fi
 if [ -z "${PR_NUMBER}" ]; then
   if [ "${AUTO}" -ne 1 ]; then
     die "no PR found for ${BRANCH}. Open it first (gh pr create --base ${BASE}), then re-run ship.sh."
   fi
-  echo "📋 No PR found for ${BRANCH} — creating one (--auto)…"
+  echo "📋 No open PR found for ${BRANCH} — creating one (--auto)…"
   # --fill derives title + body from the branch's commits. The RESTORM_COMMIT_AGENT
   # value (set by the lead before calling ship.sh) is already baked into those
   # commit messages, so --fill captures it without extra plumbing.
