@@ -25,6 +25,10 @@ const SashInner: React.FC<SashProps> = ({
 	const [isActive, setIsActive] = useState(false);
 	const hoverTimeoutRef = useRef<number | null>(null);
 	const isDraggingRef = useRef(false);
+	/** Teardown for the in-progress drag (remove the injected <style> + window
+	 * listeners). Held in a ref so an unmount MID-DRAG can run it — otherwise the
+	 * global cursor <style> and the mousemove/mouseup listeners leak. */
+	const activeDragCleanupRef = useRef<(() => void) | null>(null);
 	const [layoutMetrics, setLayoutMetrics] = useState<{ left: number; top: number; width: number; height: number }>({
 		left: 0,
 		top: 0,
@@ -253,10 +257,18 @@ const SashInner: React.FC<SashProps> = ({
 
 			window.removeEventListener('mousemove', handleMouseMove);
 			window.removeEventListener('mouseup', handleMouseUp);
+			activeDragCleanupRef.current = null;
 		};
 
 		window.addEventListener('mousemove', handleMouseMove);
 		window.addEventListener('mouseup', handleMouseUp);
+		// Record how to tear this drag down so an unmount mid-drag doesn't leak
+		// the <style> + the window listeners.
+		activeDragCleanupRef.current = (): void => {
+			style.remove();
+			window.removeEventListener('mousemove', handleMouseMove);
+			window.removeEventListener('mouseup', handleMouseUp);
+		};
 	}, [state, orientation, onStart, onChange, onEnd]);
 
 	// Handle double click
@@ -273,6 +285,9 @@ const SashInner: React.FC<SashProps> = ({
 			if (hoverTimeoutRef.current) {
 				clearTimeout(hoverTimeoutRef.current);
 			}
+			// Tear down a drag still in progress at unmount (style + listeners).
+			activeDragCleanupRef.current?.();
+			activeDragCleanupRef.current = null;
 		};
 	}, []);
 
