@@ -17,6 +17,10 @@ export interface RestormWorkbenchContainerProps {
   onTreeChange: (tree: WorkbenchTree) => void
   focusedGroupId: string | null
   onFocusedGroupChange: (groupId: string | null) => void
+  /** Forwarded from `EditorWorkbench`: the maximized (fullscreen) tab
+   * changed (id, or null when restored). The host tracks this to keep
+   * the MCP workbench-layout snapshot fresh. */
+  onFullscreenTabIdChange?: ((tabId: string | null) => void) | undefined
   onTabActivate: (tabId: string) => void
   /** Open a request by id — same handler the sidebar wires for clicks.
    *  Passed through to env-folder home tabs so the Favorite Requests
@@ -83,6 +87,7 @@ export const RestormWorkbenchContainer: React.FC<RestormWorkbenchContainerProps>
   onTreeChange,
   focusedGroupId,
   onFocusedGroupChange,
+  onFullscreenTabIdChange,
   onTabActivate,
   onRequestClick,
   onRequestAuxClick,
@@ -135,6 +140,7 @@ export const RestormWorkbenchContainer: React.FC<RestormWorkbenchContainerProps>
           onTreeChange={onTreeChange}
           focusedGroupId={focusedGroupId}
           onFocusedGroupChange={onFocusedGroupChange}
+          onFullscreenTabIdChange={onFullscreenTabIdChange}
           onTabActivate={onTabActivate}
           {...(onRequestClick ? { onRequestClick } : {})}
           {...(onRequestAuxClick ? { onRequestAuxClick } : {})}

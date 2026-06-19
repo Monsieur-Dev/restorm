@@ -1231,6 +1231,19 @@ contextBridge.exposeInMainWorld('restorm', {
       }
       ipcRenderer.on(SET_TAB_MAXIMIZED_CHANNEL, handler)
       return () => { ipcRenderer.off(SET_TAB_MAXIMIZED_CHANNEL, handler) }
+    },
+    /** Push the serialized workbench layout to main so the MCP
+     * `get_workbench_layout` tool can read it (the live tree is
+     * renderer-only). Fired on every tree / focus / maximize change. */
+    pushWorkbenchLayout: (layout: unknown): void => {
+      ipcRenderer.send('mcp:workbench-layout-changed', layout)
+    },
+    /** Subscribe to MCP `set_workbench_layout` — reconstruct the editor
+     * layout (groups / splits / sashes / tabs) from the broadcast spec. */
+    onMcpSetWorkbenchLayout: (callback: (layout: unknown) => void): (() => void) => {
+      const handler = (_e: unknown, payload: unknown): void => { callback(payload) }
+      ipcRenderer.on('mcp:set-workbench-layout', handler)
+      return () => { ipcRenderer.off('mcp:set-workbench-layout', handler) }
     }
   },
   import: {

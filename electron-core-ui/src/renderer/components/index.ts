@@ -334,3 +334,16 @@ export { insertTabAt, normalizeTree, removeTab, findGroup } from './Workbench/tr
 export type { FindResult } from './Workbench/tree'
 export { isTabGroupNode, isContainerNode } from './Workbench/types'
 export { getTabTitleString, extractTextFromReactNode } from './Workbench/utils'
+
+// Workbench layout (serializable, React-free) get/set exports
+export { serializeWorkbenchLayout, applyWorkbenchLayout, isLayoutTabGroup, isLayoutContainer } from './Workbench/layout'
+export type {
+	WorkbenchLayout,
+	LayoutNode,
+	LayoutTabGroup,
+	LayoutContainer,
+	LayoutTab,
+	TabSerializer,
+	TabRebuilder,
+	AppliedWorkbenchLayout
+} from './Workbench/layout'
