@@ -135,7 +135,9 @@ export function resolveRequestURL(input: URLResolutionInput): ResolvedURLResult 
  * Generate a unique ID for the response
  */
 function generateResponseId(): string {
-  return `resp_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`
+  // crypto.randomUUID is collision-free; the old Date.now()+Math.random() suffix
+  // could collide for two responses generated in the same millisecond.
+  return `resp_${crypto.randomUUID()}`
 }
 
 /**

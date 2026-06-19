@@ -60,6 +60,9 @@ function normalizeKeyValues(values: unknown[]): KeyValue[] {
   return values.map((v) => KeyValueModel.fromPlain(v as Record<string, unknown>))
 }
 
+/** Safety cap on how far an item's ancestor chain is walked (anti-runaway). */
+const MAX_ANCESTOR_WALK_DEPTH = 32
+
 /**
  * ContextService class - manages Handlebars context, URLs and code snippets (Main Process)
  */
@@ -285,8 +288,6 @@ class ContextService {
     // Remove from maps
     this.environmentMeta.delete(envId)
     this.transformedContexts.delete(envId)
-
-    // logger.debug('[ContextService] Deleted environment from context', { id: envId })
   }
 
   /**
@@ -698,13 +699,6 @@ class ContextService {
       }
     }
 
-    // logger.debug('[ContextService] Recalculating request context', {
-    //   requestId,
-    //   environmentId: ctx.environmentId,
-    //   baseContextKeys: Object.keys(baseContext),
-    //   groups: Array.from(ctx.keyValueGroups.keys())
-    // })
-
     // Process each KeyValue group
     for (const [_groupName, keyValues] of ctx.keyValueGroups) {
       // For each group, accumulate context as we process variables
@@ -731,12 +725,6 @@ class ContextService {
           }
         }
       }
-
-      // logger.debug('[ContextService] Processed request group', {
-      //   requestId,
-      //   groupName,
-      //   variableCount: keyValues.filter(kv => kv.id && kv.enabled !== false).length
-      // })
     }
 
     // Calculate resolved URL and code snippets if we have full data
@@ -1589,7 +1577,7 @@ class ContextService {
   /** True when `requestId`'s ancestor chain includes `folderId`. */
   private isRequestUnderFolder(requestId: string, folderId: string): boolean {
     let cursor: string | null = requestId
-    for (let i = 0; i < 32 && cursor; i++) {
+    for (let i = 0; i < MAX_ANCESTOR_WALK_DEPTH && cursor; i++) {
       const parent = collectionStore.findParentFolder(cursor)
       if (!parent) return false
       if (parent.id === folderId) return true
@@ -1605,7 +1593,7 @@ class ContextService {
    */
   private findCustomValueList(listId: string, requestId: string): CustomValueList | null {
     let cursor: string | null = requestId
-    for (let i = 0; i < 32 && cursor; i++) {
+    for (let i = 0; i < MAX_ANCESTOR_WALK_DEPTH && cursor; i++) {
       const parent = collectionStore.findParentFolder(cursor)
       if (!parent) break
       if (isEnvironmentFolder(parent)) {
@@ -1693,10 +1681,6 @@ class ContextService {
     // Recalculate all requests using affected environments
     for (const [requestId, ctx] of this.requestContexts) {
       if (ctx.environmentId && affectedEnvIds.has(ctx.environmentId)) {
-        // logger.debug('[ContextService] Recalculating request due to environment change', {
-        //   requestId,
-        //   environmentId: ctx.environmentId
-        // })
         this.recalculateRequestContext(requestId)
       }
     }

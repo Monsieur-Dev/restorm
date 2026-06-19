@@ -27,9 +27,12 @@ export function getResolver(id: string): ValueSourceResolver | undefined {
 
 /**
  * TEST-ONLY: register an extra resolver into the main registry (e.g. a slow,
- * abort-honouring stub used to exercise hydration cancellation). Never called
- * from production code.
+ * abort-honouring stub used to exercise hydration cancellation). Guarded to the
+ * test runner so a production caller can't inject a resolver via this hook.
  */
 export function registerResolverForTests(resolver: ValueSourceResolver): void {
+  if (process.env['NODE_ENV'] !== 'test' && process.env['VITEST'] === undefined) {
+    throw new Error('registerResolverForTests is test-only and must not be called in production')
+  }
   resolvers.set(resolver.id, resolver)
 }

@@ -287,7 +287,7 @@ export interface GraphQLImportOptions {
  */
 export function importGraphQL(schemaString: string, options: GraphQLImportOptions = {}): EnvironmentFolder {
   const baseUrl = options.baseUrl ?? '{{baseUrl}}'
-  const name = options.name ?? (options.baseUrl ? 'GraphQL API' : 'GraphQL API')
+  const name = options.name ?? 'GraphQL API'
   
   const schema = parseGraphQLSchema(schemaString)
   

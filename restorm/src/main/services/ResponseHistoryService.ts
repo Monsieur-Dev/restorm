@@ -71,9 +71,11 @@ function httpOutcome(result: { success: boolean; statusCode?: number }): Respons
  * non-zero value indicates an error (UNAVAILABLE, UNAUTHENTICATED,
  * etc.). We collapse to a binary outcome.
  */
+/** gRPC status 0 == OK; any other code (or a missing one) is a failure. */
+const GRPC_STATUS_OK = 0
 function grpcOutcome(result: GRPCExecutionResult): ResponseHistoryOutcome {
   if (!result.success) return 'failure'
-  return (result.statusCode ?? -1) === 0 ? 'ok' : 'failure'
+  return result.statusCode === GRPC_STATUS_OK ? 'ok' : 'failure'
 }
 
 /**
