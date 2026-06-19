@@ -405,7 +405,7 @@ describe('FeatureFlippingService', () => {
       resetFeatureService()
     })
 
-    it('legacy call: initFeatureService(path, platform) works', () => {
+    it('sets the platform from options', () => {
       const config: FeaturesYamlConfig = {
         Features: [
           { Name: 'feat', Strategies: [{ Type: 'Platform', AvailableOn: ['web'] }] }
@@ -414,7 +414,7 @@ describe('FeatureFlippingService', () => {
       vi.mocked(existsSync).mockReturnValue(true)
       vi.mocked(readFileSync).mockReturnValue(makeYaml(config))
 
-      const service = initFeatureService('/fake/features.yml', 'web')
+      const service = initFeatureService({ defaultConfigPath: '/fake/features.yml', platform: 'web' })
 
       expect(service.getPlatform()).toBe('web')
       expect(service.isEnabled('feat')).toBe(true)
@@ -422,7 +422,7 @@ describe('FeatureFlippingService', () => {
       expect(getFeatureService()).toBe(service)
     })
 
-    it('legacy call: initFeatureService(path) defaults platform to desktop', () => {
+    it('defaults platform to desktop when omitted', () => {
       const config: FeaturesYamlConfig = {
         Features: [
           { Name: 'feat', Strategies: [{ Type: 'Platform', AvailableOn: ['desktop'] }] }
@@ -431,13 +431,13 @@ describe('FeatureFlippingService', () => {
       vi.mocked(existsSync).mockReturnValue(true)
       vi.mocked(readFileSync).mockReturnValue(makeYaml(config))
 
-      const service = initFeatureService('/fake/features.yml')
+      const service = initFeatureService({ defaultConfigPath: '/fake/features.yml' })
 
       expect(service.getPlatform()).toBe('desktop')
       expect(service.isEnabled('feat')).toBe(true)
     })
 
-    it('new call: initFeatureService(defaultPath, appPath) merges configs', () => {
+    it('merges a default + app config', () => {
       const defaultConfig: FeaturesYamlConfig = {
         Features: [
           { Name: 'default-feat', Strategies: [{ Type: 'Basic', Enabled: true }] },
@@ -455,7 +455,7 @@ describe('FeatureFlippingService', () => {
         .mockReturnValueOnce(makeYaml(defaultConfig))
         .mockReturnValueOnce(makeYaml(appConfig))
 
-      const service = initFeatureService('/fake/default.yml', '/fake/app.yml')
+      const service = initFeatureService({ defaultConfigPath: '/fake/default.yml', appConfigPath: '/fake/app.yml' })
 
       expect(service.getPlatform()).toBe('desktop')
       expect(service.isEnabled('default-feat')).toBe(true)
@@ -463,7 +463,7 @@ describe('FeatureFlippingService', () => {
       expect(service.isEnabled('app-feat')).toBe(true)
     })
 
-    it('new call: initFeatureService(defaultPath, appPath, platform) sets platform', () => {
+    it('sets platform alongside a default + app config', () => {
       const config: FeaturesYamlConfig = {
         Features: [
           { Name: 'feat', Strategies: [{ Type: 'Platform', AvailableOn: ['web'] }] }
@@ -472,7 +472,7 @@ describe('FeatureFlippingService', () => {
       vi.mocked(existsSync).mockReturnValue(true)
       vi.mocked(readFileSync).mockReturnValue(makeYaml(config))
 
-      const service = initFeatureService('/fake/default.yml', '/fake/app.yml', 'web')
+      const service = initFeatureService({ defaultConfigPath: '/fake/default.yml', appConfigPath: '/fake/app.yml', platform: 'web' })
 
       expect(service.getPlatform()).toBe('web')
       expect(service.isEnabled('feat')).toBe(true)
@@ -481,8 +481,8 @@ describe('FeatureFlippingService', () => {
     it('returns existing instance if already initialized', () => {
       vi.mocked(existsSync).mockReturnValue(false)
 
-      const first = initFeatureService('/fake/a.yml')
-      const second = initFeatureService('/fake/b.yml')
+      const first = initFeatureService({ defaultConfigPath: '/fake/a.yml' })
+      const second = initFeatureService({ defaultConfigPath: '/fake/b.yml' })
 
       expect(second).toBe(first)
       expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('already initialized'))

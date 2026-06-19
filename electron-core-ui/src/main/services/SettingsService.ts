@@ -49,6 +49,13 @@ export type SettingChangedListener = (value: SettingValue) => void
 export class SettingsService {
   private groups: SettingsGroup[] = []
   private listeners = new Map<string, Set<SettingChangedListener>>()
+  /**
+   * storageKey → setting definition, rebuilt whenever the group tree changes
+   * (see {@link reindexSearch}). `findSettingByStorageKey` reads this O(1)
+   * instead of re-flattening the whole tree on every get/set — which also
+   * triggered a StorageService read per setting, making get/set quadratic.
+   */
+  private definitionIndex = new Map<string, SettingDefinition>()
   private searchIndex = new MiniSearch<{ id: string; title: string; description: string }>({
     fields: ['title', 'description', 'id'],
     storeFields: ['id', 'title', 'description'],
@@ -559,14 +566,11 @@ export class SettingsService {
 
   /** Update a setting definition */
   public updateSetting(storageKey: string, updates: Partial<SettingDefinition>): void {
-    const allSettings = this.flattenSettings(this.groups, [])
-    const found = allSettings.find((s) => s.storageKey === storageKey)
-    if (found) {
-      const setting = this.findSettingByStorageKey(storageKey)
-      if (setting) {
-        Object.assign(setting, updates)
-        this.reindexSearch()
-      }
+    // Single O(1) lookup (was a flatten + a re-flatten via findSettingByStorageKey).
+    const setting = this.findSettingByStorageKey(storageKey)
+    if (setting) {
+      Object.assign(setting, updates)
+      this.reindexSearch()
     }
   }
 
@@ -593,6 +597,10 @@ export class SettingsService {
 
   /** Rebuild search index (call on language change) */
   public reindexSearch(): void {
+    // The group tree may have changed — refresh the storageKey→definition index
+    // alongside the search index so lookups stay O(1) and current.
+    this.rebuildDefinitionIndex()
+
     this.searchIndex.removeAll()
 
     const allSettings = this.flattenSettings(this.groups, [])
@@ -658,11 +666,31 @@ export class SettingsService {
     return result
   }
 
-  /** Find a setting definition by its storage key */
+  /** Find a setting definition by its storage key (O(1) via the index). */
   private findSettingByStorageKey(storageKey: string): SettingDefinition | null {
-    const allSettings = this.flattenSettings(this.groups, [])
-    const found = allSettings.find((s) => s.storageKey === storageKey)
-    return found ?? null
+    return this.definitionIndex.get(storageKey) ?? null
+  }
+
+  /**
+   * Rebuild the storageKey → definition index. Indexes the ACTUAL `item.setting`
+   * references in the tree (not flattened copies) so `updateSetting`'s in-place
+   * `Object.assign` reaches the live object.
+   */
+  private rebuildDefinitionIndex(): void {
+    this.definitionIndex.clear()
+    const walk = (groups: SettingsGroup[], path: string[]): void => {
+      for (const group of groups) {
+        const currentPath = [...path, group.id]
+        for (const item of group.items) {
+          if (isSettingItem(item)) {
+            this.definitionIndex.set(this.buildStorageKey(currentPath, item.setting.id), item.setting)
+          } else if (isGroupItem(item)) {
+            walk([item.group], currentPath)
+          }
+        }
+      }
+    }
+    walk(this.groups, [])
   }
 
   /** Find a group by ID recursively */

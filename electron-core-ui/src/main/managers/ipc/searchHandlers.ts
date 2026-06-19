@@ -4,11 +4,15 @@ import {
   searchRegisterCategoriesArgs, searchIndexDocumentArgs, searchIndexDocumentsArgs,
   searchRemoveDocumentArgs, searchQueryArgs
 } from '../../ipc/schemas'
-import { searchService, type SearchDocument, type CategoryMeta } from '../../services'
+import { searchService, type SearchDocument } from '../../services'
 
 export function registerSearchHandlers(): void {
+  // The args are already Zod-validated against searchDocumentSchema (the single
+  // source of truth for the shape). The casts below only bridge Zod's inferred
+  // `field?: T | undefined` optionals to the interface's exact `field?: T` under
+  // exactOptionalPropertyTypes — they assert nothing the schema didn't check.
   validatedHandle('search:register-categories', searchRegisterCategoriesArgs, (_event, [categories]) => {
-    searchService.registerCategories(categories as Record<string, CategoryMeta>)
+    searchService.registerCategories(categories)
     return true
   })
 

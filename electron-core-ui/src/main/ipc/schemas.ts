@@ -105,6 +105,8 @@ export const eventBusEmitArgs = z.tuple([z.string(), z.unknown()])
 // ==========================================================================
 // Search
 // ==========================================================================
+// Shape mirrors `SearchDocument` (see SearchService) — the single source of
+// truth for the search-document shape over IPC.
 const searchDocumentSchema = z.object({
   id: z.string(),
   title: z.string(),

@@ -187,53 +187,38 @@ export class FeatureFlippingService {
 // Singleton instance
 let featureServiceInstance: FeatureFlippingService | null = null
 
+/** Options for {@link initFeatureService}. */
+export interface InitFeatureServiceOptions {
+  /** Base feature config (shipped defaults). */
+  defaultConfigPath: string
+  /** Optional app-level overrides layered over the defaults. */
+  appConfigPath?: string | undefined
+  /** Target platform (default `'desktop'`). */
+  platform?: FeaturePlatform | undefined
+  /** Target environment (default `'prod'` — packaged builds get the conservative default;
+   * pass `app.isPackaged ? 'prod' : 'dev'` for dev-only surfaces). */
+  environment?: FeatureEnvironment | undefined
+}
+
 /**
- * Initialize the singleton instance of FeatureFlippingService
- * Must be called before getFeatureService()
+ * Initialize the singleton instance of FeatureFlippingService.
+ * Must be called before getFeatureService().
  *
- * Supports two signatures for backward compatibility:
- * - initFeatureService(configPath, platform?, environment?)               — legacy
- * - initFeatureService(defaultPath, appConfigPath, platform?, environment?) — new (with app overrides)
- *
- * Disambiguation: if the second argument is a FeaturePlatform string ('desktop' | 'web'),
- * it is treated as the platform (legacy call). Otherwise it is treated as appConfigPath.
- *
- * `environment` defaults to `'prod'` when omitted — packaged builds get the conservative default.
- * Host apps that want dev-only feature surfaces should pass `app.isPackaged ? 'prod' : 'dev'`.
+ * Takes an options object so each field is named — the previous positional
+ * form disambiguated "is arg 2 a path or a platform?" by value-sniffing
+ * `'desktop'`/`'web'`, which silently mis-parsed an appConfigPath literally
+ * named "web".
  */
-export function initFeatureService(
-  defaultConfigPath: string,
-  appConfigPathOrPlatform?: string,
-  platformOrEnvironment?: FeaturePlatform | FeatureEnvironment,
-  environment?: FeatureEnvironment
-): FeatureFlippingService {
+export function initFeatureService(options: InitFeatureServiceOptions): FeatureFlippingService {
   if (featureServiceInstance) {
     logger.warn('FeatureFlippingService already initialized, returning existing instance')
     return featureServiceInstance
   }
 
-  // Disambiguate legacy vs new signature
-  let appConfigPath: string | undefined
-  let resolvedPlatform: FeaturePlatform = 'desktop'
-  let resolvedEnvironment: FeatureEnvironment = 'prod'
-
-  if (appConfigPathOrPlatform === 'desktop' || appConfigPathOrPlatform === 'web') {
-    // Legacy call: initFeatureService(path, platform, environment?)
-    resolvedPlatform = appConfigPathOrPlatform
-    if (platformOrEnvironment === 'dev' || platformOrEnvironment === 'prod') {
-      resolvedEnvironment = platformOrEnvironment
-    }
-  } else if (appConfigPathOrPlatform !== undefined) {
-    // New call: initFeatureService(defaultPath, appConfigPath, platform?, environment?)
-    appConfigPath = appConfigPathOrPlatform
-    if (platformOrEnvironment === 'desktop' || platformOrEnvironment === 'web') {
-      resolvedPlatform = platformOrEnvironment
-    }
-    if (environment !== undefined) resolvedEnvironment = environment
-  }
+  const { defaultConfigPath, appConfigPath, platform = 'desktop', environment = 'prod' } = options
 
   logger.info('FeatureFlippingService: Creating singleton instance...')
-  featureServiceInstance = new FeatureFlippingService(defaultConfigPath, resolvedPlatform, resolvedEnvironment)
+  featureServiceInstance = new FeatureFlippingService(defaultConfigPath, platform, environment)
 
   if (appConfigPath) {
     featureServiceInstance.loadAdditionalConfig(appConfigPath)

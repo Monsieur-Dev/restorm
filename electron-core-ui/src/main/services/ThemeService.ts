@@ -187,6 +187,22 @@ export class ThemeService {
   }
 
   /**
+   * Drop the resolved-theme cache and re-read every YAML from disk. The cache
+   * is otherwise populated once at startup and never invalidated, so editing a
+   * theme YAML in dev was invisible until a full restart. Call this to pick up
+   * on-disk theme changes (a dev reload hook, or after shipping a new theme).
+   */
+  public reloadThemes(): void {
+    this.themeCache.clear()
+    this.themes.clear()
+    this.baseVariables = {}
+    this.typeBaseColors = { dark: {}, light: {}, hc_dark: {}, hc_light: {} }
+    this.loadBaseFiles()
+    this.discoverThemes()
+    this.preloadAllThemes()
+  }
+
+  /**
    * Get all available themes
    */
   public listThemes(): ThemeInfo[] {

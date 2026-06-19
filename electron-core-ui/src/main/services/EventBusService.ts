@@ -83,8 +83,10 @@ class EventBusServiceImpl {
   }
 
   /**
-   * Emit an event synchronously (fire and forget)
-   * Handlers are executed asynchronously but emit returns immediately
+   * Fire-and-forget emit: the CALL returns synchronously (hence the name), but
+   * the handlers themselves run later on the next tick (`setImmediate`) and any
+   * rejection is logged, not propagated. Use when the caller can't/shouldn't
+   * await the listeners (e.g. a renderer hook emitting a CREATED event).
    * @param event Event name to emit
    * @param payload Data to pass to handlers
    */

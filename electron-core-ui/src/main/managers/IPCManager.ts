@@ -119,7 +119,12 @@ export function setupIPC(resourcesPath?: string, appSettingsConfigPath?: string,
   // resolver uses above — packaged builds (`app.isPackaged`) get
   // `prod`; everything else (`pnpm dev`, electron-vite dev, CI) gets
   // `dev`.
-  initFeatureService(featuresDefaultPath, appFeaturesConfigPath, 'desktop', isDev ? 'dev' : 'prod')
+  initFeatureService({
+    defaultConfigPath: featuresDefaultPath,
+    appConfigPath: appFeaturesConfigPath,
+    platform: 'desktop',
+    environment: isDev ? 'dev' : 'prod'
+  })
 
   logger.info('✅ Services initialized successfully')
 

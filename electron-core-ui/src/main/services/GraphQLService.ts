@@ -50,7 +50,9 @@ class GraphQLService {
   initialize(config: GraphQLServiceConfig): void {
     if (this.isRunning) {
       logger.warn('[GraphQLService] Server already running, stopping first...')
-      this.stop()
+      // State flips synchronously inside stop(); the socket closes in the
+      // background, which is fine here (a fresh start() binds a new server).
+      void this.stop()
     }
 
     this.port = config.port ?? 4000
@@ -137,13 +139,19 @@ class GraphQLService {
   /**
    * Stop the GraphQL server
    */
-  stop(): void {
-    if (this.server) {
-      this.server.close()
-      this.server = null
-      this.isRunning = false
-      logger.info('[GraphQLService] Server stopped')
-    }
+  async stop(): Promise<void> {
+    const server = this.server
+    if (!server) return
+    // Flip state first so a concurrent initialize() sees us as stopped, then
+    // await the close callback so the listener is actually released before we
+    // resolve (a bare `server.close()` returns before the socket is freed,
+    // which can leave the port bound if the process exits immediately after).
+    this.server = null
+    this.isRunning = false
+    await new Promise<void>((resolve) => {
+      server.close(() => { resolve() })
+    })
+    logger.info('[GraphQLService] Server stopped')
   }
 
   /**
