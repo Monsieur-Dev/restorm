@@ -584,12 +584,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
     // entry from before the paste doesn't survive the replace.
     updateReactiveProperty(request, 'pathParams', [])
     if (parsed.body) {
-      // Two parallel `HTTPRequestBody` shapes coexist in the codebase
-      // (`shared/types/requestPrimitives` uses kebab-case `'form-data'`,
-      // `shared/models` uses camelCase `formData`). The view + reactive
-      // pipeline standardise on the kebab-case union, so cast the
-      // assignment to bridge the model side.
-      updateReactiveProperty(request, 'body', parsed.body as unknown as HTTPRequestBody)
+      updateReactiveProperty(request, 'body', parsed.body)
       const next = parsed.body
       if (next.type === 'text') {
         setBody(next.content)

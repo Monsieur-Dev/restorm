@@ -17,7 +17,7 @@ import {
   GRAPHQL_OPERATION_TYPES,
   GRPC_CALL_TYPES,
   WEBSOCKET_PROTOCOLS,
-  HTTP_BODY_TYPES
+  HTTP_BODY_TYPE_ENUM_NAMES
 } from '../../shared/models'
 
 import {
@@ -40,7 +40,10 @@ function registerEnums(): void {
   graphQLSchemaGenerator.registerEnum('GraphQLOperationType', [...GRAPHQL_OPERATION_TYPES])
   graphQLSchemaGenerator.registerEnum('GrpcCallType', [...GRPC_CALL_TYPES])
   graphQLSchemaGenerator.registerEnum('WebSocketProtocol', [...WEBSOCKET_PROTOCOLS])
-  graphQLSchemaGenerator.registerEnum('HTTPBodyType', [...HTTP_BODY_TYPES])
+  // The canonical body-type values are kebab-case (`form-data`), which
+  // are not valid GraphQL enum identifiers — register the SCREAMING_SNAKE
+  // member names that map 1:1 onto them.
+  graphQLSchemaGenerator.registerEnum('HTTPBodyType', [...HTTP_BODY_TYPE_ENUM_NAMES])
 }
 
 // =============================================================================

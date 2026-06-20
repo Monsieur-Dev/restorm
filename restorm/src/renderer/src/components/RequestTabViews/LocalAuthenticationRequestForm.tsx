@@ -83,10 +83,10 @@ const hintStyle: CSSProperties = { fontSize: 11, color: 'var(--descriptionForegr
 const configInputWrapperStyle: CSSProperties = { maxWidth: 360 }
 
 function readBodyMode(request: AuthenticationRequest): BodyMode {
-  const raw = (request.body?.type ?? 'text') as string
-  if (raw === 'form-data' || raw === 'formData') return 'form-data'
-  if (raw === 'x-www-form-urlencoded' || raw === 'xWwwFormUrlEncoded') return 'x-www-form-urlencoded'
-  if (raw === 'file') return 'file'
+  const type = request.body?.type ?? 'text'
+  if (type === 'form-data') return 'form-data'
+  if (type === 'x-www-form-urlencoded') return 'x-www-form-urlencoded'
+  if (type === 'file') return 'file'
   return 'text'
 }
 

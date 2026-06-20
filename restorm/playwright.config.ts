@@ -164,6 +164,15 @@ const mcpLogsDisabledTestDir = defineBddConfig({
   outputDir: '.features-gen/mcp-logs-disabled'
 })
 
+const bodyTypeMigrationTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/body-type-migration/features/**/*.feature',
+  steps: [
+    'tests/e2e/bdd/body-type-migration/steps/**/*.ts',
+    'tests/e2e/bdd/body-type-migration/fixtures/body-type-migration.fixture.ts'
+  ],
+  outputDir: '.features-gen/body-type-migration'
+})
+
 /**
  * Playwright configuration for Electron E2E tests using playwright-bdd.
  * Each test group has its own project with a dedicated fixture.
@@ -322,6 +331,11 @@ export default defineConfig({
       name: 'mcp-logs-disabled',
       testDir: mcpLogsDisabledTestDir,
       timeout: 120 * 1000 // launches without --mcp; asserts the menu entry is disabled
+    },
+    {
+      name: 'body-type-migration',
+      testDir: bodyTypeMigrationTestDir,
+      timeout: 120 * 1000 // opens a fresh app + a legacy-spelling .restorm file
     },
     {
       // Headless CLI runner — a plain spec (no BDD/UI) that spawns the built app
