@@ -120,6 +120,7 @@ const tabMatchesItem = (tab: EditorTab, itemId: string): boolean => {
   // lives on `scenario`, not `request`/`folder`).
   return t.request?.id === itemId || t.folder?.id === itemId || t.scenario?.id === itemId
 }
+import { BrandIcon } from './components/common/BrandIcon'
 import { Onboarding } from './components/MainView/Workbench/Onboarding'
 import { RestormTitlebar } from './components/MainView/Titlebar/RestormTitlebar'
 import { StatusbarMcpIndicator } from './components/MainView/StatusbarMcpIndicator'
@@ -2836,7 +2837,19 @@ const App: React.FC = () => {
             onSizesChange={handleSizesChange}
             emptyFallback={
               <WelcomeScreen
-                name="Restorm"
+                name="estorm"
+                accessibleName="Restorm"
+                namePrefix={
+                  <BrandIcon
+                    variant="no-contour"
+                    style={{
+                      fontSize: '1em',
+                      lineHeight: 1,
+                      verticalAlign: 'baseline',
+                      display: 'inline-block'
+                    }}
+                  />
+                }
                 ariaLabel={t('welcome.landmarkLabel')}
                 onOpenFile={(path) => { void window.restorm?.file.openPath(path) }}
                 confirmRemoveFavorite={(fileName) => window.confirm(t('welcome.confirmRemoveFavorite', { fileName }))}

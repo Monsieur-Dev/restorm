@@ -1,0 +1,22 @@
+@font-face {
+    font-family: "restorm-brand";
+    src: url("./restorm-brand.woff2?d2fdc4fda2f38ddb6534fb82a2dd4933") format("woff2");
+}
+
+i[class^="restorm-brand-"]:before, i[class*=" restorm-brand-"]:before {
+    font-family: restorm-brand !important;
+    font-style: normal;
+    font-weight: normal !important;
+    font-variant: normal;
+    text-transform: none;
+    line-height: 1;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+.restorm-brand-restorm-logo-no-contour:before {
+    content: "\f101";
+}
+.restorm-brand-restorm-logo-contour:before {
+    content: "\f102";
+}

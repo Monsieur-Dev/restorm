@@ -14,6 +14,24 @@ export interface WelcomeScreenProps {
    */
   name: string
   /**
+   * Optional node rendered before the animated wordmark inside the `<h1>`.
+   * Use this to prepend a logo glyph (e.g. a `BrandIcon`) so the first
+   * character of `name` can be omitted in favour of the richer glyph.
+   * When `namePrefix` is supplied, pass `name` as the visible suffix only
+   * (e.g. `"estorm"`) and set `accessibleName` to the full brand string
+   * (e.g. `"Restorm"`) so screen readers announce the complete name.
+   * Size and baseline alignment are left to the caller via inline style
+   * or a wrapping element.
+   */
+  namePrefix?: React.ReactNode
+  /**
+   * Overrides the visually-hidden text inside the `<h1>` that screen readers
+   * announce for the wordmark heading. Useful when `name` is a visual suffix
+   * (e.g. `"estorm"`) and the full brand name (e.g. `"Restorm"`) should still
+   * be announced. Defaults to `name` when not provided.
+   */
+  accessibleName?: string
+  /**
    * Action buttons rendered as a centered, vertically-stacked column.
    * Typically two or three `<Button appearance="rainbow" size="xl">`
    * (New / Open / Import, etc.) — the screen doesn't impose a count
@@ -64,6 +82,8 @@ export interface WelcomeScreenProps {
  */
 export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
   name,
+  namePrefix,
+  accessibleName,
   children,
   onOpenFile,
   confirmRemoveFavorite,
@@ -90,16 +110,20 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
       <Wallpaper pattern={wallpaperPattern} />
       <header className="ecu-welcome-screen-header">
         <h1 className="ecu-welcome-screen-wordmark-heading">
-          <span className="ecu-welcome-screen-wordmark-visually-hidden">{name}</span>
-          <Wordmark
-            effect={wordmarkEffect}
-            loop
-            startDelay={wordmarkStartDelay}
-            className="ecu-welcome-screen-wordmark"
-            aria-hidden="true"
-          >
-            {name}
-          </Wordmark>
+          <span className="ecu-welcome-screen-wordmark-visually-hidden">{accessibleName ?? name}</span>
+          <span className="ecu-welcome-screen-wordmark-row" aria-hidden="true">
+            {namePrefix != null && (
+              <span className="ecu-welcome-screen-wordmark-prefix">{namePrefix}</span>
+            )}
+            <Wordmark
+              effect={wordmarkEffect}
+              loop
+              startDelay={wordmarkStartDelay}
+              className="ecu-welcome-screen-wordmark"
+            >
+              {name}
+            </Wordmark>
+          </span>
         </h1>
         <div className="ecu-welcome-screen-rule" aria-hidden="true" />
       </header>
