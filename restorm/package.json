@@ -13,6 +13,10 @@
     "node": ">=20"
   },
   "scripts": {
+    "generate-icons": "node scripts/generate-icons.mjs",
+    "prebuild": "node scripts/generate-icons.mjs",
+    "predist": "node scripts/generate-icons.mjs",
+    "prepackage": "node scripts/generate-icons.mjs",
     "dev": "cross-env ELECTRON_DISABLE_SANDBOX=1 electron-vite dev",
     "dev:petstore": "cross-env ELECTRON_DISABLE_SANDBOX=1 electron-vite dev -- --open tests/e2e/samples/Petstore.restorm",
     "dev:web": "vite --config vite.web.config.ts",
@@ -102,6 +106,7 @@
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.11.3",
+    "@img/sharp-linux-x64": "^0.35.2",
     "@playwright/test": "^1.60.0",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
@@ -136,6 +141,8 @@
     "nyc": "^18.0.0",
     "playwright": "^1.60.0",
     "playwright-bdd": "^8.5.1",
+    "png-to-ico": "^3.0.1",
+    "sharp": "^0.35.2",
     "typescript": "^6.0.3",
     "typescript-eslint": "~8.58.1",
     "vite": "^7.3.2",
