@@ -263,7 +263,7 @@ export const useRestormStore = create<RestormState>()(
       // (no debounce) so it can't reorder against an mcp import's direct
       // main-store write. Fire-and-forget — the handler is idempotent and
       // the renderer doesn't gate on the round-trip.
-      const api = (window as unknown as { restorm?: { apiUpdate?: { syncCollections?: (c: unknown[]) => Promise<void> } } }).restorm?.apiUpdate
+      const api = window.restorm?.apiUpdate
       if (api?.syncCollections) {
         // `cloneForEventBus` (not JSON round-trip) so SecretValue.toJSON()
         // isn't called — main needs the plaintext to resolve handlebars +

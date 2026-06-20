@@ -32,7 +32,7 @@ interface ApiUpdateApi {
 }
 
 function getApiUpdateApi(): ApiUpdateApi | null {
-  const api = (window as unknown as { restorm?: { apiUpdate?: ApiUpdateApi } }).restorm?.apiUpdate
+  const api = window.restorm?.apiUpdate
   return api ?? null
 }
 

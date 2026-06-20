@@ -327,10 +327,7 @@ export function useNavigation(options: UseNavigationOptions): UseNavigationRetur
     }
 
     // Conditionally sync sidebar selection based on user setting
-    const settingsApi = (window as unknown as { api?: { settings?: { get: (k: string) => Promise<unknown> } } }).api?.settings
-    const settingsPromise = settingsApi
-      ? settingsApi.get('behavior:syncSidebarWithTabs')
-      : Promise.resolve(true)
+    const settingsPromise = window.api.settings.get('behavior:syncSidebarWithTabs')
 
     // Always expand ancestor folders so the selected item is visible in the sidebar
     if (itemId) {
@@ -351,7 +348,7 @@ export function useNavigation(options: UseNavigationOptions): UseNavigationRetur
 
     // Conditionally sync sidebar selection highlight based on user setting
     void settingsPromise.then((stored) => {
-      const syncEnabled = stored !== null && stored !== undefined ? (stored as boolean) : true
+      const syncEnabled = stored !== null ? (stored as boolean) : true
       if (syncEnabled && itemId) {
         setSelectedItemId(itemId)
       }

@@ -32,8 +32,7 @@ import {
   type MiniBrowserBridgeApi,
   type ConsoleFeedSource,
   type McpLogsSource,
-  type McpLogsLabels,
-  type McpLogEntry
+  type McpLogsLabels
 } from 'electron-core-ui/renderer'
 import { PROJECT_UUID_KEY } from '../../shared/config/projectUuid'
 import { preloadRequestPanelStates, removeRequestPanelState } from './services/requestPanelStateStore'
@@ -212,28 +211,18 @@ import type { ApiDocumentation } from '../../shared/types/apiDocumentation'
 // Wire the ECUI Console feed to restorm's firewall IPC channel. The
 // store subscribes lazily on the first `useConsoleFeed` consumer, so
 // registering at module-eval time (preload has already run) is safe.
-// `window.api.firewall` is exposed by the preload but not declared on
-// `window.api`'s type — cast through the known shape.
-const firewallFeed = (window as unknown as { api?: { firewall?: ConsoleFeedSource } }).api?.firewall
+const firewallFeed = window.api.firewall as ConsoleFeedSource | undefined
 if (firewallFeed) registerConsoleFeedSource(firewallFeed)
 
 // Wire the ECUI MCP-logs viewer to restorm's runtime IPC. The viewer pulls
 // the served-call buffer on demand (`getMcpLogs`) and refreshes on
 // `onMcpLogsChanged`; `clearMcpLogs` is optional and gates the Clear button.
-const mcpLogsRuntime = (window as unknown as {
-  restorm?: {
-    runtime?: {
-      getMcpLogs?: () => Promise<McpLogEntry[]>
-      onMcpLogsChanged?: (cb: () => void) => () => void
-      clearMcpLogs?: () => Promise<void>
-    }
-  }
-}).restorm?.runtime
-if (mcpLogsRuntime?.getMcpLogs && mcpLogsRuntime.onMcpLogsChanged) {
+const mcpLogsRuntime = window.restorm?.runtime
+if (mcpLogsRuntime) {
   const source: McpLogsSource = {
-    getLogs: mcpLogsRuntime.getMcpLogs,
+    getLogs: mcpLogsRuntime.getMcpLogs as McpLogsSource['getLogs'],
     onChange: mcpLogsRuntime.onMcpLogsChanged,
-    ...(mcpLogsRuntime.clearMcpLogs ? { clear: mcpLogsRuntime.clearMcpLogs } : {})
+    clear: mcpLogsRuntime.clearMcpLogs
   }
   registerMcpLogsSource(source)
 }
@@ -332,8 +321,7 @@ const App: React.FC = () => {
   // explicit signal (not the window's first paint) guarantees the user never
   // sees the loading screen behind the splash.
   useEffect(() => {
-    const electronAPI = (window as unknown as { electronAPI?: { notifyReady?: () => void } }).electronAPI
-    electronAPI?.notifyReady?.()
+    window.electronAPI?.notifyReady()
   }, [])
 
   // Surface a toast whenever the main process restores crash-recovery
@@ -2017,10 +2005,7 @@ const App: React.FC = () => {
       // (neither `before-quit` nor the window `close` handler calls
       // FileService.close()), so the record correctly survives a quit and is
       // available to the main process on the next launch.
-      const storageOnClose = (window as unknown as {
-        api?: { storage?: { delete: (k: string) => Promise<unknown> } }
-      }).api?.storage
-      void storageOnClose?.delete(REOPEN_LAST_FILE_STORAGE_KEY)
+      void window.api.storage.delete(REOPEN_LAST_FILE_STORAGE_KEY)
 
       // Close all open tabs for the currently opened file.
       requestAnimationFrame(() => {
@@ -2057,10 +2042,7 @@ const App: React.FC = () => {
   const [reopenLastFileSetting] = useSetting(REOPEN_LAST_FILE_SETTING_KEY)
   const prevReopenSettingRef = useRef<boolean | undefined>(undefined)
   useEffect(() => {
-    const storage = (window as unknown as {
-      api?: { storage?: { set: (k: string, v: unknown) => Promise<unknown>; delete: (k: string) => Promise<unknown> } }
-    }).api?.storage
-    if (!storage) return
+    const storage = window.api.storage
     const wasEnabled = prevReopenSettingRef.current
     prevReopenSettingRef.current = reopenLastFileSetting === true
     if (reopenLastFileSetting === true) {

@@ -453,18 +453,13 @@ interface GraphQLResult<T> {
   }[]
 }
 
-interface GraphQLApi {
-  query: (query: string, variables?: Record<string, unknown>) => Promise<unknown>
-}
-
 async function executeGraphQL<T>(
   query: string,
   variables?: Record<string, unknown>
 ): Promise<GraphQLResult<T>> {
-  const restormWindow = typeof window !== 'undefined'
-    ? (window as unknown as { restorm?: { graphqlApi?: GraphQLApi } })
+  const api = typeof window !== 'undefined'
+    ? window.restorm?.graphqlApi
     : undefined
-  const api = restormWindow?.restorm?.graphqlApi
   if (api) {
     return await api.query(query, variables) as GraphQLResult<T>
   }

@@ -201,12 +201,9 @@ export const ResponseHistoryTab: React.FC<ResponseHistoryTabProps> = ({
   // Read date format setting
   const [dateFormat, setDateFormat] = useState<'us' | 'iso'>('us')
   useEffect(() => {
-    const settingsApi = (window as unknown as { api?: { settings?: { get: (k: string) => Promise<unknown> } } }).api?.settings
-    if (settingsApi) {
-      void settingsApi.get('behavior:dateTimeFormat').then((value) => {
-        if (value === 'iso' || value === 'us') setDateFormat(value)
-      })
-    }
+    void window.api.settings.get('behavior:dateTimeFormat').then((value) => {
+      if (value === 'iso' || value === 'us') setDateFormat(value)
+    })
   }, [])
 
   const formatDate = useCallback((date: Date): string => {

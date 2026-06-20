@@ -3,15 +3,6 @@ import type { FolderItem } from '../../../shared/types/collections'
 import type { FirewallOrigin } from 'electron-core-ui/renderer'
 import { collectProjectOrigins } from '../../../shared/firewall/collectProjectOrigins'
 
-interface FirewallProjectApi {
-	setProjectOrigins: (origins: FirewallOrigin[]) => Promise<void>
-}
-
-function getFirewallApi(): FirewallProjectApi | null {
-	const api = (window as unknown as { api?: { firewall?: FirewallProjectApi } }).api?.firewall
-	return api ?? null
-}
-
 /**
  * Walk the project tree, collect every request's URL, resolve
  * any `{{var}}` references against the available environments,
@@ -33,8 +24,6 @@ function getFirewallApi(): FirewallProjectApi | null {
 export function useFirewallProjectOriginsSync(rootItems: FolderItem[]): void {
 	const origins = useMemo<FirewallOrigin[]>(() => collectProjectOrigins(rootItems), [rootItems])
 	useEffect(() => {
-		const api = getFirewallApi()
-		if (api === null) return
-		void api.setProjectOrigins(origins)
+		void window.api.firewall.setProjectOrigins(origins)
 	}, [origins])
 }
