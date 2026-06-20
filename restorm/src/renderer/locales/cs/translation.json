@@ -1378,7 +1378,8 @@
       "math": "Math",
       "dataFormats": "Data formats",
       "encoding": "Encoding",
-      "time": "Časování"
+      "time": "Časování",
+      "algorithmie": "Algorithmie"
     },
     "listOp": {
       "value": "list",
@@ -1599,6 +1600,9 @@
     },
     "grpc": {
       "message": "message"
+    },
+    "palette": {
+      "arrangeActions": "Re-arrange actions"
     }
   },
   "mqtt": {

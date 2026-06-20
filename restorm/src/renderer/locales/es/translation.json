@@ -1376,7 +1376,8 @@
       "math": "Math",
       "dataFormats": "Data formats",
       "encoding": "Encoding",
-      "time": "Temporización"
+      "time": "Temporización",
+      "algorithmie": "Algorithmie"
     },
     "listOp": {
       "value": "list",
@@ -1597,6 +1598,9 @@
     },
     "grpc": {
       "message": "message"
+    },
+    "palette": {
+      "arrangeActions": "Re-arrange actions"
     }
   },
   "mqtt": {

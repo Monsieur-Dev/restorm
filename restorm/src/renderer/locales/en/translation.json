@@ -1376,7 +1376,11 @@
       "math": "Math",
       "dataFormats": "Data formats",
       "encoding": "Encoding",
-      "time": "Timing"
+      "time": "Timing",
+      "algorithmie": "Algorithmie"
+    },
+    "palette": {
+      "arrangeActions": "Re-arrange actions"
     },
     "listOp": {
       "value": "list",
