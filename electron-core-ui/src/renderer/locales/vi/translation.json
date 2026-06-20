@@ -366,6 +366,9 @@
     "openConsole": "Mở bảng điều khiển",
     "consoleClear": "Xóa bảng điều khiển",
     "setTabMaximized": "Phóng to/khôi phục tab",
-    "listInstances": "Liệt kê các phiên bản MCP"
+    "listInstances": "Liệt kê các phiên bản MCP",
+    "listThemes": "Liệt kê các chủ đề có sẵn",
+    "getCurrentTheme": "Lấy chủ đề hiện tại",
+    "switchTheme": "Chuyển chủ đề đang hoạt động"
   }
 }

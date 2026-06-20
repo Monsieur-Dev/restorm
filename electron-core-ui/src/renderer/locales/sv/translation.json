@@ -366,6 +366,9 @@
     "openConsole": "Öppna konsolen",
     "consoleClear": "Rensa konsolen",
     "setTabMaximized": "Maximera/återställ fliken",
-    "listInstances": "Lista MCP-instanser"
+    "listInstances": "Lista MCP-instanser",
+    "listThemes": "Lista tillgängliga teman",
+    "getCurrentTheme": "Hämta aktuellt tema",
+    "switchTheme": "Byt aktivt tema"
   }
 }

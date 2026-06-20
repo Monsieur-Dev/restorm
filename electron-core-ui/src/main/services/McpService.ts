@@ -12,6 +12,8 @@ import { McpServer, ResourceTemplate } from '@modelcontextprotocol/sdk/server/mc
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js'
 import { z } from 'zod'
 import { logger } from './LoggerService'
+import { getThemeService } from './ThemeService'
+import { getStorageService } from './StorageService'
 import { MCP_SESSION_ROUTING_KEY, MCP_FORWARDED_HEADER, forwardToNamedSession, readAllLiveEntries, probeMcpEndpoint } from './mcpDiscovery'
 import {
   MINI_BROWSER_OPEN_CHANNEL,
@@ -2571,6 +2573,137 @@ export class McpService {
               null,
               2
             )
+          }]
+        }
+      }
+    )
+
+    this.registerTool(
+      'list_themes',
+      {
+        titleKey: 'mcpToolTitles.listThemes',
+        title: 'List available themes',
+        description:
+          'Return the list of color themes available in the app, each with its `id`, ' +
+          '`name` (display label), and `family` (`dark` | `light` | `hcDark` | `hcLight`). ' +
+          'Useful before calling `switch_theme` to discover valid theme ids. ' +
+          'Requires the host app to have initialised `ThemeService`.',
+        inputSchema: {} as Record<string, unknown>
+      },
+      () => {
+        let themeService: ReturnType<typeof getThemeService>
+        try {
+          themeService = getThemeService()
+        } catch {
+          return { content: [{ type: 'text', text: 'ThemeService is not initialised' }], isError: true }
+        }
+        const themes = themeService.listThemes().map(t => ({ id: t.id, name: t.name, family: t.type }))
+        return { content: [{ type: 'text', text: JSON.stringify({ themes }, null, 2) }] }
+      }
+    )
+
+    this.registerTool(
+      'get_current_theme',
+      {
+        titleKey: 'mcpToolTitles.getCurrentTheme',
+        title: 'Get the current theme',
+        description:
+          'Return the `id`, `name`, and `family` of the currently active color theme. ' +
+          'Reads the persisted selection from `StorageService` and resolves it against the ' +
+          'available themes from `ThemeService`. Returns an error when either service is ' +
+          'uninitialised or the stored id is unrecognised.',
+        inputSchema: {} as Record<string, unknown>
+      },
+      () => {
+        let themeService: ReturnType<typeof getThemeService>
+        try {
+          themeService = getThemeService()
+        } catch {
+          return { content: [{ type: 'text', text: 'ThemeService is not initialised' }], isError: true }
+        }
+        const currentId = getStorageService().get('currentTheme') as string | undefined
+        const themes = themeService.listThemes()
+        const current = themes.find(t => t.id === currentId)
+        if (!current) {
+          const fallback = themes.find(t => t.type === 'dark') ?? themes[0]
+          if (!fallback) {
+            return { content: [{ type: 'text', text: 'No themes are available' }], isError: true }
+          }
+          return {
+            content: [{
+              type: 'text',
+              text: JSON.stringify({ id: fallback.id, name: fallback.name, family: fallback.type }, null, 2)
+            }]
+          }
+        }
+        return {
+          content: [{
+            type: 'text',
+            text: JSON.stringify({ id: current.id, name: current.name, family: current.type }, null, 2)
+          }]
+        }
+      }
+    )
+
+    this.registerTool(
+      'switch_theme',
+      {
+        titleKey: 'mcpToolTitles.switchTheme',
+        title: 'Switch the active theme',
+        description:
+          'Change the app color theme to the one identified by `themeId`. The id must ' +
+          'match one of the values returned by `list_themes`. Persists the selection to ' +
+          '`StorageService` and broadcasts `theme:changed` to all renderer windows so the ' +
+          'new palette is applied live without a restart — the same path the UI uses. ' +
+          'Returns an error when `themeId` is unknown.',
+        inputSchema: {
+          themeId: z.string().min(1).describe('Id of the theme to activate — must match a value from `list_themes`.')
+        } as Record<string, unknown>
+      },
+      (args) => {
+        const themeId = typeof args['themeId'] === 'string' ? args['themeId'].trim() : ''
+        if (!themeId) {
+          return { content: [{ type: 'text', text: 'themeId is required' }], isError: true }
+        }
+
+        let themeService: ReturnType<typeof getThemeService>
+        try {
+          themeService = getThemeService()
+        } catch {
+          return { content: [{ type: 'text', text: 'ThemeService is not initialised' }], isError: true }
+        }
+
+        const themes = themeService.listThemes()
+        const target = themes.find(t => t.id === themeId)
+        if (!target) {
+          const available = themes.map(t => t.id).join(', ')
+          return {
+            content: [{ type: 'text', text: `Unknown theme id "${themeId}". Available ids: ${available}` }],
+            isError: true
+          }
+        }
+
+        const storageService = getStorageService()
+        const previous = storageService.get('currentTheme') as string | undefined
+        if (previous === themeId) {
+          logger.info('McpService switch_theme: already active, skipping broadcast', { themeId })
+          return {
+            content: [{
+              type: 'text',
+              text: JSON.stringify({ id: target.id, name: target.name, family: target.type, changed: false }, null, 2)
+            }]
+          }
+        }
+
+        storageService.set('currentTheme', themeId)
+        for (const win of BrowserWindow.getAllWindows()) {
+          if (!win.isDestroyed()) win.webContents.send('theme:changed', themeId)
+        }
+        logger.info('McpService switch_theme: theme changed and broadcasted', { themeId })
+        return {
+          content: [{
+            type: 'text',
+            text: JSON.stringify({ id: target.id, name: target.name, family: target.type, changed: true }, null, 2)
           }]
         }
       }

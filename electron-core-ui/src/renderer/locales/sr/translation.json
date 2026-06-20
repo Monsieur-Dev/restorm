@@ -366,6 +366,9 @@
     "openConsole": "Отвори конзолу",
     "consoleClear": "Очисти конзолу",
     "setTabMaximized": "Увећај/врати картицу",
-    "listInstances": "Листа MCP инстанци"
+    "listInstances": "Листа MCP инстанци",
+    "listThemes": "Листа доступних тема",
+    "getCurrentTheme": "Добави тренутну тему",
+    "switchTheme": "Промени активну тему"
   }
 }

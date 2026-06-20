@@ -366,6 +366,9 @@
     "openConsole": "Buka konsol",
     "consoleClear": "Bersihkan konsol",
     "setTabMaximized": "Maksimalkan/pulihkan tab",
-    "listInstances": "Daftar instans MCP"
+    "listInstances": "Daftar instans MCP",
+    "listThemes": "Daftar tema yang tersedia",
+    "getCurrentTheme": "Dapatkan tema saat ini",
+    "switchTheme": "Ganti tema aktif"
   }
 }

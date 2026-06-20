@@ -154,6 +154,9 @@ These ship with every `McpService` consumer (Restorm + the demo app). Documented
 | `devtools` | Open the renderer's devtools panel. |
 | `drag-drop` | Synthesise a full drag-and-drop sequence between two CSS selectors. |
 | `exit` | Quit Restorm — useful for end-of-test cleanup. |
+| `list_themes` | List all available color themes with their `id`, `name`, and `family` (`dark`/`light`/`hcDark`/`hcLight`). |
+| `get_current_theme` | Return the `id`, `name`, and `family` of the currently active color theme. |
+| `switch_theme` | Switch to a theme by `themeId`. Persists the choice and broadcasts it live to all windows. Returns an error for unknown ids. |
 
 These are intentionally generic. Restorm's domain tools layer above them, but the AI can drop down to these for ad-hoc work that the domain tools don't cover.
 

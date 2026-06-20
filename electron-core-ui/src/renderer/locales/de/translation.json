@@ -366,6 +366,9 @@
     "openConsole": "Konsole öffnen",
     "consoleClear": "Konsole leeren",
     "setTabMaximized": "Tab maximieren/wiederherstellen",
-    "listInstances": "MCP-Instanzen auflisten"
+    "listInstances": "MCP-Instanzen auflisten",
+    "listThemes": "Verfügbare Themes auflisten",
+    "getCurrentTheme": "Aktuelles Theme anzeigen",
+    "switchTheme": "Aktives Theme wechseln"
   }
 }

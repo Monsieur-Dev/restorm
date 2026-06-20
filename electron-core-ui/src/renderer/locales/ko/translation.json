@@ -366,6 +366,9 @@
     "openConsole": "콘솔 열기",
     "consoleClear": "콘솔 지우기",
     "setTabMaximized": "탭 최대화/복원",
-    "listInstances": "MCP 인스턴스 목록"
+    "listInstances": "MCP 인스턴스 목록",
+    "listThemes": "사용 가능한 테마 목록",
+    "getCurrentTheme": "현재 테마 가져오기",
+    "switchTheme": "활성 테마 전환"
   }
 }

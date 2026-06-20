@@ -366,6 +366,9 @@
     "openConsole": "開啟主控台",
     "consoleClear": "清除主控台",
     "setTabMaximized": "最大化/還原分頁",
-    "listInstances": "列出 MCP 執行個體"
+    "listInstances": "列出 MCP 執行個體",
+    "listThemes": "列出可用佈景主題",
+    "getCurrentTheme": "取得目前佈景主題",
+    "switchTheme": "切換活躍佈景主題"
   }
 }

@@ -366,6 +366,9 @@
     "openConsole": "Avaa konsoli",
     "consoleClear": "Tyhjennä konsoli",
     "setTabMaximized": "Suurenna/palauta välilehti",
-    "listInstances": "Listaa MCP-instanssit"
+    "listInstances": "Listaa MCP-instanssit",
+    "listThemes": "Luettele käytettävissä olevat teemat",
+    "getCurrentTheme": "Hae nykyinen teema",
+    "switchTheme": "Vaihda aktiivinen teema"
   }
 }

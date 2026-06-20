@@ -366,6 +366,9 @@
     "openConsole": "Konzol megnyitása",
     "consoleClear": "Konzol törlése",
     "setTabMaximized": "Lap teljes méret/visszaállítás",
-    "listInstances": "MCP-példányok listázása"
+    "listInstances": "MCP-példányok listázása",
+    "listThemes": "Elérhető témák listázása",
+    "getCurrentTheme": "Jelenlegi téma lekérése",
+    "switchTheme": "Aktív téma váltása"
   }
 }

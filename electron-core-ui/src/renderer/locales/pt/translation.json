@@ -366,6 +366,9 @@
     "openConsole": "Abrir a consola",
     "consoleClear": "Limpar a consola",
     "setTabMaximized": "Maximizar/restaurar o separador",
-    "listInstances": "Listar instâncias MCP"
+    "listInstances": "Listar instâncias MCP",
+    "listThemes": "Listar temas disponíveis",
+    "getCurrentTheme": "Obter tema atual",
+    "switchTheme": "Mudar o tema ativo"
   }
 }
