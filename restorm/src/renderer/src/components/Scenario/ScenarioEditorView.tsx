@@ -1849,38 +1849,33 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
     else addLinkedNode('httpRequest', wirePort, { requestId: newId })
   }, [onCreateChild, scenario.id, addLinkedNode])
 
-  // Drag/drop are attached as NATIVE DOM listeners on the wrapper (see the
-  // effect below), not React `onDrag*` props. The workbench group's own
-  // split-drop handlers are native listeners on an ANCESTOR placeholder, and
-  // React dispatches synthetic events only after the native event has already
-  // bubbled past that ancestor — so a React `stopPropagation` here would fire
-  // too late to stop the split. A native listener on the wrapper runs DURING
-  // native bubbling, before the event reaches the ancestor, so its
-  // `stopPropagation` actually claims the drop for the scenario (AC: dropping
-  // on a scenario adds to the graph and never splits the view).
-  const onDragOver = useCallback((event: DragEvent) => {
+  // Drag/drop are plain React `onDrag*` props on the wrapper. The tab
+  // content is `createPortal`'d with `EditorWorkbench` as its React parent,
+  // so React's synthetic drag events here bubble up the REACT tree to the
+  // workbench — NOT down the real DOM to the surrounding editor group's
+  // native split-drop listeners. That divergence is exactly what keeps the
+  // scenario's add-to-graph drop from ever triggering a split: the group's
+  // overlay/external-drop channel only fires for the workbench's native DOM
+  // listeners, which never see this synthetic drop. The workbench's
+  // `isWorkbenchExternalDrop` predicate ALSO bows out whenever the drag is
+  // over a scenario editor (it inspects `event.target`), so the overlay
+  // stays dark over the canvas. (A native listener + `stopPropagation` was
+  // tried and reverted — the React Flow pane owns the canvas drag events, so
+  // the scenario's native `drop` never fired and the add was silently lost.)
+  const onDragOver = useCallback((event: React.DragEvent) => {
     // Allow the drop only when the host can resolve dragged items.
     if (!resolveBoundItem) return
-    // The scenario surface OWNS sidebar-item drops (they add a node to the
-    // graph). Stop the event before it reaches the workbench's split-overlay
-    // listeners on the surrounding group, so a drag over a scenario never
-    // shows the split overlay — keeping the add-to-scenario behaviour.
-    event.stopPropagation()
     event.preventDefault()
     // Match the source's `effectAllowed` ('move', set by the ListView) — a
     // 'copy' dropEffect against a 'move'-only source makes the browser reject
     // the drop, so the `drop` event never fires.
-    if (event.dataTransfer) event.dataTransfer.dropEffect = 'move'
+    event.dataTransfer.dropEffect = 'move'
   }, [resolveBoundItem])
 
-  const onDrop = useCallback((event: DragEvent) => {
+  const onDrop = useCallback((event: React.DragEvent) => {
     if (lockedRef.current) return
     if (!resolveBoundItem) return
-    // Claim the drop for the scenario before it can bubble to the workbench
-    // split-drop handler — even for item kinds the scenario ignores below
-    // (folders / env-folders), so dropping one on a scenario never splits.
-    event.stopPropagation()
-    const itemId = event.dataTransfer?.getData('text/plain')
+    const itemId = event.dataTransfer.getData('text/plain')
     if (!itemId) return
     const item = resolveBoundItem(itemId)
     if (!item) return
@@ -1928,25 +1923,6 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
     const flow = screenToFlowPosition({ x: event.clientX, y: event.clientY })
     addNode(kind, flow, config)
   }, [resolveBoundItem, screenToFlowPosition, addNode])
-
-  // Attach the scenario drop/dragover as native DOM listeners on the wrapper
-  // (rationale on the handlers above): they must run during native bubbling,
-  // before the event reaches the workbench group's ancestor placeholder, so
-  // `stopPropagation` keeps the drop on the scenario instead of splitting.
-  useEffect(() => {
-    const el = wrapperRef.current
-    if (!el) return undefined
-    // `dragenter` is claimed too (same handler as dragover) so the workbench
-    // group's overlay never even flashes when a drag first enters a scenario.
-    el.addEventListener('dragenter', onDragOver)
-    el.addEventListener('dragover', onDragOver)
-    el.addEventListener('drop', onDrop)
-    return () => {
-      el.removeEventListener('dragenter', onDragOver)
-      el.removeEventListener('dragover', onDragOver)
-      el.removeEventListener('drop', onDrop)
-    }
-  }, [onDragOver, onDrop])
 
   // Delete a node + any edges touching it.
   const deleteNode = useCallback((nodeId: string) => {
@@ -2758,7 +2734,7 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
     <ScenarioEdgeSelectorContext.Provider value={edgeSelectorApi}>
     <ScenarioStaticPreviewContext.Provider value={staticPreviewApi}>
     <ScenarioErrorsContext.Provider value={nodeErrors}>
-    <div ref={wrapperRef} data-testid="scenario-editor" style={containerStyle}>
+    <div ref={wrapperRef} data-testid="scenario-editor" style={containerStyle} onDragOver={onDragOver} onDrop={onDrop}>
       {nodes.length === 0 && (
         <div data-testid="scenario-editor-empty" style={emptyStyle}>
           <div className="scn-empty-onboarding">

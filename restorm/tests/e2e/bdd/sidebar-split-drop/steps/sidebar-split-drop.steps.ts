@@ -152,7 +152,12 @@ When('I drag the sidebar request {string} onto the open tab {string} zone', asyn
 When('I drag the sidebar request {string} onto the open scenario surface', async ({}, name: string) => {
   const p = requirePage()
   const itemId = await itemIdForRow(p, name)
-  await dragSidebarItemToTarget(p, itemId, '[data-testid="scenario-editor"]', 0.5, 0.5)
+  // Drop on the React Flow PANE (a descendant of the scenario wrapper), not the
+  // wrapper itself: that mirrors the real gesture (the canvas is what's under
+  // the cursor) and is where a previous regression hid — a native-listener
+  // drop handler never fired over the pane, so the add was silently lost while
+  // the wrapper-targeted test stayed green. Dropping here keeps the test honest.
+  await dragSidebarItemToTarget(p, itemId, '[data-testid="scenario-editor"] .react-flow__pane', 0.5, 0.5)
 })
 
 Then('the workbench has {int} editor groups', async ({}, count: number) => {

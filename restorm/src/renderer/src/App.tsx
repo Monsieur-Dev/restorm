@@ -2551,13 +2551,26 @@ const App: React.FC = () => {
   // dragged item beside the drop target. `isWorkbenchExternalDrop` tells
   // the overlay which drags to react to (a ListView item drag that
   // resolves to a known tree item); `handleWorkbenchExternalDrop` opens
-  // the item at the released group + zone. The scenario surface
-  // intercepts its own drop first (stopPropagation), so this never fires
-  // for a drop on a scenario — that drop still adds the item to the graph.
+  // the item at the released group + zone.
+  //
+  // The scenario surface OWNS sidebar drops (it adds the item to the
+  // graph), so the workbench split channel must NOT engage over it: we
+  // return false whenever the drag is over a scenario editor. ECUI's
+  // group handlers bubble up the real DOM from the portalled tab content,
+  // so a drag over the scenario canvas reports `event.target` inside the
+  // scenario wrapper (`data-testid="scenario-editor"`); detecting that
+  // keeps the overlay dark there and lets the scenario's own React
+  // `onDrop` add the node. (Relying on the scenario calling
+  // `stopPropagation` on its native listeners proved fragile — the React
+  // Flow pane owns the canvas drag events, so the scenario's native drop
+  // never fired and the add was lost.)
   const isWorkbenchExternalDrop = useCallback((event: DragEvent): boolean => {
     const types = event.dataTransfer?.types
     if (!types) return false
-    return Array.from(types).includes(LIST_VIEW_DRAG_MIME)
+    if (!Array.from(types).includes(LIST_VIEW_DRAG_MIME)) return false
+    const target = event.target
+    if (target instanceof Element && target.closest('[data-testid="scenario-editor"]')) return false
+    return true
   }, [])
 
   const handleWorkbenchExternalDrop = useCallback((event: DragEvent, targetGroupId: string, direction: SplitDirection): void => {
