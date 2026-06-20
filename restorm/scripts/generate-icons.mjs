@@ -2,15 +2,23 @@
 /**
  * Brand icon generation script.
  *
- * Reads the source SVG from website/.brand/restorm.svg (located by walking up
- * from this package's root, or overridden with the BRAND_SVG env var) and
- * emits every raster variant the app needs:
+ * Reads the source SVG from build/brand/restorm.svg (vendored in-repo copy,
+ * always present) and emits every raster variant the app needs:
  *
  *   assets/icons/icon.png        — 1024 px, Linux window / taskbar icon
  *   assets/icons/icon.ico        — multi-size ICO (16/24/32/48/64/128/256)
  *   assets/icons/icon.icns       — macOS ICNS (16…1024 iconset)
  *   assets/imgs/logo.png         — 1024 px full-res splash/onboarding
  *   assets/imgs/logo_400.png     — 400 px splash/onboarding (renderer)
+ *
+ * SVG source resolution order (first match wins):
+ *   1. BRAND_SVG env var override
+ *   2. build/brand/restorm.svg — vendored in-repo copy (default; what CI uses)
+ *   3. website/.brand/restorm-master (walk-up / sibling) — optional local fallback
+ *
+ * If no SVG is found at all, the script warns and exits 0, keeping the
+ * committed icon artifacts intact — the build never fails due to a missing
+ * brand source.
  *
  * Usage (from the restorm/ package root):
  *   node scripts/generate-icons.mjs
@@ -44,15 +52,21 @@ const { default: pngToIco } = require('png-to-ico')
 const PKG_ROOT = resolve(__dirname, '..')
 
 /**
- * Locate website/.brand/restorm.svg by walking up from PKG_ROOT.
- * Covers both the normal checkout (restorm-master/restorm/) and the
- * worktree layout (restorm-wt/task-xxx/restorm/) where the brand assets
- * live in restorm-master/website/.brand/.
+ * Locate the brand SVG.
+ *
+ * Priority:
+ *   1. BRAND_SVG env override — explicit path from the caller
+ *   2. build/brand/restorm.svg — vendored in-repo copy (primary; what CI uses)
+ *   3. website/.brand/restorm.svg walk-up / sibling — optional local dev fallback
  */
 function findBrandSvg() {
   if (process.env.BRAND_SVG) return resolve(process.env.BRAND_SVG)
 
-  // Walk up looking for website/.brand/restorm.svg
+  // Primary: in-repo vendored copy — always present in a restorm checkout
+  const vendored = resolve(PKG_ROOT, 'build/brand/restorm.svg')
+  if (existsSync(vendored)) return vendored
+
+  // Optional dev fallback: website submodule walk-up
   let dir = PKG_ROOT
   for (let i = 0; i < 6; i++) {
     const candidate = resolve(dir, 'website/.brand/restorm.svg')
@@ -81,10 +95,9 @@ const IMGS_DIR = resolve(PKG_ROOT, 'assets/imgs')
 // ── Preflight ────────────────────────────────────────────────────────────────
 
 if (!SRC_SVG) {
-  console.error('ERROR: brand SVG not found.')
-  console.error('Searched for website/.brand/restorm.svg up to 6 directories above the package root.')
-  console.error('Override with: BRAND_SVG=/path/to/restorm.svg node scripts/generate-icons.mjs')
-  process.exit(1)
+  console.warn('WARNING: brand SVG not found — keeping committed icon artifacts unchanged.')
+  console.warn('To regenerate icons, update build/brand/restorm.svg or set BRAND_SVG=/path/to/restorm.svg')
+  process.exit(0)
 }
 
 console.log(`Source SVG: ${SRC_SVG}`)
@@ -192,7 +205,7 @@ async function main() {
   console.log(`  assets/imgs/logo.png         (${pngMap[1024].length} bytes — 1024 px splash/onboarding)`)
   console.log(`  assets/imgs/logo_400.png     (${pngMap[400].length} bytes — 400 px splash/onboarding)`)
   console.log()
-  console.log('Re-run this script whenever website/.brand/restorm.svg is updated.')
+  console.log('Re-run this script whenever build/brand/restorm.svg is updated (vendored in-repo copy).')
 }
 
 main().catch(err => {
