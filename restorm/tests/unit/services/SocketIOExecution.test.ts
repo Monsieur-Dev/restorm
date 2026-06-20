@@ -14,7 +14,10 @@ vi.mock('electron', () => ({
 }))
 
 vi.mock('electron-core-ui/main', () => ({
-  logger: { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn() }
+  logger: { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn() },
+  // The service wraps each user-initiated connect in this bypass; in the unit
+  // context it's a transparent passthrough that just runs the connect.
+  withFirewallBypassSync: <T>(fn: () => T): T => fn()
 }))
 
 // The execution service persists finished sessions to history; that pulls the

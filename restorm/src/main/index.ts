@@ -13,13 +13,15 @@ import './cli/earlyQuiet'
 // captured too.
 //
 // `installHardenInterceptor` (the deeper net.Socket / dns / dgram
-// patches + the lockdown) lives in electron-core-ui's firewall but is
-// NOT wired here: undici's path through `net.Socket.prototype.connect`
-// interacts poorly with the wrap (Duplex internals expect `this` to
-// carry a pre-initialised timer symbol that the patch reaches before
-// the Socket constructor finishes). Re-enable once the connect-args
-// shape is fully decoded for every undici signature variant — see
-// the `[harden]` follow-up ticket.
+// patches + the lockdown) extends Layer B beyond the http/https/fetch
+// chokepoints so the non-HTTP protocol clients (`ws`, `mqtt`,
+// `socket.io-client`) — which open raw sockets, not `http.request` —
+// are gated too. It runs immediately after the http interceptor, in
+// the same pre-import window, so the http/fetch slots are patched
+// before `lockdownPatchedGlobals()` freezes them and no dependency can
+// load a raw-socket consumer ahead of the patch. The unbound-`this`
+// connect wrap (`Reflect.get` + `original.call(this, …)`) restores the
+// per-instance socket so Node's Duplex timer internals stay intact.
 //
 // `configureFirewall` injects restorm's app-specific decisions into
 // the generic engine BEFORE the interceptor arms: the internal-bridge
@@ -32,7 +34,8 @@ import './cli/earlyQuiet'
 // loopback, tagged with `MCP_FORWARDED_HEADER`) — never user-facing
 // API traffic, so it must skip the firewall or `__session` routing
 // breaks and the bridging instance piles up "blocked" prompts.
-import { installMainProcessInterceptor, configureFirewall, MCP_FORWARDED_HEADER } from 'electron-core-ui'
+import { app as firewallApp } from 'electron'
+import { installMainProcessInterceptor, installHardenInterceptor, configureFirewall, MCP_FORWARDED_HEADER } from 'electron-core-ui'
 import { graphQLService as firewallGraphQLService } from 'electron-core-ui/main'
 configureFirewall({
   internalEndpointProvider: () => firewallGraphQLService.getEndpoint(),
@@ -41,6 +44,10 @@ configureFirewall({
     const v = process.env['RESTORM_USER_DATA_OVERRIDE']
     return typeof v === 'string' && v.length > 0
   })(),
+  // Dev-only: run the harden lockdown's interceptor-first ordering
+  // assertion (logs a warning if a slot it's about to freeze is no longer
+  // the firewall's own wrapper). Off in packaged builds.
+  devAssertOrdering: process.env['NODE_ENV'] === 'development' || !firewallApp.isPackaged,
   // The header key match is case-insensitive — Node lowercases outgoing
   // header names, but be defensive against a caller that set it raw.
   internalRequestPredicate: (args: unknown[]): boolean => {
@@ -56,6 +63,7 @@ configureFirewall({
   }
 })
 installMainProcessInterceptor()
+installHardenInterceptor()
 
 import { app, BrowserWindow, ipcMain, shell } from 'electron'
 import { randomBytes } from 'node:crypto'

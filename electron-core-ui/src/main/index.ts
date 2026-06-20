@@ -92,6 +92,7 @@ export {
   installWorkerPatcher,
   registerFirewallIpc,
   withFirewallBypass,
+  withFirewallBypassSync,
   isFirewallBypassed,
   configureFirewall,
   resetFirewallConfig

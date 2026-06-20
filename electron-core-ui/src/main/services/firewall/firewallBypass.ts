@@ -42,3 +42,19 @@ export function isFirewallBypassed(): boolean {
 export function withFirewallBypass<T>(fn: () => Promise<T>): Promise<T> {
   return bypassStorage.run(true, fn)
 }
+
+/**
+ * Synchronous counterpart of {@link withFirewallBypass}. Use it to wrap a
+ * synchronous outbound-connect expression whose socket is opened during the
+ * call itself — e.g. a protocol client's constructor (`new WebSocket(url)`,
+ * `io(url)`, `mqtt.connect(url)`) that synchronously starts the handshake /
+ * raw-socket connect. The bypass is in scope only for the synchronous body,
+ * which is exactly when the connect fires, so the interceptor short-circuits
+ * to `allow`. (The async {@link withFirewallBypass} is for request runners
+ * whose whole in-flight chain must inherit the bypass; a connect made after
+ * an `await` would have already left that scope, so wrap the connect call
+ * directly with this instead.)
+ */
+export function withFirewallBypassSync<T>(fn: () => T): T {
+  return bypassStorage.run(true, fn)
+}

@@ -1,6 +1,6 @@
 // @vitest-environment node
 import { describe, it, expect } from 'vitest'
-import { withFirewallBypass, isFirewallBypassed } from './firewallBypass'
+import { withFirewallBypass, withFirewallBypassSync, isFirewallBypassed } from './firewallBypass'
 
 describe('firewallBypass', () => {
   it('is not bypassed by default', () => {
@@ -71,5 +71,50 @@ describe('firewallBypass', () => {
     bypassOpen()
     await held
     expect(observed).toEqual([false, false])
+  })
+
+  describe('withFirewallBypassSync', () => {
+    it('bypasses inside the synchronous body, returns its value, and unwinds after', () => {
+      expect(isFirewallBypassed()).toBe(false)
+      const result = withFirewallBypassSync(() => {
+        expect(isFirewallBypassed()).toBe(true)
+        return 42
+      })
+      expect(result).toBe(42)
+      expect(isFirewallBypassed()).toBe(false)
+    })
+
+    it('unwinds even when the body throws', () => {
+      expect(() => withFirewallBypassSync(() => { throw new Error('boom') })).toThrow('boom')
+      expect(isFirewallBypassed()).toBe(false)
+    })
+
+    it('propagates the bypass into an async resource created during the sync body', async () => {
+      // This is the property the protocol-connect wrap relies on: a client
+      // that defers its socket connect to a timer/microtask SCHEDULED during
+      // the synchronous `new WebSocket()` / `io()` / `mqtt.connect()` call
+      // still runs that connect inside the bypassed context (AsyncLocalStorage
+      // carries the store into resources created within `run`).
+      let observed: boolean | undefined
+      const settled = new Promise<void>((resolve) => {
+        withFirewallBypassSync(() => {
+          setTimeout(() => { observed = isFirewallBypassed(); resolve() }, 0)
+        })
+      })
+      await settled
+      expect(observed).toBe(true)
+    })
+
+    it('does NOT leak the bypass to a task rooted outside the sync body', async () => {
+      // A timer scheduled BEFORE entering the bypass belongs to its own
+      // context — the sync bypass must not retroactively capture it.
+      let observed: boolean | undefined
+      const outsider = new Promise<void>((resolve) => {
+        setTimeout(() => { observed = isFirewallBypassed(); resolve() }, 0)
+      })
+      withFirewallBypassSync(() => undefined)
+      await outsider
+      expect(observed).toBe(false)
+    })
   })
 })
