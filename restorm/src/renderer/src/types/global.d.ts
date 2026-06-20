@@ -1,6 +1,7 @@
 import type { ThemeInfo, ThemeDefinition, ThemeVariables } from 'electron-core-ui/types'
 import type { SettingValue, ResolvedSetting, SettingsGroup } from 'electron-core-ui/types'
 import type { PersistenceFormat } from 'electron-core-ui/main'
+import type { ResponseHistoryDetail, ResponseHistoryEntry } from '../../../shared/types/collections'
 
 declare global {
   interface Window {
@@ -16,6 +17,11 @@ declare global {
       }
       logger: {
         log: (level: string, message: string, meta?: Record<string, unknown>) => Promise<void>
+      }
+      storage: {
+        get: (key: string) => Promise<unknown>
+        set: (key: string, value: unknown) => Promise<boolean>
+        delete: (key: string) => Promise<boolean>
       }
       minimizeWindow: () => Promise<void>
       maximizeWindow: () => Promise<void>
@@ -49,12 +55,33 @@ declare global {
       file: {
         onAutoSaveTrigger: (callback: () => void) => () => void
       }
+      firewall: {
+        onRecord: (cb: (record: unknown) => void) => () => void
+        listWhitelist: () => Promise<unknown[]>
+        addToWhitelist: (origin: unknown) => Promise<void>
+        removeFromWhitelist: (origin: unknown) => Promise<void>
+        listBlacklist: () => Promise<unknown[]>
+        addToBlacklist: (origin: unknown) => Promise<void>
+        removeFromBlacklist: (origin: unknown) => Promise<void>
+        setProjectOrigins: (origins: unknown[]) => Promise<void>
+        onPromptShow: (cb: (payload: unknown) => void) => () => void
+        resolvePrompt: (promptId: string, verdict: 'allow' | 'deny') => Promise<void>
+      }
+    }
+    // Mirrors the preload's createElectronAPI() surface. Keep in sync with
+    // electron-core-ui/src/preload/electronAPI.ts.
+    electronAPI?: {
+      onPlatform: (callback: (platform: string) => void) => () => void
+      onWindowState: (callback: (state: string) => void) => () => void
+      sendAction: (action: string) => void
+      onKeyboardShortcut: (callback: (shortcut: string) => void) => () => void
+      registerInterceptedShortcuts: (shortcuts: string[]) => void
+      isDevMode: () => Promise<boolean>
+      notifyReady: () => void
     }
     restorm?: {
       openEditor: (file?: { title: string; content?: string; x?: number; y?: number }) => Promise<void>
       getEditorFile: () => Promise<{ title: string; content?: string } | undefined>
-      forceClose: () => Promise<void>
-      onSaveAndClose: (callback: () => void) => (() => void)
       file: {
         saveAsFile: (data: unknown, format: PersistenceFormat) => Promise<SaveResult>
         saveAsFolder: (data: unknown, format: PersistenceFormat, targetPath?: string) => Promise<SaveResult>
@@ -70,6 +97,11 @@ declare global {
         invalidate: (args: { source: string; params: Record<string, unknown>; scopeId?: string }) => Promise<{ success: boolean }>
         resolve: (args: { source: string; params: Record<string, unknown> }) => Promise<{ value?: string; error?: string }>
         refresh: (args: { source: string; params: Record<string, unknown> }) => Promise<{ success: boolean }>
+      }
+      forceClose: () => Promise<void>
+      onSaveAndClose: (callback: () => void) => (() => void)
+      request: {
+        resolveURL: (input: unknown) => Promise<unknown>
       }
       context: {
         getAllTransformResults: () => Promise<Record<string, VariableTransformResult>>
@@ -128,6 +160,9 @@ declare global {
         cancel: (requestId: string) => Promise<boolean>
         isActive: (requestId: string) => Promise<boolean>
         onProgress: (callback: (data: RequestProgressData) => void) => (() => void)
+      }
+      graphqlApi: {
+        query: (query: string, variables?: Record<string, unknown>) => Promise<unknown>
       }
       soap: {
         execute: (input: SOAPExecutionInput) => Promise<SOAPExecutionResult>
@@ -199,6 +234,11 @@ declare global {
           error?: string
         }>
       }
+      responsesHistory: {
+        list: (requestId: string) => Promise<ResponseHistoryEntry[]>
+        get: (guid: string) => Promise<ResponseHistoryDetail | null>
+        togglePin: (guid: string, pinned: boolean) => Promise<boolean>
+      }
       requestUsage: {
         get: () => Promise<Record<string, { count: number; lastSentAt: string; history: string[] }>>
         onChanged: (
@@ -211,8 +251,8 @@ declare global {
           callback: (map: Record<string, { count: number; lastRunAt: string; history: string[] }>) => void
         ) => () => void
       }
-      // API-update / refresh pipeline (mirrors the preload `apiUpdate`
-      // surface). Keep in sync with src/main/preload/index.ts.
+      // API-update / refresh pipeline (mirrors the preload `apiUpdate` surface).
+      // Keep in sync with src/main/preload/index.ts.
       apiUpdate: {
         setSettings: (folderId: string, config: unknown) => Promise<void>
         apply: (folderId: string, selection?: { include: string[]; skip: string[] }) => Promise<{ updatedFolder: unknown }>
@@ -222,6 +262,60 @@ declare global {
         >
         syncCollections: (collections: unknown[]) => Promise<void>
         updateFolderCustomValueLists: (folderId: string, lists: unknown[]) => Promise<void>
+      }
+      runtime: {
+        getConfig: () => Promise<{
+          mcp: { enabled: boolean; port: number | null; sessionName: string }
+          graphql: { endpoint: string }
+        }>
+        onMcpRequestReceived: (callback: () => void) => () => void
+        getMcpLogs: () => Promise<unknown[]>
+        onMcpLogsChanged: (callback: () => void) => () => void
+        clearMcpLogs: () => Promise<void>
+        pushMcpActiveTab: (payload: { tabId: string | null; itemId: string | null; kind: 'request' | 'folder' | 'env-folder' | 'scenario' | null }) => void
+        pushMcpActiveEnv: (payload: { envFolderId: string; envId: string | null }) => void
+        pushMcpFavorites: (payload: { projectUuid: string | null; favorites: { id: string; name: string; type: string }[] }) => void
+        pushScenarioLayout: (payload: { scenarioId: string; rects: Record<string, { x: number; y: number; width: number; height: number }> }) => void
+        runScenarioNode: (scenarioId: string, nodeId: string) => Promise<unknown>
+        cancelScenarioNode: (scenarioId: string, nodeId: string) => Promise<{ cancelled: boolean; reason?: string }>
+        getScenarioNodeResult: (scenarioId: string, nodeId: string) => Promise<Record<string, unknown> | null>
+        scenarioEngineStart: (scenarioId: string, params?: Record<string, unknown>, startPaused?: boolean, breakpoints?: string[], debug?: boolean) => Promise<{ runId: string }>
+        scenarioEnginePause: (runId: string) => Promise<{ ok: boolean }>
+        scenarioEngineResume: (runId: string) => Promise<{ ok: boolean }>
+        scenarioEngineStep: (runId: string) => Promise<{ ok: boolean }>
+        scenarioEngineSetDebug: (runId: string, enabled: boolean) => Promise<{ ok: boolean }>
+        scenarioEngineSetBreakpoints: (runId: string, ids: string[]) => Promise<{ ok: boolean }>
+        scenarioEngineAbort: (runId: string, reason?: string) => Promise<{ ok: boolean }>
+        scenarioEngineReadLog: (runId: string) => Promise<unknown[]>
+        scenarioEngineRunTree: (runId: string) => Promise<unknown[]>
+        scenarioEngineResolveUserInput: (runId: string, requestId: string, value: unknown) => Promise<{ ok: boolean }>
+        scenarioEngineCancelUserInput: (runId: string, requestId: string) => Promise<{ ok: boolean }>
+        scenarioRunHistoryList: (scenarioId: string) => Promise<unknown[]>
+        scenarioRunHistoryDetail: (guid: string) => Promise<unknown>
+        scenarioRunHistoryTogglePin: (guid: string, pinned: boolean) => Promise<boolean>
+        onScenarioEngineEvent: (cb: (event: unknown) => void) => () => void
+        pushMcpActiveStateBootstrap: (payload: {
+          tab: { tabId: string | null; itemId: string | null; kind: 'request' | 'folder' | 'env-folder' | 'scenario' | null }
+          envByFolder: Record<string, string | null>
+        }) => void
+        onMcpOpenTab: (callback: (payload: { itemId: string; kind: 'request' | 'folder' | 'env-folder' | 'scenario' }) => void) => () => void
+        onMcpRevealInTree: (callback: (payload: { itemId: string; kind: 'request' | 'folder' | 'env-folder' | 'scenario' }) => void) => () => void
+        onMcpTreeReplace: (callback: (payload: unknown) => void) => () => void
+        onMcpCloseTab: (callback: (payload: { itemId: string; kind: 'request' | 'folder' | 'env-folder' | 'scenario' }) => void) => () => void
+        onMcpRunRequest: (callback: (payload: { itemId: string }) => void) => () => void
+        onMcpRequestUpdated: (callback: (payload: { itemId: string; patch: Record<string, unknown> }) => void) => () => void
+        onMcpScenarioUpdated: (callback: (payload: { scenarioId: string; nodes: unknown[]; edges: unknown[]; name?: string; params?: unknown[] }) => void) => () => void
+        onMcpFolderUpdated: (callback: (payload: { itemId: string; patch: Record<string, unknown> }) => void) => () => void
+        onMcpSetFavorite: (callback: (payload: { itemId: string; favorite: boolean | null }) => void) => () => void
+        onMcpOpenMiniBrowser: (callback: (payload: { url?: string }) => void) => () => void
+        onMcpMiniBrowserExecute: (callback: (payload: { requestId: string; code: string }) => void) => () => void
+        replyMiniBrowserExecute: (payload: { requestId: string; result?: unknown; error?: string }) => void
+        onMcpOpenConsole: (callback: () => void) => () => void
+        onMcpConsoleClear: (callback: () => void) => () => void
+        onMcpOpenFirewall: (callback: () => void) => () => void
+        onMcpSetTabMaximized: (callback: (payload: { tabId: string | null; maximized: boolean }) => void) => () => void
+        pushWorkbenchLayout: (layout: unknown) => void
+        onMcpSetWorkbenchLayout: (callback: (layout: unknown) => void) => () => void
       }
     }
   }
@@ -300,7 +394,7 @@ export interface AvailableVariablesResult {
   sourceId?: string
 }
 
-/** HTTP execution input for backend */
+/** OData execution input */
 export interface ODataExecutionInput {
   requestId: string
   timeout?: number

@@ -28,7 +28,7 @@ interface StorageApi {
 }
 
 function getStorageApi(): StorageApi | undefined {
-  return (window as unknown as { api?: { storage?: StorageApi } }).api?.storage
+  return window.api.storage
 }
 
 function storageKey(projectUuid: string): string {

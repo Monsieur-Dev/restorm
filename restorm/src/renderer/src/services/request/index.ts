@@ -17,10 +17,7 @@ export function resolveRequestURL(input: URLResolutionInput): Promise<ResolvedUR
   if (!window.restorm) {
     throw new Error('[resolveRequestURL] window.restorm not available')
   }
-  const restorm = window.restorm as typeof window.restorm & {
-    request: { resolveURL: (input: URLResolutionInput) => Promise<ResolvedURLResult> }
-  }
-  return restorm.request.resolveURL(input)
+  return window.restorm.request.resolveURL(input) as Promise<ResolvedURLResult>
 }
 
 // Re-export types for convenience
