@@ -365,6 +365,7 @@
     "miniBrowserExecute": "Spustit kód v mini prohlížeči",
     "openConsole": "Otevřít konzoli",
     "consoleClear": "Vymazat konzoli",
-    "setTabMaximized": "Maximalizovat/obnovit kartu"
+    "setTabMaximized": "Maximalizovat/obnovit kartu",
+    "listInstances": "Vypsat instance MCP"
   }
 }

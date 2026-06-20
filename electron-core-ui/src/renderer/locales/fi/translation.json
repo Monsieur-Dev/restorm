@@ -365,6 +365,7 @@
     "miniBrowserExecute": "Suorita koodi miniselaimessa",
     "openConsole": "Avaa konsoli",
     "consoleClear": "Tyhjennä konsoli",
-    "setTabMaximized": "Suurenna/palauta välilehti"
+    "setTabMaximized": "Suurenna/palauta välilehti",
+    "listInstances": "Listaa MCP-instanssit"
   }
 }

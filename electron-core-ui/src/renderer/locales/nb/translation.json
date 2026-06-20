@@ -365,6 +365,7 @@
     "miniBrowserExecute": "Kjør kode i minileseren",
     "openConsole": "Åpne konsollen",
     "consoleClear": "Tøm konsollen",
-    "setTabMaximized": "Maksimer/gjenopprett fanen"
+    "setTabMaximized": "Maksimer/gjenopprett fanen",
+    "listInstances": "Liste MCP-instanser"
   }
 }

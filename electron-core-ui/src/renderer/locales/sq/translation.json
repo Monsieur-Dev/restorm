@@ -365,6 +365,7 @@
     "miniBrowserExecute": "Ekzekuto kod në mini shfletuesin",
     "openConsole": "Hap konsolën",
     "consoleClear": "Pastro konsolën",
-    "setTabMaximized": "Maksimizo/rikthe skedën"
+    "setTabMaximized": "Maksimizo/rikthe skedën",
+    "listInstances": "Listo instancat MCP"
   }
 }

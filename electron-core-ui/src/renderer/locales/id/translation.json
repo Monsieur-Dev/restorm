@@ -365,6 +365,7 @@
     "miniBrowserExecute": "Jalankan kode di peramban mini",
     "openConsole": "Buka konsol",
     "consoleClear": "Bersihkan konsol",
-    "setTabMaximized": "Maksimalkan/pulihkan tab"
+    "setTabMaximized": "Maksimalkan/pulihkan tab",
+    "listInstances": "Daftar instans MCP"
   }
 }

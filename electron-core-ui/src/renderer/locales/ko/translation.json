@@ -365,6 +365,7 @@
     "miniBrowserExecute": "미니 브라우저에서 코드 실행",
     "openConsole": "콘솔 열기",
     "consoleClear": "콘솔 지우기",
-    "setTabMaximized": "탭 최대화/복원"
+    "setTabMaximized": "탭 최대화/복원",
+    "listInstances": "MCP 인스턴스 목록"
   }
 }

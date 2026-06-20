@@ -12,7 +12,7 @@ import { McpServer, ResourceTemplate } from '@modelcontextprotocol/sdk/server/mc
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js'
 import { z } from 'zod'
 import { logger } from './LoggerService'
-import { MCP_SESSION_ROUTING_KEY, MCP_FORWARDED_HEADER, forwardToNamedSession } from './mcpDiscovery'
+import { MCP_SESSION_ROUTING_KEY, MCP_FORWARDED_HEADER, forwardToNamedSession, readAllLiveEntries, probeMcpEndpoint } from './mcpDiscovery'
 import {
   MINI_BROWSER_OPEN_CHANNEL,
   MINI_BROWSER_EXECUTE_CHANNEL,
@@ -2509,6 +2509,70 @@ export class McpService {
           if (!win.isDestroyed()) win.webContents.send(SET_TAB_MAXIMIZED_CHANNEL, payload)
         }
         return { content: [{ type: 'text', text: JSON.stringify(payload, null, 2) }] }
+      }
+    )
+
+    this.registerTool(
+      'list-instances',
+      {
+        titleKey: 'mcpToolTitles.listInstances',
+        title: 'List MCP instances',
+        description:
+          'Return every running instance of this app that has an active MCP endpoint, ' +
+          'including the project file each one has open (when any), its session name, ' +
+          'pid, and endpoint host:port. Only instances whose endpoint actually answers ' +
+          'an authenticated probe are reported — stale lockfiles from crashed runs are ' +
+          'silently skipped. Use `__session: "<name>"` on any subsequent tool call to ' +
+          'target a specific instance. Returns an empty list when no discovery directory ' +
+          'is configured or no live instances are found.'
+      },
+      async () => {
+        const dir = this.options.discoveryDir
+        if (!dir) {
+          return {
+            content: [{ type: 'text', text: JSON.stringify({ count: 0, instances: [] }, null, 2) }]
+          }
+        }
+
+        // Fast synchronous pass: read lockfiles + pid-alive filter.
+        // readAllLiveEntries returns full entries including the token so we
+        // can use it for the HTTP probe; token is never forwarded to the client.
+        const candidates = readAllLiveEntries(dir)
+
+        // Async pass: HTTP probe each surviving candidate. Run in parallel;
+        // bounded by the probe timeout (800 ms each).
+        const probeResults = await Promise.all(
+          candidates.map(async (c) => {
+            const alive = await probeMcpEndpoint(c.port, c.token)
+            return alive ? c : null
+          })
+        )
+
+        const live = probeResults.filter((c): c is NonNullable<typeof c> => c !== null)
+        // Sort newest-first so the most recently started instance is at the top.
+        live.sort((a, b) => (b.startedAt || '').localeCompare(a.startedAt || ''))
+
+        // Strip the bearer token before serialising — it is the auth secret
+        // for each instance's MCP endpoint and must not be exposed to callers.
+        return {
+          content: [{
+            type: 'text',
+            text: JSON.stringify(
+              {
+                count: live.length,
+                instances: live.map((c) => ({
+                  pid: c.pid,
+                  name: c.name,
+                  projectPath: c.projectPath,
+                  endpoint: `127.0.0.1:${String(c.port)}`,
+                  startedAt: c.startedAt
+                }))
+              },
+              null,
+              2
+            )
+          }]
+        }
       }
     )
   }

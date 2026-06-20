@@ -365,6 +365,7 @@
     "miniBrowserExecute": "Execută cod în mini browser",
     "openConsole": "Deschide consola",
     "consoleClear": "Golește consola",
-    "setTabMaximized": "Maximizează/restaurează fila"
+    "setTabMaximized": "Maximizează/restaurează fila",
+    "listInstances": "Listare instanțe MCP"
   }
 }

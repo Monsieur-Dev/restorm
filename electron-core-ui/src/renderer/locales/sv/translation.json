@@ -365,6 +365,7 @@
     "miniBrowserExecute": "Kör kod i minibläddraren",
     "openConsole": "Öppna konsolen",
     "consoleClear": "Rensa konsolen",
-    "setTabMaximized": "Maximera/återställ fliken"
+    "setTabMaximized": "Maximera/återställ fliken",
+    "listInstances": "Lista MCP-instanser"
   }
 }

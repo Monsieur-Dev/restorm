@@ -365,6 +365,7 @@
     "miniBrowserExecute": "Code im Mini-Browser ausführen",
     "openConsole": "Konsole öffnen",
     "consoleClear": "Konsole leeren",
-    "setTabMaximized": "Tab maximieren/wiederherstellen"
+    "setTabMaximized": "Tab maximieren/wiederherstellen",
+    "listInstances": "MCP-Instanzen auflisten"
   }
 }
