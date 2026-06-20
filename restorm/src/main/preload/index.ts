@@ -21,6 +21,18 @@ import {
   type FirewallPromptPayload,
   type RequestRecord
 } from '../../../../electron-core-ui/src/types/firewall'
+import {
+  httpExecuteResultSchema,
+  graphqlExecuteResultSchema,
+  soapExecuteResultSchema,
+  grpcExecuteResultSchema,
+  websocketConnectResultSchema,
+  authPrefetchResultSchema,
+  importPreviewResultSchema,
+  importImportResultSchema,
+  apiUpdateRefreshFetchResultSchema,
+} from '../ipc/schemas'
+import type { z } from 'zod/v4'
 
 // Expose core-ui APIs (imported from core-ui preload modules) and extend with restorm project API
 const coreUIAPI = createCoreUIAPI()
@@ -170,6 +182,24 @@ interface SaveResult {
   success: boolean
   path?: string
   error?: string
+}
+
+/**
+ * Defense-in-depth shape check for IPC output bridges.
+ * Failure is WARN-ONLY: a schema mismatch logs a warning through the
+ * main-process logger, never throws. The caller returns the raw value
+ * regardless, matching the `result as <Type>` pattern used throughout.
+ */
+function warnOnOutputMismatch(bridge: string, schema: z.ZodType, raw: unknown): void {
+  const check = schema.safeParse(raw)
+  if (!check.success) {
+    // Fire-and-forget — do not await so the hot path stays synchronous
+    void ipcRenderer.invoke('logger:log', {
+      level: 'warn',
+      message: `[preload] IPC output shape mismatch on "${bridge}"`,
+      meta: { issues: check.error.issues },
+    })
+  }
 }
 
 // Expose restorm-specific APIs
@@ -537,6 +567,7 @@ contextBridge.exposeInMainWorld('restorm', {
       requestHeaders?: Record<string, string>
     }> => {
       const result: unknown = await ipcRenderer.invoke('http:execute', input)
+      warnOnOutputMismatch('http:execute', httpExecuteResultSchema, result)
       return result as {
         requestId: string
         success: boolean
@@ -585,6 +616,7 @@ contextBridge.exposeInMainWorld('restorm', {
       requestUrl?: string
     }> => {
       const result: unknown = await ipcRenderer.invoke('graphql:execute', input)
+      warnOnOutputMismatch('graphql:execute', graphqlExecuteResultSchema, result)
       return result as {
         requestId: string
         success: boolean
@@ -638,6 +670,7 @@ contextBridge.exposeInMainWorld('restorm', {
       requestUrl?: string
     }> => {
       const result: unknown = await ipcRenderer.invoke('soap:execute', input)
+      warnOnOutputMismatch('soap:execute', soapExecuteResultSchema, result)
       return result as {
         requestId: string
         success: boolean
@@ -686,6 +719,7 @@ contextBridge.exposeInMainWorld('restorm', {
       requestMethod?: string
     }> => {
       const result: unknown = await ipcRenderer.invoke('grpc:execute', input)
+      warnOnOutputMismatch('grpc:execute', grpcExecuteResultSchema, result)
       return result as {
         requestId: string
         success: boolean
@@ -767,6 +801,7 @@ contextBridge.exposeInMainWorld('restorm', {
       requestUrl?: string
     }> => {
       const result: unknown = await ipcRenderer.invoke('odata:execute', input)
+      warnOnOutputMismatch('odata:execute', httpExecuteResultSchema, result)
       return result as {
         requestId: string
         success: boolean
@@ -813,6 +848,7 @@ contextBridge.exposeInMainWorld('restorm', {
       responseBody?: string
     }> => {
       const result: unknown = await ipcRenderer.invoke('auth:prefetch', input)
+      warnOnOutputMismatch('auth:prefetch', authPrefetchResultSchema, result)
       return result as {
         success: boolean
         statusCode: number
@@ -854,6 +890,7 @@ contextBridge.exposeInMainWorld('restorm', {
       requestUrl?: string
     }> => {
       const result: unknown = await ipcRenderer.invoke('websocket:connect', input)
+      warnOnOutputMismatch('websocket:connect', websocketConnectResultSchema, result)
       return result as {
         requestId: string
         success: boolean
@@ -1261,6 +1298,7 @@ contextBridge.exposeInMainWorld('restorm', {
       isAuthError?: boolean
     }> => {
       const result: unknown = await ipcRenderer.invoke('import:preview', input, options)
+      warnOnOutputMismatch('import:preview', importPreviewResultSchema, result)
       return result as {
         success: boolean
         items: unknown[]
@@ -1280,6 +1318,7 @@ contextBridge.exposeInMainWorld('restorm', {
       error?: string
     }> => {
       const result: unknown = await ipcRenderer.invoke('import:import', input)
+      warnOnOutputMismatch('import:import', importImportResultSchema, result)
       return result as {
         success: boolean
         items: unknown[]
@@ -1317,6 +1356,7 @@ contextBridge.exposeInMainWorld('restorm', {
       | { ok: false; error: string }
     > => {
       const result: unknown = await ipcRenderer.invoke('apiUpdate:refresh-fetch', folderId)
+      warnOnOutputMismatch('apiUpdate:refresh-fetch', apiUpdateRefreshFetchResultSchema, result)
       return result as
         | { ok: true; checksum: string; payload: string; items: unknown[]; format: string | null }
         | { ok: false; error: string }
