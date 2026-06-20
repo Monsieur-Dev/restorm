@@ -1849,20 +1849,38 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
     else addLinkedNode('httpRequest', wirePort, { requestId: newId })
   }, [onCreateChild, scenario.id, addLinkedNode])
 
-  const onDragOver = useCallback((event: React.DragEvent) => {
+  // Drag/drop are attached as NATIVE DOM listeners on the wrapper (see the
+  // effect below), not React `onDrag*` props. The workbench group's own
+  // split-drop handlers are native listeners on an ANCESTOR placeholder, and
+  // React dispatches synthetic events only after the native event has already
+  // bubbled past that ancestor — so a React `stopPropagation` here would fire
+  // too late to stop the split. A native listener on the wrapper runs DURING
+  // native bubbling, before the event reaches the ancestor, so its
+  // `stopPropagation` actually claims the drop for the scenario (AC: dropping
+  // on a scenario adds to the graph and never splits the view).
+  const onDragOver = useCallback((event: DragEvent) => {
     // Allow the drop only when the host can resolve dragged items.
     if (!resolveBoundItem) return
+    // The scenario surface OWNS sidebar-item drops (they add a node to the
+    // graph). Stop the event before it reaches the workbench's split-overlay
+    // listeners on the surrounding group, so a drag over a scenario never
+    // shows the split overlay — keeping the add-to-scenario behaviour.
+    event.stopPropagation()
     event.preventDefault()
     // Match the source's `effectAllowed` ('move', set by the ListView) — a
     // 'copy' dropEffect against a 'move'-only source makes the browser reject
     // the drop, so the `drop` event never fires.
-    event.dataTransfer.dropEffect = 'move'
+    if (event.dataTransfer) event.dataTransfer.dropEffect = 'move'
   }, [resolveBoundItem])
 
-  const onDrop = useCallback((event: React.DragEvent) => {
+  const onDrop = useCallback((event: DragEvent) => {
     if (lockedRef.current) return
     if (!resolveBoundItem) return
-    const itemId = event.dataTransfer.getData('text/plain')
+    // Claim the drop for the scenario before it can bubble to the workbench
+    // split-drop handler — even for item kinds the scenario ignores below
+    // (folders / env-folders), so dropping one on a scenario never splits.
+    event.stopPropagation()
+    const itemId = event.dataTransfer?.getData('text/plain')
     if (!itemId) return
     const item = resolveBoundItem(itemId)
     if (!item) return
@@ -1910,6 +1928,25 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
     const flow = screenToFlowPosition({ x: event.clientX, y: event.clientY })
     addNode(kind, flow, config)
   }, [resolveBoundItem, screenToFlowPosition, addNode])
+
+  // Attach the scenario drop/dragover as native DOM listeners on the wrapper
+  // (rationale on the handlers above): they must run during native bubbling,
+  // before the event reaches the workbench group's ancestor placeholder, so
+  // `stopPropagation` keeps the drop on the scenario instead of splitting.
+  useEffect(() => {
+    const el = wrapperRef.current
+    if (!el) return undefined
+    // `dragenter` is claimed too (same handler as dragover) so the workbench
+    // group's overlay never even flashes when a drag first enters a scenario.
+    el.addEventListener('dragenter', onDragOver)
+    el.addEventListener('dragover', onDragOver)
+    el.addEventListener('drop', onDrop)
+    return () => {
+      el.removeEventListener('dragenter', onDragOver)
+      el.removeEventListener('dragover', onDragOver)
+      el.removeEventListener('drop', onDrop)
+    }
+  }, [onDragOver, onDrop])
 
   // Delete a node + any edges touching it.
   const deleteNode = useCallback((nodeId: string) => {
@@ -2721,7 +2758,7 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
     <ScenarioEdgeSelectorContext.Provider value={edgeSelectorApi}>
     <ScenarioStaticPreviewContext.Provider value={staticPreviewApi}>
     <ScenarioErrorsContext.Provider value={nodeErrors}>
-    <div ref={wrapperRef} data-testid="scenario-editor" style={containerStyle} onDragOver={onDragOver} onDrop={onDrop}>
+    <div ref={wrapperRef} data-testid="scenario-editor" style={containerStyle}>
       {nodes.length === 0 && (
         <div data-testid="scenario-editor-empty" style={emptyStyle}>
           <div className="scn-empty-onboarding">

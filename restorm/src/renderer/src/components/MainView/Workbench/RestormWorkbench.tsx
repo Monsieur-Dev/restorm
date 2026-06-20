@@ -123,6 +123,13 @@ export interface RestormWorkbenchProps {
   onCreateScenarioChild?: (scenarioId: string, kind: AddChildKind) => string | null
   /** Resolve a tree item by id → live object, for drop + bound node sync. */
   resolveBoundItem?: ResolveBoundItem
+  /** Predicate marking a non-editor-tab drag (a sidebar list item) as one
+   * the workbench should show the split overlay for. Wired into ECUI's
+   * `isExternalDropDrag`. */
+  isWorkbenchExternalDrop?: (event: DragEvent) => boolean
+  /** Open a dragged sidebar item beside the drop target — ECUI resolved
+   * the released group + split zone. Wired into ECUI's `onExternalDrop`. */
+  onWorkbenchExternalDrop?: (event: DragEvent, targetGroupId: string, direction: 'left' | 'right' | 'top' | 'bottom' | 'full') => void
   /** Resolve a request's environments + default selection (scenario env section). */
   resolveRequestEnv?: ResolveRequestEnv
   /** Synthesise a documentation-derived preview for a request — used by
@@ -216,6 +223,8 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
   onCreateScenarioRequest,
   onCreateScenarioChild,
   resolveBoundItem,
+  isWorkbenchExternalDrop,
+  onWorkbenchExternalDrop,
   resolveRequestEnv,
   resolveSyntheticPreview,
   onEnvironmentFolderChange,
@@ -1417,6 +1426,13 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
       getTabContextMenuItems,
       onGetTabContent: getTabContent,
       disableTabDetach: !tabDetachEnabled,
+      // Sidebar→workbench split drop: light the split overlay for a
+      // dragged sidebar item and open it beside the drop target. Both
+      // must be present for the channel to do anything (the predicate
+      // gates the overlay, the handler performs the open).
+      ...(isWorkbenchExternalDrop && onWorkbenchExternalDrop
+        ? { isExternalDropDrag: isWorkbenchExternalDrop, onExternalDrop: onWorkbenchExternalDrop }
+        : {}),
       // Forward tab activation from any group (incl. non-main split
       // groups) so the sidebar can sync. Intentionally no dedup here:
       // clicking an already-active tab must still re-trigger ancestor
@@ -1431,7 +1447,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
       // the workbench: the same stable key the Ctrl+Tab switcher sorts by.
       getTabNavKey: (tab: EditorTab) => getTabNavKey(tab as RestormEditorTab)
     }
-  }, [handleTabDropped, workbenchRenderTabContent, renderTabTitle, handleDetachToNewWindow, getTabContextMenuItems, getTabContent, onTabActivate, tabDetachEnabled, getTabNavKey])
+  }, [handleTabDropped, workbenchRenderTabContent, renderTabTitle, handleDetachToNewWindow, getTabContextMenuItems, getTabContent, onTabActivate, tabDetachEnabled, getTabNavKey, isWorkbenchExternalDrop, onWorkbenchExternalDrop])
 
   const handleTreeChange = useCallback(
     (newTree: WorkbenchTree) => {

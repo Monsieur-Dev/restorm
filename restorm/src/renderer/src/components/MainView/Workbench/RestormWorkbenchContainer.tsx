@@ -9,6 +9,7 @@ import type { Request, Folder, Scenario, EnvironmentFolder, ScenarioNode, Scenar
 import type { ScenarioRequestUsage, ScenarioScenarioUsage } from '../../../services/scenarioRequestUsage'
 import type { ResolveBoundItem, ResolveRequestEnv } from '../../Scenario/scenarioBoundResolver'
 import type { SyntheticRequestPreview } from '../../../../../shared/utils/syntheticRequestPreview'
+import type { SplitDirection } from 'electron-core-ui/renderer'
 
 export interface RestormWorkbenchContainerProps {
   workbenchRef?: React.Ref<RestormWorkbenchHandle>
@@ -47,6 +48,12 @@ export interface RestormWorkbenchContainerProps {
    * under the scenario from the graph add-palette, returning its id. */
   onCreateScenarioChild?: (scenarioId: string, kind: AddChildKind) => string | null
   resolveBoundItem?: ResolveBoundItem
+  /** Predicate marking a non-editor-tab drag (a sidebar list item) as
+   * one the workbench should show the split overlay for. */
+  isWorkbenchExternalDrop?: (event: DragEvent) => boolean
+  /** Open a dragged sidebar item beside the drop target — the workbench
+   * resolved the released group + split zone. */
+  onWorkbenchExternalDrop?: (event: DragEvent, targetGroupId: string, direction: SplitDirection) => void
   resolveRequestEnv?: ResolveRequestEnv
   resolveSyntheticPreview?: (requestId: string) => SyntheticRequestPreview | null
   onEnvironmentFolderChange: (folderId: string, folder: EnvironmentFolder) => void
@@ -102,6 +109,8 @@ export const RestormWorkbenchContainer: React.FC<RestormWorkbenchContainerProps>
   onCreateScenarioRequest,
   onCreateScenarioChild,
   resolveBoundItem,
+  isWorkbenchExternalDrop,
+  onWorkbenchExternalDrop,
   resolveRequestEnv,
   resolveSyntheticPreview,
   onEnvironmentFolderChange,
@@ -155,6 +164,8 @@ export const RestormWorkbenchContainer: React.FC<RestormWorkbenchContainerProps>
           {...(onCreateScenarioRequest ? { onCreateScenarioRequest } : {})}
           {...(onCreateScenarioChild ? { onCreateScenarioChild } : {})}
           {...(resolveBoundItem ? { resolveBoundItem } : {})}
+          {...(isWorkbenchExternalDrop ? { isWorkbenchExternalDrop } : {})}
+          {...(onWorkbenchExternalDrop ? { onWorkbenchExternalDrop } : {})}
           {...(resolveRequestEnv ? { resolveRequestEnv } : {})}
           {...(resolveSyntheticPreview ? { resolveSyntheticPreview } : {})}
           onEnvironmentFolderChange={onEnvironmentFolderChange}

@@ -13,6 +13,16 @@ import type {
 } from './types'
 import './listView.css'
 
+/**
+ * MIME type stamped on a ListView drag's `dataTransfer`, in addition to
+ * the item id carried on `text/plain`. It lets a drop target recognise a
+ * ListView-originated drag during `dragover` (when payload data is not
+ * yet readable, only the type list is) and distinguish it from arbitrary
+ * text drags. The workbench external-drop channel keys on this to light
+ * its split overlay for a dragged sidebar item.
+ */
+export const LIST_VIEW_DRAG_MIME = 'application/x-listview-item'
+
 interface FlatItem {
   item: ListViewItemData
   depth: number
@@ -657,6 +667,10 @@ const ListViewInner: React.FC<ListViewProps> = ({
       const payload: ListViewItemEventPayload = { item: flat.item, path: flat.path }
       event.dataTransfer.effectAllowed = 'move'
       event.dataTransfer.setData('text/plain', flat.item.id)
+      // Marker MIME so drop targets can recognise this as a ListView item
+      // drag during `dragover` (the `text/plain` payload isn't readable
+      // until `drop`). `setData` can throw in locked-down environments.
+      try { event.dataTransfer.setData(LIST_VIEW_DRAG_MIME, flat.item.id) } catch { /* ignore */ }
       // Custom drag preview (native setDragImage is blank under Wayland).
       const row = event.currentTarget
       const rect = row.getBoundingClientRect()
