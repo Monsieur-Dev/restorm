@@ -24,24 +24,40 @@
  * `normalizeValueType` re-instantiate them on arrival.
  */
 export function cloneForEventBus<T>(value: T): T {
-  return walk(value) as T
+  return walk(value, new WeakMap<object, unknown>()) as T
 }
 
-function walk(value: unknown): unknown {
+/**
+ * `seen` maps each already-visited object/array to its clone. A cyclic
+ * reference (an item that, directly or indirectly, points back at an
+ * ancestor) would otherwise recurse forever and overflow the stack —
+ * fatal on the hot `broadcastTreeReplace` path that every MCP write
+ * tool triggers. Returning the in-progress clone on revisit both
+ * breaks the cycle and preserves shared-reference identity in the
+ * output.
+ */
+function walk(value: unknown, seen: WeakMap<object, unknown>): unknown {
   if (value === null || value === undefined) return value
   const typeOf = typeof value
   if (typeOf !== 'object') return value
   if (value instanceof Date) return new Date(value.getTime())
+
+  const asObject = value as object
+  const existing = seen.get(asObject)
+  if (existing !== undefined) return existing
+
   if (Array.isArray(value)) {
     const out: unknown[] = new Array(value.length)
+    seen.set(asObject, out)
     for (let i = 0; i < value.length; i++) {
-      out[i] = walk(value[i])
+      out[i] = walk(value[i], seen)
     }
     return out
   }
   const out: Record<string, unknown> = {}
+  seen.set(asObject, out)
   for (const key of Object.keys(value as Record<string, unknown>)) {
-    out[key] = walk((value as Record<string, unknown>)[key])
+    out[key] = walk((value as Record<string, unknown>)[key], seen)
   }
   return out
 }

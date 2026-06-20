@@ -1167,8 +1167,13 @@ export class McpService {
 
         const buffer = Buffer.from(result.base64, 'base64')
         const stamp = Date.now()
+        // A screencast can capture on-screen secrets — write it 0600 so
+        // it isn't world-readable in the shared system temp dir. (The
+        // file must stay directly in tmpdir(), not a subdir: the
+        // `ecui-media://` protocol handler + the cleanup path resolve it
+        // by basename under tmpdir() only.)
         const webmPath = pathJoin(tmpdir(), `ecu-screencast-${String(stamp)}.webm`)
-        writeFileSync(webmPath, buffer)
+        writeFileSync(webmPath, buffer, { mode: 0o600 })
 
         // The MediaRecorder webm has no Duration in its header, so a <video>
         // reports Infinity until fully buffered. Remux to a seekable MP4 with a

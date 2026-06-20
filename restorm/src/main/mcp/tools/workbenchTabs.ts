@@ -11,11 +11,26 @@
 
 import { z } from 'zod'
 import { BrowserWindow } from 'electron'
-import { McpService, permissionService } from 'electron-core-ui'
+import { McpService, permissionService, logger } from 'electron-core-ui'
 import type { FirewallOrigin } from 'electron-core-ui'
 
 function jsonReply(value: unknown): { content: { type: 'text'; text: string }[] } {
   return { content: [{ type: 'text', text: JSON.stringify(value, null, 2) }] }
+}
+
+/**
+ * Audit an agent-driven firewall change. An MCP client (not the user) just
+ * mutated the firewall, so leave a trail: a stamped log line AND a renderer
+ * broadcast so the UI can surface that an agent — not a human click — added the
+ * rule. Silent agent whitelisting is exactly what the firewall guards against.
+ */
+function auditAgentFirewallChange(action: string, detail: Record<string, unknown>): void {
+  logger.warn(`[firewall][audit] MCP agent ${action}`, { ...detail, source: 'mcp-agent' })
+  for (const win of BrowserWindow.getAllWindows()) {
+    try {
+      win.webContents.send('firewall:agent-rule-changed', { action, ...detail, at: new Date().toISOString() })
+    } catch { /* window torn down */ }
+  }
 }
 
 function errorReply(message: string): { content: { type: 'text'; text: string }[]; isError: true } {
@@ -37,7 +52,10 @@ function broadcast(channel: string, payload: unknown = {}): void {
  * Rejects anything that doesn't yield a non-empty host or a valid
  * 1-65535 port.
  */
-function parseOriginString(raw: string): FirewallOrigin | null {
+/** Parse a user/agent-supplied origin string into a firewall origin tuple, or
+ * `null` when it isn't a usable origin. Exported for unit-test coverage; the
+ * production call sites stay inside this module (firewall_allow / firewall_deny). */
+export function parseOriginString(raw: string): FirewallOrigin | null {
   let candidate = raw.trim()
   if (candidate.length === 0) return null
   if (!candidate.includes('://')) candidate = `https://${candidate}`
@@ -49,7 +67,9 @@ function parseOriginString(raw: string): FirewallOrigin | null {
   if (host === '') return null
   const defaultPort = scheme === 'https' || scheme === 'wss' ? 443 : 80
   const port = parsed.port !== '' ? Number(parsed.port) : defaultPort
-  if (!Number.isFinite(port) || port < 0 || port > 65535) return null
+  // Port 0 is not a real listening port, so a rule keyed on it can never match
+  // an actual connection — reject it rather than persist a dead rule.
+  if (!Number.isFinite(port) || port < 1 || port > 65535) return null
   return { scheme, host, port }
 }
 
@@ -109,6 +129,7 @@ export function registerWorkbenchTabTools(mcp: McpService): void {
       const parsed = parseOriginString(raw)
       if (!parsed) return errorReply(`origin could not be parsed: ${raw}`)
       permissionService.addToWhitelist(parsed)
+      auditAgentFirewallChange('allowed origin', { origin: parsed })
       return jsonReply({ added: parsed, list: 'whitelist' })
     }
   )
@@ -133,6 +154,7 @@ export function registerWorkbenchTabTools(mcp: McpService): void {
       const parsed = parseOriginString(raw)
       if (!parsed) return errorReply(`origin could not be parsed: ${raw}`)
       permissionService.addToBlacklist(parsed)
+      auditAgentFirewallChange('denied origin', { origin: parsed })
       return jsonReply({ added: parsed, list: 'blacklist' })
     }
   )
@@ -177,6 +199,7 @@ export function registerWorkbenchTabTools(mcp: McpService): void {
       if (!promptId) return errorReply('promptId is required')
       if (verdict !== 'allow' && verdict !== 'deny') return errorReply('verdict must be "allow" or "deny"')
       permissionService.resolvePrompt(promptId, verdict)
+      auditAgentFirewallChange('resolved prompt', { promptId, verdict })
       return jsonReply({ resolved: promptId, verdict })
     }
   )

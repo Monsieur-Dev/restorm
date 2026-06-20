@@ -23,6 +23,61 @@ import { secretHydrationService } from './secrets/SecretHydrationService'
 import { collectRequestSecrets } from './secrets/collectRequestSecrets'
 import { DEFAULT_WS_TIMEOUT_MS } from '../../shared/config/constants'
 
+/**
+ * Lifetime cap on mqtt.js auto-reconnect attempts for a streaming MQTT
+ * connection. mqtt.js retries forever on `reconnectPeriod`, so a flapping
+ * / never-bindable broker would otherwise keep the client + the
+ * activeConnections entry alive indefinitely (the connect timer was
+ * cleared on the first successful connect and is never re-armed). After
+ * this many reconnect attempts we end the client and settle with an
+ * error instead of leaking.
+ */
+const MQTT_MAX_RECONNECT_ATTEMPTS = 10
+
+/**
+ * Reconnect budget for a streaming MQTT connection. `onReconnect()`
+ * counts an attempt and returns `true` once the cap is exceeded (the
+ * caller should then end the client + settle with an error).
+ * `onConnect()` resets the budget so a long-lived stream that drops once
+ * isn't penalised by an earlier flap. Extracted as a pure unit so the
+ * cap boundary is testable without standing up the whole service.
+ */
+export function makeReconnectBudget(max: number): { onReconnect: () => boolean; onConnect: () => void } {
+  let attempts = 0
+  return {
+    onReconnect: () => {
+      attempts += 1
+      return attempts > max
+    },
+    onConnect: () => { attempts = 0 }
+  }
+}
+
+/**
+ * Extract the numeric port from a `host:port` authority, defaulting when the
+ * port is absent or invalid. Handles a bracketed IPv6 literal (`[::1]:1883`):
+ * a naive `split(':')[1]` would return an address segment, not the port. The
+ * port is whatever follows the LAST `:` that is not inside the brackets; a
+ * bare (unbracketed) IPv6 address has several colons and no port. Extracted as
+ * a pure unit so the IPv6 boundary is testable without standing up the service.
+ */
+export function extractPortFromAuthority(hostPort: string, defaultPort: number): number {
+  let portStr = ''
+  if (hostPort.startsWith('[')) {
+    const close = hostPort.indexOf(']')
+    if (close >= 0 && hostPort[close + 1] === ':') {
+      portStr = hostPort.slice(close + 2)
+    }
+  } else {
+    const colon = hostPort.lastIndexOf(':')
+    if (colon >= 0 && hostPort.indexOf(':') === colon) {
+      portStr = hostPort.slice(colon + 1)
+    }
+  }
+  const port = Number.parseInt(portStr, 10)
+  return Number.isFinite(port) && port > 0 ? port : defaultPort
+}
+
 /** WebSocket request execution input */
 export interface WebSocketExecutionInput {
   requestId: string
@@ -332,6 +387,13 @@ class WebSocketExecutionService {
           finish(false, (err as Error).message || `Failed to listen on port ${port}`)
           return
         }
+        // The await above yields the event loop: a concurrent closeAll/disconnect
+        // could have torn this port host down in the meantime. Re-fetch and bail
+        // if it's gone, so we never attach a route to a dead server.
+        if (this.portHosts.get(port) !== host) {
+          finish(false, `Port ${port} was torn down before the route could attach`)
+          return
+        }
         // Route collision: the same namespace is already hosted on this port.
         if (host.sioRoutes.has(namespace)) {
           finish(false, this.routeBusyMessage('Socket.IO', port, namespace))
@@ -389,6 +451,12 @@ class WebSocketExecutionService {
           host = await this.acquirePortHost(port)
         } catch (err) {
           finish(false, (err as Error).message || `Failed to listen on port ${port}`)
+          return
+        }
+        // See the Socket.IO path: re-fetch after the await so a concurrent
+        // teardown doesn't leave us attaching to a dead server.
+        if (this.portHosts.get(port) !== host) {
+          finish(false, `Port ${port} was torn down before the route could attach`)
           return
         }
         if (host.wsRoutes.has(path)) {
@@ -568,6 +636,12 @@ class WebSocketExecutionService {
         try { broker.close() } catch { /* not started */ }
         return { ok: false, error: (err as Error).message || `Failed to listen on port ${port}` }
       }
+      // Re-fetch after the await: a concurrent teardown must not leave us
+      // bridging onto a dead host.
+      if (this.portHosts.get(port) !== host) {
+        try { broker.close() } catch { /* not started */ }
+        return { ok: false, error: `Port ${port} was torn down before the broker could attach` }
+      }
       const path = topicFilterToWsPath(resolvedUrl)
       this.ensureWss(host)
       host.mqttWsPath = path
@@ -693,10 +767,9 @@ class WebSocketExecutionService {
     const stripped = resolvedUrl.replace(/^[a-z]+:\/\//i, '')
     const slash = stripped.indexOf('/')
     const hostPort = slash >= 0 ? stripped.slice(0, slash) : stripped
-    const portStr = hostPort.split(':')[1] ?? ''
-    const port = Number.parseInt(portStr, 10)
+    const port = extractPortFromAuthority(hostPort, 1883)
     const topicFilter = event && event.length > 0 ? event : '#'
-    return { port: Number.isFinite(port) && port > 0 ? port : 1883, topicFilter, transport }
+    return { port, topicFilter, transport }
   }
 
   /** Stop hosting an MQTT broker: close the aedes engine + its raw-TCP listener
@@ -1007,9 +1080,8 @@ class WebSocketExecutionService {
     // otherwise a `localhost:3002/chat?x=1` server never matches a `/chat` upgrade.
     const rawNamespace = slash >= 0 ? stripped.slice(slash) : '/'
     const namespace = this.parsePathname(rawNamespace)
-    const portStr = hostPort.split(':')[1] ?? ''
-    const port = Number.parseInt(portStr, 10)
-    return { port: Number.isFinite(port) && port > 0 ? port : 3001, namespace: namespace || '/' }
+    const port = extractPortFromAuthority(hostPort, 3001)
+    return { port, namespace: namespace || '/' }
   }
 
   /**
@@ -1303,8 +1375,27 @@ class WebSocketExecutionService {
           }
         }, resolved.timeout)
 
+        // Cap auto-reconnects: a flapping / never-bindable broker would
+        // otherwise have mqtt.js retry forever (the connect timer is
+        // cleared on the first connect and never re-armed), leaking the
+        // client + the activeConnections entry and never settling the
+        // one-shot. After the cap, end the client and settle with an error.
+        const reconnectBudget = makeReconnectBudget(MQTT_MAX_RECONNECT_ATTEMPTS)
+        client.on('reconnect', () => {
+          if (reconnectBudget.onReconnect()) {
+            clearTimeout(connectTimer)
+            this.activeConnections.delete(requestId)
+            this.broadcastProgress(requestId, 'error')
+            try { client.end(true) } catch { /* already ended */ }
+            fireClose(`MQTT reconnect limit reached (${MQTT_MAX_RECONNECT_ATTEMPTS} attempts)`)
+          }
+        })
+
         client.on('connect', () => {
           ctl.connected = true
+          // A successful (re)connect resets the reconnect budget so a
+          // long-lived stream that drops once isn't penalised later.
+          reconnectBudget.onConnect()
           clearTimeout(connectTimer)
           logger.info('[WebSocketExecutionService] Connected (mqtt, streaming)', { requestId })
           if (cfg.subscribe && topic) {
@@ -1429,6 +1520,12 @@ class WebSocketExecutionService {
         fireClose()
         return
       }
+      // A concurrent closeAll/disconnect (not via stopped()) may have torn the
+      // host down during the await — re-fetch and bail if it's no longer live.
+      if (this.portHosts.get(port) !== host) {
+        fireClose(`Port ${port} was torn down before the route could attach`)
+        return
+      }
       if (host.sioRoutes.has(namespace)) {
         fireClose(this.routeBusyMessage('Socket.IO', port, namespace))
         return
@@ -1515,6 +1612,12 @@ class WebSocketExecutionService {
       if (stopped()) {
         this.closePortHostIfIdle(port)
         fireClose()
+        return
+      }
+      // A concurrent closeAll/disconnect may have torn the host down during the
+      // await — re-fetch and bail if it's no longer live.
+      if (this.portHosts.get(port) !== host) {
+        fireClose(`Port ${port} was torn down before the route could attach`)
         return
       }
       if (host.wsRoutes.has(path)) {

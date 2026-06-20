@@ -14,6 +14,7 @@ import https from 'https'
 import { URL } from 'url'
 import Handlebars from 'handlebars'
 import { logger } from 'electron-core-ui/main'
+import { MAX_RESPONSE_BYTES } from '../../shared/config/constants'
 
 export interface AuthPrefetchInput {
   method: string
@@ -50,7 +51,9 @@ export async function authPrefetchOneShot(input: AuthPrefetchInput): Promise<Aut
   logger.info('[AuthPrefetch] wire-level request', {
     method: input.method,
     host: parsed.host,
-    path: `${parsed.pathname}${parsed.search}`,
+    // pathname only — the query string can carry OAuth secrets
+    // (client_secret / code / assertion).
+    path: parsed.pathname,
     headerKeys: Object.keys(headers),
     bodyLength: input.body?.length ?? 0
   })
@@ -66,7 +69,17 @@ export async function authPrefetchOneShot(input: AuthPrefetchInput): Promise<Aut
       },
       (res) => {
         const chunks: Buffer[] = []
-        res.on('data', (c: Buffer) => chunks.push(c))
+        let received = 0
+        res.on('data', (c: Buffer) => {
+          received += c.length
+          if (received > MAX_RESPONSE_BYTES) {
+            // Bound main-process memory on a runaway token endpoint.
+            req.destroy()
+            resolve({ success: false, error: `Response exceeded the ${MAX_RESPONSE_BYTES}-byte limit` })
+            return
+          }
+          chunks.push(c)
+        })
         res.on('end', () => {
           const body = Buffer.concat(chunks).toString('utf8')
           resolve({
@@ -100,18 +113,25 @@ export function resolveProducedHeaders(
   for (const kv of producedHeaders) {
     if (!kv.key) continue
     if (kv.enabled === false) continue
-    const rendered = safeRender(kv.value, parsed)
+    const rendered = safeRender(kv.value, parsed, kv.key)
     if (rendered !== '') out[kv.key] = rendered
   }
   return out
 }
 
-function safeRender(template: string, context: unknown): string {
+function safeRender(template: string, context: unknown, headerKey?: string): string {
   if (!template.includes('{{')) return template
   try {
     const compiled = Handlebars.compile(template, { noEscape: true })
     return compiled(context)
-  } catch {
+  } catch (err) {
+    // Surface the failure: silently returning '' drops the produced header and
+    // the auth request fails downstream with no clue why. Log the header name
+    // (not the template — it can reference secrets) + the error.
+    logger.warn('[AuthenticationPrefetch] produced-header template failed to render', {
+      header: headerKey,
+      error: err instanceof Error ? err.message : String(err)
+    })
     return ''
   }
 }

@@ -14,6 +14,7 @@ import {
 import * as yaml from 'yaml'
 import { createTypedKeyValue } from '../../../shared/utils/createTypedKeyValue'
 import { asyncapiToApiDocumentation } from './transformers/asyncapiToApiDocumentation'
+import { stableImportId as generateId } from './stableImportId'
 
 // ============================================================================
 // AsyncAPI Types
@@ -71,21 +72,6 @@ interface AsyncAPISpec {
 // ============================================================================
 // Helper Functions
 // ============================================================================
-
-/** Generate a deterministic ID from a seed string */
-function generateId(seed?: string): string {
-  if (!seed) {
-    return crypto.randomUUID()
-  }
-  let hash = 0
-  for (let i = 0; i < seed.length; i++) {
-    const char = seed.charCodeAt(i)
-    hash = ((hash << 5) - hash) + char
-    hash = hash & hash
-  }
-  const hex = Math.abs(hash).toString(16).padStart(8, '0')
-  return `${hex}-${seed.length.toString(16).padStart(4, '0')}-4000-8000-${hex}${hex.slice(0, 4)}`
-}
 
 /** Map AsyncAPI protocol to WebSocketProtocol */
 function mapProtocol(protocol: string): WebSocketProtocol {
@@ -238,15 +224,30 @@ export interface AsyncAPIImportOptions {
  * Import an AsyncAPI specification and convert it to a Folder structure
  */
 export function importAsyncAPI(specContent: string, options: AsyncAPIImportOptions = {}): EnvironmentFolder {
-  // Parse YAML or JSON
-  let spec: AsyncAPISpec
+  // YAML is a JSON superset, so a single yaml.parse handles both formats.
+  // Surface the real parse error instead of masking it behind a second
+  // JSON.parse that would only ever re-fail on the same bad input. Parse to
+  // `unknown` and validate the shape before treating it as an AsyncAPISpec —
+  // a malformed spec then reports the real reason, not a downstream TypeError.
+  let parsed: unknown
   try {
-    spec = yaml.parse(specContent) as AsyncAPISpec
-  } catch {
-    spec = JSON.parse(specContent) as AsyncAPISpec
+    parsed = yaml.parse(specContent)
+  } catch (err: unknown) {
+    const detail = err instanceof Error ? err.message : String(err)
+    throw new Error(`Failed to parse AsyncAPI spec: ${detail}`)
   }
-  
-  const name = options.name ?? spec.info.title
+
+  if (!parsed || typeof parsed !== 'object') {
+    throw new Error('Invalid AsyncAPI spec: expected an object')
+  }
+  const candidate = parsed as Partial<AsyncAPISpec>
+  if (!candidate.channels || typeof candidate.channels !== 'object') {
+    throw new Error('Invalid AsyncAPI spec: missing "channels"')
+  }
+
+  const title = candidate.info?.title
+  const spec = candidate as AsyncAPISpec
+  const name = options.name ?? title ?? 'AsyncAPI'
   const servers = spec.servers ?? {}
   
   // Group channels by protocol

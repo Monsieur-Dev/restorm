@@ -566,6 +566,18 @@ describe('arithmeticExecutor', () => {
     expect(runPure(arithmeticExecutor, { operator: '÷' }, { a: 6, b: 2 }).outputs[0]?.value).toBe(3)
     expect(runPure(arithmeticExecutor, { operator: '%' }, { a: 7, b: 3 }).outputs[0]?.value).toBe(1)
   })
+
+  it('throws on a present-but-UNKNOWN operator (surfaces a corrupt node)', () => {
+    expect(() => runPure(arithmeticExecutor, { operator: 'bogus' }, { a: 2, b: 3 })).toThrow(/unknown arithmetic operator/)
+  })
+
+  it('defaults a MISSING/empty operator to add (back-compat for legacy operator-less nodes)', () => {
+    // Operator-less arithmetic nodes were persisted before the operator field
+    // existed (missing == add was the historical default). They must keep
+    // working on upgrade — only a present-but-unrecognised operator throws.
+    expect(runPure(arithmeticExecutor, {}, { a: 2, b: 3 }).outputs[0]?.value).toBe(5)
+    expect(runPure(arithmeticExecutor, { operator: '' }, { a: 2, b: 3 }).outputs[0]?.value).toBe(5)
+  })
 })
 
 describe('booleanExecutor', () => {

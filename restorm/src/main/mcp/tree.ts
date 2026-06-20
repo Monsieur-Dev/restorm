@@ -59,9 +59,13 @@ export function projectFolder(folder: Folder | EnvironmentFolder, parentId: stri
 }
 
 export function projectRequest(request: Request, parentId: string | null): ListedRequest {
-  const recordRequest = request as unknown as Record<string, unknown>
-  const protocol = typeof recordRequest['type'] === 'string' ? recordRequest['type'] : UNKNOWN_PROTOCOL
-  const method = typeof recordRequest['method'] === 'string' ? recordRequest['method'] : undefined
+  // Read off the typed Request union (the `as unknown as Record` cast
+  // defeated the types and silently emitted UNKNOWN_PROTOCOL). `type` is
+  // the discriminant — always a string on every member. `method` only
+  // exists on the members that have it (HTTP/GraphQL/SOAP/OData/…), so
+  // narrow with an `in` check rather than reading a non-existent field.
+  const protocol: string = request.type
+  const method = 'method' in request && typeof request.method === 'string' ? request.method : undefined
   return {
     id: request.id,
     name: request.name,
@@ -217,8 +221,9 @@ function toTreeNode(item: FolderItem): TreeNode {
       children: item.items.map(toTreeNode)
     }
   }
-  // Request leaf.
-  const recordRequest = item as unknown as Record<string, unknown>
-  const protocol = typeof recordRequest['type'] === 'string' ? recordRequest['type'] : UNKNOWN_PROTOCOL
+  // Request leaf — read the discriminant off the typed shape (the
+  // `as unknown as Record` cast defeated the types + silently emitted
+  // UNKNOWN_PROTOCOL).
+  const protocol: string = isRequest(item) ? item.type : UNKNOWN_PROTOCOL
   return { id: item.id, name: item.name, kind: 'request', protocol }
 }

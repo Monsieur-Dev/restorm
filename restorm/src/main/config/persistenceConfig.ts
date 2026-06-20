@@ -9,6 +9,12 @@
  */
 
 import type { FileNamingConfig } from 'electron-core-ui/main'
+import {
+  isFolder as isFolderItem,
+  isEnvironmentFolder as isEnvironmentFolderItem,
+  isRequest as isRequestItem,
+  type FolderItem
+} from '../../shared/types/folderTypes'
 
 // ============================================================================
 // File Naming Configurations
@@ -120,25 +126,23 @@ export const ENVIRONMENT_SEARCHABLE_FIELDS: string[] = [
 // Type Detection Helpers
 // ============================================================================
 
-/**
- * Detect if an object is a Folder (not EnvironmentFolder or Request)
- */
+// These re-use the canonical shared guards (a single source of truth) instead
+// of re-deriving the rules here — the old local copies diverged and, notably,
+// classified a Scenario as a Request (the shared `isRequest` excludes it).
+
+/** Detect if a plain persisted object is a Folder (not EnvironmentFolder). */
 export function isFolder(obj: Record<string, unknown>): boolean {
-  return 'items' in obj && 'configuration' in obj && obj['folderType'] !== 'environment'
+  return isFolderItem(obj as unknown as FolderItem)
 }
 
-/**
- * Detect if an object is an EnvironmentFolder
- */
+/** Detect if a plain persisted object is an EnvironmentFolder. */
 export function isEnvironmentFolder(obj: Record<string, unknown>): boolean {
-  return 'items' in obj && 'folderType' in obj && obj['folderType'] === 'environment'
+  return isEnvironmentFolderItem(obj as unknown as FolderItem)
 }
 
-/**
- * Detect if an object is a Request
- */
+/** Detect if a plain persisted object is a Request (NOT a Scenario). */
 export function isRequest(obj: Record<string, unknown>): boolean {
-  return 'type' in obj && !('items' in obj)
+  return isRequestItem(obj as unknown as FolderItem)
 }
 
 /**

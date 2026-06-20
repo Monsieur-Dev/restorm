@@ -9,7 +9,9 @@ export function registerMiscHandlers(storageService: StorageService): void {
   // I18n IPC handlers
   // ========================================================================
   validatedHandle('i18n:set-language', i18nSetLanguageArgs, (_event, [language]) => {
-    storageService.set('language', language)
+    // setLanguage already persists 'language' through StorageService, so the
+    // handler must not also write it — a second set is a redundant disk write
+    // (and a window where the two could diverge if either changed).
     i18nService.setLanguage(language)
     logger.debug('Language changed via IPC', { language })
     return true

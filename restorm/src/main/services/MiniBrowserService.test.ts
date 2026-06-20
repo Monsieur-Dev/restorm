@@ -17,6 +17,7 @@ vi.mock('electron', () => ({
 			loadURL: vi.fn().mockResolvedValue(undefined),
 			getURL: vi.fn().mockReturnValue(''),
 			on: vi.fn(),
+			setWindowOpenHandler: vi.fn(),
 			close: vi.fn(),
 			isDestroyed: vi.fn().mockReturnValue(false),
 			navigationHistory: { canGoBack: () => false, canGoForward: () => false }
@@ -39,8 +40,10 @@ const makeWindow = (): {
 	win: unknown
 	addChildView: ReturnType<typeof vi.fn>
 	fireNav: (details: NavDetails) => void
+	fireClosed: () => void
 } => {
 	let navListener: NavListener | null = null
+	let closedListener: (() => void) | null = null
 	const addChildView = vi.fn()
 	const win = {
 		contentView: { addChildView, removeChildView: vi.fn() },
@@ -51,12 +54,16 @@ const makeWindow = (): {
 			once: vi.fn(),
 			isDestroyed: () => false
 		},
+		once: (event: string, listener: () => void): void => {
+			if (event === 'closed') closedListener = listener
+		},
 		isDestroyed: () => false
 	}
 	return {
 		win,
 		addChildView,
-		fireNav: (details) => navListener?.(details)
+		fireNav: (details) => navListener?.(details),
+		fireClosed: () => closedListener?.()
 	}
 }
 
@@ -66,6 +73,12 @@ const makeWindow = (): {
 interface MockView {
 	setVisible: ReturnType<typeof vi.fn>
 	setBounds: ReturnType<typeof vi.fn>
+	webContents: {
+		loadURL: ReturnType<typeof vi.fn>
+		setWindowOpenHandler: ReturnType<typeof vi.fn>
+		close: ReturnType<typeof vi.fn>
+		isDestroyed: ReturnType<typeof vi.fn>
+	}
 }
 const viewFor = (addChildView: ReturnType<typeof vi.fn>): MockView =>
 	addChildView.mock.calls[0][0] as MockView
@@ -135,5 +148,52 @@ describe('MiniBrowserService — visibility', () => {
 		fireNav({ isMainFrame: true, isSameDocument: true })   // hash / pushState
 		expect(view.setVisible).toHaveBeenLastCalledWith(true) // still shown
 		miniBrowserService.destroy(tabId)
+	})
+})
+
+describe('MiniBrowserService — security', () => {
+	let tabSeq = 100
+	const nextTab = (): string => `sec-${++tabSeq}`
+
+	it('denies window-open from embedded content', () => {
+		const { win, addChildView } = makeWindow()
+		const tabId = nextTab()
+		miniBrowserService.create(tabId, win as never, 'https://example.com')
+		const view = viewFor(addChildView)
+		const handler = view.webContents.setWindowOpenHandler.mock.calls[0][0] as () => { action: string }
+		expect(handler()).toEqual({ action: 'deny' })
+		miniBrowserService.destroy(tabId)
+	})
+
+	it('does not load a non-http(s) initial URL', () => {
+		const { win, addChildView } = makeWindow()
+		const tabId = nextTab()
+		miniBrowserService.create(tabId, win as never, 'file:///etc/passwd')
+		const view = viewFor(addChildView)
+		expect(view.webContents.loadURL).not.toHaveBeenCalled()
+		miniBrowserService.destroy(tabId)
+	})
+
+	it('blocks navigate() to a non-http(s) scheme but allows http(s)', () => {
+		const { win, addChildView } = makeWindow()
+		const tabId = nextTab()
+		miniBrowserService.create(tabId, win as never)
+		const view = viewFor(addChildView)
+		miniBrowserService.navigate(tabId, 'javascript:alert(1)')
+		expect(view.webContents.loadURL).not.toHaveBeenCalled()
+		miniBrowserService.navigate(tabId, 'https://example.com/x')
+		expect(view.webContents.loadURL).toHaveBeenCalledWith('https://example.com/x')
+		miniBrowserService.destroy(tabId)
+	})
+
+	it('tears down its views when the owner window closes', () => {
+		const { win, addChildView, fireClosed } = makeWindow()
+		const tabId = nextTab()
+		miniBrowserService.create(tabId, win as never, 'https://example.com')
+		const view = viewFor(addChildView)
+		fireClosed()
+		expect(view.webContents.close).toHaveBeenCalled()
+		// A subsequent setBounds is a safe no-op (tab already gone).
+		expect(() => { miniBrowserService.setBounds(tabId, { x: 0, y: 0, width: 1, height: 1 }) }).not.toThrow()
 	})
 })

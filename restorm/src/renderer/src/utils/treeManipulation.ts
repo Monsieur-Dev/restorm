@@ -6,9 +6,12 @@ import type { FolderItem } from '../../../shared/types/collections'
 import { isAnyFolder, isScenario, isEnvironmentFolder } from '../../../shared/types/collections'
 import { findItemWithParent } from './treeSearch'
 
-/** Generate a unique ID */
+/** Generate a unique ID. Uses crypto.randomUUID (collision-free) rather
+ * than Date.now()+Math.random(), which collides for two ids minted in the
+ * same millisecond — fatal here since these ids key the per-request
+ * stores. Matches serialization.ts's generateId(). */
 export function generateUniqueId(): string {
-  return `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`
+  return crypto.randomUUID()
 }
 
 /** A container's children array, created in place if missing. Scenarios carry
@@ -40,13 +43,27 @@ function reassignTreeIds(node: unknown, idMap: Map<string, string>): void {
   }
 }
 
-/** After ids are reassigned, walk the whole cloned subtree and replace any
- * STRING value that still holds an old id with its new id — so references to
- * the cloned items/environments/lists (a request's bound id, an operand's
- * `listId`, a `runScenario` target, an environment reference…) follow the copy.
- * The `id` fields themselves already hold new ids, so they're skipped. Tree ids
- * are unique timestamp-random strings, so a coincidental match in real data is
- * not a concern. */
+/**
+ * The set of object keys that hold a REFERENCE to another tree item's id (and
+ * so must follow a clone's remapped ids). Scoping the rewrite to these keys
+ * means a free-text field that coincidentally equals an id (a URL, a note, a
+ * header value) is never silently mutated — the old code rewrote ANY string
+ * matching a remapped id, in any field.
+ */
+const ID_REFERENCE_KEYS = new Set<string>([
+  'listId', 'customValueListId',
+  'scenarioId', 'targetScenarioId', 'runScenarioId',
+  'requestId', 'targetRequestId', 'boundRequestId',
+  'environmentId', 'envId', 'selectedEnvironmentId',
+  'parentFolderId', 'folderId',
+  'sourceNodeId', 'targetNodeId', 'fromNodeId', 'toNodeId', 'nodeId'
+])
+
+/** After ids are reassigned, walk the cloned subtree and replace an old id with
+ * its new id ONLY in known reference fields (see {@link ID_REFERENCE_KEYS}) — so
+ * references to the cloned items/environments/lists follow the copy without
+ * touching free-text fields that happen to contain a matching string. The `id`
+ * fields themselves already hold new ids and are skipped. */
 function remapReferences(node: unknown, idMap: Map<string, string>): void {
   if (Array.isArray(node)) {
     for (const v of node) remapReferences(v, idMap)
@@ -57,6 +74,7 @@ function remapReferences(node: unknown, idMap: Map<string, string>): void {
   for (const [key, value] of Object.entries(rec)) {
     if (key === 'id') continue
     if (typeof value === 'string') {
+      if (!ID_REFERENCE_KEYS.has(key)) continue
       const mapped = idMap.get(value)
       if (mapped !== undefined) rec[key] = mapped
     } else {

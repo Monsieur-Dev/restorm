@@ -332,8 +332,11 @@ class SearchIndexService {
       eventBusService.subscribe<DocumentChangedPayload>(DocumentEvents.FOLDER_UPDATED, (payload) => {
         logger.debug('[SearchIndexService] FOLDER_UPDATED', { id: payload.id })
         if (isFolder(payload.document)) {
-          searchService.indexDocument(folderToSearchDocument(payload.document))
-          publishIndexUpdate('indexed', payload.id, 'folder')
+          // Re-index the whole subtree, not just the folder itself: a folder
+          // update can be a MOVE, which changes the navigation.path of every
+          // descendant. Indexing only the folder would leave children keyed on
+          // a stale path. (Mirrors FOLDER_CREATED's recursive indexing.)
+          indexFolderRecursively(payload.document)
         }
       })
     )

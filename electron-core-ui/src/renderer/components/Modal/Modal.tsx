@@ -72,6 +72,7 @@ const ModalInner: React.FC<ModalProps> = ({
   // fade-out closing phase — so the view stays collapsed until the
   // overlay fully detaches.
   const overlayRef = useRef<HTMLDivElement>(null)
+  const dialogRef = useRef<HTMLDivElement>(null)
   useOverlayPresence(overlayRef, isRendered)
 
   const rootTestId = dataTestId ?? 'modal'
@@ -138,6 +139,58 @@ const ModalInner: React.FC<ModalProps> = ({
       window.removeEventListener('keydown', handleKeyDown)
     }
   }, [emitCloseRequest, isOpen, onClose])
+
+  // Focus management for the dialog (role=dialog aria-modal): move focus IN on
+  // open, TRAP Tab inside it, and RESTORE focus to the previously-focused
+  // element on close. Without this, keyboard + screen-reader users stay on the
+  // element behind the overlay.
+  useEffect(() => {
+    if (!isOpen || typeof document === 'undefined') return
+    const dialog = dialogRef.current
+    if (!dialog) return
+
+    const previouslyFocused = document.activeElement as HTMLElement | null
+
+    const focusable = (): HTMLElement[] =>
+      Array.from(
+        dialog.querySelectorAll<HTMLElement>(
+          'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        )
+      ).filter((el) => el.offsetParent !== null || el === document.activeElement)
+
+    // Move focus in: first focusable child, else the dialog itself.
+    const first = focusable()[0]
+    ;(first ?? dialog).focus()
+
+    const handleTab = (event: KeyboardEvent): void => {
+      if (event.key !== 'Tab') return
+      const items = focusable()
+      if (items.length === 0) {
+        event.preventDefault()
+        dialog.focus()
+        return
+      }
+      const firstEl = items[0]
+      const lastEl = items[items.length - 1]
+      const active = document.activeElement
+      if (event.shiftKey && (active === firstEl || active === dialog)) {
+        event.preventDefault()
+        lastEl?.focus()
+      } else if (!event.shiftKey && active === lastEl) {
+        event.preventDefault()
+        firstEl?.focus()
+      }
+    }
+
+    dialog.addEventListener('keydown', handleTab)
+    return () => {
+      dialog.removeEventListener('keydown', handleTab)
+      // Restore focus to whatever had it before the modal opened.
+      if (previouslyFocused && typeof previouslyFocused.focus === 'function') {
+        previouslyFocused.focus()
+      }
+    }
+  }, [isOpen])
 
   // Re-resolve the scoped container each time the modal OPENS. The anchor's
   // ref callback only fires on mount; without this, a container that was
@@ -215,6 +268,7 @@ const ModalInner: React.FC<ModalProps> = ({
       />
       <Workbench className="ecu-modal-workbench" border={false} fullscreen>
         <div
+          ref={dialogRef}
           className={containerClassName}
           role="dialog"
           aria-modal="true"
@@ -223,6 +277,7 @@ const ModalInner: React.FC<ModalProps> = ({
           data-ready="true"
           data-size={size}
           data-is-open={isOpen ? 'true' : 'false'}
+          tabIndex={-1}
         >
           <div
             className="ecu-modal-header"

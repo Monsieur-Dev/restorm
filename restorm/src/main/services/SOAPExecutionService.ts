@@ -11,7 +11,8 @@ import { logger } from 'electron-core-ui/main'
 import { contextService } from './ContextService'
 import { secretHydrationService } from './secrets/SecretHydrationService'
 import { collectRequestSecrets } from './secrets/collectRequestSecrets'
-import { DEFAULT_REQUEST_TIMEOUT_MS } from '../../shared/config/constants'
+import { DEFAULT_REQUEST_TIMEOUT_MS, MAX_RESPONSE_BYTES } from '../../shared/config/constants'
+import { XMLParser } from 'fast-xml-parser'
 
 /** SOAP request execution input */
 export interface SOAPExecutionInput {
@@ -49,21 +50,75 @@ interface ActiveRequest {
 }
 
 /**
- * Parse SOAP fault from response
+ * Parse a SOAP fault from a response body.
+ *
+ * Handles BOTH SOAP versions via a real XML parse (so namespace prefixes and
+ * entity-encoded text decode correctly, which the old regex did not):
+ *  - SOAP 1.1: `<Fault>` with `<faultcode>` / `<faultstring>`
+ *  - SOAP 1.2: `<Fault>` with `<Code><Value>` / `<Reason><Text>`
+ * Returns undefined when the body parses but carries no Fault element.
  */
-function parseSoapFault(xml: string): SOAPFault | undefined {
-  const faultMatch = /<(?:\w+:)?Fault[^>]*>([\s\S]*?)<\/(?:\w+:)?Fault>/i.exec(xml)
-  if (!faultMatch?.[1]) return undefined
-  
-  const faultContent = faultMatch[1]
-  
-  const codeMatch = /<(?:\w+:)?faultcode[^>]*>([\s\S]*?)<\/(?:\w+:)?faultcode>/i.exec(faultContent)
-  const messageMatch = /<(?:\w+:)?faultstring[^>]*>([\s\S]*?)<\/(?:\w+:)?faultstring>/i.exec(faultContent)
-  
-  return {
-    code: codeMatch?.[1]?.trim() ?? 'Unknown',
-    message: messageMatch?.[1]?.trim() ?? 'Unknown error'
+export function parseSoapFault(xml: string): SOAPFault | undefined {
+  let tree: unknown
+  try {
+    tree = new XMLParser({
+      ignoreAttributes: true,
+      removeNSPrefix: true,
+      parseTagValue: false,
+      trimValues: true
+    }).parse(xml)
+  } catch {
+    return undefined
   }
+
+  const fault = findNode(tree, 'Fault')
+  if (fault === undefined || fault === null) return undefined
+  if (typeof fault !== 'object') {
+    // A bare `<Fault>text</Fault>` — surface what we have.
+    return { code: 'Unknown', message: scalar(fault) ?? 'Unknown error' }
+  }
+
+  const node = fault as Record<string, unknown>
+  // SOAP 1.1
+  const faultcode = scalar(node.faultcode)
+  const faultstring = scalar(node.faultstring)
+  // SOAP 1.2: Code/Value (Value may itself be nested) and Reason/Text.
+  const code12 = scalar(findNode(node.Code, 'Value') ?? node.Code)
+  const reason12 = scalar(findNode(node.Reason, 'Text') ?? node.Reason)
+
+  return {
+    code: faultcode ?? code12 ?? 'Unknown',
+    message: faultstring ?? reason12 ?? 'Unknown error'
+  }
+}
+
+/** Coerce a parsed XML value to a trimmed string, or undefined. */
+function scalar(value: unknown): string | undefined {
+  if (typeof value === 'string') {
+    const t = value.trim()
+    return t.length > 0 ? t : undefined
+  }
+  if (typeof value === 'number' || typeof value === 'boolean') return String(value)
+  return undefined
+}
+
+/** Depth-first search for the first node whose (NS-stripped) key matches `name`. */
+function findNode(tree: unknown, name: string, depth = 0): unknown {
+  if (depth > 64 || tree === null || typeof tree !== 'object') return undefined
+  if (Array.isArray(tree)) {
+    for (const item of tree) {
+      const hit = findNode(item, name, depth + 1)
+      if (hit !== undefined) return hit
+    }
+    return undefined
+  }
+  const obj = tree as Record<string, unknown>
+  if (name in obj) return obj[name]
+  for (const value of Object.values(obj)) {
+    const hit = findNode(value, name, depth + 1)
+    if (hit !== undefined) return hit
+  }
+  return undefined
 }
 
 /**
@@ -281,8 +336,16 @@ class SOAPExecutionService {
 
       const request = httpModule.request(requestOptions, (response) => {
         const chunks: Buffer[] = []
+        let received = 0
 
         response.on('data', (chunk: Buffer) => {
+          received += chunk.length
+          if (received > MAX_RESPONSE_BYTES) {
+            signal.removeEventListener('abort', abortHandler)
+            request.destroy()
+            reject(new Error(`Response exceeded the ${MAX_RESPONSE_BYTES}-byte limit`))
+            return
+          }
           chunks.push(chunk)
         })
 

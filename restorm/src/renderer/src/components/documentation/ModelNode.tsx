@@ -152,7 +152,7 @@ const ModelNodeHeader: React.FC<ModelNodeHeaderProps> = ({ model }) => {
   )
 }
 
-export const ModelNode: React.FC<NodeProps> = ({ data }) => {
+const ModelNodeImpl: React.FC<NodeProps> = ({ data }) => {
   const { model, incomingEdgeIds = [], nodeHeight } = data as ModelNodeData
   const totalIncoming = incomingEdgeIds.length
   return (
@@ -244,3 +244,7 @@ export const ModelNode: React.FC<NodeProps> = ({ data }) => {
     </div>
   )
 }
+
+// Memoised: React Flow re-renders nodes on every viewport tick (pan/zoom);
+// without memo this rebuilds the whole property list + tooltips each frame.
+export const ModelNode = React.memo(ModelNodeImpl)

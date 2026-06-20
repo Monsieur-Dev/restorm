@@ -22,8 +22,9 @@ import { eventBusService } from 'electron-core-ui/main'
 import { collectionStore, pubsub, PUBSUB_TOPICS } from '../../services/CollectionStore'
 import { DocumentEvents, type DocumentChangedPayload } from '../../services/DocumentEvents'
 import { importFrom } from '../../services/import/ImportManager'
-import { isAnyFolder, isEnvironmentFolder, isRequest, type FolderItem, type EnvironmentFolder, type Environment } from '../../../shared/models'
+import { isAnyFolder, isEnvironmentFolder, isRequest, isScenario, type FolderItem, type EnvironmentFolder, type Environment } from '../../../shared/models'
 import { cloneForEventBus } from '../../../shared/utils/cloneForEventBus'
+import { assertSafeFetchUrl } from '../../utils/urlSecurity'
 
 function jsonReply(value: unknown): { content: { type: 'text'; text: string }[] } {
   return { content: [{ type: 'text', text: JSON.stringify(value, null, 2) }] }
@@ -94,6 +95,11 @@ function emitEnvironmentEvents(items: readonly FolderItem[]): void {
     }
     if (isAnyFolder(item)) {
       for (const child of item.items) visit(child)
+    } else if (isScenario(item) && Array.isArray(item.items)) {
+      // A scenario doubles as a folder-like container: descend its children too,
+      // else an environment authored inside a scenario is never announced and
+      // `run_request` would see raw `{{baseUrl}}` placeholders.
+      for (const child of item.items) visit(child)
     }
   }
   for (const item of items) visit(item)
@@ -137,6 +143,16 @@ export function registerImportTools(mcp: McpService): void {
       const argRecord = args
       const url = typeof argRecord['url'] === 'string' ? argRecord['url'] : ''
       if (!url) return errorReply('url is required')
+      // SSRF guard. This is the EXPLICIT top-level import URL the agent
+      // typed, so loopback/private hosts are allowed (importing a spec from
+      // a local dev server is legitimate) — but link-local / cloud-metadata
+      // is still blocked. Redirects + spec-embedded sub-fetches stay strict
+      // downstream (the real SSRF vectors).
+      try {
+        assertSafeFetchUrl(url, { allowPrivateHosts: true })
+      } catch (error) {
+        return errorReply(error instanceof Error ? error.message : String(error))
+      }
       const parentIdRaw = argRecord['parentFolderId']
       const parentId = typeof parentIdRaw === 'string' && parentIdRaw.length > 0 ? parentIdRaw : null
 

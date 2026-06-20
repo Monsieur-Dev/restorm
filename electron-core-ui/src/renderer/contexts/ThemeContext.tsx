@@ -1,4 +1,4 @@
-import React, { createContext, useState, useEffect, useCallback, useRef, useMemo } from 'react'
+import React, { createContext, useState, useEffect, useLayoutEffect, useCallback, useRef, useMemo } from 'react'
 import type { ThemeInfo, ThemeDefinition, ThemeVariables } from '../../types/theme'
 import { logger } from '../services/logger'
 import {
@@ -65,10 +65,19 @@ interface ThemeProviderProps {
  * Only ONE instance should be used at the app root
  */
 export function ThemeProvider({ children }: ThemeProviderProps): React.ReactElement {
-  // Mark ThemeProvider as active IMMEDIATELY (not in useEffect)
-  // This prevents useThemeLegacy from running its initialization
+  // Mark ThemeProvider as active IMMEDIATELY (not in useEffect) so it wins the
+  // race against useThemeLegacy's own init. The render-time write can't be
+  // cleanly reset (no cleanup runs for a render), so a layout effect resets the
+  // init globals on a REAL unmount, letting a remounted provider re-initialise
+  // (a StrictMode unmount→remount otherwise hit the globalInitStarted early-return).
   themeProviderActive = true
-  
+  useLayoutEffect(() => {
+    return () => {
+      globalInitStarted = false
+      globalInitPromise = null
+    }
+  }, [])
+
   const [themes, setThemes] = useState<ThemeInfo[]>([])
   const [currentThemeId, setCurrentThemeId] = useState<string | null>(null)
   const [currentTheme, setCurrentTheme] = useState<ThemeDefinition | null>(null)

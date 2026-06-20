@@ -56,7 +56,12 @@ export function VariableTransformProvider({ children }: VariableTransformProvide
       }
     })
 
-    return unsubscribe
+    return () => {
+      unsubscribe()
+      // Clear deferred-flush timers so they don't fire into subscribers after unmount.
+      for (const timer of pendingFlushTimers.values()) clearTimeout(timer)
+      pendingFlushTimers.clear()
+    }
   }, [])
 
   const getTransformResult = useCallback((variableId: string): string | undefined => {

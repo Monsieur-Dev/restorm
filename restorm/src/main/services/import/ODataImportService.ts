@@ -132,8 +132,8 @@ function unwrapCollection(type: string): { inner: string; collection: boolean } 
 // ============================================================================
 
 function parseEdmxV4(xml: string): EdmSchema {
-  const edmxMatch = /<edmx:Edmx\b[^>]*\bVersion="([^"]+)"/i.exec(xml)
-  const version: ODataVersion = edmxMatch?.[1] === '4.0' ? 'v4' : 'v4'
+  // This parser only handles OData v4 EDMX; the version is fixed.
+  const version: ODataVersion = 'v4'
 
   const schema: EdmSchema = {
     version,

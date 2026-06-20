@@ -1,5 +1,7 @@
+import * as yaml from 'yaml'
 import { logger } from 'electron-core-ui'
 import type { EnvironmentFolder } from '../../../shared/types/folderTypes'
+import { assertSafeFetchUrl } from '../../utils/urlSecurity'
 import type { ApiUpdateConfig, ImportSourceType } from '../../../shared/types/baseTypes'
 import { collectionStore, PUBSUB_TOPICS, pubsub } from '../CollectionStore'
 import { importFrom } from '../import/ImportManager'
@@ -170,7 +172,16 @@ export async function runApiUpdateApply(folderId: string, selection?: ApiUpdateA
   // post-apply `payloadChecksum` can hash the exact body the
   // refresh-fetch handler would see on the next round-trip.
   const rawSpecText = await fetchText(url, headers)
-  const fullSpec = adapter.extractNormalizedSpec(JSON.parse(rawSpecText), {})
+  // Format-aware parse: specs are commonly served as YAML, and a bare
+  // `JSON.parse` of a YAML body throws straight out of the IPC handler.
+  // `yaml.parse` accepts JSON too (JSON is a YAML subset).
+  let parsedSpec: unknown
+  try {
+    parsedSpec = yaml.parse(rawSpecText)
+  } catch (err) {
+    throw new Error(`Failed to parse spec from ${url}: ${err instanceof Error ? err.message : String(err)}`)
+  }
+  const fullSpec = adapter.extractNormalizedSpec(parsedSpec, {})
 
   // The renderer's `include` set carries ImportSelectionTree keys
   // (`request:http:METHOD {{baseUrl}}/path/{{id}}`); the pipeline
@@ -247,6 +258,14 @@ export async function runApiUpdateApply(folderId: string, selection?: ApiUpdateA
 }
 
 async function fetchText(url: string, headers: Record<string, string>): Promise<string> {
+  // SSRF guard: the spec URL is the stored, user-supplied import source
+  // — the same EXPLICIT top-level URL the initial import / `importFrom`
+  // above uses (which opts into `allowPrivateHosts`), so a local dev API
+  // server is a legitimate refresh-apply target. Keeping this strict
+  // while `importFrom` allows private hosts would also be internally
+  // inconsistent. Link-local / cloud-metadata stays blocked; not
+  // firewall-gated.
+  assertSafeFetchUrl(url, { allowPrivateHosts: true })
   const response = await fetch(url, Object.keys(headers).length === 0 ? {} : { headers })
   if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`)
   return response.text()

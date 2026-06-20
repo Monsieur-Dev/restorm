@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { logger } from '../services/logger'
 
 interface StorageAPI {
@@ -28,14 +28,25 @@ export function useStorage<T>(
 ): [T, (value: T) => void, boolean] {
   const [value, setValueState] = useState<T>(defaultValue)
   const [isLoading, setIsLoading] = useState(true)
+  // Monotonic token: each load (and each setValue) bumps it. A load only applies
+  // its result if its token is still current — so a slow load can't clobber a
+  // value the user set, or an earlier key's value, after the fact.
+  const loadTokenRef = useRef(0)
 
-  // Load initial value
+  // Load initial value (re-runs on key change)
   useEffect(() => {
+    const token = ++loadTokenRef.current
     const load = async (): Promise<void> => {
+      // Re-enter the loading state for this key (inside the async body so it's
+      // not a synchronous setState in the effect body).
+      setIsLoading(true)
       const api = getStorageAPI()
       if (api) {
         try {
           const stored = await api.get(key) as T | undefined
+          // Drop a stale load: the key changed or the user set a value while
+          // this get() was in flight (lost-update guard).
+          if (loadTokenRef.current !== token) return
           if (stored !== undefined) {
             setValueState(stored)
           }
@@ -43,7 +54,7 @@ export function useStorage<T>(
           logger.error('[useStorage] Failed to load value', { key, error: String(error) })
         }
       }
-      setIsLoading(false)
+      if (loadTokenRef.current === token) setIsLoading(false)
     }
     void load()
   }, [key])
@@ -51,6 +62,8 @@ export function useStorage<T>(
   // Save value
   const setValue = useCallback(
     (newValue: T) => {
+      // Invalidate any in-flight load so its late result can't overwrite this.
+      loadTokenRef.current += 1
       setValueState(newValue)
       const api = getStorageAPI()
       if (api) {

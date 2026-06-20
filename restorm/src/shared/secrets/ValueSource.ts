@@ -37,6 +37,16 @@ export interface ResolveCtx {
 /** Main-only. */
 export interface ValueSourceResolver {
   id: string
+  /**
+   * Whether a given `(source, params)` pair resolves to the SAME value
+   * regardless of the run scope it's resolved under. `true` (the
+   * default) lets the hydration service share one in-flight fetch + one
+   * cached payload across scopes. Set `false` for a resolver whose
+   * result depends on `ctx.scopeId` (a scope-scoped credential store):
+   * the service then keys the in-flight dedup + the synchronous peek by
+   * scope too, so one scope can never read another scope's plaintext.
+   */
+  scopeIndependent?: boolean
   read(params: Record<string, unknown>, ctx: ResolveCtx): Promise<unknown>
   write?(params: Record<string, unknown>, value: string, ctx: ResolveCtx): Promise<void>
 }

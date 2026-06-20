@@ -31,10 +31,14 @@ function parseColorToRgb(color: string): [number, number, number] {
     const b = h[2] ?? '0'
     h = r + r + g + g + b + b
   }
-  const r = parseInt(h.substring(0, 2), 16) / 255
-  const g = parseInt(h.substring(2, 4), 16) / 255
-  const b = parseInt(h.substring(4, 6), 16) / 255
-  return [r, g, b]
+  const r = parseInt(h.substring(0, 2), 16)
+  const g = parseInt(h.substring(2, 4), 16)
+  const b = parseInt(h.substring(4, 6), 16)
+  // A malformed hex yields NaN here; fall back to mid-grey instead of letting
+  // NaN flow into the luminance math (which silently produced #ffffff for any
+  // unparseable colour).
+  if (Number.isNaN(r) || Number.isNaN(g) || Number.isNaN(b)) return [0.5, 0.5, 0.5]
+  return [r / 255, g / 255, b / 255]
 }
 
 function hslToRgb(h: number, s: number, l: number): [number, number, number] {

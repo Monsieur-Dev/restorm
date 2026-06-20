@@ -29,6 +29,7 @@ import { CURRENT_FILE_FORMAT_VERSION } from '../../../shared/config/fileFormatVe
 import { postmanToApiDocumentation } from './transformers/postmanToApiDocumentation'
 import { workflowToScenario, type WorkflowRequestStep } from './workflowToScenario'
 import type { Scenario } from '../../../shared/types/scenario'
+import { stableImportId as generateId } from './stableImportId'
 
 // ============================================================================
 // Postman Collection v2.1.0 Types
@@ -190,21 +191,6 @@ function extractDescription(desc: string | { content: string; type: string } | u
   if (!desc) return ''
   if (typeof desc === 'string') return desc
   return desc.content
-}
-
-/** Generate a deterministic ID from a seed string */
-function generateId(seed?: string): string {
-  if (!seed) {
-    return crypto.randomUUID()
-  }
-  let hash = 0
-  for (let i = 0; i < seed.length; i++) {
-    const char = seed.charCodeAt(i)
-    hash = ((hash << 5) - hash) + char
-    hash = hash & hash
-  }
-  const hex = Math.abs(hash).toString(16).padStart(8, '0')
-  return `${hex}-${seed.length.toString(16).padStart(4, '0')}-4000-8000-${hex}${hex.slice(0, 4)}`
 }
 
 /** Parse Postman URL into components */
@@ -588,8 +574,14 @@ export function importPostman(
   collection: PostmanCollection,
   options: PostmanImportOptions = {}
 ): EnvironmentFolder {
-  // Validate collection schema
-  const schema = collection.info.schema
+  // Validate collection schema. Guard the deref so a malformed collection
+  // (no info / no schema) reports the real reason instead of a TypeError on
+  // `.includes` of undefined. The `info` field is typed required, but the
+  // collection arrives from untrusted JSON, so check it at runtime.
+  const schema = (collection.info as { schema?: unknown } | undefined)?.schema
+  if (typeof schema !== 'string') {
+    throw new Error('Invalid Postman collection: missing info.schema')
+  }
   if (!schema.includes('v2.1.0') && !schema.includes('v2.0.0')) {
     throw new Error(`Unsupported Postman collection schema: ${schema}. Only v2.0.0 and v2.1.0 are supported.`)
   }

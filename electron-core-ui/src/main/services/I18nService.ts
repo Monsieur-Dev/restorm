@@ -156,10 +156,14 @@ class I18nService {
       return key
     }
 
-    // Apply interpolation if params provided
+    // Apply interpolation if params provided. Use a literal split/join
+    // rather than `new RegExp({{paramKey}})`: building a regex from the
+    // raw param key (per param, per call) let a key with regex
+    // metacharacters mis-match or ReDoS. split/join replaces the exact
+    // `{{key}}` token globally with no pattern compilation.
     if (params) {
       for (const [paramKey, paramValue] of Object.entries(params)) {
-        value = value.replace(new RegExp(`{{${paramKey}}}`, 'g'), String(paramValue))
+        value = value.split(`{{${paramKey}}}`).join(String(paramValue))
       }
     }
 

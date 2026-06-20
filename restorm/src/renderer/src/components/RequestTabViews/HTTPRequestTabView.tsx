@@ -642,10 +642,10 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
     // leaves like `StringValue` for `KeyValue.value` that
     // `serializeValueForPersistence` already knows how to handle on
     // the main side via `fromPlain`).
-    const authAttachedId = (request as { authenticationRequestId?: string }).authenticationRequestId
+    const authAttachedId = request.authenticationRequestId
     const attachedAuth = authAttachedId ? resolveAuthRequest(authAttachedId) : null
     const authPlain = attachedAuth
-      ? (attachedAuth as unknown as { toPlainObject?: () => unknown }).toPlainObject?.() ?? attachedAuth
+      ? attachedAuth.toPlainObject?.() ?? attachedAuth
       : undefined
     const authRequestPayload = authPlain !== undefined
       ? JSON.parse(JSON.stringify(authPlain)) as unknown

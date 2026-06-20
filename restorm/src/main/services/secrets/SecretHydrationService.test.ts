@@ -182,4 +182,49 @@ describe('SecretHydrationService', () => {
       'unknown secret source: unknown-source'
     )
   })
+
+  // -------------------------------------------------------------------------
+  // 7. Scope-dependent sources are NOT conflated across scopes
+  // -------------------------------------------------------------------------
+  describe('scope-dependent resolver isolation', () => {
+    // A resolver whose value depends on ctx.scopeId, declaring itself
+    // scope-dependent. Two scopes must get DIFFERENT plaintext, and a
+    // scopeless peek must NOT leak one scope's value to another.
+    function makeScopedResolver(): ValueSourceResolver {
+      return {
+        id: 'scoped',
+        scopeIndependent: false,
+        read(_p: Record<string, unknown>, ctx: { scopeId: string }): Promise<unknown> {
+          return Promise.resolve(`value-for-${ctx.scopeId}`)
+        }
+      }
+    }
+
+    it('resolves per-scope and does not return another scope\'s value', async () => {
+      const svc2 = new SecretHydrationService((id) => (id === 'scoped' ? makeScopedResolver() : undefined))
+      const a = new SecretValue('scoped', { name: 'TOK' })
+      const b = new SecretValue('scoped', { name: 'TOK' })
+      await svc2.hydrate('scope-A', [a])
+      await svc2.hydrate('scope-B', [b])
+      expect(a.resolved).toBe('value-for-scope-A')
+      expect(b.resolved).toBe('value-for-scope-B')
+    })
+
+    it('peekResolved confines a scope-dependent source to its own scope', async () => {
+      const svc2 = new SecretHydrationService((id) => (id === 'scoped' ? makeScopedResolver() : undefined))
+      await svc2.hydrate('scope-A', [new SecretValue('scoped', { name: 'TOK' })])
+      // Correct scope → its own value; wrong/absent scope → no leak.
+      expect(svc2.peekResolved('scoped', { name: 'TOK' }, 'scope-A')).toBe('value-for-scope-A')
+      expect(svc2.peekResolved('scoped', { name: 'TOK' }, 'scope-B')).toBeUndefined()
+      expect(svc2.peekResolved('scoped', { name: 'TOK' })).toBeUndefined()
+    })
+
+    it('a scope-independent source still shares its peek across scopes', async () => {
+      // The default resolver (scopeIndependent unset → treated as true).
+      await svc.hydrate('scope-A', [new SecretValue('env', { name: 'API_KEY' })])
+      // peek from a DIFFERENT scope (and scopeless) still hits.
+      expect(svc.peekResolved('env', { name: 'API_KEY' }, 'scope-Z')).toBe('secret-value')
+      expect(svc.peekResolved('env', { name: 'API_KEY' })).toBe('secret-value')
+    })
+  })
 })

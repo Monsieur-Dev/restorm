@@ -15,6 +15,7 @@ import { StringValue } from '../../../shared/types/collections'
 import { DEFAULT_REQUEST_TIMEOUT_MS } from '../../../shared/config/constants'
 import type { VariableContext } from './types'
 import { resolveTemplate } from './resolveTemplate'
+import { resolveKeyValues, generateResponseId } from './keyValueResolution'
 
 /** Input for URL resolution */
 export interface URLResolutionInput {
@@ -62,18 +63,6 @@ export interface HTTPRequestInput {
   filePath?: string
   /** Variable context from environments */
   variableContext: VariableContext
-}
-
-/**
- * Resolve all KeyValue pairs using the variable context
- */
-function resolveKeyValues(keyValues: KeyValue[], context: VariableContext): KeyValue[] {
-  return keyValues.map((kv) => ({
-    key: resolveTemplate(kv.key, context),
-    value: new StringValue(resolveTemplate(kv.value.toString(), context)),
-    description: kv.description,
-    enabled: kv.enabled
-  }))
 }
 
 /**
@@ -129,13 +118,6 @@ export function resolveRequestURL(input: URLResolutionInput): ResolvedURLResult 
     baseUrl,
     queryString
   }
-}
-
-/**
- * Generate a unique ID for the response
- */
-function generateResponseId(): string {
-  return `resp_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`
 }
 
 /**
@@ -233,7 +215,11 @@ export async function executeHTTPRequest(input: HTTPRequestInput): Promise<HTTPR
 
   // Build body
   const { data, contentType } = buildRequestBody(input, context)
-  if (contentType && !headersObj['Content-Type']) {
+  // Case-insensitive presence check: a user header `content-type` (any
+  // casing) must suppress the default, else the request carries two
+  // Content-Type headers.
+  const hasContentType = Object.keys(headersObj).some((k) => k.toLowerCase() === 'content-type')
+  if (contentType && !hasContentType) {
     headersObj['Content-Type'] = contentType
   }
 

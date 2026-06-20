@@ -118,7 +118,7 @@ export function generateIds<T>(obj: T): T {
  * This matches known collection types:
  * - KeyValue: has 'key' and 'value' properties
  * - Environment: has 'name' and 'variables' properties
- * - Request types: has 'name' and 'type' properties (http, graphql, grpc, soap, websocket)
+ * - Request types: has 'name' and 'type' properties (http, graphql, grpc, soap, websocket, odata, auth)
  * - Folder: has 'name', 'items', and 'configuration' properties
  * - Response types: has 'requestId' property
  */
@@ -133,9 +133,14 @@ function shouldHaveId(obj: Record<string, unknown>): boolean {
     return true
   }
 
-  // Request types: has name and type (http, graphql, grpc, soap, websocket)
+  // Request types — must stay in lockstep with the class resolver's
+  // `type` discriminants (HTTPRequest…'http', ODataRequest…'odata',
+  // AuthenticationRequest…'auth', …). Omitting one means that request
+  // kind gets no runtime id on legacy load and duplicate ids aren't
+  // regenerated on copy-paste, colliding in every UUID-keyed
+  // per-request store.
   if ('name' in obj && 'type' in obj) {
-    const requestTypes = ['http', 'graphql', 'grpc', 'soap', 'websocket']
+    const requestTypes = ['http', 'graphql', 'grpc', 'soap', 'websocket', 'odata', 'auth']
     if (requestTypes.includes(obj['type'] as string)) {
       return true
     }

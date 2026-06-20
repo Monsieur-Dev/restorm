@@ -12,6 +12,12 @@ describe('KeyValue round-trip — secret', () => {
     expect(sv.params).toEqual({ name: 'API_TOKEN' })
   })
 
+  it('preserves the secret discriminant (never degrades to StringValue) even with a missing source', () => {
+    const kv = KeyValue.fromPlain({ key: 'k', value: { type: 'secret', params: { name: 'X' } } })
+    expect(kv.value).toBeInstanceOf(SecretValue)
+    expect((kv.value as SecretValue).params).toEqual({ name: 'X' })
+  })
+
   it('round-trip: fromPlain → serialize never includes resolved', () => {
     const kv = KeyValue.fromPlain({ key: 'k', value: { type: 'secret', source: 'envVar', params: { name: 'X' } } })
     const sv = kv.value as SecretValue
@@ -25,9 +31,10 @@ describe('KeyValue round-trip — secret', () => {
     expect(kv.value).toBe(sv)
   })
 
-  it('coerces missing source to empty string', () => {
+  it('coerces a non-string source to empty string but keeps it a SecretValue', () => {
     const kv = KeyValue.fromPlain({ key: 'k', value: { type: 'secret', source: 123, params: {} } })
     const sv = kv.value as SecretValue
+    expect(sv).toBeInstanceOf(SecretValue)
     expect(sv.source).toBe('')
   })
 

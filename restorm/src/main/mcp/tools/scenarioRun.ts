@@ -102,12 +102,18 @@ async function executeRequest(node: ScenarioNode, key: string): Promise<Scenario
   }
 }
 
-/** Duration (ms) for a `wait` box — from config if present, else a default
- * long enough to make cancel easy to demo. (Config isn't persisted yet.) */
-function waitMs(node: ScenarioNode): number {
-  const cfg = node.config as Record<string, unknown> | undefined
-  const d = cfg?.['durationMs'] ?? cfg?.['duration']
-  return typeof d === 'number' && d > 0 ? d : 5000
+/** Duration (ms) for a `wait` box, read from the node's PERSISTED config —
+ * `durationMs` / `duration` (already in ms), falling back to 1000ms. Mirrors
+ * the scenario engine's wait executor (timeAndFlowExecutors) so the inspector's
+ * single-node run waits the same amount as a full run, rather than a divergent
+ * 5000ms demo default. (Single-node runs have no wired `duration` input, so the
+ * unit toggle that the engine applies to a wired value doesn't apply here.)
+ * Exported for unit-test coverage. */
+export function waitMs(node: ScenarioNode): number {
+  const cfg = node.config as { durationMs?: number; duration?: number } | undefined
+  if (typeof cfg?.durationMs === 'number' && cfg.durationMs > 0) return cfg.durationMs
+  if (typeof cfg?.duration === 'number' && cfg.duration > 0) return cfg.duration
+  return 1000
 }
 
 /** Delay for the box's duration; cancelable (the cancel rejects the run). */

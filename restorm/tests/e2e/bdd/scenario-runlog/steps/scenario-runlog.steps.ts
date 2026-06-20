@@ -190,21 +190,28 @@ When('I run the scenario {string} and copy all its logs', async ({}, scenarioNam
   if ((await allToggle.getAttribute('aria-checked')) !== 'true') await allToggle.click()
 
   // Click copy + read the clipboard back from Electron's main-process clipboard,
-  // RETRYING until the clipboard holds THIS scenario's log. The OS clipboard is
-  // system-wide and survives across the per-test Electron processes, so the
-  // PREVIOUS scenario's copied log lingers there; a copy that grabs a not-yet-
-  // rendered panel leaves that stale value in place. A bare non-empty guard then
-  // false-passes on the neighbour's log and snapshots the wrong run. Every run
-  // log opens with a `▶ <scenario>` boundary marker, so assert on that: it is
-  // unique to this scenario among its neighbours and only appears once the panel
-  // has actually re-rendered with this run's entries. Copy is idempotent.
-  const ownMarker = `▶ ${scenarioName}`
+  // RETRYING until the clipboard holds THIS scenario's COMPLETED log. The OS
+  // clipboard is system-wide and survives across the per-test Electron
+  // processes, so the PREVIOUS scenario's copied log lingers there; a copy that
+  // grabs a not-yet-rendered (or mid-run) panel leaves a stale/partial value.
+  //
+  // Wait for the run-END boundary marker `■ <scenario>`, NOT just the run-START
+  // `▶ <scenario>`: the start marker appears the instant the run begins, so on a
+  // loaded host the copy could fire mid-run and snapshot a TRUNCATED log (the
+  // source of the Arithmetics/Loops/Main flakiness). The end marker is the last
+  // entry the engine emits for this scenario, so its presence means the whole
+  // run-log is in the clipboard. Both markers carry the scenario name, so they
+  // also disambiguate this run from a neighbour's lingering clipboard. Copy is
+  // idempotent.
+  const startMarker = `▶ ${scenarioName}`
+  const endMarker = `■ ${scenarioName}`
   let text = ''
   await expect(async () => {
     await p.locator('[data-testid="scenario-inspector-logs-copy"]').click()
     text = await requireApp().evaluate(({ clipboard }) => clipboard.readText())
-    expect(text, `clipboard did not hold this run's log (missing "${ownMarker}")`).toContain(ownMarker)
-  }).toPass({ timeout: 8000 })
+    expect(text, `clipboard did not hold this run's log (missing start "${startMarker}")`).toContain(startMarker)
+    expect(text, `run did not complete before copy (missing end "${endMarker}")`).toContain(endMarker)
+  }).toPass({ timeout: 30000 })
   copiedYaml = normalizeRunLogYaml(text)
   copiedFor = scenarioName
 })

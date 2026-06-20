@@ -123,6 +123,8 @@ export const contextRegisterRequestArgs = z.tuple([
 
 export const contextUnregisterRequestArgs = z.tuple([requestIdArg])
 
+export const contextGetEnvironmentContextArgs = z.tuple([z.string()])
+
 export const contextSetRequestEnvironmentArgs = z.tuple([
   requestIdArg,
   z.string().nullable()
@@ -170,8 +172,19 @@ export const httpExecuteArgs = z.tuple([
   z.object({
     requestId: z.string(),
     method: z.string(),
-    timeout: z.number().optional()
-  }).loose()
+    timeout: z.number().optional(),
+    // Optional raw-body / URL overrides the OData path forwards through
+    // http:execute (see HTTPExecutionInput).
+    rawBody: z.string().optional(),
+    rawBodyContentType: z.string().optional(),
+    urlOverride: z.string().optional(),
+    // The renderer hands over the attached AuthenticationRequest as a
+    // POJO; the handler re-validates it via isPlainAuthPayload +
+    // AuthenticationRequest.fromPlain, so accept it as an opaque object
+    // here (that guard stays authoritative) rather than a structural
+    // schema. Enumerating it explicitly is what lets us drop `.loose()`.
+    authRequest: z.unknown().optional()
+  })
 ])
 
 export const httpCancelArgs = z.tuple([requestIdArg])
@@ -200,8 +213,12 @@ export const odataExecuteArgs = z.tuple([
      * dispatches to that URL verbatim instead of composing one from
      * the registered request. Used for `@odata.nextLink` pagination
      * and clickable navigation links. */
-    urlOverride: z.string().optional()
-  }).loose()
+    urlOverride: z.string().optional(),
+    /** Attached AuthenticationRequest POJO — re-validated in the handler
+     * via isPlainAuthPayload + fromPlain (that guard stays
+     * authoritative), so opaque here. */
+    authRequest: z.unknown().optional()
+  })
 ])
 
 export const odataCancelArgs = z.tuple([requestIdArg])
@@ -242,7 +259,7 @@ export const authPrefetchArgs = z.tuple([
       enabled: z.boolean().optional()
     })),
     expirationExpression: z.string().optional()
-  }).loose()
+  })
 ])
 
 // ==========================================================================
@@ -253,7 +270,7 @@ export const graphqlExecuteArgs = z.tuple([
   z.object({
     requestId: z.string(),
     timeout: z.number().optional()
-  }).loose()
+  })
 ])
 
 export const graphqlCancelArgs = z.tuple([requestIdArg])
@@ -379,7 +396,16 @@ export const apiUpdateRefreshFetchArgs = z.tuple([folderIdArg])
  * without reaching back through IPC. The renderer is the source of
  * truth for the project tree; this handler just mirrors it into the
  * main-side CollectionStore. */
-export const collectionsSyncArgs = z.tuple([z.array(z.unknown())])
+/** Each synced collection node must at least be a non-null OBJECT (not a
+ * primitive / null / array). This rejects a malformed or hostile renderer
+ * payload before it reaches `setCollections` — the audit flagged this as the
+ * renderer-controlled source-of-truth that ultimately drives the apiUpdate
+ * SSRF sourceUrl, so it shouldn't be a bare `z.unknown()`. We deliberately do
+ * NOT enumerate fields (no required `id`): the tree carries many node shapes
+ * (folder / env-folder / request / scenario, plus reactive clones) and the
+ * store's reify path owns the rich validation. `.loose()` keeps every field. */
+const syncedCollectionNode = z.object({}).loose()
+export const collectionsSyncArgs = z.tuple([z.array(syncedCollectionNode)])
 
 /** `[folderId, customValueLists]` — targeted update of one env-folder's
  * custom value lists. Lists pass through as `unknown` (no strip) so the
@@ -398,10 +424,16 @@ const miniBrowserBoundsSchema = z.object({
   height: z.number()
 })
 
-export const miniBrowserCreateArgs = z.tuple([tabIdArg, z.string().optional()])
+/** Only http(s) URLs may be embedded; empty string = "no initial URL". */
+const httpUrlOrEmpty = z.string().refine(
+  (v) => v === '' || /^https?:\/\//i.test(v),
+  { message: 'mini-browser URL must be http(s)' }
+)
+
+export const miniBrowserCreateArgs = z.tuple([tabIdArg, httpUrlOrEmpty.optional()])
 export const miniBrowserDestroyArgs = z.tuple([tabIdArg])
 export const miniBrowserSetBoundsArgs = z.tuple([tabIdArg, miniBrowserBoundsSchema])
-export const miniBrowserNavigateArgs = z.tuple([tabIdArg, z.string()])
+export const miniBrowserNavigateArgs = z.tuple([tabIdArg, httpUrlOrEmpty])
 export const miniBrowserReloadArgs = z.tuple([tabIdArg])
 export const miniBrowserGoBackArgs = z.tuple([tabIdArg])
 export const miniBrowserGoForwardArgs = z.tuple([tabIdArg])

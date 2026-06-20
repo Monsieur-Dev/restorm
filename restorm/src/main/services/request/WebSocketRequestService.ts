@@ -118,15 +118,15 @@ export function connectWebSocket(
     }
   }
   
-  // Socket.IO and MQTT would require additional libraries
-  // For now, we'll note that they need specific client implementations
+  // Socket.IO / MQTT are not implemented on THIS legacy path (the live
+  // execution path is WebSocketExecutionService). Fail FAST + loud rather
+  // than returning a never-connecting connection that silently sits at
+  // `connected:false` forever (the caller would otherwise wait out a
+  // spurious timeout with no signal of why).
   if (input.protocol === 'socketio' || input.protocol === 'mqtt') {
-    // These protocols require specific client libraries:
-    // - Socket.IO: socket.io-client
-    // - MQTT: mqtt.js
-    // In Electron, these can be loaded via the main process or preload
+    throw new Error(`${input.protocol} is not supported by connectWebSocket (use the scenario execution path)`)
   }
-  
+
   connections.set(connectionId, connection)
   return connection
 }

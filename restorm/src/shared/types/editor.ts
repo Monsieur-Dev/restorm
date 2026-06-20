@@ -264,6 +264,29 @@ export function isAuthenticationRequestTab(tab: RestormEditorTab): tab is Authen
   return tab.tabType === 'auth-request'
 }
 
+/** Any protocol's request tab (carries a backing `request`). */
+export type AnyRequestTab =
+  | HTTPRequestTab
+  | GraphQLRequestTab
+  | GrpcRequestTab
+  | SoapRequestTab
+  | WebSocketRequestTab
+  | ODataRequestTab
+  | AuthenticationRequestTab
+
+const REQUEST_TAB_TYPES: ReadonlySet<string> = new Set([
+  'http-request', 'graphql-request', 'grpc-request', 'soap-request',
+  'websocket-request', 'odata-request', 'auth-request'
+])
+
+/** Type guard for ANY request tab (any protocol). Use this instead of a
+ * `tabType.includes('request')` substring sniff — it matches the exact
+ * request-tab discriminants and narrows to the union that carries
+ * `request`. */
+export function isAnyRequestTab(tab: RestormEditorTab): tab is AnyRequestTab {
+  return tab.tabType !== undefined && REQUEST_TAB_TYPES.has(tab.tabType)
+}
+
 /** Type guard for ConsoleTab */
 export function isConsoleTab(tab: RestormEditorTab): tab is ConsoleTab {
   return tab.tabType === 'console'

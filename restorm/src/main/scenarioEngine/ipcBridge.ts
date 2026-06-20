@@ -123,12 +123,9 @@ export function installScenarioEngineIPC(): void {
 }
 
 function broadcast(event: EngineEvent): void {
-  // Engine-internal events go on one channel; the `log` events from
-  // the user-facing logger come through a different channel so the
-  // renderer can subscribe selectively. The discriminator is the
-  // event `type` — only `node-completed` / `node-failed` carry a
-  // `source: 'user'` log? No — actually the log is delivered through
-  // `readLog()` on demand for now; the event stream stays compact.
+  // Engine events stream on `scenario:engine:event`; run-log entries are NOT in
+  // this stream — they're pulled on demand via `readLog()` so the event stream
+  // stays compact.
   for (const win of BrowserWindow.getAllWindows()) {
     try { win.webContents.send('scenario:engine:event', event) } catch { /* swallow */ }
   }

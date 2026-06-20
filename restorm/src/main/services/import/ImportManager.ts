@@ -15,6 +15,7 @@ import type { EnvironmentFolder, FolderItem } from '../../../shared/models'
 import { isRequest, isAnyFolder, isHTTPRequest, isAuthenticationRequest, isGraphQLRequest, isGrpcRequest, isSoapRequest, isWebSocketRequest, isODataRequest } from '../../../shared/types/collections'
 import { disableEmptyKeyValues } from '../../../shared/utils/emptyKeyValueHelper'
 import { withFirewallBypass } from 'electron-core-ui'
+import { assertSafeFetchUrl } from '../../utils/urlSecurity'
 
 // ============================================================================
 // Types
@@ -47,6 +48,42 @@ export interface ImportOptions {
    * URL-based imports). Callers plug resolved auth headers here
    * after running an AuthenticationRequest via the cache service. */
   extraHeaders?: Record<string, string>
+}
+
+// ============================================================================
+// Safe redirect-following fetch
+// ============================================================================
+
+/** Cap on import redirect hops — generous for real APIs, bounded vs. a loop. */
+const MAX_IMPORT_REDIRECTS = 5
+
+/**
+ * Fetch `url`, following redirects MANUALLY so every hop is re-validated by the
+ * SSRF guard in STRICT mode (`allowPrivateHosts` is NOT carried past the first
+ * URL). The top-level import URL may be loopback/private (the user typed it),
+ * but a redirect must never be able to pivot to an internal / cloud-metadata
+ * target — that is the real SSRF vector. `node-fetch`/undici default to
+ * following redirects opaquely, which would bypass the per-hop check.
+ *
+ * Exported for unit-test coverage; the production call site is `importFrom`.
+ */
+export async function fetchFollowingSafeRedirects(url: string, init: RequestInit): Promise<Response> {
+  let current = url
+  for (let hop = 0; hop <= MAX_IMPORT_REDIRECTS; hop++) {
+    const response = await fetch(current, { ...init, redirect: 'manual' })
+    // 3xx with a Location → a redirect we must re-validate before following.
+    const location = response.status >= 300 && response.status < 400
+      ? response.headers.get('location')
+      : null
+    if (location === null) return response
+    // Resolve relative redirects against the current URL, then re-assert
+    // STRICTLY (no allowPrivateHosts) so the hop can't reach loopback/private/
+    // metadata even though the original explicit URL was allowed to.
+    const next = new URL(location, current).toString()
+    assertSafeFetchUrl(next)
+    current = next
+  }
+  throw new Error(`Too many redirects following the import URL (>${MAX_IMPORT_REDIRECTS})`)
 }
 
 // ============================================================================
@@ -135,14 +172,17 @@ export function detectFormat(content: string, filePath?: string): string | null 
     return 'graphql'
   }
   
-  // Detect gRPC proto files
-  if (trimmed.includes('syntax = "proto') || trimmed.includes('service ') && trimmed.includes('rpc ') ||
+  // Detect gRPC proto files. Parenthesise the `&&` group explicitly:
+  // `A || B && C || D` parses as `A || (B && C) || D` — correct, but the
+  // implicit precedence is a foot-gun on edit, so make it visible.
+  if (trimmed.includes('syntax = "proto') || (trimmed.includes('service ') && trimmed.includes('rpc ')) ||
       filePath?.endsWith('.proto')) {
     return 'grpc'
   }
-  
-  // Detect SOAP WSDL
-  if (trimmed.includes('<wsdl:definitions') || trimmed.includes('<definitions') && trimmed.includes('wsdl') ||
+
+  // Detect SOAP WSDL. Same explicit grouping: a bare `<definitions` only
+  // counts as SOAP when it ALSO mentions `wsdl`.
+  if (trimmed.includes('<wsdl:definitions') || (trimmed.includes('<definitions') && trimmed.includes('wsdl')) ||
       filePath?.endsWith('.wsdl')) {
     return 'soap'
   }
@@ -347,6 +387,13 @@ export async function importFrom(
       source = input
 
       try {
+        // SSRF guard. The top-level import URL is EXPLICIT (the user/agent
+        // typed it), so loopback/private hosts are allowed — importing a spec
+        // from a local dev server is legitimate — but link-local /
+        // cloud-metadata is still blocked. Redirect hops are re-checked
+        // STRICTLY below so the explicit URL can't pivot to an internal /
+        // metadata target (the real SSRF vector).
+        assertSafeFetchUrl(input, { allowPrivateHosts: true })
         const fetchInit: RequestInit = options.extraHeaders && Object.keys(options.extraHeaders).length > 0
           ? { headers: options.extraHeaders }
           : {}
@@ -371,7 +418,7 @@ export async function importFrom(
         // user to authorise the very fetch they just typed a URL
         // for, and so a fresh project with empty `projectOrigins`
         // doesn't dead-end on auto-deny.
-        const response = await withFirewallBypass(() => fetch(input, fetchInit))
+        const response = await withFirewallBypass(() => fetchFollowingSafeRedirects(input, fetchInit))
         logger.info('[ImportManager] fetch response', {
           url: input,
           status: response.status,
@@ -469,9 +516,12 @@ export async function tryAllImports(
   try {
     if (isUrl) {
       source = input
-      // Same firewall bypass rationale as `importFromUrl` above —
-      // user typed / dropped the URL, that's the authorisation
-      // signal.
+      // Same firewall bypass rationale as `importFrom` above — user
+      // typed / dropped the URL, that's the authorisation signal, and
+      // it's an EXPLICIT top-level import URL so loopback/private hosts
+      // (a local dev API server) are a legitimate target. The SSRF guard
+      // still blocks link-local / cloud-metadata (bypass ≠ unrestricted).
+      assertSafeFetchUrl(input, { allowPrivateHosts: true })
       const response = await withFirewallBypass(() => fetch(input))
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`)

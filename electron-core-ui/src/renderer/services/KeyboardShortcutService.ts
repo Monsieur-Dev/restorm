@@ -31,7 +31,7 @@ interface ShortcutEntry {
  * Parse a shortcut string into its components
  * Supports formats like: "Ctrl+O", "Ctrl+Shift+S", "F2", "Delete", "Alt+F4"
  */
-function parseShortcut(shortcut: string): ParsedShortcut {
+export function parseShortcut(shortcut: string): ParsedShortcut {
   const parts = shortcut.split('+').map(p => p.trim().toLowerCase())
   
   const result: ParsedShortcut = {
@@ -95,22 +95,30 @@ function normalizeEventKey(event: KeyboardEvent): string {
 /**
  * Check if an event matches a parsed shortcut
  */
-function matchesShortcut(event: KeyboardEvent, parsed: ParsedShortcut): boolean {
+export function matchesShortcut(event: KeyboardEvent, parsed: ParsedShortcut): boolean {
   const eventKey = normalizeEventKey(event)
   
-  // Check modifiers
-  if (parsed.ctrl !== (event.ctrlKey || event.metaKey)) return false
+  // Check modifiers. ctrl and meta are DISTINCT (parseShortcut maps
+  // `ctrl`→ctrl, `cmd`/`meta`→meta), so match each against its own event
+  // flag. The previous `parsed.ctrl !== (ctrlKey || metaKey)` conflated
+  // them: a `cmd+…` shortcut never fired (a Cmd press set metaKey, which
+  // made the ctrl check reject it), and `ctrl+…` could be ambiguous on
+  // metaKey. Exact per-modifier comparison fixes both.
+  if (parsed.ctrl !== event.ctrlKey) return false
+  if (parsed.meta !== event.metaKey) return false
   if (parsed.alt !== event.altKey) return false
   if (parsed.shift !== event.shiftKey) return false
-  if (parsed.meta !== event.metaKey) return false
   
   // Check the key itself
   return eventKey === parsed.key
 }
 
+/** Removes a previously-registered IPC listener. */
+type Disposer = () => void
+
 /** Type for the electronAPI exposed by preload */
 interface ElectronAPI {
-  onKeyboardShortcut?: (cb: (shortcut: string) => void) => void
+  onKeyboardShortcut?: (cb: (shortcut: string) => void) => Disposer | undefined
   registerInterceptedShortcuts?: (shortcuts: string[]) => void
   isDevMode?: () => Promise<boolean>
 }
@@ -128,13 +136,24 @@ class KeyboardShortcutService {
   private isListening: boolean
   private boundHandler: (event: KeyboardEvent) => void
   private ipcListenerRegistered: boolean
+  /** Disposer for the main-process keyboard-shortcut IPC subscription, kept
+   * so stopListening can remove it and reset the registered latch. Without
+   * this, stopListening left ipcListenerRegistered true, so a later
+   * startListening re-subscribed and every IPC shortcut fired N times. */
+  private ipcListenerDisposer: (() => void) | null
   private devModeInitialized: boolean
+  /** Disposer for the dev-mode refresh shortcut, kept so clearAll can
+   * unregister it + re-init cleanly (the latch used to leave it
+   * orphaned). */
+  private devModeDisposer: (() => void) | null
 
   constructor() {
     this.shortcuts = new Map()
     this.isListening = false
     this.ipcListenerRegistered = false
+    this.ipcListenerDisposer = null
     this.devModeInitialized = false
+    this.devModeDisposer = null
     this.boundHandler = this.handleKeyDown.bind(this)
   }
   
@@ -161,8 +180,10 @@ class KeyboardShortcutService {
       try {
         const isDevMode = await electronAPI.isDevMode()
         if (isDevMode) {
-          // Register Ctrl+Shift+R for page refresh in dev mode
-          this.register('Ctrl+Shift+R', () => {
+          // Register Ctrl+Shift+R for page refresh in dev mode. Keep the
+          // disposer so clearAll can unregister it (it used to be
+          // discarded, leaving a dangling registration after clearAll).
+          this.devModeDisposer = this.register('Ctrl+Shift+R', () => {
             window.location.reload()
           })
         }
@@ -194,9 +215,10 @@ class KeyboardShortcutService {
     
     const electronAPI = getElectronAPI()
     if (electronAPI?.onKeyboardShortcut) {
-      electronAPI.onKeyboardShortcut((shortcut: string) => {
+      const disposer = electronAPI.onKeyboardShortcut((shortcut: string) => {
         this.triggerShortcut(shortcut)
       })
+      this.ipcListenerDisposer = typeof disposer === 'function' ? disposer : null
       this.ipcListenerRegistered = true
     }
   }
@@ -206,8 +228,18 @@ class KeyboardShortcutService {
    */
   stopListening(): void {
     if (!this.isListening) return
-    
+
     document.removeEventListener('keydown', this.boundHandler, { capture: true })
+
+    // Tear down the IPC subscription and reset the latch, so a later
+    // startListening re-subscribes exactly once instead of stacking a second
+    // listener (which made each IPC shortcut fire twice, then thrice, …).
+    if (this.ipcListenerDisposer) {
+      this.ipcListenerDisposer()
+      this.ipcListenerDisposer = null
+    }
+    this.ipcListenerRegistered = false
+
     this.isListening = false
   }
 
@@ -358,6 +390,15 @@ class KeyboardShortcutService {
   clearAll(): void {
     this.shortcuts.clear()
     this.stopListening()
+    // Reset the dev-mode latch so a later initDevModeShortcuts re-registers
+    // the refresh shortcut (the flag used to stay true after clearAll, so
+    // the dev refresh was lost for the rest of the session). Drop the stale
+    // disposer first.
+    if (this.devModeDisposer) {
+      this.devModeDisposer()
+      this.devModeDisposer = null
+    }
+    this.devModeInitialized = false
   }
 }
 

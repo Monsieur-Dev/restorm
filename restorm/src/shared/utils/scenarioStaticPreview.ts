@@ -1,7 +1,7 @@
 import Handlebars from 'handlebars'
 import { registerHandlebarsHelpers } from './handlebars/registerAll'
 import type { ScenarioNode, ScenarioEdge } from '../types/scenario'
-import { readInputParams } from '../scenarioInputParams'
+import { readInputParams, inputParamName } from '../scenarioInputParams'
 import { readOutputDecls } from '../scenarioOutputDecls'
 import { STATIC_PREVIEW_KINDS } from '../scenarioNodeCapabilities'
 import { compareValues as compareValuesShared } from '../scenarioComparison'
@@ -726,7 +726,7 @@ export function staticScenarioPreview(
       // that param's typed default as the example value.
       const out: Record<string, unknown> = {}
       for (const param of readInputParams(cfg)) {
-        out[param.name.trim() || 'value'] = concreteValue(param.valueType)
+        out[inputParamName(param)] = concreteValue(param.valueType)
       }
       return out
     }

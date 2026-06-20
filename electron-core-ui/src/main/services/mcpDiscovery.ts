@@ -1,4 +1,5 @@
-import { promises as fs, readdirSync, readFileSync } from 'node:fs'
+import { promises as fs, readdirSync, readFileSync, statSync } from 'node:fs'
+import { userInfo } from 'node:os'
 import { request as httpRequest } from 'node:http'
 import { tmpdir } from 'node:os'
 import { join, dirname } from 'node:path'
@@ -139,6 +140,25 @@ function isPidAlive(pid: number): boolean {
 }
 
 /**
+ * Trust a discovery file only if the CURRENT user owns it. The lockfile carries
+ * the MCP bearer token, so a file planted by another local user must not be read
+ * + routed to. On POSIX we compare the file's owner uid to ours.
+ *
+ * Windows caveat: NTFS has no Unix uid (Node reports `uid: 0` for everyone), so
+ * this check can't distinguish owners there — we fall back to trusting the file.
+ * The dir is created 0700 on POSIX; on a shared Windows host the discovery dir
+ * should live under a per-user profile path for the same guarantee.
+ */
+function isOwnedByCurrentUser(filePath: string): boolean {
+  if (process.platform === 'win32') return true
+  try {
+    return statSync(filePath).uid === userInfo().uid
+  } catch {
+    return false
+  }
+}
+
+/**
  * Find a live discovery entry in `dir` whose `name` matches verbatim. Scans
  * the dir synchronously (small, loopback-only), filters to parseable
  * lockfiles with an alive pid and a usable port/token. Returns the most-recent
@@ -158,9 +178,12 @@ export function findLiveSessionByName(dir: string, name: string): McpDiscoveryEn
   const matches: McpDiscoveryEntry[] = []
   for (const e of dirents) {
     if (!e.isFile() || !e.name.endsWith('.json')) continue
+    const filePath = join(dir, e.name)
+    // Don't read (or trust the token in) a discovery file owned by another user.
+    if (!isOwnedByCurrentUser(filePath)) continue
     let parsed: Partial<McpDiscoveryEntry>
     try {
-      parsed = JSON.parse(readFileSync(join(dir, e.name), 'utf8')) as Partial<McpDiscoveryEntry>
+      parsed = JSON.parse(readFileSync(filePath, 'utf8')) as Partial<McpDiscoveryEntry>
     } catch {
       continue
     }

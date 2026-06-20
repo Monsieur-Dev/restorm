@@ -9,6 +9,7 @@ import { StringValue } from '../../../shared/types/collections'
 import { logger } from 'electron-core-ui/main'
 import type { VariableContext } from './types'
 import { resolveTemplate } from './resolveTemplate'
+import { resolveKeyValues, headersToObject, generateResponseId } from './keyValueResolution'
 import { DEFAULT_REQUEST_TIMEOUT_MS } from '../../../shared/config/constants'
 
 // Re-export for consumers
@@ -28,31 +29,6 @@ export interface GraphQLRequestInput {
   headers: KeyValue[]
   /** Variable context from environments */
   variableContext: VariableContext
-}
-
-/** Generate a unique ID for the response */
-function generateResponseId(): string {
-  return `resp_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`
-}
-
-/** Resolve KeyValue pairs with variable context */
-function resolveKeyValues(keyValues: KeyValue[], context: VariableContext): KeyValue[] {
-  return keyValues.map((kv) => ({
-    ...kv,
-    key: resolveTemplate(kv.key, context),
-    value: new StringValue(resolveTemplate(kv.value.toString(), context))
-  }))
-}
-
-/** Convert headers to object */
-function headersToObject(headers: KeyValue[]): Record<string, string> {
-  const result: Record<string, string> = {}
-  for (const h of headers) {
-    if (h.key) {
-      result[h.key] = h.value.toString()
-    }
-  }
-  return result
 }
 
 /** Convert object to KeyValue array */
@@ -79,8 +55,11 @@ export async function executeGraphQLRequest(input: GraphQLRequestInput): Promise
   const resolvedHeaders = resolveKeyValues(input.headers, context)
   const headersObj = headersToObject(resolvedHeaders)
   
-  // Ensure Content-Type is set
-  headersObj['Content-Type'] ??= 'application/json'
+  // Ensure Content-Type is set — case-insensitive presence check so a
+  // user header in any casing suppresses the default (no duplicate).
+  if (!Object.keys(headersObj).some((k) => k.toLowerCase() === 'content-type')) {
+    headersObj['Content-Type'] = 'application/json'
+  }
   
   // Parse variables
   let variables: Record<string, unknown> = {}

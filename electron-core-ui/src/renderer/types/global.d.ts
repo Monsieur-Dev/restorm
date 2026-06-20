@@ -160,10 +160,19 @@ interface WindowApi {
 declare global {
   interface Window {
     api: WindowApi
+    // Mirrors the preload's createElectronAPI() surface. The on* methods
+    // return a disposer that removes the IPC listener — declared here so
+    // renderer consumers can capture it (and so the type stays in step with
+    // the preload, which is in a separate tsconfig project we don't import
+    // across). Keep in sync with src/preload/electronAPI.ts.
     electronAPI?: {
-      onPlatform: (callback: (platform: string) => void) => void
-      onWindowState: (callback: (state: string) => void) => void
+      onPlatform: (callback: (platform: string) => void) => () => void
+      onWindowState: (callback: (state: string) => void) => () => void
       sendAction: (action: string) => void
+      onKeyboardShortcut: (callback: (shortcut: string) => void) => () => void
+      registerInterceptedShortcuts: (shortcuts: string[]) => void
+      isDevMode: () => Promise<boolean>
+      notifyReady: () => void
     }
   }
 }

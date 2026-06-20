@@ -61,6 +61,19 @@ function errorReply(message: string): { content: { type: 'text'; text: string }[
 const BODY_TRUNCATION_THRESHOLD_BYTES = 50 * 1024
 const BODY_INLINE_PREVIEW_BYTES = 4 * 1024
 
+/**
+ * Per-instance private directory for spilled response bodies. A
+ * response body can carry secret-bearing data (tokens, PII), so it
+ * must not land world-readable in the shared system temp dir.
+ * `mkdtemp` creates the directory 0700; the files inside are written
+ * 0600. Created lazily and memoised for the lifetime of the process.
+ */
+let spillDirPromise: Promise<string> | null = null
+function getSpillDir(): Promise<string> {
+  spillDirPromise ??= fs.promises.mkdtemp(path.join(os.tmpdir(), 'restorm-mcp-body-'))
+  return spillDirPromise
+}
+
 async function maybeTruncateBody(shaped: unknown): Promise<unknown> {
   if (!shaped || typeof shaped !== 'object') return shaped
   const obj = shaped as Record<string, unknown> & { body?: unknown }
@@ -81,16 +94,17 @@ async function maybeTruncateBody(shaped: unknown): Promise<unknown> {
   // the same requestId in the same millisecond (run_request_batch, racing
   // retries) don't clobber each other's spill files.
   const suffix = Math.random().toString(36).slice(2, 10)
-  const fileName = `restorm-mcp-body-${safeId}-${Date.now()}-${suffix}.json`
-  const filePath = path.join(os.tmpdir(), fileName)
+  const fileName = `body-${safeId}-${Date.now()}-${suffix}.json`
   // Persist the body in its prettiest form: pretty-print JSON when we
   // had structured data, otherwise the raw string. The caller can
   // Read the file directly without re-parsing.
   const persisted = typeof obj.body === 'string'
     ? obj.body
     : JSON.stringify(obj.body, null, 2)
+  let filePath = ''
   try {
-    await fs.promises.writeFile(filePath, persisted, 'utf-8')
+    filePath = path.join(await getSpillDir(), fileName)
+    await fs.promises.writeFile(filePath, persisted, { encoding: 'utf-8', mode: 0o600 })
   } catch (err) {
     // Persistence failed — keep the original body. The harness's own
     // spillover still has us covered; we just lose the structured
@@ -198,7 +212,10 @@ function shapeHistoryDetail(detail: unknown): unknown {
   // We gate the grpc-specific extras on `protocol === 'grpc'` so an
   // HTTP response doesn't end up with a misleading `grpcMethod: "GET"`.
   const requestMeta = (d['requestMeta'] ?? {}) as Record<string, unknown>
-  const protocol = response['type'] ?? 'http'
+  // Every history entry stamps its real `type` (http/grpc/websocket/…). If it
+  // is ever missing, surface 'unknown' rather than silently claiming 'http' —
+  // mislabelling a grpc/ws entry as http is worse than admitting we don't know.
+  const protocol = response['type'] ?? 'unknown'
   const isGrpc = protocol === 'grpc'
   const sentRequest = {
     method: response['requestMethod'] ?? requestMeta['method'],
@@ -249,15 +266,10 @@ function broadcastOpenTab(itemId: string): void {
   }
 }
 
-async function waitForNewHistoryEntry(requestId: string, baselineGuid: string | null, timeoutMs: number): Promise<{ guid: string } | null> {
-  const deadline = Date.now() + timeoutMs
-  while (Date.now() < deadline) {
-    const entries = await responseHistoryService.list(requestId)
-    const top = entries[0]
-    if (top !== undefined && top.guid !== baselineGuid) return { guid: top.guid }
-    await new Promise<void>((resolve) => setTimeout(resolve, 200))
-  }
-  return null
+function waitForNewHistoryEntry(requestId: string, baselineGuid: string | null, timeoutMs: number): Promise<{ guid: string } | null> {
+  // Event-driven: ResponseHistoryService wakes us when the new entry is stored,
+  // so we don't busy-poll list() (disk/IPC) every 200ms for up to 120s.
+  return responseHistoryService.waitForNewEntry(requestId, baselineGuid, timeoutMs)
 }
 
 function delay(ms: number): Promise<void> {
@@ -265,21 +277,27 @@ function delay(ms: number): Promise<void> {
 }
 
 /**
- * Continuation token format for `read_stream`. We embed the request id
- * + the next-frame cursor into a single opaque string so the AI doesn't
+ * Continuation token format for `read_stream`. We embed the next-frame
+ * cursor + the request id into a single opaque string so the AI doesn't
  * need to track its own state. Plain text by design — there's nothing
  * sensitive in a cursor index.
+ *
+ * The cursor goes FIRST (it is always a `#`-free non-negative integer) and
+ * the request id is everything after the first `#`. That makes the split
+ * unambiguous even if a request id ever contains a `#` — decode uses
+ * `indexOf` on the leading numeric segment, so the request id is recovered
+ * verbatim regardless of its contents.
  */
 function encodeStreamToken(requestId: string, cursor: number): string {
-  return `${requestId}#${cursor}`
+  return `${cursor}#${requestId}`
 }
 
 function decodeStreamToken(token: string): { requestId: string; cursor: number } | null {
-  const idx = token.lastIndexOf('#')
+  const idx = token.indexOf('#')
   if (idx <= 0 || idx >= token.length - 1) return null
-  const requestId = token.slice(0, idx)
-  const cursor = Number(token.slice(idx + 1))
-  if (!Number.isFinite(cursor) || cursor < 0) return null
+  const cursor = Number(token.slice(0, idx))
+  const requestId = token.slice(idx + 1)
+  if (!Number.isInteger(cursor) || cursor < 0) return null
   return { requestId, cursor }
 }
 

@@ -112,6 +112,10 @@ export const EnvironmentProvider: React.FC<EnvironmentProviderProps> = ({
   })
 
   const restoreLoadedRef = useRef(false)
+  // Monotonic generation guarding async resolveEnvId() calls: each new resolve
+  // bumps it; a resolve only applies its result if it's still the latest, so a
+  // slow resolve can't land after a newer one (or after unmount).
+  const resolveGenRef = useRef(0)
 
   // Stable dep identity — the persistence key is an object, so spread
   // the primitives for the effects' dep list to avoid re-running on
@@ -202,9 +206,10 @@ export const EnvironmentProvider: React.FC<EnvironmentProviderProps> = ({
     } else {
       // Re-resolve: with the override gone, the folder default (or
       // first env) should take over.
+      const gen = ++resolveGenRef.current
       void (async () => {
         const next = await resolveEnvId(persistenceKey, environments)
-        setSelectedEnvIdRaw(next)
+        if (resolveGenRef.current === gen) setSelectedEnvIdRaw(next)
       })()
     }
     eventBus.emitLocalSync(DocumentEvents.REQUEST_ENV_SET, {
@@ -220,9 +225,11 @@ export const EnvironmentProvider: React.FC<EnvironmentProviderProps> = ({
   useEffect(() => {
     if (!projectUuid || !envFolderId || !requestId || !environments || environments.length === 0) return
     const reresolve = (): void => {
+      const gen = ++resolveGenRef.current
       void (async () => {
         const next = await resolveEnvId({ projectUuid, envFolderId, requestId }, environments)
-        setSelectedEnvIdRaw(next)
+        // Drop a stale resolve (a newer one started, or we unmounted/re-subscribed).
+        if (resolveGenRef.current === gen) setSelectedEnvIdRaw(next)
       })()
     }
     const folderSub = eventBus.subscribe<EnvFolderEnvEventPayload>(

@@ -127,14 +127,16 @@ function buildModels(spec: OpenAPI3SpecLike): NormalizedModel[] {
 function buildEnums(spec: OpenAPI3SpecLike): NormalizedEnum[] {
   const out: NormalizedEnum[] = []
   const seen = new Set<string>()
-  const visit = (schema: OpenAPISchemaLike, name: string): void => {
+  const visit = (schema: OpenAPISchemaLike, name: string, depth = 0): void => {
+    // Depth fuse — guard against self-referential / cyclic nested schemas.
+    if (depth > 64) return
     if (schema.enum && schema.enum.length > 0 && !seen.has(name)) {
       out.push({ name, values: schema.enum.slice(), deprecated: schema.deprecated === true })
       seen.add(name)
     }
     if (schema.properties) {
       for (const [propName, propSchema] of Object.entries(schema.properties)) {
-        visit(propSchema, `${name} ${propName}`)
+        visit(propSchema, `${name} ${propName}`, depth + 1)
       }
     }
   }

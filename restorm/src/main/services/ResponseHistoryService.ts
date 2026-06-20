@@ -38,7 +38,7 @@ import type { GRPCExecutionResult } from './GRPCExecutionService'
 import type { SOAPExecutionResult } from './SOAPExecutionService'
 import type { WebSocketExecutionResult } from './WebSocketExecutionService'
 import { normalizeODataResponse } from '../../shared/utils/odataResponse'
-import { redactTokensFromBody } from './AuthenticationRedaction'
+import { redactTokensFromBody, collectTokenValues, redactTokensFromHeaders } from './AuthenticationRedaction'
 import { isAuthenticationRequest } from '../../shared/types/collections'
 
 const DEFAULT_MAX_PER_REQUEST = 10
@@ -71,9 +71,11 @@ function httpOutcome(result: { success: boolean; statusCode?: number }): Respons
  * non-zero value indicates an error (UNAVAILABLE, UNAUTHENTICATED,
  * etc.). We collapse to a binary outcome.
  */
+/** gRPC status 0 == OK; any other code (or a missing one) is a failure. */
+const GRPC_STATUS_OK = 0
 function grpcOutcome(result: GRPCExecutionResult): ResponseHistoryOutcome {
   if (!result.success) return 'failure'
-  return (result.statusCode ?? -1) === 0 ? 'ok' : 'failure'
+  return result.statusCode === GRPC_STATUS_OK ? 'ok' : 'failure'
 }
 
 /**
@@ -92,6 +94,53 @@ function outcomeToSuccess(outcome: ResponseHistoryOutcome): boolean {
 class ResponseHistoryService {
   private subscriptions: Subscription[] = []
   private initialized = false
+  /** Per-request listeners woken when a new history entry is stored, so callers
+   * (e.g. the MCP `run_request` flow) can await the new entry instead of
+   * busy-polling `list()` (disk/IPC) on a fixed interval. */
+  private readonly storeWaiters = new Map<string, Set<(guid: string) => void>>()
+
+  /**
+   * Resolve once a NEW history entry (guid !== baselineGuid) lands for
+   * `requestId`, or to `null` after `timeoutMs`. Checks the current top first
+   * (the entry may already exist), then waits on a store notification — no
+   * polling loop.
+   */
+  async waitForNewEntry(requestId: string, baselineGuid: string | null, timeoutMs: number): Promise<{ guid: string } | null> {
+    const top = (await this.list(requestId))[0]
+    if (top !== undefined && top.guid !== baselineGuid) return { guid: top.guid }
+
+    return new Promise((resolve) => {
+      let settled = false
+      const set = this.storeWaiters.get(requestId) ?? new Set()
+      const listener = (guid: string): void => {
+        if (settled || guid === baselineGuid) return
+        settled = true
+        cleanup()
+        resolve({ guid })
+      }
+      const cleanup = (): void => {
+        clearTimeout(timer)
+        set.delete(listener)
+        if (set.size === 0) this.storeWaiters.delete(requestId)
+      }
+      const timer = setTimeout(() => {
+        if (settled) return
+        settled = true
+        cleanup()
+        resolve(null)
+      }, timeoutMs)
+      set.add(listener)
+      this.storeWaiters.set(requestId, set)
+    })
+  }
+
+  private notifyStored(requestId: string, guid: string): void {
+    const set = this.storeWaiters.get(requestId)
+    if (!set) return
+    for (const listener of [...set]) {
+      try { listener(guid) } catch { /* listener errors must not derail a store */ }
+    }
+  }
 
   initialize(): void {
     if (this.initialized) return
@@ -153,6 +202,7 @@ class ResponseHistoryService {
 
         nextEntriesData.set(this.getDetailEntryName(guid), JSON.stringify(detail))
         await writeHistoryArchive(archivePath, updatedIndex, nextEntriesData)
+        this.notifyStored(requestId, guid)
       })
     } catch (error) {
       logger.error('[ResponseHistoryService] Failed to store response history', {
@@ -418,7 +468,7 @@ class ResponseHistoryService {
     const requestBodyData = this.getRequestBodyData(requestId)
     const requestBody = requestBodyData ? this.buildHttpBody(requestId, requestBodyData) : undefined
 
-    const responseHeaders = this.headersRecordToKeyValues(result.headers)
+    let responseHeaders = this.headersRecordToKeyValues(result.headers)
     const contentTypeHeader = result.headers?.['content-type']
     const contentType = Array.isArray(contentTypeHeader) ? contentTypeHeader[0] : contentTypeHeader
     const contentLengthHeader = result.headers?.['content-length']
@@ -432,14 +482,18 @@ class ResponseHistoryService {
     let responseBody = result.body ?? ''
     const collectionItem = collectionStore.findById(requestId)
     if (collectionItem && isRequest(collectionItem) && isAuthenticationRequest(collectionItem)) {
-      responseBody = redactTokensFromBody(
-        responseBody,
-        collectionItem.producedHeaders.map((h) => ({
-          key: h.key,
-          value: h.value.toString(),
-          enabled: h.enabled
-        }))
-      )
+      const produced = collectionItem.producedHeaders.map((h) => ({
+        key: h.key,
+        value: h.value.toString(),
+        enabled: h.enabled
+      }))
+      // Capture the resolved token VALUES from the JSON body so they
+      // can be scrubbed from the (non-JSON) body AND the response
+      // headers — a token often echoes back in a Set-Cookie / custom
+      // header, which used to persist in clear on disk.
+      const tokenValues = collectTokenValues(responseBody, produced)
+      responseBody = redactTokensFromBody(responseBody, produced, tokenValues)
+      responseHeaders = redactTokensFromHeaders(responseHeaders, tokenValues)
     }
 
     return {

@@ -608,25 +608,27 @@ export class FileService {
    * Open a file (or folder if folderLoader callback is provided)
    */
   public async open(path?: string, folderLoader?: (folderPath: string) => Promise<unknown>): Promise<{ success: boolean; content?: unknown; isDirectory?: boolean }> {
-    let filePath: string
+    let filePath = ''
 
-    // Mark as loading to prevent dirty state during initialization
+    // Mark as loading to prevent dirty state during initialization. A single
+    // try/finally guarantees the flag is cleared on EVERY exit path (folder
+    // success, cancel, error) — it was previously left `true` on the
+    // folder-success and exception paths, wedging the service in "loading".
     this._isLoading = true
 
-    // Show dialog if no path provided
-    if (path) {
-      filePath = path
-    } else {
-      const result = await this.showOpenDialog()
-      const selectedPath = result.filePaths[0]
-      if (result.canceled || !selectedPath) {
-        this._isLoading = false
-        return { success: false }
-      }
-      filePath = selectedPath
-    }
-
     try {
+      // Show dialog if no path provided
+      if (path) {
+        filePath = path
+      } else {
+        const result = await this.showOpenDialog()
+        const selectedPath = result.filePaths[0]
+        if (result.canceled || !selectedPath) {
+          return { success: false }
+        }
+        filePath = selectedPath
+      }
+
       // Check if path is a directory
       const stats = statSync(filePath)
       if (stats.isDirectory()) {
@@ -639,7 +641,6 @@ export class FileService {
           }
         }
         // No folder loader or loading failed - return indication that it's a directory
-        this._isLoading = false
         return { success: false, isDirectory: true }
       }
 
@@ -688,6 +689,8 @@ export class FileService {
       const wrappedError = new FileSystemError('Failed to open file', 'FS_READ_FAILED', { cause: error })
       logger.error('FileService: Failed to open file', { path: filePath, ...errorMeta(wrappedError) })
       return { success: false }
+    } finally {
+      this._isLoading = false
     }
   }
 

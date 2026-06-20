@@ -5,9 +5,45 @@
  * Connects to the CollectionStore for data management.
  */
 
+import { z } from 'zod'
 import { searchService, logger } from 'electron-core-ui/main'
 import { contextService, responseHistoryService } from '../services'
 import { collectionStore, pubsub, PUBSUB_TOPICS } from '../services/CollectionStore'
+import { REQUEST_TYPES } from '../../shared/models/types'
+
+// ---------------------------------------------------------------------------
+// Mutation input validation
+//
+// GraphQL inputs arrive untyped; the resolvers used to `as`-cast them straight
+// into the store. Parse each create/update input through a zod schema instead,
+// so a malformed payload is rejected at the boundary rather than silently
+// writing a bad node (the cast hid missing/extra fields).
+// ---------------------------------------------------------------------------
+const folderCreateSchema = z.object({ id: z.string().optional(), name: z.string() })
+const folderUpdateSchema = z.object({ name: z.string().optional() })
+const requestCreateSchema = z.object({
+  id: z.string().optional(),
+  name: z.string(),
+  type: z.enum(REQUEST_TYPES)
+})
+const requestUpdateSchema = z.object({ name: z.string().optional() })
+const environmentCreateSchema = z.object({
+  id: z.string().optional(),
+  name: z.string(),
+  variables: z.array(z.object({ key: z.string(), value: z.string() })).optional()
+})
+const environmentUpdateSchema = z.object({ name: z.string().optional() })
+
+/** Parse a GraphQL mutation input through a schema, throwing a clear GraphQL
+ * error (with the mutation name) when it doesn't match. */
+function parseInput<S extends z.ZodType>(schema: S, input: unknown, mutation: string): z.infer<S> {
+  const result = schema.safeParse(input)
+  if (!result.success) {
+    const issues = result.error.issues.map((i) => `${i.path.join('.')}: ${i.message}`).join('; ')
+    throw new Error(`Invalid input for ${mutation}: ${issues}`)
+  }
+  return result.data as z.infer<S>
+}
 
 /**
  * Set the collections store (called when file is loaded)
@@ -24,32 +60,45 @@ export function getCollectionsStore(): unknown[] {
   return collectionStore.getCollections()
 }
 
+/**
+ * Map a request `type` discriminant to its GraphQL union member name. Returns
+ * `null` for an unknown discriminant so the caller can throw with context — a
+ * silent default (the old `'HTTPRequest'` fallback) made an odata/auth request
+ * resolve as HTTPRequest and drop its protocol-specific fields.
+ */
+function resolveRequestType(type: unknown): string | null {
+  switch (type) {
+    case 'http': return 'HTTPRequest'
+    case 'graphql': return 'GraphQLRequest'
+    case 'grpc': return 'GrpcRequest'
+    case 'soap': return 'SoapRequest'
+    case 'websocket': return 'WebSocketRequest'
+    case 'odata': return 'ODataRequest'
+    case 'auth': return 'AuthenticationRequest'
+    default: return null
+  }
+}
+
 // Type resolver for union types
 const typeResolvers = {
   Request: {
     __resolveType(obj: Record<string, unknown>): string {
-      switch (obj.type) {
-        case 'http': return 'HTTPRequest'
-        case 'graphql': return 'GraphQLRequest'
-        case 'grpc': return 'GrpcRequest'
-        case 'soap': return 'SoapRequest'
-        case 'websocket': return 'WebSocketRequest'
-        default: return 'HTTPRequest'
+      const resolved = resolveRequestType(obj.type)
+      if (resolved === null) {
+        throw new Error(`Cannot resolve GraphQL Request type for discriminant "${String(obj.type)}"`)
       }
+      return resolved
     }
   },
   FolderItem: {
     __resolveType(obj: Record<string, unknown>): string {
       if (obj.folderType === 'environment') return 'EnvironmentFolder'
       if (obj.items !== undefined && obj.type === undefined) return 'Folder'
-      switch (obj.type) {
-        case 'http': return 'HTTPRequest'
-        case 'graphql': return 'GraphQLRequest'
-        case 'grpc': return 'GrpcRequest'
-        case 'soap': return 'SoapRequest'
-        case 'websocket': return 'WebSocketRequest'
-        default: return 'Folder'
+      const resolved = resolveRequestType(obj.type)
+      if (resolved === null) {
+        throw new Error(`Cannot resolve GraphQL FolderItem type for discriminant "${String(obj.type)}"`)
       }
+      return resolved
     }
   }
 }
@@ -156,7 +205,7 @@ export const resolvers = {
   Mutation: {
     createFolder: (_: unknown, { parentId, input }: { parentId: string | null; input: unknown }): unknown => {
       logger.debug('[GraphQL] createFolder mutation', { parentId, input })
-      const folder = input as { id?: string; name: string; items?: unknown[] }
+      const folder = parseInput(folderCreateSchema, input, 'createFolder')
       return collectionStore.createFolder(parentId, {
         id: folder.id ?? '',
         name: folder.name
@@ -165,7 +214,7 @@ export const resolvers = {
 
     updateFolder: (_: unknown, { id, input }: { id: string; input: unknown }): unknown => {
       logger.debug('[GraphQL] updateFolder mutation', { id, input })
-      return collectionStore.updateFolder(id, input as { name?: string })
+      return collectionStore.updateFolder(id, parseInput(folderUpdateSchema, input, 'updateFolder'))
     },
 
     deleteFolder: (_: unknown, { id }: { id: string }): boolean => {
@@ -180,7 +229,7 @@ export const resolvers = {
 
     createRequest: (_: unknown, { parentId, input }: { parentId: string; input: unknown }): unknown => {
       logger.debug('[GraphQL] createRequest mutation', { parentId, input })
-      const request = input as { id?: string; name: string; type: 'http' | 'graphql' | 'grpc' | 'soap' | 'websocket' }
+      const request = parseInput(requestCreateSchema, input, 'createRequest')
       return collectionStore.createRequest(parentId, {
         id: request.id ?? '',
         name: request.name,
@@ -190,7 +239,7 @@ export const resolvers = {
 
     updateRequest: (_: unknown, { id, input }: { id: string; input: unknown }): unknown => {
       logger.debug('[GraphQL] updateRequest mutation', { id, input })
-      return collectionStore.updateRequest(id, input as { name?: string })
+      return collectionStore.updateRequest(id, parseInput(requestUpdateSchema, input, 'updateRequest'))
     },
 
     deleteRequest: (_: unknown, { id }: { id: string }): boolean => {
@@ -205,7 +254,7 @@ export const resolvers = {
 
     createEnvironment: (_: unknown, { parentId, input, parentEnvironmentId }: { parentId: string; input: unknown; parentEnvironmentId?: string }): unknown => {
       logger.debug('[GraphQL] createEnvironment mutation', { parentId, input, parentEnvironmentId })
-      const env = input as { id?: string; name: string; variables?: { key: string; value: string }[] }
+      const env = parseInput(environmentCreateSchema, input, 'createEnvironment')
       return collectionStore.createEnvironment(parentId, {
         id: env.id ?? '',
         name: env.name,
@@ -215,7 +264,7 @@ export const resolvers = {
 
     updateEnvironment: (_: unknown, { id, input }: { id: string; input: unknown }): unknown => {
       logger.debug('[GraphQL] updateEnvironment mutation', { id, input })
-      return collectionStore.updateEnvironment(id, input as { name?: string })
+      return collectionStore.updateEnvironment(id, parseInput(environmentUpdateSchema, input, 'updateEnvironment'))
     },
 
     deleteEnvironment: (_: unknown, { id }: { id: string }): boolean => {

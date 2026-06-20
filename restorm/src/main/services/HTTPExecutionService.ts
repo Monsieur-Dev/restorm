@@ -14,7 +14,7 @@ import { responseHistoryService } from './ResponseHistoryService'
 import { secretHydrationService } from './secrets/SecretHydrationService'
 import { collectRequestSecrets } from './secrets/collectRequestSecrets'
 import { withFirewallBypass } from 'electron-core-ui/main'
-import { DEFAULT_REQUEST_TIMEOUT_MS } from '../../shared/config/constants'
+import { DEFAULT_REQUEST_TIMEOUT_MS, MAX_RESPONSE_BYTES } from '../../shared/config/constants'
 import type { AuthenticationRequest } from '../../shared/models/requests/AuthenticationRequest'
 
 /** HTTP request execution input */
@@ -331,6 +331,13 @@ class HTTPExecutionService {
 
       return {
         requestId,
+        // A response WAS received, so the round-trip SUCCEEDED — the
+        // catch below owns transport/throw failures. `success` here means
+        // "we got a response"; the HTTP status (incl. 4xx/5xx) is carried
+        // on `statusCode` for the renderer's response pane + the auth /
+        // status-routing layers to interpret. Folding the status into
+        // `success` made a 401 render as a transport failure ("Status
+        // Code 0 Error") and mis-fire the auth-failure path.
         success: true,
         statusCode: result.statusCode,
         statusText: result.statusText,
@@ -435,8 +442,18 @@ class HTTPExecutionService {
 
       const request = httpModule.request(requestOptions, (response) => {
         const chunks: Buffer[] = []
+        let received = 0
 
         response.on('data', (chunk: Buffer) => {
+          received += chunk.length
+          if (received > MAX_RESPONSE_BYTES) {
+            // Bound main-process memory: destroy the socket and reject
+            // rather than keep buffering an unbounded body.
+            signal.removeEventListener('abort', abortHandler)
+            request.destroy()
+            reject(new Error(`Response exceeded the ${MAX_RESPONSE_BYTES}-byte limit`))
+            return
+          }
           chunks.push(chunk)
         })
 

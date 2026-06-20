@@ -47,7 +47,7 @@ import {
   type Tab,
   type VariableDefinition
 } from 'electron-core-ui/renderer'
-import type { AuthenticationRequest, HTTPResponse, HTTPMethod } from '../../../../shared/types/collections'
+import type { AuthenticationRequest, HTTPResponse, HTTPMethod, HTTPRequestBodyFormData, HTTPRequestBodyXWwwFormUrlEncoded } from '../../../../shared/types/collections'
 import { StringValue } from '../../../../shared/types/collections'
 import { KeyValue } from '../../../../shared/models'
 import { Badge } from '../common/Badge'
@@ -131,6 +131,19 @@ function keyValuesFromRows(rows: KeyValueTableRow[]): KeyValue[] {
       ...(r.enabled !== undefined ? { enabled: r.enabled } : {})
     })
   )
+}
+
+/**
+ * Build a fields-carrying body member (`form-data` / `x-www-form-urlencoded`)
+ * with the right discriminant. Narrows the kebab field-mode to a single union
+ * member so the assignment type-checks without a cast — form-data and
+ * x-www-form-urlencoded share the same `{ type, fields }` shape.
+ */
+function fieldsBody(
+  mode: 'form-data' | 'x-www-form-urlencoded',
+  fields: KeyValue[]
+): HTTPRequestBodyFormData | HTTPRequestBodyXWwwFormUrlEncoded {
+  return mode === 'form-data' ? { type: 'form-data', fields } : { type: 'x-www-form-urlencoded', fields }
 }
 
 // Accepts either the class `KeyValue` (shared/models) or its shared/types
@@ -357,27 +370,30 @@ export const LocalAuthenticationRequestForm: React.FC<LocalAuthenticationRequest
     // share the same shape; switching to text/file resets the
     // inverse buffers to keep the persisted shape coherent.
     if (next === 'text') {
-      request.body = { type: 'text' as never, content: bodyText }
+      request.body = { type: 'text', content: bodyText }
     } else if (next === 'file') {
-      request.body = { type: 'file' as never, path: bodyFilePath }
+      request.body = { type: 'file', path: bodyFilePath }
     } else {
       const existingFields = readBodyFields(request)
-      request.body = { type: next as never, fields: keyValuesFromRows(existingFields) }
+      request.body = fieldsBody(next, keyValuesFromRows(existingFields))
     }
   }, [request, bodyText, bodyFilePath])
 
   const handleBodyTextChange = useCallback((next: string) => {
     setBodyText(next)
-    request.body = { type: 'text' as never, content: next }
+    request.body = { type: 'text', content: next }
   }, [request])
 
   const handleBodyFilePathChange = useCallback((next: string) => {
     setBodyFilePath(next)
-    request.body = { type: 'file' as never, path: next }
+    request.body = { type: 'file', path: next }
   }, [request])
 
   const handleBodyFieldsChange = useCallback((rows: KeyValueTableRow[]) => {
-    request.body = { type: bodyMode as never, fields: keyValuesFromRows(rows) }
+    // The fields table is only shown for the two fields-modes, so bodyMode is
+    // one of them here; guard keeps the discriminant honest for the type system.
+    if (bodyMode !== 'form-data' && bodyMode !== 'x-www-form-urlencoded') return
+    request.body = fieldsBody(bodyMode, keyValuesFromRows(rows))
   }, [request, bodyMode])
 
   const handleProducedHeadersChange = useCallback((rows: KeyValueTableRow[]) => {
@@ -400,18 +416,18 @@ export const LocalAuthenticationRequestForm: React.FC<LocalAuthenticationRequest
     if (parsed.body) {
       const next = parsed.body
       if (next.type === 'text') {
-        request.body = { type: 'text' as never, content: next.content }
+        request.body = { type: 'text', content: next.content }
         setBodyMode('text')
         setBodyText(next.content)
       } else if (next.type === 'form-data') {
-        request.body = { type: 'form-data' as never, fields: next.fields }
+        request.body = { type: 'form-data', fields: next.fields }
         setBodyMode('form-data')
       } else if (next.type === 'x-www-form-urlencoded') {
-        request.body = { type: 'x-www-form-urlencoded' as never, fields: next.fields }
+        request.body = { type: 'x-www-form-urlencoded', fields: next.fields }
         setBodyMode('x-www-form-urlencoded')
       }
     } else {
-      request.body = { type: 'text' as never, content: '' }
+      request.body = { type: 'text', content: '' }
       setBodyMode('text')
       setBodyText('')
     }

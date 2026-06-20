@@ -62,6 +62,20 @@ import { Environment as EnvironmentClass } from '../../shared/models/Environment
 let scenarioSaveTimer: ReturnType<typeof setTimeout> | null = null
 let latestSaveAll: (() => Promise<boolean>) | null = null
 
+/**
+ * Cancel any pending scenario-edit autosave. MUST run on file-close and
+ * on App unmount: otherwise the module-scoped debounce timer can fire
+ * AFTER teardown and serialize the just-closed (or a previous) project's
+ * tree over the freshly-opened one. Also drops the stale save callback.
+ */
+function cancelScenarioSaveTimer(): void {
+  if (scenarioSaveTimer) {
+    clearTimeout(scenarioSaveTimer)
+    scenarioSaveTimer = null
+  }
+  latestSaveAll = null
+}
+
 const classForDocument = (type: 'folder' | 'request' | 'environment', doc: Record<string, unknown>): object => {
   if (type === 'request') {
     const t = doc['type']
@@ -179,7 +193,6 @@ import type {
   Folder,
   FolderItem,
   EnvironmentFolder,
-  Request,
   ScenarioNode,
   ScenarioEdge
 } from '../../shared/types/collections'
@@ -1051,12 +1064,18 @@ const App: React.FC = () => {
     const idxMatch = /^(folder|env-folder|request|scenario)-idx:([0-9]+(?:\.[0-9]+)*)$/.exec(tabId)
     if (idxMatch?.[2]) {
       const indexPath = idxMatch[2].split('.').map((n) => Number(n))
-      let cursor: unknown = rootItems[indexPath[0] ?? 0]
+      // Don't default a bad/missing segment to index 0 — that silently resolves
+      // the FIRST root/child for a malformed tab id. A non-finite segment = no match.
+      const root = indexPath[0]
+      if (root === undefined || !Number.isFinite(root)) return null
+      let cursor: unknown = rootItems[root]
       for (let i = 1; i < indexPath.length; i += 1) {
         if (!cursor || typeof cursor !== 'object' || !('items' in cursor)) return null
         const items = (cursor as { items?: unknown[] }).items
         if (!Array.isArray(items)) return null
-        cursor = items[indexPath[i] ?? 0]
+        const seg = indexPath[i]
+        if (seg === undefined || !Number.isFinite(seg)) return null
+        cursor = items[seg]
       }
       if (cursor && typeof cursor === 'object' && 'id' in cursor) {
         const id = (cursor as { id?: unknown }).id
@@ -1987,6 +2006,9 @@ const App: React.FC = () => {
       // Reset restore flags when file is closed
       hasRestoredFileRef.current = false
       hasRestoredWorkbenchRef.current = false
+      // Drop any pending scenario autosave so it can't fire after the
+      // file is gone and serialize the closed project's tree.
+      cancelScenarioSaveTimer()
       handleFileClosed()
 
       // The user explicitly closed the file → forget the auto-reopen record.
@@ -2015,6 +2037,11 @@ const App: React.FC = () => {
       unsubscribe2()
     }
   }, [handleFileOpened, handleFileClosed, filePath, hasRestoredWorkbenchRef])
+
+  // Cancel any pending scenario autosave on App unmount — the timer is
+  // module-scoped, so without this it can fire after teardown and
+  // serialize a stale tree.
+  useEffect(() => cancelScenarioSaveTimer, [])
 
   // Auto-reopen-last-file: when the `files:reopenLastFile` user setting is on,
   // record the currently-open file's path so the main process can reopen it on
@@ -2070,7 +2097,14 @@ const App: React.FC = () => {
     [rootItems]
   )
 
-  // Stable lookup callbacks — avoids re-render cascade through RestormWorkbench → EditorGroupView
+  // Lookup callbacks passed down to RestormWorkbench → EditorGroupView,
+  // which resolve a tab's request/folder/scenario by id and RENDER it.
+  // Keyed on `[rootItems]` (state) ON PURPOSE: a consumer that holds these
+  // must re-resolve when the tree changes (e.g. a freshly-imported request
+  // a tab is opening, or a renamed/deleted item) — making them stable
+  // (ref + [] deps) stopped that re-resolution and left a just-opened
+  // request tab blank (hidden send button). Correctness over the
+  // re-render micro-optimisation.
   const getRequestByIdCb = useCallback((id: string) => findRequestById(rootItems, id), [rootItems])
   const getFolderByIdCb = useCallback((id: string) => findFolderById(rootItems, id), [rootItems])
   const getScenarioByIdCb = useCallback((id: string) => findScenarioById(rootItems, id), [rootItems])
@@ -2079,7 +2113,10 @@ const App: React.FC = () => {
   // Send-time hook: request tab views call this to resolve their
   // `authenticationRequestId` back to the AuthenticationRequest
   // sitting in `rootItems`, so the IPC call carries the full auth
-  // document the main-process executor needs.
+  // document the main-process executor needs. Reads `rootItems` (state),
+  // not the ref + [] deps the lookup callbacks above use — this one is
+  // also invoked DURING RENDER (the ImportModal refresh-context IIFE),
+  // where react-hooks/refs forbids reading a ref.
   const resolveAuthRequestCb = useCallback<AuthRequestResolver>((id) => {
     const found = findRequestById(rootItems, id)
     return found && isAuthenticationRequest(found) ? found : null
@@ -2301,9 +2338,14 @@ const App: React.FC = () => {
         return null
       }
 
-      for (const rootFolder of rootItems) {
+      // NOTE: the `JSON.parse(JSON.stringify(folder))` SNAPSHOTS the folder at
+      // schedule time on purpose — the deferred checksum must reflect the state
+      // when the env event fired, not a later live mutation (passing the live
+      // object instead raced the dirty-baseline and flipped folder-mode
+      // dirty-state). Keep the snapshot.
+      for (const rootFolder of rootItemsRef.current) {
         if (rootFolder.id === parentFolderId) {
-          scheduleChecksumUpdate(parentFolderId, () => computeChecksum(JSON.parse(JSON.stringify(rootFolder)) as EnvironmentFolder | Folder | Request))
+          scheduleChecksumUpdate(parentFolderId, () => computeChecksum(JSON.parse(JSON.stringify(rootFolder)) as EnvironmentFolder | Folder))
           return
         }
         // Only search in folders, not Requests
@@ -2353,7 +2395,7 @@ const App: React.FC = () => {
       let parentId = payload.parentFolderId
       if (payload.type === 'environment' && payload.parentEnvironmentId !== undefined) {
         const topEnv = payload.parentFolderId !== undefined
-          ? findTopLevelEnvironment(rootItems, payload.parentFolderId, payload.id)
+          ? findTopLevelEnvironment(rootItemsRef.current, payload.parentFolderId, payload.id)
           : null
         if (!topEnv || topEnv.id === payload.id) {
           logger.warn('[App] upsertSaveUnit: sub-env owner not resolved, skipping', { id: payload.id })
@@ -2417,7 +2459,7 @@ const App: React.FC = () => {
         payload.parentEnvironmentId !== undefined &&
         payload.parentFolderId !== undefined
       ) {
-        const topEnv = findTopLevelEnvironment(rootItems, payload.parentFolderId, payload.parentEnvironmentId)
+        const topEnv = findTopLevelEnvironment(rootItemsRef.current, payload.parentFolderId, payload.parentEnvironmentId)
         if (topEnv) {
           doUpsert({ id: topEnv.id, type: 'environment', document: topEnv, parentFolderId: payload.parentFolderId })
           return
@@ -2485,7 +2527,12 @@ const App: React.FC = () => {
       }
       upsertTimers.clear()
     }
-  }, [updateTabDirtyChecksum, rootItems, environmentFolderCollections, filePath, projectUuid])
+    // `rootItems` is intentionally NOT a dep: the handlers read the live
+    // tree via `rootItemsRef.current`, so this 15-subscription effect
+    // mounts ONCE per file/project instead of tearing down + re-subscribing
+    // on every tree keystroke. `environmentFolderCollections`
+    // isn't read in the effect body at all, so it's dropped too.
+  }, [updateTabDirtyChecksum, filePath, projectUuid])
 
   // Dirty state is now handled by FileService in the main process
   // It subscribes to DocumentEvents and compares checksums automatically

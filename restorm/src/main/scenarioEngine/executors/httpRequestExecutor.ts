@@ -157,6 +157,31 @@ async function runGrpcUnary(req: Request, ctx: Parameters<NodeExecutor>[1]): Pro
 
 interface KV { key: string; value?: unknown; enabled?: boolean }
 
+/** The HTTP fields the override paths read/write on a `Request`. */
+interface HttpRequestShape {
+  url?: string
+  method?: string
+  pathParams?: KV[]
+  headers?: KV[]
+  params?: KV[]
+  body?: unknown
+}
+
+/**
+ * Prototype-preserving shallow clone of a `Request`, with the supplied
+ * key→value-array fields deep-copied so a mutation of the clone never touches
+ * the persisted request. Centralises the `Object.create(getPrototypeOf) +
+ * Object.assign` dance (and its casts) the override paths used to repeat.
+ */
+function cloneHttpRequest(req: Request, kvOverrides: Partial<Pick<HttpRequestShape, 'pathParams' | 'headers' | 'params'>>): Request & HttpRequestShape {
+  const src = req as Request & HttpRequestShape
+  const clone = Object.assign(Object.create(Object.getPrototypeOf(req) as object) as object, src)
+  for (const [field, value] of Object.entries(kvOverrides)) {
+    (clone as Record<string, unknown>)[field] = cloneKVs(value as KV[] | undefined)
+  }
+  return clone as Request & HttpRequestShape
+}
+
 /**
  * Return the request to flush + execute, with any wired slot inputs
  * applied. Input port ids mirror the editor + MCP slot ports:
@@ -168,12 +193,12 @@ interface KV { key: string; value?: unknown; enabled?: boolean }
 function applySlotOverrides(req: Request, inputs: Record<string, unknown>): Request {
   const slotKeys = Object.keys(inputs).filter((k) => isSlotPort(k) && inputs[k] !== undefined)
   if (slotKeys.length === 0) return req
-  const http = req as unknown as { pathParams?: KV[]; headers?: KV[]; params?: KV[]; body?: unknown }
-  const clone = Object.assign(Object.create(Object.getPrototypeOf(req) as object), req, {
-    pathParams: cloneKVs(http.pathParams),
-    headers: cloneKVs(http.headers),
-    params: cloneKVs(http.params)
-  }) as unknown as { pathParams: KV[]; headers: KV[]; params: KV[]; body?: unknown }
+  const http = req as Request & HttpRequestShape
+  const clone = cloneHttpRequest(req, {
+    pathParams: http.pathParams ?? [],
+    headers: http.headers ?? [],
+    params: http.params ?? []
+  })
   for (const portId of slotKeys) {
     const value = inputs[portId]
     if (portId === 'body') { clone.body = value; continue }
@@ -186,7 +211,7 @@ function applySlotOverrides(req: Request, inputs: Record<string, unknown>): Requ
     if (existing) existing.value = stringifyToWire(value)
     else arr.push({ key, value: stringifyToWire(value), enabled: true })
   }
-  return clone as unknown as Request
+  return clone
 }
 
 /**
@@ -199,17 +224,16 @@ function applySlotOverrides(req: Request, inputs: Record<string, unknown>): Requ
 export function applyRequestOverride(req: Request, override: unknown): Request {
   if (!override || typeof override !== 'object') return req
   const o = override as { url?: unknown; method?: unknown; headers?: unknown; body?: unknown }
-  const http = req as unknown as { url?: string; method?: string; headers?: KV[]; body?: unknown }
-  const clone = Object.assign(Object.create(Object.getPrototypeOf(req) as object), req, {
-    headers: cloneKVs(http.headers)
-  }) as unknown as { url?: string; method?: string; headers: KV[]; body?: unknown }
+  const http = req as Request & HttpRequestShape
+  const clone = cloneHttpRequest(req, { headers: http.headers ?? [] })
+  const headers = clone.headers ?? []
   if (typeof o.url === 'string' && o.url !== '') clone.url = o.url
   if (typeof o.method === 'string' && o.method !== '') clone.method = o.method.toUpperCase()
   if (o.headers && typeof o.headers === 'object' && !Array.isArray(o.headers)) {
     for (const [key, value] of Object.entries(o.headers as Record<string, unknown>)) {
-      const existing = clone.headers.find((kv) => kv.key === key)
+      const existing = headers.find((kv) => kv.key === key)
       if (existing) { existing.value = stringifyToWire(value); existing.enabled = true }
-      else clone.headers.push({ key, value: stringifyToWire(value), enabled: true })
+      else headers.push({ key, value: stringifyToWire(value), enabled: true })
     }
   }
   // A pm/bru pre-request script exposes `pm.request.body` / `req.getBody()` as a
@@ -220,7 +244,7 @@ export function applyRequestOverride(req: Request, override: unknown): Request {
   if (o.body !== undefined) {
     clone.body = { type: 'text', content: typeof o.body === 'string' ? o.body : stringifyToWire(o.body) }
   }
-  return clone as unknown as Request
+  return clone
 }
 
 function isSlotPort(portId: string): boolean {

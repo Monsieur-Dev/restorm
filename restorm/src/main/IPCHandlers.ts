@@ -6,7 +6,7 @@ import { promises as fs, existsSync, statSync, rmSync } from 'fs'
 import { EditorWindow } from './windows/EditorWindow'
 import { contextService, responseHistoryService, requestUsageService, scenarioUsageService } from './services'
 import { miniBrowserService } from './services/MiniBrowserService'
-import { assertPathWithinParent } from './utils/pathSecurity'
+import { assertPathWithinParent, isPathContained } from './utils/pathSecurity'
 import { secretHydrationService } from './services/secrets/SecretHydrationService'
 import { saveFolderStructure, loadFolderStructure, attachDraftStoreForFolder, attachDraftStoreForFile } from './FileOperations'
 import type { PersistenceFormat } from 'electron-core-ui'
@@ -29,7 +29,7 @@ import {
   secretsReadArgs, secretsWriteArgs, secretsInvalidateArgs, secretsResolveArgs, secretsRefreshArgs,
   openPathArgs,
   projectReadFileArgs,
-  contextRegisterRequestArgs, contextUnregisterRequestArgs,
+  contextRegisterRequestArgs, contextUnregisterRequestArgs, contextGetEnvironmentContextArgs,
   contextSetRequestEnvironmentArgs, contextSetAvailableEnvironmentsArgs,
   contextUpdateRequestKeyValuesArgs,
   contextUpdateFullRequestDataArgs, contextGetResolvedUrlArgs,
@@ -69,6 +69,33 @@ function isPlainAuthPayload(value: unknown): value is Parameters<typeof Authenti
 
 function getE2EMockedFolderPath(): string | null {
   return process.env['E2E_MOCK_SAVE_FOLDER'] ?? null
+}
+
+/**
+ * Containment root for renderer-supplied secrets / save paths. Secrets
+ * live either inside the opened project FOLDER (folder mode) or next to
+ * the opened `.restorm` FILE as `<file>.env` (single-file mode — the
+ * renderer writes `${filePath}.env`). So the legitimate root is the
+ * opened folder when present, otherwise the opened file's directory.
+ * Returns `null` when nothing is open at all — e.g. a brand-new
+ * unsaved single-file document whose path isn't registered yet. In
+ * that window the renderer still legitimately writes `<file>.env`
+ * next to where the document will be saved, so callers treat a null
+ * root as "no containment boundary to enforce" (allow) rather than a
+ * hard refusal — matching the prior single-file behaviour. Containment
+ * is enforced (forbidding `..` / absolute escapes) only once a root IS
+ * resolvable.
+ */
+function getSecretsContainmentRoot(): string | null {
+  if (!isFileServiceInitialized()) return null
+  const fileService = getFileService() as {
+    getOpenedFolderPath?: () => string | null
+    getFilePath?: () => string | null
+  }
+  const folder = fileService.getOpenedFolderPath?.() ?? null
+  if (folder) return folder
+  const file = fileService.getFilePath?.() ?? null
+  return file ? dirname(file) : null
 }
 
 interface KeyValueRowFromIpc {
@@ -304,18 +331,21 @@ export function registerRestormIPC(deps: {
       let folderPath: string
 
       if (targetPath) {
-        // Use provided path directly (for Ctrl+S on already opened folder)
-        // Path traversal protection: targetPath from renderer must be an absolute real path
-        if (isFileServiceInitialized()) {
-          const openedFolder = (getFileService() as { getOpenedFolderPath?: () => string | null }).getOpenedFolderPath?.()
-          if (openedFolder) {
-            try {
-              assertPathWithinParent(dirname(openedFolder), targetPath)
-            } catch {
-              logger.warn('Blocked save-as-folder - path traversal detected', { targetPath })
-              return { success: false, error: 'Path traversal detected' }
-            }
-          }
+        // Re-saving into an already-opened folder (Ctrl+S). The target
+        // must stay WITHIN that folder — not merely under its parent,
+        // which would let a renderer-supplied path clobber sibling
+        // projects. Enforce that boundary ONLY once a folder is open; the
+        // INITIAL save-as (which establishes the folder) runs before any
+        // folder is open, so a null `openedFolder` has no boundary to
+        // enforce and the user-chosen target is allowed.
+        const openedFolder = isFileServiceInitialized()
+          ? (getFileService() as { getOpenedFolderPath?: () => string | null }).getOpenedFolderPath?.() ?? null
+          : null
+        // `targetPath` may legitimately equal `openedFolder` itself
+        // (a plain re-save); containment is satisfied in that case.
+        if (openedFolder && !isPathContained(openedFolder, targetPath)) {
+          logger.warn('Blocked save-as-folder - path not contained in opened folder', { targetPath })
+          return { success: false, error: 'Path traversal detected' }
         }
         folderPath = targetPath
       } else {
@@ -459,17 +489,18 @@ export function registerRestormIPC(deps: {
     try {
       if (!filePath || !existsSync(filePath)) return null
 
-      // Path traversal protection: secrets must be within the opened folder
-      if (isFileServiceInitialized()) {
-        const openedFolder = (getFileService() as { getOpenedFolderPath?: () => string | null }).getOpenedFolderPath?.()
-        if (openedFolder) {
-          try {
-            assertPathWithinParent(openedFolder, filePath)
-          } catch {
-            logger.warn('Blocked secrets:read - path traversal detected', { filePath })
-            return null
-          }
-        }
+      // Containment: a secrets file is only ever legitimate inside the
+      // opened project folder (folder mode) or next to the opened
+      // `.restorm` file (single-file mode). Enforce that boundary —
+      // forbidding `..`/absolute escapes — ONLY once a root is
+      // resolvable. A null root (e.g. a brand-new unsaved single-file
+      // document not yet registered) has no boundary to enforce, so the
+      // renderer-derived `<file>.env` path is allowed, matching the
+      // prior single-file behaviour.
+      const root = getSecretsContainmentRoot()
+      if (root && !isPathContained(root, filePath)) {
+        logger.warn('Blocked secrets:read - path not contained in the open project', { filePath })
+        return null
       }
 
       return await fs.readFile(filePath, 'utf-8')
@@ -483,17 +514,14 @@ export function registerRestormIPC(deps: {
     try {
       if (!filePath) return { success: false, error: 'Missing path' }
 
-      // Path traversal protection: secrets must be within the opened folder
-      if (isFileServiceInitialized()) {
-        const openedFolder = (getFileService() as { getOpenedFolderPath?: () => string | null }).getOpenedFolderPath?.()
-        if (openedFolder) {
-          try {
-            assertPathWithinParent(openedFolder, filePath)
-          } catch {
-            logger.warn('Blocked secrets:write - path traversal detected', { filePath })
-            return { success: false, error: 'Path traversal detected' }
-          }
-        }
+      // Containment (see secrets:read): enforce the boundary — forbidding
+      // `..`/absolute escapes — ONLY once a root is resolvable. A null
+      // root (brand-new unsaved single-file document) has no boundary to
+      // enforce, so the renderer-derived `<file>.env` path is allowed.
+      const root = getSecretsContainmentRoot()
+      if (root && !isPathContained(root, filePath)) {
+        logger.warn('Blocked secrets:write - path not contained in the open project', { filePath })
+        return { success: false, error: 'Path traversal detected' }
       }
 
       await fs.mkdir(dirname(filePath), { recursive: true })
@@ -664,7 +692,7 @@ export function registerRestormIPC(deps: {
     return contextService.getAllVariableTransformResults()
   })
 
-  ipcMain.handle('context:get-environment-context', (_event, environmentId: string) => {
+  validatedHandle('context:get-environment-context', contextGetEnvironmentContextArgs, (_event, [environmentId]) => {
     return contextService.getContext(environmentId) ?? {}
   })
 

@@ -53,7 +53,14 @@ vi.mock('../../services/CollectionStore', () => ({
 vi.mock('../../services', () => ({
   responseHistoryService: {
     list: (id: string) => mockState.list(id),
-    getDetail: (guid: string) => mockState.getDetail(guid)
+    getDetail: (guid: string) => mockState.getDetail(guid),
+    // Mirror the real first-check: a freshly-stored entry is already present in
+    // the mocked `list`, so this resolves it immediately; otherwise null (the
+    // tests drive `list` to return either a new top guid or the baseline).
+    waitForNewEntry: async (id: string, baselineGuid: string | null) => {
+      const top = (await mockState.list(id))[0]
+      return top !== undefined && top.guid !== baselineGuid ? { guid: top.guid } : null
+    }
   }
 }))
 
@@ -165,6 +172,27 @@ describe('execute tools — run_request (unary)', () => {
       })
     })
   }
+
+  it("reports protocol 'unknown' (not 'http') when the history entry has no type", async () => {
+    vi.useFakeTimers()
+    mockState.findById.mockReturnValue({ id: 'r1', name: 'r', type: 'http' })
+    mockState.list
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([{ guid: 'g-new' }])
+    mockState.getDetail.mockResolvedValue({
+      requestId: 'r1',
+      success: true,
+      // No `type` on the response — a malformed/legacy entry. Must surface
+      // 'unknown' rather than silently claiming http.
+      response: { statusCode: 200, statusText: 'OK', timings: { durationMs: 1 } }
+    })
+    const mcp = new FakeMcpService()
+    registerExecutionTools(mcp as unknown as McpService)
+    const promise = mcp.invoke('run_request', { id: 'r1' }) as Promise<unknown>
+    await vi.advanceTimersByTimeAsync(700)
+    const { payload } = parseReply(await promise) as { payload: { protocol: string } }
+    expect(payload.protocol).toBe('unknown')
+  })
 
   it('returns parsed { data, errors } for graphql', async () => {
     vi.useFakeTimers()
@@ -295,7 +323,7 @@ describe('execute tools — run_request (websocket streaming)', () => {
     expect(payload.protocol).toBe('websocket')
     expect(payload.streaming).toBe(true)
     expect(payload.frameCount).toBe(2)
-    expect(payload.continuationToken).toBe('ws1#2')
+    expect(payload.continuationToken).toBe('2#ws1')
   })
 })
 
@@ -421,9 +449,9 @@ describe('execute tools — read_stream', () => {
 
     const mcp = new FakeMcpService()
     registerExecutionTools(mcp as unknown as McpService)
-    const { payload } = parseReply(await mcp.invoke('read_stream', { continuationToken: 'ws1#1' })) as { payload: { frameCount: number; continuationToken: string; done: boolean } }
+    const { payload } = parseReply(await mcp.invoke('read_stream', { continuationToken: '1#ws1' })) as { payload: { frameCount: number; continuationToken: string; done: boolean } }
     expect(payload.frameCount).toBe(2)
-    expect(payload.continuationToken).toBe('ws1#3')
+    expect(payload.continuationToken).toBe('3#ws1')
     expect(payload.done).toBe(false)
   })
 
@@ -432,7 +460,7 @@ describe('execute tools — read_stream', () => {
     mockState.wsIsActive.mockReturnValue(false)
     const mcp = new FakeMcpService()
     registerExecutionTools(mcp as unknown as McpService)
-    const { payload } = parseReply(await mcp.invoke('read_stream', { continuationToken: 'ws1#5' })) as { payload: { done: boolean; cursorReset?: boolean } }
+    const { payload } = parseReply(await mcp.invoke('read_stream', { continuationToken: '5#ws1' })) as { payload: { done: boolean; cursorReset?: boolean } }
     expect(payload.done).toBe(true)
     expect(payload.cursorReset).toBe(true)
   })
@@ -442,7 +470,7 @@ describe('execute tools — read_stream', () => {
     mockState.wsIsActive.mockReturnValue(false)
     const mcp = new FakeMcpService()
     registerExecutionTools(mcp as unknown as McpService)
-    const { payload } = parseReply(await mcp.invoke('read_stream', { continuationToken: 'ws1#0' })) as { payload: { frameCount: number; done: boolean } }
+    const { payload } = parseReply(await mcp.invoke('read_stream', { continuationToken: '0#ws1' })) as { payload: { frameCount: number; done: boolean } }
     expect(payload.frameCount).toBe(0)
     expect(payload.done).toBe(true)
   })
@@ -453,6 +481,27 @@ describe('execute tools — read_stream', () => {
     const { isError, text } = parseReply(await mcp.invoke('read_stream', { continuationToken: 'no-cursor-here' }))
     expect(isError).toBe(true)
     expect(text).toContain('Malformed')
+  })
+
+  it('recovers a request id that itself contains a "#" (cursor-first encoding)', async () => {
+    // The cursor is the leading numeric segment, so the request id after the
+    // first '#' is taken verbatim — even when it contains more '#' characters.
+    const all = [
+      { direction: 'received', data: 'a', timestamp: 't1' },
+      { direction: 'received', data: 'b', timestamp: 't2' }
+    ]
+    let seenId: string | undefined
+    mockState.wsGetMessages.mockImplementation((id: string, after?: number) => {
+      seenId = id
+      return { frames: all.slice(after ?? 0), total: all.length }
+    })
+    mockState.wsIsActive.mockReturnValue(true)
+    const mcp = new FakeMcpService()
+    registerExecutionTools(mcp as unknown as McpService)
+    const { payload } = parseReply(await mcp.invoke('read_stream', { continuationToken: '0#ws#weird#id' })) as { payload: { frameCount: number; continuationToken: string } }
+    expect(seenId).toBe('ws#weird#id')
+    expect(payload.frameCount).toBe(2)
+    expect(payload.continuationToken).toBe('2#ws#weird#id')
   })
 
   it('caps the returned frame count at maxFrames', async () => {
@@ -467,9 +516,9 @@ describe('execute tools — read_stream', () => {
     mockState.wsIsActive.mockReturnValue(true)
     const mcp = new FakeMcpService()
     registerExecutionTools(mcp as unknown as McpService)
-    const { payload } = parseReply(await mcp.invoke('read_stream', { continuationToken: 'ws1#0', maxFrames: 2 })) as { payload: { frameCount: number; continuationToken: string } }
+    const { payload } = parseReply(await mcp.invoke('read_stream', { continuationToken: '0#ws1', maxFrames: 2 })) as { payload: { frameCount: number; continuationToken: string } }
     expect(payload.frameCount).toBe(2)
-    expect(payload.continuationToken).toBe('ws1#2')
+    expect(payload.continuationToken).toBe('2#ws1')
   })
 
   it('signals cursorReset when the cursor overshoots the buffer', async () => {
@@ -481,9 +530,9 @@ describe('execute tools — read_stream', () => {
     mockState.wsIsActive.mockReturnValue(true)
     const mcp = new FakeMcpService()
     registerExecutionTools(mcp as unknown as McpService)
-    const { payload } = parseReply(await mcp.invoke('read_stream', { continuationToken: 'ws1#42' })) as { payload: { cursorReset?: boolean; continuationToken: string; frameCount: number } }
+    const { payload } = parseReply(await mcp.invoke('read_stream', { continuationToken: '42#ws1' })) as { payload: { cursorReset?: boolean; continuationToken: string; frameCount: number } }
     expect(payload.cursorReset).toBe(true)
-    expect(payload.continuationToken).toBe('ws1#1')
+    expect(payload.continuationToken).toBe('1#ws1')
     expect(payload.frameCount).toBe(1)
   })
 })

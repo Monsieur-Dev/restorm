@@ -8,6 +8,13 @@ interface WindowApi {
   }
 }
 
+/** The feature bridge off `window.api`, or undefined when it isn't injected
+ * (web mode / preload not ready). Centralises the `window as …` access that was
+ * repeated (non-optionally) at four call sites. */
+function getFeatureApi(): WindowApi['feature'] | undefined {
+  return (window as unknown as { api?: WindowApi }).api?.feature
+}
+
 /**
  * Hook to check if a feature is enabled
  * @param featureName - The name of the feature to check
@@ -22,8 +29,8 @@ export const useFeature = (featureName: string): { isEnabled: boolean; isLoading
 
     const checkFeature = async (): Promise<void> => {
       try {
-        const api = (window as unknown as { api: WindowApi }).api
-        const enabled = await api.feature.isEnabled(featureName)
+        const feature = getFeatureApi()
+        const enabled = (await feature?.isEnabled(featureName)) ?? false
         if (mounted) {
           setIsEnabled(enabled)
           setIsLoading(false)
@@ -59,8 +66,8 @@ export const usePlatformFeature = (): { platform: FeaturePlatform; isLoading: bo
 
     const getPlatform = async (): Promise<void> => {
       try {
-        const api = (window as unknown as { api: WindowApi }).api
-        const p = await api.feature.getPlatform()
+        const feature = getFeatureApi()
+        const p = (await feature?.getPlatform()) ?? 'web'
         if (mounted) {
           setPlatform(p)
           setIsLoading(false)
@@ -99,8 +106,7 @@ export const useIsDesktop = (): { isDesktop: boolean; isLoading: boolean } => {
  */
 export const checkFeature = async (featureName: string): Promise<boolean> => {
   try {
-    const api = (window as unknown as { api: WindowApi }).api
-    return await api.feature.isEnabled(featureName)
+    return (await getFeatureApi()?.isEnabled(featureName)) ?? false
   } catch {
     return false
   }
@@ -112,8 +118,7 @@ export const checkFeature = async (featureName: string): Promise<boolean> => {
  */
 export const getPlatform = async (): Promise<FeaturePlatform> => {
   try {
-    const api = (window as unknown as { api: WindowApi }).api
-    return await api.feature.getPlatform()
+    return (await getFeatureApi()?.getPlatform()) ?? 'web'
   } catch {
     return 'web'
   }

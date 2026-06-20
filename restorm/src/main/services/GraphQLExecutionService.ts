@@ -11,7 +11,7 @@ import { logger } from 'electron-core-ui/main'
 import { contextService } from './ContextService'
 import { secretHydrationService } from './secrets/SecretHydrationService'
 import { collectRequestSecrets } from './secrets/collectRequestSecrets'
-import { DEFAULT_REQUEST_TIMEOUT_MS } from '../../shared/config/constants'
+import { DEFAULT_REQUEST_TIMEOUT_MS, MAX_RESPONSE_BYTES } from '../../shared/config/constants'
 
 /** GraphQL request execution input */
 export interface GraphQLExecutionInput {
@@ -182,7 +182,11 @@ class GraphQLExecutionService {
 
       return {
         requestId,
-        success: !errors || errors.length === 0,
+        // GraphQL success = a 2xx/3xx transport AND no GraphQL `errors`.
+        // GraphQL conventionally returns 200 with an `errors` array, so
+        // the errors check alone isn't enough — a transport 4xx/5xx (e.g.
+        // a 500 with no GraphQL body) must also be success:false.
+        success: result.statusCode < 400 && (!errors || errors.length === 0),
         statusCode: result.statusCode,
         data,
         errors,
@@ -273,8 +277,16 @@ class GraphQLExecutionService {
 
       const request = httpModule.request(requestOptions, (response) => {
         const chunks: Buffer[] = []
+        let received = 0
 
         response.on('data', (chunk: Buffer) => {
+          received += chunk.length
+          if (received > MAX_RESPONSE_BYTES) {
+            signal.removeEventListener('abort', abortHandler)
+            request.destroy()
+            reject(new Error(`Response exceeded the ${MAX_RESPONSE_BYTES}-byte limit`))
+            return
+          }
           chunks.push(chunk)
         })
 

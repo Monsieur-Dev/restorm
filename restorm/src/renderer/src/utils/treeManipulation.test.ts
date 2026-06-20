@@ -1,6 +1,16 @@
 import { describe, it, expect } from 'vitest'
 import type { FolderItem, Scenario } from '../../../shared/types/collections'
-import { deepCloneItem, cloneItemInTree } from './treeManipulation'
+import { deepCloneItem, cloneItemInTree, generateUniqueId } from './treeManipulation'
+
+describe('generateUniqueId', () => {
+  it('produces a UUID, never colliding within a tight loop', () => {
+    const ids = new Set<string>()
+    for (let i = 0; i < 10_000; i++) ids.add(generateUniqueId())
+    // Date.now()+Math.random() collided within a millisecond; crypto.randomUUID never does.
+    expect(ids.size).toBe(10_000)
+    expect(generateUniqueId()).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/)
+  })
+})
 
 /**
  * Cloning a tree item (sidebar "Clone") must produce a FULLY independent copy:
@@ -16,7 +26,7 @@ function makeScenario(): Scenario {
     tags: [],
     params: [],
     nodes: [
-      { id: 'node-1', kind: 'httpRequest', config: { requestId: 'req-child' }, inputs: [], outputs: [], position: { x: 0, y: 0 } },
+      { id: 'node-1', kind: 'httpRequest', config: { requestId: 'req-child', note: 'see req-child docs' }, inputs: [], outputs: [], position: { x: 0, y: 0 } },
       { id: 'node-2', kind: 'log', config: {}, inputs: [], outputs: [], position: { x: 10, y: 10 } }
     ],
     edges: [
@@ -56,6 +66,16 @@ describe('deepCloneItem', () => {
     expect(boundId).toBe(newChildId)
     // Original is untouched.
     expect((original.nodes[0]?.config as { requestId?: string }).requestId).toBe('req-child')
+  })
+
+  it('does NOT rewrite a free-text field that merely contains a remapped id', () => {
+    const original = makeScenario()
+    const clone = deepCloneItem(original as unknown as FolderItem) as unknown as Scenario
+    // `requestId` (a reference field) follows the clone, but `note` (free text)
+    // must stay verbatim even though it contains the old child id.
+    const cfg = clone.nodes[0]?.config as { requestId?: string; note?: string }
+    expect(cfg.requestId).toBe(clone.items?.[0]?.id)
+    expect(cfg.note).toBe('see req-child docs')
   })
 
   it('leaves scenario-scoped node/edge ids intact (edges still point at their nodes)', () => {

@@ -63,6 +63,9 @@ class GraphQLClient {
   private headers: Record<string, string> = {}
   private isInitialized = false
   private sseClient: Client | null = null
+  /** Aborts all in-flight execute() fetches; replaced on every initialize() so
+   * re-pointing the client cancels POSTs aimed at the old endpoint. */
+  private fetchAbort = new AbortController()
 
   // ---- Link status ----
   private linkStatus: GraphQLLinkStatus = 'ok'
@@ -99,6 +102,10 @@ class GraphQLClient {
         logger.warn('[GraphQLClient] Failed to dispose previous SSE client', { error: String(error) })
       }
     }
+    // Cancel any execute() POSTs still in flight against the OLD endpoint, then
+    // arm a fresh controller for the new client.
+    this.fetchAbort.abort()
+    this.fetchAbort = new AbortController()
     this.reconnectingSince = null
     this.linkStatus = 'ok'
 
@@ -170,7 +177,10 @@ class GraphQLClient {
         body: JSON.stringify({
           query: operation,
           variables
-        })
+        }),
+        // Cancellable: a re-initialize() (or dispose) aborts in-flight POSTs so
+        // a stale request can't resolve into a re-pointed client.
+        signal: this.fetchAbort.signal
       })
 
       if (!response.ok) {

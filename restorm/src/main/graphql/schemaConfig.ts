@@ -25,7 +25,9 @@ import {
   GraphQLRequest,
   GrpcRequest,
   SoapRequest,
-  WebSocketRequest
+  WebSocketRequest,
+  ODataRequest,
+  AuthenticationRequest
 } from '../../shared/models/requests'
 
 // =============================================================================
@@ -63,6 +65,8 @@ function registerClasses(): void {
   graphQLSchemaGenerator.registerClassAuto(GrpcRequest, skipGeneric)
   graphQLSchemaGenerator.registerClassAuto(SoapRequest, skipGeneric)
   graphQLSchemaGenerator.registerClassAuto(WebSocketRequest, skipGeneric)
+  graphQLSchemaGenerator.registerClassAuto(ODataRequest, skipGeneric)
+  graphQLSchemaGenerator.registerClassAuto(AuthenticationRequest, skipGeneric)
 }
 
 // =============================================================================
@@ -71,12 +75,13 @@ function registerClasses(): void {
 
 function registerUnions(): void {
   graphQLSchemaGenerator.registerUnion('Request', [
-    'HTTPRequest', 'GraphQLRequest', 'GrpcRequest', 'SoapRequest', 'WebSocketRequest'
+    'HTTPRequest', 'GraphQLRequest', 'GrpcRequest', 'SoapRequest', 'WebSocketRequest',
+    'ODataRequest', 'AuthenticationRequest'
   ])
 
   graphQLSchemaGenerator.registerUnion('FolderItem', [
     'Folder', 'EnvironmentFolder', 'HTTPRequest', 'GraphQLRequest',
-    'GrpcRequest', 'SoapRequest', 'WebSocketRequest'
+    'GrpcRequest', 'SoapRequest', 'WebSocketRequest', 'ODataRequest', 'AuthenticationRequest'
   ])
 }
 

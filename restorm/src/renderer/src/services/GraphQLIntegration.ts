@@ -71,6 +71,11 @@ export async function initializeGraphQL(): Promise<void> {
  * Set up GraphQL subscriptions to sync with the store
  */
 function setupSubscriptions(): void {
+  // Tear down any existing subscriptions first so a re-initialize (retry after
+  // the GraphQL server wasn't ready, HMR, etc.) doesn't DOUBLE-subscribe and
+  // leak the previous set (each store event would then fire twice).
+  cleanupGraphQL()
+
   const store = useRestormStore.getState()
 
   // Subscribe to folder updates

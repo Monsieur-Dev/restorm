@@ -39,7 +39,7 @@ export interface DirtyStateHook {
 /**
  * Compute a simple hash checksum of an object
  */
-function sortedReplacer(key: string, value: unknown): unknown {
+function sortedReplacer(_key: string, value: unknown): unknown {
   if (value && typeof value === 'object' && !Array.isArray(value)) {
     const raw = value as Record<string, unknown>
     const sorted: Record<string, unknown> = {}
@@ -53,19 +53,26 @@ function sortedReplacer(key: string, value: unknown): unknown {
     return sorted
   }
   return value
-  void key
 }
 
 export function computeChecksum(data: unknown): string {
   try {
     const str = JSON.stringify(data, sortedReplacer)
-    let hash = 0
+    // Two independent 32-bit accumulators combined into a ~64-bit checksum.
+    // A single 32-bit hash collides often enough that a content change could
+    // hash equal to the baseline — reported "not dirty" and silently dropping
+    // the user's edit. Widening the space makes that effectively impossible,
+    // and we fold in the length as a cheap extra discriminator.
+    let h1 = 0x811c9dc5
+    let h2 = 0x1000193
     for (let i = 0; i < str.length; i++) {
       const char = str.charCodeAt(i)
-      hash = ((hash << 5) - hash) + char
-      hash = hash & hash
+      h1 = Math.imul(h1 ^ char, 0x01000193)
+      h2 = Math.imul(h2 + char, 0x85ebca77) ^ (h2 >>> 15)
     }
-    return hash.toString(36)
+    const part1 = (h1 >>> 0).toString(36)
+    const part2 = (h2 >>> 0).toString(36)
+    return `${part1}.${part2}.${str.length.toString(36)}`
   } catch {
     return ''
   }

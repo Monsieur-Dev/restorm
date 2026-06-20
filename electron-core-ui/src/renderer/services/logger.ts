@@ -12,12 +12,18 @@ async function log(level: LogLevel, message: string, meta?: Record<string, unkno
   try {
     await window.api.logger.log(level, `[Renderer] ${message}`, meta)
   } catch (error) {
-    // Fallback to stderr if IPC fails, to avoid using console in renderer
+    // Fallback to stderr if IPC fails, to avoid using console in renderer.
+    // In a sandboxed renderer `process` (or `process.stderr`) is absent —
+    // feature-detect it so the write actually runs when available instead of
+    // throwing into a silent catch that loses the IPC-failure entirely.
     const messageToWrite = `Failed to send log to main process: ${String(error)}\n`
-    try {
-      process.stderr.write(messageToWrite)
-    } catch {
-      // Swallow as last resort
+    const stderr = (globalThis as { process?: { stderr?: { write?: (s: string) => void } } }).process?.stderr
+    if (typeof stderr?.write === 'function') {
+      try {
+        stderr.write(messageToWrite)
+      } catch {
+        // Swallow as last resort
+      }
     }
   }
 }

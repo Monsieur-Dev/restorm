@@ -16,8 +16,9 @@
 
 import type React from 'react'
 import { useEffect } from 'react'
-import { makeReactiveFolder, makeReactiveRequest } from '../types/reactive'
-import type { Folder, Request, FolderItem } from '../../../shared/types/collections'
+import { makeReactiveFolderItem } from '../types/reactive'
+import { isAnyFolder, isRequest, isScenario } from '../../../shared/types/collections'
+import type { FolderItem } from '../../../shared/types/collections'
 
 interface RestormTreeBridge {
   onMcpTreeReplace: (cb: (payload: unknown) => void) => () => void
@@ -48,16 +49,16 @@ export interface UseMcpTreeReplaceInput {
   bumpAllTabContentVersions: () => void
 }
 
-function reifyItem(raw: unknown): FolderItem | null {
+export function reifyItem(raw: unknown): FolderItem | null {
   if (!raw || typeof raw !== 'object') return null
-  const r = raw as Record<string, unknown>
-  if ('items' in r) {
-    return makeReactiveFolder(raw as Folder)
-  }
-  if ('type' in r) {
-    return makeReactiveRequest(raw as Request)
-  }
-  return null
+  const item = raw as FolderItem
+  // Only reify recognised items; drop malformed payload entries.
+  if (!isScenario(item) && !isAnyFolder(item) && !isRequest(item)) return null
+  // Delegate to the shared reifier, which tests `isScenario` BEFORE the
+  // folder branch. A scenario carries `items` + `configuration`, so the
+  // old `'items' in r → makeReactiveFolder` shortcut mangled a top-level
+  // scenario into a folder and dropped its nodes/edges.
+  return makeReactiveFolderItem(item)
 }
 
 export function useMcpTreeReplace(input: UseMcpTreeReplaceInput): void {

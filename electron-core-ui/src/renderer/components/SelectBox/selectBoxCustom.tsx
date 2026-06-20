@@ -454,7 +454,7 @@ const SelectBoxList: React.FC<SelectBoxListProps> = ({
                 const isFocused = index === focusedIndex
                 return (
                   <div
-                    key={index}
+                    key={`${option.text}::${index}`}
                     id={`${id}-option-${index}`}
                     role="option"
                     aria-selected={isSelected}

@@ -12,7 +12,7 @@
 
 import { promises as fs } from 'fs'
 import { existsSync, mkdirSync, readdirSync, rmSync } from 'fs'
-import { join, basename, extname, dirname } from 'path'
+import { join, basename, extname, dirname, resolve, relative, isAbsolute } from 'path'
 import crypto from 'crypto'
 import JSON5 from 'json5'
 import yaml from 'js-yaml'
@@ -240,10 +240,15 @@ export function generateIndexedFileName(
  * Sanitize a file name by removing invalid characters
  */
 export function sanitizeFileName(name: string): string {
-  return name
+  const cleaned = name
     .replace(/[<>:"/\\|?*]/g, '_')
     .replace(/\s+/g, ' ')
     .trim()
+  // `.` / `..` / empty survive the char-class strip above but are path-traversal
+  // segments (a folder named `..` would resolve OUTSIDE its parent on join).
+  // Map them to a safe placeholder so a sanitized name is always a real child.
+  if (cleaned === '' || cleaned === '.' || cleaned === '..') return '_'
+  return cleaned
 }
 
 /**
@@ -533,6 +538,12 @@ export class PersistenceService {
   /**
    * Clean up folders that no longer correspond to any item
    */
+  /** True when `child` resolves to `parent` itself or a path strictly under it. */
+  private isPathWithin(parent: string, child: string): boolean {
+    const rel = relative(resolve(parent), resolve(child))
+    return rel === '' || (!rel.startsWith('..') && !isAbsolute(rel))
+  }
+
   private cleanupOrphanedFolders(
     parentPath: string,
     keepFolders: Set<string>
@@ -542,6 +553,12 @@ export class PersistenceService {
       for (const entry of entries) {
         if (entry.isDirectory() && !keepFolders.has(entry.name)) {
           const folderPath = join(parentPath, entry.name)
+          // Confine the recursive delete strictly under parentPath — defence in
+          // depth against a crafted entry name (`.`/`..`) escaping the parent.
+          if (folderPath === resolve(parentPath) || !this.isPathWithin(parentPath, folderPath)) {
+            logger.warn('[PersistenceService] Skipped non-confined orphan delete', { parentPath, folderPath })
+            continue
+          }
           rmSync(folderPath, { recursive: true, force: true })
           logger.debug('[PersistenceService] Removed orphaned folder', { path: folderPath })
         }
@@ -839,9 +856,17 @@ export class PersistenceService {
    */
   deleteFolder(folderPath: string): boolean {
     try {
-      if (existsSync(folderPath)) {
-        rmSync(folderPath, { recursive: true, force: true })
-        logger.debug('[PersistenceService] Deleted folder', { path: folderPath })
+      // Sanity guard for a recursive force-delete: require an absolute path and
+      // refuse a filesystem root, so a bad/empty/relative argument can't wipe an
+      // unintended tree.
+      const resolved = resolve(folderPath)
+      if (!isAbsolute(folderPath) || resolved === dirname(resolved)) {
+        logger.warn('[PersistenceService] Refused to delete a non-confined path', { folderPath })
+        return false
+      }
+      if (existsSync(resolved)) {
+        rmSync(resolved, { recursive: true, force: true })
+        logger.debug('[PersistenceService] Deleted folder', { path: resolved })
         return true
       }
       return false

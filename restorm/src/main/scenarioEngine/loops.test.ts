@@ -71,8 +71,10 @@ describe('for executor — numeric range', () => {
   it('lets wired inputs override config', () => {
     expect(forRange({ from: 0, to: 0, step: 1 }, { from: 2, to: 5 }).items).toEqual([2, 3, 4])
   })
-  it('bounds a runaway range', () => {
-    expect(forRange({ from: 1, to: 1e9, step: 1 }).items).toHaveLength(100_000)
+  it('throws on a runaway range instead of silently truncating', () => {
+    // Previously this clipped to 100k items with no signal; a range that
+    // would exceed the iteration cap now throws so the run-log surfaces it.
+    expect(() => forRange({ from: 1, to: 1e9, step: 1 })).toThrow(/iteration limit/)
   })
   it('sizes the parallel batch from config', () => {
     const r = forRange({ from: 1, to: 9, step: 1, parallelism: { enabled: true, count: 3 } })

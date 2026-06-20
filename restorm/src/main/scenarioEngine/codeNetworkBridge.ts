@@ -1,5 +1,6 @@
 import axios from 'axios'
 import type { SandboxHttpRequest, SandboxHttpResponse } from './codeSandbox'
+import { DEFAULT_REQUEST_TIMEOUT_MS, MAX_RESPONSE_BYTES } from '../../shared/config/constants'
 
 /**
  * Host network bridge for the `code` node's sandbox `fetch` / `pm.sendRequest`.
@@ -31,18 +32,26 @@ export async function codeNetworkBridge(req: SandboxHttpRequest, signal: AbortSi
       transformResponse: [(d: unknown) => d],
       // Never throw on status — a 404/500 is a valid response the script reads.
       validateStatus: () => true,
-      maxRedirects: 5
+      maxRedirects: 5,
+      // Bound main-process memory + wall-clock: a sandboxed script must
+      // not be able to OOM or hang the host via a giant / slow response.
+      // axios rejects past maxContentLength (caught below → clean error).
+      maxContentLength: MAX_RESPONSE_BYTES,
+      maxBodyLength: MAX_RESPONSE_BYTES,
+      timeout: DEFAULT_REQUEST_TIMEOUT_MS
     })
     const headers: Record<string, string> = {}
     for (const [key, value] of Object.entries(resp.headers as Record<string, string | string[] | undefined>)) {
       if (value == null) continue
       headers[key] = Array.isArray(value) ? value.join(', ') : value
     }
+    let body = typeof resp.data === 'string' ? resp.data : JSON.stringify(resp.data)
+    if (body.length > MAX_RESPONSE_BYTES) body = body.slice(0, MAX_RESPONSE_BYTES)
     return {
       status: resp.status,
       statusText: resp.statusText,
       headers,
-      body: typeof resp.data === 'string' ? resp.data : JSON.stringify(resp.data)
+      body
     }
   } catch (err) {
     return { status: 0, statusText: '', headers: {}, body: '', error: bridgeErrorMessage(err) }

@@ -8,6 +8,12 @@ import { BaseWindow, WindowConfiguration, logger } from 'electron-core-ui'
  * Contains common logic for determining preload path
  */
 export class RestormWindow extends BaseWindow {
+  /** Memoised preload path — the filesystem layout is fixed for the process
+   * lifetime, so resolve it once instead of re-running ~6 existsSync probes on
+   * every window creation. `false` = not yet resolved (the value can be
+   * `undefined`, which is a valid resolved result). */
+  private static preloadPathCache: string | undefined | false = false
+
   /**
    * Determines the preload script path based on environment
    * Always uses restorm preload which includes all core-ui APIs + restorm-specific APIs
@@ -15,9 +21,10 @@ export class RestormWindow extends BaseWindow {
    * In prod, uses restorm preload from dist
    */
   protected static getPreloadPath(): string | undefined {
+    if (RestormWindow.preloadPathCache !== false) return RestormWindow.preloadPathCache
     const isDev = !app.isPackaged
     let preloadPath: string | undefined
-    
+
     if (isDev) {
       // In dev, try to use restorm preload from out/ or dist/ (build) first
       // This ensures window.restorm is always available
@@ -63,6 +70,7 @@ export class RestormWindow extends BaseWindow {
       }
     }
     
+    RestormWindow.preloadPathCache = preloadPath
     return preloadPath
   }
 

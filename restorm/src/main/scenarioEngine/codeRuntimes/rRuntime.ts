@@ -30,8 +30,20 @@ let queue: Promise<unknown> = Promise.resolve()
 
 function getWebR(): Promise<WebRInstance> {
   webRSingleton ??= (async () => {
-    const { WebR } = await import('webr') as unknown as { WebR: new (opts: { baseUrl: string }) => WebRInstance }
+    const { WebR } = await import('webr') as unknown as {
+      WebR: new (opts: { baseUrl: string; createLazy?: boolean }) => WebRInstance
+    }
     const baseUrl = `${dirname(createRequire(import.meta.url).resolve('webr'))}/`
+    // R runs on a shared WebR singleton in its own Emscripten worker.
+    // Unlike the Node-worker runtimes (codeWorkerHarness, which now bounds
+    // memory via resourceLimits), WebR exposes no hard heap cap — its
+    // Emscripten module manages its own linear memory and the public
+    // WebROptions has no max-memory field. The protections that DO apply:
+    // the per-run timeout + the SIGINT interrupt (below) abort a runaway
+    // R eval, and WebR's worker is a separate process from the main heap,
+    // so an R OOM crashes the WebR worker (surfaced as a run error) rather
+    // than the main process. A hard WebR memory ceiling would need an
+    // upstream WebR option (tracked as a follow-up, not a code-quality fix).
     const webR = new WebR({ baseUrl })
     await webR.init()
     return webR

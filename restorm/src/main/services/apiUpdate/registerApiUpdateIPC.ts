@@ -13,6 +13,7 @@ import { resolveAuthHeadersForFolder } from './resolveAuthHeaders'
 import { detectFormat, importFromContent } from '../import/ImportManager'
 import type { FolderItem } from '../../../shared/types/folderTypes'
 import { isEnvironmentFolder } from '../../../shared/types/folderTypes'
+import { assertSafeFetchUrl } from '../../utils/urlSecurity'
 import type { EnvironmentFolder } from '../../../shared/types/folderTypes'
 import type { ApiUpdateConfig } from '../../../shared/types/baseTypes'
 
@@ -130,6 +131,13 @@ export function registerApiUpdateIPC(deps: ApiUpdateIPCDeps): void {
         // resolve auth here, not in the renderer.
         const dynamicHeaders = await resolveAuthHeadersForFolder(env, config.authenticationRequestId, variables)
         const headers = { ...dynamicHeaders, ...staticHeaders }
+        // SSRF guard: the spec URL is the stored, user-supplied import
+        // source — the same EXPLICIT top-level URL the initial import
+        // used, so loopback/private hosts (a local dev API server) are a
+        // legitimate refresh target and opt in via `allowPrivateHosts`.
+        // Link-local / cloud-metadata stays blocked; this fetch is not
+        // firewall-gated.
+        assertSafeFetchUrl(url, { allowPrivateHosts: true })
         const response = await fetch(url, Object.keys(headers).length === 0 ? {} : { headers })
         if (!response.ok) {
           return { ok: false, error: `HTTP ${String(response.status)}: ${response.statusText}` }

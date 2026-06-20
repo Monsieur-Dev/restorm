@@ -67,6 +67,10 @@ export function useMcpMiniBrowserBridge(input: UseMcpMiniBrowserBridgeInput): vo
     const api = bridge
     const selector = webviewSelector ?? DEFAULT_WEBVIEW_SELECTOR
 
+    // Pending deferred URL-set timers — cleared on cleanup so a set scheduled
+    // just before unmount / a deps change doesn't fire after teardown.
+    const urlTimers = new Set<ReturnType<typeof setTimeout>>()
+
     const offOpen = api.onMcpOpenMiniBrowser((payload) => {
       openMiniBrowser()
       if (typeof payload.url === 'string' && payload.url !== '') {
@@ -74,7 +78,8 @@ export function useMcpMiniBrowserBridge(input: UseMcpMiniBrowserBridgeInput): vo
         // tick — schedule the URL set after the tab mutation flushes
         // so the new tab actually picks up its URL.
         const targetUrl = payload.url
-        setTimeout(() => { setMiniBrowserUrl(targetUrl) }, 50)
+        const timer = setTimeout(() => { urlTimers.delete(timer); setMiniBrowserUrl(targetUrl) }, 50)
+        urlTimers.add(timer)
       }
     })
 
@@ -99,6 +104,11 @@ export function useMcpMiniBrowserBridge(input: UseMcpMiniBrowserBridgeInput): vo
     }
     const offExec = api.onMcpMiniBrowserExecute((payload) => { void runExecute(payload) })
 
-    return () => { offOpen(); offExec() }
+    return () => {
+      offOpen()
+      offExec()
+      for (const timer of urlTimers) clearTimeout(timer)
+      urlTimers.clear()
+    }
   }, [enabled, bridge, openMiniBrowser, setMiniBrowserUrl, webviewSelector])
 }

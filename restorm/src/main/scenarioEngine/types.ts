@@ -98,7 +98,6 @@ export interface ExecResult {
    * a scope-closed signal. */
   scopeAction?:
     | { type: 'openForEach'; items: unknown[]; parallel: boolean; batchSize: number }
-    | { type: 'closeScope' }
     // A `while` / `doWhile`: the scheduler runs the body (`then`) in a child
     // scope, waits for it to close, re-evaluates the condition, and repeats
     // while true — emitting `else` when false. `while` tests first; `doWhile`
@@ -143,7 +142,7 @@ export interface ExecResult {
     // `message` port (`events` is empty).
     | {
         type: 'openSocketioConnect'
-        transport: 'socketio' | 'websocket' | 'grpc'
+        transport: 'socketio' | 'websocket' | 'grpc' | 'mqtt'
         requestId: string
         events: string[]
         connectionName: string

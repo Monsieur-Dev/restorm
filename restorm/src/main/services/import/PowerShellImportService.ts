@@ -20,14 +20,15 @@ import {
 } from '../../../shared/models'
 import { logger } from 'electron-core-ui/main'
 import { createTypedKeyValue } from '../../../shared/utils/createTypedKeyValue'
+import { stableImportId } from './stableImportId'
 
 // ============================================================================
 // Helper Functions
 // ============================================================================
 
-/** Generate a unique ID */
-function generateId(prefix: string): string {
-  return `${prefix}-${Date.now()}-${Math.random().toString(36).substring(7)}`
+/** Generate an ID seeded from the request so re-import stays idempotent. */
+function generateId(prefix: string, seed: string): string {
+  return stableImportId(`${prefix}:${seed}`)
 }
 
 /** Parse a PowerShell hashtable string into key-value pairs */
@@ -135,29 +136,37 @@ function parsePowerShellCommand(psCommand: string): HTTPRequest | null {
       }
     }
 
-    // Parse URL to extract query params
-    const urlObj = new URL(url)
+    // Parse the URL to split off query params. Templated ({{base}}/x) or
+    // relative URLs make `new URL` throw — don't drop the whole command for
+    // that, fall back to the raw URL with no extracted params.
     const params: KeyValue[] = []
-    urlObj.searchParams.forEach((value, key) => {
-      params.push(
-        createTypedKeyValue({
-          key,
-          value,
-          enabled: true
-        })
-      )
-    })
+    let requestUrl = url
+    let pathname = url
+    try {
+      const urlObj = new URL(url)
+      urlObj.searchParams.forEach((value, key) => {
+        params.push(
+          createTypedKeyValue({
+            key,
+            value,
+            enabled: true
+          })
+        )
+      })
+      pathname = urlObj.pathname || '/'
+      requestUrl = urlObj.origin + urlObj.pathname
+    } catch {
+      // Non-absolute URL — keep it verbatim so the request still imports.
+    }
 
-    // Generate request name from URL
-    const pathname = urlObj.pathname || '/'
     const name = `${method} ${pathname}`
 
     const request: HTTPRequest = {
-      id: generateId('powershell'),
+      id: generateId('powershell', `${method}:${requestUrl}`),
       name,
       type: 'http',
       method,
-      url: urlObj.origin + urlObj.pathname,
+      url: requestUrl,
       headers,
       params,
       body,

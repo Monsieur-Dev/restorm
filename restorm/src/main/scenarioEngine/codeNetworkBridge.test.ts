@@ -46,4 +46,22 @@ describe('codeNetworkBridge', () => {
     const resp = await codeNetworkBridge({ url: 'http://x', method: 'GET', headers: {} }, new AbortController().signal)
     expect(resp.headers['set-cookie']).toBe('a=1, b=2')
   })
+
+  it('passes size + time caps so a runaway response cannot OOM/hang the host', async () => {
+    request.mockResolvedValue({ status: 200, statusText: 'OK', headers: {}, data: '' })
+    await codeNetworkBridge({ url: 'http://x', method: 'GET', headers: {} }, new AbortController().signal)
+    const arg = request.mock.calls[0][0] as Record<string, unknown>
+    expect(typeof arg.maxContentLength).toBe('number')
+    expect(arg.maxContentLength).toBeGreaterThan(0)
+    expect(arg.maxBodyLength).toBe(arg.maxContentLength)
+    expect(typeof arg.timeout).toBe('number')
+    expect(arg.timeout).toBeGreaterThan(0)
+  })
+
+  it('truncates an over-cap body to the byte limit', async () => {
+    const huge = 'x'.repeat(70 * 1024 * 1024) // > 64 MiB cap
+    request.mockResolvedValue({ status: 200, statusText: 'OK', headers: {}, data: huge })
+    const resp = await codeNetworkBridge({ url: 'http://x', method: 'GET', headers: {} }, new AbortController().signal)
+    expect(resp.body.length).toBe(64 * 1024 * 1024)
+  })
 })

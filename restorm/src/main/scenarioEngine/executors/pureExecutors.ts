@@ -58,7 +58,13 @@ export const arithmeticExecutor: NodeExecutor = (act, ctx) => {
   const a = toNumber(ra)
   const b = toNumber(rb)
   const rawOp = cfg.operator ?? cfg.op
-  const op = (rawOp !== undefined ? ARITH_OP_ALIASES[rawOp] : undefined) ?? 'add'
+  // A MISSING/empty operator defaults to ADD — that was the historical default,
+  // so scenarios persisted with an operator-less arithmetic node (legacy data)
+  // keep working across upgrades. But a PRESENT-but-unrecognised operator is a
+  // corrupt node and still THROWS, so the run-log surfaces it instead of
+  // silently computing addition.
+  const hasOp = typeof rawOp === 'string' && rawOp !== ''
+  const op = hasOp ? ARITH_OP_ALIASES[rawOp] : 'add'
   let value: number
   switch (op) {
     case 'add': value = a + b; break
@@ -70,6 +76,8 @@ export const arithmeticExecutor: NodeExecutor = (act, ctx) => {
       break
     case 'mod': value = a % b; break
     case 'pow': value = a ** b; break
+    default:
+      throw new Error(`unknown arithmetic operator: ${String(rawOp)}`)
   }
   return { outputs: [{ port: 'result', value }] }
 }

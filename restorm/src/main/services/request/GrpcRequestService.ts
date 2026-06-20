@@ -7,10 +7,10 @@
  */
 
 import type { GrpcRequest, GrpcResponse, KeyValue } from '../../../shared/types/collections'
-import { StringValue } from '../../../shared/types/collections'
 import { logger } from 'electron-core-ui/main'
 import type { VariableContext } from './types'
 import { resolveTemplate } from './resolveTemplate'
+import { resolveKeyValues, generateResponseId } from './keyValueResolution'
 
 /** Input for executing a gRPC request */
 export interface GrpcRequestInput {
@@ -28,20 +28,6 @@ export interface GrpcRequestInput {
   metadata: KeyValue[]
   /** Variable context from environments */
   variableContext: VariableContext
-}
-
-/** Generate a unique ID for the response */
-function generateResponseId(): string {
-  return `resp_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`
-}
-
-/** Resolve KeyValue pairs with variable context */
-function resolveKeyValues(keyValues: KeyValue[], context: VariableContext): KeyValue[] {
-  return keyValues.map((kv) => ({
-    ...kv,
-    key: resolveTemplate(kv.key, context),
-    value: new StringValue(resolveTemplate(kv.value.toString(), context))
-  }))
 }
 
 /**

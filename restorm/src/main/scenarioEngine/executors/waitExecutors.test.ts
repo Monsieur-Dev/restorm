@@ -58,6 +58,16 @@ describe('waitExecutor', () => {
     ctl.abort()
     await expect(p).rejects.toThrow('cancelled')
   })
+
+  it('honours a WIRED duration of 0 as no-wait (not the 1000ms default)', async () => {
+    // `> 0` used to let a wired 0 fall through to the config/1000ms default;
+    // a wired 0 must resolve immediately.
+    const p = waitExecutor(act({ duration: 0, in: 'sig' }), makeCtx(new AbortController().signal, { inputUnit: 's', durationMs: 500 })) as Promise<ExecResult>
+    let done = false
+    void p.then(() => { done = true })
+    await vi.advanceTimersByTimeAsync(0)
+    expect(done).toBe(true)
+  })
 })
 
 describe('waitUntilExecutor', () => {

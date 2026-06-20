@@ -211,6 +211,18 @@ declare global {
           callback: (map: Record<string, { count: number; lastRunAt: string; history: string[] }>) => void
         ) => () => void
       }
+      // API-update / refresh pipeline (mirrors the preload `apiUpdate`
+      // surface). Keep in sync with src/main/preload/index.ts.
+      apiUpdate: {
+        setSettings: (folderId: string, config: unknown) => Promise<void>
+        apply: (folderId: string, selection?: { include: string[]; skip: string[] }) => Promise<{ updatedFolder: unknown }>
+        refreshFetch: (folderId: string) => Promise<
+          | { ok: true; checksum: string; payload: string; items: unknown[]; format: string | null }
+          | { ok: false; error: string }
+        >
+        syncCollections: (collections: unknown[]) => Promise<void>
+        updateFolderCustomValueLists: (folderId: string, lists: unknown[]) => Promise<void>
+      }
     }
   }
 }
@@ -500,6 +512,23 @@ export interface FullRequestData {
   lwtPayload?: string | undefined
   lwtQos?: number | undefined
   lwtRetain?: boolean | undefined
+  // OData specific (requestType === 'odata'). The main ContextService
+  // appends the system query options ($filter / $select / …) to the
+  // resolved URL. Mirrors the main-side ContextServiceTypes shape.
+  odataVersion?: 'v2' | 'v3' | 'v4' | undefined
+  odataOperationKind?: 'entity-set' | 'function' | 'action' | 'batch' | undefined
+  odataQueryOptions?: {
+    filter?: string | undefined
+    select?: string[] | undefined
+    top?: string | undefined
+    skip?: string | undefined
+    count?: boolean | undefined
+    expand?: string | undefined
+    orderby?: string | undefined
+    search?: string | undefined
+    format?: string | undefined
+    apply?: string | undefined
+  } | undefined
 }
 
 export {}

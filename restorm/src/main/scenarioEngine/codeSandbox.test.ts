@@ -39,6 +39,35 @@ describe('codeSandbox', () => {
     expect(result).toBe('hello world')
   })
 
+  describe('injected data crosses as VM string, not source (no breakout)', () => {
+    it('delivers a value with quotes / template / line-separator chars intact', async () => {
+      // A value an attacker could plant in a response body. If it were
+      // interpolated into source, these chars (closing quote, backtick,
+      // `${}`, U+2028/U+2029) could break out of the string literal. Crossing
+      // as VM-parsed string data delivers it byte-for-byte.
+      const hostile = 'a"b`c${d}e f g</script>h\\i'
+      const { result } = await runCodeInSandbox({ code: 'return input.payload', input: { payload: hostile } })
+      expect(result).toBe(hostile)
+    })
+
+    it('does not execute a breakout payload smuggled through input', async () => {
+      // Classic injection: `"; globalThis.__pwned = 1; "`. As VM string data it
+      // stays a plain string and never runs.
+      const payload = '"; globalThis.__pwned = 1; ("'
+      const { result } = await runCodeInSandbox({
+        code: 'return { echoed: input.x, pwned: (globalThis).__pwned }',
+        input: { x: payload }
+      })
+      expect(result).toEqual({ echoed: payload, pwned: undefined })
+    })
+
+    it('round-trips the same hostile string through `vars`', async () => {
+      const hostile = '`${process}` "//"'
+      const { result } = await runCodeInSandbox({ code: 'return vars.v', variables: { v: hostile } })
+      expect(result).toBe(hostile)
+    })
+  })
+
   it('bundles lodash (global + require)', async () => {
     const a = await runCodeInSandbox({ code: 'return _.sum([1, 2, 3, 4])' })
     expect(a.result).toBe(10)

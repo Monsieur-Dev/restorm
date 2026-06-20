@@ -449,12 +449,7 @@ export function ImportModal({
       }
       void (async () => {
         try {
-          const api = (window as unknown as {
-            restorm?: { apiUpdate?: {
-              apply: (id: string, sel: { include: string[]; skip: string[] }) => Promise<{ updatedFolder: unknown }>
-              setSettings: (id: string, cfg: { sourceHeaders?: Record<string, string> }) => Promise<void>
-            } }
-          }).restorm?.apiUpdate
+          const api = window.restorm?.apiUpdate
           // Persist the latest header edits first so the apply
           // sees them; without this the refresh would still use
           // whatever was on disk when the modal opened.
@@ -628,14 +623,7 @@ export function ImportModal({
         // Doing the auth on main is mandatory: the renderer-side
         // `auth.prefetch` would forward the request raw, without
         // handlebars expansion against the env folder's ContextService.
-        const api = (window as unknown as {
-          restorm?: { apiUpdate?: {
-            refreshFetch: (id: string) => Promise<
-              | { ok: true; checksum: string; payload: string; items: FolderItem[]; format: string | null }
-              | { ok: false; error: string }
-            >
-          } }
-        }).restorm?.apiUpdate
+        const api = window.restorm?.apiUpdate
         if (!api) {
           if (!token.cancelled) {
             setPreviewItems([])
@@ -648,7 +636,9 @@ export function ImportModal({
         const result = await api.refreshFetch(refreshContext.targetFolderId)
         if (token.cancelled) return
         if (result.ok) {
-          const items = result.items
+          // refreshFetch returns items as `unknown[]` at the IPC boundary;
+          // they are FolderItems by contract (the main importer produced them).
+          const items = result.items as FolderItem[]
           setPreviewItems(items)
           setPreviewChecksum(result.checksum)
           setError(null)
