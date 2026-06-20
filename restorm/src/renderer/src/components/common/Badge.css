@@ -26,38 +26,38 @@
  * ============================================================================ */
 
 .badge-get {
-  background-color: #2e7d32;
-  color: #ffffff;
+  background-color: var(--badge-get-background);
+  color: var(--badge-on-accent, #ffffff);
 }
 
 .badge-post {
-  background-color: #1565c0;
-  color: #ffffff;
+  background-color: var(--badge-post-background);
+  color: var(--badge-on-accent, #ffffff);
 }
 
 .badge-put {
-  background-color: #ef6c00;
-  color: #ffffff;
+  background-color: var(--badge-put-background);
+  color: var(--badge-on-accent, #ffffff);
 }
 
 .badge-delete {
-  background-color: #c62828;
-  color: #ffffff;
+  background-color: var(--badge-delete-background);
+  color: var(--badge-on-accent, #ffffff);
 }
 
 .badge-patch {
-  background-color: #6a1b9a;
-  color: #ffffff;
+  background-color: var(--badge-patch-background);
+  color: var(--badge-on-accent, #ffffff);
 }
 
 .badge-head {
-  background-color: #00838f;
-  color: #ffffff;
+  background-color: var(--badge-head-background);
+  color: var(--badge-on-accent, #ffffff);
 }
 
 .badge-options {
-  background-color: #4527a0;
-  color: #ffffff;
+  background-color: var(--badge-options-background);
+  color: var(--badge-on-accent, #ffffff);
 }
 
 /* ============================================================================
@@ -65,28 +65,28 @@
  * ============================================================================ */
 
 .badge-unary {
-  background-color: #0277bd;
-  color: #ffffff;
+  background-color: var(--badge-grpc-unary-background);
+  color: var(--badge-on-accent, #ffffff);
 }
 
 .badge-sstr {
-  background-color: #00695c;
-  color: #ffffff;
+  background-color: var(--badge-grpc-sstr-background);
+  color: var(--badge-on-accent, #ffffff);
 }
 
 .badge-cstr {
-  background-color: #558b2f;
-  color: #ffffff;
+  background-color: var(--badge-grpc-cstr-background);
+  color: var(--badge-on-accent, #ffffff);
 }
 
 .badge-bidi {
-  background-color: #5d4037;
-  color: #ffffff;
+  background-color: var(--badge-grpc-bidi-background);
+  color: var(--badge-on-accent, #ffffff);
 }
 
 .badge-grpc {
-  background-color: #3949ab;
-  color: #ffffff;
+  background-color: var(--badge-grpc-background);
+  color: var(--badge-on-accent, #ffffff);
 }
 
 /* ============================================================================
@@ -94,23 +94,23 @@
  * ============================================================================ */
 
 .badge-gql {
-  background-color: #e535ab;
-  color: #ffffff;
+  background-color: var(--badge-gql-background);
+  color: var(--badge-on-accent, #ffffff);
 }
 
 .badge-query {
-  background-color: #e535ab;
-  color: #ffffff;
+  background-color: var(--badge-gql-background);
+  color: var(--badge-on-accent, #ffffff);
 }
 
 .badge-mutation {
-  background-color: #b71c1c;
-  color: #ffffff;
+  background-color: var(--badge-mutation-background);
+  color: var(--badge-on-accent, #ffffff);
 }
 
 .badge-subscription {
-  background-color: #7b1fa2;
-  color: #ffffff;
+  background-color: var(--badge-subscription-background);
+  color: var(--badge-on-accent, #ffffff);
 }
 
 /* ============================================================================
@@ -118,8 +118,8 @@
  * ============================================================================ */
 
 .badge-soap {
-  background-color: #f9a825;
-  color: #000000;
+  background-color: var(--badge-soap-background);
+  color: var(--badge-soap-foreground, #000000);
 }
 
 /* ============================================================================
@@ -127,18 +127,18 @@
  * ============================================================================ */
 
 .badge-ws {
-  background-color: #43a047;
-  color: #ffffff;
+  background-color: var(--badge-ws-background);
+  color: var(--badge-on-accent, #ffffff);
 }
 
 .badge-mqtt {
-  background-color: #ff6f00;
-  color: #000000;
+  background-color: var(--badge-mqtt-background);
+  color: var(--badge-mqtt-foreground, #000000);
 }
 
 .badge-sio {
-  background-color: #00897b;
-  color: #ffffff;
+  background-color: var(--badge-sio-background);
+  color: var(--badge-on-accent, #ffffff);
 }
 
 /* Server mode (restorm HOSTS the protocol): a two-part "capsule" norm shared by
@@ -155,8 +155,8 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background-color: purple;
-  color: #ffffff;
+  background-color: var(--badge-capsule-glyph-background, #6b21a8);
+  color: var(--badge-on-accent, #ffffff);
   padding: 2px 5px;
   border-radius: 3px 0 0 3px;
   font-size: 10px;
@@ -177,8 +177,8 @@
  * ============================================================================ */
 
 .badge-odata {
-  background-color: #ff6a00;
-  color: #ffffff;
+  background-color: var(--badge-odata-background);
+  color: var(--badge-on-accent, #ffffff);
 }
 
 /* ============================================================================
@@ -186,8 +186,8 @@
  * ============================================================================ */
 
 .badge-auth {
-  background-color: #f97316;
-  color: #ffffff;
+  background-color: var(--badge-auth-background);
+  color: var(--badge-on-accent, #ffffff);
   padding: 2px 4px;
 }
 
@@ -201,14 +201,14 @@
 /* Scenario badge — a violet pill with a circuit-board glyph, distinct
  * from the protocol/method palette so dataflow graphs read at a glance. */
 .badge-scenario {
-  background-color: #8b5cf6;
-  color: #ffffff;
+  background-color: var(--badge-scenario-background);
+  color: var(--badge-on-accent, #ffffff);
   padding: 2px 4px;
 }
 
 .badge-scenario .codicon-circuit-board {
   font-size: 14px !important;
-  color: #ffffff !important;
+  color: var(--badge-on-accent, #ffffff) !important;
 }
 
 /* ============================================================================
@@ -218,7 +218,10 @@
 .badge-pro {
   /* Gold gradient + dark text reads "premium" without looking like a
    * protocol acronym. Slight inner shadow gives the pill a subtle
-   * sticker feel. */
+   * sticker feel.
+   * NOTE: the gold gradient is a deliberate brand colour, NOT a theme
+   * colour — it must look identical on every theme (marketing intent).
+   * Do NOT migrate these values to CSS var() tokens. */
   background: linear-gradient(135deg, #f6c560 0%, #c98a1a 100%);
   color: #1a1306;
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.18);

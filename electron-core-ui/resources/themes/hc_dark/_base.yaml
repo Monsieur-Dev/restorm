@@ -344,3 +344,222 @@ colors:
   - id: alert.debug.border
     value: "#ffffff"
     description: Alert debug border color
+
+  # ── Protocol / HTTP-method badge colors (HC dark) ─────────────────────────
+  # High-contrast dark: bright, fully-saturated so text is legible on black.
+  - id: badge-get-background
+    value: "#4caf50"
+    description: "HTTP GET badge (HC dark)"
+
+  - id: badge-post-background
+    value: "#2196f3"
+    description: "HTTP POST badge (HC dark)"
+
+  - id: badge-put-background
+    value: "#ff9800"
+    description: "HTTP PUT badge (HC dark)"
+
+  - id: badge-delete-background
+    value: "#f44336"
+    description: "HTTP DELETE badge (HC dark)"
+
+  - id: badge-patch-background
+    value: "#9c27b0"
+    description: "HTTP PATCH badge (HC dark)"
+
+  - id: badge-head-background
+    value: "#00bcd4"
+    description: "HTTP HEAD badge (HC dark)"
+
+  - id: badge-options-background
+    value: "#673ab7"
+    description: "HTTP OPTIONS badge (HC dark)"
+
+  - id: badge-grpc-unary-background
+    value: "#03a9f4"
+    description: "gRPC Unary badge (HC dark)"
+
+  - id: badge-grpc-sstr-background
+    value: "#009688"
+    description: "gRPC Server-stream badge (HC dark)"
+
+  - id: badge-grpc-cstr-background
+    value: "#8bc34a"
+    description: "gRPC Client-stream badge (HC dark)"
+
+  - id: badge-grpc-bidi-background
+    value: "#795548"
+    description: "gRPC Bidirectional-stream badge (HC dark)"
+
+  - id: badge-grpc-background
+    value: "#3f51b5"
+    description: "gRPC generic badge (HC dark)"
+
+  - id: badge-gql-background
+    value: "#e91e8c"
+    description: "GraphQL badge (HC dark)"
+
+  - id: badge-mutation-background
+    value: "#f44336"
+    description: "GraphQL Mutation badge (HC dark)"
+
+  - id: badge-subscription-background
+    value: "#9c27b0"
+    description: "GraphQL Subscription badge (HC dark)"
+
+  - id: badge-soap-background
+    value: "#ffcc00"
+    description: "SOAP badge (HC dark)"
+
+  - id: badge-soap-foreground
+    value: "#000000"
+    description: "SOAP badge foreground (HC dark)"
+
+  - id: badge-ws-background
+    value: "#4caf50"
+    description: "WebSocket badge (HC dark)"
+
+  - id: badge-mqtt-background
+    value: "#ff9800"
+    description: "MQTT badge (HC dark)"
+
+  - id: badge-mqtt-foreground
+    value: "#000000"
+    description: "MQTT badge foreground (HC dark)"
+
+  - id: badge-sio-background
+    value: "#00bcd4"
+    description: "Socket.IO badge (HC dark)"
+
+  - id: badge-odata-background
+    value: "#ff5722"
+    description: "OData badge (HC dark)"
+
+  - id: badge-auth-background
+    value: "#ff9800"
+    description: "Auth badge (HC dark)"
+
+  - id: badge-scenario-background
+    value: "#7c4dff"
+    description: "Scenario badge (HC dark)"
+
+  - id: badge-capsule-glyph-background
+    value: "#4a148c"
+    description: "Server-mode capsule glyph (HC dark)"
+
+  # ── Scenario UI semantic colors (HC dark) ──────────────────────────────────
+  - id: scenario-action-run-background
+    value: "#4caf50"
+    description: "Scenario run button (HC dark)"
+
+  - id: scenario-action-run-hover-background
+    value: "#388e3c"
+    description: "Scenario run hover (HC dark)"
+
+  - id: scenario-action-run-active-background
+    value: "#ffcc00"
+    description: "Scenario run active/breakpoint (HC dark)"
+
+  - id: scenario-action-run-active-hover-background
+    value: "#e6b800"
+    description: "Scenario run active hover (HC dark)"
+
+  - id: scenario-action-step-background
+    value: "#2196f3"
+    description: "Scenario step button (HC dark)"
+
+  - id: scenario-action-step-hover-background
+    value: "#1976d2"
+    description: "Scenario step hover (HC dark)"
+
+  - id: scenario-action-debug-background
+    value: "#9c27b0"
+    description: "Scenario debug button (HC dark)"
+
+  - id: scenario-action-debug-hover-background
+    value: "#7b1fa2"
+    description: "Scenario debug hover (HC dark)"
+
+  - id: scenario-action-stop-background
+    value: "#f44336"
+    description: "Scenario stop button (HC dark)"
+
+  - id: scenario-action-stop-hover-background
+    value: "#d32f2f"
+    description: "Scenario stop hover (HC dark)"
+
+  - id: scenario-action-neutral-background
+    value: "#757575"
+    description: "Scenario neutral button (HC dark)"
+
+  - id: scenario-debug-edge-stroke
+    value: "#ffcc00"
+    description: "Scenario debug edge stroke (HC dark)"
+
+  - id: scenario-flow-value
+    value: "#ce93d8"
+    description: "Scenario data-flow (value) edge colour (HC dark — softer lilac meets WCAG AA on black)"
+
+  - id: scenario-error-color
+    value: "#f44336"
+    description: "Scenario error color (HC dark)"
+
+  - id: scenario-error-hover-color
+    value: "#ef5350"
+    description: "Scenario error hover (HC dark)"
+
+  - id: scenario-breakpoint-set-color
+    value: "#f44336"
+    description: "Scenario breakpoint set (HC dark)"
+
+  - id: scenario-muted-color
+    value: "#9e9e9e"
+    description: "Scenario muted icon (HC dark)"
+
+  - id: scenario-success-indicator
+    value: "#4caf50"
+    description: "Scenario success indicator (HC dark)"
+
+  - id: log-dot-debug
+    value: "#9e9e9e"
+    description: "Log level dot debug (HC dark)"
+
+  - id: log-dot-info
+    value: "#2196f3"
+    description: "Log level dot info (HC dark)"
+
+  - id: log-dot-warn
+    value: "#ff9800"
+    description: "Log level dot warn (HC dark)"
+
+  - id: log-dot-error
+    value: "#f44336"
+    description: "Log level dot error (HC dark)"
+
+  - id: scenario-status-completed
+    value: "#4caf50"
+    description: "Scenario history completed (HC dark)"
+
+  - id: scenario-status-cancelled
+    value: "#ff9800"
+    description: "Scenario history cancelled (HC dark)"
+
+  - id: scenario-status-failed
+    value: "#f44336"
+    description: "Scenario history failed (HC dark)"
+
+  - id: doc-error-outline
+    value: "#f44336"
+    description: "Doc error outline (HC dark)"
+
+  - id: electric-border-color
+    value: "#ff9800"
+    description: "Electric border (HC dark)"
+
+  - id: recent-files-star-color
+    value: "#ffcc00"
+    description: "Recent files star (HC dark)"
+
+  - id: search-result-badge-background
+    value: "#757575"
+    description: "Search result badge (HC dark)"

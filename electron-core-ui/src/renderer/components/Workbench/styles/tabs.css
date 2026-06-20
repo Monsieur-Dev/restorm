@@ -102,12 +102,12 @@
 .workbench .part.editor > .content .editor-group-container > .title .tabs-container.dimmed > .tab .label-name .codicon-file,
 .workbench .part.editor > .content .editor-group-container > .title .tabs-container > .tab:not(.active) .label-name .codicon-file {
 	opacity: 1 !important;
-	color: #fff !important;
+	color: var(--badge-on-accent, #fff) !important;
 }
 
 /* Icons inside label-name should always be white even when not dimmed */
 .workbench .part.editor > .content .editor-group-container > .title .tabs-container > .tab .label-name .codicon-file {
-	color: #fff !important;
+	color: var(--badge-on-accent, #fff) !important;
 }
 
 .workbench .part.editor > .content .editor-group-container > .title .tabs-container > .tab .tab-actions {

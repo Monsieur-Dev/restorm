@@ -1,5 +1,11 @@
 /* Theme switching: override Milkdown CSS variables based on theme class */
 
+/* NOTE: The --crepe-* variables below are part of Milkdown's own palette system
+ * (a third-party editor). They are intentionally NOT migrated to our theme token
+ * system; wiring them would be fragile against Milkdown upgrades. If per-theme
+ * Milkdown styling is needed in the future, override these in a separate CSS
+ * layer scoped to [data-theme="…"] selectors. */
+
 /* Light theme variables - use frame.css values */
 .milkdown-theme-light .milkdown {
   --crepe-color-background: #fff;

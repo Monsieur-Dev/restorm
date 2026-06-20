@@ -270,7 +270,7 @@
   }
   25%, 75% {
     outline-width: 3px;
-    outline-color: #e34c4c;
+    outline-color: var(--doc-error-outline);
   }
 }
 
@@ -747,8 +747,9 @@
 }
 
 .documentation-host-parameters-table__location-chip--query {
-  background: rgba(77, 155, 246, 0.85);
-  color: var(--editor-background);
+  /* POST-blue tint (same semantic colour as the POST method badge). */
+  background: color-mix(in srgb, var(--badge-post-background) 85%, transparent);
+  color: var(--badge-on-accent, #ffffff);
 }
 
 .documentation-host-parameters-table__location-chip--header {
@@ -1682,14 +1683,13 @@
 }
 
 /* Method-pill text is fixed white on every coloured background so the
- * sidebar reads the same on light + dark themes. The previous
- * `var(--editor-background)` made the text the same colour as the
- * editor background, which inverted contrast on light themes. */
-.documentation-host-sidebar__method--get { background: rgba(73, 174, 86, 0.85); color: #fff; }
-.documentation-host-sidebar__method--post { background: rgba(77, 155, 246, 0.85); color: #fff; }
-.documentation-host-sidebar__method--put { background: rgba(244, 162, 70, 0.85); color: #fff; }
-.documentation-host-sidebar__method--patch { background: rgba(180, 120, 200, 0.85); color: #fff; }
-.documentation-host-sidebar__method--delete { background: rgba(220, 90, 90, 0.85); color: #fff; }
+ * sidebar reads the same on light + dark themes. Uses the canonical
+ * per-verb badge tokens for consistency with Badge.css / httpMethods.css. */
+.documentation-host-sidebar__method--get { background: var(--badge-get-background); color: var(--badge-on-accent, #fff); }
+.documentation-host-sidebar__method--post { background: var(--badge-post-background); color: var(--badge-on-accent, #fff); }
+.documentation-host-sidebar__method--put { background: var(--badge-put-background); color: var(--badge-on-accent, #fff); }
+.documentation-host-sidebar__method--patch { background: var(--badge-patch-background); color: var(--badge-on-accent, #fff); }
+.documentation-host-sidebar__method--delete { background: var(--badge-delete-background); color: var(--badge-on-accent, #fff); }
 .documentation-host-sidebar__method--head,
 .documentation-host-sidebar__method--options { background: rgba(127, 127, 127, 0.4); color: var(--editor-foreground); }
 

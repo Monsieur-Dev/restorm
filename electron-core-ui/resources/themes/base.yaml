@@ -172,3 +172,244 @@ variables:
   - id: testing-iconFailed
     value: "#f14c4c"
     description: Color for failed test icon
+
+  # ── Protocol / HTTP-method badge colors ───────────────────────────────────
+  # One canonical token per verb, used by Badge.css, httpMethods.css and
+  # DocumentationHost.css so all three stay in sync. Each family _base.yaml
+  # can override for palette coherence; text on every badge is white
+  # (--ecu-on-accent) so only the background needs theming.
+  - id: badge-on-accent
+    value: "#ffffff"
+    description: "Foreground (text) on any coloured badge pill"
+
+  - id: badge-get-background
+    value: "#2e7d32"
+    description: "HTTP GET badge background (Material green)"
+
+  - id: badge-post-background
+    value: "#1565c0"
+    description: "HTTP POST badge background (Material blue)"
+
+  - id: badge-put-background
+    value: "#ef6c00"
+    description: "HTTP PUT badge background (Material orange)"
+
+  - id: badge-delete-background
+    value: "#c62828"
+    description: "HTTP DELETE badge background (Material red)"
+
+  - id: badge-patch-background
+    value: "#6a1b9a"
+    description: "HTTP PATCH badge background (Material purple)"
+
+  - id: badge-head-background
+    value: "#00838f"
+    description: "HTTP HEAD badge background (Material teal)"
+
+  - id: badge-options-background
+    value: "#4527a0"
+    description: "HTTP OPTIONS badge background (Material deep purple)"
+
+  # ── gRPC call-type badge colors ────────────────────────────────────────────
+  - id: badge-grpc-unary-background
+    value: "#0277bd"
+    description: "gRPC Unary badge background (Material light-blue)"
+
+  - id: badge-grpc-sstr-background
+    value: "#00695c"
+    description: "gRPC Server-stream badge background (Material teal)"
+
+  - id: badge-grpc-cstr-background
+    value: "#558b2f"
+    description: "gRPC Client-stream badge background (Material light-green)"
+
+  - id: badge-grpc-bidi-background
+    value: "#5d4037"
+    description: "gRPC Bidirectional-stream badge background (Material brown)"
+
+  - id: badge-grpc-background
+    value: "#3949ab"
+    description: "gRPC (generic) badge background (Material indigo)"
+
+  # ── GraphQL badge colors ────────────────────────────────────────────────────
+  - id: badge-gql-background
+    value: "#e535ab"
+    description: "GraphQL / Query badge background (GraphQL pink)"
+
+  - id: badge-mutation-background
+    value: "#b71c1c"
+    description: "GraphQL Mutation badge background (Material dark-red)"
+
+  - id: badge-subscription-background
+    value: "#7b1fa2"
+    description: "GraphQL Subscription badge background (Material purple)"
+
+  # ── SOAP ────────────────────────────────────────────────────────────────────
+  - id: badge-soap-background
+    value: "#f9a825"
+    description: "SOAP badge background (Material amber)"
+
+  - id: badge-soap-foreground
+    value: "#000000"
+    description: "SOAP badge foreground (dark text on amber)"
+
+  # ── WebSocket / real-time protocol badge colors ─────────────────────────────
+  - id: badge-ws-background
+    value: "#43a047"
+    description: "WebSocket badge background (Material green)"
+
+  - id: badge-mqtt-background
+    value: "#ff6f00"
+    description: "MQTT badge background (Material amber-dark)"
+
+  - id: badge-mqtt-foreground
+    value: "#000000"
+    description: "MQTT badge foreground (dark text on amber)"
+
+  - id: badge-sio-background
+    value: "#00897b"
+    description: "Socket.IO badge background (Material teal)"
+
+  # ── OData ───────────────────────────────────────────────────────────────────
+  - id: badge-odata-background
+    value: "#ff6a00"
+    description: "OData badge background (orange)"
+
+  # ── Auth badge ──────────────────────────────────────────────────────────────
+  - id: badge-auth-background
+    value: "#f97316"
+    description: "Auth badge background (orange)"
+
+  # ── Scenario badge ──────────────────────────────────────────────────────────
+  - id: badge-scenario-background
+    value: "#8b5cf6"
+    description: "Scenario badge background (violet)"
+
+  # ── Server-mode capsule glyph ────────────────────────────────────────────────
+  - id: badge-capsule-glyph-background
+    value: "#6b21a8"
+    description: "Server-mode capsule 'SRV' segment background (dark purple)"
+
+  # ── Scenario UI semantic colors ─────────────────────────────────────────────
+  # Used by ScenarioNodeBox inspector buttons, log-level dots, run history dots,
+  # and the debug bezier edge stroke. One semantic role = one token.
+  - id: scenario-action-run-background
+    value: "#22c55e"
+    description: "Scenario: run / success / green action background"
+
+  - id: scenario-action-run-hover-background
+    value: "#16a34a"
+    description: "Scenario: run action hover background"
+
+  - id: scenario-action-run-active-background
+    value: "#eab308"
+    description: "Scenario: run button in active/breakpoint state (yellow)"
+
+  - id: scenario-action-run-active-hover-background
+    value: "#ca8a04"
+    description: "Scenario: run button active hover background"
+
+  - id: scenario-action-step-background
+    value: "#3b82f6"
+    description: "Scenario: step action background (blue)"
+
+  - id: scenario-action-step-hover-background
+    value: "#2563eb"
+    description: "Scenario: step action hover background"
+
+  - id: scenario-action-debug-background
+    value: "#8b5cf6"
+    description: "Scenario: debug action background (violet)"
+
+  - id: scenario-action-debug-hover-background
+    value: "#7c3aed"
+    description: "Scenario: debug action hover background"
+
+  - id: scenario-action-stop-background
+    value: "#ef4444"
+    description: "Scenario: stop action background (red)"
+
+  - id: scenario-action-stop-hover-background
+    value: "#dc2626"
+    description: "Scenario: stop action hover background"
+
+  - id: scenario-action-neutral-background
+    value: "#6b7280"
+    description: "Scenario: neutral / disabled action background (gray)"
+
+  - id: scenario-debug-edge-stroke
+    value: "#facc15"
+    description: "Scenario: debug bezier edge stroke color (yellow)"
+
+  - id: scenario-flow-value
+    value: "#a855f7"
+    description: "Scenario: data-flow (value) port/edge colour (purple)"
+
+  - id: scenario-status-completed
+    value: "#3fb950"
+    description: "Scenario run history: completed status dot"
+
+  - id: scenario-status-cancelled
+    value: "#d29922"
+    description: "Scenario run history: cancelled status dot"
+
+  - id: scenario-status-failed
+    value: "#f85149"
+    description: "Scenario run history: failed status dot"
+
+  - id: scenario-error-color
+    value: "#ef4444"
+    description: "Scenario: error state color (red borders, error badge)"
+
+  - id: scenario-error-hover-color
+    value: "#f87171"
+    description: "Scenario: error state hover color"
+
+  - id: scenario-breakpoint-set-color
+    value: "#e51400"
+    description: "Scenario: breakpoint set icon color (bright red)"
+
+  - id: scenario-muted-color
+    value: "#9aa0a6"
+    description: "Scenario: muted / ghost icon color (breakpoint unset)"
+
+  - id: scenario-success-indicator
+    value: "#22c55e"
+    description: "Scenario: success/pass indicator (node result dot)"
+
+  # ── Log level dot colors ─────────────────────────────────────────────────────
+  - id: log-dot-debug
+    value: "#8a8a8a"
+    description: "Log level dot: debug (gray)"
+
+  - id: log-dot-info
+    value: "#3794ff"
+    description: "Log level dot: info (blue)"
+
+  - id: log-dot-warn
+    value: "#e0a030"
+    description: "Log level dot: warn (amber)"
+
+  - id: log-dot-error
+    value: "#f14c4c"
+    description: "Log level dot: error (red)"
+
+  # ── Documentation sidebar error outline ─────────────────────────────────────
+  - id: doc-error-outline
+    value: "#e34c4c"
+    description: "Documentation host: validation error outline color"
+
+  # ── Electric border effect ───────────────────────────────────────────────────
+  - id: electric-border-color
+    value: "#dd8448"
+    description: "Electric border animation color (warm orange)"
+
+  # ── Recent files vignette ────────────────────────────────────────────────────
+  - id: recent-files-star-color
+    value: "#f5c518"
+    description: "Recent files: starred/favourite item highlight color (gold)"
+
+  # ── Search bar result badge ──────────────────────────────────────────────────
+  - id: search-result-badge-background
+    value: "#6b7280"
+    description: "Search bar: result count badge fallback background (gray)"

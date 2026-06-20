@@ -15,7 +15,7 @@
 .ecu-electric-border {
   /* Defaults that consumers can override per-instance via inline CSS vars
    * (the React component sets them on the root). */
-  --ecu-electric-border-color: #dd8448;
+  --ecu-electric-border-color: var(--electric-border-color, #dd8448);
   --ecu-electric-border-light: oklch(from var(--ecu-electric-border-color) l c h);
   --ecu-electric-border-gradient: oklch(
     from var(--ecu-electric-border-color) 30% calc(c / 2) h / 0.4
