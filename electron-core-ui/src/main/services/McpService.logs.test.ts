@@ -250,15 +250,35 @@ describe('McpService served-call logs buffer', () => {
     service.setLogRetentionCap(0)
     expect(await fs.access(filePath).then(() => true, () => false)).toBe(false)
   })
+
+  it('deletes the on-disk screenshot temp file when its log entry is evicted', async () => {
+    // A real temp file standing in for a screenshot PNG served on demand.
+    const name = `ecu-screenshot-${String(Date.now())}.png`
+    const filePath = join(tmpdir(), name)
+    await fs.writeFile(filePath, 'fake-png-bytes')
+    expect(await fs.access(filePath).then(() => true, () => false)).toBe(true)
+
+    const attach = (c: { kind: 'image' | 'video'; mimeType: string; path?: string }): void => {
+      (service as unknown as { attachCaptureToLatest: (cap: typeof c) => void }).attachCaptureToLatest(c)
+    }
+    await callEcho(port, { n: 'shot' })
+    attach({ kind: 'image', mimeType: 'image/png', path: `ecui-media://screenshot/${name}` })
+
+    // Lower the cap to 0 → the entry (and its media) is evicted.
+    service.setLogRetentionCap(0)
+    expect(await fs.access(filePath).then(() => true, () => false)).toBe(false)
+  })
 })
 
-describe('McpService startup orphan-screencast sweep', () => {
-  it('deletes leftover ecu-screencast-* temp files on start (crashed-run orphans)', async () => {
+describe('McpService startup orphan-media sweep', () => {
+  it('deletes leftover ecu-screencast-* and ecu-screenshot-* temp files on start (crashed-run orphans)', async () => {
     const orphan = join(tmpdir(), `ecu-screencast-orphan-${String(process.pid)}.webm`)
     const orphanMp4 = join(tmpdir(), `ecu-screencast-orphan-${String(process.pid)}.mp4`)
+    const orphanPng = join(tmpdir(), `ecu-screenshot-orphan-${String(process.pid)}.png`)
     const unrelated = join(tmpdir(), `not-ours-${String(process.pid)}.webm`)
     await fs.writeFile(orphan, 'x')
     await fs.writeFile(orphanMp4, 'x')
+    await fs.writeFile(orphanPng, 'x')
     await fs.writeFile(unrelated, 'x')
 
     const svc = new McpService()
@@ -267,6 +287,7 @@ describe('McpService startup orphan-screencast sweep', () => {
       // The sweep runs on start(): our orphans gone, unrelated file untouched.
       expect(await fs.access(orphan).then(() => true, () => false)).toBe(false)
       expect(await fs.access(orphanMp4).then(() => true, () => false)).toBe(false)
+      expect(await fs.access(orphanPng).then(() => true, () => false)).toBe(false)
       expect(await fs.access(unrelated).then(() => true, () => false)).toBe(true)
     } finally {
       await svc.stop()
