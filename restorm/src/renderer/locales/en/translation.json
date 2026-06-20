@@ -835,7 +835,10 @@
     },
     "ok": "Import",
     "cancel": "Cancel",
-    "dropZone": "Drop zone"
+    "dropZone": "Drop zone",
+    "addAuth": "Add an authentication route",
+    "detachAuth": "Detach authentication route",
+    "editAuth": "Edit authentication route"
   },
   "emptyBench": {
     "importCard": {
@@ -1714,5 +1717,14 @@
     "updateRequest": "Update a request",
     "updateScenario": "Update a scenario",
     "updateScenarioNode": "Update a scenario node"
+  },
+  "odataRequestTab": {
+    "send": "Send",
+    "loadNextPage": "Load next page"
+  },
+  "typedValue": {
+    "list": {
+      "add": "Add value"
+    }
   }
 }

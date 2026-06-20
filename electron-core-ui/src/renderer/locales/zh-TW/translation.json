@@ -157,7 +157,11 @@
     }
   },
   "codeEditor": {
-    "goToDefinition": "前往定義"
+    "goToDefinition": "前往定義",
+    "copyButton": {
+      "copy": "複製程式碼",
+      "copied": "已複製！"
+    }
   },
   "tagsView": {
     "removeTag": "移除標籤",
@@ -370,5 +374,16 @@
     "listThemes": "列出可用佈景主題",
     "getCurrentTheme": "取得目前佈景主題",
     "switchTheme": "切換活躍佈景主題"
+  },
+  "customWco": {
+    "minimize": "最小化",
+    "maximize": "最大化",
+    "restore": "還原",
+    "close": "關閉"
+  },
+  "firewall": {
+    "addOrigin": "新增來源",
+    "removeOrigin": "移除 {{origin}}",
+    "noEntries": "目前沒有條目。"
   }
 }

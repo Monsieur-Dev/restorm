@@ -157,7 +157,11 @@
     }
   },
   "codeEditor": {
-    "goToDefinition": "Gå til definition"
+    "goToDefinition": "Gå til definition",
+    "copyButton": {
+      "copy": "Kopiér kode",
+      "copied": "Kopieret!"
+    }
   },
   "tagsView": {
     "removeTag": "Fjern tag",
@@ -370,5 +374,16 @@
     "listThemes": "Vis tilgængelige temaer",
     "getCurrentTheme": "Vis aktuelt tema",
     "switchTheme": "Skift aktivt tema"
+  },
+  "customWco": {
+    "minimize": "Minimer",
+    "maximize": "Maksimer",
+    "restore": "Gendan",
+    "close": "Luk"
+  },
+  "firewall": {
+    "addOrigin": "Tilføj origin",
+    "removeOrigin": "Fjern {{origin}}",
+    "noEntries": "Ingen poster endnu."
   }
 }

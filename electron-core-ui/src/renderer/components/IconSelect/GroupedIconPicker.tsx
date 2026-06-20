@@ -90,7 +90,7 @@ export const GroupedIconPicker: React.FC<GroupedIconPickerProps> = ({
             type="button"
             className={`ecui-grouped-icon-category ${activeCategory === cat.id ? 'active' : ''}`}
             onClick={() => { handleCategoryClick(cat.id) }}
-            title={getCategoryName(cat.id, cat.name)}
+            aria-label={getCategoryName(cat.id, cat.name)}
             {...(dataTestIdBase ? { 'data-testid': `${dataTestIdBase}-category-${cat.id}` } : {})}
             data-category-id={cat.id}
           >
@@ -147,7 +147,7 @@ export const GroupedIconPicker: React.FC<GroupedIconPickerProps> = ({
                     key={name}
                     type="button"
                     className="ecui-icon-select-codicon"
-                    title={name}
+                    aria-label={name}
                     onClick={() => { onSelect(name) }}
                     {...(dataTestIdBase ? { 'data-testid': `${dataTestIdBase}-icon-${name}` } : {})}
                     {...(iconType ? { 'data-icon-type': iconType } : {})}

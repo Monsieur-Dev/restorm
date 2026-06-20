@@ -837,7 +837,10 @@
     },
     "ok": "Importuj",
     "cancel": "Anuluj",
-    "dropZone": "Strefa upuszczania"
+    "dropZone": "Strefa upuszczania",
+    "addAuth": "Dodaj trasę uwierzytelniania",
+    "detachAuth": "Odłącz trasę uwierzytelniania",
+    "editAuth": "Edytuj trasę uwierzytelniania"
   },
   "emptyBench": {
     "importCard": {
@@ -1716,5 +1719,14 @@
     "updateRequest": "Zaktualizuj żądanie",
     "updateScenario": "Zaktualizuj scenariusz",
     "updateScenarioNode": "Zaktualizuj węzeł scenariusza"
+  },
+  "odataRequestTab": {
+    "send": "Wyślij",
+    "loadNextPage": "Załaduj następną stronę"
+  },
+  "typedValue": {
+    "list": {
+      "add": "Dodaj wartość"
+    }
   }
 }

@@ -157,7 +157,11 @@
     }
   },
   "codeEditor": {
-    "goToDefinition": "정의로 이동"
+    "goToDefinition": "정의로 이동",
+    "copyButton": {
+      "copy": "코드 복사",
+      "copied": "복사됨!"
+    }
   },
   "tagsView": {
     "removeTag": "태그 제거",
@@ -370,5 +374,16 @@
     "listThemes": "사용 가능한 테마 목록",
     "getCurrentTheme": "현재 테마 가져오기",
     "switchTheme": "활성 테마 전환"
+  },
+  "customWco": {
+    "minimize": "최소화",
+    "maximize": "최대화",
+    "restore": "복원",
+    "close": "닫기"
+  },
+  "firewall": {
+    "addOrigin": "오리진 추가",
+    "removeOrigin": "{{origin}} 제거",
+    "noEntries": "항목이 없습니다."
   }
 }

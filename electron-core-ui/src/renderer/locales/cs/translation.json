@@ -157,7 +157,11 @@
     }
   },
   "codeEditor": {
-    "goToDefinition": "Přejít na definici"
+    "goToDefinition": "Přejít na definici",
+    "copyButton": {
+      "copy": "Kopírovat kód",
+      "copied": "Zkopírováno!"
+    }
   },
   "tagsView": {
     "removeTag": "Odebrat štítek",
@@ -370,5 +374,16 @@
     "listThemes": "Vypsat dostupná témata",
     "getCurrentTheme": "Zobrazit aktuální téma",
     "switchTheme": "Přepnout aktivní téma"
+  },
+  "customWco": {
+    "minimize": "Minimalizovat",
+    "maximize": "Maximalizovat",
+    "restore": "Obnovit",
+    "close": "Zavřít"
+  },
+  "firewall": {
+    "addOrigin": "Přidat origin",
+    "removeOrigin": "Odebrat {{origin}}",
+    "noEntries": "Zatím žádné záznamy."
   }
 }

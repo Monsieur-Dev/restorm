@@ -86,7 +86,7 @@ export const InputNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, dat
         secondary
         icon="add"
         onClick={() => { setParams([...displayParams, { id: paramId(), name: '', valueType: { type: 'string', value: '' } }]) }}
-        options={{ ariaLabel: t('scenario.input.addParam', 'Add parameter'), title: t('scenario.input.addParam', 'Add parameter') }}
+        options={{ ariaLabel: t('scenario.input.addParam', 'Add parameter') }}
         data-testid="scenario-input-add-param"
       />
     )
@@ -197,7 +197,7 @@ export const OutputNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, da
         secondary
         icon="add"
         onClick={() => { setDecls([...displayDecls, { id: declId(), name: '' }]) }}
-        options={{ ariaLabel: t('scenario.output.addOutput', 'Add output'), title: t('scenario.output.addOutput', 'Add output') }}
+        options={{ ariaLabel: t('scenario.output.addOutput', 'Add output') }}
         data-testid="scenario-output-add-output"
       />
     )

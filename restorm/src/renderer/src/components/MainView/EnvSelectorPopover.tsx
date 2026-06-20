@@ -1,6 +1,6 @@
 import React, { Fragment, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
-import { IconView } from 'electron-core-ui/renderer'
+import { IconView, Toggle } from 'electron-core-ui/renderer'
 import { DEFAULT_ENV_COLOR, type FlatEnvRow } from './envSelectorHelpers'
 
 /** Parse a `#rgb` or `#rrggbb` hex string into r/g/b bytes. Returns
@@ -214,7 +214,7 @@ export const EnvPopoverList: React.FC<EnvPopoverListProps> = ({ rows, selectedEn
 				)
 			})}
 			{!hideApplyToAll && (
-			<label
+			<div
 				data-testid={`${testIdPrefix}-apply-to-all`}
 				style={{
 					display: 'flex',
@@ -228,14 +228,10 @@ export const EnvPopoverList: React.FC<EnvPopoverListProps> = ({ rows, selectedEn
 					cursor: 'pointer'
 				}}
 			>
-				<input
-					type="checkbox"
-					checked={applyToAll}
-					onChange={(e): void => { onApplyToAllChange(e.target.checked) }}
-					data-testid={`${testIdPrefix}-apply-to-all-input`}
-				/>
-				<span>{t('statusbar.envSelector.applyToAll', 'Apply to all requests')}</span>
-			</label>
+				<Toggle checked={applyToAll} onChange={(checked): void => { onApplyToAllChange(checked) }} aria-label={t('statusbar.envSelector.applyToAll', 'Apply to all requests')} data-testid={`${testIdPrefix}-apply-to-all-input`}>
+					<span>{t('statusbar.envSelector.applyToAll', 'Apply to all requests')}</span>
+				</Toggle>
+			</div>
 			)}
 		</div>
 	)

@@ -155,7 +155,7 @@ export const ScenarioPathSelector: React.FC<ScenarioPathSelectorProps> = ({ edge
             secondary
             icon="target"
             onClick={toggleOpen}
-            options={{ ariaLabel: t('scenario.pathSelector.pick', 'Pick from result'), title: t('scenario.pathSelector.pick', 'Pick from result') }}
+            options={{ ariaLabel: t('scenario.pathSelector.pick', 'Pick from result') }}
             data-testid="scn-path-pick"
           />
         </span>

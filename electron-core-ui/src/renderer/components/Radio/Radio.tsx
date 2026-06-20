@@ -61,7 +61,6 @@ const RadioGroup: React.FC<RadioGroupProps> = ({
             {...(dataTestId && { 'data-testid': `${dataTestId}-item-${index}` })}
             onClick={() => { handleSelect(index); }}
             disabled={item.disabled}
-            title={item.tooltip}
             type="button"
             role="radio"
             aria-checked={isActive}

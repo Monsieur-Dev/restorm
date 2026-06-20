@@ -835,7 +835,10 @@
     },
     "ok": "Importo",
     "cancel": "Anulo",
-    "dropZone": "Zona e lëshimit"
+    "dropZone": "Zona e lëshimit",
+    "addAuth": "Shto një rrugë vërtetimi",
+    "detachAuth": "Shkëput rrugën e vërtetimit",
+    "editAuth": "Ndrysho rrugën e vërtetimit"
   },
   "emptyBench": {
     "importCard": {
@@ -1714,5 +1717,14 @@
     "updateRequest": "Përditëso një kërkesë",
     "updateScenario": "Përditëso një skenar",
     "updateScenarioNode": "Përditëso një nyje skenari"
+  },
+  "odataRequestTab": {
+    "send": "Dërgo",
+    "loadNextPage": "Ngarko faqen tjetër"
+  },
+  "typedValue": {
+    "list": {
+      "add": "Shto vlerë"
+    }
   }
 }

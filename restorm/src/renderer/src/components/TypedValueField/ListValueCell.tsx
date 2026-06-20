@@ -26,11 +26,31 @@ interface ListValueCellProps {
  * Items are kept as `ValueType[]` on the `ListValue`; the owning node serialises
  * the whole list recursively on persist.
  */
+let _nextRowId = 0
+const newRowId = (): string => `lvr-${(_nextRowId++).toString(36)}`
+
 export const ListValueCell: React.FC<ListValueCellProps> = ({ value, onChange, valueTypeGroups, excludeVariableName, dataTestId }) => {
   const { t } = useTranslation()
   const anchorRef = useRef<HTMLDivElement>(null)
   const [open, setOpen] = useState(false)
   const items = value.items
+
+  // Stable per-row keys so React can reconcile across adds/removes without
+  // relying on position (key={i} would re-mount rows on removal).
+  // React's documented derived-state pattern: update state during render when
+  // a prop changes. The setter call is synchronous-ish (React re-renders once
+  // more with the new state) and loop-safe (condition becomes false after sync).
+  const [rowIds, setRowIds] = useState<string[]>(() =>
+    Array.from({ length: items.length }, newRowId)
+  )
+  if (rowIds.length < items.length) {
+    setRowIds((prev) => [
+      ...prev,
+      ...Array.from({ length: items.length - prev.length }, newRowId),
+    ])
+  } else if (rowIds.length > items.length) {
+    setRowIds((prev) => prev.slice(0, items.length))
+  }
 
   const setItems = useCallback((next: ValueType[]): void => { onChange(new ListValue(next)) }, [onChange])
 
@@ -95,7 +115,7 @@ export const ListValueCell: React.FC<ListValueCellProps> = ({ value, onChange, v
                   <div className="tvf-list-empty" style={{ opacity: 0.6, fontSize: 12, padding: '2px 0' }}>—</div>
                 )}
                 {items.map((it, i) => (
-                  <div key={i} className="tvf-list-row nodrag">
+                  <div key={rowIds[i]} className="tvf-list-row nodrag">
                     <TypedValueField
                       value={it}
                       onChange={(next) => { const n = items.slice(); n[i] = next; setItems(n) }}
@@ -121,7 +141,7 @@ export const ListValueCell: React.FC<ListValueCellProps> = ({ value, onChange, v
                 secondary
                 icon="add"
                 onClick={() => { setItems([...items, new StringValue('')]) }}
-                options={{ ariaLabel: t('typedValue.list.add', 'Add value'), title: t('typedValue.list.add', 'Add value') }}
+                options={{ ariaLabel: t('typedValue.list.add', 'Add value') }}
                 {...(dataTestId && { 'data-testid': `${dataTestId}-list-add` })}
               />
             </div>

@@ -77,12 +77,10 @@ export const Tab: React.FC<TabProps> = ({
 				<span
 					className="action-label codicon codicon-circle-filled dirty-indicator"
 					aria-label="Modified"
-					title="Modified"
 				/>
 			)}
 			<button
 				aria-label="Close"
-				title="Close"
 				{...(dataTestId && { 'data-testid': `${dataTestId}-close` })}
 				onClick={(e) => {
 					e.stopPropagation();

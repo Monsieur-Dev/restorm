@@ -834,7 +834,10 @@
     },
     "ok": "导入",
     "cancel": "取消",
-    "dropZone": "拖放区"
+    "dropZone": "拖放区",
+    "addAuth": "添加认证路由",
+    "detachAuth": "分离认证路由",
+    "editAuth": "编辑认证路由"
   },
   "emptyBench": {
     "importCard": {
@@ -1713,5 +1716,14 @@
     "updateRequest": "更新请求",
     "updateScenario": "更新场景",
     "updateScenarioNode": "更新场景节点"
+  },
+  "odataRequestTab": {
+    "send": "发送",
+    "loadNextPage": "加载下一页"
+  },
+  "typedValue": {
+    "list": {
+      "add": "添加值"
+    }
   }
 }

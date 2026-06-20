@@ -229,7 +229,7 @@ export const ScenarioRunLogView: React.FC<ScenarioRunLogViewProps> = ({ logs, te
             icon={copied ? 'check' : 'copy'}
             onClick={copyLogs}
             disabled={visibleLogs.length === 0}
-            options={{ ariaLabel: t('scenario.inspector.copyLogs', 'Copy logs'), title: t('scenario.inspector.copyLogs', 'Copy logs') }}
+            options={{ ariaLabel: t('scenario.inspector.copyLogs', 'Copy logs') }}
             data-testid={`${testIdPrefix}-copy`}
           />
           {onClear && (
@@ -239,7 +239,7 @@ export const ScenarioRunLogView: React.FC<ScenarioRunLogViewProps> = ({ logs, te
               icon="clear-all"
               onClick={onClear}
               disabled={logs.length === 0}
-              options={{ ariaLabel: t('scenario.inspector.clearLogs', 'Clear logs'), title: t('scenario.inspector.clearLogs', 'Clear logs') }}
+              options={{ ariaLabel: t('scenario.inspector.clearLogs', 'Clear logs') }}
               data-testid={`${testIdPrefix}-clear`}
             />
           )}

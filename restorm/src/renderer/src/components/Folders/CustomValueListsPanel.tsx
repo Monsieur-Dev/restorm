@@ -10,6 +10,7 @@ import {
   Pane,
   Button,
   InputBox,
+  Toggle,
   eventBus
 } from 'electron-core-ui/renderer'
 import type { EnvironmentFolder, CustomValueList, CustomValueEntry } from '../../../../shared/types/collections'
@@ -239,14 +240,11 @@ export const CustomValueListsPanel: React.FC<CustomValueListsPanelProps> = ({ fo
                   </div>
                   {selected.entries.map((entry) => (
                     <div key={entry.id} style={{ display: 'flex', gap: 8, alignItems: 'center' }} data-testid={`custom-values-entry-${entry.id}`}>
-                      <input
-                        type="checkbox"
+                      <Toggle
                         checked={entry.enabled !== false}
-                        onChange={(e) => { handleEntryEnabled(entry.id, e.target.checked) }}
+                        onChange={(checked) => { handleEntryEnabled(entry.id, checked) }}
                         aria-label={t('folderView.customValues.enabled')}
-                        title={t('folderView.customValues.enabled')}
                         data-testid={`custom-values-entry-enabled-${entry.id}`}
-                        style={{ flexShrink: 0, cursor: 'pointer' }}
                       />
                       <div style={{ flex: 1, minWidth: 0, opacity: entry.enabled === false ? 0.5 : 1 }}>
                         <InputBox

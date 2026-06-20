@@ -46,6 +46,7 @@ import { useCurlPaste, type ParsedCurl } from '../../hooks/useCurlPaste'
 import { CurlPasteCallout } from '../CurlPasteCallout'
 import { SendButtonEnvSwitcher } from './SendButtonEnvSwitcher'
 import { toasterService } from 'electron-core-ui/renderer'
+import { HeaderHoverTooltip } from '../MainView/HeaderHoverTooltip'
 
 const methodSelectWrapperStyle: CSSProperties = { width: 90, flexShrink: 0 }
 const urlInputWrapperStyle: CSSProperties = { flex: 1, minWidth: 0 }
@@ -940,16 +941,18 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
           data-testid="http-request-method-select"
         />
       </div>
-      <div style={urlInputWrapperStyle} title={resolvedUrl || url} data-testid="url-container" data-url-resolved={resolvedUrl ? 'true' : 'false'}>
-        <RestormVariableInputBox
-          value={url}
-          onChange={(value: string) => { setUrl(value) }}
-          variables={urlVariables}
-          helpers={handlebarsHelpers}
-          placeholder={t('requestTab.urlPlaceholder')}
-          data-testid="http-request-url-input"
-        />
-      </div>
+      <HeaderHoverTooltip label={resolvedUrl || url} suppressed={!(resolvedUrl || url)} className="url-container-stretch">
+        <div style={urlInputWrapperStyle} data-testid="url-container" data-url-resolved={resolvedUrl ? 'true' : 'false'} data-resolved-url={resolvedUrl || url}>
+          <RestormVariableInputBox
+            value={url}
+            onChange={(value: string) => { setUrl(value) }}
+            variables={urlVariables}
+            helpers={handlebarsHelpers}
+            placeholder={t('requestTab.urlPlaceholder')}
+            data-testid="http-request-url-input"
+          />
+        </div>
+      </HeaderHoverTooltip>
       {/* One persistent BeamWrap around both states so the beam finishes its
        * lap when the request ends (the cancel↔send toggle inside doesn't remount
        * the wrapper, which would otherwise cut the beam mid-orbit). */}

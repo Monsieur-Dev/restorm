@@ -835,7 +835,10 @@
     },
     "ok": "Importálás",
     "cancel": "Mégse",
-    "dropZone": "Bedobási terület"
+    "dropZone": "Bedobási terület",
+    "addAuth": "Hitelesítési útvonal hozzáadása",
+    "detachAuth": "Hitelesítési útvonal leválasztása",
+    "editAuth": "Hitelesítési útvonal szerkesztése"
   },
   "emptyBench": {
     "importCard": {
@@ -1714,5 +1717,14 @@
     "updateRequest": "Kérés frissítése",
     "updateScenario": "Forgatókönyv frissítése",
     "updateScenarioNode": "Forgatókönyv-csomópont frissítése"
+  },
+  "odataRequestTab": {
+    "send": "Küldés",
+    "loadNextPage": "Következő oldal betöltése"
+  },
+  "typedValue": {
+    "list": {
+      "add": "Érték hozzáadása"
+    }
   }
 }

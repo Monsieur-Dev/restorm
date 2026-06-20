@@ -835,7 +835,10 @@
     },
     "ok": "Importera",
     "cancel": "Avbryt",
-    "dropZone": "Släppzon"
+    "dropZone": "Släppzon",
+    "addAuth": "Lägg till en autentiseringsrutt",
+    "detachAuth": "Koppla bort autentiseringsrutt",
+    "editAuth": "Redigera autentiseringsrutt"
   },
   "emptyBench": {
     "importCard": {
@@ -1714,5 +1717,14 @@
     "updateRequest": "Uppdatera en begäran",
     "updateScenario": "Uppdatera ett scenario",
     "updateScenarioNode": "Uppdatera en scenarionod"
+  },
+  "odataRequestTab": {
+    "send": "Skicka",
+    "loadNextPage": "Ladda nästa sida"
+  },
+  "typedValue": {
+    "list": {
+      "add": "Lägg till värde"
+    }
   }
 }

@@ -157,7 +157,11 @@
     }
   },
   "codeEditor": {
-    "goToDefinition": "Đi đến định nghĩa"
+    "goToDefinition": "Đi đến định nghĩa",
+    "copyButton": {
+      "copy": "Sao chép mã",
+      "copied": "Đã sao chép!"
+    }
   },
   "tagsView": {
     "removeTag": "Xóa thẻ",
@@ -370,5 +374,16 @@
     "listThemes": "Liệt kê các chủ đề có sẵn",
     "getCurrentTheme": "Lấy chủ đề hiện tại",
     "switchTheme": "Chuyển chủ đề đang hoạt động"
+  },
+  "customWco": {
+    "minimize": "Thu nhỏ",
+    "maximize": "Phóng to",
+    "restore": "Khôi phục",
+    "close": "Đóng"
+  },
+  "firewall": {
+    "addOrigin": "Thêm nguồn gốc",
+    "removeOrigin": "Xóa {{origin}}",
+    "noEntries": "Chưa có mục nào."
   }
 }

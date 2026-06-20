@@ -34,6 +34,7 @@ import { findOperationForRoute } from '../../../../shared/utils/findOperationFor
 import { SendButtonEnvSwitcher } from './SendButtonEnvSwitcher'
 import { BeamWrap } from '../common/BeamWrap'
 import { useIsGrpcListening } from '../../services/grpcListeningStore'
+import { HeaderHoverTooltip } from '../MainView/HeaderHoverTooltip'
 import './WebSocketChat.css'
 
 /** One streamed gRPC frame surfaced in the live chat view. */
@@ -510,16 +511,18 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({
   const urlSection = (
     <>
       <ControlGroup data-testid="grpc-url-section">
-        <div style={{ flex: 1, minWidth: 0 }} title={resolvedUrl || url} data-testid="url-container" data-url-resolved={resolvedUrl ? 'true' : 'false'}>
-          <RestormVariableInputBox
-            value={url}
-            onChange={setUrl}
-            variables={emptyVariables}
-            helpers={handlebarsHelpers}
-            placeholder={t('grpc.urlPlaceholder')}
-            data-testid="grpc-url-input"
-          />
-        </div>
+        <HeaderHoverTooltip label={resolvedUrl || url} suppressed={!(resolvedUrl || url)} className="url-container-stretch">
+          <div style={{ flex: 1, minWidth: 0 }} data-testid="url-container" data-url-resolved={resolvedUrl ? 'true' : 'false'} data-resolved-url={resolvedUrl || url}>
+            <RestormVariableInputBox
+              value={url}
+              onChange={setUrl}
+              variables={emptyVariables}
+              helpers={handlebarsHelpers}
+              placeholder={t('grpc.urlPlaceholder')}
+              data-testid="grpc-url-input"
+            />
+          </div>
+        </HeaderHoverTooltip>
         <div style={{ minWidth: 150 }}>
           <SelectBox
             id={`grpc-call-type-${request.id}`}

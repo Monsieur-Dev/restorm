@@ -389,7 +389,6 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
       <span
         className="codicon codicon-circle-filled dirty-indicator"
         aria-label="Modified"
-        title="Modified"
         style={{ marginLeft: 6 }}
       />
     )

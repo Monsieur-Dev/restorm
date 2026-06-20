@@ -417,7 +417,7 @@ export const ScenarioNodeBoxBase: React.FC<ScenarioNodeBoxBaseProps> = ({ id, da
             position={Position.Left}
             className={`scn-handle scn-handle-launch ${inputFlowRingClass('in', data.inputs, data.kind)}`}
             style={{ background: anchorColor() }}
-            title="in"
+            aria-label="in"
           />
         )}
         {headerIcon ?? <i className={`codicon codicon-${meta.icon} scn-node-icon`} aria-hidden="true" />}
@@ -541,7 +541,7 @@ export const ScenarioNodeBoxBase: React.FC<ScenarioNodeBoxBaseProps> = ({ id, da
             position={p.type === 'target' ? Position.Left : Position.Right}
             className={`scn-handle scn-handle-positioned ${p.type === 'target' ? cellInputRingClass(p, data.inputs, data.kind) : cellOutputRingClass(p, data.outputs, data.kind)}`}
             style={{ top: `${top}px`, background: portAnchorColor(p, connectedInputs) }}
-            title={p._label ?? p.id}
+            aria-label={p._label ?? p.id}
           />
         )
       })}
@@ -553,7 +553,7 @@ export const ScenarioNodeBoxBase: React.FC<ScenarioNodeBoxBaseProps> = ({ id, da
           position={Position.Bottom}
           className={`scn-handle scn-handle-error ${outputFlowRingClass('error', data.outputs, data.kind)}`}
           style={{ background: ROLE_COLOR['error'] }}
-          title="error"
+          aria-label="error"
         />
       )}
       {/* Universal completion signal: fires once this box AND its whole
@@ -566,7 +566,7 @@ export const ScenarioNodeBoxBase: React.FC<ScenarioNodeBoxBaseProps> = ({ id, da
           type="source"
           position={Position.Bottom}
           className={`scn-handle scn-handle-done ${outputFlowRingClass('done', data.outputs, data.kind)}`}
-          title="done"
+          aria-label="done"
         />
       )}
       {/* The BorderBeam orbits the full box outline. Rendered LAST so it

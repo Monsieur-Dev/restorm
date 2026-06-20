@@ -157,7 +157,11 @@
     }
   },
   "codeEditor": {
-    "goToDefinition": "Idi na definiciju"
+    "goToDefinition": "Idi na definiciju",
+    "copyButton": {
+      "copy": "Kopiraj kod",
+      "copied": "Kopirano!"
+    }
   },
   "tagsView": {
     "removeTag": "Ukloni oznaku",
@@ -370,5 +374,16 @@
     "listThemes": "Popis dostupnih tema",
     "getCurrentTheme": "Dohvati trenutnu temu",
     "switchTheme": "Promijeni aktivnu temu"
+  },
+  "customWco": {
+    "minimize": "Minimiziraj",
+    "maximize": "Maksimiziraj",
+    "restore": "Vrati",
+    "close": "Zatvori"
+  },
+  "firewall": {
+    "addOrigin": "Dodaj origin",
+    "removeOrigin": "Ukloni {{origin}}",
+    "noEntries": "Nema još unosa."
   }
 }

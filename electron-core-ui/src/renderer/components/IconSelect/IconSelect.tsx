@@ -159,7 +159,7 @@ const IconGrid: React.FC<{
             key={name}
             type="button"
             className="ecui-icon-select-codicon"
-            title={name}
+            aria-label={name}
             onClick={() => { onSelect(name) }}
             data-testid={`${dataTestIdBase}-icon-${name}`}
             data-icon-type={iconType}

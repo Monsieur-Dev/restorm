@@ -74,7 +74,7 @@ export const ScenarioRunGraphTab: React.FC<ScenarioRunGraphTabProps> = ({ scenar
                 onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelected(i); setFocusNode(null) } }}
                 data-testid={`scenario-run-graph-thumb-${i}`}
               >
-                <span className="scn-graph-thumb-name" title={s.name}>{s.name}</span>
+                <span className="scn-graph-thumb-name" aria-label={s.name}>{s.name}</span>
                 <span className="scn-graph-thumb-canvas">
                   <ScenarioGraphPreview scenario={s as unknown as Scenario} interactive={false} testId={`scenario-run-graph-thumb-canvas-${i}`} />
                 </span>

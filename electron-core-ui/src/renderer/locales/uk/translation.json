@@ -157,7 +157,11 @@
     }
   },
   "codeEditor": {
-    "goToDefinition": "Перейти до визначення"
+    "goToDefinition": "Перейти до визначення",
+    "copyButton": {
+      "copy": "Копіювати код",
+      "copied": "Скопійовано!"
+    }
   },
   "tagsView": {
     "removeTag": "Видалити тег",
@@ -370,5 +374,16 @@
     "listThemes": "Список доступних тем",
     "getCurrentTheme": "Отримати поточну тему",
     "switchTheme": "Змінити активну тему"
+  },
+  "customWco": {
+    "minimize": "Мінімізувати",
+    "maximize": "Максимізувати",
+    "restore": "Відновити",
+    "close": "Закрити"
+  },
+  "firewall": {
+    "addOrigin": "Додати origin",
+    "removeOrigin": "Видалити {{origin}}",
+    "noEntries": "Записів ще немає."
   }
 }

@@ -51,7 +51,6 @@ export const ScenarioCallersButton: React.FC<ScenarioCallersButtonProps> = ({ us
         type="button"
         className={`request-scenario-usage-button${open ? ' is-open' : ''}`}
         aria-label={label}
-        title={label}
         aria-haspopup="dialog"
         aria-expanded={open}
         onClick={(e) => { e.stopPropagation(); setOpen((v) => !v) }}

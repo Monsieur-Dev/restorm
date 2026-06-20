@@ -157,7 +157,11 @@
     }
   },
   "codeEditor": {
-    "goToDefinition": "Μετάβαση στον ορισμό"
+    "goToDefinition": "Μετάβαση στον ορισμό",
+    "copyButton": {
+      "copy": "Αντιγραφή κώδικα",
+      "copied": "Αντιγράφηκε!"
+    }
   },
   "tagsView": {
     "removeTag": "Αφαίρεση ετικέτας",
@@ -370,5 +374,16 @@
     "listThemes": "Λίστα διαθέσιμων θεμάτων",
     "getCurrentTheme": "Εμφάνιση τρέχοντος θέματος",
     "switchTheme": "Αλλαγή ενεργού θέματος"
+  },
+  "customWco": {
+    "minimize": "Ελαχιστοποίηση",
+    "maximize": "Μεγιστοποίηση",
+    "restore": "Επαναφορά",
+    "close": "Κλείσιμο"
+  },
+  "firewall": {
+    "addOrigin": "Προσθήκη origin",
+    "removeOrigin": "Αφαίρεση {{origin}}",
+    "noEntries": "Δεν υπάρχουν ακόμα εγγραφές."
   }
 }

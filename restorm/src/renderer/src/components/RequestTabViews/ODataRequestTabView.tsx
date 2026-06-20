@@ -791,8 +791,7 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
               icon="play"
               onClick={handleSend}
               options={{
-                ariaLabel: t('odataRequestTab.send', 'Send'),
-                title: t('odataRequestTab.send', 'Send')
+                ariaLabel: t('odataRequestTab.send', 'Send')
               }}
               data-testid="odata-request-send"
             >
@@ -1207,8 +1206,7 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
               icon="arrow-circle-down"
               onClick={() => { void handleLoadNextPage() }}
               options={{
-                ariaLabel: t('odataRequestTab.loadNextPage', 'Load next page'),
-                title: t('odataRequestTab.loadNextPage', 'Load next page')
+                ariaLabel: t('odataRequestTab.loadNextPage', 'Load next page')
               }}
               data-testid="odata-response-load-next-page"
             >

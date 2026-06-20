@@ -835,7 +835,10 @@
     },
     "ok": "Importér",
     "cancel": "Annullér",
-    "dropZone": "Slip-zone"
+    "dropZone": "Slip-zone",
+    "addAuth": "Tilføj en godkendelsesrute",
+    "detachAuth": "Fjern godkendelsesrute",
+    "editAuth": "Rediger godkendelsesrute"
   },
   "emptyBench": {
     "importCard": {
@@ -1714,5 +1717,14 @@
     "updateRequest": "Opdater en anmodning",
     "updateScenario": "Opdater et scenarie",
     "updateScenarioNode": "Opdater en scenarieknude"
+  },
+  "odataRequestTab": {
+    "send": "Send",
+    "loadNextPage": "Indlæs næste side"
+  },
+  "typedValue": {
+    "list": {
+      "add": "Tilføj værdi"
+    }
   }
 }

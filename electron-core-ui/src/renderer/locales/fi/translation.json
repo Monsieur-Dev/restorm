@@ -157,7 +157,11 @@
     }
   },
   "codeEditor": {
-    "goToDefinition": "Siirry määritelmään"
+    "goToDefinition": "Siirry määritelmään",
+    "copyButton": {
+      "copy": "Kopioi koodi",
+      "copied": "Kopioitu!"
+    }
   },
   "tagsView": {
     "removeTag": "Poista tagi",
@@ -370,5 +374,16 @@
     "listThemes": "Luettele käytettävissä olevat teemat",
     "getCurrentTheme": "Hae nykyinen teema",
     "switchTheme": "Vaihda aktiivinen teema"
+  },
+  "customWco": {
+    "minimize": "Pienennä",
+    "maximize": "Suurenna",
+    "restore": "Palauta",
+    "close": "Sulje"
+  },
+  "firewall": {
+    "addOrigin": "Lisää alkuperä",
+    "removeOrigin": "Poista {{origin}}",
+    "noEntries": "Ei merkintöjä vielä."
   }
 }

@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { Button, InputBox } from 'electron-core-ui/renderer'
 
 const HIGHLIGHT_NAME = 'documentation-host-search'
 const ACTIVE_HIGHLIGHT_NAME = 'documentation-host-search-active'
@@ -102,7 +103,7 @@ export const DocumentationHostSearch = React.forwardRef<DocumentationHostSearchH
     const [query, setQuery] = useState('')
     const [activeIndex, setActiveIndex] = useState(0)
     const [matchCount, setMatchCount] = useState(0)
-    const inputRef = useRef<HTMLInputElement>(null)
+    const inputRef = useRef<HTMLInputElement | HTMLTextAreaElement>(null)
     const matchRangesRef = useRef<Range[]>([])
     // Ref-mirror of activeIndex so the recompute-on-query effect can
     // read the latest navigation position without depending on it
@@ -210,13 +211,13 @@ export const DocumentationHostSearch = React.forwardRef<DocumentationHostSearchH
         data-testid="documentation-host-search-bar"
         role="search"
       >
-        <input
-          ref={inputRef}
+        <InputBox
+          inputRef={inputRef}
           className="documentation-host-search-bar__input"
-          type="text"
-          placeholder={t('documentation.find.placeholder')}
+          data-testid="documentation-host-search-bar-input"
           value={query}
-          onChange={(e): void => { setQuery(e.target.value) }}
+          onChange={(value): void => { setQuery(value) }}
+          changeDebounceMs={0}
           onKeyDown={(e): void => {
             if (e.key === 'Escape') {
               e.preventDefault()
@@ -227,28 +228,26 @@ export const DocumentationHostSearch = React.forwardRef<DocumentationHostSearchH
               else stepNext()
             }
           }}
+          options={{ placeholder: t('documentation.find.placeholder'), ariaLabel: t('documentation.find.placeholder') }}
         />
         <span className="documentation-host-search-bar__counter">{counter}</span>
-        <button
-          type="button"
+        <Button
           className="documentation-host-search-bar__button"
-          aria-label={t('documentation.find.previousMatch')}
+          options={{ ariaLabel: t('documentation.find.previousMatch') }}
           onClick={stepPrev}
           disabled={matchCount === 0}
-        >▲</button>
-        <button
-          type="button"
+        >▲</Button>
+        <Button
           className="documentation-host-search-bar__button"
-          aria-label={t('documentation.find.nextMatch')}
+          options={{ ariaLabel: t('documentation.find.nextMatch') }}
           onClick={stepNext}
           disabled={matchCount === 0}
-        >▼</button>
-        <button
-          type="button"
+        >▼</Button>
+        <Button
           className="documentation-host-search-bar__button documentation-host-search-bar__button--close"
-          aria-label={t('documentation.find.close')}
+          options={{ ariaLabel: t('documentation.find.close') }}
           onClick={handleClose}
-        >×</button>
+        >×</Button>
       </div>
     )
   }

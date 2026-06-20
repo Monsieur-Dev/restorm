@@ -153,7 +153,7 @@ const SettingsPageBody: React.FC<SettingsPageBodyProps> = ({
           disabled={workspaceDisabled}
           className={tabClass('workspace', workspaceDisabled)}
           data-testid={`${rootTestId}-tab-workspace`}
-          title={workspacePath ?? t('settings.scope.workspaceDisabledTooltip', 'Open a project to edit workspace settings')}
+          aria-label={workspacePath ?? t('settings.scope.workspaceDisabledTooltip', 'Open a project to edit workspace settings')}
           onClick={() => { if (!workspaceDisabled) setScope('workspace') }}
         >
           {t('settings.scope.workspace', 'Workspace')}

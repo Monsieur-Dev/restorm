@@ -157,7 +157,11 @@
     }
   },
   "codeEditor": {
-    "goToDefinition": "Mergi la definiție"
+    "goToDefinition": "Mergi la definiție",
+    "copyButton": {
+      "copy": "Copiază codul",
+      "copied": "Copiat!"
+    }
   },
   "tagsView": {
     "removeTag": "Elimină eticheta",
@@ -370,5 +374,16 @@
     "listThemes": "Lista teme disponibile",
     "getCurrentTheme": "Obține tema curentă",
     "switchTheme": "Schimbă tema activă"
+  },
+  "customWco": {
+    "minimize": "Minimizare",
+    "maximize": "Maximizare",
+    "restore": "Restaurare",
+    "close": "Închidere"
+  },
+  "firewall": {
+    "addOrigin": "Adaugă origine",
+    "removeOrigin": "Elimină {{origin}}",
+    "noEntries": "Nicio intrare încă."
   }
 }

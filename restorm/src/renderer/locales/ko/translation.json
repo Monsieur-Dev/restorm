@@ -834,7 +834,10 @@
     },
     "ok": "가져오기",
     "cancel": "취소",
-    "dropZone": "드롭 영역"
+    "dropZone": "드롭 영역",
+    "addAuth": "인증 경로 추가",
+    "detachAuth": "인증 경로 분리",
+    "editAuth": "인증 경로 편집"
   },
   "emptyBench": {
     "importCard": {
@@ -1713,5 +1716,14 @@
     "updateRequest": "요청 업데이트",
     "updateScenario": "시나리오 업데이트",
     "updateScenarioNode": "시나리오 노드 업데이트"
+  },
+  "odataRequestTab": {
+    "send": "보내기",
+    "loadNextPage": "다음 페이지 로드"
+  },
+  "typedValue": {
+    "list": {
+      "add": "값 추가"
+    }
   }
 }

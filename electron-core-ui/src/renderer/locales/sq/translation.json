@@ -157,7 +157,11 @@
     }
   },
   "codeEditor": {
-    "goToDefinition": "Shko te përkufizimi"
+    "goToDefinition": "Shko te përkufizimi",
+    "copyButton": {
+      "copy": "Kopjo kodin",
+      "copied": "U kopjua!"
+    }
   },
   "tagsView": {
     "removeTag": "Hiq etiketën",
@@ -370,5 +374,16 @@
     "listThemes": "Lista e temave të disponueshme",
     "getCurrentTheme": "Merr temën aktuale",
     "switchTheme": "Ndrysho temën aktive"
+  },
+  "customWco": {
+    "minimize": "Minimizo",
+    "maximize": "Maksimizo",
+    "restore": "Rivendos",
+    "close": "Mbyll"
+  },
+  "firewall": {
+    "addOrigin": "Shto origjinën",
+    "removeOrigin": "Hiq {{origin}}",
+    "noEntries": "Ende nuk ka hyrje."
   }
 }

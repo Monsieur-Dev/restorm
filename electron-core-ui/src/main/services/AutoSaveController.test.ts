@@ -434,6 +434,40 @@ describe('AutoSaveController', () => {
     c.stop()
   })
 
+  it('resyncs: afterDelay arms immediately when onStateChanged fires with a dirty snapshot', () => {
+    // Exercises the arm-on-reopen branch (AutoSaveController.ts line 139-141):
+    // if the snapshot is dirty at the moment the file path changes (e.g. the
+    // previous session left unsaved edits or the registry was hydrated dirty),
+    // the timer must fire without waiting for a further onDirtyChanged event.
+    const settings = makeFakeSettings({ 'files:autoSave': 'afterDelay', 'files:autoSaveDelay': 1000 })
+    // Start with no file; registry is already dirty (an unsaved edit from a
+    // prior session is reflected in the snapshot).
+    const file = makeFakeFile(true, null)
+    const trigger = vi.fn()
+    const c = new AutoSaveController({
+      settings: settings.service,
+      fileService: file.service,
+      triggerSaveAll: trigger,
+      getWindows: () => []
+    })
+    c.start()
+
+    // No file open yet → no timer, even though the registry reports dirty.
+    vi.advanceTimersByTime(2000)
+    expect(trigger).not.toHaveBeenCalled()
+
+    // A file is opened (path becomes non-null) while the snapshot is still
+    // dirty. onStateChanged fires; the resync branch sees afterDelay + dirty
+    // → arms the timer immediately without needing a new onDirtyChanged.
+    file.setFilePath('/tmp/restored.restorm')
+    file.emitStateChanged()
+    vi.advanceTimersByTime(999)
+    expect(trigger).not.toHaveBeenCalled()
+    vi.advanceTimersByTime(1)
+    expect(trigger).toHaveBeenCalledTimes(1)
+    c.stop()
+  })
+
   it('stop() cancels timers, detaches blur listeners, and unsubscribes', () => {
     const settings = makeFakeSettings({ 'files:autoSave': 'afterDelay', 'files:autoSaveDelay': 1000 })
     const file = makeFakeFile(false)

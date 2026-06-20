@@ -835,7 +835,10 @@
     },
     "ok": "Importer",
     "cancel": "Avbryt",
-    "dropZone": "Slippsone"
+    "dropZone": "Slippsone",
+    "addAuth": "Legg til en autentiseringsrute",
+    "detachAuth": "Koble fra autentiseringsrute",
+    "editAuth": "Rediger autentiseringsrute"
   },
   "emptyBench": {
     "importCard": {
@@ -1714,5 +1717,14 @@
     "updateRequest": "Oppdater en forespørsel",
     "updateScenario": "Oppdater et scenario",
     "updateScenarioNode": "Oppdater en scenarionode"
+  },
+  "odataRequestTab": {
+    "send": "Send",
+    "loadNextPage": "Last neste side"
+  },
+  "typedValue": {
+    "list": {
+      "add": "Legg til verdi"
+    }
   }
 }

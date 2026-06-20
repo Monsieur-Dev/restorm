@@ -828,7 +828,7 @@ When('I press Ctrl+F', async () => {
 
 When('I type {string} in the search input', async ({}, query: string) => {
   const p = requirePage()
-  const input = p.locator('[data-testid="documentation-host-search-bar"] .documentation-host-search-bar__input')
+  const input = p.locator('[data-testid="documentation-host-search-bar-input-input"]').first()
   await expect(input).toBeVisible({ timeout: 5000 })
   await input.fill(query)
   await p.waitForTimeout(400)

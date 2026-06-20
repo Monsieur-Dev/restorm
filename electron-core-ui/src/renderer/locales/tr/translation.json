@@ -157,7 +157,11 @@
     }
   },
   "codeEditor": {
-    "goToDefinition": "Tanıma git"
+    "goToDefinition": "Tanıma git",
+    "copyButton": {
+      "copy": "Kodu kopyala",
+      "copied": "Kopyalandı!"
+    }
   },
   "tagsView": {
     "removeTag": "Etiketi kaldır",
@@ -370,5 +374,16 @@
     "listThemes": "Mevcut temaları listele",
     "getCurrentTheme": "Geçerli temayı al",
     "switchTheme": "Etkin temayı değiştir"
+  },
+  "customWco": {
+    "minimize": "Küçült",
+    "maximize": "Büyüt",
+    "restore": "Geri yükle",
+    "close": "Kapat"
+  },
+  "firewall": {
+    "addOrigin": "Kaynak ekle",
+    "removeOrigin": "{{origin}} kaldır",
+    "noEntries": "Henüz girdi yok."
   }
 }

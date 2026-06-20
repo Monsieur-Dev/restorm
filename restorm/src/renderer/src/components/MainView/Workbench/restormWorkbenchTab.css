@@ -413,3 +413,11 @@
   padding-right: 4px;
 }
 
+/* Stretch variant: lets the hover-tooltip wrapper take the place of a
+ * flex:1 child (the URL container) without changing the row layout. */
+.header-hover-tooltip.url-container-stretch {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+}
+

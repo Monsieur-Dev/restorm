@@ -82,7 +82,7 @@ export function configureCommandLineSwitches(): void {
     }
   }
 
-  logger.info('✅ Command line switches configured')
+  logger.info('Command line switches configured')
 }
 
 /**
@@ -92,7 +92,7 @@ export function configureCommandLineSwitches(): void {
  * @param appFeaturesConfigPath - Optional path to app-specific features YAML (loaded after defaults)
  */
 export function setupIPC(resourcesPath?: string, appSettingsConfigPath?: string, appFeaturesConfigPath?: string): void {
-  logger.info('🔧 Setting up IPC handlers...')
+  logger.info('Setting up IPC handlers...')
 
   // Get resources path if not provided
   const isDev = process.env['NODE_ENV'] === 'development' || !app.isPackaged
@@ -100,18 +100,18 @@ export function setupIPC(resourcesPath?: string, appSettingsConfigPath?: string,
     ? join(__dirname, '../../../resources')
     : join(process.resourcesPath, 'resources'))
 
-  logger.info(`📁 Resources path: ${finalResourcesPath}`)
+  logger.info(`Resources path: ${finalResourcesPath}`)
 
-  logger.info('🎨 Initializing theme service...')
+  logger.info('Initializing theme service...')
   const themeService = getThemeService(finalResourcesPath)
-  logger.info('💾 Initializing storage service...')
+  logger.info('Initializing storage service...')
   const storageService = getStorageService()
 
-  logger.info('⚙️ Initializing settings service...')
+  logger.info('Initializing settings service...')
   const settingsDefaultPath = join(finalResourcesPath, 'settings', 'defaults.yaml')
   initSettingsService(settingsDefaultPath, appSettingsConfigPath)
 
-  logger.info('🚩 Initializing feature service...')
+  logger.info('Initializing feature service...')
   const featuresDefaultPath = join(finalResourcesPath, 'features', 'defaults.yaml')
   // Environment is propagated to the FeatureFlippingService so YAML
   // configs can gate features behind `Type: Environment` /
@@ -126,9 +126,9 @@ export function setupIPC(resourcesPath?: string, appSettingsConfigPath?: string,
     environment: isDev ? 'dev' : 'prod'
   })
 
-  logger.info('✅ Services initialized successfully')
+  logger.info('Services initialized successfully')
 
-  logger.info('🔗 Setting up IPC handlers...')
+  logger.info('Setting up IPC handlers...')
 
   registerThemeHandlers(themeService, storageService)
   registerMiscHandlers(storageService)
@@ -138,7 +138,7 @@ export function setupIPC(resourcesPath?: string, appSettingsConfigPath?: string,
   registerSearchHandlers()
   registerSettingsHandlers()
 
-  logger.info('✅ IPC handlers setup complete')
+  logger.info('IPC handlers setup complete')
 }
 
 /**
@@ -152,7 +152,7 @@ export function setupAppLifecycle(): void {
     }
   })
 
-  logger.info('✅ App lifecycle handlers setup complete')
+  logger.info('App lifecycle handlers setup complete')
 }
 
 /**
@@ -166,7 +166,7 @@ export function setupAppProtocol(rendererPath: string): void {
     return net.fetch(pathToFileURL(filePath).toString())
   })
 
-  logger.info(`✅ App protocol registered with renderer path: ${rendererPath}`)
+  logger.info(`App protocol registered with renderer path: ${rendererPath}`)
 }
 
 /**
@@ -247,7 +247,7 @@ export function initializeApp(
   let splash: SplashWindowHandle | null = null
 
   app.whenReady().then(() => {
-    logger.info(`🚀 ${appName} application starting...`)
+    logger.info(`${appName} application starting...`)
     logger.info(`Platform: ${process.platform}`)
     logger.info(`Node version: ${process.versions.node}`)
     logger.info(`Electron version: ${process.versions.electron}`)
@@ -262,13 +262,13 @@ export function initializeApp(
       setupAppProtocol(options.rendererPath)
     }
 
-    logger.info('🔧 Starting setupIPC...')
+    logger.info('Starting setupIPC...')
     setupIPC(options.devResourcesPath, options.appSettingsConfigPath, options.appFeaturesConfigPath)
-    logger.info('🔧 setupIPC completed')
+    logger.info('setupIPC completed')
 
-    logger.info('🔧 Starting setupAppLifecycle...')
+    logger.info('Starting setupAppLifecycle...')
     setupAppLifecycle()
-    logger.info('🔧 setupAppLifecycle completed')
+    logger.info('setupAppLifecycle completed')
 
     // Close the splash exactly once, however the handoff resolves. Idempotent
     // so the throw / never-ready / normal paths can all call it safely.
@@ -282,7 +282,7 @@ export function initializeApp(
       splash = null
     }
 
-    logger.info('🪟 Starting createWindow...')
+    logger.info('Starting createWindow...')
     let mainWindow: BaseWindow | undefined
     try {
       mainWindow = options.createWindow()
@@ -292,7 +292,7 @@ export function initializeApp(
       closeSplash()
       throw error
     }
-    logger.info('🪟 createWindow completed')
+    logger.info('createWindow completed')
 
     // Hand off from splash to main window. When the main window reports
     // ready-to-show (its renderer painted), close the splash just before it
@@ -320,7 +320,7 @@ export function initializeApp(
       }
     }
 
-    logger.info(`✅ ${appName} application started successfully`)
+    logger.info(`${appName} application started successfully`)
 
     app.on('activate', () => {
       if (BrowserWindow.getAllWindows().length === 0) {

@@ -59,9 +59,9 @@ export abstract class BaseWindow {
     constructor(configuration: WindowConfiguration) {
       this.configuration = configuration
       // Create the window immediately using the provided configuration
-      logger.info('🔧 BaseWindow: About to call createWindow()')
+      logger.info('BaseWindow: About to call createWindow()')
       this.createWindow()
-      logger.info('🔧 BaseWindow: createWindow() completed')
+      logger.info('BaseWindow: createWindow() completed')
     }
   
     /**
@@ -241,7 +241,7 @@ export abstract class BaseWindow {
 
       // Register window icon handler (only once)
       if (!BaseWindow.iconHandlerRegistered) {
-        logger.info('📋 Registering get-window-icon handler (first time)')
+        logger.info('Registering get-window-icon handler (first time)')
         ipcMain.handle('get-window-icon', (event: Electron.IpcMainInvokeEvent) => {
           const wnd = BrowserWindow.fromWebContents(event.sender)
           if (!wnd || wnd.isDestroyed()) {
@@ -261,9 +261,9 @@ export abstract class BaseWindow {
         }
       })
         BaseWindow.iconHandlerRegistered = true
-        logger.info('✅ get-window-icon handler registered successfully')
+        logger.info('get-window-icon handler registered successfully')
       } else {
-        logger.info('⏭️ get-window-icon handler already registered, skipping')
+        logger.info('get-window-icon handler already registered, skipping')
       }
 
       // Register platform request handler (only once)
@@ -503,7 +503,7 @@ export abstract class BaseWindow {
      * Create and configure a BrowserWindow with the saved state
      */
   protected createWindow(options: Partial<BrowserWindowConstructorOptions> = {}): void {
-    logger.info('🔧 BaseWindow: createWindow() method started')
+    logger.info('BaseWindow: createWindow() method started')
     // Load saved window state
     const state = this.loadWindowState()
   
@@ -519,7 +519,7 @@ export abstract class BaseWindow {
           iconExt = '.icns'
         }
         this.iconPath = `${this.configuration.iconPath}${iconExt}`
-        logger.info(`🔖 Icon path: ${this.iconPath}`)
+        logger.info(`Icon path: ${this.iconPath}`)
       }
       
       // Configure window style
@@ -536,12 +536,6 @@ export abstract class BaseWindow {
         // an unstyled / half-loaded window.
         ...(this.configuration.showWhenReady ? { show: false } : {}),
         ...(this.iconPath && { icon: this.iconPath }),
-        /*titleBarStyle: 'hidden',
-        titleBarOverlay: 
-        process.platform === 'win32' || process.platform === 'darwin'
-          ? { color: '#2b2b2b', symbolColor: '#fff', height: 32 }
-          : false,*/
-        //autoHideMenuBar: true,
         webPreferences: {
           preload: this.configuration.preloadScript ?? join(__dirname, '../../preload/index.js'),
           nodeIntegration: false,

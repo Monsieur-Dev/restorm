@@ -834,7 +834,10 @@
     },
     "ok": "Nhập",
     "cancel": "Hủy",
-    "dropZone": "Vùng thả"
+    "dropZone": "Vùng thả",
+    "addAuth": "Thêm tuyến xác thực",
+    "detachAuth": "Tách tuyến xác thực",
+    "editAuth": "Chỉnh sửa tuyến xác thực"
   },
   "emptyBench": {
     "importCard": {
@@ -1713,5 +1716,14 @@
     "updateRequest": "Cập nhật yêu cầu",
     "updateScenario": "Cập nhật kịch bản",
     "updateScenarioNode": "Cập nhật nút kịch bản"
+  },
+  "odataRequestTab": {
+    "send": "Gửi",
+    "loadNextPage": "Tải trang tiếp theo"
+  },
+  "typedValue": {
+    "list": {
+      "add": "Thêm giá trị"
+    }
   }
 }

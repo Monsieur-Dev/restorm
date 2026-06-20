@@ -835,7 +835,10 @@
     },
     "ok": "Importar",
     "cancel": "Cancelar",
-    "dropZone": "Zona de arrastre"
+    "dropZone": "Zona de arrastre",
+    "addAuth": "Agregar una ruta de autenticación",
+    "detachAuth": "Desconectar ruta de autenticación",
+    "editAuth": "Editar ruta de autenticación"
   },
   "emptyBench": {
     "importCard": {
@@ -1714,5 +1717,14 @@
     "updateRequest": "Actualizar una solicitud",
     "updateScenario": "Actualizar un escenario",
     "updateScenarioNode": "Actualizar un nodo de escenario"
+  },
+  "odataRequestTab": {
+    "send": "Enviar",
+    "loadNextPage": "Cargar siguiente página"
+  },
+  "typedValue": {
+    "list": {
+      "add": "Agregar valor"
+    }
   }
 }

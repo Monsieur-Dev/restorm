@@ -834,7 +834,10 @@
     },
     "ok": "インポート",
     "cancel": "キャンセル",
-    "dropZone": "ドロップ領域"
+    "dropZone": "ドロップ領域",
+    "addAuth": "認証ルートを追加",
+    "detachAuth": "認証ルートを切り離す",
+    "editAuth": "認証ルートを編集"
   },
   "emptyBench": {
     "importCard": {
@@ -1713,5 +1716,14 @@
     "updateRequest": "リクエストを更新",
     "updateScenario": "シナリオを更新",
     "updateScenarioNode": "シナリオノードを更新"
+  },
+  "odataRequestTab": {
+    "send": "送信",
+    "loadNextPage": "次のページを読み込む"
+  },
+  "typedValue": {
+    "list": {
+      "add": "値を追加"
+    }
   }
 }

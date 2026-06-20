@@ -30,7 +30,7 @@ function boundFieldProps(kind: ValueTypeKind): { excludeTypes: ValueTypeKind[]; 
 
 /** Stale-port label: a warning glyph + the vanished param/output name. */
 const OrphanLabel: React.FC<{ name: string; title: string }> = ({ name, title }) => (
-  <span className="scn-orphan-port" title={title}>
+  <span className="scn-orphan-port" aria-label={title}>
     <i className="codicon codicon-warning" aria-hidden="true" />
     {name}
   </span>

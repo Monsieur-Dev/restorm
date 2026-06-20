@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState, type JSX } from 'react'
+import { useTranslation } from 'react-i18next'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import rehypeRaw from 'rehype-raw'
@@ -28,6 +29,7 @@ interface CodeBlockProps {
 }
 
 const CodeBlock: React.FC<CodeBlockProps> = ({ children, copyText, dataTestId }) => {
+  const { t } = useTranslation()
   const [copied, setCopied] = useState(false)
   // Track the copy-reset timer so it can be cleared on unmount (or before a
   // re-arm) — an untracked setTimeout fired setCopied() after unmount when the
@@ -63,7 +65,7 @@ const CodeBlock: React.FC<CodeBlockProps> = ({ children, copyText, dataTestId })
           type="button"
           className={`markdown-code-copy-btn ${copied ? 'copied' : ''}`}
           onClick={handleCopy}
-          title={copied ? 'Copied!' : 'Copy code'}
+          aria-label={copied ? t('codeEditor.copyButton.copied', 'Copied!') : t('codeEditor.copyButton.copy', 'Copy code')}
           {...(dataTestId && {
             'data-testid': `${dataTestId}-copy`,
             'data-is-copied': copied ? 'true' : 'false'

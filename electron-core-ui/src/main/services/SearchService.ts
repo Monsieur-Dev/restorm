@@ -6,7 +6,6 @@
  */
 
 import MiniSearch from 'minisearch'
-// import { logger } from './LoggerService'
 
 /** Navigation data for navigating to a search result (application-specific) */
 export type SearchNavigation = Record<string, unknown>
@@ -84,7 +83,6 @@ class SearchServiceImpl {
    */
   registerCategory(category: string, meta: CategoryMeta): void {
     this.categoryMeta[category] = meta
-    // logger.debug('[SearchService] Category registered', { category, meta })
   }
 
   /**
@@ -94,7 +92,6 @@ class SearchServiceImpl {
     for (const [category, meta] of Object.entries(categories)) {
       this.categoryMeta[category] = meta
     }
-    // logger.debug('[SearchService] Categories registered', { count: Object.keys(categories).length })
   }
 
   /**
@@ -109,7 +106,6 @@ class SearchServiceImpl {
 
     this.documents.set(doc.id, doc)
     this.miniSearch.add(doc)
-    // logger.debug('[SearchService] Document indexed', { id: doc.id, title: doc.title, isReindex })
   }
 
   /**
@@ -119,7 +115,6 @@ class SearchServiceImpl {
     for (const doc of docs) {
       this.indexDocument(doc)
     }
-    // logger.debug('[SearchService] Batch indexed', { count: docs.length })
   }
 
   /**
@@ -130,7 +125,6 @@ class SearchServiceImpl {
     if (doc) {
       this.miniSearch.remove(doc)
       this.documents.delete(id)
-      // logger.debug('[SearchService] Document removed', { id })
     }
   }
 
@@ -148,7 +142,6 @@ class SearchServiceImpl {
         prefix: true
       }
     })
-    // logger.debug('[SearchService] Index cleared')
   }
 
   /**
@@ -211,7 +204,6 @@ class SearchServiceImpl {
       return orderA - orderB
     })
 
-    // logger.debug('[SearchService] Search completed', { query, resultCount: searchResults.length, groupCount: groupedResults.length })
     return groupedResults
   }
 

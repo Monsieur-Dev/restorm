@@ -81,7 +81,7 @@ export const EmojiPicker: React.FC<EmojiPickerProps> = ({ onEmojiSelect, dataTes
             type="button"
             className={`ecui-emoji-picker-category ${activeCategory === category.id ? 'active' : ''}`}
             onClick={() => { handleCategoryClick(category.id) }}
-            title={getCategoryName(category.id, category.name)}
+            aria-label={getCategoryName(category.id, category.name)}
             {...(dataTestIdBase ? { 'data-testid': `${dataTestIdBase}-category-${category.id}` } : {})}
             data-category-id={category.id}
           >
@@ -139,7 +139,7 @@ export const EmojiPicker: React.FC<EmojiPickerProps> = ({ onEmojiSelect, dataTes
                     type="button"
                     className="ecui-emoji-picker-emoji"
                     onClick={() => { handleEmojiClick(emoji) }}
-                    title={emoji}
+                    aria-label={emoji}
                     {...(dataTestIdBase ? { 'data-testid': `${dataTestIdBase}-emoji-${category.id}-${index}` } : {})}
                     data-emoji={emoji}
                   >

@@ -834,7 +834,10 @@
     },
     "ok": "Impor",
     "cancel": "Batal",
-    "dropZone": "Zona lepas"
+    "dropZone": "Zona lepas",
+    "addAuth": "Tambahkan rute autentikasi",
+    "detachAuth": "Lepaskan rute autentikasi",
+    "editAuth": "Edit rute autentikasi"
   },
   "emptyBench": {
     "importCard": {
@@ -1713,5 +1716,14 @@
     "updateRequest": "Perbarui permintaan",
     "updateScenario": "Perbarui skenario",
     "updateScenarioNode": "Perbarui simpul skenario"
+  },
+  "odataRequestTab": {
+    "send": "Kirim",
+    "loadNextPage": "Muat halaman berikutnya"
+  },
+  "typedValue": {
+    "list": {
+      "add": "Tambahkan nilai"
+    }
   }
 }

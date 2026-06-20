@@ -835,7 +835,10 @@
     },
     "ok": "İçe aktar",
     "cancel": "İptal",
-    "dropZone": "Bırakma alanı"
+    "dropZone": "Bırakma alanı",
+    "addAuth": "Kimlik doğrulama rotası ekle",
+    "detachAuth": "Kimlik doğrulama rotasını ayır",
+    "editAuth": "Kimlik doğrulama rotasını düzenle"
   },
   "emptyBench": {
     "importCard": {
@@ -1714,5 +1717,14 @@
     "updateRequest": "İsteği güncelle",
     "updateScenario": "Senaryoyu güncelle",
     "updateScenarioNode": "Senaryo düğümünü güncelle"
+  },
+  "odataRequestTab": {
+    "send": "Gönder",
+    "loadNextPage": "Sonraki sayfayı yükle"
+  },
+  "typedValue": {
+    "list": {
+      "add": "Değer ekle"
+    }
   }
 }

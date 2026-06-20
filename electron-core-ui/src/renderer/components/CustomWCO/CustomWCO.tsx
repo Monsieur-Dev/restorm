@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { createPortal } from 'react-dom'
+import { useTranslation } from 'react-i18next'
 import './custom-wco.css'
 
 export interface CustomWCOProps {
@@ -30,11 +31,12 @@ interface NavigatorWithWCO extends Navigator {
  */
 const LINUX_WCO_WIDTH_PX = 92
 
-const CustomWCO: React.FC<CustomWCOProps> = ({ 
-  className = '', 
+const CustomWCO: React.FC<CustomWCOProps> = ({
+  className = '',
   platform,
   'data-testid': dataTestId
 }) => {
+  const { t } = useTranslation()
   // Track async platform detection separately
   const [asyncPlatform, setAsyncPlatform] = useState<string>('')
   const [isMaximized, setIsMaximized] = useState(false)
@@ -158,7 +160,7 @@ const CustomWCO: React.FC<CustomWCOProps> = ({
       <div
         className="window-button minimize"
         onClick={handleMinimize}
-        title="Minimize"
+        aria-label={t('customWco.minimize', 'Minimize')}
         {...(dataTestId && { 'data-testid': `${dataTestId}-minimize` })}
       >
         <span className="codicon codicon-chrome-minimize"></span>
@@ -166,7 +168,7 @@ const CustomWCO: React.FC<CustomWCOProps> = ({
       <div
         className="window-button maximize"
         onClick={handleMaximize}
-        title={isMaximized ? "Restore" : "Maximize"}
+        aria-label={isMaximized ? t('customWco.restore', 'Restore') : t('customWco.maximize', 'Maximize')}
         {...(dataTestId && { 'data-testid': `${dataTestId}-maximize` })}
       >
         <span className={`codicon ${isMaximized ? 'codicon-chrome-restore' : 'codicon-chrome-maximize'}`}></span>
@@ -174,7 +176,7 @@ const CustomWCO: React.FC<CustomWCOProps> = ({
       <div
         className="window-button close"
         onClick={handleClose}
-        title="Close"
+        aria-label={t('customWco.close', 'Close')}
         {...(dataTestId && { 'data-testid': `${dataTestId}-close` })}
       >
         <span className="codicon codicon-chrome-close"></span>

@@ -157,7 +157,11 @@
     }
   },
   "codeEditor": {
-    "goToDefinition": "Ga naar definitie"
+    "goToDefinition": "Ga naar definitie",
+    "copyButton": {
+      "copy": "Code kopiëren",
+      "copied": "Gekopieerd!"
+    }
   },
   "tagsView": {
     "removeTag": "Tag verwijderen",
@@ -370,5 +374,16 @@
     "listThemes": "Beschikbare thema's weergeven",
     "getCurrentTheme": "Huidig thema ophalen",
     "switchTheme": "Actief thema wisselen"
+  },
+  "customWco": {
+    "minimize": "Minimaliseren",
+    "maximize": "Maximaliseren",
+    "restore": "Herstellen",
+    "close": "Sluiten"
+  },
+  "firewall": {
+    "addOrigin": "Oorsprong toevoegen",
+    "removeOrigin": "{{origin}} verwijderen",
+    "noEntries": "Nog geen vermeldingen."
   }
 }

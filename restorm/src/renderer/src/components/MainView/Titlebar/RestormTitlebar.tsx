@@ -316,8 +316,7 @@ export const RestormTitlebar: React.FC<RestormTitlebarProps> = ({
           icon="gear"
           onClick={handleOpenSettings}
           options={{
-            ariaLabel: t('app.openSettings'),
-            title: t('app.openSettings')
+            ariaLabel: t('app.openSettings')
           }}
         />
       }

@@ -34,6 +34,7 @@ import { CurlPasteCallout } from '../CurlPasteCallout'
 import { SendButtonEnvSwitcher } from './SendButtonEnvSwitcher'
 import { BeamWrap } from '../common/BeamWrap'
 import { toasterService } from 'electron-core-ui/renderer'
+import { HeaderHoverTooltip } from '../MainView/HeaderHoverTooltip'
 
 export interface SoapRequestTabViewProps {
   request: SoapRequest
@@ -422,16 +423,18 @@ export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({
         />
       )}
       <ControlGroup data-testid="soap-url-section">
-        <div style={{ flex: 1, minWidth: 0 }} title={resolvedUrl || url} data-testid="url-container" data-url-resolved={resolvedUrl ? 'true' : 'false'}>
-          <RestormVariableInputBox
-            value={url}
-            onChange={setUrl}
-            variables={emptyVariables}
-            helpers={handlebarsHelpers}
-            placeholder={t('soap.urlPlaceholder')}
-            data-testid="soap-url-input"
-          />
-        </div>
+        <HeaderHoverTooltip label={resolvedUrl || url} suppressed={!(resolvedUrl || url)} className="url-container-stretch">
+          <div style={{ flex: 1, minWidth: 0 }} data-testid="url-container" data-url-resolved={resolvedUrl ? 'true' : 'false'} data-resolved-url={resolvedUrl || url}>
+            <RestormVariableInputBox
+              value={url}
+              onChange={setUrl}
+              variables={emptyVariables}
+              helpers={handlebarsHelpers}
+              placeholder={t('soap.urlPlaceholder')}
+              data-testid="soap-url-input"
+            />
+          </div>
+        </HeaderHoverTooltip>
         <SendButtonEnvSwitcher>
           <BeamWrap active={isSending} size={22} borderWidth={1.5}>
             <Button

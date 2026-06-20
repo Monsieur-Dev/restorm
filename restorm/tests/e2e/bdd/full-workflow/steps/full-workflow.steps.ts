@@ -692,8 +692,8 @@ Then(
     // give it plenty of time to propagate through handlebars + URLResolver.
     await expect.poll(
       async () => {
-        const title = await currentPage.locator('[data-testid="url-container"]').first().getAttribute('title')
-        return title ?? ''
+        const resolved = await currentPage.locator('[data-testid="url-container"]').first().getAttribute('data-resolved-url')
+        return resolved ?? ''
       },
       { timeout: 30000, message: `expected URL tooltip to equal "${expectedUrl}"` }
     ).toBe(expectedUrl)
@@ -2897,7 +2897,7 @@ When('I set the {string} custom-list entry value to {string}', async ({}, label:
 
 When('I uncheck the {string} custom-list entry', async ({}, label: string) => {
   if (!page) throw new Error('app must be launched')
-  const checkbox = page.locator(`[data-testid="custom-values-entry-enabled-${CVL_ENTRY_ID[label]}"]`)
+  const checkbox = page.locator(`[data-testid="custom-values-entry-enabled-${CVL_ENTRY_ID[label]}-action"]`)
   await expect(checkbox).toBeVisible({ timeout: 5000 })
   await checkbox.uncheck()
   await page.waitForTimeout(300)
@@ -2905,7 +2905,7 @@ When('I uncheck the {string} custom-list entry', async ({}, label: string) => {
 
 When('I check the {string} custom-list entry', async ({}, label: string) => {
   if (!page) throw new Error('app must be launched')
-  const checkbox = page.locator(`[data-testid="custom-values-entry-enabled-${CVL_ENTRY_ID[label]}"]`)
+  const checkbox = page.locator(`[data-testid="custom-values-entry-enabled-${CVL_ENTRY_ID[label]}-action"]`)
   await expect(checkbox).toBeVisible({ timeout: 5000 })
   await checkbox.check()
   await page.waitForTimeout(300)

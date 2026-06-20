@@ -181,7 +181,7 @@ const McpLogRow: React.FC<{
           <span className="ecui-mcp-logs-tool-title">{title}</span>
           {showRawName && <span className="ecui-mcp-logs-tool-raw" data-testid="mcp-logs-tool-raw">{entry.tool}</span>}
         </span>
-        <span className="ecui-mcp-logs-time" title={labels.time}>{formatTime(entry.timestamp)}</span>
+        <span className="ecui-mcp-logs-time" aria-label={labels.time}>{formatTime(entry.timestamp)}</span>
       </div>
       {(showRequest || showResponse) && (
         <div className="ecui-mcp-logs-chat">
