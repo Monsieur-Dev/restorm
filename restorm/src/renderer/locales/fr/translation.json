@@ -1376,7 +1376,11 @@
       "math": "Maths",
       "dataFormats": "Formats de données",
       "encoding": "Encodage",
-      "time": "Minuterie"
+      "time": "Minuterie",
+      "algorithmie": "Algorithmie"
+    },
+    "palette": {
+      "arrangeActions": "Réorganiser les actions"
     },
     "listOp": {
       "value": "liste",

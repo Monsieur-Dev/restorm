@@ -7,7 +7,7 @@ import type { ScenarioNodeKind } from '../../../../shared/types/collections'
  */
 /** Catalogue grouping — drives the separators in the add-node menu. */
 export type ScenarioNodeCategory =
-  | 'control' | 'composition' | 'lists' | 'loops' | 'time' | 'math' | 'compute' | 'dataFormats' | 'encoding' | 'utility'
+  | 'control' | 'composition' | 'lists' | 'loops' | 'time' | 'math' | 'compute' | 'algorithmie' | 'dataFormats' | 'encoding' | 'utility'
 
 /** Categories rendered as a nested submenu in the add-node menu + link palette
  * (label + icon), instead of a flat separator-delimited group. Keyed off the
@@ -17,6 +17,7 @@ export const SCENARIO_SUBMENU_CATEGORIES: Partial<Record<ScenarioNodeCategory, {
   loops: { labelKey: 'scenario.nodes.loops', defaultLabel: 'Loops', icon: 'sync' },
   time: { labelKey: 'scenario.menuGroups.time', defaultLabel: 'Timing', icon: 'watch' },
   math: { labelKey: 'scenario.menuGroups.math', defaultLabel: 'Math', icon: 'symbol-operator' },
+  algorithmie: { labelKey: 'scenario.menuGroups.algorithmie', defaultLabel: 'Algorithmie', icon: 'symbol-misc' },
   dataFormats: { labelKey: 'scenario.menuGroups.dataFormats', defaultLabel: 'Data formats', icon: 'file-code' },
   encoding: { labelKey: 'scenario.menuGroups.encoding', defaultLabel: 'Encoding', icon: 'lock' }
 }
@@ -77,16 +78,16 @@ export const SCENARIO_NODE_CATALOGUE: ScenarioNodeKindMeta[] = [
   { kind: 'arithmetic', labelKey: 'scenario.nodes.arithmetic', defaultLabel: 'Arithmetic', icon: 'symbol-operator', category: 'math' },
   { kind: 'comparator', labelKey: 'scenario.nodes.comparator', defaultLabel: 'Comparator', icon: 'equals', category: 'math' },
   { kind: 'math', labelKey: 'scenario.nodes.math', defaultLabel: 'Math', icon: 'symbol-numeric', category: 'math' },
-  // Compute & values
-  { kind: 'boolean', labelKey: 'scenario.nodes.boolean', defaultLabel: 'Boolean', icon: 'symbol-boolean', category: 'compute' },
-  { kind: 'object', labelKey: 'scenario.nodes.object', defaultLabel: 'Object', icon: 'symbol-namespace', category: 'compute' },
-  { kind: 'objectOp', labelKey: 'scenario.nodes.objectOp', defaultLabel: 'Object ops', icon: 'symbol-object', category: 'compute' },
-  { kind: 'setVariable', labelKey: 'scenario.nodes.setVariable', defaultLabel: 'Set variable', icon: 'symbol-variable', category: 'compute' },
-  { kind: 'getVariable', labelKey: 'scenario.nodes.getVariable', defaultLabel: 'Get variable', icon: 'symbol-variable', category: 'compute' },
-  { kind: 'transform', labelKey: 'scenario.nodes.transform', defaultLabel: 'Transform template', icon: 'symbol-string', category: 'compute' },
-  { kind: 'code', labelKey: 'scenario.nodes.code', defaultLabel: 'Code (sandbox)', icon: 'code', category: 'compute' },
-  { kind: 'cast', labelKey: 'scenario.nodes.cast', defaultLabel: 'Cast', icon: 'replace', category: 'compute' },
-  { kind: 'regex', labelKey: 'scenario.nodes.regex', defaultLabel: 'Regex', icon: 'regex', category: 'compute' },
+  // Algorithmie (grouped into an "Algorithmie" submenu)
+  { kind: 'boolean', labelKey: 'scenario.nodes.boolean', defaultLabel: 'Boolean', icon: 'symbol-boolean', category: 'algorithmie' },
+  { kind: 'object', labelKey: 'scenario.nodes.object', defaultLabel: 'Object', icon: 'symbol-namespace', category: 'algorithmie' },
+  { kind: 'objectOp', labelKey: 'scenario.nodes.objectOp', defaultLabel: 'Object ops', icon: 'symbol-object', category: 'algorithmie' },
+  { kind: 'setVariable', labelKey: 'scenario.nodes.setVariable', defaultLabel: 'Set variable', icon: 'symbol-variable', category: 'algorithmie' },
+  { kind: 'getVariable', labelKey: 'scenario.nodes.getVariable', defaultLabel: 'Get variable', icon: 'symbol-variable', category: 'algorithmie' },
+  { kind: 'transform', labelKey: 'scenario.nodes.transform', defaultLabel: 'Transform template', icon: 'symbol-string', category: 'algorithmie' },
+  { kind: 'code', labelKey: 'scenario.nodes.code', defaultLabel: 'Code (sandbox)', icon: 'code', category: 'algorithmie' },
+  { kind: 'cast', labelKey: 'scenario.nodes.cast', defaultLabel: 'Cast', icon: 'replace', category: 'algorithmie' },
+  { kind: 'regex', labelKey: 'scenario.nodes.regex', defaultLabel: 'Regex', icon: 'regex', category: 'algorithmie' },
   // Data formats (grouped into a "Data formats" submenu)
   { kind: 'json', labelKey: 'scenario.nodes.json', defaultLabel: 'JSON', icon: 'json', category: 'dataFormats' },
   { kind: 'xml', labelKey: 'scenario.nodes.xml', defaultLabel: 'XML', icon: 'code', category: 'dataFormats' },

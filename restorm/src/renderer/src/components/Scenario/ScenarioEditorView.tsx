@@ -978,6 +978,34 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
     }
   }, [nodes, edges, scenario.id, setNodes, persist, fitView])
 
+  // ── Manual re-arrange (palette action) ─────────────────────────────────────
+  // Runs the same ELK layout as the auto-layout, but unconditionally (no
+  // overlap guard, no first-open flag) and on-demand. Used by the canvas
+  // right-click palette entry so the user can tidy the graph at any point.
+  const runManualLayout = useCallback((): void => {
+    const current = nodesRef.current
+    if (current.length === 0) return
+    const rectOf = (n: Node<NodeData>): { id: string; width: number; height: number } => {
+      const m = (n as { measured?: { width?: number; height?: number } }).measured
+      return { id: n.id, width: m?.width ?? n.width ?? SCENARIO_NODE_FALLBACK_WIDTH, height: m?.height ?? n.height ?? SCENARIO_NODE_FALLBACK_HEIGHT }
+    }
+    const inputNodes = current.map(rectOf)
+    const inputEdges = edgesRef.current.map((e) => ({ id: e.id, source: e.source, target: e.target }))
+    void layoutScenarioGraph(inputNodes, inputEdges).then((positions) => {
+      if (positions.size === 0) return
+      const before = nodesRef.current
+      const laid = before.map((n) => {
+        const p = positions.get(n.id)
+        if (!p || (n.position.x === p.x && n.position.y === p.y)) return n
+        return { ...n, position: p }
+      })
+      if (laid.every((n, i) => n === before[i])) return
+      setNodes(laid)
+      persist(laid, edgesRef.current)
+      void fitView({ duration: 300, padding: 0.2 })
+    })
+  }, [setNodes, persist, fitView])
+
   // The JSON-path selector on a data link reads + writes that edge's `selector`
   // through this api; the write mutates the authoritative edge store, mirrors it
   // onto the flow edge's `data` (so validation reads it from render state), and
@@ -2871,7 +2899,9 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
               withAddSubmenu: onCreateChild !== undefined,
               pickNode: (kind) => () => { addNode(kind, palette.flow) },
               pickChild: (kind) => () => { addChildNode(kind as AddChildKind, palette.flow) }
-            })
+            }),
+            { id: 'arrange-sep', isSeparator: true, label: '' },
+            { id: 'arrange-actions', label: t('scenario.palette.arrangeActions', 'Re-arrange actions'), icon: 'layout', onClick: () => { setPalette(null); runManualLayout() } }
           ]}
         />
       )}
