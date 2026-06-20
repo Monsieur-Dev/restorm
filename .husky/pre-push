@@ -95,7 +95,14 @@ echo "✅ All lint checks passed!"
 # flake-free recipe). scripts/ship.sh is the orchestrator that drives this
 # (rebase → push [this hook] → wait CI → merge); it relies on this hook for
 # the e2e and never re-runs it.
-echo "🧪 Running full e2e suite (xvfb) before push..."
+#
+# RESTORM_SHIP=1 tells playwright.config.ts to set retries:2, so a single
+# memory-bound flake self-heals without aborting the push. A consistently
+# broken test still fails all retries and blocks the push — no regressions
+# are masked. Plain `pnpm test:e2e` (no RESTORM_SHIP) keeps retries:0 for
+# dev debugging.
+export RESTORM_SHIP=1
+echo "🧪 Running full e2e suite (xvfb, retries:2) before push..."
 pnpm --filter restorm run test:e2e || {
     echo "❌ ERROR: e2e suite failed — push aborted."
     echo "Inspect restorm/test-results/ for the failing test, then fix and re-push."
