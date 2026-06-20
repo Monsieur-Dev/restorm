@@ -344,7 +344,18 @@ class GRPCExecutionService {
 
       let client: ReturnType<typeof resolveGrpcMethod>['client']
       try {
-        client = resolveGrpcMethod(protoSource, address, service, method, this.credentials(secure)).client
+        const resolvedMethod = resolveGrpcMethod(protoSource, address, service, method, this.credentials(secure))
+        client = resolvedMethod.client
+        // The proto is ground truth: if the method is actually streaming,
+        // dispatching it as unary would crash deep in grpc-js with an opaque
+        // error. Reconcile and surface a clear failure instead.
+        const actual = reconcileCallType('unary', resolvedMethod.requestStream, resolvedMethod.responseStream)
+        if (actual !== 'unary') {
+          this.broadcastProgress(requestId, 'error')
+          closeClient(client)
+          finish(this.failure(requestId, `proto declares '${actual}' but request was dispatched as unary`, resolved))
+          return
+        }
         activeClient = client
       } catch (err) {
         this.broadcastProgress(requestId, 'error')
@@ -572,8 +583,13 @@ class GRPCExecutionService {
       ctl.method = `${resolved.service}/${resolved.method}`
 
       let client: ReturnType<typeof resolveGrpcMethod>['client']
+      let reconciledCallType = resolved.callType
       try {
-        client = resolveGrpcMethod(resolved.protoSource, resolved.address, resolved.service, resolved.method, this.credentials(resolved.secure)).client
+        const resolvedMethod = resolveGrpcMethod(resolved.protoSource, resolved.address, resolved.service, resolved.method, this.credentials(resolved.secure))
+        client = resolvedMethod.client
+        // Trust the proto's streaming flags over the request's (possibly stale)
+        // callType, so a unary method never gets dispatched down a stream path.
+        reconciledCallType = reconcileCallType(resolved.callType, resolvedMethod.requestStream, resolvedMethod.responseStream)
         activeClient = client
       } catch (err) {
         this.broadcastProgress(requestId, 'error')
@@ -604,7 +620,8 @@ class GRPCExecutionService {
         fireClose()
       }
 
-      const { method, metadata, callType } = resolved
+      const { method, metadata } = resolved
+      const callType = reconciledCallType
       let stream: ActiveCall['stream']
       if (callType === 'server-stream') {
         let reqObj: object
