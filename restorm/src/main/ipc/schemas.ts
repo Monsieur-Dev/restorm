@@ -439,3 +439,86 @@ export const miniBrowserGoBackArgs = z.tuple([tabIdArg])
 export const miniBrowserGoForwardArgs = z.tuple([tabIdArg])
 export const miniBrowserGetStateArgs = z.tuple([tabIdArg])
 export const miniBrowserCaptureArgs = z.tuple([tabIdArg])
+
+// ==========================================================================
+// OUTPUT (return-shape) schemas — preload defense-in-depth
+// --------------------------------------------------------------------------
+// These validate what main sends BACK to the renderer on externally-sourced
+// bridges (import pipeline, spec fetches, HTTP/WS/gRPC response envelopes).
+// For hot execute paths the check is envelope-shape-only — the body string
+// is arbitrary external content and must NOT be re-parsed.
+// Failure mode in the preload: warn-only (never throw on mismatch so a
+// schema drift never breaks a live request flow).
+// ==========================================================================
+
+const timingsSchema = z.object({ startedAt: z.string(), durationMs: z.number() })
+
+export const httpExecuteResultSchema = z.object({
+  requestId: z.string(),
+  success: z.boolean(),
+  statusCode: z.number().optional(),
+  statusText: z.string().optional(),
+  headers: z.record(z.string(), z.union([z.string(), z.array(z.string())])).optional(),
+  body: z.string().optional(),
+  error: z.string().optional(),
+  timings: timingsSchema,
+  requestUrl: z.string().optional(),
+  requestHeaders: z.record(z.string(), z.string()).optional(),
+})
+
+export const graphqlExecuteResultSchema = z.object({
+  requestId: z.string(),
+  success: z.boolean(),
+  statusCode: z.number().optional(),
+  statusText: z.string().optional(),
+  headers: z.record(z.string(), z.union([z.string(), z.array(z.string())])).optional(),
+  body: z.string().optional(),
+  error: z.string().optional(),
+  timings: timingsSchema,
+})
+
+export const soapExecuteResultSchema = z.object({
+  requestId: z.string(),
+  success: z.boolean(),
+  statusCode: z.number().optional(),
+  statusText: z.string().optional(),
+  headers: z.record(z.string(), z.union([z.string(), z.array(z.string())])).optional(),
+  body: z.string().optional(),
+  error: z.string().optional(),
+  timings: timingsSchema,
+})
+
+export const grpcExecuteResultSchema = z.object({
+  requestId: z.string(),
+  success: z.boolean(),
+  statusCode: z.number().optional(),
+  statusMessage: z.string().optional(),
+  body: z.string().optional(),
+  error: z.string().optional(),
+  timings: timingsSchema,
+})
+
+export const websocketConnectResultSchema = z.object({
+  requestId: z.string(),
+  success: z.boolean(),
+  error: z.string().optional(),
+})
+
+export const authPrefetchResultSchema = z.object({
+  requestId: z.string(),
+  success: z.boolean(),
+  error: z.string().optional(),
+})
+
+export const importPreviewResultSchema = z.object({
+  items: z.array(z.looseObject({ name: z.string() })),
+})
+
+export const importImportResultSchema = z.object({
+  imported: z.number(),
+})
+
+export const apiUpdateRefreshFetchResultSchema = z.discriminatedUnion('ok', [
+  z.object({ ok: z.literal(true), spec: z.string() }),
+  z.object({ ok: z.literal(false), error: z.string() }),
+])

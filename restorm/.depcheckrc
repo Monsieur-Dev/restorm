@@ -36,6 +36,8 @@
     "pyodide",
     "wasmoon",
     "webr",
-    "@ruby/*"
+    "@ruby/*",
+    "sharp",
+    "@img/sharp-linux-x64"
   ]
 }

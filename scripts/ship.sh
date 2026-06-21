@@ -179,6 +179,17 @@ else
   echo "✅ ${BRANCH} already up to date with origin/${BASE}."
 fi
 
+# ── 1b. Rebuild dist so the e2e gate tests the REBASED source ───────────
+# The pre-push e2e launches the built dist/, produced only by the pre-commit
+# hook — a rebase doesn't rebuild it, so a branch rebased onto a moved main
+# would otherwise run the e2e against a STALE bundle. Install first (the
+# rebase may have pulled new deps into the lockfile), then build.
+echo "🔧 pnpm install --frozen-lockfile (rebase may have pulled new deps)…"
+pnpm install --frozen-lockfile || die "pnpm install failed after rebase."
+echo "🏗️  pnpm build (rebuild dist from the rebased source)…"
+pnpm run build:core-ui || die "build:core-ui failed after rebase."
+pnpm run build:restorm || die "build:restorm failed after rebase."
+
 # ── 2. Push → the pre-push hook runs the FULL e2e under xvfb ────────────
 # Wrap in the same 20-min hard timeout + journal mechanics as the commit
 # wrapper. `--force-with-lease` is safe + required after a rebase. The hook's

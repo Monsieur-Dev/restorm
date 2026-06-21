@@ -86,7 +86,13 @@ export default defineConfig({
     }
   },
   preload: {
-    plugins: [externalizeDepsPlugin()],
+    // `zod` is excluded from externalization so it is BUNDLED into the preload
+    // script. The preload imports the IPC output-shape schemas (../ipc/schemas),
+    // which `import { z } from 'zod/v4'` as a runtime value. Left externalized,
+    // electron-vite emits a bare `require('zod/v4')` that fails to resolve at
+    // preload load → the module throws before `contextBridge.exposeInMainWorld`
+    // runs → `window.restorm` is undefined → the renderer never signals ready.
+    plugins: [externalizeDepsPlugin({ exclude: ['zod'] })],
     build: {
       sourcemap: process.env.VITE_COVERAGE === 'true',
       rollupOptions: {
