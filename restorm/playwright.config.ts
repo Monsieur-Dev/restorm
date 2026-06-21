@@ -183,8 +183,12 @@ export default defineConfig({
   /* Fail the build on CI if you accidentally left test.only in the source code */
   forbidOnly: !!process.env.CI,
 
-  /* Retry on CI only */
-  retries: process.env.CI ? 2 : 0,
+  /* Retries: enabled automatically at ship/push time (RESTORM_SHIP=1, set by
+   * the pre-push hook) and on CI (CI=1). Plain `pnpm test:e2e` in dev gets
+   * retries:0 so raw failure output is immediately visible.
+   * Retries only self-heal genuine flakes (fail-then-pass); a consistently
+   * broken test still fails every attempt and blocks the push. */
+  retries: (process.env.RESTORM_SHIP || process.env.CI) ? 2 : 0,
 
   /* Electron projects run across workers (each project/file stays serial
    * internally — `fullyParallel: false`), so the long-pole projects (scenario

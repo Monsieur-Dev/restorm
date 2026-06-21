@@ -50,6 +50,13 @@ Runs before pushing to remote and performs:
    - Runs `pnpm --filter restorm test:e2e`, which wraps Playwright in
      `xvfb-run` on Linux (isolated virtual display → the proven flake-free
      recipe)
+   - The hook exports `RESTORM_SHIP=1` before invoking the suite, which
+     tells `playwright.config.ts` to run with **retries:2**. A single
+     memory-bound flake (different test each run) self-heals without
+     aborting the push. A consistently broken test still fails all retries
+     and blocks the push — retries do not mask real regressions.
+   - Plain `pnpm test:e2e` (no `RESTORM_SHIP`) keeps **retries:0** for dev
+     debugging, so raw failure output is immediately visible.
    - **Aborts the push on any e2e failure** — so the suite can't be forgotten
    - Only `git push --no-verify` skips it, and that is **forbidden** by project
      rules
