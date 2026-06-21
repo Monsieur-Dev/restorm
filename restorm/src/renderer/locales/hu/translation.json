@@ -1380,7 +1380,8 @@
       "dataFormats": "Data formats",
       "encoding": "Encoding",
       "time": "Időzítés",
-      "algorithmie": "Algorithmie"
+      "algorithmie": "Algorithmie",
+      "ux": "UX"
     },
     "listOp": {
       "value": "list",
@@ -1553,7 +1554,8 @@
       "mqttClose": "Closes an already-open MQTT connection.",
       "mqttConnectServer": "Starts a local MQTT broker (port + topic filter); subscribes to its topic filter and re-emits each received message on its `message` port. Send publishes to connected subscribers.",
       "mqttSendServer": "Publishes a message to every subscriber of the referenced MQTT broker.",
-      "mqttCloseServer": "Stops the referenced MQTT broker and disconnects its clients."
+      "mqttCloseServer": "Stops the referenced MQTT broker and disconnects its clients.",
+      "toast": "Emits a toast notification in the Restorm UI while the scenario runs."
     },
     "legend": {
       "title": "Jelmagyarázat",
@@ -1609,6 +1611,11 @@
       "in": "in",
       "error": "error",
       "done": "done"
+    },
+    "toast": {
+      "title": "cím",
+      "message": "üzenet",
+      "duration": "időtartam (mp)"
     }
   },
   "mqtt": {

@@ -42,6 +42,7 @@ import {
   throwExecutor
 } from './pureExecutors'
 import { schemaExecutor, readFileExecutor, writeFileExecutor } from './ioExecutors'
+import { toastExecutor } from './toastExecutor'
 import { codeExecutor } from './codeExecutor'
 import {
   waitExecutor,
@@ -181,6 +182,7 @@ function pickExecutor(kind: string): NodeExecutor {
     case 'getVariable': return getVariableExecutor
     case 'object': return objectExecutor
     case 'log': return logExecutor
+    case 'toast': return toastExecutor
     case 'assert': return assertExecutor
     case 'map': return mapExecutor
     case 'filter': return filterExecutor

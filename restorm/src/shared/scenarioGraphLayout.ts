@@ -15,6 +15,21 @@ export interface LayoutEdgeInput {
   target: string
 }
 
+/**
+ * Whether a scenario graph still needs its INITIAL auto-placement. `position`
+ * is always present in the model, so an un-placed box is detected by the origin
+ * sentinel `(0,0)` that the MCP/agent (`create_scenario_node` defaults to 0,0)
+ * and import paths leave behind. The editor auto-arranges on first open ONLY
+ * when this is true; once every box has a real position the graph is left
+ * exactly as saved (re-organisation is then on-demand only). An empty graph
+ * needs no placement.
+ */
+export function scenarioGraphNeedsPlacement(
+  nodes: { position: { x: number; y: number } }[]
+): boolean {
+  return nodes.some((n) => n.position.x === 0 && n.position.y === 0)
+}
+
 const elk = new ELK()
 
 /** Fallbacks when a node hasn't been measured by React Flow yet (e.g. just

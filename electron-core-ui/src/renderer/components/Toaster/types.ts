@@ -20,6 +20,14 @@ export interface ToastInput {
    */
   id?: string | undefined
   title: string
+  /**
+   * Optional rich header content rendered in place of the plain `title` text
+   * on the toast's header row (the same row as the close button). When set, the
+   * `title` string is still used for accessibility + `data-toast-title`, but the
+   * visible header shows this node — letting callers put an icon, colour, or
+   * other markup alongside the title without leaving the close-button row.
+   */
+  titleNode?: ReactNode | undefined
   body: ReactNode
   /** Duration before auto-dismiss. `undefined` → indefinite (no progress bar). */
   durationMs?: number | undefined
@@ -31,6 +39,8 @@ export interface ToastInput {
 export interface Toast {
   id: string
   title: string
+  /** Optional rich header content (see {@link ToastInput.titleNode}). */
+  titleNode?: ReactNode | undefined
   body: ReactNode
   durationMs: number | undefined
   ariaLive: 'polite' | 'assertive'

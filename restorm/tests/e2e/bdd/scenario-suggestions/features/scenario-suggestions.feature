@@ -14,6 +14,7 @@ Feature: Scenario inspector data suggestions end-to-end
     Examples:
       | scenario       |
       | Logs           |
+      | Toast          |
       | Arithmetics    |
       | Loops          |
       | Inputs/outputs |

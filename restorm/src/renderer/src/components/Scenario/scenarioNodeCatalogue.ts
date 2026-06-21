@@ -7,7 +7,7 @@ import type { ScenarioNodeKind } from '../../../../shared/types/collections'
  */
 /** Catalogue grouping — drives the separators in the add-node menu. */
 export type ScenarioNodeCategory =
-  | 'control' | 'composition' | 'lists' | 'loops' | 'time' | 'math' | 'compute' | 'algorithmie' | 'dataFormats' | 'encoding' | 'utility'
+  | 'control' | 'composition' | 'lists' | 'loops' | 'time' | 'math' | 'compute' | 'algorithmie' | 'dataFormats' | 'encoding' | 'utility' | 'ux'
 
 /** Categories rendered as a nested submenu in the add-node menu + link palette
  * (label + icon), instead of a flat separator-delimited group. Keyed off the
@@ -19,7 +19,8 @@ export const SCENARIO_SUBMENU_CATEGORIES: Partial<Record<ScenarioNodeCategory, {
   math: { labelKey: 'scenario.menuGroups.math', defaultLabel: 'Math', icon: 'symbol-operator' },
   algorithmie: { labelKey: 'scenario.menuGroups.algorithmie', defaultLabel: 'Algorithmie', icon: 'symbol-misc' },
   dataFormats: { labelKey: 'scenario.menuGroups.dataFormats', defaultLabel: 'Data formats', icon: 'file-code' },
-  encoding: { labelKey: 'scenario.menuGroups.encoding', defaultLabel: 'Encoding', icon: 'lock' }
+  encoding: { labelKey: 'scenario.menuGroups.encoding', defaultLabel: 'Encoding', icon: 'lock' },
+  ux: { labelKey: 'scenario.menuGroups.ux', defaultLabel: 'UX', icon: 'bell' }
 }
 
 export interface ScenarioNodeKindMeta {
@@ -97,6 +98,8 @@ export const SCENARIO_NODE_CATALOGUE: ScenarioNodeKindMeta[] = [
   { kind: 'crypto', labelKey: 'scenario.nodes.crypto', defaultLabel: 'Crypto', icon: 'lock', category: 'encoding' },
   { kind: 'jwt', labelKey: 'scenario.nodes.jwt', defaultLabel: 'JWT', icon: 'key', category: 'encoding' },
   { kind: 'url', labelKey: 'scenario.nodes.url', defaultLabel: 'URL', icon: 'link', category: 'encoding' },
+  // UX (grouped into a "UX" submenu)
+  { kind: 'toast', labelKey: 'scenario.nodes.toast', defaultLabel: 'Toast', icon: 'bell', category: 'ux' },
   // Utilities
   { kind: 'random', labelKey: 'scenario.nodes.random', defaultLabel: 'Random', icon: 'wand', category: 'utility' },
   { kind: 'schema', labelKey: 'scenario.nodes.schema', defaultLabel: 'Schema validate', icon: 'checklist', category: 'utility' },

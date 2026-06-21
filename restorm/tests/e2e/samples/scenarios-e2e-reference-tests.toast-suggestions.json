@@ -1,0 +1,57 @@
+[
+  {
+    "id": "baea49e9-04f5-44d9-9443-7e0ec8c8223c",
+    "kind": "toast",
+    "suggestion": {
+      "title": "Info",
+      "message": "Scenario started",
+      "level": "info",
+      "duration": 0
+    },
+    "source": "static"
+  },
+  {
+    "id": "54c4dc20-93cd-4b99-8469-9f56f9b424f4",
+    "kind": "toast",
+    "suggestion": {
+      "title": "Success",
+      "message": "Step completed",
+      "level": "success",
+      "duration": 5
+    },
+    "source": "static"
+  },
+  {
+    "id": "2b6c0627-e5b5-4038-80d9-55cfae7dce46",
+    "kind": "toast",
+    "suggestion": {
+      "title": "Warning",
+      "message": "Check your config",
+      "level": "warning",
+      "duration": 0
+    },
+    "source": "static"
+  },
+  {
+    "id": "e734d262-3e68-4b42-b3a3-fb85e0852454",
+    "kind": "toast",
+    "suggestion": {
+      "title": "Error",
+      "message": "Something failed",
+      "level": "error",
+      "duration": 0
+    },
+    "source": "static"
+  },
+  {
+    "id": "cc1e4f6d-f88f-41c2-b7e6-9a4418a0b4e1",
+    "kind": "toast",
+    "suggestion": {
+      "title": "Persistent",
+      "message": "Stays until dismissed",
+      "level": "info",
+      "duration": 0
+    },
+    "source": "static"
+  }
+]

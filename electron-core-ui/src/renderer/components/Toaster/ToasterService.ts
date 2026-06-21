@@ -108,6 +108,7 @@ class ToasterServiceImpl {
         const updated: Toast = {
           id: existing.id,
           title: input.title,
+          titleNode: input.titleNode,
           body: input.body,
           durationMs: input.durationMs,
           ariaLive,
@@ -136,6 +137,7 @@ class ToasterServiceImpl {
     const toast: Toast = {
       id,
       title: input.title,
+      titleNode: input.titleNode,
       body: input.body,
       durationMs: input.durationMs,
       ariaLive,

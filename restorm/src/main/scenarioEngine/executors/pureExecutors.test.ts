@@ -152,6 +152,19 @@ describe('logExecutor', () => {
     const entry = runLog({ message: { type: 'variable', value: 'cpt' } }, {}, new Map([['cpt', 'Rouge']]))
     expect(entry.message).toBe('Rouge')
   })
+
+  it('an EXPRESSION reading a data key named like a registered helper reads the VALUE, not the helper', () => {
+    // `test` is a registered Handlebars helper; `{{test}}` must read the data
+    // key, not dispatch to the helper (which throws on `.inverse`).
+    const entry = runLog({ message: { type: 'expression', value: '{{test}}' } }, { data: { test: 'eeeeeee' } })
+    expect(entry.message).toBe('eeeeeee')
+  })
+
+  it('throws on a malformed EXPRESSION message so the scheduler routes it to the `error` port', () => {
+    // An unclosed block is a parse error; letting it throw (not swallow) is what
+    // makes the failure visible via the node's error port instead of silent.
+    expect(() => runLog({ message: { type: 'expression', value: '{{#each}}' } }, { data: {} })).toThrow()
+  })
 })
 
 describe('switchExecutor', () => {

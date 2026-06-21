@@ -123,6 +123,7 @@ const tabMatchesItem = (tab: EditorTab, itemId: string): boolean => {
 import { Onboarding } from './components/MainView/Workbench/Onboarding'
 import { RestormTitlebar } from './components/MainView/Titlebar/RestormTitlebar'
 import { StatusbarMcpIndicator } from './components/MainView/StatusbarMcpIndicator'
+import { ScenarioToastBody, ScenarioToastTitle } from './components/ScenarioToastBody'
 import { useMcpEnabled } from './hooks/useMcpEnabled'
 import { useMcpActiveStateBridge } from './hooks/useMcpActiveStateBridge'
 import { useMcpNavigation } from './hooks/useMcpNavigation'
@@ -1046,6 +1047,31 @@ const App: React.FC = () => {
       })
     })
   }, [t])
+
+  // `toast` scenario node → renderer bridge.
+  //
+  // Subscribes to the main-side `scenario:toast` IPC (emitted by the toast
+  // executor via BrowserWindow.getAllWindows()…send) and surfaces a toast in
+  // the global toaster. The header (level glyph + colour + bold title) is passed
+  // as the ECUI Toast `titleNode` so it shares the close-button row; the message
+  // renders below in the body. `title` (the plain string) backs accessibility +
+  // `data-toast-title`. The level maps to the ariaLive politeness (error/warning
+  // → assertive). `durationMs` undefined → the toast persists until dismissed
+  // (the executor sends it only when the configured duration is > 0 seconds).
+  useEffect(() => {
+    const api = window.restorm?.runtime
+    if (!api?.onScenarioToast) return undefined
+    return api.onScenarioToast((payload) => {
+      const ariaLive: 'polite' | 'assertive' = payload.level === 'error' || payload.level === 'warning' ? 'assertive' : 'polite'
+      toasterService.push('app', {
+        title: payload.title.trim().length > 0 ? payload.title : payload.message,
+        titleNode: <ScenarioToastTitle title={payload.title} message={payload.message} level={payload.level} />,
+        body: <ScenarioToastBody title={payload.title} message={payload.message} />,
+        durationMs: typeof payload.durationMs === 'number' && payload.durationMs > 0 ? payload.durationMs : undefined,
+        ariaLive
+      })
+    })
+  }, [])
 
   // Resolve a workbench tab id (e.g. `request-idx:0.1`, `request-id:uuid`,
   // or the legacy `request-<id>` form) to its item id.

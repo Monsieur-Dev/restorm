@@ -1,0 +1,34 @@
+/* Scenario `toast` node — rich toast header + message.
+ * The header (level glyph + title, bold + coloured per level) is rendered into
+ * the ECUI Toast `titleNode` slot, so it sits on the close-button row inside the
+ * `.toast-title` span (which is flex:1, nowrap, ellipsis). The message renders
+ * below in normal weight with the default foreground colour. */
+
+.scn-toast-header {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	min-width: 0;
+	font-weight: 600;
+	/* color inherited from the inline level colour set on the row */
+}
+
+.scn-toast-icon {
+	font-size: 14px;
+	flex-shrink: 0;
+}
+
+.scn-toast-title {
+	flex: 1;
+	min-width: 0;
+	font-weight: 600;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.scn-toast-message {
+	font-weight: 400;
+	color: var(--foreground, inherit);
+	word-break: break-word;
+}

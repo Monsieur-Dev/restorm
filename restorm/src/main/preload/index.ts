@@ -1127,6 +1127,15 @@ contextBridge.exposeInMainWorld('restorm', {
       ipcRenderer.invoke('scenario:history:detail', guid) as Promise<unknown>,
     scenarioRunHistoryTogglePin: (guid: string, pinned: boolean): Promise<boolean> =>
       ipcRenderer.invoke('scenario:history:toggle-pin', guid, pinned) as Promise<boolean>,
+    /** Subscribe to `scenario:toast` broadcasts emitted by the `toast` executor.
+     * Each payload carries `{ title, message, level, durationMs?, nodeId }`
+     * (`durationMs` omitted → the toast persists until dismissed).
+     * Returns an unsubscribe function. */
+    onScenarioToast: (callback: (payload: { title: string; message: string; level: string; durationMs?: number; nodeId: string }) => void): (() => void) => {
+      const handler = (_e: unknown, payload: unknown): void => { callback(payload as { title: string; message: string; level: string; durationMs?: number; nodeId: string }) }
+      ipcRenderer.on('scenario:toast', handler)
+      return () => { ipcRenderer.off('scenario:toast', handler) }
+    },
     /** Subscribe to engine events (node-started/-completed/data-flow/run-…).
      * Returns an unsubscribe function. The renderer animates the graph
      * + edge beams off these events. */

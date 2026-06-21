@@ -39,9 +39,15 @@ const STATIC_PREVIEW = new Set<ScenarioNodeKind>([
 /**
  * Kinds that do NOT expose the implicit `error` output port. Default: every
  * kind can fail, so it carries one. Opt-outs are sinks / pure reads where an
- * error anchor is meaningless (`output`, `log`, `now`).
+ * error anchor is meaningless (`output`, `now`).
+ *
+ * `log` and `toast` DO carry one: they resolve operands and render Handlebars
+ * expressions (title / message / data), which can fail at runtime (a bad
+ * template, an unresolvable variable). The executor lets that error throw so the
+ * scheduler routes it to the `error` port — a failure is never swallowed
+ * silently. `retry` keeps no error port — it is itself the error boundary.
  */
-const NO_ERROR_PORT = new Set<ScenarioNodeKind>(['output', 'log', 'now', 'retry'])
+const NO_ERROR_PORT = new Set<ScenarioNodeKind>(['output', 'now', 'retry'])
 
 /**
  * Kinds that do NOT expose the implicit `done` completion port. Default: every

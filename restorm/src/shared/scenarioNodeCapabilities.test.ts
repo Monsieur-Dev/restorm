@@ -25,11 +25,13 @@ describe('scenario node capabilities', () => {
     }
   })
 
-  it('error port: default true, off for output / log / now', () => {
-    for (const k of ['if', 'httpRequest', 'arithmetic', 'comparator'] as ScenarioNodeKind[]) {
+  it('error port: default true, off for output / now / retry', () => {
+    // `log` and `toast` DO carry one — they render Handlebars expressions that
+    // can fail at runtime, and the failure routes to `error` (never silent).
+    for (const k of ['if', 'httpRequest', 'arithmetic', 'comparator', 'log', 'toast'] as ScenarioNodeKind[]) {
       expect(hasErrorPort(k), `${k} should have an error port`).toBe(true)
     }
-    for (const k of ['output', 'log', 'now'] as ScenarioNodeKind[]) {
+    for (const k of ['output', 'now', 'retry'] as ScenarioNodeKind[]) {
       expect(hasErrorPort(k), `${k} should have no error port`).toBe(false)
     }
   })

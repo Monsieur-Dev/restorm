@@ -851,6 +851,41 @@ export function staticScenarioPreview(
         data: dataVal === undefined ? null : dataVal
       }
     }
+    case 'toast': {
+      // Side-effect sink (no output port) — like `log`, the inspector summarises
+      // what the toast WOULD display so the user can sanity-check it before a
+      // run: the resolved title + message, the level (drives glyph + colour) and
+      // the auto-dismiss duration in seconds (`0` = persists until dismissed).
+      // Wired non-static inputs land as `null` placeholders the inspector
+      // overrides at run-time. Mirrors `toastExecutor`'s inline-Expression
+      // handling: an un-wired Expression title/message renders Handlebars so the
+      // preview matches what fires.
+      const allowedLevels = ['info', 'success', 'warning', 'error']
+      const rawLevel = cfg['level']
+      const level = typeof rawLevel === 'string' && allowedLevels.includes(rawLevel) ? rawLevel : 'info'
+      const previewText = (portId: string): unknown => {
+        const wired = edges.some((e) => e.to.nodeId === node.id && e.to.portId === portId)
+        const opCfg = cfg[portId] as { type?: unknown; value?: unknown } | undefined
+        if (!wired && opCfg?.type === 'expression' && typeof opCfg.value === 'string') {
+          try {
+            return Handlebars.compile(opCfg.value, { noEscape: true })({})
+          } catch {
+            return opCfg.value
+          }
+        }
+        return operandPreviewValue(node.id, portId, cfg[portId], nodes, edges)
+      }
+      const title = previewText('title')
+      const message = previewText('message')
+      const rawDuration = cfg['duration']
+      const duration = typeof rawDuration === 'number' && rawDuration > 0 ? rawDuration : 0
+      return {
+        title: title === undefined ? null : title,
+        message: message === undefined ? null : message,
+        level,
+        duration
+      }
+    }
     case 'assert': {
       // Same operands + operator as `comparator`/`if`. Signal outputs
       // (`pass` / `fail`); the preview surfaces which branch the assertion
