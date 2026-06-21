@@ -55,15 +55,28 @@ vi.mock('../../../src/main/services/ContextService', () => {
 vi.mock('http', () => ({ default: { request: vi.fn() }, request: vi.fn() }))
 vi.mock('https', () => ({ default: { request: vi.fn() }, request: vi.fn() }))
 
+// grpcProtoLoader: default to a factory that throws (the existing behaviour for
+// the "service not in proto" path); individual tests override
+// resolveGrpcMethodMock to return a controlled { client, requestStream,
+// responseStream } shape.
+vi.mock('../../../src/main/services/grpc/grpcProtoLoader', () => ({
+  resolveGrpcMethod: vi.fn((_src: unknown, _addr: unknown, service: string) => {
+    throw new Error(`Service '${service}' not found in proto descriptor`)
+  }),
+  grpcStatusName: vi.fn((code: number) => `STATUS_${code}`)
+}))
+
 // ---------------------------------------------------------------------------
 // Imports (after mocks)
 // ---------------------------------------------------------------------------
 import { httpExecutionService } from '../../../src/main/services/HTTPExecutionService'
 import { grpcExecutionService } from '../../../src/main/services/GRPCExecutionService'
 import { contextService } from '../../../src/main/services/ContextService'
+import * as grpcProtoLoader from '../../../src/main/services/grpc/grpcProtoLoader'
 import httpMod from 'http'
 
 const mockedContextService = vi.mocked(contextService)
+const resolveGrpcMethodMock = vi.mocked(grpcProtoLoader.resolveGrpcMethod)
 const httpRequestSpy = vi.mocked(httpMod.request) as unknown as ReturnType<typeof vi.fn>
 
 // ---------------------------------------------------------------------------
@@ -302,6 +315,76 @@ describe('GRPCExecutionService', () => {
     expect(result.requestUrl).toBe('localhost:50051')
     expect(result.requestMethod).toBe('mypackage.MyService/SayHello')
     expect(result.timings.durationMs).toBeGreaterThanOrEqual(0)
+  })
+
+  it('executeUnary: fails with a clear error when the proto declares a streaming method', async () => {
+    // Arrange: context resolves to a unary callType, but the proto's streaming
+    // flags say it is a server-stream method. The reconciliation in executeUnary
+    // must surface this as a descriptive failure instead of crashing in grpc-js.
+    setupResolvedUrl('grpc://localhost:50051')
+    setupRequestContext({
+      fullData: { service: 'pkg.Svc', grpcMethod: 'Subscribe', callType: 'unary', requestMessage: '{}' }
+    })
+    const fakeClient = { Subscribe: vi.fn(), close: vi.fn() }
+    resolveGrpcMethodMock.mockReturnValueOnce({
+      client: fakeClient as never,
+      requestStream: false,
+      responseStream: true   // proto says server-stream, not unary
+    })
+
+    const result = await grpcExecutionService.execute({ requestId: 'g3' })
+
+    expect(result.success).toBe(false)
+    expect(result.error).toContain('server-stream')
+    expect(result.error).toContain('unary')
+    // The mismatch is caught before any grpc-js call is made.
+    expect(fakeClient.Subscribe).not.toHaveBeenCalled()
+  })
+
+  it('connectStreaming: uses the proto-reconciled callType, not the stale request callType', async () => {
+    // Arrange: saved callType is 'bidirectional-stream' but the proto only has
+    // requestStream=false/responseStream=true → reconcileCallType corrects to
+    // 'server-stream'. The connectStreaming path must use that corrected value.
+    setupResolvedUrl('grpc://localhost:50051')
+    setupRequestContext({
+      fullData: { service: 'pkg.Svc', grpcMethod: 'Watch', callType: 'bidirectional-stream', requestMessage: '{}' }
+    })
+
+    const serverStream = new EventEmitter() as EventEmitter & { cancel: ReturnType<typeof vi.fn> }
+    serverStream.cancel = vi.fn()
+    const fakeClient = { Watch: vi.fn().mockReturnValue(serverStream), close: vi.fn() }
+    resolveGrpcMethodMock.mockReturnValueOnce({
+      client: fakeClient as never,
+      requestStream: false,   // proto: no client writes
+      responseStream: true    // proto: server pushes frames → 'server-stream'
+    })
+
+    let connected = false
+    let closed = false
+    const handle = grpcExecutionService.connectStreaming({
+      requestId: 'g4',
+      onConnect: () => { connected = true },
+      onMessage: vi.fn(),
+      onClose: () => { closed = true }
+    })
+
+    // Allow the async IIFE inside connectStreaming to run.
+    await new Promise((r) => setTimeout(r, 0))
+
+    expect(connected).toBe(true)
+    // The client's Watch method was called without a callback argument (server-stream
+    // call signature: client[method](req, metadata, options) — not with a final cb).
+    expect(fakeClient.Watch).toHaveBeenCalled()
+
+    // `send` should be a no-op for server-stream (returns false).
+    expect(handle.send('', '{}')).toBe(false)
+
+    // Closing via handle cancels the server-stream.
+    handle.close()
+    // Emit 'end' to let the call settle.
+    serverStream.emit('end')
+    await new Promise((r) => setTimeout(r, 0))
+    expect(closed).toBe(true)
   })
 
   it('isActive() returns false when no request is running', () => {
