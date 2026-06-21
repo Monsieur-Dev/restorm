@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   width="500"
+   height="500"
+   viewBox="0 0 132.29166 132.29166"
+   version="1.1"
+   id="svg1"
+   sodipodi:docname="restorm-aligned.svg"
+   inkscape:version="1.4.3 (0d15f75042, 2025-12-25)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs1">
+    <rect
+       x="104.68853"
+       y="82.036628"
+       width="348.96178"
+       height="308.55568"
+       id="rect1" />
+    <clipPath
+       clipPathUnits="userSpaceOnUse"
+       id="clipPath4">
+      <path
+         transform="matrix(0.29507001,0,0,0.29507001,-6.1250092,22.312784)"
+         id="text4"
+         d="m 236.98945,-21.069057 q 59.85,0 88.2,22.9500003 28.8,22.4999997 28.8,68.3999997 0,25.65 -9.45,42.749997 -9.45,17.1 -24.3,27.45 -14.4,9.9 -30.6,15.75 l 88.2,144 h -47.25 l -77.85,-132.75 h -63.9 v 132.75 h -40.5 V -21.069057 Z m -2.25,35.1 h -45.9 V 133.28094 h 48.15 q 39.15,0 57.15,-15.3 18,-15.75 18,-45.899997 0,-31.5 -18.9,-44.55 -18.9,-13.5 -58.5,-13.5 z" />
+    </clipPath>
+  </defs>
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:zoom="1.155"
+     inkscape:cx="231.16882"
+     inkscape:cy="183.54978"
+     inkscape:window-width="1434"
+     inkscape:window-height="1217"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="svg1" />
+  <rect
+     id="frame"
+     x="3.34"
+     y="3.34"
+     width="125.61"
+     height="125.61"
+     rx="10"
+     fill="#ad38f9"
+     stroke="#1a1a1a"
+     stroke-width="6"
+     stroke-linejoin="round"
+     style="fill:#2b2b2b;fill-opacity:1" />
+  <g
+     id="mono"
+     transform="translate(-4.5517370,2.5702198)">
+    <path
+       id="rect2"
+       clip-path="url(#clipPath4)"
+       style="fill:#ffffff;stroke-width:0"
+       inkscape:label="R"
+       d="m 78.328376,5.2366786 h 35.678104 c 6.6787,0 12.05542,5.3767204 12.05542,12.0554264 v 87.105765 c 0,6.67871 -5.37672,12.05543 -12.05542,12.05543 H 78.328376 c -6.678707,0 -12.055427,-5.37672 -12.055427,-12.05543 V 17.292105 c 0,-6.678706 5.37672,-12.0554264 12.055427,-12.0554264 z"
+       transform="translate(3.7041663)" />
+    <path
+       id="bolt"
+       fill="#000000"
+       d="m 43.971408,16.291677 19.603175,6.09e-4 0.03536,55.650401 -12.342121,-7.205875 1.516234,46.235084 -21.022248,-72.291433 16.906875,9.870917 z"
+       sodipodi:nodetypes="cccccccc"
+       style="fill:#f4b53f;fill-opacity:1;stroke-width:0.809217" />
+  </g>
+</svg>
