@@ -50,9 +50,22 @@ export type RequestType = (typeof REQUEST_TYPES)[number]
 export const ODATA_VERSIONS = ['v2', 'v3', 'v4'] as const
 export type ODataVersion = (typeof ODATA_VERSIONS)[number]
 
-/** HTTP request body type discriminator */
-export const HTTP_BODY_TYPES = ['text', 'file', 'formData', 'xWwwFormUrlEncoded'] as const
+/**
+ * HTTP request body type discriminator. These are the canonical
+ * on-the-wire / on-disk spellings — kebab-case for the multi-word
+ * members so a `body.type` round-trips through persistence, the
+ * execution engine, and the UI without any spelling translation.
+ */
+export const HTTP_BODY_TYPES = ['text', 'file', 'form-data', 'x-www-form-urlencoded'] as const
 export type HTTPBodyType = (typeof HTTP_BODY_TYPES)[number]
+
+/**
+ * GraphQL enum member names for {@link HTTP_BODY_TYPES}. GraphQL enum
+ * values must be valid identifiers, so the kebab-case wire spellings
+ * cannot be enum members verbatim; these are the SCREAMING_SNAKE_CASE
+ * names that map 1:1 (same order) onto the canonical kebab values.
+ */
+export const HTTP_BODY_TYPE_ENUM_NAMES = ['TEXT', 'FILE', 'FORM_DATA', 'X_WWW_FORM_URLENCODED'] as const
 
 /** Folder type discriminator */
 export type FolderType = 'standard' | 'environment'

@@ -5,45 +5,25 @@
  * so the two code paths can never drift on body serialization or
  * header forwarding.
  *
- * Body type normalization: the class-level union is camelCase
- * (`formData` / `xWwwFormUrlEncoded`) but the UI actually stores
- * the kebab-case HTTP names verbatim (`form-data` /
- * `x-www-form-urlencoded`). We accept both so the helper works
- * regardless of which form is on disk, and emit kebab-case on the
- * wire so the main-side serializer can set Content-Type directly.
+ * `body.type` is the canonical kebab-case HTTP vocabulary
+ * (`form-data` / `x-www-form-urlencoded`) end-to-end — on disk, in the
+ * model, and on the wire — so the builder branches on the discriminated
+ * union directly and the main-side serializer can set Content-Type from
+ * the same value.
  */
 
 import type { AuthenticationRequest } from '../../../../shared/types/collections'
 
 type PrefetchPayload = Parameters<NonNullable<typeof window.restorm>['auth']['prefetch']>[0]
 
-interface LooseBody {
-  type?: string
-  content?: string
-  fields?: readonly { key: string; value: { toString(): string }; enabled?: boolean }[]
-}
-
 export function buildAuthPrefetchPayload(request: AuthenticationRequest): PrefetchPayload {
-  // The body slot on the `shared/types` request is a discriminated
-  // union. We branch on a normalized string for kebab-vs-camelCase
-  // tolerance, which defeats TS's narrowing of the union — cast
-  // through a loose view so field access is type-safe.
-  const body = request.body as LooseBody | undefined
-  const rawBodyType = body?.type
+  const body = request.body
   let bodyPayload: PrefetchPayload['body']
-  if (rawBodyType === 'text' && body?.content) {
+  if (body?.type === 'text' && body.content) {
     bodyPayload = { type: 'text', content: body.content }
-  } else if (
-    (rawBodyType === 'x-www-form-urlencoded' || rawBodyType === 'xWwwFormUrlEncoded' ||
-      rawBodyType === 'form-data' || rawBodyType === 'formData') &&
-    body?.fields
-  ) {
-    const normalizedType =
-      rawBodyType === 'x-www-form-urlencoded' || rawBodyType === 'xWwwFormUrlEncoded'
-        ? 'x-www-form-urlencoded'
-        : 'form-data'
+  } else if (body?.type === 'x-www-form-urlencoded' || body?.type === 'form-data') {
     bodyPayload = {
-      type: normalizedType,
+      type: body.type,
       fields: body.fields.map((f) => serializeKv(f))
     }
   }

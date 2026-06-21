@@ -65,6 +65,7 @@ import { makeReactiveFolder, makeReactiveRequest } from '../types/reactive'
 import { prepareForSerialization, processAfterDeserialization } from '../utils/serialization'
 import { cloneForEventBus } from '../utils/cloneForEventBus'
 import { normalizeFileFormatVersion } from '../../../shared/config/fileFormatVersion'
+import { normalizeBodyTypes } from '../../../shared/config/normalizeBodyType'
 import type { Folder, EnvironmentFolder, FolderItem, Environment } from '../../../shared/types/collections'
 import { isEnvironmentFolder, isAnyFolder, isScenario } from '../../../shared/types/collections'
 import type { PersistenceFormat, WorkbenchTree } from 'electron-core-ui/renderer'
@@ -868,6 +869,10 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
         // next save.
         for (const root of collectionsWithIds) {
           normalizeFileFormatVersion(root, logger)
+          // Rewrite legacy camelCase `body.type` spellings to the
+          // canonical kebab-case form (same BEFORE-reactive-wrap /
+          // BEFORE-checksum-baseline contract as the version default).
+          normalizeBodyTypes(root)
         }
         // Requests can legally live at the root (see `useImport`'s
         // empty-file branch). Folders and env-folders go through
