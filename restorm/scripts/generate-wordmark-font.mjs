@@ -54,6 +54,7 @@ import sys, io, xml.etree.ElementTree as ET
 from fontTools import ttLib
 from fontTools.pens.ttGlyphPen import TTGlyphPen
 from fontTools.pens.transformPen import TransformPen
+from fontTools.pens.cu2quPen import Cu2QuPen
 from fontTools.svgLib.path import parse_path
 from fontTools.subset import Subsetter, Options
 
@@ -122,8 +123,15 @@ transform = (scale, 0, 0, -scale, tx, ty)
 print(f"  SVG viewBox: ({vb_x0},{vb_y0}) {vb_w}x{vb_h}")
 print(f"  Glyph transform: scale={scale:.4f} tx={tx:.2f} ty={ty:.2f}")
 
+# SVG paths use cubic Bezier curves (C/c commands); TrueType glyfs require
+# quadratic Bezier curves. Cu2QuPen converts cubic → quadratic automatically
+# (max_err=1.0 font unit ≈ 0.14% of cap-height, invisible at display sizes).
+# Without this, fontTools writes 0x80 "cubic point" flags which are only valid
+# in OpenType 1.9+ (Variable Font CFF2), and Chromium's TrueType validator
+# rejects the font with a silent "error" status in document.fonts.
 pen  = TTGlyphPen(tt.getGlyphSet())
-tpen = TransformPen(pen, transform)
+cu2qu_pen = Cu2QuPen(pen, max_err=1.0, reverse_direction=False)
+tpen = TransformPen(cu2qu_pen, transform)
 
 for path_el in root_el.findall(f'{{{ns_uri}}}path'):
     d = path_el.get('d', '')
@@ -134,23 +142,43 @@ new_glyph = pen.glyph()
 print(f"  Brand glyph: {new_glyph.numberOfContours} contours")
 
 # ── 4. Replace 'R' in the subsetted font with the brand glyph ─────────────────
+# Recalculate the glyph bounding box so head.xMin/xMax/yMin/yMax are accurate
+new_glyph.recalcBounds(tt.getGlyphSet())
 tt['glyf']['R'] = new_glyph
-tt['hmtx']['R'] = (r_advance, 0)   # bounds will be recomputed on save
+# Set LSB to the actual left-side bearing of the glyph
+lsb = new_glyph.xMin if hasattr(new_glyph, 'xMin') else 0
+tt['hmtx']['R'] = (r_advance, lsb)
+print(f"  R lsb={lsb}, advance={r_advance}")
 
 # ── 5. Patch the font name so it's a distinct family (no conflict with system Noto)
+# Use setName() which handles platform/encoding/language correctly for all records.
 name_table = tt['name']
 FAMILY_NAME = 'Restorm Wordmark'
-for record in name_table.names:
-    if record.nameID == 1:   # Family
-        record.string = FAMILY_NAME.encode('utf-16-be')
-    elif record.nameID == 4: # Full name
-        record.string = f'{FAMILY_NAME} Bold'.encode('utf-16-be')
-    elif record.nameID == 6: # PostScript name
-        record.string = b'RestormWordmark-Bold'
+PS_NAME = 'RestormWordmark-Bold'
+FULL_NAME = f'{FAMILY_NAME} Bold'
+# Set for both Mac (platformID=1) and Windows (platformID=3) name tables
+for pid, eid, lid in [(3, 1, 0x0409), (1, 0, 0)]:
+    name_table.setName(FAMILY_NAME, 1, pid, eid, lid)   # Family name
+    name_table.setName('Bold',       2, pid, eid, lid)   # Subfamily
+    name_table.setName(FULL_NAME,    4, pid, eid, lid)   # Full name
+    name_table.setName(PS_NAME,      6, pid, eid, lid)   # PostScript name
 
-# ── 6. Save as woff2 ──────────────────────────────────────────────────────────
-tt.flavor = 'woff2'
-tt.save(out_path)
+# ── 6. Force-recalculate all table checksums + save as woff2 ──────────────────
+# After replacing a glyph, the SFNT table-directory checksum for 'head' (and
+# potentially others) can be stale because fontTools computes it lazily. Chromium
+# (unlike fontTools itself) validates individual table checksums strictly and
+# rejects the font with a silent load error if any table checksum mismatches.
+# Compile the entire font into a BytesIO buffer first (forces recalculation of
+# all checksums in the SFNT directory), then save that to disk as woff2.
+import io as _io
+sfnt_buf = _io.BytesIO()
+tt.flavor = None
+tt.save(sfnt_buf)
+sfnt_buf.seek(0)
+# Reload from the clean SFNT bytes to get fresh checksums baked in
+tt2 = ttLib.TTFont(sfnt_buf)
+tt2.flavor = 'woff2'
+tt2.save(out_path)
 size_kb = len(open(out_path,'rb').read()) / 1024
 print(f"  Saved: {out_path} ({size_kb:.1f} KB)")
 print("Done.")

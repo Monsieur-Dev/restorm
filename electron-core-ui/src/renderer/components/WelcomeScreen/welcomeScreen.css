@@ -75,7 +75,11 @@
   color: var(--foreground);
 }
 
-.ecu-welcome-screen-wordmark {
+/* Scoped to .ecu-welcome-screen for specificity (0,2,0) so the wordmark font
+ * wins over .workbench.linux / .workbench.mac / .workbench.windows platform
+ * font-family rules (also 0,2,0) that would otherwise override this via
+ * inheritance. Source order ensures our rule wins on tied specificity. */
+.ecu-welcome-screen .ecu-welcome-screen-wordmark {
   font-family: 'Restorm Wordmark', sans-serif;
   font-size: 120px;
   font-weight: 700;
