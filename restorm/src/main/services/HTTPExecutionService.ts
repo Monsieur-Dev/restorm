@@ -5,10 +5,12 @@
 
 import http from 'http'
 import https from 'https'
+import type { IncomingMessage, ServerResponse } from 'http'
 import { URL } from 'url'
 import { BrowserWindow } from 'electron'
 import { logger } from 'electron-core-ui/main'
 import { contextService } from './ContextService'
+import { websocketExecutionService } from './WebSocketExecutionService'
 import { authenticationCacheService, type ResolvedAuthShape } from './AuthenticationCacheService'
 import { responseHistoryService } from './ResponseHistoryService'
 import { secretHydrationService } from './secrets/SecretHydrationService'
@@ -16,6 +18,25 @@ import { collectRequestSecrets } from './secrets/collectRequestSecrets'
 import { withFirewallBypass } from 'electron-core-ui/main'
 import { DEFAULT_REQUEST_TIMEOUT_MS, MAX_RESPONSE_BYTES } from '../../shared/config/constants'
 import type { AuthenticationRequest } from '../../shared/models/requests/AuthenticationRequest'
+
+/** One served HTTP-mock request, surfaced on a scenario `httpListen` node's
+ * `served` output (shape mirrors the `{ request, response }` an httpRequest
+ * node emits, so a JSON-path picker drills it the same way). */
+interface ServedSummary {
+  request: { method: string; url: string; headers: Record<string, string> }
+  response: { status: number; headers: Record<string, string>; body: string }
+}
+
+/** Flatten Node's `IncomingHttpHeaders` (string | string[] | undefined) to a
+ * plain string map for the served summary. */
+function flattenIncomingHeaders(headers: IncomingMessage['headers']): Record<string, string> {
+  const out: Record<string, string> = {}
+  for (const [k, v] of Object.entries(headers)) {
+    if (v === undefined) continue
+    out[k] = Array.isArray(v) ? v.join(', ') : v
+  }
+  return out
+}
 
 /** HTTP request execution input */
 export interface HTTPExecutionInput {
@@ -75,6 +96,9 @@ interface ActiveRequest {
  */
 class HTTPExecutionService {
   private activeRequests = new Map<string, ActiveRequest>()
+  /** Per-request served-request counter for hosted HTTP mock routes (server
+   * mode). Drives the "served N requests" banner. */
+  private servedCounts = new Map<string, number>()
 
   /**
    * Execute an HTTP request using the resolved URL and data from ContextService
@@ -376,6 +400,199 @@ class HTTPExecutionService {
       }
     } finally {
       this.activeRequests.delete(requestId)
+    }
+  }
+
+  /**
+   * SERVER MODE: start hosting this request as a local HTTP mock. restorm
+   * LISTENS on `localhost:<port><path>` for the request's METHOD + PATH and
+   * answers every matching inbound request with the configured response
+   * (status/headers/body), resolved through ContextService — i.e. Handlebars
+   * `{{var}}` substituted AT SERVE TIME — until {@link stopListening}. A
+   * non-matching path/method on the port 404s.
+   *
+   * The shared per-port server lives in {@link WebSocketExecutionService} (one
+   * OS socket per port across protocols), so an HTTP mock and a Socket.IO / raw
+   * WS server can bind the SAME port. This method owns only the HTTP envelope:
+   * route address, the served-response shape, request recording + the served
+   * count broadcast.
+   */
+  async listen(requestId: string): Promise<{ success: boolean; listening: boolean; error?: string }> {
+    const fullData = contextService.getRequestContext(requestId)?.fullData
+    const method = (fullData?.method ?? 'GET').toUpperCase()
+    const { port, path } = this.parseMockAddress(fullData?.url ?? '')
+    if (!Number.isFinite(port) || port <= 0) {
+      return { success: false, listening: false, error: 'A valid localhost port is required for an HTTP mock server' }
+    }
+
+    this.broadcastProgress(requestId, 'started')
+    this.servedCounts.set(requestId, 0)
+
+    const result = await websocketExecutionService.listenHttpServer({
+      requestId,
+      method,
+      port,
+      path,
+      onRequest: (req, res) => { this.serveMockResponse(requestId, req, res) },
+      // The route stopped (Stop button / file close / quit): clear the served
+      // count + broadcast on the HTTP progress channel so the request panel's
+      // Listen↔Stop toggle flips back.
+      onStopped: (error) => {
+        this.servedCounts.delete(requestId)
+        this.broadcastProgress(requestId, error ? 'error' : 'completed')
+      }
+    })
+
+    if (!result.listening) {
+      this.servedCounts.delete(requestId)
+      this.broadcastProgress(requestId, 'error')
+    }
+    return result
+  }
+
+  /**
+   * SCENARIO server node ({@link httpListenExecutor}): HOST this request's HTTP
+   * mock as a LONG-LIVED listener and bridge it to the scheduler's connect
+   * machinery (`SocketioConnHandle`). A DISTINCT path from the one-shot request
+   * execution — `connect` = listen, each served request re-emits via `onMessage`
+   * (→ the `served` port), `close` = stop the server (→ the node's `done`). Stays
+   * up until `close()` (an httpClose node) or a Stop, exactly like a WS server.
+   */
+  connectStreamingHttpServer(input: {
+    requestId: string
+    onConnect: () => void
+    onMessage: (event: string | undefined, payload: unknown) => void
+    onClose: (error?: string) => void
+  }): { send: (channel: string, payload: string) => boolean; close: () => void; isOpen: () => boolean } {
+    const { requestId } = input
+    const fullData = contextService.getRequestContext(requestId)?.fullData
+    const method = (fullData?.method ?? 'GET').toUpperCase()
+    const { port, path } = this.parseMockAddress(fullData?.url ?? '')
+    let fired = false
+    const fireClose = (error?: string): void => {
+      if (fired) return
+      fired = true
+      this.servedCounts.delete(requestId)
+      this.broadcastProgress(requestId, error ? 'error' : 'completed')
+      input.onClose(error)
+    }
+
+    if (!Number.isFinite(port) || port <= 0) {
+      // Synchronous failure: report it as a close-on-error (the scheduler handles
+      // a sync onClose during the bridge call).
+      queueMicrotask(() => { fireClose('A valid localhost port is required for an HTTP mock server') })
+      return { send: () => false, close: () => { fireClose() }, isOpen: () => false }
+    }
+
+    this.broadcastProgress(requestId, 'started')
+    this.servedCounts.set(requestId, 0)
+
+    void websocketExecutionService.listenHttpServer({
+      requestId,
+      method,
+      port,
+      path,
+      onRequest: (req, res) => {
+        const summary = this.serveMockResponse(requestId, req, res)
+        // Re-emit each served request on the node's `served` output.
+        input.onMessage(undefined, summary)
+      },
+      onStopped: (error) => { fireClose(error) }
+    }).then((result) => {
+      if (result.listening) input.onConnect()
+      else fireClose(result.error ?? `failed to start HTTP mock server for ${requestId}`)
+    }).catch((err: unknown) => { fireClose(err instanceof Error ? err.message : String(err)) })
+
+    return {
+      // A hosted HTTP mock never SENDS unprompted — it only answers inbound
+      // requests — so `send` is a no-op (there is no httpSend node).
+      send: () => false,
+      close: () => { this.stopListening(requestId) },
+      isOpen: () => this.isListening(requestId)
+    }
+  }
+
+  /** Stop hosting this request's HTTP mock route (the Stop button). Frees the
+   * shared port once it was the last route. Idempotent. */
+  stopListening(requestId: string): boolean {
+    this.servedCounts.delete(requestId)
+    return websocketExecutionService.disconnect(requestId)
+  }
+
+  /** Whether this request is currently hosting an HTTP mock route. */
+  isListening(requestId: string): boolean {
+    return websocketExecutionService.isActive(requestId)
+  }
+
+  /** Split a mock address (`localhost:<port><path>`, optional scheme) into its
+   * numeric port + pathname. The path defaults to `/` and the query is dropped
+   * (route matching is on the pathname only). */
+  private parseMockAddress(raw: string): { port: number; path: string } {
+    const stripped = raw.replace(/^[a-z]+:\/\//i, '')
+    const slash = stripped.indexOf('/')
+    const authority = slash >= 0 ? stripped.slice(0, slash) : stripped
+    let path = slash >= 0 ? stripped.slice(slash) : '/'
+    const q = path.indexOf('?')
+    if (q >= 0) path = path.slice(0, q)
+    if (path.length === 0) path = '/'
+    const colon = authority.lastIndexOf(':')
+    const port = colon >= 0 ? Number.parseInt(authority.slice(colon + 1), 10) : NaN
+    return { port, path }
+  }
+
+  /** Resolve + write the configured mock response for one inbound request, then
+   * record the hit + bump the served count. Status comes from `mockStatus`
+   * (default 200); headers + body are resolved through ContextService so any
+   * `{{var}}` is substituted at serve time (the protocol playbook hard-rule). */
+  private serveMockResponse(requestId: string, req: IncomingMessage, res: ServerResponse): ServedSummary {
+    const requestContext = contextService.getRequestContext(requestId)
+    const fullData = requestContext?.fullData
+    const status = fullData?.mockStatus ?? 200
+
+    // Resolve headers (type-aware, like the client Send path): only expression
+    // rows are Handlebars-substituted; verbatim string rows ship as-is.
+    const headers: Record<string, string> = {}
+    const headersGroup = requestContext?.keyValueGroups.get('headers')
+    if (headersGroup) {
+      for (const h of headersGroup) {
+        if (h.enabled === false || !h.key) continue
+        headers[h.key] = contextService.resolveKeyValueForRequest(h, requestId)
+      }
+    }
+
+    // Resolve the body: any body with stored content is Handlebars-resolved at
+    // serve time, so `{{var}}` substitutes from the active environment.
+    let body = ''
+    if (fullData?.body) {
+      const bodyData = fullData.body
+      // A `text` body's content is Handlebars-resolved at serve time. Other body
+      // kinds (form-data / file) are not meaningful for a mock response.
+      if (bodyData.type === 'text' && bodyData.content) {
+        body = contextService.resolveValue(bodyData.content, requestId)
+      }
+    }
+
+    if (!res.headersSent) res.writeHead(status, headers)
+    res.end(body)
+
+    const served = (this.servedCounts.get(requestId) ?? 0) + 1
+    this.servedCounts.set(requestId, served)
+    this.broadcastServed(requestId, served)
+    logger.info('[HTTPExecutionService] mock served', { requestId, method: req.method, url: req.url, status, served })
+    // The served summary feeds the scenario `httpListen` node's `served` output
+    // (a hosted mock has no `response` output — it serves, it does not call out).
+    return {
+      request: { method: req.method ?? '', url: req.url ?? '', headers: flattenIncomingHeaders(req.headers) },
+      response: { status, headers, body }
+    }
+  }
+
+  /** Broadcast the HTTP mock's served-request count to the renderer — the
+   * request panel shows "served N requests" while listening. */
+  private broadcastServed(requestId: string, count: number): void {
+    const windows = BrowserWindow.getAllWindows()
+    for (const win of windows) {
+      win.webContents.send('http:server-served', { requestId, count })
     }
   }
 

@@ -45,6 +45,7 @@ import { SocketioConnectNodeBox, SocketioSendNodeBox, SocketioCloseNodeBox } fro
 import { WebsocketConnectNodeBox, WebsocketSendNodeBox, WebsocketCloseNodeBox } from './WebsocketNodeBoxes'
 import { MqttConnectNodeBox, MqttSendNodeBox, MqttCloseNodeBox } from './MqttNodeBoxes'
 import { GrpcConnectNodeBox, GrpcSendNodeBox, GrpcCloseNodeBox } from './GrpcNodeBoxes'
+import { HttpListenNodeBox, HttpCloseNodeBox } from './HttpServerNodeBoxes'
 
 export type { ScenarioNodeBoxData, ScenarioNodeBoxType, ScenarioNodeCell } from './ScenarioNodeBoxBase'
 export { ScenarioNodeBoxBase } from './ScenarioNodeBoxBase'
@@ -73,6 +74,8 @@ const SCENARIO_NODE_COMPONENTS: Record<ScenarioNodeKind, NodeBoxComponent> = {
   grpcConnect: GrpcConnectNodeBox,
   grpcSend: GrpcSendNodeBox,
   grpcClose: GrpcCloseNodeBox,
+  httpListen: HttpListenNodeBox,
+  httpClose: HttpCloseNodeBox,
   socketioConnect: SocketioConnectNodeBox,
   socketioSend: SocketioSendNodeBox,
   socketioClose: SocketioCloseNodeBox,

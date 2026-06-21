@@ -154,6 +154,14 @@ declare global {
         cancel: (requestId: string) => Promise<boolean>
         isActive: (requestId: string) => Promise<boolean>
         onProgress: (callback: (data: HTTPProgressData) => void) => (() => void)
+        /** SERVER MODE: start hosting this request as a local HTTP mock server. */
+        listen: (requestId: string) => Promise<{ success: boolean; listening: boolean; error?: string }>
+        /** SERVER MODE: stop hosting this request's HTTP mock route. */
+        stop: (requestId: string) => Promise<boolean>
+        /** SERVER MODE: whether this request is currently hosting a mock route. */
+        isListening: (requestId: string) => Promise<boolean>
+        /** SERVER MODE: served-request count updates for the "served N" banner. */
+        onServerServed: (callback: (data: { requestId: string; count: number }) => void) => (() => void)
       }
       graphql: {
         execute: (input: GraphQLExecutionInput) => Promise<GraphQLExecutionResult>
@@ -578,6 +586,8 @@ export interface FullRequestData {
   params?: KeyValueData[] | undefined
   pathParams?: KeyValueData[] | undefined
   body?: { type: string; content?: string | undefined; path?: string | undefined; fields?: KeyValueData[] | undefined } | undefined
+  /** HTTP mock server (server === true): status code the mock serves (defaults to 200). */
+  mockStatus?: number | undefined
   operationType?: string | undefined
   query?: string | undefined
   variables?: string | undefined

@@ -120,6 +120,17 @@ const PORTS: Partial<Record<ScenarioNodeKind, KindPorts>> = {
   grpcSend: { inputs: [{ id: 'payload', name: 'payload' }], outputs: [] },
   // gRPC close: half-closes the named streaming call. Sequences via `done`.
   grpcClose: { inputs: [], outputs: [] },
+  // HTTP mock server listen: a long-lived server (like websocketConnect but
+  // restorm HOSTS). `connected` (a pure signal) fires once the server is
+  // listening; EACH request the mock serves re-emits its `{ request, response }`
+  // data on the `served` output (the analogue of a received frame); the run stays
+  // alive until an httpClose (or a Stop) ends the server, at which point the
+  // universal `done` port fires. No `response` output — a server serves, it does
+  // not call out.
+  httpListen: { inputs: [], outputs: [{ id: 'connected', name: 'connected', flow: 'signal' }, { id: 'served', name: 'served', flow: 'both' }] },
+  // HTTP mock server close: stops the server named by `config.connectionNodeId`
+  // (firing that listen node's `done`). Sequences via the universal `done` port.
+  httpClose: { inputs: [], outputs: [] },
   // Iteration & collections. `items` carries a value-selector fallback in the
   // editor (list-typed sources), so it isn't a hard-required port — like the
   // `if` operands; the editor flags it red only when no list type is available.

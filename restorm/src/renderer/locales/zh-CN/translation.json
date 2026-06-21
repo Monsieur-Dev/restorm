@@ -243,6 +243,7 @@
         "httpPut": "HTTP – PUT 请求",
         "httpPatch": "HTTP – PATCH 请求",
         "httpDelete": "HTTP – DELETE 请求",
+        "httpServer": "HTTP 模拟服务器",
         "graphql": "GraphQL 请求",
         "grpc": "gRPC 请求",
         "grpcServerStream": "gRPC server-streaming request",
@@ -995,7 +996,9 @@
       "grpcClose": "gRPC close",
       "mqttConnect": "MQTT connect",
       "mqttSend": "MQTT publish",
-      "mqttClose": "MQTT close"
+      "mqttClose": "MQTT close",
+      "httpListen": "HTTP server",
+      "httpClose": "HTTP close"
     },
     "comparator": {
       "result": "结果"
@@ -1554,7 +1557,9 @@
       "mqttConnectServer": "Starts a local MQTT broker (port + topic filter); subscribes to its topic filter and re-emits each received message on its `message` port. Send publishes to connected subscribers.",
       "mqttSendServer": "Publishes a message to every subscriber of the referenced MQTT broker.",
       "mqttCloseServer": "Stops the referenced MQTT broker and disconnects its clients.",
-      "toast": "Emits a toast notification in the Restorm UI while the scenario runs."
+      "toast": "Emits a toast notification in the Restorm UI while the scenario runs.",
+      "httpListen": "Hosts a local HTTP mock server and listens indefinitely. `connected` fires once it is listening; each served request re-emits its data on the `served` port. The server stays up until an HTTP close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
+      "httpClose": "Stops an already-listening HTTP mock server (declared by an HTTP server node), freeing its port."
     },
     "legend": {
       "title": "图例",
@@ -1615,6 +1620,9 @@
       "title": "标题",
       "message": "消息",
       "duration": "持续时间 (秒)"
+    },
+    "http": {
+      "served": "served"
     }
   },
   "mqtt": {
@@ -1736,6 +1744,15 @@
   "typedValue": {
     "list": {
       "add": "添加值"
+    }
+  },
+  "http": {
+    "server": {
+      "startListening": "开始监听",
+      "stopListening": "停止监听",
+      "notListening": "未在监听",
+      "served": "监听中 — 已服务 {{count}} 个请求",
+      "listenFailed": "无法启动模拟服务器"
     }
   }
 }

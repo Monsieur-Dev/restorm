@@ -244,6 +244,7 @@
         "httpPut": "Requête HTTP – PUT",
         "httpPatch": "Requête HTTP – PATCH",
         "httpDelete": "Requête HTTP – DELETE",
+        "httpServer": "Serveur HTTP fictif",
         "graphql": "Requête GraphQL",
         "grpc": "Requête gRPC",
         "grpcServerStream": "Requête gRPC server-streaming",
@@ -996,7 +997,9 @@
       "grpcClose": "Fermeture gRPC",
       "mqttConnect": "Connexion MQTT",
       "mqttSend": "Publication MQTT",
-      "mqttClose": "Fermeture MQTT"
+      "mqttClose": "Fermeture MQTT",
+      "httpListen": "Serveur HTTP",
+      "httpClose": "Fermeture HTTP"
     },
     "comparator": {
       "result": "résultat"
@@ -1558,7 +1561,9 @@
       "mqttConnectServer": "Démarre un courtier MQTT local (port + filtre de sujet) ; s’abonne à son filtre de sujet et ré-émet chaque message reçu sur son port `message`. L’envoi publie aux abonnés connectés.",
       "mqttSendServer": "Publie un message à chaque abonné du courtier MQTT référencé.",
       "mqttCloseServer": "Arrête le courtier MQTT référencé et déconnecte ses clients.",
-      "toast": "Affiche une notification toast dans l'interface Restorm pendant l'exécution du scénario."
+      "toast": "Affiche une notification toast dans l'interface Restorm pendant l'exécution du scénario.",
+      "httpListen": "Héberge un serveur HTTP fictif local et écoute indéfiniment. « connected » se déclenche une fois le serveur démarré ; chaque requête servie réémet ses données sur le port « served ». Le serveur reste actif jusqu’à une fermeture HTTP (ou un Stop), puis « done » se déclenche. Pas de sortie response — il sert, il n’appelle pas.",
+      "httpClose": "Arrête un serveur HTTP fictif déjà en écoute (déclaré par un nœud serveur HTTP) et libère son port."
     },
     "legend": {
       "title": "Légende",
@@ -1616,6 +1621,9 @@
       "title": "titre",
       "message": "message",
       "duration": "durée (s)"
+    },
+    "http": {
+      "served": "servie"
     }
   },
   "mqtt": {
@@ -1737,6 +1745,15 @@
   "typedValue": {
     "list": {
       "add": "Ajouter une valeur"
+    }
+  },
+  "http": {
+    "server": {
+      "startListening": "Démarrer l'écoute",
+      "stopListening": "Arrêter l'écoute",
+      "notListening": "Pas à l'écoute",
+      "served": "À l'écoute — {{count}} requête(s) servie(s)",
+      "listenFailed": "Échec du démarrage du serveur fictif"
     }
   }
 }

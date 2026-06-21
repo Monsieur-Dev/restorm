@@ -246,6 +246,7 @@
         "httpPut": "HTTP — запит PUT",
         "httpPatch": "HTTP — запит PATCH",
         "httpDelete": "HTTP — запит DELETE",
+        "httpServer": "HTTP mock-сервер",
         "graphql": "Запит GraphQL",
         "grpc": "Запит gRPC",
         "grpcServerStream": "gRPC server-streaming request",
@@ -998,7 +999,9 @@
       "grpcClose": "gRPC close",
       "mqttConnect": "MQTT connect",
       "mqttSend": "MQTT publish",
-      "mqttClose": "MQTT close"
+      "mqttClose": "MQTT close",
+      "httpListen": "HTTP server",
+      "httpClose": "HTTP close"
     },
     "comparator": {
       "result": "результат"
@@ -1557,7 +1560,9 @@
       "mqttConnectServer": "Starts a local MQTT broker (port + topic filter); subscribes to its topic filter and re-emits each received message on its `message` port. Send publishes to connected subscribers.",
       "mqttSendServer": "Publishes a message to every subscriber of the referenced MQTT broker.",
       "mqttCloseServer": "Stops the referenced MQTT broker and disconnects its clients.",
-      "toast": "Emits a toast notification in the Restorm UI while the scenario runs."
+      "toast": "Emits a toast notification in the Restorm UI while the scenario runs.",
+      "httpListen": "Hosts a local HTTP mock server and listens indefinitely. `connected` fires once it is listening; each served request re-emits its data on the `served` port. The server stays up until an HTTP close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
+      "httpClose": "Stops an already-listening HTTP mock server (declared by an HTTP server node), freeing its port."
     },
     "legend": {
       "title": "Легенда",
@@ -1618,6 +1623,9 @@
       "title": "заголовок",
       "message": "повідомлення",
       "duration": "тривалість (с)"
+    },
+    "http": {
+      "served": "served"
     }
   },
   "mqtt": {
@@ -1739,6 +1747,15 @@
   "typedValue": {
     "list": {
       "add": "Додати значення"
+    }
+  },
+  "http": {
+    "server": {
+      "startListening": "Почати слухати",
+      "stopListening": "Зупинити прослуховування",
+      "notListening": "Не слухає",
+      "served": "Слухає — оброблено {{count}} запит(ів)",
+      "listenFailed": "Не вдалося запустити mock-сервер"
     }
   }
 }

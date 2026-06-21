@@ -57,7 +57,11 @@ export const SCENARIO_ADD_REQUEST_GROUPS: ScenarioAddEntry[][] = [
     { kind: 'socketio', badge: 'SIO', labelKey: 'sidebar.contextMenu.add.socketio', defaultLabel: 'Socket.IO request' },
     { kind: 'socketio-server', badge: 'SIO', mode: 'server', labelKey: 'sidebar.contextMenu.add.socketioServer', defaultLabel: 'Socket.IO server' },
     { kind: 'mqtt', badge: 'MQTT', labelKey: 'sidebar.contextMenu.add.mqtt', defaultLabel: 'MQTT request' },
-    { kind: 'mqtt-server', badge: 'MQTT', mode: 'server', labelKey: 'sidebar.contextMenu.add.mqttServer', defaultLabel: 'MQTT broker' }
+    { kind: 'mqtt-server', badge: 'MQTT', mode: 'server', labelKey: 'sidebar.contextMenu.add.mqttServer', defaultLabel: 'MQTT broker' },
+    // HTTP mock server is server-only (a one-shot HTTP request already has its own
+    // method entries above): dropping it creates a server: true request + a bound
+    // httpListen node.
+    { kind: 'http-server', badge: 'GET', mode: 'server', labelKey: 'sidebar.contextMenu.add.httpServer', defaultLabel: 'HTTP server' }
   ],
   [
     { kind: 'graphql', badge: 'QUERY', labelKey: 'sidebar.contextMenu.add.graphql', defaultLabel: 'GraphQL request' },
@@ -140,6 +144,21 @@ export const SCENARIO_ADD_GRPC_ACTIONS: ScenarioAddGrpcActionEntry[] = [
   { kind: 'grpcClose', icon: 'debug-disconnect', labelKey: 'scenario.nodes.grpcClose', defaultLabel: 'gRPC close' }
 ]
 
+/** HTTP mock-server action entries — CLOSE only (the listen comes from the
+ * "HTTP server" request entry, which drops a bound httpListen). A hosted mock
+ * never SENDS unprompted, so there is no http send action. Badged with the
+ * server pill + the close codicon. */
+export interface ScenarioAddHttpActionEntry {
+  kind: 'httpClose'
+  icon: string
+  labelKey: string
+  defaultLabel: string
+}
+
+export const SCENARIO_ADD_HTTP_ACTIONS: ScenarioAddHttpActionEntry[] = [
+  { kind: 'httpClose', icon: 'debug-disconnect', labelKey: 'scenario.nodes.httpClose', defaultLabel: 'HTTP close' }
+]
+
 /** The protocol/scenario badge glyph for a palette entry — `mode: 'server'`
  * renders the two-part "hosts a server" pill (websocket-server / socketio-server). */
 export function scenarioAddIcon(badge: BadgeType, mode?: 'server'): ReactNode {
@@ -164,4 +183,9 @@ export function scenarioAddGrpcIcon(icon: string): ReactNode {
 /** The "MQTT" badge with the action's codicon inside (MQTT section). */
 export function scenarioAddMqttIcon(icon: string): ReactNode {
   return React.createElement(Badge, { type: 'MQTT', icon })
+}
+
+/** The server-pill HTTP badge with the action's codicon inside (HTTP section). */
+export function scenarioAddHttpIcon(icon: string): ReactNode {
+  return React.createElement(Badge, { type: 'GET', mode: 'server', icon })
 }

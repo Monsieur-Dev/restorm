@@ -43,6 +43,7 @@ import type { EnvironmentFolder, Folder, Request, Scenario, ScenarioNode, Scenar
 import { getFolderIcon } from '../../../utils/treeSearch'
 import { Badge } from '../../common/Badge'
 import { ScenarioRunningBadge } from '../../common/ScenarioRunningBadge'
+import { ServerListeningBadge } from '../../common/ServerListeningBadge'
 import { SecretResolvingSpinner } from '../../common/SecretResolvingSpinner'
 import { SecretErrorIndicator } from '../../common/SecretErrorIndicator'
 import { ItemSecretBadges } from '../../common/ItemSecretBadges'
@@ -440,11 +441,17 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
       )
     }
 
-    // HTTP request tab: show method badge
+    // HTTP request tab: show method badge. A mock SERVER (server === true) shows
+    // the SRV capsule + the listening border-beam while it hosts — the same beam
+    // the sidebar tree paints, driven by the same listening state.
     if (isHTTPRequestTab(restormTab)) {
+      const isServer = restormTab.request.server === true
+      const badge = <Badge type={mapToBadgeType(restormTab.request.method)} mode={isServer ? 'server' : undefined} />
       return (
         <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-          <Badge type={mapToBadgeType(restormTab.request.method)} />
+          {isServer
+            ? <ServerListeningBadge requestId={restormTab.request.id}>{badge}</ServerListeningBadge>
+            : badge}
           <span>{restormTab.request.name}</span>
           <ItemSecretBadges itemId={restormTab.request.id} />
           {renderDirtyIndicator(restormTab)}
@@ -488,11 +495,16 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
       )
     }
 
-    // WebSocket request tab
+    // WebSocket request tab (raw WS / Socket.IO / MQTT). The listening beam
+    // orbits the badge while a connection / server is open — the same beam the
+    // sidebar tree paints, driven by the same listening state.
     if (isWebSocketRequestTab(restormTab)) {
+      const isServer = restormTab.request.server === true
       return (
         <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-          <Badge type={mapToBadgeType(restormTab.request.protocol)} />
+          <ServerListeningBadge requestId={restormTab.request.id}>
+            <Badge type={mapToBadgeType(restormTab.request.protocol)} mode={isServer ? 'server' : undefined} />
+          </ServerListeningBadge>
           <span>{restormTab.request.name}</span>
           <ItemSecretBadges itemId={restormTab.request.id} />
           {renderDirtyIndicator(restormTab)}

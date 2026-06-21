@@ -1,0 +1,65 @@
+collections:
+  - folderType: environment
+    name: HTTP Mock Playground
+    documentation: |-
+      # HTTP Mock Playground
+
+      A self-contained HTTP mock playground: restorm HOSTS a local HTTP server
+      AND calls it as a client — no external service needed.
+
+      - **Pets Mock** hosts a local HTTP mock server on `localhost:8099`. It
+        answers `GET /pets` with the configured status (200) + body. Press
+        Listen to start serving.
+      - **Pets Consumer** is a plain HTTP request to `http://localhost:8099/pets`.
+        Run it (Send) once the mock is listening and it receives the configured
+        response.
+    tags: []
+    configuration: {}
+    environments:
+      - name: Default
+        variables: []
+        id: 9b1f0a51-2c44-4d8e-9a01-7c3e26d40aa1
+    items:
+      - type: http
+        name: Pets Mock
+        documentation: |-
+          Hosts a local HTTP mock server on `localhost:8099`. Press Listen, then
+          run **Pets Consumer**. Answers `GET /pets` with status 200 + the body
+          below.
+        tags:
+          - http
+          - server
+        method: GET
+        url: localhost:8099/pets
+        server: true
+        mockStatus: 200
+        headers:
+          - key: Content-Type
+            value: application/json
+            enabled: true
+        params: []
+        pathParams: []
+        body:
+          type: text
+          content: |-
+            {
+              "pets": [
+                "Rex",
+                "Whiskers"
+              ]
+            }
+        id: 6d2a1b90-5e77-4c10-bf21-0a9f3b612001
+      - type: http
+        name: Pets Consumer
+        documentation: Calls the local Pets Mock and shows the configured response.
+        tags:
+          - http
+        method: GET
+        url: http://localhost:8099/pets
+        headers: []
+        params: []
+        pathParams: []
+        id: 6d2a1b90-5e77-4c10-bf21-0a9f3b612002
+    id: 5a0d7e3c-1f88-49b2-90ad-2b7c9e640f10
+    fileFormatVersion: 1
+_projectUuid: 3e7a2c19-8d44-4b6f-a1c2-9f0e5d738b22

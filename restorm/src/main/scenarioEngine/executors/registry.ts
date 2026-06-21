@@ -55,7 +55,7 @@ import {
 } from './timeAndFlowExecutors'
 import { httpRequestExecutor } from './httpRequestExecutor'
 import { runScenarioExecutor } from './runScenarioExecutor'
-import { socketioConnectExecutor, socketioSendExecutor, socketioCloseExecutor, websocketConnectExecutor, websocketSendExecutor, websocketCloseExecutor, mqttConnectExecutor, mqttSendExecutor, mqttCloseExecutor, grpcConnectExecutor, grpcSendExecutor, grpcCloseExecutor } from './socketioExecutors'
+import { socketioConnectExecutor, socketioSendExecutor, socketioCloseExecutor, websocketConnectExecutor, websocketSendExecutor, websocketCloseExecutor, mqttConnectExecutor, mqttSendExecutor, mqttCloseExecutor, grpcConnectExecutor, grpcSendExecutor, grpcCloseExecutor, httpListenExecutor, httpCloseExecutor } from './socketioExecutors'
 import { concreteValue } from '../../../shared/utils/scenarioStaticPreview'
 import { coerceCliParamValue } from '../../../shared/scenarioCliParams'
 import { readInputParams, inputParamName } from '../../../shared/scenarioInputParams'
@@ -235,6 +235,8 @@ function pickExecutor(kind: string): NodeExecutor {
     case 'grpcConnect': return grpcConnectExecutor
     case 'grpcSend': return grpcSendExecutor
     case 'grpcClose': return grpcCloseExecutor
+    case 'httpListen': return httpListenExecutor
+    case 'httpClose': return httpCloseExecutor
     case 'input': return inputExecutor
     case 'output': return outputPassthroughExecutor
     default: throw new Error(`no executor for kind '${kind}'`)

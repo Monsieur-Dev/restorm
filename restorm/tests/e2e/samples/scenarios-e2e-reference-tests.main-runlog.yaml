@@ -7379,4 +7379,131 @@
         hello: from mqtt scenario
     output:lastMessage:
       hello: from mqtt scenario
+- message: ⚪ [<time>] start runScenario
+  data:
+    scenarioId: <uuid>
+    label: HTTP Server
+    in: true
+- message: 🔵 [<time>] ▶ HTTP Server
+- message: ⚪ [<time>] start httpListen
+  data:
+    requestId: <uuid>
+    connectionName: Mock Server
+    label: start mock server
+- message: ⚪ [<time>] done httpListen
+- message: ⚪ [<time>] http-server "Mock Server" connecting
+- message: ⚪ [<time>] http-server "Mock Server" connected
+- message: ⚪ [<time>] start httpRequest
+  data:
+    requestId: <uuid>
+    label: call the mock
+    in: true
+- message: ⚪ [<time>] start httpClose
+  data:
+    connectionNodeId: <uuid>
+    label: stop the mock server
+    in:
+      request:
+        method: GET
+        url: /pets
+        headers:
+          host: localhost:8077
+          connection: keep-alive
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+        body: '{"pets":["Rex","Whiskers"]}'
+- message: ⚪ [<time>] http-server "Mock Server" closed
+- message: ⚪ [<time>] start log
+  data:
+    message: serveur HTTP arrêté
+    level: info
+    in: true
+- message: 🔵 [<time>] serveur HTTP arrêté
+- message: ⚪ [<time>] done log
+  data: {}
+- message: ⚪ [<time>] done httpClose
+- message: ⚪ [<time>] done httpRequest
+  data:
+    response:
+      request:
+        url: http://localhost:8077/pets
+        method: GET
+        headers: {}
+      response:
+        status: 200
+        statusText: OK
+        headers:
+          content-type: application/json
+          date: <dynamic-time>
+          connection: keep-alive
+          keep-alive: timeout=5
+          transfer-encoding: chunked
+        body: '{"pets":["Rex","Whiskers"]}'
+        durationMs: <dynamic-time>
+        success: true
+- message: ⚪ [<time>] start log
+  data:
+    message: réponse du consumer reçue
+    level: info
+    runOnEachEvent: false
+    data:
+      request:
+        url: http://localhost:8077/pets
+        method: GET
+        headers: {}
+      response:
+        status: 200
+        statusText: OK
+        headers:
+          content-type: application/json
+          date: <dynamic-time>
+          connection: keep-alive
+          keep-alive: timeout=5
+          transfer-encoding: chunked
+        body: '{"pets":["Rex","Whiskers"]}'
+        durationMs: <dynamic-time>
+        success: true
+- message: 🔵 [<time>] réponse du consumer reçue
+  data:
+    request:
+      url: http://localhost:8077/pets
+      method: GET
+      headers: {}
+    response:
+      status: 200
+      statusText: OK
+      headers:
+        content-type: application/json
+        date: <dynamic-time>
+        connection: keep-alive
+        keep-alive: timeout=5
+        transfer-encoding: chunked
+      body: '{"pets":["Rex","Whiskers"]}'
+      durationMs: <dynamic-time>
+      success: true
+- message: ⚪ [<time>] done log
+  data:
+    value:
+      request:
+        url: http://localhost:8077/pets
+        method: GET
+        headers: {}
+      response:
+        status: 200
+        statusText: OK
+        headers:
+          content-type: application/json
+          date: <dynamic-time>
+          connection: keep-alive
+          keep-alive: timeout=5
+          transfer-encoding: chunked
+        body: '{"pets":["Rex","Whiskers"]}'
+        durationMs: <dynamic-time>
+        success: true
+- message: 🔵 [<time>] ■ HTTP Server
+- message: ⚪ [<time>] done runScenario
+  data:
+    result: {}
 - message: 🔵 [<time>] ■ Main

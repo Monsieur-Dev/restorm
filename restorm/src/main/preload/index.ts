@@ -147,6 +147,8 @@ interface FullRequestData {
   params?: { id?: string; key: string; value: string }[]
   pathParams?: { id?: string; key: string; value: string }[]
   body?: { type: string; content?: string; path?: string; fields?: { id?: string; key: string; value: string }[] }
+  /** HTTP mock server: status code the mock serves (defaults to 200). */
+  mockStatus?: number
   operationType?: string
   query?: string
   variables?: string
@@ -599,6 +601,32 @@ contextBridge.exposeInMainWorld('restorm', {
       ipcRenderer.on('http:request-progress', handler)
       return () => {
         ipcRenderer.removeListener('http:request-progress', handler)
+      }
+    },
+    /** SERVER MODE: start hosting this request as a local HTTP mock server.
+     * Resolves once the mock route stops (Stop / file close / quit). */
+    listen: async (requestId: string): Promise<{ success: boolean; listening: boolean; error?: string }> => {
+      const result: unknown = await ipcRenderer.invoke('http:listen', requestId)
+      return result as { success: boolean; listening: boolean; error?: string }
+    },
+    /** SERVER MODE: stop hosting this request's HTTP mock route. */
+    stop: async (requestId: string): Promise<boolean> => {
+      const result: unknown = await ipcRenderer.invoke('http:stop', requestId)
+      return result as boolean
+    },
+    /** SERVER MODE: whether this request is currently hosting a mock route. */
+    isListening: async (requestId: string): Promise<boolean> => {
+      const result: unknown = await ipcRenderer.invoke('http:is-listening', requestId)
+      return result as boolean
+    },
+    /** SERVER MODE: served-request count updates for the "served N" banner. */
+    onServerServed: (callback: (data: { requestId: string; count: number }) => void): (() => void) => {
+      const handler = (_event: Electron.IpcRendererEvent, data: { requestId: string; count: number }): void => {
+        callback(data)
+      }
+      ipcRenderer.on('http:server-served', handler)
+      return () => {
+        ipcRenderer.removeListener('http:server-served', handler)
       }
     }
   },

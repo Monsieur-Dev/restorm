@@ -117,6 +117,14 @@ export const SCENARIO_KIND_DOCS: Record<ScenarioNodeKind, ScenarioKindDoc> = {
     summary: 'Half-closes an already-open streaming gRPC call (declared by a grpcConnect node), letting the server\'s final frames/response arrive and firing that node\'s `done`. Pure-event action: triggered on `in`, sequences via its own `done`. Errors (to `error`) when no connection is selected.',
     config: { connectionNodeId: 'Id of the grpcConnect node whose call to close.' }
   },
+  httpListen: {
+    summary: 'HOSTS a local HTTP mock server from a bound `server: true` HTTP request and listens INDEFINITELY (restorm serves, it does not call out — so there is NO `response` output). `connected` (a pure signal) fires once the server is listening; EACH request the mock serves re-emits its `{ request, response }` data on the `served` output. The server stays up — keeping the run in-progress — until an httpClose targets it (or the run is stopped), then `done` fires.',
+    config: { requestId: 'Id of the server: true HTTP request to host (its METHOD + PATH + port + configured mock status/headers/body).', connectionName: 'Unique-per-scenario name an httpClose references for display (defaults to the request name).', label: 'Display label on the box.' }
+  },
+  httpClose: {
+    summary: 'Stops an already-listening HTTP mock server (declared by an httpListen node), freeing its port and firing that node\'s `done`. Pure-event action: triggered on `in`, sequences via its own `done`. Errors (to `error`) when no server is selected.',
+    config: { connectionNodeId: 'Id of the httpListen node whose server to stop.' }
+  },
   forEach: {
     summary: 'Iterates a collection: fans out `each` item, then fires `done` once every iteration\'s sub-graph has finished. `items` is wired or taken from a configured list.',
     config: { parallelism: '`{ enabled, count }` — bounded concurrent iterations (count≥2). Off = sequential.' }

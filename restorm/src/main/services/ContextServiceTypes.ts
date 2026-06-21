@@ -70,6 +70,9 @@ export interface FullRequestData {
   params?: KeyValue[]
   pathParams?: KeyValue[]
   body?: HTTPRequestBody
+  /** HTTP mock server (server === true): the status code the mock serves
+   * (defaults to 200). */
+  mockStatus?: number
 
   // GraphQL specific
   operationType?: string

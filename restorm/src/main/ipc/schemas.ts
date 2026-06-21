@@ -189,6 +189,10 @@ export const httpExecuteArgs = z.tuple([
 
 export const httpCancelArgs = z.tuple([requestIdArg])
 export const httpIsActiveArgs = z.tuple([requestIdArg])
+// HTTP mock server (server mode): start/stop hosting + listening check.
+export const httpListenArgs = z.tuple([requestIdArg])
+export const httpStopArgs = z.tuple([requestIdArg])
+export const httpIsListeningArgs = z.tuple([requestIdArg])
 
 // ==========================================================================
 // OData Execution (reuses httpExecutionService under the hood)
