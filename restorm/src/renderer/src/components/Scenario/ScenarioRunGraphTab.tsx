@@ -1,6 +1,6 @@
-import React, { useState } from 'react'
+import React, { useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ScrollableElement } from 'electron-core-ui/renderer'
+import { ScrollableElement, Tooltip } from 'electron-core-ui/renderer'
 import type { Scenario } from '../../../../shared/types/collections'
 import type { ScenarioRunSnapshot } from '../../../../shared/types/scenarioRunHistory'
 import { ScenarioGraphPreview } from '../MainView/Titlebar/ScenarioGraphPreview'
@@ -31,6 +31,8 @@ export const ScenarioRunGraphTab: React.FC<ScenarioRunGraphTabProps> = ({ scenar
   // The node to pan/zoom + flash in the detail pane. Paired with `selected`:
   // set together on a focus request, cleared when the user picks a thumbnail.
   const [focusNode, setFocusNode] = useState<{ nodeId: string; token: number } | null>(null)
+  const [hoveredThumbName, setHoveredThumbName] = useState<string | null>(null)
+  const thumbNameTooltipRef = useRef<HTMLElement | null>(null)
   const [appliedReqToken, setAppliedReqToken] = useState(-1)
   const [seenRunKey, setSeenRunKey] = useState<string | null | undefined>(runKey)
 
@@ -74,7 +76,12 @@ export const ScenarioRunGraphTab: React.FC<ScenarioRunGraphTabProps> = ({ scenar
                 onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelected(i); setFocusNode(null) } }}
                 data-testid={`scenario-run-graph-thumb-${i}`}
               >
-                <span className="scn-graph-thumb-name" title={s.name}>{s.name}</span>
+                <span
+                  className="scn-graph-thumb-name"
+                  aria-label={s.name}
+                  onMouseEnter={(e) => { thumbNameTooltipRef.current = e.currentTarget; setHoveredThumbName(s.name) }}
+                  onMouseLeave={() => { setHoveredThumbName(null) }}
+                >{s.name}</span>
                 <span className="scn-graph-thumb-canvas">
                   <ScenarioGraphPreview scenario={s as unknown as Scenario} interactive={false} testId={`scenario-run-graph-thumb-canvas-${i}`} />
                 </span>
@@ -83,6 +90,12 @@ export const ScenarioRunGraphTab: React.FC<ScenarioRunGraphTabProps> = ({ scenar
           </div>
         </ScrollableElement>
       )}
+      <Tooltip
+        targetRef={thumbNameTooltipRef as React.RefObject<HTMLElement>}
+        content={hoveredThumbName}
+        show={hoveredThumbName !== null}
+        placement="below"
+      />
       <div className="scn-graph-detail" data-testid="scenario-run-graph-detail">
         {current ? (
           <ScenarioGraphPreview

@@ -835,7 +835,10 @@
     },
     "ok": "Importeren",
     "cancel": "Annuleren",
-    "dropZone": "Sleepzone"
+    "dropZone": "Sleepzone",
+    "addAuth": "Een authenticatieroute toevoegen",
+    "detachAuth": "Authenticatieroute loskoppelen",
+    "editAuth": "Authenticatieroute bewerken"
   },
   "emptyBench": {
     "importCard": {
@@ -1601,6 +1604,11 @@
     },
     "palette": {
       "arrangeActions": "Re-arrange actions"
+    },
+    "port": {
+      "in": "in",
+      "error": "error",
+      "done": "done"
     }
   },
   "mqtt": {
@@ -1714,5 +1722,14 @@
     "updateRequest": "Een verzoek bijwerken",
     "updateScenario": "Een scenario bijwerken",
     "updateScenarioNode": "Een scenarioknooppunt bijwerken"
+  },
+  "odataRequestTab": {
+    "send": "Verzenden",
+    "loadNextPage": "Volgende pagina laden"
+  },
+  "typedValue": {
+    "list": {
+      "add": "Waarde toevoegen"
+    }
   }
 }

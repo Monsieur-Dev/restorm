@@ -835,7 +835,10 @@
     },
     "ok": "Importa",
     "cancel": "Annulla",
-    "dropZone": "Area di rilascio"
+    "dropZone": "Area di rilascio",
+    "addAuth": "Aggiungi una route di autenticazione",
+    "detachAuth": "Scollega route di autenticazione",
+    "editAuth": "Modifica route di autenticazione"
   },
   "emptyBench": {
     "importCard": {
@@ -1601,6 +1604,11 @@
     },
     "palette": {
       "arrangeActions": "Re-arrange actions"
+    },
+    "port": {
+      "in": "in",
+      "error": "error",
+      "done": "done"
     }
   },
   "mqtt": {
@@ -1714,5 +1722,14 @@
     "updateRequest": "Aggiorna una richiesta",
     "updateScenario": "Aggiorna uno scenario",
     "updateScenarioNode": "Aggiorna un nodo dello scenario"
+  },
+  "odataRequestTab": {
+    "send": "Invia",
+    "loadNextPage": "Carica pagina successiva"
+  },
+  "typedValue": {
+    "list": {
+      "add": "Aggiungi valore"
+    }
   }
 }

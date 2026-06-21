@@ -1,6 +1,7 @@
-import React, { useCallback } from 'react'
+import React, { useCallback, useRef, useState } from 'react'
 import './radio.css'
 import type { RadioGroupProps } from './types'
+import { Tooltip } from '../Tooltip'
 
 const RadioGroup: React.FC<RadioGroupProps> = ({
   options,
@@ -18,6 +19,9 @@ const RadioGroup: React.FC<RadioGroupProps> = ({
   // mode switches.)
   const propActive = options.items.findIndex((item) => item.isActive);
   const activeIndex = propActive >= 0 ? propActive : 0;
+
+  const tooltipTargetRef = useRef<HTMLElement | null>(null)
+  const [hoveredTooltip, setHoveredTooltip] = useState<string | null>(null)
 
   const handleSelect = useCallback((index: number) => {
     if (options.items[index]?.disabled) return;
@@ -54,6 +58,8 @@ const RadioGroup: React.FC<RadioGroupProps> = ({
           isPreviousActive ? 'previous-active' : ''
         ].filter(Boolean).join(' ');
 
+        const tooltipLabel = item.tooltip ?? null
+
         return (
           <button
             key={index}
@@ -61,16 +67,25 @@ const RadioGroup: React.FC<RadioGroupProps> = ({
             {...(dataTestId && { 'data-testid': `${dataTestId}-item-${index}` })}
             onClick={() => { handleSelect(index); }}
             disabled={item.disabled}
-            title={item.tooltip}
             type="button"
             role="radio"
             aria-checked={isActive}
-            aria-label={item.text}
+            aria-label={item.tooltip ?? item.text}
+            {...(tooltipLabel !== null ? {
+              onMouseEnter: (e) => { tooltipTargetRef.current = e.currentTarget; setHoveredTooltip(tooltipLabel) },
+              onMouseLeave: () => { setHoveredTooltip(null) }
+            } : {})}
           >
             {item.text}
           </button>
         );
       })}
+      <Tooltip
+        targetRef={tooltipTargetRef as React.RefObject<HTMLElement>}
+        content={hoveredTooltip}
+        show={hoveredTooltip !== null}
+        placement="below"
+      />
     </div>
   );
 };

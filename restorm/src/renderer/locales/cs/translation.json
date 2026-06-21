@@ -837,7 +837,10 @@
     },
     "ok": "Importovat",
     "cancel": "Zrušit",
-    "dropZone": "Zóna pro vložení"
+    "dropZone": "Zóna pro vložení",
+    "addAuth": "Přidat ověřovací trasu",
+    "detachAuth": "Odebrat ověřovací trasu",
+    "editAuth": "Upravit ověřovací trasu"
   },
   "emptyBench": {
     "importCard": {
@@ -1603,6 +1606,11 @@
     },
     "palette": {
       "arrangeActions": "Re-arrange actions"
+    },
+    "port": {
+      "in": "in",
+      "error": "error",
+      "done": "done"
     }
   },
   "mqtt": {
@@ -1716,5 +1724,14 @@
     "updateRequest": "Aktualizovat požadavek",
     "updateScenario": "Aktualizovat scénář",
     "updateScenarioNode": "Aktualizovat uzel scénáře"
+  },
+  "odataRequestTab": {
+    "send": "Odeslat",
+    "loadNextPage": "Načíst další stránku"
+  },
+  "typedValue": {
+    "list": {
+      "add": "Přidat hodnotu"
+    }
   }
 }

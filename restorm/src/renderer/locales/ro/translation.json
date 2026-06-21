@@ -836,7 +836,10 @@
     },
     "ok": "Importă",
     "cancel": "Anulează",
-    "dropZone": "Zonă de plasare"
+    "dropZone": "Zonă de plasare",
+    "addAuth": "Adaugă o rută de autentificare",
+    "detachAuth": "Dezatașează ruta de autentificare",
+    "editAuth": "Editează ruta de autentificare"
   },
   "emptyBench": {
     "importCard": {
@@ -1602,6 +1605,11 @@
     },
     "palette": {
       "arrangeActions": "Re-arrange actions"
+    },
+    "port": {
+      "in": "in",
+      "error": "error",
+      "done": "done"
     }
   },
   "mqtt": {
@@ -1715,5 +1723,14 @@
     "updateRequest": "Actualizează o cerere",
     "updateScenario": "Actualizează un scenariu",
     "updateScenarioNode": "Actualizează un nod de scenariu"
+  },
+  "odataRequestTab": {
+    "send": "Trimite",
+    "loadNextPage": "Încarcă pagina următoare"
+  },
+  "typedValue": {
+    "list": {
+      "add": "Adaugă valoare"
+    }
   }
 }

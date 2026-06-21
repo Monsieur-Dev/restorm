@@ -168,8 +168,7 @@ export const ScenarioRunHistoryModal: React.FC<ScenarioRunHistoryModalProps> = (
                     icon={run.pinned ? 'pinned' : 'pin'}
                     onClick={(e) => { e.stopPropagation(); togglePin(run) }}
                     options={{
-                      ariaLabel: run.pinned ? t('scenario.runHistory.unpin', 'Unpin') : t('scenario.runHistory.pin', 'Pin'),
-                      title: run.pinned ? t('scenario.runHistory.unpin', 'Unpin') : t('scenario.runHistory.pin', 'Pin')
+                      ariaLabel: run.pinned ? t('scenario.runHistory.unpin', 'Unpin') : t('scenario.runHistory.pin', 'Pin')
                     }}
                   />
                 </li>

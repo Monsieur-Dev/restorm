@@ -199,7 +199,7 @@ export const SwitchNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, da
             const seed = last ? nextOfSameType(last.value, valueTypeGroups) : { type: 'string' as const, value: '' }
             setCases([...displayCases, { id: caseId(), value: seed }])
           }}
-          options={{ ariaLabel: t('scenario.switch.addCase', 'Add case'), title: t('scenario.switch.addCase', 'Add case') }}
+          options={{ ariaLabel: t('scenario.switch.addCase', 'Add case') }}
           data-testid="scenario-switch-add-case"
         />
       )

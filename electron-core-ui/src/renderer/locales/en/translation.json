@@ -157,7 +157,11 @@
     }
   },
   "codeEditor": {
-    "goToDefinition": "Go to Definition"
+    "goToDefinition": "Go to Definition",
+    "copyButton": {
+      "copy": "Copy code",
+      "copied": "Copied!"
+    }
   },
   "tagsView": {
     "removeTag": "Remove tag",
@@ -370,5 +374,16 @@
     "listThemes": "List available themes",
     "getCurrentTheme": "Get the current theme",
     "switchTheme": "Switch the active theme"
+  },
+  "customWco": {
+    "minimize": "Minimize",
+    "maximize": "Maximize",
+    "restore": "Restore",
+    "close": "Close"
+  },
+  "firewall": {
+    "addOrigin": "Add origin",
+    "removeOrigin": "Remove {{origin}}",
+    "noEntries": "No entries yet."
   }
 }

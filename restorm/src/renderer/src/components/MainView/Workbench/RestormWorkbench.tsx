@@ -56,6 +56,7 @@ import { RequestHeaderEnvSelector } from '../RequestHeaderEnvSelector'
 import { RequestHeaderHistoryButton } from '../RequestHeaderHistoryButton'
 import { RequestHeaderAuthSelector } from '../RequestHeaderAuthSelector'
 import { ScenarioCallersButton } from './ScenarioCallersButton'
+import { HeaderHoverTooltip } from '../HeaderHoverTooltip'
 import { ScenarioRunHistoryButton } from '../../Scenario/ScenarioRunHistoryButton'
 import type { ScenarioRequestUsage, ScenarioScenarioUsage } from '../../../services/scenarioRequestUsage'
 import { useTabSwitcher } from '../../../hooks/useTabSwitcher'
@@ -386,12 +387,13 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
     const itemId = getTabItemId(tab)
     if (!itemId || !dirtyItemIdsSet?.has(itemId)) return null
     return (
-      <span
-        className="codicon codicon-circle-filled dirty-indicator"
-        aria-label="Modified"
-        title="Modified"
-        style={{ marginLeft: 6 }}
-      />
+      <HeaderHoverTooltip label="Modified">
+        <span
+          className="codicon codicon-circle-filled dirty-indicator"
+          aria-label="Modified"
+          style={{ marginLeft: 6 }}
+        />
+      </HeaderHoverTooltip>
     )
   }, [dirtyItemIdsSet, getTabItemId])
 

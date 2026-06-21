@@ -835,7 +835,10 @@
     },
     "ok": "Tuo",
     "cancel": "Peruuta",
-    "dropZone": "Pudotusalue"
+    "dropZone": "Pudotusalue",
+    "addAuth": "Lisää todennusreitti",
+    "detachAuth": "Irrota todennusreitti",
+    "editAuth": "Muokkaa todennusreittiä"
   },
   "emptyBench": {
     "importCard": {
@@ -1601,6 +1604,11 @@
     },
     "palette": {
       "arrangeActions": "Re-arrange actions"
+    },
+    "port": {
+      "in": "in",
+      "error": "error",
+      "done": "done"
     }
   },
   "mqtt": {
@@ -1714,5 +1722,14 @@
     "updateRequest": "Päivitä pyyntö",
     "updateScenario": "Päivitä skenaario",
     "updateScenarioNode": "Päivitä skenaarion solmu"
+  },
+  "odataRequestTab": {
+    "send": "Lähetä",
+    "loadNextPage": "Lataa seuraava sivu"
+  },
+  "typedValue": {
+    "list": {
+      "add": "Lisää arvo"
+    }
   }
 }

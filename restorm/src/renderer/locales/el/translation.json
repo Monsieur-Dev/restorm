@@ -835,7 +835,10 @@
     },
     "ok": "Εισαγωγή",
     "cancel": "Ακύρωση",
-    "dropZone": "Ζώνη απόθεσης"
+    "dropZone": "Ζώνη απόθεσης",
+    "addAuth": "Προσθήκη διαδρομής ελέγχου ταυτότητας",
+    "detachAuth": "Αποσύνδεση διαδρομής ελέγχου ταυτότητας",
+    "editAuth": "Επεξεργασία διαδρομής ελέγχου ταυτότητας"
   },
   "emptyBench": {
     "importCard": {
@@ -1601,6 +1604,11 @@
     },
     "palette": {
       "arrangeActions": "Re-arrange actions"
+    },
+    "port": {
+      "in": "in",
+      "error": "error",
+      "done": "done"
     }
   },
   "mqtt": {
@@ -1714,5 +1722,14 @@
     "updateRequest": "Ενημέρωση αιτήματος",
     "updateScenario": "Ενημέρωση σεναρίου",
     "updateScenarioNode": "Ενημέρωση κόμβου σεναρίου"
+  },
+  "odataRequestTab": {
+    "send": "Αποστολή",
+    "loadNextPage": "Φόρτωση επόμενης σελίδας"
+  },
+  "typedValue": {
+    "list": {
+      "add": "Προσθήκη τιμής"
+    }
   }
 }

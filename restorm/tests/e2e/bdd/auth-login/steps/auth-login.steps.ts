@@ -699,7 +699,7 @@ When(
     await expect(popover).toBeVisible({ timeout: 5000 })
     // Uncheck apply-to-all if checked — we want the env to land only
     // on the focused tab. The checkbox is checked by default.
-    const applyToAll = popover.locator('[data-testid="statusbar-env-selector-apply-to-all-input"]')
+    const applyToAll = popover.locator('[data-testid="statusbar-env-selector-apply-to-all-input-action"]')
     if (await applyToAll.isChecked()) {
       await applyToAll.click()
     }
@@ -858,7 +858,7 @@ When(
     // Make sure "Apply to all" is checked — earlier steps in the
     // scenario may have toggled it off to set per-tab envs. Re-checking
     // is a no-op when it was already on.
-    const applyToAll = popover.locator('[data-testid="statusbar-env-selector-apply-to-all-input"]')
+    const applyToAll = popover.locator('[data-testid="statusbar-env-selector-apply-to-all-input-action"]')
     if (!(await applyToAll.isChecked())) {
       await applyToAll.click()
     }

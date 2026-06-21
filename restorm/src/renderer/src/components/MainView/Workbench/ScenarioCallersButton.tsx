@@ -23,6 +23,7 @@ export const ScenarioCallersButton: React.FC<ScenarioCallersButtonProps> = ({ us
   const { t } = useTranslation()
   const buttonRef = useRef<HTMLButtonElement>(null)
   const [open, setOpen] = useState(false)
+  const [hovered, setHovered] = useState(false)
 
   useEffect(() => {
     if (!open) return undefined
@@ -51,15 +52,22 @@ export const ScenarioCallersButton: React.FC<ScenarioCallersButtonProps> = ({ us
         type="button"
         className={`request-scenario-usage-button${open ? ' is-open' : ''}`}
         aria-label={label}
-        title={label}
         aria-haspopup="dialog"
         aria-expanded={open}
         onClick={(e) => { e.stopPropagation(); setOpen((v) => !v) }}
         onMouseDown={(e) => { e.stopPropagation() }}
+        onMouseEnter={() => { setHovered(true) }}
+        onMouseLeave={() => { setHovered(false) }}
         data-testid="scenario-callers-button"
       >
         <Badge type="SCENARIO" />
       </button>
+      <Tooltip
+        targetRef={buttonRef}
+        show={hovered && !open}
+        placement="below"
+        content={label}
+      />
       <Tooltip
         targetRef={buttonRef}
         show={open}

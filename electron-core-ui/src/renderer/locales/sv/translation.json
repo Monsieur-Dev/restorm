@@ -157,7 +157,11 @@
     }
   },
   "codeEditor": {
-    "goToDefinition": "Gå till definition"
+    "goToDefinition": "Gå till definition",
+    "copyButton": {
+      "copy": "Kopiera kod",
+      "copied": "Kopierat!"
+    }
   },
   "tagsView": {
     "removeTag": "Ta bort tagg",
@@ -370,5 +374,16 @@
     "listThemes": "Lista tillgängliga teman",
     "getCurrentTheme": "Hämta aktuellt tema",
     "switchTheme": "Byt aktivt tema"
+  },
+  "customWco": {
+    "minimize": "Minimera",
+    "maximize": "Maximera",
+    "restore": "Återställ",
+    "close": "Stäng"
+  },
+  "firewall": {
+    "addOrigin": "Lägg till origin",
+    "removeOrigin": "Ta bort {{origin}}",
+    "noEntries": "Inga poster ännu."
   }
 }

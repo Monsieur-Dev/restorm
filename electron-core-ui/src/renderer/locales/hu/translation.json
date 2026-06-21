@@ -157,7 +157,11 @@
     }
   },
   "codeEditor": {
-    "goToDefinition": "Ugrás a definícióhoz"
+    "goToDefinition": "Ugrás a definícióhoz",
+    "copyButton": {
+      "copy": "Kód másolása",
+      "copied": "Másolva!"
+    }
   },
   "tagsView": {
     "removeTag": "Címke eltávolítása",
@@ -370,5 +374,16 @@
     "listThemes": "Elérhető témák listázása",
     "getCurrentTheme": "Jelenlegi téma lekérése",
     "switchTheme": "Aktív téma váltása"
+  },
+  "customWco": {
+    "minimize": "Kis méret",
+    "maximize": "Teljes méret",
+    "restore": "Visszaállítás",
+    "close": "Bezárás"
+  },
+  "firewall": {
+    "addOrigin": "Eredet hozzáadása",
+    "removeOrigin": "{{origin}} eltávolítása",
+    "noEntries": "Még nincsenek bejegyzések."
   }
 }

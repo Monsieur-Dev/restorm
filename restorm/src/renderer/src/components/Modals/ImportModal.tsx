@@ -829,8 +829,7 @@ export function ImportModal({
                 icon="key"
                 onClick={() => { setShowAuthSetupModal(true) }}
                 options={{
-                  ariaLabel: t('import.addAuth', 'Add an authentication route'),
-                  title: t('import.addAuth', 'Add an authentication route')
+                  ariaLabel: t('import.addAuth', 'Add an authentication route')
                 }}
                 data-testid="import-add-auth-button"
               >
@@ -872,7 +871,6 @@ export function ImportModal({
               <button
                 type="button"
                 onClick={() => { setShowAuthSetupModal(true) }}
-                title={t('import.editAuth', 'Edit authentication route')}
                 aria-label={t('import.editAuth', 'Edit authentication route')}
                 data-testid="import-edit-auth-button"
                 style={{
@@ -895,8 +893,7 @@ export function ImportModal({
                 icon="close"
                 onClick={handleDetachAuth}
                 options={{
-                  ariaLabel: t('import.detachAuth', 'Detach authentication route'),
-                  title: t('import.detachAuth', 'Detach authentication route')
+                  ariaLabel: t('import.detachAuth', 'Detach authentication route')
                 }}
                 data-testid="import-detach-auth-button"
               />

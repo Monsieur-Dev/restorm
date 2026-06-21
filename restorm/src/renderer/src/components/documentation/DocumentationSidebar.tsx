@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react'
-import { ScrollableElement } from 'electron-core-ui/renderer'
+import { Button, ScrollableElement } from 'electron-core-ui/renderer'
+import { HeaderHoverTooltip } from '../MainView/HeaderHoverTooltip'
 import type {
   ModelDocumentation,
   OperationDocumentation
@@ -90,15 +91,14 @@ export const DocumentationSidebar: React.FC<DocumentationSidebarProps> = ({
           className="documentation-host-sidebar__section documentation-host-sidebar__section--top"
           aria-label="Overview"
         >
-          <button
-            type="button"
+          <Button
             className="documentation-host-sidebar__overview-link"
             onClick={(): void => { nav?.scrollToTop() }}
             data-testid="documentation-host-sidebar-overview"
           >
             <span className="documentation-host-sidebar__overview-name">{scopeTitle}</span>
             <span className="documentation-host-sidebar__overview-hint">Overview</span>
-          </button>
+          </Button>
         </nav>
       )}
       {groups.length > 0 && (
@@ -106,21 +106,19 @@ export const DocumentationSidebar: React.FC<DocumentationSidebarProps> = ({
           className="documentation-host-sidebar__section"
           aria-label="Operations"
         >
-          <button
-            type="button"
+          <Button
             className="documentation-host-sidebar__section-title documentation-host-sidebar__section-title--button"
             onClick={(): void => { nav?.scrollToOperations() }}
             data-testid="documentation-host-sidebar-section-operations"
           >
             Operations
-          </button>
+          </Button>
           <ul className="documentation-host-sidebar__group-list">
             {groups.map((group) => {
               const isCollapsed = collapsed.has(group.name)
               return (
                 <li key={group.name} className="documentation-host-sidebar__group">
-                  <button
-                    type="button"
+                  <Button
                     className="documentation-host-sidebar__group-header"
                     aria-expanded={!isCollapsed}
                     onClick={(): void => { toggle(group.name) }}
@@ -131,7 +129,7 @@ export const DocumentationSidebar: React.FC<DocumentationSidebarProps> = ({
                       aria-hidden="true"
                     />
                     <span className="documentation-host-sidebar__group-name">{group.name}</span>
-                  </button>
+                  </Button>
                   {!isCollapsed && (
                     <ul className="documentation-host-sidebar__op-list">
                       {group.operations.map((op) => {
@@ -140,22 +138,23 @@ export const DocumentationSidebar: React.FC<DocumentationSidebarProps> = ({
                         const method = op.match.method?.toUpperCase()
                         return (
                           <li key={slug} className="documentation-host-sidebar__op-item">
-                            <button
-                              type="button"
-                              className="documentation-host-sidebar__op-link"
-                              onClick={(): void => { nav?.scrollToOperation(slug) }}
-                              data-testid={`documentation-host-sidebar-op-${slug}`}
-                              title={summary}
-                            >
-                              {method !== undefined && method.length > 0 && (
-                                <span
-                                  className={`documentation-host-sidebar__method documentation-host-sidebar__method--${method.toLowerCase()}`}
-                                >
-                                  {method}
-                                </span>
-                              )}
-                              <span className="documentation-host-sidebar__op-summary">{summary}</span>
-                            </button>
+                            <HeaderHoverTooltip label={summary}>
+                              <Button
+                                className="documentation-host-sidebar__op-link"
+                                onClick={(): void => { nav?.scrollToOperation(slug) }}
+                                data-testid={`documentation-host-sidebar-op-${slug}`}
+                                options={{ ariaLabel: summary }}
+                              >
+                                {method !== undefined && method.length > 0 && (
+                                  <span
+                                    className={`documentation-host-sidebar__method documentation-host-sidebar__method--${method.toLowerCase()}`}
+                                  >
+                                    {method}
+                                  </span>
+                                )}
+                                <span className="documentation-host-sidebar__op-summary">{summary}</span>
+                              </Button>
+                            </HeaderHoverTooltip>
                           </li>
                         )
                       })}
@@ -173,8 +172,7 @@ export const DocumentationSidebar: React.FC<DocumentationSidebarProps> = ({
           className="documentation-host-sidebar__section"
           aria-label="Models"
         >
-          <button
-            type="button"
+          <Button
             className="documentation-host-sidebar__section-title documentation-host-sidebar__section-title--button"
             onClick={(): void => {
               const first = models[0]
@@ -183,18 +181,17 @@ export const DocumentationSidebar: React.FC<DocumentationSidebarProps> = ({
             data-testid="documentation-host-sidebar-section-models"
           >
             Models
-          </button>
+          </Button>
           <ul className="documentation-host-sidebar__model-list">
             {models.map((model) => (
               <li key={model.name} className="documentation-host-sidebar__model-item">
-                <button
-                  type="button"
+                <Button
                   className="documentation-host-sidebar__model-link"
                   onClick={(): void => { nav?.scrollToModel(model.name) }}
                   data-testid={`documentation-host-sidebar-model-${model.name}`}
                 >
                   {model.name}
-                </button>
+                </Button>
               </li>
             ))}
           </ul>
@@ -206,8 +203,7 @@ export const DocumentationSidebar: React.FC<DocumentationSidebarProps> = ({
           className="documentation-host-sidebar__section"
           aria-label="Enums"
         >
-          <button
-            type="button"
+          <Button
             className="documentation-host-sidebar__section-title documentation-host-sidebar__section-title--button"
             onClick={(): void => {
               const first = enumGroups[0]
@@ -216,33 +212,33 @@ export const DocumentationSidebar: React.FC<DocumentationSidebarProps> = ({
             data-testid="documentation-host-sidebar-section-enums"
           >
             Enums
-          </button>
+          </Button>
           <ul className="documentation-host-sidebar__enum-list">
             {enumGroups.map((group) => (
               <li key={group.modelName} className="documentation-host-sidebar__enum-group">
-                <button
-                  type="button"
+                <Button
                   className="documentation-host-sidebar__enum-model"
                   onClick={(): void => { nav?.scrollToEnum(group.modelName) }}
                   data-testid={`documentation-host-sidebar-enum-${group.modelName}`}
                 >
                   {group.modelName}
-                </button>
+                </Button>
                 <ul className="documentation-host-sidebar__enum-prop-list">
                   {group.entries.map((entry) => (
                     <li
                       key={entry.propertyName}
                       className="documentation-host-sidebar__enum-prop-item"
                     >
-                      <button
-                        type="button"
-                        className="documentation-host-sidebar__enum-prop-link"
-                        onClick={(): void => { nav?.scrollToEnum(group.modelName, entry.propertyName) }}
-                        data-testid={`documentation-host-sidebar-enum-${group.modelName}-${entry.propertyName}`}
-                        title={`${group.modelName}.${entry.propertyName}`}
-                      >
-                        {entry.propertyName}
-                      </button>
+                      <HeaderHoverTooltip label={`${group.modelName}.${entry.propertyName}`}>
+                        <Button
+                          className="documentation-host-sidebar__enum-prop-link"
+                          onClick={(): void => { nav?.scrollToEnum(group.modelName, entry.propertyName) }}
+                          data-testid={`documentation-host-sidebar-enum-${group.modelName}-${entry.propertyName}`}
+                          options={{ ariaLabel: `${group.modelName}.${entry.propertyName}` }}
+                        >
+                          {entry.propertyName}
+                        </Button>
+                      </HeaderHoverTooltip>
                     </li>
                   ))}
                 </ul>

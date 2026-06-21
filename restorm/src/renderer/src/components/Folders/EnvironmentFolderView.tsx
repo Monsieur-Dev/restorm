@@ -32,6 +32,7 @@ function updateReactiveProperty<T extends object, K extends keyof T>(obj: T, key
   (obj as Record<K, T[K]>)[key] = value
 }
 import { BaseFolderView } from './BaseFolderView'
+import { HeaderHoverTooltip } from '../MainView/HeaderHoverTooltip'
 import type { ApiDocumentation, OperationDocumentation } from '../../../../shared/types/apiDocumentation'
 import { DocumentationHost } from '../documentation/DocumentationHost'
 import { mergeEnumDefinitionsIntoModels } from '../documentation/mergeEnumDefinitions'
@@ -844,20 +845,16 @@ const ContextVariablesSection = React.memo<{ envId: string | null; secretVariabl
               onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent' }}
             >
               <td style={{ padding: '3px 4px', textAlign: 'center' }}>
-                <button
-                  type="button"
-                  onClick={() => { handleCopy(key) }}
-                  style={{
-                    background: 'none', border: 'none', cursor: 'pointer', padding: 2,
-                    opacity: copiedKey === key ? 1 : 0.5,
-                    color: copiedKey === key ? 'var(--notificationsInfoIcon-foreground)' : 'inherit',
-                    fontSize: 14, lineHeight: 1
-                  }}
-                  title={copiedKey === key ? t('folderView.contextVariables.copied') : `{{${key}}}`}
-                  data-testid={`context-var-copy-${key}`}
-                >
-                  <span className={`codicon codicon-${copiedKey === key ? 'check' : 'copy'}`} />
-                </button>
+                <HeaderHoverTooltip label={copiedKey === key ? t('folderView.contextVariables.copied') : `{{${key}}}`}>
+                  <Button
+                    small
+                    secondary
+                    icon={copiedKey === key ? 'check' : 'copy'}
+                    onClick={() => { handleCopy(key) }}
+                    options={{ ariaLabel: copiedKey === key ? t('folderView.contextVariables.copied') : `{{${key}}}` }}
+                    data-testid={`context-var-copy-${key}`}
+                  />
+                </HeaderHoverTooltip>
               </td>
               <td style={{ padding: '3px 8px', fontFamily: 'monospace', whiteSpace: 'nowrap' }}>{`{{${key}}}`}</td>
               <td

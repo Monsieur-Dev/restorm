@@ -1,5 +1,5 @@
 import React from 'react'
-import { MarkdownViewer, getColorFromString, getContrastColor } from 'electron-core-ui/renderer'
+import { MarkdownViewer, getColorFromString, getContrastColor, Button } from 'electron-core-ui/renderer'
 import type { OperationDocumentation, SecurityScheme } from '../../../../shared/types/apiDocumentation'
 import { Badge } from '../common/Badge'
 import { mapToBadgeType } from '../../utils/badgeUtils'
@@ -243,14 +243,14 @@ export const RouteHeader: React.FC<RouteHeaderProps> = ({ operation, headingLeve
       </div>
 
       {onAddRequest !== undefined && (
-        <button
-          type="button"
+        <Button
+          secondary
           className="documentation-host-route-header__add-button"
           data-testid={`documentation-host-route-header-add-${operation.operationId ?? operation.match.urlPattern}`}
           onClick={(): void => { onAddRequest(operation) }}
         >
           + Add a request
-        </button>
+        </Button>
       )}
 
       {operation.description !== undefined && operation.description.length > 0 && (

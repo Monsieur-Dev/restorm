@@ -474,8 +474,7 @@ export const ScenarioInspectorPanel: React.FC<ScenarioInspectorPanelProps> = ({ 
                     })()
                   }}
                   options={{
-                    ariaLabel: t('scenario.inspector.run', 'Run'),
-                    title: t('scenario.inspector.run', 'Run')
+                    ariaLabel: t('scenario.inspector.run', 'Run')
                   }}
                   data-testid="scenario-inspector-inline-run"
                 />

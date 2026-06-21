@@ -157,7 +157,11 @@
     }
   },
   "codeEditor": {
-    "goToDefinition": "Pergi ke definisi"
+    "goToDefinition": "Pergi ke definisi",
+    "copyButton": {
+      "copy": "Salin kode",
+      "copied": "Disalin!"
+    }
   },
   "tagsView": {
     "removeTag": "Hapus tag",
@@ -370,5 +374,16 @@
     "listThemes": "Daftar tema yang tersedia",
     "getCurrentTheme": "Dapatkan tema saat ini",
     "switchTheme": "Ganti tema aktif"
+  },
+  "customWco": {
+    "minimize": "Perkecil",
+    "maximize": "Perbesar",
+    "restore": "Pulihkan",
+    "close": "Tutup"
+  },
+  "firewall": {
+    "addOrigin": "Tambahkan origin",
+    "removeOrigin": "Hapus {{origin}}",
+    "noEntries": "Belum ada entri."
   }
 }

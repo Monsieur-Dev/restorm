@@ -171,7 +171,6 @@ const Button: React.FC<ButtonProps> = ({
         onKeyDown={handleKeyDown}
         onMouseEnter={onMouseEnter}
         onMouseLeave={onMouseLeave}
-        title={typeof mergedOptions.title === 'string' ? mergedOptions.title : undefined}
         aria-label={mergedOptions.ariaLabel}
         role={role}
         {...(ariaChecked !== undefined ? { 'aria-checked': ariaChecked } : {})}

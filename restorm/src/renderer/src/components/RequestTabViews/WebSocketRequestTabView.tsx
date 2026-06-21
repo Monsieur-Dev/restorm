@@ -702,16 +702,18 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
         </>
       ) : (
         <>
-          <div style={{ flex: 1, minWidth: 0 }} title={resolvedUrl || url} data-testid="url-container" data-url-resolved={resolvedUrl ? 'true' : 'false'}>
-            <RestormVariableInputBox
-              value={url}
-              onChange={setUrl}
-              variables={emptyVariables}
-              helpers={handlebarsHelpers}
-              placeholder={t('websocket.urlPlaceholder')}
-              data-testid="websocket-url-input"
-            />
-          </div>
+          <HeaderHoverTooltip label={resolvedUrl || url} suppressed={!(resolvedUrl || url)} className="url-container-stretch">
+            <div style={{ flex: 1, minWidth: 0 }} data-testid="url-container" data-url-resolved={resolvedUrl ? 'true' : 'false'} data-resolved-url={resolvedUrl || url}>
+              <RestormVariableInputBox
+                value={url}
+                onChange={setUrl}
+                variables={emptyVariables}
+                helpers={handlebarsHelpers}
+                placeholder={t('websocket.urlPlaceholder')}
+                data-testid="websocket-url-input"
+              />
+            </div>
+          </HeaderHoverTooltip>
           <SendButtonEnvSwitcher>{connectButton}</SendButtonEnvSwitcher>
         </>
       )}

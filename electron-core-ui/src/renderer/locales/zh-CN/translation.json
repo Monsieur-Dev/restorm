@@ -157,7 +157,11 @@
     }
   },
   "codeEditor": {
-    "goToDefinition": "转到定义"
+    "goToDefinition": "转到定义",
+    "copyButton": {
+      "copy": "复制代码",
+      "copied": "已复制！"
+    }
   },
   "tagsView": {
     "removeTag": "移除标签",
@@ -370,5 +374,16 @@
     "listThemes": "列出可用主题",
     "getCurrentTheme": "获取当前主题",
     "switchTheme": "切换活跃主题"
+  },
+  "customWco": {
+    "minimize": "最小化",
+    "maximize": "最大化",
+    "restore": "还原",
+    "close": "关闭"
+  },
+  "firewall": {
+    "addOrigin": "添加来源",
+    "removeOrigin": "移除 {{origin}}",
+    "noEntries": "暂无条目。"
   }
 }

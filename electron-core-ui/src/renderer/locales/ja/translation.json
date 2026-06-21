@@ -157,7 +157,11 @@
     }
   },
   "codeEditor": {
-    "goToDefinition": "定義へ移動"
+    "goToDefinition": "定義へ移動",
+    "copyButton": {
+      "copy": "コードをコピー",
+      "copied": "コピーしました！"
+    }
   },
   "tagsView": {
     "removeTag": "タグを削除",
@@ -370,5 +374,16 @@
     "listThemes": "利用可能なテーマを一覧表示",
     "getCurrentTheme": "現在のテーマを取得",
     "switchTheme": "アクティブなテーマを切り替え"
+  },
+  "customWco": {
+    "minimize": "最小化",
+    "maximize": "最大化",
+    "restore": "元のサイズに戻す",
+    "close": "閉じる"
+  },
+  "firewall": {
+    "addOrigin": "オリジンを追加",
+    "removeOrigin": "{{origin}} を削除",
+    "noEntries": "エントリがありません。"
   }
 }

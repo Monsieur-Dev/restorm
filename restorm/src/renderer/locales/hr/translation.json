@@ -836,7 +836,10 @@
     },
     "ok": "Uvezi",
     "cancel": "Odustani",
-    "dropZone": "Područje za ispuštanje"
+    "dropZone": "Područje za ispuštanje",
+    "addAuth": "Dodaj rutu provjere autentičnosti",
+    "detachAuth": "Odvoji rutu provjere autentičnosti",
+    "editAuth": "Uredi rutu provjere autentičnosti"
   },
   "emptyBench": {
     "importCard": {
@@ -1602,6 +1605,11 @@
     },
     "palette": {
       "arrangeActions": "Re-arrange actions"
+    },
+    "port": {
+      "in": "in",
+      "error": "error",
+      "done": "done"
     }
   },
   "mqtt": {
@@ -1715,5 +1723,14 @@
     "updateRequest": "Ažuriraj zahtjev",
     "updateScenario": "Ažuriraj scenarij",
     "updateScenarioNode": "Ažuriraj čvor scenarija"
+  },
+  "odataRequestTab": {
+    "send": "Pošalji",
+    "loadNextPage": "Učitaj sljedeću stranicu"
+  },
+  "typedValue": {
+    "list": {
+      "add": "Dodaj vrijednost"
+    }
   }
 }

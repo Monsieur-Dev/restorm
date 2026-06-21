@@ -157,7 +157,11 @@
     }
   },
   "codeEditor": {
-    "goToDefinition": "Ir a la definición"
+    "goToDefinition": "Ir a la definición",
+    "copyButton": {
+      "copy": "Copiar código",
+      "copied": "¡Copiado!"
+    }
   },
   "tagsView": {
     "removeTag": "Quitar etiqueta",
@@ -370,5 +374,16 @@
     "listThemes": "Listar temas disponibles",
     "getCurrentTheme": "Obtener el tema actual",
     "switchTheme": "Cambiar el tema activo"
+  },
+  "customWco": {
+    "minimize": "Minimizar",
+    "maximize": "Maximizar",
+    "restore": "Restaurar",
+    "close": "Cerrar"
+  },
+  "firewall": {
+    "addOrigin": "Agregar origen",
+    "removeOrigin": "Eliminar {{origin}}",
+    "noEntries": "Aún no hay entradas."
   }
 }

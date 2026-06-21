@@ -1,4 +1,5 @@
-import React, { useCallback, useMemo, useState } from 'react'
+import React, { useCallback, useMemo, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Tabs, type Tab } from '../Tabs'
 import { ControlGroup } from '../ControlGroup'
 import { InputBox } from '../InputBox'
@@ -7,6 +8,7 @@ import { IconView } from '../IconView'
 import { ScrollableElement } from '../ScrollableElement'
 import { useFeature } from '../../hooks/useFeature'
 import { useFirewallControl } from './useFirewallControl'
+import { Tooltip } from '../Tooltip'
 import './firewallPanel.css'
 import type { FirewallOrigin } from '../../../types/firewall'
 
@@ -209,7 +211,10 @@ interface OriginListSectionProps {
 const OriginListSection: React.FC<OriginListSectionProps> = ({
 	testIdPrefix, hint, placeholder, draft, onDraftChange, onAdd, origins, onRemove
 }) => {
+	const { t } = useTranslation()
 	const draftValid = parseOriginInput(draft) !== null
+	const labelTooltipRef = useRef<HTMLElement | null>(null)
+	const [hoveredLabel, setHoveredLabel] = useState<string | null>(null)
 	return (
 		<div className="firewall-panel__tab-body" data-testid={`${testIdPrefix}-body`}>
 			<p className="firewall-panel__hint">{hint}</p>
@@ -224,7 +229,7 @@ const OriginListSection: React.FC<OriginListSectionProps> = ({
 				/>
 				<Button
 					icon="add"
-					options={{ ariaLabel: 'Add origin', title: 'Add origin to the list' }}
+					options={{ ariaLabel: t('firewall.addOrigin', 'Add origin') }}
 					data-testid={`${testIdPrefix}-add`}
 					onClick={onAdd}
 					disabled={!draftValid}
@@ -232,7 +237,7 @@ const OriginListSection: React.FC<OriginListSectionProps> = ({
 				/>
 			</ControlGroup>
 			{origins.length === 0 ? (
-				<div className="firewall-panel__empty">No entries yet.</div>
+				<div className="firewall-panel__empty">{t('firewall.noEntries', 'No entries yet.')}</div>
 			) : (
 				<ul className="firewall-panel__list">
 					{origins.map((origin) => {
@@ -240,12 +245,17 @@ const OriginListSection: React.FC<OriginListSectionProps> = ({
 						return (
 							<li key={display} className="firewall-panel__list-row">
 								<ControlGroup className="firewall-panel__group" data-testid={`${testIdPrefix}-row-${display}`}>
-									<div className="firewall-panel__list-label" title={display}>
+									<div
+										className="firewall-panel__list-label"
+										aria-label={display}
+										onMouseEnter={(e) => { labelTooltipRef.current = e.currentTarget; setHoveredLabel(display) }}
+										onMouseLeave={() => { setHoveredLabel(null) }}
+									>
 										<code>{display}</code>
 									</div>
 									<Button
 										icon="trash"
-										options={{ ariaLabel: `Remove ${display}`, title: `Remove ${display}` }}
+										options={{ ariaLabel: t('firewall.removeOrigin', 'Remove {{origin}}', { origin: display }) }}
 										data-testid={`${testIdPrefix}-remove-${display}`}
 										onClick={() => { void onRemove(origin) }}
 										secondary
@@ -256,6 +266,12 @@ const OriginListSection: React.FC<OriginListSectionProps> = ({
 					})}
 				</ul>
 			)}
+			<Tooltip
+				targetRef={labelTooltipRef as React.RefObject<HTMLElement>}
+				content={hoveredLabel}
+				show={hoveredLabel !== null}
+				placement="below"
+			/>
 		</div>
 	)
 }
