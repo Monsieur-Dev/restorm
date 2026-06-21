@@ -581,3 +581,135 @@ colors:
   - id: alert.debug.border
     value: "#e0e0e0"
     description: Alert debug border color
+
+  # ── Protocol / HTTP-method badge colors (light themes) ────────────────────
+  # Deeper / more saturated than Material defaults so they pop on white.
+  - id: badge-get-background
+    value: "#2e7d32"
+    description: "HTTP GET badge (light)"
+
+  - id: badge-post-background
+    value: "#1565c0"
+    description: "HTTP POST badge (light)"
+
+  - id: badge-put-background
+    value: "#ef6c00"
+    description: "HTTP PUT badge (light)"
+
+  - id: badge-delete-background
+    value: "#c62828"
+    description: "HTTP DELETE badge (light)"
+
+  - id: badge-patch-background
+    value: "#6a1b9a"
+    description: "HTTP PATCH badge (light)"
+
+  - id: badge-head-background
+    value: "#00838f"
+    description: "HTTP HEAD badge (light)"
+
+  - id: badge-options-background
+    value: "#4527a0"
+    description: "HTTP OPTIONS badge (light)"
+
+  # ── Scenario UI semantic colors (light themes) ──────────────────────────────
+  # Slightly deeper than universal defaults to stay legible on light backgrounds.
+  - id: scenario-action-run-background
+    value: "#16a34a"
+    description: "Scenario run button (light)"
+
+  - id: scenario-action-run-hover-background
+    value: "#15803d"
+    description: "Scenario run hover (light)"
+
+  - id: scenario-action-run-active-background
+    value: "#ca8a04"
+    description: "Scenario run active/breakpoint state (light)"
+
+  - id: scenario-action-run-active-hover-background
+    value: "#a16207"
+    description: "Scenario run active hover (light)"
+
+  - id: scenario-action-step-background
+    value: "#2563eb"
+    description: "Scenario step button (light)"
+
+  - id: scenario-action-step-hover-background
+    value: "#1d4ed8"
+    description: "Scenario step hover (light)"
+
+  - id: scenario-action-debug-background
+    value: "#7c3aed"
+    description: "Scenario debug button (light)"
+
+  - id: scenario-action-debug-hover-background
+    value: "#6d28d9"
+    description: "Scenario debug hover (light)"
+
+  - id: scenario-action-stop-background
+    value: "#dc2626"
+    description: "Scenario stop button (light)"
+
+  - id: scenario-action-stop-hover-background
+    value: "#b91c1c"
+    description: "Scenario stop hover (light)"
+
+  - id: scenario-action-neutral-background
+    value: "#6b7280"
+    description: "Scenario neutral/disabled button (light)"
+
+  - id: scenario-error-color
+    value: "#dc2626"
+    description: "Scenario error color (light)"
+
+  - id: scenario-error-hover-color
+    value: "#ef4444"
+    description: "Scenario error hover color (light)"
+
+  - id: scenario-debug-edge-stroke
+    value: "#d97706"
+    description: "Scenario debug edge stroke (light — amber reads on white)"
+
+  - id: scenario-flow-value
+    value: "#7c3aed"
+    description: "Scenario data-flow (value) edge colour (light — deeper violet for contrast on white)"
+
+  - id: scenario-breakpoint-set-color
+    value: "#dc2626"
+    description: "Scenario breakpoint set (light)"
+
+  - id: scenario-muted-color
+    value: "#6b7280"
+    description: "Scenario muted icon color (light)"
+
+  - id: scenario-success-indicator
+    value: "#16a34a"
+    description: "Scenario success indicator (light)"
+
+  - id: log-dot-debug
+    value: "#9ca3af"
+    description: "Log level dot debug (light)"
+
+  - id: log-dot-info
+    value: "#2563eb"
+    description: "Log level dot info (light)"
+
+  - id: log-dot-warn
+    value: "#d97706"
+    description: "Log level dot warn (light)"
+
+  - id: log-dot-error
+    value: "#dc2626"
+    description: "Log level dot error (light)"
+
+  - id: scenario-status-completed
+    value: "#16a34a"
+    description: "Scenario run history completed (light)"
+
+  - id: scenario-status-cancelled
+    value: "#d97706"
+    description: "Scenario run history cancelled (light)"
+
+  - id: scenario-status-failed
+    value: "#dc2626"
+    description: "Scenario run history failed (light)"

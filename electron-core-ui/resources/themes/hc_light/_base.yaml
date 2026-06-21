@@ -358,3 +358,222 @@ colors:
   - id: alert.debug.border
     value: "#000000"
     description: Alert debug border color
+
+  # ── Protocol / HTTP-method badge colors (HC light) ────────────────────────
+  # High-contrast light: darkened to pass 4.5:1 contrast on white.
+  - id: badge-get-background
+    value: "#1b5e20"
+    description: "HTTP GET badge (HC light)"
+
+  - id: badge-post-background
+    value: "#0d47a1"
+    description: "HTTP POST badge (HC light)"
+
+  - id: badge-put-background
+    value: "#bf360c"
+    description: "HTTP PUT badge (HC light)"
+
+  - id: badge-delete-background
+    value: "#b71c1c"
+    description: "HTTP DELETE badge (HC light)"
+
+  - id: badge-patch-background
+    value: "#4a148c"
+    description: "HTTP PATCH badge (HC light)"
+
+  - id: badge-head-background
+    value: "#006064"
+    description: "HTTP HEAD badge (HC light)"
+
+  - id: badge-options-background
+    value: "#311b92"
+    description: "HTTP OPTIONS badge (HC light)"
+
+  - id: badge-grpc-unary-background
+    value: "#01579b"
+    description: "gRPC Unary badge (HC light)"
+
+  - id: badge-grpc-sstr-background
+    value: "#004d40"
+    description: "gRPC Server-stream badge (HC light)"
+
+  - id: badge-grpc-cstr-background
+    value: "#33691e"
+    description: "gRPC Client-stream badge (HC light)"
+
+  - id: badge-grpc-bidi-background
+    value: "#3e2723"
+    description: "gRPC Bidirectional-stream badge (HC light)"
+
+  - id: badge-grpc-background
+    value: "#1a237e"
+    description: "gRPC generic badge (HC light)"
+
+  - id: badge-gql-background
+    value: "#880e4f"
+    description: "GraphQL badge (HC light)"
+
+  - id: badge-mutation-background
+    value: "#b71c1c"
+    description: "GraphQL Mutation badge (HC light)"
+
+  - id: badge-subscription-background
+    value: "#4a148c"
+    description: "GraphQL Subscription badge (HC light)"
+
+  - id: badge-soap-background
+    value: "#f57f17"
+    description: "SOAP badge (HC light)"
+
+  - id: badge-soap-foreground
+    value: "#000000"
+    description: "SOAP badge foreground (HC light)"
+
+  - id: badge-ws-background
+    value: "#1b5e20"
+    description: "WebSocket badge (HC light)"
+
+  - id: badge-mqtt-background
+    value: "#e65100"
+    description: "MQTT badge (HC light)"
+
+  - id: badge-mqtt-foreground
+    value: "#ffffff"
+    description: "MQTT badge foreground (HC light)"
+
+  - id: badge-sio-background
+    value: "#006064"
+    description: "Socket.IO badge (HC light)"
+
+  - id: badge-odata-background
+    value: "#bf360c"
+    description: "OData badge (HC light)"
+
+  - id: badge-auth-background
+    value: "#e65100"
+    description: "Auth badge (HC light)"
+
+  - id: badge-scenario-background
+    value: "#4a148c"
+    description: "Scenario badge (HC light)"
+
+  - id: badge-capsule-glyph-background
+    value: "#311b92"
+    description: "Server-mode capsule glyph (HC light)"
+
+  # ── Scenario UI semantic colors (HC light) ─────────────────────────────────
+  - id: scenario-action-run-background
+    value: "#1b5e20"
+    description: "Scenario run button (HC light)"
+
+  - id: scenario-action-run-hover-background
+    value: "#15451a"
+    description: "Scenario run hover (HC light)"
+
+  - id: scenario-action-run-active-background
+    value: "#f57f17"
+    description: "Scenario run active/breakpoint (HC light)"
+
+  - id: scenario-action-run-active-hover-background
+    value: "#e65100"
+    description: "Scenario run active hover (HC light)"
+
+  - id: scenario-action-step-background
+    value: "#0d47a1"
+    description: "Scenario step button (HC light)"
+
+  - id: scenario-action-step-hover-background
+    value: "#0a3680"
+    description: "Scenario step hover (HC light)"
+
+  - id: scenario-action-debug-background
+    value: "#4a148c"
+    description: "Scenario debug button (HC light)"
+
+  - id: scenario-action-debug-hover-background
+    value: "#38006b"
+    description: "Scenario debug hover (HC light)"
+
+  - id: scenario-action-stop-background
+    value: "#b71c1c"
+    description: "Scenario stop button (HC light)"
+
+  - id: scenario-action-stop-hover-background
+    value: "#7f0000"
+    description: "Scenario stop hover (HC light)"
+
+  - id: scenario-action-neutral-background
+    value: "#546e7a"
+    description: "Scenario neutral button (HC light)"
+
+  - id: scenario-debug-edge-stroke
+    value: "#f57f17"
+    description: "Scenario debug edge stroke (HC light)"
+
+  - id: scenario-flow-value
+    value: "#6a1b9a"
+    description: "Scenario data-flow (value) edge colour (HC light — deep violet meets WCAG AA on white)"
+
+  - id: scenario-error-color
+    value: "#b71c1c"
+    description: "Scenario error color (HC light)"
+
+  - id: scenario-error-hover-color
+    value: "#c62828"
+    description: "Scenario error hover (HC light)"
+
+  - id: scenario-breakpoint-set-color
+    value: "#b71c1c"
+    description: "Scenario breakpoint set (HC light)"
+
+  - id: scenario-muted-color
+    value: "#546e7a"
+    description: "Scenario muted icon (HC light)"
+
+  - id: scenario-success-indicator
+    value: "#1b5e20"
+    description: "Scenario success indicator (HC light)"
+
+  - id: log-dot-debug
+    value: "#546e7a"
+    description: "Log level dot debug (HC light)"
+
+  - id: log-dot-info
+    value: "#0d47a1"
+    description: "Log level dot info (HC light)"
+
+  - id: log-dot-warn
+    value: "#e65100"
+    description: "Log level dot warn (HC light)"
+
+  - id: log-dot-error
+    value: "#b71c1c"
+    description: "Log level dot error (HC light)"
+
+  - id: scenario-status-completed
+    value: "#1b5e20"
+    description: "Scenario history completed (HC light)"
+
+  - id: scenario-status-cancelled
+    value: "#e65100"
+    description: "Scenario history cancelled (HC light)"
+
+  - id: scenario-status-failed
+    value: "#b71c1c"
+    description: "Scenario history failed (HC light)"
+
+  - id: doc-error-outline
+    value: "#b71c1c"
+    description: "Doc error outline (HC light)"
+
+  - id: electric-border-color
+    value: "#e65100"
+    description: "Electric border (HC light)"
+
+  - id: recent-files-star-color
+    value: "#f57f17"
+    description: "Recent files star (HC light)"
+
+  - id: search-result-badge-background
+    value: "#546e7a"
+    description: "Search result badge (HC light)"

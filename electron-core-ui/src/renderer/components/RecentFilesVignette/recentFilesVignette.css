@@ -51,7 +51,7 @@
 }
 
 .ecu-recent-files-vignette-section-icon--favorite {
-  color: #f5c518;
+  color: var(--recent-files-star-color);
 }
 
 .ecu-recent-files-vignette-list {

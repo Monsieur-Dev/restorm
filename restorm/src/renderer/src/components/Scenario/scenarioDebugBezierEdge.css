@@ -8,12 +8,12 @@
  * keyframes work in percent regardless of the actual bezier length.
  */
 .scn-edge-beam-stroke {
-  stroke: #facc15;
+  stroke: var(--scenario-debug-edge-stroke, #facc15);
   stroke-width: 3px;
   stroke-linecap: round;
   stroke-linejoin: round;
   pointer-events: none;
-  filter: drop-shadow(0 0 4px #22c55e);
+  filter: drop-shadow(0 0 4px var(--scenario-action-run-background, #22c55e));
   animation-name: scn-edge-beam-dash;
   animation-iteration-count: 1;
   animation-timing-function: linear;

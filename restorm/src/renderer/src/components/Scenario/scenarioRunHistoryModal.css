@@ -52,9 +52,9 @@
   flex: 0 0 8px;
 }
 
-.scn-run-history-dot-completed { background: #3fb950; }
-.scn-run-history-dot-cancelled { background: #d29922; }
-.scn-run-history-dot-failed { background: #f85149; }
+.scn-run-history-dot-completed { background: var(--scenario-status-completed); }
+.scn-run-history-dot-cancelled { background: var(--scenario-status-cancelled); }
+.scn-run-history-dot-failed { background: var(--scenario-status-failed); }
 
 .scn-run-history-when {
   flex: 1;

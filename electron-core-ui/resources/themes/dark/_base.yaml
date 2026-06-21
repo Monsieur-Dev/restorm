@@ -535,3 +535,76 @@ colors:
   - id: inputValidation.infoForeground
     value: "#75bfcf"
     description: Input validation info foreground
+
+  # ── Protocol / HTTP-method badge colors (dark themes) ─────────────────────
+  # Slightly desaturated / lightened vs. Material spec so they read on dark
+  # backgrounds without being garish. White text (badge-on-accent) is kept.
+  - id: badge-get-background
+    value: "#388e3c"
+    description: "HTTP GET badge (dark)"
+
+  - id: badge-post-background
+    value: "#1976d2"
+    description: "HTTP POST badge (dark)"
+
+  - id: badge-put-background
+    value: "#f57c00"
+    description: "HTTP PUT badge (dark)"
+
+  - id: badge-delete-background
+    value: "#d32f2f"
+    description: "HTTP DELETE badge (dark)"
+
+  - id: badge-patch-background
+    value: "#7b1fa2"
+    description: "HTTP PATCH badge (dark)"
+
+  - id: badge-head-background
+    value: "#0097a7"
+    description: "HTTP HEAD badge (dark)"
+
+  - id: badge-options-background
+    value: "#512da8"
+    description: "HTTP OPTIONS badge (dark)"
+
+  # ── Scenario UI semantic colors (dark themes) ───────────────────────────────
+  # Action colors intentionally brighter on dark for icon-button contrast.
+  - id: scenario-action-run-background
+    value: "#22c55e"
+    description: "Scenario run button (dark)"
+
+  - id: scenario-action-run-hover-background
+    value: "#16a34a"
+    description: "Scenario run hover (dark)"
+
+  - id: scenario-action-step-background
+    value: "#3b82f6"
+    description: "Scenario step button (dark)"
+
+  - id: scenario-action-step-hover-background
+    value: "#2563eb"
+    description: "Scenario step hover (dark)"
+
+  - id: scenario-action-debug-background
+    value: "#8b5cf6"
+    description: "Scenario debug button (dark)"
+
+  - id: scenario-action-debug-hover-background
+    value: "#7c3aed"
+    description: "Scenario debug hover (dark)"
+
+  - id: scenario-action-stop-background
+    value: "#ef4444"
+    description: "Scenario stop button (dark)"
+
+  - id: scenario-action-stop-hover-background
+    value: "#dc2626"
+    description: "Scenario stop hover (dark)"
+
+  - id: scenario-error-color
+    value: "#ef4444"
+    description: "Scenario error color (dark)"
+
+  - id: scenario-error-hover-color
+    value: "#f87171"
+    description: "Scenario error hover color (dark)"
