@@ -158,7 +158,7 @@
     },
     "codeLanguages": {
       "title": "Biraz kod yazmaya ne dersiniz?",
-      "body": "Kodu doğrudan senaryolarınızın içine yazın — TypeScript, JavaScript, Python, Lua, Ruby veya R ile!"
+      "body": "Kodu doğrudan senaryolarınızın içine yazın — TypeScript, JavaScript, Python, Lua, Ruby, C# veya R ile!"
     },
     "scenarioAi": {
       "title": "Yapay zekâ ile yönetilebilen senaryolar",

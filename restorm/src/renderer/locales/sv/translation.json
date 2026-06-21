@@ -158,7 +158,7 @@
     },
     "codeLanguages": {
       "title": "Sugen på att skriva lite kod?",
-      "body": "Skriv kod direkt i dina scenarier — i TypeScript, JavaScript, Python, Lua, Ruby eller R!"
+      "body": "Skriv kod direkt i dina scenarier — i TypeScript, JavaScript, Python, Lua, Ruby, C# eller R!"
     },
     "scenarioAi": {
       "title": "Scenarier som kan styras av AI",

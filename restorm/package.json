@@ -165,7 +165,12 @@
     "asarUnpack": [
       "**/*.node"
     ],
-    "extraResources": [],
+    "extraResources": [
+      {
+        "from": "resources/dotnet-wasm",
+        "to": "restorm-resources/dotnet-wasm"
+      }
+    ],
     "linux": {
       "target": [
         "deb",

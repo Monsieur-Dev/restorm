@@ -158,7 +158,7 @@
     },
     "codeLanguages": {
       "title": "Fancy writing some code?",
-      "body": "Write code right inside your scenarios — in TypeScript, JavaScript, Python, Lua, Ruby or R!"
+      "body": "Write code right inside your scenarios — in TypeScript, JavaScript, Python, Lua, Ruby, C# or R!"
     },
     "scenarioAi": {
       "title": "AI-drivable scenarios",

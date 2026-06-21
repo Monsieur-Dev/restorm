@@ -9,6 +9,7 @@ import { pythonRuntime } from './pythonRuntime'
 import { luaRuntime } from './luaRuntime'
 import { rubyRuntime } from './rubyRuntime'
 import { rRuntime } from './rRuntime'
+import { csharpRuntime } from './csharpRuntime'
 
 let installed = false
 
@@ -22,6 +23,7 @@ export function ensureCodeRuntimes(): void {
   registerCodeRuntime(luaRuntime)
   registerCodeRuntime(rubyRuntime)
   registerCodeRuntime(rRuntime)
+  registerCodeRuntime(csharpRuntime)
 }
 
 export { getCodeRuntime, registeredCodeLanguages } from './registry'

@@ -158,7 +158,7 @@
     },
     "codeLanguages": {
       "title": "Keni dëshirë të shkruani pak kod?",
-      "body": "Shkruani kod drejtpërdrejt brenda skenarëve tuaj — në TypeScript, JavaScript, Python, Lua, Ruby ose R!"
+      "body": "Shkruani kod drejtpërdrejt brenda skenarëve tuaj — në TypeScript, JavaScript, Python, Lua, Ruby, C# ose R!"
     },
     "scenarioAi": {
       "title": "Skenarë të drejtueshëm nga IA",

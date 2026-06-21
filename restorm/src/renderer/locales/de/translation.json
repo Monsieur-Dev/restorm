@@ -158,7 +158,7 @@
     },
     "codeLanguages": {
       "title": "Lust, etwas Code zu schreiben?",
-      "body": "Schreibe Code direkt in deinen Szenarien — in TypeScript, JavaScript, Python, Lua, Ruby oder R!"
+      "body": "Schreibe Code direkt in deinen Szenarien — in TypeScript, JavaScript, Python, Lua, Ruby, C# oder R!"
     },
     "scenarioAi": {
       "title": "Per KI steuerbare Szenarien",

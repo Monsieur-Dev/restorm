@@ -65,7 +65,7 @@ const configureMonacoForCodeNode: OnMount = (_editor, monaco) => { configureTsDe
 
 /** Languages the embedded editor knows how to highlight. Kept as a closed union
  * so callers pick a sensible Monaco mode for the content they edit. */
-export type ScenarioCodeLanguage = 'json' | 'xml' | 'yaml' | 'csv' | 'handlebars' | 'plaintext' | 'sql' | 'html' | 'typescript' | 'javascript' | 'python' | 'lua' | 'ruby' | 'r'
+export type ScenarioCodeLanguage = 'json' | 'xml' | 'yaml' | 'csv' | 'handlebars' | 'plaintext' | 'sql' | 'html' | 'typescript' | 'javascript' | 'python' | 'lua' | 'ruby' | 'r' | 'csharp'
 
 /** How many lines of the value to show in the collapsed preview. */
 const PREVIEW_LINES = 4

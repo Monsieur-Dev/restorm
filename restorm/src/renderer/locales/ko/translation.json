@@ -157,7 +157,7 @@
     },
     "codeLanguages": {
       "title": "코드를 좀 작성해 볼까요?",
-      "body": "시나리오 안에 바로 코드를 작성하세요 — TypeScript, JavaScript, Python, Lua, Ruby, R 로요!"
+      "body": "시나리오 안에 바로 코드를 작성하세요 — TypeScript, JavaScript, Python, Lua, Ruby, C#, R 로요!"
     },
     "scenarioAi": {
       "title": "AI 로 다룰 수 있는 시나리오",

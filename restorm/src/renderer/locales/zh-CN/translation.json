@@ -157,7 +157,7 @@
     },
     "codeLanguages": {
       "title": "想写点代码?",
-      "body": "直接在你的场景里写代码 — 用 TypeScript、JavaScript、Python、Lua、Ruby 或 R!"
+      "body": "直接在你的场景里写代码 — 用 TypeScript、JavaScript、Python、Lua、Ruby、C# 或 R!"
     },
     "scenarioAi": {
       "title": "可由 AI 驱动的场景",

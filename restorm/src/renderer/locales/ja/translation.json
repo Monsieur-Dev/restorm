@@ -157,7 +157,7 @@
     },
     "codeLanguages": {
       "title": "コードを書いてみませんか?",
-      "body": "シナリオの中に直接コードを書けます。TypeScript、JavaScript、Python、Lua、Ruby、R が使えます!"
+      "body": "シナリオの中に直接コードを書けます。TypeScript、JavaScript、Python、Lua、Ruby、C#、R が使えます!"
     },
     "scenarioAi": {
       "title": "AI で操作できるシナリオ",

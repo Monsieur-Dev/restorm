@@ -787,6 +787,25 @@ collections:
                 position:
                   x: 800
                   'y': 1720
+              - id: 520d7913-c2ff-4a6c-b09b-f3c27b1831ee
+                kind: runScenario
+                config:
+                  scenarioId: d7416a34-7ebf-4e28-9ae0-7738a08582c6
+                  label: Code C#
+                inputs:
+                  - id: in
+                    name: ''
+                    dataType: any
+                    flow: signal
+                outputs:
+                  - id: result
+                    name: result
+                    dataType: any
+                    role: response
+                    flow: both
+                position:
+                  x: 1020
+                  'y': 1720
               - id: ec3ea5d2-2043-48f0-b9b9-a268c4e4f72a
                 kind: runScenario
                 config:
@@ -1183,6 +1202,13 @@ collections:
               - id: a6c57b94-c50d-4e96-abea-195780dc5772
                 from:
                   nodeId: 84986541-c95a-4ebb-a059-865b2b92a11f
+                  portId: done
+                to:
+                  nodeId: 520d7913-c2ff-4a6c-b09b-f3c27b1831ee
+                  portId: in
+              - id: c549e7a0-f115-4281-9eb1-9df217e32aa0
+                from:
+                  nodeId: 520d7913-c2ff-4a6c-b09b-f3c27b1831ee
                   portId: done
                 to:
                   nodeId: 49ed9e8a-d1e0-423f-8652-1f12e6facee4
@@ -17810,6 +17836,142 @@ collections:
                     selector: .
                 id: ee605f22-b0bf-4485-8785-6f58bfb445e5
                 name: Code R
+                items: []
+              - type: scenario
+                tags: []
+                params: []
+                nodes:
+                  - id: b332ea15-8e6d-483f-8eb0-b301d1bda8cb
+                    kind: code
+                    config:
+                      language: csharp
+                      code: |-
+                        // Fixed dataset (no input -> runs at start). Console.WriteLine -> run log.
+                        var data = new List<Dictionary<string, object>> {
+                            new() { ["n"] = "a", ["v"] = 3 },
+                            new() { ["n"] = "b", ["v"] = 1 },
+                            new() { ["n"] = "c", ["v"] = 2 },
+                        };
+                        Console.WriteLine($"csharp: built {data.Count} rows");
+                        data
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: input
+                        dataType: any
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: any
+                        flow: both
+                    position:
+                      x: -420
+                      'y': 40
+                  - id: 25d1f84e-0e13-4a97-a5f0-629f2d3a1494
+                    kind: code
+                    config:
+                      language: csharp
+                      code: |-
+                        // `input` = wired value (list of records). LINQ aggregate.
+                        var rows = ((IEnumerable<object>)input).Cast<IDictionary<string, object>>().ToList();
+                        long total = rows.Sum(r => Convert.ToInt64(r["v"]));
+                        var names = rows.OrderBy(r => Convert.ToInt64(r["v"])).Select(r => (string)r["n"]).ToList();
+                        Console.WriteLine($"csharp: total = {total} names = {string.Join(",", names)}");
+                        new Dictionary<string, object> { ["total"] = total, ["names"] = names }
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: input
+                        dataType: any
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: any
+                        flow: both
+                    position:
+                      x: 300
+                      'y': 40
+                  - id: b1eda16c-95c1-4b51-af6e-e22fb25e6048
+                    kind: code
+                    config:
+                      language: csharp
+                      code: |-
+                        // String summary of the previous result.
+                        var names = (IEnumerable<object>)input["names"];
+                        var summary = $"{names.Count()} items summing to {input["total"]}";
+                        Console.WriteLine($"csharp: {summary}");
+                        new Dictionary<string, object> { ["lang"] = "csharp", ["summary"] = summary, ["total"] = input["total"] }
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: input
+                        dataType: any
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: any
+                        flow: both
+                    position:
+                      x: 300
+                      'y': 400
+                  - id: a9bec39a-6bbb-45cc-b267-867c80980fa0
+                    kind: log
+                    config:
+                      level: info
+                      message:
+                        type: expression
+                        value: 'C# result: {{.}}'
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 980
+                      'y': 400
+                edges:
+                  - id: c388f714-9c30-489d-89a6-b07d88d0ade4
+                    from:
+                      nodeId: b332ea15-8e6d-483f-8eb0-b301d1bda8cb
+                      portId: result
+                    to:
+                      nodeId: 25d1f84e-0e13-4a97-a5f0-629f2d3a1494
+                      portId: value
+                    selector: .
+                  - id: 7e873d39-b6bd-4f4e-b073-b46641320576
+                    from:
+                      nodeId: 25d1f84e-0e13-4a97-a5f0-629f2d3a1494
+                      portId: result
+                    to:
+                      nodeId: b1eda16c-95c1-4b51-af6e-e22fb25e6048
+                      portId: value
+                    selector: .
+                  - id: 587ac5f4-cf69-4716-92f6-e2a76a4e3725
+                    from:
+                      nodeId: b1eda16c-95c1-4b51-af6e-e22fb25e6048
+                      portId: result
+                    to:
+                      nodeId: a9bec39a-6bbb-45cc-b267-867c80980fa0
+                      portId: data
+                    selector: .
+                id: d7416a34-7ebf-4e28-9ae0-7738a08582c6
+                name: Code C#
                 items: []
               - type: scenario
                 tags: []

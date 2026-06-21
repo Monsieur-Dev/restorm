@@ -157,7 +157,7 @@
     },
     "codeLanguages": {
       "title": "Ingin menulis sedikit kode?",
-      "body": "Tulis kode langsung di dalam skenariomu — dalam TypeScript, JavaScript, Python, Lua, Ruby, atau R!"
+      "body": "Tulis kode langsung di dalam skenariomu — dalam TypeScript, JavaScript, Python, Lua, Ruby, C#, atau R!"
     },
     "scenarioAi": {
       "title": "Skenario yang bisa dikendalikan AI",

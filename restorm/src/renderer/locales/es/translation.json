@@ -158,7 +158,7 @@
     },
     "codeLanguages": {
       "title": "¿Te apetece escribir algo de código?",
-      "body": "Escribe código directamente en tus escenarios — ¡en TypeScript, JavaScript, Python, Lua, Ruby o R!"
+      "body": "Escribe código directamente en tus escenarios — ¡en TypeScript, JavaScript, Python, Lua, Ruby, C# o R!"
     },
     "scenarioAi": {
       "title": "Escenarios manejables por IA",

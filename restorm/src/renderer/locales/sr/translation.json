@@ -159,7 +159,7 @@
     },
     "codeLanguages": {
       "title": "Имате вољу да напишете мало кода?",
-      "body": "Пишите код директно у својим сценаријима — на TypeScript, JavaScript, Python, Lua, Ruby или R!"
+      "body": "Пишите код директно у својим сценаријима — на TypeScript, JavaScript, Python, Lua, Ruby, C# или R!"
     },
     "scenarioAi": {
       "title": "Сценарији којима управља вештачка интелигенција",

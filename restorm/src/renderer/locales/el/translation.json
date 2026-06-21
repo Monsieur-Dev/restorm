@@ -158,7 +158,7 @@
     },
     "codeLanguages": {
       "title": "Όρεξη για λίγο κώδικα;",
-      "body": "Γράψτε κώδικα απευθείας μέσα στα σενάριά σας — σε TypeScript, JavaScript, Python, Lua, Ruby ή R!"
+      "body": "Γράψτε κώδικα απευθείας μέσα στα σενάριά σας — σε TypeScript, JavaScript, Python, Lua, Ruby, C# ή R!"
     },
     "scenarioAi": {
       "title": "Σενάρια που οδηγούνται από ΤΝ",

@@ -158,7 +158,7 @@
     },
     "codeLanguages": {
       "title": "Tekisikö mieli kirjoittaa koodia?",
-      "body": "Kirjoita koodia suoraan skenaarioihisi — kielillä TypeScript, JavaScript, Python, Lua, Ruby tai R!"
+      "body": "Kirjoita koodia suoraan skenaarioihisi — kielillä TypeScript, JavaScript, Python, Lua, Ruby, C# tai R!"
     },
     "scenarioAi": {
       "title": "Tekoälyllä ohjattavat skenaariot",

@@ -160,7 +160,7 @@
     },
     "codeLanguages": {
       "title": "Máte chuť psát kód?",
-      "body": "Pište kód přímo ve svých scénářích — v TypeScriptu, JavaScriptu, Pythonu, Lua, Ruby nebo R!"
+      "body": "Pište kód přímo ve svých scénářích — v TypeScriptu, JavaScriptu, Pythonu, Lua, Ruby, C# nebo R!"
     },
     "scenarioAi": {
       "title": "Scénáře řiditelné umělou inteligencí",
