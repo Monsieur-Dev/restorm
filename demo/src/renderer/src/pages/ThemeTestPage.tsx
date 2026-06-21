@@ -1,7 +1,7 @@
 import React, { useEffect, useCallback, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useTheme, Tabs, logger, SelectBox, Titlebar, MenuBar, MenuBarItem, MenuItem, MenuItemSeparator, Button, Statusbar, StatusbarElement, useSettingsModal, Toaster, StatusBarBellButton } from 'electron-core-ui/renderer'
-import type { Tab } from 'electron-core-ui/renderer'
+import { useThemeContext, Tabs, logger, SelectBox, Titlebar, MenuBar, MenuBarItem, MenuItem, MenuItemSeparator, Button, Statusbar, StatusbarElement, useSettingsModal, Toaster, StatusBarBellButton } from 'electron-core-ui/renderer'
+import type { Tab, ThemeInfo } from 'electron-core-ui/renderer'
 import '@vscode/codicons/dist/codicon.css'
 import { 
   InputsTab, 
@@ -58,36 +58,7 @@ interface ThemeOption {
   id: string
 }
 
-// Local interface to ensure proper type resolution
-interface SafeThemeInfo {
-  id: string
-  name: string
-  type: 'dark' | 'light' | 'hc' | 'hcLight'
-  path: string
-}
-
-// Type-safe wrapper for useTheme hook
-function useThemeTyped(): {
-  themes: SafeThemeInfo[]
-  currentThemeId: string | null
-  setTheme: (themeId: string) => Promise<void>
-} {
-  const resultUnknown: unknown = useTheme()
-  const result = resultUnknown as { themes: unknown; currentThemeId: unknown; setTheme: unknown }
-  const themesRaw: unknown = result.themes
-  const themesArray: unknown[] = Array.isArray(themesRaw) ? themesRaw : []
-  const themes: SafeThemeInfo[] = themesArray as SafeThemeInfo[]
-  const currentThemeIdRaw: unknown = result.currentThemeId
-  const currentThemeId: string | null = (typeof currentThemeIdRaw === 'string') ? currentThemeIdRaw : null
-  const setThemeRaw: unknown = result.setTheme
-  const setTheme: (themeId: string) => Promise<void> = async (themeId: string): Promise<void> => {
-    const setThemeFunc = setThemeRaw as (themeId: string) => Promise<unknown>
-    await setThemeFunc(themeId)
-  }
-  return { themes, currentThemeId, setTheme }
-}
-
-function getThemeByIdHelper(themes: readonly SafeThemeInfo[], themeId: string): SafeThemeInfo | undefined {
+function getThemeByIdHelper(themes: readonly ThemeInfo[], themeId: string): ThemeInfo | undefined {
   for (const themeItem of themes) {
     if (themeItem.id === themeId) {
       return themeItem
@@ -98,11 +69,11 @@ function getThemeByIdHelper(themes: readonly SafeThemeInfo[], themeId: string): 
 
 const ThemeTestPage: React.FC = () => {
   const { t, i18n } = useTranslation()
-  const { themes, currentThemeId, setTheme } = useThemeTyped()
+  const { themes, currentThemeId, setTheme } = useThemeContext()
   const { showSettingsModal } = useSettingsModal()
 
   // Helper function to safely access theme properties
-  const getThemeById = useCallback((themeId: string | null): SafeThemeInfo | undefined => {
+  const getThemeById = useCallback((themeId: string | null): ThemeInfo | undefined => {
     if (themeId === null) return undefined
     return getThemeByIdHelper(themes, themeId)
   }, [themes])

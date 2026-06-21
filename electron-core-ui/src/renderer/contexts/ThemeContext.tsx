@@ -49,13 +49,6 @@ function getThemeApi(): ThemeApi | null {
 let globalInitStarted = false
 let globalInitPromise: Promise<void> | null = null
 
-/**
- * Flag indicating that ThemeProvider is managing themes.
- * When true, useThemeLegacy should not run its own initialization
- * to avoid race conditions and CSS variable conflicts.
- */
-export let themeProviderActive = false
-
 interface ThemeProviderProps {
   children: React.ReactNode
 }
@@ -65,12 +58,9 @@ interface ThemeProviderProps {
  * Only ONE instance should be used at the app root
  */
 export function ThemeProvider({ children }: ThemeProviderProps): React.ReactElement {
-  // Mark ThemeProvider as active IMMEDIATELY (not in useEffect) so it wins the
-  // race against useThemeLegacy's own init. The render-time write can't be
-  // cleanly reset (no cleanup runs for a render), so a layout effect resets the
-  // init globals on a REAL unmount, letting a remounted provider re-initialise
-  // (a StrictMode unmount→remount otherwise hit the globalInitStarted early-return).
-  themeProviderActive = true
+  // Reset the init globals on a REAL unmount so a remounted provider can
+  // re-initialise. Without this, a StrictMode unmount→remount would hit the
+  // `globalInitStarted` early-return below and never re-run init.
   useLayoutEffect(() => {
     return () => {
       globalInitStarted = false
