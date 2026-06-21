@@ -160,7 +160,7 @@
     },
     "codeLanguages": {
       "title": "Masz ochotę napisać trochę kodu?",
-      "body": "Pisz kod prosto w swoich scenariuszach — w TypeScript, JavaScript, Python, Lua, Ruby lub R!"
+      "body": "Pisz kod prosto w swoich scenariuszach — w TypeScript, JavaScript, Python, Lua, Ruby, C# lub R!"
     },
     "scenarioAi": {
       "title": "Scenariusze sterowane przez AI",

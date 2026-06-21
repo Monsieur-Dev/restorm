@@ -158,7 +158,7 @@
     },
     "codeLanguages": {
       "title": "Zin om wat code te schrijven?",
-      "body": "Schrijf code rechtstreeks in je scenario's — in TypeScript, JavaScript, Python, Lua, Ruby of R!"
+      "body": "Schrijf code rechtstreeks in je scenario's — in TypeScript, JavaScript, Python, Lua, Ruby, C# of R!"
     },
     "scenarioAi": {
       "title": "Scenario's die je met AI kunt aansturen",

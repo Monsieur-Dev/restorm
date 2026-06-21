@@ -7,7 +7,7 @@
  *
  * Ordered TS/JS first (the original default), then the additional runtimes.
  */
-export const CODE_LANGUAGES = ['typescript', 'javascript', 'python', 'lua', 'ruby', 'r'] as const
+export const CODE_LANGUAGES = ['typescript', 'javascript', 'python', 'lua', 'ruby', 'r', 'csharp'] as const
 
 export type CodeLanguage = (typeof CODE_LANGUAGES)[number]
 
@@ -18,7 +18,8 @@ export const CODE_LANGUAGE_LABELS: Record<CodeLanguage, string> = {
   python: 'Python',
   lua: 'Lua',
   ruby: 'Ruby',
-  r: 'R'
+  r: 'R',
+  csharp: 'C#'
 }
 
 /** The original default — a `code` node with no `config.language` runs as

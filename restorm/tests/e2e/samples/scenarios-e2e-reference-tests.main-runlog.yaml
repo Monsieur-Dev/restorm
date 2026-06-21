@@ -6222,6 +6222,122 @@
 - message: ⚪ [<time>] start runScenario
   data:
     scenarioId: <uuid>
+    label: Code C#
+    in: true
+- message: 🔵 [<time>] ▶ Code C#
+- message: ⚪ [<time>] start code
+  data:
+    language: csharp
+    code: >-
+      // Fixed dataset (no input -> runs at start). Console.WriteLine -> run
+      log.
+
+      var data = new List<Dictionary<string, object>> {
+          new() { ["n"] = "a", ["v"] = 3 },
+          new() { ["n"] = "b", ["v"] = 1 },
+          new() { ["n"] = "c", ["v"] = 2 },
+      };
+
+      Console.WriteLine($"csharp: built {data.Count} rows");
+
+      data
+- message: "🔵 [<time>] csharp: built 3 rows"
+- message: ⚪ [<time>] done code
+  data:
+    result:
+      - n: a
+        v: 3
+      - n: b
+        v: 1
+      - n: c
+        v: 2
+- message: ⚪ [<time>] start code
+  data:
+    language: csharp
+    code: >-
+      // `input` = wired value (list of records). LINQ aggregate.
+
+      var rows = ((IEnumerable<object>)input).Cast<IDictionary<string,
+      object>>().ToList();
+
+      long total = rows.Sum(r => Convert.ToInt64(r["v"]));
+
+      var names = rows.OrderBy(r => Convert.ToInt64(r["v"])).Select(r =>
+      (string)r["n"]).ToList();
+
+      Console.WriteLine($"csharp: total = {total} names = {string.Join(",",
+      names)}");
+
+      new Dictionary<string, object> { ["total"] = total, ["names"] = names }
+    value:
+      - n: a
+        v: 3
+      - n: b
+        v: 1
+      - n: c
+        v: 2
+- message: "🔵 [<time>] csharp: total = 6 names = b,c,a"
+- message: ⚪ [<time>] done code
+  data:
+    result:
+      total: 6
+      names:
+        - b
+        - c
+        - a
+- message: ⚪ [<time>] start code
+  data:
+    language: csharp
+    code: >-
+      // String summary of the previous result.
+
+      var names = (IEnumerable<object>)input["names"];
+
+      var summary = $"{names.Count()} items summing to {input["total"]}";
+
+      Console.WriteLine($"csharp: {summary}");
+
+      new Dictionary<string, object> { ["lang"] = "csharp", ["summary"] =
+      summary, ["total"] = input["total"] }
+    value:
+      total: 6
+      names:
+        - b
+        - c
+        - a
+- message: "🔵 [<time>] csharp: 3 items summing to 6"
+- message: ⚪ [<time>] done code
+  data:
+    result:
+      lang: csharp
+      summary: 3 items summing to 6
+      total: 6
+- message: ⚪ [<time>] start log
+  data:
+    level: info
+    message: "C# result: {{.}}"
+    data:
+      lang: csharp
+      summary: 3 items summing to 6
+      total: 6
+- message: "🔵 [<time>] C# result: [object Object]"
+  data:
+    lang: csharp
+    summary: 3 items summing to 6
+    total: 6
+- message: ⚪ [<time>] done log
+  data:
+    value:
+      lang: csharp
+      summary: 3 items summing to 6
+      total: 6
+- message: 🔵 [<time>] ■ Code C#
+- message: ⚪ [<time>] done runScenario
+  data:
+    result: {}
+- message: ⚪ [<time>] start runScenario
+  data:
+    scenarioId: <uuid>
     label: Socket.IO
     in: true
 - message: 🔵 [<time>] ▶ Socket.IO

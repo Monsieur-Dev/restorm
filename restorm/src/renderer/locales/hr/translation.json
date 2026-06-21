@@ -159,7 +159,7 @@
     },
     "codeLanguages": {
       "title": "Imaš želju napisati malo koda?",
-      "body": "Piši kôd izravno unutar svojih scenarija — u TypeScript, JavaScript, Python, Lua, Ruby ili R!"
+      "body": "Piši kôd izravno unutar svojih scenarija — u TypeScript, JavaScript, Python, Lua, Ruby, C# ili R!"
     },
     "scenarioAi": {
       "title": "Scenariji vođeni umjetnom inteligencijom",

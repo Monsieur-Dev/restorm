@@ -160,7 +160,7 @@
     },
     "codeLanguages": {
       "title": "Маєте бажання написати трохи коду?",
-      "body": "Пишіть код просто всередині своїх сценаріїв — мовами TypeScript, JavaScript, Python, Lua, Ruby або R!"
+      "body": "Пишіть код просто всередині своїх сценаріїв — мовами TypeScript, JavaScript, Python, Lua, Ruby, C# або R!"
     },
     "scenarioAi": {
       "title": "Сценарії, керовані ШІ",

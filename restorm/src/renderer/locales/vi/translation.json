@@ -157,7 +157,7 @@
     },
     "codeLanguages": {
       "title": "Thích viết một chút mã chứ?",
-      "body": "Viết mã ngay bên trong các kịch bản của bạn — bằng TypeScript, JavaScript, Python, Lua, Ruby hoặc R!"
+      "body": "Viết mã ngay bên trong các kịch bản của bạn — bằng TypeScript, JavaScript, Python, Lua, Ruby, C# hoặc R!"
     },
     "scenarioAi": {
       "title": "Kịch bản điều khiển được bằng AI",

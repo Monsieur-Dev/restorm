@@ -54,6 +54,7 @@ Feature: Scenario run-log end-to-end
       | Code Lua       |
       | Code Ruby      |
       | Code R         |
+      | Code C#        |
       | Socket.IO      |
       | WebSocket      |
       | gRPC unary     |

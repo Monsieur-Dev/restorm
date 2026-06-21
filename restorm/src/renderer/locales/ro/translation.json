@@ -159,7 +159,7 @@
     },
     "codeLanguages": {
       "title": "Ai chef să scrii niște cod?",
-      "body": "Scrie cod direct în scenariile tale — în TypeScript, JavaScript, Python, Lua, Ruby sau R!"
+      "body": "Scrie cod direct în scenariile tale — în TypeScript, JavaScript, Python, Lua, Ruby, C# sau R!"
     },
     "scenarioAi": {
       "title": "Scenarii pilotabile de AI",
