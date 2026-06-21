@@ -91,15 +91,16 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
       <header className="ecu-welcome-screen-header">
         <h1 className="ecu-welcome-screen-wordmark-heading">
           <span className="ecu-welcome-screen-wordmark-visually-hidden">{name}</span>
-          <Wordmark
-            effect={wordmarkEffect}
-            loop
-            startDelay={wordmarkStartDelay}
-            className="ecu-welcome-screen-wordmark"
-            aria-hidden="true"
-          >
-            {name}
-          </Wordmark>
+          <span aria-hidden="true">
+            <Wordmark
+              effect={wordmarkEffect}
+              loop
+              startDelay={wordmarkStartDelay}
+              className="ecu-welcome-screen-wordmark"
+            >
+              {name}
+            </Wordmark>
+          </span>
         </h1>
         <div className="ecu-welcome-screen-rule" aria-hidden="true" />
       </header>
