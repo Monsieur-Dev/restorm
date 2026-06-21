@@ -1849,6 +1849,19 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
     else addLinkedNode('httpRequest', wirePort, { requestId: newId })
   }, [onCreateChild, scenario.id, addLinkedNode])
 
+  // Drag/drop are plain React `onDrag*` props on the wrapper. The tab
+  // content is `createPortal`'d with `EditorWorkbench` as its React parent,
+  // so React's synthetic drag events here bubble up the REACT tree to the
+  // workbench — NOT down the real DOM to the surrounding editor group's
+  // native split-drop listeners. That divergence is exactly what keeps the
+  // scenario's add-to-graph drop from ever triggering a split: the group's
+  // overlay/external-drop channel only fires for the workbench's native DOM
+  // listeners, which never see this synthetic drop. The workbench's
+  // `isWorkbenchExternalDrop` predicate ALSO bows out whenever the drag is
+  // over a scenario editor (it inspects `event.target`), so the overlay
+  // stays dark over the canvas. (A native listener + `stopPropagation` was
+  // tried and reverted — the React Flow pane owns the canvas drag events, so
+  // the scenario's native `drop` never fired and the add was silently lost.)
   const onDragOver = useCallback((event: React.DragEvent) => {
     // Allow the drop only when the host can resolve dragged items.
     if (!resolveBoundItem) return

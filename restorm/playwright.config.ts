@@ -173,6 +173,15 @@ const bodyTypeMigrationTestDir = defineBddConfig({
   outputDir: '.features-gen/body-type-migration'
 })
 
+const sidebarSplitDropTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/sidebar-split-drop/features/**/*.feature',
+  steps: [
+    'tests/e2e/bdd/sidebar-split-drop/steps/**/*.ts',
+    'tests/e2e/bdd/fixtures/sidebar-split-drop.fixture.ts'
+  ],
+  outputDir: '.features-gen/sidebar-split-drop'
+})
+
 /**
  * Playwright configuration for Electron E2E tests using playwright-bdd.
  * Each test group has its own project with a dedicated fixture.
@@ -336,6 +345,11 @@ export default defineConfig({
       name: 'body-type-migration',
       testDir: bodyTypeMigrationTestDir,
       timeout: 120 * 1000 // opens a fresh app + a legacy-spelling .restorm file
+    },
+    {
+      name: 'sidebar-split-drop',
+      testDir: sidebarSplitDropTestDir,
+      timeout: 120 * 1000 // opens the reference project; drags sidebar items onto tabs / a scenario
     },
     {
       // Headless CLI runner — a plain spec (no BDD/UI) that spawns the built app

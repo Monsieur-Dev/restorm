@@ -50,10 +50,14 @@ export const EditorGroupView: React.FC<EditorGroupViewProps> = (props) => {
 	const {
 		group, onSplitTab, onActivateTab, hasFocus = false, onFocusRequested,
 		onChangeFullscreenTabId, maximizedTabId = null, modalBody = null,
-		getTabHost,
+		getTabHost, isExternalDropDrag, onExternalDrop,
 		'data-testid': dataTestId
 	} = props;
 	const [splitTarget, setSplitTarget] = useState<SplitDirection | 'center' | undefined>(undefined);
+	// True while the drag hovering this group is something the overlay
+	// should react to: a workbench editor-tab drag OR a host-opted-in
+	// external drag (e.g. a sidebar tree item). Kept under the historical
+	// name so the existing overlay/test attributes don't churn.
 	const [isEditorDrag, setIsEditorDrag] = useState<boolean>(false);
 	const contentRef = useRef<HTMLDivElement | null>(null);
 	const [advancedEffects] = useSetting('appearance:advancedVisualEffects');
@@ -145,17 +149,28 @@ export const EditorGroupView: React.FC<EditorGroupViewProps> = (props) => {
 			group.tabs[0]?.id === data.editorId;
 	}, [group.id, group.tabs]);
 
-	const onDragOverGroup = useCallback(
+	// Classify a drag for the split overlay. A drag is overlay-eligible
+	// when it's a workbench editor-tab drag OR a host-opted-in external
+	// drag (sidebar item). The two differ only at drop time: an editor
+	// drag MOVES the existing tab (`onSplitTab`), an external drag asks
+	// the host to OPEN a new tab (`onExternalDrop`). The self-drop block
+	// applies to editor drags only (an external drag has no source tab).
+	const classifyDrag = useCallback((e: DragEvent): { eligible: boolean; external: boolean } => {
+		if (isEditorDragEvent(e)) return { eligible: true, external: false };
+		if (isExternalDropDrag?.(e)) return { eligible: true, external: true };
+		return { eligible: false, external: false };
+	}, [isExternalDropDrag]);
+
+	const handleOverOrEnter = useCallback(
 		(e: DragEvent) => {
-			// Detect if current drag is coming from editor tabs (using MIME type or fallback flag)
-			const isEditor = isEditorDragEvent(e);
-			setIsEditorDrag(isEditor);
-			if (!isEditor) {
+			const { eligible, external } = classifyDrag(e);
+			setIsEditorDrag(eligible);
+			if (!eligible) {
 				setSplitTarget(undefined);
 				return;
 			}
 			e.preventDefault();
-			if (isBlockedDrop(e)) {
+			if (!external && isBlockedDrop(e)) {
 				if (e.dataTransfer) e.dataTransfer.dropEffect = 'none';
 				setSplitTarget(undefined);
 				return;
@@ -163,28 +178,11 @@ export const EditorGroupView: React.FC<EditorGroupViewProps> = (props) => {
 			if (e.dataTransfer) e.dataTransfer.dropEffect = 'move';
 			setSplitTarget(computeDirection(e));
 		},
-		[computeDirection, isBlockedDrop]
+		[classifyDrag, computeDirection, isBlockedDrop]
 	);
 
-	const onDragEnterGroup = useCallback(
-		(e: DragEvent) => {
-			const isEditor = isEditorDragEvent(e);
-			setIsEditorDrag(isEditor);
-			if (!isEditor) {
-				setSplitTarget(undefined);
-				return;
-			}
-			e.preventDefault();
-			if (isBlockedDrop(e)) {
-				if (e.dataTransfer) e.dataTransfer.dropEffect = 'none';
-				setSplitTarget(undefined);
-				return;
-			}
-			if (e.dataTransfer) e.dataTransfer.dropEffect = 'move';
-			setSplitTarget(computeDirection(e));
-		},
-		[computeDirection, isBlockedDrop]
-	);
+	const onDragOverGroup = handleOverOrEnter;
+	const onDragEnterGroup = handleOverOrEnter;
 
 	const onDragLeaveGroup = useCallback((e: DragEvent) => {
 		// `dragleave` also fires when the pointer crosses between this
@@ -202,8 +200,18 @@ export const EditorGroupView: React.FC<EditorGroupViewProps> = (props) => {
 	const onDropGroup = useCallback(
 		(e: DragEvent) => {
 			const data = getEditorDragData(e);
-			// Ignore drops that are not coming from editor tabs (e.g. Milkdown drag & drop)
+			// Not an editor-tab drag. If it's a host-opted-in external
+			// payload (sidebar item), resolve the zone and hand it to the
+			// host to open a tab there; otherwise ignore (e.g. Milkdown).
 			if (!data) {
+				if (isExternalDropDrag?.(e) && onExternalDrop) {
+					e.preventDefault();
+					const dir = computeDirection(e);
+					setSplitTarget(undefined);
+					setIsEditorDrag(false);
+					onExternalDrop(e, group.id, dir === 'center' ? 'full' : dir);
+					return;
+				}
 				setSplitTarget(undefined);
 				setIsEditorDrag(false);
 				return;
@@ -227,7 +235,7 @@ export const EditorGroupView: React.FC<EditorGroupViewProps> = (props) => {
 			// the split overlay swallow drops meant for the editor content.
 			clearEditorDragData();
 		},
-		[computeDirection, onSplitTab, group.id, group.tabs]
+		[computeDirection, onSplitTab, group.id, group.tabs, isExternalDropDrag, onExternalDrop]
 	);
 
 	// Attach the split-drop drag handlers as NATIVE DOM listeners on the

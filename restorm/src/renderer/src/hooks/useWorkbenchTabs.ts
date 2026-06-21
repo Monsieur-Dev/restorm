@@ -5,10 +5,15 @@
 import { useCallback, useRef } from 'react'
 import {
   isContainerNode,
+  isTabGroupNode,
   computeChecksum,
+  insertTabAt,
+  normalizeTree,
+  removeTab,
+  findGroup,
   logger
 } from 'electron-core-ui/renderer'
-import type { WorkbenchTree, GroupNode, EditorTab } from 'electron-core-ui/renderer'
+import type { WorkbenchTree, GroupNode, EditorTab, SplitDirection } from 'electron-core-ui/renderer'
 import type { RestormWorkbenchHandle } from '../components/MainView/Workbench/RestormWorkbench'
 import {
   findFirstTabGroupId,
@@ -80,6 +85,90 @@ export interface UseWorkbenchTabsOptions {
  * selection stay put. */
 export interface OpenTabOptions {
   focus?: boolean
+  /**
+   * Open the tab at an explicit position in the tree rather than the
+   * default focused/first group. Used by the sidebar→workbench split
+   * drop: the user released the dragged item over `targetGroupId`'s
+   * `zone` ('left'|'right'|'top'|'bottom' split, or 'full' = stack as a
+   * normal tab in that group). When set, the focused-group append /
+   * background-vs-foreground bookkeeping is bypassed in favour of ECUI's
+   * `insertTabAt`. Ignored when the target group no longer exists.
+   */
+  placement?: { targetGroupId: string; zone: SplitDirection }
+}
+
+/** Find the group + tab id of an open tab whose underlying item id matches.
+ * A tab's item id is its `folder.id` or `request.id`. Pure (no React) so it
+ * can be unit-tested and reused by {@link placeTabAtPosition}. */
+function findOpenTabByItemId(nodes: GroupNode[], itemId: string): { groupId: string; tabId: string } | null {
+  for (const node of nodes) {
+    if (isContainerNode(node)) {
+      const inner = findOpenTabByItemId(node.groups, itemId)
+      if (inner !== null) return inner
+      continue
+    }
+    for (const tab of node.tabs) {
+      const t = tab as { folder?: { id?: string }; request?: { id?: string } }
+      const tabItemId = t.folder?.id ?? t.request?.id
+      if (typeof tabItemId === 'string' && tabItemId === itemId) {
+        return { groupId: node.id, tabId: tab.id }
+      }
+    }
+  }
+  return null
+}
+
+/**
+ * Place a tab at an explicit group + split zone — the sidebar→workbench
+ * split drop. If the same item is already open (by tab id, or by its
+ * underlying item id when the index-path tab id changed), the stale copy
+ * is removed first so the tree never holds two tabs with the same id
+ * (which breaks the workbench's id-keyed slot reconciliation) — the net
+ * effect matches dragging the open tab into the new split. When the target
+ * group no longer exists (e.g. removing the stale tab emptied + collapsed
+ * it), the tab is appended to the first available group instead.
+ *
+ * Returns the new (normalized) tree and the group the tab landed in (for
+ * focus). Pure — all tree ops come from ECUI; no React, so unit-testable.
+ */
+export function placeTabAtPosition(
+  prev: WorkbenchTree,
+  tabId: string,
+  newTab: EditorTab,
+  placement: { targetGroupId: string; zone: SplitDirection },
+  itemId?: string
+): { tree: WorkbenchTree; landedGroupId: string } {
+  const { targetGroupId, zone } = placement
+  // Locate any already-open copy of this item (by tab id, then by the
+  // underlying item id when the index-path tab id changed).
+  let openGroupId = findGroupIdForTab(prev.groups, tabId)
+  let openTabId = tabId
+  if (!openGroupId && typeof itemId === 'string' && itemId.length > 0) {
+    const stale = findOpenTabByItemId(prev.groups, itemId)
+    if (stale !== null) { openGroupId = stale.groupId; openTabId = stale.tabId }
+  }
+
+  // No-op self-drop: the item is already the SOLE tab of the target group.
+  // Splitting a single-tab group against itself would just recreate the same
+  // layout — so leave the tree untouched (mirrors the editor-tab self-drop
+  // block in EditorGroupView). The center/'full' zone is likewise a no-op
+  // here (the tab already lives in, and is active in, this group).
+  if (openGroupId === targetGroupId) {
+    const loc = findGroup(prev, targetGroupId)
+    if (loc.node && isTabGroupNode(loc.node) && loc.node.tabs.length === 1) {
+      return { tree: prev, landedGroupId: targetGroupId }
+    }
+  }
+
+  const base = openGroupId ? removeTab(prev, openGroupId, openTabId).tree : prev
+  // `insertTabAt` runs against `base` BEFORE normalization, so re-check the
+  // target on `base`; fall back to a plain append when removing the stale
+  // copy emptied + collapsed it.
+  if (!hasGroupWithId(base.groups, targetGroupId)) {
+    const fallbackGroupId = findFirstTabGroupId(base.groups) ?? 'restorm-main-group'
+    return { tree: normalizeTree(insertTabAt(base, fallbackGroupId, 'full', newTab)), landedGroupId: fallbackGroupId }
+  }
+  return { tree: normalizeTree(insertTabAt(base, targetGroupId, zone, newTab)), landedGroupId: targetGroupId }
 }
 
 export interface UseWorkbenchTabsReturn {
@@ -210,6 +299,16 @@ export function useWorkbenchTabs(options: UseWorkbenchTabsOptions): UseWorkbench
           }
         ]
       }
+    }
+
+    // Explicit placement (sidebar→workbench split drop). The user picked a
+    // target group + zone, so honour it instead of the focused/first group
+    // append (delegated to the pure `placeTabAtPosition`). Only when the
+    // target group still exists — otherwise fall through to the normal path.
+    if (options?.placement && hasGroupWithId(prev.groups, options.placement.targetGroupId)) {
+      const { tree: nextTree, landedGroupId } = placeTabAtPosition(prev, tabId, newTab, options.placement, itemId)
+      if (focusGroup) queueMicrotask(() => { focusGroup(landedGroupId) })
+      return nextTree
     }
 
     // Dedup pass A — by tabId. Fast path for the common case

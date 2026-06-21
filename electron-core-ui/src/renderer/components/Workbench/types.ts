@@ -101,6 +101,30 @@ export interface EditorWorkbenchCallbacks {
 	 */
 	onWorkbenchTabDropped?: (tabData: { tabId: string; title: string; groupId: string; content?: string; cursorX?: number; cursorY?: number }) => boolean | Promise<boolean>;
 	/**
+	 * Predicate that decides whether a given drag — one that is NOT a
+	 * workbench editor-tab drag — is an "external" payload the host wants
+	 * to drop into the workbench (e.g. a tree/list item dragged from a
+	 * sidebar). When it returns true, a group lights up the SAME split
+	 * overlay + drop zones as an editor-tab drag; on drop the workbench
+	 * resolves the target group + zone and calls {@link onExternalDrop}
+	 * (instead of {@link onSplitTab}, which only moves an existing tab).
+	 *
+	 * Read from the drag event's `dataTransfer` (MIME types / payload).
+	 * Omitted → external drops are ignored and only editor-tab drags
+	 * trigger the overlay (the previous behaviour).
+	 */
+	isExternalDropDrag?: (event: DragEvent) => boolean;
+	/**
+	 * Handle an external (non-editor-tab) drop the host opted into via
+	 * {@link isExternalDropDrag}. The workbench has already resolved the
+	 * target group and the split direction the user released over
+	 * (`'full'` = the center zone, i.e. open/stack as a normal tab in
+	 * that group). The host reads its own payload off the event and opens
+	 * the corresponding tab at that position. The original `drop` event is
+	 * forwarded so the host can read `dataTransfer`.
+	 */
+	onExternalDrop?: (event: DragEvent, targetGroupId: string, direction: SplitDirection) => void;
+	/**
 	 * Optional callback to build a context menu for a tab.
 	 * The actions helpers will perform the default close behaviours for this workbench.
 	 */

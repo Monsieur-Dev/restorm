@@ -97,7 +97,8 @@ const classForDocument = (type: 'folder' | 'request' | 'environment', doc: Recor
 }
 import { DocumentEvents, type DocumentChangedPayload, type DocumentDeletedPayload } from './services/DocumentEvents'
 import type { EditorTab, WorkbenchTree, GroupNode, TabGroupNode, ContainerGroupNode } from 'electron-core-ui/renderer'
-import { isContainerNode, isTabGroupNode, loadWorkbenchTabIds, useSetting } from 'electron-core-ui/renderer'
+import { isContainerNode, isTabGroupNode, loadWorkbenchTabIds, useSetting, LIST_VIEW_DRAG_MIME } from 'electron-core-ui/renderer'
+import type { SplitDirection } from 'electron-core-ui/renderer'
 import { REOPEN_LAST_FILE_STORAGE_KEY, REOPEN_LAST_FILE_SETTING_KEY } from '../../shared/config/reopenLastFile'
 import { CONSOLE_TAB_ID, FIREWALL_TAB_ID, MINI_BROWSER_TAB_ID, SETTINGS_TAB_ID, MCP_LOGS_TAB_ID, type ConsoleTab, type FirewallTab, type MiniBrowserTab, type SettingsTab, type McpLogsTab } from '../../shared/types/editor'
 import { findGroupIdForTab, hasGroupWithId, updateGroupById } from './utils/workbenchHelpers'
@@ -2523,6 +2524,7 @@ const App: React.FC = () => {
   const {
     handleItemClick,
     handleItemAuxClick,
+    openItemAtSplit,
     handleBreadcrumbClick,
     handleBreadcrumbAuxClick,
     handleTabActivate,
@@ -2542,6 +2544,44 @@ const App: React.FC = () => {
   // Patch the forward-reference ref consumed by `useMcpWorkbenchLayout`
   // (above) now that `handleTabActivate` exists.
   useEffect(() => { tabActivateForLayoutRef.current = handleTabActivate }, [handleTabActivate])
+
+  // Sidebar → workbench split drop. A sidebar tree item dragged over an
+  // open tab lights the SAME split overlay as a dragged workbench tab
+  // (the shared ECUI external-drop channel) and, on release, opens the
+  // dragged item beside the drop target. `isWorkbenchExternalDrop` tells
+  // the overlay which drags to react to (a ListView item drag that
+  // resolves to a known tree item); `handleWorkbenchExternalDrop` opens
+  // the item at the released group + zone.
+  //
+  // The scenario surface OWNS sidebar drops (it adds the item to the
+  // graph), so the workbench split channel must NOT engage over it: we
+  // return false whenever the drag is over a scenario editor. ECUI's
+  // group handlers bubble up the real DOM from the portalled tab content,
+  // so a drag over the scenario canvas reports `event.target` inside the
+  // scenario wrapper (`data-testid="scenario-editor"`); detecting that
+  // keeps the overlay dark there and lets the scenario's own React
+  // `onDrop` add the node. (Relying on the scenario calling
+  // `stopPropagation` on its native listeners proved fragile — the React
+  // Flow pane owns the canvas drag events, so the scenario's native drop
+  // never fired and the add was lost.)
+  const isWorkbenchExternalDrop = useCallback((event: DragEvent): boolean => {
+    const types = event.dataTransfer?.types
+    if (!types) return false
+    if (!Array.from(types).includes(LIST_VIEW_DRAG_MIME)) return false
+    const target = event.target
+    if (target instanceof Element && target.closest('[data-testid="scenario-editor"]')) return false
+    return true
+  }, [])
+
+  const handleWorkbenchExternalDrop = useCallback((event: DragEvent, targetGroupId: string, direction: SplitDirection): void => {
+    const itemId = event.dataTransfer?.getData('text/plain')
+    if (!itemId) return
+    // Only open items that exist in the tree (request / folder / env-folder
+    // / scenario). Unknown ids (a foreign drag that happened to carry our
+    // marker MIME) are ignored.
+    if (!resolveBoundItem(itemId)) return
+    openItemAtSplit(itemId, targetGroupId, direction)
+  }, [resolveBoundItem, openItemAtSplit])
 
   // Reverse navigation request → scenarios: list the scenarios using a request,
   // and open one (optionally centring the bound box). Computed live from the
@@ -2735,6 +2775,8 @@ const App: React.FC = () => {
               onCreateScenarioRequest={handleCreateScenarioRequest}
               onCreateScenarioChild={handleCreateScenarioChild}
               resolveBoundItem={resolveBoundItem}
+              isWorkbenchExternalDrop={isWorkbenchExternalDrop}
+              onWorkbenchExternalDrop={handleWorkbenchExternalDrop}
               resolveRequestEnv={resolveRequestEnv}
               resolveSyntheticPreview={resolveSyntheticPreview}
               onEnvironmentFolderChange={handleEnvironmentFolderChange}
@@ -2786,6 +2828,8 @@ const App: React.FC = () => {
             onCreateScenarioRequest={handleCreateScenarioRequest}
             onCreateScenarioChild={handleCreateScenarioChild}
             resolveBoundItem={resolveBoundItem}
+            isWorkbenchExternalDrop={isWorkbenchExternalDrop}
+            onWorkbenchExternalDrop={handleWorkbenchExternalDrop}
             resolveRequestEnv={resolveRequestEnv}
             resolveSyntheticPreview={resolveSyntheticPreview}
             onEnvironmentFolderChange={handleEnvironmentFolderChange}

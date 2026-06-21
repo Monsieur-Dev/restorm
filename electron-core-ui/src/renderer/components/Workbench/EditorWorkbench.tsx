@@ -1261,6 +1261,15 @@ export const EditorWorkbench = forwardRef<EditorWorkbenchHandle, EditorWorkbench
 		if (extCallbacks.disableTabDetach) {
 			extras['disableTabDetach'] = extCallbacks.disableTabDetach;
 		}
+		// External-drop channel: lets the host light the split overlay for a
+		// non-editor-tab drag (e.g. a sidebar item) and open a tab where it's
+		// released. Both must be forwarded together to be useful.
+		if (extCallbacks.isExternalDropDrag) {
+			extras['isExternalDropDrag'] = extCallbacks.isExternalDropDrag;
+		}
+		if (extCallbacks.onExternalDrop) {
+			extras['onExternalDrop'] = extCallbacks.onExternalDrop;
+		}
 		// Determine if this group has focus
 		const hasFocus = effectiveFocusedGroupId === leaf.id;
 		return (
@@ -1293,6 +1302,8 @@ export const EditorWorkbench = forwardRef<EditorWorkbenchHandle, EditorWorkbench
 		extCallbacks.onGetTabContent,
 		extCallbacks.getTabContextMenuItems,
 		extCallbacks.disableTabDetach,
+		extCallbacks.isExternalDropDrag,
+		extCallbacks.onExternalDrop,
 		effectiveFocusedGroupId,
 		modalOwnerTabId,
 		modalBody,

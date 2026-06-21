@@ -15,6 +15,9 @@ import type { BreadcrumbItem } from '../../../shared/types/editor'
  * surface so we don't couple the two modules at the signature level. */
 export interface OpenNavTabOptions {
   focus?: boolean
+  /** Open the tab at an explicit group + split zone (sidebar→workbench
+   * split drop). Mirrors `OpenTabOptions.placement`. */
+  placement?: { targetGroupId: string; zone: 'left' | 'right' | 'top' | 'bottom' | 'full' }
 }
 
 export interface UseNavigationOptions {
@@ -38,6 +41,15 @@ export interface UseNavigationReturn {
    * navigation-service event.
    */
   handleItemAuxClick: (itemId: string) => void
+  /**
+   * Open a tree item as a workbench tab at an explicit position — the
+   * sidebar→workbench split drop. `zone` is the split direction the user
+   * released over ('full' = stack as a normal tab in the target group).
+   * Mirrors `handleItemClick`'s item→tab dispatch (request / folder /
+   * env-folder / scenario), but threads a `placement` so the tab opens
+   * beside the drop target instead of in the focused group.
+   */
+  openItemAtSplit: (itemId: string, targetGroupId: string, zone: 'left' | 'right' | 'top' | 'bottom' | 'full') => void
   handleBreadcrumbClick: (item: BreadcrumbItem, index: number, isLast: boolean) => void
   /**
    * Middle-click handler for a breadcrumb folder / env-folder segment.
@@ -183,6 +195,34 @@ export function useNavigation(options: UseNavigationOptions): UseNavigationRetur
     if (isRequest(item)) {
       const environments = getNearestEnvironmentsForBreadcrumbs(rootItems, breadcrumbs)
       openAnyRequestTab(item, breadcrumbs, environments, { focus: false })
+    }
+  }, [rootItems, openFolderTab, openScenarioEditorTab, openEnvironmentFolderTab, openAnyRequestTab, getNearestEnvironmentsForBreadcrumbs])
+
+  // Open a dragged sidebar item at an explicit split position. Same
+  // item→tab dispatch as `handleItemClick`, but with a `placement` so the
+  // tab lands beside the drop target; foreground (the user explicitly
+  // dropped it there). No navigation-service event: a split drop is a
+  // layout gesture, not a back/forward-history navigation.
+  const openItemAtSplit = useCallback((itemId: string, targetGroupId: string, zone: 'left' | 'right' | 'top' | 'bottom' | 'full') => {
+    const { item, breadcrumbs } = findItemWithBreadcrumbs(rootItems, itemId)
+    if (!item) return
+    const placement = { targetGroupId, zone }
+
+    if (isEnvironmentFolder(item)) {
+      openEnvironmentFolderTab(item, breadcrumbs, { placement })
+      return
+    }
+    if (isFolder(item)) {
+      openFolderTab(item, breadcrumbs, { placement })
+      return
+    }
+    if (isScenario(item)) {
+      openScenarioEditorTab(item, breadcrumbs, { placement })
+      return
+    }
+    if (isRequest(item)) {
+      const environments = getNearestEnvironmentsForBreadcrumbs(rootItems, breadcrumbs)
+      openAnyRequestTab(item, breadcrumbs, environments, { placement })
     }
   }, [rootItems, openFolderTab, openScenarioEditorTab, openEnvironmentFolderTab, openAnyRequestTab, getNearestEnvironmentsForBreadcrumbs])
 
@@ -369,6 +409,7 @@ export function useNavigation(options: UseNavigationOptions): UseNavigationRetur
   return {
     handleItemClick,
     handleItemAuxClick,
+    openItemAtSplit,
     handleBreadcrumbClick,
     handleBreadcrumbAuxClick,
     handleTabActivate,
