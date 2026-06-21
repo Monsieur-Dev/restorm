@@ -1,6 +1,7 @@
-import React, { useState, useMemo, useCallback } from 'react'
+import React, { useState, useMemo, useCallback, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ScrollableElement } from '../ScrollableElement'
+import { Tooltip } from '../Tooltip'
 import type { IconCategory } from './iconCategories'
 import { getIconsForCategory, searchIcons } from './iconCategories'
 import type { IconType } from '../../../types/icon'
@@ -40,6 +41,8 @@ export const GroupedIconPicker: React.FC<GroupedIconPickerProps> = ({
   const { t } = useTranslation()
   const [searchTerm, setSearchTerm] = useState('')
   const [activeCategory, setActiveCategory] = useState(categories[0]?.id ?? '')
+  const [hoveredTooltip, setHoveredTooltip] = useState<string | null>(null)
+  const tooltipTargetRef = useRef<HTMLElement | null>(null)
 
   // Build categorized icons
   const categorizedIcons = useMemo(() => {
@@ -84,19 +87,24 @@ export const GroupedIconPicker: React.FC<GroupedIconPickerProps> = ({
     <div className="ecui-grouped-icon-picker" {...(dataTestIdBase ? { 'data-testid': dataTestIdBase } : {})}>
       {/* Category tabs */}
       <div className="ecui-grouped-icon-categories">
-        {categories.map(cat => (
-          <button
-            key={cat.id}
-            type="button"
-            className={`ecui-grouped-icon-category ${activeCategory === cat.id ? 'active' : ''}`}
-            onClick={() => { handleCategoryClick(cat.id) }}
-            aria-label={getCategoryName(cat.id, cat.name)}
-            {...(dataTestIdBase ? { 'data-testid': `${dataTestIdBase}-category-${cat.id}` } : {})}
-            data-category-id={cat.id}
-          >
-            <i className={`codicon codicon-${cat.icon}`} />
-          </button>
-        ))}
+        {categories.map(cat => {
+          const label = getCategoryName(cat.id, cat.name)
+          return (
+            <button
+              key={cat.id}
+              type="button"
+              className={`ecui-grouped-icon-category ${activeCategory === cat.id ? 'active' : ''}`}
+              onClick={() => { handleCategoryClick(cat.id) }}
+              aria-label={label}
+              onMouseEnter={(e) => { tooltipTargetRef.current = e.currentTarget; setHoveredTooltip(label) }}
+              onMouseLeave={() => { setHoveredTooltip(null) }}
+              {...(dataTestIdBase ? { 'data-testid': `${dataTestIdBase}-category-${cat.id}` } : {})}
+              data-category-id={cat.id}
+            >
+              <i className={`codicon codicon-${cat.icon}`} />
+            </button>
+          )
+        })}
       </div>
 
       {/* Search input */}
@@ -149,6 +157,8 @@ export const GroupedIconPicker: React.FC<GroupedIconPickerProps> = ({
                     className="ecui-icon-select-codicon"
                     aria-label={name}
                     onClick={() => { onSelect(name) }}
+                    onMouseEnter={(e) => { tooltipTargetRef.current = e.currentTarget; setHoveredTooltip(name) }}
+                    onMouseLeave={() => { setHoveredTooltip(null) }}
                     {...(dataTestIdBase ? { 'data-testid': `${dataTestIdBase}-icon-${name}` } : {})}
                     {...(iconType ? { 'data-icon-type': iconType } : {})}
                     data-icon-name={name}
@@ -171,6 +181,12 @@ export const GroupedIconPicker: React.FC<GroupedIconPickerProps> = ({
           )}
         </div>
       </ScrollableElement>
+      <Tooltip
+        targetRef={tooltipTargetRef as React.RefObject<HTMLElement>}
+        content={hoveredTooltip}
+        show={hoveredTooltip !== null}
+        placement="below"
+      />
     </div>
   )
 }

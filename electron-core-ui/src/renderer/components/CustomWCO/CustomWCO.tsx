@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
+import { Tooltip } from '../Tooltip'
 import './custom-wco.css'
 
 export interface CustomWCOProps {
@@ -41,6 +42,8 @@ const CustomWCO: React.FC<CustomWCOProps> = ({
   const [asyncPlatform, setAsyncPlatform] = useState<string>('')
   const [isMaximized, setIsMaximized] = useState(false)
   const [wcoWidth, setWcoWidth] = useState<number>(138) // Default Windows WCO width
+  const [hoveredWco, setHoveredWco] = useState<string | null>(null)
+  const wcoTooltipRef = useRef<HTMLElement | null>(null)
 
   // Effective platform: use prop if provided, otherwise async-detected
   const currentPlatform = platform ?? asyncPlatform
@@ -155,12 +158,18 @@ const CustomWCO: React.FC<CustomWCOProps> = ({
   // overlay's stacking context wins against the constrained host
   // ancestor. The on-page `.custom-wco` placeholder still occupies
   // the title bar's grid cell so layout doesn't shift.
+  const minimizeLabel = t('customWco.minimize', 'Minimize')
+  const maximizeLabel = isMaximized ? t('customWco.restore', 'Restore') : t('customWco.maximize', 'Maximize')
+  const closeLabel = t('customWco.close', 'Close')
+
   const buttonRow = (
     <div className="window-controls-container">
       <div
         className="window-button minimize"
         onClick={handleMinimize}
-        aria-label={t('customWco.minimize', 'Minimize')}
+        aria-label={minimizeLabel}
+        onMouseEnter={(e) => { wcoTooltipRef.current = e.currentTarget; setHoveredWco(minimizeLabel) }}
+        onMouseLeave={() => { setHoveredWco(null) }}
         {...(dataTestId && { 'data-testid': `${dataTestId}-minimize` })}
       >
         <span className="codicon codicon-chrome-minimize"></span>
@@ -168,7 +177,9 @@ const CustomWCO: React.FC<CustomWCOProps> = ({
       <div
         className="window-button maximize"
         onClick={handleMaximize}
-        aria-label={isMaximized ? t('customWco.restore', 'Restore') : t('customWco.maximize', 'Maximize')}
+        aria-label={maximizeLabel}
+        onMouseEnter={(e) => { wcoTooltipRef.current = e.currentTarget; setHoveredWco(maximizeLabel) }}
+        onMouseLeave={() => { setHoveredWco(null) }}
         {...(dataTestId && { 'data-testid': `${dataTestId}-maximize` })}
       >
         <span className={`codicon ${isMaximized ? 'codicon-chrome-restore' : 'codicon-chrome-maximize'}`}></span>
@@ -176,11 +187,19 @@ const CustomWCO: React.FC<CustomWCOProps> = ({
       <div
         className="window-button close"
         onClick={handleClose}
-        aria-label={t('customWco.close', 'Close')}
+        aria-label={closeLabel}
+        onMouseEnter={(e) => { wcoTooltipRef.current = e.currentTarget; setHoveredWco(closeLabel) }}
+        onMouseLeave={() => { setHoveredWco(null) }}
         {...(dataTestId && { 'data-testid': `${dataTestId}-close` })}
       >
         <span className="codicon codicon-chrome-close"></span>
       </div>
+      <Tooltip
+        targetRef={wcoTooltipRef as React.RefObject<HTMLElement>}
+        content={hoveredWco}
+        show={hoveredWco !== null}
+        placement="below"
+      />
     </div>
   )
 

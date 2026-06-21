@@ -1,6 +1,7 @@
-import React, { useState, useMemo, useCallback } from 'react'
+import React, { useState, useMemo, useCallback, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ScrollableElement } from '../ScrollableElement'
+import { Tooltip } from '../Tooltip'
 import { EMOJI_CATEGORIES, type EmojiCategory } from './emojiData'
 
 export interface EmojiPickerProps {
@@ -17,6 +18,8 @@ export const EmojiPicker: React.FC<EmojiPickerProps> = ({ onEmojiSelect, dataTes
   const { t } = useTranslation()
   const [searchQuery, setSearchQuery] = useState('')
   const [activeCategory, setActiveCategory] = useState<string>(EMOJI_CATEGORIES[0]?.id ?? 'people')
+  const [hoveredTooltip, setHoveredTooltip] = useState<string | null>(null)
+  const tooltipTargetRef = useRef<HTMLElement | null>(null)
 
   // Filter emojis based on search
   const filteredCategories = useMemo((): EmojiCategory[] => {
@@ -75,19 +78,24 @@ export const EmojiPicker: React.FC<EmojiPickerProps> = ({ onEmojiSelect, dataTes
     <div className="ecui-emoji-picker">
       {/* Category tabs */}
       <div className="ecui-emoji-picker-categories">
-        {EMOJI_CATEGORIES.map(category => (
-          <button
-            key={category.id}
-            type="button"
-            className={`ecui-emoji-picker-category ${activeCategory === category.id ? 'active' : ''}`}
-            onClick={() => { handleCategoryClick(category.id) }}
-            aria-label={getCategoryName(category.id, category.name)}
-            {...(dataTestIdBase ? { 'data-testid': `${dataTestIdBase}-category-${category.id}` } : {})}
-            data-category-id={category.id}
-          >
-            {category.icon}
-          </button>
-        ))}
+        {EMOJI_CATEGORIES.map(category => {
+          const label = getCategoryName(category.id, category.name)
+          return (
+            <button
+              key={category.id}
+              type="button"
+              className={`ecui-emoji-picker-category ${activeCategory === category.id ? 'active' : ''}`}
+              onClick={() => { handleCategoryClick(category.id) }}
+              aria-label={label}
+              onMouseEnter={(e) => { tooltipTargetRef.current = e.currentTarget; setHoveredTooltip(label) }}
+              onMouseLeave={() => { setHoveredTooltip(null) }}
+              {...(dataTestIdBase ? { 'data-testid': `${dataTestIdBase}-category-${category.id}` } : {})}
+              data-category-id={category.id}
+            >
+              {category.icon}
+            </button>
+          )
+        })}
       </div>
 
       {/* Search input */}
@@ -140,6 +148,8 @@ export const EmojiPicker: React.FC<EmojiPickerProps> = ({ onEmojiSelect, dataTes
                     className="ecui-emoji-picker-emoji"
                     onClick={() => { handleEmojiClick(emoji) }}
                     aria-label={emoji}
+                    onMouseEnter={(e) => { tooltipTargetRef.current = e.currentTarget; setHoveredTooltip(emoji) }}
+                    onMouseLeave={() => { setHoveredTooltip(null) }}
                     {...(dataTestIdBase ? { 'data-testid': `${dataTestIdBase}-emoji-${category.id}-${index}` } : {})}
                     data-emoji={emoji}
                   >
@@ -154,6 +164,12 @@ export const EmojiPicker: React.FC<EmojiPickerProps> = ({ onEmojiSelect, dataTes
           )}
         </div>
       </ScrollableElement>
+      <Tooltip
+        targetRef={tooltipTargetRef as React.RefObject<HTMLElement>}
+        content={hoveredTooltip}
+        show={hoveredTooltip !== null}
+        placement="below"
+      />
     </div>
   )
 }

@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react'
 import { Button, ScrollableElement } from 'electron-core-ui/renderer'
+import { HeaderHoverTooltip } from '../MainView/HeaderHoverTooltip'
 import type {
   ModelDocumentation,
   OperationDocumentation
@@ -137,21 +138,23 @@ export const DocumentationSidebar: React.FC<DocumentationSidebarProps> = ({
                         const method = op.match.method?.toUpperCase()
                         return (
                           <li key={slug} className="documentation-host-sidebar__op-item">
-                            <Button
-                              className="documentation-host-sidebar__op-link"
-                              onClick={(): void => { nav?.scrollToOperation(slug) }}
-                              data-testid={`documentation-host-sidebar-op-${slug}`}
-                              options={{ ariaLabel: summary }}
-                            >
-                              {method !== undefined && method.length > 0 && (
-                                <span
-                                  className={`documentation-host-sidebar__method documentation-host-sidebar__method--${method.toLowerCase()}`}
-                                >
-                                  {method}
-                                </span>
-                              )}
-                              <span className="documentation-host-sidebar__op-summary">{summary}</span>
-                            </Button>
+                            <HeaderHoverTooltip label={summary}>
+                              <Button
+                                className="documentation-host-sidebar__op-link"
+                                onClick={(): void => { nav?.scrollToOperation(slug) }}
+                                data-testid={`documentation-host-sidebar-op-${slug}`}
+                                options={{ ariaLabel: summary }}
+                              >
+                                {method !== undefined && method.length > 0 && (
+                                  <span
+                                    className={`documentation-host-sidebar__method documentation-host-sidebar__method--${method.toLowerCase()}`}
+                                  >
+                                    {method}
+                                  </span>
+                                )}
+                                <span className="documentation-host-sidebar__op-summary">{summary}</span>
+                              </Button>
+                            </HeaderHoverTooltip>
                           </li>
                         )
                       })}
@@ -226,14 +229,16 @@ export const DocumentationSidebar: React.FC<DocumentationSidebarProps> = ({
                       key={entry.propertyName}
                       className="documentation-host-sidebar__enum-prop-item"
                     >
-                      <Button
-                        className="documentation-host-sidebar__enum-prop-link"
-                        onClick={(): void => { nav?.scrollToEnum(group.modelName, entry.propertyName) }}
-                        data-testid={`documentation-host-sidebar-enum-${group.modelName}-${entry.propertyName}`}
-                        options={{ ariaLabel: `${group.modelName}.${entry.propertyName}` }}
-                      >
-                        {entry.propertyName}
-                      </Button>
+                      <HeaderHoverTooltip label={`${group.modelName}.${entry.propertyName}`}>
+                        <Button
+                          className="documentation-host-sidebar__enum-prop-link"
+                          onClick={(): void => { nav?.scrollToEnum(group.modelName, entry.propertyName) }}
+                          data-testid={`documentation-host-sidebar-enum-${group.modelName}-${entry.propertyName}`}
+                          options={{ ariaLabel: `${group.modelName}.${entry.propertyName}` }}
+                        >
+                          {entry.propertyName}
+                        </Button>
+                      </HeaderHoverTooltip>
                     </li>
                   ))}
                 </ul>

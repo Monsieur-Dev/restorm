@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react'
+import React, { useMemo, useRef, useState } from 'react'
 import { Button } from '../Button'
 import { IconView } from '../IconView'
 import { ScrollableElement } from '../ScrollableElement'
@@ -6,6 +6,7 @@ import { MarkdownViewer } from '../MarkdownViewer/MarkdownViewer'
 import { ChatBubble } from '../ChatBubble'
 import { Thumbnail, type ThumbnailMedia } from '../Thumbnail'
 import { useMcpLogsFeed } from './useMcpLogsFeed'
+import { Tooltip } from '../Tooltip'
 import type { McpLogEntry, McpLogsLabels } from './types'
 import './mcpLogs.css'
 
@@ -153,6 +154,8 @@ const McpLogRow: React.FC<{
   labels: McpLogsLabels
   translateToolTitle: TranslateToolTitle
 }> = ({ entry, labels, translateToolTitle }) => {
+  const timeRef = useRef<HTMLSpanElement>(null)
+  const [showTimeTooltip, setShowTimeTooltip] = useState(false)
   const request = useMemo(
     () => formatPayload(entry.payload, entry.payloadTruncated),
     [entry.payload, entry.payloadTruncated]
@@ -181,7 +184,19 @@ const McpLogRow: React.FC<{
           <span className="ecui-mcp-logs-tool-title">{title}</span>
           {showRawName && <span className="ecui-mcp-logs-tool-raw" data-testid="mcp-logs-tool-raw">{entry.tool}</span>}
         </span>
-        <span className="ecui-mcp-logs-time" aria-label={labels.time}>{formatTime(entry.timestamp)}</span>
+        <span
+          ref={timeRef}
+          className="ecui-mcp-logs-time"
+          aria-label={labels.time}
+          onMouseEnter={() => { setShowTimeTooltip(true) }}
+          onMouseLeave={() => { setShowTimeTooltip(false) }}
+        >{formatTime(entry.timestamp)}</span>
+        <Tooltip
+          targetRef={timeRef}
+          content={labels.time}
+          show={showTimeTooltip}
+          placement="below"
+        />
       </div>
       {(showRequest || showResponse) && (
         <div className="ecui-mcp-logs-chat">

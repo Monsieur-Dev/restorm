@@ -1,6 +1,7 @@
-import React, { useContext, useMemo, useState } from 'react'
+import React, { useContext, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { SelectBox } from '../SelectBox'
+import { Tooltip } from '../Tooltip'
 import type { ISelectData } from '../SelectBox/types'
 import { ThemeCarousel } from './ThemeCarousel'
 import { SettingsView } from './SettingsView'
@@ -120,6 +121,8 @@ const SettingsPageBody: React.FC<SettingsPageBodyProps> = ({
   const { t } = useTranslation()
   const [scope, setScope] = useState<SettingsScope>('user')
   const workspaceDisabled = workspacePath === null
+  const [showWorkspaceTooltip, setShowWorkspaceTooltip] = useState(false)
+  const workspaceTabRef = useRef<HTMLButtonElement>(null)
   // If the workspace closes while the Workspace tab is active, fall
   // back to User so the user isn't stuck on a disabled tab.
   React.useEffect(() => {
@@ -146,6 +149,7 @@ const SettingsPageBody: React.FC<SettingsPageBodyProps> = ({
           {t('settings.scope.user', 'User')}
         </button>
         <button
+          ref={workspaceTabRef}
           type="button"
           role="tab"
           aria-selected={scope === 'workspace'}
@@ -154,10 +158,18 @@ const SettingsPageBody: React.FC<SettingsPageBodyProps> = ({
           className={tabClass('workspace', workspaceDisabled)}
           data-testid={`${rootTestId}-tab-workspace`}
           aria-label={workspacePath ?? t('settings.scope.workspaceDisabledTooltip', 'Open a project to edit workspace settings')}
+          onMouseEnter={() => { setShowWorkspaceTooltip(true) }}
+          onMouseLeave={() => { setShowWorkspaceTooltip(false) }}
           onClick={() => { if (!workspaceDisabled) setScope('workspace') }}
         >
           {t('settings.scope.workspace', 'Workspace')}
         </button>
+        <Tooltip
+          targetRef={workspaceTabRef}
+          content={workspacePath ?? t('settings.scope.workspaceDisabledTooltip', 'Open a project to edit workspace settings')}
+          show={showWorkspaceTooltip}
+          placement="below"
+        />
       </div>
       <SettingsView data-testid={`${rootTestId}-settings-view`} scope={scope} />
       {children}

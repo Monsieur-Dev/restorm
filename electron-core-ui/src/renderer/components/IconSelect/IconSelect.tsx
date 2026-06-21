@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState, type RefObject } from 'react'
 import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
 import codiconsMapping from '@vscode/codicons/src/template/mapping.json'
@@ -8,6 +8,7 @@ import { ScrollableElement } from '../ScrollableElement'
 import type { Icon, IconType } from '../../../types/icon'
 import { IconView } from '../IconView'
 import { Button } from '../Button'
+import { Tooltip } from '../Tooltip'
 import { useOverlayPresence } from '../../hooks/useOverlayPresence'
 import {
   getIconoirNames,
@@ -150,7 +151,9 @@ const IconGrid: React.FC<{
 }> = ({ icons, renderIcon, onSelect, maxDisplay = 500, moreHintText, dataTestIdBase, iconType }) => {
   const displayedIcons = icons.slice(0, maxDisplay)
   const hasMore = icons.length > maxDisplay
-  
+  const [hoveredTooltip, setHoveredTooltip] = useState<string | null>(null)
+  const tooltipTargetRef = useRef<HTMLElement | null>(null)
+
   return (
     <div className="ecui-icon-select-library">
       <div className="ecui-icon-select-codicons-grid">
@@ -161,6 +164,8 @@ const IconGrid: React.FC<{
             className="ecui-icon-select-codicon"
             aria-label={name}
             onClick={() => { onSelect(name) }}
+            onMouseEnter={(e) => { tooltipTargetRef.current = e.currentTarget; setHoveredTooltip(name) }}
+            onMouseLeave={() => { setHoveredTooltip(null) }}
             data-testid={`${dataTestIdBase}-icon-${name}`}
             data-icon-type={iconType}
             data-icon-name={name}
@@ -174,6 +179,12 @@ const IconGrid: React.FC<{
           {moreHintText}
         </div>
       )}
+      <Tooltip
+        targetRef={tooltipTargetRef as RefObject<HTMLElement>}
+        content={hoveredTooltip}
+        show={hoveredTooltip !== null}
+        placement="below"
+      />
     </div>
   )
 }

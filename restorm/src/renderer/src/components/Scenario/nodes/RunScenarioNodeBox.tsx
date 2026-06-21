@@ -1,7 +1,7 @@
-import React, { useMemo } from 'react'
+import React, { useMemo, useRef, useState } from 'react'
 import { useNodeConnections, type NodeProps } from '@xyflow/react'
 import { useTranslation } from 'react-i18next'
-import { Button } from 'electron-core-ui/renderer'
+import { Button, Tooltip } from 'electron-core-ui/renderer'
 import { isScenario } from '../../../../../shared/types/collections'
 import { Badge } from '../../common/Badge'
 import { useScenarioBoundResolver } from '../scenarioBoundResolver'
@@ -29,12 +29,30 @@ function boundFieldProps(kind: ValueTypeKind): { excludeTypes: ValueTypeKind[]; 
 }
 
 /** Stale-port label: a warning glyph + the vanished param/output name. */
-const OrphanLabel: React.FC<{ name: string; title: string }> = ({ name, title }) => (
-  <span className="scn-orphan-port" aria-label={title}>
-    <i className="codicon codicon-warning" aria-hidden="true" />
-    {name}
-  </span>
-)
+const OrphanLabel: React.FC<{ name: string; title: string }> = ({ name, title }) => {
+  const spanRef = useRef<HTMLSpanElement>(null)
+  const [showTooltip, setShowTooltip] = useState(false)
+  return (
+    <>
+      <span
+        ref={spanRef}
+        className="scn-orphan-port"
+        aria-label={title}
+        onMouseEnter={() => { setShowTooltip(true) }}
+        onMouseLeave={() => { setShowTooltip(false) }}
+      >
+        <i className="codicon codicon-warning" aria-hidden="true" />
+        {name}
+      </span>
+      <Tooltip
+        targetRef={spanRef}
+        content={title}
+        show={showTooltip}
+        placement="below"
+      />
+    </>
+  )
+}
 
 /** Distinct connected handle ids (target or source) on this node. */
 function useConnectedHandles(id: string, handleType: 'target' | 'source'): Set<string> {

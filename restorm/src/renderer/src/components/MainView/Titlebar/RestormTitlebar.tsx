@@ -12,6 +12,7 @@ import {
   type SearchResult
 } from 'electron-core-ui/renderer'
 import { renderSearchTooltipContent } from './renderSearchTooltipContent'
+import { HeaderHoverTooltip } from '../HeaderHoverTooltip'
 import { Badge } from '../../common/Badge'
 import { mapToBadgeType } from '../../../utils/badgeUtils'
 import { useMcpEnabled } from '../../../hooks/useMcpEnabled'
@@ -309,16 +310,18 @@ export const RestormTitlebar: React.FC<RestormTitlebarProps> = ({
         </MenuBar>
       }
       rightContent={
-        <Button
-          data-testid="titlebar-settings-button"
-          small
-          secondary
-          icon="gear"
-          onClick={handleOpenSettings}
-          options={{
-            ariaLabel: t('app.openSettings')
-          }}
-        />
+        <HeaderHoverTooltip label={t('app.openSettings')}>
+          <Button
+            data-testid="titlebar-settings-button"
+            small
+            secondary
+            icon="gear"
+            onClick={handleOpenSettings}
+            options={{
+              ariaLabel: t('app.openSettings')
+            }}
+          />
+        </HeaderHoverTooltip>
       }
     />
   )
