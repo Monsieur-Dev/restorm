@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from 'react'
+import React, { useCallback, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Tabs, type Tab } from '../Tabs'
 import { ControlGroup } from '../ControlGroup'
@@ -8,6 +8,7 @@ import { IconView } from '../IconView'
 import { ScrollableElement } from '../ScrollableElement'
 import { useFeature } from '../../hooks/useFeature'
 import { useFirewallControl } from './useFirewallControl'
+import { Tooltip } from '../Tooltip'
 import './firewallPanel.css'
 import type { FirewallOrigin } from '../../../types/firewall'
 
@@ -212,6 +213,8 @@ const OriginListSection: React.FC<OriginListSectionProps> = ({
 }) => {
 	const { t } = useTranslation()
 	const draftValid = parseOriginInput(draft) !== null
+	const labelTooltipRef = useRef<HTMLElement | null>(null)
+	const [hoveredLabel, setHoveredLabel] = useState<string | null>(null)
 	return (
 		<div className="firewall-panel__tab-body" data-testid={`${testIdPrefix}-body`}>
 			<p className="firewall-panel__hint">{hint}</p>
@@ -242,7 +245,12 @@ const OriginListSection: React.FC<OriginListSectionProps> = ({
 						return (
 							<li key={display} className="firewall-panel__list-row">
 								<ControlGroup className="firewall-panel__group" data-testid={`${testIdPrefix}-row-${display}`}>
-									<div className="firewall-panel__list-label">
+									<div
+										className="firewall-panel__list-label"
+										aria-label={display}
+										onMouseEnter={(e) => { labelTooltipRef.current = e.currentTarget; setHoveredLabel(display) }}
+										onMouseLeave={() => { setHoveredLabel(null) }}
+									>
 										<code>{display}</code>
 									</div>
 									<Button
@@ -258,6 +266,12 @@ const OriginListSection: React.FC<OriginListSectionProps> = ({
 					})}
 				</ul>
 			)}
+			<Tooltip
+				targetRef={labelTooltipRef as React.RefObject<HTMLElement>}
+				content={hoveredLabel}
+				show={hoveredLabel !== null}
+				placement="below"
+			/>
 		</div>
 	)
 }

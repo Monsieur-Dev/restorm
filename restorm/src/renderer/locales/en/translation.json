@@ -1604,6 +1604,11 @@
     },
     "grpc": {
       "message": "message"
+    },
+    "port": {
+      "in": "in",
+      "error": "error",
+      "done": "done"
     }
   },
   "mqtt": {

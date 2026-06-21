@@ -158,6 +158,8 @@ export const ScenarioNodeBoxBase: React.FC<ScenarioNodeBoxBaseProps> = ({ id, da
   const [bodyMounted, setBodyMounted] = useState(!collapsed)
   const [bodyOpen, setBodyOpen] = useState(!collapsed)
   const rafHandle = useRef<number | null>(null)
+  const portTooltipRef = useRef<HTMLElement | null>(null)
+  const [hoveredPortLabel, setHoveredPortLabel] = useState<string | null>(null)
   // `animating` is armed synchronously by `onToggle` BEFORE the parent flips
   // `collapsed`. Any flip that arrives without going through `onToggle` (eg.
   // parent state hydration replaying the persisted state, MCP graph patch)
@@ -417,7 +419,9 @@ export const ScenarioNodeBoxBase: React.FC<ScenarioNodeBoxBaseProps> = ({ id, da
             position={Position.Left}
             className={`scn-handle scn-handle-launch ${inputFlowRingClass('in', data.inputs, data.kind)}`}
             style={{ background: anchorColor() }}
-            aria-label="in"
+            aria-label={t('scenario.port.in', 'in')}
+            onMouseEnter={(e) => { portTooltipRef.current = e.currentTarget; setHoveredPortLabel(t('scenario.port.in', 'in')) }}
+            onMouseLeave={() => { setHoveredPortLabel(null) }}
           />
         )}
         {headerIcon ?? <i className={`codicon codicon-${meta.icon} scn-node-icon`} aria-hidden="true" />}
@@ -553,7 +557,9 @@ export const ScenarioNodeBoxBase: React.FC<ScenarioNodeBoxBaseProps> = ({ id, da
           position={Position.Bottom}
           className={`scn-handle scn-handle-error ${outputFlowRingClass('error', data.outputs, data.kind)}`}
           style={{ background: ROLE_COLOR['error'] }}
-          aria-label="error"
+          aria-label={t('scenario.port.error', 'error')}
+          onMouseEnter={(e) => { portTooltipRef.current = e.currentTarget; setHoveredPortLabel(t('scenario.port.error', 'error')) }}
+          onMouseLeave={() => { setHoveredPortLabel(null) }}
         />
       )}
       {/* Universal completion signal: fires once this box AND its whole
@@ -566,9 +572,17 @@ export const ScenarioNodeBoxBase: React.FC<ScenarioNodeBoxBaseProps> = ({ id, da
           type="source"
           position={Position.Bottom}
           className={`scn-handle scn-handle-done ${outputFlowRingClass('done', data.outputs, data.kind)}`}
-          aria-label="done"
+          aria-label={t('scenario.port.done', 'done')}
+          onMouseEnter={(e) => { portTooltipRef.current = e.currentTarget; setHoveredPortLabel(t('scenario.port.done', 'done')) }}
+          onMouseLeave={() => { setHoveredPortLabel(null) }}
         />
       )}
+      <Tooltip
+        targetRef={portTooltipRef as React.RefObject<HTMLElement>}
+        content={hoveredPortLabel}
+        show={hoveredPortLabel !== null}
+        placement="below"
+      />
       {/* The BorderBeam orbits the full box outline. Rendered LAST so it
        * paints on top of the header background — otherwise the trail's lap
        * along the top edge disappears behind the header's solid fill. */}

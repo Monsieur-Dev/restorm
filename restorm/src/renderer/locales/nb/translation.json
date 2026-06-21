@@ -1604,6 +1604,11 @@
     },
     "palette": {
       "arrangeActions": "Re-arrange actions"
+    },
+    "port": {
+      "in": "in",
+      "error": "error",
+      "done": "done"
     }
   },
   "mqtt": {
