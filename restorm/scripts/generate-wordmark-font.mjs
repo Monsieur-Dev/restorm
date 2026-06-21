@@ -163,13 +163,25 @@ for pid, eid, lid in [(3, 1, 0x0409), (1, 0, 0)]:
     name_table.setName(FULL_NAME,    4, pid, eid, lid)   # Full name
     name_table.setName(PS_NAME,      6, pid, eid, lid)   # PostScript name
 
-# ── 6. Force-recalculate all table checksums + save as woff2 ──────────────────
+# ── 6. Pin head.modified + force-recalculate checksums + save as woff2 ───────
 # After replacing a glyph, the SFNT table-directory checksum for 'head' (and
 # potentially others) can be stale because fontTools computes it lazily. Chromium
 # (unlike fontTools itself) validates individual table checksums strictly and
 # rejects the font with a silent load error if any table checksum mismatches.
 # Compile the entire font into a BytesIO buffer first (forces recalculation of
 # all checksums in the SFNT directory), then save that to disk as woff2.
+#
+# head.modified is a wall-clock timestamp written by fontTools on each save.
+# Pin it to a fixed epoch so repeated runs of this script produce a byte-identical
+# woff2 (true reproducibility — avoids spurious diffs in git).
+# Value: seconds since 1904-01-01 00:00:00 UTC (OpenType epoch).
+# We pin to 2025-01-01 00:00:00 UTC = Unix 1735689600 + OT epoch offset 2082844800
+#   = 3818534400 OT seconds.
+import datetime as _dt
+_OT_EPOCH = _dt.datetime(1904, 1, 1, tzinfo=_dt.timezone.utc)
+_PIN_DATE  = _dt.datetime(2025, 1, 1, tzinfo=_dt.timezone.utc)
+tt['head'].modified = int((_PIN_DATE - _OT_EPOCH).total_seconds())
+
 import io as _io
 sfnt_buf = _io.BytesIO()
 tt.flavor = None

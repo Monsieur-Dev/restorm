@@ -54,27 +54,6 @@
   border: 0;
 }
 
-/* Flex row that holds the optional logo prefix + the animated wordmark
- * side by side, baseline-aligned so the glyph cap-height matches the
- * text cap-height. */
-.ecu-welcome-screen-wordmark-row {
-  display: inline-flex;
-  align-items: baseline;
-  line-height: 1;
-}
-
-/* Prefix slot (e.g. a brand-icon glyph replacing the first letter).
- * Font-size and color match .ecu-welcome-screen-wordmark so the glyph
- * renders at the same size and brightness as the wordmark text.
- * Baseline-aligned via the parent flex row's `align-items: baseline`. */
-.ecu-welcome-screen-wordmark-prefix {
-  display: inline-flex;
-  align-items: baseline;
-  line-height: 1;
-  font-size: 120px;
-  color: var(--foreground);
-}
-
 /* Scoped to .ecu-welcome-screen for specificity (0,2,0) so the wordmark font
  * wins over .workbench.linux / .workbench.mac / .workbench.windows platform
  * font-family rules (also 0,2,0) that would otherwise override this via
@@ -170,11 +149,6 @@
     font-size: 64px;
   }
 
-  /* Prefix inherits font-size from the wordmark row context at 64px */
-  .ecu-welcome-screen-wordmark-prefix {
-    font-size: 64px;
-  }
-
   .ecu-welcome-screen-content {
     order: 2;
     align-self: center;
@@ -196,10 +170,6 @@
 
 @media (width <= 480px) {
   .ecu-welcome-screen-wordmark {
-    font-size: 48px;
-  }
-
-  .ecu-welcome-screen-wordmark-prefix {
     font-size: 48px;
   }
 
