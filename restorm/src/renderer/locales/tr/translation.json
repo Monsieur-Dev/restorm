@@ -262,7 +262,8 @@
         "mqttServer": "MQTT aracısı",
         "grpcServer": "gRPC mock sunucusu",
         "soapServer": "SOAP sahte sunucusu",
-        "graphqlServer": "GraphQL mock sunucusu"
+        "graphqlServer": "GraphQL mock sunucusu",
+        "odataServer": "OData mock sunucusu"
       }
     },
     "deleteConfirm": {
@@ -1056,7 +1057,9 @@
       "soapListen": "SOAP sunucusu",
       "soapClose": "SOAP'ı kapat",
       "graphqlListen": "GraphQL server",
-      "graphqlClose": "GraphQL close"
+      "graphqlClose": "GraphQL close",
+      "odataListen": "OData server",
+      "odataClose": "OData close"
     },
     "comparator": {
       "result": "sonuç"
@@ -1624,7 +1627,9 @@
       "soapListen": "Yerel bir SOAP sahte sunucusu barındırır ve süresiz olarak dinler. Gelen her istek, yapılandırılmış bir işleme yönlendirilir (SOAPAction'ına veya gövdedeki işlem adına göre) ve önceden tanımlanmış SOAP zarfıyla yanıtlanır (bir hata işlemi `<soap:Fault>` döndürür). Sunucu dinlemeye başlar başlamaz `connected` tetiklenir; hizmet verilen her istek, verilerini `served` bağlantı noktasında yeniden yayınlar. Sunucu, bir SOAP kapatmasına (veya bir durdurmaya) kadar etkin kalır, ardından `done` tetiklenir.",
       "soapClose": "Zaten dinlemekte olan bir SOAP sahte sunucusunu (bir SOAP sunucu düğümü tarafından bildirilen) durdurur ve bağlantı noktasını serbest bırakır.",
       "graphqlListen": "Hosts a local GraphQL mock server and listens indefinitely. `connected` fires once it is listening; each served operation re-emits its data on the `served` port. The server stays up until a GraphQL close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
-      "graphqlClose": "Stops an already-listening GraphQL mock server (declared by a GraphQL server node), freeing its port."
+      "graphqlClose": "Stops an already-listening GraphQL mock server (declared by a GraphQL server node), freeing its port.",
+      "odataListen": "Yerel bir OData v4 sahte hizmetini barındırır ve süresiz olarak dinler. Dinlemeye başlar başlamaz `connected` tetiklenir; sunulan her istek verisini `served` bağlantı noktasında yeniden yayar. Sunucu bir OData kapatmaya (veya bir Stop'a) kadar açık kalır, ardından `done` tetiklenir. response çıktısı yoktur — hizmet verir, dışarıyı çağırmaz.",
+      "odataClose": "Halihazırda dinlemekte olan bir OData sahte hizmetini (bir OData sunucu düğümü tarafından bildirilen) durdurur ve bağlantı noktasını serbest bırakır."
     },
     "legend": {
       "title": "Gösterge",
@@ -1851,6 +1856,17 @@
       "notListening": "Dinlemiyor",
       "served": "Dinliyor — {{count}} istek karşılandı",
       "listenFailed": "Mock sunucusu başlatılamadı"
+    }
+  },
+  "odata": {
+    "server": {
+      "startListening": "Dinlemeyi başlat",
+      "stopListening": "Dinlemeyi durdur",
+      "notListening": "Dinlemiyor",
+      "served": "Dinliyor — {{count}} istek karşılandı",
+      "listenFailed": "OData mock sunucusu başlatılamadı",
+      "metadataLabel": "$metadata (CSDL)",
+      "dataLabel": "Sunulan varlık verileri (varlık kümesine göre)"
     }
   }
 }

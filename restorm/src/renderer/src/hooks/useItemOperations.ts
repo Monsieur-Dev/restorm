@@ -45,6 +45,48 @@ service MockService {
 }
 `
 
+/** A minimal OData v4 CSDL ($metadata) a freshly-created mock serves, so the
+ * service is runnable + browsable the moment it is created. One `Pets` entity
+ * set keyed by `Id`, with a `Status` + a `Category` navigation property. */
+const ODATA_MOCK_STARTER_METADATA = `<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="4.0" xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx">
+  <edmx:DataServices>
+    <Schema Namespace="Restorm.Mock" xmlns="http://docs.oasis-open.org/odata/ns/edm">
+      <EntityType Name="Pet">
+        <Key><PropertyRef Name="Id"/></Key>
+        <Property Name="Id" Type="Edm.Int32" Nullable="false"/>
+        <Property Name="Name" Type="Edm.String"/>
+        <Property Name="Status" Type="Edm.String"/>
+        <Property Name="CategoryId" Type="Edm.Int32"/>
+        <NavigationProperty Name="Category" Type="Restorm.Mock.Category"/>
+      </EntityType>
+      <EntityType Name="Category">
+        <Key><PropertyRef Name="Id"/></Key>
+        <Property Name="Id" Type="Edm.Int32" Nullable="false"/>
+        <Property Name="Name" Type="Edm.String"/>
+      </EntityType>
+      <EntityContainer Name="Container">
+        <EntitySet Name="Pets" EntityType="Restorm.Mock.Pet"/>
+        <EntitySet Name="Categories" EntityType="Restorm.Mock.Category"/>
+      </EntityContainer>
+    </Schema>
+  </edmx:DataServices>
+</edmx:Edmx>`
+
+/** Starter entity data the mock serves for the {@link ODATA_MOCK_STARTER_METADATA}
+ * schema — two pets + their categories, so $filter/$select/$expand all return
+ * something the moment the server is created. */
+const ODATA_MOCK_STARTER_DATA: Record<string, Record<string, unknown>[]> = {
+  Pets: [
+    { Id: 1, Name: 'Rex', Status: 'Available', CategoryId: 1 },
+    { Id: 2, Name: 'Whiskers', Status: 'Pending', CategoryId: 2 }
+  ],
+  Categories: [
+    { Id: 1, Name: 'Dogs' },
+    { Id: 2, Name: 'Cats' }
+  ]
+}
+
 export interface UseItemOperationsOptions {
   rootItems: FolderItem[]
   setRootItems: React.Dispatch<React.SetStateAction<FolderItem[]>>
@@ -430,6 +472,7 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
       case 'mqtt': return 'New MQTT request'
       case 'mqtt-server': return 'New MQTT broker'
       case 'odata': return 'New OData request'
+      case 'odata-server': return 'New OData mock server'
       case 'auth': return 'New auth request'
       case 'scenario': return 'New scenario'
     }
@@ -623,6 +666,18 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
         built = new WebSocketRequest({ id, name, protocol: 'mqtt', server: true, url: 'mqtt://localhost:1883', event: '#' })
       } else if (kind === 'odata') {
         built = new ODataRequest({ id, name })
+      } else if (kind === 'odata-server') {
+        // restorm acts as a local OData v4 mock service: OData request + server
+        // flag, host forced to localhost, default port 8081 + service root, plus
+        // a starter CSDL + entity data so it is runnable the moment it is created.
+        built = new ODataRequest({
+          id,
+          name,
+          server: true,
+          url: 'localhost:8081/odata',
+          mockMetadata: ODATA_MOCK_STARTER_METADATA,
+          mockData: ODATA_MOCK_STARTER_DATA
+        })
       } else {
         built = new AuthenticationRequest({ id, name })
       }

@@ -262,7 +262,8 @@
         "mqttServer": "MQTT-Broker",
         "grpcServer": "gRPC-Mock-Server",
         "soapServer": "SOAP-Mock-Server",
-        "graphqlServer": "GraphQL-Mock-Server"
+        "graphqlServer": "GraphQL-Mock-Server",
+        "odataServer": "OData-Mock-Server"
       }
     },
     "deleteConfirm": {
@@ -1056,7 +1057,9 @@
       "soapListen": "SOAP-Server",
       "soapClose": "SOAP schließen",
       "graphqlListen": "GraphQL server",
-      "graphqlClose": "GraphQL close"
+      "graphqlClose": "GraphQL close",
+      "odataListen": "OData server",
+      "odataClose": "OData close"
     },
     "comparator": {
       "result": "Ergebnis"
@@ -1624,7 +1627,9 @@
       "soapListen": "Hostet einen lokalen SOAP-Mock-Server und lauscht unbegrenzt. Jede eingehende Anfrage wird an eine konfigurierte Operation weitergeleitet (per SOAPAction oder Operationsname im Body) und mit dem hinterlegten SOAP-Umschlag beantwortet (eine Fehler-Operation liefert `<soap:Fault>`). `connected` wird ausgelöst, sobald der Server lauscht; jede bediente Anfrage gibt ihre Daten erneut am Port `served` aus. Der Server bleibt aktiv, bis ein SOAP-Schließen (oder ein Stopp) erfolgt, dann wird `done` ausgelöst.",
       "soapClose": "Stoppt einen bereits lauschenden SOAP-Mock-Server (von einem SOAP-Server-Knoten deklariert) und gibt dessen Port frei.",
       "graphqlListen": "Hosts a local GraphQL mock server and listens indefinitely. `connected` fires once it is listening; each served operation re-emits its data on the `served` port. The server stays up until a GraphQL close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
-      "graphqlClose": "Stops an already-listening GraphQL mock server (declared by a GraphQL server node), freeing its port."
+      "graphqlClose": "Stops an already-listening GraphQL mock server (declared by a GraphQL server node), freeing its port.",
+      "odataListen": "Hostet einen lokalen OData-v4-Mock-Dienst und lauscht unbegrenzt. `connected` wird ausgelöst, sobald gelauscht wird; jede bediente Anfrage sendet ihre Daten erneut über den Port `served`. Der Server bleibt aktiv, bis ein OData-Schließen (oder ein Stopp) erfolgt, dann wird `done` ausgelöst. Keine response-Ausgabe — er bedient, er ruft nicht nach außen.",
+      "odataClose": "Stoppt einen bereits lauschenden OData-Mock-Dienst (deklariert durch einen OData-Server-Knoten) und gibt dessen Port frei."
     },
     "legend": {
       "title": "Legende",
@@ -1851,6 +1856,17 @@
       "notListening": "Hört nicht zu",
       "served": "Hört zu — {{count}} Anfrage(n) bedient",
       "listenFailed": "Mock-Server konnte nicht gestartet werden"
+    }
+  },
+  "odata": {
+    "server": {
+      "startListening": "Empfang starten",
+      "stopListening": "Empfang stoppen",
+      "notListening": "Hört nicht zu",
+      "served": "Hört zu — {{count}} Anfrage(n) bedient",
+      "listenFailed": "OData-Mock-Server konnte nicht gestartet werden",
+      "metadataLabel": "$metadata (CSDL)",
+      "dataLabel": "Bereitgestellte Entitätsdaten (nach Entitätssatz)"
     }
   }
 }

@@ -161,4 +161,13 @@ export interface ODataRequest extends BaseRequest {
   operationParameters?: ODataOperationParameterSpec[]
   /** Whether this endpoint is deprecated. */
   deprecated?: boolean
+  /** When true, restorm ACTS AS a local OData v4 mock service hosting
+   * `mockMetadata` + `mockData` on `localhost:<port><serviceRoot>` (the URL
+   * carries only that address), instead of sending a client request. */
+  server?: boolean
+  /** The CSDL ($metadata) document the mock serves verbatim (server mode). */
+  mockMetadata?: string
+  /** Served entity data, keyed by entity-set name → entity objects (server
+   * mode). The query-option executor applies the system options over each. */
+  mockData?: Record<string, Record<string, unknown>[]>
 }

@@ -262,7 +262,8 @@
         "mqttServer": "MQTT-megler",
         "grpcServer": "gRPC-mockserver",
         "soapServer": "SOAP-mockserver",
-        "graphqlServer": "GraphQL-mockserver"
+        "graphqlServer": "GraphQL-mockserver",
+        "odataServer": "OData-mockserver"
       }
     },
     "deleteConfirm": {
@@ -1056,7 +1057,9 @@
       "soapListen": "SOAP-server",
       "soapClose": "Lukk SOAP",
       "graphqlListen": "GraphQL server",
-      "graphqlClose": "GraphQL close"
+      "graphqlClose": "GraphQL close",
+      "odataListen": "OData server",
+      "odataClose": "OData close"
     },
     "comparator": {
       "result": "resultat"
@@ -1624,7 +1627,9 @@
       "soapListen": "Er vert for en lokal SOAP-mockserver og lytter i det uendelige. Hver innkommende forespørsel rutes til en konfigurert operasjon (etter SOAPAction eller operasjonsnavnet i brødteksten) og besvares med den forhåndsdefinerte SOAP-konvolutten (en feiloperasjon returnerer `<soap:Fault>`). `connected` utløses så snart serveren lytter; hver betjent forespørsel sender dataene sine på nytt på porten `served`. Serveren forblir aktiv til en SOAP-lukking (eller en stopp), deretter utløses `done`.",
       "soapClose": "Stopper en SOAP-mockserver som allerede lytter (deklarert av en SOAP-servernode), og frigjør porten dens.",
       "graphqlListen": "Hosts a local GraphQL mock server and listens indefinitely. `connected` fires once it is listening; each served operation re-emits its data on the `served` port. The server stays up until a GraphQL close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
-      "graphqlClose": "Stops an already-listening GraphQL mock server (declared by a GraphQL server node), freeing its port."
+      "graphqlClose": "Stops an already-listening GraphQL mock server (declared by a GraphQL server node), freeing its port.",
+      "odataListen": "Er vert for en lokal OData v4-mocktjeneste og lytter i det uendelige. `connected` utløses så snart den lytter; hver betjent forespørsel sender dataene sine på nytt på `served`-porten. Serveren holder seg oppe til en OData-lukking (eller et Stopp), deretter utløses `done`. Ingen response-utdata — den betjener, den kaller ikke ut.",
+      "odataClose": "Stopper en OData-mocktjeneste som allerede lytter (erklært av en OData-servernode) og frigjør porten dens."
     },
     "legend": {
       "title": "Forklaring",
@@ -1851,6 +1856,17 @@
       "notListening": "Lytter ikke",
       "served": "Lytter — {{count}} forespørsel(er) betjent",
       "listenFailed": "Kunne ikke starte mock-serveren"
+    }
+  },
+  "odata": {
+    "server": {
+      "startListening": "Begynn å lytte",
+      "stopListening": "Slutt å lytte",
+      "notListening": "Lytter ikke",
+      "served": "Lytter — {{count}} forespørsel(er) betjent",
+      "listenFailed": "Kunne ikke starte OData-mock-serveren",
+      "metadataLabel": "$metadata (CSDL)",
+      "dataLabel": "Betjente entitetsdata (etter entitetssett)"
     }
   }
 }

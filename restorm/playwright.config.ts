@@ -116,6 +116,12 @@ const graphqlServerExecutionTestDir = defineBddConfig({
   outputDir: '.features-gen/graphql-server'
 })
 
+const odataServerExecutionTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/odata-server/features/**/*.feature',
+  steps: ['tests/e2e/bdd/odata-server/steps/**/*.ts', 'tests/e2e/bdd/fixtures/mcp-server.fixture.ts'],
+  outputDir: '.features-gen/odata-server'
+})
+
 const httpExecutionTestDir = defineBddConfig({
   features: 'tests/e2e/bdd/http-execution/features/**/*.feature',
   steps: ['tests/e2e/bdd/http-execution/steps/**/*.ts', 'tests/e2e/bdd/fixtures/mcp-server.fixture.ts'],
@@ -378,6 +384,11 @@ export default defineConfig({
     {
       name: 'graphql-server',
       testDir: graphqlServerExecutionTestDir,
+      timeout: 180 * 1000
+    },
+    {
+      name: 'odata-server',
+      testDir: odataServerExecutionTestDir,
       timeout: 180 * 1000
     },
     {

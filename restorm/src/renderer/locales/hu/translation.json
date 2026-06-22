@@ -262,7 +262,8 @@
         "mqttServer": "MQTT broker",
         "grpcServer": "gRPC mock-kiszolgáló",
         "soapServer": "SOAP mock-kiszolgáló",
-        "graphqlServer": "GraphQL mock-kiszolgáló"
+        "graphqlServer": "GraphQL mock-kiszolgáló",
+        "odataServer": "OData mock-kiszolgáló"
       }
     },
     "deleteConfirm": {
@@ -1056,7 +1057,9 @@
       "soapListen": "SOAP-kiszolgáló",
       "soapClose": "SOAP lezárása",
       "graphqlListen": "GraphQL server",
-      "graphqlClose": "GraphQL close"
+      "graphqlClose": "GraphQL close",
+      "odataListen": "OData server",
+      "odataClose": "OData close"
     },
     "comparator": {
       "result": "eredmény"
@@ -1624,7 +1627,9 @@
       "soapListen": "Helyi SOAP mock-kiszolgálót üzemeltet, és korlátlan ideig figyel. Minden bejövő kérést egy konfigurált művelethez irányít (a SOAPAction vagy a törzs műveletneve alapján), és az előre megadott SOAP-borítékkal válaszol (egy hibaművelet `<soap:Fault>` választ ad). A `connected` akkor aktiválódik, amint a kiszolgáló figyel; minden kiszolgált kérés újra kibocsátja az adatait a `served` porton. A kiszolgáló aktív marad egy SOAP-lezárásig (vagy leállításig), majd a `done` aktiválódik.",
       "soapClose": "Leállít egy már figyelő SOAP mock-kiszolgálót (amelyet egy SOAP-kiszolgáló csomópont deklarált), és felszabadítja a portját.",
       "graphqlListen": "Hosts a local GraphQL mock server and listens indefinitely. `connected` fires once it is listening; each served operation re-emits its data on the `served` port. The server stays up until a GraphQL close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
-      "graphqlClose": "Stops an already-listening GraphQL mock server (declared by a GraphQL server node), freeing its port."
+      "graphqlClose": "Stops an already-listening GraphQL mock server (declared by a GraphQL server node), freeing its port.",
+      "odataListen": "Helyi OData v4 mock szolgáltatást üzemeltet, és határozatlan ideig figyel. A `connected` akkor aktiválódik, amint figyel; minden kiszolgált kérés újraküldi az adatait a `served` porton. A kiszolgáló az OData lezárásig (vagy egy Stopig) fut, majd a `done` aktiválódik. Nincs response kimenet — kiszolgál, nem hív kifelé.",
+      "odataClose": "Leállít egy már figyelő OData mock szolgáltatást (amelyet egy OData kiszolgáló csomópont deklarált), és felszabadítja a portját."
     },
     "legend": {
       "title": "Jelmagyarázat",
@@ -1851,6 +1856,17 @@
       "notListening": "Nem figyel",
       "served": "Figyel — {{count}} kérés kiszolgálva",
       "listenFailed": "A mock-kiszolgáló indítása sikertelen"
+    }
+  },
+  "odata": {
+    "server": {
+      "startListening": "Hallgatás indítása",
+      "stopListening": "Hallgatás leállítása",
+      "notListening": "Nem figyel",
+      "served": "Figyel — {{count}} kérés kiszolgálva",
+      "listenFailed": "Az OData mock-kiszolgáló indítása sikertelen",
+      "metadataLabel": "$metadata (CSDL)",
+      "dataLabel": "Kiszolgált entitásadatok (entitáskészletenként)"
     }
   }
 }

@@ -40,14 +40,14 @@ import { CURRENT_FILE_FORMAT_VERSION } from '../../../shared/config/fileFormatVe
 // CSDL (EDMX) intermediate shapes
 // ============================================================================
 
-interface EdmProperty {
+export interface EdmProperty {
   name: string
   type: string
   nullable: boolean
   collection: boolean
 }
 
-interface EdmEntityType {
+export interface EdmEntityType {
   namespace: string
   name: string
   qualifiedName: string
@@ -56,7 +56,7 @@ interface EdmEntityType {
   navigationProperties: EdmProperty[]
 }
 
-interface EdmEnumType {
+export interface EdmEnumType {
   namespace: string
   name: string
   qualifiedName: string
@@ -81,12 +81,12 @@ interface EdmOperation {
   returnType?: string
 }
 
-interface EdmEntitySet {
+export interface EdmEntitySet {
   name: string
   entityType: string
 }
 
-interface EdmSchema {
+export interface EdmSchema {
   version: ODataVersion
   entityTypes: EdmEntityType[]
   enumTypes: EdmEnumType[]
@@ -199,6 +199,16 @@ function parseEdmxVersion(xml: string): ODataVersion {
  * The detected `version` is stamped onto the schema so every generated
  * request is tagged correctly.
  */
+/**
+ * Parse a v4 EDMX `$metadata` document into an `EdmSchema`. A thin v4-fixed
+ * wrapper over {@link parseEdmx} for callers that only ever serve OData v4 (the
+ * local OData mock service): the version is known, so version detection is
+ * skipped.
+ */
+export function parseEdmxV4(xml: string): EdmSchema {
+  return parseEdmx(xml, 'v4')
+}
+
 function parseEdmx(xml: string, version: ODataVersion): EdmSchema {
   const schema: EdmSchema = {
     version,

@@ -262,7 +262,8 @@
         "mqttServer": "Broker MQTT",
         "grpcServer": "Servidor gRPC simulado",
         "soapServer": "Servidor SOAP de prueba",
-        "graphqlServer": "Servidor GraphQL simulado"
+        "graphqlServer": "Servidor GraphQL simulado",
+        "odataServer": "Servidor OData simulado"
       }
     },
     "deleteConfirm": {
@@ -1056,7 +1057,9 @@
       "soapListen": "Servidor SOAP",
       "soapClose": "Cerrar SOAP",
       "graphqlListen": "GraphQL server",
-      "graphqlClose": "GraphQL close"
+      "graphqlClose": "GraphQL close",
+      "odataListen": "OData server",
+      "odataClose": "OData close"
     },
     "comparator": {
       "result": "resultado"
@@ -1624,7 +1627,9 @@
       "soapListen": "Aloja un servidor SOAP de prueba local y escucha indefinidamente. Cada solicitud entrante se dirige a una operación configurada (por su SOAPAction o el nombre de operación del cuerpo) y se responde con el sobre SOAP predefinido (una operación de fallo devuelve `<soap:Fault>`). `connected` se activa en cuanto el servidor escucha; cada solicitud atendida vuelve a emitir sus datos en el puerto `served`. El servidor permanece activo hasta un cierre SOAP (o una parada), entonces se activa `done`.",
       "soapClose": "Detiene un servidor SOAP de prueba que ya está escuchando (declarado por un nodo de servidor SOAP) y libera su puerto.",
       "graphqlListen": "Hosts a local GraphQL mock server and listens indefinitely. `connected` fires once it is listening; each served operation re-emits its data on the `served` port. The server stays up until a GraphQL close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
-      "graphqlClose": "Stops an already-listening GraphQL mock server (declared by a GraphQL server node), freeing its port."
+      "graphqlClose": "Stops an already-listening GraphQL mock server (declared by a GraphQL server node), freeing its port.",
+      "odataListen": "Aloja un servicio simulado OData v4 local y escucha indefinidamente. `connected` se activa en cuanto está escuchando; cada solicitud atendida reemite sus datos por el puerto `served`. El servidor permanece activo hasta un cierre OData (o un Stop), luego se activa `done`. Sin salida response — sirve, no llama hacia fuera.",
+      "odataClose": "Detiene un servicio simulado OData que ya está escuchando (declarado por un nodo de servidor OData) y libera su puerto."
     },
     "legend": {
       "title": "Leyenda",
@@ -1851,6 +1856,17 @@
       "notListening": "Sin escuchar",
       "served": "Escuchando — {{count}} solicitud(es) atendida(s)",
       "listenFailed": "No se pudo iniciar el servidor simulado"
+    }
+  },
+  "odata": {
+    "server": {
+      "startListening": "Empezar a escuchar",
+      "stopListening": "Dejar de escuchar",
+      "notListening": "Sin escuchar",
+      "served": "Escuchando — {{count}} solicitud(es) atendida(s)",
+      "listenFailed": "No se pudo iniciar el servidor simulado de OData",
+      "metadataLabel": "$metadata (CSDL)",
+      "dataLabel": "Datos de entidades atendidos (por conjunto de entidades)"
     }
   }
 }

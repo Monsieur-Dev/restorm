@@ -264,7 +264,8 @@
         "mqttServer": "MQTT-брокер",
         "grpcServer": "gRPC mock-сервер",
         "soapServer": "Макетний сервер SOAP",
-        "graphqlServer": "GraphQL mock-сервер"
+        "graphqlServer": "GraphQL mock-сервер",
+        "odataServer": "OData mock-сервер"
       }
     },
     "deleteConfirm": {
@@ -1058,7 +1059,9 @@
       "soapListen": "Сервер SOAP",
       "soapClose": "Закрити SOAP",
       "graphqlListen": "GraphQL server",
-      "graphqlClose": "GraphQL close"
+      "graphqlClose": "GraphQL close",
+      "odataListen": "OData server",
+      "odataClose": "OData close"
     },
     "comparator": {
       "result": "результат"
@@ -1626,7 +1629,9 @@
       "soapListen": "Розміщує локальний макетний сервер SOAP і слухає необмежено. Кожен вхідний запит спрямовується до налаштованої операції (за його SOAPAction або назвою операції в тілі) і отримує відповідь у вигляді попередньо визначеного конверта SOAP (операція помилки повертає `<soap:Fault>`). `connected` спрацьовує, щойно сервер слухає; кожен обслужений запит повторно надсилає свої дані на порт `served`. Сервер залишається активним до закриття SOAP (або зупинки), після чого спрацьовує `done`.",
       "soapClose": "Зупиняє макетний сервер SOAP, який уже слухає (оголошений вузлом сервера SOAP), і звільняє його порт.",
       "graphqlListen": "Hosts a local GraphQL mock server and listens indefinitely. `connected` fires once it is listening; each served operation re-emits its data on the `served` port. The server stays up until a GraphQL close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
-      "graphqlClose": "Stops an already-listening GraphQL mock server (declared by a GraphQL server node), freeing its port."
+      "graphqlClose": "Stops an already-listening GraphQL mock server (declared by a GraphQL server node), freeing its port.",
+      "odataListen": "Розміщує локальну фіктивну службу OData v4 і слухає необмежено. `connected` спрацьовує, щойно вона починає слухати; кожен обслужений запит повторно надсилає свої дані на порт `served`. Сервер працює до закриття OData (або зупинки), після чого спрацьовує `done`. Без виводу response — він обслуговує, а не викликає назовні.",
+      "odataClose": "Зупиняє фіктивну службу OData, яка вже слухає (оголошену вузлом сервера OData), звільняючи її порт."
     },
     "legend": {
       "title": "Легенда",
@@ -1853,6 +1858,17 @@
       "notListening": "Не слухає",
       "served": "Слухає — оброблено {{count}} запит(ів)",
       "listenFailed": "Не вдалося запустити mock-сервер"
+    }
+  },
+  "odata": {
+    "server": {
+      "startListening": "Почати слухати",
+      "stopListening": "Зупинити прослуховування",
+      "notListening": "Не слухає",
+      "served": "Слухає — оброблено {{count}} запит(ів)",
+      "listenFailed": "Не вдалося запустити mock-сервер OData",
+      "metadataLabel": "$metadata (CSDL)",
+      "dataLabel": "Оброблені дані сутностей (за набором сутностей)"
     }
   }
 }

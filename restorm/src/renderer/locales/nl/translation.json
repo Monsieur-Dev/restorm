@@ -262,7 +262,8 @@
         "mqttServer": "MQTT-broker",
         "grpcServer": "gRPC-mockserver",
         "soapServer": "SOAP-mockserver",
-        "graphqlServer": "GraphQL-mockserver"
+        "graphqlServer": "GraphQL-mockserver",
+        "odataServer": "OData-mockserver"
       }
     },
     "deleteConfirm": {
@@ -1056,7 +1057,9 @@
       "soapListen": "SOAP-server",
       "soapClose": "SOAP sluiten",
       "graphqlListen": "GraphQL server",
-      "graphqlClose": "GraphQL close"
+      "graphqlClose": "GraphQL close",
+      "odataListen": "OData server",
+      "odataClose": "OData close"
     },
     "comparator": {
       "result": "resultaat"
@@ -1624,7 +1627,9 @@
       "soapListen": "Host een lokale SOAP-mockserver en luistert onbeperkt. Elk binnenkomend verzoek wordt naar een geconfigureerde bewerking geleid (op basis van de SOAPAction of de bewerkingsnaam in de body) en beantwoord met de vooraf ingestelde SOAP-envelop (een foutbewerking retourneert `<soap:Fault>`). `connected` wordt geactiveerd zodra de server luistert; elk afgehandeld verzoek zendt zijn gegevens opnieuw uit op de poort `served`. De server blijft actief tot een SOAP-sluiting (of een stop), waarna `done` wordt geactiveerd.",
       "soapClose": "Stopt een al luisterende SOAP-mockserver (gedeclareerd door een SOAP-serverknooppunt) en maakt de poort vrij.",
       "graphqlListen": "Hosts a local GraphQL mock server and listens indefinitely. `connected` fires once it is listening; each served operation re-emits its data on the `served` port. The server stays up until a GraphQL close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
-      "graphqlClose": "Stops an already-listening GraphQL mock server (declared by a GraphQL server node), freeing its port."
+      "graphqlClose": "Stops an already-listening GraphQL mock server (declared by a GraphQL server node), freeing its port.",
+      "odataListen": "Host een lokale OData v4-mockservice en luistert oneindig. `connected` wordt geactiveerd zodra er geluisterd wordt; elk bediend verzoek zendt zijn gegevens opnieuw uit op de `served`-poort. De server blijft actief tot een OData-sluiting (of een Stop), waarna `done` wordt geactiveerd. Geen response-uitvoer — hij bedient, hij roept niet naar buiten.",
+      "odataClose": "Stopt een al luisterende OData-mockservice (gedeclareerd door een OData-serverknooppunt) en maakt de poort vrij."
     },
     "legend": {
       "title": "Legenda",
@@ -1851,6 +1856,17 @@
       "notListening": "Luistert niet",
       "served": "Luistert — {{count}} verzoek(en) bediend",
       "listenFailed": "Kan de mockserver niet starten"
+    }
+  },
+  "odata": {
+    "server": {
+      "startListening": "Begin met luisteren",
+      "stopListening": "Stop met luisteren",
+      "notListening": "Luistert niet",
+      "served": "Luistert — {{count}} verzoek(en) bediend",
+      "listenFailed": "Kan de OData-mockserver niet starten",
+      "metadataLabel": "$metadata (CSDL)",
+      "dataLabel": "Bediende entiteitsgegevens (per entiteitenset)"
     }
   }
 }

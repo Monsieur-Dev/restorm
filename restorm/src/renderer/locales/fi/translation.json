@@ -262,7 +262,8 @@
         "mqttServer": "MQTT-välittäjä",
         "grpcServer": "gRPC-mock-palvelin",
         "soapServer": "SOAP-mock-palvelin",
-        "graphqlServer": "GraphQL-mock-palvelin"
+        "graphqlServer": "GraphQL-mock-palvelin",
+        "odataServer": "OData-mock-palvelin"
       }
     },
     "deleteConfirm": {
@@ -1056,7 +1057,9 @@
       "soapListen": "SOAP-palvelin",
       "soapClose": "Sulje SOAP",
       "graphqlListen": "GraphQL server",
-      "graphqlClose": "GraphQL close"
+      "graphqlClose": "GraphQL close",
+      "odataListen": "OData server",
+      "odataClose": "OData close"
     },
     "comparator": {
       "result": "tulos"
@@ -1624,7 +1627,9 @@
       "soapListen": "Isännöi paikallista SOAP-mock-palvelinta ja kuuntelee loputtomasti. Jokainen saapuva pyyntö ohjataan määritettyyn toimintoon (sen SOAPActionin tai rungon toiminnon nimen perusteella) ja siihen vastataan ennalta määritetyllä SOAP-kuorella (virhetoiminto palauttaa `<soap:Fault>`). `connected` laukeaa heti, kun palvelin kuuntelee; jokainen palveltu pyyntö lähettää tietonsa uudelleen `served`-porttiin. Palvelin pysyy aktiivisena SOAP-sulkemiseen (tai pysäytykseen) asti, minkä jälkeen `done` laukeaa.",
       "soapClose": "Pysäyttää jo kuuntelevan SOAP-mock-palvelimen (jonka SOAP-palvelinsolmu on määrittänyt) ja vapauttaa sen portin.",
       "graphqlListen": "Hosts a local GraphQL mock server and listens indefinitely. `connected` fires once it is listening; each served operation re-emits its data on the `served` port. The server stays up until a GraphQL close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
-      "graphqlClose": "Stops an already-listening GraphQL mock server (declared by a GraphQL server node), freeing its port."
+      "graphqlClose": "Stops an already-listening GraphQL mock server (declared by a GraphQL server node), freeing its port.",
+      "odataListen": "Isännöi paikallista OData v4 -näennäispalvelua ja kuuntelee loputtomiin. `connected` laukeaa heti kun palvelu kuuntelee; jokainen palveltu pyyntö lähettää tietonsa uudelleen `served`-porttiin. Palvelin pysyy käynnissä OData-sulkemiseen (tai pysäytykseen) asti, minkä jälkeen `done` laukeaa. Ei response-tulostetta — se palvelee, se ei kutsu ulospäin.",
+      "odataClose": "Pysäyttää jo kuuntelevan OData-näennäispalvelun (jonka OData-palvelinsolmu on määrittänyt) ja vapauttaa sen portin."
     },
     "legend": {
       "title": "Selite",
@@ -1851,6 +1856,17 @@
       "notListening": "Ei kuuntele",
       "served": "Kuuntelee — {{count}} pyyntö(ä) palveltu",
       "listenFailed": "Mock-palvelimen käynnistys epäonnistui"
+    }
+  },
+  "odata": {
+    "server": {
+      "startListening": "Aloita kuuntelu",
+      "stopListening": "Lopeta kuuntelu",
+      "notListening": "Ei kuuntele",
+      "served": "Kuuntelee — {{count}} pyyntö(ä) palveltu",
+      "listenFailed": "OData-mock-palvelimen käynnistys epäonnistui",
+      "metadataLabel": "$metadata (CSDL)",
+      "dataLabel": "Palvellut entiteettitiedot (entiteettijoukoittain)"
     }
   }
 }

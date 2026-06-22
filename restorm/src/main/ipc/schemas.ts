@@ -329,6 +329,11 @@ export const grpcListenArgs = z.tuple([requestIdArg])
 export const grpcStopArgs = z.tuple([requestIdArg])
 export const grpcIsListeningArgs = z.tuple([requestIdArg])
 
+// OData mock server (server mode): start/stop hosting + listening check.
+export const odataListenArgs = z.tuple([requestIdArg])
+export const odataStopArgs = z.tuple([requestIdArg])
+export const odataIsListeningArgs = z.tuple([requestIdArg])
+
 // ==========================================================================
 // WebSocket Execution
 // ==========================================================================

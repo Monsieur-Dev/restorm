@@ -145,10 +145,10 @@ export interface SocketioConnectRequest {
   requestId: string
   /** Wire transport — `socketio` opens a socket.io client, `websocket` a raw WS,
    * `grpc` a streaming RPC (server / client / bidi), `http-server` HOSTS a local
-   * HTTP mock, `grpc-server` a local gRPC mock, `soap-server` a local SOAP mock
-   * and `graphql-server` a local GraphQL mock (each served request / call /
-   * operation re-emits on `served`). */
-  transport: 'socketio' | 'websocket' | 'grpc' | 'mqtt' | 'http-server' | 'grpc-server' | 'soap-server' | 'graphql-server'
+   * HTTP mock, `grpc-server` a local gRPC mock, `soap-server` a local SOAP mock,
+   * `graphql-server` a local GraphQL mock and `odata-server` a local OData v4
+   * mock (each served request / call / operation re-emits on `served`). */
+  transport: 'socketio' | 'websocket' | 'grpc' | 'mqtt' | 'http-server' | 'grpc-server' | 'soap-server' | 'graphql-server' | 'odata-server'
   /** Fired once the socket is open. */
   onConnect: () => void
   /** Fired for every received frame (event name — undefined for raw WS — + payload). */
@@ -1225,7 +1225,7 @@ export class Scheduler {
    */
   private runSocketioConnect(
     act: InternalActivation,
-    action: { transport: 'socketio' | 'websocket' | 'grpc' | 'mqtt' | 'http-server' | 'grpc-server' | 'soap-server' | 'graphql-server'; requestId: string; events: string[]; connectionName: string }
+    action: { transport: 'socketio' | 'websocket' | 'grpc' | 'mqtt' | 'http-server' | 'grpc-server' | 'soap-server' | 'graphql-server' | 'odata-server'; requestId: string; events: string[]; connectionName: string }
   ): void {
     if (!this.socketioConnectBridge) { this.fail('socketio bridge not wired'); return }
     let iter = 0
@@ -1298,10 +1298,10 @@ export class Scheduler {
         // port. Socket.IO routes to the matching `event:<name>` port when listened
         // + wired, else the `others` catch-all (the switch `default` analogue).
         let port: string
-        if (action.transport === 'http-server' || action.transport === 'grpc-server' || action.transport === 'soap-server' || action.transport === 'graphql-server') {
-          // A hosted mock (HTTP / gRPC / SOAP / GraphQL) has no received frames —
-          // every SERVED request / call / operation re-emits its served-summary
-          // `{ request, response }` data on the dedicated `served` port.
+        if (action.transport === 'http-server' || action.transport === 'grpc-server' || action.transport === 'soap-server' || action.transport === 'graphql-server' || action.transport === 'odata-server') {
+          // A hosted mock (HTTP / gRPC / SOAP / GraphQL / OData) has no received
+          // frames — every SERVED request / call / operation re-emits its
+          // served-summary `{ request, response }` data on the dedicated `served` port.
           port = 'served'
         } else if (action.transport === 'websocket' || action.transport === 'grpc' || action.transport === 'mqtt') {
           port = 'message'

@@ -261,7 +261,8 @@
         "mqttServer": "Broker MQTT",
         "grpcServer": "Server mock gRPC",
         "soapServer": "Server tiruan SOAP",
-        "graphqlServer": "Server mock GraphQL"
+        "graphqlServer": "Server mock GraphQL",
+        "odataServer": "Server mock OData"
       }
     },
     "deleteConfirm": {
@@ -1055,7 +1056,9 @@
       "soapListen": "Server SOAP",
       "soapClose": "Tutup SOAP",
       "graphqlListen": "GraphQL server",
-      "graphqlClose": "GraphQL close"
+      "graphqlClose": "GraphQL close",
+      "odataListen": "OData server",
+      "odataClose": "OData close"
     },
     "comparator": {
       "result": "hasil"
@@ -1623,7 +1626,9 @@
       "soapListen": "Menjadi host server tiruan SOAP lokal dan mendengarkan tanpa batas. Setiap permintaan masuk diarahkan ke operasi yang dikonfigurasi (berdasarkan SOAPAction-nya atau nama operasi di body) dan dijawab dengan amplop SOAP yang telah ditentukan (operasi kesalahan mengembalikan `<soap:Fault>`). `connected` dipicu segera setelah server mendengarkan; setiap permintaan yang dilayani memancarkan kembali datanya di port `served`. Server tetap aktif hingga penutupan SOAP (atau penghentian), lalu `done` dipicu.",
       "soapClose": "Menghentikan server tiruan SOAP yang sudah mendengarkan (dideklarasikan oleh node server SOAP) dan membebaskan port-nya.",
       "graphqlListen": "Hosts a local GraphQL mock server and listens indefinitely. `connected` fires once it is listening; each served operation re-emits its data on the `served` port. The server stays up until a GraphQL close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
-      "graphqlClose": "Stops an already-listening GraphQL mock server (declared by a GraphQL server node), freeing its port."
+      "graphqlClose": "Stops an already-listening GraphQL mock server (declared by a GraphQL server node), freeing its port.",
+      "odataListen": "Menghosting layanan tiruan OData v4 lokal dan mendengarkan tanpa batas. `connected` terpicu begitu mulai mendengarkan; setiap permintaan yang dilayani memancarkan ulang datanya pada port `served`. Server tetap aktif hingga penutupan OData (atau Stop), lalu `done` terpicu. Tanpa keluaran response — ia melayani, bukan memanggil keluar.",
+      "odataClose": "Menghentikan layanan tiruan OData yang sudah mendengarkan (dideklarasikan oleh node server OData), membebaskan portnya."
     },
     "legend": {
       "title": "Legenda",
@@ -1850,6 +1855,17 @@
       "notListening": "Tidak mendengarkan",
       "served": "Mendengarkan — {{count}} permintaan dilayani",
       "listenFailed": "Gagal memulai server mock"
+    }
+  },
+  "odata": {
+    "server": {
+      "startListening": "Mulai mendengarkan",
+      "stopListening": "Berhenti mendengarkan",
+      "notListening": "Tidak mendengarkan",
+      "served": "Mendengarkan — {{count}} permintaan dilayani",
+      "listenFailed": "Gagal memulai server mock OData",
+      "metadataLabel": "$metadata (CSDL)",
+      "dataLabel": "Data entitas yang dilayani (per kumpulan entitas)"
     }
   }
 }

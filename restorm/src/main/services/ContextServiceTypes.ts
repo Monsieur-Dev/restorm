@@ -145,6 +145,10 @@ export interface FullRequestData {
     format?: string
     apply?: string
   }
+  /** OData mock service (server === true): the CSDL the mock serves verbatim. */
+  mockMetadata?: string
+  /** OData mock service: served entity data keyed by entity-set name. */
+  mockData?: Record<string, Record<string, unknown>[]>
 }
 
 /** Request context tracking with full data */

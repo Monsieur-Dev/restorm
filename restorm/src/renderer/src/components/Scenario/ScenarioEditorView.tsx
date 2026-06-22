@@ -132,7 +132,9 @@ const STREAM_CONNECT_FOR_CHILD: Partial<Record<AddChildKind, ScenarioNodeKind>> 
   'soap-server': 'soapListen',
   // The GraphQL mock server mirrors it: a `server: true` GraphQL request + a
   // bound `graphqlListen` node.
-  'graphql-server': 'graphqlListen'
+  'graphql-server': 'graphqlListen',
+  // Same for the OData mock server → a bound `odataListen` node.
+  'odata-server': 'odataListen'
 }
 
 const nodeTypes = { scenarioNode: ScenarioNodeView }
@@ -301,7 +303,7 @@ function buildScenarioPaletteItems(p: PaletteBuildParams): ContextMenuItem[] {
     if ('separator' in e) return [sep(`sep-${i}`)]
     if (p.withAddSubmenu && e.kind === 'runScenario') return [] // folds into "Add"
     // The Socket.IO actions fold into the "Add" submenu (their own section) too.
-    if (p.withAddSubmenu && (e.kind === 'socketioConnect' || e.kind === 'socketioSend' || e.kind === 'socketioClose' || e.kind === 'websocketConnect' || e.kind === 'websocketSend' || e.kind === 'websocketClose' || e.kind === 'mqttConnect' || e.kind === 'mqttSend' || e.kind === 'mqttClose' || e.kind === 'grpcConnect' || e.kind === 'grpcSend' || e.kind === 'grpcClose' || e.kind === 'httpListen' || e.kind === 'httpClose' || e.kind === 'grpcListen' || e.kind === 'grpcServerClose' || e.kind === 'soapListen' || e.kind === 'soapClose' || e.kind === 'graphqlListen' || e.kind === 'graphqlClose')) return []
+    if (p.withAddSubmenu && (e.kind === 'socketioConnect' || e.kind === 'socketioSend' || e.kind === 'socketioClose' || e.kind === 'websocketConnect' || e.kind === 'websocketSend' || e.kind === 'websocketClose' || e.kind === 'mqttConnect' || e.kind === 'mqttSend' || e.kind === 'mqttClose' || e.kind === 'grpcConnect' || e.kind === 'grpcSend' || e.kind === 'grpcClose' || e.kind === 'httpListen' || e.kind === 'httpClose' || e.kind === 'grpcListen' || e.kind === 'grpcServerClose' || e.kind === 'soapListen' || e.kind === 'soapClose' || e.kind === 'graphqlListen' || e.kind === 'graphqlClose' || e.kind === 'odataListen' || e.kind === 'odataClose')) return []
     if (p.withAddSubmenu && e.kind === 'httpRequest') {
       const groupItems = (group: typeof SCENARIO_ADD_REQUEST_GROUPS[number]): ContextMenuItem[] =>
         group.flatMap((c): ContextMenuItem[] => {
@@ -2466,33 +2468,33 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
         title = boundItem.name
         titleBadge = <Badge type="SCENARIO" />
       }
-    } else if (n.data.kind === 'httpRequest' || n.data.kind === 'soapRequest' || n.data.kind === 'socketioConnect' || n.data.kind === 'websocketConnect' || n.data.kind === 'mqttConnect' || n.data.kind === 'grpcConnect' || n.data.kind === 'httpListen' || n.data.kind === 'grpcListen' || n.data.kind === 'soapListen' || n.data.kind === 'graphqlListen') {
+    } else if (n.data.kind === 'httpRequest' || n.data.kind === 'soapRequest' || n.data.kind === 'socketioConnect' || n.data.kind === 'websocketConnect' || n.data.kind === 'mqttConnect' || n.data.kind === 'grpcConnect' || n.data.kind === 'httpListen' || n.data.kind === 'grpcListen' || n.data.kind === 'soapListen' || n.data.kind === 'graphqlListen' || n.data.kind === 'odataListen') {
       const boundId = typeof cfg['requestId'] === 'string' ? cfg['requestId'] : null
       const boundItem = boundId ? (resolveBoundItem?.(boundId) ?? null) : null
       if (boundItem && isRequest(boundItem)) {
         title = boundItem.name
-        // An httpListen / grpcListen / soapListen / graphqlListen node always
-        // HOSTS a server — force the SRV capsule even if the bound request's
-        // badge mode resolves to client. soapRequest is a CLIENT call, so it
-        // keeps the request's own badge mode.
-        const alwaysServer = n.data.kind === 'httpListen' || n.data.kind === 'grpcListen' || n.data.kind === 'soapListen' || n.data.kind === 'graphqlListen'
+        // An httpListen / grpcListen / soapListen / graphqlListen / odataListen
+        // node always HOSTS a server — force the SRV capsule even if the bound
+        // request's badge mode resolves to client. soapRequest is a CLIENT call,
+        // so it keeps the request's own badge mode.
+        const alwaysServer = n.data.kind === 'httpListen' || n.data.kind === 'grpcListen' || n.data.kind === 'soapListen' || n.data.kind === 'graphqlListen' || n.data.kind === 'odataListen'
         titleBadge = <Badge type={requestBadgeType(boundItem)} mode={alwaysServer ? 'server' : requestBadgeMode(boundItem)} />
         if ((n.data.kind === 'socketioConnect' || n.data.kind === 'websocketConnect' || n.data.kind === 'mqttConnect') && requestBadgeMode(boundItem) === 'server') {
           helpKey = `${n.data.kind}Server`
         }
       }
-    } else if (n.data.kind === 'socketioSend' || n.data.kind === 'socketioClose' || n.data.kind === 'websocketSend' || n.data.kind === 'websocketClose' || n.data.kind === 'mqttSend' || n.data.kind === 'mqttClose' || n.data.kind === 'httpClose' || n.data.kind === 'grpcServerClose' || n.data.kind === 'soapClose' || n.data.kind === 'graphqlClose') {
+    } else if (n.data.kind === 'socketioSend' || n.data.kind === 'socketioClose' || n.data.kind === 'websocketSend' || n.data.kind === 'websocketClose' || n.data.kind === 'mqttSend' || n.data.kind === 'mqttClose' || n.data.kind === 'httpClose' || n.data.kind === 'grpcServerClose' || n.data.kind === 'soapClose' || n.data.kind === 'graphqlClose' || n.data.kind === 'odataClose') {
       // Send/close reference a connection NODE — if that node hosts a server,
       // the blurb should read "broadcast to clients" / "stop the server".
       const connId = typeof cfg['connectionNodeId'] === 'string' ? cfg['connectionNodeId'] : null
       const connNode = connId ? nodes.find((x) => x.id === connId) : null
       const connReqId = typeof connNode?.data.config?.['requestId'] === 'string' ? connNode.data.config['requestId'] : null
       const connReq = connReqId ? (resolveBoundItem?.(connReqId) ?? null) : null
-      // httpClose / grpcServerClose / soapClose / graphqlClose have a single
-      // meaning (an httpListen / grpcListen / soapListen / graphqlListen ALWAYS
-      // hosts), so they use their plain help key — only the WS/SIO/MQTT
-      // send/close kinds have a distinct server-variant blurb.
-      if (n.data.kind !== 'httpClose' && n.data.kind !== 'grpcServerClose' && n.data.kind !== 'soapClose' && n.data.kind !== 'graphqlClose' && connReq && isRequest(connReq) && requestBadgeMode(connReq) === 'server') {
+      // httpClose / grpcServerClose / soapClose / graphqlClose / odataClose have
+      // a single meaning (an httpListen / grpcListen / soapListen / graphqlListen
+      // / odataListen ALWAYS hosts), so they use their plain help key — only the
+      // WS/SIO/MQTT send/close kinds have a distinct server-variant blurb.
+      if (n.data.kind !== 'httpClose' && n.data.kind !== 'grpcServerClose' && n.data.kind !== 'soapClose' && n.data.kind !== 'graphqlClose' && n.data.kind !== 'odataClose' && connReq && isRequest(connReq) && requestBadgeMode(connReq) === 'server') {
         helpKey = `${n.data.kind}Server`
       }
     }
@@ -2552,10 +2554,10 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
     // backing item in a workbench tab from the inspector's top row.
     let openItemId: string | undefined
     let openItemKind: 'request' | 'scenario' | undefined
-    if (n.data.kind === 'httpRequest' || n.data.kind === 'soapRequest' || n.data.kind === 'socketioConnect' || n.data.kind === 'websocketConnect' || n.data.kind === 'mqttConnect' || n.data.kind === 'grpcConnect' || n.data.kind === 'httpListen' || n.data.kind === 'grpcListen' || n.data.kind === 'soapListen' || n.data.kind === 'graphqlListen') {
+    if (n.data.kind === 'httpRequest' || n.data.kind === 'soapRequest' || n.data.kind === 'socketioConnect' || n.data.kind === 'websocketConnect' || n.data.kind === 'mqttConnect' || n.data.kind === 'grpcConnect' || n.data.kind === 'httpListen' || n.data.kind === 'grpcListen' || n.data.kind === 'soapListen' || n.data.kind === 'graphqlListen' || n.data.kind === 'odataListen') {
       // A streaming connect / httpListen / grpcListen / soapListen / graphqlListen
-      // node binds a request the same way httpRequest does (`config.requestId`),
-      // so it gets the same open-the-request navigation.
+      // / odataListen node binds a request the same way httpRequest does
+      // (`config.requestId`), so it gets the same open-the-request navigation.
       const reqId = typeof cfg['requestId'] === 'string' ? cfg['requestId'] : undefined
       if (reqId) { openItemId = reqId; openItemKind = 'request' }
     } else if (n.data.kind === 'runScenario') {
@@ -2720,7 +2722,7 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
   const scenarioConnections = useMemo<ScenarioConnectionRef[]>(() => {
     const out: ScenarioConnectionRef[] = []
     for (const node of scenario.nodes) {
-      if (node.kind !== 'socketioConnect' && node.kind !== 'websocketConnect' && node.kind !== 'mqttConnect' && node.kind !== 'grpcConnect' && node.kind !== 'httpListen' && node.kind !== 'grpcListen' && node.kind !== 'soapListen' && node.kind !== 'graphqlListen') continue
+      if (node.kind !== 'socketioConnect' && node.kind !== 'websocketConnect' && node.kind !== 'mqttConnect' && node.kind !== 'grpcConnect' && node.kind !== 'httpListen' && node.kind !== 'grpcListen' && node.kind !== 'soapListen' && node.kind !== 'graphqlListen' && node.kind !== 'odataListen') continue
       const cfg = node.config as { connectionName?: unknown; requestId?: unknown }
       const name = typeof cfg.connectionName === 'string' && cfg.connectionName.trim() !== '' ? cfg.connectionName.trim() : node.id
       // Pull the linked request's event + message so a send node can pre-fill its

@@ -218,6 +218,11 @@ declare global {
         execute: (input: ODataExecutionInput) => Promise<HTTPExecutionResult>
         cancel: (requestId: string) => Promise<boolean>
         isActive: (requestId: string) => Promise<boolean>
+        onProgress: (callback: (event: { requestId: string; status: 'started' | 'completed' | 'cancelled' | 'error' }) => void) => (() => void)
+        listen: (requestId: string) => Promise<{ success: boolean; listening: boolean; error?: string }>
+        stop: (requestId: string) => Promise<boolean>
+        isListening: (requestId: string) => Promise<boolean>
+        onServerServed: (callback: (data: { requestId: string; count: number }) => void) => (() => void)
       }
       auth: {
         prefetch: (input: {
@@ -671,6 +676,8 @@ export interface FullRequestData {
     format?: string | undefined
     apply?: string | undefined
   } | undefined
+  mockMetadata?: string | undefined
+  mockData?: Record<string, Record<string, unknown>[]> | undefined
 }
 
 export {}

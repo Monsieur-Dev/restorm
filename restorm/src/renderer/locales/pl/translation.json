@@ -264,7 +264,8 @@
         "mqttServer": "Broker MQTT",
         "grpcServer": "Serwer mock gRPC",
         "soapServer": "Serwer mock SOAP",
-        "graphqlServer": "Serwer mock GraphQL"
+        "graphqlServer": "Serwer mock GraphQL",
+        "odataServer": "Serwer mock OData"
       }
     },
     "deleteConfirm": {
@@ -1058,7 +1059,9 @@
       "soapListen": "Serwer SOAP",
       "soapClose": "Zamknij SOAP",
       "graphqlListen": "GraphQL server",
-      "graphqlClose": "GraphQL close"
+      "graphqlClose": "GraphQL close",
+      "odataListen": "OData server",
+      "odataClose": "OData close"
     },
     "comparator": {
       "result": "wynik"
@@ -1626,7 +1629,9 @@
       "soapListen": "Hostuje lokalny serwer mock SOAP i nasłuchuje bez ograniczeń. Każde przychodzące żądanie jest kierowane do skonfigurowanej operacji (na podstawie jego SOAPAction lub nazwy operacji w treści) i otrzymuje odpowiedź w postaci predefiniowanej koperty SOAP (operacja błędu zwraca `<soap:Fault>`). `connected` uruchamia się, gdy tylko serwer nasłuchuje; każde obsłużone żądanie ponownie emituje swoje dane na porcie `served`. Serwer pozostaje aktywny do zamknięcia SOAP (lub zatrzymania), po czym uruchamia się `done`.",
       "soapClose": "Zatrzymuje już nasłuchujący serwer mock SOAP (zadeklarowany przez węzeł serwera SOAP) i zwalnia jego port.",
       "graphqlListen": "Hosts a local GraphQL mock server and listens indefinitely. `connected` fires once it is listening; each served operation re-emits its data on the `served` port. The server stays up until a GraphQL close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
-      "graphqlClose": "Stops an already-listening GraphQL mock server (declared by a GraphQL server node), freeing its port."
+      "graphqlClose": "Stops an already-listening GraphQL mock server (declared by a GraphQL server node), freeing its port.",
+      "odataListen": "Hostuje lokalną usługę próbną OData v4 i nasłuchuje bezterminowo. Port `connected` uruchamia się, gdy tylko zacznie nasłuchiwać; każde obsłużone żądanie ponownie wysyła swoje dane na porcie `served`. Serwer działa aż do zamknięcia OData (lub zatrzymania), po czym uruchamia się port `done`. Brak wyjścia response — obsługuje, nie wywołuje na zewnątrz.",
+      "odataClose": "Zatrzymuje już nasłuchującą usługę próbną OData (zadeklarowaną przez węzeł serwera OData) i zwalnia jej port."
     },
     "legend": {
       "title": "Legenda",
@@ -1853,6 +1858,17 @@
       "notListening": "Nie nasłuchuje",
       "served": "Nasłuchuje — obsłużono {{count}} żądań",
       "listenFailed": "Nie udało się uruchomić serwera mock"
+    }
+  },
+  "odata": {
+    "server": {
+      "startListening": "Rozpocznij nasłuchiwanie",
+      "stopListening": "Zatrzymaj nasłuchiwanie",
+      "notListening": "Nie nasłuchuje",
+      "served": "Nasłuchuje — obsłużono {{count}} żądań",
+      "listenFailed": "Nie udało się uruchomić serwera mock OData",
+      "metadataLabel": "$metadata (CSDL)",
+      "dataLabel": "Obsłużone dane encji (według zestawu encji)"
     }
   }
 }

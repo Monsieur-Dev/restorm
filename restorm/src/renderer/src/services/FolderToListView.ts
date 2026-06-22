@@ -217,15 +217,24 @@ function websocketRequestToListViewItem(
 }
 
 /**
- * Convert an ODataRequest to a ListViewItemData. Phase 1 shows a
- * dedicated `odata` badge so entries don't masquerade as plain HTTP
- * GETs in the sidebar. The badge label changes across phases when
- * actions ('ACT') and functions ('FN') land.
+ * Convert an ODataRequest to a ListViewItemData. Shows a dedicated
+ * `odata` badge so entries don't masquerade as plain HTTP GETs in the
+ * sidebar. An OData mock SERVER (server === true) renders the uniform
+ * SRV capsule over the `odata` badge (and the listening beam), like the
+ * HTTP/gRPC mock servers.
  */
 function odataRequestToListViewItem(
   request: ODataRequest,
   options: FolderToListViewOptions
 ): ListViewItemData {
+  if (request.server === true) {
+    const badge = options.renderProtocolBadge?.('odata', 'ODATA', 'server')
+    return {
+      id: request.id,
+      title: request.name,
+      icon: withListeningBeam(request.id, badge)
+    }
+  }
   const badge = options.renderProtocolBadge?.('odata', 'ODATA')
   return {
     id: request.id,

@@ -261,7 +261,8 @@
         "mqttServer": "MQTT 代理",
         "grpcServer": "gRPC 模擬伺服器",
         "soapServer": "SOAP 模擬伺服器",
-        "graphqlServer": "GraphQL 模擬伺服器"
+        "graphqlServer": "GraphQL 模擬伺服器",
+        "odataServer": "OData 模擬伺服器"
       }
     },
     "deleteConfirm": {
@@ -1055,7 +1056,9 @@
       "soapListen": "SOAP 伺服器",
       "soapClose": "關閉 SOAP",
       "graphqlListen": "GraphQL server",
-      "graphqlClose": "GraphQL close"
+      "graphqlClose": "GraphQL close",
+      "odataListen": "OData server",
+      "odataClose": "OData close"
     },
     "comparator": {
       "result": "結果"
@@ -1623,7 +1626,9 @@
       "soapListen": "託管本機 SOAP 模擬伺服器並無限期接聽。每個傳入要求都會分派到已設定的作業（依據其 SOAPAction 或內文中的作業名稱），並以預先定義的 SOAP 信封回應（故障作業會傳回 `<soap:Fault>`）。伺服器一旦開始接聽便會觸發 `connected`；每個已處理的要求都會在 `served` 連接埠重新發出其資料。伺服器會持續執行，直到 SOAP 關閉（或停止），隨後觸發 `done`。",
       "soapClose": "停止一個已在接聽的 SOAP 模擬伺服器（由 SOAP 伺服器節點宣告），並釋放其連接埠。",
       "graphqlListen": "Hosts a local GraphQL mock server and listens indefinitely. `connected` fires once it is listening; each served operation re-emits its data on the `served` port. The server stays up until a GraphQL close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
-      "graphqlClose": "Stops an already-listening GraphQL mock server (declared by a GraphQL server node), freeing its port."
+      "graphqlClose": "Stops an already-listening GraphQL mock server (declared by a GraphQL server node), freeing its port.",
+      "odataListen": "託管本地 OData v4 模擬服務並無限期監聽。一旦開始監聽便觸發 `connected`；每個被服務的請求都會在 `served` 連接埠重新發出其資料。伺服器持續執行，直到 OData 關閉（或 Stop），然後觸發 `done`。無 response 輸出——它只提供服務，不向外呼叫。",
+      "odataClose": "停止一個已在監聽的 OData 模擬服務（由 OData 伺服器節點宣告），釋放其連接埠。"
     },
     "legend": {
       "title": "圖例",
@@ -1850,6 +1855,17 @@
       "notListening": "未在監聽",
       "served": "監聽中 — 已服務 {{count}} 個請求",
       "listenFailed": "無法啟動模擬伺服器"
+    }
+  },
+  "odata": {
+    "server": {
+      "startListening": "開始監聽",
+      "stopListening": "停止監聽",
+      "notListening": "未在監聽",
+      "served": "監聽中 — 已服務 {{count}} 個請求",
+      "listenFailed": "無法啟動 OData 模擬伺服器",
+      "metadataLabel": "$metadata (CSDL)",
+      "dataLabel": "已服務的實體資料（依實體集）"
     }
   }
 }

@@ -22,12 +22,12 @@ export function requestBadgeType(request: Request): BadgeType {
 /**
  * Badge `mode` for a saved request: `server` when restorm HOSTS the protocol
  * (a WebSocket/Socket.IO/MQTT server, an HTTP mock server, a gRPC mock server,
- * or a SOAP mock server), otherwise `client`. Any request whose `server` flag is set renders
- * the uniform SRV capsule variant of its protocol badge — pair with
- * {@link requestBadgeType}.
+ * a SOAP / GraphQL mock server, or an OData mock service), otherwise `client`. Any
+ * request whose `server` flag is set renders the uniform SRV capsule variant of its
+ * protocol badge — pair with {@link requestBadgeType}.
  */
 export function requestBadgeMode(request: Request): 'client' | 'server' {
-  return (request.type === 'websocket' || request.type === 'http' || request.type === 'grpc' || request.type === 'soap' || request.type === 'graphql')
+  return (request.type === 'websocket' || request.type === 'http' || request.type === 'grpc' || request.type === 'soap' || request.type === 'graphql' || request.type === 'odata')
     && (request as { server?: boolean }).server === true
     ? 'server'
     : 'client'
