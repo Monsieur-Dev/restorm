@@ -35,6 +35,7 @@ import { SendButtonEnvSwitcher } from './SendButtonEnvSwitcher'
 import { BeamWrap } from '../common/BeamWrap'
 import { useIsGrpcListening } from '../../services/grpcListeningStore'
 import { HeaderHoverTooltip } from '../MainView/HeaderHoverTooltip'
+import { GrpcServerTabView } from './GrpcServerTabView'
 import './WebSocketChat.css'
 
 /** One streamed gRPC frame surfaced in the live chat view. */
@@ -54,6 +55,18 @@ export interface GrpcRequestTabViewProps {
 }
 
 export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({
+  request
+}) => {
+  // SERVER MODE: restorm HOSTS a local gRPC mock server (a wholly different
+  // surface from the client request — Start/Stop + per-method mock editor), so
+  // it renders its own component rather than threading branches through here.
+  if (request.server === true) {
+    return <GrpcServerTabView request={request} />
+  }
+  return <GrpcClientTabView request={request} />
+}
+
+const GrpcClientTabView: React.FC<GrpcRequestTabViewProps> = ({
   request
 }) => {
   const [historyModalOpen, setHistoryModalOpen] = useState(false)
@@ -149,6 +162,12 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({
       grpcMethod: currentRequest.method,
       callType: currentRequest.callType,
       requestMessage: currentRequest.requestMessage,
+      // The execution service resolves the dynamic client from the request's own
+      // proto (inline content or a `.proto` path); omitting these falls back to
+      // the bundled grpcbin proto, so a custom-proto request fails with "service
+      // not found".
+      protoContent: currentRequest.protoContent,
+      protoPath: currentRequest.protoPath,
       headers: toKeyValueData(currentRequest.metadata),
       body: { type: 'text', content: currentRequest.requestMessage }
     }, sourceIdRef.current)
@@ -210,10 +229,15 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({
       grpcMethod: request.method,
       callType,
       requestMessage,
+      // Keep the proto on every refresh — this effect re-runs on URL/message
+      // edits and would otherwise clobber the proto set on mount, leaving the
+      // execution service to fall back to the bundled grpcbin proto.
+      protoContent: request.protoContent,
+      protoPath: request.protoPath,
       headers: toKeyValueData(request.metadata),
       body: { type: 'text', content: requestMessage }
     }, sourceIdRef.current)
-  }, [request.id, request.service, request.method, callType, request.metadata, url, requestMessage])
+  }, [request.id, request.service, request.method, callType, request.metadata, url, requestMessage, request.protoContent, request.protoPath])
 
   // Sync state changes to reactive request object
   const setUrl = useCallback((value: string): void => {

@@ -806,6 +806,43 @@ contextBridge.exposeInMainWorld('restorm', {
       return () => {
         ipcRenderer.removeListener('grpc:message', handler)
       }
+    },
+    /** SERVER MODE: start hosting this request as a local gRPC mock server.
+     * Resolves once the server is bound (or fails to bind). */
+    listen: async (requestId: string): Promise<{ success: boolean; listening: boolean; error?: string }> => {
+      const result: unknown = await ipcRenderer.invoke('grpc:listen', requestId)
+      return result as { success: boolean; listening: boolean; error?: string }
+    },
+    /** SERVER MODE: stop hosting this request's gRPC mock server. */
+    stopServer: async (requestId: string): Promise<boolean> => {
+      const result: unknown = await ipcRenderer.invoke('grpc:stop', requestId)
+      return result as boolean
+    },
+    /** SERVER MODE: whether this request is currently hosting a gRPC mock server. */
+    isServerListening: async (requestId: string): Promise<boolean> => {
+      const result: unknown = await ipcRenderer.invoke('grpc:is-listening', requestId)
+      return result as boolean
+    },
+    /** SERVER MODE: listening lifecycle on the DISTINCT server channel (not the
+     * client `grpc:request-progress`). */
+    onServerProgress: (callback: (data: { requestId: string; status: 'started' | 'completed' | 'cancelled' | 'error' }) => void): (() => void) => {
+      const handler = (_event: Electron.IpcRendererEvent, data: { requestId: string; status: 'started' | 'completed' | 'cancelled' | 'error' }): void => {
+        callback(data)
+      }
+      ipcRenderer.on('grpc:server-progress', handler)
+      return () => {
+        ipcRenderer.removeListener('grpc:server-progress', handler)
+      }
+    },
+    /** SERVER MODE: served-call count updates for the "served N" banner. */
+    onServerServed: (callback: (data: { requestId: string; count: number }) => void): (() => void) => {
+      const handler = (_event: Electron.IpcRendererEvent, data: { requestId: string; count: number }): void => {
+        callback(data)
+      }
+      ipcRenderer.on('grpc:server-served', handler)
+      return () => {
+        ipcRenderer.removeListener('grpc:server-served', handler)
+      }
     }
   },
   odata: {

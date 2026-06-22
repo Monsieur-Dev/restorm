@@ -89,6 +89,15 @@
   color: var(--badge-on-accent, #ffffff);
 }
 
+/* Force the action codicon (grpcSend arrow-up / grpcClose + grpcServerClose
+ * debug-disconnect / grpcListen plug) white on the dark-navy GRPC badge: a
+ * generic menu/list `.codicon { color }` rule otherwise wins over the badge's
+ * inherited colour and renders the glyph dark-on-dark (illegible). Same fix the
+ * scenario badge needed. Covers the server-capsule body too. */
+.badge-grpc .codicon {
+  color: var(--badge-on-accent, #ffffff) !important;
+}
+
 /* ============================================================================
  * GraphQL
  * ============================================================================ */

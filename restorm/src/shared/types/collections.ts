@@ -20,7 +20,7 @@ export type {
   ODataVersion
 } from './requestPrimitives'
 
-export type { BaseRequest, HTTPRequest, GraphQLRequest, GrpcRequest, SoapRequest, WebSocketRequest, ODataRequest, ODataQueryOptions, ODataOperationKind, ODataBatchSubRequestSpec, ODataOperationParameterSpec, AuthenticationRequest, Request } from './requests/index'
+export type { BaseRequest, HTTPRequest, GraphQLRequest, GrpcRequest, GrpcMockMethod, SoapRequest, WebSocketRequest, ODataRequest, ODataQueryOptions, ODataOperationKind, ODataBatchSubRequestSpec, ODataOperationParameterSpec, AuthenticationRequest, Request } from './requests/index'
 export { isHTTPRequest, isGraphQLRequest, isGrpcRequest, isSoapRequest, isWebSocketRequest, isODataRequest, isAuthenticationRequest } from './requests/index'
 
 export type {

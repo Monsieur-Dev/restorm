@@ -56,7 +56,7 @@ import {
 } from './timeAndFlowExecutors'
 import { httpRequestExecutor } from './httpRequestExecutor'
 import { runScenarioExecutor } from './runScenarioExecutor'
-import { socketioConnectExecutor, socketioSendExecutor, socketioCloseExecutor, websocketConnectExecutor, websocketSendExecutor, websocketCloseExecutor, mqttConnectExecutor, mqttSendExecutor, mqttCloseExecutor, grpcConnectExecutor, grpcSendExecutor, grpcCloseExecutor, httpListenExecutor, httpCloseExecutor } from './socketioExecutors'
+import { socketioConnectExecutor, socketioSendExecutor, socketioCloseExecutor, websocketConnectExecutor, websocketSendExecutor, websocketCloseExecutor, mqttConnectExecutor, mqttSendExecutor, mqttCloseExecutor, grpcConnectExecutor, grpcSendExecutor, grpcCloseExecutor, grpcListenExecutor, grpcServerCloseExecutor, httpListenExecutor, httpCloseExecutor } from './socketioExecutors'
 import { concreteValue } from '../../../shared/utils/scenarioStaticPreview'
 import { coerceCliParamValue } from '../../../shared/scenarioCliParams'
 import { readInputParams, inputParamName } from '../../../shared/scenarioInputParams'
@@ -249,6 +249,8 @@ export function pickExecutor(kind: string): NodeExecutor {
     case 'grpcClose': return grpcCloseExecutor
     case 'httpListen': return httpListenExecutor
     case 'httpClose': return httpCloseExecutor
+    case 'grpcListen': return grpcListenExecutor
+    case 'grpcServerClose': return grpcServerCloseExecutor
     case 'input': return inputExecutor
     case 'output': return outputPassthroughExecutor
     default: return assertNever(k)

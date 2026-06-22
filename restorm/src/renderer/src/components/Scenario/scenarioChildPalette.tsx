@@ -61,7 +61,10 @@ export const SCENARIO_ADD_REQUEST_GROUPS: ScenarioAddEntry[][] = [
     // HTTP mock server is server-only (a one-shot HTTP request already has its own
     // method entries above): dropping it creates a server: true request + a bound
     // httpListen node.
-    { kind: 'http-server', badge: 'GET', mode: 'server', labelKey: 'sidebar.contextMenu.add.httpServer', defaultLabel: 'HTTP server' }
+    { kind: 'http-server', badge: 'GET', mode: 'server', labelKey: 'sidebar.contextMenu.add.httpServer', defaultLabel: 'HTTP server' },
+    // gRPC mock server is server-only too: dropping it creates a server: true gRPC
+    // request + a bound grpcListen node.
+    { kind: 'grpc-server', badge: 'GRPC', mode: 'server', labelKey: 'sidebar.contextMenu.add.grpcServer', defaultLabel: 'gRPC server' }
   ],
   [
     { kind: 'graphql', badge: 'QUERY', labelKey: 'sidebar.contextMenu.add.graphql', defaultLabel: 'GraphQL request' },
@@ -157,6 +160,20 @@ export interface ScenarioAddHttpActionEntry {
 
 export const SCENARIO_ADD_HTTP_ACTIONS: ScenarioAddHttpActionEntry[] = [
   { kind: 'httpClose', icon: 'debug-disconnect', labelKey: 'scenario.nodes.httpClose', defaultLabel: 'HTTP close' }
+]
+
+/** gRPC mock-server action entries — CLOSE only (the listen comes from the
+ * "gRPC server" request entry, which drops a bound grpcListen). A hosted mock
+ * never SENDS unprompted, so there is no gRPC-server send action. */
+export interface ScenarioAddGrpcServerActionEntry {
+  kind: 'grpcServerClose'
+  icon: string
+  labelKey: string
+  defaultLabel: string
+}
+
+export const SCENARIO_ADD_GRPC_SERVER_ACTIONS: ScenarioAddGrpcServerActionEntry[] = [
+  { kind: 'grpcServerClose', icon: 'debug-disconnect', labelKey: 'scenario.nodes.grpcServerClose', defaultLabel: 'gRPC server close' }
 ]
 
 /** The protocol/scenario badge glyph for a palette entry — `mode: 'server'`

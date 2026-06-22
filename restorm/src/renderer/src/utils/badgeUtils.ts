@@ -21,12 +21,14 @@ export function requestBadgeType(request: Request): BadgeType {
 
 /**
  * Badge `mode` for a saved request: `server` when restorm HOSTS the protocol
- * (a WebSocket/Socket.IO/MQTT server, or an HTTP mock server), otherwise
- * `client`. Any request whose `server` flag is set renders the uniform SRV
- * capsule variant of its protocol badge — pair with {@link requestBadgeType}.
+ * (a WebSocket/Socket.IO/MQTT server, an HTTP mock server, or a gRPC mock
+ * server), otherwise `client`. Any request whose `server` flag is set renders
+ * the uniform SRV capsule variant of its protocol badge — pair with
+ * {@link requestBadgeType}.
  */
 export function requestBadgeMode(request: Request): 'client' | 'server' {
-  return (request.type === 'websocket' || request.type === 'http') && request.server === true
+  return (request.type === 'websocket' || request.type === 'http' || request.type === 'grpc')
+    && (request as { server?: boolean }).server === true
     ? 'server'
     : 'client'
 }

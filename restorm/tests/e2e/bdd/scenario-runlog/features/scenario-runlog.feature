@@ -64,4 +64,5 @@ Feature: Scenario run-log end-to-end
       | gRPC bidi      |
       | MQTT           |
       | HTTP Server    |
+      | gRPC Server    |
       | Main           |

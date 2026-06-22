@@ -31,6 +31,20 @@ import { eventBus } from 'electron-core-ui/renderer'
 import type { AddChildKind } from '../components/MainView/Sidebar/contextMenuBuilder'
 import { removeFavorite as favoritesStoreRemove } from '../services/favoritesStore'
 
+/** Starter `.proto` a freshly-created gRPC mock server is seeded with: one
+ * service with a unary method, so the new server is runnable + self-connectable
+ * the moment it is created (the user can replace it with their own proto). */
+const GRPC_MOCK_STARTER_PROTO = `syntax = "proto3";
+package mock;
+
+message UnaryRequest { string name = 1; }
+message UnaryReply { string message = 1; }
+
+service MockService {
+  rpc Unary (UnaryRequest) returns (UnaryReply);
+}
+`
+
 export interface UseItemOperationsOptions {
   rootItems: FolderItem[]
   setRootItems: React.Dispatch<React.SetStateAction<FolderItem[]>>
@@ -405,6 +419,7 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
       case 'grpc-server-stream': return 'New gRPC server-streaming request'
       case 'grpc-client-stream': return 'New gRPC client-streaming request'
       case 'grpc-bidi': return 'New gRPC bidirectional request'
+      case 'grpc-server': return 'New gRPC mock server'
       case 'soap': return 'New SOAP request'
       case 'websocket': return 'New WebSocket request'
       case 'socketio': return 'New Socket.IO request'
@@ -537,6 +552,24 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
               kind === 'grpc-bidi' ? 'bidirectional-stream' :
                 'unary'
         built = new GrpcRequest({ id, name, callType })
+      } else if (kind === 'grpc-server') {
+        // restorm acts as a local gRPC mock server: gRPC request + server flag,
+        // host forced to localhost, default port 50051 + a starter proto + one
+        // unary mock method so the server is runnable the moment it is created.
+        built = new GrpcRequest({
+          id,
+          name,
+          server: true,
+          url: 'localhost:50051',
+          reflection: true,
+          protoContent: GRPC_MOCK_STARTER_PROTO,
+          mockMethods: [{
+            service: 'mock.MockService',
+            method: 'Unary',
+            callType: 'unary',
+            responseMessage: '{\n  "message": "hello from restorm mock"\n}'
+          }]
+        })
       } else if (kind === 'soap') {
         built = new SoapRequest({ id, name })
       } else if (kind === 'websocket') {

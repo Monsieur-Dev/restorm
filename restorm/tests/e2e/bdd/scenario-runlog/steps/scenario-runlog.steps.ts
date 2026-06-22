@@ -205,13 +205,20 @@ When('I run the scenario {string} and copy all its logs', async ({}, scenarioNam
   // idempotent.
   const startMarker = `▶ ${scenarioName}`
   const endMarker = `■ ${scenarioName}`
+  // A server-bound scenario (gRPC / HTTP mock) HOSTS its own server — a real
+  // `bindAsync` socket bind — before it can serve + reach the `■` end marker. On
+  // a COLD, freshly-built process that first bind can take a few extra seconds,
+  // occasionally past the 30s default the pure-compute rows are fine with. Give
+  // just those rows a longer copy budget so the single-shot ship-gate doesn't
+  // hit a cold-bind timeout; every other row keeps the tight 30s.
+  const isServerScenario = scenarioName.endsWith(' Server')
   let text = ''
   await expect(async () => {
     await p.locator('[data-testid="scenario-inspector-logs-copy"]').click()
     text = await requireApp().evaluate(({ clipboard }) => clipboard.readText())
     expect(text, `clipboard did not hold this run's log (missing start "${startMarker}")`).toContain(startMarker)
     expect(text, `run did not complete before copy (missing end "${endMarker}")`).toContain(endMarker)
-  }).toPass({ timeout: 30000 })
+  }).toPass({ timeout: isServerScenario ? 60000 : 30000 })
   copiedYaml = normalizeRunLogYaml(text)
   copiedFor = scenarioName
 })

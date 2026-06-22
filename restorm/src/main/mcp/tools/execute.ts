@@ -352,6 +352,11 @@ export function flushRequestStateToContext(req: Request): void {
     data.grpcMethod = grpc.method
     data.callType = grpc.callType
     data.requestMessage = grpc.requestMessage
+    // The dynamic client is built from the request's own proto; without it the
+    // execution falls back to the bundled grpcbin proto and a custom-proto
+    // request fails with "service not found".
+    data.protoContent = grpc.protoContent
+    data.protoPath = grpc.protoPath
     if (Array.isArray(metadata)) data.metadata = metadata as FullRequestData['metadata']
   } else if (isSoapRequest(req)) {
     const soap = req as SoapRequest

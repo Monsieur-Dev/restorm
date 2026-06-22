@@ -1,6 +1,7 @@
 import React from 'react'
 import { useIsWebsocketListening } from '../../services/websocketListeningStore'
 import { useIsGrpcListening } from '../../services/grpcListeningStore'
+import { useIsGrpcServerListening } from '../../services/grpcServerListeningStore'
 import { useIsHttpListening } from '../../services/httpListeningStore'
 import { BeamWrap } from './BeamWrap'
 
@@ -25,9 +26,10 @@ export interface ServerListeningBadgeProps {
 export const ServerListeningBadge: React.FC<ServerListeningBadgeProps> = ({ requestId, children }) => {
   const wsListening = useIsWebsocketListening(requestId)
   const grpcListening = useIsGrpcListening(requestId)
+  const grpcServerListening = useIsGrpcServerListening(requestId)
   const httpListening = useIsHttpListening(requestId)
   return (
-    <BeamWrap active={wsListening || grpcListening || httpListening} size={16} borderWidth={1.5}>
+    <BeamWrap active={wsListening || grpcListening || grpcServerListening || httpListening} size={16} borderWidth={1.5}>
       {children}
     </BeamWrap>
   )

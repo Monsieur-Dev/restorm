@@ -97,6 +97,7 @@ import { installScenarioEngineIPC } from './scenarioEngine/ipcBridge'
 import { registerBuiltinSources } from './services/secrets/mainSourceRegistry'
 import { secretHydrationService } from './services/secrets/SecretHydrationService'
 import { websocketExecutionService } from './services/WebSocketExecutionService'
+import { grpcMockServerService } from './services/GRPCMockServerService'
 import { registerApiUpdateIPC } from './services/apiUpdate/registerApiUpdateIPC'
 import { runApiUpdateApply } from './services/apiUpdate/orchestrateApply'
 import { loadFolderStructure, loadProjectIntoStore, attachDraftStoreForFolder, attachDraftStoreForFile, getDraftsRootDir } from './FileOperations'
@@ -486,6 +487,8 @@ app.on('before-quit', () => {
   // server route doesn't linger past quit (process exit would reclaim the port,
   // but this flushes history + closes clients cleanly).
   websocketExecutionService.closeAll()
+  // Same for any hosted gRPC mock server (its own grpc.Server / port).
+  grpcMockServerService.closeAll()
 })
 
 // Initialize Search Index Service (listens to document events from renderer)

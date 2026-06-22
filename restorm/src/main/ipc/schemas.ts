@@ -317,6 +317,10 @@ export const grpcSendArgs = z.tuple([requestIdArg, z.string()])
 export const grpcDisconnectArgs = z.tuple([requestIdArg])
 export const grpcCancelArgs = z.tuple([requestIdArg])
 export const grpcIsActiveArgs = z.tuple([requestIdArg])
+// gRPC mock server (server mode): start/stop hosting + listening check.
+export const grpcListenArgs = z.tuple([requestIdArg])
+export const grpcStopArgs = z.tuple([requestIdArg])
+export const grpcIsListeningArgs = z.tuple([requestIdArg])
 
 // ==========================================================================
 // WebSocket Execution

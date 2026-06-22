@@ -471,11 +471,20 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
       )
     }
 
-    // gRPC request tab
+    // gRPC request tab. A mock server shows the SRV capsule over the `grpc`
+    // badge + the listening beam (like the WS/SIO/MQTT server tabs); a client
+    // request keeps its call-type badge.
     if (isGrpcRequestTab(restormTab)) {
+      const isGrpcServer = restormTab.request.server === true
       return (
         <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-          <Badge type={mapToBadgeType(restormTab.request.callType)} />
+          {isGrpcServer ? (
+            <ServerListeningBadge requestId={restormTab.request.id}>
+              <Badge type="GRPC" mode="server" />
+            </ServerListeningBadge>
+          ) : (
+            <Badge type={mapToBadgeType(restormTab.request.callType)} />
+          )}
           <span>{restormTab.request.name}</span>
           <ItemSecretBadges itemId={restormTab.request.id} />
           {renderDirtyIndicator(restormTab)}

@@ -38,6 +38,7 @@ export type AddChildKind =
   | 'grpc-server-stream'
   | 'grpc-client-stream'
   | 'grpc-bidi'
+  | 'grpc-server'
   | 'soap'
   | 'websocket'
   | 'socketio'
@@ -153,6 +154,14 @@ export const buildAddSubmenu = (
     label: t('sidebar.contextMenu.add.grpcBidi'),
     icon: React.createElement(Badge, { type: 'BIDI' }),
     onClick: () => { onAddChildItem(parentId, 'grpc-bidi') }
+  },
+  // gRPC mock server: restorm HOSTS a local gRPC endpoint (its proto + per-method
+  // mock responses) on a port — the SRV capsule variant of the gRPC badge.
+  {
+    id: `add-grpc-server-${parentId}`,
+    label: t('sidebar.contextMenu.add.grpcServer'),
+    icon: React.createElement(Badge, { type: 'GRPC', mode: 'server' }),
+    onClick: () => { onAddChildItem(parentId, 'grpc-server') }
   },
   { id: `sep-add-grpc-${parentId}`, isSeparator: true, label: '' },
   {

@@ -20,6 +20,7 @@ import { authenticationCacheService } from './services/AuthenticationCacheServic
 import { graphqlExecutionService, type GraphQLExecutionInput } from './services/GraphQLExecutionService'
 import { soapExecutionService, type SOAPExecutionInput } from './services/SOAPExecutionService'
 import { grpcExecutionService, type GRPCExecutionInput } from './services/GRPCExecutionService'
+import { grpcMockServerService } from './services/GRPCMockServerService'
 import { websocketExecutionService, type WebSocketExecutionInput } from './services/WebSocketExecutionService'
 import { scenarioEngine } from './scenarioEngine/engine'
 import { importFrom } from './services/import/ImportManager'
@@ -42,6 +43,7 @@ import {
   graphqlExecuteArgs, graphqlCancelArgs, graphqlIsActiveArgs,
   soapExecuteArgs, soapCancelArgs, soapIsActiveArgs,
   grpcExecuteArgs, grpcConnectArgs, grpcSendArgs, grpcDisconnectArgs, grpcCancelArgs, grpcIsActiveArgs,
+  grpcListenArgs, grpcStopArgs, grpcIsListeningArgs,
   websocketConnectArgs, websocketDisconnectArgs, websocketSendArgs, websocketIsActiveArgs,
   responsesHistoryListArgs, responsesHistoryGetArgs,
   responsesHistoryTogglePinArgs,
@@ -775,6 +777,9 @@ export function registerRestormIPC(deps: {
     // Socket.IO server. A server is collection-scoped: closing the file must
     // release its port, otherwise it keeps listening with no UI left to stop it.
     websocketExecutionService.closeAll()
+    // File close — same for any hosted gRPC mock server (its own grpc.Server on
+    // its own port): release the port so it doesn't keep listening past the file.
+    grpcMockServerService.closeAll()
     // File close — the auth token cache is scoped to the open
     // collection, so flush it here. Opening a different file (or the
     // same one again) must force a fresh round of token fetches.
@@ -1096,6 +1101,23 @@ export function registerRestormIPC(deps: {
 
   validatedHandle('grpc:is-active', grpcIsActiveArgs, (_event, [requestId]) => {
     return grpcExecutionService.isActive(requestId)
+  })
+
+  // gRPC mock server (server mode): start hosting a local gRPC server (its own
+  // @grpc/grpc-js Server, NOT the shared HTTP PortHost), stop it, and check
+  // whether it is listening. `grpc:listen` resolves once the server is bound (or
+  // fails); it then stays up until `grpc:stop` (stop signal via
+  // grpc:server-progress).
+  validatedHandle('grpc:listen', grpcListenArgs, async (_event, [requestId]) => {
+    return await grpcMockServerService.listen(requestId)
+  })
+
+  validatedHandle('grpc:stop', grpcStopArgs, (_event, [requestId]) => {
+    return grpcMockServerService.stopListening(requestId)
+  })
+
+  validatedHandle('grpc:is-listening', grpcIsListeningArgs, (_event, [requestId]) => {
+    return grpcMockServerService.isListening(requestId)
   })
 
   // ==========================================================================
