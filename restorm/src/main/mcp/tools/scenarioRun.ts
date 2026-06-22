@@ -20,8 +20,9 @@ import { McpService } from 'electron-core-ui'
 import { z } from 'zod'
 import { collectionStore } from '../../services/CollectionStore'
 import { httpExecutionService, type HTTPExecutionInput } from '../../services/HTTPExecutionService'
+import { soapExecutionService } from '../../services/SOAPExecutionService'
 import { responseHistoryService, requestUsageService } from '../../services'
-import { isHTTPRequest, isAuthenticationRequest } from '../../../shared/types/collections'
+import { isHTTPRequest, isAuthenticationRequest, isSoapRequest } from '../../../shared/types/collections'
 import type { Scenario } from '../../../shared/models/Scenario'
 import type { ScenarioNode } from '../../../shared/types/scenario'
 import { readSocketioEvents } from '../../../shared/scenarioNodePorts'
@@ -102,6 +103,33 @@ async function executeRequest(node: ScenarioNode, key: string): Promise<Scenario
   }
 }
 
+/** Execute a `soapRequest` box exactly like the classic SOAP Send (main exec +
+ * history) — the unary analogue of `executeRequest`, so the inspector's
+ * play-from-here button populates the same SOAP history the preview reads. */
+async function executeSoapRequest(node: ScenarioNode, key: string): Promise<ScenarioNodeRunSummary> {
+  const requestId = boundRequestId(node)
+  if (!requestId) throw new Error(`soapRequest node ${node.id} has no bound request (config.requestId)`)
+  const req = collectionStore.findById(requestId)
+  if (!req) throw new Error(`bound request ${requestId} not found`)
+  if (!isSoapRequest(req)) throw new Error(`bound request ${requestId} is not a SOAP request (${(req as { type?: string }).type})`)
+
+  // Make the executor authoritative whether or not the request's tab is open.
+  flushRequestStateToContext(req)
+
+  running.set(key, { startedAt: new Date().toISOString(), cancel: () => { soapExecutionService.cancel(req.id) } })
+  const result = await soapExecutionService.execute({ requestId: req.id })
+  await responseHistoryService.storeExecutionResult(req.id, 'soap', result)
+  requestUsageService.recordSend(req.id)
+  return {
+    nodeId: node.id,
+    kind: node.kind,
+    requestId: req.id,
+    success: result.success,
+    status: result.statusCode ?? 0,
+    durationMs: result.timings.durationMs
+  }
+}
+
 /** Duration (ms) for a `wait` box, read from the node's PERSISTED config —
  * `durationMs` / `duration` (already in ms), falling back to 1000ms. Mirrors
  * the scenario engine's wait executor (timeAndFlowExecutors) so the inspector's
@@ -143,6 +171,8 @@ export async function runScenarioNode(scenarioId: string, nodeId: string): Promi
       case 'httpRequest':
       case 'request':
         return await executeRequest(node, key)
+      case 'soapRequest':
+        return await executeSoapRequest(node, key)
       case 'wait':
         return await executeWait(node, key)
       default:
@@ -248,6 +278,44 @@ const resolveStreamConnectPreview: PreviewResolver = async (_scenarioId, node) =
   return null
 }
 
+/** `soapRequest`: the bound SOAP request's last SUCCESSFUL send result — resolved
+ * request, raw restorm model, and parsed response — from history. The unary
+ * analogue of `resolveRequestPreview`, so an edge leaving the `response` port
+ * gets a JSON-path picker over real SOAP response data. */
+const resolveSoapPreview: PreviewResolver = async (_scenarioId, node) => {
+  const requestId = boundRequestId(node)
+  if (!requestId) return null
+  const entries = await responseHistoryService.list(requestId)
+  const entry = freshestSuccessfulEntry(entries)
+  if (!entry) return null
+  const detail = await responseHistoryService.getDetail(entry.guid)
+  if (detail?.response.type !== 'soap') return null
+  const r = detail.response
+  const raw = collectionStore.findById(requestId)
+  return {
+    nodeId: node.id,
+    requestId,
+    historyGuid: detail.guid,
+    timestamp: detail.timestamp,
+    request: {
+      url: r.requestUrl,
+      method: 'POST',
+      soapAction: r.requestSoapAction,
+      headers: r.requestHeaders,
+      ...(r.requestBody ? { body: r.requestBody } : {})
+    },
+    restormRequest: raw ?? null,
+    response: {
+      status: r.statusCode,
+      headers: r.responseHeaders,
+      body: r.responseBody,
+      durationMs: r.timings.durationMs,
+      ...(r.fault ? { fault: r.fault } : {}),
+      ...(r.error ? { error: r.error } : {})
+    }
+  }
+}
+
 /** `code`: the box's last run output (result + captured logs). Unlike a request
  * there's no on-disk history, so the executor caches each run in memory and we
  * read the freshest record back here. Null until the box has actually run. */
@@ -263,6 +331,7 @@ const resolveCodePreview: PreviewResolver = async (_scenarioId, node) => {
 const previewResolvers: Partial<Record<ScenarioNode['kind'], PreviewResolver>> = {
   httpRequest: resolveRequestPreview,
   request: resolveRequestPreview,
+  soapRequest: resolveSoapPreview,
   socketioConnect: resolveStreamConnectPreview,
   websocketConnect: resolveStreamConnectPreview,
   mqttConnect: resolveStreamConnectPreview,

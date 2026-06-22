@@ -996,6 +996,7 @@
     "nodes": {
       "arithmetic": "Aritmatika",
       "httpRequest": "Permintaan HTTP",
+      "soapRequest": "Permintaan SOAP",
       "runScenario": "Jalankan skenario",
       "wait": "Tunggu",
       "waitUntil": "Tunggu hingga",
@@ -1537,6 +1538,7 @@
       "if": "Branches the flow to then / else by comparing two operands.",
       "switch": "Routes the input to a matching case, or to default.",
       "httpRequest": "Runs a saved API request and emits its response.",
+      "soapRequest": "Menjalankan permintaan SOAP yang tersimpan dan memancarkan respons terurainya. Sebuah SOAP fault muncul pada respons; panggilan yang gagal diarahkan ke port `error`.",
       "runScenario": "Runs another scenario as a reusable sub-step.",
       "forEach": "Runs the body once per item of a collection, then continues.",
       "for": "Loops over a number range, running the body for each value.",

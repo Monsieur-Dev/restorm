@@ -55,6 +55,7 @@ import {
   aggregateExecutor
 } from './timeAndFlowExecutors'
 import { httpRequestExecutor } from './httpRequestExecutor'
+import { soapRequestExecutor } from './soapRequestExecutor'
 import { runScenarioExecutor } from './runScenarioExecutor'
 import { socketioConnectExecutor, socketioSendExecutor, socketioCloseExecutor, websocketConnectExecutor, websocketSendExecutor, websocketCloseExecutor, mqttConnectExecutor, mqttSendExecutor, mqttCloseExecutor, grpcConnectExecutor, grpcSendExecutor, grpcCloseExecutor, grpcListenExecutor, grpcServerCloseExecutor, httpListenExecutor, httpCloseExecutor, soapListenExecutor, soapCloseExecutor } from './socketioExecutors'
 import { concreteValue } from '../../../shared/utils/scenarioStaticPreview'
@@ -234,6 +235,7 @@ export function pickExecutor(kind: string): NodeExecutor {
     case 'doWhile': return doWhileExecutor
     case 'aggregate': return aggregateExecutor
     case 'httpRequest': return httpRequestExecutor
+    case 'soapRequest': return soapRequestExecutor
     case 'runScenario': return runScenarioExecutor
     case 'socketioConnect': return socketioConnectExecutor
     case 'socketioSend': return socketioSendExecutor

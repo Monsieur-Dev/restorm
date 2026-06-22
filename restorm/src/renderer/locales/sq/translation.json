@@ -997,6 +997,7 @@
     "nodes": {
       "arithmetic": "Aritmetika",
       "httpRequest": "Kërkesë HTTP",
+      "soapRequest": "Kërkesë SOAP",
       "runScenario": "Ekzekuto skenarin",
       "wait": "Prit",
       "waitUntil": "Prit deri",
@@ -1538,6 +1539,7 @@
       "if": "Branches the flow to then / else by comparing two operands.",
       "switch": "Routes the input to a matching case, or to default.",
       "httpRequest": "Runs a saved API request and emits its response.",
+      "soapRequest": "Ekzekuton një kërkesë SOAP të ruajtur dhe emeton përgjigjen e saj të analizuar. Një gabim SOAP shfaqet në përgjigje; një thirrje e dështuar drejtohet te porta `error`.",
       "runScenario": "Runs another scenario as a reusable sub-step.",
       "forEach": "Runs the body once per item of a collection, then continues.",
       "for": "Loops over a number range, running the body for each value.",

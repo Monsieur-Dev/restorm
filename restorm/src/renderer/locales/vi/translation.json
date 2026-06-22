@@ -996,6 +996,7 @@
     "nodes": {
       "arithmetic": "Số học",
       "httpRequest": "Yêu cầu HTTP",
+      "soapRequest": "Yêu cầu SOAP",
       "runScenario": "Chạy kịch bản",
       "wait": "Chờ",
       "waitUntil": "Chờ đến",
@@ -1537,6 +1538,7 @@
       "if": "Branches the flow to then / else by comparing two operands.",
       "switch": "Routes the input to a matching case, or to default.",
       "httpRequest": "Runs a saved API request and emits its response.",
+      "soapRequest": "Chạy một yêu cầu SOAP đã lưu và phát ra phản hồi đã phân tích của nó. Một lỗi SOAP hiển thị trong phản hồi; một lệnh gọi thất bại được định tuyến tới cổng `error`.",
       "runScenario": "Runs another scenario as a reusable sub-step.",
       "forEach": "Runs the body once per item of a collection, then continues.",
       "for": "Loops over a number range, running the body for each value.",

@@ -999,6 +999,7 @@
     "nodes": {
       "arithmetic": "Арифметика",
       "httpRequest": "HTTP-запит",
+      "soapRequest": "SOAP-запит",
       "runScenario": "Запустити сценарій",
       "wait": "Очікувати",
       "waitUntil": "Очікувати до",
@@ -1540,6 +1541,7 @@
       "if": "Branches the flow to then / else by comparing two operands.",
       "switch": "Routes the input to a matching case, or to default.",
       "httpRequest": "Runs a saved API request and emits its response.",
+      "soapRequest": "Виконує збережений SOAP-запит і видає його розібрану відповідь. Помилка SOAP відображається у відповіді; невдалий виклик спрямовується на порт `error`.",
       "runScenario": "Runs another scenario as a reusable sub-step.",
       "forEach": "Runs the body once per item of a collection, then continues.",
       "for": "Loops over a number range, running the body for each value.",

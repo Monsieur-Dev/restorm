@@ -996,6 +996,7 @@
     "nodes": {
       "arithmetic": "算術",
       "httpRequest": "HTTPリクエスト",
+      "soapRequest": "SOAP リクエスト",
       "runScenario": "シナリオ実行",
       "wait": "待機",
       "waitUntil": "指定時刻まで待機",
@@ -1537,6 +1538,7 @@
       "if": "Branches the flow to then / else by comparing two operands.",
       "switch": "Routes the input to a matching case, or to default.",
       "httpRequest": "Runs a saved API request and emits its response.",
+      "soapRequest": "保存された SOAP リクエストを実行し、解析済みのレスポンスを出力します。SOAP フォールトはレスポンスに反映され、呼び出しの失敗は `error` ポートへ送られます。",
       "runScenario": "Runs another scenario as a reusable sub-step.",
       "forEach": "Runs the body once per item of a collection, then continues.",
       "for": "Loops over a number range, running the body for each value.",

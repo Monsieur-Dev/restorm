@@ -19,7 +19,7 @@ import '@xyflow/react/dist/style.css'
 import { useTranslation } from 'react-i18next'
 import { Button, ContextMenu, Tooltip, ColorPicker, Modal, MarkdownEditor, GraphCanvas, eventBus, isUndoKeyEvent, isRedoKeyEvent, type ContextMenuItem } from 'electron-core-ui/renderer'
 import type { Scenario, ScenarioNode, ScenarioEdge, ScenarioNodeKind, ScenarioPort } from '../../../../shared/types/collections'
-import { isRequest, isScenario, isWebSocketRequest, isGrpcRequest } from '../../../../shared/types/collections'
+import { isRequest, isScenario, isWebSocketRequest, isGrpcRequest, isSoapRequest } from '../../../../shared/types/collections'
 import { Badge } from '../common/Badge'
 import { requestBadgeType, requestBadgeMode } from '../../utils/badgeUtils'
 import { ScenarioBoundResolverContext, ScenarioRequestEnvContext, type ResolveBoundItem, type ResolveRequestEnv } from './scenarioBoundResolver'
@@ -1937,6 +1937,18 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
       kind = 'grpcConnect'
       config = { requestId: item.id, connectionName: item.name, label: item.name }
     }
+    else if (isRequest(item) && isSoapRequest(item)) {
+      // A SOAP request is unary, so it maps to a one-shot `soapRequest` node
+      // (single `response` output) — UNLESS it is a `server: true` mock, which
+      // hosts a local SOAP server and maps to the long-lived `soapListen` node.
+      if ((item as { server?: boolean }).server === true) {
+        kind = 'soapListen'
+        config = { requestId: item.id, connectionName: item.name, label: item.name }
+      } else {
+        kind = 'soapRequest'
+        config = { requestId: item.id, label: item.name }
+      }
+    }
     else if (isRequest(item)) { kind = 'httpRequest'; config = { requestId: item.id, label: item.name } }
     else if (isScenario(item)) { kind = 'runScenario'; config = { scenarioId: item.id, label: item.name } }
     else return
@@ -2386,7 +2398,7 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
       // A request / runScenario box is always created bound (palette or drag),
       // so an *unbound* box can't occur — only a *deleted* binding can, which
       // we flag as a safety net (incoherent state from an external delete).
-      if (n.kind === 'httpRequest') {
+      if (n.kind === 'httpRequest' || n.kind === 'soapRequest') {
         const requestId = typeof n.config['requestId'] === 'string' ? n.config['requestId'] : ''
         if (requestId) {
           const item = resolveBoundItem?.(requestId) ?? null
@@ -2445,14 +2457,15 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
         title = boundItem.name
         titleBadge = <Badge type="SCENARIO" />
       }
-    } else if (n.data.kind === 'httpRequest' || n.data.kind === 'socketioConnect' || n.data.kind === 'websocketConnect' || n.data.kind === 'mqttConnect' || n.data.kind === 'grpcConnect' || n.data.kind === 'httpListen' || n.data.kind === 'grpcListen' || n.data.kind === 'soapListen') {
+    } else if (n.data.kind === 'httpRequest' || n.data.kind === 'soapRequest' || n.data.kind === 'socketioConnect' || n.data.kind === 'websocketConnect' || n.data.kind === 'mqttConnect' || n.data.kind === 'grpcConnect' || n.data.kind === 'httpListen' || n.data.kind === 'grpcListen' || n.data.kind === 'soapListen') {
       const boundId = typeof cfg['requestId'] === 'string' ? cfg['requestId'] : null
       const boundItem = boundId ? (resolveBoundItem?.(boundId) ?? null) : null
       if (boundItem && isRequest(boundItem)) {
         title = boundItem.name
         // An httpListen / grpcListen / soapListen node always HOSTS a server —
         // force the SRV capsule even if the bound request's badge mode resolves
-        // to client.
+        // to client. soapRequest is a CLIENT call, so it keeps the request's
+        // own badge mode.
         const alwaysServer = n.data.kind === 'httpListen' || n.data.kind === 'grpcListen' || n.data.kind === 'soapListen'
         titleBadge = <Badge type={requestBadgeType(boundItem)} mode={alwaysServer ? 'server' : requestBadgeMode(boundItem)} />
         if ((n.data.kind === 'socketioConnect' || n.data.kind === 'websocketConnect' || n.data.kind === 'mqttConnect') && requestBadgeMode(boundItem) === 'server') {
@@ -2525,12 +2538,12 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
     // `runScenarioNode` switch). The inspector uses this to swap its
     // "example data based on previous runs" info row for an inline
     // play-from-here button when the box has no result yet.
-    const runnable = n.data.kind === 'httpRequest'
+    const runnable = n.data.kind === 'httpRequest' || n.data.kind === 'soapRequest'
     // Bound-item navigation: a request / runScenario box can open its
     // backing item in a workbench tab from the inspector's top row.
     let openItemId: string | undefined
     let openItemKind: 'request' | 'scenario' | undefined
-    if (n.data.kind === 'httpRequest' || n.data.kind === 'socketioConnect' || n.data.kind === 'websocketConnect' || n.data.kind === 'mqttConnect' || n.data.kind === 'grpcConnect' || n.data.kind === 'httpListen' || n.data.kind === 'grpcListen' || n.data.kind === 'soapListen') {
+    if (n.data.kind === 'httpRequest' || n.data.kind === 'soapRequest' || n.data.kind === 'socketioConnect' || n.data.kind === 'websocketConnect' || n.data.kind === 'mqttConnect' || n.data.kind === 'grpcConnect' || n.data.kind === 'httpListen' || n.data.kind === 'grpcListen' || n.data.kind === 'soapListen') {
       // A streaming connect / httpListen / grpcListen / soapListen node binds a
       // request the same way httpRequest does (`config.requestId`), so it gets
       // the same open-the-request navigation.

@@ -166,6 +166,15 @@ export const SCENARIO_KIND_REGISTRY = {
       config: { requestId: 'Id of the request item to execute.', label: 'Display label on the box.' }
     }
   },
+  soapRequest: {
+    labelKey: 'scenario.nodes.soapRequest', defaultLabel: 'SOAP Request', icon: 'globe', category: 'composition',
+    requestBinding: true,
+    ports: { inputs: [{ id: 'env', name: 'env', flow: 'value' }], outputs: [{ id: 'response', name: 'response', dataType: 'response', role: 'response', flow: 'both' }] },
+    doc: {
+      summary: 'Runs a bound SOAP request (single request -> single response) and emits its parsed `response`. A `<soap:Fault>` surfaces on the response object (and routes to `error` when the call itself fails). Sequence it via the `in` trigger.',
+      config: { requestId: 'Id of the SOAP request item to execute.', label: 'Display label on the box.' }
+    }
+  },
   runScenario: {
     labelKey: 'scenario.nodes.runScenario', defaultLabel: 'Run scenario', icon: 'circuit-board', category: 'composition',
     ports: { inputs: [], outputs: [{ id: 'result', name: 'result', role: 'response', flow: 'both' }] },
