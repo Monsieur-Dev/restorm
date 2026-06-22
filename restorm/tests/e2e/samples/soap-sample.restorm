@@ -1,0 +1,279 @@
+collections:
+  - folderType: environment
+    name: SOAP Playground
+    documentation: |-
+      # SOAP Playground
+
+      Connects to the local SOAP mock server (tests/docker/soap-server, port 8091).
+      The mock is a zero-dependency node:http server that dispatches on the
+      SOAPAction header and returns deterministic SOAP 1.1 envelopes.
+
+      Each request exercises a distinct E2E scenario:
+        - Echo: string echo + Handlebars-on-wire (the resolved value appears in
+          the response body, not the literal template).
+        - Echo with env URL: proves the URL itself resolves env variables.
+        - Calculator Add: complex-type input (two integer elements).
+        - Calculator Fault: SOAP Fault surface in the response panel.
+        - Slow cancel: 8-second delay — used for the cancellation scenario.
+        - Malformed: non-XML response body — triggers the malformed-XML clean error.
+    tags: []
+    configuration: {}
+    environments:
+      - name: Default
+        variables:
+          - key: soapBase
+            value:
+              type: string
+              value: 'http://localhost:8091/soap'
+            enabled: true
+          - key: echoMessage
+            value:
+              type: string
+              value: hello-handlebars-42
+            enabled: true
+          - key: reqId
+            value:
+              type: string
+              value: test-request-id-999
+            enabled: true
+        id: a1b2c3d4-e5f6-4071-8293-a4b5c6d7e8f9
+    items:
+      - type: soap
+        name: SOAP Echo
+        documentation: |-
+          Sends <message>{{echoMessage}}</message> in the request envelope.
+          The mock reflects it back in <EchoResponse>/<message>. Asserting
+          the response contains the resolved value (not "{{echoMessage}}")
+          proves Handlebars substitution reached the wire.
+        tags:
+          - soap
+          - echo
+        url: 'http://localhost:8091/soap'
+        soapAction: 'http://restorm.test/castlemock/Echo'
+        service: TestService
+        operation: Echo
+        body: |-
+          <?xml version="1.0" encoding="UTF-8"?>
+          <soap:Envelope
+            xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"
+            xmlns:tns="http://restorm.test/castlemock">
+            <soap:Header/>
+            <soap:Body>
+              <tns:EchoRequest>
+                <tns:message>{{echoMessage}}</tns:message>
+              </tns:EchoRequest>
+            </soap:Body>
+          </soap:Envelope>
+        headers:
+          - key: Content-Type
+            value:
+              type: string
+              value: text/xml; charset=utf-8
+            description: ''
+            enabled: true
+          - key: SOAPAction
+            value:
+              type: string
+              value: 'http://restorm.test/castlemock/Echo'
+            description: ''
+            enabled: true
+          - key: X-Request-Id
+            value:
+              type: expression
+              value: '{{reqId}}'
+            description: ''
+            enabled: true
+        id: b2c3d4e5-f607-4182-9304-b5c6d7e8f901
+      - type: soap
+        name: SOAP Echo (env URL)
+        documentation: |-
+          Same Echo operation but the URL comes from the {{soapBase}} env variable.
+          Proves URL Handlebars substitution works alongside the body substitution.
+        tags:
+          - soap
+          - echo
+          - env
+        url: '{{soapBase}}'
+        soapAction: 'http://restorm.test/castlemock/Echo'
+        service: TestService
+        operation: Echo
+        body: |-
+          <?xml version="1.0" encoding="UTF-8"?>
+          <soap:Envelope
+            xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"
+            xmlns:tns="http://restorm.test/castlemock">
+            <soap:Header/>
+            <soap:Body>
+              <tns:EchoRequest>
+                <tns:message>env-url-test</tns:message>
+              </tns:EchoRequest>
+            </soap:Body>
+          </soap:Envelope>
+        headers:
+          - key: Content-Type
+            value:
+              type: string
+              value: text/xml; charset=utf-8
+            description: ''
+            enabled: true
+          - key: SOAPAction
+            value:
+              type: string
+              value: 'http://restorm.test/castlemock/Echo'
+            description: ''
+            enabled: true
+        id: c3d4e5f6-0718-4293-a4b5-c6d7e8f90213
+      - type: soap
+        name: SOAP Add (complex type)
+        documentation: |-
+          Calculator Add — sends two integer elements (<a> and <b>) and
+          asserts the response contains the sum. Exercises complex-type
+          (nested element) input.
+        tags:
+          - soap
+          - calculator
+        url: 'http://localhost:8091/soap'
+        soapAction: 'http://restorm.test/castlemock/Add'
+        service: TestService
+        operation: Add
+        body: |-
+          <?xml version="1.0" encoding="UTF-8"?>
+          <soap:Envelope
+            xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"
+            xmlns:tns="http://restorm.test/castlemock">
+            <soap:Header/>
+            <soap:Body>
+              <tns:AddRequest>
+                <tns:a>7</tns:a>
+                <tns:b>3</tns:b>
+              </tns:AddRequest>
+            </soap:Body>
+          </soap:Envelope>
+        headers:
+          - key: Content-Type
+            value:
+              type: string
+              value: text/xml; charset=utf-8
+            description: ''
+            enabled: true
+          - key: SOAPAction
+            value:
+              type: string
+              value: 'http://restorm.test/castlemock/Add'
+            description: ''
+            enabled: true
+        id: d4e5f607-1829-43a4-b5c6-d7e8f9012345
+      - type: soap
+        name: SOAP Fault
+        documentation: |-
+          Always triggers a SOAP Fault (faultcode soap:Server, faultstring
+          "Fault triggered for testing"). Asserts the fault block is
+          surfaced distinctly in the response panel.
+        tags:
+          - soap
+          - fault
+        url: 'http://localhost:8091/soap'
+        soapAction: 'http://restorm.test/castlemock/Fault'
+        service: TestService
+        operation: Fault
+        body: |-
+          <?xml version="1.0" encoding="UTF-8"?>
+          <soap:Envelope
+            xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"
+            xmlns:tns="http://restorm.test/castlemock">
+            <soap:Header/>
+            <soap:Body>
+              <tns:FaultRequest/>
+            </soap:Body>
+          </soap:Envelope>
+        headers:
+          - key: Content-Type
+            value:
+              type: string
+              value: text/xml; charset=utf-8
+            description: ''
+            enabled: true
+          - key: SOAPAction
+            value:
+              type: string
+              value: 'http://restorm.test/castlemock/Fault'
+            description: ''
+            enabled: true
+        id: e5f60718-2930-44b5-c6d7-e8f901234567
+      - type: soap
+        name: SOAP Slow (cancel)
+        documentation: |-
+          The mock waits 8 seconds before responding. Used by the
+          cancellation scenario: click Send, immediately click Cancel,
+          and assert the panel returns to the idle state with no result.
+        tags:
+          - soap
+          - cancel
+        url: 'http://localhost:8091/soap'
+        soapAction: 'http://restorm.test/castlemock/Slow'
+        service: TestService
+        operation: Slow
+        body: |-
+          <?xml version="1.0" encoding="UTF-8"?>
+          <soap:Envelope
+            xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"
+            xmlns:tns="http://restorm.test/castlemock">
+            <soap:Header/>
+            <soap:Body>
+              <tns:SlowRequest/>
+            </soap:Body>
+          </soap:Envelope>
+        headers:
+          - key: Content-Type
+            value:
+              type: string
+              value: text/xml; charset=utf-8
+            description: ''
+            enabled: true
+          - key: SOAPAction
+            value:
+              type: string
+              value: 'http://restorm.test/castlemock/Slow'
+            description: ''
+            enabled: true
+        id: f6071829-3041-45c6-d7e8-f90123456789
+      - type: soap
+        name: SOAP Malformed
+        documentation: |-
+          The mock returns a non-XML body ("THIS IS NOT XML…"). Asserts
+          the panel surfaces a clean error rather than a blank or crashed
+          response area.
+        tags:
+          - soap
+          - malformed
+        url: 'http://localhost:8091/soap'
+        soapAction: 'http://restorm.test/castlemock/Malformed'
+        service: TestService
+        operation: Malformed
+        body: |-
+          <?xml version="1.0" encoding="UTF-8"?>
+          <soap:Envelope
+            xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"
+            xmlns:tns="http://restorm.test/castlemock">
+            <soap:Header/>
+            <soap:Body>
+              <tns:MalformedRequest/>
+            </soap:Body>
+          </soap:Envelope>
+        headers:
+          - key: Content-Type
+            value:
+              type: string
+              value: text/xml; charset=utf-8
+            description: ''
+            enabled: true
+          - key: SOAPAction
+            value:
+              type: string
+              value: 'http://restorm.test/castlemock/Malformed'
+            description: ''
+            enabled: true
+        id: 07182930-4152-46d7-e8f9-012345678901
+    id: 18293041-5263-47e8-f901-234567890123
+    fileFormatVersion: 1
+_projectUuid: 29304152-6374-48f9-0123-456789012345

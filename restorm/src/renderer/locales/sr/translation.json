@@ -466,7 +466,8 @@
     "tabs": {
       "body": "Telo",
       "headers": "Zaglavlja"
-    }
+    },
+    "malformedXmlError": "Nevažeći XML odgovor"
   },
   "websocket": {
     "connect": "Poveži",

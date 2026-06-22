@@ -465,7 +465,8 @@
     "tabs": {
       "body": "Törzs",
       "headers": "Fejlécek"
-    }
+    },
+    "malformedXmlError": "Érvénytelen XML válasz"
   },
   "websocket": {
     "connect": "Csatlakozás",

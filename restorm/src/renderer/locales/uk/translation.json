@@ -467,7 +467,8 @@
     "tabs": {
       "body": "Тіло",
       "headers": "Заголовки"
-    }
+    },
+    "malformedXmlError": "Недійсна XML-відповідь"
   },
   "websocket": {
     "connect": "З’єднатися",

@@ -464,7 +464,8 @@
     "tabs": {
       "body": "內文",
       "headers": "標頭"
-    }
+    },
+    "malformedXmlError": "無效的XML回應"
   },
   "websocket": {
     "connect": "連線",

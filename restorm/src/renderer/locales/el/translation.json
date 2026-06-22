@@ -465,7 +465,8 @@
     "tabs": {
       "body": "Σώμα",
       "headers": "Κεφαλίδες"
-    }
+    },
+    "malformedXmlError": "Μη έγκυρη απάντηση XML"
   },
   "websocket": {
     "connect": "Σύνδεση",

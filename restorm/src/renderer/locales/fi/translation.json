@@ -465,7 +465,8 @@
     "tabs": {
       "body": "Sisältö",
       "headers": "Otsakkeet"
-    }
+    },
+    "malformedXmlError": "Virheellinen XML-vastaus"
   },
   "websocket": {
     "connect": "Yhdistä",

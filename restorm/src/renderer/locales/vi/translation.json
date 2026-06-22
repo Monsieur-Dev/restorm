@@ -464,7 +464,8 @@
     "tabs": {
       "body": "Body",
       "headers": "Header"
-    }
+    },
+    "malformedXmlError": "Phản hồi XML không hợp lệ"
   },
   "websocket": {
     "connect": "Kết nối",

@@ -464,7 +464,8 @@
     "tabs": {
       "body": "본문",
       "headers": "헤더"
-    }
+    },
+    "malformedXmlError": "잘못된 XML 응답"
   },
   "websocket": {
     "connect": "연결",

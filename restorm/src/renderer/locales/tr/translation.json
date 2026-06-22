@@ -465,7 +465,8 @@
     "tabs": {
       "body": "Gövde",
       "headers": "Başlıklar"
-    }
+    },
+    "malformedXmlError": "Geçersiz XML yanıtı"
   },
   "websocket": {
     "connect": "Bağlan",

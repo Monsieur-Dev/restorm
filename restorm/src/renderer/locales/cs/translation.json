@@ -467,7 +467,8 @@
     "tabs": {
       "body": "Tělo",
       "headers": "Hlavičky"
-    }
+    },
+    "malformedXmlError": "Neplatná odpověď XML"
   },
   "websocket": {
     "connect": "Připojit",

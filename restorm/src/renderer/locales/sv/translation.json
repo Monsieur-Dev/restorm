@@ -465,7 +465,8 @@
     "tabs": {
       "body": "Kropp",
       "headers": "Headers"
-    }
+    },
+    "malformedXmlError": "Ogiltigt XML-svar"
   },
   "websocket": {
     "connect": "Anslut",

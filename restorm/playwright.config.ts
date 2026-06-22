@@ -68,6 +68,12 @@ const grpcExecutionTestDir = defineBddConfig({
   outputDir: '.features-gen/grpc-execution'
 })
 
+const soapExecutionTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/soap-execution/features/**/*.feature',
+  steps: ['tests/e2e/bdd/soap-execution/steps/**/*.ts', 'tests/e2e/bdd/fixtures/mcp-server.fixture.ts'],
+  outputDir: '.features-gen/soap-execution'
+})
+
 const mqttExecutionTestDir = defineBddConfig({
   features: 'tests/e2e/bdd/mqtt-execution/features/**/*.feature',
   steps: ['tests/e2e/bdd/mqtt-execution/steps/**/*.ts', 'tests/e2e/bdd/fixtures/mcp-server.fixture.ts'],
@@ -304,6 +310,11 @@ export default defineConfig({
     {
       name: 'grpc-execution',
       testDir: grpcExecutionTestDir,
+      timeout: 180 * 1000
+    },
+    {
+      name: 'soap-execution',
+      testDir: soapExecutionTestDir,
       timeout: 180 * 1000
     },
     {
