@@ -261,7 +261,8 @@
         "mqtt": "Requête MQTT",
         "mqttServer": "Courtier MQTT",
         "grpcServer": "Serveur gRPC fictif",
-        "soapServer": "Serveur mock SOAP"
+        "soapServer": "Serveur mock SOAP",
+        "graphqlServer": "Serveur GraphQL fictif"
       }
     },
     "deleteConfirm": {
@@ -422,6 +423,15 @@
       "query": "Requête",
       "variables": "Variables",
       "headers": "En-têtes"
+    },
+    "server": {
+      "schema": "Schéma (SDL)",
+      "resolvers": "Résolveurs (prédéfinis)",
+      "startListening": "Démarrer l'écoute",
+      "stopListening": "Arrêter l'écoute",
+      "served": "À l'écoute — {{count}} opération(s) servie(s)",
+      "notListening": "Pas à l'écoute",
+      "listenFailed": "Échec du démarrage du serveur fictif"
     }
   },
   "grpc": {
@@ -1044,7 +1054,9 @@
       "httpClose": "Fermeture HTTP",
       "grpcServerClose": "Fermeture serveur gRPC",
       "soapListen": "Serveur SOAP",
-      "soapClose": "Fermeture SOAP"
+      "soapClose": "Fermeture SOAP",
+      "graphqlListen": "Serveur GraphQL",
+      "graphqlClose": "Fermeture GraphQL"
     },
     "comparator": {
       "result": "résultat"
@@ -1613,7 +1625,9 @@
       "grpcListen": "Héberge un serveur gRPC fictif local et écoute indéfiniment. « connected » se déclenche une fois le serveur en écoute ; chaque appel servi réémet ses données sur le port « served ». Le serveur reste actif jusqu’à une fermeture serveur gRPC (ou un Stop), puis « done » se déclenche. Pas de sortie response — il sert, il n’appelle pas.",
       "grpcServerClose": "Arrête un serveur gRPC fictif déjà en écoute (déclaré par un nœud serveur gRPC) et libère son port.",
       "soapListen": "Héberge un serveur mock SOAP local et écoute indéfiniment. Chaque requête entrante est dirigée vers une opération configurée (selon son SOAPAction ou le nom d'opération du corps) et reçoit l'enveloppe SOAP préenregistrée (une opération de type faute renvoie `<soap:Fault>`). `connected` se déclenche dès que le serveur écoute ; chaque requête servie réémet ses données sur le port `served`. Le serveur reste actif jusqu'à une fermeture SOAP (ou un arrêt), puis `done` se déclenche.",
-      "soapClose": "Arrête un serveur mock SOAP déjà en écoute (déclaré par un nœud serveur SOAP) et libère son port."
+      "soapClose": "Arrête un serveur mock SOAP déjà en écoute (déclaré par un nœud serveur SOAP) et libère son port.",
+      "graphqlListen": "Héberge un serveur GraphQL fictif local et écoute indéfiniment. « connected » se déclenche une fois le serveur démarré ; chaque opération servie réémet ses données sur le port « served ». Le serveur reste actif jusqu’à une fermeture GraphQL (ou un Stop), puis « done » se déclenche. Pas de sortie response — il sert, il n’appelle pas.",
+      "graphqlClose": "Arrête un serveur GraphQL fictif déjà en écoute (déclaré par un nœud serveur GraphQL) et libère son port."
     },
     "legend": {
       "title": "Légende",

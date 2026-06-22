@@ -19906,6 +19906,210 @@ collections:
                       service Greeter {
                         rpc SayHello (HelloRequest) returns (HelloReply);
                       }
+              - type: scenario
+                tags: []
+                params: []
+                nodes:
+                  - id: 2a7c1f40-9b3e-4d61-8c02-1e5a73b04201
+                    kind: graphqlListen
+                    config:
+                      requestId: 2a7c1f40-9b3e-4d61-8c02-1e5a73b04901
+                      connectionName: GraphQL Mock
+                      label: start GraphQL mock server
+                      id: 2a7c1f40-9b3e-4d61-8c02-1e5a73b04301
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                    outputs:
+                      - id: connected
+                        name: connected
+                        dataType: any
+                        flow: signal
+                      - id: served
+                        name: served
+                        dataType: any
+                        flow: both
+                    position:
+                      x: 12
+                      'y': 231
+                    note: restorm hosts a GraphQL endpoint on localhost:4222/graphql (listens until closed)
+                  - id: 2a7c1f40-9b3e-4d61-8c02-1e5a73b04202
+                    kind: httpRequest
+                    config:
+                      requestId: 2a7c1f40-9b3e-4d61-8c02-1e5a73b04902
+                      label: query the mock
+                      id: 2a7c1f40-9b3e-4d61-8c02-1e5a73b04302
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: env
+                        name: env
+                        dataType: any
+                        flow: value
+                    outputs:
+                      - id: response
+                        name: response
+                        dataType: response
+                        role: response
+                        flow: both
+                    position:
+                      x: 500
+                      'y': 100
+                    note: consumes the hosted GraphQL mock
+                  - id: 2a7c1f40-9b3e-4d61-8c02-1e5a73b04203
+                    kind: log
+                    config:
+                      message: réponse GraphQL du consumer reçue
+                      level: info
+                      runOnEachEvent: false
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 860
+                      'y': 80
+                  - id: 2a7c1f40-9b3e-4d61-8c02-1e5a73b04204
+                    kind: graphqlClose
+                    config:
+                      connectionNodeId: 2a7c1f40-9b3e-4d61-8c02-1e5a73b04201
+                      label: stop the GraphQL mock server
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                    outputs: []
+                    position:
+                      x: 500
+                      'y': 280
+                    note: stops the server once it has served an operation
+                  - id: 2a7c1f40-9b3e-4d61-8c02-1e5a73b04205
+                    kind: log
+                    config:
+                      message: serveur GraphQL arrêté
+                      level: info
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 500
+                      'y': 460
+                edges:
+                  # connected (signal) → consumer.in: the consumer fires once the
+                  # mock is listening.
+                  - id: 2a7c1f40-9b3e-4d61-8c02-1e5a73b04404
+                    from:
+                      nodeId: 2a7c1f40-9b3e-4d61-8c02-1e5a73b04201
+                      portId: connected
+                    to:
+                      nodeId: 2a7c1f40-9b3e-4d61-8c02-1e5a73b04202
+                      portId: in
+                  # consumer.response carries the data INTO the log…
+                  - id: 2a7c1f40-9b3e-4d61-8c02-1e5a73b04401
+                    from:
+                      nodeId: 2a7c1f40-9b3e-4d61-8c02-1e5a73b04202
+                      portId: response
+                    to:
+                      nodeId: 2a7c1f40-9b3e-4d61-8c02-1e5a73b04203
+                      portId: data
+                    selector: .
+                  # …and ALSO drives that log's signal `in` (the `response` port is
+                  # flow:both, carrying signal + data), so the log fires on a
+                  # topology edge — the consumer completing — not on the listen
+                  # node's `served` re-emission.
+                  - id: 2a7c1f40-9b3e-4d61-8c02-1e5a73b04405
+                    from:
+                      nodeId: 2a7c1f40-9b3e-4d61-8c02-1e5a73b04202
+                      portId: response
+                    to:
+                      nodeId: 2a7c1f40-9b3e-4d61-8c02-1e5a73b04203
+                      portId: in
+                  # graphqlClose is gated on the consumer-LOG's `done`, NOT on the
+                  # listen node's `served` port — this LINEARISES the run so the
+                  # close always sequences AFTER the response log, making the
+                  # run-log order topology-determined (deterministic on a cold run)
+                  # instead of racing the served↔consumer branches.
+                  - id: 2a7c1f40-9b3e-4d61-8c02-1e5a73b04402
+                    from:
+                      nodeId: 2a7c1f40-9b3e-4d61-8c02-1e5a73b04203
+                      portId: done
+                    to:
+                      nodeId: 2a7c1f40-9b3e-4d61-8c02-1e5a73b04204
+                      portId: in
+                  # graphqlListen.done → the "server stopped" log (fires when close
+                  # has actually torn the server down).
+                  - id: 2a7c1f40-9b3e-4d61-8c02-1e5a73b04403
+                    from:
+                      nodeId: 2a7c1f40-9b3e-4d61-8c02-1e5a73b04201
+                      portId: done
+                    to:
+                      nodeId: 2a7c1f40-9b3e-4d61-8c02-1e5a73b04205
+                      portId: in
+                id: 2a7c1f40-9b3e-4d61-8c02-1e5a73b04001
+                name: GraphQL Server
+                items:
+                  - type: graphql
+                    documentation: ''
+                    tags:
+                      - graphql
+                      - server
+                    id: 2a7c1f40-9b3e-4d61-8c02-1e5a73b04901
+                    name: GraphQL Mock Server
+                    operationType: query
+                    url: localhost:4222/graphql
+                    server: true
+                    schema: |-
+                      type Query {
+                        pets: [String!]!
+                      }
+                    mockResolvers: |-
+                      {
+                        "Query.pets": ["Rex", "Whiskers"]
+                      }
+                    headers: []
+                    params: []
+                    pathParams: []
+                  - type: http
+                    documentation: 'GraphQL-over-HTTP: a plain POST so the httpRequest node can drive it.'
+                    tags:
+                      - http
+                    id: 2a7c1f40-9b3e-4d61-8c02-1e5a73b04902
+                    name: GraphQL Mock Consumer
+                    method: POST
+                    url: http://localhost:4222/graphql
+                    headers:
+                      - key: Content-Type
+                        value:
+                          type: string
+                          value: application/json
+                        enabled: true
+                    body:
+                      type: text
+                      content: '{"query":"{ pets }"}'
+                    params: []
+                    pathParams: []
           - type: scenario
             tags: []
             params: []

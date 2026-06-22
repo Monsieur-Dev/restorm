@@ -4,6 +4,7 @@ import { useIsGrpcListening } from '../../services/grpcListeningStore'
 import { useIsGrpcServerListening } from '../../services/grpcServerListeningStore'
 import { useIsHttpListening } from '../../services/httpListeningStore'
 import { useIsSoapListening } from '../../services/soapListeningStore'
+import { useIsGraphqlListening } from '../../services/graphqlListeningStore'
 import { BeamWrap } from './BeamWrap'
 
 export interface ServerListeningBadgeProps {
@@ -15,8 +16,8 @@ export interface ServerListeningBadgeProps {
 
 /**
  * Wraps a long-running / server request badge and runs the border-beam around it
- * while the request is listening — an HTTP mock host, a raw-WS / Socket.IO / MQTT
- * server, a SOAP mock host, or an open gRPC stream. The same orbiting trail a running scenario
+ * while the request is listening — an HTTP / GraphQL / SOAP mock host, a raw-WS /
+ * Socket.IO / MQTT server, or an open gRPC stream. The same orbiting trail a running scenario
  * shows, so an active listener is visible BOTH in the sidebar tree AND on the
  * workbench tab without opening the request.
  *
@@ -30,9 +31,9 @@ export const ServerListeningBadge: React.FC<ServerListeningBadgeProps> = ({ requ
   const grpcServerListening = useIsGrpcServerListening(requestId)
   const httpListening = useIsHttpListening(requestId)
   const soapListening = useIsSoapListening(requestId)
+  const graphqlListening = useIsGraphqlListening(requestId)
   return (
-    <BeamWrap active={wsListening || grpcListening || grpcServerListening || httpListening || soapListening} size={16} borderWidth={1.5}>
-
+    <BeamWrap active={wsListening || grpcListening || grpcServerListening || httpListening || soapListening || graphqlListening} size={16} borderWidth={1.5}>
       {children}
     </BeamWrap>
   )

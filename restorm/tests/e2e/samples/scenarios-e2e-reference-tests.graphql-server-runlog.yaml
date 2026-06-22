@@ -1,0 +1,130 @@
+- message: 🔵 [<time>] ▶ GraphQL Server
+- message: ⚪ [<time>] start graphqlListen
+  data:
+    requestId: <uuid>
+    connectionName: GraphQL Mock
+    label: start GraphQL mock server
+- message: ⚪ [<time>] done graphqlListen
+- message: ⚪ [<time>] graphql-server "GraphQL Mock" connecting
+- message: ⚪ [<time>] graphql-server "GraphQL Mock" connected
+- message: ⚪ [<time>] start httpRequest
+  data:
+    requestId: <uuid>
+    label: query the mock
+    in: true
+- message: ⚪ [<time>] done httpRequest
+  data:
+    response:
+      request:
+        url: http://localhost:4222/graphql
+        method: POST
+        headers:
+          Content-Type: application/json
+      response:
+        status: 200
+        statusText: OK
+        headers:
+          content-type: application/json; charset=utf-8
+          content-length: "36"
+          date: <dynamic-time>
+          connection: keep-alive
+          keep-alive: timeout=5
+        body: '{"data":{"pets":["Rex","Whiskers"]}}'
+        durationMs: <dynamic-time>
+        success: true
+- message: ⚪ [<time>] start log
+  data:
+    message: réponse GraphQL du consumer reçue
+    level: info
+    runOnEachEvent: false
+    data:
+      request:
+        url: http://localhost:4222/graphql
+        method: POST
+        headers:
+          Content-Type: application/json
+      response:
+        status: 200
+        statusText: OK
+        headers:
+          content-type: application/json; charset=utf-8
+          content-length: "36"
+          date: <dynamic-time>
+          connection: keep-alive
+          keep-alive: timeout=5
+        body: '{"data":{"pets":["Rex","Whiskers"]}}'
+        durationMs: <dynamic-time>
+        success: true
+    in:
+      request:
+        url: http://localhost:4222/graphql
+        method: POST
+        headers:
+          Content-Type: application/json
+      response:
+        status: 200
+        statusText: OK
+        headers:
+          content-type: application/json; charset=utf-8
+          content-length: "36"
+          date: <dynamic-time>
+          connection: keep-alive
+          keep-alive: timeout=5
+        body: '{"data":{"pets":["Rex","Whiskers"]}}'
+        durationMs: <dynamic-time>
+        success: true
+- message: 🔵 [<time>] réponse GraphQL du consumer reçue
+  data:
+    request:
+      url: http://localhost:4222/graphql
+      method: POST
+      headers:
+        Content-Type: application/json
+    response:
+      status: 200
+      statusText: OK
+      headers:
+        content-type: application/json; charset=utf-8
+        content-length: "36"
+        date: <dynamic-time>
+        connection: keep-alive
+        keep-alive: timeout=5
+      body: '{"data":{"pets":["Rex","Whiskers"]}}'
+      durationMs: <dynamic-time>
+      success: true
+- message: ⚪ [<time>] done log
+  data:
+    value:
+      request:
+        url: http://localhost:4222/graphql
+        method: POST
+        headers:
+          Content-Type: application/json
+      response:
+        status: 200
+        statusText: OK
+        headers:
+          content-type: application/json; charset=utf-8
+          content-length: "36"
+          date: <dynamic-time>
+          connection: keep-alive
+          keep-alive: timeout=5
+        body: '{"data":{"pets":["Rex","Whiskers"]}}'
+        durationMs: <dynamic-time>
+        success: true
+- message: ⚪ [<time>] start graphqlClose
+  data:
+    connectionNodeId: <uuid>
+    label: stop the GraphQL mock server
+    in: true
+- message: ⚪ [<time>] graphql-server "GraphQL Mock" closed
+- message: ⚪ [<time>] start log
+  data:
+    message: serveur GraphQL arrêté
+    level: info
+    in: true
+- message: 🔵 [<time>] serveur GraphQL arrêté
+- message: ⚪ [<time>] done log
+  data: {}
+- message: ⚪ [<time>] done graphqlClose
+- message: 🔵 [<time>] ■ GraphQL Server

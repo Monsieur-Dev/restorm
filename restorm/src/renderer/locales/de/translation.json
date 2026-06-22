@@ -261,7 +261,8 @@
         "mqtt": "MQTT request",
         "mqttServer": "MQTT-Broker",
         "grpcServer": "gRPC-Mock-Server",
-        "soapServer": "SOAP-Mock-Server"
+        "soapServer": "SOAP-Mock-Server",
+        "graphqlServer": "GraphQL-Mock-Server"
       }
     },
     "deleteConfirm": {
@@ -422,6 +423,15 @@
       "query": "Query",
       "variables": "Variablen",
       "headers": "Header"
+    },
+    "server": {
+      "schema": "Schema (SDL)",
+      "resolvers": "Resolver (vordefiniert)",
+      "startListening": "Empfang starten",
+      "stopListening": "Empfang stoppen",
+      "served": "Hört zu — {{count}} Operation(en) bedient",
+      "notListening": "Hört nicht zu",
+      "listenFailed": "Mock-Server konnte nicht gestartet werden"
     }
   },
   "grpc": {
@@ -1044,7 +1054,9 @@
       "httpClose": "HTTP close",
       "grpcServerClose": "gRPC-Server schließen",
       "soapListen": "SOAP-Server",
-      "soapClose": "SOAP schließen"
+      "soapClose": "SOAP schließen",
+      "graphqlListen": "GraphQL server",
+      "graphqlClose": "GraphQL close"
     },
     "comparator": {
       "result": "Ergebnis"
@@ -1610,7 +1622,9 @@
       "grpcListen": "Hosts a local gRPC mock server and listens indefinitely. `connected` fires once it is listening; each served call re-emits its data on the `served` port. The server stays up until a gRPC server close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
       "grpcServerClose": "Stops an already-listening gRPC mock server (declared by a gRPC server node), freeing its port.",
       "soapListen": "Hostet einen lokalen SOAP-Mock-Server und lauscht unbegrenzt. Jede eingehende Anfrage wird an eine konfigurierte Operation weitergeleitet (per SOAPAction oder Operationsname im Body) und mit dem hinterlegten SOAP-Umschlag beantwortet (eine Fehler-Operation liefert `<soap:Fault>`). `connected` wird ausgelöst, sobald der Server lauscht; jede bediente Anfrage gibt ihre Daten erneut am Port `served` aus. Der Server bleibt aktiv, bis ein SOAP-Schließen (oder ein Stopp) erfolgt, dann wird `done` ausgelöst.",
-      "soapClose": "Stoppt einen bereits lauschenden SOAP-Mock-Server (von einem SOAP-Server-Knoten deklariert) und gibt dessen Port frei."
+      "soapClose": "Stoppt einen bereits lauschenden SOAP-Mock-Server (von einem SOAP-Server-Knoten deklariert) und gibt dessen Port frei.",
+      "graphqlListen": "Hosts a local GraphQL mock server and listens indefinitely. `connected` fires once it is listening; each served operation re-emits its data on the `served` port. The server stays up until a GraphQL close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
+      "graphqlClose": "Stops an already-listening GraphQL mock server (declared by a GraphQL server node), freeing its port."
     },
     "legend": {
       "title": "Legende",

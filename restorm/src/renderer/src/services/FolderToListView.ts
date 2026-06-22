@@ -137,7 +137,12 @@ function graphqlRequestToListViewItem(
   request: GraphQLRequest,
   options: FolderToListViewOptions
 ): ListViewItemData {
-  const badge = options.renderProtocolBadge?.(request.operationType)
+  // A GraphQL mock SERVER (server === true) renders the SRV capsule variant of
+  // its badge so it's distinct from a normal request in the tree — mirrors the
+  // HTTP / WebSocket / Socket.IO server entries.
+  const badge = request.server === true
+    ? options.renderProtocolBadge?.(request.operationType, undefined, 'server')
+    : options.renderProtocolBadge?.(request.operationType)
   return {
     id: request.id,
     title: request.name,

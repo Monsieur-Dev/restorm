@@ -27,7 +27,7 @@ export function requestBadgeType(request: Request): BadgeType {
  * {@link requestBadgeType}.
  */
 export function requestBadgeMode(request: Request): 'client' | 'server' {
-  return (request.type === 'websocket' || request.type === 'http' || request.type === 'grpc' || request.type === 'soap')
+  return (request.type === 'websocket' || request.type === 'http' || request.type === 'grpc' || request.type === 'soap' || request.type === 'graphql')
     && (request as { server?: boolean }).server === true
     ? 'server'
     : 'client'

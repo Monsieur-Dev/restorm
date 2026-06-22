@@ -7,6 +7,7 @@ import { useHandlebarsHelpers } from '../../hooks/useHandlebarsHelpers'
 import {
   Button,
   CodeEditor,
+  InputBox,
   SplitView,
   Pane,
   ControlGroup,
@@ -35,6 +36,10 @@ import { SendButtonEnvSwitcher } from './SendButtonEnvSwitcher'
 import { BeamWrap } from '../common/BeamWrap'
 import { toasterService } from 'electron-core-ui/renderer'
 import { HeaderHoverTooltip } from '../MainView/HeaderHoverTooltip'
+
+const urlInputWrapperStyle: React.CSSProperties = { flex: 1, minWidth: 0 }
+const serverHostLabelStyle: React.CSSProperties = { display: 'flex', alignItems: 'center', padding: '0 4px', whiteSpace: 'nowrap', opacity: 0.8 }
+const serverPortWrapperStyle: React.CSSProperties = { width: 80, flexShrink: 0 }
 
 export interface GraphQLRequestTabViewProps {
   request: GraphQLRequest
@@ -65,6 +70,13 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
   const [isSending, setIsSending] = useState(false)
   const [response, setResponse] = useState<GraphQLResponse | null>(null)
   const [historyRefreshKey, setHistoryRefreshKey] = useState(0)
+
+  // Server mode: restorm HOSTS a GraphQL mock instead of sending as a client.
+  const isServer = request.server === true
+  const [schema, setSchemaState] = useState(request.schema ?? '')
+  const [mockResolvers, setMockResolversState] = useState(request.mockResolvers ?? '')
+  const [isListening, setIsListening] = useState(false)
+  const [servedCount, setServedCount] = useState(0)
 
   // See HTTPRequestTabView for the pattern. GraphQL has only a
   // collapsible headers pane today (query + variables don't collapse),
@@ -112,6 +124,8 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
     setUrlState(request.url)
     setQueryState(request.query)
     setVariablesState(request.variables ?? '{}')
+    setSchemaState(request.schema ?? '')
+    setMockResolversState(request.mockResolvers ?? '')
     setResponse(null)
   }, [request])
   useRequestReset(request, handleRequestReset)
@@ -196,7 +210,9 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
     }
   }, [selectedEnvId, environments, request.id])
 
-  // Notify ContextService when URL, query or variables change
+  // Notify ContextService when URL, query or variables change. In server mode
+  // also push the SDL + canned resolvers so the main-process mock can read them
+  // off `fullData`.
   useEffect(() => {
     const toKeyValueData = toKeyValueDataShared
 
@@ -205,9 +221,10 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
       method: 'POST',
       requestType: 'graphql',
       headers: toKeyValueData(request.headers),
-      body: { type: 'text', content: JSON.stringify({ query, variables }) }
+      body: { type: 'text', content: JSON.stringify({ query, variables }) },
+      ...(isServer ? { server: true, schema, mockResolvers } : {})
     }, sourceIdRef.current)
-  }, [request.id, request.headers, url, query, variables])
+  }, [request.id, request.headers, url, query, variables, isServer, schema, mockResolvers])
 
   // Sync state changes to reactive request object
   const setUrl = useCallback((value: string): void => {
@@ -222,6 +239,73 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
     setVariablesState(value)
     updateReactiveProperty(request, 'variables', value)
   }, [request])
+  const setSchema = useCallback((value: string): void => {
+    setSchemaState(value)
+    updateReactiveProperty(request, 'schema', value)
+  }, [request])
+  const setMockResolvers = useCallback((value: string): void => {
+    setMockResolversState(value)
+    updateReactiveProperty(request, 'mockResolvers', value)
+  }, [request])
+
+  // Server mode: split `localhost:<port>/<path>` into editable port + path, and
+  // recompose on edit (host is fixed to localhost).
+  const { serverPort, serverPath } = useMemo(() => {
+    const stripped = url.replace(/^[a-z]+:\/\//i, '')
+    const slash = stripped.indexOf('/')
+    const hostPort = slash >= 0 ? stripped.slice(0, slash) : stripped
+    const path = slash >= 0 ? stripped.slice(slash + 1) : ''
+    const port = hostPort.split(':')[1] ?? ''
+    return { serverPort: port, serverPath: path }
+  }, [url])
+  const composeServerUrl = useCallback((port: string, pathPart: string): string => {
+    const cleanPath = pathPart.replace(/^\/+/, '')
+    return `localhost:${port}/${cleanPath}`
+  }, [])
+  const setServerPort = useCallback((p: string): void => {
+    setUrl(composeServerUrl(p.replace(/[^0-9]/g, ''), serverPath))
+  }, [composeServerUrl, serverPath, setUrl])
+  const setServerPath = useCallback((p: string): void => {
+    setUrl(composeServerUrl(serverPort, p))
+  }, [composeServerUrl, serverPort, setUrl])
+
+  const handleListen = useCallback((): void => {
+    const requestId = request.id
+    if (!requestId || isListening) return
+    setServedCount(0)
+    void window.restorm?.graphql.listen(requestId)
+      .then((res) => {
+        if (res.error) {
+          toasterService.push('app', { title: t('graphql.server.listenFailed'), body: res.error, durationMs: 10000 })
+          logger.error('GraphQL mock server failed to listen', { error: res.error })
+        }
+      })
+      .catch((err: unknown) => { logger.error('GraphQL mock server listen error', { error: String(err) }) })
+  }, [request.id, isListening, t])
+
+  const handleStop = useCallback((): void => {
+    void window.restorm?.graphql.stop(request.id)
+  }, [request.id])
+
+  // Track listening state + served count in server mode.
+  useEffect(() => {
+    if (!isServer) return undefined
+    const requestId = request.id
+    let cancelled = false
+    void window.restorm?.graphql.isListening(requestId).then((listening) => {
+      if (!cancelled) setIsListening(listening)
+    })
+    const unsubProgress = window.restorm?.graphql.onProgress(({ requestId: rid, status }) => {
+      if (rid !== requestId) return
+      if (status === 'started') { setIsListening(true); setServedCount(0) }
+      if (status === 'completed' || status === 'cancelled' || status === 'error') setIsListening(false)
+    })
+    const unsubServed = window.restorm?.graphql.onServerServed(({ requestId: rid, count }) => {
+      if (rid !== requestId) return
+      setServedCount(count)
+    })
+    return () => { cancelled = true; unsubProgress?.(); unsubServed?.() }
+  }, [isServer, request.id])
   
   // Stable empty array for components that get variables via their own variableId
   const emptyVariables = useMemo<VariableDefinition[]>(() => [], [])
@@ -344,7 +428,42 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
       </Pane>
     </SplitView>
   )
-  
+
+  // Server-mode request content: SDL schema + canned resolvers the mock serves
+  // (the "Send" panels — query / variables — have no meaning when hosting).
+  const serverRequestContent = (
+    <SplitView
+      orientation="vertical"
+      style={{ width: '100%', height: '100%' }}
+      data-testid="graphql-server-splitview"
+    >
+      <Pane title={t('graphql.server.schema')} initialSize={0.6} minSize={150} data-testid="graphql-server-schema-pane">
+        <div style={{ height: '100%', border: '1px solid var(--panel-border)', borderRadius: 3 }}>
+          <CodeEditor
+            height="100%"
+            language="graphql"
+            value={schema}
+            onChange={(v) => { setSchema(v ?? '') }}
+            options={{ minimap: { enabled: false }, wordWrap: 'on', automaticLayout: true }}
+            data-testid="graphql-server-schema-editor"
+          />
+        </div>
+      </Pane>
+      <Pane title={t('graphql.server.resolvers')} initialSize={0.4} minSize={100} data-testid="graphql-server-resolvers-pane">
+        <div style={{ height: '100%', border: '1px solid var(--panel-border)', borderRadius: 3 }}>
+          <CodeEditor
+            height="100%"
+            language="json"
+            value={mockResolvers}
+            onChange={(v) => { setMockResolvers(v ?? '') }}
+            options={{ minimap: { enabled: false }, wordWrap: 'on', automaticLayout: true }}
+            data-testid="graphql-server-resolvers-editor"
+          />
+        </div>
+      </Pane>
+    </SplitView>
+  )
+
   // Use backend-provided code snippets
   const codeSnippetsContent = backendCodeSnippets || t('requestTab.codeSnippets.loading', 'Loading code snippets...')
 
@@ -451,35 +570,88 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
         />
       )}
     <ControlGroup data-testid="graphql-url-section">
-      <HeaderHoverTooltip label={resolvedUrl || url} suppressed={!(resolvedUrl || url)} className="url-container-stretch">
-        <div style={{ flex: 1, minWidth: 0 }} data-testid="url-container" data-url-resolved={resolvedUrl ? 'true' : 'false'} data-resolved-url={resolvedUrl || url}>
-          <RestormVariableInputBox
-            value={url}
-            onChange={setUrl}
-            variables={emptyVariables}
-            helpers={handlebarsHelpers}
-            placeholder={t('graphql.urlPlaceholder')}
-            data-testid="graphql-url-input"
-          />
-        </div>
-      </HeaderHoverTooltip>
-      <SendButtonEnvSwitcher>
-        <BeamWrap active={isSending} size={22} borderWidth={1.5}>
-          <Button
-            icon={isSending ? 'close' : 'send'}
-            onClick={isSending ? handleCancel : handleSend}
-            {...(isSending ? { emphasis: 0 } : sendButtonStyle ? { style: sendButtonStyle } : { emphasis: 1 })}
-            options={{
-              title: isSending ? t('cancel') : t('graphql.send'),
-              ariaLabel: isSending ? t('cancel') : t('graphql.send')
-            }}
-            data-testid="graphql-action-button"
-          />
-        </BeamWrap>
-      </SendButtonEnvSwitcher>
+      {isServer ? (
+        // SERVER MODE: localhost-fixed host + port + endpoint path.
+        <>
+          <span style={serverHostLabelStyle}>localhost:</span>
+          <div style={serverPortWrapperStyle}>
+            <InputBox
+              value={serverPort}
+              onChange={setServerPort}
+              options={{ placeholder: '4000' }}
+              data-testid="graphql-server-port-input"
+            />
+          </div>
+          <span style={serverHostLabelStyle}>/</span>
+          <div style={urlInputWrapperStyle}>
+            <InputBox
+              value={serverPath}
+              onChange={setServerPath}
+              options={{ placeholder: 'graphql' }}
+              data-testid="graphql-server-path-input"
+            />
+          </div>
+          <BeamWrap active={isListening} size={22} borderWidth={1.5}>
+            <Button
+              icon={isListening ? 'debug-disconnect' : 'plug'}
+              onClick={isListening ? handleStop : handleListen}
+              {...(isListening ? {} : { emphasis: 1 })}
+              options={{
+                title: isListening ? t('graphql.server.stopListening') : t('graphql.server.startListening'),
+                ariaLabel: isListening ? t('graphql.server.stopListening') : t('graphql.server.startListening')
+              }}
+              data-testid="graphql-server-listen-button"
+            />
+          </BeamWrap>
+        </>
+      ) : (
+        <>
+          <HeaderHoverTooltip label={resolvedUrl || url} suppressed={!(resolvedUrl || url)} className="url-container-stretch">
+            <div style={{ flex: 1, minWidth: 0 }} data-testid="url-container" data-url-resolved={resolvedUrl ? 'true' : 'false'} data-resolved-url={resolvedUrl || url}>
+              <RestormVariableInputBox
+                value={url}
+                onChange={setUrl}
+                variables={emptyVariables}
+                helpers={handlebarsHelpers}
+                placeholder={t('graphql.urlPlaceholder')}
+                data-testid="graphql-url-input"
+              />
+            </div>
+          </HeaderHoverTooltip>
+          <SendButtonEnvSwitcher>
+            <BeamWrap active={isSending} size={22} borderWidth={1.5}>
+              <Button
+                icon={isSending ? 'close' : 'send'}
+                onClick={isSending ? handleCancel : handleSend}
+                {...(isSending ? { emphasis: 0 } : sendButtonStyle ? { style: sendButtonStyle } : { emphasis: 1 })}
+                options={{
+                  title: isSending ? t('cancel') : t('graphql.send'),
+                  ariaLabel: isSending ? t('cancel') : t('graphql.send')
+                }}
+                data-testid="graphql-action-button"
+              />
+            </BeamWrap>
+          </SendButtonEnvSwitcher>
+        </>
+      )}
     </ControlGroup>
     </div>
   )
+
+  // Server-mode listening status banner (mirrors the HTTP mock's "served N").
+  const serverResponseContent = isServer ? (
+    <div
+      data-testid="graphql-server-served-banner"
+      style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 12px' }}
+    >
+      <span className={`codicon codicon-${isListening ? 'broadcast' : 'circle-slash'}`} aria-hidden="true" />
+      <span>
+        {isListening
+          ? t('graphql.server.served', { count: servedCount, defaultValue: 'Listening — {{count}} operation(s) served' })
+          : t('graphql.server.notListening', 'Not listening')}
+      </span>
+    </div>
+  ) : undefined
   
   const handleCloseHistoryModal = useCallback(() => {
     setHistoryModalOpen(false)
@@ -501,16 +673,16 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
       <BaseRequestTabView
         requestId={request.id}
         urlSection={urlSection}
-        requestContent={requestContent}
+        requestContent={isServer ? serverRequestContent : requestContent}
         codeSnippetsContent={codeSnippetsContent}
         {...(apiDocumentation && route && findOperationForRoute(apiDocumentation, route) ? { docsContent: <DocumentationHost apiDocumentation={apiDocumentation} filters={[route]} /> } : {})}
         notes={request.notes}
         onNotesChange={(md): void => { updateReactiveProperty(request, 'notes', md) }}
         isLoading={isSending}
-        showResponse={response !== null}
-        infosContent={infosContent}
-        responseContent={responseContent}
-        jsonData={response ? { data: response.data, errors: response.errors } : undefined}
+        showResponse={isServer ? isListening : response !== null}
+        infosContent={isServer ? undefined : infosContent}
+        responseContent={isServer ? serverResponseContent : responseContent}
+        jsonData={isServer ? undefined : (response ? { data: response.data, errors: response.errors } : undefined)}
       />
       <ResponseHistoryModal
         isOpen={historyModalOpen}

@@ -345,6 +345,12 @@ export function flushRequestStateToContext(req: Request): void {
     data.operationType = gql.operationType
     data.query = gql.query
     data.variables = gql.variables
+    // Server mode (graphql mock host): the SDL + resolvers the mock serves.
+    // Flushed so a scenario-hosted graphqlListen can read them off fullData.
+    if (gql.server !== undefined) data.server = gql.server
+    if (gql.schema !== undefined) data.schema = gql.schema
+    if (gql.mockResolvers !== undefined) data.mockResolvers = gql.mockResolvers
+    if (gql.resolverScript !== undefined) data.resolverScript = gql.resolverScript
   } else if (isGrpcRequest(req)) {
     const grpc = req as GrpcRequest
     data.requestType = 'grpc'

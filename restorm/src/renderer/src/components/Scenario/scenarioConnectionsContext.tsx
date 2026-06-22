@@ -16,8 +16,8 @@ export interface ScenarioConnectionRef {
   /** The connect node's kind — a send/close picker shows only its own transport's
    * connections (`socketioConnect` vs `websocketConnect` vs `grpcConnect`;
    * `httpListen` for a hosted HTTP mock server, `grpcListen` for a gRPC one,
-   * `soapListen` for a SOAP one). */
-  kind: 'socketioConnect' | 'websocketConnect' | 'grpcConnect' | 'mqttConnect' | 'httpListen' | 'grpcListen' | 'soapListen'
+   * `soapListen` for a SOAP one, `graphqlListen` for a GraphQL one). */
+  kind: 'socketioConnect' | 'websocketConnect' | 'grpcConnect' | 'mqttConnect' | 'httpListen' | 'grpcListen' | 'soapListen' | 'graphqlListen'
   /** The connect node's linked request event — pre-fills a send node's channel. */
   defaultChannel?: string
   /** The connect node's linked request message — pre-fills a send node's payload. */

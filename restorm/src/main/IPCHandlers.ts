@@ -18,6 +18,7 @@ import { StringValue, ExpressionValue, CustomListValue, CustomListMultiValue, Se
 import type { KeyValue } from '../shared/types/baseTypes'
 import { authenticationCacheService } from './services/AuthenticationCacheService'
 import { graphqlExecutionService, type GraphQLExecutionInput } from './services/GraphQLExecutionService'
+import { graphqlMockServerService } from './services/GraphQLMockServerService'
 import { soapExecutionService, type SOAPExecutionInput } from './services/SOAPExecutionService'
 import { grpcExecutionService, type GRPCExecutionInput } from './services/GRPCExecutionService'
 import { grpcMockServerService } from './services/GRPCMockServerService'
@@ -42,6 +43,7 @@ import {
   authPrefetchArgs,
   graphqlExecuteArgs, graphqlCancelArgs, graphqlIsActiveArgs,
   soapExecuteArgs, soapCancelArgs, soapIsActiveArgs, soapListenArgs, soapStopArgs, soapIsListeningArgs,
+  graphqlListenArgs, graphqlStopArgs, graphqlIsListeningArgs,
   grpcExecuteArgs, grpcConnectArgs, grpcSendArgs, grpcDisconnectArgs, grpcCancelArgs, grpcIsActiveArgs,
   grpcListenArgs, grpcStopArgs, grpcIsListeningArgs,
   websocketConnectArgs, websocketDisconnectArgs, websocketSendArgs, websocketIsActiveArgs,
@@ -1034,6 +1036,22 @@ export function registerRestormIPC(deps: {
 
   validatedHandle('graphql:is-active', graphqlIsActiveArgs, (_event, [requestId]) => {
     return graphqlExecutionService.isActive(requestId)
+  })
+
+  // GraphQL mock server (server mode): start hosting a local GraphQL endpoint,
+  // stop it, and check whether it is currently listening. `graphql:listen`
+  // resolves as soon as the route is listening (or fails to bind / collides);
+  // the route stays up until `graphql:stop` (stop arrives via graphql:request-progress).
+  validatedHandle('graphql:listen', graphqlListenArgs, async (_event, [requestId]) => {
+    return await graphqlMockServerService.listen(requestId)
+  })
+
+  validatedHandle('graphql:stop', graphqlStopArgs, (_event, [requestId]) => {
+    return graphqlMockServerService.stopListening(requestId)
+  })
+
+  validatedHandle('graphql:is-listening', graphqlIsListeningArgs, (_event, [requestId]) => {
+    return graphqlMockServerService.isListening(requestId)
   })
 
   // ==========================================================================

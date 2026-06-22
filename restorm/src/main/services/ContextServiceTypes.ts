@@ -79,6 +79,13 @@ export interface FullRequestData {
   operationType?: string
   query?: string
   variables?: string
+  /** GraphQL mock server (server === true): SDL schema served. */
+  schema?: string
+  /** GraphQL mock server: per-field canned response values (JSON keyed by
+   * `Type.field`). */
+  mockResolvers?: string
+  /** GraphQL mock server: optional scripted resolver body. */
+  resolverScript?: string
 
   // gRPC specific
   service?: string

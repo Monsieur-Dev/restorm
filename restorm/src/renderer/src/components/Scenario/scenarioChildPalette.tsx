@@ -68,6 +68,9 @@ export const SCENARIO_ADD_REQUEST_GROUPS: ScenarioAddEntry[][] = [
   ],
   [
     { kind: 'graphql', badge: 'QUERY', labelKey: 'sidebar.contextMenu.add.graphql', defaultLabel: 'GraphQL request' },
+    // GraphQL mock server is server-only: dropping it creates a server: true
+    // request + a bound graphqlListen node.
+    { kind: 'graphql-server', badge: 'QUERY', mode: 'server', labelKey: 'sidebar.contextMenu.add.graphqlServer', defaultLabel: 'GraphQL server' },
     { kind: 'soap', badge: 'SOAP', labelKey: 'sidebar.contextMenu.add.soap', defaultLabel: 'SOAP request' },
     // SOAP mock server is server-only (like the HTTP mock server): dropping it
     // creates a server: true SOAP request + a bound soapListen node.
@@ -193,6 +196,20 @@ export const SCENARIO_ADD_SOAP_ACTIONS: ScenarioAddSoapActionEntry[] = [
   { kind: 'soapClose', icon: 'debug-disconnect', labelKey: 'scenario.nodes.soapClose', defaultLabel: 'SOAP close' }
 ]
 
+/** GraphQL mock-server action entries — CLOSE only (the listen comes from the
+ * "GraphQL server" request entry, which drops a bound graphqlListen). A hosted
+ * mock never SENDS unprompted, so there is no graphql send action. */
+export interface ScenarioAddGraphqlActionEntry {
+  kind: 'graphqlClose'
+  icon: string
+  labelKey: string
+  defaultLabel: string
+}
+
+export const SCENARIO_ADD_GRAPHQL_ACTIONS: ScenarioAddGraphqlActionEntry[] = [
+  { kind: 'graphqlClose', icon: 'debug-disconnect', labelKey: 'scenario.nodes.graphqlClose', defaultLabel: 'GraphQL close' }
+]
+
 /** The protocol/scenario badge glyph for a palette entry — `mode: 'server'`
  * renders the two-part "hosts a server" pill (websocket-server / socketio-server). */
 export function scenarioAddIcon(badge: BadgeType, mode?: 'server'): ReactNode {
@@ -227,4 +244,9 @@ export function scenarioAddHttpIcon(icon: string): ReactNode {
 /** The server-pill SOAP badge with the action's codicon inside (SOAP section). */
 export function scenarioAddSoapIcon(icon: string): ReactNode {
   return React.createElement(Badge, { type: 'SOAP', mode: 'server', icon })
+}
+
+/** The GraphQL mock-server close action's badge (QUERY server pill + codicon). */
+export function scenarioAddGraphqlIcon(icon: string): ReactNode {
+  return React.createElement(Badge, { type: 'QUERY', mode: 'server', icon })
 }

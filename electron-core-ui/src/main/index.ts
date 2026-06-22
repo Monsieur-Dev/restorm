@@ -32,6 +32,7 @@ export {
 export {
   graphQLService,
   createSchema,
+  createYoga,
   createPubSub,
   graphQLSchemaGenerator,
   inferGraphQLType,

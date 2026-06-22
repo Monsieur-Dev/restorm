@@ -45,6 +45,31 @@ export class GraphQLRequest extends BaseRequest {
   @graphqlField({ type: 'KeyValue', isArray: true })
   headers: KeyValue[] = []
 
+  /** When true, restorm ACTS AS a local GraphQL mock server: it hosts a GraphQL
+   * endpoint on `localhost:<port><path>` resolving operations from the
+   * configured SDL + resolvers, instead of sending the request as a client. The
+   * URL then carries only `localhost:<port><path>` (host is fixed). */
+  @graphqlField({ type: 'Boolean', nullable: true })
+  @TreatEmptyAsUndefined()
+  server?: boolean
+
+  /** SDL schema served in server mode (the `typeDefs` passed to the mock). */
+  @graphqlField({ type: 'String', nullable: true })
+  @TreatEmptyAsUndefined()
+  schema?: string
+
+  /** Per-field canned response values served in server mode: a JSON object
+   * keyed by `Type.field` (e.g. `Query.pets`). */
+  @graphqlField({ type: 'String', nullable: true })
+  @TreatEmptyAsUndefined()
+  mockResolvers?: string
+
+  /** Optional scripted resolver (a JavaScript code-node body) computing the
+   * response from `(parent, args, context)` in server mode. */
+  @graphqlField({ type: 'String', nullable: true })
+  @TreatEmptyAsUndefined()
+  resolverScript?: string
+
   constructor(init?: Partial<GraphQLRequest>) {
     super(init)
     if (init) {
@@ -73,6 +98,10 @@ export class GraphQLRequest extends BaseRequest {
     query?: string
     variables?: string
     headers?: Parameters<typeof KeyValue.fromPlain>[0][]
+    server?: boolean
+    schema?: string
+    mockResolvers?: string
+    resolverScript?: string
   }): GraphQLRequest {
     return new GraphQLRequest({
       ...(obj.id !== undefined && { id: obj.id }),
@@ -86,7 +115,11 @@ export class GraphQLRequest extends BaseRequest {
       operationType: obj.operationType ?? 'query',
       query: obj.query ?? '',
       ...(obj.variables !== undefined && { variables: obj.variables }),
-      headers: (obj.headers ?? []) as KeyValue[]
+      headers: (obj.headers ?? []) as KeyValue[],
+      ...(obj.server !== undefined && { server: obj.server }),
+      ...(obj.schema !== undefined && { schema: obj.schema }),
+      ...(obj.mockResolvers !== undefined && { mockResolvers: obj.mockResolvers }),
+      ...(obj.resolverScript !== undefined && { resolverScript: obj.resolverScript })
     })
   }
 
@@ -107,7 +140,11 @@ export class GraphQLRequest extends BaseRequest {
       operationType: this.operationType,
       query: this.query,
       variables: this.variables,
-      headers: this.headers.map(h => h.toPlainObject())
+      headers: this.headers.map(h => h.toPlainObject()),
+      ...(this.server !== undefined && { server: this.server }),
+      ...(this.schema !== undefined && { schema: this.schema }),
+      ...(this.mockResolvers !== undefined && { mockResolvers: this.mockResolvers }),
+      ...(this.resolverScript !== undefined && { resolverScript: this.resolverScript })
     }
   }
 }
