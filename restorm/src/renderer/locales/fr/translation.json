@@ -380,7 +380,9 @@
         "pin": "Épingler la réponse",
         "unpin": "Désépingler la réponse"
       }
-    }
+    },
+    "followRedirects": "Suivre les redirections",
+    "timeoutLabel": "Délai (ms)"
   },
   "workbench": {
     "tabContextMenu": {

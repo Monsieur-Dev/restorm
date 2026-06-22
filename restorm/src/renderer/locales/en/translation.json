@@ -380,7 +380,9 @@
         "pin": "Pin response",
         "unpin": "Unpin response"
       }
-    }
+    },
+    "followRedirects": "Follow redirects",
+    "timeoutLabel": "Timeout (ms)"
   },
   "workbench": {
     "tabContextMenu": {

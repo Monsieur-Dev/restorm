@@ -380,7 +380,9 @@
         "pin": "Fastgør svar",
         "unpin": "Frigør svar"
       }
-    }
+    },
+    "followRedirects": "Følg omdirigeringer",
+    "timeoutLabel": "Timeout (ms)"
   },
   "workbench": {
     "tabContextMenu": {

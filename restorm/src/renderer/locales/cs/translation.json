@@ -382,7 +382,9 @@
         "pin": "Připnout odpověď",
         "unpin": "Odepnout odpověď"
       }
-    }
+    },
+    "followRedirects": "Sledovat přesměrování",
+    "timeoutLabel": "Časový limit (ms)"
   },
   "workbench": {
     "tabContextMenu": {

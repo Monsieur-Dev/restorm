@@ -22,6 +22,22 @@ services:
     ports:
       - "8081:8080"
 
+  # HTTP utility mock - zero-dependency Node server used by the
+  # `http-execution` E2E suite for the deterministic cases the Petstore
+  # can't do: redirects, settable cookies, arbitrary status codes,
+  # request echo, binary/XML/HTML responses, multi-value headers, a
+  # slow route (cancellation/timeout). Pure `node:http`, no npm install,
+  # so it boots the instant the container starts. Listens on :8082.
+  http-util:
+    image: node:20-alpine
+    container_name: restorm-http-util
+    working_dir: /app
+    volumes:
+      - ./http-util:/app
+    command: node server.js
+    ports:
+      - "8082:8082"
+
   # GraphQL - Custom test server
   graphql:
     image: node:20-alpine

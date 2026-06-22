@@ -379,7 +379,9 @@
         "pin": "固定响应",
         "unpin": "取消固定响应"
       }
-    }
+    },
+    "followRedirects": "跟随重定向",
+    "timeoutLabel": "超时 (毫秒)"
   },
   "workbench": {
     "tabContextMenu": {

@@ -178,6 +178,8 @@ export const httpExecuteArgs = z.tuple([
     rawBody: z.string().optional(),
     rawBodyContentType: z.string().optional(),
     urlOverride: z.string().optional(),
+    // Whether the executor follows 3xx redirects (defaults to true).
+    followRedirects: z.boolean().optional(),
     // The renderer hands over the attached AuthenticationRequest as a
     // POJO; the handler re-validates it via isPlainAuthPayload +
     // AuthenticationRequest.fromPlain, so accept it as an opaque object

@@ -380,7 +380,9 @@
         "pin": "Καρφίτσωμα απάντησης",
         "unpin": "Ξεκαρφίτσωμα απάντησης"
       }
-    }
+    },
+    "followRedirects": "Παρακολούθηση ανακατευθύνσεων",
+    "timeoutLabel": "Χρονικό όριο (ms)"
   },
   "workbench": {
     "tabContextMenu": {

@@ -379,7 +379,9 @@
         "pin": "Ghim phản hồi",
         "unpin": "Bỏ ghim phản hồi"
       }
-    }
+    },
+    "followRedirects": "Theo dõi chuyển hướng",
+    "timeoutLabel": "Thời gian chờ (ms)"
   },
   "workbench": {
     "tabContextMenu": {

@@ -379,7 +379,9 @@
         "pin": "Sematkan respons",
         "unpin": "Lepas sematan respons"
       }
-    }
+    },
+    "followRedirects": "Ikuti pengalihan",
+    "timeoutLabel": "Batas waktu (ms)"
   },
   "workbench": {
     "tabContextMenu": {

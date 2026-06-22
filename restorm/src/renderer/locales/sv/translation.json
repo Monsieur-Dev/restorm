@@ -380,7 +380,9 @@
         "pin": "Nåla fast svar",
         "unpin": "Lossa svar"
       }
-    }
+    },
+    "followRedirects": "Följ omdirigeringar",
+    "timeoutLabel": "Tidsgräns (ms)"
   },
   "workbench": {
     "tabContextMenu": {

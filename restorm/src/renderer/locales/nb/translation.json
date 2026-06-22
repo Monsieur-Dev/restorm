@@ -380,7 +380,9 @@
         "pin": "Fest svar",
         "unpin": "Løsne svar"
       }
-    }
+    },
+    "followRedirects": "Følg omdirigeringer",
+    "timeoutLabel": "Tidsavbrudd (ms)"
   },
   "workbench": {
     "tabContextMenu": {

@@ -379,7 +379,9 @@
         "pin": "レスポンスをピン留め",
         "unpin": "ピン留めを解除"
       }
-    }
+    },
+    "followRedirects": "リダイレクトに従う",
+    "timeoutLabel": "タイムアウト (ms)"
   },
   "workbench": {
     "tabContextMenu": {

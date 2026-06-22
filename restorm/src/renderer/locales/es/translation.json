@@ -380,7 +380,9 @@
         "pin": "Anclar respuesta",
         "unpin": "Desanclar respuesta"
       }
-    }
+    },
+    "followRedirects": "Seguir redirecciones",
+    "timeoutLabel": "Tiempo de espera (ms)"
   },
   "workbench": {
     "tabContextMenu": {

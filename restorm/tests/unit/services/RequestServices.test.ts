@@ -23,9 +23,7 @@ import { StringValue } from '../../../src/shared/types/collections'
 import type { KeyValue } from '../../../src/shared/types/collections'
 
 import {
-  resolveRequestURL,
-  executeHTTPRequest,
-  type HTTPRequestInput
+  resolveRequestURL
 } from '../../../src/main/services/request/HTTPRequestService'
 
 import { executeGraphQLRequest } from '../../../src/main/services/request/GraphQLRequestService'
@@ -89,78 +87,6 @@ describe('HTTPRequestService', () => {
     })
   })
 
-  describe('executeHTTPRequest', () => {
-    function baseInput(overrides?: Partial<HTTPRequestInput>): HTTPRequestInput {
-      return {
-        request: { id: 'req-1', name: 'Test', type: 'http', method: 'GET', url: '', headers: [], params: [], documentation: '', tags: [] },
-        method: 'GET',
-        url: 'https://api.example.com/data',
-        headers: [kv('Authorization', 'Bearer tok')],
-        params: [],
-        pathParams: [],
-        bodyMode: 'text',
-        bodyContent: '',
-        variableContext: {},
-        ...overrides
-      }
-    }
-
-    it('assembles headers from KeyValue array and sends them to axios', async () => {
-      const mockedAxios = vi.mocked(axios)
-      mockedAxios.mockResolvedValue({ status: 200, statusText: 'OK', data: '{}', headers: {} })
-
-      await executeHTTPRequest(baseInput())
-
-      const config = mockedAxios.mock.calls[0][0]
-      expect(config.headers).toMatchObject({ Authorization: 'Bearer tok' })
-    })
-
-    it('sends text body content', async () => {
-      const mockedAxios = vi.mocked(axios)
-      mockedAxios.mockResolvedValue({ status: 200, statusText: 'OK', data: '', headers: {} })
-
-      await executeHTTPRequest(baseInput({ method: 'POST', bodyMode: 'text', bodyContent: '{"a":1}' }))
-
-      const config = mockedAxios.mock.calls[0][0]
-      expect(config.data).toBe('{"a":1}')
-    })
-
-    it('builds x-www-form-urlencoded body from form fields', async () => {
-      const mockedAxios = vi.mocked(axios)
-      mockedAxios.mockResolvedValue({ status: 200, statusText: 'OK', data: '', headers: {} })
-
-      await executeHTTPRequest(baseInput({
-        method: 'POST',
-        bodyMode: 'x-www-form-urlencoded',
-        formFields: [kv('user', 'alice'), kv('pass', 's3cret')]
-      }))
-
-      const config = mockedAxios.mock.calls[0][0]
-      expect(config.data).toBe('user=alice&pass=s3cret')
-      expect(config.headers['Content-Type']).toBe('application/x-www-form-urlencoded')
-    })
-
-    it('returns status 0 and error message on network failure', async () => {
-      const mockedAxios = vi.mocked(axios)
-      mockedAxios.mockRejectedValue(new Error('ECONNREFUSED'))
-
-      const resp = await executeHTTPRequest(baseInput())
-
-      expect(resp.statusCode).toBe(0)
-      expect(resp.statusText).toBe('Network Error')
-      expect(resp.error).toBe('ECONNREFUSED')
-    })
-
-    it('defaults bodyContent to empty string when undefined', async () => {
-      const mockedAxios = vi.mocked(axios)
-      mockedAxios.mockResolvedValue({ status: 200, statusText: 'OK', data: '', headers: {} })
-
-      await executeHTTPRequest(baseInput({ bodyMode: 'text', bodyContent: undefined }))
-
-      const config = mockedAxios.mock.calls[0][0]
-      expect(config.data).toBe('')
-    })
-  })
 })
 
 // ── GraphQLRequestService ───────────────────────────────────────────────────

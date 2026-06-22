@@ -380,7 +380,9 @@
         "pin": "Fissa la risposta",
         "unpin": "Sblocca la risposta"
       }
-    }
+    },
+    "followRedirects": "Segui i reindirizzamenti",
+    "timeoutLabel": "Timeout (ms)"
   },
   "workbench": {
     "tabContextMenu": {

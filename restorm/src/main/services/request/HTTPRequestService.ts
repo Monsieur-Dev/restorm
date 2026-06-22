@@ -1,21 +1,22 @@
 /**
  * HTTP Request Service
- * Handles building and executing HTTP requests with variable resolution
+ *
+ * URL-resolution surface for HTTP requests: turns a URL template plus
+ * path / query params and the environment context into a fully resolved,
+ * URL-encoded request URL. Consumed by `request:resolve-url` (main IPC)
+ * and the renderer's `resolveRequestURL` wrapper for the URL tooltip.
+ *
+ * The actual request DISPATCH lives in `HTTPExecutionService.execute`
+ * (Node `http`/`https`, the single funnel shared by the Send button, the
+ * OData engine, and the scenario httpRequest node). The earlier
+ * axios-based `executeHTTPRequest` here was a parallel, unused path and
+ * has been removed.
  */
 
-import axios, { type AxiosResponse, type AxiosError, type AxiosRequestConfig } from 'axios'
-import type {
-  HTTPRequest,
-  HTTPResponse,
-  HTTPRequestBody,
-  KeyValue,
-  HTTPMethod
-} from '../../../shared/types/collections'
-import { StringValue } from '../../../shared/types/collections'
-import { DEFAULT_REQUEST_TIMEOUT_MS } from '../../../shared/config/constants'
+import type { KeyValue } from '../../../shared/types/collections'
 import type { VariableContext } from './types'
 import { resolveTemplate } from './resolveTemplate'
-import { resolveKeyValues, generateResponseId } from './keyValueResolution'
+import { resolveKeyValues } from './keyValueResolution'
 
 /** Input for URL resolution */
 export interface URLResolutionInput {
@@ -37,32 +38,6 @@ export interface ResolvedURLResult {
   baseUrl: string
   /** Query string (without leading ?) */
   queryString: string
-}
-
-/** Input for building and executing an HTTP request */
-export interface HTTPRequestInput {
-  /** The HTTP request definition */
-  request: HTTPRequest
-  /** Current method (may differ from request.method if user changed it) */
-  method: HTTPMethod
-  /** Current URL template (may differ from request.url if user changed it) */
-  url: string
-  /** Current headers */
-  headers: KeyValue[]
-  /** Current query parameters */
-  params: KeyValue[]
-  /** Current path parameters */
-  pathParams: KeyValue[]
-  /** Current body content (for text mode) */
-  bodyContent?: string
-  /** Current body mode */
-  bodyMode: 'text' | 'form-data' | 'x-www-form-urlencoded' | 'file'
-  /** Form fields (for form-data or x-www-form-urlencoded) */
-  formFields?: KeyValue[]
-  /** File path (for file mode) */
-  filePath?: string
-  /** Variable context from environments */
-  variableContext: VariableContext
 }
 
 /**
@@ -117,204 +92,5 @@ export function resolveRequestURL(input: URLResolutionInput): ResolvedURLResult 
     url,
     baseUrl,
     queryString
-  }
-}
-
-/**
- * Convert axios headers to KeyValue array
- */
-function headersToKeyValues(headers: Record<string, unknown>): KeyValue[] {
-  const result: KeyValue[] = []
-  for (const [key, value] of Object.entries(headers)) {
-    if (value !== undefined && value !== null) {
-      result.push({
-        key,
-        value: new StringValue(typeof value === 'string' ? value : JSON.stringify(value))
-      })
-    }
-  }
-  return result
-}
-
-/**
- * Build request body based on body mode
- */
-function buildRequestBody(
-  input: HTTPRequestInput,
-  context: VariableContext
-): { data: unknown; contentType?: string } {
-  switch (input.bodyMode) {
-    case 'text': {
-      const content = input.bodyContent ?? ''
-      const resolvedContent = resolveTemplate(content, context)
-      return { data: resolvedContent }
-    }
-
-    case 'form-data': {
-      const formData = new FormData()
-      const fields = input.formFields ?? []
-      for (const field of fields) {
-        const key = resolveTemplate(field.key, context)
-        const value = resolveTemplate(field.value.toString(), context)
-        if (key) {
-          formData.append(key, value)
-        }
-      }
-      return { data: formData, contentType: 'multipart/form-data' }
-    }
-
-    case 'x-www-form-urlencoded': {
-      const params = new URLSearchParams()
-      const fields = input.formFields ?? []
-      for (const field of fields) {
-        const key = resolveTemplate(field.key, context)
-        const value = resolveTemplate(field.value.toString(), context)
-        if (key) {
-          params.append(key, value)
-        }
-      }
-      return { data: params.toString(), contentType: 'application/x-www-form-urlencoded' }
-    }
-
-    case 'file': {
-      // File handling would need IPC for Electron
-      // For now, return empty - file reading should be handled separately
-      return { data: undefined }
-    }
-
-    default:
-      return { data: undefined }
-  }
-}
-
-/**
- * Execute an HTTP request and return the response
- */
-export async function executeHTTPRequest(input: HTTPRequestInput): Promise<HTTPResponse> {
-  const startTime = Date.now()
-  const startedAt = new Date().toISOString()
-
-  const context = input.variableContext
-
-  // Build URL using the centralized resolution function
-  const urlResult = resolveRequestURL({
-    urlTemplate: input.url,
-    pathParams: input.pathParams,
-    queryParams: input.params,
-    environmentContext: context
-  })
-
-  // Resolve headers
-  const resolvedHeaders = resolveKeyValues(input.headers, context)
-  const headersObj: Record<string, string> = {}
-  for (const h of resolvedHeaders) {
-    if (h.key) {
-      headersObj[h.key] = h.value.toString()
-    }
-  }
-
-  // Build body
-  const { data, contentType } = buildRequestBody(input, context)
-  // Case-insensitive presence check: a user header `content-type` (any
-  // casing) must suppress the default, else the request carries two
-  // Content-Type headers.
-  const hasContentType = Object.keys(headersObj).some((k) => k.toLowerCase() === 'content-type')
-  if (contentType && !hasContentType) {
-    headersObj['Content-Type'] = contentType
-  }
-
-  // Build request body for storage
-  let requestBody: HTTPRequestBody | undefined
-  switch (input.bodyMode) {
-    case 'text':
-      requestBody = { type: 'text', content: input.bodyContent ?? '' }
-      break
-    case 'form-data':
-      requestBody = { type: 'form-data', fields: input.formFields ?? [] }
-      break
-    case 'x-www-form-urlencoded':
-      requestBody = { type: 'x-www-form-urlencoded', fields: input.formFields ?? [] }
-      break
-    case 'file':
-      requestBody = { type: 'file', path: input.filePath ?? '' }
-      break
-  }
-
-  const config: AxiosRequestConfig = {
-    method: input.method.toLowerCase(),
-    url: urlResult.url,
-    headers: headersObj,
-    data,
-    // Return response for all status codes
-    validateStatus: () => true,
-    // Get response as text to preserve original format
-    responseType: 'text',
-    // Include timing info
-    timeout: DEFAULT_REQUEST_TIMEOUT_MS
-  }
-
-  try {
-    const response: AxiosResponse = await axios(config)
-    const durationMs = Date.now() - startTime
-
-    // Parse response body
-    let responseBody = ''
-    if (response.data !== undefined && response.data !== null) {
-      responseBody = typeof response.data === 'string' ? response.data : JSON.stringify(response.data)
-    }
-
-    // Get content info from headers
-    const contentTypeHeader = response.headers['content-type'] as string | undefined
-    const contentLengthHeader = response.headers['content-length'] as string | undefined
-    const contentLength = contentLengthHeader ? parseInt(contentLengthHeader, 10) : undefined
-
-    const parsedContentLength = contentLength !== undefined && !isNaN(contentLength) ? contentLength : undefined
-
-    return {
-      id: generateResponseId(),
-      type: 'http',
-      requestId: input.request.id,
-      requestUrl: urlResult.url,
-      requestMethod: input.method,
-      requestHeaders: resolvedHeaders,
-      requestParams: resolveKeyValues(input.params, context),
-      requestPathParams: resolveKeyValues(input.pathParams, input.variableContext),
-      requestBody,
-      statusCode: response.status,
-      statusText: response.statusText,
-      responseHeaders: headersToKeyValues(response.headers),
-      responseBody,
-      ...(contentTypeHeader !== undefined && { contentType: contentTypeHeader }),
-      ...(parsedContentLength !== undefined && { contentLength: parsedContentLength }),
-      timings: {
-        startedAt,
-        durationMs
-      }
-    }
-  } catch (err) {
-    const durationMs = Date.now() - startTime
-    const axiosError = err as AxiosError
-
-    // Handle network errors
-    return {
-      id: generateResponseId(),
-      type: 'http',
-      requestId: input.request.id,
-      requestUrl: urlResult.url,
-      requestMethod: input.method,
-      requestHeaders: resolvedHeaders,
-      requestParams: resolveKeyValues(input.params, context),
-      requestPathParams: resolveKeyValues(input.pathParams, input.variableContext),
-      requestBody,
-      statusCode: 0,
-      statusText: 'Network Error',
-      responseHeaders: [],
-      responseBody: '',
-      error: axiosError.message || 'Request failed',
-      timings: {
-        startedAt,
-        durationMs
-      }
-    }
   }
 }

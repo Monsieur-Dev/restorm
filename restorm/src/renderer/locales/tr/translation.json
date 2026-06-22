@@ -380,7 +380,9 @@
         "pin": "Yanıtı sabitle",
         "unpin": "Yanıt sabitlemesini kaldır"
       }
-    }
+    },
+    "followRedirects": "Yönlendirmeleri izle",
+    "timeoutLabel": "Zaman aşımı (ms)"
   },
   "workbench": {
     "tabContextMenu": {

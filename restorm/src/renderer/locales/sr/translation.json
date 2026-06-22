@@ -381,7 +381,9 @@
         "pin": "Zakači odgovor",
         "unpin": "Otkači odgovor"
       }
-    }
+    },
+    "followRedirects": "Прати преусмеравања",
+    "timeoutLabel": "Временско ограничење (ms)"
   },
   "workbench": {
     "tabContextMenu": {

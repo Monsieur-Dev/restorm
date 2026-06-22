@@ -72,6 +72,18 @@ export class HTTPRequest extends BaseRequest {
   @TreatEmptyAsUndefined()
   mockStatus?: number
 
+  /** Per-request timeout in milliseconds. When unset the executor
+   * falls back to the global default (`DEFAULT_REQUEST_TIMEOUT_MS`). */
+  @graphqlField({ type: 'Int', nullable: true })
+  timeout?: number
+
+  /** Whether the executor follows 3xx redirects (301/302/303/307/308).
+   * Undefined defaults to `true` at dispatch — most users expect a Send
+   * to land on the final resource; the toggle lets them inspect the raw
+   * redirect response instead. */
+  @graphqlField({ type: 'Boolean', nullable: true })
+  followRedirects?: boolean
+
   constructor(init?: Partial<HTTPRequest>) {
     super(init)
     if (init) {
@@ -110,6 +122,8 @@ export class HTTPRequest extends BaseRequest {
     deprecated?: boolean
     server?: boolean
     mockStatus?: number
+    timeout?: number
+    followRedirects?: boolean
   }): HTTPRequest {
     return new HTTPRequest({
       ...(obj.id !== undefined && { id: obj.id }),
@@ -127,7 +141,9 @@ export class HTTPRequest extends BaseRequest {
       ...(obj.body !== undefined && { body: obj.body }),
       deprecated: obj.deprecated ?? false,
       ...(obj.server !== undefined && { server: obj.server }),
-      ...(obj.mockStatus !== undefined && { mockStatus: obj.mockStatus })
+      ...(obj.mockStatus !== undefined && { mockStatus: obj.mockStatus }),
+      ...(obj.timeout !== undefined && { timeout: obj.timeout }),
+      ...(obj.followRedirects !== undefined && { followRedirects: obj.followRedirects })
     })
   }
 
@@ -152,7 +168,9 @@ export class HTTPRequest extends BaseRequest {
       body: this.body,
       deprecated: this.deprecated,
       ...(this.server !== undefined && { server: this.server }),
-      ...(this.mockStatus !== undefined && { mockStatus: this.mockStatus })
+      ...(this.mockStatus !== undefined && { mockStatus: this.mockStatus }),
+      ...(this.timeout !== undefined && { timeout: this.timeout }),
+      ...(this.followRedirects !== undefined && { followRedirects: this.followRedirects })
     }
   }
 }
