@@ -51,3 +51,25 @@ Feature: gRPC execution end-to-end
     When I click the gRPC Disconnect button
     Then the gRPC Connect button shows the disconnected state
     And the gRPC Send button is disabled
+
+  Scenario: A non-OK gRPC status surfaces a readable label and raw code
+    # Exercises the executeUnary error branch: SpecificError returns code 3
+    # (INVALID_ARGUMENT). The response panel must show the non-OK raw code,
+    # the human-readable label from grpcStatusName(), and the error message text.
+    When I open the "gRPC Error (SpecificError)" request tab via MCP
+    And I click the gRPC Invoke button
+    Then the gRPC response shows a non-OK status code 3
+    And the gRPC response shows the status label "INVALID_ARGUMENT"
+    And the gRPC response error text contains "e2e-error-mapping-test"
+
+  Scenario: Cancel a server-stream mid-flight and see the disconnected state
+    # Exercises the disconnect()/cancel() path on a server-stream: connect,
+    # receive at least one frame, then disconnect — the Connect button must
+    # return to the disconnected (plugged) state, confirming the call ended.
+    When I open the "gRPC Echo (server stream)" request tab via MCP
+    And I click the gRPC Connect button
+    Then the gRPC chat shows a received message matching "stream-me"
+    And the gRPC Connect button shows the connected state
+
+    When I click the gRPC Disconnect button
+    Then the gRPC Connect button shows the disconnected state
