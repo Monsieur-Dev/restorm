@@ -422,6 +422,9 @@ importers:
       fast-xml-parser:
         specifier: ^4.5.6
         version: 4.5.6
+      graphql-sse:
+        specifier: ^2.6.0
+        version: 2.6.0(graphql@16.14.0)
       handlebars:
         specifier: ^4.7.9
         version: 4.7.9

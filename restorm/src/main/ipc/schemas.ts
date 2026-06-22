@@ -285,6 +285,16 @@ export const graphqlIsActiveArgs = z.tuple([requestIdArg])
 export const graphqlListenArgs = z.tuple([requestIdArg])
 export const graphqlStopArgs = z.tuple([requestIdArg])
 export const graphqlIsListeningArgs = z.tuple([requestIdArg])
+// GraphQL subscription client (consume an SSE subscription stream): subscribe,
+// unsubscribe (Stop), and active check.
+export const graphqlSubscribeArgs = z.tuple([
+  z.object({
+    requestId: z.string(),
+    timeout: z.number().optional()
+  })
+])
+export const graphqlUnsubscribeArgs = z.tuple([requestIdArg])
+export const graphqlIsSubscribingArgs = z.tuple([requestIdArg])
 
 // ==========================================================================
 // SOAP Execution

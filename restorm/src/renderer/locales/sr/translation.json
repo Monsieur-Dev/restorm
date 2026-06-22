@@ -435,6 +435,15 @@
       "served": "Слуша — опслужено {{count}} операција",
       "notListening": "Не слуша",
       "listenFailed": "Покретање mock сервера није успело"
+    },
+    "subscription": {
+      "subscribe": "Претплати се",
+      "stop": "Заустави",
+      "waiting": "Претплаћено — чекање на догађаје…",
+      "noEvents": "Још нема догађаја. Претплатите се да започнете стримовање.",
+      "idle": "Без претплате",
+      "streaming": "Стримовање — примљено {{count}} догађаја",
+      "eventLabel": "Догађај {{index}}"
     }
   },
   "grpc": {
@@ -1061,7 +1070,9 @@
       "graphqlListen": "GraphQL server",
       "graphqlClose": "GraphQL close",
       "odataListen": "OData server",
-      "odataClose": "OData close"
+      "odataClose": "OData close",
+      "graphqlSubscribe": "GraphQL претплата",
+      "graphqlUnsubscribe": "Откажи GraphQL претплату"
     },
     "comparator": {
       "result": "резултат"
@@ -1631,7 +1642,9 @@
       "graphqlListen": "Hosts a local GraphQL mock server and listens indefinitely. `connected` fires once it is listening; each served operation re-emits its data on the `served` port. The server stays up until a GraphQL close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
       "graphqlClose": "Stops an already-listening GraphQL mock server (declared by a GraphQL server node), freeing its port.",
       "odataListen": "Хостује локалну лажну OData v4 услугу и слуша неограничено. `connected` се активира чим почне да слуша; сваки опслужени захтев поново емитује своје податке на порту `served`. Сервер остаје активан до OData затварања (или заустављања), након чега се активира `done`. Без response излаза — опслужује, не позива ка споља.",
-      "odataClose": "Зауставља лажну OData услугу која већ слуша (декларисану OData серверским чвором) и ослобађа њен порт."
+      "odataClose": "Зауставља лажну OData услугу која већ слуша (декларисану OData серверским чвором) и ослобађа њен порт.",
+      "graphqlSubscribe": "Отвара дуготрајну GraphQL претплату као клијент преко SSE и слуша. `connected` се покреће чим се ток отвори; сваки примљени терет се поново емитује на порту `message` (претплата само прима, без именованих догађаја). Ток остаје отворен до отказивања GraphQL претплате (или заустављања), или док га сервер не доврши, а затим се покреће `done`.",
+      "graphqlUnsubscribe": "Зауставља већ отворену GraphQL претплату (декларисану GraphQL претплатним чвором) и затвара њен SSE ток."
     },
     "legend": {
       "title": "Легенда",

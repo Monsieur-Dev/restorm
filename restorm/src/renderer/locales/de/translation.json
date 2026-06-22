@@ -434,6 +434,15 @@
       "served": "Hört zu — {{count}} Operation(en) bedient",
       "notListening": "Hört nicht zu",
       "listenFailed": "Mock-Server konnte nicht gestartet werden"
+    },
+    "subscription": {
+      "subscribe": "Abonnieren",
+      "stop": "Stoppen",
+      "waiting": "Abonniert – warte auf Ereignisse…",
+      "noEvents": "Noch keine Ereignisse. Abonnieren Sie, um den Stream zu starten.",
+      "idle": "Nicht abonniert",
+      "streaming": "Streaming – {{count}} Ereignis(se) empfangen",
+      "eventLabel": "Ereignis {{index}}"
     }
   },
   "grpc": {
@@ -1060,7 +1069,9 @@
       "graphqlListen": "GraphQL server",
       "graphqlClose": "GraphQL close",
       "odataListen": "OData server",
-      "odataClose": "OData close"
+      "odataClose": "OData close",
+      "graphqlSubscribe": "GraphQL abonnieren",
+      "graphqlUnsubscribe": "GraphQL abbestellen"
     },
     "comparator": {
       "result": "Ergebnis"
@@ -1630,7 +1641,9 @@
       "graphqlListen": "Hosts a local GraphQL mock server and listens indefinitely. `connected` fires once it is listening; each served operation re-emits its data on the `served` port. The server stays up until a GraphQL close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
       "graphqlClose": "Stops an already-listening GraphQL mock server (declared by a GraphQL server node), freeing its port.",
       "odataListen": "Hostet einen lokalen OData-v4-Mock-Dienst und lauscht unbegrenzt. `connected` wird ausgelöst, sobald gelauscht wird; jede bediente Anfrage sendet ihre Daten erneut über den Port `served`. Der Server bleibt aktiv, bis ein OData-Schließen (oder ein Stopp) erfolgt, dann wird `done` ausgelöst. Keine response-Ausgabe — er bedient, er ruft nicht nach außen.",
-      "odataClose": "Stoppt einen bereits lauschenden OData-Mock-Dienst (deklariert durch einen OData-Server-Knoten) und gibt dessen Port frei."
+      "odataClose": "Stoppt einen bereits lauschenden OData-Mock-Dienst (deklariert durch einen OData-Server-Knoten) und gibt dessen Port frei.",
+      "graphqlSubscribe": "Öffnet ein langlebiges GraphQL-Abonnement als Client über SSE und hört zu. `connected` wird ausgelöst, sobald der Stream offen ist; jede gesendete Nutzlast wird am `message`-Port erneut ausgegeben (ein Abonnement ist nur empfangend, ohne benannte Ereignisse). Der Stream bleibt offen, bis ein GraphQL-Abbestellen (oder ein Stopp) erfolgt oder der Server ihn abschließt, dann wird `done` ausgelöst.",
+      "graphqlUnsubscribe": "Stoppt ein bereits offenes GraphQL-Abonnement (deklariert durch einen GraphQL-Abonnieren-Knoten) und baut dessen SSE-Stream ab."
     },
     "legend": {
       "title": "Legende",

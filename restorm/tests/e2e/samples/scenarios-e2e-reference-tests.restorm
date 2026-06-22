@@ -20384,6 +20384,279 @@ collections:
                       content: '{"query":"{ pets }"}'
                     params: []
                     pathParams: []
+              - type: scenario
+                tags: []
+                params: []
+                nodes:
+                  - id: 3b8d2e51-1c4f-4a72-9d13-2f6b84c15301
+                    kind: graphqlListen
+                    config:
+                      requestId: 3b8d2e51-1c4f-4a72-9d13-2f6b84c15901
+                      connectionName: GraphQL Sub Mock
+                      label: start GraphQL mock (with subscription)
+                      id: 3b8d2e51-1c4f-4a72-9d13-2f6b84c15401
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                    outputs:
+                      - id: connected
+                        name: connected
+                        dataType: any
+                        flow: signal
+                      - id: served
+                        name: served
+                        dataType: any
+                        flow: both
+                    position:
+                      x: 12
+                      'y': 231
+                    note: restorm hosts a GraphQL endpoint on localhost:4223/graphql whose `ticks` subscription emits one value then stays open
+                  - id: 3b8d2e51-1c4f-4a72-9d13-2f6b84c15302
+                    kind: graphqlSubscribe
+                    config:
+                      requestId: 3b8d2e51-1c4f-4a72-9d13-2f6b84c15902
+                      connectionName: GraphQL Subscription
+                      label: subscribe to ticks
+                      id: 3b8d2e51-1c4f-4a72-9d13-2f6b84c15402
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                    outputs:
+                      - id: connected
+                        name: connected
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: any
+                        flow: both
+                    position:
+                      x: 500
+                      'y': 100
+                    note: consumes the hosted GraphQL subscription over SSE
+                  - id: 3b8d2e51-1c4f-4a72-9d13-2f6b84c15303
+                    kind: log
+                    config:
+                      message: événement de souscription GraphQL reçu
+                      level: info
+                      runOnEachEvent: false
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 860
+                      'y': 80
+                  - id: 3b8d2e51-1c4f-4a72-9d13-2f6b84c15304
+                    kind: graphqlUnsubscribe
+                    config:
+                      connectionNodeId: 3b8d2e51-1c4f-4a72-9d13-2f6b84c15302
+                      label: stop the GraphQL subscription
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                    outputs: []
+                    position:
+                      x: 500
+                      'y': 280
+                    note: unsubscribes once the first event has been logged
+                  - id: 3b8d2e51-1c4f-4a72-9d13-2f6b84c15305
+                    kind: log
+                    config:
+                      message: souscription GraphQL arrêtée
+                      level: info
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 500
+                      'y': 460
+                  - id: 3b8d2e51-1c4f-4a72-9d13-2f6b84c15306
+                    kind: graphqlClose
+                    config:
+                      connectionNodeId: 3b8d2e51-1c4f-4a72-9d13-2f6b84c15301
+                      label: stop the GraphQL mock server
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                    outputs: []
+                    position:
+                      x: 860
+                      'y': 460
+                    note: stops the mock server so the run can finish
+                  - id: 3b8d2e51-1c4f-4a72-9d13-2f6b84c15307
+                    kind: log
+                    config:
+                      message: serveur GraphQL arrêté
+                      level: info
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 860
+                      'y': 620
+                edges:
+                  # graphqlListen.connected (signal) → graphqlSubscribe.in: the
+                  # client subscribes once the mock is listening.
+                  - id: 3b8d2e51-1c4f-4a72-9d13-2f6b84c15404
+                    from:
+                      nodeId: 3b8d2e51-1c4f-4a72-9d13-2f6b84c15301
+                      portId: connected
+                    to:
+                      nodeId: 3b8d2e51-1c4f-4a72-9d13-2f6b84c15302
+                      portId: in
+                  # graphqlSubscribe.message carries the pushed payload INTO the log…
+                  - id: 3b8d2e51-1c4f-4a72-9d13-2f6b84c15401e
+                    from:
+                      nodeId: 3b8d2e51-1c4f-4a72-9d13-2f6b84c15302
+                      portId: message
+                    to:
+                      nodeId: 3b8d2e51-1c4f-4a72-9d13-2f6b84c15303
+                      portId: data
+                    selector: .
+                  # …and ALSO drives that log's signal `in` (the `message` port is
+                  # flow:both), so the log fires on the first received event.
+                  - id: 3b8d2e51-1c4f-4a72-9d13-2f6b84c15405
+                    from:
+                      nodeId: 3b8d2e51-1c4f-4a72-9d13-2f6b84c15302
+                      portId: message
+                    to:
+                      nodeId: 3b8d2e51-1c4f-4a72-9d13-2f6b84c15303
+                      portId: in
+                  # graphqlUnsubscribe is gated on the event-LOG's `done`, NOT on the
+                  # subscribe node's raw `message` — this LINEARISES the run so the
+                  # unsubscribe always sequences AFTER the first event is logged,
+                  # making the run-log order topology-determined (deterministic cold).
+                  - id: 3b8d2e51-1c4f-4a72-9d13-2f6b84c15402e
+                    from:
+                      nodeId: 3b8d2e51-1c4f-4a72-9d13-2f6b84c15303
+                      portId: done
+                    to:
+                      nodeId: 3b8d2e51-1c4f-4a72-9d13-2f6b84c15304
+                      portId: in
+                  # graphqlSubscribe.done → the "subscription stopped" log (fires when
+                  # the unsubscribe has actually torn the SSE stream down).
+                  - id: 3b8d2e51-1c4f-4a72-9d13-2f6b84c15403e
+                    from:
+                      nodeId: 3b8d2e51-1c4f-4a72-9d13-2f6b84c15302
+                      portId: done
+                    to:
+                      nodeId: 3b8d2e51-1c4f-4a72-9d13-2f6b84c15305
+                      portId: in
+                  # the "subscription stopped" log's done → graphqlClose: stop the
+                  # mock server so the run can finish (the listener keeps the run
+                  # in-progress until it is closed). Linearised after the stop log.
+                  - id: 3b8d2e51-1c4f-4a72-9d13-2f6b84c15406e
+                    from:
+                      nodeId: 3b8d2e51-1c4f-4a72-9d13-2f6b84c15305
+                      portId: done
+                    to:
+                      nodeId: 3b8d2e51-1c4f-4a72-9d13-2f6b84c15306
+                      portId: in
+                  # graphqlListen.done → the "server stopped" log (fires when close
+                  # has actually torn the mock server down), ending the run.
+                  - id: 3b8d2e51-1c4f-4a72-9d13-2f6b84c15407e
+                    from:
+                      nodeId: 3b8d2e51-1c4f-4a72-9d13-2f6b84c15301
+                      portId: done
+                    to:
+                      nodeId: 3b8d2e51-1c4f-4a72-9d13-2f6b84c15307
+                      portId: in
+                id: 3b8d2e51-1c4f-4a72-9d13-2f6b84c15001
+                name: GraphQL Subscription
+                items:
+                  - type: graphql
+                    documentation: ''
+                    tags:
+                      - graphql
+                      - server
+                    id: 3b8d2e51-1c4f-4a72-9d13-2f6b84c15901
+                    name: GraphQL Sub Mock Server
+                    operationType: query
+                    url: localhost:4223/graphql
+                    server: true
+                    schema: |-
+                      type Query {
+                        _: Boolean
+                      }
+                      type Subscription {
+                        ticks: Int
+                      }
+                    resolverScript: |-
+                      return {
+                        Subscription: {
+                          ticks: {
+                            subscribe: async function* () {
+                              yield 42
+                              // Stay open after the first event so the CLIENT
+                              // controls the stop (no timers — `setTimeout` is not
+                              // in the resolver sandbox; a never-resolving promise
+                              // suspends the generator until unsubscribe aborts it).
+                              await new Promise(() => {})
+                            },
+                            resolve: (value) => value
+                          }
+                        }
+                      }
+                    headers: []
+                    params: []
+                    pathParams: []
+                  - type: graphql
+                    documentation: 'A GraphQL subscription operation consumed over SSE by the graphqlSubscribe node.'
+                    tags:
+                      - graphql
+                      - subscription
+                    id: 3b8d2e51-1c4f-4a72-9d13-2f6b84c15902
+                    name: GraphQL Subscription Consumer
+                    operationType: subscription
+                    url: http://localhost:4223/graphql
+                    query: |-
+                      subscription {
+                        ticks
+                      }
+                    headers:
+                      - key: Content-Type
+                        value:
+                          type: string
+                          value: application/json
+                        enabled: true
+                    variables: '{}'
+                    params: []
+                    pathParams: []
           - type: scenario
             tags: []
             params: []

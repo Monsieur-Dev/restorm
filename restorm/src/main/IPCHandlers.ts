@@ -19,6 +19,7 @@ import type { KeyValue } from '../shared/types/baseTypes'
 import { authenticationCacheService } from './services/AuthenticationCacheService'
 import { graphqlExecutionService, type GraphQLExecutionInput } from './services/GraphQLExecutionService'
 import { graphqlMockServerService } from './services/GraphQLMockServerService'
+import { graphqlSubscriptionService } from './services/GraphQLSubscriptionService'
 import { soapExecutionService, type SOAPExecutionInput } from './services/SOAPExecutionService'
 import { grpcExecutionService, type GRPCExecutionInput } from './services/GRPCExecutionService'
 import { grpcMockServerService } from './services/GRPCMockServerService'
@@ -45,6 +46,7 @@ import {
   graphqlExecuteArgs, graphqlCancelArgs, graphqlIsActiveArgs,
   soapExecuteArgs, soapCancelArgs, soapIsActiveArgs, soapListenArgs, soapStopArgs, soapIsListeningArgs,
   graphqlListenArgs, graphqlStopArgs, graphqlIsListeningArgs,
+  graphqlSubscribeArgs, graphqlUnsubscribeArgs, graphqlIsSubscribingArgs,
   grpcExecuteArgs, grpcConnectArgs, grpcSendArgs, grpcDisconnectArgs, grpcCancelArgs, grpcIsActiveArgs,
   grpcListenArgs, grpcStopArgs, grpcIsListeningArgs,
   odataListenArgs, odataStopArgs, odataIsListeningArgs,
@@ -1059,6 +1061,32 @@ export function registerRestormIPC(deps: {
 
   validatedHandle('graphql:is-listening', graphqlIsListeningArgs, (_event, [requestId]) => {
     return graphqlMockServerService.isListening(requestId)
+  })
+
+  // GraphQL subscription client (consume an SSE subscription stream): open a
+  // long-lived subscription, unsubscribe (Stop), and check whether it is
+  // streaming. Pushed payloads + lifecycle reach the renderer via the
+  // `graphql-sub:event` / `graphql-sub:progress` broadcasts the service fires
+  // internally, so the callbacks here are no-ops.
+  validatedHandle('graphql-sub:subscribe', graphqlSubscribeArgs, (_event, [input]) => {
+    const noop = (): void => { /* lifecycle is delivered via the IPC broadcasts */ }
+    graphqlSubscriptionService.connectStreaming({
+      requestId: input.requestId,
+      onConnect: noop,
+      onMessage: noop,
+      onClose: noop,
+      ...(input.timeout !== undefined ? { timeout: input.timeout } : {})
+    })
+    setImmediate(() => { requestUsageService.recordSend(input.requestId) })
+    return { started: true }
+  })
+
+  validatedHandle('graphql-sub:unsubscribe', graphqlUnsubscribeArgs, (_event, [requestId]) => {
+    return graphqlSubscriptionService.unsubscribe(requestId)
+  })
+
+  validatedHandle('graphql-sub:is-subscribing', graphqlIsSubscribingArgs, (_event, [requestId]) => {
+    return graphqlSubscriptionService.isActive(requestId)
   })
 
   // ==========================================================================

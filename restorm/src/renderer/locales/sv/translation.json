@@ -434,6 +434,15 @@
       "served": "Lyssnar — {{count}} åtgärd(er) betjänad(e)",
       "notListening": "Lyssnar inte",
       "listenFailed": "Det gick inte att starta mockservern"
+    },
+    "subscription": {
+      "subscribe": "Prenumerera",
+      "stop": "Stoppa",
+      "waiting": "Prenumererad — väntar på händelser…",
+      "noEvents": "Inga händelser ännu. Prenumerera för att starta strömmen.",
+      "idle": "Inte prenumererad",
+      "streaming": "Strömmar — {{count}} händelse(r) mottagna",
+      "eventLabel": "Händelse {{index}}"
     }
   },
   "grpc": {
@@ -1060,7 +1069,9 @@
       "graphqlListen": "GraphQL server",
       "graphqlClose": "GraphQL close",
       "odataListen": "OData server",
-      "odataClose": "OData close"
+      "odataClose": "OData close",
+      "graphqlSubscribe": "GraphQL-prenumeration",
+      "graphqlUnsubscribe": "Avsluta GraphQL-prenumeration"
     },
     "comparator": {
       "result": "resultat"
@@ -1630,7 +1641,9 @@
       "graphqlListen": "Hosts a local GraphQL mock server and listens indefinitely. `connected` fires once it is listening; each served operation re-emits its data on the `served` port. The server stays up until a GraphQL close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
       "graphqlClose": "Stops an already-listening GraphQL mock server (declared by a GraphQL server node), freeing its port.",
       "odataListen": "Är värd för en lokal OData v4-mocktjänst och lyssnar i all oändlighet. `connected` utlöses så snart den lyssnar; varje betjänad begäran sänder sina data på nytt på `served`-porten. Servern är aktiv tills en OData-stängning (eller ett Stopp), sedan utlöses `done`. Ingen response-utdata — den betjänar, den ringer inte ut.",
-      "odataClose": "Stoppar en redan lyssnande OData-mocktjänst (deklarerad av en OData-servernod) och frigör dess port."
+      "odataClose": "Stoppar en redan lyssnande OData-mocktjänst (deklarerad av en OData-servernod) och frigör dess port.",
+      "graphqlSubscribe": "Öppnar en långlivad GraphQL-prenumeration som klient via SSE och lyssnar. `connected` utlöses så snart strömmen är öppen; varje mottagen nyttolast återutsänds på `message`-porten (en prenumeration är endast mottagande, utan namngivna händelser). Strömmen förblir öppen tills en GraphQL-avprenumeration (eller ett stopp), eller tills servern slutför den, sedan utlöses `done`.",
+      "graphqlUnsubscribe": "Stoppar en redan öppen GraphQL-prenumeration (deklarerad av en GraphQL-prenumerationsnod) och river ner dess SSE-ström."
     },
     "legend": {
       "title": "Förklaring",

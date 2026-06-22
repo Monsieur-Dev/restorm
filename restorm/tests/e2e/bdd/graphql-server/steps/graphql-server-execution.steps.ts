@@ -27,6 +27,8 @@ const LISTEN_BTN = '[data-testid="graphql-server-listen-button"]:visible'
 const SEND_BTN = '[data-testid="graphql-action-button"]:visible'
 const SERVED_BANNER = '[data-testid="graphql-server-served-banner"]:visible'
 const RESPONSE_BODY = '[data-testid="graphql-response-editor"]:visible'
+const SUBSCRIBE_BTN = '[data-testid="graphql-subscribe-button"]:visible'
+const SUB_EVENT = '[data-testid="graphql-subscription-event"]:visible'
 
 function parsedReply(reply: McpToolReply): unknown {
   const text = reply.content?.[0]?.text ?? ''
@@ -116,6 +118,32 @@ Then('the Listen button shows the listening state', async () => {
 Then('the Listen button shows the stopped state', async () => {
   if (page === null) throw new Error('launch first')
   await expect(page.locator(`${LISTEN_BTN} .codicon-plug`)).toBeVisible({ timeout: 10_000 })
+})
+
+When('I click the Subscribe button', async () => {
+  if (page === null) throw new Error('launch first')
+  // Gate on the query editor having flushed (same race as Send) so the
+  // subscription operation isn't empty when Subscribe fires.
+  await expect(page.locator('[data-testid="graphql-query-editor"]:visible')).not.toBeEmpty({ timeout: 10_000 })
+  await page.locator(SUBSCRIBE_BTN).click()
+})
+
+When('I click the Unsubscribe button', async () => {
+  if (page === null) throw new Error('launch first')
+  // Same button as Subscribe — it toggles to the Stop action while streaming.
+  await page.locator(SUBSCRIBE_BTN).click()
+})
+
+Then('the subscription receives at least {int} event', async ({}, _n: number) => {
+  if (page === null) throw new Error('launch first')
+  // The self-emitting mock pushes a bounded sequence of ticks; assert at least
+  // one event row appears in the live append-only list.
+  await expect(page.locator(SUB_EVENT).first()).toBeVisible({ timeout: 20_000 })
+})
+
+Then('the Subscribe button shows the idle state', async () => {
+  if (page === null) throw new Error('launch first')
+  await expect(page.locator(`${SUBSCRIBE_BTN} .codicon-broadcast`)).toBeVisible({ timeout: 10_000 })
 })
 
 Then('the mock shows the listening banner', async () => {

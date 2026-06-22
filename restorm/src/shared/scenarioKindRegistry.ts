@@ -368,6 +368,23 @@ export const SCENARIO_KIND_REGISTRY = {
       config: { connectionNodeId: 'Id of the odataListen node whose service to stop.' }
     }
   },
+  graphqlSubscribe: {
+    labelKey: 'scenario.nodes.graphqlSubscribe', defaultLabel: 'GraphQL subscribe', icon: 'broadcast', category: 'composition',
+    requestBinding: true,
+    ports: { inputs: [], outputs: [{ id: 'connected', name: 'connected', flow: 'signal' }, { id: 'message', name: 'message', flow: 'both' }] },
+    doc: {
+      summary: 'Opens a long-lived GraphQL SUBSCRIPTION from a bound request over Server-Sent Events and listens. `connected` fires once the subscription stream is open; EVERY pushed payload re-emits on the single `message` output (a subscription has no named events). A subscription is receive-only — there is no send. The stream stays open until a graphqlUnsubscribe targets it (or the run is stopped) or the server completes it, then `done` fires.',
+      config: { requestId: 'Id of the GraphQL subscription request to consume (its endpoint URL + headers + subscription query/variables).', connectionName: 'Unique-per-scenario name a graphqlUnsubscribe references for display (defaults to the request name).', label: 'Display label on the box.' }
+    }
+  },
+  graphqlUnsubscribe: {
+    labelKey: 'scenario.nodes.graphqlUnsubscribe', defaultLabel: 'GraphQL unsubscribe', icon: 'debug-disconnect', category: 'composition',
+    ports: { inputs: [], outputs: [] },
+    doc: {
+      summary: 'Stops an already-open GraphQL subscription (declared by a graphqlSubscribe node), tearing down the SSE stream and firing that node\'s `done`. Pure-event action: triggered on `in`, sequences via its own `done`. Errors (to `error`) when no subscription is selected.',
+      config: { connectionNodeId: 'Id of the graphqlSubscribe node whose subscription to stop.' }
+    }
+  },
 
   // --- Lists (grouped into a "Lists" submenu) ---
   aggregate: {

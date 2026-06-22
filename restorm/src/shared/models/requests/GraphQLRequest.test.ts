@@ -85,3 +85,28 @@ describe('GraphQLRequest — operationName persistence round-trip', () => {
     expect(restored.operationName).toBeUndefined()
   })
 })
+
+describe('GraphQLRequest subscription-client persistence', () => {
+  it('round-trips a subscription operation (operationType + query + variables) through toPlainObject / fromPlain', () => {
+    const original = new GraphQLRequest({
+      id: 'gql-sub-1',
+      name: 'Live ticks',
+      url: 'http://localhost:4222/graphql',
+      operationType: 'subscription',
+      query: 'subscription OnTick { ticks }',
+      variables: '{ "channel": "main" }'
+    })
+
+    const plain = original.toPlainObject()
+    expect(plain['operationType']).toBe('subscription')
+    expect(plain['query']).toBe('subscription OnTick { ticks }')
+    expect(plain['variables']).toBe('{ "channel": "main" }')
+
+    const restored = GraphQLRequest.fromPlain(plain as Parameters<typeof GraphQLRequest.fromPlain>[0])
+    expect(restored.operationType).toBe('subscription')
+    expect(restored.query).toBe('subscription OnTick { ticks }')
+    expect(restored.variables).toBe('{ "channel": "main" }')
+    // A subscription client never carries the server-hosting config.
+    expect(restored.server).toBeUndefined()
+  })
+})

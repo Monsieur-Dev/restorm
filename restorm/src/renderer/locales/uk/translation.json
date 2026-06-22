@@ -436,6 +436,15 @@
       "served": "Слухає — оброблено {{count}} операцій",
       "notListening": "Не слухає",
       "listenFailed": "Не вдалося запустити mock-сервер"
+    },
+    "subscription": {
+      "subscribe": "Підписатися",
+      "stop": "Зупинити",
+      "waiting": "Підписано — очікування подій…",
+      "noEvents": "Подій ще немає. Підпишіться, щоб почати трансляцію.",
+      "idle": "Не підписано",
+      "streaming": "Трансляція — отримано {{count}} подій",
+      "eventLabel": "Подія {{index}}"
     }
   },
   "grpc": {
@@ -1062,7 +1071,9 @@
       "graphqlListen": "GraphQL server",
       "graphqlClose": "GraphQL close",
       "odataListen": "OData server",
-      "odataClose": "OData close"
+      "odataClose": "OData close",
+      "graphqlSubscribe": "Підписка GraphQL",
+      "graphqlUnsubscribe": "Скасувати підписку GraphQL"
     },
     "comparator": {
       "result": "результат"
@@ -1632,7 +1643,9 @@
       "graphqlListen": "Hosts a local GraphQL mock server and listens indefinitely. `connected` fires once it is listening; each served operation re-emits its data on the `served` port. The server stays up until a GraphQL close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
       "graphqlClose": "Stops an already-listening GraphQL mock server (declared by a GraphQL server node), freeing its port.",
       "odataListen": "Розміщує локальну фіктивну службу OData v4 і слухає необмежено. `connected` спрацьовує, щойно вона починає слухати; кожен обслужений запит повторно надсилає свої дані на порт `served`. Сервер працює до закриття OData (або зупинки), після чого спрацьовує `done`. Без виводу response — він обслуговує, а не викликає назовні.",
-      "odataClose": "Зупиняє фіктивну службу OData, яка вже слухає (оголошену вузлом сервера OData), звільняючи її порт."
+      "odataClose": "Зупиняє фіктивну службу OData, яка вже слухає (оголошену вузлом сервера OData), звільняючи її порт.",
+      "graphqlSubscribe": "Відкриває довготривалу підписку GraphQL як клієнт через SSE та слухає. `connected` спрацьовує, щойно потік відкрито; кожне надіслане корисне навантаження повторно випромінюється на порт `message` (підписка лише приймає, без іменованих подій). Потік залишається відкритим до скасування підписки GraphQL (або зупинки), або доки сервер не завершить його, після чого спрацьовує `done`.",
+      "graphqlUnsubscribe": "Зупиняє вже відкриту підписку GraphQL (оголошену вузлом підписки GraphQL), закриваючи її потік SSE."
     },
     "legend": {
       "title": "Легенда",

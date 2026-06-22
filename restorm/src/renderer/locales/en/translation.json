@@ -434,6 +434,15 @@
       "served": "Listening — {{count}} operation(s) served",
       "notListening": "Not listening",
       "listenFailed": "Failed to start the mock server"
+    },
+    "subscription": {
+      "subscribe": "Subscribe",
+      "stop": "Stop",
+      "waiting": "Subscribed — waiting for events…",
+      "noEvents": "No events yet. Subscribe to start streaming.",
+      "idle": "Not subscribed",
+      "streaming": "Streaming — {{count}} event(s) received",
+      "eventLabel": "Event {{index}}"
     }
   },
   "grpc": {
@@ -1060,7 +1069,9 @@
       "graphqlListen": "GraphQL server",
       "graphqlClose": "GraphQL close",
       "odataListen": "OData server",
-      "odataClose": "OData close"
+      "odataClose": "OData close",
+      "graphqlSubscribe": "GraphQL subscribe",
+      "graphqlUnsubscribe": "GraphQL unsubscribe"
     },
     "comparator": {
       "result": "result"
@@ -1633,7 +1644,9 @@
       "graphqlListen": "Hosts a local GraphQL mock server and listens indefinitely. `connected` fires once it is listening; each served operation re-emits its data on the `served` port. The server stays up until a GraphQL close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
       "graphqlClose": "Stops an already-listening GraphQL mock server (declared by a GraphQL server node), freeing its port.",
       "odataListen": "Hosts a local OData v4 mock service and listens indefinitely. `connected` fires once it is listening; each served request re-emits its data on the `served` port. The server stays up until an OData close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
-      "odataClose": "Stops an already-listening OData mock service (declared by an OData server node), freeing its port."
+      "odataClose": "Stops an already-listening OData mock service (declared by an OData server node), freeing its port.",
+      "graphqlSubscribe": "Opens a long-lived GraphQL subscription as a client over SSE and listens. `connected` fires once the stream is open; every pushed payload re-emits on the `message` port (a subscription is receive-only, with no named events). The stream stays open until a GraphQL unsubscribe (or a Stop), or the server completes it, then `done` fires.",
+      "graphqlUnsubscribe": "Stops an already-open GraphQL subscription (declared by a GraphQL subscribe node), tearing down its SSE stream."
     },
     "legend": {
       "title": "Legend",

@@ -13,6 +13,7 @@ import {
   Pane,
   ControlGroup,
   SelectBox,
+  ScrollableElement,
   eventBus,
   logger,
   getContrastColor,
@@ -40,6 +41,15 @@ import { SendButtonEnvSwitcher } from './SendButtonEnvSwitcher'
 import { BeamWrap } from '../common/BeamWrap'
 import { toasterService } from 'electron-core-ui/renderer'
 import { HeaderHoverTooltip } from '../MainView/HeaderHoverTooltip'
+import { useIsGraphqlSubscribing } from '../../services/graphqlSubscriptionListeningStore'
+import { detectGraphqlOperationType } from '../../../../shared/utils/detectGraphqlOperationType'
+import './GraphQLSubscriptionEvents.css'
+
+/** One payload pushed by a subscription, kept in the live append-only list. */
+interface SubscriptionEventItem {
+  data: string
+  timestamp: string
+}
 
 const urlInputWrapperStyle: React.CSSProperties = { flex: 1, minWidth: 0 }
 const serverHostLabelStyle: React.CSSProperties = { display: 'flex', alignItems: 'center', padding: '0 4px', whiteSpace: 'nowrap', opacity: 0.8 }
@@ -103,6 +113,16 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
   const [mockResolvers, setMockResolversState] = useState(request.mockResolvers ?? '')
   const [isListening, setIsListening] = useState(false)
   const [servedCount, setServedCount] = useState(0)
+
+  // Subscription client mode: when the (client-mode) operation is a subscription,
+  // the Send button becomes Subscribe/Stop and the response panel shows a live,
+  // append-only list of pushed payloads. The operation type is read from the
+  // query SDL (the user edits it freely, so this is more reliable than the stored
+  // `operationType` field).
+  const isSubscription = !isServer && detectGraphqlOperationType(query) === 'subscription'
+  const isSubscribing = useIsGraphqlSubscribing(request.id)
+  const [subscriptionEvents, setSubscriptionEvents] = useState<SubscriptionEventItem[]>([])
+  const [expandedEvents, setExpandedEvents] = useState<Set<number>>(() => new Set())
 
   // See HTTPRequestTabView for the pattern. GraphQL has only a
   // collapsible headers pane today (query + variables don't collapse),
@@ -494,7 +514,45 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
   const handleCancel = (): void => {
     void window.restorm?.graphql.cancel(request.id)
   }
-  
+
+  // Subscription client: open the SSE subscription (clears the prior event list)
+  // / stop it. Pushed payloads + lifecycle arrive via the streaming effect below.
+  const handleSubscribe = useCallback((): void => {
+    setSubscriptionEvents([])
+    setExpandedEvents(new Set())
+    void window.restorm?.graphql.subscribe({ requestId: request.id })
+      .catch((err: unknown) => { logger.error('GraphQL subscribe failed', { error: String(err) }) })
+  }, [request.id])
+
+  const handleUnsubscribe = useCallback((): void => {
+    void window.restorm?.graphql.unsubscribe(request.id)
+  }, [request.id])
+
+  const toggleEventExpanded = useCallback((index: number): void => {
+    setExpandedEvents((prev) => {
+      const next = new Set(prev)
+      if (next.has(index)) next.delete(index)
+      else next.add(index)
+      return next
+    })
+  }, [])
+
+  // Stream pushed payloads + lifecycle into the live event list. A `started`
+  // resets the list (a fresh subscription); each event appends in arrival order.
+  useEffect(() => {
+    if (isServer) return undefined
+    const requestId = request.id
+    const unsubEvent = window.restorm?.graphql.onEvent(({ requestId: rid, event }) => {
+      if (rid !== requestId) return
+      setSubscriptionEvents((prev) => [...prev, { data: event.data, timestamp: event.timestamp }])
+    })
+    const unsubProgress = window.restorm?.graphql.onSubscriptionProgress(({ requestId: rid, status }) => {
+      if (rid !== requestId) return
+      if (status === 'started') { setSubscriptionEvents([]); setExpandedEvents(new Set()) }
+    })
+    return () => { unsubEvent?.(); unsubProgress?.() }
+  }, [isServer, request.id])
+
   // Request content (SplitView with Query, Variables, Headers)
   const requestContent = (
     <SplitView
@@ -662,6 +720,74 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
     [buildGraphqlResponseView, response]
   )
 
+  // Subscription client: the live, append-only list of pushed payloads. Each
+  // event is timestamped and expandable to inspect its full JSON. The ECUI
+  // ScrollableElement owns the (themed) scrollbar — never a native one.
+  const subscriptionContent = useMemo((): React.ReactNode => {
+    if (subscriptionEvents.length === 0) {
+      return (
+        <div className="gql-sub-events-empty" data-testid="graphql-subscription-empty">
+          {isSubscribing
+            ? t('graphql.subscription.waiting', 'Subscribed — waiting for events…')
+            : t('graphql.subscription.noEvents', 'No events yet. Subscribe to start streaming.')}
+        </div>
+      )
+    }
+    return (
+      <ScrollableElement
+        options={{ vertical: 'auto', horizontal: 'hidden', useShadows: true }}
+        style={{ flex: 1, minHeight: 0 }}
+      >
+        <div className="gql-sub-events" data-testid="graphql-subscription-events">
+          {subscriptionEvents.map((event, i) => {
+            const expanded = expandedEvents.has(i)
+            let pretty = event.data
+            try {
+              pretty = JSON.stringify(JSON.parse(event.data), null, 2)
+            } catch {
+              // Leave the raw payload as-is when it isn't valid JSON.
+            }
+            return (
+              <div className="gql-sub-event" key={i} data-testid="graphql-subscription-event">
+                <button
+                  type="button"
+                  className="gql-sub-event-header"
+                  onClick={() => { toggleEventExpanded(i) }}
+                  aria-expanded={expanded}
+                  data-testid="graphql-subscription-event-header"
+                >
+                  <span className={`codicon codicon-chevron-${expanded ? 'down' : 'right'}`} aria-hidden="true" />
+                  <span className="gql-sub-event-index">
+                    {t('graphql.subscription.eventLabel', { index: i + 1, defaultValue: 'Event {{index}}' })}
+                  </span>
+                  <span className="gql-sub-event-time">{new Date(event.timestamp).toLocaleTimeString()}</span>
+                </button>
+                {expanded && (
+                  <pre className="gql-sub-event-body" data-testid="graphql-subscription-event-body">{pretty}</pre>
+                )}
+              </div>
+            )
+          })}
+        </div>
+      </ScrollableElement>
+    )
+  }, [subscriptionEvents, expandedEvents, isSubscribing, toggleEventExpanded, t])
+
+  // Subscription-mode connection-state banner (mirrors the server "served N").
+  const subscriptionInfosContent = isSubscription ? (
+    <div
+      data-testid="graphql-subscription-state"
+      style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 12px', fontSize: 12 }}
+    >
+      <span className={`codicon codicon-${isSubscribing ? 'broadcast' : 'circle-slash'}`} aria-hidden="true" />
+      <span>
+        {isSubscribing
+          ? t('graphql.subscription.streaming', { count: subscriptionEvents.length, defaultValue: 'Streaming — {{count}} event(s) received' })
+          : t('graphql.subscription.idle', 'Not subscribed')}
+      </span>
+    </div>
+  ) : undefined
+
   const buildHistoryView = useCallback((detail: ResponseHistoryDetail) => {
     if (detail.response.type !== 'graphql') {
       return { infosContent: undefined, responseContent: undefined, jsonData: undefined }
@@ -780,18 +906,34 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
             </div>
           )}
           <SendButtonEnvSwitcher>
-            <BeamWrap active={isSending} size={22} borderWidth={1.5}>
-              <Button
-                icon={isSending ? 'close' : 'send'}
-                onClick={isSending ? handleCancel : handleSend}
-                {...(isSending ? { emphasis: 0 } : sendButtonStyle ? { style: sendButtonStyle } : { emphasis: 1 })}
-                options={{
-                  title: isSending ? t('cancel') : t('graphql.send'),
-                  ariaLabel: isSending ? t('cancel') : t('graphql.send')
-                }}
-                data-testid="graphql-action-button"
-              />
-            </BeamWrap>
+            {isSubscription ? (
+              // Subscription operation: Subscribe opens the SSE stream, Stop ends it.
+              <BeamWrap active={isSubscribing} size={22} borderWidth={1.5}>
+                <Button
+                  icon={isSubscribing ? 'debug-disconnect' : 'broadcast'}
+                  onClick={isSubscribing ? handleUnsubscribe : handleSubscribe}
+                  {...(isSubscribing ? { emphasis: 0 } : sendButtonStyle ? { style: sendButtonStyle } : { emphasis: 1 })}
+                  options={{
+                    title: isSubscribing ? t('graphql.subscription.stop') : t('graphql.subscription.subscribe'),
+                    ariaLabel: isSubscribing ? t('graphql.subscription.stop') : t('graphql.subscription.subscribe')
+                  }}
+                  data-testid="graphql-subscribe-button"
+                />
+              </BeamWrap>
+            ) : (
+              <BeamWrap active={isSending} size={22} borderWidth={1.5}>
+                <Button
+                  icon={isSending ? 'close' : 'send'}
+                  onClick={isSending ? handleCancel : handleSend}
+                  {...(isSending ? { emphasis: 0 } : sendButtonStyle ? { style: sendButtonStyle } : { emphasis: 1 })}
+                  options={{
+                    title: isSending ? t('cancel') : t('graphql.send'),
+                    ariaLabel: isSending ? t('cancel') : t('graphql.send')
+                  }}
+                  data-testid="graphql-action-button"
+                />
+              </BeamWrap>
+            )}
           </SendButtonEnvSwitcher>
         </>
       )}
@@ -840,10 +982,10 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
         notes={request.notes}
         onNotesChange={(md): void => { updateReactiveProperty(request, 'notes', md) }}
         isLoading={isSending}
-        showResponse={isServer ? isListening : response !== null}
-        infosContent={isServer ? undefined : infosContent}
-        responseContent={isServer ? serverResponseContent : responseContent}
-        jsonData={isServer ? undefined : (response ? { data: response.data, errors: response.errors } : undefined)}
+        showResponse={isServer ? isListening : (isSubscription ? (isSubscribing || subscriptionEvents.length > 0) : response !== null)}
+        infosContent={isServer ? undefined : (isSubscription ? subscriptionInfosContent : infosContent)}
+        responseContent={isServer ? serverResponseContent : (isSubscription ? subscriptionContent : responseContent)}
+        jsonData={isServer || isSubscription ? undefined : (response ? { data: response.data, errors: response.errors } : undefined)}
       />
       <ResponseHistoryModal
         isOpen={historyModalOpen}

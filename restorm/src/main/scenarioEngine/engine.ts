@@ -14,6 +14,7 @@ import { websocketExecutionService } from '../services/WebSocketExecutionService
 import { httpExecutionService } from '../services/HTTPExecutionService'
 import { soapExecutionService } from '../services/SOAPExecutionService'
 import { graphqlMockServerService } from '../services/GraphQLMockServerService'
+import { graphqlSubscriptionService } from '../services/GraphQLSubscriptionService'
 import { grpcExecutionService } from '../services/GRPCExecutionService'
 import { grpcMockServerService } from '../services/GRPCMockServerService'
 import { odataMockServerService } from '../services/ODataMockServerService'
@@ -193,6 +194,19 @@ export class ScenarioEngine {
           flushRequestStateToContext(bound as unknown as Parameters<typeof flushRequestStateToContext>[0])
         }
         if (req.transport === 'grpc') return grpcExecutionService.connectStreaming(req)
+        // GraphQL subscription: a long-lived CLIENT consumer of a subscription
+        // over SSE (a `graphqlSubscribe` node). Receive-only — every pushed
+        // payload re-emits on `message`; there is no send, so the handle exposes
+        // a no-op `send`. `done` fires on unsubscribe / server-complete / stop.
+        if (req.transport === 'graphql-subscribe') {
+          const handle = graphqlSubscriptionService.connectStreaming({
+            requestId: req.requestId,
+            onConnect: req.onConnect,
+            onMessage: (payload) => { req.onMessage(undefined, payload) },
+            onClose: req.onClose
+          })
+          return { send: () => false, close: handle.close, isOpen: handle.isOpen }
+        }
         // HTTP mock server: a DISTINCT long-lived listener with its OWN path (an
         // `httpListen` node, never a one-shot `httpRequest`). It HOSTS the bound
         // `server: true` request's METHOD+PATH+port and re-emits each served

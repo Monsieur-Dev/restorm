@@ -176,6 +176,16 @@ declare global {
         isListening: (requestId: string) => Promise<boolean>
         /** SERVER MODE: served-operation count updates for the "served N" banner. */
         onServerServed: (callback: (data: { requestId: string; count: number }) => void) => (() => void)
+        /** SUBSCRIPTION CLIENT: open a long-lived GraphQL subscription over SSE. */
+        subscribe: (input: GraphQLExecutionInput) => Promise<{ started: boolean }>
+        /** SUBSCRIPTION CLIENT: stop / unsubscribe an active subscription. */
+        unsubscribe: (requestId: string) => Promise<boolean>
+        /** SUBSCRIPTION CLIENT: whether a subscription is currently streaming. */
+        isSubscribing: (requestId: string) => Promise<boolean>
+        /** SUBSCRIPTION CLIENT: each pushed subscription payload, in arrival order. */
+        onEvent: (callback: (data: { requestId: string; event: { data: string; timestamp: string } }) => void) => (() => void)
+        /** SUBSCRIPTION CLIENT: lifecycle updates (drives the listening badge beam). */
+        onSubscriptionProgress: (callback: (data: RequestProgressData) => void) => (() => void)
       }
       graphqlApi: {
         query: (query: string, variables?: Record<string, unknown>) => Promise<unknown>

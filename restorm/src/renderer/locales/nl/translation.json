@@ -434,6 +434,15 @@
       "served": "Luistert — {{count}} bewerking(en) bediend",
       "notListening": "Luistert niet",
       "listenFailed": "Kan de mockserver niet starten"
+    },
+    "subscription": {
+      "subscribe": "Abonneren",
+      "stop": "Stoppen",
+      "waiting": "Geabonneerd — wachten op gebeurtenissen…",
+      "noEvents": "Nog geen gebeurtenissen. Abonneer om de stream te starten.",
+      "idle": "Niet geabonneerd",
+      "streaming": "Streamen — {{count}} gebeurtenis(sen) ontvangen",
+      "eventLabel": "Gebeurtenis {{index}}"
     }
   },
   "grpc": {
@@ -1060,7 +1069,9 @@
       "graphqlListen": "GraphQL server",
       "graphqlClose": "GraphQL close",
       "odataListen": "OData server",
-      "odataClose": "OData close"
+      "odataClose": "OData close",
+      "graphqlSubscribe": "GraphQL-abonnement",
+      "graphqlUnsubscribe": "GraphQL-abonnement opzeggen"
     },
     "comparator": {
       "result": "resultaat"
@@ -1630,7 +1641,9 @@
       "graphqlListen": "Hosts a local GraphQL mock server and listens indefinitely. `connected` fires once it is listening; each served operation re-emits its data on the `served` port. The server stays up until a GraphQL close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
       "graphqlClose": "Stops an already-listening GraphQL mock server (declared by a GraphQL server node), freeing its port.",
       "odataListen": "Host een lokale OData v4-mockservice en luistert oneindig. `connected` wordt geactiveerd zodra er geluisterd wordt; elk bediend verzoek zendt zijn gegevens opnieuw uit op de `served`-poort. De server blijft actief tot een OData-sluiting (of een Stop), waarna `done` wordt geactiveerd. Geen response-uitvoer — hij bedient, hij roept niet naar buiten.",
-      "odataClose": "Stopt een al luisterende OData-mockservice (gedeclareerd door een OData-serverknooppunt) en maakt de poort vrij."
+      "odataClose": "Stopt een al luisterende OData-mockservice (gedeclareerd door een OData-serverknooppunt) en maakt de poort vrij.",
+      "graphqlSubscribe": "Opent een langlevend GraphQL-abonnement als client via SSE en luistert. `connected` wordt geactiveerd zodra de stream open is; elke ontvangen payload wordt opnieuw uitgezonden op de `message`-poort (een abonnement is alleen-ontvangen, zonder benoemde gebeurtenissen). De stream blijft open tot een GraphQL-opzegging (of een stop), of tot de server hem voltooit, daarna wordt `done` geactiveerd.",
+      "graphqlUnsubscribe": "Stopt een al geopend GraphQL-abonnement (gedeclareerd door een GraphQL-abonnementsknooppunt) en breekt zijn SSE-stream af."
     },
     "legend": {
       "title": "Legenda",

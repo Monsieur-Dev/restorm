@@ -434,6 +434,15 @@
       "served": "Kuuntelee — {{count}} operaatio(ta) palveltu",
       "notListening": "Ei kuuntele",
       "listenFailed": "Mock-palvelimen käynnistys epäonnistui"
+    },
+    "subscription": {
+      "subscribe": "Tilaa",
+      "stop": "Pysäytä",
+      "waiting": "Tilattu — odotetaan tapahtumia…",
+      "noEvents": "Ei vielä tapahtumia. Tilaa aloittaaksesi suoratoiston.",
+      "idle": "Ei tilattu",
+      "streaming": "Suoratoisto — {{count}} tapahtuma(a) vastaanotettu",
+      "eventLabel": "Tapahtuma {{index}}"
     }
   },
   "grpc": {
@@ -1060,7 +1069,9 @@
       "graphqlListen": "GraphQL server",
       "graphqlClose": "GraphQL close",
       "odataListen": "OData server",
-      "odataClose": "OData close"
+      "odataClose": "OData close",
+      "graphqlSubscribe": "GraphQL-tilaus",
+      "graphqlUnsubscribe": "Peruuta GraphQL-tilaus"
     },
     "comparator": {
       "result": "tulos"
@@ -1630,7 +1641,9 @@
       "graphqlListen": "Hosts a local GraphQL mock server and listens indefinitely. `connected` fires once it is listening; each served operation re-emits its data on the `served` port. The server stays up until a GraphQL close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
       "graphqlClose": "Stops an already-listening GraphQL mock server (declared by a GraphQL server node), freeing its port.",
       "odataListen": "Isännöi paikallista OData v4 -näennäispalvelua ja kuuntelee loputtomiin. `connected` laukeaa heti kun palvelu kuuntelee; jokainen palveltu pyyntö lähettää tietonsa uudelleen `served`-porttiin. Palvelin pysyy käynnissä OData-sulkemiseen (tai pysäytykseen) asti, minkä jälkeen `done` laukeaa. Ei response-tulostetta — se palvelee, se ei kutsu ulospäin.",
-      "odataClose": "Pysäyttää jo kuuntelevan OData-näennäispalvelun (jonka OData-palvelinsolmu on määrittänyt) ja vapauttaa sen portin."
+      "odataClose": "Pysäyttää jo kuuntelevan OData-näennäispalvelun (jonka OData-palvelinsolmu on määrittänyt) ja vapauttaa sen portin.",
+      "graphqlSubscribe": "Avaa pitkäkestoisen GraphQL-tilauksen asiakkaana SSE:n kautta ja kuuntelee. `connected` laukeaa heti kun virta on auki; jokainen vastaanotettu hyötykuorma lähetetään uudelleen `message`-porttiin (tilaus on vain vastaanottava, ilman nimettyjä tapahtumia). Virta pysyy auki, kunnes GraphQL-tilaus perutaan (tai pysäytys), tai kunnes palvelin päättää sen, jolloin `done` laukeaa.",
+      "graphqlUnsubscribe": "Pysäyttää jo avoimen GraphQL-tilauksen (jonka GraphQL-tilaussolmu on määrittänyt) ja purkaa sen SSE-virran."
     },
     "legend": {
       "title": "Selite",

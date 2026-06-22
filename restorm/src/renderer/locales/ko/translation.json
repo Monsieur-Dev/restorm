@@ -433,6 +433,15 @@
       "served": "수신 대기 중 — {{count}}개 작업 처리됨",
       "notListening": "수신 안 함",
       "listenFailed": "목 서버를 시작하지 못했습니다"
+    },
+    "subscription": {
+      "subscribe": "구독",
+      "stop": "중지",
+      "waiting": "구독됨 — 이벤트를 기다리는 중…",
+      "noEvents": "아직 이벤트가 없습니다. 구독하여 스트리밍을 시작하세요.",
+      "idle": "구독 안 함",
+      "streaming": "스트리밍 중 — {{count}}개의 이벤트 수신됨",
+      "eventLabel": "이벤트 {{index}}"
     }
   },
   "grpc": {
@@ -1059,7 +1068,9 @@
       "graphqlListen": "GraphQL server",
       "graphqlClose": "GraphQL close",
       "odataListen": "OData server",
-      "odataClose": "OData close"
+      "odataClose": "OData close",
+      "graphqlSubscribe": "GraphQL 구독",
+      "graphqlUnsubscribe": "GraphQL 구독 취소"
     },
     "comparator": {
       "result": "결과"
@@ -1629,7 +1640,9 @@
       "graphqlListen": "Hosts a local GraphQL mock server and listens indefinitely. `connected` fires once it is listening; each served operation re-emits its data on the `served` port. The server stays up until a GraphQL close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
       "graphqlClose": "Stops an already-listening GraphQL mock server (declared by a GraphQL server node), freeing its port.",
       "odataListen": "로컬 OData v4 모의 서비스를 호스팅하고 무기한 수신 대기합니다. 수신을 시작하면 `connected`가 발생하며, 처리된 각 요청은 해당 데이터를 `served` 포트로 다시 내보냅니다. 서버는 OData 종료(또는 Stop)까지 유지되며, 그 후 `done`이 발생합니다. response 출력은 없습니다. 제공만 할 뿐 외부로 호출하지 않습니다.",
-      "odataClose": "이미 수신 대기 중인 OData 모의 서비스(OData 서버 노드가 선언한)를 중지하고 해당 포트를 해제합니다."
+      "odataClose": "이미 수신 대기 중인 OData 모의 서비스(OData 서버 노드가 선언한)를 중지하고 해당 포트를 해제합니다.",
+      "graphqlSubscribe": "SSE를 통해 클라이언트로서 오래 지속되는 GraphQL 구독을 열고 수신합니다. 스트림이 열리면 `connected`가 실행됩니다. 푸시된 각 페이로드는 `message` 포트로 다시 방출됩니다(구독은 수신 전용이며 명명된 이벤트가 없습니다). 스트림은 GraphQL 구독 취소(또는 중지)까지, 또는 서버가 완료할 때까지 열린 상태로 유지되며 그 후 `done`이 실행됩니다.",
+      "graphqlUnsubscribe": "이미 열린 GraphQL 구독(GraphQL 구독 노드로 선언됨)을 중지하고 해당 SSE 스트림을 해제합니다."
     },
     "legend": {
       "title": "범례",

@@ -436,6 +436,15 @@
       "served": "Naslouchá — obslouženo {{count}} operací",
       "notListening": "Neposlouchá",
       "listenFailed": "Nepodařilo se spustit mock server"
+    },
+    "subscription": {
+      "subscribe": "Odebírat",
+      "stop": "Zastavit",
+      "waiting": "Přihlášeno — čekání na události…",
+      "noEvents": "Zatím žádné události. Přihlaste se k odběru pro spuštění streamu.",
+      "idle": "Bez odběru",
+      "streaming": "Streamování — přijato {{count}} událostí",
+      "eventLabel": "Událost {{index}}"
     }
   },
   "grpc": {
@@ -1062,7 +1071,9 @@
       "graphqlListen": "GraphQL server",
       "graphqlClose": "GraphQL close",
       "odataListen": "OData server",
-      "odataClose": "OData close"
+      "odataClose": "OData close",
+      "graphqlSubscribe": "Odběr GraphQL",
+      "graphqlUnsubscribe": "Zrušení odběru GraphQL"
     },
     "comparator": {
       "result": "výsledek"
@@ -1632,7 +1643,9 @@
       "graphqlListen": "Hosts a local GraphQL mock server and listens indefinitely. `connected` fires once it is listening; each served operation re-emits its data on the `served` port. The server stays up until a GraphQL close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
       "graphqlClose": "Stops an already-listening GraphQL mock server (declared by a GraphQL server node), freeing its port.",
       "odataListen": "Hostuje místní fiktivní službu OData v4 a naslouchá neomezeně. Port `connected` se aktivuje, jakmile služba naslouchá; každý obsloužený požadavek znovu vyšle svá data na portu `served`. Server běží až do uzavření OData (nebo do zastavení), poté se aktivuje port `done`. Žádný výstup response — pouze obsluhuje, sám nevolá ven.",
-      "odataClose": "Zastaví již naslouchající fiktivní službu OData (deklarovanou uzlem serveru OData) a uvolní její port."
+      "odataClose": "Zastaví již naslouchající fiktivní službu OData (deklarovanou uzlem serveru OData) a uvolní její port.",
+      "graphqlSubscribe": "Otevře dlouhotrvající odběr GraphQL jako klient přes SSE a naslouchá. `connected` se spustí, jakmile je proud otevřen; každá přijatá zpráva se znovu vyšle na port `message` (odběr pouze přijímá, bez pojmenovaných událostí). Proud zůstává otevřený až do zrušení odběru GraphQL (nebo zastavení), případně dokud jej server nedokončí, poté se spustí `done`.",
+      "graphqlUnsubscribe": "Zastaví již otevřený odběr GraphQL (deklarovaný uzlem odběru GraphQL) a uzavře jeho SSE proud."
     },
     "legend": {
       "title": "Legenda",
