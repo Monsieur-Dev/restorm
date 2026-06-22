@@ -1,8 +1,13 @@
-import type { ScenarioNodeKind, ScenarioPort, ScenarioDataType, ScenarioPortRole, PortFlow, Scenario } from './types/collections'
+import type { ScenarioNodeKind, ScenarioPort, ScenarioDataType, PortFlow, Scenario } from './types/collections'
+import type { PortSpec, KindPorts } from './scenarioKindRegistry'
+import { REGISTRY } from './scenarioKindRegistry'
 import { readInputParams } from './scenarioInputParams'
 import { readOutputDecls } from './scenarioOutputDecls'
 import { acceptsInputEvent } from './scenarioNodeCapabilities'
-import { LIST_MUTATION_DEFAULT_VALUE_ID } from './scenarioListMutationValues'
+
+// PortSpec / KindPorts moved to the kind registry (the single source of truth);
+// re-exported here so existing importers of these shapes keep working.
+export type { PortSpec, KindPorts } from './scenarioKindRegistry'
 
 /**
  * Default input/output ports per node kind (epic §5b "per-kind
@@ -22,15 +27,6 @@ import { LIST_MUTATION_DEFAULT_VALUE_ID } from './scenarioListMutationValues'
  * trigger is `signal` (accepts B/AB).
  */
 
-interface PortSpec {
-  id: string
-  name?: string
-  dataType?: ScenarioDataType
-  role?: ScenarioPortRole
-  required?: boolean
-  flow?: PortFlow
-}
-
 function p(spec: PortSpec): ScenarioPort {
   return {
     id: spec.id,
@@ -42,264 +38,18 @@ function p(spec: PortSpec): ScenarioPort {
   }
 }
 
-interface KindPorts {
-  inputs: PortSpec[]
-  outputs: PortSpec[]
-}
-
 /** Generic header launch trigger — a `signal` input (accepts B/AB). Stamped
  * centrally by {@link defaultPortsForKind} for every kind that
- * {@link acceptsInputEvent}, so it is NOT listed per-kind below. */
+ * {@link acceptsInputEvent}, so it is NOT carried in the registry's per-kind
+ * port specs. */
 const IN: PortSpec = { id: 'in', flow: 'signal' }
-/** Generic output — carries a value AND acts as a trigger (`both`). */
-const OUT: PortSpec = { id: 'out', flow: 'both' }
-
-// The header `in` trigger is no longer listed per entry: `defaultPortsForKind`
-// prepends it for every kind that `acceptsInputEvent` (the default — every kind
-// except the `output` sink). So a spec's `inputs` here lists ONLY the kind's
-// own data/value inputs; the launch trigger is the capability's business.
-const PORTS: Partial<Record<ScenarioNodeKind, KindPorts>> = {
-  // Sources & control
-  input: { inputs: [], outputs: [{ id: 'value', name: 'value', flow: 'both' }] },
-  // `output` — declares a named scenario output (the symmetric counterpart of
-  // `input`): it consumes a `value` and exposes it as one of the scenario's
-  // outputs, which a parent `runScenario` derives into an output port. A
-  // terminal sink — no output of its own, and the SOLE kind with no header
-  // trigger (see `acceptsInputEvent`).
-  output: { inputs: [{ id: 'value', name: 'value' }], outputs: [] },
-  if: { inputs: [{ id: 'left', name: 'left' }, { id: 'right', name: 'right' }], outputs: [{ id: 'then', name: 'then', role: 'then', flow: 'both' }, { id: 'else', name: 'else', role: 'else', flow: 'both' }] },
-  switch: { inputs: [{ id: 'on', name: 'on' }], outputs: [{ id: 'default', name: 'default', role: 'default', flow: 'both' }] },
-  // Requests & composition
-  // `requestOverride` accepts a whole-request patch `{ url?, method?, headers?, body? }`
-  // merged over the bound request before dispatch (used by an upstream Postman/Bruno
-  // pre-request `code` node that mutated `pm.request` / `req`).
-  httpRequest: { inputs: [{ id: 'env', name: 'env', flow: 'value' }, { id: 'requestOverride', name: 'override', dataType: 'object', flow: 'value' }], outputs: [{ id: 'response', name: 'response', dataType: 'response', role: 'response', flow: 'both' }] },
-  runScenario: { inputs: [], outputs: [{ id: 'result', name: 'result', role: 'response', flow: 'both' }] },
-  // Socket.IO connect: a long-lived listener. `connected` fires once the socket
-  // is open (a pure signal). Each listened event re-emits on its OWN derived
-  // port (`event:<name>` — switch-like, added from `config.events`); any other
-  // server-pushed event lands on the `others` catch-all (the switch `default`
-  // analogue). The connection stays open until a `socketioClose` (or a Stop)
-  // ends it, at which point the universal `done` port fires. The per-event ports
-  // are derived (see {@link socketioConnectEventPorts}), not stamped here.
-  socketioConnect: { inputs: [], outputs: [{ id: 'connected', name: 'connected', flow: 'signal' }, { id: 'others', name: 'others', role: 'default', flow: 'both' }] },
-  // Socket.IO send: a pure-event action. Triggered on `in`, it emits `payload`
-  // on the `channel` event of the connection named by `config.connectionNodeId`.
-  // Sequencing happens via the universal `done` port (there's no separate value
-  // output — the action's outcome IS its completion). Both `channel` and
-  // `payload` carry inline fallbacks, so they aren't hard-required.
-  socketioSend: { inputs: [{ id: 'channel', name: 'channel', dataType: 'string' }, { id: 'payload', name: 'payload' }], outputs: [] },
-  // Socket.IO close: a pure-event action. Triggered on `in`, it closes the
-  // connection named by `config.connectionNodeId` (firing that connect node's
-  // `done`). Sequencing happens via the universal `done` port.
-  socketioClose: { inputs: [], outputs: [] },
-  // Raw WebSocket connect: like socketioConnect but a raw WS has no named events,
-  // so every received frame re-emits on a SINGLE `message` port (no `event:<name>`
-  // derivation, no `others`). `connected` fires once open; `done` fires on close.
-  websocketConnect: { inputs: [], outputs: [{ id: 'connected', name: 'connected', flow: 'signal' }, { id: 'message', name: 'message', flow: 'both' }] },
-  // Raw WebSocket send: sends `payload` (text) on the connection named by
-  // `config.connectionNodeId` — no channel/event. Sequences via `done`.
-  websocketSend: { inputs: [{ id: 'payload', name: 'payload' }], outputs: [] },
-  // Raw WebSocket close: closes the named connection. Sequences via `done`.
-  websocketClose: { inputs: [], outputs: [] },
-  // MQTT connect: like websocketConnect — MQTT has no named events, so every
-  // received message re-emits on a SINGLE `message` port. `connected` fires once
-  // the broker accepts + the topic is subscribed; `done` fires on close.
-  mqttConnect: { inputs: [], outputs: [{ id: 'connected', name: 'connected', flow: 'signal' }, { id: 'message', name: 'message', flow: 'both' }] },
-  // MQTT publish: publishes `payload` on the connection named by
-  // `config.connectionNodeId` (to that connection's topic). Sequences via `done`.
-  mqttSend: { inputs: [{ id: 'payload', name: 'payload' }], outputs: [] },
-  // MQTT close: closes the named connection. Sequences via `done`.
-  mqttClose: { inputs: [], outputs: [] },
-  // gRPC streaming connect: like websocketConnect — a streaming RPC has no named
-  // events, so every received frame re-emits on a SINGLE `message` port.
-  // `connected` fires once the call opens; `done` fires when the stream ends.
-  grpcConnect: { inputs: [], outputs: [{ id: 'connected', name: 'connected', flow: 'signal' }, { id: 'message', name: 'message', flow: 'both' }] },
-  // gRPC send: writes `payload` (a request message) on the connection named by
-  // `config.connectionNodeId` (client / bidi) — no channel. Sequences via `done`.
-  grpcSend: { inputs: [{ id: 'payload', name: 'payload' }], outputs: [] },
-  // gRPC close: half-closes the named streaming call. Sequences via `done`.
-  grpcClose: { inputs: [], outputs: [] },
-  // HTTP mock server listen: a long-lived server (like websocketConnect but
-  // restorm HOSTS). `connected` (a pure signal) fires once the server is
-  // listening; EACH request the mock serves re-emits its `{ request, response }`
-  // data on the `served` output (the analogue of a received frame); the run stays
-  // alive until an httpClose (or a Stop) ends the server, at which point the
-  // universal `done` port fires. No `response` output — a server serves, it does
-  // not call out.
-  httpListen: { inputs: [], outputs: [{ id: 'connected', name: 'connected', flow: 'signal' }, { id: 'served', name: 'served', flow: 'both' }] },
-  // HTTP mock server close: stops the server named by `config.connectionNodeId`
-  // (firing that listen node's `done`). Sequences via the universal `done` port.
-  httpClose: { inputs: [], outputs: [] },
-  // Iteration & collections. `items` carries a value-selector fallback in the
-  // editor (list-typed sources), so it isn't a hard-required port — like the
-  // `if` operands; the editor flags it red only when no list type is available.
-  // Loop completion is the universal implicit `Done` port (drawn on every box),
-  // so no explicit `done` output here — it would be a duplicate.
-  forEach: { inputs: [{ id: 'items', name: 'items', dataType: 'json' }], outputs: [{ id: 'each', name: 'each', role: 'then', flow: 'both' }] },
-  // `items` has a value-selector fallback in the editor (like forEach), so it
-  // isn't a hard-required port; the editor flags it red only when no list type
-  // is available to pick.
-  aggregate: { inputs: [{ id: 'items', name: 'items', dataType: 'json' }], outputs: [{ id: 'result', name: 'result', flow: 'both' }] },
-  // `items` has a value-selector fallback (like forEach); the per-item
-  // transform lives in config.
-  map: { inputs: [{ id: 'items', name: 'items', dataType: 'json' }], outputs: [{ id: 'mapped', name: 'mapped', dataType: 'json', flow: 'both' }] },
-  // `items` has a value-selector fallback in the editor (like forEach), so it
-  // isn't a hard-required port; the predicate (field/operator/value) lives in
-  // config.
-  filter: { inputs: [{ id: 'items', name: 'items', dataType: 'json' }], outputs: [{ id: 'kept', name: 'kept', dataType: 'json', flow: 'both' }, { id: 'rejected', name: 'rejected', dataType: 'json', flow: 'both' }] },
-  // List mutation: `list` is the target collection (a list-typed source/variable,
-  // value-selector fallback). The values to add/remove are N per-row inputs (each
-  // its own connectable port, derived from config like the object node's
-  // properties — not listed here). `result` is the new list.
-  // `list` is the list-only TARGET (a list-typed variable or a wired list — a
-  // plain `object` can't land here). The default value-row port is declared
-  // (dataType `any`) so a dragged value/object lands on it rather than `list`
-  // (the box renders it as the first value row when none are persisted yet).
-  addToList: { inputs: [{ id: 'list', name: 'list', dataType: 'list' }, { id: LIST_MUTATION_DEFAULT_VALUE_ID, name: '', dataType: 'any' }], outputs: [{ id: 'result', name: 'result', dataType: 'json', flow: 'both' }] },
-  removeFromList: { inputs: [{ id: 'list', name: 'list', dataType: 'list' }, { id: LIST_MUTATION_DEFAULT_VALUE_ID, name: '', dataType: 'any' }], outputs: [{ id: 'result', name: 'result', dataType: 'json', flow: 'both' }] },
-  // Loops. `for` is a numeric-range forEach: `from` / `to` / `step` carry
-  // inline value fallbacks (like the `if` operands), so they aren't hard
-  // required; it fans out the range over `each` (the current number) and fires
-  // `done` once every iteration's scope has closed — reusing the forEach
-  // scope machinery + the parallelism control.
-  for: { inputs: [{ id: 'from', name: 'from', dataType: 'number' }, { id: 'to', name: 'to', dataType: 'number' }, { id: 'step', name: 'step', dataType: 'number' }], outputs: [{ id: 'each', name: 'index', role: 'then', flow: 'both' }] },
-  // `while` / `doWhile` are the `if` mechanism in a loop dress: the header
-  // trigger + two operands compared by the operator toggle, routing to `then`
-  // (the loop body) when the condition holds and `else` (exit) when it fails.
-  // The loop is closed by a user-wired edge from the body back into `in` (or
-  // an operand) — the scheduler's merge-on-loop-back re-fires the node each
-  // pass. `while` tests at the top; `doWhile` is wired after the body so it
-  // runs at least once. The `then` label differs to hint the wiring.
-  // Loop exit ("once the condition lets us out") is the universal implicit
-  // `Done` port — no explicit `else`/`done` output here (it would duplicate it).
-  // The body branch (`then`) is a pure SIGNAL — it just fires the loop body each
-  // pass; there's no per-iteration value to carry (unlike a forEach `each` item).
-  while: { inputs: [{ id: 'left', name: 'left' }, { id: 'right', name: 'right' }], outputs: [{ id: 'then', name: 'body', role: 'then', flow: 'signal' }] },
-  doWhile: { inputs: [{ id: 'left', name: 'left' }, { id: 'right', name: 'right' }], outputs: [{ id: 'then', name: 'loop', role: 'then', flow: 'signal' }] },
-  // Time. No explicit output — `wait` sequences the next node via the universal
-  // `done` port (which fires once the delay elapses). A value to carry past the
-  // delay is held in a run variable / wired around the wait, not passed through.
-  wait: { inputs: [{ id: 'duration', name: 'duration', dataType: 'duration' }], outputs: [] },
-  // Aligned on `wait`: an inline value fallback (a date-time picker) on `until`,
-  // so it isn't a hard-required port and the node is runnable on its own.
-  // Sequences via `done` (no value passthrough), like `wait`.
-  waitUntil: { inputs: [{ id: 'until', name: 'until' }], outputs: [] },
-  now: { inputs: [], outputs: [{ id: 'value', name: 'now', dataType: 'string', flow: 'both' }] },
-  // `timer` fires its `tick` body on each interval (a frequency number+unit OR a
-  // cron), optionally bounded by a total duration / end date, until it stops.
-  // The frequency, cron, duration and endDate are all wireable inputs.
-  timer: { inputs: [{ id: 'frequency', name: 'frequency', dataType: 'number' }, { id: 'cron', name: 'cron', dataType: 'string' }, { id: 'duration', name: 'duration', dataType: 'number' }, { id: 'endDate', name: 'endDate' }], outputs: [{ id: 'tick', name: 'tick', role: 'then', flow: 'both' }] },
-  // Data & compute. Operands carry typed value-selector fallbacks (like `if`),
-  // so they aren't hard-required ports. These are data-driven (they run once
-  // their inputs resolve and expose `result`), but they still carry the header
-  // trigger so a flow can gate WHEN they (re)compute / re-read a variable.
-  arithmetic: { inputs: [{ id: 'a', name: 'a', dataType: 'number' }, { id: 'b', name: 'b', dataType: 'number' }], outputs: [{ id: 'result', name: 'result', dataType: 'number', flow: 'both' }] },
-  comparator: { inputs: [{ id: 'a', name: 'a' }, { id: 'b', name: 'b' }], outputs: [{ id: 'result', name: 'result', dataType: 'boolean', flow: 'both' }] },
-  // `object` builds a structured object from N named properties. The property
-  // inputs are user-configured (rendered from config like the switch cases), so
-  // none are stamped here; the single output is the assembled JSON object.
-  object: { inputs: [], outputs: [{ id: 'object', name: 'object', dataType: 'object', flow: 'both' }] },
-  boolean: { inputs: [{ id: 'a', name: 'a', dataType: 'boolean' }, { id: 'b', name: 'b', dataType: 'boolean' }], outputs: [{ id: 'result', name: 'result', dataType: 'boolean', flow: 'both' }] },
-  // No `event` output — completion is the universal `Done` port (which made the
-  // old `event` signal redundant).
-  setVariable: { inputs: [{ id: 'value', name: 'value' }], outputs: [] },
-  getVariable: { inputs: [], outputs: [{ id: 'value', name: 'value', flow: 'both' }] },
-  // `transform` (a.k.a. "Transform template") applies an expression/Handlebars
-  // template to its optional `value` input and emits the result. The `value`
-  // input stays optional so the node can also run on its own (a pure template).
-  // The `expression` input is also optional: wire it to drive the template text
-  // from an upstream value, else the inline editor's template is used. The
-  // expression determines the output type.
-  transform: { inputs: [{ id: 'value', name: 'value' }, { id: 'expression', name: 'expression' }], outputs: [{ id: 'out', name: 'value', flow: 'both' }] },
-  // `code` runs user TS/JS: its `value` input is exposed as `input`, the script's
-  // return value flows out of `result`. The `code` input lets the SCRIPT TEXT
-  // itself be wired (an upstream node can supply the code); unwired, the inline
-  // editor's code is used.
-  code: { inputs: [{ id: 'value', name: 'input' }, { id: 'code', name: 'code', dataType: 'string' }], outputs: [{ id: 'result', name: 'result', flow: 'both' }] },
-  // `cast` converts its `value` input to the configured target type (the output
-  // type is the chosen target, so no fixed dataType is stamped here).
-  cast: { inputs: [{ id: 'value', name: 'value' }], outputs: [{ id: 'result', name: 'result', flow: 'both' }] },
-  // `regex` runs the configured operation (extract / match / replace / split)
-  // over its `value` string input; the output type depends on the op.
-  regex: { inputs: [{ id: 'value', name: 'value', dataType: 'string' }, { id: 'pattern', name: 'pattern', dataType: 'string' }], outputs: [{ id: 'result', name: 'result', flow: 'both' }] },
-  // `json` parses its `value` string into a value, or stringifies its `value`;
-  // the output type depends on the op (parsed value vs JSON string).
-  json: { inputs: [{ id: 'value', name: 'value' }], outputs: [{ id: 'result', name: 'result', flow: 'both' }] },
-  // `xml` / `yaml` parse their `value` string into a value, or stringify their
-  // `value`; the output type depends on the op (parsed value vs markup string).
-  xml: { inputs: [{ id: 'value', name: 'value' }], outputs: [{ id: 'result', name: 'result', flow: 'both' }] },
-  yaml: { inputs: [{ id: 'value', name: 'value' }], outputs: [{ id: 'result', name: 'result', flow: 'both' }] },
-  // `crypto` encodes / hashes / signs its `value` string (or generates a UUID);
-  // the result is always a string.
-  crypto: { inputs: [{ id: 'value', name: 'value', dataType: 'string' }], outputs: [{ id: 'result', name: 'result', dataType: 'string', flow: 'both' }] },
-  // `jwt` decodes its `value` token string into `{ header, payload, signature }`.
-  jwt: { inputs: [{ id: 'value', name: 'value', dataType: 'string' }], outputs: [{ id: 'result', name: 'result', flow: 'both' }] },
-  // `datetime` shifts / formats / diffs its `value` date; output is an ISO string
-  // (add / subtract / format) or a number (diff). The `amount` (add/subtract) and
-  // `other` second date (diff) are optional inputs: wire them, else use the inline
-  // fields.
-  datetime: { inputs: [{ id: 'value', name: 'value' }, { id: 'amount', name: 'amount' }, { id: 'other', name: 'other' }], outputs: [{ id: 'result', name: 'result', flow: 'both' }] },
-  // `objectOp` reshapes its `value` object (get/set/merge/pick/omit/keys/values);
-  // path / keys / the set-or-merge operand live in config.
-  objectOp: { inputs: [{ id: 'value', name: 'value' }, { id: 'path', name: 'path', dataType: 'string' }], outputs: [{ id: 'result', name: 'result', flow: 'both' }] },
-  // `url` encodes / decodes / parses / builds its `value` (a string, or an object
-  // for buildQuery); the output type depends on the op.
-  url: { inputs: [{ id: 'value', name: 'value' }], outputs: [{ id: 'result', name: 'result', flow: 'both' }] },
-  // `random` generates a value (int / float / string / boolean / pick) — no data
-  // input; every parameter is config.
-  random: { inputs: [{ id: 'min', name: 'min', dataType: 'number' }, { id: 'max', name: 'max', dataType: 'number' }, { id: 'seed', name: 'seed' }], outputs: [{ id: 'result', name: 'result', flow: 'both' }] },
-  // `listOp` reshapes its `value` list (sort/unique/reverse/flatten/chunk/slice/
-  // groupBy); the key / order / size / bounds live in config.
-  listOp: { inputs: [{ id: 'value', name: 'value', dataType: 'list' }, { id: 'key', name: 'key', dataType: 'string' }], outputs: [{ id: 'result', name: 'result', flow: 'both' }] },
-  // `csv` parses a CSV string → rows / stringifies a list → CSV; delimiter +
-  // header are config. Like json/xml/yaml the `value` shape depends on the op.
-  csv: { inputs: [{ id: 'value', name: 'value' }, { id: 'delimiter', name: 'delimiter', dataType: 'string' }], outputs: [{ id: 'result', name: 'result', flow: 'both' }] },
-  // `math` runs a scalar op on `a`; the second operand (min/max), clamp bounds
-  // and round precision live in config.
-  math: { inputs: [{ id: 'a', name: 'a', dataType: 'number' }, { id: 'precision', name: 'precision', dataType: 'number' }], outputs: [{ id: 'result', name: 'result', dataType: 'number', flow: 'both' }] },
-  // `schema` validates `value` against a JSON Schema → routes the value to
-  // `valid` / `invalid` + the error list on `errors`.
-  schema: { inputs: [{ id: 'value', name: 'value' }, { id: 'schema', name: 'schema', dataType: 'string' }], outputs: [{ id: 'valid', name: 'valid', role: 'then', flow: 'both' }, { id: 'invalid', name: 'invalid', role: 'else', flow: 'both' }, { id: 'errors', name: 'errors', flow: 'both' }] },
-  // `readFile` reads the file at `path` (relative to the scenario, or absolute)
-  // → its text on `content`.
-  readFile: { inputs: [{ id: 'path', name: 'path', dataType: 'string' }], outputs: [{ id: 'content', name: 'content', dataType: 'string', flow: 'both' }] },
-  // `writeFile` writes / appends `content` to `path`. Terminal (no value output).
-  writeFile: { inputs: [{ id: 'path', name: 'path', dataType: 'string' }, { id: 'content', name: 'content' }], outputs: [] },
-  // `retry` runs the body wired off `attempt` as an error-boundary scope; the
-  // implicit `done` is the success exit, `exhausted` the give-up branch.
-  retry: { inputs: [{ id: 'maxAttempts', name: 'maxAttempts', dataType: 'number' }, { id: 'delay', name: 'delay', dataType: 'number' }], outputs: [{ id: 'attempt', name: 'attempt', role: 'then', flow: 'both' }, { id: 'exhausted', name: 'exhausted', role: 'else', flow: 'both' }] },
-  // Utilities
-  // A terminal sink with two optional inputs (wire either, or set inline).
-  // `message` is a string, `data` any value. No output (terminal).
-  log: { inputs: [{ id: 'message', name: 'message', dataType: 'string' }, { id: 'data', name: 'data' }], outputs: [] },
-  // An assertion compares two operands (`actual` / `expected`) with the same
-  // operator toggle as `if`/`comparator`; both operands carry inline
-  // value-selector fallbacks, so they aren't hard-required ports. Branches
-  // `pass` / `fail`; the failure label lives in config (`message`).
-  assert: { inputs: [{ id: 'a', name: 'actual' }, { id: 'b', name: 'expected' }, { id: 'message', name: 'message', dataType: 'string' }], outputs: [{ id: 'then', name: 'pass', role: 'then', flow: 'both' }, { id: 'else', name: 'fail', role: 'else', flow: 'both' }] },
-  // `toast` broadcasts a notification to the Restorm UI (renderer). Wireable /
-  // inline text inputs: `title` (header) + `message` (body). `level` (info /
-  // success / warning / error, a segmented toggle) and `duration` (a plain
-  // number of seconds) are config-only — not wireable ports. No value output —
-  // emits `done` implicitly via the capability default, and the implicit `error`
-  // port (a title/message expression can fail to render).
-  toast: { inputs: [{ id: 'title', name: 'title', dataType: 'string' }, { id: 'message', name: 'message', dataType: 'string' }], outputs: [] },
-  // `throw` deliberately fails with a `message` (wired or inline) — routed to the
-  // node's implicit `error` port (or it fails the run if nothing handles it). No
-  // value output: a throw never completes normally.
-  throw: { inputs: [{ id: 'message', name: 'message', dataType: 'string' }], outputs: [] }
-}
-
-/** A generic single-in/single-out node for any kind without a spec (the `in`
- * trigger is added by {@link defaultPortsForKind}, so only the output here). */
-const FALLBACK: KindPorts = { inputs: [], outputs: [OUT] }
 
 /** Fresh default ports for a node of the given kind (new arrays each call). The
- * header `in` launch trigger is prepended for every kind that
+ * per-kind static ports come from the kind registry (the single source of
+ * truth); the header `in` launch trigger is prepended for every kind that
  * {@link acceptsInputEvent} — i.e. all but the `output` sink. */
 export function defaultPortsForKind(kind: ScenarioNodeKind): { inputs: ScenarioPort[]; outputs: ScenarioPort[] } {
-  const spec = PORTS[kind] ?? FALLBACK
+  const spec: KindPorts = REGISTRY[kind].ports
   const inputs = acceptsInputEvent(kind) ? [IN, ...spec.inputs] : spec.inputs
   return { inputs: inputs.map(p), outputs: spec.outputs.map(p) }
 }
