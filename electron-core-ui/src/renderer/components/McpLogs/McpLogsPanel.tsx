@@ -92,16 +92,17 @@ function formatTime(ts: number): string {
 }
 
 /** Resolve a log capture to a renderable Thumbnail media, or null once it's no
- * longer retrievable. Images carry inline base64 (rendered via a `data:` URL);
- * videos carry an `ecui-media://` URL in `path` (the renderer blocks `file://`,
- * so the webm is streamed on demand from disk through the privileged scheme
- * instead of bloating the buffer with multi-MB base64). */
+ * longer retrievable. Both images and videos are served on demand from disk via
+ * an `ecui-media://` URL in `path` (the renderer blocks `file://`, so the temp
+ * file is streamed through the privileged scheme instead of bloating the buffer
+ * with multi-MB base64). A legacy inline `base64` payload is still honoured as a
+ * `data:` URL fallback for any entry that predates on-demand image serving. */
 function captureToMedia(capture: NonNullable<McpLogEntry['capture']>): ThumbnailMedia | null {
+  if (capture.path) {
+    return { kind: capture.kind, src: capture.path, mimeType: capture.mimeType }
+  }
   if (capture.kind === 'image' && capture.base64) {
     return { kind: 'image', src: `data:${capture.mimeType};base64,${capture.base64}`, mimeType: capture.mimeType }
-  }
-  if (capture.kind === 'video' && capture.path) {
-    return { kind: 'video', src: capture.path, mimeType: capture.mimeType }
   }
   return null
 }

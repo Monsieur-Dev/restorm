@@ -30,17 +30,20 @@ export interface McpLogEntry {
 
 /** A captured artefact (screenshot / screencast) attached to a log entry. */
 export interface McpLogCapture {
-  /** `image` for a base64 PNG, `video` for a screencast file path. */
+  /** `image` for a PNG screenshot, `video` for a screencast clip. */
   kind: 'image' | 'video'
   /** MIME type, e.g. `image/png` or `video/webm`. */
   mimeType: string
-  /** Inline base64 payload for `image` (PNG), rendered via a `data:` URL;
-   * absent once evicted from memory. Not used for `video`. */
+  /** Legacy inline base64 payload (a `data:` URL source); absent once evicted.
+   * No longer produced for new captures — both image + video are served on
+   * demand via {@link path} — but kept for forward/back-compat with any entry
+   * still carrying inline bytes. */
   base64?: string
-  /** For `video`: an `ecui-media://` URL the renderer loads on demand (the
-   * renderer blocks `file://`, so the webm is streamed from disk via the
-   * privileged scheme rather than inlined). Kept even on older entries since
-   * it's lightweight; the clip stays playable while its temp file exists. */
+  /** An `ecui-media://<ns>/<file>` URL the renderer loads on demand (the renderer
+   * blocks `file://`, so the temp file is streamed via the privileged scheme
+   * rather than inlined): `screenshot/<file>.png` for an image, `screencast/<file>`
+   * for a video. Kept even on older entries since it's lightweight; the capture
+   * stays loadable while its temp file exists. */
   path?: string
 }
 

@@ -311,8 +311,15 @@ function extractResultText(result: unknown): unknown {
 }
 
 /** URL prefix the logs viewer uses to load a screencast clip the renderer
- * can't reach over `file://`. Resolved by {@link installScreencastMediaProtocol}. */
+ * can't reach over `file://`. Resolved by {@link installEcuiMediaProtocol}. */
 export const SCREENCAST_MEDIA_URL_PREFIX = 'ecui-media://screencast/'
+
+/** URL prefix for a captured screenshot served on-demand. The SAME URI is read
+ * two ways: an external MCP client `resources/read`s it (the SDK ships the PNG
+ * blob over the wire — see {@link McpService.registerBuiltinResources}), and the
+ * in-app logs viewer loads it as an `<img src>` via {@link installEcuiMediaProtocol}.
+ * Keeping the heavy base64 out of the `screenshot` tool result. */
+export const SCREENSHOT_MEDIA_URL_PREFIX = 'ecui-media://screenshot/'
 
 /** True for a screencast temp-file basename we own (mp4 remux or raw webm).
  * Used to guard both protocol serving and temp-file cleanup against path
@@ -321,26 +328,43 @@ function isScreencastTempName(name: string): boolean {
   return name.startsWith('ecu-screencast-') && (name.endsWith('.mp4') || name.endsWith('.webm'))
 }
 
-let screencastMediaProtocolInstalled = false
+/** True for a screenshot temp-file basename we own. Same traversal/guard role as
+ * {@link isScreencastTempName}, for the `ecu-screenshot-*.png` captures. */
+function isScreenshotTempName(name: string): boolean {
+  return name.startsWith('ecu-screenshot-') && name.endsWith('.png')
+}
+
+/** True for any ECUI media temp-file basename (screencast clip or screenshot)
+ * we own — drives the orphan sweep + eviction cleanup across both kinds. */
+function isEcuiMediaTempName(name: string): boolean {
+  return isScreencastTempName(name) || isScreenshotTempName(name)
+}
+
+let ecuiMediaProtocolInstalled = false
 /**
- * Register the `ecui-media://screencast/<file>` protocol handler that streams a
- * screencast `.webm` from the OS temp dir to the renderer. The renderer BLOCKS
- * `file://` resources, so a `<video src=file://…>` never loads; this privileged
- * scheme (declared in IPCManager's pre-ready list) does. Idempotent.
+ * Register the `ecui-media://<namespace>/<file>` protocol handler that streams a
+ * captured media temp file (a screencast `.webm`/`.mp4` under the `screencast`
+ * namespace, or a screenshot `.png` under the `screenshot` namespace) from the
+ * OS temp dir to the renderer. The renderer BLOCKS `file://` resources, so a
+ * `<video>`/`<img src=file://…>` never loads; this privileged scheme (declared
+ * in IPCManager's pre-ready list) does. Idempotent.
  *
- * Security: only serves files directly inside `tmpdir()` whose name matches the
- * screencast prefix — the path is reduced to its basename so `..` / nested
- * paths can't escape the temp dir.
+ * Security: only serves files directly inside `tmpdir()` whose name matches an
+ * ECUI media prefix, AND whose basename kind matches its namespace — the path is
+ * reduced to its basename so `..` / nested paths can't escape the temp dir.
  */
-function installScreencastMediaProtocol(): void {
-  if (screencastMediaProtocolInstalled) return
-  screencastMediaProtocolInstalled = true
+function installEcuiMediaProtocol(): void {
+  if (ecuiMediaProtocolInstalled) return
+  ecuiMediaProtocolInstalled = true
   protocol.handle('ecui-media', (request) => {
     try {
       const url = new URL(request.url)
-      // host is the namespace ("screencast"); pathname is "/<basename>".
+      // host is the namespace ("screencast" | "screenshot"); pathname is "/<basename>".
       const name = pathBasename(decodeURIComponent(url.pathname))
-      if (url.host !== 'screencast' || !isScreencastTempName(name)) {
+      const matchesNamespace =
+        (url.host === 'screencast' && isScreencastTempName(name)) ||
+        (url.host === 'screenshot' && isScreenshotTempName(name))
+      if (!matchesNamespace) {
         return new Response('Not found', { status: 404 })
       }
       const filePath = pathJoin(tmpdir(), name)
@@ -351,17 +375,17 @@ function installScreencastMediaProtocol(): void {
       return new Response('Error', { status: 500 })
     }
   })
-  logger.info('McpService: ecui-media screencast protocol registered')
+  logger.info('McpService: ecui-media protocol registered')
 }
 
 /**
- * Best-effort sweep of leftover `ecu-screencast-*.{webm,mp4}` temp files from a
- * previously CRASHED run. The on-exit + eviction cleanups handle the normal
- * case, but a SIGKILL / power loss skips them, leaving orphans in the OS temp
- * dir. Run once at startup. Basename-guarded so it only ever touches our own
- * screencast temp files.
+ * Best-effort sweep of leftover ECUI media temp files (`ecu-screencast-*.{webm,mp4}`
+ * + `ecu-screenshot-*.png`) from a previously CRASHED run. The on-exit + eviction
+ * cleanups handle the normal case, but a SIGKILL / power loss skips them, leaving
+ * orphans in the OS temp dir. Run once at startup. Basename-guarded so it only ever
+ * touches our own media temp files.
  */
-function sweepOrphanScreencastFiles(): void {
+function sweepOrphanMediaFiles(): void {
   const dir = tmpdir()
   let names: string[]
   try {
@@ -371,13 +395,13 @@ function sweepOrphanScreencastFiles(): void {
   }
   let removed = 0
   for (const name of names) {
-    if (!isScreencastTempName(name)) continue
+    if (!isEcuiMediaTempName(name)) continue
     try {
       rmSync(pathJoin(dir, name), { force: true })
       removed++
     } catch { /* best-effort */ }
   }
-  if (removed > 0) logger.info('McpService: swept orphan screencast temp files', { removed })
+  if (removed > 0) logger.info('McpService: swept orphan media temp files', { removed })
 }
 
 /**
@@ -547,6 +571,7 @@ export class McpService {
   constructor(options: McpServiceOptions = {}) {
     this.options = options
     this.registerBuiltinTools()
+    this.registerBuiltinResources()
   }
 
   /**
@@ -761,11 +786,12 @@ export class McpService {
 
   /**
    * Bound capture memory + disk to the most-recent {@link captureRetentionCap}
-   * entries: any older capture drops its heavy payload — image `base64` is
-   * cleared, and a video's `path` (an `ecui-media://` URL) is dropped AND its
-   * on-disk temp file deleted. Only the capture metadata (kind / mimeType)
-   * stays, so the viewer shows "capture no longer available". Called after
-   * every record / capture-attach and on a cap change.
+   * entries: any older capture drops its heavy payload — an inline image `base64`
+   * is cleared, and a `path`-backed capture (a screenshot or video served via an
+   * `ecui-media://` URL) is dropped AND its on-disk temp file deleted. Only the
+   * capture metadata (kind / mimeType) stays, so the viewer shows "capture no
+   * longer available" and a later `resources/read` of the URI returns a clean
+   * "gone" error. Called after every record / capture-attach and on a cap change.
    */
   private pruneOldCaptures(): void {
     const keepFrom = this.servedCalls.length - this.captureRetentionCap
@@ -774,29 +800,38 @@ export class McpService {
       if (!e?.capture) continue
       const { kind, mimeType, base64, path } = e.capture
       if (base64 === undefined && path === undefined) continue // already pruned
-      // Delete the backing screencast temp file (video) before dropping the ref.
+      // Delete the backing temp file (screenshot / video) before dropping the ref.
       this.disposeEvictedMedia([e])
       e.capture = { kind, mimeType }
     }
   }
 
   /**
-   * Delete the on-disk screencast temp files backing the given evicted entries
-   * so `/tmp` doesn't grow unbounded. A video capture's `path` is an
-   * `ecui-media://screencast/<file>` URL → its temp file is `tmpdir()/<file>`.
-   * Best-effort: a missing file or an unparsable path is ignored. Call with the
-   * entries being dropped from the buffer (cap overflow / cap lowered / clear).
+   * Delete the on-disk media temp files backing the given evicted entries so
+   * `/tmp` doesn't grow unbounded. A capture's `path` is an `ecui-media://<ns>/<file>`
+   * URL (video clip under `screencast/`, screenshot under `screenshot/`) → its temp
+   * file is `tmpdir()/<file>`. Best-effort: a missing file or an unparsable path is
+   * ignored. Call with the entries being dropped from the buffer (cap overflow / cap
+   * lowered / clear). Once deleted, a later `resources/read` of the URI returns a
+   * clean "gone" error (the resource handler basename-guards + existence-checks).
    */
   private disposeEvictedMedia(evicted: readonly McpServedCallEntry[]): void {
     for (const e of evicted) {
-      const url = e.capture?.kind === 'video' ? e.capture.path : undefined
-      if (!url?.startsWith(SCREENCAST_MEDIA_URL_PREFIX)) continue
-      const name = pathBasename(url.slice(SCREENCAST_MEDIA_URL_PREFIX.length))
-      if (!isScreencastTempName(name)) continue
+      const url = e.capture?.path
+      if (!url) continue
+      let name: string | undefined
+      if (url.startsWith(SCREENCAST_MEDIA_URL_PREFIX)) {
+        const candidate = pathBasename(url.slice(SCREENCAST_MEDIA_URL_PREFIX.length))
+        if (isScreencastTempName(candidate)) name = candidate
+      } else if (url.startsWith(SCREENSHOT_MEDIA_URL_PREFIX)) {
+        const candidate = pathBasename(url.slice(SCREENSHOT_MEDIA_URL_PREFIX.length))
+        if (isScreenshotTempName(candidate)) name = candidate
+      }
+      if (!name) continue
       try {
         rmSync(pathJoin(tmpdir(), name), { force: true })
       } catch (err) {
-        logger.warn('McpService: failed to delete evicted screencast temp file', { name, error: String(err) })
+        logger.warn('McpService: failed to delete evicted media temp file', { name, error: String(err) })
       }
     }
   }
@@ -821,8 +856,8 @@ export class McpService {
     // McpService instances in the same process (rare; tests) doesn't
     // double-wrap the dialog API.
     installDialogBypass()
-    installScreencastMediaProtocol()
-    sweepOrphanScreencastFiles()
+    installEcuiMediaProtocol()
+    sweepOrphanMediaFiles()
     this.attachConsoleSubscriptions()
 
     const httpServer = createServer((req, res) => {
@@ -978,6 +1013,47 @@ export class McpService {
     this.resources.push({ name, uri, config, handler })
   }
 
+  /**
+   * Register the built-in resources that ship with every McpService host.
+   *
+   * `ecui-media://screenshot/{file}` resolves a screenshot captured by the
+   * `screenshot` tool: the tool writes the PNG to a temp file and returns a
+   * `resource_link` to this uri (instead of inlining the base64), so an external
+   * MCP client fetches the bytes on demand via `resources/read` — the handler
+   * reads the temp file and returns it as a base64 `blob` (the SDK ships it over
+   * the wire). The SAME uri is loaded by the in-app logs viewer as an `<img src>`
+   * via the privileged `ecui-media` protocol handler ({@link installEcuiMediaProtocol}).
+   *
+   * Security: the `{file}` segment is reduced to its basename and must match the
+   * screenshot temp-name guard + still exist under `tmpdir()` — so `..` / nested
+   * paths can't escape the temp dir, and a captured-then-evicted screenshot reads
+   * back as a clean "gone" error rather than stale or unrelated bytes.
+   */
+  private registerBuiltinResources(): void {
+    this.registerResource(
+      'screenshot',
+      'ecui-media://screenshot/{file}',
+      {
+        title: 'Captured screenshot',
+        description:
+          'A PNG screenshot captured by the `screenshot` tool, served on demand. The `screenshot` ' +
+          'result returns a resource_link to `ecui-media://screenshot/<file>`; read it here to get the image bytes.',
+        mimeType: 'image/png'
+      },
+      (uri) => {
+        const name = pathBasename(decodeURIComponent(uri.pathname))
+        if (!isScreenshotTempName(name)) {
+          return { text: JSON.stringify({ error: 'not a screenshot resource' }), mimeType: 'application/json' }
+        }
+        const filePath = pathJoin(tmpdir(), name)
+        if (!existsSync(filePath)) {
+          return { text: JSON.stringify({ error: 'screenshot no longer available (evicted)' }), mimeType: 'application/json' }
+        }
+        return { blob: readFileSync(filePath).toString('base64'), mimeType: 'image/png' }
+      }
+    )
+  }
+
   private registerBuiltinTools(): void {
     this.registerTool(
       'screenshot',
@@ -985,8 +1061,11 @@ export class McpService {
         titleKey: 'mcpToolTitles.screenshot',
         title: 'Screenshot',
         description:
-          'Capture an Electron window as a PNG and return it base64-encoded. ' +
-          'Use this to inspect the application UI state. Pass `windowId` to target a specific window in multi-window setups.',
+          'Capture an Electron window as a PNG and serve it on-demand. The heavy image bytes are NOT inlined ' +
+          'in this result; instead the result carries a `resource_link` whose `uri` is an `ecui-media://screenshot/<file>` ' +
+          'reference. Fetch the PNG by calling `resources/read` on that uri — it returns the image as a base64 `blob`. ' +
+          'Use this to inspect the application UI state. Pass `windowId` to target a specific window in multi-window setups. ' +
+          'The capture is retained briefly; reading it after it has been evicted returns a "gone" error.',
         inputSchema: { windowId: windowIdSchema } as Record<string, unknown>
       },
       async (args) => {
@@ -995,13 +1074,36 @@ export class McpService {
         const win = pickWindow(windowId)
         if (!win) return noWindowError(windowId)
         const image = await win.webContents.capturePage()
-        const base64 = image.toPNG().toString('base64')
-        // Surface the capture inline in the logs viewer (bonus). Attached to
-        // the most-recent served-call entry — i.e. this very `screenshot`
-        // call — and auto-evicted for older entries to bound memory.
-        this.attachCaptureToLatest({ kind: 'image', mimeType: 'image/png', base64 })
+        const png = image.toPNG()
+        // Write the PNG to a temp file (0600 — a screenshot can capture
+        // on-screen secrets) and serve it on demand rather than inlining the
+        // heavy base64 in the tool result. An external MCP client fetches it via
+        // `resources/read` on the returned `ecui-media://screenshot/<file>` uri
+        // (the SDK ships the blob — see registerBuiltinResources), and the in-app
+        // logs viewer loads the SAME uri as an `<img src>` via the privileged
+        // `ecui-media` protocol handler.
+        const fileName = `ecu-screenshot-${String(Date.now())}.png`
+        const filePath = pathJoin(tmpdir(), fileName)
+        writeFileSync(filePath, png, { mode: 0o600 })
+        const uri = `${SCREENSHOT_MEDIA_URL_PREFIX}${fileName}`
+        // Surface the capture inline in the logs viewer (bonus). Attached to the
+        // most-recent served-call entry — i.e. this very `screenshot` call — and
+        // auto-evicted for older entries (the temp file deleted) to bound disk.
+        this.attachCaptureToLatest({ kind: 'image', mimeType: 'image/png', path: uri })
         return {
-          content: [{ type: 'image', data: base64, mimeType: 'image/png' }]
+          content: [
+            {
+              type: 'resource_link',
+              uri,
+              name: fileName,
+              mimeType: 'image/png',
+              description: 'PNG screenshot — read this uri via resources/read to fetch the image bytes.'
+            },
+            {
+              type: 'text',
+              text: JSON.stringify({ uri, mimeType: 'image/png', byteLength: png.byteLength })
+            }
+          ]
         }
       }
     )
@@ -2345,6 +2447,37 @@ export class McpService {
                 }
               } catch (err) {
                 logger.warn('batch: failed to inline screencast .webm', { error: String(err) })
+              }
+            }
+          }
+
+          // Special case: screenshot serves its PNG on demand via an
+          // `ecui-media://screenshot/<file>` resource (no base64 in its own
+          // result). Inline the bytes as a `resource` content part here so a
+          // batch caller gets the image in this one round-trip without a follow-up
+          // `resources/read`. Silent-skip on any parse / IO failure — the uri is
+          // still in the resource_link + text parts above.
+          if (step.name === 'screenshot') {
+            const linkPart = content.find((c) => c['type'] === 'resource_link')
+            const uri = linkPart && typeof linkPart['uri'] === 'string' ? linkPart['uri'] : null
+            if (uri?.startsWith(SCREENSHOT_MEDIA_URL_PREFIX)) {
+              try {
+                const name = pathBasename(uri.slice(SCREENSHOT_MEDIA_URL_PREFIX.length))
+                if (isScreenshotTempName(name)) {
+                  const filePath = pathJoin(tmpdir(), name)
+                  if (existsSync(filePath)) {
+                    aggregatedContent.push({
+                      type: 'resource',
+                      resource: {
+                        uri,
+                        mimeType: 'image/png',
+                        blob: readFileSync(filePath).toString('base64')
+                      }
+                    })
+                  }
+                }
+              } catch (err) {
+                logger.warn('batch: failed to inline screenshot .png', { error: String(err) })
               }
             }
           }
