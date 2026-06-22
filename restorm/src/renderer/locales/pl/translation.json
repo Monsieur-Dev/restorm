@@ -262,7 +262,8 @@
         "socketio": "Żądanie Socket.IO",
         "mqtt": "MQTT request",
         "mqttServer": "Broker MQTT",
-        "grpcServer": "Serwer mock gRPC"
+        "grpcServer": "Serwer mock gRPC",
+        "soapServer": "Serwer mock SOAP"
       }
     },
     "deleteConfirm": {
@@ -468,7 +469,24 @@
       "body": "Treść",
       "headers": "Nagłówki"
     },
-    "malformedXmlError": "Nieprawidłowa odpowiedź XML"
+    "malformedXmlError": "Nieprawidłowa odpowiedź XML",
+    "server": {
+      "startListening": "Uruchom serwer mock SOAP",
+      "stopListening": "Zatrzymaj serwer mock SOAP",
+      "notListening": "Nie nasłuchuje",
+      "served": "Nasłuchiwanie — obsłużono {{count}} żądań",
+      "listenFailed": "Nie można uruchomić serwera mock SOAP",
+      "portLabel": "Port",
+      "routeLabel": "Trasa",
+      "operationNameLabel": "Nazwa operacji",
+      "operationNamePlaceholder": "Nazwa operacji",
+      "soapActionLabel": "SOAPAction",
+      "soapActionPlaceholder": "SOAPAction (opcjonalnie)",
+      "faultLabel": "Błąd",
+      "removeOperation": "Usuń operację",
+      "addOperation": "Dodaj operację",
+      "noCodeSnippets": "Serwer mock SOAP nie ma fragmentu kodu klienta."
+    }
   },
   "websocket": {
     "connect": "Połącz",
@@ -1025,7 +1043,9 @@
       "mqttClose": "MQTT close",
       "httpListen": "HTTP server",
       "httpClose": "HTTP close",
-      "grpcServerClose": "Zamknij serwer gRPC"
+      "grpcServerClose": "Zamknij serwer gRPC",
+      "soapListen": "Serwer SOAP",
+      "soapClose": "Zamknij SOAP"
     },
     "comparator": {
       "result": "wynik"
@@ -1588,7 +1608,9 @@
       "httpListen": "Hosts a local HTTP mock server and listens indefinitely. `connected` fires once it is listening; each served request re-emits its data on the `served` port. The server stays up until an HTTP close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
       "httpClose": "Stops an already-listening HTTP mock server (declared by an HTTP server node), freeing its port.",
       "grpcListen": "Hosts a local gRPC mock server and listens indefinitely. `connected` fires once it is listening; each served call re-emits its data on the `served` port. The server stays up until a gRPC server close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
-      "grpcServerClose": "Stops an already-listening gRPC mock server (declared by a gRPC server node), freeing its port."
+      "grpcServerClose": "Stops an already-listening gRPC mock server (declared by a gRPC server node), freeing its port.",
+      "soapListen": "Hostuje lokalny serwer mock SOAP i nasłuchuje bez ograniczeń. Każde przychodzące żądanie jest kierowane do skonfigurowanej operacji (na podstawie jego SOAPAction lub nazwy operacji w treści) i otrzymuje odpowiedź w postaci predefiniowanej koperty SOAP (operacja błędu zwraca `<soap:Fault>`). `connected` uruchamia się, gdy tylko serwer nasłuchuje; każde obsłużone żądanie ponownie emituje swoje dane na porcie `served`. Serwer pozostaje aktywny do zamknięcia SOAP (lub zatrzymania), po czym uruchamia się `done`.",
+      "soapClose": "Zatrzymuje już nasłuchujący serwer mock SOAP (zadeklarowany przez węzeł serwera SOAP) i zwalnia jego port."
     },
     "legend": {
       "title": "Legenda",

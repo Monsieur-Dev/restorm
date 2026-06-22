@@ -260,7 +260,8 @@
         "socketio": "Socket.IO isteği",
         "mqtt": "MQTT request",
         "mqttServer": "MQTT aracısı",
-        "grpcServer": "gRPC mock sunucusu"
+        "grpcServer": "gRPC mock sunucusu",
+        "soapServer": "SOAP sahte sunucusu"
       }
     },
     "deleteConfirm": {
@@ -466,7 +467,24 @@
       "body": "Gövde",
       "headers": "Başlıklar"
     },
-    "malformedXmlError": "Geçersiz XML yanıtı"
+    "malformedXmlError": "Geçersiz XML yanıtı",
+    "server": {
+      "startListening": "SOAP sahte sunucusunu başlat",
+      "stopListening": "SOAP sahte sunucusunu durdur",
+      "notListening": "Dinlemiyor",
+      "served": "Dinleniyor — {{count}} istek karşılandı",
+      "listenFailed": "SOAP sahte sunucusu başlatılamadı",
+      "portLabel": "Bağlantı noktası",
+      "routeLabel": "Rota",
+      "operationNameLabel": "İşlem adı",
+      "operationNamePlaceholder": "İşlem adı",
+      "soapActionLabel": "SOAPAction",
+      "soapActionPlaceholder": "SOAPAction (isteğe bağlı)",
+      "faultLabel": "Hata",
+      "removeOperation": "İşlemi kaldır",
+      "addOperation": "İşlem ekle",
+      "noCodeSnippets": "Bir SOAP sahte sunucusunun istemci kod parçacığı yoktur."
+    }
   },
   "websocket": {
     "connect": "Bağlan",
@@ -1023,7 +1041,9 @@
       "mqttClose": "MQTT close",
       "httpListen": "HTTP server",
       "httpClose": "HTTP close",
-      "grpcServerClose": "gRPC sunucusunu kapat"
+      "grpcServerClose": "gRPC sunucusunu kapat",
+      "soapListen": "SOAP sunucusu",
+      "soapClose": "SOAP'ı kapat"
     },
     "comparator": {
       "result": "sonuç"
@@ -1586,7 +1606,9 @@
       "httpListen": "Hosts a local HTTP mock server and listens indefinitely. `connected` fires once it is listening; each served request re-emits its data on the `served` port. The server stays up until an HTTP close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
       "httpClose": "Stops an already-listening HTTP mock server (declared by an HTTP server node), freeing its port.",
       "grpcListen": "Hosts a local gRPC mock server and listens indefinitely. `connected` fires once it is listening; each served call re-emits its data on the `served` port. The server stays up until a gRPC server close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
-      "grpcServerClose": "Stops an already-listening gRPC mock server (declared by a gRPC server node), freeing its port."
+      "grpcServerClose": "Stops an already-listening gRPC mock server (declared by a gRPC server node), freeing its port.",
+      "soapListen": "Yerel bir SOAP sahte sunucusu barındırır ve süresiz olarak dinler. Gelen her istek, yapılandırılmış bir işleme yönlendirilir (SOAPAction'ına veya gövdedeki işlem adına göre) ve önceden tanımlanmış SOAP zarfıyla yanıtlanır (bir hata işlemi `<soap:Fault>` döndürür). Sunucu dinlemeye başlar başlamaz `connected` tetiklenir; hizmet verilen her istek, verilerini `served` bağlantı noktasında yeniden yayınlar. Sunucu, bir SOAP kapatmasına (veya bir durdurmaya) kadar etkin kalır, ardından `done` tetiklenir.",
+      "soapClose": "Zaten dinlemekte olan bir SOAP sahte sunucusunu (bir SOAP sunucu düğümü tarafından bildirilen) durdurur ve bağlantı noktasını serbest bırakır."
     },
     "legend": {
       "title": "Gösterge",

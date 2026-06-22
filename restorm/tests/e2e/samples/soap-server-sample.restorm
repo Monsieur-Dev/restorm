@@ -1,0 +1,91 @@
+collections:
+  - folderType: environment
+    name: SOAP Mock Playground
+    documentation: |-
+      # SOAP Mock Playground
+
+      A self-contained SOAP mock playground: restorm HOSTS a local SOAP server
+      AND calls it as a client — no external service needed.
+
+      - **Calculator Mock** hosts a local SOAP mock server on `localhost:8098`.
+        It answers the `Add` operation with a canned envelope and the `Boom`
+        operation with a `<soap:Fault>`. Press Listen to start serving.
+      - **Add Consumer** posts an `Add` SOAP envelope to
+        `http://localhost:8098/calculator`; run it (Send) once the mock is
+        listening and it receives the canned response.
+      - **Fault Consumer** posts a `Boom` envelope and receives the
+        `<soap:Fault>`.
+    tags: []
+    configuration: {}
+    environments:
+      - name: Default
+        variables: []
+        id: 1c2d3e4f-5a6b-7c8d-9e0f-1a2b3c4d5e6f
+    items:
+      - type: soap
+        name: Calculator Mock
+        documentation: |-
+          Hosts a local SOAP mock server on `localhost:8098`. Press Listen, then
+          run **Add Consumer** / **Fault Consumer**. Dispatches by the body
+          operation name.
+        tags:
+          - soap
+          - server
+        url: localhost:8098/calculator
+        soapAction: ''
+        service: ''
+        operation: ''
+        body: ''
+        server: true
+        mockOperations:
+          - name: Add
+            soapAction: urn:Add
+            responseBody: |-
+              <AddResponse xmlns="urn:calculator"><result>7</result></AddResponse>
+          - name: Boom
+            responseBody: The Boom operation always fails
+            isFault: true
+        headers: []
+        id: 2c2d3e4f-5a6b-7c8d-9e0f-1a2b3c4d5e01
+      - type: soap
+        name: Add Consumer
+        documentation: Posts an Add envelope to the local Calculator Mock.
+        tags:
+          - soap
+        url: http://localhost:8098/calculator
+        soapAction: urn:Add
+        service: Calculator
+        operation: Add
+        body: |-
+          <?xml version="1.0" encoding="utf-8"?>
+          <soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
+            <soap:Body>
+              <Add xmlns="urn:calculator">
+                <a>4</a>
+                <b>3</b>
+              </Add>
+            </soap:Body>
+          </soap:Envelope>
+        headers: []
+        id: 2c2d3e4f-5a6b-7c8d-9e0f-1a2b3c4d5e02
+      - type: soap
+        name: Fault Consumer
+        documentation: Posts a Boom envelope to the local Calculator Mock and receives a SOAP Fault.
+        tags:
+          - soap
+        url: http://localhost:8098/calculator
+        soapAction: ''
+        service: Calculator
+        operation: Boom
+        body: |-
+          <?xml version="1.0" encoding="utf-8"?>
+          <soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
+            <soap:Body>
+              <Boom xmlns="urn:calculator"/>
+            </soap:Body>
+          </soap:Envelope>
+        headers: []
+        id: 2c2d3e4f-5a6b-7c8d-9e0f-1a2b3c4d5e03
+    id: 3c2d3e4f-5a6b-7c8d-9e0f-1a2b3c4d5e10
+    fileFormatVersion: 1
+_projectUuid: 4c2d3e4f-5a6b-7c8d-9e0f-1a2b3c4d5e20

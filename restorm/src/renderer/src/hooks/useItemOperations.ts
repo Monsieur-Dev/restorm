@@ -421,6 +421,7 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
       case 'grpc-bidi': return 'New gRPC bidirectional request'
       case 'grpc-server': return 'New gRPC mock server'
       case 'soap': return 'New SOAP request'
+      case 'soap-server': return 'New SOAP mock server'
       case 'websocket': return 'New WebSocket request'
       case 'socketio': return 'New Socket.IO request'
       case 'socketio-server': return 'New Socket.IO server'
@@ -572,6 +573,20 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
         })
       } else if (kind === 'soap') {
         built = new SoapRequest({ id, name })
+      } else if (kind === 'soap-server') {
+        // restorm acts as a local SOAP mock server: SOAP request + server flag,
+        // host forced to localhost, default port + route pre-filled, seeded with
+        // one canned operation + one fault operation so it answers out of the box.
+        built = new SoapRequest({
+          id,
+          name,
+          server: true,
+          url: 'localhost:8080/',
+          mockOperations: [
+            { name: 'Echo', responseBody: '<EchoResponse><message>Hello from restorm</message></EchoResponse>' },
+            { name: 'Fault', responseBody: 'Mock fault', isFault: true }
+          ]
+        })
       } else if (kind === 'websocket') {
         built = new WebSocketRequest({ id, name })
       } else if (kind === 'socketio') {

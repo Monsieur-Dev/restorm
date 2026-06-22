@@ -260,7 +260,8 @@
         "socketio": "Αίτημα Socket.IO",
         "mqtt": "MQTT request",
         "mqttServer": "MQTT broker",
-        "grpcServer": "Διακομιστής gRPC mock"
+        "grpcServer": "Διακομιστής gRPC mock",
+        "soapServer": "Διακομιστής εικονικού SOAP"
       }
     },
     "deleteConfirm": {
@@ -466,7 +467,24 @@
       "body": "Σώμα",
       "headers": "Κεφαλίδες"
     },
-    "malformedXmlError": "Μη έγκυρη απάντηση XML"
+    "malformedXmlError": "Μη έγκυρη απάντηση XML",
+    "server": {
+      "startListening": "Εκκίνηση του διακομιστή εικονικού SOAP",
+      "stopListening": "Διακοπή του διακομιστή εικονικού SOAP",
+      "notListening": "Δεν ακούει",
+      "served": "Ακούει — εξυπηρετήθηκαν {{count}} αιτήματα",
+      "listenFailed": "Δεν ήταν δυνατή η εκκίνηση του διακομιστή εικονικού SOAP",
+      "portLabel": "Θύρα",
+      "routeLabel": "Διαδρομή",
+      "operationNameLabel": "Όνομα λειτουργίας",
+      "operationNamePlaceholder": "Όνομα λειτουργίας",
+      "soapActionLabel": "SOAPAction",
+      "soapActionPlaceholder": "SOAPAction (προαιρετικό)",
+      "faultLabel": "Σφάλμα",
+      "removeOperation": "Αφαίρεση λειτουργίας",
+      "addOperation": "Προσθήκη λειτουργίας",
+      "noCodeSnippets": "Ένας διακομιστής εικονικού SOAP δεν έχει απόσπασμα κώδικα πελάτη."
+    }
   },
   "websocket": {
     "connect": "Σύνδεση",
@@ -1023,7 +1041,9 @@
       "mqttClose": "MQTT close",
       "httpListen": "HTTP server",
       "httpClose": "HTTP close",
-      "grpcServerClose": "Κλείσιμο διακομιστή gRPC"
+      "grpcServerClose": "Κλείσιμο διακομιστή gRPC",
+      "soapListen": "Διακομιστής SOAP",
+      "soapClose": "Κλείσιμο SOAP"
     },
     "comparator": {
       "result": "αποτέλεσμα"
@@ -1586,7 +1606,9 @@
       "httpListen": "Hosts a local HTTP mock server and listens indefinitely. `connected` fires once it is listening; each served request re-emits its data on the `served` port. The server stays up until an HTTP close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
       "httpClose": "Stops an already-listening HTTP mock server (declared by an HTTP server node), freeing its port.",
       "grpcListen": "Hosts a local gRPC mock server and listens indefinitely. `connected` fires once it is listening; each served call re-emits its data on the `served` port. The server stays up until a gRPC server close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
-      "grpcServerClose": "Stops an already-listening gRPC mock server (declared by a gRPC server node), freeing its port."
+      "grpcServerClose": "Stops an already-listening gRPC mock server (declared by a gRPC server node), freeing its port.",
+      "soapListen": "Φιλοξενεί έναν τοπικό διακομιστή εικονικού SOAP και ακούει επ' αόριστον. Κάθε εισερχόμενο αίτημα δρομολογείται σε μια διαμορφωμένη λειτουργία (βάσει του SOAPAction του ή του ονόματος λειτουργίας στο σώμα) και απαντάται με τον προκαθορισμένο φάκελο SOAP (μια λειτουργία σφάλματος επιστρέφει `<soap:Fault>`). Το `connected` ενεργοποιείται μόλις ο διακομιστής ακούει· κάθε εξυπηρετούμενο αίτημα επανεκπέμπει τα δεδομένα του στη θύρα `served`. Ο διακομιστής παραμένει ενεργός μέχρι ένα κλείσιμο SOAP (ή μια διακοπή), και μετά ενεργοποιείται το `done`.",
+      "soapClose": "Σταματά έναν διακομιστή εικονικού SOAP που ήδη ακούει (δηλωμένον από έναν κόμβο διακομιστή SOAP) και απελευθερώνει τη θύρα του."
     },
     "legend": {
       "title": "Υπόμνημα",

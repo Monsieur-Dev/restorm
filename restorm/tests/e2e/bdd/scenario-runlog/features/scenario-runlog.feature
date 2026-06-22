@@ -65,4 +65,5 @@ Feature: Scenario run-log end-to-end
       | MQTT           |
       | HTTP Server    |
       | gRPC Server    |
+      | SOAP Server    |
       | Main           |

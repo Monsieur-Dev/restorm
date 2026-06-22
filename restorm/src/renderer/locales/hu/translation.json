@@ -260,7 +260,8 @@
         "socketio": "Socket.IO-kérés",
         "mqtt": "MQTT request",
         "mqttServer": "MQTT broker",
-        "grpcServer": "gRPC mock-kiszolgáló"
+        "grpcServer": "gRPC mock-kiszolgáló",
+        "soapServer": "SOAP mock-kiszolgáló"
       }
     },
     "deleteConfirm": {
@@ -466,7 +467,24 @@
       "body": "Törzs",
       "headers": "Fejlécek"
     },
-    "malformedXmlError": "Érvénytelen XML válasz"
+    "malformedXmlError": "Érvénytelen XML válasz",
+    "server": {
+      "startListening": "SOAP mock-kiszolgáló indítása",
+      "stopListening": "SOAP mock-kiszolgáló leállítása",
+      "notListening": "Nem figyel",
+      "served": "Figyel — {{count}} kérés kiszolgálva",
+      "listenFailed": "A SOAP mock-kiszolgáló nem indítható el",
+      "portLabel": "Port",
+      "routeLabel": "Útvonal",
+      "operationNameLabel": "Művelet neve",
+      "operationNamePlaceholder": "Művelet neve",
+      "soapActionLabel": "SOAPAction",
+      "soapActionPlaceholder": "SOAPAction (nem kötelező)",
+      "faultLabel": "Hiba",
+      "removeOperation": "Művelet eltávolítása",
+      "addOperation": "Művelet hozzáadása",
+      "noCodeSnippets": "Egy SOAP mock-kiszolgálónak nincs kliensoldali kódrészlete."
+    }
   },
   "websocket": {
     "connect": "Csatlakozás",
@@ -1023,7 +1041,9 @@
       "mqttClose": "MQTT close",
       "httpListen": "HTTP server",
       "httpClose": "HTTP close",
-      "grpcServerClose": "gRPC-kiszolgáló bezárása"
+      "grpcServerClose": "gRPC-kiszolgáló bezárása",
+      "soapListen": "SOAP-kiszolgáló",
+      "soapClose": "SOAP lezárása"
     },
     "comparator": {
       "result": "eredmény"
@@ -1586,7 +1606,9 @@
       "httpListen": "Hosts a local HTTP mock server and listens indefinitely. `connected` fires once it is listening; each served request re-emits its data on the `served` port. The server stays up until an HTTP close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
       "httpClose": "Stops an already-listening HTTP mock server (declared by an HTTP server node), freeing its port.",
       "grpcListen": "Hosts a local gRPC mock server and listens indefinitely. `connected` fires once it is listening; each served call re-emits its data on the `served` port. The server stays up until a gRPC server close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
-      "grpcServerClose": "Stops an already-listening gRPC mock server (declared by a gRPC server node), freeing its port."
+      "grpcServerClose": "Stops an already-listening gRPC mock server (declared by a gRPC server node), freeing its port.",
+      "soapListen": "Helyi SOAP mock-kiszolgálót üzemeltet, és korlátlan ideig figyel. Minden bejövő kérést egy konfigurált művelethez irányít (a SOAPAction vagy a törzs műveletneve alapján), és az előre megadott SOAP-borítékkal válaszol (egy hibaművelet `<soap:Fault>` választ ad). A `connected` akkor aktiválódik, amint a kiszolgáló figyel; minden kiszolgált kérés újra kibocsátja az adatait a `served` porton. A kiszolgáló aktív marad egy SOAP-lezárásig (vagy leállításig), majd a `done` aktiválódik.",
+      "soapClose": "Leállít egy már figyelő SOAP mock-kiszolgálót (amelyet egy SOAP-kiszolgáló csomópont deklarált), és felszabadítja a portját."
     },
     "legend": {
       "title": "Jelmagyarázat",

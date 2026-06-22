@@ -260,7 +260,8 @@
         "socketio": "Kërkesë Socket.IO",
         "mqtt": "MQTT request",
         "mqttServer": "Broker MQTT",
-        "grpcServer": "Server gRPC mock"
+        "grpcServer": "Server gRPC mock",
+        "soapServer": "Server mock SOAP"
       }
     },
     "deleteConfirm": {
@@ -466,7 +467,24 @@
       "body": "Trupi",
       "headers": "Kokat"
     },
-    "malformedXmlError": "Përgjigje XML e pavlefshme"
+    "malformedXmlError": "Përgjigje XML e pavlefshme",
+    "server": {
+      "startListening": "Nis serverin mock SOAP",
+      "stopListening": "Ndal serverin mock SOAP",
+      "notListening": "Nuk po dëgjon",
+      "served": "Po dëgjon — {{count}} kërkesë(a) të shërbyera",
+      "listenFailed": "Serveri mock SOAP nuk mund të nisej",
+      "portLabel": "Porta",
+      "routeLabel": "Rruga",
+      "operationNameLabel": "Emri i operacionit",
+      "operationNamePlaceholder": "Emri i operacionit",
+      "soapActionLabel": "SOAPAction",
+      "soapActionPlaceholder": "SOAPAction (opsionale)",
+      "faultLabel": "Gabim",
+      "removeOperation": "Hiq operacionin",
+      "addOperation": "Shto operacion",
+      "noCodeSnippets": "Një server mock SOAP nuk ka fragment kodi klienti."
+    }
   },
   "websocket": {
     "connect": "Lidh",
@@ -1023,7 +1041,9 @@
       "mqttClose": "MQTT close",
       "httpListen": "HTTP server",
       "httpClose": "HTTP close",
-      "grpcServerClose": "Mbyll serverin gRPC"
+      "grpcServerClose": "Mbyll serverin gRPC",
+      "soapListen": "Server SOAP",
+      "soapClose": "Mbyll SOAP"
     },
     "comparator": {
       "result": "rezultati"
@@ -1586,7 +1606,9 @@
       "httpListen": "Hosts a local HTTP mock server and listens indefinitely. `connected` fires once it is listening; each served request re-emits its data on the `served` port. The server stays up until an HTTP close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
       "httpClose": "Stops an already-listening HTTP mock server (declared by an HTTP server node), freeing its port.",
       "grpcListen": "Hosts a local gRPC mock server and listens indefinitely. `connected` fires once it is listening; each served call re-emits its data on the `served` port. The server stays up until a gRPC server close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
-      "grpcServerClose": "Stops an already-listening gRPC mock server (declared by a gRPC server node), freeing its port."
+      "grpcServerClose": "Stops an already-listening gRPC mock server (declared by a gRPC server node), freeing its port.",
+      "soapListen": "Strehon një server mock SOAP lokal dhe dëgjon pafundësisht. Çdo kërkesë hyrëse drejtohet te një operacion i konfiguruar (sipas SOAPAction-it të saj ose emrit të operacionit në trup) dhe i përgjigjet me zarfin SOAP të paracaktuar (një operacion gabimi kthen `<soap:Fault>`). `connected` aktivizohet sapo serveri dëgjon; çdo kërkesë e shërbyer riemeton të dhënat e saj në portën `served`. Serveri qëndron aktiv deri në një mbyllje SOAP (ose një ndalim), pastaj aktivizohet `done`.",
+      "soapClose": "Ndalon një server mock SOAP që tashmë po dëgjon (deklaruar nga një nyje serveri SOAP) dhe liron portën e tij."
     },
     "legend": {
       "title": "Legjenda",

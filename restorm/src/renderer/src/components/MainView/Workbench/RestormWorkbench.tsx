@@ -28,6 +28,7 @@ import {
   GraphQLRequestTabView,
   GrpcRequestTabView,
   SoapRequestTabView,
+  SoapServerRequestTabView,
   WebSocketRequestTabView,
   ODataRequestTabView
 } from '../../RequestTabViews'
@@ -1156,9 +1157,9 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
             starLeftAction={starLeftActionFor(request)}
           >
             <div style={{ flex: 1, minHeight: 0, minWidth: 0, padding: '0 16px 8px 16px' }}>
-              <SoapRequestTabView
-                request={request}
-              />
+              {request.server === true
+                ? <SoapServerRequestTabView request={request} />
+                : <SoapRequestTabView request={request} />}
             </div>
           </RestormWorkbenchTab>
         </EnvironmentProvider>

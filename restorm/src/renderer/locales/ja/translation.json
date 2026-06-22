@@ -259,7 +259,8 @@
         "socketio": "Socket.IO リクエスト",
         "mqtt": "MQTT request",
         "mqttServer": "MQTT ブローカー",
-        "grpcServer": "gRPC モックサーバー"
+        "grpcServer": "gRPC モックサーバー",
+        "soapServer": "SOAP モックサーバー"
       }
     },
     "deleteConfirm": {
@@ -465,7 +466,24 @@
       "body": "ボディ",
       "headers": "ヘッダー"
     },
-    "malformedXmlError": "無効なXMLレスポンス"
+    "malformedXmlError": "無効なXMLレスポンス",
+    "server": {
+      "startListening": "SOAP モックサーバーを開始",
+      "stopListening": "SOAP モックサーバーを停止",
+      "notListening": "リッスンしていません",
+      "served": "リッスン中 — {{count}} 件のリクエストを処理しました",
+      "listenFailed": "SOAP モックサーバーを開始できませんでした",
+      "portLabel": "ポート",
+      "routeLabel": "ルート",
+      "operationNameLabel": "操作名",
+      "operationNamePlaceholder": "操作名",
+      "soapActionLabel": "SOAPAction",
+      "soapActionPlaceholder": "SOAPAction（任意）",
+      "faultLabel": "フォルト",
+      "removeOperation": "操作を削除",
+      "addOperation": "操作を追加",
+      "noCodeSnippets": "SOAP モックサーバーにはクライアントのコードスニペットはありません。"
+    }
   },
   "websocket": {
     "connect": "接続",
@@ -1022,7 +1040,9 @@
       "mqttClose": "MQTT close",
       "httpListen": "HTTP server",
       "httpClose": "HTTP close",
-      "grpcServerClose": "gRPC サーバーを閉じる"
+      "grpcServerClose": "gRPC サーバーを閉じる",
+      "soapListen": "SOAP サーバー",
+      "soapClose": "SOAP を閉じる"
     },
     "comparator": {
       "result": "結果"
@@ -1585,7 +1605,9 @@
       "httpListen": "Hosts a local HTTP mock server and listens indefinitely. `connected` fires once it is listening; each served request re-emits its data on the `served` port. The server stays up until an HTTP close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
       "httpClose": "Stops an already-listening HTTP mock server (declared by an HTTP server node), freeing its port.",
       "grpcListen": "Hosts a local gRPC mock server and listens indefinitely. `connected` fires once it is listening; each served call re-emits its data on the `served` port. The server stays up until a gRPC server close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
-      "grpcServerClose": "Stops an already-listening gRPC mock server (declared by a gRPC server node), freeing its port."
+      "grpcServerClose": "Stops an already-listening gRPC mock server (declared by a gRPC server node), freeing its port.",
+      "soapListen": "ローカルの SOAP モックサーバーをホストし、無期限にリッスンします。受信した各リクエストは、設定された操作（その SOAPAction または本文の操作名による）にディスパッチされ、定義済みの SOAP エンベロープで応答されます（フォルト操作は `<soap:Fault>` を返します）。サーバーがリッスンを開始すると `connected` が発火します。処理された各リクエストは、そのデータを `served` ポートで再発行します。サーバーは SOAP のクローズ（または停止）まで稼働し続け、その後 `done` が発火します。",
+      "soapClose": "すでにリッスンしている SOAP モックサーバー（SOAP サーバーノードで宣言されたもの）を停止し、そのポートを解放します。"
     },
     "legend": {
       "title": "凡例",

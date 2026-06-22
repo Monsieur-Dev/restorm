@@ -5,14 +5,18 @@
 
 import http from 'http'
 import https from 'https'
+import type { IncomingMessage, ServerResponse } from 'http'
 import { URL } from 'url'
 import { BrowserWindow } from 'electron'
 import { logger } from 'electron-core-ui/main'
 import { contextService } from './ContextService'
+import { websocketExecutionService } from './WebSocketExecutionService'
 import { secretHydrationService } from './secrets/SecretHydrationService'
 import { collectRequestSecrets } from './secrets/collectRequestSecrets'
 import { DEFAULT_REQUEST_TIMEOUT_MS, MAX_RESPONSE_BYTES } from '../../shared/config/constants'
 import { XMLParser } from 'fast-xml-parser'
+import { resolveSoapOperation, buildSoapResponse, buildUnmatchedFault, firstBodyOperationName, normalizeSoapAction } from '../../shared/soapMockDispatch'
+import type { SoapMockOperation } from '../../shared/types/requests/SoapRequest'
 
 /** SOAP request execution input */
 export interface SOAPExecutionInput {
@@ -47,6 +51,40 @@ interface ActiveRequest {
   requestId: string
   abortController: AbortController
   startTime: number
+}
+
+/** One served SOAP-mock request, surfaced on a scenario `soapListen` node's
+ * `served` output (shape mirrors the HTTP mock's served summary so a JSON-path
+ * picker drills it the same way). */
+interface ServedSummary {
+  request: { soapAction: string; operation: string; url: string; body: string }
+  response: { status: number; body: string; fault: boolean }
+}
+
+/** Read a single inbound header value (case-insensitive), flattening an array. */
+function headerValue(req: IncomingMessage, name: string): string | undefined {
+  const raw = req.headers[name.toLowerCase()]
+  if (raw === undefined) return undefined
+  return Array.isArray(raw) ? raw[0] : raw
+}
+
+/** Read a request body to a UTF-8 string, capped at the shared response limit. */
+function readBody(req: IncomingMessage): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const chunks: Buffer[] = []
+    let received = 0
+    req.on('data', (chunk: Buffer) => {
+      received += chunk.length
+      if (received > MAX_RESPONSE_BYTES) {
+        req.destroy()
+        reject(new Error(`Request exceeded the ${MAX_RESPONSE_BYTES}-byte limit`))
+        return
+      }
+      chunks.push(chunk)
+    })
+    req.on('end', () => { resolve(Buffer.concat(chunks).toString('utf-8')) })
+    req.on('error', reject)
+  })
 }
 
 /**
@@ -126,6 +164,9 @@ function findNode(tree: unknown, name: string, depth = 0): unknown {
  */
 class SOAPExecutionService {
   private activeRequests = new Map<string, ActiveRequest>()
+  /** Per-request served-request counter for hosted SOAP mock routes (server
+   * mode). Drives the "served N requests" banner. */
+  private servedCounts = new Map<string, number>()
 
   /**
    * Execute a SOAP request using the resolved URL and data from ContextService
@@ -301,6 +342,184 @@ class SOAPExecutionService {
    */
   isActive(requestId: string): boolean {
     return this.activeRequests.has(requestId)
+  }
+
+  // --------------------------------------------------------------------------
+  // SERVER MODE — host a local SOAP mock (server === true).
+  //
+  // SOAP-over-HTTP, so this reuses the shared per-port HTTP dispatcher in
+  // {@link WebSocketExecutionService} (one OS socket per port; an HTTP route and
+  // a SOAP route can coexist on the same port). This service owns only the SOAP
+  // envelope: operation dispatch (SOAPAction / body operation), the canned-XML /
+  // `<soap:Fault>` serialization, request recording + the served count.
+  // --------------------------------------------------------------------------
+
+  /**
+   * Request panel "Listen" button: HOST this request's SOAP mock on
+   * `localhost:<port><path>` and answer every inbound POST by dispatching to the
+   * matching configured operation, until {@link stopListening}. A non-matching
+   * path/method on the port 404s; an unmatched operation answers a `<soap:Fault>`.
+   */
+  async listen(requestId: string): Promise<{ success: boolean; listening: boolean; error?: string }> {
+    const fullData = contextService.getRequestContext(requestId)?.fullData
+    const { port, path } = this.parseMockAddress(fullData?.url ?? '')
+    if (!Number.isFinite(port) || port <= 0) {
+      return { success: false, listening: false, error: 'A valid localhost port is required for a SOAP mock server' }
+    }
+
+    this.broadcastProgress(requestId, 'started')
+    this.servedCounts.set(requestId, 0)
+
+    const result = await websocketExecutionService.listenHttpServer({
+      requestId,
+      method: 'POST',
+      port,
+      path,
+      onRequest: (req, res) => { void this.serveMockResponse(requestId, req, res) },
+      onStopped: (error) => {
+        this.servedCounts.delete(requestId)
+        this.broadcastProgress(requestId, error ? 'error' : 'completed')
+      }
+    })
+
+    if (!result.listening) {
+      this.servedCounts.delete(requestId)
+      this.broadcastProgress(requestId, 'error')
+    }
+    return result
+  }
+
+  /**
+   * SCENARIO server node ({@link soapListenExecutor}): HOST this request's SOAP
+   * mock as a LONG-LIVED listener and bridge it to the scheduler's connect
+   * machinery (mirrors {@link HTTPExecutionService.connectStreamingHttpServer}).
+   * `connect` = listen, each served request re-emits via `onMessage` (→ the
+   * `served` port), `close` = stop the server (→ the node's `done`).
+   */
+  connectStreamingSoapServer(input: {
+    requestId: string
+    onConnect: () => void
+    onMessage: (event: string | undefined, payload: unknown) => void
+    onClose: (error?: string) => void
+  }): { send: (channel: string, payload: string) => boolean; close: () => void; isOpen: () => boolean } {
+    const { requestId } = input
+    const fullData = contextService.getRequestContext(requestId)?.fullData
+    const { port, path } = this.parseMockAddress(fullData?.url ?? '')
+    let fired = false
+    const fireClose = (error?: string): void => {
+      if (fired) return
+      fired = true
+      this.servedCounts.delete(requestId)
+      this.broadcastProgress(requestId, error ? 'error' : 'completed')
+      input.onClose(error)
+    }
+
+    if (!Number.isFinite(port) || port <= 0) {
+      queueMicrotask(() => { fireClose('A valid localhost port is required for a SOAP mock server') })
+      return { send: () => false, close: () => { fireClose() }, isOpen: () => false }
+    }
+
+    this.broadcastProgress(requestId, 'started')
+    this.servedCounts.set(requestId, 0)
+
+    void websocketExecutionService.listenHttpServer({
+      requestId,
+      method: 'POST',
+      port,
+      path,
+      onRequest: (req, res) => {
+        void this.serveMockResponse(requestId, req, res).then((summary) => {
+          if (summary) input.onMessage(undefined, summary)
+        })
+      },
+      onStopped: (error) => { fireClose(error) }
+    }).then((result) => {
+      if (result.listening) input.onConnect()
+      else fireClose(result.error ?? `failed to start SOAP mock server for ${requestId}`)
+    }).catch((err: unknown) => { fireClose(err instanceof Error ? err.message : String(err)) })
+
+    return {
+      // A hosted SOAP mock never SENDS unprompted — it only answers inbound
+      // requests — so `send` is a no-op (there is no soapSend node).
+      send: () => false,
+      close: () => { this.stopListening(requestId) },
+      isOpen: () => this.isListening(requestId)
+    }
+  }
+
+  /** Stop hosting this request's SOAP mock route (the Stop button). Frees the
+   * shared port once it was the last route. Idempotent. */
+  stopListening(requestId: string): boolean {
+    this.servedCounts.delete(requestId)
+    return websocketExecutionService.disconnect(requestId)
+  }
+
+  /** Whether this request is currently hosting a SOAP mock route. */
+  isListening(requestId: string): boolean {
+    return websocketExecutionService.isActive(requestId)
+  }
+
+  /** Split a mock address (`localhost:<port><path>`, optional scheme) into its
+   * numeric port + pathname. The path defaults to `/` and the query is dropped. */
+  private parseMockAddress(raw: string): { port: number; path: string } {
+    const stripped = raw.replace(/^[a-z]+:\/\//i, '')
+    const slash = stripped.indexOf('/')
+    const authority = slash >= 0 ? stripped.slice(0, slash) : stripped
+    let path = slash >= 0 ? stripped.slice(slash) : '/'
+    const q = path.indexOf('?')
+    if (q >= 0) path = path.slice(0, q)
+    if (path.length === 0) path = '/'
+    const colon = authority.lastIndexOf(':')
+    const port = colon >= 0 ? Number.parseInt(authority.slice(colon + 1), 10) : NaN
+    return { port, path }
+  }
+
+  /** Resolve + write the mock SOAP response for one inbound request, then record
+   * the hit + bump the served count. Reads the configured `mockOperations` from
+   * the request context, dispatches by SOAPAction / body operation, and answers
+   * the canned envelope (`<soap:Fault>` + HTTP 500 for a fault operation). */
+  private async serveMockResponse(requestId: string, req: IncomingMessage, res: ServerResponse): Promise<ServedSummary | undefined> {
+    let inboundBody = ''
+    try {
+      inboundBody = await readBody(req)
+    } catch (err) {
+      logger.warn('[SOAPExecutionService] failed to read inbound mock body', { requestId, error: err instanceof Error ? err.message : String(err) })
+    }
+
+    const operations = this.mockOperationsFor(requestId)
+    const soapActionHeader = normalizeSoapAction(headerValue(req, 'soapaction'))
+    const op = resolveSoapOperation(operations, { soapAction: soapActionHeader, body: inboundBody })
+
+    const requestedOperation = soapActionHeader ?? firstBodyOperationName(inboundBody)
+    const { status, xml } = op ? buildSoapResponse(op) : buildUnmatchedFault(requestedOperation)
+
+    if (!res.headersSent) res.writeHead(status, { 'Content-Type': 'text/xml; charset=utf-8' })
+    res.end(xml)
+
+    const served = (this.servedCounts.get(requestId) ?? 0) + 1
+    this.servedCounts.set(requestId, served)
+    this.broadcastServed(requestId, served)
+    logger.info('[SOAPExecutionService] mock served', { requestId, operation: op?.name ?? requestedOperation ?? '(unmatched)', status, served })
+
+    return {
+      request: { soapAction: soapActionHeader ?? '', operation: requestedOperation ?? '', url: req.url ?? '', body: inboundBody },
+      response: { status, body: xml, fault: !op || op.isFault === true }
+    }
+  }
+
+  /** The configured mock operations for a request, read from its full context. */
+  private mockOperationsFor(requestId: string): SoapMockOperation[] {
+    const fullData = contextService.getRequestContext(requestId)?.fullData
+    return fullData?.soapMockOperations ?? []
+  }
+
+  /** Broadcast the SOAP mock's served-request count to the renderer — the
+   * request panel shows "served N requests" while listening. */
+  private broadcastServed(requestId: string, count: number): void {
+    const windows = BrowserWindow.getAllWindows()
+    for (const win of windows) {
+      win.webContents.send('soap:server-served', { requestId, count })
+    }
   }
 
   /**

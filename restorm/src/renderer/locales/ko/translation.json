@@ -259,7 +259,8 @@
         "socketio": "Socket.IO 요청",
         "mqtt": "MQTT request",
         "mqttServer": "MQTT 브로커",
-        "grpcServer": "gRPC 목 서버"
+        "grpcServer": "gRPC 목 서버",
+        "soapServer": "SOAP 모의 서버"
       }
     },
     "deleteConfirm": {
@@ -465,7 +466,24 @@
       "body": "본문",
       "headers": "헤더"
     },
-    "malformedXmlError": "잘못된 XML 응답"
+    "malformedXmlError": "잘못된 XML 응답",
+    "server": {
+      "startListening": "SOAP 모의 서버 시작",
+      "stopListening": "SOAP 모의 서버 중지",
+      "notListening": "수신 대기 안 함",
+      "served": "수신 대기 중 — 요청 {{count}}건 처리됨",
+      "listenFailed": "SOAP 모의 서버를 시작할 수 없습니다",
+      "portLabel": "포트",
+      "routeLabel": "경로",
+      "operationNameLabel": "작업 이름",
+      "operationNamePlaceholder": "작업 이름",
+      "soapActionLabel": "SOAPAction",
+      "soapActionPlaceholder": "SOAPAction(선택 사항)",
+      "faultLabel": "오류",
+      "removeOperation": "작업 제거",
+      "addOperation": "작업 추가",
+      "noCodeSnippets": "SOAP 모의 서버에는 클라이언트 코드 조각이 없습니다."
+    }
   },
   "websocket": {
     "connect": "연결",
@@ -1022,7 +1040,9 @@
       "mqttClose": "MQTT close",
       "httpListen": "HTTP server",
       "httpClose": "HTTP close",
-      "grpcServerClose": "gRPC 서버 닫기"
+      "grpcServerClose": "gRPC 서버 닫기",
+      "soapListen": "SOAP 서버",
+      "soapClose": "SOAP 닫기"
     },
     "comparator": {
       "result": "결과"
@@ -1585,7 +1605,9 @@
       "httpListen": "Hosts a local HTTP mock server and listens indefinitely. `connected` fires once it is listening; each served request re-emits its data on the `served` port. The server stays up until an HTTP close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
       "httpClose": "Stops an already-listening HTTP mock server (declared by an HTTP server node), freeing its port.",
       "grpcListen": "Hosts a local gRPC mock server and listens indefinitely. `connected` fires once it is listening; each served call re-emits its data on the `served` port. The server stays up until a gRPC server close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
-      "grpcServerClose": "Stops an already-listening gRPC mock server (declared by a gRPC server node), freeing its port."
+      "grpcServerClose": "Stops an already-listening gRPC mock server (declared by a gRPC server node), freeing its port.",
+      "soapListen": "로컬 SOAP 모의 서버를 호스팅하고 무기한 수신 대기합니다. 들어오는 각 요청은 구성된 작업으로 디스패치되어(해당 SOAPAction 또는 본문의 작업 이름 기준) 미리 정의된 SOAP 엔벨로프로 응답됩니다(오류 작업은 `<soap:Fault>`를 반환). 서버가 수신 대기하면 즉시 `connected`가 실행됩니다. 처리된 각 요청은 해당 데이터를 `served` 포트에서 다시 내보냅니다. 서버는 SOAP 닫기(또는 중지)까지 유지되고, 그 후 `done`이 실행됩니다.",
+      "soapClose": "이미 수신 대기 중인 SOAP 모의 서버(SOAP 서버 노드로 선언됨)를 중지하고 해당 포트를 해제합니다."
     },
     "legend": {
       "title": "범례",

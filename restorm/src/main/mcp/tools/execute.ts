@@ -365,6 +365,10 @@ export function flushRequestStateToContext(req: Request): void {
     data.soapService = soap.service
     data.operation = soap.operation
     data.soapBody = (soap as { body?: unknown }).body as string | undefined
+    // Server mode: carry the hosted-mock config so a soapListen node (which
+    // resolves operations from `fullData.soapMockOperations`) can serve them.
+    if (soap.server !== undefined) data.server = soap.server
+    if (soap.mockOperations !== undefined) data.soapMockOperations = soap.mockOperations
   } else if (isODataRequest(req)) {
     data.requestType = 'odata'
     if (Array.isArray(params)) data.params = params as FullRequestData['params']

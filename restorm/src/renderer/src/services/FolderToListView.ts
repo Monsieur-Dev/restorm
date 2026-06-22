@@ -178,11 +178,14 @@ function soapRequestToListViewItem(
   request: SoapRequest,
   options: FolderToListViewOptions
 ): ListViewItemData {
-  const badge = options.renderProtocolBadge?.('soap')
+  const isServer = request.server === true
+  const badge = options.renderProtocolBadge?.('soap', undefined, isServer ? 'server' : undefined)
   return {
     id: request.id,
     title: request.name,
-    icon: withExecutingBeam(request.id, badge)
+    // A hosted SOAP mock shows the listening beam (like the WS/HTTP servers); a
+    // client request shows the executing beam.
+    icon: isServer ? withListeningBeam(request.id, badge) : withExecutingBeam(request.id, badge)
   }
 }
 

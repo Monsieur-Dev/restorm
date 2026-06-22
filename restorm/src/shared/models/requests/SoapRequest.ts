@@ -11,6 +11,18 @@ import {
 import { BaseRequest } from './BaseRequest'
 import { KeyValue } from '../KeyValue'
 import type { RequestType, RuntimeId, Icon } from '../types'
+import type { SoapMockOperation } from '../../types/requests/SoapRequest'
+
+/** Deep-copy a mock-operations array so a model never aliases a caller's array
+ * (mirrors the `headers` copy below — keeps persistence + edits independent). */
+function cloneMockOperations(ops: SoapMockOperation[]): SoapMockOperation[] {
+  return ops.map(op => ({
+    name: op.name,
+    ...(op.soapAction !== undefined && { soapAction: op.soapAction }),
+    responseBody: op.responseBody,
+    ...(op.isFault !== undefined && { isFault: op.isFault })
+  }))
+}
 
 /**
  * SOAP request definition with service, operation, and body.
@@ -48,6 +60,16 @@ export class SoapRequest extends BaseRequest {
   @graphqlField({ type: 'KeyValue', isArray: true })
   headers: KeyValue[] = []
 
+  /** When true, restorm ACTS AS the server (hosts a SOAP mock on localhost)
+   * instead of calling out as a client. The URL then carries only
+   * `localhost:<port>[/<route>]` (host is fixed). */
+  @TreatEmptyAsUndefined()
+  server?: boolean
+
+  /** Operations the hosted mock answers (server mode): each maps an inbound
+   * SOAPAction / body-operation to a canned XML response (or a `<soap:Fault>`). */
+  mockOperations?: SoapMockOperation[]
+
   constructor(init?: Partial<SoapRequest>) {
     super(init)
     if (init) {
@@ -56,6 +78,9 @@ export class SoapRequest extends BaseRequest {
         this.headers = init.headers.map(h =>
           h instanceof KeyValue ? h : KeyValue.fromPlain(h as unknown as Parameters<typeof KeyValue.fromPlain>[0])
         )
+      }
+      if (init.mockOperations) {
+        this.mockOperations = cloneMockOperations(init.mockOperations)
       }
     }
   }
@@ -77,6 +102,8 @@ export class SoapRequest extends BaseRequest {
     operation?: string
     body?: string
     headers?: Parameters<typeof KeyValue.fromPlain>[0][]
+    server?: boolean
+    mockOperations?: SoapMockOperation[]
   }): SoapRequest {
     return new SoapRequest({
       ...(obj.id !== undefined && { id: obj.id }),
@@ -91,7 +118,9 @@ export class SoapRequest extends BaseRequest {
       service: obj.service ?? '',
       operation: obj.operation ?? '',
       body: obj.body ?? '',
-      headers: (obj.headers ?? []) as KeyValue[]
+      headers: (obj.headers ?? []) as KeyValue[],
+      ...(obj.server !== undefined && { server: obj.server }),
+      ...(obj.mockOperations !== undefined && { mockOperations: cloneMockOperations(obj.mockOperations) })
     })
   }
 
@@ -113,7 +142,9 @@ export class SoapRequest extends BaseRequest {
       service: this.service,
       operation: this.operation,
       body: this.body,
-      headers: this.headers.map(h => h.toPlainObject())
+      headers: this.headers.map(h => h.toPlainObject()),
+      ...(this.server !== undefined && { server: this.server }),
+      ...(this.mockOperations !== undefined && { mockOperations: cloneMockOperations(this.mockOperations) })
     }
   }
 }
