@@ -14,6 +14,10 @@ export interface HTTPResponse extends BaseResponse {
   statusText: string
   responseHeaders: KeyValue[]
   responseBody: string
+  /** When true, `responseBody` is a base64-encoded binary payload
+   * (the response was detected as non-text). The panel offers a
+   * download instead of rendering the bytes as corrupting text. */
+  bodyIsBase64?: boolean | undefined
   contentType?: string | undefined
   contentLength?: number | undefined
   timings: HTTPTimings

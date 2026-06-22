@@ -380,7 +380,9 @@
         "pin": "Antwoord vastmaken",
         "unpin": "Antwoord losmaken"
       }
-    }
+    },
+    "followRedirects": "Omleidingen volgen",
+    "timeoutLabel": "Time-out (ms)"
   },
   "workbench": {
     "tabContextMenu": {

@@ -782,6 +782,10 @@ export function registerRestormIPC(deps: {
     // Resolved secrets are equally collection-scoped: drop every cached
     // credential so a freshly opened file re-fetches from its providers.
     secretHydrationService.clearAll()
+    // Session cookies (Set-Cookie store / Cookie re-send) are likewise
+    // scoped to the open collection — clear the jar so a freshly opened
+    // file starts with no inherited cookies.
+    httpExecutionService.clearCookies()
   })
 
   // ==========================================================================

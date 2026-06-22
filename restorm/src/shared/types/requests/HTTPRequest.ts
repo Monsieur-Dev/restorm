@@ -19,4 +19,8 @@ export interface HTTPRequest extends BaseRequest {
   server?: boolean | undefined
   /** HTTP status code the mock serves (server mode; defaults to 200). */
   mockStatus?: number | undefined
+  /** Per-request timeout in milliseconds; falls back to the global default. */
+  timeout?: number
+  /** Follow 3xx redirects on dispatch (defaults to true when unset). */
+  followRedirects?: boolean
 }

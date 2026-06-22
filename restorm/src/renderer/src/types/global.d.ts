@@ -428,6 +428,12 @@ export interface HTTPExecutionInput {
   requestId: string
   method: string
   timeout?: number
+  /** Reactive request path the executor uses to look up live state. */
+  requestPath?: string
+  /** Attached AuthenticationRequest as a plain object (re-hydrated main-side). */
+  authRequest?: unknown
+  /** Follow 3xx redirects (defaults to true when omitted). */
+  followRedirects?: boolean
 }
 
 /** HTTP execution result from backend */
@@ -438,6 +444,8 @@ export interface HTTPExecutionResult {
   statusText?: string
   headers?: Record<string, string | string[]>
   body?: string
+  /** When true, `body` is base64-encoded binary (download, don't text-render). */
+  bodyIsBase64?: boolean
   error?: string
   timings: {
     startedAt: string

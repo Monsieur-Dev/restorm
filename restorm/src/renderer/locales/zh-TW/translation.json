@@ -379,7 +379,9 @@
         "pin": "釘選回應",
         "unpin": "取消釘選回應"
       }
-    }
+    },
+    "followRedirects": "跟隨重新導向",
+    "timeoutLabel": "逾時 (毫秒)"
   },
   "workbench": {
     "tabContextMenu": {

@@ -382,7 +382,9 @@
         "pin": "Przypnij odpowiedź",
         "unpin": "Odepnij odpowiedź"
       }
-    }
+    },
+    "followRedirects": "Podążaj za przekierowaniami",
+    "timeoutLabel": "Limit czasu (ms)"
   },
   "workbench": {
     "tabContextMenu": {

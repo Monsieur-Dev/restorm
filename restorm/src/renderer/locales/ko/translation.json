@@ -379,7 +379,9 @@
         "pin": "응답 고정",
         "unpin": "응답 고정 해제"
       }
-    }
+    },
+    "followRedirects": "리디렉션 따르기",
+    "timeoutLabel": "시간 초과 (ms)"
   },
   "workbench": {
     "tabContextMenu": {

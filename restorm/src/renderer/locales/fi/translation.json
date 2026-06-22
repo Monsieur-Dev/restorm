@@ -380,7 +380,9 @@
         "pin": "Kiinnitä vastaus",
         "unpin": "Poista kiinnitys"
       }
-    }
+    },
+    "followRedirects": "Seuraa uudelleenohjauksia",
+    "timeoutLabel": "Aikakatkaisu (ms)"
   },
   "workbench": {
     "tabContextMenu": {

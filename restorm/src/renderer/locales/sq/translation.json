@@ -380,7 +380,9 @@
         "pin": "Fikso përgjigjen",
         "unpin": "Hiq fiksimin e përgjigjes"
       }
-    }
+    },
+    "followRedirects": "Ndiq ridrejtimet",
+    "timeoutLabel": "Afati kohor (ms)"
   },
   "workbench": {
     "tabContextMenu": {

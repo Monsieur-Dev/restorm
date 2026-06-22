@@ -80,6 +80,12 @@ const httpServerExecutionTestDir = defineBddConfig({
   outputDir: '.features-gen/http-server'
 })
 
+const httpExecutionTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/http-execution/features/**/*.feature',
+  steps: ['tests/e2e/bdd/http-execution/steps/**/*.ts', 'tests/e2e/bdd/fixtures/mcp-server.fixture.ts'],
+  outputDir: '.features-gen/http-execution'
+})
+
 const fullyDocumentedPetstoreTestDir = defineBddConfig({
   features: 'tests/e2e/bdd/fully-documented-petstore/features/**/*.feature',
   steps: [
@@ -302,6 +308,11 @@ export default defineConfig({
     {
       name: 'http-server',
       testDir: httpServerExecutionTestDir,
+      timeout: 180 * 1000
+    },
+    {
+      name: 'http-execution',
+      testDir: httpExecutionTestDir,
       timeout: 180 * 1000
     },
     {

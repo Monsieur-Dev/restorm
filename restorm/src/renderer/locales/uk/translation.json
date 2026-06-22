@@ -382,7 +382,9 @@
         "pin": "Закріпити відповідь",
         "unpin": "Відкріпити відповідь"
       }
-    }
+    },
+    "followRedirects": "Стежити за переадресаціями",
+    "timeoutLabel": "Час очікування (ms)"
   },
   "workbench": {
     "tabContextMenu": {

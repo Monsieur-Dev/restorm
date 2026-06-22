@@ -26,7 +26,6 @@ import { importSoapFromString } from '../../src/main/services/import/SoapImportS
 import { importAsyncAPIFromString } from '../../src/main/services/import/AsyncAPIImportService'
 
 // Request services
-import { executeHTTPRequest, type HTTPRequestInput } from '../../src/main/services/request/HTTPRequestService'
 import { executeGraphQLRequest, type GraphQLRequestInput } from '../../src/main/services/request/GraphQLRequestService'
 
 // Types
@@ -167,7 +166,6 @@ describe('Integration Tests with Docker Services', () => {
   describe('HTTP/REST - Petstore API', () => {
     let importedCollection: EnvironmentFolder
     let httpRequests: HTTPRequest[]
-    let variableContext: VariableContext
 
     beforeAll(() => {
       if (!dockerAvailable || !containersStarted) return
@@ -179,7 +177,6 @@ describe('Integration Tests with Docker Services', () => {
       })
 
       httpRequests = findAllRequests(importedCollection, isHTTPRequest)
-      variableContext = createVariableContext(importedCollection)
     })
 
     it('should import Petstore spec successfully', () => {
@@ -190,109 +187,11 @@ describe('Integration Tests with Docker Services', () => {
       expect(httpRequests.length).toBeGreaterThan(0)
     })
 
-    it('should execute GET /pet/findByStatus request', async () => {
-      if (!dockerAvailable || !containersStarted) return
-
-      const input: HTTPRequestInput = {
-        request: {
-          id: 'test-find-by-status',
-          type: 'http',
-          name: 'Find By Status',
-          method: 'GET',
-          url: `${SERVICES.petstore.baseUrl}/api/pet/findByStatus`,
-          headers: [{ key: 'Accept', value: 'application/json' }],
-          params: [{ key: 'status', value: 'available' }],
-          pathParams: []
-        },
-        method: 'GET',
-        url: `${SERVICES.petstore.baseUrl}/api/pet/findByStatus`,
-        headers: [{ key: 'Accept', value: 'application/json' }],
-        params: [{ key: 'status', value: 'available' }],
-        pathParams: [],
-        bodyMode: 'text',
-        variableContext
-      }
-
-      const response = await executeHTTPRequest(input)
-
-      expect(response).toBeDefined()
-      expect(response.statusCode).toBe(200)
-      expect(response.responseBody).toBeDefined()
-      expect(response.timings.durationMs).toBeGreaterThan(0)
-    }, TEST_TIMEOUT)
-
-    it('should execute POST /pet request to create a pet', async () => {
-      if (!dockerAvailable || !containersStarted) return
-
-      const testPet = {
-        id: Date.now(),
-        name: 'TestPet',
-        category: { id: 1, name: 'Dogs' },
-        photoUrls: ['http://example.com/photo.jpg'],
-        tags: [{ id: 1, name: 'test' }],
-        status: 'available'
-      }
-
-      const input: HTTPRequestInput = {
-        request: {
-          id: 'test-add-pet',
-          type: 'http',
-          name: 'Add Pet',
-          method: 'POST',
-          url: `${SERVICES.petstore.baseUrl}/api/pet`,
-          headers: [{ key: 'Content-Type', value: 'application/json' }],
-          params: [],
-          pathParams: []
-        },
-        method: 'POST',
-        url: `${SERVICES.petstore.baseUrl}/api/pet`,
-        headers: [
-          { key: 'Content-Type', value: 'application/json' },
-          { key: 'Accept', value: 'application/json' }
-        ],
-        params: [],
-        pathParams: [],
-        bodyContent: JSON.stringify(testPet),
-        bodyMode: 'text',
-        variableContext
-      }
-
-      const response = await executeHTTPRequest(input)
-
-      expect(response).toBeDefined()
-      expect(response.statusCode).toBe(200)
-      expect(response.responseBody).toContain('TestPet')
-    }, TEST_TIMEOUT)
-
-    it('should execute GET /pet/{petId} request', async () => {
-      if (!dockerAvailable || !containersStarted) return
-
-      const input: HTTPRequestInput = {
-        request: {
-          id: 'test-get-pet',
-          type: 'http',
-          name: 'Get Pet',
-          method: 'GET',
-          url: `${SERVICES.petstore.baseUrl}/api/pet/1`,
-          headers: [{ key: 'Accept', value: 'application/json' }],
-          params: [],
-          pathParams: []
-        },
-        method: 'GET',
-        url: `${SERVICES.petstore.baseUrl}/api/pet/1`,
-        headers: [{ key: 'Accept', value: 'application/json' }],
-        params: [],
-        pathParams: [],
-        bodyMode: 'text',
-        variableContext
-      }
-
-      const response = await executeHTTPRequest(input)
-
-      expect(response).toBeDefined()
-      // Pet may or may not exist
-      expect([200, 404]).toContain(response.statusCode)
-    }, TEST_TIMEOUT)
+    // NOTE: live HTTP execution against the Docker Petstore is now
+    // exercised end-to-end by the `http-execution` Playwright BDD suite
+    // (the real Send path, `HTTPExecutionService.execute`). The former
+    // `executeHTTPRequest` integration tests drove a parallel axios path
+    // that has been removed.
   })
 
   // =============================================================================
@@ -302,7 +201,6 @@ describe('Integration Tests with Docker Services', () => {
   describe('HTTP/REST - Petstore via OpenAPI 3.0 spec', () => {
     let importedCollection: EnvironmentFolder
     let httpRequests: HTTPRequest[]
-    let variableContext: VariableContext
 
     beforeAll(() => {
       if (!dockerAvailable || !containersStarted) return
@@ -315,7 +213,6 @@ describe('Integration Tests with Docker Services', () => {
         baseUrl: SERVICES.petstore.baseUrl
       })
       httpRequests = findAllRequests(importedCollection, isHTTPRequest)
-      variableContext = createVariableContext(importedCollection)
     })
 
     it('imports the 3.0 spec into a tagged folder structure', () => {
@@ -324,32 +221,8 @@ describe('Integration Tests with Docker Services', () => {
       expect(importedCollection.apiDocumentation?.sourceType).toBe('openapi')
       expect(httpRequests.length).toBeGreaterThan(0)
     })
-
-    it('executes a GET findPetsByStatus against the Docker mock', async () => {
-      if (!dockerAvailable || !containersStarted) return
-      const input: HTTPRequestInput = {
-        request: {
-          id: 'oas3-find-by-status',
-          type: 'http',
-          name: 'Finds Pets by status',
-          method: 'GET',
-          url: `${SERVICES.petstore.baseUrl}/api/pet/findByStatus`,
-          headers: [{ key: 'Accept', value: 'application/json' }],
-          params: [{ key: 'status', value: 'available' }],
-          pathParams: []
-        },
-        method: 'GET',
-        url: `${SERVICES.petstore.baseUrl}/api/pet/findByStatus`,
-        headers: [{ key: 'Accept', value: 'application/json' }],
-        params: [{ key: 'status', value: 'available' }],
-        pathParams: [],
-        bodyMode: 'text',
-        variableContext
-      }
-      const response = await executeHTTPRequest(input)
-      expect(response.statusCode).toBe(200)
-      expect(response.responseBody).toBeDefined()
-    }, TEST_TIMEOUT)
+    // Live execution of imported 3.0 requests is covered by the
+    // `http-execution` Playwright suite (real Send path).
   })
 
   describe('HTTP/REST - Live OpenAPI 3.0 spec via URL', () => {
@@ -376,19 +249,16 @@ describe('Integration Tests with Docker Services', () => {
       expect(getById).toBeDefined()
     }, TEST_TIMEOUT)
 
-    it('executes a request from the imported 3.0 collection against the live 3.0 mock (api_key auth)', async () => {
+    it('resolves a relative `/v3` server URL against the sourceUrl when importing the live 3.0 spec', async () => {
       if (!dockerAvailable || !containersStarted) return
       // Fetch the spec live, import via `importOpenAPIFromJson` *with the
       // sourceUrl set* — no `baseUrl` override. The spec's `servers: [{
       // url: "/v3" }]` is root-relative, so the importer resolves it
       // against the source URL to build the runtime base
       // `http://localhost:8081/v3`. That proves the importer's
-      // relative-server-URL resolution works end-to-end and the imported
-      // request URL (`{{baseUrl}}/store/inventory`) resolves correctly
-      // through the variable context. (`/pet/*` paths require
-      // `petstore_auth` OAuth which the image enforces strictly;
-      // `/store/inventory` accepts the documented `api_key: special-key`
-      // header on its own.)
+      // relative-server-URL resolution works end-to-end. (Live execution
+      // of the imported requests is covered by the `http-execution`
+      // Playwright suite.)
       const response = await fetch(SERVICES.petstoreOpenApi3.openapiUrl)
       const json = await response.text()
       const folder = importOpenAPIFromJson(json, {
@@ -403,29 +273,6 @@ describe('Integration Tests with Docker Services', () => {
       const requests = findAllRequests(folder, isHTTPRequest)
       const inventory = requests.find((r) => r.url.endsWith('/store/inventory'))
       expect(inventory, 'expected an imported request for /store/inventory').toBeDefined()
-      if (!inventory) return
-
-      // Build the variable context out of the imported environment so the
-      // imported `{{baseUrl}}/store/inventory` URL resolves correctly.
-      const variableContext = createVariableContext(folder)
-      const resolvedUrl = `${SERVICES.petstoreOpenApi3.baseUrl}/v3/store/inventory`
-      const input: HTTPRequestInput = {
-        request: inventory,
-        method: 'GET',
-        url: resolvedUrl,
-        headers: [
-          { key: 'Accept', value: 'application/json' },
-          { key: 'api_key', value: 'special-key' }
-        ],
-        params: [],
-        pathParams: [],
-        bodyMode: 'text',
-        variableContext
-      }
-
-      const result = await executeHTTPRequest(input)
-      expect(result.statusCode).toBe(200)
-      expect(result.responseBody).toBeDefined()
     }, TEST_TIMEOUT)
   })
 

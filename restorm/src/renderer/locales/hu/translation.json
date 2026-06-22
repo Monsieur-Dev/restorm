@@ -380,7 +380,9 @@
         "pin": "Válasz rögzítése",
         "unpin": "Rögzítés feloldása"
       }
-    }
+    },
+    "followRedirects": "Átirányítások követése",
+    "timeoutLabel": "Időkorlát (ms)"
   },
   "workbench": {
     "tabContextMenu": {

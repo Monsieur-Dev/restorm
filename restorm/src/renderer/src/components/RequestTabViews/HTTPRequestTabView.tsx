@@ -10,6 +10,7 @@ import {
   Pane,
   ControlGroup,
   InputBox,
+  Toggle,
   eventBus,
   logger,
   getContrastColor,
@@ -55,6 +56,9 @@ const urlInputWrapperStyle: CSSProperties = { flex: 1, minWidth: 0 }
 // and the narrow numeric port field, mirroring the WebSocket server layout.
 const serverHostLabelStyle: CSSProperties = { display: 'flex', alignItems: 'center', padding: '0 4px', whiteSpace: 'nowrap', opacity: 0.8 }
 const serverPortWrapperStyle: CSSProperties = { width: 80, flexShrink: 0 }
+const requestOptionsRowStyle: CSSProperties = { display: 'flex', alignItems: 'center', gap: 16, padding: '6px 4px', flexWrap: 'wrap' }
+const timeoutFieldStyle: CSSProperties = { display: 'flex', alignItems: 'center', gap: 6 }
+const timeoutLabelStyle: CSSProperties = { color: 'var(--descriptionForeground)', whiteSpace: 'nowrap' }
 
 export interface HTTPRequestTabViewProps {
   /** An HTTPRequest or an AuthenticationRequest. The latter inherits
@@ -165,6 +169,17 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
   // requests it has served while listening.
   const [isListening, setIsListening] = useState<boolean>(false)
   const [servedCount, setServedCount] = useState<number>(0)
+  // Per-request execution options apply only to genuine HTTP requests
+  // (an AuthenticationRequest reuses this view but has no timeout /
+  // follow-redirects). `httpReq` is the request narrowed to HTTP, or
+  // undefined when it's the auth variant.
+  const httpReq: HTTPRequest | undefined = isAuthenticationRequest(request) ? undefined : request
+  // Timeout is an empty string when the request uses the global default;
+  // follow-redirects defaults to on.
+  const [timeoutMs, setTimeoutMs] = useState<string>(
+    typeof httpReq?.timeout === 'number' ? String(httpReq.timeout) : ''
+  )
+  const [followRedirects, setFollowRedirects] = useState<boolean>(httpReq?.followRedirects !== false)
 
   // Lift the SplitView's per-pane collapsed state up into
   // HTTPRequestTabView so it survives the SplitView's remount when
@@ -430,6 +445,31 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
     }
   }, [url, request])
 
+  // Sync per-request timeout to the reactive object. An empty / invalid
+  // entry clears the override (the executor falls back to the global
+  // default); a positive integer persists as the per-request value.
+  useEffect(() => {
+    if (requestIdRef.current !== request.id) return
+    if (isAuthenticationRequest(request)) return
+    const trimmed = timeoutMs.trim()
+    const parsed = trimmed === '' ? undefined : Number(trimmed)
+    const next = parsed !== undefined && Number.isFinite(parsed) && parsed > 0 ? parsed : undefined
+    if (next !== request.timeout) {
+      updateReactiveProperty(request, 'timeout', next)
+    }
+  }, [timeoutMs, request])
+
+  // Sync follow-redirects to the reactive object. Only the explicit
+  // "off" value is persisted; on (the default) leaves the field unset.
+  useEffect(() => {
+    if (requestIdRef.current !== request.id) return
+    if (isAuthenticationRequest(request)) return
+    const next = followRedirects ? undefined : false
+    if (next !== request.followRedirects) {
+      updateReactiveProperty(request, 'followRedirects', next)
+    }
+  }, [followRedirects, request])
+
   // Sync body changes to reactive object
   useEffect(() => {
     if (requestIdRef.current !== request.id) return
@@ -668,11 +708,14 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
       ? JSON.parse(JSON.stringify(authPlain)) as unknown
       : undefined
 
-    // Execute via backend
+    // Execute via backend. Timeout + follow-redirects are per-request,
+    // overridable fields; fall back to the global default / on when the
+    // request leaves them unset.
     window.restorm?.http.execute({
       requestId,
       method,
-      timeout: DEFAULT_REQUEST_TIMEOUT_MS,
+      timeout: typeof httpReq?.timeout === 'number' ? httpReq.timeout : DEFAULT_REQUEST_TIMEOUT_MS,
+      followRedirects: httpReq?.followRedirects !== false,
       ...(requestPath ? { requestPath } : {}),
       ...(authRequestPayload ? { authRequest: authRequestPayload } : {})
     })
@@ -719,6 +762,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
             statusText: result.statusText ?? '',
             responseHeaders,
             responseBody: result.body ?? '',
+            ...(result.bodyIsBase64 ? { bodyIsBase64: true } : {}),
             timings: result.timings,
             ...(request.body && { requestBody: request.body }),
             ...(contentType && { contentType }),
@@ -763,7 +807,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
       .finally(() => {
         setIsSending(false)
       })
-  }, [isSending, request, method, url, requestPath, resolveAuthRequest])
+  }, [isSending, request, httpReq, method, url, requestPath, resolveAuthRequest])
 
   const handleCancel = useCallback((): void => {
     const requestId = request.id
@@ -1106,6 +1150,26 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
         </BeamWrap>
       )}
     </ControlGroup>
+    {httpReq && (
+      <div style={requestOptionsRowStyle} data-testid="http-request-options-row">
+        <Toggle
+          checked={followRedirects}
+          onChange={(next: boolean): void => { setFollowRedirects(next) }}
+          data-testid="http-request-follow-redirects-toggle"
+        >
+          {t('requestTab.followRedirects', 'Follow redirects')}
+        </Toggle>
+        <div style={timeoutFieldStyle}>
+          <span style={timeoutLabelStyle}>{t('requestTab.timeoutLabel', 'Timeout (ms)')}</span>
+          <InputBox
+            value={timeoutMs}
+            onChange={(value: string): void => { setTimeoutMs(value) }}
+            options={{ placeholder: String(DEFAULT_REQUEST_TIMEOUT_MS), type: 'number' }}
+            data-testid="http-request-timeout-input"
+          />
+        </div>
+      </div>
+    )}
     </div>
   )
 

@@ -380,7 +380,9 @@
         "pin": "Antwort anheften",
         "unpin": "Antwort lösen"
       }
-    }
+    },
+    "followRedirects": "Weiterleitungen folgen",
+    "timeoutLabel": "Zeitlimit (ms)"
   },
   "workbench": {
     "tabContextMenu": {

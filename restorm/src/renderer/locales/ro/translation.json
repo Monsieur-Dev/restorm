@@ -381,7 +381,9 @@
         "pin": "Fixează răspunsul",
         "unpin": "Defixează răspunsul"
       }
-    }
+    },
+    "followRedirects": "Urmărește redirecționările",
+    "timeoutLabel": "Expirare (ms)"
   },
   "workbench": {
     "tabContextMenu": {

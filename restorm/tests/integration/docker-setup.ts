@@ -39,6 +39,10 @@ export const SERVICES = {
     name: 'GraphQL Server',
     baseUrl: 'http://localhost:4000'
   },
+  httpUtil: {
+    name: 'HTTP Utility Mock',
+    baseUrl: 'http://localhost:8082'
+  },
   soap: {
     name: 'SOAP Server (Castle Mock)',
     baseUrl: 'http://localhost:8090'
@@ -144,6 +148,10 @@ export async function waitForServices(): Promise<void> {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ query: '{ __typename }' })
+    },
+    {
+      name: 'HTTP Utility Mock',
+      url: `${SERVICES.httpUtil.baseUrl}/health`
     },
     {
       name: 'SOAP (Castle Mock)',

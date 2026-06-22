@@ -1,5 +1,6 @@
 import { type CSSProperties, type ReactNode } from 'react'
 import {
+  Button,
   CodeEditor,
   ListView,
   type ListViewItemData
@@ -37,15 +38,20 @@ function getStatusColor(statusCode: number): 'green' | 'red' | 'orange' {
   return 'red'
 }
 
-/** Convert KeyValue array to ListView items */
+/** Convert KeyValue array to ListView items.
+ *
+ * Each row carries `data-testid="<prefix>-row"` + `data-header-key` /
+ * `data-header-value` on its key/value spans so an E2E can assert a
+ * specific header (including a multi-value header, which arrives as one
+ * row whose value is the comma-joined list). */
 function keyValuesToListItems(keyValues: KeyValue[], prefix: string): ListViewItemData[] {
   return keyValues.map((kv, index) => ({
     id: `${prefix}-${index}`,
     icon: 'blank',
     title: (
-      <span style={flexRowStyle}>
+      <span style={flexRowStyle} data-testid={`${prefix}-row`} data-header-key={kv.key}>
         <span style={kvKeyStyle}>{kv.key}</span>
-        <span style={kvValueStyle}>{kv.value.toString()}</span>
+        <span style={kvValueStyle} data-header-value={kv.value.toString()}>{kv.value.toString()}</span>
       </span>
     )
   }))
@@ -88,7 +94,7 @@ export function buildHttpResponseViewData(
     }
     const statusCodeNode = (
       <ResponseInfoStatusCodeTooltip code={codeStr} docDescription={docDescription}>
-        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, color: statusColor }}>
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, color: statusColor }} data-testid="http-response-status" data-status-code={codeStr}>
           <span style={dotStyle} aria-hidden="true" />
           <span>{response.statusCode} {response.statusText}</span>
         </span>
@@ -98,7 +104,7 @@ export function buildHttpResponseViewData(
       { id: 'general-request-url', icon: 'blank', title: <span style={flexRowStyle}><span style={boldLabelStyle}>Request URL</span><span>{response.requestUrl}</span></span> },
       { id: 'general-request-method', icon: 'blank', title: <span style={flexRowStyle}><span style={boldLabelStyle}>Request Method</span><span>{response.requestMethod}</span></span> },
       { id: 'general-status-code', icon: 'blank', title: <span style={flexRowStyle}><span style={boldLabelStyle}>Status Code</span>{statusCodeNode}</span> },
-      { id: 'general-duration', icon: 'blank', title: <span style={flexRowStyle}><span style={boldLabelStyle}>Duration</span><span>{formatDuration(response.timings.durationMs)}</span></span> }
+      { id: 'general-duration', icon: 'blank', title: <span style={flexRowStyle}><span style={boldLabelStyle}>Duration</span><span data-testid="http-response-duration">{formatDuration(response.timings.durationMs)}</span></span> }
     )
     if (response.contentType) {
       generalItems.push({ id: 'general-content-type', icon: 'blank', title: <span style={flexRowStyle}><span style={boldLabelStyle}>Content-Type</span><span>{response.contentType}</span></span> })
@@ -139,7 +145,43 @@ export function buildHttpResponseViewData(
     return responseBody
   })()
 
-  const responseContent = response && formattedResponseBody ? (
+  // Binary response: the body is base64-encoded bytes (a UTF-8 text
+  // render would corrupt them), so offer a download instead. Decode in
+  // the browser and trigger an anchor download with a filename derived
+  // from the Content-Type.
+  const downloadBinary = (): void => {
+    if (!response) return
+    try {
+      const byteChars = atob(response.responseBody)
+      const bytes = new Uint8Array(byteChars.length)
+      for (let i = 0; i < byteChars.length; i++) bytes[i] = byteChars.charCodeAt(i)
+      const mime = response.contentType ?? 'application/octet-stream'
+      const blob = new Blob([bytes], { type: mime })
+      const objectUrl = URL.createObjectURL(blob)
+      const ext = mime.split('/')[1]?.split(';')[0] ?? 'bin'
+      const anchor = document.createElement('a')
+      anchor.href = objectUrl
+      anchor.download = `response.${ext}`
+      anchor.click()
+      URL.revokeObjectURL(objectUrl)
+    } catch {
+      // A malformed base64 payload simply produces no download.
+    }
+  }
+
+  const responseContent = response?.bodyIsBase64 ? (
+    <div style={fullHeightBoxStyle} data-testid="http-response-binary">
+      <div style={{ padding: 12 }}>
+        <div style={{ marginBottom: 8, color: 'var(--descriptionForeground)' }}>
+          Binary response ({response.contentType ?? 'unknown type'})
+          {response.contentLength !== undefined ? ` — ${formatBytes(response.contentLength)}` : ''}
+        </div>
+        <Button onClick={downloadBinary} data-testid="http-response-download-button">
+          Download
+        </Button>
+      </div>
+    </div>
+  ) : response && formattedResponseBody ? (
     <div style={editorContainerStyle}>
       <CodeEditor
         height="100%"
@@ -153,6 +195,7 @@ export function buildHttpResponseViewData(
 
   const jsonData = (() => {
     if (!response?.responseBody) return undefined
+    if (response.bodyIsBase64) return undefined
     if (!response.contentType?.includes('application/json')) return undefined
     try {
       return JSON.parse(response.responseBody) as unknown
