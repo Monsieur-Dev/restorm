@@ -80,7 +80,11 @@ export function isDockerAvailable(): boolean {
 export function startDocker(): void {
   console.log('Starting Docker containers...')
   try {
-    execSync(`docker compose -f "${DOCKER_COMPOSE_PATH}" up -d`, {
+    // --wait makes compose block until every container with a healthcheck
+    // reports healthy (not just "started"). This prevents a race where the
+    // e2e suite begins before soap-server (or other fast-starting services)
+    // are actually ready to serve requests.
+    execSync(`docker compose -f "${DOCKER_COMPOSE_PATH}" up -d --wait`, {
       stdio: 'inherit',
       timeout: 120000
     })
