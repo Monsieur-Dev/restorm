@@ -210,20 +210,41 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
     }
   }, [selectedEnvId, environments, request.id])
 
-  // Notify ContextService when URL, query or variables change. In server mode
-  // also push the SDL + canned resolvers so the main-process mock can read them
-  // off `fullData`.
+  // Notify ContextService when URL, query or variables change — debounced so
+  // rapid keystrokes in the Monaco editors coalesce into a single IPC call
+  // (mirrors the ECUI InputBox 300 ms debounce model and the playbook rule
+  // requiring that rapid typing emits at most a couple of document-update
+  // events, verified by the e2e debounce scenario). In server mode also push
+  // the SDL + canned resolvers so the main-process mock can read them off
+  // `fullData`.
+  const updateDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   useEffect(() => {
     const toKeyValueData = toKeyValueDataShared
-
-    void window.restorm?.context.updateFullRequestData(request.id, {
+    const reqId = request.id
+    const source = sourceIdRef.current
+    const payload = {
       url,
-      method: 'POST',
-      requestType: 'graphql',
+      method: 'POST' as const,
+      requestType: 'graphql' as const,
       headers: toKeyValueData(request.headers),
-      body: { type: 'text', content: JSON.stringify({ query, variables }) },
+      body: { type: 'text' as const, content: JSON.stringify({ query, variables }) },
       ...(isServer ? { server: true, schema, mockResolvers } : {})
-    }, sourceIdRef.current)
+    }
+
+    if (updateDebounceRef.current !== null) {
+      clearTimeout(updateDebounceRef.current)
+    }
+    updateDebounceRef.current = setTimeout(() => {
+      updateDebounceRef.current = null
+      void window.restorm?.context.updateFullRequestData(reqId, payload, source)
+    }, 300)
+
+    return () => {
+      if (updateDebounceRef.current !== null) {
+        clearTimeout(updateDebounceRef.current)
+        updateDebounceRef.current = null
+      }
+    }
   }, [request.id, request.headers, url, query, variables, isServer, schema, mockResolvers])
 
   // Sync state changes to reactive request object
@@ -344,7 +365,10 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
           data: res.data,
           errors: res.errors,
           responseHeaders: [],
-          timings: res.timings
+          timings: res.timings,
+          // Propagate transport / network / cancellation error so the response
+          // panel can surface it (e.g. 'Request cancelled', ECONNREFUSED).
+          ...(res.error ? { error: res.error } : {})
         }
         setResponse(graphqlResponse)
         setHistoryRefreshKey(prev => prev + 1)
@@ -497,12 +521,23 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
       </div>
     ) : null
 
-    const responseContent = resp && (resp.data ?? resp.errors) ? (
+    // Surface any response payload: successful data, GraphQL errors[], or a
+    // transport-level error string (network failure, cancellation).
+    const responseJson = resp
+      ? JSON.stringify(
+          resp.error
+            ? { error: resp.error }
+            : { data: resp.data, errors: resp.errors },
+          null,
+          2
+        )
+      : null
+    const responseContent = resp && (resp.data ?? resp.errors ?? resp.error) ? (
       <div style={{ height: '100%', border: '1px solid var(--panel-border)', borderRadius: 3 }}>
         <CodeEditor
           height="100%"
           language="json"
-          value={JSON.stringify({ data: resp.data, errors: resp.errors }, null, 2)}
+          value={responseJson ?? ''}
           options={{ readOnly: true, minimap: { enabled: false }, automaticLayout: true }}
           data-testid="graphql-response-editor"
         />

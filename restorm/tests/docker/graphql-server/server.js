@@ -36,6 +36,14 @@ const typeDefs = `
     posts: [Post!]!
     post(id: ID!): Post
     echo(message: String!): String!
+    # Returns the value of the named HTTP request header as received by the
+    # server. Used by the auth/Handlebars e2e assertion to prove that the
+    # env-resolved header value reached the wire (not the literal template).
+    echoHeader(name: String!): String
+    # Waits delayMs milliseconds before echoing the message. Used by the
+    # cancellation e2e scenario to guarantee the request is still in-flight
+    # when the test clicks Cancel.
+    slowEcho(delayMs: Int!, message: String!): String!
   }
 
   type Mutation {
@@ -58,6 +66,14 @@ const resolvers = {
     posts: () => posts,
     post: (_, { id }) => posts.find((p) => p.id === id),
     echo: (_, { message }) => `Echo: ${message}`,
+    echoHeader: (_, { name }, context) => {
+      // `context.req` is the Express/Node.js request injected by
+      // `startStandaloneServer`. Header names are lower-cased by Node.
+      const value = context.req?.headers?.[name.toLowerCase()] ?? null
+      return value
+    },
+    slowEcho: (_, { delayMs, message }) =>
+      new Promise((resolve) => setTimeout(() => resolve(`Echo: ${message}`), delayMs)),
   },
   Mutation: {
     createUser: (_, { name, email }) => {
@@ -95,6 +111,9 @@ async function startServer() {
   const server = new ApolloServer({ typeDefs, resolvers });
   const { url } = await startStandaloneServer(server, {
     listen: { port: 4000, host: '0.0.0.0' },
+    // Expose the raw Node.js request so resolvers can read HTTP headers
+    // (used by `echoHeader` to prove Handlebars-resolved values reach the wire).
+    context: async ({ req }) => ({ req }),
   });
   console.log(`GraphQL server ready at ${url}`);
 }
