@@ -40,7 +40,10 @@ const EXCLUDED_FIELDS = new Set([
   'removed',
   'toPlainObject',
   'authenticationRequestId',
-  'type'
+  'type',
+  // Exclude the config list itself so loading a snapshot never overwrites
+  // the live config list with a stale one embedded inside the saved fields.
+  'quickConfigs'
 ])
 
 /**

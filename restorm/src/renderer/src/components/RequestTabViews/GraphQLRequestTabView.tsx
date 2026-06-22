@@ -1,6 +1,7 @@
 import { toKeyValueData as toKeyValueDataShared } from '../../utils/toKeyValueData'
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { useRequestReset } from '../../hooks/useRequestReset'
+import { useTransportReplaced } from '../../hooks/useTransportReplaced'
 import { getRequestPanelState, setRequestPanelCollapsed } from '../../services/requestPanelStateStore'
 import { useTranslation } from 'react-i18next'
 import { useHandlebarsHelpers } from '../../hooks/useHandlebarsHelpers'
@@ -136,18 +137,31 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
   useEffect(() => { selectedEnvIdRef.current = selectedEnvId }, [selectedEnvId])
   useEffect(() => { requestRef.current = request }, [request])
 
+  // Re-sync local state when a quick-config load (or MCP update_request)
+  // replaces the transport. useTransportReplaced fires the callback once
+  // per event for this request; the state updates then re-trigger the
+  // updateFullRequestData useEffect below → Handlebars re-resolution.
+  const handleTransportReplaced = useCallback(() => {
+    const current = requestRef.current
+    setUrlState(current.url)
+    setQueryState(current.query)
+    setVariablesState(current.variables ?? '{}')
+    setTransportEpoch((n) => n + 1)
+  }, [])
+  useTransportReplaced(request, handleTransportReplaced)
+
   // Register request with ContextService on mount, unregister on unmount
   useEffect(() => {
     const requestId = request.id
     const currentEnvId = selectedEnvIdRef.current ?? environments?.[0]?.id ?? null
     const currentRequest = requestRef.current
-    
+
     // Get restorm context (available in both Electron and web mode via shim)
     const restormContext = window.restorm?.context
     if (!restormContext) {
       return
     }
-    
+
     logger.debug('[GraphQLRequestTabView] Registering request with ContextService', { requestId, selectedEnvId: currentEnvId })
 
     const toKeyValueData = toKeyValueDataShared

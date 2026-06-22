@@ -57,6 +57,7 @@ import { buildHttpResponseViewData } from './HTTPResponsePanel'
 import { RestormVariableInputBox } from '../RestormVariableInputBox'
 import { useHandlebarsHelpers } from '../../hooks/useHandlebarsHelpers'
 import { useCurlPaste, type ParsedCurl } from '../../hooks/useCurlPaste'
+import { useTransportReplaced } from '../../hooks/useTransportReplaced'
 import { CurlPasteCallout } from '../CurlPasteCallout'
 import { toasterService } from 'electron-core-ui/renderer'
 
@@ -210,6 +211,22 @@ export const LocalAuthenticationRequestForm: React.FC<LocalAuthenticationRequest
   // smart-paste apply so they remount with the freshly-mutated request.
   const [transportEpoch, setTransportEpoch] = useState(0)
   const urlSectionHostRef = useRef<HTMLDivElement | null>(null)
+
+  // Re-sync form state when a quick-config load replaces the transport.
+  const requestRef = useRef(request)
+  useEffect(() => { requestRef.current = request }, [request])
+  const handleTransportReplaced = useCallback(() => {
+    const current = requestRef.current
+    setMethod(current.method)
+    setUrl(current.url)
+    setBodyMode(readBodyMode(current))
+    setBodyText(readBodyText(current))
+    setBodyFilePath(readBodyFilePath(current))
+    setExpirationExpression(current.expirationExpression ?? '')
+    setErrorCodesText(formatErrorCodes(current.authErrorCodes))
+    setTransportEpoch((n) => n + 1)
+  }, [])
+  useTransportReplaced(request, handleTransportReplaced)
 
   // Last auth response parsed as JSON, kept in a ref so the read-only
   // "Resolved value" cells of the producedHeaders table can compile

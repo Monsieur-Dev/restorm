@@ -26,6 +26,7 @@
 
 import React, { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import { useRequestReset } from '../../hooks/useRequestReset'
+import { useTransportReplaced } from '../../hooks/useTransportReplaced'
 import { useHandlebarsHelpers } from '../../hooks/useHandlebarsHelpers'
 import { useTranslation } from 'react-i18next'
 import {
@@ -694,6 +695,30 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
     request.mockData,
     pushFullRequestDataToContextService
   ])
+
+  // Keep a ref to push so the transport-replaced callback can always call
+  // the latest version (stable closure for useTransportReplaced).
+  const pushFullRequestDataRef = useRef(pushFullRequestDataToContextService)
+  useEffect(() => { pushFullRequestDataRef.current = pushFullRequestDataToContextService }, [pushFullRequestDataToContextService])
+  const requestRef = useRef(request)
+  useEffect(() => { requestRef.current = request }, [request])
+
+  // Re-sync local query-option state and push to ContextService when a
+  // quick-config load (or MCP update_request) replaces the transport.
+  const handleTransportReplaced = useCallback(() => {
+    const current = requestRef.current
+    setFilterText(current.queryOptions.filter ?? '')
+    setSelectText((current.queryOptions.select ?? []).join(', '))
+    setTopText(current.queryOptions.top ?? '')
+    setSkipText(current.queryOptions.skip ?? '')
+    setExpandText(current.queryOptions.expand ?? '')
+    setOrderbyText(current.queryOptions.orderby ?? '')
+    setSearchText(current.queryOptions.search ?? '')
+    setFormatText(current.queryOptions.format ?? '')
+    setApplyText(current.queryOptions.apply ?? '')
+    void pushFullRequestDataRef.current()
+  }, [])
+  useTransportReplaced(request, handleTransportReplaced)
 
   const handleSend = useCallback((): void => {
     if (isSending) return
