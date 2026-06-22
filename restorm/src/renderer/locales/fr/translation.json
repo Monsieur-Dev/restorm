@@ -259,7 +259,8 @@
         "websocketServer": "Serveur WebSocket",
         "socketio": "Requête Socket.IO",
         "mqtt": "Requête MQTT",
-        "mqttServer": "Courtier MQTT"
+        "mqttServer": "Courtier MQTT",
+        "grpcServer": "Serveur gRPC fictif"
       }
     },
     "deleteConfirm": {
@@ -437,6 +438,25 @@
       "serverStream": "Streaming serveur",
       "clientStream": "Streaming client",
       "bidi": "Streaming bidirectionnel"
+    },
+    "server": {
+      "proto": "Proto",
+      "methods": "Méthodes fictives",
+      "addMethod": "Ajouter une méthode",
+      "removeMethod": "Supprimer la méthode",
+      "noMethods": "Aucune méthode pour l’instant",
+      "servicePlaceholder": "paquet.Service",
+      "methodPlaceholder": "Méthode",
+      "statusCode": "Code de statut",
+      "statusMessagePlaceholder": "Message de statut (pour un code non OK)",
+      "responseLabel": "Message de réponse (JSON)",
+      "reflection": "Réflexion",
+      "startListening": "Démarrer le serveur",
+      "stopListening": "Arrêter le serveur",
+      "served": "À l’écoute — {{count}} appel(s) servi(s)",
+      "notListening": "Inactif",
+      "listenFailed": "Échec du démarrage du serveur gRPC",
+      "snippetsUnavailable": "Les extraits de code ne sont pas disponibles pour un serveur fictif."
     }
   },
   "soap": {
@@ -1001,7 +1021,8 @@
       "mqttSend": "Publication MQTT",
       "mqttClose": "Fermeture MQTT",
       "httpListen": "Serveur HTTP",
-      "httpClose": "Fermeture HTTP"
+      "httpClose": "Fermeture HTTP",
+      "grpcServerClose": "Fermeture serveur gRPC"
     },
     "comparator": {
       "result": "résultat"
@@ -1565,7 +1586,9 @@
       "mqttCloseServer": "Arrête le courtier MQTT référencé et déconnecte ses clients.",
       "toast": "Affiche une notification toast dans l'interface Restorm pendant l'exécution du scénario.",
       "httpListen": "Héberge un serveur HTTP fictif local et écoute indéfiniment. « connected » se déclenche une fois le serveur démarré ; chaque requête servie réémet ses données sur le port « served ». Le serveur reste actif jusqu’à une fermeture HTTP (ou un Stop), puis « done » se déclenche. Pas de sortie response — il sert, il n’appelle pas.",
-      "httpClose": "Arrête un serveur HTTP fictif déjà en écoute (déclaré par un nœud serveur HTTP) et libère son port."
+      "httpClose": "Arrête un serveur HTTP fictif déjà en écoute (déclaré par un nœud serveur HTTP) et libère son port.",
+      "grpcListen": "Héberge un serveur gRPC fictif local et écoute indéfiniment. « connected » se déclenche une fois le serveur en écoute ; chaque appel servi réémet ses données sur le port « served ». Le serveur reste actif jusqu’à une fermeture serveur gRPC (ou un Stop), puis « done » se déclenche. Pas de sortie response — il sert, il n’appelle pas.",
+      "grpcServerClose": "Arrête un serveur gRPC fictif déjà en écoute (déclaré par un nœud serveur gRPC) et libère son port."
     },
     "legend": {
       "title": "Légende",

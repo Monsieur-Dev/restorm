@@ -187,6 +187,11 @@ declare global {
         isActive: (requestId: string) => Promise<boolean>
         onProgress: (callback: (data: RequestProgressData) => void) => (() => void)
         onMessage: (callback: (data: GrpcMessageData) => void) => (() => void)
+        listen: (requestId: string) => Promise<{ success: boolean; listening: boolean; error?: string }>
+        stopServer: (requestId: string) => Promise<boolean>
+        isServerListening: (requestId: string) => Promise<boolean>
+        onServerProgress: (callback: (data: RequestProgressData) => void) => (() => void)
+        onServerServed: (callback: (data: { requestId: string; count: number }) => void) => (() => void)
       }
       websocket: {
         connect: (input: WebSocketExecutionInput) => Promise<WebSocketExecutionResult>
@@ -603,6 +608,10 @@ export interface FullRequestData {
   grpcMethod?: string | undefined
   callType?: string | undefined
   requestMessage?: string | undefined
+  /** gRPC: the request's own proto, used to build the dynamic client (falls back
+   * to the bundled grpcbin proto when absent). */
+  protoContent?: string | undefined
+  protoPath?: string | undefined
   metadata?: KeyValueData[] | undefined
   soapAction?: string | undefined
   soapService?: string | undefined

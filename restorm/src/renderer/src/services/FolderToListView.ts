@@ -152,6 +152,17 @@ function grpcRequestToListViewItem(
   request: GrpcRequest,
   options: FolderToListViewOptions
 ): ListViewItemData {
+  // A gRPC mock server renders the uniform SRV capsule over the `grpc` badge
+  // (and the listening beam), like the WS/SIO/MQTT/HTTP servers; a client gRPC
+  // request keeps its call-type badge + the executing beam.
+  if (request.server === true) {
+    const badge = options.renderProtocolBadge?.('grpc', undefined, 'server')
+    return {
+      id: request.id,
+      title: request.name,
+      icon: withListeningBeam(request.id, badge)
+    }
+  }
   const badge = options.renderProtocolBadge?.(request.callType)
   return {
     id: request.id,

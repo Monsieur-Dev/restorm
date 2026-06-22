@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import * as grpc from '@grpc/grpc-js'
-import { resolveGrpcMethod, grpcStatusName } from '../../src/main/services/grpc/grpcProtoLoader'
+import { resolveGrpcMethod, grpcStatusName, loadGrpcPackage, enumerateGrpcServices } from '../../src/main/services/grpc/grpcProtoLoader'
 
 /**
  * The bundled grpcbin descriptor must resolve each call type's streaming flags
@@ -63,5 +63,35 @@ describe('grpcStatusName', () => {
     expect(grpcStatusName(0)).toBe('OK')
     expect(grpcStatusName(5)).toBe('NOT_FOUND')
     expect(grpcStatusName(12)).toBe('UNIMPLEMENTED')
+  })
+})
+
+describe('loadGrpcPackage + enumerateGrpcServices (server side)', () => {
+  it('enumerates every service + its methods with streaming flags from inline content', () => {
+    const proto = `syntax = "proto3";
+package demo;
+message Req {} message Res {}
+service Greeter {
+  rpc Unary (Req) returns (Res);
+  rpc Down (Req) returns (stream Res);
+  rpc Up (stream Req) returns (Res);
+  rpc Both (stream Req) returns (stream Res);
+}`
+    const services = enumerateGrpcServices(loadGrpcPackage({ protoContent: proto }))
+    const greeter = services.find((s) => s.name === 'demo.Greeter')
+    if (!greeter) throw new Error('demo.Greeter not resolved')
+    const byName = new Map(greeter.methods.map((m) => [m.name, m]))
+    expect(byName.get('Unary')).toMatchObject({ requestStream: false, responseStream: false })
+    expect(byName.get('Down')).toMatchObject({ requestStream: false, responseStream: true })
+    expect(byName.get('Up')).toMatchObject({ requestStream: true, responseStream: false })
+    expect(byName.get('Both')).toMatchObject({ requestStream: true, responseStream: true })
+    // The definition is what grpc.Server.addService consumes.
+    expect(typeof greeter.definition).toBe('object')
+    expect(Object.keys(greeter.definition)).toContain('Unary')
+  })
+
+  it('falls back to the bundled grpcbin descriptor when no source is given', () => {
+    const services = enumerateGrpcServices(loadGrpcPackage({}))
+    expect(services.some((s) => s.name === 'grpcbin.GRPCBin')).toBe(true)
   })
 })

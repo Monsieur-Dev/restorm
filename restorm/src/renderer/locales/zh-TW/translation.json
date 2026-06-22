@@ -258,7 +258,8 @@
         "websocketServer": "WebSocket 伺服器",
         "socketio": "Socket.IO 要求",
         "mqtt": "MQTT request",
-        "mqttServer": "MQTT 代理"
+        "mqttServer": "MQTT 代理",
+        "grpcServer": "gRPC 模擬伺服器"
       }
     },
     "deleteConfirm": {
@@ -436,6 +437,25 @@
       "serverStream": "Server streaming",
       "clientStream": "Client streaming",
       "bidi": "Bidirectional streaming"
+    },
+    "server": {
+      "proto": "Proto",
+      "methods": "模擬方法",
+      "addMethod": "新增方法",
+      "removeMethod": "移除方法",
+      "noMethods": "尚無方法",
+      "servicePlaceholder": "套件.Service",
+      "methodPlaceholder": "方法",
+      "statusCode": "狀態碼",
+      "statusMessagePlaceholder": "狀態訊息（用於非 OK 狀態碼）",
+      "responseLabel": "回應訊息（JSON）",
+      "reflection": "反射",
+      "startListening": "啟動伺服器",
+      "stopListening": "停止伺服器",
+      "served": "監聽中 — 已服務 {{count}} 個呼叫",
+      "notListening": "未在監聽",
+      "listenFailed": "gRPC 伺服器啟動失敗",
+      "snippetsUnavailable": "模擬伺服器無法使用程式碼片段。"
     }
   },
   "soap": {
@@ -1000,7 +1020,8 @@
       "mqttSend": "MQTT publish",
       "mqttClose": "MQTT close",
       "httpListen": "HTTP server",
-      "httpClose": "HTTP close"
+      "httpClose": "HTTP close",
+      "grpcServerClose": "關閉 gRPC 伺服器"
     },
     "comparator": {
       "result": "結果"
@@ -1561,7 +1582,9 @@
       "mqttCloseServer": "Stops the referenced MQTT broker and disconnects its clients.",
       "toast": "Emits a toast notification in the Restorm UI while the scenario runs.",
       "httpListen": "Hosts a local HTTP mock server and listens indefinitely. `connected` fires once it is listening; each served request re-emits its data on the `served` port. The server stays up until an HTTP close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
-      "httpClose": "Stops an already-listening HTTP mock server (declared by an HTTP server node), freeing its port."
+      "httpClose": "Stops an already-listening HTTP mock server (declared by an HTTP server node), freeing its port.",
+      "grpcListen": "Hosts a local gRPC mock server and listens indefinitely. `connected` fires once it is listening; each served call re-emits its data on the `served` port. The server stays up until a gRPC server close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
+      "grpcServerClose": "Stops an already-listening gRPC mock server (declared by a gRPC server node), freeing its port."
     },
     "legend": {
       "title": "圖例",

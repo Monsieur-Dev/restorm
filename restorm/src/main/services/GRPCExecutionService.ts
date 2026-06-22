@@ -233,8 +233,8 @@ class GRPCExecutionService {
     const message = (full?.requestMessage) ?? '{}'
     const resolvedMessage = contextService.resolveValue(message, requestId)
     const protoSource: ProtoSource = {
-      protoContent: full?.protoContent as string | undefined,
-      protoPath: full?.protoPath as string | undefined
+      protoContent: full?.protoContent,
+      protoPath: full?.protoPath
     }
     const { address, secure } = normalizeAddress(resolvedUrl)
 

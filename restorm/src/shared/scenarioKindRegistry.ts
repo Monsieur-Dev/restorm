@@ -291,6 +291,23 @@ export const SCENARIO_KIND_REGISTRY = {
       config: { connectionNodeId: 'Id of the httpListen node whose server to stop.' }
     }
   },
+  grpcListen: {
+    labelKey: 'scenario.nodes.grpcListen', defaultLabel: 'gRPC server', icon: 'server', category: 'composition',
+    requestBinding: true,
+    ports: { inputs: [], outputs: [{ id: 'connected', name: 'connected', flow: 'signal' }, { id: 'served', name: 'served', flow: 'both' }] },
+    doc: {
+      summary: 'HOSTS a local gRPC mock server from a bound `server: true` gRPC request and listens INDEFINITELY (restorm serves, it does not call out — so there is NO `response` output). `connected` (a pure signal) fires once the server is listening; EACH call the mock serves re-emits its `{ request, response }` data on the `served` output. The server stays up — keeping the run in-progress — until a grpcServerClose targets it (or the run is stopped), then `done` fires.',
+      config: { requestId: 'Id of the server: true gRPC request to host (its port + proto + per-method mock responses/status).', connectionName: 'Unique-per-scenario name a grpcServerClose references for display (defaults to the request name).', label: 'Display label on the box.' }
+    }
+  },
+  grpcServerClose: {
+    labelKey: 'scenario.nodes.grpcServerClose', defaultLabel: 'gRPC server close', icon: 'debug-disconnect', category: 'composition',
+    ports: { inputs: [], outputs: [] },
+    doc: {
+      summary: 'Stops an already-listening gRPC mock server (declared by a grpcListen node), freeing its port and firing that node\'s `done`. Pure-event action: triggered on `in`, sequences via its own `done`. Errors (to `error`) when no server is selected.',
+      config: { connectionNodeId: 'Id of the grpcListen node whose server to stop.' }
+    }
+  },
 
   // --- Lists (grouped into a "Lists" submenu) ---
   aggregate: {

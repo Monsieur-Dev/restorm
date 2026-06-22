@@ -148,6 +148,65 @@ export interface ProtoSource {
   protoPath?: string | undefined
 }
 
+/**
+ * Resolve a {@link ProtoSource} into the loaded gRPC package object, applying
+ * the same precedence as the client path: inline `protoContent` first, then a
+ * `.proto` file at `protoPath`, then the bundled grpcbin fallback. Shared by the
+ * client (`resolveGrpcMethod`) and the mock SERVER (which walks every service /
+ * method to build its `ServiceDefinition`s) so both parse a proto identically.
+ */
+export function loadGrpcPackage(source: ProtoSource): grpc.GrpcObject {
+  if (source.protoContent && source.protoContent.trim() !== '') {
+    return loadFromContent(source.protoContent)
+  }
+  if (source.protoPath && source.protoPath.trim() !== '') {
+    return loadFromPath(source.protoPath)
+  }
+  return loadFromContent(GRPCBIN_PROTO)
+}
+
+/** The raw definition of one service in a loaded proto: its fully-qualified
+ * name + the proto-loader `ServiceDefinition` (what `grpc.Server.addService`
+ * consumes), with each method's streaming flags exposed for handler wiring. */
+export interface GrpcServiceDefinitionEntry {
+  /** Fully-qualified service name (e.g. `grpcbin.GRPCBin`). */
+  name: string
+  /** The proto-loader service definition (keyed by method name). */
+  definition: grpc.ServiceDefinition
+  /** Per-method streaming flags (requestStream / responseStream). */
+  methods: { name: string; requestStream: boolean; responseStream: boolean }[]
+}
+
+/**
+ * Walk a loaded gRPC package object and collect every service's
+ * `ServiceDefinition` (the `.service` member each generated constructor carries)
+ * along with its fully-qualified name + per-method streaming flags. The mock
+ * server registers one handler set per returned entry.
+ */
+export function enumerateGrpcServices(root: grpc.GrpcObject): GrpcServiceDefinitionEntry[] {
+  const out: GrpcServiceDefinitionEntry[] = []
+  const walk = (obj: grpc.GrpcObject, prefix: string): void => {
+    for (const [key, value] of Object.entries(obj)) {
+      // proto-loader runtime objects can carry null entries — widen + null-guard.
+      const node: unknown = value
+      const qualified = prefix ? `${prefix}.${key}` : key
+      if (typeof node === 'function' && 'service' in node) {
+        const definition = (node as ServiceClientConstructor).service
+        const methods = Object.entries(definition).map(([methodName, def]) => ({
+          name: methodName,
+          requestStream: (def as MethodDefinition<object, object>).requestStream,
+          responseStream: (def as MethodDefinition<object, object>).responseStream
+        }))
+        out.push({ name: qualified, definition, methods })
+      } else if (typeof node === 'object' && node !== null && !('service' in node)) {
+        walk(node as grpc.GrpcObject, qualified)
+      }
+    }
+  }
+  walk(root, '')
+  return out
+}
+
 /** Walk a dotted, package-qualified service name into the loaded GrpcObject. */
 function resolveServiceConstructor(root: grpc.GrpcObject, serviceName: string): ServiceClientConstructor | undefined {
   // Try the fully-qualified name first (e.g. `grpcbin.GRPCBin`), then the bare
@@ -205,16 +264,9 @@ export function resolveGrpcMethod(
   method: string,
   credentials: grpc.ChannelCredentials
 ): ResolvedGrpcMethod {
-  let root: grpc.GrpcObject
-  if (source.protoContent && source.protoContent.trim() !== '') {
-    root = loadFromContent(source.protoContent)
-  } else if (source.protoPath && source.protoPath.trim() !== '') {
-    // loadFromPath validates the path (absolute, .proto, real file) and
-    // throws a descriptive error the caller surfaces as a gRPC failure.
-    root = loadFromPath(source.protoPath)
-  } else {
-    root = loadFromContent(GRPCBIN_PROTO)
-  }
+  // Inline content → `.proto` path → bundled grpcbin fallback (loadFromPath
+  // validates the path and throws a descriptive error the caller surfaces).
+  const root = loadGrpcPackage(source)
 
   const Ctor = resolveServiceConstructor(root, service)
   if (!Ctor) {

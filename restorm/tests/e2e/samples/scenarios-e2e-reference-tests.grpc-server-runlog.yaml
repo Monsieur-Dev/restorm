@@ -1,0 +1,88 @@
+- message: 🔵 [<time>] ▶ gRPC Server
+- message: ⚪ [<time>] start grpcListen
+  data:
+    requestId: <uuid>
+    connectionName: gRPC Mock
+    label: start gRPC mock
+- message: ⚪ [<time>] done grpcListen
+- message: ⚪ [<time>] grpc-server "gRPC Mock" connecting
+- message: ⚪ [<time>] grpc-server "gRPC Mock" connected
+- message: ⚪ [<time>] start httpRequest
+  data:
+    requestId: <uuid>
+    label: call the gRPC mock
+    in: true
+- message: ⚪ [<time>] done httpRequest
+  data:
+    response:
+      request:
+        url: localhost:50152
+        method: mock.Greeter/SayHello
+        headers: {}
+      response:
+        status: 0
+        statusText: OK
+        headers: {}
+        body: '{"message":"hello from the restorm mock"}'
+        durationMs: <dynamic-time>
+        success: true
+- message: ⚪ [<time>] start log
+  data:
+    message: réponse du consumer gRPC reçue
+    level: info
+    runOnEachEvent: false
+    data:
+      request:
+        url: localhost:50152
+        method: mock.Greeter/SayHello
+        headers: {}
+      response:
+        status: 0
+        statusText: OK
+        headers: {}
+        body: '{"message":"hello from the restorm mock"}'
+        durationMs: <dynamic-time>
+        success: true
+- message: 🔵 [<time>] réponse du consumer gRPC reçue
+  data:
+    request:
+      url: localhost:50152
+      method: mock.Greeter/SayHello
+      headers: {}
+    response:
+      status: 0
+      statusText: OK
+      headers: {}
+      body: '{"message":"hello from the restorm mock"}'
+      durationMs: <dynamic-time>
+      success: true
+- message: ⚪ [<time>] done log
+  data:
+    value:
+      request:
+        url: localhost:50152
+        method: mock.Greeter/SayHello
+        headers: {}
+      response:
+        status: 0
+        statusText: OK
+        headers: {}
+        body: '{"message":"hello from the restorm mock"}'
+        durationMs: <dynamic-time>
+        success: true
+- message: ⚪ [<time>] start grpcServerClose
+  data:
+    connectionNodeId: <uuid>
+    label: stop the gRPC mock server
+    in: true
+- message: ⚪ [<time>] done grpcServerClose
+- message: ⚪ [<time>] grpc-server "gRPC Mock" closed
+- message: ⚪ [<time>] start log
+  data:
+    message: serveur gRPC arrêté
+    level: info
+    in: true
+- message: 🔵 [<time>] serveur gRPC arrêté
+- message: ⚪ [<time>] done log
+  data: {}
+- message: 🔵 [<time>] ■ gRPC Server

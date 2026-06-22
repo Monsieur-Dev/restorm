@@ -1,0 +1,123 @@
+collections:
+  - folderType: environment
+    name: gRPC Mock Playground
+    documentation: |-
+      # gRPC Mock Playground
+
+      A self-contained gRPC mock playground: restorm HOSTS a local gRPC mock
+      server AND calls it as a client — no external service needed.
+
+      - **Greeter Mock** hosts a local gRPC mock server on `localhost:50151`. It
+        loads the proto below and answers `mock.Greeter/SayHello` with a canned
+        message, and `mock.Greeter/Fail` with a non-OK status (NOT_FOUND). Press
+        Start to begin serving.
+      - **Greeter Consumer** is a unary gRPC request to
+        `localhost:50151 mock.Greeter/SayHello`. Run it (Send) once the mock is
+        serving and it receives the canned response.
+      - **Greeter Error Consumer** calls `mock.Greeter/Fail` and receives the
+        configured NOT_FOUND status.
+    tags: []
+    configuration: {}
+    environments:
+      - name: Default
+        variables: []
+        id: 7c1f0a51-2c44-4d8e-9a01-7c3e26d40bb2
+    items:
+      - type: grpc
+        name: Greeter Mock
+        documentation: |-
+          Hosts a local gRPC mock server on `localhost:50151`. Press Start, then
+          run **Greeter Consumer**. Answers `mock.Greeter/SayHello` with a canned
+          message and `mock.Greeter/Fail` with a NOT_FOUND status.
+        tags:
+          - grpc
+          - server
+        url: localhost:50151
+        service: ''
+        method: ''
+        callType: unary
+        requestMessage: ''
+        metadata: []
+        server: true
+        reflection: true
+        protoContent: |-
+          syntax = "proto3";
+          package mock;
+
+          message HelloRequest { string name = 1; }
+          message HelloReply { string message = 1; }
+          message Empty {}
+
+          service Greeter {
+            rpc SayHello (HelloRequest) returns (HelloReply);
+            rpc Fail (Empty) returns (Empty);
+          }
+        mockMethods:
+          - service: mock.Greeter
+            method: SayHello
+            callType: unary
+            responseMessage: |-
+              {
+                "message": "hello from the restorm mock"
+              }
+          - service: mock.Greeter
+            method: Fail
+            callType: unary
+            responseMessage: '{}'
+            statusCode: 5
+            statusMessage: not here
+        id: 8d2a1b90-5e77-4c10-bf21-0a9f3b613001
+      - type: grpc
+        name: Greeter Consumer
+        documentation: Calls the local Greeter Mock SayHello and shows the canned response.
+        tags:
+          - grpc
+        url: localhost:50151
+        service: mock.Greeter
+        method: SayHello
+        callType: unary
+        requestMessage: |-
+          {
+            "name": "world"
+          }
+        metadata: []
+        protoContent: |-
+          syntax = "proto3";
+          package mock;
+
+          message HelloRequest { string name = 1; }
+          message HelloReply { string message = 1; }
+          message Empty {}
+
+          service Greeter {
+            rpc SayHello (HelloRequest) returns (HelloReply);
+            rpc Fail (Empty) returns (Empty);
+          }
+        id: 8d2a1b90-5e77-4c10-bf21-0a9f3b613002
+      - type: grpc
+        name: Greeter Error Consumer
+        documentation: Calls the local Greeter Mock Fail and shows the configured NOT_FOUND status.
+        tags:
+          - grpc
+        url: localhost:50151
+        service: mock.Greeter
+        method: Fail
+        callType: unary
+        requestMessage: '{}'
+        metadata: []
+        protoContent: |-
+          syntax = "proto3";
+          package mock;
+
+          message HelloRequest { string name = 1; }
+          message HelloReply { string message = 1; }
+          message Empty {}
+
+          service Greeter {
+            rpc SayHello (HelloRequest) returns (HelloReply);
+            rpc Fail (Empty) returns (Empty);
+          }
+        id: 8d2a1b90-5e77-4c10-bf21-0a9f3b613003
+    id: 6b0d7e3c-1f88-49b2-90ad-2b7c9e641f20
+    fileFormatVersion: 1
+_projectUuid: 4f7a2c19-8d44-4b6f-a1c2-9f0e5d738c33

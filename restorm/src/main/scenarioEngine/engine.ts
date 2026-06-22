@@ -13,6 +13,7 @@ import { collectionStore } from '../services/CollectionStore'
 import { websocketExecutionService } from '../services/WebSocketExecutionService'
 import { httpExecutionService } from '../services/HTTPExecutionService'
 import { grpcExecutionService } from '../services/GRPCExecutionService'
+import { grpcMockServerService } from '../services/GRPCMockServerService'
 import { flushRequestStateToContext } from '../mcp/tools/execute'
 import { installScenarioValueResolvers } from '../../shared/scenarioValueResolvers'
 import { setSecretPreviewResolver } from '../../shared/utils/scenarioStaticPreview'
@@ -195,6 +196,12 @@ export class ScenarioEngine {
         // request on `served`; `done` fires when it stops. No client branch — an
         // httpListen node only ever hosts.
         if (req.transport === 'http-server') return httpExecutionService.connectStreamingHttpServer(req)
+        // gRPC mock server: a DISTINCT long-lived listener with its OWN
+        // @grpc/grpc-js Server (a `grpcListen` node, never a one-shot
+        // grpcConnect). It HOSTS the bound `server: true` request's proto on its
+        // port and re-emits each served call on `served`; `done` fires when it
+        // stops. No client branch — a grpcListen node only ever hosts.
+        if (req.transport === 'grpc-server') return grpcMockServerService.connectStreamingGrpcServer(req)
         // A request flagged `server` HOSTS the server / broker (restorm acts as
         // the server); otherwise it connects as a client — same split for raw WS,
         // Socket.IO and MQTT.

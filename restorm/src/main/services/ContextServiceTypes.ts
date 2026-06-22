@@ -84,6 +84,10 @@ export interface FullRequestData {
   grpcMethod?: string
   callType?: string
   requestMessage?: string
+  /** The request's own proto, used to build the dynamic client (falls back to
+   * the bundled grpcbin proto when absent). */
+  protoContent?: string
+  protoPath?: string
   metadata?: KeyValue[]
 
   // SOAP specific
