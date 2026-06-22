@@ -1927,5 +1927,35 @@
       "metadataLabel": "$metadata (CSDL)",
       "dataLabel": "Obsłużone dane encji (według zestawu encji)"
     }
+  },
+  "quickSettings": {
+    "button": {
+      "tooltip": "Szybkie ustawienia"
+    },
+    "namePlaceholder": "Nazwa konfiguracji",
+    "saveButton": "Zapisz",
+    "storageTarget": {
+      "label": "Zapisz w pliku projektu",
+      "project": "Zapisano w pliku projektu (.restorm)",
+      "settings": "Zapisano w ustawieniach użytkownika"
+    },
+    "badge": {
+      "project": "projekt",
+      "settings": "użytkownik"
+    },
+    "listLabel": "Zapisane konfiguracje",
+    "emptyList": "Brak zapisanych konfiguracji.",
+    "loadConfirm": {
+      "title": "Wczytaj konfigurację",
+      "message": "Czy chcesz wczytać konfigurację „{{name}}\"? Twoja aktualna niezapisana konfiguracja zostanie utracona."
+    },
+    "deleteConfirm": {
+      "title": "Usuń konfigurację",
+      "message": "Czy chcesz usunąć konfigurację „{{name}}\"?"
+    },
+    "confirm": {
+      "ok": "OK",
+      "cancel": "Anuluj"
+    }
   }
 }

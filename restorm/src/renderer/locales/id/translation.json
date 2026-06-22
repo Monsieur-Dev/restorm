@@ -1924,5 +1924,35 @@
       "metadataLabel": "$metadata (CSDL)",
       "dataLabel": "Data entitas yang dilayani (per kumpulan entitas)"
     }
+  },
+  "quickSettings": {
+    "button": {
+      "tooltip": "Pengaturan cepat"
+    },
+    "namePlaceholder": "Nama konfigurasi",
+    "saveButton": "Simpan",
+    "storageTarget": {
+      "label": "Simpan ke file proyek",
+      "project": "Disimpan ke file proyek (.restorm)",
+      "settings": "Disimpan ke pengaturan pengguna"
+    },
+    "badge": {
+      "project": "proyek",
+      "settings": "pengguna"
+    },
+    "listLabel": "Konfigurasi tersimpan",
+    "emptyList": "Belum ada konfigurasi yang tersimpan.",
+    "loadConfirm": {
+      "title": "Muat konfigurasi",
+      "message": "Apakah Anda ingin memuat konfigurasi \"{{name}}\"? Konfigurasi Anda saat ini yang belum disimpan akan hilang."
+    },
+    "deleteConfirm": {
+      "title": "Hapus konfigurasi",
+      "message": "Apakah Anda ingin menghapus konfigurasi \"{{name}}\"?"
+    },
+    "confirm": {
+      "ok": "OK",
+      "cancel": "Batal"
+    }
   }
 }

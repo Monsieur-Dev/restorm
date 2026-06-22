@@ -1925,5 +1925,35 @@
       "metadataLabel": "$metadata (CSDL)",
       "dataLabel": "Betjänad entitetsdata (per entitetsuppsättning)"
     }
+  },
+  "quickSettings": {
+    "button": {
+      "tooltip": "Snabbinställningar"
+    },
+    "namePlaceholder": "Konfigurationsnamn",
+    "saveButton": "Spara",
+    "storageTarget": {
+      "label": "Spara i projektfil",
+      "project": "Sparat i projektfil (.restorm)",
+      "settings": "Sparat i användarinställningar"
+    },
+    "badge": {
+      "project": "projekt",
+      "settings": "användare"
+    },
+    "listLabel": "Sparade konfigurationer",
+    "emptyList": "Inga sparade konfigurationer än.",
+    "loadConfirm": {
+      "title": "Läs in konfiguration",
+      "message": "Vill du läsa in konfigurationen \"{{name}}\"? Din nuvarande osparade konfiguration kommer att gå förlorad."
+    },
+    "deleteConfirm": {
+      "title": "Ta bort konfiguration",
+      "message": "Vill du ta bort konfigurationen \"{{name}}\"?"
+    },
+    "confirm": {
+      "ok": "OK",
+      "cancel": "Avbryt"
+    }
   }
 }

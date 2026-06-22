@@ -1927,5 +1927,35 @@
       "metadataLabel": "$metadata (CSDL)",
       "dataLabel": "Obsloužená data entit (podle sady entit)"
     }
+  },
+  "quickSettings": {
+    "button": {
+      "tooltip": "Rychlá nastavení"
+    },
+    "namePlaceholder": "Název konfigurace",
+    "saveButton": "Uložit",
+    "storageTarget": {
+      "label": "Uložit do souboru projektu",
+      "project": "Uloženo v souboru projektu (.restorm)",
+      "settings": "Uloženo v uživatelském nastavení"
+    },
+    "badge": {
+      "project": "projekt",
+      "settings": "uživatel"
+    },
+    "listLabel": "Uložené konfigurace",
+    "emptyList": "Zatím žádné uložené konfigurace.",
+    "loadConfirm": {
+      "title": "Načíst konfiguraci",
+      "message": "Chcete načíst konfiguraci „{{name}}\"? Vaše aktuální neuložená konfigurace bude ztracena."
+    },
+    "deleteConfirm": {
+      "title": "Smazat konfiguraci",
+      "message": "Chcete smazat konfiguraci „{{name}}\"?"
+    },
+    "confirm": {
+      "ok": "OK",
+      "cancel": "Zrušit"
+    }
   }
 }

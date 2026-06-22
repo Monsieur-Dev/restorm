@@ -1924,5 +1924,35 @@
       "metadataLabel": "$metadata (CSDL)",
       "dataLabel": "Dữ liệu thực thể được phục vụ (theo tập thực thể)"
     }
+  },
+  "quickSettings": {
+    "button": {
+      "tooltip": "Cài đặt nhanh"
+    },
+    "namePlaceholder": "Tên cấu hình",
+    "saveButton": "Lưu",
+    "storageTarget": {
+      "label": "Lưu vào tệp dự án",
+      "project": "Đã lưu vào tệp dự án (.restorm)",
+      "settings": "Đã lưu vào cài đặt người dùng"
+    },
+    "badge": {
+      "project": "dự án",
+      "settings": "người dùng"
+    },
+    "listLabel": "Cấu hình đã lưu",
+    "emptyList": "Chưa có cấu hình nào được lưu.",
+    "loadConfirm": {
+      "title": "Tải cấu hình",
+      "message": "Bạn có muốn tải cấu hình \"{{name}}\" không? Cấu hình hiện tại chưa lưu sẽ bị mất."
+    },
+    "deleteConfirm": {
+      "title": "Xóa cấu hình",
+      "message": "Bạn có muốn xóa cấu hình \"{{name}}\" không?"
+    },
+    "confirm": {
+      "ok": "OK",
+      "cancel": "Hủy"
+    }
   }
 }

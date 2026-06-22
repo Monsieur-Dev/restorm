@@ -1924,5 +1924,35 @@
       "metadataLabel": "$metadata (CSDL)",
       "dataLabel": "已服務的實體資料（依實體集）"
     }
+  },
+  "quickSettings": {
+    "button": {
+      "tooltip": "快速設定"
+    },
+    "namePlaceholder": "設定名稱",
+    "saveButton": "儲存",
+    "storageTarget": {
+      "label": "儲存至專案檔案",
+      "project": "已儲存至專案檔案 (.restorm)",
+      "settings": "已儲存至使用者設定"
+    },
+    "badge": {
+      "project": "專案",
+      "settings": "使用者"
+    },
+    "listLabel": "已儲存的設定",
+    "emptyList": "尚無已儲存的設定。",
+    "loadConfirm": {
+      "title": "載入設定",
+      "message": "是否要載入設定「{{name}}」？您目前未儲存的設定將會遺失。"
+    },
+    "deleteConfirm": {
+      "title": "刪除設定",
+      "message": "是否要刪除設定「{{name}}」？"
+    },
+    "confirm": {
+      "ok": "確定",
+      "cancel": "取消"
+    }
   }
 }

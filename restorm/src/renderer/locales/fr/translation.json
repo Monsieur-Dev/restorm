@@ -1925,5 +1925,35 @@
       "metadataLabel": "$metadata (CSDL)",
       "dataLabel": "Données d'entités servies (par jeu d'entités)"
     }
+  },
+  "quickSettings": {
+    "button": {
+      "tooltip": "Paramètres rapides"
+    },
+    "namePlaceholder": "Nom de la configuration",
+    "saveButton": "Enregistrer",
+    "storageTarget": {
+      "label": "Enregistrer dans le fichier projet",
+      "project": "Enregistré dans le fichier projet (.restorm)",
+      "settings": "Enregistré dans les paramètres utilisateur"
+    },
+    "badge": {
+      "project": "projet",
+      "settings": "utilisateur"
+    },
+    "listLabel": "Configurations enregistrées",
+    "emptyList": "Aucune configuration enregistrée pour l'instant.",
+    "loadConfirm": {
+      "title": "Charger la configuration",
+      "message": "Voulez-vous recharger la configuration « {{name}} » ? Vous perdrez la configuration actuelle si elle n'a pas été enregistrée."
+    },
+    "deleteConfirm": {
+      "title": "Supprimer la configuration",
+      "message": "Voulez-vous supprimer la configuration « {{name}} » ?"
+    },
+    "confirm": {
+      "ok": "OK",
+      "cancel": "Annuler"
+    }
   }
 }

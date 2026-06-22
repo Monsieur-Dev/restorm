@@ -1925,5 +1925,35 @@
       "metadataLabel": "$metadata (CSDL)",
       "dataLabel": "Betjente entitetsdata (efter entitetssæt)"
     }
+  },
+  "quickSettings": {
+    "button": {
+      "tooltip": "Hurtige indstillinger"
+    },
+    "namePlaceholder": "Konfigurationsnavn",
+    "saveButton": "Gem",
+    "storageTarget": {
+      "label": "Gem i projektfil",
+      "project": "Gemt i projektfil (.restorm)",
+      "settings": "Gemt i brugerindstillinger"
+    },
+    "badge": {
+      "project": "projekt",
+      "settings": "bruger"
+    },
+    "listLabel": "Gemte konfigurationer",
+    "emptyList": "Ingen gemte konfigurationer endnu.",
+    "loadConfirm": {
+      "title": "Indlæs konfiguration",
+      "message": "Vil du indlæse konfigurationen \"{{name}}\"? Din aktuelle konfiguration vil gå tabt, hvis den ikke er gemt."
+    },
+    "deleteConfirm": {
+      "title": "Slet konfiguration",
+      "message": "Vil du slette konfigurationen \"{{name}}\"?"
+    },
+    "confirm": {
+      "ok": "OK",
+      "cancel": "Annuller"
+    }
   }
 }

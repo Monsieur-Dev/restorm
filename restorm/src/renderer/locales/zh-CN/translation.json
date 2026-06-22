@@ -1924,5 +1924,35 @@
       "metadataLabel": "$metadata (CSDL)",
       "dataLabel": "已服务的实体数据（按实体集）"
     }
+  },
+  "quickSettings": {
+    "button": {
+      "tooltip": "快速设置"
+    },
+    "namePlaceholder": "配置名称",
+    "saveButton": "保存",
+    "storageTarget": {
+      "label": "保存到项目文件",
+      "project": "已保存到项目文件 (.restorm)",
+      "settings": "已保存到用户设置"
+    },
+    "badge": {
+      "project": "项目",
+      "settings": "用户"
+    },
+    "listLabel": "已保存的配置",
+    "emptyList": "尚无已保存的配置。",
+    "loadConfirm": {
+      "title": "加载配置",
+      "message": "是否要加载配置\"{{name}}\"？您当前未保存的配置将会丢失。"
+    },
+    "deleteConfirm": {
+      "title": "删除配置",
+      "message": "是否要删除配置\"{{name}}\"？"
+    },
+    "confirm": {
+      "ok": "确定",
+      "cancel": "取消"
+    }
   }
 }

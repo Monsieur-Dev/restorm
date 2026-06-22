@@ -1925,5 +1925,35 @@
       "metadataLabel": "$metadata (CSDL)",
       "dataLabel": "Dati delle entità serviti (per set di entità)"
     }
+  },
+  "quickSettings": {
+    "button": {
+      "tooltip": "Impostazioni rapide"
+    },
+    "namePlaceholder": "Nome della configurazione",
+    "saveButton": "Salva",
+    "storageTarget": {
+      "label": "Salva nel file di progetto",
+      "project": "Salvato nel file di progetto (.restorm)",
+      "settings": "Salvato nelle impostazioni utente"
+    },
+    "badge": {
+      "project": "progetto",
+      "settings": "utente"
+    },
+    "listLabel": "Configurazioni salvate",
+    "emptyList": "Nessuna configurazione salvata.",
+    "loadConfirm": {
+      "title": "Carica configurazione",
+      "message": "Vuoi caricare la configurazione \"{{name}}\"? La configurazione attuale non salvata andrà persa."
+    },
+    "deleteConfirm": {
+      "title": "Elimina configurazione",
+      "message": "Vuoi eliminare la configurazione \"{{name}}\"?"
+    },
+    "confirm": {
+      "ok": "OK",
+      "cancel": "Annulla"
+    }
   }
 }

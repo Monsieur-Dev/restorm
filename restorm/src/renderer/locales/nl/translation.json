@@ -1925,5 +1925,35 @@
       "metadataLabel": "$metadata (CSDL)",
       "dataLabel": "Bediende entiteitsgegevens (per entiteitenset)"
     }
+  },
+  "quickSettings": {
+    "button": {
+      "tooltip": "Snelle instellingen"
+    },
+    "namePlaceholder": "Naam van de configuratie",
+    "saveButton": "Opslaan",
+    "storageTarget": {
+      "label": "Opslaan in projectbestand",
+      "project": "Opgeslagen in projectbestand (.restorm)",
+      "settings": "Opgeslagen in gebruikersinstellingen"
+    },
+    "badge": {
+      "project": "project",
+      "settings": "gebruiker"
+    },
+    "listLabel": "Opgeslagen configuraties",
+    "emptyList": "Nog geen opgeslagen configuraties.",
+    "loadConfirm": {
+      "title": "Configuratie laden",
+      "message": "Wil je de configuratie \"{{name}}\" laden? Je huidige niet-opgeslagen configuratie gaat verloren."
+    },
+    "deleteConfirm": {
+      "title": "Configuratie verwijderen",
+      "message": "Wil je de configuratie \"{{name}}\" verwijderen?"
+    },
+    "confirm": {
+      "ok": "OK",
+      "cancel": "Annuleren"
+    }
   }
 }
