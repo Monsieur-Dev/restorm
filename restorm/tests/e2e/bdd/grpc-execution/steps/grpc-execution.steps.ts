@@ -161,3 +161,35 @@ Then(
     await expect(sentBubble).toBeVisible({ timeout: 15_000 })
   }
 )
+
+Then(
+  'the gRPC response shows a non-OK status code {int}',
+  async ({}, code: number) => {
+    if (page === null) throw new Error('launch first')
+    // The response status span appears once the unary call completes (with or
+    // without an error). Wait for the element carrying the expected raw code.
+    const statusEl = page.locator(`[data-testid="grpc-response-status"][data-status-code="${code}"]`).first()
+    await expect(statusEl).toBeVisible({ timeout: 15_000 })
+  }
+)
+
+Then(
+  'the gRPC response shows the status label {string}',
+  async ({}, label: string) => {
+    if (page === null) throw new Error('launch first')
+    // The status message attribute is set to the grpcStatusName() string.
+    const statusEl = page.locator(`[data-testid="grpc-response-status"][data-status-message="${label}"]`).first()
+    await expect(statusEl).toBeVisible({ timeout: 10_000 })
+  }
+)
+
+Then(
+  'the gRPC response error text contains {string}',
+  async ({}, needle: string) => {
+    if (page === null) throw new Error('launch first')
+    // The error div appears when the response carries a non-OK error string.
+    const errorEl = page.locator('[data-testid="grpc-response-error"]').first()
+    await expect(errorEl).toBeVisible({ timeout: 10_000 })
+    await expect(errorEl).toContainText(needle, { timeout: 5_000 })
+  }
+)

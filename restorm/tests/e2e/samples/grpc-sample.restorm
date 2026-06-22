@@ -115,6 +115,27 @@ collections:
           }
         metadata: []
         id: d2b3c4d5-e6f7-4081-9a2b-3c4d5e6f7081
+      - type: grpc
+        name: gRPC Error (SpecificError)
+        documentation: |-
+          Calls grpcbin's SpecificError with code=3 (INVALID_ARGUMENT), exercising
+          the executeUnary error branch: the response panel must surface the
+          non-OK status code and the human-readable label from grpcStatusName().
+        tags:
+          - grpc
+          - unary
+          - error
+        url: localhost:9000
+        service: grpcbin.GRPCBin
+        method: SpecificError
+        callType: unary
+        requestMessage: |-
+          {
+            "code": 3,
+            "reason": "e2e-error-mapping-test"
+          }
+        metadata: []
+        id: e5f6a7b8-c9d0-4e1f-b2c3-d4e5f6a7b8c9
     id: e3c4d5e6-f708-4192-ab3c-4d5e6f708192
     fileFormatVersion: 1
 _projectUuid: f4d5e6f7-0819-42a3-bc4d-5e6f70819203

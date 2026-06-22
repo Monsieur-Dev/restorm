@@ -387,7 +387,12 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8, fontSize: 12 }}>
         <div style={{ display: 'flex', gap: 8 }}>
           <span style={{ fontWeight: 600, minWidth: 100 }}>Status:</span>
-          <span style={{ color: resp.statusCode === 0 ? 'var(--testing-iconPassed)' : 'var(--editorWarning-foreground)' }}>
+          <span
+            data-testid="grpc-response-status"
+            data-status-code={resp.statusCode}
+            data-status-message={resp.statusMessage}
+            style={{ color: resp.statusCode === 0 ? 'var(--testing-iconPassed)' : 'var(--editorWarning-foreground)' }}
+          >
             {resp.statusCode} ({resp.statusCode === 0 ? 'OK' : 'Error'})
           </span>
         </div>
@@ -410,7 +415,10 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({
         {resp.error && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginTop: 8 }}>
             <span style={{ fontWeight: 600, color: 'var(--testing-iconFailed)' }}>Error:</span>
-            <div style={{ padding: 4, background: 'var(--inputValidation-errorBackground)', borderRadius: 3 }}>
+            <div
+              data-testid="grpc-response-error"
+              style={{ padding: 4, background: 'var(--inputValidation-errorBackground)', borderRadius: 3 }}
+            >
               {resp.error}
             </div>
           </div>
