@@ -859,7 +859,12 @@ function trySyntheticReply(parsed) {
       id: parsed.id ?? null,
       result: {
         protocolVersion: parsed.params?.protocolVersion ?? PROTOCOL_VERSION,
-        capabilities: { tools: { listChanged: true } },
+        // Advertise `resources` so the client will actually send `resources/list`
+        // and `resources/read` — without it the client short-circuits with
+        // "Server restorm does not support resources" and never reaches our
+        // generic forward path (which relays those methods verbatim to the live
+        // restorm instance, e.g. for on-demand `ecui-media://screenshot/<file>`).
+        capabilities: { tools: { listChanged: true }, resources: { listChanged: true } },
         serverInfo: { name: 'restorm', version: '0.0.0-launcher' }
       }
     }
