@@ -4,6 +4,7 @@ import type { ScenarioNode, ScenarioEdge } from '../types/scenario'
 import { readInputParams, inputParamName } from '../scenarioInputParams'
 import { readOutputDecls } from '../scenarioOutputDecls'
 import { STATIC_PREVIEW_KINDS } from '../scenarioNodeCapabilities'
+import { REGISTRY, SCENARIO_KINDS } from '../scenarioKindRegistry'
 import { compareValues as compareValuesShared } from '../scenarioComparison'
 import { castValue, isScenarioCastType } from '../scenarioCast'
 import { applyRegex, isRegexOp } from '../scenarioRegex'
@@ -170,8 +171,11 @@ export function expectsObjectInput(targetKind: ScenarioNode['kind'], targetPortI
  * models — `transform` emits `{ result }`, `input` emits `{ <name>: value }`.
  * For these the wrapper must NOT be unwrapped (the downstream selector drills
  * into it). Every other static-preview kind emits the BARE value, with the
- * preview key only a display label. */
-const PREVIEW_WRAPPER_KINDS = new Set<ScenarioNode['kind']>(['transform', 'input', 'object'])
+ * preview key only a display label. Derived from the kind registry's
+ * `previewWrapper` flag (the single source of truth). */
+const PREVIEW_WRAPPER_KINDS: ReadonlySet<ScenarioNode['kind']> = new Set(
+  SCENARIO_KINDS.filter((k) => REGISTRY[k].previewWrapper === true)
+)
 
 /**
  * The runtime VALUE a given output port carries, unwrapped from the preview's

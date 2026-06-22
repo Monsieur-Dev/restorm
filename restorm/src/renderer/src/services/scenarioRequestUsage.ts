@@ -1,5 +1,6 @@
 import type { FolderItem, Scenario } from '../../../shared/types/collections'
 import { isScenario } from '../../../shared/types/collections'
+import { REGISTRY, SCENARIO_KINDS } from '../../../shared/scenarioKindRegistry'
 
 /**
  * Where a request is referenced by a scenario: the scenario plus the ids of its request-binding
@@ -30,11 +31,14 @@ function walkScenarios(items: FolderItem[], visit: (scenario: Scenario) => void)
 /** Scenario node kinds that bind a sidebar request through `config.requestId` —
  * the one-shot `httpRequest`, the long-lived streaming connect nodes (Socket.IO /
  * raw WebSocket / MQTT / gRPC), and the HTTP mock-server `httpListen` (bound to a
- * `server: true` request). Any request-bound kind must be listed here so the
- * request ties to the scenario for BOTH the "used in scenarios" reverse-nav and
- * the delete → move-into-scenario flow. (`httpClose` binds a `connectionNodeId`,
- * not a request, so it is intentionally NOT listed.) */
-const REQUEST_BINDING_KINDS = new Set(['httpRequest', 'socketioConnect', 'websocketConnect', 'mqttConnect', 'grpcConnect', 'httpListen'])
+ * `server: true` request). DERIVED from the kind registry's `requestBinding` flag
+ * (the single source of truth) so a request ties to the scenario for BOTH the
+ * "used in scenarios" reverse-nav and the delete → move-into-scenario flow. (A
+ * kind like `httpClose` binds a `connectionNodeId`, not a request, so its
+ * `requestBinding` is unset and it is excluded.) */
+const REQUEST_BINDING_KINDS: ReadonlySet<string> = new Set(
+  SCENARIO_KINDS.filter((k) => REGISTRY[k].requestBinding === true)
+)
 
 /** Whether a scenario node binds `requestId` (via `config.requestId`). */
 function nodeBindsRequest(node: { kind: string; config: Record<string, unknown> }, requestId: string): boolean {

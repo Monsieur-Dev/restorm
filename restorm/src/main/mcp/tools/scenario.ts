@@ -17,23 +17,17 @@ import { McpService } from 'electron-core-ui'
 import { collectionStore } from '../../services/CollectionStore'
 import type { Scenario } from '../../../shared/models/Scenario'
 import type { ScenarioNode, ScenarioEdge, ScenarioNodeKind, ScenarioPort } from '../../../shared/types/scenario'
+import { SCENARIO_KINDS } from '../../../shared/scenarioKindRegistry'
 import { defaultPortsForKind, isValidScenarioConnection, outputPortFlow, inputPortFlow, deriveRunScenarioPorts, socketioConnectEventPorts } from '../../../shared/scenarioNodePorts'
 import { layoutScenarioGraph, SCENARIO_NODE_FALLBACK_WIDTH, SCENARIO_NODE_FALLBACK_HEIGHT } from '../../../shared/scenarioGraphLayout'
 import { SCENARIO_KIND_DOCS, VALUE_TYPE_DOCS } from '../../../shared/scenarioKindDocs'
 import { STATIC_PREVIEW_KINDS, staticScenarioPreview, singleDeepPath, singleTopLevelKey, portPreviewValue, expectsObjectInput, type StaticPreviewEdge } from '../../../shared/utils/scenarioStaticPreview'
 import { broadcastTreeReplace } from './import'
 
-const SCENARIO_KINDS = [
-  'input', 'output', 'if', 'switch', 'httpRequest', 'runScenario',
-  'socketioConnect', 'socketioSend', 'socketioClose',
-  'websocketConnect', 'websocketSend', 'websocketClose',
-  'mqttConnect', 'mqttSend', 'mqttClose',
-  'grpcConnect', 'grpcSend', 'grpcClose',
-  'httpListen', 'httpClose', 'forEach', 'for', 'while', 'doWhile',
-  'aggregate', 'map', 'filter', 'addToList', 'removeFromList', 'wait', 'waitUntil', 'now', 'timer', 'arithmetic', 'comparator', 'boolean', 'object',
-  'setVariable', 'getVariable', 'transform', 'code', 'cast', 'regex', 'json', 'xml', 'yaml', 'crypto', 'jwt', 'datetime',
-  'objectOp', 'url', 'random', 'listOp', 'csv', 'math', 'schema', 'readFile', 'writeFile', 'retry', 'log', 'toast', 'assert', 'throw'
-] as const
+// SCENARIO_KINDS is DERIVED from the kind registry (the single source of truth):
+// `Object.keys(SCENARIO_KIND_REGISTRY)`, in registry order. The z.enum below and
+// the create-node tool description feed off it, so a new kind reaches the MCP
+// schema without editing this file (the drift-guard test enforces it).
 
 function jsonReply(value: unknown): { content: { type: 'text'; text: string }[] } {
   return { content: [{ type: 'text', text: JSON.stringify(value, null, 2) }] }

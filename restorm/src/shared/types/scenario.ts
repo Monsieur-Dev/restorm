@@ -1,5 +1,6 @@
 import type { RuntimeId } from './baseTypes'
 import type { FolderItem } from './folderTypes'
+import type { ScenarioNodeKind } from '../scenarioKindRegistry'
 
 /**
  * Scenarios — dataflow graphs of orchestrated requests (restorm's answer
@@ -74,134 +75,17 @@ export interface ScenarioPort {
 }
 
 /**
- * Open catalogue of node kinds (epic §5). New boxes are added here +
- * a derived component/runner, without touching the base node shape.
+ * Open catalogue of node kinds (epic §5). The union is INVERTED from the
+ * single-source-of-truth registry's keys: adding a node kind is a single edit to
+ * `SCENARIO_KIND_REGISTRY` (its ports / capabilities / docs / catalogue meta),
+ * and every dependent list — this union, the MCP `z.enum`, the add-node
+ * catalogue, the capability sets, the port map, the docs record — is derived
+ * from it (a `default → assertNever` exhaustiveness guard on the executor switch
+ * + a drift-guard test catch any layer that forgets a kind). Re-exported from
+ * the registry so the catalogue/runner contracts grow per-kind there, never by
+ * touching the base node shape.
  */
-export type ScenarioNodeKind =
-  // Sources & control
-  | 'input'
-  | 'output'
-  | 'if'
-  | 'switch'
-  // Requests & composition
-  | 'httpRequest'
-  | 'runScenario'
-  // Socket.IO — a long-lived connection (`socketioConnect`) that re-emits each
-  // received event on its matching output port (switch-like), plus the two
-  // actions that drive an already-declared connection: `socketioSend` emits a
-  // message on it, `socketioClose` stops it. Send / close reference the connect
-  // node by id.
-  | 'socketioConnect'
-  | 'socketioSend'
-  | 'socketioClose'
-  // Raw WebSocket — the same connect/send/close trio as Socket.IO, but a raw WS
-  // has no named events: `websocketConnect` re-emits EVERY received frame on a
-  // single `message` output (no per-event ports), `websocketSend` sends a raw
-  // payload (no channel), `websocketClose` stops it.
-  | 'websocketConnect'
-  | 'websocketSend'
-  | 'websocketClose'
-  // MQTT — the same connect/publish/close trio as raw WebSocket (no named
-  // events). `mqttConnect` opens a long-lived broker connection AND subscribes
-  // to the bound request's topic, re-emitting EVERY received message on a single
-  // `message` output; `mqttSend` publishes a payload to the connection's topic;
-  // `mqttClose` stops it.
-  | 'mqttConnect'
-  | 'mqttSend'
-  | 'mqttClose'
-  // gRPC streaming — the same connect/send/close trio. A `grpcConnect` opens a
-  // streaming RPC (server / client / bidi, inferred from the bound request's
-  // call type) and re-emits EVERY received frame on a single `message` output;
-  // `grpcSend` writes a request message (client / bidi), `grpcClose` half-closes
-  // it. Send / close reference the connect node by id.
-  | 'grpcConnect'
-  | 'grpcSend'
-  | 'grpcClose'
-  // HTTP mock server — restorm HOSTS a local HTTP mock. `httpListen` opens a
-  // long-lived server bound to a `server: true` HTTP request's METHOD + PATH +
-  // port and listens INDEFINITELY: `connected` (a pure signal) fires once the
-  // server is listening, EACH inbound request served re-emits its request/
-  // response data on the `served` output, and the run stays in-progress until an
-  // `httpClose` (or a Stop) ends the server, at which point `done` fires. Unlike
-  // a one-shot `httpRequest`, a hosted mock has NO `response` output — it serves,
-  // it does not call out. `httpClose` stops the server referenced by id.
-  | 'httpListen'
-  | 'httpClose'
-  // Iteration & collections
-  | 'forEach'
-  | 'aggregate'
-  | 'map'
-  | 'filter'
-  // List mutation — append / remove values to / from a list.
-  | 'addToList'
-  | 'removeFromList'
-  // Loops — `for` is a numeric-range forEach; `while` / `doWhile` reuse the
-  // `if` condition mechanism (operands + operator → body/done), the loop
-  // closed by a user-wired edge back into the node.
-  | 'for'
-  | 'while'
-  | 'doWhile'
-  // Time
-  | 'wait'
-  | 'waitUntil'
-  | 'now'
-  // Timer — fires its `tick` body on each interval (frequency or cron), bounded
-  // by an optional duration / end date.
-  | 'timer'
-  // Data & compute
-  | 'arithmetic'
-  | 'comparator'
-  | 'boolean'
-  | 'object'
-  | 'setVariable'
-  | 'getVariable'
-  | 'transform'
-  // Run user TypeScript/JavaScript in a sandbox (QuickJS) — transform/validate
-  // data with a curated stdlib; the returned value is the node's `result`.
-  | 'code'
-  // Type conversion — explicit cast since comparisons / aggregates are strict.
-  | 'cast'
-  // Regular expressions — extract / match / replace / split on a string.
-  | 'regex'
-  // JSON — parse a string into a value, or stringify a value.
-  | 'json'
-  // XML / YAML — parse a string into a value, or stringify a value.
-  | 'xml'
-  | 'yaml'
-  // Crypto — base64 / hashes / HMAC / UUID over a string.
-  | 'crypto'
-  // JWT — decode a compact token into header + payload + signature.
-  | 'jwt'
-  // Date math — shift / format / diff an existing date (the clock is `now`).
-  | 'datetime'
-  // Retry — re-runs its body (an error-boundary scope) with a backoff policy.
-  | 'retry'
-  // Object reshaping — get / set / merge / pick / omit / keys / values.
-  | 'objectOp'
-  // URL — encode / decode a component, parse / build a query, parse a URL.
-  | 'url'
-  // Random / faker — int / float / string / boolean / pick (optional seed).
-  | 'random'
-  // List reshaping — sort / unique / reverse / flatten / chunk / slice / groupBy.
-  | 'listOp'
-  // CSV — parse a CSV string into rows / stringify a list back to CSV.
-  | 'csv'
-  // Scalar math — round / floor / ceil / trunc / abs / sign / sqrt / min / max / clamp.
-  | 'math'
-  // JSON Schema validation (ajv) — routes valid / invalid + the error list.
-  | 'schema'
-  // Read a file (path relative to the scenario, or absolute) → its text.
-  | 'readFile'
-  // Write / append text to a file (path relative to the scenario, or absolute).
-  | 'writeFile'
-  // Utilities
-  | 'log'
-  // Emit a toast notification in the Restorm UI (side-effect; emits `done`).
-  // Headless / CLI: no-op (no window to notify), run still succeeds.
-  | 'toast'
-  // Deliberate failure — throws a message (for error branches / retry tests).
-  | 'throw'
-  | 'assert'
+export type { ScenarioNodeKind } from '../scenarioKindRegistry'
 
 /**
  * A node on the scenario surface. The common contract (header, ports,

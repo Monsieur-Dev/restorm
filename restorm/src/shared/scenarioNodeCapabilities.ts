@@ -1,80 +1,48 @@
 import type { ScenarioNodeKind } from './types/scenario'
+import { REGISTRY, SCENARIO_KINDS } from './scenarioKindRegistry'
 
 /**
- * Per-kind capability flags — the SINGLE source of truth for behaviours that
- * several layers must agree on, so a kind's traits are declared once here
- * instead of being duplicated (and silently drifting) across the port specs,
- * the box render flags and the preview resolvers. Each accessor encodes the
- * default, so the sets below only list the kinds that DIFFER from it.
+ * Per-kind capability accessors — derived from the kind registry (the single
+ * source of truth). Each flag carries a documented DEFAULT in the registry's
+ * `KindSpec`, so a kind only states its exceptions and the accessor here applies
+ * the default. No kind list is duplicated: a new kind's traits live in one
+ * registry entry and these accessors read them.
  */
 
-/**
- * Kinds that do NOT accept a header input-event (the `in` launch trigger).
- *
+/** Whether a kind carries the header input-event launch trigger (`in` port).
  * Default: every kind accepts one — including the "data-driven" nodes
  * (comparator, object, map/filter/aggregate, boolean, arithmetic, …), which
  * routinely read variables, so a trigger lets a flow say WHEN to (re)compute /
  * re-fetch a variable's current value rather than only running once their value
- * inputs resolve. Even the `output` sink keeps it, so it can be sequenced in a
- * flow. No kind opts out today (kept as the hook for any that should).
- */
-const NO_INPUT_EVENT = new Set<ScenarioNodeKind>()
-
-/**
- * Kinds whose inspector preview is fully derived from their config (no run / no
- * play needed) — the output is determined entirely by the box's configuration.
- */
-const STATIC_PREVIEW = new Set<ScenarioNodeKind>([
-  'now', 'input', 'setVariable', 'getVariable', 'object', 'output',
-  'arithmetic', 'comparator', 'boolean', 'transform', 'cast', 'regex', 'json',
-  'xml', 'yaml', 'crypto', 'jwt', 'datetime', 'objectOp', 'url', 'random',
-  'listOp', 'csv', 'math', 'schema',
-  'if', 'switch', 'wait', 'waitUntil',
-  'map', 'filter', 'aggregate',
-  'addToList', 'removeFromList',
-  // `while` / `doWhile` route a value to body/done exactly like `if`.
-  'while', 'doWhile'
-])
-
-/**
- * Kinds that do NOT expose the implicit `error` output port. Default: every
- * kind can fail, so it carries one. Opt-outs are sinks / pure reads where an
- * error anchor is meaningless (`output`, `now`).
- *
- * `log` and `toast` DO carry one: they resolve operands and render Handlebars
- * expressions (title / message / data), which can fail at runtime (a bad
- * template, an unresolvable variable). The executor lets that error throw so the
- * scheduler routes it to the `error` port — a failure is never swallowed
- * silently. `retry` keeps no error port — it is itself the error boundary.
- */
-const NO_ERROR_PORT = new Set<ScenarioNodeKind>(['output', 'now', 'retry'])
-
-/**
- * Kinds that do NOT expose the implicit `done` completion port. Default: every
- * kind signals completion so a flow can sequence what comes next. The `output`
- * sink opts out — it terminates the (sub-)scenario, there is nothing after it.
- */
-const NO_DONE_PORT = new Set<ScenarioNodeKind>(['output', 'throw'])
-
-/** Whether a kind carries the header input-event launch trigger (`in` port). */
+ * inputs resolve. Even the `output` sink keeps it, so it can be sequenced. */
 export function acceptsInputEvent(kind: ScenarioNodeKind): boolean {
-  return !NO_INPUT_EVENT.has(kind)
+  return REGISTRY[kind].acceptsInputEvent !== false
 }
 
-/** Whether a kind draws the implicit `error` output port. */
+/** Whether a kind draws the implicit `error` output port. Default: every kind
+ * can fail, so it carries one. Opt-outs are sinks / pure reads / the retry
+ * error-boundary (`output`, `now`, `retry`). `log` and `toast` DO carry one:
+ * they render Handlebars expressions which can fail, and the executor lets that
+ * error throw so the scheduler routes it to `error` rather than swallowing it. */
 export function hasErrorPort(kind: ScenarioNodeKind): boolean {
-  return !NO_ERROR_PORT.has(kind)
+  return REGISTRY[kind].hasErrorPort !== false
 }
 
-/** Whether a kind draws the implicit `done` completion output port. */
+/** Whether a kind draws the implicit `done` completion output port. Default:
+ * every kind signals completion so a flow can sequence what comes next. The
+ * `output` sink (terminates the (sub-)scenario) and `throw` (never completes
+ * normally) opt out. */
 export function hasDonePort(kind: ScenarioNodeKind): boolean {
-  return !NO_DONE_PORT.has(kind)
+  return REGISTRY[kind].hasDonePort !== false
 }
 
-/** Whether a kind's inspector preview is derived statically from its config. */
+/** Whether a kind's inspector preview is derived statically from its config
+ * (no run / no play needed) — the output is fully determined by the box config. */
 export function hasStaticPreview(kind: ScenarioNodeKind): boolean {
-  return STATIC_PREVIEW.has(kind)
+  return REGISTRY[kind].staticPreview === true
 }
 
 /** The set of statically-previewable kinds (derived from {@link hasStaticPreview}). */
-export const STATIC_PREVIEW_KINDS: ReadonlySet<ScenarioNodeKind> = STATIC_PREVIEW
+export const STATIC_PREVIEW_KINDS: ReadonlySet<ScenarioNodeKind> = new Set(
+  SCENARIO_KINDS.filter(hasStaticPreview)
+)

@@ -6,6 +6,7 @@
 
 import type { NodeExecutor, ExecContext } from '../types'
 import type { ScenarioModel } from '../types'
+import type { ScenarioNodeKind } from '../../../shared/types/scenario'
 import {
   arithmeticExecutor,
   comparatorExecutor,
@@ -170,8 +171,20 @@ export function buildExecutorRegistry(scenario: ScenarioModel): Map<string, Node
   return out
 }
 
-function pickExecutor(kind: string): NodeExecutor {
-  switch (kind) {
+/** Compile-time exhaustiveness guard: if a new `ScenarioNodeKind` is added to
+ * the registry without a `case` below, `kind` is no longer `never` here and the
+ * build fails — so the executor map can't silently drift behind the registry
+ * (the runtime side of the single-source-of-truth registry). */
+function assertNever(kind: never): never {
+  throw new Error(`no executor for scenario kind '${String(kind)}'`)
+}
+
+export function pickExecutor(kind: string): NodeExecutor {
+  // `request` is a legacy persisted alias of `httpRequest` (not a catalogue
+  // kind), handled before the exhaustive switch over the live kind union.
+  if (kind === 'request') return httpRequestExecutor
+  const k = kind as ScenarioNodeKind
+  switch (k) {
     case 'arithmetic': return arithmeticExecutor
     case 'comparator': return comparatorExecutor
     case 'boolean': return booleanExecutor
@@ -220,8 +233,7 @@ function pickExecutor(kind: string): NodeExecutor {
     case 'while': return whileExecutor
     case 'doWhile': return doWhileExecutor
     case 'aggregate': return aggregateExecutor
-    case 'httpRequest':
-    case 'request': return httpRequestExecutor
+    case 'httpRequest': return httpRequestExecutor
     case 'runScenario': return runScenarioExecutor
     case 'socketioConnect': return socketioConnectExecutor
     case 'socketioSend': return socketioSendExecutor
@@ -239,6 +251,6 @@ function pickExecutor(kind: string): NodeExecutor {
     case 'httpClose': return httpCloseExecutor
     case 'input': return inputExecutor
     case 'output': return outputPassthroughExecutor
-    default: throw new Error(`no executor for kind '${kind}'`)
+    default: return assertNever(k)
   }
 }
