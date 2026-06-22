@@ -186,6 +186,9 @@ export type ScenarioNodeKind =
   | 'writeFile'
   // Utilities
   | 'log'
+  // Emit a toast notification in the Restorm UI (side-effect; emits `done`).
+  // Headless / CLI: no-op (no window to notify), run still succeeds.
+  | 'toast'
   // Deliberate failure — throws a message (for error branches / retry tests).
   | 'throw'
   | 'assert'

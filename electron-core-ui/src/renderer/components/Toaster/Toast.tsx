@@ -162,7 +162,7 @@ export const Toast: React.FC<ToastProps> = React.memo(({
       {...(cellTestId && { 'data-testid': cellTestId })}
     >
       <div className="toast-header">
-        <span className="toast-title">{toast.title}</span>
+        <span className="toast-title">{toast.titleNode ?? toast.title}</span>
         <button
           type="button"
           className="toast-close"

@@ -281,6 +281,10 @@ export const SCENARIO_KIND_DOCS: Record<ScenarioNodeKind, ScenarioKindDoc> = {
     summary: 'Writes one entry to the run log (visible via get_scenario_run_status + the inspector panel) and passes the value through. Sequence it via the `in` trigger.',
     config: { level: 'debug | info | warn | error', message: 'Text (typed value).', data: 'Optional structured payload (or wire `data`).' }
   },
+  toast: {
+    summary: 'Emits a toast notification in the Restorm UI (renderer). The `level` drives the toast glyph + colour. Headless / CLI: no-op — the run still succeeds and `done` is emitted. Sequence it via the `in` trigger.',
+    config: { title: 'Header text (typed value; or wire `title`).', message: 'Body text below the title (typed value; or wire `message`).', level: 'info (default) | success | warning | error', duration: 'Auto-dismiss after this many SECONDS. 0 (or unset) → the toast persists until dismissed.' }
+  },
   assert: {
     summary: 'Asserts `actual` (vs `expected`) with `operator`, routing the trigger to `then` (pass) or `else` (fail). Beyond the shared comparators, chai-style operators: type checks, presence/emptiness, regex match, membership, deep equality and length.',
     config: { operator: 'eq | ne | lt | lte | gt | gte | contains | isString | isNumber | isBoolean | isArray | isObject | isNull | exists | isEmpty | matchesRegex | isOneOf | deepEquals | lengthEq | lengthGt | lengthLt', a: 'Actual operand (or wire `a`).', b: 'Expected operand / pattern / list / length (binary operators).', message: 'Failure label.' }

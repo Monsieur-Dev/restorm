@@ -5,6 +5,7 @@
  */
 
 import Handlebars from 'handlebars'
+import { resolveWithContextPriority } from '../../../shared/utils/handlebars/resolveWithContextPriority'
 import type { Activation, ExecContext, NodeExecutor } from '../types'
 import { LIST_MUTATION_DEFAULT_VALUE_ID } from '../../../shared/scenarioListMutationValues'
 import { resolveConfigItems, applyListOp } from '../../../shared/utils/scenarioStaticPreview'
@@ -412,10 +413,24 @@ function expressionTemplate(config: unknown): string {
   return ''
 }
 
-function renderHandlebars(template: string, ctx: unknown): string {
+export function renderHandlebars(template: string, ctx: unknown): string {
   // `noEscape` to match the inspector preview + the map executor (both compile
   // with it). Without it, `{{name}}` over "Tom & Jerry" renders "Tom &amp;
   // Jerry" at runtime but "Tom & Jerry" in the preview — a silent drift.
+  //
+  // The scenario engine registers the whole Handlebars helper suite globally
+  // (via `scenarioStaticPreview`'s module-load `registerHandlebarsHelpers()`),
+  // so a bare `{{test}}` over a context variable named `test` would dispatch to
+  // the `test` HELPER (which expects block options → `Cannot read properties of
+  // undefined (reading 'inverse')`) instead of reading the variable. Route an
+  // object context through `resolveWithContextPriority` — the SAME disambiguator
+  // the request URL/field resolution uses (`ContextService.transformValue`) — so
+  // a context variable wins over a same-named helper. A non-object context
+  // (`transform`'s `{{.}}` over a primitive) has no named keys to collide, so it
+  // compiles directly.
+  if (ctx !== null && typeof ctx === 'object' && !Array.isArray(ctx)) {
+    return resolveWithContextPriority(template, ctx as Record<string, unknown>)
+  }
   return Handlebars.compile(template, { noEscape: true })(ctx)
 }
 

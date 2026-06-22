@@ -293,6 +293,7 @@ declare global {
         scenarioRunHistoryList: (scenarioId: string) => Promise<unknown[]>
         scenarioRunHistoryDetail: (guid: string) => Promise<unknown>
         scenarioRunHistoryTogglePin: (guid: string, pinned: boolean) => Promise<boolean>
+        onScenarioToast: (callback: (payload: { title: string; message: string; level: string; durationMs?: number; nodeId: string }) => void) => () => void
         onScenarioEngineEvent: (cb: (event: unknown) => void) => () => void
         pushMcpActiveStateBootstrap: (payload: {
           tab: { tabId: string | null; itemId: string | null; kind: 'request' | 'folder' | 'env-folder' | 'scenario' | null }

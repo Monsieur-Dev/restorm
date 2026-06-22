@@ -45,7 +45,7 @@ import './scenarioEnvPreview'
 // Side-effect: registers the secret → plaintext resolver (async cache) so the
 // inspector's static preview resolves a SecretValue operand to its live value.
 import { useSecretPreviewVersion } from './scenarioSecretPreview'
-import { layoutScenarioGraph, SCENARIO_NODE_FALLBACK_WIDTH, SCENARIO_NODE_FALLBACK_HEIGHT } from '../../../../shared/scenarioGraphLayout'
+import { layoutScenarioGraph, scenarioGraphNeedsPlacement, SCENARIO_NODE_FALLBACK_WIDTH, SCENARIO_NODE_FALLBACK_HEIGHT } from '../../../../shared/scenarioGraphLayout'
 import { SCENARIO_ADD_REQUEST_GROUPS, SCENARIO_ADD_SCENARIO_ENTRY, SCENARIO_ADD_SOCKETIO_ACTIONS, SCENARIO_ADD_WEBSOCKET_ACTIONS, SCENARIO_ADD_MQTT_ACTIONS, SCENARIO_ADD_GRPC_ACTIONS, scenarioAddIcon, scenarioAddSocketioIcon, scenarioAddWebsocketIcon, scenarioAddMqttIcon, scenarioAddGrpcIcon } from './scenarioChildPalette'
 import type { AddChildKind } from '../MainView/Sidebar/contextMenuBuilder'
 import type { TFunction } from 'i18next'
@@ -888,29 +888,35 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
     })
   }, [onScenarioChange, scenario.id])
 
-  // ── Auto-layout ────────────────────────────────────────────────────────────
-  // Re-run an ELK layered layout whenever the scenario's STRUCTURE changes (a
-  // node or edge added / removed): the ENTIRE graph is re-laid out left→right so
-  // boxes never overlap — the agent / user just drops boxes and the graph tidies
-  // itself. Position-only changes (dragging) don't change the signature, so they
-  // don't trigger a pass; but a manual nudge survives only until the next
-  // structural edit, which re-lays every box (this is the intended "always tidy"
-  // behaviour, not a per-box placement). On a scenario's FIRST open we re-arrange
-  // ONLY when its boxes significantly overlap (it was built / edited while the
-  // editor was closed — e.g. an agent stacked them at 0,0); an already-tidy,
-  // hand-arranged scenario is left exactly as saved.
-  const lastLayoutSigRef = useRef<string>('')
+  // ── Auto-layout (INITIAL PLACEMENT only) ─────────────────────────────────────
+  // Auto-layout runs ONLY for the initial placement of an un-positioned graph,
+  // on its first open, and NEVER again. A scenario built while the editor was
+  // closed — by the MCP/agent (`create_scenario_node` defaults every box to
+  // 0,0) or an import — would otherwise pile every box at the origin; one ELK
+  // layered pass spreads it left→right so it's legible. The trigger is the
+  // origin sentinel: a box at (0,0) means "never placed". If EVERY box already
+  // has a real position (the normal case — a hand-arranged or previously-tidied
+  // scenario), this never fires on open.
+  //
+  // After that single pass, NO user mutation re-layouts: adding a box (it
+  // arrives with its own drop position), deleting a box, dragging, or drawing an
+  // edge all leave the existing boxes exactly where they are. Re-organisation is
+  // ON DEMAND ONLY — the canvas "re-arrange actions" palette action
+  // (`runManualLayout`) or the `arrange_scenario` MCP route. This is why the
+  // effect, once it has claimed the scenario id, returns immediately for every
+  // later trigger (node-set change / drag / edge): a mutation is never a reason
+  // to reflow.
   const layoutScenarioRef = useRef<string>('')
   const autoLayoutTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   useEffect(() => {
     if (nodes.length === 0) return
-    const sig = nodes.map((n) => n.id).sort().join(',') + '|' +
-      edges.map((e) => `${e.source}>${e.target}:${e.sourceHandle ?? ''}>${e.targetHandle ?? ''}`).sort().join(',')
-    // First open always schedules (the stacked-overlap check runs at fire time);
-    // afterwards only a structural change (a new signature) reschedules.
-    const firstOpen = layoutScenarioRef.current !== scenario.id
-    if (!firstOpen && sig === lastLayoutSigRef.current) return
-    lastLayoutSigRef.current = sig
+    // Schedule ONLY for this scenario's first open. The id is claimed lazily in
+    // the debounced body (not here), so the load burst — nodes set, then edges
+    // set re-rendering with a fresh `nodes` identity — keeps re-scheduling (all
+    // debounced into one pass) until it settles; once the body has claimed the
+    // id, every later trigger (add/delete node, drag, edge) returns here. A
+    // node-set change (add OR delete) is no longer a trigger.
+    if (layoutScenarioRef.current === scenario.id) return
     // Guards a post-unmount / re-run setState: the cleanup flips this and the
     // async body bails after its `await` (closing the tab during the debounce
     // otherwise fires setNodes/persist/fitView on a torn-down component).
@@ -920,43 +926,28 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
     // created boxes have a frame to be measured by React Flow before we read sizes.
     autoLayoutTimerRef.current = setTimeout(() => {
       void (async () => {
-        // Decide first-open HERE, not eagerly in the effect body: a burst of
+        // Claim the scenario id HERE, not eagerly in the effect body: a burst of
         // renders during load (nodes then edges) collapses into this single
-        // debounced run, so `isFirstOpen` is evaluated once against the full
-        // graph and the scenario id is claimed only when we actually act — an
-        // eager claim let a later burst flip firstOpen→false and skip the guard.
-        const isFirstOpen = layoutScenarioRef.current !== scenario.id
+        // debounced run, so the un-positioned check is evaluated once against the
+        // full graph and the id is claimed only when we actually run — an eager
+        // claim let a later burst skip this body (and the guard with it).
+        if (layoutScenarioRef.current === scenario.id) return
         layoutScenarioRef.current = scenario.id
         const current = nodesRef.current
         if (current.length === 0) return
-        const rectOf = (n: Node<NodeData>): { id: string; x: number; y: number; width: number; height: number } => {
+        // Auto-arrange ONLY when ≥1 box lacks a saved position (the origin
+        // sentinel) — a graph where every box has a real position is left
+        // exactly as saved.
+        if (!scenarioGraphNeedsPlacement(current)) return
+        const rectOf = (n: Node<NodeData>): { id: string; width: number; height: number } => {
           const m = (n as { measured?: { width?: number; height?: number } }).measured
           return {
             id: n.id,
-            x: n.position.x,
-            y: n.position.y,
             width: m?.width ?? n.width ?? SCENARIO_NODE_FALLBACK_WIDTH,
             height: m?.height ?? n.height ?? SCENARIO_NODE_FALLBACK_HEIGHT
           }
         }
-        const rects = current.map(rectOf)
-        // On a scenario's first open, skip the re-layout UNLESS its boxes
-        // SIGNIFICANTLY overlap — measured as an intersection area exceeding half
-        // the smaller box. A graph an agent built while the editor was closed
-        // stacks every box at the same point (≈100% overlap) and gets arranged;
-        // a hand-arranged scenario whose neighbours merely graze each other (the
-        // Bestiary's grid touches by a few px) stays exactly as saved.
-        if (isFirstOpen) {
-          const stacked = rects.some((a, i) => rects.some((b, j) => {
-            if (j <= i) return false
-            const ix = Math.min(a.x + a.width, b.x + b.width) - Math.max(a.x, b.x)
-            const iy = Math.min(a.y + a.height, b.y + b.height) - Math.max(a.y, b.y)
-            if (ix <= 0 || iy <= 0) return false
-            return ix * iy > 0.5 * Math.min(a.width * a.height, b.width * b.height)
-          }))
-          if (!stacked) return
-        }
-        const inputNodes = rects.map((r) => ({ id: r.id, width: r.width, height: r.height }))
+        const inputNodes = current.map(rectOf)
         const inputEdges = edgesRef.current.map((e) => ({ id: e.id, source: e.source, target: e.target }))
         const positions = await layoutScenarioGraph(inputNodes, inputEdges)
         if (cancelled || positions.size === 0) return
@@ -976,7 +967,10 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
       cancelled = true
       if (autoLayoutTimerRef.current) { clearTimeout(autoLayoutTimerRef.current); autoLayoutTimerRef.current = null }
     }
-  }, [nodes, edges, scenario.id, setNodes, persist, fitView])
+    // Intentionally NOT depending on `edges`: an edge add/remove must not
+    // trigger a re-layout. After the first-open claim the body returns early, so
+    // the `nodes` dep only matters for the initial load burst.
+  }, [nodes, scenario.id, setNodes, persist, fitView])
 
   // ── Manual re-arrange (palette action) ─────────────────────────────────────
   // Runs the same ELK layout as the auto-layout, but unconditionally (no

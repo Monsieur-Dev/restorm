@@ -3244,6 +3244,169 @@ collections:
                 tags: []
                 params: []
                 nodes:
+                  - id: baea49e9-04f5-44d9-9443-7e0ec8c8223c
+                    kind: toast
+                    config:
+                      title:
+                        type: string
+                        value: Info
+                      message:
+                        type: string
+                        value: Scenario started
+                      level: info
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: title
+                        name: title
+                        dataType: string
+                      - id: message
+                        name: message
+                        dataType: string
+                    outputs: []
+                    position:
+                      x: 40
+                      'y': 40
+                  - id: 54c4dc20-93cd-4b99-8469-9f56f9b424f4
+                    kind: toast
+                    config:
+                      title:
+                        type: string
+                        value: Success
+                      message:
+                        type: string
+                        value: Step completed
+                      level: success
+                      duration: 5
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: title
+                        name: title
+                        dataType: string
+                      - id: message
+                        name: message
+                        dataType: string
+                    outputs: []
+                    position:
+                      x: 40
+                      'y': 220
+                  - id: 2b6c0627-e5b5-4038-80d9-55cfae7dce46
+                    kind: toast
+                    config:
+                      title:
+                        type: string
+                        value: Warning
+                      message:
+                        type: string
+                        value: Check your config
+                      level: warning
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: title
+                        name: title
+                        dataType: string
+                      - id: message
+                        name: message
+                        dataType: string
+                    outputs: []
+                    position:
+                      x: 40
+                      'y': 400
+                  - id: e734d262-3e68-4b42-b3a3-fb85e0852454
+                    kind: toast
+                    config:
+                      title:
+                        type: string
+                        value: Error
+                      message:
+                        type: string
+                        value: Something failed
+                      level: error
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: title
+                        name: title
+                        dataType: string
+                      - id: message
+                        name: message
+                        dataType: string
+                    outputs: []
+                    position:
+                      x: 40
+                      'y': 580
+                  - id: cc1e4f6d-f88f-41c2-b7e6-9a4418a0b4e1
+                    kind: toast
+                    config:
+                      title:
+                        type: string
+                        value: Persistent
+                      message:
+                        type: string
+                        value: Stays until dismissed
+                      level: info
+                      duration: 0
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: title
+                        name: title
+                        dataType: string
+                      - id: message
+                        name: message
+                        dataType: string
+                    outputs: []
+                    position:
+                      x: 40
+                      'y': 760
+                edges:
+                  - id: ca4a03c0-5a43-4f3b-9da3-31a4d331be2a
+                    from:
+                      nodeId: baea49e9-04f5-44d9-9443-7e0ec8c8223c
+                      portId: done
+                    to:
+                      nodeId: 54c4dc20-93cd-4b99-8469-9f56f9b424f4
+                      portId: in
+                  - id: 49097469-164f-460a-937d-ad42f40c6bfd
+                    from:
+                      nodeId: 54c4dc20-93cd-4b99-8469-9f56f9b424f4
+                      portId: done
+                    to:
+                      nodeId: 2b6c0627-e5b5-4038-80d9-55cfae7dce46
+                      portId: in
+                  - id: 92df7062-61ad-42a4-84a1-fa8c25dd2b1f
+                    from:
+                      nodeId: 2b6c0627-e5b5-4038-80d9-55cfae7dce46
+                      portId: done
+                    to:
+                      nodeId: e734d262-3e68-4b42-b3a3-fb85e0852454
+                      portId: in
+                  - id: a6e89415-a5ac-4578-8212-ed0f485efd3c
+                    from:
+                      nodeId: e734d262-3e68-4b42-b3a3-fb85e0852454
+                      portId: done
+                    to:
+                      nodeId: cc1e4f6d-f88f-41c2-b7e6-9a4418a0b4e1
+                      portId: in
+                id: 83d86631-4805-4a0f-81a1-c1850090f087
+                name: Toast
+                items: []
+              - type: scenario
+                tags: []
+                params: []
+                nodes:
                   - id: 1780290664616-qdq134
                     kind: input
                     config:
@@ -20584,6 +20747,31 @@ collections:
                 outputs: []
                 position:
                   x: 1000
+                  'y': 4640
+              - id: 13a9c033-0526-4d73-9c9d-800508787774
+                kind: toast
+                config:
+                  title:
+                    type: string
+                    value: Toast
+                  message:
+                    type: string
+                    value: Notification body
+                  level: info
+                inputs:
+                  - id: in
+                    name: ''
+                    dataType: any
+                    flow: signal
+                  - id: title
+                    name: title
+                    dataType: string
+                  - id: message
+                    name: message
+                    dataType: string
+                outputs: []
+                position:
+                  x: 1480
                   'y': 4640
             edges: []
             id: cfb401ce-df62-4d41-88e2-8989206abe2f

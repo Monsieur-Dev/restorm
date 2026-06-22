@@ -137,8 +137,9 @@ export const LogNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, data,
       ]
     }
   ]
-  // Terminal sink: a header launch trigger (`in`) so it can be sequenced, but
-  // no output (no passthrough, and logging can't fail, so no error port either).
+  // A header launch trigger (`in`) so it can be sequenced; the `done` and
+  // `error` ports are drawn implicitly by the base — a message expression /
+  // data operand can fail to render, and that failure routes to `error`.
   return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={[]} />
 }
 

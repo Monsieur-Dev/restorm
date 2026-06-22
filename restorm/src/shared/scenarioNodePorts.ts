@@ -267,6 +267,13 @@ const PORTS: Partial<Record<ScenarioNodeKind, KindPorts>> = {
   // value-selector fallbacks, so they aren't hard-required ports. Branches
   // `pass` / `fail`; the failure label lives in config (`message`).
   assert: { inputs: [{ id: 'a', name: 'actual' }, { id: 'b', name: 'expected' }, { id: 'message', name: 'message', dataType: 'string' }], outputs: [{ id: 'then', name: 'pass', role: 'then', flow: 'both' }, { id: 'else', name: 'fail', role: 'else', flow: 'both' }] },
+  // `toast` broadcasts a notification to the Restorm UI (renderer). Wireable /
+  // inline text inputs: `title` (header) + `message` (body). `level` (info /
+  // success / warning / error, a segmented toggle) and `duration` (a plain
+  // number of seconds) are config-only — not wireable ports. No value output —
+  // emits `done` implicitly via the capability default, and the implicit `error`
+  // port (a title/message expression can fail to render).
+  toast: { inputs: [{ id: 'title', name: 'title', dataType: 'string' }, { id: 'message', name: 'message', dataType: 'string' }], outputs: [] },
   // `throw` deliberately fails with a `message` (wired or inline) — routed to the
   // node's implicit `error` port (or it fails the run if nothing handles it). No
   // value output: a throw never completes normally.

@@ -243,3 +243,55 @@ describe('concreteValue — secret', () => {
     setSecretPreviewResolver(null)
   })
 })
+
+describe('staticScenarioPreview — toast node', () => {
+  it('summarises the resolved title / message / level / duration (seconds)', () => {
+    const node: StaticPreviewNode = {
+      id: 'toast1',
+      kind: 'toast',
+      config: {
+        title: { type: 'string', value: 'Heads up' },
+        message: { type: 'string', value: 'All good' },
+        level: 'success',
+        duration: 5
+      }
+    }
+    expect(staticScenarioPreview(node, [node], [])).toEqual({
+      title: 'Heads up',
+      message: 'All good',
+      level: 'success',
+      duration: 5
+    })
+  })
+
+  it('defaults level to info and duration to 0 (persists until dismissed)', () => {
+    const node: StaticPreviewNode = {
+      id: 'toast2',
+      kind: 'toast',
+      config: { message: { type: 'string', value: 'hi' } }
+    }
+    expect(staticScenarioPreview(node, [node], [])).toEqual({
+      title: null,
+      message: 'hi',
+      level: 'info',
+      duration: 0
+    })
+  })
+
+  it('renders an inline Expression message via Handlebars (empty context pre-run)', () => {
+    // The pre-run preview has no live variables, so a `{{token}}` renders empty
+    // — but the template IS compiled (proves Handlebars runs, mirroring the
+    // executor, which renders the same template against the live run variables).
+    const node: StaticPreviewNode = {
+      id: 'toast3',
+      kind: 'toast',
+      config: { message: { type: 'expression', value: 'Got {{itemCount}} items' }, level: 'warning' }
+    }
+    expect(staticScenarioPreview(node, [node], [])).toEqual({
+      title: null,
+      message: 'Got  items',
+      level: 'warning',
+      duration: 0
+    })
+  })
+})

@@ -31,7 +31,7 @@ const SCENARIO_KINDS = [
   'grpcConnect', 'grpcSend', 'grpcClose', 'forEach', 'for', 'while', 'doWhile',
   'aggregate', 'map', 'filter', 'addToList', 'removeFromList', 'wait', 'waitUntil', 'now', 'timer', 'arithmetic', 'comparator', 'boolean', 'object',
   'setVariable', 'getVariable', 'transform', 'code', 'cast', 'regex', 'json', 'xml', 'yaml', 'crypto', 'jwt', 'datetime',
-  'objectOp', 'url', 'random', 'listOp', 'csv', 'math', 'schema', 'readFile', 'writeFile', 'retry', 'log', 'assert', 'throw'
+  'objectOp', 'url', 'random', 'listOp', 'csv', 'math', 'schema', 'readFile', 'writeFile', 'retry', 'log', 'toast', 'assert', 'throw'
 ] as const
 
 function jsonReply(value: unknown): { content: { type: 'text'; text: string }[] } {

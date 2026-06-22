@@ -24,6 +24,7 @@ Feature: Scenario run-log end-to-end
     Examples:
       | scenario       |
       | Logs           |
+      | Toast          |
       | Arithmetics    |
       | Loops          |
       | Inputs/outputs |

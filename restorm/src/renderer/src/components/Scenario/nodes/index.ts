@@ -37,6 +37,7 @@ import { FilterNodeBox } from './FilterNodeBox'
 import { MapNodeBox } from './MapNodeBox'
 import { ListMutationNodeBox } from './ListMutationNodeBox'
 import { LogNodeBox, AssertNodeBox, NowNodeBox } from './UtilityNodeBoxes'
+import { ToastNodeBox } from './ToastNodeBox'
 import { SchemaNodeBox, ReadFileNodeBox, WriteFileNodeBox } from './IoNodeBoxes'
 import { TimerNodeBox } from './TimerNodeBox'
 import { CodeNodeBox } from './CodeNodeBox'
@@ -116,6 +117,7 @@ const SCENARIO_NODE_COMPONENTS: Record<ScenarioNodeKind, NodeBoxComponent> = {
   throw: ThrowNodeBox,
   retry: RetryNodeBox,
   log: LogNodeBox,
+  toast: ToastNodeBox,
   assert: AssertNodeBox
 }
 
