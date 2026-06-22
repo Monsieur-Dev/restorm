@@ -1664,7 +1664,9 @@
     "logsRetentionCap": "Oppbevaring av MCP-kallogg",
     "logsRetentionCapDescription": "Maksimalt antall behandlede MCP-kall som holdes i minnet for MCP-loggviseren. Eldre kall forkastes når grensen nås; 0 deaktiverer oppbevaring.",
     "captureRetentionCap": "MCP-opptaksbevaring",
-    "captureRetentionCapDescription": "Hvor mange nylige MCP-kall som beholder skjermbildet / opptaket sitt (i minnet og på disk). Når grensen nås, mister eldre opptak mediet sitt og den midlertidige videofilen slettes; 0 deaktiverer bevaring."
+    "captureRetentionCapDescription": "Hvor mange nylige MCP-kall som beholder skjermbildet / opptaket sitt (i minnet og på disk). Når grensen nås, mister eldre opptak mediet sitt og den midlertidige videofilen slettes; 0 deaktiverer bevaring.",
+    "enabled": "Aktiver MCP-server",
+    "enabledDescription": "Starter den innebygde MCP-serveren ved oppstart slik at AI-verktøy kan koble til denne instansen. Deaktiver for å forhindre MCP-tilkoblinger."
   },
   "mcpToolTitles": {
     "answerScenarioInput": "Svar på en scenarioinndata",
@@ -1738,7 +1740,9 @@
     "updateFolder": "Oppdater en mappe",
     "updateRequest": "Oppdater en forespørsel",
     "updateScenario": "Oppdater et scenario",
-    "updateScenarioNode": "Oppdater en scenarionode"
+    "updateScenarioNode": "Oppdater en scenarionode",
+    "createInstance": "Opprett en ny instans",
+    "terminateInstance": "Avslutt en instans"
   },
   "odataRequestTab": {
     "send": "Send",

@@ -1664,7 +1664,9 @@
     "logsRetentionCap": "Aufbewahrung des MCP-Aufrufprotokolls",
     "logsRetentionCapDescription": "Maximale Anzahl bedienter MCP-Aufrufe, die für den MCP-Protokoll-Viewer im Speicher gehalten werden. Ältere Aufrufe werden beim Erreichen des Limits verworfen; 0 deaktiviert die Aufbewahrung.",
     "captureRetentionCap": "MCP-Aufnahmen-Aufbewahrung",
-    "captureRetentionCapDescription": "Wie viele der letzten MCP-Aufrufe ihren erfassten Screenshot / Screencast behalten (im Speicher und auf der Festplatte). Ältere Aufnahmen verlieren ihr Medium — und ihre temporäre Videodatei wird gelöscht — sobald das Limit erreicht ist; 0 deaktiviert die Aufbewahrung."
+    "captureRetentionCapDescription": "Wie viele der letzten MCP-Aufrufe ihren erfassten Screenshot / Screencast behalten (im Speicher und auf der Festplatte). Ältere Aufnahmen verlieren ihr Medium — und ihre temporäre Videodatei wird gelöscht — sobald das Limit erreicht ist; 0 deaktiviert die Aufbewahrung.",
+    "enabled": "MCP-Server aktivieren",
+    "enabledDescription": "Startet den integrierten MCP-Server beim Start, damit KI-Tools eine Verbindung zu dieser Instanz herstellen können. Deaktivieren, um MCP-Verbindungen zu verhindern."
   },
   "mcpToolTitles": {
     "answerScenarioInput": "Szenario-Eingabe beantworten",
@@ -1738,7 +1740,9 @@
     "updateFolder": "Ordner aktualisieren",
     "updateRequest": "Anfrage aktualisieren",
     "updateScenario": "Szenario aktualisieren",
-    "updateScenarioNode": "Szenario-Knoten aktualisieren"
+    "updateScenarioNode": "Szenario-Knoten aktualisieren",
+    "createInstance": "Eine neue Instanz erstellen",
+    "terminateInstance": "Eine Instanz beenden"
   },
   "odataRequestTab": {
     "send": "Senden",

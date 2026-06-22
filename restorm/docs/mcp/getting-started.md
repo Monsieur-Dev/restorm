@@ -2,23 +2,20 @@
 
 This page walks through the smallest path from "fresh checkout" to "Claude Code can run a real request via Restorm".
 
-## 1. Enable the MCP server
+## 1. The MCP server is on by default
 
-The server is **off by default**. Two ways to switch it on:
+The embedded MCP server is **on by default** — every normal launch starts it, no flag needed. There is no CLI flag or environment variable to toggle it; MCP is governed entirely by a setting plus a headless rule:
 
-```bash
-# CLI flag (preferred for one-off / dev runs)
-restorm --mcp
+- **Setting (persistent):** Settings → MCP → "Enable MCP server" (default ON). This is the one and only persistent control — turn it off to keep the server off across launches.
+- **Headless rule:** on a true headless host (no usable display — e.g. a bare CI box with no `DISPLAY`/`WAYLAND_DISPLAY`), MCP never starts regardless of the setting. A normal desktop session — or a CI run under a virtual display like xvfb — has a display, so MCP stays on.
 
-# or environment variable (preferred for shell wrappers)
-ECUI_MCP=1 restorm
-```
+You can also stop / resume the server at runtime from the MCP status-bar indicator's popover (the **stop / resume** button). That runtime toggle is **session-only**: it cuts or resumes the server for the current run but does **not** change the persistent setting, so the next launch honours the setting again. The **MCP logs** button in that popover is always available, whether the server is running or stopped.
 
-Either flag tells Restorm to:
+A normal launch tells Restorm to:
 
 - Pick a free OS-assigned port at boot (no hardcoded ports → multiple Restorm instances coexist).
 - Generate a per-process bearer token.
-- Write a discovery file at `os.tmpdir()/restorm-mcp/<pid>.json` with `{port, token, projectPath, pid, startedAt}`.
+- Write a discovery file at `os.tmpdir()/restorm-mcp/<pid>.json` with `{port, token, projectPath, pid, startedAt, name, mcpActive}`.
 - Start a stateless JSON-RPC HTTP server on `127.0.0.1:<port>` (loopback only).
 
 The status bar shows an MCP indicator that pulses on every incoming request — a quick way to confirm the server is up and being talked to.
@@ -32,10 +29,10 @@ You have two options, depending on whether you want the AI to spawn Restorm or t
 `scripts/mcp-launcher.mjs` (in this repo) is a stdio↔HTTP proxy designed for Claude Code / Cursor. It does three things:
 
 1. Answers `initialize` and `tools/list` from a small built-in manifest at session start, so the client never blocks on a missing Restorm.
-2. On the first `tools/call`, probes the discovery directory for a live Restorm. If none is running, spawns `pnpm dev:restorm -- --mcp` detached, waits for the port to open, then forwards the call.
+2. On the first `tools/call`, discovers a live, **MCP-accepting** Restorm in the discovery directory and forwards to it. It **never auto-starts** one — if nothing is reachable it returns a clean JSON-RPC error telling you to use the `create_instance` tool. (The old silent auto-spawn was removed: it was misleading — an instance whose MCP you had deliberately **cut** would have been silently replaced by a fresh one instead of refusing.)
 3. Reads the discovery file to recover `port + token`, injects `Authorization: Bearer <token>` on every forwarded HTTP request, and emits `notifications/tools/list_changed` whenever it (re)connects to a fresh restorm instance.
 
-Result: the user never thinks about ports or tokens.
+Result: the user never thinks about ports or tokens — and a cut instance stays cut.
 
 #### Claude Code config
 
@@ -75,7 +72,7 @@ Cursor needs the absolute path because it doesn't resolve `args` relative to the
 
 If you want to skip the launcher and have your client talk JSON-RPC directly:
 
-1. Boot Restorm with `--mcp`.
+1. Boot Restorm normally (MCP is on by default).
 2. Read `os.tmpdir()/restorm-mcp/<pid>.json` and grab `port` + `token`.
 3. POST JSON-RPC 2.0 to `http://127.0.0.1:<port>/mcp` with header `Authorization: Bearer <token>` and `Accept: application/json, text/event-stream`.
 
@@ -133,16 +130,18 @@ The `run_request` tool dispatches the request via the same code path the user's 
 
 ## 5. Disable when you're done
 
+To stop exposing MCP, either turn the **Settings → MCP → "Enable MCP server"** toggle off (persistent) or use the status-bar **stop** button (session-only). To quit the app entirely:
+
 ```bash
 # stop the running Restorm
-pkill -f 'restorm.*--mcp'
+pkill -f restorm
 
 # discovery file is auto-cleaned on graceful exit, but a SIGKILL leaves
 # a stale entry — safe to delete by hand:
 rm -f $TMPDIR/restorm-mcp/*.json
 ```
 
-The launcher tolerates stale entries: it probes `process.kill(pid, 0)` before forwarding and falls back to a fresh spawn when no live instance answers.
+The launcher tolerates stale entries: it probes `process.kill(pid, 0)` before forwarding and, when no live instance answers, returns a clean JSON-RPC error telling the client to use the explicit `create_instance` route (it no longer silently spawns one).
 
 ## See also
 

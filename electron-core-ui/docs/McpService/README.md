@@ -119,7 +119,7 @@ system ffmpeg and does not bundle one.
 
 #### Cross-instance routing bridge
 
-Multiple `--mcp` instances of the **same** app can run at once (parallel
+Multiple MCP-enabled instances of the **same** app can run at once (parallel
 agents, multiple checkouts). The bridge lets a single MCP client reach a
 specific one by name. The whole mechanism — discovery, transport, and the
 routing-key plumbing — lives in ECUI, so any consuming app gets it by

@@ -338,7 +338,10 @@
     "mcp": {
       "serverRunningOnPort": "MCP sunucusu {{port}} bağlantı noktasında çalışıyor",
       "sessionName": "Oturum: {{name}}",
-      "viewLogs": "Günlükleri görüntüle"
+      "viewLogs": "Günlükleri görüntüle",
+      "stopServer": "MCP sunucusunu durdur",
+      "resumeServer": "MCP sunucusunu devam ettir",
+      "serverStopped": "durduruldu"
     }
   },
   "mcpToolTitles": {

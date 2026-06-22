@@ -338,7 +338,10 @@
     "mcp": {
       "serverRunningOnPort": "MCP сервер ради на порту {{port}}",
       "sessionName": "Сесија: {{name}}",
-      "viewLogs": "Прикажи евиденције"
+      "viewLogs": "Прикажи евиденције",
+      "stopServer": "Zaustavi MCP server",
+      "resumeServer": "Nastavi MCP server",
+      "serverStopped": "zaustavljeno"
     }
   },
   "mcpToolTitles": {

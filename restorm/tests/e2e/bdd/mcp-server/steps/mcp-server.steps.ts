@@ -1,6 +1,6 @@
 /**
  * Steps for the `mcp-server` BDD scenario. Drives an end-to-end loop:
- * launch restorm with `--mcp`, talk JSON-RPC to the embedded server,
+ * launch restorm (MCP on by default), talk JSON-RPC to the embedded server,
  * import a Petstore swagger served by a tiny in-process HTTP fixture,
  * run a request via MCP, and assert both the JSON-RPC reply and the
  * renderer UI state.

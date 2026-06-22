@@ -338,7 +338,10 @@
     "mcp": {
       "serverRunningOnPort": "MCP 서버가 포트 {{port}}에서 실행 중입니다",
       "sessionName": "세션: {{name}}",
-      "viewLogs": "로그 보기"
+      "viewLogs": "로그 보기",
+      "stopServer": "MCP 서버 중지",
+      "resumeServer": "MCP 서버 재개",
+      "serverStopped": "중지됨"
     }
   },
   "mcpToolTitles": {

@@ -31,6 +31,12 @@ SCENARIOS (the dataflow engine)
 - Execution model: data-driven. A node fires when all its WIRED inputs have arrived (unwired inputs are not awaited). Nodes with no inputs start immediately, in parallel. Branch with 'if'/'switch'; iterate with 'forEach'/'for'; loop with 'while'/'doWhile' (the 'if' mechanism + a user-wired edge back into the node). 'log' writes to the run log.
 - Run + observe: run_scenario returns a runId. get_scenario_run_status(runId) returns status + the full run log (incl. sub-scenario runs) DURING and after the run. list_scenario_runs finds runs you didn't start (e.g. a Play-button run from the UI). stop_scenario_run cancels.
 
+INSTANCES (multiple windows)
+- Several restorm instances can run at once, each addressed by session name via the reserved \`__session\` key on any tool call. list-instances shows every instance that ACCEPTS MCP, with its open fileName + name — call it before targeting one.
+- There is NO auto-spawn: if no instance is reachable you get a clear error. Use create_instance to launch one explicitly (optionally for a file / with a name). Creation is refused if another instance already has that name OR that file open (one instance per file).
+- The user can CUT MCP on an instance (the "stop" button) to halt a misbehaving agent. A cut instance REFUSES every command and disappears from list-instances; targeting it by name is refused, never redirected — respect that, do not try to route around it.
+- terminate_instance closes an instance cleanly (File->Quit, never a force-kill). With unsaved changes and autosave off, pass save:true/false; omit save to let the user confirm via a modal (the call returns "awaiting user confirmation" without closing).
+
 CONVENTIONS
 - Everything is addressed by id; list/search/get tools return the ids you pass to mutating tools.
 - User-facing text fields accept {{handlebars}} + env variables.

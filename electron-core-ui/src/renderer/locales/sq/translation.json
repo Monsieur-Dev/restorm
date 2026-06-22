@@ -338,7 +338,10 @@
     "mcp": {
       "serverRunningOnPort": "Serveri MCP po ekzekutohet në portën {{port}}",
       "sessionName": "Sesioni: {{name}}",
-      "viewLogs": "Shiko regjistrat"
+      "viewLogs": "Shiko regjistrat",
+      "stopServer": "Ndalo serverin MCP",
+      "resumeServer": "Rifillo serverin MCP",
+      "serverStopped": "ndaluar"
     }
   },
   "mcpToolTitles": {

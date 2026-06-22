@@ -1044,14 +1044,33 @@ contextBridge.exposeInMainWorld('restorm', {
      * are picked at startup — the renderer reads them once and caches
      * them for the lifetime of the window. */
     getConfig: async (): Promise<{
-      mcp: { enabled: boolean; port: number | null; sessionName: string }
+      mcp: { enabled: boolean; port: number | null; sessionName: string; running: boolean }
       graphql: { endpoint: string }
     }> => {
       const result: unknown = await ipcRenderer.invoke('runtime:get-config')
       return result as {
-        mcp: { enabled: boolean; port: number | null; sessionName: string }
+        mcp: { enabled: boolean; port: number | null; sessionName: string; running: boolean }
         graphql: { endpoint: string }
       }
+    },
+    /** Toggle the MCP server on or off at runtime (without restarting).
+     * Returns the new state (and the freshly-bound port on resume, `null`
+     * when stopped). The user-facing choice is persisted to settings so a
+     * restart honours it. */
+    toggleServer: async (): Promise<{ running: boolean; port: number | null }> => {
+      const result: unknown = await ipcRenderer.invoke('mcp:toggle-server')
+      return result as { running: boolean; port: number | null }
+    },
+    /** Subscribe to MCP server state changes (started / stopped at runtime
+     * via the toggle button). The payload carries the freshly-bound port on
+     * resume (`null` when stopped) so the indicator can restore its label.
+     * Returns an unsubscribe function. */
+    onMcpServerStateChanged: (
+      callback: (state: { running: boolean; port: number | null }) => void
+    ): (() => void) => {
+      const handler = (_event: unknown, state: { running: boolean; port: number | null }): void => { callback(state) }
+      ipcRenderer.on('mcp:server-state-changed', handler)
+      return () => { ipcRenderer.off('mcp:server-state-changed', handler) }
     },
     /** Subscribe to a "ping" emitted on every incoming MCP request
      * (no payload — pure activity signal). Drives the ripple

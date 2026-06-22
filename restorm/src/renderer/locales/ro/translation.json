@@ -1665,7 +1665,9 @@
     "logsRetentionCap": "Păstrarea jurnalului de apeluri MCP",
     "logsRetentionCapDescription": "Numărul maxim de apeluri MCP deservite păstrate în memorie pentru vizualizatorul de jurnale MCP. Apelurile mai vechi sunt eliminate la atingerea limitei; 0 dezactivează păstrarea.",
     "captureRetentionCap": "Păstrarea capturilor MCP",
-    "captureRetentionCapDescription": "Câte apeluri MCP recente își păstrează captura de ecran / înregistrarea (în memorie și pe disc). La atingerea limitei, capturile mai vechi își pierd media, iar fișierul video temporar este șters; 0 dezactivează păstrarea."
+    "captureRetentionCapDescription": "Câte apeluri MCP recente își păstrează captura de ecran / înregistrarea (în memorie și pe disc). La atingerea limitei, capturile mai vechi își pierd media, iar fișierul video temporar este șters; 0 dezactivează păstrarea.",
+    "enabled": "Activează serverul MCP",
+    "enabledDescription": "Pornește serverul MCP integrat la lansare pentru ca instrumentele AI să se poată conecta la această instanță. Dezactivați pentru a preveni conexiunile MCP."
   },
   "mcpToolTitles": {
     "answerScenarioInput": "Răspunde la o intrare de scenariu",
@@ -1739,7 +1741,9 @@
     "updateFolder": "Actualizează un folder",
     "updateRequest": "Actualizează o cerere",
     "updateScenario": "Actualizează un scenariu",
-    "updateScenarioNode": "Actualizează un nod de scenariu"
+    "updateScenarioNode": "Actualizează un nod de scenariu",
+    "createInstance": "Creă o instanță nouă",
+    "terminateInstance": "Închide o instanță"
   },
   "odataRequestTab": {
     "send": "Trimite",

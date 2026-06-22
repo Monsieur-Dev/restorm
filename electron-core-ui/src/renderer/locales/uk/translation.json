@@ -338,7 +338,10 @@
     "mcp": {
       "serverRunningOnPort": "Сервер MCP працює на порту {{port}}",
       "sessionName": "Сеанс: {{name}}",
-      "viewLogs": "Переглянути журнали"
+      "viewLogs": "Переглянути журнали",
+      "stopServer": "Зупинити MCP-сервер",
+      "resumeServer": "Відновити MCP-сервер",
+      "serverStopped": "зупинено"
     }
   },
   "mcpToolTitles": {

@@ -11,9 +11,14 @@
  *     ECUI's `McpService` defaults. The Claude Code session starts
  *     fast and stays free of any GUI app launching unprompted.
  *   - On the first `tools/call` (or any other forwardable request), we
- *     probe `127.0.0.1:39000`. If nothing is listening, we detach
- *     `pnpm dev:restorm -- --mcp-port=39000`, wait until the port
- *     answers, then forward the call.
+ *     discover a live, MCP-accepting restorm via the shared discovery
+ *     dir and forward to it. We NEVER auto-spawn one: a silent spawn was
+ *     misleading (an AI whose target instance had MCP CUT would get a
+ *     fresh instance instead of the intended refusal). When no
+ *     MCP-accepting instance is reachable we return a clean JSON-RPC
+ *     error telling the caller to use the explicit `create_instance`
+ *     route. Instance creation is restorm's job (its documented
+ *     `create_instance` tool), not the launcher's.
  *   - Whenever restorm transitions from unreachable → reachable
  *     (initial spawn OR a mid-session restart we detected via a
  *     connection error on a previous forward), we emit
@@ -46,8 +51,6 @@ import { fileURLToPath } from 'node:url'
 import { createInterface } from 'node:readline'
 
 const HOST = '127.0.0.1'
-const SPAWN_WAIT_MS = 90_000
-const PROBE_INTERVAL_MS = 250
 // Short HTTP timeout when validating a discovered endpoint or GC'ing
 // stale lockfiles. The endpoint is local, so a healthy restorm answers
 // well under this; anything slower is treated as a stale carcass.
@@ -620,59 +623,28 @@ function probeMcpEndpoint(port, token) {
   })
 }
 
+
 /**
- * Poll a specific discovery file for up to `timeoutMs`. Restorm writes
- * the file atomically once its MCP server is bound. Returns the parsed
- * `{port,...}` entry or `null` on timeout.
+ * Sentinel thrown when no MCP-accepting restorm instance is reachable. The
+ * launcher NO LONGER silently spawns one (that was misleading: a misbehaving
+ * AI whose target instance had MCP CUT would get a fresh instance instead of a
+ * refusal). The AI must instead EXPLICITLY create or attach to an instance via
+ * restorm's documented `create_instance` route. `handleLine` turns this into a
+ * clean JSON-RPC error rather than a hang or a stray app launch.
  */
-async function waitForDiscoveryFile(filePath, timeoutMs) {
-  const deadline = Date.now() + timeoutMs
-  while (Date.now() < deadline) {
-    try {
-      const text = await fs.readFile(filePath, 'utf8')
-      const parsed = JSON.parse(text)
-      if (Number.isInteger(parsed.port) && parsed.port > 0) {
-        return parsed
-      }
-    } catch {
-      // Not yet written — retry.
-    }
-    await new Promise((r) => setTimeout(r, PROBE_INTERVAL_MS))
-  }
-  return null
-}
-
-function spawnRestormDetached(discoveryFile) {
-  log('restorm not running, spawning detached', { cwd: repoRoot, discoveryFile })
-  // `pnpm dev:restorm` → `pnpm --filter restorm run dev` →
-  // `electron-vite dev`. The `--` separator passes flags through to
-  // the Electron main process. Restorm writes its chosen port to
-  // `discoveryFile` once bound.
-  //
-  // `--inactive-window`: this is a programmatic launch (no human asked for it),
-  // so reveal the window WITHOUT stealing OS focus or switching the user's
-  // active virtual desktop — it just appears in the background.
-  const child = spawn(
-    'pnpm',
-    ['dev:restorm', '--', '--mcp', '--inactive-window', `--mcp-discovery-file=${discoveryFile}`],
-    {
-      cwd: repoRoot,
-      detached: true,
-      stdio: 'ignore',
-      // Strip the activation tokens so the window doesn't grab focus on Wayland.
-      env: inactiveLaunchEnv()
-    }
-  )
-  child.unref()
-}
+const NO_LIVE_INSTANCE_MESSAGE =
+  'No MCP-accepting restorm instance is running. The launcher does not auto-start one. ' +
+  'Use the `create_instance` tool to explicitly create an instance (optionally for a ' +
+  'specific file), or `list-instances` to see which instances currently accept MCP, ' +
+  'then target one with `__session: "<name>"`.'
 
 /**
- * Returns `{ becameUp: true }` when restorm transitioned from
- * unreachable → reachable during this call (either we spawned it
- * fresh, or the user restarted it externally and we noticed). Caller
- * uses that signal to emit `notifications/tools/list_changed`.
- *
- * Side effect: sets `currentPort` to the resolved live port.
+ * Resolve a live, MCP-accepting restorm via the shared discovery dir. Returns
+ * `{ becameUp }` (true when we transitioned unreachable → reachable, so the
+ * caller emits `notifications/tools/list_changed`) and sets `currentPort` /
+ * `currentToken`. Throws with {@link NO_LIVE_INSTANCE_MESSAGE} when nothing is
+ * reachable — it DOES NOT spawn. `discoverRunningRestorm` does its own
+ * token-authenticated HTTP probe, so a returned entry is already validated.
  */
 async function ensureRestormRunning() {
   // Fast path: we already saw a port up; verify it's still listening.
@@ -682,11 +654,6 @@ async function ensureRestormRunning() {
 
   const wasDownBefore = !lastSeenUp
 
-  // Try to reuse a live restorm via the central discovery dir before
-  // spawning a fresh one. Useful when the user launched restorm from
-  // their dock / a separate terminal. `discoverRunningRestorm` does
-  // its own HTTP probe with the recorded token, so a returned entry
-  // is already validated — no extra round-trip needed.
   const existing = await discoverRunningRestorm()
   if (existing) {
     currentPort = existing.port
@@ -696,25 +663,13 @@ async function ensureRestormRunning() {
     return { becameUp: wasDownBefore }
   }
 
-  // No live instance — spawn one and wait for its discovery file.
-  await fs.mkdir(DISCOVERY_DIR, { recursive: true })
-  const discoveryFile = join(DISCOVERY_DIR, `launcher-${String(process.pid)}-${String(Date.now())}.json`)
-  spawnRestormDetached(discoveryFile)
-  const entry = await waitForDiscoveryFile(discoveryFile, SPAWN_WAIT_MS)
-  if (!entry) {
-    throw new Error(
-      `restorm did not announce a port within ${SPAWN_WAIT_MS}ms — check that ` +
-      `\`pnpm dev:restorm -- --mcp\` works manually from ${repoRoot}`
-    )
-  }
-  currentPort = entry.port
-  currentToken = typeof entry.token === 'string' ? entry.token : null
-  log('restorm came up', { port: entry.port, pid: entry.pid, hasToken: currentToken !== null })
-  // Cleanup the launcher-specific file (the per-pid lockfile stays
-  // for future launchers to discover).
-  try { await fs.unlink(discoveryFile) } catch { /* already gone */ }
-  lastSeenUp = true
-  return { becameUp: wasDownBefore }
+  // No live MCP-accepting instance — refuse, do NOT spawn. (See the rationale
+  // on NO_LIVE_INSTANCE_MESSAGE.)
+  lastSeenUp = false
+  currentPort = null
+  const err = new Error(NO_LIVE_INSTANCE_MESSAGE)
+  err.noLiveInstance = true
+  throw err
 }
 
 function isConnectionError(err) {
@@ -931,7 +886,14 @@ async function handleLine(text) {
   try {
     ;({ becameUp } = await ensureRestormRunning())
   } catch (err) {
-    writeReply(makeErrorReply(parsed.id ?? null, -32000, String(err)))
+    // No MCP-accepting instance reachable: a deliberate refusal (the launcher
+    // no longer auto-spawns), so return its plain message under a distinct code
+    // rather than a wrapped `Error: …` string.
+    if (err && err.noLiveInstance) {
+      writeReply(makeErrorReply(parsed.id ?? null, -32002, err.message))
+    } else {
+      writeReply(makeErrorReply(parsed.id ?? null, -32000, String(err)))
+    }
     return
   }
 
@@ -961,9 +923,11 @@ async function handleLine(text) {
 /**
  * Manual mode: run when invoked from a TTY (typically via
  * `pnpm dev:restorm:mcp`). Sweeps the discovery dir synchronously,
- * then spawns `pnpm dev:restorm -- --mcp [...extraArgs]` in the
+ * then spawns `pnpm dev:restorm -- [...extraArgs]` in the
  * foreground — stdio inherited so the user sees Vite + Electron
- * logs — and waits for it to exit. Extra args supplied after `--`
+ * logs — and waits for it to exit. MCP is on by default now (no
+ * `--mcp` flag exists), so the launcher just opens restorm normally.
+ * Extra args supplied after `--`
  * (e.g. `pnpm dev:restorm:mcp -- -o /path/to.restorm`) are
  * forwarded verbatim to restorm's CLI so the user can open a file
  * straight from the launcher. No JSON-RPC handling: the launcher
@@ -973,7 +937,7 @@ async function runManualMode() {
   // pnpm keeps its `--` separator in the spawned script's argv, so
   // `pnpm dev:restorm:mcp -- -o /path` reaches us as
   // `['--', '-o', '/path']`. If we re-injected that leading `--` into
-  // the inner `pnpm dev:restorm -- --mcp ...` invocation, Electron
+  // the inner `pnpm dev:restorm -- ...` invocation, Electron
   // would stop parsing flags at the second `--` and the `-o /path`
   // pair would land as positional argv instead of opening the file.
   // Strip the leading separator so forwarded flags reach Electron's
@@ -988,7 +952,7 @@ async function runManualMode() {
   // grabbing the user's focus.
   const child = spawn(
     'pnpm',
-    ['dev:restorm', '--', '--mcp', '--inactive-window', ...extraArgs],
+    ['dev:restorm', '--', '--inactive-window', ...extraArgs],
     // Strip the activation tokens so the window doesn't grab focus on Wayland.
     { cwd: repoRoot, stdio: 'inherit', env: inactiveLaunchEnv() }
   )

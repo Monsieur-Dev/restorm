@@ -338,7 +338,10 @@
     "mcp": {
       "serverRunningOnPort": "MCP サーバーはポート {{port}} で実行中です",
       "sessionName": "セッション: {{name}}",
-      "viewLogs": "ログを表示"
+      "viewLogs": "ログを表示",
+      "stopServer": "MCPサーバーを停止",
+      "resumeServer": "MCPサーバーを再開",
+      "serverStopped": "停止中"
     }
   },
   "mcpToolTitles": {

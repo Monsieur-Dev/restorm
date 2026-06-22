@@ -233,12 +233,14 @@ describe('list-instances MCP tool', () => {
     const text = getResultText(reply)
     const parsed = JSON.parse(text) as {
       count: number
-      instances: { pid: number; name: string; projectPath: string | null; endpoint: string; startedAt: string }[]
+      instances: { pid: number; name: string; fileName: string | null; projectPath: string | null; endpoint: string; startedAt: string }[]
     }
     expect(parsed.count).toBe(1)
     const inst = parsed.instances[0]
     expect(inst?.pid).toBe(PEER_PID)
     expect(inst?.name).toBe(PEER_NAME)
+    // The open file's NAME (basename) is surfaced alongside the full path.
+    expect(inst?.fileName).toBe('my-project.restorm')
     expect(inst?.projectPath).toBe('/home/user/my-project.restorm')
     expect(inst?.endpoint).toBe(`127.0.0.1:${String(peerPort)}`)
     expect(inst?.startedAt).toBe('2026-01-15T10:00:00.000Z')

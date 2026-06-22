@@ -338,7 +338,10 @@
     "mcp": {
       "serverRunningOnPort": "Serverul MCP rulează pe portul {{port}}",
       "sessionName": "Sesiune: {{name}}",
-      "viewLogs": "Vizualizează jurnalele"
+      "viewLogs": "Vizualizează jurnalele",
+      "stopServer": "Oprește serverul MCP",
+      "resumeServer": "Reia serverul MCP",
+      "serverStopped": "oprit"
     }
   },
   "mcpToolTitles": {

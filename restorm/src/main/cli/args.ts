@@ -33,13 +33,6 @@ export interface CliArgs {
   open?: string
   clearSettings: boolean
   /**
-   * Whether to start the embedded MCP server. When true, restorm picks
-   * a free port at boot and announces it via the discovery file (see
-   * `mcpDiscoveryFile`) plus the per-pid lockfile in the central dir.
-   * Falsy → no MCP listener at all.
-   */
-  mcpEnabled: boolean
-  /**
    * Human-readable name identifying this MCP session. Always set (a
    * sensible auto-default is derived when neither `--mcp-session-name`
    * nor `RESTORM_MCP_SESSION_NAME` is given) so every instance is
@@ -60,9 +53,10 @@ export interface CliArgs {
    * appears via `showInactive()` (visible — so automation/MCP screenshots
    * still work — but NOT focused, activated, raised, or desktop-switching)
    * instead of the focusing `show()`. Set it for programmatically-launched
-   * instances (the `--mcp` dev instances, agent windows) so they don't steal
-   * the user's focus. Defaults to false — the user's normal launch focuses
-   * as usual. The flag is handled in electron-core-ui's window manager.
+   * instances (the `dev:restorm:mcp` launcher's instances, e2e/agent windows)
+   * so they don't steal the user's focus. Defaults to false — the user's normal
+   * launch focuses as usual. The flag is handled in electron-core-ui's window
+   * manager.
    */
   inactiveWindow: boolean
   /** Set when `--run` was passed — see {@link CliRunOptions}. */
@@ -72,7 +66,6 @@ export interface CliArgs {
 interface ParsedArgs {
   open?: string
   clearSettings?: boolean
-  mcp?: boolean
   mcpSessionName?: string
   mcpDiscoveryFile?: string
   inactiveWindow?: boolean
@@ -102,11 +95,6 @@ export function parseCliArgs(): CliArgs {
       default: false,
       describe: 'Clear user preferences before starting'
     })
-    .option('mcp', {
-      type: 'boolean',
-      default: false,
-      describe: 'Start the embedded MCP server (loopback only) on a free OS-picked port. Omit to keep MCP off.'
-    })
     .option('mcp-session-name', {
       type: 'string',
       describe: 'Human-readable name for this MCP session (e.g. a ticket name). Written into the lockfile and matched verbatim when a tool call targets a specific instance via the `__session` routing key. Defaults to a stable auto name when omitted (env: RESTORM_MCP_SESSION_NAME).'
@@ -118,7 +106,7 @@ export function parseCliArgs(): CliArgs {
     .option('inactive-window', {
       type: 'boolean',
       default: false,
-      describe: 'Reveal the main window without taking OS focus (showInactive): visible — so MCP screenshots/automation still work — but NOT focused, activated, raised, or desktop-switching. For programmatic launches (--mcp dev instances, agent windows) so they don\'t steal the user\'s focus. Omit it for the normal focusing launch.'
+      describe: 'Reveal the main window without taking OS focus (showInactive): visible — so MCP screenshots/automation still work — but NOT focused, activated, raised, or desktop-switching. For programmatic launches (the dev:restorm:mcp launcher, e2e/agent windows) so they don\'t steal the user\'s focus. Omit it for the normal focusing launch.'
     })
     .option('run', {
       type: 'string',
@@ -154,14 +142,11 @@ export function parseCliArgs(): CliArgs {
     .alias('version', 'v')
     .parseSync() as ArgumentsCamelCase<ParsedArgs>
 
-  // CLI flag wins; env var (`ECUI_MCP=1`) is the lower-priority
-  // fallback so consumers can flip MCP on without changing argv.
-  const envEnabled = process.env['ECUI_MCP'] === '1' || process.env['ECUI_MCP'] === 'true'
-  const mcpEnabled = Boolean(argv.mcp) || envEnabled
-
+  // MCP is governed entirely by the user-facing `mcp:enabled` setting
+  // (default ON) plus the headless rule (no usable display → never start) —
+  // see index.ts. There is no longer any CLI flag or env var to toggle it.
   const result: CliArgs = {
     clearSettings: Boolean(argv.clearSettings),
-    mcpEnabled,
     mcpSessionName: resolveMcpSessionName(argv.mcpSessionName, argv.open),
     inactiveWindow: Boolean(argv.inactiveWindow)
   }

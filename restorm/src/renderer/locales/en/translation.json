@@ -1664,7 +1664,9 @@
     "logsRetentionCap": "MCP call-log retention",
     "logsRetentionCapDescription": "Maximum number of served MCP calls kept in memory for the MCP logs viewer. Older calls are dropped once the limit is reached; 0 disables retention.",
     "captureRetentionCap": "MCP capture retention",
-    "captureRetentionCapDescription": "How many recent MCP calls keep their captured screenshot / screencast (in memory and on disk). Older captures drop their media — and their temp video file is deleted — once the limit is reached; 0 disables capture retention."
+    "captureRetentionCapDescription": "How many recent MCP calls keep their captured screenshot / screencast (in memory and on disk). Older captures drop their media — and their temp video file is deleted — once the limit is reached; 0 disables capture retention.",
+    "enabled": "Enable MCP server",
+    "enabledDescription": "Start the embedded MCP server on launch so AI tooling can connect to this instance. Disable to prevent any MCP connections."
   },
   "mcpToolTitles": {
     "answerScenarioInput": "Answer a scenario input",
@@ -1738,7 +1740,9 @@
     "updateFolder": "Update a folder",
     "updateRequest": "Update a request",
     "updateScenario": "Update a scenario",
-    "updateScenarioNode": "Update a scenario node"
+    "updateScenarioNode": "Update a scenario node",
+    "createInstance": "Create a new instance",
+    "terminateInstance": "Terminate an instance"
   },
   "odataRequestTab": {
     "send": "Send",

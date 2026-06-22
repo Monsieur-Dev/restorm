@@ -4,15 +4,11 @@ A short operational guide: how to enable the MCP server, diagnose connection fai
 
 ## Enable / disable
 
-```bash
-# enable (CLI)
-restorm --mcp
+MCP is **on by default** — just `restorm` boots with the listener. There is no CLI flag or env var; it is governed by:
 
-# enable (env var)
-ECUI_MCP=1 restorm
-
-# disable: omit both. Restorm boots normally with no listener.
-```
+- **Setting (persistent):** Settings → MCP → "Enable MCP server" (default ON). Turn it off to keep MCP off across launches.
+- **Headless rule:** on a host with no usable display (no `DISPLAY`/`WAYLAND_DISPLAY`, e.g. a bare CI box) MCP never starts, whatever the setting says. A virtual display (xvfb) counts as a display, so MCP stays on there.
+- **Runtime stop/resume:** the status-bar MCP indicator's stop/resume button cuts/resumes the server for the current session only — it does NOT change the persistent setting.
 
 Per-instance state lives in `os.tmpdir()/restorm-mcp/<pid>.json`. The file is written when the listener binds and removed on graceful shutdown. SIGKILL leaves the file behind but launchers ignore stale entries (they probe `process.kill(pid, 0)`).
 
@@ -20,8 +16,8 @@ Per-instance state lives in `os.tmpdir()/restorm-mcp/<pid>.json`. The file is wr
 
 ### Symptom: client says "MCP server not responding"
 
-1. **Confirm Restorm is running with `--mcp`.** The status bar shows the MCP icon when it's enabled; absence = not enabled.
-2. **Check the discovery dir:** `ls $TMPDIR/restorm-mcp/`. There must be at least one `<pid>.json` file. Empty dir → Restorm didn't write one (boot crashed, `--mcp` was missing, or permissions blocked the write).
+1. **Confirm Restorm has MCP enabled.** The status bar shows the MCP icon when it's enabled; absence = not enabled (the setting is off, the host is headless, or it was stopped at runtime).
+2. **Check the discovery dir:** `ls $TMPDIR/restorm-mcp/`. There must be at least one `<pid>.json` file. Empty dir → Restorm didn't write one (boot crashed, MCP was disabled via the setting / headless rule, or permissions blocked the write).
 3. **Probe the port directly:**
 
    ```bash
@@ -68,7 +64,7 @@ The launcher detaches the Restorm process so the GUI keeps running after the lau
 # the discovery file is removed in the `before-quit` handler
 
 # force-kill: leaves a stale discovery file
-pkill -f 'restorm.*--mcp'
+pkill -f restorm
 rm -f $TMPDIR/restorm-mcp/*.json
 ```
 
@@ -79,7 +75,7 @@ When in doubt:
 ```bash
 pkill -f restorm
 rm -rf $TMPDIR/restorm-mcp/
-# restart Restorm with --mcp
+# restart Restorm (MCP is on by default)
 ```
 
 Brutal but reliable.

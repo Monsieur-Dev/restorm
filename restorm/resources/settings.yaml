@@ -39,6 +39,12 @@ groups:
     titleKey: "mcp.title"
     items:
       - setting:
+          id: "enabled"
+          titleKey: "mcp.enabled"
+          descriptionKey: "mcp.enabledDescription"
+          type: "toggle"
+          default: true
+      - setting:
           id: "logsRetentionCap"
           titleKey: "mcp.logsRetentionCap"
           descriptionKey: "mcp.logsRetentionCapDescription"

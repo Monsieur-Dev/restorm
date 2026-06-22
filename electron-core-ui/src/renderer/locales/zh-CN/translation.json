@@ -338,7 +338,10 @@
     "mcp": {
       "serverRunningOnPort": "MCP 服务器正在端口 {{port}} 上运行",
       "sessionName": "会话：{{name}}",
-      "viewLogs": "查看日志"
+      "viewLogs": "查看日志",
+      "stopServer": "停止 MCP 服务器",
+      "resumeServer": "恢复 MCP 服务器",
+      "serverStopped": "已停止"
     }
   },
   "mcpToolTitles": {

@@ -338,7 +338,10 @@
     "mcp": {
       "serverRunningOnPort": "MCP-servern körs på port {{port}}",
       "sessionName": "Session: {{name}}",
-      "viewLogs": "Visa loggar"
+      "viewLogs": "Visa loggar",
+      "stopServer": "Stoppa MCP-server",
+      "resumeServer": "Återuppta MCP-server",
+      "serverStopped": "stoppad"
     }
   },
   "mcpToolTitles": {

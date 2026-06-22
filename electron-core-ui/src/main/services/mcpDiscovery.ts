@@ -8,7 +8,7 @@ import { logger } from './LoggerService'
 /**
  * MCP cross-instance bridge — generic discovery + transport.
  *
- * Multiple `--mcp` instances of the SAME Electron app can run at once, each
+ * Multiple MCP-enabled instances of the SAME Electron app can run at once, each
  * binding a free port and minting a bearer token. To let a single MCP client
  * (one launcher) reach a SPECIFIC instance, every instance drops a per-pid
  * lockfile into a shared discovery directory, and any instance can act as a
@@ -60,6 +60,19 @@ export interface McpDiscoveryEntry {
    * a specific instance: a `tools/call` carrying `__session: "<name>"` is
    * routed to the instance whose lockfile records this exact name. */
   name: string
+  /**
+   * Whether this instance is currently ACCEPTING MCP commands. `true` (or
+   * absent, for backward compatibility) → the embedded MCP server is up and
+   * the instance is in the AI-facing instance list. `false` → the user CUT
+   * MCP on this instance: its HTTP endpoint is torn down and the instance
+   * REFUSES MCP commands, but the lockfile is deliberately KEPT so the
+   * internal "all instances" discovery view ({@link readAllInstancesIncludingCut})
+   * still sees it for the create-instance uniqueness check (name + file
+   * collision must consider MCP-cut instances too). A cut entry is never
+   * returned by {@link readAllLiveEntries} (the AI-facing list) nor routed to
+   * by {@link findLiveSessionByName}.
+   */
+  mcpActive?: boolean
 }
 
 /**
@@ -188,6 +201,12 @@ export function findLiveSessionByName(dir: string, name: string): McpDiscoveryEn
       continue
     }
     if (parsed.name !== name) continue
+    // A CUT instance (mcpActive === false) REFUSES MCP commands. It keeps its
+    // lockfile only for the internal create-uniqueness view; it must NEVER be
+    // a routing target. Skipping it here makes a name-targeted forward find no
+    // match → the bridge answers a clean "no live session" error (the hard
+    // lockout — never redirected, never auto-spawned).
+    if (parsed.mcpActive === false) continue
     const pid = Number(parsed.pid)
     const port = Number(parsed.port)
     if (!Number.isInteger(pid) || !Number.isInteger(port) || port <= 0) continue
@@ -246,6 +265,10 @@ export function readAllLiveEntries(dir: string): McpDiscoveryEntry[] {
     } catch {
       continue
     }
+    // A CUT instance is excluded from the AI-facing list: it has torn down its
+    // HTTP endpoint and refuses commands, so it must not be advertised as a
+    // routing target (only the internal view sees it).
+    if (parsed.mcpActive === false) continue
     const pid = Number(parsed.pid)
     const port = Number(parsed.port)
     if (!Number.isInteger(pid) || !Number.isInteger(port) || port <= 0) continue
@@ -258,7 +281,57 @@ export function readAllLiveEntries(dir: string): McpDiscoveryEntry[] {
       token: parsed.token,
       name: parsed.name,
       projectPath: typeof parsed.projectPath === 'string' ? parsed.projectPath : null,
-      startedAt: typeof parsed.startedAt === 'string' ? parsed.startedAt : ''
+      startedAt: typeof parsed.startedAt === 'string' ? parsed.startedAt : '',
+      mcpActive: true
+    })
+  }
+  return out
+}
+
+/**
+ * INTERNAL discovery view — read every parseable lockfile in `dir` with an
+ * alive pid, INCLUDING instances that have CUT MCP (`mcpActive === false`).
+ * Distinct from {@link readAllLiveEntries} (the AI-facing list, MCP-active
+ * only): the create-instance uniqueness check must consider MCP-cut instances
+ * too, since a cut instance still HAS a file open and a name — creating a
+ * second instance on the same file / name would violate the one-instance-per-
+ * file invariant.
+ *
+ * Does NOT do an HTTP probe (a cut instance has no endpoint by design; the pid
+ * liveness check is the right gate here). The bearer token is OMITTED from the
+ * returned entries — this view exists purely for collision detection, never
+ * for routing, so it carries no secret. Returns an empty array when `dir` does
+ * not exist or is unreadable.
+ */
+export function readAllInstancesIncludingCut(
+  dir: string
+): { pid: number; name: string; projectPath: string | null; startedAt: string; mcpActive: boolean }[] {
+  let dirents: import('fs').Dirent[]
+  try {
+    dirents = readdirSync(dir, { withFileTypes: true })
+  } catch {
+    return []
+  }
+  const out: { pid: number; name: string; projectPath: string | null; startedAt: string; mcpActive: boolean }[] = []
+  for (const e of dirents) {
+    if (!e.isFile() || !e.name.endsWith('.json')) continue
+    let parsed: Partial<McpDiscoveryEntry>
+    try {
+      parsed = JSON.parse(readFileSync(join(dir, e.name), 'utf8')) as Partial<McpDiscoveryEntry>
+    } catch {
+      continue
+    }
+    const pid = Number(parsed.pid)
+    if (!Number.isInteger(pid)) continue
+    if (typeof parsed.name !== 'string') continue
+    if (!isPidAlive(pid)) continue
+    out.push({
+      pid,
+      name: parsed.name,
+      projectPath: typeof parsed.projectPath === 'string' ? parsed.projectPath : null,
+      startedAt: typeof parsed.startedAt === 'string' ? parsed.startedAt : '',
+      // Absent flag = legacy active instance; only an explicit `false` is cut.
+      mcpActive: parsed.mcpActive !== false
     })
   }
   return out
@@ -292,7 +365,17 @@ export function probeMcpEndpoint(port: number, token: string, timeoutMs = 800): 
       'Content-Type': 'application/json',
       'Accept': 'application/json, text/event-stream',
       'Content-Length': Buffer.byteLength(payload),
-      'Authorization': `Bearer ${token}`
+      'Authorization': `Bearer ${token}`,
+      // Tag this as restorm's own inter-instance MCP-infra traffic so the
+      // main-process firewall exempts it (see `internalRequestPredicate`).
+      // Without it, the list-instances discovery probe to a peer's loopback
+      // MCP endpoint surfaces as an "Outbound request blocked" prompt and the
+      // peer is never reported. It's the same exemption the cross-instance
+      // forward already carries — a probe is just as much restorm's own infra,
+      // not a user/dependency request. The receiver only reads this header to
+      // skip RE-forwarding a `tools/call`; an `initialize` probe never forwards,
+      // so tagging it is inert on the receiving side.
+      [MCP_FORWARDED_HEADER]: '1'
     }
     let settled = false
     const settle = (ok: boolean): void => { if (!settled) { settled = true; resolve(ok) } }

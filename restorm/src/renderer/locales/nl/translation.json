@@ -1664,7 +1664,9 @@
     "logsRetentionCap": "Bewaring van MCP-aanroeplogboek",
     "logsRetentionCapDescription": "Maximaal aantal verwerkte MCP-aanroepen dat in het geheugen wordt bewaard voor de MCP-logboekviewer. Oudere aanroepen worden verwijderd zodra de limiet is bereikt; 0 schakelt bewaring uit.",
     "captureRetentionCap": "MCP-opnamebehoud",
-    "captureRetentionCapDescription": "Hoeveel recente MCP-aanroepen hun schermafbeelding / opname behouden (in geheugen en op schijf). Bij het bereiken van de limiet verliezen oudere opnamen hun media en wordt het tijdelijke videobestand verwijderd; 0 schakelt behoud uit."
+    "captureRetentionCapDescription": "Hoeveel recente MCP-aanroepen hun schermafbeelding / opname behouden (in geheugen en op schijf). Bij het bereiken van de limiet verliezen oudere opnamen hun media en wordt het tijdelijke videobestand verwijderd; 0 schakelt behoud uit.",
+    "enabled": "MCP-server inschakelen",
+    "enabledDescription": "Start de ingebouwde MCP-server bij het opstarten zodat AI-tools verbinding kunnen maken met deze instantie. Schakel uit om MCP-verbindingen te voorkomen."
   },
   "mcpToolTitles": {
     "answerScenarioInput": "Een scenario-invoer beantwoorden",
@@ -1738,7 +1740,9 @@
     "updateFolder": "Een map bijwerken",
     "updateRequest": "Een verzoek bijwerken",
     "updateScenario": "Een scenario bijwerken",
-    "updateScenarioNode": "Een scenarioknooppunt bijwerken"
+    "updateScenarioNode": "Een scenarioknooppunt bijwerken",
+    "createInstance": "Een nieuwe instantie maken",
+    "terminateInstance": "Een instantie beëindigen"
   },
   "odataRequestTab": {
     "send": "Verzenden",

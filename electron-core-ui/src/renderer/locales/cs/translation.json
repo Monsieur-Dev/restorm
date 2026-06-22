@@ -338,7 +338,10 @@
     "mcp": {
       "serverRunningOnPort": "Server MCP běží na portu {{port}}",
       "sessionName": "Relace: {{name}}",
-      "viewLogs": "Zobrazit protokoly"
+      "viewLogs": "Zobrazit protokoly",
+      "stopServer": "Zastavit MCP server",
+      "resumeServer": "Obnovit MCP server",
+      "serverStopped": "zastaveno"
     }
   },
   "mcpToolTitles": {

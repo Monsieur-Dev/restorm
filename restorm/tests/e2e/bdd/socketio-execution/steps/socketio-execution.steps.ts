@@ -1,7 +1,7 @@
 /**
  * Steps for the self-hosted `socketio-execution` BDD scenario. restorm acts as
  * BOTH the Socket.IO server and the client connecting to it — no external mock.
- * Reuses the MCP fixture to launch restorm with `--mcp` and open the sample +
+ * Reuses the MCP fixture to launch restorm (MCP on by default) and open the sample +
  * tabs, then drives the REAL UI: starts the Echo Server, connects the Echo
  * client, emits with an ack (the server ACKs on reception), broadcasts from the
  * server's Send button (the client receives it), then disconnects.

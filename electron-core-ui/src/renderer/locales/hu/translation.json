@@ -338,7 +338,10 @@
     "mcp": {
       "serverRunningOnPort": "Az MCP-kiszolgáló a(z) {{port}} porton fut",
       "sessionName": "Munkamenet: {{name}}",
-      "viewLogs": "Naplók megtekintése"
+      "viewLogs": "Naplók megtekintése",
+      "stopServer": "MCP szerver leállítása",
+      "resumeServer": "MCP szerver folytatása",
+      "serverStopped": "leállítva"
     }
   },
   "mcpToolTitles": {

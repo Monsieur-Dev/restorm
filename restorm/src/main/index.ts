@@ -30,7 +30,7 @@ import './cli/earlyQuiet'
 // (set by the Playwright fixture via `RESTORM_USER_DATA_OVERRIDE` so
 // tests against ephemeral mock servers don't deadlock on a toast), and
 // the internal-request predicate that exempts cross-instance MCP-bridge
-// traffic (a `tools/call` forwarded to a peer `--mcp` instance over
+// traffic (a `tools/call` forwarded to a peer MCP-enabled instance over
 // loopback, tagged with `MCP_FORWARDED_HEADER`) — never user-facing
 // API traffic, so it must skip the firewall or `__session` routing
 // breaks and the bridging instance piles up "blocked" prompts.
@@ -82,8 +82,11 @@ import { PROJECT_UUID_KEY } from '../shared/config/projectUuid'
 import type { PersistenceFormat } from 'electron-core-ui'
 import { dirname, join } from 'path'
 import { existsSync, statSync } from 'fs'
+import { spawn } from 'node:child_process'
 import { searchIndexService, contextService, responseHistoryService, requestUsageService, scenarioUsageService, authenticationCacheService } from './services'
 import { registerRestormMcp } from './mcp'
+import { isHeadlessHost as isHeadlessHostPure, isMcpEnabledForLaunch, shouldLaunchInactive } from './mcp/mcpEnablement'
+import { readAutoSaveOn, type InstanceLifecycleHost } from './mcp/tools/instances'
 import { registerActiveStateBridge } from './mcp/tools/activeState'
 import { RESTORM_MCP_INSTRUCTIONS } from './mcp/instructions'
 import { graphQLService } from 'electron-core-ui/main'
@@ -443,7 +446,7 @@ logger.info('Dirty state managed by FileService checksum system')
 // Firewall wiring: Layer A listener + IPC bridge + restorm-internal
 // auto-allow ports. The "infra ports" let restorm's own
 // renderer ↔ main GraphQL bridge, the Vite dev server (in dev),
-// and the MCP server (when launched with `--mcp`) bypass the
+// and the embedded MCP server (when enabled) bypass the
 // whitelist gate — only EXACTLY these `localhost:<port>` triples
 // auto-allow; any other localhost port goes through the same
 // whitelist / blacklist / project-origins checks as external
@@ -494,7 +497,7 @@ contextService.initialize()
 logger.info('Context Service initialized')
 
 // Mirror the renderer's per-env-folder active-environment selection into the
-// main process — unconditionally, NOT only under --mcp. ContextService needs it
+// main process — unconditionally, NOT only when MCP is on. ContextService needs it
 // to decide which environment an item inherits for its secret badge (the active
 // env, not just the first one). Idempotent; the MCP path also calls it.
 registerActiveStateBridge()
@@ -576,17 +579,17 @@ void app.whenReady().then(() => {
   logger.info('AutoSave controller initialized')
 })
 
-// Embedded MCP server. Off by default; the user opts in via `--mcp`
-// on the CLI (or `ECUI_MCP=1` env var). When enabled, AI tooling
-// (Claude Code & friends) can drive the running app — taking
-// screenshots, listing collections, etc. — over a loopback port the
-// OS picks for us. Restorm announces the chosen port via the
-// discovery lockfile so the MCP launcher can find us.
+// Embedded MCP server. On by default — every normal launch exposes the
+// MCP server so AI tooling (Claude Code & friends) can drive the running
+// app without needing a special flag. Governed solely by the user-facing
+// Settings toggle (mcp:enabled, default ON) plus the headless rule (never
+// start with no usable display); there is no CLI flag / env var. Per-process
+// bearer token + loopback-only bind preserved verbatim — zero change to the
+// security model.
 // Per-process bearer token for the MCP HTTP endpoint. Generated once
-// at module load (microsecond cost, fine even when MCP stays off) and
-// regenerated on every restorm restart. The launcher reads it from the
-// discovery file and injects `Authorization: Bearer <token>` on every
-// forwarded request — totally transparent for Claude Code / Cursor.
+// at module load and regenerated on every restorm restart. The launcher
+// reads it from the discovery file and injects `Authorization: Bearer <token>`
+// on every forwarded request — totally transparent for Claude Code / Cursor.
 const mcpAuthToken = randomBytes(16).toString('hex')
 // Shared discovery dir where every live restorm instance drops its lockfile.
 // MUST resolve identically to `DISCOVERY_DIR` in scripts/mcp-launcher.mjs
@@ -600,6 +603,35 @@ const MCP_LOGS_RETENTION_CAP_KEY = 'mcp:logsRetentionCap'
 /** Settings key for how many recent entries keep their heavy capture payload
  * (image base64 / video temp file) — see the `mcp` group in settings.yaml. */
 const MCP_CAPTURE_RETENTION_CAP_KEY = 'mcp:captureRetentionCap'
+/** Settings key for the user-facing "enable MCP server" toggle. */
+const MCP_ENABLED_KEY = 'mcp:enabled'
+
+/** Read the MCP-enabled toggle. Returns `false` ONLY when the user has
+ * explicitly turned it off (the toggle persists a real boolean); a cleared /
+ * never-set value (undefined or the settings store's empty-string default)
+ * counts as ON, since MCP is on by default. This is the ONE persistent control
+ * (Preferences) — there is no CLI flag / env var to toggle MCP anymore. */
+function getMcpEnabledSetting(): boolean {
+  if (!isSettingsServiceInitialized()) return true
+  return getSettingsService().get(MCP_ENABLED_KEY) !== false
+}
+
+/** True on a true headless host (no usable display). See `isHeadlessHost` in
+ * `mcp/mcpEnablement.ts` — MCP must never start there. */
+function isHeadlessHost(): boolean {
+  return isHeadlessHostPure({ platform: process.platform, env: process.env })
+}
+
+/** Effective MCP-on decision for THIS launch: the user setting (default ON)
+ * AND a usable display (never on a headless host). Computed at boot and on
+ * each runtime toggle; mirrored to the renderer via `runtime:get-config`. */
+function isMcpEnabledThisSession(): boolean {
+  const settingValue = isSettingsServiceInitialized()
+    ? getSettingsService().get(MCP_ENABLED_KEY)
+    : undefined
+  return isMcpEnabledForLaunch({ settingValue, platform: process.platform, env: process.env })
+}
+
 const mcpService = new McpService({
   serverInfo: { name: 'restorm', version: app.getVersion() },
   instructions: RESTORM_MCP_INSTRUCTIONS,
@@ -618,98 +650,275 @@ const mcpService = new McpService({
   // user-facing video feature ever ships. (See McpServiceOptions.ffmpegPath —
   // the injection point exists so an app that DOES bundle ffmpeg can wire it.)
 })
+
+/** Broadcast the current MCP server state (running / stopped) to all renderer
+ * windows so the statusbar indicator can reflect a runtime toggle immediately. */
+function broadcastMcpServerState(): void {
+  const port = mcpService.getPort()
+  const payload = { running: port !== null, port }
+  for (const win of BrowserWindow.getAllWindows()) {
+    if (!win.isDestroyed()) win.webContents.send('mcp:server-state-changed', payload)
+  }
+}
+
+/** Tracks whether the restorm-domain tools/resources + IPC bridges have been
+ * registered. Registration is once-per-process: `registerRestormMcp` calls
+ * `McpService.registerTool` (throws on a duplicate name) and `ipcMain.handle`
+ * (throws on a second handler), so it MUST NOT run again on a runtime resume.
+ * The tool registry + bridges survive `mcpService.stop()` (only the HTTP
+ * listener is torn down), so a resume just re-listens + re-writes the lockfile. */
+let restormMcpRegistered = false
+
+/** Wire the long-lived McpService event subscriptions (request ripple, served-call
+ * log refresh, retention caps, discovery-file project refresh). These are
+ * subscriptions on the service, NOT the HTTP listener, so they survive a runtime
+ * stop/resume and are wired exactly once — alongside tool registration — on the
+ * first start, whether that's at boot or via the runtime toggle. */
+function wireMcpServiceListeners(): void {
+  // Forward every incoming MCP request as an IPC `mcp:request-received`
+  // ping to all renderer windows. Drives the ripple animation on the
+  // statusbar's MCP indicator. No payload — the event is just a
+  // tick-of-activity, the renderer instantiates one ripple per
+  // ping and lets each instance unmount on `onAnimationEnd`.
+  mcpService.onRequest(() => {
+    for (const win of BrowserWindow.getAllWindows()) {
+      if (!win.isDestroyed()) win.webContents.send('mcp:request-received')
+    }
+  })
+
+  // Broadcast served-call buffer changes to every renderer so an open MCP
+  // logs viewer refreshes live (a call recorded, the buffer cleared, or
+  // trimmed by a cap change).
+  mcpService.onServedCall(() => {
+    for (const win of BrowserWindow.getAllWindows()) {
+      if (!win.isDestroyed()) win.webContents.send('mcp:logs-changed')
+    }
+  })
+
+  // Apply the configurable retention cap from settings, and keep the buffer
+  // sized as the user changes it. The setting is read defensively (number
+  // only); a missing / non-numeric value leaves the service default (100).
+  if (isSettingsServiceInitialized()) {
+    const settings = getSettingsService()
+    const applyCap = (value: unknown): void => {
+      if (typeof value === 'number') mcpService.setLogRetentionCap(value)
+    }
+    applyCap(settings.get(MCP_LOGS_RETENTION_CAP_KEY))
+    settings.onSettingChanged(MCP_LOGS_RETENTION_CAP_KEY, applyCap)
+    // Same plumbing for the media-capture retention count (how many recent
+    // entries keep their image base64 / video temp file).
+    const applyCaptureCap = (value: unknown): void => {
+      if (typeof value === 'number') mcpService.setCaptureRetentionCap(value)
+    }
+    applyCaptureCap(settings.get(MCP_CAPTURE_RETENTION_CAP_KEY))
+    settings.onSettingChanged(MCP_CAPTURE_RETENTION_CAP_KEY, applyCaptureCap)
+  }
+
+  // Refresh the discovery file when the active project changes so
+  // launchers that route by project path see the up-to-date value, and so
+  // the create-instance uniqueness check (which keys on the open file) is
+  // accurate. Refresh even while MCP is CUT: a cut instance keeps its
+  // lockfile (mcpActive:false) so the internal "all instances" view still
+  // blocks creating a second instance on the same file it has open.
+  getFileService().onStateChanged((state) => {
+    void writeDiscoveryLockfile(mcpService.getPort() !== null, state.currentFile.path)
+  })
+}
+
+/** Resolve the path of the project this instance currently has open, for the
+ * discovery lockfile. `null` when nothing is open / FileService isn't ready. */
+function currentProjectPath(): string | null {
+  return isFileServiceInitialized() ? getFileService().getFilePath() : null
+}
+
+/**
+ * Write this instance's discovery lockfile. `active` reflects whether the
+ * embedded MCP server is currently accepting commands:
+ *   - `true`  → MCP-active entry (live port + bearer token), routable + listed.
+ *   - `false` → CUT marker: port 0, mcpActive:false, and an EMPTY token. Kept so
+ *     the internal create-uniqueness view sees the instance (name + open file),
+ *     but never routed to nor listed in the AI-facing instance list. The token
+ *     is blanked as defence-in-depth — a cut instance must never persist a
+ *     usable bearer secret on disk (the endpoint is down anyway).
+ */
+async function writeDiscoveryLockfile(active: boolean, projectPath: string | null): Promise<void> {
+  await writeMcpDiscoveryFile(MCP_DISCOVERY_DIR, {
+    port: active ? (mcpService.getPort() ?? 0) : 0,
+    projectPath,
+    pid: process.pid,
+    startedAt: new Date().toISOString(),
+    token: active ? mcpAuthToken : '',
+    name: cliArgs.mcpSessionName,
+    mcpActive: active
+  }, cliArgs.mcpDiscoveryFile)
+}
+
+/**
+ * Spawn a NEW detached restorm instance (the create-instance route's only
+ * side-effect). MCP is on by default (governed by the setting), so no flag is
+ * needed; we pass an optional `-o <file>` and an optional `--mcp-session-name`.
+ *
+ * Window focus: a create-instance is a USER-facing action — the user asked the
+ * AI to open something and must SEE it — so the new window launches ACTIVE
+ * (focused/raised) by default. The focus-stealing-suppression flag
+ * (`--inactive-window`) is passed ONLY under the e2e/test marker
+ * (`RESTORM_USER_DATA_OVERRIDE`, set by the Playwright fixture) so automated
+ * launches don't steal the harness's focus; a real user always gets the new
+ * window up front.
+ *
+ * Detached so it outlives this process. Dev vs packaged: in dev we go through
+ * `pnpm dev:restorm`; packaged, we re-exec our own binary.
+ */
+function spawnRestormInstance(file: string | null, name: string | null): void {
+  const inactive = shouldLaunchInactive(process.env)
+  const passthrough: string[] = inactive ? ['--inactive-window'] : []
+  if (file) passthrough.push('-o', file)
+  if (name) passthrough.push(`--mcp-session-name=${name}`)
+  const env = { ...process.env }
+  // Only when launching INACTIVE (the e2e/test marker): strip the desktop
+  // activation tokens so the new window can't grab focus / switch desktop on
+  // Wayland. A real user launch is ACTIVE on purpose — keep the tokens so the
+  // compositor actually grants it focus.
+  if (inactive) {
+    delete env['XDG_ACTIVATION_TOKEN']
+    delete env['DESKTOP_STARTUP_ID']
+  }
+  const isDev = process.env['NODE_ENV'] === 'development' || !app.isPackaged
+  const child = isDev
+    ? spawn('pnpm', ['dev:restorm', '--', ...passthrough], {
+        cwd: join(__dirname, '../../..'), // restorm/dist/main → monorepo root
+        detached: true,
+        stdio: 'ignore',
+        env
+      })
+    : spawn(process.execPath, passthrough, { detached: true, stdio: 'ignore', env })
+  child.unref()
+  logger.info('Spawned new restorm instance', { file, name, isDev })
+}
+
+/** Host adapter the instance-lifecycle MCP tools (create/terminate) drive. The
+ * Electron-specific side-effects live here so the tools + decision logic stay
+ * testable + Electron-free. */
+const instanceLifecycleHost: InstanceLifecycleHost = {
+  discoveryDir: MCP_DISCOVERY_DIR,
+  selfPid: process.pid,
+  spawnInstance: (file, name) => { spawnRestormInstance(file, name) },
+  isAutoSaveOn: () => readAutoSaveOn(),
+  saveThenClose: () => { mainWindow?.webContents.send('app:save-and-close') },
+  discardThenClose: () => { closeAllWindows() },
+  closeNow: () => { closeAllWindows() },
+  showSaveModal: () => {
+    // File→Quit's confirmation modal. Non-blocking: fire the dialog and act on
+    // the user's choice when it resolves; the route already returned
+    // "awaiting user confirmation" without waiting on this.
+    if (!isFileServiceInitialized()) { closeAllWindows(); return }
+    void getFileService().showUnsavedChangesDialog().then((result) => {
+      if (result === 'save') mainWindow?.webContents.send('app:save-and-close')
+      else if (result === 'discard') closeAllWindows()
+      // 'cancel' → leave the instance running.
+    })
+  }
+}
+
+/** Start the MCP server, write discovery lockfile, wire firewall port. Idempotent:
+ * no-ops if already running. */
+async function startMcpServer(): Promise<void> {
+  if (mcpService.getPort() !== null) return
+  // Register restorm-domain tools + resources ONCE, before the first
+  // `start()`, so the first incoming request sees the full registry. Order
+  // matters: the active-state IPC bridge is wired here too. Guarded so a
+  // runtime resume (stop → start) doesn't re-register — re-registering would
+  // throw on the first duplicate tool name / IPC handler and abort the resume.
+  if (!restormMcpRegistered) {
+    registerRestormMcp(mcpService, instanceLifecycleHost)
+    wireMcpServiceListeners()
+    restormMcpRegistered = true
+  }
+
+  await mcpService.start(0)
+  const port = mcpService.getPort()
+  if (port === null) {
+    logger.error('MCP service started but reports no port')
+    return
+  }
+  // Tell the firewall about the freshly-bound MCP port so
+  // restorm's own MCP traffic to localhost auto-allows. Any
+  // OTHER localhost port still goes through the regular
+  // whitelist / blacklist gates.
+  permissionService.setInfraPorts({ mcpPort: port })
+  await writeDiscoveryLockfile(true, currentProjectPath())
+
+  broadcastMcpServerState()
+  logger.info('MCP server started', { port })
+}
+
+/**
+ * Stop (CUT) the MCP server. Idempotent: no-ops if already stopped. The HTTP
+ * endpoint is torn down so the instance REFUSES MCP commands (the hard
+ * lockout) — but the discovery lockfile is REWRITTEN as a CUT marker
+ * (mcpActive:false), NOT deleted, so the internal create-uniqueness view still
+ * knows this pid + name + open file exists (a second instance must not be
+ * created on the same file). Full lockfile removal happens only on quit.
+ */
+async function stopMcpServer(): Promise<void> {
+  if (mcpService.getPort() === null) return
+  await mcpService.stop()
+  await writeDiscoveryLockfile(false, currentProjectPath())
+  broadcastMcpServerState()
+  logger.info('MCP server stopped by user (cut — instance now refuses MCP commands)')
+}
+
 void app.whenReady().then(async () => {
-  if (!cliArgs.mcpEnabled) return
+  // MCP starts iff the user setting is on (default ON; only an EXPLICIT false
+  // disables it — a cleared/never-set value reads back as undefined or the
+  // store's empty-string default, both of which keep MCP on) AND the host has a
+  // usable display (never on a true headless box). There is no CLI flag / env
+  // var anymore — the setting + the headless rule are the only inputs.
+  if (!isMcpEnabledThisSession()) {
+    logger.info('MCP server disabled', {
+      settingEnabled: getMcpEnabledSetting(),
+      headless: isHeadlessHost()
+    })
+    return
+  }
+
   try {
-    // Register restorm-domain tools + resources before `start()` so the
-    // first incoming request sees the full registry. Order matters: the
-    // active-state IPC bridge is wired here too (idempotent), so the
-    // renderer's bootstrap push lands in a ready listener.
-    registerRestormMcp(mcpService)
-
-    await mcpService.start(0)
-    const port = mcpService.getPort()
-    if (port === null) {
-      logger.error('MCP service started but reports no port')
-      return
-    }
-    // Tell the firewall about the freshly-bound MCP port so
-    // restorm's own MCP traffic to localhost auto-allows. Any
-    // OTHER localhost port still goes through the regular
-    // whitelist / blacklist gates.
-    permissionService.setInfraPorts({ mcpPort: port })
-    await writeMcpDiscoveryFile(MCP_DISCOVERY_DIR, {
-      port,
-      projectPath: null,
-      pid: process.pid,
-      startedAt: new Date().toISOString(),
-      token: mcpAuthToken,
-      name: cliArgs.mcpSessionName
-    }, cliArgs.mcpDiscoveryFile)
-
-    // Forward every incoming MCP request as an IPC `mcp:request-received`
-    // ping to all renderer windows. Drives the ripple animation on the
-    // statusbar's MCP indicator. No payload — the event is just a
-    // tick-of-activity, the renderer instantiates one ripple per
-    // ping and lets each instance unmount on `onAnimationEnd`.
-    mcpService.onRequest(() => {
-      for (const win of BrowserWindow.getAllWindows()) {
-        if (!win.isDestroyed()) win.webContents.send('mcp:request-received')
-      }
-    })
-
-    // Broadcast served-call buffer changes to every renderer so an open MCP
-    // logs viewer refreshes live (a call recorded, the buffer cleared, or
-    // trimmed by a cap change).
-    mcpService.onServedCall(() => {
-      for (const win of BrowserWindow.getAllWindows()) {
-        if (!win.isDestroyed()) win.webContents.send('mcp:logs-changed')
-      }
-    })
-
-    // Apply the configurable retention cap from settings, and keep the buffer
-    // sized as the user changes it. The setting is read defensively (number
-    // only); a missing / non-numeric value leaves the service default (100).
-    if (isSettingsServiceInitialized()) {
-      const settings = getSettingsService()
-      const applyCap = (value: unknown): void => {
-        if (typeof value === 'number') mcpService.setLogRetentionCap(value)
-      }
-      applyCap(settings.get(MCP_LOGS_RETENTION_CAP_KEY))
-      settings.onSettingChanged(MCP_LOGS_RETENTION_CAP_KEY, applyCap)
-      // Same plumbing for the media-capture retention count (how many recent
-      // entries keep their image base64 / video temp file).
-      const applyCaptureCap = (value: unknown): void => {
-        if (typeof value === 'number') mcpService.setCaptureRetentionCap(value)
-      }
-      applyCaptureCap(settings.get(MCP_CAPTURE_RETENTION_CAP_KEY))
-      settings.onSettingChanged(MCP_CAPTURE_RETENTION_CAP_KEY, applyCaptureCap)
-    }
-
-    // Refresh the discovery file when the active project changes so
-    // launchers that route by project path see the up-to-date value.
-    // First-live-wins routing doesn't need this today, but it's cheap
-    // to keep accurate.
-    getFileService().onStateChanged((state) => {
-      const livePort = mcpService.getPort()
-      if (livePort === null) return
-      void writeMcpDiscoveryFile(MCP_DISCOVERY_DIR, {
-        port: livePort,
-        projectPath: state.currentFile.path,
-        pid: process.pid,
-        startedAt: new Date().toISOString(),
-        token: mcpAuthToken,
-        name: cliArgs.mcpSessionName
-      }, cliArgs.mcpDiscoveryFile)
-    })
+    // Wires the long-lived McpService listeners (once) + starts the server.
+    await startMcpServer()
   } catch (error) {
     logger.error('Failed to start MCP service', { error: String(error) })
   }
 })
-app.on('before-quit', () => {
-  if (cliArgs.mcpEnabled) {
-    void cleanupMcpDiscoveryFile(MCP_DISCOVERY_DIR, process.pid, cliArgs.mcpDiscoveryFile)
+
+// Runtime stop/resume — called by the statusbar toggle button. SESSION-ONLY:
+// it cuts/resumes the in-process MCP server for THIS run, but deliberately does
+// NOT write the `mcp:enabled` setting. The setting (Preferences, default ON) is
+// the one and only persistent control, so a runtime cut never carries over to
+// the next launch — the user who hits "stop" to halt a misbehaving AI gets MCP
+// back on a normal relaunch, and only an explicit preference change persists.
+ipcMain.handle('mcp:toggle-server', async () => {
+  const running = mcpService.getPort() !== null
+  try {
+    if (running) {
+      await stopMcpServer()
+    } else {
+      await startMcpServer()
+    }
+    const port = mcpService.getPort()
+    return { running: port !== null, port }
+  } catch (error) {
+    logger.error('mcp:toggle-server failed', { error: String(error) })
+    const port = mcpService.getPort()
+    return { running: port !== null, port, error: String(error) }
   }
+})
+
+app.on('before-quit', () => {
+  // Always remove the lockfile on quit — the instance is going away, so neither
+  // the AI-facing list nor the internal create-uniqueness view should keep
+  // seeing it. This covers all three states: running (lockfile present), CUT
+  // (mcpActive:false marker present), and toggled-on-from-a-disabled-launch.
+  void cleanupMcpDiscoveryFile(MCP_DISCOVERY_DIR, process.pid, cliArgs.mcpDiscoveryFile)
   void mcpService.stop()
 })
 
@@ -718,9 +927,13 @@ app.on('before-quit', () => {
 // renderer fetches them once at startup instead of hardcoding.
 ipcMain.handle('runtime:get-config', () => ({
   mcp: {
-    enabled: cliArgs.mcpEnabled,
+    // Whether MCP is governed-on for this launch (setting ON + not headless).
+    // The renderer enables its MCP-driven features + statusbar indicator on
+    // this; the live `running` flag below reflects the runtime stop/resume.
+    enabled: isMcpEnabledThisSession(),
     port: mcpService.getPort(),
-    sessionName: cliArgs.mcpSessionName
+    sessionName: cliArgs.mcpSessionName,
+    running: mcpService.getPort() !== null
   },
   graphql: {
     endpoint: graphQLService.getEndpoint()

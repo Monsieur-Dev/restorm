@@ -338,7 +338,10 @@
     "mcp": {
       "serverRunningOnPort": "Ο διακομιστής MCP εκτελείται στη θύρα {{port}}",
       "sessionName": "Συνεδρία: {{name}}",
-      "viewLogs": "Προβολή αρχείων καταγραφής"
+      "viewLogs": "Προβολή αρχείων καταγραφής",
+      "stopServer": "Διακοπή διακομιστή MCP",
+      "resumeServer": "Συνέχιση διακομιστή MCP",
+      "serverStopped": "σταματημένος"
     }
   },
   "mcpToolTitles": {

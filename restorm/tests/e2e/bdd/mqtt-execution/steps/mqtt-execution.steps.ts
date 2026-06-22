@@ -7,7 +7,7 @@
  * straight back through its own subscription (sent + received bubble) and a
  * broker Send reaches the connected client.
  *
- * Reuses the MCP fixture to launch restorm with `--mcp` and open the sample +
+ * Reuses the MCP fixture to launch restorm (MCP on by default) and open the sample +
  * tabs, then drives the REAL UI. MQTT reuses `WebSocketRequestTabView`, so the
  * Connect / Send / chat-bubble / server-client-count testids are the shared
  * `websocket-*` / `ws-chat-*` ones.

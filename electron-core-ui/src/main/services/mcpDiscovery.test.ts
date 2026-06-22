@@ -14,7 +14,10 @@ import {
   cleanupMcpDiscoveryFile,
   findLiveSessionByName,
   forwardToNamedSession,
+  probeMcpEndpoint,
   resolveMcpDiscoveryDir,
+  readAllLiveEntries,
+  readAllInstancesIncludingCut,
   type McpDiscoveryEntry
 } from './mcpDiscovery'
 
@@ -199,5 +202,142 @@ describe('forwardToNamedSession', () => {
 
   it('returns null when no entry matches the name', async () => {
     expect(await forwardToNamedSession(DIR, 'absent-session', '{}')).toBeNull()
+  })
+})
+
+describe('probeMcpEndpoint', () => {
+  let server: Server
+  let port: number
+  let received: { auth?: string | undefined; forwarded?: string | undefined } | null = null
+  let nextStatus = 200
+
+  beforeAll(async () => {
+    server = createServer((req, res) => {
+      req.on('data', () => { /* drain */ })
+      req.on('end', () => {
+        received = {
+          auth: typeof req.headers.authorization === 'string' ? req.headers.authorization : undefined,
+          forwarded: typeof req.headers['x-mcp-forwarded'] === 'string' ? req.headers['x-mcp-forwarded'] : undefined
+        }
+        res.statusCode = nextStatus
+        res.setHeader('Content-Type', 'application/json')
+        res.end('{"jsonrpc":"2.0","id":"ecui-probe","result":{}}')
+      })
+    })
+    await new Promise<void>((resolve) => { server.listen(0, '127.0.0.1', resolve) })
+    const addr = server.address()
+    port = typeof addr === 'object' && addr ? addr.port : 0
+  })
+
+  afterAll(async () => {
+    await new Promise<void>((resolve) => { server.close(() => { resolve() }) })
+  })
+
+  afterEach(() => { received = null; nextStatus = 200 })
+
+  it('returns true on a 2xx and sends the bearer token', async () => {
+    expect(await probeMcpEndpoint(port, 'probe-token')).toBe(true)
+    expect(received?.auth).toBe('Bearer probe-token')
+  })
+
+  // The probe must carry the x-mcp-forwarded marker so restorm's main-process
+  // firewall recognises it as the app's own inter-instance MCP-infra traffic
+  // and exempts it (no "outbound request blocked" prompt). Without this the
+  // list-instances discovery probe to a peer would be firewall-gated and the
+  // peer never reported.
+  it('tags the probe with the inter-instance MCP-infra (x-mcp-forwarded) header', async () => {
+    await probeMcpEndpoint(port, 'probe-token')
+    expect(received?.forwarded).toBe('1')
+  })
+
+  it('returns false on a non-2xx status', async () => {
+    nextStatus = 401
+    expect(await probeMcpEndpoint(port, 'probe-token')).toBe(false)
+  })
+
+  it('returns false for an invalid port without touching the network', async () => {
+    expect(await probeMcpEndpoint(0, 'probe-token')).toBe(false)
+    expect(received).toBeNull()
+  })
+})
+
+// The MCP-cut hard-lockout + dual-view contract: a CUT instance (mcpActive:false)
+// keeps its lockfile for the INTERNAL create-uniqueness view but is invisible to
+// (and unroutable by) the AI-facing list. Two alive pids are used so an active
+// and a cut entry coexist (the filename is `<pid>.json`).
+describe('MCP-cut instances — dual discovery view', () => {
+  const ACTIVE_PID = process.pid
+  const CUT_PID = process.ppid
+  const ACTIVE_NAME = `cut-suite-active-${String(ACTIVE_PID)}`
+  const CUT_NAME = `cut-suite-cut-${String(CUT_PID)}`
+
+  afterEach(async () => {
+    await cleanupMcpDiscoveryFile(DIR, ACTIVE_PID)
+    await cleanupMcpDiscoveryFile(DIR, CUT_PID)
+  })
+
+  async function writeActive(): Promise<void> {
+    await writeMcpDiscoveryFile(DIR, {
+      port: 40123, projectPath: '/tmp/active.restorm', pid: ACTIVE_PID,
+      startedAt: '2026-05-03T00:00:00.000Z', token: 'tok', name: ACTIVE_NAME, mcpActive: true
+    })
+  }
+  // Mirrors restorm's cut-marker write: port 0, mcpActive:false, and an EMPTY
+  // token (defence-in-depth — a cut instance never persists a usable secret).
+  async function writeCut(): Promise<void> {
+    await writeMcpDiscoveryFile(DIR, {
+      port: 0, projectPath: '/tmp/cut.restorm', pid: CUT_PID,
+      startedAt: '2026-05-03T00:00:01.000Z', token: '', name: CUT_NAME, mcpActive: false
+    })
+  }
+
+  it('readAllLiveEntries (AI-facing) EXCLUDES a cut instance, KEEPS the active one', async () => {
+    await writeActive()
+    await writeCut()
+    const live = readAllLiveEntries(DIR)
+    const names = live.map((e) => e.name)
+    expect(names).toContain(ACTIVE_NAME)
+    expect(names).not.toContain(CUT_NAME)
+  })
+
+  it('readAllInstancesIncludingCut (internal) INCLUDES both, flagging mcpActive', async () => {
+    await writeActive()
+    await writeCut()
+    const all = readAllInstancesIncludingCut(DIR)
+    const active = all.find((e) => e.name === ACTIVE_NAME)
+    const cut = all.find((e) => e.name === CUT_NAME)
+    expect(active?.mcpActive).toBe(true)
+    expect(cut?.mcpActive).toBe(false)
+    // The internal view carries the open file for the create-uniqueness check.
+    expect(cut?.projectPath).toBe('/tmp/cut.restorm')
+    // ...and never the bearer token (collision-only view).
+    expect(cut).not.toHaveProperty('token')
+  })
+
+  it('findLiveSessionByName REFUSES a cut instance (hard lockout — never a routing target)', async () => {
+    await writeCut()
+    expect(findLiveSessionByName(DIR, CUT_NAME)).toBeNull()
+  })
+
+  it('the cut-marker on disk carries NO usable bearer token (defence-in-depth)', async () => {
+    await writeCut()
+    const onDisk = JSON.parse(await fs.readFile(join(DIR, `${String(CUT_PID)}.json`), 'utf8')) as { token: string; mcpActive: boolean }
+    expect(onDisk.mcpActive).toBe(false)
+    // The token field exists (stable shape) but is blank — no usable secret.
+    expect(onDisk.token).toBe('')
+  })
+
+  it('findLiveSessionByName still resolves an active instance', async () => {
+    await writeActive()
+    expect(findLiveSessionByName(DIR, ACTIVE_NAME)?.name).toBe(ACTIVE_NAME)
+  })
+
+  it('an entry without the mcpActive flag is treated as active (backward compatible)', async () => {
+    await writeMcpDiscoveryFile(DIR, {
+      port: 40124, projectPath: null, pid: ACTIVE_PID,
+      startedAt: '2026-05-03T00:00:00.000Z', token: 'tok', name: ACTIVE_NAME
+    })
+    expect(readAllLiveEntries(DIR).map((e) => e.name)).toContain(ACTIVE_NAME)
+    expect(findLiveSessionByName(DIR, ACTIVE_NAME)?.name).toBe(ACTIVE_NAME)
   })
 })

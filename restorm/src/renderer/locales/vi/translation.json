@@ -1663,7 +1663,9 @@
     "logsRetentionCap": "Lưu giữ nhật ký lệnh gọi MCP",
     "logsRetentionCapDescription": "Số lượng tối đa lệnh gọi MCP đã phục vụ được giữ trong bộ nhớ cho trình xem nhật ký MCP. Các lệnh gọi cũ hơn sẽ bị loại bỏ khi đạt giới hạn; 0 sẽ tắt việc lưu giữ.",
     "captureRetentionCap": "Lưu giữ bản ghi MCP",
-    "captureRetentionCapDescription": "Số lệnh gọi MCP gần đây giữ lại ảnh chụp màn hình / bản ghi của chúng (trong bộ nhớ và trên đĩa). Khi đạt giới hạn, các bản ghi cũ hơn sẽ mất media và tệp video tạm bị xóa; 0 tắt việc lưu giữ."
+    "captureRetentionCapDescription": "Số lệnh gọi MCP gần đây giữ lại ảnh chụp màn hình / bản ghi của chúng (trong bộ nhớ và trên đĩa). Khi đạt giới hạn, các bản ghi cũ hơn sẽ mất media và tệp video tạm bị xóa; 0 tắt việc lưu giữ.",
+    "enabled": "Bật máy chủ MCP",
+    "enabledDescription": "Khởi động máy chủ MCP tích hợp khi khởi chạy để các công cụ AI có thể kết nối với phiên bản này. Tắt để ngăn chặn kết nối MCP."
   },
   "mcpToolTitles": {
     "answerScenarioInput": "Trả lời đầu vào kịch bản",
@@ -1737,7 +1739,9 @@
     "updateFolder": "Cập nhật thư mục",
     "updateRequest": "Cập nhật yêu cầu",
     "updateScenario": "Cập nhật kịch bản",
-    "updateScenarioNode": "Cập nhật nút kịch bản"
+    "updateScenarioNode": "Cập nhật nút kịch bản",
+    "createInstance": "Tạo một phiên bản mới",
+    "terminateInstance": "Kết thúc một phiên bản"
   },
   "odataRequestTab": {
     "send": "Gửi",

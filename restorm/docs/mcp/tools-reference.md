@@ -129,6 +129,18 @@ For unary protocols, the tool delegates to the renderer's Send-button flow:
 
 For WebSocket, the tool returns immediately with the first frames buffered + a `continuationToken`. The MCP channel stays responsive; the AI pulls subsequent frames via `read_stream`.
 
+## Instances (multi-instance lifecycle)
+
+Multiple Restorm instances coexist; each exposes its own MCP endpoint and is addressed by session `name` via the reserved `__session` key on any `tools/call`. These tools manage the set of instances. See [the safety model](./safety.md#instance-lifecycle-create--terminate--cut) for the full rationale.
+
+| Tool | Summary |
+|---|---|
+| `list-instances` | Return every instance that **accepts MCP**, each with the open `fileName` (basename, when any), full `projectPath`, session `name`, `pid`, and `endpoint`. Instances on which the user has **cut** MCP are excluded — they refuse commands and are unroutable. (ECUI built-in.) |
+| `create_instance` | Explicitly launch a NEW MCP-accepting instance, optionally opening `file` and/or with an explicit `name`. The launcher never auto-spawns, so this is how you get one. **Refused** if another instance (MCP-active OR cut) already has that `name`, or already has that `file` open — one instance per file. |
+| `terminate_instance` | Close an instance with **File→Quit semantics** — never a pid-kill. Target via `__session`; omit to terminate the connected one. Autosave on / nothing dirty → closes now. Autosave off + dirty → pass `save: true` (save then close) or `save: false` (discard then close); **omit `save`** to show the user the save-confirmation modal and return **non-blocking** (`"awaiting user confirmation"`). |
+
+Source: [`restorm/src/main/mcp/tools/instances.ts`](../../src/main/mcp/tools/instances.ts), decision logic in [`restorm/src/main/mcp/instanceLifecycle.ts`](../../src/main/mcp/instanceLifecycle.ts).
+
 ## ECUI built-in tools
 
 These ship with every `McpService` consumer (Restorm + the demo app). Documented in detail at [`electron-core-ui/docs/McpService/README.md`](../../../electron-core-ui/docs/McpService/README.md).
@@ -154,6 +166,7 @@ These ship with every `McpService` consumer (Restorm + the demo app). Documented
 | `devtools` | Open the renderer's devtools panel. |
 | `drag-drop` | Synthesise a full drag-and-drop sequence between two CSS selectors. |
 | `exit` | Quit Restorm — useful for end-of-test cleanup. |
+| `list-instances` | List every MCP-accepting instance (open `fileName`, `projectPath`, `name`, `pid`, `endpoint`). See [Instances](#instances-multi-instance-lifecycle). |
 | `list_themes` | List all available color themes with their `id`, `name`, and `family` (`dark`/`light`/`hcDark`/`hcLight`). |
 | `get_current_theme` | Return the `id`, `name`, and `family` of the currently active color theme. |
 | `switch_theme` | Switch to a theme by `themeId`. Persists the choice and broadcasts it live to all windows. Returns an error for unknown ids. |

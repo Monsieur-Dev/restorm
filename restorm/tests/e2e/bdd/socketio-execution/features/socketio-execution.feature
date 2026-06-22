@@ -1,6 +1,6 @@
 Feature: Socket.IO execution end-to-end (self-hosted)
   restorm hosts a Socket.IO server AND connects to it as a client — no external
-  mock. Boots restorm with `--mcp`, opens the sample, starts the Echo Server
+  mock. Boots restorm (MCP on by default), opens the sample, starts the Echo Server
   (assert Start listening toggles to the listening state + enables Send), opens
   the Echo client and connects it, emits on the socket (asserting the sent
   bubble + its acknowledgement check — the server ACKs on reception), then

@@ -3,7 +3,7 @@
  * `websocket-execution`, covering all call types against the live grpcbin
  * server: unary (Invoke → response), server-streaming (Connect → echoed frames)
  * and bidirectional (Connect → Send → echo → Disconnect). Reuses the MCP fixture
- * to launch restorm with `--mcp` and open the sample + tabs, then drives the
+ * to launch restorm (MCP on by default) and open the sample + tabs, then drives the
  * REAL request panel and asserts the button states + chat bubbles.
  */
 
