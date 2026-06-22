@@ -2,7 +2,7 @@
  * Steps for the self-hosted `websocket-execution` BDD scenario — the raw-WS
  * counterpart of `socketio-execution`. restorm acts as BOTH the raw WebSocket
  * server and the client connecting to it — no external mock. Reuses the MCP
- * fixture to launch restorm with `--mcp` and open the sample + tabs, then drives
+ * fixture to launch restorm (MCP on by default) and open the sample + tabs, then drives
  * the REAL request panel: starts the WS Echo Server, connects the WS Echo
  * client, sends a frame (raw WS has no ack), broadcasts from the server's Send
  * button (the client receives it), then disconnects.

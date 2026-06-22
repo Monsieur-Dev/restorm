@@ -78,7 +78,8 @@ export {
   writeMcpDiscoveryFile,
   cleanupMcpDiscoveryFile,
   findLiveSessionByName,
-  forwardToNamedSession
+  forwardToNamedSession,
+  readAllInstancesIncludingCut
 } from './services'
 export type { McpDiscoveryEntry } from './services'
 

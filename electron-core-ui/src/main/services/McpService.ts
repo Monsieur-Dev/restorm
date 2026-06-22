@@ -2653,13 +2653,16 @@ export class McpService {
         titleKey: 'mcpToolTitles.listInstances',
         title: 'List MCP instances',
         description:
-          'Return every running instance of this app that has an active MCP endpoint, ' +
-          'including the project file each one has open (when any), its session name, ' +
-          'pid, and endpoint host:port. Only instances whose endpoint actually answers ' +
-          'an authenticated probe are reported — stale lockfiles from crashed runs are ' +
-          'silently skipped. Use `__session: "<name>"` on any subsequent tool call to ' +
-          'target a specific instance. Returns an empty list when no discovery directory ' +
-          'is configured or no live instances are found.'
+          'Return every running instance of this app that ACCEPTS MCP commands, ' +
+          'each with the open file name (`fileName`, when any) and its full ' +
+          '`projectPath`, the session `name`, `pid`, and `endpoint` host:port. ' +
+          'Only instances whose endpoint actually answers an authenticated probe ' +
+          'are reported. Instances on which the user has CUT MCP are deliberately ' +
+          'EXCLUDED — they refuse commands and must not be targeted. Stale ' +
+          'lockfiles from crashed runs are silently skipped. Use ' +
+          '`__session: "<name>"` on any subsequent tool call to target a specific ' +
+          'instance. Returns an empty list when no discovery directory is ' +
+          'configured or no MCP-accepting instances are found.'
       },
       async () => {
         const dir = this.options.discoveryDir
@@ -2698,6 +2701,9 @@ export class McpService {
                 instances: live.map((c) => ({
                   pid: c.pid,
                   name: c.name,
+                  // The open file's NAME (basename) for quick identification,
+                  // plus the full path. Both null when nothing is open.
+                  fileName: c.projectPath !== null ? pathBasename(c.projectPath) : null,
                   projectPath: c.projectPath,
                   endpoint: `127.0.0.1:${String(c.port)}`,
                   startedAt: c.startedAt

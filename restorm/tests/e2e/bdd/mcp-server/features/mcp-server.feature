@@ -1,5 +1,5 @@
 Feature: MCP server end-to-end
-  Boots restorm with `--mcp`, then drives the embedded JSON-RPC server
+  Boots restorm (MCP on by default), then drives the embedded JSON-RPC server
   the same way an MCP client (Claude / Cursor) would: discover the port
   + token from the launcher discovery file, list tools, create a
   project, import a Petstore swagger, and execute a request — asserting

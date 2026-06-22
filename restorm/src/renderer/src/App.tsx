@@ -1504,10 +1504,12 @@ const App: React.FC = () => {
     setSidebarEditingItemId(itemId)
   }, [])
 
-  // Drives the conditional `right-aligned` on the bell vs the MCP
-  // indicator: at most one of them should carry `margin-left: auto`,
-  // otherwise both push right and the second one ends up stranded in
-  // the middle of the statusbar.
+  // `mcpEnabled` gates the MCP renderer hooks below. Statusbar
+  // right-alignment is owned SOLELY by the always-mounted MCP indicator
+  // (it carries the lone `margin-left: auto`); the bell no longer takes a
+  // conditional `right-aligned`, so the indicator anchors right in every
+  // state — having two `margin-left: auto` cells would split the flex free
+  // space and strand the second one in the middle.
   const mcpEnabled = useMcpEnabled()
 
   // Wire MCP active-state push (renderer → main, drives `get_current_tab`)
@@ -2906,22 +2908,23 @@ const App: React.FC = () => {
         </div>
       )}
 
-      {/* Pre-compute which status-bar entries actually mount so the
-          FIRST visible right-side cell carries `right-aligned`
-          (margin-left: auto). Only the leftmost-of-the-right needs
-          the auto margin; the rest follow naturally to its right. */}
+      {/* Only the FIRST visible right-side cell carries `right-aligned`
+          (margin-left: auto); the rest follow naturally to its right.
+          Two cells with the auto margin would split the free space and
+          strand the first one near the centre. The MCP indicator now
+          ALWAYS mounts (even when the server is stopped/disabled — it
+          stays reachable so the user can re-enable it), so it is always
+          the leftmost-of-the-right cell and always owns the auto margin;
+          the bell, which follows it, must never carry `right-aligned`. */}
       <Statusbar data-testid="app-statusbar">
         {filePath && <StatusbarElement data-testid="app-statusbar-element" title={filePath} />}
         <DesktopIndicator />
         {/* The environment selector, request-history button and auth-route
          * selector now all live in the request tab header, not here. The
-         * MCP indicator carries the `right-aligned` auto margin when it
-         * mounts (MCP mode); the bell takes it only when MCP won't render. */}
+         * MCP indicator carries the `right-aligned` auto margin in every
+         * state (running and stopped/disabled) since it always renders. */}
         <StatusbarMcpIndicator rightAligned onViewLogs={handleOpenMcpLogs} />
-        <StatusBarBellButton
-          toasterId="app"
-          {...(!mcpEnabled ? { className: 'right-aligned' } : {})}
-        />
+        <StatusBarBellButton toasterId="app" />
       </Statusbar>
 
       {/* Global toaster anchored to the bottom-right, toggled by the statusbar bell. */}

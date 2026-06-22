@@ -1664,7 +1664,9 @@
     "logsRetentionCap": "MCP-hívásnapló megőrzése",
     "logsRetentionCapDescription": "A memóriában az MCP-naplónézegetőhöz megőrzött kiszolgált MCP-hívások maximális száma. A korlát elérésekor a régebbi hívások eldobásra kerülnek; a 0 letiltja a megőrzést.",
     "captureRetentionCap": "MCP-felvételek megőrzése",
-    "captureRetentionCapDescription": "Hány legutóbbi MCP-hívás őrzi meg a képernyőképét / felvételét (memóriában és lemezen). A korlát elérésekor a régebbi felvételek elveszítik a médiumukat, és az ideiglenes videofájljuk törlődik; a 0 kikapcsolja a megőrzést."
+    "captureRetentionCapDescription": "Hány legutóbbi MCP-hívás őrzi meg a képernyőképét / felvételét (memóriában és lemezen). A korlát elérésekor a régebbi felvételek elveszítik a médiumukat, és az ideiglenes videofájljuk törlődik; a 0 kikapcsolja a megőrzést.",
+    "enabled": "MCP szerver engedélyezése",
+    "enabledDescription": "Indításkor elindítja a beépített MCP szervert, hogy az AI eszközök csatlakozni tudjanak ehhez a példányhoz. Tiltsa le az MCP kapcsolatok megakadályozásához."
   },
   "mcpToolTitles": {
     "answerScenarioInput": "Forgatókönyv-bemenet megválaszolása",
@@ -1738,7 +1740,9 @@
     "updateFolder": "Mappa frissítése",
     "updateRequest": "Kérés frissítése",
     "updateScenario": "Forgatókönyv frissítése",
-    "updateScenarioNode": "Forgatókönyv-csomópont frissítése"
+    "updateScenarioNode": "Forgatókönyv-csomópont frissítése",
+    "createInstance": "Új példány létrehozása",
+    "terminateInstance": "Példány bezárása"
   },
   "odataRequestTab": {
     "send": "Küldés",

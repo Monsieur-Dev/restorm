@@ -1,6 +1,6 @@
 Feature: Raw WebSocket execution end-to-end (self-hosted)
   restorm hosts a raw WebSocket server AND connects to it as a client — no
-  external mock. Boots restorm with `--mcp`, opens the sample, starts the WS Echo
+  external mock. Boots restorm (MCP on by default), opens the sample, starts the WS Echo
   Server (assert Start listening toggles to the listening state + enables Send),
   opens the WS Echo client and connects it, sends a frame (asserting the sent
   bubble — a raw socket has no acknowledgement), then broadcasts from the

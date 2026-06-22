@@ -1664,7 +1664,9 @@
     "logsRetentionCap": "Retenção do registo de chamadas MCP",
     "logsRetentionCapDescription": "Número máximo de chamadas MCP servidas mantidas em memória para o visualizador de registos MCP. As chamadas mais antigas são descartadas ao atingir o limite; 0 desativa a retenção.",
     "captureRetentionCap": "Retenção de capturas MCP",
-    "captureRetentionCapDescription": "Quantas chamadas MCP recentes mantêm a captura de ecrã / vídeo (em memória e em disco). Atingido o limite, as capturas mais antigas perdem o seu media e o ficheiro de vídeo temporário é eliminado; 0 desativa a retenção."
+    "captureRetentionCapDescription": "Quantas chamadas MCP recentes mantêm a captura de ecrã / vídeo (em memória e em disco). Atingido o limite, as capturas mais antigas perdem o seu media e o ficheiro de vídeo temporário é eliminado; 0 desativa a retenção.",
+    "enabled": "Habilitar servidor MCP",
+    "enabledDescription": "Inicia o servidor MCP integrado na inicialização para que ferramentas de IA possam se conectar a esta instância. Desabilite para impedir conexões MCP."
   },
   "mcpToolTitles": {
     "answerScenarioInput": "Responder a uma entrada de cenário",
@@ -1738,7 +1740,9 @@
     "updateFolder": "Atualizar uma pasta",
     "updateRequest": "Atualizar um pedido",
     "updateScenario": "Atualizar um cenário",
-    "updateScenarioNode": "Atualizar um nó de cenário"
+    "updateScenarioNode": "Atualizar um nó de cenário",
+    "createInstance": "Criar uma nova instância",
+    "terminateInstance": "Encerrar uma instância"
   },
   "odataRequestTab": {
     "send": "Enviar",

@@ -1664,7 +1664,9 @@
     "logsRetentionCap": "Retención del registro de llamadas MCP",
     "logsRetentionCapDescription": "Número máximo de llamadas MCP atendidas que se mantienen en memoria para el visor de registros MCP. Las llamadas más antiguas se descartan al alcanzar el límite; 0 desactiva la retención.",
     "captureRetentionCap": "Retención de capturas MCP",
-    "captureRetentionCapDescription": "Cuántas llamadas MCP recientes conservan su captura de pantalla / vídeo (en memoria y en disco). Al alcanzar el límite, las capturas más antiguas pierden su medio y se elimina su archivo de vídeo temporal; 0 desactiva la retención."
+    "captureRetentionCapDescription": "Cuántas llamadas MCP recientes conservan su captura de pantalla / vídeo (en memoria y en disco). Al alcanzar el límite, las capturas más antiguas pierden su medio y se elimina su archivo de vídeo temporal; 0 desactiva la retención.",
+    "enabled": "Habilitar servidor MCP",
+    "enabledDescription": "Inicia el servidor MCP integrado al arrancar para que las herramientas de IA puedan conectarse a esta instancia. Deshabilítelo para impedir conexiones MCP."
   },
   "mcpToolTitles": {
     "answerScenarioInput": "Responder a una entrada de escenario",
@@ -1738,7 +1740,9 @@
     "updateFolder": "Actualizar una carpeta",
     "updateRequest": "Actualizar una solicitud",
     "updateScenario": "Actualizar un escenario",
-    "updateScenarioNode": "Actualizar un nodo de escenario"
+    "updateScenarioNode": "Actualizar un nodo de escenario",
+    "createInstance": "Crear una nueva instancia",
+    "terminateInstance": "Cerrar una instancia"
   },
   "odataRequestTab": {
     "send": "Enviar",

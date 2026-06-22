@@ -338,7 +338,10 @@
     "mcp": {
       "serverRunningOnPort": "MCP-server kjører på port {{port}}",
       "sessionName": "Økt: {{name}}",
-      "viewLogs": "Vis logger"
+      "viewLogs": "Vis logger",
+      "stopServer": "Stopp MCP-server",
+      "resumeServer": "Gjenoppta MCP-server",
+      "serverStopped": "stoppet"
     }
   },
   "mcpToolTitles": {

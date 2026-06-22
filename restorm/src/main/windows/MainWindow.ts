@@ -6,9 +6,10 @@ import { RestormWindow } from './RestormWindow'
 export interface MainWindowOptions {
   /**
    * Reveal the window without taking OS focus (showInactive) instead of the
-   * focusing show(). Set for programmatic launches (--mcp dev instances, agent
-   * windows) so they appear without stealing the user's focus or switching
-   * their active virtual desktop. Defaults to false (normal focusing launch).
+   * focusing show(). Set for programmatic launches (the dev:restorm:mcp
+   * launcher, e2e/agent windows) so they appear without stealing the user's
+   * focus or switching their active virtual desktop. Defaults to false (normal
+   * focusing launch).
    */
   revealInactive?: boolean
 }

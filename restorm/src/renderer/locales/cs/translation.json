@@ -1666,7 +1666,9 @@
     "logsRetentionCap": "Uchování protokolu volání MCP",
     "logsRetentionCapDescription": "Maximální počet obsloužených volání MCP uchovávaných v paměti pro prohlížeč protokolů MCP. Po dosažení limitu se starší volání zahodí; 0 uchovávání vypne.",
     "captureRetentionCap": "Uchovávání záznamů MCP",
-    "captureRetentionCapDescription": "Kolik nedávných volání MCP si ponechá svůj snímek obrazovky / záznam (v paměti i na disku). Po dosažení limitu starší záznamy přijdou o médium a jejich dočasný videosoubor se smaže; 0 vypne uchovávání."
+    "captureRetentionCapDescription": "Kolik nedávných volání MCP si ponechá svůj snímek obrazovky / záznam (v paměti i na disku). Po dosažení limitu starší záznamy přijdou o médium a jejich dočasný videosoubor se smaže; 0 vypne uchovávání.",
+    "enabled": "Povolit MCP server",
+    "enabledDescription": "Spustí integrovaný MCP server při startu, aby se k němu mohly připojit nástroje AI. Deaktivujte, abyste zabránili jakýmkoli MCP připojením."
   },
   "mcpToolTitles": {
     "answerScenarioInput": "Odpovědět na vstup scénáře",
@@ -1740,7 +1742,9 @@
     "updateFolder": "Aktualizovat složku",
     "updateRequest": "Aktualizovat požadavek",
     "updateScenario": "Aktualizovat scénář",
-    "updateScenarioNode": "Aktualizovat uzel scénáře"
+    "updateScenarioNode": "Aktualizovat uzel scénáře",
+    "createInstance": "Vytvořit novou instanci",
+    "terminateInstance": "Ukončit instanci"
   },
   "odataRequestTab": {
     "send": "Odeslat",

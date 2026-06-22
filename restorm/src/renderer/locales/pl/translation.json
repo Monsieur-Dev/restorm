@@ -1666,7 +1666,9 @@
     "logsRetentionCap": "Przechowywanie dziennika wywołań MCP",
     "logsRetentionCapDescription": "Maksymalna liczba obsłużonych wywołań MCP przechowywanych w pamięci dla przeglądarki dzienników MCP. Po osiągnięciu limitu starsze wywołania są usuwane; 0 wyłącza przechowywanie.",
     "captureRetentionCap": "Przechowywanie przechwytywań MCP",
-    "captureRetentionCapDescription": "Ile ostatnich wywołań MCP zachowuje zrzut ekranu / nagranie (w pamięci i na dysku). Po przekroczeniu limitu starsze przechwytywania tracą multimedia, a ich tymczasowy plik wideo jest usuwany; 0 wyłącza przechowywanie."
+    "captureRetentionCapDescription": "Ile ostatnich wywołań MCP zachowuje zrzut ekranu / nagranie (w pamięci i na dysku). Po przekroczeniu limitu starsze przechwytywania tracą multimedia, a ich tymczasowy plik wideo jest usuwany; 0 wyłącza przechowywanie.",
+    "enabled": "Włącz serwer MCP",
+    "enabledDescription": "Uruchamia wbudowany serwer MCP przy starcie, aby narzędzia AI mogły połączyć się z tą instancją. Wyłącz, aby zapobiec połączeniom MCP."
   },
   "mcpToolTitles": {
     "answerScenarioInput": "Odpowiedz na dane wejściowe scenariusza",
@@ -1740,7 +1742,9 @@
     "updateFolder": "Zaktualizuj folder",
     "updateRequest": "Zaktualizuj żądanie",
     "updateScenario": "Zaktualizuj scenariusz",
-    "updateScenarioNode": "Zaktualizuj węzeł scenariusza"
+    "updateScenarioNode": "Zaktualizuj węzeł scenariusza",
+    "createInstance": "Utwórz nową instancję",
+    "terminateInstance": "Zakończ instancję"
   },
   "odataRequestTab": {
     "send": "Wyślij",

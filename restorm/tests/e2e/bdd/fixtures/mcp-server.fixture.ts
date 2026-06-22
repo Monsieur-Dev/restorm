@@ -57,8 +57,8 @@ export interface LaunchedMcpApp {
 export interface McpServerFixtures {
   restormRoot: string
   /**
-   * Launch restorm with `--mcp` + a launcher-extra discovery file path,
-   * then read it back to recover `port + token`. Resolves once both are
+   * Launch restorm (MCP on by default) with a launcher-extra discovery file
+   * path, then read it back to recover `port + token`. Resolves once both are
    * known. Fresh isolated userData dir per launch.
    */
   launchAppWithMcp: () => Promise<LaunchedMcpApp>
@@ -152,7 +152,9 @@ export const test = base.extend<McpServerFixtures>({
           '--no-sandbox', '--ozone-platform=x11', '--disable-background-timer-throttling', '--disable-renderer-backgrounding', '--disable-backgrounding-occluded-windows',
           mainJsPath,
           '--clear-settings',
-          '--mcp',
+          // MCP is on by default now (governed by the setting, ON by default) —
+          // no `--mcp` flag exists anymore. xvfb provides a DISPLAY so the
+          // headless rule keeps MCP on under the e2e harness.
           `--mcp-discovery-file=${discoveryPath}`
         ],
         env: baseEnv

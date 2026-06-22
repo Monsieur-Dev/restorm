@@ -21,7 +21,7 @@ The full inventory lives in [tools-reference.md](./tools-reference.md) and [reso
 
 ## Quickstart
 
-1. Launch Restorm with `--mcp` (or set `ECUI_MCP=1`) — see [getting-started.md](./getting-started.md).
+1. Launch Restorm normally — MCP is on by default (governed by the Settings toggle + the headless rule, no flag) — see [getting-started.md](./getting-started.md).
 2. Point your MCP client at the launcher script that ships in this repo (`scripts/mcp-launcher.mjs`) — Claude Code config:
 
    ```json
@@ -41,7 +41,7 @@ The full inventory lives in [tools-reference.md](./tools-reference.md) and [reso
 
 - **Loopback only.** The HTTP listener binds `127.0.0.1` and rejects every non-loopback caller with `403 Forbidden` before any handler runs.
 - **Bearer token.** Every request needs `Authorization: Bearer <token>` matching the per-process token written to the discovery file (`os.tmpdir()/restorm-mcp/<pid>.json`). The launcher reads it and injects it transparently. A constant-time string compare protects against timing oracles.
-- **Off by default.** Without `--mcp` (or `ECUI_MCP=1`), the HTTP server never starts. The discovery file is never written.
+- **Disableable.** Turning the **Settings → MCP → "Enable MCP server"** toggle off (or running on a headless host with no display) keeps the HTTP server from starting — the discovery file is never written. The status-bar stop button also cuts it for the current session.
 - **Secrets stay redacted.** `get_request` strips `PasswordValue` fields via `CollectionStore.serializeRequest`. `get_response` and `get_response_history` go through `ResponseHistoryService`, which honours the project's "redact secrets in response history" toggle (default on). The AI never sees plaintext credentials even if the live response carried them.
 - **Real network effects.** `run_request` performs real HTTP / GraphQL / SOAP / etc. calls against whatever target the request points at. The MCP client's approval flow is the gate; Restorm itself does not show an extra confirmation modal. See [safety.md](./safety.md).
 

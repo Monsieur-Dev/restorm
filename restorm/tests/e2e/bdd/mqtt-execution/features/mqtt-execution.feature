@@ -1,6 +1,6 @@
 Feature: MQTT execution end-to-end (self-hosted broker)
   restorm HOSTS a local MQTT broker AND connects to it as a client — no external
-  Mosquitto. Boots restorm with `--mcp`, opens the sample, starts the MQTT Broker
+  Mosquitto. Boots restorm (MCP on by default), opens the sample, starts the MQTT Broker
   (assert Start listening toggles to the listening state + enables Send), opens
   the MQTT Chat client and connects it (which subscribes to `restorm/e2e/chat`),
   publishes from the client (asserting the payload shows as a sent bubble that

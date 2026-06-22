@@ -25,11 +25,25 @@ When the user authorises a `tools/call`, the AI gets to:
 
 ## What the AI cannot do
 
-- **Open the network port.** `--mcp` is the only switch and the user owns it.
+- **Force an instance to accept MCP.** MCP is on by default, but the user can **cut** it on any instance (the status-bar stop button for the current session, or the Settings toggle persistently). A cut instance **refuses** every MCP command and is invisible to `list-instances`; targeting it by name is refused, never redirected.
 - **Skip the bearer-token check.** No tool short-circuits it — the gate is in `McpService.handleRequest` before any tool dispatch.
 - **Reach files outside the open project.** The mutation tools take ids resolved against the open `CollectionStore`. There's no `read_file(path)` / `write_file(path)` general-purpose escape hatch.
 - **Read plaintext secrets.** `PasswordValue` and `SecretValue` shape go through `CollectionStore.serialize*` on the way out and become `{ "type": "password" }`. Same masking applies to `restorm://request/{id}` and to history payloads when the project's "redact secrets" toggle is on (default on).
 - **Persist a token across reboots.** Each boot mints a fresh token and writes a fresh discovery file.
+
+## Instance lifecycle (create / terminate / cut)
+
+The instance model exists so a user can **stop a misbehaving AI** ("stop, this isn't good") without killing the app — and so the AI can never silently route around that stop.
+
+- **`list-instances`** returns ONLY instances that currently ACCEPT MCP. Each entry carries the open `fileName` (basename, when any), its full `projectPath`, the session `name`, `pid`, and `endpoint`. Cut instances are deliberately excluded.
+
+- **Cutting MCP = hard lockout.** When the user cuts MCP on an instance (status-bar stop button for the session, or the Settings toggle persistently), its HTTP endpoint is torn down and its discovery lockfile is rewritten as a `mcpActive:false` marker. The instance then refuses every MCP command. Targeting it by `__session: "<name>"` is **refused** (a clean JSON-RPC error), never redirected and never auto-replaced.
+
+- **No silent auto-spawn.** The launcher no longer creates an instance on a generic call. The AI must use the explicit route below.
+
+- **`create_instance`** (explicit, documented) launches a NEW MCP-accepting instance, optionally for a `file` and/or with an explicit `name`. It is **refused** unless BOTH hold, checked against **all** instances including MCP-cut ones (an INTERNAL discovery view distinct from `list-instances`): (a) no other instance already has that `name`, and (b) no other instance already has that `file` open. One instance per file is an invariant. (Auto-derived names are `restorm-<pid>` — not stable across launches — so uniqueness leans on per-file uniqueness; pass an explicit `name` when you need a stable address.)
+
+- **`terminate_instance`** (explicit, documented) closes the targeted instance with **File→Quit semantics** — a clean close, **never** a pid-kill. With autosave on, or nothing dirty, it closes immediately. With autosave off AND unsaved changes it takes a `save` param: `true` → save-then-close, `false` → discard-then-close. If `save` is **omitted** in that case, the app shows the user the save-confirmation modal and the route returns **non-blocking** (`"awaiting user confirmation"`) — the user decides; the AI cannot force the close.
 
 ## Approval flow
 
@@ -61,7 +75,8 @@ If you turn on `LOG_LEVEL=debug` for diagnostic work, treat the resulting log fi
 | AI extracts plaintext secrets from a request payload | `CollectionStore.serialize*` masks `PasswordValue` before the handler returns |
 | AI extracts plaintext secrets from a stored response | `ResponseHistoryService` redaction (default on) covers headers + body |
 | AI runs destructive operations without user awareness | MCP-client approval flow prompts on every `tools/call` |
-| AI launches Restorm without user consent | The launcher only spawns Restorm on the first forwarded `tools/call` — i.e. after the user approved a tool |
+| AI launches Restorm without user consent | The launcher **never** auto-spawns. A new instance is created only via the explicit, user-visible `create_instance` tool (one approved `tools/call`) |
+| AI keeps acting on an instance after the user said "stop" | Cutting MCP tears down the HTTP endpoint **and** marks the lockfile `mcpActive:false`; the instance refuses commands and is unroutable — the launcher cannot replace it |
 | Stale discovery file from a SIGKILLed Restorm | Launcher probes `process.kill(pid, 0)` before forwarding; ignores dead entries |
 
 If you spot a class of threat that's not covered, file an issue — defence in depth is cheap to add and we'd rather extend this list than discover gaps in production.

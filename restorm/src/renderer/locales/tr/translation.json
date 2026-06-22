@@ -1664,7 +1664,9 @@
     "logsRetentionCap": "MCP çağrı günlüğü saklama",
     "logsRetentionCapDescription": "MCP günlük görüntüleyici için bellekte tutulan işlenmiş MCP çağrılarının azami sayısı. Sınıra ulaşıldığında eski çağrılar atılır; 0 saklamayı devre dışı bırakır.",
     "captureRetentionCap": "MCP yakalama saklama",
-    "captureRetentionCapDescription": "Son MCP çağrılarından kaçının ekran görüntüsünü / kaydını tuttuğu (bellekte ve diskte). Sınıra ulaşıldığında eski yakalamalar medyasını kaybeder ve geçici video dosyası silinir; 0 saklamayı devre dışı bırakır."
+    "captureRetentionCapDescription": "Son MCP çağrılarından kaçının ekran görüntüsünü / kaydını tuttuğu (bellekte ve diskte). Sınıra ulaşıldığında eski yakalamalar medyasını kaybeder ve geçici video dosyası silinir; 0 saklamayı devre dışı bırakır.",
+    "enabled": "MCP sunucusunu etkinleştir",
+    "enabledDescription": "AI araçlarının bu örneğe bağlanabilmesi için başlatma sırasında yerleşik MCP sunucusunu başlatır. MCP bağlantılarını engellemek için devre dışı bırakın."
   },
   "mcpToolTitles": {
     "answerScenarioInput": "Senaryo girişini yanıtla",
@@ -1738,7 +1740,9 @@
     "updateFolder": "Klasörü güncelle",
     "updateRequest": "İsteği güncelle",
     "updateScenario": "Senaryoyu güncelle",
-    "updateScenarioNode": "Senaryo düğümünü güncelle"
+    "updateScenarioNode": "Senaryo düğümünü güncelle",
+    "createInstance": "Yeni bir örnek oluştur",
+    "terminateInstance": "Bir örneği sonlandır"
   },
   "odataRequestTab": {
     "send": "Gönder",

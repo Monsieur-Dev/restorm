@@ -356,12 +356,12 @@ export default defineConfig({
     {
       name: 'mcp-logs',
       testDir: mcpLogsTestDir,
-      timeout: 120 * 1000 // launches with --mcp; opens the viewer as tab + modal
+      timeout: 120 * 1000 // MCP on by default; opens the viewer as tab + modal
     },
     {
       name: 'mcp-logs-disabled',
       testDir: mcpLogsDisabledTestDir,
-      timeout: 120 * 1000 // launches without --mcp; asserts the menu entry is disabled
+      timeout: 120 * 1000 // pre-seeds mcp:enabled=false (no --no-mcp flag); asserts the menu entry is disabled
     },
     {
       name: 'body-type-migration',

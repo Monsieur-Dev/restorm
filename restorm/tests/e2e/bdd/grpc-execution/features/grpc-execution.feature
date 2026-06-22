@@ -1,5 +1,5 @@
 Feature: gRPC execution end-to-end
-  Boots restorm with `--mcp`, opens the gRPC sample and drives the real UI
+  Boots restorm (MCP on by default), opens the gRPC sample and drives the real UI
   against the live grpcbin server across all the call types: a unary call shows
   its response, a server-streaming call surfaces each echoed frame, and a
   bidirectional call connects, sends a frame, receives the echo and disconnects.

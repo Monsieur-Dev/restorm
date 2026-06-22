@@ -4,10 +4,8 @@ import StatusbarElement from './StatusbarElement'
 import { Button } from '../Button'
 
 export interface StatusbarMcpIndicatorProps {
-  /** Whether the embedded MCP server is enabled / running. When false (or
-   * `port` is null) the indicator renders nothing. */
-  enabled: boolean
-  /** The MCP HTTP server's bound port, or `null` until it's known. */
+  /** The MCP HTTP server's bound port, or `null` until it's known (or while
+   * the server is stopped / disabled). */
   port: number | null
   /** Human-readable session name for this instance (e.g. a ticket name).
    * Rendered inline next to the `mcp` label as `mcp · <name>` so multiple
@@ -23,6 +21,16 @@ export interface StatusbarMcpIndicatorProps {
   /** When provided, the popover shows a "view logs" link that calls this —
    * the host opens its MCP-logs viewer (tab or modal). Omitted → no link. */
   onViewLogs?: () => void
+  /** Whether the server is currently accepting MCP commands. When false the
+   * indicator shows a stopped/disabled state with an "Enable / Resume" button —
+   * the indicator is ALWAYS rendered (even when the server is stopped), so the
+   * user can always re-enable the server from the GUI. Defaults to
+   * `port !== null` when omitted. */
+  running?: boolean
+  /** Called when the user clicks the stop/resume(enable) button in the popover.
+   * The host toggles the MCP server and updates `running` accordingly. Omitted
+   * → button is hidden. */
+  onToggleServer?: () => void
 }
 
 /**
@@ -36,25 +44,32 @@ export interface StatusbarMcpIndicatorProps {
  * electron-core-ui.
  */
 export const StatusbarMcpIndicator: React.FC<StatusbarMcpIndicatorProps> = ({
-  enabled,
   port,
   sessionName = '',
   pulseSignal = 0,
   rightAligned = false,
-  onViewLogs
+  onViewLogs,
+  running,
+  onToggleServer
 }) => {
   const { t } = useTranslation()
 
-  if (!enabled || port === null) return null
+  // `running` reflects whether the server currently accepts commands; it
+  // defaults to the port state for callers that don't wire the toggle.
+  const isRunning = running ?? (port !== null)
+
+  // The indicator is ALWAYS rendered — even when the server is stopped — so the
+  // enable/resume + logs affordances stay reachable and the user can always turn
+  // MCP back on from the GUI.
 
   const label = sessionName ? `mcp · ${sessionName}` : 'mcp'
 
   return (
     <StatusbarElement
       data-testid="statusbar-mcp-indicator"
-      className={rightAligned ? 'right-aligned' : ''}
+      className={`${rightAligned ? 'right-aligned' : ''}${!isRunning ? ' mcp-stopped' : ''}`.trim()}
       icon={{ type: 'codicon', value: 'mcp' }}
-      title={label}
+      title={isRunning ? label : `${label} (${t('statusbar.mcp.serverStopped')})`}
       tooltipTrigger="click"
       tooltipPlacement="above"
       pulseSignal={pulseSignal}
@@ -63,12 +78,31 @@ export const StatusbarMcpIndicator: React.FC<StatusbarMcpIndicatorProps> = ({
         data-testid="statusbar-mcp-popover"
         style={{ padding: '8px 12px', whiteSpace: 'nowrap' }}
       >
-        <div>{t('statusbar.mcp.serverRunningOnPort', { port })}</div>
+        {isRunning && port !== null
+          ? <div>{t('statusbar.mcp.serverRunningOnPort', { port })}</div>
+          : <div style={{ opacity: 0.7 }}>{t('statusbar.mcp.serverStopped')}</div>
+        }
         {sessionName && (
           <div data-testid="statusbar-mcp-popover-session" style={{ marginTop: 4, opacity: 0.8 }}>
             {t('statusbar.mcp.sessionName', { name: sessionName })}
           </div>
         )}
+        {onToggleServer && (
+          <div style={{ marginTop: 6 }}>
+            <Button
+              link
+              icon={isRunning ? 'debug-stop' : 'debug-start'}
+              onClick={() => { onToggleServer() }}
+              data-testid="statusbar-mcp-toggle-server"
+            >
+              {isRunning ? t('statusbar.mcp.stopServer') : t('statusbar.mcp.resumeServer')}
+            </Button>
+          </div>
+        )}
+        {/* The MCP logs button is ALWAYS present whether the server is started
+            or stopped — the logs (recent served calls) survive a stop, and the
+            user needs them most precisely after cutting MCP on a misbehaving
+            AI to review what it did. */}
         {onViewLogs && (
           <div style={{ marginTop: 6 }}>
             <Button

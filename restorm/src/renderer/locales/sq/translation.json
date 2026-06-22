@@ -1664,7 +1664,9 @@
     "logsRetentionCap": "Ruajtja e regjistrit të thirrjeve MCP",
     "logsRetentionCapDescription": "Numri maksimal i thirrjeve MCP të shërbyera që mbahen në memorie për shikuesin e regjistrave MCP. Thirrjet më të vjetra hidhen poshtë kur arrihet kufiri; 0 e çaktivizon ruajtjen.",
     "captureRetentionCap": "Ruajtja e kapjeve MCP",
-    "captureRetentionCapDescription": "Sa thirrje të fundit MCP e mbajnë pamjen e ekranit / regjistrimin e tyre (në memorie dhe në disk). Kur arrihet kufiri, kapjet më të vjetra humbasin median dhe skedari i përkohshëm i videos fshihet; 0 e çaktivizon ruajtjen."
+    "captureRetentionCapDescription": "Sa thirrje të fundit MCP e mbajnë pamjen e ekranit / regjistrimin e tyre (në memorie dhe në disk). Kur arrihet kufiri, kapjet më të vjetra humbasin median dhe skedari i përkohshëm i videos fshihet; 0 e çaktivizon ruajtjen.",
+    "enabled": "Aktivizo serverin MCP",
+    "enabledDescription": "Fillon serverin MCP të integruar gjatë nisjes në mënyrë që mjetet AI të mund të lidhen me këtë instancë. Çaktivizoni për të parandaluar lidhjet MCP."
   },
   "mcpToolTitles": {
     "answerScenarioInput": "Përgjigju një hyrjeje skenari",
@@ -1738,7 +1740,9 @@
     "updateFolder": "Përditëso një dosje",
     "updateRequest": "Përditëso një kërkesë",
     "updateScenario": "Përditëso një skenar",
-    "updateScenarioNode": "Përditëso një nyje skenari"
+    "updateScenarioNode": "Përditëso një nyje skenari",
+    "createInstance": "Krijo një instancë të re",
+    "terminateInstance": "Mbyll një instancë"
   },
   "odataRequestTab": {
     "send": "Dërgo",

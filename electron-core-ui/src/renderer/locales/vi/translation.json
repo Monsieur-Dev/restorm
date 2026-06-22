@@ -338,7 +338,10 @@
     "mcp": {
       "serverRunningOnPort": "Máy chủ MCP đang chạy trên cổng {{port}}",
       "sessionName": "Phiên: {{name}}",
-      "viewLogs": "Xem nhật ký"
+      "viewLogs": "Xem nhật ký",
+      "stopServer": "Dừng máy chủ MCP",
+      "resumeServer": "Tiếp tục máy chủ MCP",
+      "serverStopped": "đã dừng"
     }
   },
   "mcpToolTitles": {

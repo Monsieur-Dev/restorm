@@ -56,7 +56,7 @@ export function isDevToolsEnabled(): boolean {
  * When the `--inactive-window` flag is present the app's windows are revealed
  * with `showInactive()` (visible but not focused/activated/raised) instead of
  * `show()`. This lets a programmatically-launched instance (an automation /
- * agent window, a `--mcp` dev instance, …) appear without taking the user's OS
+ * agent window, a background MCP dev instance, …) appear without taking the user's OS
  * focus or switching their active virtual desktop. A per-window
  * `revealInactive` configuration flag takes precedence when explicitly set.
  */

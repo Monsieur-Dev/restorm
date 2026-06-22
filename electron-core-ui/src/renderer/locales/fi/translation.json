@@ -338,7 +338,10 @@
     "mcp": {
       "serverRunningOnPort": "MCP-palvelin käynnissä portissa {{port}}",
       "sessionName": "Istunto: {{name}}",
-      "viewLogs": "Näytä lokit"
+      "viewLogs": "Näytä lokit",
+      "stopServer": "Pysäytä MCP-palvelin",
+      "resumeServer": "Jatka MCP-palvelinta",
+      "serverStopped": "pysäytetty"
     }
   },
   "mcpToolTitles": {

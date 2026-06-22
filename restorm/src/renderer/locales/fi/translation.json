@@ -1664,7 +1664,9 @@
     "logsRetentionCap": "MCP-kutsulokin säilytys",
     "logsRetentionCapDescription": "Muistissa MCP-lokinäkymää varten säilytettävien käsiteltyjen MCP-kutsujen enimmäismäärä. Vanhemmat kutsut poistetaan rajan täytyttyä; 0 poistaa säilytyksen käytöstä.",
     "captureRetentionCap": "MCP-kaappausten säilytys",
-    "captureRetentionCapDescription": "Kuinka monta viimeisintä MCP-kutsua säilyttää kuvakaappauksensa / tallenteensa (muistissa ja levyllä). Rajan ylittyessä vanhemmat kaappaukset menettävät mediansa ja niiden väliaikainen videotiedosto poistetaan; 0 poistaa säilytyksen käytöstä."
+    "captureRetentionCapDescription": "Kuinka monta viimeisintä MCP-kutsua säilyttää kuvakaappauksensa / tallenteensa (muistissa ja levyllä). Rajan ylittyessä vanhemmat kaappaukset menettävät mediansa ja niiden väliaikainen videotiedosto poistetaan; 0 poistaa säilytyksen käytöstä.",
+    "enabled": "Ota MCP-palvelin käyttöön",
+    "enabledDescription": "Käynnistää sisäänrakennetun MCP-palvelimen käynnistyksessä, jotta AI-työkalut voivat yhdistää tähän instanssiin. Poista käytöstä MCP-yhteyksien estämiseksi."
   },
   "mcpToolTitles": {
     "answerScenarioInput": "Vastaa skenaarion syötteeseen",
@@ -1738,7 +1740,9 @@
     "updateFolder": "Päivitä kansio",
     "updateRequest": "Päivitä pyyntö",
     "updateScenario": "Päivitä skenaario",
-    "updateScenarioNode": "Päivitä skenaarion solmu"
+    "updateScenarioNode": "Päivitä skenaarion solmu",
+    "createInstance": "Luo uusi instanssi",
+    "terminateInstance": "Lopeta instanssi"
   },
   "odataRequestTab": {
     "send": "Lähetä",

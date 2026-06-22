@@ -338,7 +338,10 @@
     "mcp": {
       "serverRunningOnPort": "MCP server running on port {{port}}",
       "sessionName": "Session: {{name}}",
-      "viewLogs": "View logs"
+      "viewLogs": "View logs",
+      "stopServer": "Stop MCP server",
+      "resumeServer": "Resume MCP server",
+      "serverStopped": "stopped"
     }
   },
   "mcpToolTitles": {

@@ -1664,7 +1664,9 @@
     "logsRetentionCap": "Rétention du journal d’appels MCP",
     "logsRetentionCapDescription": "Nombre maximal d’appels MCP traités conservés en mémoire pour la visionneuse de journaux MCP. Les appels les plus anciens sont supprimés une fois la limite atteinte ; 0 désactive la rétention.",
     "captureRetentionCap": "Conservation des captures MCP",
-    "captureRetentionCapDescription": "Nombre d'appels MCP récents qui conservent leur capture d'écran / vidéo (en mémoire et sur disque). Au-delà de la limite, les captures plus anciennes perdent leur média — et leur fichier vidéo temporaire est supprimé ; 0 désactive la conservation."
+    "captureRetentionCapDescription": "Nombre d'appels MCP récents qui conservent leur capture d'écran / vidéo (en mémoire et sur disque). Au-delà de la limite, les captures plus anciennes perdent leur média — et leur fichier vidéo temporaire est supprimé ; 0 désactive la conservation.",
+    "enabled": "Activer le serveur MCP",
+    "enabledDescription": "Démarrez le serveur MCP intégré au lancement afin que les outils IA puissent se connecter à cette instance. Désactivez pour empêcher toute connexion MCP."
   },
   "mcpToolTitles": {
     "answerScenarioInput": "Répondre à une entrée de scénario",
@@ -1738,7 +1740,9 @@
     "updateFolder": "Mettre à jour un dossier",
     "updateRequest": "Mettre à jour une requête",
     "updateScenario": "Mettre à jour un scénario",
-    "updateScenarioNode": "Mettre à jour un nœud de scénario"
+    "updateScenarioNode": "Mettre à jour un nœud de scénario",
+    "createInstance": "Créer une nouvelle instance",
+    "terminateInstance": "Fermer une instance"
   },
   "odataRequestTab": {
     "send": "Envoyer",

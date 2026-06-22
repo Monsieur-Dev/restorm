@@ -219,7 +219,7 @@ For interactive debugging when you also want Claude Code's MCP launcher to drive
 pnpm dev:restorm:mcp
 ```
 
-This sweeps stale MCP lockfiles (`pnpm mcp:cleanup` under the hood) and then runs `pnpm dev:restorm -- --mcp`. The `--mcp` flag turns on the embedded HTTP MCP server, which writes a per-pid lockfile to `/tmp/restorm-mcp/<pid>.json` (port + bearer token). `scripts/mcp-launcher.mjs` discovers that lockfile and forwards Claude's MCP traffic to the running instance instead of spawning a fresh, hidden one — so the renderer / DevTools you're looking at is the same renderer the launcher is talking to.
+This sweeps stale MCP lockfiles (`pnpm mcp:cleanup` under the hood) and then runs `pnpm dev:restorm` (with `--inactive-window`). The embedded HTTP MCP server is on by default (governed by the `mcp:enabled` setting + the headless rule — no CLI flag), and writes a per-pid lockfile to `/tmp/restorm-mcp/<pid>.json` (port + bearer token). `scripts/mcp-launcher.mjs` discovers that lockfile and forwards Claude's MCP traffic to the running instance instead of spawning a fresh, hidden one — so the renderer / DevTools you're looking at is the same renderer the launcher is talking to.
 
 The cleanup pass is shared in two paths:
 

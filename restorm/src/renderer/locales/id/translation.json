@@ -1663,7 +1663,9 @@
     "logsRetentionCap": "Retensi log panggilan MCP",
     "logsRetentionCapDescription": "Jumlah maksimum panggilan MCP yang dilayani dan disimpan di memori untuk penampil log MCP. Panggilan lama dibuang setelah batas tercapai; 0 menonaktifkan retensi.",
     "captureRetentionCap": "Retensi tangkapan MCP",
-    "captureRetentionCapDescription": "Berapa banyak panggilan MCP terbaru yang mempertahankan tangkapan layar / rekamannya (di memori dan disk). Setelah batas tercapai, tangkapan lama kehilangan medianya dan berkas video sementaranya dihapus; 0 menonaktifkan retensi."
+    "captureRetentionCapDescription": "Berapa banyak panggilan MCP terbaru yang mempertahankan tangkapan layar / rekamannya (di memori dan disk). Setelah batas tercapai, tangkapan lama kehilangan medianya dan berkas video sementaranya dihapus; 0 menonaktifkan retensi.",
+    "enabled": "Aktifkan server MCP",
+    "enabledDescription": "Memulai server MCP bawaan saat diluncurkan agar alat AI dapat terhubung ke instans ini. Nonaktifkan untuk mencegah koneksi MCP."
   },
   "mcpToolTitles": {
     "answerScenarioInput": "Jawab masukan skenario",
@@ -1737,7 +1739,9 @@
     "updateFolder": "Perbarui folder",
     "updateRequest": "Perbarui permintaan",
     "updateScenario": "Perbarui skenario",
-    "updateScenarioNode": "Perbarui simpul skenario"
+    "updateScenarioNode": "Perbarui simpul skenario",
+    "createInstance": "Buat instans baru",
+    "terminateInstance": "Akhiri instans"
   },
   "odataRequestTab": {
     "send": "Kirim",

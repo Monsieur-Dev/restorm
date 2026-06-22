@@ -1665,7 +1665,9 @@
     "logsRetentionCap": "Zadržavanje zapisa MCP poziva",
     "logsRetentionCapDescription": "Najveći broj posluženih MCP poziva koji se čuvaju u memoriji za preglednik MCP zapisa. Stariji se pozivi odbacuju kada se dosegne ograničenje; 0 onemogućuje zadržavanje.",
     "captureRetentionCap": "Zadržavanje MCP snimaka",
-    "captureRetentionCapDescription": "Koliko nedavnih MCP poziva zadržava svoju snimku zaslona / videosnimku (u memoriji i na disku). Po dosezanju ograničenja starije snimke gube svoj medij, a njihova privremena videodatoteka se briše; 0 onemogućuje zadržavanje."
+    "captureRetentionCapDescription": "Koliko nedavnih MCP poziva zadržava svoju snimku zaslona / videosnimku (u memoriji i na disku). Po dosezanju ograničenja starije snimke gube svoj medij, a njihova privremena videodatoteka se briše; 0 onemogućuje zadržavanje.",
+    "enabled": "Omogući MCP poslužitelj",
+    "enabledDescription": "Pokreće ugrađeni MCP poslužitelj pri pokretanju kako bi se AI alati mogli spojiti na ovu instancu. Onemogućite za sprječavanje MCP veza."
   },
   "mcpToolTitles": {
     "answerScenarioInput": "Odgovori na unos scenarija",
@@ -1739,7 +1741,9 @@
     "updateFolder": "Ažuriraj mapu",
     "updateRequest": "Ažuriraj zahtjev",
     "updateScenario": "Ažuriraj scenarij",
-    "updateScenarioNode": "Ažuriraj čvor scenarija"
+    "updateScenarioNode": "Ažuriraj čvor scenarija",
+    "createInstance": "Stvori novu instancu",
+    "terminateInstance": "Zatvori instancu"
   },
   "odataRequestTab": {
     "send": "Pošalji",

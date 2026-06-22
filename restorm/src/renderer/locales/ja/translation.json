@@ -1663,7 +1663,9 @@
     "logsRetentionCap": "MCP 呼び出しログの保持数",
     "logsRetentionCapDescription": "MCP ログビューアー用にメモリに保持する処理済み MCP 呼び出しの最大数。上限に達すると古い呼び出しは破棄されます。0 で保持を無効にします。",
     "captureRetentionCap": "MCP キャプチャの保持",
-    "captureRetentionCapDescription": "最近の MCP 呼び出しのうち、スクリーンショット / 画面録画を保持する数（メモリとディスク）。上限に達すると古いキャプチャはメディアを失い、一時動画ファイルが削除されます。0 で保持を無効化。"
+    "captureRetentionCapDescription": "最近の MCP 呼び出しのうち、スクリーンショット / 画面録画を保持する数（メモリとディスク）。上限に達すると古いキャプチャはメディアを失い、一時動画ファイルが削除されます。0 で保持を無効化。",
+    "enabled": "MCPサーバーを有効にする",
+    "enabledDescription": "起動時に内蔵MCPサーバーを開始してAIツールがこのインスタンスに接続できるようにします。MCP接続を防ぐには無効にしてください。"
   },
   "mcpToolTitles": {
     "answerScenarioInput": "シナリオ入力に応答",
@@ -1737,7 +1739,9 @@
     "updateFolder": "フォルダーを更新",
     "updateRequest": "リクエストを更新",
     "updateScenario": "シナリオを更新",
-    "updateScenarioNode": "シナリオノードを更新"
+    "updateScenarioNode": "シナリオノードを更新",
+    "createInstance": "新しいインスタンスを作成",
+    "terminateInstance": "インスタンスを終了"
   },
   "odataRequestTab": {
     "send": "送信",

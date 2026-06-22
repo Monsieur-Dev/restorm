@@ -1663,7 +1663,9 @@
     "logsRetentionCap": "MCP 呼叫記錄保留",
     "logsRetentionCapDescription": "為 MCP 記錄檢視器在記憶體中保留的已處理 MCP 呼叫的最大數量。達到上限後將捨棄較舊的呼叫；0 會停用保留。",
     "captureRetentionCap": "MCP 擷取保留",
-    "captureRetentionCapDescription": "保留其螢幕擷取/錄製的最近 MCP 呼叫數量（記憶體與磁碟中）。達到上限後，較舊的擷取會捨棄其媒體並刪除暫存影片檔；0 表示停用保留。"
+    "captureRetentionCapDescription": "保留其螢幕擷取/錄製的最近 MCP 呼叫數量（記憶體與磁碟中）。達到上限後，較舊的擷取會捨棄其媒體並刪除暫存影片檔；0 表示停用保留。",
+    "enabled": "啟用 MCP 伺服器",
+    "enabledDescription": "在啟動時啟動內建 MCP 伺服器，以便 AI 工具可以連接到此實例。停用以阻止 MCP 連線。"
   },
   "mcpToolTitles": {
     "answerScenarioInput": "回答情境輸入",
@@ -1737,7 +1739,9 @@
     "updateFolder": "更新資料夾",
     "updateRequest": "更新請求",
     "updateScenario": "更新情境",
-    "updateScenarioNode": "更新情境節點"
+    "updateScenarioNode": "更新情境節點",
+    "createInstance": "建立新實例",
+    "terminateInstance": "終止實例"
   },
   "odataRequestTab": {
     "send": "傳送",

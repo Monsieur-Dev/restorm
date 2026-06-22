@@ -9,6 +9,7 @@
  */
 
 import { McpService } from 'electron-core-ui'
+import { registerInstanceLifecycleTools, type InstanceLifecycleHost } from './tools/instances'
 import { registerActiveStateBridge } from './tools/activeState'
 import { registerFavoritesBridge } from './favoritesBridge'
 import { registerReadTools } from './tools/read'
@@ -25,8 +26,9 @@ import { registerScenarioEngineTools } from './tools/scenarioEngineTools'
 import { installScenarioEngineIPC } from '../scenarioEngine/ipcBridge'
 import { registerResources } from './resources'
 
-export function registerRestormMcp(mcp: McpService): void {
+export function registerRestormMcp(mcp: McpService, instanceHost: InstanceLifecycleHost): void {
   registerActiveStateBridge()
+  registerInstanceLifecycleTools(mcp, instanceHost)
   registerFavoritesBridge()
   registerReadTools(mcp)
   registerNavigationTools(mcp)

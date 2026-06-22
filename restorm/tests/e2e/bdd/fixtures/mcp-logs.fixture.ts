@@ -8,10 +8,11 @@ interface McpLogsFixtures {
 }
 
 /**
- * Fixture for the MCP-logs-viewer E2E. Launches WITH `--mcp` so the embedded
- * MCP server is running and the `View → MCP logs` entry is enabled — the
- * viewer can then be opened as a modal (welcome screen) or a tab (file open).
- * The disabled-menu case uses its own no-`--mcp` fixture.
+ * Fixture for the MCP-logs-viewer E2E. MCP is on by default, so a normal launch
+ * keeps the embedded server running and the `View → MCP logs` entry enabled —
+ * the viewer can then be opened as a modal (welcome screen) or a tab (file
+ * open). The disabled-menu case uses its own fixture that pre-seeds the
+ * `mcp:enabled` setting to false.
  */
 export const test = restormBaseTest.extend<McpLogsFixtures>({
   petstoreFolderPath: async ({ restormRoot }, use) => {
@@ -22,7 +23,7 @@ export const test = restormBaseTest.extend<McpLogsFixtures>({
   electronApp: async ({ restormRoot }, use, testInfo: TestInfo) => {
     const app: ElectronApplication = await launchRestormElectronApp({
       restormRoot,
-      args: ['--mcp', '--mcp-session-name=e2e-mcp-logs']
+      args: ['--mcp-session-name=e2e-mcp-logs']
     })
     await use(app)
     const logFile = writeAppLogs(app, testInfo.outputDir)

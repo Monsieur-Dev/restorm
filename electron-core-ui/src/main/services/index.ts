@@ -135,7 +135,7 @@ export type {
 } from './McpService'
 
 // MCP cross-instance bridge — generic named-session discovery + transport.
-// Lets multiple `--mcp` instances of the same app coexist and route
+// Lets multiple MCP-enabled instances of the same app coexist and route
 // `tools/call`s to a specific instance by name. See docs/McpService/README.md.
 export {
   MCP_SESSION_ROUTING_KEY,
@@ -144,7 +144,8 @@ export {
   writeMcpDiscoveryFile,
   cleanupMcpDiscoveryFile,
   findLiveSessionByName,
-  forwardToNamedSession
+  forwardToNamedSession,
+  readAllInstancesIncludingCut
 } from './mcpDiscovery'
 export type { McpDiscoveryEntry } from './mcpDiscovery'
 
