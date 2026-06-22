@@ -131,12 +131,16 @@ export const RequestQuickSettingsButton: React.FC<RequestQuickSettingsButtonProp
 }) => {
   const { t } = useTranslation()
   const anchorRef = useRef<HTMLSpanElement>(null)
+  // Ref to the underlying <input> DOM element so handleSave can read the live
+  // value synchronously — bypasses the ECUI InputBox's setTimeout(fn, 0)
+  // debounce which would make configName state stale at click time.
+  const nameInputRef = useRef<HTMLInputElement>(null)
   const [open, setOpen] = useState(false)
 
   // Storage target: 'settings' (user-local) or 'project' (.restorm file)
   const [storageTarget, setStorageTarget] = useState<QuickConfigStorageTarget>('settings')
 
-  // Config name input
+  // Config name input (state drives the controlled InputBox value)
   const [configName, setConfigName] = useState('')
 
   // Confirmation modal state
@@ -195,16 +199,27 @@ export const RequestQuickSettingsButton: React.FC<RequestQuickSettingsButtonProp
   // matchingName is passed to the button's onClick to pre-fill on open.
   const matchingName = matchingConfig?.name ?? ''
 
-  // Save current config
+  // Save current config. Reads the live DOM value from nameInputRef as the
+  // authoritative name — the ECUI InputBox fires onChange via setTimeout(fn, 0)
+  // even with changeDebounceMs={0}, so configName state may be one render
+  // behind at click time. The ref gives the value the user actually typed.
   const handleSave = useCallback((): void => {
-    const trimmed = configName.trim()
+    const liveValue = nameInputRef.current?.value ?? configName
+    const trimmed = liveValue.trim()
     if (!trimmed) return
 
     if (storageTarget === 'settings' && projectUuid) {
       saveSettingsConfig(projectUuid, request.id, trimmed, currentFields)
+      // Settings saves don't emit REQUEST_UPDATED (no reactive proxy involved),
+      // so manually bump tick to force allConfigs to re-read the updated cache.
+      setTick((n) => n + 1)
     } else if (storageTarget === 'project') {
       saveProjectConfig(request, trimmed, currentFields)
+      // Project saves mutate the reactive proxy which emits REQUEST_UPDATED →
+      // tick bumps automatically via the eventBus subscription above.
     }
+    // Update state to match what was actually saved so the input stays in sync.
+    setConfigName(trimmed)
     // Keep the popover open so the user sees the updated list immediately.
   }, [configName, storageTarget, projectUuid, request, currentFields])
 
@@ -239,8 +254,11 @@ export const RequestQuickSettingsButton: React.FC<RequestQuickSettingsButtonProp
         setConfirmModal(CONFIRM_MODAL_INITIAL)
         if (config.storageTarget === 'settings' && projectUuid) {
           deleteSettingsConfig(projectUuid, request.id, config.id)
+          // Bump tick: settings deletes don't emit REQUEST_UPDATED.
+          setTick((n) => n + 1)
         } else {
           deleteProjectConfig(request, config.id)
+          // Project deletes mutate the reactive proxy → REQUEST_UPDATED → tick bumps automatically.
         }
       }
     })
@@ -308,6 +326,7 @@ export const RequestQuickSettingsButton: React.FC<RequestQuickSettingsButtonProp
                       value={configName}
                       onChange={setConfigName}
                       changeDebounceMs={0}
+                      inputRef={nameInputRef}
                       onKeyDown={handleKeyDownOnName}
                       data-testid="quick-settings-name-input"
                     />

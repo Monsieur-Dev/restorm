@@ -15,6 +15,7 @@
  * the settings backend; immediate for the project backend via reactive proxy).
  */
 
+import { eventBus } from 'electron-core-ui/renderer'
 import type { QuickConfig, QuickConfigStorageTarget } from '../../../shared/types/requests/QuickConfig'
 import type { Request } from '../../../shared/types/collections'
 
@@ -52,7 +53,16 @@ export function extractSnapshotFields(request: Request): Record<string, unknown>
   const reqMap = request as unknown as Record<string, unknown>
   for (const key of Object.keys(reqMap)) {
     if (!EXCLUDED_FIELDS.has(key)) {
-      snapshot[key] = reqMap[key]
+      const val = reqMap[key]
+      // JSON round-trip strips reactive proxy wrappers so the snapshot is
+      // plain-object serialisable (required for IPC structured-clone via
+      // window.api.storage.set). Values that cannot be JSON-serialised
+      // (functions, undefined, circular refs) are dropped — intentional.
+      try {
+        snapshot[key] = JSON.parse(JSON.stringify(val)) as unknown
+      } catch {
+        // non-serialisable value — omit from snapshot
+      }
     }
   }
   return snapshot
@@ -338,16 +348,29 @@ export function findMatchingConfig(
 }
 
 /**
- * Apply a saved config's fields to a reactive request proxy. Assigning
- * each field triggers the reactive proxy's set-trap, which debounces and
- * emits REQUEST_UPDATED — the same autosave path as any user edit.
- * The tab view's own useEffect hooks subscribe to REQUEST_UPDATED and
- * re-call updateFullRequestData, so Handlebars resolution re-runs
- * automatically without explicit cross-process calls here.
+ * Apply a saved config's fields to a reactive request proxy.
+ *
+ * Two complementary signals fire after the mutation:
+ *
+ * 1. Reactive proxy set-trap → debounced REQUEST_UPDATED → autosave (persists
+ *    the restored values to the .restorm file exactly like a user edit).
+ *
+ * 2. `request:transport-replaced` (emitLocalSync) → tab view's
+ *    transport-replaced subscription calls setUrl/setMethod/setHeaders/…
+ *    from the now-updated proxy, which in turn re-triggers the tab's
+ *    `updateFullRequestData` useEffect → main-process Handlebars resolution
+ *    re-runs with the new field values (AC#8).
+ *
+ * The `request:transport-replaced` pattern is exactly what `useMcpRequestPatch`
+ * uses for MCP-driven field mutations — reusing it here keeps the two paths
+ * consistent and avoids protocol-specific serialisation in this service.
  */
 export function applyConfigToRequest(request: Request, config: QuickConfig): void {
   const req = request as unknown as Record<string, unknown>
   for (const [key, value] of Object.entries(config.fields)) {
     req[key] = value
   }
+  // Signal the open tab view to re-sync its local state from the now-updated
+  // proxy and re-call updateFullRequestData for Handlebars re-resolution.
+  eventBus.emitLocalSync('request:transport-replaced', { requestId: request.id })
 }

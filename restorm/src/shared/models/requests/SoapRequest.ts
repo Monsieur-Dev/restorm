@@ -12,6 +12,7 @@ import { BaseRequest } from './BaseRequest'
 import { KeyValue } from '../KeyValue'
 import type { RequestType, RuntimeId, Icon } from '../types'
 import type { SoapMockOperation } from '../../types/requests/SoapRequest'
+import type { QuickConfig } from '../../types/requests/QuickConfig'
 
 /** Deep-copy a mock-operations array so a model never aliases a caller's array
  * (mirrors the `headers` copy below — keeps persistence + edits independent). */
@@ -70,6 +71,9 @@ export class SoapRequest extends BaseRequest {
    * SOAPAction / body-operation to a canned XML response (or a `<soap:Fault>`). */
   mockOperations?: SoapMockOperation[]
 
+  /** User-saved quick-config snapshots for this request. */
+  quickConfigs?: QuickConfig[]
+
   constructor(init?: Partial<SoapRequest>) {
     super(init)
     if (init) {
@@ -104,6 +108,7 @@ export class SoapRequest extends BaseRequest {
     headers?: Parameters<typeof KeyValue.fromPlain>[0][]
     server?: boolean
     mockOperations?: SoapMockOperation[]
+    quickConfigs?: QuickConfig[]
   }): SoapRequest {
     return new SoapRequest({
       ...(obj.id !== undefined && { id: obj.id }),
@@ -120,7 +125,8 @@ export class SoapRequest extends BaseRequest {
       body: obj.body ?? '',
       headers: (obj.headers ?? []) as KeyValue[],
       ...(obj.server !== undefined && { server: obj.server }),
-      ...(obj.mockOperations !== undefined && { mockOperations: cloneMockOperations(obj.mockOperations) })
+      ...(obj.mockOperations !== undefined && { mockOperations: cloneMockOperations(obj.mockOperations) }),
+      ...(obj.quickConfigs !== undefined && { quickConfigs: obj.quickConfigs })
     })
   }
 
@@ -144,7 +150,8 @@ export class SoapRequest extends BaseRequest {
       body: this.body,
       headers: this.headers.map(h => h.toPlainObject()),
       ...(this.server !== undefined && { server: this.server }),
-      ...(this.mockOperations !== undefined && { mockOperations: cloneMockOperations(this.mockOperations) })
+      ...(this.mockOperations !== undefined && { mockOperations: cloneMockOperations(this.mockOperations) }),
+      ...(this.quickConfigs !== undefined && this.quickConfigs.length > 0 && { quickConfigs: this.quickConfigs })
     }
   }
 }

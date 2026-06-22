@@ -11,6 +11,7 @@ import {
 import { BaseRequest } from './BaseRequest'
 import { KeyValue } from '../KeyValue'
 import type { WebSocketProtocol, RequestType, RuntimeId, Icon } from '../types'
+import type { QuickConfig } from '../../types/requests/QuickConfig'
 
 /**
  * WebSocket request definition with protocol, event, and message.
@@ -110,6 +111,9 @@ export class WebSocketRequest extends BaseRequest {
   @TreatEmptyAsUndefined()
   lwtRetain?: boolean
 
+  /** User-saved quick-config snapshots for this request. */
+  quickConfigs?: QuickConfig[]
+
   constructor(init?: Partial<WebSocketRequest>) {
     super(init)
     if (init) {
@@ -150,6 +154,7 @@ export class WebSocketRequest extends BaseRequest {
     lwtPayload?: string
     lwtQos?: number
     lwtRetain?: boolean
+    quickConfigs?: QuickConfig[]
   }): WebSocketRequest {
     return new WebSocketRequest({
       ...(obj.id !== undefined && { id: obj.id }),
@@ -175,7 +180,8 @@ export class WebSocketRequest extends BaseRequest {
       ...(obj.lwtTopic !== undefined && { lwtTopic: obj.lwtTopic }),
       ...(obj.lwtPayload !== undefined && { lwtPayload: obj.lwtPayload }),
       ...(obj.lwtQos !== undefined && { lwtQos: obj.lwtQos }),
-      ...(obj.lwtRetain !== undefined && { lwtRetain: obj.lwtRetain })
+      ...(obj.lwtRetain !== undefined && { lwtRetain: obj.lwtRetain }),
+      ...(obj.quickConfigs !== undefined && { quickConfigs: obj.quickConfigs })
     })
   }
 
@@ -208,7 +214,8 @@ export class WebSocketRequest extends BaseRequest {
       ...(this.lwtTopic !== undefined && { lwtTopic: this.lwtTopic }),
       ...(this.lwtPayload !== undefined && { lwtPayload: this.lwtPayload }),
       ...(this.lwtQos !== undefined && { lwtQos: this.lwtQos }),
-      ...(this.lwtRetain !== undefined && { lwtRetain: this.lwtRetain })
+      ...(this.lwtRetain !== undefined && { lwtRetain: this.lwtRetain }),
+      ...(this.quickConfigs !== undefined && this.quickConfigs.length > 0 && { quickConfigs: this.quickConfigs })
     }
   }
 }

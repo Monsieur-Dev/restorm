@@ -11,6 +11,7 @@ import {
 import { BaseRequest } from './BaseRequest'
 import { KeyValue } from '../KeyValue'
 import type { GraphQLOperationType, RequestType, RuntimeId, Icon } from '../types'
+import type { QuickConfig } from '../../types/requests/QuickConfig'
 
 /**
  * GraphQL request definition with operation type, query, and variables.
@@ -70,6 +71,9 @@ export class GraphQLRequest extends BaseRequest {
   @TreatEmptyAsUndefined()
   resolverScript?: string
 
+  /** User-saved quick-config snapshots for this request. */
+  quickConfigs?: QuickConfig[]
+
   constructor(init?: Partial<GraphQLRequest>) {
     super(init)
     if (init) {
@@ -102,6 +106,7 @@ export class GraphQLRequest extends BaseRequest {
     schema?: string
     mockResolvers?: string
     resolverScript?: string
+    quickConfigs?: QuickConfig[]
   }): GraphQLRequest {
     return new GraphQLRequest({
       ...(obj.id !== undefined && { id: obj.id }),
@@ -119,7 +124,8 @@ export class GraphQLRequest extends BaseRequest {
       ...(obj.server !== undefined && { server: obj.server }),
       ...(obj.schema !== undefined && { schema: obj.schema }),
       ...(obj.mockResolvers !== undefined && { mockResolvers: obj.mockResolvers }),
-      ...(obj.resolverScript !== undefined && { resolverScript: obj.resolverScript })
+      ...(obj.resolverScript !== undefined && { resolverScript: obj.resolverScript }),
+      ...(obj.quickConfigs !== undefined && { quickConfigs: obj.quickConfigs })
     })
   }
 
@@ -144,7 +150,8 @@ export class GraphQLRequest extends BaseRequest {
       ...(this.server !== undefined && { server: this.server }),
       ...(this.schema !== undefined && { schema: this.schema }),
       ...(this.mockResolvers !== undefined && { mockResolvers: this.mockResolvers }),
-      ...(this.resolverScript !== undefined && { resolverScript: this.resolverScript })
+      ...(this.resolverScript !== undefined && { resolverScript: this.resolverScript }),
+      ...(this.quickConfigs !== undefined && this.quickConfigs.length > 0 && { quickConfigs: this.quickConfigs })
     }
   }
 }
