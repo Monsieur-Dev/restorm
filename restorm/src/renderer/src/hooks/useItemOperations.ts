@@ -399,6 +399,7 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
       case 'http-put': return 'New PUT request'
       case 'http-patch': return 'New PATCH request'
       case 'http-delete': return 'New DELETE request'
+      case 'http-server': return 'New HTTP mock server'
       case 'graphql': return 'New GraphQL request'
       case 'grpc': return 'New gRPC request'
       case 'grpc-server-stream': return 'New gRPC server-streaming request'
@@ -523,6 +524,10 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
       let built: unknown
       if (httpMethod !== undefined) {
         built = new HTTPRequest({ id, name, method: httpMethod })
+      } else if (kind === 'http-server') {
+        // restorm acts as a local HTTP mock server: HTTP request + server flag,
+        // host forced to localhost, default port + route + 200 status pre-filled.
+        built = new HTTPRequest({ id, name, method: 'GET', server: true, url: 'localhost:8080/', mockStatus: 200 })
       } else if (kind === 'graphql') {
         built = new GraphQLRequest({ id, name })
       } else if (kind === 'grpc' || kind === 'grpc-server-stream' || kind === 'grpc-client-stream' || kind === 'grpc-bidi') {

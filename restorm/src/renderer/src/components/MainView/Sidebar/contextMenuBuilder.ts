@@ -45,6 +45,7 @@ export type AddChildKind =
   | 'websocket-server'
   | 'mqtt'
   | 'mqtt-server'
+  | 'http-server'
   | 'odata'
   | 'auth'
   | 'scenario'
@@ -118,6 +119,14 @@ export const buildAddSubmenu = (
     label: t('sidebar.contextMenu.add.httpDelete'),
     icon: React.createElement(Badge, { type: 'DELETE' }),
     onClick: () => { onAddChildItem(parentId, 'http-delete') }
+  },
+  // HTTP mock server: restorm hosts a local HTTP endpoint (METHOD + PATH) that
+  // serves a configured response — grouped with the HTTP methods it answers for.
+  {
+    id: `add-http-server-${parentId}`,
+    label: t('sidebar.contextMenu.add.httpServer'),
+    icon: React.createElement(Badge, { type: 'GET', mode: 'server' }),
+    onClick: () => { onAddChildItem(parentId, 'http-server') }
   },
   { id: `sep-add-http-${parentId}`, isSeparator: true, label: '' },
   // gRPC — its own group (the four call types) right after HTTP.

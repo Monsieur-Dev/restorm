@@ -5,7 +5,8 @@
 import {
   searchable,
   fileNaming,
-  graphqlField
+  graphqlField,
+  TreatEmptyAsUndefined
 } from 'electron-core-ui/decorators'
 import { BaseRequest } from './BaseRequest'
 import { KeyValue } from '../KeyValue'
@@ -57,6 +58,20 @@ export class HTTPRequest extends BaseRequest {
   @graphqlField({ type: 'Boolean', nullable: true })
   deprecated = false
 
+  /** When true, restorm ACTS AS a local HTTP mock server: it listens on
+   * `localhost:<port><path>` for this request's METHOD + PATH and answers with
+   * the configured response (status/headers/body) instead of sending the
+   * request as a client. The URL then carries only `localhost:<port><path>`
+   * (host is fixed). */
+  @graphqlField({ type: 'Boolean', nullable: true })
+  @TreatEmptyAsUndefined()
+  server?: boolean
+
+  /** HTTP status code the mock serves (server mode; defaults to 200). */
+  @graphqlField({ type: 'Int', nullable: true })
+  @TreatEmptyAsUndefined()
+  mockStatus?: number
+
   constructor(init?: Partial<HTTPRequest>) {
     super(init)
     if (init) {
@@ -93,6 +108,8 @@ export class HTTPRequest extends BaseRequest {
     pathParams?: Parameters<typeof KeyValue.fromPlain>[0][]
     body?: HTTPRequestBody
     deprecated?: boolean
+    server?: boolean
+    mockStatus?: number
   }): HTTPRequest {
     return new HTTPRequest({
       ...(obj.id !== undefined && { id: obj.id }),
@@ -108,7 +125,9 @@ export class HTTPRequest extends BaseRequest {
       params: (obj.params ?? []) as KeyValue[],
       pathParams: (obj.pathParams ?? []) as KeyValue[],
       ...(obj.body !== undefined && { body: obj.body }),
-      deprecated: obj.deprecated ?? false
+      deprecated: obj.deprecated ?? false,
+      ...(obj.server !== undefined && { server: obj.server }),
+      ...(obj.mockStatus !== undefined && { mockStatus: obj.mockStatus })
     })
   }
 
@@ -131,7 +150,9 @@ export class HTTPRequest extends BaseRequest {
       params: this.params.map(p => p.toPlainObject()),
       pathParams: this.pathParams.map(p => p.toPlainObject()),
       body: this.body,
-      deprecated: this.deprecated
+      deprecated: this.deprecated,
+      ...(this.server !== undefined && { server: this.server }),
+      ...(this.mockStatus !== undefined && { mockStatus: this.mockStatus })
     }
   }
 }

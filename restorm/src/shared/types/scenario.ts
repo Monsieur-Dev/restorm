@@ -117,6 +117,16 @@ export type ScenarioNodeKind =
   | 'grpcConnect'
   | 'grpcSend'
   | 'grpcClose'
+  // HTTP mock server — restorm HOSTS a local HTTP mock. `httpListen` opens a
+  // long-lived server bound to a `server: true` HTTP request's METHOD + PATH +
+  // port and listens INDEFINITELY: `connected` (a pure signal) fires once the
+  // server is listening, EACH inbound request served re-emits its request/
+  // response data on the `served` output, and the run stays in-progress until an
+  // `httpClose` (or a Stop) ends the server, at which point `done` fires. Unlike
+  // a one-shot `httpRequest`, a hosted mock has NO `response` output — it serves,
+  // it does not call out. `httpClose` stops the server referenced by id.
+  | 'httpListen'
+  | 'httpClose'
   // Iteration & collections
   | 'forEach'
   | 'aggregate'

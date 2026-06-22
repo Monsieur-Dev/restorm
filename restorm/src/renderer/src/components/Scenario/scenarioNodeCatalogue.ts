@@ -57,6 +57,8 @@ export const SCENARIO_NODE_CATALOGUE: ScenarioNodeKindMeta[] = [
   { kind: 'grpcConnect', labelKey: 'scenario.nodes.grpcConnect', defaultLabel: 'gRPC connect', icon: 'plug', category: 'composition' },
   { kind: 'grpcSend', labelKey: 'scenario.nodes.grpcSend', defaultLabel: 'gRPC send', icon: 'arrow-up', category: 'composition' },
   { kind: 'grpcClose', labelKey: 'scenario.nodes.grpcClose', defaultLabel: 'gRPC close', icon: 'debug-disconnect', category: 'composition' },
+  { kind: 'httpListen', labelKey: 'scenario.nodes.httpListen', defaultLabel: 'HTTP server', icon: 'server', category: 'composition' },
+  { kind: 'httpClose', labelKey: 'scenario.nodes.httpClose', defaultLabel: 'HTTP close', icon: 'debug-disconnect', category: 'composition' },
   // Lists (grouped into a "Lists" submenu)
   { kind: 'aggregate', labelKey: 'scenario.nodes.aggregate', defaultLabel: 'Aggregate', icon: 'combine', category: 'lists' },
   { kind: 'map', labelKey: 'scenario.nodes.map', defaultLabel: 'Map', icon: 'arrow-swap', category: 'lists' },

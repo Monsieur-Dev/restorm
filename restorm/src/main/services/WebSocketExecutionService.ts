@@ -11,7 +11,7 @@ import WebSocket, { WebSocketServer, createWebSocketStream } from 'ws'
 import mqtt, { type MqttClient, type IClientOptions } from 'mqtt'
 import { io, type Socket } from 'socket.io-client'
 import { Server as SocketIOServer, type Socket as ServerSocket } from 'socket.io'
-import { createServer, type Server as HttpServer } from 'node:http'
+import { createServer, type Server as HttpServer, type IncomingMessage, type ServerResponse } from 'node:http'
 import { createServer as createTcpServer, type Server as TcpServer } from 'node:net'
 import { Aedes } from 'aedes'
 import type { AedesPublishPacket } from 'aedes'
@@ -111,7 +111,7 @@ export interface WebSocketExecutionResult {
  * per-port server (see {@link PortServer}). */
 interface ActiveConnection {
   requestId: string
-  kind: 'websocket' | 'socketio' | 'socketio-server' | 'websocket-server' | 'mqtt' | 'mqtt-server'
+  kind: 'websocket' | 'socketio' | 'socketio-server' | 'websocket-server' | 'mqtt' | 'mqtt-server' | 'http-server'
   ws?: WebSocket
   socket?: Socket
   /** MQTT client (kind 'mqtt'). */
@@ -140,6 +140,16 @@ interface WsRoute {
   onConnection: (ws: WebSocket) => void
 }
 
+/** One hosted HTTP-mock route: the request handler that writes the configured
+ * response for an inbound HTTP request matching this route's METHOD + PATH, and
+ * the requestId that owns it (for teardown). restorm acts as a local mock HTTP
+ * server — the handler reads the configured status/headers/body (resolved at
+ * serve time) and writes them back. */
+interface HttpRoute {
+  requestId: string
+  handler: (req: IncomingMessage, res: ServerResponse) => void
+}
+
 /** ONE shared http server bound to a port, that EVERY server-mode protocol
  * attaches to — so a Socket.IO server, a raw-WebSocket server (and, later, HTTP
  * / GraphQL / SOAP / OData) can coexist on the SAME port:
@@ -158,6 +168,14 @@ interface PortHost {
   sioRoutes: Set<string>
   /** Live raw-WS routes (URL path → its sockets + connection handler). */
   wsRoutes: Map<string, WsRoute>
+  /** Live HTTP-mock routes keyed `<METHOD> <path>` (e.g. `GET /pets`) → the
+   * handler that writes the configured response. Lazily dispatched by an
+   * `on('request')` listener (see {@link WebSocketExecutionService.ensureHttpDispatcher}).
+   * Coexists with the `on('upgrade')` SIO/WS routes on the SAME port. */
+  httpRoutes: Map<string, HttpRoute>
+  /** True once the one-time `on('request')` dispatcher is attached to this host
+   * (so it is not attached twice when a second HTTP route registers). */
+  httpDispatcherAttached?: boolean
   /** When this port also hosts an MQTT broker over WebSocket, the ws path that
    * bridges incoming upgrades into the broker (`aedes.handle(stream)`). At most
    * one MQTT-over-WS bridge per port (one broker per port). */
@@ -469,6 +487,87 @@ class WebSocketExecutionService {
         const connection: ActiveConnection = { requestId, kind: 'websocket-server', port, namespace: path, startTime, messages, serverSettle: finish }
         this.activeConnections.set(requestId, connection)
         logger.info('[WebSocketExecutionService] WebSocket server route listening', { requestId, port, path })
+      })()
+    })
+  }
+
+  /**
+   * SERVER MODE (HTTP mock): host a `<METHOD> <path>` route on
+   * `localhost:<port>` and stay listening until {@link disconnect}. Each inbound
+   * HTTP request matching the route fires `input.onRequest` (which resolves +
+   * writes the configured response and records/counts the hit); a non-matching
+   * request 404s. Shares the port host with any other protocol's routes (one OS
+   * socket per port). Returns once the route stops (Stop / closeAll) — mirrors
+   * {@link listenRawWebSocketServer}, but restorm answers HTTP requests here.
+   *
+   * Kept HTTP-agnostic: `onRequest` is supplied by {@link HTTPExecutionService},
+   * which owns request-context resolution + the `http:*` IPC broadcasts. This
+   * service only owns the shared port host + route lifecycle.
+   */
+  listenHttpServer(input: {
+    requestId: string
+    method: string
+    port: number
+    path: string
+    onRequest: (req: IncomingMessage, res: ServerResponse) => void
+    /** Called once the route stops (Stop button / closeAll). HTTP owns its own
+     * `http:*` progress channel, so the stop signal is delegated here rather than
+     * broadcast on this service's `websocket:*` channel. */
+    onStopped: (error?: string) => void
+  }): Promise<{ success: boolean; listening: boolean; error?: string }> {
+    const { requestId, port, path } = input
+    const method = input.method.toUpperCase()
+    const routeKey = `${method} ${path}`
+    const startTime = Date.now()
+
+    // Unlike the WS/SIO server paths (which return a session result only when the
+    // route STOPS), an HTTP mock has no per-session result to collect — it just
+    // answers each inbound request. So this promise resolves as soon as the route
+    // is REGISTERED (listening) or fails (bind error / collision); the route then
+    // stays alive until disconnect() via its `serverSettle` (which only tears down
+    // + broadcasts, it does not resolve this promise).
+    return new Promise((resolve) => {
+      let settled = false
+      const settle = (result: { success: boolean; listening: boolean; error?: string }): void => {
+        if (settled) return
+        settled = true
+        resolve(result)
+      }
+      // Stop this route (the Stop button / closeAll). Drops the route + frees the
+      // shared port when it was the last one, then signals the owner so it can
+      // broadcast the stop on the HTTP progress channel (not this service's WS one).
+      const serverSettle = (_success: boolean, error?: string): void => {
+        this.releaseServerRoute(requestId)
+        this.activeConnections.delete(requestId)
+        input.onStopped(error)
+      }
+
+      void (async () => {
+        let host: PortHost
+        try {
+          host = await this.acquirePortHost(port)
+        } catch (err) {
+          settle({ success: false, listening: false, error: (err as Error).message || `Failed to listen on port ${port}` })
+          return
+        }
+        // Re-fetch after the await so a concurrent teardown doesn't leave us
+        // attaching a route to a dead server (see the SIO/WS paths).
+        if (this.portHosts.get(port) !== host) {
+          settle({ success: false, listening: false, error: `Port ${port} was torn down before the route could attach` })
+          return
+        }
+        // Collision: the same METHOD + PATH is already mocked on this port.
+        if (host.httpRoutes.has(routeKey)) {
+          settle({ success: false, listening: false, error: this.routeBusyMessage('HTTP', port, routeKey) })
+          return
+        }
+        this.ensureHttpDispatcher(host)
+        host.httpRoutes.set(routeKey, { requestId, handler: input.onRequest })
+        const connection: ActiveConnection = { requestId, kind: 'http-server', port, namespace: routeKey, startTime, messages: [], serverSettle }
+        this.activeConnections.set(requestId, connection)
+        logger.info('[WebSocketExecutionService] HTTP mock route listening', { requestId, port, route: routeKey })
+        // No idle timeout: stay listening until disconnect() (the Stop button).
+        settle({ success: true, listening: true })
       })()
     })
   }
@@ -813,7 +912,7 @@ class WebSocketExecutionService {
         // removed, a later socket 'error' would otherwise be unhandled and throw
         // in the main process. Log + swallow instead.
         httpServer.on('error', (e: Error) => { logger.warn('[WebSocketExecutionService] port host runtime error', { port, error: e.message }) })
-        const host: PortHost = { httpServer, sioRoutes: new Set(), wsRoutes: new Map() }
+        const host: PortHost = { httpServer, sioRoutes: new Set(), wsRoutes: new Map(), httpRoutes: new Map() }
         this.portHosts.set(port, host)
         logger.info('[WebSocketExecutionService] Port host listening', { port })
         resolve(host)
@@ -857,9 +956,37 @@ class WebSocketExecutionService {
     return wss
   }
 
+  /** Attach the one-time HTTP-mock `request` dispatcher on first use. The
+   * PortHost's http server already exists (it backs SIO/WS upgrades); a plain
+   * HTTP request to the port had no handler until now. This routes by
+   * `<METHOD> <path>` to a registered {@link HttpRoute}, or answers 404. SIO/WS
+   * own `upgrade`; HTTP owns `request` — they coexist on one port. Attached at
+   * most once per host (guarded by {@link PortHost.httpDispatcherAttached}). */
+  private ensureHttpDispatcher(host: PortHost): void {
+    if (host.httpDispatcherAttached) return
+    host.httpDispatcherAttached = true
+    host.httpServer.on('request', (req: IncomingMessage, res: ServerResponse) => {
+      const method = (req.method ?? 'GET').toUpperCase()
+      const path = this.parsePathname(req.url ?? '/')
+      const route = host.httpRoutes.get(`${method} ${path}`)
+      if (route) {
+        try {
+          route.handler(req, res)
+        } catch (err) {
+          logger.warn('[WebSocketExecutionService] http mock handler error', { method, path, error: (err as Error).message })
+          if (!res.headersSent) res.writeHead(500, { 'Content-Type': 'text/plain' })
+          res.end('Mock handler error')
+        }
+        return
+      }
+      res.writeHead(404, { 'Content-Type': 'text/plain' })
+      res.end(`No mock route for ${method} ${path}`)
+    })
+  }
+
   /** Total live routes on a port across every protocol (drives port teardown). */
   private hostRouteCount(host: PortHost): number {
-    return host.sioRoutes.size + host.wsRoutes.size + (host.mqttWsBroker ? 1 : 0)
+    return host.sioRoutes.size + host.wsRoutes.size + host.httpRoutes.size + (host.mqttWsBroker ? 1 : 0)
   }
 
   /** Extract just the pathname from a request URL (drop the query). */
@@ -939,6 +1066,10 @@ class WebSocketExecutionService {
         route.sockets.clear()
       }
       host.wsRoutes.delete(conn.namespace)
+    } else if (conn.kind === 'http-server') {
+      // Drop this mock route (the `request` dispatcher stays attached; an empty
+      // httpRoutes map just 404s). `namespace` carries the `<METHOD> <path>` key.
+      host.httpRoutes.delete(conn.namespace)
     }
     this.closePortHostIfIdle(conn.port)
   }
@@ -1979,7 +2110,7 @@ class WebSocketExecutionService {
     } else if (connection.kind === 'mqtt') {
       // force-end stops mqtt.js's auto-reconnect loop and fires 'end' → finish().
       connection.mqttClient?.end(true)
-    } else if (connection.kind === 'socketio-server' || connection.kind === 'websocket-server' || connection.kind === 'mqtt-server') {
+    } else if (connection.kind === 'socketio-server' || connection.kind === 'websocket-server' || connection.kind === 'mqtt-server' || connection.kind === 'http-server') {
       // Stop listening on this route. `serverSettle` runs the matching release
       // (drops the route / closes the broker + frees the port when it was the
       // last route), resolves the run, broadcasts 'completed' and drops the
@@ -2012,6 +2143,7 @@ class WebSocketExecutionService {
       if (!host) continue
       host.sioRoutes.clear()
       host.wsRoutes.clear()
+      host.httpRoutes.clear()
       try { host.mqttWsBroker?.close() } catch { /* already closed */ }
       delete host.mqttWsBroker
       delete host.mqttWsPath
@@ -2128,6 +2260,10 @@ class WebSocketExecutionService {
     if (connection.kind === 'websocket-server') {
       return connection.port !== undefined && connection.namespace !== undefined
         && this.portHosts.get(connection.port)?.wsRoutes.has(connection.namespace) === true
+    }
+    if (connection.kind === 'http-server') {
+      return connection.port !== undefined && connection.namespace !== undefined
+        && this.portHosts.get(connection.port)?.httpRoutes.has(connection.namespace) === true
     }
     return connection.socket?.connected === true
   }

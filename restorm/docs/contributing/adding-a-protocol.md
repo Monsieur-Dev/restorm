@@ -28,6 +28,7 @@ Before you open the PR, all of these must be true:
 - [ ] **Code-snippet examples are relevant** — the request panel's "code examples" tab renders a correct, env-/Handlebars-resolved snippet for the protocol in EVERY listed language (no empty output, no literal `{{var}}`, the right host/method/headers). Add a `CodeSnippetGenerator` template + wire its template variables, and verify each entry — [Section 8](#section-8--ui-verifications-the-e2e-must-hit).
 - [ ] Response history builder added in `ResponseHistoryService`.
 - [ ] **Scenario-graph integration complete** — action nodes, MCP, the request↔scenario links, demo scenario + goldens, palette/Bestiary — [Section 13](#section-13--scenario-graph-integration-streaming--bound-protocols) (the part most easily forgotten).
+- [ ] **Server / long-running action = a DISTINCT scenario node (listen + close) + reference scenario + listening beam** — [Section 14](#section-14--server--long-running-actions-scenario-node-reference-scenario-listening-beam) (a server is its OWN node kind with `connected` / `served` / `done` ports and NO `response` — never a request-with-a-flag; it MUST appear in `scenarios-e2e-reference-tests.restorm` as a Main sub-scenario with both goldens regenerated, AND its running beam MUST orbit BOTH the sidebar badge AND the workbench-tab badge).
 - [ ] User-facing + dev docs updated — [Section 10](#section-10--documentation-checklist).
 - [ ] Protocol PR template ([Section 11](#section-11--pr-review-checklist)) populated and ticked.
 
@@ -740,6 +741,96 @@ mechanics. **A request-bound protocol shows up in a scenario one of two ways:**
 > `components/Scenario/nodes/SocketioNodeBoxes.tsx` +
 > `WebsocketNodeBoxes.tsx`, `mcp/tools/scenarioRun.ts` (preview resolvers),
 > `tests/e2e/bdd/{socketio,websocket}-execution/`, `tests/docker/ws-echo-server/`.
+
+---
+
+## Section 14 — Server / long-running actions: scenario node, reference scenario, listening beam
+
+A protocol that can **host a server** (an HTTP mock, a Socket.IO / raw-WS / MQTT
+server) or otherwise **runs long-lived** carries three extra obligations beyond
+Section 13. All were real gaps caught in validation — they are now mandatory.
+
+### 14.1 — A server is a DISTINCT long-lived scenario node, never a request-with-a-flag
+
+A server is **fundamentally different** from a one-shot request: a request is a
+client that calls out once and returns a `response`; a server **listens
+indefinitely** and the scenario must NOT complete until it is stopped (the action
+stays in-progress, exactly like a WS server). So a server gets its **own scenario
+node kind** with its **own executor and engine/scheduler path** — do NOT reuse
+the one-shot request node's execution with a `server` flag, and do NOT share
+request-execution code between them. (The only acceptable sharing is the GUI /
+editor box, since the panels may look alike — and only if it genuinely helps.)
+
+Concretely, mirror the HTTP mock's `httpListen` / `httpClose` pair (which itself
+mirrors `websocketConnect` / `websocketClose`):
+
+- A **listen** kind (e.g. `httpListen`) bound to the `server: true` request.
+  Ports: **`connected`** (a PURE SIGNAL — fires once the server is listening),
+  **`served`** (`flow: 'both'` — re-emits each served request's
+  `{ request, response }` data, the analogue of a received frame), and the
+  universal **`done`** (fires when the server STOPS). There is **NO `response`
+  output** — a server serves, it does not call out.
+- A **close** kind (e.g. `httpClose`) that stops the server named by
+  `config.connectionNodeId`, firing that listen node's `done`.
+- The listen executor hands the scheduler an `openSocketioConnect` scope action
+  with the protocol's own `transport` discriminator, so the run stays alive
+  (`pendingReentry`) until the close (or a Stop). Route the transport's
+  `onMessage` to the right output port in the scheduler.
+- Wire EVERY kind-enumeration site (the type-checker enforces most): the
+  `ScenarioNodeKind` union, `scenarioNodePorts`, `scenarioKindDocs`, the
+  node-box registry + a box component, `scenarioNodeCatalogue`, the scenario
+  **palette** ("Serveur HTTP" / "Fermeture HTTP" — a server request entry that
+  drops the bound listen node + a close action section), the executor registry,
+  the engine connect-bridge dispatch, the MCP `SCENARIO_KINDS`, and the
+  `scenario.nodes.*` + `scenario.help.*` strings across **all 27 locales**
+  (`scenario.help.*` is test-enforced).
+
+### 14.2 — Add it to the reference scenarios (`scenarios-e2e-reference-tests.restorm`)
+
+The server MUST appear in
+`restorm/tests/e2e/samples/scenarios-e2e-reference-tests.restorm` as a **Main
+sub-scenario** that both **hosts in-scenario AND is consumed in the same run**.
+The canonical shape (the HTTP Server sub-scenario):
+
+- the **listen** node → a short `wait` wired on its **`connected`** output (so the
+  consumer only fires once the server is up, keeping the run-log deterministic) →
+  a **consumer** request node that fetches the server → a `log`;
+- a **close** node wired on the listen node's **`served`** output (stop once a
+  request has been served), and optionally a `log` on the listen node's `done`.
+- A `runScenario` node in **Main** calling the sub-scenario, chained `done` → `in`
+  after the previous server sub-scenario, plus a standalone Examples row in
+  `tests/e2e/bdd/scenario-runlog/features/scenario-runlog.feature`.
+
+Then regenerate **both** goldens and **verify each without the UPDATE flag**
+(a golden is written from whatever the app emits — including a recorded failure —
+so re-run clean + READ it):
+
+- run-log: `UPDATE_RUNLOG_GOLDEN=1` (then re-run plain + read — confirm the listen
+  node reports `connected`, the consumer receives the served response, the close
+  stops it, and there is no `EADDRINUSE` and no `response` output on the server);
+- suggestions: `UPDATE_SUGGESTIONS_GOLDEN=1`, regenerated **LAST** (it compares
+  node IDs exactly — do not re-edit the `.restorm` after).
+
+Pick a port distinct from the others (SIO `3001`, raw-WS `3002`, MQTT, the HTTP
+mock's `8077`) so two server sub-scenarios never collide.
+
+### 14.3 — The running beam orbits BOTH badges
+
+The yellow→green "running" beam that signals an open server / connection MUST
+spin around the protocol badge in **both** places it appears:
+
+- the **sidebar tree** row (`FolderToListView`), and
+- the **workbench tab** title (`RestormWorkbench`).
+
+Drive both from the **same listening state**. The shared mechanism is
+`ServerListeningBadge` (in `components/common/`), which wraps a badge in the
+generic `BeamWrap` and lights it while the request is listening — it ORs every
+protocol's listening store (`websocketListeningStore` / `grpcListeningStore` /
+`httpListeningStore`, all fed by the per-protocol `*:request-progress` stream).
+A new long-running protocol adds its listening store (mirror the existing ones)
+to that OR, and reuses `ServerListeningBadge` in both render sites — never a
+bespoke per-protocol badge. Shipping the beam on only the sidebar (the tab badge
+left static) is a fault, not a nit.
 
 ---
 

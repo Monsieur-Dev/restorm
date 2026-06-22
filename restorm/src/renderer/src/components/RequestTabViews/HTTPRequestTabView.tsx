@@ -9,6 +9,7 @@ import {
   SplitView,
   Pane,
   ControlGroup,
+  InputBox,
   eventBus,
   logger,
   getContrastColor,
@@ -50,6 +51,10 @@ import { HeaderHoverTooltip } from '../MainView/HeaderHoverTooltip'
 
 const methodSelectWrapperStyle: CSSProperties = { width: 90, flexShrink: 0 }
 const urlInputWrapperStyle: CSSProperties = { flex: 1, minWidth: 0 }
+// SERVER MODE (HTTP mock) URL-section pieces: a fixed "localhost:" / "/" label
+// and the narrow numeric port field, mirroring the WebSocket server layout.
+const serverHostLabelStyle: CSSProperties = { display: 'flex', alignItems: 'center', padding: '0 4px', whiteSpace: 'nowrap', opacity: 0.8 }
+const serverPortWrapperStyle: CSSProperties = { width: 80, flexShrink: 0 }
 
 export interface HTTPRequestTabViewProps {
   /** An HTTPRequest or an AuthenticationRequest. The latter inherits
@@ -156,6 +161,10 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
   const [isSending, setIsSending] = useState<boolean>(false)
   const [httpResponse, setHttpResponse] = useState<HTTPResponse | null>(null)
   const [historyRefreshKey, setHistoryRefreshKey] = useState(0)
+  // SERVER MODE (HTTP mock): whether restorm is hosting this route + how many
+  // requests it has served while listening.
+  const [isListening, setIsListening] = useState<boolean>(false)
+  const [servedCount, setServedCount] = useState<number>(0)
 
   // Lift the SplitView's per-pane collapsed state up into
   // HTTPRequestTabView so it survives the SplitView's remount when
@@ -450,6 +459,12 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
     }
   }, [body, bodyMode, bodyFilePath, request])
 
+  // HTTP-mock fields, read once with the HTTP-only cast (an AuthenticationRequest
+  // reuses this view and never has them, so they read as undefined). Extracted
+  // here so the effect below can depend on plain values, not a cast expression.
+  const mockServerFlag = (request as HTTPRequest).server
+  const mockStatusValue = (request as HTTPRequest).mockStatus
+
   // Send full request data to backend for URL resolution and code snippets
   useEffect(() => {
     const requestId = request.id
@@ -477,9 +492,15 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
       headers: toKeyValueData(request.headers),
       params: toKeyValueData(request.params),
       pathParams: request.pathParams ? toKeyValueData(request.pathParams) : [],
-      body: bodyData
+      body: bodyData,
+      // HTTP mock server: host flag + served status so the main process can
+      // listen + answer with the configured response. `server`/`mockStatus` are
+      // HTTP-only — an AuthenticationRequest (which reuses this view) never has
+      // them, so they read as undefined.
+      ...(mockServerFlag !== undefined ? { server: mockServerFlag } : {}),
+      ...(mockStatusValue !== undefined ? { mockStatus: mockStatusValue } : {})
     }, sourceIdRef.current)
-  }, [request.id, request.type, url, method, request.headers, request.params, request.pathParams, body, bodyMode, bodyFilePath, request.body, toKeyValueData])
+  }, [request.id, request.type, url, method, request.headers, request.params, request.pathParams, body, bodyMode, bodyFilePath, request.body, mockServerFlag, mockStatusValue, toKeyValueData])
   
   // Stable empty array for components that get variables via their own variableId
   const emptyVariables = useMemo<VariableDefinition[]>(() => [], [])
@@ -758,6 +779,73 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
       })
   }, [request.id])
 
+  // ----------------------------------------------------------------------
+  // SERVER MODE: restorm acts as a local HTTP mock server. The host is forced
+  // to localhost — only the port + path are user-configurable (alongside the
+  // existing METHOD selector) — and the Send button becomes a Listen↔Stop
+  // toggle. The configured response (status/headers/body) is served verbatim
+  // (Handlebars-resolved at serve time) to every matching inbound request.
+  // ----------------------------------------------------------------------
+  const isServer = mockServerFlag === true
+  const { serverPort, serverPath } = useMemo(() => {
+    const stripped = url.replace(/^[a-z]+:\/\//i, '')
+    const slash = stripped.indexOf('/')
+    const hostPort = slash >= 0 ? stripped.slice(0, slash) : stripped
+    const path = slash >= 0 ? stripped.slice(slash + 1) : ''
+    const port = hostPort.split(':')[1] ?? ''
+    return { serverPort: port, serverPath: path }
+  }, [url])
+  const composeServerUrl = useCallback((port: string, pathPart: string): string => {
+    const cleanPath = pathPart.replace(/^\/+/, '')
+    return `localhost:${port}/${cleanPath}`
+  }, [])
+  const setServerPort = useCallback((p: string): void => {
+    setUrl(composeServerUrl(p.replace(/[^0-9]/g, ''), serverPath))
+  }, [composeServerUrl, serverPath])
+  const setServerPath = useCallback((p: string): void => {
+    setUrl(composeServerUrl(serverPort, p))
+  }, [composeServerUrl, serverPort])
+
+  // Listen = start hosting the mock route. It stays up (no timeout) until Stop /
+  // file close / quit; the promise resolves when the route stops.
+  const handleListen = useCallback((): void => {
+    const requestId = request.id
+    if (!requestId || isListening) return
+    setServedCount(0)
+    void window.restorm?.http.listen(requestId)
+      .then((res) => {
+        if (res.error) {
+          toasterService.push('app', { title: t('http.server.listenFailed'), body: res.error, durationMs: 10000 })
+          logger.error('HTTP mock server failed to listen', { error: res.error })
+        }
+      })
+      .catch((err: unknown) => { logger.error('HTTP mock server listen error', { error: String(err) }) })
+  }, [request.id, isListening, t])
+
+  const handleStop = useCallback((): void => {
+    void window.restorm?.http.stop(request.id)
+  }, [request.id])
+
+  // Track listening state + served count for the hosted mock route.
+  useEffect(() => {
+    if (!isServer) return undefined
+    const requestId = request.id
+    let cancelled = false
+    void window.restorm?.http.isListening(requestId).then((listening) => {
+      if (!cancelled) setIsListening(listening)
+    })
+    const unsubProgress = window.restorm?.http.onProgress(({ requestId: rid, status }) => {
+      if (rid !== requestId) return
+      if (status === 'started') { setIsListening(true); setServedCount(0) }
+      if (status === 'completed' || status === 'cancelled' || status === 'error') setIsListening(false)
+    })
+    const unsubServed = window.restorm?.http.onServerServed(({ requestId: rid, count }) => {
+      if (rid !== requestId) return
+      setServedCount(count)
+    })
+    return () => { cancelled = true; unsubProgress?.(); unsubServed?.() }
+  }, [isServer, request.id])
+
   // Request content (SplitView with Panes). Every Pane provides an
   // explicit `collapsed` from `panelCollapsed` → SplitView runs in
   // controlled mode (see ECUI `collapsedLogic.ts`). `onCollapsedChange`
@@ -941,41 +1029,82 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
           data-testid="http-request-method-select"
         />
       </div>
-      <HeaderHoverTooltip label={resolvedUrl || url} suppressed={!(resolvedUrl || url)} className="url-container-stretch">
-        <div style={urlInputWrapperStyle} data-testid="url-container" data-url-resolved={resolvedUrl ? 'true' : 'false'} data-resolved-url={resolvedUrl || url}>
-          <RestormVariableInputBox
-            value={url}
-            onChange={(value: string) => { setUrl(value) }}
-            variables={urlVariables}
-            helpers={handlebarsHelpers}
-            placeholder={t('requestTab.urlPlaceholder')}
-            data-testid="http-request-url-input"
-          />
-        </div>
-      </HeaderHoverTooltip>
-      {/* One persistent BeamWrap around both states so the beam finishes its
-       * lap when the request ends (the cancel↔send toggle inside doesn't remount
-       * the wrapper, which would otherwise cut the beam mid-orbit). */}
-      <BeamWrap active={isSending} size={22} borderWidth={1.5}>
-        {isSending ? (
-          <Button
-            icon="close"
-            onClick={handleCancel}
-            options={{ title: t('requestTab.cancel'), ariaLabel: t('requestTab.cancel') }}
-            data-testid="http-request-cancel-button"
-          />
-        ) : (
-          <SendButtonEnvSwitcher>
-            <Button
-              icon="send"
-              onClick={handleSend}
-              {...(sendButtonStyle ? { style: sendButtonStyle } : { emphasis: 1 })}
-              options={{ title: t('requestTab.send'), ariaLabel: t('requestTab.send') }}
-              data-testid="http-request-send-button"
+      {isServer ? (
+        // SERVER MODE: localhost-fixed host + port + path. The METHOD selector
+        // above doubles as the route's method.
+        <>
+          <span style={serverHostLabelStyle}>localhost:</span>
+          <div style={serverPortWrapperStyle}>
+            <InputBox
+              value={serverPort}
+              onChange={setServerPort}
+              options={{ placeholder: '8080' }}
+              data-testid="http-server-port-input"
             />
-          </SendButtonEnvSwitcher>
-        )}
-      </BeamWrap>
+          </div>
+          <span style={serverHostLabelStyle}>/</span>
+          <div style={urlInputWrapperStyle}>
+            <InputBox
+              value={serverPath}
+              onChange={setServerPath}
+              options={{ placeholder: 'pets' }}
+              data-testid="http-server-path-input"
+            />
+          </div>
+        </>
+      ) : (
+        <HeaderHoverTooltip label={resolvedUrl || url} suppressed={!(resolvedUrl || url)} className="url-container-stretch">
+          <div style={urlInputWrapperStyle} data-testid="url-container" data-url-resolved={resolvedUrl ? 'true' : 'false'} data-resolved-url={resolvedUrl || url}>
+            <RestormVariableInputBox
+              value={url}
+              onChange={(value: string) => { setUrl(value) }}
+              variables={urlVariables}
+              helpers={handlebarsHelpers}
+              placeholder={t('requestTab.urlPlaceholder')}
+              data-testid="http-request-url-input"
+            />
+          </div>
+        </HeaderHoverTooltip>
+      )}
+      {isServer ? (
+        // Listen↔Stop toggle (Send has no meaning when hosting a mock).
+        <BeamWrap active={isListening} size={22} borderWidth={1.5}>
+          <Button
+            icon={isListening ? 'debug-disconnect' : 'plug'}
+            onClick={isListening ? handleStop : handleListen}
+            {...(isListening ? {} : { emphasis: 1 })}
+            options={{
+              title: isListening ? t('http.server.stopListening') : t('http.server.startListening'),
+              ariaLabel: isListening ? t('http.server.stopListening') : t('http.server.startListening')
+            }}
+            data-testid="http-server-listen-button"
+          />
+        </BeamWrap>
+      ) : (
+        // One persistent BeamWrap around both states so the beam finishes its
+        // lap when the request ends (the cancel↔send toggle inside doesn't
+        // remount the wrapper, which would otherwise cut the beam mid-orbit).
+        <BeamWrap active={isSending} size={22} borderWidth={1.5}>
+          {isSending ? (
+            <Button
+              icon="close"
+              onClick={handleCancel}
+              options={{ title: t('requestTab.cancel'), ariaLabel: t('requestTab.cancel') }}
+              data-testid="http-request-cancel-button"
+            />
+          ) : (
+            <SendButtonEnvSwitcher>
+              <Button
+                icon="send"
+                onClick={handleSend}
+                {...(sendButtonStyle ? { style: sendButtonStyle } : { emphasis: 1 })}
+                options={{ title: t('requestTab.send'), ariaLabel: t('requestTab.send') }}
+                data-testid="http-request-send-button"
+              />
+            </SendButtonEnvSwitcher>
+          )}
+        </BeamWrap>
+      )}
     </ControlGroup>
     </div>
   )
@@ -1008,6 +1137,22 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
       }]
     : undefined
 
+  // SERVER MODE: the response panel shows the live listening state + served
+  // count instead of a client response (a mock SERVER has no single response).
+  const serverResponseContent = isServer ? (
+    <div
+      data-testid="http-server-served-banner"
+      style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 12px' }}
+    >
+      <span className={`codicon codicon-${isListening ? 'broadcast' : 'circle-slash'}`} aria-hidden="true" />
+      <span>
+        {isListening
+          ? t('http.server.served', { count: servedCount, defaultValue: 'Listening — {{count}} request(s) served' })
+          : t('http.server.notListening', 'Not listening')}
+      </span>
+    </div>
+  ) : undefined
+
   return (
     <>
       <BaseRequestTabView
@@ -1019,10 +1164,10 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
         notes={request.notes}
         onNotesChange={(md): void => { updateReactiveProperty(request, 'notes', md) }}
         isLoading={isSending}
-        showResponse={httpResponse !== null}
-        infosContent={infosContent}
-        responseContent={responseContent}
-        jsonData={jsonData}
+        showResponse={isServer ? isListening : httpResponse !== null}
+        infosContent={isServer ? undefined : infosContent}
+        responseContent={isServer ? serverResponseContent : responseContent}
+        jsonData={isServer ? undefined : jsonData}
         {...(additionalRequestTabs ? { additionalRequestTabs } : {})}
       />
       <ResponseHistoryModal

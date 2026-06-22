@@ -11,6 +11,7 @@
 import { logger, getSettingsService, isSettingsServiceInitialized } from 'electron-core-ui/main'
 import { collectionStore } from '../services/CollectionStore'
 import { websocketExecutionService } from '../services/WebSocketExecutionService'
+import { httpExecutionService } from '../services/HTTPExecutionService'
 import { grpcExecutionService } from '../services/GRPCExecutionService'
 import { flushRequestStateToContext } from '../mcp/tools/execute'
 import { installScenarioValueResolvers } from '../../shared/scenarioValueResolvers'
@@ -188,6 +189,12 @@ export class ScenarioEngine {
           flushRequestStateToContext(bound as unknown as Parameters<typeof flushRequestStateToContext>[0])
         }
         if (req.transport === 'grpc') return grpcExecutionService.connectStreaming(req)
+        // HTTP mock server: a DISTINCT long-lived listener with its OWN path (an
+        // `httpListen` node, never a one-shot `httpRequest`). It HOSTS the bound
+        // `server: true` request's METHOD+PATH+port and re-emits each served
+        // request on `served`; `done` fires when it stops. No client branch — an
+        // httpListen node only ever hosts.
+        if (req.transport === 'http-server') return httpExecutionService.connectStreamingHttpServer(req)
         // A request flagged `server` HOSTS the server / broker (restorm acts as
         // the server); otherwise it connects as a client — same split for raw WS,
         // Socket.IO and MQTT.

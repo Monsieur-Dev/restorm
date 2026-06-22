@@ -14,8 +14,9 @@ export interface ScenarioConnectionRef {
   id: string
   name: string
   /** The connect node's kind — a send/close picker shows only its own transport's
-   * connections (`socketioConnect` vs `websocketConnect` vs `grpcConnect`). */
-  kind: 'socketioConnect' | 'websocketConnect' | 'grpcConnect' | 'mqttConnect'
+   * connections (`socketioConnect` vs `websocketConnect` vs `grpcConnect`;
+   * `httpListen` for a hosted HTTP mock server). */
+  kind: 'socketioConnect' | 'websocketConnect' | 'grpcConnect' | 'mqttConnect' | 'httpListen'
   /** The connect node's linked request event — pre-fills a send node's channel. */
   defaultChannel?: string
   /** The connect node's linked request message — pre-fills a send node's payload. */

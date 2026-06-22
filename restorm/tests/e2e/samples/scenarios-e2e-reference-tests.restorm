@@ -958,6 +958,25 @@ collections:
                 position:
                   x: 580
                   'y': 2000
+              - id: 99db48aa-9a1f-401e-b6ca-29da52b5587a
+                kind: runScenario
+                config:
+                  scenarioId: dd98c54e-0580-4140-bf2a-54200b42a07a
+                  label: HTTP Server
+                inputs:
+                  - id: in
+                    name: ''
+                    dataType: any
+                    flow: signal
+                outputs:
+                  - id: result
+                    name: result
+                    dataType: any
+                    role: response
+                    flow: both
+                position:
+                  x: 800
+                  'y': 2000
             edges:
               - id: e-1780418276241-f2q3hz
                 from:
@@ -1254,6 +1273,13 @@ collections:
                   portId: done
                 to:
                   nodeId: c0e256d1-88c4-4263-93ba-49d91bf20858
+                  portId: in
+              - id: e-http-1782090379-466e38
+                from:
+                  nodeId: c0e256d1-88c4-4263-93ba-49d91bf20858
+                  portId: done
+                to:
+                  nodeId: 99db48aa-9a1f-401e-b6ca-29da52b5587a
                   portId: in
             id: c1573ce0-985c-44b5-b5d4-e081de2d4303
             name: Main
@@ -19304,8 +19330,8 @@ collections:
                         dataType: any
                         flow: both
                     position:
-                      x: 12
-                      'y': 259
+                      x: 418
+                      'y': 247
                   - id: b5757e26-c59a-46c8-8d7b-d4246c0378d4
                     kind: mqttSend
                     config:
@@ -19321,8 +19347,8 @@ collections:
                         dataType: any
                     outputs: []
                     position:
-                      x: 419
-                      'y': 245
+                      x: 825
+                      'y': 233
                   - id: c6b21f87-18b8-4fcd-8d06-ad8088e55ed3
                     kind: log
                     config:
@@ -19340,8 +19366,8 @@ collections:
                         dataType: any
                     outputs: []
                     position:
-                      x: 419
-                      'y': 12
+                      x: 825
+                      'y': 444
                   - id: bdf0e643-f7f7-4ff1-b082-4de2419174be
                     kind: wait
                     config:
@@ -19356,8 +19382,8 @@ collections:
                         dataType: duration
                     outputs: []
                     position:
-                      x: 813
-                      'y': 283
+                      x: 1219
+                      'y': 271
                   - id: 330c8b06-d4b3-461f-93a7-3d033532e8d7
                     kind: mqttClose
                     config:
@@ -19369,8 +19395,8 @@ collections:
                         flow: signal
                     outputs: []
                     position:
-                      x: 1177
-                      'y': 273
+                      x: 1583
+                      'y': 261
                   - id: 0ef1eb56-c399-4145-afea-b1f798409246
                     kind: output
                     config:
@@ -19385,14 +19411,15 @@ collections:
                         dataType: any
                     outputs: []
                     position:
-                      x: 419
-                      'y': 456
+                      x: 825
+                      'y': 12
                   - id: 52cc48a3-a169-43d3-b115-2436ee065e08
                     kind: mqttConnect
                     config:
                       requestId: 00565580-0c6a-444d-8655-dd2551ddc754
                       connectionName: Broker
                       label: Broker listen
+                      id: 85a8ba9d-ad54-4b9b-84bf-aaf4f5193ea8
                     inputs:
                       - id: in
                         name: ''
@@ -19408,8 +19435,8 @@ collections:
                         dataType: any
                         flow: both
                     position:
-                      x: 0
-                      'y': 0
+                      x: 12
+                      'y': 247
                   - id: 9915ab4a-4218-4187-ae66-541e46cf1e0c
                     kind: mqttClose
                     config:
@@ -19422,8 +19449,8 @@ collections:
                         flow: signal
                     outputs: []
                     position:
-                      x: 0
-                      'y': 0
+                      x: 1952
+                      'y': 261
                 edges:
                   - id: 77eaca7d-eb26-4798-9e50-0bb13b1dd601
                     from:
@@ -19500,6 +19527,182 @@ collections:
                     id: 00565580-0c6a-444d-8655-dd2551ddc754
                     server: true
                     event: restorm/demo/#
+              - type: scenario
+                tags: []
+                params: []
+                nodes:
+                  - id: c5f2d375-cf36-4586-a0f6-fbc39922bc2e
+                    kind: httpListen
+                    config:
+                      requestId: a1b07338-e892-41eb-9ea8-fe615933ae94
+                      connectionName: Mock Server
+                      label: start mock server
+                      id: 3ce455bc-d403-4cf7-930c-c0dbbd60339f
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                    outputs:
+                      - id: connected
+                        name: connected
+                        dataType: any
+                        flow: signal
+                      - id: served
+                        name: served
+                        dataType: any
+                        flow: both
+                    position:
+                      x: 12
+                      'y': 231
+                    note: restorm hosts GET /pets on localhost:8077 (listens until closed)
+                  - id: af2ecce3-8f3f-402d-9b1a-d22ecf9e5e93
+                    kind: httpRequest
+                    config:
+                      requestId: cea45242-fd09-4053-864f-2ee81d12428d
+                      label: call the mock
+                      id: b2b4a625-c0b2-4bc9-90d3-0437310a465f
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: env
+                        name: env
+                        dataType: any
+                        flow: value
+                    outputs:
+                      - id: response
+                        name: response
+                        dataType: response
+                        role: response
+                        flow: both
+                    position:
+                      x: 500
+                      'y': 100
+                    note: consumes the hosted mock
+                  - id: 3766adfa-1d76-4753-8679-345e14300e71
+                    kind: log
+                    config:
+                      message: réponse du consumer reçue
+                      level: info
+                      runOnEachEvent: false
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 860
+                      'y': 80
+                  - id: e9fb840a-7c92-4079-b80a-78e8962cbe63
+                    kind: httpClose
+                    config:
+                      connectionNodeId: c5f2d375-cf36-4586-a0f6-fbc39922bc2e
+                      label: stop the mock server
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                    outputs: []
+                    position:
+                      x: 500
+                      'y': 280
+                    note: stops the server once it has served a request
+                  - id: 0918ff28-1690-4ede-96bb-117a9019f04b
+                    kind: log
+                    config:
+                      message: serveur HTTP arrêté
+                      level: info
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 500
+                      'y': 460
+                edges:
+                  - id: a3a25a8e-4f83-4ced-8f32-491976526ebe
+                    from:
+                      nodeId: af2ecce3-8f3f-402d-9b1a-d22ecf9e5e93
+                      portId: response
+                    to:
+                      nodeId: 3766adfa-1d76-4753-8679-345e14300e71
+                      portId: data
+                    selector: .
+                  - id: a8607b2b-7be7-477a-9956-3b1d8136c5a3
+                    from:
+                      nodeId: c5f2d375-cf36-4586-a0f6-fbc39922bc2e
+                      portId: served
+                    to:
+                      nodeId: e9fb840a-7c92-4079-b80a-78e8962cbe63
+                      portId: in
+                  - id: 6883ec43-e86c-4a5d-8ef7-e20f39bcc200
+                    from:
+                      nodeId: c5f2d375-cf36-4586-a0f6-fbc39922bc2e
+                      portId: done
+                    to:
+                      nodeId: 0918ff28-1690-4ede-96bb-117a9019f04b
+                      portId: in
+                  - id: e-1782098872507-1l51oz
+                    from:
+                      nodeId: c5f2d375-cf36-4586-a0f6-fbc39922bc2e
+                      portId: connected
+                    to:
+                      nodeId: af2ecce3-8f3f-402d-9b1a-d22ecf9e5e93
+                      portId: in
+                id: dd98c54e-0580-4140-bf2a-54200b42a07a
+                name: HTTP Server
+                items:
+                  - type: http
+                    documentation: ''
+                    tags:
+                      - http
+                      - server
+                    id: a1b07338-e892-41eb-9ea8-fe615933ae94
+                    name: Mock Server
+                    method: GET
+                    url: localhost:8077/pets
+                    server: true
+                    mockStatus: 200
+                    headers:
+                      - key: Content-Type
+                        value:
+                          type: string
+                          value: application/json
+                        enabled: true
+                    params: []
+                    pathParams: []
+                    body:
+                      type: text
+                      content: '{"pets":["Rex","Whiskers"]}'
+                  - type: http
+                    documentation: ''
+                    tags:
+                      - http
+                    id: cea45242-fd09-4053-864f-2ee81d12428d
+                    name: Mock Consumer
+                    method: GET
+                    url: http://localhost:8077/pets
+                    headers: []
+                    params: []
+                    pathParams: []
           - type: scenario
             tags: []
             params: []

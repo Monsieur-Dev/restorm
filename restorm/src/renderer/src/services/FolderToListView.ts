@@ -9,12 +9,19 @@ import type { Folder, FolderItem, HTTPRequest, EnvironmentFolder, GraphQLRequest
 import { isFolder, isRequest, isHTTPRequest, isEnvironmentFolder, isAnyFolder, isGraphQLRequest, isGrpcRequest, isSoapRequest, isWebSocketRequest, isODataRequest, isAuthenticationRequest, isScenario } from '../../../shared/types/collections'
 import React, { type ReactNode } from 'react'
 import { ScenarioRunningBadge } from '../components/common/ScenarioRunningBadge'
-import { WebsocketListeningBadge } from '../components/common/WebsocketListeningBadge'
+import { ServerListeningBadge } from '../components/common/ServerListeningBadge'
 import { RequestExecutingBadge } from '../components/common/RequestExecutingBadge'
 
 /** Wrap a request badge so it runs the running-beam while the request executes. */
 function withExecutingBeam(requestId: string, badge: ReactNode): ReactNode {
   return badge != null ? React.createElement(RequestExecutingBadge, { requestId }, badge) : badge
+}
+
+/** Wrap a long-running / server request badge so the border-beam orbits it while
+ * the request is listening (HTTP mock host, WS/SIO/MQTT server, gRPC stream) —
+ * the same beam shown on the workbench tab, driven by the same listening state. */
+function withListeningBeam(requestId: string, badge: ReactNode): ReactNode {
+  return badge != null ? React.createElement(ServerListeningBadge, { requestId }, badge) : badge
 }
 import { SecretResolvingSpinner } from '../components/common/SecretResolvingSpinner'
 import { SecretErrorIndicator } from '../components/common/SecretErrorIndicator'
@@ -99,16 +106,27 @@ function httpRequestToListViewItem(
   request: HTTPRequest,
   options: FolderToListViewOptions
 ): ListViewItemData {
+  // An HTTP mock SERVER (server === true) renders the SRV capsule variant of its
+  // method badge so it's distinct from a normal request in the tree — mirrors
+  // the WebSocket/Socket.IO server entries. The method doubles as the route's
+  // method, so it stays the badge label.
+  const badge = request.server === true
+    ? options.renderProtocolBadge?.(request.method, undefined, 'server') ?? options.renderMethodBadge(request.method)
+    : options.renderMethodBadge(request.method)
   const decorated = applyDeprecatedDimming(
     request,
     options,
     decorateRequestTitle(request.name, request, options),
-    options.renderMethodBadge(request.method)
+    badge
   )
   return {
     id: request.id,
     title: decorated.title,
-    icon: withExecutingBeam(request.id, decorated.icon)
+    // A mock SERVER beams while listening (like WS/SIO/MQTT); a normal request
+    // beams only while it executes.
+    icon: request.server === true
+      ? withListeningBeam(request.id, decorated.icon)
+      : withExecutingBeam(request.id, decorated.icon)
   }
 }
 
@@ -168,7 +186,7 @@ function websocketRequestToListViewItem(
   return {
     id: request.id,
     title: request.name,
-    icon: badge ? React.createElement(WebsocketListeningBadge, { requestId: request.id }, badge) : badge
+    icon: withListeningBeam(request.id, badge)
   }
 }
 

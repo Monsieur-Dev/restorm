@@ -36,6 +36,7 @@ import {
   contextGetCodeSnippetsArgs,
   requestResolveUrlArgs,
   httpExecuteArgs, httpCancelArgs, httpIsActiveArgs,
+  httpListenArgs, httpStopArgs, httpIsListeningArgs,
   odataExecuteArgs, odataCancelArgs, odataIsActiveArgs,
   authPrefetchArgs,
   graphqlExecuteArgs, graphqlCancelArgs, graphqlIsActiveArgs,
@@ -823,6 +824,22 @@ export function registerRestormIPC(deps: {
 
   validatedHandle('http:is-active', httpIsActiveArgs, (_event, [requestId]) => {
     return httpExecutionService.isActive(requestId)
+  })
+
+  // HTTP mock server (server mode): start hosting a local mock route, stop it,
+  // and check whether it is currently listening. `http:listen` resolves as soon
+  // as the route is listening (or fails to bind / collides); the route then
+  // stays up until `http:stop` (the stop signal arrives via http:request-progress).
+  validatedHandle('http:listen', httpListenArgs, async (_event, [requestId]) => {
+    return await httpExecutionService.listen(requestId)
+  })
+
+  validatedHandle('http:stop', httpStopArgs, (_event, [requestId]) => {
+    return httpExecutionService.stopListening(requestId)
+  })
+
+  validatedHandle('http:is-listening', httpIsListeningArgs, (_event, [requestId]) => {
+    return httpExecutionService.isListening(requestId)
   })
 
   // ==========================================================================

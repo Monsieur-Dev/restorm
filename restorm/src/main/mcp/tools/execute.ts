@@ -530,7 +530,7 @@ export function registerExecutionTools(mcp: McpService): void {
       if (target === null || !isRequest(target)) {
         return errorReply(`No request with id ${id}`)
       }
-      const req = target as Request
+      const req = target
       const timeoutMs = typeof argRecord['timeoutMs'] === 'number' ? argRecord['timeoutMs'] : null
 
       switch (req.type) {
@@ -574,7 +574,7 @@ export function registerExecutionTools(mcp: McpService): void {
       if (target === null || !isRequest(target)) {
         return errorReply(`No request with id ${id}`)
       }
-      const req = target as Request
+      const req = target
 
       let cancelled: boolean
       switch (req.type) {
@@ -640,7 +640,7 @@ export function registerExecutionTools(mcp: McpService): void {
             error: { code: 'UNKNOWN_REQUEST', message: `No request with id ${id}; stopped early at index ${results.length}` }
           })
         }
-        const req = target as Request
+        const req = target
         let result: unknown
         switch (req.type) {
           case 'http':
@@ -776,7 +776,7 @@ export function registerExecutionTools(mcp: McpService): void {
 
       const target: FolderItem | null = collectionStore.findById(id)
       if (target === null || !isRequest(target)) return errorReply(`No request with id ${id}`)
-      const req = target as Request
+      const req = target
       if (req.type !== 'websocket') {
         return errorReply(`send_message: request ${id} is not a WebSocket/Socket.IO request (type "${req.type}")`)
       }
