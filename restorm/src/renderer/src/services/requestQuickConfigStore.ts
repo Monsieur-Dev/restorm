@@ -17,7 +17,8 @@
 
 import { eventBus } from 'electron-core-ui/renderer'
 import type { QuickConfig, QuickConfigStorageTarget } from '../../../shared/types/requests/QuickConfig'
-import type { Request } from '../../../shared/types/collections'
+import type { KeyValue, Request } from '../../../shared/types/collections'
+import { KeyValue as KeyValueClass } from '../../../shared/models/keyValues/KeyValue'
 
 // ============================================================================
 // Helpers
@@ -371,9 +372,31 @@ export function findMatchingConfig(
 export function applyConfigToRequest(request: Request, config: QuickConfig): void {
   const req = request as unknown as Record<string, unknown>
   for (const [key, value] of Object.entries(config.fields)) {
-    req[key] = value
+    // A snapshot is plain JSON (see extractSnapshotFields' JSON round-trip), so
+    // its key-value arrays are bare objects. The model + every KV table expect
+    // real `KeyValue` instances (their `toPlainObject` is walked on the next
+    // autosave, and the table normalises typed values off the class); assigning
+    // the plain objects leaves the headers/params/metadata tables blank after a
+    // load. Reify exactly the fields MCP's `update_request` does.
+    req[key] = KEYVALUE_FIELDS.has(key) ? reifyKeyValueArray(value) : value
   }
   // Signal the open tab view to re-sync its local state from the now-updated
   // proxy and re-call updateFullRequestData for Handlebars re-resolution.
   eventBus.emitLocalSync('request:transport-replaced', { requestId: request.id })
+}
+
+/** KV-array fields that must hold real `KeyValue` instances, not plain objects.
+ * Mirrors the set MCP's `update_request` reifies. */
+const KEYVALUE_FIELDS = new Set(['headers', 'params', 'pathParams', 'metadata'])
+
+/** Turn a snapshot's plain key-value array back into `KeyValue` instances. */
+function reifyKeyValueArray(arr: unknown): KeyValue[] {
+  if (!Array.isArray(arr)) return arr as KeyValue[]
+  return arr.map((entry: unknown): KeyValue => {
+    if (entry instanceof KeyValueClass) return entry
+    if (entry !== null && typeof entry === 'object') {
+      return KeyValueClass.fromPlain(entry as Parameters<typeof KeyValueClass.fromPlain>[0])
+    }
+    return entry as KeyValue
+  })
 }

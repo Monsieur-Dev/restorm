@@ -278,6 +278,7 @@ export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({
       <Pane title={t('soap.tabs.body')} initialSize={0.7} minSize={150} collapsed={panelCollapsed.body} data-testid="soap-request-body-pane">
         <div style={{ height: '100%', border: '1px solid var(--panel-border)', borderRadius: 3 }}>
           <CodeEditor
+            key={`body-${transportEpoch}`}
             height="100%"
             language="xml"
             value={body}

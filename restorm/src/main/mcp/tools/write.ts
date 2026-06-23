@@ -19,6 +19,7 @@ import { McpService } from 'electron-core-ui'
 import { collectionStore } from '../../services/CollectionStore'
 import { contextService } from '../../services/ContextService'
 import { isAnyFolder, isEnvironmentFolder, isRequest, isScenario, KeyValue, Environment } from '../../../shared/models'
+import { isSoapRequest } from '../../../shared/types/requests/index'
 import type { EnvironmentFolder, CustomValueList, CustomValueEntry } from '../../../shared/types/collections'
 import { broadcastTreeReplace } from './import'
 import { broadcastScenario } from './scenario'
@@ -64,14 +65,14 @@ function validateSecretValue(value: unknown): string | null {
 
 /**
  * Walk a `update_request` patch and convert any plain-object key-value
- * entries (headers / params / pathParams / metadata) into real
- * `KeyValue` class instances. Without this, `request.toPlainObject()`
+ * entries (headers / params / pathParams / metadata / producedHeaders) into
+ * real `KeyValue` class instances. Without this, `request.toPlainObject()`
  * crashes when the next event emit walks the array — `p.toPlainObject`
  * is undefined on a plain object.
  */
 function reifyKeyValueArrays(patch: Record<string, unknown>): Record<string, unknown> {
   const out: Record<string, unknown> = { ...patch }
-  for (const field of ['headers', 'params', 'pathParams', 'metadata']) {
+  for (const field of ['headers', 'params', 'pathParams', 'metadata', 'producedHeaders']) {
     const arr = out[field]
     if (Array.isArray(arr)) {
       out[field] = arr.map((entry: unknown): unknown => {
@@ -325,7 +326,10 @@ export function registerWriteTools(mcp: McpService): void {
       // POST, surfacing as a generic 4xx from the upstream server.
       const VALID_BODY_TYPES = ['text', 'file', 'form-data', 'x-www-form-urlencoded'] as const
       const patchedBody = (rawSafePatch as { body?: unknown }).body
-      if (patchedBody !== undefined && patchedBody !== null) {
+      // SOAP carries its body as a raw XML envelope STRING, not an
+      // `HTTPRequestBody` object — the object/`type` validation below only
+      // applies to the HTTP-shaped body union, so skip it for SOAP requests.
+      if (patchedBody !== undefined && patchedBody !== null && !isSoapRequest(target)) {
         if (typeof patchedBody !== 'object' || Array.isArray(patchedBody)) {
           return errorReply('body must be an object')
         }

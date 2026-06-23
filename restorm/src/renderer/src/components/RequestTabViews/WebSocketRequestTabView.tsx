@@ -404,6 +404,7 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
               <span style={{ fontSize: 12 }}>{request.protocol === 'mqtt' ? t('websocket.topic') : t('websocket.event')}:</span>
               <div style={{ flex: 1 }}>
                 <RestormVariableInputBox
+                  key={`event-${transportEpoch}`}
                   value={event}
                   onChange={setEvent}
                   variables={emptyVariables}
@@ -419,6 +420,7 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
           )}
           <div style={{ flex: 1, border: '1px solid var(--panel-border)', borderRadius: 3 }}>
             <CodeEditor
+              key={`message-${transportEpoch}`}
               height="100%"
               language="json"
               value={message}

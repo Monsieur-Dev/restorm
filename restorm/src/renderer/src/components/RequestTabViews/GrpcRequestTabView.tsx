@@ -377,6 +377,7 @@ const GrpcClientTabView: React.FC<GrpcRequestTabViewProps> = ({
       <Pane title={t('grpc.tabs.message')} initialSize={0.7} minSize={150} collapsed={panelCollapsed.message} data-testid="grpc-message-pane">
         <div style={{ height: '100%', border: '1px solid var(--panel-border)', borderRadius: 3 }}>
           <CodeEditor
+            key={`message-${transportEpoch}`}
             height="100%"
             language="json"
             value={requestMessage}

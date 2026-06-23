@@ -10,14 +10,16 @@
  * request model — every snapshot-eligible field set to a distinctive,
  * non-default value — and assert that:
  *
- *  - every non-excluded field round-trips byte-for-byte (deep-equal), and
+ *  - every non-excluded field round-trips (key-value arrays compared by their
+ *    logical `{ id?, key, value }` projection, since the load path reifies them
+ *    into `KeyValue` instances — see normalizeForCompare), and
  *  - the excluded identity fields (id / name / notes / tags / icon /
  *    importOrigin / deprecated / removed / authenticationRequestId / type /
  *    quickConfigs) are NOT carried by the snapshot.
  *
- * The store treats a request as a plain `Record<string, unknown>` (it never
- * touches the reactive-proxy machinery), so plain objects faithfully
- * reproduce the data-layer behaviour exercised by the popover's save/load.
+ * The store treats a request as a plain `Record<string, unknown>` and only
+ * reifies the key-value array fields on load (the shape the request tables
+ * render), faithfully reproducing the popover's save/load behaviour.
  */
 
 import { describe, it, expect, vi } from 'vitest'
@@ -78,10 +80,42 @@ function roundTrip(
   return { dest: bareDest, snapshot }
 }
 
-/** Assert every key in `expected` deep-equals the same key on `dest`. */
+/**
+ * Normalise a value for comparison: `applyConfigToRequest` reifies the
+ * snapshot's plain key-value arrays (headers / params / pathParams / metadata /
+ * producedHeaders) into `KeyValue` class instances — that is the editor-correct
+ * shape — so a restored KV array is structurally a `KeyValue[]`, not the bare
+ * objects the snapshot held. Project both sides to `{ id?, key, value }` so the
+ * round-trip is asserted on the logical content, independent of the wrapper.
+ */
+function normalizeForCompare(value: unknown): unknown {
+  if (!Array.isArray(value)) return value
+  return (value as unknown[]).map((entry: unknown) => {
+    if (entry === null || typeof entry !== 'object') return entry
+    const e = entry as Record<string, unknown>
+    if (!('key' in e)) return entry
+    const rawValue = e['value']
+    // A reified KeyValue stores its value as a typed-value object ({ type,
+    // value, … }); unwrap to the scalar the snapshot recorded.
+    const scalar = (rawValue !== null && typeof rawValue === 'object' && 'value' in rawValue)
+      ? (rawValue as { value: unknown }).value
+      : rawValue
+    // `enabled` is dropped from the projection: a reified KeyValue stamps the
+    // model default (`true`) that a bare snapshot object may omit, so it is not
+    // part of the value-fidelity contract this assertion guards.
+    return {
+      ...(e['id'] !== undefined && { id: e['id'] }),
+      key: e['key'],
+      value: scalar
+    }
+  })
+}
+
+/** Assert every key in `expected` round-trips onto `dest` (KV arrays compared
+ * by their logical `{ id?, key, value }` projection — see normalizeForCompare). */
 function expectFieldsRestored(dest: Record<string, unknown>, expected: Record<string, unknown>): void {
   for (const [key, value] of Object.entries(expected)) {
-    expect(dest[key], `field "${key}" must round-trip`).toEqual(value)
+    expect(normalizeForCompare(dest[key]), `field "${key}" must round-trip`).toEqual(normalizeForCompare(value))
   }
 }
 

@@ -438,6 +438,7 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
       <Pane title={t('graphql.tabs.query')} initialSize={0.5} minSize={150} collapsed={panelCollapsed.query} data-testid="graphql-query-pane">
         <div style={{ height: '100%', border: '1px solid var(--panel-border)', borderRadius: 3 }}>
           <CodeEditor
+            key={`query-${transportEpoch}`}
             height="100%"
             language="graphql"
             value={query}
@@ -450,6 +451,7 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
       <Pane title={t('graphql.tabs.variables')} initialSize={0.25} minSize={100} collapsed={panelCollapsed.variables} data-testid="graphql-variables-pane">
         <div style={{ height: '100%', border: '1px solid var(--panel-border)', borderRadius: 3 }}>
           <CodeEditor
+            key={`variables-${transportEpoch}`}
             height="100%"
             language="json"
             value={variables}

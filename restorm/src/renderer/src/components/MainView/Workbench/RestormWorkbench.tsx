@@ -1099,7 +1099,15 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
 
     // GraphQL request tab
     if (isGraphQLRequestTab(effectiveTab)) {
-      const request = effectiveTab.request
+      // Prefer the live reactive request proxy (so in-place mutations — quick-
+      // config Load, MCP update_request — re-render this tab) and fall back to
+      // the tab's static snapshot only when the tree lookup misses. Mirrors the
+      // HTTP branch above; without it a non-HTTP tab edits a detached snapshot.
+      // The lookup returns a `Request`; this branch's type guard fixed the
+      // concrete kind, and the reactive node shares the tab request's id, so the
+      // cast to the tab request's type is sound.
+      const reactive = getRequestById?.(effectiveTab.request.id)
+      const request = reactive?.type === effectiveTab.request.type ? reactive : effectiveTab.request
       return (
         <EnvironmentProvider environments={liveEnvironments} tagColors={requestTagColors} persistenceKey={envPersistenceKey(effectiveTab.request.id)} folderRequestIds={envFolderRequestIds}>
           <RestormWorkbenchTab
@@ -1130,7 +1138,15 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
 
     // gRPC request tab
     if (isGrpcRequestTab(effectiveTab)) {
-      const request = effectiveTab.request
+      // Prefer the live reactive request proxy (so in-place mutations — quick-
+      // config Load, MCP update_request — re-render this tab) and fall back to
+      // the tab's static snapshot only when the tree lookup misses. Mirrors the
+      // HTTP branch above; without it a non-HTTP tab edits a detached snapshot.
+      // The lookup returns a `Request`; this branch's type guard fixed the
+      // concrete kind, and the reactive node shares the tab request's id, so the
+      // cast to the tab request's type is sound.
+      const reactive = getRequestById?.(effectiveTab.request.id)
+      const request = reactive?.type === effectiveTab.request.type ? reactive : effectiveTab.request
       return (
         <EnvironmentProvider environments={liveEnvironments} tagColors={requestTagColors} persistenceKey={envPersistenceKey(effectiveTab.request.id)} folderRequestIds={envFolderRequestIds}>
           <RestormWorkbenchTab
@@ -1161,7 +1177,15 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
 
     // SOAP request tab
     if (isSoapRequestTab(effectiveTab)) {
-      const request = effectiveTab.request
+      // Prefer the live reactive request proxy (so in-place mutations — quick-
+      // config Load, MCP update_request — re-render this tab) and fall back to
+      // the tab's static snapshot only when the tree lookup misses. Mirrors the
+      // HTTP branch above; without it a non-HTTP tab edits a detached snapshot.
+      // The lookup returns a `Request`; this branch's type guard fixed the
+      // concrete kind, and the reactive node shares the tab request's id, so the
+      // cast to the tab request's type is sound.
+      const reactive = getRequestById?.(effectiveTab.request.id)
+      const request = reactive?.type === effectiveTab.request.type ? reactive : effectiveTab.request
       return (
         <EnvironmentProvider environments={liveEnvironments} tagColors={requestTagColors} persistenceKey={envPersistenceKey(effectiveTab.request.id)} folderRequestIds={envFolderRequestIds}>
           <RestormWorkbenchTab
@@ -1192,7 +1216,15 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
 
     // WebSocket request tab
     if (isWebSocketRequestTab(effectiveTab)) {
-      const request = effectiveTab.request
+      // Prefer the live reactive request proxy (so in-place mutations — quick-
+      // config Load, MCP update_request — re-render this tab) and fall back to
+      // the tab's static snapshot only when the tree lookup misses. Mirrors the
+      // HTTP branch above; without it a non-HTTP tab edits a detached snapshot.
+      // The lookup returns a `Request`; this branch's type guard fixed the
+      // concrete kind, and the reactive node shares the tab request's id, so the
+      // cast to the tab request's type is sound.
+      const reactive = getRequestById?.(effectiveTab.request.id)
+      const request = reactive?.type === effectiveTab.request.type ? reactive : effectiveTab.request
       return (
         <EnvironmentProvider environments={liveEnvironments} tagColors={requestTagColors} persistenceKey={envPersistenceKey(effectiveTab.request.id)} folderRequestIds={envFolderRequestIds}>
           <RestormWorkbenchTab
@@ -1223,7 +1255,15 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
 
     // OData request tab
     if (isODataRequestTab(effectiveTab)) {
-      const request = effectiveTab.request
+      // Prefer the live reactive request proxy (so in-place mutations — quick-
+      // config Load, MCP update_request — re-render this tab) and fall back to
+      // the tab's static snapshot only when the tree lookup misses. Mirrors the
+      // HTTP branch above; without it a non-HTTP tab edits a detached snapshot.
+      // The lookup returns a `Request`; this branch's type guard fixed the
+      // concrete kind, and the reactive node shares the tab request's id, so the
+      // cast to the tab request's type is sound.
+      const reactive = getRequestById?.(effectiveTab.request.id)
+      const request = reactive?.type === effectiveTab.request.type ? reactive : effectiveTab.request
       return (
         <EnvironmentProvider environments={liveEnvironments} tagColors={requestTagColors} persistenceKey={envPersistenceKey(effectiveTab.request.id)} folderRequestIds={envFolderRequestIds}>
           <RestormWorkbenchTab
@@ -1253,7 +1293,15 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
     // Authentication request tab — reuses HTTPRequestTabView, which
     // injects an extra "Configuration" tab when it sees type === 'auth'.
     if (isAuthenticationRequestTab(effectiveTab)) {
-      const request = effectiveTab.request
+      // Prefer the live reactive request proxy (so in-place mutations — quick-
+      // config Load, MCP update_request — re-render this tab) and fall back to
+      // the tab's static snapshot only when the tree lookup misses. Mirrors the
+      // HTTP branch above; without it a non-HTTP tab edits a detached snapshot.
+      // The lookup returns a `Request`; this branch's type guard fixed the
+      // concrete kind, and the reactive node shares the tab request's id, so the
+      // cast to the tab request's type is sound.
+      const reactive = getRequestById?.(effectiveTab.request.id)
+      const request = reactive?.type === effectiveTab.request.type ? reactive : effectiveTab.request
       return (
         <EnvironmentProvider environments={liveEnvironments} tagColors={requestTagColors} persistenceKey={envPersistenceKey(effectiveTab.request.id)} folderRequestIds={envFolderRequestIds}>
           <RestormWorkbenchTab

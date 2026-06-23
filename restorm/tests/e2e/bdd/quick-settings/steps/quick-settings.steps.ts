@@ -60,6 +60,61 @@ interface ProtocolMatrix {
 
 const kv = (key: string, value: string): { key: string; value: string; enabled: boolean } => ({ key, value, enabled: true })
 
+// A RestormKeyValueTable renders each cell as an ECUI InputBox, so the row's
+// key/value live in `<input>` VALUES — not as table text. `toContainText`
+// never sees them; assert against the inputs' values instead. The key cell
+// carries `<table-testid>-key-input`; the value cell is a TypedValueField whose
+// inner input has no per-cell testid, so match any input under the table.
+async function expectKvTableKey(p: Page, tableTestid: string, key: string): Promise<void> {
+  const inputs = p.locator(`${vis(tableTestid)} input`)
+  await expect.poll(async () => {
+    const values = await inputs.evaluateAll((els) => els.map((e) => (e as HTMLInputElement).value))
+    return values.includes(key)
+  }, { timeout: 20_000, message: `${tableTestid} should have a row whose input value is "${key}"` }).toBe(true)
+}
+
+async function expectKvTableLacksKey(p: Page, tableTestid: string, key: string): Promise<void> {
+  const inputs = p.locator(`${vis(tableTestid)} input`)
+  await expect.poll(async () => {
+    const values = await inputs.evaluateAll((els) => els.map((e) => (e as HTMLInputElement).value))
+    return values.includes(key)
+  }, { timeout: 20_000, message: `${tableTestid} should NOT have a row whose input value is "${key}"` }).toBe(false)
+}
+
+// A surface's value can live in three places depending on the widget: plain
+// text (rendered labels), an `<input>`/`<textarea>` value (ECUI InputBox), or a
+// Monaco editor (its text is split across `.view-line` spans AND mirrored in a
+// hidden textarea). `toContainText` only sees the first. This reads all three
+// and asserts the substring is present (or absent) in their union.
+async function surfaceContains(p: Page, testid: string, needle: string): Promise<boolean> {
+  // Resolve inside a single page.evaluate (not a Playwright element handle):
+  // surfaces that remount on Load (Monaco editors keyed by a transport epoch)
+  // detach mid-poll, which makes a handle-based `.evaluate` throw and the poll
+  // read a spurious false. Re-querying the DOM each tick avoids the stale handle.
+  return p.evaluate(({ tid, n }) => {
+    const els = Array.from(document.querySelectorAll(`[data-testid="${tid}"]`))
+      .filter((el) => (el as HTMLElement).offsetParent !== null)
+    for (const el of els) {
+      const texts: string[] = [el.textContent]
+      el.querySelectorAll('input, textarea').forEach((i) => texts.push((i as HTMLInputElement).value))
+      if (texts.some((t) => t.includes(n))) return true
+    }
+    return false
+  }, { tid: testid, n: needle }).catch(() => false)
+}
+
+async function expectSurfaceContains(p: Page, testid: string, needle: string): Promise<void> {
+  await expect.poll(() => surfaceContains(p, testid, needle), {
+    timeout: 20_000, message: `${testid} should surface "${needle}" (text / input / monaco)`
+  }).toBe(true)
+}
+
+async function expectSurfaceLacks(p: Page, testid: string, needle: string): Promise<void> {
+  await expect.poll(() => surfaceContains(p, testid, needle), {
+    timeout: 20_000, message: `${testid} should NOT surface "${needle}"`
+  }).toBe(false)
+}
+
 const MATRIX: Record<string, ProtocolMatrix> = {
   http: {
     protocol: 'http',
@@ -78,15 +133,16 @@ const MATRIX: Record<string, ProtocolMatrix> = {
       body: { type: 'text', content: 'CHANGED-BODY' }
     },
     assert: async (p) => {
+      // `data-resolved-url` carries the fully-resolved URL — the base plus any
+      // resolved query params appended (`?savedParam=…`) — so match the base as
+      // a prefix rather than an exact string.
       await expect(p.locator(`${vis('http-request-url-section')} [data-testid="url-container"]`))
-        .toHaveAttribute('data-resolved-url', 'https://saved.example.com/widgets', { timeout: 10_000 })
-      const headers = p.locator(vis('http-request-headers-table'))
-      await expect(headers).toContainText('X-Saved-Header', { timeout: 10_000 })
-      await expect(headers).toContainText('saved-hval')
-      await expect(headers).not.toContainText('X-Changed-Header')
-      const params = p.locator(vis('http-request-query-params-table'))
-      await expect(params).toContainText('savedParam')
-      await expect(params).not.toContainText('changedParam')
+        .toHaveAttribute('data-resolved-url', /^https:\/\/saved\.example\.com\/widgets(\?|$)/, { timeout: 10_000 })
+      await expectKvTableKey(p, 'http-request-headers-table', 'X-Saved-Header')
+      await expectKvTableKey(p, 'http-request-headers-table', 'saved-hval')
+      await expectKvTableLacksKey(p, 'http-request-headers-table', 'X-Changed-Header')
+      await expectKvTableKey(p, 'http-request-query-params-table', 'savedParam')
+      await expectKvTableLacksKey(p, 'http-request-query-params-table', 'changedParam')
     }
   },
 
@@ -107,9 +163,9 @@ const MATRIX: Record<string, ProtocolMatrix> = {
     assert: async (p) => {
       await expect(p.locator(`${vis('graphql-url-section')} [data-testid="url-container"]`))
         .toHaveAttribute('data-resolved-url', 'https://saved.example.com/graphql', { timeout: 10_000 })
-      await expect(p.locator(vis('graphql-query-editor'))).toContainText('SavedOp', { timeout: 10_000 })
-      await expect(p.locator(vis('graphql-query-editor'))).not.toContainText('ChangedOp')
-      await expect(p.locator(vis('graphql-variables-editor'))).toContainText('savedVar')
+      await expectSurfaceContains(p, 'graphql-query-editor', 'SavedOp')
+      await expectSurfaceLacks(p, 'graphql-query-editor', 'ChangedOp')
+      await expectSurfaceContains(p, 'graphql-variables-editor', 'savedVar')
     }
   },
 
@@ -128,8 +184,8 @@ const MATRIX: Record<string, ProtocolMatrix> = {
     assert: async (p) => {
       await expect(p.locator(`${vis('soap-url-section')} [data-testid="url-container"]`))
         .toHaveAttribute('data-resolved-url', 'https://saved.example.com/svc', { timeout: 10_000 })
-      await expect(p.locator(vis('soap-request-body-editor'))).toContainText('SavedOp', { timeout: 10_000 })
-      await expect(p.locator(vis('soap-request-body-editor'))).not.toContainText('ChangedOp')
+      await expectSurfaceContains(p, 'soap-request-body-editor', 'SavedOp')
+      await expectSurfaceLacks(p, 'soap-request-body-editor', 'ChangedOp')
     }
   },
 
@@ -149,12 +205,11 @@ const MATRIX: Record<string, ProtocolMatrix> = {
     },
     // GAP A surface: the metadata table must remount on Load.
     assert: async (p) => {
-      await expect(p.locator(vis('grpc-request-message-editor'))).toContainText('savedMsg', { timeout: 10_000 })
-      await expect(p.locator(vis('grpc-request-message-editor'))).not.toContainText('changedMsg')
-      const meta = p.locator(vis('grpc-metadata-table'))
-      await expect(meta).toContainText('x-saved-meta', { timeout: 10_000 })
-      await expect(meta).toContainText('saved-meta-val')
-      await expect(meta).not.toContainText('x-changed-meta')
+      await expectSurfaceContains(p, 'grpc-request-message-editor', 'savedMsg')
+      await expectSurfaceLacks(p, 'grpc-request-message-editor', 'changedMsg')
+      await expectKvTableKey(p, 'grpc-metadata-table', 'x-saved-meta')
+      await expectKvTableKey(p, 'grpc-metadata-table', 'saved-meta-val')
+      await expectKvTableLacksKey(p, 'grpc-metadata-table', 'x-changed-meta')
     }
   },
 
@@ -181,11 +236,19 @@ const MATRIX: Record<string, ProtocolMatrix> = {
       }
     },
     assert: async (p) => {
-      await expect(p.locator(`${vis('odata-request-url-section')} [data-testid="url-container"]`))
-        .toHaveAttribute('data-resolved-url', 'https://saved.example.com/odata/People', { timeout: 10_000 })
-      // $filter / $search are ECUI InputBoxes → the value lives on the inner <input>.
-      await expect(p.locator(vis('odata-request-filter-input'))).toHaveValue("Name eq 'saved'", { timeout: 10_000 })
-      await expect(p.locator(vis('odata-request-search-input'))).toHaveValue('saved-search')
+      // OData's URL is a Monaco-backed VariableInputBox (`odata-request-url`)
+      // with no `url-container`; $filter is a Monaco ODataFilterEditor. Both are
+      // mounted by default for an entity-set request and prove the queryOptions
+      // round-trip through the editor on Load. ($top / $skip / $search sit in a
+      // section not mounted by default, so they are not visible to assert here —
+      // their round-trip is locked at the data layer by the
+      // requestQuickConfigStore.roundtrip unit test.)
+      await expectSurfaceContains(p, 'odata-request-url', 'https://saved.example.com/odata/People')
+      // Monaco tokenises the filter into separate spans (identifier / operator /
+      // string-literal), so the concatenated textContent isn't guaranteed to
+      // preserve the inter-token spaces — match the distinctive literal token.
+      await expectSurfaceContains(p, 'odata-request-filter', "'saved'")
+      await expectSurfaceLacks(p, 'odata-request-filter', "'changed'")
     }
   },
 
@@ -208,13 +271,13 @@ const MATRIX: Record<string, ProtocolMatrix> = {
     // GAP B surface: the headers table must remount on Load.
     assert: async (p) => {
       await expect(p.locator(`${vis('websocket-url-section')} [data-testid="url-container"]`))
-        .toHaveAttribute('data-resolved-url', 'wss://saved.example.com/socket', { timeout: 10_000 })
-      // event input is a Monaco-backed VariableInputBox → assert its text.
-      await expect(p.locator(vis('websocket-event-input'))).toContainText('saved-event', { timeout: 10_000 })
-      await expect(p.locator(vis('websocket-message-editor'))).toContainText('savedFrame')
-      const headers = p.locator(vis('websocket-headers-table'))
-      await expect(headers).toContainText('X-Saved-WS', { timeout: 10_000 })
-      await expect(headers).not.toContainText('X-Changed-WS')
+        .toHaveAttribute('data-resolved-url', /^wss:\/\/saved\.example\.com\/socket(\?|$)/, { timeout: 10_000 })
+      // A plain `websocket` request has no event/topic field (only socketio /
+      // mqtt render one), so `event` is not asserted here — it is covered by
+      // the MQTT scenario, which drives the topic field.
+      await expectSurfaceContains(p, 'websocket-message-editor', 'savedFrame')
+      await expectKvTableKey(p, 'websocket-headers-table', 'X-Saved-WS')
+      await expectKvTableLacksKey(p, 'websocket-headers-table', 'X-Changed-WS')
     }
   },
 
@@ -250,16 +313,16 @@ const MATRIX: Record<string, ProtocolMatrix> = {
     // VariableInputBoxes (assert text); keepalive is a plain InputBox (the
     // value lives on its inner <input>).
     assert: async (p) => {
-      await expect(p.locator(vis('mqtt-clientid-input'))).toContainText('saved-client', { timeout: 10_000 })
-      await expect(p.locator(vis('mqtt-clientid-input'))).not.toContainText('changed-client')
-      await expect(p.locator(vis('mqtt-username-input'))).toContainText('saved-user')
-      await expect(p.locator(vis('mqtt-password-input'))).toContainText('saved-pass')
+      await expectSurfaceContains(p, 'mqtt-clientid-input', 'saved-client')
+      await expectSurfaceLacks(p, 'mqtt-clientid-input', 'changed-client')
+      await expectSurfaceContains(p, 'mqtt-username-input', 'saved-user')
+      await expectSurfaceContains(p, 'mqtt-password-input', 'saved-pass')
       await expect(p.locator(vis('mqtt-keepalive-input-input'))).toHaveValue('33')
-      await expect(p.locator(vis('mqtt-lwt-topic-input'))).toContainText('sensors/saved-status')
-      await expect(p.locator(vis('mqtt-lwt-payload-input'))).toContainText('saved-offline')
+      await expectSurfaceContains(p, 'mqtt-lwt-topic-input', 'sensors/saved-status')
+      await expectSurfaceContains(p, 'mqtt-lwt-payload-input', 'saved-offline')
       // event = MQTT topic; message = publish payload.
-      await expect(p.locator(vis('websocket-event-input'))).toContainText('sensors/saved')
-      await expect(p.locator(vis('websocket-message-editor'))).toContainText('saved-payload')
+      await expectSurfaceContains(p, 'websocket-event-input', 'sensors/saved')
+      await expectSurfaceContains(p, 'websocket-message-editor', 'saved-payload')
     }
   },
 
@@ -289,20 +352,21 @@ const MATRIX: Record<string, ProtocolMatrix> = {
     // (AuthenticationConfigurationTab). GAP C surface = the produced-headers
     // table in that sub-tab, which must remount on Load.
     assert: async (p) => {
-      // HTTP-shared fields on the default request tab (InputBox → inner input).
-      await expect(p.locator(vis('http-request-url-input-input'))).toHaveValue('https://saved.example.com/token', { timeout: 10_000 })
-      const headers = p.locator(vis('http-request-headers-table'))
-      await expect(headers).toContainText('X-Saved-Auth', { timeout: 10_000 })
-      await expect(headers).not.toContainText('X-Changed-Auth')
+      // HTTP-shared fields on the default request tab. The URL is a Monaco-
+      // backed VariableInputBox, so its value lives in `url-container`'s
+      // `data-resolved-url` (no plain inner <input>).
+      await expect(p.locator(`${vis('http-request-url-section')} [data-testid="url-container"]`))
+        .toHaveAttribute('data-resolved-url', /^https:\/\/saved\.example\.com\/token(\?|$)/, { timeout: 10_000 })
+      await expectKvTableKey(p, 'http-request-headers-table', 'X-Saved-Auth')
+      await expectKvTableLacksKey(p, 'http-request-headers-table', 'X-Changed-Auth')
 
       // Switch to the Configuration sub-tab and assert the auth-specific fields.
       await p.locator(vis('base-request-tabs-request-tab-configuration')).click()
       await p.locator(vis('auth-request-configuration')).waitFor({ state: 'visible', timeout: 10_000 })
-      const produced = p.locator(vis('auth-request-produced-headers'))
-      await expect(produced).toContainText('Saved {{access_token}}', { timeout: 10_000 })
-      await expect(produced).not.toContainText('Changed {{access_token}}')
+      await expectKvTableKey(p, 'auth-request-produced-headers', 'Saved {{access_token}}')
+      await expectKvTableLacksKey(p, 'auth-request-produced-headers', 'Changed {{access_token}}')
       // expiration + error-codes read request.* live → re-sync on re-render.
-      await expect(p.locator(vis('auth-request-expiration'))).toContainText('{{saved_expires}}')
+      await expectSurfaceContains(p, 'auth-request-expiration', '{{saved_expires}}')
       await expect(p.locator(vis('auth-request-error-codes-input'))).toHaveValue('401, 403, 419')
     }
   }
@@ -344,24 +408,53 @@ Given('I launch restorm with the MCP server enabled', async ({ launchAppWithMcp 
 Given(
   'I have a fresh {string} request named {string} populated with its field matrix',
   async ({ callMcpTool }, matrixKey: string, name: string) => {
-    if (discovery === null) throw new Error('launch first')
+    if (discovery === null || page === null) throw new Error('launch first')
+    const disco = discovery
+    const pg = page
     const matrix = getMatrix(matrixKey)
 
     // Fresh project so the request id / config list start clean.
     const projectPath = `/tmp/qs-e2e-${matrixKey}-${String(Date.now())}.restorm`
-    expect((await callMcpTool(discovery, 'create_project', { filePath: projectPath })).isError ?? false).toBe(false)
+    expect((await callMcpTool(disco, 'create_project', { filePath: projectPath })).isError ?? false).toBe(false)
 
-    folderId = await ensureFolder(callMcpTool)
-    const created = parsedReply(await callMcpTool(discovery, 'create_request', {
-      parentFolderId: folderId,
-      name,
-      protocol: matrix.protocol
-    })) as { id: string }
-    requestId = created.id
-    expect(requestId, 'request id missing').toBeTruthy()
-
-    // Populate the SAVED field values.
-    expect((await callMcpTool(discovery, 'update_request', { id: requestId, patch: matrix.saved })).isError ?? false).toBe(false)
+    // create_project opens the empty file ASYNCHRONOUSLY in the renderer (its
+    // React tree is the save source of truth). A create_request that races the
+    // still-in-flight empty-project load lands in the main store, then the late
+    // load flushes the renderer's empty tree back and WIPES it. There is no
+    // settle event to await, so create + populate, then poll `list_requests`
+    // until the request stays present across several consecutive reads — only
+    // then has the late load passed. Re-create if an early attempt was wiped.
+    const listHasRequest = async (id: string): Promise<boolean> => {
+      const lr = parsedReply(await callMcpTool(disco, 'list_requests', {})) as { id: string }[] | { requests?: { id: string }[] }
+      const arr = Array.isArray(lr) ? lr : (lr.requests ?? [])
+      return arr.some((r) => r.id === id)
+    }
+    const deadline = Date.now() + 20_000
+    let stable = false
+    while (Date.now() < deadline && !stable) {
+      folderId = await ensureFolder(callMcpTool)
+      const created = parsedReply(await callMcpTool(disco, 'create_request', {
+        parentFolderId: folderId,
+        name,
+        protocol: matrix.protocol
+      })) as { id: string }
+      requestId = created.id
+      expect(requestId, 'request id missing').toBeTruthy()
+      expect((await callMcpTool(disco, 'update_request', { id: requestId, patch: matrix.saved })).isError ?? false).toBe(false)
+      // Confirm it survives the late empty-project load: 4 consecutive present reads.
+      let consecutive = 0
+      while (Date.now() < deadline && consecutive < 4) {
+        if (await listHasRequest(requestId)) {
+          consecutive++
+        } else {
+          consecutive = 0
+          break // wiped — recreate from the top
+        }
+        await pg.waitForTimeout(250)
+      }
+      stable = consecutive >= 4
+    }
+    expect(stable, 'request never stabilised after create_project').toBe(true)
   }
 )
 
@@ -369,8 +462,23 @@ When(
   'I open its tab and save a quick config named {string}',
   async ({ callMcpTool }, configName: string) => {
     if (discovery === null || page === null) throw new Error('launch first')
-    expect((await callMcpTool(discovery, 'open_tab', { itemId: requestId })).isError ?? false).toBe(false)
-
+    // The request was just created via MCP; the renderer's tree projection
+    // lags the create broadcast, so a single `open_tab` can race ahead of the
+    // node existing in the renderer and silently no-op (the workbench stays on
+    // the empty bench). Re-issue `open_tab` until `get_current_tab` reflects
+    // our request id, mirroring the mcp-server suite's open-then-poll recipe.
+    const deadline = Date.now() + 15_000
+    let opened = false
+    while (Date.now() < deadline) {
+      expect((await callMcpTool(discovery, 'open_tab', { itemId: requestId })).isError ?? false).toBe(false)
+      const cur = parsedReply(await callMcpTool(discovery, 'get_current_tab', {})) as { itemId?: string | null; tabId?: string | null }
+      if (cur.itemId === requestId && typeof cur.tabId === 'string' && cur.tabId.length > 0) {
+        opened = true
+        break
+      }
+      await page.waitForTimeout(250)
+    }
+    expect(opened, 'open_tab never surfaced the request as the current tab').toBe(true)
     // Wait for the smartbar quick-settings button to render in the active tab.
     await page.locator(vis('quick-settings-open-button')).waitFor({ state: 'visible', timeout: 15_000 })
     await page.locator(vis('quick-settings-open-button')).click()
