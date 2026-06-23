@@ -1770,13 +1770,28 @@
     "createInstance": "Utwórz nową instancję",
     "terminateInstance": "Zakończ instancję"
   },
+  "odataFilter": {
+    "detail": {
+      "property": "właściwość",
+      "navigation": "nawigacja",
+      "operator": "operator",
+      "logical": "operator logiczny",
+      "function": "funkcja",
+      "enumValue": "wartość wyliczeniowa"
+    },
+    "validation": {
+      "unknownProperty": "Nieznana właściwość",
+      "wrongTypeOperator": "Operator nie ma zastosowania do tego typu właściwości"
+    }
+  },
   "odataRequestTab": {
     "send": "Wyślij",
     "loadNextPage": "Załaduj następną stronę",
     "batchFormatLabel": "Format wsadu",
     "batchFormatMultipart": "multipart/mixed",
     "batchFormatJson": "Wsad JSON",
-    "versionMismatchWarning": "To żądanie jest oznaczone jako {{requestVersion}}, ale odpowiedź wygląda na {{responseVersion}}. Zmień wersję żądania, aby pasowała do serwera."
+    "versionMismatchWarning": "To żądanie jest oznaczone jako {{requestVersion}}, ale odpowiedź wygląda na {{responseVersion}}. Zmień wersję żądania, aby pasowała do serwera.",
+    "orderbyPropertyPickerPlaceholder": "Wybierz…"
   },
   "typedValue": {
     "list": {

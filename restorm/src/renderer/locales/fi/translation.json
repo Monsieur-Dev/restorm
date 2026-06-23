@@ -1768,13 +1768,28 @@
     "createInstance": "Luo uusi instanssi",
     "terminateInstance": "Lopeta instanssi"
   },
+  "odataFilter": {
+    "detail": {
+      "property": "ominaisuus",
+      "navigation": "navigointi",
+      "operator": "operaattori",
+      "logical": "looginen operaattori",
+      "function": "funktio",
+      "enumValue": "enum-arvo"
+    },
+    "validation": {
+      "unknownProperty": "Tuntematon ominaisuus",
+      "wrongTypeOperator": "Operaattoria ei voi käyttää tähän ominaisuustyyppiin"
+    }
+  },
   "odataRequestTab": {
     "send": "Lähetä",
     "loadNextPage": "Lataa seuraava sivu",
     "batchFormatLabel": "Erän muoto",
     "batchFormatMultipart": "multipart/mixed",
     "batchFormatJson": "JSON-erä",
-    "versionMismatchWarning": "Tämä pyyntö on merkitty versioksi {{requestVersion}}, mutta vastaus näyttää versiolta {{responseVersion}}. Vaihda pyynnön versio vastaamaan palvelinta."
+    "versionMismatchWarning": "Tämä pyyntö on merkitty versioksi {{requestVersion}}, mutta vastaus näyttää versiolta {{responseVersion}}. Vaihda pyynnön versio vastaamaan palvelinta.",
+    "orderbyPropertyPickerPlaceholder": "Valitse…"
   },
   "typedValue": {
     "list": {

@@ -1768,13 +1768,28 @@
     "createInstance": "Új példány létrehozása",
     "terminateInstance": "Példány bezárása"
   },
+  "odataFilter": {
+    "detail": {
+      "property": "tulajdonság",
+      "navigation": "navigáció",
+      "operator": "operátor",
+      "logical": "logikai operátor",
+      "function": "függvény",
+      "enumValue": "enum érték"
+    },
+    "validation": {
+      "unknownProperty": "Ismeretlen tulajdonság",
+      "wrongTypeOperator": "Az operátor nem alkalmazható erre a tulajdonságtípusra"
+    }
+  },
   "odataRequestTab": {
     "send": "Küldés",
     "loadNextPage": "Következő oldal betöltése",
     "batchFormatLabel": "Köteg formátuma",
     "batchFormatMultipart": "multipart/mixed",
     "batchFormatJson": "JSON köteg",
-    "versionMismatchWarning": "Ez a kérés {{requestVersion}} verzióval van megjelölve, de a válasz {{responseVersion}} verziónak tűnik. Módosítsa a kérés verzióját, hogy megegyezzen a kiszolgálóval."
+    "versionMismatchWarning": "Ez a kérés {{requestVersion}} verzióval van megjelölve, de a válasz {{responseVersion}} verziónak tűnik. Módosítsa a kérés verzióját, hogy megegyezzen a kiszolgálóval.",
+    "orderbyPropertyPickerPlaceholder": "Válasszon…"
   },
   "typedValue": {
     "list": {

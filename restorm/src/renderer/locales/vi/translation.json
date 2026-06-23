@@ -1767,13 +1767,28 @@
     "createInstance": "Tạo một phiên bản mới",
     "terminateInstance": "Kết thúc một phiên bản"
   },
+  "odataFilter": {
+    "detail": {
+      "property": "thuộc tính",
+      "navigation": "điều hướng",
+      "operator": "toán tử",
+      "logical": "toán tử logic",
+      "function": "hàm",
+      "enumValue": "giá trị enum"
+    },
+    "validation": {
+      "unknownProperty": "Thuộc tính không xác định",
+      "wrongTypeOperator": "Toán tử không áp dụng được cho kiểu thuộc tính này"
+    }
+  },
   "odataRequestTab": {
     "send": "Gửi",
     "loadNextPage": "Tải trang tiếp theo",
     "batchFormatLabel": "Định dạng lô",
     "batchFormatMultipart": "multipart/mixed",
     "batchFormatJson": "Lô JSON",
-    "versionMismatchWarning": "Yêu cầu này được gắn thẻ {{requestVersion}} nhưng phản hồi trông giống {{responseVersion}}. Hãy đổi phiên bản yêu cầu cho khớp với máy chủ."
+    "versionMismatchWarning": "Yêu cầu này được gắn thẻ {{requestVersion}} nhưng phản hồi trông giống {{responseVersion}}. Hãy đổi phiên bản yêu cầu cho khớp với máy chủ.",
+    "orderbyPropertyPickerPlaceholder": "Chọn…"
   },
   "typedValue": {
     "list": {

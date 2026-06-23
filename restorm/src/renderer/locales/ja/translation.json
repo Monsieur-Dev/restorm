@@ -1767,13 +1767,28 @@
     "createInstance": "新しいインスタンスを作成",
     "terminateInstance": "インスタンスを終了"
   },
+  "odataFilter": {
+    "detail": {
+      "property": "プロパティ",
+      "navigation": "ナビゲーション",
+      "operator": "演算子",
+      "logical": "論理演算子",
+      "function": "関数",
+      "enumValue": "列挙値"
+    },
+    "validation": {
+      "unknownProperty": "不明なプロパティ",
+      "wrongTypeOperator": "このプロパティの型には演算子を適用できません"
+    }
+  },
   "odataRequestTab": {
     "send": "送信",
     "loadNextPage": "次のページを読み込む",
     "batchFormatLabel": "バッチ形式",
     "batchFormatMultipart": "multipart/mixed",
     "batchFormatJson": "JSON バッチ",
-    "versionMismatchWarning": "このリクエストは {{requestVersion}} とタグ付けされていますが、レスポンスは {{responseVersion}} のようです。サーバーに合わせてリクエストのバージョンを変更してください。"
+    "versionMismatchWarning": "このリクエストは {{requestVersion}} とタグ付けされていますが、レスポンスは {{responseVersion}} のようです。サーバーに合わせてリクエストのバージョンを変更してください。",
+    "orderbyPropertyPickerPlaceholder": "選択…"
   },
   "typedValue": {
     "list": {

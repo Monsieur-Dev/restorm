@@ -120,6 +120,14 @@ export interface ODataRequest extends BaseRequest {
   /** Wire format for the `$batch` envelope. `'multipart'` (default)
    * uses multipart/mixed; `'json'` uses the v4 JSON batch format. */
   batchFormat?: ODataBatchFormat
+  /** Qualified EDMX name of the entity type this request is bound to
+   * (e.g. `OData.PetStore.Models.Pet`), pre-filled by the importer.
+   * Lets the renderer resolve the request's `ModelDocumentation` in
+   * `apiDocumentation.models` to drive metadata-aware `$filter` /
+   * `$orderby` autocomplete (property / operator / value suggestions,
+   * enum values, type hints). Absent on a hand-authored request ⇒
+   * autocomplete falls back to no suggestions. */
+  entityTypeRef?: string
   /** Names of structural properties on the bound entity type (pre-
    * filled by the importer from the EDMX `EntityType`). The UI
    * surfaces these as clickable chips beneath $select / $orderby

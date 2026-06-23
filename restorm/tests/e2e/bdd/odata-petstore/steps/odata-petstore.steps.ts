@@ -137,11 +137,30 @@ async function typeIntoOdataInput(p: Page, testId: string, text: string): Promis
   await p.keyboard.type(text, { delay: 5 })
 }
 
+/** Set the Monaco-backed `$filter` editor content. Per-character
+ * `keyboard.type` races the suggestion widget (the open widget consumes
+ * arrow/selection state and drops or reorders characters), so we clear
+ * the field then insert the whole string atomically with
+ * `insertText` — a single IME-style event Monaco applies verbatim.
+ * Escape afterwards closes any suggestion widget the insert popped. */
+async function typeIntoOdataFilter(p: Page, text: string): Promise<void> {
+  const editor = p.locator('[data-testid="odata-request-filter"] .monaco-editor').first()
+  await editor.click()
+  await p.keyboard.press('Escape')
+  await p.keyboard.press('Control+A')
+  await p.keyboard.press('Delete')
+  await p.keyboard.insertText(text)
+  await p.keyboard.press('Escape')
+}
+
 When(
   'I narrow the OData query to filter {string} and select {string}',
   async ({}, filter: string, select: string) => {
     const p = requirePage()
-    await typeIntoOdataInput(p, 'odata-request-filter', filter)
+    await typeIntoOdataFilter(p, filter)
+    // Dismiss the suggestion widget so it doesn't intercept the next
+    // field's focus / typing.
+    await p.keyboard.press('Escape')
     await typeIntoOdataInput(p, 'odata-request-select', select)
     // Settle the per-field 250 ms debounce so the proxy's
     // `queryOptions` write actually fires before the next Send
@@ -151,3 +170,50 @@ When(
     await p.waitForTimeout(350)
   }
 )
+
+When('I type {string} into the OData filter editor', async ({}, text: string) => {
+  const p = requirePage()
+  await typeIntoOdataFilter(p, text)
+  // The editor uses `quickSuggestions: false`, so the suggest widget
+  // only appears on an explicit trigger — invoke it the same way Ctrl+
+  // Space does for the user.
+  await p.keyboard.press('Control+Space')
+})
+
+Then('the OData filter suggestion list should contain {string}', async ({}, expected: string) => {
+  const p = requirePage()
+  // Monaco renders the suggest widget into an overflow container on the
+  // body (fixedOverflowWidgets); it carries the `.visible` class while
+  // open. Match the row by its label text.
+  const widget = p.locator('.suggest-widget.visible').first()
+  await expect(widget).toBeVisible({ timeout: 5000 })
+  await expect(widget.locator('.monaco-list-row').filter({ hasText: expected }).first())
+    .toBeVisible({ timeout: 5000 })
+})
+
+When('I dismiss the OData filter suggestion list', async () => {
+  const p = requirePage()
+  await p.keyboard.press('Escape')
+})
+
+When('I set the OData filter to {string}', async ({}, text: string) => {
+  const p = requirePage()
+  await typeIntoOdataFilter(p, text)
+})
+
+Then('the OData filter editor should contain {string}', async ({}, expected: string) => {
+  const p = requirePage()
+  // The Monaco view renders the content across `.view-line` spans; the
+  // editor root carries the test id.
+  await expect(p.locator('[data-testid="odata-request-filter"] .view-lines'))
+    .toContainText(expected, { timeout: 5000 })
+})
+
+Then('the OData filter editor should have no validation errors', async () => {
+  const p = requirePage()
+  // An error marker renders as an `squiggly-error` decoration in the
+  // editor overlay. A well-formed clause with a real property + an
+  // opaque {{template}} value must produce none.
+  await expect(p.locator('[data-testid="odata-request-filter"] .squiggly-error'))
+    .toHaveCount(0, { timeout: 5000 })
+})

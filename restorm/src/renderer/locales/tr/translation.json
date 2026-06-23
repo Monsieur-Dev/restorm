@@ -1768,13 +1768,28 @@
     "createInstance": "Yeni bir örnek oluştur",
     "terminateInstance": "Bir örneği sonlandır"
   },
+  "odataFilter": {
+    "detail": {
+      "property": "özellik",
+      "navigation": "gezinme",
+      "operator": "operatör",
+      "logical": "mantıksal operatör",
+      "function": "işlev",
+      "enumValue": "enum değeri"
+    },
+    "validation": {
+      "unknownProperty": "Bilinmeyen özellik",
+      "wrongTypeOperator": "Operatör bu özellik türüne uygulanamaz"
+    }
+  },
   "odataRequestTab": {
     "send": "Gönder",
     "loadNextPage": "Sonraki sayfayı yükle",
     "batchFormatLabel": "Toplu iş biçimi",
     "batchFormatMultipart": "multipart/mixed",
     "batchFormatJson": "JSON toplu işi",
-    "versionMismatchWarning": "Bu istek {{requestVersion}} olarak etiketlenmiş ancak yanıt {{responseVersion}} gibi görünüyor. İstek sürümünü sunucuyla eşleşecek şekilde değiştirin."
+    "versionMismatchWarning": "Bu istek {{requestVersion}} olarak etiketlenmiş ancak yanıt {{responseVersion}} gibi görünüyor. İstek sürümünü sunucuyla eşleşecek şekilde değiştirin.",
+    "orderbyPropertyPickerPlaceholder": "Seçin…"
   },
   "typedValue": {
     "list": {

@@ -46,6 +46,7 @@ import {
 import { RestormVariableInputBox } from '../RestormVariableInputBox'
 import type { ODataRequest, ODataQueryOptions, ODataVersion, ODataOperationKind, ODataBatchFormat, ODataBatchSubRequestSpec, ODataOperationParameterSpec, KeyValue, ResponseHistoryDetail } from '../../../../shared/types/collections'
 import { ODataBatchEditor } from './ODataBatchEditor'
+import { ODataFilterEditor } from './ODataFilterEditor'
 import { ODataOrderbyEditor } from './ODataOrderbyEditor'
 import { ODataExpandEditor } from './ODataExpandEditor'
 import { ODataPropertyChips } from './ODataPropertyChips'
@@ -79,6 +80,7 @@ import {
 } from '../../../../shared/utils/odataBatch'
 import { DEFAULT_REQUEST_TIMEOUT_MS } from '../../../../shared/config/constants'
 import { useRestormStore } from '../../store/restormStore'
+import { useApiDocumentationFromRequest } from '../../hooks/useApiDocumentationFromRequest'
 import { buildRequestPath } from '../../utils/requestPath'
 import { SendButtonEnvSwitcher } from './SendButtonEnvSwitcher'
 import { BeamWrap } from '../common/BeamWrap'
@@ -186,6 +188,12 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
   const { selectedEnvId, environments } = useEnvironmentContext()
   const collections = useRestormStore((state) => state.collections)
   const resolveAuthRequest = useAuthRequestResolver()
+
+  // Structured documentation of the owning env folder (entity types +
+  // properties + enum values), used to drive $filter / $orderby
+  // metadata-aware autocomplete. Undefined for a hand-authored request
+  // with no imported spec → autocomplete degrades to no suggestions.
+  const { apiDocumentation } = useApiDocumentationFromRequest(request)
 
   const odataVersionOptions = useMemo<ISelectOptionItem[]>(() => [
     { text: 'v4' },
@@ -943,11 +951,12 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
 
       <div style={rowStyle}>
         <label style={labelStyle} htmlFor="odata-filter">$filter</label>
-        <InputBox
+        <ODataFilterEditor
           value={filterText}
           onChange={setFilter}
-          changeDebounceMs={0}
-          options={{ placeholder: t('odataRequestTab.filterPlaceholder', "Name eq 'Alice' and Age gt 21") }}
+          apiDocumentation={apiDocumentation}
+          entityTypeRef={request.entityTypeRef}
+          placeholder={t('odataRequestTab.filterPlaceholder', "Name eq 'Alice' and Age gt 21")}
           data-testid="odata-request-filter"
         />
       </div>
@@ -1028,6 +1037,7 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
         <ODataOrderbyEditor
           value={orderbyText}
           onChange={setOrderby}
+          propertySuggestions={request.entitySetProperties ?? []}
         />
         <ODataPropertyChips
           properties={request.entitySetProperties ?? []}

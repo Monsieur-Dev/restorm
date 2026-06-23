@@ -1768,13 +1768,28 @@
     "createInstance": "Create a new instance",
     "terminateInstance": "Terminate an instance"
   },
+  "odataFilter": {
+    "detail": {
+      "property": "property",
+      "navigation": "navigation",
+      "operator": "operator",
+      "logical": "logical operator",
+      "function": "function",
+      "enumValue": "enum value"
+    },
+    "validation": {
+      "unknownProperty": "Unknown property",
+      "wrongTypeOperator": "Operator not applicable to this property type"
+    }
+  },
   "odataRequestTab": {
     "send": "Send",
     "loadNextPage": "Load next page",
     "batchFormatLabel": "Batch format",
     "batchFormatMultipart": "multipart/mixed",
     "batchFormatJson": "JSON batch",
-    "versionMismatchWarning": "This request is tagged {{requestVersion}} but the response looks like {{responseVersion}}. Switch the request version to match the server."
+    "versionMismatchWarning": "This request is tagged {{requestVersion}} but the response looks like {{responseVersion}}. Switch the request version to match the server.",
+    "orderbyPropertyPickerPlaceholder": "Pick…"
   },
   "typedValue": {
     "list": {

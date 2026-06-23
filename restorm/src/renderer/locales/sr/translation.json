@@ -1769,13 +1769,28 @@
     "createInstance": "Направи нову инстанцу",
     "terminateInstance": "Затвори инстанцу"
   },
+  "odataFilter": {
+    "detail": {
+      "property": "својство",
+      "navigation": "навигација",
+      "operator": "оператор",
+      "logical": "логички оператор",
+      "function": "функција",
+      "enumValue": "enum вредност"
+    },
+    "validation": {
+      "unknownProperty": "Непознато својство",
+      "wrongTypeOperator": "Оператор није применљив на овај тип својства"
+    }
+  },
   "odataRequestTab": {
     "send": "Пошаљи",
     "loadNextPage": "Учитај следећу страницу",
     "batchFormatLabel": "Формат групе",
     "batchFormatMultipart": "multipart/mixed",
     "batchFormatJson": "JSON група",
-    "versionMismatchWarning": "Овај захтев је означен као {{requestVersion}}, али одговор изгледа као {{responseVersion}}. Промените верзију захтева да одговара серверу."
+    "versionMismatchWarning": "Овај захтев је означен као {{requestVersion}}, али одговор изгледа као {{responseVersion}}. Промените верзију захтева да одговара серверу.",
+    "orderbyPropertyPickerPlaceholder": "Изаберите…"
   },
   "typedValue": {
     "list": {
