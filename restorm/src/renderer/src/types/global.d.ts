@@ -643,7 +643,7 @@ export interface FullRequestData {
   // OData specific (requestType === 'odata'). The main ContextService
   // appends the system query options ($filter / $select / …) to the
   // resolved URL. Mirrors the main-side ContextServiceTypes shape.
-  odataVersion?: 'v2' | 'v3' | 'v4' | undefined
+  odataVersion?: 'v2' | 'v3' | 'v4' | 'v4.01' | undefined
   odataOperationKind?: 'entity-set' | 'function' | 'action' | 'batch' | undefined
   odataQueryOptions?: {
     filter?: string | undefined

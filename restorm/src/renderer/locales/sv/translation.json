@@ -1815,7 +1815,13 @@
     "batchAllowGetInChangeSet": "Tillåt GET i change-set",
     "batchAllowGetInChangeSetTooltip": "OData-specifikationen förbjuder GET inuti ett change-set; många servrar kommer att avvisa sådana batchar. Aktivera denna flagga bara om din server explicit stödjer det.",
     "batchGetInChangeSetWarning": "GET inuti ett change-set kanske inte accepteras av alla servrar (inte tillåtet enligt OData-specifikationen).",
-    "batchForceIncludeInChangeSet": "Inkludera ändå"
+    "batchForceIncludeInChangeSet": "Inkludera ändå",
+    "batchForceAbsoluteBatchUrls": "Tvinga absoluta batch-URL:er (v4.01)",
+    "batchForceAbsoluteBatchUrlsTooltip": "OData v4.01 föredrar starkt relativa URL:er i underbegäranden. Aktivera detta för att behålla absoluta URL:er (för servrar som kräver dem).",
+    "getDelta": "Hämta delta",
+    "deltaHint": "@odata.deltaLink tillgänglig — klicka för att ersätta detta svar med den senaste ändringsuppsättningen.",
+    "deltaChanged": "{{count}} ändrad(e)",
+    "deltaRemoved": "{{count}} borttagen/borttagna"
   },
   "typedValue": {
     "list": {

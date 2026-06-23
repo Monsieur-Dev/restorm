@@ -1816,7 +1816,13 @@
     "batchAllowGetInChangeSet": "Permite GET în change-set",
     "batchAllowGetInChangeSetTooltip": "Specificația OData interzice GET în interiorul unui change-set; mulți serveri vor respinge astfel de loturi. Activați acest indicator numai dacă serverul dvs. îl acceptă explicit.",
     "batchGetInChangeSetWarning": "GET în interiorul unui change-set poate să nu fie acceptat de toți serverii (nepermidat conform specificației OData).",
-    "batchForceIncludeInChangeSet": "Include oricum"
+    "batchForceIncludeInChangeSet": "Include oricum",
+    "batchForceAbsoluteBatchUrls": "Forțează URL-uri absolute în lot (v4.01)",
+    "batchForceAbsoluteBatchUrlsTooltip": "OData v4.01 preferă puternic URL-uri relative în sub-cereri. Activați aceasta pentru a păstra URL-uri absolute (pentru servere care le necesită).",
+    "getDelta": "Obțineți delta",
+    "deltaHint": "@odata.deltaLink disponibil — faceți clic pentru a înlocui acest răspuns cu cel mai recent set de modificări.",
+    "deltaChanged": "{{count}} modificat(e)",
+    "deltaRemoved": "{{count}} eliminat(e)"
   },
   "typedValue": {
     "list": {

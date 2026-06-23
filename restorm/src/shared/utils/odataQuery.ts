@@ -15,6 +15,7 @@
 
 import type { ODataQueryOptions, ODataVersion } from '../types/collections'
 import type { KeyValue } from '../types/baseTypes'
+import { isV4Family } from './odataResponse'
 
 /** Canonical ordering we emit system options in. Purely cosmetic — OData
  * servers don't require a specific order — but stable output makes URLs
@@ -49,9 +50,9 @@ export function serializeODataQueryOptions(
     out.push(['$skip', options.skip])
   }
   if (options.count === true) {
-    // v4 uses `$count=true`. v2 / v3 use `$inlinecount=allpages`; the
+    // v4/v4.01 use `$count=true`. v2 / v3 use `$inlinecount=allpages`; the
     // v2/v3 engine PR will flip this branch when it lands.
-    if (version === 'v4') {
+    if (isV4Family(version)) {
       out.push(['$count', 'true'])
     } else {
       out.push(['$inlinecount', 'allpages'])
@@ -80,7 +81,7 @@ export function serializeODataQueryOptions(
   // appended alphabetically). Today every emitted key is in the
   // canonical list, but this keeps the contract stable as options are
   // added incrementally across phases.
-  if (version === 'v4') {
+  if (isV4Family(version)) {
     out.sort((a, b) => {
       const ia = V4_KEY_ORDER.indexOf(a[0] as (typeof V4_KEY_ORDER)[number])
       const ib = V4_KEY_ORDER.indexOf(b[0] as (typeof V4_KEY_ORDER)[number])

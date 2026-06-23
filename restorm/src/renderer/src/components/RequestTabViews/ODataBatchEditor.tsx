@@ -61,6 +61,15 @@ export interface ODataBatchEditorProps {
   allowGetInChangeSet?: boolean
   /** Called when the user toggles the allow-GET-in-change-set flag. */
   onAllowGetInChangeSetChange?: (next: boolean) => void
+  /** v4.01 only: when true, sub-request URLs are kept absolute instead
+   * of being made relative to the service root. Only shown when the
+   * request is v4.01. */
+  forceAbsoluteBatchUrls?: boolean
+  /** Called when the user toggles the force-absolute-batch-URLs flag. */
+  onForceAbsoluteBatchUrlsChange?: (next: boolean) => void
+  /** Whether the current request is v4.01 (controls visibility of
+   * the force-absolute toggle). */
+  isV401?: boolean
 }
 
 function newSubRequest(): ODataBatchSubRequestSpec {
@@ -77,7 +86,10 @@ export const ODataBatchEditor: React.FC<ODataBatchEditorProps> = ({
   format = 'multipart',
   onFormatChange,
   allowGetInChangeSet = false,
-  onAllowGetInChangeSetChange
+  onAllowGetInChangeSetChange,
+  forceAbsoluteBatchUrls = false,
+  onForceAbsoluteBatchUrlsChange,
+  isV401 = false
 }) => {
   const { t } = useTranslation()
   const methodOptions: ISelectOptionItem[] = BATCH_METHODS.map((m) => ({ text: m }))
@@ -176,6 +188,27 @@ export const ODataBatchEditor: React.FC<ODataBatchEditorProps> = ({
           {t('odataRequestTab.batchAllowGetInChangeSet', 'Allow GET inside change-set')}
         </span>
       </div>
+
+      {isV401 ? (
+        <div style={rowStyle}>
+          <HeaderHoverTooltip
+            label={t(
+              'odataRequestTab.batchForceAbsoluteBatchUrlsTooltip',
+              'OData v4.01 strongly prefers relative sub-request URLs. Enable this to keep absolute URLs instead (for servers that require them).'
+            )}
+            data-testid="odata-batch-force-absolute-tooltip"
+          >
+            <Toggle
+              checked={forceAbsoluteBatchUrls}
+              onChange={(v) => { onForceAbsoluteBatchUrlsChange?.(v) }}
+              data-testid="odata-batch-force-absolute-urls"
+            />
+          </HeaderHoverTooltip>
+          <span style={labelStyle}>
+            {t('odataRequestTab.batchForceAbsoluteBatchUrls', 'Force absolute batch URLs (v4.01)')}
+          </span>
+        </div>
+      ) : null}
 
       {value.length === 0 ? (
         <span style={{ ...labelStyle, fontStyle: 'italic' }}>

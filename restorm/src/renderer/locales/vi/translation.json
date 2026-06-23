@@ -1814,7 +1814,13 @@
     "batchAllowGetInChangeSet": "Cho phép GET trong change-set",
     "batchAllowGetInChangeSetTooltip": "Thông số OData cấm GET trong một change-set; nhiều máy chủ sẽ từ chối các lô như vậy. Chỉ bật cờ này khi máy chủ của bạn hỗ trợ nó một cách rõ ràng.",
     "batchGetInChangeSetWarning": "GET trong một change-set có thể không được chấp nhận bởi tất cả các máy chủ (không được phép theo thông số OData).",
-    "batchForceIncludeInChangeSet": "Vẫn đưa vào"
+    "batchForceIncludeInChangeSet": "Vẫn đưa vào",
+    "batchForceAbsoluteBatchUrls": "Buộc URL tuyệt đối trong lô (v4.01)",
+    "batchForceAbsoluteBatchUrlsTooltip": "OData v4.01 ưu tiên mạnh mẽ URL tương đối trong các yêu cầu con. Bật tùy chọn này để giữ URL tuyệt đối (cho các máy chủ yêu cầu chúng).",
+    "getDelta": "Lấy delta",
+    "deltaHint": "@odata.deltaLink khả dụng — nhấp để thay thế phản hồi này bằng tập hợp thay đổi mới nhất.",
+    "deltaChanged": "{{count}} đã thay đổi",
+    "deltaRemoved": "{{count}} đã xóa"
   },
   "typedValue": {
     "list": {

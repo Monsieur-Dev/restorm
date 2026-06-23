@@ -124,7 +124,7 @@ export interface FullRequestData {
   // OData specific — carried verbatim through URLResolver, which
   // appends the system query options ($filter / $select / $top /
   // $skip / $count) to the resolved URL as a final step.
-  odataVersion?: 'v2' | 'v3' | 'v4'
+  odataVersion?: 'v2' | 'v3' | 'v4' | 'v4.01'
   odataOperationKind?: 'entity-set' | 'function' | 'action' | 'batch'
   odataQueryOptions?: {
     filter?: string

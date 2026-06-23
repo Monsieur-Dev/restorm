@@ -522,7 +522,7 @@ class ResponseHistoryService {
 
     const requestContext = contextService.getRequestContext(requestId)
     const fullData = requestContext?.fullData
-    const odataVersion: 'v2' | 'v3' | 'v4' = fullData?.odataVersion ?? 'v4'
+    const odataVersion: 'v2' | 'v3' | 'v4' | 'v4.01' = fullData?.odataVersion ?? 'v4'
     const operationKind: 'entity-set' | 'function' | 'action' | 'batch' =
       fullData?.odataOperationKind ?? 'entity-set'
     // `getRequestMeta` has no 'odata' branch, and OData requests carry

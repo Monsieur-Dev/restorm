@@ -1815,7 +1815,13 @@
     "batchAllowGetInChangeSet": "Salli GET change-setissä",
     "batchAllowGetInChangeSetTooltip": "OData-spesifikaatio kieltää GET-pyynnöt change-setin sisällä; monet palvelimet hylkäävät tällaiset eräpyynnöt. Ota tämä asetus käyttöön vain, jos palvelimesi tukee sitä nimenomaisesti.",
     "batchGetInChangeSetWarning": "GET change-setin sisällä ei välttämättä hyväksytä kaikilla palvelimilla (OData-spesifikaation mukaan ei sallittu).",
-    "batchForceIncludeInChangeSet": "Sisällytä joka tapauksessa"
+    "batchForceIncludeInChangeSet": "Sisällytä joka tapauksessa",
+    "batchForceAbsoluteBatchUrls": "Pakota absoluuttiset erä-URL:t (v4.01)",
+    "batchForceAbsoluteBatchUrlsTooltip": "OData v4.01 suosii voimakkaasti suhteellisia URL-osoitteita alipyynnöissä. Ota käyttöön absoluuttisten URL-osoitteiden säilyttämiseksi (palvelimille, jotka vaativat niitä).",
+    "getDelta": "Hae delta",
+    "deltaHint": "@odata.deltaLink saatavilla — napsauta korvata tämä vastaus viimeisimmällä muutosjoukolla.",
+    "deltaChanged": "{{count}} muutettu",
+    "deltaRemoved": "{{count}} poistettu"
   },
   "typedValue": {
     "list": {

@@ -1817,7 +1817,13 @@
     "batchAllowGetInChangeSet": "Zezwól na GET w change-set",
     "batchAllowGetInChangeSetTooltip": "Specyfikacja OData zabrania GET wewnątrz change-set; wiele serwerów odrzuci takie partie. Włącz tę flagę tylko jeśli serwer jawnie to obsługuje.",
     "batchGetInChangeSetWarning": "GET wewnątrz change-set może nie być akceptowany przez wszystkie serwery (niedozwolone wg specyfikacji OData).",
-    "batchForceIncludeInChangeSet": "Uwzględnij mimo to"
+    "batchForceIncludeInChangeSet": "Uwzględnij mimo to",
+    "batchForceAbsoluteBatchUrls": "Wymuś bezwzględne URL-e w pakiecie (v4.01)",
+    "batchForceAbsoluteBatchUrlsTooltip": "OData v4.01 silnie preferuje względne URL-e w podzapytaniach. Włącz to, aby zachować bezwzględne URL-e (dla serwerów, które tego wymagają).",
+    "getDelta": "Pobierz delta",
+    "deltaHint": "@odata.deltaLink dostępny — kliknij, aby zastąpić tę odpowiedź najnowszym zestawem zmian.",
+    "deltaChanged": "{{count}} zmieniono",
+    "deltaRemoved": "{{count}} usunięto"
   },
   "typedValue": {
     "list": {

@@ -357,3 +357,38 @@ When('I add a standalone GET sub-request to the batch with URL {string}', async 
   // No change-set group — this is a standalone request outside any change-set.
   await typeBatchInput(p, `odata-batch-url-${lastIndex}`, url)
 })
+
+// ODATA_VERSION_BY_INDEX (mirrors ODataRequestTabView.tsx): v4=0, v4.01=1, v3=2, v2=3
+const ODATA_VERSION_INDEX: Record<string, number> = {
+  'v4': 0,
+  'v4.01': 1,
+  'v3': 2,
+  'v2': 3
+}
+
+Then('the OData version selector should include {string}', async ({}, version: string) => {
+  const p = requirePage()
+  // The version SelectBox is rendered as a native <select> with a custom overlay.
+  // The native <select> element (`data-testid="odata-request-version-select"`)
+  // always has all options in the DOM without needing to open the dropdown.
+  // Check the native select's options for the requested version text.
+  const nativeSelect = p.locator('[data-testid="odata-request-version-select"]').first()
+  await expect(nativeSelect).toBeAttached({ timeout: 5000 })
+  const optionFound = await nativeSelect.locator(`option`).filter({ hasText: version }).count()
+  if (optionFound === 0) throw new Error(`OData version option "${version}" not found in selector`)
+})
+
+When('I select OData version {string}', async ({}, version: string) => {
+  const p = requirePage()
+  // Use the known version→index mapping to click via the ECUI SelectBox API.
+  const index = ODATA_VERSION_INDEX[version]
+  if (index === undefined) throw new Error(`Unknown OData version "${version}" — update ODATA_VERSION_INDEX`)
+  await selectBatchBoxOption(p, 'odata-request-version', index)
+  await p.waitForTimeout(300)
+})
+
+Then('the force-absolute-batch-URLs toggle should be visible', async () => {
+  const p = requirePage()
+  await expect(p.locator('[data-testid="odata-batch-force-absolute-urls"]').first())
+    .toBeVisible({ timeout: 5000 })
+})

@@ -1814,7 +1814,13 @@
     "batchAllowGetInChangeSet": "change-set 내에서 GET 허용",
     "batchAllowGetInChangeSetTooltip": "OData 사양은 change-set 내에서 GET을 금지합니다. 많은 서버가 이러한 배치 요청을 거부합니다. 서버가 명시적으로 지원하는 경우에만 이 플래그를 활성화하세요.",
     "batchGetInChangeSetWarning": "change-set 내의 GET은 모든 서버에서 허용되지 않을 수 있습니다 (OData 사양에서 허용되지 않음).",
-    "batchForceIncludeInChangeSet": "그래도 포함"
+    "batchForceIncludeInChangeSet": "그래도 포함",
+    "batchForceAbsoluteBatchUrls": "배치에서 절대 URL 강제 사용 (v4.01)",
+    "batchForceAbsoluteBatchUrlsTooltip": "OData v4.01은 하위 요청에서 상대 URL을 강력히 선호합니다. 절대 URL을 유지하려면 활성화하세요(이를 요구하는 서버용).",
+    "getDelta": "델타 가져오기",
+    "deltaHint": "@odata.deltaLink 사용 가능 — 클릭하여 이 응답을 최신 변경 세트로 교체합니다.",
+    "deltaChanged": "{{count}}개 변경됨",
+    "deltaRemoved": "{{count}}개 제거됨"
   },
   "typedValue": {
     "list": {

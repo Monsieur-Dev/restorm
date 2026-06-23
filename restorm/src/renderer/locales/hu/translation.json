@@ -1815,7 +1815,13 @@
     "batchAllowGetInChangeSet": "GET engedélyezése a change-setben",
     "batchAllowGetInChangeSetTooltip": "Az OData specifikáció tiltja a GET-et egy change-seten belül; sok szerver elutasítja az ilyen kötegeket. Csak akkor engedélyezze ezt a jelzőt, ha a szerver kifejezetten támogatja.",
     "batchGetInChangeSetWarning": "A GET a change-seten belül nem biztos, hogy minden szerver elfogadja (az OData specifikáció nem engedélyezi).",
-    "batchForceIncludeInChangeSet": "Mégis belefoglalás"
+    "batchForceIncludeInChangeSet": "Mégis belefoglalás",
+    "batchForceAbsoluteBatchUrls": "Abszolút köteg URL-ek kényszerítése (v4.01)",
+    "batchForceAbsoluteBatchUrlsTooltip": "Az OData v4.01 erősen preferálja a relatív URL-eket az alárendelt kérésekben. Engedélyezze ezt az abszolút URL-ek megtartásához (olyan szerverekhez, amelyek ezt igénylik).",
+    "getDelta": "Delta lekérése",
+    "deltaHint": "@odata.deltaLink elérhető — kattintson a válasz legújabb módosítási készlettel való cseréjéhez.",
+    "deltaChanged": "{{count}} megváltozott",
+    "deltaRemoved": "{{count}} eltávolítva"
   },
   "typedValue": {
     "list": {

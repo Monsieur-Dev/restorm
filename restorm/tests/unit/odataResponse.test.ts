@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { normalizeODataResponse, detectODataVersionMismatch } from '../../src/shared/utils/odataResponse'
+import { normalizeODataResponse, detectODataVersionMismatch, isV4Family } from '../../src/shared/utils/odataResponse'
 
 describe('detectODataVersionMismatch', () => {
   it('flags a v4 request that got a v2 `d.results` envelope', () => {
@@ -95,5 +95,63 @@ describe('normalizeODataResponse', () => {
       const out = normalizeODataResponse(body, 'v2')
       expect(out?.body).toBe(body)
     })
+  })
+
+  describe('v4.01 delta payloads', () => {
+    it('extracts @odata.deltaLink on v4.01 responses', () => {
+      const body = {
+        '@odata.context': 'http://x/$metadata#People/$delta',
+        '@odata.deltaLink': 'http://x/People?$deltatoken=abc123',
+        value: [{ Id: 1, Name: 'Alice' }, { '@removed': { reason: 'deleted' }, Id: 2 }]
+      }
+      const out = normalizeODataResponse(body, 'v4.01')
+      expect(out?.deltaLink).toBe('http://x/People?$deltatoken=abc123')
+      expect(out?.value).toHaveLength(2)
+    })
+
+    it('extracts @odata.deltaLink on v4 responses too (v4 family)', () => {
+      const body = {
+        '@odata.deltaLink': 'http://x/People?$deltatoken=xyz',
+        value: []
+      }
+      const out = normalizeODataResponse(body, 'v4')
+      expect(out?.deltaLink).toBe('http://x/People?$deltatoken=xyz')
+    })
+
+    it('omits deltaLink when the annotation is absent', () => {
+      const body = { value: [{ Id: 1 }] }
+      const out = normalizeODataResponse(body, 'v4.01')
+      expect(out?.deltaLink).toBeUndefined()
+    })
+  })
+})
+
+describe('isV4Family', () => {
+  it('returns true for v4', () => {
+    expect(isV4Family('v4')).toBe(true)
+  })
+
+  it('returns true for v4.01', () => {
+    expect(isV4Family('v4.01')).toBe(true)
+  })
+
+  it('returns false for v3', () => {
+    expect(isV4Family('v3')).toBe(false)
+  })
+
+  it('returns false for v2', () => {
+    expect(isV4Family('v2')).toBe(false)
+  })
+})
+
+describe('detectODataVersionMismatch — v4.01', () => {
+  it('flags a v4.01 request that got a v2 envelope', () => {
+    const body = { d: { results: [{ ID: 1 }], __count: '1' } }
+    expect(detectODataVersionMismatch(body, 'v4.01')).toBe('v2')
+  })
+
+  it('returns null when v4.01 response has v4-style value array', () => {
+    const body = { value: [{ ID: 1 }], '@odata.deltaLink': 'http://x/delta' }
+    expect(detectODataVersionMismatch(body, 'v4.01')).toBeNull()
   })
 })

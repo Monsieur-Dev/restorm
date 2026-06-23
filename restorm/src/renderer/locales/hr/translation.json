@@ -1816,7 +1816,13 @@
     "batchAllowGetInChangeSet": "Dopusti GET u change-setu",
     "batchAllowGetInChangeSetTooltip": "OData specifikacija zabranjuje GET unutar change-seta; mnogi poslužitelji će odbiti takve skupove. Omogućite ovu zastavu samo ako je vaš poslužitelj izričito podržava.",
     "batchGetInChangeSetWarning": "GET unutar change-seta možda neće biti prihvaćen od svih poslužitelja (nije dopušteno prema OData specifikaciji).",
-    "batchForceIncludeInChangeSet": "Uključi svejedno"
+    "batchForceIncludeInChangeSet": "Uključi svejedno",
+    "batchForceAbsoluteBatchUrls": "Prisiliti apsolutne URL-ove u skupu (v4.01)",
+    "batchForceAbsoluteBatchUrlsTooltip": "OData v4.01 snažno preferira relativne URL-ove u podzahtjevima. Omogućite ovo za zadržavanje apsolutnih URL-ova (za poslužitelje koji to zahtijevaju).",
+    "getDelta": "Dohvati deltu",
+    "deltaHint": "@odata.deltaLink dostupan — kliknite za zamjenu ovog odgovora najnovijim skupom promjena.",
+    "deltaChanged": "{{count}} promijenjeno",
+    "deltaRemoved": "{{count}} uklonjeno"
   },
   "typedValue": {
     "list": {

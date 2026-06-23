@@ -4,7 +4,8 @@ import {
   parseODataBatchResponse,
   serializeODataJsonBatch,
   parseODataJsonBatchResponse,
-  extractBoundary
+  extractBoundary,
+  toRelativeBatchUrl
 } from '../../src/shared/utils/odataBatch'
 
 describe('serializeODataBatch', () => {
@@ -304,5 +305,71 @@ describe('parseODataJsonBatchResponse', () => {
   it('returns [] for malformed or non-batch JSON', () => {
     expect(parseODataJsonBatchResponse('not json')).toEqual([])
     expect(parseODataJsonBatchResponse('{"foo":1}')).toEqual([])
+  })
+})
+
+describe('toRelativeBatchUrl', () => {
+  it('strips the service root prefix and trailing slash', () => {
+    expect(toRelativeBatchUrl('https://example.com/odata/Customers(1)', 'https://example.com/odata'))
+      .toBe('Customers(1)')
+  })
+
+  it('handles a service root already ending with /', () => {
+    expect(toRelativeBatchUrl('https://example.com/odata/People?$top=5', 'https://example.com/odata/'))
+      .toBe('People?$top=5')
+  })
+
+  it('returns the URL unchanged when it does not start with the service root', () => {
+    expect(toRelativeBatchUrl('https://other.com/Pets', 'https://example.com/odata'))
+      .toBe('https://other.com/Pets')
+  })
+
+  it('returns the URL unchanged when serviceRoot is empty', () => {
+    expect(toRelativeBatchUrl('https://example.com/odata/Pets', '')).toBe('https://example.com/odata/Pets')
+  })
+
+  it('already-relative URLs pass through unchanged', () => {
+    expect(toRelativeBatchUrl('Pets(1)', 'https://example.com/odata')).toBe('Pets(1)')
+  })
+})
+
+describe('serializeODataBatch — v4.01 relative URLs', () => {
+  it('rewrites sub-request URLs to relative when serviceRoot is provided', () => {
+    const out = serializeODataBatch(
+      [{ method: 'GET', url: 'https://example.com/odata/Pets(1)' }],
+      'b',
+      { serviceRoot: 'https://example.com/odata' }
+    )
+    expect(out.body).toContain('GET Pets(1) HTTP/1.1')
+    expect(out.body).not.toContain('GET https://example.com/odata/Pets(1)')
+  })
+
+  it('keeps absolute URLs when forceAbsoluteUrls is true', () => {
+    const out = serializeODataBatch(
+      [{ method: 'GET', url: 'https://example.com/odata/Pets(1)' }],
+      'b',
+      { serviceRoot: 'https://example.com/odata', forceAbsoluteUrls: true }
+    )
+    expect(out.body).toContain('GET https://example.com/odata/Pets(1) HTTP/1.1')
+  })
+})
+
+describe('serializeODataJsonBatch — v4.01 relative URLs', () => {
+  it('rewrites sub-request URLs to relative when serviceRoot is provided', () => {
+    const out = serializeODataJsonBatch(
+      [{ method: 'GET', url: 'https://example.com/odata/Pets' }],
+      { serviceRoot: 'https://example.com/odata' }
+    )
+    const doc = JSON.parse(out.body) as { requests: { url: string }[] }
+    expect(doc.requests[0]?.url).toBe('Pets')
+  })
+
+  it('keeps absolute URLs when forceAbsoluteUrls is true', () => {
+    const out = serializeODataJsonBatch(
+      [{ method: 'GET', url: 'https://example.com/odata/Pets' }],
+      { serviceRoot: 'https://example.com/odata', forceAbsoluteUrls: true }
+    )
+    const doc = JSON.parse(out.body) as { requests: { url: string }[] }
+    expect(doc.requests[0]?.url).toBe('https://example.com/odata/Pets')
   })
 })

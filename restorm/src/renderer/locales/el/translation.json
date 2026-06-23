@@ -1815,7 +1815,13 @@
     "batchAllowGetInChangeSet": "Να επιτρέπεται το GET εντός change-set",
     "batchAllowGetInChangeSetTooltip": "Η προδιαγραφή OData απαγορεύει το GET εντός ενός change-set· πολλοί διακομιστές θα απορρίψουν τέτοιες δέσμες. Ενεργοποιήστε αυτή την επιλογή μόνο αν ο διακομιστής σας το υποστηρίζει ρητά.",
     "batchGetInChangeSetWarning": "Το GET εντός ενός change-set ενδέχεται να μην γίνει δεκτό από όλους τους διακομιστές (δεν επιτρέπεται σύμφωνα με την προδιαγραφή OData).",
-    "batchForceIncludeInChangeSet": "Συμπερίληψη παρ' όλα αυτά"
+    "batchForceIncludeInChangeSet": "Συμπερίληψη παρ' όλα αυτά",
+    "batchForceAbsoluteBatchUrls": "Επιβολή απόλυτων URL δέσμης (v4.01)",
+    "batchForceAbsoluteBatchUrlsTooltip": "Το OData v4.01 προτιμά ισχυρά σχετικές URL σε υπο-αιτήματα. Ενεργοποιήστε το για να διατηρήσετε απόλυτες URL (για διακομιστές που το απαιτούν).",
+    "getDelta": "Λήψη δέλτα",
+    "deltaHint": "@odata.deltaLink διαθέσιμο — κάντε κλικ για να αντικαταστήσετε αυτή την απόκριση με το τελευταίο σύνολο αλλαγών.",
+    "deltaChanged": "{{count}} αλλαγμένα",
+    "deltaRemoved": "{{count}} αφαιρέθηκαν"
   },
   "typedValue": {
     "list": {

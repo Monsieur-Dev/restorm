@@ -141,6 +141,10 @@ export interface ODataRequest extends BaseRequest {
    * servers reject such batches). Toggle this flag when your server
    * explicitly supports it. */
   allowGetInChangeSet?: boolean
+  /** v4.01 only: when true, batch sub-request URLs are kept as
+   * absolute URLs even though the v4.01 spec strongly prefers relative
+   * URIs. Useful when the target server requires absolute URLs. */
+  forceAbsoluteBatchUrls?: boolean
   /** Names of structural properties on the bound entity type (pre-
    * filled by the importer from the EDMX `EntityType`). The UI
    * surfaces these as clickable chips beneath $select / $orderby
