@@ -142,3 +142,109 @@ describe('importOData (v4 EDMX)', () => {
     expect(base?.value.toString()).toBe('http://localhost/odata')
   })
 })
+
+const v2Fixture = readFileSync(join(__dirname, 'fixtures/odata/v2-metadata.xml'), 'utf-8')
+const v3Fixture = readFileSync(join(__dirname, 'fixtures/odata/v3-metadata.xml'), 'utf-8')
+const jsonCsdlFixture = readFileSync(join(__dirname, 'fixtures/odata/v4-csdl.json'), 'utf-8')
+
+function firstEntitySetRequests(root: ReturnType<typeof importOData>, setName: string): ODataRequest[] {
+  const folder = findSubFolder(root, setName)
+  return folder.items.filter((i): i is ODataRequest => i instanceof ODataRequest)
+}
+
+describe('importOData (v2 EDMX)', () => {
+  it('detects v2 from the edmx Version + DataServiceVersion and tags the root', () => {
+    const root = importOData(v2Fixture)
+    expect(root.tags).toContain('odata:v2')
+  })
+
+  it('tags every generated request with odataVersion v2', () => {
+    const root = importOData(v2Fixture)
+    const reqs = firstEntitySetRequests(root, 'Products')
+    expect(reqs.length).toBe(5)
+    expect(reqs.every((r) => r.odataVersion === 'v2')).toBe(true)
+  })
+
+  it('parses entity sets, keys and properties from the v2 CSDL', () => {
+    const root = importOData(v2Fixture)
+    expect(findSubFolder(root, 'Products')).toBeDefined()
+    expect(findSubFolder(root, 'Categories')).toBeDefined()
+    const getByKey = firstEntitySetRequests(root, 'Products').find((r) => r.name.startsWith('Get'))
+    // Key is `ID` → the by-key URL inlines a lower-cased {{id}} placeholder.
+    expect(expectPresent(getByKey, 'GET-by-key').url).toContain('({{id}})')
+  })
+
+  it('imports a v2 <FunctionImport> into the Functions folder', () => {
+    const root = importOData(v2Fixture)
+    const functions = findSubFolder(root, 'Functions')
+    const names = functions.items
+      .filter((i): i is ODataRequest => i instanceof ODataRequest)
+      .map((r) => r.name)
+    expect(names.some((n) => n.includes('GetProductsByRating'))).toBe(true)
+  })
+})
+
+describe('importOData (v3 EDMX)', () => {
+  it('detects v3 and tags the root + requests', () => {
+    const root = importOData(v3Fixture)
+    expect(root.tags).toContain('odata:v3')
+    const reqs = firstEntitySetRequests(root, 'Suppliers')
+    expect(reqs.every((r) => r.odataVersion === 'v3')).toBe(true)
+  })
+
+  it('routes a POST <FunctionImport> into the Actions folder', () => {
+    const root = importOData(v3Fixture)
+    const actions = findSubFolder(root, 'Actions')
+    const names = actions.items
+      .filter((i): i is ODataRequest => i instanceof ODataRequest)
+      .map((r) => r.name)
+    expect(names.some((n) => n.includes('DiscountProducts'))).toBe(true)
+  })
+})
+
+describe('importOData (v4 JSON-CSDL)', () => {
+  it('parses a JSON-CSDL document into v4-tagged entity-set folders', () => {
+    const root = importOData(jsonCsdlFixture)
+    expect(root.tags).toContain('odata:v4')
+    expect(findSubFolder(root, 'Products')).toBeDefined()
+    expect(findSubFolder(root, 'Categories')).toBeDefined()
+    const reqs = firstEntitySetRequests(root, 'Products')
+    expect(reqs.length).toBe(5)
+    expect(reqs.every((r) => r.odataVersion === 'v4')).toBe(true)
+  })
+
+  it('extracts the enum type into ApiDocumentation models', () => {
+    const root = importOData(jsonCsdlFixture)
+    const doc = expectPresent(root.apiDocumentation, 'apiDocumentation')
+    expect(doc.models['ODataDemo.Color']?.type).toBe('enum')
+    expect(doc.models['ODataDemo.Color']?.enum).toEqual(['Red', 'Green', 'Blue'])
+  })
+
+  it('imports a bound action and an unbound function', () => {
+    const root = importOData(jsonCsdlFixture)
+    const actionNames = findSubFolder(root, 'Actions').items
+      .filter((i): i is ODataRequest => i instanceof ODataRequest)
+      .map((r) => r.name)
+    const functionNames = findSubFolder(root, 'Functions').items
+      .filter((i): i is ODataRequest => i instanceof ODataRequest)
+      .map((r) => r.name)
+    expect(actionNames.some((n) => n.includes('Discount'))).toBe(true)
+    expect(functionNames.some((n) => n.includes('TopProducts'))).toBe(true)
+  })
+
+  it('strips the binding parameter from a bound action body', () => {
+    const root = importOData(jsonCsdlFixture)
+    const action = findSubFolder(root, 'Actions').items
+      .filter((i): i is ODataRequest => i instanceof ODataRequest)
+      .find((r) => r.name.includes('Discount'))
+    const actionBody: string = expectPresent(action, 'Discount action').actionBody ?? '{}'
+    const body = JSON.parse(actionBody) as Record<string, unknown>
+    // `product` is the binding parameter and must not appear; `percent` does.
+    expect(body).toHaveProperty('percent')
+    expect(body).not.toHaveProperty('product')
+  })
+
+  it('throws a clean error on malformed JSON-CSDL', () => {
+    expect(() => importOData('{ not valid json')).toThrow(/JSON-CSDL|JSON/)
+  })
+})

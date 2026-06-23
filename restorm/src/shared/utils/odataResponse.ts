@@ -102,3 +102,48 @@ export function normalizeODataResponse(
   if (typeof nextLink === 'string') out.nextLink = nextLink
   return out
 }
+
+/**
+ * Detect whether the response envelope contradicts the version the
+ * request is tagged with — e.g. a request marked `v4` whose server
+ * answered with a v2/v3 `{ d: … }` wrapper, or a v2/v3 request that got
+ * a bare v4 `{ value: … }` payload. Returns the version the envelope
+ * actually looks like when it disagrees with `requestVersion`, or
+ * `null` when they're consistent (or the shape is inconclusive).
+ *
+ * The check is deliberately conservative: a single entity, an error
+ * payload, or any object without a recognisable collection marker
+ * returns `null` so we never cry wolf on a shape we can't classify.
+ */
+export function detectODataVersionMismatch(
+  parsed: unknown,
+  requestVersion: ODataVersion
+): ODataVersion | null {
+  if (parsed === null || typeof parsed !== 'object' || Array.isArray(parsed)) {
+    return null
+  }
+  const obj = parsed as Record<string, unknown>
+
+  // A `d` wrapper holding `results` (collection) or `__count`/`__next`
+  // is the unmistakable v2/v3 signature.
+  const d = obj['d']
+  const looksV2V3 =
+    d !== undefined &&
+    d !== null &&
+    typeof d === 'object' &&
+    ('results' in (d as Record<string, unknown>) ||
+      '__count' in (d as Record<string, unknown>) ||
+      '__next' in (d as Record<string, unknown>))
+
+  // A v4 OData-Version annotation or a `@odata.*` collection marker is
+  // the v4 signature.
+  const looksV4 =
+    '@odata.context' in obj ||
+    '@odata.count' in obj ||
+    '@odata.nextLink' in obj ||
+    (('value' in obj) && Array.isArray(obj['value']))
+
+  if (looksV2V3 && requestVersion === 'v4') return '__count' in (d as Record<string, unknown>) ? 'v2' : 'v3'
+  if (looksV4 && (requestVersion === 'v2' || requestVersion === 'v3')) return 'v4'
+  return null
+}

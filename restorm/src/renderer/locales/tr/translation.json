@@ -1770,7 +1770,11 @@
   },
   "odataRequestTab": {
     "send": "Gönder",
-    "loadNextPage": "Sonraki sayfayı yükle"
+    "loadNextPage": "Sonraki sayfayı yükle",
+    "batchFormatLabel": "Toplu iş biçimi",
+    "batchFormatMultipart": "multipart/mixed",
+    "batchFormatJson": "JSON toplu işi",
+    "versionMismatchWarning": "Bu istek {{requestVersion}} olarak etiketlenmiş ancak yanıt {{responseVersion}} gibi görünüyor. İstek sürümünü sunucuyla eşleşecek şekilde değiştirin."
   },
   "typedValue": {
     "list": {

@@ -1769,7 +1769,11 @@
   },
   "odataRequestTab": {
     "send": "보내기",
-    "loadNextPage": "다음 페이지 로드"
+    "loadNextPage": "다음 페이지 로드",
+    "batchFormatLabel": "일괄 처리 형식",
+    "batchFormatMultipart": "multipart/mixed",
+    "batchFormatJson": "JSON 일괄 처리",
+    "versionMismatchWarning": "이 요청은 {{requestVersion}}(으)로 태그되어 있지만 응답은 {{responseVersion}}처럼 보입니다. 서버에 맞게 요청 버전을 변경하세요."
   },
   "typedValue": {
     "list": {

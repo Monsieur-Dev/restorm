@@ -1770,7 +1770,11 @@
   },
   "odataRequestTab": {
     "send": "Envoyer",
-    "loadNextPage": "Charger la page suivante"
+    "loadNextPage": "Charger la page suivante",
+    "batchFormatLabel": "Format du lot",
+    "batchFormatMultipart": "multipart/mixed",
+    "batchFormatJson": "Lot JSON",
+    "versionMismatchWarning": "Cette requête est marquée {{requestVersion}} mais la réponse ressemble à du {{responseVersion}}. Changez la version de la requête pour correspondre au serveur."
   },
   "typedValue": {
     "list": {

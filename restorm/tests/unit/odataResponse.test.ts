@@ -1,5 +1,33 @@
 import { describe, it, expect } from 'vitest'
-import { normalizeODataResponse } from '../../src/shared/utils/odataResponse'
+import { normalizeODataResponse, detectODataVersionMismatch } from '../../src/shared/utils/odataResponse'
+
+describe('detectODataVersionMismatch', () => {
+  it('flags a v4 request that got a v2 `d.results` envelope', () => {
+    const body = { d: { results: [{ ID: 1 }], __count: '1' } }
+    expect(detectODataVersionMismatch(body, 'v4')).toBe('v2')
+  })
+
+  it('flags a v4 request that got a v3-style `d` wrapper without __count', () => {
+    const body = { d: { results: [{ ID: 1 }] } }
+    expect(detectODataVersionMismatch(body, 'v4')).toBe('v3')
+  })
+
+  it('flags a v2 request that got a bare v4 `value` collection', () => {
+    const body = { '@odata.context': 'x', value: [{ ID: 1 }] }
+    expect(detectODataVersionMismatch(body, 'v2')).toBe('v4')
+  })
+
+  it('returns null when the envelope matches the request version', () => {
+    expect(detectODataVersionMismatch({ value: [{ ID: 1 }] }, 'v4')).toBeNull()
+    expect(detectODataVersionMismatch({ d: { results: [] } }, 'v2')).toBeNull()
+  })
+
+  it('returns null for inconclusive shapes (single entity / error)', () => {
+    expect(detectODataVersionMismatch({ error: { code: 'X' } }, 'v4')).toBeNull()
+    expect(detectODataVersionMismatch({ ID: 1, Name: 'x' }, 'v4')).toBeNull()
+    expect(detectODataVersionMismatch(null, 'v4')).toBeNull()
+  })
+})
 
 describe('normalizeODataResponse', () => {
   describe('v4 payloads', () => {

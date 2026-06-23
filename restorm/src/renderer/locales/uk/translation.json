@@ -1772,7 +1772,11 @@
   },
   "odataRequestTab": {
     "send": "Надіслати",
-    "loadNextPage": "Завантажити наступну сторінку"
+    "loadNextPage": "Завантажити наступну сторінку",
+    "batchFormatLabel": "Формат пакета",
+    "batchFormatMultipart": "multipart/mixed",
+    "batchFormatJson": "Пакет JSON",
+    "versionMismatchWarning": "Цей запит позначено як {{requestVersion}}, але відповідь схожа на {{responseVersion}}. Змініть версію запиту відповідно до сервера."
   },
   "typedValue": {
     "list": {

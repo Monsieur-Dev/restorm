@@ -1772,7 +1772,11 @@
   },
   "odataRequestTab": {
     "send": "Odeslat",
-    "loadNextPage": "Načíst další stránku"
+    "loadNextPage": "Načíst další stránku",
+    "batchFormatLabel": "Formát dávky",
+    "batchFormatMultipart": "multipart/mixed",
+    "batchFormatJson": "Dávka JSON",
+    "versionMismatchWarning": "Tento požadavek je označen jako {{requestVersion}}, ale odpověď vypadá jako {{responseVersion}}. Změňte verzi požadavku tak, aby odpovídala serveru."
   },
   "typedValue": {
     "list": {

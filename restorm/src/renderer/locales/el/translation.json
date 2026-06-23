@@ -1770,7 +1770,11 @@
   },
   "odataRequestTab": {
     "send": "Αποστολή",
-    "loadNextPage": "Φόρτωση επόμενης σελίδας"
+    "loadNextPage": "Φόρτωση επόμενης σελίδας",
+    "batchFormatLabel": "Μορφή δέσμης",
+    "batchFormatMultipart": "multipart/mixed",
+    "batchFormatJson": "Δέσμη JSON",
+    "versionMismatchWarning": "Αυτό το αίτημα έχει επισημανθεί ως {{requestVersion}} αλλά η απάντηση μοιάζει με {{responseVersion}}. Αλλάξτε την έκδοση του αιτήματος ώστε να ταιριάζει με τον διακομιστή."
   },
   "typedValue": {
     "list": {

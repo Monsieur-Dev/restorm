@@ -4,10 +4,18 @@
  * requests, one sub-folder per entity set (CRUD) plus `Actions` and
  * `Functions` sub-folders.
  *
- * Phase 1 covers v4 EDMX XML only. v2/v3 CSDL and JSON-CSDL land in
- * a follow-up. Parsing is regex-based — EDMX is well-structured and
- * SOAP's WSDL importer already shows the pattern works at scale, so
- * we avoid pulling in a new XML dependency.
+ * Three input shapes are handled, all dispatched from `importOData`:
+ *   - v4 EDMX XML (`edmx:Edmx Version="4.0"`),
+ *   - v2/v3 EDMX XML (older CSDL — `<Key>/<PropertyRef>`, no `<EnumType>`,
+ *     `<FunctionImport>` instead of `<Action>`/`<Function>`),
+ *   - JSON-CSDL (`{ $Version, $EntityContainer, … }`, OData v4.0/4.01).
+ *
+ * The folder is tagged with the detected `odataVersion` so the engine
+ * emits the right query options (`$inlinecount` vs `$count`) and the
+ * response normaliser unwraps the right envelope (`d.results` vs
+ * `value`). Parsing is regex-based — EDMX is well-structured and SOAP's
+ * WSDL importer already shows the pattern works at scale, so we avoid
+ * pulling in a new XML dependency.
  */
 
 import { createHash } from 'node:crypto'
@@ -128,13 +136,68 @@ function unwrapCollection(type: string): { inner: string; collection: boolean } 
 }
 
 // ============================================================================
-// CSDL → EdmSchema parser (v4 XML)
+// Version detection
 // ============================================================================
 
-function parseEdmxV4(xml: string): EdmSchema {
-  // This parser only handles OData v4 EDMX; the version is fixed.
-  const version: ODataVersion = 'v4'
+/**
+ * Detect the OData protocol version of an EDMX XML document.
+ *
+ * The authoritative signal is the `Version` attribute on the
+ * `<edmx:Edmx>` root: `4.0`/`4.01` → v4, `3.0` → v3, `1.0`/`2.0` → v2.
+ * Older services sometimes omit it, so we also look at
+ * `m:DataServiceVersion` on `<edmx:DataServices>` and at the EDM
+ * namespace URI (the v4 namespace is `…/odata/ns/edm`, while v1-v3 use
+ * `…/ado/2006|2007|2008|2009/…/edm`). When nothing matches we default
+ * to v4 — the modern, most-common case.
+ */
+function parseEdmxVersion(xml: string): ODataVersion {
+  const edmxRoot = /<(?:edmx:)?Edmx\b([^>]*)>/.exec(xml)
+  const rootVersion = edmxRoot ? parseAttributes(edmxRoot[1] ?? '')['Version'] : undefined
+  if (rootVersion !== undefined) {
+    if (rootVersion.startsWith('4')) return 'v4'
+    if (rootVersion.startsWith('3')) return 'v3'
+    if (rootVersion.startsWith('1') || rootVersion.startsWith('2')) return 'v2'
+  }
 
+  const dataServices = /<(?:edmx:)?DataServices\b([^>]*)>/.exec(xml)
+  const dsVersion = dataServices
+    ? parseAttributes(dataServices[1] ?? '')['m:DataServiceVersion']
+      ?? parseAttributes(dataServices[1] ?? '')['DataServiceVersion']
+    : undefined
+  if (dsVersion !== undefined) {
+    if (dsVersion.startsWith('3')) return 'v3'
+    if (dsVersion.startsWith('1') || dsVersion.startsWith('2')) return 'v2'
+  }
+
+  // Namespace fallback — the v4 EDM namespace is unambiguous.
+  if (xml.includes('docs.oasis-open.org/odata/ns/edm')) return 'v4'
+  if (xml.includes('/ado/2009/11/edm')) return 'v3'
+  if (xml.includes('/ado/2008/09/edm') || xml.includes('/ado/2007/05/edm') || xml.includes('/ado/2006/04/edm')) {
+    return 'v2'
+  }
+
+  return 'v4'
+}
+
+// ============================================================================
+// CSDL → EdmSchema parser (EDMX XML, all versions)
+// ============================================================================
+
+/**
+ * Parse an EDMX XML document into the version-agnostic `EdmSchema`.
+ *
+ * The element shapes the importer needs (`<EntityType>`, `<Key>`,
+ * `<PropertyRef>`, `<Property>`, `<NavigationProperty>`, `<EntitySet>`)
+ * are spelled the same across v2/v3/v4, so one regex pass covers all
+ * three. Where the versions genuinely diverge:
+ *   - v4 carries `<Action>`/`<Function>` (bound + unbound); v2/v3 only
+ *     expose `<FunctionImport>` inside the container — we pick those up
+ *     as functions so the `Functions` folder isn't empty.
+ *   - v2 has no `<EnumType>` — `findTags` simply returns none.
+ * The detected `version` is stamped onto the schema so every generated
+ * request is tagged correctly.
+ */
+function parseEdmx(xml: string, version: ODataVersion): EdmSchema {
   const schema: EdmSchema = {
     version,
     entityTypes: [],
@@ -237,13 +300,194 @@ function parseEdmxV4(xml: string): EdmSchema {
       }
     }
 
-    // --- Entity sets ---
+    // --- Entity sets + container-level function imports ---
     for (const container of findTags(block.body, 'EntityContainer')) {
       for (const es of findTags(container.body, 'EntitySet')) {
         const name = es.attrs['Name'] ?? ''
         const entityType = es.attrs['EntityType'] ?? ''
         if (name && entityType) {
           schema.entitySets.push({ name, entityType })
+        }
+      }
+
+      // v2/v3 expose callable operations only as `<FunctionImport>` in
+      // the container (no schema-level `<Function>`/`<Action>`). v4 has
+      // FunctionImports too but they just re-expose an already-declared
+      // `<Function>`, so skip any whose name we already captured above.
+      for (const fi of findTags(container.body, 'FunctionImport')) {
+        const name = fi.attrs['Name'] ?? ''
+        if (!name) continue
+        if (schema.operations.some((op) => op.name === name)) continue
+        const parameters: EdmOperationParameter[] = findTags(fi.body, 'Parameter').map((p) => {
+          const rawType = p.attrs['Type'] ?? 'Edm.String'
+          const { inner, collection } = unwrapCollection(rawType)
+          return {
+            name: p.attrs['Name'] ?? '',
+            type: inner,
+            nullable: (p.attrs['Nullable'] ?? 'true') !== 'false',
+            collection
+          }
+        })
+        // v2/v3 carry the return type as a `ReturnType` attribute; a
+        // POST `m:HttpMethod` marks it as an action-shaped import.
+        const returnType = fi.attrs['ReturnType']
+        const isAction = (fi.attrs['m:HttpMethod'] ?? fi.attrs['HttpMethod'] ?? 'GET').toUpperCase() === 'POST'
+        schema.operations.push({
+          kind: isAction ? 'action' : 'function',
+          namespace,
+          name,
+          qualifiedName: `${namespace}.${name}`,
+          isBound: false,
+          parameters,
+          ...(returnType !== undefined ? { returnType } : {})
+        })
+      }
+    }
+  }
+
+  return schema
+}
+
+// ============================================================================
+// CSDL → EdmSchema parser (JSON-CSDL, v4)
+// ============================================================================
+
+/**
+ * Parse an OData v4 JSON-CSDL document into the version-agnostic
+ * `EdmSchema`.
+ *
+ * JSON-CSDL replaces the XML element tree with nested objects: each
+ * top-level key (other than the `$…` directives) is a namespace whose
+ * members are keyed by name. A member is discriminated by its `$Kind`
+ * (`EntityType` / `EnumType` / `Action` / `Function` / `EntityContainer`).
+ * Properties live as sibling keys on the type object (anything not
+ * starting with `$`), with their facets under `$Type` / `$Collection` /
+ * `$Nullable`. The shape is documented at
+ * https://docs.oasis-open.org/odata/odata-csdl-json/v4.01/.
+ */
+function parseJsonCsdl(root: Record<string, unknown>): EdmSchema {
+  const schema: EdmSchema = {
+    version: 'v4', // JSON-CSDL only exists for OData v4.0 / v4.01.
+    entityTypes: [],
+    enumTypes: [],
+    operations: [],
+    entitySets: []
+  }
+
+  const propertyFromMember = (member: Record<string, unknown>): { type: string; nullable: boolean; collection: boolean } => {
+    const isCollection = member['$Collection'] === true
+    const type = typeof member['$Type'] === 'string' ? member['$Type'] : 'Edm.String'
+    const nullable = member['$Nullable'] !== false
+    return { type, nullable, collection: isCollection }
+  }
+
+  const parseOperationOverloads = (
+    kind: 'action' | 'function',
+    name: string,
+    namespace: string,
+    overloads: unknown
+  ): void => {
+    // An action/function member is an array of overloads. We import the
+    // first overload — Restorm requests don't model overload selection.
+    const list: unknown[] = Array.isArray(overloads) ? overloads : []
+    const first = list[0]
+    if (first === undefined || first === null || typeof first !== 'object') return
+    const overload = first as Record<string, unknown>
+    const isBound = overload['$IsBound'] === true
+    const rawParams = Array.isArray(overload['$Parameter']) ? (overload['$Parameter'] as unknown[]) : []
+    const parameters: EdmOperationParameter[] = rawParams
+      .filter((p): p is Record<string, unknown> => p !== null && typeof p === 'object')
+      .map((p) => {
+        const facets = propertyFromMember(p)
+        return {
+          name: typeof p['$Name'] === 'string' ? p['$Name'] : '',
+          type: facets.type,
+          nullable: facets.nullable,
+          collection: facets.collection
+        }
+      })
+    const bindingType = isBound && parameters[0] ? parameters[0].type : undefined
+    const userParameters = isBound ? parameters.slice(1) : parameters
+    const returnTypeObj = overload['$ReturnType']
+    const returnType = returnTypeObj !== null && typeof returnTypeObj === 'object'
+      ? (typeof (returnTypeObj as Record<string, unknown>)['$Type'] === 'string'
+          ? ((returnTypeObj as Record<string, unknown>)['$Type'] as string)
+          : undefined)
+      : undefined
+    schema.operations.push({
+      kind,
+      namespace,
+      name,
+      qualifiedName: `${namespace}.${name}`,
+      isBound,
+      parameters: userParameters,
+      ...(bindingType !== undefined ? { bindingType } : {}),
+      ...(returnType !== undefined ? { returnType } : {})
+    })
+  }
+
+  for (const [namespace, nsValue] of Object.entries(root)) {
+    if (namespace.startsWith('$')) continue // $Version, $EntityContainer, $Reference…
+    if (nsValue === null || typeof nsValue !== 'object') continue
+    const members = nsValue as Record<string, unknown>
+
+    for (const [memberName, memberValue] of Object.entries(members)) {
+      if (memberName.startsWith('$')) continue // $Alias and friends.
+      // Actions / functions are arrays of overloads; types are objects.
+      if (Array.isArray(memberValue)) {
+        const kind = memberValue.find(
+          (o): o is Record<string, unknown> => o !== null && typeof o === 'object'
+        )?.['$Kind']
+        if (kind === 'Action') parseOperationOverloads('action', memberName, namespace, memberValue)
+        else if (kind === 'Function') parseOperationOverloads('function', memberName, namespace, memberValue)
+        continue
+      }
+      if (memberValue === null || typeof memberValue !== 'object') continue
+      const member = memberValue as Record<string, unknown>
+      const memberKind = member['$Kind']
+
+      if (memberKind === 'EntityType') {
+        const rawKeys = Array.isArray(member['$Key']) ? (member['$Key'] as unknown[]) : []
+        const keys = rawKeys.filter((k): k is string => typeof k === 'string')
+        const properties: EdmProperty[] = []
+        const navigationProperties: EdmProperty[] = []
+        for (const [propName, propValue] of Object.entries(member)) {
+          if (propName.startsWith('$')) continue
+          if (propValue === null || typeof propValue !== 'object') continue
+          const prop = propValue as Record<string, unknown>
+          const facets = propertyFromMember(prop)
+          const target: EdmProperty = { name: propName, type: facets.type, nullable: facets.nullable, collection: facets.collection }
+          if (prop['$Kind'] === 'NavigationProperty') navigationProperties.push(target)
+          else properties.push(target)
+        }
+        schema.entityTypes.push({
+          namespace,
+          name: memberName,
+          qualifiedName: `${namespace}.${memberName}`,
+          keys,
+          properties,
+          navigationProperties
+        })
+      } else if (memberKind === 'EnumType') {
+        const enumMembers: { name: string; value: string }[] = []
+        for (const [enumName, enumValue] of Object.entries(member)) {
+          if (enumName.startsWith('$')) continue
+          enumMembers.push({ name: enumName, value: String(enumValue) })
+        }
+        schema.enumTypes.push({
+          namespace,
+          name: memberName,
+          qualifiedName: `${namespace}.${memberName}`,
+          members: enumMembers
+        })
+      } else if (memberKind === 'EntityContainer') {
+        for (const [setName, setValue] of Object.entries(member)) {
+          if (setName.startsWith('$')) continue
+          if (setValue === null || typeof setValue !== 'object') continue
+          const set = setValue as Record<string, unknown>
+          if (set['$Collection'] === true && typeof set['$Type'] === 'string') {
+            schema.entitySets.push({ name: setName, entityType: set['$Type'] })
+          }
         }
       }
     }
@@ -433,6 +677,39 @@ function isStringType(type: string, collection: boolean): boolean {
 }
 
 // ============================================================================
+// Metadata dispatch (JSON-CSDL vs EDMX XML, version-aware)
+// ============================================================================
+
+/**
+ * Turn a raw `$metadata` document into an `EdmSchema`, picking the
+ * right parser by content shape:
+ *   - JSON-CSDL — a JSON object carrying the `$Version` directive,
+ *   - EDMX XML — everything else, with the version detected from the
+ *     `<edmx:Edmx>` root.
+ *
+ * `ImportManager.detectFormat` already gates which strings reach the
+ * OData adapter, but we re-sniff here so the service is usable
+ * stand-alone (unit tests, direct callers) without that gate.
+ */
+function parseODataMetadata(content: string): EdmSchema {
+  const trimmed = content.trim()
+  if (trimmed.startsWith('{')) {
+    let json: unknown
+    try {
+      json = JSON.parse(trimmed)
+    } catch {
+      throw new Error('OData metadata looked like JSON-CSDL but failed to parse as JSON.')
+    }
+    if (json === null || typeof json !== 'object' || Array.isArray(json)) {
+      throw new Error('OData JSON-CSDL metadata must be a JSON object.')
+    }
+    return parseJsonCsdl(json as Record<string, unknown>)
+  }
+  const version = parseEdmxVersion(trimmed)
+  return parseEdmx(trimmed, version)
+}
+
+// ============================================================================
 // ApiDocumentation transformer
 // ============================================================================
 
@@ -531,7 +808,7 @@ function apiTitleFromSchema(schema: EdmSchema, fallback: string): string {
 /** Main entry — synchronously turn a metadata XML string into an
  * `EnvironmentFolder`. Matches the `importSwagger` signature. */
 export function importOData(content: string, options: ODataImportOptions = {}): EnvironmentFolder {
-  const schema = parseEdmxV4(content)
+  const schema = parseODataMetadata(content)
   const serviceRoot = options.baseUrl
     ?? (options.sourceUrl !== undefined ? deriveServiceRoot(options.sourceUrl) : 'http://localhost/odata')
   const apiTitle = apiTitleFromSchema(schema, 'OData service')
@@ -620,7 +897,10 @@ export function importOData(content: string, options: ODataImportOptions = {}): 
     fileFormatVersion: CURRENT_FILE_FORMAT_VERSION,
     id: generateId(`odata:root:${apiTitle}`),
     name: apiTitle,
-    tags: ['odata'],
+    // Tag the imported root with the detected protocol version so it is
+    // discoverable in the tree without opening a request; per-request
+    // behaviour still rides each `ODataRequest.odataVersion`.
+    tags: ['odata', `odata:${schema.version}`],
     configuration: {},
     environments: [environment],
     items: importedItems,

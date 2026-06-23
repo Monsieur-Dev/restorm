@@ -1769,7 +1769,11 @@
   },
   "odataRequestTab": {
     "send": "发送",
-    "loadNextPage": "加载下一页"
+    "loadNextPage": "加载下一页",
+    "batchFormatLabel": "批处理格式",
+    "batchFormatMultipart": "multipart/mixed",
+    "batchFormatJson": "JSON 批处理",
+    "versionMismatchWarning": "此请求标记为 {{requestVersion}}，但响应看起来像 {{responseVersion}}。请更改请求版本以与服务器匹配。"
   },
   "typedValue": {
     "list": {

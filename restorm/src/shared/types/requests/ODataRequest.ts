@@ -61,6 +61,13 @@ export interface ODataOperationParameterSpec {
   value?: string
 }
 
+/** Wire format for a `$batch` request. OData v4 defines two: the
+ * original `multipart/mixed` envelope (works on every v4 server) and
+ * the newer, easier-to-read JSON batch (`application/json`, a
+ * `{ requests: [...] }` document). Defaults to `'multipart'` when
+ * absent so existing files keep their behaviour. */
+export type ODataBatchFormat = 'multipart' | 'json'
+
 /** A single sub-request inside a `$batch`. Atomicity groups collect
  * sub-requests that must succeed or fail together (change-sets per
  * the OData v4 spec). A sub-request with no `atomicityGroup` is a
@@ -110,6 +117,9 @@ export interface ODataRequest extends BaseRequest {
    * array; the engine serializes it into multipart/mixed (with
    * nested change-set envelopes when `atomicityGroup` is set). */
   batchSubRequests?: ODataBatchSubRequestSpec[]
+  /** Wire format for the `$batch` envelope. `'multipart'` (default)
+   * uses multipart/mixed; `'json'` uses the v4 JSON batch format. */
+  batchFormat?: ODataBatchFormat
   /** Names of structural properties on the bound entity type (pre-
    * filled by the importer from the EDMX `EntityType`). The UI
    * surfaces these as clickable chips beneath $select / $orderby

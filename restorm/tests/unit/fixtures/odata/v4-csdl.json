@@ -1,0 +1,83 @@
+{
+  "$Version": "4.01",
+  "$EntityContainer": "ODataDemo.Container",
+  "ODataDemo": {
+    "$Alias": "self",
+    "Color": {
+      "$Kind": "EnumType",
+      "Red": 0,
+      "Green": 1,
+      "Blue": 2
+    },
+    "Product": {
+      "$Kind": "EntityType",
+      "$Key": ["ID"],
+      "ID": {
+        "$Type": "Edm.Int32",
+        "$Nullable": false
+      },
+      "Name": {
+        "$Type": "Edm.String"
+      },
+      "Price": {
+        "$Type": "Edm.Decimal",
+        "$Nullable": false
+      },
+      "Tags": {
+        "$Type": "Edm.String",
+        "$Collection": true
+      },
+      "Category": {
+        "$Kind": "NavigationProperty",
+        "$Type": "ODataDemo.Category"
+      }
+    },
+    "Category": {
+      "$Kind": "EntityType",
+      "$Key": ["ID"],
+      "ID": {
+        "$Type": "Edm.Int32",
+        "$Nullable": false
+      },
+      "Name": {
+        "$Type": "Edm.String"
+      },
+      "Products": {
+        "$Kind": "NavigationProperty",
+        "$Collection": true,
+        "$Type": "ODataDemo.Product"
+      }
+    },
+    "Discount": [
+      {
+        "$Kind": "Action",
+        "$IsBound": true,
+        "$Parameter": [
+          { "$Name": "product", "$Type": "ODataDemo.Product" },
+          { "$Name": "percent", "$Type": "Edm.Int32", "$Nullable": false }
+        ],
+        "$ReturnType": { "$Type": "ODataDemo.Product" }
+      }
+    ],
+    "TopProducts": [
+      {
+        "$Kind": "Function",
+        "$Parameter": [
+          { "$Name": "count", "$Type": "Edm.Int32", "$Nullable": false }
+        ],
+        "$ReturnType": { "$Type": "ODataDemo.Product", "$Collection": true }
+      }
+    ],
+    "Container": {
+      "$Kind": "EntityContainer",
+      "Products": {
+        "$Collection": true,
+        "$Type": "ODataDemo.Product"
+      },
+      "Categories": {
+        "$Collection": true,
+        "$Type": "ODataDemo.Category"
+      }
+    }
+  }
+}

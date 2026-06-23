@@ -4,10 +4,10 @@ import type { GraphQLRequest } from './GraphQLRequest'
 import type { GrpcRequest, GrpcMockMethod } from './GrpcRequest'
 import type { SoapRequest } from './SoapRequest'
 import type { WebSocketRequest } from './WebSocketRequest'
-import type { ODataRequest, ODataQueryOptions, ODataOperationKind, ODataBatchSubRequestSpec, ODataOperationParameterSpec } from './ODataRequest'
+import type { ODataRequest, ODataQueryOptions, ODataOperationKind, ODataBatchFormat, ODataBatchSubRequestSpec, ODataOperationParameterSpec } from './ODataRequest'
 import type { AuthenticationRequest } from './AuthenticationRequest'
 
-export type { BaseRequest, ImportOrigin, HTTPRequest, GraphQLRequest, GrpcRequest, GrpcMockMethod, SoapRequest, WebSocketRequest, ODataRequest, ODataQueryOptions, ODataOperationKind, ODataBatchSubRequestSpec, ODataOperationParameterSpec, AuthenticationRequest }
+export type { BaseRequest, ImportOrigin, HTTPRequest, GraphQLRequest, GrpcRequest, GrpcMockMethod, SoapRequest, WebSocketRequest, ODataRequest, ODataQueryOptions, ODataOperationKind, ODataBatchFormat, ODataBatchSubRequestSpec, ODataOperationParameterSpec, AuthenticationRequest }
 
 export type Request = HTTPRequest | GraphQLRequest | GrpcRequest | SoapRequest | WebSocketRequest | ODataRequest | AuthenticationRequest
 

@@ -178,14 +178,16 @@ jobs:
           cd restorm
           pnpm install --frozen-lockfile
 
-      - name: Start GraphQL, Socket.IO, raw-WebSocket, HTTP-util and SOAP mock servers
+      - name: Start GraphQL, Socket.IO, raw-WebSocket, HTTP-util, SOAP and OData-v2 mock servers
         run: |
           cd restorm/tests/docker/graphql-server && npm install && node server.js &
           cd restorm/tests/docker/socketio-server && npm install && node server.js &
           cd restorm/tests/docker/ws-echo-server && npm install && node server.js &
-          # http-util and soap-server are zero-dependency (pure node:http) — no npm install needed.
+          # http-util, soap-server and odata-v2-petstore are zero-dependency
+          # (pure node:http) — no npm install needed.
           cd restorm/tests/docker/http-util && node server.js &
           cd restorm/tests/docker/soap-server && node server.js &
+          cd restorm/tests/docker/odata-v2-petstore && node server.js &
           sleep 10
 
       - name: Start OData Pet Store

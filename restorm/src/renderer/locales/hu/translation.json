@@ -1770,7 +1770,11 @@
   },
   "odataRequestTab": {
     "send": "Küldés",
-    "loadNextPage": "Következő oldal betöltése"
+    "loadNextPage": "Következő oldal betöltése",
+    "batchFormatLabel": "Köteg formátuma",
+    "batchFormatMultipart": "multipart/mixed",
+    "batchFormatJson": "JSON köteg",
+    "versionMismatchWarning": "Ez a kérés {{requestVersion}} verzióval van megjelölve, de a válasz {{responseVersion}} verziónak tűnik. Módosítsa a kérés verzióját, hogy megegyezzen a kiszolgálóval."
   },
   "typedValue": {
     "list": {

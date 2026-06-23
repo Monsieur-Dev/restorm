@@ -1770,7 +1770,11 @@
   },
   "odataRequestTab": {
     "send": "Invia",
-    "loadNextPage": "Carica pagina successiva"
+    "loadNextPage": "Carica pagina successiva",
+    "batchFormatLabel": "Formato del batch",
+    "batchFormatMultipart": "multipart/mixed",
+    "batchFormatJson": "Batch JSON",
+    "versionMismatchWarning": "Questa richiesta è contrassegnata come {{requestVersion}} ma la risposta sembra {{responseVersion}}. Cambia la versione della richiesta per allinearla al server."
   },
   "typedValue": {
     "list": {

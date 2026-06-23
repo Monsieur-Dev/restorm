@@ -1771,7 +1771,11 @@
   },
   "odataRequestTab": {
     "send": "Пошаљи",
-    "loadNextPage": "Учитај следећу страницу"
+    "loadNextPage": "Учитај следећу страницу",
+    "batchFormatLabel": "Формат групе",
+    "batchFormatMultipart": "multipart/mixed",
+    "batchFormatJson": "JSON група",
+    "versionMismatchWarning": "Овај захтев је означен као {{requestVersion}}, али одговор изгледа као {{responseVersion}}. Промените верзију захтева да одговара серверу."
   },
   "typedValue": {
     "list": {
