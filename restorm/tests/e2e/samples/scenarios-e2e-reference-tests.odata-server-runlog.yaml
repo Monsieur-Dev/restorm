@@ -123,18 +123,48 @@
         url: http://localhost:8078/odata/$batch
         method: POST
         headers:
-          Content-Type: multipart/mixed; boundary=batch_mqqzffii_uy6h9o
+          Content-Type: multipart/mixed; boundary=batch_<boundary>
       response:
         status: 200
         statusText: OK
         headers:
-          content-type: multipart/mixed; boundary=batchresponse_pzrku4h0
+          content-type: multipart/mixed; boundary=batchresponse_<boundary>
           odata-version: "4.0"
           date: <dynamic-time>
           connection: keep-alive
           keep-alive: timeout=5
           transfer-encoding: chunked
-        body: LS1iYXRjaHJlc3BvbnNlX3B6cmt1NGgwDQpDb250ZW50LVR5cGU6IGFwcGxpY2F0aW9uL2h0dHANCg0KSFRUUC8xLjEgMjAwIE9LDQpDb250ZW50LVR5cGU6IGFwcGxpY2F0aW9uL2pzb247IG9kYXRhLm1ldGFkYXRhPW1pbmltYWwNCg0KeyJAb2RhdGEuY29udGV4dCI6Ii9vZGF0YS8kbWV0YWRhdGEjUGV0cyIsInZhbHVlIjpbeyJJZCI6MSwiTmFtZSI6IlJleCJ9LHsiSWQiOjIsIk5hbWUiOiJXaGlza2VycyJ9XX0NCi0tYmF0Y2hyZXNwb25zZV9wenJrdTRoMA0KQ29udGVudC1UeXBlOiBhcHBsaWNhdGlvbi9odHRwDQoNCkhUVFAvMS4xIDIwMCBPSw0KQ29udGVudC1UeXBlOiBhcHBsaWNhdGlvbi9qc29uOyBvZGF0YS5tZXRhZGF0YT1taW5pbWFsDQoNCnsiQG9kYXRhLmNvbnRleHQiOiIvb2RhdGEvJG1ldGFkYXRhI1BldHMiLCJ2YWx1ZSI6W3siSWQiOjEsIk5hbWUiOiJSZXgifSx7IklkIjoyLCJOYW1lIjoiV2hpc2tlcnMifV19DQotLWJhdGNocmVzcG9uc2VfcHpya3U0aDAtLQ0K
+        body: "--batchresponse_<boundary>\r
+
+          Content-Type: application/http\r
+
+          \r
+
+          HTTP/1.1 200 OK\r
+
+          Content-Type: application/json; odata.metadata=minimal\r
+
+          \r
+
+          {\"@odata.context\":\"/odata/$metadata#Pets\",\"value\":[{\"Id\":1,\"\
+          Name\":\"Rex\"},{\"Id\":2,\"Name\":\"Whiskers\"}]}\r
+
+          --batchresponse_<boundary>\r
+
+          Content-Type: application/http\r
+
+          \r
+
+          HTTP/1.1 200 OK\r
+
+          Content-Type: application/json; odata.metadata=minimal\r
+
+          \r
+
+          {\"@odata.context\":\"/odata/$metadata#Pets\",\"value\":[{\"Id\":1,\"\
+          Name\":\"Rex\"},{\"Id\":2,\"Name\":\"Whiskers\"}]}\r
+
+          --batchresponse_<boundary>--\r\n"
         durationMs: <dynamic-time>
         success: true
 - message: ⚪ [<time>] start log
@@ -147,18 +177,48 @@
         url: http://localhost:8078/odata/$batch
         method: POST
         headers:
-          Content-Type: multipart/mixed; boundary=batch_mqqzffii_uy6h9o
+          Content-Type: multipart/mixed; boundary=batch_<boundary>
       response:
         status: 200
         statusText: OK
         headers:
-          content-type: multipart/mixed; boundary=batchresponse_pzrku4h0
+          content-type: multipart/mixed; boundary=batchresponse_<boundary>
           odata-version: "4.0"
           date: <dynamic-time>
           connection: keep-alive
           keep-alive: timeout=5
           transfer-encoding: chunked
-        body: LS1iYXRjaHJlc3BvbnNlX3B6cmt1NGgwDQpDb250ZW50LVR5cGU6IGFwcGxpY2F0aW9uL2h0dHANCg0KSFRUUC8xLjEgMjAwIE9LDQpDb250ZW50LVR5cGU6IGFwcGxpY2F0aW9uL2pzb247IG9kYXRhLm1ldGFkYXRhPW1pbmltYWwNCg0KeyJAb2RhdGEuY29udGV4dCI6Ii9vZGF0YS8kbWV0YWRhdGEjUGV0cyIsInZhbHVlIjpbeyJJZCI6MSwiTmFtZSI6IlJleCJ9LHsiSWQiOjIsIk5hbWUiOiJXaGlza2VycyJ9XX0NCi0tYmF0Y2hyZXNwb25zZV9wenJrdTRoMA0KQ29udGVudC1UeXBlOiBhcHBsaWNhdGlvbi9odHRwDQoNCkhUVFAvMS4xIDIwMCBPSw0KQ29udGVudC1UeXBlOiBhcHBsaWNhdGlvbi9qc29uOyBvZGF0YS5tZXRhZGF0YT1taW5pbWFsDQoNCnsiQG9kYXRhLmNvbnRleHQiOiIvb2RhdGEvJG1ldGFkYXRhI1BldHMiLCJ2YWx1ZSI6W3siSWQiOjEsIk5hbWUiOiJSZXgifSx7IklkIjoyLCJOYW1lIjoiV2hpc2tlcnMifV19DQotLWJhdGNocmVzcG9uc2VfcHpya3U0aDAtLQ0K
+        body: "--batchresponse_<boundary>\r
+
+          Content-Type: application/http\r
+
+          \r
+
+          HTTP/1.1 200 OK\r
+
+          Content-Type: application/json; odata.metadata=minimal\r
+
+          \r
+
+          {\"@odata.context\":\"/odata/$metadata#Pets\",\"value\":[{\"Id\":1,\"\
+          Name\":\"Rex\"},{\"Id\":2,\"Name\":\"Whiskers\"}]}\r
+
+          --batchresponse_<boundary>\r
+
+          Content-Type: application/http\r
+
+          \r
+
+          HTTP/1.1 200 OK\r
+
+          Content-Type: application/json; odata.metadata=minimal\r
+
+          \r
+
+          {\"@odata.context\":\"/odata/$metadata#Pets\",\"value\":[{\"Id\":1,\"\
+          Name\":\"Rex\"},{\"Id\":2,\"Name\":\"Whiskers\"}]}\r
+
+          --batchresponse_<boundary>--\r\n"
         durationMs: <dynamic-time>
         success: true
 - message: 🔵 [<time>] réponse OData $batch reçue
@@ -167,18 +227,48 @@
       url: http://localhost:8078/odata/$batch
       method: POST
       headers:
-        Content-Type: multipart/mixed; boundary=batch_mqqzffii_uy6h9o
+        Content-Type: multipart/mixed; boundary=batch_<boundary>
     response:
       status: 200
       statusText: OK
       headers:
-        content-type: multipart/mixed; boundary=batchresponse_pzrku4h0
+        content-type: multipart/mixed; boundary=batchresponse_<boundary>
         odata-version: "4.0"
         date: <dynamic-time>
         connection: keep-alive
         keep-alive: timeout=5
         transfer-encoding: chunked
-      body: LS1iYXRjaHJlc3BvbnNlX3B6cmt1NGgwDQpDb250ZW50LVR5cGU6IGFwcGxpY2F0aW9uL2h0dHANCg0KSFRUUC8xLjEgMjAwIE9LDQpDb250ZW50LVR5cGU6IGFwcGxpY2F0aW9uL2pzb247IG9kYXRhLm1ldGFkYXRhPW1pbmltYWwNCg0KeyJAb2RhdGEuY29udGV4dCI6Ii9vZGF0YS8kbWV0YWRhdGEjUGV0cyIsInZhbHVlIjpbeyJJZCI6MSwiTmFtZSI6IlJleCJ9LHsiSWQiOjIsIk5hbWUiOiJXaGlza2VycyJ9XX0NCi0tYmF0Y2hyZXNwb25zZV9wenJrdTRoMA0KQ29udGVudC1UeXBlOiBhcHBsaWNhdGlvbi9odHRwDQoNCkhUVFAvMS4xIDIwMCBPSw0KQ29udGVudC1UeXBlOiBhcHBsaWNhdGlvbi9qc29uOyBvZGF0YS5tZXRhZGF0YT1taW5pbWFsDQoNCnsiQG9kYXRhLmNvbnRleHQiOiIvb2RhdGEvJG1ldGFkYXRhI1BldHMiLCJ2YWx1ZSI6W3siSWQiOjEsIk5hbWUiOiJSZXgifSx7IklkIjoyLCJOYW1lIjoiV2hpc2tlcnMifV19DQotLWJhdGNocmVzcG9uc2VfcHpya3U0aDAtLQ0K
+      body: "--batchresponse_<boundary>\r
+
+        Content-Type: application/http\r
+
+        \r
+
+        HTTP/1.1 200 OK\r
+
+        Content-Type: application/json; odata.metadata=minimal\r
+
+        \r
+
+        {\"@odata.context\":\"/odata/$metadata#Pets\",\"value\":[{\"Id\":1,\"Na\
+        me\":\"Rex\"},{\"Id\":2,\"Name\":\"Whiskers\"}]}\r
+
+        --batchresponse_<boundary>\r
+
+        Content-Type: application/http\r
+
+        \r
+
+        HTTP/1.1 200 OK\r
+
+        Content-Type: application/json; odata.metadata=minimal\r
+
+        \r
+
+        {\"@odata.context\":\"/odata/$metadata#Pets\",\"value\":[{\"Id\":1,\"Na\
+        me\":\"Rex\"},{\"Id\":2,\"Name\":\"Whiskers\"}]}\r
+
+        --batchresponse_<boundary>--\r\n"
       durationMs: <dynamic-time>
       success: true
 - message: ⚪ [<time>] start odataClose
@@ -190,18 +280,48 @@
         url: http://localhost:8078/odata/$batch
         method: POST
         headers:
-          Content-Type: multipart/mixed; boundary=batch_mqqzffii_uy6h9o
+          Content-Type: multipart/mixed; boundary=batch_<boundary>
       response:
         status: 200
         statusText: OK
         headers:
-          content-type: multipart/mixed; boundary=batchresponse_pzrku4h0
+          content-type: multipart/mixed; boundary=batchresponse_<boundary>
           odata-version: "4.0"
           date: <dynamic-time>
           connection: keep-alive
           keep-alive: timeout=5
           transfer-encoding: chunked
-        body: LS1iYXRjaHJlc3BvbnNlX3B6cmt1NGgwDQpDb250ZW50LVR5cGU6IGFwcGxpY2F0aW9uL2h0dHANCg0KSFRUUC8xLjEgMjAwIE9LDQpDb250ZW50LVR5cGU6IGFwcGxpY2F0aW9uL2pzb247IG9kYXRhLm1ldGFkYXRhPW1pbmltYWwNCg0KeyJAb2RhdGEuY29udGV4dCI6Ii9vZGF0YS8kbWV0YWRhdGEjUGV0cyIsInZhbHVlIjpbeyJJZCI6MSwiTmFtZSI6IlJleCJ9LHsiSWQiOjIsIk5hbWUiOiJXaGlza2VycyJ9XX0NCi0tYmF0Y2hyZXNwb25zZV9wenJrdTRoMA0KQ29udGVudC1UeXBlOiBhcHBsaWNhdGlvbi9odHRwDQoNCkhUVFAvMS4xIDIwMCBPSw0KQ29udGVudC1UeXBlOiBhcHBsaWNhdGlvbi9qc29uOyBvZGF0YS5tZXRhZGF0YT1taW5pbWFsDQoNCnsiQG9kYXRhLmNvbnRleHQiOiIvb2RhdGEvJG1ldGFkYXRhI1BldHMiLCJ2YWx1ZSI6W3siSWQiOjEsIk5hbWUiOiJSZXgifSx7IklkIjoyLCJOYW1lIjoiV2hpc2tlcnMifV19DQotLWJhdGNocmVzcG9uc2VfcHpya3U0aDAtLQ0K
+        body: "--batchresponse_<boundary>\r
+
+          Content-Type: application/http\r
+
+          \r
+
+          HTTP/1.1 200 OK\r
+
+          Content-Type: application/json; odata.metadata=minimal\r
+
+          \r
+
+          {\"@odata.context\":\"/odata/$metadata#Pets\",\"value\":[{\"Id\":1,\"\
+          Name\":\"Rex\"},{\"Id\":2,\"Name\":\"Whiskers\"}]}\r
+
+          --batchresponse_<boundary>\r
+
+          Content-Type: application/http\r
+
+          \r
+
+          HTTP/1.1 200 OK\r
+
+          Content-Type: application/json; odata.metadata=minimal\r
+
+          \r
+
+          {\"@odata.context\":\"/odata/$metadata#Pets\",\"value\":[{\"Id\":1,\"\
+          Name\":\"Rex\"},{\"Id\":2,\"Name\":\"Whiskers\"}]}\r
+
+          --batchresponse_<boundary>--\r\n"
         durationMs: <dynamic-time>
         success: true
 - message: ⚪ [<time>] odata-server "OData Mock" closed
@@ -218,18 +338,48 @@
         url: http://localhost:8078/odata/$batch
         method: POST
         headers:
-          Content-Type: multipart/mixed; boundary=batch_mqqzffii_uy6h9o
+          Content-Type: multipart/mixed; boundary=batch_<boundary>
       response:
         status: 200
         statusText: OK
         headers:
-          content-type: multipart/mixed; boundary=batchresponse_pzrku4h0
+          content-type: multipart/mixed; boundary=batchresponse_<boundary>
           odata-version: "4.0"
           date: <dynamic-time>
           connection: keep-alive
           keep-alive: timeout=5
           transfer-encoding: chunked
-        body: LS1iYXRjaHJlc3BvbnNlX3B6cmt1NGgwDQpDb250ZW50LVR5cGU6IGFwcGxpY2F0aW9uL2h0dHANCg0KSFRUUC8xLjEgMjAwIE9LDQpDb250ZW50LVR5cGU6IGFwcGxpY2F0aW9uL2pzb247IG9kYXRhLm1ldGFkYXRhPW1pbmltYWwNCg0KeyJAb2RhdGEuY29udGV4dCI6Ii9vZGF0YS8kbWV0YWRhdGEjUGV0cyIsInZhbHVlIjpbeyJJZCI6MSwiTmFtZSI6IlJleCJ9LHsiSWQiOjIsIk5hbWUiOiJXaGlza2VycyJ9XX0NCi0tYmF0Y2hyZXNwb25zZV9wenJrdTRoMA0KQ29udGVudC1UeXBlOiBhcHBsaWNhdGlvbi9odHRwDQoNCkhUVFAvMS4xIDIwMCBPSw0KQ29udGVudC1UeXBlOiBhcHBsaWNhdGlvbi9qc29uOyBvZGF0YS5tZXRhZGF0YT1taW5pbWFsDQoNCnsiQG9kYXRhLmNvbnRleHQiOiIvb2RhdGEvJG1ldGFkYXRhI1BldHMiLCJ2YWx1ZSI6W3siSWQiOjEsIk5hbWUiOiJSZXgifSx7IklkIjoyLCJOYW1lIjoiV2hpc2tlcnMifV19DQotLWJhdGNocmVzcG9uc2VfcHpya3U0aDAtLQ0K
+        body: "--batchresponse_<boundary>\r
+
+          Content-Type: application/http\r
+
+          \r
+
+          HTTP/1.1 200 OK\r
+
+          Content-Type: application/json; odata.metadata=minimal\r
+
+          \r
+
+          {\"@odata.context\":\"/odata/$metadata#Pets\",\"value\":[{\"Id\":1,\"\
+          Name\":\"Rex\"},{\"Id\":2,\"Name\":\"Whiskers\"}]}\r
+
+          --batchresponse_<boundary>\r
+
+          Content-Type: application/http\r
+
+          \r
+
+          HTTP/1.1 200 OK\r
+
+          Content-Type: application/json; odata.metadata=minimal\r
+
+          \r
+
+          {\"@odata.context\":\"/odata/$metadata#Pets\",\"value\":[{\"Id\":1,\"\
+          Name\":\"Rex\"},{\"Id\":2,\"Name\":\"Whiskers\"}]}\r
+
+          --batchresponse_<boundary>--\r\n"
         durationMs: <dynamic-time>
         success: true
 - message: ⚪ [<time>] done log
