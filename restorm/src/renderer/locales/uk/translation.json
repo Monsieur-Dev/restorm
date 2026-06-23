@@ -1935,9 +1935,7 @@
     "namePlaceholder": "Назва конфігурації",
     "saveButton": "Зберегти",
     "storageTarget": {
-      "label": "Зберегти у файл проєкту",
-      "project": "Збережено у файл проєкту (.restorm)",
-      "settings": "Збережено у налаштуваннях користувача"
+      "label": "Зберегти у файл проєкту (.restorm)"
     },
     "badge": {
       "project": "проєкт",

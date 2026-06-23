@@ -1933,9 +1933,7 @@
     "namePlaceholder": "Emri i konfigurimit",
     "saveButton": "Ruaj",
     "storageTarget": {
-      "label": "Ruaj në skedarin e projektit",
-      "project": "Ruajtur në skedarin e projektit (.restorm)",
-      "settings": "Ruajtur në cilësimet e përdoruesit"
+      "label": "Ruaj në skedarin e projektit (.restorm)"
     },
     "badge": {
       "project": "projekt",

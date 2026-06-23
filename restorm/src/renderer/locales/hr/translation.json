@@ -1934,9 +1934,7 @@
     "namePlaceholder": "Naziv konfiguracije",
     "saveButton": "Spremi",
     "storageTarget": {
-      "label": "Spremi u datoteku projekta",
-      "project": "Spremljeno u datoteku projekta (.restorm)",
-      "settings": "Spremljeno u korisničke postavke"
+      "label": "Spremi u datoteku projekta (.restorm)"
     },
     "badge": {
       "project": "projekt",

@@ -1933,9 +1933,7 @@
     "namePlaceholder": "Konfigurationsnavn",
     "saveButton": "Gem",
     "storageTarget": {
-      "label": "Gem i projektfil",
-      "project": "Gemt i projektfil (.restorm)",
-      "settings": "Gemt i brugerindstillinger"
+      "label": "Gem i projektfil (.restorm)"
     },
     "badge": {
       "project": "projekt",

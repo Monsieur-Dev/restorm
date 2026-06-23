@@ -1933,9 +1933,7 @@
     "namePlaceholder": "Configuration name",
     "saveButton": "Save",
     "storageTarget": {
-      "label": "Save to project file",
-      "project": "Saved to project file (.restorm)",
-      "settings": "Saved to user settings"
+      "label": "Save to project file (.restorm)"
     },
     "badge": {
       "project": "project",

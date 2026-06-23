@@ -1932,9 +1932,7 @@
     "namePlaceholder": "設定名稱",
     "saveButton": "儲存",
     "storageTarget": {
-      "label": "儲存至專案檔案",
-      "project": "已儲存至專案檔案 (.restorm)",
-      "settings": "已儲存至使用者設定"
+      "label": "儲存至專案檔案 (.restorm)"
     },
     "badge": {
       "project": "專案",

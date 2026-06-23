@@ -1933,9 +1933,7 @@
     "namePlaceholder": "Nombre de la configuración",
     "saveButton": "Guardar",
     "storageTarget": {
-      "label": "Guardar en el archivo del proyecto",
-      "project": "Guardado en el archivo del proyecto (.restorm)",
-      "settings": "Guardado en los ajustes del usuario"
+      "label": "Guardar en el archivo del proyecto (.restorm)"
     },
     "badge": {
       "project": "proyecto",

@@ -1933,9 +1933,7 @@
     "namePlaceholder": "Konfigurasjonsnavn",
     "saveButton": "Lagre",
     "storageTarget": {
-      "label": "Lagre i prosjektfil",
-      "project": "Lagret i prosjektfil (.restorm)",
-      "settings": "Lagret i brukerinnstillinger"
+      "label": "Lagre i prosjektfil (.restorm)"
     },
     "badge": {
       "project": "prosjekt",

@@ -331,17 +331,23 @@ export const RequestQuickSettingsButton: React.FC<RequestQuickSettingsButtonProp
                       data-testid="quick-settings-name-input"
                     />
                   </div>
-                  <Button
-                    small
-                    disabled={configName.trim().length === 0}
-                    data-testid="quick-settings-save-button"
-                    onClick={handleSave}
+                  <HeaderHoverTooltip
+                    label={t('quickSettings.saveButton')}
+                    placement="below"
                   >
-                    {t('quickSettings.saveButton')}
-                  </Button>
+                    <Button
+                      small
+                      icon="check"
+                      options={{ ariaLabel: t('quickSettings.saveButton') }}
+                      disabled={configName.trim().length === 0}
+                      data-testid="quick-settings-save-button"
+                      onClick={handleSave}
+                    />
+                  </HeaderHoverTooltip>
                 </div>
 
-                {/* Storage target toggle */}
+                {/* Storage target toggle. The label is passed as the Toggle's
+                    children so the whole row (switch + text) is clickable. */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                   <Toggle
                     appearance="switch"
@@ -349,12 +355,11 @@ export const RequestQuickSettingsButton: React.FC<RequestQuickSettingsButtonProp
                     onChange={(checked: boolean) => { setStorageTarget(checked ? 'project' : 'settings') }}
                     aria-label={t('quickSettings.storageTarget.label')}
                     data-testid="quick-settings-storage-toggle"
-                  />
-                  <span style={{ fontSize: '0.85em', lineHeight: 1.3 }}>
-                    {storageTarget === 'project'
-                      ? t('quickSettings.storageTarget.project')
-                      : t('quickSettings.storageTarget.settings')}
-                  </span>
+                  >
+                    <span style={{ fontSize: '0.85em', lineHeight: 1.3 }}>
+                      {t('quickSettings.storageTarget.label')}
+                    </span>
+                  </Toggle>
                 </div>
 
                 {/* Config list */}

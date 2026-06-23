@@ -1932,9 +1932,7 @@
     "namePlaceholder": "설정 이름",
     "saveButton": "저장",
     "storageTarget": {
-      "label": "프로젝트 파일에 저장",
-      "project": "프로젝트 파일에 저장됨 (.restorm)",
-      "settings": "사용자 설정에 저장됨"
+      "label": "프로젝트 파일에 저장 (.restorm)"
     },
     "badge": {
       "project": "프로젝트",

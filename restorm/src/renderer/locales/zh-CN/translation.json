@@ -1932,9 +1932,7 @@
     "namePlaceholder": "配置名称",
     "saveButton": "保存",
     "storageTarget": {
-      "label": "保存到项目文件",
-      "project": "已保存到项目文件 (.restorm)",
-      "settings": "已保存到用户设置"
+      "label": "保存到项目文件 (.restorm)"
     },
     "badge": {
       "project": "项目",

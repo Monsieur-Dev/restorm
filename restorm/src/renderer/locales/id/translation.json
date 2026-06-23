@@ -1932,9 +1932,7 @@
     "namePlaceholder": "Nama konfigurasi",
     "saveButton": "Simpan",
     "storageTarget": {
-      "label": "Simpan ke file proyek",
-      "project": "Disimpan ke file proyek (.restorm)",
-      "settings": "Disimpan ke pengaturan pengguna"
+      "label": "Simpan ke file proyek (.restorm)"
     },
     "badge": {
       "project": "proyek",

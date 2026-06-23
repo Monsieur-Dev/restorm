@@ -1934,9 +1934,7 @@
     "namePlaceholder": "Naziv konfiguracije",
     "saveButton": "Sačuvaj",
     "storageTarget": {
-      "label": "Sačuvaj u datoteci projekta",
-      "project": "Sačuvano u datoteci projekta (.restorm)",
-      "settings": "Sačuvano u korisničkim podešavanjima"
+      "label": "Sačuvaj u datoteci projekta (.restorm)"
     },
     "badge": {
       "project": "projekat",

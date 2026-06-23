@@ -1935,9 +1935,7 @@
     "namePlaceholder": "Název konfigurace",
     "saveButton": "Uložit",
     "storageTarget": {
-      "label": "Uložit do souboru projektu",
-      "project": "Uloženo v souboru projektu (.restorm)",
-      "settings": "Uloženo v uživatelském nastavení"
+      "label": "Uložit do souboru projektu (.restorm)"
     },
     "badge": {
       "project": "projekt",

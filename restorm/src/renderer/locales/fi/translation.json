@@ -1933,9 +1933,7 @@
     "namePlaceholder": "Konfiguraation nimi",
     "saveButton": "Tallenna",
     "storageTarget": {
-      "label": "Tallenna projektitiedostoon",
-      "project": "Tallennettu projektitiedostoon (.restorm)",
-      "settings": "Tallennettu käyttäjäasetuksiin"
+      "label": "Tallenna projektitiedostoon (.restorm)"
     },
     "badge": {
       "project": "projekti",

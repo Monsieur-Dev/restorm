@@ -1933,9 +1933,7 @@
     "namePlaceholder": "Yapılandırma adı",
     "saveButton": "Kaydet",
     "storageTarget": {
-      "label": "Proje dosyasına kaydet",
-      "project": "Proje dosyasına kaydedildi (.restorm)",
-      "settings": "Kullanıcı ayarlarına kaydedildi"
+      "label": "Proje dosyasına kaydet (.restorm)"
     },
     "badge": {
       "project": "proje",

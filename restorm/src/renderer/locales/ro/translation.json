@@ -1934,9 +1934,7 @@
     "namePlaceholder": "Numele configurației",
     "saveButton": "Salvează",
     "storageTarget": {
-      "label": "Salvează în fișierul proiectului",
-      "project": "Salvat în fișierul proiectului (.restorm)",
-      "settings": "Salvat în setările utilizatorului"
+      "label": "Salvează în fișierul proiectului (.restorm)"
     },
     "badge": {
       "project": "proiect",

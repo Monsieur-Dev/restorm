@@ -1933,9 +1933,7 @@
     "namePlaceholder": "Konfigurationsnamn",
     "saveButton": "Spara",
     "storageTarget": {
-      "label": "Spara i projektfil",
-      "project": "Sparat i projektfil (.restorm)",
-      "settings": "Sparat i användarinställningar"
+      "label": "Spara i projektfil (.restorm)"
     },
     "badge": {
       "project": "projekt",

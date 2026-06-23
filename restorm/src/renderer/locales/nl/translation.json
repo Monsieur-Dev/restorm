@@ -1933,9 +1933,7 @@
     "namePlaceholder": "Naam van de configuratie",
     "saveButton": "Opslaan",
     "storageTarget": {
-      "label": "Opslaan in projectbestand",
-      "project": "Opgeslagen in projectbestand (.restorm)",
-      "settings": "Opgeslagen in gebruikersinstellingen"
+      "label": "Opslaan in projectbestand (.restorm)"
     },
     "badge": {
       "project": "project",

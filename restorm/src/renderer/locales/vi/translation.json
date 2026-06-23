@@ -1932,9 +1932,7 @@
     "namePlaceholder": "Tên cấu hình",
     "saveButton": "Lưu",
     "storageTarget": {
-      "label": "Lưu vào tệp dự án",
-      "project": "Đã lưu vào tệp dự án (.restorm)",
-      "settings": "Đã lưu vào cài đặt người dùng"
+      "label": "Lưu vào tệp dự án (.restorm)"
     },
     "badge": {
       "project": "dự án",

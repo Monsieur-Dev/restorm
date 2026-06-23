@@ -1933,9 +1933,7 @@
     "namePlaceholder": "Konfiguráció neve",
     "saveButton": "Mentés",
     "storageTarget": {
-      "label": "Mentés a projektfájlba",
-      "project": "Mentve a projektfájlba (.restorm)",
-      "settings": "Mentve a felhasználói beállításokba"
+      "label": "Mentés a projektfájlba (.restorm)"
     },
     "badge": {
       "project": "projekt",

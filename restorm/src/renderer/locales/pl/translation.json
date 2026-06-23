@@ -1935,9 +1935,7 @@
     "namePlaceholder": "Nazwa konfiguracji",
     "saveButton": "Zapisz",
     "storageTarget": {
-      "label": "Zapisz w pliku projektu",
-      "project": "Zapisano w pliku projektu (.restorm)",
-      "settings": "Zapisano w ustawieniach użytkownika"
+      "label": "Zapisz w pliku projektu (.restorm)"
     },
     "badge": {
       "project": "projekt",
