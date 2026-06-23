@@ -421,6 +421,7 @@
   "graphql": {
     "send": "Trimite",
     "urlPlaceholder": "URL-ul endpoint-ului GraphQL",
+    "operationName": "Operațiune",
     "tabs": {
       "query": "Interogare",
       "variables": "Variabile",

@@ -86,6 +86,8 @@ export interface FullRequestData {
   mockResolvers?: string
   /** GraphQL mock server: optional scripted resolver body. */
   resolverScript?: string
+  /** Selected operation when the query document declares more than one. */
+  operationName?: string
 
   // gRPC specific
   service?: string

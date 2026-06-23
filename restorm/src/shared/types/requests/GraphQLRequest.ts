@@ -8,6 +8,12 @@ export interface GraphQLRequest extends BaseRequest {
   operationType: GraphQLOperationType
   query: string
   variables?: string
+  /**
+   * Selected operation to execute when the query document declares more
+   * than one named operation (GraphQL-over-HTTP requires `operationName`
+   * in that case). Undefined when the document has a single operation.
+   */
+  operationName?: string
   headers: KeyValue[]
   /** When true, restorm ACTS AS a local GraphQL mock server: it hosts a GraphQL
    * endpoint on `localhost:<port><path>` that resolves operations from the

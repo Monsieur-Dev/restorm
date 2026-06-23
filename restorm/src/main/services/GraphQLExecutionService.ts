@@ -186,6 +186,7 @@ class GraphQLExecutionService {
         // Fallback: try to construct from fullData
         const query = requestContext?.fullData?.query ?? ''
         const variables = requestContext?.fullData?.variables ?? '{}'
+        const operationName = requestContext?.fullData?.operationName
         let parsedVariables: Record<string, unknown> = {}
         try {
           const parsed = JSON.parse(variables) as unknown
@@ -197,7 +198,10 @@ class GraphQLExecutionService {
         }
         body = JSON.stringify({
           query,
-          variables: Object.keys(parsedVariables).length > 0 ? parsedVariables : undefined
+          variables: Object.keys(parsedVariables).length > 0 ? parsedVariables : undefined,
+          // Only include operationName when the document declares more than
+          // one operation (GraphQL-over-HTTP requirement).
+          ...(typeof operationName === 'string' && operationName ? { operationName } : {})
         })
       }
 

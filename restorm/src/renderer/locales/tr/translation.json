@@ -420,6 +420,7 @@
   "graphql": {
     "send": "Gönder",
     "urlPlaceholder": "GraphQL uç nokta URL'si",
+    "operationName": "İşlem",
     "tabs": {
       "query": "Sorgu",
       "variables": "Değişkenler",

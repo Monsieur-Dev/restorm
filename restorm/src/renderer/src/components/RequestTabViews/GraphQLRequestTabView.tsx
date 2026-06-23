@@ -12,9 +12,11 @@ import {
   SplitView,
   Pane,
   ControlGroup,
+  SelectBox,
   eventBus,
   logger,
   getContrastColor,
+  type ISelectData,
   type VariableDefinition
 } from 'electron-core-ui/renderer'
 import { DocumentEvents, type RequestHistoryEventPayload } from '../../services/DocumentEvents'
@@ -31,6 +33,7 @@ import { updateReactiveProperty, toKeyValuesFromHistory } from './requestTabView
 import { useApiDocumentationFromRequest } from '../../hooks/useApiDocumentationFromRequest'
 import { DocumentationHost } from '../documentation/DocumentationHost'
 import { findOperationForRoute } from '../../../../shared/utils/findOperationForRoute'
+import { parseGraphQLOperationNames } from '../../../../shared/utils/graphqlOperations'
 import { useCurlPaste, type ParsedCurl } from '../../hooks/useCurlPaste'
 import { CurlPasteCallout } from '../CurlPasteCallout'
 import { SendButtonEnvSwitcher } from './SendButtonEnvSwitcher'
@@ -44,6 +47,19 @@ const serverPortWrapperStyle: React.CSSProperties = { width: 80, flexShrink: 0 }
 
 export interface GraphQLRequestTabViewProps {
   request: GraphQLRequest
+}
+
+/**
+ * Serialise the GraphQL POST body. `operationName` is only emitted when
+ * set (multi-operation documents) so single-operation requests keep the
+ * minimal `{query, variables}` shape.
+ */
+function buildGraphqlBody(query: string, variables: string | undefined, operationName: string | undefined): string {
+  return JSON.stringify({
+    query,
+    variables,
+    ...(operationName ? { operationName } : {})
+  })
 }
 
 export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
@@ -68,6 +84,7 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
   const [url, setUrlState] = useState(request.url)
   const [query, setQueryState] = useState(request.query)
   const [variables, setVariablesState] = useState(request.variables ?? '{}')
+  const [operationName, setOperationNameState] = useState<string | undefined>(request.operationName)
   const [isSending, setIsSending] = useState(false)
   const [response, setResponse] = useState<GraphQLResponse | null>(null)
   const [historyRefreshKey, setHistoryRefreshKey] = useState(0)
@@ -127,6 +144,7 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
     setVariablesState(request.variables ?? '{}')
     setSchemaState(request.schema ?? '')
     setMockResolversState(request.mockResolvers ?? '')
+    setOperationNameState(request.operationName)
     setResponse(null)
   }, [request])
   useRequestReset(request, handleRequestReset)
@@ -176,7 +194,7 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
       method: 'POST',
       requestType: 'graphql',
       headers: toKeyValueData(currentRequest.headers),
-      body: { type: 'text', content: JSON.stringify({ query: currentRequest.query, variables: currentRequest.variables }) }
+      body: { type: 'text', content: buildGraphqlBody(currentRequest.query, currentRequest.variables, currentRequest.operationName) }
     }, sourceIdRef.current)
 
     // Subscribe to backend events
@@ -259,7 +277,7 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
       method: 'POST' as const,
       requestType: 'graphql' as const,
       headers: toKeyValueData(request.headers),
-      body: { type: 'text' as const, content: JSON.stringify({ query, variables }) },
+      body: { type: 'text' as const, content: buildGraphqlBody(query, variables, operationName) },
       ...(isServer ? { server: true, schema, mockResolvers } : {})
     }
     latestPayloadRef.current = payload
@@ -278,7 +296,7 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
         updateDebounceRef.current = null
       }
     }
-  }, [request.id, request.headers, url, query, variables, isServer, schema, mockResolvers])
+  }, [request.id, request.headers, url, query, variables, operationName, isServer, schema, mockResolvers])
 
   // Sync state changes to reactive request object
   const setUrl = useCallback((value: string): void => {
@@ -363,7 +381,43 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
     })
     return () => { cancelled = true; unsubProgress?.(); unsubServed?.() }
   }, [isServer, request.id])
-  
+
+  const setOperationName = useCallback((value: string | undefined): void => {
+    setOperationNameState(value)
+    updateReactiveProperty(request, 'operationName', value)
+  }, [request])
+
+  // Named operations declared in the current query document. When the
+  // document declares more than one, GraphQL-over-HTTP requires an
+  // explicit `operationName`, so we surface a selector.
+  const operationNames = useMemo(() => parseGraphQLOperationNames(query), [query])
+
+  // Keep the selected operation valid as the document changes: clear it
+  // when the document drops back to a single (or zero) operation, and
+  // default to the first operation when several exist but none is chosen
+  // (or the previously-chosen one no longer exists). The setState calls
+  // are deferred behind an awaited microtask so they don't fire
+  // synchronously in the effect body (react-hooks/set-state-in-effect).
+  useEffect(() => {
+    const cancelRef = { current: false }
+    // The function wrapper hides the read behind a type boundary so
+    // ESLint's control-flow narrowing doesn't treat the guard as a
+    // constant `false` no-op (same trick as EnvironmentContext).
+    const isCancelled = (): boolean => cancelRef.current
+    void (async () => {
+      await Promise.resolve()
+      if (isCancelled()) return
+      if (operationNames.length <= 1) {
+        if (operationName !== undefined) setOperationName(undefined)
+        return
+      }
+      if (!operationName || !operationNames.includes(operationName)) {
+        setOperationName(operationNames[0])
+      }
+    })()
+    return () => { cancelRef.current = true }
+  }, [operationNames, operationName, setOperationName])
+
   // Stable empty array for components that get variables via their own variableId
   const emptyVariables = useMemo<VariableDefinition[]>(() => [], [])
 
@@ -695,6 +749,22 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
               />
             </div>
           </HeaderHoverTooltip>
+          {operationNames.length > 1 && (
+            <div style={{ minWidth: 180 }} data-testid="graphql-operation-name-host">
+              <SelectBox
+                id={`graphql-operation-name-${request.id}`}
+                className=""
+                options={operationNames.map((name) => ({ text: name }))}
+                selected={Math.max(0, operationNames.indexOf(operationName ?? operationNames[0] ?? ''))}
+                onDidSelect={(d: ISelectData) => {
+                  const picked = operationNames[d.index]
+                  if (picked) setOperationName(picked)
+                }}
+                selectBoxOptions={{ ariaLabel: t('graphql.operationName') }}
+                data-testid="graphql-operation-name-select"
+              />
+            </div>
+          )}
           <SendButtonEnvSwitcher>
             <BeamWrap active={isSending} size={22} borderWidth={1.5}>
               <Button

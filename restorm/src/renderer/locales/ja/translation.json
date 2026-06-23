@@ -419,6 +419,7 @@
   "graphql": {
     "send": "送信",
     "urlPlaceholder": "GraphQL エンドポイント URL",
+    "operationName": "オペレーション",
     "tabs": {
       "query": "クエリ",
       "variables": "変数",

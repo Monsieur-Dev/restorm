@@ -420,6 +420,7 @@
   "graphql": {
     "send": "Αποστολή",
     "urlPlaceholder": "URL τελικού σημείου GraphQL",
+    "operationName": "Λειτουργία",
     "tabs": {
       "query": "Ερώτημα",
       "variables": "Μεταβλητές",

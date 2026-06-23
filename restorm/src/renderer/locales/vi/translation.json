@@ -419,6 +419,7 @@
   "graphql": {
     "send": "Gửi",
     "urlPlaceholder": "URL endpoint GraphQL",
+    "operationName": "Thao tác",
     "tabs": {
       "query": "Truy vấn",
       "variables": "Biến",

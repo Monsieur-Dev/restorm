@@ -421,6 +421,7 @@
   "graphql": {
     "send": "Pošalji",
     "urlPlaceholder": "URL GraphQL krajnje točke",
+    "operationName": "Operacija",
     "tabs": {
       "query": "Upit",
       "variables": "Varijable",

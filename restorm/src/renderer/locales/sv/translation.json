@@ -420,6 +420,7 @@
   "graphql": {
     "send": "Skicka",
     "urlPlaceholder": "URL till GraphQL-endpoint",
+    "operationName": "Operation",
     "tabs": {
       "query": "Fråga",
       "variables": "Variabler",

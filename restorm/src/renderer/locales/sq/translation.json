@@ -420,6 +420,7 @@
   "graphql": {
     "send": "Dërgo",
     "urlPlaceholder": "URL e pikës fundore GraphQL",
+    "operationName": "Operacioni",
     "tabs": {
       "query": "Pyetja",
       "variables": "Variablat",

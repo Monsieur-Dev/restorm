@@ -80,6 +80,12 @@ const grpcExecutionTestDir = defineBddConfig({
   outputDir: '.features-gen/grpc-execution'
 })
 
+const graphqlOperationNameTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/graphql-operation-name/features/**/*.feature',
+  steps: ['tests/e2e/bdd/graphql-operation-name/steps/**/*.ts', 'tests/e2e/bdd/fixtures/mcp-server.fixture.ts'],
+  outputDir: '.features-gen/graphql-operation-name'
+})
+
 const soapExecutionTestDir = defineBddConfig({
   features: 'tests/e2e/bdd/soap-execution/features/**/*.feature',
   steps: ['tests/e2e/bdd/soap-execution/steps/**/*.ts', 'tests/e2e/bdd/fixtures/mcp-server.fixture.ts'],
@@ -360,6 +366,11 @@ export default defineConfig({
     {
       name: 'grpc-execution',
       testDir: grpcExecutionTestDir,
+      timeout: 180 * 1000
+    },
+    {
+      name: 'graphql-operation-name',
+      testDir: graphqlOperationNameTestDir,
       timeout: 180 * 1000
     },
     {

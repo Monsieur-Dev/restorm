@@ -42,6 +42,14 @@ export class GraphQLRequest extends BaseRequest {
   @TreatEmptyAsUndefined()
   variables?: string
 
+  /**
+   * Selected operation name when the query document declares more than
+   * one named operation. Undefined for single-operation documents.
+   */
+  @graphqlField({ type: 'String', nullable: true })
+  @TreatEmptyAsUndefined()
+  operationName?: string
+
   /** HTTP headers */
   @graphqlField({ type: 'KeyValue', isArray: true })
   headers: KeyValue[] = []
@@ -101,6 +109,7 @@ export class GraphQLRequest extends BaseRequest {
     operationType?: GraphQLOperationType
     query?: string
     variables?: string
+    operationName?: string
     headers?: Parameters<typeof KeyValue.fromPlain>[0][]
     server?: boolean
     schema?: string
@@ -120,6 +129,7 @@ export class GraphQLRequest extends BaseRequest {
       operationType: obj.operationType ?? 'query',
       query: obj.query ?? '',
       ...(obj.variables !== undefined && { variables: obj.variables }),
+      ...(obj.operationName !== undefined && { operationName: obj.operationName }),
       headers: (obj.headers ?? []) as KeyValue[],
       ...(obj.server !== undefined && { server: obj.server }),
       ...(obj.schema !== undefined && { schema: obj.schema }),
@@ -146,6 +156,7 @@ export class GraphQLRequest extends BaseRequest {
       operationType: this.operationType,
       query: this.query,
       variables: this.variables,
+      ...(this.operationName !== undefined && { operationName: this.operationName }),
       headers: this.headers.map(h => h.toPlainObject()),
       ...(this.server !== undefined && { server: this.server }),
       ...(this.schema !== undefined && { schema: this.schema }),
