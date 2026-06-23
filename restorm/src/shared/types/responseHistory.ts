@@ -93,6 +93,9 @@ export interface ResponseHistoryODataResponse {
   contentLength?: number
   odataCount?: number
   odataNextLink?: string
+  /** `@odata.deltaLink` captured from a v4.01 delta response, preserved
+   * so the entry can be replayed / the change-tracking chain walked. */
+  odataDeltaLink?: string
   timings: {
     startedAt: string
     durationMs: number

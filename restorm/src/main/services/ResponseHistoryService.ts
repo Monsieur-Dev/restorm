@@ -543,6 +543,7 @@ class ResponseHistoryService {
 
     let odataCount: number | undefined
     let odataNextLink: string | undefined
+    let odataDeltaLink: string | undefined
     if (result.body) {
       try {
         const parsed: unknown = JSON.parse(result.body)
@@ -551,6 +552,7 @@ class ResponseHistoryService {
           if (normalized) {
             if (normalized.count !== undefined) odataCount = normalized.count
             if (normalized.nextLink) odataNextLink = normalized.nextLink
+            if (normalized.deltaLink) odataDeltaLink = normalized.deltaLink
           }
         }
       } catch {
@@ -575,6 +577,7 @@ class ResponseHistoryService {
       ...(contentLength !== undefined && !isNaN(contentLength) ? { contentLength } : {}),
       ...(odataCount !== undefined ? { odataCount } : {}),
       ...(odataNextLink ? { odataNextLink } : {}),
+      ...(odataDeltaLink ? { odataDeltaLink } : {}),
       timings: result.timings,
       ...(result.error ? { error: result.error } : {})
     }

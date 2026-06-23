@@ -1922,6 +1922,7 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
         disableNavigate: true,
         ...(r.odataCount !== undefined ? { odataCount: r.odataCount } : {}),
         ...(r.odataNextLink !== undefined ? { odataNextLink: r.odataNextLink } : {}),
+        ...(r.odataDeltaLink !== undefined ? { odataDeltaLink: r.odataDeltaLink } : {}),
         ...(r.contentType !== undefined ? { contentType: r.contentType } : {}),
         ...(r.contentLength !== undefined ? { contentLength: r.contentLength } : {}),
         ...(r.error !== undefined ? { error: r.error } : {})
