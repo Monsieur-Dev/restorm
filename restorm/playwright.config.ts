@@ -122,6 +122,12 @@ const httpExecutionTestDir = defineBddConfig({
   outputDir: '.features-gen/http-execution'
 })
 
+const graphqlExecutionTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/graphql-execution/features/**/*.feature',
+  steps: ['tests/e2e/bdd/graphql-execution/steps/**/*.ts', 'tests/e2e/bdd/fixtures/mcp-server.fixture.ts'],
+  outputDir: '.features-gen/graphql-execution'
+})
+
 const fullyDocumentedPetstoreTestDir = defineBddConfig({
   features: 'tests/e2e/bdd/fully-documented-petstore/features/**/*.feature',
   steps: [
@@ -377,6 +383,11 @@ export default defineConfig({
     {
       name: 'http-execution',
       testDir: httpExecutionTestDir,
+      timeout: 180 * 1000
+    },
+    {
+      name: 'graphql-execution',
+      testDir: graphqlExecutionTestDir,
       timeout: 180 * 1000
     },
     {

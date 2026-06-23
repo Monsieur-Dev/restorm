@@ -210,20 +210,60 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
     }
   }, [selectedEnvId, environments, request.id])
 
-  // Notify ContextService when URL, query or variables change. In server mode
-  // also push the SDL + canned resolvers so the main-process mock can read them
-  // off `fullData`.
+  // Notify ContextService when URL, query or variables change — debounced so
+  // rapid keystrokes in the Monaco editors coalesce into a single IPC call
+  // (mirrors the ECUI InputBox 300 ms debounce model and the playbook rule
+  // requiring that rapid typing emits at most a couple of document-update
+  // events, verified by the e2e debounce scenario). In server mode also push
+  // the SDL + canned resolvers so the main-process mock can read them off
+  // `fullData`.
+  //
+  // The latest payload is mirrored into a ref so an action that reads
+  // `fullData` (Send / Listen) can flush it synchronously and bypass the
+  // 300 ms lag — otherwise the main process would execute / host a stale
+  // (pre-keystroke) query or schema.
+  const updateDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const latestPayloadRef = useRef<Parameters<NonNullable<typeof window.restorm>['context']['updateFullRequestData']>[1] | null>(null)
+
+  const flushUpdate = useCallback((): void => {
+    if (updateDebounceRef.current !== null) {
+      clearTimeout(updateDebounceRef.current)
+      updateDebounceRef.current = null
+    }
+    const payload = latestPayloadRef.current
+    if (payload) {
+      void window.restorm?.context.updateFullRequestData(request.id, payload, sourceIdRef.current)
+    }
+  }, [request.id])
+
   useEffect(() => {
     const toKeyValueData = toKeyValueDataShared
-
-    void window.restorm?.context.updateFullRequestData(request.id, {
+    const reqId = request.id
+    const source = sourceIdRef.current
+    const payload = {
       url,
-      method: 'POST',
-      requestType: 'graphql',
+      method: 'POST' as const,
+      requestType: 'graphql' as const,
       headers: toKeyValueData(request.headers),
-      body: { type: 'text', content: JSON.stringify({ query, variables }) },
+      body: { type: 'text' as const, content: JSON.stringify({ query, variables }) },
       ...(isServer ? { server: true, schema, mockResolvers } : {})
-    }, sourceIdRef.current)
+    }
+    latestPayloadRef.current = payload
+
+    if (updateDebounceRef.current !== null) {
+      clearTimeout(updateDebounceRef.current)
+    }
+    updateDebounceRef.current = setTimeout(() => {
+      updateDebounceRef.current = null
+      void window.restorm?.context.updateFullRequestData(reqId, payload, source)
+    }, 300)
+
+    return () => {
+      if (updateDebounceRef.current !== null) {
+        clearTimeout(updateDebounceRef.current)
+        updateDebounceRef.current = null
+      }
+    }
   }, [request.id, request.headers, url, query, variables, isServer, schema, mockResolvers])
 
   // Sync state changes to reactive request object
@@ -272,6 +312,9 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
   const handleListen = useCallback((): void => {
     const requestId = request.id
     if (!requestId || isListening) return
+    // Flush the debounced schema / resolver push so the main-process mock
+    // hosts the current SDL — not the pre-debounce (possibly empty) one.
+    flushUpdate()
     setServedCount(0)
     void window.restorm?.graphql.listen(requestId)
       .then((res) => {
@@ -281,7 +324,7 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
         }
       })
       .catch((err: unknown) => { logger.error('GraphQL mock server listen error', { error: String(err) }) })
-  }, [request.id, isListening, t])
+  }, [request.id, isListening, t, flushUpdate])
 
   const handleStop = useCallback((): void => {
     void window.restorm?.graphql.stop(request.id)
@@ -323,9 +366,13 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
   
   const handleSend = (): void => {
     if (isSending) return
+    // Flush the debounced query / variables push so the main process executes
+    // the current operation, not the pre-debounce one (a Send fired within
+    // 300 ms of a keystroke would otherwise POST a stale query).
+    flushUpdate()
     setIsSending(true)
     setResponse(null)
-    
+
     window.restorm?.graphql.execute({
       requestId: request.id,
       ...(requestPath ? { requestPath } : {})
@@ -344,7 +391,10 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
           data: res.data,
           errors: res.errors,
           responseHeaders: [],
-          timings: res.timings
+          timings: res.timings,
+          // Propagate transport / network / cancellation error so the response
+          // panel can surface it (e.g. 'Request cancelled', ECONNREFUSED).
+          ...(res.error ? { error: res.error } : {})
         }
         setResponse(graphqlResponse)
         setHistoryRefreshKey(prev => prev + 1)
@@ -497,12 +547,23 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
       </div>
     ) : null
 
-    const responseContent = resp && (resp.data ?? resp.errors) ? (
+    // Surface any response payload: successful data, GraphQL errors[], or a
+    // transport-level error string (network failure, cancellation).
+    const responseJson = resp
+      ? JSON.stringify(
+          resp.error
+            ? { error: resp.error }
+            : { data: resp.data, errors: resp.errors },
+          null,
+          2
+        )
+      : null
+    const responseContent = resp && (resp.data ?? resp.errors ?? resp.error) ? (
       <div style={{ height: '100%', border: '1px solid var(--panel-border)', borderRadius: 3 }}>
         <CodeEditor
           height="100%"
           language="json"
-          value={JSON.stringify({ data: resp.data, errors: resp.errors }, null, 2)}
+          value={responseJson ?? ''}
           options={{ readOnly: true, minimap: { enabled: false }, automaticLayout: true }}
           data-testid="graphql-response-editor"
         />
