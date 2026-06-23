@@ -127,6 +127,8 @@ const ODATA_REQUEST_INDEXABLE_KEYS = new Set([
   'queryOptions',
   'actionBody',
   'batchSubRequests',
+  'batchFormat',
+  'allowGetInChangeSet',
   'entitySetProperties',
   'navigationProperties',
   'operationParameters',

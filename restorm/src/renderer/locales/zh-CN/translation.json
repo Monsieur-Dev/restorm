@@ -1810,7 +1810,11 @@
     "batchFormatMultipart": "multipart/mixed",
     "batchFormatJson": "JSON 批处理",
     "versionMismatchWarning": "此请求标记为 {{requestVersion}}，但响应看起来像 {{responseVersion}}。请更改请求版本以与服务器匹配。",
-    "orderbyPropertyPickerPlaceholder": "选择…"
+    "orderbyPropertyPickerPlaceholder": "选择…",
+    "batchAllowGetInChangeSet": "允许 change-set 中的 GET",
+    "batchAllowGetInChangeSetTooltip": "OData 规范禁止在 change-set 中使用 GET；许多服务器会拒绝此类批量请求。仅在服务器明确支持时才启用此选项。",
+    "batchGetInChangeSetWarning": "change-set 中的 GET 可能不会被所有服务器接受（OData 规范不允许）。",
+    "batchForceIncludeInChangeSet": "仍然包含"
   },
   "typedValue": {
     "list": {

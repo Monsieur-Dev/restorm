@@ -1812,7 +1812,11 @@
     "batchFormatMultipart": "multipart/mixed",
     "batchFormatJson": "JSON skupna obrada",
     "versionMismatchWarning": "Ovaj je zahtjev označen kao {{requestVersion}}, ali odgovor izgleda kao {{responseVersion}}. Promijenite verziju zahtjeva da odgovara poslužitelju.",
-    "orderbyPropertyPickerPlaceholder": "Odaberite…"
+    "orderbyPropertyPickerPlaceholder": "Odaberite…",
+    "batchAllowGetInChangeSet": "Dopusti GET u change-setu",
+    "batchAllowGetInChangeSetTooltip": "OData specifikacija zabranjuje GET unutar change-seta; mnogi poslužitelji će odbiti takve skupove. Omogućite ovu zastavu samo ako je vaš poslužitelj izričito podržava.",
+    "batchGetInChangeSetWarning": "GET unutar change-seta možda neće biti prihvaćen od svih poslužitelja (nije dopušteno prema OData specifikaciji).",
+    "batchForceIncludeInChangeSet": "Uključi svejedno"
   },
   "typedValue": {
     "list": {

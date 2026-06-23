@@ -1810,7 +1810,11 @@
     "batchFormatMultipart": "multipart/mixed",
     "batchFormatJson": "Batch JSON",
     "versionMismatchWarning": "Permintaan ini ditandai {{requestVersion}} tetapi responsnya tampak seperti {{responseVersion}}. Ubah versi permintaan agar sesuai dengan server.",
-    "orderbyPropertyPickerPlaceholder": "Pilih…"
+    "orderbyPropertyPickerPlaceholder": "Pilih…",
+    "batchAllowGetInChangeSet": "Izinkan GET dalam change-set",
+    "batchAllowGetInChangeSetTooltip": "Spesifikasi OData melarang GET di dalam change-set; banyak server akan menolak batch semacam itu. Aktifkan bendera ini hanya jika server Anda mendukungnya secara eksplisit.",
+    "batchGetInChangeSetWarning": "GET di dalam change-set mungkin tidak diterima oleh semua server (tidak diizinkan menurut spesifikasi OData).",
+    "batchForceIncludeInChangeSet": "Sertakan saja"
   },
   "typedValue": {
     "list": {

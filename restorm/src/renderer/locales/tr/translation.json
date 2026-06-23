@@ -1811,7 +1811,11 @@
     "batchFormatMultipart": "multipart/mixed",
     "batchFormatJson": "JSON toplu işi",
     "versionMismatchWarning": "Bu istek {{requestVersion}} olarak etiketlenmiş ancak yanıt {{responseVersion}} gibi görünüyor. İstek sürümünü sunucuyla eşleşecek şekilde değiştirin.",
-    "orderbyPropertyPickerPlaceholder": "Seçin…"
+    "orderbyPropertyPickerPlaceholder": "Seçin…",
+    "batchAllowGetInChangeSet": "Change-set içinde GET'e izin ver",
+    "batchAllowGetInChangeSetTooltip": "OData spesifikasyonu, bir change-set içinde GET kullanımını yasaklar; birçok sunucu bu tür toplu istekleri reddeder. Bu bayrağı yalnızca sunucunuz bunu açıkça destekliyorsa etkinleştirin.",
+    "batchGetInChangeSetWarning": "Change-set içindeki GET tüm sunucular tarafından kabul edilmeyebilir (OData spesifikasyonuna göre izin verilmez).",
+    "batchForceIncludeInChangeSet": "Yine de dahil et"
   },
   "typedValue": {
     "list": {

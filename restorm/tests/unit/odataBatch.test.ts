@@ -93,6 +93,53 @@ describe('serializeODataBatch', () => {
     const changesetCount = (out.body.match(/boundary=changeset_/g) ?? []).length
     expect(changesetCount).toBe(2)
   })
+
+  it('includes GET in a change-set and emits a warning when allowGetInChangeSet is false (default)', () => {
+    const out = serializeODataBatch(
+      [
+        { method: 'GET', url: 'Pets(1)', atomicityGroup: 'cs1' },
+        { method: 'POST', url: 'Pets', body: '{"Name":"Rex"}', atomicityGroup: 'cs1' }
+      ],
+      'b'
+    )
+    // GET is still serialized inside the change-set (keep-in + warn).
+    expect(out.body).toContain('GET Pets(1) HTTP/1.1')
+    expect(out.body).toMatch(/Content-Type: multipart\/mixed; boundary=changeset_/)
+    // A warning is emitted.
+    expect(out.warnings).toHaveLength(1)
+    expect(out.warnings[0]).toContain('GET "Pets(1)"')
+    expect(out.warnings[0]).toContain('cs1')
+  })
+
+  it('emits no warning when allowGetInChangeSet is true', () => {
+    const out = serializeODataBatch(
+      [{ method: 'GET', url: 'Pets(1)', atomicityGroup: 'cs1' }],
+      'b',
+      { allowGetInChangeSet: true }
+    )
+    expect(out.body).toContain('GET Pets(1) HTTP/1.1')
+    expect(out.warnings).toHaveLength(0)
+  })
+
+  it('emits no warning when the child has forceIncludeInChangeSet set', () => {
+    const out = serializeODataBatch(
+      [{ method: 'GET', url: 'Pets(1)', atomicityGroup: 'cs1', forceIncludeInChangeSet: true }],
+      'b'
+    )
+    expect(out.body).toContain('GET Pets(1) HTTP/1.1')
+    expect(out.warnings).toHaveLength(0)
+  })
+
+  it('emits warnings=[] on a request with no change-set GETs', () => {
+    const out = serializeODataBatch(
+      [
+        { method: 'GET', url: 'Pets(1)' },
+        { method: 'POST', url: 'Pets', body: '{"Name":"A"}', atomicityGroup: 'cs1' }
+      ],
+      'b'
+    )
+    expect(out.warnings).toHaveLength(0)
+  })
 })
 
 describe('parseODataBatchResponse', () => {
@@ -139,6 +186,31 @@ describe('parseODataBatchResponse', () => {
     const withPreamble = 'preamble text\r\n' + multipart
     const out = parseODataBatchResponse(withPreamble, 'resp_1')
     expect(out).toHaveLength(2)
+  })
+
+  it('parses a 4xx sub-response from a change-set rejection correctly', () => {
+    // A server may wrap change-set rejections in a nested multipart/mixed.
+    // Our parser keys on the outer boundary and returns all flat parts
+    // (the nested changeset response is treated as a single opaque part).
+    // This test verifies that a 400 part inside the outer envelope is
+    // surfaced as a sub-response with status 400.
+    const multipartWithError = [
+      '--resp_outer',
+      'Content-Type: application/http',
+      'Content-Transfer-Encoding: binary',
+      '',
+      'HTTP/1.1 400 Bad Request',
+      'Content-Type: application/json',
+      '',
+      '{"error":{"code":"BadRequest","message":"GET is not allowed in a change-set"}}',
+      '--resp_outer--',
+      ''
+    ].join('\r\n')
+    const out = parseODataBatchResponse(multipartWithError, 'resp_outer')
+    expect(out).toHaveLength(1)
+    expect(out[0]?.status).toBe(400)
+    expect(out[0]?.statusText).toBe('Bad Request')
+    expect(out[0]?.body).toContain('GET is not allowed in a change-set')
   })
 
   it('emits status 0 when the HTTP status line is malformed', () => {

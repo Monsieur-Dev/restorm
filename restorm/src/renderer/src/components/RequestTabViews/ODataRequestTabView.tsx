@@ -76,7 +76,11 @@ import { extractNavigationLinks } from '../../../../shared/utils/odataNavigation
 import {
   serializeODataBatch,
   serializeODataJsonBatch,
-  type ODataBatchSubRequest
+  extractBoundary,
+  parseODataBatchResponse,
+  parseODataJsonBatchResponse,
+  type ODataBatchSubRequest,
+  type ODataBatchSubResponse
 } from '../../../../shared/utils/odataBatch'
 import { DEFAULT_REQUEST_TIMEOUT_MS } from '../../../../shared/config/constants'
 import { useRestormStore } from '../../store/restormStore'
@@ -177,6 +181,12 @@ interface ODataResponseViewData {
   headers?: Record<string, string | string[]>
   method: string
   error?: string
+  /** Per-child sub-responses when operationKind === 'batch' and
+   * the response was a parseable multipart/mixed or JSON batch. */
+  batchSubResponses?: ODataBatchSubResponse[]
+  /** Warnings produced by the batch serializer (e.g. GET in
+   * a change-set when allowGetInChangeSet is false). */
+  batchWarnings?: string[]
 }
 
 export interface ODataRequestTabViewProps {
@@ -363,6 +373,11 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
     updateReactiveProperty(request, 'batchFormat', next)
     // Keep the format SelectBox (controlled by `request.batchFormat`) in
     // sync — the proxy write alone doesn't re-render this component.
+    forceProxyRender((n) => n + 1)
+  }, [request])
+
+  const setAllowGetInChangeSet = useCallback((next: boolean) => {
+    updateReactiveProperty(request, 'allowGetInChangeSet', next)
     forceProxyRender((n) => n + 1)
   }, [request])
 
@@ -675,6 +690,7 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
     let method = 'GET'
     let body: string | undefined
     let contentTypeOverride: string | undefined
+    let pendingBatchWarnings: string[] = []
     if (request.operationKind === 'action') {
       method = 'POST'
       body = request.actionBody ?? undefined
@@ -708,17 +724,32 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
           url: spec.url,
           ...(Object.keys(headers).length > 0 ? { headers } : {}),
           ...(spec.body !== undefined ? { body: spec.body } : {}),
-          ...(spec.atomicityGroup ? { atomicityGroup: spec.atomicityGroup } : {})
+          ...(spec.atomicityGroup ? { atomicityGroup: spec.atomicityGroup } : {}),
+          ...(spec.forceIncludeInChangeSet ? { forceIncludeInChangeSet: true } : {})
         }
       })
-      const serialized = request.batchFormat === 'json'
-        ? serializeODataJsonBatch(subRequests)
-        : serializeODataBatch(subRequests)
-      method = 'POST'
-      body = serialized.body
-      contentTypeOverride = serialized.contentType
+      const isBatchJson = request.batchFormat === 'json'
+      if (isBatchJson) {
+        const serialized = serializeODataJsonBatch(subRequests)
+        method = 'POST'
+        body = serialized.body
+        contentTypeOverride = serialized.contentType
+      } else {
+        const serialized = serializeODataBatch(subRequests, undefined, { allowGetInChangeSet: request.allowGetInChangeSet ?? false })
+        method = 'POST'
+        body = serialized.body
+        contentTypeOverride = serialized.contentType
+        // Surface serializer warnings in the response panel even before
+        // the batch completes — they are informational, not blocking.
+        if (serialized.warnings.length > 0) {
+          pendingBatchWarnings = serialized.warnings
+        }
+      }
     }
     const dispatchedMethod = method
+    const capturedBatchWarnings = pendingBatchWarnings
+    const capturedBatchFormat = request.operationKind === 'batch' ? (request.batchFormat ?? 'multipart') : null
+    const capturedOperationKind = request.operationKind
     const authAttachedId = request.authenticationRequestId
     const attachedAuth = authAttachedId ? resolveAuthRequest(authAttachedId) : null
     const authPlain = attachedAuth
@@ -740,6 +771,25 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
       ...(authRequestPayload ? { authRequest: authRequestPayload } : {})
     })
       .then((result) => {
+        // For batch requests, parse the multipart/mixed (or JSON batch)
+        // response body into per-child sub-responses so the UI can render
+        // each one individually and highlight 4xx/5xx change-set errors.
+        let batchSubResponses: ODataBatchSubResponse[] | undefined
+        if (capturedOperationKind === 'batch') {
+          const body = result.body ?? ''
+          if (capturedBatchFormat === 'json') {
+            const parsed = parseODataJsonBatchResponse(body)
+            if (parsed.length > 0) batchSubResponses = parsed
+          } else {
+            const ct = result.headers?.['content-type']
+            const ctStr = Array.isArray(ct) ? ct[0] : ct
+            const boundary = extractBoundary(ctStr)
+            if (boundary) {
+              const parsed = parseODataBatchResponse(body, boundary)
+              if (parsed.length > 0) batchSubResponses = parsed
+            }
+          }
+        }
         setResponse({
           statusCode: result.statusCode ?? 0,
           statusText: result.statusText ?? '',
@@ -748,7 +798,9 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
           body: result.body ?? '',
           method: dispatchedMethod,
           ...(result.headers !== undefined && { headers: result.headers }),
-          ...(result.error !== undefined && { error: result.error })
+          ...(result.error !== undefined && { error: result.error }),
+          ...(batchSubResponses !== undefined && { batchSubResponses }),
+          ...(capturedBatchWarnings.length > 0 && { batchWarnings: capturedBatchWarnings })
         })
         setHistoryRefreshKey((prev) => prev + 1)
         eventBus.emitLocalSync(DocumentEvents.REQUEST_HISTORY_RECORDED, { requestId } as RequestHistoryEventPayload)
@@ -920,6 +972,8 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
             onChange={setBatchSubRequests}
             format={request.batchFormat ?? 'multipart'}
             onFormatChange={setBatchFormat}
+            allowGetInChangeSet={request.allowGetInChangeSet ?? false}
+            onAllowGetInChangeSetChange={setAllowGetInChangeSet}
           />
         </div>
       ) : null}
@@ -1211,6 +1265,12 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
     contentLength?: number | undefined
     error?: string | undefined
     disableNavigate?: boolean
+    /** Parsed per-child responses from a `$batch` call. When present
+     * the response panel renders one card per child instead of the
+     * raw batch body. */
+    batchSubResponses?: ODataBatchSubResponse[]
+    /** Serializer warnings (e.g. GET in a change-set). */
+    batchWarnings?: string[]
   }): {
     responseContent: React.ReactNode
     infosContent: React.ReactNode
@@ -1235,6 +1295,128 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
     // request that got a v2 `{ d: … }` body) — the response is still
     // normalised + rendered, the banner just flags the discrepancy.
     const mismatchVersion = detectODataVersionMismatch(parsed, input.odataVersion)
+
+    // For `$batch` responses, render a batch-specific panel when there
+    // are serializer warnings (e.g. GET in a change-set) and/or parsed
+    // per-child sub-responses. 4xx/5xx children are highlighted.
+    const hasBatchWarnings = (input.batchWarnings?.length ?? 0) > 0
+    const hasBatchSubResponses = (input.batchSubResponses?.length ?? 0) > 0
+    if (hasBatchWarnings || hasBatchSubResponses) {
+      const batchSubResponses = input.batchSubResponses ?? []
+      const batchContent: React.ReactNode = (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8, height: '100%' }} data-testid="odata-batch-response-panel">
+          {(input.batchWarnings ?? []).map((warning, wi) => (
+            <div
+              key={wi}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 6,
+                flexShrink: 0,
+                padding: '4px 8px',
+                borderRadius: 4,
+                border: '1px solid var(--inputValidation-warningBorder)',
+                background: 'var(--inputValidation-warningBackground)',
+                color: 'var(--inputValidation-warningForeground, var(--foreground))',
+                fontSize: 12
+              }}
+              data-testid={`odata-batch-serializer-warning-${wi}`}
+            >
+              {warning}
+            </div>
+          ))}
+          {hasBatchSubResponses ? (
+            <div style={{ flex: 1, minHeight: 0, overflowY: 'auto' }}>
+              {batchSubResponses.map((sub, si) => {
+                const isError = sub.status >= 400
+                return (
+                  <div
+                    key={si}
+                    style={{
+                      marginBottom: 8,
+                      border: `1px solid ${isError ? 'var(--inputValidation-errorBorder)' : 'var(--panel-border)'}`,
+                      borderRadius: 4,
+                      overflow: 'hidden'
+                    }}
+                    data-testid={`odata-batch-sub-response-${si}`}
+                  >
+                    <div
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 8,
+                        padding: '4px 8px',
+                        background: isError ? 'var(--inputValidation-errorBackground)' : 'var(--sideBar-background)',
+                        fontSize: 12,
+                        fontFamily: 'var(--editor-font-family, monospace)'
+                      }}
+                    >
+                      <span
+                        style={{ color: getStatusColor(sub.status), fontWeight: 600 }}
+                        data-testid={`odata-batch-sub-status-${si}`}
+                      >
+                        {sub.status !== 0 ? sub.status : '—'}
+                        {sub.statusText ? ` ${sub.statusText}` : ''}
+                      </span>
+                    </div>
+                    {sub.body ? (
+                      <div style={{ height: 120, borderTop: '1px solid var(--panel-border)' }}>
+                        <CodeEditor
+                          height="100%"
+                          language="json"
+                          value={(() => {
+                            try { return JSON.stringify(JSON.parse(sub.body), null, 2) } catch { return sub.body }
+                          })()}
+                          options={{
+                            minimap: { enabled: false },
+                            wordWrap: 'on',
+                            scrollBeyondLastLine: false,
+                            automaticLayout: true,
+                            readOnly: true
+                          }}
+                          data-testid={`odata-batch-sub-body-${si}`}
+                        />
+                      </div>
+                    ) : null}
+                  </div>
+                )
+              })}
+            </div>
+          ) : null}
+        </div>
+      )
+      return {
+        responseContent: batchContent,
+        infosContent: (() => {
+          // Build a minimal infos panel for the batch-level response.
+          const generalItems: ListViewItemData[] = []
+          if (input.requestUrl) {
+            generalItems.push({ id: 'g-url', icon: 'blank', title: <span style={kvRowStyle}><span style={infoLabelStyle}>Request URL</span><span>{input.requestUrl}</span></span> })
+          }
+          generalItems.push({ id: 'g-method', icon: 'blank', title: <span style={kvRowStyle}><span style={infoLabelStyle}>Request Method</span><span>{input.method}</span></span> })
+          generalItems.push({ id: 'g-status', icon: 'blank', title: <span style={kvRowStyle}><span style={infoLabelStyle}>Status Code</span><span style={{ color: getStatusColor(input.statusCode) }}>{input.statusCode} {input.statusText}</span></span> })
+          generalItems.push({ id: 'g-dur', icon: 'blank', title: <span style={kvRowStyle}><span style={infoLabelStyle}>Duration</span><span>{formatDuration(input.durationMs)}</span></span> })
+          generalItems.push({ id: 'g-children', icon: 'blank', title: <span style={kvRowStyle}><span style={infoLabelStyle}>Sub-responses</span><span>{batchSubResponses.length}</span></span> })
+          const responseHeaderItems: ListViewItemData[] = input.headers
+            ? headersToListItems(input.headers, 'resp-header')
+            : (input.headersFromHistory ?? []).map((kv, index) => ({
+              id: `resp-header-${index}`,
+              icon: 'blank' as const,
+              title: <span style={kvRowStyle}><span style={kvKeyStyle}>{kv.key}</span><span style={kvValueStyle}>{kv.value}</span></span>
+            }))
+          const treeItems: ListViewItemData[] = [
+            { id: 'group-general', title: 'General', icon: 'info', isExpandable: true, isExpanded: true, children: generalItems },
+            { id: 'group-response-headers', title: `Response headers (${responseHeaderItems.length})`, icon: 'call-incoming', isExpandable: true, isExpanded: true, children: responseHeaderItems }
+          ]
+          return (
+            <div style={fullHeightBoxStyle}>
+              <ListView items={treeItems} rootRole="tree" ariaLabel="OData batch response info" data-testid="odata-batch-response-headers-list" />
+            </div>
+          )
+        })(),
+        jsonData: null
+      }
+    }
 
     const renderedContent: React.ReactNode = input.body ? (
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8, height: '100%' }}>
@@ -1557,7 +1739,9 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
       headers: response.headers,
       odataVersion: request.odataVersion,
       operationKind: request.operationKind,
-      ...(response.error !== undefined ? { error: response.error } : {})
+      ...(response.error !== undefined ? { error: response.error } : {}),
+      ...(response.batchSubResponses !== undefined ? { batchSubResponses: response.batchSubResponses } : {}),
+      ...(response.batchWarnings !== undefined ? { batchWarnings: response.batchWarnings } : {})
     })
   }, [response, request.odataVersion, request.operationKind, buildResponseView])
 

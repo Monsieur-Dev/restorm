@@ -1813,7 +1813,11 @@
     "batchFormatMultipart": "multipart/mixed",
     "batchFormatJson": "Dávka JSON",
     "versionMismatchWarning": "Tento požadavek je označen jako {{requestVersion}}, ale odpověď vypadá jako {{responseVersion}}. Změňte verzi požadavku tak, aby odpovídala serveru.",
-    "orderbyPropertyPickerPlaceholder": "Vyberte…"
+    "orderbyPropertyPickerPlaceholder": "Vyberte…",
+    "batchAllowGetInChangeSet": "Povolit GET v change-setu",
+    "batchAllowGetInChangeSetTooltip": "Specifikace OData zakazuje GET uvnitř change-setu; mnoho serverů taková dávková volání odmítne. Tuto možnost povolte pouze tehdy, pokud ji váš server explicitně podporuje.",
+    "batchGetInChangeSetWarning": "GET uvnitř change-setu nemusí být přijat všemi servery (specifikace OData to nedovoluje).",
+    "batchForceIncludeInChangeSet": "Přesto zahrnout"
   },
   "typedValue": {
     "list": {

@@ -47,3 +47,16 @@ Feature: OData petstore — import + send + filter
     When I set the OData filter to "Name eq '{{petName}}'"
     Then the OData filter editor should contain "{{petName}}"
     And the OData filter editor should have no validation errors
+
+  Scenario: $batch — GET inside a change-set triggers a serializer warning
+    Given a new single-file YAML collection for the OData petstore
+    When I open the import modal and paste the OData metadata URL
+    And I import the previewed routes
+    And I create a new batch request named "test-batch"
+    And I add a GET sub-request to the batch with URL "Pets(1)" in change-set "cs1"
+    And I send the OData batch request
+    Then the batch GET-in-change-set warning should be visible
+
+    When I enable the "Allow GET in change-set" toggle
+    And I send the OData batch request
+    Then the batch GET-in-change-set warning should not be visible

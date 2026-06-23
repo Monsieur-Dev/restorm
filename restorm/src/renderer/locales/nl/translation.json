@@ -1811,7 +1811,11 @@
     "batchFormatMultipart": "multipart/mixed",
     "batchFormatJson": "JSON-batch",
     "versionMismatchWarning": "Deze aanvraag is gemarkeerd als {{requestVersion}} maar het antwoord lijkt op {{responseVersion}}. Wijzig de aanvraagversie zodat deze overeenkomt met de server.",
-    "orderbyPropertyPickerPlaceholder": "Kiezen…"
+    "orderbyPropertyPickerPlaceholder": "Kiezen…",
+    "batchAllowGetInChangeSet": "GET in change-set toestaan",
+    "batchAllowGetInChangeSetTooltip": "De OData-specificatie verbiedt GET binnen een change-set; veel servers zullen dergelijke batches weigeren. Schakel deze vlag alleen in als uw server dit expliciet ondersteunt.",
+    "batchGetInChangeSetWarning": "GET binnen een change-set wordt mogelijk niet door alle servers geaccepteerd (niet toegestaan volgens de OData-specificatie).",
+    "batchForceIncludeInChangeSet": "Toch opnemen"
   },
   "typedValue": {
     "list": {

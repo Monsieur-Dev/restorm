@@ -1813,7 +1813,11 @@
     "batchFormatMultipart": "multipart/mixed",
     "batchFormatJson": "Пакет JSON",
     "versionMismatchWarning": "Цей запит позначено як {{requestVersion}}, але відповідь схожа на {{responseVersion}}. Змініть версію запиту відповідно до сервера.",
-    "orderbyPropertyPickerPlaceholder": "Виберіть…"
+    "orderbyPropertyPickerPlaceholder": "Виберіть…",
+    "batchAllowGetInChangeSet": "Дозволити GET у change-set",
+    "batchAllowGetInChangeSetTooltip": "Специфікація OData забороняє GET всередині change-set; багато серверів відхилять такі пакети. Вмикайте цей прапорець лише якщо ваш сервер явно підтримує це.",
+    "batchGetInChangeSetWarning": "GET всередині change-set може бути не прийнятий усіма серверами (не дозволено специфікацією OData).",
+    "batchForceIncludeInChangeSet": "Включити все одно"
   },
   "typedValue": {
     "list": {

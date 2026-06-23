@@ -1813,7 +1813,11 @@
     "batchFormatMultipart": "multipart/mixed",
     "batchFormatJson": "Wsad JSON",
     "versionMismatchWarning": "To żądanie jest oznaczone jako {{requestVersion}}, ale odpowiedź wygląda na {{responseVersion}}. Zmień wersję żądania, aby pasowała do serwera.",
-    "orderbyPropertyPickerPlaceholder": "Wybierz…"
+    "orderbyPropertyPickerPlaceholder": "Wybierz…",
+    "batchAllowGetInChangeSet": "Zezwól na GET w change-set",
+    "batchAllowGetInChangeSetTooltip": "Specyfikacja OData zabrania GET wewnątrz change-set; wiele serwerów odrzuci takie partie. Włącz tę flagę tylko jeśli serwer jawnie to obsługuje.",
+    "batchGetInChangeSetWarning": "GET wewnątrz change-set może nie być akceptowany przez wszystkie serwery (niedozwolone wg specyfikacji OData).",
+    "batchForceIncludeInChangeSet": "Uwzględnij mimo to"
   },
   "typedValue": {
     "list": {

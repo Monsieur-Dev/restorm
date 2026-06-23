@@ -14,9 +14,11 @@ import {
   CodeEditor,
   InputBox,
   SelectBox,
+  Toggle,
   type ISelectData,
   type ISelectOptionItem
 } from 'electron-core-ui/renderer'
+import { HeaderHoverTooltip } from '../MainView/HeaderHoverTooltip'
 import type { ODataBatchSubRequestSpec, ODataBatchFormat } from '../../../../shared/types/collections'
 
 const BATCH_METHODS = ['GET', 'POST', 'PATCH', 'PUT', 'DELETE'] as const
@@ -54,6 +56,11 @@ export interface ODataBatchEditorProps {
   format?: ODataBatchFormat
   /** Called when the user switches the wire format. */
   onFormatChange?: (next: ODataBatchFormat) => void
+  /** When true, GET sub-requests inside change-sets are emitted
+   * without a warning. Defaults to `false`. */
+  allowGetInChangeSet?: boolean
+  /** Called when the user toggles the allow-GET-in-change-set flag. */
+  onAllowGetInChangeSetChange?: (next: boolean) => void
 }
 
 function newSubRequest(): ODataBatchSubRequestSpec {
@@ -64,7 +71,14 @@ function newSubRequest(): ODataBatchSubRequestSpec {
   }
 }
 
-export const ODataBatchEditor: React.FC<ODataBatchEditorProps> = ({ value, onChange, format = 'multipart', onFormatChange }) => {
+export const ODataBatchEditor: React.FC<ODataBatchEditorProps> = ({
+  value,
+  onChange,
+  format = 'multipart',
+  onFormatChange,
+  allowGetInChangeSet = false,
+  onAllowGetInChangeSetChange
+}) => {
   const { t } = useTranslation()
   const methodOptions: ISelectOptionItem[] = BATCH_METHODS.map((m) => ({ text: m }))
   const formatOptions: ISelectOptionItem[] = [
@@ -87,6 +101,19 @@ export const ODataBatchEditor: React.FC<ODataBatchEditorProps> = ({ value, onCha
     if (!current) return
     const { atomicityGroup: _removed, ...rest } = current
     next[index] = rest
+    onChange(next)
+  }
+
+  const setForceIncludeInChangeSet = (index: number, force: boolean): void => {
+    const next = value.slice()
+    const current = next[index]
+    if (!current) return
+    if (force) {
+      next[index] = { ...current, forceIncludeInChangeSet: true }
+    } else {
+      const { forceIncludeInChangeSet: _removed, ...rest } = current
+      next[index] = rest
+    }
     onChange(next)
   }
 
@@ -131,6 +158,25 @@ export const ODataBatchEditor: React.FC<ODataBatchEditorProps> = ({ value, onCha
         </div>
       </div>
 
+      <div style={rowStyle}>
+        <HeaderHoverTooltip
+          label={t(
+            'odataRequestTab.batchAllowGetInChangeSetTooltip',
+            'The OData spec forbids GET inside a change-set; many servers will reject such batches. Enable this flag only when your server explicitly supports it.'
+          )}
+          data-testid="odata-batch-allow-get-tooltip"
+        >
+          <Toggle
+            checked={allowGetInChangeSet}
+            onChange={(v) => { onAllowGetInChangeSetChange?.(v) }}
+            data-testid="odata-batch-allow-get-in-changeset"
+          />
+        </HeaderHoverTooltip>
+        <span style={labelStyle}>
+          {t('odataRequestTab.batchAllowGetInChangeSet', 'Allow GET inside change-set')}
+        </span>
+      </div>
+
       {value.length === 0 ? (
         <span style={{ ...labelStyle, fontStyle: 'italic' }}>
           {t('odataRequestTab.batchEmpty', 'No sub-requests yet. Add one below.')}
@@ -139,6 +185,8 @@ export const ODataBatchEditor: React.FC<ODataBatchEditorProps> = ({ value, onCha
 
       {value.map((sub, index) => {
         const methodIndex = Math.max(0, BATCH_METHODS.indexOf(sub.method.toUpperCase() as BatchMethod))
+        const isGetInChangeSet = sub.method.toUpperCase() === 'GET' && !!sub.atomicityGroup
+        const showGetWarning = isGetInChangeSet && !allowGetInChangeSet
         return (
           <div key={sub.id} style={cardStyle} data-testid={`odata-batch-sub-${index}`}>
             <div style={rowStyle}>
@@ -226,6 +274,39 @@ export const ODataBatchEditor: React.FC<ODataBatchEditorProps> = ({ value, onCha
                     }}
                     data-testid={`odata-batch-body-${index}`}
                   />
+                </div>
+              </div>
+            ) : null}
+            {showGetWarning ? (
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 8,
+                  padding: '4px 6px',
+                  borderRadius: 3,
+                  background: 'var(--inputValidation-warningBackground)',
+                  border: '1px solid var(--inputValidation-warningBorder)',
+                  color: 'var(--inputValidation-warningForeground, var(--foreground))',
+                  fontSize: 12
+                }}
+                data-testid={`odata-batch-get-warning-${index}`}
+              >
+                <span style={{ flex: 1 }}>
+                  {t(
+                    'odataRequestTab.batchGetInChangeSetWarning',
+                    'GET inside a change-set may not be accepted by all servers (not allowed per OData spec).'
+                  )}
+                </span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 4, flexShrink: 0 }}>
+                  <Toggle
+                    checked={sub.forceIncludeInChangeSet === true}
+                    onChange={(v) => { setForceIncludeInChangeSet(index, v) }}
+                    data-testid={`odata-batch-force-include-${index}`}
+                  />
+                  <span>
+                    {t('odataRequestTab.batchForceIncludeInChangeSet', 'Include anyway')}
+                  </span>
                 </div>
               </div>
             ) : null}

@@ -834,6 +834,34 @@ left static) is a fault, not a nit.
 
 ---
 
+## OData `$batch` — change-set GET behavior
+
+The OData v4 spec (section 11.7.3) forbids GET requests inside a change-set
+(atomic group). Many servers enforce this and return a 4xx on the whole batch
+or on the offending part.
+
+**Restorm behavior by default (allowGetInChangeSet = false):**
+- A GET sub-request that carries an `atomicityGroup` label is still serialized
+  inside the change-set envelope so the user sees the server's actual rejection
+  response.
+- A human-readable warning is emitted by `serializeODataBatch` (`result.warnings[]`)
+  and surfaced in the response panel.
+
+**Opt-in paths:**
+1. **Per-batch toggle** — "Allow GET inside change-set" in the batch editor's
+   header row (`allowGetInChangeSet` on the `ODataRequest` model). Suppresses
+   the warning for all GET children in all change-sets on this request.
+2. **Per-child override** — "Include anyway" toggle shown on each GET child
+   whose `atomicityGroup` is non-empty (`forceIncludeInChangeSet` on
+   `ODataBatchSubRequestSpec`). Overrides the default even when the batch-level
+   flag is off; useful when only some GETs in a multi-group batch need the
+   server's special handling.
+
+Enable either flag only when the target server explicitly documents support
+for GET in a change-set.
+
+---
+
 ## Trial-run acceptance
 
 The doc is "done" when a reviewer who didn't write it can take a hello-

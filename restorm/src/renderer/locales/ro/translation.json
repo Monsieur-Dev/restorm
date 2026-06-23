@@ -1812,7 +1812,11 @@
     "batchFormatMultipart": "multipart/mixed",
     "batchFormatJson": "Lot JSON",
     "versionMismatchWarning": "Această cerere este marcată ca {{requestVersion}}, dar răspunsul pare {{responseVersion}}. Schimbați versiunea cererii pentru a corespunde serverului.",
-    "orderbyPropertyPickerPlaceholder": "Alegeți…"
+    "orderbyPropertyPickerPlaceholder": "Alegeți…",
+    "batchAllowGetInChangeSet": "Permite GET în change-set",
+    "batchAllowGetInChangeSetTooltip": "Specificația OData interzice GET în interiorul unui change-set; mulți serveri vor respinge astfel de loturi. Activați acest indicator numai dacă serverul dvs. îl acceptă explicit.",
+    "batchGetInChangeSetWarning": "GET în interiorul unui change-set poate să nu fie acceptat de toți serverii (nepermidat conform specificației OData).",
+    "batchForceIncludeInChangeSet": "Include oricum"
   },
   "typedValue": {
     "list": {

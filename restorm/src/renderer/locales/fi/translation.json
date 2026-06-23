@@ -1811,7 +1811,11 @@
     "batchFormatMultipart": "multipart/mixed",
     "batchFormatJson": "JSON-erä",
     "versionMismatchWarning": "Tämä pyyntö on merkitty versioksi {{requestVersion}}, mutta vastaus näyttää versiolta {{responseVersion}}. Vaihda pyynnön versio vastaamaan palvelinta.",
-    "orderbyPropertyPickerPlaceholder": "Valitse…"
+    "orderbyPropertyPickerPlaceholder": "Valitse…",
+    "batchAllowGetInChangeSet": "Salli GET change-setissä",
+    "batchAllowGetInChangeSetTooltip": "OData-spesifikaatio kieltää GET-pyynnöt change-setin sisällä; monet palvelimet hylkäävät tällaiset eräpyynnöt. Ota tämä asetus käyttöön vain, jos palvelimesi tukee sitä nimenomaisesti.",
+    "batchGetInChangeSetWarning": "GET change-setin sisällä ei välttämättä hyväksytä kaikilla palvelimilla (OData-spesifikaation mukaan ei sallittu).",
+    "batchForceIncludeInChangeSet": "Sisällytä joka tapauksessa"
   },
   "typedValue": {
     "list": {

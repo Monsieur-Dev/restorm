@@ -1811,7 +1811,11 @@
     "batchFormatMultipart": "multipart/mixed",
     "batchFormatJson": "JSON köteg",
     "versionMismatchWarning": "Ez a kérés {{requestVersion}} verzióval van megjelölve, de a válasz {{responseVersion}} verziónak tűnik. Módosítsa a kérés verzióját, hogy megegyezzen a kiszolgálóval.",
-    "orderbyPropertyPickerPlaceholder": "Válasszon…"
+    "orderbyPropertyPickerPlaceholder": "Válasszon…",
+    "batchAllowGetInChangeSet": "GET engedélyezése a change-setben",
+    "batchAllowGetInChangeSetTooltip": "Az OData specifikáció tiltja a GET-et egy change-seten belül; sok szerver elutasítja az ilyen kötegeket. Csak akkor engedélyezze ezt a jelzőt, ha a szerver kifejezetten támogatja.",
+    "batchGetInChangeSetWarning": "A GET a change-seten belül nem biztos, hogy minden szerver elfogadja (az OData specifikáció nem engedélyezi).",
+    "batchForceIncludeInChangeSet": "Mégis belefoglalás"
   },
   "typedValue": {
     "list": {

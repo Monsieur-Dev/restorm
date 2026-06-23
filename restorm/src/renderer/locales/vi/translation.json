@@ -1810,7 +1810,11 @@
     "batchFormatMultipart": "multipart/mixed",
     "batchFormatJson": "Lô JSON",
     "versionMismatchWarning": "Yêu cầu này được gắn thẻ {{requestVersion}} nhưng phản hồi trông giống {{responseVersion}}. Hãy đổi phiên bản yêu cầu cho khớp với máy chủ.",
-    "orderbyPropertyPickerPlaceholder": "Chọn…"
+    "orderbyPropertyPickerPlaceholder": "Chọn…",
+    "batchAllowGetInChangeSet": "Cho phép GET trong change-set",
+    "batchAllowGetInChangeSetTooltip": "Thông số OData cấm GET trong một change-set; nhiều máy chủ sẽ từ chối các lô như vậy. Chỉ bật cờ này khi máy chủ của bạn hỗ trợ nó một cách rõ ràng.",
+    "batchGetInChangeSetWarning": "GET trong một change-set có thể không được chấp nhận bởi tất cả các máy chủ (không được phép theo thông số OData).",
+    "batchForceIncludeInChangeSet": "Vẫn đưa vào"
   },
   "typedValue": {
     "list": {

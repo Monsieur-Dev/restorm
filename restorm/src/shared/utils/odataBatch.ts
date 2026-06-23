@@ -36,6 +36,10 @@ export interface ODataBatchSubRequest {
    * boundary=changeset_<id>` envelope so the server commits them as
    * a single transaction. */
   atomicityGroup?: string
+  /** Per-child escape hatch: force this GET into the change-set even
+   * when the batch-level `allowGetInChangeSet` is false. Only
+   * meaningful when `method === 'GET'` and `atomicityGroup` is set. */
+  forceIncludeInChangeSet?: boolean
 }
 
 export interface ODataBatchSubResponse {
@@ -57,6 +61,11 @@ export interface ODataBatchSerializationResult {
   body: string
   /** The boundary token used. Useful for tests / logging. */
   boundary: string
+  /** Human-readable warnings emitted during serialization. Currently
+   * populated when a GET sub-request appears inside a change-set and
+   * `allowGetInChangeSet` is not set. The batch is still emitted; the
+   * warnings are surfaced in the UI so the user understands the risk. */
+  warnings: string[]
 }
 
 /**
@@ -66,13 +75,21 @@ export interface ODataBatchSerializationResult {
  * The caller is responsible for URL-encoding and for having resolved
  * any env / handlebars templates — this helper treats each
  * sub-request as already-concrete.
+ *
+ * When `allowGetInChangeSet` is false (default) and a GET appears
+ * inside a change-set, the sub-request is still emitted as-is (so
+ * the server's rejection is visible) but a human-readable entry is
+ * pushed to `result.warnings` for the UI to surface.
  */
 export function serializeODataBatch(
   subRequests: readonly ODataBatchSubRequest[],
-  boundaryOverride?: string
+  boundaryOverride?: string,
+  options?: { allowGetInChangeSet?: boolean }
 ): ODataBatchSerializationResult {
   const boundary = boundaryOverride ?? `batch_${generateBoundaryToken()}`
+  const allowGet = options?.allowGetInChangeSet ?? false
   const parts: string[] = []
+  const warnings: string[] = []
 
   // Group consecutive sub-requests by `atomicityGroup`. Same label
   // ⇒ one nested changeset; empty / undefined ⇒ standalone. Non-
@@ -105,6 +122,21 @@ export function serializeODataBatch(
     parts.push(`Content-Type: multipart/mixed; boundary=${changesetBoundary}`)
     parts.push('')
     for (const sub of group.items) {
+      // GET inside a change-set is spec-non-conformant. Warn when
+      // neither the batch-level flag nor the per-child override
+      // explicitly opts in, then include it anyway so the server
+      // response (likely a 4xx) is visible to the user.
+      if (
+        sub.method.toUpperCase() === 'GET' &&
+        !allowGet &&
+        !sub.forceIncludeInChangeSet
+      ) {
+        warnings.push(
+          `GET "${sub.url}" is inside change-set "${group.label}". ` +
+          'The OData spec forbids GET inside a change-set; many servers will reject this batch. ' +
+          'Enable "Allow GET in change-set" to suppress this warning.'
+        )
+      }
       appendSubRequestPart(parts, changesetBoundary, sub)
     }
     parts.push(`--${changesetBoundary}--`)
@@ -116,7 +148,8 @@ export function serializeODataBatch(
   return {
     contentType: `multipart/mixed; boundary=${boundary}`,
     body: parts.join('\r\n'),
-    boundary
+    boundary,
+    warnings
   }
 }
 

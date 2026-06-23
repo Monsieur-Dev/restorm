@@ -1811,7 +1811,11 @@
     "batchFormatMultipart": "multipart/mixed",
     "batchFormatJson": "JSON-batch",
     "versionMismatchWarning": "Den här begäran är märkt {{requestVersion}}, men svaret ser ut som {{responseVersion}}. Ändra begärans version så att den matchar servern.",
-    "orderbyPropertyPickerPlaceholder": "Välj…"
+    "orderbyPropertyPickerPlaceholder": "Välj…",
+    "batchAllowGetInChangeSet": "Tillåt GET i change-set",
+    "batchAllowGetInChangeSetTooltip": "OData-specifikationen förbjuder GET inuti ett change-set; många servrar kommer att avvisa sådana batchar. Aktivera denna flagga bara om din server explicit stödjer det.",
+    "batchGetInChangeSetWarning": "GET inuti ett change-set kanske inte accepteras av alla servrar (inte tillåtet enligt OData-specifikationen).",
+    "batchForceIncludeInChangeSet": "Inkludera ändå"
   },
   "typedValue": {
     "list": {

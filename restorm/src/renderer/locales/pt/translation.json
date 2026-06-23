@@ -1811,7 +1811,11 @@
     "batchFormatMultipart": "multipart/mixed",
     "batchFormatJson": "Lote JSON",
     "versionMismatchWarning": "Esta solicitação está marcada como {{requestVersion}}, mas a resposta parece {{responseVersion}}. Altere a versão da solicitação para corresponder ao servidor.",
-    "orderbyPropertyPickerPlaceholder": "Selecionar…"
+    "orderbyPropertyPickerPlaceholder": "Selecionar…",
+    "batchAllowGetInChangeSet": "Permitir GET dentro do change-set",
+    "batchAllowGetInChangeSetTooltip": "A especificação OData proíbe GET dentro de um change-set; muitos servidores rejeitarão esses lotes. Ative este sinalizador apenas se o seu servidor o suportar explicitamente.",
+    "batchGetInChangeSetWarning": "GET dentro de um change-set pode não ser aceite por todos os servidores (não permitido pela especificação OData).",
+    "batchForceIncludeInChangeSet": "Incluir mesmo assim"
   },
   "typedValue": {
     "list": {
