@@ -38,6 +38,22 @@ services:
     ports:
       - "8082:8082"
 
+  # OData v2 - tiny zero-dependency node:http mock (companion to the
+  # .NET v4 odata-petstore below). Exercises the v2 `{ d: { results,
+  # __count, __next } }` envelope, `$inlinecount=allpages`, the older
+  # CSDL `$metadata`, server-driven paging, and a v2/JSON `$batch`.
+  # Pure `node:http`, mounted like http-util — no npm install, boots
+  # instantly. Listens on :5102 (5100 = v4 OData, 5110 = auth-service).
+  odata-v2-petstore:
+    image: node:20-alpine
+    container_name: restorm-odata-v2-petstore
+    working_dir: /app
+    volumes:
+      - ./odata-v2-petstore:/app
+    command: node server.js
+    ports:
+      - "5102:5102"
+
   # GraphQL - Custom test server
   graphql:
     image: node:20-alpine

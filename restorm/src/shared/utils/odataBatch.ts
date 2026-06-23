@@ -7,14 +7,17 @@
  * envelope. The server replies with the same shape: one multipart
  * body, one part per sub-response.
  *
+ * v4 also defines a JSON batch format (`OData-Version: 4.0`):
+ * `{ "requests": [ { id, method, url, headers, body, atomicityGroup } ] }`
+ * with a symmetric `{ "responses": [ … ] }` reply. It is far easier to
+ * read and debug than the multipart envelope, so the request panel
+ * offers a multipart/JSON toggle; the JSON helpers live alongside the
+ * multipart ones below (`serializeODataJsonBatch` /
+ * `parseODataJsonBatchResponse`).
+ *
  * This file ships pure, browser+node-friendly helpers so both the
  * renderer (for building the body client-side) and unit tests can
  * exercise the format without a live server.
- *
- * Change-sets (atomicity groups) are *not* covered in Phase 5a — all
- * sub-requests are flat parts for now. Wrapping a subset into a
- * `multipart/mixed; boundary=changeset_<id>` nested body is additive
- * and lands in Phase 5b.
  */
 
 export interface ODataBatchSubRequest {
@@ -212,6 +215,126 @@ export function extractBoundary(contentTypeHeader: string | undefined): string |
   const match = /boundary=(?:"([^"]+)"|([^;\s]+))/.exec(contentTypeHeader)
   if (!match) return null
   return match[1] ?? match[2] ?? null
+}
+
+// ============================================================================
+// JSON batch (OData v4) serialization + parsing
+// ============================================================================
+
+export interface ODataJsonBatchSerializationResult {
+  /** Always `application/json` for the JSON batch format. */
+  contentType: string
+  /** The full request body — a JSON `{ "requests": [...] }` document. */
+  body: string
+}
+
+/**
+ * Serialize sub-requests into an OData v4 JSON batch body.
+ *
+ * Each sub-request becomes one `requests[]` entry with a unique `id`.
+ * Sub-requests sharing an `atomicityGroup` are emitted with that label
+ * verbatim so the server commits them transactionally — same grouping
+ * contract as the multipart path, but the server reads it off the JSON
+ * `atomicityGroup` member instead of a nested `changeset_…` boundary.
+ *
+ * The body is parsed as JSON when present and a string; otherwise it is
+ * passed through as-is (so a raw, already-stringified body still works).
+ * The caller is responsible for having resolved env / Handlebars
+ * templates first — every field here is treated as concrete.
+ */
+export function serializeODataJsonBatch(
+  subRequests: readonly ODataBatchSubRequest[]
+): ODataJsonBatchSerializationResult {
+  const requests = subRequests.map((sub, index) => {
+    const id = String(index + 1)
+    const entry: Record<string, unknown> = {
+      id,
+      method: sub.method.toUpperCase(),
+      url: sub.url
+    }
+    if (sub.atomicityGroup && sub.atomicityGroup.length > 0) {
+      entry['atomicityGroup'] = sub.atomicityGroup
+    }
+    const headers = { ...(sub.headers ?? {}) }
+    if (sub.body !== undefined && sub.body !== '' && !hasHeader(headers, 'content-type')) {
+      headers['Content-Type'] = 'application/json'
+    }
+    if (Object.keys(headers).length > 0) {
+      // JSON batch wants lower-cased header names per the spec example.
+      entry['headers'] = Object.fromEntries(
+        Object.entries(headers).map(([k, v]) => [k.toLowerCase(), v])
+      )
+    }
+    if (sub.body !== undefined && sub.body !== '') {
+      entry['body'] = parseBodyForJsonBatch(sub.body)
+    }
+    return entry
+  })
+
+  return {
+    contentType: 'application/json',
+    body: JSON.stringify({ requests }, null, 2)
+  }
+}
+
+/**
+ * Parse an OData v4 JSON batch response (`{ "responses": [...] }`) into
+ * the same `ODataBatchSubResponse[]` shape the multipart parser emits,
+ * so the response panel renders both formats identically.
+ *
+ * Responses are returned in the order the server sent them (it may
+ * reorder vs the request when `dependsOn` is used). A body that came
+ * back as a JSON object/array is re-stringified so the `body` field
+ * stays a string, matching the multipart contract. Malformed input
+ * yields `[]` rather than throwing.
+ */
+export function parseODataJsonBatchResponse(rawBody: string): ODataBatchSubResponse[] {
+  let parsed: unknown
+  try {
+    parsed = JSON.parse(rawBody)
+  } catch {
+    return []
+  }
+  if (parsed === null || typeof parsed !== 'object') return []
+  const responses = (parsed as Record<string, unknown>)['responses']
+  if (!Array.isArray(responses)) return []
+
+  const results: ODataBatchSubResponse[] = []
+  for (const item of responses) {
+    if (item === null || typeof item !== 'object') continue
+    const obj = item as Record<string, unknown>
+    const status = typeof obj['status'] === 'number' ? obj['status'] : 0
+    const headers: Record<string, string> = {}
+    const rawHeaders = obj['headers']
+    if (rawHeaders !== null && typeof rawHeaders === 'object') {
+      for (const [k, v] of Object.entries(rawHeaders as Record<string, unknown>)) {
+        headers[k.toLowerCase()] = String(v)
+      }
+    }
+    const rawResponseBody = obj['body']
+    const body = rawResponseBody === undefined
+      ? ''
+      : typeof rawResponseBody === 'string'
+        ? rawResponseBody
+        : JSON.stringify(rawResponseBody)
+    results.push({ status, statusText: '', headers, body })
+  }
+  return results
+}
+
+/** Best-effort: a JSON object/array body is inlined as a real JSON
+ * value (so the batch document nests it rather than double-encoding a
+ * string); anything else is left as the raw string the caller gave. */
+function parseBodyForJsonBatch(body: string): unknown {
+  const trimmed = body.trim()
+  if (trimmed.startsWith('{') || trimmed.startsWith('[')) {
+    try {
+      return JSON.parse(trimmed)
+    } catch {
+      return body
+    }
+  }
+  return body
 }
 
 function hasHeader(headers: Record<string, string>, name: string): boolean {

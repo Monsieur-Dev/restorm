@@ -17,10 +17,13 @@ import {
   type ISelectData,
   type ISelectOptionItem
 } from 'electron-core-ui/renderer'
-import type { ODataBatchSubRequestSpec } from '../../../../shared/types/collections'
+import type { ODataBatchSubRequestSpec, ODataBatchFormat } from '../../../../shared/types/collections'
 
 const BATCH_METHODS = ['GET', 'POST', 'PATCH', 'PUT', 'DELETE'] as const
 type BatchMethod = (typeof BATCH_METHODS)[number]
+
+/** Wire-format options, in the SelectBox index order. */
+const BATCH_FORMATS: ODataBatchFormat[] = ['multipart', 'json']
 
 const rowStyle: CSSProperties = { display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }
 const cardStyle: CSSProperties = {
@@ -47,6 +50,10 @@ const bodyWrapperStyle: CSSProperties = {
 export interface ODataBatchEditorProps {
   value: readonly ODataBatchSubRequestSpec[]
   onChange: (next: ODataBatchSubRequestSpec[]) => void
+  /** Current `$batch` wire format. Defaults to `'multipart'`. */
+  format?: ODataBatchFormat
+  /** Called when the user switches the wire format. */
+  onFormatChange?: (next: ODataBatchFormat) => void
 }
 
 function newSubRequest(): ODataBatchSubRequestSpec {
@@ -57,9 +64,14 @@ function newSubRequest(): ODataBatchSubRequestSpec {
   }
 }
 
-export const ODataBatchEditor: React.FC<ODataBatchEditorProps> = ({ value, onChange }) => {
+export const ODataBatchEditor: React.FC<ODataBatchEditorProps> = ({ value, onChange, format = 'multipart', onFormatChange }) => {
   const { t } = useTranslation()
   const methodOptions: ISelectOptionItem[] = BATCH_METHODS.map((m) => ({ text: m }))
+  const formatOptions: ISelectOptionItem[] = [
+    { text: t('odataRequestTab.batchFormatMultipart', 'multipart/mixed') },
+    { text: t('odataRequestTab.batchFormatJson', 'JSON batch') }
+  ]
+  const formatIndex = Math.max(0, BATCH_FORMATS.indexOf(format))
 
   const update = (index: number, patch: Partial<ODataBatchSubRequestSpec>): void => {
     const next = value.slice()
@@ -102,6 +114,23 @@ export const ODataBatchEditor: React.FC<ODataBatchEditorProps> = ({ value, onCha
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }} data-testid="odata-batch-editor">
+      <div style={rowStyle}>
+        <span style={labelStyle}>{t('odataRequestTab.batchFormatLabel', 'Batch format')}</span>
+        <div style={groupWrapperStyle}>
+          <SelectBox
+            id="odata-batch-format"
+            className=""
+            options={formatOptions}
+            selected={formatIndex}
+            onDidSelect={(data: ISelectData) => {
+              const next = BATCH_FORMATS[data.index]
+              if (next && onFormatChange) onFormatChange(next)
+            }}
+            data-testid="odata-batch-format"
+          />
+        </div>
+      </div>
+
       {value.length === 0 ? (
         <span style={{ ...labelStyle, fontStyle: 'italic' }}>
           {t('odataRequestTab.batchEmpty', 'No sub-requests yet. Add one below.')}

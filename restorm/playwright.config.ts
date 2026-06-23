@@ -38,6 +38,18 @@ const odataPetstoreTestDir = defineBddConfig({
   outputDir: '.features-gen/odata-petstore'
 })
 
+const odataExecutionTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/odata-execution/features/**/*.feature',
+  steps: ['tests/e2e/bdd/odata-execution/steps/**/*.ts', 'tests/e2e/bdd/fixtures/odata-petstore.fixture.ts'],
+  outputDir: '.features-gen/odata-execution'
+})
+
+const odataImportTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/odata-import/features/**/*.feature',
+  steps: ['tests/e2e/bdd/odata-import/steps/**/*.ts', 'tests/e2e/bdd/fixtures/odata-petstore.fixture.ts'],
+  outputDir: '.features-gen/odata-import'
+})
+
 const authLoginTestDir = defineBddConfig({
   features: 'tests/e2e/bdd/auth-login/features/**/*.feature',
   steps: ['tests/e2e/bdd/auth-login/steps/**/*.ts', 'tests/e2e/bdd/fixtures/auth-login.fixture.ts'],
@@ -287,6 +299,14 @@ export default defineConfig({
     {
       name: 'odata-petstore',
       testDir: odataPetstoreTestDir
+    },
+    {
+      name: 'odata-execution',
+      testDir: odataExecutionTestDir
+    },
+    {
+      name: 'odata-import',
+      testDir: odataImportTestDir
     },
     {
       name: 'auth-login',

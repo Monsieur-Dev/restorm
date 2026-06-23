@@ -1769,7 +1769,11 @@
   },
   "odataRequestTab": {
     "send": "Kirim",
-    "loadNextPage": "Muat halaman berikutnya"
+    "loadNextPage": "Muat halaman berikutnya",
+    "batchFormatLabel": "Format batch",
+    "batchFormatMultipart": "multipart/mixed",
+    "batchFormatJson": "Batch JSON",
+    "versionMismatchWarning": "Permintaan ini ditandai {{requestVersion}} tetapi responsnya tampak seperti {{responseVersion}}. Ubah versi permintaan agar sesuai dengan server."
   },
   "typedValue": {
     "list": {

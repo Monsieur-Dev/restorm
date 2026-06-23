@@ -1770,7 +1770,11 @@
   },
   "odataRequestTab": {
     "send": "Lähetä",
-    "loadNextPage": "Lataa seuraava sivu"
+    "loadNextPage": "Lataa seuraava sivu",
+    "batchFormatLabel": "Erän muoto",
+    "batchFormatMultipart": "multipart/mixed",
+    "batchFormatJson": "JSON-erä",
+    "versionMismatchWarning": "Tämä pyyntö on merkitty versioksi {{requestVersion}}, mutta vastaus näyttää versiolta {{responseVersion}}. Vaihda pyynnön versio vastaamaan palvelinta."
   },
   "typedValue": {
     "list": {

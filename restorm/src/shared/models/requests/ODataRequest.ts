@@ -57,6 +57,10 @@ export interface ODataQueryOptions {
  */
 export type ODataOperationKind = 'entity-set' | 'function' | 'action' | 'batch'
 
+/** Wire format for a `$batch`: `multipart/mixed` (default) or the v4
+ * JSON batch format. Persisted so the user's choice survives reload. */
+export type ODataBatchFormat = 'multipart' | 'json'
+
 /** Parameter descriptor for action/function invocations. */
 export interface ODataOperationParameterSpec {
   name: string
@@ -126,6 +130,11 @@ export class ODataRequest extends BaseRequest {
   @graphqlField({ type: 'JSON', nullable: true })
   batchSubRequests?: ODataBatchSubRequestSpec[]
 
+  /** Wire format for the `$batch` envelope. `'multipart'` (default)
+   * uses multipart/mixed; `'json'` uses the v4 JSON batch format. */
+  @graphqlField({ type: 'String', nullable: true })
+  batchFormat?: ODataBatchFormat
+
   /** Structural-property names pre-filled by the importer from the
    * bound entity type. Surfaces in the UI as $select / $orderby
    * chip hints. */
@@ -178,6 +187,7 @@ export class ODataRequest extends BaseRequest {
     queryOptions?: ODataQueryOptions
     actionBody?: string
     batchSubRequests?: ODataBatchSubRequestSpec[]
+    batchFormat?: ODataBatchFormat
     entitySetProperties?: string[]
     navigationProperties?: string[]
     operationParameters?: ODataOperationParameterSpec[]
@@ -199,6 +209,7 @@ export class ODataRequest extends BaseRequest {
       queryOptions: obj.queryOptions ?? {},
       ...(obj.actionBody !== undefined && { actionBody: obj.actionBody }),
       ...(obj.batchSubRequests !== undefined && { batchSubRequests: obj.batchSubRequests }),
+      ...(obj.batchFormat !== undefined && { batchFormat: obj.batchFormat }),
       ...(obj.entitySetProperties !== undefined && { entitySetProperties: obj.entitySetProperties }),
       ...(obj.navigationProperties !== undefined && { navigationProperties: obj.navigationProperties }),
       ...(obj.operationParameters !== undefined && { operationParameters: obj.operationParameters }),
@@ -224,6 +235,7 @@ export class ODataRequest extends BaseRequest {
       queryOptions: this.queryOptions,
       ...(this.actionBody !== undefined && { actionBody: this.actionBody }),
       ...(this.batchSubRequests !== undefined && { batchSubRequests: this.batchSubRequests }),
+      ...(this.batchFormat !== undefined && { batchFormat: this.batchFormat }),
       ...(this.entitySetProperties !== undefined && { entitySetProperties: this.entitySetProperties }),
       ...(this.navigationProperties !== undefined && { navigationProperties: this.navigationProperties }),
       ...(this.operationParameters !== undefined && { operationParameters: this.operationParameters }),

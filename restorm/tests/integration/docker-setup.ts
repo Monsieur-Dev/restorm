@@ -43,6 +43,10 @@ export const SERVICES = {
     name: 'HTTP Utility Mock',
     baseUrl: 'http://localhost:8082'
   },
+  odataV2: {
+    name: 'OData v2 PetStore Mock',
+    baseUrl: 'http://localhost:5102'
+  },
   soap: {
     /** Castle Mock — kept for manual local testing; E2E suite uses soapServer below. */
     name: 'SOAP Server (Castle Mock)',
@@ -168,6 +172,10 @@ export async function waitForServices(): Promise<void> {
       // soap-server is a zero-dependency node:http server that starts instantly.
       name: 'SOAP mock server',
       url: `${SERVICES.soapServer.baseUrl}/health`
+    },
+    {
+      name: 'OData v2 PetStore Mock',
+      url: `${SERVICES.odataV2.baseUrl}/health`
     }
     // No Socket.IO check: restorm self-hosts its Socket.IO server in-instance.
   ]

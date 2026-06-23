@@ -8,6 +8,7 @@ route incoming files / URLs / pasted content to the right adapter.
 | Format | Doc |
 | --- | --- |
 | OpenAPI 2.0 / 3.0 / 3.1 (Swagger) | [`openapi.md`](./openapi.md) |
+| OData v2 / v3 / v4 (EDMX + JSON-CSDL) | [`odata.md`](./odata.md) |
 
 For periodic re-checks of an already-imported spec (Swagger,
 OpenAPI 3, GraphQL, Postman, Insomnia, Bruno, AsyncAPI, gRPC, SOAP,

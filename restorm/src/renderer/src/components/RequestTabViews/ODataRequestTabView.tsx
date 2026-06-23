@@ -44,7 +44,7 @@ import {
   type VariableDefinition
 } from 'electron-core-ui/renderer'
 import { RestormVariableInputBox } from '../RestormVariableInputBox'
-import type { ODataRequest, ODataQueryOptions, ODataVersion, ODataOperationKind, ODataBatchSubRequestSpec, ODataOperationParameterSpec, KeyValue, ResponseHistoryDetail } from '../../../../shared/types/collections'
+import type { ODataRequest, ODataQueryOptions, ODataVersion, ODataOperationKind, ODataBatchFormat, ODataBatchSubRequestSpec, ODataOperationParameterSpec, KeyValue, ResponseHistoryDetail } from '../../../../shared/types/collections'
 import { ODataBatchEditor } from './ODataBatchEditor'
 import { ODataOrderbyEditor } from './ODataOrderbyEditor'
 import { ODataExpandEditor } from './ODataExpandEditor'
@@ -70,10 +70,11 @@ import {
   buildODataUrl,
   keyValuesToPairs
 } from '../../../../shared/utils/odataQuery'
-import { normalizeODataResponse } from '../../../../shared/utils/odataResponse'
+import { normalizeODataResponse, detectODataVersionMismatch } from '../../../../shared/utils/odataResponse'
 import { extractNavigationLinks } from '../../../../shared/utils/odataNavigationLinks'
 import {
   serializeODataBatch,
+  serializeODataJsonBatch,
   type ODataBatchSubRequest
 } from '../../../../shared/utils/odataBatch'
 import { DEFAULT_REQUEST_TIMEOUT_MS } from '../../../../shared/config/constants'
@@ -330,6 +331,12 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
 
   const setOperationKind = useCallback((next: ODataOperationKind) => {
     updateReactiveProperty(request, 'operationKind', next)
+    // `operationKind` gates which editor section renders (entity-set
+    // query options vs action body vs batch editor vs function params).
+    // The proxy write alone doesn't re-render this component — only the
+    // debounced query-field flush calls `forceProxyRender` — so force a
+    // render here, otherwise the panel keeps showing the old section.
+    forceProxyRender((n) => n + 1)
   }, [request])
 
   const setActionBody = useCallback((next: string) => {
@@ -338,6 +345,17 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
 
   const setBatchSubRequests = useCallback((next: ODataBatchSubRequestSpec[]) => {
     updateReactiveProperty(request, 'batchSubRequests', next)
+    // The batch editor renders one card per sub-request; the proxy write
+    // alone doesn't re-render, so adding/removing/reordering a card would
+    // be invisible without forcing a render here.
+    forceProxyRender((n) => n + 1)
+  }, [request])
+
+  const setBatchFormat = useCallback((next: ODataBatchFormat) => {
+    updateReactiveProperty(request, 'batchFormat', next)
+    // Keep the format SelectBox (controlled by `request.batchFormat`) in
+    // sync — the proxy write alone doesn't re-render this component.
+    forceProxyRender((n) => n + 1)
   }, [request])
 
   const setOperationParameters = useCallback((next: ODataOperationParameterSpec[]) => {
@@ -685,7 +703,9 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
           ...(spec.atomicityGroup ? { atomicityGroup: spec.atomicityGroup } : {})
         }
       })
-      const serialized = serializeODataBatch(subRequests)
+      const serialized = request.batchFormat === 'json'
+        ? serializeODataJsonBatch(subRequests)
+        : serializeODataBatch(subRequests)
       method = 'POST'
       body = serialized.body
       contentTypeOverride = serialized.contentType
@@ -890,6 +910,8 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
           <ODataBatchEditor
             value={request.batchSubRequests ?? []}
             onChange={setBatchSubRequests}
+            format={request.batchFormat ?? 'multipart'}
+            onFormatChange={setBatchFormat}
           />
         </div>
       ) : null}
@@ -1198,8 +1220,37 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
     const nextLinkForPagination = input.odataNextLink ?? normalized?.nextLink
     const showLoadMore = !input.disableNavigate && typeof nextLinkForPagination === 'string' && nextLinkForPagination.length > 0
 
+    // Surface a non-blocking warning when the response envelope shape
+    // contradicts the version this request is tagged with (e.g. a v4
+    // request that got a v2 `{ d: … }` body) — the response is still
+    // normalised + rendered, the banner just flags the discrepancy.
+    const mismatchVersion = detectODataVersionMismatch(parsed, input.odataVersion)
+
     const renderedContent: React.ReactNode = input.body ? (
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8, height: '100%' }}>
+        {mismatchVersion ? (
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 6,
+              flexShrink: 0,
+              padding: '4px 8px',
+              borderRadius: 4,
+              border: '1px solid var(--inputValidation-warningBorder)',
+              background: 'var(--inputValidation-warningBackground)',
+              color: 'var(--inputValidation-warningForeground, var(--foreground))',
+              fontSize: 12
+            }}
+            data-testid="odata-response-version-warning"
+          >
+            {t(
+              'odataRequestTab.versionMismatchWarning',
+              'This request is tagged {{requestVersion}} but the response looks like {{responseVersion}}. Switch the request version to match the server.',
+              { requestVersion: input.odataVersion, responseVersion: mismatchVersion }
+            )}
+          </div>
+        ) : null}
         {showLoadMore ? (
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
             <Button

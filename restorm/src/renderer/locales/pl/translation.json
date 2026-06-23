@@ -1772,7 +1772,11 @@
   },
   "odataRequestTab": {
     "send": "Wyślij",
-    "loadNextPage": "Załaduj następną stronę"
+    "loadNextPage": "Załaduj następną stronę",
+    "batchFormatLabel": "Format wsadu",
+    "batchFormatMultipart": "multipart/mixed",
+    "batchFormatJson": "Wsad JSON",
+    "versionMismatchWarning": "To żądanie jest oznaczone jako {{requestVersion}}, ale odpowiedź wygląda na {{responseVersion}}. Zmień wersję żądania, aby pasowała do serwera."
   },
   "typedValue": {
     "list": {

@@ -2,6 +2,8 @@ import { describe, it, expect } from 'vitest'
 import {
   serializeODataBatch,
   parseODataBatchResponse,
+  serializeODataJsonBatch,
+  parseODataJsonBatchResponse,
   extractBoundary
 } from '../../src/shared/utils/odataBatch'
 
@@ -172,5 +174,63 @@ describe('extractBoundary', () => {
   it('returns null when missing', () => {
     expect(extractBoundary(undefined)).toBeNull()
     expect(extractBoundary('application/json')).toBeNull()
+  })
+})
+
+describe('serializeODataJsonBatch', () => {
+  it('emits an application/json body with one request entry per sub-request', () => {
+    const out = serializeODataJsonBatch([
+      { method: 'GET', url: 'Products(1)' },
+      { method: 'GET', url: 'Products(2)' }
+    ])
+    expect(out.contentType).toBe('application/json')
+    const doc = JSON.parse(out.body) as { requests: { id: string; method: string; url: string }[] }
+    expect(doc.requests).toHaveLength(2)
+    expect(doc.requests[0]).toMatchObject({ id: '1', method: 'GET', url: 'Products(1)' })
+    expect(doc.requests[1]).toMatchObject({ id: '2', method: 'GET', url: 'Products(2)' })
+  })
+
+  it('carries the atomicityGroup label and inlines a JSON body', () => {
+    const out = serializeODataJsonBatch([
+      { method: 'POST', url: 'Products', body: '{"Name":"Widget"}', atomicityGroup: 'cs1' },
+      { method: 'PATCH', url: 'Products(1)', body: '{"Price":9}', atomicityGroup: 'cs1' }
+    ])
+    const doc = JSON.parse(out.body) as {
+      requests: { atomicityGroup?: string; body?: unknown; headers?: Record<string, string> }[]
+    }
+    expect(doc.requests[0]?.atomicityGroup).toBe('cs1')
+    expect(doc.requests[1]?.atomicityGroup).toBe('cs1')
+    // Body inlined as a real JSON object, not a double-encoded string.
+    expect(doc.requests[0]?.body).toEqual({ Name: 'Widget' })
+    // Default content-type header added for the body-bearing entry.
+    expect(doc.requests[0]?.headers?.['content-type']).toBe('application/json')
+  })
+
+  it('leaves a non-JSON body as a raw string', () => {
+    const out = serializeODataJsonBatch([{ method: 'POST', url: 'Things', body: 'plain text' }])
+    const doc = JSON.parse(out.body) as { requests: { body?: unknown }[] }
+    expect(doc.requests[0]?.body).toBe('plain text')
+  })
+})
+
+describe('parseODataJsonBatchResponse', () => {
+  it('maps responses[] into the multipart-parser shape', () => {
+    const raw = JSON.stringify({
+      responses: [
+        { id: '1', status: 200, headers: { 'Content-Type': 'application/json' }, body: { value: [] } },
+        { id: '2', status: 404, body: { error: { code: 'NotFound' } } }
+      ]
+    })
+    const out = parseODataJsonBatchResponse(raw)
+    expect(out).toHaveLength(2)
+    expect(out[0]?.status).toBe(200)
+    expect(out[0]?.headers['content-type']).toBe('application/json')
+    expect(out[0]?.body).toBe(JSON.stringify({ value: [] }))
+    expect(out[1]?.status).toBe(404)
+  })
+
+  it('returns [] for malformed or non-batch JSON', () => {
+    expect(parseODataJsonBatchResponse('not json')).toEqual([])
+    expect(parseODataJsonBatchResponse('{"foo":1}')).toEqual([])
   })
 })

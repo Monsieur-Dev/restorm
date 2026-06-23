@@ -1770,7 +1770,11 @@
   },
   "odataRequestTab": {
     "send": "Dërgo",
-    "loadNextPage": "Ngarko faqen tjetër"
+    "loadNextPage": "Ngarko faqen tjetër",
+    "batchFormatLabel": "Formati i grupit",
+    "batchFormatMultipart": "multipart/mixed",
+    "batchFormatJson": "Grup JSON",
+    "versionMismatchWarning": "Kjo kërkesë është etiketuar si {{requestVersion}}, por përgjigja duket si {{responseVersion}}. Ndryshoni versionin e kërkesës që të përputhet me serverin."
   },
   "typedValue": {
     "list": {

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<edmx:Edmx Version="1.0" xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx">
+  <edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="2.0">
+    <Schema Namespace="PetStoreV2" xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" xmlns="http://schemas.microsoft.com/ado/2006/04/edm">
+      <EntityType Name="Product">
+        <Key><PropertyRef Name="ID" /></Key>
+        <Property Name="ID" Type="Edm.Int32" Nullable="false" />
+        <Property Name="Name" Type="Edm.String" Nullable="true" />
+        <Property Name="Description" Type="Edm.String" Nullable="true" />
+        <Property Name="Price" Type="Edm.Decimal" Nullable="false" />
+        <Property Name="Rating" Type="Edm.Int32" Nullable="false" />
+        <NavigationProperty Name="Category" Relationship="PetStoreV2.Product_Category" FromRole="Product" ToRole="Category" />
+      </EntityType>
+      <EntityType Name="Category">
+        <Key><PropertyRef Name="ID" /></Key>
+        <Property Name="ID" Type="Edm.Int32" Nullable="false" />
+        <Property Name="Name" Type="Edm.String" Nullable="true" />
+        <NavigationProperty Name="Products" Relationship="PetStoreV2.Product_Category" FromRole="Category" ToRole="Product" />
+      </EntityType>
+      <EntityContainer Name="PetStoreV2Service" m:IsDefaultEntityContainer="true">
+        <EntitySet Name="Products" EntityType="PetStoreV2.Product" />
+        <EntitySet Name="Categories" EntityType="PetStoreV2.Category" />
+        <FunctionImport Name="GetProductsByRating" EntitySet="Products" ReturnType="Collection(PetStoreV2.Product)" m:HttpMethod="GET">
+          <Parameter Name="rating" Type="Edm.Int32" Mode="In" />
+        </FunctionImport>
+      </EntityContainer>
+    </Schema>
+  </edmx:DataServices>
+</edmx:Edmx>

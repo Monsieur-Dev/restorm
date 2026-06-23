@@ -1769,7 +1769,11 @@
   },
   "odataRequestTab": {
     "send": "Gửi",
-    "loadNextPage": "Tải trang tiếp theo"
+    "loadNextPage": "Tải trang tiếp theo",
+    "batchFormatLabel": "Định dạng lô",
+    "batchFormatMultipart": "multipart/mixed",
+    "batchFormatJson": "Lô JSON",
+    "versionMismatchWarning": "Yêu cầu này được gắn thẻ {{requestVersion}} nhưng phản hồi trông giống {{responseVersion}}. Hãy đổi phiên bản yêu cầu cho khớp với máy chủ."
   },
   "typedValue": {
     "list": {

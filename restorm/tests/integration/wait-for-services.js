@@ -20,6 +20,7 @@ const SERVICES = [
   { name: 'SOAP (Castle Mock)', url: 'http://localhost:8090/castlemock/web' },
   // No Socket.IO / WS mock: restorm self-hosts those servers in-instance.
   { name: 'OData PetStore', url: 'http://localhost:5100/health' },
+  { name: 'OData v2 PetStore', url: 'http://localhost:5102/health' },
   { name: 'Auth Service', url: 'http://localhost:5110/health' },
   // gRPC (moul/grpcbin) speaks HTTP/2 on 9000 — not HTTP/1, so probe the raw TCP
   // port instead of an HTTP endpoint.

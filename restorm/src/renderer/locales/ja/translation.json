@@ -1769,7 +1769,11 @@
   },
   "odataRequestTab": {
     "send": "送信",
-    "loadNextPage": "次のページを読み込む"
+    "loadNextPage": "次のページを読み込む",
+    "batchFormatLabel": "バッチ形式",
+    "batchFormatMultipart": "multipart/mixed",
+    "batchFormatJson": "JSON バッチ",
+    "versionMismatchWarning": "このリクエストは {{requestVersion}} とタグ付けされていますが、レスポンスは {{responseVersion}} のようです。サーバーに合わせてリクエストのバージョンを変更してください。"
   },
   "typedValue": {
     "list": {

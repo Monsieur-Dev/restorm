@@ -1771,7 +1771,11 @@
   },
   "odataRequestTab": {
     "send": "Trimite",
-    "loadNextPage": "Încarcă pagina următoare"
+    "loadNextPage": "Încarcă pagina următoare",
+    "batchFormatLabel": "Format lot",
+    "batchFormatMultipart": "multipart/mixed",
+    "batchFormatJson": "Lot JSON",
+    "versionMismatchWarning": "Această cerere este marcată ca {{requestVersion}}, dar răspunsul pare {{responseVersion}}. Schimbați versiunea cererii pentru a corespunde serverului."
   },
   "typedValue": {
     "list": {

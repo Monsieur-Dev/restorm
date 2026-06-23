@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+  <edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="3.0" m:MaxDataServiceVersion="3.0">
+    <Schema Namespace="ODataDemo" xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
+      <EntityType Name="Supplier">
+        <Key>
+          <PropertyRef Name="ID" />
+        </Key>
+        <Property Name="ID" Type="Edm.Int32" Nullable="false" />
+        <Property Name="Name" Type="Edm.String" Nullable="true" />
+        <Property Name="Country" Type="Edm.String" Nullable="true" />
+        <NavigationProperty Name="Products" Relationship="ODataDemo.Product_Supplier" FromRole="Supplier" ToRole="Product" />
+      </EntityType>
+      <EntityType Name="Product">
+        <Key>
+          <PropertyRef Name="ID" />
+        </Key>
+        <Property Name="ID" Type="Edm.Int32" Nullable="false" />
+        <Property Name="Name" Type="Edm.String" Nullable="true" />
+        <Property Name="Price" Type="Edm.Decimal" Nullable="false" />
+        <NavigationProperty Name="Supplier" Relationship="ODataDemo.Product_Supplier" FromRole="Product" ToRole="Supplier" />
+      </EntityType>
+      <EntityContainer Name="DemoService" m:IsDefaultEntityContainer="true">
+        <EntitySet Name="Suppliers" EntityType="ODataDemo.Supplier" />
+        <EntitySet Name="Products" EntityType="ODataDemo.Product" />
+        <FunctionImport Name="DiscountProducts" m:HttpMethod="POST">
+          <Parameter Name="percent" Type="Edm.Int32" Mode="In" />
+        </FunctionImport>
+      </EntityContainer>
+    </Schema>
+  </edmx:DataServices>
+</edmx:Edmx>
