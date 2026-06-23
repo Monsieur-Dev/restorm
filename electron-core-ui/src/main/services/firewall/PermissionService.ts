@@ -114,6 +114,34 @@ const PROMPT_TIMEOUT_MS = 60_000
 const LOCALHOST_HOSTS = new Set<string>(['localhost', '127.0.0.1', '0.0.0.0', '::1', '[::1]'])
 
 /**
+ * The application-level protocols `detectWireProtocol` refines an outbound
+ * request to (graphql / grpc / soap / odata) all ride the HTTP transport — but
+ * the interceptor passes that refined label as the origin's `scheme`, while
+ * project-derived origins (collectProjectOrigins) + user whitelist entries are
+ * keyed by the TRANSPORT scheme (`http` / `https`). Without normalisation a
+ * GraphQL/gRPC/SOAP/OData request to a project URL never matches its own
+ * project origin (scheme `graphql` ≠ `http`) and prompts the firewall every
+ * time — the symptom Yoann hit hosting a local GraphQL mock. Normalising the
+ * app-protocol back to its transport (default `http`) before the host+port+
+ * scheme compare fixes all four in one spot. This never WIDENS the boundary: a
+ * `graphql` request over real HTTPS still carries an `https` project origin, so
+ * normalising the request to `http` simply fails to match (→ prompt, the safe
+ * default) rather than matching a stricter `https` entry.
+ */
+const APP_PROTOCOL_TRANSPORT = new Map<string, string>([
+	['graphql', 'http'],
+	['grpc', 'http'],
+	['soap', 'http'],
+	['odata', 'http']
+])
+
+/** Map a refined app-protocol scheme back to its transport scheme for
+ * origin-matching; transport schemes (http/https/ws/wss/…) pass through. */
+function transportScheme(scheme: string): string {
+	return APP_PROTOCOL_TRANSPORT.get(scheme) ?? scheme
+}
+
+/**
  * Reserved sentinel for port wildcards. `0` is never a real service
  * port (kernel allocates ephemeral ports starting at 32768+), so we
  * use it as the "match any port" marker without inventing a separate
@@ -396,7 +424,7 @@ class PermissionService {
 		if (isFirewallE2EBypass()) return 'allow'
 		this.loadIfNeeded()
 		const origin: FirewallOrigin = {
-			scheme: input.scheme.toLowerCase(),
+			scheme: transportScheme(input.scheme.toLowerCase()),
 			host: input.host.toLowerCase(),
 			port: input.port
 		}
@@ -415,7 +443,7 @@ class PermissionService {
 		const cls = this.classify(input)
 		if (cls === 'allow' || cls === 'deny') return Promise.resolve(cls)
 		const origin: FirewallOrigin = {
-			scheme: input.scheme.toLowerCase(),
+			scheme: transportScheme(input.scheme.toLowerCase()),
 			host: input.host.toLowerCase(),
 			port: input.port
 		}

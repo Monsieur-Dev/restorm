@@ -137,12 +137,19 @@ function graphqlRequestToListViewItem(
   request: GraphQLRequest,
   options: FolderToListViewOptions
 ): ListViewItemData {
-  // A GraphQL mock SERVER (server === true) renders the SRV capsule variant of
-  // its badge so it's distinct from a normal request in the tree — mirrors the
-  // HTTP / WebSocket / Socket.IO server entries.
-  const badge = request.server === true
-    ? options.renderProtocolBadge?.(request.operationType, undefined, 'server')
-    : options.renderProtocolBadge?.(request.operationType)
+  // A GraphQL mock SERVER (server === true) renders the SRV capsule over its
+  // badge + the listening beam while it hosts (like the HTTP / gRPC / WS / SIO /
+  // MQTT servers); a client GraphQL request keeps its op-type badge + the
+  // executing beam.
+  if (request.server === true) {
+    const badge = options.renderProtocolBadge?.(request.operationType, undefined, 'server')
+    return {
+      id: request.id,
+      title: request.name,
+      icon: withListeningBeam(request.id, badge)
+    }
+  }
+  const badge = options.renderProtocolBadge?.(request.operationType)
   return {
     id: request.id,
     title: request.name,

@@ -220,3 +220,42 @@ describe('PermissionService.check', () => {
 		).toBe(false)
 	})
 })
+
+describe('PermissionService.classify — app-protocol scheme normalisation', () => {
+	// detectWireProtocol refines outbound requests to graphql/grpc/soap/odata,
+	// but project origins + whitelist entries are keyed by the http/https
+	// TRANSPORT. classify() must normalise the app-protocol back to its
+	// transport so a request to a project mock auto-allows instead of prompting.
+	it('auto-allows a graphql-classified request against an http project origin', () => {
+		permissionService.setProjectOrigins([{ scheme: 'http', host: 'localhost', port: 4111 }])
+		expect(
+			permissionService.classify({ scheme: 'graphql', host: 'localhost', port: 4111, source: 'main-http' })
+		).toBe('allow')
+	})
+
+	it('auto-allows grpc / soap / odata classified requests against their http project origin', () => {
+		permissionService.setProjectOrigins([
+			{ scheme: 'http', host: 'localhost', port: 50152 },
+			{ scheme: 'http', host: 'localhost', port: 8088 },
+			{ scheme: 'http', host: 'localhost', port: 9000 }
+		])
+		expect(permissionService.classify({ scheme: 'grpc', host: 'localhost', port: 50152, source: 'main-http' })).toBe('allow')
+		expect(permissionService.classify({ scheme: 'soap', host: 'localhost', port: 8088, source: 'main-http' })).toBe('allow')
+		expect(permissionService.classify({ scheme: 'odata', host: 'localhost', port: 9000, source: 'main-http' })).toBe('allow')
+	})
+
+	it('does NOT downgrade: a graphql request still prompts against an https-only project origin', () => {
+		// Normalising graphql→http must not let it match a stricter https entry.
+		permissionService.setProjectOrigins([{ scheme: 'https', host: 'api.example.com', port: 443 }])
+		expect(
+			permissionService.classify({ scheme: 'graphql', host: 'api.example.com', port: 443, source: 'main-https' })
+		).toBe('prompt')
+	})
+
+	it('leaves transport schemes (http/https/ws) untouched', () => {
+		permissionService.setProjectOrigins([{ scheme: 'https', host: 'p.example', port: 443 }])
+		expect(
+			permissionService.classify({ scheme: 'https', host: 'p.example', port: 443, source: 'main-https' })
+		).toBe('allow')
+	})
+})

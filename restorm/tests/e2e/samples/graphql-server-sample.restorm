@@ -27,7 +27,9 @@ collections:
         documentation: |-
           Hosts a local GraphQL mock server on `localhost:4111/graphql`. Press
           Listen, then run **Pets Consumer**. Resolves `pets` from the canned
-          resolver; introspection (`__schema`) stays on.
+          resolver; introspection (`__schema`) stays on. A `ticks` subscription
+          streams its canned value over SSE (a canned Subscription field, no
+          scripted resolver needed).
         tags:
           - graphql
           - server
@@ -38,10 +40,14 @@ collections:
             pets: [String!]!
             count: Int
           }
+          type Subscription {
+            ticks: Int
+          }
         mockResolvers: |-
           {
             "Query.pets": ["Rex", "Whiskers"],
-            "Query.count": 2
+            "Query.count": 2,
+            "Subscription.ticks": 7
           }
         headers: []
         params: []

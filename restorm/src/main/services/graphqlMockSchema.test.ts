@@ -11,7 +11,7 @@ vi.mock('electron-core-ui/main', async (importOriginal) => {
 })
 
 import { createYoga } from 'electron-core-ui/main'
-import { buildMockSchema, parseCannedResolvers, mergeResolvers } from './graphqlMockSchema'
+import { buildMockSchema, parseCannedResolvers, mergeResolvers, subscriptionTypeNames } from './graphqlMockSchema'
 
 /** Execute a GraphQL operation against a built mock schema through a real
  * graphql-yoga handler (a fetch `Request` → `Response`), so the test exercises
@@ -130,4 +130,58 @@ describe('graphqlMockSchema — subscriptions (SSE)', () => {
     }
     expect(buf).toContain('"ticks":7')
   }, 15000)
+
+  it('streams a CANNED subscription value with NO scripted resolver (the no-script path)', async () => {
+    // A Subscription field with only a canned value (no resolverScript) must
+    // build a `{ subscribe, resolve }` AsyncIterable — a plain `() => value`
+    // resolver yields undefined → "Subscription field must return Async Iterable".
+    const schema = buildMockSchema({
+      schema: 'type Query {\n  _: Boolean\n}\ntype Subscription {\n  ticks: Int\n}',
+      mockResolvers: '{ "Subscription.ticks": 42 }'
+    })
+    const yoga = createYoga({ schema, graphqlEndpoint: '/graphql', landingPage: false })
+
+    const response = await yoga.fetch('http://localhost/graphql', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', accept: 'text/event-stream' },
+      body: JSON.stringify({ query: 'subscription { ticks }' })
+    })
+    expect(response.headers.get('content-type')).toContain('text/event-stream')
+
+    const reader = (response.body as ReadableStream<Uint8Array>).getReader()
+    const decoder = new TextDecoder()
+    let buf = ''
+    const deadline = Date.now() + 8000
+    try {
+      while (Date.now() < deadline && !buf.includes('"ticks"')) {
+        const { value, done } = await reader.read()
+        if (done) break
+        buf += decoder.decode(value, { stream: true })
+      }
+    } finally {
+      await reader.cancel().catch(() => { /* stream already closing */ })
+    }
+    // The canned value streams once (no validation error about Async Iterable).
+    expect(buf).not.toContain('Async Iterable')
+    expect(buf).toContain('"ticks":42')
+  }, 15000)
+
+  it('renames the subscription root via `schema { subscription: X }` and still builds an AsyncIterable', () => {
+    const sdl = 'schema { query: Q subscription: Feed }\ntype Q { _: Boolean }\ntype Feed { ping: String }'
+    expect(subscriptionTypeNames(sdl).has('Feed')).toBe(true)
+    const resolvers = parseCannedResolvers('{ "Feed.ping": "pong" }', sdl)
+    const feed = resolvers['Feed']
+    expect(feed).toBeDefined()
+    // A subscription-shaped resolver object (has `subscribe`), NOT a bare function.
+    const ping = feed?.['ping']
+    expect(typeof ping).toBe('object')
+    expect(typeof (ping as { subscribe?: unknown }).subscribe).toBe('function')
+  })
+
+  it('keeps Query fields as plain value resolvers even when a Subscription type exists', () => {
+    const sdl = 'type Query { pets: [String!]! }\ntype Subscription { ticks: Int }'
+    const resolvers = parseCannedResolvers('{ "Query.pets": ["Rex"], "Subscription.ticks": 1 }', sdl)
+    expect(typeof resolvers['Query']?.['pets']).toBe('function') // plain value resolver
+    expect(typeof resolvers['Subscription']?.['ticks']).toBe('object') // subscription-shaped
+  })
 })
