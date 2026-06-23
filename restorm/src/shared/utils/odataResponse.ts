@@ -21,8 +21,19 @@ export interface NormalizedODataPayload {
   count?: number
   /** Server-side pagination link when present. */
   nextLink?: string
+  /** Delta tracking link for v4.01 delta responses (@odata.deltaLink). */
+  deltaLink?: string
   /** The full normalized object, with v4 annotations copied in. */
   body: Record<string, unknown>
+}
+
+/**
+ * Returns true for the v4 family of OData versions (v4, v4.01).
+ * Use this in place of `version === 'v4'` so every branch naturally
+ * picks up v4.01 without a separate case.
+ */
+export function isV4Family(version: ODataVersion): boolean {
+  return version === 'v4' || version === 'v4.01'
 }
 
 /**
@@ -48,7 +59,7 @@ export function normalizeODataResponse(
 
   const obj = parsed as Record<string, unknown>
 
-  if (version === 'v4') {
+  if (isV4Family(version)) {
     const out: NormalizedODataPayload = { body: obj }
     if ('value' in obj) out.value = obj['value']
     const count = obj['@odata.count']
@@ -56,6 +67,8 @@ export function normalizeODataResponse(
     else if (typeof count === 'string' && /^\d+$/.test(count)) out.count = Number(count)
     const nextLink = obj['@odata.nextLink']
     if (typeof nextLink === 'string' && nextLink !== '') out.nextLink = nextLink
+    const deltaLink = obj['@odata.deltaLink']
+    if (typeof deltaLink === 'string' && deltaLink !== '') out.deltaLink = deltaLink
     return out
   }
 
@@ -143,7 +156,7 @@ export function detectODataVersionMismatch(
     '@odata.nextLink' in obj ||
     (('value' in obj) && Array.isArray(obj['value']))
 
-  if (looksV2V3 && requestVersion === 'v4') return '__count' in (d as Record<string, unknown>) ? 'v2' : 'v3'
+  if (looksV2V3 && isV4Family(requestVersion)) return '__count' in (d as Record<string, unknown>) ? 'v2' : 'v3'
   if (looksV4 && (requestVersion === 'v2' || requestVersion === 'v3')) return 'v4'
   return null
 }

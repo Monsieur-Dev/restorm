@@ -82,7 +82,7 @@ export interface ResponseHistoryODataResponse {
   requestHeaders: ResponseHistoryKeyValue[]
   requestParams: ResponseHistoryKeyValue[]
   requestBody?: ResponseHistoryHttpBody
-  odataVersion: 'v2' | 'v3' | 'v4'
+  odataVersion: 'v2' | 'v3' | 'v4' | 'v4.01'
   operationKind: 'entity-set' | 'function' | 'action' | 'batch'
   queryOptions?: Record<string, string | boolean | string[]>
   statusCode: number
@@ -93,6 +93,9 @@ export interface ResponseHistoryODataResponse {
   contentLength?: number
   odataCount?: number
   odataNextLink?: string
+  /** `@odata.deltaLink` captured from a v4.01 delta response, preserved
+   * so the entry can be replayed / the change-tracking chain walked. */
+  odataDeltaLink?: string
   timings: {
     startedAt: string
     durationMs: number

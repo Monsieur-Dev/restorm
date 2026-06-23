@@ -1811,7 +1811,17 @@
     "batchFormatMultipart": "multipart/mixed",
     "batchFormatJson": "JSON-Batch",
     "versionMismatchWarning": "Diese Anfrage ist als {{requestVersion}} markiert, aber die Antwort sieht wie {{responseVersion}} aus. Ändern Sie die Anfrageversion passend zum Server.",
-    "orderbyPropertyPickerPlaceholder": "Auswählen…"
+    "orderbyPropertyPickerPlaceholder": "Auswählen…",
+    "batchAllowGetInChangeSet": "GET in Change-Set erlauben",
+    "batchAllowGetInChangeSetTooltip": "Die OData-Spezifikation verbietet GET innerhalb eines Change-Sets; viele Server werden solche Batches ablehnen. Aktivieren Sie dieses Flag nur, wenn Ihr Server dies explizit unterstützt.",
+    "batchGetInChangeSetWarning": "GET in einem Change-Set wird nicht von allen Servern akzeptiert (laut OData-Spezifikation nicht erlaubt).",
+    "batchForceIncludeInChangeSet": "Trotzdem einschließen",
+    "batchForceAbsoluteBatchUrls": "Absolute Batch-URLs erzwingen (v4.01)",
+    "batchForceAbsoluteBatchUrlsTooltip": "OData v4.01 bevorzugt stark relative URLs in Unteranfragen. Aktivieren Sie dies, um absolute URLs beizubehalten (für Server, die dies erfordern).",
+    "getDelta": "Delta abrufen",
+    "deltaHint": "@odata.deltaLink verfügbar — klicken Sie, um diese Antwort durch das neueste Änderungsset zu ersetzen.",
+    "deltaChanged": "{{count}} geändert",
+    "deltaRemoved": "{{count}} entfernt"
   },
   "typedValue": {
     "list": {

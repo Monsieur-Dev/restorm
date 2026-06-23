@@ -1811,7 +1811,17 @@
     "batchFormatMultipart": "multipart/mixed",
     "batchFormatJson": "JSON-batch",
     "versionMismatchWarning": "Denne forespørselen er merket {{requestVersion}}, men svaret ser ut som {{responseVersion}}. Endre forespørselsversjonen slik at den samsvarer med serveren.",
-    "orderbyPropertyPickerPlaceholder": "Velg…"
+    "orderbyPropertyPickerPlaceholder": "Velg…",
+    "batchAllowGetInChangeSet": "Tillat GET i change-set",
+    "batchAllowGetInChangeSetTooltip": "OData-spesifikasjonen forbyr GET inni et change-set; mange servere vil avvise slike batch-forespørsler. Aktiver dette flagget bare hvis serveren din eksplisitt støtter det.",
+    "batchGetInChangeSetWarning": "GET inni et change-set aksepteres kanskje ikke av alle servere (ikke tillatt ifølge OData-spesifikasjonen).",
+    "batchForceIncludeInChangeSet": "Inkluder uansett",
+    "batchForceAbsoluteBatchUrls": "Tving absolutte batch-URL-er (v4.01)",
+    "batchForceAbsoluteBatchUrlsTooltip": "OData v4.01 foretrekker sterkt relative URL-er i underforespørsler. Aktiver dette for å beholde absolutte URL-er (for servere som krever dem).",
+    "getDelta": "Hent delta",
+    "deltaHint": "@odata.deltaLink tilgjengelig — klikk for å erstatte dette svaret med det siste endringssettet.",
+    "deltaChanged": "{{count}} endret",
+    "deltaRemoved": "{{count}} fjernet"
   },
   "typedValue": {
     "list": {

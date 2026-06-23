@@ -1810,7 +1810,17 @@
     "batchFormatMultipart": "multipart/mixed",
     "batchFormatJson": "JSON 批处理",
     "versionMismatchWarning": "此请求标记为 {{requestVersion}}，但响应看起来像 {{responseVersion}}。请更改请求版本以与服务器匹配。",
-    "orderbyPropertyPickerPlaceholder": "选择…"
+    "orderbyPropertyPickerPlaceholder": "选择…",
+    "batchAllowGetInChangeSet": "允许 change-set 中的 GET",
+    "batchAllowGetInChangeSetTooltip": "OData 规范禁止在 change-set 中使用 GET；许多服务器会拒绝此类批量请求。仅在服务器明确支持时才启用此选项。",
+    "batchGetInChangeSetWarning": "change-set 中的 GET 可能不会被所有服务器接受（OData 规范不允许）。",
+    "batchForceIncludeInChangeSet": "仍然包含",
+    "batchForceAbsoluteBatchUrls": "强制批处理使用绝对URL (v4.01)",
+    "batchForceAbsoluteBatchUrlsTooltip": "OData v4.01强烈建议在子请求中使用相对URL。启用此项以保留绝对URL（适用于需要绝对URL的服务器）。",
+    "getDelta": "获取增量",
+    "deltaHint": "@odata.deltaLink可用 — 单击以将此响应替换为最新的更改集。",
+    "deltaChanged": "{{count}}个已更改",
+    "deltaRemoved": "{{count}}个已删除"
   },
   "typedValue": {
     "list": {

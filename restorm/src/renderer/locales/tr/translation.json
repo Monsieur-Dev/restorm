@@ -1811,7 +1811,17 @@
     "batchFormatMultipart": "multipart/mixed",
     "batchFormatJson": "JSON toplu işi",
     "versionMismatchWarning": "Bu istek {{requestVersion}} olarak etiketlenmiş ancak yanıt {{responseVersion}} gibi görünüyor. İstek sürümünü sunucuyla eşleşecek şekilde değiştirin.",
-    "orderbyPropertyPickerPlaceholder": "Seçin…"
+    "orderbyPropertyPickerPlaceholder": "Seçin…",
+    "batchAllowGetInChangeSet": "Change-set içinde GET'e izin ver",
+    "batchAllowGetInChangeSetTooltip": "OData spesifikasyonu, bir change-set içinde GET kullanımını yasaklar; birçok sunucu bu tür toplu istekleri reddeder. Bu bayrağı yalnızca sunucunuz bunu açıkça destekliyorsa etkinleştirin.",
+    "batchGetInChangeSetWarning": "Change-set içindeki GET tüm sunucular tarafından kabul edilmeyebilir (OData spesifikasyonuna göre izin verilmez).",
+    "batchForceIncludeInChangeSet": "Yine de dahil et",
+    "batchForceAbsoluteBatchUrls": "Toplu istekte mutlak URL'leri zorla (v4.01)",
+    "batchForceAbsoluteBatchUrlsTooltip": "OData v4.01 alt isteklerde göreli URL'leri güçlü bir şekilde tercih eder. Mutlak URL'leri korumak için bunu etkinleştirin (bunu gerektiren sunucular için).",
+    "getDelta": "Deltayı al",
+    "deltaHint": "@odata.deltaLink mevcut — bu yanıtı en son değişiklik kümesiyle değiştirmek için tıklayın.",
+    "deltaChanged": "{{count}} değiştirildi",
+    "deltaRemoved": "{{count}} kaldırıldı"
   },
   "typedValue": {
     "list": {

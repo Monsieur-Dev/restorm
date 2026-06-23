@@ -295,4 +295,27 @@ describe('ResponseHistoryService', () => {
     expect(parsed.response.operationKind).toBe('entity-set')
   })
 
+  it('storeExecutionResult preserves @odata.deltaLink for later replay', async () => {
+    setupCols()
+    const deltaBody = JSON.stringify({
+      '@odata.context': 'https://api.test.com/$metadata#Pets/$delta',
+      '@odata.deltaLink': 'https://api.test.com/Pets?$deltatoken=abc123',
+      value: [{ Id: 1, Name: 'Rex' }, { '@removed': { reason: 'deleted' }, Id: 2 }]
+    })
+    const result = {
+      requestId: 'req-1', success: true, statusCode: 200, statusText: 'OK',
+      headers: { 'content-type': 'application/json; odata.metadata=minimal' } as Record<string, string | string[]>,
+      body: deltaBody,
+      timings: { startedAt: '2026-01-15T10:00:00.000Z', durationMs: 50 },
+      requestUrl: 'https://api.test.com/Pets/$delta'
+    }
+    await responseHistoryService.storeExecutionResult('req-1', 'odata', result)
+    const idx = getIdx(AP)
+    const guid = idx?.requests[0]?.entries[0]?.guid
+    const detailText = store.get(AP)?.get(`responses/${String(guid)}.json`)
+    const parsed = JSON.parse(detailText ?? '{}') as ResponseHistoryDetail
+    if (parsed.response.type !== 'odata') throw new Error('expected odata response')
+    expect(parsed.response.odataDeltaLink).toBe('https://api.test.com/Pets?$deltatoken=abc123')
+  })
+
 })

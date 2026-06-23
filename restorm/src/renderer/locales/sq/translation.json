@@ -1811,7 +1811,17 @@
     "batchFormatMultipart": "multipart/mixed",
     "batchFormatJson": "Grup JSON",
     "versionMismatchWarning": "Kjo kërkesë është etiketuar si {{requestVersion}}, por përgjigja duket si {{responseVersion}}. Ndryshoni versionin e kërkesës që të përputhet me serverin.",
-    "orderbyPropertyPickerPlaceholder": "Zgjidhni…"
+    "orderbyPropertyPickerPlaceholder": "Zgjidhni…",
+    "batchAllowGetInChangeSet": "Lejo GET brenda change-set",
+    "batchAllowGetInChangeSetTooltip": "Specifikimi OData ndalon GET brenda një change-set; shumë serverë do t'i refuzojnë lotët e tillë. Aktivizoni këtë opsion vetëm nëse serveri juaj e mbështet në mënyrë eksplicite.",
+    "batchGetInChangeSetWarning": "GET brenda një change-set mund të mos pranohet nga të gjithë serverët (i ndaluar nga specifikimi OData).",
+    "batchForceIncludeInChangeSet": "Përfshij gjithsesi",
+    "batchForceAbsoluteBatchUrls": "Detyro URL-të absolute në grup (v4.01)",
+    "batchForceAbsoluteBatchUrlsTooltip": "OData v4.01 preferon fuqishëm URL-të relative në nën-kërkesat. Aktivizoni këtë për të mbajtur URL-të absolute (për serverët që i kërkojnë).",
+    "getDelta": "Merr delta",
+    "deltaHint": "@odata.deltaLink i disponueshëm — klikoni për të zëvendësuar këtë përgjigje me grupin e fundit të ndryshimeve.",
+    "deltaChanged": "{{count}} ndryshuar",
+    "deltaRemoved": "{{count}} hequr"
   },
   "typedValue": {
     "list": {

@@ -1810,7 +1810,17 @@
     "batchFormatMultipart": "multipart/mixed",
     "batchFormatJson": "JSON バッチ",
     "versionMismatchWarning": "このリクエストは {{requestVersion}} とタグ付けされていますが、レスポンスは {{responseVersion}} のようです。サーバーに合わせてリクエストのバージョンを変更してください。",
-    "orderbyPropertyPickerPlaceholder": "選択…"
+    "orderbyPropertyPickerPlaceholder": "選択…",
+    "batchAllowGetInChangeSet": "change-set内のGETを許可する",
+    "batchAllowGetInChangeSetTooltip": "OData仕様ではchange-set内にGETを含めることが禁止されています。多くのサーバーはこのようなバッチリクエストを拒否します。サーバーが明示的にサポートしている場合のみこのフラグを有効にしてください。",
+    "batchGetInChangeSetWarning": "change-set内のGETはすべてのサーバーで受け入れられるとは限りません（OData仕様では許可されていません）。",
+    "batchForceIncludeInChangeSet": "それでも含める",
+    "batchForceAbsoluteBatchUrls": "バッチで絶対URLを強制 (v4.01)",
+    "batchForceAbsoluteBatchUrlsTooltip": "OData v4.01はサブリクエストで相対URLを強く推奨します。絶対URLを維持するにはこれを有効にしてください（必要とするサーバー向け）。",
+    "getDelta": "デルタを取得",
+    "deltaHint": "@odata.deltaLinkが利用可能です — クリックしてこのレスポンスを最新の変更セットに置き換えます。",
+    "deltaChanged": "{{count}}件 変更",
+    "deltaRemoved": "{{count}}件 削除"
   },
   "typedValue": {
     "list": {

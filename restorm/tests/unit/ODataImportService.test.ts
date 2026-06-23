@@ -282,3 +282,30 @@ describe('importOData (v4 JSON-CSDL)', () => {
     expect(() => importOData('{ not valid json')).toThrow(/JSON-CSDL|JSON/)
   })
 })
+
+describe('importOData — v4.01 CSDL detection', () => {
+  it('tags the root and requests as v4.01 when Edmx Version="4.01"', () => {
+    const v401Csdl = `<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="4.01" xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx">
+  <edmx:DataServices>
+    <Schema Namespace="Demo" xmlns="http://docs.oasis-open.org/odata/ns/edm">
+      <EntityType Name="Pet">
+        <Key><PropertyRef Name="Id"/></Key>
+        <Property Name="Id" Type="Edm.Int32" Nullable="false"/>
+        <Property Name="Name" Type="Edm.String"/>
+      </EntityType>
+      <EntityContainer Name="Container">
+        <EntitySet Name="Pets" EntityType="Demo.Pet"/>
+      </EntityContainer>
+    </Schema>
+  </edmx:DataServices>
+</edmx:Edmx>`
+    const root = importOData(v401Csdl)
+    expect(root.tags).toContain('odata:v4.01')
+    const petsFolder = root.items.find((i): i is Folder => 'items' in i && i.name === 'Pets') as Folder | undefined
+    expect(petsFolder).toBeDefined()
+    const reqs = (petsFolder?.items ?? []).filter((i): i is ODataRequest => i instanceof ODataRequest)
+    expect(reqs.length).toBeGreaterThan(0)
+    expect(reqs.every((r) => r.odataVersion === 'v4.01')).toBe(true)
+  })
+})

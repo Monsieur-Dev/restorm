@@ -75,8 +75,10 @@ export type ODataBatchFormat = 'multipart' | 'json'
 export interface ODataBatchSubRequestSpec {
   /** Stable ID used by the UI for keys / reordering. */
   id: string
-  /** HTTP method. GET inside a change-set is spec-illegal but we let
-   * the user build it so they see the error the server returns. */
+  /** HTTP method. GET inside a change-set is spec-non-conformant;
+   * Restorm warns by default and lets the user opt in via
+   * `allowGetInChangeSet` (batch level) or `forceIncludeInChangeSet`
+   * (per child). */
   method: string
   /** URL relative to the service root (resolved at send time). */
   url: string
@@ -90,6 +92,11 @@ export interface ODataBatchSubRequestSpec {
   atomicityGroup?: string
   /** User-visible label shown in the sidebar list. */
   label?: string
+  /** Per-child escape hatch: force this GET sub-request into the
+   * change-set even when the batch-level `allowGetInChangeSet` flag
+   * is off. Only meaningful when `method === 'GET'` and `atomicityGroup`
+   * is non-empty. */
+  forceIncludeInChangeSet?: boolean
 }
 
 export interface ODataRequest extends BaseRequest {
@@ -128,6 +135,16 @@ export interface ODataRequest extends BaseRequest {
    * enum values, type hints). Absent on a hand-authored request ⇒
    * autocomplete falls back to no suggestions. */
   entityTypeRef?: string
+  /** When true, GET sub-requests inside change-sets are allowed
+   * without a warning. Default `false` (Restorm emits a warning
+   * because the OData spec forbids GET inside a change-set; many
+   * servers reject such batches). Toggle this flag when your server
+   * explicitly supports it. */
+  allowGetInChangeSet?: boolean
+  /** v4.01 only: when true, batch sub-request URLs are kept as
+   * absolute URLs even though the v4.01 spec strongly prefers relative
+   * URIs. Useful when the target server requires absolute URLs. */
+  forceAbsoluteBatchUrls?: boolean
   /** Names of structural properties on the bound entity type (pre-
    * filled by the importer from the EDMX `EntityType`). The UI
    * surfaces these as clickable chips beneath $select / $orderby

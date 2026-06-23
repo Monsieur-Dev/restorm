@@ -57,16 +57,16 @@ Feature: OData execution — query options, CRUD, batch, v2 envelope
     And I open the OData request "List Products"
     And I switch the request to a JSON batch of three GETs
     And I send the OData request
-    Then the OData response body should contain "responses"
-    And the OData response body should contain "Bread"
+    Then the OData batch response should have 3 sub-responses
+    And the OData batch sub-response 0 body should contain "Bread"
 
   Scenario: JSON batch change-set rolls back all-or-nothing on a server error
     When I import the OData v2 metadata URL
     And I open the OData request "List Products"
     And I switch the request to a JSON batch change-set with a valid POST and a failing DELETE
     And I send the OData request
-    Then the OData response body should contain "responses"
-    And the OData response body should contain "ChangeSetFailed"
+    Then the OData batch response should have 2 sub-responses
+    And the OData batch sub-response 0 body should contain "ChangeSetFailed"
 
   # --- Response handling ----------------------------------------------------
 

@@ -1813,7 +1813,17 @@
     "batchFormatMultipart": "multipart/mixed",
     "batchFormatJson": "Dávka JSON",
     "versionMismatchWarning": "Tento požadavek je označen jako {{requestVersion}}, ale odpověď vypadá jako {{responseVersion}}. Změňte verzi požadavku tak, aby odpovídala serveru.",
-    "orderbyPropertyPickerPlaceholder": "Vyberte…"
+    "orderbyPropertyPickerPlaceholder": "Vyberte…",
+    "batchAllowGetInChangeSet": "Povolit GET v change-setu",
+    "batchAllowGetInChangeSetTooltip": "Specifikace OData zakazuje GET uvnitř change-setu; mnoho serverů taková dávková volání odmítne. Tuto možnost povolte pouze tehdy, pokud ji váš server explicitně podporuje.",
+    "batchGetInChangeSetWarning": "GET uvnitř change-setu nemusí být přijat všemi servery (specifikace OData to nedovoluje).",
+    "batchForceIncludeInChangeSet": "Přesto zahrnout",
+    "batchForceAbsoluteBatchUrls": "Vynutit absolutní URL v dávce (v4.01)",
+    "batchForceAbsoluteBatchUrlsTooltip": "OData v4.01 silně preferuje relativní URL v podrequestech. Povolte tuto možnost pro zachování absolutních URL (pro servery, které je vyžadují).",
+    "getDelta": "Načíst delta",
+    "deltaHint": "@odata.deltaLink je k dispozici — kliknutím nahradíte tuto odpověď nejnovější sadou změn.",
+    "deltaChanged": "{{count}} změněno",
+    "deltaRemoved": "{{count}} odstraněno"
   },
   "typedValue": {
     "list": {

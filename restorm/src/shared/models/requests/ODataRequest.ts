@@ -81,6 +81,9 @@ export interface ODataBatchSubRequestSpec {
   body?: string
   atomicityGroup?: string
   label?: string
+  /** Per-child escape hatch: include this GET in the change-set even
+   * when the batch-level `allowGetInChangeSet` is off. */
+  forceIncludeInChangeSet?: boolean
 }
 
 @fileNaming({ pattern: '{index} - {name}', nameProperty: 'name', idProperty: 'id' })
@@ -142,6 +145,18 @@ export class ODataRequest extends BaseRequest {
   @graphqlField({ type: 'String', nullable: true })
   entityTypeRef?: string
 
+  /** When true, GET sub-requests inside change-sets are serialized
+   * without a warning. Default `false` — Restorm emits a warning
+   * because the OData spec forbids GET inside a change-set. */
+  @graphqlField({ type: 'Boolean', nullable: true })
+  allowGetInChangeSet?: boolean
+
+  /** v4.01 only: when true, batch sub-request URLs are kept as
+   * absolute URLs (the v4.01 spec strongly prefers relative URIs;
+   * this escape hatch lets you target servers that require absolute). */
+  @graphqlField({ type: 'Boolean', nullable: true })
+  forceAbsoluteBatchUrls?: boolean
+
   /** Structural-property names pre-filled by the importer from the
    * bound entity type. Surfaces in the UI as $select / $orderby
    * chip hints. */
@@ -196,6 +211,8 @@ export class ODataRequest extends BaseRequest {
     batchSubRequests?: ODataBatchSubRequestSpec[]
     batchFormat?: ODataBatchFormat
     entityTypeRef?: string
+    allowGetInChangeSet?: boolean
+    forceAbsoluteBatchUrls?: boolean
     entitySetProperties?: string[]
     navigationProperties?: string[]
     operationParameters?: ODataOperationParameterSpec[]
@@ -219,6 +236,8 @@ export class ODataRequest extends BaseRequest {
       ...(obj.batchSubRequests !== undefined && { batchSubRequests: obj.batchSubRequests }),
       ...(obj.batchFormat !== undefined && { batchFormat: obj.batchFormat }),
       ...(obj.entityTypeRef !== undefined && { entityTypeRef: obj.entityTypeRef }),
+      ...(obj.allowGetInChangeSet !== undefined && { allowGetInChangeSet: obj.allowGetInChangeSet }),
+      ...(obj.forceAbsoluteBatchUrls !== undefined && { forceAbsoluteBatchUrls: obj.forceAbsoluteBatchUrls }),
       ...(obj.entitySetProperties !== undefined && { entitySetProperties: obj.entitySetProperties }),
       ...(obj.navigationProperties !== undefined && { navigationProperties: obj.navigationProperties }),
       ...(obj.operationParameters !== undefined && { operationParameters: obj.operationParameters }),
@@ -246,6 +265,8 @@ export class ODataRequest extends BaseRequest {
       ...(this.batchSubRequests !== undefined && { batchSubRequests: this.batchSubRequests }),
       ...(this.batchFormat !== undefined && { batchFormat: this.batchFormat }),
       ...(this.entityTypeRef !== undefined && { entityTypeRef: this.entityTypeRef }),
+      ...(this.allowGetInChangeSet !== undefined && { allowGetInChangeSet: this.allowGetInChangeSet }),
+      ...(this.forceAbsoluteBatchUrls !== undefined && { forceAbsoluteBatchUrls: this.forceAbsoluteBatchUrls }),
       ...(this.entitySetProperties !== undefined && { entitySetProperties: this.entitySetProperties }),
       ...(this.navigationProperties !== undefined && { navigationProperties: this.navigationProperties }),
       ...(this.operationParameters !== undefined && { operationParameters: this.operationParameters }),

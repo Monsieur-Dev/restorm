@@ -155,6 +155,7 @@ function parseEdmxVersion(xml: string): ODataVersion {
   const edmxRoot = /<(?:edmx:)?Edmx\b([^>]*)>/.exec(xml)
   const rootVersion = edmxRoot ? parseAttributes(edmxRoot[1] ?? '')['Version'] : undefined
   if (rootVersion !== undefined) {
+    if (rootVersion === '4.01') return 'v4.01'
     if (rootVersion.startsWith('4')) return 'v4'
     if (rootVersion.startsWith('3')) return 'v3'
     if (rootVersion.startsWith('1') || rootVersion.startsWith('2')) return 'v2'

@@ -76,7 +76,11 @@ import { extractNavigationLinks } from '../../../../shared/utils/odataNavigation
 import {
   serializeODataBatch,
   serializeODataJsonBatch,
-  type ODataBatchSubRequest
+  extractBoundary,
+  parseODataBatchResponse,
+  parseODataJsonBatchResponse,
+  type ODataBatchSubRequest,
+  type ODataBatchSubResponse
 } from '../../../../shared/utils/odataBatch'
 import { DEFAULT_REQUEST_TIMEOUT_MS } from '../../../../shared/config/constants'
 import { useRestormStore } from '../../store/restormStore'
@@ -152,7 +156,7 @@ function headersToListItems(headers: Record<string, string | string[]> | undefin
   }))
 }
 
-const ODATA_VERSION_BY_INDEX: ODataVersion[] = ['v4', 'v3', 'v2']
+const ODATA_VERSION_BY_INDEX: ODataVersion[] = ['v4', 'v4.01', 'v3', 'v2']
 const ODATA_OPERATION_KIND_BY_INDEX: ODataOperationKind[] = ['entity-set', 'function', 'action', 'batch']
 
 function toKeyValueData(kvs: readonly KeyValue[]): KeyValueData[] {
@@ -177,6 +181,14 @@ interface ODataResponseViewData {
   headers?: Record<string, string | string[]>
   method: string
   error?: string
+  /** Per-child sub-responses when operationKind === 'batch' and
+   * the response was a parseable multipart/mixed or JSON batch. */
+  batchSubResponses?: ODataBatchSubResponse[]
+  /** Warnings produced by the batch serializer (e.g. GET in
+   * a change-set when allowGetInChangeSet is false). */
+  batchWarnings?: string[]
+  /** @odata.deltaLink captured from the response for delta tracking. */
+  odataDeltaLink?: string
 }
 
 export interface ODataRequestTabViewProps {
@@ -197,6 +209,7 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
 
   const odataVersionOptions = useMemo<ISelectOptionItem[]>(() => [
     { text: 'v4' },
+    { text: 'v4.01' },
     { text: t('odataRequestTab.version.v3NotYet', 'v3 (execution not yet supported)') },
     { text: t('odataRequestTab.version.v2NotYet', 'v2 (execution not yet supported)') }
   ], [t])
@@ -335,6 +348,10 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
 
   const setVersion = useCallback((next: string) => {
     updateReactiveProperty(request, 'odataVersion', next as ODataVersion)
+    // `odataVersion` gates v4.01-specific UI (force-absolute-batch-URLs toggle,
+    // delta-follow button). The proxy write alone doesn't re-render this
+    // component, so force a render here, same as setOperationKind.
+    forceProxyRender((n) => n + 1)
   }, [request])
 
   const setOperationKind = useCallback((next: ODataOperationKind) => {
@@ -363,6 +380,16 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
     updateReactiveProperty(request, 'batchFormat', next)
     // Keep the format SelectBox (controlled by `request.batchFormat`) in
     // sync — the proxy write alone doesn't re-render this component.
+    forceProxyRender((n) => n + 1)
+  }, [request])
+
+  const setAllowGetInChangeSet = useCallback((next: boolean) => {
+    updateReactiveProperty(request, 'allowGetInChangeSet', next)
+    forceProxyRender((n) => n + 1)
+  }, [request])
+
+  const setForceAbsoluteBatchUrls = useCallback((next: boolean) => {
+    updateReactiveProperty(request, 'forceAbsoluteBatchUrls', next)
     forceProxyRender((n) => n + 1)
   }, [request])
 
@@ -675,6 +702,7 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
     let method = 'GET'
     let body: string | undefined
     let contentTypeOverride: string | undefined
+    let pendingBatchWarnings: string[] = []
     if (request.operationKind === 'action') {
       method = 'POST'
       body = request.actionBody ?? undefined
@@ -708,17 +736,50 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
           url: spec.url,
           ...(Object.keys(headers).length > 0 ? { headers } : {}),
           ...(spec.body !== undefined ? { body: spec.body } : {}),
-          ...(spec.atomicityGroup ? { atomicityGroup: spec.atomicityGroup } : {})
+          ...(spec.atomicityGroup ? { atomicityGroup: spec.atomicityGroup } : {}),
+          ...(spec.forceIncludeInChangeSet ? { forceIncludeInChangeSet: true } : {})
         }
       })
-      const serialized = request.batchFormat === 'json'
-        ? serializeODataJsonBatch(subRequests)
-        : serializeODataBatch(subRequests)
-      method = 'POST'
-      body = serialized.body
-      contentTypeOverride = serialized.contentType
+      const isBatchJson = request.batchFormat === 'json'
+      // v4.01 emits relative batch URIs unless the user opted out.
+      const isV401 = request.odataVersion === 'v4.01'
+      // Service root for relative URL conversion: strip the `/$batch` suffix
+      // (and any query string). If the URL doesn't contain `/$batch` we still
+      // strip the last path segment as a best-effort guess — the caller can
+      // override with forceAbsoluteBatchUrls if the heuristic is wrong.
+      const batchServiceRoot = isV401 && !request.forceAbsoluteBatchUrls
+        ? (request.url.includes('/$batch')
+          ? request.url.replace(/\/\$batch.*$/, '')
+          : request.url.replace(/\/[^/]*$/, ''))
+        : undefined
+      if (isBatchJson) {
+        const serialized = serializeODataJsonBatch(subRequests, {
+          ...(batchServiceRoot !== undefined ? { serviceRoot: batchServiceRoot } : {}),
+          ...(request.forceAbsoluteBatchUrls ? { forceAbsoluteUrls: true } : {})
+        })
+        method = 'POST'
+        body = serialized.body
+        contentTypeOverride = serialized.contentType
+      } else {
+        const serialized = serializeODataBatch(subRequests, undefined, {
+          allowGetInChangeSet: request.allowGetInChangeSet ?? false,
+          ...(batchServiceRoot !== undefined ? { serviceRoot: batchServiceRoot } : {}),
+          ...(request.forceAbsoluteBatchUrls ? { forceAbsoluteUrls: true } : {})
+        })
+        method = 'POST'
+        body = serialized.body
+        contentTypeOverride = serialized.contentType
+        // Surface serializer warnings in the response panel even before
+        // the batch completes — they are informational, not blocking.
+        if (serialized.warnings.length > 0) {
+          pendingBatchWarnings = serialized.warnings
+        }
+      }
     }
     const dispatchedMethod = method
+    const capturedBatchWarnings = pendingBatchWarnings
+    const capturedBatchFormat = request.operationKind === 'batch' ? (request.batchFormat ?? 'multipart') : null
+    const capturedOperationKind = request.operationKind
     const authAttachedId = request.authenticationRequestId
     const attachedAuth = authAttachedId ? resolveAuthRequest(authAttachedId) : null
     const authPlain = attachedAuth
@@ -740,6 +801,29 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
       ...(authRequestPayload ? { authRequest: authRequestPayload } : {})
     })
       .then((result) => {
+        // For batch requests, parse the multipart/mixed (or JSON batch)
+        // response body into per-child sub-responses so the UI can render
+        // each one individually and highlight 4xx/5xx change-set errors.
+        let batchSubResponses: ODataBatchSubResponse[] | undefined
+        if (capturedOperationKind === 'batch') {
+          const body = result.body ?? ''
+          if (capturedBatchFormat === 'json') {
+            const parsed = parseODataJsonBatchResponse(body)
+            if (parsed.length > 0) batchSubResponses = parsed
+          } else {
+            const ct = result.headers?.['content-type']
+            const ctStr = Array.isArray(ct) ? ct[0] : ct
+            const boundary = extractBoundary(ctStr)
+            if (boundary) {
+              const parsed = parseODataBatchResponse(body, boundary)
+              if (parsed.length > 0) batchSubResponses = parsed
+            }
+          }
+        }
+        const sendParsed = tryParseJson(result.body ?? '')
+        const sendNormalized = sendParsed !== null && typeof sendParsed === 'object'
+          ? normalizeODataResponse(sendParsed, request.odataVersion)
+          : null
         setResponse({
           statusCode: result.statusCode ?? 0,
           statusText: result.statusText ?? '',
@@ -748,7 +832,10 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
           body: result.body ?? '',
           method: dispatchedMethod,
           ...(result.headers !== undefined && { headers: result.headers }),
-          ...(result.error !== undefined && { error: result.error })
+          ...(result.error !== undefined && { error: result.error }),
+          ...(batchSubResponses !== undefined && { batchSubResponses }),
+          ...(capturedBatchWarnings.length > 0 && { batchWarnings: capturedBatchWarnings }),
+          ...(sendNormalized?.deltaLink !== undefined && { odataDeltaLink: sendNormalized.deltaLink })
         })
         setHistoryRefreshKey((prev) => prev + 1)
         eventBus.emitLocalSync(DocumentEvents.REQUEST_HISTORY_RECORDED, { requestId } as RequestHistoryEventPayload)
@@ -920,6 +1007,11 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
             onChange={setBatchSubRequests}
             format={request.batchFormat ?? 'multipart'}
             onFormatChange={setBatchFormat}
+            allowGetInChangeSet={request.allowGetInChangeSet ?? false}
+            onAllowGetInChangeSetChange={setAllowGetInChangeSet}
+            forceAbsoluteBatchUrls={request.forceAbsoluteBatchUrls ?? false}
+            onForceAbsoluteBatchUrlsChange={setForceAbsoluteBatchUrls}
+            isV401={request.odataVersion === 'v4.01'}
           />
         </div>
       ) : null}
@@ -1193,6 +1285,64 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
     }
   }, [response, request, resolveAuthRequest])
 
+  /**
+   * Follow the `@odata.deltaLink` to fetch the next delta set.
+   * Unlike pagination which APPENDS the new `value[]`, delta REPLACES:
+   * the response contains the complete current change-set (added /
+   * updated entities, plus `@removed` tombstones). The response body
+   * is overwritten entirely with the fresh delta payload, and
+   * `@odata.deltaLink` is updated (or cleared when the server doesn't
+   * emit one on the delta response).
+   */
+  const handleLoadDelta = useCallback(async (): Promise<void> => {
+    if (!response) return
+    const deltaLink = response.odataDeltaLink
+    if (!deltaLink) return
+    const api = window.restorm?.odata
+    if (!api) return
+    setIsSending(true)
+    try {
+      const authId = request.authenticationRequestId
+      const auth = authId ? resolveAuthRequest(authId) : null
+      const authPlain = auth ? auth.toPlainObject?.() ?? auth : undefined
+      const authPayload = authPlain !== undefined
+        ? JSON.parse(JSON.stringify(authPlain)) as unknown
+        : undefined
+      const result = await api.execute({
+        requestId: request.id,
+        timeout: DEFAULT_REQUEST_TIMEOUT_MS,
+        method: 'GET',
+        urlOverride: deltaLink,
+        ...(authPayload ? { authRequest: authPayload } : {})
+      })
+      // Delta REPLACES — set the new body directly, capture the new
+      // deltaLink (or clear it when the server omits it).
+      const deltaParsed = tryParseJson(result.body ?? '')
+      const deltaNormalized = deltaParsed !== null && typeof deltaParsed === 'object'
+        ? normalizeODataResponse(deltaParsed, request.odataVersion)
+        : null
+      // Strip the old deltaLink from the spread so we don't carry over a stale link
+      // when the new delta response doesn't emit one.
+      const { odataDeltaLink: _oldDelta, ...responseWithoutDelta } = response
+      setResponse({
+        ...responseWithoutDelta,
+        statusCode: result.statusCode ?? response.statusCode,
+        statusText: result.statusText ?? response.statusText,
+        requestUrl: result.requestUrl ?? response.requestUrl,
+        durationMs: result.timings.durationMs,
+        body: result.body ?? response.body,
+        ...(result.headers !== undefined && { headers: result.headers }),
+        ...(deltaNormalized?.deltaLink !== undefined ? { odataDeltaLink: deltaNormalized.deltaLink } : {})
+      })
+      setHistoryRefreshKey((prev) => prev + 1)
+      eventBus.emitLocalSync(DocumentEvents.REQUEST_HISTORY_RECORDED, { requestId: request.id } as RequestHistoryEventPayload)
+    } catch (err) {
+      logger.error('OData load-delta failed', { error: String(err) })
+    } finally {
+      setIsSending(false)
+    }
+  }, [response, request, resolveAuthRequest])
+
   const buildResponseView = useCallback((input: {
     statusCode: number
     statusText: string
@@ -1211,6 +1361,14 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
     contentLength?: number | undefined
     error?: string | undefined
     disableNavigate?: boolean
+    /** Parsed per-child responses from a `$batch` call. When present
+     * the response panel renders one card per child instead of the
+     * raw batch body. */
+    batchSubResponses?: ODataBatchSubResponse[]
+    /** Serializer warnings (e.g. GET in a change-set). */
+    batchWarnings?: string[]
+    /** @odata.deltaLink from the response, for delta-follow button. */
+    odataDeltaLink?: string | undefined
   }): {
     responseContent: React.ReactNode
     infosContent: React.ReactNode
@@ -1229,12 +1387,147 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
 
     const nextLinkForPagination = input.odataNextLink ?? normalized?.nextLink
     const showLoadMore = !input.disableNavigate && typeof nextLinkForPagination === 'string' && nextLinkForPagination.length > 0
+    const deltaLinkForGet = input.odataDeltaLink ?? normalized?.deltaLink
+    const showGetDelta = !input.disableNavigate && typeof deltaLinkForGet === 'string' && deltaLinkForGet.length > 0
+
+    // Delta classification: count @removed tombstones vs changed entries.
+    // A tombstone has `@removed` at the top level; everything else in
+    // `value[]` is an added or updated entity (we can't distinguish
+    // added vs updated without the prior state, so both are labelled "changed").
+    const deltaEntries = Array.isArray(normalized?.value) ? normalized.value as unknown[] : []
+    const deltaRemovedCount = deltaEntries.filter(
+      (e) => e !== null && typeof e === 'object' && '@removed' in (e as Record<string, unknown>)
+    ).length
+    const deltaChangedCount = deltaEntries.length - deltaRemovedCount
+    const hasDeltaEntries = deltaEntries.length > 0 && deltaLinkForGet !== undefined
 
     // Surface a non-blocking warning when the response envelope shape
     // contradicts the version this request is tagged with (e.g. a v4
     // request that got a v2 `{ d: … }` body) — the response is still
     // normalised + rendered, the banner just flags the discrepancy.
     const mismatchVersion = detectODataVersionMismatch(parsed, input.odataVersion)
+
+    // For `$batch` responses, render a batch-specific panel when there
+    // are serializer warnings (e.g. GET in a change-set) and/or parsed
+    // per-child sub-responses. 4xx/5xx children are highlighted.
+    const hasBatchWarnings = (input.batchWarnings?.length ?? 0) > 0
+    const hasBatchSubResponses = (input.batchSubResponses?.length ?? 0) > 0
+    if (hasBatchWarnings || hasBatchSubResponses) {
+      const batchSubResponses = input.batchSubResponses ?? []
+      const batchContent: React.ReactNode = (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8, height: '100%' }} data-testid="odata-batch-response-panel">
+          {(input.batchWarnings ?? []).map((warning, wi) => (
+            <div
+              key={wi}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 6,
+                flexShrink: 0,
+                padding: '4px 8px',
+                borderRadius: 4,
+                border: '1px solid var(--inputValidation-warningBorder)',
+                background: 'var(--inputValidation-warningBackground)',
+                color: 'var(--inputValidation-warningForeground, var(--foreground))',
+                fontSize: 12
+              }}
+              data-testid={`odata-batch-serializer-warning-${wi}`}
+            >
+              {warning}
+            </div>
+          ))}
+          {hasBatchSubResponses ? (
+            <div style={{ flex: 1, minHeight: 0, overflowY: 'auto' }}>
+              {batchSubResponses.map((sub, si) => {
+                const isError = sub.status >= 400
+                return (
+                  <div
+                    key={si}
+                    style={{
+                      marginBottom: 8,
+                      border: `1px solid ${isError ? 'var(--inputValidation-errorBorder)' : 'var(--panel-border)'}`,
+                      borderRadius: 4,
+                      overflow: 'hidden'
+                    }}
+                    data-testid={`odata-batch-sub-response-${si}`}
+                  >
+                    <div
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 8,
+                        padding: '4px 8px',
+                        background: isError ? 'var(--inputValidation-errorBackground)' : 'var(--sideBar-background)',
+                        fontSize: 12,
+                        fontFamily: 'var(--editor-font-family, monospace)'
+                      }}
+                    >
+                      <span
+                        style={{ color: getStatusColor(sub.status), fontWeight: 600 }}
+                        data-testid={`odata-batch-sub-status-${si}`}
+                      >
+                        {sub.status !== 0 ? sub.status : '—'}
+                        {sub.statusText ? ` ${sub.statusText}` : ''}
+                      </span>
+                    </div>
+                    {sub.body ? (
+                      <div style={{ height: 120, borderTop: '1px solid var(--panel-border)' }}>
+                        <CodeEditor
+                          height="100%"
+                          language="json"
+                          value={(() => {
+                            try { return JSON.stringify(JSON.parse(sub.body), null, 2) } catch { return sub.body }
+                          })()}
+                          options={{
+                            minimap: { enabled: false },
+                            wordWrap: 'on',
+                            scrollBeyondLastLine: false,
+                            automaticLayout: true,
+                            readOnly: true
+                          }}
+                          data-testid={`odata-batch-sub-body-${si}`}
+                        />
+                      </div>
+                    ) : null}
+                  </div>
+                )
+              })}
+            </div>
+          ) : null}
+        </div>
+      )
+      return {
+        responseContent: batchContent,
+        infosContent: (() => {
+          // Build a minimal infos panel for the batch-level response.
+          const generalItems: ListViewItemData[] = []
+          if (input.requestUrl) {
+            generalItems.push({ id: 'g-url', icon: 'blank', title: <span style={kvRowStyle}><span style={infoLabelStyle}>Request URL</span><span>{input.requestUrl}</span></span> })
+          }
+          generalItems.push({ id: 'g-method', icon: 'blank', title: <span style={kvRowStyle}><span style={infoLabelStyle}>Request Method</span><span>{input.method}</span></span> })
+          generalItems.push({ id: 'g-status', icon: 'blank', title: <span style={kvRowStyle}><span style={infoLabelStyle}>Status Code</span><span style={{ color: getStatusColor(input.statusCode) }}>{input.statusCode} {input.statusText}</span></span> })
+          generalItems.push({ id: 'g-dur', icon: 'blank', title: <span style={kvRowStyle}><span style={infoLabelStyle}>Duration</span><span>{formatDuration(input.durationMs)}</span></span> })
+          generalItems.push({ id: 'g-children', icon: 'blank', title: <span style={kvRowStyle}><span style={infoLabelStyle}>Sub-responses</span><span>{batchSubResponses.length}</span></span> })
+          const responseHeaderItems: ListViewItemData[] = input.headers
+            ? headersToListItems(input.headers, 'resp-header')
+            : (input.headersFromHistory ?? []).map((kv, index) => ({
+              id: `resp-header-${index}`,
+              icon: 'blank' as const,
+              title: <span style={kvRowStyle}><span style={kvKeyStyle}>{kv.key}</span><span style={kvValueStyle}>{kv.value}</span></span>
+            }))
+          const treeItems: ListViewItemData[] = [
+            { id: 'group-general', title: 'General', icon: 'info', isExpandable: true, isExpanded: true, children: generalItems },
+            { id: 'group-response-headers', title: `Response headers (${responseHeaderItems.length})`, icon: 'call-incoming', isExpandable: true, isExpanded: true, children: responseHeaderItems }
+          ]
+          return (
+            <div style={fullHeightBoxStyle}>
+              <ListView items={treeItems} rootRole="tree" ariaLabel="OData batch response info" data-testid="odata-batch-response-headers-list" />
+            </div>
+          )
+        })(),
+        jsonData: null
+      }
+    }
 
     const renderedContent: React.ReactNode = input.body ? (
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8, height: '100%' }}>
@@ -1278,6 +1571,37 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
             </span>
           </div>
         ) : null}
+        {showGetDelta ? (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0, flexWrap: 'wrap' }}>
+            <Button
+              icon="arrow-circle-down"
+              onClick={() => { void handleLoadDelta() }}
+              options={{
+                ariaLabel: t('odataRequestTab.getDelta', 'Get delta')
+              }}
+              data-testid="odata-response-get-delta"
+            >
+              {t('odataRequestTab.getDelta', 'Get delta')}
+            </Button>
+            <span style={{ fontSize: 12, color: 'var(--descriptionForeground)' }}>
+              {t('odataRequestTab.deltaHint', '@odata.deltaLink available — click to replace this response with the latest change-set.')}
+            </span>
+            {hasDeltaEntries ? (
+              <span style={{ display: 'flex', gap: 6, fontSize: 12, flexShrink: 0 }} data-testid="odata-delta-summary">
+                {deltaChangedCount > 0 ? (
+                  <span style={{ color: 'var(--testing-iconPassed)', fontWeight: 600 }}>
+                    {t('odataRequestTab.deltaChanged', '{{count}} changed', { count: deltaChangedCount })}
+                  </span>
+                ) : null}
+                {deltaRemovedCount > 0 ? (
+                  <span style={{ color: 'var(--testing-iconFailed)', fontWeight: 600 }}>
+                    {t('odataRequestTab.deltaRemoved', '{{count}} removed', { count: deltaRemovedCount })}
+                  </span>
+                ) : null}
+              </span>
+            ) : null}
+          </div>
+        ) : null}
         <div style={{ ...editorContainerStyle, flex: 1, minHeight: 0 }}>
           <CodeEditor
             height="100%"
@@ -1308,6 +1632,7 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
 
     const count = input.odataCount ?? normalized?.count
     const nextLink = input.odataNextLink ?? normalized?.nextLink
+    const deltaLink = input.odataDeltaLink ?? normalized?.deltaLink
 
     const generalItems: ListViewItemData[] = []
     if (input.requestUrl) {
@@ -1434,6 +1759,18 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
         )
       })
     }
+    if (deltaLink) {
+      generalItems.push({
+        id: 'general-odata-deltalink',
+        icon: 'blank',
+        title: (
+          <span style={kvRowStyle}>
+            <span style={infoLabelStyle}>@odata.deltaLink</span>
+            <span style={{ wordBreak: 'break-all' }}>{deltaLink}</span>
+          </span>
+        )
+      })
+    }
     if (input.error) {
       generalItems.push({
         id: 'general-error',
@@ -1537,7 +1874,7 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
       infosContent: renderedInfos,
       jsonData: json
     }
-  }, [t, handleNavigateToLink, handleLoadNextPage])
+  }, [t, handleNavigateToLink, handleLoadNextPage, handleLoadDelta])
 
   const { responseContent, infosContent, jsonData } = useMemo(() => {
     if (!response) {
@@ -1557,7 +1894,10 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
       headers: response.headers,
       odataVersion: request.odataVersion,
       operationKind: request.operationKind,
-      ...(response.error !== undefined ? { error: response.error } : {})
+      ...(response.error !== undefined ? { error: response.error } : {}),
+      ...(response.batchSubResponses !== undefined ? { batchSubResponses: response.batchSubResponses } : {}),
+      ...(response.batchWarnings !== undefined ? { batchWarnings: response.batchWarnings } : {}),
+      ...(response.odataDeltaLink !== undefined ? { odataDeltaLink: response.odataDeltaLink } : {})
     })
   }, [response, request.odataVersion, request.operationKind, buildResponseView])
 
@@ -1582,6 +1922,7 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
         disableNavigate: true,
         ...(r.odataCount !== undefined ? { odataCount: r.odataCount } : {}),
         ...(r.odataNextLink !== undefined ? { odataNextLink: r.odataNextLink } : {}),
+        ...(r.odataDeltaLink !== undefined ? { odataDeltaLink: r.odataDeltaLink } : {}),
         ...(r.contentType !== undefined ? { contentType: r.contentType } : {}),
         ...(r.contentLength !== undefined ? { contentLength: r.contentLength } : {}),
         ...(r.error !== undefined ? { error: r.error } : {})

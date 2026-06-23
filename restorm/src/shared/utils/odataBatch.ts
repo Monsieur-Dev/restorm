@@ -36,6 +36,10 @@ export interface ODataBatchSubRequest {
    * boundary=changeset_<id>` envelope so the server commits them as
    * a single transaction. */
   atomicityGroup?: string
+  /** Per-child escape hatch: force this GET into the change-set even
+   * when the batch-level `allowGetInChangeSet` is false. Only
+   * meaningful when `method === 'GET'` and `atomicityGroup` is set. */
+  forceIncludeInChangeSet?: boolean
 }
 
 export interface ODataBatchSubResponse {
@@ -57,6 +61,34 @@ export interface ODataBatchSerializationResult {
   body: string
   /** The boundary token used. Useful for tests / logging. */
   boundary: string
+  /** Human-readable warnings emitted during serialization. Currently
+   * populated when a GET sub-request appears inside a change-set and
+   * `allowGetInChangeSet` is not set. The batch is still emitted; the
+   * warnings are surfaced in the UI so the user understands the risk. */
+  warnings: string[]
+}
+
+/**
+ * Convert an absolute sub-request URL to a relative URL by stripping
+ * the OData service root. Used by v4.01 batch serializers to emit
+ * relative URIs as the spec strongly prefers.
+ *
+ * Strips the service root with a trailing slash, e.g.:
+ *   `https://example.com/odata/Customers(1)` with root
+ *   `https://example.com/odata` → `Customers(1)`.
+ *
+ * If `url` does not begin with `serviceRoot` (case-insensitive), or
+ * `serviceRoot` is empty, the original URL is returned unchanged so
+ * callers never produce a malformed request.
+ */
+export function toRelativeBatchUrl(url: string, serviceRoot: string): string {
+  if (!serviceRoot) return url
+  // Normalise: ensure root ends with exactly one slash.
+  const root = serviceRoot.endsWith('/') ? serviceRoot : `${serviceRoot}/`
+  if (url.toLowerCase().startsWith(root.toLowerCase())) {
+    return url.slice(root.length)
+  }
+  return url
 }
 
 /**
@@ -66,13 +98,38 @@ export interface ODataBatchSerializationResult {
  * The caller is responsible for URL-encoding and for having resolved
  * any env / handlebars templates — this helper treats each
  * sub-request as already-concrete.
+ *
+ * When `allowGetInChangeSet` is false (default) and a GET appears
+ * inside a change-set, the sub-request is still emitted as-is (so
+ * the server's rejection is visible) but a human-readable entry is
+ * pushed to `result.warnings` for the UI to surface.
  */
 export function serializeODataBatch(
   subRequests: readonly ODataBatchSubRequest[],
-  boundaryOverride?: string
+  boundaryOverride?: string,
+  options?: {
+    allowGetInChangeSet?: boolean
+    /** Strip the service-root prefix from sub-request URLs to produce
+     * relative URIs as the v4.01 spec prefers. Provide the bare
+     * service root (e.g. `https://example.com/odata`). Ignored when
+     * `forceAbsoluteUrls` is true. */
+    serviceRoot?: string
+    /** When true, sub-request URLs are kept absolute even for v4.01.
+     * Useful when the target server requires absolute URIs. */
+    forceAbsoluteUrls?: boolean
+  }
 ): ODataBatchSerializationResult {
   const boundary = boundaryOverride ?? `batch_${generateBoundaryToken()}`
+  const allowGet = options?.allowGetInChangeSet ?? false
+  const resolvedServiceRoot =
+    !options?.forceAbsoluteUrls &&
+    typeof options?.serviceRoot === 'string' &&
+    options.serviceRoot.length > 0
+      ? options.serviceRoot
+      : ''
+  const shouldRelativize = resolvedServiceRoot.length > 0
   const parts: string[] = []
+  const warnings: string[] = []
 
   // Group consecutive sub-requests by `atomicityGroup`. Same label
   // ⇒ one nested changeset; empty / undefined ⇒ standalone. Non-
@@ -90,11 +147,19 @@ export function serializeODataBatch(
     }
   }
 
+  /** Rewrite a sub-request's URL to relative when enabled. */
+  const maybeMakeRelative = (sub: ODataBatchSubRequest): ODataBatchSubRequest => {
+    if (!shouldRelativize) return sub
+    const relUrl = toRelativeBatchUrl(sub.url, resolvedServiceRoot)
+    if (relUrl === sub.url) return sub
+    return { ...sub, url: relUrl }
+  }
+
   for (const group of groups) {
     if (group.label === undefined) {
       // Standalone sub-request — inline directly.
       for (const sub of group.items) {
-        appendSubRequestPart(parts, boundary, sub)
+        appendSubRequestPart(parts, boundary, maybeMakeRelative(sub))
       }
       continue
     }
@@ -105,7 +170,22 @@ export function serializeODataBatch(
     parts.push(`Content-Type: multipart/mixed; boundary=${changesetBoundary}`)
     parts.push('')
     for (const sub of group.items) {
-      appendSubRequestPart(parts, changesetBoundary, sub)
+      // GET inside a change-set is spec-non-conformant. Warn when
+      // neither the batch-level flag nor the per-child override
+      // explicitly opts in, then include it anyway so the server
+      // response (likely a 4xx) is visible to the user.
+      if (
+        sub.method.toUpperCase() === 'GET' &&
+        !allowGet &&
+        !sub.forceIncludeInChangeSet
+      ) {
+        warnings.push(
+          `GET "${sub.url}" is inside change-set "${group.label}". ` +
+          'The OData spec forbids GET inside a change-set; many servers will reject this batch. ' +
+          'Enable "Allow GET in change-set" to suppress this warning.'
+        )
+      }
+      appendSubRequestPart(parts, changesetBoundary, maybeMakeRelative(sub))
     }
     parts.push(`--${changesetBoundary}--`)
   }
@@ -116,7 +196,8 @@ export function serializeODataBatch(
   return {
     contentType: `multipart/mixed; boundary=${boundary}`,
     body: parts.join('\r\n'),
-    boundary
+    boundary,
+    warnings
   }
 }
 
@@ -243,14 +324,31 @@ export interface ODataJsonBatchSerializationResult {
  * templates first — every field here is treated as concrete.
  */
 export function serializeODataJsonBatch(
-  subRequests: readonly ODataBatchSubRequest[]
+  subRequests: readonly ODataBatchSubRequest[],
+  options?: {
+    /** Strip the service-root prefix from sub-request URLs (v4.01 relative URIs). */
+    serviceRoot?: string
+    /** When true, URLs are kept absolute even for v4.01. */
+    forceAbsoluteUrls?: boolean
+  }
 ): ODataJsonBatchSerializationResult {
+  const resolvedServiceRoot =
+    !options?.forceAbsoluteUrls &&
+    typeof options?.serviceRoot === 'string' &&
+    options.serviceRoot.length > 0
+      ? options.serviceRoot
+      : ''
+  const shouldRelativize = resolvedServiceRoot.length > 0
+
   const requests = subRequests.map((sub, index) => {
     const id = String(index + 1)
+    const resolvedUrl = shouldRelativize
+      ? toRelativeBatchUrl(sub.url, resolvedServiceRoot)
+      : sub.url
     const entry: Record<string, unknown> = {
       id,
       method: sub.method.toUpperCase(),
-      url: sub.url
+      url: resolvedUrl
     }
     if (sub.atomicityGroup && sub.atomicityGroup.length > 0) {
       entry['atomicityGroup'] = sub.atomicityGroup

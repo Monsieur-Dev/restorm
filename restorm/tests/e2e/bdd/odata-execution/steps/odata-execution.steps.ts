@@ -148,8 +148,12 @@ When('I open the OData request {string}', async ({}, requestName: string) => {
 
 When('I send the OData request', async () => {
   const p = requirePage()
-  await p.locator('[data-testid="odata-request-send"]:visible').first().click()
-  await expect(p.locator('[data-testid="odata-response-body-editor"]:visible').first()).toBeVisible({ timeout: 30000 })
+  const sendBtn = p.locator('[data-testid="odata-request-send"]:visible').first()
+  await sendBtn.click()
+  // Wait for the send button to re-enable (response received, even on error).
+  // Batch requests show per-child cards instead of `odata-response-body-editor`
+  // so we gate on the send button rather than a specific response element.
+  await expect(sendBtn).toBeEnabled({ timeout: 30000 })
   await p.waitForTimeout(300)
 })
 
@@ -284,4 +288,24 @@ When('I click the OData next-page button', async () => {
   const p = requirePage()
   await p.locator('[data-testid="odata-response-load-next-page"]:visible').first().click()
   await p.waitForTimeout(500)
+})
+
+// JSON-batch per-child assertions. 66.16 renders each child as an
+// `odata-batch-sub-response-N` card (status + body editor) instead
+// of a single `odata-response-body-editor` for the raw batch envelope.
+Then('the OData batch response should have {int} sub-responses', async ({}, count: number) => {
+  const p = requirePage()
+  // Wait for the first card to appear, then count all cards.
+  await expect(p.locator('[data-testid="odata-batch-sub-response-0"]').first())
+    .toBeVisible({ timeout: 15000 })
+  const actual = await p.locator('[data-testid^="odata-batch-sub-response-"]').count()
+  if (actual !== count) throw new Error(`Expected ${count} batch sub-responses, got ${actual}`)
+})
+
+Then('the OData batch sub-response {int} body should contain {string}', async ({}, index: number, text: string) => {
+  const p = requirePage()
+  // The sub-body is a Monaco CodeEditor; its textarea holds the rendered JSON.
+  const bodyEditor = p.locator(`[data-testid="odata-batch-sub-body-${index}"]`).first()
+  await expect(bodyEditor).toBeVisible({ timeout: 10000 })
+  await expect(bodyEditor).toContainText(text, { timeout: 5000 })
 })
