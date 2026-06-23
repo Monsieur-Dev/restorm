@@ -68,6 +68,22 @@ async function typeIntoOdataUrl(p: Page, text: string): Promise<void> {
   await p.keyboard.type(text, { delay: 5 })
 }
 
+/** The `$filter` field is a Monaco-backed `VariableInputBox` (testid
+ * `odata-request-filter`), not a plain InputBox — it has no
+ * `${testId}-input`. Per-character typing races the suggestion widget,
+ * so clear then insert the whole string atomically with `insertText`;
+ * Escape closes any suggestion the insert popped. Mirrors the
+ * odata-petstore filter helper. */
+async function typeIntoOdataFilter(p: Page, text: string): Promise<void> {
+  const editor = p.locator('[data-testid="odata-request-filter"] .monaco-editor').first()
+  await editor.click()
+  await p.keyboard.press('Escape')
+  await p.keyboard.press('Control+A')
+  await p.keyboard.press('Delete')
+  await p.keyboard.insertText(text)
+  await p.keyboard.press('Escape')
+}
+
 /** Pick an option in an ECUI SelectBox by index: click its trigger,
  * then the option row (both force-clicked, matching the ECUI selectBox
  * test step). */
@@ -139,7 +155,8 @@ When('I send the OData request', async () => {
 
 When('I set the OData filter to {string} and select {string}', async ({}, filter: string, select: string) => {
   const p = requirePage()
-  await typeIntoOdataInput(p, 'odata-request-filter', filter)
+  await typeIntoOdataFilter(p, filter)
+  await p.keyboard.press('Escape')
   await typeIntoOdataInput(p, 'odata-request-select', select)
   await p.waitForTimeout(350)
 })
