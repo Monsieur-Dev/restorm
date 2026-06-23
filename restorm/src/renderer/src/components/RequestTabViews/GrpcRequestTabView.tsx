@@ -122,6 +122,11 @@ const GrpcClientTabView: React.FC<GrpcRequestTabViewProps> = ({
   const [backendCodeSnippets, setBackendCodeSnippets] = useState<string>('')
   const sourceIdRef = useRef<string>(crypto.randomUUID())
 
+  // Bumped on a quick-config load (or MCP update_request) so the metadata
+  // KV table remounts and re-reads its `initialRows` from the now-mutated
+  // request — the ECUI KeyValueTable seeds its rows from props once at mount.
+  const [transportEpoch, setTransportEpoch] = useState(0)
+
   const metadataRef = useRef<KeyValueTableHandle | null>(null)
 
   const handleRequestReset = useCallback(() => {
@@ -147,6 +152,8 @@ const GrpcClientTabView: React.FC<GrpcRequestTabViewProps> = ({
     setUrlState(current.url)
     setRequestMessageState(current.requestMessage)
     setCallTypeState(current.callType)
+    // Remount the metadata table so it re-reads the restored rows.
+    setTransportEpoch((n) => n + 1)
   }, [])
   useTransportReplaced(request, handleTransportReplaced)
 
@@ -400,6 +407,7 @@ const GrpcClientTabView: React.FC<GrpcRequestTabViewProps> = ({
         )}
       >
         <RestormKeyValueTable
+          key={`metadata-${transportEpoch}`}
           ref={metadataRef}
           variables={emptyVariables}
           helpers={handlebarsHelpers}

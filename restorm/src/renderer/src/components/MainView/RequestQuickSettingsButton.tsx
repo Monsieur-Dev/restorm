@@ -291,7 +291,7 @@ export const RequestQuickSettingsButton: React.FC<RequestQuickSettingsButtonProp
             secondary
             small
             line
-            icon="save"
+            icon="list-ordered"
             data-testid="quick-settings-open-button"
             onClick={() => {
               if (!open) {

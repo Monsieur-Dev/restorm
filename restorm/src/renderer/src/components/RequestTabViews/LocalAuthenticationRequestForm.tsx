@@ -224,7 +224,10 @@ export const LocalAuthenticationRequestForm: React.FC<LocalAuthenticationRequest
     setBodyFilePath(readBodyFilePath(current))
     setExpirationExpression(current.expirationExpression ?? '')
     setErrorCodesText(formatErrorCodes(current.authErrorCodes))
+    // Remount the headers + body-fields tables …
     setTransportEpoch((n) => n + 1)
+    // … and the produced-headers table, so it re-reads the restored rows.
+    setProducedHeadersRemountKey((k) => k + 1)
   }, [])
   useTransportReplaced(request, handleTransportReplaced)
 

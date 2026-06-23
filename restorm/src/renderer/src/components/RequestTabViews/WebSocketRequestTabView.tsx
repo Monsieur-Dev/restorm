@@ -121,6 +121,11 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
   const [backendCodeSnippets, setBackendCodeSnippets] = useState<string>('')
   const sourceIdRef = useRef<string>(crypto.randomUUID())
 
+  // Bumped on a quick-config load (or MCP update_request) so the headers KV
+  // table and the MQTT options panel remount and re-read their values from the
+  // now-mutated request (both seed local state from props once at mount).
+  const [transportEpoch, setTransportEpoch] = useState(0)
+
   const headersRef = useRef<KeyValueTableHandle | null>(null)
 
   const handleRequestReset = useCallback(() => {
@@ -146,6 +151,9 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
     setUrlState(current.url)
     setEventState(current.event ?? '')
     setMessageState(current.message)
+    // Remount the headers table + MQTT options panel so they re-read the
+    // restored values.
+    setTransportEpoch((n) => n + 1)
   }, [])
   useTransportReplaced(request, handleTransportReplaced)
 
@@ -407,7 +415,7 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
             </div>
           )}
           {request.protocol === 'mqtt' && (
-            <MqttOptionsPanel request={request} variables={emptyVariables} helpers={handlebarsHelpers} server={isServer} />
+            <MqttOptionsPanel key={`mqtt-${transportEpoch}`} request={request} variables={emptyVariables} helpers={handlebarsHelpers} server={isServer} />
           )}
           <div style={{ flex: 1, border: '1px solid var(--panel-border)', borderRadius: 3 }}>
             <CodeEditor
@@ -442,6 +450,7 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
         )}
       >
         <RestormKeyValueTable
+          key={`headers-${transportEpoch}`}
           ref={headersRef}
           variables={emptyVariables}
           helpers={handlebarsHelpers}
