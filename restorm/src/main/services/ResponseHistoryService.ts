@@ -668,7 +668,7 @@ class ResponseHistoryService {
       requestHeaders,
       statusCode: result.statusCode ?? 0,
       responseBody: result.responseBody ?? '',
-      responseHeaders: [],
+      responseHeaders: this.headersRecordToKeyValues(result.headers),
       fault: result.fault,
       timings: result.timings,
       ...(result.error ? { error: result.error } : {})

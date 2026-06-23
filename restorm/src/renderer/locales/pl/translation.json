@@ -467,7 +467,8 @@
     "tabs": {
       "body": "Treść",
       "headers": "Nagłówki"
-    }
+    },
+    "malformedXmlError": "Nieprawidłowa odpowiedź XML"
   },
   "websocket": {
     "connect": "Połącz",

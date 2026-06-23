@@ -19,6 +19,7 @@ import { DocumentEvents, type RequestHistoryEventPayload } from '../../services/
 import { RestormVariableInputBox } from '../RestormVariableInputBox'
 import { RestormKeyValueTable, type KeyValueTableHandle } from '../RestormKeyValueTable'
 import type { SoapRequest, SoapResponse, KeyValue, ResponseHistoryDetail } from '../../../../shared/types/collections'
+import { StringValue } from '../../../../shared/types/collections'
 import { useEnvironmentContext } from '../../contexts/useEnvironmentContext'
 import type { SOAPExecutionResult } from '../../types/global.d'
 import { BaseRequestTabView } from './BaseRequestTabView'
@@ -229,7 +230,11 @@ export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({
           requestHeaders: request.headers,
           statusCode: res.statusCode ?? 0,
           responseBody: res.responseBody ?? '',
-          responseHeaders: [],
+          responseHeaders: Object.entries(res.headers ?? {}).flatMap(([key, val]) =>
+            Array.isArray(val)
+              ? val.map((v, i) => ({ id: `${key}-${i}`, key, value: new StringValue(v), enabled: true, description: '' }))
+              : [{ id: key, key, value: new StringValue(val), enabled: true, description: '' }]
+          ),
           fault: res.fault,
           timings: res.timings
         }
@@ -311,11 +316,23 @@ export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({
     resp: SoapResponse | null,
     meta?: { service?: string; operation?: string; soapAction?: string }
   ) => {
+    // Detect malformed XML: the body is present but not parseable as XML.
+    // A SOAP response must start with a valid XML declaration or envelope tag.
+    const isMalformedXml = Boolean(
+      resp?.responseBody &&
+      !resp.fault &&
+      !resp.responseBody.trimStart().startsWith('<')
+    )
+
     const infosContent = resp ? (
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8, fontSize: 12 }}>
         <div style={{ display: 'flex', gap: 8 }}>
           <span style={{ fontWeight: 600, minWidth: 100 }}>Status:</span>
-          <span style={{ color: resp.statusCode >= 200 && resp.statusCode < 300 ? 'var(--testing-iconPassed)' : 'var(--testing-iconFailed)' }}>
+          <span
+            data-testid="soap-response-status"
+            data-status-code={resp.statusCode}
+            style={{ color: resp.statusCode >= 200 && resp.statusCode < 300 ? 'var(--testing-iconPassed)' : 'var(--testing-iconFailed)' }}
+          >
             {resp.statusCode}
           </span>
         </div>
@@ -336,11 +353,40 @@ export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({
           <span>{meta?.soapAction ?? '-'}</span>
         </div>
         {resp.fault && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginTop: 8 }}>
+          <div
+            data-testid="soap-response-fault"
+            style={{ display: 'flex', flexDirection: 'column', gap: 4, marginTop: 8 }}
+          >
             <span style={{ fontWeight: 600, color: 'var(--testing-iconFailed)' }}>SOAP Fault:</span>
             <div style={{ padding: 4, background: 'var(--inputValidation-errorBackground)', borderRadius: 3 }}>
               <div><strong>Code:</strong> {resp.fault.code}</div>
-              <div><strong>Message:</strong> {resp.fault.message}</div>
+              <div data-testid="soap-response-fault-message"><strong>Message:</strong> {resp.fault.message}</div>
+            </div>
+          </div>
+        )}
+        {isMalformedXml && (
+          <div
+            data-testid="soap-response-malformed-error"
+            style={{ display: 'flex', gap: 4, marginTop: 8, color: 'var(--testing-iconFailed)' }}
+          >
+            <span style={{ fontWeight: 600 }}>Error:</span>
+            <span>{t('soap.malformedXmlError', 'Invalid XML response')}</span>
+          </div>
+        )}
+        {resp.responseHeaders.length > 0 && (
+          <div style={{ marginTop: 8 }}>
+            <div style={{ fontWeight: 600, marginBottom: 4 }}>Response Headers:</div>
+            <div data-testid="soap-response-headers-list" style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+              {resp.responseHeaders.map((h, idx) => (
+                <div
+                  key={h.id ?? `header-${idx}`}
+                  data-header-key={h.key.toLowerCase()}
+                  style={{ display: 'flex', gap: 8, fontFamily: 'monospace', fontSize: 11 }}
+                >
+                  <span style={{ color: 'var(--descriptionForeground)', minWidth: 160 }}>{h.key}</span>
+                  <span>{h.value.toString()}</span>
+                </div>
+              ))}
             </div>
           </div>
         )}
@@ -360,7 +406,7 @@ export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({
     ) : null
 
     return { infosContent, responseContent, jsonData: undefined }
-  }, [])
+  }, [t])
 
   const { infosContent, responseContent } = useMemo(
     () => buildSoapResponseView(response, { service: request.service, operation: request.operation, soapAction: request.soapAction }),

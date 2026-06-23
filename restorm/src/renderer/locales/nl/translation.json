@@ -465,7 +465,8 @@
     "tabs": {
       "body": "Body",
       "headers": "Headers"
-    }
+    },
+    "malformedXmlError": "Ongeldig XML-antwoord"
   },
   "websocket": {
     "connect": "Verbinden",

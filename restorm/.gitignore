@@ -88,3 +88,4 @@ tests/e2e/samples/grpc-sample.restorm.responses.zip
 tests/e2e/samples/mqtt-sample.restorm.responses.zip
 tests/e2e/samples/http-sample.restorm.responses.zip
 tests/e2e/samples/grpc-server-sample.restorm.responses.zip
+tests/e2e/samples/soap-sample.restorm.responses.zip

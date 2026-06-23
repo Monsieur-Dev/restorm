@@ -466,7 +466,8 @@
     "tabs": {
       "body": "Corp",
       "headers": "Antete"
-    }
+    },
+    "malformedXmlError": "Răspuns XML invalid"
   },
   "websocket": {
     "connect": "Conectează",

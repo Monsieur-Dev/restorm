@@ -465,7 +465,8 @@
     "tabs": {
       "body": "Corpo",
       "headers": "Header"
-    }
+    },
+    "malformedXmlError": "Risposta XML non valida"
   },
   "websocket": {
     "connect": "Connetti",

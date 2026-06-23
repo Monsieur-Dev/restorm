@@ -464,7 +464,8 @@
     "tabs": {
       "body": "ボディ",
       "headers": "ヘッダー"
-    }
+    },
+    "malformedXmlError": "無効なXMLレスポンス"
   },
   "websocket": {
     "connect": "接続",

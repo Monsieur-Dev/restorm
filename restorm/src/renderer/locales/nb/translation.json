@@ -465,7 +465,8 @@
     "tabs": {
       "body": "Body",
       "headers": "Headere"
-    }
+    },
+    "malformedXmlError": "Ugyldig XML-svar"
   },
   "websocket": {
     "connect": "Koble til",

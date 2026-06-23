@@ -464,7 +464,8 @@
     "tabs": {
       "body": "Body",
       "headers": "Header"
-    }
+    },
+    "malformedXmlError": "Respons XML tidak valid"
   },
   "websocket": {
     "connect": "Hubungkan",

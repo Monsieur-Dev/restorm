@@ -13,7 +13,11 @@ const SERVICES = [
   { name: 'Petstore OpenAPI 3.0', url: 'http://localhost:8081/openapi.json' },
   { name: 'GraphQL', url: 'http://localhost:4000', method: 'POST', body: '{"query":"{ __typename }"}', headers: { 'Content-Type': 'application/json' } },
   { name: 'HTTP util', url: 'http://localhost:8082/health' },
-  { name: 'SOAP', url: 'http://localhost:8090/castlemock/web' },
+  // The E2E suite uses the soap-server mock (:8091), not Castle Mock (:8090).
+  // soap-server is a zero-dependency node:http server started by the CI
+  // manual-start step (no seeding required).
+  { name: 'SOAP mock server', url: 'http://localhost:8091/health' },
+  { name: 'SOAP (Castle Mock)', url: 'http://localhost:8090/castlemock/web' },
   // No Socket.IO / WS mock: restorm self-hosts those servers in-instance.
   { name: 'OData PetStore', url: 'http://localhost:5100/health' },
   { name: 'Auth Service', url: 'http://localhost:5110/health' },

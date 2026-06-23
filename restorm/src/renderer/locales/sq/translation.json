@@ -465,7 +465,8 @@
     "tabs": {
       "body": "Trupi",
       "headers": "Kokat"
-    }
+    },
+    "malformedXmlError": "Përgjigje XML e pavlefshme"
   },
   "websocket": {
     "connect": "Lidh",

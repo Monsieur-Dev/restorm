@@ -44,8 +44,14 @@ export const SERVICES = {
     baseUrl: 'http://localhost:8082'
   },
   soap: {
+    /** Castle Mock — kept for manual local testing; E2E suite uses soapServer below. */
     name: 'SOAP Server (Castle Mock)',
     baseUrl: 'http://localhost:8090'
+  },
+  soapServer: {
+    /** Zero-dependency SOAP mock used by the soap-execution E2E suite. */
+    name: 'SOAP mock server',
+    baseUrl: 'http://localhost:8091'
   },
   grpc: {
     name: 'gRPC Server (grpcbin)',
@@ -74,7 +80,11 @@ export function isDockerAvailable(): boolean {
 export function startDocker(): void {
   console.log('Starting Docker containers...')
   try {
-    execSync(`docker compose -f "${DOCKER_COMPOSE_PATH}" up -d`, {
+    // --wait makes compose block until every container with a healthcheck
+    // reports healthy (not just "started"). This prevents a race where the
+    // e2e suite begins before soap-server (or other fast-starting services)
+    // are actually ready to serve requests.
+    execSync(`docker compose -f "${DOCKER_COMPOSE_PATH}" up -d --wait`, {
       stdio: 'inherit',
       timeout: 120000
     })
@@ -154,9 +164,10 @@ export async function waitForServices(): Promise<void> {
       url: `${SERVICES.httpUtil.baseUrl}/health`
     },
     {
-      name: 'SOAP (Castle Mock)',
-      url: `${SERVICES.soap.baseUrl}/castlemock/web`,
-      retries: 40 // Castle Mock takes longer to start
+      // The E2E suite targets the soap-server mock (:8091), not Castle Mock.
+      // soap-server is a zero-dependency node:http server that starts instantly.
+      name: 'SOAP mock server',
+      url: `${SERVICES.soapServer.baseUrl}/health`
     }
     // No Socket.IO check: restorm self-hosts its Socket.IO server in-instance.
   ]
