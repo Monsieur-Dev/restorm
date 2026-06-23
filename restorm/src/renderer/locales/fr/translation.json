@@ -260,7 +260,8 @@
         "socketio": "Requête Socket.IO",
         "mqtt": "Requête MQTT",
         "mqttServer": "Courtier MQTT",
-        "grpcServer": "Serveur gRPC fictif"
+        "grpcServer": "Serveur gRPC fictif",
+        "soapServer": "Serveur mock SOAP"
       }
     },
     "deleteConfirm": {
@@ -466,7 +467,24 @@
       "body": "Corps",
       "headers": "En-têtes"
     },
-    "malformedXmlError": "Réponse XML invalide"
+    "malformedXmlError": "Réponse XML invalide",
+    "server": {
+      "startListening": "Démarrer le serveur mock SOAP",
+      "stopListening": "Arrêter le serveur mock SOAP",
+      "notListening": "À l'arrêt",
+      "served": "En écoute — {{count}} requête(s) servie(s)",
+      "listenFailed": "Impossible de démarrer le serveur mock SOAP",
+      "portLabel": "Port",
+      "routeLabel": "Route",
+      "operationNameLabel": "Nom de l'opération",
+      "operationNamePlaceholder": "Nom de l'opération",
+      "soapActionLabel": "SOAPAction",
+      "soapActionPlaceholder": "SOAPAction (optionnel)",
+      "faultLabel": "Faute",
+      "removeOperation": "Supprimer l'opération",
+      "addOperation": "Ajouter une opération",
+      "noCodeSnippets": "Un serveur mock SOAP n'a pas d'extrait de code client."
+    }
   },
   "websocket": {
     "connect": "Connecter",
@@ -1023,7 +1041,9 @@
       "mqttClose": "Fermeture MQTT",
       "httpListen": "Serveur HTTP",
       "httpClose": "Fermeture HTTP",
-      "grpcServerClose": "Fermeture serveur gRPC"
+      "grpcServerClose": "Fermeture serveur gRPC",
+      "soapListen": "Serveur SOAP",
+      "soapClose": "Fermeture SOAP"
     },
     "comparator": {
       "result": "résultat"
@@ -1589,7 +1609,9 @@
       "httpListen": "Héberge un serveur HTTP fictif local et écoute indéfiniment. « connected » se déclenche une fois le serveur démarré ; chaque requête servie réémet ses données sur le port « served ». Le serveur reste actif jusqu’à une fermeture HTTP (ou un Stop), puis « done » se déclenche. Pas de sortie response — il sert, il n’appelle pas.",
       "httpClose": "Arrête un serveur HTTP fictif déjà en écoute (déclaré par un nœud serveur HTTP) et libère son port.",
       "grpcListen": "Héberge un serveur gRPC fictif local et écoute indéfiniment. « connected » se déclenche une fois le serveur en écoute ; chaque appel servi réémet ses données sur le port « served ». Le serveur reste actif jusqu’à une fermeture serveur gRPC (ou un Stop), puis « done » se déclenche. Pas de sortie response — il sert, il n’appelle pas.",
-      "grpcServerClose": "Arrête un serveur gRPC fictif déjà en écoute (déclaré par un nœud serveur gRPC) et libère son port."
+      "grpcServerClose": "Arrête un serveur gRPC fictif déjà en écoute (déclaré par un nœud serveur gRPC) et libère son port.",
+      "soapListen": "Héberge un serveur mock SOAP local et écoute indéfiniment. Chaque requête entrante est dirigée vers une opération configurée (selon son SOAPAction ou le nom d'opération du corps) et reçoit l'enveloppe SOAP préenregistrée (une opération de type faute renvoie `<soap:Fault>`). `connected` se déclenche dès que le serveur écoute ; chaque requête servie réémet ses données sur le port `served`. Le serveur reste actif jusqu'à une fermeture SOAP (ou un arrêt), puis `done` se déclenche.",
+      "soapClose": "Arrête un serveur mock SOAP déjà en écoute (déclaré par un nœud serveur SOAP) et libère son port."
     },
     "legend": {
       "title": "Légende",

@@ -295,6 +295,9 @@ export const soapExecuteArgs = z.tuple([
 
 export const soapCancelArgs = z.tuple([requestIdArg])
 export const soapIsActiveArgs = z.tuple([requestIdArg])
+export const soapListenArgs = z.tuple([requestIdArg])
+export const soapStopArgs = z.tuple([requestIdArg])
+export const soapIsListeningArgs = z.tuple([requestIdArg])
 
 // ==========================================================================
 // gRPC Execution

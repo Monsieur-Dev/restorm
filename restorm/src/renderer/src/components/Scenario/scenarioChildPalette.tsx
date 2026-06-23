@@ -69,6 +69,9 @@ export const SCENARIO_ADD_REQUEST_GROUPS: ScenarioAddEntry[][] = [
   [
     { kind: 'graphql', badge: 'QUERY', labelKey: 'sidebar.contextMenu.add.graphql', defaultLabel: 'GraphQL request' },
     { kind: 'soap', badge: 'SOAP', labelKey: 'sidebar.contextMenu.add.soap', defaultLabel: 'SOAP request' },
+    // SOAP mock server is server-only (like the HTTP mock server): dropping it
+    // creates a server: true SOAP request + a bound soapListen node.
+    { kind: 'soap-server', badge: 'SOAP', mode: 'server', labelKey: 'sidebar.contextMenu.add.soapServer', defaultLabel: 'SOAP server' },
     { kind: 'odata', badge: 'ODATA', labelKey: 'sidebar.contextMenu.add.odata', defaultLabel: 'OData request' }
   ],
   [
@@ -172,8 +175,22 @@ export interface ScenarioAddGrpcServerActionEntry {
   defaultLabel: string
 }
 
+/** SOAP mock-server action entries — CLOSE only (the listen comes from the
+ * "SOAP server" request entry, which drops a bound soapListen). Mirrors the HTTP
+ * section; badged with the server pill + the close codicon. */
+export interface ScenarioAddSoapActionEntry {
+  kind: 'soapClose'
+  icon: string
+  labelKey: string
+  defaultLabel: string
+}
+
 export const SCENARIO_ADD_GRPC_SERVER_ACTIONS: ScenarioAddGrpcServerActionEntry[] = [
   { kind: 'grpcServerClose', icon: 'debug-disconnect', labelKey: 'scenario.nodes.grpcServerClose', defaultLabel: 'gRPC server close' }
+]
+
+export const SCENARIO_ADD_SOAP_ACTIONS: ScenarioAddSoapActionEntry[] = [
+  { kind: 'soapClose', icon: 'debug-disconnect', labelKey: 'scenario.nodes.soapClose', defaultLabel: 'SOAP close' }
 ]
 
 /** The protocol/scenario badge glyph for a palette entry — `mode: 'server'`
@@ -205,4 +222,9 @@ export function scenarioAddMqttIcon(icon: string): ReactNode {
 /** The server-pill HTTP badge with the action's codicon inside (HTTP section). */
 export function scenarioAddHttpIcon(icon: string): ReactNode {
   return React.createElement(Badge, { type: 'GET', mode: 'server', icon })
+}
+
+/** The server-pill SOAP badge with the action's codicon inside (SOAP section). */
+export function scenarioAddSoapIcon(icon: string): ReactNode {
+  return React.createElement(Badge, { type: 'SOAP', mode: 'server', icon })
 }

@@ -263,6 +263,41 @@ export const grpcServerCloseExecutor: NodeExecutor = (_act, ctx) => {
   return { outputs: [] }
 }
 
+/**
+ * A (soapListen): HOST a local SOAP mock server. DERIVES from httpListen — same
+ * long-lived listener machinery, but the `soap-server` transport answers SOAP
+ * envelopes (operation dispatch + `<soap:Fault>`). `connected` fires once the
+ * server is up, each SERVED request re-emits on `served`, and `done` fires when
+ * a soapClose (or a Stop) ends it.
+ */
+export const soapListenExecutor: NodeExecutor = (_act, ctx) => {
+  const cfg = ctx.node.config as { requestId?: unknown; connectionName?: unknown }
+  if (typeof cfg.requestId !== 'string' || cfg.requestId === '') {
+    throw new Error(`soapListen node ${ctx.node.id} has no bound requestId`)
+  }
+  const connectionName = typeof cfg.connectionName === 'string' && cfg.connectionName.trim() !== ''
+    ? cfg.connectionName.trim()
+    : cfg.requestId
+  return {
+    outputs: [],
+    scopeAction: { type: 'openSocketioConnect', transport: 'soap-server', requestId: cfg.requestId, events: [], connectionName }
+  }
+}
+
+/** C (soapClose): stop the SOAP mock server named by `config.connectionNodeId`
+ * (firing that soapListen node's `done`). DERIVES from httpClose. */
+export const soapCloseExecutor: NodeExecutor = (_act, ctx) => {
+  const cfg = ctx.node.config as { connectionNodeId?: unknown }
+  const connectionNodeId = typeof cfg.connectionNodeId === 'string' ? cfg.connectionNodeId : ''
+  if (connectionNodeId === '') throw new Error('soapClose: no server selected')
+  if (!ctx.socketio) throw new Error('soapClose: socket bridge unavailable')
+  if (!ctx.socketio.has(connectionNodeId)) {
+    throw new Error('soapClose: the referenced server does not exist in this run')
+  }
+  ctx.socketio.close(connectionNodeId)
+  return { outputs: [] }
+}
+
 /** B (socketioSend): emit on the referenced connection. */
 export const socketioSendExecutor: NodeExecutor = (act, ctx) => {
   const cfg = ctx.node.config as { connectionNodeId?: unknown; channel?: unknown; payload?: unknown }

@@ -40,6 +40,7 @@ export type AddChildKind =
   | 'grpc-bidi'
   | 'grpc-server'
   | 'soap'
+  | 'soap-server'
   | 'websocket'
   | 'socketio'
   | 'socketio-server'
@@ -175,6 +176,14 @@ export const buildAddSubmenu = (
     label: t('sidebar.contextMenu.add.soap'),
     icon: React.createElement(Badge, { type: 'SOAP' }),
     onClick: () => { onAddChildItem(parentId, 'soap') }
+  },
+  // SOAP mock server: restorm hosts a local SOAP endpoint that answers configured
+  // operations with canned XML envelopes (incl. <soap:Fault>) — grouped with SOAP.
+  {
+    id: `add-soap-server-${parentId}`,
+    label: t('sidebar.contextMenu.add.soapServer'),
+    icon: React.createElement(Badge, { type: 'SOAP', mode: 'server' }),
+    onClick: () => { onAddChildItem(parentId, 'soap-server') }
   },
   { id: `sep-add-ws-${parentId}`, isSeparator: true, label: '' },
   // WebSocket group: client + server together.

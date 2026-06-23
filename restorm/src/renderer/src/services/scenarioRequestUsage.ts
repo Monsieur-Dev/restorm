@@ -30,8 +30,8 @@ function walkScenarios(items: FolderItem[], visit: (scenario: Scenario) => void)
 
 /** Scenario node kinds that bind a sidebar request through `config.requestId` —
  * the one-shot `httpRequest`, the long-lived streaming connect nodes (Socket.IO /
- * raw WebSocket / MQTT / gRPC), and the HTTP mock-server `httpListen` (bound to a
- * `server: true` request). DERIVED from the kind registry's `requestBinding` flag
+ * raw WebSocket / MQTT / gRPC), and the HTTP / SOAP mock-server `httpListen` /
+ * `soapListen` (bound to a `server: true` request). DERIVED from the kind registry's `requestBinding` flag
  * (the single source of truth) so a request ties to the scenario for BOTH the
  * "used in scenarios" reverse-nav and the delete → move-into-scenario flow. (A
  * kind like `httpClose` binds a `connectionNodeId`, not a request, so its

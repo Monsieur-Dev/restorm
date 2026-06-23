@@ -177,6 +177,10 @@ declare global {
         cancel: (requestId: string) => Promise<boolean>
         isActive: (requestId: string) => Promise<boolean>
         onProgress: (callback: (data: RequestProgressData) => void) => (() => void)
+        listen: (requestId: string) => Promise<{ success: boolean; listening: boolean; error?: string }>
+        stop: (requestId: string) => Promise<boolean>
+        isListening: (requestId: string) => Promise<boolean>
+        onServerServed: (callback: (data: { requestId: string; count: number }) => void) => (() => void)
       }
       grpc: {
         execute: (input: GRPCExecutionInput) => Promise<GRPCExecutionResult>
@@ -617,6 +621,8 @@ export interface FullRequestData {
   soapService?: string | undefined
   operation?: string | undefined
   soapBody?: string | undefined
+  /** SOAP mock server (server === true): the operations the hosted mock answers. */
+  soapMockOperations?: { name: string; soapAction?: string | undefined; responseBody: string; isFault?: boolean | undefined }[] | undefined
   protocol?: string | undefined
   event?: string | undefined
   message?: string | undefined

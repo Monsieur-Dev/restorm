@@ -259,7 +259,8 @@
         "socketio": "Yêu cầu Socket.IO",
         "mqtt": "MQTT request",
         "mqttServer": "MQTT broker",
-        "grpcServer": "Máy chủ gRPC giả lập"
+        "grpcServer": "Máy chủ gRPC giả lập",
+        "soapServer": "Máy chủ mô phỏng SOAP"
       }
     },
     "deleteConfirm": {
@@ -465,7 +466,24 @@
       "body": "Body",
       "headers": "Header"
     },
-    "malformedXmlError": "Phản hồi XML không hợp lệ"
+    "malformedXmlError": "Phản hồi XML không hợp lệ",
+    "server": {
+      "startListening": "Khởi động máy chủ mô phỏng SOAP",
+      "stopListening": "Dừng máy chủ mô phỏng SOAP",
+      "notListening": "Không lắng nghe",
+      "served": "Đang lắng nghe — đã phục vụ {{count}} yêu cầu",
+      "listenFailed": "Không thể khởi động máy chủ mô phỏng SOAP",
+      "portLabel": "Cổng",
+      "routeLabel": "Tuyến",
+      "operationNameLabel": "Tên thao tác",
+      "operationNamePlaceholder": "Tên thao tác",
+      "soapActionLabel": "SOAPAction",
+      "soapActionPlaceholder": "SOAPAction (tùy chọn)",
+      "faultLabel": "Lỗi",
+      "removeOperation": "Xóa thao tác",
+      "addOperation": "Thêm thao tác",
+      "noCodeSnippets": "Máy chủ mô phỏng SOAP không có đoạn mã máy khách."
+    }
   },
   "websocket": {
     "connect": "Kết nối",
@@ -1022,7 +1040,9 @@
       "mqttClose": "MQTT close",
       "httpListen": "HTTP server",
       "httpClose": "HTTP close",
-      "grpcServerClose": "Đóng máy chủ gRPC"
+      "grpcServerClose": "Đóng máy chủ gRPC",
+      "soapListen": "Máy chủ SOAP",
+      "soapClose": "Đóng SOAP"
     },
     "comparator": {
       "result": "kết quả"
@@ -1585,7 +1605,9 @@
       "httpListen": "Hosts a local HTTP mock server and listens indefinitely. `connected` fires once it is listening; each served request re-emits its data on the `served` port. The server stays up until an HTTP close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
       "httpClose": "Stops an already-listening HTTP mock server (declared by an HTTP server node), freeing its port.",
       "grpcListen": "Hosts a local gRPC mock server and listens indefinitely. `connected` fires once it is listening; each served call re-emits its data on the `served` port. The server stays up until a gRPC server close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
-      "grpcServerClose": "Stops an already-listening gRPC mock server (declared by a gRPC server node), freeing its port."
+      "grpcServerClose": "Stops an already-listening gRPC mock server (declared by a gRPC server node), freeing its port.",
+      "soapListen": "Lưu trữ một máy chủ mô phỏng SOAP cục bộ và lắng nghe vô thời hạn. Mỗi yêu cầu đến được định tuyến đến một thao tác đã cấu hình (theo SOAPAction của nó hoặc tên thao tác trong phần thân) và được trả lời bằng phong bì SOAP định sẵn (thao tác lỗi trả về `<soap:Fault>`). `connected` kích hoạt ngay khi máy chủ lắng nghe; mỗi yêu cầu được phục vụ sẽ phát lại dữ liệu của nó trên cổng `served`. Máy chủ vẫn hoạt động cho đến khi đóng SOAP (hoặc dừng), sau đó `done` kích hoạt.",
+      "soapClose": "Dừng một máy chủ mô phỏng SOAP đang lắng nghe (được khai báo bởi một nút máy chủ SOAP) và giải phóng cổng của nó."
     },
     "legend": {
       "title": "Chú giải",

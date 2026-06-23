@@ -259,7 +259,8 @@
         "socketio": "Permintaan Socket.IO",
         "mqtt": "MQTT request",
         "mqttServer": "Broker MQTT",
-        "grpcServer": "Server mock gRPC"
+        "grpcServer": "Server mock gRPC",
+        "soapServer": "Server tiruan SOAP"
       }
     },
     "deleteConfirm": {
@@ -465,7 +466,24 @@
       "body": "Body",
       "headers": "Header"
     },
-    "malformedXmlError": "Respons XML tidak valid"
+    "malformedXmlError": "Respons XML tidak valid",
+    "server": {
+      "startListening": "Mulai server tiruan SOAP",
+      "stopListening": "Hentikan server tiruan SOAP",
+      "notListening": "Tidak mendengarkan",
+      "served": "Mendengarkan — {{count}} permintaan dilayani",
+      "listenFailed": "Tidak dapat memulai server tiruan SOAP",
+      "portLabel": "Port",
+      "routeLabel": "Rute",
+      "operationNameLabel": "Nama operasi",
+      "operationNamePlaceholder": "Nama operasi",
+      "soapActionLabel": "SOAPAction",
+      "soapActionPlaceholder": "SOAPAction (opsional)",
+      "faultLabel": "Kesalahan",
+      "removeOperation": "Hapus operasi",
+      "addOperation": "Tambah operasi",
+      "noCodeSnippets": "Server tiruan SOAP tidak memiliki cuplikan kode klien."
+    }
   },
   "websocket": {
     "connect": "Hubungkan",
@@ -1022,7 +1040,9 @@
       "mqttClose": "MQTT close",
       "httpListen": "HTTP server",
       "httpClose": "HTTP close",
-      "grpcServerClose": "Tutup server gRPC"
+      "grpcServerClose": "Tutup server gRPC",
+      "soapListen": "Server SOAP",
+      "soapClose": "Tutup SOAP"
     },
     "comparator": {
       "result": "hasil"
@@ -1585,7 +1605,9 @@
       "httpListen": "Hosts a local HTTP mock server and listens indefinitely. `connected` fires once it is listening; each served request re-emits its data on the `served` port. The server stays up until an HTTP close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
       "httpClose": "Stops an already-listening HTTP mock server (declared by an HTTP server node), freeing its port.",
       "grpcListen": "Hosts a local gRPC mock server and listens indefinitely. `connected` fires once it is listening; each served call re-emits its data on the `served` port. The server stays up until a gRPC server close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
-      "grpcServerClose": "Stops an already-listening gRPC mock server (declared by a gRPC server node), freeing its port."
+      "grpcServerClose": "Stops an already-listening gRPC mock server (declared by a gRPC server node), freeing its port.",
+      "soapListen": "Menjadi host server tiruan SOAP lokal dan mendengarkan tanpa batas. Setiap permintaan masuk diarahkan ke operasi yang dikonfigurasi (berdasarkan SOAPAction-nya atau nama operasi di body) dan dijawab dengan amplop SOAP yang telah ditentukan (operasi kesalahan mengembalikan `<soap:Fault>`). `connected` dipicu segera setelah server mendengarkan; setiap permintaan yang dilayani memancarkan kembali datanya di port `served`. Server tetap aktif hingga penutupan SOAP (atau penghentian), lalu `done` dipicu.",
+      "soapClose": "Menghentikan server tiruan SOAP yang sudah mendengarkan (dideklarasikan oleh node server SOAP) dan membebaskan port-nya."
     },
     "legend": {
       "title": "Legenda",

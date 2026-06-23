@@ -3,5 +3,6 @@ export { HTTPRequestTabView, type HTTPRequestTabViewProps } from './HTTPRequestT
 export { GraphQLRequestTabView, type GraphQLRequestTabViewProps } from './GraphQLRequestTabView'
 export { GrpcRequestTabView, type GrpcRequestTabViewProps } from './GrpcRequestTabView'
 export { SoapRequestTabView, type SoapRequestTabViewProps } from './SoapRequestTabView'
+export { SoapServerRequestTabView, type SoapServerRequestTabViewProps } from './SoapServerRequestTabView'
 export { WebSocketRequestTabView, type WebSocketRequestTabViewProps } from './WebSocketRequestTabView'
 export { ODataRequestTabView, type ODataRequestTabViewProps } from './ODataRequestTabView'

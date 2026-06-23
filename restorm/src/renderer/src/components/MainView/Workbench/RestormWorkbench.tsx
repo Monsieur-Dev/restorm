@@ -28,6 +28,7 @@ import {
   GraphQLRequestTabView,
   GrpcRequestTabView,
   SoapRequestTabView,
+  SoapServerRequestTabView,
   WebSocketRequestTabView,
   ODataRequestTabView
 } from '../../RequestTabViews'
@@ -492,11 +493,17 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
       )
     }
 
-    // SOAP request tab
+    // SOAP request tab. A SOAP mock-server tab carries the SRV capsule + the
+    // listening border-beam while it hosts — the same beam the sidebar tree
+    // paints, driven by the same listening state.
     if (isSoapRequestTab(restormTab)) {
+      const isServer = restormTab.request.server === true
+      const badge = <Badge type="SOAP" mode={isServer ? 'server' : undefined} />
       return (
         <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-          <Badge type="SOAP" />
+          {isServer
+            ? <ServerListeningBadge requestId={restormTab.request.id}>{badge}</ServerListeningBadge>
+            : badge}
           <span>{restormTab.request.name}</span>
           <ItemSecretBadges itemId={restormTab.request.id} />
           {renderDirtyIndicator(restormTab)}
@@ -1156,9 +1163,9 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
             starLeftAction={starLeftActionFor(request)}
           >
             <div style={{ flex: 1, minHeight: 0, minWidth: 0, padding: '0 16px 8px 16px' }}>
-              <SoapRequestTabView
-                request={request}
-              />
+              {request.server === true
+                ? <SoapServerRequestTabView request={request} />
+                : <SoapRequestTabView request={request} />}
             </div>
           </RestormWorkbenchTab>
         </EnvironmentProvider>

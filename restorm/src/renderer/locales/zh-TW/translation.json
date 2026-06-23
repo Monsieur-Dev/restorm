@@ -259,7 +259,8 @@
         "socketio": "Socket.IO 要求",
         "mqtt": "MQTT request",
         "mqttServer": "MQTT 代理",
-        "grpcServer": "gRPC 模擬伺服器"
+        "grpcServer": "gRPC 模擬伺服器",
+        "soapServer": "SOAP 模擬伺服器"
       }
     },
     "deleteConfirm": {
@@ -465,7 +466,24 @@
       "body": "內文",
       "headers": "標頭"
     },
-    "malformedXmlError": "無效的XML回應"
+    "malformedXmlError": "無效的XML回應",
+    "server": {
+      "startListening": "啟動 SOAP 模擬伺服器",
+      "stopListening": "停止 SOAP 模擬伺服器",
+      "notListening": "未接聽",
+      "served": "正在接聽 — 已處理 {{count}} 個要求",
+      "listenFailed": "無法啟動 SOAP 模擬伺服器",
+      "portLabel": "連接埠",
+      "routeLabel": "路由",
+      "operationNameLabel": "作業名稱",
+      "operationNamePlaceholder": "作業名稱",
+      "soapActionLabel": "SOAPAction",
+      "soapActionPlaceholder": "SOAPAction（選用）",
+      "faultLabel": "故障",
+      "removeOperation": "移除作業",
+      "addOperation": "新增作業",
+      "noCodeSnippets": "SOAP 模擬伺服器沒有用戶端程式碼片段。"
+    }
   },
   "websocket": {
     "connect": "連線",
@@ -1022,7 +1040,9 @@
       "mqttClose": "MQTT close",
       "httpListen": "HTTP server",
       "httpClose": "HTTP close",
-      "grpcServerClose": "關閉 gRPC 伺服器"
+      "grpcServerClose": "關閉 gRPC 伺服器",
+      "soapListen": "SOAP 伺服器",
+      "soapClose": "關閉 SOAP"
     },
     "comparator": {
       "result": "結果"
@@ -1585,7 +1605,9 @@
       "httpListen": "Hosts a local HTTP mock server and listens indefinitely. `connected` fires once it is listening; each served request re-emits its data on the `served` port. The server stays up until an HTTP close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
       "httpClose": "Stops an already-listening HTTP mock server (declared by an HTTP server node), freeing its port.",
       "grpcListen": "Hosts a local gRPC mock server and listens indefinitely. `connected` fires once it is listening; each served call re-emits its data on the `served` port. The server stays up until a gRPC server close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
-      "grpcServerClose": "Stops an already-listening gRPC mock server (declared by a gRPC server node), freeing its port."
+      "grpcServerClose": "Stops an already-listening gRPC mock server (declared by a gRPC server node), freeing its port.",
+      "soapListen": "託管本機 SOAP 模擬伺服器並無限期接聽。每個傳入要求都會分派到已設定的作業（依據其 SOAPAction 或內文中的作業名稱），並以預先定義的 SOAP 信封回應（故障作業會傳回 `<soap:Fault>`）。伺服器一旦開始接聽便會觸發 `connected`；每個已處理的要求都會在 `served` 連接埠重新發出其資料。伺服器會持續執行，直到 SOAP 關閉（或停止），隨後觸發 `done`。",
+      "soapClose": "停止一個已在接聽的 SOAP 模擬伺服器（由 SOAP 伺服器節點宣告），並釋放其連接埠。"
     },
     "legend": {
       "title": "圖例",

@@ -261,7 +261,8 @@
         "socketio": "Socket.IO захтев",
         "mqtt": "MQTT request",
         "mqttServer": "MQTT broker",
-        "grpcServer": "gRPC mock сервер"
+        "grpcServer": "gRPC mock сервер",
+        "soapServer": "SOAP mock сервер"
       }
     },
     "deleteConfirm": {
@@ -467,7 +468,24 @@
       "body": "Telo",
       "headers": "Zaglavlja"
     },
-    "malformedXmlError": "Nevažeći XML odgovor"
+    "malformedXmlError": "Nevažeći XML odgovor",
+    "server": {
+      "startListening": "Покрени SOAP mock сервер",
+      "stopListening": "Заустави SOAP mock сервер",
+      "notListening": "Не слуша",
+      "served": "Слуша — опслужено {{count}} захтева",
+      "listenFailed": "SOAP mock сервер није могуће покренути",
+      "portLabel": "Порт",
+      "routeLabel": "Рута",
+      "operationNameLabel": "Назив операције",
+      "operationNamePlaceholder": "Назив операције",
+      "soapActionLabel": "SOAPAction",
+      "soapActionPlaceholder": "SOAPAction (опционо)",
+      "faultLabel": "Грешка",
+      "removeOperation": "Уклони операцију",
+      "addOperation": "Додај операцију",
+      "noCodeSnippets": "SOAP mock сервер нема исечак клијентског кода."
+    }
   },
   "websocket": {
     "connect": "Poveži",
@@ -1024,7 +1042,9 @@
       "mqttClose": "MQTT close",
       "httpListen": "HTTP server",
       "httpClose": "HTTP close",
-      "grpcServerClose": "Затвори gRPC сервер"
+      "grpcServerClose": "Затвори gRPC сервер",
+      "soapListen": "SOAP сервер",
+      "soapClose": "Затвори SOAP"
     },
     "comparator": {
       "result": "резултат"
@@ -1587,7 +1607,9 @@
       "httpListen": "Hosts a local HTTP mock server and listens indefinitely. `connected` fires once it is listening; each served request re-emits its data on the `served` port. The server stays up until an HTTP close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
       "httpClose": "Stops an already-listening HTTP mock server (declared by an HTTP server node), freeing its port.",
       "grpcListen": "Hosts a local gRPC mock server and listens indefinitely. `connected` fires once it is listening; each served call re-emits its data on the `served` port. The server stays up until a gRPC server close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
-      "grpcServerClose": "Stops an already-listening gRPC mock server (declared by a gRPC server node), freeing its port."
+      "grpcServerClose": "Stops an already-listening gRPC mock server (declared by a gRPC server node), freeing its port.",
+      "soapListen": "Хостује локални SOAP mock сервер и слуша неограничено. Сваки долазни захтев усмерава се ка конфигурисаној операцији (према његовој SOAPAction или називу операције у телу) и одговара му се унапред дефинисаном SOAP ковертом (операција грешке враћа `<soap:Fault>`). `connected` се активира чим сервер слуша; сваки опслужени захтев поново емитује своје податке на порту `served`. Сервер остаје активан до SOAP затварања (или заустављања), а затим се активира `done`.",
+      "soapClose": "Зауставља SOAP mock сервер који већ слуша (декларисан SOAP серверским чвором) и ослобађа његов порт."
     },
     "legend": {
       "title": "Легенда",

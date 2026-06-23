@@ -5,6 +5,7 @@
  */
 
 import type { ValueType } from '../../shared/types/collections'
+import type { SoapMockOperation } from '../../shared/types/requests/SoapRequest'
 
 /** KeyValue structure from environment */
 export interface KeyValue {
@@ -95,6 +96,10 @@ export interface FullRequestData {
   soapService?: string
   operation?: string
   soapBody?: string
+  /** SOAP mock server (server === true): the operations the hosted mock answers
+   * (each canned XML response / `<soap:Fault>`, dispatched by SOAPAction or the
+   * inbound body operation). */
+  soapMockOperations?: SoapMockOperation[]
 
   // WebSocket specific
   protocol?: string

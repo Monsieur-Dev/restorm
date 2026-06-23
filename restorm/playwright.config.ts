@@ -104,6 +104,12 @@ const httpServerExecutionTestDir = defineBddConfig({
   outputDir: '.features-gen/http-server'
 })
 
+const soapServerExecutionTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/soap-server/features/**/*.feature',
+  steps: ['tests/e2e/bdd/soap-server/steps/**/*.ts', 'tests/e2e/bdd/fixtures/mcp-server.fixture.ts'],
+  outputDir: '.features-gen/soap-server'
+})
+
 const httpExecutionTestDir = defineBddConfig({
   features: 'tests/e2e/bdd/http-execution/features/**/*.feature',
   steps: ['tests/e2e/bdd/http-execution/steps/**/*.ts', 'tests/e2e/bdd/fixtures/mcp-server.fixture.ts'],
@@ -350,6 +356,11 @@ export default defineConfig({
     {
       name: 'http-server',
       testDir: httpServerExecutionTestDir,
+      timeout: 180 * 1000
+    },
+    {
+      name: 'soap-server',
+      testDir: soapServerExecutionTestDir,
       timeout: 180 * 1000
     },
     {

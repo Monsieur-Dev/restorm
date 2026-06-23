@@ -308,6 +308,23 @@ export const SCENARIO_KIND_REGISTRY = {
       config: { connectionNodeId: 'Id of the grpcListen node whose server to stop.' }
     }
   },
+  soapListen: {
+    labelKey: 'scenario.nodes.soapListen', defaultLabel: 'SOAP server', icon: 'server', category: 'composition',
+    requestBinding: true,
+    ports: { inputs: [], outputs: [{ id: 'connected', name: 'connected', flow: 'signal' }, { id: 'served', name: 'served', flow: 'both' }] },
+    doc: {
+      summary: 'HOSTS a local SOAP mock server from a bound `server: true` SOAP request and listens INDEFINITELY (restorm serves, it does not call out — so there is NO `response` output). Each inbound POST is dispatched to a configured operation by its SOAPAction header or body operation name and answered with the canned SOAP envelope (a fault operation returns `<soap:Fault>`). `connected` (a pure signal) fires once the server is listening; EACH request the mock serves re-emits its `{ request, response }` data on the `served` output. The server stays up — keeping the run in-progress — until a soapClose targets it (or the run is stopped), then `done` fires.',
+      config: { requestId: 'Id of the server: true SOAP request to host (its port + route + configured mock operations).', connectionName: 'Unique-per-scenario name a soapClose references for display (defaults to the request name).', label: 'Display label on the box.' }
+    }
+  },
+  soapClose: {
+    labelKey: 'scenario.nodes.soapClose', defaultLabel: 'SOAP close', icon: 'debug-disconnect', category: 'composition',
+    ports: { inputs: [], outputs: [] },
+    doc: {
+      summary: 'Stops an already-listening SOAP mock server (declared by a soapListen node), freeing its port and firing that node\'s `done`. Pure-event action: triggered on `in`, sequences via its own `done`. Errors (to `error`) when no server is selected.',
+      config: { connectionNodeId: 'Id of the soapListen node whose server to stop.' }
+    }
+  },
 
   // --- Lists (grouped into a "Lists" submenu) ---
   aggregate: {

@@ -161,6 +161,8 @@ interface FullRequestData {
   soapService?: string
   operation?: string
   soapBody?: string
+  /** SOAP mock server: the operations the hosted mock answers. */
+  soapMockOperations?: { name: string; soapAction?: string; responseBody: string; isFault?: boolean }[]
   protocol?: string
   event?: string
   message?: string
@@ -729,6 +731,32 @@ contextBridge.exposeInMainWorld('restorm', {
       ipcRenderer.on('soap:request-progress', handler)
       return () => {
         ipcRenderer.removeListener('soap:request-progress', handler)
+      }
+    },
+    /** SERVER MODE: start hosting this request as a local SOAP mock server.
+     * Resolves once the mock route is listening (or fails to bind / collides). */
+    listen: async (requestId: string): Promise<{ success: boolean; listening: boolean; error?: string }> => {
+      const result: unknown = await ipcRenderer.invoke('soap:listen', requestId)
+      return result as { success: boolean; listening: boolean; error?: string }
+    },
+    /** SERVER MODE: stop hosting this request's SOAP mock route. */
+    stop: async (requestId: string): Promise<boolean> => {
+      const result: unknown = await ipcRenderer.invoke('soap:stop', requestId)
+      return result as boolean
+    },
+    /** SERVER MODE: whether this request is currently hosting a mock route. */
+    isListening: async (requestId: string): Promise<boolean> => {
+      const result: unknown = await ipcRenderer.invoke('soap:is-listening', requestId)
+      return result as boolean
+    },
+    /** SERVER MODE: served-request count updates for the "served N" banner. */
+    onServerServed: (callback: (data: { requestId: string; count: number }) => void): (() => void) => {
+      const handler = (_event: Electron.IpcRendererEvent, data: { requestId: string; count: number }): void => {
+        callback(data)
+      }
+      ipcRenderer.on('soap:server-served', handler)
+      return () => {
+        ipcRenderer.removeListener('soap:server-served', handler)
       }
     }
   },

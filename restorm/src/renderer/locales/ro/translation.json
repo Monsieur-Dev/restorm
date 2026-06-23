@@ -261,7 +261,8 @@
         "socketio": "Cerere Socket.IO",
         "mqtt": "MQTT request",
         "mqttServer": "Broker MQTT",
-        "grpcServer": "Server gRPC simulat"
+        "grpcServer": "Server gRPC simulat",
+        "soapServer": "Server mock SOAP"
       }
     },
     "deleteConfirm": {
@@ -467,7 +468,24 @@
       "body": "Corp",
       "headers": "Antete"
     },
-    "malformedXmlError": "Răspuns XML invalid"
+    "malformedXmlError": "Răspuns XML invalid",
+    "server": {
+      "startListening": "Pornește serverul mock SOAP",
+      "stopListening": "Oprește serverul mock SOAP",
+      "notListening": "Nu ascultă",
+      "served": "Ascultă — {{count}} cerere(i) servită(e)",
+      "listenFailed": "Serverul mock SOAP nu a putut fi pornit",
+      "portLabel": "Port",
+      "routeLabel": "Rută",
+      "operationNameLabel": "Numele operațiunii",
+      "operationNamePlaceholder": "Numele operațiunii",
+      "soapActionLabel": "SOAPAction",
+      "soapActionPlaceholder": "SOAPAction (opțional)",
+      "faultLabel": "Eroare",
+      "removeOperation": "Elimină operațiunea",
+      "addOperation": "Adaugă operațiune",
+      "noCodeSnippets": "Un server mock SOAP nu are fragment de cod client."
+    }
   },
   "websocket": {
     "connect": "Conectează",
@@ -1024,7 +1042,9 @@
       "mqttClose": "MQTT close",
       "httpListen": "HTTP server",
       "httpClose": "HTTP close",
-      "grpcServerClose": "Închide serverul gRPC"
+      "grpcServerClose": "Închide serverul gRPC",
+      "soapListen": "Server SOAP",
+      "soapClose": "Închide SOAP"
     },
     "comparator": {
       "result": "rezultat"
@@ -1587,7 +1607,9 @@
       "httpListen": "Hosts a local HTTP mock server and listens indefinitely. `connected` fires once it is listening; each served request re-emits its data on the `served` port. The server stays up until an HTTP close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
       "httpClose": "Stops an already-listening HTTP mock server (declared by an HTTP server node), freeing its port.",
       "grpcListen": "Hosts a local gRPC mock server and listens indefinitely. `connected` fires once it is listening; each served call re-emits its data on the `served` port. The server stays up until a gRPC server close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
-      "grpcServerClose": "Stops an already-listening gRPC mock server (declared by a gRPC server node), freeing its port."
+      "grpcServerClose": "Stops an already-listening gRPC mock server (declared by a gRPC server node), freeing its port.",
+      "soapListen": "Găzduiește un server mock SOAP local și ascultă la nesfârșit. Fiecare cerere primită este direcționată către o operațiune configurată (după SOAPAction sau numele operațiunii din corp) și primește ca răspuns plicul SOAP predefinit (o operațiune de eroare returnează `<soap:Fault>`). `connected` se declanșează imediat ce serverul ascultă; fiecare cerere servită își reemite datele pe portul `served`. Serverul rămâne activ până la o închidere SOAP (sau o oprire), apoi se declanșează `done`.",
+      "soapClose": "Oprește un server mock SOAP care ascultă deja (declarat de un nod de server SOAP) și îi eliberează portul."
     },
     "legend": {
       "title": "Legendă",

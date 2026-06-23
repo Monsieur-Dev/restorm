@@ -41,7 +41,7 @@ import {
   odataExecuteArgs, odataCancelArgs, odataIsActiveArgs,
   authPrefetchArgs,
   graphqlExecuteArgs, graphqlCancelArgs, graphqlIsActiveArgs,
-  soapExecuteArgs, soapCancelArgs, soapIsActiveArgs,
+  soapExecuteArgs, soapCancelArgs, soapIsActiveArgs, soapListenArgs, soapStopArgs, soapIsListeningArgs,
   grpcExecuteArgs, grpcConnectArgs, grpcSendArgs, grpcDisconnectArgs, grpcCancelArgs, grpcIsActiveArgs,
   grpcListenArgs, grpcStopArgs, grpcIsListeningArgs,
   websocketConnectArgs, websocketDisconnectArgs, websocketSendArgs, websocketIsActiveArgs,
@@ -1055,6 +1055,22 @@ export function registerRestormIPC(deps: {
 
   validatedHandle('soap:is-active', soapIsActiveArgs, (_event, [requestId]) => {
     return soapExecutionService.isActive(requestId)
+  })
+
+  // SOAP mock server (server mode): start hosting a local SOAP mock route, stop
+  // it, and check whether it is currently listening. `soap:listen` resolves as
+  // soon as the route is listening (or fails to bind / collides); the route then
+  // stays up until `soap:stop` (the stop signal arrives via soap:request-progress).
+  validatedHandle('soap:listen', soapListenArgs, async (_event, [requestId]) => {
+    return await soapExecutionService.listen(requestId)
+  })
+
+  validatedHandle('soap:stop', soapStopArgs, (_event, [requestId]) => {
+    return soapExecutionService.stopListening(requestId)
+  })
+
+  validatedHandle('soap:is-listening', soapIsListeningArgs, (_event, [requestId]) => {
+    return soapExecutionService.isListening(requestId)
   })
 
   // ==========================================================================
