@@ -997,6 +997,7 @@
     "nodes": {
       "arithmetic": "Αριθμητική",
       "httpRequest": "Αίτημα HTTP",
+      "soapRequest": "Αίτημα SOAP",
       "runScenario": "Εκτέλεση σεναρίου",
       "wait": "Αναμονή",
       "waitUntil": "Αναμονή έως",
@@ -1538,6 +1539,7 @@
       "if": "Branches the flow to then / else by comparing two operands.",
       "switch": "Routes the input to a matching case, or to default.",
       "httpRequest": "Runs a saved API request and emits its response.",
+      "soapRequest": "Εκτελεί ένα αποθηκευμένο αίτημα SOAP και εκπέμπει την αναλυμένη απόκρισή του. Ένα SOAP fault εμφανίζεται στην απόκριση· μια αποτυχία κλήσης οδηγείται στη θύρα `error`.",
       "runScenario": "Runs another scenario as a reusable sub-step.",
       "forEach": "Runs the body once per item of a collection, then continues.",
       "for": "Loops over a number range, running the body for each value.",

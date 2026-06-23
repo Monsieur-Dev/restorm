@@ -66,6 +66,10 @@ const SCENARIO_NODE_COMPONENTS: Record<ScenarioNodeKind, NodeBoxComponent> = {
   if: IfNodeBox,
   switch: SwitchNodeBox,
   httpRequest: RequestNodeBox,
+  // SOAP is a unary request, so it reuses the protocol-agnostic request box
+  // (header badge + collapsible slots + a single `response` output), exactly
+  // like httpRequest — no bespoke box needed.
+  soapRequest: RequestNodeBox,
   runScenario: RunScenarioNodeBox,
   websocketConnect: WebsocketConnectNodeBox,
   websocketSend: WebsocketSendNodeBox,

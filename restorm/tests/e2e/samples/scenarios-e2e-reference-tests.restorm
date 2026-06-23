@@ -21253,6 +21253,28 @@ collections:
                 position:
                   x: 2440
                   'y': 4640
+              - id: 3f9c2a17-8d4b-4e6a-9c1f-2b7e5a0d6c84
+                kind: soapRequest
+                config:
+                  label: SOAP request
+                inputs:
+                  - id: in
+                    name: ''
+                    dataType: any
+                    flow: signal
+                  - id: env
+                    name: env
+                    dataType: any
+                    flow: value
+                outputs:
+                  - id: response
+                    name: response
+                    dataType: response
+                    role: response
+                    flow: both
+                position:
+                  x: 2920
+                  'y': 4640
             edges: []
             id: cfb401ce-df62-4d41-88e2-8989206abe2f
             name: Bestiary
@@ -21613,7 +21635,7 @@ collections:
                   x: 12
                   'y': 231
               - id: c1600ab5-e364-42df-850a-e8ebfede6824
-                kind: httpRequest
+                kind: soapRequest
                 config:
                   requestId: c3277e4e-7c63-4013-a705-eb8205be7574
                   label: call the mock
@@ -21625,10 +21647,6 @@ collections:
                   - id: env
                     name: env
                     dataType: any
-                    flow: value
-                  - id: requestOverride
-                    name: override
-                    dataType: object
                     flow: value
                 outputs:
                   - id: response
@@ -21749,36 +21767,24 @@ collections:
               - documentation: ''
                 tags: []
                 name: SOAP Mock Consumer
-                method: POST
                 url: http://localhost:8076/calculator
-                headers:
-                  - key: Content-Type
-                    enabled: true
-                    value:
-                      type: string
-                      value: text/xml; charset=utf-8
-                  - key: SOAPAction
-                    enabled: true
-                    value:
-                      type: string
-                      value: urn:Add
-                params: []
-                pathParams: []
+                soapAction: urn:Add
+                service: ''
+                operation: Add
+                headers: []
                 deprecated: false
-                type: http
+                type: soap
                 id: c3277e4e-7c63-4013-a705-eb8205be7574
-                body:
-                  type: text
-                  content: |-
-                    <?xml version="1.0" encoding="utf-8"?>
-                    <soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
-                      <soap:Body>
-                        <Add xmlns="urn:calculator">
-                          <a>4</a>
-                          <b>3</b>
-                        </Add>
-                      </soap:Body>
-                    </soap:Envelope>
+                body: |-
+                  <?xml version="1.0" encoding="utf-8"?>
+                  <soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
+                    <soap:Body>
+                      <Add xmlns="urn:calculator">
+                        <a>4</a>
+                        <b>3</b>
+                      </Add>
+                    </soap:Body>
+                  </soap:Envelope>
         id: f1000000-0000-0000-0000-00000000auth
         name: Pet API
       - documentation: ''

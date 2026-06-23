@@ -996,6 +996,7 @@
     "nodes": {
       "arithmetic": "算術",
       "httpRequest": "HTTP 請求",
+      "soapRequest": "SOAP 請求",
       "runScenario": "執行場景",
       "wait": "等待",
       "waitUntil": "等待至",
@@ -1537,6 +1538,7 @@
       "if": "Branches the flow to then / else by comparing two operands.",
       "switch": "Routes the input to a matching case, or to default.",
       "httpRequest": "Runs a saved API request and emits its response.",
+      "soapRequest": "執行已儲存的 SOAP 請求並發出其解析後的回應。SOAP 錯誤會顯示在回應中；呼叫失敗將路由至 `error` 連接埠。",
       "runScenario": "Runs another scenario as a reusable sub-step.",
       "forEach": "Runs the body once per item of a collection, then continues.",
       "for": "Loops over a number range, running the body for each value.",

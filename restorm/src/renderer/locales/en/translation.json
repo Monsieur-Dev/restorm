@@ -997,6 +997,7 @@
     "nodes": {
       "arithmetic": "Arithmetic",
       "httpRequest": "HTTP Request",
+      "soapRequest": "SOAP Request",
       "runScenario": "Run scenario",
       "wait": "Wait",
       "waitUntil": "Wait until",
@@ -1541,6 +1542,7 @@
       "if": "Branches the flow to then / else by comparing two operands.",
       "switch": "Routes the input to a matching case, or to default.",
       "httpRequest": "Runs a saved API request and emits its response.",
+      "soapRequest": "Runs a saved SOAP request and emits its parsed response. A SOAP fault is surfaced on the response; a failed call is routed to the `error` port.",
       "runScenario": "Runs another scenario as a reusable sub-step.",
       "forEach": "Runs the body once per item of a collection, then continues.",
       "for": "Loops over a number range, running the body for each value.",

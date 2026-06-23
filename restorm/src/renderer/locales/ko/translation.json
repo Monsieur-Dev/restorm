@@ -996,6 +996,7 @@
     "nodes": {
       "arithmetic": "산술",
       "httpRequest": "HTTP 요청",
+      "soapRequest": "SOAP 요청",
       "runScenario": "시나리오 실행",
       "wait": "대기",
       "waitUntil": "까지 대기",
@@ -1537,6 +1538,7 @@
       "if": "Branches the flow to then / else by comparing two operands.",
       "switch": "Routes the input to a matching case, or to default.",
       "httpRequest": "Runs a saved API request and emits its response.",
+      "soapRequest": "저장된 SOAP 요청을 실행하고 파싱된 응답을 내보냅니다. SOAP 폴트는 응답에 표시되며, 호출 실패는 `error` 포트로 전달됩니다.",
       "runScenario": "Runs another scenario as a reusable sub-step.",
       "forEach": "Runs the body once per item of a collection, then continues.",
       "for": "Loops over a number range, running the body for each value.",

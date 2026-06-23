@@ -7,7 +7,7 @@
 - message: ⚪ [<time>] done soapListen
 - message: ⚪ [<time>] soap-server "Mock Server" connecting
 - message: ⚪ [<time>] soap-server "Mock Server" connected
-- message: ⚪ [<time>] start httpRequest
+- message: ⚪ [<time>] start soapRequest
   data:
     requestId: <uuid>
     label: call the mock
@@ -47,18 +47,16 @@
 - message: ⚪ [<time>] done log
   data: {}
 - message: ⚪ [<time>] done soapClose
-- message: ⚪ [<time>] done httpRequest
+- message: ⚪ [<time>] done soapRequest
   data:
     response:
       request:
         url: http://localhost:8076/calculator
         method: POST
-        headers:
-          Content-Type: text/xml; charset=utf-8
-          SOAPAction: urn:Add
+        headers: {}
       response:
         status: 200
-        statusText: OK
+        statusText: ""
         headers:
           content-type: text/xml; charset=utf-8
           date: <dynamic-time>
@@ -79,12 +77,10 @@
       request:
         url: http://localhost:8076/calculator
         method: POST
-        headers:
-          Content-Type: text/xml; charset=utf-8
-          SOAPAction: urn:Add
+        headers: {}
       response:
         status: 200
-        statusText: OK
+        statusText: ""
         headers:
           content-type: text/xml; charset=utf-8
           date: <dynamic-time>
@@ -101,12 +97,10 @@
     request:
       url: http://localhost:8076/calculator
       method: POST
-      headers:
-        Content-Type: text/xml; charset=utf-8
-        SOAPAction: urn:Add
+      headers: {}
     response:
       status: 200
-      statusText: OK
+      statusText: ""
       headers:
         content-type: text/xml; charset=utf-8
         date: <dynamic-time>
@@ -124,12 +118,10 @@
       request:
         url: http://localhost:8076/calculator
         method: POST
-        headers:
-          Content-Type: text/xml; charset=utf-8
-          SOAPAction: urn:Add
+        headers: {}
       response:
         status: 200
-        statusText: OK
+        statusText: ""
         headers:
           content-type: text/xml; charset=utf-8
           date: <dynamic-time>
