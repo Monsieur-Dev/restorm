@@ -21,7 +21,7 @@ import { httpExecutionService, type HTTPExecutionInput } from '../../services/HT
 import { grpcExecutionService } from '../../services/GRPCExecutionService'
 import { responseHistoryService } from '../../services/ResponseHistoryService'
 import { flushRequestStateToContext } from '../../mcp/tools/execute'
-import { isHTTPRequest, isAuthenticationRequest, isGrpcRequest } from '../../../shared/types/collections'
+import { isHTTPRequest, isAuthenticationRequest, isGrpcRequest, isODataRequest } from '../../../shared/types/collections'
 import type { Request } from '../../../shared/types/collections'
 import type { NodeExecutor, ExecResult } from '../types'
 
@@ -34,7 +34,23 @@ export const httpRequestExecutor: NodeExecutor = async (act, ctx) => {
   // like httpRequest; streaming gRPC binds a grpcConnect instead) runs through
   // the gRPC execution service and emits the same `{ request, response }` shape.
   if (isGrpcRequest(req)) return runGrpcUnary(req, ctx)
-  if (!isHTTPRequest(req)) throw new Error(`bound request ${cfg.requestId} is not HTTP (${(req as { type?: string }).type})`)
+  // An OData request binds to this generic request node like HTTP: it executes
+  // through the SAME httpExecutionService (the `odata:execute` IPC path does too),
+  // and URLResolver composes its system query options into the resolved URL from
+  // the odata fields flushRequestStateToContext carries. The model has no
+  // `method`; derive the verb from operationKind exactly like the request-panel
+  // Send (entity-set / function read = GET; action / batch = POST), so a future
+  // action/batch scenario sends the right verb.
+  // LIMITATION: the action/batch request BODY (actionBody / the multipart $batch
+  // envelope the renderer assembles in handleSend) is NOT composed on this
+  // scenario path yet — only entity-set/function reads round-trip fully here. An
+  // action/batch scenario node would need that body wired before it works.
+  const odata = isODataRequest(req)
+  if (!isHTTPRequest(req) && !odata) throw new Error(`bound request ${cfg.requestId} is not HTTP or OData (${(req as { type?: string }).type})`)
+  const odataKind = odata ? (req as { operationKind?: string }).operationKind : undefined
+  const method = odata
+    ? (odataKind === 'action' || odataKind === 'batch' ? 'POST' : 'GET')
+    : (req as { method: string }).method
 
   // Slot short-circuit: a wired input port whose id is `pathParams:<key>`
   // / `headers:<key>` / `params:<key>` / `body` overrides that slot's
@@ -57,7 +73,7 @@ export const httpRequestExecutor: NodeExecutor = async (act, ctx) => {
         {
           port: 'response',
           value: {
-            request: { url: req.url, method: req.method, headers: {} },
+            request: { url: req.url, method, headers: {} },
             response: { status: 0, statusText: 'skipped', headers: {}, body: '', durationMs: 0, success: true, skipped: true }
           }
         }
@@ -72,7 +88,7 @@ export const httpRequestExecutor: NodeExecutor = async (act, ctx) => {
   const auth = authId ? collectionStore.findById(authId) : null
   const input: HTTPExecutionInput = {
     requestId: req.id,
-    method: req.method,
+    method,
     ...(auth && isAuthenticationRequest(auth) ? { authRequest: auth } : {})
   }
 
@@ -84,7 +100,7 @@ export const httpRequestExecutor: NodeExecutor = async (act, ctx) => {
 
   const result = await httpExecutionService.execute(input)
   ctx.signal.removeEventListener('abort', onAbort)
-  await responseHistoryService.storeExecutionResult(req.id, 'http', result)
+  await responseHistoryService.storeExecutionResult(req.id, odata ? 'odata' : 'http', result)
 
   // The `response` port carries the SAME `{ request, response }` shape the
   // JSON-path picker shows (see `getScenarioNodeResult` in
@@ -101,7 +117,7 @@ export const httpRequestExecutor: NodeExecutor = async (act, ctx) => {
         value: {
           request: {
             url: result.requestUrl,
-            method: req.method,
+            method,
             headers: result.requestHeaders ?? {}
           },
           response: {

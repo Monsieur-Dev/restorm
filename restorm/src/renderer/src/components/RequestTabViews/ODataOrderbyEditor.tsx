@@ -72,7 +72,21 @@ export interface ODataOrderbyEditorProps {
 
 export const ODataOrderbyEditor: React.FC<ODataOrderbyEditorProps> = ({ value, onChange, propertySuggestions = [] }) => {
   const { t } = useTranslation()
-  const specs = React.useMemo(() => parseOrderby(value), [value])
+  // The clause SERIALIZES away empty-property rows, so round-tripping through the
+  // string `value` would make a freshly-added blank row vanish before the user
+  // can type into it. Hold the specs as LOCAL state (the editing source of truth)
+  // and only push the serialized form up; re-seed from `value` only when it
+  // changes EXTERNALLY (its serialization diverges from what we last emitted).
+  const [specs, setSpecs] = React.useState<OrderbyClauseSpec[]>(() => parseOrderby(value))
+  // Track the last clause we're in sync with AS STATE (this repo forbids ref
+  // access during render + setState in effects). An external `value` change
+  // reseeds during render; our own `emit` advances `synced` itself, so an
+  // echoed-back serialization that dropped a blank row does NOT reseed.
+  const [synced, setSynced] = React.useState<string>(value ?? '')
+  if ((value ?? '') !== synced) {
+    setSynced(value ?? '')
+    setSpecs(parseOrderby(value))
+  }
   const directionOptions: ISelectOptionItem[] = DIRECTIONS.map((d) => ({ text: d }))
   const propertyOptions = useMemo(
     () => propertySuggestions
@@ -83,6 +97,8 @@ export const ODataOrderbyEditor: React.FC<ODataOrderbyEditorProps> = ({ value, o
   )
 
   const emit = (next: OrderbyClauseSpec[]): void => {
+    setSpecs(next)
+    setSynced(serializeOrderby(next))
     onChange(serializeOrderby(next))
   }
 

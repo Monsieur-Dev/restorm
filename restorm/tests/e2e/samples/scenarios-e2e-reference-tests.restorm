@@ -19884,17 +19884,18 @@ collections:
                           Name: Rex
                         - Id: 2
                           Name: Whiskers
-                  - type: http
+                  - type: odata
                     documentation: ''
                     tags:
-                      - http
+                      - odata
                     id: 3c4d5e6f-7081-4920-a314-2c3d4e5f6071
                     name: OData Consumer
-                    method: GET
                     url: http://localhost:8078/odata/Pets
+                    odataVersion: v4
+                    operationKind: entity-set
                     headers: []
                     params: []
-                    pathParams: []
+                    queryOptions: {}
               - type: scenario
                 tags: []
                 params: []

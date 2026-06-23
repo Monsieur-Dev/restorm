@@ -33,8 +33,10 @@ import {
   CodeEditor,
   InputBox,
   ListView,
+  Pane,
   ScrollableElement,
   SelectBox,
+  SplitView,
   Toggle,
   eventBus,
   logger,
@@ -56,6 +58,7 @@ import {
   buildFunctionInlinedArgs
 } from '../../../../shared/utils/odataOperationParams'
 import { useEnvironmentContext } from '../../contexts/useEnvironmentContext'
+import { getRequestPanelState, setRequestPanelCollapsed } from '../../services/requestPanelStateStore'
 import { useAuthRequestResolver } from '../../contexts/authRequestResolverContext'
 import type { KeyValueData } from '../../types/global.d'
 import { toKeyValueData as toKeyValueDataShared } from '../../utils/toKeyValueData'
@@ -198,7 +201,7 @@ export interface ODataRequestTabViewProps {
 
 export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ request }) => {
   const { t } = useTranslation()
-  const { selectedEnvId, environments } = useEnvironmentContext()
+  const { selectedEnvId, environments, projectUuid } = useEnvironmentContext()
   const collections = useRestormStore((state) => state.collections)
   const resolveAuthRequest = useAuthRequestResolver()
 
@@ -211,15 +214,15 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
   const odataVersionOptions = useMemo<ISelectOptionItem[]>(() => [
     { text: 'v4' },
     { text: 'v4.01' },
-    { text: t('odataRequestTab.version.v3NotYet', 'v3 (execution not yet supported)') },
-    { text: t('odataRequestTab.version.v2NotYet', 'v2 (execution not yet supported)') }
+    { text: t('odataRequestTab.versionV3NotYet', 'v3 (execution not yet supported)') },
+    { text: t('odataRequestTab.versionV2NotYet', 'v2 (execution not yet supported)') }
   ], [t])
 
   const operationKindOptions = useMemo<ISelectOptionItem[]>(() => [
-    { text: t('odataRequestTab.operationKind.entitySet', 'Entity set (GET)') },
-    { text: t('odataRequestTab.operationKind.function', 'Function (GET with inlined parameters)') },
-    { text: t('odataRequestTab.operationKind.action', 'Action (POST with JSON body)') },
-    { text: t('odataRequestTab.operationKind.batch', 'Batch ($batch — multipart/mixed)') }
+    { text: t('odataRequestTab.operationKindEntitySet', 'Entity set (GET)') },
+    { text: t('odataRequestTab.operationKindFunction', 'Function (GET with inlined parameters)') },
+    { text: t('odataRequestTab.operationKindAction', 'Action (POST with JSON body)') },
+    { text: t('odataRequestTab.operationKindBatch', 'Batch ($batch — multipart/mixed)') }
   ], [t])
 
   const [isSending, setIsSending] = useState(false)
@@ -227,6 +230,24 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
   // service, and how many requests it has served (for the "served N" banner).
   const [isListening, setIsListening] = useState<boolean>(false)
   const [servedCount, setServedCount] = useState<number>(0)
+  // Server mode: per-pane collapsed state for the $metadata / served-data
+  // SplitView, lifted up so it survives the SplitView remount when the response
+  // panel toggles (mirrors HTTPRequestTabView's panelCollapsed plumbing).
+  const [serverPanelCollapsed, setServerPanelCollapsed] = useState<{ metadata: boolean; data: boolean }>(() => {
+    const seed = (projectUuid ? getRequestPanelState(projectUuid, request.id) : undefined) ?? {}
+    return {
+      metadata: typeof seed['odataMetadata'] === 'boolean' ? seed['odataMetadata'] : false,
+      data: typeof seed['odataData'] === 'boolean' ? seed['odataData'] : false
+    }
+  })
+  const handleServerPanelCollapsedChange = useCallback((arr: boolean[]): void => {
+    const next = { metadata: arr[0] ?? false, data: arr[1] ?? false }
+    setServerPanelCollapsed(next)
+    if (projectUuid) {
+      setRequestPanelCollapsed(projectUuid, request.id, 'odataMetadata', next.metadata)
+      setRequestPanelCollapsed(projectUuid, request.id, 'odataData', next.data)
+    }
+  }, [projectUuid, request.id])
   const [response, setResponse] = useState<ODataResponseViewData | null>(null)
   const [historyModalOpen, setHistoryModalOpen] = useState(false)
   const [historyRefreshKey, setHistoryRefreshKey] = useState(0)
@@ -1005,39 +1026,45 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
   )
 
   const serverRequestContent = (
-    <ScrollableElement
-      style={formOuterStyle}
-      options={{ vertical: 'auto', horizontal: 'hidden', useShadows: true }}
+    <SplitView
+      orientation="vertical"
+      style={{ width: '100%', height: '100%' }}
+      data-testid="odata-server-split-view"
+      onCollapsedChange={handleServerPanelCollapsedChange}
     >
-      <div style={formStyle} data-testid="odata-server-form">
-        <div style={rowStyle}>
-          <label style={labelStyle} htmlFor="odata-server-metadata">
-            {t('odata.server.metadataLabel', '$metadata (CSDL)')}
-          </label>
-          <CodeEditor
-            value={(request).mockMetadata ?? ''}
-            language="xml"
-            onChange={setMockMetadata}
-            height="240px"
-            options={{ minimap: { enabled: false }, wordWrap: 'on', automaticLayout: true }}
-            data-testid="odata-server-metadata"
-          />
-        </div>
-        <div style={rowStyle}>
-          <label style={labelStyle} htmlFor="odata-server-data">
-            {t('odata.server.dataLabel', 'Served entity data (by entity set)')}
-          </label>
-          <CodeEditor
-            value={mockDataText}
-            language="json"
-            onChange={setMockData}
-            height="240px"
-            options={{ minimap: { enabled: false }, wordWrap: 'on', automaticLayout: true }}
-            data-testid="odata-server-data"
-          />
-        </div>
-      </div>
-    </ScrollableElement>
+      <Pane
+        title={t('odata.server.metadataLabel', '$metadata (CSDL)')}
+        initialSize={0.5}
+        collapsed={serverPanelCollapsed.metadata}
+        minSize={120}
+        data-testid="odata-server-metadata-pane"
+      >
+        <CodeEditor
+          value={(request).mockMetadata ?? ''}
+          language="xml"
+          onChange={setMockMetadata}
+          height="100%"
+          options={{ minimap: { enabled: false }, wordWrap: 'on', automaticLayout: true }}
+          data-testid="odata-server-metadata"
+        />
+      </Pane>
+      <Pane
+        title={t('odata.server.dataLabel', 'Served entity data (by entity set)')}
+        initialSize={0.5}
+        collapsed={serverPanelCollapsed.data}
+        minSize={120}
+        data-testid="odata-server-data-pane"
+      >
+        <CodeEditor
+          value={mockDataText}
+          language="json"
+          onChange={setMockData}
+          height="100%"
+          options={{ minimap: { enabled: false }, wordWrap: 'on', automaticLayout: true }}
+          data-testid="odata-server-data"
+        />
+      </Pane>
+    </SplitView>
   )
 
   const serverResponseContent = (

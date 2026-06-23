@@ -9,7 +9,7 @@
  * stable.
  */
 
-import React, { useCallback, useMemo, useState, type CSSProperties } from 'react'
+import React, { useCallback, useState, type CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   Button,
@@ -314,9 +314,28 @@ export interface ODataExpandEditorProps {
 }
 
 export const ODataExpandEditor: React.FC<ODataExpandEditorProps> = ({ value, onChange }) => {
-  const nodes = useMemo(() => parseExpand(value), [value])
+  // `serializeExpand` drops empty-property nodes, so round-tripping a freshly
+  // added blank node through the string `value` would make it vanish before the
+  // user can type a property. Hold the nodes as LOCAL state (the editing source
+  // of truth) and only push the serialized form up; re-seed from `value` only
+  // when it changes EXTERNALLY (diverges from what we last emitted). The reseed
+  // is done DURING RENDER (React's "adjust state while rendering" idiom) rather
+  // than in an effect, so a new blank row appears in the same commit.
+  const [nodes, setNodes] = useState<ExpandNode[]>(() => parseExpand(value))
+  // Track the last clause we're in sync with AS STATE (not a ref — this repo
+  // forbids ref access during render). When `value` differs from it, an EXTERNAL
+  // change arrived → reseed (the React "adjust state while rendering" idiom);
+  // our own `emit` advances `synced` itself, so an echoed-back serialization
+  // that dropped a blank row does NOT trigger a reseed.
+  const [synced, setSynced] = useState<string>(value ?? '')
+  if ((value ?? '') !== synced) {
+    setSynced(value ?? '')
+    setNodes(parseExpand(value))
+  }
 
   const emit = useCallback((next: ExpandNode[]): void => {
+    setNodes(next)
+    setSynced(serializeExpand(next))
     onChange(serializeExpand(next))
   }, [onChange])
 
