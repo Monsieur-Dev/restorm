@@ -77,14 +77,12 @@ import {
 import { normalizeODataResponse, detectODataVersionMismatch } from '../../../../shared/utils/odataResponse'
 import { extractNavigationLinks } from '../../../../shared/utils/odataNavigationLinks'
 import {
-  serializeODataBatch,
-  serializeODataJsonBatch,
   extractBoundary,
   parseODataBatchResponse,
   parseODataJsonBatchResponse,
-  type ODataBatchSubRequest,
   type ODataBatchSubResponse
 } from '../../../../shared/utils/odataBatch'
+import { composeODataRequestBody } from '../../../../shared/utils/odataRequestBody'
 import { DEFAULT_REQUEST_TIMEOUT_MS } from '../../../../shared/config/constants'
 import { useRestormStore } from '../../store/restormStore'
 import { useApiDocumentationFromRequest } from '../../hooks/useApiDocumentationFromRequest'
@@ -732,83 +730,28 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
       return
     }
 
-    let method = 'GET'
-    let body: string | undefined
-    let contentTypeOverride: string | undefined
-    let pendingBatchWarnings: string[] = []
-    if (request.operationKind === 'action') {
-      method = 'POST'
-      body = request.actionBody ?? undefined
-    } else if (request.operationKind === 'batch') {
-      // The structured `batchSubRequests` array drives serialization
-      // directly — no JSON parse required. We flatten the editor's
-      // header list into a Record, coalesce the (flat + change-set)
-      // sequence into the multipart/mixed envelope, and let the
-      // engine see a plain POST.
-      const specs = request.batchSubRequests ?? []
-      if (specs.length === 0) {
-        setIsSending(false)
-        setResponse({
-          statusCode: 0,
-          statusText: '',
-          requestUrl: '',
-          durationMs: 0,
-          body: '',
-          method,
-          error: 'Batch has no sub-requests — add at least one before sending.'
-        })
-        return
-      }
-      const subRequests: ODataBatchSubRequest[] = specs.map((spec) => {
-        const headers: Record<string, string> = {}
-        for (const kv of spec.headers ?? []) {
-          if (kv.key) headers[kv.key] = kv.value
-        }
-        return {
-          method: spec.method,
-          url: spec.url,
-          ...(Object.keys(headers).length > 0 ? { headers } : {}),
-          ...(spec.body !== undefined ? { body: spec.body } : {}),
-          ...(spec.atomicityGroup ? { atomicityGroup: spec.atomicityGroup } : {}),
-          ...(spec.forceIncludeInChangeSet ? { forceIncludeInChangeSet: true } : {})
-        }
+    // Compose the verb + body via the shared composer so the request panel
+    // and the scenario engine produce byte-identical wire bodies.
+    const composed = composeODataRequestBody(request)
+    if (composed.error !== undefined) {
+      setIsSending(false)
+      setResponse({
+        statusCode: 0,
+        statusText: '',
+        requestUrl: '',
+        durationMs: 0,
+        body: '',
+        method: composed.method,
+        error: composed.error
       })
-      const isBatchJson = request.batchFormat === 'json'
-      // v4.01 emits relative batch URIs unless the user opted out.
-      const isV401 = request.odataVersion === 'v4.01'
-      // Service root for relative URL conversion: strip the `/$batch` suffix
-      // (and any query string). If the URL doesn't contain `/$batch` we still
-      // strip the last path segment as a best-effort guess — the caller can
-      // override with forceAbsoluteBatchUrls if the heuristic is wrong.
-      const batchServiceRoot = isV401 && !request.forceAbsoluteBatchUrls
-        ? (request.url.includes('/$batch')
-          ? request.url.replace(/\/\$batch.*$/, '')
-          : request.url.replace(/\/[^/]*$/, ''))
-        : undefined
-      if (isBatchJson) {
-        const serialized = serializeODataJsonBatch(subRequests, {
-          ...(batchServiceRoot !== undefined ? { serviceRoot: batchServiceRoot } : {}),
-          ...(request.forceAbsoluteBatchUrls ? { forceAbsoluteUrls: true } : {})
-        })
-        method = 'POST'
-        body = serialized.body
-        contentTypeOverride = serialized.contentType
-      } else {
-        const serialized = serializeODataBatch(subRequests, undefined, {
-          allowGetInChangeSet: request.allowGetInChangeSet ?? false,
-          ...(batchServiceRoot !== undefined ? { serviceRoot: batchServiceRoot } : {}),
-          ...(request.forceAbsoluteBatchUrls ? { forceAbsoluteUrls: true } : {})
-        })
-        method = 'POST'
-        body = serialized.body
-        contentTypeOverride = serialized.contentType
-        // Surface serializer warnings in the response panel even before
-        // the batch completes — they are informational, not blocking.
-        if (serialized.warnings.length > 0) {
-          pendingBatchWarnings = serialized.warnings
-        }
-      }
+      return
     }
+    const method = composed.method
+    const body = composed.rawBody
+    const contentTypeOverride = composed.rawBodyContentType
+    // Surface batch serializer warnings in the response panel even before
+    // the batch completes — they are informational, not blocking.
+    const pendingBatchWarnings: string[] = composed.batchWarnings ?? []
     const dispatchedMethod = method
     const capturedBatchWarnings = pendingBatchWarnings
     const capturedBatchFormat = request.operationKind === 'batch' ? (request.batchFormat ?? 'multipart') : null

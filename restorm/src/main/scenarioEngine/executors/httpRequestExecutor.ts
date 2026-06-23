@@ -22,6 +22,7 @@ import { grpcExecutionService } from '../../services/GRPCExecutionService'
 import { responseHistoryService } from '../../services/ResponseHistoryService'
 import { flushRequestStateToContext } from '../../mcp/tools/execute'
 import { isHTTPRequest, isAuthenticationRequest, isGrpcRequest, isODataRequest } from '../../../shared/types/collections'
+import { composeODataRequestBody, type ODataBodySource } from '../../../shared/utils/odataRequestBody'
 import type { Request } from '../../../shared/types/collections'
 import type { NodeExecutor, ExecResult } from '../types'
 
@@ -38,18 +39,19 @@ export const httpRequestExecutor: NodeExecutor = async (act, ctx) => {
   // through the SAME httpExecutionService (the `odata:execute` IPC path does too),
   // and URLResolver composes its system query options into the resolved URL from
   // the odata fields flushRequestStateToContext carries. The model has no
-  // `method`; derive the verb from operationKind exactly like the request-panel
-  // Send (entity-set / function read = GET; action / batch = POST), so a future
-  // action/batch scenario sends the right verb.
-  // LIMITATION: the action/batch request BODY (actionBody / the multipart $batch
-  // envelope the renderer assembles in handleSend) is NOT composed on this
-  // scenario path yet — only entity-set/function reads round-trip fully here. An
-  // action/batch scenario node would need that body wired before it works.
+  // `method`; the verb + body come from `composeODataRequestBody` — the SAME
+  // composer the request-panel Send uses — so the scenario path and the panel
+  // produce byte-identical wire bodies: entity-set / function reads = GET (no
+  // body); action = POST with the `actionBody` JSON; batch = POST with the
+  // assembled multipart/mixed (or JSON) `$batch` envelope. The composition runs
+  // against `effectiveReq` below (after slot/request overrides) so a wired
+  // override is honoured.
   const odata = isODataRequest(req)
   if (!isHTTPRequest(req) && !odata) throw new Error(`bound request ${cfg.requestId} is not HTTP or OData (${(req as { type?: string }).type})`)
-  const odataKind = odata ? (req as { operationKind?: string }).operationKind : undefined
+  // Verb for the synthetic skip response (before slot overrides apply); the real
+  // dispatch re-composes verb + body from `effectiveReq` below.
   const method = odata
-    ? (odataKind === 'action' || odataKind === 'batch' ? 'POST' : 'GET')
+    ? composeODataRequestBody(req as unknown as ODataBodySource).method
     : (req as { method: string }).method
 
   // Slot short-circuit: a wired input port whose id is `pathParams:<key>`
@@ -84,11 +86,21 @@ export const httpRequestExecutor: NodeExecutor = async (act, ctx) => {
   const effectiveReq = applySlotOverrides(applyRequestOverride(req, override), act.inputs)
   flushRequestStateToContext(effectiveReq)
 
+  // For OData, derive the dispatched verb + body from the (override-applied)
+  // request via the shared composer — byte-identical to the request-panel Send.
+  // An empty batch throws here (the panel surfaces the same message inline).
+  const composed = odata ? composeODataRequestBody(effectiveReq as unknown as ODataBodySource) : undefined
+  if (composed?.error !== undefined) throw new Error(composed.error)
+  const dispatchMethod = composed ? composed.method : method
+
   const authId = req.authenticationRequestId
   const auth = authId ? collectionStore.findById(authId) : null
   const input: HTTPExecutionInput = {
     requestId: req.id,
-    method,
+    method: dispatchMethod,
+    ...(composed?.rawBody !== undefined
+      ? { rawBody: composed.rawBody, ...(composed.rawBodyContentType !== undefined ? { rawBodyContentType: composed.rawBodyContentType } : {}) }
+      : {}),
     ...(auth && isAuthenticationRequest(auth) ? { authRequest: auth } : {})
   }
 
@@ -117,7 +129,7 @@ export const httpRequestExecutor: NodeExecutor = async (act, ctx) => {
         value: {
           request: {
             url: result.requestUrl,
-            method,
+            method: dispatchMethod,
             headers: result.requestHeaders ?? {}
           },
           response: {
