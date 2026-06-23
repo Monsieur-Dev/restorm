@@ -217,7 +217,25 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
   // events, verified by the e2e debounce scenario). In server mode also push
   // the SDL + canned resolvers so the main-process mock can read them off
   // `fullData`.
+  //
+  // The latest payload is mirrored into a ref so an action that reads
+  // `fullData` (Send / Listen) can flush it synchronously and bypass the
+  // 300 ms lag — otherwise the main process would execute / host a stale
+  // (pre-keystroke) query or schema.
   const updateDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const latestPayloadRef = useRef<Parameters<NonNullable<typeof window.restorm>['context']['updateFullRequestData']>[1] | null>(null)
+
+  const flushUpdate = useCallback((): void => {
+    if (updateDebounceRef.current !== null) {
+      clearTimeout(updateDebounceRef.current)
+      updateDebounceRef.current = null
+    }
+    const payload = latestPayloadRef.current
+    if (payload) {
+      void window.restorm?.context.updateFullRequestData(request.id, payload, sourceIdRef.current)
+    }
+  }, [request.id])
+
   useEffect(() => {
     const toKeyValueData = toKeyValueDataShared
     const reqId = request.id
@@ -230,6 +248,7 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
       body: { type: 'text' as const, content: JSON.stringify({ query, variables }) },
       ...(isServer ? { server: true, schema, mockResolvers } : {})
     }
+    latestPayloadRef.current = payload
 
     if (updateDebounceRef.current !== null) {
       clearTimeout(updateDebounceRef.current)
@@ -293,6 +312,9 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
   const handleListen = useCallback((): void => {
     const requestId = request.id
     if (!requestId || isListening) return
+    // Flush the debounced schema / resolver push so the main-process mock
+    // hosts the current SDL — not the pre-debounce (possibly empty) one.
+    flushUpdate()
     setServedCount(0)
     void window.restorm?.graphql.listen(requestId)
       .then((res) => {
@@ -302,7 +324,7 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
         }
       })
       .catch((err: unknown) => { logger.error('GraphQL mock server listen error', { error: String(err) }) })
-  }, [request.id, isListening, t])
+  }, [request.id, isListening, t, flushUpdate])
 
   const handleStop = useCallback((): void => {
     void window.restorm?.graphql.stop(request.id)
@@ -344,9 +366,13 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
   
   const handleSend = (): void => {
     if (isSending) return
+    // Flush the debounced query / variables push so the main process executes
+    // the current operation, not the pre-debounce one (a Send fired within
+    // 300 ms of a keystroke would otherwise POST a stale query).
+    flushUpdate()
     setIsSending(true)
     setResponse(null)
-    
+
     window.restorm?.graphql.execute({
       requestId: request.id,
       ...(requestPath ? { requestPath } : {})
