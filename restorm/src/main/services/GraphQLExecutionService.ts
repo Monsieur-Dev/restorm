@@ -43,6 +43,39 @@ interface ActiveRequest {
 }
 
 /**
+ * Normalise a serialised GraphQL request body so it is valid GraphQL-over-HTTP:
+ * the request panel stores `variables` as a JSON STRING (`"{}"`), but the spec
+ * requires `variables` to be an object or absent. Parse it, coerce a string
+ * `variables` to an object, and drop it when empty. A body that doesn't parse as
+ * an object is returned untouched (e.g. a hand-authored raw payload).
+ */
+function normalizeGraphqlBody(raw: string): string {
+  let parsed: unknown
+  try {
+    parsed = JSON.parse(raw)
+  } catch {
+    return raw
+  }
+  if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return raw
+  const obj = parsed as { query?: unknown; variables?: unknown; operationName?: unknown }
+  let variables = obj.variables
+  if (typeof variables === 'string') {
+    try {
+      const v: unknown = JSON.parse(variables)
+      variables = v && typeof v === 'object' && !Array.isArray(v) ? v : undefined
+    } catch {
+      variables = undefined
+    }
+  }
+  const hasVariables = variables && typeof variables === 'object' && Object.keys(variables).length > 0
+  return JSON.stringify({
+    query: obj.query ?? '',
+    ...(hasVariables ? { variables } : {}),
+    ...(obj.operationName !== undefined ? { operationName: obj.operationName } : {})
+  })
+}
+
+/**
  * Service for executing GraphQL requests in the main process
  */
 class GraphQLExecutionService {
@@ -132,9 +165,23 @@ class GraphQLExecutionService {
 
       // Build GraphQL body from fullData
       let body: string
-      if (requestContext?.fullData?.body && typeof requestContext.fullData.body === 'string') {
-        // Body is already JSON string with query/variables
-        body = contextService.resolveValue(requestContext.fullData.body, requestId)
+      const fullBody = requestContext?.fullData?.body
+      // The request panel pushes the GraphQL body as a `{ type: 'text', content }`
+      // tagged object (the JSON string with query/variables); older/MCP callers
+      // may push a bare string. Accept both before falling back to the discrete
+      // query/variables fields.
+      const bodyString =
+        typeof fullBody === 'string'
+          ? fullBody
+          : fullBody && typeof fullBody === 'object' && typeof (fullBody as { content?: unknown }).content === 'string'
+            ? (fullBody as { content: string }).content
+            : undefined
+      if (bodyString !== undefined && bodyString.trim() !== '') {
+        // Body is already a JSON string with query/variables. The request panel
+        // serialises `variables` as a STRING (`"{}"`); GraphQL-over-HTTP requires
+        // it to be an object (or absent), so normalise it before sending.
+        const resolved = contextService.resolveValue(bodyString, requestId)
+        body = normalizeGraphqlBody(resolved)
       } else {
         // Fallback: try to construct from fullData
         const query = requestContext?.fullData?.query ?? ''

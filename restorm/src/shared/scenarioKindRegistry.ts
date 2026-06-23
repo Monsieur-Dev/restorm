@@ -334,6 +334,23 @@ export const SCENARIO_KIND_REGISTRY = {
       config: { connectionNodeId: 'Id of the soapListen node whose server to stop.' }
     }
   },
+  graphqlListen: {
+    labelKey: 'scenario.nodes.graphqlListen', defaultLabel: 'GraphQL server', icon: 'server', category: 'composition',
+    requestBinding: true,
+    ports: { inputs: [], outputs: [{ id: 'connected', name: 'connected', flow: 'signal' }, { id: 'served', name: 'served', flow: 'both' }] },
+    doc: {
+      summary: 'HOSTS a local GraphQL mock server from a bound `server: true` GraphQL request and listens INDEFINITELY (restorm serves operations from the configured SDL + resolvers, it does not call out — so there is NO `response` output). `connected` (a pure signal) fires once the server is listening; EACH operation the mock serves re-emits its `{ request, response }` data on the `served` output. The server stays up — keeping the run in-progress — until a graphqlClose targets it (or the run is stopped), then `done` fires.',
+      config: { requestId: 'Id of the server: true GraphQL request to host (its port + endpoint path + SDL schema + canned/scripted resolvers).', connectionName: 'Unique-per-scenario name a graphqlClose references for display (defaults to the request name).', label: 'Display label on the box.' }
+    }
+  },
+  graphqlClose: {
+    labelKey: 'scenario.nodes.graphqlClose', defaultLabel: 'GraphQL close', icon: 'debug-disconnect', category: 'composition',
+    ports: { inputs: [], outputs: [] },
+    doc: {
+      summary: 'Stops an already-listening GraphQL mock server (declared by a graphqlListen node), freeing its port and firing that node\'s `done`. Pure-event action: triggered on `in`, sequences via its own `done`. Errors (to `error`) when no server is selected.',
+      config: { connectionNodeId: 'Id of the graphqlListen node whose server to stop.' }
+    }
+  },
 
   // --- Lists (grouped into a "Lists" submenu) ---
   aggregate: {

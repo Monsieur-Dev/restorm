@@ -110,6 +110,12 @@ const soapServerExecutionTestDir = defineBddConfig({
   outputDir: '.features-gen/soap-server'
 })
 
+const graphqlServerExecutionTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/graphql-server/features/**/*.feature',
+  steps: ['tests/e2e/bdd/graphql-server/steps/**/*.ts', 'tests/e2e/bdd/fixtures/mcp-server.fixture.ts'],
+  outputDir: '.features-gen/graphql-server'
+})
+
 const httpExecutionTestDir = defineBddConfig({
   features: 'tests/e2e/bdd/http-execution/features/**/*.feature',
   steps: ['tests/e2e/bdd/http-execution/steps/**/*.ts', 'tests/e2e/bdd/fixtures/mcp-server.fixture.ts'],
@@ -361,6 +367,11 @@ export default defineConfig({
     {
       name: 'soap-server',
       testDir: soapServerExecutionTestDir,
+      timeout: 180 * 1000
+    },
+    {
+      name: 'graphql-server',
+      testDir: graphqlServerExecutionTestDir,
       timeout: 180 * 1000
     },
     {

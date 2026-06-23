@@ -261,7 +261,8 @@
         "mqtt": "MQTT request",
         "mqttServer": "MQTT-megler",
         "grpcServer": "gRPC-mockserver",
-        "soapServer": "SOAP-mockserver"
+        "soapServer": "SOAP-mockserver",
+        "graphqlServer": "GraphQL-mockserver"
       }
     },
     "deleteConfirm": {
@@ -422,6 +423,15 @@
       "query": "Spørring",
       "variables": "Variabler",
       "headers": "Headere"
+    },
+    "server": {
+      "schema": "Skjema (SDL)",
+      "resolvers": "Resolvere (forhåndsdefinerte)",
+      "startListening": "Begynn å lytte",
+      "stopListening": "Slutt å lytte",
+      "served": "Lytter — {{count}} operasjon(er) betjent",
+      "notListening": "Lytter ikke",
+      "listenFailed": "Kunne ikke starte mock-serveren"
     }
   },
   "grpc": {
@@ -1044,7 +1054,9 @@
       "httpClose": "HTTP close",
       "grpcServerClose": "Lukk gRPC-server",
       "soapListen": "SOAP-server",
-      "soapClose": "Lukk SOAP"
+      "soapClose": "Lukk SOAP",
+      "graphqlListen": "GraphQL server",
+      "graphqlClose": "GraphQL close"
     },
     "comparator": {
       "result": "resultat"
@@ -1610,7 +1622,9 @@
       "grpcListen": "Hosts a local gRPC mock server and listens indefinitely. `connected` fires once it is listening; each served call re-emits its data on the `served` port. The server stays up until a gRPC server close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
       "grpcServerClose": "Stops an already-listening gRPC mock server (declared by a gRPC server node), freeing its port.",
       "soapListen": "Er vert for en lokal SOAP-mockserver og lytter i det uendelige. Hver innkommende forespørsel rutes til en konfigurert operasjon (etter SOAPAction eller operasjonsnavnet i brødteksten) og besvares med den forhåndsdefinerte SOAP-konvolutten (en feiloperasjon returnerer `<soap:Fault>`). `connected` utløses så snart serveren lytter; hver betjent forespørsel sender dataene sine på nytt på porten `served`. Serveren forblir aktiv til en SOAP-lukking (eller en stopp), deretter utløses `done`.",
-      "soapClose": "Stopper en SOAP-mockserver som allerede lytter (deklarert av en SOAP-servernode), og frigjør porten dens."
+      "soapClose": "Stopper en SOAP-mockserver som allerede lytter (deklarert av en SOAP-servernode), og frigjør porten dens.",
+      "graphqlListen": "Hosts a local GraphQL mock server and listens indefinitely. `connected` fires once it is listening; each served operation re-emits its data on the `served` port. The server stays up until a GraphQL close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
+      "graphqlClose": "Stops an already-listening GraphQL mock server (declared by a GraphQL server node), freeing its port."
     },
     "legend": {
       "title": "Forklaring",

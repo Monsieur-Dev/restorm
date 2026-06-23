@@ -1,0 +1,105 @@
+collections:
+  - folderType: environment
+    name: GraphQL Mock Playground
+    documentation: |-
+      # GraphQL Mock Playground
+
+      A self-contained GraphQL mock playground: restorm HOSTS a local GraphQL
+      endpoint AND queries it as a client — no external service needed.
+
+      - **Pets Mock** hosts a local GraphQL mock server on `localhost:4111/graphql`.
+        It resolves `pets` from the canned resolver below, with introspection on.
+        Press Listen to start serving.
+      - **Pets Consumer** is a plain GraphQL request to
+        `http://localhost:4111/graphql`. Run it (Send) once the mock is listening
+        and it receives the canned data; a second query reads `__schema` to prove
+        introspection is exposed.
+    tags: []
+    configuration: {}
+    environments:
+      - name: Default
+        variables: []
+        id: 4c2e9a71-7d31-4b8f-9c02-1a4e37e51bb2
+    items:
+      - type: graphql
+        name: Pets Mock
+        operationType: query
+        documentation: |-
+          Hosts a local GraphQL mock server on `localhost:4111/graphql`. Press
+          Listen, then run **Pets Consumer**. Resolves `pets` from the canned
+          resolver; introspection (`__schema`) stays on. A `ticks` subscription
+          streams its canned value over SSE (a canned Subscription field, no
+          scripted resolver needed).
+        tags:
+          - graphql
+          - server
+        url: localhost:4111/graphql
+        server: true
+        schema: |-
+          type Query {
+            pets: [String!]!
+            count: Int
+          }
+          type Subscription {
+            ticks: Int
+          }
+        mockResolvers: |-
+          {
+            "Query.pets": ["Rex", "Whiskers"],
+            "Query.count": 2,
+            "Subscription.ticks": 7
+          }
+        headers: []
+        params: []
+        pathParams: []
+        id: 7e3b2c01-6f88-4d21-af32-1b0a4c723101
+      - type: graphql
+        name: Pets Consumer
+        operationType: query
+        documentation: Queries the local Pets Mock and shows the canned response.
+        tags:
+          - graphql
+        url: http://localhost:4111/graphql
+        query: |-
+          query {
+            pets
+            count
+          }
+        headers:
+          - key: Content-Type
+            value:
+              type: string
+              value: application/json
+            enabled: true
+        variables: '{}'
+        params: []
+        pathParams: []
+        id: 7e3b2c01-6f88-4d21-af32-1b0a4c723102
+      - type: graphql
+        name: Schema Probe
+        operationType: query
+        documentation: Reads `__schema` from the local mock to prove introspection.
+        tags:
+          - graphql
+        url: http://localhost:4111/graphql
+        query: |-
+          query {
+            __schema {
+              queryType {
+                name
+              }
+            }
+          }
+        headers:
+          - key: Content-Type
+            value:
+              type: string
+              value: application/json
+            enabled: true
+        variables: '{}'
+        params: []
+        pathParams: []
+        id: 7e3b2c01-6f88-4d21-af32-1b0a4c723103
+    id: 6b1d8f4c-2e99-4a13-91be-3c8daf751f20
+    fileFormatVersion: 1
+_projectUuid: 4f8b3d2a-9e55-4c7f-b2d3-af1e6c849c33

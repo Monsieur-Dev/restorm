@@ -261,7 +261,8 @@
         "mqtt": "MQTT request",
         "mqttServer": "MQTT broker",
         "grpcServer": "Διακομιστής gRPC mock",
-        "soapServer": "Διακομιστής εικονικού SOAP"
+        "soapServer": "Διακομιστής εικονικού SOAP",
+        "graphqlServer": "Διακομιστής GraphQL mock"
       }
     },
     "deleteConfirm": {
@@ -422,6 +423,15 @@
       "query": "Ερώτημα",
       "variables": "Μεταβλητές",
       "headers": "Κεφαλίδες"
+    },
+    "server": {
+      "schema": "Σχήμα (SDL)",
+      "resolvers": "Επιλύτες (προκαθορισμένοι)",
+      "startListening": "Έναρξη ακρόασης",
+      "stopListening": "Διακοπή ακρόασης",
+      "served": "Ακρόαση — εξυπηρετήθηκαν {{count}} λειτουργίες",
+      "notListening": "Δεν ακούει",
+      "listenFailed": "Αποτυχία εκκίνησης του διακομιστή mock"
     }
   },
   "grpc": {
@@ -1044,7 +1054,9 @@
       "httpClose": "HTTP close",
       "grpcServerClose": "Κλείσιμο διακομιστή gRPC",
       "soapListen": "Διακομιστής SOAP",
-      "soapClose": "Κλείσιμο SOAP"
+      "soapClose": "Κλείσιμο SOAP",
+      "graphqlListen": "GraphQL server",
+      "graphqlClose": "GraphQL close"
     },
     "comparator": {
       "result": "αποτέλεσμα"
@@ -1610,7 +1622,9 @@
       "grpcListen": "Hosts a local gRPC mock server and listens indefinitely. `connected` fires once it is listening; each served call re-emits its data on the `served` port. The server stays up until a gRPC server close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
       "grpcServerClose": "Stops an already-listening gRPC mock server (declared by a gRPC server node), freeing its port.",
       "soapListen": "Φιλοξενεί έναν τοπικό διακομιστή εικονικού SOAP και ακούει επ' αόριστον. Κάθε εισερχόμενο αίτημα δρομολογείται σε μια διαμορφωμένη λειτουργία (βάσει του SOAPAction του ή του ονόματος λειτουργίας στο σώμα) και απαντάται με τον προκαθορισμένο φάκελο SOAP (μια λειτουργία σφάλματος επιστρέφει `<soap:Fault>`). Το `connected` ενεργοποιείται μόλις ο διακομιστής ακούει· κάθε εξυπηρετούμενο αίτημα επανεκπέμπει τα δεδομένα του στη θύρα `served`. Ο διακομιστής παραμένει ενεργός μέχρι ένα κλείσιμο SOAP (ή μια διακοπή), και μετά ενεργοποιείται το `done`.",
-      "soapClose": "Σταματά έναν διακομιστή εικονικού SOAP που ήδη ακούει (δηλωμένον από έναν κόμβο διακομιστή SOAP) και απελευθερώνει τη θύρα του."
+      "soapClose": "Σταματά έναν διακομιστή εικονικού SOAP που ήδη ακούει (δηλωμένον από έναν κόμβο διακομιστή SOAP) και απελευθερώνει τη θύρα του.",
+      "graphqlListen": "Hosts a local GraphQL mock server and listens indefinitely. `connected` fires once it is listening; each served operation re-emits its data on the `served` port. The server stays up until a GraphQL close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
+      "graphqlClose": "Stops an already-listening GraphQL mock server (declared by a GraphQL server node), freeing its port."
     },
     "legend": {
       "title": "Υπόμνημα",

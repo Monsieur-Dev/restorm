@@ -260,7 +260,8 @@
         "mqtt": "MQTT request",
         "mqttServer": "MQTT 代理",
         "grpcServer": "gRPC 模擬伺服器",
-        "soapServer": "SOAP 模擬伺服器"
+        "soapServer": "SOAP 模擬伺服器",
+        "graphqlServer": "GraphQL 模擬伺服器"
       }
     },
     "deleteConfirm": {
@@ -421,6 +422,15 @@
       "query": "查詢",
       "variables": "變數",
       "headers": "標頭"
+    },
+    "server": {
+      "schema": "結構描述 (SDL)",
+      "resolvers": "解析器（預設）",
+      "startListening": "開始監聽",
+      "stopListening": "停止監聽",
+      "served": "監聽中 — 已服務 {{count}} 個操作",
+      "notListening": "未在監聽",
+      "listenFailed": "無法啟動模擬伺服器"
     }
   },
   "grpc": {
@@ -1043,7 +1053,9 @@
       "httpClose": "HTTP close",
       "grpcServerClose": "關閉 gRPC 伺服器",
       "soapListen": "SOAP 伺服器",
-      "soapClose": "關閉 SOAP"
+      "soapClose": "關閉 SOAP",
+      "graphqlListen": "GraphQL server",
+      "graphqlClose": "GraphQL close"
     },
     "comparator": {
       "result": "結果"
@@ -1609,7 +1621,9 @@
       "grpcListen": "Hosts a local gRPC mock server and listens indefinitely. `connected` fires once it is listening; each served call re-emits its data on the `served` port. The server stays up until a gRPC server close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
       "grpcServerClose": "Stops an already-listening gRPC mock server (declared by a gRPC server node), freeing its port.",
       "soapListen": "託管本機 SOAP 模擬伺服器並無限期接聽。每個傳入要求都會分派到已設定的作業（依據其 SOAPAction 或內文中的作業名稱），並以預先定義的 SOAP 信封回應（故障作業會傳回 `<soap:Fault>`）。伺服器一旦開始接聽便會觸發 `connected`；每個已處理的要求都會在 `served` 連接埠重新發出其資料。伺服器會持續執行，直到 SOAP 關閉（或停止），隨後觸發 `done`。",
-      "soapClose": "停止一個已在接聽的 SOAP 模擬伺服器（由 SOAP 伺服器節點宣告），並釋放其連接埠。"
+      "soapClose": "停止一個已在接聽的 SOAP 模擬伺服器（由 SOAP 伺服器節點宣告），並釋放其連接埠。",
+      "graphqlListen": "Hosts a local GraphQL mock server and listens indefinitely. `connected` fires once it is listening; each served operation re-emits its data on the `served` port. The server stays up until a GraphQL close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
+      "graphqlClose": "Stops an already-listening GraphQL mock server (declared by a GraphQL server node), freeing its port."
     },
     "legend": {
       "title": "圖例",

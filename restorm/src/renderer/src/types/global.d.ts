@@ -168,6 +168,14 @@ declare global {
         cancel: (requestId: string) => Promise<boolean>
         isActive: (requestId: string) => Promise<boolean>
         onProgress: (callback: (data: RequestProgressData) => void) => (() => void)
+        /** SERVER MODE: start hosting this request as a local GraphQL mock server. */
+        listen: (requestId: string) => Promise<{ success: boolean; listening: boolean; error?: string }>
+        /** SERVER MODE: stop hosting this request's GraphQL mock route. */
+        stop: (requestId: string) => Promise<boolean>
+        /** SERVER MODE: whether this request is currently hosting a mock route. */
+        isListening: (requestId: string) => Promise<boolean>
+        /** SERVER MODE: served-operation count updates for the "served N" banner. */
+        onServerServed: (callback: (data: { requestId: string; count: number }) => void) => (() => void)
       }
       graphqlApi: {
         query: (query: string, variables?: Record<string, unknown>) => Promise<unknown>
@@ -608,6 +616,12 @@ export interface FullRequestData {
   operationType?: string | undefined
   query?: string | undefined
   variables?: string | undefined
+  /** GraphQL mock server (server === true): SDL schema served. */
+  schema?: string | undefined
+  /** GraphQL mock server: per-field canned response values (JSON keyed by `Type.field`). */
+  mockResolvers?: string | undefined
+  /** GraphQL mock server: optional scripted resolver body. */
+  resolverScript?: string | undefined
   service?: string | undefined
   grpcMethod?: string | undefined
   callType?: string | undefined

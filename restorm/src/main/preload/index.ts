@@ -678,6 +678,31 @@ contextBridge.exposeInMainWorld('restorm', {
       return () => {
         ipcRenderer.removeListener('graphql:request-progress', handler)
       }
+    },
+    /** SERVER MODE: start hosting this request as a local GraphQL mock server. */
+    listen: async (requestId: string): Promise<{ success: boolean; listening: boolean; error?: string }> => {
+      const result: unknown = await ipcRenderer.invoke('graphql:listen', requestId)
+      return result as { success: boolean; listening: boolean; error?: string }
+    },
+    /** SERVER MODE: stop hosting this request's GraphQL mock route. */
+    stop: async (requestId: string): Promise<boolean> => {
+      const result: unknown = await ipcRenderer.invoke('graphql:stop', requestId)
+      return result as boolean
+    },
+    /** SERVER MODE: whether this request is currently hosting a mock route. */
+    isListening: async (requestId: string): Promise<boolean> => {
+      const result: unknown = await ipcRenderer.invoke('graphql:is-listening', requestId)
+      return result as boolean
+    },
+    /** SERVER MODE: served-operation count updates for the "served N" banner. */
+    onServerServed: (callback: (data: { requestId: string; count: number }) => void): (() => void) => {
+      const handler = (_event: Electron.IpcRendererEvent, data: { requestId: string; count: number }): void => {
+        callback(data)
+      }
+      ipcRenderer.on('graphql:server-served', handler)
+      return () => {
+        ipcRenderer.removeListener('graphql:server-served', handler)
+      }
     }
   },
   graphqlApi: {

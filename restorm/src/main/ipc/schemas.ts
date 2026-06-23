@@ -281,6 +281,10 @@ export const graphqlExecuteArgs = z.tuple([
 
 export const graphqlCancelArgs = z.tuple([requestIdArg])
 export const graphqlIsActiveArgs = z.tuple([requestIdArg])
+// GraphQL mock server (server mode): start/stop hosting + listening check.
+export const graphqlListenArgs = z.tuple([requestIdArg])
+export const graphqlStopArgs = z.tuple([requestIdArg])
+export const graphqlIsListeningArgs = z.tuple([requestIdArg])
 
 // ==========================================================================
 // SOAP Execution

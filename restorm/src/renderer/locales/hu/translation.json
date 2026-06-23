@@ -261,7 +261,8 @@
         "mqtt": "MQTT request",
         "mqttServer": "MQTT broker",
         "grpcServer": "gRPC mock-kiszolgáló",
-        "soapServer": "SOAP mock-kiszolgáló"
+        "soapServer": "SOAP mock-kiszolgáló",
+        "graphqlServer": "GraphQL mock-kiszolgáló"
       }
     },
     "deleteConfirm": {
@@ -422,6 +423,15 @@
       "query": "Lekérdezés",
       "variables": "Változók",
       "headers": "Fejlécek"
+    },
+    "server": {
+      "schema": "Séma (SDL)",
+      "resolvers": "Resolverek (előre megadott)",
+      "startListening": "Hallgatás indítása",
+      "stopListening": "Hallgatás leállítása",
+      "served": "Figyel — {{count}} művelet kiszolgálva",
+      "notListening": "Nem figyel",
+      "listenFailed": "A mock-kiszolgáló indítása sikertelen"
     }
   },
   "grpc": {
@@ -1044,7 +1054,9 @@
       "httpClose": "HTTP close",
       "grpcServerClose": "gRPC-kiszolgáló bezárása",
       "soapListen": "SOAP-kiszolgáló",
-      "soapClose": "SOAP lezárása"
+      "soapClose": "SOAP lezárása",
+      "graphqlListen": "GraphQL server",
+      "graphqlClose": "GraphQL close"
     },
     "comparator": {
       "result": "eredmény"
@@ -1610,7 +1622,9 @@
       "grpcListen": "Hosts a local gRPC mock server and listens indefinitely. `connected` fires once it is listening; each served call re-emits its data on the `served` port. The server stays up until a gRPC server close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
       "grpcServerClose": "Stops an already-listening gRPC mock server (declared by a gRPC server node), freeing its port.",
       "soapListen": "Helyi SOAP mock-kiszolgálót üzemeltet, és korlátlan ideig figyel. Minden bejövő kérést egy konfigurált művelethez irányít (a SOAPAction vagy a törzs műveletneve alapján), és az előre megadott SOAP-borítékkal válaszol (egy hibaművelet `<soap:Fault>` választ ad). A `connected` akkor aktiválódik, amint a kiszolgáló figyel; minden kiszolgált kérés újra kibocsátja az adatait a `served` porton. A kiszolgáló aktív marad egy SOAP-lezárásig (vagy leállításig), majd a `done` aktiválódik.",
-      "soapClose": "Leállít egy már figyelő SOAP mock-kiszolgálót (amelyet egy SOAP-kiszolgáló csomópont deklarált), és felszabadítja a portját."
+      "soapClose": "Leállít egy már figyelő SOAP mock-kiszolgálót (amelyet egy SOAP-kiszolgáló csomópont deklarált), és felszabadítja a portját.",
+      "graphqlListen": "Hosts a local GraphQL mock server and listens indefinitely. `connected` fires once it is listening; each served operation re-emits its data on the `served` port. The server stays up until a GraphQL close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
+      "graphqlClose": "Stops an already-listening GraphQL mock server (declared by a GraphQL server node), freeing its port."
     },
     "legend": {
       "title": "Jelmagyarázat",

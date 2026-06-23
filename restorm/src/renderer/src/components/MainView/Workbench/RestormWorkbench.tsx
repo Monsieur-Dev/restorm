@@ -460,11 +460,18 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
       )
     }
 
-    // GraphQL request tab
+    // GraphQL request tab. A mock SERVER (server === true) shows the SRV capsule
+    // over the GQL badge + the listening border-beam while it hosts — the same
+    // beam the sidebar tree paints, driven by the same listening state (mirrors
+    // the HTTP / gRPC / WebSocket server tabs).
     if (isGraphQLRequestTab(restormTab)) {
+      const isServer = restormTab.request.server === true
+      const badge = <Badge type="GQL" mode={isServer ? 'server' : undefined} />
       return (
         <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-          <Badge type="GQL" />
+          {isServer
+            ? <ServerListeningBadge requestId={restormTab.request.id}>{badge}</ServerListeningBadge>
+            : badge}
           <span>{restormTab.request.name}</span>
           <ItemSecretBadges itemId={restormTab.request.id} />
           {renderDirtyIndicator(restormTab)}

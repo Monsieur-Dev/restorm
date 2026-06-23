@@ -13,7 +13,7 @@ import type { PubSub } from '@graphql-yoga/subscription'
 import { logger } from './LoggerService'
 
 // Re-export for consumers
-export { createSchema, createPubSub }
+export { createSchema, createYoga, createPubSub }
 export type { PubSub }
 
 // Generic types for GraphQL configuration

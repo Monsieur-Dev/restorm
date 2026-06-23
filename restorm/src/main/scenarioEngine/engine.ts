@@ -13,6 +13,7 @@ import { collectionStore } from '../services/CollectionStore'
 import { websocketExecutionService } from '../services/WebSocketExecutionService'
 import { httpExecutionService } from '../services/HTTPExecutionService'
 import { soapExecutionService } from '../services/SOAPExecutionService'
+import { graphqlMockServerService } from '../services/GraphQLMockServerService'
 import { grpcExecutionService } from '../services/GRPCExecutionService'
 import { grpcMockServerService } from '../services/GRPCMockServerService'
 import { flushRequestStateToContext } from '../mcp/tools/execute'
@@ -208,6 +209,10 @@ export class ScenarioEngine {
         // each served request on `served`; `done` fires when it stops. Like the
         // HTTP mock but answers SOAP envelopes (operation dispatch + `<soap:Fault>`).
         if (req.transport === 'soap-server') return soapExecutionService.connectStreamingSoapServer(req)
+        // GraphQL mock server: a DISTINCT long-lived listener (a `graphqlListen`
+        // node) HOSTING the bound `server: true` request's GraphQL endpoint;
+        // re-emits each served operation on `served`, `done` fires on stop.
+        if (req.transport === 'graphql-server') return graphqlMockServerService.connectStreamingGraphqlServer(req)
         // A request flagged `server` HOSTS the server / broker (restorm acts as
         // the server); otherwise it connects as a client — same split for raw WS,
         // Socket.IO and MQTT.

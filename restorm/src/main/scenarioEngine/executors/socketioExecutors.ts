@@ -298,6 +298,44 @@ export const soapCloseExecutor: NodeExecutor = (_act, ctx) => {
   return { outputs: [] }
 }
 
+/**
+ * A (graphqlListen): HOST a local GraphQL mock server. A DISTINCT long-lived
+ * listener — NOT a one-shot request with a flag. Hands the server off to the
+ * scheduler via the `graphql-server` transport: the scheduler keeps the run
+ * alive while it listens, fires `connected` once it is up, re-emits each SERVED
+ * operation on `served`, and fires `done` when a graphqlClose (or a Stop) ends
+ * it. Mirrors {@link httpListenExecutor}.
+ */
+export const graphqlListenExecutor: NodeExecutor = (_act, ctx) => {
+  const cfg = ctx.node.config as { requestId?: unknown; connectionName?: unknown }
+  if (typeof cfg.requestId !== 'string' || cfg.requestId === '') {
+    throw new Error(`graphqlListen node ${ctx.node.id} has no bound requestId`)
+  }
+  const connectionName = typeof cfg.connectionName === 'string' && cfg.connectionName.trim() !== ''
+    ? cfg.connectionName.trim()
+    : cfg.requestId
+  return {
+    outputs: [],
+    scopeAction: { type: 'openSocketioConnect', transport: 'graphql-server', requestId: cfg.requestId, events: [], connectionName }
+  }
+}
+
+/** C (graphqlClose): stop the GraphQL mock server named by
+ * `config.connectionNodeId` (firing that graphqlListen node's `done`).
+ * Pure-event action; sequences via its own `done`. Errors when no server is
+ * selected or it is not listening. */
+export const graphqlCloseExecutor: NodeExecutor = (_act, ctx) => {
+  const cfg = ctx.node.config as { connectionNodeId?: unknown }
+  const connectionNodeId = typeof cfg.connectionNodeId === 'string' ? cfg.connectionNodeId : ''
+  if (connectionNodeId === '') throw new Error('graphqlClose: no server selected')
+  if (!ctx.socketio) throw new Error('graphqlClose: socket bridge unavailable')
+  if (!ctx.socketio.has(connectionNodeId)) {
+    throw new Error('graphqlClose: the referenced server does not exist in this run')
+  }
+  ctx.socketio.close(connectionNodeId)
+  return { outputs: [] }
+}
+
 /** B (socketioSend): emit on the referenced connection. */
 export const socketioSendExecutor: NodeExecutor = (act, ctx) => {
   const cfg = ctx.node.config as { connectionNodeId?: unknown; channel?: unknown; payload?: unknown }

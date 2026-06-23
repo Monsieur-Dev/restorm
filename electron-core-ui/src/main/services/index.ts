@@ -35,7 +35,7 @@ export type {
   CategoryMeta
 } from './SearchService'
 
-export { graphQLService, createSchema, createPubSub } from './GraphQLService'
+export { graphQLService, createSchema, createYoga, createPubSub } from './GraphQLService'
 export type { GraphQLServiceConfig, PubSub } from './GraphQLService'
 
 export {

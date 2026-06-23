@@ -48,6 +48,7 @@ export type AddChildKind =
   | 'mqtt'
   | 'mqtt-server'
   | 'http-server'
+  | 'graphql-server'
   | 'odata'
   | 'auth'
   | 'scenario'
@@ -170,6 +171,14 @@ export const buildAddSubmenu = (
     label: t('sidebar.contextMenu.add.graphql'),
     icon: React.createElement(Badge, { type: 'QUERY' }),
     onClick: () => { onAddChildItem(parentId, 'graphql') }
+  },
+  // GraphQL mock server: restorm hosts a local GraphQL endpoint that resolves
+  // operations from a configured schema — grouped with the GraphQL client.
+  {
+    id: `add-graphql-server-${parentId}`,
+    label: t('sidebar.contextMenu.add.graphqlServer'),
+    icon: React.createElement(Badge, { type: 'QUERY', mode: 'server' }),
+    onClick: () => { onAddChildItem(parentId, 'graphql-server') }
   },
   {
     id: `add-soap-${parentId}`,

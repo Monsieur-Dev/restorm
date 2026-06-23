@@ -415,6 +415,7 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
       case 'http-delete': return 'New DELETE request'
       case 'http-server': return 'New HTTP mock server'
       case 'graphql': return 'New GraphQL request'
+      case 'graphql-server': return 'New GraphQL mock server'
       case 'grpc': return 'New gRPC request'
       case 'grpc-server-stream': return 'New gRPC server-streaming request'
       case 'grpc-client-stream': return 'New gRPC client-streaming request'
@@ -546,6 +547,18 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
         built = new HTTPRequest({ id, name, method: 'GET', server: true, url: 'localhost:8080/', mockStatus: 200 })
       } else if (kind === 'graphql') {
         built = new GraphQLRequest({ id, name })
+      } else if (kind === 'graphql-server') {
+        // restorm acts as a local GraphQL mock server: GraphQL request + server
+        // flag, host forced to localhost, default port + /graphql endpoint, and
+        // a minimal SDL + canned resolver pre-filled so it answers out of the box.
+        built = new GraphQLRequest({
+          id,
+          name,
+          server: true,
+          url: 'localhost:4000/graphql',
+          schema: 'type Query {\n  hello: String\n}',
+          mockResolvers: '{\n  "Query.hello": "Hello from restorm"\n}'
+        })
       } else if (kind === 'grpc' || kind === 'grpc-server-stream' || kind === 'grpc-client-stream' || kind === 'grpc-bidi') {
         const callType =
           kind === 'grpc-server-stream' ? 'server-stream' :

@@ -90,3 +90,5 @@ tests/e2e/samples/http-sample.restorm.responses.zip
 tests/e2e/samples/grpc-server-sample.restorm.responses.zip
 tests/e2e/samples/soap-sample.restorm.responses.zip
 tests/e2e/samples/soap-server-sample.restorm.responses.zip
+tests/e2e/samples/http-server-sample.restorm.responses.zip
+tests/e2e/samples/graphql-server-sample.restorm.responses.zip

@@ -261,7 +261,8 @@
         "mqtt": "MQTT request",
         "mqttServer": "MQTT-välittäjä",
         "grpcServer": "gRPC-mock-palvelin",
-        "soapServer": "SOAP-mock-palvelin"
+        "soapServer": "SOAP-mock-palvelin",
+        "graphqlServer": "GraphQL-mock-palvelin"
       }
     },
     "deleteConfirm": {
@@ -422,6 +423,15 @@
       "query": "Kysely",
       "variables": "Muuttujat",
       "headers": "Otsakkeet"
+    },
+    "server": {
+      "schema": "Skeema (SDL)",
+      "resolvers": "Resolverit (esimääritetyt)",
+      "startListening": "Aloita kuuntelu",
+      "stopListening": "Lopeta kuuntelu",
+      "served": "Kuuntelee — {{count}} operaatio(ta) palveltu",
+      "notListening": "Ei kuuntele",
+      "listenFailed": "Mock-palvelimen käynnistys epäonnistui"
     }
   },
   "grpc": {
@@ -1044,7 +1054,9 @@
       "httpClose": "HTTP close",
       "grpcServerClose": "Sulje gRPC-palvelin",
       "soapListen": "SOAP-palvelin",
-      "soapClose": "Sulje SOAP"
+      "soapClose": "Sulje SOAP",
+      "graphqlListen": "GraphQL server",
+      "graphqlClose": "GraphQL close"
     },
     "comparator": {
       "result": "tulos"
@@ -1610,7 +1622,9 @@
       "grpcListen": "Hosts a local gRPC mock server and listens indefinitely. `connected` fires once it is listening; each served call re-emits its data on the `served` port. The server stays up until a gRPC server close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
       "grpcServerClose": "Stops an already-listening gRPC mock server (declared by a gRPC server node), freeing its port.",
       "soapListen": "Isännöi paikallista SOAP-mock-palvelinta ja kuuntelee loputtomasti. Jokainen saapuva pyyntö ohjataan määritettyyn toimintoon (sen SOAPActionin tai rungon toiminnon nimen perusteella) ja siihen vastataan ennalta määritetyllä SOAP-kuorella (virhetoiminto palauttaa `<soap:Fault>`). `connected` laukeaa heti, kun palvelin kuuntelee; jokainen palveltu pyyntö lähettää tietonsa uudelleen `served`-porttiin. Palvelin pysyy aktiivisena SOAP-sulkemiseen (tai pysäytykseen) asti, minkä jälkeen `done` laukeaa.",
-      "soapClose": "Pysäyttää jo kuuntelevan SOAP-mock-palvelimen (jonka SOAP-palvelinsolmu on määrittänyt) ja vapauttaa sen portin."
+      "soapClose": "Pysäyttää jo kuuntelevan SOAP-mock-palvelimen (jonka SOAP-palvelinsolmu on määrittänyt) ja vapauttaa sen portin.",
+      "graphqlListen": "Hosts a local GraphQL mock server and listens indefinitely. `connected` fires once it is listening; each served operation re-emits its data on the `served` port. The server stays up until a GraphQL close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
+      "graphqlClose": "Stops an already-listening GraphQL mock server (declared by a GraphQL server node), freeing its port."
     },
     "legend": {
       "title": "Selite",

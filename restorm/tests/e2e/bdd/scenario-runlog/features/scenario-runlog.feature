@@ -66,4 +66,5 @@ Feature: Scenario run-log end-to-end
       | HTTP Server    |
       | gRPC Server    |
       | SOAP Server    |
+      | GraphQL Server |
       | Main           |
