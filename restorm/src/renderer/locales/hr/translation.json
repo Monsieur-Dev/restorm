@@ -263,7 +263,8 @@
         "mqttServer": "MQTT broker",
         "grpcServer": "gRPC mock poslužitelj",
         "soapServer": "SOAP mock poslužitelj",
-        "graphqlServer": "GraphQL mock poslužitelj"
+        "graphqlServer": "GraphQL mock poslužitelj",
+        "odataServer": "OData mock poslužitelj"
       }
     },
     "deleteConfirm": {
@@ -1057,7 +1058,9 @@
       "soapListen": "SOAP poslužitelj",
       "soapClose": "Zatvori SOAP",
       "graphqlListen": "GraphQL server",
-      "graphqlClose": "GraphQL close"
+      "graphqlClose": "GraphQL close",
+      "odataListen": "OData server",
+      "odataClose": "OData close"
     },
     "comparator": {
       "result": "rezultat"
@@ -1625,7 +1628,9 @@
       "soapListen": "Udomljuje lokalni SOAP mock poslužitelj i sluša neograničeno. Svaki dolazni zahtjev usmjerava se na konfiguriranu operaciju (prema njegovoj SOAPAction ili nazivu operacije u tijelu) i odgovara mu se unaprijed definiranom SOAP omotnicom (operacija pogreške vraća `<soap:Fault>`). `connected` se aktivira čim poslužitelj sluša; svaki posluženi zahtjev ponovno emitira svoje podatke na priključku `served`. Poslužitelj ostaje aktivan do SOAP zatvaranja (ili zaustavljanja), a zatim se aktivira `done`.",
       "soapClose": "Zaustavlja SOAP mock poslužitelj koji već sluša (deklariran SOAP poslužiteljskim čvorom) i oslobađa njegov priključak.",
       "graphqlListen": "Hosts a local GraphQL mock server and listens indefinitely. `connected` fires once it is listening; each served operation re-emits its data on the `served` port. The server stays up until a GraphQL close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
-      "graphqlClose": "Stops an already-listening GraphQL mock server (declared by a GraphQL server node), freeing its port."
+      "graphqlClose": "Stops an already-listening GraphQL mock server (declared by a GraphQL server node), freeing its port.",
+      "odataListen": "Hostira lokalnu lažnu OData v4 uslugu i sluša neograničeno. `connected` se aktivira čim počne slušati; svaki posluženi zahtjev ponovno emitira svoje podatke na priključku `served`. Poslužitelj ostaje aktivan do OData zatvaranja (ili zaustavljanja), nakon čega se aktivira `done`. Bez response izlaza — poslužuje, ne poziva prema van.",
+      "odataClose": "Zaustavlja lažnu OData uslugu koja već sluša (deklariranu OData poslužiteljskim čvorom) i oslobađa njezin priključak."
     },
     "legend": {
       "title": "Legenda",
@@ -1838,7 +1843,64 @@
     "getDelta": "Dohvati deltu",
     "deltaHint": "@odata.deltaLink dostupan — kliknite za zamjenu ovog odgovora najnovijim skupom promjena.",
     "deltaChanged": "{{count}} promijenjeno",
-    "deltaRemoved": "{{count}} uklonjeno"
+    "deltaRemoved": "{{count}} uklonjeno",
+    "actionBody": "Tijelo akcije (JSON)",
+    "actionParameters": "Parametri akcije (iz metapodataka)",
+    "applyPlaceholder": "groupby((Status),aggregate($count as Total))",
+    "batchAdd": "Dodaj podzahtjev",
+    "batchAtomicityPlaceholder": "skup promjena (neobavezno)",
+    "batchBody": "Podzahtjevi skupne obrade",
+    "batchBodyLabel": "Tijelo (JSON)",
+    "batchEmpty": "Još nema podzahtjeva. Dodajte jedan u nastavku.",
+    "batchMoveDown": "Pomakni dolje",
+    "batchMoveUp": "Pomakni gore",
+    "batchRemove": "Ukloni podzahtjev",
+    "batchUrlPlaceholder": "Pets(1) — relativno u odnosu na korijen usluge",
+    "expandAdd": "Dodaj proširenje",
+    "expandCollapseOptions": "Sakrij opcije",
+    "expandEmpty": "Još nema proširenja. Dodajte jedno u nastavku.",
+    "expandMoveDown": "Pomakni dolje",
+    "expandMoveUp": "Pomakni gore",
+    "expandNested": "Ugniježđeni $expand",
+    "expandOrderbyPlaceholder": "Name asc",
+    "expandPropertyPlaceholder": "Navigacijsko svojstvo (npr. Tags)",
+    "expandRemove": "Ukloni",
+    "expandSelectPlaceholder": "Id, Name (odvojeno zarezima)",
+    "expandShowOptions": "Prikaži opcije",
+    "expandSkipPlaceholder": "0",
+    "expandTopPlaceholder": "5",
+    "filterPlaceholder": "Name eq 'Alice' and Age gt 21",
+    "formatPlaceholder": "json",
+    "functionParameters": "Parametri funkcije (iz metapodataka)",
+    "navigationPropertiesHint": "Navigacijska svojstva:",
+    "orderbyAdd": "Dodaj sortiranje",
+    "orderbyEmpty": "Još nema sortiranja. Dodajte svojstvo u nastavku.",
+    "orderbyMoveDown": "Pomakni dolje",
+    "orderbyMoveUp": "Pomakni gore",
+    "orderbyPropertyPlaceholder": "Name",
+    "orderbyRemove": "Ukloni",
+    "paginatedHint": "@odata.nextLink dostupan — kliknite da biste dodali sljedeću stranicu ovom odgovoru.",
+    "paramsApply": "Primijeni parametre",
+    "paramsApplyToBody": "Primijeni na tijelo",
+    "paramsApplyToUrl": "Primijeni na URL",
+    "paramsNone": "Ne očekuju se parametri.",
+    "propertiesHint": "Svojstva:",
+    "propertyPickerPlaceholder": "Odaberite svojstvo…",
+    "responseEmpty": "Nema tijela odgovora",
+    "searchPlaceholder": "puppy",
+    "selectPlaceholder": "Id, Name, Email (odvojeno zarezima)",
+    "skipPlaceholder": "0",
+    "topPlaceholder": "50",
+    "urlPlaceholder": "https://service/odata/EntitySet",
+    "urlPreview": "Pregled URL-a (prije razrješavanja)",
+    "versionV2NotYet": "v2 (izvršavanje još nije podržano)",
+    "versionV3NotYet": "v3 (izvršavanje još nije podržano)",
+    "operationKindEntitySet": "Skup entiteta (GET)",
+    "operationKindFunction": "Funkcija (GET s ugrađenim parametrima)",
+    "operationKindAction": "Akcija (POST s JSON tijelom)",
+    "operationKindBatch": "Skupna obrada ($batch — multipart/mixed)",
+    "version": "OData verzija",
+    "operationKind": "Vrsta operacije"
   },
   "typedValue": {
     "list": {
@@ -1852,6 +1914,17 @@
       "notListening": "Ne sluša",
       "served": "Sluša — posluženo {{count}} zahtjeva",
       "listenFailed": "Pokretanje mock poslužitelja nije uspjelo"
+    }
+  },
+  "odata": {
+    "server": {
+      "startListening": "Počni slušati",
+      "stopListening": "Zaustavi slušanje",
+      "notListening": "Ne sluša",
+      "served": "Sluša — posluženo {{count}} zahtjeva",
+      "listenFailed": "Pokretanje mock OData poslužitelja nije uspjelo",
+      "metadataLabel": "$metadata (CSDL)",
+      "dataLabel": "Posluženi podaci entiteta (po skupu entiteta)"
     }
   }
 }

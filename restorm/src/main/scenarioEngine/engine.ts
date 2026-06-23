@@ -16,6 +16,7 @@ import { soapExecutionService } from '../services/SOAPExecutionService'
 import { graphqlMockServerService } from '../services/GraphQLMockServerService'
 import { grpcExecutionService } from '../services/GRPCExecutionService'
 import { grpcMockServerService } from '../services/GRPCMockServerService'
+import { odataMockServerService } from '../services/ODataMockServerService'
 import { flushRequestStateToContext } from '../mcp/tools/execute'
 import { installScenarioValueResolvers } from '../../shared/scenarioValueResolvers'
 import { setSecretPreviewResolver } from '../../shared/utils/scenarioStaticPreview'
@@ -213,6 +214,12 @@ export class ScenarioEngine {
         // node) HOSTING the bound `server: true` request's GraphQL endpoint;
         // re-emits each served operation on `served`, `done` fires on stop.
         if (req.transport === 'graphql-server') return graphqlMockServerService.connectStreamingGraphqlServer(req)
+        // OData mock server: a DISTINCT long-lived listener that HOSTS the bound
+        // `server: true` request's CSDL + entity data on the shared HTTP PortHost
+        // (an `odataListen` node, never a one-shot odata request) and re-emits
+        // each served request on `served`; `done` fires when it stops. No client
+        // branch — an odataListen node only ever hosts.
+        if (req.transport === 'odata-server') return odataMockServerService.connectStreamingODataServer(req)
         // A request flagged `server` HOSTS the server / broker (restorm acts as
         // the server); otherwise it connects as a client — same split for raw WS,
         // Socket.IO and MQTT.

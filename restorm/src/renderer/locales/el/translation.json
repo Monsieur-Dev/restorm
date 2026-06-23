@@ -262,7 +262,8 @@
         "mqttServer": "MQTT broker",
         "grpcServer": "Διακομιστής gRPC mock",
         "soapServer": "Διακομιστής εικονικού SOAP",
-        "graphqlServer": "Διακομιστής GraphQL mock"
+        "graphqlServer": "Διακομιστής GraphQL mock",
+        "odataServer": "Διακομιστής OData mock"
       }
     },
     "deleteConfirm": {
@@ -1056,7 +1057,9 @@
       "soapListen": "Διακομιστής SOAP",
       "soapClose": "Κλείσιμο SOAP",
       "graphqlListen": "GraphQL server",
-      "graphqlClose": "GraphQL close"
+      "graphqlClose": "GraphQL close",
+      "odataListen": "OData server",
+      "odataClose": "OData close"
     },
     "comparator": {
       "result": "αποτέλεσμα"
@@ -1624,7 +1627,9 @@
       "soapListen": "Φιλοξενεί έναν τοπικό διακομιστή εικονικού SOAP και ακούει επ' αόριστον. Κάθε εισερχόμενο αίτημα δρομολογείται σε μια διαμορφωμένη λειτουργία (βάσει του SOAPAction του ή του ονόματος λειτουργίας στο σώμα) και απαντάται με τον προκαθορισμένο φάκελο SOAP (μια λειτουργία σφάλματος επιστρέφει `<soap:Fault>`). Το `connected` ενεργοποιείται μόλις ο διακομιστής ακούει· κάθε εξυπηρετούμενο αίτημα επανεκπέμπει τα δεδομένα του στη θύρα `served`. Ο διακομιστής παραμένει ενεργός μέχρι ένα κλείσιμο SOAP (ή μια διακοπή), και μετά ενεργοποιείται το `done`.",
       "soapClose": "Σταματά έναν διακομιστή εικονικού SOAP που ήδη ακούει (δηλωμένον από έναν κόμβο διακομιστή SOAP) και απελευθερώνει τη θύρα του.",
       "graphqlListen": "Hosts a local GraphQL mock server and listens indefinitely. `connected` fires once it is listening; each served operation re-emits its data on the `served` port. The server stays up until a GraphQL close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
-      "graphqlClose": "Stops an already-listening GraphQL mock server (declared by a GraphQL server node), freeing its port."
+      "graphqlClose": "Stops an already-listening GraphQL mock server (declared by a GraphQL server node), freeing its port.",
+      "odataListen": "Φιλοξενεί μια τοπική εικονική υπηρεσία OData v4 και ακούει επ’ αόριστον. Η θύρα `connected` ενεργοποιείται μόλις αρχίσει να ακούει· κάθε εξυπηρετούμενο αίτημα επανεκπέμπει τα δεδομένα του στη θύρα `served`. Ο διακομιστής παραμένει ενεργός μέχρι ένα κλείσιμο OData (ή ένα Stop), οπότε ενεργοποιείται η θύρα `done`. Καμία έξοδος response — εξυπηρετεί, δεν καλεί προς τα έξω.",
+      "odataClose": "Σταματά μια ήδη ενεργή εικονική υπηρεσία OData (που δηλώθηκε από έναν κόμβο διακομιστή OData), απελευθερώνοντας τη θύρα της."
     },
     "legend": {
       "title": "Υπόμνημα",
@@ -1837,7 +1842,64 @@
     "getDelta": "Λήψη δέλτα",
     "deltaHint": "@odata.deltaLink διαθέσιμο — κάντε κλικ για να αντικαταστήσετε αυτή την απόκριση με το τελευταίο σύνολο αλλαγών.",
     "deltaChanged": "{{count}} αλλαγμένα",
-    "deltaRemoved": "{{count}} αφαιρέθηκαν"
+    "deltaRemoved": "{{count}} αφαιρέθηκαν",
+    "actionBody": "Σώμα ενέργειας (JSON)",
+    "actionParameters": "Παράμετροι ενέργειας (από τα μεταδεδομένα)",
+    "applyPlaceholder": "groupby((Status),aggregate($count as Total))",
+    "batchAdd": "Προσθήκη υπο-αιτήματος",
+    "batchAtomicityPlaceholder": "σύνολο αλλαγών (προαιρετικό)",
+    "batchBody": "Υπο-αιτήματα δέσμης",
+    "batchBodyLabel": "Σώμα (JSON)",
+    "batchEmpty": "Δεν υπάρχουν ακόμη υπο-αιτήματα. Προσθέστε ένα παρακάτω.",
+    "batchMoveDown": "Μετακίνηση κάτω",
+    "batchMoveUp": "Μετακίνηση πάνω",
+    "batchRemove": "Αφαίρεση υπο-αιτήματος",
+    "batchUrlPlaceholder": "Pets(1) — σχετικά με τη ρίζα της υπηρεσίας",
+    "expandAdd": "Προσθήκη επέκτασης",
+    "expandCollapseOptions": "Απόκρυψη επιλογών",
+    "expandEmpty": "Δεν υπάρχουν ακόμη επεκτάσεις. Προσθέστε μία παρακάτω.",
+    "expandMoveDown": "Μετακίνηση κάτω",
+    "expandMoveUp": "Μετακίνηση πάνω",
+    "expandNested": "Ένθετο $expand",
+    "expandOrderbyPlaceholder": "Name asc",
+    "expandPropertyPlaceholder": "Ιδιότητα πλοήγησης (π.χ. Tags)",
+    "expandRemove": "Αφαίρεση",
+    "expandSelectPlaceholder": "Id, Name (διαχωρισμένα με κόμμα)",
+    "expandShowOptions": "Εμφάνιση επιλογών",
+    "expandSkipPlaceholder": "0",
+    "expandTopPlaceholder": "5",
+    "filterPlaceholder": "Name eq 'Alice' and Age gt 21",
+    "formatPlaceholder": "json",
+    "functionParameters": "Παράμετροι συνάρτησης (από τα μεταδεδομένα)",
+    "navigationPropertiesHint": "Ιδιότητες πλοήγησης:",
+    "orderbyAdd": "Προσθήκη ταξινόμησης",
+    "orderbyEmpty": "Δεν υπάρχει ακόμη ταξινόμηση. Προσθέστε μια ιδιότητα παρακάτω.",
+    "orderbyMoveDown": "Μετακίνηση κάτω",
+    "orderbyMoveUp": "Μετακίνηση πάνω",
+    "orderbyPropertyPlaceholder": "Name",
+    "orderbyRemove": "Αφαίρεση",
+    "paginatedHint": "@odata.nextLink διαθέσιμο — κάντε κλικ για να προσαρτήσετε την επόμενη σελίδα σε αυτήν την απόκριση.",
+    "paramsApply": "Εφαρμογή παραμέτρων",
+    "paramsApplyToBody": "Εφαρμογή στο σώμα",
+    "paramsApplyToUrl": "Εφαρμογή στη διεύθυνση URL",
+    "paramsNone": "Δεν αναμένονται παράμετροι.",
+    "propertiesHint": "Ιδιότητες:",
+    "propertyPickerPlaceholder": "Επιλέξτε μια ιδιότητα…",
+    "responseEmpty": "Χωρίς σώμα απόκρισης",
+    "searchPlaceholder": "puppy",
+    "selectPlaceholder": "Id, Name, Email (διαχωρισμένα με κόμμα)",
+    "skipPlaceholder": "0",
+    "topPlaceholder": "50",
+    "urlPlaceholder": "https://service/odata/EntitySet",
+    "urlPreview": "Προεπισκόπηση URL (πριν την επίλυση)",
+    "versionV2NotYet": "v2 (η εκτέλεση δεν υποστηρίζεται ακόμη)",
+    "versionV3NotYet": "v3 (η εκτέλεση δεν υποστηρίζεται ακόμη)",
+    "operationKindEntitySet": "Σύνολο οντοτήτων (GET)",
+    "operationKindFunction": "Συνάρτηση (GET με ενσωματωμένες παραμέτρους)",
+    "operationKindAction": "Ενέργεια (POST με σώμα JSON)",
+    "operationKindBatch": "Δέσμη ($batch — multipart/mixed)",
+    "version": "Έκδοση OData",
+    "operationKind": "Είδος λειτουργίας"
   },
   "typedValue": {
     "list": {
@@ -1851,6 +1913,17 @@
       "notListening": "Δεν ακούει",
       "served": "Ακρόαση — εξυπηρετήθηκαν {{count}} αιτήματα",
       "listenFailed": "Αποτυχία εκκίνησης του διακομιστή mock"
+    }
+  },
+  "odata": {
+    "server": {
+      "startListening": "Έναρξη ακρόασης",
+      "stopListening": "Διακοπή ακρόασης",
+      "notListening": "Δεν ακούει",
+      "served": "Ακρόαση — εξυπηρετήθηκαν {{count}} αιτήματα",
+      "listenFailed": "Αποτυχία εκκίνησης του διακομιστή mock OData",
+      "metadataLabel": "$metadata (CSDL)",
+      "dataLabel": "Δεδομένα οντοτήτων που εξυπηρετήθηκαν (ανά σύνολο οντοτήτων)"
     }
   }
 }

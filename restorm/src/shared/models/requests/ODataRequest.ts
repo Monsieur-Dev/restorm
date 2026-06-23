@@ -178,6 +178,26 @@ export class ODataRequest extends BaseRequest {
   @graphqlField({ type: 'Boolean', nullable: true })
   deprecated = false
 
+  /** When true, restorm ACTS AS a local OData v4 mock service: it hosts the
+   * `mockMetadata` CSDL + the `mockData` entity collections on
+   * `localhost:<port><serviceRoot>` (the URL carries only that address) and
+   * answers `$metadata` + entity-set + by-key + `$count` + `$batch` with the
+   * system query options applied, instead of sending a client request. */
+  @graphqlField({ type: 'Boolean', nullable: true })
+  server?: boolean
+
+  /** The CSDL ($metadata) document the mock serves verbatim. Its entity-set +
+   * entity-type declarations are re-parsed (via the EDMX parser) to derive the
+   * route table + validate $select/$filter property names. Server mode only. */
+  @graphqlField({ type: 'String', nullable: true })
+  mockMetadata?: string
+
+  /** Served entity data, keyed by entity-set name → an array of entity objects.
+   * The query-option executor applies $filter/$orderby/$top/$skip/$count/$select
+   * over each set. Server mode only. */
+  @graphqlField({ type: 'JSON', nullable: true })
+  mockData?: Record<string, Record<string, unknown>[]>
+
   constructor(init?: Partial<ODataRequest>) {
     super(init)
     if (init) {
@@ -217,6 +237,9 @@ export class ODataRequest extends BaseRequest {
     navigationProperties?: string[]
     operationParameters?: ODataOperationParameterSpec[]
     deprecated?: boolean
+    server?: boolean
+    mockMetadata?: string
+    mockData?: Record<string, Record<string, unknown>[]>
   }): ODataRequest {
     return new ODataRequest({
       ...(obj.id !== undefined && { id: obj.id }),
@@ -241,7 +264,10 @@ export class ODataRequest extends BaseRequest {
       ...(obj.entitySetProperties !== undefined && { entitySetProperties: obj.entitySetProperties }),
       ...(obj.navigationProperties !== undefined && { navigationProperties: obj.navigationProperties }),
       ...(obj.operationParameters !== undefined && { operationParameters: obj.operationParameters }),
-      deprecated: obj.deprecated ?? false
+      deprecated: obj.deprecated ?? false,
+      ...(obj.server !== undefined && { server: obj.server }),
+      ...(obj.mockMetadata !== undefined && { mockMetadata: obj.mockMetadata }),
+      ...(obj.mockData !== undefined && { mockData: obj.mockData })
     })
   }
 
@@ -270,7 +296,10 @@ export class ODataRequest extends BaseRequest {
       ...(this.entitySetProperties !== undefined && { entitySetProperties: this.entitySetProperties }),
       ...(this.navigationProperties !== undefined && { navigationProperties: this.navigationProperties }),
       ...(this.operationParameters !== undefined && { operationParameters: this.operationParameters }),
-      deprecated: this.deprecated
+      deprecated: this.deprecated,
+      ...(this.server !== undefined && { server: this.server }),
+      ...(this.mockMetadata !== undefined && { mockMetadata: this.mockMetadata }),
+      ...(this.mockData !== undefined && { mockData: this.mockData })
     }
   }
 }

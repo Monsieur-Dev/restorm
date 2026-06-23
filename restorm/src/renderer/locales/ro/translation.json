@@ -263,7 +263,8 @@
         "mqttServer": "Broker MQTT",
         "grpcServer": "Server gRPC simulat",
         "soapServer": "Server mock SOAP",
-        "graphqlServer": "Server GraphQL simulat"
+        "graphqlServer": "Server GraphQL simulat",
+        "odataServer": "Server OData simulat"
       }
     },
     "deleteConfirm": {
@@ -1057,7 +1058,9 @@
       "soapListen": "Server SOAP",
       "soapClose": "Închide SOAP",
       "graphqlListen": "GraphQL server",
-      "graphqlClose": "GraphQL close"
+      "graphqlClose": "GraphQL close",
+      "odataListen": "OData server",
+      "odataClose": "OData close"
     },
     "comparator": {
       "result": "rezultat"
@@ -1625,7 +1628,9 @@
       "soapListen": "Găzduiește un server mock SOAP local și ascultă la nesfârșit. Fiecare cerere primită este direcționată către o operațiune configurată (după SOAPAction sau numele operațiunii din corp) și primește ca răspuns plicul SOAP predefinit (o operațiune de eroare returnează `<soap:Fault>`). `connected` se declanșează imediat ce serverul ascultă; fiecare cerere servită își reemite datele pe portul `served`. Serverul rămâne activ până la o închidere SOAP (sau o oprire), apoi se declanșează `done`.",
       "soapClose": "Oprește un server mock SOAP care ascultă deja (declarat de un nod de server SOAP) și îi eliberează portul.",
       "graphqlListen": "Hosts a local GraphQL mock server and listens indefinitely. `connected` fires once it is listening; each served operation re-emits its data on the `served` port. The server stays up until a GraphQL close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
-      "graphqlClose": "Stops an already-listening GraphQL mock server (declared by a GraphQL server node), freeing its port."
+      "graphqlClose": "Stops an already-listening GraphQL mock server (declared by a GraphQL server node), freeing its port.",
+      "odataListen": "Găzduiește un serviciu fictiv OData v4 local și ascultă la nesfârșit. `connected` se declanșează imediat ce ascultă; fiecare cerere servită își reemite datele pe portul `served`. Serverul rămâne activ până la o închidere OData (sau un Stop), apoi se declanșează `done`. Fără ieșire response — servește, nu apelează în exterior.",
+      "odataClose": "Oprește un serviciu fictiv OData care ascultă deja (declarat de un nod server OData), eliberându-i portul."
     },
     "legend": {
       "title": "Legendă",
@@ -1838,7 +1843,64 @@
     "getDelta": "Obțineți delta",
     "deltaHint": "@odata.deltaLink disponibil — faceți clic pentru a înlocui acest răspuns cu cel mai recent set de modificări.",
     "deltaChanged": "{{count}} modificat(e)",
-    "deltaRemoved": "{{count}} eliminat(e)"
+    "deltaRemoved": "{{count}} eliminat(e)",
+    "actionBody": "Corpul acțiunii (JSON)",
+    "actionParameters": "Parametrii acțiunii (din metadate)",
+    "applyPlaceholder": "groupby((Status),aggregate($count as Total))",
+    "batchAdd": "Adaugă sub-cerere",
+    "batchAtomicityPlaceholder": "set de modificări (opțional)",
+    "batchBody": "Sub-cereri ale lotului",
+    "batchBodyLabel": "Corp (JSON)",
+    "batchEmpty": "Încă nu există sub-cereri. Adăugați una mai jos.",
+    "batchMoveDown": "Mută în jos",
+    "batchMoveUp": "Mută în sus",
+    "batchRemove": "Elimină sub-cererea",
+    "batchUrlPlaceholder": "Pets(1) — relativ la rădăcina serviciului",
+    "expandAdd": "Adaugă expansiune",
+    "expandCollapseOptions": "Ascunde opțiunile",
+    "expandEmpty": "Încă nu există expansiuni. Adăugați una mai jos.",
+    "expandMoveDown": "Mută în jos",
+    "expandMoveUp": "Mută în sus",
+    "expandNested": "$expand imbricat",
+    "expandOrderbyPlaceholder": "Name asc",
+    "expandPropertyPlaceholder": "Proprietate de navigare (ex. Tags)",
+    "expandRemove": "Elimină",
+    "expandSelectPlaceholder": "Id, Name (separate prin virgule)",
+    "expandShowOptions": "Afișează opțiunile",
+    "expandSkipPlaceholder": "0",
+    "expandTopPlaceholder": "5",
+    "filterPlaceholder": "Name eq 'Alice' and Age gt 21",
+    "formatPlaceholder": "json",
+    "functionParameters": "Parametrii funcției (din metadate)",
+    "navigationPropertiesHint": "Proprietăți de navigare:",
+    "orderbyAdd": "Adaugă ordonare",
+    "orderbyEmpty": "Încă nu există ordonare. Adăugați o proprietate mai jos.",
+    "orderbyMoveDown": "Mută în jos",
+    "orderbyMoveUp": "Mută în sus",
+    "orderbyPropertyPlaceholder": "Name",
+    "orderbyRemove": "Elimină",
+    "paginatedHint": "@odata.nextLink disponibil — faceți clic pentru a adăuga pagina următoare la acest răspuns.",
+    "paramsApply": "Aplică parametrii",
+    "paramsApplyToBody": "Aplică la corp",
+    "paramsApplyToUrl": "Aplică la URL",
+    "paramsNone": "Nu se așteaptă niciun parametru.",
+    "propertiesHint": "Proprietăți:",
+    "propertyPickerPlaceholder": "Alegeți o proprietate…",
+    "responseEmpty": "Fără corp de răspuns",
+    "searchPlaceholder": "puppy",
+    "selectPlaceholder": "Id, Name, Email (separate prin virgule)",
+    "skipPlaceholder": "0",
+    "topPlaceholder": "50",
+    "urlPlaceholder": "https://service/odata/EntitySet",
+    "urlPreview": "Previzualizare URL (înainte de rezolvare)",
+    "versionV2NotYet": "v2 (execuția nu este încă acceptată)",
+    "versionV3NotYet": "v3 (execuția nu este încă acceptată)",
+    "operationKindEntitySet": "Set de entități (GET)",
+    "operationKindFunction": "Funcție (GET cu parametri încorporați)",
+    "operationKindAction": "Acțiune (POST cu corp JSON)",
+    "operationKindBatch": "Lot ($batch — multipart/mixed)",
+    "version": "Versiune OData",
+    "operationKind": "Tip de operație"
   },
   "typedValue": {
     "list": {
@@ -1852,6 +1914,17 @@
       "notListening": "Nu ascultă",
       "served": "Ascultă — {{count}} cerere(i) servite",
       "listenFailed": "Pornirea serverului simulat a eșuat"
+    }
+  },
+  "odata": {
+    "server": {
+      "startListening": "Începe ascultarea",
+      "stopListening": "Oprește ascultarea",
+      "notListening": "Nu ascultă",
+      "served": "Ascultă — {{count}} cerere(i) servite",
+      "listenFailed": "Pornirea serverului OData simulat a eșuat",
+      "metadataLabel": "$metadata (CSDL)",
+      "dataLabel": "Date de entități servite (pe set de entități)"
     }
   }
 }

@@ -22,6 +22,7 @@ import { graphqlMockServerService } from './services/GraphQLMockServerService'
 import { soapExecutionService, type SOAPExecutionInput } from './services/SOAPExecutionService'
 import { grpcExecutionService, type GRPCExecutionInput } from './services/GRPCExecutionService'
 import { grpcMockServerService } from './services/GRPCMockServerService'
+import { odataMockServerService } from './services/ODataMockServerService'
 import { websocketExecutionService, type WebSocketExecutionInput } from './services/WebSocketExecutionService'
 import { scenarioEngine } from './scenarioEngine/engine'
 import { importFrom } from './services/import/ImportManager'
@@ -46,6 +47,7 @@ import {
   graphqlListenArgs, graphqlStopArgs, graphqlIsListeningArgs,
   grpcExecuteArgs, grpcConnectArgs, grpcSendArgs, grpcDisconnectArgs, grpcCancelArgs, grpcIsActiveArgs,
   grpcListenArgs, grpcStopArgs, grpcIsListeningArgs,
+  odataListenArgs, odataStopArgs, odataIsListeningArgs,
   websocketConnectArgs, websocketDisconnectArgs, websocketSendArgs, websocketIsActiveArgs,
   responsesHistoryListArgs, responsesHistoryGetArgs,
   responsesHistoryTogglePinArgs,
@@ -782,6 +784,9 @@ export function registerRestormIPC(deps: {
     // File close — same for any hosted gRPC mock server (its own grpc.Server on
     // its own port): release the port so it doesn't keep listening past the file.
     grpcMockServerService.closeAll()
+    // File close — same for any hosted OData mock service (its routes on the
+    // shared HTTP PortHost): release the port so it doesn't outlive the file.
+    odataMockServerService.closeAll()
     // File close — the auth token cache is scoped to the open
     // collection, so flush it here. Opening a different file (or the
     // same one again) must force a fresh round of token fetches.
@@ -1152,6 +1157,22 @@ export function registerRestormIPC(deps: {
 
   validatedHandle('grpc:is-listening', grpcIsListeningArgs, (_event, [requestId]) => {
     return grpcMockServerService.isListening(requestId)
+  })
+
+  // OData mock server (server mode): host a local OData v4 service on the shared
+  // HTTP PortHost (one matchPrefix route per method under the service root), stop
+  // it, and check whether it is listening. `odata:listen` resolves once the
+  // routes are registered (or fail); it stays up until `odata:stop`.
+  validatedHandle('odata:listen', odataListenArgs, async (_event, [requestId]) => {
+    return await odataMockServerService.listen(requestId)
+  })
+
+  validatedHandle('odata:stop', odataStopArgs, (_event, [requestId]) => {
+    return odataMockServerService.stopListening(requestId)
+  })
+
+  validatedHandle('odata:is-listening', odataIsListeningArgs, (_event, [requestId]) => {
+    return odataMockServerService.isListening(requestId)
   })
 
   // ==========================================================================

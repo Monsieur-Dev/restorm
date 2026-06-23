@@ -1,0 +1,388 @@
+- message: 🔵 [<time>] ▶ OData Server
+- message: ⚪ [<time>] start odataListen
+  data:
+    requestId: <uuid>
+    connectionName: OData Mock
+    label: start OData mock
+- message: ⚪ [<time>] done odataListen
+- message: ⚪ [<time>] odata-server "OData Mock" connecting
+- message: ⚪ [<time>] odata-server "OData Mock" connected
+- message: ⚪ [<time>] start httpRequest
+  data:
+    requestId: <uuid>
+    label: call the OData mock
+    in: true
+- message: ⚪ [<time>] done httpRequest
+  data:
+    response:
+      request:
+        url: http://localhost:8078/odata/Pets
+        method: GET
+        headers: {}
+      response:
+        status: 200
+        statusText: OK
+        headers:
+          content-type: application/json; odata.metadata=minimal
+          odata-version: "4.0"
+          date: <dynamic-time>
+          connection: keep-alive
+          keep-alive: timeout=5
+          transfer-encoding: chunked
+        body: '{"@odata.context":"/odata/$metadata#Pets","value":[{"Id":1,"Name":"Rex"},{"Id":2,"Name":"Whiskers"}]}'
+        durationMs: <dynamic-time>
+        success: true
+- message: ⚪ [<time>] start log
+  data:
+    message: réponse OData reçue
+    level: info
+    runOnEachEvent: false
+    data:
+      request:
+        url: http://localhost:8078/odata/Pets
+        method: GET
+        headers: {}
+      response:
+        status: 200
+        statusText: OK
+        headers:
+          content-type: application/json; odata.metadata=minimal
+          odata-version: "4.0"
+          date: <dynamic-time>
+          connection: keep-alive
+          keep-alive: timeout=5
+          transfer-encoding: chunked
+        body: '{"@odata.context":"/odata/$metadata#Pets","value":[{"Id":1,"Name":"Rex"},{"Id":2,"Name":"Whiskers"}]}'
+        durationMs: <dynamic-time>
+        success: true
+- message: 🔵 [<time>] réponse OData reçue
+  data:
+    request:
+      url: http://localhost:8078/odata/Pets
+      method: GET
+      headers: {}
+    response:
+      status: 200
+      statusText: OK
+      headers:
+        content-type: application/json; odata.metadata=minimal
+        odata-version: "4.0"
+        date: <dynamic-time>
+        connection: keep-alive
+        keep-alive: timeout=5
+        transfer-encoding: chunked
+      body: '{"@odata.context":"/odata/$metadata#Pets","value":[{"Id":1,"Name":"Rex"},{"Id":2,"Name":"Whiskers"}]}'
+      durationMs: <dynamic-time>
+      success: true
+- message: ⚪ [<time>] start httpRequest
+  data:
+    requestId: <uuid>
+    label: call the OData mock ($batch)
+    in:
+      request:
+        url: http://localhost:8078/odata/Pets
+        method: GET
+        headers: {}
+      response:
+        status: 200
+        statusText: OK
+        headers:
+          content-type: application/json; odata.metadata=minimal
+          odata-version: "4.0"
+          date: <dynamic-time>
+          connection: keep-alive
+          keep-alive: timeout=5
+          transfer-encoding: chunked
+        body: '{"@odata.context":"/odata/$metadata#Pets","value":[{"Id":1,"Name":"Rex"},{"Id":2,"Name":"Whiskers"}]}'
+        durationMs: <dynamic-time>
+        success: true
+- message: ⚪ [<time>] done log
+  data:
+    value:
+      request:
+        url: http://localhost:8078/odata/Pets
+        method: GET
+        headers: {}
+      response:
+        status: 200
+        statusText: OK
+        headers:
+          content-type: application/json; odata.metadata=minimal
+          odata-version: "4.0"
+          date: <dynamic-time>
+          connection: keep-alive
+          keep-alive: timeout=5
+          transfer-encoding: chunked
+        body: '{"@odata.context":"/odata/$metadata#Pets","value":[{"Id":1,"Name":"Rex"},{"Id":2,"Name":"Whiskers"}]}'
+        durationMs: <dynamic-time>
+        success: true
+- message: ⚪ [<time>] done httpRequest
+  data:
+    response:
+      request:
+        url: http://localhost:8078/odata/$batch
+        method: POST
+        headers:
+          Content-Type: multipart/mixed; boundary=batch_<boundary>
+      response:
+        status: 200
+        statusText: OK
+        headers:
+          content-type: multipart/mixed; boundary=batchresponse_<boundary>
+          odata-version: "4.0"
+          date: <dynamic-time>
+          connection: keep-alive
+          keep-alive: timeout=5
+          transfer-encoding: chunked
+        body: "--batchresponse_<boundary>\r
+
+          Content-Type: application/http\r
+
+          \r
+
+          HTTP/1.1 200 OK\r
+
+          Content-Type: application/json; odata.metadata=minimal\r
+
+          \r
+
+          {\"@odata.context\":\"/odata/$metadata#Pets\",\"value\":[{\"Id\":1,\"\
+          Name\":\"Rex\"},{\"Id\":2,\"Name\":\"Whiskers\"}]}\r
+
+          --batchresponse_<boundary>\r
+
+          Content-Type: application/http\r
+
+          \r
+
+          HTTP/1.1 200 OK\r
+
+          Content-Type: application/json; odata.metadata=minimal\r
+
+          \r
+
+          {\"@odata.context\":\"/odata/$metadata#Pets\",\"value\":[{\"Id\":1,\"\
+          Name\":\"Rex\"},{\"Id\":2,\"Name\":\"Whiskers\"}]}\r
+
+          --batchresponse_<boundary>--\r\n"
+        durationMs: <dynamic-time>
+        success: true
+- message: ⚪ [<time>] start log
+  data:
+    message: réponse OData $batch reçue
+    level: info
+    runOnEachEvent: false
+    data:
+      request:
+        url: http://localhost:8078/odata/$batch
+        method: POST
+        headers:
+          Content-Type: multipart/mixed; boundary=batch_<boundary>
+      response:
+        status: 200
+        statusText: OK
+        headers:
+          content-type: multipart/mixed; boundary=batchresponse_<boundary>
+          odata-version: "4.0"
+          date: <dynamic-time>
+          connection: keep-alive
+          keep-alive: timeout=5
+          transfer-encoding: chunked
+        body: "--batchresponse_<boundary>\r
+
+          Content-Type: application/http\r
+
+          \r
+
+          HTTP/1.1 200 OK\r
+
+          Content-Type: application/json; odata.metadata=minimal\r
+
+          \r
+
+          {\"@odata.context\":\"/odata/$metadata#Pets\",\"value\":[{\"Id\":1,\"\
+          Name\":\"Rex\"},{\"Id\":2,\"Name\":\"Whiskers\"}]}\r
+
+          --batchresponse_<boundary>\r
+
+          Content-Type: application/http\r
+
+          \r
+
+          HTTP/1.1 200 OK\r
+
+          Content-Type: application/json; odata.metadata=minimal\r
+
+          \r
+
+          {\"@odata.context\":\"/odata/$metadata#Pets\",\"value\":[{\"Id\":1,\"\
+          Name\":\"Rex\"},{\"Id\":2,\"Name\":\"Whiskers\"}]}\r
+
+          --batchresponse_<boundary>--\r\n"
+        durationMs: <dynamic-time>
+        success: true
+- message: 🔵 [<time>] réponse OData $batch reçue
+  data:
+    request:
+      url: http://localhost:8078/odata/$batch
+      method: POST
+      headers:
+        Content-Type: multipart/mixed; boundary=batch_<boundary>
+    response:
+      status: 200
+      statusText: OK
+      headers:
+        content-type: multipart/mixed; boundary=batchresponse_<boundary>
+        odata-version: "4.0"
+        date: <dynamic-time>
+        connection: keep-alive
+        keep-alive: timeout=5
+        transfer-encoding: chunked
+      body: "--batchresponse_<boundary>\r
+
+        Content-Type: application/http\r
+
+        \r
+
+        HTTP/1.1 200 OK\r
+
+        Content-Type: application/json; odata.metadata=minimal\r
+
+        \r
+
+        {\"@odata.context\":\"/odata/$metadata#Pets\",\"value\":[{\"Id\":1,\"Na\
+        me\":\"Rex\"},{\"Id\":2,\"Name\":\"Whiskers\"}]}\r
+
+        --batchresponse_<boundary>\r
+
+        Content-Type: application/http\r
+
+        \r
+
+        HTTP/1.1 200 OK\r
+
+        Content-Type: application/json; odata.metadata=minimal\r
+
+        \r
+
+        {\"@odata.context\":\"/odata/$metadata#Pets\",\"value\":[{\"Id\":1,\"Na\
+        me\":\"Rex\"},{\"Id\":2,\"Name\":\"Whiskers\"}]}\r
+
+        --batchresponse_<boundary>--\r\n"
+      durationMs: <dynamic-time>
+      success: true
+- message: ⚪ [<time>] start odataClose
+  data:
+    connectionNodeId: <uuid>
+    label: stop the OData mock
+    in:
+      request:
+        url: http://localhost:8078/odata/$batch
+        method: POST
+        headers:
+          Content-Type: multipart/mixed; boundary=batch_<boundary>
+      response:
+        status: 200
+        statusText: OK
+        headers:
+          content-type: multipart/mixed; boundary=batchresponse_<boundary>
+          odata-version: "4.0"
+          date: <dynamic-time>
+          connection: keep-alive
+          keep-alive: timeout=5
+          transfer-encoding: chunked
+        body: "--batchresponse_<boundary>\r
+
+          Content-Type: application/http\r
+
+          \r
+
+          HTTP/1.1 200 OK\r
+
+          Content-Type: application/json; odata.metadata=minimal\r
+
+          \r
+
+          {\"@odata.context\":\"/odata/$metadata#Pets\",\"value\":[{\"Id\":1,\"\
+          Name\":\"Rex\"},{\"Id\":2,\"Name\":\"Whiskers\"}]}\r
+
+          --batchresponse_<boundary>\r
+
+          Content-Type: application/http\r
+
+          \r
+
+          HTTP/1.1 200 OK\r
+
+          Content-Type: application/json; odata.metadata=minimal\r
+
+          \r
+
+          {\"@odata.context\":\"/odata/$metadata#Pets\",\"value\":[{\"Id\":1,\"\
+          Name\":\"Rex\"},{\"Id\":2,\"Name\":\"Whiskers\"}]}\r
+
+          --batchresponse_<boundary>--\r\n"
+        durationMs: <dynamic-time>
+        success: true
+- message: ⚪ [<time>] odata-server "OData Mock" closed
+- message: ⚪ [<time>] start log
+  data:
+    message: service OData arrêté
+    level: info
+    in: true
+- message: 🔵 [<time>] service OData arrêté
+- message: ⚪ [<time>] done log
+  data:
+    value:
+      request:
+        url: http://localhost:8078/odata/$batch
+        method: POST
+        headers:
+          Content-Type: multipart/mixed; boundary=batch_<boundary>
+      response:
+        status: 200
+        statusText: OK
+        headers:
+          content-type: multipart/mixed; boundary=batchresponse_<boundary>
+          odata-version: "4.0"
+          date: <dynamic-time>
+          connection: keep-alive
+          keep-alive: timeout=5
+          transfer-encoding: chunked
+        body: "--batchresponse_<boundary>\r
+
+          Content-Type: application/http\r
+
+          \r
+
+          HTTP/1.1 200 OK\r
+
+          Content-Type: application/json; odata.metadata=minimal\r
+
+          \r
+
+          {\"@odata.context\":\"/odata/$metadata#Pets\",\"value\":[{\"Id\":1,\"\
+          Name\":\"Rex\"},{\"Id\":2,\"Name\":\"Whiskers\"}]}\r
+
+          --batchresponse_<boundary>\r
+
+          Content-Type: application/http\r
+
+          \r
+
+          HTTP/1.1 200 OK\r
+
+          Content-Type: application/json; odata.metadata=minimal\r
+
+          \r
+
+          {\"@odata.context\":\"/odata/$metadata#Pets\",\"value\":[{\"Id\":1,\"\
+          Name\":\"Rex\"},{\"Id\":2,\"Name\":\"Whiskers\"}]}\r
+
+          --batchresponse_<boundary>--\r\n"
+        durationMs: <dynamic-time>
+        success: true
+- message: ⚪ [<time>] done log
+  data: {}
+- message: ⚪ [<time>] done odataClose
+- message: 🔵 [<time>] ■ OData Server

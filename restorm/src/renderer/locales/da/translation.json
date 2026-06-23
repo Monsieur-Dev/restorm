@@ -262,7 +262,8 @@
         "mqttServer": "MQTT-broker",
         "grpcServer": "gRPC-mockserver",
         "soapServer": "SOAP-mockserver",
-        "graphqlServer": "GraphQL-mockserver"
+        "graphqlServer": "GraphQL-mockserver",
+        "odataServer": "OData-mockserver"
       }
     },
     "deleteConfirm": {
@@ -1056,7 +1057,9 @@
       "soapListen": "SOAP-server",
       "soapClose": "Luk SOAP",
       "graphqlListen": "GraphQL server",
-      "graphqlClose": "GraphQL close"
+      "graphqlClose": "GraphQL close",
+      "odataListen": "OData server",
+      "odataClose": "OData close"
     },
     "comparator": {
       "result": "resultat"
@@ -1624,7 +1627,9 @@
       "soapListen": "Hoster en lokal SOAP-mockserver og lytter uendeligt. Hver indkommende anmodning dirigeres til en konfigureret handling (efter dens SOAPAction eller handlingsnavnet i brødteksten) og besvares med den foruddefinerede SOAP-konvolut (en fejlhandling returnerer `<soap:Fault>`). `connected` udløses, så snart serveren lytter; hver betjent anmodning genudsender sine data på porten `served`. Serveren forbliver aktiv, indtil en SOAP-lukning (eller et stop), hvorefter `done` udløses.",
       "soapClose": "Stopper en SOAP-mockserver, der allerede lytter (erklæret af en SOAP-serverknude), og frigiver dens port.",
       "graphqlListen": "Hosts a local GraphQL mock server and listens indefinitely. `connected` fires once it is listening; each served operation re-emits its data on the `served` port. The server stays up until a GraphQL close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
-      "graphqlClose": "Stops an already-listening GraphQL mock server (declared by a GraphQL server node), freeing its port."
+      "graphqlClose": "Stops an already-listening GraphQL mock server (declared by a GraphQL server node), freeing its port.",
+      "odataListen": "Hoster en lokal OData v4-mockservice og lytter i det uendelige. `connected` udløses, så snart den lytter; hver betjent forespørgsel sender sine data igen på `served`-porten. Serveren kører, indtil en OData-lukning (eller et Stop), hvorefter `done` udløses. Intet response-output — den betjener, den kalder ikke ud.",
+      "odataClose": "Stopper en allerede lyttende OData-mockservice (erklæret af en OData-serverknude) og frigiver dens port."
     },
     "legend": {
       "title": "Forklaring",
@@ -1837,7 +1842,64 @@
     "getDelta": "Hent delta",
     "deltaHint": "@odata.deltaLink tilgængelig — klik for at erstatte dette svar med det seneste ændringssæt.",
     "deltaChanged": "{{count}} ændret",
-    "deltaRemoved": "{{count}} fjernet"
+    "deltaRemoved": "{{count}} fjernet",
+    "actionBody": "Handlingstekst (JSON)",
+    "actionParameters": "Handlingsparametre (fra metadata)",
+    "applyPlaceholder": "groupby((Status),aggregate($count as Total))",
+    "batchAdd": "Tilføj underanmodning",
+    "batchAtomicityPlaceholder": "ændringssæt (valgfrit)",
+    "batchBody": "Batch-underanmodninger",
+    "batchBodyLabel": "Tekst (JSON)",
+    "batchEmpty": "Ingen underanmodninger endnu. Tilføj en nedenfor.",
+    "batchMoveDown": "Flyt ned",
+    "batchMoveUp": "Flyt op",
+    "batchRemove": "Fjern underanmodning",
+    "batchUrlPlaceholder": "Pets(1) — relativt til tjenestens rod",
+    "expandAdd": "Tilføj udvidelse",
+    "expandCollapseOptions": "Skjul indstillinger",
+    "expandEmpty": "Ingen udvidelser endnu. Tilføj en nedenfor.",
+    "expandMoveDown": "Flyt ned",
+    "expandMoveUp": "Flyt op",
+    "expandNested": "Indlejret $expand",
+    "expandOrderbyPlaceholder": "Name asc",
+    "expandPropertyPlaceholder": "Navigationsegenskab (f.eks. Tags)",
+    "expandRemove": "Fjern",
+    "expandSelectPlaceholder": "Id, Name (kommasepareret)",
+    "expandShowOptions": "Vis indstillinger",
+    "expandSkipPlaceholder": "0",
+    "expandTopPlaceholder": "5",
+    "filterPlaceholder": "Name eq 'Alice' and Age gt 21",
+    "formatPlaceholder": "json",
+    "functionParameters": "Funktionsparametre (fra metadata)",
+    "navigationPropertiesHint": "Navigationsegenskaber:",
+    "orderbyAdd": "Tilføj sortering",
+    "orderbyEmpty": "Ingen sortering endnu. Tilføj en egenskab nedenfor.",
+    "orderbyMoveDown": "Flyt ned",
+    "orderbyMoveUp": "Flyt op",
+    "orderbyPropertyPlaceholder": "Name",
+    "orderbyRemove": "Fjern",
+    "paginatedHint": "@odata.nextLink tilgængelig — klik for at føje den næste side til dette svar.",
+    "paramsApply": "Anvend parametre",
+    "paramsApplyToBody": "Anvend på tekst",
+    "paramsApplyToUrl": "Anvend på URL",
+    "paramsNone": "Ingen parametre forventet.",
+    "propertiesHint": "Egenskaber:",
+    "propertyPickerPlaceholder": "Vælg en egenskab…",
+    "responseEmpty": "Ingen svartekst",
+    "searchPlaceholder": "puppy",
+    "selectPlaceholder": "Id, Name, Email (kommasepareret)",
+    "skipPlaceholder": "0",
+    "topPlaceholder": "50",
+    "urlPlaceholder": "https://service/odata/EntitySet",
+    "urlPreview": "URL-eksempel (før resolution)",
+    "versionV2NotYet": "v2 (kørsel understøttes endnu ikke)",
+    "versionV3NotYet": "v3 (kørsel understøttes endnu ikke)",
+    "operationKindEntitySet": "Entitetssæt (GET)",
+    "operationKindFunction": "Funktion (GET med indlejrede parametre)",
+    "operationKindAction": "Handling (POST med JSON-tekst)",
+    "operationKindBatch": "Batch ($batch — multipart/mixed)",
+    "version": "OData-version",
+    "operationKind": "Operationstype"
   },
   "typedValue": {
     "list": {
@@ -1851,6 +1913,17 @@
       "notListening": "Lytter ikke",
       "served": "Lytter — {{count}} anmodning(er) betjent",
       "listenFailed": "Kunne ikke starte mock-serveren"
+    }
+  },
+  "odata": {
+    "server": {
+      "startListening": "Begynd at lytte",
+      "stopListening": "Stop med at lytte",
+      "notListening": "Lytter ikke",
+      "served": "Lytter — {{count}} anmodning(er) betjent",
+      "listenFailed": "OData-mockserveren kunne ikke startes",
+      "metadataLabel": "$metadata (CSDL)",
+      "dataLabel": "Betjente entitetsdata (efter entitetssæt)"
     }
   }
 }

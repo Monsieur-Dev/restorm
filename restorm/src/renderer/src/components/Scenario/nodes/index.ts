@@ -49,6 +49,7 @@ import { HttpListenNodeBox, HttpCloseNodeBox } from './HttpServerNodeBoxes'
 import { GrpcListenNodeBox, GrpcServerCloseNodeBox } from './GrpcServerNodeBoxes'
 import { SoapListenNodeBox, SoapCloseNodeBox } from './SoapServerNodeBoxes'
 import { GraphqlListenNodeBox, GraphqlCloseNodeBox } from './GraphqlServerNodeBoxes'
+import { ODataListenNodeBox, ODataCloseNodeBox } from './ODataServerNodeBoxes'
 
 export type { ScenarioNodeBoxData, ScenarioNodeBoxType, ScenarioNodeCell } from './ScenarioNodeBoxBase'
 export { ScenarioNodeBoxBase } from './ScenarioNodeBoxBase'
@@ -89,6 +90,8 @@ const SCENARIO_NODE_COMPONENTS: Record<ScenarioNodeKind, NodeBoxComponent> = {
   soapClose: SoapCloseNodeBox,
   graphqlListen: GraphqlListenNodeBox,
   graphqlClose: GraphqlCloseNodeBox,
+  odataListen: ODataListenNodeBox,
+  odataClose: ODataCloseNodeBox,
   socketioConnect: SocketioConnectNodeBox,
   socketioSend: SocketioSendNodeBox,
   socketioClose: SocketioCloseNodeBox,

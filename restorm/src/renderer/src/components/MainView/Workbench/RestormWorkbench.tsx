@@ -537,11 +537,17 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
 
     // OData request tab. All OData operations share the 'ODATA' badge today;
     // once an `operationKind` discriminator ('entity-set' | 'function' |
-    // 'action') exists, functions / actions could get their own badges.
+    // 'action') exists, functions / actions could get their own badges. A mock
+    // SERVER (server === true) shows the SRV capsule + the listening border-beam
+    // while it hosts — the same beam the sidebar tree paints.
     if (isODataRequestTab(restormTab)) {
+      const isServer = restormTab.request.server === true
+      const badge = <Badge type="ODATA" mode={isServer ? 'server' : undefined} />
       return (
         <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-          <Badge type="ODATA" />
+          {isServer
+            ? <ServerListeningBadge requestId={restormTab.request.id}>{badge}</ServerListeningBadge>
+            : badge}
           <span>{restormTab.request.name}</span>
           <ItemSecretBadges itemId={restormTab.request.id} />
           {renderDirtyIndicator(restormTab)}

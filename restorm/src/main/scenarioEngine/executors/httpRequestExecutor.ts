@@ -21,7 +21,8 @@ import { httpExecutionService, type HTTPExecutionInput } from '../../services/HT
 import { grpcExecutionService } from '../../services/GRPCExecutionService'
 import { responseHistoryService } from '../../services/ResponseHistoryService'
 import { flushRequestStateToContext } from '../../mcp/tools/execute'
-import { isHTTPRequest, isAuthenticationRequest, isGrpcRequest } from '../../../shared/types/collections'
+import { isHTTPRequest, isAuthenticationRequest, isGrpcRequest, isODataRequest } from '../../../shared/types/collections'
+import { composeODataRequestBody, type ODataBodySource } from '../../../shared/utils/odataRequestBody'
 import type { Request } from '../../../shared/types/collections'
 import type { NodeExecutor, ExecResult } from '../types'
 
@@ -34,7 +35,24 @@ export const httpRequestExecutor: NodeExecutor = async (act, ctx) => {
   // like httpRequest; streaming gRPC binds a grpcConnect instead) runs through
   // the gRPC execution service and emits the same `{ request, response }` shape.
   if (isGrpcRequest(req)) return runGrpcUnary(req, ctx)
-  if (!isHTTPRequest(req)) throw new Error(`bound request ${cfg.requestId} is not HTTP (${(req as { type?: string }).type})`)
+  // An OData request binds to this generic request node like HTTP: it executes
+  // through the SAME httpExecutionService (the `odata:execute` IPC path does too),
+  // and URLResolver composes its system query options into the resolved URL from
+  // the odata fields flushRequestStateToContext carries. The model has no
+  // `method`; the verb + body come from `composeODataRequestBody` — the SAME
+  // composer the request-panel Send uses — so the scenario path and the panel
+  // produce byte-identical wire bodies: entity-set / function reads = GET (no
+  // body); action = POST with the `actionBody` JSON; batch = POST with the
+  // assembled multipart/mixed (or JSON) `$batch` envelope. The composition runs
+  // against `effectiveReq` below (after slot/request overrides) so a wired
+  // override is honoured.
+  const odata = isODataRequest(req)
+  if (!isHTTPRequest(req) && !odata) throw new Error(`bound request ${cfg.requestId} is not HTTP or OData (${(req as { type?: string }).type})`)
+  // Verb for the synthetic skip response (before slot overrides apply); the real
+  // dispatch re-composes verb + body from `effectiveReq` below.
+  const method = odata
+    ? composeODataRequestBody(req as unknown as ODataBodySource).method
+    : (req as { method: string }).method
 
   // Slot short-circuit: a wired input port whose id is `pathParams:<key>`
   // / `headers:<key>` / `params:<key>` / `body` overrides that slot's
@@ -57,7 +75,7 @@ export const httpRequestExecutor: NodeExecutor = async (act, ctx) => {
         {
           port: 'response',
           value: {
-            request: { url: req.url, method: req.method, headers: {} },
+            request: { url: req.url, method, headers: {} },
             response: { status: 0, statusText: 'skipped', headers: {}, body: '', durationMs: 0, success: true, skipped: true }
           }
         }
@@ -68,11 +86,21 @@ export const httpRequestExecutor: NodeExecutor = async (act, ctx) => {
   const effectiveReq = applySlotOverrides(applyRequestOverride(req, override), act.inputs)
   flushRequestStateToContext(effectiveReq)
 
+  // For OData, derive the dispatched verb + body from the (override-applied)
+  // request via the shared composer — byte-identical to the request-panel Send.
+  // An empty batch throws here (the panel surfaces the same message inline).
+  const composed = odata ? composeODataRequestBody(effectiveReq as unknown as ODataBodySource) : undefined
+  if (composed?.error !== undefined) throw new Error(composed.error)
+  const dispatchMethod = composed ? composed.method : method
+
   const authId = req.authenticationRequestId
   const auth = authId ? collectionStore.findById(authId) : null
   const input: HTTPExecutionInput = {
     requestId: req.id,
-    method: req.method,
+    method: dispatchMethod,
+    ...(composed?.rawBody !== undefined
+      ? { rawBody: composed.rawBody, ...(composed.rawBodyContentType !== undefined ? { rawBodyContentType: composed.rawBodyContentType } : {}) }
+      : {}),
     ...(auth && isAuthenticationRequest(auth) ? { authRequest: auth } : {})
   }
 
@@ -84,7 +112,7 @@ export const httpRequestExecutor: NodeExecutor = async (act, ctx) => {
 
   const result = await httpExecutionService.execute(input)
   ctx.signal.removeEventListener('abort', onAbort)
-  await responseHistoryService.storeExecutionResult(req.id, 'http', result)
+  await responseHistoryService.storeExecutionResult(req.id, odata ? 'odata' : 'http', result)
 
   // The `response` port carries the SAME `{ request, response }` shape the
   // JSON-path picker shows (see `getScenarioNodeResult` in
@@ -101,7 +129,7 @@ export const httpRequestExecutor: NodeExecutor = async (act, ctx) => {
         value: {
           request: {
             url: result.requestUrl,
-            method: req.method,
+            method: dispatchMethod,
             headers: result.requestHeaders ?? {}
           },
           response: {

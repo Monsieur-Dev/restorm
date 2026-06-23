@@ -261,7 +261,8 @@
         "mqttServer": "MQTT 代理",
         "grpcServer": "gRPC 模拟服务器",
         "soapServer": "SOAP 模拟服务器",
-        "graphqlServer": "GraphQL 模拟服务器"
+        "graphqlServer": "GraphQL 模拟服务器",
+        "odataServer": "OData 模拟服务器"
       }
     },
     "deleteConfirm": {
@@ -1055,7 +1056,9 @@
       "soapListen": "SOAP 服务器",
       "soapClose": "关闭 SOAP",
       "graphqlListen": "GraphQL server",
-      "graphqlClose": "GraphQL close"
+      "graphqlClose": "GraphQL close",
+      "odataListen": "OData server",
+      "odataClose": "OData close"
     },
     "comparator": {
       "result": "结果"
@@ -1623,7 +1626,9 @@
       "soapListen": "托管本地 SOAP 模拟服务器并无限期侦听。每个传入请求都会被分发到已配置的操作（依据其 SOAPAction 或正文中的操作名称），并以预定义的 SOAP 信封进行响应（故障操作返回 `<soap:Fault>`）。服务器一旦开始侦听便会触发 `connected`；每个已处理的请求都会在 `served` 端口重新发出其数据。服务器会一直运行，直到 SOAP 关闭（或停止），随后触发 `done`。",
       "soapClose": "停止一个已在侦听的 SOAP 模拟服务器（由 SOAP 服务器节点声明），并释放其端口。",
       "graphqlListen": "Hosts a local GraphQL mock server and listens indefinitely. `connected` fires once it is listening; each served operation re-emits its data on the `served` port. The server stays up until a GraphQL close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
-      "graphqlClose": "Stops an already-listening GraphQL mock server (declared by a GraphQL server node), freeing its port."
+      "graphqlClose": "Stops an already-listening GraphQL mock server (declared by a GraphQL server node), freeing its port.",
+      "odataListen": "托管本地 OData v4 模拟服务并无限期监听。一旦开始监听便触发 `connected`；每个被服务的请求都会在 `served` 端口重新发出其数据。服务器持续运行，直到 OData 关闭（或 Stop），然后触发 `done`。无 response 输出——它只提供服务，不向外调用。",
+      "odataClose": "停止一个已在监听的 OData 模拟服务（由 OData 服务器节点声明），释放其端口。"
     },
     "legend": {
       "title": "图例",
@@ -1836,7 +1841,64 @@
     "getDelta": "获取增量",
     "deltaHint": "@odata.deltaLink可用 — 单击以将此响应替换为最新的更改集。",
     "deltaChanged": "{{count}}个已更改",
-    "deltaRemoved": "{{count}}个已删除"
+    "deltaRemoved": "{{count}}个已删除",
+    "actionBody": "操作正文 (JSON)",
+    "actionParameters": "操作参数（来自元数据）",
+    "applyPlaceholder": "groupby((Status),aggregate($count as Total))",
+    "batchAdd": "添加子请求",
+    "batchAtomicityPlaceholder": "变更集（可选）",
+    "batchBody": "批处理子请求",
+    "batchBodyLabel": "正文 (JSON)",
+    "batchEmpty": "暂无子请求。在下方添加一个。",
+    "batchMoveDown": "下移",
+    "batchMoveUp": "上移",
+    "batchRemove": "移除子请求",
+    "batchUrlPlaceholder": "Pets(1) — 相对于服务根",
+    "expandAdd": "添加展开",
+    "expandCollapseOptions": "隐藏选项",
+    "expandEmpty": "暂无展开。在下方添加一个。",
+    "expandMoveDown": "下移",
+    "expandMoveUp": "上移",
+    "expandNested": "嵌套的 $expand",
+    "expandOrderbyPlaceholder": "Name asc",
+    "expandPropertyPlaceholder": "导航属性（例如 Tags）",
+    "expandRemove": "移除",
+    "expandSelectPlaceholder": "Id, Name（以逗号分隔）",
+    "expandShowOptions": "显示选项",
+    "expandSkipPlaceholder": "0",
+    "expandTopPlaceholder": "5",
+    "filterPlaceholder": "Name eq 'Alice' and Age gt 21",
+    "formatPlaceholder": "json",
+    "functionParameters": "函数参数（来自元数据）",
+    "navigationPropertiesHint": "导航属性：",
+    "orderbyAdd": "添加排序",
+    "orderbyEmpty": "暂无排序。在下方添加一个属性。",
+    "orderbyMoveDown": "下移",
+    "orderbyMoveUp": "上移",
+    "orderbyPropertyPlaceholder": "Name",
+    "orderbyRemove": "移除",
+    "paginatedHint": "@odata.nextLink 可用 — 单击可将下一页追加到此响应。",
+    "paramsApply": "应用参数",
+    "paramsApplyToBody": "应用到正文",
+    "paramsApplyToUrl": "应用到 URL",
+    "paramsNone": "无需参数。",
+    "propertiesHint": "属性：",
+    "propertyPickerPlaceholder": "选择一个属性…",
+    "responseEmpty": "无响应正文",
+    "searchPlaceholder": "puppy",
+    "selectPlaceholder": "Id, Name, Email（以逗号分隔）",
+    "skipPlaceholder": "0",
+    "topPlaceholder": "50",
+    "urlPlaceholder": "https://service/odata/EntitySet",
+    "urlPreview": "URL 预览（解析前）",
+    "versionV2NotYet": "v2（尚不支持执行）",
+    "versionV3NotYet": "v3（尚不支持执行）",
+    "operationKindEntitySet": "实体集 (GET)",
+    "operationKindFunction": "函数（带内联参数的 GET）",
+    "operationKindAction": "操作（带 JSON 正文的 POST）",
+    "operationKindBatch": "批处理 ($batch — multipart/mixed)",
+    "version": "OData 版本",
+    "operationKind": "操作类型"
   },
   "typedValue": {
     "list": {
@@ -1850,6 +1912,17 @@
       "notListening": "未在监听",
       "served": "监听中 — 已服务 {{count}} 个请求",
       "listenFailed": "无法启动模拟服务器"
+    }
+  },
+  "odata": {
+    "server": {
+      "startListening": "开始监听",
+      "stopListening": "停止监听",
+      "notListening": "未在监听",
+      "served": "监听中 — 已服务 {{count}} 个请求",
+      "listenFailed": "无法启动 OData 模拟服务器",
+      "metadataLabel": "$metadata (CSDL)",
+      "dataLabel": "已服务的实体数据（按实体集）"
     }
   }
 }

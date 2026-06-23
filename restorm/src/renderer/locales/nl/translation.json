@@ -262,7 +262,8 @@
         "mqttServer": "MQTT-broker",
         "grpcServer": "gRPC-mockserver",
         "soapServer": "SOAP-mockserver",
-        "graphqlServer": "GraphQL-mockserver"
+        "graphqlServer": "GraphQL-mockserver",
+        "odataServer": "OData-mockserver"
       }
     },
     "deleteConfirm": {
@@ -1056,7 +1057,9 @@
       "soapListen": "SOAP-server",
       "soapClose": "SOAP sluiten",
       "graphqlListen": "GraphQL server",
-      "graphqlClose": "GraphQL close"
+      "graphqlClose": "GraphQL close",
+      "odataListen": "OData server",
+      "odataClose": "OData close"
     },
     "comparator": {
       "result": "resultaat"
@@ -1624,7 +1627,9 @@
       "soapListen": "Host een lokale SOAP-mockserver en luistert onbeperkt. Elk binnenkomend verzoek wordt naar een geconfigureerde bewerking geleid (op basis van de SOAPAction of de bewerkingsnaam in de body) en beantwoord met de vooraf ingestelde SOAP-envelop (een foutbewerking retourneert `<soap:Fault>`). `connected` wordt geactiveerd zodra de server luistert; elk afgehandeld verzoek zendt zijn gegevens opnieuw uit op de poort `served`. De server blijft actief tot een SOAP-sluiting (of een stop), waarna `done` wordt geactiveerd.",
       "soapClose": "Stopt een al luisterende SOAP-mockserver (gedeclareerd door een SOAP-serverknooppunt) en maakt de poort vrij.",
       "graphqlListen": "Hosts a local GraphQL mock server and listens indefinitely. `connected` fires once it is listening; each served operation re-emits its data on the `served` port. The server stays up until a GraphQL close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
-      "graphqlClose": "Stops an already-listening GraphQL mock server (declared by a GraphQL server node), freeing its port."
+      "graphqlClose": "Stops an already-listening GraphQL mock server (declared by a GraphQL server node), freeing its port.",
+      "odataListen": "Host een lokale OData v4-mockservice en luistert oneindig. `connected` wordt geactiveerd zodra er geluisterd wordt; elk bediend verzoek zendt zijn gegevens opnieuw uit op de `served`-poort. De server blijft actief tot een OData-sluiting (of een Stop), waarna `done` wordt geactiveerd. Geen response-uitvoer — hij bedient, hij roept niet naar buiten.",
+      "odataClose": "Stopt een al luisterende OData-mockservice (gedeclareerd door een OData-serverknooppunt) en maakt de poort vrij."
     },
     "legend": {
       "title": "Legenda",
@@ -1837,7 +1842,64 @@
     "getDelta": "Delta ophalen",
     "deltaHint": "@odata.deltaLink beschikbaar — klik om dit antwoord te vervangen door de laatste wijzigingenset.",
     "deltaChanged": "{{count}} gewijzigd",
-    "deltaRemoved": "{{count}} verwijderd"
+    "deltaRemoved": "{{count}} verwijderd",
+    "actionBody": "Actie-body (JSON)",
+    "actionParameters": "Actieparameters (uit metadata)",
+    "applyPlaceholder": "groupby((Status),aggregate($count as Total))",
+    "batchAdd": "Subaanvraag toevoegen",
+    "batchAtomicityPlaceholder": "wijzigingenset (optioneel)",
+    "batchBody": "Batch-subaanvragen",
+    "batchBodyLabel": "Body (JSON)",
+    "batchEmpty": "Nog geen subaanvragen. Voeg er hieronder een toe.",
+    "batchMoveDown": "Omlaag",
+    "batchMoveUp": "Omhoog",
+    "batchRemove": "Subaanvraag verwijderen",
+    "batchUrlPlaceholder": "Pets(1) — relatief ten opzichte van de servicehoofdmap",
+    "expandAdd": "Uitbreiding toevoegen",
+    "expandCollapseOptions": "Opties verbergen",
+    "expandEmpty": "Nog geen uitbreidingen. Voeg er hieronder een toe.",
+    "expandMoveDown": "Omlaag",
+    "expandMoveUp": "Omhoog",
+    "expandNested": "Geneste $expand",
+    "expandOrderbyPlaceholder": "Name asc",
+    "expandPropertyPlaceholder": "Navigatie-eigenschap (bijv. Tags)",
+    "expandRemove": "Verwijderen",
+    "expandSelectPlaceholder": "Id, Name (door komma's gescheiden)",
+    "expandShowOptions": "Opties tonen",
+    "expandSkipPlaceholder": "0",
+    "expandTopPlaceholder": "5",
+    "filterPlaceholder": "Name eq 'Alice' and Age gt 21",
+    "formatPlaceholder": "json",
+    "functionParameters": "Functieparameters (uit metadata)",
+    "navigationPropertiesHint": "Navigatie-eigenschappen:",
+    "orderbyAdd": "Sortering toevoegen",
+    "orderbyEmpty": "Nog geen sortering. Voeg hieronder een eigenschap toe.",
+    "orderbyMoveDown": "Omlaag",
+    "orderbyMoveUp": "Omhoog",
+    "orderbyPropertyPlaceholder": "Name",
+    "orderbyRemove": "Verwijderen",
+    "paginatedHint": "@odata.nextLink beschikbaar — klik om de volgende pagina aan dit antwoord toe te voegen.",
+    "paramsApply": "Parameters toepassen",
+    "paramsApplyToBody": "Op body toepassen",
+    "paramsApplyToUrl": "Op URL toepassen",
+    "paramsNone": "Geen parameters verwacht.",
+    "propertiesHint": "Eigenschappen:",
+    "propertyPickerPlaceholder": "Kies een eigenschap…",
+    "responseEmpty": "Geen antwoord-body",
+    "searchPlaceholder": "puppy",
+    "selectPlaceholder": "Id, Name, Email (door komma's gescheiden)",
+    "skipPlaceholder": "0",
+    "topPlaceholder": "50",
+    "urlPlaceholder": "https://service/odata/EntitySet",
+    "urlPreview": "URL-voorbeeld (vóór resolutie)",
+    "versionV2NotYet": "v2 (uitvoering nog niet ondersteund)",
+    "versionV3NotYet": "v3 (uitvoering nog niet ondersteund)",
+    "operationKindEntitySet": "Entiteitenset (GET)",
+    "operationKindFunction": "Functie (GET met ingebedde parameters)",
+    "operationKindAction": "Actie (POST met JSON-body)",
+    "operationKindBatch": "Batch ($batch — multipart/mixed)",
+    "version": "OData-versie",
+    "operationKind": "Bewerkingstype"
   },
   "typedValue": {
     "list": {
@@ -1851,6 +1913,17 @@
       "notListening": "Luistert niet",
       "served": "Luistert — {{count}} verzoek(en) bediend",
       "listenFailed": "Kan de mockserver niet starten"
+    }
+  },
+  "odata": {
+    "server": {
+      "startListening": "Begin met luisteren",
+      "stopListening": "Stop met luisteren",
+      "notListening": "Luistert niet",
+      "served": "Luistert — {{count}} verzoek(en) bediend",
+      "listenFailed": "Kan de OData-mockserver niet starten",
+      "metadataLabel": "$metadata (CSDL)",
+      "dataLabel": "Bediende entiteitsgegevens (per entiteitenset)"
     }
   }
 }

@@ -351,6 +351,23 @@ export const SCENARIO_KIND_REGISTRY = {
       config: { connectionNodeId: 'Id of the graphqlListen node whose server to stop.' }
     }
   },
+  odataListen: {
+    labelKey: 'scenario.nodes.odataListen', defaultLabel: 'OData server', icon: 'server', category: 'composition',
+    requestBinding: true,
+    ports: { inputs: [], outputs: [{ id: 'connected', name: 'connected', flow: 'signal' }, { id: 'served', name: 'served', flow: 'both' }] },
+    doc: {
+      summary: 'HOSTS a local OData v4 mock service from a bound `server: true` OData request and listens INDEFINITELY (restorm serves, it does not call out — so there is NO `response` output). It serves the request\'s CSDL ($metadata) + entity collections, applying the system query options ($filter/$select/$orderby/$top/$skip/$count/$expand) and `$batch`. `connected` (a pure signal) fires once the service is listening; EACH request the mock serves re-emits its `{ request, response }` data on the `served` output. The service stays up — keeping the run in-progress — until an odataClose targets it (or the run is stopped), then `done` fires.',
+      config: { requestId: 'Id of the server: true OData request to host (its port + service root + CSDL + served entity data).', connectionName: 'Unique-per-scenario name an odataClose references for display (defaults to the request name).', label: 'Display label on the box.' }
+    }
+  },
+  odataClose: {
+    labelKey: 'scenario.nodes.odataClose', defaultLabel: 'OData close', icon: 'debug-disconnect', category: 'composition',
+    ports: { inputs: [], outputs: [] },
+    doc: {
+      summary: 'Stops an already-listening OData mock service (declared by an odataListen node), freeing its port and firing that node\'s `done`. Pure-event action: triggered on `in`, sequences via its own `done`. Errors (to `error`) when no server is selected.',
+      config: { connectionNodeId: 'Id of the odataListen node whose service to stop.' }
+    }
+  },
 
   // --- Lists (grouped into a "Lists" submenu) ---
   aggregate: {

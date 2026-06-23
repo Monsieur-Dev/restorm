@@ -179,6 +179,9 @@ interface FullRequestData {
   lwtPayload?: string
   lwtQos?: number
   lwtRetain?: boolean
+  // OData mock service (server === true)
+  mockMetadata?: string
+  mockData?: Record<string, Record<string, unknown>[]>
 }
 
 /** Save result type */
@@ -941,6 +944,43 @@ contextBridge.exposeInMainWorld('restorm', {
     isActive: async (requestId: string): Promise<boolean> => {
       const result: unknown = await ipcRenderer.invoke('odata:is-active', requestId)
       return result as boolean
+    },
+    /** SERVER MODE: progress stream for the Listen↔Stop toggle (the request is
+     * "listening" between `started` and `completed`/`cancelled`/`error`). */
+    onProgress: (callback: (event: { requestId: string; status: 'started' | 'completed' | 'cancelled' | 'error' }) => void): (() => void) => {
+      const handler = (_event: Electron.IpcRendererEvent, data: { requestId: string; status: 'started' | 'completed' | 'cancelled' | 'error' }): void => {
+        callback(data)
+      }
+      ipcRenderer.on('odata:request-progress', handler)
+      return () => {
+        ipcRenderer.removeListener('odata:request-progress', handler)
+      }
+    },
+    /** SERVER MODE: start hosting this request as a local OData mock service.
+     * Resolves once the routes are registered (or fail to bind). */
+    listen: async (requestId: string): Promise<{ success: boolean; listening: boolean; error?: string }> => {
+      const result: unknown = await ipcRenderer.invoke('odata:listen', requestId)
+      return result as { success: boolean; listening: boolean; error?: string }
+    },
+    /** SERVER MODE: stop hosting this request's OData mock service. */
+    stop: async (requestId: string): Promise<boolean> => {
+      const result: unknown = await ipcRenderer.invoke('odata:stop', requestId)
+      return result as boolean
+    },
+    /** SERVER MODE: whether this request is currently hosting a mock service. */
+    isListening: async (requestId: string): Promise<boolean> => {
+      const result: unknown = await ipcRenderer.invoke('odata:is-listening', requestId)
+      return result as boolean
+    },
+    /** SERVER MODE: served-request count updates for the "served N" banner. */
+    onServerServed: (callback: (data: { requestId: string; count: number }) => void): (() => void) => {
+      const handler = (_event: Electron.IpcRendererEvent, data: { requestId: string; count: number }): void => {
+        callback(data)
+      }
+      ipcRenderer.on('odata:server-served', handler)
+      return () => {
+        ipcRenderer.removeListener('odata:server-served', handler)
+      }
     }
   },
   auth: {

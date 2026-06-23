@@ -264,7 +264,8 @@
         "mqttServer": "MQTT-брокер",
         "grpcServer": "gRPC mock-сервер",
         "soapServer": "Макетний сервер SOAP",
-        "graphqlServer": "GraphQL mock-сервер"
+        "graphqlServer": "GraphQL mock-сервер",
+        "odataServer": "OData mock-сервер"
       }
     },
     "deleteConfirm": {
@@ -1058,7 +1059,9 @@
       "soapListen": "Сервер SOAP",
       "soapClose": "Закрити SOAP",
       "graphqlListen": "GraphQL server",
-      "graphqlClose": "GraphQL close"
+      "graphqlClose": "GraphQL close",
+      "odataListen": "OData server",
+      "odataClose": "OData close"
     },
     "comparator": {
       "result": "результат"
@@ -1626,7 +1629,9 @@
       "soapListen": "Розміщує локальний макетний сервер SOAP і слухає необмежено. Кожен вхідний запит спрямовується до налаштованої операції (за його SOAPAction або назвою операції в тілі) і отримує відповідь у вигляді попередньо визначеного конверта SOAP (операція помилки повертає `<soap:Fault>`). `connected` спрацьовує, щойно сервер слухає; кожен обслужений запит повторно надсилає свої дані на порт `served`. Сервер залишається активним до закриття SOAP (або зупинки), після чого спрацьовує `done`.",
       "soapClose": "Зупиняє макетний сервер SOAP, який уже слухає (оголошений вузлом сервера SOAP), і звільняє його порт.",
       "graphqlListen": "Hosts a local GraphQL mock server and listens indefinitely. `connected` fires once it is listening; each served operation re-emits its data on the `served` port. The server stays up until a GraphQL close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
-      "graphqlClose": "Stops an already-listening GraphQL mock server (declared by a GraphQL server node), freeing its port."
+      "graphqlClose": "Stops an already-listening GraphQL mock server (declared by a GraphQL server node), freeing its port.",
+      "odataListen": "Розміщує локальну фіктивну службу OData v4 і слухає необмежено. `connected` спрацьовує, щойно вона починає слухати; кожен обслужений запит повторно надсилає свої дані на порт `served`. Сервер працює до закриття OData (або зупинки), після чого спрацьовує `done`. Без виводу response — він обслуговує, а не викликає назовні.",
+      "odataClose": "Зупиняє фіктивну службу OData, яка вже слухає (оголошену вузлом сервера OData), звільняючи її порт."
     },
     "legend": {
       "title": "Легенда",
@@ -1839,7 +1844,64 @@
     "getDelta": "Отримати дельту",
     "deltaHint": "@odata.deltaLink доступний — натисніть, щоб замінити цю відповідь останнім набором змін.",
     "deltaChanged": "{{count}} змінено",
-    "deltaRemoved": "{{count}} видалено"
+    "deltaRemoved": "{{count}} видалено",
+    "actionBody": "Тіло дії (JSON)",
+    "actionParameters": "Параметри дії (з метаданих)",
+    "applyPlaceholder": "groupby((Status),aggregate($count as Total))",
+    "batchAdd": "Додати підзапит",
+    "batchAtomicityPlaceholder": "набір змін (необов'язково)",
+    "batchBody": "Підзапити пакета",
+    "batchBodyLabel": "Тіло (JSON)",
+    "batchEmpty": "Підзапитів ще немає. Додайте один нижче.",
+    "batchMoveDown": "Перемістити вниз",
+    "batchMoveUp": "Перемістити вгору",
+    "batchRemove": "Видалити підзапит",
+    "batchUrlPlaceholder": "Pets(1) — відносно кореня служби",
+    "expandAdd": "Додати розгортання",
+    "expandCollapseOptions": "Сховати параметри",
+    "expandEmpty": "Розгортань ще немає. Додайте одне нижче.",
+    "expandMoveDown": "Перемістити вниз",
+    "expandMoveUp": "Перемістити вгору",
+    "expandNested": "Вкладений $expand",
+    "expandOrderbyPlaceholder": "Name asc",
+    "expandPropertyPlaceholder": "Властивість навігації (напр. Tags)",
+    "expandRemove": "Видалити",
+    "expandSelectPlaceholder": "Id, Name (через кому)",
+    "expandShowOptions": "Показати параметри",
+    "expandSkipPlaceholder": "0",
+    "expandTopPlaceholder": "5",
+    "filterPlaceholder": "Name eq 'Alice' and Age gt 21",
+    "formatPlaceholder": "json",
+    "functionParameters": "Параметри функції (з метаданих)",
+    "navigationPropertiesHint": "Властивості навігації:",
+    "orderbyAdd": "Додати сортування",
+    "orderbyEmpty": "Сортування ще немає. Додайте властивість нижче.",
+    "orderbyMoveDown": "Перемістити вниз",
+    "orderbyMoveUp": "Перемістити вгору",
+    "orderbyPropertyPlaceholder": "Name",
+    "orderbyRemove": "Видалити",
+    "paginatedHint": "@odata.nextLink доступний — натисніть, щоб додати наступну сторінку до цієї відповіді.",
+    "paramsApply": "Застосувати параметри",
+    "paramsApplyToBody": "Застосувати до тіла",
+    "paramsApplyToUrl": "Застосувати до URL",
+    "paramsNone": "Параметри не очікуються.",
+    "propertiesHint": "Властивості:",
+    "propertyPickerPlaceholder": "Виберіть властивість…",
+    "responseEmpty": "Немає тіла відповіді",
+    "searchPlaceholder": "puppy",
+    "selectPlaceholder": "Id, Name, Email (через кому)",
+    "skipPlaceholder": "0",
+    "topPlaceholder": "50",
+    "urlPlaceholder": "https://service/odata/EntitySet",
+    "urlPreview": "Попередній перегляд URL (до розв'язання)",
+    "versionV2NotYet": "v2 (виконання ще не підтримується)",
+    "versionV3NotYet": "v3 (виконання ще не підтримується)",
+    "operationKindEntitySet": "Набір сутностей (GET)",
+    "operationKindFunction": "Функція (GET із вбудованими параметрами)",
+    "operationKindAction": "Дія (POST із тілом JSON)",
+    "operationKindBatch": "Пакет ($batch — multipart/mixed)",
+    "version": "Версія OData",
+    "operationKind": "Тип операції"
   },
   "typedValue": {
     "list": {
@@ -1853,6 +1915,17 @@
       "notListening": "Не слухає",
       "served": "Слухає — оброблено {{count}} запит(ів)",
       "listenFailed": "Не вдалося запустити mock-сервер"
+    }
+  },
+  "odata": {
+    "server": {
+      "startListening": "Почати слухати",
+      "stopListening": "Зупинити прослуховування",
+      "notListening": "Не слухає",
+      "served": "Слухає — оброблено {{count}} запит(ів)",
+      "listenFailed": "Не вдалося запустити mock-сервер OData",
+      "metadataLabel": "$metadata (CSDL)",
+      "dataLabel": "Оброблені дані сутностей (за набором сутностей)"
     }
   }
 }

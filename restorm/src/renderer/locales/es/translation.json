@@ -262,7 +262,8 @@
         "mqttServer": "Broker MQTT",
         "grpcServer": "Servidor gRPC simulado",
         "soapServer": "Servidor SOAP de prueba",
-        "graphqlServer": "Servidor GraphQL simulado"
+        "graphqlServer": "Servidor GraphQL simulado",
+        "odataServer": "Servidor OData simulado"
       }
     },
     "deleteConfirm": {
@@ -1056,7 +1057,9 @@
       "soapListen": "Servidor SOAP",
       "soapClose": "Cerrar SOAP",
       "graphqlListen": "GraphQL server",
-      "graphqlClose": "GraphQL close"
+      "graphqlClose": "GraphQL close",
+      "odataListen": "OData server",
+      "odataClose": "OData close"
     },
     "comparator": {
       "result": "resultado"
@@ -1624,7 +1627,9 @@
       "soapListen": "Aloja un servidor SOAP de prueba local y escucha indefinidamente. Cada solicitud entrante se dirige a una operación configurada (por su SOAPAction o el nombre de operación del cuerpo) y se responde con el sobre SOAP predefinido (una operación de fallo devuelve `<soap:Fault>`). `connected` se activa en cuanto el servidor escucha; cada solicitud atendida vuelve a emitir sus datos en el puerto `served`. El servidor permanece activo hasta un cierre SOAP (o una parada), entonces se activa `done`.",
       "soapClose": "Detiene un servidor SOAP de prueba que ya está escuchando (declarado por un nodo de servidor SOAP) y libera su puerto.",
       "graphqlListen": "Hosts a local GraphQL mock server and listens indefinitely. `connected` fires once it is listening; each served operation re-emits its data on the `served` port. The server stays up until a GraphQL close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
-      "graphqlClose": "Stops an already-listening GraphQL mock server (declared by a GraphQL server node), freeing its port."
+      "graphqlClose": "Stops an already-listening GraphQL mock server (declared by a GraphQL server node), freeing its port.",
+      "odataListen": "Aloja un servicio simulado OData v4 local y escucha indefinidamente. `connected` se activa en cuanto está escuchando; cada solicitud atendida reemite sus datos por el puerto `served`. El servidor permanece activo hasta un cierre OData (o un Stop), luego se activa `done`. Sin salida response — sirve, no llama hacia fuera.",
+      "odataClose": "Detiene un servicio simulado OData que ya está escuchando (declarado por un nodo de servidor OData) y libera su puerto."
     },
     "legend": {
       "title": "Leyenda",
@@ -1837,7 +1842,64 @@
     "getDelta": "Obtener delta",
     "deltaHint": "@odata.deltaLink disponible — haz clic para reemplazar esta respuesta con el último conjunto de cambios.",
     "deltaChanged": "{{count}} cambiado(s)",
-    "deltaRemoved": "{{count}} eliminado(s)"
+    "deltaRemoved": "{{count}} eliminado(s)",
+    "actionBody": "Cuerpo de la acción (JSON)",
+    "actionParameters": "Parámetros de la acción (de los metadatos)",
+    "applyPlaceholder": "groupby((Status),aggregate($count as Total))",
+    "batchAdd": "Añadir subsolicitud",
+    "batchAtomicityPlaceholder": "conjunto de cambios (opcional)",
+    "batchBody": "Subsolicitudes del lote",
+    "batchBodyLabel": "Cuerpo (JSON)",
+    "batchEmpty": "Aún no hay subsolicitudes. Añada una a continuación.",
+    "batchMoveDown": "Bajar",
+    "batchMoveUp": "Subir",
+    "batchRemove": "Quitar subsolicitud",
+    "batchUrlPlaceholder": "Pets(1) — relativo a la raíz del servicio",
+    "expandAdd": "Añadir expansión",
+    "expandCollapseOptions": "Ocultar opciones",
+    "expandEmpty": "Aún no hay expansiones. Añada una a continuación.",
+    "expandMoveDown": "Bajar",
+    "expandMoveUp": "Subir",
+    "expandNested": "$expand anidado",
+    "expandOrderbyPlaceholder": "Name asc",
+    "expandPropertyPlaceholder": "Propiedad de navegación (p. ej. Tags)",
+    "expandRemove": "Quitar",
+    "expandSelectPlaceholder": "Id, Name (separados por comas)",
+    "expandShowOptions": "Mostrar opciones",
+    "expandSkipPlaceholder": "0",
+    "expandTopPlaceholder": "5",
+    "filterPlaceholder": "Name eq 'Alice' and Age gt 21",
+    "formatPlaceholder": "json",
+    "functionParameters": "Parámetros de la función (de los metadatos)",
+    "navigationPropertiesHint": "Propiedades de navegación:",
+    "orderbyAdd": "Añadir ordenación",
+    "orderbyEmpty": "Aún no hay ordenación. Añada una propiedad a continuación.",
+    "orderbyMoveDown": "Bajar",
+    "orderbyMoveUp": "Subir",
+    "orderbyPropertyPlaceholder": "Name",
+    "orderbyRemove": "Quitar",
+    "paginatedHint": "@odata.nextLink disponible — haga clic para añadir la siguiente página a esta respuesta.",
+    "paramsApply": "Aplicar parámetros",
+    "paramsApplyToBody": "Aplicar al cuerpo",
+    "paramsApplyToUrl": "Aplicar a la URL",
+    "paramsNone": "No se esperan parámetros.",
+    "propertiesHint": "Propiedades:",
+    "propertyPickerPlaceholder": "Elija una propiedad…",
+    "responseEmpty": "Sin cuerpo de respuesta",
+    "searchPlaceholder": "puppy",
+    "selectPlaceholder": "Id, Name, Email (separados por comas)",
+    "skipPlaceholder": "0",
+    "topPlaceholder": "50",
+    "urlPlaceholder": "https://service/odata/EntitySet",
+    "urlPreview": "Vista previa de la URL (antes de la resolución)",
+    "versionV2NotYet": "v2 (ejecución aún no admitida)",
+    "versionV3NotYet": "v3 (ejecución aún no admitida)",
+    "operationKindEntitySet": "Conjunto de entidades (GET)",
+    "operationKindFunction": "Función (GET con parámetros incorporados)",
+    "operationKindAction": "Acción (POST con cuerpo JSON)",
+    "operationKindBatch": "Lote ($batch — multipart/mixed)",
+    "version": "Versión de OData",
+    "operationKind": "Tipo de operación"
   },
   "typedValue": {
     "list": {
@@ -1851,6 +1913,17 @@
       "notListening": "Sin escuchar",
       "served": "Escuchando — {{count}} solicitud(es) atendida(s)",
       "listenFailed": "No se pudo iniciar el servidor simulado"
+    }
+  },
+  "odata": {
+    "server": {
+      "startListening": "Empezar a escuchar",
+      "stopListening": "Dejar de escuchar",
+      "notListening": "Sin escuchar",
+      "served": "Escuchando — {{count}} solicitud(es) atendida(s)",
+      "listenFailed": "No se pudo iniciar el servidor simulado de OData",
+      "metadataLabel": "$metadata (CSDL)",
+      "dataLabel": "Datos de entidades atendidos (por conjunto de entidades)"
     }
   }
 }

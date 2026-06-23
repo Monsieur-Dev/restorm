@@ -261,7 +261,8 @@
         "mqttServer": "Broker MQTT",
         "grpcServer": "Server mock gRPC",
         "soapServer": "Server tiruan SOAP",
-        "graphqlServer": "Server mock GraphQL"
+        "graphqlServer": "Server mock GraphQL",
+        "odataServer": "Server mock OData"
       }
     },
     "deleteConfirm": {
@@ -1055,7 +1056,9 @@
       "soapListen": "Server SOAP",
       "soapClose": "Tutup SOAP",
       "graphqlListen": "GraphQL server",
-      "graphqlClose": "GraphQL close"
+      "graphqlClose": "GraphQL close",
+      "odataListen": "OData server",
+      "odataClose": "OData close"
     },
     "comparator": {
       "result": "hasil"
@@ -1623,7 +1626,9 @@
       "soapListen": "Menjadi host server tiruan SOAP lokal dan mendengarkan tanpa batas. Setiap permintaan masuk diarahkan ke operasi yang dikonfigurasi (berdasarkan SOAPAction-nya atau nama operasi di body) dan dijawab dengan amplop SOAP yang telah ditentukan (operasi kesalahan mengembalikan `<soap:Fault>`). `connected` dipicu segera setelah server mendengarkan; setiap permintaan yang dilayani memancarkan kembali datanya di port `served`. Server tetap aktif hingga penutupan SOAP (atau penghentian), lalu `done` dipicu.",
       "soapClose": "Menghentikan server tiruan SOAP yang sudah mendengarkan (dideklarasikan oleh node server SOAP) dan membebaskan port-nya.",
       "graphqlListen": "Hosts a local GraphQL mock server and listens indefinitely. `connected` fires once it is listening; each served operation re-emits its data on the `served` port. The server stays up until a GraphQL close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
-      "graphqlClose": "Stops an already-listening GraphQL mock server (declared by a GraphQL server node), freeing its port."
+      "graphqlClose": "Stops an already-listening GraphQL mock server (declared by a GraphQL server node), freeing its port.",
+      "odataListen": "Menghosting layanan tiruan OData v4 lokal dan mendengarkan tanpa batas. `connected` terpicu begitu mulai mendengarkan; setiap permintaan yang dilayani memancarkan ulang datanya pada port `served`. Server tetap aktif hingga penutupan OData (atau Stop), lalu `done` terpicu. Tanpa keluaran response — ia melayani, bukan memanggil keluar.",
+      "odataClose": "Menghentikan layanan tiruan OData yang sudah mendengarkan (dideklarasikan oleh node server OData), membebaskan portnya."
     },
     "legend": {
       "title": "Legenda",
@@ -1836,7 +1841,64 @@
     "getDelta": "Dapatkan delta",
     "deltaHint": "@odata.deltaLink tersedia — klik untuk mengganti respons ini dengan kumpulan perubahan terbaru.",
     "deltaChanged": "{{count}} diubah",
-    "deltaRemoved": "{{count}} dihapus"
+    "deltaRemoved": "{{count}} dihapus",
+    "actionBody": "Isi aksi (JSON)",
+    "actionParameters": "Parameter aksi (dari metadata)",
+    "applyPlaceholder": "groupby((Status),aggregate($count as Total))",
+    "batchAdd": "Tambah sub-permintaan",
+    "batchAtomicityPlaceholder": "set perubahan (opsional)",
+    "batchBody": "Sub-permintaan batch",
+    "batchBodyLabel": "Isi (JSON)",
+    "batchEmpty": "Belum ada sub-permintaan. Tambahkan satu di bawah.",
+    "batchMoveDown": "Pindah ke bawah",
+    "batchMoveUp": "Pindah ke atas",
+    "batchRemove": "Hapus sub-permintaan",
+    "batchUrlPlaceholder": "Pets(1) — relatif terhadap akar layanan",
+    "expandAdd": "Tambah ekspansi",
+    "expandCollapseOptions": "Sembunyikan opsi",
+    "expandEmpty": "Belum ada ekspansi. Tambahkan satu di bawah.",
+    "expandMoveDown": "Pindah ke bawah",
+    "expandMoveUp": "Pindah ke atas",
+    "expandNested": "$expand bersarang",
+    "expandOrderbyPlaceholder": "Name asc",
+    "expandPropertyPlaceholder": "Properti navigasi (mis. Tags)",
+    "expandRemove": "Hapus",
+    "expandSelectPlaceholder": "Id, Name (dipisahkan koma)",
+    "expandShowOptions": "Tampilkan opsi",
+    "expandSkipPlaceholder": "0",
+    "expandTopPlaceholder": "5",
+    "filterPlaceholder": "Name eq 'Alice' and Age gt 21",
+    "formatPlaceholder": "json",
+    "functionParameters": "Parameter fungsi (dari metadata)",
+    "navigationPropertiesHint": "Properti navigasi:",
+    "orderbyAdd": "Tambah pengurutan",
+    "orderbyEmpty": "Belum ada pengurutan. Tambahkan properti di bawah.",
+    "orderbyMoveDown": "Pindah ke bawah",
+    "orderbyMoveUp": "Pindah ke atas",
+    "orderbyPropertyPlaceholder": "Name",
+    "orderbyRemove": "Hapus",
+    "paginatedHint": "@odata.nextLink tersedia — klik untuk menambahkan halaman berikutnya ke respons ini.",
+    "paramsApply": "Terapkan parameter",
+    "paramsApplyToBody": "Terapkan ke isi",
+    "paramsApplyToUrl": "Terapkan ke URL",
+    "paramsNone": "Tidak ada parameter yang diharapkan.",
+    "propertiesHint": "Properti:",
+    "propertyPickerPlaceholder": "Pilih properti…",
+    "responseEmpty": "Tidak ada isi respons",
+    "searchPlaceholder": "puppy",
+    "selectPlaceholder": "Id, Name, Email (dipisahkan koma)",
+    "skipPlaceholder": "0",
+    "topPlaceholder": "50",
+    "urlPlaceholder": "https://service/odata/EntitySet",
+    "urlPreview": "Pratinjau URL (sebelum resolusi)",
+    "versionV2NotYet": "v2 (eksekusi belum didukung)",
+    "versionV3NotYet": "v3 (eksekusi belum didukung)",
+    "operationKindEntitySet": "Set entitas (GET)",
+    "operationKindFunction": "Fungsi (GET dengan parameter tersemat)",
+    "operationKindAction": "Aksi (POST dengan isi JSON)",
+    "operationKindBatch": "Batch ($batch — multipart/mixed)",
+    "version": "Versi OData",
+    "operationKind": "Jenis operasi"
   },
   "typedValue": {
     "list": {
@@ -1850,6 +1912,17 @@
       "notListening": "Tidak mendengarkan",
       "served": "Mendengarkan — {{count}} permintaan dilayani",
       "listenFailed": "Gagal memulai server mock"
+    }
+  },
+  "odata": {
+    "server": {
+      "startListening": "Mulai mendengarkan",
+      "stopListening": "Berhenti mendengarkan",
+      "notListening": "Tidak mendengarkan",
+      "served": "Mendengarkan — {{count}} permintaan dilayani",
+      "listenFailed": "Gagal memulai server mock OData",
+      "metadataLabel": "$metadata (CSDL)",
+      "dataLabel": "Data entitas yang dilayani (per kumpulan entitas)"
     }
   }
 }

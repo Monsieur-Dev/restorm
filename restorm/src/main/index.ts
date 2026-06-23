@@ -98,6 +98,7 @@ import { registerBuiltinSources } from './services/secrets/mainSourceRegistry'
 import { secretHydrationService } from './services/secrets/SecretHydrationService'
 import { websocketExecutionService } from './services/WebSocketExecutionService'
 import { grpcMockServerService } from './services/GRPCMockServerService'
+import { odataMockServerService } from './services/ODataMockServerService'
 import { registerApiUpdateIPC } from './services/apiUpdate/registerApiUpdateIPC'
 import { runApiUpdateApply } from './services/apiUpdate/orchestrateApply'
 import { loadFolderStructure, loadProjectIntoStore, attachDraftStoreForFolder, attachDraftStoreForFile, getDraftsRootDir } from './FileOperations'
@@ -489,6 +490,8 @@ app.on('before-quit', () => {
   websocketExecutionService.closeAll()
   // Same for any hosted gRPC mock server (its own grpc.Server / port).
   grpcMockServerService.closeAll()
+  // Same for any hosted OData mock service (its routes on the shared HTTP host).
+  odataMockServerService.closeAll()
 })
 
 // Initialize Search Index Service (listens to document events from renderer)

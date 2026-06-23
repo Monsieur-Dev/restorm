@@ -5,6 +5,7 @@ import { useIsGrpcServerListening } from '../../services/grpcServerListeningStor
 import { useIsHttpListening } from '../../services/httpListeningStore'
 import { useIsSoapListening } from '../../services/soapListeningStore'
 import { useIsGraphqlListening } from '../../services/graphqlListeningStore'
+import { useIsODataListening } from '../../services/odataListeningStore'
 import { BeamWrap } from './BeamWrap'
 
 export interface ServerListeningBadgeProps {
@@ -32,8 +33,9 @@ export const ServerListeningBadge: React.FC<ServerListeningBadgeProps> = ({ requ
   const httpListening = useIsHttpListening(requestId)
   const soapListening = useIsSoapListening(requestId)
   const graphqlListening = useIsGraphqlListening(requestId)
+  const odataListening = useIsODataListening(requestId)
   return (
-    <BeamWrap active={wsListening || grpcListening || grpcServerListening || httpListening || soapListening || graphqlListening} size={16} borderWidth={1.5}>
+    <BeamWrap active={wsListening || grpcListening || grpcServerListening || httpListening || soapListening || graphqlListening || odataListening} size={16} borderWidth={1.5}>
       {children}
     </BeamWrap>
   )

@@ -262,7 +262,8 @@
         "mqttServer": "Broker MQTT",
         "grpcServer": "Server gRPC mock",
         "soapServer": "Server mock SOAP",
-        "graphqlServer": "Server mock GraphQL"
+        "graphqlServer": "Server mock GraphQL",
+        "odataServer": "Server mock OData"
       }
     },
     "deleteConfirm": {
@@ -1056,7 +1057,9 @@
       "soapListen": "Server SOAP",
       "soapClose": "Chiudi SOAP",
       "graphqlListen": "GraphQL server",
-      "graphqlClose": "GraphQL close"
+      "graphqlClose": "GraphQL close",
+      "odataListen": "OData server",
+      "odataClose": "OData close"
     },
     "comparator": {
       "result": "risultato"
@@ -1624,7 +1627,9 @@
       "soapListen": "Ospita un server mock SOAP locale e resta in ascolto indefinitamente. Ogni richiesta in arrivo viene instradata a un'operazione configurata (in base alla sua SOAPAction o al nome dell'operazione nel corpo) e riceve in risposta la busta SOAP predefinita (un'operazione di errore restituisce `<soap:Fault>`). `connected` si attiva non appena il server è in ascolto; ogni richiesta servita riemette i suoi dati sulla porta `served`. Il server resta attivo fino a una chiusura SOAP (o a un arresto), quindi si attiva `done`.",
       "soapClose": "Arresta un server mock SOAP già in ascolto (dichiarato da un nodo server SOAP) e ne libera la porta.",
       "graphqlListen": "Hosts a local GraphQL mock server and listens indefinitely. `connected` fires once it is listening; each served operation re-emits its data on the `served` port. The server stays up until a GraphQL close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
-      "graphqlClose": "Stops an already-listening GraphQL mock server (declared by a GraphQL server node), freeing its port."
+      "graphqlClose": "Stops an already-listening GraphQL mock server (declared by a GraphQL server node), freeing its port.",
+      "odataListen": "Ospita un servizio mock OData v4 locale e resta in ascolto indefinitamente. `connected` si attiva non appena è in ascolto; ogni richiesta servita riemette i suoi dati sulla porta `served`. Il server resta attivo fino a una chiusura OData (o uno Stop), poi si attiva `done`. Nessun output response — serve, non chiama verso l’esterno.",
+      "odataClose": "Arresta un servizio mock OData già in ascolto (dichiarato da un nodo server OData), liberandone la porta."
     },
     "legend": {
       "title": "Legenda",
@@ -1837,7 +1842,64 @@
     "getDelta": "Ottieni delta",
     "deltaHint": "@odata.deltaLink disponibile — clicca per sostituire questa risposta con l'ultimo set di modifiche.",
     "deltaChanged": "{{count}} modificato/i",
-    "deltaRemoved": "{{count}} rimosso/i"
+    "deltaRemoved": "{{count}} rimosso/i",
+    "actionBody": "Corpo dell'azione (JSON)",
+    "actionParameters": "Parametri dell'azione (dai metadati)",
+    "applyPlaceholder": "groupby((Status),aggregate($count as Total))",
+    "batchAdd": "Aggiungi sotto-richiesta",
+    "batchAtomicityPlaceholder": "change-set (facoltativo)",
+    "batchBody": "Sotto-richieste del batch",
+    "batchBodyLabel": "Corpo (JSON)",
+    "batchEmpty": "Nessuna sotto-richiesta. Aggiungine una qui sotto.",
+    "batchMoveDown": "Sposta giù",
+    "batchMoveUp": "Sposta su",
+    "batchRemove": "Rimuovi sotto-richiesta",
+    "batchUrlPlaceholder": "Pets(1) — relativo alla radice del servizio",
+    "expandAdd": "Aggiungi espansione",
+    "expandCollapseOptions": "Nascondi opzioni",
+    "expandEmpty": "Nessuna espansione. Aggiungine una qui sotto.",
+    "expandMoveDown": "Sposta giù",
+    "expandMoveUp": "Sposta su",
+    "expandNested": "$expand annidato",
+    "expandOrderbyPlaceholder": "Name asc",
+    "expandPropertyPlaceholder": "Proprietà di navigazione (es. Tags)",
+    "expandRemove": "Rimuovi",
+    "expandSelectPlaceholder": "Id, Name (separati da virgole)",
+    "expandShowOptions": "Mostra opzioni",
+    "expandSkipPlaceholder": "0",
+    "expandTopPlaceholder": "5",
+    "filterPlaceholder": "Name eq 'Alice' and Age gt 21",
+    "formatPlaceholder": "json",
+    "functionParameters": "Parametri della funzione (dai metadati)",
+    "navigationPropertiesHint": "Proprietà di navigazione:",
+    "orderbyAdd": "Aggiungi ordinamento",
+    "orderbyEmpty": "Nessun ordinamento. Aggiungi una proprietà qui sotto.",
+    "orderbyMoveDown": "Sposta giù",
+    "orderbyMoveUp": "Sposta su",
+    "orderbyPropertyPlaceholder": "Name",
+    "orderbyRemove": "Rimuovi",
+    "paginatedHint": "@odata.nextLink disponibile — fai clic per aggiungere la pagina successiva a questa risposta.",
+    "paramsApply": "Applica parametri",
+    "paramsApplyToBody": "Applica al corpo",
+    "paramsApplyToUrl": "Applica all'URL",
+    "paramsNone": "Nessun parametro previsto.",
+    "propertiesHint": "Proprietà:",
+    "propertyPickerPlaceholder": "Scegli una proprietà…",
+    "responseEmpty": "Nessun corpo della risposta",
+    "searchPlaceholder": "puppy",
+    "selectPlaceholder": "Id, Name, Email (separati da virgole)",
+    "skipPlaceholder": "0",
+    "topPlaceholder": "50",
+    "urlPlaceholder": "https://service/odata/EntitySet",
+    "urlPreview": "Anteprima dell'URL (prima della risoluzione)",
+    "versionV2NotYet": "v2 (esecuzione non ancora supportata)",
+    "versionV3NotYet": "v3 (esecuzione non ancora supportata)",
+    "operationKindEntitySet": "Set di entità (GET)",
+    "operationKindFunction": "Funzione (GET con parametri incorporati)",
+    "operationKindAction": "Azione (POST con corpo JSON)",
+    "operationKindBatch": "Batch ($batch — multipart/mixed)",
+    "version": "Versione OData",
+    "operationKind": "Tipo di operazione"
   },
   "typedValue": {
     "list": {
@@ -1851,6 +1913,17 @@
       "notListening": "Non in ascolto",
       "served": "In ascolto — {{count}} richiesta/e servita/e",
       "listenFailed": "Impossibile avviare il server mock"
+    }
+  },
+  "odata": {
+    "server": {
+      "startListening": "Inizia ad ascoltare",
+      "stopListening": "Smetti di ascoltare",
+      "notListening": "Non in ascolto",
+      "served": "In ascolto — {{count}} richiesta/e servita/e",
+      "listenFailed": "Impossibile avviare il server mock OData",
+      "metadataLabel": "$metadata (CSDL)",
+      "dataLabel": "Dati delle entità serviti (per set di entità)"
     }
   }
 }

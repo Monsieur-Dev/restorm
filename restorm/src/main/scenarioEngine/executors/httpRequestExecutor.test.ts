@@ -196,6 +196,70 @@ describe('httpRequestExecutor — slot short-circuit', () => {
   })
 })
 
+describe('httpRequestExecutor — OData verb + body composition', () => {
+  /** A persisted OData ACTION request: no `method` field (the verb is derived
+   * from operationKind), an actionBody JSON payload. */
+  function makeODataAction(): Record<string, unknown> {
+    return {
+      id: 'req-1',
+      type: 'odata',
+      url: 'http://localhost:8078/odata/Pets(1)/Restorm.AdoptPet',
+      operationKind: 'action',
+      actionBody: '{"ownerId":7}',
+      headers: [] as KV[],
+      params: [] as KV[],
+      pathParams: []
+    }
+  }
+
+  it('an OData action feeds POST + the actionBody rawBody into HTTPExecutionInput', async () => {
+    findById.mockReturnValue(makeODataAction())
+
+    await httpRequestExecutor(makeActivation({}), makeCtx(node()))
+
+    expect(execute).toHaveBeenCalledTimes(1)
+    const input = execute.mock.calls[0]?.[0] as { method: string; rawBody?: string; rawBodyContentType?: string }
+    // The verb + body come from composeODataRequestBody — the SAME composer the
+    // request-panel Send uses — so the scenario path dispatches a real action
+    // POST with the JSON payload, not a bodyless GET.
+    expect(input.method).toBe('POST')
+    expect(input.rawBody).toBe('{"ownerId":7}')
+  })
+
+  it('an OData entity-set read stays a bodyless GET (working path unregressed)', async () => {
+    findById.mockReturnValue({
+      id: 'req-1', type: 'odata', url: 'http://localhost:8078/odata/Pets',
+      operationKind: 'entity-set', headers: [] as KV[], params: [] as KV[], pathParams: []
+    })
+
+    await httpRequestExecutor(makeActivation({}), makeCtx(node()))
+
+    const input = execute.mock.calls[0]?.[0] as { method: string; rawBody?: string }
+    expect(input.method).toBe('GET')
+    expect(input.rawBody).toBeUndefined()
+  })
+
+  it('an OData batch with no sub-requests throws the composition error (never dispatches an empty POST)', async () => {
+    findById.mockReturnValue({
+      id: 'req-1', type: 'odata', url: 'http://localhost:8078/odata/$batch',
+      operationKind: 'batch', batchSubRequests: [], headers: [] as KV[], params: [] as KV[], pathParams: []
+    })
+
+    await expect(httpRequestExecutor(makeActivation({}), makeCtx(node()))).rejects.toThrow(/no sub-requests/i)
+    // The network was never hit — the guard fires before dispatch.
+    expect(execute).not.toHaveBeenCalled()
+  })
+
+  it('records OData execution history under the `odata` kind, not `http`', async () => {
+    findById.mockReturnValue(makeODataAction())
+
+    await httpRequestExecutor(makeActivation({}), makeCtx(node()))
+
+    expect(storeExecutionResult).toHaveBeenCalledTimes(1)
+    expect(storeExecutionResult.mock.calls[0]?.[1]).toBe('odata')
+  })
+})
+
 describe('applyRequestOverride (pm.request / req mutation → bound request)', () => {
   const baseReq = (): Record<string, unknown> => ({
     id: 'r', type: 'http', url: 'https://api.test/pets', method: 'GET',

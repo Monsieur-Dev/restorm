@@ -38,7 +38,7 @@ import { soapExecutionService } from '../../services/SOAPExecutionService'
 import { grpcExecutionService } from '../../services/GRPCExecutionService'
 import { websocketExecutionService } from '../../services/WebSocketExecutionService'
 import { isHTTPRequest, isGraphQLRequest, isGrpcRequest, isSoapRequest, isODataRequest, isAuthenticationRequest, isWebSocketRequest, isEnvironmentFolder } from '../../../shared/types/collections'
-import type { HTTPRequest, GraphQLRequest, GrpcRequest, SoapRequest, WebSocketRequest, AuthenticationRequest, KeyValue, EnvironmentFolder } from '../../../shared/types/collections'
+import type { HTTPRequest, GraphQLRequest, GrpcRequest, SoapRequest, WebSocketRequest, AuthenticationRequest, ODataRequest, KeyValue, EnvironmentFolder } from '../../../shared/types/collections'
 import { isRequest, type FolderItem, type Request } from '../../../shared/models'
 
 function jsonReply(value: unknown): { content: { type: 'text'; text: string }[] } {
@@ -376,9 +376,19 @@ export function flushRequestStateToContext(req: Request): void {
     if (soap.server !== undefined) data.server = soap.server
     if (soap.mockOperations !== undefined) data.soapMockOperations = soap.mockOperations
   } else if (isODataRequest(req)) {
+    const odata = req as ODataRequest
     data.requestType = 'odata'
     if (Array.isArray(params)) data.params = params as FullRequestData['params']
     if (Array.isArray(pathParams)) data.pathParams = pathParams as FullRequestData['pathParams']
+    data.odataVersion = odata.odataVersion
+    data.odataOperationKind = odata.operationKind
+    data.odataQueryOptions = { ...odata.queryOptions }
+    // OData mock SERVER: the hosted service reads the CSDL + served entity data
+    // from fullData (an `odataListen` scenario node never opens a request tab,
+    // so this is the only path that populates them for a scenario run).
+    if (odata.server !== undefined) data.server = odata.server
+    if (odata.mockMetadata !== undefined) data.mockMetadata = odata.mockMetadata
+    if (odata.mockData !== undefined) data.mockData = odata.mockData
   } else if (isWebSocketRequest(req)) {
     const ws = req as WebSocketRequest
     data.requestType = 'websocket'

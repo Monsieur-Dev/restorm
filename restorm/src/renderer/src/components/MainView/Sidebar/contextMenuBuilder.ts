@@ -50,6 +50,7 @@ export type AddChildKind =
   | 'http-server'
   | 'graphql-server'
   | 'odata'
+  | 'odata-server'
   | 'auth'
   | 'scenario'
 
@@ -242,6 +243,12 @@ export const buildAddSubmenu = (
     label: t('sidebar.contextMenu.add.odata'),
     icon: React.createElement(Badge, { type: 'ODATA' }),
     onClick: () => { onAddChildItem(parentId, 'odata') }
+  },
+  {
+    id: `add-odata-server-${parentId}`,
+    label: t('sidebar.contextMenu.add.odataServer'),
+    icon: React.createElement(Badge, { type: 'ODATA', mode: 'server' }),
+    onClick: () => { onAddChildItem(parentId, 'odata-server') }
   },
   { id: `sep-add-proto-${parentId}`, isSeparator: true, label: '' },
   {

@@ -33,8 +33,10 @@ import {
   CodeEditor,
   InputBox,
   ListView,
+  Pane,
   ScrollableElement,
   SelectBox,
+  SplitView,
   Toggle,
   eventBus,
   logger,
@@ -56,6 +58,7 @@ import {
   buildFunctionInlinedArgs
 } from '../../../../shared/utils/odataOperationParams'
 import { useEnvironmentContext } from '../../contexts/useEnvironmentContext'
+import { getRequestPanelState, setRequestPanelCollapsed } from '../../services/requestPanelStateStore'
 import { useAuthRequestResolver } from '../../contexts/authRequestResolverContext'
 import type { KeyValueData } from '../../types/global.d'
 import { toKeyValueData as toKeyValueDataShared } from '../../utils/toKeyValueData'
@@ -74,14 +77,12 @@ import {
 import { normalizeODataResponse, detectODataVersionMismatch } from '../../../../shared/utils/odataResponse'
 import { extractNavigationLinks } from '../../../../shared/utils/odataNavigationLinks'
 import {
-  serializeODataBatch,
-  serializeODataJsonBatch,
   extractBoundary,
   parseODataBatchResponse,
   parseODataJsonBatchResponse,
-  type ODataBatchSubRequest,
   type ODataBatchSubResponse
 } from '../../../../shared/utils/odataBatch'
+import { composeODataRequestBody } from '../../../../shared/utils/odataRequestBody'
 import { DEFAULT_REQUEST_TIMEOUT_MS } from '../../../../shared/config/constants'
 import { useRestormStore } from '../../store/restormStore'
 import { useApiDocumentationFromRequest } from '../../hooks/useApiDocumentationFromRequest'
@@ -92,6 +93,7 @@ import { BeamWrap } from '../common/BeamWrap'
 const urlRowStyle: CSSProperties = { display: 'flex', gap: 8, alignItems: 'center' }
 const urlInputWrapperStyle: CSSProperties = { flex: 1, minWidth: 0 }
 const sendButtonWrapperStyle: CSSProperties = { flexShrink: 0 }
+const serverPortWrapperStyle: CSSProperties = { width: 80, flexShrink: 0 }
 const formOuterStyle: CSSProperties = {
   height: '100%',
   width: '100%'
@@ -197,7 +199,7 @@ export interface ODataRequestTabViewProps {
 
 export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ request }) => {
   const { t } = useTranslation()
-  const { selectedEnvId, environments } = useEnvironmentContext()
+  const { selectedEnvId, environments, projectUuid } = useEnvironmentContext()
   const collections = useRestormStore((state) => state.collections)
   const resolveAuthRequest = useAuthRequestResolver()
 
@@ -210,18 +212,40 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
   const odataVersionOptions = useMemo<ISelectOptionItem[]>(() => [
     { text: 'v4' },
     { text: 'v4.01' },
-    { text: t('odataRequestTab.version.v3NotYet', 'v3 (execution not yet supported)') },
-    { text: t('odataRequestTab.version.v2NotYet', 'v2 (execution not yet supported)') }
+    { text: t('odataRequestTab.versionV3NotYet', 'v3 (execution not yet supported)') },
+    { text: t('odataRequestTab.versionV2NotYet', 'v2 (execution not yet supported)') }
   ], [t])
 
   const operationKindOptions = useMemo<ISelectOptionItem[]>(() => [
-    { text: t('odataRequestTab.operationKind.entitySet', 'Entity set (GET)') },
-    { text: t('odataRequestTab.operationKind.function', 'Function (GET with inlined parameters)') },
-    { text: t('odataRequestTab.operationKind.action', 'Action (POST with JSON body)') },
-    { text: t('odataRequestTab.operationKind.batch', 'Batch ($batch — multipart/mixed)') }
+    { text: t('odataRequestTab.operationKindEntitySet', 'Entity set (GET)') },
+    { text: t('odataRequestTab.operationKindFunction', 'Function (GET with inlined parameters)') },
+    { text: t('odataRequestTab.operationKindAction', 'Action (POST with JSON body)') },
+    { text: t('odataRequestTab.operationKindBatch', 'Batch ($batch — multipart/mixed)') }
   ], [t])
 
   const [isSending, setIsSending] = useState(false)
+  // Server mode: whether restorm is currently hosting this request's OData mock
+  // service, and how many requests it has served (for the "served N" banner).
+  const [isListening, setIsListening] = useState<boolean>(false)
+  const [servedCount, setServedCount] = useState<number>(0)
+  // Server mode: per-pane collapsed state for the $metadata / served-data
+  // SplitView, lifted up so it survives the SplitView remount when the response
+  // panel toggles (mirrors HTTPRequestTabView's panelCollapsed plumbing).
+  const [serverPanelCollapsed, setServerPanelCollapsed] = useState<{ metadata: boolean; data: boolean }>(() => {
+    const seed = (projectUuid ? getRequestPanelState(projectUuid, request.id) : undefined) ?? {}
+    return {
+      metadata: typeof seed['odataMetadata'] === 'boolean' ? seed['odataMetadata'] : false,
+      data: typeof seed['odataData'] === 'boolean' ? seed['odataData'] : false
+    }
+  })
+  const handleServerPanelCollapsedChange = useCallback((arr: boolean[]): void => {
+    const next = { metadata: arr[0] ?? false, data: arr[1] ?? false }
+    setServerPanelCollapsed(next)
+    if (projectUuid) {
+      setRequestPanelCollapsed(projectUuid, request.id, 'odataMetadata', next.metadata)
+      setRequestPanelCollapsed(projectUuid, request.id, 'odataData', next.data)
+    }
+  }, [projectUuid, request.id])
   const [response, setResponse] = useState<ODataResponseViewData | null>(null)
   const [historyModalOpen, setHistoryModalOpen] = useState(false)
   const [historyRefreshKey, setHistoryRefreshKey] = useState(0)
@@ -647,7 +671,11 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
       params: toKeyValueData(request.params),
       odataVersion: request.odataVersion,
       odataOperationKind: request.operationKind,
-      odataQueryOptions: { ...request.queryOptions }
+      odataQueryOptions: { ...request.queryOptions },
+      // Server mode: the mock service reads the CSDL + served data from fullData.
+      ...(request.server !== undefined && { server: request.server }),
+      ...(request.mockMetadata !== undefined && { mockMetadata: request.mockMetadata }),
+      ...(request.mockData !== undefined && { mockData: request.mockData })
     }, sourceIdRef.current)
   }, [request])
 
@@ -661,6 +689,9 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
     request.odataVersion,
     request.operationKind,
     request.queryOptions,
+    request.server,
+    request.mockMetadata,
+    request.mockData,
     pushFullRequestDataToContextService
   ])
 
@@ -699,83 +730,28 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
       return
     }
 
-    let method = 'GET'
-    let body: string | undefined
-    let contentTypeOverride: string | undefined
-    let pendingBatchWarnings: string[] = []
-    if (request.operationKind === 'action') {
-      method = 'POST'
-      body = request.actionBody ?? undefined
-    } else if (request.operationKind === 'batch') {
-      // The structured `batchSubRequests` array drives serialization
-      // directly — no JSON parse required. We flatten the editor's
-      // header list into a Record, coalesce the (flat + change-set)
-      // sequence into the multipart/mixed envelope, and let the
-      // engine see a plain POST.
-      const specs = request.batchSubRequests ?? []
-      if (specs.length === 0) {
-        setIsSending(false)
-        setResponse({
-          statusCode: 0,
-          statusText: '',
-          requestUrl: '',
-          durationMs: 0,
-          body: '',
-          method,
-          error: 'Batch has no sub-requests — add at least one before sending.'
-        })
-        return
-      }
-      const subRequests: ODataBatchSubRequest[] = specs.map((spec) => {
-        const headers: Record<string, string> = {}
-        for (const kv of spec.headers ?? []) {
-          if (kv.key) headers[kv.key] = kv.value
-        }
-        return {
-          method: spec.method,
-          url: spec.url,
-          ...(Object.keys(headers).length > 0 ? { headers } : {}),
-          ...(spec.body !== undefined ? { body: spec.body } : {}),
-          ...(spec.atomicityGroup ? { atomicityGroup: spec.atomicityGroup } : {}),
-          ...(spec.forceIncludeInChangeSet ? { forceIncludeInChangeSet: true } : {})
-        }
+    // Compose the verb + body via the shared composer so the request panel
+    // and the scenario engine produce byte-identical wire bodies.
+    const composed = composeODataRequestBody(request)
+    if (composed.error !== undefined) {
+      setIsSending(false)
+      setResponse({
+        statusCode: 0,
+        statusText: '',
+        requestUrl: '',
+        durationMs: 0,
+        body: '',
+        method: composed.method,
+        error: composed.error
       })
-      const isBatchJson = request.batchFormat === 'json'
-      // v4.01 emits relative batch URIs unless the user opted out.
-      const isV401 = request.odataVersion === 'v4.01'
-      // Service root for relative URL conversion: strip the `/$batch` suffix
-      // (and any query string). If the URL doesn't contain `/$batch` we still
-      // strip the last path segment as a best-effort guess — the caller can
-      // override with forceAbsoluteBatchUrls if the heuristic is wrong.
-      const batchServiceRoot = isV401 && !request.forceAbsoluteBatchUrls
-        ? (request.url.includes('/$batch')
-          ? request.url.replace(/\/\$batch.*$/, '')
-          : request.url.replace(/\/[^/]*$/, ''))
-        : undefined
-      if (isBatchJson) {
-        const serialized = serializeODataJsonBatch(subRequests, {
-          ...(batchServiceRoot !== undefined ? { serviceRoot: batchServiceRoot } : {}),
-          ...(request.forceAbsoluteBatchUrls ? { forceAbsoluteUrls: true } : {})
-        })
-        method = 'POST'
-        body = serialized.body
-        contentTypeOverride = serialized.contentType
-      } else {
-        const serialized = serializeODataBatch(subRequests, undefined, {
-          allowGetInChangeSet: request.allowGetInChangeSet ?? false,
-          ...(batchServiceRoot !== undefined ? { serviceRoot: batchServiceRoot } : {}),
-          ...(request.forceAbsoluteBatchUrls ? { forceAbsoluteUrls: true } : {})
-        })
-        method = 'POST'
-        body = serialized.body
-        contentTypeOverride = serialized.contentType
-        // Surface serializer warnings in the response panel even before
-        // the batch completes — they are informational, not blocking.
-        if (serialized.warnings.length > 0) {
-          pendingBatchWarnings = serialized.warnings
-        }
-      }
+      return
     }
+    const method = composed.method
+    const body = composed.rawBody
+    const contentTypeOverride = composed.rawBodyContentType
+    // Surface batch serializer warnings in the response panel even before
+    // the batch completes — they are informational, not blocking.
+    const pendingBatchWarnings: string[] = composed.batchWarnings ?? []
     const dispatchedMethod = method
     const capturedBatchWarnings = pendingBatchWarnings
     const capturedBatchFormat = request.operationKind === 'batch' ? (request.batchFormat ?? 'multipart') : null
@@ -877,6 +853,176 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
     hostRef: urlSectionHostRef,
     apply: applyParsedCurl
   })
+
+  // ── Server mode (restorm HOSTS a local OData v4 mock service) ────────
+  const isServer = (request).server === true
+  const { serverPort, serverRoot } = useMemo(() => {
+    const stripped = request.url.replace(/^[a-z]+:\/\//i, '')
+    const slash = stripped.indexOf('/')
+    const hostPort = slash >= 0 ? stripped.slice(0, slash) : stripped
+    const root = slash >= 0 ? stripped.slice(slash + 1) : ''
+    return { serverPort: hostPort.split(':')[1] ?? '', serverRoot: root }
+  }, [request.url])
+  const composeServerUrl = useCallback((port: string, rootPart: string): string => {
+    return `localhost:${port}/${rootPart.replace(/^\/+/, '')}`
+  }, [])
+  const setServerPort = useCallback((p: string): void => {
+    setUrl(composeServerUrl(p.replace(/[^0-9]/g, ''), serverRoot))
+  }, [composeServerUrl, serverRoot, setUrl])
+  const setServerRoot = useCallback((p: string): void => {
+    setUrl(composeServerUrl(serverPort, p))
+  }, [composeServerUrl, serverPort, setUrl])
+  const setMockMetadata = useCallback((next?: string): void => {
+    updateReactiveProperty(request, 'mockMetadata', next ?? '')
+  }, [request])
+  const setMockData = useCallback((next?: string): void => {
+    // Persist the served-data JSON as-typed; a parse error surfaces only when the
+    // mock is started (the server answers 400), so editing stays unblocked.
+    try {
+      updateReactiveProperty(request, 'mockData', JSON.parse(next ?? '{}') as Record<string, Record<string, unknown>[]>)
+    } catch {
+      updateReactiveProperty(request, 'mockData', (next ?? '') as unknown as Record<string, Record<string, unknown>[]>)
+    }
+  }, [request])
+  const mockDataText = useMemo(
+    () => JSON.stringify((request).mockData ?? {}, null, 2),
+    [request]
+  )
+
+  // Listen = start hosting the mock service. It stays up (no timeout) until Stop /
+  // file close / quit; the promise resolves when the routes stop.
+  const handleListen = useCallback((): void => {
+    const requestId = request.id
+    if (!requestId || isListening) return
+    setServedCount(0)
+    void window.restorm?.odata.listen(requestId)
+      .then((res) => {
+        if (res.error) {
+          toasterService.push('app', { title: t('odata.server.listenFailed', 'OData mock server failed to start'), body: res.error, durationMs: 10000 })
+          logger.error('OData mock server failed to listen', { error: res.error })
+        }
+      })
+      .catch((err: unknown) => { logger.error('OData mock server listen error', { error: String(err) }) })
+  }, [request.id, isListening, t])
+
+  const handleStop = useCallback((): void => {
+    void window.restorm?.odata.stop(request.id)
+  }, [request.id])
+
+  // Track listening state + served count for the hosted mock service.
+  useEffect(() => {
+    if (!isServer) return undefined
+    const requestId = request.id
+    let cancelled = false
+    void window.restorm?.odata.isListening(requestId).then((listening) => {
+      if (!cancelled) setIsListening(listening)
+    })
+    const unsubProgress = window.restorm?.odata.onProgress(({ requestId: rid, status }) => {
+      if (rid !== requestId) return
+      if (status === 'started') { setIsListening(true); setServedCount(0) }
+      if (status === 'completed' || status === 'cancelled' || status === 'error') setIsListening(false)
+    })
+    const unsubServed = window.restorm?.odata.onServerServed(({ requestId: rid, count }) => {
+      if (rid !== requestId) return
+      setServedCount(count)
+    })
+    return () => { cancelled = true; unsubProgress?.(); unsubServed?.() }
+  }, [isServer, request.id])
+
+  const serverUrlSection = (
+    <div data-testid="odata-request-url-section-host">
+      <div style={urlRowStyle} data-testid="odata-server-url-section">
+        <span style={labelStyle}>localhost:</span>
+        <div style={serverPortWrapperStyle}>
+          <InputBox
+            value={serverPort}
+            onChange={setServerPort}
+            options={{ placeholder: '8081' }}
+            data-testid="odata-server-port"
+          />
+        </div>
+        <span style={labelStyle}>/</span>
+        <div style={urlInputWrapperStyle}>
+          <InputBox
+            value={serverRoot}
+            onChange={setServerRoot}
+            options={{ placeholder: 'odata' }}
+            data-testid="odata-server-root"
+          />
+        </div>
+        <div style={sendButtonWrapperStyle}>
+          <BeamWrap active={isListening} size={22} borderWidth={1.5}>
+            <Button
+              icon={isListening ? 'debug-disconnect' : 'plug'}
+              onClick={isListening ? handleStop : handleListen}
+              {...(isListening ? {} : { emphasis: 1 })}
+              options={{
+                title: isListening ? t('odata.server.stopListening', 'Stop listening') : t('odata.server.startListening', 'Start listening'),
+                ariaLabel: isListening ? t('odata.server.stopListening', 'Stop listening') : t('odata.server.startListening', 'Start listening')
+              }}
+              data-testid="odata-server-listen"
+            />
+          </BeamWrap>
+        </div>
+      </div>
+    </div>
+  )
+
+  const serverRequestContent = (
+    <SplitView
+      orientation="vertical"
+      style={{ width: '100%', height: '100%' }}
+      data-testid="odata-server-split-view"
+      onCollapsedChange={handleServerPanelCollapsedChange}
+    >
+      <Pane
+        title={t('odata.server.metadataLabel', '$metadata (CSDL)')}
+        initialSize={0.5}
+        collapsed={serverPanelCollapsed.metadata}
+        minSize={120}
+        data-testid="odata-server-metadata-pane"
+      >
+        <CodeEditor
+          value={(request).mockMetadata ?? ''}
+          language="xml"
+          onChange={setMockMetadata}
+          height="100%"
+          options={{ minimap: { enabled: false }, wordWrap: 'on', automaticLayout: true }}
+          data-testid="odata-server-metadata"
+        />
+      </Pane>
+      <Pane
+        title={t('odata.server.dataLabel', 'Served entity data (by entity set)')}
+        initialSize={0.5}
+        collapsed={serverPanelCollapsed.data}
+        minSize={120}
+        data-testid="odata-server-data-pane"
+      >
+        <CodeEditor
+          value={mockDataText}
+          language="json"
+          onChange={setMockData}
+          height="100%"
+          options={{ minimap: { enabled: false }, wordWrap: 'on', automaticLayout: true }}
+          data-testid="odata-server-data"
+        />
+      </Pane>
+    </SplitView>
+  )
+
+  const serverResponseContent = (
+    <div
+      data-testid="odata-server-served-banner"
+      style={{ display: 'flex', alignItems: 'center', gap: 8, padding: 12, color: 'var(--descriptionForeground)' }}
+    >
+      <span className={`codicon codicon-${isListening ? 'broadcast' : 'circle-slash'}`} aria-hidden="true" />
+      <span>
+        {isListening
+          ? t('odata.server.served', { count: servedCount, defaultValue: 'Listening — {{count}} request(s) served' })
+          : t('odata.server.notListening', 'Not listening')}
+      </span>
+    </div>
+  )
 
   const urlSection = (
     <div ref={urlSectionHostRef} data-testid="odata-request-url-section-host">
@@ -1982,8 +2128,8 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
     <>
       <BaseRequestTabView
         requestId={request.id}
-        urlSection={urlSection}
-        requestContent={requestContent}
+        urlSection={isServer ? serverUrlSection : urlSection}
+        requestContent={isServer ? serverRequestContent : requestContent}
         codeSnippetsContent={t(
           'odataRequestTab.codeSnippetsPlaceholder',
           '// Code snippet generation will ship alongside OData execution.'
@@ -1991,10 +2137,10 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
         notes={request.notes}
         onNotesChange={(notes: string) => { updateReactiveProperty(request, 'notes', notes) }}
         isLoading={isSending}
-        showResponse={response !== null}
-        {...(responseContent !== undefined ? { responseContent } : {})}
-        {...(infosContent !== undefined ? { infosContent } : {})}
-        {...(jsonData !== undefined ? { jsonData } : {})}
+        showResponse={isServer ? isListening : response !== null}
+        {...(isServer ? { responseContent: serverResponseContent } : responseContent !== undefined ? { responseContent } : {})}
+        {...(isServer ? {} : infosContent !== undefined ? { infosContent } : {})}
+        {...(isServer ? {} : jsonData !== undefined ? { jsonData } : {})}
       />
       <ResponseHistoryModal
         isOpen={historyModalOpen}

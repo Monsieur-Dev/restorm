@@ -148,6 +148,13 @@ interface WsRoute {
 interface HttpRoute {
   requestId: string
   handler: (req: IncomingMessage, res: ServerResponse) => void
+  /** When true, this route claims the WHOLE sub-tree under its path: the
+   * dispatcher matches it for any inbound path that equals OR begins with the
+   * route's path (after every EXACT route has been tried first). A protocol
+   * whose URLs are dynamic — e.g. OData's `/odata/Pets(1)`, `/odata/$metadata`,
+   * `/odata/$batch` under one service root — registers a single `matchPrefix`
+   * route and dispatches internally, instead of pre-registering every key. */
+  matchPrefix?: boolean
 }
 
 /** ONE shared http server bound to a port, that EVERY server-mode protocol
@@ -514,6 +521,10 @@ class WebSocketExecutionService {
      * `http:*` progress channel, so the stop signal is delegated here rather than
      * broadcast on this service's `websocket:*` channel. */
     onStopped: (error?: string) => void
+    /** Claim the whole sub-tree under `path` (prefix match) rather than the exact
+     * path only — see {@link HttpRoute.matchPrefix}. The route still collides on
+     * its own `<METHOD> <path>` key (one prefix owner per service root). */
+    matchPrefix?: boolean
   }): Promise<{ success: boolean; listening: boolean; error?: string }> {
     const { requestId, port, path } = input
     const method = input.method.toUpperCase()
@@ -562,7 +573,7 @@ class WebSocketExecutionService {
           return
         }
         this.ensureHttpDispatcher(host)
-        host.httpRoutes.set(routeKey, { requestId, handler: input.onRequest })
+        host.httpRoutes.set(routeKey, { requestId, handler: input.onRequest, matchPrefix: input.matchPrefix })
         const connection: ActiveConnection = { requestId, kind: 'http-server', port, namespace: routeKey, startTime, messages: [], serverSettle }
         this.activeConnections.set(requestId, connection)
         logger.info('[WebSocketExecutionService] HTTP mock route listening', { requestId, port, route: routeKey })
@@ -968,7 +979,9 @@ class WebSocketExecutionService {
     host.httpServer.on('request', (req: IncomingMessage, res: ServerResponse) => {
       const method = (req.method ?? 'GET').toUpperCase()
       const path = this.parsePathname(req.url ?? '/')
-      const route = host.httpRoutes.get(`${method} ${path}`)
+      // Exact match wins; a `matchPrefix` route only catches what no exact route
+      // claimed, so existing exact-path mocks (HTTP/SOAP/GraphQL) never regress.
+      const route = host.httpRoutes.get(`${method} ${path}`) ?? this.matchPrefixRoute(host, method, path)
       if (route) {
         try {
           route.handler(req, res)
@@ -982,6 +995,31 @@ class WebSocketExecutionService {
       res.writeHead(404, { 'Content-Type': 'text/plain' })
       res.end(`No mock route for ${method} ${path}`)
     })
+  }
+
+  /** Fallback for the dispatcher: among the `matchPrefix` routes whose method
+   * matches, pick the one whose path is a prefix of the inbound path (the LONGEST
+   * such prefix wins, so nested service roots are unambiguous). Only consulted
+   * AFTER an exact-match miss, so it never shadows a registered exact route. */
+  private matchPrefixRoute(host: PortHost, method: string, path: string): HttpRoute | undefined {
+    let best: HttpRoute | undefined
+    let bestLen = -1
+    for (const [key, route] of host.httpRoutes) {
+      if (!route.matchPrefix) continue
+      const sep = key.indexOf(' ')
+      const routeMethod = key.slice(0, sep)
+      // A `*`-method prefix route matches every method (e.g. OData hosts GET reads
+      // + a POST `$batch` under one service-root route).
+      if (routeMethod !== '*' && routeMethod !== method) continue
+      const routePath = key.slice(sep + 1)
+      // Match the root itself or anything strictly UNDER it — `/odata` claims
+      // `/odata` and `/odata/Pets`, but NOT a sibling like `/odatax`.
+      if ((path === routePath || path.startsWith(`${routePath}/`)) && routePath.length > bestLen) {
+        best = route
+        bestLen = routePath.length
+      }
+    }
+    return best
   }
 
   /** Total live routes on a port across every protocol (drives port teardown). */

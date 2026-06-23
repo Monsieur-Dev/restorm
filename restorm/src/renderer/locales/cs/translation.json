@@ -264,7 +264,8 @@
         "mqttServer": "MQTT broker",
         "grpcServer": "Mock server gRPC",
         "soapServer": "Server SOAP mock",
-        "graphqlServer": "Server GraphQL mock"
+        "graphqlServer": "Server GraphQL mock",
+        "odataServer": "Fiktivní server OData"
       }
     },
     "deleteConfirm": {
@@ -1058,7 +1059,9 @@
       "soapListen": "Server SOAP",
       "soapClose": "Zavřít SOAP",
       "graphqlListen": "GraphQL server",
-      "graphqlClose": "GraphQL close"
+      "graphqlClose": "GraphQL close",
+      "odataListen": "OData server",
+      "odataClose": "OData close"
     },
     "comparator": {
       "result": "výsledek"
@@ -1626,7 +1629,9 @@
       "soapListen": "Hostuje místní server SOAP mock a naslouchá neomezeně. Každý příchozí požadavek je směrován na nakonfigurovanou operaci (podle jeho SOAPAction nebo názvu operace v těle) a je zodpovězen předdefinovanou obálkou SOAP (chybová operace vrací `<soap:Fault>`). `connected` se spustí, jakmile server naslouchá; každý obsloužený požadavek znovu vyšle svá data na portu `served`. Server zůstává aktivní až do zavření SOAP (nebo zastavení), poté se spustí `done`.",
       "soapClose": "Zastaví již naslouchající server SOAP mock (deklarovaný uzlem serveru SOAP) a uvolní jeho port.",
       "graphqlListen": "Hosts a local GraphQL mock server and listens indefinitely. `connected` fires once it is listening; each served operation re-emits its data on the `served` port. The server stays up until a GraphQL close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
-      "graphqlClose": "Stops an already-listening GraphQL mock server (declared by a GraphQL server node), freeing its port."
+      "graphqlClose": "Stops an already-listening GraphQL mock server (declared by a GraphQL server node), freeing its port.",
+      "odataListen": "Hostuje místní fiktivní službu OData v4 a naslouchá neomezeně. Port `connected` se aktivuje, jakmile služba naslouchá; každý obsloužený požadavek znovu vyšle svá data na portu `served`. Server běží až do uzavření OData (nebo do zastavení), poté se aktivuje port `done`. Žádný výstup response — pouze obsluhuje, sám nevolá ven.",
+      "odataClose": "Zastaví již naslouchající fiktivní službu OData (deklarovanou uzlem serveru OData) a uvolní její port."
     },
     "legend": {
       "title": "Legenda",
@@ -1839,7 +1844,64 @@
     "getDelta": "Načíst delta",
     "deltaHint": "@odata.deltaLink je k dispozici — kliknutím nahradíte tuto odpověď nejnovější sadou změn.",
     "deltaChanged": "{{count}} změněno",
-    "deltaRemoved": "{{count}} odstraněno"
+    "deltaRemoved": "{{count}} odstraněno",
+    "actionBody": "Tělo akce (JSON)",
+    "actionParameters": "Parametry akce (z metadat)",
+    "applyPlaceholder": "groupby((Status),aggregate($count as Total))",
+    "batchAdd": "Přidat dílčí požadavek",
+    "batchAtomicityPlaceholder": "sada změn (volitelné)",
+    "batchBody": "Dílčí požadavky dávky",
+    "batchBodyLabel": "Tělo (JSON)",
+    "batchEmpty": "Zatím žádné dílčí požadavky. Přidejte jeden níže.",
+    "batchMoveDown": "Posunout dolů",
+    "batchMoveUp": "Posunout nahoru",
+    "batchRemove": "Odebrat dílčí požadavek",
+    "batchUrlPlaceholder": "Pets(1) — relativně ke kořeni služby",
+    "expandAdd": "Přidat rozšíření",
+    "expandCollapseOptions": "Skrýt možnosti",
+    "expandEmpty": "Zatím žádná rozšíření. Přidejte jedno níže.",
+    "expandMoveDown": "Posunout dolů",
+    "expandMoveUp": "Posunout nahoru",
+    "expandNested": "Vnořené $expand",
+    "expandOrderbyPlaceholder": "Name asc",
+    "expandPropertyPlaceholder": "Navigační vlastnost (např. Tags)",
+    "expandRemove": "Odebrat",
+    "expandSelectPlaceholder": "Id, Name (oddělené čárkami)",
+    "expandShowOptions": "Zobrazit možnosti",
+    "expandSkipPlaceholder": "0",
+    "expandTopPlaceholder": "5",
+    "filterPlaceholder": "Name eq 'Alice' and Age gt 21",
+    "formatPlaceholder": "json",
+    "functionParameters": "Parametry funkce (z metadat)",
+    "navigationPropertiesHint": "Navigační vlastnosti:",
+    "orderbyAdd": "Přidat řazení",
+    "orderbyEmpty": "Zatím žádné řazení. Přidejte vlastnost níže.",
+    "orderbyMoveDown": "Posunout dolů",
+    "orderbyMoveUp": "Posunout nahoru",
+    "orderbyPropertyPlaceholder": "Name",
+    "orderbyRemove": "Odebrat",
+    "paginatedHint": "@odata.nextLink k dispozici — klikněte pro připojení další stránky k této odpovědi.",
+    "paramsApply": "Použít parametry",
+    "paramsApplyToBody": "Použít na tělo",
+    "paramsApplyToUrl": "Použít na URL",
+    "paramsNone": "Nejsou očekávány žádné parametry.",
+    "propertiesHint": "Vlastnosti:",
+    "propertyPickerPlaceholder": "Vyberte vlastnost…",
+    "responseEmpty": "Žádné tělo odpovědi",
+    "searchPlaceholder": "puppy",
+    "selectPlaceholder": "Id, Name, Email (oddělené čárkami)",
+    "skipPlaceholder": "0",
+    "topPlaceholder": "50",
+    "urlPlaceholder": "https://service/odata/EntitySet",
+    "urlPreview": "Náhled URL (před vyhodnocením)",
+    "versionV2NotYet": "v2 (spouštění zatím není podporováno)",
+    "versionV3NotYet": "v3 (spouštění zatím není podporováno)",
+    "operationKindEntitySet": "Sada entit (GET)",
+    "operationKindFunction": "Funkce (GET s vloženými parametry)",
+    "operationKindAction": "Akce (POST s tělem JSON)",
+    "operationKindBatch": "Dávka ($batch — multipart/mixed)",
+    "version": "Verze OData",
+    "operationKind": "Druh operace"
   },
   "typedValue": {
     "list": {
@@ -1853,6 +1915,17 @@
       "notListening": "Neposlouchá",
       "served": "Naslouchá — obslouženo {{count}} požadavků",
       "listenFailed": "Nepodařilo se spustit mock server"
+    }
+  },
+  "odata": {
+    "server": {
+      "startListening": "Začít naslouchat",
+      "stopListening": "Zastavit naslouchání",
+      "notListening": "Neposlouchá",
+      "served": "Naslouchá — obslouženo {{count}} požadavků",
+      "listenFailed": "Nepodařilo se spustit fiktivní server OData",
+      "metadataLabel": "$metadata (CSDL)",
+      "dataLabel": "Obsloužená data entit (podle sady entit)"
     }
   }
 }

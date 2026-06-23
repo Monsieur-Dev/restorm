@@ -262,7 +262,8 @@
         "mqttServer": "MQTT aracısı",
         "grpcServer": "gRPC mock sunucusu",
         "soapServer": "SOAP sahte sunucusu",
-        "graphqlServer": "GraphQL mock sunucusu"
+        "graphqlServer": "GraphQL mock sunucusu",
+        "odataServer": "OData mock sunucusu"
       }
     },
     "deleteConfirm": {
@@ -1056,7 +1057,9 @@
       "soapListen": "SOAP sunucusu",
       "soapClose": "SOAP'ı kapat",
       "graphqlListen": "GraphQL server",
-      "graphqlClose": "GraphQL close"
+      "graphqlClose": "GraphQL close",
+      "odataListen": "OData server",
+      "odataClose": "OData close"
     },
     "comparator": {
       "result": "sonuç"
@@ -1624,7 +1627,9 @@
       "soapListen": "Yerel bir SOAP sahte sunucusu barındırır ve süresiz olarak dinler. Gelen her istek, yapılandırılmış bir işleme yönlendirilir (SOAPAction'ına veya gövdedeki işlem adına göre) ve önceden tanımlanmış SOAP zarfıyla yanıtlanır (bir hata işlemi `<soap:Fault>` döndürür). Sunucu dinlemeye başlar başlamaz `connected` tetiklenir; hizmet verilen her istek, verilerini `served` bağlantı noktasında yeniden yayınlar. Sunucu, bir SOAP kapatmasına (veya bir durdurmaya) kadar etkin kalır, ardından `done` tetiklenir.",
       "soapClose": "Zaten dinlemekte olan bir SOAP sahte sunucusunu (bir SOAP sunucu düğümü tarafından bildirilen) durdurur ve bağlantı noktasını serbest bırakır.",
       "graphqlListen": "Hosts a local GraphQL mock server and listens indefinitely. `connected` fires once it is listening; each served operation re-emits its data on the `served` port. The server stays up until a GraphQL close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
-      "graphqlClose": "Stops an already-listening GraphQL mock server (declared by a GraphQL server node), freeing its port."
+      "graphqlClose": "Stops an already-listening GraphQL mock server (declared by a GraphQL server node), freeing its port.",
+      "odataListen": "Yerel bir OData v4 sahte hizmetini barındırır ve süresiz olarak dinler. Dinlemeye başlar başlamaz `connected` tetiklenir; sunulan her istek verisini `served` bağlantı noktasında yeniden yayar. Sunucu bir OData kapatmaya (veya bir Stop'a) kadar açık kalır, ardından `done` tetiklenir. response çıktısı yoktur — hizmet verir, dışarıyı çağırmaz.",
+      "odataClose": "Halihazırda dinlemekte olan bir OData sahte hizmetini (bir OData sunucu düğümü tarafından bildirilen) durdurur ve bağlantı noktasını serbest bırakır."
     },
     "legend": {
       "title": "Gösterge",
@@ -1837,7 +1842,64 @@
     "getDelta": "Deltayı al",
     "deltaHint": "@odata.deltaLink mevcut — bu yanıtı en son değişiklik kümesiyle değiştirmek için tıklayın.",
     "deltaChanged": "{{count}} değiştirildi",
-    "deltaRemoved": "{{count}} kaldırıldı"
+    "deltaRemoved": "{{count}} kaldırıldı",
+    "actionBody": "Eylem gövdesi (JSON)",
+    "actionParameters": "Eylem parametreleri (meta verilerden)",
+    "applyPlaceholder": "groupby((Status),aggregate($count as Total))",
+    "batchAdd": "Alt istek ekle",
+    "batchAtomicityPlaceholder": "değişiklik kümesi (isteğe bağlı)",
+    "batchBody": "Toplu iş alt istekleri",
+    "batchBodyLabel": "Gövde (JSON)",
+    "batchEmpty": "Henüz alt istek yok. Aşağıya bir tane ekleyin.",
+    "batchMoveDown": "Aşağı taşı",
+    "batchMoveUp": "Yukarı taşı",
+    "batchRemove": "Alt isteği kaldır",
+    "batchUrlPlaceholder": "Pets(1) — hizmet köküne göre",
+    "expandAdd": "Genişletme ekle",
+    "expandCollapseOptions": "Seçenekleri gizle",
+    "expandEmpty": "Henüz genişletme yok. Aşağıya bir tane ekleyin.",
+    "expandMoveDown": "Aşağı taşı",
+    "expandMoveUp": "Yukarı taşı",
+    "expandNested": "İç içe $expand",
+    "expandOrderbyPlaceholder": "Name asc",
+    "expandPropertyPlaceholder": "Gezinme özelliği (örn. Tags)",
+    "expandRemove": "Kaldır",
+    "expandSelectPlaceholder": "Id, Name (virgülle ayrılmış)",
+    "expandShowOptions": "Seçenekleri göster",
+    "expandSkipPlaceholder": "0",
+    "expandTopPlaceholder": "5",
+    "filterPlaceholder": "Name eq 'Alice' and Age gt 21",
+    "formatPlaceholder": "json",
+    "functionParameters": "İşlev parametreleri (meta verilerden)",
+    "navigationPropertiesHint": "Gezinme özellikleri:",
+    "orderbyAdd": "Sıralama ekle",
+    "orderbyEmpty": "Henüz sıralama yok. Aşağıya bir özellik ekleyin.",
+    "orderbyMoveDown": "Aşağı taşı",
+    "orderbyMoveUp": "Yukarı taşı",
+    "orderbyPropertyPlaceholder": "Name",
+    "orderbyRemove": "Kaldır",
+    "paginatedHint": "@odata.nextLink kullanılabilir — sonraki sayfayı bu yanıta eklemek için tıklayın.",
+    "paramsApply": "Parametreleri uygula",
+    "paramsApplyToBody": "Gövdeye uygula",
+    "paramsApplyToUrl": "URL'ye uygula",
+    "paramsNone": "Parametre beklenmiyor.",
+    "propertiesHint": "Özellikler:",
+    "propertyPickerPlaceholder": "Bir özellik seçin…",
+    "responseEmpty": "Yanıt gövdesi yok",
+    "searchPlaceholder": "puppy",
+    "selectPlaceholder": "Id, Name, Email (virgülle ayrılmış)",
+    "skipPlaceholder": "0",
+    "topPlaceholder": "50",
+    "urlPlaceholder": "https://service/odata/EntitySet",
+    "urlPreview": "URL önizlemesi (çözümlemeden önce)",
+    "versionV2NotYet": "v2 (yürütme henüz desteklenmiyor)",
+    "versionV3NotYet": "v3 (yürütme henüz desteklenmiyor)",
+    "operationKindEntitySet": "Varlık kümesi (GET)",
+    "operationKindFunction": "İşlev (satır içi parametreli GET)",
+    "operationKindAction": "Eylem (JSON gövdeli POST)",
+    "operationKindBatch": "Toplu iş ($batch — multipart/mixed)",
+    "version": "OData sürümü",
+    "operationKind": "İşlem türü"
   },
   "typedValue": {
     "list": {
@@ -1851,6 +1913,17 @@
       "notListening": "Dinlemiyor",
       "served": "Dinliyor — {{count}} istek karşılandı",
       "listenFailed": "Mock sunucusu başlatılamadı"
+    }
+  },
+  "odata": {
+    "server": {
+      "startListening": "Dinlemeyi başlat",
+      "stopListening": "Dinlemeyi durdur",
+      "notListening": "Dinlemiyor",
+      "served": "Dinliyor — {{count}} istek karşılandı",
+      "listenFailed": "OData mock sunucusu başlatılamadı",
+      "metadataLabel": "$metadata (CSDL)",
+      "dataLabel": "Sunulan varlık verileri (varlık kümesine göre)"
     }
   }
 }

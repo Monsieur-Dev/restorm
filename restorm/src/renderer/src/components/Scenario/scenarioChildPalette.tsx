@@ -75,7 +75,10 @@ export const SCENARIO_ADD_REQUEST_GROUPS: ScenarioAddEntry[][] = [
     // SOAP mock server is server-only (like the HTTP mock server): dropping it
     // creates a server: true SOAP request + a bound soapListen node.
     { kind: 'soap-server', badge: 'SOAP', mode: 'server', labelKey: 'sidebar.contextMenu.add.soapServer', defaultLabel: 'SOAP server' },
-    { kind: 'odata', badge: 'ODATA', labelKey: 'sidebar.contextMenu.add.odata', defaultLabel: 'OData request' }
+    { kind: 'odata', badge: 'ODATA', labelKey: 'sidebar.contextMenu.add.odata', defaultLabel: 'OData request' },
+    // OData mock server is server-only: dropping it creates a server: true OData
+    // request + a bound odataListen node.
+    { kind: 'odata-server', badge: 'ODATA', mode: 'server', labelKey: 'sidebar.contextMenu.add.odataServer', defaultLabel: 'OData server' }
   ],
   [
     { kind: 'auth', badge: 'AUTH', labelKey: 'sidebar.contextMenu.add.auth', defaultLabel: 'Authentication HTTP request' }
