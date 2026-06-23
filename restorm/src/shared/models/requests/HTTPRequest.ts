@@ -11,6 +11,7 @@ import {
 import { BaseRequest } from './BaseRequest'
 import { KeyValue } from '../KeyValue'
 import type { HTTPMethod, RequestType, HTTPBodyType, RuntimeId, Icon } from '../types'
+import type { QuickConfig } from '../../types/requests/QuickConfig'
 
 /** HTTP request body content */
 export interface HTTPRequestBody {
@@ -84,6 +85,11 @@ export class HTTPRequest extends BaseRequest {
   @graphqlField({ type: 'Boolean', nullable: true })
   followRedirects?: boolean
 
+  /** User-saved quick-config snapshots for this request.
+   * Stored directly in the .restorm project file (project target).
+   * The user-settings target is stored separately via window.api.storage. */
+  quickConfigs?: QuickConfig[]
+
   constructor(init?: Partial<HTTPRequest>) {
     super(init)
     if (init) {
@@ -124,6 +130,7 @@ export class HTTPRequest extends BaseRequest {
     mockStatus?: number
     timeout?: number
     followRedirects?: boolean
+    quickConfigs?: QuickConfig[]
   }): HTTPRequest {
     return new HTTPRequest({
       ...(obj.id !== undefined && { id: obj.id }),
@@ -143,7 +150,8 @@ export class HTTPRequest extends BaseRequest {
       ...(obj.server !== undefined && { server: obj.server }),
       ...(obj.mockStatus !== undefined && { mockStatus: obj.mockStatus }),
       ...(obj.timeout !== undefined && { timeout: obj.timeout }),
-      ...(obj.followRedirects !== undefined && { followRedirects: obj.followRedirects })
+      ...(obj.followRedirects !== undefined && { followRedirects: obj.followRedirects }),
+      ...(obj.quickConfigs !== undefined && { quickConfigs: obj.quickConfigs })
     })
   }
 
@@ -170,7 +178,8 @@ export class HTTPRequest extends BaseRequest {
       ...(this.server !== undefined && { server: this.server }),
       ...(this.mockStatus !== undefined && { mockStatus: this.mockStatus }),
       ...(this.timeout !== undefined && { timeout: this.timeout }),
-      ...(this.followRedirects !== undefined && { followRedirects: this.followRedirects })
+      ...(this.followRedirects !== undefined && { followRedirects: this.followRedirects }),
+      ...(this.quickConfigs !== undefined && this.quickConfigs.length > 0 && { quickConfigs: this.quickConfigs })
     }
   }
 }

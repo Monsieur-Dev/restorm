@@ -1925,5 +1925,33 @@
       "metadataLabel": "$metadata (CSDL)",
       "dataLabel": "Served entity data (by entity set)"
     }
+  },
+  "quickSettings": {
+    "button": {
+      "tooltip": "Quick settings"
+    },
+    "namePlaceholder": "Configuration name",
+    "saveButton": "Save",
+    "storageTarget": {
+      "label": "Save to project file (.restorm)"
+    },
+    "badge": {
+      "project": "project",
+      "settings": "user"
+    },
+    "listLabel": "Saved configurations",
+    "emptyList": "No saved configurations yet.",
+    "loadConfirm": {
+      "title": "Load configuration",
+      "message": "Do you want to load the configuration \"{{name}}\"? Your current unsaved configuration will be lost."
+    },
+    "deleteConfirm": {
+      "title": "Delete configuration",
+      "message": "Do you want to delete the configuration \"{{name}}\"?"
+    },
+    "confirm": {
+      "ok": "OK",
+      "cancel": "Cancel"
+    }
   }
 }

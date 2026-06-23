@@ -1926,5 +1926,33 @@
       "metadataLabel": "$metadata (CSDL)",
       "dataLabel": "Posluženi podaci entiteta (po skupu entiteta)"
     }
+  },
+  "quickSettings": {
+    "button": {
+      "tooltip": "Brze postavke"
+    },
+    "namePlaceholder": "Naziv konfiguracije",
+    "saveButton": "Spremi",
+    "storageTarget": {
+      "label": "Spremi u datoteku projekta (.restorm)"
+    },
+    "badge": {
+      "project": "projekt",
+      "settings": "korisnik"
+    },
+    "listLabel": "Spremljene konfiguracije",
+    "emptyList": "Nema još spremljenih konfiguracija.",
+    "loadConfirm": {
+      "title": "Učitaj konfiguraciju",
+      "message": "Želite li učitati konfiguraciju \"{{name}}\"? Vaša trenutna nespremljena konfiguracija bit će izgubljena."
+    },
+    "deleteConfirm": {
+      "title": "Izbriši konfiguraciju",
+      "message": "Želite li izbrisati konfiguraciju \"{{name}}\"?"
+    },
+    "confirm": {
+      "ok": "OK",
+      "cancel": "Odustani"
+    }
   }
 }

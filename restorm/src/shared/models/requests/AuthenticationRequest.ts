@@ -14,6 +14,7 @@ import { BaseRequest } from './BaseRequest'
 import { KeyValue } from '../KeyValue'
 import type { HTTPRequestBody } from './HTTPRequest'
 import type { HTTPMethod, RuntimeId, Icon } from '../types'
+import type { QuickConfig } from '../../types/requests/QuickConfig'
 
 const DEFAULT_AUTH_ERROR_CODES = [401, 403]
 
@@ -61,6 +62,9 @@ export class AuthenticationRequest extends BaseRequest {
   @graphqlField({ type: 'Boolean', nullable: true })
   deprecated = false
 
+  /** User-saved quick-config snapshots for this request. */
+  quickConfigs?: QuickConfig[]
+
   constructor(init?: Partial<AuthenticationRequest>) {
     super(init)
     if (init) {
@@ -99,6 +103,7 @@ export class AuthenticationRequest extends BaseRequest {
     expirationExpression?: string
     authErrorCodes?: number[]
     deprecated?: boolean
+    quickConfigs?: QuickConfig[]
   }): AuthenticationRequest {
     return new AuthenticationRequest({
       ...(obj.id !== undefined && { id: obj.id }),
@@ -117,7 +122,8 @@ export class AuthenticationRequest extends BaseRequest {
       producedHeaders: (obj.producedHeaders ?? []) as KeyValue[],
       ...(obj.expirationExpression !== undefined && { expirationExpression: obj.expirationExpression }),
       authErrorCodes: obj.authErrorCodes ?? [...DEFAULT_AUTH_ERROR_CODES],
-      deprecated: obj.deprecated ?? false
+      deprecated: obj.deprecated ?? false,
+      ...(obj.quickConfigs !== undefined && { quickConfigs: obj.quickConfigs })
     })
   }
 
@@ -140,7 +146,8 @@ export class AuthenticationRequest extends BaseRequest {
       producedHeaders: this.producedHeaders.map((h) => h.toPlainObject()),
       ...(this.expirationExpression !== undefined && { expirationExpression: this.expirationExpression }),
       authErrorCodes: this.authErrorCodes,
-      deprecated: this.deprecated
+      deprecated: this.deprecated,
+      ...(this.quickConfigs !== undefined && this.quickConfigs.length > 0 && { quickConfigs: this.quickConfigs })
     }
   }
 }

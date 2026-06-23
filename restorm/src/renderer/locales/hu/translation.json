@@ -1925,5 +1925,33 @@
       "metadataLabel": "$metadata (CSDL)",
       "dataLabel": "Kiszolgált entitásadatok (entitáskészletenként)"
     }
+  },
+  "quickSettings": {
+    "button": {
+      "tooltip": "Gyorsbeállítások"
+    },
+    "namePlaceholder": "Konfiguráció neve",
+    "saveButton": "Mentés",
+    "storageTarget": {
+      "label": "Mentés a projektfájlba (.restorm)"
+    },
+    "badge": {
+      "project": "projekt",
+      "settings": "felhasználó"
+    },
+    "listLabel": "Mentett konfigurációk",
+    "emptyList": "Még nincsenek mentett konfigurációk.",
+    "loadConfirm": {
+      "title": "Konfiguráció betöltése",
+      "message": "Szeretné betölteni a(z) \"{{name}}\" konfigurációt? Az aktuális mentetlen konfigurációja elvész."
+    },
+    "deleteConfirm": {
+      "title": "Konfiguráció törlése",
+      "message": "Szeretné törölni a(z) \"{{name}}\" konfigurációt?"
+    },
+    "confirm": {
+      "ok": "OK",
+      "cancel": "Mégse"
+    }
   }
 }

@@ -17,6 +17,7 @@ import type { RequestType, RuntimeId, Icon } from '../types'
 // camelCase `GRPC_CALL_TYPES` in `../types` exists only for the GraphQL enum.
 import type { GrpcCallType } from '../../types/requestPrimitives'
 import type { GrpcMockMethod } from '../../types/requests/GrpcRequest'
+import type { QuickConfig } from '../../types/requests/QuickConfig'
 
 /** Normalise a (plain or class) trailers list to `KeyValue` instances. */
 function toKeyValues(rows: unknown): KeyValue[] {
@@ -131,6 +132,9 @@ export class GrpcRequest extends BaseRequest {
   @TreatEmptyAsUndefined()
   tlsKeyPem?: string
 
+  /** User-saved quick-config snapshots for this request. */
+  quickConfigs?: QuickConfig[]
+
   constructor(init?: Partial<GrpcRequest>) {
     super(init)
     if (init) {
@@ -171,6 +175,7 @@ export class GrpcRequest extends BaseRequest {
     tls?: boolean
     tlsCertPem?: string
     tlsKeyPem?: string
+    quickConfigs?: QuickConfig[]
   }): GrpcRequest {
     return new GrpcRequest({
       ...(obj.id !== undefined && { id: obj.id }),
@@ -193,7 +198,8 @@ export class GrpcRequest extends BaseRequest {
       ...(obj.reflection !== undefined && { reflection: obj.reflection }),
       ...(obj.tls !== undefined && { tls: obj.tls }),
       ...(obj.tlsCertPem !== undefined && { tlsCertPem: obj.tlsCertPem }),
-      ...(obj.tlsKeyPem !== undefined && { tlsKeyPem: obj.tlsKeyPem })
+      ...(obj.tlsKeyPem !== undefined && { tlsKeyPem: obj.tlsKeyPem }),
+      ...(obj.quickConfigs !== undefined && { quickConfigs: obj.quickConfigs })
     })
   }
 
@@ -223,7 +229,8 @@ export class GrpcRequest extends BaseRequest {
       ...(this.reflection !== undefined && { reflection: this.reflection }),
       ...(this.tls !== undefined && { tls: this.tls }),
       ...(this.tlsCertPem !== undefined && { tlsCertPem: this.tlsCertPem }),
-      ...(this.tlsKeyPem !== undefined && { tlsKeyPem: this.tlsKeyPem })
+      ...(this.tlsKeyPem !== undefined && { tlsKeyPem: this.tlsKeyPem }),
+      ...(this.quickConfigs !== undefined && this.quickConfigs.length > 0 && { quickConfigs: this.quickConfigs })
     }
   }
 }

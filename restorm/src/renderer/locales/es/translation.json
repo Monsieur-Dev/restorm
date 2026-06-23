@@ -1925,5 +1925,33 @@
       "metadataLabel": "$metadata (CSDL)",
       "dataLabel": "Datos de entidades atendidos (por conjunto de entidades)"
     }
+  },
+  "quickSettings": {
+    "button": {
+      "tooltip": "Configuración rápida"
+    },
+    "namePlaceholder": "Nombre de la configuración",
+    "saveButton": "Guardar",
+    "storageTarget": {
+      "label": "Guardar en el archivo del proyecto (.restorm)"
+    },
+    "badge": {
+      "project": "proyecto",
+      "settings": "usuario"
+    },
+    "listLabel": "Configuraciones guardadas",
+    "emptyList": "No hay configuraciones guardadas aún.",
+    "loadConfirm": {
+      "title": "Cargar configuración",
+      "message": "¿Desea cargar la configuración \"{{name}}\"? Su configuración actual no guardada se perderá."
+    },
+    "deleteConfirm": {
+      "title": "Eliminar configuración",
+      "message": "¿Desea eliminar la configuración \"{{name}}\"?"
+    },
+    "confirm": {
+      "ok": "OK",
+      "cancel": "Cancelar"
+    }
   }
 }

@@ -26,6 +26,7 @@
 
 import React, { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import { useRequestReset } from '../../hooks/useRequestReset'
+import { useTransportReplaced } from '../../hooks/useTransportReplaced'
 import { useHandlebarsHelpers } from '../../hooks/useHandlebarsHelpers'
 import { useTranslation } from 'react-i18next'
 import {
@@ -695,6 +696,37 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
     pushFullRequestDataToContextService
   ])
 
+  // Keep a ref to push so the transport-replaced callback can always call
+  // the latest version (stable closure for useTransportReplaced).
+  const pushFullRequestDataRef = useRef(pushFullRequestDataToContextService)
+  useEffect(() => { pushFullRequestDataRef.current = pushFullRequestDataToContextService }, [pushFullRequestDataToContextService])
+  const requestRef = useRef(request)
+  useEffect(() => { requestRef.current = request }, [request])
+
+  // Bumped on a quick-config load (or MCP update_request) so the URL
+  // VariableInputBox (which seeds Monaco from its `value` prop at mount and
+  // reads `request.url` directly, with no local state to re-sync) remounts and
+  // re-reads the restored URL.
+  const [transportEpoch, setTransportEpoch] = useState(0)
+
+  // Re-sync local query-option state and push to ContextService when a
+  // quick-config load (or MCP update_request) replaces the transport.
+  const handleTransportReplaced = useCallback(() => {
+    const current = requestRef.current
+    setTransportEpoch((n) => n + 1)
+    setFilterText(current.queryOptions.filter ?? '')
+    setSelectText((current.queryOptions.select ?? []).join(', '))
+    setTopText(current.queryOptions.top ?? '')
+    setSkipText(current.queryOptions.skip ?? '')
+    setExpandText(current.queryOptions.expand ?? '')
+    setOrderbyText(current.queryOptions.orderby ?? '')
+    setSearchText(current.queryOptions.search ?? '')
+    setFormatText(current.queryOptions.format ?? '')
+    setApplyText(current.queryOptions.apply ?? '')
+    void pushFullRequestDataRef.current()
+  }, [])
+  useTransportReplaced(request, handleTransportReplaced)
+
   const handleSend = useCallback((): void => {
     if (isSending) return
     const requestId = request.id
@@ -1036,6 +1068,7 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
     <div style={urlRowStyle} data-testid="odata-request-url-section">
       <div style={urlInputWrapperStyle}>
         <RestormVariableInputBox
+          key={`odata-url-${transportEpoch}`}
           value={request.url}
           onChange={setUrl}
           variables={urlVariables}
@@ -1190,6 +1223,7 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
       <div style={rowStyle}>
         <label style={labelStyle} htmlFor="odata-filter">$filter</label>
         <ODataFilterEditor
+          key={`filter-${transportEpoch}`}
           value={filterText}
           onChange={setFilter}
           apiDocumentation={apiDocumentation}
@@ -1202,6 +1236,7 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
       <div style={rowStyle}>
         <label style={labelStyle} htmlFor="odata-select">$select</label>
         <InputBox
+          key={`select-${transportEpoch}`}
           value={selectText}
           onChange={setSelect}
           changeDebounceMs={0}
@@ -1219,6 +1254,7 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
         <div style={{ ...rowStyle, ...numericItemStyle }}>
           <label style={labelStyle} htmlFor="odata-top">$top</label>
           <InputBox
+            key={`top-${transportEpoch}`}
             value={topText}
             onChange={setTop}
             changeDebounceMs={0}
@@ -1234,6 +1270,7 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
         <div style={{ ...rowStyle, ...numericItemStyle }}>
           <label style={labelStyle} htmlFor="odata-skip">$skip</label>
           <InputBox
+            key={`skip-${transportEpoch}`}
             value={skipText}
             onChange={setSkip}
             changeDebounceMs={0}
@@ -1273,6 +1310,7 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
       <div style={rowStyle}>
         <label style={labelStyle}>$orderby</label>
         <ODataOrderbyEditor
+          key={`orderby-${transportEpoch}`}
           value={orderbyText}
           onChange={setOrderby}
           propertySuggestions={request.entitySetProperties ?? []}
@@ -1288,6 +1326,7 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
         <div style={{ ...rowStyle, ...numericItemStyle }}>
           <label style={labelStyle} htmlFor="odata-search">$search</label>
           <InputBox
+            key={`search-${transportEpoch}`}
             value={searchText}
             onChange={setSearch}
             changeDebounceMs={0}
@@ -1298,6 +1337,7 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
         <div style={{ ...rowStyle, ...numericItemStyle }}>
           <label style={labelStyle} htmlFor="odata-format">$format</label>
           <InputBox
+            key={`format-${transportEpoch}`}
             value={formatText}
             onChange={setFormat}
             changeDebounceMs={0}
@@ -1310,6 +1350,7 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
       <div style={rowStyle}>
         <label style={labelStyle} htmlFor="odata-apply">$apply</label>
         <InputBox
+          key={`apply-${transportEpoch}`}
           value={applyText}
           onChange={setApply}
           changeDebounceMs={0}

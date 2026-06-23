@@ -16,6 +16,7 @@ import {
 import { BaseRequest } from './BaseRequest'
 import { KeyValue } from '../KeyValue'
 import type { RequestType, RuntimeId, Icon, ODataVersion } from '../types'
+import type { QuickConfig } from '../../types/requests/QuickConfig'
 
 /**
  * System query options persisted alongside an OData request. Phase 2
@@ -198,6 +199,9 @@ export class ODataRequest extends BaseRequest {
   @graphqlField({ type: 'JSON', nullable: true })
   mockData?: Record<string, Record<string, unknown>[]>
 
+  /** User-saved quick-config snapshots for this request. */
+  quickConfigs?: QuickConfig[]
+
   constructor(init?: Partial<ODataRequest>) {
     super(init)
     if (init) {
@@ -240,6 +244,7 @@ export class ODataRequest extends BaseRequest {
     server?: boolean
     mockMetadata?: string
     mockData?: Record<string, Record<string, unknown>[]>
+    quickConfigs?: QuickConfig[]
   }): ODataRequest {
     return new ODataRequest({
       ...(obj.id !== undefined && { id: obj.id }),
@@ -267,7 +272,8 @@ export class ODataRequest extends BaseRequest {
       deprecated: obj.deprecated ?? false,
       ...(obj.server !== undefined && { server: obj.server }),
       ...(obj.mockMetadata !== undefined && { mockMetadata: obj.mockMetadata }),
-      ...(obj.mockData !== undefined && { mockData: obj.mockData })
+      ...(obj.mockData !== undefined && { mockData: obj.mockData }),
+      ...(obj.quickConfigs !== undefined && { quickConfigs: obj.quickConfigs })
     })
   }
 
@@ -299,7 +305,8 @@ export class ODataRequest extends BaseRequest {
       deprecated: this.deprecated,
       ...(this.server !== undefined && { server: this.server }),
       ...(this.mockMetadata !== undefined && { mockMetadata: this.mockMetadata }),
-      ...(this.mockData !== undefined && { mockData: this.mockData })
+      ...(this.mockData !== undefined && { mockData: this.mockData }),
+      ...(this.quickConfigs !== undefined && this.quickConfigs.length > 0 && { quickConfigs: this.quickConfigs })
     }
   }
 }

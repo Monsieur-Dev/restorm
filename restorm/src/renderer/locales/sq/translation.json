@@ -1925,5 +1925,33 @@
       "metadataLabel": "$metadata (CSDL)",
       "dataLabel": "Të dhënat e entiteteve të shërbyera (sipas grupit të entiteteve)"
     }
+  },
+  "quickSettings": {
+    "button": {
+      "tooltip": "Cilësimet e shpejta"
+    },
+    "namePlaceholder": "Emri i konfigurimit",
+    "saveButton": "Ruaj",
+    "storageTarget": {
+      "label": "Ruaj në skedarin e projektit (.restorm)"
+    },
+    "badge": {
+      "project": "projekt",
+      "settings": "përdorues"
+    },
+    "listLabel": "Konfigurimet e ruajtura",
+    "emptyList": "Nuk ka konfigurime të ruajtura akoma.",
+    "loadConfirm": {
+      "title": "Ngarko konfigurimin",
+      "message": "Dëshironi të ngarkoni konfigurimin \"{{name}}\"? Konfigurimi juaj aktual i paruajtur do të humbasë."
+    },
+    "deleteConfirm": {
+      "title": "Fshij konfigurimin",
+      "message": "Dëshironi të fshini konfigurimin \"{{name}}\"?"
+    },
+    "confirm": {
+      "ok": "OK",
+      "cancel": "Anulo"
+    }
   }
 }

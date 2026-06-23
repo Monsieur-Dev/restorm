@@ -1,6 +1,7 @@
 import { toKeyValueData as toKeyValueDataShared } from '../../utils/toKeyValueData'
 import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react'
 import { useRequestReset } from '../../hooks/useRequestReset'
+import { useTransportReplaced } from '../../hooks/useTransportReplaced'
 import { getRequestPanelState, setRequestPanelCollapsed } from '../../services/requestPanelStateStore'
 import { useTranslation } from 'react-i18next'
 import { useHandlebarsHelpers } from '../../hooks/useHandlebarsHelpers'
@@ -121,6 +122,11 @@ const GrpcClientTabView: React.FC<GrpcRequestTabViewProps> = ({
   const [backendCodeSnippets, setBackendCodeSnippets] = useState<string>('')
   const sourceIdRef = useRef<string>(crypto.randomUUID())
 
+  // Bumped on a quick-config load (or MCP update_request) so the metadata
+  // KV table remounts and re-reads its `initialRows` from the now-mutated
+  // request — the ECUI KeyValueTable seeds its rows from props once at mount.
+  const [transportEpoch, setTransportEpoch] = useState(0)
+
   const metadataRef = useRef<KeyValueTableHandle | null>(null)
 
   const handleRequestReset = useCallback(() => {
@@ -137,6 +143,19 @@ const GrpcClientTabView: React.FC<GrpcRequestTabViewProps> = ({
   const requestRef = useRef(request)
   useEffect(() => { selectedEnvIdRef.current = selectedEnvId }, [selectedEnvId])
   useEffect(() => { requestRef.current = request }, [request])
+
+  // Re-sync local state when a quick-config load (or MCP update_request)
+  // replaces the transport. The state updates re-trigger the
+  // updateFullRequestData useEffect below → Handlebars re-resolution.
+  const handleTransportReplaced = useCallback(() => {
+    const current = requestRef.current
+    setUrlState(current.url)
+    setRequestMessageState(current.requestMessage)
+    setCallTypeState(current.callType)
+    // Remount the metadata table so it re-reads the restored rows.
+    setTransportEpoch((n) => n + 1)
+  }, [])
+  useTransportReplaced(request, handleTransportReplaced)
 
   // Register request with ContextService on mount, unregister on unmount
   useEffect(() => {
@@ -358,6 +377,7 @@ const GrpcClientTabView: React.FC<GrpcRequestTabViewProps> = ({
       <Pane title={t('grpc.tabs.message')} initialSize={0.7} minSize={150} collapsed={panelCollapsed.message} data-testid="grpc-message-pane">
         <div style={{ height: '100%', border: '1px solid var(--panel-border)', borderRadius: 3 }}>
           <CodeEditor
+            key={`message-${transportEpoch}`}
             height="100%"
             language="json"
             value={requestMessage}
@@ -388,6 +408,7 @@ const GrpcClientTabView: React.FC<GrpcRequestTabViewProps> = ({
         )}
       >
         <RestormKeyValueTable
+          key={`metadata-${transportEpoch}`}
           ref={metadataRef}
           variables={emptyVariables}
           helpers={handlebarsHelpers}

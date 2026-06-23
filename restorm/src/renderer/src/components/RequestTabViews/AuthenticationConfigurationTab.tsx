@@ -13,13 +13,14 @@
  *   downstream requests. Defaults to `401, 403`.
  */
 
-import React, { useCallback, useRef, type CSSProperties } from 'react'
+import React, { useCallback, useRef, useState, type CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Button, InputBox } from 'electron-core-ui/renderer'
 import type { AuthenticationRequest, KeyValue } from '../../../../shared/types/collections'
 import { RestormKeyValueTable, type KeyValueTableHandle } from '../RestormKeyValueTable'
 import { RestormVariableInputBox } from '../RestormVariableInputBox'
 import { useHandlebarsHelpers } from '../../hooks/useHandlebarsHelpers'
+import { useTransportReplaced } from '../../hooks/useTransportReplaced'
 import { updateReactiveProperty } from './requestTabViewUtils'
 
 const containerStyle: CSSProperties = {
@@ -68,6 +69,14 @@ export const AuthenticationConfigurationTab: React.FC<AuthenticationConfiguratio
   const handlebarsHelpers = useHandlebarsHelpers()
   const producedHeadersRef = useRef<KeyValueTableHandle | null>(null)
 
+  // Remount the produced-headers table on a quick-config load (or MCP
+  // update_request): the ECUI KeyValueTable seeds its rows from props once
+  // at mount, so without a key change the restored rows would not appear.
+  // expirationExpression + authErrorCodes read `request.*` live, so they
+  // re-sync on the re-render this triggers.
+  const [transportEpoch, setTransportEpoch] = useState(0)
+  useTransportReplaced(request, () => { setTransportEpoch((n) => n + 1) })
+
   const handleProducedHeadersChange = useCallback((rows: KeyValue[]) => {
     updateReactiveProperty(request, 'producedHeaders', rows)
   }, [request])
@@ -110,6 +119,7 @@ export const AuthenticationConfigurationTab: React.FC<AuthenticationConfiguratio
           </Button>
         </div>
         <RestormKeyValueTable
+          key={`produced-headers-${transportEpoch}`}
           ref={producedHeadersRef}
           variables={[]}
           helpers={handlebarsHelpers}

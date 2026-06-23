@@ -1925,5 +1925,33 @@
       "metadataLabel": "$metadata (CSDL)",
       "dataLabel": "Palvellut entiteettitiedot (entiteettijoukoittain)"
     }
+  },
+  "quickSettings": {
+    "button": {
+      "tooltip": "Pikaasetukset"
+    },
+    "namePlaceholder": "Konfiguraation nimi",
+    "saveButton": "Tallenna",
+    "storageTarget": {
+      "label": "Tallenna projektitiedostoon (.restorm)"
+    },
+    "badge": {
+      "project": "projekti",
+      "settings": "käyttäjä"
+    },
+    "listLabel": "Tallennetut konfiguraatiot",
+    "emptyList": "Ei vielä tallennettuja konfiguraatioita.",
+    "loadConfirm": {
+      "title": "Lataa konfiguraatio",
+      "message": "Haluatko ladata konfiguraation \"{{name}}\"? Nykyinen tallentamaton konfiguraatiosi menetetään."
+    },
+    "deleteConfirm": {
+      "title": "Poista konfiguraatio",
+      "message": "Haluatko poistaa konfiguraation \"{{name}}\"?"
+    },
+    "confirm": {
+      "ok": "OK",
+      "cancel": "Peruuta"
+    }
   }
 }

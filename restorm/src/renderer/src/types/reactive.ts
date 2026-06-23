@@ -56,7 +56,8 @@ const HTTP_REQUEST_INDEXABLE_KEYS = new Set([
   'headers',
   'params',
   'pathParams',
-  'body'
+  'body',
+  'quickConfigs'
 ])
 
 /** Properties that trigger re-indexing when modified (GraphQL requests) */
@@ -69,7 +70,8 @@ const GRAPHQL_REQUEST_INDEXABLE_KEYS = new Set([
   'headers',
   'operationType',
   'query',
-  'variables'
+  'variables',
+  'quickConfigs'
 ])
 
 /** Properties that trigger re-indexing when modified (gRPC requests) */
@@ -83,7 +85,8 @@ const GRPC_REQUEST_INDEXABLE_KEYS = new Set([
   'service',
   'method',
   'callType',
-  'requestMessage'
+  'requestMessage',
+  'quickConfigs'
 ])
 
 /** Properties that trigger re-indexing when modified (SOAP requests) */
@@ -97,7 +100,8 @@ const SOAP_REQUEST_INDEXABLE_KEYS = new Set([
   'service',
   'operation',
   'soapAction',
-  'body'
+  'body',
+  'quickConfigs'
 ])
 
 /** Properties that trigger re-indexing when modified (WebSocket requests) */
@@ -110,7 +114,8 @@ const WEBSOCKET_REQUEST_INDEXABLE_KEYS = new Set([
   'headers',
   'protocol',
   'event',
-  'message'
+  'message',
+  'quickConfigs'
 ])
 
 /** Properties that trigger re-indexing when modified (OData requests) */
@@ -133,7 +138,8 @@ const ODATA_REQUEST_INDEXABLE_KEYS = new Set([
   'entitySetProperties',
   'navigationProperties',
   'operationParameters',
-  'deprecated'
+  'deprecated',
+  'quickConfigs'
 ])
 
 /** Properties that trigger re-indexing when modified (Auth requests).
@@ -152,7 +158,8 @@ const AUTH_REQUEST_INDEXABLE_KEYS = new Set([
   'producedHeaders',
   'expirationExpression',
   'authErrorCodes',
-  'deprecated'
+  'deprecated',
+  'quickConfigs'
 ])
 
 /** Properties that trigger re-indexing when modified (Environments) */

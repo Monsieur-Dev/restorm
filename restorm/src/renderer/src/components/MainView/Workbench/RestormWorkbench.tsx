@@ -57,6 +57,7 @@ import { RequestScenarioUsageButton } from './RequestScenarioUsageButton'
 import { RequestHeaderEnvSelector } from '../RequestHeaderEnvSelector'
 import { RequestHeaderHistoryButton } from '../RequestHeaderHistoryButton'
 import { RequestHeaderAuthSelector } from '../RequestHeaderAuthSelector'
+import { RequestQuickSettingsButton } from '../RequestQuickSettingsButton'
 import { ScenarioCallersButton } from './ScenarioCallersButton'
 import { HeaderHoverTooltip } from '../HeaderHoverTooltip'
 import { ScenarioRunHistoryButton } from '../../Scenario/ScenarioRunHistoryButton'
@@ -1035,11 +1036,15 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
 
     // Request tab-header action cluster (left of the bookmark ribbon):
     // the env selector (reads the surrounding EnvironmentProvider) + the
-    // response-history button. Rendered for every request protocol.
-    const requestHeaderActionsFor = (id: string): React.ReactNode => (
+    // response-history button + the quick-settings button. Rendered for
+    // every request protocol — the quick-settings button is only mounted
+    // on request tabs (this function is never called for folder/env/scenario
+    // tabs, so no additional gating is required).
+    const requestHeaderActionsFor = (id: string, reactiveReq: Request): React.ReactNode => (
       <>
         <RequestHeaderEnvSelector folderRequestIds={envFolderRequestIds ?? []} projectUuid={projectUuid ?? null} />
         <RequestHeaderHistoryButton requestId={id} />
+        <RequestQuickSettingsButton request={reactiveReq} projectUuid={projectUuid} />
       </>
     )
 
@@ -1078,7 +1083,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
             onTagColorChange={handleRequestTagColorChange}
             tabId={effectiveTab.id}
             {...favoritePropsFor(request.id)}
-            headerActions={requestHeaderActionsFor(request.id)}
+            headerActions={requestHeaderActionsFor(request.id, request)}
             topRightAction={scenarioUsageActionFor(request.id)}
             starLeftAction={starLeftActionFor(request)}
           >
@@ -1094,7 +1099,15 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
 
     // GraphQL request tab
     if (isGraphQLRequestTab(effectiveTab)) {
-      const request = effectiveTab.request
+      // Prefer the live reactive request proxy (so in-place mutations — quick-
+      // config Load, MCP update_request — re-render this tab) and fall back to
+      // the tab's static snapshot only when the tree lookup misses. Mirrors the
+      // HTTP branch above; without it a non-HTTP tab edits a detached snapshot.
+      // The lookup returns a `Request`; this branch's type guard fixed the
+      // concrete kind, and the reactive node shares the tab request's id, so the
+      // cast to the tab request's type is sound.
+      const reactive = getRequestById?.(effectiveTab.request.id)
+      const request = reactive?.type === effectiveTab.request.type ? reactive : effectiveTab.request
       return (
         <EnvironmentProvider environments={liveEnvironments} tagColors={requestTagColors} persistenceKey={envPersistenceKey(effectiveTab.request.id)} folderRequestIds={envFolderRequestIds}>
           <RestormWorkbenchTab
@@ -1109,7 +1122,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
             onTagColorChange={handleRequestTagColorChange}
             tabId={effectiveTab.id}
             {...favoritePropsFor(request.id)}
-            headerActions={requestHeaderActionsFor(request.id)}
+            headerActions={requestHeaderActionsFor(request.id, request)}
             topRightAction={scenarioUsageActionFor(request.id)}
             starLeftAction={starLeftActionFor(request)}
           >
@@ -1125,7 +1138,15 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
 
     // gRPC request tab
     if (isGrpcRequestTab(effectiveTab)) {
-      const request = effectiveTab.request
+      // Prefer the live reactive request proxy (so in-place mutations — quick-
+      // config Load, MCP update_request — re-render this tab) and fall back to
+      // the tab's static snapshot only when the tree lookup misses. Mirrors the
+      // HTTP branch above; without it a non-HTTP tab edits a detached snapshot.
+      // The lookup returns a `Request`; this branch's type guard fixed the
+      // concrete kind, and the reactive node shares the tab request's id, so the
+      // cast to the tab request's type is sound.
+      const reactive = getRequestById?.(effectiveTab.request.id)
+      const request = reactive?.type === effectiveTab.request.type ? reactive : effectiveTab.request
       return (
         <EnvironmentProvider environments={liveEnvironments} tagColors={requestTagColors} persistenceKey={envPersistenceKey(effectiveTab.request.id)} folderRequestIds={envFolderRequestIds}>
           <RestormWorkbenchTab
@@ -1140,7 +1161,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
             onTagColorChange={handleRequestTagColorChange}
             tabId={effectiveTab.id}
             {...favoritePropsFor(request.id)}
-            headerActions={requestHeaderActionsFor(request.id)}
+            headerActions={requestHeaderActionsFor(request.id, request)}
             topRightAction={scenarioUsageActionFor(request.id)}
             starLeftAction={starLeftActionFor(request)}
           >
@@ -1156,7 +1177,15 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
 
     // SOAP request tab
     if (isSoapRequestTab(effectiveTab)) {
-      const request = effectiveTab.request
+      // Prefer the live reactive request proxy (so in-place mutations — quick-
+      // config Load, MCP update_request — re-render this tab) and fall back to
+      // the tab's static snapshot only when the tree lookup misses. Mirrors the
+      // HTTP branch above; without it a non-HTTP tab edits a detached snapshot.
+      // The lookup returns a `Request`; this branch's type guard fixed the
+      // concrete kind, and the reactive node shares the tab request's id, so the
+      // cast to the tab request's type is sound.
+      const reactive = getRequestById?.(effectiveTab.request.id)
+      const request = reactive?.type === effectiveTab.request.type ? reactive : effectiveTab.request
       return (
         <EnvironmentProvider environments={liveEnvironments} tagColors={requestTagColors} persistenceKey={envPersistenceKey(effectiveTab.request.id)} folderRequestIds={envFolderRequestIds}>
           <RestormWorkbenchTab
@@ -1171,7 +1200,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
             onTagColorChange={handleRequestTagColorChange}
             tabId={effectiveTab.id}
             {...favoritePropsFor(request.id)}
-            headerActions={requestHeaderActionsFor(request.id)}
+            headerActions={requestHeaderActionsFor(request.id, request)}
             topRightAction={scenarioUsageActionFor(request.id)}
             starLeftAction={starLeftActionFor(request)}
           >
@@ -1187,7 +1216,15 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
 
     // WebSocket request tab
     if (isWebSocketRequestTab(effectiveTab)) {
-      const request = effectiveTab.request
+      // Prefer the live reactive request proxy (so in-place mutations — quick-
+      // config Load, MCP update_request — re-render this tab) and fall back to
+      // the tab's static snapshot only when the tree lookup misses. Mirrors the
+      // HTTP branch above; without it a non-HTTP tab edits a detached snapshot.
+      // The lookup returns a `Request`; this branch's type guard fixed the
+      // concrete kind, and the reactive node shares the tab request's id, so the
+      // cast to the tab request's type is sound.
+      const reactive = getRequestById?.(effectiveTab.request.id)
+      const request = reactive?.type === effectiveTab.request.type ? reactive : effectiveTab.request
       return (
         <EnvironmentProvider environments={liveEnvironments} tagColors={requestTagColors} persistenceKey={envPersistenceKey(effectiveTab.request.id)} folderRequestIds={envFolderRequestIds}>
           <RestormWorkbenchTab
@@ -1202,7 +1239,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
             onTagColorChange={handleRequestTagColorChange}
             tabId={effectiveTab.id}
             {...favoritePropsFor(request.id)}
-            headerActions={requestHeaderActionsFor(request.id)}
+            headerActions={requestHeaderActionsFor(request.id, request)}
             topRightAction={scenarioUsageActionFor(request.id)}
             starLeftAction={starLeftActionFor(request)}
           >
@@ -1218,7 +1255,15 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
 
     // OData request tab
     if (isODataRequestTab(effectiveTab)) {
-      const request = effectiveTab.request
+      // Prefer the live reactive request proxy (so in-place mutations — quick-
+      // config Load, MCP update_request — re-render this tab) and fall back to
+      // the tab's static snapshot only when the tree lookup misses. Mirrors the
+      // HTTP branch above; without it a non-HTTP tab edits a detached snapshot.
+      // The lookup returns a `Request`; this branch's type guard fixed the
+      // concrete kind, and the reactive node shares the tab request's id, so the
+      // cast to the tab request's type is sound.
+      const reactive = getRequestById?.(effectiveTab.request.id)
+      const request = reactive?.type === effectiveTab.request.type ? reactive : effectiveTab.request
       return (
         <EnvironmentProvider environments={liveEnvironments} tagColors={requestTagColors} persistenceKey={envPersistenceKey(effectiveTab.request.id)} folderRequestIds={envFolderRequestIds}>
           <RestormWorkbenchTab
@@ -1233,7 +1278,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
             onTagColorChange={handleRequestTagColorChange}
             tabId={effectiveTab.id}
             {...favoritePropsFor(request.id)}
-            headerActions={requestHeaderActionsFor(request.id)}
+            headerActions={requestHeaderActionsFor(request.id, request)}
             topRightAction={scenarioUsageActionFor(request.id)}
             starLeftAction={starLeftActionFor(request)}
           >
@@ -1248,7 +1293,15 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
     // Authentication request tab — reuses HTTPRequestTabView, which
     // injects an extra "Configuration" tab when it sees type === 'auth'.
     if (isAuthenticationRequestTab(effectiveTab)) {
-      const request = effectiveTab.request
+      // Prefer the live reactive request proxy (so in-place mutations — quick-
+      // config Load, MCP update_request — re-render this tab) and fall back to
+      // the tab's static snapshot only when the tree lookup misses. Mirrors the
+      // HTTP branch above; without it a non-HTTP tab edits a detached snapshot.
+      // The lookup returns a `Request`; this branch's type guard fixed the
+      // concrete kind, and the reactive node shares the tab request's id, so the
+      // cast to the tab request's type is sound.
+      const reactive = getRequestById?.(effectiveTab.request.id)
+      const request = reactive?.type === effectiveTab.request.type ? reactive : effectiveTab.request
       return (
         <EnvironmentProvider environments={liveEnvironments} tagColors={requestTagColors} persistenceKey={envPersistenceKey(effectiveTab.request.id)} folderRequestIds={envFolderRequestIds}>
           <RestormWorkbenchTab
@@ -1263,7 +1316,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
             onTagColorChange={handleRequestTagColorChange}
             tabId={effectiveTab.id}
             {...favoritePropsFor(request.id)}
-            headerActions={requestHeaderActionsFor(request.id)}
+            headerActions={requestHeaderActionsFor(request.id, request)}
             topRightAction={scenarioUsageActionFor(request.id)}
             starLeftAction={starLeftActionFor(request)}
           >

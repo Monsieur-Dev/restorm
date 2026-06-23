@@ -92,6 +92,12 @@ const mqttExecutionTestDir = defineBddConfig({
   outputDir: '.features-gen/mqtt-execution'
 })
 
+const quickSettingsTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/quick-settings/features/**/*.feature',
+  steps: ['tests/e2e/bdd/quick-settings/steps/**/*.ts', 'tests/e2e/bdd/fixtures/mcp-server.fixture.ts'],
+  outputDir: '.features-gen/quick-settings'
+})
+
 const grpcServerExecutionTestDir = defineBddConfig({
   features: 'tests/e2e/bdd/grpc-server/features/**/*.feature',
   steps: ['tests/e2e/bdd/grpc-server/steps/**/*.ts', 'tests/e2e/bdd/fixtures/mcp-server.fixture.ts'],
@@ -365,6 +371,11 @@ export default defineConfig({
       name: 'mqtt-execution',
       testDir: mqttExecutionTestDir,
       timeout: 180 * 1000
+    },
+    {
+      name: 'quick-settings',
+      testDir: quickSettingsTestDir,
+      timeout: 300 * 1000 // 5 min — 8 scenarios, each launches a fresh app
     },
     {
       name: 'grpc-server',

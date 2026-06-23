@@ -1924,5 +1924,33 @@
       "metadataLabel": "$metadata (CSDL)",
       "dataLabel": "提供されるエンティティデータ（エンティティセット別）"
     }
+  },
+  "quickSettings": {
+    "button": {
+      "tooltip": "クイック設定"
+    },
+    "namePlaceholder": "設定名",
+    "saveButton": "保存",
+    "storageTarget": {
+      "label": "プロジェクトファイルに保存 (.restorm)"
+    },
+    "badge": {
+      "project": "プロジェクト",
+      "settings": "ユーザー"
+    },
+    "listLabel": "保存済み設定",
+    "emptyList": "保存済みの設定はありません。",
+    "loadConfirm": {
+      "title": "設定を読み込む",
+      "message": "設定「{{name}}」を読み込みますか？現在の未保存の設定は失われます。"
+    },
+    "deleteConfirm": {
+      "title": "設定を削除",
+      "message": "設定「{{name}}」を削除しますか？"
+    },
+    "confirm": {
+      "ok": "OK",
+      "cancel": "キャンセル"
+    }
   }
 }

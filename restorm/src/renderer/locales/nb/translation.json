@@ -1925,5 +1925,33 @@
       "metadataLabel": "$metadata (CSDL)",
       "dataLabel": "Betjente entitetsdata (etter entitetssett)"
     }
+  },
+  "quickSettings": {
+    "button": {
+      "tooltip": "Hurtiginnstillinger"
+    },
+    "namePlaceholder": "Konfigurasjonsnavn",
+    "saveButton": "Lagre",
+    "storageTarget": {
+      "label": "Lagre i prosjektfil (.restorm)"
+    },
+    "badge": {
+      "project": "prosjekt",
+      "settings": "bruker"
+    },
+    "listLabel": "Lagrede konfigurasjoner",
+    "emptyList": "Ingen lagrede konfigurasjoner ennå.",
+    "loadConfirm": {
+      "title": "Last inn konfigurasjon",
+      "message": "Vil du laste inn konfigurasjonen \"{{name}}\"? Din nåværende ulagrede konfigurasjon vil gå tapt."
+    },
+    "deleteConfirm": {
+      "title": "Slett konfigurasjon",
+      "message": "Vil du slette konfigurasjonen \"{{name}}\"?"
+    },
+    "confirm": {
+      "ok": "OK",
+      "cancel": "Avbryt"
+    }
   }
 }

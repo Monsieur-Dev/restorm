@@ -1,6 +1,7 @@
 import { toKeyValueData as toKeyValueDataShared } from '../../utils/toKeyValueData'
 import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react'
 import { useRequestReset } from '../../hooks/useRequestReset'
+import { useTransportReplaced } from '../../hooks/useTransportReplaced'
 import { getRequestPanelState, setRequestPanelCollapsed } from '../../services/requestPanelStateStore'
 import { useTranslation } from 'react-i18next'
 import { useHandlebarsHelpers } from '../../hooks/useHandlebarsHelpers'
@@ -120,6 +121,11 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
   const [backendCodeSnippets, setBackendCodeSnippets] = useState<string>('')
   const sourceIdRef = useRef<string>(crypto.randomUUID())
 
+  // Bumped on a quick-config load (or MCP update_request) so the headers KV
+  // table and the MQTT options panel remount and re-read their values from the
+  // now-mutated request (both seed local state from props once at mount).
+  const [transportEpoch, setTransportEpoch] = useState(0)
+
   const headersRef = useRef<KeyValueTableHandle | null>(null)
 
   const handleRequestReset = useCallback(() => {
@@ -136,6 +142,20 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
   const requestRef = useRef(request)
   useEffect(() => { selectedEnvIdRef.current = selectedEnvId }, [selectedEnvId])
   useEffect(() => { requestRef.current = request }, [request])
+
+  // Re-sync local state when a quick-config load (or MCP update_request)
+  // replaces the transport. The state updates re-trigger the
+  // updateFullRequestData useEffect below → Handlebars re-resolution.
+  const handleTransportReplaced = useCallback(() => {
+    const current = requestRef.current
+    setUrlState(current.url)
+    setEventState(current.event ?? '')
+    setMessageState(current.message)
+    // Remount the headers table + MQTT options panel so they re-read the
+    // restored values.
+    setTransportEpoch((n) => n + 1)
+  }, [])
+  useTransportReplaced(request, handleTransportReplaced)
 
   // Register request with ContextService on mount, unregister on unmount
   useEffect(() => {
@@ -384,6 +404,7 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
               <span style={{ fontSize: 12 }}>{request.protocol === 'mqtt' ? t('websocket.topic') : t('websocket.event')}:</span>
               <div style={{ flex: 1 }}>
                 <RestormVariableInputBox
+                  key={`event-${transportEpoch}`}
                   value={event}
                   onChange={setEvent}
                   variables={emptyVariables}
@@ -395,10 +416,11 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
             </div>
           )}
           {request.protocol === 'mqtt' && (
-            <MqttOptionsPanel request={request} variables={emptyVariables} helpers={handlebarsHelpers} server={isServer} />
+            <MqttOptionsPanel key={`mqtt-${transportEpoch}`} request={request} variables={emptyVariables} helpers={handlebarsHelpers} server={isServer} />
           )}
           <div style={{ flex: 1, border: '1px solid var(--panel-border)', borderRadius: 3 }}>
             <CodeEditor
+              key={`message-${transportEpoch}`}
               height="100%"
               language="json"
               value={message}
@@ -430,6 +452,7 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
         )}
       >
         <RestormKeyValueTable
+          key={`headers-${transportEpoch}`}
           ref={headersRef}
           variables={emptyVariables}
           helpers={handlebarsHelpers}

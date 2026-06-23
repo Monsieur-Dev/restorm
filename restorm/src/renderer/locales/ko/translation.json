@@ -1924,5 +1924,33 @@
       "metadataLabel": "$metadata (CSDL)",
       "dataLabel": "제공되는 엔터티 데이터 (엔터티 집합별)"
     }
+  },
+  "quickSettings": {
+    "button": {
+      "tooltip": "빠른 설정"
+    },
+    "namePlaceholder": "설정 이름",
+    "saveButton": "저장",
+    "storageTarget": {
+      "label": "프로젝트 파일에 저장 (.restorm)"
+    },
+    "badge": {
+      "project": "프로젝트",
+      "settings": "사용자"
+    },
+    "listLabel": "저장된 설정",
+    "emptyList": "저장된 설정이 없습니다.",
+    "loadConfirm": {
+      "title": "설정 불러오기",
+      "message": "\"{{name}}\" 설정을 불러오시겠습니까? 저장되지 않은 현재 설정이 손실됩니다."
+    },
+    "deleteConfirm": {
+      "title": "설정 삭제",
+      "message": "\"{{name}}\" 설정을 삭제하시겠습니까?"
+    },
+    "confirm": {
+      "ok": "OK",
+      "cancel": "취소"
+    }
   }
 }

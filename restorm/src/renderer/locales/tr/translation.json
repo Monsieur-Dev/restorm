@@ -1925,5 +1925,33 @@
       "metadataLabel": "$metadata (CSDL)",
       "dataLabel": "Sunulan varlık verileri (varlık kümesine göre)"
     }
+  },
+  "quickSettings": {
+    "button": {
+      "tooltip": "Hızlı ayarlar"
+    },
+    "namePlaceholder": "Yapılandırma adı",
+    "saveButton": "Kaydet",
+    "storageTarget": {
+      "label": "Proje dosyasına kaydet (.restorm)"
+    },
+    "badge": {
+      "project": "proje",
+      "settings": "kullanıcı"
+    },
+    "listLabel": "Kaydedilen yapılandırmalar",
+    "emptyList": "Henüz kaydedilmiş yapılandırma yok.",
+    "loadConfirm": {
+      "title": "Yapılandırmayı yükle",
+      "message": "\"{{name}}\" yapılandırmasını yüklemek istiyor musunuz? Mevcut kaydedilmemiş yapılandırmanız kaybolacak."
+    },
+    "deleteConfirm": {
+      "title": "Yapılandırmayı sil",
+      "message": "\"{{name}}\" yapılandırmasını silmek istiyor musunuz?"
+    },
+    "confirm": {
+      "ok": "Tamam",
+      "cancel": "İptal"
+    }
   }
 }

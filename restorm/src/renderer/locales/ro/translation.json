@@ -1926,5 +1926,33 @@
       "metadataLabel": "$metadata (CSDL)",
       "dataLabel": "Date de entități servite (pe set de entități)"
     }
+  },
+  "quickSettings": {
+    "button": {
+      "tooltip": "Setări rapide"
+    },
+    "namePlaceholder": "Numele configurației",
+    "saveButton": "Salvează",
+    "storageTarget": {
+      "label": "Salvează în fișierul proiectului (.restorm)"
+    },
+    "badge": {
+      "project": "proiect",
+      "settings": "utilizator"
+    },
+    "listLabel": "Configurații salvate",
+    "emptyList": "Nu există configurații salvate încă.",
+    "loadConfirm": {
+      "title": "Încarcă configurația",
+      "message": "Doriți să încărcați configurația „{{name}}\"? Configurația actuală nesalvată va fi pierdută."
+    },
+    "deleteConfirm": {
+      "title": "Șterge configurația",
+      "message": "Doriți să ștergeți configurația „{{name}}\"?"
+    },
+    "confirm": {
+      "ok": "OK",
+      "cancel": "Anulează"
+    }
   }
 }
