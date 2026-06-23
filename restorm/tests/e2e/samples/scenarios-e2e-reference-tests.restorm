@@ -19780,6 +19780,52 @@ collections:
                     position:
                       x: 860
                       'y': 80
+                  - id: e6f70819-2031-4142-b536-5e6f70718293
+                    kind: httpRequest
+                    config:
+                      requestId: 5e6f7081-9203-4a31-b526-4e5f60718293
+                      label: call the OData mock ($batch)
+                      id: f7081920-3142-4253-c647-6f7081829304
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: env
+                        name: env
+                        dataType: any
+                        flow: value
+                    outputs:
+                      - id: response
+                        name: response
+                        dataType: response
+                        role: response
+                        flow: both
+                    position:
+                      x: 900
+                      'y': 240
+                    note: consumes the hosted OData mock with a read-only $batch (GET Pets(1) + Pets(2))
+                  - id: 07182930-4253-4364-c758-718293041526
+                    kind: log
+                    config:
+                      message: réponse OData $batch reçue
+                      level: info
+                      runOnEachEvent: false
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 1260
+                      'y': 220
                   - id: b2c3d4e5-f607-4182-9304-5b6c7d8e9fa0
                     kind: odataClose
                     config:
@@ -19824,10 +19870,25 @@ collections:
                       nodeId: a1b2c3d4-e5f6-4071-8293-4a5b6c7d8e9f
                       portId: data
                     selector: .
-                  - id: e5f60718-2930-4415-c637-8e9fa0b1c2d3
+                  - id: 18293041-5263-4475-c869-8293041526e7
                     from:
-                      nodeId: 8f1a2c3d-4e5b-4a6c-9d7e-1f2a3b4c5d6e
-                      portId: served
+                      nodeId: 9a8b7c6d-5e4f-4302-8110-2f3e4d5c6b7a
+                      portId: response
+                    to:
+                      nodeId: e6f70819-2031-4142-b536-5e6f70718293
+                      portId: in
+                  - id: 29304152-6374-4586-d970-93041526e7f8
+                    from:
+                      nodeId: e6f70819-2031-4142-b536-5e6f70718293
+                      portId: response
+                    to:
+                      nodeId: 07182930-4253-4364-c758-718293041526
+                      portId: data
+                    selector: .
+                  - id: 30415263-7485-4697-ea81-041526e7f809
+                    from:
+                      nodeId: e6f70819-2031-4142-b536-5e6f70718293
+                      portId: response
                     to:
                       nodeId: b2c3d4e5-f607-4182-9304-5b6c7d8e9fa0
                       portId: in
@@ -19896,6 +19957,28 @@ collections:
                     headers: []
                     params: []
                     queryOptions: {}
+                  - type: odata
+                    documentation: ''
+                    tags:
+                      - odata
+                    id: 5e6f7081-9203-4a31-b526-4e5f60718293
+                    name: OData Batch Consumer
+                    url: http://localhost:8078/odata/$batch
+                    odataVersion: v4
+                    operationKind: batch
+                    headers: []
+                    params: []
+                    queryOptions: {}
+                    batchFormat: multipart
+                    batchSubRequests:
+                      - id: 6f708192-0314-4a25-b637-5f6071829304
+                        method: GET
+                        url: Pets(1)
+                        label: read Pet 1
+                      - id: 70819203-1425-4b36-c748-60718293041a
+                        method: GET
+                        url: Pets(2)
+                        label: read Pet 2
               - type: scenario
                 tags: []
                 params: []
