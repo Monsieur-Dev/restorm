@@ -1767,13 +1767,28 @@
     "createInstance": "创建新实例",
     "terminateInstance": "终止实例"
   },
+  "odataFilter": {
+    "detail": {
+      "property": "属性",
+      "navigation": "导航",
+      "operator": "运算符",
+      "logical": "逻辑运算符",
+      "function": "函数",
+      "enumValue": "枚举值"
+    },
+    "validation": {
+      "unknownProperty": "未知属性",
+      "wrongTypeOperator": "运算符不适用于此属性类型"
+    }
+  },
   "odataRequestTab": {
     "send": "发送",
     "loadNextPage": "加载下一页",
     "batchFormatLabel": "批处理格式",
     "batchFormatMultipart": "multipart/mixed",
     "batchFormatJson": "JSON 批处理",
-    "versionMismatchWarning": "此请求标记为 {{requestVersion}}，但响应看起来像 {{responseVersion}}。请更改请求版本以与服务器匹配。"
+    "versionMismatchWarning": "此请求标记为 {{requestVersion}}，但响应看起来像 {{responseVersion}}。请更改请求版本以与服务器匹配。",
+    "orderbyPropertyPickerPlaceholder": "选择…"
   },
   "typedValue": {
     "list": {

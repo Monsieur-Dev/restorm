@@ -22,3 +22,28 @@ Feature: OData petstore — import + send + filter
     Then the OData response body should contain "Rex"
     And the OData response body should not contain "Whiskers"
     And the OData response body should not contain "PhotoUrls"
+
+  Scenario: Metadata-driven $filter autocomplete suggests properties and enum values
+    Given a new single-file YAML collection for the OData petstore
+    When I open the import modal and paste the OData metadata URL
+    And I import the previewed routes
+    And I open the "List Pets" request in an OData tab
+
+    # Property position: typing a prefix suggests entity-type properties.
+    When I type "Sta" into the OData filter editor
+    Then the OData filter suggestion list should contain "Status"
+    And I dismiss the OData filter suggestion list
+
+    # Value position after a comparison operator on an enum property
+    # suggests the enum members parsed from the metadata.
+    When I type "Status eq " into the OData filter editor
+    Then the OData filter suggestion list should contain "Available"
+    And the OData filter suggestion list should contain "Sold"
+    And I dismiss the OData filter suggestion list
+
+    # Handlebars coexistence: an env-templated value survives the
+    # odata-filter editor verbatim (the grammar treats {{...}} as an
+    # opaque span, so it is neither mangled nor flagged as invalid).
+    When I set the OData filter to "Name eq '{{petName}}'"
+    Then the OData filter editor should contain "{{petName}}"
+    And the OData filter editor should have no validation errors

@@ -1768,13 +1768,28 @@
     "createInstance": "Δημιουργία νέας περίπτωσης",
     "terminateInstance": "Τερματισμός περίπτωσης"
   },
+  "odataFilter": {
+    "detail": {
+      "property": "ιδιότητα",
+      "navigation": "πλοήγηση",
+      "operator": "τελεστής",
+      "logical": "λογικός τελεστής",
+      "function": "συνάρτηση",
+      "enumValue": "τιμή enum"
+    },
+    "validation": {
+      "unknownProperty": "Άγνωστη ιδιότητα",
+      "wrongTypeOperator": "Ο τελεστής δεν ισχύει για αυτόν τον τύπο ιδιότητας"
+    }
+  },
   "odataRequestTab": {
     "send": "Αποστολή",
     "loadNextPage": "Φόρτωση επόμενης σελίδας",
     "batchFormatLabel": "Μορφή δέσμης",
     "batchFormatMultipart": "multipart/mixed",
     "batchFormatJson": "Δέσμη JSON",
-    "versionMismatchWarning": "Αυτό το αίτημα έχει επισημανθεί ως {{requestVersion}} αλλά η απάντηση μοιάζει με {{responseVersion}}. Αλλάξτε την έκδοση του αιτήματος ώστε να ταιριάζει με τον διακομιστή."
+    "versionMismatchWarning": "Αυτό το αίτημα έχει επισημανθεί ως {{requestVersion}} αλλά η απάντηση μοιάζει με {{responseVersion}}. Αλλάξτε την έκδοση του αιτήματος ώστε να ταιριάζει με τον διακομιστή.",
+    "orderbyPropertyPickerPlaceholder": "Επιλέξτε…"
   },
   "typedValue": {
     "list": {

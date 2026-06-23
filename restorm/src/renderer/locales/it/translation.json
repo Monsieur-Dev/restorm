@@ -1768,13 +1768,28 @@
     "createInstance": "Crea una nuova istanza",
     "terminateInstance": "Termina un’istanza"
   },
+  "odataFilter": {
+    "detail": {
+      "property": "proprietà",
+      "navigation": "navigazione",
+      "operator": "operatore",
+      "logical": "operatore logico",
+      "function": "funzione",
+      "enumValue": "valore enum"
+    },
+    "validation": {
+      "unknownProperty": "Proprietà sconosciuta",
+      "wrongTypeOperator": "Operatore non applicabile a questo tipo di proprietà"
+    }
+  },
   "odataRequestTab": {
     "send": "Invia",
     "loadNextPage": "Carica pagina successiva",
     "batchFormatLabel": "Formato del batch",
     "batchFormatMultipart": "multipart/mixed",
     "batchFormatJson": "Batch JSON",
-    "versionMismatchWarning": "Questa richiesta è contrassegnata come {{requestVersion}} ma la risposta sembra {{responseVersion}}. Cambia la versione della richiesta per allinearla al server."
+    "versionMismatchWarning": "Questa richiesta è contrassegnata come {{requestVersion}} ma la risposta sembra {{responseVersion}}. Cambia la versione della richiesta per allinearla al server.",
+    "orderbyPropertyPickerPlaceholder": "Seleziona…"
   },
   "typedValue": {
     "list": {

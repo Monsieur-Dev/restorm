@@ -1769,13 +1769,28 @@
     "createInstance": "Creă o instanță nouă",
     "terminateInstance": "Închide o instanță"
   },
+  "odataFilter": {
+    "detail": {
+      "property": "proprietate",
+      "navigation": "navigare",
+      "operator": "operator",
+      "logical": "operator logic",
+      "function": "funcție",
+      "enumValue": "valoare enum"
+    },
+    "validation": {
+      "unknownProperty": "Proprietate necunoscută",
+      "wrongTypeOperator": "Operatorul nu se aplică acestui tip de proprietate"
+    }
+  },
   "odataRequestTab": {
     "send": "Trimite",
     "loadNextPage": "Încarcă pagina următoare",
     "batchFormatLabel": "Format lot",
     "batchFormatMultipart": "multipart/mixed",
     "batchFormatJson": "Lot JSON",
-    "versionMismatchWarning": "Această cerere este marcată ca {{requestVersion}}, dar răspunsul pare {{responseVersion}}. Schimbați versiunea cererii pentru a corespunde serverului."
+    "versionMismatchWarning": "Această cerere este marcată ca {{requestVersion}}, dar răspunsul pare {{responseVersion}}. Schimbați versiunea cererii pentru a corespunde serverului.",
+    "orderbyPropertyPickerPlaceholder": "Alegeți…"
   },
   "typedValue": {
     "list": {

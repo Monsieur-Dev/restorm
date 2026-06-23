@@ -30,7 +30,8 @@ import type { ODataVersion } from '../../../shared/models/types'
 import type {
   ApiDocumentation,
   ModelDocumentation,
-  OperationDocumentation
+  OperationDocumentation,
+  PropertyDocumentation
 } from '../../../shared/types/apiDocumentation'
 import { StringValue } from '../../../shared/types/collections'
 import { CURRENT_FILE_FORMAT_VERSION } from '../../../shared/config/fileFormatVersion'
@@ -570,6 +571,7 @@ function buildEntitySetRequest(
     params: [],
     queryOptions: {},
     ...(actionBody !== undefined ? { actionBody } : {}),
+    ...(entity?.qualifiedName ? { entityTypeRef: entity.qualifiedName } : {}),
     ...(entitySetProperties.length > 0 ? { entitySetProperties } : {}),
     ...(navigationProperties.length > 0 ? { navigationProperties } : {}),
     tags: ['odata', set.name]
@@ -676,6 +678,31 @@ function isStringType(type: string, collection: boolean): boolean {
   return type === 'Edm.String' || type === 'Edm.Guid'
 }
 
+/** Map an Edm primitive type to a short `format` hint surfaced on the
+ * property documentation. Drives the `$filter` value-position
+ * suggestions (date picker for date/datetime, UUID placeholder for
+ * guid, true/false for boolean). Returns `undefined` for types with
+ * no special value affordance. */
+function edmFormatHint(type: string): string | undefined {
+  switch (type) {
+    case 'Edm.DateTimeOffset':
+      return 'date-time'
+    case 'Edm.Date':
+      return 'date'
+    case 'Edm.TimeOfDay':
+    case 'Edm.Time':
+      return 'time'
+    case 'Edm.Duration':
+      return 'duration'
+    case 'Edm.Guid':
+      return 'uuid'
+    case 'Edm.Boolean':
+      return 'boolean'
+    default:
+      return undefined
+  }
+}
+
 // ============================================================================
 // Metadata dispatch (JSON-CSDL vs EDMX XML, version-aware)
 // ============================================================================
@@ -717,17 +744,37 @@ function buildApiDocumentation(
   schema: EdmSchema,
   options: { baseUrl?: string; sourceUrl?: string; apiTitle: string }
 ): ApiDocumentation {
+  // Qualified names of every parsed enum type — used to link an
+  // enum-typed property to its enum model so the renderer can offer
+  // the allowed values as `$filter` value suggestions.
+  const enumQualifiedNames = new Set(schema.enumTypes.map((e) => e.qualifiedName))
+
   const models: Record<string, ModelDocumentation> = {}
   for (const et of schema.entityTypes) {
     models[et.qualifiedName] = {
       name: et.name,
       type: 'object',
       description: `${et.qualifiedName} (OData entity, key: ${et.keys.join(', ')})`,
-      properties: et.properties.map((p) => ({
-        name: p.name,
-        type: p.collection ? `Collection(${p.type})` : p.type,
-        required: !p.nullable
-      }))
+      properties: et.properties.map((p) => {
+        const prop: PropertyDocumentation = {
+          name: p.name,
+          type: p.collection ? `Collection(${p.type})` : p.type,
+          required: !p.nullable
+        }
+        // Link enum-typed properties to their enum model so the
+        // autocomplete can surface the members as value suggestions.
+        if (enumQualifiedNames.has(p.type)) {
+          prop.targetModelRef = p.type
+          if (p.collection) prop.isArrayOfRef = true
+        }
+        // Carry a `format` hint for the primitive types whose value
+        // position drives a smarter suggestion (date picker, GUID
+        // placeholder, true/false). Keeps the doc viewer + the
+        // autocomplete in sync without re-parsing the Edm type label.
+        const fmt = edmFormatHint(p.type)
+        if (fmt) prop.format = fmt
+        return prop
+      })
     }
   }
   for (const enumType of schema.enumTypes) {

@@ -1768,13 +1768,28 @@
     "createInstance": "Criar uma nova instância",
     "terminateInstance": "Encerrar uma instância"
   },
+  "odataFilter": {
+    "detail": {
+      "property": "propriedade",
+      "navigation": "navegação",
+      "operator": "operador",
+      "logical": "operador lógico",
+      "function": "função",
+      "enumValue": "valor de enumeração"
+    },
+    "validation": {
+      "unknownProperty": "Propriedade desconhecida",
+      "wrongTypeOperator": "Operador não aplicável a este tipo de propriedade"
+    }
+  },
   "odataRequestTab": {
     "send": "Enviar",
     "loadNextPage": "Carregar próxima página",
     "batchFormatLabel": "Formato do lote",
     "batchFormatMultipart": "multipart/mixed",
     "batchFormatJson": "Lote JSON",
-    "versionMismatchWarning": "Esta solicitação está marcada como {{requestVersion}}, mas a resposta parece {{responseVersion}}. Altere a versão da solicitação para corresponder ao servidor."
+    "versionMismatchWarning": "Esta solicitação está marcada como {{requestVersion}}, mas a resposta parece {{responseVersion}}. Altere a versão da solicitação para corresponder ao servidor.",
+    "orderbyPropertyPickerPlaceholder": "Selecionar…"
   },
   "typedValue": {
     "list": {

@@ -135,6 +135,40 @@ describe('importOData (v4 EDMX)', () => {
     expect(doc.operations.some((op) => op.method === 'GET' && op.path.includes('GetAvailablePets'))).toBe(true)
   })
 
+  it('sets entityTypeRef to the bound entity type on entity-set requests', () => {
+    const root = importOData(fixture)
+    const pets = findSubFolder(root, 'Pets')
+    const list = expectPresent(pets.items[0] as ODataRequest | undefined, 'pets.items[0]')
+    expect(list.entityTypeRef).toBe('OData.PetStore.Models.Pet')
+    const categories = findSubFolder(root, 'Categories')
+    const catList = expectPresent(categories.items[0] as ODataRequest | undefined, 'categories.items[0]')
+    expect(catList.entityTypeRef).toBe('OData.PetStore.Models.Category')
+  })
+
+  it('round-trips entityTypeRef through toPlainObject / fromPlain', () => {
+    const root = importOData(fixture)
+    const pets = findSubFolder(root, 'Pets')
+    const list = expectPresent(pets.items[0] as ODataRequest | undefined, 'pets.items[0]')
+    const plain = list.toPlainObject()
+    expect(plain.entityTypeRef).toBe('OData.PetStore.Models.Pet')
+    const restored = ODataRequest.fromPlain(plain as Parameters<typeof ODataRequest.fromPlain>[0])
+    expect(restored.entityTypeRef).toBe('OData.PetStore.Models.Pet')
+  })
+
+  it('links an enum-typed property to its enum model via targetModelRef', () => {
+    const root = importOData(fixture)
+    const doc = expectPresent(root.apiDocumentation, 'apiDocumentation')
+    const pet = expectPresent(doc.models['OData.PetStore.Models.Pet'], 'Pet model')
+    const status = expectPresent(
+      pet.properties.find((p) => p.name === 'Status'),
+      'Pet.Status property'
+    )
+    expect(status.targetModelRef).toBe('OData.PetStore.Models.PetStatus')
+    // A primitive property carries no targetModelRef.
+    const name = expectPresent(pet.properties.find((p) => p.name === 'Name'), 'Pet.Name property')
+    expect(name.targetModelRef).toBeUndefined()
+  })
+
   it('defaults the service root when neither baseUrl nor sourceUrl is given', () => {
     const root = importOData(fixture)
     const env = expectPresent(root.environments[0], 'environment[0]')

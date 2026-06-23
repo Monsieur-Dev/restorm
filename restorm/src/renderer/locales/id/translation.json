@@ -1767,13 +1767,28 @@
     "createInstance": "Buat instans baru",
     "terminateInstance": "Akhiri instans"
   },
+  "odataFilter": {
+    "detail": {
+      "property": "properti",
+      "navigation": "navigasi",
+      "operator": "operator",
+      "logical": "operator logika",
+      "function": "fungsi",
+      "enumValue": "nilai enum"
+    },
+    "validation": {
+      "unknownProperty": "Properti tidak dikenal",
+      "wrongTypeOperator": "Operator tidak berlaku untuk tipe properti ini"
+    }
+  },
   "odataRequestTab": {
     "send": "Kirim",
     "loadNextPage": "Muat halaman berikutnya",
     "batchFormatLabel": "Format batch",
     "batchFormatMultipart": "multipart/mixed",
     "batchFormatJson": "Batch JSON",
-    "versionMismatchWarning": "Permintaan ini ditandai {{requestVersion}} tetapi responsnya tampak seperti {{responseVersion}}. Ubah versi permintaan agar sesuai dengan server."
+    "versionMismatchWarning": "Permintaan ini ditandai {{requestVersion}} tetapi responsnya tampak seperti {{responseVersion}}. Ubah versi permintaan agar sesuai dengan server.",
+    "orderbyPropertyPickerPlaceholder": "Pilih…"
   },
   "typedValue": {
     "list": {

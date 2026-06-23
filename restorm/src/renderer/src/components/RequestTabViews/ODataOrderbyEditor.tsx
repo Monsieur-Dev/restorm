@@ -10,11 +10,12 @@
  * the property name — the URL resolver resolves them at send time.
  */
 
-import React, { type CSSProperties } from 'react'
+import React, { type CSSProperties, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   Button,
   InputBox,
+  MultiSelectCombo,
   SelectBox,
   type ISelectData,
   type ISelectOptionItem
@@ -32,6 +33,7 @@ const DIRECTIONS: Direction[] = ['asc', 'desc']
 
 const rowStyle: CSSProperties = { display: 'flex', gap: 8, alignItems: 'center' }
 const propertyWrapperStyle: CSSProperties = { flex: 1, minWidth: 150 }
+const propertyPickerWrapperStyle: CSSProperties = { width: 130, minWidth: 0 }
 const directionWrapperStyle: CSSProperties = { width: 100 }
 const buttonRowStyle: CSSProperties = { display: 'flex', gap: 4 }
 const labelStyle: CSSProperties = { fontSize: 12, color: 'var(--descriptionForeground)' }
@@ -61,12 +63,24 @@ function serializeOrderby(specs: readonly OrderbyClauseSpec[]): string {
 export interface ODataOrderbyEditorProps {
   value: string | undefined
   onChange: (next: string) => void
+  /** Bound entity-type property names (from the importer). When
+   * present, each row gains a property picker that fills its property
+   * field — the metadata-driven autocomplete affordance for $orderby.
+   * The free-text input stays so `{{template}}` clauses still work. */
+  propertySuggestions?: readonly string[]
 }
 
-export const ODataOrderbyEditor: React.FC<ODataOrderbyEditorProps> = ({ value, onChange }) => {
+export const ODataOrderbyEditor: React.FC<ODataOrderbyEditorProps> = ({ value, onChange, propertySuggestions = [] }) => {
   const { t } = useTranslation()
   const specs = React.useMemo(() => parseOrderby(value), [value])
   const directionOptions: ISelectOptionItem[] = DIRECTIONS.map((d) => ({ text: d }))
+  const propertyOptions = useMemo(
+    () => propertySuggestions
+      .slice()
+      .sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }))
+      .map((name) => ({ value: name, label: name })),
+    [propertySuggestions]
+  )
 
   const emit = (next: OrderbyClauseSpec[]): void => {
     onChange(serializeOrderby(next))
@@ -118,6 +132,20 @@ export const ODataOrderbyEditor: React.FC<ODataOrderbyEditorProps> = ({ value, o
               data-testid={`odata-orderby-property-${index}`}
             />
           </div>
+          {propertyOptions.length > 0 ? (
+            <div style={propertyPickerWrapperStyle}>
+              <MultiSelectCombo
+                options={propertyOptions}
+                selected={[]}
+                onChange={(next: string[]) => {
+                  const picked = next[next.length - 1]
+                  if (picked) update(index, { property: picked })
+                }}
+                placeholder={t('odataRequestTab.orderbyPropertyPickerPlaceholder', 'Pick…')}
+                data-testid={`odata-orderby-property-picker-${index}`}
+              />
+            </div>
+          ) : null}
           <div style={directionWrapperStyle}>
             <SelectBox
               id={`odata-orderby-direction-${index}`}

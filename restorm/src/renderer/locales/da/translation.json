@@ -1768,13 +1768,28 @@
     "createInstance": "Opret en ny instans",
     "terminateInstance": "Afslut en instans"
   },
+  "odataFilter": {
+    "detail": {
+      "property": "egenskab",
+      "navigation": "navigation",
+      "operator": "operator",
+      "logical": "logisk operator",
+      "function": "funktion",
+      "enumValue": "enum-værdi"
+    },
+    "validation": {
+      "unknownProperty": "Ukendt egenskab",
+      "wrongTypeOperator": "Operatoren kan ikke anvendes på denne egenskabstype"
+    }
+  },
   "odataRequestTab": {
     "send": "Send",
     "loadNextPage": "Indlæs næste side",
     "batchFormatLabel": "Batchformat",
     "batchFormatMultipart": "multipart/mixed",
     "batchFormatJson": "JSON-batch",
-    "versionMismatchWarning": "Denne anmodning er mærket {{requestVersion}}, men svaret ligner {{responseVersion}}. Skift anmodningsversionen, så den matcher serveren."
+    "versionMismatchWarning": "Denne anmodning er mærket {{requestVersion}}, men svaret ligner {{responseVersion}}. Skift anmodningsversionen, så den matcher serveren.",
+    "orderbyPropertyPickerPlaceholder": "Vælg…"
   },
   "typedValue": {
     "list": {

@@ -1767,13 +1767,28 @@
     "createInstance": "建立新實例",
     "terminateInstance": "終止實例"
   },
+  "odataFilter": {
+    "detail": {
+      "property": "屬性",
+      "navigation": "導覽",
+      "operator": "運算子",
+      "logical": "邏輯運算子",
+      "function": "函式",
+      "enumValue": "列舉值"
+    },
+    "validation": {
+      "unknownProperty": "未知屬性",
+      "wrongTypeOperator": "運算子不適用於此屬性類型"
+    }
+  },
   "odataRequestTab": {
     "send": "傳送",
     "loadNextPage": "載入下一頁",
     "batchFormatLabel": "批次格式",
     "batchFormatMultipart": "multipart/mixed",
     "batchFormatJson": "JSON 批次",
-    "versionMismatchWarning": "此請求標記為 {{requestVersion}}，但回應看起來像 {{responseVersion}}。請變更請求版本以與伺服器相符。"
+    "versionMismatchWarning": "此請求標記為 {{requestVersion}}，但回應看起來像 {{responseVersion}}。請變更請求版本以與伺服器相符。",
+    "orderbyPropertyPickerPlaceholder": "選擇…"
   },
   "typedValue": {
     "list": {

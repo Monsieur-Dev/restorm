@@ -1770,13 +1770,28 @@
     "createInstance": "Створити новий екземпляр",
     "terminateInstance": "Завершити екземпляр"
   },
+  "odataFilter": {
+    "detail": {
+      "property": "властивість",
+      "navigation": "навігація",
+      "operator": "оператор",
+      "logical": "логічний оператор",
+      "function": "функція",
+      "enumValue": "значення переліку"
+    },
+    "validation": {
+      "unknownProperty": "Невідома властивість",
+      "wrongTypeOperator": "Оператор не застосовний до цього типу властивості"
+    }
+  },
   "odataRequestTab": {
     "send": "Надіслати",
     "loadNextPage": "Завантажити наступну сторінку",
     "batchFormatLabel": "Формат пакета",
     "batchFormatMultipart": "multipart/mixed",
     "batchFormatJson": "Пакет JSON",
-    "versionMismatchWarning": "Цей запит позначено як {{requestVersion}}, але відповідь схожа на {{responseVersion}}. Змініть версію запиту відповідно до сервера."
+    "versionMismatchWarning": "Цей запит позначено як {{requestVersion}}, але відповідь схожа на {{responseVersion}}. Змініть версію запиту відповідно до сервера.",
+    "orderbyPropertyPickerPlaceholder": "Виберіть…"
   },
   "typedValue": {
     "list": {

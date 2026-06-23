@@ -1768,13 +1768,28 @@
     "createInstance": "Opprett en ny instans",
     "terminateInstance": "Avslutt en instans"
   },
+  "odataFilter": {
+    "detail": {
+      "property": "egenskap",
+      "navigation": "navigasjon",
+      "operator": "operator",
+      "logical": "logisk operator",
+      "function": "funksjon",
+      "enumValue": "enum-verdi"
+    },
+    "validation": {
+      "unknownProperty": "Ukjent egenskap",
+      "wrongTypeOperator": "Operatoren kan ikke brukes på denne egenskapstypen"
+    }
+  },
   "odataRequestTab": {
     "send": "Send",
     "loadNextPage": "Last neste side",
     "batchFormatLabel": "Batchformat",
     "batchFormatMultipart": "multipart/mixed",
     "batchFormatJson": "JSON-batch",
-    "versionMismatchWarning": "Denne forespørselen er merket {{requestVersion}}, men svaret ser ut som {{responseVersion}}. Endre forespørselsversjonen slik at den samsvarer med serveren."
+    "versionMismatchWarning": "Denne forespørselen er merket {{requestVersion}}, men svaret ser ut som {{responseVersion}}. Endre forespørselsversjonen slik at den samsvarer med serveren.",
+    "orderbyPropertyPickerPlaceholder": "Velg…"
   },
   "typedValue": {
     "list": {

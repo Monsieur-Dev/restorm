@@ -1768,13 +1768,28 @@
     "createInstance": "Skapa en ny instans",
     "terminateInstance": "Avsluta en instans"
   },
+  "odataFilter": {
+    "detail": {
+      "property": "egenskap",
+      "navigation": "navigering",
+      "operator": "operator",
+      "logical": "logisk operator",
+      "function": "funktion",
+      "enumValue": "enum-värde"
+    },
+    "validation": {
+      "unknownProperty": "Okänd egenskap",
+      "wrongTypeOperator": "Operatorn kan inte tillämpas på den här egenskapstypen"
+    }
+  },
   "odataRequestTab": {
     "send": "Skicka",
     "loadNextPage": "Ladda nästa sida",
     "batchFormatLabel": "Batchformat",
     "batchFormatMultipart": "multipart/mixed",
     "batchFormatJson": "JSON-batch",
-    "versionMismatchWarning": "Den här begäran är märkt {{requestVersion}}, men svaret ser ut som {{responseVersion}}. Ändra begärans version så att den matchar servern."
+    "versionMismatchWarning": "Den här begäran är märkt {{requestVersion}}, men svaret ser ut som {{responseVersion}}. Ändra begärans version så att den matchar servern.",
+    "orderbyPropertyPickerPlaceholder": "Välj…"
   },
   "typedValue": {
     "list": {
