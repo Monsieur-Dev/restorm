@@ -61,11 +61,11 @@ function isPortFree(port: number): Promise<boolean> {
 }
 
 describe('WebSocketExecutionService — HTTP mock route dispatcher', () => {
-  beforeEach(() => {
-    websocketExecutionService.closeAll()
+  beforeEach(async () => {
+    await websocketExecutionService.closeAll()
   })
-  afterEach(() => {
-    websocketExecutionService.closeAll()
+  afterEach(async () => {
+    await websocketExecutionService.closeAll()
   })
 
   it('matches a registered METHOD + PATH and runs its handler', async () => {

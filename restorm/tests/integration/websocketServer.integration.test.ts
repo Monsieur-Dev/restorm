@@ -192,6 +192,113 @@ describe('WebSocketExecutionService — Socket.IO server mode', () => {
     expect(ping?.data).toBe(JSON.stringify({ n: 7 }))
   })
 
+  it('one-shot execute(): Stop during the bind window releases the port (no leaked listener)', async () => {
+    const port = await freePort()
+    stubServerRequest('srv-bind-race', `localhost:${port}`)
+
+    // Kick off the one-shot server run. execute() first awaits resolveExecution,
+    // THEN dispatches to listenSocketIOServer which registers a placeholder
+    // BEFORE its acquirePortHost await. Poll disconnect until it first succeeds —
+    // that first success lands in the bind window (placeholder present, route not
+    // yet attached). Without the placeholder, disconnect would no-op the whole
+    // window and the route would attach + leak.
+    const runPromise = websocketExecutionService.execute({ requestId: 'srv-bind-race' })
+    // Drain on the MICROTASK queue: resolveExecution (mocked, sync) settles on
+    // microtasks and registers the placeholder, while acquirePortHost's
+    // httpServer.listen callback is a slower macrotask. Disconnecting on the
+    // first microtask where the placeholder exists therefore lands inside the
+    // bind window — before the route attaches.
+    let stopped = false
+    for (let i = 0; i < 1000 && !stopped; i++) {
+      stopped = websocketExecutionService.disconnect('srv-bind-race')
+      if (!stopped) await Promise.resolve()
+    }
+    expect(stopped).toBe(true) // the placeholder made the Stop detectable (not a no-op)
+
+    // The run settles (cancelled) and the route never stayed listening — the
+    // Stop landed in the bind window (connected stays false).
+    const result = await runPromise
+    expect(result.connected).toBe(false)
+    expect(websocketExecutionService.isActive('srv-bind-race')).toBe(false)
+    // The port was released — a leaked listener would keep it bound forever.
+    await waitForPortFree(port, true)
+
+    // And a fresh server rebinds the same port cleanly (proves no leak).
+    stubServerRequest('srv-bind-reuse', `localhost:${port}`)
+    let up = false
+    websocketExecutionService.connectStreamingServer({
+      requestId: 'srv-bind-reuse', onConnect: () => { up = true }, onMessage: noop, onClose: noop
+    })
+    await waitFor(() => up)
+    expect(websocketExecutionService.isActive('srv-bind-reuse')).toBe(true)
+    websocketExecutionService.disconnect('srv-bind-reuse')
+    await waitFor(() => !websocketExecutionService.isActive('srv-bind-reuse'))
+  })
+
+  it('one-shot raw-WS execute(): Stop during the bind window releases the port', async () => {
+    const port = await freePort()
+    stubbed.set('raw-bind-race', { url: `localhost:${port}/chat`, message: '{}' })
+    vi.mocked(contextService.getRequestContext).mockImplementation(
+      (id: string) => {
+        const s = stubbed.get(id)
+        return (s ? { fullData: { server: true, protocol: 'websocket', message: s.message }, keyValueGroups: new Map() } : undefined) as never
+      }
+    )
+
+    const runPromise = websocketExecutionService.execute({ requestId: 'raw-bind-race' })
+    let stopped = false
+    for (let i = 0; i < 1000 && !stopped; i++) {
+      stopped = websocketExecutionService.disconnect('raw-bind-race')
+      if (!stopped) await Promise.resolve()
+    }
+    expect(stopped).toBe(true)
+    const result = await runPromise
+    expect(result.connected).toBe(false)
+    expect(websocketExecutionService.isActive('raw-bind-race')).toBe(false)
+    await waitForPortFree(port, true)
+  })
+
+  it('execute(): an unparseable port surfaces an error (no silent 3001 default)', async () => {
+    // A typo'd port must fail the run, not bind the 3001 default behind the user's
+    // back. The stub returns a server request whose URL has a non-numeric port.
+    stubServerRequest('srv-bad-port', 'localhost:30O1') // letter 'O', not zero
+    const result = await websocketExecutionService.execute({ requestId: 'srv-bad-port' })
+    expect(result.success).toBe(false)
+    expect(result.error).toMatch(/invalid server port/i)
+    expect(websocketExecutionService.isActive('srv-bad-port')).toBe(false)
+    // Nothing bound 3001 as a side effect.
+    expect(await isPortFree(3001)).toBe(true)
+  })
+
+  it('closeAll() awaits the OS socket release so an immediate same-port reopen rebinds cleanly', async () => {
+    const port = await freePort()
+    stubServerRequest('srv-reopen', `localhost:${port}`)
+    let up = false
+    websocketExecutionService.connectStreamingServer({
+      requestId: 'srv-reopen', onConnect: () => { up = true }, onMessage: noop, onClose: noop
+    })
+    await waitFor(() => up)
+    expect(await isPortFree(port)).toBe(false) // bound
+
+    // closeAll resolves only AFTER the OS socket is released — so the very next
+    // bind on the same port can't race EADDRINUSE.
+    await websocketExecutionService.closeAll()
+    expect(await isPortFree(port)).toBe(true) // already free, no polling needed
+
+    // Reopen on the same port in the next tick: binds cleanly.
+    stubServerRequest('srv-reopen-2', `localhost:${port}`)
+    let up2 = false
+    let err2: string | undefined
+    websocketExecutionService.connectStreamingServer({
+      requestId: 'srv-reopen-2', onConnect: () => { up2 = true }, onMessage: noop, onClose: (e) => { err2 = e }
+    })
+    await waitFor(() => up2)
+    expect(err2).toBeUndefined()
+    expect(websocketExecutionService.isActive('srv-reopen-2')).toBe(true)
+    websocketExecutionService.disconnect('srv-reopen-2')
+    await waitFor(() => !websocketExecutionService.isActive('srv-reopen-2'))
+  })
+
   it('two routes (distinct namespaces) share ONE port; each client reaches its own route', async () => {
     const port = await freePort()
     stubServerRequest('srv-root', `localhost:${port}`)        // namespace "/"
@@ -300,7 +407,7 @@ describe('WebSocketExecutionService — Socket.IO server mode', () => {
     await waitFor(() => xUp && yUp)
 
     // Closing the project tears down BOTH hosted servers (no leaked listener).
-    websocketExecutionService.closeAll()
+    await websocketExecutionService.closeAll()
     await waitFor(() => xClosed && yClosed)
     expect(websocketExecutionService.isActive('srv-x')).toBe(false)
     expect(websocketExecutionService.isActive('srv-y')).toBe(false)
@@ -422,7 +529,7 @@ describe('WebSocketExecutionService — Socket.IO server mode', () => {
     })
     await waitFor(() => up)
 
-    websocketExecutionService.closeAll()
+    await websocketExecutionService.closeAll()
     await waitFor(() => closed)
     expect(websocketExecutionService.isActive('raw-close')).toBe(false)
     // The raw-WS host owns the bare http server; closeAll must close it so the

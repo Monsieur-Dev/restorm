@@ -486,8 +486,9 @@ app.on('before-quit', () => {
   secretHydrationService.clearAll()
   // Gracefully close every live connection + any hosted Socket.IO server so a
   // server route doesn't linger past quit (process exit would reclaim the port,
-  // but this flushes history + closes clients cleanly).
-  websocketExecutionService.closeAll()
+  // but this flushes history + closes clients cleanly). Fire-and-forget: the
+  // process is exiting, so we don't await the OS socket release here.
+  void websocketExecutionService.closeAll()
   // Same for any hosted gRPC mock server (its own grpc.Server / port).
   grpcMockServerService.closeAll()
   // Same for any hosted OData mock service (its routes on the shared HTTP host).
