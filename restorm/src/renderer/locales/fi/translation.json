@@ -1707,6 +1707,39 @@
     },
     "http": {
       "served": "served"
+    },
+    "actionOverride": {
+      "button": {
+        "tooltip": "Ohita pyynnön asetukset",
+        "label": "Ohita",
+        "activeLabel": "{{count}} ohitusta"
+      },
+      "configSelector": {
+        "label": "Perusasetukset",
+        "none": "Ei mitään (pyynnön oletusarvot)"
+      },
+      "configMissing": "Valittu kokoonpano poistettiin; pyynnön oletusarvot ovat voimassa.",
+      "overridesLabel": "Kenttäohitukset",
+      "clear": "Palauta peritty arvo",
+      "fields": {
+        "url": "URL",
+        "method": "Menetelmä",
+        "body": "Runko",
+        "env": "Ympäristö"
+      },
+      "advanced": {
+        "label": "Muut kentät (JSON)",
+        "placeholder": "{ \"headers\": [ … ], \"body\": { … } }",
+        "invalid": "Virheellinen JSON — ei käytetty"
+      },
+      "sections": {
+        "headers": "Otsikot",
+        "params": "Parametrit",
+        "pathParams": "Polkuparametrit"
+      },
+      "inherit": "Peri",
+      "addField": "Lisää ohituskenttä",
+      "configMissingShort": "Kokoonpano puuttuu"
     }
   },
   "mqtt": {
@@ -1967,7 +2000,9 @@
     },
     "deleteConfirm": {
       "title": "Poista konfiguraatio",
-      "message": "Haluatko poistaa konfiguraation \"{{name}}\"?"
+      "message": "Haluatko poistaa konfiguraation \"{{name}}\"?",
+      "usedByScenarios_one": "Sitä käyttää skenaario {{scenarios}}.",
+      "usedByScenarios_other": "Sitä käyttävät skenaariot {{scenarios}}."
     },
     "confirm": {
       "ok": "OK",

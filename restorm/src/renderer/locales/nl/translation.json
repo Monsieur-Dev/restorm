@@ -1707,6 +1707,39 @@
     },
     "http": {
       "served": "served"
+    },
+    "actionOverride": {
+      "button": {
+        "tooltip": "Verzoekconfiguratie overschrijven",
+        "label": "Overschrijven",
+        "activeLabel": "{{count}} overschrijving(en)"
+      },
+      "configSelector": {
+        "label": "Basisconfiguratie",
+        "none": "Geen (standaardwaarden van verzoek)"
+      },
+      "configMissing": "De geselecteerde configuratie is verwijderd; de standaardwaarden van het verzoek gelden.",
+      "overridesLabel": "Veldoverschrijvingen",
+      "clear": "Terugzetten naar overgenomen",
+      "fields": {
+        "url": "URL",
+        "method": "Methode",
+        "body": "Body",
+        "env": "Omgeving"
+      },
+      "advanced": {
+        "label": "Andere velden (JSON)",
+        "placeholder": "{ \"headers\": [ … ], \"body\": { … } }",
+        "invalid": "Ongeldige JSON — niet toegepast"
+      },
+      "sections": {
+        "headers": "Headers",
+        "params": "Parameters",
+        "pathParams": "Padparameters"
+      },
+      "inherit": "Overnemen",
+      "addField": "Overschrijvingsveld toevoegen",
+      "configMissingShort": "Configuratie ontbreekt"
     }
   },
   "mqtt": {
@@ -1967,7 +2000,9 @@
     },
     "deleteConfirm": {
       "title": "Configuratie verwijderen",
-      "message": "Wil je de configuratie \"{{name}}\" verwijderen?"
+      "message": "Wil je de configuratie \"{{name}}\" verwijderen?",
+      "usedByScenarios_one": "Het wordt gebruikt door het scenario {{scenarios}}.",
+      "usedByScenarios_other": "Het wordt gebruikt door de scenario’s {{scenarios}}."
     },
     "confirm": {
       "ok": "OK",

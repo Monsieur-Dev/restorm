@@ -1707,6 +1707,39 @@
     },
     "http": {
       "served": "served"
+    },
+    "actionOverride": {
+      "button": {
+        "tooltip": "Substituir a configuração da solicitação",
+        "label": "Substituir",
+        "activeLabel": "{{count}} substituição(ões)"
+      },
+      "configSelector": {
+        "label": "Configuração base",
+        "none": "Nenhuma (valores padrão da solicitação)"
+      },
+      "configMissing": "A configuração selecionada foi excluída; aplicam-se os valores padrão da solicitação.",
+      "overridesLabel": "Substituições de campos",
+      "clear": "Repor para herdado",
+      "fields": {
+        "url": "URL",
+        "method": "Método",
+        "body": "Corpo",
+        "env": "Ambiente"
+      },
+      "advanced": {
+        "label": "Outros campos (JSON)",
+        "placeholder": "{ \"headers\": [ … ], \"body\": { … } }",
+        "invalid": "JSON inválido — não aplicado"
+      },
+      "sections": {
+        "headers": "Cabeçalhos",
+        "params": "Parâmetros",
+        "pathParams": "Parâmetros de caminho"
+      },
+      "inherit": "Herdar",
+      "addField": "Adicionar um campo de substituição",
+      "configMissingShort": "Configuração ausente"
     }
   },
   "mqtt": {
@@ -1967,7 +2000,9 @@
     },
     "deleteConfirm": {
       "title": "Excluir configuração",
-      "message": "Deseja excluir a configuração \"{{name}}\"?"
+      "message": "Deseja excluir a configuração \"{{name}}\"?",
+      "usedByScenarios_one": "É usada pelo cenário {{scenarios}}.",
+      "usedByScenarios_other": "É usada pelos cenários {{scenarios}}."
     },
     "confirm": {
       "ok": "OK",

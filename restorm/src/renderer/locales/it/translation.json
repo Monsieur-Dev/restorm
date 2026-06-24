@@ -1707,6 +1707,39 @@
     },
     "http": {
       "served": "served"
+    },
+    "actionOverride": {
+      "button": {
+        "tooltip": "Sovrascrivi la configurazione della richiesta",
+        "label": "Sovrascrivi",
+        "activeLabel": "{{count}} sovrascrittura/e"
+      },
+      "configSelector": {
+        "label": "Configurazione di base",
+        "none": "Nessuna (valori predefiniti della richiesta)"
+      },
+      "configMissing": "La configurazione selezionata è stata eliminata; si applicano i valori predefiniti della richiesta.",
+      "overridesLabel": "Sostituzioni dei campi",
+      "clear": "Ripristina ereditato",
+      "fields": {
+        "url": "URL",
+        "method": "Metodo",
+        "body": "Corpo",
+        "env": "Ambiente"
+      },
+      "advanced": {
+        "label": "Altri campi (JSON)",
+        "placeholder": "{ \"headers\": [ … ], \"body\": { … } }",
+        "invalid": "JSON non valido — non applicato"
+      },
+      "sections": {
+        "headers": "Intestazioni",
+        "params": "Parametri",
+        "pathParams": "Parametri di percorso"
+      },
+      "inherit": "Eredita",
+      "addField": "Aggiungi un campo di sostituzione",
+      "configMissingShort": "Configurazione mancante"
     }
   },
   "mqtt": {
@@ -1967,7 +2000,9 @@
     },
     "deleteConfirm": {
       "title": "Elimina configurazione",
-      "message": "Vuoi eliminare la configurazione \"{{name}}\"?"
+      "message": "Vuoi eliminare la configurazione \"{{name}}\"?",
+      "usedByScenarios_one": "È usata dallo scenario {{scenarios}}.",
+      "usedByScenarios_other": "È usata dagli scenari {{scenarios}}."
     },
     "confirm": {
       "ok": "OK",

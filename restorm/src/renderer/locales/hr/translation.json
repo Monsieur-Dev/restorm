@@ -1708,6 +1708,39 @@
     },
     "http": {
       "served": "served"
+    },
+    "actionOverride": {
+      "button": {
+        "tooltip": "Zamijeni konfiguraciju zahtjeva",
+        "label": "Zamijeni",
+        "activeLabel": "{{count}} zamjena"
+      },
+      "configSelector": {
+        "label": "Osnovna konfiguracija",
+        "none": "Nijedna (zadane vrijednosti zahtjeva)"
+      },
+      "configMissing": "Odabrana konfiguracija je izbrisana; primjenjuju se zadane vrijednosti zahtjeva.",
+      "overridesLabel": "Zamjene polja",
+      "clear": "Vrati na naslijeđeno",
+      "fields": {
+        "url": "URL",
+        "method": "Metoda",
+        "body": "Tijelo",
+        "env": "Okruženje"
+      },
+      "advanced": {
+        "label": "Ostala polja (JSON)",
+        "placeholder": "{ \"headers\": [ … ], \"body\": { … } }",
+        "invalid": "Nevažeći JSON — nije primijenjeno"
+      },
+      "sections": {
+        "headers": "Zaglavlja",
+        "params": "Parametri",
+        "pathParams": "Parametri putanje"
+      },
+      "inherit": "Naslijedi",
+      "addField": "Dodaj polje zamjene",
+      "configMissingShort": "Konfiguracija nedostaje"
     }
   },
   "mqtt": {
@@ -1968,7 +2001,9 @@
     },
     "deleteConfirm": {
       "title": "Izbriši konfiguraciju",
-      "message": "Želite li izbrisati konfiguraciju \"{{name}}\"?"
+      "message": "Želite li izbrisati konfiguraciju \"{{name}}\"?",
+      "usedByScenarios_one": "Koristi je scenarij {{scenarios}}.",
+      "usedByScenarios_other": "Koriste je scenariji {{scenarios}}."
     },
     "confirm": {
       "ok": "OK",

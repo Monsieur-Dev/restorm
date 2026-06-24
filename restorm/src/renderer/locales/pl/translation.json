@@ -1709,6 +1709,39 @@
     },
     "http": {
       "served": "served"
+    },
+    "actionOverride": {
+      "button": {
+        "tooltip": "Zastąp konfigurację żądania",
+        "label": "Zastąp",
+        "activeLabel": "{{count}} zastąpień"
+      },
+      "configSelector": {
+        "label": "Konfiguracja bazowa",
+        "none": "Brak (wartości domyślne żądania)"
+      },
+      "configMissing": "Wybrana konfiguracja została usunięta; obowiązują wartości domyślne żądania.",
+      "overridesLabel": "Zastąpienia pól",
+      "clear": "Przywróć dziedziczenie",
+      "fields": {
+        "url": "URL",
+        "method": "Metoda",
+        "body": "Treść",
+        "env": "Środowisko"
+      },
+      "advanced": {
+        "label": "Inne pola (JSON)",
+        "placeholder": "{ \"headers\": [ … ], \"body\": { … } }",
+        "invalid": "Nieprawidłowy JSON — nie zastosowano"
+      },
+      "sections": {
+        "headers": "Nagłówki",
+        "params": "Parametry",
+        "pathParams": "Parametry ścieżki"
+      },
+      "inherit": "Dziedzicz",
+      "addField": "Dodaj pole zastąpienia",
+      "configMissingShort": "Brak konfiguracji"
     }
   },
   "mqtt": {
@@ -1969,7 +2002,9 @@
     },
     "deleteConfirm": {
       "title": "Usuń konfigurację",
-      "message": "Czy chcesz usunąć konfigurację „{{name}}\"?"
+      "message": "Czy chcesz usunąć konfigurację „{{name}}\"?",
+      "usedByScenarios_one": "Jest używana przez scenariusz {{scenarios}}.",
+      "usedByScenarios_other": "Jest używana przez scenariusze {{scenarios}}."
     },
     "confirm": {
       "ok": "OK",

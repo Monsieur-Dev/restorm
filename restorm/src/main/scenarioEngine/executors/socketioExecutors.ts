@@ -18,6 +18,20 @@
 import type { NodeExecutor } from '../types'
 import { readSocketioEvents } from '../../../shared/scenarioNodePorts'
 import { resolveOperand } from '../conditionEval'
+import { QUICK_CONFIG_ID_KEY, OVERRIDES_KEY } from '../../../shared/scenarioActionOverride'
+
+/** Pull the node's override config (picked quick-config id + static field
+ * overrides) into a scope-action `overrideConfig`, or undefined when none is set
+ * — so the engine applies the same override-resolution to a streaming connect /
+ * listen request as to a one-shot httpRequest. The config is resolved by id from
+ * the bound request's PROJECT configs in `engine.ts`, so only the id travels. */
+function overrideConfigFrom(config: Record<string, unknown>): Record<string, unknown> | undefined {
+  const out: Record<string, unknown> = {}
+  for (const key of [QUICK_CONFIG_ID_KEY, OVERRIDES_KEY]) {
+    if (config[key] !== undefined) out[key] = config[key]
+  }
+  return Object.keys(out).length > 0 ? out : undefined
+}
 
 /** Coerce a resolved operand to the wire string the connection's `send` expects
  * (a JSON string for objects, the raw text otherwise). */
@@ -45,7 +59,8 @@ export const socketioConnectExecutor: NodeExecutor = (_act, ctx) => {
       transport: 'socketio',
       requestId: cfg.requestId,
       events: readSocketioEvents(ctx.node.config),
-      connectionName
+      connectionName,
+      ...(overrideConfigFrom(ctx.node.config) ? { overrideConfig: overrideConfigFrom(ctx.node.config) } : {})
     }
   }
 }
@@ -62,7 +77,7 @@ export const websocketConnectExecutor: NodeExecutor = (_act, ctx) => {
     : cfg.requestId
   return {
     outputs: [],
-    scopeAction: { type: 'openSocketioConnect', transport: 'websocket', requestId: cfg.requestId, events: [], connectionName }
+    scopeAction: { type: 'openSocketioConnect', transport: 'websocket', requestId: cfg.requestId, events: [], connectionName, ...(overrideConfigFrom(ctx.node.config) ? { overrideConfig: overrideConfigFrom(ctx.node.config) } : {}) }
   }
 }
 
@@ -109,7 +124,7 @@ export const mqttConnectExecutor: NodeExecutor = (_act, ctx) => {
     : cfg.requestId
   return {
     outputs: [],
-    scopeAction: { type: 'openSocketioConnect', transport: 'mqtt', requestId: cfg.requestId, events: [], connectionName }
+    scopeAction: { type: 'openSocketioConnect', transport: 'mqtt', requestId: cfg.requestId, events: [], connectionName, ...(overrideConfigFrom(ctx.node.config) ? { overrideConfig: overrideConfigFrom(ctx.node.config) } : {}) }
   }
 }
 
@@ -155,7 +170,7 @@ export const grpcConnectExecutor: NodeExecutor = (_act, ctx) => {
     : cfg.requestId
   return {
     outputs: [],
-    scopeAction: { type: 'openSocketioConnect', transport: 'grpc', requestId: cfg.requestId, events: [], connectionName }
+    scopeAction: { type: 'openSocketioConnect', transport: 'grpc', requestId: cfg.requestId, events: [], connectionName, ...(overrideConfigFrom(ctx.node.config) ? { overrideConfig: overrideConfigFrom(ctx.node.config) } : {}) }
   }
 }
 
@@ -207,7 +222,7 @@ export const httpListenExecutor: NodeExecutor = (_act, ctx) => {
     : cfg.requestId
   return {
     outputs: [],
-    scopeAction: { type: 'openSocketioConnect', transport: 'http-server', requestId: cfg.requestId, events: [], connectionName }
+    scopeAction: { type: 'openSocketioConnect', transport: 'http-server', requestId: cfg.requestId, events: [], connectionName, ...(overrideConfigFrom(ctx.node.config) ? { overrideConfig: overrideConfigFrom(ctx.node.config) } : {}) }
   }
 }
 
@@ -244,7 +259,7 @@ export const grpcListenExecutor: NodeExecutor = (_act, ctx) => {
     : cfg.requestId
   return {
     outputs: [],
-    scopeAction: { type: 'openSocketioConnect', transport: 'grpc-server', requestId: cfg.requestId, events: [], connectionName }
+    scopeAction: { type: 'openSocketioConnect', transport: 'grpc-server', requestId: cfg.requestId, events: [], connectionName, ...(overrideConfigFrom(ctx.node.config) ? { overrideConfig: overrideConfigFrom(ctx.node.config) } : {}) }
   }
 }
 

@@ -1707,6 +1707,39 @@
     },
     "http": {
       "served": "served"
+    },
+    "actionOverride": {
+      "button": {
+        "tooltip": "Åsidosätt begärans konfiguration",
+        "label": "Åsidosätt",
+        "activeLabel": "{{count}} åsidosättning(ar)"
+      },
+      "configSelector": {
+        "label": "Baskonfiguration",
+        "none": "Ingen (begärans standardvärden)"
+      },
+      "configMissing": "Den valda konfigurationen togs bort; begärans standardvärden gäller.",
+      "overridesLabel": "Fältåsidosättningar",
+      "clear": "Återställ till ärvt",
+      "fields": {
+        "url": "URL",
+        "method": "Metod",
+        "body": "Brödtext",
+        "env": "Miljö"
+      },
+      "advanced": {
+        "label": "Andra fält (JSON)",
+        "placeholder": "{ \"headers\": [ … ], \"body\": { … } }",
+        "invalid": "Ogiltig JSON — tillämpas inte"
+      },
+      "sections": {
+        "headers": "Rubriker",
+        "params": "Parametrar",
+        "pathParams": "Sökvägsparametrar"
+      },
+      "inherit": "Ärv",
+      "addField": "Lägg till ett åsidosättningsfält",
+      "configMissingShort": "Konfiguration saknas"
     }
   },
   "mqtt": {
@@ -1967,7 +2000,9 @@
     },
     "deleteConfirm": {
       "title": "Ta bort konfiguration",
-      "message": "Vill du ta bort konfigurationen \"{{name}}\"?"
+      "message": "Vill du ta bort konfigurationen \"{{name}}\"?",
+      "usedByScenarios_one": "Den används av scenariot {{scenarios}}.",
+      "usedByScenarios_other": "Den används av scenarierna {{scenarios}}."
     },
     "confirm": {
       "ok": "OK",

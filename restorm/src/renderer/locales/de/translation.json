@@ -1707,6 +1707,39 @@
     },
     "http": {
       "served": "served"
+    },
+    "actionOverride": {
+      "button": {
+        "tooltip": "Anfragekonfiguration überschreiben",
+        "label": "Überschreiben",
+        "activeLabel": "{{count}} Überschreibung(en)"
+      },
+      "configSelector": {
+        "label": "Basiskonfiguration",
+        "none": "Keine (Standardwerte der Anfrage)"
+      },
+      "configMissing": "Die ausgewählte Konfiguration wurde gelöscht; es gelten die Standardwerte der Anfrage.",
+      "overridesLabel": "Feldüberschreibungen",
+      "clear": "Auf vererbt zurücksetzen",
+      "fields": {
+        "url": "URL",
+        "method": "Methode",
+        "body": "Body",
+        "env": "Umgebung"
+      },
+      "advanced": {
+        "label": "Weitere Felder (JSON)",
+        "placeholder": "{ \"headers\": [ … ], \"body\": { … } }",
+        "invalid": "Ungültiges JSON — nicht angewendet"
+      },
+      "sections": {
+        "headers": "Header",
+        "params": "Parameter",
+        "pathParams": "Pfadparameter"
+      },
+      "inherit": "Erben",
+      "addField": "Überschreibungsfeld hinzufügen",
+      "configMissingShort": "Konfiguration fehlt"
     }
   },
   "mqtt": {
@@ -1967,7 +2000,9 @@
     },
     "deleteConfirm": {
       "title": "Konfiguration löschen",
-      "message": "Möchten Sie die Konfiguration „{{name}}\" löschen?"
+      "message": "Möchten Sie die Konfiguration „{{name}}\" löschen?",
+      "usedByScenarios_one": "Sie wird vom Szenario {{scenarios}} verwendet.",
+      "usedByScenarios_other": "Sie wird von den Szenarien {{scenarios}} verwendet."
     },
     "confirm": {
       "ok": "OK",

@@ -1707,6 +1707,39 @@
     },
     "http": {
       "served": "served"
+    },
+    "actionOverride": {
+      "button": {
+        "tooltip": "Tilsidesæt anmodningskonfiguration",
+        "label": "Tilsidesæt",
+        "activeLabel": "{{count}} tilsidesættelse(r)"
+      },
+      "configSelector": {
+        "label": "Baseopsætning",
+        "none": "Ingen (anmodningens standardværdier)"
+      },
+      "configMissing": "Den valgte konfiguration blev slettet; anmodningens standardværdier gælder.",
+      "overridesLabel": "Felttilsidesættelser",
+      "clear": "Nulstil til nedarvet",
+      "fields": {
+        "url": "URL",
+        "method": "Metode",
+        "body": "Brødtekst",
+        "env": "Miljø"
+      },
+      "advanced": {
+        "label": "Andre felter (JSON)",
+        "placeholder": "{ \"headers\": [ … ], \"body\": { … } }",
+        "invalid": "Ugyldig JSON — ikke anvendt"
+      },
+      "sections": {
+        "headers": "Headers",
+        "params": "Parametre",
+        "pathParams": "Stiparametre"
+      },
+      "inherit": "Nedarv",
+      "addField": "Tilføj et tilsidesættelsesfelt",
+      "configMissingShort": "Konfiguration mangler"
     }
   },
   "mqtt": {
@@ -1967,7 +2000,9 @@
     },
     "deleteConfirm": {
       "title": "Slet konfiguration",
-      "message": "Vil du slette konfigurationen \"{{name}}\"?"
+      "message": "Vil du slette konfigurationen \"{{name}}\"?",
+      "usedByScenarios_one": "Den bruges af scenariet {{scenarios}}.",
+      "usedByScenarios_other": "Den bruges af scenarierne {{scenarios}}."
     },
     "confirm": {
       "ok": "OK",

@@ -1706,6 +1706,39 @@
     },
     "http": {
       "served": "served"
+    },
+    "actionOverride": {
+      "button": {
+        "tooltip": "Timpa konfigurasi permintaan",
+        "label": "Timpa",
+        "activeLabel": "{{count}} penimpaan"
+      },
+      "configSelector": {
+        "label": "Konfigurasi dasar",
+        "none": "Tidak ada (nilai bawaan permintaan)"
+      },
+      "configMissing": "Konfigurasi yang dipilih telah dihapus; nilai bawaan permintaan berlaku.",
+      "overridesLabel": "Penimpaan bidang",
+      "clear": "Atur ulang ke warisan",
+      "fields": {
+        "url": "URL",
+        "method": "Metode",
+        "body": "Body",
+        "env": "Lingkungan"
+      },
+      "advanced": {
+        "label": "Bidang lain (JSON)",
+        "placeholder": "{ \"headers\": [ … ], \"body\": { … } }",
+        "invalid": "JSON tidak valid — tidak diterapkan"
+      },
+      "sections": {
+        "headers": "Header",
+        "params": "Parameter",
+        "pathParams": "Parameter Jalur"
+      },
+      "inherit": "Warisi",
+      "addField": "Tambahkan bidang penimpaan",
+      "configMissingShort": "Konfigurasi tidak ada"
     }
   },
   "mqtt": {
@@ -1966,7 +1999,9 @@
     },
     "deleteConfirm": {
       "title": "Hapus konfigurasi",
-      "message": "Apakah Anda ingin menghapus konfigurasi \"{{name}}\"?"
+      "message": "Apakah Anda ingin menghapus konfigurasi \"{{name}}\"?",
+      "usedByScenarios_one": "Digunakan oleh skenario {{scenarios}}.",
+      "usedByScenarios_other": "Digunakan oleh skenario {{scenarios}}."
     },
     "confirm": {
       "ok": "OK",

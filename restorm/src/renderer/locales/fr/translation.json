@@ -1707,6 +1707,39 @@
     },
     "http": {
       "served": "servie"
+    },
+    "actionOverride": {
+      "button": {
+        "tooltip": "Remplacer la configuration de la requête",
+        "label": "Remplacer",
+        "activeLabel": "{{count}} remplacement(s)"
+      },
+      "configSelector": {
+        "label": "Configuration de base",
+        "none": "Aucune (valeurs par défaut de la requête)"
+      },
+      "configMissing": "La configuration sélectionnée a été supprimée ; les valeurs par défaut de la requête s’appliquent.",
+      "overridesLabel": "Remplacements de champs",
+      "clear": "Rétablir la valeur héritée",
+      "fields": {
+        "url": "URL",
+        "method": "Méthode",
+        "body": "Corps",
+        "env": "Environnement"
+      },
+      "advanced": {
+        "label": "Autres champs (JSON)",
+        "placeholder": "{ \"headers\": [ … ], \"body\": { … } }",
+        "invalid": "JSON invalide — non appliqué"
+      },
+      "sections": {
+        "headers": "En-têtes",
+        "params": "Paramètres",
+        "pathParams": "Paramètres de chemin"
+      },
+      "inherit": "Hériter",
+      "addField": "Ajouter un champ à remplacer",
+      "configMissingShort": "Configuration introuvable"
     }
   },
   "mqtt": {
@@ -1967,7 +2000,9 @@
     },
     "deleteConfirm": {
       "title": "Supprimer la configuration",
-      "message": "Voulez-vous supprimer la configuration « {{name}} » ?"
+      "message": "Voulez-vous supprimer la configuration « {{name}} » ?",
+      "usedByScenarios_one": "Elle est utilisée par le scénario {{scenarios}}.",
+      "usedByScenarios_other": "Elle est utilisée par les scénarios {{scenarios}}."
     },
     "confirm": {
       "ok": "OK",

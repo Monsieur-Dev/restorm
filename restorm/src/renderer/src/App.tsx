@@ -150,7 +150,7 @@ import { AvailableVariablesProvider } from './contexts/AvailableVariablesContext
 import { VariableTransformProvider } from './contexts/VariableTransformContext'
 import { AuthRequestResolverContext, type AuthRequestResolver } from './contexts/authRequestResolverContext'
 import { collectExpandableIds } from './services/FolderToListView'
-import { findScenariosUsingRequest, findScenariosUsingScenario, requestScenarioDeleteUsages } from './services/scenarioRequestUsage'
+import { findScenariosUsingRequest, findScenariosUsingScenario, findScenariosUsingQuickConfig, requestScenarioDeleteUsages } from './services/scenarioRequestUsage'
 import { diffScenarioPortRenames, remapCallerScenarioEdges, isEmptyRenameMap } from '../../shared/scenarioPortRename'
 import { requestScenarioNodeFocus } from './services/scenarioFocusBus'
 import {
@@ -2624,6 +2624,12 @@ const App: React.FC = () => {
     (scenarioId: string) => findScenariosUsingScenario(rootItems, scenarioId),
     [rootItems]
   )
+  // Quick-config delete cross-link: the scenarios whose actions reference a
+  // saved config by id, so the quick-settings trash confirmation can name them.
+  const getScenariosUsingQuickConfigCb = useCallback(
+    (quickConfigId: string) => findScenariosUsingQuickConfig(rootItems, quickConfigId),
+    [rootItems]
+  )
   const openScenarioFromRequest = useCallback((scenarioId: string, focusNodeId?: string) => {
     handleItemClick(scenarioId)
     if (focusNodeId) requestScenarioNodeFocus(scenarioId, focusNodeId)
@@ -2822,6 +2828,7 @@ const App: React.FC = () => {
               onStateRestored={handleStateRestoredGated}
               getRequestById={getRequestByIdCb}
               getScenariosUsingRequest={getScenariosUsingRequestCb}
+              getScenariosUsingQuickConfig={getScenariosUsingQuickConfigCb}
               getScenariosUsingScenario={getScenariosUsingScenarioCb}
               onOpenScenarioFromRequest={openScenarioFromRequest}
               getFolderById={getFolderByIdCb}
@@ -2894,6 +2901,7 @@ const App: React.FC = () => {
             onStateRestored={handleStateRestored}
             getRequestById={(id) => findRequestById(rootItems, id)}
             getScenariosUsingRequest={getScenariosUsingRequestCb}
+            getScenariosUsingQuickConfig={getScenariosUsingQuickConfigCb}
             getScenariosUsingScenario={getScenariosUsingScenarioCb}
             onOpenScenarioFromRequest={openScenarioFromRequest}
             getFolderById={(id) => findFolderById(rootItems, id)}

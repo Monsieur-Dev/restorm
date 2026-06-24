@@ -1706,6 +1706,39 @@
     },
     "http": {
       "served": "served"
+    },
+    "actionOverride": {
+      "button": {
+        "tooltip": "요청 구성 재정의",
+        "label": "재정의",
+        "activeLabel": "재정의 {{count}}개"
+      },
+      "configSelector": {
+        "label": "기본 구성",
+        "none": "없음(요청 기본값 사용)"
+      },
+      "configMissing": "선택한 구성이 삭제되었습니다. 요청 기본값이 적용됩니다.",
+      "overridesLabel": "필드 재정의",
+      "clear": "상속으로 재설정",
+      "fields": {
+        "url": "URL",
+        "method": "메서드",
+        "body": "본문",
+        "env": "환경"
+      },
+      "advanced": {
+        "label": "기타 필드 (JSON)",
+        "placeholder": "{ \"headers\": [ … ], \"body\": { … } }",
+        "invalid": "잘못된 JSON — 적용되지 않음"
+      },
+      "sections": {
+        "headers": "헤더",
+        "params": "매개변수",
+        "pathParams": "경로 매개변수"
+      },
+      "inherit": "상속",
+      "addField": "재정의 필드 추가",
+      "configMissingShort": "구성 없음"
     }
   },
   "mqtt": {
@@ -1966,7 +1999,9 @@
     },
     "deleteConfirm": {
       "title": "설정 삭제",
-      "message": "\"{{name}}\" 설정을 삭제하시겠습니까?"
+      "message": "\"{{name}}\" 설정을 삭제하시겠습니까?",
+      "usedByScenarios_one": "시나리오 {{scenarios}}에서 사용 중입니다.",
+      "usedByScenarios_other": "시나리오 {{scenarios}}에서 사용 중입니다."
     },
     "confirm": {
       "ok": "OK",

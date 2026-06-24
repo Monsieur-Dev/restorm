@@ -1707,6 +1707,39 @@
     },
     "http": {
       "served": "served"
+    },
+    "actionOverride": {
+      "button": {
+        "tooltip": "Kérés konfigurációjának felülbírálása",
+        "label": "Felülbírálás",
+        "activeLabel": "{{count}} felülbírálás"
+      },
+      "configSelector": {
+        "label": "Alapkonfiguráció",
+        "none": "Nincs (a kérés alapértelmezett értékei)"
+      },
+      "configMissing": "A kiválasztott konfiguráció törölve lett; a kérés alapértelmezett értékei érvényesek.",
+      "overridesLabel": "Mezőfelülbírálások",
+      "clear": "Visszaállítás örököltre",
+      "fields": {
+        "url": "URL",
+        "method": "Metódus",
+        "body": "Törzs",
+        "env": "Környezet"
+      },
+      "advanced": {
+        "label": "Egyéb mezők (JSON)",
+        "placeholder": "{ \"headers\": [ … ], \"body\": { … } }",
+        "invalid": "Érvénytelen JSON — nincs alkalmazva"
+      },
+      "sections": {
+        "headers": "Fejlécek",
+        "params": "Paraméterek",
+        "pathParams": "Útvonalparaméterek"
+      },
+      "inherit": "Öröklés",
+      "addField": "Felülbírálási mező hozzáadása",
+      "configMissingShort": "Hiányzó konfiguráció"
     }
   },
   "mqtt": {
@@ -1967,7 +2000,9 @@
     },
     "deleteConfirm": {
       "title": "Konfiguráció törlése",
-      "message": "Szeretné törölni a(z) \"{{name}}\" konfigurációt?"
+      "message": "Szeretné törölni a(z) \"{{name}}\" konfigurációt?",
+      "usedByScenarios_one": "A(z) {{scenarios}} forgatókönyv használja.",
+      "usedByScenarios_other": "A(z) {{scenarios}} forgatókönyvek használják."
     },
     "confirm": {
       "ok": "OK",

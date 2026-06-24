@@ -10,6 +10,7 @@ import { ConnectionPicker } from './SocketioNodeBoxes'
 import { useScenarioBoundResolver } from '../scenarioBoundResolver'
 import { isRequest } from '../../../../../shared/types/collections'
 import { readCodeString } from './scenarioCodeValue'
+import { useStreamingOverrideSections } from './scenarioOverridePorts'
 
 const stop = (e: React.MouseEvent): void => { e.stopPropagation() }
 
@@ -29,7 +30,9 @@ export const WebsocketConnectNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> =
   // server capsule + a "started" port label, distinct from a client connect.
   const resolve = useScenarioBoundResolver()
   const boundItem = requestId && resolve ? resolve(requestId) : null
-  const isServerBound = !!boundItem && isRequest(boundItem) && (boundItem as { server?: boolean }).server === true
+  const boundRequest = boundItem && isRequest(boundItem) ? boundItem : null
+  const isServerBound = !!boundRequest && (boundRequest as { server?: boolean }).server === true
+  const overrideSections = useStreamingOverrideSections(boundRequest, config, (patch) => { data.onSetConfig?.(id, patch) })
 
   const left: ScenarioNodeSection[] = [
     ...(requestId && data.onOpenItem
@@ -50,6 +53,7 @@ export const WebsocketConnectNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> =
           }]
         }]
       : []),
+    ...overrideSections,
     {
       id: 'main',
       rows: [

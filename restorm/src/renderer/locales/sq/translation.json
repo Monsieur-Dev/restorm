@@ -1707,6 +1707,39 @@
     },
     "http": {
       "served": "served"
+    },
+    "actionOverride": {
+      "button": {
+        "tooltip": "Mbishkruaj konfigurimin e kërkesës",
+        "label": "Mbishkruaj",
+        "activeLabel": "{{count}} mbishkrime"
+      },
+      "configSelector": {
+        "label": "Konfigurimi bazë",
+        "none": "Asnjë (vlerat e parazgjedhura të kërkesës)"
+      },
+      "configMissing": "Konfigurimi i zgjedhur u fshi; zbatohen vlerat e parazgjedhura të kërkesës.",
+      "overridesLabel": "Mbishkrimet e fushave",
+      "clear": "Riveho te e trashëguara",
+      "fields": {
+        "url": "URL",
+        "method": "Metoda",
+        "body": "Trupi",
+        "env": "Mjedisi"
+      },
+      "advanced": {
+        "label": "Fusha të tjera (JSON)",
+        "placeholder": "{ \"headers\": [ … ], \"body\": { … } }",
+        "invalid": "JSON i pavlefshëm — nuk u zbatua"
+      },
+      "sections": {
+        "headers": "Kokat",
+        "params": "Parametrat",
+        "pathParams": "Parametrat e shtegut"
+      },
+      "inherit": "Trashëgo",
+      "addField": "Shto një fushë mbishkrimi",
+      "configMissingShort": "Mungon konfigurimi"
     }
   },
   "mqtt": {
@@ -1967,7 +2000,9 @@
     },
     "deleteConfirm": {
       "title": "Fshij konfigurimin",
-      "message": "Dëshironi të fshini konfigurimin \"{{name}}\"?"
+      "message": "Dëshironi të fshini konfigurimin \"{{name}}\"?",
+      "usedByScenarios_one": "Përdoret nga skenari {{scenarios}}.",
+      "usedByScenarios_other": "Përdoret nga skenarët {{scenarios}}."
     },
     "confirm": {
       "ok": "OK",

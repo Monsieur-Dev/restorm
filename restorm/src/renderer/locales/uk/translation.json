@@ -1709,6 +1709,39 @@
     },
     "http": {
       "served": "served"
+    },
+    "actionOverride": {
+      "button": {
+        "tooltip": "Перевизначити конфігурацію запиту",
+        "label": "Перевизначити",
+        "activeLabel": "{{count}} перевизначень"
+      },
+      "configSelector": {
+        "label": "Базова конфігурація",
+        "none": "Немає (типові значення запиту)"
+      },
+      "configMissing": "Вибрану конфігурацію видалено; застосовуються типові значення запиту.",
+      "overridesLabel": "Перевизначення полів",
+      "clear": "Скинути до успадкованого",
+      "fields": {
+        "url": "URL",
+        "method": "Метод",
+        "body": "Тіло",
+        "env": "Середовище"
+      },
+      "advanced": {
+        "label": "Інші поля (JSON)",
+        "placeholder": "{ \"headers\": [ … ], \"body\": { … } }",
+        "invalid": "Недійсний JSON — не застосовано"
+      },
+      "sections": {
+        "headers": "Заголовки",
+        "params": "Параметри",
+        "pathParams": "Параметри шляху"
+      },
+      "inherit": "Успадкувати",
+      "addField": "Додати поле перевизначення",
+      "configMissingShort": "Конфігурацію не знайдено"
     }
   },
   "mqtt": {
@@ -1969,7 +2002,9 @@
     },
     "deleteConfirm": {
       "title": "Видалити конфігурацію",
-      "message": "Бажаєте видалити конфігурацію «{{name}}»?"
+      "message": "Бажаєте видалити конфігурацію «{{name}}»?",
+      "usedByScenarios_one": "Її використовує сценарій {{scenarios}}.",
+      "usedByScenarios_other": "Її використовують сценарії {{scenarios}}."
     },
     "confirm": {
       "ok": "OK",

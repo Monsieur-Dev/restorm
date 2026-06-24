@@ -1707,6 +1707,39 @@
     },
     "http": {
       "served": "served"
+    },
+    "actionOverride": {
+      "button": {
+        "tooltip": "Override request configuration",
+        "label": "Override",
+        "activeLabel": "{{count}} override(s)"
+      },
+      "configSelector": {
+        "label": "Base configuration",
+        "none": "None (use request defaults)"
+      },
+      "configMissing": "The selected configuration was deleted; the request defaults apply.",
+      "overridesLabel": "Field overrides",
+      "clear": "Reset to inherit",
+      "fields": {
+        "url": "URL",
+        "method": "Method",
+        "body": "Body",
+        "env": "Environment"
+      },
+      "advanced": {
+        "label": "Other fields (JSON)",
+        "placeholder": "{ \"headers\": [ … ], \"body\": { … } }",
+        "invalid": "Invalid JSON — not applied"
+      },
+      "sections": {
+        "headers": "Headers",
+        "params": "Params",
+        "pathParams": "Path Params"
+      },
+      "inherit": "Inherit",
+      "addField": "Add an override field",
+      "configMissingShort": "Configuration missing"
     }
   },
   "mqtt": {
@@ -1967,7 +2000,9 @@
     },
     "deleteConfirm": {
       "title": "Delete configuration",
-      "message": "Do you want to delete the configuration \"{{name}}\"?"
+      "message": "Do you want to delete the configuration \"{{name}}\"?",
+      "usedByScenarios_one": "It is used by the scenario {{scenarios}}.",
+      "usedByScenarios_other": "It is used by the scenarios {{scenarios}}."
     },
     "confirm": {
       "ok": "OK",

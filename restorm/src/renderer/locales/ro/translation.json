@@ -1708,6 +1708,39 @@
     },
     "http": {
       "served": "served"
+    },
+    "actionOverride": {
+      "button": {
+        "tooltip": "Suprascrie configurația cererii",
+        "label": "Suprascrie",
+        "activeLabel": "{{count}} suprascrieri"
+      },
+      "configSelector": {
+        "label": "Configurație de bază",
+        "none": "Niciuna (valorile implicite ale cererii)"
+      },
+      "configMissing": "Configurația selectată a fost ștearsă; se aplică valorile implicite ale cererii.",
+      "overridesLabel": "Suprascrieri de câmpuri",
+      "clear": "Resetare la moștenit",
+      "fields": {
+        "url": "URL",
+        "method": "Metodă",
+        "body": "Corp",
+        "env": "Mediu"
+      },
+      "advanced": {
+        "label": "Alte câmpuri (JSON)",
+        "placeholder": "{ \"headers\": [ … ], \"body\": { … } }",
+        "invalid": "JSON nevalid — neaplicat"
+      },
+      "sections": {
+        "headers": "Anteturi",
+        "params": "Parametri",
+        "pathParams": "Parametri de cale"
+      },
+      "inherit": "Moștenire",
+      "addField": "Adăugați un câmp de suprascriere",
+      "configMissingShort": "Configurație lipsă"
     }
   },
   "mqtt": {
@@ -1968,7 +2001,9 @@
     },
     "deleteConfirm": {
       "title": "Șterge configurația",
-      "message": "Doriți să ștergeți configurația „{{name}}\"?"
+      "message": "Doriți să ștergeți configurația „{{name}}\"?",
+      "usedByScenarios_one": "Este utilizată de scenariul {{scenarios}}.",
+      "usedByScenarios_other": "Este utilizată de scenariile {{scenarios}}."
     },
     "confirm": {
       "ok": "OK",

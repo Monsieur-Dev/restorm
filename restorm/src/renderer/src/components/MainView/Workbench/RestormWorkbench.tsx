@@ -160,6 +160,10 @@ export interface RestormWorkbenchProps {
   /** Scenarios that reference a request — drives the "used in scenarios"
    * reverse-navigation button in the request editor's toolbar. */
   getScenariosUsingRequest?: ((requestId: string) => ScenarioRequestUsage[]) | undefined
+  /** Scenarios whose actions reference a saved quick-config by id — names them
+   * in the quick-settings delete confirmation so deleting a used config is not
+   * silent. */
+  getScenariosUsingQuickConfig?: ((quickConfigId: string) => ScenarioRequestUsage[]) | undefined
   /** Open a scenario tab from a request; `focusNodeId` centres a box. */
   onOpenScenarioFromRequest?: ((scenarioId: string, focusNodeId?: string) => void) | undefined
   /** Scenarios that reference a sub-scenario via a `runScenario` node — drives
@@ -248,6 +252,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
   isItemFavorite,
   onToggleFavorite,
   getScenariosUsingRequest,
+  getScenariosUsingQuickConfig,
   onOpenScenarioFromRequest,
   getScenariosUsingScenario
 }, ref) => {
@@ -1044,7 +1049,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
       <>
         <RequestHeaderEnvSelector folderRequestIds={envFolderRequestIds ?? []} projectUuid={projectUuid ?? null} />
         <RequestHeaderHistoryButton requestId={id} />
-        <RequestQuickSettingsButton request={reactiveReq} projectUuid={projectUuid} />
+        <RequestQuickSettingsButton request={reactiveReq} projectUuid={projectUuid} getScenariosUsingQuickConfig={getScenariosUsingQuickConfig} />
       </>
     )
 
@@ -1387,7 +1392,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
 
     // Legacy/empty tab fallback (should not happen with typed tabs)
     return null
-  }, [t, mcpLogsLabels, onBreadcrumbClick, onBreadcrumbAuxClick, onItemRename, onItemIconChange, onTagsChange, onTagColorChange, onFolderChange, onScenarioChange, onCreateScenarioRequest, onCreateScenarioChild, resolveBoundItem, resolveRequestEnv, resolveSyntheticPreview, onEnvironmentFolderChange, onRequestClick, onRequestAuxClick, getRequestById, getFolderById, getScenarioById, getEnvironmentFolderById, getTagColorsFromBreadcrumbs, getEnvFolderIdFromBreadcrumbs, projectUuid, isItemFavorite, onToggleFavorite, getScenariosUsingRequest, onOpenScenarioFromRequest, getScenariosUsingScenario, updateMiniBrowserUrl])
+  }, [t, mcpLogsLabels, onBreadcrumbClick, onBreadcrumbAuxClick, onItemRename, onItemIconChange, onTagsChange, onTagColorChange, onFolderChange, onScenarioChange, onCreateScenarioRequest, onCreateScenarioChild, resolveBoundItem, resolveRequestEnv, resolveSyntheticPreview, onEnvironmentFolderChange, onRequestClick, onRequestAuxClick, getRequestById, getFolderById, getScenarioById, getEnvironmentFolderById, getTagColorsFromBreadcrumbs, getEnvFolderIdFromBreadcrumbs, projectUuid, isItemFavorite, onToggleFavorite, getScenariosUsingRequest, getScenariosUsingQuickConfig, onOpenScenarioFromRequest, getScenariosUsingScenario, updateMiniBrowserUrl])
 
   // Handle tab detach to new window
   const handleDetachToNewWindow = useCallback(

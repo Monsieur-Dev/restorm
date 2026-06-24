@@ -1707,6 +1707,39 @@
     },
     "http": {
       "served": "served"
+    },
+    "actionOverride": {
+      "button": {
+        "tooltip": "Παράκαμψη διαμόρφωσης αιτήματος",
+        "label": "Παράκαμψη",
+        "activeLabel": "{{count}} παρακάμψεις"
+      },
+      "configSelector": {
+        "label": "Βασική διαμόρφωση",
+        "none": "Καμία (προεπιλογές αιτήματος)"
+      },
+      "configMissing": "Η επιλεγμένη διαμόρφωση διαγράφηκε· ισχύουν οι προεπιλογές του αιτήματος.",
+      "overridesLabel": "Παρακάμψεις πεδίων",
+      "clear": "Επαναφορά σε κληρονομημένο",
+      "fields": {
+        "url": "URL",
+        "method": "Μέθοδος",
+        "body": "Σώμα",
+        "env": "Περιβάλλον"
+      },
+      "advanced": {
+        "label": "Άλλα πεδία (JSON)",
+        "placeholder": "{ \"headers\": [ … ], \"body\": { … } }",
+        "invalid": "Μη έγκυρο JSON — δεν εφαρμόστηκε"
+      },
+      "sections": {
+        "headers": "Κεφαλίδες",
+        "params": "Παράμετροι",
+        "pathParams": "Παράμετροι διαδρομής"
+      },
+      "inherit": "Κληρονομιά",
+      "addField": "Προσθήκη πεδίου παράκαμψης",
+      "configMissingShort": "Λείπει η διαμόρφωση"
     }
   },
   "mqtt": {
@@ -1967,7 +2000,9 @@
     },
     "deleteConfirm": {
       "title": "Διαγραφή ρύθμισης",
-      "message": "Θέλετε να διαγράψετε τη ρύθμιση \"{{name}}\";"
+      "message": "Θέλετε να διαγράψετε τη ρύθμιση \"{{name}}\";",
+      "usedByScenarios_one": "Χρησιμοποιείται από το σενάριο {{scenarios}}.",
+      "usedByScenarios_other": "Χρησιμοποιείται από τα σενάρια {{scenarios}}."
     },
     "confirm": {
       "ok": "OK",

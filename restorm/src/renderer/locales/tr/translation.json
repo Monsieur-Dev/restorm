@@ -1707,6 +1707,39 @@
     },
     "http": {
       "served": "served"
+    },
+    "actionOverride": {
+      "button": {
+        "tooltip": "İstek yapılandırmasını geçersiz kıl",
+        "label": "Geçersiz kıl",
+        "activeLabel": "{{count}} geçersiz kılma"
+      },
+      "configSelector": {
+        "label": "Temel yapılandırma",
+        "none": "Yok (isteğin varsayılanları)"
+      },
+      "configMissing": "Seçilen yapılandırma silindi; isteğin varsayılan değerleri uygulanır.",
+      "overridesLabel": "Alan geçersiz kılmaları",
+      "clear": "Devralınana sıfırla",
+      "fields": {
+        "url": "URL",
+        "method": "Yöntem",
+        "body": "Gövde",
+        "env": "Ortam"
+      },
+      "advanced": {
+        "label": "Diğer alanlar (JSON)",
+        "placeholder": "{ \"headers\": [ … ], \"body\": { … } }",
+        "invalid": "Geçersiz JSON — uygulanmadı"
+      },
+      "sections": {
+        "headers": "Başlıklar",
+        "params": "Parametreler",
+        "pathParams": "Yol Parametreleri"
+      },
+      "inherit": "Devral",
+      "addField": "Geçersiz kılma alanı ekle",
+      "configMissingShort": "Yapılandırma eksik"
     }
   },
   "mqtt": {
@@ -1967,7 +2000,9 @@
     },
     "deleteConfirm": {
       "title": "Yapılandırmayı sil",
-      "message": "\"{{name}}\" yapılandırmasını silmek istiyor musunuz?"
+      "message": "\"{{name}}\" yapılandırmasını silmek istiyor musunuz?",
+      "usedByScenarios_one": "{{scenarios}} senaryosu tarafından kullanılıyor.",
+      "usedByScenarios_other": "{{scenarios}} senaryoları tarafından kullanılıyor."
     },
     "confirm": {
       "ok": "Tamam",

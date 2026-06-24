@@ -297,3 +297,41 @@ describe('applyRequestOverride (pm.request / req mutation → bound request)', (
     expect(out.body).toEqual({ type: 'text', content: '{{petPayload}}' })
   })
 })
+
+describe('httpRequestExecutor — on-box override ports', () => {
+  it('overrides url + method via inline config.overrides', async () => {
+    const n = { id: 'n1', kind: 'httpRequest', config: { requestId: 'req-1', overrides: { url: 'https://inline.test/x', method: 'put' } }, inputs: [], outputs: [], position: { x: 0, y: 0 } } as unknown as ScenarioNode
+    await httpRequestExecutor(makeActivation({}), makeCtx(n))
+    const flushed = flushRequestStateToContext.mock.calls[0]?.[0] as { url: string; method: string }
+    expect(flushed.url).toBe('https://inline.test/x')
+    expect(flushed.method).toBe('PUT') // upper-cased
+  })
+
+  it('a wired slot wins over the inline override (live > stored)', async () => {
+    const n = { id: 'n1', kind: 'httpRequest', config: { requestId: 'req-1', overrides: { url: 'https://inline.test', 'headers:X-Test': 'inline' } }, inputs: [], outputs: [], position: { x: 0, y: 0 } } as unknown as ScenarioNode
+    await httpRequestExecutor(makeActivation({ url: 'https://wired.test', 'headers:X-Test': 'wired' }), makeCtx(n))
+    const flushed = flushRequestStateToContext.mock.calls[0]?.[0] as { url: string; headers: KV[] }
+    expect(flushed.url).toBe('https://wired.test')
+    expect(flushed.headers.find((kv) => kv.key === 'X-Test')?.value).toBe('wired')
+  })
+
+  it('resolves a picked project quick-config by id, then layers the inline override on top', async () => {
+    findById.mockReturnValue({
+      ...makeRequest(),
+      url: 'https://base.test',
+      quickConfigs: [{ id: 'qc-1', name: 'Prod', requestId: 'req-1', storageTarget: 'project', fields: { url: 'https://config.test', method: 'GET' } }]
+    })
+    const n = { id: 'n1', kind: 'httpRequest', config: { requestId: 'req-1', quickConfigId: 'qc-1', overrides: { method: 'DELETE' } }, inputs: [], outputs: [], position: { x: 0, y: 0 } } as unknown as ScenarioNode
+    await httpRequestExecutor(makeActivation({}), makeCtx(n))
+    const flushed = flushRequestStateToContext.mock.calls[0]?.[0] as { url: string; method: string }
+    expect(flushed.url).toBe('https://config.test') // from the config
+    expect(flushed.method).toBe('DELETE') // inline override wins over the config's GET
+  })
+
+  it('a deleted config id falls back to overrides-only (no throw)', async () => {
+    const n = { id: 'n1', kind: 'httpRequest', config: { requestId: 'req-1', quickConfigId: 'qc-gone', overrides: { url: 'https://only.test' } }, inputs: [], outputs: [], position: { x: 0, y: 0 } } as unknown as ScenarioNode
+    await httpRequestExecutor(makeActivation({}), makeCtx(n))
+    const flushed = flushRequestStateToContext.mock.calls[0]?.[0] as { url: string }
+    expect(flushed.url).toBe('https://only.test')
+  })
+})

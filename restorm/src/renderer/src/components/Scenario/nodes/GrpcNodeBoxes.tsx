@@ -11,6 +11,7 @@ import { ScenarioNameInput } from './ScenarioNameInput'
 import { ScenarioCodeField } from './ScenarioCodeField'
 import { ConnectionPicker } from './SocketioNodeBoxes'
 import { readCodeString } from './scenarioCodeValue'
+import { useStreamingOverrideSections } from './scenarioOverridePorts'
 
 const stop = (e: React.MouseEvent): void => { e.stopPropagation() }
 
@@ -36,6 +37,7 @@ export const GrpcConnectNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ i
   const headerIcon = boundRequest
     ? <Badge type={requestBadgeType(boundRequest)} />
     : <Badge type="GRPC" icon="plug" />
+  const overrideSections = useStreamingOverrideSections(boundRequest, config, (patch) => { data.onSetConfig?.(id, patch) })
 
   const left: ScenarioNodeSection[] = [
     ...(requestId && data.onOpenItem
@@ -56,6 +58,7 @@ export const GrpcConnectNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ i
           }]
         }]
       : []),
+    ...overrideSections,
     {
       id: 'main',
       rows: [

@@ -41,6 +41,11 @@ export interface RequestQuickSettingsButtonProps {
   request: Request
   /** Project UUID — scopes the user-settings backend key. */
   projectUuid: string | null | undefined
+  /** Live lookup of the scenarios whose actions reference a saved config by id,
+   * each entry path-qualified by the resolver. When provided, deleting a config
+   * that one or more scenarios use names them in the confirmation so the user
+   * knows what bindings they'll orphan. */
+  getScenariosUsingQuickConfig?: ((quickConfigId: string) => { scenario: { id: string; name: string } }[]) | undefined
 }
 
 // ============================================================================
@@ -127,7 +132,8 @@ const ConfigRow: React.FC<ConfigRowProps> = ({ config, onLoad, onDelete, project
 
 export const RequestQuickSettingsButton: React.FC<RequestQuickSettingsButtonProps> = ({
   request,
-  projectUuid
+  projectUuid,
+  getScenariosUsingQuickConfig
 }) => {
   const { t } = useTranslation()
   const anchorRef = useRef<HTMLSpanElement>(null)
@@ -244,12 +250,24 @@ export const RequestQuickSettingsButton: React.FC<RequestQuickSettingsButtonProp
     })
   }, [t, request])
 
-  // Delete config: prompt confirmation first
+  // Delete config: prompt confirmation first. When the config is referenced by
+  // one or more scenario actions (by id), name those scenarios in the message
+  // so the user sees what bindings they'll orphan (the action keeps its static
+  // overrides + a "config missing" surface; nothing fails silently).
   const handleDeleteRequest = useCallback((config: QuickConfig): void => {
+    const usingScenarios = getScenariosUsingQuickConfig?.(config.id) ?? []
+    const uniqueNames = [...new Set(usingScenarios.map((u) => u.scenario.name))]
+    const baseMessage = t('quickSettings.deleteConfirm.message', { name: config.name })
+    const message = uniqueNames.length > 0
+      ? `${baseMessage} ${t('quickSettings.deleteConfirm.usedByScenarios', {
+        count: uniqueNames.length,
+        scenarios: uniqueNames.join(', ')
+      })}`
+      : baseMessage
     setConfirmModal({
       open: true,
       title: t('quickSettings.deleteConfirm.title'),
-      message: t('quickSettings.deleteConfirm.message', { name: config.name }),
+      message,
       onConfirm: () => {
         setConfirmModal(CONFIRM_MODAL_INITIAL)
         if (config.storageTarget === 'settings' && projectUuid) {
@@ -262,7 +280,7 @@ export const RequestQuickSettingsButton: React.FC<RequestQuickSettingsButtonProp
         }
       }
     })
-  }, [t, projectUuid, request])
+  }, [t, projectUuid, request, getScenariosUsingQuickConfig])
 
   const handleKeyDownOnName = useCallback((e: React.KeyboardEvent): void => {
     if (e.key === 'Enter') {

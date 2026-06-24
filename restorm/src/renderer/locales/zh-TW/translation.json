@@ -1706,6 +1706,39 @@
     },
     "http": {
       "served": "served"
+    },
+    "actionOverride": {
+      "button": {
+        "tooltip": "覆寫請求設定",
+        "label": "覆寫",
+        "activeLabel": "{{count}} 項覆寫"
+      },
+      "configSelector": {
+        "label": "基礎設定",
+        "none": "無（使用請求預設值）"
+      },
+      "configMissing": "所選設定已被刪除；將套用請求的預設值。",
+      "overridesLabel": "欄位覆寫",
+      "clear": "重設為繼承",
+      "fields": {
+        "url": "URL",
+        "method": "方法",
+        "body": "內容",
+        "env": "環境"
+      },
+      "advanced": {
+        "label": "其他欄位 (JSON)",
+        "placeholder": "{ \"headers\": [ … ], \"body\": { … } }",
+        "invalid": "無效的 JSON — 未套用"
+      },
+      "sections": {
+        "headers": "標頭",
+        "params": "參數",
+        "pathParams": "路徑參數"
+      },
+      "inherit": "繼承",
+      "addField": "新增覆寫欄位",
+      "configMissingShort": "設定遺失"
     }
   },
   "mqtt": {
@@ -1966,7 +1999,9 @@
     },
     "deleteConfirm": {
       "title": "刪除設定",
-      "message": "是否要刪除設定「{{name}}」？"
+      "message": "是否要刪除設定「{{name}}」？",
+      "usedByScenarios_one": "它被情境 {{scenarios}} 使用。",
+      "usedByScenarios_other": "它被情境 {{scenarios}} 使用。"
     },
     "confirm": {
       "ok": "確定",

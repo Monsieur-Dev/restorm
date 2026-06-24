@@ -1707,6 +1707,39 @@
     },
     "http": {
       "served": "served"
+    },
+    "actionOverride": {
+      "button": {
+        "tooltip": "Overstyr forespørselskonfigurasjon",
+        "label": "Overstyr",
+        "activeLabel": "{{count}} overstyring(er)"
+      },
+      "configSelector": {
+        "label": "Basiskonfigurasjon",
+        "none": "Ingen (forespørselens standardverdier)"
+      },
+      "configMissing": "Den valgte konfigurasjonen ble slettet; forespørselens standardverdier gjelder.",
+      "overridesLabel": "Feltoverstyringer",
+      "clear": "Tilbakestill til arvet",
+      "fields": {
+        "url": "URL",
+        "method": "Metode",
+        "body": "Brødtekst",
+        "env": "Miljø"
+      },
+      "advanced": {
+        "label": "Andre felter (JSON)",
+        "placeholder": "{ \"headers\": [ … ], \"body\": { … } }",
+        "invalid": "Ugyldig JSON — ikke brukt"
+      },
+      "sections": {
+        "headers": "Headere",
+        "params": "Parametere",
+        "pathParams": "Stiparametere"
+      },
+      "inherit": "Arv",
+      "addField": "Legg til et overstyringsfelt",
+      "configMissingShort": "Konfigurasjon mangler"
     }
   },
   "mqtt": {
@@ -1967,7 +2000,9 @@
     },
     "deleteConfirm": {
       "title": "Slett konfigurasjon",
-      "message": "Vil du slette konfigurasjonen \"{{name}}\"?"
+      "message": "Vil du slette konfigurasjonen \"{{name}}\"?",
+      "usedByScenarios_one": "Den brukes av scenariet {{scenarios}}.",
+      "usedByScenarios_other": "Den brukes av scenariene {{scenarios}}."
     },
     "confirm": {
       "ok": "OK",

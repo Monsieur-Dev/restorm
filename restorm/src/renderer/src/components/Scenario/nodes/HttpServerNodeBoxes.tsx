@@ -9,6 +9,7 @@ import { ConnectionPicker } from './SocketioNodeBoxes'
 import { useScenarioBoundResolver } from '../scenarioBoundResolver'
 import { isRequest } from '../../../../../shared/types/collections'
 import { mapToBadgeType } from '../../../utils/badgeUtils'
+import { useStreamingOverrideSections } from './scenarioOverridePorts'
 
 const stop = (e: React.MouseEvent): void => { e.stopPropagation() }
 
@@ -28,9 +29,11 @@ export const HttpListenNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id
   // The header shows the bound request's method as the "SRV" server capsule.
   const resolve = useScenarioBoundResolver()
   const boundItem = requestId && resolve ? resolve(requestId) : null
-  const method = boundItem && isRequest(boundItem) && (boundItem as { method?: string }).method
-    ? (boundItem as { method: string }).method
+  const boundRequest = boundItem && isRequest(boundItem) ? boundItem : null
+  const method = boundRequest && (boundRequest as { method?: string }).method
+    ? (boundRequest as { method: string }).method
     : 'GET'
+  const overrideSections = useStreamingOverrideSections(boundRequest, config, (patch) => { data.onSetConfig?.(id, patch) })
 
   const left: ScenarioNodeSection[] = [
     ...(requestId && data.onOpenItem
@@ -51,6 +54,7 @@ export const HttpListenNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id
           }]
         }]
       : []),
+    ...overrideSections,
     {
       id: 'main',
       rows: [

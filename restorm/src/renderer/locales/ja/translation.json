@@ -1706,6 +1706,39 @@
     },
     "http": {
       "served": "served"
+    },
+    "actionOverride": {
+      "button": {
+        "tooltip": "リクエスト構成を上書き",
+        "label": "上書き",
+        "activeLabel": "{{count}} 件の上書き"
+      },
+      "configSelector": {
+        "label": "ベース構成",
+        "none": "なし（リクエストの既定値）"
+      },
+      "configMissing": "選択した構成は削除されました。リクエストの既定値が適用されます。",
+      "overridesLabel": "フィールドの上書き",
+      "clear": "継承にリセット",
+      "fields": {
+        "url": "URL",
+        "method": "メソッド",
+        "body": "ボディ",
+        "env": "環境"
+      },
+      "advanced": {
+        "label": "その他のフィールド (JSON)",
+        "placeholder": "{ \"headers\": [ … ], \"body\": { … } }",
+        "invalid": "無効な JSON — 適用されません"
+      },
+      "sections": {
+        "headers": "ヘッダー",
+        "params": "パラメーター",
+        "pathParams": "パスパラメーター"
+      },
+      "inherit": "継承",
+      "addField": "上書きフィールドを追加",
+      "configMissingShort": "構成がありません"
     }
   },
   "mqtt": {
@@ -1966,7 +1999,9 @@
     },
     "deleteConfirm": {
       "title": "設定を削除",
-      "message": "設定「{{name}}」を削除しますか？"
+      "message": "設定「{{name}}」を削除しますか？",
+      "usedByScenarios_one": "シナリオ {{scenarios}} で使用されています。",
+      "usedByScenarios_other": "シナリオ {{scenarios}} で使用されています。"
     },
     "confirm": {
       "ok": "OK",

@@ -1706,6 +1706,39 @@
     },
     "http": {
       "served": "served"
+    },
+    "actionOverride": {
+      "button": {
+        "tooltip": "覆盖请求配置",
+        "label": "覆盖",
+        "activeLabel": "{{count}} 项覆盖"
+      },
+      "configSelector": {
+        "label": "基础配置",
+        "none": "无（使用请求默认值）"
+      },
+      "configMissing": "所选配置已被删除；将应用请求的默认值。",
+      "overridesLabel": "字段覆盖",
+      "clear": "重置为继承",
+      "fields": {
+        "url": "URL",
+        "method": "方法",
+        "body": "正文",
+        "env": "环境"
+      },
+      "advanced": {
+        "label": "其他字段 (JSON)",
+        "placeholder": "{ \"headers\": [ … ], \"body\": { … } }",
+        "invalid": "无效的 JSON — 未应用"
+      },
+      "sections": {
+        "headers": "请求头",
+        "params": "参数",
+        "pathParams": "路径参数"
+      },
+      "inherit": "继承",
+      "addField": "添加覆盖字段",
+      "configMissingShort": "配置缺失"
     }
   },
   "mqtt": {
@@ -1966,7 +1999,9 @@
     },
     "deleteConfirm": {
       "title": "删除配置",
-      "message": "是否要删除配置\"{{name}}\"？"
+      "message": "是否要删除配置\"{{name}}\"？",
+      "usedByScenarios_one": "它被场景 {{scenarios}} 使用。",
+      "usedByScenarios_other": "它被场景 {{scenarios}} 使用。"
     },
     "confirm": {
       "ok": "确定",

@@ -63,6 +63,26 @@ export function findScenariosUsingRequest(rootItems: FolderItem[], requestId: st
   return out
 }
 
+/**
+ * Every scenario (across all projects) whose request-binding nodes reference a
+ * saved quick-config by id (`config.quickConfigId`). Drives the quick-settings
+ * delete-confirmation cross-link: deleting a config that one or more scenario
+ * actions use names those scenarios so the user knows what they'll orphan.
+ * Computed live from the tree (no stored back-reference) so a deleted scenario
+ * or node drops out of the result automatically. Each entry carries the
+ * matching node ids; the caller dedups by scenario.
+ */
+export function findScenariosUsingQuickConfig(rootItems: FolderItem[], quickConfigId: string): ScenarioRequestUsage[] {
+  const out: ScenarioRequestUsage[] = []
+  walkScenarios(rootItems, (scenario) => {
+    const nodeIds = scenario.nodes
+      .filter((n) => REQUEST_BINDING_KINDS.has(n.kind) && n.config['quickConfigId'] === quickConfigId)
+      .map((n) => n.id)
+    if (nodeIds.length > 0) out.push({ scenario, nodeIds })
+  })
+  return out
+}
+
 /** Whether `requestId` lives inside `scenario`'s own subtree (it was authored
  * as a child of the scenario, as opposed to referenced from elsewhere). Decides
  * the request-deletion flow: a child request warns it will affect the scenario;

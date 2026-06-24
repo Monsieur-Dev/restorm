@@ -17,6 +17,8 @@
  */
 
 import { collectionStore } from '../../services/CollectionStore'
+import { buildEffectiveRequest } from './effectiveRequest'
+import { readActionOverrides } from '../../../shared/scenarioActionOverride'
 import { httpExecutionService, type HTTPExecutionInput } from '../../services/HTTPExecutionService'
 import { grpcExecutionService } from '../../services/GRPCExecutionService'
 import { responseHistoryService } from '../../services/ResponseHistoryService'
@@ -29,8 +31,14 @@ import type { NodeExecutor, ExecResult } from '../types'
 export const httpRequestExecutor: NodeExecutor = async (act, ctx) => {
   const cfg = ctx.node.config as { requestId?: string }
   if (typeof cfg.requestId !== 'string') throw new Error(`httpRequest node ${ctx.node.id} has no bound requestId`)
-  const req = collectionStore.findById(cfg.requestId)
-  if (!req) throw new Error(`bound request ${cfg.requestId} not found`)
+  const bound = collectionStore.findById(cfg.requestId)
+  if (!bound) throw new Error(`bound request ${cfg.requestId} not found`)
+  // Apply the action's picked quick-config (base → config fields, by id from the
+  // file). The per-input overrides — inline literal in `config.overrides[portId]`
+  // and the wired-edge slot value — are layered on top by `applySlotOverrides`
+  // below, with the wired value winning over the inline literal (live > stored).
+  // Returns the bound request unchanged when the node picked no config.
+  const req = buildEffectiveRequest(bound, ctx.node.config)
   // A one-shot gRPC request (a unary call binds to this generic request node,
   // like httpRequest; streaming gRPC binds a grpcConnect instead) runs through
   // the gRPC execution service and emits the same `{ request, response }` shape.
@@ -83,7 +91,11 @@ export const httpRequestExecutor: NodeExecutor = async (act, ctx) => {
     }
   }
 
-  const effectiveReq = applySlotOverrides(applyRequestOverride(req, override), act.inputs)
+  // Per-input override layer: an inline literal (stored in `config.overrides`,
+  // keyed by port id — `url` / `method` / `body` / `headers:<key>` / …) is the
+  // base, a WIRED edge value (in `act.inputs`) wins over it (live > stored).
+  const slotInputs = mergeInlineAndWiredSlots(readActionOverrides(ctx.node.config), act.inputs)
+  const effectiveReq = applySlotOverrides(applyRequestOverride(req, override), slotInputs)
   flushRequestStateToContext(effectiveReq)
 
   // For OData, derive the dispatched verb + body from the (override-applied)
@@ -211,12 +223,24 @@ function cloneHttpRequest(req: Request, kvOverrides: Partial<Pick<HttpRequestSha
 }
 
 /**
- * Return the request to flush + execute, with any wired slot inputs
- * applied. Input port ids mirror the editor + MCP slot ports:
- * `pathParams:<key>`, `headers:<key>`, `params:<key>`, `body`. When
- * nothing is wired, the original request is returned unchanged. The
- * clone is shallow per-array so the persisted request is never
- * mutated.
+ * Merge the inline per-input overrides (from `config.overrides`, keyed by port
+ * id) with the wired-edge values (from `act.inputs`), the WIRED value winning on
+ * any port present in both (live > stored). Returns one slot-input map the
+ * slot-merge consumes; an inline `undefined` (a cleared field) is dropped.
+ */
+function mergeInlineAndWiredSlots(inline: Record<string, unknown>, wired: Record<string, unknown>): Record<string, unknown> {
+  const out: Record<string, unknown> = {}
+  for (const [k, v] of Object.entries(inline)) if (isSlotPort(k) && v !== undefined) out[k] = v
+  for (const [k, v] of Object.entries(wired)) if (v !== undefined) out[k] = v
+  return out
+}
+
+/**
+ * Return the request to flush + execute, with any slot inputs applied. Input
+ * port ids mirror the editor + MCP slot ports: `url`, `method`, `body`,
+ * `pathParams:<key>`, `headers:<key>`, `params:<key>`. When nothing is set, the
+ * original request is returned unchanged. The clone is shallow per-array so the
+ * persisted request is never mutated.
  */
 function applySlotOverrides(req: Request, inputs: Record<string, unknown>): Request {
   const slotKeys = Object.keys(inputs).filter((k) => isSlotPort(k) && inputs[k] !== undefined)
@@ -229,6 +253,8 @@ function applySlotOverrides(req: Request, inputs: Record<string, unknown>): Requ
   })
   for (const portId of slotKeys) {
     const value = inputs[portId]
+    if (portId === 'url') { clone.url = stringifyToWire(value); continue }
+    if (portId === 'method') { clone.method = stringifyToWire(value).toUpperCase(); continue }
     if (portId === 'body') { clone.body = value; continue }
     const sep = portId.indexOf(':')
     const group = portId.slice(0, sep)
@@ -276,7 +302,8 @@ export function applyRequestOverride(req: Request, override: unknown): Request {
 }
 
 function isSlotPort(portId: string): boolean {
-  return portId === 'body' || portId.startsWith('pathParams:') || portId.startsWith('headers:') || portId.startsWith('params:')
+  return portId === 'url' || portId === 'method' || portId === 'body'
+    || portId.startsWith('pathParams:') || portId.startsWith('headers:') || portId.startsWith('params:')
 }
 
 function cloneKVs(kvs: KV[] | undefined): KV[] {

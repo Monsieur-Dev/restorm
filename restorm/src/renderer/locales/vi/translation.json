@@ -1706,6 +1706,39 @@
     },
     "http": {
       "served": "served"
+    },
+    "actionOverride": {
+      "button": {
+        "tooltip": "Ghi đè cấu hình yêu cầu",
+        "label": "Ghi đè",
+        "activeLabel": "{{count}} ghi đè"
+      },
+      "configSelector": {
+        "label": "Cấu hình cơ sở",
+        "none": "Không (giá trị mặc định của yêu cầu)"
+      },
+      "configMissing": "Cấu hình đã chọn đã bị xóa; các giá trị mặc định của yêu cầu được áp dụng.",
+      "overridesLabel": "Ghi đè trường",
+      "clear": "Đặt lại về kế thừa",
+      "fields": {
+        "url": "URL",
+        "method": "Phương thức",
+        "body": "Phần thân",
+        "env": "Môi trường"
+      },
+      "advanced": {
+        "label": "Trường khác (JSON)",
+        "placeholder": "{ \"headers\": [ … ], \"body\": { … } }",
+        "invalid": "JSON không hợp lệ — chưa áp dụng"
+      },
+      "sections": {
+        "headers": "Tiêu đề",
+        "params": "Tham số",
+        "pathParams": "Tham số đường dẫn"
+      },
+      "inherit": "Kế thừa",
+      "addField": "Thêm trường ghi đè",
+      "configMissingShort": "Thiếu cấu hình"
     }
   },
   "mqtt": {
@@ -1966,7 +1999,9 @@
     },
     "deleteConfirm": {
       "title": "Xóa cấu hình",
-      "message": "Bạn có muốn xóa cấu hình \"{{name}}\" không?"
+      "message": "Bạn có muốn xóa cấu hình \"{{name}}\" không?",
+      "usedByScenarios_one": "Được sử dụng bởi kịch bản {{scenarios}}.",
+      "usedByScenarios_other": "Được sử dụng bởi các kịch bản {{scenarios}}."
     },
     "confirm": {
       "ok": "OK",

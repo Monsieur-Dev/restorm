@@ -86,11 +86,29 @@ function deriveRequestSlotPorts(node: ScenarioNode): ScenarioPort[] {
   if (!requestId) return []
   const req = collectionStore.findById(requestId) as { headers?: KV[]; params?: KV[]; pathParams?: KV[]; body?: unknown } | null
   if (!req) return []
+  const overrides = node.config['overrides']
+  const overrideKeys = overrides !== null && typeof overrides === 'object' && !Array.isArray(overrides)
+    ? Object.keys(overrides as Record<string, unknown>)
+    : []
   const ports: ScenarioPort[] = []
+  // url + method are overridable on every HTTP-family request.
+  ports.push({ id: 'url', name: 'url', dataType: 'any', flow: 'value' })
+  ports.push({ id: 'method', name: 'method', dataType: 'any', flow: 'value' })
   const add = (prefix: 'pathParams' | 'headers' | 'params', kvs: KV[] | undefined): void => {
+    const seen = new Set<string>()
     for (const kv of kvs ?? []) {
       if (kv.enabled === false || !kv.key) continue
+      seen.add(kv.key)
       ports.push({ id: `${prefix}:${kv.key}`, name: kv.key, dataType: 'any', flow: 'value' })
+    }
+    // Extra keys the action added an override for, beyond the base request's.
+    for (const ok of overrideKeys) {
+      if (!ok.startsWith(`${prefix}:`)) continue
+      const key = ok.slice(prefix.length + 1)
+      if (key && !seen.has(key)) {
+        seen.add(key)
+        ports.push({ id: ok, name: key, dataType: 'any', flow: 'value' })
+      }
     }
   }
   add('pathParams', req.pathParams)

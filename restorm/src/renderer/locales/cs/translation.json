@@ -1709,6 +1709,39 @@
     },
     "http": {
       "served": "served"
+    },
+    "actionOverride": {
+      "button": {
+        "tooltip": "Přepsat konfiguraci požadavku",
+        "label": "Přepsat",
+        "activeLabel": "{{count}} přepsání"
+      },
+      "configSelector": {
+        "label": "Základní konfigurace",
+        "none": "Žádná (výchozí hodnoty požadavku)"
+      },
+      "configMissing": "Vybraná konfigurace byla smazána; použijí se výchozí hodnoty požadavku.",
+      "overridesLabel": "Přepsání polí",
+      "clear": "Obnovit zděděné",
+      "fields": {
+        "url": "URL",
+        "method": "Metoda",
+        "body": "Tělo",
+        "env": "Prostředí"
+      },
+      "advanced": {
+        "label": "Další pole (JSON)",
+        "placeholder": "{ \"headers\": [ … ], \"body\": { … } }",
+        "invalid": "Neplatný JSON — neaplikováno"
+      },
+      "sections": {
+        "headers": "Hlavičky",
+        "params": "Parametry",
+        "pathParams": "Parametry cesty"
+      },
+      "inherit": "Zdědit",
+      "addField": "Přidat pole přepsání",
+      "configMissingShort": "Konfigurace chybí"
     }
   },
   "mqtt": {
@@ -1969,7 +2002,9 @@
     },
     "deleteConfirm": {
       "title": "Smazat konfiguraci",
-      "message": "Chcete smazat konfiguraci „{{name}}\"?"
+      "message": "Chcete smazat konfiguraci „{{name}}\"?",
+      "usedByScenarios_one": "Používá ji scénář {{scenarios}}.",
+      "usedByScenarios_other": "Používají ji scénáře {{scenarios}}."
     },
     "confirm": {
       "ok": "OK",
