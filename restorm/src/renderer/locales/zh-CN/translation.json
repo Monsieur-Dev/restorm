@@ -419,6 +419,7 @@
   "graphql": {
     "send": "发送",
     "urlPlaceholder": "GraphQL 端点 URL",
+    "operationName": "操作",
     "tabs": {
       "query": "查询",
       "variables": "变量",

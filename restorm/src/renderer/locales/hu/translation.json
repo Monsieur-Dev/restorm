@@ -420,6 +420,7 @@
   "graphql": {
     "send": "Küldés",
     "urlPlaceholder": "GraphQL-végpont URL-je",
+    "operationName": "Művelet",
     "tabs": {
       "query": "Lekérdezés",
       "variables": "Változók",

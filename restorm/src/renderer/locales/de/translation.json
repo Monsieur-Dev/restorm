@@ -420,6 +420,7 @@
   "graphql": {
     "send": "Senden",
     "urlPlaceholder": "GraphQL-Endpunkt-URL",
+    "operationName": "Operation",
     "tabs": {
       "query": "Query",
       "variables": "Variablen",

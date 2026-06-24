@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { GraphQLRequest } from './GraphQLRequest'
+import { KeyValue } from '../KeyValue'
 
 describe('GraphQLRequest server-mode persistence', () => {
   it('round-trips the server config through toPlainObject / fromPlain', () => {
@@ -34,5 +35,53 @@ describe('GraphQLRequest server-mode persistence', () => {
     expect('schema' in plain).toBe(false)
     expect('mockResolvers' in plain).toBe(false)
     expect('resolverScript' in plain).toBe(false)
+  })
+})
+
+/**
+ * `operationName` selects which operation to run when a GraphQL document
+ * declares more than one named operation. It must round-trip through
+ * `toPlainObject` → `fromPlain` so the user's choice survives a
+ * save/reload from disk.
+ */
+describe('GraphQLRequest — operationName persistence round-trip', () => {
+  it('round-trips operationName alongside query/variables/headers', () => {
+    const original = new GraphQLRequest({
+      id: 'gql1',
+      name: 'Multi-op',
+      url: 'https://example.com/graphql',
+      query: 'query A { a } query B { b }',
+      variables: '{"id":1}',
+      operationName: 'B',
+      headers: [KeyValue.fromPlain({ key: 'X-Test', value: '1', enabled: true })]
+    })
+
+    const plain = original.toPlainObject()
+    expect(plain.operationName).toBe('B')
+
+    const restored = GraphQLRequest.fromPlain(
+      plain as unknown as Parameters<typeof GraphQLRequest.fromPlain>[0]
+    )
+    expect(restored.operationName).toBe('B')
+    expect(restored.query).toBe('query A { a } query B { b }')
+    expect(restored.variables).toBe('{"id":1}')
+    expect(restored.headers).toHaveLength(1)
+  })
+
+  it('omits operationName from the plain object when unset (single-operation document)', () => {
+    const original = new GraphQLRequest({
+      id: 'gql2',
+      name: 'Single-op',
+      url: 'https://example.com/graphql',
+      query: 'query Only { x }'
+    })
+
+    const plain = original.toPlainObject()
+    expect('operationName' in plain).toBe(false)
+
+    const restored = GraphQLRequest.fromPlain(
+      plain as unknown as Parameters<typeof GraphQLRequest.fromPlain>[0]
+    )
+    expect(restored.operationName).toBeUndefined()
   })
 })

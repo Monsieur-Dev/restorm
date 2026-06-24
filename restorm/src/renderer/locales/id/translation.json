@@ -419,6 +419,7 @@
   "graphql": {
     "send": "Kirim",
     "urlPlaceholder": "URL endpoint GraphQL",
+    "operationName": "Operasi",
     "tabs": {
       "query": "Kueri",
       "variables": "Variabel",

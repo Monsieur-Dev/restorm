@@ -422,6 +422,7 @@
   "graphql": {
     "send": "Odeslat",
     "urlPlaceholder": "URL endpointu GraphQL",
+    "operationName": "Operace",
     "tabs": {
       "query": "Dotaz",
       "variables": "Proměnné",

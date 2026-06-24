@@ -419,6 +419,7 @@
   "graphql": {
     "send": "보내기",
     "urlPlaceholder": "GraphQL 엔드포인트 URL",
+    "operationName": "오퍼레이션",
     "tabs": {
       "query": "쿼리",
       "variables": "변수",

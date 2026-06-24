@@ -422,6 +422,7 @@
   "graphql": {
     "send": "Надіслати",
     "urlPlaceholder": "URL точки доступу GraphQL",
+    "operationName": "Операція",
     "tabs": {
       "query": "Запит",
       "variables": "Змінні",

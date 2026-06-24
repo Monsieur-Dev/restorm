@@ -71,6 +71,7 @@ const GRAPHQL_REQUEST_INDEXABLE_KEYS = new Set([
   'operationType',
   'query',
   'variables',
+  'operationName',
   'quickConfigs'
 ])
 

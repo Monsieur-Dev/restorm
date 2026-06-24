@@ -420,6 +420,7 @@
   "graphql": {
     "send": "Lähetä",
     "urlPlaceholder": "GraphQL-päätepisteen URL",
+    "operationName": "Toiminto",
     "tabs": {
       "query": "Kysely",
       "variables": "Muuttujat",
