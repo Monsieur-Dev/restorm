@@ -74,6 +74,14 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
   // per-request panel-state store from.
   const { selectedEnvId, environments, envColor, projectUuid } = useEnvironmentContext()
   const collections = useRestormStore((state) => state.collections)
+  const setCollections = useRestormStore((state) => state.setCollections)
+  // Live tree ref so `setOperationName` can re-mirror the collections onto the
+  // main store without re-subscribing the auto-select effect on every store
+  // change (the callback stays stable on `[request, setCollections]`).
+  const collectionsRef = useRef(collections)
+  useEffect(() => {
+    collectionsRef.current = collections
+  }, [collections])
   const handlebarsHelpers = useHandlebarsHelpers()
   const { apiDocumentation, route } = useApiDocumentationFromRequest(request)
   const previousEnvIdRef = useRef<string | null>(null)
@@ -385,7 +393,13 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
   const setOperationName = useCallback((value: string | undefined): void => {
     setOperationNameState(value)
     updateReactiveProperty(request, 'operationName', value)
-  }, [request])
+    // The in-place proxy mutation fires REQUEST_UPDATED (autosave + indexing)
+    // but does NOT bump the rootItems reference, so the `setCollections` memo
+    // in App.tsx never re-mirrors the tree onto the main-side CollectionStore
+    // — leaving `get_request` (which reads that store) blind to the pick.
+    // Re-mirror explicitly so the operation choice reaches main immediately.
+    setCollections(collectionsRef.current, 'user')
+  }, [request, setCollections])
 
   // Named operations declared in the current query document. When the
   // document declares more than one, GraphQL-over-HTTP requires an

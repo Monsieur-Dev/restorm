@@ -47,6 +47,23 @@ function parsedReply(reply: McpToolReply): unknown {
   try { return JSON.parse(text) } catch { return text }
 }
 
+/**
+ * True when a request with `id` is currently present in the renderer's
+ * collection (read via `list_requests`). Used to confirm a freshly-created
+ * request survived the late empty-project load.
+ */
+async function listHasRequest(
+  callMcpTool: (d: McpDiscovery, n: string, a?: Record<string, unknown>) => Promise<McpToolReply>,
+  id: string
+): Promise<boolean> {
+  if (discovery === null) throw new Error('launch first')
+  const lr = parsedReply(await callMcpTool(discovery, 'list_requests', {})) as
+    | { id: string }[]
+    | { requests?: { id: string }[] }
+  const arr = Array.isArray(lr) ? lr : (lr.requests ?? [])
+  return arr.some((r) => r.id === id)
+}
+
 Given('I launch restorm with the MCP server enabled', async ({ launchAppWithMcp }) => {
   const launched = await launchAppWithMcp()
   discovery = launched.discovery
@@ -55,22 +72,53 @@ Given('I launch restorm with the MCP server enabled', async ({ launchAppWithMcp 
 })
 
 Given('I create a GraphQL request with a multi-operation document via MCP', async ({ callMcpTool }) => {
-  if (discovery === null) throw new Error('launch first')
-  // Root env-folder → graphql request → patch in the multi-operation document.
-  const folder = parsedReply(await callMcpTool(discovery, 'create_folder', { name: 'GraphQL Ops' })) as { id: string }
-  expect(folder.id).toBeTruthy()
-  const created = parsedReply(await callMcpTool(discovery, 'create_request', {
-    parentFolderId: folder.id,
-    name: 'Multi-op GraphQL',
-    protocol: 'graphql'
-  })) as { id: string }
-  expect(created.id).toBeTruthy()
-  requestId = created.id
-  const updated = await callMcpTool(discovery, 'update_request', {
-    id: requestId,
-    patch: { query: MULTI_OP_DOCUMENT }
-  })
-  expect(updated.isError ?? false).toBe(false)
+  if (discovery === null || page === null) throw new Error('launch first')
+  const disco = discovery
+  const pg = page
+
+  // Fresh project so the request lands in a real, open collection. `create_project`
+  // opens the empty file ASYNCHRONOUSLY in the renderer (its React tree is the save
+  // source of truth). A `create_request` that races the still-in-flight empty-project
+  // load lands in the main store, then the late load flushes the renderer's empty tree
+  // back and WIPES it — so `open_tab` would target an item the renderer can't resolve
+  // and the panel never renders. There is no settle event to await: create + populate,
+  // then poll `list_requests` until the request stays present across several
+  // consecutive reads (the late load has passed), re-creating if an early attempt was
+  // wiped.
+  const projectPath = `/tmp/gql-opname-e2e-${String(Date.now())}.restorm`
+  expect((await callMcpTool(disco, 'create_project', { filePath: projectPath })).isError ?? false).toBe(false)
+
+  const deadline = Date.now() + 20_000
+  let stable = false
+  while (Date.now() < deadline && !stable) {
+    const folder = parsedReply(await callMcpTool(disco, 'create_folder', { name: 'GraphQL Ops' })) as { id: string }
+    expect(folder.id).toBeTruthy()
+    const created = parsedReply(await callMcpTool(disco, 'create_request', {
+      parentFolderId: folder.id,
+      name: 'Multi-op GraphQL',
+      protocol: 'graphql'
+    })) as { id: string }
+    expect(created.id, 'request id missing').toBeTruthy()
+    requestId = created.id
+    expect((await callMcpTool(disco, 'update_request', {
+      id: requestId,
+      patch: { query: MULTI_OP_DOCUMENT }
+    })).isError ?? false).toBe(false)
+
+    // Confirm it survives the late empty-project load: 4 consecutive present reads.
+    let consecutive = 0
+    while (Date.now() < deadline && consecutive < 4) {
+      if (await listHasRequest(callMcpTool, requestId)) {
+        consecutive++
+      } else {
+        consecutive = 0
+        break // wiped — recreate from the top
+      }
+      await pg.waitForTimeout(250)
+    }
+    stable = consecutive >= 4
+  }
+  expect(stable, 'request never stabilised after create_project').toBe(true)
 })
 
 When('I replace the GraphQL document with a single operation via MCP', async ({ callMcpTool }) => {
@@ -87,7 +135,7 @@ When('I open the GraphQL request tab via MCP', async ({ callMcpTool }) => {
   const tab = await callMcpTool(discovery, 'open_tab', { itemId: requestId })
   expect(tab.isError ?? false).toBe(false)
   // The panel is up once the URL input is rendered.
-  await page.locator(URL_INPUT).first().waitFor({ state: 'visible', timeout: 15_000 })
+  await page.locator(URL_INPUT).first().waitFor({ state: 'visible', timeout: 20_000 })
 })
 
 When('I select the GraphQL operation {string}', async ({}, name: string) => {
