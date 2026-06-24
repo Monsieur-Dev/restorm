@@ -62,7 +62,22 @@ export function makeReconnectBudget(max: number): { onReconnect: () => boolean; 
  * a pure unit so the IPv6 boundary is testable without standing up the service.
  */
 export function extractPortFromAuthority(hostPort: string, defaultPort: number): number {
-  let portStr = ''
+  const parsed = parseAuthorityPort(hostPort)
+  return parsed.port ?? defaultPort
+}
+
+/**
+ * Split a `host:port` authority's port from its address, distinguishing the
+ * three cases the server-mode bind must treat differently: NO port at all
+ * (`localhost` → `{ port: undefined, present: false }`, caller defaults), a
+ * VALID port (`{ port: n, present: true }`), and a PRESENT-but-unparseable port
+ * (`localhost:abc` → `{ port: undefined, present: true }`, caller should error
+ * instead of silently defaulting). Handles the bracketed IPv6 literal the same
+ * way {@link extractPortFromAuthority} does. Pure unit so the boundary is
+ * testable without standing up the service.
+ */
+export function parseAuthorityPort(hostPort: string): { port: number | undefined; present: boolean } {
+  let portStr: string | undefined
   if (hostPort.startsWith('[')) {
     const close = hostPort.indexOf(']')
     if (close >= 0 && hostPort[close + 1] === ':') {
@@ -70,12 +85,18 @@ export function extractPortFromAuthority(hostPort: string, defaultPort: number):
     }
   } else {
     const colon = hostPort.lastIndexOf(':')
+    // A single colon is a `host:port` separator; a bare (unbracketed) IPv6
+    // address has several colons and no port, so only treat one-colon authorities
+    // as carrying a port.
     if (colon >= 0 && hostPort.indexOf(':') === colon) {
       portStr = hostPort.slice(colon + 1)
     }
   }
+  if (portStr === undefined || portStr === '') return { port: undefined, present: false }
   const port = Number.parseInt(portStr, 10)
-  return Number.isFinite(port) && port > 0 ? port : defaultPort
+  // `parseInt('80abc')` is 80, so reject any non-digit residue too.
+  if (Number.isFinite(port) && port > 0 && /^\d+$/.test(portStr)) return { port, present: true }
+  return { port: undefined, present: true }
 }
 
 /** WebSocket request execution input */
@@ -312,6 +333,11 @@ class WebSocketExecutionService {
    * (`mqtt://`) lives here; the `ws://` transport bridges the shared port host
    * (`portHosts`) on the same port — see {@link listenMqttBroker}. */
   private mqttBrokers = new Map<number, MqttBroker>()
+  /** While a {@link closeAll} is in progress, every port-host teardown promise
+   * triggered by a route's disconnect lands here so closeAll can await the OS
+   * socket releases (and not race a same-port reopen into EADDRINUSE). `null`
+   * outside a closeAll — teardowns then fire-and-forget as usual. */
+  private closeAllTeardowns: Promise<void>[] | null = null
 
   /**
    * Resolve the request, hydrate secrets, then dispatch to the transport
@@ -376,12 +402,21 @@ class WebSocketExecutionService {
    */
   private listenSocketIOServer(resolved: ResolvedExecution): Promise<WebSocketExecutionResult> {
     const { requestId, startTime, startedAt, resolvedUrl } = resolved
-    const { port, namespace } = this.parseServerAddress(resolvedUrl)
 
     return new Promise((resolve) => {
       const messages: WebSocketMessage[] = []
       let listening = false
       let settled = false
+      // Stop-during-bind guard: a `disconnect(requestId)` (Stop button) arriving
+      // while `acquirePortHost` is still awaiting would no-op if the connection
+      // weren't tracked yet, and the route would then register + listen forever.
+      // We register a placeholder connection BEFORE the await whose serverSettle
+      // flips this flag, so a Stop is detectable after the await. Mirrors the
+      // `closedByCaller` guard in the streaming twins. Read through a function so
+      // flow analysis doesn't narrow it to `false` across the await (the
+      // placeholder's serverSettle flips it from a separate disconnect call).
+      const cancel = { stopped: false }
+      const wasStopped = (): boolean => cancel.stopped
 
       // Tear down THIS route + resolve the run. The shared port server stays up
       // if other routes still listen on it (closed only when the last leaves).
@@ -404,12 +439,38 @@ class WebSocketExecutionService {
         resolve(result)
       }
 
+      // Parse + validate the address up front: a typo'd port surfaces as a run
+      // failure (not a silent 3001 bind). Inside the promise so the throw
+      // resolves the run instead of rejecting execute()'s returned promise.
+      let port: number
+      let namespace: string
+      try {
+        ({ port, namespace } = this.parseServerAddress(resolvedUrl))
+      } catch (err) {
+        finish(false, (err as Error).message)
+        return
+      }
+
+      // Placeholder so a Stop during the bind window is captured (not a no-op):
+      // it carries no port/namespace yet, so releaseServerRoute can't act on it,
+      // and serverSettle just records the cancellation for the post-await check.
+      this.activeConnections.set(requestId, { requestId, kind: 'socketio-server', startTime, messages, serverSettle: () => { cancel.stopped = true } })
+
       void (async () => {
         let host: PortHost
         try {
           host = await this.acquirePortHost(port)
         } catch (err) {
           finish(false, (err as Error).message || `Failed to listen on port ${port}`)
+          return
+        }
+        // Stop pressed while we were binding — the just-acquired port host would
+        // listen forever if no other route holds it. Release it if idle (await
+        // the OS socket close so an immediate rebind can't race EADDRINUSE) and
+        // bail before registering the route.
+        if (wasStopped()) {
+          await this.closePortHostIfIdle(port)
+          finish(false)
           return
         }
         // The await above yields the event loop: a concurrent closeAll/disconnect
@@ -445,12 +506,14 @@ class WebSocketExecutionService {
    */
   private listenRawWebSocketServer(resolved: ResolvedExecution): Promise<WebSocketExecutionResult> {
     const { requestId, startTime, startedAt, resolvedUrl } = resolved
-    const { port, namespace: path } = this.parseServerAddress(resolvedUrl)
 
     return new Promise((resolve) => {
       const messages: WebSocketMessage[] = []
       let listening = false
       let settled = false
+      // Stop-during-bind guard — see listenSocketIOServer for the rationale.
+      const cancel = { stopped: false }
+      const wasStopped = (): boolean => cancel.stopped
       const finish = (success: boolean, error?: string): void => {
         if (settled) return
         settled = true
@@ -470,12 +533,37 @@ class WebSocketExecutionService {
         resolve(result)
       }
 
+      // Parse + validate the address up front (see the Socket.IO path): a typo'd
+      // port fails the run instead of silently binding 3001.
+      let port: number
+      let path: string
+      try {
+        const parsed = this.parseServerAddress(resolvedUrl)
+        port = parsed.port
+        path = parsed.namespace
+      } catch (err) {
+        finish(false, (err as Error).message)
+        return
+      }
+
+      // Placeholder so a Stop during the bind window is captured (see the
+      // Socket.IO path): no port/namespace yet, serverSettle records the stop.
+      this.activeConnections.set(requestId, { requestId, kind: 'websocket-server', startTime, messages, serverSettle: () => { cancel.stopped = true } })
+
       void (async () => {
         let host: PortHost
         try {
           host = await this.acquirePortHost(port)
         } catch (err) {
           finish(false, (err as Error).message || `Failed to listen on port ${port}`)
+          return
+        }
+        // Stop pressed mid-bind: release the just-acquired port host if idle so
+        // it doesn't listen forever (await the OS socket close so an immediate
+        // rebind can't race EADDRINUSE), and bail before registering the route.
+        if (wasStopped()) {
+          await this.closePortHostIfIdle(port)
+          finish(false)
           return
         }
         // See the Socket.IO path: re-fetch after the await so a concurrent
@@ -900,7 +988,7 @@ class WebSocketExecutionService {
       try { host.mqttWsBroker.close() } catch { /* already closed */ }
       delete host.mqttWsPath
       delete host.mqttWsBroker
-      this.closePortHostIfIdle(port)
+      void this.closePortHostIfIdle(port)
     }
   }
 
@@ -1109,31 +1197,45 @@ class WebSocketExecutionService {
       // httpRoutes map just 404s). `namespace` carries the `<METHOD> <path>` key.
       host.httpRoutes.delete(conn.namespace)
     }
-    this.closePortHostIfIdle(conn.port)
+    void this.closePortHostIfIdle(conn.port)
   }
 
   /** Close + drop the shared port host only when no route (ANY protocol) holds it
-   * any more — the last route leaving releases the OS socket. No-op otherwise. */
-  private closePortHostIfIdle(port: number): void {
+   * any more — the last route leaving releases the OS socket. No-op otherwise.
+   * Returns a promise that resolves once the OS socket is actually released, so
+   * the quit / reopen path can await it before a same-port rebind. */
+  private closePortHostIfIdle(port: number): Promise<void> {
     const host = this.portHosts.get(port)
-    if (!host || this.hostRouteCount(host) > 0) return
-    this.tearDownPortHost(host)
+    if (!host || this.hostRouteCount(host) > 0) return Promise.resolve()
     this.portHosts.delete(port)
     logger.info('[WebSocketExecutionService] Port host closed (no routes left)', { port })
+    const teardown = this.tearDownPortHost(host)
+    // During a closeAll, surface this release so it gets awaited (a route's
+    // disconnect runs synchronously and would otherwise float its promise).
+    this.closeAllTeardowns?.push(teardown)
+    return teardown
   }
 
   /** Close a host's OS socket + attached protocol servers. `ioServer.close()`
    * ALSO closes the underlying http server (socket.io owns it); for a host with
    * NO socket.io we must close the http server ourselves — a `noServer` `ws`
-   * server does not own it, so `wss.close()` alone would leak the bound port. */
-  private tearDownPortHost(host: PortHost): void {
+   * server does not own it, so `wss.close()` alone would leak the bound port.
+   * Resolves once the OS socket has been released (the `close` callback fired),
+   * so an immediate same-port rebind on the quit/reopen path can't race
+   * EADDRINUSE against a socket that's still in the closing handshake. */
+  private tearDownPortHost(host: PortHost): Promise<void> {
     try { host.httpServer.closeAllConnections() } catch { /* already closed */ }
     try { host.wss?.close() } catch { /* already closed */ }
-    if (host.ioServer) {
-      try { void host.ioServer.close() } catch { /* already closed */ }
-    } else {
-      try { host.httpServer.close() } catch { /* already closed */ }
-    }
+    return new Promise<void>((resolve) => {
+      if (host.ioServer) {
+        // socket.io owns the http server; its close() callback fires once the
+        // underlying server has released the socket.
+        try { void host.ioServer.close(() => { resolve() }) } catch { resolve() }
+      } else {
+        // A `noServer` ws host doesn't own the http server — close it ourselves.
+        try { host.httpServer.close(() => { resolve() }) } catch { resolve() }
+      }
+    })
   }
 
   /** Human message for a route-collision (same route already on the port). */
@@ -1239,7 +1341,8 @@ class WebSocketExecutionService {
 
   /** Parse `localhost:<port>[/<namespace>]` into a port + socket.io namespace.
    * Host is ignored (server always binds localhost); a missing port falls back
-   * to the default Socket.IO port. */
+   * to the default 3001. THROWS on a present-but-unparseable port (a typo) so
+   * the run fails loudly instead of silently binding the default. */
   private parseServerAddress(resolvedUrl: string): { port: number; namespace: string } {
     const stripped = resolvedUrl.replace(/^[a-z]+:\/\//i, '')
     const slash = stripped.indexOf('/')
@@ -1249,8 +1352,14 @@ class WebSocketExecutionService {
     // otherwise a `localhost:3002/chat?x=1` server never matches a `/chat` upgrade.
     const rawNamespace = slash >= 0 ? stripped.slice(slash) : '/'
     const namespace = this.parsePathname(rawNamespace)
-    const port = extractPortFromAuthority(hostPort, 3001)
-    return { port, namespace: namespace || '/' }
+    const parsed = parseAuthorityPort(hostPort)
+    // A present-but-unparseable port (a typo like `localhost:30O1`) must fail the
+    // run, not silently bind the 3001 default — a confusing surprise the user
+    // would chase. An absent port still defaults to 3001.
+    if (parsed.present && parsed.port === undefined) {
+      throw new Error(`Invalid server port in "${resolvedUrl}" — the port must be a positive number.`)
+    }
+    return { port: parsed.port ?? 3001, namespace: namespace || '/' }
   }
 
   /**
@@ -1603,8 +1712,11 @@ class WebSocketExecutionService {
           }
         })
         // 'end' (explicit disconnect / timeout / error) is the terminal signal;
-        // 'close' is not (reconnect may follow).
+        // 'close' is not (reconnect may follow). Clear the connect timer here too:
+        // if the client is ended (Stop) before it ever connected, a still-armed
+        // timer would later fire a stray 'error' progress event.
         client.on('end', () => {
+          clearTimeout(connectTimer)
           this.activeConnections.delete(requestId)
           this.broadcastProgress(requestId, 'completed')
           fireClose()
@@ -1680,7 +1792,14 @@ class WebSocketExecutionService {
       ctl.startedAt = resolved.startedAt
       ctl.url = resolved.resolvedUrl
 
-      const { port, namespace } = this.parseServerAddress(resolved.resolvedUrl)
+      let port: number
+      let namespace: string
+      try {
+        ({ port, namespace } = this.parseServerAddress(resolved.resolvedUrl))
+      } catch (err) {
+        fireClose((err as Error).message)
+        return
+      }
       let host: PortHost
       try {
         host = await this.acquirePortHost(port)
@@ -1691,9 +1810,10 @@ class WebSocketExecutionService {
       // The caller may have hit Stop while we were binding — the connection
       // wasn't tracked yet, so its close()/disconnect() no-op'd. Bail before
       // registering the route, and release the just-acquired port host if no
-      // other route holds it (else it would listen forever, leaked).
+      // other route holds it (else it would listen forever, leaked). Await the
+      // OS socket close so an immediate rebind can't race EADDRINUSE.
       if (stopped()) {
-        this.closePortHostIfIdle(port)
+        await this.closePortHostIfIdle(port)
         fireClose()
         return
       }
@@ -1778,7 +1898,16 @@ class WebSocketExecutionService {
       ctl.startedAt = resolved.startedAt
       ctl.url = resolved.resolvedUrl
 
-      const { port, namespace: path } = this.parseServerAddress(resolved.resolvedUrl)
+      let port: number
+      let path: string
+      try {
+        const parsed = this.parseServerAddress(resolved.resolvedUrl)
+        port = parsed.port
+        path = parsed.namespace
+      } catch (err) {
+        fireClose((err as Error).message)
+        return
+      }
       let host: PortHost
       try {
         host = await this.acquirePortHost(port)
@@ -1787,7 +1916,7 @@ class WebSocketExecutionService {
         return
       }
       if (stopped()) {
-        this.closePortHostIfIdle(port)
+        await this.closePortHostIfIdle(port)
         fireClose()
         return
       }
@@ -2165,37 +2294,53 @@ class WebSocketExecutionService {
    * open project closes (file close) or the app quits, so no client socket and
    * — crucially — no hosted Socket.IO server outlives the project that started
    * it (a leaked server would keep its port bound with no UI to stop it).
+   *
+   * Resolves once every hosted port host's OS socket has actually been released,
+   * so a same-port reopen right after a file-close / reopen can't race
+   * EADDRINUSE against a socket still finishing its close handshake. Callers on
+   * the quit / reopen path should await it; others may fire-and-forget.
    */
-  closeAll(): void {
+  async closeAll(): Promise<void> {
     const count = this.activeConnections.size + this.portHosts.size + this.mqttBrokers.size
-    // Disconnect each tracked connection (a server route's disconnect closes its
-    // shared port host / MQTT broker once it was the last route). Snapshot the
-    // keys — disconnect mutates the map.
-    for (const requestId of [...this.activeConnections.keys()]) {
-      try { this.disconnect(requestId) } catch { /* best-effort teardown */ }
+    // Collect every port-host teardown so we can await the OS socket releases.
+    // A route's disconnect (below) closes its shared host once it's the last
+    // route, synchronously — closePortHostIfIdle pushes that release here.
+    const teardowns: Promise<void>[] = (this.closeAllTeardowns = [])
+    try {
+      // Disconnect each tracked connection (settles its run, broadcasts, drops
+      // it from the active map; the last route on a port closes the host).
+      // Snapshot the keys — disconnect mutates the active map.
+      for (const requestId of [...this.activeConnections.keys()]) {
+        try { this.disconnect(requestId) } catch { /* best-effort teardown */ }
+      }
+      // Defensive sweep: force-close any port host still bound (e.g. one whose
+      // backing connection was already dropped from the active map).
+      for (const port of [...this.portHosts.keys()]) {
+        const host = this.portHosts.get(port)
+        if (!host) continue
+        host.sioRoutes.clear()
+        host.wsRoutes.clear()
+        host.httpRoutes.clear()
+        try { host.mqttWsBroker?.close() } catch { /* already closed */ }
+        delete host.mqttWsBroker
+        delete host.mqttWsPath
+        teardowns.push(this.tearDownPortHost(host))
+        this.portHosts.delete(port)
+      }
+      // Defensive sweep: force-close any raw-TCP MQTT broker still bound.
+      for (const port of [...this.mqttBrokers.keys()]) {
+        const b = this.mqttBrokers.get(port)
+        if (!b) continue
+        try { b.aedes.close() } catch { /* already closed */ }
+        try { b.tcpServer?.close() } catch { /* already closed */ }
+        this.mqttBrokers.delete(port)
+      }
+    } finally {
+      this.closeAllTeardowns = null
     }
-    // Defensive sweep: force-close any port host still bound (e.g. one whose
-    // backing connection was already dropped from the active map).
-    for (const port of [...this.portHosts.keys()]) {
-      const host = this.portHosts.get(port)
-      if (!host) continue
-      host.sioRoutes.clear()
-      host.wsRoutes.clear()
-      host.httpRoutes.clear()
-      try { host.mqttWsBroker?.close() } catch { /* already closed */ }
-      delete host.mqttWsBroker
-      delete host.mqttWsPath
-      this.tearDownPortHost(host)
-      this.portHosts.delete(port)
-    }
-    // Defensive sweep: force-close any raw-TCP MQTT broker still bound.
-    for (const port of [...this.mqttBrokers.keys()]) {
-      const b = this.mqttBrokers.get(port)
-      if (!b) continue
-      try { b.aedes.close() } catch { /* already closed */ }
-      try { b.tcpServer?.close() } catch { /* already closed */ }
-      this.mqttBrokers.delete(port)
-    }
+    // Await every OS socket release so an immediate same-port reopen can't race
+    // EADDRINUSE against a socket still in its close handshake.
+    await Promise.all(teardowns)
     if (count > 0) logger.info('[WebSocketExecutionService] Closed all connections + servers', { count })
   }
 

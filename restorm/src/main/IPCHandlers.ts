@@ -771,7 +771,7 @@ export function registerRestormIPC(deps: {
     return contextService.getCodeSnippets(requestId)
   })
 
-  ipcMain.handle('context:clear-all', () => {
+  ipcMain.handle('context:clear-all', async () => {
     contextService.clearAll()
     // File close — stop every running scenario. Runs are project-scoped: closing
     // the file (or opening another over it) must halt anything still executing,
@@ -780,7 +780,9 @@ export function registerRestormIPC(deps: {
     // File close — tear down every live connection AND any hosted WebSocket /
     // Socket.IO server. A server is collection-scoped: closing the file must
     // release its port, otherwise it keeps listening with no UI left to stop it.
-    websocketExecutionService.closeAll()
+    // Await it so the OS socket is fully released before this round-trip
+    // resolves — a reopen that rebinds the same port can't race EADDRINUSE.
+    await websocketExecutionService.closeAll()
     // File close — same for any hosted gRPC mock server (its own grpc.Server on
     // its own port): release the port so it doesn't keep listening past the file.
     grpcMockServerService.closeAll()
