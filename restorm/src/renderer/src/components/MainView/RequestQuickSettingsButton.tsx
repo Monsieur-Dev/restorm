@@ -30,6 +30,8 @@ import {
   extractSnapshotFields,
   findMatchingConfig,
   getAllConfigs,
+  getProjectConfigs,
+  getSettingsConfigs,
   saveProjectConfig,
   saveSettingsConfig
 } from '../../services/requestQuickConfigStore'
@@ -215,14 +217,26 @@ export const RequestQuickSettingsButton: React.FC<RequestQuickSettingsButtonProp
     if (!trimmed) return
 
     if (storageTarget === 'settings' && projectUuid) {
+      // Transform (not duplicate): re-saving an existing name into user storage
+      // moves it there — drop any same-named file config so the two backends
+      // never hold parallel copies of one name.
+      const fileDup = getProjectConfigs(request).find((c) => c.name === trimmed)
+      if (fileDup) deleteProjectConfig(request, fileDup.id)
       saveSettingsConfig(projectUuid, request.id, trimmed, currentFields)
       // Settings saves don't emit REQUEST_UPDATED (no reactive proxy involved),
       // so manually bump tick to force allConfigs to re-read the updated cache.
       setTick((n) => n + 1)
     } else if (storageTarget === 'project') {
+      // Transform (not duplicate): re-saving an existing name into file storage
+      // moves it there — drop any same-named user config first.
+      if (projectUuid) {
+        const userDup = getSettingsConfigs(projectUuid, request.id).find((c) => c.name === trimmed)
+        if (userDup) deleteSettingsConfig(projectUuid, request.id, userDup.id)
+      }
       saveProjectConfig(request, trimmed, currentFields)
       // Project saves mutate the reactive proxy which emits REQUEST_UPDATED →
       // tick bumps automatically via the eventBus subscription above.
+      setTick((n) => n + 1)
     }
     // Update state to match what was actually saved so the input stays in sync.
     setConfigName(trimmed)
