@@ -25,6 +25,7 @@ import { useAllEnvValueTypeGroups } from '../../../hooks/useAllEnvValueTypeGroup
 import type { KeyValue } from '../../../../../shared/types/baseTypes'
 import type { Request } from '../../../../../shared/types/collections'
 import { TypedValueField } from '../../TypedValueField'
+import type { ValueTypeKind } from '../../TypedValueField/castValue'
 import type { EnvValueTypeGroup } from '../../../hooks/useAllEnvValueTypeGroups'
 import { normalizeValueType } from '../../../utils/normalizeValueType'
 import { serializeValueForPersistence } from '../../../../../shared/utils/valuePersistence'
@@ -60,9 +61,26 @@ interface FieldContext {
  * it instead. An empty inline value means "inherit" (the base request / picked
  * quick-config value applies). `baseValue` is shown as the row's right-column
  * hint so the inherited value stays visible. */
-function scalarRow(portId: string, label: string, baseValue: string | undefined, ctx: FieldContext): ScenarioNodeCell {
+/** Per-field value-type policy. Defaults preserve the original behaviour (every
+ * kind except `expression`, env values allowed). A URL field overrides this to
+ * the only kinds that make sense in an endpoint — a string, a variable, or an
+ * expression — so the picker never offers a colour / number / list for a URL. */
+interface ScalarFieldPolicy {
+  excludeTypes?: ValueTypeKind[]
+  allowEnvironment?: boolean
+}
+
+/** Every value kind EXCEPT the three that are coherent for a URL
+ * (string / variable / expression). Keep in sync with `ValueTypeKind`. */
+const URL_EXCLUDE_TYPES: ValueTypeKind[] = [
+  'secret', 'number', 'dateTime', 'color', 'boolean',
+  'enum', 'enumList', 'customList', 'customListMulti', 'environment', 'null', 'list'
+]
+
+function scalarRow(portId: string, label: string, baseValue: string | undefined, ctx: FieldContext, policy?: ScalarFieldPolicy): ScenarioNodeCell {
   const overrides = readActionOverrides(ctx.config)
   const stored = overrides[portId]
+  const allowEnvironment = policy?.allowEnvironment ?? true
   return {
     id: portId,
     label,
@@ -75,14 +93,19 @@ function scalarRow(portId: string, label: string, baseValue: string | undefined,
           value={normalizeValueType(stored)}
           onChange={(next) => { setOverride(ctx.config, portId, serializeValueForPersistence(next), ctx.onSetConfig) }}
           valueTypeGroups={ctx.valueTypeGroups}
-          excludeTypes={['expression']}
-          allowEnvironment
+          excludeTypes={policy?.excludeTypes ?? ['expression']}
+          allowEnvironment={allowEnvironment}
           dataTestId={`scn-override-${portId}`}
         />
       </div>
     )
   }
 }
+
+/** The value-type policy for a URL override field: only string / variable /
+ * expression are coherent endpoints, env values are folded into the `variable`
+ * picker, so environment is not offered separately. */
+const URL_FIELD_POLICY: ScalarFieldPolicy = { excludeTypes: URL_EXCLUDE_TYPES, allowEnvironment: false }
 
 /** Verb options for the method select; index 0 = "inherit" (no override). */
 const METHOD_VERBS = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS']
@@ -207,7 +230,7 @@ export function buildHttpOverrideSections(
     id: 'override-core',
     rows: [
       overridesCaptionRow(labels.overridesLabel),
-      scalarRow('url', labels.url, request.url, ctx),
+      scalarRow('url', labels.url, request.url, ctx, URL_FIELD_POLICY),
       methodRow(request.method, ctx, labels.inherit, labels.method)
     ]
   })
@@ -236,7 +259,7 @@ export function buildStreamingOverrideSections(
   labels: OverrideLabels
 ): ScenarioNodeSection[] {
   const out: ScenarioNodeSection[] = [
-    { id: 'override-core', rows: [overridesCaptionRow(labels.overridesLabel), scalarRow('url', labels.url, request.url, ctx)] }
+    { id: 'override-core', rows: [overridesCaptionRow(labels.overridesLabel), scalarRow('url', labels.url, request.url, ctx, URL_FIELD_POLICY)] }
   ]
   const headers = kvOverrideSection('headers', labels.headers, request.headers, ctx, labels.addField)
   if (headers) out.push(headers)
