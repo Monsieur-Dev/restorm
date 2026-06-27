@@ -156,10 +156,17 @@ function kvOverrideSection(group: 'headers' | 'params' | 'pathParams', name: str
     .filter((k) => k && !baseKeys.includes(k))
   const keys = [...baseKeys, ...extraKeys]
 
-  const rows: ScenarioNodeCell[] = keys.map((key) => {
-    const base = (kvs ?? []).find((kv) => kv.key === key)
-    return scalarRow(`${group}:${key}`, key, base ? displayValue(base.value) : undefined, ctx)
-  })
+  // Whole-table object port (id = the bare group): wiring an upstream object
+  // output — or an inline JSON object — into it merges every entry into the
+  // table at run time (the executor's slot merge reads the same bare-group id).
+  // Sits first so the table-wide override reads above the per-key rows.
+  const rows: ScenarioNodeCell[] = [
+    scalarRow(group, name, undefined, ctx),
+    ...keys.map((key) => {
+      const base = (kvs ?? []).find((kv) => kv.key === key)
+      return scalarRow(`${group}:${key}`, key, base ? displayValue(base.value) : undefined, ctx)
+    })
+  ]
   rows.push({
     id: `${group}:__add`,
     content: (

@@ -108,6 +108,30 @@ describe('httpRequestExecutor — slot short-circuit', () => {
     expect(execute).toHaveBeenCalledTimes(1)
   })
 
+  it('a wired whole-object headers slot merges each entry into the table', async () => {
+    await httpRequestExecutor(
+      makeActivation({ headers: { 'X-A': '1', 'X-Env': 'replaced' } }),
+      makeCtx(node())
+    )
+
+    expect(flushRequestStateToContext).toHaveBeenCalledTimes(1)
+    const flushed = flushRequestStateToContext.mock.calls[0]?.[0] as { headers: KV[] }
+    // A new key from the object is appended.
+    expect(flushed.headers.find((kv) => kv.key === 'X-A')?.value).toBe('1')
+    // A key the request already defines is updated in place.
+    expect(flushed.headers.find((kv) => kv.key === 'X-Env')?.value).toBe('replaced')
+    expect(execute).toHaveBeenCalledTimes(1)
+  })
+
+  it('an inline JSON-string whole-object params slot merges into the table', async () => {
+    const n = { id: 'n1', kind: 'httpRequest', config: { requestId: 'req-1', overrides: { params: '{"page":"2"}' } }, inputs: [], outputs: [], position: { x: 0, y: 0 } } as unknown as ScenarioNode
+    await httpRequestExecutor(makeActivation({}), makeCtx(n))
+
+    expect(flushRequestStateToContext).toHaveBeenCalledTimes(1)
+    const flushed = flushRequestStateToContext.mock.calls[0]?.[0] as { params: KV[] }
+    expect(flushed.params.find((kv) => kv.key === 'page')?.value).toBe('2')
+  })
+
   it('leaves unwired slots untouched so classic env + Handlebars resolution still applies', async () => {
     const persisted = makeRequest()
     findById.mockReturnValue(persisted)

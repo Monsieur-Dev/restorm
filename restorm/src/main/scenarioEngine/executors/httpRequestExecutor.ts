@@ -256,6 +256,20 @@ function applySlotOverrides(req: Request, inputs: Record<string, unknown>): Requ
     if (portId === 'url') { clone.url = stringifyToWire(value); continue }
     if (portId === 'method') { clone.method = stringifyToWire(value).toUpperCase(); continue }
     if (portId === 'body') { clone.body = value; continue }
+    // Whole-table object port: merge every entry of the wired/inline object into
+    // the group's KV array (a present key updates, a new key appends).
+    if (portId === 'headers' || portId === 'params' || portId === 'pathParams') {
+      const arr = portId === 'pathParams' ? clone.pathParams : portId === 'headers' ? clone.headers : clone.params
+      const obj = asKvObject(value)
+      if (arr && obj) {
+        for (const [k, v] of Object.entries(obj)) {
+          const existing = arr.find((kv) => kv.key === k)
+          if (existing) { existing.value = stringifyToWire(v); existing.enabled = true }
+          else arr.push({ key: k, value: stringifyToWire(v), enabled: true })
+        }
+      }
+      continue
+    }
     const sep = portId.indexOf(':')
     const group = portId.slice(0, sep)
     const key = portId.slice(sep + 1)
@@ -303,7 +317,23 @@ export function applyRequestOverride(req: Request, override: unknown): Request {
 
 function isSlotPort(portId: string): boolean {
   return portId === 'url' || portId === 'method' || portId === 'body'
+    // Whole-table object ports: a bare group id accepts an object that is merged
+    // key-by-key into the request's headers / params / path params.
+    || portId === 'headers' || portId === 'params' || portId === 'pathParams'
     || portId.startsWith('pathParams:') || portId.startsWith('headers:') || portId.startsWith('params:')
+}
+
+/** Coerce a whole-table override value to a `key → value` record. Accepts a
+ * plain object (a wired upstream object output) or a JSON object string (an
+ * inline literal). Anything else (array, scalar, invalid JSON) yields null so
+ * the merge is skipped rather than corrupting the table. */
+function asKvObject(value: unknown): Record<string, unknown> | null {
+  let obj = value
+  if (typeof obj === 'string') {
+    try { obj = JSON.parse(obj) } catch { return null }
+  }
+  if (obj !== null && typeof obj === 'object' && !Array.isArray(obj)) return obj as Record<string, unknown>
+  return null
 }
 
 function cloneKVs(kvs: KV[] | undefined): KV[] {
