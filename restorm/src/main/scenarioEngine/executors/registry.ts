@@ -57,7 +57,7 @@ import {
 import { httpRequestExecutor } from './httpRequestExecutor'
 import { soapRequestExecutor } from './soapRequestExecutor'
 import { runScenarioExecutor } from './runScenarioExecutor'
-import { socketioConnectExecutor, socketioSendExecutor, socketioCloseExecutor, websocketConnectExecutor, websocketSendExecutor, websocketCloseExecutor, mqttConnectExecutor, mqttSendExecutor, mqttCloseExecutor, grpcConnectExecutor, grpcSendExecutor, grpcCloseExecutor, grpcListenExecutor, grpcServerCloseExecutor, httpListenExecutor, httpCloseExecutor, soapListenExecutor, soapCloseExecutor, graphqlListenExecutor, graphqlCloseExecutor, odataListenExecutor, odataCloseExecutor } from './socketioExecutors'
+import { socketioConnectExecutor, socketioSendExecutor, socketioCloseExecutor, websocketConnectExecutor, websocketSendExecutor, websocketCloseExecutor, mqttConnectExecutor, mqttSendExecutor, mqttCloseExecutor, grpcConnectExecutor, grpcSendExecutor, grpcCloseExecutor, grpcListenExecutor, grpcServerCloseExecutor, httpListenExecutor, httpCloseExecutor, soapListenExecutor, soapCloseExecutor, graphqlListenExecutor, graphqlCloseExecutor, odataListenExecutor, odataCloseExecutor, graphqlSubscribeExecutor, graphqlUnsubscribeExecutor } from './socketioExecutors'
 import { concreteValue } from '../../../shared/utils/scenarioStaticPreview'
 import { coerceCliParamValue } from '../../../shared/scenarioCliParams'
 import { readInputParams, inputParamName } from '../../../shared/scenarioInputParams'
@@ -259,6 +259,8 @@ export function pickExecutor(kind: string): NodeExecutor {
     case 'graphqlClose': return graphqlCloseExecutor
     case 'odataListen': return odataListenExecutor
     case 'odataClose': return odataCloseExecutor
+    case 'graphqlSubscribe': return graphqlSubscribeExecutor
+    case 'graphqlUnsubscribe': return graphqlUnsubscribeExecutor
     case 'input': return inputExecutor
     case 'output': return outputPassthroughExecutor
     default: return assertNever(k)

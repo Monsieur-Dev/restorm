@@ -358,6 +358,28 @@ export const odataListenExecutor: NodeExecutor = (_act, ctx) => {
   }
 }
 
+/**
+ * A (graphqlSubscribe): open a long-lived GraphQL SUBSCRIPTION as a CLIENT over
+ * SSE. A receive-only stream — NOT a one-shot request. Hands it off to the
+ * scheduler via the `graphql-subscribe` transport: the scheduler keeps the run
+ * alive while it streams, fires `connected` once it is open, re-emits each pushed
+ * payload on `message`, and fires `done` when a graphqlUnsubscribe (or a Stop)
+ * ends it, or the server completes the stream. Mirrors {@link grpcConnectExecutor}.
+ */
+export const graphqlSubscribeExecutor: NodeExecutor = (_act, ctx) => {
+  const cfg = ctx.node.config as { requestId?: unknown; connectionName?: unknown }
+  if (typeof cfg.requestId !== 'string' || cfg.requestId === '') {
+    throw new Error(`graphqlSubscribe node ${ctx.node.id} has no bound requestId`)
+  }
+  const connectionName = typeof cfg.connectionName === 'string' && cfg.connectionName.trim() !== ''
+    ? cfg.connectionName.trim()
+    : cfg.requestId
+  return {
+    outputs: [],
+    scopeAction: { type: 'openSocketioConnect', transport: 'graphql-subscribe', requestId: cfg.requestId, events: [], connectionName }
+  }
+}
+
 /** C (odataClose): stop the OData mock service named by `config.connectionNodeId`
  * (firing that odataListen node's `done`). Pure-event action; sequences via its
  * own `done`. Errors when no server is selected or it is not listening. */
@@ -368,6 +390,22 @@ export const odataCloseExecutor: NodeExecutor = (_act, ctx) => {
   if (!ctx.socketio) throw new Error('odataClose: socket bridge unavailable')
   if (!ctx.socketio.has(connectionNodeId)) {
     throw new Error('odataClose: the referenced server does not exist in this run')
+  }
+  ctx.socketio.close(connectionNodeId)
+  return { outputs: [] }
+}
+
+/** C (graphqlUnsubscribe): stop the GraphQL subscription named by
+ * `config.connectionNodeId` (firing that graphqlSubscribe node's `done`).
+ * Pure-event action; sequences via its own `done`. Errors when no subscription
+ * is selected or it is not open. */
+export const graphqlUnsubscribeExecutor: NodeExecutor = (_act, ctx) => {
+  const cfg = ctx.node.config as { connectionNodeId?: unknown }
+  const connectionNodeId = typeof cfg.connectionNodeId === 'string' ? cfg.connectionNodeId : ''
+  if (connectionNodeId === '') throw new Error('graphqlUnsubscribe: no subscription selected')
+  if (!ctx.socketio) throw new Error('graphqlUnsubscribe: socket bridge unavailable')
+  if (!ctx.socketio.has(connectionNodeId)) {
+    throw new Error('graphqlUnsubscribe: the referenced subscription does not exist in this run')
   }
   ctx.socketio.close(connectionNodeId)
   return { outputs: [] }

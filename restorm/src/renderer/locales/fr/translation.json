@@ -434,6 +434,15 @@
       "served": "À l'écoute — {{count}} opération(s) servie(s)",
       "notListening": "Pas à l'écoute",
       "listenFailed": "Échec du démarrage du serveur fictif"
+    },
+    "subscription": {
+      "subscribe": "S’abonner",
+      "stop": "Arrêter",
+      "waiting": "Abonné — en attente d’événements…",
+      "noEvents": "Aucun événement pour l’instant. Abonnez-vous pour démarrer le flux.",
+      "idle": "Non abonné",
+      "streaming": "Diffusion — {{count}} événement(s) reçu(s)",
+      "eventLabel": "Événement {{index}}"
     }
   },
   "grpc": {
@@ -1060,7 +1069,9 @@
       "graphqlListen": "Serveur GraphQL",
       "graphqlClose": "Fermeture GraphQL",
       "odataListen": "Serveur OData",
-      "odataClose": "Fermeture OData"
+      "odataClose": "Fermeture OData",
+      "graphqlSubscribe": "Abonnement GraphQL",
+      "graphqlUnsubscribe": "Désabonnement GraphQL"
     },
     "comparator": {
       "result": "résultat"
@@ -1633,7 +1644,9 @@
       "graphqlListen": "Héberge un serveur GraphQL fictif local et écoute indéfiniment. « connected » se déclenche une fois le serveur démarré ; chaque opération servie réémet ses données sur le port « served ». Le serveur reste actif jusqu’à une fermeture GraphQL (ou un Stop), puis « done » se déclenche. Pas de sortie response — il sert, il n’appelle pas.",
       "graphqlClose": "Arrête un serveur GraphQL fictif déjà en écoute (déclaré par un nœud serveur GraphQL) et libère son port.",
       "odataListen": "Héberge un service OData v4 fictif local et écoute indéfiniment. « connected » se déclenche une fois le service démarré ; chaque requête servie réémet ses données sur le port « served ». Le service reste actif jusqu’à une fermeture OData (ou un Stop), puis « done » se déclenche. Pas de sortie response — il sert, il n’appelle pas.",
-      "odataClose": "Arrête un service OData fictif déjà en écoute (déclaré par un nœud serveur OData) et libère son port."
+      "odataClose": "Arrête un service OData fictif déjà en écoute (déclaré par un nœud serveur OData) et libère son port.",
+      "graphqlSubscribe": "Ouvre un abonnement GraphQL persistant côté client via SSE et écoute. `connected` se déclenche dès que le flux est ouvert ; chaque charge utile reçue est réémise sur le port `message` (un abonnement est en lecture seule, sans événements nommés). Le flux reste ouvert jusqu’à un désabonnement GraphQL (ou un arrêt), ou jusqu’à ce que le serveur le termine, puis `done` se déclenche.",
+      "graphqlUnsubscribe": "Arrête un abonnement GraphQL déjà ouvert (déclaré par un nœud d’abonnement GraphQL) en fermant son flux SSE."
     },
     "legend": {
       "title": "Légende",

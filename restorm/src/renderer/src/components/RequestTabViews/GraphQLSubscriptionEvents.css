@@ -1,0 +1,66 @@
+/* The themed scrollbar is owned by the wrapping ECUI ScrollableElement; this
+ * inner list just lays the events out and grows to fit its content. */
+.gql-sub-events {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px;
+}
+
+.gql-sub-event {
+  border: 1px solid var(--panel-border);
+  border-radius: 6px;
+  background: var(--editor-inactiveSelectionBackground, #2a2d2e);
+  overflow: hidden;
+}
+
+.gql-sub-event-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 6px 10px;
+  background: transparent;
+  border: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.gql-sub-event-header:hover {
+  background: var(--list-hoverBackground);
+}
+
+.gql-sub-event-header .codicon {
+  font-size: 13px;
+  opacity: 0.8;
+}
+
+.gql-sub-event-index {
+  font-weight: 600;
+  font-size: 12px;
+}
+
+.gql-sub-event-time {
+  font-size: 10px;
+  opacity: 0.7;
+  margin-left: auto;
+  font-family: var(--editor-font-family);
+}
+
+.gql-sub-event-body {
+  margin: 0;
+  padding: 6px 10px 8px;
+  font-family: var(--editor-font-family);
+  font-size: 12px;
+  white-space: pre-wrap;
+  word-break: break-word;
+  border-top: 1px solid var(--panel-border);
+}
+
+.gql-sub-events-empty {
+  color: var(--descriptionForeground);
+  padding: 8px;
+  font-size: 12px;
+}

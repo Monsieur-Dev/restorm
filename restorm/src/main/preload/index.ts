@@ -706,6 +706,41 @@ contextBridge.exposeInMainWorld('restorm', {
       return () => {
         ipcRenderer.removeListener('graphql:server-served', handler)
       }
+    },
+    /** SUBSCRIPTION CLIENT: open a long-lived GraphQL subscription over SSE. */
+    subscribe: async (input: { requestId: string; timeout?: number }): Promise<{ started: boolean }> => {
+      const result: unknown = await ipcRenderer.invoke('graphql-sub:subscribe', input)
+      return result as { started: boolean }
+    },
+    /** SUBSCRIPTION CLIENT: stop / unsubscribe an active subscription. */
+    unsubscribe: async (requestId: string): Promise<boolean> => {
+      const result: unknown = await ipcRenderer.invoke('graphql-sub:unsubscribe', requestId)
+      return result as boolean
+    },
+    /** SUBSCRIPTION CLIENT: whether a subscription is currently streaming. */
+    isSubscribing: async (requestId: string): Promise<boolean> => {
+      const result: unknown = await ipcRenderer.invoke('graphql-sub:is-subscribing', requestId)
+      return result as boolean
+    },
+    /** SUBSCRIPTION CLIENT: each pushed subscription payload, in arrival order. */
+    onEvent: (callback: (data: { requestId: string; event: { data: string; timestamp: string } }) => void): (() => void) => {
+      const handler = (_event: Electron.IpcRendererEvent, data: { requestId: string; event: { data: string; timestamp: string } }): void => {
+        callback(data)
+      }
+      ipcRenderer.on('graphql-sub:event', handler)
+      return () => {
+        ipcRenderer.removeListener('graphql-sub:event', handler)
+      }
+    },
+    /** SUBSCRIPTION CLIENT: lifecycle updates (drives the listening badge beam). */
+    onSubscriptionProgress: (callback: (data: { requestId: string; status: 'started' | 'completed' | 'cancelled' | 'error' }) => void): (() => void) => {
+      const handler = (_event: Electron.IpcRendererEvent, data: { requestId: string; status: 'started' | 'completed' | 'cancelled' | 'error' }): void => {
+        callback(data)
+      }
+      ipcRenderer.on('graphql-sub:progress', handler)
+      return () => {
+        ipcRenderer.removeListener('graphql-sub:progress', handler)
+      }
     }
   },
   graphqlApi: {

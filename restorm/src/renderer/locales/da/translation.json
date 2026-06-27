@@ -434,6 +434,15 @@
       "served": "Lytter — {{count}} handling(er) betjent",
       "notListening": "Lytter ikke",
       "listenFailed": "Kunne ikke starte mock-serveren"
+    },
+    "subscription": {
+      "subscribe": "Abonner",
+      "stop": "Stop",
+      "waiting": "Abonneret — venter på hændelser…",
+      "noEvents": "Ingen hændelser endnu. Abonner for at starte streamen.",
+      "idle": "Ikke abonneret",
+      "streaming": "Streamer — {{count}} hændelse(r) modtaget",
+      "eventLabel": "Hændelse {{index}}"
     }
   },
   "grpc": {
@@ -1060,7 +1069,9 @@
       "graphqlListen": "GraphQL server",
       "graphqlClose": "GraphQL close",
       "odataListen": "OData server",
-      "odataClose": "OData close"
+      "odataClose": "OData close",
+      "graphqlSubscribe": "GraphQL-abonnement",
+      "graphqlUnsubscribe": "Opsig GraphQL-abonnement"
     },
     "comparator": {
       "result": "resultat"
@@ -1630,7 +1641,9 @@
       "graphqlListen": "Hosts a local GraphQL mock server and listens indefinitely. `connected` fires once it is listening; each served operation re-emits its data on the `served` port. The server stays up until a GraphQL close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
       "graphqlClose": "Stops an already-listening GraphQL mock server (declared by a GraphQL server node), freeing its port.",
       "odataListen": "Hoster en lokal OData v4-mockservice og lytter i det uendelige. `connected` udløses, så snart den lytter; hver betjent forespørgsel sender sine data igen på `served`-porten. Serveren kører, indtil en OData-lukning (eller et Stop), hvorefter `done` udløses. Intet response-output — den betjener, den kalder ikke ud.",
-      "odataClose": "Stopper en allerede lyttende OData-mockservice (erklæret af en OData-serverknude) og frigiver dens port."
+      "odataClose": "Stopper en allerede lyttende OData-mockservice (erklæret af en OData-serverknude) og frigiver dens port.",
+      "graphqlSubscribe": "Åbner et langlivet GraphQL-abonnement som klient via SSE og lytter. `connected` udløses, så snart streamen er åben; hver modtaget nyttelast genudsendes på `message`-porten (et abonnement er kun modtagende, uden navngivne hændelser). Streamen forbliver åben indtil en GraphQL-opsigelse (eller et stop), eller indtil serveren fuldfører den, hvorefter `done` udløses.",
+      "graphqlUnsubscribe": "Stopper et allerede åbent GraphQL-abonnement (erklæret af en GraphQL-abonnementsknude) og lukker dets SSE-stream."
     },
     "legend": {
       "title": "Forklaring",

@@ -144,11 +144,12 @@ export interface SchedulerInit {
 export interface SocketioConnectRequest {
   requestId: string
   /** Wire transport — `socketio` opens a socket.io client, `websocket` a raw WS,
-   * `grpc` a streaming RPC (server / client / bidi), `http-server` HOSTS a local
-   * HTTP mock, `grpc-server` a local gRPC mock, `soap-server` a local SOAP mock,
-   * `graphql-server` a local GraphQL mock and `odata-server` a local OData v4
+   * `grpc` a streaming RPC (server / client / bidi), `graphql-subscribe` a GraphQL
+   * subscription over SSE (receive-only; each pushed payload re-emits on
+   * `message`), `http-server` HOSTS a local HTTP mock, `grpc-server` a local gRPC
+   * mock, `soap-server` a local SOAP mock and `graphql-server` a local GraphQL
    * mock (each served request / call / operation re-emits on `served`). */
-  transport: 'socketio' | 'websocket' | 'grpc' | 'mqtt' | 'http-server' | 'grpc-server' | 'soap-server' | 'graphql-server' | 'odata-server'
+  transport: 'socketio' | 'websocket' | 'grpc' | 'mqtt' | 'graphql-subscribe' | 'http-server' | 'grpc-server' | 'soap-server' | 'graphql-server' | 'odata-server'
   /** Fired once the socket is open. */
   onConnect: () => void
   /** Fired for every received frame (event name — undefined for raw WS — + payload). */
@@ -1225,7 +1226,7 @@ export class Scheduler {
    */
   private runSocketioConnect(
     act: InternalActivation,
-    action: { transport: 'socketio' | 'websocket' | 'grpc' | 'mqtt' | 'http-server' | 'grpc-server' | 'soap-server' | 'graphql-server' | 'odata-server'; requestId: string; events: string[]; connectionName: string }
+    action: { transport: 'socketio' | 'websocket' | 'grpc' | 'mqtt' | 'graphql-subscribe' | 'http-server' | 'grpc-server' | 'soap-server' | 'graphql-server' | 'odata-server'; requestId: string; events: string[]; connectionName: string }
   ): void {
     if (!this.socketioConnectBridge) { this.fail('socketio bridge not wired'); return }
     let iter = 0
@@ -1303,7 +1304,7 @@ export class Scheduler {
           // frames — every SERVED request / call / operation re-emits its
           // served-summary `{ request, response }` data on the dedicated `served` port.
           port = 'served'
-        } else if (action.transport === 'websocket' || action.transport === 'grpc' || action.transport === 'mqtt') {
+        } else if (action.transport === 'websocket' || action.transport === 'grpc' || action.transport === 'mqtt' || action.transport === 'graphql-subscribe') {
           port = 'message'
         } else {
           const named = eventName !== undefined && action.events.includes(eventName)

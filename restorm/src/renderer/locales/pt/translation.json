@@ -434,6 +434,15 @@
       "served": "A escutar — {{count}} operação(ões) atendida(s)",
       "notListening": "Sem escutar",
       "listenFailed": "Falha ao iniciar o servidor simulado"
+    },
+    "subscription": {
+      "subscribe": "Subscrever",
+      "stop": "Parar",
+      "waiting": "Subscrito — à espera de eventos…",
+      "noEvents": "Ainda sem eventos. Subscreva para iniciar a transmissão.",
+      "idle": "Não subscrito",
+      "streaming": "A transmitir — {{count}} evento(s) recebido(s)",
+      "eventLabel": "Evento {{index}}"
     }
   },
   "grpc": {
@@ -1060,7 +1069,9 @@
       "graphqlListen": "GraphQL server",
       "graphqlClose": "GraphQL close",
       "odataListen": "OData server",
-      "odataClose": "OData close"
+      "odataClose": "OData close",
+      "graphqlSubscribe": "Subscrição GraphQL",
+      "graphqlUnsubscribe": "Cancelar subscrição GraphQL"
     },
     "comparator": {
       "result": "resultado"
@@ -1630,7 +1641,9 @@
       "graphqlListen": "Hosts a local GraphQL mock server and listens indefinitely. `connected` fires once it is listening; each served operation re-emits its data on the `served` port. The server stays up until a GraphQL close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
       "graphqlClose": "Stops an already-listening GraphQL mock server (declared by a GraphQL server node), freeing its port.",
       "odataListen": "Hospeda um serviço fictício OData v4 local e escuta indefinidamente. `connected` é acionado assim que está a escutar; cada pedido servido reemite os seus dados na porta `served`. O servidor permanece ativo até um fecho OData (ou um Stop), depois `done` é acionado. Sem saída response — ele serve, não chama para fora.",
-      "odataClose": "Para um serviço fictício OData que já está a escutar (declarado por um nó de servidor OData), libertando a sua porta."
+      "odataClose": "Para um serviço fictício OData que já está a escutar (declarado por um nó de servidor OData), libertando a sua porta.",
+      "graphqlSubscribe": "Abre uma subscrição GraphQL de longa duração como cliente através de SSE e escuta. `connected` dispara assim que o fluxo está aberto; cada payload recebido é reemitido na porta `message` (uma subscrição é apenas de receção, sem eventos nomeados). O fluxo permanece aberto até um cancelamento de subscrição GraphQL (ou uma paragem), ou até o servidor o concluir, e então `done` dispara.",
+      "graphqlUnsubscribe": "Para uma subscrição GraphQL já aberta (declarada por um nó de subscrição GraphQL), encerrando o seu fluxo SSE."
     },
     "legend": {
       "title": "Legenda",

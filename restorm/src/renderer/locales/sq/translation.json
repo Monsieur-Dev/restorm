@@ -434,6 +434,15 @@
       "served": "Në dëgjim — u shërbyen {{count}} operacione",
       "notListening": "Nuk dëgjon",
       "listenFailed": "Dështoi nisja e serverit mock"
+    },
+    "subscription": {
+      "subscribe": "Abonohu",
+      "stop": "Ndalo",
+      "waiting": "I abonuar — në pritje të ngjarjeve…",
+      "noEvents": "Ende asnjë ngjarje. Abonohu për të nisur transmetimin.",
+      "idle": "I paabonuar",
+      "streaming": "Transmetim — {{count}} ngjarje të marra",
+      "eventLabel": "Ngjarja {{index}}"
     }
   },
   "grpc": {
@@ -1060,7 +1069,9 @@
       "graphqlListen": "GraphQL server",
       "graphqlClose": "GraphQL close",
       "odataListen": "OData server",
-      "odataClose": "OData close"
+      "odataClose": "OData close",
+      "graphqlSubscribe": "Abonim GraphQL",
+      "graphqlUnsubscribe": "Çabonim GraphQL"
     },
     "comparator": {
       "result": "rezultati"
@@ -1630,7 +1641,9 @@
       "graphqlListen": "Hosts a local GraphQL mock server and listens indefinitely. `connected` fires once it is listening; each served operation re-emits its data on the `served` port. The server stays up until a GraphQL close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
       "graphqlClose": "Stops an already-listening GraphQL mock server (declared by a GraphQL server node), freeing its port.",
       "odataListen": "Pret një shërbim lokal imitues OData v4 dhe dëgjon pafundësisht. `connected` aktivizohet sapo fillon të dëgjojë; çdo kërkesë e shërbyer riemeton të dhënat e saj në portën `served`. Serveri qëndron aktiv deri në një mbyllje OData (ose një Stop), pastaj aktivizohet `done`. Pa dalje response — shërben, nuk thërret nga jashtë.",
-      "odataClose": "Ndalon një shërbim imitues OData që po dëgjon tashmë (i deklaruar nga një nyje serveri OData), duke liruar portën e tij."
+      "odataClose": "Ndalon një shërbim imitues OData që po dëgjon tashmë (i deklaruar nga një nyje serveri OData), duke liruar portën e tij.",
+      "graphqlSubscribe": "Hap një abonim GraphQL afatgjatë si klient përmes SSE dhe dëgjon. `connected` aktivizohet sapo rrjedha të hapet; çdo ngarkesë e marrë riemetohet në portën `message` (një abonim është vetëm marrës, pa ngjarje të emërtuara). Rrjedha mbetet e hapur deri në një çabonim GraphQL (ose një ndalim), ose derisa serveri ta përfundojë, pastaj aktivizohet `done`.",
+      "graphqlUnsubscribe": "Ndalon një abonim GraphQL tashmë të hapur (deklaruar nga një nyje abonimi GraphQL), duke mbyllur rrjedhën e tij SSE."
     },
     "legend": {
       "title": "Legjenda",

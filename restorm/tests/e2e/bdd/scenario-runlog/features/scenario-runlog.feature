@@ -68,4 +68,5 @@ Feature: Scenario run-log end-to-end
       | SOAP Server    |
       | GraphQL Server |
       | OData Server   |
+      | GraphQL Subscription |
       | Main           |

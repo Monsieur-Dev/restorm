@@ -1,0 +1,69 @@
+- message: 🔵 [<time>] ▶ GraphQL Subscription
+- message: ⚪ [<time>] start graphqlListen
+  data:
+    requestId: <uuid>
+    connectionName: GraphQL Sub Mock
+    label: start GraphQL mock (with subscription)
+- message: ⚪ [<time>] done graphqlListen
+- message: ⚪ [<time>] graphql-server "GraphQL Sub Mock" connecting
+- message: ⚪ [<time>] graphql-server "GraphQL Sub Mock" connected
+- message: ⚪ [<time>] start graphqlSubscribe
+  data:
+    requestId: <uuid>
+    connectionName: GraphQL Subscription
+    label: subscribe to ticks
+    in: true
+- message: ⚪ [<time>] done graphqlSubscribe
+- message: ⚪ [<time>] graphql-subscribe "GraphQL Subscription" connecting
+- message: ⚪ [<time>] graphql-subscribe "GraphQL Subscription" connected
+- message: ⚪ [<time>] start log
+  data:
+    message: événement de souscription GraphQL reçu
+    level: info
+    runOnEachEvent: false
+    data:
+      data:
+        ticks: 42
+    in:
+      data:
+        ticks: 42
+- message: 🔵 [<time>] événement de souscription GraphQL reçu
+  data:
+    data:
+      ticks: 42
+- message: ⚪ [<time>] done log
+  data:
+    value:
+      data:
+        ticks: 42
+- message: ⚪ [<time>] start graphqlUnsubscribe
+  data:
+    connectionNodeId: <uuid>
+    label: stop the GraphQL subscription
+    in: true
+- message: ⚪ [<time>] graphql-subscribe "GraphQL Subscription" closed
+- message: ⚪ [<time>] start log
+  data:
+    message: souscription GraphQL arrêtée
+    level: info
+    in: true
+- message: 🔵 [<time>] souscription GraphQL arrêtée
+- message: ⚪ [<time>] done log
+  data: {}
+- message: ⚪ [<time>] done graphqlUnsubscribe
+- message: ⚪ [<time>] start graphqlClose
+  data:
+    connectionNodeId: <uuid>
+    label: stop the GraphQL mock server
+    in: true
+- message: ⚪ [<time>] graphql-server "GraphQL Sub Mock" closed
+- message: ⚪ [<time>] start log
+  data:
+    message: serveur GraphQL arrêté
+    level: info
+    in: true
+- message: 🔵 [<time>] serveur GraphQL arrêté
+- message: ⚪ [<time>] done log
+  data: {}
+- message: ⚪ [<time>] done graphqlClose
+- message: 🔵 [<time>] ■ GraphQL Subscription

@@ -436,6 +436,15 @@
       "served": "Nasłuchuje — obsłużono {{count}} operacji",
       "notListening": "Nie nasłuchuje",
       "listenFailed": "Nie udało się uruchomić serwera mock"
+    },
+    "subscription": {
+      "subscribe": "Subskrybuj",
+      "stop": "Zatrzymaj",
+      "waiting": "Zasubskrybowano — oczekiwanie na zdarzenia…",
+      "noEvents": "Brak zdarzeń. Subskrybuj, aby rozpocząć strumieniowanie.",
+      "idle": "Brak subskrypcji",
+      "streaming": "Strumieniowanie — odebrano {{count}} zdarzeń",
+      "eventLabel": "Zdarzenie {{index}}"
     }
   },
   "grpc": {
@@ -1062,7 +1071,9 @@
       "graphqlListen": "GraphQL server",
       "graphqlClose": "GraphQL close",
       "odataListen": "OData server",
-      "odataClose": "OData close"
+      "odataClose": "OData close",
+      "graphqlSubscribe": "Subskrypcja GraphQL",
+      "graphqlUnsubscribe": "Anuluj subskrypcję GraphQL"
     },
     "comparator": {
       "result": "wynik"
@@ -1632,7 +1643,9 @@
       "graphqlListen": "Hosts a local GraphQL mock server and listens indefinitely. `connected` fires once it is listening; each served operation re-emits its data on the `served` port. The server stays up until a GraphQL close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
       "graphqlClose": "Stops an already-listening GraphQL mock server (declared by a GraphQL server node), freeing its port.",
       "odataListen": "Hostuje lokalną usługę próbną OData v4 i nasłuchuje bezterminowo. Port `connected` uruchamia się, gdy tylko zacznie nasłuchiwać; każde obsłużone żądanie ponownie wysyła swoje dane na porcie `served`. Serwer działa aż do zamknięcia OData (lub zatrzymania), po czym uruchamia się port `done`. Brak wyjścia response — obsługuje, nie wywołuje na zewnątrz.",
-      "odataClose": "Zatrzymuje już nasłuchującą usługę próbną OData (zadeklarowaną przez węzeł serwera OData) i zwalnia jej port."
+      "odataClose": "Zatrzymuje już nasłuchującą usługę próbną OData (zadeklarowaną przez węzeł serwera OData) i zwalnia jej port.",
+      "graphqlSubscribe": "Otwiera długotrwałą subskrypcję GraphQL jako klient przez SSE i nasłuchuje. `connected` uruchamia się, gdy strumień jest otwarty; każdy odebrany ładunek jest ponownie emitowany na porcie `message` (subskrypcja tylko odbiera, bez nazwanych zdarzeń). Strumień pozostaje otwarty do anulowania subskrypcji GraphQL (lub zatrzymania), albo dopóki serwer go nie zakończy, a następnie uruchamia się `done`.",
+      "graphqlUnsubscribe": "Zatrzymuje już otwartą subskrypcję GraphQL (zadeklarowaną przez węzeł subskrypcji GraphQL), zamykając jej strumień SSE."
     },
     "legend": {
       "title": "Legenda",

@@ -434,6 +434,15 @@
       "served": "Dinliyor — {{count}} işlem karşılandı",
       "notListening": "Dinlemiyor",
       "listenFailed": "Mock sunucusu başlatılamadı"
+    },
+    "subscription": {
+      "subscribe": "Abone ol",
+      "stop": "Durdur",
+      "waiting": "Abone olundu — olaylar bekleniyor…",
+      "noEvents": "Henüz olay yok. Akışı başlatmak için abone olun.",
+      "idle": "Abone değil",
+      "streaming": "Akış — {{count}} olay alındı",
+      "eventLabel": "Olay {{index}}"
     }
   },
   "grpc": {
@@ -1060,7 +1069,9 @@
       "graphqlListen": "GraphQL server",
       "graphqlClose": "GraphQL close",
       "odataListen": "OData server",
-      "odataClose": "OData close"
+      "odataClose": "OData close",
+      "graphqlSubscribe": "GraphQL abone ol",
+      "graphqlUnsubscribe": "GraphQL abonelikten çık"
     },
     "comparator": {
       "result": "sonuç"
@@ -1630,7 +1641,9 @@
       "graphqlListen": "Hosts a local GraphQL mock server and listens indefinitely. `connected` fires once it is listening; each served operation re-emits its data on the `served` port. The server stays up until a GraphQL close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
       "graphqlClose": "Stops an already-listening GraphQL mock server (declared by a GraphQL server node), freeing its port.",
       "odataListen": "Yerel bir OData v4 sahte hizmetini barındırır ve süresiz olarak dinler. Dinlemeye başlar başlamaz `connected` tetiklenir; sunulan her istek verisini `served` bağlantı noktasında yeniden yayar. Sunucu bir OData kapatmaya (veya bir Stop'a) kadar açık kalır, ardından `done` tetiklenir. response çıktısı yoktur — hizmet verir, dışarıyı çağırmaz.",
-      "odataClose": "Halihazırda dinlemekte olan bir OData sahte hizmetini (bir OData sunucu düğümü tarafından bildirilen) durdurur ve bağlantı noktasını serbest bırakır."
+      "odataClose": "Halihazırda dinlemekte olan bir OData sahte hizmetini (bir OData sunucu düğümü tarafından bildirilen) durdurur ve bağlantı noktasını serbest bırakır.",
+      "graphqlSubscribe": "SSE üzerinden istemci olarak uzun ömürlü bir GraphQL aboneliği açar ve dinler. Akış açılır açılmaz `connected` tetiklenir; gönderilen her yük `message` bağlantı noktasında yeniden yayılır (abonelik yalnızca alır, adlandırılmış olaylar yoktur). Akış, bir GraphQL abonelikten çıkmaya (veya bir durdurmaya) kadar ya da sunucu onu tamamlayana kadar açık kalır, ardından `done` tetiklenir.",
+      "graphqlUnsubscribe": "Zaten açık olan bir GraphQL aboneliğini (bir GraphQL abone ol düğümü tarafından bildirilen) durdurur ve SSE akışını kapatır."
     },
     "legend": {
       "title": "Gösterge",

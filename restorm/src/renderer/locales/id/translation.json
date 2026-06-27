@@ -433,6 +433,15 @@
       "served": "Mendengarkan — {{count}} operasi dilayani",
       "notListening": "Tidak mendengarkan",
       "listenFailed": "Gagal memulai server mock"
+    },
+    "subscription": {
+      "subscribe": "Berlangganan",
+      "stop": "Hentikan",
+      "waiting": "Berlangganan — menunggu peristiwa…",
+      "noEvents": "Belum ada peristiwa. Berlangganan untuk memulai streaming.",
+      "idle": "Tidak berlangganan",
+      "streaming": "Streaming — {{count}} peristiwa diterima",
+      "eventLabel": "Peristiwa {{index}}"
     }
   },
   "grpc": {
@@ -1059,7 +1068,9 @@
       "graphqlListen": "GraphQL server",
       "graphqlClose": "GraphQL close",
       "odataListen": "OData server",
-      "odataClose": "OData close"
+      "odataClose": "OData close",
+      "graphqlSubscribe": "Langganan GraphQL",
+      "graphqlUnsubscribe": "Batalkan langganan GraphQL"
     },
     "comparator": {
       "result": "hasil"
@@ -1629,7 +1640,9 @@
       "graphqlListen": "Hosts a local GraphQL mock server and listens indefinitely. `connected` fires once it is listening; each served operation re-emits its data on the `served` port. The server stays up until a GraphQL close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
       "graphqlClose": "Stops an already-listening GraphQL mock server (declared by a GraphQL server node), freeing its port.",
       "odataListen": "Menghosting layanan tiruan OData v4 lokal dan mendengarkan tanpa batas. `connected` terpicu begitu mulai mendengarkan; setiap permintaan yang dilayani memancarkan ulang datanya pada port `served`. Server tetap aktif hingga penutupan OData (atau Stop), lalu `done` terpicu. Tanpa keluaran response — ia melayani, bukan memanggil keluar.",
-      "odataClose": "Menghentikan layanan tiruan OData yang sudah mendengarkan (dideklarasikan oleh node server OData), membebaskan portnya."
+      "odataClose": "Menghentikan layanan tiruan OData yang sudah mendengarkan (dideklarasikan oleh node server OData), membebaskan portnya.",
+      "graphqlSubscribe": "Membuka langganan GraphQL berumur panjang sebagai klien melalui SSE dan mendengarkan. `connected` terpicu segera setelah aliran terbuka; setiap payload yang dikirim dipancarkan ulang pada porta `message` (langganan hanya menerima, tanpa peristiwa bernama). Aliran tetap terbuka hingga pembatalan langganan GraphQL (atau penghentian), atau hingga server menyelesaikannya, lalu `done` terpicu.",
+      "graphqlUnsubscribe": "Menghentikan langganan GraphQL yang sudah terbuka (dideklarasikan oleh node langganan GraphQL), menutup aliran SSE-nya."
     },
     "legend": {
       "title": "Legenda",

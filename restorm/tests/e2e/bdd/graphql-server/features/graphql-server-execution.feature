@@ -27,5 +27,12 @@ Feature: GraphQL mock server end-to-end (self-hosted)
     When I open the "Pets Mock" request tab via MCP
     Then the mock shows at least 1 operation served
 
+    When I open the "Pets Subscriber" request tab via MCP
+    And I click the Subscribe button
+    Then the subscription receives at least 1 event
+    When I click the Unsubscribe button
+    Then the Subscribe button shows the idle state
+
+    When I open the "Pets Mock" request tab via MCP
     When I click the Stop button
     Then the Listen button shows the stopped state

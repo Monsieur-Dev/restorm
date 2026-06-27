@@ -49,6 +49,22 @@ collections:
             "Query.count": 2,
             "Subscription.ticks": 7
           }
+        resolverScript: |-
+          return {
+            Subscription: {
+              ticks: {
+                subscribe: async function* () {
+                  // Emit a long, slow tick stream so the CLIENT controls the
+                  // stop (Unsubscribe) rather than the stream self-completing.
+                  for (let n = 1; n <= 1000; n++) {
+                    await new Promise((r) => setTimeout(r, 200))
+                    yield n
+                  }
+                },
+                resolve: (value) => value
+              }
+            }
+          }
         headers: []
         params: []
         pathParams: []
@@ -100,6 +116,31 @@ collections:
         params: []
         pathParams: []
         id: 7e3b2c01-6f88-4d21-af32-1b0a4c723103
+      - type: graphql
+        name: Pets Subscriber
+        operationType: subscription
+        documentation: |-
+          Subscribes to the local Pets Mock's `ticks` subscription over SSE.
+          Press Subscribe (once the mock is listening) and the pushed events
+          stream into the live event list; press Stop to unsubscribe.
+        tags:
+          - graphql
+          - subscription
+        url: http://localhost:4111/graphql
+        query: |-
+          subscription {
+            ticks
+          }
+        headers:
+          - key: Content-Type
+            value:
+              type: string
+              value: application/json
+            enabled: true
+        variables: '{}'
+        params: []
+        pathParams: []
+        id: 7e3b2c01-6f88-4d21-af32-1b0a4c723104
     id: 6b1d8f4c-2e99-4a13-91be-3c8daf751f20
     fileFormatVersion: 1
 _projectUuid: 4f8b3d2a-9e55-4c7f-b2d3-af1e6c849c33

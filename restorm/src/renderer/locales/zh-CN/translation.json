@@ -433,6 +433,15 @@
       "served": "监听中 — 已服务 {{count}} 个操作",
       "notListening": "未在监听",
       "listenFailed": "无法启动模拟服务器"
+    },
+    "subscription": {
+      "subscribe": "订阅",
+      "stop": "停止",
+      "waiting": "已订阅 — 正在等待事件…",
+      "noEvents": "暂无事件。订阅以开始流式传输。",
+      "idle": "未订阅",
+      "streaming": "正在流式传输 — 已接收 {{count}} 个事件",
+      "eventLabel": "事件 {{index}}"
     }
   },
   "grpc": {
@@ -1059,7 +1068,9 @@
       "graphqlListen": "GraphQL server",
       "graphqlClose": "GraphQL close",
       "odataListen": "OData server",
-      "odataClose": "OData close"
+      "odataClose": "OData close",
+      "graphqlSubscribe": "GraphQL 订阅",
+      "graphqlUnsubscribe": "GraphQL 取消订阅"
     },
     "comparator": {
       "result": "结果"
@@ -1629,7 +1640,9 @@
       "graphqlListen": "Hosts a local GraphQL mock server and listens indefinitely. `connected` fires once it is listening; each served operation re-emits its data on the `served` port. The server stays up until a GraphQL close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
       "graphqlClose": "Stops an already-listening GraphQL mock server (declared by a GraphQL server node), freeing its port.",
       "odataListen": "托管本地 OData v4 模拟服务并无限期监听。一旦开始监听便触发 `connected`；每个被服务的请求都会在 `served` 端口重新发出其数据。服务器持续运行，直到 OData 关闭（或 Stop），然后触发 `done`。无 response 输出——它只提供服务，不向外调用。",
-      "odataClose": "停止一个已在监听的 OData 模拟服务（由 OData 服务器节点声明），释放其端口。"
+      "odataClose": "停止一个已在监听的 OData 模拟服务（由 OData 服务器节点声明），释放其端口。",
+      "graphqlSubscribe": "作为客户端通过 SSE 打开一个长期的 GraphQL 订阅并监听。流一旦打开，`connected` 即触发；每个推送的载荷都会在 `message` 端口重新发出（订阅仅接收，没有命名事件）。流会一直保持打开，直到 GraphQL 取消订阅（或停止），或服务器将其完成，然后触发 `done`。",
+      "graphqlUnsubscribe": "停止一个已打开的 GraphQL 订阅（由 GraphQL 订阅节点声明），并拆除其 SSE 流。"
     },
     "legend": {
       "title": "图例",

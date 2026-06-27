@@ -434,6 +434,15 @@
       "served": "Figyel — {{count}} művelet kiszolgálva",
       "notListening": "Nem figyel",
       "listenFailed": "A mock-kiszolgáló indítása sikertelen"
+    },
+    "subscription": {
+      "subscribe": "Feliratkozás",
+      "stop": "Leállítás",
+      "waiting": "Feliratkozva — eseményekre várakozás…",
+      "noEvents": "Még nincsenek események. Iratkozzon fel a folyam indításához.",
+      "idle": "Nincs feliratkozva",
+      "streaming": "Folyam — {{count}} esemény érkezett",
+      "eventLabel": "{{index}}. esemény"
     }
   },
   "grpc": {
@@ -1060,7 +1069,9 @@
       "graphqlListen": "GraphQL server",
       "graphqlClose": "GraphQL close",
       "odataListen": "OData server",
-      "odataClose": "OData close"
+      "odataClose": "OData close",
+      "graphqlSubscribe": "GraphQL feliratkozás",
+      "graphqlUnsubscribe": "GraphQL leiratkozás"
     },
     "comparator": {
       "result": "eredmény"
@@ -1630,7 +1641,9 @@
       "graphqlListen": "Hosts a local GraphQL mock server and listens indefinitely. `connected` fires once it is listening; each served operation re-emits its data on the `served` port. The server stays up until a GraphQL close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
       "graphqlClose": "Stops an already-listening GraphQL mock server (declared by a GraphQL server node), freeing its port.",
       "odataListen": "Helyi OData v4 mock szolgáltatást üzemeltet, és határozatlan ideig figyel. A `connected` akkor aktiválódik, amint figyel; minden kiszolgált kérés újraküldi az adatait a `served` porton. A kiszolgáló az OData lezárásig (vagy egy Stopig) fut, majd a `done` aktiválódik. Nincs response kimenet — kiszolgál, nem hív kifelé.",
-      "odataClose": "Leállít egy már figyelő OData mock szolgáltatást (amelyet egy OData kiszolgáló csomópont deklarált), és felszabadítja a portját."
+      "odataClose": "Leállít egy már figyelő OData mock szolgáltatást (amelyet egy OData kiszolgáló csomópont deklarált), és felszabadítja a portját.",
+      "graphqlSubscribe": "Hosszú életű GraphQL-feliratkozást nyit ügyfélként SSE-n keresztül és figyel. A `connected` akkor sül el, amikor a folyam megnyílik; minden beérkező hasznos teher újra kibocsátódik a `message` porton (a feliratkozás csak fogadó, megnevezett események nélkül). A folyam nyitva marad egy GraphQL-leiratkozásig (vagy leállításig), illetve amíg a kiszolgáló be nem fejezi, majd a `done` sül el.",
+      "graphqlUnsubscribe": "Leállít egy már nyitott GraphQL-feliratkozást (amelyet egy GraphQL-feliratkozás csomópont deklarált), lebontva annak SSE-folyamát."
     },
     "legend": {
       "title": "Jelmagyarázat",
