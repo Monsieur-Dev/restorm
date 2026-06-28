@@ -456,6 +456,13 @@ export interface TypedValueFieldProps {
    * new type.
    */
   lockType?: boolean | undefined
+  /**
+   * Placeholder shown in the (empty) string input — used by the scenario action
+   * override fields to surface the bound request's INHERITED base value when no
+   * override is typed, so an empty field doesn't read as "no value". Applies to
+   * the single-line string widget only.
+   */
+  placeholder?: string | undefined
 }
 
 /**
@@ -483,7 +490,8 @@ export const TypedValueField: React.FC<TypedValueFieldProps> = ({
   dataTestId,
   lockType,
   trailingControls,
-  multilineLanguage
+  multilineLanguage,
+  placeholder
 }) => {
   const { t } = useTranslation()
 
@@ -1089,7 +1097,7 @@ export const TypedValueField: React.FC<TypedValueFieldProps> = ({
       <InputBox
         value={value.toString()}
         onChange={(next) => { onChange(new StringValue(next)) }}
-        options={{ type: 'text' }}
+        options={{ type: 'text', ...(placeholder ? { placeholder } : {}) }}
         {...(dataTestId && { 'data-testid': `${dataTestId}-value-input-string` })}
       />,
       { icon: 'symbol-string', ariaLabel: 'String value', typeTestid: 'string' }

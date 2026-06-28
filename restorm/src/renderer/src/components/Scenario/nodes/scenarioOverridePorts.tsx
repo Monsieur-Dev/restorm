@@ -99,6 +99,7 @@ function scalarRow(portId: string, label: string, baseValue: string | undefined,
           valueTypeGroups={ctx.valueTypeGroups}
           excludeTypes={policy?.excludeTypes ?? ['expression']}
           allowEnvironment={allowEnvironment}
+          {...(baseValue ? { placeholder: baseValue } : {})}
           dataTestId={`scn-override-${portId}`}
         />
       </div>
@@ -295,8 +296,8 @@ export function buildGraphqlOverrideSections(
       name: labels.overridesLabel,
       rows: [
         scalarRow('url', labels.url, request.url, ctx, TEXT_FIELD_POLICY),
-        scalarRow('query', labels.query, undefined, ctx, TEXT_FIELD_POLICY),
-        scalarRow('variables', labels.variables, undefined, ctx, TEXT_FIELD_POLICY)
+        scalarRow('query', labels.query, request.query, ctx, TEXT_FIELD_POLICY),
+        scalarRow('variables', labels.variables, request.variables, ctx, TEXT_FIELD_POLICY)
       ]
     }
   ]
@@ -331,7 +332,7 @@ export function buildGrpcOverrideSections(
         scalarRow('url', labels.url, request.url, ctx, TEXT_FIELD_POLICY),
         scalarRow('service', labels.service, request.service, ctx, TEXT_FIELD_POLICY),
         scalarRow('method', labels.grpcMethod, request.method, ctx, TEXT_FIELD_POLICY),
-        scalarRow('requestMessage', labels.requestMessage, undefined, ctx, TEXT_FIELD_POLICY)
+        scalarRow('requestMessage', labels.requestMessage, request.requestMessage, ctx, TEXT_FIELD_POLICY)
       ]
     }
   ]
