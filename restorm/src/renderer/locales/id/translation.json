@@ -1803,6 +1803,7 @@
     "readStream": "Baca aliran",
     "refreshEnvironment": "Segarkan lingkungan",
     "renameEnvironment": "Ganti nama lingkungan",
+    "moveItem": "Pindahkan item",
     "renameItem": "Ganti nama item",
     "revealInTree": "Tampilkan di pohon",
     "runRequest": "Jalankan permintaan",

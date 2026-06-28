@@ -1803,6 +1803,7 @@
     "readStream": "ストリームを読む",
     "refreshEnvironment": "環境を更新",
     "renameEnvironment": "環境の名前を変更",
+    "moveItem": "アイテムを移動",
     "renameItem": "項目の名前を変更",
     "revealInTree": "ツリーで表示",
     "runRequest": "リクエストを実行",

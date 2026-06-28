@@ -1803,6 +1803,7 @@
     "readStream": "读取流",
     "refreshEnvironment": "刷新环境",
     "renameEnvironment": "重命名环境",
+    "moveItem": "移动一个项目",
     "renameItem": "重命名项",
     "revealInTree": "在树中显示",
     "runRequest": "运行请求",

@@ -1804,6 +1804,7 @@
     "readStream": "Ανάγνωση ροής",
     "refreshEnvironment": "Ανανέωση περιβάλλοντος",
     "renameEnvironment": "Μετονομασία περιβάλλοντος",
+    "moveItem": "Μετακίνηση στοιχείου",
     "renameItem": "Μετονομασία στοιχείου",
     "revealInTree": "Εμφάνιση στο δέντρο",
     "runRequest": "Εκτέλεση αιτήματος",

@@ -1804,6 +1804,7 @@
     "readStream": "Een stream lezen",
     "refreshEnvironment": "De omgeving vernieuwen",
     "renameEnvironment": "Een omgeving hernoemen",
+    "moveItem": "Een item verplaatsen",
     "renameItem": "Een item hernoemen",
     "revealInTree": "Tonen in de structuur",
     "runRequest": "Een verzoek uitvoeren",

@@ -1803,6 +1803,7 @@
     "readStream": "Đọc luồng",
     "refreshEnvironment": "Làm mới môi trường",
     "renameEnvironment": "Đổi tên môi trường",
+    "moveItem": "Di chuyển một mục",
     "renameItem": "Đổi tên mục",
     "revealInTree": "Hiển thị trong cây",
     "runRequest": "Chạy yêu cầu",

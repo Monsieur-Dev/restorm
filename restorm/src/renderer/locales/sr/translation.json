@@ -1805,6 +1805,7 @@
     "readStream": "Читај ток",
     "refreshEnvironment": "Освежи окружење",
     "renameEnvironment": "Преименуј окружење",
+    "moveItem": "Премести ставку",
     "renameItem": "Преименуј ставку",
     "revealInTree": "Прикажи у стаблу",
     "runRequest": "Покрени захтев",

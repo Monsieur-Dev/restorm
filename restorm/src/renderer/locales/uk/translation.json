@@ -1806,6 +1806,7 @@
     "readStream": "Читати потік",
     "refreshEnvironment": "Оновити середовище",
     "renameEnvironment": "Перейменувати середовище",
+    "moveItem": "Перемістити елемент",
     "renameItem": "Перейменувати елемент",
     "revealInTree": "Показати в дереві",
     "runRequest": "Виконати запит",

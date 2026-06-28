@@ -1803,6 +1803,7 @@
     "readStream": "스트림 읽기",
     "refreshEnvironment": "환경 새로 고침",
     "renameEnvironment": "환경 이름 바꾸기",
+    "moveItem": "항목 이동",
     "renameItem": "항목 이름 바꾸기",
     "revealInTree": "트리에서 표시",
     "runRequest": "요청 실행",

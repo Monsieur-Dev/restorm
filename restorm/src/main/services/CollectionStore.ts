@@ -475,6 +475,101 @@ class CollectionStore {
     return request
   }
 
+  /**
+   * Move a tree item (request / folder / env-folder / scenario) to a new parent
+   * and/or position, with full validation. Unlike {@link moveFolder} /
+   * {@link moveRequest} — which remove-then-add and would ORPHAN the item if the
+   * target turns out invalid — this validates everything BEFORE mutating, so a
+   * rejected move never loses the item.
+   *
+   * @param newParentId Destination container id. `undefined` keeps the current
+   *   parent (reorder-only).
+   * @param index 0-based slot among the destination's children, interpreted
+   *   AFTER the item leaves its current spot (so moving an item earlier shifts
+   *   the items at/after that slot one position later). `undefined` appends.
+   *
+   * Rules enforced:
+   *  - the destination must be a container (a request cannot be a parent);
+   *  - an item cannot move into itself or its own descendant (cycle);
+   *  - an env-folder may not have an env-folder OR a scenario as any ancestor
+   *    (at any depth) — it can otherwise live anywhere (incl. a plain folder).
+   */
+  moveItem(
+    id: string,
+    newParentId: string | undefined,
+    index: number | undefined
+  ): { ok: true; kind: 'request' | 'folder' | 'env-folder' | 'scenario'; parentId: string | null; index: number } | { ok: false; error: string } {
+    const item = this.findById(id)
+    if (!item) return { ok: false, error: `No item with id ${id}` }
+
+    const kind: 'request' | 'folder' | 'env-folder' | 'scenario' =
+      isScenario(item) ? 'scenario' : isEnvironmentFolder(item) ? 'env-folder' : isAnyFolder(item) ? 'folder' : 'request'
+    const explicitParent = newParentId !== undefined && newParentId.length > 0
+    const currentParent = this.findParentFolder(id)
+    const isRootItem = currentParent === null && this.collections.some((c) => c.id === id)
+
+    // Reorder among the ROOT collections: the item is already a root item and no
+    // new parent was given (a pure position change at the top level). The
+    // container `move*` helpers can't target root, so splice `this.collections`
+    // directly. The env-folder rule is moot here — root has no ancestor.
+    if (!explicitParent && isRootItem) {
+      const cur = this.collections.findIndex((c) => c.id === id)
+      const [removed] = this.collections.splice(cur, 1)
+      const target = index === undefined
+        ? this.collections.length
+        : Math.max(0, Math.min(index, this.collections.length))
+      this.collections.splice(target, 0, removed)
+      if (kind === 'request') this.emitRequestUpdated(removed as unknown as Request)
+      else this.emitFolderUpdated(removed as Folder | EnvironmentFolder)
+      return { ok: true, kind, parentId: null, index: target }
+    }
+
+    const destId = explicitParent ? newParentId : currentParent?.id
+    if (destId === undefined) return { ok: false, error: `${id} is a root item; pass newParentId to move it into a container` }
+    const dest = this.findById(destId)
+    if (!dest) return { ok: false, error: `No item with id ${destId}` }
+    if (!this.isContainer(dest)) return { ok: false, error: `${destId} is not a container (folder, env-folder or scenario)` }
+
+    // Cycle guard: the destination must not be the item itself, nor any of its
+    // descendants (walk the destination's ancestor chain looking for `id`).
+    for (let p: Folder | EnvironmentFolder | Scenario | null = dest; p !== null; p = this.findParentFolder(p.id)) {
+      if (p.id === id) return { ok: false, error: 'cannot move an item into itself or its own descendant' }
+    }
+
+    // env-folder placement rule: no env-folder or scenario anywhere up the chain.
+    if (kind === 'env-folder') {
+      for (let p: Folder | EnvironmentFolder | Scenario | null = dest; p !== null; p = this.findParentFolder(p.id)) {
+        if (isEnvironmentFolder(p)) return { ok: false, error: 'an env-folder cannot be nested inside another env-folder' }
+        if (isScenario(p)) return { ok: false, error: 'an env-folder cannot be placed inside a scenario' }
+      }
+    }
+
+    // Resolve the final index against the post-removal child count of the dest.
+    const sameParent = currentParent?.id === destId
+    const childCountAfterRemoval = this.childItems(dest).length - (sameParent ? 1 : 0)
+    const targetIndex = index === undefined
+      ? childCountAfterRemoval
+      : Math.max(0, Math.min(index, childCountAfterRemoval))
+
+    // All validation passed — perform the move by splicing directly rather than
+    // delegating to moveRequest/moveFolder. moveFolder gates on isAnyFolder,
+    // which a Scenario FAILS (it has no `configuration` field), so delegating
+    // would silently drop a scenario item. Splicing handles every kind
+    // uniformly, and the checks above already guarantee a safe destination.
+    if (currentParent) {
+      const siblings = this.childItemsForWrite(currentParent)
+      const cur = siblings.findIndex((x) => x.id === id)
+      if (cur !== -1) siblings.splice(cur, 1)
+    } else {
+      const cur = this.collections.findIndex((c) => c.id === id)
+      if (cur !== -1) this.collections.splice(cur, 1)
+    }
+    this.childItemsForWrite(dest).splice(targetIndex, 0, item)
+    if (kind === 'request') this.emitRequestUpdated(item as Request)
+    else this.emitFolderUpdated(item as Folder | EnvironmentFolder)
+    return { ok: true, kind, parentId: destId, index: targetIndex }
+  }
+
   // ==========================================================================
   // Mutations - Environments
   // ==========================================================================
