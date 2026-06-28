@@ -1,0 +1,126 @@
+- message: 🔵 [<time>] ▶ setVariable override
+- message: ⚪ [<time>] start setVariable
+  data:
+    name: petId
+    value: 1
+- message: ⚪ [<time>] done setVariable
+- message: ⚪ [<time>] start httpRequest
+  data:
+    requestId: <uuid>
+    label: Find pet by ID
+    in: true
+- message: ⚪ [<time>] done httpRequest
+  data:
+    response:
+      request:
+        url: http://localhost:8080/api/pet/1
+        method: GET
+        headers:
+          api_key: ""
+      response:
+        status: 200
+        statusText: OK
+        headers:
+          date: <dynamic-time>
+          access-control-allow-origin: "*"
+          access-control-allow-methods: GET, POST, DELETE, PUT
+          access-control-allow-headers: Content-Type, api_key, Authorization
+          content-type: application/json
+          transfer-encoding: chunked
+          server: Jetty(9.2.9.v20150224)
+        body: '{"id":1,"category":{"id":2,"name":"Cats"},"name":"Cat
+          1","photoUrls":["url1","url2"],"tags":[{"id":1,"name":"tag1"},{"id":2,"name":"tag2"}],"status":"available"}'
+        durationMs: <dynamic-time>
+        success: true
+- message: ⚪ [<time>] start log
+  data:
+    message: pet récupéré (petId surchargé par setVariable)
+    level: info
+    data:
+      request:
+        url: http://localhost:8080/api/pet/1
+        method: GET
+        headers:
+          api_key: ""
+      response:
+        status: 200
+        statusText: OK
+        headers:
+          date: <dynamic-time>
+          access-control-allow-origin: "*"
+          access-control-allow-methods: GET, POST, DELETE, PUT
+          access-control-allow-headers: Content-Type, api_key, Authorization
+          content-type: application/json
+          transfer-encoding: chunked
+          server: Jetty(9.2.9.v20150224)
+        body: '{"id":1,"category":{"id":2,"name":"Cats"},"name":"Cat
+          1","photoUrls":["url1","url2"],"tags":[{"id":1,"name":"tag1"},{"id":2,"name":"tag2"}],"status":"available"}'
+        durationMs: <dynamic-time>
+        success: true
+    in:
+      request:
+        url: http://localhost:8080/api/pet/1
+        method: GET
+        headers:
+          api_key: ""
+      response:
+        status: 200
+        statusText: OK
+        headers:
+          date: <dynamic-time>
+          access-control-allow-origin: "*"
+          access-control-allow-methods: GET, POST, DELETE, PUT
+          access-control-allow-headers: Content-Type, api_key, Authorization
+          content-type: application/json
+          transfer-encoding: chunked
+          server: Jetty(9.2.9.v20150224)
+        body: '{"id":1,"category":{"id":2,"name":"Cats"},"name":"Cat
+          1","photoUrls":["url1","url2"],"tags":[{"id":1,"name":"tag1"},{"id":2,"name":"tag2"}],"status":"available"}'
+        durationMs: <dynamic-time>
+        success: true
+- message: 🔵 [<time>] pet récupéré (petId surchargé par setVariable)
+  data:
+    request:
+      url: http://localhost:8080/api/pet/1
+      method: GET
+      headers:
+        api_key: ""
+    response:
+      status: 200
+      statusText: OK
+      headers:
+        date: <dynamic-time>
+        access-control-allow-origin: "*"
+        access-control-allow-methods: GET, POST, DELETE, PUT
+        access-control-allow-headers: Content-Type, api_key, Authorization
+        content-type: application/json
+        transfer-encoding: chunked
+        server: Jetty(9.2.9.v20150224)
+      body: '{"id":1,"category":{"id":2,"name":"Cats"},"name":"Cat
+        1","photoUrls":["url1","url2"],"tags":[{"id":1,"name":"tag1"},{"id":2,"name":"tag2"}],"status":"available"}'
+      durationMs: <dynamic-time>
+      success: true
+- message: ⚪ [<time>] done log
+  data:
+    value:
+      request:
+        url: http://localhost:8080/api/pet/1
+        method: GET
+        headers:
+          api_key: ""
+      response:
+        status: 200
+        statusText: OK
+        headers:
+          date: <dynamic-time>
+          access-control-allow-origin: "*"
+          access-control-allow-methods: GET, POST, DELETE, PUT
+          access-control-allow-headers: Content-Type, api_key, Authorization
+          content-type: application/json
+          transfer-encoding: chunked
+          server: Jetty(9.2.9.v20150224)
+        body: '{"id":1,"category":{"id":2,"name":"Cats"},"name":"Cat
+          1","photoUrls":["url1","url2"],"tags":[{"id":1,"name":"tag1"},{"id":2,"name":"tag2"}],"status":"available"}'
+        durationMs: <dynamic-time>
+        success: true
+- message: 🔵 [<time>] ■ setVariable override

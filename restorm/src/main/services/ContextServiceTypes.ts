@@ -168,6 +168,15 @@ export interface RequestContext {
   keyValueGroups: Map<string, KeyValue[]>
   /** Full request data for URL and code snippet generation */
   fullData: FullRequestData | null
+  /**
+   * Per-run variable OVERLAY set by a scenario `setVariable` node before this
+   * request runs. Merged ON TOP of the environment context (overlay WINS) for
+   * every resolution of this request — so a scenario can override an env-folder
+   * variable for the request's URL / headers / params / body. Undefined outside
+   * a scenario run (or when no setVariable applies). Name → already-resolved
+   * string, exactly like the transformed env context.
+   */
+  scenarioVariables?: TransformedContext
 }
 
 /** Resolved URL result */

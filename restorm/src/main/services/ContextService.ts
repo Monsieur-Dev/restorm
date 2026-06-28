@@ -690,7 +690,9 @@ class ContextService {
     const ctx = this.requestContexts.get(requestId)
     if (!ctx) return
 
-    // Get the base context from the selected environment
+    // Get the base context from the selected environment, then layer the
+    // scenario `setVariable` overlay ON TOP (overlay wins) so the resolved URL +
+    // KV transforms reflect a per-run override of an env-folder variable.
     let baseContext: TransformedContext = {}
     if (ctx.environmentId) {
       const envContext = this.transformedContexts.get(ctx.environmentId)
@@ -698,6 +700,7 @@ class ContextService {
         baseContext = { ...envContext }
       }
     }
+    if (ctx.scenarioVariables) baseContext = { ...baseContext, ...ctx.scenarioVariables }
 
     // Process each KeyValue group
     for (const [_groupName, keyValues] of ctx.keyValueGroups) {
@@ -1435,18 +1438,41 @@ class ContextService {
    * `resolveKeyValueForRequest` instead so the type-aware gate in
    * `resolveKeyValue` fires.
    */
+  /**
+   * Set (or clear) a request's scenario `setVariable` OVERLAY — the per-run
+   * variables that win over the env context for this request. Recalculates the
+   * request context so the CACHED resolved URL (and KV transforms) reflect the
+   * overlay immediately. Pass an empty map / undefined to clear it.
+   */
+  setScenarioVariables(requestId: string, variables: TransformedContext | undefined): void {
+    const ctx = this.requestContexts.get(requestId)
+    if (!ctx) return
+    const next = variables && Object.keys(variables).length > 0 ? variables : undefined
+    if (ctx.scenarioVariables === undefined && next === undefined) return
+    ctx.scenarioVariables = next
+    this.recalculateRequestContext(requestId)
+  }
+
+  /**
+   * The context a request resolves against: the transformed ENV context with
+   * the scenario `setVariable` overlay merged ON TOP (overlay wins). Returns the
+   * plain env context when there's no overlay, just the overlay when there's no
+   * env, or undefined when there's neither.
+   */
+  private effectiveEnvContext(ctx: RequestContext): TransformedContext | undefined {
+    const env = ctx.environmentId ? this.transformedContexts.get(ctx.environmentId) : undefined
+    if (ctx.scenarioVariables && Object.keys(ctx.scenarioVariables).length > 0) {
+      return { ...(env ?? {}), ...ctx.scenarioVariables }
+    }
+    return env
+  }
+
   resolveValue(value: string, requestId: string): string {
     const ctx = this.requestContexts.get(requestId)
-    if (!ctx?.environmentId) {
-      return value
-    }
-
-    const envContext = this.transformedContexts.get(ctx.environmentId)
-    if (!envContext) {
-      return value
-    }
-
-    return this.transformValue(value, envContext)
+    if (!ctx) return value
+    const context = this.effectiveEnvContext(ctx)
+    if (!context) return value
+    return this.transformValue(value, context)
   }
 
   /**
@@ -1471,14 +1497,10 @@ class ContextService {
       return this.resolveCustomListMultiValue(kv.value, requestId).join(',')
     }
     const ctx = this.requestContexts.get(requestId)
-    if (!ctx?.environmentId) {
-      return kv.value.toString()
-    }
-    const envContext = this.transformedContexts.get(ctx.environmentId)
-    if (!envContext) {
-      return kv.value.toString()
-    }
-    return this.resolveKeyValue(kv, envContext)
+    if (!ctx) return kv.value.toString()
+    const context = this.effectiveEnvContext(ctx)
+    if (!context) return kv.value.toString()
+    return this.resolveKeyValue(kv, context)
   }
 
   /**

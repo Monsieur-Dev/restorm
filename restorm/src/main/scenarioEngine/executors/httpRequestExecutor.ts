@@ -96,7 +96,7 @@ export const httpRequestExecutor: NodeExecutor = async (act, ctx) => {
   }
 
   const effectiveReq = applySlotOverrides(applyRequestOverride(req, override), act.inputs)
-  flushRequestStateToContext(effectiveReq)
+  flushRequestStateToContext(effectiveReq, ctx.variables)
 
   // For OData, derive the dispatched verb + body from the (override-applied)
   // request via the shared composer — byte-identical to the request-panel Send.
@@ -171,7 +171,7 @@ export const httpRequestExecutor: NodeExecutor = async (act, ctx) => {
  * gRPC, `graphqlExecutionService.execute()` does NOT persist history itself, so
  * we store it here (mirroring the `graphql:execute` IPC handler). */
 async function runGraphqlUnary(req: Request, ctx: Parameters<NodeExecutor>[1]): Promise<ExecResult> {
-  flushRequestStateToContext(req)
+  flushRequestStateToContext(req, ctx.variables)
   const onAbort = (): void => { graphqlExecutionService.cancel(req.id) }
   if (ctx.signal.aborted) onAbort()
   else ctx.signal.addEventListener('abort', onAbort, { once: true })
@@ -207,7 +207,7 @@ async function runGraphqlUnary(req: Request, ctx: Parameters<NodeExecutor>[1]): 
 }
 
 async function runGrpcUnary(req: Request, ctx: Parameters<NodeExecutor>[1]): Promise<ExecResult> {
-  flushRequestStateToContext(req)
+  flushRequestStateToContext(req, ctx.variables)
   const onAbort = (): void => { grpcExecutionService.cancel(req.id) }
   if (ctx.signal.aborted) onAbort()
   else ctx.signal.addEventListener('abort', onAbort, { once: true })

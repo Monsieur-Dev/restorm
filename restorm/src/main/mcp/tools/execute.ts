@@ -319,7 +319,21 @@ function decodeStreamToken(token: string): { requestId: string; cursor: number }
  * the API answers "already at destination"). Pushing from main here
  * sidesteps the renderer entirely and keeps the executor authoritative.
  */
-export function flushRequestStateToContext(req: Request): void {
+/** Stringify a scenario variable map (name → already-resolved value) into the
+ * name → string overlay the ContextService merges over the env context. */
+function scenarioVarsToOverlay(vars: ReadonlyMap<string, unknown> | undefined): Record<string, string> | undefined {
+  if (!vars || vars.size === 0) return undefined
+  const out: Record<string, string> = {}
+  for (const [k, v] of vars) {
+    if (v === null || v === undefined) continue
+    if (typeof v === 'string') out[k] = v
+    else if (typeof v === 'number' || typeof v === 'boolean' || typeof v === 'bigint') out[k] = String(v)
+    else { try { out[k] = JSON.stringify(v) } catch { /* skip unserialisable values */ } }
+  }
+  return Object.keys(out).length > 0 ? out : undefined
+}
+
+export function flushRequestStateToContext(req: Request, scenarioVariables?: ReadonlyMap<string, unknown>): void {
   // Headers / params / pathParams / metadata are common across most
   // protocols — pull them off whichever shape the request takes.
   const headers = (req as { headers?: unknown }).headers
@@ -442,6 +456,15 @@ export function flushRequestStateToContext(req: Request): void {
     // path throws — and any `logger.debug` we'd use to report it
     // also throws for the same reason. In production this never
     // fires (Electron populates `app.isPackaged`); silently skip.
+  }
+  // Apply (or clear) the scenario `setVariable` overlay LAST, so the cached
+  // resolved URL + KV transforms reflect a per-run override of an env variable.
+  // Called every dispatch with the current run's variables (or undefined), so a
+  // previous run's overlay never leaks into a later one.
+  try {
+    contextService.setScenarioVariables(req.id, scenarioVarsToOverlay(scenarioVariables))
+  } catch {
+    // Same vitest logger-stub guard as above.
   }
 }
 
