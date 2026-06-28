@@ -1724,7 +1724,13 @@
         "url": "URL",
         "method": "Phương thức",
         "body": "Phần thân",
-        "env": "Môi trường"
+        "env": "Môi trường",
+        "query": "Truy vấn",
+        "variables": "Biến",
+        "service": "Dịch vụ",
+        "grpcMethod": "Phương thức",
+        "requestMessage": "Thông điệp yêu cầu",
+        "topic": "Chủ đề"
       },
       "advanced": {
         "label": "Trường khác (JSON)",

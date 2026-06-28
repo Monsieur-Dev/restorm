@@ -1727,7 +1727,13 @@
         "url": "URL",
         "method": "Метод",
         "body": "Тіло",
-        "env": "Середовище"
+        "env": "Середовище",
+        "query": "Запит",
+        "variables": "Змінні",
+        "service": "Сервіс",
+        "grpcMethod": "Метод",
+        "requestMessage": "Повідомлення запиту",
+        "topic": "Тема"
       },
       "advanced": {
         "label": "Інші поля (JSON)",

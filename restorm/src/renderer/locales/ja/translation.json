@@ -1724,7 +1724,13 @@
         "url": "URL",
         "method": "メソッド",
         "body": "ボディ",
-        "env": "環境"
+        "env": "環境",
+        "query": "クエリ",
+        "variables": "変数",
+        "service": "サービス",
+        "grpcMethod": "メソッド",
+        "requestMessage": "リクエストメッセージ",
+        "topic": "トピック"
       },
       "advanced": {
         "label": "その他のフィールド (JSON)",

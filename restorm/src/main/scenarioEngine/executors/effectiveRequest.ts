@@ -27,6 +27,7 @@ import {
   readQuickConfigId,
   resolveProjectConfigFields
 } from '../../../shared/scenarioActionOverride'
+import { coercePersistedOverride } from './overrideValue'
 
 /** Identity / non-config fields a config must never clobber on the request
  * object — they define WHICH request this is, not how it's configured. */
@@ -109,7 +110,10 @@ export function buildEffectiveStreamingRequest<T extends object>(req: T, overrid
     Object.create(Object.getPrototypeOf(withConfig) as object) as object,
     src
   ) as Record<string, unknown>
-  for (const key of fieldKeys) clone[key] = cloneValue(overrides[key])
+  // An inline typed-value literal (`{ type:'string', value }`, …) resolves to
+  // its wire form (a string for url/topic; `{{handlebars}}` for a variable); a
+  // wired value or an OBJECT field (server config) passes through unchanged.
+  for (const key of fieldKeys) clone[key] = cloneValue(coercePersistedOverride(overrides[key]))
   return clone as unknown as T
 }
 

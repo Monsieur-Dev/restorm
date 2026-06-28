@@ -18,12 +18,14 @@
 
 import { collectionStore } from '../../services/CollectionStore'
 import { buildEffectiveRequest } from './effectiveRequest'
+import { stringifyToWire, persistedOverrideToWire } from './overrideValue'
 import { readActionOverrides } from '../../../shared/scenarioActionOverride'
 import { httpExecutionService, type HTTPExecutionInput } from '../../services/HTTPExecutionService'
 import { grpcExecutionService } from '../../services/GRPCExecutionService'
+import { graphqlExecutionService } from '../../services/GraphQLExecutionService'
 import { responseHistoryService } from '../../services/ResponseHistoryService'
 import { flushRequestStateToContext } from '../../mcp/tools/execute'
-import { isHTTPRequest, isAuthenticationRequest, isGrpcRequest, isODataRequest } from '../../../shared/types/collections'
+import { isHTTPRequest, isAuthenticationRequest, isGrpcRequest, isGraphQLRequest, isODataRequest } from '../../../shared/types/collections'
 import { composeODataRequestBody, type ODataBodySource } from '../../../shared/utils/odataRequestBody'
 import type { Request } from '../../../shared/types/collections'
 import type { NodeExecutor, ExecResult } from '../types'
@@ -42,7 +44,14 @@ export const httpRequestExecutor: NodeExecutor = async (act, ctx) => {
   // A one-shot gRPC request (a unary call binds to this generic request node,
   // like httpRequest; streaming gRPC binds a grpcConnect instead) runs through
   // the gRPC execution service and emits the same `{ request, response }` shape.
-  if (isGrpcRequest(req)) return runGrpcUnary(req, ctx)
+  if (isGrpcRequest(req)) return runGrpcUnary(req, ctx, mergeInlineAndWiredSlots(readActionOverrides(ctx.node.config), act.inputs))
+  // A GraphQL request (a unary query/mutation) binds to this generic request
+  // node like httpRequest; it runs through the GraphQL execution service and
+  // emits the same `{ request, response }` shape, the response body carrying the
+  // `{ data, errors }` envelope so picker selectors (`response.body.data.…`)
+  // resolve at run time. Per-slot query/variables overrides are applied to a
+  // clone before the call (see `runGraphqlUnary`).
+  if (isGraphQLRequest(req)) return runGraphqlUnary(req, ctx, mergeInlineAndWiredSlots(readActionOverrides(ctx.node.config), act.inputs))
   // An OData request binds to this generic request node like HTTP: it executes
   // through the SAME httpExecutionService (the `odata:execute` IPC path does too),
   // and URLResolver composes its system query options into the resolved URL from
@@ -165,9 +174,11 @@ export const httpRequestExecutor: NodeExecutor = async (act, ctx) => {
 }
 
 /** Run a bound gRPC request (a unary one-shot in scenario terms) and shape its
- * result onto the `response` port like an HTTP request node. */
-async function runGrpcUnary(req: Request, ctx: Parameters<NodeExecutor>[1]): Promise<ExecResult> {
-  flushRequestStateToContext(req)
+ * result onto the `response` port like an HTTP request node. The `url` /
+ * `service` / `method` / `requestMessage` slot inputs (inline literal or wired
+ * edge) override the request's discrete fields on a clone before the call. */
+async function runGrpcUnary(req: Request, ctx: Parameters<NodeExecutor>[1], slotInputs: Record<string, unknown>): Promise<ExecResult> {
+  flushRequestStateToContext(applyGrpcSlotOverrides(req, slotInputs))
   const onAbort = (): void => { grpcExecutionService.cancel(req.id) }
   if (ctx.signal.aborted) onAbort()
   else ctx.signal.addEventListener('abort', onAbort, { once: true })
@@ -193,6 +204,78 @@ async function runGrpcUnary(req: Request, ctx: Parameters<NodeExecutor>[1]): Pro
       }
     ]
   }
+}
+
+/** Run a bound GraphQL request (a unary query/mutation in scenario terms) and
+ * shape its result onto the `response` port like an HTTP request node. The
+ * `query` / `variables` slot inputs (inline literal or wired edge) override the
+ * request's discrete fields on a clone before the call. Unlike gRPC,
+ * `graphqlExecutionService.execute()` does NOT persist history itself, so we
+ * store it here (mirroring the `graphql:execute` IPC handler). */
+async function runGraphqlUnary(req: Request, ctx: Parameters<NodeExecutor>[1], slotInputs: Record<string, unknown>): Promise<ExecResult> {
+  const effectiveReq = applyGraphqlSlotOverrides(req, slotInputs)
+  flushRequestStateToContext(effectiveReq)
+  const onAbort = (): void => { graphqlExecutionService.cancel(req.id) }
+  if (ctx.signal.aborted) onAbort()
+  else ctx.signal.addEventListener('abort', onAbort, { once: true })
+  const result = await graphqlExecutionService.execute({ requestId: req.id })
+  ctx.signal.removeEventListener('abort', onAbort)
+  await responseHistoryService.storeExecutionResult(req.id, 'graphql', result)
+  // The wire body of a GraphQL HTTP response is the `{ data, errors }` envelope;
+  // serialise it so a picker-built selector like `response.body.data.…` resolves
+  // at run time, exactly like the HTTP path's raw response string.
+  const body = JSON.stringify({
+    ...(result.data !== undefined ? { data: result.data } : {}),
+    ...(result.errors !== undefined ? { errors: result.errors } : {})
+  })
+  return {
+    outputs: [
+      {
+        port: 'response',
+        value: {
+          // GraphQL-over-HTTP is always a POST to the endpoint URL.
+          request: { url: result.requestUrl ?? '', method: 'POST', headers: {} },
+          response: {
+            status: result.statusCode ?? 0,
+            statusText: '',
+            headers: result.headers ?? {},
+            body,
+            durationMs: result.timings.durationMs,
+            success: result.success,
+            ...(result.error !== undefined ? { error: result.error } : {})
+          }
+        }
+      }
+    ]
+  }
+}
+
+/** GraphQL slot ports — `query` (a GraphQL document string) and `variables` (a
+ * JSON object or its string form). Applied to a prototype-preserving clone so
+ * the persisted request is never mutated; the overridden discrete fields are
+ * what `flushRequestStateToContext` carries into the execution context (the
+ * GraphQL service reads `fullData.query` / `fullData.variables`). */
+function applyGraphqlSlotOverrides(req: Request, inputs: Record<string, unknown>): Request {
+  const hasQuery = inputs['query'] !== undefined
+  const hasVariables = inputs['variables'] !== undefined
+  if (!hasQuery && !hasVariables) return req
+  const clone = Object.assign(Object.create(Object.getPrototypeOf(req) as object) as object, req) as Request & { query?: string; variables?: string }
+  if (hasQuery) clone.query = persistedOverrideToWire(inputs['query'])
+  if (hasVariables) clone.variables = persistedOverrideToWire(inputs['variables'])
+  return clone
+}
+
+/** Apply the gRPC unary slot overrides (`url` / `service` / `method` /
+ * `requestMessage`) onto a prototype-preserving clone so the persisted request
+ * is never mutated; the overridden discrete fields are what
+ * `flushRequestStateToContext` carries into the gRPC execution context. */
+function applyGrpcSlotOverrides(req: Request, inputs: Record<string, unknown>): Request {
+  const fields = ['url', 'service', 'method', 'requestMessage'] as const
+  const present = fields.filter((f) => inputs[f] !== undefined)
+  if (present.length === 0) return req
+  const clone = Object.assign(Object.create(Object.getPrototypeOf(req) as object) as object, req) as Request & Record<string, unknown>
+  for (const f of present) clone[f] = persistedOverrideToWire(inputs[f])
+  return clone
 }
 
 interface KV { key: string; value?: unknown; enabled?: boolean }
@@ -253,8 +336,8 @@ function applySlotOverrides(req: Request, inputs: Record<string, unknown>): Requ
   })
   for (const portId of slotKeys) {
     const value = inputs[portId]
-    if (portId === 'url') { clone.url = stringifyToWire(value); continue }
-    if (portId === 'method') { clone.method = stringifyToWire(value).toUpperCase(); continue }
+    if (portId === 'url') { clone.url = persistedOverrideToWire(value); continue }
+    if (portId === 'method') { clone.method = persistedOverrideToWire(value).toUpperCase(); continue }
     if (portId === 'body') { clone.body = value; continue }
     // Whole-table object port: merge every entry of the wired/inline object into
     // the group's KV array (a present key updates, a new key appends).
@@ -264,8 +347,8 @@ function applySlotOverrides(req: Request, inputs: Record<string, unknown>): Requ
       if (arr && obj) {
         for (const [k, v] of Object.entries(obj)) {
           const existing = arr.find((kv) => kv.key === k)
-          if (existing) { existing.value = stringifyToWire(v); existing.enabled = true }
-          else arr.push({ key: k, value: stringifyToWire(v), enabled: true })
+          if (existing) { existing.value = persistedOverrideToWire(v); existing.enabled = true }
+          else arr.push({ key: k, value: persistedOverrideToWire(v), enabled: true })
         }
       }
       continue
@@ -276,8 +359,8 @@ function applySlotOverrides(req: Request, inputs: Record<string, unknown>): Requ
     const arr = group === 'pathParams' ? clone.pathParams : group === 'headers' ? clone.headers : group === 'params' ? clone.params : null
     if (!arr) continue
     const existing = arr.find((kv) => kv.key === key)
-    if (existing) existing.value = stringifyToWire(value)
-    else arr.push({ key, value: stringifyToWire(value), enabled: true })
+    if (existing) existing.value = persistedOverrideToWire(value)
+    else arr.push({ key, value: persistedOverrideToWire(value), enabled: true })
   }
   return clone
 }
@@ -317,6 +400,10 @@ export function applyRequestOverride(req: Request, override: unknown): Request {
 
 function isSlotPort(portId: string): boolean {
   return portId === 'url' || portId === 'method' || portId === 'body'
+    // GraphQL slot ports (a graphql request node has these instead of url/method).
+    || portId === 'query' || portId === 'variables'
+    // gRPC unary slot ports (service + method name + the request message JSON).
+    || portId === 'service' || portId === 'requestMessage'
     // Whole-table object ports: a bare group id accepts an object that is merged
     // key-by-key into the request's headers / params / path params.
     || portId === 'headers' || portId === 'params' || portId === 'pathParams'
@@ -338,12 +425,4 @@ function asKvObject(value: unknown): Record<string, unknown> | null {
 
 function cloneKVs(kvs: KV[] | undefined): KV[] {
   return (kvs ?? []).map((kv) => ({ ...kv }))
-}
-
-function stringifyToWire(v: unknown): string {
-  if (typeof v === 'string') return v
-  if (v === null || v === undefined) return ''
-  if (typeof v === 'object') return JSON.stringify(v)
-  if (typeof v === 'number' || typeof v === 'boolean' || typeof v === 'bigint') return String(v)
-  return ''
 }

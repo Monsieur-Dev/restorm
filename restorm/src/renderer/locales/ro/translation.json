@@ -1726,7 +1726,13 @@
         "url": "URL",
         "method": "Metodă",
         "body": "Corp",
-        "env": "Mediu"
+        "env": "Mediu",
+        "query": "Interogare",
+        "variables": "Variabile",
+        "service": "Serviciu",
+        "grpcMethod": "Metodă",
+        "requestMessage": "Mesaj de cerere",
+        "topic": "Subiect"
       },
       "advanced": {
         "label": "Alte câmpuri (JSON)",

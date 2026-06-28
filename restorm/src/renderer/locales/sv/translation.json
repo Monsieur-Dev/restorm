@@ -1725,7 +1725,13 @@
         "url": "URL",
         "method": "Metod",
         "body": "Brödtext",
-        "env": "Miljö"
+        "env": "Miljö",
+        "query": "Fråga",
+        "variables": "Variabler",
+        "service": "Tjänst",
+        "grpcMethod": "Metod",
+        "requestMessage": "Begärandemeddelande",
+        "topic": "Ämne"
       },
       "advanced": {
         "label": "Andra fält (JSON)",

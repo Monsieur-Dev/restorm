@@ -1725,7 +1725,13 @@
         "url": "URL",
         "method": "Methode",
         "body": "Body",
-        "env": "Omgeving"
+        "env": "Omgeving",
+        "query": "Query",
+        "variables": "Variabelen",
+        "service": "Service",
+        "grpcMethod": "Methode",
+        "requestMessage": "Aanvraagbericht",
+        "topic": "Onderwerp"
       },
       "advanced": {
         "label": "Andere velden (JSON)",

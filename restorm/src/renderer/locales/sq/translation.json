@@ -1725,7 +1725,13 @@
         "url": "URL",
         "method": "Metoda",
         "body": "Trupi",
-        "env": "Mjedisi"
+        "env": "Mjedisi",
+        "query": "Pyetje",
+        "variables": "Variabla",
+        "service": "Shërbim",
+        "grpcMethod": "Metodë",
+        "requestMessage": "Mesazhi i kërkesës",
+        "topic": "Tema"
       },
       "advanced": {
         "label": "Fusha të tjera (JSON)",

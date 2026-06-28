@@ -1725,7 +1725,13 @@
         "url": "URL",
         "method": "Metódus",
         "body": "Törzs",
-        "env": "Környezet"
+        "env": "Környezet",
+        "query": "Lekérdezés",
+        "variables": "Változók",
+        "service": "Szolgáltatás",
+        "grpcMethod": "Metódus",
+        "requestMessage": "Kérésüzenet",
+        "topic": "Téma"
       },
       "advanced": {
         "label": "Egyéb mezők (JSON)",

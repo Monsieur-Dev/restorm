@@ -1725,7 +1725,13 @@
         "url": "URL",
         "method": "Método",
         "body": "Corpo",
-        "env": "Ambiente"
+        "env": "Ambiente",
+        "query": "Consulta",
+        "variables": "Variáveis",
+        "service": "Serviço",
+        "grpcMethod": "Método",
+        "requestMessage": "Mensagem da requisição",
+        "topic": "Tópico"
       },
       "advanced": {
         "label": "Outros campos (JSON)",

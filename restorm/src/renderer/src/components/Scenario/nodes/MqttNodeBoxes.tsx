@@ -10,7 +10,7 @@ import { ConnectionPicker } from './SocketioNodeBoxes'
 import { useScenarioBoundResolver } from '../scenarioBoundResolver'
 import { isRequest } from '../../../../../shared/types/collections'
 import { readCodeString } from './scenarioCodeValue'
-import { useStreamingOverrideSections } from './scenarioOverridePorts'
+import { useStreamingOverrideSections, useOverrideLabels } from './scenarioOverridePorts'
 
 const stop = (e: React.MouseEvent): void => { e.stopPropagation() }
 
@@ -32,7 +32,16 @@ export const MqttConnectNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ i
   const boundItem = requestId && resolve ? resolve(requestId) : null
   const boundRequest = boundItem && isRequest(boundItem) ? boundItem : null
   const isServerBound = !!boundRequest && (boundRequest as { server?: boolean }).server === true
-  const overrideSections = useStreamingOverrideSections(boundRequest, config, (patch) => { data.onSetConfig?.(id, patch) })
+  // MQTT carries its topic in the request's `event` field — expose it as a
+  // wireable override port (the only protocol-specific connection field).
+  const labels = useOverrideLabels()
+  const topicBase = typeof (boundRequest as { event?: unknown } | null)?.event === 'string' ? (boundRequest as { event: string }).event : undefined
+  const overrideSections = useStreamingOverrideSections(
+    boundRequest,
+    config,
+    (patch) => { data.onSetConfig?.(id, patch) },
+    [{ portId: 'event', label: labels.topic, ...(topicBase !== undefined ? { baseValue: topicBase } : {}) }]
+  )
 
   const left: ScenarioNodeSection[] = [
     ...(requestId && data.onOpenItem

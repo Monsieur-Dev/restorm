@@ -1725,7 +1725,13 @@
         "url": "URL",
         "method": "Metode",
         "body": "Brødtekst",
-        "env": "Miljø"
+        "env": "Miljø",
+        "query": "Forespørgsel",
+        "variables": "Variabler",
+        "service": "Tjeneste",
+        "grpcMethod": "Metode",
+        "requestMessage": "Anmodningsbesked",
+        "topic": "Emne"
       },
       "advanced": {
         "label": "Andre felter (JSON)",

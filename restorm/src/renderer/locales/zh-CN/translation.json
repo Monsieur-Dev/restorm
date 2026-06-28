@@ -1724,7 +1724,13 @@
         "url": "URL",
         "method": "方法",
         "body": "正文",
-        "env": "环境"
+        "env": "环境",
+        "query": "查询",
+        "variables": "变量",
+        "service": "服务",
+        "grpcMethod": "方法",
+        "requestMessage": "请求消息",
+        "topic": "主题"
       },
       "advanced": {
         "label": "其他字段 (JSON)",

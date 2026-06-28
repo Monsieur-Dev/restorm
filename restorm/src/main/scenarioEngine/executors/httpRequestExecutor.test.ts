@@ -19,10 +19,20 @@ const execute = vi.fn<(i: unknown) => Promise<unknown>>()
 const cancel = vi.fn<(id: string) => void>()
 const storeExecutionResult = vi.fn<(...a: unknown[]) => Promise<void>>()
 const flushRequestStateToContext = vi.fn<(r: unknown) => void>()
+const grpcExecute = vi.fn<(i: unknown) => Promise<unknown>>()
+const grpcCancel = vi.fn<(id: string) => void>()
+const graphqlExecute = vi.fn<(i: unknown) => Promise<unknown>>()
+const graphqlCancel = vi.fn<(id: string) => void>()
 
 vi.mock('../../services/CollectionStore', () => ({ collectionStore: { findById: (id: string) => findById(id) } }))
 vi.mock('../../services/HTTPExecutionService', () => ({
   httpExecutionService: { execute: (i: unknown) => execute(i), cancel: (id: string) => { cancel(id) } }
+}))
+vi.mock('../../services/GRPCExecutionService', () => ({
+  grpcExecutionService: { execute: (i: unknown) => grpcExecute(i), cancel: (id: string) => { grpcCancel(id) } }
+}))
+vi.mock('../../services/GraphQLExecutionService', () => ({
+  graphqlExecutionService: { execute: (i: unknown) => graphqlExecute(i), cancel: (id: string) => { graphqlCancel(id) } }
 }))
 vi.mock('../../services/ResponseHistoryService', () => ({
   responseHistoryService: { storeExecutionResult: (...a: unknown[]) => storeExecutionResult(...a) }
@@ -87,6 +97,10 @@ beforeEach(() => {
   cancel.mockReset()
   storeExecutionResult.mockReset().mockResolvedValue(undefined)
   flushRequestStateToContext.mockReset()
+  grpcExecute.mockReset()
+  grpcCancel.mockReset()
+  graphqlExecute.mockReset()
+  graphqlCancel.mockReset()
 })
 
 describe('httpRequestExecutor — slot short-circuit', () => {
@@ -357,5 +371,69 @@ describe('httpRequestExecutor — on-box override ports', () => {
     await httpRequestExecutor(makeActivation({}), makeCtx(n))
     const flushed = flushRequestStateToContext.mock.calls[0]?.[0] as { url: string }
     expect(flushed.url).toBe('https://only.test')
+  })
+
+  it('unwraps a persisted typed-value inline override (string + variable) to wire form', async () => {
+    const n = { id: 'n1', kind: 'httpRequest', config: { requestId: 'req-1', overrides: { url: { type: 'string', value: 'https://typed.test' }, 'headers:X-Tok': { type: 'variable', value: 'token' } } }, inputs: [], outputs: [], position: { x: 0, y: 0 } } as unknown as ScenarioNode
+    await httpRequestExecutor(makeActivation({}), makeCtx(n))
+    const flushed = flushRequestStateToContext.mock.calls[0]?.[0] as { url: string; headers: KV[] }
+    // A `{ type:'string', value }` literal resolves to the bare string…
+    expect(flushed.url).toBe('https://typed.test')
+    // …and a `{ type:'variable', value }` becomes its `{{handlebars}}` token.
+    expect(flushed.headers.find((kv) => kv.key === 'X-Tok')?.value).toBe('{{token}}')
+  })
+})
+
+describe('httpRequestExecutor — GraphQL unary', () => {
+  function makeGraphqlRequest(): Record<string, unknown> {
+    return { id: 'req-1', type: 'graphql', url: 'https://gql.test/graphql', operationType: 'query', query: 'query { ping }', variables: '{}' }
+  }
+  function gqlResult(): Record<string, unknown> {
+    return { requestId: 'req-1', success: true, statusCode: 200, data: { ping: 'pong' }, headers: { 'content-type': 'application/json' }, requestUrl: 'https://gql.test/graphql', timings: { startedAt: '2026-01-01T00:00:00.000Z', durationMs: 7 } }
+  }
+
+  it('executes a bound GraphQL request and shapes the response port (+ persists history)', async () => {
+    findById.mockReturnValue(makeGraphqlRequest())
+    graphqlExecute.mockResolvedValue(gqlResult())
+    const out = await httpRequestExecutor(makeActivation({}), makeCtx(node()))
+    expect(graphqlExecute).toHaveBeenCalledTimes(1)
+    // History is stored by the executor (the service does not persist it itself).
+    expect(storeExecutionResult).toHaveBeenCalledWith('req-1', 'graphql', expect.anything())
+    const value = out.outputs[0]?.value as { request: { url: string; method: string }; response: { status: number; success: boolean; body: string } }
+    expect(value.request.method).toBe('POST')
+    expect(value.request.url).toBe('https://gql.test/graphql')
+    expect(value.response.status).toBe(200)
+    expect(value.response.success).toBe(true)
+    // The wire body carries the `{ data, errors }` envelope so `response.body.data.…` selectors resolve.
+    expect(JSON.parse(value.response.body)).toEqual({ data: { ping: 'pong' } })
+  })
+
+  it('applies query/variables slot overrides onto the flushed request', async () => {
+    findById.mockReturnValue(makeGraphqlRequest())
+    graphqlExecute.mockResolvedValue(gqlResult())
+    await httpRequestExecutor(makeActivation({ query: 'query { other }', variables: { id: 5 } }), makeCtx(node()))
+    const flushed = flushRequestStateToContext.mock.calls[0]?.[0] as { query: string; variables: string }
+    expect(flushed.query).toBe('query { other }')
+    expect(flushed.variables).toBe('{"id":5}')
+  })
+})
+
+describe('httpRequestExecutor — gRPC unary', () => {
+  function makeGrpcRequest(): Record<string, unknown> {
+    return { id: 'req-1', type: 'grpc', url: 'localhost:50051', service: 'pkg.Svc', method: 'Echo', callType: 'unary', requestMessage: '{}', metadata: [] }
+  }
+  function grpcResult(): Record<string, unknown> {
+    return { requestId: 'req-1', success: true, statusCode: 0, statusMessage: 'OK', responseMessage: '{"msg":"hi"}', requestUrl: 'localhost:50051', requestMethod: 'pkg.Svc/Echo', timings: { startedAt: '2026-01-01T00:00:00.000Z', durationMs: 4 } }
+  }
+
+  it('applies service/method/requestMessage slot overrides onto the flushed request', async () => {
+    findById.mockReturnValue(makeGrpcRequest())
+    grpcExecute.mockResolvedValue(grpcResult())
+    await httpRequestExecutor(makeActivation({ service: 'pkg.Other', method: 'Ping', requestMessage: '{"n":1}' }), makeCtx(node()))
+    expect(grpcExecute).toHaveBeenCalledTimes(1)
+    const flushed = flushRequestStateToContext.mock.calls[0]?.[0] as { service: string; method: string; requestMessage: string }
+    expect(flushed.service).toBe('pkg.Other')
+    expect(flushed.method).toBe('Ping')
+    expect(flushed.requestMessage).toBe('{"n":1}')
   })
 })

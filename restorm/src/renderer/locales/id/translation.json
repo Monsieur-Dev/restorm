@@ -1724,7 +1724,13 @@
         "url": "URL",
         "method": "Metode",
         "body": "Body",
-        "env": "Lingkungan"
+        "env": "Lingkungan",
+        "query": "Kueri",
+        "variables": "Variabel",
+        "service": "Layanan",
+        "grpcMethod": "Metode",
+        "requestMessage": "Pesan permintaan",
+        "topic": "Topik"
       },
       "advanced": {
         "label": "Bidang lain (JSON)",

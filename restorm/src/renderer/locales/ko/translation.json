@@ -1724,7 +1724,13 @@
         "url": "URL",
         "method": "메서드",
         "body": "본문",
-        "env": "환경"
+        "env": "환경",
+        "query": "쿼리",
+        "variables": "변수",
+        "service": "서비스",
+        "grpcMethod": "메서드",
+        "requestMessage": "요청 메시지",
+        "topic": "토픽"
       },
       "advanced": {
         "label": "기타 필드 (JSON)",

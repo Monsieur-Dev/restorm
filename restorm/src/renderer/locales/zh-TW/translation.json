@@ -1724,7 +1724,13 @@
         "url": "URL",
         "method": "方法",
         "body": "內容",
-        "env": "環境"
+        "env": "環境",
+        "query": "查詢",
+        "variables": "變數",
+        "service": "服務",
+        "grpcMethod": "方法",
+        "requestMessage": "請求訊息",
+        "topic": "主題"
       },
       "advanced": {
         "label": "其他欄位 (JSON)",

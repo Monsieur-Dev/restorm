@@ -1727,7 +1727,13 @@
         "url": "URL",
         "method": "Metoda",
         "body": "Tělo",
-        "env": "Prostředí"
+        "env": "Prostředí",
+        "query": "Dotaz",
+        "variables": "Proměnné",
+        "service": "Služba",
+        "grpcMethod": "Metoda",
+        "requestMessage": "Zpráva požadavku",
+        "topic": "Téma"
       },
       "advanced": {
         "label": "Další pole (JSON)",

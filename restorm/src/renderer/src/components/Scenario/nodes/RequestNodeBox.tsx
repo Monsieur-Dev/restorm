@@ -2,7 +2,7 @@ import React from 'react'
 import type { NodeProps } from '@xyflow/react'
 import { useTranslation } from 'react-i18next'
 import { Button } from 'electron-core-ui/renderer'
-import { isRequest } from '../../../../../shared/types/collections'
+import { isRequest, isGraphQLRequest, isGrpcRequest } from '../../../../../shared/types/collections'
 import type { KeyValue } from '../../../../../shared/types/baseTypes'
 import { Badge } from '../../common/Badge'
 import { requestBadgeType, requestBadgeMode } from '../../../utils/badgeUtils'
@@ -14,7 +14,7 @@ import { normalizeValueType } from '../../../utils/normalizeValueType'
 import { serializeValueForPersistence } from '../../../../../shared/utils/valuePersistence'
 import { EnvironmentValue } from '../../../../../shared/types/collections'
 import { ScenarioNodeBoxBase, type ScenarioNodeBoxType, type ScenarioNodeCell, type ScenarioNodeSection } from './ScenarioNodeBoxBase'
-import { buildHttpOverrideSections, buildSelectorSection, useOverrideLabels } from './scenarioOverridePorts'
+import { buildHttpOverrideSections, buildGraphqlOverrideSections, buildGrpcOverrideSections, buildSelectorSection, useOverrideLabels } from './scenarioOverridePorts'
 
 /** The request node's `env` field is pinned to the `environment` type: every
  * other concrete type is excluded, leaving the env picker plus — via the
@@ -105,14 +105,22 @@ export const RequestNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, d
   // inline editor. A field is overridden by wiring an upstream output into its
   // port (live, wins) or by typing an inline literal (stored in
   // config.overrides[portId]). Resolution: base → quick-config → inline → wired.
+  // Protocol-specific override ports: GraphQL exposes query/variables (no verb),
+  // gRPC exposes service/method/requestMessage; every other request (HTTP /
+  // OData / SOAP unary) uses the HTTP-family url/method/kv/body set.
   const overrideLabels = useOverrideLabels()
-  const overrideSections = request
-    ? buildHttpOverrideSections(
-      request as { url?: string; method?: string; headers?: KeyValue[]; params?: KeyValue[]; pathParams?: KeyValue[]; body?: unknown },
-      { config, valueTypeGroups, onSetConfig },
-      overrideLabels
-    )
-    : []
+  const fieldCtx = { config, valueTypeGroups, onSetConfig }
+  const overrideSections = !request
+    ? []
+    : isGraphQLRequest(request)
+      ? buildGraphqlOverrideSections(request as { url?: string; query?: string; variables?: string; headers?: KeyValue[] }, fieldCtx, overrideLabels)
+      : isGrpcRequest(request)
+        ? buildGrpcOverrideSections(request as { url?: string; service?: string; method?: string; requestMessage?: string }, fieldCtx, overrideLabels)
+        : buildHttpOverrideSections(
+          request as { url?: string; method?: string; headers?: KeyValue[]; params?: KeyValue[]; pathParams?: KeyValue[]; body?: unknown },
+          fieldCtx,
+          overrideLabels
+        )
 
   const left: ScenarioNodeSection[] = [
     editSection,

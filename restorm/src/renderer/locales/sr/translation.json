@@ -1726,7 +1726,13 @@
         "url": "URL",
         "method": "Метода",
         "body": "Тело",
-        "env": "Окружење"
+        "env": "Окружење",
+        "query": "Упит",
+        "variables": "Променљиве",
+        "service": "Услуга",
+        "grpcMethod": "Метода",
+        "requestMessage": "Порука захтева",
+        "topic": "Тема"
       },
       "advanced": {
         "label": "Остала поља (JSON)",

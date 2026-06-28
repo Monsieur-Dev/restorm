@@ -1725,7 +1725,13 @@
         "url": "URL",
         "method": "Yöntem",
         "body": "Gövde",
-        "env": "Ortam"
+        "env": "Ortam",
+        "query": "Sorgu",
+        "variables": "Değişkenler",
+        "service": "Hizmet",
+        "grpcMethod": "Metot",
+        "requestMessage": "İstek mesajı",
+        "topic": "Konu"
       },
       "advanced": {
         "label": "Diğer alanlar (JSON)",

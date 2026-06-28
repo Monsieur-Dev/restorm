@@ -1725,7 +1725,13 @@
         "url": "URL",
         "method": "Menetelmä",
         "body": "Runko",
-        "env": "Ympäristö"
+        "env": "Ympäristö",
+        "query": "Kysely",
+        "variables": "Muuttujat",
+        "service": "Palvelu",
+        "grpcMethod": "Metodi",
+        "requestMessage": "Pyyntöviesti",
+        "topic": "Aihe"
       },
       "advanced": {
         "label": "Muut kentät (JSON)",

@@ -204,6 +204,18 @@ export interface OverrideLabels {
   headers: string
   params: string
   pathParams: string
+  /** GraphQL document. */
+  query: string
+  /** GraphQL variables (JSON). */
+  variables: string
+  /** gRPC fully-qualified service. */
+  service: string
+  /** gRPC method name (distinct from the HTTP verb `method`). */
+  grpcMethod: string
+  /** gRPC request message (JSON). */
+  requestMessage: string
+  /** MQTT topic (the connection's publish/subscribe topic). */
+  topic: string
   /** Caption heading the override-port group (separates it from the chooser rows). */
   overridesLabel: string
   /** "(inherit)" / base-value option for the method select. */
@@ -235,8 +247,8 @@ export function buildHttpOverrideSections(
   const out: ScenarioNodeSection[] = []
   out.push({
     id: 'override-core',
+    name: labels.overridesLabel,
     rows: [
-      overridesCaptionRow(labels.overridesLabel),
       scalarRow('url', labels.url, request.url, ctx, URL_FIELD_POLICY),
       methodRow(request.method, ctx, labels.inherit, labels.method)
     ]
@@ -253,6 +265,73 @@ export function buildHttpOverrideSections(
   return out
 }
 
+/** Shape a bound GraphQL request exposes for override ports. */
+interface GraphqlLikeRequest {
+  url?: string
+  query?: string
+  variables?: string
+  headers?: KeyValue[]
+}
+
+/**
+ * Build the override-port sections for a bound GraphQL (unary query/mutation)
+ * request: url + query + variables top rows, then a collapsible headers section.
+ * GraphQL-over-HTTP is always a POST, so there is no method row; the document +
+ * variables stand in for the HTTP body.
+ */
+export function buildGraphqlOverrideSections(
+  request: GraphqlLikeRequest,
+  ctx: FieldContext,
+  labels: OverrideLabels
+): ScenarioNodeSection[] {
+  const out: ScenarioNodeSection[] = [
+    {
+      id: 'override-core',
+      name: labels.overridesLabel,
+      rows: [
+        scalarRow('url', labels.url, request.url, ctx, URL_FIELD_POLICY),
+        scalarRow('query', labels.query, undefined, ctx),
+        scalarRow('variables', labels.variables, undefined, ctx)
+      ]
+    }
+  ]
+  const headers = kvOverrideSection('headers', labels.headers, request.headers, ctx, labels.addField)
+  if (headers) out.push(headers)
+  return out
+}
+
+/** Shape a bound gRPC request exposes for override ports. */
+interface GrpcLikeRequest {
+  url?: string
+  service?: string
+  method?: string
+  requestMessage?: string
+}
+
+/**
+ * Build the override-port sections for a bound gRPC (unary) request: the address
+ * `url`, the `service` + `method` names, and the `requestMessage` (JSON). gRPC
+ * has no HTTP verb / params / path-params, so only these fields are exposed.
+ */
+export function buildGrpcOverrideSections(
+  request: GrpcLikeRequest,
+  ctx: FieldContext,
+  labels: OverrideLabels
+): ScenarioNodeSection[] {
+  return [
+    {
+      id: 'override-core',
+      name: labels.overridesLabel,
+      rows: [
+        scalarRow('url', labels.url, request.url, ctx, URL_FIELD_POLICY),
+        scalarRow('service', labels.service, request.service, ctx),
+        scalarRow('method', labels.grpcMethod, request.method, ctx),
+        scalarRow('requestMessage', labels.requestMessage, undefined, ctx)
+      ]
+    }
+  ]
+}
+
 /**
  * Build the override-port sections for a STREAMING connect / mock-server listen
  * bound request (ws / socketio / mqtt / grpc / http-server / grpc-server). A
@@ -263,25 +342,24 @@ export function buildHttpOverrideSections(
 export function buildStreamingOverrideSections(
   request: HttpLikeRequest,
   ctx: FieldContext,
-  labels: OverrideLabels
+  labels: OverrideLabels,
+  extraScalars?: { portId: string; label: string; baseValue?: string }[]
 ): ScenarioNodeSection[] {
   const out: ScenarioNodeSection[] = [
-    { id: 'override-core', rows: [overridesCaptionRow(labels.overridesLabel), scalarRow('url', labels.url, request.url, ctx, URL_FIELD_POLICY)] }
+    {
+      id: 'override-core',
+      name: labels.overridesLabel,
+      rows: [
+        scalarRow('url', labels.url, request.url, ctx, URL_FIELD_POLICY),
+        // Protocol-specific connection fields (e.g. the MQTT topic) sit under
+        // the endpoint url, each a wireable override port like the rest.
+        ...(extraScalars ?? []).map((f) => scalarRow(f.portId, f.label, f.baseValue, ctx))
+      ]
+    }
   ]
   const headers = kvOverrideSection('headers', labels.headers, request.headers, ctx, labels.addField)
   if (headers) out.push(headers)
   return out
-}
-
-/** A non-port caption row that heads + visually separates the override ports
- * from the chooser rows (quick-config selector / env) above. No `port`, so it
- * carries no anchor — purely a label + top divider (the `scn-override-caption`
- * class draws the separator line). */
-function overridesCaptionRow(label: string): ScenarioNodeCell {
-  return {
-    id: 'override-caption',
-    content: <div className="scn-field-caption scn-override-caption">{label}</div>
-  }
 }
 
 /** Resolve every override label via i18n in one place, so each box doesn't
@@ -295,6 +373,12 @@ export function useOverrideLabels(): OverrideLabels {
     headers: t('scenario.actionOverride.sections.headers', 'Headers'),
     params: t('scenario.actionOverride.sections.params', 'Params'),
     pathParams: t('scenario.actionOverride.sections.pathParams', 'Path Params'),
+    query: t('scenario.actionOverride.fields.query', 'Query'),
+    variables: t('scenario.actionOverride.fields.variables', 'Variables'),
+    service: t('scenario.actionOverride.fields.service', 'Service'),
+    grpcMethod: t('scenario.actionOverride.fields.grpcMethod', 'Method'),
+    requestMessage: t('scenario.actionOverride.fields.requestMessage', 'Request message'),
+    topic: t('scenario.actionOverride.fields.topic', 'Topic'),
     overridesLabel: t('scenario.actionOverride.overridesLabel', 'Field overrides'),
     inherit: t('scenario.actionOverride.inherit', 'Inherit'),
     addField: t('scenario.actionOverride.addField', 'Add override field')
@@ -327,7 +411,8 @@ export function buildSelectorSection(
 export function useStreamingOverrideSections(
   request: Request | null,
   config: Record<string, unknown>,
-  onSetConfig: (patch: Record<string, unknown>) => void
+  onSetConfig: (patch: Record<string, unknown>) => void,
+  extraScalars?: { portId: string; label: string; baseValue?: string }[]
 ): ScenarioNodeSection[] {
   const labels = useOverrideLabels()
   const valueTypeGroups = useAllEnvValueTypeGroups()
@@ -336,7 +421,8 @@ export function useStreamingOverrideSections(
   const sections = buildStreamingOverrideSections(
     request as unknown as HttpLikeRequest,
     { config, valueTypeGroups, onSetConfig },
-    labels
+    labels,
+    extraScalars
   )
   return selector ? [selector, ...sections] : sections
 }

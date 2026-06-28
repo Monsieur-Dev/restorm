@@ -1727,7 +1727,13 @@
         "url": "URL",
         "method": "Metoda",
         "body": "Treść",
-        "env": "Środowisko"
+        "env": "Środowisko",
+        "query": "Zapytanie",
+        "variables": "Zmienne",
+        "service": "Usługa",
+        "grpcMethod": "Metoda",
+        "requestMessage": "Wiadomość żądania",
+        "topic": "Temat"
       },
       "advanced": {
         "label": "Inne pola (JSON)",

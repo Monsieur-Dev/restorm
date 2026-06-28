@@ -1725,7 +1725,13 @@
         "url": "URL",
         "method": "Μέθοδος",
         "body": "Σώμα",
-        "env": "Περιβάλλον"
+        "env": "Περιβάλλον",
+        "query": "Ερώτημα",
+        "variables": "Μεταβλητές",
+        "service": "Υπηρεσία",
+        "grpcMethod": "Μέθοδος",
+        "requestMessage": "Μήνυμα αιτήματος",
+        "topic": "Θέμα"
       },
       "advanced": {
         "label": "Άλλα πεδία (JSON)",

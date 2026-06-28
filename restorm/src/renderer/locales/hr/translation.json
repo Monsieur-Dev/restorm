@@ -1726,7 +1726,13 @@
         "url": "URL",
         "method": "Metoda",
         "body": "Tijelo",
-        "env": "Okruženje"
+        "env": "Okruženje",
+        "query": "Upit",
+        "variables": "Varijable",
+        "service": "Usluga",
+        "grpcMethod": "Metoda",
+        "requestMessage": "Poruka zahtjeva",
+        "topic": "Tema"
       },
       "advanced": {
         "label": "Ostala polja (JSON)",
