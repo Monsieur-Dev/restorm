@@ -1707,6 +1707,17 @@
     },
     "http": {
       "served": "served"
+    },
+    "actionOverride": {
+      "configMissingShort": "Λείπει η διαμόρφωση",
+      "configSelector": {
+        "label": "Βασική διαμόρφωση",
+        "none": "Καμία (προεπιλογές αιτήματος)"
+      },
+      "configMissing": "Η επιλεγμένη διαμόρφωση διαγράφηκε· ισχύουν οι προεπιλογές του αιτήματος.",
+      "fields": {
+        "env": "Περιβάλλον"
+      }
     }
   },
   "mqtt": {
@@ -1967,7 +1978,9 @@
     },
     "deleteConfirm": {
       "title": "Διαγραφή ρύθμισης",
-      "message": "Θέλετε να διαγράψετε τη ρύθμιση \"{{name}}\";"
+      "message": "Θέλετε να διαγράψετε τη ρύθμιση \"{{name}}\";",
+      "usedByScenarios_one": "Χρησιμοποιείται από το σενάριο {{scenarios}}.",
+      "usedByScenarios_other": "Χρησιμοποιείται από τα σενάρια {{scenarios}}."
     },
     "confirm": {
       "ok": "OK",

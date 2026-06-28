@@ -28,7 +28,7 @@ vi.mock('electron-core-ui/renderer', () => {
     Modal: C, RadioGroup: C, ScrollableElement: C, SelectBox: C, Tab: C, Tabs: C,
     Toggle: C, Tooltip: C, VerticalSashContainer: C,
     getContrastColor: () => '#000000',
-    eventBus: { emit: () => undefined, on: () => () => undefined, off: () => undefined },
+    eventBus: { emit: () => undefined, on: () => () => undefined, off: () => undefined, subscribe: () => ({ unsubscribe: () => undefined }) },
     isUndoKeyEvent: () => false,
     isRedoKeyEvent: () => false,
     usePlatform: () => ({ isMacintosh: false, isWindows: false, isLinux: true }),

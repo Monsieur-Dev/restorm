@@ -16,6 +16,7 @@ import { useScenarioConnections } from '../scenarioConnectionsContext'
 import { useScenarioBoundResolver } from '../scenarioBoundResolver'
 import { isRequest } from '../../../../../shared/types/collections'
 import { readCodeString } from './scenarioCodeValue'
+import { useStreamingOverrideSections } from './scenarioOverridePorts'
 
 const stop = (e: React.MouseEvent): void => { e.stopPropagation() }
 
@@ -39,7 +40,9 @@ export const SocketioConnectNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = 
   // from a client connect at a glance.
   const resolve = useScenarioBoundResolver()
   const boundItem = requestId && resolve ? resolve(requestId) : null
-  const isServerBound = !!boundItem && isRequest(boundItem) && (boundItem as { server?: boolean }).server === true
+  const boundRequest = boundItem && isRequest(boundItem) ? boundItem : null
+  const isServerBound = !!boundRequest && (boundRequest as { server?: boolean }).server === true
+  const overrideSections = useStreamingOverrideSections(boundRequest, config, (patch) => { data.onSetConfig?.(id, patch) })
 
   const setEvents = (next: string[]): void => { data.onSetConfig?.(id, { events: next }) }
 
@@ -62,6 +65,7 @@ export const SocketioConnectNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = 
           }]
         }]
       : []),
+    ...overrideSections,
     {
       id: 'main',
       rows: [

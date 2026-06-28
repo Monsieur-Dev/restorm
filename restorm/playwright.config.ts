@@ -104,6 +104,12 @@ const quickSettingsTestDir = defineBddConfig({
   outputDir: '.features-gen/quick-settings'
 })
 
+const scenarioQuickConfigSelectorTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/scenario-quick-config-selector/features/**/*.feature',
+  steps: ['tests/e2e/bdd/scenario-quick-config-selector/steps/**/*.ts', 'tests/e2e/bdd/fixtures/mcp-server.fixture.ts'],
+  outputDir: '.features-gen/scenario-quick-config-selector'
+})
+
 const grpcServerExecutionTestDir = defineBddConfig({
   features: 'tests/e2e/bdd/grpc-server/features/**/*.feature',
   steps: ['tests/e2e/bdd/grpc-server/steps/**/*.ts', 'tests/e2e/bdd/fixtures/mcp-server.fixture.ts'],
@@ -387,6 +393,11 @@ export default defineConfig({
       name: 'quick-settings',
       testDir: quickSettingsTestDir,
       timeout: 300 * 1000 // 5 min — 8 scenarios, each launches a fresh app
+    },
+    {
+      name: 'scenario-quick-config-selector',
+      testDir: scenarioQuickConfigSelectorTestDir,
+      timeout: 240 * 1000
     },
     {
       name: 'grpc-server',

@@ -1707,6 +1707,17 @@
     },
     "http": {
       "served": "served"
+    },
+    "actionOverride": {
+      "configMissingShort": "Hiányzó konfiguráció",
+      "configSelector": {
+        "label": "Alapkonfiguráció",
+        "none": "Nincs (a kérés alapértelmezett értékei)"
+      },
+      "configMissing": "A kiválasztott konfiguráció törölve lett; a kérés alapértelmezett értékei érvényesek.",
+      "fields": {
+        "env": "Környezet"
+      }
     }
   },
   "mqtt": {
@@ -1967,7 +1978,9 @@
     },
     "deleteConfirm": {
       "title": "Konfiguráció törlése",
-      "message": "Szeretné törölni a(z) \"{{name}}\" konfigurációt?"
+      "message": "Szeretné törölni a(z) \"{{name}}\" konfigurációt?",
+      "usedByScenarios_one": "A(z) {{scenarios}} forgatókönyv használja.",
+      "usedByScenarios_other": "A(z) {{scenarios}} forgatókönyvek használják."
     },
     "confirm": {
       "ok": "OK",

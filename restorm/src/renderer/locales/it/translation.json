@@ -1707,6 +1707,17 @@
     },
     "http": {
       "served": "served"
+    },
+    "actionOverride": {
+      "configMissingShort": "Configurazione mancante",
+      "configSelector": {
+        "label": "Configurazione di base",
+        "none": "Nessuna (valori predefiniti della richiesta)"
+      },
+      "configMissing": "La configurazione selezionata è stata eliminata; si applicano i valori predefiniti della richiesta.",
+      "fields": {
+        "env": "Ambiente"
+      }
     }
   },
   "mqtt": {
@@ -1967,7 +1978,9 @@
     },
     "deleteConfirm": {
       "title": "Elimina configurazione",
-      "message": "Vuoi eliminare la configurazione \"{{name}}\"?"
+      "message": "Vuoi eliminare la configurazione \"{{name}}\"?",
+      "usedByScenarios_one": "È usata dallo scenario {{scenarios}}.",
+      "usedByScenarios_other": "È usata dagli scenari {{scenarios}}."
     },
     "confirm": {
       "ok": "OK",

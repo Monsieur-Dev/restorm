@@ -1707,6 +1707,17 @@
     },
     "http": {
       "served": "served"
+    },
+    "actionOverride": {
+      "configMissingShort": "Konfigurasjon mangler",
+      "configSelector": {
+        "label": "Basiskonfigurasjon",
+        "none": "Ingen (forespørselens standardverdier)"
+      },
+      "configMissing": "Den valgte konfigurasjonen ble slettet; forespørselens standardverdier gjelder.",
+      "fields": {
+        "env": "Miljø"
+      }
     }
   },
   "mqtt": {
@@ -1967,7 +1978,9 @@
     },
     "deleteConfirm": {
       "title": "Slett konfigurasjon",
-      "message": "Vil du slette konfigurasjonen \"{{name}}\"?"
+      "message": "Vil du slette konfigurasjonen \"{{name}}\"?",
+      "usedByScenarios_one": "Den brukes av scenariet {{scenarios}}.",
+      "usedByScenarios_other": "Den brukes av scenariene {{scenarios}}."
     },
     "confirm": {
       "ok": "OK",

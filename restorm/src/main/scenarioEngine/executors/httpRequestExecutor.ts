@@ -17,11 +17,13 @@
  */
 
 import { collectionStore } from '../../services/CollectionStore'
+import { buildEffectiveRequest } from './effectiveRequest'
 import { httpExecutionService, type HTTPExecutionInput } from '../../services/HTTPExecutionService'
 import { grpcExecutionService } from '../../services/GRPCExecutionService'
+import { graphqlExecutionService } from '../../services/GraphQLExecutionService'
 import { responseHistoryService } from '../../services/ResponseHistoryService'
 import { flushRequestStateToContext } from '../../mcp/tools/execute'
-import { isHTTPRequest, isAuthenticationRequest, isGrpcRequest, isODataRequest } from '../../../shared/types/collections'
+import { isHTTPRequest, isAuthenticationRequest, isGrpcRequest, isGraphQLRequest, isODataRequest } from '../../../shared/types/collections'
 import { composeODataRequestBody, type ODataBodySource } from '../../../shared/utils/odataRequestBody'
 import type { Request } from '../../../shared/types/collections'
 import type { NodeExecutor, ExecResult } from '../types'
@@ -29,12 +31,22 @@ import type { NodeExecutor, ExecResult } from '../types'
 export const httpRequestExecutor: NodeExecutor = async (act, ctx) => {
   const cfg = ctx.node.config as { requestId?: string }
   if (typeof cfg.requestId !== 'string') throw new Error(`httpRequest node ${ctx.node.id} has no bound requestId`)
-  const req = collectionStore.findById(cfg.requestId)
-  if (!req) throw new Error(`bound request ${cfg.requestId} not found`)
+  const bound = collectionStore.findById(cfg.requestId)
+  if (!bound) throw new Error(`bound request ${cfg.requestId} not found`)
+  // Apply the action's picked quick-config (base request → the saved config's
+  // fields, resolved by id from the .restorm file). Returns the bound request
+  // unchanged when the node picked no config.
+  const req = buildEffectiveRequest(bound, ctx.node.config)
   // A one-shot gRPC request (a unary call binds to this generic request node,
   // like httpRequest; streaming gRPC binds a grpcConnect instead) runs through
   // the gRPC execution service and emits the same `{ request, response }` shape.
   if (isGrpcRequest(req)) return runGrpcUnary(req, ctx)
+  // A GraphQL request (a unary query/mutation) binds to this generic request
+  // node like httpRequest; it runs through the GraphQL execution service and
+  // emits the same `{ request, response }` shape, the response body carrying the
+  // `{ data, errors }` envelope so picker selectors (`response.body.data.…`)
+  // resolve at run time.
+  if (isGraphQLRequest(req)) return runGraphqlUnary(req, ctx)
   // An OData request binds to this generic request node like HTTP: it executes
   // through the SAME httpExecutionService (the `odata:execute` IPC path does too),
   // and URLResolver composes its system query options into the resolved URL from
@@ -154,6 +166,46 @@ export const httpRequestExecutor: NodeExecutor = async (act, ctx) => {
 
 /** Run a bound gRPC request (a unary one-shot in scenario terms) and shape its
  * result onto the `response` port like an HTTP request node. */
+/** Run a bound GraphQL request (a unary query/mutation in scenario terms) and
+ * shape its result onto the `response` port like an HTTP request node. Unlike
+ * gRPC, `graphqlExecutionService.execute()` does NOT persist history itself, so
+ * we store it here (mirroring the `graphql:execute` IPC handler). */
+async function runGraphqlUnary(req: Request, ctx: Parameters<NodeExecutor>[1]): Promise<ExecResult> {
+  flushRequestStateToContext(req)
+  const onAbort = (): void => { graphqlExecutionService.cancel(req.id) }
+  if (ctx.signal.aborted) onAbort()
+  else ctx.signal.addEventListener('abort', onAbort, { once: true })
+  const result = await graphqlExecutionService.execute({ requestId: req.id })
+  ctx.signal.removeEventListener('abort', onAbort)
+  await responseHistoryService.storeExecutionResult(req.id, 'graphql', result)
+  // The wire body of a GraphQL HTTP response is the `{ data, errors }` envelope;
+  // serialise it so a picker-built selector like `response.body.data.…` resolves.
+  const body = JSON.stringify({
+    ...(result.data !== undefined ? { data: result.data } : {}),
+    ...(result.errors !== undefined ? { errors: result.errors } : {})
+  })
+  return {
+    outputs: [
+      {
+        port: 'response',
+        value: {
+          // GraphQL-over-HTTP is always a POST to the endpoint URL.
+          request: { url: result.requestUrl ?? '', method: 'POST', headers: {} },
+          response: {
+            status: result.statusCode ?? 0,
+            statusText: '',
+            headers: result.headers ?? {},
+            body,
+            durationMs: result.timings.durationMs,
+            success: result.success,
+            ...(result.error !== undefined ? { error: result.error } : {})
+          }
+        }
+      }
+    ]
+  }
+}
+
 async function runGrpcUnary(req: Request, ctx: Parameters<NodeExecutor>[1]): Promise<ExecResult> {
   flushRequestStateToContext(req)
   const onAbort = (): void => { grpcExecutionService.cancel(req.id) }

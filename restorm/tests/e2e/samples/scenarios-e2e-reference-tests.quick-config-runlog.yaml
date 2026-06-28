@@ -1,0 +1,125 @@
+- message: 🔵 [<time>] ▶ Quick config
+- message: ⚪ [<time>] start httpListen
+  data:
+    requestId: <uuid>
+    connectionName: QC Mock
+    label: start mock server
+- message: ⚪ [<time>] done httpListen
+- message: ⚪ [<time>] http-server "QC Mock" connecting
+- message: ⚪ [<time>] http-server "QC Mock" connected
+- message: ⚪ [<time>] start httpRequest
+  data:
+    requestId: <uuid>
+    quickConfigId: qc_f47542c5-83ca-4c6b-b39a-dda9bca8810a
+    label: call the mock (QC config redirects to /pets)
+    in: true
+- message: ⚪ [<time>] done httpRequest
+  data:
+    response:
+      request:
+        url: http://localhost:8077/pets
+        method: GET
+        headers: {}
+      response:
+        status: 200
+        statusText: OK
+        headers:
+          content-type: application/json
+          date: <dynamic-time>
+          connection: keep-alive
+          keep-alive: timeout=5
+          transfer-encoding: chunked
+        body: '{"pets":["Rex","Whiskers"]}'
+        durationMs: <dynamic-time>
+        success: true
+- message: ⚪ [<time>] start log
+  data:
+    message: réponse reçue (config QC appliquée)
+    level: info
+    data:
+      request:
+        url: http://localhost:8077/pets
+        method: GET
+        headers: {}
+      response:
+        status: 200
+        statusText: OK
+        headers:
+          content-type: application/json
+          date: <dynamic-time>
+          connection: keep-alive
+          keep-alive: timeout=5
+          transfer-encoding: chunked
+        body: '{"pets":["Rex","Whiskers"]}'
+        durationMs: <dynamic-time>
+        success: true
+    in:
+      request:
+        url: http://localhost:8077/pets
+        method: GET
+        headers: {}
+      response:
+        status: 200
+        statusText: OK
+        headers:
+          content-type: application/json
+          date: <dynamic-time>
+          connection: keep-alive
+          keep-alive: timeout=5
+          transfer-encoding: chunked
+        body: '{"pets":["Rex","Whiskers"]}'
+        durationMs: <dynamic-time>
+        success: true
+- message: 🔵 [<time>] réponse reçue (config QC appliquée)
+  data:
+    request:
+      url: http://localhost:8077/pets
+      method: GET
+      headers: {}
+    response:
+      status: 200
+      statusText: OK
+      headers:
+        content-type: application/json
+        date: <dynamic-time>
+        connection: keep-alive
+        keep-alive: timeout=5
+        transfer-encoding: chunked
+      body: '{"pets":["Rex","Whiskers"]}'
+      durationMs: <dynamic-time>
+      success: true
+- message: ⚪ [<time>] done log
+  data:
+    value:
+      request:
+        url: http://localhost:8077/pets
+        method: GET
+        headers: {}
+      response:
+        status: 200
+        statusText: OK
+        headers:
+          content-type: application/json
+          date: <dynamic-time>
+          connection: keep-alive
+          keep-alive: timeout=5
+          transfer-encoding: chunked
+        body: '{"pets":["Rex","Whiskers"]}'
+        durationMs: <dynamic-time>
+        success: true
+- message: ⚪ [<time>] start httpClose
+  data:
+    connectionNodeId: <uuid>
+    label: stop the mock server
+    in: true
+- message: ⚪ [<time>] http-server "QC Mock" closed
+- message: ⚪ [<time>] start log
+  data:
+    message: serveur arrêté
+    level: info
+    in: true
+- message: 🔵 [<time>] serveur arrêté
+- message: ⚪ [<time>] done log
+  data: {}
+- message: ⚪ [<time>] done httpClose
+- message: 🔵 [<time>] ■ Quick config

@@ -1707,6 +1707,17 @@
     },
     "http": {
       "served": "served"
+    },
+    "actionOverride": {
+      "configMissingShort": "Konfiguration saknas",
+      "configSelector": {
+        "label": "Baskonfiguration",
+        "none": "Ingen (begärans standardvärden)"
+      },
+      "configMissing": "Den valda konfigurationen togs bort; begärans standardvärden gäller.",
+      "fields": {
+        "env": "Miljö"
+      }
     }
   },
   "mqtt": {
@@ -1967,7 +1978,9 @@
     },
     "deleteConfirm": {
       "title": "Ta bort konfiguration",
-      "message": "Vill du ta bort konfigurationen \"{{name}}\"?"
+      "message": "Vill du ta bort konfigurationen \"{{name}}\"?",
+      "usedByScenarios_one": "Den används av scenariot {{scenarios}}.",
+      "usedByScenarios_other": "Den används av scenarierna {{scenarios}}."
     },
     "confirm": {
       "ok": "OK",

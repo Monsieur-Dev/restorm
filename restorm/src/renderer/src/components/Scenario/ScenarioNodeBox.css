@@ -1069,6 +1069,17 @@
   opacity: 0.6;
   margin-bottom: 3px;
 }
+/* Caption heading the override-port group on a request action box: a top
+ * divider + extra space separates the override ports (url/method/headers/…)
+ * from the chooser rows above (quick-config selector / environment), so the
+ * first override port's anchor never reads as if it belongs to the selector. */
+.scn-override-caption {
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px solid var(--scn-node-border, rgba(128, 128, 128, 0.25));
+  text-transform: uppercase;
+  font-weight: 600;
+}
 /* forEach parallelism config row (right column, no port): caption + enable
  * toggle + a narrow bounded count field, laid out inline. */
 .scn-foreach-parallelism {

@@ -1,0 +1,96 @@
+collections:
+- folderType: environment
+  fileFormatVersion: 1
+  tags:
+  - auth
+  tagColors: {}
+  configuration: {}
+  environments:
+  - variables:
+    - key: baseUrl
+      enabled: true
+      value:
+        type: string
+        value: http://localhost:5110
+      description: ''
+    - key: clientId
+      enabled: true
+      value:
+        type: string
+        value: VALID_CLIENT_ID
+      description: ''
+    - key: socketUrl
+      enabled: true
+      value:
+        type: string
+        value: http://localhost:3001
+      description: The Socket.IO server restorm hosts in-scenario (Echo Server)
+    id: 6c323ee6-0513-42a0-9d9a-68b329b405b4
+    name: localhost
+    subEnvironments:
+    - variables: []
+      id: env-1780300487228-md0ml0o
+      name: Sub-env
+      icon:
+        type: phosphor
+        value: ArrowFatLineDown
+      color: '#bd10e0'
+  id: a0000000-0000-0000-0000-00000000auth
+  name: Auth Service
+  customValueLists:
+  - id: b0cd9e29-a779-4b49-a092-8b033ffb1674
+    name: Pet Colors
+    entries:
+    - id: 96a8cf1a-17f7-4ea0-afda-f7a16b115dcd
+      label: Rouge
+      value: FF0000
+    - id: 963ded6d-aabc-4a14-b6ea-2e06dcd1b535
+      label: Vert
+      value: 00FF00
+    - id: 6d015220-3937-4878-9139-5193389a2f4f
+      label: Bleu
+      value: 0000FF
+  items:
+  - documentation: ''
+    tags: []
+    id: aa000000-0000-0000-0000-0000000qcsrq
+    name: qcs-req
+    method: GET
+    url: https://qcs.example.com/widgets
+    headers: []
+    params: []
+    pathParams: []
+    deprecated: false
+    type: http
+  - type: scenario
+    tags: []
+    params: {}
+    nodes:
+    - id: cc000000-0000-0000-0000-00000node01
+      kind: httpRequest
+      config:
+        requestId: aa000000-0000-0000-0000-0000000qcsrq
+        label: qcs-req
+        id: dd000000-0000-0000-0000-0000cfg0001
+      inputs:
+      - id: in
+        name: ''
+        dataType: any
+        flow: signal
+      - id: env
+        name: env
+        dataType: any
+        flow: value
+      outputs:
+      - id: response
+        name: response
+        dataType: response
+        role: response
+        flow: both
+      position:
+        x: 400
+        y: 200
+    edges: []
+    id: bb000000-0000-0000-0000-0000000qcssc
+    name: qcs-scn
+    items: []

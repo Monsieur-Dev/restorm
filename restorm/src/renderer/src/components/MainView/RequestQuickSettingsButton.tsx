@@ -30,6 +30,8 @@ import {
   extractSnapshotFields,
   findMatchingConfig,
   getAllConfigs,
+  getProjectConfigs,
+  getSettingsConfigs,
   saveProjectConfig,
   saveSettingsConfig
 } from '../../services/requestQuickConfigStore'
@@ -41,6 +43,11 @@ export interface RequestQuickSettingsButtonProps {
   request: Request
   /** Project UUID — scopes the user-settings backend key. */
   projectUuid: string | null | undefined
+  /** Live lookup of the scenarios whose actions reference a saved config by id,
+   * each entry path-qualified by the resolver. When provided, deleting a config
+   * that one or more scenarios use names them in the confirmation so the user
+   * knows what bindings they'll orphan. */
+  getScenariosUsingQuickConfig?: ((quickConfigId: string) => { scenario: { id: string; name: string } }[]) | undefined
 }
 
 // ============================================================================
@@ -127,7 +134,8 @@ const ConfigRow: React.FC<ConfigRowProps> = ({ config, onLoad, onDelete, project
 
 export const RequestQuickSettingsButton: React.FC<RequestQuickSettingsButtonProps> = ({
   request,
-  projectUuid
+  projectUuid,
+  getScenariosUsingQuickConfig
 }) => {
   const { t } = useTranslation()
   const anchorRef = useRef<HTMLSpanElement>(null)
@@ -209,14 +217,26 @@ export const RequestQuickSettingsButton: React.FC<RequestQuickSettingsButtonProp
     if (!trimmed) return
 
     if (storageTarget === 'settings' && projectUuid) {
+      // Transform (not duplicate): re-saving an existing name into user storage
+      // moves it there — drop any same-named file config so the two backends
+      // never hold parallel copies of one name.
+      const fileDup = getProjectConfigs(request).find((c) => c.name === trimmed)
+      if (fileDup) deleteProjectConfig(request, fileDup.id)
       saveSettingsConfig(projectUuid, request.id, trimmed, currentFields)
       // Settings saves don't emit REQUEST_UPDATED (no reactive proxy involved),
       // so manually bump tick to force allConfigs to re-read the updated cache.
       setTick((n) => n + 1)
     } else if (storageTarget === 'project') {
+      // Transform (not duplicate): re-saving an existing name into file storage
+      // moves it there — drop any same-named user config first.
+      if (projectUuid) {
+        const userDup = getSettingsConfigs(projectUuid, request.id).find((c) => c.name === trimmed)
+        if (userDup) deleteSettingsConfig(projectUuid, request.id, userDup.id)
+      }
       saveProjectConfig(request, trimmed, currentFields)
       // Project saves mutate the reactive proxy which emits REQUEST_UPDATED →
       // tick bumps automatically via the eventBus subscription above.
+      setTick((n) => n + 1)
     }
     // Update state to match what was actually saved so the input stays in sync.
     setConfigName(trimmed)
@@ -244,12 +264,24 @@ export const RequestQuickSettingsButton: React.FC<RequestQuickSettingsButtonProp
     })
   }, [t, request])
 
-  // Delete config: prompt confirmation first
+  // Delete config: prompt confirmation first. When the config is referenced by
+  // one or more scenario actions (by id), name those scenarios in the message
+  // so the user sees what bindings they'll orphan (the action keeps its static
+  // overrides + a "config missing" surface; nothing fails silently).
   const handleDeleteRequest = useCallback((config: QuickConfig): void => {
+    const usingScenarios = getScenariosUsingQuickConfig?.(config.id) ?? []
+    const uniqueNames = [...new Set(usingScenarios.map((u) => u.scenario.name))]
+    const baseMessage = t('quickSettings.deleteConfirm.message', { name: config.name })
+    const message = uniqueNames.length > 0
+      ? `${baseMessage} ${t('quickSettings.deleteConfirm.usedByScenarios', {
+        count: uniqueNames.length,
+        scenarios: uniqueNames.join(', ')
+      })}`
+      : baseMessage
     setConfirmModal({
       open: true,
       title: t('quickSettings.deleteConfirm.title'),
-      message: t('quickSettings.deleteConfirm.message', { name: config.name }),
+      message,
       onConfirm: () => {
         setConfirmModal(CONFIRM_MODAL_INITIAL)
         if (config.storageTarget === 'settings' && projectUuid) {
@@ -262,7 +294,7 @@ export const RequestQuickSettingsButton: React.FC<RequestQuickSettingsButtonProp
         }
       }
     })
-  }, [t, projectUuid, request])
+  }, [t, projectUuid, request, getScenariosUsingQuickConfig])
 
   const handleKeyDownOnName = useCallback((e: React.KeyboardEvent): void => {
     if (e.key === 'Enter') {
