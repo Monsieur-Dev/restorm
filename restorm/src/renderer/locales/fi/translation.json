@@ -1804,6 +1804,7 @@
     "readStream": "Lue virta",
     "refreshEnvironment": "Päivitä ympäristö",
     "renameEnvironment": "Nimeä ympäristö uudelleen",
+    "moveItem": "Siirrä kohde",
     "renameItem": "Nimeä kohde uudelleen",
     "revealInTree": "Näytä puussa",
     "runRequest": "Suorita pyyntö",

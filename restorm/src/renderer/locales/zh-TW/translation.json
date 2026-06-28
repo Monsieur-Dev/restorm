@@ -1803,6 +1803,7 @@
     "readStream": "讀取串流",
     "refreshEnvironment": "重新整理環境",
     "renameEnvironment": "重新命名環境",
+    "moveItem": "移動一個項目",
     "renameItem": "重新命名項目",
     "revealInTree": "在樹狀結構中顯示",
     "runRequest": "執行請求",

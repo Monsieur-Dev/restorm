@@ -1806,6 +1806,7 @@
     "readStream": "Odczytaj strumień",
     "refreshEnvironment": "Odśwież środowisko",
     "renameEnvironment": "Zmień nazwę środowiska",
+    "moveItem": "Przenieś element",
     "renameItem": "Zmień nazwę elementu",
     "revealInTree": "Pokaż w drzewie",
     "runRequest": "Uruchom żądanie",

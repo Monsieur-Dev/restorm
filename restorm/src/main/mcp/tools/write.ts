@@ -278,6 +278,42 @@ export function registerWriteTools(mcp: McpService): void {
   )
 
   mcp.registerTool(
+    'move_item',
+    {
+      titleKey: 'mcpToolTitles.moveItem',
+      title: 'Move a folder, request or scenario to a new parent or position',
+      description:
+        'Reparent and/or reorder an existing sidebar item (request, folder, env-folder or scenario). ' +
+        'With `newParentId`, the item moves under that container (folder, env-folder or scenario); omit ' +
+        'it to keep the current parent and only change the position. `index` is the 0-based slot among ' +
+        'the destination parent\'s children, interpreted AFTER the item leaves its current spot (so moving ' +
+        'an item earlier shifts the items at/after that slot one position later); omit it to append at the ' +
+        'end. Rules: the destination must be a container (a request cannot be a parent); an item cannot ' +
+        'move into itself or its own descendant; an env-folder may live anywhere EXCEPT inside another ' +
+        'env-folder or a scenario (at any depth). Returns `{ id, kind, parentId, index }`.',
+      inputSchema: {
+        itemId: z.string().min(1).describe('Id of the item to move (from list_folders / list_requests / list_scenarios).'),
+        newParentId: z.string().min(1).optional().describe('Destination container id. Omit to reorder within the current parent.'),
+        index: z.number().int().min(0).optional().describe('0-based position among the destination parent\'s children. Omit to append at the end.')
+      } as Record<string, unknown>
+    },
+    (args) => {
+      const argRecord = args
+      const itemId = typeof argRecord['itemId'] === 'string' ? argRecord['itemId'] : ''
+      if (!itemId) return errorReply('itemId is required')
+      const newParentIdRaw = argRecord['newParentId']
+      const newParentId = typeof newParentIdRaw === 'string' && newParentIdRaw.length > 0 ? newParentIdRaw : undefined
+      const indexRaw = argRecord['index']
+      const index = typeof indexRaw === 'number' ? indexRaw : undefined
+      const result = collectionStore.moveItem(itemId, newParentId, index)
+      if (!result.ok) return errorReply(result.error)
+      broadcastTreeReplace()
+      triggerSave()
+      return jsonReply({ id: itemId, kind: result.kind, parentId: result.parentId, index: result.index })
+    }
+  )
+
+  mcp.registerTool(
     'update_request',
     {
       titleKey: 'mcpToolTitles.updateRequest',

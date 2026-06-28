@@ -1804,6 +1804,7 @@
     "readStream": "Adatfolyam olvasása",
     "refreshEnvironment": "Környezet frissítése",
     "renameEnvironment": "Környezet átnevezése",
+    "moveItem": "Elem áthelyezése",
     "renameItem": "Elem átnevezése",
     "revealInTree": "Megjelenítés a fában",
     "runRequest": "Kérés futtatása",

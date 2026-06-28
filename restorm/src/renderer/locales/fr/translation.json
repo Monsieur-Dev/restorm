@@ -1804,6 +1804,7 @@
     "readStream": "Lire un flux",
     "refreshEnvironment": "Actualiser l'environnement",
     "renameEnvironment": "Renommer un environnement",
+    "moveItem": "Déplacer un élément",
     "renameItem": "Renommer un élément",
     "revealInTree": "Révéler dans l'arborescence",
     "runRequest": "Exécuter une requête",

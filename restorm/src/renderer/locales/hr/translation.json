@@ -1805,6 +1805,7 @@
     "readStream": "Čitaj tok",
     "refreshEnvironment": "Osvježi okruženje",
     "renameEnvironment": "Preimenuj okruženje",
+    "moveItem": "Premjesti stavku",
     "renameItem": "Preimenuj stavku",
     "revealInTree": "Prikaži u stablu",
     "runRequest": "Pokreni zahtjev",

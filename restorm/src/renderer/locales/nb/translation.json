@@ -1804,6 +1804,7 @@
     "readStream": "Les en strøm",
     "refreshEnvironment": "Oppdater miljøet",
     "renameEnvironment": "Gi nytt navn til et miljø",
+    "moveItem": "Flytt et element",
     "renameItem": "Gi nytt navn til et element",
     "revealInTree": "Vis i treet",
     "runRequest": "Kjør en forespørsel",

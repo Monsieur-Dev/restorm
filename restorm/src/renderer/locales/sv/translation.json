@@ -1804,6 +1804,7 @@
     "readStream": "Läs en ström",
     "refreshEnvironment": "Uppdatera miljön",
     "renameEnvironment": "Byt namn på en miljö",
+    "moveItem": "Flytta ett objekt",
     "renameItem": "Byt namn på ett objekt",
     "revealInTree": "Visa i trädet",
     "runRequest": "Kör en begäran",

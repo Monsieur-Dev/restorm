@@ -1804,6 +1804,7 @@
     "readStream": "Lexo një rrjedhë",
     "refreshEnvironment": "Rifresko mjedisin",
     "renameEnvironment": "Riemërto një mjedis",
+    "moveItem": "Zhvendos një element",
     "renameItem": "Riemërto një artikull",
     "revealInTree": "Shfaq në pemë",
     "runRequest": "Ekzekuto një kërkesë",

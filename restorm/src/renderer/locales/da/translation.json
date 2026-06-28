@@ -1804,6 +1804,7 @@
     "readStream": "Læs en strøm",
     "refreshEnvironment": "Opdater miljøet",
     "renameEnvironment": "Omdøb et miljø",
+    "moveItem": "Flyt et element",
     "renameItem": "Omdøb et element",
     "revealInTree": "Vis i træet",
     "runRequest": "Kør en anmodning",

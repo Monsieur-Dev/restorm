@@ -1805,6 +1805,7 @@
     "readStream": "Citește un flux",
     "refreshEnvironment": "Reîmprospătează mediul",
     "renameEnvironment": "Redenumește un mediu",
+    "moveItem": "Mută un element",
     "renameItem": "Redenumește un element",
     "revealInTree": "Afișează în arbore",
     "runRequest": "Execută o cerere",

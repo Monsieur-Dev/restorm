@@ -1804,6 +1804,7 @@
     "readStream": "Akışı oku",
     "refreshEnvironment": "Ortamı yenile",
     "renameEnvironment": "Ortamı yeniden adlandır",
+    "moveItem": "Bir öğeyi taşı",
     "renameItem": "Öğeyi yeniden adlandır",
     "revealInTree": "Ağaçta göster",
     "runRequest": "İstek çalıştır",

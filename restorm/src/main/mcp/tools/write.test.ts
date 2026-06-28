@@ -39,6 +39,7 @@ const updateEnvironmentSpy = vi.fn<(id: string, patch: Record<string, unknown>) 
 const updateFolderSpy = vi.fn<(id: string, patch: Record<string, unknown>) => unknown>()
 const createEnvironmentSpy = vi.fn<(parentId: string, data: { name: string }, parentEnvironmentId?: string) => { id: string; name: string }>()
 const deleteEnvironmentSpy = vi.fn<(id: string) => boolean>()
+const moveItemSpy = vi.fn<(id: string, newParentId: string | undefined, index: number | undefined) => unknown>()
 
 const broadcastSpy = vi.fn<() => void>()
 const getAllWindowsSpy = vi.fn<() => unknown[]>(() => [])
@@ -56,7 +57,8 @@ vi.mock('../../services/CollectionStore', () => ({
     updateEnvironment: (id: string, patch: Record<string, unknown>) => updateEnvironmentSpy(id, patch),
     updateFolder: (id: string, patch: Record<string, unknown>) => updateFolderSpy(id, patch),
     createEnvironment: (parentId: string, data: { name: string }, parentEnvironmentId?: string) => createEnvironmentSpy(parentId, data, parentEnvironmentId),
-    deleteEnvironment: (id: string) => deleteEnvironmentSpy(id)
+    deleteEnvironment: (id: string) => deleteEnvironmentSpy(id),
+    moveItem: (id: string, newParentId: string | undefined, index: number | undefined) => moveItemSpy(id, newParentId, index)
   }
 }))
 
@@ -162,6 +164,52 @@ describe('create_scenario MCP tool', () => {
     expect(scenario.name).toBe('New')
     // broadcastScenario (mocked onto broadcastSpy) repaints editor + sidebar.
     expect(broadcastSpy).toHaveBeenCalled()
+  })
+})
+
+describe('move_item MCP tool', () => {
+  let mcp: FakeMcpService
+
+  beforeEach(async () => {
+    moveItemSpy.mockReset()
+    broadcastSpy.mockReset()
+    getAllWindowsSpy.mockReset()
+    getAllWindowsSpy.mockImplementation(() => [])
+    mcp = new FakeMcpService()
+    const { registerWriteTools } = await import('./write')
+    registerWriteTools(mcp as unknown as McpService)
+  })
+
+  it('moves an item, returns the resolved position, and broadcasts + saves', () => {
+    moveItemSpy.mockReturnValue({ ok: true, kind: 'scenario', parentId: 'main', index: 2 })
+    const res = mcp.invoke('move_item', { itemId: 'demo', newParentId: 'main', index: 2 })
+    expect(res.isError).toBeUndefined()
+    expect(parse(res)).toEqual({ id: 'demo', kind: 'scenario', parentId: 'main', index: 2 })
+    expect(moveItemSpy).toHaveBeenCalledWith('demo', 'main', 2)
+    expect(broadcastSpy).toHaveBeenCalledTimes(1)
+    expect(getAllWindowsSpy).toHaveBeenCalled()
+  })
+
+  it('reorder-only: omitting newParentId passes undefined through and reports parentId null', () => {
+    moveItemSpy.mockReturnValue({ ok: true, kind: 'env-folder', parentId: null, index: 0 })
+    const res = mcp.invoke('move_item', { itemId: 'envB', index: 0 })
+    expect(res.isError).toBeUndefined()
+    expect(parse(res)).toEqual({ id: 'envB', kind: 'env-folder', parentId: null, index: 0 })
+    expect(moveItemSpy).toHaveBeenCalledWith('envB', undefined, 0)
+  })
+
+  it('maps a store rejection to an MCP error and does NOT broadcast or save', () => {
+    moveItemSpy.mockReturnValue({ ok: false, error: 'newParentId req-1 is not a container (folder, env-folder or scenario)' })
+    const res = mcp.invoke('move_item', { itemId: 'mover', newParentId: 'req-1', index: 0 })
+    expect(res.isError).toBe(true)
+    expect(res.content[0]?.text).toContain('not a container')
+    expect(broadcastSpy).not.toHaveBeenCalled()
+  })
+
+  it('rejects a missing itemId before touching the store', () => {
+    const res = mcp.invoke('move_item', { itemId: '' })
+    expect(res.isError).toBe(true)
+    expect(moveItemSpy).not.toHaveBeenCalled()
   })
 })
 
