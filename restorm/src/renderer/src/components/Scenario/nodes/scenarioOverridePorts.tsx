@@ -62,17 +62,21 @@ interface FieldContext {
  * quick-config value applies). `baseValue` is shown as the row's right-column
  * hint so the inherited value stays visible. */
 /** Per-field value-type policy. Defaults preserve the original behaviour (every
- * kind except `expression`, env values allowed). A URL field overrides this to
- * the only kinds that make sense in an endpoint — a string, a variable, or an
- * expression — so the picker never offers a colour / number / list for a URL. */
+ * kind except `expression`, env values allowed). A free-text field (URL,
+ * GraphQL query/variables, gRPC service/method/requestMessage, MQTT topic)
+ * overrides this to the only kinds that make sense — a string, a variable, or
+ * an expression — so the picker never offers a colour / number / list there. */
 interface ScalarFieldPolicy {
   excludeTypes?: ValueTypeKind[]
   allowEnvironment?: boolean
 }
 
-/** Every value kind EXCEPT the three that are coherent for a URL
- * (string / variable / expression). Keep in sync with `ValueTypeKind`. */
-const URL_EXCLUDE_TYPES: ValueTypeKind[] = [
+/** Every value kind EXCEPT the three that are coherent for a free-text field —
+ * a URL, a GraphQL document/variables, a gRPC service/method/message, an MQTT
+ * topic: string / variable / expression. A colour / number / boolean / list
+ * makes no sense for these, so they're excluded. Keep in sync with
+ * `ValueTypeKind`. */
+const TEXT_EXCLUDE_TYPES: ValueTypeKind[] = [
   'secret', 'number', 'dateTime', 'color', 'boolean',
   'enum', 'enumList', 'customList', 'customListMulti', 'environment', 'null', 'list'
 ]
@@ -102,10 +106,11 @@ function scalarRow(portId: string, label: string, baseValue: string | undefined,
   }
 }
 
-/** The value-type policy for a URL override field: only string / variable /
- * expression are coherent endpoints, env values are folded into the `variable`
- * picker, so environment is not offered separately. */
-const URL_FIELD_POLICY: ScalarFieldPolicy = { excludeTypes: URL_EXCLUDE_TYPES, allowEnvironment: false }
+/** The value-type policy for a free-text override field (URL, GraphQL
+ * query/variables, gRPC service/method/requestMessage, MQTT topic): only
+ * string / variable / expression are coherent, env values are folded into the
+ * `variable` picker, so environment is not offered separately. */
+const TEXT_FIELD_POLICY: ScalarFieldPolicy = { excludeTypes: TEXT_EXCLUDE_TYPES, allowEnvironment: false }
 
 /** Verb options for the method select; index 0 = "inherit" (no override). */
 const METHOD_VERBS = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS']
@@ -249,7 +254,7 @@ export function buildHttpOverrideSections(
     id: 'override-core',
     name: labels.overridesLabel,
     rows: [
-      scalarRow('url', labels.url, request.url, ctx, URL_FIELD_POLICY),
+      scalarRow('url', labels.url, request.url, ctx, TEXT_FIELD_POLICY),
       methodRow(request.method, ctx, labels.inherit, labels.method)
     ]
   })
@@ -289,9 +294,9 @@ export function buildGraphqlOverrideSections(
       id: 'override-core',
       name: labels.overridesLabel,
       rows: [
-        scalarRow('url', labels.url, request.url, ctx, URL_FIELD_POLICY),
-        scalarRow('query', labels.query, undefined, ctx),
-        scalarRow('variables', labels.variables, undefined, ctx)
+        scalarRow('url', labels.url, request.url, ctx, TEXT_FIELD_POLICY),
+        scalarRow('query', labels.query, undefined, ctx, TEXT_FIELD_POLICY),
+        scalarRow('variables', labels.variables, undefined, ctx, TEXT_FIELD_POLICY)
       ]
     }
   ]
@@ -323,10 +328,10 @@ export function buildGrpcOverrideSections(
       id: 'override-core',
       name: labels.overridesLabel,
       rows: [
-        scalarRow('url', labels.url, request.url, ctx, URL_FIELD_POLICY),
-        scalarRow('service', labels.service, request.service, ctx),
-        scalarRow('method', labels.grpcMethod, request.method, ctx),
-        scalarRow('requestMessage', labels.requestMessage, undefined, ctx)
+        scalarRow('url', labels.url, request.url, ctx, TEXT_FIELD_POLICY),
+        scalarRow('service', labels.service, request.service, ctx, TEXT_FIELD_POLICY),
+        scalarRow('method', labels.grpcMethod, request.method, ctx, TEXT_FIELD_POLICY),
+        scalarRow('requestMessage', labels.requestMessage, undefined, ctx, TEXT_FIELD_POLICY)
       ]
     }
   ]
@@ -350,10 +355,10 @@ export function buildStreamingOverrideSections(
       id: 'override-core',
       name: labels.overridesLabel,
       rows: [
-        scalarRow('url', labels.url, request.url, ctx, URL_FIELD_POLICY),
+        scalarRow('url', labels.url, request.url, ctx, TEXT_FIELD_POLICY),
         // Protocol-specific connection fields (e.g. the MQTT topic) sit under
         // the endpoint url, each a wireable override port like the rest.
-        ...(extraScalars ?? []).map((f) => scalarRow(f.portId, f.label, f.baseValue, ctx))
+        ...(extraScalars ?? []).map((f) => scalarRow(f.portId, f.label, f.baseValue, ctx, TEXT_FIELD_POLICY))
       ]
     }
   ]
