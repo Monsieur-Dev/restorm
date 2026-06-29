@@ -93,6 +93,7 @@ import { graphQLService } from 'electron-core-ui/main'
 import { clearUserSettings, parseCliArgs } from './cli/args'
 import { setupGraphQL } from './GraphQLSetup'
 import { registerRestormIPC } from './IPCHandlers'
+import { initEntitlementService } from './services/auth/authComposition'
 import { installScenarioEngineIPC } from './scenarioEngine/ipcBridge'
 import { registerBuiltinSources } from './services/secrets/mainSourceRegistry'
 import { secretHydrationService } from './services/secrets/SecretHydrationService'
@@ -584,6 +585,14 @@ void app.whenReady().then(() => {
     fileService: getFileService()
   })
   logger.info('AutoSave controller initialized')
+})
+
+// Auth + entitlement: the reactive capability source of truth
+// (login loopback, offline entitlement cache, IPC). Built after `whenReady` so
+// `app.getPath('userData')` (the encrypted token cache) and `safeStorage` are
+// resolvable. Registers its own IPC and restores a cached session internally.
+void app.whenReady().then(() => {
+  initEntitlementService()
 })
 
 // Embedded MCP server. On by default — every normal launch exposes the

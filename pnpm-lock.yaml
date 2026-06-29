@@ -434,6 +434,9 @@ importers:
       i18next:
         specifier: ^26.2.0
         version: 26.2.0(typescript@6.0.3)
+      jose:
+        specifier: ^6.2.3
+        version: 6.2.3
       lodash:
         specifier: ^4.18.1
         version: 4.18.1

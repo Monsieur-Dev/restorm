@@ -2,6 +2,7 @@ import type { ThemeInfo, ThemeDefinition, ThemeVariables } from 'electron-core-u
 import type { SettingValue, ResolvedSetting, SettingsGroup } from 'electron-core-ui/types'
 import type { PersistenceFormat } from 'electron-core-ui/main'
 import type { ResponseHistoryDetail, ResponseHistoryEntry } from '../../../shared/types/collections'
+import type { AuthState } from '../../../shared/auth/authState'
 
 declare global {
   interface Window {
@@ -255,6 +256,14 @@ declare global {
         }>
         onRunning: (callback: (payload: { authRequestId: string; phase: 'started' | 'succeeded' | 'failed'; reason?: string }) => void) => (() => void)
         onFailed: (callback: (payload: { authRequestId: string; reason?: string }) => void) => (() => void)
+      }
+      /** Account / login. Distinct from `auth` above (HTTP request
+       * authentication) — this is the user's cloud session + entitlement. */
+      account: {
+        login: () => Promise<AuthState>
+        logout: () => Promise<AuthState>
+        getState: () => Promise<AuthState>
+        onStateChanged: (callback: (state: AuthState) => void) => (() => void)
       }
       import: {
         preview: (input: string, options?: { extraHeaders?: Record<string, string> }) => Promise<{
