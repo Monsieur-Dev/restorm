@@ -31,6 +31,11 @@ fi
 echo "✅ No forbidden patterns found"
 echo ""
 
+# i18n guard: missing-from-en keys + false-tick translations
+echo "🌍 Running i18n guard..."
+node scripts/check-i18n.mjs || exit 1
+echo ""
+
 # electron-core-ui
 echo "📦 electron-core-ui: depcheck"
 cd electron-core-ui && npx depcheck || exit 1
