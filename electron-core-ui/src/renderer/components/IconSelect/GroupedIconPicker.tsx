@@ -1,5 +1,7 @@
 import React, { useState, useMemo, useCallback, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
+import { Button } from '../Button'
+import { InputBox } from '../InputBox'
 import { ScrollableElement } from '../ScrollableElement'
 import { Tooltip } from '../Tooltip'
 import type { IconCategory } from './iconCategories'
@@ -90,19 +92,17 @@ export const GroupedIconPicker: React.FC<GroupedIconPickerProps> = ({
         {categories.map(cat => {
           const label = getCategoryName(cat.id, cat.name)
           return (
-            <button
+            <Button
               key={cat.id}
-              type="button"
               className={`ecui-grouped-icon-category ${activeCategory === cat.id ? 'active' : ''}`}
+              options={{ ariaLabel: label }}
               onClick={() => { handleCategoryClick(cat.id) }}
-              aria-label={label}
               onMouseEnter={(e) => { tooltipTargetRef.current = e.currentTarget; setHoveredTooltip(label) }}
               onMouseLeave={() => { setHoveredTooltip(null) }}
               {...(dataTestIdBase ? { 'data-testid': `${dataTestIdBase}-category-${cat.id}` } : {})}
-              data-category-id={cat.id}
             >
               <i className={`codicon codicon-${cat.icon}`} />
-            </button>
+            </Button>
           )
         })}
       </div>
@@ -110,23 +110,22 @@ export const GroupedIconPicker: React.FC<GroupedIconPickerProps> = ({
       {/* Search input */}
       <div className="ecui-icon-select-search">
         <i className="codicon codicon-search" />
-        <input
-          type="text"
+        <InputBox
+          options={{ placeholder: searchPlaceholder }}
           value={searchTerm}
-          onChange={(e) => { setSearchTerm(e.target.value) }}
-          placeholder={searchPlaceholder}
+          onChange={(value) => { setSearchTerm(value) }}
+          changeDebounceMs={0}
           className="ecui-icon-select-search-input"
           {...(dataTestIdBase ? { 'data-testid': `${dataTestIdBase}-search-input` } : {})}
         />
         {searchTerm && (
-          <button
-            type="button"
+          <Button
+            line
+            icon="close"
             className="ecui-icon-select-search-clear"
             onClick={handleClearSearch}
             {...(dataTestIdBase ? { 'data-testid': `${dataTestIdBase}-search-clear` } : {})}
-          >
-            <i className="codicon codicon-close" />
-          </button>
+          />
         )}
       </div>
 

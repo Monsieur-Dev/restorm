@@ -8,8 +8,10 @@ import {
   Button,
   InputBox,
   KeyValueTable,
+  Tabs,
   Wordmark,
   getContrastColor,
+  type Tab,
   type KeyValueTableHandle,
   type KeyValueTableRow
 } from 'electron-core-ui/renderer'
@@ -868,26 +870,16 @@ export function ImportModal({
                 alignSelf: 'flex-start'
               }}
             >
-              <button
-                type="button"
-                onClick={() => { setShowAuthSetupModal(true) }}
-                aria-label={t('import.editAuth', 'Edit authentication route')}
+              <Button
+                line
+                options={{ ariaLabel: t('import.editAuth', 'Edit authentication route') }}
                 data-testid="import-edit-auth-button"
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: 6,
-                  border: 'none',
-                  background: 'transparent',
-                  color: 'inherit',
-                  padding: 0,
-                  cursor: 'pointer',
-                  font: 'inherit'
-                }}
+                onClick={() => { setShowAuthSetupModal(true) }}
+                style={{ color: 'inherit', background: 'transparent', padding: 0 }}
               >
                 <i className="codicon codicon-key" aria-hidden="true" />
                 <span>{t('import.authenticatedVia', 'Authenticated via {{name}}', { name: attachedAuth.name || 'auth route' })}</span>
-              </button>
+              </Button>
               <Button
                 small
                 icon="close"
@@ -1113,111 +1105,95 @@ const ImportPreviewTabs: React.FC<ImportPreviewTabsProps> = ({
     return undefined
   }, [previewItems])
 
-  // Mounted inline rather than via ECUI `<Tabs>` so the inactive
-  // panel is *fully unmounted* instead of hidden via `visibility:
-  // hidden`. The hidden-pane strategy from Tabs cascaded into the
-  // active panel's bounding box in some refresh-modal renders,
-  // making the routes tree look unrenderable to the e2e visibility
-  // assertion even though the data was there.
-  return (
-    <div
-      className="import-preview-tabs-root"
-      data-testid="import-preview-tabs"
-      data-active-tab-id={activeTab}
-    >
-      <div className="import-preview-tab-bar" role="tablist">
-        <button
-          type="button"
-          role="tab"
-          aria-selected={activeTab === 'routes'}
-          className={`import-preview-tab-button${activeTab === 'routes' ? ' is-active' : ''}`}
-          data-testid="import-preview-tabs-tab-routes"
-          onClick={() => { setActiveTab('routes') }}
+  const previewTabs: Tab[] = [
+    {
+      id: 'routes',
+      label: t('import.tabs.routes', 'Routes'),
+      useScrollableElement: false,
+      content: (
+        <div
+          className="import-preview-routes-tab"
+          data-testid="import-preview-tabs-tabpanel-routes"
         >
-          {t('import.tabs.routes', 'Routes')}
-        </button>
-        <button
-          type="button"
-          role="tab"
-          aria-selected={activeTab === 'documentation'}
-          className={`import-preview-tab-button${activeTab === 'documentation' ? ' is-active' : ''}`}
-          data-testid="import-preview-tabs-tab-documentation"
-          onClick={() => { setActiveTab('documentation') }}
+          <div className="import-preview-header">
+            <div className="import-preview-actions">
+              <Button
+                secondary
+                onClick={() => { onSelectionChange(allLeafKeys(previewItems)) }}
+                data-testid="import-select-all-button"
+              >
+                {t('import.selectAll', 'Select all')}
+              </Button>
+              <Button
+                secondary
+                onClick={() => {
+                  // Locked leaves stay checked even on "Select none"
+                  // — opting them out would silently drop a route the
+                  // target folder already exposes.
+                  onSelectionChange(new Set(lockedKeys))
+                }}
+                data-testid="import-select-none-button"
+              >
+                {t('import.selectNone', 'Select none')}
+              </Button>
+            </div>
+          </div>
+          <div className="import-preview-search">
+            <InputBox
+              value={searchFilter}
+              onChange={onSearchFilterChange}
+              options={{ placeholder: t('import.searchPlaceholder', 'Filter routes / folders…') }}
+              data-testid="import-selection-search"
+            />
+          </div>
+          <div className="import-preview">
+            <ImportSelectionTree
+              items={previewItems}
+              selection={selection}
+              onSelectionChange={onSelectionChange}
+              searchFilter={searchFilter}
+              lockedKeys={lockedKeys}
+              data-testid="import-selection-tree"
+            />
+          </div>
+        </div>
+      )
+    },
+    {
+      id: 'documentation',
+      label: t('import.tabs.documentation', 'Documentation'),
+      useScrollableElement: false,
+      content: (
+        <div
+          className="import-preview-doc-tab"
+          data-testid="import-preview-tabs-tabpanel-documentation"
         >
-          {t('import.tabs.documentation', 'Documentation')}
-        </button>
-      </div>
-      <div className="import-preview-tab-panel">
-        {activeTab === 'routes' && (
-          <div
-            className="import-preview-routes-tab"
-            data-testid="import-preview-tabs-tabpanel-routes"
-          >
-            <div className="import-preview-header">
-              <div className="import-preview-actions">
-                <Button
-                  secondary
-                  onClick={() => { onSelectionChange(allLeafKeys(previewItems)) }}
-                  data-testid="import-select-all-button"
-                >
-                  {t('import.selectAll', 'Select all')}
-                </Button>
-                <Button
-                  secondary
-                  onClick={() => {
-                    // Locked leaves stay checked even on "Select none"
-                    // — opting them out would silently drop a route the
-                    // target folder already exposes.
-                    onSelectionChange(new Set(lockedKeys))
-                  }}
-                  data-testid="import-select-none-button"
-                >
-                  {t('import.selectNone', 'Select none')}
-                </Button>
+          {apiDocumentation
+            ? (
+              <DocumentationHost
+                apiDocumentation={apiDocumentation}
+                showApiInfo
+                hideAddRequest
+                testId="import-preview-documentation"
+              />
+              )
+            : (
+              <div className="import-preview-doc-empty" data-testid="import-preview-documentation-empty">
+                {t('import.preview.noDocumentation', 'No parsed documentation for this source.')}
               </div>
-            </div>
-            <div className="import-preview-search">
-              <InputBox
-                value={searchFilter}
-                onChange={onSearchFilterChange}
-                options={{ placeholder: t('import.searchPlaceholder', 'Filter routes / folders…') }}
-                data-testid="import-selection-search"
-              />
-            </div>
-            <div className="import-preview">
-              <ImportSelectionTree
-                items={previewItems}
-                selection={selection}
-                onSelectionChange={onSelectionChange}
-                searchFilter={searchFilter}
-                lockedKeys={lockedKeys}
-                data-testid="import-selection-tree"
-              />
-            </div>
-          </div>
-        )}
-        {activeTab === 'documentation' && (
-          <div
-            className="import-preview-doc-tab"
-            data-testid="import-preview-tabs-tabpanel-documentation"
-          >
-            {apiDocumentation
-              ? (
-                <DocumentationHost
-                  apiDocumentation={apiDocumentation}
-                  showApiInfo
-                  hideAddRequest
-                  testId="import-preview-documentation"
-                />
-                )
-              : (
-                <div className="import-preview-doc-empty" data-testid="import-preview-documentation-empty">
-                  {t('import.preview.noDocumentation', 'No parsed documentation for this source.')}
-                </div>
-                )}
-          </div>
-        )}
-      </div>
-    </div>
+              )}
+        </div>
+      )
+    }
+  ]
+
+  return (
+    <Tabs
+      tabs={previewTabs}
+      activeTabId={activeTab}
+      onTabChange={(id) => { setActiveTab(id as ImportPreviewTabId) }}
+      mountStrategy="active-only"
+      data-testid="import-preview-tabs"
+    />
   )
 }

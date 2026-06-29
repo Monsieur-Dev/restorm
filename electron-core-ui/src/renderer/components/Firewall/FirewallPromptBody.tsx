@@ -1,3 +1,4 @@
+import { Button } from '../Button'
 import type { FirewallPromptPayload } from '../../../types/firewall'
 import './firewallPromptToast.css'
 
@@ -29,21 +30,19 @@ export function FirewallPromptBody({ payload, resolve }: FirewallPromptBodyProps
 				)}
 			</div>
 			<div className="firewall-prompt-toast__actions">
-				<button
-					type="button"
-					data-testid="firewall-prompt-allow"
+				<Button
 					className="firewall-prompt-toast__primary"
+					data-testid="firewall-prompt-allow"
 					onClick={() => { resolve('allow') }}
 				>
 					Allow
-				</button>
-				<button
-					type="button"
+				</Button>
+				<Button
 					data-testid="firewall-prompt-deny"
 					onClick={() => { resolve('deny') }}
 				>
 					Deny
-				</button>
+				</Button>
 			</div>
 		</div>
 	)

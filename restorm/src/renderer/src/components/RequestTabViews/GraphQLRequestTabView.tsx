@@ -749,11 +749,9 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
             }
             return (
               <div className="gql-sub-event" key={i} data-testid="graphql-subscription-event">
-                <button
-                  type="button"
+                <Button
                   className="gql-sub-event-header"
                   onClick={() => { toggleEventExpanded(i) }}
-                  aria-expanded={expanded}
                   data-testid="graphql-subscription-event-header"
                 >
                   <span className={`codicon codicon-chevron-${expanded ? 'down' : 'right'}`} aria-hidden="true" />
@@ -761,7 +759,7 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
                     {t('graphql.subscription.eventLabel', { index: i + 1, defaultValue: 'Event {{index}}' })}
                   </span>
                   <span className="gql-sub-event-time">{new Date(event.timestamp).toLocaleTimeString()}</span>
-                </button>
+                </Button>
                 {expanded && (
                   <pre className="gql-sub-event-body" data-testid="graphql-subscription-event-body">{pretty}</pre>
                 )}

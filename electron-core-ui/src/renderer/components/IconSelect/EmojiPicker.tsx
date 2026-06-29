@@ -1,5 +1,7 @@
 import React, { useState, useMemo, useCallback, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
+import { Button } from '../Button'
+import { InputBox } from '../InputBox'
 import { ScrollableElement } from '../ScrollableElement'
 import { Tooltip } from '../Tooltip'
 import { EMOJI_CATEGORIES, type EmojiCategory } from './emojiData'
@@ -59,8 +61,8 @@ export const EmojiPicker: React.FC<EmojiPickerProps> = ({ onEmojiSelect, dataTes
     element?.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }, [])
 
-  const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(e.target.value)
+  const handleSearchChange = useCallback((value: string) => {
+    setSearchQuery(value)
   }, [])
 
   const handleClearSearch = useCallback(() => {
@@ -81,19 +83,17 @@ export const EmojiPicker: React.FC<EmojiPickerProps> = ({ onEmojiSelect, dataTes
         {EMOJI_CATEGORIES.map(category => {
           const label = getCategoryName(category.id, category.name)
           return (
-            <button
+            <Button
               key={category.id}
-              type="button"
               className={`ecui-emoji-picker-category ${activeCategory === category.id ? 'active' : ''}`}
+              options={{ ariaLabel: label }}
               onClick={() => { handleCategoryClick(category.id) }}
-              aria-label={label}
               onMouseEnter={(e) => { tooltipTargetRef.current = e.currentTarget; setHoveredTooltip(label) }}
               onMouseLeave={() => { setHoveredTooltip(null) }}
               {...(dataTestIdBase ? { 'data-testid': `${dataTestIdBase}-category-${category.id}` } : {})}
-              data-category-id={category.id}
             >
               {category.icon}
-            </button>
+            </Button>
           )
         })}
       </div>
@@ -101,23 +101,22 @@ export const EmojiPicker: React.FC<EmojiPickerProps> = ({ onEmojiSelect, dataTes
       {/* Search input */}
       <div className="ecui-emoji-picker-search">
         <i className="codicon codicon-search" />
-        <input
-          type="text"
+        <InputBox
+          options={{ placeholder: t('iconSelect.searchEmojis') }}
           value={searchQuery}
           onChange={handleSearchChange}
-          placeholder={t('iconSelect.searchEmojis')}
+          changeDebounceMs={0}
           className="ecui-emoji-picker-search-input"
           {...(dataTestIdBase ? { 'data-testid': `${dataTestIdBase}-search-input` } : {})}
         />
         {searchQuery && (
-          <button
-            type="button"
+          <Button
+            line
+            icon="close"
             className="ecui-emoji-picker-search-clear"
             onClick={handleClearSearch}
             {...(dataTestIdBase ? { 'data-testid': `${dataTestIdBase}-search-clear` } : {})}
-          >
-            <i className="codicon codicon-close" />
-          </button>
+          />
         )}
       </div>
 

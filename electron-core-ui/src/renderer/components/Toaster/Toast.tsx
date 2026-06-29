@@ -6,6 +6,7 @@ import React, {
   useRef,
   useState
 } from 'react'
+import { Button } from '../Button'
 import { ToasterInteractionContext } from './ToasterInteractionContext'
 import type { Toast as ToastData } from './types'
 
@@ -163,15 +164,14 @@ export const Toast: React.FC<ToastProps> = React.memo(({
     >
       <div className="toast-header">
         <span className="toast-title">{toast.titleNode ?? toast.title}</span>
-        <button
-          type="button"
+        <Button
+          line
+          icon="close"
           className="toast-close"
-          aria-label="Dismiss notification"
+          options={{ ariaLabel: 'Dismiss notification' }}
           onClick={() => { onRequestDismiss(toast.id) }}
           {...(cellTestId && { 'data-testid': `${cellTestId}-close` })}
-        >
-          <span className="codicon codicon-close" />
-        </button>
+        />
       </div>
       <div className="toast-body">
         {toast.body}

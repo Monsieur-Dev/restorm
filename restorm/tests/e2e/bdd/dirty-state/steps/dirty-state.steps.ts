@@ -121,7 +121,7 @@ When('I import the Petstore sample', async () => {
   await p.waitForTimeout(500)
   const activeTab = p.locator('.tab[role="tab"][aria-selected="true"]').first()
   if (await activeTab.count() > 0 && await activeTab.isVisible()) {
-    const closeBtn = activeTab.locator('button[aria-label="Close"]').first()
+    const closeBtn = activeTab.locator('[aria-label="Close"]').first()
     if (await closeBtn.count() > 0) await closeBtn.click()
   }
   // The auto-save-on-import effect fires on the next commit. Wait for

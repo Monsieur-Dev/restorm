@@ -35,39 +35,35 @@ export const ConsoleToolbar: React.FC<ConsoleToolbarProps> = ({
       }}
     >
       <div
-        role="group"
+        role="radiogroup"
         aria-label="Shell flavor"
         style={{ display: 'inline-flex', borderRadius: 4, overflow: 'hidden', border: '1px solid var(--button-background, #2c4156)' }}
       >
-        <button
-          type="button"
+        <Button
+          role="radio"
+          aria-checked={!isPS}
           data-testid="console-toolbar-shell-curl"
-          aria-pressed={!isPS}
           onClick={() => { onShellChange('curl') }}
           style={{
             padding: '2px 10px',
             background: !isPS ? 'var(--button-background, #2c4156)' : 'transparent',
             color: !isPS ? 'var(--button-foreground, #fff)' : 'var(--editor-foreground)',
-            border: 'none',
-            cursor: 'pointer',
             fontSize: 12
           }}
-        >curl</button>
-        <button
-          type="button"
+        >curl</Button>
+        <Button
+          role="radio"
+          aria-checked={isPS}
           data-testid="console-toolbar-shell-powershell"
-          aria-pressed={isPS}
           onClick={() => { onShellChange('powershell') }}
           style={{
             padding: '2px 10px',
             background: isPS ? 'var(--button-background, #2c4156)' : 'transparent',
             color: isPS ? 'var(--button-foreground, #fff)' : 'var(--editor-foreground)',
-            border: 'none',
             borderLeft: '1px solid var(--button-background, #2c4156)',
-            cursor: 'pointer',
             fontSize: 12
           }}
-        >powershell</button>
+        >powershell</Button>
       </div>
       <div style={{ flex: 1 }} />
       <Button

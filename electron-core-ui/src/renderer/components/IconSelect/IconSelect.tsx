@@ -8,6 +8,7 @@ import { ScrollableElement } from '../ScrollableElement'
 import type { Icon, IconType } from '../../../types/icon'
 import { IconView } from '../IconView'
 import { Button } from '../Button'
+import { InputBox } from '../InputBox'
 import { Tooltip } from '../Tooltip'
 import { useOverlayPresence } from '../../hooks/useOverlayPresence'
 import {
@@ -114,28 +115,36 @@ const SearchInput: React.FC<{
   placeholder: string
   inputTestId?: string
   clearTestId?: string
-}> = ({ value, onChange, placeholder, inputTestId, clearTestId }) => (
-  <div className="ecui-icon-select-search">
-    <i className="codicon codicon-search" />
-    <input
-      type="text"
-      value={value}
-      onChange={(e) => { onChange(e.target.value) }}
-      placeholder={placeholder}
-      className="ecui-icon-select-search-input"
-      {...(inputTestId ? { 'data-testid': inputTestId } : {})}
-      autoFocus
-    />
-    {value && (
-      <Button
-        line
-        icon="close"
-        onClick={() => { onChange('') }}
-        {...(clearTestId ? { 'data-testid': clearTestId } : {})}
+}> = ({ value, onChange, placeholder, inputTestId, clearTestId }) => {
+  const inputRef = useRef<HTMLInputElement | null>(null)
+  // Restore the autoFocus behaviour that the native <input autoFocus> provided:
+  // focus the field when the picker mounts so the user can type immediately.
+  useEffect(() => {
+    inputRef.current?.focus()
+  }, [])
+  return (
+    <div className="ecui-icon-select-search">
+      <i className="codicon codicon-search" />
+      <InputBox
+        options={{ placeholder }}
+        value={value}
+        onChange={onChange}
+        changeDebounceMs={0}
+        className="ecui-icon-select-search-input"
+        inputRef={inputRef}
+        {...(inputTestId ? { 'data-testid': inputTestId } : {})}
       />
-    )}
-  </div>
-)
+      {value && (
+        <Button
+          line
+          icon="close"
+          onClick={() => { onChange('') }}
+          {...(clearTestId ? { 'data-testid': clearTestId } : {})}
+        />
+      )}
+    </div>
+  )
+}
 
 /**
  * Generic icon grid component

@@ -1,4 +1,5 @@
 import React from 'react'
+import { Button } from 'electron-core-ui/renderer'
 import { useDocumentationNavigation } from './documentationNavigation'
 
 export interface ModelRefLinkProps {
@@ -28,22 +29,22 @@ export const ModelRefLink: React.FC<ModelRefLinkProps> = ({
   className
 }) => {
   const nav = useDocumentationNavigation()
-  const handleClick = (e: React.MouseEvent<HTMLButtonElement>): void => {
+  const handleClick = (e: React.MouseEvent<HTMLAnchorElement>): void => {
     e.preventDefault()
     e.stopPropagation()
     nav?.scrollToModel(modelName)
   }
   return (
-    <button
-      type="button"
+    <Button
+      link
       className={className !== undefined && className.length > 0
         ? `documentation-host-model-ref ${className}`
         : 'documentation-host-model-ref'}
       onClick={handleClick}
       data-testid={`documentation-host-model-ref-${modelName}`}
-      aria-label={`Jump to model ${modelName}`}
+      options={{ ariaLabel: `Jump to model ${modelName}` }}
     >
       {children ?? modelName}
-    </button>
+    </Button>
   )
 }

@@ -1,4 +1,5 @@
 import React, { forwardRef, useState } from 'react'
+import { Button } from 'electron-core-ui/renderer'
 import type { EnumGroup } from './enumGroups'
 
 export interface EnumsSectionProps {
@@ -101,15 +102,15 @@ const EnumValues: React.FC<{ values: string[] }> = ({ values }) => {
         </code>
       ))}
       {truncated && (
-        <button
-          type="button"
+        <Button
+          link
           className="documentation-host-enums__see-more"
-          onClick={(): void => { setExpanded(!expanded) }}
+          onClick={() => { setExpanded(!expanded) }}
         >
           {expanded
             ? 'see less'
             : `see more (${String(values.length - SEE_MORE_THRESHOLD)} more)`}
-        </button>
+        </Button>
       )}
     </>
   )

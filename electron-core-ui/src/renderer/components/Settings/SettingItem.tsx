@@ -1,5 +1,6 @@
 import React, { useState, useCallback, useRef, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
+import { Button } from '../Button'
 import { ContextMenu } from '../ContextMenu/ContextMenu'
 import type { ContextMenuItem } from '../ContextMenu/ContextMenu'
 import { ToggleRenderer } from './renderers/ToggleRenderer'
@@ -115,14 +116,14 @@ export const SettingItem: React.FC<SettingItemProps> = ({
       data-testid={`setting-item-${setting.storageKey}`}
     >
       {isFocused && (
-        <button
+        <Button
+          line
+          icon="gear"
           className="setting-item-gear"
-          onClick={handleGearClick}
-          aria-label={t('settings.settingOptions', 'Setting options')}
+          options={{ ariaLabel: t('settings.settingOptions', 'Setting options') }}
           data-testid={`setting-gear-${setting.storageKey}`}
-        >
-          <span className="codicon codicon-gear" />
-        </button>
+          onClick={handleGearClick}
+        />
       )}
       <div className="setting-item-header">
         <span className="setting-item-title">

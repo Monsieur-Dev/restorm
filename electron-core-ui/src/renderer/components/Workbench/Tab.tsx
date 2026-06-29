@@ -1,5 +1,6 @@
 import React, { useRef, useState } from 'react';
 import type { EditorTab, EditorWorkbenchCallbacks } from './types';
+import { Button } from '../Button';
 import { Tooltip } from '../Tooltip';
 
 export interface TabProps extends Pick<EditorWorkbenchCallbacks, 'renderTabTitle'> {
@@ -40,7 +41,7 @@ export const Tab: React.FC<TabProps> = ({
 }) => {
 	// Use renderTabTitle if provided, otherwise use tab.title directly
 	const titleContent = renderTabTitle ? renderTabTitle(tab) : tab.title;
-	const closeRef = useRef<HTMLButtonElement>(null);
+	const closeRef = useRef<HTMLSpanElement>(null);
 	const [showCloseTooltip, setShowCloseTooltip] = useState(false);
 
 	return (
@@ -82,19 +83,24 @@ export const Tab: React.FC<TabProps> = ({
 					aria-label="Modified"
 				/>
 			)}
-			<button
+			<span
 				ref={closeRef}
-				aria-label="Close"
-				{...(dataTestId && { 'data-testid': `${dataTestId}-close` })}
-				onClick={(e) => {
-					e.stopPropagation();
-					onClose?.(tab.id);
-				}}
+				style={{ display: 'inline-flex' }}
 				onMouseEnter={() => { setShowCloseTooltip(true) }}
 				onMouseLeave={() => { setShowCloseTooltip(false) }}
-				className="action-label codicon codicon-close"
-				style={{ background: 'transparent', border: 'none', cursor: 'pointer' }}
-			/>
+			>
+				<Button
+					line
+					icon="close"
+					options={{ ariaLabel: 'Close' }}
+					className="action-label"
+					{...(dataTestId && { 'data-testid': `${dataTestId}-close` })}
+					onClick={(e) => {
+						e.stopPropagation();
+						onClose?.(tab.id);
+					}}
+				/>
+			</span>
 			<Tooltip
 				targetRef={closeRef}
 				content="Close"
