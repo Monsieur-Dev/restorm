@@ -29,6 +29,7 @@ import {
 } from '../../../shared/auth/authState'
 import { decodeSessionInfo, isSessionExpired } from '../auth/sessionToken'
 import {
+  createCheckout,
   fetchEntitlement,
   importEntitlementPublicKey,
   isWithinGrace,
@@ -44,6 +45,8 @@ export interface EntitlementServiceDeps {
   store: { load: () => { sessionToken: string; entitlementToken: string | null } | null; save: (d: { sessionToken: string; entitlementToken: string | null }) => void; clear: () => void }
   /** `<base>/entitlement`. */
   entitlementUrl: string
+  /** `<base>/checkout` — the « S'abonner » upsell creates a Paddle transaction here. */
+  checkoutUrl: string
   /** Embedded Ed25519 SPKI public key PEM for this channel. */
   publicKeyPem: string
   /** False when the channel's key is a placeholder (prod, pre-launch) → never
@@ -143,6 +146,23 @@ export class EntitlementService {
     this.entitlement = null
     this.deps.store.clear()
     this.emit()
+  }
+
+  /**
+   * Create a Paddle checkout for the « S'abonner » upsell. Returns `null` when
+   * there is no live session (the caller prompts login first); otherwise
+   * `{ checkoutUrl }` where the URL may itself be `null` (the backend can omit
+   * it). The session JWT is private to this service — the bearer call lives here,
+   * mirroring `refresh()`; the URL is handed to the main process to open in the
+   * system browser (it never reaches the renderer). Throws `CheckoutHttpError`
+   * (e.g. 403 admin-only) / network errors so the IPC layer can map them.
+   */
+  async startCheckout(): Promise<{ checkoutUrl: string | null } | null> {
+    if (!this.sessionToken || isSessionExpired(this.sessionToken, nowSeconds(this.deps.now))) {
+      return null
+    }
+    const checkoutUrl = await createCheckout(this.deps.checkoutUrl, this.sessionToken, this.deps.fetchImpl)
+    return { checkoutUrl }
   }
 
   /**

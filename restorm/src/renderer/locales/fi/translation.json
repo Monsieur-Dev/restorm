@@ -1991,5 +1991,11 @@
       "ok": "OK",
       "cancel": "Peruuta"
     }
+  },
+  "subscription": {
+    "checkout": {
+      "forbidden": "Pyydä organisaatiosi järjestelmänvalvojaa tilaamaan.",
+      "error": "Tilausta ei voitu aloittaa. Yritä uudelleen."
+    }
   }
 }

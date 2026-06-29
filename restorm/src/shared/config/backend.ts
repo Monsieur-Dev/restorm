@@ -49,7 +49,8 @@ export function functionsHost(channel: ReleaseChannel): string {
 export const BACKEND_ENDPOINTS = {
   login: 'login',
   session: 'session',
-  entitlement: 'entitlement'
+  entitlement: 'entitlement',
+  checkout: 'checkout'
 } as const
 
 /** Build a full endpoint URL for a channel, e.g. `loginUrl('preview')`. */

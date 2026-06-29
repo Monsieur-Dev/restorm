@@ -1991,5 +1991,11 @@
       "ok": "OK",
       "cancel": "Abbrechen"
     }
+  },
+  "subscription": {
+    "checkout": {
+      "forbidden": "Bitten Sie den Administrator Ihrer Organisation, ein Abonnement abzuschließen.",
+      "error": "Das Abonnement konnte nicht gestartet werden. Bitte versuchen Sie es erneut."
+    }
   }
 }

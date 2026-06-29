@@ -351,3 +351,7 @@ export type {
 	TabRebuilder,
 	AppliedWorkbenchLayout
 } from './Workbench/layout'
+
+// GatedControl exports
+export { GatedControl } from './GatedControl'
+export type { GatedControlProps } from './GatedControl'

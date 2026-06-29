@@ -3,6 +3,7 @@ import { describe, it, expect, beforeAll } from 'vitest'
 import {
   verifyEntitlementToken,
   fetchEntitlement,
+  createCheckout,
   isWithinGrace,
   needsRefresh,
   ENTITLEMENT_AUDIENCE
@@ -142,5 +143,62 @@ describe('fetchEntitlement', () => {
     await expect(
       fetchEntitlement('https://x.supabase.co/functions/v1/entitlement', 'jwt', fetchImpl)
     ).rejects.toThrow()
+  })
+})
+
+describe('createCheckout', () => {
+  it('POSTs the bearer + {seats,cycle} body (default 1/monthly) and returns the URL', async () => {
+    let seenUrl = ''
+    let seenMethod = ''
+    let seenAuth = ''
+    let seenBody = ''
+    let seenContentType = ''
+    const fetchImpl = ((url: string, init?: RequestInit) => {
+      seenUrl = url
+      seenMethod = init?.method ?? ''
+      const headers = init?.headers as Record<string, string>
+      seenAuth = headers.authorization
+      seenContentType = headers['content-type']
+      seenBody = init?.body as string
+      return Promise.resolve(new Response(JSON.stringify({ transactionId: 'txn_1', checkoutUrl: 'https://pay.paddle.com/abc' }), { status: 200 }))
+    }) as unknown as typeof fetch
+
+    const url = await createCheckout('https://x.supabase.co/functions/v1/checkout', 'session-jwt', fetchImpl)
+    expect(seenUrl).toContain('/checkout')
+    expect(seenMethod).toBe('POST')
+    expect(seenAuth).toBe('Bearer session-jwt')
+    expect(seenContentType).toBe('application/json')
+    expect(JSON.parse(seenBody)).toEqual({ seats: 1, cycle: 'monthly' })
+    expect(url).toBe('https://pay.paddle.com/abc')
+  })
+
+  it('forwards a caller-supplied seats / cycle', async () => {
+    let seenBody = ''
+    const fetchImpl = ((_url: string, init?: RequestInit) => {
+      seenBody = init?.body as string
+      return Promise.resolve(new Response(JSON.stringify({ checkoutUrl: 'https://pay.paddle.com/x' }), { status: 200 }))
+    }) as unknown as typeof fetch
+    await createCheckout('https://x.supabase.co/functions/v1/checkout', 'jwt', fetchImpl, { seats: 5, cycle: 'annual' })
+    expect(JSON.parse(seenBody)).toEqual({ seats: 5, cycle: 'annual' })
+  })
+
+  it('returns null when the backend omits the checkoutUrl (nullable contract)', async () => {
+    const fetchImpl = (() => Promise.resolve(new Response(JSON.stringify({ transactionId: 'txn_1', checkoutUrl: null }), { status: 200 }))) as unknown as typeof fetch
+    const url = await createCheckout('https://x.supabase.co/functions/v1/checkout', 'jwt', fetchImpl)
+    expect(url).toBeNull()
+  })
+
+  it('throws a CheckoutHttpError carrying the status (403 = admin-only)', async () => {
+    const fetchImpl = (() => Promise.resolve(new Response('forbidden', { status: 403 }))) as unknown as typeof fetch
+    await expect(
+      createCheckout('https://x.supabase.co/functions/v1/checkout', 'jwt', fetchImpl)
+    ).rejects.toMatchObject({ name: 'CheckoutHttpError', statusCode: 403 })
+  })
+
+  it('throws CheckoutHttpError on other non-2xx (401)', async () => {
+    const fetchImpl = (() => Promise.resolve(new Response('nope', { status: 401 }))) as unknown as typeof fetch
+    await expect(
+      createCheckout('https://x.supabase.co/functions/v1/checkout', 'jwt', fetchImpl)
+    ).rejects.toMatchObject({ statusCode: 401 })
   })
 })

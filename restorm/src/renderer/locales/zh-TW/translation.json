@@ -1990,5 +1990,11 @@
       "ok": "確定",
       "cancel": "取消"
     }
+  },
+  "subscription": {
+    "checkout": {
+      "forbidden": "請讓貴組織的管理員訂閱。",
+      "error": "無法開始訂閱，請重試。"
+    }
   }
 }

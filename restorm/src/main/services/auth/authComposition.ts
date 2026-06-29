@@ -75,6 +75,7 @@ export function initEntitlementService(version: string = app.getVersion()): Enti
   instance = new EntitlementService({
     store,
     entitlementUrl: endpointUrl(channel, 'entitlement'),
+    checkoutUrl: endpointUrl(channel, 'checkout'),
     publicKeyPem: entitlementPublicKeyPem(channel),
     publicKeyConfigured: isEntitlementPublicKeyConfigured(channel),
     fetchImpl: backendFetch,
@@ -89,7 +90,7 @@ export function initEntitlementService(version: string = app.getVersion()): Enti
     log: (msg, fields) => { logger.warn(msg, fields) }
   })
 
-  registerAuthIpc(instance)
+  registerAuthIpc(instance, (url) => shell.openExternal(url))
 
   // Restore a cached session + entitlement and refresh in the background; never
   // let a restore failure crash startup.

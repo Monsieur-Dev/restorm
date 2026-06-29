@@ -55,6 +55,7 @@ function makeHarness(opts: {
       clear: () => { counters.cleared += 1; cache = null }
     },
     entitlementUrl: 'https://x.supabase.co/functions/v1/entitlement',
+    checkoutUrl: 'https://x.supabase.co/functions/v1/checkout',
     publicKeyPem: keys.publicSpkiPem,
     fetchImpl: fetchMock as unknown as typeof fetch,
     login: loginMock,
@@ -221,5 +222,44 @@ describe('EntitlementService — init from cache + offline grace', () => {
     const state = h.service.getState()
     expect(state.plan).toBe('pro') // cached entitlement preserved
     expect(state.capabilities).toEqual(['scenario.stepDebug'])
+  })
+})
+
+describe('EntitlementService — startCheckout', () => {
+  it('returns null when there is no signed-in session', async () => {
+    const h = makeHarness({ now: at(10) })
+    expect(await h.service.startCheckout()).toBeNull()
+  })
+
+  it('POSTs to the checkout endpoint with the session bearer and returns the URL when signed in', async () => {
+    const sessionToken = await signSession({ secret: SESSION_SECRET, email: 'a@b.com', iatSeconds: IAT })
+    const entitlementToken = await signEntitlement({
+      privateKey: keys.privateKey,
+      iatSeconds: IAT,
+      plan: 'pro',
+      capabilities: ['scenario.stepDebug']
+    })
+    const h = makeHarness({ now: at(10), sessionToken, entitlementToken })
+    await h.service.signIn()
+
+    // The next fetch (the checkout POST) returns the hosted Paddle URL.
+    h.fetchMock.mockResolvedValueOnce(
+      new Response(JSON.stringify({ transactionId: 'txn_1', checkoutUrl: 'https://pay.paddle.com/abc' }), { status: 200 })
+    )
+    const result = await h.service.startCheckout()
+    expect(result).toEqual({ checkoutUrl: 'https://pay.paddle.com/abc' })
+    const lastCall = last(h.fetchMock.mock.calls) as unknown as [string, RequestInit]
+    expect(lastCall[0]).toContain('/checkout')
+    expect(lastCall[1].method).toBe('POST')
+    expect((lastCall[1].headers as Record<string, string>).authorization).toBe(`Bearer ${sessionToken}`)
+  })
+
+  it('surfaces a backend HTTP error (e.g. 403 admin-only) by throwing', async () => {
+    const sessionToken = await signSession({ secret: SESSION_SECRET, iatSeconds: IAT })
+    const entitlementToken = await signEntitlement({ privateKey: keys.privateKey, iatSeconds: IAT })
+    const h = makeHarness({ now: at(10), sessionToken, entitlementToken })
+    await h.service.signIn()
+    h.fetchMock.mockResolvedValueOnce(new Response('forbidden', { status: 403 }))
+    await expect(h.service.startCheckout()).rejects.toMatchObject({ statusCode: 403 })
   })
 })

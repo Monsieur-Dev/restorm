@@ -1993,5 +1993,11 @@
       "ok": "OK",
       "cancel": "Anuluj"
     }
+  },
+  "subscription": {
+    "checkout": {
+      "forbidden": "Poproś administratora swojej organizacji o wykupienie subskrypcji.",
+      "error": "Nie można rozpocząć subskrypcji. Spróbuj ponownie."
+    }
   }
 }

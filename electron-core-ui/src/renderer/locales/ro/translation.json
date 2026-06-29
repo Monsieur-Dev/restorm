@@ -406,5 +406,9 @@
   },
   "keyValueTable": {
     "description": "Descriere"
+  },
+  "gatedControl": {
+    "proLabel": "Versiunea Pro",
+    "subscribe": "Abonează-te"
   }
 }

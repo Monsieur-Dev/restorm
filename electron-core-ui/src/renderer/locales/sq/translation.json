@@ -406,5 +406,9 @@
   },
   "keyValueTable": {
     "description": "Përshkrimi"
+  },
+  "gatedControl": {
+    "proLabel": "Versioni Pro",
+    "subscribe": "Abonohu"
   }
 }

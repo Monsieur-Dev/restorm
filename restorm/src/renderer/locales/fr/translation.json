@@ -1991,5 +1991,11 @@
       "ok": "OK",
       "cancel": "Annuler"
     }
+  },
+  "subscription": {
+    "checkout": {
+      "forbidden": "Demandez à l'administrateur de votre organisation de s'abonner.",
+      "error": "Impossible de démarrer l'abonnement. Veuillez réessayer."
+    }
   }
 }

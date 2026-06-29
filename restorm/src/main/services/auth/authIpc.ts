@@ -7,7 +7,8 @@
  */
 
 import { BrowserWindow, ipcMain } from 'electron'
-import { AUTH_IPC, type AuthState } from '../../../shared/auth/authState'
+import { AUTH_IPC, type AuthState, type CheckoutResult } from '../../../shared/auth/authState'
+import { CheckoutHttpError } from '../entitlement/entitlementClient'
 import type { EntitlementService } from '../entitlement/EntitlementService'
 
 /** Push an auth state to every live renderer. Injected into the service as its
@@ -20,10 +21,15 @@ export function broadcastAuthState(channel: string, state: AuthState): void {
   }
 }
 
-/** Register `auth:login` / `auth:logout` / `auth:get-state`. Idempotent enough —
- * call once during startup. The `auth:state-changed` push is emitted by the
- * service via the injected broadcaster, not registered here. */
-export function registerAuthIpc(service: EntitlementService): void {
+/** Register `auth:login` / `auth:logout` / `auth:get-state` / `auth:checkout`.
+ * Idempotent enough — call once during startup. The `auth:state-changed` push is
+ * emitted by the service via the injected broadcaster, not registered here.
+ * `openExternal` is injected (the composition root passes `shell.openExternal`)
+ * so this module stays unit-testable without electron's `shell`. */
+export function registerAuthIpc(
+  service: EntitlementService,
+  openExternal: (url: string) => Promise<void>
+): void {
   // Login drives the browser loopback round-trip; it can take as long as the
   // user takes to authenticate (bounded by the loopback timeout). Returns the
   // resulting state so the caller can update without waiting for the broadcast.
@@ -38,4 +44,23 @@ export function registerAuthIpc(service: EntitlementService): void {
   })
 
   ipcMain.handle(AUTH_IPC.GET_STATE, () => service.getState())
+
+  // « S'abonner »: create the Paddle checkout and open it in the SYSTEM browser.
+  // The raw URL never crosses the bridge — only the outcome does. 403 (the
+  // backend's org-admin-only gate) is surfaced distinctly so a non-admin gets an
+  // actionable message instead of a generic failure.
+  ipcMain.handle(AUTH_IPC.CHECKOUT, async (): Promise<CheckoutResult> => {
+    try {
+      const result = await service.startCheckout()
+      if (!result) return { status: 'not-signed-in' }
+      if (!result.checkoutUrl) return { status: 'error' }
+      await openExternal(result.checkoutUrl)
+      return { status: 'opened' }
+    } catch (err) {
+      if (err instanceof CheckoutHttpError && err.statusCode === 403) {
+        return { status: 'forbidden' }
+      }
+      return { status: 'error' }
+    }
+  })
 }

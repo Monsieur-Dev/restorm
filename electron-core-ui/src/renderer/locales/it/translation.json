@@ -406,5 +406,9 @@
   },
   "keyValueTable": {
     "description": "Descrizione"
+  },
+  "gatedControl": {
+    "proLabel": "Versione Pro",
+    "subscribe": "Abbonati"
   }
 }

@@ -2,7 +2,7 @@ import type { ThemeInfo, ThemeDefinition, ThemeVariables } from 'electron-core-u
 import type { SettingValue, ResolvedSetting, SettingsGroup } from 'electron-core-ui/types'
 import type { PersistenceFormat } from 'electron-core-ui/main'
 import type { ResponseHistoryDetail, ResponseHistoryEntry } from '../../../shared/types/collections'
-import type { AuthState } from '../../../shared/auth/authState'
+import type { AuthState, CheckoutResult } from '../../../shared/auth/authState'
 
 declare global {
   interface Window {
@@ -76,6 +76,7 @@ declare global {
         logout: () => Promise<AuthState>
         getState: () => Promise<AuthState>
         onStateChanged: (callback: (state: AuthState) => void) => (() => void)
+        subscribe: () => Promise<CheckoutResult>
       }
       /** App-level metadata bridged from the main process. */
       app: {

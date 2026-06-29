@@ -1992,5 +1992,11 @@
       "ok": "OK",
       "cancel": "Odustani"
     }
+  },
+  "subscription": {
+    "checkout": {
+      "forbidden": "Zatražite administratora svoje organizacije da se pretplati.",
+      "error": "Pretplatu nije moguće pokrenuti. Pokušajte ponovno."
+    }
   }
 }

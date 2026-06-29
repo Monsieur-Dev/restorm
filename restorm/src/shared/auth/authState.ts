@@ -74,8 +74,25 @@ export const AUTH_IPC = {
   LOGIN: 'auth:login',
   LOGOUT: 'auth:logout',
   GET_STATE: 'auth:get-state',
-  STATE_CHANGED: 'auth:state-changed'
+  STATE_CHANGED: 'auth:state-changed',
+  CHECKOUT: 'auth:checkout'
 } as const
+
+/**
+ * Result of a « S'abonner » checkout attempt, surfaced to the renderer. The raw
+ * Paddle URL never crosses the bridge — the main process opens it directly in
+ * the system browser — so the renderer only learns the outcome.
+ */
+export type CheckoutResult =
+  /** The checkout URL was created and handed to the system browser. */
+  | { status: 'opened' }
+  /** No signed-in session — the caller should prompt login first. */
+  | { status: 'not-signed-in' }
+  /** Checkout is org-admin-only (backend 403) — a non-admin must ask their org
+   * admin to subscribe. Surfaced as a distinct, actionable message. */
+  | { status: 'forbidden' }
+  /** Backend / network / open failure; already logged in the main process. */
+  | { status: 'error' }
 
 /** Convenience: does a state grant a given capability? */
 export function hasCapability(state: AuthState, capability: Capability): boolean {

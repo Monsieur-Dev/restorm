@@ -1992,5 +1992,11 @@
       "ok": "OK",
       "cancel": "Anulează"
     }
+  },
+  "subscription": {
+    "checkout": {
+      "forbidden": "Cereți administratorului organizației dvs. să se aboneze.",
+      "error": "Abonamentul nu a putut fi inițiat. Încercați din nou."
+    }
   }
 }

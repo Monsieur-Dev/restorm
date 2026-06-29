@@ -1990,5 +1990,11 @@
       "ok": "OK",
       "cancel": "Hủy"
     }
+  },
+  "subscription": {
+    "checkout": {
+      "forbidden": "Hãy đề nghị quản trị viên tổ chức của bạn đăng ký.",
+      "error": "Không thể bắt đầu đăng ký. Vui lòng thử lại."
+    }
   }
 }

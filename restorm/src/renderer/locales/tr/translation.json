@@ -1991,5 +1991,11 @@
       "ok": "Tamam",
       "cancel": "İptal"
     }
+  },
+  "subscription": {
+    "checkout": {
+      "forbidden": "Kuruluşunuzun yöneticisinden abone olmasını isteyin.",
+      "error": "Abonelik başlatılamadı. Lütfen tekrar deneyin."
+    }
   }
 }

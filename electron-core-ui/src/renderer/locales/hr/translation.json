@@ -406,5 +406,9 @@
   },
   "keyValueTable": {
     "description": "Opis"
+  },
+  "gatedControl": {
+    "proLabel": "Pro verzija",
+    "subscribe": "Pretplati se"
   }
 }

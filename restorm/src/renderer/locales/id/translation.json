@@ -1990,5 +1990,11 @@
       "ok": "OK",
       "cancel": "Batal"
     }
+  },
+  "subscription": {
+    "checkout": {
+      "forbidden": "Minta administrator organisasi Anda untuk berlangganan.",
+      "error": "Tidak dapat memulai langganan. Silakan coba lagi."
+    }
   }
 }

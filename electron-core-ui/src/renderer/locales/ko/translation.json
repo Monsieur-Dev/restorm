@@ -406,5 +406,9 @@
   },
   "keyValueTable": {
     "description": "설명"
+  },
+  "gatedControl": {
+    "proLabel": "Pro 버전",
+    "subscribe": "구독하기"
   }
 }

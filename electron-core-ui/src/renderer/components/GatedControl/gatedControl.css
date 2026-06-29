@@ -1,0 +1,61 @@
+/* GatedControl — the « visible mais verrouillé » gating primitive.
+ *
+ * The anchor stays interactive (it owns the hover that reveals the upsell), but
+ * the wrapped child is greyed and made pointer-inert so the locked control can
+ * neither be clicked nor show its own tooltip. Colours come from existing theme
+ * tokens only (no new vars), so the locked look is correct on every theme. */
+
+.ecu-gated {
+  display: inline-flex;
+  align-items: center;
+
+  /* The lock affordance lives on the whole anchor so the cursor reads as
+   * "not available" anywhere over the gated control. */
+  cursor: not-allowed;
+}
+
+.ecu-gated-child {
+  display: inline-flex;
+  align-items: center;
+
+  /* Greyed: the control is dimmed and desaturated to read as unavailable. */
+  opacity: 0.45;
+  filter: grayscale(0.6);
+
+  /* Pointer-inert: clicks + the child's own hover never fire while gated, yet
+   * the control stays visible (NOT hidden) per the gating UX. */
+  pointer-events: none;
+}
+
+/* Upsell info-bulle ------------------------------------------------------- */
+
+.ecu-gated-upsell {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+
+  /* Let the « S'abonner » Button receive clicks even though the anchor child is
+   * inert — the tooltip is a separate portal with its own pointer events. */
+  pointer-events: auto;
+}
+
+.ecu-gated-upsell-pro {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-weight: 600;
+  white-space: nowrap;
+  color: var(--foreground, inherit);
+}
+
+.ecu-gated-upsell-pro .codicon {
+  font-size: 13px;
+  opacity: 0.85;
+}
+
+.ecu-gated-upsell-link {
+  /* The externalLink Button already renders as an underlined link; nudge the
+   * font size down to match the tooltip body. */
+  font-size: 12px;
+}

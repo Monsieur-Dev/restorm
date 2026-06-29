@@ -1991,5 +1991,11 @@
       "ok": "OK",
       "cancel": "Avbryt"
     }
+  },
+  "subscription": {
+    "checkout": {
+      "forbidden": "Be administratören för din organisation att prenumerera.",
+      "error": "Det gick inte att starta prenumerationen. Försök igen."
+    }
   }
 }

@@ -406,5 +406,9 @@
   },
   "keyValueTable": {
     "description": "説明"
+  },
+  "gatedControl": {
+    "proLabel": "Pro版",
+    "subscribe": "申し込む"
   }
 }
