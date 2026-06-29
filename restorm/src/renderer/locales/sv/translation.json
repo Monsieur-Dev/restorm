@@ -47,7 +47,7 @@
     }
   },
   "tips": {
-    "cardTitle": "Tips & tricks",
+    "cardTitle": "Tips och tricks",
     "maximizeTab": {
       "title": "Maximera en flik med ett klick",
       "body": "Dubbelklicka på valfri workbench-flik för att visa den i helskärm. Tryck Esc för att återgå till den föregående layouten."
@@ -247,9 +247,9 @@
         "httpServer": "HTTP-mockserver",
         "graphql": "GraphQL-förfrågan",
         "grpc": "gRPC-förfrågan",
-        "grpcServerStream": "gRPC server-streaming request",
-        "grpcClientStream": "gRPC client-streaming request",
-        "grpcBidi": "gRPC bidirectional request",
+        "grpcServerStream": "gRPC server-streaming-begäran",
+        "grpcClientStream": "gRPC client-streaming-begäran",
+        "grpcBidi": "Dubbelriktad gRPC-begäran",
         "soap": "SOAP-förfrågan",
         "websocket": "WebSocket-förfrågan",
         "odata": "OData-förfrågan",
@@ -332,13 +332,13 @@
     "customValues": {
       "lists": "Lists",
       "values": "Values",
-      "addList": "Add a list",
+      "addList": "Lägg till en lista",
       "newListName": "New list",
-      "addEntry": "Add a value",
+      "addEntry": "Lägg till ett värde",
       "label": "Label",
       "value": "Value",
-      "noEntries": "No values yet",
-      "selectList": "Select a list",
+      "noEntries": "Inga värden ännu",
+      "selectList": "Välj en lista",
       "enabled": "Aktiverad"
     }
   },
@@ -454,7 +454,7 @@
     },
     "connect": "Connect",
     "disconnect": "Disconnect",
-    "noFrames": "No frames yet.",
+    "noFrames": "Inga ramar ännu.",
     "callType": {
       "unary": "Unary",
       "serverStream": "Server streaming",
@@ -600,7 +600,7 @@
       "description": "Den efterfrågade resursen kunde inte hittas men kan vara tillgänglig i framtiden."
     },
     "405": {
-      "name": "Method Not Allowed",
+      "name": "Metod inte tillåten",
       "description": "En förfrågansmetod stöds inte för den efterfrågade resursen."
     },
     "408": {
@@ -616,7 +616,7 @@
       "description": "Anger att den efterfrågade resursen tidigare var i bruk men inte längre är tillgänglig och inte kommer att vara tillgänglig igen."
     },
     "415": {
-      "name": "Unsupported Media Type",
+      "name": "Medietyp som inte stöds",
       "description": "Förfrågans entitet har en mediatyp som servern eller resursen inte stöder."
     },
     "422": {
@@ -624,11 +624,11 @@
       "description": "Förfrågan var välformad men kunde inte följas på grund av semantiska fel."
     },
     "429": {
-      "name": "Too Many Requests",
+      "name": "För många förfrågningar",
       "description": "Användaren har skickat för många förfrågningar under en given tid (hastighetsbegränsning)."
     },
     "500": {
-      "name": "Internal Server Error",
+      "name": "Internt serverfel",
       "description": "Ett generiskt felmeddelande som ges när ett oväntat tillstånd uppstått och inget mer specifikt meddelande är lämpligt."
     },
     "501": {
@@ -941,10 +941,10 @@
     },
     "pathSelector": {
       "placeholder": "JSON path",
-      "ariaLabel": "JSON path selector",
-      "pick": "Pick from result",
+      "ariaLabel": "JSON-sökvägsväljare",
+      "pick": "Välj från resultat",
       "loading": "Loading…",
-      "noResult": "Run the source action to pick a property from its result."
+      "noResult": "Kör källåtgärden för att välja en egenskap från dess resultat."
     },
     "tab": {
       "graph": "Scenario",
@@ -954,7 +954,7 @@
       "menu": {
         "changeColor": "Change colour",
         "resetColor": "Reset colour",
-        "addNote": "Add / edit note",
+        "addNote": "Lägg till/redigera anteckning",
         "runOnEachEvent": "Kör vid varje mottagen händelse",
         "duplicate": "Duplicate",
         "delete": "Delete",
@@ -1094,9 +1094,9 @@
         "eq": "equals",
         "ne": "not equals",
         "lt": "less than",
-        "lte": "less or equal",
+        "lte": "mindre än eller lika med",
         "gt": "greater than",
-        "gte": "greater or equal",
+        "gte": "större än eller lika med",
         "contains": "contains",
         "isString": "is string",
         "isNumber": "is number",
@@ -1107,7 +1107,7 @@
         "exists": "exists",
         "isEmpty": "is empty",
         "matchesRegex": "matches regex",
-        "isOneOf": "is one of",
+        "isOneOf": "är en av",
         "deepEquals": "deep equals",
         "lengthEq": "length ==",
         "lengthGt": "length >",
@@ -1129,7 +1129,7 @@
     },
     "input": {
       "name": "Name",
-      "defaultType": "Default / type",
+      "defaultType": "Standard / typ",
       "addParam": "Lägg till parameter",
       "removeParam": "Ta bort"
     },
@@ -1183,7 +1183,7 @@
         "missing": "Det länkade scenariot finns inte längre."
       },
       "file": {
-        "missingPath": "A file path is required."
+        "missingPath": "En filsökväg krävs."
       }
     },
     "usage": {
@@ -1196,7 +1196,7 @@
       "undo": "Ångra",
       "redo": "Gör om",
       "step": "Steg för steg",
-      "previewInfo": "Example data, based on previous request results.",
+      "previewInfo": "Exempeldata, baserat på tidigare begäranresultat.",
       "pause": "Pausa",
       "noRunsHint": "Ingen nyligen utförd körning för denna förfrågan — kör den härifrån för att fylla scenariot.",
       "syntheticInfo": "Exempeldata genererad från denna förfrågans dokumentation.",
@@ -1206,11 +1206,11 @@
       "copyLogs": "Copy logs",
       "copyThisLog": "Kopiera denna logg",
       "clearLogs": "Rensa loggar",
-      "logsShowAll": "Show all logs",
+      "logsShowAll": "Visa alla loggar",
       "showLevelLogs": "Visa {{level}}-loggar",
       "showLevelOnly": "Högerklick: endast denna nivå",
-      "noUserLogs": "No user logs (entries from the Log action) in this run.",
-      "helpTitle": "What this action does"
+      "noUserLogs": "Inga användarloggar (poster från Log-åtgärden) i denna körning.",
+      "helpTitle": "Vad den här åtgärden gör"
     },
     "now": {
       "timezone": "Timezone",
@@ -1222,8 +1222,8 @@
       }
     },
     "callers": {
-      "button": "Scenarios calling this scenario",
-      "title": "This scenario is called by:"
+      "button": "Scenarier som anropar detta scenario",
+      "title": "Detta scenario anropas av:"
     },
     "runPrompt": {
       "title": "Run parameters",
@@ -1303,8 +1303,8 @@
       },
       "flag": {
         "i": "Case-insensitive",
-        "m": "Multiline (^ and $ match line breaks)",
-        "s": "Dotall (. matches newlines)"
+        "m": "Flerradig (^ och $ matchar radbrytningar)",
+        "s": "Dotall (. matchar nya rader)"
       }
     },
     "json": {
@@ -1438,9 +1438,9 @@
       "backoff": "backoff",
       "delay": "delay",
       "factor": "factor",
-      "retryOnError": "retry on error",
-      "retryOnStatus": "retry on HTTP status",
-      "retryOnFailure": "retry on any non-2xx",
+      "retryOnError": "försök igen vid fel",
+      "retryOnStatus": "försök igen vid HTTP-status",
+      "retryOnFailure": "försök igen vid alla icke-2xx",
       "attempt": "attempt",
       "exhausted": "exhausted",
       "backoffOpt": {
@@ -1516,7 +1516,7 @@
       "valid": "valid",
       "invalid": "invalid",
       "errors": "errors",
-      "editTitle": "Edit JSON Schema"
+      "editTitle": "Redigera JSON Schema"
     },
     "readFile": {
       "path": "path",
@@ -1561,85 +1561,85 @@
       "timeout": "Tidsgräns (s)"
     },
     "help": {
-      "input": "Injects the scenario's input parameters and constants into the graph.",
-      "output": "Declares one of the scenario's named results, read by a parent Run-scenario.",
-      "if": "Branches the flow to then / else by comparing two operands.",
-      "switch": "Routes the input to a matching case, or to default.",
-      "httpRequest": "Runs a saved API request and emits its response.",
+      "input": "Injicerar scenariots indataparametrar och konstanter i grafen.",
+      "output": "Deklarerar ett av scenariots namngivna resultat, läst av ett överordnat Run-scenario.",
+      "if": "Förgrenar flödet till then / else genom att jämföra två operander.",
+      "switch": "Dirigerar indatan till ett matchande case, eller till default.",
+      "httpRequest": "Kör en sparad API-begäran och sänder dess svar.",
       "soapRequest": "Kör en sparad SOAP-begäran och sänder ut dess tolkade svar. Ett SOAP-fel visas i svaret; ett misslyckat anrop dirigeras till porten `error`.",
-      "runScenario": "Runs another scenario as a reusable sub-step.",
-      "forEach": "Runs the body once per item of a collection, then continues.",
-      "for": "Loops over a number range, running the body for each value.",
-      "while": "Repeats the body while a condition holds (tested first).",
-      "doWhile": "Repeats the body while a condition holds (runs at least once).",
-      "aggregate": "Reduces a collection to one value (count, sum, min, max, average, join).",
-      "map": "Transforms every item of a collection into a new list.",
-      "filter": "Keeps the items that match a condition; routes the rest aside.",
-      "addToList": "Appends values to a list.",
-      "removeFromList": "Removes matching values from a list.",
-      "wait": "Pauses for a duration, then continues.",
-      "waitUntil": "Pauses until a given date/time, then continues.",
-      "now": "Emits the current date and time.",
-      "timer": "Fires its body on a repeating interval or a cron schedule.",
+      "runScenario": "Kör ett annat scenario som ett återanvändbart delsteg.",
+      "forEach": "Kör kroppen en gång per objekt i en samling och fortsätter sedan.",
+      "for": "Loopar över ett talintervall och kör kroppen för varje värde.",
+      "while": "Upprepar kroppen så länge ett villkor gäller (testas först).",
+      "doWhile": "Upprepar kroppen så länge ett villkor gäller (körs minst en gång).",
+      "aggregate": "Reducerar en samling till ett värde (count, sum, min, max, medelvärde, join).",
+      "map": "Omvandlar varje objekt i en samling till en ny lista.",
+      "filter": "Behåller objekten som matchar ett villkor; dirigerar resten åt sidan.",
+      "addToList": "Lägger till värden i en lista.",
+      "removeFromList": "Tar bort matchande värden från en lista.",
+      "wait": "Pausar under en tid och fortsätter sedan.",
+      "waitUntil": "Pausar tills ett angivet datum/klockslag och fortsätter sedan.",
+      "now": "Sänder aktuellt datum och klockslag.",
+      "timer": "Utlöser sin kropp med ett upprepat intervall eller ett cron-schema.",
       "arithmetic": "Computes a + − × ÷ … of two numbers.",
-      "comparator": "Compares two values and emits true or false.",
-      "boolean": "Combines booleans with and / or / xor / not.",
-      "object": "Builds an object from its named inputs.",
-      "setVariable": "Stores a value into a run variable.",
-      "getVariable": "Reads a run variable's value.",
-      "transform": "Renders a Handlebars template from the input and run variables.",
+      "comparator": "Jämför två värden och sänder sant eller falskt.",
+      "boolean": "Kombinerar booleans med and / or / xor / not.",
+      "object": "Bygger ett objekt från sina namngivna indata.",
+      "setVariable": "Lagrar ett värde i en run-variabel.",
+      "getVariable": "Läser värdet på en run-variabel.",
+      "transform": "Renderar en Handlebars-mall från indatan och run-variablerna.",
       "code": "Kör din kod (TypeScript, JavaScript, Python, Lua, Ruby eller R) i en sandlåda och returnerar resultatet.",
-      "cast": "Converts a value to another type (number, string, boolean, date, list).",
-      "regex": "Matches, extracts, replaces or splits text with a regular expression.",
-      "json": "Parses a JSON string, or serialises a value to JSON.",
-      "xml": "Parses an XML string, or serialises a value to XML.",
-      "yaml": "Parses a YAML string, or serialises a value to YAML.",
+      "cast": "Konverterar ett värde till en annan typ (tal, text, boolean, datum, lista).",
+      "regex": "Matchar, extraherar, ersätter eller delar text med ett reguljärt uttryck.",
+      "json": "Tolkar en JSON-sträng eller serialiserar ett värde till JSON.",
+      "xml": "Tolkar en XML-sträng eller serialiserar ett värde till XML.",
+      "yaml": "Tolkar en YAML-sträng eller serialiserar ett värde till YAML.",
       "crypto": "Hashes or encodes a string (base64, md5, sha…, hmac, uuid).",
-      "jwt": "Decodes a JWT token into header, payload and signature.",
-      "datetime": "Shifts, formats or diffs a date.",
-      "retry": "Re-runs its body until it succeeds, with a backoff policy.",
-      "objectOp": "Reshapes an object (get/set a path, merge, pick, omit, keys, values).",
-      "url": "Encodes, decodes or parses URLs and query strings.",
-      "random": "Generates a random number, string, boolean or pick.",
-      "listOp": "Reshapes a list (sort, unique, reverse, flatten, chunk, slice, groupBy).",
-      "csv": "Parses a CSV string, or serialises a list to CSV.",
+      "jwt": "Avkodar ett JWT-token till header, payload och signatur.",
+      "datetime": "Förskjuter, formaterar eller jämför ett datum.",
+      "retry": "Kör sin kropp på nytt tills den lyckas, med en backoff-policy.",
+      "objectOp": "Omformar ett objekt (get/set av en sökväg, merge, pick, omit, keys, values).",
+      "url": "Kodar, avkodar eller tolkar URL:er och query strings.",
+      "random": "Genererar ett slumpmässigt tal, text, boolean eller urval.",
+      "listOp": "Omformar en lista (sort, unique, reverse, flatten, chunk, slice, groupBy).",
+      "csv": "Tolkar en CSV-sträng eller serialiserar en lista till CSV.",
       "math": "Runs a scalar math op (round, abs, sqrt, min, max, clamp…).",
-      "schema": "Validates a value against a JSON Schema.",
-      "readFile": "Reads a file's text content.",
-      "writeFile": "Writes or appends text to a file.",
-      "throw": "Deliberately fails with a message (for error branches and tests).",
-      "log": "Writes a message to the run log and passes the value through.",
-      "assert": "Checks a condition (chai-style) and routes to pass or fail.",
-      "socketioConnect": "Opens a Socket.IO connection and re-emits each received event on its port.",
-      "socketioSend": "Sends a message on an already-open Socket.IO connection.",
-      "socketioClose": "Closes an already-open Socket.IO connection.",
-      "websocketConnect": "Opens a raw WebSocket connection and re-emits each received message on its port.",
-      "websocketSend": "Sends a payload on an already-open WebSocket connection.",
-      "websocketClose": "Closes an already-open WebSocket connection.",
-      "grpcConnect": "Opens a streaming gRPC call and re-emits each received frame on its message port.",
-      "grpcSend": "Writes a request message on an already-open streaming gRPC call.",
-      "grpcClose": "Half-closes an already-open streaming gRPC call.",
+      "schema": "Validerar ett värde mot ett JSON Schema.",
+      "readFile": "Läser en fils textinnehåll.",
+      "writeFile": "Skriver eller lägger till text i en fil.",
+      "throw": "Misslyckas avsiktligt med ett meddelande (för felgrenar och tester).",
+      "log": "Skriver ett meddelande till run-log och släpper igenom värdet.",
+      "assert": "Kontrollerar ett villkor (chai-stil) och dirigerar till godkänt eller misslyckat.",
+      "socketioConnect": "Öppnar en Socket.IO-anslutning och återsänder varje mottagen event på sin port.",
+      "socketioSend": "Skickar ett meddelande på en redan-öppen Socket.IO-anslutning.",
+      "socketioClose": "Stänger en redan-öppen Socket.IO-anslutning.",
+      "websocketConnect": "Öppnar en rå WebSocket-anslutning och återsänder varje mottaget meddelande på sin port.",
+      "websocketSend": "Skickar en payload på en redan-öppen WebSocket-anslutning.",
+      "websocketClose": "Stänger en redan-öppen WebSocket-anslutning.",
+      "grpcConnect": "Öppnar ett streaming-gRPC-anrop och återsänder varje mottagen ram på sin message-port.",
+      "grpcSend": "Skriver ett begäranmeddelande till ett redan-öppet streaming-gRPC-anrop.",
+      "grpcClose": "Halvstänger (half-close) ett redan-öppet streaming-gRPC-anrop.",
       "socketioConnectServer": "Startar en Socket.IO-server (port + rutt); bekräftar varje mottagen händelse och sänder den igen på sin port. Skicka sänder till anslutna klienter.",
       "socketioSendServer": "Sänder ett meddelande till alla klienter som är anslutna till den refererade Socket.IO-servern.",
       "socketioCloseServer": "Stoppar den refererade Socket.IO-servern och kopplar från dess klienter.",
       "websocketConnectServer": "Startar en rå WebSocket-server (port + sökväg); registrerar varje mottagen frame och sänder den igen på sin message-port. Skicka sänder till anslutna klienter.",
       "websocketSendServer": "Sänder en frame till alla klienter som är anslutna till den refererade WebSocket-servern.",
       "websocketCloseServer": "Stoppar den refererade WebSocket-servern och kopplar från dess klienter.",
-      "mqttConnect": "Opens a long-lived MQTT connection from a bound request and subscribes to its topic; re-emits each received message on its `message` port.",
-      "mqttSend": "Publishes a payload on an already-open MQTT connection (to its topic).",
-      "mqttClose": "Closes an already-open MQTT connection.",
-      "mqttConnectServer": "Starts a local MQTT broker (port + topic filter); subscribes to its topic filter and re-emits each received message on its `message` port. Send publishes to connected subscribers.",
-      "mqttSendServer": "Publishes a message to every subscriber of the referenced MQTT broker.",
-      "mqttCloseServer": "Stops the referenced MQTT broker and disconnects its clients.",
-      "toast": "Emits a toast notification in the Restorm UI while the scenario runs.",
+      "mqttConnect": "Öppnar en långlivad MQTT-anslutning från en bunden begäran och prenumererar på dess topic; återsänder varje mottaget meddelande på sin `message`-port.",
+      "mqttSend": "Publicerar en payload på en redan-öppen MQTT-anslutning (till dess topic).",
+      "mqttClose": "Stänger en redan-öppen MQTT-anslutning.",
+      "mqttConnectServer": "Startar en lokal MQTT-broker (port + topicfilter); prenumererar på sitt topicfilter och återsänder varje mottaget meddelande på sin `message`-port. Send publicerar till anslutna prenumeranter.",
+      "mqttSendServer": "Publicerar ett meddelande till varje prenumerant på den refererade MQTT-brokern.",
+      "mqttCloseServer": "Stoppar den refererade MQTT-brokern och kopplar från dess klienter.",
+      "toast": "Visar en toast-avisering i Restorm-gränssnittet medan scenariot körs.",
       "httpListen": "Hosts a local HTTP mock server and listens indefinitely. `connected` fires once it is listening; each served request re-emits its data on the `served` port. The server stays up until an HTTP close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
-      "httpClose": "Stops an already-listening HTTP mock server (declared by an HTTP server node), freeing its port.",
+      "httpClose": "Stoppar en redan-lyssnande HTTP-mockserver (deklarerad av en HTTP-servernod) och frigör dess port.",
       "grpcListen": "Hosts a local gRPC mock server and listens indefinitely. `connected` fires once it is listening; each served call re-emits its data on the `served` port. The server stays up until a gRPC server close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
-      "grpcServerClose": "Stops an already-listening gRPC mock server (declared by a gRPC server node), freeing its port.",
+      "grpcServerClose": "Stoppar en redan-lyssnande gRPC-mockserver (deklarerad av en gRPC-servernod) och frigör dess port.",
       "soapListen": "Är värd för en lokal SOAP-mockserver och lyssnar i obegränsad tid. Varje inkommande begäran dirigeras till en konfigurerad operation (efter dess SOAPAction eller operationsnamnet i brödtexten) och besvaras med det fördefinierade SOAP-kuvertet (en feloperation returnerar `<soap:Fault>`). `connected` utlöses så snart servern lyssnar; varje betjänad begäran återutsänder sina data på porten `served`. Servern förblir aktiv tills en SOAP-stängning (eller ett stopp), sedan utlöses `done`.",
       "soapClose": "Stoppar en redan lyssnande SOAP-mockserver (deklarerad av en SOAP-servernod) och frigör dess port.",
       "graphqlListen": "Hosts a local GraphQL mock server and listens indefinitely. `connected` fires once it is listening; each served operation re-emits its data on the `served` port. The server stays up until a GraphQL close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
-      "graphqlClose": "Stops an already-listening GraphQL mock server (declared by a GraphQL server node), freeing its port.",
+      "graphqlClose": "Stoppar en redan-lyssnande GraphQL-mockserver (deklarerad av en GraphQL-servernod) och frigör dess port.",
       "odataListen": "Är värd för en lokal OData v4-mocktjänst och lyssnar i all oändlighet. `connected` utlöses så snart den lyssnar; varje betjänad begäran sänder sina data på nytt på `served`-porten. Servern är aktiv tills en OData-stängning (eller ett Stopp), sedan utlöses `done`. Ingen response-utdata — den betjänar, den ringer inte ut.",
       "odataClose": "Stoppar en redan lyssnande OData-mocktjänst (deklarerad av en OData-servernod) och frigör dess port.",
       "graphqlSubscribe": "Öppnar en långlivad GraphQL-prenumeration som klient via SSE och lyssnar. `connected` utlöses så snart strömmen är öppen; varje mottagen nyttolast återutsänds på `message`-porten (en prenumeration är endast mottagande, utan namngivna händelser). Strömmen förblir öppen tills en GraphQL-avprenumeration (eller ett stopp), eller tills servern slutför den, sedan utlöses `done`.",
@@ -1665,11 +1665,11 @@
       "select": "markera / flerval"
     },
     "cli": {
-      "title": "Run from the command line",
-      "intro": "Run this scenario without opening the app (CI, cron, script):",
-      "byId": "Designate by id",
+      "title": "Kör från kommandoraden",
+      "intro": "Kör detta scenario utan att öppna appen (CI, cron, script):",
+      "byId": "Ange med id",
       "allLogs": "All logs",
-      "note": "`--out file` also writes the run-log to a file.",
+      "note": "`--out file` skriver även run-log till en fil.",
       "projectPlaceholder": "<project.restorm>"
     },
     "socketio": {
@@ -1723,13 +1723,13 @@
   "mqtt": {
     "qos": "QoS",
     "retain": "Retain",
-    "subscribeOnConnect": "Subscribe on connect",
+    "subscribeOnConnect": "Prenumerera vid anslutning",
     "clientId": "Client ID",
-    "clientIdPlaceholder": "auto-generated if empty",
+    "clientIdPlaceholder": "genereras automatiskt om tomt",
     "username": "Username",
     "password": "Password",
     "keepalive": "Keepalive (s)",
-    "lwt": "Last Will & Testament",
+    "lwt": "Sista vilja (LWT)",
     "topic": "Topic",
     "lwtTopicPlaceholder": "will/topic",
     "lwtPayload": "Payload",
@@ -1876,7 +1876,7 @@
     "deltaRemoved": "{{count}} borttagen/borttagna",
     "actionBody": "Åtgärdens brödtext (JSON)",
     "actionParameters": "Åtgärdsparametrar (från metadata)",
-    "applyPlaceholder": "groupby((Status),aggregate($count as Total))",
+    "applyPlaceholder": "groupby((Status),aggregate($count as Totalt))",
     "batchAdd": "Lägg till underbegäran",
     "batchAtomicityPlaceholder": "ändringsuppsättning (valfritt)",
     "batchBody": "Batchunderbegäranden",
@@ -1899,7 +1899,7 @@
     "expandShowOptions": "Visa alternativ",
     "expandSkipPlaceholder": "0",
     "expandTopPlaceholder": "5",
-    "filterPlaceholder": "Name eq 'Alice' and Age gt 21",
+    "filterPlaceholder": "Name eq 'Astrid' and Age gt 21",
     "formatPlaceholder": "json",
     "functionParameters": "Funktionsparametrar (från metadata)",
     "navigationPropertiesHint": "Navigeringsegenskaper:",
