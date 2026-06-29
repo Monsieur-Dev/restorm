@@ -1,4 +1,9 @@
 {
+  "account": {
+    "tooltip": "Llogaria",
+    "signIn": "Hyr",
+    "signOut": "Dil"
+  },
   "secrets": {
     "others": "Të tjera",
     "refresh": "Rifresko sekretin",

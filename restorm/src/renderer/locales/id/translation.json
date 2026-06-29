@@ -1,4 +1,9 @@
 {
+  "account": {
+    "tooltip": "Akun",
+    "signIn": "Masuk",
+    "signOut": "Keluar"
+  },
   "secrets": {
     "others": "Lainnya",
     "refresh": "Segarkan rahasia",

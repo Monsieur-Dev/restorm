@@ -157,6 +157,10 @@ export type { EditableLabelAs, EditableLabelProps } from './EditableLabel'
 export { BookmarkRibbon, BookmarkRibbonStack } from './BookmarkRibbon'
 export type { BookmarkRibbonProps, BookmarkRibbonStackProps, Bookmark } from './BookmarkRibbon'
 
+// Avatar exports
+export { Avatar, deriveInitials } from './Avatar'
+export type { AvatarProps } from './Avatar'
+
 // Tag exports
 export { Tag } from './Tag'
 export type { TagProps } from './Tag'

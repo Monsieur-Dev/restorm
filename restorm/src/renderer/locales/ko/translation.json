@@ -1,4 +1,9 @@
 {
+  "account": {
+    "tooltip": "계정",
+    "signIn": "로그인",
+    "signOut": "로그아웃"
+  },
   "secrets": {
     "others": "기타",
     "refresh": "비밀 새로 고침",

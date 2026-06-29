@@ -1,4 +1,9 @@
 {
+  "account": {
+    "tooltip": "账户",
+    "signIn": "登录",
+    "signOut": "退出登录"
+  },
   "secrets": {
     "others": "其他",
     "refresh": "刷新密钥",

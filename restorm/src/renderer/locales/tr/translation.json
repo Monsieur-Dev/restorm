@@ -1,4 +1,9 @@
 {
+  "account": {
+    "tooltip": "Hesap",
+    "signIn": "Oturum aç",
+    "signOut": "Oturumu kapat"
+  },
   "secrets": {
     "others": "Diğer",
     "refresh": "Gizli bilgiyi yenile",

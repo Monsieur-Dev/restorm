@@ -1,0 +1,6 @@
+/* Account button spacing — the titlebar right zone is a gapless flex row, so
+   nudge the account button away from the adjacent settings gear (matches the
+   zone's existing ~5px spacing convention). */
+.account-button-anchor {
+  margin-inline-end: 6px;
+}

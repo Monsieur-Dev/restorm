@@ -1,4 +1,9 @@
 {
+  "account": {
+    "tooltip": "アカウント",
+    "signIn": "ログイン",
+    "signOut": "ログアウト"
+  },
   "secrets": {
     "others": "その他",
     "refresh": "シークレットを更新",

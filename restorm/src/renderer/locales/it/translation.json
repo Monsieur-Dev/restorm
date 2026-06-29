@@ -1,4 +1,9 @@
 {
+  "account": {
+    "tooltip": "Account",
+    "signIn": "Accedi",
+    "signOut": "Esci"
+  },
   "secrets": {
     "others": "Altri",
     "refresh": "Aggiorna segreto",

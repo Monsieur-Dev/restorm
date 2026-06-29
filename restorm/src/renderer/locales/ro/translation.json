@@ -1,4 +1,9 @@
 {
+  "account": {
+    "tooltip": "Cont",
+    "signIn": "Conectare",
+    "signOut": "Deconectare"
+  },
   "secrets": {
     "others": "Altele",
     "refresh": "Reîmprospătează secretul",

@@ -1,4 +1,9 @@
 {
+  "account": {
+    "tooltip": "Konto",
+    "signIn": "Log ind",
+    "signOut": "Log ud"
+  },
   "secrets": {
     "others": "Andre",
     "refresh": "Opdater hemmelighed",

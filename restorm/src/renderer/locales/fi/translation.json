@@ -1,4 +1,9 @@
 {
+  "account": {
+    "tooltip": "Tili",
+    "signIn": "Kirjaudu sisään",
+    "signOut": "Kirjaudu ulos"
+  },
   "secrets": {
     "others": "Muut",
     "refresh": "Päivitä salaisuus",

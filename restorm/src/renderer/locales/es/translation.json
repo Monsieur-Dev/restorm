@@ -1,4 +1,9 @@
 {
+  "account": {
+    "tooltip": "Cuenta",
+    "signIn": "Iniciar sesión",
+    "signOut": "Cerrar sesión"
+  },
   "secrets": {
     "others": "Otros",
     "refresh": "Actualizar secreto",

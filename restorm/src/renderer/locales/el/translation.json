@@ -1,4 +1,9 @@
 {
+  "account": {
+    "tooltip": "Λογαριασμός",
+    "signIn": "Σύνδεση",
+    "signOut": "Αποσύνδεση"
+  },
   "secrets": {
     "others": "Άλλα",
     "refresh": "Ανανέωση μυστικού",

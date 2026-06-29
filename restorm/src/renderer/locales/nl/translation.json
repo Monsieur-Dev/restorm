@@ -1,4 +1,9 @@
 {
+  "account": {
+    "tooltip": "Account",
+    "signIn": "Inloggen",
+    "signOut": "Uitloggen"
+  },
   "secrets": {
     "others": "Overige",
     "refresh": "Geheim vernieuwen",

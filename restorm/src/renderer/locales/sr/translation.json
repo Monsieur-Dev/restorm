@@ -1,4 +1,9 @@
 {
+  "account": {
+    "tooltip": "Налог",
+    "signIn": "Пријава",
+    "signOut": "Одјава"
+  },
   "secrets": {
     "others": "Остало",
     "refresh": "Освежи тајну",

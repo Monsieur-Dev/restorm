@@ -1,4 +1,9 @@
 {
+  "account": {
+    "tooltip": "Účet",
+    "signIn": "Přihlásit se",
+    "signOut": "Odhlásit se"
+  },
   "secrets": {
     "others": "Ostatní",
     "refresh": "Obnovit tajemství",

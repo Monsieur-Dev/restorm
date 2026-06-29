@@ -1,4 +1,9 @@
 {
+  "account": {
+    "tooltip": "Tài khoản",
+    "signIn": "Đăng nhập",
+    "signOut": "Đăng xuất"
+  },
   "secrets": {
     "others": "Khác",
     "refresh": "Làm mới bí mật",

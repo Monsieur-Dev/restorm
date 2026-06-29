@@ -1,4 +1,9 @@
 {
+  "account": {
+    "tooltip": "Fiók",
+    "signIn": "Bejelentkezés",
+    "signOut": "Kijelentkezés"
+  },
   "secrets": {
     "others": "Egyéb",
     "refresh": "Titok frissítése",

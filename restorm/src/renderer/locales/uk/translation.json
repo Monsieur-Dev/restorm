@@ -1,4 +1,9 @@
 {
+  "account": {
+    "tooltip": "Обліковий запис",
+    "signIn": "Увійти",
+    "signOut": "Вийти"
+  },
   "secrets": {
     "others": "Інше",
     "refresh": "Оновити секрет",
