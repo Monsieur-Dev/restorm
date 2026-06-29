@@ -1,0 +1,80 @@
+name: Build (staging artifacts)
+
+# Internal QA build on every merge to main: build the distributables and push
+# them to the PRIVATE R2 bucket (restorm-builds — no public domain, restricted
+# access). These are NOT public releases; they let us grab the latest main build
+# for testing without cutting a version.
+#
+# MVP scope: Linux only, unsigned (same as release.yml; Windows/macOS = TASK-63).
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch: {}
+
+# Avoid piling up builds if several merges land quickly.
+concurrency:
+  group: build-staging
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build staging (linux)
+    runs-on: ubuntu-latest
+    # Skip the auto preview build on release-bump commits: manual-release.yml
+    # pushes the version bump to main + a tag, and the tag's release.yml already
+    # builds that exact commit for prod — so a preview build of it is redundant.
+    if: ${{ !startsWith(github.event.head_commit.message, 'chore(release):') }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '25'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Install + build electron-core-ui
+        run: |
+          cd electron-core-ui
+          pnpm install --frozen-lockfile
+          pnpm run build
+
+      - name: Install restorm dependencies
+        run: |
+          cd restorm
+          pnpm install --frozen-lockfile
+
+      - name: Install rpm tooling
+        run: sudo apt-get update && sudo apt-get install -y rpm
+
+      - name: Build distributables (electron-builder)
+        run: |
+          cd restorm
+          NODE_OPTIONS="--max-old-space-size=4096" pnpm run dist
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Publish to R2 (private — restorm-builds)
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: auto
+          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+        run: |
+          aws s3 cp restorm/dist-electron/ "s3://restorm-builds/main/" \
+            --recursive --endpoint-url "${R2_ENDPOINT}" \
+            --exclude "*" \
+            --include "*.deb" --include "*.rpm" --include "*.AppImage" \
+            --include "*.yml" --include "*.blockmap" \
+            --exclude "builder-debug.yml" \
+            --exclude "*/*"

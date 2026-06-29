@@ -1,0 +1,67 @@
+name: Manual Release (production)
+
+# On-demand PRODUCTION release. Pick patch/minor/major → this bumps
+# restorm/package.json, commits, creates the tag vX.Y.Z and pushes it. The tag
+# then triggers release.yml, which builds the distributables and publishes them
+# to the PUBLIC bucket (dl.restorm.app) + a GitHub Release.
+#
+# (Preview builds, by contrast, happen automatically on every merge to main via
+# build-staging.yml → the private restorm-builds bucket.)
+
+on:
+  workflow_dispatch:
+    inputs:
+      version_type:
+        description: 'Version increment'
+        required: true
+        default: 'patch'
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+
+permissions:
+  contents: write
+
+jobs:
+  bump-and-tag:
+    name: Bump version and tag
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '25'
+
+      - name: Bump version (strip pre-release, increment)
+        id: bump
+        run: |
+          CURRENT=$(node -p "require('./restorm/package.json').version")
+          BASE=${CURRENT%%-*}            # drop any -preview / -beta suffix
+          IFS='.' read -r MAJ MIN PAT <<< "$BASE"
+          case "${{ inputs.version_type }}" in
+            major) MAJ=$((MAJ + 1)); MIN=0; PAT=0 ;;
+            minor) MIN=$((MIN + 1)); PAT=0 ;;
+            patch) PAT=$((PAT + 1)) ;;
+          esac
+          NEW="${MAJ}.${MIN}.${PAT}"
+          echo "new_version=$NEW" >> "$GITHUB_OUTPUT"
+          node -e "const fs=require('fs');const p='restorm/package.json';const j=JSON.parse(fs.readFileSync(p));j.version='$NEW';fs.writeFileSync(p, JSON.stringify(j, null, 2) + '\n');"
+          echo "Bumped $CURRENT → $NEW"
+
+      - name: Commit, tag and push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add restorm/package.json
+          git commit -m "chore(release): v${{ steps.bump.outputs.new_version }}"
+          git tag "v${{ steps.bump.outputs.new_version }}"
+          git push origin HEAD:main
+          git push origin "v${{ steps.bump.outputs.new_version }}"

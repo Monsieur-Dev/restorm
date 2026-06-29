@@ -1,0 +1,103 @@
+name: Release (production)
+
+# Production release: build the distributables and publish them to the PUBLIC
+# R2 bucket (restorm-releases, served at https://dl.restorm.app) + a GitHub
+# Release. Triggered on a version tag (vX.Y.Z) or manually.
+#
+# MVP scope: Linux only (deb/rpm), unsigned. Windows + macOS (with code signing
+# / notarisation) are added in TASK-63. The matrix is structured so adding them
+# is a one-line uncomment.
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Release (${{ matrix.platform }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            platform: linux
+          # TASK-63 (signing): enable Windows + macOS once certs are set up.
+          # - os: windows-latest
+          #   platform: windows
+          # - os: macos-latest
+          #   platform: macos
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '25'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Install + build electron-core-ui
+        run: |
+          cd electron-core-ui
+          pnpm install --frozen-lockfile
+          pnpm run build
+
+      - name: Install restorm dependencies
+        run: |
+          cd restorm
+          pnpm install --frozen-lockfile
+
+      - name: Install rpm tooling (Linux)
+        if: matrix.platform == 'linux'
+        run: sudo apt-get update && sudo apt-get install -y rpm
+
+      - name: Build distributables (electron-builder)
+        run: |
+          cd restorm
+          NODE_OPTIONS="--max-old-space-size=4096" pnpm run dist
+        env:
+          # generic publish provider → electron-builder generates latest*.yml
+          # (the auto-update feed) without uploading; we upload to R2 below.
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Publish to R2 (public — restorm-releases)
+        run: |
+          aws s3 cp restorm/dist-electron/ "s3://restorm-releases/" \
+            --recursive --endpoint-url "${R2_ENDPOINT}" \
+            --exclude "*" \
+            --include "*.deb" --include "*.rpm" --include "*.exe" \
+            --include "*.dmg" --include "*.zip" --include "*.AppImage" \
+            --include "*.yml" --include "*.blockmap" \
+            --exclude "builder-debug.yml" \
+            --exclude "*/*"
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: auto
+          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+
+      - name: GitHub Release (on tag)
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+          files: |
+            restorm/dist-electron/*.deb
+            restorm/dist-electron/*.rpm
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
