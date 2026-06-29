@@ -33,6 +33,7 @@ import {
   apiUpdateRefreshFetchResultSchema,
 } from '../ipc/schemas'
 import type { z } from 'zod/v4'
+import { AUTH_IPC, type AuthState } from '../../shared/auth/authState'
 
 // Expose core-ui APIs (imported from core-ui preload modules) and extend with restorm project API
 const coreUIAPI = createCoreUIAPI()
@@ -99,6 +100,30 @@ contextBridge.exposeInMainWorld('api', {
     },
     resolvePrompt: async (promptId: string, verdict: 'allow' | 'deny'): Promise<void> => {
       await ipcRenderer.invoke(FIREWALL_IPC.PROMPT_RESOLVE, { promptId, verdict })
+    }
+  },
+  // Account / login. Named `account` to avoid the existing
+  // `api.auth` namespace (HTTP request authentication). The raw session /
+  // entitlement JWTs never cross the bridge — only the `AuthState` value.
+  account: {
+    /** Start the browser loopback login; resolves with the new state. */
+    login: async (): Promise<AuthState> => {
+      return (await ipcRenderer.invoke(AUTH_IPC.LOGIN)) as AuthState
+    },
+    /** Sign out; resolves with the (signed-out) state. */
+    logout: async (): Promise<AuthState> => {
+      return (await ipcRenderer.invoke(AUTH_IPC.LOGOUT)) as AuthState
+    },
+    /** Read the current auth state. */
+    getState: async (): Promise<AuthState> => {
+      return (await ipcRenderer.invoke(AUTH_IPC.GET_STATE)) as AuthState
+    },
+    /** Subscribe to state changes (login / logout / refresh). Returns an
+     * unsubscribe fn so consumers can detach on unmount. */
+    onStateChanged: (callback: (state: AuthState) => void): (() => void) => {
+      const handler = (_event: unknown, state: AuthState): void => { callback(state) }
+      ipcRenderer.on(AUTH_IPC.STATE_CHANGED, handler)
+      return (): void => { ipcRenderer.off(AUTH_IPC.STATE_CHANGED, handler) }
     }
   }
 })

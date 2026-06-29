@@ -1,0 +1,150 @@
+/**
+ * Entitlement client — fetches the signed entitlement from the
+ * backend and verifies it OFFLINE, plus the grace / refresh time arithmetic.
+ *
+ * Security contract (mirrors `cloud/supabase/functions/_shared/entitlement.ts`
+ * EXACTLY so the two never drift):
+ *   - the token is EdDSA (Ed25519), verified with the embedded PUBLIC key;
+ *   - verification PINS `algorithms: ['EdDSA']` so a forged `alg:none` / HS256
+ *     token is rejected (alg-confusion guard);
+ *   - the audience is PINNED to `restorm-entitlement` so a session / state token
+ *     can never be replayed as an entitlement (token-confusion guard);
+ *   - `exp` (iat + 15d) is enforced by the verify itself — a cached token past
+ *     its hard grace ceiling is cryptographically unusable, even offline.
+ *
+ * We use `jose` (the same library the backend signs with) rather than hand-rolled
+ * crypto: offline licence verification is exactly where a subtle JWT bug
+ * (skipped exp, alg confusion, base64url edge case) defeats the whole model.
+ */
+
+import * as jose from 'jose'
+import type { Capability, PlanTier } from '../../../shared/auth/authState'
+
+/** PINNED audience — must equal the backend's `AUD_ENTITLEMENT`. */
+export const ENTITLEMENT_AUDIENCE = 'restorm-entitlement'
+/** PINNED algorithm — Ed25519 only. */
+const ENTITLEMENT_ALGS = ['EdDSA']
+
+/** The verified entitlement claims (recovered from a valid token). Mirrors the
+ * backend `EntitlementClaims`. `org` is the JWT `sub`. */
+export interface EntitlementClaims {
+  org: string
+  uid: string
+  email: string
+  plan: PlanTier
+  capabilities: Capability[]
+  /** issued-at (epoch seconds). */
+  iat: number
+  /** hard grace ceiling (epoch seconds) = iat + 15d; verify rejects past it. */
+  exp: number
+  /** online-refresh-due marker (epoch seconds) = iat + 24h; advisory. */
+  refreshAfter: number
+}
+
+/** The parsed JSON body returned by the `entitlement` endpoint. The JWT is
+ * authoritative; the loose fields are advisory convenience. */
+export interface EntitlementResponse {
+  /** The signed EdDSA entitlement JWT — the only field we trust after verifying. */
+  entitlement: string
+  plan?: string
+  capabilities?: string[]
+  expires_in?: number
+  grace_seconds?: number
+}
+
+/** Import an Ed25519 SPKI PEM public key for verification. */
+export function importEntitlementPublicKey(spkiPem: string): Promise<jose.CryptoKey> {
+  return jose.importSPKI(spkiPem, ENTITLEMENT_ALGS[0])
+}
+
+/**
+ * Verify an entitlement JWT with the public key (signature + freshness +
+ * audience + algorithm pinning). Throws if invalid / tampered / expired /
+ * wrong-aud / wrong-alg. The returned claims are the ONLY trusted source of plan
+ * + capabilities.
+ *
+ * @param publicKey either an already-imported key or the raw SPKI PEM string.
+ */
+export async function verifyEntitlementToken(
+  token: string,
+  publicKey: jose.CryptoKey | string,
+  opts: { now?: () => number } = {}
+): Promise<EntitlementClaims> {
+  const key = typeof publicKey === 'string' ? await importEntitlementPublicKey(publicKey) : publicKey
+  const { payload } = await jose.jwtVerify(token, key, {
+    algorithms: ENTITLEMENT_ALGS,
+    audience: ENTITLEMENT_AUDIENCE,
+    currentDate: opts.now ? new Date(opts.now()) : undefined
+  })
+
+  const plan = payload.plan
+  const capabilities = payload.capabilities
+  const refreshAfter = payload.refreshAfter
+  if (typeof plan !== 'string' || !Array.isArray(capabilities) || typeof refreshAfter !== 'number') {
+    throw new Error('entitlement: malformed payload')
+  }
+  // `capabilities` may legitimately contain strings the app doesn't model yet;
+  // keep them verbatim (the app ignores unknown ones at the gate site).
+  return {
+    org: typeof payload.sub === 'string' ? payload.sub : '',
+    uid: typeof payload.uid === 'string' ? payload.uid : '',
+    email: typeof payload.email === 'string' ? payload.email : '',
+    plan: plan as PlanTier,
+    capabilities: capabilities.filter((c): c is Capability => typeof c === 'string'),
+    iat: Number(payload.iat),
+    exp: Number(payload.exp),
+    refreshAfter
+  }
+}
+
+/**
+ * Fetch a fresh entitlement from the backend with the session JWT as a bearer
+ * token. Returns the parsed body (caller verifies `entitlement` offline before
+ * trusting anything). Throws on non-2xx / network failure so the caller can fall
+ * back to a cached entitlement within grace.
+ *
+ * @param fetchImpl injected so the caller can wrap it in `withFirewallBypass`
+ *   (host-guarded) and tests can stub it — this module never references electron.
+ */
+export async function fetchEntitlement(
+  entitlementUrl: string,
+  sessionToken: string,
+  fetchImpl: typeof fetch
+): Promise<EntitlementResponse> {
+  const res = await fetchImpl(entitlementUrl, {
+    method: 'GET',
+    headers: { authorization: `Bearer ${sessionToken}` }
+  })
+  if (!res.ok) {
+    throw new Error(`entitlement: backend responded ${String(res.status)}`)
+  }
+  const parsed = (await res.json()) as { entitlement?: unknown }
+  if (typeof parsed.entitlement !== 'string' || parsed.entitlement.length === 0) {
+    throw new Error('entitlement: response missing signed token')
+  }
+  return parsed as EntitlementResponse
+}
+
+/** Epoch seconds, injectable clock. */
+export function nowSeconds(now?: () => number): number {
+  return Math.floor((now?.() ?? Date.now()) / 1000)
+}
+
+/**
+ * Whether a cached entitlement is still within its hard offline-grace window
+ * (now < exp). Past it the token is cryptographically unusable and treated as
+ * absent. (Verification also enforces this; this helper lets the service check
+ * cheaply without a re-verify.)
+ */
+export function isWithinGrace(claims: Pick<EntitlementClaims, 'exp'>, nowSec: number): boolean {
+  return nowSec < claims.exp
+}
+
+/**
+ * Whether an entitlement is due an online refresh (now ≥ refreshAfter, = iat+24h).
+ * Advisory only — the app keeps using the current token until `exp`; it just
+ * re-polls when online to pick up plan changes early.
+ */
+export function needsRefresh(claims: Pick<EntitlementClaims, 'refreshAfter'>, nowSec: number): boolean {
+  return nowSec >= claims.refreshAfter
+}
