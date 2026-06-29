@@ -199,6 +199,12 @@
         "zip"
       ],
       "category": "public.app-category.developer-tools"
-    }
+    },
+    "publish": [
+      {
+        "provider": "generic",
+        "url": "https://dl.restorm.app"
+      }
+    ]
   }
 }
