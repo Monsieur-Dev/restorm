@@ -56,6 +56,8 @@ export const ScenarioCallersButton: React.FC<ScenarioCallersButtonProps> = ({ us
         <Button
           className={`request-scenario-usage-button${open ? ' is-open' : ''}`}
           options={{ ariaLabel: label }}
+          aria-haspopup="dialog"
+          aria-expanded={open}
           onClick={(e: React.MouseEvent) => { e.stopPropagation(); setOpen((v) => !v) }}
           onMouseEnter={() => { setHovered(true) }}
           onMouseLeave={() => { setHovered(false) }}

@@ -65,7 +65,6 @@
     "resetSetting": "Reimposta",
     "copySettingId": "Copia l'ID dell'impostazione",
     "settingOptions": "Opzioni dell'impostazione",
-    "scopeTabsLabel": "Ambito delle impostazioni",
     "userOnlyHidden": "{{count}} impostazione/i solo utente nascosta/e in questa scheda.",
     "scope": {
       "user": "Utente",

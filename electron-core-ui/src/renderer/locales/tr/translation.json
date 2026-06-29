@@ -65,7 +65,6 @@
     "resetSetting": "Ayarı sıfırla",
     "copySettingId": "Ayar kimliğini kopyala",
     "settingOptions": "Ayar seçenekleri",
-    "scopeTabsLabel": "Ayar kapsamı",
     "userOnlyHidden": "Bu sekmede {{count}} yalnızca kullanıcıya özel ayar gizlenmiştir.",
     "scope": {
       "user": "Kullanıcı",

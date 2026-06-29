@@ -65,7 +65,6 @@
     "resetSetting": "Einstellung zurücksetzen",
     "copySettingId": "Einstellungs-ID kopieren",
     "settingOptions": "Optionen der Einstellung",
-    "scopeTabsLabel": "Geltungsbereich der Einstellungen",
     "userOnlyHidden": "{{count}} nur für den Benutzer geltende Einstellung(en) auf diesem Tab ausgeblendet.",
     "scope": {
       "user": "Benutzer",

@@ -65,7 +65,6 @@
     "resetSetting": "重置设置",
     "copySettingId": "复制设置 ID",
     "settingOptions": "设置选项",
-    "scopeTabsLabel": "设置作用范围",
     "userOnlyHidden": "{{count}} 项仅用户级设置在此选项卡中已隐藏。",
     "scope": {
       "user": "用户",

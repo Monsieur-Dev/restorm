@@ -65,7 +65,6 @@
     "resetSetting": "Đặt lại cài đặt",
     "copySettingId": "Sao chép ID cài đặt",
     "settingOptions": "Tùy chọn cài đặt",
-    "scopeTabsLabel": "Phạm vi cài đặt",
     "userOnlyHidden": "Có {{count}} cài đặt chỉ dành cho người dùng được ẩn trên tab này.",
     "scope": {
       "user": "Người dùng",

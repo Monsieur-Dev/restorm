@@ -65,7 +65,6 @@
     "resetSetting": "重設此設定",
     "copySettingId": "複製設定 ID",
     "settingOptions": "設定選項",
-    "scopeTabsLabel": "設定範圍",
     "userOnlyHidden": "此索引標籤已隱藏 {{count}} 項僅限使用者的設定。",
     "scope": {
       "user": "使用者",

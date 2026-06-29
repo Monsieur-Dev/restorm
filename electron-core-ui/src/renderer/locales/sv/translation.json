@@ -65,7 +65,6 @@
     "resetSetting": "Återställ inställning",
     "copySettingId": "Kopiera inställnings-ID",
     "settingOptions": "Inställningsalternativ",
-    "scopeTabsLabel": "Inställningsnivå",
     "userOnlyHidden": "{{count}} inställning(ar) endast för användare är dold(a) på denna flik.",
     "scope": {
       "user": "Användare",

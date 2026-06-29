@@ -65,7 +65,6 @@
     "resetSetting": "설정 초기화",
     "copySettingId": "설정 ID 복사",
     "settingOptions": "설정 옵션",
-    "scopeTabsLabel": "설정 범위",
     "userOnlyHidden": "이 탭에서는 사용자 전용 설정 {{count}}개가 숨겨져 있습니다.",
     "scope": {
       "user": "사용자",

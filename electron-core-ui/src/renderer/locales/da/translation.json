@@ -65,7 +65,6 @@
     "resetSetting": "Nulstil indstilling",
     "copySettingId": "Kopiér indstillings-ID",
     "settingOptions": "Indstillingsmuligheder",
-    "scopeTabsLabel": "Indstillingsomfang",
     "userOnlyHidden": "{{count}} brugerindstilling(er) er skjult på denne fane.",
     "scope": {
       "user": "Bruger",

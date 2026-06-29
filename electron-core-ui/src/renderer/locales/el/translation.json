@@ -65,7 +65,6 @@
     "resetSetting": "Επαναφορά ρύθμισης",
     "copySettingId": "Αντιγραφή ID ρύθμισης",
     "settingOptions": "Επιλογές ρύθμισης",
-    "scopeTabsLabel": "Εύρος ρυθμίσεων",
     "userOnlyHidden": "{{count}} ρυθμίσεις μόνο χρήστη είναι κρυμμένες σε αυτήν την καρτέλα.",
     "scope": {
       "user": "Χρήστης",

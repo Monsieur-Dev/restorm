@@ -65,7 +65,6 @@
     "resetSetting": "Palauta asetus",
     "copySettingId": "Kopioi asetuksen tunnus",
     "settingOptions": "Asetusvaihtoehdot",
-    "scopeTabsLabel": "Asetusten laajuus",
     "userOnlyHidden": "{{count}} vain käyttäjälle tarkoitettu asetus on piilotettu tällä välilehdellä.",
     "scope": {
       "user": "Käyttäjä",

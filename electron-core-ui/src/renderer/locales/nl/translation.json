@@ -65,7 +65,6 @@
     "resetSetting": "Instelling herstellen",
     "copySettingId": "Instellings-ID kopiëren",
     "settingOptions": "Instellingsopties",
-    "scopeTabsLabel": "Bereik van instellingen",
     "userOnlyHidden": "{{count}} alleen-gebruiker-instelling(en) zijn verborgen op dit tabblad.",
     "scope": {
       "user": "Gebruiker",

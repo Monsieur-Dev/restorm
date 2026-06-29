@@ -65,7 +65,6 @@
     "resetSetting": "Resetuj podešavanje",
     "copySettingId": "Kopiraj ID podešavanja",
     "settingOptions": "Opcije podešavanja",
-    "scopeTabsLabel": "Opseg podešavanja",
     "userOnlyHidden": "{{count}} korisničkih podešavanja je sakriveno na ovoj kartici.",
     "scope": {
       "user": "Korisnik",

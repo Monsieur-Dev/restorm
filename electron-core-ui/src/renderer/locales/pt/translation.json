@@ -65,7 +65,6 @@
     "resetSetting": "Repor definição",
     "copySettingId": "Copiar ID da definição",
     "settingOptions": "Opções da definição",
-    "scopeTabsLabel": "Âmbito das definições",
     "userOnlyHidden": "{{count}} definição(ões) apenas de utilizador ocultas neste separador.",
     "scope": {
       "user": "Utilizador",

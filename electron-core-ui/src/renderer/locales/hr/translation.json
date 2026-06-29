@@ -65,7 +65,6 @@
     "resetSetting": "Vrati postavku",
     "copySettingId": "Kopiraj ID postavke",
     "settingOptions": "Opcije postavke",
-    "scopeTabsLabel": "Opseg postavki",
     "userOnlyHidden": "{{count}} korisničkih postavki je skriveno na ovoj kartici.",
     "scope": {
       "user": "Korisnik",

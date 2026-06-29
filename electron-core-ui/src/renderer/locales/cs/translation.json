@@ -65,7 +65,6 @@
     "resetSetting": "Resetovat nastavení",
     "copySettingId": "Kopírovat ID nastavení",
     "settingOptions": "Možnosti nastavení",
-    "scopeTabsLabel": "Rozsah nastavení",
     "userOnlyHidden": "{{count}} nastavení pouze pro uživatele je v této záložce skryto.",
     "scope": {
       "user": "Uživatel",

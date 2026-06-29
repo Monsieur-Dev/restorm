@@ -28,6 +28,8 @@ const Button: React.FC<ButtonProps> = ({
   id,
   role = 'button',
   'aria-checked': ariaChecked,
+  'aria-expanded': ariaExpanded,
+  'aria-haspopup': ariaHasPopup,
   tabIndex,
   'data-testid': dataTestId,
   children
@@ -174,6 +176,8 @@ const Button: React.FC<ButtonProps> = ({
         aria-label={mergedOptions.ariaLabel}
         role={role}
         {...(ariaChecked !== undefined ? { 'aria-checked': ariaChecked } : {})}
+        {...(ariaExpanded !== undefined ? { 'aria-expanded': ariaExpanded } : {})}
+        {...(ariaHasPopup !== undefined ? { 'aria-haspopup': ariaHasPopup } : {})}
         tabIndex={tabIndex ?? (disabled ? -1 : 0)}
         aria-disabled={disabled}
       >

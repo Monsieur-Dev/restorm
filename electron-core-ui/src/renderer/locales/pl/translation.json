@@ -65,7 +65,6 @@
     "resetSetting": "Resetuj ustawienie",
     "copySettingId": "Kopiuj identyfikator ustawienia",
     "settingOptions": "Opcje ustawienia",
-    "scopeTabsLabel": "Zakres ustawień",
     "userOnlyHidden": "Ukryto {{count}} ustawień wyłącznie użytkownika na tej karcie.",
     "scope": {
       "user": "Użytkownik",

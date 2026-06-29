@@ -65,7 +65,6 @@
     "resetSetting": "Resetează setarea",
     "copySettingId": "Copiază ID-ul setării",
     "settingOptions": "Opțiuni de setare",
-    "scopeTabsLabel": "Domeniul setărilor",
     "userOnlyHidden": "{{count}} setare/setări doar pentru utilizator sunt ascunse în acest tab.",
     "scope": {
       "user": "Utilizator",

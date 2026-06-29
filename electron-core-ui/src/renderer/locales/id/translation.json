@@ -65,7 +65,6 @@
     "resetSetting": "Atur ulang pengaturan",
     "copySettingId": "Salin ID pengaturan",
     "settingOptions": "Opsi pengaturan",
-    "scopeTabsLabel": "Cakupan pengaturan",
     "userOnlyHidden": "{{count}} pengaturan khusus pengguna disembunyikan pada tab ini.",
     "scope": {
       "user": "Pengguna",

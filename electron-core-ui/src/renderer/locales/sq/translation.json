@@ -65,7 +65,6 @@
     "resetSetting": "Rikthe parametrin",
     "copySettingId": "Kopjo ID-në e parametrit",
     "settingOptions": "Opsionet e parametrit",
-    "scopeTabsLabel": "Fusha e parametrave",
     "userOnlyHidden": "{{count}} parametra vetëm për përdoruesin janë të fshehur në këtë skedë.",
     "scope": {
       "user": "Përdoruesi",
