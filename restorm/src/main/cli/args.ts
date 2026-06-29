@@ -1,7 +1,8 @@
 import { app } from 'electron'
+import { execFileSync } from 'node:child_process'
 import { existsSync, rmSync } from 'fs'
-import { join } from 'path'
-import { logger } from 'electron-core-ui'
+import { basename, join } from 'path'
+import { logger, generateUniqueSessionName, readAllInstancesIncludingCut, resolveMcpDiscoveryDir } from 'electron-core-ui'
 import yargs from 'yargs'
 import type { ArgumentsCamelCase } from 'yargs'
 
@@ -181,13 +182,35 @@ export function parseCliArgs(): CliArgs {
 
 /**
  * Resolve the MCP session name with a stable fallback so every instance
- * always has one. Precedence: the `--mcp-session-name` flag → the
- * `RESTORM_MCP_SESSION_NAME` env var → an auto name derived from the
- * `--open` target's basename → a short generated id. The name is matched
- * verbatim by the cross-instance bridge, so a human-readable string
- * (spaces included) is fine. Exported for unit testing.
+ * always has one. Precedence:
+ *   1. `--mcp-session-name` flag (verbatim)
+ *   2. `RESTORM_MCP_SESSION_NAME` env var (verbatim)
+ *   3. A name derived from the `--open` target's basename, pid-suffixed so two
+ *      instances opening the same file stay distinct.
+ *   4. A friendly random adjective-animal pair (e.g. `lucky-unicorn`), unique
+ *      across currently live instances; in DEV mode the worktree basename is
+ *      appended as `<name>@<worktree>` for developer convenience.
+ *
+ * The name is matched verbatim by the cross-instance bridge, so human-readable
+ * strings (spaces, @ signs) are fine. Exported for unit testing.
+ *
+ * The optional `_resolveWorktreeBasename` parameter is injectable for tests: in
+ * production the default reads the git toplevel via `execFileSync`.
  */
-export function resolveMcpSessionName(flagValue: string | undefined, openTarget: string | undefined): string {
+function defaultResolveWorktreeBasename(): string {
+  try {
+    const toplevel = execFileSync('git', ['rev-parse', '--show-toplevel'], { encoding: 'utf8' }).trim()
+    return basename(toplevel)
+  } catch {
+    return basename(process.cwd())
+  }
+}
+
+export function resolveMcpSessionName(
+  flagValue: string | undefined,
+  openTarget: string | undefined,
+  _resolveWorktreeBasename: () => string = defaultResolveWorktreeBasename
+): string {
   const flag = flagValue?.trim()
   if (flag !== undefined && flag !== '') return flag
   const env = process.env['RESTORM_MCP_SESSION_NAME']?.trim()
@@ -204,9 +227,18 @@ export function resolveMcpSessionName(flagValue: string | undefined, openTarget:
     // this entirely when the user wants a fixed readable name).
     if (cleaned !== '') return `restorm:${cleaned} (${String(process.pid)})`
   }
-  // No project to name after — fall back to a short pid-derived id so two
-  // anonymous instances still get distinct, stable names.
-  return `restorm-${String(process.pid)}`
+  // No project to name after — generate a friendly random adjective-animal name
+  // and ensure it does not clash with any currently live instance.
+  const isDev = process.env['NODE_ENV'] === 'development' || !app.isPackaged
+  const discoveryDir = resolveMcpDiscoveryDir('restorm-mcp', process.env['RESTORM_MCP_DIR'])
+  const existingNames = readAllInstancesIncludingCut(discoveryDir).map((i) => i.name)
+  // In DEV, append the worktree's root directory name so simultaneous
+  // per-worktree instances are visually distinct. Use `git rev-parse
+  // --show-toplevel` (not `process.cwd()`) because the canonical launch
+  // `pnpm dev:restorm` runs with cwd = the restorm sub-package dir, which
+  // is the same for every worktree; git always returns the worktree root.
+  const worktreeSuffix = isDev ? _resolveWorktreeBasename() : undefined
+  return generateUniqueSessionName(existingNames, worktreeSuffix)
 }
 
 export function clearUserSettings(): void {

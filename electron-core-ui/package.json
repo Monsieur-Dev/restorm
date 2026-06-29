@@ -152,6 +152,7 @@
     "remark-gfm": "^4.0.1",
     "simple-icons": "^16.20.0",
     "simplex-noise": "^4.0.3",
+    "unique-names-generator": "^4.7.1",
     "winston": "^3.19.0",
     "zod": "^4.4.3"
   },

@@ -158,6 +158,9 @@ export type {
   EnsureUuidResult
 } from './services'
 
+// Session name generator — friendly random adjective-animal names for MCP instances
+export { generateSessionName, generateUniqueSessionName } from './utils/sessionNameGenerator'
+
 // Decorators
 export {
   trackable,
