@@ -576,6 +576,13 @@
   will-change: transform;
 }
 
+/* ARRANGE animation: the programmatic re-arrange (palette "Re-arrange actions"
+ * and the MCP arrange_scenario tool) glides nodes to their new positions by
+ * interpolating the node POSITIONS frame-by-frame in JS (requestAnimationFrame),
+ * NOT a CSS transform transition — see ScenarioEditorView's animateNodePositions.
+ * Driving the data positions makes React Flow redraw the EDGES every frame too,
+ * so links glide with their nodes instead of snapping to the final layout. */
+
 .scn-node {
   min-width: 160px;
   border: 1px solid var(--widget-border, #454545);
