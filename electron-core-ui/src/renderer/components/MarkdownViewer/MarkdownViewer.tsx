@@ -4,6 +4,7 @@ import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import rehypeRaw from 'rehype-raw'
 import rehypeHighlight from 'rehype-highlight'
+import { Button } from '../Button'
 import { Tooltip } from '../Tooltip'
 import './markdownViewer.css'
 // Theme-aware syntax highlighting: instead of a fixed highlight.js stylesheet
@@ -33,7 +34,7 @@ const CodeBlock: React.FC<CodeBlockProps> = ({ children, copyText, dataTestId })
   const { t } = useTranslation()
   const [copied, setCopied] = useState(false)
   const [showCopyTooltip, setShowCopyTooltip] = useState(false)
-  const copyBtnRef = useRef<HTMLButtonElement>(null)
+  const copyBtnRef = useRef<HTMLSpanElement>(null)
   // Track the copy-reset timer so it can be cleared on unmount (or before a
   // re-arm) — an untracked setTimeout fired setCopied() after unmount when the
   // block was removed within the 2s window.
@@ -64,21 +65,22 @@ const CodeBlock: React.FC<CodeBlockProps> = ({ children, copyText, dataTestId })
         * <details> disclosure (`details > :not(summary)`), which
         * would otherwise leave the button hanging past the frame. */}
       <div className="markdown-code-block-inner">
-        <button
+        <span
           ref={copyBtnRef}
-          type="button"
-          className={`markdown-code-copy-btn ${copied ? 'copied' : ''}`}
-          onClick={handleCopy}
-          aria-label={copied ? t('codeEditor.copyButton.copied', 'Copied!') : t('codeEditor.copyButton.copy', 'Copy code')}
-          onMouseEnter={() => { setShowCopyTooltip(true) }}
-          onMouseLeave={() => { setShowCopyTooltip(false) }}
-          {...(dataTestId && {
-            'data-testid': `${dataTestId}-copy`,
-            'data-is-copied': copied ? 'true' : 'false'
-          })}
+          style={{ display: 'inline-flex' }}
+          {...(dataTestId && { 'data-is-copied': copied ? 'true' : 'false' })}
         >
-          <i className={`codicon codicon-${copied ? 'check' : 'copy'}`} />
-        </button>
+          <Button
+            line
+            icon={copied ? 'check' : 'copy'}
+            className={`markdown-code-copy-btn ${copied ? 'copied' : ''}`}
+            options={{ ariaLabel: copied ? t('codeEditor.copyButton.copied', 'Copied!') : t('codeEditor.copyButton.copy', 'Copy code') }}
+            onClick={handleCopy}
+            onMouseEnter={() => { setShowCopyTooltip(true) }}
+            onMouseLeave={() => { setShowCopyTooltip(false) }}
+            {...(dataTestId && { 'data-testid': `${dataTestId}-copy` })}
+          />
+        </span>
         <Tooltip
           targetRef={copyBtnRef}
           content={copied ? t('codeEditor.copyButton.copied', 'Copied!') : t('codeEditor.copyButton.copy', 'Copy code')}

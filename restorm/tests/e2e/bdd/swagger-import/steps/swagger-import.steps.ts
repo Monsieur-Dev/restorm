@@ -60,7 +60,7 @@ When('I close the active workbench tab', async () => {
 
   const activeTab = page.locator('.tab[role="tab"][aria-selected="true"]').first()
   await expect(activeTab).toBeVisible({ timeout: 2000 })
-  await activeTab.locator('button[aria-label="Close"]').first().click()
+  await activeTab.locator('[aria-label="Close"]').first().click()
   await page.waitForTimeout(300)
 })
 

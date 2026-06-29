@@ -1,5 +1,14 @@
-import { describe, it, expect } from 'vitest'
+import React from 'react'
+import { describe, it, expect, vi } from 'vitest'
 import { render } from '@testing-library/react'
+
+// Stub out the renderer barrel so the test loader does not have to resolve
+// Monaco (pulled in transitively via ModelRefLink → Button → ECUI barrel).
+// We only need Button to pass children through so model-name text is visible.
+vi.mock('electron-core-ui/renderer', () => ({
+  Button: ({ children }: { children: React.ReactNode }) => <>{children}</>
+}))
+
 import { CompositionSection } from '../../src/renderer/src/components/documentation/CompositionSection'
 import type { ModelDocumentation } from '../../src/shared/types/apiDocumentation'
 

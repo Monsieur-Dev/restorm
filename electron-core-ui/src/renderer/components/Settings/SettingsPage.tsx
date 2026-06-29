@@ -1,5 +1,6 @@
 import React, { useContext, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { Tabs, type Tab } from '../Tabs'
 import { SelectBox } from '../SelectBox'
 import { Tooltip } from '../Tooltip'
 import type { ISelectData } from '../SelectBox/types'
@@ -122,57 +123,69 @@ const SettingsPageBody: React.FC<SettingsPageBodyProps> = ({
   const [scope, setScope] = useState<SettingsScope>('user')
   const workspaceDisabled = workspacePath === null
   const [showWorkspaceTooltip, setShowWorkspaceTooltip] = useState(false)
-  const workspaceTabRef = useRef<HTMLButtonElement>(null)
+  const workspaceTabLabelRef = useRef<HTMLSpanElement>(null)
   // If the workspace closes while the Workspace tab is active, fall
   // back to User so the user isn't stuck on a disabled tab.
   React.useEffect(() => {
     if (workspaceDisabled && scope === 'workspace') setScope('user')
   }, [workspaceDisabled, scope])
 
-  const tabClass = (s: SettingsScope, disabled: boolean): string => [
-    'settings-page-tab',
-    s === scope ? 'settings-page-tab--active' : '',
-    disabled ? 'settings-page-tab--disabled' : ''
-  ].filter(Boolean).join(' ')
+  const settingsTabs: Tab[] = [
+    {
+      id: 'user',
+      label: (
+        <span data-testid={`${rootTestId}-tab-user`}>
+          {t('settings.scope.user', 'User')}
+        </span>
+      ),
+      useScrollableElement: false,
+      content: (
+        <>
+          <SettingsView data-testid={`${rootTestId}-settings-view`} scope="user" />
+          {children}
+        </>
+      )
+    },
+    {
+      id: 'workspace',
+      label: (
+        <span
+          ref={workspaceTabLabelRef}
+          data-testid={`${rootTestId}-tab-workspace`}
+          style={workspaceDisabled ? { opacity: 0.5, cursor: 'not-allowed' } : undefined}
+          onMouseEnter={() => { setShowWorkspaceTooltip(true) }}
+          onMouseLeave={() => { setShowWorkspaceTooltip(false) }}
+        >
+          {t('settings.scope.workspace', 'Workspace')}
+        </span>
+      ),
+      useScrollableElement: false,
+      content: (
+        <>
+          <SettingsView data-testid={`${rootTestId}-settings-view`} scope="workspace" />
+          {children}
+        </>
+      )
+    }
+  ]
 
   return (
     <div className="settings-page" data-testid={rootTestId} data-language={language} data-scope={scope}>
-      <div className="settings-page-tabs" role="tablist" aria-label={t('settings.scopeTabsLabel', 'Settings scope')}>
-        <button
-          type="button"
-          role="tab"
-          aria-selected={scope === 'user'}
-          className={tabClass('user', false)}
-          data-testid={`${rootTestId}-tab-user`}
-          onClick={() => { setScope('user') }}
-        >
-          {t('settings.scope.user', 'User')}
-        </button>
-        <button
-          ref={workspaceTabRef}
-          type="button"
-          role="tab"
-          aria-selected={scope === 'workspace'}
-          aria-disabled={workspaceDisabled}
-          disabled={workspaceDisabled}
-          className={tabClass('workspace', workspaceDisabled)}
-          data-testid={`${rootTestId}-tab-workspace`}
-          aria-label={workspacePath ?? t('settings.scope.workspaceDisabledTooltip', 'Open a project to edit workspace settings')}
-          onMouseEnter={() => { setShowWorkspaceTooltip(true) }}
-          onMouseLeave={() => { setShowWorkspaceTooltip(false) }}
-          onClick={() => { if (!workspaceDisabled) setScope('workspace') }}
-        >
-          {t('settings.scope.workspace', 'Workspace')}
-        </button>
-        <Tooltip
-          targetRef={workspaceTabRef}
-          content={workspacePath ?? t('settings.scope.workspaceDisabledTooltip', 'Open a project to edit workspace settings')}
-          show={showWorkspaceTooltip}
-          placement="below"
-        />
-      </div>
-      <SettingsView data-testid={`${rootTestId}-settings-view`} scope={scope} />
-      {children}
+      <Tabs
+        tabs={settingsTabs}
+        activeTabId={scope}
+        onTabChange={(id) => {
+          if (id === 'workspace' && workspaceDisabled) return
+          setScope(id as SettingsScope)
+        }}
+        mountStrategy="active-only"
+      />
+      <Tooltip
+        targetRef={workspaceTabLabelRef}
+        content={workspacePath ?? t('settings.scope.workspaceDisabledTooltip', 'Open a project to edit workspace settings')}
+        show={showWorkspaceTooltip}
+        placement="below"
+      />
     </div>
   )
 }

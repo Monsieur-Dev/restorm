@@ -247,7 +247,7 @@ const EnvironmentConfigPanel: React.FC<EnvironmentConfigPanelProps> = ({ folder,
 
   // Track which environment's color picker is open
   const [colorPickerEnvId, setColorPickerEnvId] = useState<string | null>(null)
-  const colorButtonRef = useRef<HTMLButtonElement | null>(null)
+  const colorButtonRef = useRef<HTMLSpanElement | null>(null)
   const tooltipClassName = 'restorm-env-color-picker-tooltip'
 
   // Close color picker on outside mousedown
@@ -449,32 +449,36 @@ const EnvironmentConfigPanel: React.FC<EnvironmentConfigPanelProps> = ({ folder,
         style={{ width: 24, height: 24 }}
         data-testid={`environment-icon-select-${env.id}`}
       />
-      <button
+      <span
         ref={(el) => {
-          // Store ref when this is the active color picker target
+          // Keep colorButtonRef pointing to the wrapper of the active color picker target.
           if (colorPickerEnvId === env.id || !colorButtonRef.current) {
             colorButtonRef.current = el
           }
         }}
-        type="button"
-        onClick={(e) => {
-          e.stopPropagation()
-          colorButtonRef.current = e.currentTarget as HTMLButtonElement
-          setColorPickerEnvId(prev => prev === env.id ? null : env.id)
-        }}
-        style={{
-          width: 14,
-          height: 14,
-          minWidth: 14,
-          padding: 0,
-          border: '1px solid var(--panel-border)',
-          borderRadius: 3,
-          backgroundColor: env.color ?? 'var(--button-background-emphasis-1, #c75000)',
-          cursor: 'pointer',
-          flexShrink: 0
-        }}
-        data-testid={`environment-color-button-${env.id}`}
-      />
+        data-env-color-btn={env.id}
+        style={{ display: 'inline-flex', flexShrink: 0 }}
+      >
+        <Button
+          style={{
+            width: 14,
+            height: 14,
+            minWidth: 14,
+            padding: 0,
+            border: '1px solid var(--panel-border)',
+            borderRadius: 3,
+          }}
+          backgroundColor={env.color ?? 'var(--button-background-emphasis-1, #c75000)'}
+          onClick={(e: React.MouseEvent) => {
+            e.stopPropagation()
+            // Update ref to the closest wrapper span for accurate Tooltip anchoring.
+            const wrapper = (e.target as HTMLElement).closest('[data-env-color-btn]')
+            colorButtonRef.current = wrapper as HTMLSpanElement | null
+            setColorPickerEnvId(prev => prev === env.id ? null : env.id)
+          }}
+          data-testid={`environment-color-button-${env.id}`}
+        />
+      </span>
     </>
   ), [handleIconChange, colorPickerEnvId])
 

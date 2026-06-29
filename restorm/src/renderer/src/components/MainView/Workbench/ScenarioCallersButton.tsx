@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Tooltip } from 'electron-core-ui/renderer'
+import { Button, Tooltip } from 'electron-core-ui/renderer'
 import { Badge } from '../../common/Badge'
 import type { ScenarioScenarioUsage } from '../../../services/scenarioRequestUsage'
 
@@ -21,7 +21,8 @@ export interface ScenarioCallersButtonProps {
  */
 export const ScenarioCallersButton: React.FC<ScenarioCallersButtonProps> = ({ usages, onOpenScenario }) => {
   const { t } = useTranslation()
-  const buttonRef = useRef<HTMLButtonElement>(null)
+  // Span wrapper provides a stable DOM ref for Tooltip anchoring and outside-click detection.
+  const buttonRef = useRef<HTMLSpanElement>(null)
   const [open, setOpen] = useState(false)
   const [hovered, setHovered] = useState(false)
 
@@ -47,21 +48,22 @@ export const ScenarioCallersButton: React.FC<ScenarioCallersButtonProps> = ({ us
   const label = t('scenario.callers.button', 'Scenarios calling this scenario')
   return (
     <>
-      <button
+      <span
         ref={buttonRef}
-        type="button"
-        className={`request-scenario-usage-button${open ? ' is-open' : ''}`}
-        aria-label={label}
-        aria-haspopup="dialog"
-        aria-expanded={open}
-        onClick={(e) => { e.stopPropagation(); setOpen((v) => !v) }}
+        style={{ display: 'inline-flex' }}
         onMouseDown={(e) => { e.stopPropagation() }}
-        onMouseEnter={() => { setHovered(true) }}
-        onMouseLeave={() => { setHovered(false) }}
-        data-testid="scenario-callers-button"
       >
-        <Badge type="SCENARIO" />
-      </button>
+        <Button
+          className={`request-scenario-usage-button${open ? ' is-open' : ''}`}
+          options={{ ariaLabel: label }}
+          onClick={(e: React.MouseEvent) => { e.stopPropagation(); setOpen((v) => !v) }}
+          onMouseEnter={() => { setHovered(true) }}
+          onMouseLeave={() => { setHovered(false) }}
+          data-testid="scenario-callers-button"
+        >
+          <Badge type="SCENARIO" />
+        </Button>
+      </span>
       <Tooltip
         targetRef={buttonRef}
         show={hovered && !open}
@@ -79,15 +81,15 @@ export const ScenarioCallersButton: React.FC<ScenarioCallersButtonProps> = ({ us
             <ul className="request-scenario-usage-list">
               {usages.map((usage) => (
                 <li key={usage.scenario.id}>
-                  <button
-                    type="button"
+                  <Button
+                    link
                     className="request-scenario-usage-link"
                     onClick={() => { openCaller(usage) }}
                     data-testid={`scenario-callers-link-${usage.scenario.id}`}
                   >
                     <Badge type="SCENARIO" />
                     <span className="request-scenario-usage-name">{usage.scenario.name}</span>
-                  </button>
+                  </Button>
                 </li>
               ))}
             </ul>

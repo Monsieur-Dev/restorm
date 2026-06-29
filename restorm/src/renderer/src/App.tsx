@@ -1021,25 +1021,14 @@ const App: React.FC = () => {
         body: (
           <div data-testid="auth-failure-toast">
             <div style={{ marginBottom: 6 }}>{reason}</div>
-            <a
-              role="button"
-              tabIndex={0}
+            <Button
+              link
               data-testid="auth-failure-toast-open-link"
-              onClick={(e) => { e.preventDefault(); handleOpen() }}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.preventDefault()
-                  handleOpen()
-                }
-              }}
-              style={{
-                cursor: 'pointer',
-                color: 'var(--linkForeground, #3794ff)',
-                textDecoration: 'underline'
-              }}
+              onClick={() => { handleOpen() }}
+              style={{ color: 'var(--linkForeground, #3794ff)' }}
             >
               {t('authFailureToast.openAuthRoute', 'Open authentication route')}
-            </a>
+            </Button>
           </div>
         ),
         durationMs: 8000,

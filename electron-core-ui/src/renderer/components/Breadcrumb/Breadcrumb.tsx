@@ -1,5 +1,6 @@
 import React, { useCallback } from 'react'
 import type { Icon } from '../../../types/icon'
+import { Button } from '../Button'
 import { IconView } from '../IconView'
 import { IconSelect } from '../IconSelect/IconSelect'
 import { EditableLabel } from '../EditableLabel'
@@ -136,14 +137,12 @@ const BreadcrumbInner: React.FC<BreadcrumbProps> = ({
             const isFinalListItem = index === items.length - 1
             return (
               <li key={item.id} className="ecui-breadcrumb-item">
-                <button
-                  type="button"
-                  className="ecui-breadcrumb-link"
-                  onClick={(event): void => {
-                    if (onItemClick) {
-                      onItemClick(item, index, event)
-                    }
-                  }}
+                {/* span wrapper: onAuxClick (middle-click) is not forwarded by
+                    ECUI Button; a display:contents span preserves the breadcrumb
+                    item layout while intercepting middle-click before the browser
+                    auto-scroll kicks in. Type-cast: callers ignore the event arg. */}
+                <span
+                  style={{ display: 'contents' }}
                   onAuxClick={(event): void => {
                     if (event.button !== 1) return
                     // Prevent the browser's default middle-click behaviour
@@ -151,13 +150,23 @@ const BreadcrumbInner: React.FC<BreadcrumbProps> = ({
                     // we're hijacking it for navigation.
                     event.preventDefault()
                     if (onItemAuxClick) {
-                      onItemAuxClick(item, index, event)
+                      onItemAuxClick(item, index, event as unknown as React.MouseEvent<HTMLButtonElement>)
                     }
                   }}
                 >
-                  {renderIcon(item.icon)}
-                  {item.label}
-                </button>
+                  <Button
+                    link
+                    className="ecui-breadcrumb-link"
+                    onClick={(event): void => {
+                      if (onItemClick) {
+                        onItemClick(item, index, event as unknown as React.MouseEvent<HTMLButtonElement>)
+                      }
+                    }}
+                  >
+                    {renderIcon(item.icon)}
+                    {item.label}
+                  </Button>
+                </span>
                 {!isFinalListItem ? (
                   <span className="ecui-breadcrumb-separator" aria-hidden="true">
                     <i className="codicon codicon-chevron-right" />

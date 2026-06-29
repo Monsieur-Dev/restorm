@@ -132,6 +132,14 @@ if (fs.existsSync(utilsDir)) {
   copyCssFilesRecursive(utilsDir, destUtilsDir)
 }
 
+// Effects (e.g. borderBeam) also import CSS directly; mirror them alongside
+// the compiled JS so the import resolves through `dist/.../effects/*`.
+const effectsDir = path.join(__dirname, '..', 'src', 'renderer', 'effects')
+const destEffectsDir = path.join(distSrcDir, 'renderer', 'effects')
+if (fs.existsSync(effectsDir)) {
+  copyCssFilesRecursive(effectsDir, destEffectsDir)
+}
+
 // Copy resources directory (themes, etc.)
 copyIfExists(
   path.join(__dirname, '..', 'resources'),

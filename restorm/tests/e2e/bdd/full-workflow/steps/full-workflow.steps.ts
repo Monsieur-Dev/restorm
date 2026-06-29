@@ -323,7 +323,7 @@ async function runImport(currentPage: Page, source: string): Promise<void> {
   // imports don't accumulate tabs that obscure other tab-based assertions.
   const activeTab = currentPage.locator('.tab[role="tab"][aria-selected="true"]').first()
   await expect(activeTab).toBeVisible({ timeout: 10000 })
-  await activeTab.locator('button[aria-label="Close"]').first().click()
+  await activeTab.locator('[aria-label="Close"]').first().click()
   await expect(currentPage.locator('.tab[role="tab"]')).toHaveCount(0, { timeout: 5000 })
 }
 
@@ -377,7 +377,7 @@ When(
     // assertions; close it the same way `runImport` does.
     const activeTab = page.locator('.tab[role="tab"][aria-selected="true"]').first()
     await expect(activeTab).toBeVisible({ timeout: 10000 })
-    await activeTab.locator('button[aria-label="Close"]').first().click()
+    await activeTab.locator('[aria-label="Close"]').first().click()
     await expect(page.locator('.tab[role="tab"]')).toHaveCount(0, { timeout: 5000 })
   }
 )
@@ -1488,13 +1488,13 @@ When('I focus the {string} folder tab', async ({}, folderName: string) => {
 
 When('I click the breadcrumb folder {string} in the active tab', async ({}, label: string) => {
   if (!page) throw new Error('app must be launched')
-  // Non-last breadcrumb items render as `<button class="ecui-breadcrumb-link">`.
+  // Non-last breadcrumb items render as `<a class="ecui-breadcrumb-link">` (ECUI Button).
   // Match the label with `getByText(exact)` — `hasText` alone does
   // substring matching, which would pick "Swagger Petstore" (contains
   // "pet") before the actual "pet" segment.
   const p = page
   const segment = p
-    .locator('li.ecui-breadcrumb-item:not(.ecui-breadcrumb-item--last) button.ecui-breadcrumb-link:visible')
+    .locator('li.ecui-breadcrumb-item:not(.ecui-breadcrumb-item--last) a.ecui-breadcrumb-link:visible')
     .filter({ has: p.getByText(label, { exact: true }) })
     .first()
   await expect(segment).toBeVisible({ timeout: 5000 })
@@ -1507,10 +1507,10 @@ When('I middle-click the breadcrumb folder {string} in the active tab', async ({
   if (!page) throw new Error('app must be launched')
   // Same selector as the regular-click step; the aux-click gesture
   // uses Playwright's `click({ button: 'middle' })` so browsers route
-  // it through `onAuxClick` rather than `onClick`.
+  // it through `onAuxClick` on the span wrapper rather than `onClick`.
   const p = page
   const segment = p
-    .locator('li.ecui-breadcrumb-item:not(.ecui-breadcrumb-item--last) button.ecui-breadcrumb-link:visible')
+    .locator('li.ecui-breadcrumb-item:not(.ecui-breadcrumb-item--last) a.ecui-breadcrumb-link:visible')
     .filter({ has: p.getByText(label, { exact: true }) })
     .first()
   await expect(segment).toBeVisible({ timeout: 5000 })
@@ -2001,7 +2001,7 @@ When('I close the active tab', async () => {
     ? focused.locator('.tab[role="tab"][aria-selected="true"]').first()
     : page.locator('.tab[role="tab"][aria-selected="true"]').first()
   await expect(activeTab).toBeVisible({ timeout: 5000 })
-  await activeTab.locator('button[aria-label="Close"]').first().click()
+  await activeTab.locator('[aria-label="Close"]').first().click()
 })
 
 // ---------------------------------------------------------------------------
@@ -2614,12 +2614,11 @@ Then('the console panel should be visible', async () => {
 
 Then('the console toolbar should default to curl', async () => {
   if (!page) throw new Error('app must be launched')
-  // The active toggle button is the one that has `aria-pressed="true"`
-  // (or equivalent) — the toolbar uses ECUI Button so the active
-  // state is reflected via class. Check both for resilience.
+  // The active toggle uses ECUI Button with role="radio" — the active
+  // state is reflected via `aria-checked="true"` on the rendered <a>.
   const curl = page.locator('[data-testid="console-toolbar-shell-curl"]').first()
   await expect(curl).toBeVisible({ timeout: 5_000 })
-  await expect(curl).toHaveAttribute('aria-pressed', 'true', { timeout: 5_000 })
+  await expect(curl).toHaveAttribute('aria-checked', 'true', { timeout: 5_000 })
 })
 
 When('I toggle the console shell to powershell', async () => {

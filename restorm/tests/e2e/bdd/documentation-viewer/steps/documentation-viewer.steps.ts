@@ -93,7 +93,7 @@ Given('the docs viewer scenario is bootstrapped with the Petstore spec', async (
   // 3. Close any auto-opened request tab and let the window settle.
   const activeTab = page.locator('.tab[role="tab"][aria-selected="true"]').first()
   if (await activeTab.count() > 0 && await activeTab.isVisible()) {
-    const closeBtn = activeTab.locator('button[aria-label="Close"]').first()
+    const closeBtn = activeTab.locator('[aria-label="Close"]').first()
     if (await closeBtn.count() > 0) await closeBtn.click()
   }
   await page.waitForTimeout(500)
