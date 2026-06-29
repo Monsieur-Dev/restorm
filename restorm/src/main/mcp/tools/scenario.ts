@@ -104,8 +104,10 @@ function deriveRequestSlotPorts(node: ScenarioNode): ScenarioPort[] {
 
 interface KV { key: string; value?: unknown; enabled?: boolean }
 
-/** Push the mutated scenario to any open editor + sidebar, then autosave. */
-export function broadcastScenario(scenario: Scenario): void {
+/** Push the mutated scenario to any open editor + sidebar, then autosave.
+ * Pass `source:'arrange'` when the positions were computed by the ELK
+ * auto-arranger so open editors can animate nodes to their new coordinates. */
+export function broadcastScenario(scenario: Scenario, source?: 'arrange'): void {
   for (const win of BrowserWindow.getAllWindows()) {
     if (win.isDestroyed()) continue
     win.webContents.send('mcp:scenario-updated', {
@@ -113,7 +115,8 @@ export function broadcastScenario(scenario: Scenario): void {
       nodes: scenario.nodes,
       edges: scenario.edges,
       name: scenario.name,
-      params: scenario.params
+      params: scenario.params,
+      ...(source ? { source } : {})
     })
   }
   broadcastTreeReplace()
@@ -339,7 +342,7 @@ export function registerScenarioTools(mcp: McpService): void {
       // Fast path stays synchronous (the layout is async); only `arrange`
       // returns a Promise — the MCP SDK awaits either.
       if (args['arrange'] === true) {
-        return arrangeScenario(scenario).then(() => { broadcastScenario(scenario); return reply(true) })
+        return arrangeScenario(scenario).then(() => { broadcastScenario(scenario, 'arrange'); return reply(true) })
       }
       broadcastScenario(scenario)
       return reply(false)
@@ -365,7 +368,7 @@ export function registerScenarioTools(mcp: McpService): void {
       const scenario = findScenario(id)
       if (!scenario) return errorReply(`No scenario with id ${id}`)
       const moved = await arrangeScenario(scenario)
-      broadcastScenario(scenario)
+      broadcastScenario(scenario, 'arrange')
       return jsonReply({ scenarioId: id, moved })
     }
   )

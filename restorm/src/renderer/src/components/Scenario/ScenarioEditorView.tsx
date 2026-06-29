@@ -946,6 +946,44 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
   // to reflow.
   const layoutScenarioRef = useRef<string>('')
   const autoLayoutTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  // Animates a programmatic re-arrange (palette "Re-arrange actions" or the MCP
+  // arrange_scenario tool) by interpolating the node POSITIONS frame-by-frame
+  // with requestAnimationFrame, rather than a CSS transform transition. Driving
+  // the data positions (not just the visual transform) means React Flow redraws
+  // the EDGES every frame too, so links glide with their nodes instead of
+  // snapping to the final layout. Cheap despite the per-frame setNodes: the node
+  // component is memoised to ignore position, so only React Flow's lightweight
+  // node-wrapper transforms and edge paths recompute.
+  const arrangeRafRef = useRef<number | null>(null)
+  const animateNodePositions = useCallback(
+    (targets: Map<string, { x: number; y: number }>, durationMs: number, onDone?: () => void): void => {
+      if (arrangeRafRef.current != null) cancelAnimationFrame(arrangeRafRef.current)
+      const starts = new Map(nodesRef.current.map((n) => [n.id, { x: n.position.x, y: n.position.y }]))
+      const t0 = performance.now()
+      // easeInOutCubic — symmetric accelerate/decelerate, close to the prior
+      // cubic-bezier(.4,0,.2,1) feel the speed was validated against.
+      const ease = (t: number): number => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2)
+      const tick = (now: number): void => {
+        const raw = Math.min(1, (now - t0) / durationMs)
+        const e = ease(raw)
+        setNodes((cur) =>
+          cur.map((n) => {
+            const s = starts.get(n.id)
+            const tg = targets.get(n.id)
+            if (!s || !tg) return n
+            return { ...n, position: { x: s.x + (tg.x - s.x) * e, y: s.y + (tg.y - s.y) * e } }
+          })
+        )
+        if (raw < 1) arrangeRafRef.current = requestAnimationFrame(tick)
+        else { arrangeRafRef.current = null; onDone?.() }
+      }
+      arrangeRafRef.current = requestAnimationFrame(tick)
+    },
+    [setNodes]
+  )
+  // Cancel any in-flight arrange animation on unmount (avoids a setState on a
+  // torn-down component, like the autoLayoutTimerRef cleanup).
+  useEffect(() => () => { if (arrangeRafRef.current != null) cancelAnimationFrame(arrangeRafRef.current) }, [])
   useEffect(() => {
     if (nodes.length === 0) return
     // Schedule ONLY for this scenario's first open. The id is claimed lazily in
@@ -1032,11 +1070,18 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
         return { ...n, position: p }
       })
       if (laid.every((n, i) => n === before[i])) return
-      setNodes(laid)
+      // Glide the nodes AND their edges to the new layout (rAF interpolation of
+      // the data positions), then persist the final positions and reframe.
+      const targets = new Map(laid.map((n) => [n.id, n.position]))
+      // Persist the final layout immediately — not in the rAF onDone — so a tab
+      // switch mid-glide can't drop the re-arrange. The animation is purely
+      // visual; the target positions are already known here.
       persist(laid, edgesRef.current)
-      void fitView({ duration: 300, padding: 0.2 })
+      animateNodePositions(targets, 600, () => {
+        void fitView({ duration: 300, padding: 0.2 })
+      })
     })
-  }, [setNodes, persist, fitView])
+  }, [animateNodePositions, persist, fitView])
 
   // The JSON-path selector on a data link reads + writes that edge's `selector`
   // through this api; the write mutates the authoritative edge store, mirrors it
@@ -1495,18 +1540,33 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
   // bypasses the seededId guard — these aren't our own edits, so the open
   // editor must repaint from the incoming graph.
   useEffect(() => {
-    const api = (window as { restorm?: { runtime?: { onMcpScenarioUpdated?: (cb: (p: { scenarioId: string; nodes: unknown[]; edges: unknown[] }) => void) => () => void } } }).restorm?.runtime
+    const api = (window as { restorm?: { runtime?: { onMcpScenarioUpdated?: (cb: (p: { scenarioId: string; nodes: unknown[]; edges: unknown[]; source?: 'arrange' }) => void) => () => void } } }).restorm?.runtime
     if (!api?.onMcpScenarioUpdated) return
-    return api.onMcpScenarioUpdated(({ scenarioId, nodes, edges }) => {
+    return api.onMcpScenarioUpdated(({ scenarioId, nodes, edges, source }) => {
       if (scenarioId !== scenario.id) return
       const ns = nodes as ScenarioNode[]
       const es = edges as Scenario['edges']
       nodeStore.current = new Map(ns.map((n) => [n.id, n]))
       edgeStore.current = new Map(es.map((e) => [e.id, e]))
-      setNodes(ns.map((n) => toFlowNode(n, handlers.current)))
+      const finalNodes = ns.map((n) => toFlowNode(n, handlers.current))
       setEdges(es.map(buildFlowEdge))
+      // When the MCP arrange_scenario tool repositioned nodes, glide them (and
+      // their edges) to the new layout instead of snapping: seed the incoming
+      // node data but keep each node's CURRENT position as the animation start,
+      // then interpolate to the final positions (same rAF path as the manual
+      // re-arrange). Other MCP mutations repaint instantly.
+      if (source === 'arrange') {
+        const targets = new Map(finalNodes.map((n) => [n.id, n.position]))
+        const curPos = new Map(nodesRef.current.map((n) => [n.id, { x: n.position.x, y: n.position.y }]))
+        setNodes(finalNodes.map((n) => ({ ...n, position: curPos.get(n.id) ?? n.position })))
+        // Reframe the view once the glide settles, mirroring the manual
+        // re-arrange path so an MCP arrange recentres the graph too.
+        animateNodePositions(targets, 600, () => { void fitView({ duration: 300, padding: 0.2 }) })
+      } else {
+        setNodes(finalNodes)
+      }
     })
-  }, [scenario.id, setNodes, setEdges, buildFlowEdge])
+  }, [scenario.id, setNodes, setEdges, buildFlowEdge, animateNodePositions, fitView])
 
   // Re-seed edges when a bound sub-scenario renamed a port: the parent App
   // remaps THIS caller's `output:<name>` / `param:<name>` edge handles to the
@@ -2767,7 +2827,12 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
   const onMoveStartStable = useCallback(() => {
     setNodeMenu(null); setSelectionMenu(null); setMultiColorPicker(null); setPalette(null); setColorPickerNodeId(null); setEdgeMenu(null); setEdgeColorPicker(null); setLinkPalette(null)
   }, [])
-  const onNodeDragStartStable = useCallback(() => { closeAllMenus() }, [closeAllMenus])
+  const onNodeDragStartStable = useCallback(() => {
+    closeAllMenus()
+    // Kill any in-flight arrange animation immediately so the dragged node
+    // never lags behind the cursor.
+    if (arrangeRafRef.current != null) { cancelAnimationFrame(arrangeRafRef.current); arrangeRafRef.current = null }
+  }, [closeAllMenus])
   const onMoveStable = useCallback((_e: MouseEvent | TouchEvent | null, viewport: Viewport) => {
     if (projectUuid) setScenarioViewport(projectUuid, scenario.id, viewport)
   }, [projectUuid, scenario.id])

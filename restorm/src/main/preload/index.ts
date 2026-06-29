@@ -1417,8 +1417,8 @@ contextBridge.exposeInMainWorld('restorm', {
      * connect/disconnect). Carries the full nodes + edges so an open editor
      * re-seeds its React Flow state in place (the seed effect otherwise
      * guards against same-id re-seeds to protect in-progress edits). */
-    onMcpScenarioUpdated: (callback: (payload: { scenarioId: string; nodes: unknown[]; edges: unknown[]; name?: string; params?: unknown[] }) => void): (() => void) => {
-      const handler = (_e: unknown, payload: unknown): void => { callback(payload as { scenarioId: string; nodes: unknown[]; edges: unknown[]; name?: string; params?: unknown[] }) }
+    onMcpScenarioUpdated: (callback: (payload: { scenarioId: string; nodes: unknown[]; edges: unknown[]; name?: string; params?: unknown[]; source?: 'arrange' }) => void): (() => void) => {
+      const handler = (_e: unknown, payload: unknown): void => { callback(payload as { scenarioId: string; nodes: unknown[]; edges: unknown[]; name?: string; params?: unknown[]; source?: 'arrange' }) }
       ipcRenderer.on('mcp:scenario-updated', handler)
       return () => { ipcRenderer.off('mcp:scenario-updated', handler) }
     },
