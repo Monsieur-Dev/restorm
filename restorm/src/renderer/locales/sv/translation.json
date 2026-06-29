@@ -1,4 +1,9 @@
 {
+  "account": {
+    "tooltip": "Konto",
+    "signIn": "Logga in",
+    "signOut": "Logga ut"
+  },
   "secrets": {
     "others": "Övriga",
     "refresh": "Uppdatera hemlighet",
@@ -1985,6 +1990,12 @@
     "confirm": {
       "ok": "OK",
       "cancel": "Avbryt"
+    }
+  },
+  "subscription": {
+    "checkout": {
+      "forbidden": "Be administratören för din organisation att prenumerera.",
+      "error": "Det gick inte att starta prenumerationen. Försök igen."
     }
   }
 }

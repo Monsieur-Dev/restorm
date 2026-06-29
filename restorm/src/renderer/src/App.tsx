@@ -162,6 +162,7 @@ import {
   getNearestEnvironmentsForBreadcrumbs
 } from './utils/treeSearch'
 import { DesktopIndicator } from './components/MainView/DesktopIndicator'
+import { StatusbarVersionPlan } from './components/MainView/StatusbarVersionPlan'
 import { findItemById, findItemWithParent } from './utils/treeSearch'
 import { getSessionRequestOverride, getSessionFolderEnv, findEnvironmentById } from './services/environmentSelectionStore'
 import type { RequestEnvInfo } from './components/Scenario/scenarioBoundResolver'
@@ -2914,6 +2915,7 @@ const App: React.FC = () => {
           the leftmost-of-the-right cell and always owns the auto margin;
           the bell, which follows it, must never carry `right-aligned`. */}
       <Statusbar data-testid="app-statusbar">
+        <StatusbarVersionPlan />
         {filePath && <StatusbarElement data-testid="app-statusbar-element" title={filePath} />}
         <DesktopIndicator />
         {/* The environment selector, request-history button and auth-route

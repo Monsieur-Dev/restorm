@@ -1,4 +1,9 @@
 {
+  "account": {
+    "tooltip": "Hesap",
+    "signIn": "Oturum aç",
+    "signOut": "Oturumu kapat"
+  },
   "secrets": {
     "others": "Diğer",
     "refresh": "Gizli bilgiyi yenile",
@@ -1985,6 +1990,12 @@
     "confirm": {
       "ok": "Tamam",
       "cancel": "İptal"
+    }
+  },
+  "subscription": {
+    "checkout": {
+      "forbidden": "Kuruluşunuzun yöneticisinden abone olmasını isteyin.",
+      "error": "Abonelik başlatılamadı. Lütfen tekrar deneyin."
     }
   }
 }

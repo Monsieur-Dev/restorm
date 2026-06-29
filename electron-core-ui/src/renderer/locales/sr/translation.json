@@ -406,5 +406,9 @@
   },
   "keyValueTable": {
     "description": "Опис"
+  },
+  "gatedControl": {
+    "proLabel": "Pro verzija",
+    "subscribe": "Pretplati se"
   }
 }

@@ -1,4 +1,9 @@
 {
+  "account": {
+    "tooltip": "Konto",
+    "signIn": "Zaloguj się",
+    "signOut": "Wyloguj się"
+  },
   "secrets": {
     "others": "Inne",
     "refresh": "Odśwież sekret",
@@ -1987,6 +1992,12 @@
     "confirm": {
       "ok": "OK",
       "cancel": "Anuluj"
+    }
+  },
+  "subscription": {
+    "checkout": {
+      "forbidden": "Poproś administratora swojej organizacji o wykupienie subskrypcji.",
+      "error": "Nie można rozpocząć subskrypcji. Spróbuj ponownie."
     }
   }
 }

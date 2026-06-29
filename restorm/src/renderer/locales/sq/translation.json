@@ -1,4 +1,9 @@
 {
+  "account": {
+    "tooltip": "Llogaria",
+    "signIn": "Hyr",
+    "signOut": "Dil"
+  },
   "secrets": {
     "others": "Të tjera",
     "refresh": "Rifresko sekretin",
@@ -1985,6 +1990,12 @@
     "confirm": {
       "ok": "OK",
       "cancel": "Anulo"
+    }
+  },
+  "subscription": {
+    "checkout": {
+      "forbidden": "Kërkojini administratorit të organizatës suaj të abonohet.",
+      "error": "Abonimi nuk mund të niste. Ju lutemi provoni përsëri."
     }
   }
 }

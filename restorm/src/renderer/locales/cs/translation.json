@@ -1,4 +1,9 @@
 {
+  "account": {
+    "tooltip": "Účet",
+    "signIn": "Přihlásit se",
+    "signOut": "Odhlásit se"
+  },
   "secrets": {
     "others": "Ostatní",
     "refresh": "Obnovit tajemství",
@@ -1987,6 +1992,12 @@
     "confirm": {
       "ok": "OK",
       "cancel": "Zrušit"
+    }
+  },
+  "subscription": {
+    "checkout": {
+      "forbidden": "Požádejte správce své organizace o předplatné.",
+      "error": "Předplatné se nepodařilo spustit. Zkuste to znovu."
     }
   }
 }

@@ -406,5 +406,9 @@
   },
   "keyValueTable": {
     "description": "描述"
+  },
+  "gatedControl": {
+    "proLabel": "专业版",
+    "subscribe": "订阅"
   }
 }

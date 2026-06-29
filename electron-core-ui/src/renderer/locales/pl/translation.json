@@ -406,5 +406,9 @@
   },
   "keyValueTable": {
     "description": "Opis"
+  },
+  "gatedControl": {
+    "proLabel": "Wersja Pro",
+    "subscribe": "Subskrybuj"
   }
 }

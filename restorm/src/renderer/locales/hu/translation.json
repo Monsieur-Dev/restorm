@@ -1,4 +1,9 @@
 {
+  "account": {
+    "tooltip": "Fiók",
+    "signIn": "Bejelentkezés",
+    "signOut": "Kijelentkezés"
+  },
   "secrets": {
     "others": "Egyéb",
     "refresh": "Titok frissítése",
@@ -1985,6 +1990,12 @@
     "confirm": {
       "ok": "OK",
       "cancel": "Mégse"
+    }
+  },
+  "subscription": {
+    "checkout": {
+      "forbidden": "Kérje meg a szervezete rendszergazdáját, hogy fizessen elő.",
+      "error": "Az előfizetés nem indítható el. Próbálja újra."
     }
   }
 }

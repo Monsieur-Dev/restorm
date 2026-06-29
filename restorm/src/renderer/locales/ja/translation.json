@@ -1,4 +1,9 @@
 {
+  "account": {
+    "tooltip": "アカウント",
+    "signIn": "ログイン",
+    "signOut": "ログアウト"
+  },
   "secrets": {
     "others": "その他",
     "refresh": "シークレットを更新",
@@ -1984,6 +1989,12 @@
     "confirm": {
       "ok": "OK",
       "cancel": "キャンセル"
+    }
+  },
+  "subscription": {
+    "checkout": {
+      "forbidden": "組織の管理者にサブスクリプションの申し込みを依頼してください。",
+      "error": "サブスクリプションを開始できませんでした。もう一度お試しください。"
     }
   }
 }

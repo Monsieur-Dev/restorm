@@ -406,5 +406,9 @@
   },
   "keyValueTable": {
     "description": "Kuvaus"
+  },
+  "gatedControl": {
+    "proLabel": "Pro-versio",
+    "subscribe": "Tilaa"
   }
 }

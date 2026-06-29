@@ -1,4 +1,9 @@
 {
+  "account": {
+    "tooltip": "Tili",
+    "signIn": "Kirjaudu sisään",
+    "signOut": "Kirjaudu ulos"
+  },
   "secrets": {
     "others": "Muut",
     "refresh": "Päivitä salaisuus",
@@ -1985,6 +1990,12 @@
     "confirm": {
       "ok": "OK",
       "cancel": "Peruuta"
+    }
+  },
+  "subscription": {
+    "checkout": {
+      "forbidden": "Pyydä organisaatiosi järjestelmänvalvojaa tilaamaan.",
+      "error": "Tilausta ei voitu aloittaa. Yritä uudelleen."
     }
   }
 }

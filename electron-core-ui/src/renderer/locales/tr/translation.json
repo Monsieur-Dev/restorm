@@ -406,5 +406,9 @@
   },
   "keyValueTable": {
     "description": "Açıklama"
+  },
+  "gatedControl": {
+    "proLabel": "Pro sürüm",
+    "subscribe": "Abone ol"
   }
 }

@@ -1,4 +1,9 @@
 {
+  "account": {
+    "tooltip": "账户",
+    "signIn": "登录",
+    "signOut": "退出登录"
+  },
   "secrets": {
     "others": "其他",
     "refresh": "刷新密钥",
@@ -1984,6 +1989,12 @@
     "confirm": {
       "ok": "确定",
       "cancel": "取消"
+    }
+  },
+  "subscription": {
+    "checkout": {
+      "forbidden": "请让贵组织的管理员订阅。",
+      "error": "无法开始订阅，请重试。"
     }
   }
 }

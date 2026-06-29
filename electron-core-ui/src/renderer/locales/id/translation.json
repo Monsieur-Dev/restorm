@@ -406,5 +406,9 @@
   },
   "keyValueTable": {
     "description": "Deskripsi"
+  },
+  "gatedControl": {
+    "proLabel": "Versi Pro",
+    "subscribe": "Berlangganan"
   }
 }

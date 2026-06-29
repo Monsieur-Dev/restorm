@@ -1,4 +1,9 @@
 {
+  "account": {
+    "tooltip": "계정",
+    "signIn": "로그인",
+    "signOut": "로그아웃"
+  },
   "secrets": {
     "others": "기타",
     "refresh": "비밀 새로 고침",
@@ -1984,6 +1989,12 @@
     "confirm": {
       "ok": "OK",
       "cancel": "취소"
+    }
+  },
+  "subscription": {
+    "checkout": {
+      "forbidden": "조직 관리자에게 구독을 요청하세요.",
+      "error": "구독을 시작할 수 없습니다. 다시 시도해 주세요."
     }
   }
 }

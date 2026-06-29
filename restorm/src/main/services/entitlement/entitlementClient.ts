@@ -125,6 +125,64 @@ export async function fetchEntitlement(
   return parsed as EntitlementResponse
 }
 
+/** Checkout request body. The backend resolves the customer + the Pro price from
+ * the session; the app only chooses how many seats and which billing cycle. */
+export interface CheckoutRequest {
+  /** Seat count (backend enforces 1..1000). */
+  seats: number
+  cycle: 'monthly' | 'annual'
+}
+
+/** The « S'abonner » upsell default: a single monthly seat. A seat/cycle picker
+ * can refine this later. */
+export const DEFAULT_CHECKOUT_REQUEST: CheckoutRequest = { seats: 1, cycle: 'monthly' }
+
+/** A non-2xx checkout response, carrying the HTTP status so the caller can map
+ * the backend's contract (notably 403 = checkout is org-admin-only) to a precise
+ * user-facing outcome instead of a generic failure. */
+export class CheckoutHttpError extends Error {
+  constructor(readonly statusCode: number) {
+    super(`checkout: backend responded ${String(statusCode)}`)
+    this.name = 'CheckoutHttpError'
+  }
+}
+
+/**
+ * Ask the backend to create a Paddle checkout transaction for the signed-in user
+ * and return the hosted checkout URL (or `null` — the backend may legitimately
+ * omit a URL in edge cases). The session JWT (bearer) is the only credential; the
+ * backend resolves the customer + the Pro price, so the app only sends the seat /
+ * cycle choice. Throws `CheckoutHttpError` on a non-2xx response (so the caller
+ * can special-case 403 admin-only) and rethrows network failures.
+ *
+ * @param fetchImpl injected so the caller wraps it in `withFirewallBypass`
+ *   (host-guarded) and tests can stub it — this module never references electron.
+ */
+export async function createCheckout(
+  checkoutUrl: string,
+  sessionToken: string,
+  fetchImpl: typeof fetch,
+  body: CheckoutRequest = DEFAULT_CHECKOUT_REQUEST
+): Promise<string | null> {
+  const res = await fetchImpl(checkoutUrl, {
+    method: 'POST',
+    headers: {
+      authorization: `Bearer ${sessionToken}`,
+      'content-type': 'application/json'
+    },
+    body: JSON.stringify(body)
+  })
+  if (!res.ok) {
+    throw new CheckoutHttpError(res.status)
+  }
+  const parsed = (await res.json()) as { checkoutUrl?: unknown }
+  // checkoutUrl is nullable in the contract; treat anything but a non-empty
+  // string as "no URL to open" and let the caller decide what to surface.
+  return typeof parsed.checkoutUrl === 'string' && parsed.checkoutUrl.length > 0
+    ? parsed.checkoutUrl
+    : null
+}
+
 /** Epoch seconds, injectable clock. */
 export function nowSeconds(now?: () => number): number {
   return Math.floor((now?.() ?? Date.now()) / 1000)

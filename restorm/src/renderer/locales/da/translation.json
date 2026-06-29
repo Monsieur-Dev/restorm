@@ -1,4 +1,9 @@
 {
+  "account": {
+    "tooltip": "Konto",
+    "signIn": "Log ind",
+    "signOut": "Log ud"
+  },
   "secrets": {
     "others": "Andre",
     "refresh": "Opdater hemmelighed",
@@ -1985,6 +1990,12 @@
     "confirm": {
       "ok": "OK",
       "cancel": "Annuller"
+    }
+  },
+  "subscription": {
+    "checkout": {
+      "forbidden": "Bed administratoren for din organisation om at abonnere.",
+      "error": "Abonnementet kunne ikke startes. Prøv igen."
     }
   }
 }

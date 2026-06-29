@@ -2,7 +2,7 @@ import type { ThemeInfo, ThemeDefinition, ThemeVariables } from 'electron-core-u
 import type { SettingValue, ResolvedSetting, SettingsGroup } from 'electron-core-ui/types'
 import type { PersistenceFormat } from 'electron-core-ui/main'
 import type { ResponseHistoryDetail, ResponseHistoryEntry } from '../../../shared/types/collections'
-import type { AuthState } from '../../../shared/auth/authState'
+import type { AuthState, CheckoutResult } from '../../../shared/auth/authState'
 
 declare global {
   interface Window {
@@ -67,6 +67,21 @@ declare global {
         setProjectOrigins: (origins: unknown[]) => Promise<void>
         onPromptShow: (cb: (payload: unknown) => void) => () => void
         resolvePrompt: (promptId: string, verdict: 'allow' | 'deny') => Promise<void>
+      }
+      /** Account / login. Distinct from the `restorm.auth` namespace (HTTP
+       * request authentication) — this is the user's cloud session +
+       * entitlement. Exposed on the `api` world by the preload. */
+      account: {
+        login: () => Promise<AuthState>
+        logout: () => Promise<AuthState>
+        getState: () => Promise<AuthState>
+        onStateChanged: (callback: (state: AuthState) => void) => (() => void)
+        subscribe: () => Promise<CheckoutResult>
+      }
+      /** App-level metadata bridged from the main process. */
+      app: {
+        /** The running app version (e.g. `0.1.12-preview`). */
+        getVersion: () => Promise<string>
       }
     }
     // Mirrors the preload's createElectronAPI() surface. Keep in sync with
@@ -256,14 +271,6 @@ declare global {
         }>
         onRunning: (callback: (payload: { authRequestId: string; phase: 'started' | 'succeeded' | 'failed'; reason?: string }) => void) => (() => void)
         onFailed: (callback: (payload: { authRequestId: string; reason?: string }) => void) => (() => void)
-      }
-      /** Account / login. Distinct from `auth` above (HTTP request
-       * authentication) — this is the user's cloud session + entitlement. */
-      account: {
-        login: () => Promise<AuthState>
-        logout: () => Promise<AuthState>
-        getState: () => Promise<AuthState>
-        onStateChanged: (callback: (state: AuthState) => void) => (() => void)
       }
       import: {
         preview: (input: string, options?: { extraHeaders?: Record<string, string> }) => Promise<{

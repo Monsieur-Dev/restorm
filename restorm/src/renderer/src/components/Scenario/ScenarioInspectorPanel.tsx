@@ -1,7 +1,9 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Button, ListView, usePlatform } from 'electron-core-ui/renderer'
+import { Button, GatedControl, ListView, usePlatform } from 'electron-core-ui/renderer'
 import { HeaderHoverTooltip } from '../MainView/HeaderHoverTooltip'
+import { useCapability } from '../../hooks/useCapability'
+import { subscribeToPro } from '../../services/subscribeToPro'
 import type { ScenarioLogEntry } from '../../hooks/useScenarioEngine'
 import { ScenarioRunLogView, type LogLevelFilter } from './ScenarioRunLogView'
 import { ScenarioInspectorLegend } from './ScenarioInspectorLegend'
@@ -151,6 +153,10 @@ function scenarioRuntime(): ScenarioRuntime | undefined {
 export const ScenarioInspectorPanel: React.FC<ScenarioInspectorPanelProps> = ({ scenarioId, scenarioName, errors, errorBoxCount, onFocusNode, previewNode, onOpenItem, engineState, onEngineRun, onEnginePause, onEngineResume, onEngineStep, onEngineStepStart, onEngineStop, onEngineDebug, onEngineDebugContinue, hasBreakpoints, runLog, onClearRunLog, canUndo, canRedo, onUndo, onRedo }) => {
   const { t } = useTranslation()
   const { isMacintosh, isWindows } = usePlatform()
+  // Step-debug (Step + Debug) is a Pro capability: greyed + upsell when absent,
+  // fully functional when granted. Run / Stop stay free baseline.
+  const stepDebugLocked = !useCapability('scenario.stepDebug')
+  const handleSubscribe = (): void => { void subscribeToPro() }
   const [result, setResult] = useState<Record<string, unknown> | null>(null)
   const fetchToken = useRef(0)
   const panelRef = useRef<HTMLDivElement>(null)
@@ -367,13 +373,17 @@ export const ScenarioInspectorPanel: React.FC<ScenarioInspectorPanelProps> = ({ 
         <HeaderHoverTooltip label={runTooltip}>
           <Button small icon={runIcon} onClick={onRun} disabled={runDisabled} className={`scn-inspector-run-round${runIsPause ? ' scn-inspector-run-round-active' : ''}`} options={{ ariaLabel: runLabel }} data-testid="scenario-inspector-run" />
         </HeaderHoverTooltip>
-        <HeaderHoverTooltip label={stepTooltip}>
-          <Button small icon="debug-step-over" onClick={onStep} disabled={stepDisabled} className="scn-inspector-step-round" options={{ ariaLabel: stepLabel }} data-testid="scenario-inspector-step" />
-        </HeaderHoverTooltip>
-        {engineWired && (
-          <HeaderHoverTooltip label={debugTooltip}>
-            <Button small icon="debug-alt" onClick={onDebug} disabled={debugDisabled} className="scn-inspector-debug-round" options={{ ariaLabel: debugLabel }} data-testid="scenario-inspector-debug" />
+        <GatedControl locked={stepDebugLocked} onSubscribe={handleSubscribe} data-testid="scenario-inspector-step-gate">
+          <HeaderHoverTooltip label={stepTooltip}>
+            <Button small icon="debug-step-over" onClick={onStep} disabled={stepDisabled} className="scn-inspector-step-round" options={{ ariaLabel: stepLabel }} data-testid="scenario-inspector-step" />
           </HeaderHoverTooltip>
+        </GatedControl>
+        {engineWired && (
+          <GatedControl locked={stepDebugLocked} onSubscribe={handleSubscribe} data-testid="scenario-inspector-debug-gate">
+            <HeaderHoverTooltip label={debugTooltip}>
+              <Button small icon="debug-alt" onClick={onDebug} disabled={debugDisabled} className="scn-inspector-debug-round" options={{ ariaLabel: debugLabel }} data-testid="scenario-inspector-debug" />
+            </HeaderHoverTooltip>
+          </GatedControl>
         )}
         {engineWired && (
           <HeaderHoverTooltip label={stopTooltip}>

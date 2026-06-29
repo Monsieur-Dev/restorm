@@ -1,4 +1,9 @@
 {
+  "account": {
+    "tooltip": "Account",
+    "signIn": "Inloggen",
+    "signOut": "Uitloggen"
+  },
   "secrets": {
     "others": "Overige",
     "refresh": "Geheim vernieuwen",
@@ -1985,6 +1990,12 @@
     "confirm": {
       "ok": "OK",
       "cancel": "Annuleren"
+    }
+  },
+  "subscription": {
+    "checkout": {
+      "forbidden": "Vraag de beheerder van je organisatie om een abonnement te nemen.",
+      "error": "Kan het abonnement niet starten. Probeer het opnieuw."
     }
   }
 }
