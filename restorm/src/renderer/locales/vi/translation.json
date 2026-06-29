@@ -1706,6 +1706,17 @@
     },
     "http": {
       "served": "served"
+    },
+    "actionOverride": {
+      "configMissingShort": "Thiếu cấu hình",
+      "configSelector": {
+        "label": "Cấu hình cơ sở",
+        "none": "Không (giá trị mặc định của yêu cầu)"
+      },
+      "configMissing": "Cấu hình đã chọn đã bị xóa; các giá trị mặc định của yêu cầu được áp dụng.",
+      "fields": {
+        "env": "Môi trường"
+      }
     }
   },
   "mqtt": {
@@ -1966,7 +1977,9 @@
     },
     "deleteConfirm": {
       "title": "Xóa cấu hình",
-      "message": "Bạn có muốn xóa cấu hình \"{{name}}\" không?"
+      "message": "Bạn có muốn xóa cấu hình \"{{name}}\" không?",
+      "usedByScenarios_one": "Được sử dụng bởi kịch bản {{scenarios}}.",
+      "usedByScenarios_other": "Được sử dụng bởi các kịch bản {{scenarios}}."
     },
     "confirm": {
       "ok": "OK",

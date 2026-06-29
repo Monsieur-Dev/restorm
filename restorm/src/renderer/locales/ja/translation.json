@@ -1706,6 +1706,17 @@
     },
     "http": {
       "served": "served"
+    },
+    "actionOverride": {
+      "configMissingShort": "構成がありません",
+      "configSelector": {
+        "label": "ベース構成",
+        "none": "なし（リクエストの既定値）"
+      },
+      "configMissing": "選択した構成は削除されました。リクエストの既定値が適用されます。",
+      "fields": {
+        "env": "環境"
+      }
     }
   },
   "mqtt": {
@@ -1966,7 +1977,9 @@
     },
     "deleteConfirm": {
       "title": "設定を削除",
-      "message": "設定「{{name}}」を削除しますか？"
+      "message": "設定「{{name}}」を削除しますか？",
+      "usedByScenarios_one": "シナリオ {{scenarios}} で使用されています。",
+      "usedByScenarios_other": "シナリオ {{scenarios}} で使用されています。"
     },
     "confirm": {
       "ok": "OK",

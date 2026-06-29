@@ -1706,6 +1706,17 @@
     },
     "http": {
       "served": "served"
+    },
+    "actionOverride": {
+      "configMissingShort": "設定遺失",
+      "configSelector": {
+        "label": "基礎設定",
+        "none": "無（使用請求預設值）"
+      },
+      "configMissing": "所選設定已被刪除；將套用請求的預設值。",
+      "fields": {
+        "env": "環境"
+      }
     }
   },
   "mqtt": {
@@ -1966,7 +1977,9 @@
     },
     "deleteConfirm": {
       "title": "刪除設定",
-      "message": "是否要刪除設定「{{name}}」？"
+      "message": "是否要刪除設定「{{name}}」？",
+      "usedByScenarios_one": "它被情境 {{scenarios}} 使用。",
+      "usedByScenarios_other": "它被情境 {{scenarios}} 使用。"
     },
     "confirm": {
       "ok": "確定",

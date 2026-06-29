@@ -1708,6 +1708,17 @@
     },
     "http": {
       "served": "served"
+    },
+    "actionOverride": {
+      "configMissingShort": "Konfiguracija nedostaje",
+      "configSelector": {
+        "label": "Osnovna konfiguracija",
+        "none": "Nijedna (zadane vrijednosti zahtjeva)"
+      },
+      "configMissing": "Odabrana konfiguracija je izbrisana; primjenjuju se zadane vrijednosti zahtjeva.",
+      "fields": {
+        "env": "Okruženje"
+      }
     }
   },
   "mqtt": {
@@ -1968,7 +1979,9 @@
     },
     "deleteConfirm": {
       "title": "Izbriši konfiguraciju",
-      "message": "Želite li izbrisati konfiguraciju \"{{name}}\"?"
+      "message": "Želite li izbrisati konfiguraciju \"{{name}}\"?",
+      "usedByScenarios_one": "Koristi je scenarij {{scenarios}}.",
+      "usedByScenarios_other": "Koriste je scenariji {{scenarios}}."
     },
     "confirm": {
       "ok": "OK",

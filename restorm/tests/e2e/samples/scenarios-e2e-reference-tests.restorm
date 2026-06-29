@@ -1072,6 +1072,25 @@ collections:
                 position:
                   x: 1520
                   'y': 2140
+              - id: e418f9fe-0d7e-4b8b-8b54-ba3ce8239e5a
+                kind: runScenario
+                config:
+                  scenarioId: 86e3b22e-a36f-40b3-9612-c0895fdc5d5b
+                  label: GraphQL unary
+                inputs:
+                  - id: in
+                    name: ''
+                    dataType: any
+                    flow: signal
+                outputs:
+                  - id: result
+                    name: result
+                    dataType: any
+                    role: response
+                    flow: both
+                position:
+                  x: 1800
+                  'y': 2140
             edges:
               - id: e-1780418276241-f2q3hz
                 from:
@@ -1410,6 +1429,13 @@ collections:
                   portId: done
                 to:
                   nodeId: 1f7168ac-0544-480b-b6b5-320ab66cff72
+                  portId: in
+              - id: 8f8a7de0-472f-4c95-b35a-5b00b46bba4c
+                from:
+                  nodeId: 1f7168ac-0544-480b-b6b5-320ab66cff72
+                  portId: done
+                to:
+                  nodeId: e418f9fe-0d7e-4b8b-8b54-ba3ce8239e5a
                   portId: in
             id: c1573ce0-985c-44b5-b5d4-e081de2d4303
             name: Main
@@ -20936,6 +20962,305 @@ collections:
                       </soap:Envelope>
                     headers: []
                     type: soap
+              - type: scenario
+                tags: []
+                params: []
+                nodes:
+                  - id: 436f1963-7fb2-430b-82e0-465ed035ba96
+                    kind: graphqlListen
+                    config:
+                      requestId: 2a7c1f40-9b3e-4d61-8c02-1e5a73b04901
+                      connectionName: GraphQL Unary Mock
+                      label: start GraphQL mock server
+                      id: 75ed329c-1560-4c6e-b649-ed29f979bab3
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                    outputs:
+                      - id: connected
+                        name: connected
+                        dataType: any
+                        flow: signal
+                      - id: served
+                        name: served
+                        dataType: any
+                        flow: both
+                    position:
+                      x: 12
+                      'y': 60
+                  - id: cfa5b493-2524-4b1b-b2e2-2a05c2cb26a7
+                    kind: httpRequest
+                    config:
+                      requestId: 10f2163c-de61-4a3a-b7ff-c63a1914f067
+                      label: query the mock (native GraphQL)
+                      id: aefd4bfa-50d0-4561-ac5e-299b629108dc
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: env
+                        name: env
+                        dataType: any
+                        flow: value
+                      - id: requestOverride
+                        name: override
+                        dataType: object
+                        flow: value
+                    outputs:
+                      - id: response
+                        name: response
+                        dataType: response
+                        role: response
+                        flow: both
+                    position:
+                      x: 409
+                      'y': 245
+                  - id: ab2a3f6d-ebfe-4a01-8996-9c675a385b87
+                    kind: log
+                    config:
+                      message: réponse GraphQL unary reçue
+                      level: info
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 845
+                      'y': 439
+                  - id: 3959c163-f364-4a04-95ad-633848a8de66
+                    kind: graphqlClose
+                    config:
+                      connectionNodeId: 436f1963-7fb2-430b-82e0-465ed035ba96
+                      label: stop the GraphQL mock server
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                    outputs: []
+                    position:
+                      x: 1211
+                      'y': 478
+                  - id: 8cbda17b-340e-4009-bc3f-90657335ed8d
+                    kind: log
+                    config:
+                      message: serveur GraphQL unary arrêté
+                      level: info
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 409
+                      'y': 12
+                edges:
+                  - id: f0679708-8663-45e5-a881-755079d0a503
+                    from:
+                      nodeId: 436f1963-7fb2-430b-82e0-465ed035ba96
+                      portId: connected
+                    to:
+                      nodeId: cfa5b493-2524-4b1b-b2e2-2a05c2cb26a7
+                      portId: in
+                  - id: af37345a-13bb-4f7e-abb2-851eb43002fa
+                    from:
+                      nodeId: cfa5b493-2524-4b1b-b2e2-2a05c2cb26a7
+                      portId: response
+                    to:
+                      nodeId: ab2a3f6d-ebfe-4a01-8996-9c675a385b87
+                      portId: data
+                    selector: response.body
+                  - id: 3e88d909-f434-47eb-95c8-bc4c6f9bf42a
+                    from:
+                      nodeId: cfa5b493-2524-4b1b-b2e2-2a05c2cb26a7
+                      portId: response
+                    to:
+                      nodeId: ab2a3f6d-ebfe-4a01-8996-9c675a385b87
+                      portId: in
+                  - id: b0b910d2-6a9f-4212-b9da-97c1645c6051
+                    from:
+                      nodeId: ab2a3f6d-ebfe-4a01-8996-9c675a385b87
+                      portId: done
+                    to:
+                      nodeId: 3959c163-f364-4a04-95ad-633848a8de66
+                      portId: in
+                  - id: 67a703b6-99b5-47b1-8e1f-207832a853a0
+                    from:
+                      nodeId: 436f1963-7fb2-430b-82e0-465ed035ba96
+                      portId: done
+                    to:
+                      nodeId: 8cbda17b-340e-4009-bc3f-90657335ed8d
+                      portId: in
+                id: 86e3b22e-a36f-40b3-9612-c0895fdc5d5b
+                name: GraphQL unary
+                items: []
+              - type: scenario
+                tags: []
+                params: []
+                nodes:
+                  - id: a9f19044-2199-4f1c-9392-7976bdcc0a81
+                    kind: httpListen
+                    config:
+                      requestId: a1b07338-e892-41eb-9ea8-fe615933ae94
+                      connectionName: QC Mock
+                      label: start mock server
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                    outputs:
+                      - id: connected
+                        name: connected
+                        dataType: any
+                        flow: signal
+                      - id: served
+                        name: served
+                        dataType: any
+                        flow: both
+                    position:
+                      x: 12
+                      'y': 50
+                  - id: bc871f13-ff42-4f13-8589-57b3828674b4
+                    kind: httpRequest
+                    config:
+                      requestId: a9cb1b58-b9d3-4dac-9341-62f7d3e9a370
+                      quickConfigId: qc_f47542c5-83ca-4c6b-b39a-dda9bca8810a
+                      label: call the mock (QC config redirects to /pets)
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: env
+                        name: env
+                        dataType: any
+                        flow: value
+                      - id: requestOverride
+                        name: override
+                        dataType: object
+                        flow: value
+                    outputs:
+                      - id: response
+                        name: response
+                        dataType: response
+                        role: response
+                        flow: both
+                    position:
+                      x: 362
+                      'y': 218
+                  - id: 62f94f48-5205-418e-89ca-26eabae2640c
+                    kind: log
+                    config:
+                      message: réponse reçue (config QC appliquée)
+                      level: info
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 712
+                      'y': 218
+                  - id: ce6f2031-aca8-4548-8eb0-ee67ea48bd29
+                    kind: httpClose
+                    config:
+                      connectionNodeId: a9f19044-2199-4f1c-9392-7976bdcc0a81
+                      label: stop the mock server
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                    outputs: []
+                    position:
+                      x: 1062
+                      'y': 242
+                  - id: 74045a14-8665-45f4-af5c-fa171bf3a53f
+                    kind: log
+                    config:
+                      message: serveur arrêté
+                      level: info
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 362
+                      'y': 12
+                edges:
+                  - id: 9a01164b-8a97-41b9-ae36-c6d12e9e8fc0
+                    from:
+                      nodeId: a9f19044-2199-4f1c-9392-7976bdcc0a81
+                      portId: connected
+                    to:
+                      nodeId: bc871f13-ff42-4f13-8589-57b3828674b4
+                      portId: in
+                  - id: 6338da42-c031-4c7d-8505-c418de7e3aeb
+                    from:
+                      nodeId: bc871f13-ff42-4f13-8589-57b3828674b4
+                      portId: response
+                    to:
+                      nodeId: 62f94f48-5205-418e-89ca-26eabae2640c
+                      portId: data
+                    selector: .
+                  - id: 1ceff369-e48f-48e5-ac19-a8e413c4b595
+                    from:
+                      nodeId: bc871f13-ff42-4f13-8589-57b3828674b4
+                      portId: response
+                    to:
+                      nodeId: 62f94f48-5205-418e-89ca-26eabae2640c
+                      portId: in
+                  - id: 9a4bb9fb-1eaf-4858-a69d-7711204912c0
+                    from:
+                      nodeId: 62f94f48-5205-418e-89ca-26eabae2640c
+                      portId: done
+                    to:
+                      nodeId: ce6f2031-aca8-4548-8eb0-ee67ea48bd29
+                      portId: in
+                  - id: 26ccf6df-8f46-44ff-81af-318dc8f6310a
+                    from:
+                      nodeId: a9f19044-2199-4f1c-9392-7976bdcc0a81
+                      portId: done
+                    to:
+                      nodeId: 74045a14-8665-45f4-af5c-fa171bf3a53f
+                      portId: in
+                name: Quick config
+                id: 35c2c7e4-ff60-4150-b397-acf7c146ff8e
+                items: []
           - type: scenario
             tags: []
             params: []
@@ -22637,6 +22962,37 @@ collections:
             requestMessage: '{"f_string":"chunk"}'
             metadata: []
             type: grpc
+          - documentation: ''
+            tags: []
+            id: 10f2163c-de61-4a3a-b7ff-c63a1914f067
+            name: GraphQL Unary Client
+            url: http://localhost:4222/graphql
+            operationType: query
+            query: '{ pets }'
+            variables: '{}'
+            headers: []
+            type: graphql
+          - documentation: ''
+            tags: []
+            name: QC Config Consumer
+            method: GET
+            url: http://localhost:8077/wrong
+            headers: []
+            params: []
+            pathParams: []
+            deprecated: false
+            type: http
+            id: a9cb1b58-b9d3-4dac-9341-62f7d3e9a370
+            description: Base URL points at a wrong path (404). A project quick-config 'QC' redirects it to the served /pets — so a green run proves the scenario action applied the selected config.
+            quickConfigs:
+              - id: qc_f47542c5-83ca-4c6b-b39a-dda9bca8810a
+                name: QC
+                requestId: a9cb1b58-b9d3-4dac-9341-62f7d3e9a370
+                storageTarget: project
+                fields:
+                  url: http://localhost:8077/pets
+                createdAt: '2026-06-28T07:35:19.862Z'
+                updatedAt: '2026-06-28T07:35:19.862Z'
         id: f1000000-0000-0000-0000-00000000auth
         name: Pet API
       - documentation: ''

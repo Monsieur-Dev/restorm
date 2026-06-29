@@ -104,6 +104,12 @@ const quickSettingsTestDir = defineBddConfig({
   outputDir: '.features-gen/quick-settings'
 })
 
+const scenarioQuickConfigSelectorTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/scenario-quick-config-selector/features/**/*.feature',
+  steps: ['tests/e2e/bdd/scenario-quick-config-selector/steps/**/*.ts', 'tests/e2e/bdd/fixtures/mcp-server.fixture.ts'],
+  outputDir: '.features-gen/scenario-quick-config-selector'
+})
+
 const grpcServerExecutionTestDir = defineBddConfig({
   features: 'tests/e2e/bdd/grpc-server/features/**/*.feature',
   steps: ['tests/e2e/bdd/grpc-server/steps/**/*.ts', 'tests/e2e/bdd/fixtures/mcp-server.fixture.ts'],
@@ -189,6 +195,15 @@ const scenarioRunlogTestDir = defineBddConfig({
     'tests/e2e/bdd/fixtures/scenario-runlog.fixture.ts'
   ],
   outputDir: '.features-gen/scenario-runlog'
+})
+
+const scenarioSetVariableOverrideTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/scenario-setvariable-override/features/**/*.feature',
+  steps: [
+    'tests/e2e/bdd/scenario-setvariable-override/steps/**/*.ts',
+    'tests/e2e/bdd/fixtures/scenario-runlog.fixture.ts'
+  ],
+  outputDir: '.features-gen/scenario-setvariable-override'
 })
 
 const postmanImportTestDir = defineBddConfig({
@@ -389,6 +404,11 @@ export default defineConfig({
       timeout: 300 * 1000 // 5 min — 8 scenarios, each launches a fresh app
     },
     {
+      name: 'scenario-quick-config-selector',
+      testDir: scenarioQuickConfigSelectorTestDir,
+      timeout: 240 * 1000
+    },
+    {
       name: 'grpc-server',
       testDir: grpcServerExecutionTestDir,
       timeout: 180 * 1000
@@ -445,6 +465,11 @@ export default defineConfig({
       name: 'scenario-runlog',
       testDir: scenarioRunlogTestDir,
       timeout: 180 * 1000 // 3 min — three scenarios, each opens a fresh app + runs the engine
+    },
+    {
+      name: 'scenario-setvariable-override',
+      testDir: scenarioSetVariableOverrideTestDir,
+      timeout: 120 * 1000 // 2 min — opens a fresh app + runs one scenario against the petstore mock
     },
     {
       name: 'postman-import',

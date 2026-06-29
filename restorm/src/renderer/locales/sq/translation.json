@@ -1707,6 +1707,17 @@
     },
     "http": {
       "served": "served"
+    },
+    "actionOverride": {
+      "configMissingShort": "Mungon konfigurimi",
+      "configSelector": {
+        "label": "Konfigurimi bazë",
+        "none": "Asnjë (vlerat e parazgjedhura të kërkesës)"
+      },
+      "configMissing": "Konfigurimi i zgjedhur u fshi; zbatohen vlerat e parazgjedhura të kërkesës.",
+      "fields": {
+        "env": "Mjedisi"
+      }
     }
   },
   "mqtt": {
@@ -1967,7 +1978,9 @@
     },
     "deleteConfirm": {
       "title": "Fshij konfigurimin",
-      "message": "Dëshironi të fshini konfigurimin \"{{name}}\"?"
+      "message": "Dëshironi të fshini konfigurimin \"{{name}}\"?",
+      "usedByScenarios_one": "Përdoret nga skenari {{scenarios}}.",
+      "usedByScenarios_other": "Përdoret nga skenarët {{scenarios}}."
     },
     "confirm": {
       "ok": "OK",

@@ -1709,6 +1709,17 @@
     },
     "http": {
       "served": "served"
+    },
+    "actionOverride": {
+      "configMissingShort": "Konfigurace chybí",
+      "configSelector": {
+        "label": "Základní konfigurace",
+        "none": "Žádná (výchozí hodnoty požadavku)"
+      },
+      "configMissing": "Vybraná konfigurace byla smazána; použijí se výchozí hodnoty požadavku.",
+      "fields": {
+        "env": "Prostředí"
+      }
     }
   },
   "mqtt": {
@@ -1969,7 +1980,9 @@
     },
     "deleteConfirm": {
       "title": "Smazat konfiguraci",
-      "message": "Chcete smazat konfiguraci „{{name}}\"?"
+      "message": "Chcete smazat konfiguraci „{{name}}\"?",
+      "usedByScenarios_one": "Používá ji scénář {{scenarios}}.",
+      "usedByScenarios_other": "Používají ji scénáře {{scenarios}}."
     },
     "confirm": {
       "ok": "OK",

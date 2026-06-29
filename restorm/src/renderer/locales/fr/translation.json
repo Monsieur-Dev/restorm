@@ -1707,6 +1707,17 @@
     },
     "http": {
       "served": "servie"
+    },
+    "actionOverride": {
+      "configMissingShort": "Configuration introuvable",
+      "configSelector": {
+        "label": "Configuration de base",
+        "none": "Aucune (valeurs par défaut de la requête)"
+      },
+      "configMissing": "La configuration sélectionnée a été supprimée ; les valeurs par défaut de la requête s’appliquent.",
+      "fields": {
+        "env": "Environnement"
+      }
     }
   },
   "mqtt": {
@@ -1967,7 +1978,9 @@
     },
     "deleteConfirm": {
       "title": "Supprimer la configuration",
-      "message": "Voulez-vous supprimer la configuration « {{name}} » ?"
+      "message": "Voulez-vous supprimer la configuration « {{name}} » ?",
+      "usedByScenarios_one": "Elle est utilisée par le scénario {{scenarios}}.",
+      "usedByScenarios_other": "Elle est utilisée par les scénarios {{scenarios}}."
     },
     "confirm": {
       "ok": "OK",

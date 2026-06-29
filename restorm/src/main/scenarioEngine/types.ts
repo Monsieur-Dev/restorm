@@ -146,6 +146,12 @@ export interface ExecResult {
         requestId: string
         events: string[]
         connectionName: string
+        // The bound node's quick-config + static field overrides (see
+        // `shared/scenarioActionOverride`). The engine applies them to the bound
+        // request before flushing it, so a streaming connect / mock-server listen
+        // honours the same override-resolution order as a one-shot httpRequest.
+        // Absent when the node carries no override config.
+        overrideConfig?: Record<string, unknown>
       }
 }
 

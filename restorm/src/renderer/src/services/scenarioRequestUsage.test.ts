@@ -3,6 +3,7 @@ import type { FolderItem } from '../../../shared/types/collections'
 import {
   findScenariosUsingRequest,
   findScenariosUsingScenario,
+  findScenariosUsingQuickConfig,
   isRequestInScenarioSubtree,
   collectRequestScenarioRelations,
   requestScenarioDeleteUsages
@@ -192,5 +193,36 @@ describe('requestScenarioDeleteUsages (delete-dialog trigger)', () => {
 
   it('returns nothing for a request unrelated to any scenario', () => {
     expect(requestScenarioDeleteUsages(rootItems, 'req-absent')).toHaveLength(0)
+  })
+})
+
+describe('findScenariosUsingQuickConfig', () => {
+  // A request-binding node referencing a saved config by id ties that config to
+  // the scenario — drives the quick-settings delete cross-link.
+  const qcNode = (id: string, requestId: string, quickConfigId: string): { id: string; kind: string; config: { requestId: string; quickConfigId: string }; inputs: never[]; outputs: never[]; position: { x: number; y: number } } =>
+    ({ id, kind: 'httpRequest', config: { requestId, quickConfigId }, inputs: [], outputs: [], position: { x: 0, y: 0 } })
+  const scnA = {
+    type: 'scenario', id: 'scn-a', name: 'Scenario A', tags: [], params: [],
+    nodes: [qcNode('a1', 'req-bound', 'qc-1'), qcNode('a2', 'req-bound', 'qc-1')], edges: [], items: []
+  }
+  const scnB = {
+    type: 'scenario', id: 'scn-b', name: 'Scenario B', tags: [], params: [],
+    nodes: [qcNode('b1', 'req-bound', 'qc-2')], edges: [], items: []
+  }
+  const roots = [scnA, scnB] as unknown as FolderItem[]
+
+  it('finds every scenario whose action references the config id', () => {
+    const usages = findScenariosUsingQuickConfig(roots, 'qc-1')
+    expect(usages).toHaveLength(1)
+    expect(usages[0]?.scenario.id).toBe('scn-a')
+    expect(usages[0]?.nodeIds).toEqual(['a1', 'a2'])
+  })
+
+  it('separates two scenarios using two different configs', () => {
+    expect(findScenariosUsingQuickConfig(roots, 'qc-2')[0]?.scenario.id).toBe('scn-b')
+  })
+
+  it('returns nothing for a config no action references', () => {
+    expect(findScenariosUsingQuickConfig(roots, 'qc-absent')).toHaveLength(0)
   })
 })

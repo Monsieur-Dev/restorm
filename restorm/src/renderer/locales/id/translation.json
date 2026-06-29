@@ -1706,6 +1706,17 @@
     },
     "http": {
       "served": "served"
+    },
+    "actionOverride": {
+      "configMissingShort": "Konfigurasi tidak ada",
+      "configSelector": {
+        "label": "Konfigurasi dasar",
+        "none": "Tidak ada (nilai bawaan permintaan)"
+      },
+      "configMissing": "Konfigurasi yang dipilih telah dihapus; nilai bawaan permintaan berlaku.",
+      "fields": {
+        "env": "Lingkungan"
+      }
     }
   },
   "mqtt": {
@@ -1966,7 +1977,9 @@
     },
     "deleteConfirm": {
       "title": "Hapus konfigurasi",
-      "message": "Apakah Anda ingin menghapus konfigurasi \"{{name}}\"?"
+      "message": "Apakah Anda ingin menghapus konfigurasi \"{{name}}\"?",
+      "usedByScenarios_one": "Digunakan oleh skenario {{scenarios}}.",
+      "usedByScenarios_other": "Digunakan oleh skenario {{scenarios}}."
     },
     "confirm": {
       "ok": "OK",

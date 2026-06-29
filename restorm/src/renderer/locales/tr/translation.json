@@ -1707,6 +1707,17 @@
     },
     "http": {
       "served": "served"
+    },
+    "actionOverride": {
+      "configMissingShort": "Yapılandırma eksik",
+      "configSelector": {
+        "label": "Temel yapılandırma",
+        "none": "Yok (isteğin varsayılanları)"
+      },
+      "configMissing": "Seçilen yapılandırma silindi; isteğin varsayılan değerleri uygulanır.",
+      "fields": {
+        "env": "Ortam"
+      }
     }
   },
   "mqtt": {
@@ -1967,7 +1978,9 @@
     },
     "deleteConfirm": {
       "title": "Yapılandırmayı sil",
-      "message": "\"{{name}}\" yapılandırmasını silmek istiyor musunuz?"
+      "message": "\"{{name}}\" yapılandırmasını silmek istiyor musunuz?",
+      "usedByScenarios_one": "{{scenarios}} senaryosu tarafından kullanılıyor.",
+      "usedByScenarios_other": "{{scenarios}} senaryoları tarafından kullanılıyor."
     },
     "confirm": {
       "ok": "Tamam",

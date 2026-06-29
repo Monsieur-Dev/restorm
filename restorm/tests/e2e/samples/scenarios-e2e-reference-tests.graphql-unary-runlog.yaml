@@ -1,0 +1,76 @@
+- message: 🔵 [<time>] ▶ GraphQL unary
+- message: ⚪ [<time>] start graphqlListen
+  data:
+    requestId: <uuid>
+    connectionName: GraphQL Unary Mock
+    label: start GraphQL mock server
+- message: ⚪ [<time>] done graphqlListen
+- message: ⚪ [<time>] graphql-server "GraphQL Unary Mock" connecting
+- message: ⚪ [<time>] graphql-server "GraphQL Unary Mock" connected
+- message: ⚪ [<time>] start httpRequest
+  data:
+    requestId: <uuid>
+    label: query the mock (native GraphQL)
+    in: true
+- message: ⚪ [<time>] done httpRequest
+  data:
+    response:
+      request:
+        url: http://localhost:4222/graphql
+        method: POST
+        headers: {}
+      response:
+        status: 200
+        statusText: ""
+        headers:
+          content-type: application/json; charset=utf-8
+          content-length: "36"
+          date: <dynamic-time>
+          connection: keep-alive
+          keep-alive: timeout=5
+        body: '{"data":{"pets":["Rex","Whiskers"]}}'
+        durationMs: <dynamic-time>
+        success: true
+- message: ⚪ [<time>] start log
+  data:
+    message: réponse GraphQL unary reçue
+    level: info
+    data: '{"data":{"pets":["Rex","Whiskers"]}}'
+    in:
+      request:
+        url: http://localhost:4222/graphql
+        method: POST
+        headers: {}
+      response:
+        status: 200
+        statusText: ""
+        headers:
+          content-type: application/json; charset=utf-8
+          content-length: "36"
+          date: <dynamic-time>
+          connection: keep-alive
+          keep-alive: timeout=5
+        body: '{"data":{"pets":["Rex","Whiskers"]}}'
+        durationMs: <dynamic-time>
+        success: true
+- message: 🔵 [<time>] réponse GraphQL unary reçue
+  data: '{"data":{"pets":["Rex","Whiskers"]}}'
+- message: ⚪ [<time>] done log
+  data:
+    value: '{"data":{"pets":["Rex","Whiskers"]}}'
+- message: ⚪ [<time>] start graphqlClose
+  data:
+    connectionNodeId: <uuid>
+    label: stop the GraphQL mock server
+    in: true
+- message: ⚪ [<time>] graphql-server "GraphQL Unary Mock" closed
+- message: ⚪ [<time>] start log
+  data:
+    message: serveur GraphQL unary arrêté
+    level: info
+    in: true
+- message: 🔵 [<time>] serveur GraphQL unary arrêté
+- message: ⚪ [<time>] done log
+  data: {}
+- message: ⚪ [<time>] done graphqlClose
+- message: 🔵 [<time>] ■ GraphQL unary

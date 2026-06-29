@@ -72,6 +72,7 @@ export interface RestormWorkbenchContainerProps {
   onStateRestored: (tree: WorkbenchTree | null) => void
   getRequestById: (id: string) => Request | undefined
   getScenariosUsingRequest?: (requestId: string) => ScenarioRequestUsage[]
+  getScenariosUsingQuickConfig?: (quickConfigId: string) => ScenarioRequestUsage[]
   onOpenScenarioFromRequest?: (scenarioId: string, focusNodeId?: string) => void
   getScenariosUsingScenario?: (scenarioId: string) => ScenarioScenarioUsage[]
   getFolderById: (id: string) => Folder | undefined
@@ -121,6 +122,7 @@ export const RestormWorkbenchContainer: React.FC<RestormWorkbenchContainerProps>
   onStateRestored,
   getRequestById,
   getScenariosUsingRequest,
+  getScenariosUsingQuickConfig,
   getScenariosUsingScenario,
   onOpenScenarioFromRequest,
   getFolderById,
@@ -178,6 +180,7 @@ export const RestormWorkbenchContainer: React.FC<RestormWorkbenchContainerProps>
           onStateRestored={onStateRestored}
           getRequestById={getRequestById}
           getScenariosUsingRequest={getScenariosUsingRequest}
+          getScenariosUsingQuickConfig={getScenariosUsingQuickConfig}
           getScenariosUsingScenario={getScenariosUsingScenario}
           onOpenScenarioFromRequest={onOpenScenarioFromRequest}
           getFolderById={getFolderById}

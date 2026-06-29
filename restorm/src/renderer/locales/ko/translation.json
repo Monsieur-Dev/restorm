@@ -1706,6 +1706,17 @@
     },
     "http": {
       "served": "served"
+    },
+    "actionOverride": {
+      "configMissingShort": "구성 없음",
+      "configSelector": {
+        "label": "기본 구성",
+        "none": "없음(요청 기본값 사용)"
+      },
+      "configMissing": "선택한 구성이 삭제되었습니다. 요청 기본값이 적용됩니다.",
+      "fields": {
+        "env": "환경"
+      }
     }
   },
   "mqtt": {
@@ -1966,7 +1977,9 @@
     },
     "deleteConfirm": {
       "title": "설정 삭제",
-      "message": "\"{{name}}\" 설정을 삭제하시겠습니까?"
+      "message": "\"{{name}}\" 설정을 삭제하시겠습니까?",
+      "usedByScenarios_one": "시나리오 {{scenarios}}에서 사용 중입니다.",
+      "usedByScenarios_other": "시나리오 {{scenarios}}에서 사용 중입니다."
     },
     "confirm": {
       "ok": "OK",

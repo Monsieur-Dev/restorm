@@ -1706,6 +1706,17 @@
     },
     "http": {
       "served": "served"
+    },
+    "actionOverride": {
+      "configMissingShort": "配置缺失",
+      "configSelector": {
+        "label": "基础配置",
+        "none": "无（使用请求默认值）"
+      },
+      "configMissing": "所选配置已被删除；将应用请求的默认值。",
+      "fields": {
+        "env": "环境"
+      }
     }
   },
   "mqtt": {
@@ -1966,7 +1977,9 @@
     },
     "deleteConfirm": {
       "title": "删除配置",
-      "message": "是否要删除配置\"{{name}}\"？"
+      "message": "是否要删除配置\"{{name}}\"？",
+      "usedByScenarios_one": "它被场景 {{scenarios}} 使用。",
+      "usedByScenarios_other": "它被场景 {{scenarios}} 使用。"
     },
     "confirm": {
       "ok": "确定",

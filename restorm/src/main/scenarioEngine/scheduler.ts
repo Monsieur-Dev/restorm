@@ -150,6 +150,11 @@ export interface SocketioConnectRequest {
    * mock, `soap-server` a local SOAP mock and `graphql-server` a local GraphQL
    * mock (each served request / call / operation re-emits on `served`). */
   transport: 'socketio' | 'websocket' | 'grpc' | 'mqtt' | 'graphql-subscribe' | 'http-server' | 'grpc-server' | 'soap-server' | 'graphql-server' | 'odata-server'
+  /** The bound node's quick-config + static field overrides (see
+   * `shared/scenarioActionOverride`). The bridge applies them to the bound
+   * request before flushing, so a streaming connect / mock-server listen honours
+   * the same override-resolution order as a one-shot httpRequest. */
+  overrideConfig?: Record<string, unknown>
   /** Fired once the socket is open. */
   onConnect: () => void
   /** Fired for every received frame (event name — undefined for raw WS — + payload). */
@@ -1226,7 +1231,7 @@ export class Scheduler {
    */
   private runSocketioConnect(
     act: InternalActivation,
-    action: { transport: 'socketio' | 'websocket' | 'grpc' | 'mqtt' | 'graphql-subscribe' | 'http-server' | 'grpc-server' | 'soap-server' | 'graphql-server' | 'odata-server'; requestId: string; events: string[]; connectionName: string }
+    action: { transport: 'socketio' | 'websocket' | 'grpc' | 'mqtt' | 'graphql-subscribe' | 'http-server' | 'grpc-server' | 'soap-server' | 'graphql-server' | 'odata-server'; requestId: string; events: string[]; connectionName: string; overrideConfig?: Record<string, unknown> }
   ): void {
     if (!this.socketioConnectBridge) { this.fail('socketio bridge not wired'); return }
     let iter = 0
@@ -1287,6 +1292,7 @@ export class Scheduler {
     const handle = this.socketioConnectBridge({
       requestId: action.requestId,
       transport: action.transport,
+      ...(action.overrideConfig ? { overrideConfig: action.overrideConfig } : {}),
       onConnect: () => {
         if (this.abortCtl.signal.aborted) return
         this.pushLog({ ts: now(), runId: this.runId, level: 'debug', source: 'engine', nodeId: act.nodeId, scope: act.scope, message: `${action.transport} "${action.connectionName}" connected` })

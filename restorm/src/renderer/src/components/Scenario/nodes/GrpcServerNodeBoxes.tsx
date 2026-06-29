@@ -6,6 +6,9 @@ import { Badge } from '../../common/Badge'
 import { ScenarioNodeBoxBase, type ScenarioNodeBoxType, type ScenarioNodeCell, type ScenarioNodeSection } from './ScenarioNodeBoxBase'
 import { ScenarioNameInput } from './ScenarioNameInput'
 import { ConnectionPicker } from './SocketioNodeBoxes'
+import { useScenarioBoundResolver } from '../scenarioBoundResolver'
+import { isRequest } from '../../../../../shared/types/collections'
+import { useStreamingOverrideSections } from './scenarioOverridePorts'
 
 const stop = (e: React.MouseEvent): void => { e.stopPropagation() }
 
@@ -21,6 +24,10 @@ export const GrpcListenNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id
   const config = data.config ?? {}
   const connectionName = typeof config['connectionName'] === 'string' ? config['connectionName'] : ''
   const requestId = typeof config['requestId'] === 'string' ? config['requestId'] : undefined
+  const resolve = useScenarioBoundResolver()
+  const boundItem = requestId && resolve ? resolve(requestId) : null
+  const boundRequest = boundItem && isRequest(boundItem) ? boundItem : null
+  const overrideSections = useStreamingOverrideSections(boundRequest, config, (patch) => { data.onSetConfig?.(id, patch) })
 
   const left: ScenarioNodeSection[] = [
     ...(requestId && data.onOpenItem
@@ -41,6 +48,7 @@ export const GrpcListenNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id
           }]
         }]
       : []),
+    ...overrideSections,
     {
       id: 'main',
       rows: [

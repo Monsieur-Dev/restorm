@@ -26,6 +26,7 @@ import { isScenario } from '../../shared/types/collections'
 import type { Scenario } from '../../shared/types/scenario'
 import { Scheduler, type RunOptions } from './scheduler'
 import { buildExecutorRegistry } from './executors/registry'
+import { buildEffectiveStreamingRequest } from './executors/effectiveRequest'
 import { RunArchive, type ArchivedRun } from './runArchive'
 import { collectReferencedScenarios } from './collectReferencedScenarios'
 import { scenarioRunHistoryService } from '../services/ScenarioRunHistoryService'
@@ -189,7 +190,14 @@ export class ScenarioEngine {
       // on the matching transport. The scheduler keeps the returned handle and
       // drives send / close from it.
       socketioConnect: (req) => {
-        const bound = collectionStore.findById(req.requestId)
+        const rawBound = collectionStore.findById(req.requestId)
+        // Apply the node's quick-config (by id) + inline field overrides before
+        // flushing, so a streaming connect / mock-server listen honours the same
+        // override-resolution (base → quickConfig → inline override) as a
+        // one-shot httpRequest. The bound request is left untouched (clone).
+        const bound = rawBound && req.overrideConfig
+          ? buildEffectiveStreamingRequest(rawBound, req.overrideConfig)
+          : rawBound
         if (bound && (bound as { type?: string }).type !== 'scenario') {
           flushRequestStateToContext(bound as unknown as Parameters<typeof flushRequestStateToContext>[0])
         }

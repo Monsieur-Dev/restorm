@@ -1707,6 +1707,17 @@
     },
     "http": {
       "served": "served"
+    },
+    "actionOverride": {
+      "configMissingShort": "Kokoonpano puuttuu",
+      "configSelector": {
+        "label": "Perusasetukset",
+        "none": "Ei mitään (pyynnön oletusarvot)"
+      },
+      "configMissing": "Valittu kokoonpano poistettiin; pyynnön oletusarvot ovat voimassa.",
+      "fields": {
+        "env": "Ympäristö"
+      }
     }
   },
   "mqtt": {
@@ -1967,7 +1978,9 @@
     },
     "deleteConfirm": {
       "title": "Poista konfiguraatio",
-      "message": "Haluatko poistaa konfiguraation \"{{name}}\"?"
+      "message": "Haluatko poistaa konfiguraation \"{{name}}\"?",
+      "usedByScenarios_one": "Sitä käyttää skenaario {{scenarios}}.",
+      "usedByScenarios_other": "Sitä käyttävät skenaariot {{scenarios}}."
     },
     "confirm": {
       "ok": "OK",

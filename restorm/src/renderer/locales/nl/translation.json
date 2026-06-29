@@ -1707,6 +1707,17 @@
     },
     "http": {
       "served": "served"
+    },
+    "actionOverride": {
+      "configMissingShort": "Configuratie ontbreekt",
+      "configSelector": {
+        "label": "Basisconfiguratie",
+        "none": "Geen (standaardwaarden van verzoek)"
+      },
+      "configMissing": "De geselecteerde configuratie is verwijderd; de standaardwaarden van het verzoek gelden.",
+      "fields": {
+        "env": "Omgeving"
+      }
     }
   },
   "mqtt": {
@@ -1967,7 +1978,9 @@
     },
     "deleteConfirm": {
       "title": "Configuratie verwijderen",
-      "message": "Wil je de configuratie \"{{name}}\" verwijderen?"
+      "message": "Wil je de configuratie \"{{name}}\" verwijderen?",
+      "usedByScenarios_one": "Het wordt gebruikt door het scenario {{scenarios}}.",
+      "usedByScenarios_other": "Het wordt gebruikt door de scenario’s {{scenarios}}."
     },
     "confirm": {
       "ok": "OK",

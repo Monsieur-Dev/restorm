@@ -19,10 +19,14 @@ const execute = vi.fn<(i: unknown) => Promise<unknown>>()
 const cancel = vi.fn<(id: string) => void>()
 const storeExecutionResult = vi.fn<(...a: unknown[]) => Promise<void>>()
 const flushRequestStateToContext = vi.fn<(r: unknown) => void>()
+const graphqlExecute = vi.fn<(i: unknown) => Promise<unknown>>()
 
 vi.mock('../../services/CollectionStore', () => ({ collectionStore: { findById: (id: string) => findById(id) } }))
 vi.mock('../../services/HTTPExecutionService', () => ({
   httpExecutionService: { execute: (i: unknown) => execute(i), cancel: (id: string) => { cancel(id) } }
+}))
+vi.mock('../../services/GraphQLExecutionService', () => ({
+  graphqlExecutionService: { execute: (i: unknown) => graphqlExecute(i), cancel: () => undefined }
 }))
 vi.mock('../../services/ResponseHistoryService', () => ({
   responseHistoryService: { storeExecutionResult: (...a: unknown[]) => storeExecutionResult(...a) }
@@ -87,6 +91,32 @@ beforeEach(() => {
   cancel.mockReset()
   storeExecutionResult.mockReset().mockResolvedValue(undefined)
   flushRequestStateToContext.mockReset()
+  graphqlExecute.mockReset()
+})
+
+describe('httpRequestExecutor — GraphQL unary', () => {
+  function makeGraphqlRequest(): Record<string, unknown> {
+    return { id: 'req-1', type: 'graphql', url: 'https://gql.test/graphql', operationType: 'query', query: 'query { ping }', variables: '{}' }
+  }
+  function gqlResult(): Record<string, unknown> {
+    return { requestId: 'req-1', success: true, statusCode: 200, data: { ping: 'pong' }, headers: { 'content-type': 'application/json' }, requestUrl: 'https://gql.test/graphql', timings: { startedAt: '2026-01-01T00:00:00.000Z', durationMs: 7 } }
+  }
+
+  it('runs a bound GraphQL request and shapes the response port (+ persists history)', async () => {
+    findById.mockReturnValue(makeGraphqlRequest())
+    graphqlExecute.mockResolvedValue(gqlResult())
+    const out = await httpRequestExecutor(makeActivation({}), makeCtx(node()))
+    expect(graphqlExecute).toHaveBeenCalledTimes(1)
+    // History is stored by the executor (the service does not persist it itself).
+    expect(storeExecutionResult).toHaveBeenCalledWith('req-1', 'graphql', expect.anything())
+    const value = out.outputs[0]?.value as { request: { method: string; url: string }; response: { status: number; success: boolean; body: string } }
+    expect(value.request.method).toBe('POST')
+    expect(value.request.url).toBe('https://gql.test/graphql')
+    expect(value.response.status).toBe(200)
+    expect(value.response.success).toBe(true)
+    // The wire body carries the `{ data, errors }` envelope so `response.body.data.…` selectors resolve.
+    expect(JSON.parse(value.response.body)).toEqual({ data: { ping: 'pong' } })
+  })
 })
 
 describe('httpRequestExecutor — slot short-circuit', () => {
