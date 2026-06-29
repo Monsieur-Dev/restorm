@@ -29,8 +29,11 @@
 .text-button {
 	box-sizing: border-box;
 	display: flex;
-	width: 100%;
-	max-width: 200px;
+
+	/* Size to the label so a long caption is never clipped; never exceed the
+	   container (an explicit `.full-width` opt-in below fills it instead). */
+	width: fit-content;
+	max-width: 100%;
 	height: auto;
 	min-height: 22px;
 	padding: 4px 12px;
