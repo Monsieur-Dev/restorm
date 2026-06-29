@@ -387,5 +387,24 @@
     "addOrigin": "Προσθήκη origin",
     "removeOrigin": "Αφαίρεση {{origin}}",
     "noEntries": "Δεν υπάρχουν ακόμα εγγραφές."
+  },
+  "bookmarkRibbon": {
+    "addBookmark": "Προσθήκη σελιδοδείκτη"
+  },
+  "themeCarousel": {
+    "selectedTheme": "Επιλεγμένο θέμα"
+  },
+  "toaster": {
+    "notificationsRegion": "Ειδοποιήσεις"
+  },
+  "console": {
+    "shellFlavor": "Τύπος κελύφους"
+  },
+  "workbench": {
+    "tabModified": "Τροποποιήθηκε",
+    "editorTabs": "Καρτέλες επεξεργαστή"
+  },
+  "keyValueTable": {
+    "description": "Περιγραφή"
   }
 }

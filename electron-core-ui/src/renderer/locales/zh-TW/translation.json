@@ -387,5 +387,24 @@
     "addOrigin": "新增來源",
     "removeOrigin": "移除 {{origin}}",
     "noEntries": "目前沒有條目。"
+  },
+  "bookmarkRibbon": {
+    "addBookmark": "新增書籤"
+  },
+  "themeCarousel": {
+    "selectedTheme": "已選主題"
+  },
+  "toaster": {
+    "notificationsRegion": "通知"
+  },
+  "console": {
+    "shellFlavor": "Shell 類型"
+  },
+  "workbench": {
+    "tabModified": "已修改",
+    "editorTabs": "編輯器分頁"
+  },
+  "keyValueTable": {
+    "description": "描述"
   }
 }

@@ -387,5 +387,24 @@
     "addOrigin": "Tambahkan origin",
     "removeOrigin": "Hapus {{origin}}",
     "noEntries": "Belum ada entri."
+  },
+  "bookmarkRibbon": {
+    "addBookmark": "Tambah penanda"
+  },
+  "themeCarousel": {
+    "selectedTheme": "Tema terpilih"
+  },
+  "toaster": {
+    "notificationsRegion": "Notifikasi"
+  },
+  "console": {
+    "shellFlavor": "Jenis shell"
+  },
+  "workbench": {
+    "tabModified": "Diubah",
+    "editorTabs": "Tab editor"
+  },
+  "keyValueTable": {
+    "description": "Deskripsi"
   }
 }

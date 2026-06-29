@@ -387,5 +387,24 @@
     "addOrigin": "Додати origin",
     "removeOrigin": "Видалити {{origin}}",
     "noEntries": "Записів ще немає."
+  },
+  "bookmarkRibbon": {
+    "addBookmark": "Додати закладку"
+  },
+  "themeCarousel": {
+    "selectedTheme": "Вибрана тема"
+  },
+  "toaster": {
+    "notificationsRegion": "Сповіщення"
+  },
+  "console": {
+    "shellFlavor": "Тип оболонки"
+  },
+  "workbench": {
+    "tabModified": "Змінено",
+    "editorTabs": "Вкладки редактора"
+  },
+  "keyValueTable": {
+    "description": "Опис"
   }
 }

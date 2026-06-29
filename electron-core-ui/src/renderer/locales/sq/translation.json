@@ -387,5 +387,24 @@
     "addOrigin": "Shto origjinën",
     "removeOrigin": "Hiq {{origin}}",
     "noEntries": "Ende nuk ka hyrje."
+  },
+  "bookmarkRibbon": {
+    "addBookmark": "Shto faqeshënues"
+  },
+  "themeCarousel": {
+    "selectedTheme": "Tema e zgjedhur"
+  },
+  "toaster": {
+    "notificationsRegion": "Njoftime"
+  },
+  "console": {
+    "shellFlavor": "Lloji i shell-it"
+  },
+  "workbench": {
+    "tabModified": "I ndryshuar",
+    "editorTabs": "Skedat e redaktuesit"
+  },
+  "keyValueTable": {
+    "description": "Përshkrimi"
   }
 }

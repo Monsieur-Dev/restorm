@@ -387,5 +387,24 @@
     "addOrigin": "Kaynak ekle",
     "removeOrigin": "{{origin}} kaldır",
     "noEntries": "Henüz girdi yok."
+  },
+  "bookmarkRibbon": {
+    "addBookmark": "Yer işareti ekle"
+  },
+  "themeCarousel": {
+    "selectedTheme": "Seçili tema"
+  },
+  "toaster": {
+    "notificationsRegion": "Bildirimler"
+  },
+  "console": {
+    "shellFlavor": "Kabuk türü"
+  },
+  "workbench": {
+    "tabModified": "Değiştirildi",
+    "editorTabs": "Düzenleyici sekmeleri"
+  },
+  "keyValueTable": {
+    "description": "Açıklama"
   }
 }

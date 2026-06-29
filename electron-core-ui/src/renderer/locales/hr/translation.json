@@ -387,5 +387,24 @@
     "addOrigin": "Dodaj origin",
     "removeOrigin": "Ukloni {{origin}}",
     "noEntries": "Nema još unosa."
+  },
+  "bookmarkRibbon": {
+    "addBookmark": "Dodaj oznaku"
+  },
+  "themeCarousel": {
+    "selectedTheme": "Odabrana tema"
+  },
+  "toaster": {
+    "notificationsRegion": "Obavijesti"
+  },
+  "console": {
+    "shellFlavor": "Vrsta ljuske"
+  },
+  "workbench": {
+    "tabModified": "Izmijenjeno",
+    "editorTabs": "Kartice uređivača"
+  },
+  "keyValueTable": {
+    "description": "Opis"
   }
 }

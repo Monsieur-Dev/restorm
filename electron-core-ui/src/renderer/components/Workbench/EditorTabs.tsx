@@ -1,4 +1,5 @@
 import React, { useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import './styles/tabs.css';
 import Tab from './Tab';
 import type { EditorGroup, EditorTab, EditorWorkbenchCallbacks } from './types';
@@ -42,6 +43,7 @@ export const EditorTabs: React.FC<EditorTabsProps> = ({
 	onTabDoubleClick,
 	'data-testid': dataTestId
 }) => {
+	const { t: translate } = useTranslation();
 	const containerRef = useRef<HTMLDivElement | null>(null);
 	const [_dragOverIndex, setDragOverIndex] = useState<number | null>(null);
 	const [hoveredTabIndex, setHoveredTabIndex] = useState<number | null>(null);
@@ -417,7 +419,7 @@ export const EditorTabs: React.FC<EditorTabsProps> = ({
 					ref={containerRef}
 					className={`tabs-container${dimmed ? ' dimmed' : ''}`}
 					role="tablist"
-					aria-label="Editor tabs"
+					aria-label={translate('workbench.editorTabs')}
 					{...(dataTestId && { 'data-testid': `${dataTestId}-container` })}
 					onDragEnter={updateDragOver}
 					onDragOver={updateDragOver}

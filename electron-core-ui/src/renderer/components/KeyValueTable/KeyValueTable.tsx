@@ -7,6 +7,7 @@ import React, {
   useState,
   type ComponentType
 } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Toggle } from '../Toggle'
 import { InputBox } from '../InputBox'
 import { ScrollableElement } from '../ScrollableElement'
@@ -163,6 +164,7 @@ export const KeyValueTable = React.memo(React.forwardRef<KeyValueTableHandle, Ke
   },
   ref
 ) => {
+  const { t } = useTranslation()
   // Convert initialRows to ParamRow format
   const defaultRows = useMemo<ParamRow[]>(() => {
     if (!initialRows || initialRows.length === 0) {
@@ -352,7 +354,7 @@ export const KeyValueTable = React.memo(React.forwardRef<KeyValueTableHandle, Ke
     if (showDescription) {
       cols.push({
         id: 'description',
-        header: 'Description',
+        header: t('keyValueTable.description'),
         resizable: true,
         minWidth: 120,
         renderCell: (row) => {
@@ -363,7 +365,7 @@ export const KeyValueTable = React.memo(React.forwardRef<KeyValueTableHandle, Ke
                 <DescRenderer
                   value={row.description}
                   onChange={(v) => { updateData(idx, 'description', v) }}
-                  placeholder="Description"
+                  placeholder={t('keyValueTable.description')}
                   {...(dataTestId && { 'data-testid': `${dataTestId}-row-${row.id}-description` })}
                   rowId={row.id}
                 />
@@ -402,7 +404,7 @@ export const KeyValueTable = React.memo(React.forwardRef<KeyValueTableHandle, Ke
     }
 
     return cols
-  }, [KeyCellRenderer, ValueCellRenderer, DescriptionCellRenderer, ResolvedValueCellRenderer, showDescription, showResolvedValue, showEnabledToggle, rows, updateData, dataTestId, handleRemoveRow])
+  }, [KeyCellRenderer, ValueCellRenderer, DescriptionCellRenderer, ResolvedValueCellRenderer, showDescription, showResolvedValue, showEnabledToggle, rows, updateData, dataTestId, handleRemoveRow, t])
 
   return (
     <div

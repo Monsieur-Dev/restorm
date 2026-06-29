@@ -1,4 +1,5 @@
 import React, { useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { EditorTab, EditorWorkbenchCallbacks } from './types';
 import { Button } from '../Button';
 import { Tooltip } from '../Tooltip';
@@ -39,6 +40,7 @@ export const Tab: React.FC<TabProps> = ({
 	renderTabTitle,
 	'data-testid': dataTestId
 }) => {
+	const { t } = useTranslation();
 	// Use renderTabTitle if provided, otherwise use tab.title directly
 	const titleContent = renderTabTitle ? renderTabTitle(tab) : tab.title;
 	const closeRef = useRef<HTMLSpanElement>(null);
@@ -80,7 +82,7 @@ export const Tab: React.FC<TabProps> = ({
 			{tab.isDirty && (
 				<span
 					className="action-label codicon codicon-circle-filled dirty-indicator"
-					aria-label="Modified"
+					aria-label={t('workbench.tabModified')}
 				/>
 			)}
 			<span

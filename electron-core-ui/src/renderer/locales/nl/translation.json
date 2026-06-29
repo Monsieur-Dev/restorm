@@ -387,5 +387,24 @@
     "addOrigin": "Oorsprong toevoegen",
     "removeOrigin": "{{origin}} verwijderen",
     "noEntries": "Nog geen vermeldingen."
+  },
+  "bookmarkRibbon": {
+    "addBookmark": "Bladwijzer toevoegen"
+  },
+  "themeCarousel": {
+    "selectedTheme": "Geselecteerd thema"
+  },
+  "toaster": {
+    "notificationsRegion": "Meldingen"
+  },
+  "console": {
+    "shellFlavor": "Shell-type"
+  },
+  "workbench": {
+    "tabModified": "Gewijzigd",
+    "editorTabs": "Editortabbladen"
+  },
+  "keyValueTable": {
+    "description": "Beschrijving"
   }
 }

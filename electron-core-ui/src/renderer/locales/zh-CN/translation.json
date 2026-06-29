@@ -387,5 +387,24 @@
     "addOrigin": "添加来源",
     "removeOrigin": "移除 {{origin}}",
     "noEntries": "暂无条目。"
+  },
+  "bookmarkRibbon": {
+    "addBookmark": "添加书签"
+  },
+  "themeCarousel": {
+    "selectedTheme": "已选主题"
+  },
+  "toaster": {
+    "notificationsRegion": "通知"
+  },
+  "console": {
+    "shellFlavor": "Shell 类型"
+  },
+  "workbench": {
+    "tabModified": "已修改",
+    "editorTabs": "编辑器选项卡"
+  },
+  "keyValueTable": {
+    "description": "描述"
   }
 }

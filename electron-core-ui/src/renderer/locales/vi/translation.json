@@ -387,5 +387,24 @@
     "addOrigin": "Thêm nguồn gốc",
     "removeOrigin": "Xóa {{origin}}",
     "noEntries": "Chưa có mục nào."
+  },
+  "bookmarkRibbon": {
+    "addBookmark": "Thêm dấu trang"
+  },
+  "themeCarousel": {
+    "selectedTheme": "Chủ đề đã chọn"
+  },
+  "toaster": {
+    "notificationsRegion": "Thông báo"
+  },
+  "console": {
+    "shellFlavor": "Loại shell"
+  },
+  "workbench": {
+    "tabModified": "Đã sửa đổi",
+    "editorTabs": "Thẻ trình soạn thảo"
+  },
+  "keyValueTable": {
+    "description": "Mô tả"
   }
 }

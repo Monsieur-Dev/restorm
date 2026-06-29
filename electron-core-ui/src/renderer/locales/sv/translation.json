@@ -387,5 +387,24 @@
     "addOrigin": "Lägg till origin",
     "removeOrigin": "Ta bort {{origin}}",
     "noEntries": "Inga poster ännu."
+  },
+  "bookmarkRibbon": {
+    "addBookmark": "Lägg till bokmärke"
+  },
+  "themeCarousel": {
+    "selectedTheme": "Valt tema"
+  },
+  "toaster": {
+    "notificationsRegion": "Aviseringar"
+  },
+  "console": {
+    "shellFlavor": "Skaltyp"
+  },
+  "workbench": {
+    "tabModified": "Ändrad",
+    "editorTabs": "Redigerarflikar"
+  },
+  "keyValueTable": {
+    "description": "Beskrivning"
   }
 }

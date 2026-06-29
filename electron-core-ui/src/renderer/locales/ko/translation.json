@@ -387,5 +387,24 @@
     "addOrigin": "오리진 추가",
     "removeOrigin": "{{origin}} 제거",
     "noEntries": "항목이 없습니다."
+  },
+  "bookmarkRibbon": {
+    "addBookmark": "북마크 추가"
+  },
+  "themeCarousel": {
+    "selectedTheme": "선택된 테마"
+  },
+  "toaster": {
+    "notificationsRegion": "알림"
+  },
+  "console": {
+    "shellFlavor": "셸 종류"
+  },
+  "workbench": {
+    "tabModified": "수정됨",
+    "editorTabs": "편집기 탭"
+  },
+  "keyValueTable": {
+    "description": "설명"
   }
 }

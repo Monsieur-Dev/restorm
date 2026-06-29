@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import type { CSSProperties } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useThemeContext } from '../../contexts/useThemeContext'
 import type { ThemeInfo, ThemeVariables } from '../../../types/theme'
 import { setPendingThemeRevealOrigin } from '../../utils/themeReveal'
@@ -52,6 +53,7 @@ export const ThemeCarousel: React.FC<ThemeCarouselProps> = ({
   scrollableTestId,
   onSelect
 }) => {
+  const { t } = useTranslation()
   const { themes, currentThemeId, setTheme, isLoading } = useThemeContext()
   const rootTestId = dataTestId ?? 'theme-carousel'
   const scrollableId = scrollableTestId ?? `${rootTestId}-scrollable`
@@ -215,7 +217,7 @@ export const ThemeCarousel: React.FC<ThemeCarouselProps> = ({
                     </span>
                   </div>
                   {isSelected && (
-                    <span className="theme-carousel-item-selected-indicator" aria-label="Selected theme" />
+                    <span className="theme-carousel-item-selected-indicator" aria-label={t('themeCarousel.selectedTheme')} />
                   )}
                 </div>
 

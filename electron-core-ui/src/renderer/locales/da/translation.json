@@ -387,5 +387,24 @@
     "addOrigin": "Tilføj origin",
     "removeOrigin": "Fjern {{origin}}",
     "noEntries": "Ingen poster endnu."
+  },
+  "bookmarkRibbon": {
+    "addBookmark": "Tilføj bogmærke"
+  },
+  "themeCarousel": {
+    "selectedTheme": "Valgt tema"
+  },
+  "toaster": {
+    "notificationsRegion": "Notifikationer"
+  },
+  "console": {
+    "shellFlavor": "Shell-type"
+  },
+  "workbench": {
+    "tabModified": "Ændret",
+    "editorTabs": "Editorfaner"
+  },
+  "keyValueTable": {
+    "description": "Beskrivelse"
   }
 }

@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { BookmarkRibbon } from './BookmarkRibbon'
 import { Tooltip } from '../Tooltip'
 import { Button } from '../Button'
@@ -42,6 +43,7 @@ export const BookmarkRibbonStack: React.FC<BookmarkRibbonStackProps> = ({
   className,
   'data-testid': dataTestId
 }) => {
+  const { t } = useTranslation()
   const [isAddOpen, setIsAddOpen] = useState(false)
   const [addDraft, setAddDraft] = useState('')
   const addBtnRef = useRef<HTMLButtonElement | null>(null)
@@ -83,7 +85,7 @@ export const BookmarkRibbonStack: React.FC<BookmarkRibbonStackProps> = ({
             ref={addBtnRef}
             type="button"
             className="ecui-bookmark-ribbon ecui-bookmark-ribbon--add"
-            aria-label="Add bookmark"
+            aria-label={t('bookmarkRibbon.addBookmark')}
             aria-expanded={isAddOpen}
             onClick={() => {
               setAddDraft('')

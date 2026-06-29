@@ -387,5 +387,24 @@
     "addOrigin": "オリジンを追加",
     "removeOrigin": "{{origin}} を削除",
     "noEntries": "エントリがありません。"
+  },
+  "bookmarkRibbon": {
+    "addBookmark": "ブックマークを追加"
+  },
+  "themeCarousel": {
+    "selectedTheme": "選択中のテーマ"
+  },
+  "toaster": {
+    "notificationsRegion": "通知"
+  },
+  "console": {
+    "shellFlavor": "シェルの種類"
+  },
+  "workbench": {
+    "tabModified": "変更あり",
+    "editorTabs": "エディタータブ"
+  },
+  "keyValueTable": {
+    "description": "説明"
   }
 }

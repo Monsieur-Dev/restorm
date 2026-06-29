@@ -387,5 +387,24 @@
     "addOrigin": "Adaugă origine",
     "removeOrigin": "Elimină {{origin}}",
     "noEntries": "Nicio intrare încă."
+  },
+  "bookmarkRibbon": {
+    "addBookmark": "Adaugă marcaj"
+  },
+  "themeCarousel": {
+    "selectedTheme": "Tema selectată"
+  },
+  "toaster": {
+    "notificationsRegion": "Notificări"
+  },
+  "console": {
+    "shellFlavor": "Tip de shell"
+  },
+  "workbench": {
+    "tabModified": "Modificat",
+    "editorTabs": "File editor"
+  },
+  "keyValueTable": {
+    "description": "Descriere"
   }
 }

@@ -387,5 +387,24 @@
     "addOrigin": "Origin hinzufügen",
     "removeOrigin": "{{origin}} entfernen",
     "noEntries": "Noch keine Einträge."
+  },
+  "bookmarkRibbon": {
+    "addBookmark": "Lesezeichen hinzufügen"
+  },
+  "themeCarousel": {
+    "selectedTheme": "Ausgewähltes Design"
+  },
+  "toaster": {
+    "notificationsRegion": "Benachrichtigungen"
+  },
+  "console": {
+    "shellFlavor": "Shell-Variante"
+  },
+  "workbench": {
+    "tabModified": "Geändert",
+    "editorTabs": "Editor-Tabs"
+  },
+  "keyValueTable": {
+    "description": "Beschreibung"
   }
 }

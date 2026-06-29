@@ -387,5 +387,24 @@
     "addOrigin": "Lisää alkuperä",
     "removeOrigin": "Poista {{origin}}",
     "noEntries": "Ei merkintöjä vielä."
+  },
+  "bookmarkRibbon": {
+    "addBookmark": "Lisää kirjanmerkki"
+  },
+  "themeCarousel": {
+    "selectedTheme": "Valittu teema"
+  },
+  "toaster": {
+    "notificationsRegion": "Ilmoitukset"
+  },
+  "console": {
+    "shellFlavor": "Komentotulkin tyyppi"
+  },
+  "workbench": {
+    "tabModified": "Muokattu",
+    "editorTabs": "Editorin välilehdet"
+  },
+  "keyValueTable": {
+    "description": "Kuvaus"
   }
 }

@@ -8,6 +8,7 @@ import React, {
   useSyncExternalStore
 } from 'react'
 import { createPortal } from 'react-dom'
+import { useTranslation } from 'react-i18next'
 import Workbench from '../Workbench/Workbench'
 import { Button } from '../Button'
 import { ScrollableElement } from '../ScrollableElement'
@@ -40,6 +41,7 @@ export const Toaster: React.FC<ToasterProps> = ({
   animationDurations,
   'data-testid': dataTestId
 }) => {
+  const { t: translate } = useTranslation()
   const enterMs = animationDurations?.enter ?? DEFAULT_ENTER
   const exitMs = animationDurations?.exit ?? DEFAULT_EXIT
   const reflowMs = animationDurations?.reflow ?? DEFAULT_REFLOW
@@ -274,7 +276,7 @@ export const Toaster: React.FC<ToasterProps> = ({
         data-donotdisturb={doNotDisturbNow ? 'true' : 'false'}
         data-toast-count={visibleToasts.length}
         role="region"
-        aria-label="Notifications"
+        aria-label={translate('toaster.notificationsRegion')}
         style={cssVars}
         onMouseEnter={() => { setHovered(true) }}
         onMouseLeave={() => { setHovered(false) }}
