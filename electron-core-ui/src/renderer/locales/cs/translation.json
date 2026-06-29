@@ -65,7 +65,6 @@
     "resetSetting": "Resetovat nastavení",
     "copySettingId": "Kopírovat ID nastavení",
     "settingOptions": "Možnosti nastavení",
-    "scopeTabsLabel": "Rozsah nastavení",
     "userOnlyHidden": "{{count}} nastavení pouze pro uživatele je v této záložce skryto.",
     "scope": {
       "user": "Uživatel",
@@ -388,5 +387,24 @@
     "addOrigin": "Přidat origin",
     "removeOrigin": "Odebrat {{origin}}",
     "noEntries": "Zatím žádné záznamy."
+  },
+  "bookmarkRibbon": {
+    "addBookmark": "Přidat záložku"
+  },
+  "themeCarousel": {
+    "selectedTheme": "Vybraný motiv"
+  },
+  "toaster": {
+    "notificationsRegion": "Oznámení"
+  },
+  "console": {
+    "shellFlavor": "Typ shellu"
+  },
+  "workbench": {
+    "tabModified": "Změněno",
+    "editorTabs": "Karty editoru"
+  },
+  "keyValueTable": {
+    "description": "Popis"
   }
 }

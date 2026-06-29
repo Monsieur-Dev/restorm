@@ -65,7 +65,6 @@
     "resetSetting": "Resetează setarea",
     "copySettingId": "Copiază ID-ul setării",
     "settingOptions": "Opțiuni de setare",
-    "scopeTabsLabel": "Domeniul setărilor",
     "userOnlyHidden": "{{count}} setare/setări doar pentru utilizator sunt ascunse în acest tab.",
     "scope": {
       "user": "Utilizator",
@@ -388,5 +387,24 @@
     "addOrigin": "Adaugă origine",
     "removeOrigin": "Elimină {{origin}}",
     "noEntries": "Nicio intrare încă."
+  },
+  "bookmarkRibbon": {
+    "addBookmark": "Adaugă marcaj"
+  },
+  "themeCarousel": {
+    "selectedTheme": "Tema selectată"
+  },
+  "toaster": {
+    "notificationsRegion": "Notificări"
+  },
+  "console": {
+    "shellFlavor": "Tip de shell"
+  },
+  "workbench": {
+    "tabModified": "Modificat",
+    "editorTabs": "File editor"
+  },
+  "keyValueTable": {
+    "description": "Descriere"
   }
 }

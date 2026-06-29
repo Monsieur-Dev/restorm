@@ -65,7 +65,6 @@
     "resetSetting": "Palauta asetus",
     "copySettingId": "Kopioi asetuksen tunnus",
     "settingOptions": "Asetusvaihtoehdot",
-    "scopeTabsLabel": "Asetusten laajuus",
     "userOnlyHidden": "{{count}} vain käyttäjälle tarkoitettu asetus on piilotettu tällä välilehdellä.",
     "scope": {
       "user": "Käyttäjä",
@@ -388,5 +387,24 @@
     "addOrigin": "Lisää alkuperä",
     "removeOrigin": "Poista {{origin}}",
     "noEntries": "Ei merkintöjä vielä."
+  },
+  "bookmarkRibbon": {
+    "addBookmark": "Lisää kirjanmerkki"
+  },
+  "themeCarousel": {
+    "selectedTheme": "Valittu teema"
+  },
+  "toaster": {
+    "notificationsRegion": "Ilmoitukset"
+  },
+  "console": {
+    "shellFlavor": "Komentotulkin tyyppi"
+  },
+  "workbench": {
+    "tabModified": "Muokattu",
+    "editorTabs": "Editorin välilehdet"
+  },
+  "keyValueTable": {
+    "description": "Kuvaus"
   }
 }

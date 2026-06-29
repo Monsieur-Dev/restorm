@@ -65,7 +65,6 @@
     "resetSetting": "Rikthe parametrin",
     "copySettingId": "Kopjo ID-në e parametrit",
     "settingOptions": "Opsionet e parametrit",
-    "scopeTabsLabel": "Fusha e parametrave",
     "userOnlyHidden": "{{count}} parametra vetëm për përdoruesin janë të fshehur në këtë skedë.",
     "scope": {
       "user": "Përdoruesi",
@@ -388,5 +387,24 @@
     "addOrigin": "Shto origjinën",
     "removeOrigin": "Hiq {{origin}}",
     "noEntries": "Ende nuk ka hyrje."
+  },
+  "bookmarkRibbon": {
+    "addBookmark": "Shto faqeshënues"
+  },
+  "themeCarousel": {
+    "selectedTheme": "Tema e zgjedhur"
+  },
+  "toaster": {
+    "notificationsRegion": "Njoftime"
+  },
+  "console": {
+    "shellFlavor": "Lloji i shell-it"
+  },
+  "workbench": {
+    "tabModified": "I ndryshuar",
+    "editorTabs": "Skedat e redaktuesit"
+  },
+  "keyValueTable": {
+    "description": "Përshkrimi"
   }
 }

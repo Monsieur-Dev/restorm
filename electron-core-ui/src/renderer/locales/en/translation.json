@@ -65,7 +65,6 @@
     "resetSetting": "Reset Setting",
     "copySettingId": "Copy Setting ID",
     "settingOptions": "Setting options",
-    "scopeTabsLabel": "Settings scope",
     "userOnlyHidden": "{{count}} user-only setting(s) are hidden on this tab.",
     "scope": {
       "user": "User",
@@ -388,5 +387,24 @@
     "addOrigin": "Add origin",
     "removeOrigin": "Remove {{origin}}",
     "noEntries": "No entries yet."
+  },
+  "bookmarkRibbon": {
+    "addBookmark": "Add bookmark"
+  },
+  "themeCarousel": {
+    "selectedTheme": "Selected theme"
+  },
+  "toaster": {
+    "notificationsRegion": "Notifications"
+  },
+  "console": {
+    "shellFlavor": "Shell flavor"
+  },
+  "workbench": {
+    "tabModified": "Modified",
+    "editorTabs": "Editor tabs"
+  },
+  "keyValueTable": {
+    "description": "Description"
   }
 }

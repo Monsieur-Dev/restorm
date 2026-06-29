@@ -1,4 +1,5 @@
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import { Button } from '../Button'
 import type { ConsoleShell } from './types'
 
@@ -21,6 +22,7 @@ export const ConsoleToolbar: React.FC<ConsoleToolbarProps> = ({
   onClear,
   'data-testid': dataTestId
 }) => {
+  const { t } = useTranslation()
   const isPS = shell === 'powershell'
   return (
     <div
@@ -36,7 +38,7 @@ export const ConsoleToolbar: React.FC<ConsoleToolbarProps> = ({
     >
       <div
         role="radiogroup"
-        aria-label="Shell flavor"
+        aria-label={t('console.shellFlavor')}
         style={{ display: 'inline-flex', borderRadius: 4, overflow: 'hidden', border: '1px solid var(--button-background, #2c4156)' }}
       >
         <Button

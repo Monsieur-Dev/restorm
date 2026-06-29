@@ -65,7 +65,6 @@
     "resetSetting": "Reimposta",
     "copySettingId": "Copia l'ID dell'impostazione",
     "settingOptions": "Opzioni dell'impostazione",
-    "scopeTabsLabel": "Ambito delle impostazioni",
     "userOnlyHidden": "{{count}} impostazione/i solo utente nascosta/e in questa scheda.",
     "scope": {
       "user": "Utente",
@@ -388,5 +387,24 @@
     "addOrigin": "Aggiungi origine",
     "removeOrigin": "Rimuovi {{origin}}",
     "noEntries": "Nessuna voce ancora."
+  },
+  "bookmarkRibbon": {
+    "addBookmark": "Aggiungi segnalibro"
+  },
+  "themeCarousel": {
+    "selectedTheme": "Tema selezionato"
+  },
+  "toaster": {
+    "notificationsRegion": "Notifiche"
+  },
+  "console": {
+    "shellFlavor": "Tipo di shell"
+  },
+  "workbench": {
+    "tabModified": "Modificato",
+    "editorTabs": "Schede dell'editor"
+  },
+  "keyValueTable": {
+    "description": "Descrizione"
   }
 }

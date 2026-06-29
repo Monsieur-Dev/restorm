@@ -65,7 +65,6 @@
     "resetSetting": "설정 초기화",
     "copySettingId": "설정 ID 복사",
     "settingOptions": "설정 옵션",
-    "scopeTabsLabel": "설정 범위",
     "userOnlyHidden": "이 탭에서는 사용자 전용 설정 {{count}}개가 숨겨져 있습니다.",
     "scope": {
       "user": "사용자",
@@ -388,5 +387,24 @@
     "addOrigin": "오리진 추가",
     "removeOrigin": "{{origin}} 제거",
     "noEntries": "항목이 없습니다."
+  },
+  "bookmarkRibbon": {
+    "addBookmark": "북마크 추가"
+  },
+  "themeCarousel": {
+    "selectedTheme": "선택된 테마"
+  },
+  "toaster": {
+    "notificationsRegion": "알림"
+  },
+  "console": {
+    "shellFlavor": "셸 종류"
+  },
+  "workbench": {
+    "tabModified": "수정됨",
+    "editorTabs": "편집기 탭"
+  },
+  "keyValueTable": {
+    "description": "설명"
   }
 }

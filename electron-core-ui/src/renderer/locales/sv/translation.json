@@ -65,7 +65,6 @@
     "resetSetting": "Återställ inställning",
     "copySettingId": "Kopiera inställnings-ID",
     "settingOptions": "Inställningsalternativ",
-    "scopeTabsLabel": "Inställningsnivå",
     "userOnlyHidden": "{{count}} inställning(ar) endast för användare är dold(a) på denna flik.",
     "scope": {
       "user": "Användare",
@@ -388,5 +387,24 @@
     "addOrigin": "Lägg till origin",
     "removeOrigin": "Ta bort {{origin}}",
     "noEntries": "Inga poster ännu."
+  },
+  "bookmarkRibbon": {
+    "addBookmark": "Lägg till bokmärke"
+  },
+  "themeCarousel": {
+    "selectedTheme": "Valt tema"
+  },
+  "toaster": {
+    "notificationsRegion": "Aviseringar"
+  },
+  "console": {
+    "shellFlavor": "Skaltyp"
+  },
+  "workbench": {
+    "tabModified": "Ändrad",
+    "editorTabs": "Redigerarflikar"
+  },
+  "keyValueTable": {
+    "description": "Beskrivning"
   }
 }

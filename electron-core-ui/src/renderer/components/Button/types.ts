@@ -153,6 +153,20 @@ export interface ButtonProps {
    * `aria-checked` attribute (`true` / `false` / `'mixed'`).
    */
   'aria-checked'?: boolean | 'false' | 'true' | 'mixed';
+  /**
+   * Expanded state for a Button that controls a collapsible region, a
+   * popover, or a disclosure (e.g. a menu/dialog trigger or an accordion
+   * header). Rendered verbatim as the `aria-expanded` attribute. Only
+   * forwarded when defined, so plain buttons stay attribute-free.
+   */
+  'aria-expanded'?: boolean | 'false' | 'true';
+  /**
+   * Signals that activating the Button opens a popup of the given kind
+   * (a menu, listbox, tree, grid, or dialog — or `true` for a generic
+   * menu). Rendered verbatim as the `aria-haspopup` attribute. Pair with
+   * `aria-expanded` to expose the open/closed state of the popup.
+   */
+  'aria-haspopup'?: boolean | 'false' | 'true' | 'menu' | 'listbox' | 'tree' | 'grid' | 'dialog';
   /** Tab order override. Defaults to `0` (focusable), `-1` when disabled. */
   tabIndex?: number;
   'data-testid'?: string;

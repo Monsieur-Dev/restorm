@@ -65,7 +65,6 @@
     "resetSetting": "設定をリセット",
     "copySettingId": "設定 ID をコピー",
     "settingOptions": "設定オプション",
-    "scopeTabsLabel": "設定の適用範囲",
     "userOnlyHidden": "このタブではユーザー専用の設定 {{count}} 件が非表示になっています。",
     "scope": {
       "user": "ユーザー",
@@ -388,5 +387,24 @@
     "addOrigin": "オリジンを追加",
     "removeOrigin": "{{origin}} を削除",
     "noEntries": "エントリがありません。"
+  },
+  "bookmarkRibbon": {
+    "addBookmark": "ブックマークを追加"
+  },
+  "themeCarousel": {
+    "selectedTheme": "選択中のテーマ"
+  },
+  "toaster": {
+    "notificationsRegion": "通知"
+  },
+  "console": {
+    "shellFlavor": "シェルの種類"
+  },
+  "workbench": {
+    "tabModified": "変更あり",
+    "editorTabs": "エディタータブ"
+  },
+  "keyValueTable": {
+    "description": "説明"
   }
 }

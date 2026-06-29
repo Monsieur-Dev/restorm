@@ -65,7 +65,6 @@
     "resetSetting": "Tilbakestill innstilling",
     "copySettingId": "Kopier innstillings-ID",
     "settingOptions": "Innstillingsalternativer",
-    "scopeTabsLabel": "Innstillingsomfang",
     "userOnlyHidden": "{{count}} brukerinnstilling(er) er skjult på denne fanen.",
     "scope": {
       "user": "Bruker",
@@ -388,5 +387,24 @@
     "addOrigin": "Legg til opprinnelse",
     "removeOrigin": "Fjern {{origin}}",
     "noEntries": "Ingen oppføringer ennå."
+  },
+  "bookmarkRibbon": {
+    "addBookmark": "Legg til bokmerke"
+  },
+  "themeCarousel": {
+    "selectedTheme": "Valgt tema"
+  },
+  "toaster": {
+    "notificationsRegion": "Varsler"
+  },
+  "console": {
+    "shellFlavor": "Shell-type"
+  },
+  "workbench": {
+    "tabModified": "Endret",
+    "editorTabs": "Editorfaner"
+  },
+  "keyValueTable": {
+    "description": "Beskrivelse"
   }
 }

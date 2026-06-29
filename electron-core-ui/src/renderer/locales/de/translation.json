@@ -65,7 +65,6 @@
     "resetSetting": "Einstellung zurücksetzen",
     "copySettingId": "Einstellungs-ID kopieren",
     "settingOptions": "Optionen der Einstellung",
-    "scopeTabsLabel": "Geltungsbereich der Einstellungen",
     "userOnlyHidden": "{{count}} nur für den Benutzer geltende Einstellung(en) auf diesem Tab ausgeblendet.",
     "scope": {
       "user": "Benutzer",
@@ -388,5 +387,24 @@
     "addOrigin": "Origin hinzufügen",
     "removeOrigin": "{{origin}} entfernen",
     "noEntries": "Noch keine Einträge."
+  },
+  "bookmarkRibbon": {
+    "addBookmark": "Lesezeichen hinzufügen"
+  },
+  "themeCarousel": {
+    "selectedTheme": "Ausgewähltes Design"
+  },
+  "toaster": {
+    "notificationsRegion": "Benachrichtigungen"
+  },
+  "console": {
+    "shellFlavor": "Shell-Variante"
+  },
+  "workbench": {
+    "tabModified": "Geändert",
+    "editorTabs": "Editor-Tabs"
+  },
+  "keyValueTable": {
+    "description": "Beschreibung"
   }
 }

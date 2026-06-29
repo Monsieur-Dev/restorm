@@ -65,7 +65,6 @@
     "resetSetting": "Επαναφορά ρύθμισης",
     "copySettingId": "Αντιγραφή ID ρύθμισης",
     "settingOptions": "Επιλογές ρύθμισης",
-    "scopeTabsLabel": "Εύρος ρυθμίσεων",
     "userOnlyHidden": "{{count}} ρυθμίσεις μόνο χρήστη είναι κρυμμένες σε αυτήν την καρτέλα.",
     "scope": {
       "user": "Χρήστης",
@@ -388,5 +387,24 @@
     "addOrigin": "Προσθήκη origin",
     "removeOrigin": "Αφαίρεση {{origin}}",
     "noEntries": "Δεν υπάρχουν ακόμα εγγραφές."
+  },
+  "bookmarkRibbon": {
+    "addBookmark": "Προσθήκη σελιδοδείκτη"
+  },
+  "themeCarousel": {
+    "selectedTheme": "Επιλεγμένο θέμα"
+  },
+  "toaster": {
+    "notificationsRegion": "Ειδοποιήσεις"
+  },
+  "console": {
+    "shellFlavor": "Τύπος κελύφους"
+  },
+  "workbench": {
+    "tabModified": "Τροποποιήθηκε",
+    "editorTabs": "Καρτέλες επεξεργαστή"
+  },
+  "keyValueTable": {
+    "description": "Περιγραφή"
   }
 }

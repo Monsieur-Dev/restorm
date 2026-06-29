@@ -65,7 +65,6 @@
     "resetSetting": "Restablecer ajuste",
     "copySettingId": "Copiar identificador del ajuste",
     "settingOptions": "Opciones del ajuste",
-    "scopeTabsLabel": "Alcance de los ajustes",
     "userOnlyHidden": "{{count}} ajuste(s) solo de usuario oculto(s) en esta pestaña.",
     "scope": {
       "user": "Usuario",
@@ -388,5 +387,24 @@
     "addOrigin": "Agregar origen",
     "removeOrigin": "Eliminar {{origin}}",
     "noEntries": "Aún no hay entradas."
+  },
+  "bookmarkRibbon": {
+    "addBookmark": "Añadir marcador"
+  },
+  "themeCarousel": {
+    "selectedTheme": "Tema seleccionado"
+  },
+  "toaster": {
+    "notificationsRegion": "Notificaciones"
+  },
+  "console": {
+    "shellFlavor": "Tipo de shell"
+  },
+  "workbench": {
+    "tabModified": "Modificado",
+    "editorTabs": "Pestañas del editor"
+  },
+  "keyValueTable": {
+    "description": "Descripción"
   }
 }

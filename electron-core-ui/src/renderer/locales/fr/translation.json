@@ -57,7 +57,6 @@
   },
   "settings": {
     "title": "Paramètres",
-    "scopeTabsLabel": "Niveau de paramètres",
     "userOnlyHidden": "{{count}} paramètre(s) utilisateur masqué(s) sur cet onglet.",
     "scope": {
       "user": "Utilisateur",
@@ -388,5 +387,24 @@
     "addOrigin": "Ajouter un origin",
     "removeOrigin": "Retirer {{origin}}",
     "noEntries": "Aucune entrée pour l'instant."
+  },
+  "bookmarkRibbon": {
+    "addBookmark": "Ajouter un signet"
+  },
+  "themeCarousel": {
+    "selectedTheme": "Thème sélectionné"
+  },
+  "toaster": {
+    "notificationsRegion": "Notifications"
+  },
+  "console": {
+    "shellFlavor": "Type de shell"
+  },
+  "workbench": {
+    "tabModified": "Modifié",
+    "editorTabs": "Onglets de l'éditeur"
+  },
+  "keyValueTable": {
+    "description": "Description"
   }
 }

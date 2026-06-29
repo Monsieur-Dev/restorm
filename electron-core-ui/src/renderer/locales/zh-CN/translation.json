@@ -65,7 +65,6 @@
     "resetSetting": "重置设置",
     "copySettingId": "复制设置 ID",
     "settingOptions": "设置选项",
-    "scopeTabsLabel": "设置作用范围",
     "userOnlyHidden": "{{count}} 项仅用户级设置在此选项卡中已隐藏。",
     "scope": {
       "user": "用户",
@@ -388,5 +387,24 @@
     "addOrigin": "添加来源",
     "removeOrigin": "移除 {{origin}}",
     "noEntries": "暂无条目。"
+  },
+  "bookmarkRibbon": {
+    "addBookmark": "添加书签"
+  },
+  "themeCarousel": {
+    "selectedTheme": "已选主题"
+  },
+  "toaster": {
+    "notificationsRegion": "通知"
+  },
+  "console": {
+    "shellFlavor": "Shell 类型"
+  },
+  "workbench": {
+    "tabModified": "已修改",
+    "editorTabs": "编辑器选项卡"
+  },
+  "keyValueTable": {
+    "description": "描述"
   }
 }

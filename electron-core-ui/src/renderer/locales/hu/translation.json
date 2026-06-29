@@ -65,7 +65,6 @@
     "resetSetting": "Beállítás visszaállítása",
     "copySettingId": "Beállítás azonosítójának másolása",
     "settingOptions": "Beállítás lehetőségei",
-    "scopeTabsLabel": "Beállítások hatóköre",
     "userOnlyHidden": "{{count}} csak-felhasználói beállítás rejtett ezen a fülön.",
     "scope": {
       "user": "Felhasználó",
@@ -388,5 +387,24 @@
     "addOrigin": "Eredet hozzáadása",
     "removeOrigin": "{{origin}} eltávolítása",
     "noEntries": "Még nincsenek bejegyzések."
+  },
+  "bookmarkRibbon": {
+    "addBookmark": "Könyvjelző hozzáadása"
+  },
+  "themeCarousel": {
+    "selectedTheme": "Kiválasztott téma"
+  },
+  "toaster": {
+    "notificationsRegion": "Értesítések"
+  },
+  "console": {
+    "shellFlavor": "Shell típusa"
+  },
+  "workbench": {
+    "tabModified": "Módosítva",
+    "editorTabs": "Szerkesztő lapok"
+  },
+  "keyValueTable": {
+    "description": "Leírás"
   }
 }

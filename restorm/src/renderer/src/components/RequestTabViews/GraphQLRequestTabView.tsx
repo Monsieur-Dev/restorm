@@ -751,6 +751,7 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
               <div className="gql-sub-event" key={i} data-testid="graphql-subscription-event">
                 <Button
                   className="gql-sub-event-header"
+                  aria-expanded={expanded}
                   onClick={() => { toggleEventExpanded(i) }}
                   data-testid="graphql-subscription-event-header"
                 >
