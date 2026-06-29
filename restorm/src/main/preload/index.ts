@@ -125,6 +125,15 @@ contextBridge.exposeInMainWorld('api', {
       ipcRenderer.on(AUTH_IPC.STATE_CHANGED, handler)
       return (): void => { ipcRenderer.off(AUTH_IPC.STATE_CHANGED, handler) }
     }
+  },
+  // App-level metadata. `getVersion` mirrors `app.getVersion()` to the
+  // renderer (main-only otherwise) for the statusbar version cell; the
+  // package.json `-preview` suffix rides preview builds for free.
+  app: {
+    /** The running app version, e.g. `0.1.12-preview` (suffix on preview). */
+    getVersion: async (): Promise<string> => {
+      return (await ipcRenderer.invoke('app:get-version')) as string
+    }
   }
 })
 contextBridge.exposeInMainWorld('electronAPI', createElectronAPI())

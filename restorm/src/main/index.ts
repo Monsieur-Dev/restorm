@@ -956,6 +956,12 @@ ipcMain.handle('runtime:get-config', () => ({
   }
 }))
 
+// The running app version, surfaced to the renderer for the far-left
+// statusbar version cell. `app.getVersion()` reads package.json's `version`,
+// so the `-preview` suffix rides preview builds for free (the release strips
+// it) — nothing channel-specific to compute here.
+ipcMain.handle('app:get-version', () => app.getVersion())
+
 // MCP call-logs viewer bridge: the buffer lives in the main process (ECUI
 // McpService). The renderer pulls a snapshot, refreshes on `mcp:logs-changed`
 // (broadcast from the served-call listener wired in `whenReady`), and clears
