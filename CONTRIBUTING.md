@@ -84,6 +84,53 @@ Electron app, or only in this project?"), then update the matching doc
 under `electron-core-ui/docs/` in the same commit. Undocumented public
 surface is not considered shipped.
 
+## i18n guard-rail
+
+The pre-commit hook runs `scripts/check-i18n.mjs`, a repo-wide static
+analysis tool that catches two classes of i18n bug that diff-scoped review
+cannot see:
+
+1. **Missing-from-en** — a `t('key', …)` call site references a key that is
+   absent from the base `en/translation.json`. i18next can never resolve it;
+   every locale falls back to the inline English default (or renders the raw
+   key string when no default is given).
+
+2. **False-tick translations** — a non-en/fr locale carries a value
+   byte-identical to the en value for a key whose en value reads as English
+   prose (≥3 ASCII words). The translator copied the source string instead of
+   translating it.
+
+The script exits 0 (clean) or 1 (violations printed to stdout with file:line,
+key, and affected locales). Runtime is ~<1 s (pure file I/O).
+
+### Allow-list (`.i18n-allow-list.json`)
+
+Kept at the repo root and git-tracked. Three fields:
+
+| Field | Purpose |
+|---|---|
+| `dynamic_key_patterns` | Wildcard patterns (e.g. `"scenario.help.*"`) for keys that come from template-literal interpolations and cannot be statically resolved. These prefixes are exempt from the missing-from-en check as long as en contains at least one matching key. |
+| `missing_from_en_exceptions` | Exact dotted key paths that are currently missing from `en` (pre-existing debt). Add a key here only if fixing it is tracked separately; removing it from the list is the fix signal. |
+| `false_tick_exceptions` | Exact dotted key paths whose value is legitimately identical to en: proper nouns, syntax examples, codes, or pre-existing translation debt tracked elsewhere. |
+
+To add an exception, append the key to the right array and commit the
+updated `.i18n-allow-list.json`. Use the smallest scope that covers the
+legitimate case — prefer an exact key over a broad wildcard.
+
+### What the reviewer checks
+
+The automated check replaces the manual "read every t() call and cross-check
+every locale file" step. Reviewers no longer need to scan the diff for
+missing or false-tick translations; the gate catches both classes globally,
+not just in the PR diff. Review focus shifts to:
+
+- Verifying that any new `dynamic_key_patterns` entries are genuinely
+  unresolvable at static analysis time (not a workaround for a missing key).
+- Ensuring that new `false_tick_exceptions` are legitimately identical (proper
+  nouns, universal codes) rather than untranslated strings.
+- Confirming that any new `missing_from_en_exceptions` have a corresponding
+  follow-up ticket.
+
 ## Daily workflow
 
 ```bash
