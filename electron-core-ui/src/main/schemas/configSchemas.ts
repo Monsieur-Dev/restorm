@@ -68,10 +68,29 @@ const environmentStrategySchema = z.object({
   AvailableIn: z.array(z.enum(['dev', 'prod']))
 })
 
-const featureStrategySchema = z.discriminatedUnion('Type', [
+// Known built-in strategy type names. A strategy with one of these `Type`
+// values MUST satisfy its strict built-in schema (invalid fields are
+// rejected). Any other `Type` string is a custom strategy and passes through.
+const BUILTIN_STRATEGY_TYPES = ['Basic', 'Platform', 'Environment'] as const
+
+// Custom strategy fallback: any object with a string `Type` field that is
+// NOT one of the built-in names (which would mean a malformed built-in).
+// Placed last in the union so the strict built-in schemas are tried first.
+const customStrategyFallbackSchema = z
+  .object({ Type: z.string() })
+  .catchall(z.unknown())
+  .refine(
+    (obj) => !(BUILTIN_STRATEGY_TYPES as readonly string[]).includes(obj.Type),
+    { message: 'Built-in strategy type used with invalid fields' }
+  )
+
+// Use z.union (not z.discriminatedUnion) so the open-ended fallback
+// arm can be appended without Zod rejecting non-literal Type values.
+const featureStrategySchema = z.union([
   basicStrategySchema,
   platformStrategySchema,
-  environmentStrategySchema
+  environmentStrategySchema,
+  customStrategyFallbackSchema
 ])
 
 export const featureConfigSchema = z.object({

@@ -296,7 +296,10 @@ export function ensureCoreUiWebApiShim(): void {
       // different signal (NODE_ENV / Vite import.meta.env) and isn't
       // wired today.
       return Promise.resolve('prod')
-    }
+    },
+    // Web shim: no main process to push changes from, so onChanged is a no-op
+    // that returns an empty unsubscribe function.
+    onChanged: (_callback: () => void): (() => void) => () => undefined
   }
 
   // File API shim for web builds

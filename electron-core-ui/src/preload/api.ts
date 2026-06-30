@@ -157,6 +157,11 @@ export const createCoreUIAPI = (): CoreUiApi => ({
     getEnvironment: async (): Promise<FeatureEnvironment> => {
       const result: unknown = await ipcRenderer.invoke('feature:get-environment')
       return result as FeatureEnvironment
+    },
+    onChanged: (callback: () => void): (() => void) => {
+      const handler = (): void => { callback() }
+      ipcRenderer.on('feature:changed', handler)
+      return (): void => { ipcRenderer.removeListener('feature:changed', handler) }
     }
   },
 
