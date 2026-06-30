@@ -3,7 +3,9 @@
     "tooltip": "Konto",
     "connected": "Pålogget",
     "signIn": "Logg inn",
-    "signOut": "Logg ut"
+    "signOut": "Logg ut",
+    "manageSubscription": "Administrer abonnement",
+    "upgradeToPro": "Oppgrader til Pro"
   },
   "secrets": {
     "others": "Andre",
@@ -2001,6 +2003,10 @@
     "checkout": {
       "forbidden": "Be administratoren for organisasjonen din om å abonnere.",
       "error": "Kunne ikke starte abonnementet. Prøv igjen."
+    },
+    "portal": {
+      "noSubscription": "Ingen aktivt abonnement å administrere.",
+      "error": "Kunne ikke åpne abonnementsportalen. Prøv igjen."
     }
   }
 }

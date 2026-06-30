@@ -3,7 +3,9 @@
     "tooltip": "Tài khoản",
     "connected": "Đã đăng nhập",
     "signIn": "Đăng nhập",
-    "signOut": "Đăng xuất"
+    "signOut": "Đăng xuất",
+    "manageSubscription": "Quản lý đăng ký",
+    "upgradeToPro": "Nâng cấp lên Pro"
   },
   "secrets": {
     "others": "Khác",
@@ -2000,6 +2002,10 @@
     "checkout": {
       "forbidden": "Hãy đề nghị quản trị viên tổ chức của bạn đăng ký.",
       "error": "Không thể bắt đầu đăng ký. Vui lòng thử lại."
+    },
+    "portal": {
+      "noSubscription": "Không có gói đăng ký nào đang hoạt động để quản lý.",
+      "error": "Không thể mở cổng quản lý đăng ký. Vui lòng thử lại."
     }
   }
 }

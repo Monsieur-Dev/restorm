@@ -3,7 +3,9 @@
     "tooltip": "계정",
     "connected": "로그인됨",
     "signIn": "로그인",
-    "signOut": "로그아웃"
+    "signOut": "로그아웃",
+    "manageSubscription": "구독 관리",
+    "upgradeToPro": "Pro로 업그레이드"
   },
   "secrets": {
     "others": "기타",
@@ -2000,6 +2002,10 @@
     "checkout": {
       "forbidden": "조직 관리자에게 구독을 요청하세요.",
       "error": "구독을 시작할 수 없습니다. 다시 시도해 주세요."
+    },
+    "portal": {
+      "noSubscription": "관리할 활성 구독이 없습니다.",
+      "error": "구독 포털을 열 수 없습니다. 다시 시도해 주세요."
     }
   }
 }

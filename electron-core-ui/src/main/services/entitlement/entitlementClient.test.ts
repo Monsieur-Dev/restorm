@@ -4,6 +4,7 @@ import {
   verifyEntitlementToken,
   fetchEntitlement,
   createCheckout,
+  createCustomerPortalSession,
   isWithinGrace,
   needsRefresh
 } from './entitlementClient'
@@ -187,5 +188,39 @@ describe('createCheckout', () => {
     await expect(
       createCheckout('https://x.supabase.co/functions/v1/checkout', 'jwt', fetchImpl)
     ).rejects.toMatchObject({ statusCode: 401 })
+  })
+})
+
+describe('createCustomerPortalSession', () => {
+  it('POSTs the bearer and returns the portal URL', async () => {
+    let seenUrl = ''
+    let seenMethod = ''
+    let seenAuth = ''
+    const fetchImpl = ((url: string, init?: RequestInit) => {
+      seenUrl = url
+      seenMethod = init?.method ?? ''
+      const headers = init?.headers as Record<string, string>
+      seenAuth = headers['authorization'] ?? ''
+      return Promise.resolve(new Response(JSON.stringify({ portalUrl: 'https://customer-portal.paddle.com/abc' }), { status: 200 }))
+    }) as unknown as typeof fetch
+
+    const url = await createCustomerPortalSession('https://x.supabase.co/functions/v1/customer-portal', 'session-jwt', fetchImpl)
+    expect(seenUrl).toContain('/customer-portal')
+    expect(seenMethod).toBe('POST')
+    expect(seenAuth).toBe('Bearer session-jwt')
+    expect(url).toBe('https://customer-portal.paddle.com/abc')
+  })
+
+  it('returns null when the backend omits the portalUrl (no billing customer)', async () => {
+    const fetchImpl = (() => Promise.resolve(new Response(JSON.stringify({ portalUrl: null }), { status: 200 }))) as unknown as typeof fetch
+    const url = await createCustomerPortalSession('https://x.supabase.co/functions/v1/customer-portal', 'jwt', fetchImpl)
+    expect(url).toBeNull()
+  })
+
+  it('throws on a non-2xx response', async () => {
+    const fetchImpl = (() => Promise.resolve(new Response('nope', { status: 500 }))) as unknown as typeof fetch
+    await expect(
+      createCustomerPortalSession('https://x.supabase.co/functions/v1/customer-portal', 'jwt', fetchImpl)
+    ).rejects.toThrow()
   })
 })

@@ -3,7 +3,9 @@
     "tooltip": "Konto",
     "connected": "Zalogowano",
     "signIn": "Zaloguj się",
-    "signOut": "Wyloguj się"
+    "signOut": "Wyloguj się",
+    "manageSubscription": "Zarządzaj subskrypcją",
+    "upgradeToPro": "Przejdź na Pro"
   },
   "secrets": {
     "others": "Inne",
@@ -2003,6 +2005,10 @@
     "checkout": {
       "forbidden": "Poproś administratora swojej organizacji o wykupienie subskrypcji.",
       "error": "Nie można rozpocząć subskrypcji. Spróbuj ponownie."
+    },
+    "portal": {
+      "noSubscription": "Brak aktywnej subskrypcji do zarządzania.",
+      "error": "Nie udało się otworzyć portalu subskrypcji. Spróbuj ponownie."
     }
   }
 }

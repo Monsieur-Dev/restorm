@@ -3,7 +3,9 @@
     "tooltip": "Račun",
     "connected": "Prijavljen",
     "signIn": "Prijava",
-    "signOut": "Odjava"
+    "signOut": "Odjava",
+    "manageSubscription": "Upravljanje pretplatom",
+    "upgradeToPro": "Nadogradi na Pro"
   },
   "secrets": {
     "others": "Ostalo",
@@ -2002,6 +2004,10 @@
     "checkout": {
       "forbidden": "Zatražite administratora svoje organizacije da se pretplati.",
       "error": "Pretplatu nije moguće pokrenuti. Pokušajte ponovno."
+    },
+    "portal": {
+      "noSubscription": "Nema aktivne pretplate za upravljanje.",
+      "error": "Portal za pretplatu nije moguće otvoriti. Pokušajte ponovno."
     }
   }
 }

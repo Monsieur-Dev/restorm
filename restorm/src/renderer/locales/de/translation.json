@@ -3,7 +3,9 @@
     "tooltip": "Konto",
     "connected": "Angemeldet",
     "signIn": "Anmelden",
-    "signOut": "Abmelden"
+    "signOut": "Abmelden",
+    "manageSubscription": "Abonnement verwalten",
+    "upgradeToPro": "Auf Pro upgraden"
   },
   "secrets": {
     "others": "Andere",
@@ -2001,6 +2003,10 @@
     "checkout": {
       "forbidden": "Bitten Sie den Administrator Ihrer Organisation, ein Abonnement abzuschließen.",
       "error": "Das Abonnement konnte nicht gestartet werden. Bitte versuchen Sie es erneut."
+    },
+    "portal": {
+      "noSubscription": "Kein aktives Abonnement zum Verwalten.",
+      "error": "Das Abonnementportal konnte nicht geöffnet werden. Bitte versuchen Sie es erneut."
     }
   }
 }

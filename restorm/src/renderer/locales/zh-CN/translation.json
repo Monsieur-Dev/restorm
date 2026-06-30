@@ -3,7 +3,9 @@
     "tooltip": "账户",
     "connected": "已登录",
     "signIn": "登录",
-    "signOut": "退出登录"
+    "signOut": "退出登录",
+    "manageSubscription": "管理订阅",
+    "upgradeToPro": "升级到 Pro"
   },
   "secrets": {
     "others": "其他",
@@ -2000,6 +2002,10 @@
     "checkout": {
       "forbidden": "请让贵组织的管理员订阅。",
       "error": "无法开始订阅，请重试。"
+    },
+    "portal": {
+      "noSubscription": "没有可管理的有效订阅。",
+      "error": "无法打开订阅门户。请重试。"
     }
   }
 }

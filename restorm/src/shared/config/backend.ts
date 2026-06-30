@@ -50,7 +50,8 @@ export const BACKEND_ENDPOINTS = {
   login: 'login',
   session: 'session',
   entitlement: 'entitlement',
-  checkout: 'checkout'
+  checkout: 'checkout',
+  'customer-portal': 'customer-portal'
 } as const
 
 /** Build a full endpoint URL for a channel, e.g. `loginUrl('preview')`. */

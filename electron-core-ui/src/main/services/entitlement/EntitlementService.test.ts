@@ -56,6 +56,7 @@ function makeHarness(opts: {
     },
     entitlementUrl: 'https://x.supabase.co/functions/v1/entitlement',
     checkoutUrl: 'https://x.supabase.co/functions/v1/checkout',
+    portalUrl: 'https://x.supabase.co/functions/v1/customer-portal',
     publicKeyPem: keys.publicSpkiPem,
     entitlementAudience: ENTITLEMENT_AUD,
     sessionAudience: SESSION_AUD,
@@ -359,6 +360,54 @@ describe('EntitlementService — startCheckout', () => {
     await h.service.signIn()
     h.fetchMock.mockResolvedValueOnce(new Response('forbidden', { status: 403 }))
     await expect(h.service.startCheckout()).rejects.toMatchObject({ statusCode: 403 })
+  })
+})
+
+describe('EntitlementService — startCustomerPortal', () => {
+  it('returns null when there is no signed-in session', async () => {
+    const h = makeHarness({ now: at(10) })
+    expect(await h.service.startCustomerPortal()).toBeNull()
+  })
+
+  it('POSTs to the portal endpoint with the session bearer and returns the URL when signed in', async () => {
+    const sessionToken = await signSession({ secret: SESSION_SECRET, email: 'a@b.com', iatSeconds: IAT })
+    const entitlementToken = await signEntitlement({
+      privateKey: keys.privateKey,
+      iatSeconds: IAT,
+      plan: 'pro',
+      capabilities: ['scenario.stepDebug']
+    })
+    const h = makeHarness({ now: at(10), sessionToken, entitlementToken })
+    await h.service.signIn()
+
+    // The next fetch (the portal POST) returns the hosted Paddle portal URL.
+    h.fetchMock.mockResolvedValueOnce(
+      new Response(JSON.stringify({ portalUrl: 'https://customer-portal.paddle.com/abc' }), { status: 200 })
+    )
+    const result = await h.service.startCustomerPortal()
+    expect(result).toEqual({ portalUrl: 'https://customer-portal.paddle.com/abc' })
+    const lastCall = last(h.fetchMock.mock.calls) as unknown as [string, RequestInit]
+    expect(lastCall[0]).toContain('/customer-portal')
+    expect(lastCall[1].method).toBe('POST')
+    expect((lastCall[1].headers as Record<string, string>)['authorization']).toBe(`Bearer ${sessionToken}`)
+  })
+
+  it('returns { portalUrl: null } when the account has no billing customer', async () => {
+    const sessionToken = await signSession({ secret: SESSION_SECRET, iatSeconds: IAT })
+    const entitlementToken = await signEntitlement({ privateKey: keys.privateKey, iatSeconds: IAT })
+    const h = makeHarness({ now: at(10), sessionToken, entitlementToken })
+    await h.service.signIn()
+    h.fetchMock.mockResolvedValueOnce(new Response(JSON.stringify({ portalUrl: null }), { status: 200 }))
+    expect(await h.service.startCustomerPortal()).toEqual({ portalUrl: null })
+  })
+
+  it('rethrows a backend HTTP error', async () => {
+    const sessionToken = await signSession({ secret: SESSION_SECRET, iatSeconds: IAT })
+    const entitlementToken = await signEntitlement({ privateKey: keys.privateKey, iatSeconds: IAT })
+    const h = makeHarness({ now: at(10), sessionToken, entitlementToken })
+    await h.service.signIn()
+    h.fetchMock.mockResolvedValueOnce(new Response('boom', { status: 500 }))
+    await expect(h.service.startCustomerPortal()).rejects.toThrow()
   })
 })
 

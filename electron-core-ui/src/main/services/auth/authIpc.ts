@@ -7,7 +7,7 @@
  */
 
 import { BrowserWindow, ipcMain } from 'electron'
-import { AUTH_IPC, type AuthState, type CheckoutResult } from '../../../shared/auth/authState'
+import { AUTH_IPC, type AuthState, type CheckoutResult, type PortalResult } from '../../../shared/auth/authState'
 import { CheckoutHttpError } from '../entitlement/entitlementClient'
 import type { EntitlementService } from '../entitlement/EntitlementService'
 
@@ -60,6 +60,23 @@ export function registerAuthIpc(
       if (err instanceof CheckoutHttpError && err.statusCode === 403) {
         return { status: 'forbidden' }
       }
+      return { status: 'error' }
+    }
+  })
+
+  // « Gérer mon abonnement »: mint a hosted Paddle customer-portal session and
+  // open it in the SYSTEM browser. The raw URL never crosses the bridge — only
+  // the outcome does. `no-subscription` (the backend has no billing customer for
+  // this account) is surfaced distinctly so the user gets an actionable message
+  // rather than a silent no-op.
+  ipcMain.handle(AUTH_IPC.PORTAL, async (): Promise<PortalResult> => {
+    try {
+      const result = await service.startCustomerPortal()
+      if (!result) return { status: 'not-signed-in' }
+      if (!result.portalUrl) return { status: 'no-subscription' }
+      await openExternal(result.portalUrl)
+      return { status: 'opened' }
+    } catch {
       return { status: 'error' }
     }
   })

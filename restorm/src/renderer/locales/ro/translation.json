@@ -3,7 +3,9 @@
     "tooltip": "Cont",
     "connected": "Conectat",
     "signIn": "Conectare",
-    "signOut": "Deconectare"
+    "signOut": "Deconectare",
+    "manageSubscription": "Gestionează abonamentul",
+    "upgradeToPro": "Treci la Pro"
   },
   "secrets": {
     "others": "Altele",
@@ -2002,6 +2004,10 @@
     "checkout": {
       "forbidden": "Cereți administratorului organizației dvs. să se aboneze.",
       "error": "Abonamentul nu a putut fi inițiat. Încercați din nou."
+    },
+    "portal": {
+      "noSubscription": "Niciun abonament activ de gestionat.",
+      "error": "Portalul de abonament nu a putut fi deschis. Încearcă din nou."
     }
   }
 }

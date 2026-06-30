@@ -3,7 +3,9 @@
     "tooltip": "Fiók",
     "connected": "Bejelentkezve",
     "signIn": "Bejelentkezés",
-    "signOut": "Kijelentkezés"
+    "signOut": "Kijelentkezés",
+    "manageSubscription": "Előfizetés kezelése",
+    "upgradeToPro": "Váltás Pro-ra"
   },
   "secrets": {
     "others": "Egyéb",
@@ -2001,6 +2003,10 @@
     "checkout": {
       "forbidden": "Kérje meg a szervezete rendszergazdáját, hogy fizessen elő.",
       "error": "Az előfizetés nem indítható el. Próbálja újra."
+    },
+    "portal": {
+      "noSubscription": "Nincs kezelhető aktív előfizetés.",
+      "error": "Az előfizetési portál nem nyitható meg. Próbálja újra."
     }
   }
 }

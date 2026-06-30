@@ -3,7 +3,9 @@
     "tooltip": "Cuenta",
     "connected": "Conectado",
     "signIn": "Iniciar sesión",
-    "signOut": "Cerrar sesión"
+    "signOut": "Cerrar sesión",
+    "manageSubscription": "Gestionar suscripción",
+    "upgradeToPro": "Cambiar a Pro"
   },
   "secrets": {
     "others": "Otros",
@@ -2001,6 +2003,10 @@
     "checkout": {
       "forbidden": "Pide al administrador de tu organización que se suscriba.",
       "error": "No se pudo iniciar la suscripción. Inténtalo de nuevo."
+    },
+    "portal": {
+      "noSubscription": "No hay ninguna suscripción activa que gestionar.",
+      "error": "No se pudo abrir el portal de suscripción. Inténtalo de nuevo."
     }
   }
 }

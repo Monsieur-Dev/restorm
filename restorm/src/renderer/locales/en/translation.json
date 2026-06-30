@@ -3,7 +3,9 @@
     "tooltip": "Account",
     "connected": "Signed in",
     "signIn": "Sign in",
-    "signOut": "Sign out"
+    "signOut": "Sign out",
+    "manageSubscription": "Manage subscription",
+    "upgradeToPro": "Upgrade to Pro"
   },
   "secrets": {
     "others": "Others",
@@ -2001,6 +2003,10 @@
     "checkout": {
       "forbidden": "Ask your organization's administrator to subscribe.",
       "error": "Couldn't start the subscription. Please try again."
+    },
+    "portal": {
+      "noSubscription": "No active subscription to manage.",
+      "error": "Couldn't open the subscription portal. Please try again."
     }
   }
 }

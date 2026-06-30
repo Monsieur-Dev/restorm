@@ -3,7 +3,9 @@
     "tooltip": "Account",
     "connected": "Connesso",
     "signIn": "Accedi",
-    "signOut": "Esci"
+    "signOut": "Esci",
+    "manageSubscription": "Gestisci abbonamento",
+    "upgradeToPro": "Passa a Pro"
   },
   "secrets": {
     "others": "Altri",
@@ -2001,6 +2003,10 @@
     "checkout": {
       "forbidden": "Chiedi all'amministratore della tua organizzazione di abbonarsi.",
       "error": "Impossibile avviare l'abbonamento. Riprova."
+    },
+    "portal": {
+      "noSubscription": "Nessun abbonamento attivo da gestire.",
+      "error": "Impossibile aprire il portale dell'abbonamento. Riprova."
     }
   }
 }
