@@ -254,6 +254,54 @@ describe('EntitlementService — init from cache + offline grace', () => {
   })
 })
 
+describe('EntitlementService — refresh (auto-refresh trigger target)', () => {
+  it('re-fetches and broadcasts a plan change (community → pro) without a re-login', async () => {
+    const sessionToken = await signSession({ secret: SESSION_SECRET, email: 'a@b.com', iatSeconds: IAT })
+    const community = await signEntitlement({ privateKey: keys.privateKey, iatSeconds: IAT, plan: 'community', capabilities: [] })
+    const h = makeHarness({ now: at(10), sessionToken, entitlementToken: community })
+    await h.service.signIn()
+    expect(h.service.getState().plan).toBe('community')
+    h.broadcasts.length = 0
+
+    // The backend now returns a pro entitlement (the user upgraded via checkout).
+    const pro = await signEntitlement({
+      privateKey: keys.privateKey,
+      iatSeconds: IAT,
+      plan: 'pro',
+      capabilities: ['scenario.stepDebug']
+    })
+    h.fetchMock.mockResolvedValueOnce(new Response(JSON.stringify({ entitlement: pro }), { status: 200 }))
+
+    await h.service.refresh()
+
+    const state = h.service.getState()
+    expect(state.plan).toBe('pro')
+    expect(state.capabilities).toEqual(['scenario.stepDebug'])
+    expect(last(h.broadcasts)).toMatchObject({ plan: 'pro' })
+  })
+
+  it('is a no-op when signed out (no fetch, no broadcast)', async () => {
+    const h = makeHarness({ now: at(10) })
+    await h.service.refresh()
+    expect(h.fetchMock.mock.calls.length).toBe(0)
+    expect(h.broadcasts.length).toBe(0)
+  })
+
+  it('keeps the cached entitlement when a refresh fails (offline) — no sign-out', async () => {
+    const sessionToken = await signSession({ secret: SESSION_SECRET, iatSeconds: IAT })
+    const pro = await signEntitlement({ privateKey: keys.privateKey, iatSeconds: IAT, plan: 'pro', capabilities: ['scenario.stepDebug'] })
+    const h = makeHarness({ now: at(10), sessionToken, entitlementToken: pro })
+    await h.service.signIn()
+
+    h.fetchMock.mockRejectedValueOnce(new Error('offline'))
+    await h.service.refresh()
+
+    const state = h.service.getState()
+    expect(state.plan).toBe('pro')
+    expect(state.capabilities).toEqual(['scenario.stepDebug'])
+  })
+})
+
 describe('EntitlementService — startCheckout', () => {
   it('returns null when there is no signed-in session', async () => {
     const h = makeHarness({ now: at(10) })

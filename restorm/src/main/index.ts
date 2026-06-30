@@ -93,7 +93,7 @@ import { graphQLService } from 'electron-core-ui/main'
 import { clearUserSettings, parseCliArgs } from './cli/args'
 import { setupGraphQL } from './GraphQLSetup'
 import { registerRestormIPC } from './IPCHandlers'
-import { initEntitlementService } from './services/auth/authComposition'
+import { initEntitlementService, stopEntitlementAutoRefresh } from './services/auth/authComposition'
 import { installScenarioEngineIPC } from './scenarioEngine/ipcBridge'
 import { registerBuiltinSources } from './services/secrets/mainSourceRegistry'
 import { secretHydrationService } from './services/secrets/SecretHydrationService'
@@ -593,6 +593,12 @@ void app.whenReady().then(() => {
 // resolvable. Registers its own IPC and restores a cached session internally.
 void app.whenReady().then(() => {
   initEntitlementService()
+})
+
+// Tear down the entitlement auto-refresh triggers (poll timer + window-focus
+// listener) on quit so neither outlives the process.
+app.on('before-quit', () => {
+  stopEntitlementAutoRefresh()
 })
 
 // Embedded MCP server. On by default — every normal launch exposes the

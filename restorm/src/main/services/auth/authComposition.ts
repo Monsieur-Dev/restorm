@@ -13,6 +13,7 @@ import { logger, withFirewallBypass } from 'electron-core-ui'
 import { endpointUrl, functionsHost, resolveChannel, type ReleaseChannel } from '../../../shared/config/backend'
 import { entitlementPublicKeyPem, isEntitlementPublicKeyConfigured } from '../entitlement/keys'
 import { EntitlementService } from '../entitlement/EntitlementService'
+import { startEntitlementAutoRefresh } from '../entitlement/autoRefresh'
 import { AuthStore, type AuthStoreFs, type SecureStoragePort } from './authStore'
 import { loopbackLogin } from './loopbackLogin'
 import { makeGuardedFetch } from './guardedFetch'
@@ -52,6 +53,9 @@ function makeFsPort(): AuthStoreFs {
 }
 
 let instance: EntitlementService | null = null
+/** Tears down the focus + interval auto-refresh triggers; set once the service is
+ * built, called on app quit. */
+let stopAutoRefresh: (() => void) | null = null
 
 /**
  * Build the EntitlementService for this launch's channel, register its IPC, and
@@ -92,6 +96,20 @@ export function initEntitlementService(version: string = app.getVersion()): Enti
 
   registerAuthIpc(instance, (url) => shell.openExternal(url))
 
+  // Auto-refresh the entitlement on window focus (the « S'abonner » checkout
+  // returns into the app via the system browser — focus is the moment we learn
+  // the user is back) and on a periodic poll, so a subscription upgrade reflects
+  // without a re-login. `refresh()` no-ops when signed out and fails soft when
+  // offline, so these ambient triggers are always safe.
+  const service = instance
+  stopAutoRefresh = startEntitlementAutoRefresh({
+    refresh: () => { void service.refresh() },
+    onFocus: (handler) => {
+      app.on('browser-window-focus', handler)
+      return () => { app.off('browser-window-focus', handler) }
+    }
+  })
+
   // Restore a cached session + entitlement and refresh in the background; never
   // let a restore failure crash startup.
   void instance.init().catch((err: unknown) => {
@@ -112,7 +130,15 @@ export function getEntitlementService(): EntitlementService {
   return instance
 }
 
+/** Stop the entitlement auto-refresh triggers (timer + focus listener). Call on
+ * app quit so neither outlives the process. Idempotent. */
+export function stopEntitlementAutoRefresh(): void {
+  stopAutoRefresh?.()
+  stopAutoRefresh = null
+}
+
 /** Test-only reset. */
 export function resetEntitlementServiceForTests(): void {
+  stopEntitlementAutoRefresh()
   instance = null
 }
