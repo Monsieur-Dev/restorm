@@ -91,6 +91,35 @@ describe('EntitlementService — sign in / out', () => {
     expect(last(h.saved)).toEqual({ sessionToken, entitlementToken })
   })
 
+  it('flows the session name + photoUrl into the avatar-facing user profile', async () => {
+    const sessionToken = await signSession({
+      secret: SESSION_SECRET,
+      email: 'a@b.com',
+      name: 'Ada Lovelace',
+      photoUrl: 'https://lh3.googleusercontent.com/a/ada',
+      iatSeconds: IAT
+    })
+    const entitlementToken = await signEntitlement({ privateKey: keys.privateKey, iatSeconds: IAT })
+    const h = makeHarness({ now: at(10), sessionToken, entitlementToken })
+
+    const state = await h.service.signIn()
+
+    expect(state.user?.name).toBe('Ada Lovelace')
+    expect(state.user?.photoUrl).toBe('https://lh3.googleusercontent.com/a/ada')
+  })
+
+  it('omits name + photoUrl when the session carries none (clean fallback to initials)', async () => {
+    const sessionToken = await signSession({ secret: SESSION_SECRET, email: 'a@b.com', iatSeconds: IAT })
+    const entitlementToken = await signEntitlement({ privateKey: keys.privateKey, iatSeconds: IAT })
+    const h = makeHarness({ now: at(10), sessionToken, entitlementToken })
+
+    const state = await h.service.signIn()
+
+    expect(state.user?.email).toBe('a@b.com')
+    expect(state.user?.name).toBeUndefined()
+    expect(state.user?.photoUrl).toBeUndefined()
+  })
+
   it('signOut clears the cache, resets to community, and broadcasts signed-out', async () => {
     const sessionToken = await signSession({ secret: SESSION_SECRET, iatSeconds: IAT })
     const entitlementToken = await signEntitlement({ privateKey: keys.privateKey, iatSeconds: IAT })
@@ -221,6 +250,54 @@ describe('EntitlementService — init from cache + offline grace', () => {
     await h.service.init()
     const state = h.service.getState()
     expect(state.plan).toBe('pro') // cached entitlement preserved
+    expect(state.capabilities).toEqual(['scenario.stepDebug'])
+  })
+})
+
+describe('EntitlementService — refresh (auto-refresh trigger target)', () => {
+  it('re-fetches and broadcasts a plan change (community → pro) without a re-login', async () => {
+    const sessionToken = await signSession({ secret: SESSION_SECRET, email: 'a@b.com', iatSeconds: IAT })
+    const community = await signEntitlement({ privateKey: keys.privateKey, iatSeconds: IAT, plan: 'community', capabilities: [] })
+    const h = makeHarness({ now: at(10), sessionToken, entitlementToken: community })
+    await h.service.signIn()
+    expect(h.service.getState().plan).toBe('community')
+    h.broadcasts.length = 0
+
+    // The backend now returns a pro entitlement (the user upgraded via checkout).
+    const pro = await signEntitlement({
+      privateKey: keys.privateKey,
+      iatSeconds: IAT,
+      plan: 'pro',
+      capabilities: ['scenario.stepDebug']
+    })
+    h.fetchMock.mockResolvedValueOnce(new Response(JSON.stringify({ entitlement: pro }), { status: 200 }))
+
+    await h.service.refresh()
+
+    const state = h.service.getState()
+    expect(state.plan).toBe('pro')
+    expect(state.capabilities).toEqual(['scenario.stepDebug'])
+    expect(last(h.broadcasts)).toMatchObject({ plan: 'pro' })
+  })
+
+  it('is a no-op when signed out (no fetch, no broadcast)', async () => {
+    const h = makeHarness({ now: at(10) })
+    await h.service.refresh()
+    expect(h.fetchMock.mock.calls.length).toBe(0)
+    expect(h.broadcasts.length).toBe(0)
+  })
+
+  it('keeps the cached entitlement when a refresh fails (offline) — no sign-out', async () => {
+    const sessionToken = await signSession({ secret: SESSION_SECRET, iatSeconds: IAT })
+    const pro = await signEntitlement({ privateKey: keys.privateKey, iatSeconds: IAT, plan: 'pro', capabilities: ['scenario.stepDebug'] })
+    const h = makeHarness({ now: at(10), sessionToken, entitlementToken: pro })
+    await h.service.signIn()
+
+    h.fetchMock.mockRejectedValueOnce(new Error('offline'))
+    await h.service.refresh()
+
+    const state = h.service.getState()
+    expect(state.plan).toBe('pro')
     expect(state.capabilities).toEqual(['scenario.stepDebug'])
   })
 })

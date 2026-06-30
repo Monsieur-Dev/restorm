@@ -21,6 +21,10 @@ export const SESSION_AUDIENCE = 'restorm-session'
 /** The subset of session claims we read for display / freshness. */
 export interface SessionInfo {
   email?: string
+  /** display name (first + last), when the backend captured it from the provider. */
+  name?: string
+  /** profile photo URL (e.g. Google picture), when the provider supplied one. */
+  photoUrl?: string
   /** organizations.id. */
   org?: string
   /** expiry (epoch seconds), if present. */
@@ -46,6 +50,10 @@ export function decodeSessionInfo(token: string): SessionInfo | null {
     const payload = JSON.parse(base64urlDecode(parts[1])) as Record<string, unknown>
     const info: SessionInfo = {}
     if (typeof payload.email === 'string') info.email = payload.email
+    // `name` / `photoUrl` are best-effort display fields the backend mints only
+    // when the provider supplied them (omitted otherwise — never null keys).
+    if (typeof payload.name === 'string') info.name = payload.name
+    if (typeof payload.photoUrl === 'string') info.photoUrl = payload.photoUrl
     if (typeof payload.org === 'string') info.org = payload.org
     if (typeof payload.exp === 'number') info.exp = payload.exp
     if (typeof payload.aud === 'string') info.aud = payload.aud
