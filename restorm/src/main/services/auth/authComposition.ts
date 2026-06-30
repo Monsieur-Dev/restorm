@@ -23,7 +23,9 @@ import {
   makeGuardedFetch,
   broadcastAuthState,
   registerAuthIpc,
-  AvatarFirewallExemption
+  AvatarFirewallExemption,
+  getFeatureService,
+  isFeatureServiceInitialized
 } from 'electron-core-ui/main'
 import type { AuthState } from '../../../shared/auth/authState'
 import {
@@ -102,10 +104,19 @@ const avatarExemption = new AvatarFirewallExemption(permissionService)
  * (ERR_BLOCKED_BY_CLIENT). Syncing before the broadcast means the host is
  * allowed by the time the renderer mounts the avatar; it is dropped on logout /
  * a photo-less profile.
+ *
+ * Also invalidates the FeatureFlippingService so any `Type: Entitlement`
+ * strategy re-evaluates against the new capabilities. The service may not
+ * be initialized yet on the very first boot broadcast (the entitlement service
+ * fires before `setupIPC` completes on some startup races) — guarded defensively.
  */
 function broadcastAuthStateWithAvatarExemption(channel: string, state: AuthState): void {
   avatarExemption.sync(state)
   broadcastAuthState(channel, state)
+  // Invalidate so `useFeature` subscribers re-evaluate Entitlement strategies.
+  if (isFeatureServiceInitialized()) {
+    getFeatureService().invalidate()
+  }
 }
 
 /**

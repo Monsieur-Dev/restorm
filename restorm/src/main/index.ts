@@ -91,11 +91,12 @@ import { isHeadlessHost as isHeadlessHostPure, isMcpEnabledForLaunch, shouldLaun
 import { readAutoSaveOn, type InstanceLifecycleHost } from './mcp/tools/instances'
 import { registerActiveStateBridge } from './mcp/tools/activeState'
 import { RESTORM_MCP_INSTRUCTIONS } from './mcp/instructions'
-import { graphQLService } from 'electron-core-ui/main'
+import { graphQLService, getFeatureService, isFeatureServiceInitialized } from 'electron-core-ui/main'
 import { clearUserSettings, parseCliArgs } from './cli/args'
 import { setupGraphQL } from './GraphQLSetup'
 import { registerRestormIPC } from './IPCHandlers'
 import { initEntitlementService, stopEntitlementAutoRefresh } from './services/auth/authComposition'
+import { createEntitlementEvaluator } from './services/entitlement/entitlementStrategy'
 import { installScenarioEngineIPC } from './scenarioEngine/ipcBridge'
 import { registerBuiltinSources } from './services/secrets/mainSourceRegistry'
 import { secretHydrationService } from './services/secrets/SecretHydrationService'
@@ -594,7 +595,19 @@ void app.whenReady().then(() => {
 // `app.getPath('userData')` (the encrypted token cache) and `safeStorage` are
 // resolvable. Registers its own IPC and restores a cached session internally.
 void app.whenReady().then(() => {
-  initEntitlementService()
+  const entitlementService = initEntitlementService()
+  // Register the 'Entitlement' custom strategy so features.yaml entries that
+  // declare `Type: Entitlement` / `RequiredCapabilities: [...]` are evaluated
+  // against the live auth state. `setupIPC` (called inside `initializeApp`'s
+  // own `whenReady` callback, which queued ahead of this one) has already
+  // called `initFeatureService`, so the service is guaranteed to be ready here.
+  if (isFeatureServiceInitialized()) {
+    getFeatureService().registerStrategy(
+      'Entitlement',
+      createEntitlementEvaluator(() => entitlementService.getState())
+    )
+    logger.info('FeatureFlippingService: Entitlement strategy registered')
+  }
 })
 
 // Tear down the entitlement auto-refresh triggers (poll timer + window-focus
