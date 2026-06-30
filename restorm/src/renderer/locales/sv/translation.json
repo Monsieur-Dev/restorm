@@ -3,7 +3,9 @@
     "tooltip": "Konto",
     "connected": "Inloggad",
     "signIn": "Logga in",
-    "signOut": "Logga ut"
+    "signOut": "Logga ut",
+    "manageSubscription": "Hantera prenumeration",
+    "upgradeToPro": "Uppgradera till Pro"
   },
   "secrets": {
     "others": "Övriga",
@@ -2001,6 +2003,10 @@
     "checkout": {
       "forbidden": "Be administratören för din organisation att prenumerera.",
       "error": "Det gick inte att starta prenumerationen. Försök igen."
+    },
+    "portal": {
+      "noSubscription": "Ingen aktiv prenumeration att hantera.",
+      "error": "Det gick inte att öppna prenumerationsportalen. Försök igen."
     }
   }
 }

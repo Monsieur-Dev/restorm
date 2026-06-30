@@ -62,6 +62,7 @@ export function seedEntitlementForE2E(
 import { decodeSessionInfo, isSessionExpired } from '../auth/sessionToken'
 import {
   createCheckout,
+  createCustomerPortalSession,
   fetchEntitlement,
   importEntitlementPublicKey,
   isWithinGrace,
@@ -79,6 +80,9 @@ export interface EntitlementServiceDeps {
   entitlementUrl: string
   /** `<base>/checkout` — the « S'abonner » upsell creates a Paddle transaction here. */
   checkoutUrl: string
+  /** `<base>/customer-portal` — "manage my subscription" mints a hosted Paddle
+   * customer-portal session here (manage / cancel / change card / invoices). */
+  portalUrl: string
   /** Embedded Ed25519 SPKI public key PEM for this channel. */
   publicKeyPem: string
   /** False when the channel's key is a placeholder (prod, pre-launch) → never
@@ -223,6 +227,24 @@ export class EntitlementService {
     }
     const checkoutUrl = await createCheckout(this.deps.checkoutUrl, this.sessionToken, this.deps.fetchImpl)
     return { checkoutUrl }
+  }
+
+  /**
+   * Mint a hosted Paddle customer-portal session for "manage my subscription".
+   * Returns `null` when there is no live session (the caller prompts login
+   * first); otherwise `{ portalUrl }` where the URL may itself be `null` (the
+   * backend has no billing customer for this account → nothing to manage). The
+   * session JWT stays private to this service, mirroring `startCheckout()`; the
+   * URL is handed to the main process to open in the system browser (it never
+   * reaches the renderer). Rethrows network / backend errors so the IPC layer
+   * can map them to a generic failure.
+   */
+  async startCustomerPortal(): Promise<{ portalUrl: string | null } | null> {
+    if (!this.sessionToken || isSessionExpired(this.sessionToken, nowSeconds(this.deps.now), this.deps.sessionAudience)) {
+      return null
+    }
+    const portalUrl = await createCustomerPortalSession(this.deps.portalUrl, this.sessionToken, this.deps.fetchImpl)
+    return { portalUrl }
   }
 
   /**

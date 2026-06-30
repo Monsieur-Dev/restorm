@@ -3,7 +3,9 @@
     "tooltip": "Account",
     "connected": "Ingelogd",
     "signIn": "Inloggen",
-    "signOut": "Uitloggen"
+    "signOut": "Uitloggen",
+    "manageSubscription": "Abonnement beheren",
+    "upgradeToPro": "Upgraden naar Pro"
   },
   "secrets": {
     "others": "Overige",
@@ -2001,6 +2003,10 @@
     "checkout": {
       "forbidden": "Vraag de beheerder van je organisatie om een abonnement te nemen.",
       "error": "Kan het abonnement niet starten. Probeer het opnieuw."
+    },
+    "portal": {
+      "noSubscription": "Geen actief abonnement om te beheren.",
+      "error": "Kan het abonnementsportaal niet openen. Probeer het opnieuw."
     }
   }
 }

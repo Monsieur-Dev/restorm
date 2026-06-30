@@ -3,7 +3,9 @@
     "tooltip": "Compte",
     "connected": "Connecté",
     "signIn": "Se connecter",
-    "signOut": "Se déconnecter"
+    "signOut": "Se déconnecter",
+    "manageSubscription": "Gérer mon abonnement",
+    "upgradeToPro": "Passer à Pro"
   },
   "secrets": {
     "others": "Autres",
@@ -2001,6 +2003,10 @@
     "checkout": {
       "forbidden": "Demandez à l'administrateur de votre organisation de s'abonner.",
       "error": "Impossible de démarrer l'abonnement. Veuillez réessayer."
+    },
+    "portal": {
+      "noSubscription": "Aucun abonnement actif à gérer.",
+      "error": "Impossible d'ouvrir le portail d'abonnement. Veuillez réessayer."
     }
   }
 }

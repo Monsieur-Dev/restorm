@@ -3,7 +3,9 @@
     "tooltip": "Účet",
     "connected": "Přihlášeno",
     "signIn": "Přihlásit se",
-    "signOut": "Odhlásit se"
+    "signOut": "Odhlásit se",
+    "manageSubscription": "Spravovat předplatné",
+    "upgradeToPro": "Přejít na Pro"
   },
   "secrets": {
     "others": "Ostatní",
@@ -2003,6 +2005,10 @@
     "checkout": {
       "forbidden": "Požádejte správce své organizace o předplatné.",
       "error": "Předplatné se nepodařilo spustit. Zkuste to znovu."
+    },
+    "portal": {
+      "noSubscription": "Žádné aktivní předplatné ke správě.",
+      "error": "Portál předplatného se nepodařilo otevřít. Zkuste to znovu."
     }
   }
 }

@@ -3,7 +3,9 @@
     "tooltip": "Llogaria",
     "connected": "I kyçur",
     "signIn": "Hyr",
-    "signOut": "Dil"
+    "signOut": "Dil",
+    "manageSubscription": "Menaxho abonimin",
+    "upgradeToPro": "Kalo në Pro"
   },
   "secrets": {
     "others": "Të tjera",
@@ -2001,6 +2003,10 @@
     "checkout": {
       "forbidden": "Kërkojini administratorit të organizatës suaj të abonohet.",
       "error": "Abonimi nuk mund të niste. Ju lutemi provoni përsëri."
+    },
+    "portal": {
+      "noSubscription": "Nuk ka abonim aktiv për të menaxhuar.",
+      "error": "Portali i abonimit nuk u hap dot. Provo përsëri."
     }
   }
 }

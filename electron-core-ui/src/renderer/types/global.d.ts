@@ -4,7 +4,7 @@ import type { ThemeInfo, ThemeDefinition, ThemeVariables } from '../../types/the
 import type { FeaturePlatform } from '../../types/feature'
 import type { FileServiceState, FileMetadata, SerializationFormat } from '../../types/file'
 import type { SettingValue, ResolvedSetting, SettingsGroup } from '../../types/settings'
-import type { AuthState, CheckoutResult } from '../../shared/auth/authState'
+import type { AuthState, CheckoutResult, PortalResult } from '../../shared/auth/authState'
 
 interface WindowApiTheme {
   list: () => Promise<ThemeInfo[]>
@@ -111,6 +111,9 @@ interface WindowApiAccount {
   onStateChanged: (callback: (state: AuthState) => void) => () => void
   /** Open the Paddle checkout URL for upgrading to Pro. */
   subscribe: () => Promise<CheckoutResult>
+  /** Open the hosted Paddle customer portal (manage / cancel the subscription)
+   * in the system browser. */
+  manageSubscription: () => Promise<PortalResult>
 }
 
 interface WindowApiSettings {

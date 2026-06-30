@@ -63,7 +63,8 @@ export const AUTH_IPC = {
   LOGOUT: 'auth:logout',
   GET_STATE: 'auth:get-state',
   STATE_CHANGED: 'auth:state-changed',
-  CHECKOUT: 'auth:checkout'
+  CHECKOUT: 'auth:checkout',
+  PORTAL: 'auth:customer-portal'
 } as const
 
 /**
@@ -75,6 +76,22 @@ export type CheckoutResult =
   | { status: 'opened' }
   | { status: 'not-signed-in' }
   | { status: 'forbidden' }
+  | { status: 'error' }
+
+/**
+ * Result of opening the hosted customer portal (manage / cancel the
+ * subscription), surfaced to the renderer. Like checkout, the raw portal URL
+ * never crosses the bridge — the main process opens it in the system browser.
+ *
+ * `no-subscription` is the "nothing to manage" outcome: the backend resolved no
+ * billing customer for the account (never subscribed), so there is no portal to
+ * open. The renderer turns it into an actionable message instead of a silent
+ * no-op.
+ */
+export type PortalResult =
+  | { status: 'opened' }
+  | { status: 'not-signed-in' }
+  | { status: 'no-subscription' }
   | { status: 'error' }
 
 /** Convenience: does a state grant a given capability? */

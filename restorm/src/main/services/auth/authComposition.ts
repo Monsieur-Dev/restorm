@@ -146,6 +146,7 @@ export function initEntitlementService(version: string = app.getVersion()): Enti
     store,
     entitlementUrl: endpointUrl(channel, 'entitlement'),
     checkoutUrl: endpointUrl(channel, 'checkout'),
+    portalUrl: endpointUrl(channel, 'customer-portal'),
     publicKeyPem: entitlementPublicKeyPem(channel),
     publicKeyConfigured: isEntitlementPublicKeyConfigured(channel),
     fetchImpl: backendFetch,

@@ -3,7 +3,9 @@
     "tooltip": "Hesap",
     "connected": "Giriş yapıldı",
     "signIn": "Oturum aç",
-    "signOut": "Oturumu kapat"
+    "signOut": "Oturumu kapat",
+    "manageSubscription": "Aboneliği yönet",
+    "upgradeToPro": "Pro'ya geç"
   },
   "secrets": {
     "others": "Diğer",
@@ -2001,6 +2003,10 @@
     "checkout": {
       "forbidden": "Kuruluşunuzun yöneticisinden abone olmasını isteyin.",
       "error": "Abonelik başlatılamadı. Lütfen tekrar deneyin."
+    },
+    "portal": {
+      "noSubscription": "Yönetilecek etkin abonelik yok.",
+      "error": "Abonelik portalı açılamadı. Lütfen tekrar deneyin."
     }
   }
 }

@@ -3,7 +3,9 @@
     "tooltip": "Akun",
     "connected": "Masuk",
     "signIn": "Masuk",
-    "signOut": "Keluar"
+    "signOut": "Keluar",
+    "manageSubscription": "Kelola langganan",
+    "upgradeToPro": "Tingkatkan ke Pro"
   },
   "secrets": {
     "others": "Lainnya",
@@ -2000,6 +2002,10 @@
     "checkout": {
       "forbidden": "Minta administrator organisasi Anda untuk berlangganan.",
       "error": "Tidak dapat memulai langganan. Silakan coba lagi."
+    },
+    "portal": {
+      "noSubscription": "Tidak ada langganan aktif untuk dikelola.",
+      "error": "Tidak dapat membuka portal langganan. Silakan coba lagi."
     }
   }
 }

@@ -33,7 +33,7 @@ import {
   apiUpdateRefreshFetchResultSchema,
 } from '../ipc/schemas'
 import type { z } from 'zod/v4'
-import { AUTH_IPC, type AuthState, type CheckoutResult } from '../../shared/auth/authState'
+import { AUTH_IPC, type AuthState, type CheckoutResult, type PortalResult } from '../../shared/auth/authState'
 
 // Expose core-ui APIs (imported from core-ui preload modules) and extend with restorm project API
 const coreUIAPI = createCoreUIAPI()
@@ -129,6 +129,11 @@ contextBridge.exposeInMainWorld('api', {
      * browser. Resolves with the outcome; the URL never crosses the bridge. */
     subscribe: async (): Promise<CheckoutResult> => {
       return (await ipcRenderer.invoke(AUTH_IPC.CHECKOUT)) as CheckoutResult
+    },
+    /** « Gérer mon abonnement »: open the hosted Paddle customer portal in the
+     * system browser. Resolves with the outcome; the URL never crosses the bridge. */
+    manageSubscription: async (): Promise<PortalResult> => {
+      return (await ipcRenderer.invoke(AUTH_IPC.PORTAL)) as PortalResult
     }
   },
   // App-level metadata. `getVersion` mirrors `app.getVersion()` to the

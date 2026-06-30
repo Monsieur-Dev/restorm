@@ -3,7 +3,9 @@
     "tooltip": "Conta",
     "connected": "Conectado",
     "signIn": "Iniciar sessão",
-    "signOut": "Terminar sessão"
+    "signOut": "Terminar sessão",
+    "manageSubscription": "Gerenciar assinatura",
+    "upgradeToPro": "Mudar para Pro"
   },
   "secrets": {
     "others": "Outros",
@@ -2001,6 +2003,10 @@
     "checkout": {
       "forbidden": "Peça ao administrador da sua organização para assinar.",
       "error": "Não foi possível iniciar a assinatura. Tente novamente."
+    },
+    "portal": {
+      "noSubscription": "Nenhuma assinatura ativa para gerenciar.",
+      "error": "Não foi possível abrir o portal de assinatura. Tente novamente."
     }
   }
 }

@@ -3,7 +3,9 @@
     "tooltip": "アカウント",
     "connected": "サインイン済み",
     "signIn": "ログイン",
-    "signOut": "ログアウト"
+    "signOut": "ログアウト",
+    "manageSubscription": "サブスクリプションを管理",
+    "upgradeToPro": "Pro にアップグレード"
   },
   "secrets": {
     "others": "その他",
@@ -2000,6 +2002,10 @@
     "checkout": {
       "forbidden": "組織の管理者にサブスクリプションの申し込みを依頼してください。",
       "error": "サブスクリプションを開始できませんでした。もう一度お試しください。"
+    },
+    "portal": {
+      "noSubscription": "管理できる有効なサブスクリプションがありません。",
+      "error": "サブスクリプションポータルを開けませんでした。もう一度お試しください。"
     }
   }
 }

@@ -3,7 +3,9 @@
     "tooltip": "Tili",
     "connected": "Kirjautunut sisään",
     "signIn": "Kirjaudu sisään",
-    "signOut": "Kirjaudu ulos"
+    "signOut": "Kirjaudu ulos",
+    "manageSubscription": "Hallinnoi tilausta",
+    "upgradeToPro": "Päivitä Pro-versioon"
   },
   "secrets": {
     "others": "Muut",
@@ -2001,6 +2003,10 @@
     "checkout": {
       "forbidden": "Pyydä organisaatiosi järjestelmänvalvojaa tilaamaan.",
       "error": "Tilausta ei voitu aloittaa. Yritä uudelleen."
+    },
+    "portal": {
+      "noSubscription": "Ei aktiivista tilausta hallittavaksi.",
+      "error": "Tilausportaalin avaaminen epäonnistui. Yritä uudelleen."
     }
   }
 }

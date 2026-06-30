@@ -188,6 +188,37 @@ export async function createCheckout(
     : null
 }
 
+/**
+ * Ask the backend to create a hosted customer-portal session for the signed-in
+ * user and return its URL (or `null` — the backend returns no URL when the
+ * account has no billing customer, i.e. it never subscribed). The session JWT
+ * (bearer) is the only credential; the backend resolves the customer from it.
+ * Throws on a non-2xx response (mapped to a generic failure by the caller) and
+ * rethrows network failures.
+ *
+ * @param fetchImpl injected so the caller wraps it in `withFirewallBypass`
+ *   (host-guarded) and tests can stub it — this module never references electron.
+ */
+export async function createCustomerPortalSession(
+  portalUrl: string,
+  sessionToken: string,
+  fetchImpl: typeof fetch
+): Promise<string | null> {
+  const res = await fetchImpl(portalUrl, {
+    method: 'POST',
+    headers: { authorization: `Bearer ${sessionToken}` }
+  })
+  if (!res.ok) {
+    throw new Error(`customer-portal: backend responded ${String(res.status)}`)
+  }
+  const parsed = (await res.json()) as { portalUrl?: unknown }
+  // portalUrl is nullable in the contract (no billing customer → nothing to
+  // manage); treat anything but a non-empty string as "no URL to open".
+  return typeof parsed.portalUrl === 'string' && parsed.portalUrl.length > 0
+    ? parsed.portalUrl
+    : null
+}
+
 /** Epoch seconds, injectable clock. */
 export function nowSeconds(now?: () => number): number {
   return Math.floor((now?.() ?? Date.now()) / 1000)

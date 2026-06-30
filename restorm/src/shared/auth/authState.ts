@@ -13,7 +13,8 @@ export type {
   PlanTier,
   AuthUser,
   AuthState,
-  CheckoutResult
+  CheckoutResult,
+  PortalResult
 } from '../../../../electron-core-ui/src/shared/auth/authState'
 
 export {
