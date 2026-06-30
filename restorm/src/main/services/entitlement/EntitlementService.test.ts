@@ -91,6 +91,35 @@ describe('EntitlementService — sign in / out', () => {
     expect(last(h.saved)).toEqual({ sessionToken, entitlementToken })
   })
 
+  it('flows the session name + photoUrl into the avatar-facing user profile', async () => {
+    const sessionToken = await signSession({
+      secret: SESSION_SECRET,
+      email: 'a@b.com',
+      name: 'Ada Lovelace',
+      photoUrl: 'https://lh3.googleusercontent.com/a/ada',
+      iatSeconds: IAT
+    })
+    const entitlementToken = await signEntitlement({ privateKey: keys.privateKey, iatSeconds: IAT })
+    const h = makeHarness({ now: at(10), sessionToken, entitlementToken })
+
+    const state = await h.service.signIn()
+
+    expect(state.user?.name).toBe('Ada Lovelace')
+    expect(state.user?.photoUrl).toBe('https://lh3.googleusercontent.com/a/ada')
+  })
+
+  it('omits name + photoUrl when the session carries none (clean fallback to initials)', async () => {
+    const sessionToken = await signSession({ secret: SESSION_SECRET, email: 'a@b.com', iatSeconds: IAT })
+    const entitlementToken = await signEntitlement({ privateKey: keys.privateKey, iatSeconds: IAT })
+    const h = makeHarness({ now: at(10), sessionToken, entitlementToken })
+
+    const state = await h.service.signIn()
+
+    expect(state.user?.email).toBe('a@b.com')
+    expect(state.user?.name).toBeUndefined()
+    expect(state.user?.photoUrl).toBeUndefined()
+  })
+
   it('signOut clears the cache, resets to community, and broadcasts signed-out', async () => {
     const sessionToken = await signSession({ secret: SESSION_SECRET, iatSeconds: IAT })
     const entitlementToken = await signEntitlement({ privateKey: keys.privateKey, iatSeconds: IAT })

@@ -66,10 +66,14 @@ export function signEntitlement(opts: FixtureEntitlementOpts): Promise<string> {
     .sign(opts.privateKey)
 }
 
-/** Sign a fixture HS256 session JWT like the backend `mintSessionJwt`. */
+/** Sign a fixture HS256 session JWT like the backend `mintSessionJwt`. The
+ * optional `name` / `photoUrl` mirror the backend's omit-when-absent display
+ * claims (only emitted when provided, never as null keys). */
 export function signSession(opts: {
   secret: string
   email?: string
+  name?: string
+  photoUrl?: string
   org?: string
   iatSeconds: number
   ttlSeconds?: number
@@ -81,7 +85,9 @@ export function signSession(opts: {
     wuid: 'wuid-1',
     org: opts.org ?? 'org-1',
     role: 'admin',
-    email: opts.email ?? 'user@example.com'
+    email: opts.email ?? 'user@example.com',
+    ...(opts.name !== undefined ? { name: opts.name } : {}),
+    ...(opts.photoUrl !== undefined ? { photoUrl: opts.photoUrl } : {})
   })
     .setProtectedHeader({ alg: 'HS256' })
     .setSubject('appuser-1')

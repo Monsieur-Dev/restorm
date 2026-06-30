@@ -230,7 +230,11 @@ export class EntitlementService {
     }
     const session = decodeSessionInfo(this.sessionToken)
     const email = session?.email ?? this.entitlement?.claims.email ?? ''
+    // `name` / `photoUrl` are display-only session claims (avatar). Set only when
+    // present so `AuthUser` carries no null fields when the provider omitted them.
     const user: AuthUser = { email }
+    if (session?.name) user.name = session.name
+    if (session?.photoUrl) user.photoUrl = session.photoUrl
 
     let plan: PlanTier = 'community'
     let capabilities: Capability[] = []
@@ -256,6 +260,8 @@ function statesEqual(a: AuthState, b: AuthState): boolean {
   return a.signedIn === b.signedIn &&
     a.plan === b.plan &&
     (a.user?.email ?? null) === (b.user?.email ?? null) &&
+    (a.user?.name ?? null) === (b.user?.name ?? null) &&
+    (a.user?.photoUrl ?? null) === (b.user?.photoUrl ?? null) &&
     a.capabilities.length === b.capabilities.length &&
     a.capabilities.every((c, i) => c === b.capabilities[i])
 }

@@ -19,6 +19,25 @@ describe('sessionToken', () => {
     expect(info?.exp).toBe(IAT + 60 * 60 * 24 * 30)
   })
 
+  it('decodes name + photoUrl when the JWT carries them', async () => {
+    const withProfile = await signSession({
+      secret: 'a-secret-at-least-32-bytes-long-xxxxxx',
+      email: 'u@e.com',
+      name: 'Ada Lovelace',
+      photoUrl: 'https://lh3.googleusercontent.com/a/ada',
+      iatSeconds: IAT
+    })
+    const info = decodeSessionInfo(withProfile)
+    expect(info?.name).toBe('Ada Lovelace')
+    expect(info?.photoUrl).toBe('https://lh3.googleusercontent.com/a/ada')
+  })
+
+  it('leaves name + photoUrl undefined when the JWT omits them (provider gave none)', () => {
+    const info = decodeSessionInfo(token)
+    expect(info?.name).toBeUndefined()
+    expect(info?.photoUrl).toBeUndefined()
+  })
+
   it('returns null for a non-JWT string', () => {
     expect(decodeSessionInfo('garbage')).toBeNull()
     expect(decodeSessionInfo('a.b')).toBeNull()
