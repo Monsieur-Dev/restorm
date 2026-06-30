@@ -1,6 +1,8 @@
 import { readFileSync, existsSync } from 'fs'
 import yaml from 'js-yaml'
 import type {
+  CustomStrategyConfig,
+  CustomStrategyEvaluator,
   FeatureConfig,
   FeatureEnvironment,
   FeaturePlatform,
@@ -29,6 +31,10 @@ export class FeatureFlippingService {
   private features = new Map<string, FeatureConfig>()
   private platform: FeaturePlatform
   private environment: FeatureEnvironment
+  /** Evaluators for custom strategy types registered by the host app. */
+  private customEvaluators = new Map<string, CustomStrategyEvaluator>()
+  /** Listeners notified when feature evaluations may have changed. */
+  private listeners = new Set<() => void>()
 
   constructor(featuresConfigPath: string, platform: FeaturePlatform = 'desktop', environment: FeatureEnvironment = 'prod') {
     this.platform = platform
@@ -121,19 +127,30 @@ export class FeatureFlippingService {
   }
 
   /**
-   * Evaluate a single strategy
+   * Evaluate a single strategy.
+   *
+   * Built-in types (Basic / Platform / Environment) are handled inline.
+   * Any other `Type` is dispatched to an evaluator registered via
+   * {@link registerStrategy}; if none is found the feature evaluates to
+   * `false` and a warning is logged (misconfigured YAML or a strategy
+   * type injected after the feature was queried).
    */
   private evaluateStrategy(strategy: FeatureStrategy, featureName: string): boolean {
     switch (strategy.Type) {
       case 'Basic':
-        return this.evaluateBasicStrategy(strategy)
+        return this.evaluateBasicStrategy(strategy as BasicStrategy)
       case 'Platform':
-        return this.evaluatePlatformStrategy(strategy)
+        return this.evaluatePlatformStrategy(strategy as PlatformStrategy)
       case 'Environment':
-        return this.evaluateEnvironmentStrategy(strategy)
-      default:
-        logger.warn(`Unknown strategy type for feature "${featureName}": ${(strategy as { Type: string }).Type}`)
+        return this.evaluateEnvironmentStrategy(strategy as EnvironmentStrategy)
+      default: {
+        const evaluator = this.customEvaluators.get(strategy.Type)
+        if (evaluator) {
+          return evaluator(strategy as CustomStrategyConfig)
+        }
+        logger.warn(`Unknown strategy type for feature "${featureName}": ${strategy.Type} (no evaluator registered)`)
         return false
+      }
     }
   }
 
@@ -159,6 +176,50 @@ export class FeatureFlippingService {
    */
   private evaluateEnvironmentStrategy(strategy: EnvironmentStrategy): boolean {
     return strategy.AvailableIn.includes(this.environment)
+  }
+
+  /**
+   * Register an evaluator for a custom strategy type.
+   *
+   * The `type` string must match the `Type` field in the YAML config.
+   * Built-in names (`Basic`, `Platform`, `Environment`) are reserved;
+   * registering them here is silently ignored (the switch handles them).
+   *
+   * Safe to call after `initFeatureService` returns — the service dispatches
+   * to evaluators on every `isEnabled()` call, so late registration is fine
+   * as long as it happens before the first `isEnabled()` for that feature.
+   */
+  public registerStrategy(type: string, evaluator: CustomStrategyEvaluator): void {
+    this.customEvaluators.set(type, evaluator)
+  }
+
+  /**
+   * Subscribe to feature state invalidations.
+   *
+   * The listener is called whenever external state that influences custom
+   * strategies may have changed (e.g. an entitlement refresh). `isEnabled()`
+   * already re-evaluates on every call, so the listener's job is to notify
+   * downstream consumers (e.g. push an IPC `feature:changed` event) so they
+   * re-query the service.
+   *
+   * @returns An unsubscribe function that removes the listener.
+   */
+  public subscribe(listener: () => void): () => void {
+    this.listeners.add(listener)
+    return (): void => { this.listeners.delete(listener) }
+  }
+
+  /**
+   * Signal that external state has changed and feature evaluations should be
+   * re-checked. Fires all registered listeners synchronously.
+   *
+   * Called by the host app when a state change that affects custom strategy
+   * evaluation occurs (e.g. the entitlement service emits a new auth state).
+   */
+  public invalidate(): void {
+    for (const listener of this.listeners) {
+      listener()
+    }
   }
 
   /**

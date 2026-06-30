@@ -18,9 +18,16 @@ export type FeaturePlatform = 'desktop' | 'web'
 export type FeatureEnvironment = 'dev' | 'prod'
 
 /**
- * Available strategy types
+ * Built-in strategy type literals.
+ * Alias: {@link FeatureStrategyType} (kept for compatibility).
  */
-export type FeatureStrategyType = 'Basic' | 'Platform' | 'Environment'
+export type BuiltinFeatureStrategyType = 'Basic' | 'Platform' | 'Environment'
+
+/**
+ * Available strategy types (built-in). Use `string` when accepting custom types.
+ * Prefer {@link BuiltinFeatureStrategyType} in new code.
+ */
+export type FeatureStrategyType = BuiltinFeatureStrategyType
 
 /**
  * Basic strategy - simple on/off toggle
@@ -49,9 +56,32 @@ export interface EnvironmentStrategy {
 }
 
 /**
- * Union type for all strategy configurations
+ * Config shape accepted for any custom strategy type registered at runtime.
+ * The `Type` discriminator must not collide with the built-in names
+ * (Basic, Platform, Environment). All additional fields are passed verbatim
+ * to the evaluator the app registered for that type.
  */
-export type FeatureStrategy = BasicStrategy | PlatformStrategy | EnvironmentStrategy
+export interface CustomStrategyConfig {
+  Type: string
+  [key: string]: unknown
+}
+
+/**
+ * Evaluator function injected by the host app for a custom strategy type.
+ *
+ * Called on every `isEnabled()` invocation — must be fast (no I/O; no async).
+ * Live state (e.g. entitlement plan, user role) is accessed via a closure
+ * the evaluator holds, not through the config object. ECUI stays generic:
+ * it calls the evaluator and relies on the host to provide the semantics.
+ */
+export type CustomStrategyEvaluator = (strategyConfig: CustomStrategyConfig) => boolean
+
+/**
+ * Union type for all strategy configurations (built-in + custom).
+ * Custom types pass through YAML validation and are dispatched to the
+ * evaluator registered via {@link FeatureFlippingService.registerStrategy}.
+ */
+export type FeatureStrategy = BasicStrategy | PlatformStrategy | EnvironmentStrategy | CustomStrategyConfig
 
 /**
  * Feature configuration with multiple strategies
@@ -84,4 +114,7 @@ export interface FeatureApi {
   isEnabled: (featureName: string) => Promise<boolean>
   getPlatform: () => Promise<FeaturePlatform>
   getEnvironment: () => Promise<FeatureEnvironment>
+  /** Subscribe to feature state changes pushed from the main process.
+   * Returns an unsubscribe function. */
+  onChanged: (callback: () => void) => () => void
 }

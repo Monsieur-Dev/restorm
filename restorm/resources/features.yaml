@@ -51,3 +51,26 @@ Features:
       - Type: Environment
         AvailableIn:
           - dev
+
+  # Scenario step-debugger: pause-at-breakpoint, step-over, inspect node
+  # output mid-run. Pro-only capability — requires the `scenario.stepDebug`
+  # entitlement from the backend. Community users see the control but it is
+  # disabled (upsell CTA). The `Entitlement` strategy type is evaluated live
+  # against the current AuthState by the registered entitlementEvaluator.
+  - Name: "scenario.stepDebug"
+    Strategies:
+      - Type: Entitlement
+        RequiredCapabilities:
+          - scenario.stepDebug
+
+  # Advanced MCP tools (schema introspection, live request manipulation,
+  # etc.). The MCP server itself is free; only the Pro tool set is gated.
+  # Mirrors the `mcp.pro` capability minted by the backend into `pro` +
+  # `enterprise` entitlement tokens. Used by `mcpProGate.ts` via direct
+  # closure (unchanged); this YAML entry lets `useFeature('mcp.pro')` work
+  # as an alternative renderer-side gate.
+  - Name: "mcp.pro"
+    Strategies:
+      - Type: Entitlement
+        RequiredCapabilities:
+          - mcp.pro

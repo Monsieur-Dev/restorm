@@ -1,10 +1,11 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import type { FeaturePlatform } from '../../types/feature'
 
 interface WindowApi {
   feature: {
     isEnabled: (featureName: string) => Promise<boolean>
     getPlatform: () => Promise<FeaturePlatform>
+    onChanged?: (callback: () => void) => () => void
   }
 }
 
@@ -16,7 +17,13 @@ function getFeatureApi(): WindowApi['feature'] | undefined {
 }
 
 /**
- * Hook to check if a feature is enabled
+ * Hook to check if a feature is enabled.
+ *
+ * Queries the main process on mount, then re-evaluates whenever the main
+ * process pushes a `feature:changed` notification (e.g. after an entitlement
+ * refresh triggered by login / logout / token renewal). Components re-render
+ * automatically — no app restart required.
+ *
  * @param featureName - The name of the feature to check
  * @returns Object containing the enabled state and loading state
  */
@@ -24,31 +31,40 @@ export const useFeature = (featureName: string): { isEnabled: boolean; isLoading
   const [isEnabled, setIsEnabled] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
 
+  const checkFeature = useCallback(async (): Promise<void> => {
+    try {
+      const feature = getFeatureApi()
+      const enabled = (await feature?.isEnabled(featureName)) ?? false
+      setIsEnabled(enabled)
+      setIsLoading(false)
+    } catch {
+      setIsEnabled(false)
+      setIsLoading(false)
+    }
+  }, [featureName])
+
+  // Initial fetch + subscribe to main-process invalidation events.
   useEffect(() => {
     let mounted = true
 
-    const checkFeature = async (): Promise<void> => {
-      try {
-        const feature = getFeatureApi()
-        const enabled = (await feature?.isEnabled(featureName)) ?? false
-        if (mounted) {
-          setIsEnabled(enabled)
-          setIsLoading(false)
-        }
-      } catch {
-        if (mounted) {
-          setIsEnabled(false)
-          setIsLoading(false)
-        }
-      }
+    const check = async (): Promise<void> => {
+      if (!mounted) return
+      await checkFeature()
     }
 
-    void checkFeature()
+    void check()
+
+    // Re-fetch whenever the feature service signals a state change (e.g. an
+    // entitlement refresh flipped a custom strategy's outcome).
+    const unsubscribe = getFeatureApi()?.onChanged?.(() => {
+      if (mounted) void check()
+    })
 
     return () => {
       mounted = false
+      unsubscribe?.()
     }
-  }, [featureName])
+  }, [checkFeature])
 
   return { isEnabled, isLoading }
 }

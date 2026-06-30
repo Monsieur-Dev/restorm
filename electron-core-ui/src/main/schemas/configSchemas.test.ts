@@ -117,13 +117,18 @@ describe('Feature schemas', () => {
       expect(featuresYamlConfigSchema.safeParse(data).success).toBe(true)
     })
 
-    it('rejects unknown strategy type', () => {
+    it('accepts an unknown strategy type as a custom strategy', () => {
+      // Unknown Type values are no longer rejected at the schema layer — they
+      // pass through as CustomStrategyConfig and are dispatched to an evaluator
+      // registered via FeatureFlippingService.registerStrategy() at runtime.
+      // An unregistered custom type evaluates to false (with a warning), but it
+      // is not a config parse error.
       const data = {
         Features: [
           { Name: 'test', Strategies: [{ Type: 'Unknown', Enabled: true }] }
         ]
       }
-      expect(featuresYamlConfigSchema.safeParse(data).success).toBe(false)
+      expect(featuresYamlConfigSchema.safeParse(data).success).toBe(true)
     })
 
     it('rejects invalid platform value', () => {

@@ -38,6 +38,10 @@ export interface CoreUiFeatureApi {
   isEnabled: (featureName: string) => Promise<boolean>
   getPlatform: () => Promise<FeaturePlatform>
   getEnvironment: () => Promise<FeatureEnvironment>
+  /** Subscribe to feature state change notifications pushed from the main
+   * process. Returns an unsubscribe function. Re-query `isEnabled` inside the
+   * callback to get the updated state. */
+  onChanged: (callback: () => void) => () => void
 }
 
 export interface CoreUiFileApi {

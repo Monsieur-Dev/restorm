@@ -1,4 +1,4 @@
-import { ipcMain } from 'electron'
+import { ipcMain, BrowserWindow } from 'electron'
 import { validatedHandle } from '../../ipc/validate'
 import { i18nSetLanguageArgs, loggerLogArgs, featureIsEnabledArgs, eventBusEmitArgs } from '../../ipc/schemas'
 import { logger, i18nService, isFeatureServiceInitialized, getFeatureService, eventBusService } from '../../services'
@@ -68,6 +68,21 @@ export function registerMiscHandlers(storageService: StorageService): void {
     }
     return getFeatureService().getEnvironment()
   })
+
+  // Subscribe to feature service invalidations and push `feature:changed` to
+  // every live renderer window.  This fires when the host app calls
+  // `featureService.invalidate()` — e.g. after an entitlement refresh — so
+  // renderer hooks that subscribed to `onChanged` can re-query `isEnabled`.
+  if (isFeatureServiceInitialized()) {
+    getFeatureService().subscribe(() => {
+      const windows = BrowserWindow.getAllWindows()
+      for (const win of windows) {
+        if (!win.isDestroyed()) {
+          win.webContents.send('feature:changed')
+        }
+      }
+    })
+  }
 
   // ========================================================================
   // EventBus IPC handlers

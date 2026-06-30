@@ -237,10 +237,13 @@ export type {
 // Re-export feature types
 export type {
   FeatureStrategyType,
+  BuiltinFeatureStrategyType,
   FeaturePlatform,
   FeatureStrategy,
   BasicStrategy,
   PlatformStrategy,
+  CustomStrategyConfig,
+  CustomStrategyEvaluator,
   FeatureConfig,
   FeaturesYamlConfig
 } from '../types/feature'

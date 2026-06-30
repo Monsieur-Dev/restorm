@@ -20,7 +20,7 @@ vi.mock('./LoggerService', () => ({
 import { existsSync, readFileSync } from 'fs'
 import { FeatureFlippingService, initFeatureService, getFeatureService, isFeatureServiceInitialized, resetFeatureService } from './FeatureFlippingService'
 import { logger } from './LoggerService'
-import type { FeaturesYamlConfig } from '../../types/feature'
+import type { CustomStrategyConfig, FeaturesYamlConfig } from '../../types/feature'
 
 /** Helper to create a YAML config string */
 function makeYaml(config: FeaturesYamlConfig): string {
@@ -390,6 +390,164 @@ describe('FeatureFlippingService', () => {
       // Original features still intact
       expect(service.listFeatures()).toEqual(['feat-a'])
       expect(logger.warn).toHaveBeenCalledWith('Invalid features configuration', expect.any(Object))
+    })
+  })
+
+  // ---------------------------------------------------------------
+  // Custom strategy registration
+  // ---------------------------------------------------------------
+  describe('registerStrategy', () => {
+    it('evaluates a custom strategy via the registered evaluator', () => {
+      const config: FeaturesYamlConfig = {
+        Features: [
+          {
+            Name: 'pro-feature',
+            Strategies: [{ Type: 'Entitlement', RequiredCapabilities: ['pro.feature'] }]
+          }
+        ]
+      }
+      vi.mocked(existsSync).mockReturnValue(true)
+      vi.mocked(readFileSync).mockReturnValue(makeYaml(config))
+
+      const service = new FeatureFlippingService('/fake/features.yml')
+
+      let hasCap = false
+      service.registerStrategy('Entitlement', (strategyConfig: CustomStrategyConfig) => {
+        const caps = strategyConfig['RequiredCapabilities'] as string[]
+        return caps.every(() => hasCap)
+      })
+
+      expect(service.isEnabled('pro-feature')).toBe(false)
+
+      hasCap = true
+      expect(service.isEnabled('pro-feature')).toBe(true)
+    })
+
+    it('re-evaluates on every isEnabled call (live closure)', () => {
+      const config: FeaturesYamlConfig = {
+        Features: [
+          { Name: 'live-gate', Strategies: [{ Type: 'Live' }] }
+        ]
+      }
+      vi.mocked(existsSync).mockReturnValue(true)
+      vi.mocked(readFileSync).mockReturnValue(makeYaml(config))
+
+      const service = new FeatureFlippingService('/fake/features.yml')
+
+      let toggle = false
+      service.registerStrategy('Live', () => toggle)
+
+      expect(service.isEnabled('live-gate')).toBe(false)
+      toggle = true
+      expect(service.isEnabled('live-gate')).toBe(true)
+      toggle = false
+      expect(service.isEnabled('live-gate')).toBe(false)
+    })
+
+    it('AND-combines custom strategy with built-in strategies', () => {
+      const config: FeaturesYamlConfig = {
+        Features: [
+          {
+            Name: 'combo',
+            Strategies: [
+              { Type: 'Basic', Enabled: true },
+              { Type: 'Custom', pass: true }
+            ]
+          }
+        ]
+      }
+      vi.mocked(existsSync).mockReturnValue(true)
+      vi.mocked(readFileSync).mockReturnValue(makeYaml(config))
+
+      const service = new FeatureFlippingService('/fake/features.yml')
+      let customPass = true
+      service.registerStrategy('Custom', () => customPass)
+
+      expect(service.isEnabled('combo')).toBe(true)
+
+      customPass = false
+      expect(service.isEnabled('combo')).toBe(false)
+    })
+
+    it('warns and returns false for an unregistered custom type', () => {
+      const config: FeaturesYamlConfig = {
+        Features: [
+          { Name: 'unknown-type', Strategies: [{ Type: 'Unregistered' }] }
+        ]
+      }
+      vi.mocked(existsSync).mockReturnValue(true)
+      vi.mocked(readFileSync).mockReturnValue(makeYaml(config))
+
+      const service = new FeatureFlippingService('/fake/features.yml')
+
+      expect(service.isEnabled('unknown-type')).toBe(false)
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('no evaluator registered'))
+    })
+
+    it('last-registered evaluator wins when the same type is registered twice', () => {
+      const config: FeaturesYamlConfig = {
+        Features: [
+          { Name: 'feat', Strategies: [{ Type: 'Toggle' }] }
+        ]
+      }
+      vi.mocked(existsSync).mockReturnValue(true)
+      vi.mocked(readFileSync).mockReturnValue(makeYaml(config))
+
+      const service = new FeatureFlippingService('/fake/features.yml')
+      service.registerStrategy('Toggle', () => false)
+      service.registerStrategy('Toggle', () => true)
+
+      expect(service.isEnabled('feat')).toBe(true)
+    })
+  })
+
+  // ---------------------------------------------------------------
+  // subscribe / invalidate (pub/sub)
+  // ---------------------------------------------------------------
+  describe('subscribe / invalidate', () => {
+    it('notifies a subscriber when invalidate() is called', () => {
+      vi.mocked(existsSync).mockReturnValue(false)
+      const service = new FeatureFlippingService('/fake/features.yml')
+      const listener = vi.fn()
+
+      service.subscribe(listener)
+      service.invalidate()
+
+      expect(listener).toHaveBeenCalledTimes(1)
+    })
+
+    it('notifies all registered subscribers', () => {
+      vi.mocked(existsSync).mockReturnValue(false)
+      const service = new FeatureFlippingService('/fake/features.yml')
+      const listenerA = vi.fn()
+      const listenerB = vi.fn()
+
+      service.subscribe(listenerA)
+      service.subscribe(listenerB)
+      service.invalidate()
+
+      expect(listenerA).toHaveBeenCalledTimes(1)
+      expect(listenerB).toHaveBeenCalledTimes(1)
+    })
+
+    it('does not notify a listener after unsubscribing', () => {
+      vi.mocked(existsSync).mockReturnValue(false)
+      const service = new FeatureFlippingService('/fake/features.yml')
+      const listener = vi.fn()
+
+      const unsubscribe = service.subscribe(listener)
+      unsubscribe()
+      service.invalidate()
+
+      expect(listener).not.toHaveBeenCalled()
+    })
+
+    it('does nothing when no subscribers are registered', () => {
+      vi.mocked(existsSync).mockReturnValue(false)
+      const service = new FeatureFlippingService('/fake/features.yml')
+
+      // Should not throw
+      expect(() => { service.invalidate() }).not.toThrow()
     })
   })
 

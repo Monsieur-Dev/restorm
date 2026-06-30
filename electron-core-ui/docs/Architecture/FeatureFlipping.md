@@ -111,6 +111,66 @@ This feature is enabled only when `Basic.Enabled` is `true` AND the runtime plat
 
 A feature with no strategies returns `false`.
 
+## Custom Strategies
+
+ECUI's strategy set is open for extension. A consuming app can register its own strategy types — evaluators that ECUI knows nothing about semantically — and they participate in the same AND-logic as the built-ins.
+
+### Registering an Evaluator
+
+```typescript
+import { getFeatureService } from 'electron-core-ui/main'
+import type { CustomStrategyConfig } from 'electron-core-ui'
+
+// Call after initFeatureService (e.g. in the same app-ready callback).
+getFeatureService().registerStrategy(
+  'Entitlement',
+  (config: CustomStrategyConfig): boolean => {
+    const caps = config['RequiredCapabilities'] as string[]
+    // read LIVE state from a closure — the evaluator is called on every isEnabled()
+    return caps.every(cap => myEntitlementService.hasCapability(cap))
+  }
+)
+```
+
+The evaluator is called **synchronously on every `isEnabled()` invocation** — it must be fast (no I/O; no async). Live state is read through a closure the evaluator holds.
+
+ECUI remains generic: it orchestrates evaluators, but knows nothing about the semantics of capabilities, plans, or user roles.
+
+### YAML Config for Custom Strategies
+
+Custom strategy types appear in the features YAML like any built-in strategy. Unknown `Type` values that have no registered evaluator are silently treated as disabled (a warning is logged).
+
+```yaml
+Features:
+  - Name: "scenario.stepDebug"
+    Strategies:
+      - Type: Entitlement
+        RequiredCapabilities:
+          - "scenario.stepDebug"
+
+  - Name: "mcp.pro"
+    Strategies:
+      - Type: Entitlement
+        RequiredCapabilities:
+          - "mcp.pro"
+```
+
+### Reactivity — Invalidation
+
+Custom strategies may depend on state that changes at runtime (e.g. login / logout / entitlement refresh). The service exposes an explicit pub/sub pair:
+
+```typescript
+// Subscribe to invalidation notifications
+const unsubscribe = getFeatureService().subscribe(() => {
+  // re-query isEnabled here, or push a renderer notification
+})
+
+// Call when external state has changed
+getFeatureService().invalidate()
+```
+
+In practice the host app calls `invalidate()` from the same place it broadcasts the auth state change. The IPC handler in ECUI subscribes internally and pushes `feature:changed` to all renderer windows, so `useFeature` hooks re-render automatically.
+
 ## FeatureFlippingService API
 
 ### Initialization (Main Process)
@@ -118,20 +178,23 @@ A feature with no strategies returns `false`.
 ```typescript
 import { initFeatureService, getFeatureService, isFeatureServiceInitialized } from 'electron-core-ui/main'
 
-// Initialize singleton (typically done inside setupIPC or manually)
-const service = initFeatureService(
-  path.join(__dirname, '../resources/features.yaml'),
-  appFeaturesYamlPath,  // optional per-app overrides
-  'desktop',            // FeaturePlatform, defaults to 'desktop'
-  app.isPackaged ? 'prod' : 'dev'  // FeatureEnvironment, defaults to 'prod'
-)
+// Initialized automatically by setupIPC / initializeApp; options form:
+const service = initFeatureService({
+  defaultConfigPath: path.join(__dirname, '../resources/features.yaml'),
+  appConfigPath: appFeaturesYamlPath,      // optional per-app overrides
+  platform: 'desktop',                     // FeaturePlatform, default 'desktop'
+  environment: app.isPackaged ? 'prod' : 'dev'  // FeatureEnvironment, default 'prod'
+})
 ```
 
 ### Instance Methods
 
 | Method | Returns | Description |
 |--------|---------|-------------|
-| `isEnabled(featureName)` | `boolean` | Evaluate all strategies; `false` if feature not found |
+| `isEnabled(featureName)` | `boolean` | Evaluate all strategies (AND); `false` if feature not found |
+| `registerStrategy(type, evaluator)` | `void` | Register an evaluator for a custom strategy type |
+| `subscribe(listener)` | `() => void` | Subscribe to invalidation notifications; returns unsubscribe |
+| `invalidate()` | `void` | Signal external state change; fires all subscribers |
 | `getPlatform()` | `FeaturePlatform` | Current runtime platform (`'desktop'` or `'web'`) |
 | `getEnvironment()` | `FeatureEnvironment` | Current build environment (`'dev'` or `'prod'`) |
 | `listFeatures()` | `string[]` | All registered feature names (for debugging) |
@@ -140,20 +203,20 @@ const service = initFeatureService(
 
 | Function | Description |
 |----------|-------------|
-| `initFeatureService(configPath, platform?)` | Legacy signature — creates the singleton without per-app overrides |
-| `initFeatureService(defaultPath, appPath, platform?, environment?)` | New signature with overrides + environment |
+| `initFeatureService(options)` | Create the singleton; idempotent (returns existing if already init) |
 | `getFeatureService()` | Get the singleton; throws if not initialized |
 | `isFeatureServiceInitialized()` | Check if the singleton exists |
 
 ## IPC Channels
 
-| Channel | Args | Returns | Description |
-|---------|------|---------|-------------|
-| `feature:is-enabled` | `featureName: string` | `boolean` | Check if a feature is enabled |
-| `feature:get-platform` | -- | `FeaturePlatform` | Get the runtime platform |
-| `feature:get-environment` | -- | `FeatureEnvironment` | Get the build environment |
+| Channel | Direction | Args | Returns | Description |
+|---------|-----------|------|---------|-------------|
+| `feature:is-enabled` | main→renderer (invoke) | `featureName: string` | `boolean` | Check if a feature is enabled |
+| `feature:get-platform` | main→renderer (invoke) | -- | `FeaturePlatform` | Get the runtime platform |
+| `feature:get-environment` | main→renderer (invoke) | -- | `FeatureEnvironment` | Get the build environment |
+| `feature:changed` | main→renderer (send) | -- | -- | Feature state may have changed; re-query `isEnabled` |
 
-Handlers return safe defaults (`false` / `'desktop'` / `'prod'`) if the service is not initialized.
+Invoke handlers return safe defaults (`false` / `'desktop'` / `'prod'`) if the service is not initialized. `feature:changed` is pushed when `invalidate()` is called.
 
 ## React Hooks and Utilities
 
@@ -161,7 +224,7 @@ All exported from `electron-core-ui/renderer`.
 
 ### useFeature(name)
 
-Hook to check if a feature is enabled. Queries the main process on mount.
+Hook to check if a feature is enabled. Reactive: re-evaluates on mount **and** whenever the main process pushes `feature:changed` (e.g. after an entitlement refresh). No restart required.
 
 ```tsx
 const { isEnabled, isLoading } = useFeature('new-editor')
