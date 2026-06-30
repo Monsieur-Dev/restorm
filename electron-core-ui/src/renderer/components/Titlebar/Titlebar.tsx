@@ -26,6 +26,7 @@ const Titlebar: React.FC<TitlebarProps> = ({
   searchTooltipHideDelayMs,
   customWcoTestId,
   customWcoPlatform,
+  customWcoHoverTooltips,
   showNavigation
 }) => {
   const rootTestId = dataTestId ?? 'titlebar'
@@ -144,7 +145,11 @@ const Titlebar: React.FC<TitlebarProps> = ({
         {rightContent}
       </div>
       
-      <CustomWCO data-testid={derivedCustomWcoTestId} {...(customWcoPlatform ? { platform: customWcoPlatform } : {})} />
+      <CustomWCO
+        data-testid={derivedCustomWcoTestId}
+        {...(customWcoPlatform ? { platform: customWcoPlatform } : {})}
+        {...(customWcoHoverTooltips === false ? { hoverTooltips: false } : {})}
+      />
     </div>
   )
 }

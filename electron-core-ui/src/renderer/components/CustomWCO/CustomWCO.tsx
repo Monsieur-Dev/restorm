@@ -9,6 +9,14 @@ export interface CustomWCOProps {
   platform?: string
   /** Optional test id applied to the root element. */
   'data-testid'?: string
+  /**
+   * Show the styled hover tooltip (Minimize / Maximize / Restore / Close) on the
+   * window-control buttons. Default `true`. Set `false` to hide it — the buttons
+   * keep their `aria-label` for a11y and never fall back to the native `title`;
+   * the icons are self-explanatory. (Restorm opts out via the Titlebar's
+   * `customWcoHoverTooltips`.)
+   */
+  hoverTooltips?: boolean
 }
 
 // Extend Navigator type for windowControlsOverlay API
@@ -35,7 +43,8 @@ const LINUX_WCO_WIDTH_PX = 92
 const CustomWCO: React.FC<CustomWCOProps> = ({
   className = '',
   platform,
-  'data-testid': dataTestId
+  'data-testid': dataTestId,
+  hoverTooltips = true
 }) => {
   const { t } = useTranslation()
   // Track async platform detection separately
@@ -162,14 +171,23 @@ const CustomWCO: React.FC<CustomWCOProps> = ({
   const maximizeLabel = isMaximized ? t('customWco.restore', 'Restore') : t('customWco.maximize', 'Maximize')
   const closeLabel = t('customWco.close', 'Close')
 
+  // Hover-tooltip handlers — no-ops when `hoverTooltips` is false, so the buttons
+  // show no label on hover (their `aria-label` still names them for a11y).
+  const handleWcoEnter = (label: string) => (e: React.MouseEvent<HTMLElement>): void => {
+    if (!hoverTooltips) return
+    wcoTooltipRef.current = e.currentTarget
+    setHoveredWco(label)
+  }
+  const handleWcoLeave = (): void => { setHoveredWco(null) }
+
   const buttonRow = (
     <div className="window-controls-container">
       <div
         className="window-button minimize"
         onClick={handleMinimize}
         aria-label={minimizeLabel}
-        onMouseEnter={(e) => { wcoTooltipRef.current = e.currentTarget; setHoveredWco(minimizeLabel) }}
-        onMouseLeave={() => { setHoveredWco(null) }}
+        onMouseEnter={handleWcoEnter(minimizeLabel)}
+        onMouseLeave={handleWcoLeave}
         {...(dataTestId && { 'data-testid': `${dataTestId}-minimize` })}
       >
         <span className="codicon codicon-chrome-minimize"></span>
@@ -178,8 +196,8 @@ const CustomWCO: React.FC<CustomWCOProps> = ({
         className="window-button maximize"
         onClick={handleMaximize}
         aria-label={maximizeLabel}
-        onMouseEnter={(e) => { wcoTooltipRef.current = e.currentTarget; setHoveredWco(maximizeLabel) }}
-        onMouseLeave={() => { setHoveredWco(null) }}
+        onMouseEnter={handleWcoEnter(maximizeLabel)}
+        onMouseLeave={handleWcoLeave}
         {...(dataTestId && { 'data-testid': `${dataTestId}-maximize` })}
       >
         <span className={`codicon ${isMaximized ? 'codicon-chrome-restore' : 'codicon-chrome-maximize'}`}></span>
@@ -188,18 +206,20 @@ const CustomWCO: React.FC<CustomWCOProps> = ({
         className="window-button close"
         onClick={handleClose}
         aria-label={closeLabel}
-        onMouseEnter={(e) => { wcoTooltipRef.current = e.currentTarget; setHoveredWco(closeLabel) }}
-        onMouseLeave={() => { setHoveredWco(null) }}
+        onMouseEnter={handleWcoEnter(closeLabel)}
+        onMouseLeave={handleWcoLeave}
         {...(dataTestId && { 'data-testid': `${dataTestId}-close` })}
       >
         <span className="codicon codicon-chrome-close"></span>
       </div>
-      <Tooltip
-        targetRef={wcoTooltipRef as React.RefObject<HTMLElement>}
-        content={hoveredWco}
-        show={hoveredWco !== null}
-        placement="below"
-      />
+      {hoverTooltips && (
+        <Tooltip
+          targetRef={wcoTooltipRef as React.RefObject<HTMLElement>}
+          content={hoveredWco}
+          show={hoveredWco !== null}
+          placement="below"
+        />
+      )}
     </div>
   )
 

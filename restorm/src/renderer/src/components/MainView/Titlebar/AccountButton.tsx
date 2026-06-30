@@ -9,6 +9,13 @@ import './AccountButton.css'
  * button paints the account codicon immediately on mount. */
 const SIGNED_OUT: AuthState = { signedIn: false, user: null, plan: 'community', capabilities: [] }
 
+/** The value when it is a non-blank string, else `undefined` — so a blank name /
+ * email falls through to the next label source rather than showing an empty
+ * tooltip. */
+function nonEmpty(value: string | undefined): string | undefined {
+  return typeof value === 'string' && value.trim() !== '' ? value : undefined
+}
+
 /**
  * Account button for the titlebar: an avatar/codicon trigger that opens a small
  * ECUI dropdown to sign in (loopback login) or sign out. The auth state is read
@@ -64,6 +71,13 @@ export const AccountButton: React.FC = () => {
   // Prefer the display name, fall back to the email (always present when signed
   // in) for both the initials and the deterministic avatar colour.
   const displayName = user?.name ?? user?.email ?? ''
+  // Tooltip + aria-label identify the account: when signed IN, the name, then the
+  // email, else « Connecté » (no profile name/email). When signed OUT, the
+  // « Se connecter » call to action (reusing the menu item's key).
+  const profileLabel = nonEmpty(user?.name) ?? nonEmpty(user?.email)
+  const accountLabel = signedIn
+    ? (profileLabel ?? t('account.connected'))
+    : t('account.signIn')
 
   const menuItems: ContextMenuItem[] = signedIn
     ? [
@@ -86,7 +100,7 @@ export const AccountButton: React.FC = () => {
       ]
 
   return (
-    <HeaderHoverTooltip label={t('account.tooltip')} suppressed={menu.visible} className="account-button-anchor">
+    <HeaderHoverTooltip label={accountLabel} suppressed={menu.visible} className="account-button-anchor">
       <span ref={anchorRef} style={{ display: 'inline-flex' }}>
         <Button
           data-testid="titlebar-account-button"
@@ -98,7 +112,7 @@ export const AccountButton: React.FC = () => {
               : 'account'
           }
           onClick={openMenu}
-          options={{ ariaLabel: t('account.tooltip') }}
+          options={{ ariaLabel: accountLabel }}
         />
       </span>
       <ContextMenu

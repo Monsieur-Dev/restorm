@@ -1,6 +1,7 @@
 {
   "account": {
     "tooltip": "Tili",
+    "connected": "Kirjautunut sisään",
     "signIn": "Kirjaudu sisään",
     "signOut": "Kirjaudu ulos"
   },

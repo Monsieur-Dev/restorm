@@ -1,6 +1,7 @@
 {
   "account": {
     "tooltip": "Обліковий запис",
+    "connected": "Авторизовано",
     "signIn": "Увійти",
     "signOut": "Вийти"
   },

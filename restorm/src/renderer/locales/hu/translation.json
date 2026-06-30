@@ -1,6 +1,7 @@
 {
   "account": {
     "tooltip": "Fiók",
+    "connected": "Bejelentkezve",
     "signIn": "Bejelentkezés",
     "signOut": "Kijelentkezés"
   },

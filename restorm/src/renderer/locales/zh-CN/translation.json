@@ -1,6 +1,7 @@
 {
   "account": {
     "tooltip": "账户",
+    "connected": "已登录",
     "signIn": "登录",
     "signOut": "退出登录"
   },

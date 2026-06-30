@@ -1,6 +1,7 @@
 {
   "account": {
     "tooltip": "계정",
+    "connected": "로그인됨",
     "signIn": "로그인",
     "signOut": "로그아웃"
   },
