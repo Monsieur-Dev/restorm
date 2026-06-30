@@ -1031,8 +1031,14 @@ if (cliArgs.cliRun && cliArgs.open !== undefined) {
       // Gate: scenario.headless capability required.  The user must export
       // RESTORM_TOKEN (an org-scoped PAT with rstk_… prefix, minted on their
       // account) so CI runners can authenticate without a browser login.
+      // Dev-only e2e bypass: RESTORM_E2E_ENTITLEMENT_PLAN seeds a Pro entitlement
+      // for the interactive path (seedEntitlementForE2E); extend the same privilege
+      // here so headless CLI e2e tests can run without a real token.  The
+      // isPackaged guard ensures this is never reachable in a production build.
       const channel = resolveChannel(app.getVersion())
-      const entResult = await checkHeadlessEntitlement({
+      const e2ePlan = process.env['RESTORM_E2E_ENTITLEMENT_PLAN']
+      const skipGateForE2E = !app.isPackaged && (e2ePlan === 'pro' || e2ePlan === 'enterprise')
+      const entResult = skipGateForE2E ? { granted: true as const } : await checkHeadlessEntitlement({
         entitlementUrl: endpointUrl(channel, 'entitlement'),
         publicKeyPem: entitlementPublicKeyPem(channel),
         publicKeyConfigured: isEntitlementPublicKeyConfigured(channel),
