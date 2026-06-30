@@ -5,7 +5,13 @@
     "signIn": "Σύνδεση",
     "signOut": "Αποσύνδεση",
     "manageSubscription": "Διαχείριση συνδρομής",
-    "upgradeToPro": "Αναβάθμιση σε Pro"
+    "upgradeToPro": "Αναβάθμιση σε Pro",
+    "dashboard": "Πίνακας ελέγχου",
+    "signOutConfirm": {
+      "message": "Θέλετε σίγουρα να αποσυνδεθείτε;",
+      "confirm": "Ναι",
+      "cancel": "Ακύρωση"
+    }
   },
   "secrets": {
     "others": "Άλλα",

@@ -5,7 +5,13 @@
     "signIn": "ログイン",
     "signOut": "ログアウト",
     "manageSubscription": "サブスクリプションを管理",
-    "upgradeToPro": "Pro にアップグレード"
+    "upgradeToPro": "Pro にアップグレード",
+    "dashboard": "ダッシュボード",
+    "signOutConfirm": {
+      "message": "本当にサインアウトしますか？",
+      "confirm": "はい",
+      "cancel": "キャンセル"
+    }
   },
   "secrets": {
     "others": "その他",

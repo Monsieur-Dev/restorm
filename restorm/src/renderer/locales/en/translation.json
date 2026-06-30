@@ -5,7 +5,13 @@
     "signIn": "Sign in",
     "signOut": "Sign out",
     "manageSubscription": "Manage subscription",
-    "upgradeToPro": "Upgrade to Pro"
+    "upgradeToPro": "Upgrade to Pro",
+    "dashboard": "Dashboard",
+    "signOutConfirm": {
+      "message": "Are you sure you want to sign out?",
+      "confirm": "Yes",
+      "cancel": "Cancel"
+    }
   },
   "secrets": {
     "others": "Others",

@@ -5,7 +5,13 @@
     "signIn": "登入",
     "signOut": "登出",
     "manageSubscription": "管理訂閱",
-    "upgradeToPro": "升級到 Pro"
+    "upgradeToPro": "升級到 Pro",
+    "dashboard": "儀表板",
+    "signOutConfirm": {
+      "message": "確定要登出嗎？",
+      "confirm": "是",
+      "cancel": "取消"
+    }
   },
   "secrets": {
     "others": "其他",

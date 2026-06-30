@@ -5,7 +5,13 @@
     "signIn": "Oturum aç",
     "signOut": "Oturumu kapat",
     "manageSubscription": "Aboneliği yönet",
-    "upgradeToPro": "Pro'ya geç"
+    "upgradeToPro": "Pro'ya geç",
+    "dashboard": "Kontrol paneli",
+    "signOutConfirm": {
+      "message": "Oturumu kapatmak istediğinizden emin misiniz?",
+      "confirm": "Evet",
+      "cancel": "İptal"
+    }
   },
   "secrets": {
     "others": "Diğer",

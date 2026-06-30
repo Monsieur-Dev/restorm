@@ -5,7 +5,13 @@
     "signIn": "Logga in",
     "signOut": "Logga ut",
     "manageSubscription": "Hantera prenumeration",
-    "upgradeToPro": "Uppgradera till Pro"
+    "upgradeToPro": "Uppgradera till Pro",
+    "dashboard": "Kontrollpanel",
+    "signOutConfirm": {
+      "message": "Är du säker på att du vill logga ut?",
+      "confirm": "Ja",
+      "cancel": "Avbryt"
+    }
   },
   "secrets": {
     "others": "Övriga",

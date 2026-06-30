@@ -5,7 +5,13 @@
     "signIn": "Kirjaudu sisään",
     "signOut": "Kirjaudu ulos",
     "manageSubscription": "Hallinnoi tilausta",
-    "upgradeToPro": "Päivitä Pro-versioon"
+    "upgradeToPro": "Päivitä Pro-versioon",
+    "dashboard": "Koontinäyttö",
+    "signOutConfirm": {
+      "message": "Haluatko varmasti kirjautua ulos?",
+      "confirm": "Kyllä",
+      "cancel": "Peruuta"
+    }
   },
   "secrets": {
     "others": "Muut",

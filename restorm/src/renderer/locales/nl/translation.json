@@ -5,7 +5,13 @@
     "signIn": "Inloggen",
     "signOut": "Uitloggen",
     "manageSubscription": "Abonnement beheren",
-    "upgradeToPro": "Upgraden naar Pro"
+    "upgradeToPro": "Upgraden naar Pro",
+    "dashboard": "Dashboard",
+    "signOutConfirm": {
+      "message": "Weet je zeker dat je wilt afmelden?",
+      "confirm": "Ja",
+      "cancel": "Annuleren"
+    }
   },
   "secrets": {
     "others": "Overige",

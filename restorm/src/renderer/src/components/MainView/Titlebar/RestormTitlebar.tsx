@@ -13,6 +13,7 @@ import {
   type SearchResult
 } from 'electron-core-ui/renderer'
 import { renderSearchTooltipContent } from './renderSearchTooltipContent'
+import { DASHBOARD_URL } from '../../../../../shared/config/site'
 import { HeaderHoverTooltip } from '../HeaderHoverTooltip'
 import { Badge } from '../../common/Badge'
 import { mapToBadgeType } from '../../../utils/badgeUtils'
@@ -315,7 +316,7 @@ export const RestormTitlebar: React.FC<RestormTitlebarProps> = ({
       }
       rightContent={
         <>
-          <AccountButton />
+          <AccountButton dashboardUrl={DASHBOARD_URL} />
           <HeaderHoverTooltip label={t('app.openSettings')}>
             <Button
               data-testid="titlebar-settings-button"

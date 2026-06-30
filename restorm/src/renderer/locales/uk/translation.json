@@ -5,7 +5,13 @@
     "signIn": "Увійти",
     "signOut": "Вийти",
     "manageSubscription": "Керувати підпискою",
-    "upgradeToPro": "Перейти на Pro"
+    "upgradeToPro": "Перейти на Pro",
+    "dashboard": "Панель керування",
+    "signOutConfirm": {
+      "message": "Ви впевнені, що хочете вийти?",
+      "confirm": "Так",
+      "cancel": "Скасувати"
+    }
   },
   "secrets": {
     "others": "Інше",

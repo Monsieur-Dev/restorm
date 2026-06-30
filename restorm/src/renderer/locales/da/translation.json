@@ -5,7 +5,13 @@
     "signIn": "Log ind",
     "signOut": "Log ud",
     "manageSubscription": "Administrer abonnement",
-    "upgradeToPro": "Opgrader til Pro"
+    "upgradeToPro": "Opgrader til Pro",
+    "dashboard": "Dashboard",
+    "signOutConfirm": {
+      "message": "Er du sikker på, at du vil logge ud?",
+      "confirm": "Ja",
+      "cancel": "Annuller"
+    }
   },
   "secrets": {
     "others": "Andre",

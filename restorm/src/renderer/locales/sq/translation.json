@@ -5,7 +5,13 @@
     "signIn": "Hyr",
     "signOut": "Dil",
     "manageSubscription": "Menaxho abonimin",
-    "upgradeToPro": "Kalo në Pro"
+    "upgradeToPro": "Kalo në Pro",
+    "dashboard": "Paneli i kontrollit",
+    "signOutConfirm": {
+      "message": "Jeni i sigurt që doni të dilni?",
+      "confirm": "Po",
+      "cancel": "Anulo"
+    }
   },
   "secrets": {
     "others": "Të tjera",
