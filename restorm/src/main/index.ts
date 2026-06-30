@@ -70,6 +70,8 @@ import { randomBytes } from 'node:crypto'
 import { MainWindow } from './windows/MainWindow'
 import { initializeApp, logger, initFileService, getFileService, isFileServiceInitialized, i18nService, initPersistenceService, isPersistenceServiceInitialized, FileService, getSettingsService, isSettingsServiceInitialized, getStorageService, initAutoSaveController, McpService, resolveMcpDiscoveryDir, writeMcpDiscoveryFile, cleanupMcpDiscoveryFile, firewallService, permissionService, registerFirewallIpc, installWorkerPatcher } from 'electron-core-ui'
 import { REOPEN_LAST_FILE_SETTING_KEY, REOPEN_LAST_FILE_STORAGE_KEY } from '../shared/config/reopenLastFile'
+import { resolveChannel } from '../shared/config/backend'
+import { pricingUrl } from '../shared/config/site'
 // Restorm-specific renderer translations (notably the `behavior.*`
 // keys referenced by `restorm/resources/settings.yaml`). The main
 // process needs them so `SettingsService.reindexSearch()` and any
@@ -959,7 +961,12 @@ ipcMain.handle('runtime:get-config', () => ({
   },
   graphql: {
     endpoint: graphQLService.getEndpoint()
-  }
+  },
+  // Channel-resolved marketing-site pricing page (dev site on preview builds,
+  // restorm.app on release). Surfaced so the MCP Pro upsell link in the renderer
+  // and the MCP 402 refusal's upgradeUrl (resolved main-side via the same
+  // `pricingUrl`) point at the same page — one source of truth, no drift.
+  pricingUrl: pricingUrl(resolveChannel(app.getVersion()))
 }))
 
 // The running app version, surfaced to the renderer for the far-left

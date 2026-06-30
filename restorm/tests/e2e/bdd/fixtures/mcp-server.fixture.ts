@@ -141,7 +141,11 @@ export const test = base.extend<McpServerFixtures>({
         ...withE2ECoverageEnv(restormRoot, process.env),
         NODE_ENV: 'development',
         RESTORM_USER_DATA_OVERRIDE: isolatedUserDataDir,
-        ECUI_DISABLE_GPU: '1'
+        ECUI_DISABLE_GPU: '1',
+        // The mcp-server e2e exercises Pro-gated tools (e.g. set_tab_maximized is
+        // UI automation = Pro). Boot with a seeded Pro entitlement so the gate
+        // passes in this dev-only harness (dead code in packaged builds).
+        RESTORM_E2E_ENTITLEMENT_PLAN: 'pro'
       }
       const discoveryPath = join(tmpdir(), `restorm-mcp-e2e-${String(Date.now())}-${String(Math.floor(Math.random() * 1_000_000))}.json`)
       try { rmSync(discoveryPath, { force: true }) } catch { /* fine */ }

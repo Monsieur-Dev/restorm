@@ -169,6 +169,52 @@ export type McpToolHandler = (
   extra: unknown
 ) => unknown
 
+/**
+ * The minimal `CallToolResult` shape an {@link McpToolGate} returns to refuse a
+ * call: a `content` array (typically one `text` part the agent reads) with
+ * `isError: true`, plus an optional `structuredContent` block carrying a
+ * machine-readable reason. Kept loose (`[k: string]: unknown`) so a host can
+ * attach extra MCP fields without fighting the type.
+ */
+export interface McpToolResult {
+  content: { type: string; text?: string; [k: string]: unknown }[]
+  isError?: boolean
+  structuredContent?: Record<string, unknown>
+  [k: string]: unknown
+}
+
+/**
+ * A pluggable per-tool authorization gate. The host (consuming app) owns the
+ * policy — which tools are gated behind a paid plan, whether the live
+ * entitlement currently grants them, and the exact refusal payload — so ECUI
+ * stays domain-agnostic. Injected via {@link McpService.setToolGate}; consulted
+ * at the SINGLE dispatch chokepoint (every locally-served `tools/call`, plus
+ * `batch` sub-calls routed through {@link McpService.invokeTool}) and at
+ * `tools/list` time (to annotate a gated tool's description).
+ */
+export interface McpToolGate {
+  /**
+   * True when `toolName` is gated behind a paid capability — drives the
+   * `tools/list` description annotation. The tool STAYS listed (discoverability
+   * of the upsell); this only marks it. Independent of the current plan.
+   */
+  isGated(toolName: string): boolean
+  /**
+   * Host-branded suffix appended to a gated tool's `tools/list` description
+   * (e.g. ` (Restorm Pro)`), so an agent enumerating tools sees the tool exists
+   * but needs an upgrade. Include any leading space.
+   */
+  readonly gatedDescriptionSuffix: string
+  /**
+   * Authorize a `tools/call` at invocation time. Return `null` to allow the
+   * call through to its handler; return a `CallToolResult`-shaped refusal
+   * (`isError: true` + an agent-readable message + a machine-readable block) to
+   * block it. Called for every locally-dispatched call, including `batch`
+   * sub-calls.
+   */
+  authorize(toolName: string): McpToolResult | null
+}
+
 interface ToolRegistration {
   name: string
   config: McpToolConfig
@@ -563,6 +609,14 @@ export class McpService {
   private readonly servedCalls: McpServedCallEntry[] = []
   /** Configurable cap on {@link servedCalls}; default 100, clamped ≥ 0. */
   private servedCallCap = DEFAULT_SERVED_CALL_CAP
+  /**
+   * Optional per-tool authorization gate. `null` (the default) means every tool
+   * is allowed — ECUI ships ungated. A host injects a gate via
+   * {@link setToolGate} to make some tools require a paid capability; it is the
+   * single source of truth for the free/Pro split and is consulted at the one
+   * dispatch chokepoint (and at `tools/list` for description annotation).
+   */
+  private toolGate: McpToolGate | null = null
   /** Configurable count of most-recent entries that keep their heavy capture
    * payload (image base64 / video temp file); default 20, clamped ≥ 0. */
   private captureRetentionCap = DEFAULT_CAPTURE_RETENTION_CAP
@@ -966,6 +1020,33 @@ export class McpService {
   }
 
   /**
+   * Install (or clear, with `null`) the per-tool authorization gate. The gate is
+   * the host's single source of truth for which tools require a paid capability
+   * and what the refusal looks like; ECUI consults it at the one dispatch
+   * chokepoint (every served `tools/call` + every `batch` sub-call through
+   * {@link invokeTool}) and at `tools/list` time to annotate a gated tool's
+   * description. Idempotent; safe before or after `start()`.
+   */
+  setToolGate(gate: McpToolGate | null): void {
+    this.toolGate = gate
+  }
+
+  /**
+   * Return the tool config to register on the per-request server, with a gated
+   * tool's description suffixed by the gate's marker (idempotent — never
+   * double-appends). Ungated tools (or no gate) get the config untouched, so
+   * there's zero behaviour change when no gate is installed.
+   */
+  private annotateConfigForGate(name: string, config: McpToolConfig): McpToolConfig {
+    const gate = this.toolGate
+    if (!gate?.isGated(name)) return config
+    const suffix = gate.gatedDescriptionSuffix
+    const base = config.description ?? ''
+    if (base.endsWith(suffix)) return config
+    return { ...config, description: `${base}${suffix}` }
+  }
+
+  /**
    * The `(name, titleKey)` pair of every registered tool. Exposed so a host can
    * assert each title i18n key resolves in its locale catalogue (a CI guard
    * against "declared the key but forgot the translation").
@@ -989,6 +1070,10 @@ export class McpService {
     if (!entry) {
       throw new Error(`McpService.invokeTool: tool "${name}" is not registered`)
     }
+    // Same gate as the HTTP dispatch path, so a `batch` (itself free) can't
+    // smuggle a gated tool past the chokepoint by invoking it in-process.
+    const refusal = this.toolGate?.authorize(name)
+    if (refusal) return refusal
     return entry.handler(args, extra)
   }
 
@@ -2955,6 +3040,16 @@ export class McpService {
           // answered them — matching `recordServedCall`'s local-only scope.
           const baseHandler = tool.handler as (a: unknown, e: unknown) => unknown
           const loggedHandler = (a: unknown, e: unknown): unknown => {
+            // The single per-tool authorization chokepoint: a gated tool whose
+            // capability the live plan lacks is refused HERE (a clean `isError`
+            // tool-result — the JSON-RPC transport stays 200), before its handler
+            // runs. The refusal is logged like any other response so the viewer
+            // shows it.
+            const refusal = this.toolGate?.authorize(tool.name)
+            if (refusal) {
+              this.attachResponseToLatest(refusal)
+              return refusal
+            }
             const out: unknown = baseHandler(a, e)
             if (out instanceof Promise) {
               return (out as Promise<unknown>).then((r: unknown): unknown => {
@@ -2965,7 +3060,12 @@ export class McpService {
             this.attachResponseToLatest(out)
             return out
           }
-          ;(server.registerTool.bind(server) as SdkRegisterTool)(tool.name, tool.config, loggedHandler)
+          // Annotate a gated tool's `tools/list` description with the host's
+          // marker (e.g. " (Restorm Pro)") so an agent enumerating tools sees it
+          // exists but needs an upgrade — the tool stays listed (discoverability
+          // of the upsell), never hidden.
+          const config = this.annotateConfigForGate(tool.name, tool.config)
+          ;(server.registerTool.bind(server) as SdkRegisterTool)(tool.name, config, loggedHandler)
         }
         for (const resource of this.resources) {
           // Static URI vs templated URI: the SDK has different overloads

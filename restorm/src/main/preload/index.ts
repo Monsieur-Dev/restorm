@@ -1250,11 +1250,13 @@ contextBridge.exposeInMainWorld('restorm', {
     getConfig: async (): Promise<{
       mcp: { enabled: boolean; port: number | null; sessionName: string; running: boolean }
       graphql: { endpoint: string }
+      pricingUrl: string
     }> => {
       const result: unknown = await ipcRenderer.invoke('runtime:get-config')
       return result as {
         mcp: { enabled: boolean; port: number | null; sessionName: string; running: boolean }
         graphql: { endpoint: string }
+        pricingUrl: string
       }
     },
     /** Toggle the MCP server on or off at runtime (without restarting).

@@ -1764,7 +1764,11 @@
     "captureRetentionCap": "MCP capture retention",
     "captureRetentionCapDescription": "How many recent MCP calls keep their captured screenshot / screencast (in memory and on disk). Older captures drop their media — and their temp video file is deleted — once the limit is reached; 0 disables capture retention.",
     "enabled": "Enable MCP server",
-    "enabledDescription": "Start the embedded MCP server on launch so AI tooling can connect to this instance. Disable to prevent any MCP connections."
+    "enabledDescription": "Start the embedded MCP server on launch so AI tooling can connect to this instance. Disable to prevent any MCP connections.",
+    "proUpsell": {
+      "note": "On the Community plan, AI agents drive your requests. Upgrade to Pro to drive scenarios, the interface and advanced automation.",
+      "link": "Upgrade to Pro"
+    }
   },
   "mcpToolTitles": {
     "answerScenarioInput": "Answer a scenario input",

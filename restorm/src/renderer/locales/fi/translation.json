@@ -1764,7 +1764,11 @@
     "captureRetentionCap": "MCP-kaappausten säilytys",
     "captureRetentionCapDescription": "Kuinka monta viimeisintä MCP-kutsua säilyttää kuvakaappauksensa / tallenteensa (muistissa ja levyllä). Rajan ylittyessä vanhemmat kaappaukset menettävät mediansa ja niiden väliaikainen videotiedosto poistetaan; 0 poistaa säilytyksen käytöstä.",
     "enabled": "Ota MCP-palvelin käyttöön",
-    "enabledDescription": "Käynnistää sisäänrakennetun MCP-palvelimen käynnistyksessä, jotta AI-työkalut voivat yhdistää tähän instanssiin. Poista käytöstä MCP-yhteyksien estämiseksi."
+    "enabledDescription": "Käynnistää sisäänrakennetun MCP-palvelimen käynnistyksessä, jotta AI-työkalut voivat yhdistää tähän instanssiin. Poista käytöstä MCP-yhteyksien estämiseksi.",
+    "proUpsell": {
+      "note": "Community-versiossa tekoälyagentit ohjaavat pyyntöjäsi. Siirry Pro-versioon ohjataksesi skenaarioita, käyttöliittymää ja edistynyttä automaatiota.",
+      "link": "Siirry Pro-versioon"
+    }
   },
   "mcpToolTitles": {
     "answerScenarioInput": "Vastaa skenaarion syötteeseen",

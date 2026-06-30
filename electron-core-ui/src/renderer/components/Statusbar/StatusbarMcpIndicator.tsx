@@ -31,6 +31,24 @@ export interface StatusbarMcpIndicatorProps {
    * The host toggles the MCP server and updates `running` accordingly. Omitted
    * → button is hidden. */
   onToggleServer?: () => void
+  /**
+   * Optional non-blocking Pro upsell shown inside the popover. The host passes it
+   * only when the current plan lacks the advanced-MCP entitlement (e.g.
+   * Community): the MCP server stays fully usable (agents drive requests for
+   * free), and this just informs the user that scenarios / UI automation need
+   * Pro and offers an upgrade link. Strings are host-provided (translated by the
+   * host) so this component stays domain-agnostic. Omitted → nothing shown (the
+   * entitled case). `onUpgrade` opens the host's pricing page in the system
+   * browser.
+   */
+  proUpsell?: {
+    /** The explanatory note (e.g. wording ③). */
+    note: string
+    /** The upgrade link label (e.g. « Passez à la version Pro »). */
+    linkLabel: string
+    /** Open the pricing page in the system browser. */
+    onUpgrade: () => void
+  }
 }
 
 /**
@@ -50,7 +68,8 @@ export const StatusbarMcpIndicator: React.FC<StatusbarMcpIndicatorProps> = ({
   rightAligned = false,
   onViewLogs,
   running,
-  onToggleServer
+  onToggleServer,
+  proUpsell
 }) => {
   const { t } = useTranslation()
 
@@ -85,6 +104,27 @@ export const StatusbarMcpIndicator: React.FC<StatusbarMcpIndicatorProps> = ({
         {sessionName && (
           <div data-testid="statusbar-mcp-popover-session" style={{ marginTop: 4, opacity: 0.8 }}>
             {t('statusbar.mcp.sessionName', { name: sessionName })}
+          </div>
+        )}
+        {/* Non-blocking Pro upsell (shown only for a non-entitled plan): the
+            server stays usable for the free request tools; this just informs +
+            offers the upgrade link. */}
+        {proUpsell && (
+          <div
+            data-testid="statusbar-mcp-pro-upsell"
+            style={{ marginTop: 8, maxWidth: 280, whiteSpace: 'normal' }}
+          >
+            <div style={{ opacity: 0.85 }}>{proUpsell.note}</div>
+            <div style={{ marginTop: 4 }}>
+              <Button
+                link
+                externalLink
+                onClick={() => { proUpsell.onUpgrade() }}
+                data-testid="statusbar-mcp-pro-upsell-link"
+              >
+                {proUpsell.linkLabel}
+              </Button>
+            </div>
           </div>
         )}
         {onToggleServer && (

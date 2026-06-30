@@ -1764,7 +1764,11 @@
     "captureRetentionCap": "Retenção de capturas MCP",
     "captureRetentionCapDescription": "Quantas chamadas MCP recentes mantêm a captura de ecrã / vídeo (em memória e em disco). Atingido o limite, as capturas mais antigas perdem o seu media e o ficheiro de vídeo temporário é eliminado; 0 desativa a retenção.",
     "enabled": "Habilitar servidor MCP",
-    "enabledDescription": "Inicia o servidor MCP integrado na inicialização para que ferramentas de IA possam se conectar a esta instância. Desabilite para impedir conexões MCP."
+    "enabledDescription": "Inicia o servidor MCP integrado na inicialização para que ferramentas de IA possam se conectar a esta instância. Desabilite para impedir conexões MCP.",
+    "proUpsell": {
+      "note": "Na versão Community, os agentes de IA controlam as suas solicitações. Mude para o Pro para controlar cenários, a interface e a automação avançada.",
+      "link": "Mudar para o Pro"
+    }
   },
   "mcpToolTitles": {
     "answerScenarioInput": "Responder a uma entrada de cenário",

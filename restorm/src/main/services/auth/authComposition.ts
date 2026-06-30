@@ -13,7 +13,7 @@ import { logger, withFirewallBypass, permissionService } from 'electron-core-ui'
 import type { AuthState } from '../../../shared/auth/authState'
 import { endpointUrl, functionsHost, resolveChannel, type ReleaseChannel } from '../../../shared/config/backend'
 import { entitlementPublicKeyPem, isEntitlementPublicKeyConfigured } from '../entitlement/keys'
-import { EntitlementService } from '../entitlement/EntitlementService'
+import { EntitlementService, seedEntitlementForE2E } from '../entitlement/EntitlementService'
 import { startEntitlementAutoRefresh } from '../entitlement/autoRefresh'
 import { AuthStore, type AuthStoreFs, type SecureStoragePort } from './authStore'
 import { loopbackLogin } from './loopbackLogin'
@@ -117,6 +117,13 @@ export function initEntitlementService(version: string = app.getVersion()): Enti
   })
 
   registerAuthIpc(instance, (url) => shell.openExternal(url))
+
+  // Dev-only e2e seam: seed a Pro entitlement when RESTORM_E2E_ENTITLEMENT_PLAN=pro.
+  // The guard inside seedEntitlementForE2E also checks isPackaged, but we pass
+  // app.isPackaged explicitly so the call is a hard NO-OP in any packaged build.
+  if (seedEntitlementForE2E(instance, app.isPackaged, process.env['RESTORM_E2E_ENTITLEMENT_PLAN'])) {
+    logger.warn('⚠️ TEST entitlement seeded (plan=pro, mcp.pro cap) — dev-only, RESTORM_E2E_ENTITLEMENT_PLAN is set')
+  }
 
   // Auto-refresh the entitlement on window focus (the « S'abonner » checkout
   // returns into the app via the system browser — focus is the moment we learn

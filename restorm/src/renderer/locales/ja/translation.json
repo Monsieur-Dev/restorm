@@ -1763,7 +1763,11 @@
     "captureRetentionCap": "MCP キャプチャの保持",
     "captureRetentionCapDescription": "最近の MCP 呼び出しのうち、スクリーンショット / 画面録画を保持する数（メモリとディスク）。上限に達すると古いキャプチャはメディアを失い、一時動画ファイルが削除されます。0 で保持を無効化。",
     "enabled": "MCPサーバーを有効にする",
-    "enabledDescription": "起動時に内蔵MCPサーバーを開始してAIツールがこのインスタンスに接続できるようにします。MCP接続を防ぐには無効にしてください。"
+    "enabledDescription": "起動時に内蔵MCPサーバーを開始してAIツールがこのインスタンスに接続できるようにします。MCP接続を防ぐには無効にしてください。",
+    "proUpsell": {
+      "note": "Community 版では、AI エージェントがリクエストを操作します。シナリオ、インターフェース、高度な自動化を操作するには Pro にアップグレードしてください。",
+      "link": "Pro にアップグレード"
+    }
   },
   "mcpToolTitles": {
     "answerScenarioInput": "シナリオ入力に応答",

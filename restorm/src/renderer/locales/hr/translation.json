@@ -1765,7 +1765,11 @@
     "captureRetentionCap": "Zadržavanje MCP snimaka",
     "captureRetentionCapDescription": "Koliko nedavnih MCP poziva zadržava svoju snimku zaslona / videosnimku (u memoriji i na disku). Po dosezanju ograničenja starije snimke gube svoj medij, a njihova privremena videodatoteka se briše; 0 onemogućuje zadržavanje.",
     "enabled": "Omogući MCP poslužitelj",
-    "enabledDescription": "Pokreće ugrađeni MCP poslužitelj pri pokretanju kako bi se AI alati mogli spojiti na ovu instancu. Onemogućite za sprječavanje MCP veza."
+    "enabledDescription": "Pokreće ugrađeni MCP poslužitelj pri pokretanju kako bi se AI alati mogli spojiti na ovu instancu. Onemogućite za sprječavanje MCP veza.",
+    "proUpsell": {
+      "note": "U verziji Community AI agenti upravljaju vašim zahtjevima. Prijeđite na Pro za upravljanje scenarijima, sučeljem i naprednom automatizacijom.",
+      "link": "Prijeđite na Pro"
+    }
   },
   "mcpToolTitles": {
     "answerScenarioInput": "Odgovori na unos scenarija",

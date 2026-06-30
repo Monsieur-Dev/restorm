@@ -1763,7 +1763,11 @@
     "captureRetentionCap": "MCP 捕获保留",
     "captureRetentionCapDescription": "保留其截图/录屏的最近 MCP 调用数量（内存和磁盘中）。达到上限后，较旧的捕获将丢弃其媒体，并删除其临时视频文件；0 表示禁用保留。",
     "enabled": "启用 MCP 服务器",
-    "enabledDescription": "在启动时启动内置 MCP 服务器，以便 AI 工具可以连接到此实例。禁用以阻止 MCP 连接。"
+    "enabledDescription": "在启动时启动内置 MCP 服务器，以便 AI 工具可以连接到此实例。禁用以阻止 MCP 连接。",
+    "proUpsell": {
+      "note": "在 Community 版本中，AI 智能体负责驱动您的请求。升级到 Pro 即可驱动场景、界面和高级自动化。",
+      "link": "升级到 Pro"
+    }
   },
   "mcpToolTitles": {
     "answerScenarioInput": "回答场景输入",

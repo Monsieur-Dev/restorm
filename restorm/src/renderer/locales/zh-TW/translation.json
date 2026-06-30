@@ -1763,7 +1763,11 @@
     "captureRetentionCap": "MCP 擷取保留",
     "captureRetentionCapDescription": "保留其螢幕擷取/錄製的最近 MCP 呼叫數量（記憶體與磁碟中）。達到上限後，較舊的擷取會捨棄其媒體並刪除暫存影片檔；0 表示停用保留。",
     "enabled": "啟用 MCP 伺服器",
-    "enabledDescription": "在啟動時啟動內建 MCP 伺服器，以便 AI 工具可以連接到此實例。停用以阻止 MCP 連線。"
+    "enabledDescription": "在啟動時啟動內建 MCP 伺服器，以便 AI 工具可以連接到此實例。停用以阻止 MCP 連線。",
+    "proUpsell": {
+      "note": "在 Community 版本中，AI 代理負責驅動您的請求。升級至 Pro 即可驅動情境、介面與進階自動化。",
+      "link": "升級至 Pro"
+    }
   },
   "mcpToolTitles": {
     "answerScenarioInput": "回答情境輸入",
