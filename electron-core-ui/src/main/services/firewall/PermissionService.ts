@@ -193,6 +193,21 @@ class PermissionService {
 	private infraPorts: InfraPorts = { graphqlPort: null, mcpPort: null, viteDevPort: null }
 
 	/**
+	 * Hosts the host app has exempted from the user firewall as
+	 * system / display assets — e.g. the signed-in user's avatar CDN
+	 * host (`lh3.googleusercontent.com`), which the renderer loads via
+	 * an `<img>` and which would otherwise be blocked by the user
+	 * firewall. Distinct from the user-managed whitelist: in-memory,
+	 * never persisted, not surfaced in the firewall rules UI, and not
+	 * user-deletable. The app registers / clears entries programmatically
+	 * as the relevant state changes (login / logout). Matched by EXACT
+	 * host over HTTPS only (these are always-https display assets) — a
+	 * deliberately narrow exemption that never auto-allows plaintext http
+	 * to the host.
+	 */
+	private readonly systemAllowedHosts = new Set<string>()
+
+	/**
 	 * Pending toast prompts keyed by promptId. The renderer
 	 * resolves each one via `resolvePrompt(promptId, verdict)`. We
 	 * dedupe in-flight prompts by origin: a flurry of subresource
@@ -401,6 +416,34 @@ class PermissionService {
 	}
 
 	/**
+	 * Exempt `host` from the user firewall as a system / display asset
+	 * (e.g. the avatar CDN host). Idempotent. The exemption is in-memory
+	 * and not user-deletable — the host app owns its lifecycle and is
+	 * expected to drop it (`removeSystemAllowedHost`) when no longer
+	 * needed (e.g. on logout). A blank host is ignored.
+	 */
+	addSystemAllowedHost(host: string): void {
+		const normalised = host.trim().toLowerCase()
+		if (normalised === '') return
+		this.systemAllowedHosts.add(normalised)
+	}
+
+	/** Drop a previously system-exempted host. No-op if it wasn't set. */
+	removeSystemAllowedHost(host: string): void {
+		this.systemAllowedHosts.delete(host.trim().toLowerCase())
+	}
+
+	/** Snapshot of the system-exempted hosts (sorted). Introspection / tests. */
+	listSystemAllowedHosts(): string[] {
+		return Array.from(this.systemAllowedHosts).sort()
+	}
+
+	/** True when `host` is a host-app-registered system / display asset. */
+	private isSystemAllowedHost(host: string): boolean {
+		return this.systemAllowedHosts.has(host)
+	}
+
+	/**
 	 * True if the origin is `localhost:<port>` and `<port>` matches
 	 * one of the host app's known infrastructure ports. Localhost on
 	 * any other port is NOT auto-allowed — this is a deliberately
@@ -430,6 +473,10 @@ class PermissionService {
 		}
 		if (origin.host === '') return 'allow'
 		if (this.isInfraOrigin(origin)) return 'allow'
+		// System / display asset host (e.g. the avatar CDN) the host app exempted
+		// — auto-allow HTTPS only (these are always-https assets), never prompt,
+		// not user-deletable. Plaintext http to the same host still prompts.
+		if (origin.scheme === 'https' && this.isSystemAllowedHost(origin.host)) return 'allow'
 		if (this.contains(this.whitelist, origin)) return 'allow'
 		if (this.contains(this.projectOrigins, origin)) return 'allow'
 		if (this.contains(this.blacklist, origin)) {
