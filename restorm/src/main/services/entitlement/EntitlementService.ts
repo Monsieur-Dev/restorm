@@ -54,8 +54,9 @@ export interface EntitlementServiceDeps {
   publicKeyConfigured?: boolean
   /** Host-guarded (firewall-bypassed) fetch for backend calls. */
   fetchImpl: typeof fetch
-  /** Drive the browser loopback login → session JWT. */
-  login: () => Promise<string>
+  /** Drive the browser loopback login → session JWT. The `signal` lets a fresh
+   * sign-in cancel the in-flight attempt (restartable « Se connecter » retry). */
+  login: (signal?: AbortSignal) => Promise<string>
   /** Push a new state to all renderers (the `auth:state-changed` broadcast). */
   broadcast: (channel: string, state: AuthState) => void
   /** Injectable clock (epoch ms). */
@@ -120,18 +121,41 @@ export class EntitlementService {
    * (so a failed entitlement fetch still leaves us signed in), then fetch +
    * verify the entitlement. Broadcasts on success. Rejects if the login flow
    * itself fails (timeout / browser / exchange).
+   *
+   * Restartable: a sign-in while a previous attempt is still in flight CANCELS
+   * the stale attempt (closes its loopback listener + invalidates its nonce) and
+   * starts a fresh one — the « Se connecter » retry path when the first attempt
+   * opened the wrong browser/profile or was abandoned. The superseded attempt
+   * resolves to the current snapshot rather than throwing, so a fire-and-forget
+   * caller never sees an unhandled rejection from being retried.
    */
   async signIn(): Promise<AuthState> {
-    // Coalesce concurrent sign-in requests (e.g. a double-click on the account
-    // menu) so we never open two loopback listeners / browser tabs at once.
-    this.loginInFlight ??= this.runSignIn().finally(() => { this.loginInFlight = null })
-    return this.loginInFlight
+    this.loginAbort?.abort()
+    const abort = new AbortController()
+    this.loginAbort = abort
+    try {
+      return await this.runSignIn(abort.signal)
+    } finally {
+      if (this.loginAbort === abort) this.loginAbort = null
+    }
   }
 
-  private loginInFlight: Promise<AuthState> | null = null
+  /** AbortController for the in-flight login attempt; a new signIn aborts it. */
+  private loginAbort: AbortController | null = null
 
-  private async runSignIn(): Promise<AuthState> {
-    const sessionToken = await this.deps.login()
+  private async runSignIn(signal: AbortSignal): Promise<AuthState> {
+    let sessionToken: string
+    try {
+      sessionToken = await this.deps.login(signal)
+    } catch (err) {
+      // Superseded by a newer sign-in → swallow; the fresh attempt owns the
+      // outcome. A genuine login failure (browser/timeout) still propagates.
+      if (signal.aborted) return this.getState()
+      throw err
+    }
+    // Won the race against a supersede the instant before we resolved → don't
+    // clobber the newer attempt's session with this stale one.
+    if (signal.aborted) return this.getState()
     this.sessionToken = sessionToken
     this.entitlement = null
     this.persist()

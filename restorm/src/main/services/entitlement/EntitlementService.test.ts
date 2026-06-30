@@ -27,7 +27,7 @@ interface Harness {
   saved: Persisted[]
   counters: { cleared: number }
   fetchMock: Mock<() => Promise<Response>>
-  loginMock: Mock<() => Promise<string>>
+  loginMock: Mock<(signal?: AbortSignal) => Promise<string>>
 }
 
 function makeHarness(opts: {
@@ -46,7 +46,7 @@ function makeHarness(opts: {
     if (opts.fetchRejects) return Promise.reject(new Error('offline'))
     return Promise.resolve(new Response(JSON.stringify({ entitlement: opts.entitlementToken ?? '' }), { status: 200 }))
   })
-  const loginMock = vi.fn((): Promise<string> => Promise.resolve(opts.sessionToken ?? 'unused'))
+  const loginMock = vi.fn((_signal?: AbortSignal): Promise<string> => Promise.resolve(opts.sessionToken ?? 'unused'))
 
   const deps: EntitlementServiceDeps = {
     store: {
@@ -136,12 +136,33 @@ describe('EntitlementService — sign in / out', () => {
     expect(last(h.broadcasts)).toMatchObject({ signedIn: false, plan: 'community' })
   })
 
-  it('coalesces concurrent signIn calls into one login', async () => {
+  it('restartable: a second signIn supersedes the in-flight attempt and relaunches login', async () => {
+    // 128.26: « Se connecter » must be restartable — a 2nd click while the first
+    // attempt is in flight CANCELS the stale one and starts fresh (not coalesce).
     const sessionToken = await signSession({ secret: SESSION_SECRET, iatSeconds: IAT })
     const entitlementToken = await signEntitlement({ privateKey: keys.privateKey, iatSeconds: IAT })
     const h = makeHarness({ now: at(10), sessionToken, entitlementToken })
-    await Promise.all([h.service.signIn(), h.service.signIn()])
-    expect(h.loginMock.mock.calls.length).toBe(1)
+
+    const first = h.service.signIn()
+    const second = h.service.signIn()
+    // The superseded attempt resolves (does NOT throw) so a fire-and-forget
+    // renderer caller never sees an unhandled rejection; the fresh attempt owns
+    // the outcome.
+    const [, secondState] = await Promise.all([first, second])
+
+    // login() ran twice — the first was cancelled + relaunched, not coalesced.
+    expect(h.loginMock.mock.calls.length).toBe(2)
+    expect(secondState.signedIn).toBe(true)
+    expect(h.service.getState().signedIn).toBe(true)
+  })
+
+  it('the in-flight login receives an AbortSignal it can honour for cancellation', async () => {
+    const sessionToken = await signSession({ secret: SESSION_SECRET, iatSeconds: IAT })
+    const entitlementToken = await signEntitlement({ privateKey: keys.privateKey, iatSeconds: IAT })
+    const h = makeHarness({ now: at(10), sessionToken, entitlementToken })
+    await h.service.signIn()
+    const firstArg = h.loginMock.mock.calls[0]?.[0] as unknown
+    expect(firstArg).toBeInstanceOf(AbortSignal)
   })
 })
 

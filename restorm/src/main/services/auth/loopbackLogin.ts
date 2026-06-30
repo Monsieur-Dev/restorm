@@ -46,6 +46,27 @@ export interface LoopbackLoginDeps {
   timeoutMs?: number
   /** Structured logger (never receives the code / token). */
   log?: (msg: string, fields?: Record<string, unknown>) => void
+  /**
+   * Cancels an in-flight attempt (the restartable « Se connecter » retry). When
+   * it aborts, the transient listener is torn down + the timeout cleared and the
+   * attempt rejects with `LoopbackLoginCancelledError`; the freed port + the
+   * abandoned per-attempt nonce mean a late callback from the cancelled attempt
+   * can no longer complete a login.
+   */
+  signal?: AbortSignal
+}
+
+/**
+ * Thrown when an in-flight loopback attempt is superseded by a newer one (the
+ * user clicked « Se connecter » again because the first attempt landed on the
+ * wrong browser / profile or was abandoned). Distinct so the caller can treat a
+ * supersede as a non-error — the fresh attempt now owns the outcome.
+ */
+export class LoopbackLoginCancelledError extends Error {
+  constructor() {
+    super('loopback: login attempt cancelled')
+    this.name = 'LoopbackLoginCancelledError'
+  }
 }
 
 /** A URL-safe random token (default 256 bits). */
@@ -139,7 +160,12 @@ export async function loopbackLogin(deps: LoopbackLoginDeps): Promise<string> {
   const log = deps.log ?? ((): void => undefined)
 
   const code = await new Promise<string>((resolve, reject) => {
+    const signal = deps.signal
+    // Already superseded before we even bound the port — bail without listening.
+    if (signal?.aborted) { reject(new LoopbackLoginCancelledError()); return }
+
     let settled = false
+    let onAbort: (() => void) | null = null
 
     const server = createServer((req: IncomingMessage, res: ServerResponse) => {
       const verdict = evaluateCallback(req.method, req.url, nonce)
@@ -152,11 +178,13 @@ export async function loopbackLogin(deps: LoopbackLoginDeps): Promise<string> {
     if (typeof timer.unref === 'function') timer.unref()
 
     // Tear the listener + timer down on EVERY exit path (success or failure),
-    // exactly once.
+    // exactly once. Closing the server frees the port and means any later
+    // callback to this attempt's nonce can no longer settle the login.
     function settle(): boolean {
       if (settled) return false
       settled = true
       clearTimeout(timer)
+      if (onAbort && signal) signal.removeEventListener('abort', onAbort)
       server.close()
       return true
     }
@@ -168,6 +196,12 @@ export async function loopbackLogin(deps: LoopbackLoginDeps): Promise<string> {
     }
 
     server.on('error', (err) => { fail(err instanceof Error ? err : new Error(String(err))) })
+
+    // Restartable login: a newer attempt aborts this one — tear down + reject.
+    if (signal) {
+      onAbort = () => { fail(new LoopbackLoginCancelledError()) }
+      signal.addEventListener('abort', onAbort, { once: true })
+    }
 
     // Bind to the 127.0.0.1 LITERAL only — never the wildcard, so no other host
     // on the network can reach the transient listener.

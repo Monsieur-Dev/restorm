@@ -4,7 +4,8 @@ import {
   buildLoginUrl,
   evaluateCallback,
   exchangeCodeForSession,
-  loopbackLogin
+  loopbackLogin,
+  LoopbackLoginCancelledError
 } from './loopbackLogin'
 
 describe('buildLoginUrl', () => {
@@ -112,5 +113,72 @@ describe('loopbackLogin end-to-end (real 127.0.0.1 listener)', () => {
       fetchImpl: (() => Promise.resolve(new Response('{}'))) as unknown as typeof fetch,
       timeoutMs: 50
     })).rejects.toThrow(/timed out/)
+  })
+})
+
+describe('loopbackLogin — restartable / abort (a 2nd « Se connecter » cancels the stale attempt)', () => {
+  it('aborting an in-flight attempt tears down the listener, rejects (cancelled), and frees the port', async () => {
+    const controller = new AbortController()
+    let openedPort = 0
+    let signalOpened: () => void = () => undefined
+    const opened = new Promise<void>((resolve) => { signalOpened = resolve })
+
+    // The fake browser opens (capturing the loopback port) but NEVER hits the
+    // callback — the abandoned-attempt scenario the user retries out of.
+    const openExternal = (loginUrl: string): Promise<void> => {
+      const returnTo = new URL(new URL(loginUrl).searchParams.get('return_to') ?? '')
+      openedPort = Number(returnTo.port)
+      signalOpened()
+      return Promise.resolve()
+    }
+
+    const p = loopbackLogin({
+      loginUrl: 'https://x.supabase.co/functions/v1/login',
+      sessionUrl: 'https://x.supabase.co/functions/v1/session',
+      openExternal,
+      fetchImpl: (() => Promise.reject(new Error('no session exchange expected'))) as unknown as typeof fetch,
+      signal: controller.signal,
+      timeoutMs: 5000
+    })
+
+    await opened
+    expect(openedPort).toBeGreaterThan(0)
+
+    controller.abort()
+    await expect(p).rejects.toBeInstanceOf(LoopbackLoginCancelledError)
+
+    // The listener was torn down: a late callback from the cancelled attempt can
+    // no longer reach a server on that port (connection refused).
+    await expect(
+      fetch(`http://127.0.0.1:${String(openedPort)}/callback?code=late&state=stale`)
+    ).rejects.toThrow()
+  })
+
+  it('rejects immediately when the signal is already aborted (never opens the browser)', async () => {
+    const controller = new AbortController()
+    controller.abort()
+    let opened = false
+    await expect(loopbackLogin({
+      loginUrl: 'https://x.supabase.co/functions/v1/login',
+      sessionUrl: 'https://x.supabase.co/functions/v1/session',
+      openExternal: () => { opened = true; return Promise.resolve() },
+      fetchImpl: (() => Promise.resolve(new Response('{}'))) as unknown as typeof fetch,
+      signal: controller.signal,
+      timeoutMs: 5000
+    })).rejects.toBeInstanceOf(LoopbackLoginCancelledError)
+    expect(opened).toBe(false)
+  })
+
+  it('a fresh attempt mints a distinct nonce, so a callback carrying the old nonce is rejected', () => {
+    // Per-attempt 256-bit nonce: two attempts get different state values, so a
+    // late callback echoing the CANCELLED attempt's nonce fails the binding guard
+    // on the fresh attempt.
+    const a = buildLoginUrl('https://x/login', 'http://127.0.0.1:1/callback', 'nonce-OLD')
+    const b = buildLoginUrl('https://x/login', 'http://127.0.0.1:2/callback', 'nonce-NEW')
+    expect(new URL(a).searchParams.get('nonce')).not.toBe(new URL(b).searchParams.get('nonce'))
+    // A callback with the OLD nonce is refused against the NEW attempt's nonce.
+    const v = evaluateCallback('GET', '/callback?code=c&state=nonce-OLD', 'nonce-NEW')
+    expect(v.status).toBe(400)
+    expect(v.code).toBeUndefined()
   })
 })

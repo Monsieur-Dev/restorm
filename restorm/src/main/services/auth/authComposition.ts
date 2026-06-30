@@ -83,12 +83,13 @@ export function initEntitlementService(version: string = app.getVersion()): Enti
     publicKeyPem: entitlementPublicKeyPem(channel),
     publicKeyConfigured: isEntitlementPublicKeyConfigured(channel),
     fetchImpl: backendFetch,
-    login: () => loopbackLogin({
+    login: (signal) => loopbackLogin({
       loginUrl: endpointUrl(channel, 'login'),
       sessionUrl: endpointUrl(channel, 'session'),
       openExternal: (url) => shell.openExternal(url),
       fetchImpl: backendFetch,
-      log: (msg, fields) => { logger.info(msg, fields) }
+      log: (msg, fields) => { logger.info(msg, fields) },
+      ...(signal ? { signal } : {})
     }),
     broadcast: broadcastAuthState,
     log: (msg, fields) => { logger.warn(msg, fields) }
