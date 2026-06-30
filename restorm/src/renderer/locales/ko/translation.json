@@ -1763,7 +1763,11 @@
     "captureRetentionCap": "MCP 캡처 보관",
     "captureRetentionCapDescription": "최근 MCP 호출 중 스크린샷 / 화면 녹화를 보관하는 수(메모리 및 디스크). 한도에 도달하면 오래된 캡처는 미디어를 잃고 임시 동영상 파일이 삭제됩니다. 0이면 보관 비활성화.",
     "enabled": "MCP 서버 활성화",
-    "enabledDescription": "시작 시 내장 MCP 서버를 시작하여 AI 도구가 이 인스턴스에 연결할 수 있도록 합니다. MCP 연결을 방지하려면 비활성화하세요."
+    "enabledDescription": "시작 시 내장 MCP 서버를 시작하여 AI 도구가 이 인스턴스에 연결할 수 있도록 합니다. MCP 연결을 방지하려면 비활성화하세요.",
+    "proUpsell": {
+      "note": "Community 버전에서는 AI 에이전트가 요청을 제어합니다. 시나리오, 인터페이스 및 고급 자동화를 제어하려면 Pro로 업그레이드하세요.",
+      "link": "Pro로 업그레이드"
+    }
   },
   "mcpToolTitles": {
     "answerScenarioInput": "시나리오 입력에 응답",

@@ -1766,7 +1766,11 @@
     "captureRetentionCap": "Uchovávání záznamů MCP",
     "captureRetentionCapDescription": "Kolik nedávných volání MCP si ponechá svůj snímek obrazovky / záznam (v paměti i na disku). Po dosažení limitu starší záznamy přijdou o médium a jejich dočasný videosoubor se smaže; 0 vypne uchovávání.",
     "enabled": "Povolit MCP server",
-    "enabledDescription": "Spustí integrovaný MCP server při startu, aby se k němu mohly připojit nástroje AI. Deaktivujte, abyste zabránili jakýmkoli MCP připojením."
+    "enabledDescription": "Spustí integrovaný MCP server při startu, aby se k němu mohly připojit nástroje AI. Deaktivujte, abyste zabránili jakýmkoli MCP připojením.",
+    "proUpsell": {
+      "note": "Ve verzi Community řídí vaše požadavky agenti AI. Přejděte na verzi Pro a získejte řízení scénářů, rozhraní a pokročilé automatizace.",
+      "link": "Přejděte na verzi Pro"
+    }
   },
   "mcpToolTitles": {
     "answerScenarioInput": "Odpovědět na vstup scénáře",

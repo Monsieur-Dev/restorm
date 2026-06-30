@@ -81,3 +81,31 @@ describe('StatusbarMcpIndicator — always present, even when the server is stop
     expect(el.classList.contains('mcp-stopped')).toBe(true)
   })
 })
+
+describe('StatusbarMcpIndicator — Pro upsell (non-blocking)', () => {
+  it('shows the upsell note + link when proUpsell is provided, and does NOT gate the toggle', () => {
+    const onUpgrade = vi.fn()
+    render(
+      <StatusbarMcpIndicator
+        port={39000}
+        running
+        onToggleServer={vi.fn()}
+        proUpsell={{ note: 'agents drive requests; pro for more', linkLabel: 'Upgrade to Pro', onUpgrade }}
+      />
+    )
+    openPopover()
+
+    expect(screen.getByTestId('statusbar-mcp-pro-upsell').textContent).toContain('agents drive requests')
+    // The server toggle stays present + usable — the upsell never locks MCP.
+    expect(screen.getByTestId('statusbar-mcp-toggle-server')).toBeTruthy()
+
+    fireEvent.click(screen.getByTestId('statusbar-mcp-pro-upsell-link'))
+    expect(onUpgrade).toHaveBeenCalledTimes(1)
+  })
+
+  it('renders NO upsell when proUpsell is omitted (the entitled case)', () => {
+    render(<StatusbarMcpIndicator port={39000} running onToggleServer={vi.fn()} />)
+    openPopover()
+    expect(screen.queryByTestId('statusbar-mcp-pro-upsell')).toBeNull()
+  })
+})

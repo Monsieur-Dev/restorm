@@ -1764,7 +1764,11 @@
     "captureRetentionCap": "MCP-inspelningsbevarande",
     "captureRetentionCapDescription": "Hur många senaste MCP-anrop som behåller sin skärmbild / inspelning (i minnet och på disk). När gränsen nås förlorar äldre inspelningar sitt media och deras tillfälliga videofil tas bort; 0 inaktiverar bevarande.",
     "enabled": "Aktivera MCP-server",
-    "enabledDescription": "Startar den inbyggda MCP-servern vid uppstart så att AI-verktyg kan ansluta till den här instansen. Inaktivera för att förhindra MCP-anslutningar."
+    "enabledDescription": "Startar den inbyggda MCP-servern vid uppstart så att AI-verktyg kan ansluta till den här instansen. Inaktivera för att förhindra MCP-anslutningar.",
+    "proUpsell": {
+      "note": "I Community-versionen styr AI-agenter dina förfrågningar. Uppgradera till Pro för att styra scenarier, gränssnittet och avancerad automatisering.",
+      "link": "Uppgradera till Pro"
+    }
   },
   "mcpToolTitles": {
     "answerScenarioInput": "Besvara en scenarioinmatning",

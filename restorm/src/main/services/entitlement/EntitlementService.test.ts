@@ -1,6 +1,6 @@
 // @vitest-environment node
 import { describe, it, expect, beforeAll, vi, type Mock } from 'vitest'
-import { EntitlementService, type EntitlementServiceDeps } from './EntitlementService'
+import { EntitlementService, seedEntitlementForE2E, type EntitlementServiceDeps } from './EntitlementService'
 import { generateEdKeyPair, signEntitlement, signSession, type EdKeyPair } from './entitlementTestKit'
 import type { AuthState } from '../../../shared/auth/authState'
 
@@ -359,5 +359,68 @@ describe('EntitlementService — startCheckout', () => {
     await h.service.signIn()
     h.fetchMock.mockResolvedValueOnce(new Response('forbidden', { status: 403 }))
     await expect(h.service.startCheckout()).rejects.toMatchObject({ statusCode: 403 })
+  })
+})
+
+describe('EntitlementService — seedEntitlementForE2E / __seedEntitlementForTesting seam', () => {
+  // These tests cover the dev-only e2e seam used by the mcp-server e2e suite to
+  // boot the app as a Pro user without a real signed JWT.
+
+  it('(a) seeds plan=pro + mcp.pro capability when isPackaged=false and envPlan=pro', () => {
+    const h = makeHarness()
+    const seeded = seedEntitlementForE2E(h.service, false, 'pro')
+
+    expect(seeded).toBe(true)
+    const state = h.service.getState()
+    expect(state.signedIn).toBe(true)
+    expect(state.plan).toBe('pro')
+    expect(state.capabilities).toContain('mcp.pro')
+    // The seed broadcasts immediately so renderers reflect it at first paint.
+    expect(last(h.broadcasts)).toMatchObject({ plan: 'pro', signedIn: true })
+  })
+
+  it('(b) is a strict NO-OP when app.isPackaged=true, even with envPlan=pro', () => {
+    const h = makeHarness()
+    const seeded = seedEntitlementForE2E(h.service, /* isPackaged */ true, 'pro')
+
+    expect(seeded).toBe(false)
+    const state = h.service.getState()
+    // Community / signed-out: the seam must be unreachable in packaged builds.
+    expect(state.plan).toBe('community')
+    expect(state.signedIn).toBe(false)
+    expect(state.capabilities).toEqual([])
+    expect(h.broadcasts.length).toBe(0)
+  })
+
+  it('is a NO-OP when envPlan is unset (undefined)', () => {
+    const h = makeHarness()
+    const seeded = seedEntitlementForE2E(h.service, false, undefined)
+
+    expect(seeded).toBe(false)
+    expect(h.service.getState().plan).toBe('community')
+  })
+
+  it('is a NO-OP when envPlan is some other value (not "pro")', () => {
+    const h = makeHarness()
+    const seeded = seedEntitlementForE2E(h.service, false, 'community')
+
+    expect(seeded).toBe(false)
+    expect(h.service.getState().plan).toBe('community')
+  })
+
+  it('seeded state survives init() when no cached session exists', async () => {
+    // Mirrors the mcp-server e2e boot path: initEntitlementService() seeds first,
+    // then init() runs (finds no cached session → community path, calls emit()).
+    // The seeded state must win the derive() → renderers get Pro at first paint.
+    const h = makeHarness() // no initial cache → init() finds no session
+    seedEntitlementForE2E(h.service, false, 'pro')
+    await h.service.init()
+
+    const state = h.service.getState()
+    expect(state.plan).toBe('pro')
+    expect(state.capabilities).toContain('mcp.pro')
+    // init() must NOT trigger a network refresh (no sessionToken, seededState bypasses
+    // the JWT-path condition check).
+    expect(h.fetchMock.mock.calls.length).toBe(0)
   })
 })

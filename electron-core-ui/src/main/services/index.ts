@@ -128,6 +128,8 @@ export type {
   McpServiceOptions,
   McpToolConfig,
   McpToolHandler,
+  McpToolResult,
+  McpToolGate,
   McpResourceConfig,
   McpResourceHandler,
   McpServedCallEntry,

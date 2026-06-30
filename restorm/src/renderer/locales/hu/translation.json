@@ -1764,7 +1764,11 @@
     "captureRetentionCap": "MCP-felvételek megőrzése",
     "captureRetentionCapDescription": "Hány legutóbbi MCP-hívás őrzi meg a képernyőképét / felvételét (memóriában és lemezen). A korlát elérésekor a régebbi felvételek elveszítik a médiumukat, és az ideiglenes videofájljuk törlődik; a 0 kikapcsolja a megőrzést.",
     "enabled": "MCP szerver engedélyezése",
-    "enabledDescription": "Indításkor elindítja a beépített MCP szervert, hogy az AI eszközök csatlakozni tudjanak ehhez a példányhoz. Tiltsa le az MCP kapcsolatok megakadályozásához."
+    "enabledDescription": "Indításkor elindítja a beépített MCP szervert, hogy az AI eszközök csatlakozni tudjanak ehhez a példányhoz. Tiltsa le az MCP kapcsolatok megakadályozásához.",
+    "proUpsell": {
+      "note": "A Community verzióban a mesterséges intelligencia ügynökök vezérlik a kéréseit. Váltson Pro verzióra a forgatókönyvek, a felület és a speciális automatizálás vezérléséhez.",
+      "link": "Váltás Pro verzióra"
+    }
   },
   "mcpToolTitles": {
     "answerScenarioInput": "Forgatókönyv-bemenet megválaszolása",

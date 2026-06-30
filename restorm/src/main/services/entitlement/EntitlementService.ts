@@ -27,6 +27,45 @@ import {
   type Capability,
   type PlanTier
 } from '../../../shared/auth/authState'
+
+// ---- dev-only e2e test seam ------------------------------------------------
+
+/**
+ * Seed a Pro entitlement without a real JWT. Called from the composition root
+ * ONLY when `!app.isPackaged` (enforced by the caller) AND the explicit opt-in
+ * env var `RESTORM_E2E_ENTITLEMENT_PLAN=pro` is set.
+ *
+ * Capabilities: the cloud's exact pro set lives in
+ * `cloud/supabase/functions/_shared/providers/capabilities.ts` and is not
+ * locally available here, so we seed only the capabilities the e2e exercises.
+ * Adding `mcp.pro` unblocks the mcp-server e2e (set_tab_maximized etc.);
+ * extend this list when new Pro-feature e2e suites are added.
+ *
+ * Returns `true` when the seed was applied; `false` when the guard rejects it
+ * (isPackaged or wrong envPlan). The return value is used for logging.
+ */
+export const E2E_PRO_CAPABILITIES: readonly Capability[] = [
+  'mcp.pro'
+  // NOTE: extend here if new Pro-feature e2e suites require additional caps.
+]
+
+export function seedEntitlementForE2E(
+  service: EntitlementService,
+  isPackaged: boolean,
+  envPlan: string | undefined
+): boolean {
+  // Double-guard: caller (authComposition) already checks !isPackaged, but the
+  // explicit check here makes the NO-OP branch directly unit-testable without
+  // mocking electron.
+  if (isPackaged || envPlan !== 'pro') return false
+  service.__seedEntitlementForTesting({
+    signedIn: true,
+    user: { email: 'e2e@test.local' },
+    plan: 'pro',
+    capabilities: [...E2E_PRO_CAPABILITIES]
+  })
+  return true
+}
 import { decodeSessionInfo, isSessionExpired } from '../auth/sessionToken'
 import {
   createCheckout,
@@ -73,6 +112,11 @@ export class EntitlementService {
   private importedKey: CryptoKey | null = null
   private lastBroadcast: AuthState | null = null
   private readonly log: (msg: string, fields?: Record<string, unknown>) => void
+  /** Dev-only test seam (set via {@link __seedEntitlementForTesting}). When
+   * non-null, {@link deriveState} returns this snapshot directly, bypassing the
+   * JWT verify path.  NEVER set in packaged builds — enforced by the caller in
+   * authComposition which guards on `!app.isPackaged`. */
+  private seededState: AuthState | null = null
 
   constructor(private readonly deps: EntitlementServiceDeps) {
     this.log = deps.log ?? ((): void => undefined)
@@ -211,6 +255,19 @@ export class EntitlementService {
     }
   }
 
+  // ---- dev-only test seam --------------------------------------------------
+
+  /**
+   * Inject a fixed auth snapshot without going through JWT verification.
+   * ONLY called by {@link seedEntitlementForE2E} which itself is guarded by
+   * `!app.isPackaged` in authComposition — dead code in packaged builds.
+   * Emits immediately so renderers reflect the seeded state at first paint.
+   */
+  __seedEntitlementForTesting(state: AuthState): void {
+    this.seededState = { ...state }
+    this.emit()
+  }
+
   // ---- internals -----------------------------------------------------------
 
   /** Verify a token from the wire; returns claims or null on any failure. */
@@ -249,6 +306,9 @@ export class EntitlementService {
   }
 
   private deriveState(): AuthState {
+    // Dev-only seam: return the injected snapshot verbatim, bypassing JWT path.
+    if (this.seededState) return { ...this.seededState }
+
     if (!this.sessionToken || isSessionExpired(this.sessionToken, nowSeconds(this.deps.now))) {
       return { ...SIGNED_OUT_STATE, capabilities: [] }
     }

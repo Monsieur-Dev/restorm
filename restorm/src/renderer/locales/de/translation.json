@@ -1764,7 +1764,11 @@
     "captureRetentionCap": "MCP-Aufnahmen-Aufbewahrung",
     "captureRetentionCapDescription": "Wie viele der letzten MCP-Aufrufe ihren erfassten Screenshot / Screencast behalten (im Speicher und auf der Festplatte). Ältere Aufnahmen verlieren ihr Medium — und ihre temporäre Videodatei wird gelöscht — sobald das Limit erreicht ist; 0 deaktiviert die Aufbewahrung.",
     "enabled": "MCP-Server aktivieren",
-    "enabledDescription": "Startet den integrierten MCP-Server beim Start, damit KI-Tools eine Verbindung zu dieser Instanz herstellen können. Deaktivieren, um MCP-Verbindungen zu verhindern."
+    "enabledDescription": "Startet den integrierten MCP-Server beim Start, damit KI-Tools eine Verbindung zu dieser Instanz herstellen können. Deaktivieren, um MCP-Verbindungen zu verhindern.",
+    "proUpsell": {
+      "note": "In der Community-Version steuern KI-Agenten Ihre Anfragen. Wechseln Sie zu Pro, um Szenarien, die Oberfläche und erweiterte Automatisierung zu steuern.",
+      "link": "Auf Pro upgraden"
+    }
   },
   "mcpToolTitles": {
     "answerScenarioInput": "Szenario-Eingabe beantworten",

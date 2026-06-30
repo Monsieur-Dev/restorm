@@ -1,5 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { StatusbarMcpIndicator as EcuiStatusbarMcpIndicator } from 'electron-core-ui/renderer'
+import { useCapability } from '../../hooks/useCapability'
 
 export interface StatusbarMcpIndicatorProps {
   /** See the electron-core-ui StatusbarMcpIndicator — passed straight through. */
@@ -19,14 +21,25 @@ export interface StatusbarMcpIndicatorProps {
  * restarting restorm.
  */
 export const StatusbarMcpIndicator: React.FC<StatusbarMcpIndicatorProps> = ({ rightAligned = false, onViewLogs }) => {
+  const { t } = useTranslation()
   const [port, setPort] = useState<number | null>(null)
   const [sessionName, setSessionName] = useState<string>('')
   const [running, setRunning] = useState(false)
   const [pulseSignal, setPulseSignal] = useState(0)
+  // Channel-resolved pricing URL, read from the per-boot runtime config so the
+  // upsell link and the MCP 402 refusal (resolved main-side) point at the SAME
+  // page (dev site on preview builds, restorm.app on release).
+  const [pricingUrl, setPricingUrl] = useState<string | null>(null)
+
+  // The advanced MCP tools (scenarios, captures, UI automation, multi-instance)
+  // require Pro; without the live `mcp.pro` capability we surface a non-blocking
+  // upsell in the popover. The server itself stays usable — Community drives
+  // requests for free — so we never gate the toggle, only inform + offer upgrade.
+  const mcpPro = useCapability('mcp.pro')
 
   useEffect(() => {
     const root = window as {
-      restorm?: { runtime?: { getConfig?: () => Promise<{ mcp: { enabled: boolean; port: number | null; sessionName: string; running?: boolean } }> } }
+      restorm?: { runtime?: { getConfig?: () => Promise<{ mcp: { enabled: boolean; port: number | null; sessionName: string; running?: boolean }; pricingUrl?: string }> } }
     }
     const getConfig = root.restorm?.runtime?.getConfig
     if (!getConfig) return
@@ -38,6 +51,7 @@ export const StatusbarMcpIndicator: React.FC<StatusbarMcpIndicatorProps> = ({ ri
       // `running` was added alongside the toggle; fall back to port!=null for
       // builds that predate this ticket.
       setRunning(cfg.mcp.running ?? cfg.mcp.port !== null)
+      if (cfg.pricingUrl) setPricingUrl(cfg.pricingUrl)
     })
     return () => { cancelled = true }
   }, [])
@@ -85,6 +99,19 @@ export const StatusbarMcpIndicator: React.FC<StatusbarMcpIndicatorProps> = ({ ri
     })
   }, [])
 
+  // Open the pricing page in the SYSTEM browser. The main process'
+  // `setWindowOpenHandler` routes `window.open` of an http(s) URL through
+  // `shell.openExternal` (outside the app firewall), so no extra bridge / raw
+  // anchor is needed — the same path the documentation host uses for its links.
+  const handleUpgrade = useCallback(() => {
+    if (!pricingUrl) return
+    window.open(pricingUrl, '_blank', 'noopener,noreferrer')
+  }, [pricingUrl])
+
+  // Show the upsell only for a non-Pro plan AND once the channel-resolved pricing
+  // URL has loaded (so the link never dead-clicks).
+  const showUpsell = !mcpPro && pricingUrl !== null
+
   return (
     <EcuiStatusbarMcpIndicator
       port={port}
@@ -94,6 +121,15 @@ export const StatusbarMcpIndicator: React.FC<StatusbarMcpIndicatorProps> = ({ ri
       running={running}
       onToggleServer={handleToggleServer}
       {...(onViewLogs ? { onViewLogs } : {})}
+      {...(showUpsell
+        ? {
+            proUpsell: {
+              note: t('mcp.proUpsell.note'),
+              linkLabel: t('mcp.proUpsell.link'),
+              onUpgrade: handleUpgrade
+            }
+          }
+        : {})}
     />
   )
 }

@@ -73,7 +73,7 @@ export type { AutoSaveMode, AutoSaveControllerOptions } from './services'
 
 // MCP service (Streamable HTTP, off by default)
 export { McpService, MCP_SESSION_ROUTING_KEY, MCP_FORWARDED_HEADER } from './services'
-export type { McpServiceOptions, McpToolConfig, McpToolHandler, McpResourceConfig, McpResourceHandler } from './services'
+export type { McpServiceOptions, McpToolConfig, McpToolHandler, McpToolResult, McpToolGate, McpResourceConfig, McpResourceHandler } from './services'
 export {
   resolveMcpDiscoveryDir,
   writeMcpDiscoveryFile,

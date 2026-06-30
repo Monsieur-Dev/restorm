@@ -1763,7 +1763,11 @@
     "captureRetentionCap": "Lưu giữ bản ghi MCP",
     "captureRetentionCapDescription": "Số lệnh gọi MCP gần đây giữ lại ảnh chụp màn hình / bản ghi của chúng (trong bộ nhớ và trên đĩa). Khi đạt giới hạn, các bản ghi cũ hơn sẽ mất media và tệp video tạm bị xóa; 0 tắt việc lưu giữ.",
     "enabled": "Bật máy chủ MCP",
-    "enabledDescription": "Khởi động máy chủ MCP tích hợp khi khởi chạy để các công cụ AI có thể kết nối với phiên bản này. Tắt để ngăn chặn kết nối MCP."
+    "enabledDescription": "Khởi động máy chủ MCP tích hợp khi khởi chạy để các công cụ AI có thể kết nối với phiên bản này. Tắt để ngăn chặn kết nối MCP.",
+    "proUpsell": {
+      "note": "Ở bản Community, các tác nhân AI điều khiển các yêu cầu của bạn. Nâng cấp lên Pro để điều khiển kịch bản, giao diện và tự động hóa nâng cao.",
+      "link": "Nâng cấp lên Pro"
+    }
   },
   "mcpToolTitles": {
     "answerScenarioInput": "Trả lời đầu vào kịch bản",

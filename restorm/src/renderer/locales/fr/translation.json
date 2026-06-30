@@ -1764,7 +1764,11 @@
     "captureRetentionCap": "Conservation des captures MCP",
     "captureRetentionCapDescription": "Nombre d'appels MCP récents qui conservent leur capture d'écran / vidéo (en mémoire et sur disque). Au-delà de la limite, les captures plus anciennes perdent leur média — et leur fichier vidéo temporaire est supprimé ; 0 désactive la conservation.",
     "enabled": "Activer le serveur MCP",
-    "enabledDescription": "Démarrez le serveur MCP intégré au lancement afin que les outils IA puissent se connecter à cette instance. Désactivez pour empêcher toute connexion MCP."
+    "enabledDescription": "Démarrez le serveur MCP intégré au lancement afin que les outils IA puissent se connecter à cette instance. Désactivez pour empêcher toute connexion MCP.",
+    "proUpsell": {
+      "note": "En version Community, les agents IA pilotent vos requêtes. Passez à Pro pour piloter les scénarios, l'interface et l'automatisation avancée.",
+      "link": "Passez à la version Pro"
+    }
   },
   "mcpToolTitles": {
     "answerScenarioInput": "Répondre à une entrée de scénario",

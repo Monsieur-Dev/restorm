@@ -1764,7 +1764,11 @@
     "captureRetentionCap": "MCP yakalama saklama",
     "captureRetentionCapDescription": "Son MCP çağrılarından kaçının ekran görüntüsünü / kaydını tuttuğu (bellekte ve diskte). Sınıra ulaşıldığında eski yakalamalar medyasını kaybeder ve geçici video dosyası silinir; 0 saklamayı devre dışı bırakır.",
     "enabled": "MCP sunucusunu etkinleştir",
-    "enabledDescription": "AI araçlarının bu örneğe bağlanabilmesi için başlatma sırasında yerleşik MCP sunucusunu başlatır. MCP bağlantılarını engellemek için devre dışı bırakın."
+    "enabledDescription": "AI araçlarının bu örneğe bağlanabilmesi için başlatma sırasında yerleşik MCP sunucusunu başlatır. MCP bağlantılarını engellemek için devre dışı bırakın.",
+    "proUpsell": {
+      "note": "Community sürümünde yapay zeka aracıları isteklerinizi yürütür. Senaryoları, arayüzü ve gelişmiş otomasyonu yürütmek için Pro'ya yükseltin.",
+      "link": "Pro'ya yükseltin"
+    }
   },
   "mcpToolTitles": {
     "answerScenarioInput": "Senaryo girişini yanıtla",

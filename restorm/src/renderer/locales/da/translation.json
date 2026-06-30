@@ -1764,7 +1764,11 @@
     "captureRetentionCap": "Opbevaring af MCP-optagelser",
     "captureRetentionCapDescription": "Hvor mange nylige MCP-kald beholder deres skærmbillede / optagelse (i hukommelsen og på disken). Når grænsen nås, mister ældre optagelser deres medie, og deres midlertidige videofil slettes; 0 deaktiverer opbevaring.",
     "enabled": "Aktivér MCP-server",
-    "enabledDescription": "Start den integrerede MCP-server ved opstart, så AI-værktøjer kan oprette forbindelse til denne instans. Deaktiver for at forhindre MCP-forbindelser."
+    "enabledDescription": "Start den integrerede MCP-server ved opstart, så AI-værktøjer kan oprette forbindelse til denne instans. Deaktiver for at forhindre MCP-forbindelser.",
+    "proUpsell": {
+      "note": "I Community-versionen styrer AI-agenter dine anmodninger. Skift til Pro for at styre scenarier, brugerfladen og avanceret automatisering.",
+      "link": "Skift til Pro"
+    }
   },
   "mcpToolTitles": {
     "answerScenarioInput": "Besvar et scenarieinput",

@@ -1765,7 +1765,11 @@
     "captureRetentionCap": "Păstrarea capturilor MCP",
     "captureRetentionCapDescription": "Câte apeluri MCP recente își păstrează captura de ecran / înregistrarea (în memorie și pe disc). La atingerea limitei, capturile mai vechi își pierd media, iar fișierul video temporar este șters; 0 dezactivează păstrarea.",
     "enabled": "Activează serverul MCP",
-    "enabledDescription": "Pornește serverul MCP integrat la lansare pentru ca instrumentele AI să se poată conecta la această instanță. Dezactivați pentru a preveni conexiunile MCP."
+    "enabledDescription": "Pornește serverul MCP integrat la lansare pentru ca instrumentele AI să se poată conecta la această instanță. Dezactivați pentru a preveni conexiunile MCP.",
+    "proUpsell": {
+      "note": "În versiunea Community, agenții AI vă controlează cererile. Treceți la Pro pentru a controla scenariile, interfața și automatizarea avansată.",
+      "link": "Treceți la Pro"
+    }
   },
   "mcpToolTitles": {
     "answerScenarioInput": "Răspunde la o intrare de scenariu",

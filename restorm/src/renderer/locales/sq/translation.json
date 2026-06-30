@@ -1764,7 +1764,11 @@
     "captureRetentionCap": "Ruajtja e kapjeve MCP",
     "captureRetentionCapDescription": "Sa thirrje të fundit MCP e mbajnë pamjen e ekranit / regjistrimin e tyre (në memorie dhe në disk). Kur arrihet kufiri, kapjet më të vjetra humbasin median dhe skedari i përkohshëm i videos fshihet; 0 e çaktivizon ruajtjen.",
     "enabled": "Aktivizo serverin MCP",
-    "enabledDescription": "Fillon serverin MCP të integruar gjatë nisjes në mënyrë që mjetet AI të mund të lidhen me këtë instancë. Çaktivizoni për të parandaluar lidhjet MCP."
+    "enabledDescription": "Fillon serverin MCP të integruar gjatë nisjes në mënyrë që mjetet AI të mund të lidhen me këtë instancë. Çaktivizoni për të parandaluar lidhjet MCP.",
+    "proUpsell": {
+      "note": "Në versionin Community, agjentët e IA-së drejtojnë kërkesat tuaja. Kaloni në Pro për të drejtuar skenarët, ndërfaqen dhe automatizimin e avancuar.",
+      "link": "Kaloni në Pro"
+    }
   },
   "mcpToolTitles": {
     "answerScenarioInput": "Përgjigju një hyrjeje skenari",

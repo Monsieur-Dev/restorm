@@ -1763,7 +1763,11 @@
     "captureRetentionCap": "Retensi tangkapan MCP",
     "captureRetentionCapDescription": "Berapa banyak panggilan MCP terbaru yang mempertahankan tangkapan layar / rekamannya (di memori dan disk). Setelah batas tercapai, tangkapan lama kehilangan medianya dan berkas video sementaranya dihapus; 0 menonaktifkan retensi.",
     "enabled": "Aktifkan server MCP",
-    "enabledDescription": "Memulai server MCP bawaan saat diluncurkan agar alat AI dapat terhubung ke instans ini. Nonaktifkan untuk mencegah koneksi MCP."
+    "enabledDescription": "Memulai server MCP bawaan saat diluncurkan agar alat AI dapat terhubung ke instans ini. Nonaktifkan untuk mencegah koneksi MCP.",
+    "proUpsell": {
+      "note": "Pada versi Community, agen AI menjalankan permintaan Anda. Tingkatkan ke Pro untuk menjalankan skenario, antarmuka, dan otomatisasi lanjutan.",
+      "link": "Tingkatkan ke Pro"
+    }
   },
   "mcpToolTitles": {
     "answerScenarioInput": "Jawab masukan skenario",

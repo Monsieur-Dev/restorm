@@ -30,6 +30,11 @@ export type Capability =
   | 'sso'
   | 'scim'
   | 'audit.logs'
+  // Gates the advanced MCP tools (scenarios, screenshots/screencast, low-level
+  // UI automation, multi-instance). The request-driving MCP tools stay free, so
+  // the MCP server itself is NOT gated — only the Pro tools refuse at call time.
+  // Backend contract: minted into `pro` + `enterprise`, never `community`.
+  | 'mcp.pro'
 
 /** The signed-in user's display profile. `email` is always present (it rides the
  * session JWT); `name` / `photoUrl` are best-effort and may be absent — the

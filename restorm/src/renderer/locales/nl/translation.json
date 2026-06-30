@@ -1764,7 +1764,11 @@
     "captureRetentionCap": "MCP-opnamebehoud",
     "captureRetentionCapDescription": "Hoeveel recente MCP-aanroepen hun schermafbeelding / opname behouden (in geheugen en op schijf). Bij het bereiken van de limiet verliezen oudere opnamen hun media en wordt het tijdelijke videobestand verwijderd; 0 schakelt behoud uit.",
     "enabled": "MCP-server inschakelen",
-    "enabledDescription": "Start de ingebouwde MCP-server bij het opstarten zodat AI-tools verbinding kunnen maken met deze instantie. Schakel uit om MCP-verbindingen te voorkomen."
+    "enabledDescription": "Start de ingebouwde MCP-server bij het opstarten zodat AI-tools verbinding kunnen maken met deze instantie. Schakel uit om MCP-verbindingen te voorkomen.",
+    "proUpsell": {
+      "note": "In de Community-versie sturen AI-agents uw verzoeken aan. Stap over naar Pro om scenario's, de interface en geavanceerde automatisering aan te sturen.",
+      "link": "Overstappen naar Pro"
+    }
   },
   "mcpToolTitles": {
     "answerScenarioInput": "Een scenario-invoer beantwoorden",
