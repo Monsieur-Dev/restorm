@@ -1679,7 +1679,10 @@
       "byId": "Desemnați după id",
       "allLogs": "All logs",
       "note": "`--out fișier` scrie de asemenea run-log-ul într-un fișier.",
-      "projectPlaceholder": "<project.restorm>"
+      "projectPlaceholder": "<project.restorm>",
+      "tokenPlaceholder": "<token_dvs>",
+      "tokenNote": "O rulare headless necesită un plan Restorm Pro și un token CI.",
+      "tokenLink": "Obțineți un token →"
     },
     "socketio": {
       "connectionNameLabel": "Connection name",

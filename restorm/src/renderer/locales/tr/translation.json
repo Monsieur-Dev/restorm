@@ -1678,7 +1678,10 @@
       "byId": "id ile belirt",
       "allLogs": "All logs",
       "note": "`--out file` ayrıca run-log'u bir dosyaya yazar.",
-      "projectPlaceholder": "<project.restorm>"
+      "projectPlaceholder": "<project.restorm>",
+      "tokenPlaceholder": "<token>",
+      "tokenNote": "Başsız çalıştırma, Restorm Pro planı ve CI token gerektirir.",
+      "tokenLink": "Token al →"
     },
     "socketio": {
       "connectionNameLabel": "Connection name",

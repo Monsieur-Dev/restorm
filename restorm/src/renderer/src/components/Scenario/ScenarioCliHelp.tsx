@@ -38,7 +38,12 @@ export const ScenarioCliHelp: React.FC<{ scenarioName: string; scenarioId: strin
   const target = byId
     ? `--run ${scenarioId} --by id`
     : `--run "${runName}"`
-  const command = `restorm --open ${projectPath} ${target} --headless${allLogs ? ' --all-logs' : ''}`
+  // Headless runs require RESTORM_TOKEN. The command shows the env var prefix so
+  // the user can copy a paste-ready example directly into their CI configuration.
+  // TODO(128.9/128.15): replace the account URL with the real token-management
+  // page once the account portal is live.
+  const tokenPlaceholder = t('scenario.cli.tokenPlaceholder', '<your_token>')
+  const command = `RESTORM_TOKEN=${tokenPlaceholder} restorm --open ${projectPath} ${target} --headless${allLogs ? ' --all-logs' : ''}`
 
   return (
     <div className="scn-inspector-section scn-cli-help" data-testid="scenario-inspector-cli-help">
@@ -62,6 +67,18 @@ export const ScenarioCliHelp: React.FC<{ scenarioName: string; scenarioId: strin
       </div>
       <p className="scn-cli-help-note">
         {t('scenario.cli.note', '`--out fichier` écrit aussi le run-log dans un fichier.')}
+      </p>
+      {/* Token discovery: headless runs need a Pro plan + CI token. */}
+      <p className="scn-cli-help-note scn-cli-help-token-note">
+        {t('scenario.cli.tokenNote', 'A headless run requires a Restorm Pro plan and a CI token.')}{' '}
+        <a
+          href="https://restorm.app/account"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="scn-cli-help-link"
+        >
+          {t('scenario.cli.tokenLink', 'Get a token →')}
+        </a>
       </p>
     </div>
   )

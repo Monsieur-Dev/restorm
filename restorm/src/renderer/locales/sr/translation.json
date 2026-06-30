@@ -1679,7 +1679,10 @@
       "byId": "Одреди по id-у",
       "allLogs": "All logs",
       "note": "`--out file` уписује run-log и у датотеку.",
-      "projectPlaceholder": "<project.restorm>"
+      "projectPlaceholder": "<project.restorm>",
+      "tokenPlaceholder": "<vaš_token>",
+      "tokenNote": "Headless pokretanje zahteva Restorm Pro plan i CI token.",
+      "tokenLink": "Dohvati token →"
     },
     "socketio": {
       "connectionNameLabel": "Connection name",

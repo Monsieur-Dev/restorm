@@ -1677,7 +1677,10 @@
       "byId": "id で指定する",
       "allLogs": "All logs",
       "note": "`--out file` は run-log もファイルに書き出します。",
-      "projectPlaceholder": "<project.restorm>"
+      "projectPlaceholder": "<project.restorm>",
+      "tokenPlaceholder": "<token>",
+      "tokenNote": "ヘッドレス実行にはRestorm ProプランとCIトークンが必要です。",
+      "tokenLink": "トークンを取得 →"
     },
     "socketio": {
       "connectionNameLabel": "Connection name",

@@ -1678,7 +1678,10 @@
       "byId": "Määritä id:n mukaan",
       "allLogs": "All logs",
       "note": "`--out file` kirjoittaa run-login myös tiedostoon.",
-      "projectPlaceholder": "<project.restorm>"
+      "projectPlaceholder": "<project.restorm>",
+      "tokenPlaceholder": "<token>",
+      "tokenNote": "Headless-ajo vaatii Restorm Pro -suunnitelman ja CI-tokenin.",
+      "tokenLink": "Hanki token →"
     },
     "socketio": {
       "connectionNameLabel": "Connection name",

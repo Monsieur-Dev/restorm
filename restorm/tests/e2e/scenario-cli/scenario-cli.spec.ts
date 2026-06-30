@@ -21,7 +21,9 @@ interface CliResult { code: number | null; stdout: string; stderr: string }
 function runCli(args: string[]): Promise<CliResult> {
   return new Promise((resolve, reject) => {
     const child = spawn(ELECTRON, ['--no-sandbox', '--ozone-platform=x11', MAIN_JS, ...args], {
-      env: { ...process.env, TZ: 'UTC', NODE_ENV: 'development' }
+      // RESTORM_E2E_ENTITLEMENT_PLAN seeds Pro entitlement so the headless gate
+      // is bypassed in dev builds — mirrors mcp-server.fixture.ts.
+      env: { ...process.env, TZ: 'UTC', NODE_ENV: 'development', RESTORM_E2E_ENTITLEMENT_PLAN: 'pro' }
     })
     let stdout = ''
     let stderr = ''

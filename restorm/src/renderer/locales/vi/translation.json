@@ -1677,7 +1677,10 @@
       "byId": "Chỉ định theo id",
       "allLogs": "All logs",
       "note": "`--out file` cũng ghi run-log vào một tệp.",
-      "projectPlaceholder": "<project.restorm>"
+      "projectPlaceholder": "<project.restorm>",
+      "tokenPlaceholder": "<token>",
+      "tokenNote": "Chạy headless yêu cầu gói Restorm Pro và token CI.",
+      "tokenLink": "Lấy token →"
     },
     "socketio": {
       "connectionNameLabel": "Connection name",

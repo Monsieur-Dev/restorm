@@ -1680,7 +1680,10 @@
       "byId": "Označit podle id",
       "allLogs": "All logs",
       "note": "`--out file` zapíše run-log také do souboru.",
-      "projectPlaceholder": "<project.restorm>"
+      "projectPlaceholder": "<project.restorm>",
+      "tokenPlaceholder": "<váš_token>",
+      "tokenNote": "Headless spuštění vyžaduje plán Restorm Pro a CI token.",
+      "tokenLink": "Získat token →"
     },
     "socketio": {
       "connectionNameLabel": "Connection name",

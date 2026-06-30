@@ -1680,7 +1680,10 @@
       "byId": "Визначити за id",
       "allLogs": "All logs",
       "note": "`--out file` також записує run-log у файл.",
-      "projectPlaceholder": "<project.restorm>"
+      "projectPlaceholder": "<project.restorm>",
+      "tokenPlaceholder": "<токен>",
+      "tokenNote": "Безголовий запуск вимагає плану Restorm Pro та CI-токена.",
+      "tokenLink": "Отримати токен →"
     },
     "socketio": {
       "connectionNameLabel": "Connection name",
