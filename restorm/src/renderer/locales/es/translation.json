@@ -5,7 +5,13 @@
     "signIn": "Iniciar sesión",
     "signOut": "Cerrar sesión",
     "manageSubscription": "Gestionar suscripción",
-    "upgradeToPro": "Cambiar a Pro"
+    "upgradeToPro": "Cambiar a Pro",
+    "dashboard": "Panel de control",
+    "signOutConfirm": {
+      "message": "¿Seguro que quieres cerrar sesión?",
+      "confirm": "Sí",
+      "cancel": "Cancelar"
+    }
   },
   "secrets": {
     "others": "Otros",

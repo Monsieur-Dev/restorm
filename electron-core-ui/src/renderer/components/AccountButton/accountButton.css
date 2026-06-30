@@ -4,3 +4,84 @@
 .account-button-anchor {
   margin-inline-end: 6px;
 }
+
+/* ── Account popover card ─────────────────────────────────────────────────
+   Hosted inside the ECUI Tooltip (click-triggered). Colours reuse existing
+   editor theme tokens so the card matches every named theme. */
+.account-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 240px;
+  max-width: 320px;
+  padding: 12px;
+}
+
+.account-card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.account-card-identity {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.account-card-name {
+  font-weight: 600;
+  color: var(--vscode-foreground);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Plan badge — a compact pill in the neutral badge token, identical for every
+   tier (matching the statusbar plan cell, which gives no tier its own colour).
+   The per-tier modifier class is left as a styling hook without a default. */
+.account-plan-badge {
+  align-self: flex-start;
+  padding: 1px 8px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 16px;
+  letter-spacing: 0.02em;
+  background: var(--vscode-badge-background);
+  color: var(--vscode-badge-foreground);
+}
+
+.account-card-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 2px;
+  border-top: 1px solid var(--vscode-widget-border, rgb(128, 128, 128, 0.35));
+  padding-top: 8px;
+}
+
+/* The link-style buttons in the card read as a left-aligned action list. */
+.account-card-actions .button {
+  justify-content: flex-start;
+}
+
+/* ── Sign-out confirmation dialog ─────────────────────────────────────────── */
+.account-sign-out-confirm {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 4px 2px;
+}
+
+.account-sign-out-confirm-message {
+  margin: 0;
+  color: var(--vscode-foreground);
+}
+
+.account-sign-out-confirm-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}

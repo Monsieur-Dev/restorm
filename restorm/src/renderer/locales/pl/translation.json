@@ -5,7 +5,13 @@
     "signIn": "Zaloguj się",
     "signOut": "Wyloguj się",
     "manageSubscription": "Zarządzaj subskrypcją",
-    "upgradeToPro": "Przejdź na Pro"
+    "upgradeToPro": "Przejdź na Pro",
+    "dashboard": "Panel",
+    "signOutConfirm": {
+      "message": "Czy na pewno chcesz się wylogować?",
+      "confirm": "Tak",
+      "cancel": "Anuluj"
+    }
   },
   "secrets": {
     "others": "Inne",

@@ -29,3 +29,12 @@ export function siteBaseUrl(channel: ReleaseChannel): string {
 export function pricingUrl(channel: ReleaseChannel): string {
   return `${siteBaseUrl(channel)}/pricing`
 }
+
+/**
+ * The customer dashboard (self-serve account / billing) URL. A single host
+ * across channels for now: the dashboard is not yet deployed, so this resolves
+ * to a page that 404s until it ships — acceptable because there are no
+ * production users before then. Split per-channel here if a dev dashboard host
+ * later appears.
+ */
+export const DASHBOARD_URL = 'https://my.restorm.app'

@@ -5,7 +5,13 @@
     "signIn": "Anmelden",
     "signOut": "Abmelden",
     "manageSubscription": "Abonnement verwalten",
-    "upgradeToPro": "Auf Pro upgraden"
+    "upgradeToPro": "Auf Pro upgraden",
+    "dashboard": "Dashboard",
+    "signOutConfirm": {
+      "message": "Möchten Sie sich wirklich abmelden?",
+      "confirm": "Ja",
+      "cancel": "Abbrechen"
+    }
   },
   "secrets": {
     "others": "Andere",

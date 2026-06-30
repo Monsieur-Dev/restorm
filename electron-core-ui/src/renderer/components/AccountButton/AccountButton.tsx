@@ -1,16 +1,18 @@
-import React, { useCallback, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Avatar } from '../Avatar'
 import { Button } from '../Button'
-import { ContextMenu, type ContextMenuItem } from '../ContextMenu/ContextMenu'
+import { Tooltip } from '../Tooltip'
+import { Modal } from '../Modal'
 import { toasterService } from '../Toaster'
 import { useAuthState } from '../../hooks/useAuthState'
 import { logger } from '../../services/logger'
+import type { PlanTier } from '../../../shared/auth/authState'
 import './accountButton.css'
 
 /** The value when it is a non-blank string, else `undefined` — so a blank name /
  * email falls through to the next label source rather than showing an empty
- * tooltip. */
+ * label. */
 function nonEmpty(value: string | undefined): string | undefined {
   return typeof value === 'string' && value.trim() !== '' ? value : undefined
 }
@@ -20,49 +22,91 @@ function toast(title: string): void {
   toasterService.push('app', { title, body: '', durationMs: 8000, ariaLive: 'assertive' })
 }
 
+/** Plan tier display labels. Proper nouns — NOT translated (kept identical
+ * across locales, matching the statusbar plan cell). */
+const PLAN_LABELS: Record<PlanTier, string> = {
+  community: 'Community',
+  pro: 'Pro',
+  enterprise: 'Enterprise'
+}
+
+export interface AccountButtonProps {
+  /** The host app's customer dashboard URL (self-serve account / billing). When
+   * provided, the card shows a "dashboard" link that opens it in the system
+   * browser; omitted → no dashboard link (keeps the component host-agnostic). */
+  dashboardUrl?: string
+}
+
 /**
- * Account button for the app shell: an avatar/codicon trigger that opens a small
- * ECUI dropdown to sign in (loopback login) or sign out. The auth state is read
- * once on mount and then kept live via `useAuthState` so a login / logout from
- * anywhere repaints the button.
+ * Account button for the app shell: an avatar/codicon trigger that opens an ECUI
+ * popover **card** with the current plan, a dashboard link, the subscription
+ * action (manage / upgrade), and sign in / out. Signing out goes through a
+ * confirmation dialog. The auth state is read once on mount and then kept live
+ * via `useAuthState` so a login / logout from anywhere repaints the card.
  *
  * Requires the host app's preload to expose `window.api.account`.
  */
-export const AccountButton: React.FC = () => {
+export const AccountButton: React.FC<AccountButtonProps> = ({ dashboardUrl }) => {
   const { t } = useTranslation()
   // Live auth state — useAuthState handles the getState() + onStateChanged subscription.
   const authState = useAuthState()
-  const [menu, setMenu] = useState<{ visible: boolean; x: number; y: number }>({ visible: false, x: 0, y: 0 })
+  const [open, setOpen] = useState(false)
+  const [confirmSignOutOpen, setConfirmSignOutOpen] = useState(false)
   const anchorRef = useRef<HTMLSpanElement>(null)
+  const cardRef = useRef<HTMLDivElement>(null)
 
-  const openMenu = useCallback(() => {
-    const rect = anchorRef.current?.getBoundingClientRect()
-    if (rect) {
-      // Anchor the dropdown to the button's bottom-left; ContextMenu clamps it
-      // back inside the viewport if it would overflow the right edge.
-      setMenu({ visible: true, x: rect.left, y: rect.bottom })
-    } else {
-      setMenu((prev) => ({ ...prev, visible: true }))
+  const { signedIn, user, plan } = authState
+
+  const close = useCallback(() => { setOpen(false) }, [])
+  const toggleOpen = useCallback(() => { setOpen((prev) => !prev) }, [])
+
+  // Dismiss the card on an outside click / Escape — clicks inside the card (its
+  // buttons) or on the trigger stay open. Mirrors the ECUI click-popover pattern.
+  useEffect(() => {
+    if (!open) return
+    const onMouseDown = (event: MouseEvent): void => {
+      const target = event.target as Node | null
+      if (!target) return
+      if (anchorRef.current?.contains(target)) return
+      if (cardRef.current?.contains(target)) return
+      setOpen(false)
     }
-  }, [])
-
-  const closeMenu = useCallback(() => {
-    setMenu((prev) => ({ ...prev, visible: false }))
-  }, [])
+    const onKeyDown = (event: KeyboardEvent): void => {
+      if (event.key === 'Escape') setOpen(false)
+    }
+    window.addEventListener('mousedown', onMouseDown)
+    window.addEventListener('keydown', onKeyDown)
+    return () => {
+      window.removeEventListener('mousedown', onMouseDown)
+      window.removeEventListener('keydown', onKeyDown)
+    }
+  }, [open])
 
   const handleSignIn = useCallback(() => {
+    close()
     void window.api.account.login()
+  }, [close])
+
+  // « Se déconnecter » asks for confirmation first (a translated dialog) before
+  // the real logout — sign-out is easy to hit by accident and re-login is a full
+  // browser round-trip.
+  const requestSignOut = useCallback(() => {
+    setOpen(false)
+    setConfirmSignOutOpen(true)
   }, [])
 
-  const handleSignOut = useCallback(() => {
+  const cancelSignOut = useCallback(() => { setConfirmSignOutOpen(false) }, [])
+
+  const confirmSignOut = useCallback(() => {
+    setConfirmSignOutOpen(false)
     void window.api.account.logout()
   }, [])
 
-  // The signed-in upgrade upsell. The user is already signed in here, so this
-  // goes straight to checkout; the Paddle URL opens in the system browser.
-  // Checkout is org-admin-only on the backend, so a non-admin gets an actionable
-  // toast rather than a silent failure.
+  // « Passer à Pro » upsell. Shown only to a signed-in community user, so it goes
+  // straight to checkout. Checkout is org-admin-only on the backend → a non-admin
+  // gets an actionable toast. The Paddle URL opens in the system browser.
   const handleSubscribe = useCallback(() => {
+    close()
     void (async (): Promise<void> => {
       const result = await window.api.account.subscribe()
       switch (result.status) {
@@ -80,12 +124,13 @@ export const AccountButton: React.FC = () => {
           break
       }
     })()
-  }, [t])
+  }, [close, t])
 
   // Open the hosted Paddle customer portal (manage / cancel the subscription) in
   // the system browser. `no-subscription` (no billing customer) and a backend
   // error each surface an actionable toast; 'opened' hands off silently.
   const handleManageSubscription = useCallback(() => {
+    close()
     void (async (): Promise<void> => {
       const result = await window.api.account.manageSubscription()
       switch (result.status) {
@@ -96,64 +141,108 @@ export const AccountButton: React.FC = () => {
           toast(t('subscription.portal.error'))
           break
         case 'not-signed-in':
-          // Unreachable: the manage item only shows when signed in. Log if it fires.
-          logger.warn('account: customer-portal returned not-signed-in from the signed-in account menu')
+          // Unreachable: the manage entry only shows when signed in. Log if it fires.
+          logger.warn('account: customer-portal returned not-signed-in from the signed-in card')
           break
         case 'opened':
           break
       }
     })()
-  }, [t])
+  }, [close, t])
 
-  const { signedIn, user, plan } = authState
+  // Open the host dashboard in the system browser (main routes http(s)
+  // window.open through shell.openExternal).
+  const handleDashboard = useCallback(() => {
+    if (!dashboardUrl) return
+    close()
+    window.open(dashboardUrl, '_blank', 'noopener,noreferrer')
+  }, [close, dashboardUrl])
+
   // Prefer the display name, fall back to the email for both the initials and the
   // deterministic avatar colour.
   const displayName = user?.name ?? user?.email ?? ''
-  // aria-label: name then email when signed in, else the sign-in CTA.
   const profileLabel = nonEmpty(user?.name) ?? nonEmpty(user?.email)
   const accountLabel = signedIn
     ? (profileLabel ?? t('account.connected'))
     : t('account.signIn')
 
-  // A subscription affordance sits above sign-out: community users get the
-  // upgrade upsell, paid (pro / enterprise) users get the manage-subscription
-  // entry (the hosted Paddle portal to manage / cancel).
-  const subscriptionItem: ContextMenuItem = plan === 'community'
-    ? {
-        id: 'account-upgrade',
-        label: t('account.upgradeToPro'),
-        icon: 'rocket',
-        onClick: handleSubscribe,
-        'data-testid': 'account-menu-upgrade'
-      }
-    : {
-        id: 'account-manage-subscription',
-        label: t('account.manageSubscription'),
-        icon: 'credit-card',
-        onClick: handleManageSubscription,
-        'data-testid': 'account-menu-manage-subscription'
-      }
+  // Signed out → a minimal card with just the sign-in action (the plan badge and
+  // upsell belong to the signed-in states). Signed in → the full account card.
+  const card = signedIn
+    ? (
+      <div className="account-card" ref={cardRef} data-testid="account-card">
+        <div className="account-card-header">
+          <Avatar name={displayName} imageUrl={user?.photoUrl} size={28} data-testid="account-card-avatar" />
+          <div className="account-card-identity">
+            <span className="account-card-name" data-testid="account-card-name">
+              {profileLabel ?? t('account.connected')}
+            </span>
+            <span
+              className={`account-plan-badge account-plan-badge--${plan}`}
+              data-testid="account-card-plan-badge"
+            >
+              {PLAN_LABELS[plan]}
+            </span>
+          </div>
+        </div>
 
-  const menuItems: ContextMenuItem[] = signedIn
-    ? [
-        subscriptionItem,
-        {
-          id: 'account-sign-out',
-          label: t('account.signOut'),
-          icon: 'sign-out',
-          onClick: handleSignOut,
-          'data-testid': 'account-menu-sign-out'
-        }
-      ]
-    : [
-        {
-          id: 'account-sign-in',
-          label: t('account.signIn'),
-          icon: 'sign-in',
-          onClick: handleSignIn,
-          'data-testid': 'account-menu-sign-in'
-        }
-      ]
+        <div className="account-card-actions">
+          {dashboardUrl !== undefined && (
+            <Button
+              link
+              icon="dashboard"
+              onClick={handleDashboard}
+              data-testid="account-card-dashboard"
+            >
+              {t('account.dashboard')}
+            </Button>
+          )}
+
+          {plan === 'community'
+            ? (
+              <Button
+                link
+                icon="rocket"
+                onClick={handleSubscribe}
+                data-testid="account-card-upgrade"
+              >
+                {t('account.upgradeToPro')}
+              </Button>
+            )
+            : (
+              <Button
+                link
+                icon="credit-card"
+                onClick={handleManageSubscription}
+                data-testid="account-card-manage-subscription"
+              >
+                {t('account.manageSubscription')}
+              </Button>
+            )}
+
+          <Button
+            link
+            icon="sign-out"
+            onClick={requestSignOut}
+            data-testid="account-card-sign-out"
+          >
+            {t('account.signOut')}
+          </Button>
+        </div>
+      </div>
+    )
+    : (
+      <div className="account-card account-card--signed-out" ref={cardRef} data-testid="account-card">
+        <Button
+          link
+          icon="sign-in"
+          onClick={handleSignIn}
+          data-testid="account-card-sign-in"
+        >
+          {t('account.signIn')}
+        </Button>
+      </div>
+    )
 
   return (
     <span className="account-button-anchor" ref={anchorRef} style={{ display: 'inline-flex' }}>
@@ -161,22 +250,52 @@ export const AccountButton: React.FC = () => {
         data-testid="titlebar-account-button"
         small
         secondary
+        aria-haspopup="dialog"
+        aria-expanded={open}
         icon={
           signedIn
             ? <Avatar name={displayName} imageUrl={user?.photoUrl} size={18} data-testid="titlebar-account-avatar" />
             : 'account'
         }
-        onClick={openMenu}
+        onClick={toggleOpen}
         options={{ ariaLabel: accountLabel }}
       />
-      <ContextMenu
-        visible={menu.visible}
-        x={menu.x}
-        y={menu.y}
-        items={menuItems}
-        data-testid="account-context-menu"
-        onRequestClose={closeMenu}
+      <Tooltip
+        targetRef={anchorRef}
+        placement="below"
+        content={card}
+        show={open}
+        className="account-card-tooltip"
+        data-testid="account-card-popover"
       />
+      <Modal
+        title={t('account.signOut')}
+        isOpen={confirmSignOutOpen}
+        onClose={cancelSignOut}
+        size="dialog"
+        data-testid="account-sign-out-confirm"
+      >
+        <div className="account-sign-out-confirm">
+          <p className="account-sign-out-confirm-message" data-testid="account-sign-out-confirm-message">
+            {t('account.signOutConfirm.message')}
+          </p>
+          <div className="account-sign-out-confirm-actions">
+            <Button
+              secondary
+              onClick={cancelSignOut}
+              data-testid="account-sign-out-confirm-cancel"
+            >
+              {t('account.signOutConfirm.cancel')}
+            </Button>
+            <Button
+              onClick={confirmSignOut}
+              data-testid="account-sign-out-confirm-yes"
+            >
+              {t('account.signOutConfirm.confirm')}
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </span>
   )
 }

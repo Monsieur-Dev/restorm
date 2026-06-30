@@ -358,3 +358,4 @@ export type { GatedControlProps } from './GatedControl'
 
 // AccountButton exports — cloud account avatar/login button for the app shell.
 export { AccountButton } from './AccountButton'
+export type { AccountButtonProps } from './AccountButton'

@@ -5,7 +5,13 @@
     "signIn": "Masuk",
     "signOut": "Keluar",
     "manageSubscription": "Kelola langganan",
-    "upgradeToPro": "Tingkatkan ke Pro"
+    "upgradeToPro": "Tingkatkan ke Pro",
+    "dashboard": "Dasbor",
+    "signOutConfirm": {
+      "message": "Yakin ingin keluar?",
+      "confirm": "Ya",
+      "cancel": "Batal"
+    }
   },
   "secrets": {
     "others": "Lainnya",

@@ -5,7 +5,13 @@
     "signIn": "Prijava",
     "signOut": "Odjava",
     "manageSubscription": "Upravljanje pretplatom",
-    "upgradeToPro": "Nadogradi na Pro"
+    "upgradeToPro": "Nadogradi na Pro",
+    "dashboard": "Nadzorna ploča",
+    "signOutConfirm": {
+      "message": "Jeste li sigurni da se želite odjaviti?",
+      "confirm": "Da",
+      "cancel": "Odustani"
+    }
   },
   "secrets": {
     "others": "Ostalo",

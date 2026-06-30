@@ -5,7 +5,13 @@
     "signIn": "Conectare",
     "signOut": "Deconectare",
     "manageSubscription": "Gestionează abonamentul",
-    "upgradeToPro": "Treci la Pro"
+    "upgradeToPro": "Treci la Pro",
+    "dashboard": "Tablou de bord",
+    "signOutConfirm": {
+      "message": "Sigur doriți să vă deconectați?",
+      "confirm": "Da",
+      "cancel": "Anulează"
+    }
   },
   "secrets": {
     "others": "Altele",

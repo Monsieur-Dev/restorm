@@ -5,7 +5,13 @@
     "signIn": "Bejelentkezés",
     "signOut": "Kijelentkezés",
     "manageSubscription": "Előfizetés kezelése",
-    "upgradeToPro": "Váltás Pro-ra"
+    "upgradeToPro": "Váltás Pro-ra",
+    "dashboard": "Irányítópult",
+    "signOutConfirm": {
+      "message": "Biztosan ki szeretne jelentkezni?",
+      "confirm": "Igen",
+      "cancel": "Mégse"
+    }
   },
   "secrets": {
     "others": "Egyéb",

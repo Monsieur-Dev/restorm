@@ -5,7 +5,13 @@
     "signIn": "Přihlásit se",
     "signOut": "Odhlásit se",
     "manageSubscription": "Spravovat předplatné",
-    "upgradeToPro": "Přejít na Pro"
+    "upgradeToPro": "Přejít na Pro",
+    "dashboard": "Řídicí panel",
+    "signOutConfirm": {
+      "message": "Opravdu se chcete odhlásit?",
+      "confirm": "Ano",
+      "cancel": "Zrušit"
+    }
   },
   "secrets": {
     "others": "Ostatní",

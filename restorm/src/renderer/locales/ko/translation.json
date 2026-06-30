@@ -5,7 +5,13 @@
     "signIn": "로그인",
     "signOut": "로그아웃",
     "manageSubscription": "구독 관리",
-    "upgradeToPro": "Pro로 업그레이드"
+    "upgradeToPro": "Pro로 업그레이드",
+    "dashboard": "대시보드",
+    "signOutConfirm": {
+      "message": "정말 로그아웃하시겠습니까?",
+      "confirm": "예",
+      "cancel": "취소"
+    }
   },
   "secrets": {
     "others": "기타",

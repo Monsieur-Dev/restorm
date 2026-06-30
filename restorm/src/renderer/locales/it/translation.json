@@ -5,7 +5,13 @@
     "signIn": "Accedi",
     "signOut": "Esci",
     "manageSubscription": "Gestisci abbonamento",
-    "upgradeToPro": "Passa a Pro"
+    "upgradeToPro": "Passa a Pro",
+    "dashboard": "Dashboard",
+    "signOutConfirm": {
+      "message": "Vuoi davvero disconnetterti?",
+      "confirm": "Sì",
+      "cancel": "Annulla"
+    }
   },
   "secrets": {
     "others": "Altri",

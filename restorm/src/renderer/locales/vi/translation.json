@@ -5,7 +5,13 @@
     "signIn": "Đăng nhập",
     "signOut": "Đăng xuất",
     "manageSubscription": "Quản lý đăng ký",
-    "upgradeToPro": "Nâng cấp lên Pro"
+    "upgradeToPro": "Nâng cấp lên Pro",
+    "dashboard": "Bảng điều khiển",
+    "signOutConfirm": {
+      "message": "Bạn có chắc muốn đăng xuất không?",
+      "confirm": "Có",
+      "cancel": "Hủy"
+    }
   },
   "secrets": {
     "others": "Khác",

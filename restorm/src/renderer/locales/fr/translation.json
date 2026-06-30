@@ -5,7 +5,13 @@
     "signIn": "Se connecter",
     "signOut": "Se déconnecter",
     "manageSubscription": "Gérer mon abonnement",
-    "upgradeToPro": "Passer à Pro"
+    "upgradeToPro": "Passer à Pro",
+    "dashboard": "Tableau de bord",
+    "signOutConfirm": {
+      "message": "Voulez-vous vraiment vous déconnecter ?",
+      "confirm": "Oui",
+      "cancel": "Annuler"
+    }
   },
   "secrets": {
     "others": "Autres",
