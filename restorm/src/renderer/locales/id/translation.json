@@ -1677,7 +1677,10 @@
       "byId": "Tetapkan berdasarkan id",
       "allLogs": "All logs",
       "note": "`--out file` juga menulis run-log ke sebuah file.",
-      "projectPlaceholder": "<project.restorm>"
+      "projectPlaceholder": "<project.restorm>",
+      "tokenPlaceholder": "<token_anda>",
+      "tokenNote": "Eksekusi headless memerlukan paket Restorm Pro dan token CI.",
+      "tokenLink": "Dapatkan token →"
     },
     "socketio": {
       "connectionNameLabel": "Connection name",

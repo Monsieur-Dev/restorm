@@ -1678,7 +1678,10 @@
       "byId": "Megadás id alapján",
       "allLogs": "All logs",
       "note": "A `--out file` a run-log fájlba írását is elvégzi.",
-      "projectPlaceholder": "<project.restorm>"
+      "projectPlaceholder": "<project.restorm>",
+      "tokenPlaceholder": "<token>",
+      "tokenNote": "A headless futtatáshoz Restorm Pro csomag és CI token szükséges.",
+      "tokenLink": "Token beszerzése →"
     },
     "socketio": {
       "connectionNameLabel": "Connection name",

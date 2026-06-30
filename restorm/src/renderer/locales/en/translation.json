@@ -1681,7 +1681,10 @@
       "byId": "Designate by id",
       "allLogs": "All logs",
       "note": "`--out file` also writes the run-log to a file.",
-      "projectPlaceholder": "<project.restorm>"
+      "projectPlaceholder": "<project.restorm>",
+      "tokenPlaceholder": "<your_token>",
+      "tokenNote": "A headless run requires a Restorm Pro plan and a CI token.",
+      "tokenLink": "Get a token →"
     },
     "socketio": {
       "connectionNameLabel": "Connection name",

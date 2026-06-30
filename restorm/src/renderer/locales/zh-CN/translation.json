@@ -1677,7 +1677,10 @@
       "byId": "按 id 指定",
       "allLogs": "All logs",
       "note": "`--out file` 还会将 run-log 写入文件。",
-      "projectPlaceholder": "<project.restorm>"
+      "projectPlaceholder": "<project.restorm>",
+      "tokenPlaceholder": "<token>",
+      "tokenNote": "无头运行需要 Restorm Pro 计划和 CI 令牌。",
+      "tokenLink": "获取令牌 →"
     },
     "socketio": {
       "connectionNameLabel": "Connection name",

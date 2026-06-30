@@ -1678,7 +1678,10 @@
       "byId": "Προσδιορισμός με id",
       "allLogs": "All logs",
       "note": "Το `--out file` γράφει επίσης το run-log σε αρχείο.",
-      "projectPlaceholder": "<project.restorm>"
+      "projectPlaceholder": "<project.restorm>",
+      "tokenPlaceholder": "<token>",
+      "tokenNote": "Μια εκτέλεση headless απαιτεί πλάνο Restorm Pro και CI token.",
+      "tokenLink": "Αποκτήστε token →"
     },
     "socketio": {
       "connectionNameLabel": "Connection name",

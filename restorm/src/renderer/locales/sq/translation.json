@@ -1678,7 +1678,10 @@
       "byId": "Cakto sipas id-së",
       "allLogs": "All logs",
       "note": "`--out file` e shkruan run-log-un edhe në një skedar.",
-      "projectPlaceholder": "<project.restorm>"
+      "projectPlaceholder": "<project.restorm>",
+      "tokenPlaceholder": "<token_juaj>",
+      "tokenNote": "Një ekzekutim headless kërkon një plan Restorm Pro dhe një token CI.",
+      "tokenLink": "Merr një token →"
     },
     "socketio": {
       "connectionNameLabel": "Connection name",

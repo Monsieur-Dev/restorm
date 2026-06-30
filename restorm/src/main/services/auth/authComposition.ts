@@ -201,6 +201,22 @@ export function initEntitlementService(version: string = app.getVersion()): Enti
   return instance
 }
 
+/**
+ * Create a channel-scoped, firewall-bypassed fetch for the backend Edge
+ * Functions host. Used by the headless CLI path (`checkHeadlessEntitlement`)
+ * which cannot go through `initEntitlementService` (requires
+ * `app.whenReady` + `safeStorage`). The fetch is identical to what the
+ * EntitlementService uses internally — same guarded fetch, same bypass scope.
+ */
+export function makeBackendFetch(version: string): typeof fetch {
+  const channel = resolveChannel(version)
+  const host = functionsHost(channel)
+  return makeGuardedFetch({
+    isEligibleUrl: (url) => isBackendFunctionsUrl(url, host),
+    bypass: withFirewallBypass
+  })
+}
+
 /** The initialized service, or throw if `initEntitlementService` hasn't run. */
 export function getEntitlementService(): EntitlementService {
   if (!instance) {

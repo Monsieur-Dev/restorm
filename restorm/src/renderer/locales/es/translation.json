@@ -1678,7 +1678,10 @@
       "byId": "Designar por id",
       "allLogs": "All logs",
       "note": "`--out archivo` también escribe el run-log en un archivo.",
-      "projectPlaceholder": "<project.restorm>"
+      "projectPlaceholder": "<project.restorm>",
+      "tokenPlaceholder": "<su_token>",
+      "tokenNote": "Una ejecución headless requiere un plan Restorm Pro y un token de CI.",
+      "tokenLink": "Obtener un token →"
     },
     "socketio": {
       "connectionNameLabel": "Connection name",

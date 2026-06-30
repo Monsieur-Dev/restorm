@@ -70,7 +70,8 @@ import { randomBytes } from 'node:crypto'
 import { MainWindow } from './windows/MainWindow'
 import { initializeApp, logger, initFileService, getFileService, isFileServiceInitialized, i18nService, initPersistenceService, isPersistenceServiceInitialized, FileService, getSettingsService, isSettingsServiceInitialized, getStorageService, initAutoSaveController, McpService, resolveMcpDiscoveryDir, writeMcpDiscoveryFile, cleanupMcpDiscoveryFile, firewallService, permissionService, registerFirewallIpc, installWorkerPatcher } from 'electron-core-ui'
 import { REOPEN_LAST_FILE_SETTING_KEY, REOPEN_LAST_FILE_STORAGE_KEY } from '../shared/config/reopenLastFile'
-import { resolveChannel } from '../shared/config/backend'
+import { resolveChannel, endpointUrl } from '../shared/config/backend'
+import { entitlementPublicKeyPem, isEntitlementPublicKeyConfigured } from './services/entitlement/keys'
 import { pricingUrl } from '../shared/config/site'
 // Restorm-specific renderer translations (notably the `behavior.*`
 // keys referenced by `restorm/resources/settings.yaml`). The main
@@ -93,9 +94,10 @@ import { registerActiveStateBridge } from './mcp/tools/activeState'
 import { RESTORM_MCP_INSTRUCTIONS } from './mcp/instructions'
 import { graphQLService, getFeatureService, isFeatureServiceInitialized } from 'electron-core-ui/main'
 import { clearUserSettings, parseCliArgs } from './cli/args'
+import { checkHeadlessEntitlement } from './cli/headlessEntitlementFetch'
 import { setupGraphQL } from './GraphQLSetup'
 import { registerRestormIPC } from './IPCHandlers'
-import { initEntitlementService, stopEntitlementAutoRefresh } from './services/auth/authComposition'
+import { initEntitlementService, stopEntitlementAutoRefresh, makeBackendFetch } from './services/auth/authComposition'
 import { createEntitlementEvaluator } from './services/entitlement/entitlementStrategy'
 import { installScenarioEngineIPC } from './scenarioEngine/ipcBridge'
 import { registerBuiltinSources } from './services/secrets/mainSourceRegistry'
@@ -1025,6 +1027,51 @@ if (cliArgs.cliRun && cliArgs.open !== undefined) {
     }
     try {
       await settingsReady()
+
+      // Gate: scenario.headless capability required.  The user must export
+      // RESTORM_TOKEN (an org-scoped PAT with rstk_… prefix, minted on their
+      // account) so CI runners can authenticate without a browser login.
+      const channel = resolveChannel(app.getVersion())
+      const entResult = await checkHeadlessEntitlement({
+        entitlementUrl: endpointUrl(channel, 'entitlement'),
+        publicKeyPem: entitlementPublicKeyPem(channel),
+        publicKeyConfigured: isEntitlementPublicKeyConfigured(channel),
+        fetchImpl: makeBackendFetch(app.getVersion())
+      })
+      if (!entResult.granted) {
+        const upgradeUrl = pricingUrl(channel)
+        switch (entResult.reason) {
+          case 'token-missing':
+            process.stderr.write(
+              'Headless scenario runs require a Restorm Pro plan and a CI token.\n' +
+              `Set RESTORM_TOKEN to a token minted on your account.\n` +
+              `Subscribe or get a token: ${upgradeUrl}\n`
+            )
+            break
+          case 'plan-insufficient':
+            process.stderr.write(
+              'Headless scenario runs require a Pro or Enterprise plan.\n' +
+              `Your CI token is valid but the org plan does not grant scenario.headless.\n` +
+              `Upgrade: ${upgradeUrl}\n`
+            )
+            break
+          case 'fetch-error':
+            process.stderr.write(
+              'Could not verify RESTORM_TOKEN: entitlement endpoint unreachable.\n' +
+              'Check your network connection and try again.\n'
+            )
+            break
+          default:
+            // 'token-invalid': bad signature / expired / revoked
+            process.stderr.write(
+              'RESTORM_TOKEN is invalid or has been revoked.\n' +
+              `Generate a new token on your account: ${upgradeUrl}\n`
+            )
+        }
+        app.exit(3)
+        return
+      }
+
       await loadProjectIntoStore(project)
       const code = await runScenarioHeadless(cliRun)
       app.exit(code)

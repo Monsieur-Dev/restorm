@@ -1678,7 +1678,10 @@
       "byId": "Ange med id",
       "allLogs": "All logs",
       "note": "`--out file` skriver även run-log till en fil.",
-      "projectPlaceholder": "<project.restorm>"
+      "projectPlaceholder": "<project.restorm>",
+      "tokenPlaceholder": "<din_token>",
+      "tokenNote": "En headless-körning kräver ett Restorm Pro-plan och en CI-token.",
+      "tokenLink": "Hämta token →"
     },
     "socketio": {
       "connectionNameLabel": "Connection name",

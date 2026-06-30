@@ -1677,7 +1677,10 @@
       "byId": "id로 지정",
       "allLogs": "All logs",
       "note": "`--out file`은 run-log도 파일에 기록합니다.",
-      "projectPlaceholder": "<project.restorm>"
+      "projectPlaceholder": "<project.restorm>",
+      "tokenPlaceholder": "<token>",
+      "tokenNote": "헤드리스 실행에는 Restorm Pro 플랜과 CI 토큰이 필요합니다.",
+      "tokenLink": "토큰 받기 →"
     },
     "socketio": {
       "connectionNameLabel": "Connection name",
