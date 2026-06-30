@@ -87,3 +87,9 @@ export type {
   DecomposeOptions
 } from '../main/services/saveUnit/decomposer'
 export type { SaveUnitKind, DirtyReason } from '../main/services/saveUnit/types'
+
+// Auth shared types — re-exported from renderer so renderer code can import
+// `AuthState`, `AUTH_IPC`, etc. from `electron-core-ui/renderer` without
+// crossing into the main-process module tree.
+export type { AuthState, CheckoutResult, PlanTier } from '../shared/auth/authState'
+export { AUTH_IPC, SIGNED_OUT_STATE, hasCapability } from '../shared/auth/authState'

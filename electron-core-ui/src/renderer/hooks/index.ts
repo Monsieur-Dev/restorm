@@ -23,3 +23,4 @@ export type { UseMcpMiniBrowserBridgeInput, MiniBrowserBridgeApi } from './useMc
 export { useMcpWorkbenchLayoutBridge } from './useMcpWorkbenchLayoutBridge'
 export type { UseMcpWorkbenchLayoutBridgeInput, WorkbenchLayoutBridgeApi } from './useMcpWorkbenchLayoutBridge'
 export { useOverlayPresence } from './useOverlayPresence'
+export { useAuthState } from './useAuthState'

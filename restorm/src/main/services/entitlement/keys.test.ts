@@ -1,7 +1,7 @@
 // @vitest-environment node
 import { describe, it, expect } from 'vitest'
 import { entitlementPublicKeyPem, isEntitlementPublicKeyConfigured } from './keys'
-import { importEntitlementPublicKey } from './entitlementClient'
+import { importEntitlementPublicKey } from 'electron-core-ui/main'
 
 describe('entitlement keys', () => {
   it('the embedded DEV (preview) key is a real, importable Ed25519 SPKI key', async () => {

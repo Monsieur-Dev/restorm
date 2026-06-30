@@ -61,6 +61,10 @@ export default tseslint.config(
       'no-multiple-empty-lines': ['error', { max: 1, maxEOF: 0 }],
       // Allow numbers and booleans in template literals (common for CSS values)
       '@typescript-eslint/restrict-template-expressions': ['error', { allowNumber: true, allowBoolean: true }],
+      // When TypeScript's `noPropertyAccessFromIndexSignature` is on, bracket notation
+      // is REQUIRED for index-signed types (Record<string,…>) — the dot-notation rule
+      // must not conflict with the compiler flag.
+      '@typescript-eslint/dot-notation': ['error', { allowIndexSignaturePropertyAccess: true }],
       // STRICT: Block all eslint-disable usage
       'eslint-comments/no-restricted-disable': ['error', '*'],
       'eslint-comments/no-unused-disable': 'error',

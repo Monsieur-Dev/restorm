@@ -24,7 +24,6 @@ import {
   SIGNED_OUT_STATE,
   type AuthState,
   type AuthUser,
-  type Capability,
   type PlanTier
 } from '../../../shared/auth/authState'
 
@@ -33,18 +32,12 @@ import {
 /**
  * Seed a Pro entitlement without a real JWT. Called from the composition root
  * ONLY when `!app.isPackaged` (enforced by the caller) AND the explicit opt-in
- * env var `RESTORM_E2E_ENTITLEMENT_PLAN=pro` is set.
- *
- * Capabilities: the cloud's exact pro set lives in
- * `cloud/supabase/functions/_shared/providers/capabilities.ts` and is not
- * locally available here, so we seed only the capabilities the e2e exercises.
- * Adding `mcp.pro` unblocks the mcp-server e2e (set_tab_maximized etc.);
- * extend this list when new Pro-feature e2e suites are added.
+ * env var is set.
  *
  * Returns `true` when the seed was applied; `false` when the guard rejects it
  * (isPackaged or wrong envPlan). The return value is used for logging.
  */
-export const E2E_PRO_CAPABILITIES: readonly Capability[] = [
+export const E2E_PRO_CAPABILITIES: readonly string[] = [
   'mcp.pro'
   // NOTE: extend here if new Pro-feature e2e suites require additional caps.
 ]
@@ -94,10 +87,14 @@ export interface EntitlementServiceDeps {
   /** Host-guarded (firewall-bypassed) fetch for backend calls. */
   fetchImpl: typeof fetch
   /** Drive the browser loopback login → session JWT. The `signal` lets a fresh
-   * sign-in cancel the in-flight attempt (restartable « Se connecter » retry). */
+   * sign-in cancel the in-flight attempt (restartable retry). */
   login: (signal?: AbortSignal) => Promise<string>
   /** Push a new state to all renderers (the `auth:state-changed` broadcast). */
   broadcast: (channel: string, state: AuthState) => void
+  /** The expected audience of entitlement tokens (e.g. `'myapp-entitlement'`). */
+  entitlementAudience: string
+  /** The expected audience of session tokens (e.g. `'myapp-session'`). */
+  sessionAudience: string
   /** Injectable clock (epoch ms). */
   now?: () => number
   /** Structured logger (never receives tokens). */
@@ -122,10 +119,6 @@ export class EntitlementService {
     this.log = deps.log ?? ((): void => undefined)
   }
 
-  private now(): number {
-    return this.deps.now?.() ?? Date.now()
-  }
-
   private get keyConfigured(): boolean {
     return this.deps.publicKeyConfigured ?? true
   }
@@ -138,7 +131,7 @@ export class EntitlementService {
    */
   async init(): Promise<void> {
     const cached = this.deps.store.load()
-    if (cached && !isSessionExpired(cached.sessionToken, nowSeconds(this.deps.now))) {
+    if (cached && !isSessionExpired(cached.sessionToken, nowSeconds(this.deps.now), this.deps.sessionAudience)) {
       this.sessionToken = cached.sessionToken
       if (cached.entitlementToken) {
         const claims = await this.verifyCached(cached.entitlementToken)
@@ -168,10 +161,9 @@ export class EntitlementService {
    *
    * Restartable: a sign-in while a previous attempt is still in flight CANCELS
    * the stale attempt (closes its loopback listener + invalidates its nonce) and
-   * starts a fresh one — the « Se connecter » retry path when the first attempt
-   * opened the wrong browser/profile or was abandoned. The superseded attempt
-   * resolves to the current snapshot rather than throwing, so a fire-and-forget
-   * caller never sees an unhandled rejection from being retried.
+   * starts a fresh one. The superseded attempt resolves to the current snapshot
+   * rather than throwing, so a fire-and-forget caller never sees an unhandled
+   * rejection from being retried.
    */
   async signIn(): Promise<AuthState> {
     this.loginAbort?.abort()
@@ -226,7 +218,7 @@ export class EntitlementService {
    * (e.g. 403 admin-only) / network errors so the IPC layer can map them.
    */
   async startCheckout(): Promise<{ checkoutUrl: string | null } | null> {
-    if (!this.sessionToken || isSessionExpired(this.sessionToken, nowSeconds(this.deps.now))) {
+    if (!this.sessionToken || isSessionExpired(this.sessionToken, nowSeconds(this.deps.now), this.deps.sessionAudience)) {
       return null
     }
     const checkoutUrl = await createCheckout(this.deps.checkoutUrl, this.sessionToken, this.deps.fetchImpl)
@@ -278,7 +270,10 @@ export class EntitlementService {
     }
     try {
       this.importedKey ??= await importEntitlementPublicKey(this.deps.publicKeyPem)
-      return await verifyEntitlementToken(token, this.importedKey, { now: this.deps.now })
+      return await verifyEntitlementToken(token, this.importedKey, {
+        ...(this.deps.now !== undefined ? { now: this.deps.now } : {}),
+        audience: this.deps.entitlementAudience
+      })
     } catch (err) {
       this.log('auth: entitlement verification failed', {
         message: err instanceof Error ? err.message : String(err)
@@ -309,7 +304,7 @@ export class EntitlementService {
     // Dev-only seam: return the injected snapshot verbatim, bypassing JWT path.
     if (this.seededState) return { ...this.seededState }
 
-    if (!this.sessionToken || isSessionExpired(this.sessionToken, nowSeconds(this.deps.now))) {
+    if (!this.sessionToken || isSessionExpired(this.sessionToken, nowSeconds(this.deps.now), this.deps.sessionAudience)) {
       return { ...SIGNED_OUT_STATE, capabilities: [] }
     }
     const session = decodeSessionInfo(this.sessionToken)
@@ -321,7 +316,7 @@ export class EntitlementService {
     if (session?.photoUrl) user.photoUrl = session.photoUrl
 
     let plan: PlanTier = 'community'
-    let capabilities: Capability[] = []
+    let capabilities: string[] = []
     if (this.entitlement && isWithinGrace(this.entitlement.claims, nowSeconds(this.deps.now))) {
       plan = this.entitlement.claims.plan
       capabilities = [...this.entitlement.claims.capabilities]

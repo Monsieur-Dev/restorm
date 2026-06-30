@@ -1,7 +1,7 @@
 // @vitest-environment node
 import { describe, it, expect, beforeAll, vi, type Mock } from 'vitest'
 import { EntitlementService, seedEntitlementForE2E, type EntitlementServiceDeps } from './EntitlementService'
-import { generateEdKeyPair, signEntitlement, signSession, type EdKeyPair } from './entitlementTestKit'
+import { generateEdKeyPair, signEntitlement, signSession, type EdKeyPair, ENTITLEMENT_AUD, SESSION_AUD } from './entitlementTestKit'
 import type { AuthState } from '../../../shared/auth/authState'
 
 const IAT = 1_700_000_000
@@ -57,10 +57,12 @@ function makeHarness(opts: {
     entitlementUrl: 'https://x.supabase.co/functions/v1/entitlement',
     checkoutUrl: 'https://x.supabase.co/functions/v1/checkout',
     publicKeyPem: keys.publicSpkiPem,
+    entitlementAudience: ENTITLEMENT_AUD,
+    sessionAudience: SESSION_AUD,
     fetchImpl: fetchMock as unknown as typeof fetch,
     login: loginMock,
     broadcast: (_channel, state) => { broadcasts.push(state) },
-    now: opts.now,
+    ...(opts.now !== undefined ? { now: opts.now } : {}),
     log: () => undefined
   }
   const service = new EntitlementService(deps)
@@ -137,8 +139,6 @@ describe('EntitlementService — sign in / out', () => {
   })
 
   it('restartable: a second signIn supersedes the in-flight attempt and relaunches login', async () => {
-    // 128.26: « Se connecter » must be restartable — a 2nd click while the first
-    // attempt is in flight CANCELS the stale one and starts fresh (not coalesce).
     const sessionToken = await signSession({ secret: SESSION_SECRET, iatSeconds: IAT })
     const entitlementToken = await signEntitlement({ privateKey: keys.privateKey, iatSeconds: IAT })
     const h = makeHarness({ now: at(10), sessionToken, entitlementToken })
@@ -349,7 +349,7 @@ describe('EntitlementService — startCheckout', () => {
     const lastCall = last(h.fetchMock.mock.calls) as unknown as [string, RequestInit]
     expect(lastCall[0]).toContain('/checkout')
     expect(lastCall[1].method).toBe('POST')
-    expect((lastCall[1].headers as Record<string, string>).authorization).toBe(`Bearer ${sessionToken}`)
+    expect((lastCall[1].headers as Record<string, string>)['authorization']).toBe(`Bearer ${sessionToken}`)
   })
 
   it('surfaces a backend HTTP error (e.g. 403 admin-only) by throwing', async () => {

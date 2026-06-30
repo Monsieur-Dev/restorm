@@ -9,12 +9,18 @@ const TEST_PRICING_URL = 'https://test.restorm.example/pricing'
 // Capture the props the wrapper hands to the generic ECUI indicator so we can
 // assert the Pro-upsell wiring without rendering the real popover.
 const lastProps: { current: Record<string, unknown> | null } = { current: null }
-vi.mock('electron-core-ui/renderer', () => ({
-  StatusbarMcpIndicator: (props: Record<string, unknown>) => {
-    lastProps.current = props
-    return null
+// The renderer barrel loads Monaco (needs document.queryCommandSupported, absent in jsdom).
+// Import useAuthState from its source file directly; stub only StatusbarMcpIndicator.
+vi.mock('electron-core-ui/renderer', async () => {
+  const { useAuthState } = await import('../../../../../../electron-core-ui/src/renderer/hooks/useAuthState')
+  return {
+    useAuthState,
+    StatusbarMcpIndicator: (props: Record<string, unknown>) => {
+      lastProps.current = props
+      return null
+    }
   }
-}))
+})
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key: string) => key })
 }))

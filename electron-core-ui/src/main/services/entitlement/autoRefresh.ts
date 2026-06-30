@@ -37,7 +37,10 @@ export interface AutoRefreshOptions {
   minGapMs?: number
   /** Injectable clock (epoch ms); defaults to `Date.now`. */
   now?: () => number
-  /** Injectable timer (defaults to the global) — overridden in tests. */
+  /** Injectable timer (defaults to the global) — overridden in tests.
+   * Typed to `ReturnType<typeof setInterval>` which resolves to `NodeJS.Timeout`
+   * in Node context and `number` in DOM-only context; the implementations
+   * are fully compatible in both environments. */
   setIntervalImpl?: (handler: () => void, ms: number) => ReturnType<typeof setInterval>
   clearIntervalImpl?: (handle: ReturnType<typeof setInterval>) => void
 }
@@ -68,7 +71,9 @@ export function startEntitlementAutoRefresh(options: AutoRefreshOptions): () => 
     refresh()
   }
 
-  const timer = setIntervalImpl(maybeRefresh, intervalMs)
+  // Cast to the explicit type so the compiler doesn't see a `number | Timeout`
+  // union when both DOM and @types/node overloads of `setInterval` are in scope.
+  const timer = setIntervalImpl(maybeRefresh, intervalMs) as ReturnType<typeof setInterval>
   const unsubscribeFocus = onFocus(maybeRefresh)
 
   return (): void => {

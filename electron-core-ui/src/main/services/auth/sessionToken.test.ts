@@ -1,9 +1,12 @@
 // @vitest-environment node
 import { describe, it, expect, beforeAll } from 'vitest'
-import { decodeSessionInfo, isSessionExpired, SESSION_AUDIENCE } from './sessionToken'
+import { decodeSessionInfo, isSessionExpired } from './sessionToken'
 import { signSession } from '../entitlement/entitlementTestKit'
 
 const IAT = 1_700_000_000
+// Local audience constant — SESSION_AUDIENCE is no longer exported by ECUI's
+// sessionToken (it is injected by the caller). Use the test kit's value.
+const SESSION_AUD = 'restorm-session'
 
 describe('sessionToken', () => {
   let token: string
@@ -15,7 +18,7 @@ describe('sessionToken', () => {
     const info = decodeSessionInfo(token)
     expect(info?.email).toBe('u@e.com')
     expect(info?.org).toBe('org-9')
-    expect(info?.aud).toBe(SESSION_AUDIENCE)
+    expect(info?.aud).toBe(SESSION_AUD)
     expect(info?.exp).toBe(IAT + 60 * 60 * 24 * 30)
   })
 
@@ -44,13 +47,13 @@ describe('sessionToken', () => {
   })
 
   it('isSessionExpired is false before exp and true after', () => {
-    expect(isSessionExpired(token, IAT + 60 * 60 * 24 * 29)).toBe(false)
-    expect(isSessionExpired(token, IAT + 60 * 60 * 24 * 31)).toBe(true)
+    expect(isSessionExpired(token, IAT + 60 * 60 * 24 * 29, SESSION_AUD)).toBe(false)
+    expect(isSessionExpired(token, IAT + 60 * 60 * 24 * 31, SESSION_AUD)).toBe(true)
   })
 
   it('treats a malformed / missing-exp / wrong-aud token as expired', async () => {
-    expect(isSessionExpired('garbage', IAT)).toBe(true)
+    expect(isSessionExpired('garbage', IAT, SESSION_AUD)).toBe(true)
     const wrongAud = await signSession({ secret: 'a-secret-at-least-32-bytes-long-xxxxxx', iatSeconds: IAT, audience: 'restorm-state' })
-    expect(isSessionExpired(wrongAud, IAT + 10)).toBe(true)
+    expect(isSessionExpired(wrongAud, IAT + 10, SESSION_AUD)).toBe(true)
   })
 })
