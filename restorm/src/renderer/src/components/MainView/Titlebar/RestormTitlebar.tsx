@@ -7,13 +7,13 @@ import {
   MenuItem,
   MenuItemSeparator,
   Button,
+  AccountButton,
   useSettingsModal,
   useFeature,
   type SearchResult
 } from 'electron-core-ui/renderer'
 import { renderSearchTooltipContent } from './renderSearchTooltipContent'
 import { HeaderHoverTooltip } from '../HeaderHoverTooltip'
-import { AccountButton } from './AccountButton'
 import { Badge } from '../../common/Badge'
 import { mapToBadgeType } from '../../../utils/badgeUtils'
 import { useMcpEnabled } from '../../../hooks/useMcpEnabled'

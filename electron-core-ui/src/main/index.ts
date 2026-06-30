@@ -255,3 +255,66 @@ export type {
   FileServiceState,
   FileServiceApi
 } from '../types/file'
+
+// ── Auth / entitlement ─────────────────────────────────────────────────────
+// Shared auth types (AuthState, AUTH_IPC, CheckoutResult, PlanTier …)
+export type { AuthState, CheckoutResult, PlanTier } from './services'
+export { AUTH_IPC, SIGNED_OUT_STATE, hasCapability } from './services'
+
+// AuthStore — encrypted safeStorage for session + entitlement tokens.
+export { AuthStore } from './services'
+export type { SecureStoragePort, AuthStoreFs, PersistedAuth } from './services'
+
+// SessionToken — HS256 session JWT utilities.
+export { isSessionExpired, NO_CAPABILITIES } from './services'
+
+// GuardedFetch — network requests gated by an `isEligibleUrl` predicate.
+export { makeGuardedFetch } from './services'
+export type { GuardedFetchDeps } from './services'
+
+// LoopbackLogin — RFC 8252 loopback OAuth flow.
+export {
+  loopbackLogin,
+  evaluateCallback,
+  generateLoopbackNonce,
+  buildLoginUrl,
+  LoopbackLoginCancelledError
+} from './services'
+export type { LoopbackLoginDeps, CallbackVerdict } from './services'
+
+// AvatarFirewallExemption — per-session CDN host exemption in the firewall.
+export { AvatarFirewallExemption, avatarHostOf } from './services'
+export type { SystemHostAllowlist } from './services'
+
+// AuthIpc — registers `auth:*` IPC channels on the main process.
+export { registerAuthIpc, broadcastAuthState } from './services'
+
+// EntitlementService — reactive capability source of truth.
+export { EntitlementService, E2E_PRO_CAPABILITIES, seedEntitlementForE2E } from './services'
+export type { EntitlementServiceDeps } from './services'
+
+// EntitlementClient — fetch, verify and cache the EdDSA entitlement JWT.
+export {
+  fetchEntitlement,
+  verifyEntitlementToken,
+  importEntitlementPublicKey,
+  createCheckout,
+  isWithinGrace,
+  needsRefresh,
+  nowSeconds,
+  CheckoutHttpError,
+  DEFAULT_CHECKOUT_REQUEST
+} from './services'
+export type { EntitlementClaims, EntitlementResponse, CheckoutRequest } from './services'
+
+// AutoRefresh — interval + focus-triggered entitlement refresh.
+export {
+  startEntitlementAutoRefresh,
+  DEFAULT_AUTO_REFRESH_INTERVAL_MS,
+  DEFAULT_AUTO_REFRESH_MIN_GAP_MS
+} from './services'
+export type { AutoRefreshOptions } from './services'
+
+// EntitlementTestKit — test-only helpers for signing EdDSA tokens.
+export { generateEdKeyPair, signEntitlement, signSession, ENTITLEMENT_AUD, SESSION_AUD } from './services'
+export type { EdKeyPair, FixtureEntitlementOpts } from './services'

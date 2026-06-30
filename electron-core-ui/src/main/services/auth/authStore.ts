@@ -45,8 +45,8 @@ interface Envelope {
 function isPersistedAuth(value: unknown): value is PersistedAuth {
   if (typeof value !== 'object' || value === null) return false
   const v = value as Record<string, unknown>
-  return typeof v.sessionToken === 'string' &&
-    (v.entitlementToken === null || typeof v.entitlementToken === 'string')
+  return typeof v['sessionToken'] === 'string' &&
+    (v['entitlementToken'] === null || typeof v['entitlementToken'] === 'string')
 }
 
 export class AuthStore {

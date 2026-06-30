@@ -5,11 +5,9 @@ import {
   fetchEntitlement,
   createCheckout,
   isWithinGrace,
-  needsRefresh,
-  ENTITLEMENT_AUDIENCE
+  needsRefresh
 } from './entitlementClient'
-import { entitlementPublicKeyPem } from './keys'
-import { generateEdKeyPair, signEntitlement, type EdKeyPair } from './entitlementTestKit'
+import { generateEdKeyPair, signEntitlement, type EdKeyPair, ENTITLEMENT_AUD } from './entitlementTestKit'
 
 const IAT = 1_700_000_000 // fixed epoch seconds for determinism
 const at = (secondsAfterIat: number): (() => number) => () => (IAT + secondsAfterIat) * 1000
@@ -29,7 +27,7 @@ describe('verifyEntitlementToken', () => {
       plan: 'pro',
       capabilities: ['scenario.stepDebug', 'scenario.headless']
     })
-    const claims = await verifyEntitlementToken(token, keys.publicSpkiPem, { now: at(60) })
+    const claims = await verifyEntitlementToken(token, keys.publicSpkiPem, { now: at(60), audience: ENTITLEMENT_AUD })
     expect(claims.org).toBe('org-42')
     expect(claims.plan).toBe('pro')
     expect(claims.capabilities).toEqual(['scenario.stepDebug', 'scenario.headless'])
@@ -41,28 +39,21 @@ describe('verifyEntitlementToken', () => {
     // The exact attack we must defeat: take a valid `pro` token and rewrite the
     // payload to `enterprise`, keeping the original signature.
     const token = await signEntitlement({ privateKey: keys.privateKey, iatSeconds: IAT, plan: 'pro' })
-    const [h, p, s] = token.split('.')
+    const tokenParts = token.split('.')
+    const [h, p, s] = tokenParts
+    if (p === undefined || s === undefined) throw new Error('unexpected token shape')
     const payload = JSON.parse(Buffer.from(p, 'base64url').toString('utf8')) as Record<string, unknown>
-    payload.plan = 'enterprise'
-    payload.capabilities = ['scenario.stepDebug', 'sso', 'scim']
+    payload['plan'] = 'enterprise'
+    payload['capabilities'] = ['scenario.stepDebug', 'sso', 'scim']
     const forgedPayload = Buffer.from(JSON.stringify(payload)).toString('base64url')
     const tampered = `${h}.${forgedPayload}.${s}`
-    await expect(verifyEntitlementToken(tampered, keys.publicSpkiPem, { now: at(60) })).rejects.toThrow()
+    await expect(verifyEntitlementToken(tampered, keys.publicSpkiPem, { now: at(60), audience: ENTITLEMENT_AUD })).rejects.toThrow()
   })
 
   it('rejects a token signed by a DIFFERENT key (wrong key)', async () => {
     const other = await generateEdKeyPair()
     const token = await signEntitlement({ privateKey: other.privateKey, iatSeconds: IAT })
-    await expect(verifyEntitlementToken(token, keys.publicSpkiPem, { now: at(60) })).rejects.toThrow()
-  })
-
-  it('rejects a token NOT signed by the embedded DEV key', async () => {
-    // Forge-resistance against the real embedded key: an attacker without the
-    // DEV private key cannot mint anything the app will accept.
-    const token = await signEntitlement({ privateKey: keys.privateKey, iatSeconds: IAT })
-    await expect(
-      verifyEntitlementToken(token, entitlementPublicKeyPem('preview'), { now: at(60) })
-    ).rejects.toThrow()
+    await expect(verifyEntitlementToken(token, keys.publicSpkiPem, { now: at(60), audience: ENTITLEMENT_AUD })).rejects.toThrow()
   })
 
   it('rejects an HS256 / alg-confusion token (algorithms pinned to EdDSA)', async () => {
@@ -72,7 +63,7 @@ describe('verifyEntitlementToken', () => {
     const [, p, s] = token.split('.')
     const forgedHeader = Buffer.from(JSON.stringify({ alg: 'HS256', typ: 'JWT' })).toString('base64url')
     const forged = `${forgedHeader}.${p}.${s}`
-    await expect(verifyEntitlementToken(forged, keys.publicSpkiPem, { now: at(60) })).rejects.toThrow()
+    await expect(verifyEntitlementToken(forged, keys.publicSpkiPem, { now: at(60), audience: ENTITLEMENT_AUD })).rejects.toThrow()
   })
 
   it('rejects a wrong-audience token (token-confusion guard)', async () => {
@@ -81,7 +72,7 @@ describe('verifyEntitlementToken', () => {
       iatSeconds: IAT,
       audience: 'restorm-session'
     })
-    await expect(verifyEntitlementToken(token, keys.publicSpkiPem, { now: at(60) })).rejects.toThrow()
+    await expect(verifyEntitlementToken(token, keys.publicSpkiPem, { now: at(60), audience: ENTITLEMENT_AUD })).rejects.toThrow()
   })
 
   it('rejects a token past its exp (grace ceiling), even with a valid signature', async () => {
@@ -91,11 +82,7 @@ describe('verifyEntitlementToken', () => {
       graceSeconds: 100
     })
     // now = iat + 200s > exp (iat + 100s)
-    await expect(verifyEntitlementToken(token, keys.publicSpkiPem, { now: at(200) })).rejects.toThrow()
-  })
-
-  it('matches the backend audience constant', () => {
-    expect(ENTITLEMENT_AUDIENCE).toBe('restorm-entitlement')
+    await expect(verifyEntitlementToken(token, keys.publicSpkiPem, { now: at(200), audience: ENTITLEMENT_AUD })).rejects.toThrow()
   })
 })
 
@@ -121,7 +108,7 @@ describe('fetchEntitlement', () => {
     let seenAuth = ''
     const fetchImpl = ((url: string, init?: RequestInit) => {
       seenUrl = url
-      seenAuth = (init?.headers as Record<string, string>).authorization
+      seenAuth = (init?.headers as Record<string, string>)['authorization'] ?? ''
       return Promise.resolve(new Response(JSON.stringify({ entitlement: 'signed.jwt.here', plan: 'pro' }), { status: 200 }))
     }) as unknown as typeof fetch
 
@@ -157,8 +144,8 @@ describe('createCheckout', () => {
       seenUrl = url
       seenMethod = init?.method ?? ''
       const headers = init?.headers as Record<string, string>
-      seenAuth = headers.authorization
-      seenContentType = headers['content-type']
+      seenAuth = headers['authorization'] ?? ''
+      seenContentType = headers['content-type'] ?? ''
       seenBody = init?.body as string
       return Promise.resolve(new Response(JSON.stringify({ transactionId: 'txn_1', checkoutUrl: 'https://pay.paddle.com/abc' }), { status: 200 }))
     }) as unknown as typeof fetch

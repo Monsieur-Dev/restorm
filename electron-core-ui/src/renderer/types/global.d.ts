@@ -4,6 +4,7 @@ import type { ThemeInfo, ThemeDefinition, ThemeVariables } from '../../types/the
 import type { FeaturePlatform } from '../../types/feature'
 import type { FileServiceState, FileMetadata, SerializationFormat } from '../../types/file'
 import type { SettingValue, ResolvedSetting, SettingsGroup } from '../../types/settings'
+import type { AuthState, CheckoutResult } from '../../shared/auth/authState'
 
 interface WindowApiTheme {
   list: () => Promise<ThemeInfo[]>
@@ -99,6 +100,19 @@ interface WindowApiSearch {
   getDocumentCount: () => Promise<number>
 }
 
+interface WindowApiAccount {
+  /** Trigger RFC 8252 loopback login; resolves to the resulting AuthState. */
+  login: () => Promise<AuthState>
+  /** Clear the local session (safeStorage wipe) and broadcast signed-out state. */
+  logout: () => Promise<AuthState>
+  /** Return the current in-memory AuthState snapshot (no IPC round-trip). */
+  getState: () => Promise<AuthState>
+  /** Subscribe to live state transitions; returns an unsubscribe function. */
+  onStateChanged: (callback: (state: AuthState) => void) => () => void
+  /** Open the Paddle checkout URL for upgrading to Pro. */
+  subscribe: () => Promise<CheckoutResult>
+}
+
 interface WindowApiSettings {
   get: (storageKey: string) => Promise<SettingValue | null>
   set: (storageKey: string, value: SettingValue) => Promise<boolean>
@@ -137,6 +151,8 @@ interface WindowApi {
   eventBus: WindowApiEventBus
   search: WindowApiSearch
   settings: WindowApiSettings
+  /** Cloud account: session login/logout + live entitlement state. */
+  account: WindowApiAccount
   minimizeWindow: () => Promise<void>
   maximizeWindow: () => Promise<void>
   closeWindow: () => Promise<void>

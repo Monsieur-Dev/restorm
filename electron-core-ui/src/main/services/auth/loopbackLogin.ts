@@ -54,6 +54,16 @@ export interface LoopbackLoginDeps {
    * can no longer complete a login.
    */
   signal?: AbortSignal
+  /**
+   * Optional HTML page shown to the user in their browser on a SUCCESSFUL login.
+   * Falls back to a generic "Signed in" page. Inject to show the app's own branding.
+   */
+  successHtml?: string
+  /**
+   * Optional HTML page shown to the user in their browser when the callback FAILS.
+   * Falls back to a generic error page. Inject to show the app's own branding.
+   */
+  errorHtml?: string
 }
 
 /**
@@ -92,13 +102,13 @@ export interface CallbackVerdict {
   code?: string
 }
 
-const SUCCESS_HTML =
-  '<!doctype html><meta charset="utf-8"><title>Restorm</title>' +
+const DEFAULT_SUCCESS_HTML =
+  '<!doctype html><meta charset="utf-8"><title>Signed in</title>' +
   '<body style="font-family:system-ui;text-align:center;padding-top:3rem">' +
-  '<h2>Signed in to Restorm</h2><p>You can close this tab and return to the app.</p></body>'
+  '<h2>Signed in</h2><p>You can close this tab and return to the app.</p></body>'
 
-const ERROR_HTML =
-  '<!doctype html><meta charset="utf-8"><title>Restorm</title>' +
+const DEFAULT_ERROR_HTML =
+  '<!doctype html><meta charset="utf-8"><title>Login error</title>' +
   '<body style="font-family:system-ui;text-align:center;padding-top:3rem">' +
   '<h2>Login could not be completed</h2><p>Please return to the app and try again.</p></body>'
 
@@ -107,26 +117,37 @@ const ERROR_HTML =
  * Only a GET to `/callback` carrying `code` and a `state` that EQUALS our nonce
  * yields the code; everything else is refused without aborting the wait (a
  * stray/forged hit on the loopback port must not derail the legitimate flow).
+ *
+ * @param successHtml - optional branded success page
+ * @param errorHtml   - optional branded error page
  */
-export function evaluateCallback(method: string | undefined, rawUrl: string | undefined, expectedNonce: string): CallbackVerdict {
-  if (method !== 'GET') return { status: 405, body: ERROR_HTML }
+export function evaluateCallback(
+  method: string | undefined,
+  rawUrl: string | undefined,
+  expectedNonce: string,
+  successHtml?: string,
+  errorHtml?: string
+): CallbackVerdict {
+  const errBody = errorHtml ?? DEFAULT_ERROR_HTML
+  const okBody = successHtml ?? DEFAULT_SUCCESS_HTML
+  if (method !== 'GET') return { status: 405, body: errBody }
   let url: URL
   try {
     // rawUrl is path-relative ("/callback?..."); base host is irrelevant here.
     url = new URL(rawUrl ?? '', 'http://127.0.0.1')
   } catch {
-    return { status: 400, body: ERROR_HTML }
+    return { status: 400, body: errBody }
   }
-  if (url.pathname !== '/callback') return { status: 404, body: ERROR_HTML }
+  if (url.pathname !== '/callback') return { status: 404, body: errBody }
 
   const code = url.searchParams.get('code') ?? ''
   const state = url.searchParams.get('state') ?? ''
   // Constant-ish comparison is unnecessary (the nonce is single-use and local),
   // but the equality MUST hold before we accept the code.
-  if (state.length === 0 || state !== expectedNonce) return { status: 400, body: ERROR_HTML }
-  if (code.length === 0 || code.length > 4096) return { status: 400, body: ERROR_HTML }
+  if (state.length === 0 || state !== expectedNonce) return { status: 400, body: errBody }
+  if (code.length === 0 || code.length > 4096) return { status: 400, body: errBody }
 
-  return { status: 200, body: SUCCESS_HTML, code }
+  return { status: 200, body: okBody, code }
 }
 
 /** Redeem the one-time code at the `session` endpoint → the session JWT string. */
@@ -168,7 +189,7 @@ export async function loopbackLogin(deps: LoopbackLoginDeps): Promise<string> {
     let onAbort: (() => void) | null = null
 
     const server = createServer((req: IncomingMessage, res: ServerResponse) => {
-      const verdict = evaluateCallback(req.method, req.url, nonce)
+      const verdict = evaluateCallback(req.method, req.url, nonce, deps.successHtml, deps.errorHtml)
       res.writeHead(verdict.status, { 'content-type': 'text/html; charset=utf-8' })
       res.end(verdict.body)
       if (verdict.code) succeed(verdict.code)

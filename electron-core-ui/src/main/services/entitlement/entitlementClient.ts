@@ -2,28 +2,31 @@
  * Entitlement client — fetches the signed entitlement from the
  * backend and verifies it OFFLINE, plus the grace / refresh time arithmetic.
  *
- * Security contract (mirrors `cloud/supabase/functions/_shared/entitlement.ts`
- * EXACTLY so the two never drift):
+ * Security contract:
  *   - the token is EdDSA (Ed25519), verified with the embedded PUBLIC key;
  *   - verification PINS `algorithms: ['EdDSA']` so a forged `alg:none` / HS256
  *     token is rejected (alg-confusion guard);
- *   - the audience is PINNED to `restorm-entitlement` so a session / state token
- *     can never be replayed as an entitlement (token-confusion guard);
+ *   - the audience is PINNED to the injected `audience` string so a session /
+ *     state token can never be replayed as an entitlement (token-confusion guard);
  *   - `exp` (iat + 15d) is enforced by the verify itself — a cached token past
  *     its hard grace ceiling is cryptographically unusable, even offline.
  *
  * We use `jose` (the same library the backend signs with) rather than hand-rolled
  * crypto: offline licence verification is exactly where a subtle JWT bug
  * (skipped exp, alg confusion, base64url edge case) defeats the whole model.
+ *
+ * The audience is injected via `verifyEntitlementToken`'s opts so this module
+ * stays generic — a host app binds its own audience value.
  */
 
 import * as jose from 'jose'
-import type { Capability, PlanTier } from '../../../shared/auth/authState'
+import type { PlanTier } from '../../../shared/auth/authState'
 
-/** PINNED audience — must equal the backend's `AUD_ENTITLEMENT`. */
-export const ENTITLEMENT_AUDIENCE = 'restorm-entitlement'
-/** PINNED algorithm — Ed25519 only. */
-const ENTITLEMENT_ALGS = ['EdDSA']
+/** PINNED algorithm — Ed25519 only. The literal constant is used for `importSPKI`
+ * (which expects a string literal), while the mutable array is passed to `jwtVerify`
+ * (which expects `string[]`). */
+const ENTITLEMENT_ALG = 'EdDSA' as const
+const ENTITLEMENT_ALGS: string[] = [ENTITLEMENT_ALG]
 
 /** The verified entitlement claims (recovered from a valid token). Mirrors the
  * backend `EntitlementClaims`. `org` is the JWT `sub`. */
@@ -32,7 +35,7 @@ export interface EntitlementClaims {
   uid: string
   email: string
   plan: PlanTier
-  capabilities: Capability[]
+  capabilities: string[]
   /** issued-at (epoch seconds). */
   iat: number
   /** hard grace ceiling (epoch seconds) = iat + 15d; verify rejects past it. */
@@ -54,7 +57,7 @@ export interface EntitlementResponse {
 
 /** Import an Ed25519 SPKI PEM public key for verification. */
 export function importEntitlementPublicKey(spkiPem: string): Promise<jose.CryptoKey> {
-  return jose.importSPKI(spkiPem, ENTITLEMENT_ALGS[0])
+  return jose.importSPKI(spkiPem, ENTITLEMENT_ALG)
 }
 
 /**
@@ -64,22 +67,24 @@ export function importEntitlementPublicKey(spkiPem: string): Promise<jose.Crypto
  * + capabilities.
  *
  * @param publicKey either an already-imported key or the raw SPKI PEM string.
+ * @param opts.audience the expected audience string (e.g. `'myapp-entitlement'`).
+ *   REQUIRED — not having a default forces the caller to be explicit.
  */
 export async function verifyEntitlementToken(
   token: string,
   publicKey: jose.CryptoKey | string,
-  opts: { now?: () => number } = {}
+  opts: { now?: () => number; audience: string }
 ): Promise<EntitlementClaims> {
   const key = typeof publicKey === 'string' ? await importEntitlementPublicKey(publicKey) : publicKey
   const { payload } = await jose.jwtVerify(token, key, {
     algorithms: ENTITLEMENT_ALGS,
-    audience: ENTITLEMENT_AUDIENCE,
-    currentDate: opts.now ? new Date(opts.now()) : undefined
+    audience: opts.audience,
+    ...(opts.now !== undefined ? { currentDate: new Date(opts.now()) } : {})
   })
 
-  const plan = payload.plan
-  const capabilities = payload.capabilities
-  const refreshAfter = payload.refreshAfter
+  const plan = payload['plan']
+  const capabilities = payload['capabilities']
+  const refreshAfter = payload['refreshAfter']
   if (typeof plan !== 'string' || !Array.isArray(capabilities) || typeof refreshAfter !== 'number') {
     throw new Error('entitlement: malformed payload')
   }
@@ -87,10 +92,10 @@ export async function verifyEntitlementToken(
   // keep them verbatim (the app ignores unknown ones at the gate site).
   return {
     org: typeof payload.sub === 'string' ? payload.sub : '',
-    uid: typeof payload.uid === 'string' ? payload.uid : '',
-    email: typeof payload.email === 'string' ? payload.email : '',
+    uid: typeof payload['uid'] === 'string' ? payload['uid'] : '',
+    email: typeof payload['email'] === 'string' ? payload['email'] : '',
     plan: plan as PlanTier,
-    capabilities: capabilities.filter((c): c is Capability => typeof c === 'string'),
+    capabilities: capabilities.filter((c): c is string => typeof c === 'string'),
     iat: Number(payload.iat),
     exp: Number(payload.exp),
     refreshAfter

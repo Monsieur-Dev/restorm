@@ -69,6 +69,12 @@ copyIfExists(
   path.join(distSrcDir, 'errors')
 )
 
+// Copy shared (generic cross-layer types consumed by both main and renderer)
+copyIfExists(
+  path.join(__dirname, '..', 'dist-main', 'src', 'shared'),
+  path.join(distSrcDir, 'shared')
+)
+
 // Copy types (try from dist-main first, then dist-renderer)
 if (!copyIfExists(
   path.join(__dirname, '..', 'dist-main', 'src', 'types'),

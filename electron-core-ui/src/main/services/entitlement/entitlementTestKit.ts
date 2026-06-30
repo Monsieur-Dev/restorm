@@ -1,15 +1,18 @@
 /**
  * Test support for the auth/entitlement unit tests. Generates
  * ephemeral keys + signs fixture JWTs that mirror the backend's mint contract
- * EXACTLY (`cloud/supabase/functions/_shared/{entitlement,session}.ts`), so the
- * app-side verifier is tested against tokens shaped like the real ones — without
- * needing the real (secret) DEV private key.
+ * EXACTLY, so the app-side verifier is tested against tokens shaped like the
+ * real ones — without needing the real (secret) DEV private key.
  *
  * Not a `.test.ts` file (it exports helpers, no tests); imported by the specs.
+ *
+ * `ENTITLEMENT_AUD` and `SESSION_AUD` are exported as test defaults so tests
+ * can pass them to `verifyEntitlementToken` and `isSessionExpired` without
+ * hard-coding string literals.
  */
 
 import * as jose from 'jose'
-import type { Capability, PlanTier } from '../../../shared/auth/authState'
+import type { PlanTier } from '../../../shared/auth/authState'
 
 export const ENTITLEMENT_AUD = 'restorm-entitlement'
 export const SESSION_AUD = 'restorm-session'
@@ -34,7 +37,7 @@ export interface FixtureEntitlementOpts {
   uid?: string
   email?: string
   plan?: PlanTier
-  capabilities?: Capability[]
+  capabilities?: string[]
   iatSeconds: number
   /** seconds after iat the token hard-expires (grace ceiling). Default 15d. */
   graceSeconds?: number

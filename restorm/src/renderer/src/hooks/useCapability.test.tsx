@@ -4,6 +4,14 @@ import { renderHook, waitFor, act, cleanup } from '@testing-library/react'
 import { useCapability } from './useCapability'
 import type { AuthState } from '../../../shared/auth/authState'
 
+// Import the hook directly from its source file rather than the ECUI renderer barrel.
+// The barrel transitively loads Monaco Editor, which calls document.queryCommandSupported
+// — an API jsdom doesn't implement.  useAuthState itself only needs React + window.api.
+vi.mock('electron-core-ui/renderer', async () => {
+  const { useAuthState } = await import('../../../../../electron-core-ui/src/renderer/hooks/useAuthState')
+  return { useAuthState }
+})
+
 const PRO: AuthState = {
   signedIn: true,
   user: { email: 'a@b.com' },

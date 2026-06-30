@@ -2,27 +2,57 @@
  * Auth composition root — the ONE place that wires the
  * EntitlementService to real electron + node dependencies (safeStorage, the
  * filesystem, `shell.openExternal`, the BrowserWindow broadcast, and the
- * host-guarded firewall-bypassed fetch). Every other auth module stays
- * electron-free + unit-testable; this file is the thin, untested seam.
+ * host-guarded firewall-bypassed fetch). Every other auth module lives in ECUI
+ * and stays electron-free + unit-testable; this file is the thin, untested seam.
  */
 
 import { app, safeStorage, shell } from 'electron'
 import { join } from 'node:path'
 import { readFileSync, writeFileSync, rmSync } from 'node:fs'
-import { logger, withFirewallBypass, permissionService } from 'electron-core-ui'
+import {
+  logger,
+  withFirewallBypass,
+  permissionService,
+  EntitlementService,
+  seedEntitlementForE2E,
+  startEntitlementAutoRefresh,
+  AuthStore,
+  type AuthStoreFs,
+  type SecureStoragePort,
+  loopbackLogin,
+  makeGuardedFetch,
+  broadcastAuthState,
+  registerAuthIpc,
+  AvatarFirewallExemption
+} from 'electron-core-ui/main'
 import type { AuthState } from '../../../shared/auth/authState'
-import { endpointUrl, functionsHost, resolveChannel, type ReleaseChannel } from '../../../shared/config/backend'
+import {
+  endpointUrl,
+  functionsHost,
+  resolveChannel,
+  isBackendFunctionsUrl,
+  type ReleaseChannel
+} from '../../../shared/config/backend'
 import { entitlementPublicKeyPem, isEntitlementPublicKeyConfigured } from '../entitlement/keys'
-import { EntitlementService, seedEntitlementForE2E } from '../entitlement/EntitlementService'
-import { startEntitlementAutoRefresh } from '../entitlement/autoRefresh'
-import { AuthStore, type AuthStoreFs, type SecureStoragePort } from './authStore'
-import { loopbackLogin } from './loopbackLogin'
-import { makeGuardedFetch } from './guardedFetch'
-import { broadcastAuthState, registerAuthIpc } from './authIpc'
-import { AvatarFirewallExemption } from './avatarFirewallExemption'
+
+/** Restorm audience strings — injected into ECUI's generic service. */
+const RESTORM_ENTITLEMENT_AUDIENCE = 'restorm-entitlement'
+const RESTORM_SESSION_AUDIENCE = 'restorm-session'
 
 /** Filename of the encrypted token cache under `userData`. */
 const AUTH_CACHE_FILE = 'auth-session.dat'
+
+/** Restorm-branded HTML shown in the browser tab after a successful loopback login. */
+const SUCCESS_HTML =
+  '<!doctype html><meta charset="utf-8"><title>Restorm</title>' +
+  '<body style="font-family:system-ui;text-align:center;padding-top:3rem">' +
+  '<h2>Signed in to Restorm</h2><p>You can close this tab and return to the app.</p></body>'
+
+/** HTML shown in the browser on a failed / invalid loopback callback. */
+const ERROR_HTML =
+  '<!doctype html><meta charset="utf-8"><title>Restorm</title>' +
+  '<body style="font-family:system-ui;text-align:center;padding-top:3rem">' +
+  '<h2>Login could not be completed</h2><p>Please return to the app and try again.</p></body>'
 
 function makeStoragePort(): SecureStoragePort {
   return {
@@ -87,9 +117,13 @@ export function initEntitlementService(version: string = app.getVersion()): Enti
   if (instance) return instance
 
   const channel: ReleaseChannel = resolveChannel(version)
+  const host = functionsHost(channel)
   // Bypass is scoped to the EXACT channel project host (never *.supabase.co),
   // and never follows a 3xx out of it (redirect: 'manual').
-  const backendFetch = makeGuardedFetch({ allowedHost: functionsHost(channel), bypass: withFirewallBypass })
+  const backendFetch = makeGuardedFetch({
+    isEligibleUrl: (url) => isBackendFunctionsUrl(url, host),
+    bypass: withFirewallBypass
+  })
   const store = new AuthStore(
     join(app.getPath('userData'), AUTH_CACHE_FILE),
     makeStoragePort(),
@@ -110,9 +144,13 @@ export function initEntitlementService(version: string = app.getVersion()): Enti
       openExternal: (url) => shell.openExternal(url),
       fetchImpl: backendFetch,
       log: (msg, fields) => { logger.info(msg, fields) },
+      successHtml: SUCCESS_HTML,
+      errorHtml: ERROR_HTML,
       ...(signal ? { signal } : {})
     }),
     broadcast: broadcastAuthStateWithAvatarExemption,
+    entitlementAudience: RESTORM_ENTITLEMENT_AUDIENCE,
+    sessionAudience: RESTORM_SESSION_AUDIENCE,
     log: (msg, fields) => { logger.warn(msg, fields) }
   })
 
