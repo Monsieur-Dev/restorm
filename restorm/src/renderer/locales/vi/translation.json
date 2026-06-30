@@ -1,6 +1,7 @@
 {
   "account": {
     "tooltip": "Tài khoản",
+    "connected": "Đã đăng nhập",
     "signIn": "Đăng nhập",
     "signOut": "Đăng xuất"
   },

@@ -1,6 +1,7 @@
 {
   "account": {
     "tooltip": "Cont",
+    "connected": "Conectat",
     "signIn": "Conectare",
     "signOut": "Deconectare"
   },

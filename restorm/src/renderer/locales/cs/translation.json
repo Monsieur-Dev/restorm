@@ -1,6 +1,7 @@
 {
   "account": {
     "tooltip": "Účet",
+    "connected": "Přihlášeno",
     "signIn": "Přihlásit se",
     "signOut": "Odhlásit se"
   },

@@ -135,4 +135,41 @@ describe('AccountButton', () => {
     const { getByTestId } = render(<AccountButton />)
     await waitFor(() => { expect(getByTestId('titlebar-account-avatar').getAttribute('data-image')).toBe('https://x/p.png') })
   })
+
+  // The tooltip + aria-label identify the account: name → email → « Connecté »
+  // (account.connected) when signed in, and « Se connecter » (account.signIn)
+  // when signed out. We assert the button's aria-label (the Button mock mirrors
+  // `options.ariaLabel` onto it).
+  it('labels the button with the account NAME when present', async () => {
+    getState.mockResolvedValue({ ...SIGNED_IN, user: { email: 'jane.doe@acme.io', name: 'Jane Doe' } })
+    const { getByTestId } = render(<AccountButton />)
+    await waitFor(() => {
+      expect(getByTestId('titlebar-account-button').getAttribute('aria-label')).toBe('Jane Doe')
+    })
+  })
+
+  it('falls back to the EMAIL when there is no name', async () => {
+    getState.mockResolvedValue({ ...SIGNED_IN, user: { email: 'jane.doe@acme.io' } })
+    const { getByTestId } = render(<AccountButton />)
+    await waitFor(() => {
+      expect(getByTestId('titlebar-account-button').getAttribute('aria-label')).toBe('jane.doe@acme.io')
+    })
+  })
+
+  it('falls back to « Connecté » (account.connected) when signed in without a name or email', async () => {
+    getState.mockResolvedValue({ signedIn: true, user: { email: '' }, plan: 'community', capabilities: [] })
+    const { getByTestId } = render(<AccountButton />)
+    await waitFor(() => {
+      // Signed in but no profile → the connected label, NOT the generic « Compte ».
+      expect(getByTestId('titlebar-account-button').getAttribute('aria-label')).toBe('account.connected')
+    })
+  })
+
+  it('shows the « Se connecter » call to action (account.signIn) when signed OUT', async () => {
+    getState.mockResolvedValue(SIGNED_OUT)
+    const { getByTestId } = render(<AccountButton />)
+    await waitFor(() => { expect(getState).toHaveBeenCalled() })
+    // `t` echoes the key in tests → the existing sign-in key (reused, not new).
+    expect(getByTestId('titlebar-account-button').getAttribute('aria-label')).toBe('account.signIn')
+  })
 })

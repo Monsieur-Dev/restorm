@@ -1,6 +1,7 @@
 {
   "account": {
     "tooltip": "Llogaria",
+    "connected": "I kyçur",
     "signIn": "Hyr",
     "signOut": "Dil"
   },

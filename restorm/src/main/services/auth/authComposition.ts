@@ -9,7 +9,8 @@
 import { app, safeStorage, shell } from 'electron'
 import { join } from 'node:path'
 import { readFileSync, writeFileSync, rmSync } from 'node:fs'
-import { logger, withFirewallBypass } from 'electron-core-ui'
+import { logger, withFirewallBypass, permissionService } from 'electron-core-ui'
+import type { AuthState } from '../../../shared/auth/authState'
 import { endpointUrl, functionsHost, resolveChannel, type ReleaseChannel } from '../../../shared/config/backend'
 import { entitlementPublicKeyPem, isEntitlementPublicKeyConfigured } from '../entitlement/keys'
 import { EntitlementService } from '../entitlement/EntitlementService'
@@ -18,6 +19,7 @@ import { AuthStore, type AuthStoreFs, type SecureStoragePort } from './authStore
 import { loopbackLogin } from './loopbackLogin'
 import { makeGuardedFetch } from './guardedFetch'
 import { broadcastAuthState, registerAuthIpc } from './authIpc'
+import { AvatarFirewallExemption } from './avatarFirewallExemption'
 
 /** Filename of the encrypted token cache under `userData`. */
 const AUTH_CACHE_FILE = 'auth-session.dat'
@@ -57,6 +59,25 @@ let instance: EntitlementService | null = null
  * built, called on app quit. */
 let stopAutoRefresh: (() => void) | null = null
 
+/** Keeps the firewall's system allowlist in lock-step with the signed-in user's
+ * avatar host (register on login, swap on profile change, drop on logout). */
+const avatarExemption = new AvatarFirewallExemption(permissionService)
+
+/**
+ * Broadcast the auth state to renderers, reconciling the avatar-host firewall
+ * exemption FIRST. The avatar `<img src={photoUrl}>` is a display/system asset,
+ * not user API traffic — without the exemption the renderer's fetch to the
+ * provider CDN (Google/MS/GitHub…) is blocked by the USER firewall (which only
+ * exempts the backend functions host) and the photo never loads
+ * (ERR_BLOCKED_BY_CLIENT). Syncing before the broadcast means the host is
+ * allowed by the time the renderer mounts the avatar; it is dropped on logout /
+ * a photo-less profile.
+ */
+function broadcastAuthStateWithAvatarExemption(channel: string, state: AuthState): void {
+  avatarExemption.sync(state)
+  broadcastAuthState(channel, state)
+}
+
 /**
  * Build the EntitlementService for this launch's channel, register its IPC, and
  * kick off cache-restore + refresh. Call ONCE after `app.whenReady` (userData
@@ -83,14 +104,15 @@ export function initEntitlementService(version: string = app.getVersion()): Enti
     publicKeyPem: entitlementPublicKeyPem(channel),
     publicKeyConfigured: isEntitlementPublicKeyConfigured(channel),
     fetchImpl: backendFetch,
-    login: () => loopbackLogin({
+    login: (signal) => loopbackLogin({
       loginUrl: endpointUrl(channel, 'login'),
       sessionUrl: endpointUrl(channel, 'session'),
       openExternal: (url) => shell.openExternal(url),
       fetchImpl: backendFetch,
-      log: (msg, fields) => { logger.info(msg, fields) }
+      log: (msg, fields) => { logger.info(msg, fields) },
+      ...(signal ? { signal } : {})
     }),
-    broadcast: broadcastAuthState,
+    broadcast: broadcastAuthStateWithAvatarExemption,
     log: (msg, fields) => { logger.warn(msg, fields) }
   })
 
@@ -140,5 +162,6 @@ export function stopEntitlementAutoRefresh(): void {
 /** Test-only reset. */
 export function resetEntitlementServiceForTests(): void {
   stopEntitlementAutoRefresh()
+  avatarExemption.clear()
   instance = null
 }

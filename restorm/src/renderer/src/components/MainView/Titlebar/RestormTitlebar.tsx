@@ -154,6 +154,9 @@ export const RestormTitlebar: React.FC<RestormTitlebarProps> = ({
       title={fileName ? `Restorm - ${fileName}${isDirty ? ' *' : ''}` : t('app.title')}
       showSearchBar
       showNavigation={navigationEnabled}
+      // The window-control buttons' icons are self-explanatory — drop the hover
+      // tooltip (the aria-label stays for a11y).
+      customWcoHoverTooltips={false}
       onSearchResultClick={onSearchResultClick}
       renderSearchTooltipContent={renderSearchTooltipContent}
       renderSearchBadge={(method) => <Badge type={mapToBadgeType(method)} />}

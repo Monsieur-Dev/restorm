@@ -24,6 +24,7 @@ import { permissionService } from './PermissionService'
 beforeEach(() => {
 	for (const o of permissionService.listWhitelist()) permissionService.removeFromWhitelist(o)
 	for (const o of permissionService.listBlacklist()) permissionService.removeFromBlacklist(o)
+	for (const h of permissionService.listSystemAllowedHosts()) permissionService.removeSystemAllowedHost(h)
 	permissionService.setProjectOrigins([])
 	permissionService.setInfraPorts({ graphqlPort: null, mcpPort: null, viteDevPort: null })
 })
@@ -177,6 +178,68 @@ describe('PermissionService.classify — wildcards', () => {
 		permissionService.addToWhitelist({ scheme: 'https', host: 'api.*.com', port: 443 })
 		permissionService.addToWhitelist({ scheme: 'https', host: '*.*.example.com', port: 443 })
 		expect(permissionService.listWhitelist()).toHaveLength(0)
+	})
+})
+
+describe('PermissionService — system-allowed hosts (display / system assets, e.g. avatar CDN)', () => {
+	it('auto-allows a system-allowed host over HTTPS on any port, without a whitelist entry', () => {
+		permissionService.addSystemAllowedHost('lh3.googleusercontent.com')
+		// https on the standard 443 and any other port both pass — these are fixed
+		// display assets fetched over https; the port isn't pinned.
+		expect(
+			permissionService.classify({ scheme: 'https', host: 'lh3.googleusercontent.com', port: 443, source: 'main-https' })
+		).toBe('allow')
+		expect(
+			permissionService.classify({ scheme: 'https', host: 'lh3.googleusercontent.com', port: 8443, source: 'main-https' })
+		).toBe('allow')
+	})
+
+	it('does NOT auto-allow plaintext http to a system-allowed host (https-only exemption)', () => {
+		permissionService.addSystemAllowedHost('lh3.googleusercontent.com')
+		expect(
+			permissionService.classify({ scheme: 'http', host: 'lh3.googleusercontent.com', port: 80, source: 'main-http' })
+		).toBe('prompt')
+	})
+
+	it('is case-insensitive on the host', () => {
+		permissionService.addSystemAllowedHost('LH3.GoogleUserContent.com')
+		expect(
+			permissionService.classify({ scheme: 'https', host: 'lh3.googleusercontent.com', port: 443, source: 'main-https' })
+		).toBe('allow')
+	})
+
+	it('only the exact host is exempted — a different host still prompts', () => {
+		permissionService.addSystemAllowedHost('lh3.googleusercontent.com')
+		expect(
+			permissionService.classify({ scheme: 'https', host: 'evil.example', port: 443, source: 'main-https' })
+		).toBe('prompt')
+	})
+
+	it('removing the host (e.g. on logout) drops the exemption — back to prompt', () => {
+		permissionService.addSystemAllowedHost('avatars.githubusercontent.com')
+		expect(
+			permissionService.classify({ scheme: 'https', host: 'avatars.githubusercontent.com', port: 443, source: 'main-https' })
+		).toBe('allow')
+		permissionService.removeSystemAllowedHost('avatars.githubusercontent.com')
+		expect(
+			permissionService.classify({ scheme: 'https', host: 'avatars.githubusercontent.com', port: 443, source: 'main-https' })
+		).toBe('prompt')
+	})
+
+	it('is in-memory only — never written to the persisted whitelist/blacklist (not user-deletable via the rules UI)', () => {
+		permissionService.addSystemAllowedHost('lh3.googleusercontent.com')
+		expect(permissionService.listWhitelist()).toHaveLength(0)
+		expect(permissionService.listBlacklist()).toHaveLength(0)
+		expect(permissionService.listSystemAllowedHosts()).toContain('lh3.googleusercontent.com')
+	})
+
+	it('ignores a blank host and is idempotent', () => {
+		permissionService.addSystemAllowedHost('   ')
+		permissionService.addSystemAllowedHost('')
+		expect(permissionService.listSystemAllowedHosts()).toHaveLength(0)
+		permissionService.addSystemAllowedHost('cdn.example')
+		permissionService.addSystemAllowedHost('cdn.example')
+		expect(permissionService.listSystemAllowedHosts()).toEqual(['cdn.example'])
 	})
 })
 

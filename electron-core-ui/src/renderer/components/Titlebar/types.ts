@@ -50,6 +50,13 @@ export interface TitlebarProps {
    */
   customWcoPlatform?: string
 
+  /**
+   * Forwarded to the internal CustomWCO as `hoverTooltips`. Set `false` to hide
+   * the window-control buttons' hover tooltip (the icons are self-explanatory);
+   * the buttons keep their `aria-label`. Defaults to `true` (tooltip shown).
+   */
+  customWcoHoverTooltips?: boolean
+
   /** Show back/forward navigation buttons before the center zone */
   showNavigation?: boolean
 }

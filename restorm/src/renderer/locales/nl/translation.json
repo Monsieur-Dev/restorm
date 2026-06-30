@@ -1,6 +1,7 @@
 {
   "account": {
     "tooltip": "Account",
+    "connected": "Ingelogd",
     "signIn": "Inloggen",
     "signOut": "Uitloggen"
   },

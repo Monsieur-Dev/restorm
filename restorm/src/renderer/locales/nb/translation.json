@@ -1,6 +1,7 @@
 {
   "account": {
     "tooltip": "Konto",
+    "connected": "Pålogget",
     "signIn": "Logg inn",
     "signOut": "Logg ut"
   },

@@ -1,6 +1,7 @@
 {
   "account": {
     "tooltip": "Hesap",
+    "connected": "Giriş yapıldı",
     "signIn": "Oturum aç",
     "signOut": "Oturumu kapat"
   },

@@ -1,6 +1,7 @@
 {
   "account": {
     "tooltip": "Račun",
+    "connected": "Prijavljen",
     "signIn": "Prijava",
     "signOut": "Odjava"
   },
