@@ -89,6 +89,9 @@ const fixtures: Record<string, { content: string; filePath?: string }> = {
   },
   'api-blueprint': {
     content: readFileSync(join(FIXTURES, 'api-blueprint', 'polls.apib'), 'utf-8')
+  },
+  thrift: {
+    content: readFileSync(join(FIXTURES, 'thrift', 'petstore.thrift'), 'utf-8')
   }
 }
 

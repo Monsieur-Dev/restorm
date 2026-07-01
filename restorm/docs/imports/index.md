@@ -18,6 +18,7 @@ route incoming files / URLs / pasted content to the right adapter.
 | RAML 1.0 / 0.8 | [`raml.md`](./raml.md) |
 | WADL (Web Application Description Language) | [`wadl.md`](./wadl.md) |
 | API Blueprint (`.apib`) | [`api-blueprint.md`](./api-blueprint.md) |
+| Apache Thrift IDL (`.thrift`, documentation only) | [`thrift.md`](./thrift.md) |
 
 For periodic re-checks of an already-imported spec (Swagger,
 OpenAPI 3, GraphQL, Postman, Insomnia, Bruno, AsyncAPI, gRPC, SOAP,

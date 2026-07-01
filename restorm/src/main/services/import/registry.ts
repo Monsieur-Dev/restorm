@@ -23,8 +23,11 @@ export interface ImportProvider {
    * provider).
    */
   canImport(content: string, filePath?: string): boolean
-  /** Full parse → EnvironmentFolder. Called only after `canImport` returned true. */
-  parse(content: string, opts: { sourceUrl?: string }): EnvironmentFolder
+  /** Full parse → EnvironmentFolder. Called only after `canImport` returned true.
+   * `filePath` is the local path the content was read from (absent for URL
+   * fetches and pasted content) — formats whose spec can `include` sibling
+   * files (Thrift IDL) use it to resolve those relative to the source file. */
+  parse(content: string, opts: { sourceUrl?: string; filePath?: string }): EnvironmentFolder
 }
 
 /**

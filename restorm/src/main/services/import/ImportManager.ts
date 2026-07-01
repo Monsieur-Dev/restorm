@@ -157,7 +157,8 @@ export async function importFromContent(
   content: string,
   format: string,
   source: string,
-  sourceUrl?: string
+  sourceUrl?: string,
+  filePath?: string
 ): Promise<ImportResult> {
   try {
     logger.info(`[ImportManager] Importing from ${source} as ${format}`)
@@ -172,7 +173,10 @@ export async function importFromContent(
       }
     }
 
-    const opts = sourceUrl !== undefined ? { sourceUrl } : {}
+    const opts = {
+      ...(sourceUrl !== undefined ? { sourceUrl } : {}),
+      ...(filePath !== undefined ? { filePath } : {})
+    }
     // Await the parse result so this function stays genuinely async — callers
     // can rely on the Promise-based API even if all current parsers are sync.
     const folder: EnvironmentFolder = await Promise.resolve(provider.parse(content, opts))
@@ -314,7 +318,7 @@ export async function importFrom(
     }
 
     // Import using detected format
-    const result = await importFromContent(content, detectedFormat, source, isUrl ? input : undefined)
+    const result = await importFromContent(content, detectedFormat, source, isUrl ? input : undefined, isUrl ? undefined : input)
     if (result.success) {
       // Stamp the payload checksum on every successful import — the
       // env folder's `apiUpdate.payloadChecksum` is what the Refresh
@@ -379,7 +383,7 @@ export async function tryAllImports(
   const formats = importProviders.map(p => p.format)
 
   const results = await Promise.all(
-    formats.map(format => importFromContent(content, format, source, isUrl ? input : undefined))
+    formats.map(format => importFromContent(content, format, source, isUrl ? input : undefined, isUrl ? undefined : input))
   )
 
   // Return only successful results

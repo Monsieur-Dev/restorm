@@ -34,6 +34,10 @@ const ramlImportTestDir = defineBddConfig({
   features: 'tests/e2e/bdd/raml-import/features/**/*.feature',
   steps: ['tests/e2e/bdd/raml-import/steps/**/*.ts', 'tests/e2e/bdd/fixtures/raml-import.fixture.ts'],
   outputDir: '.features-gen/raml-import'
+const thriftImportTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/thrift-import/features/**/*.feature',
+  steps: ['tests/e2e/bdd/thrift-import/steps/**/*.ts', 'tests/e2e/bdd/fixtures/thrift-import.fixture.ts'],
+  outputDir: '.features-gen/thrift-import'
 })
 
 const dirtyStateTestDir = defineBddConfig({
@@ -396,6 +400,8 @@ export default defineConfig({
       testDir: restClientImportTestDir
       name: 'raml-import',
       testDir: ramlImportTestDir
+      name: 'thrift-import',
+      testDir: thriftImportTestDir
     },
     {
       name: 'dirty-state',

@@ -44,5 +44,6 @@ import './WadlImportService'
 // had first refusal, since a Markdown document has no discriminating root
 // field to check ahead of the others.
 import './ApiBlueprintImportService'
+import './ThriftImportService'
 
 export { importProviders } from './registry'
