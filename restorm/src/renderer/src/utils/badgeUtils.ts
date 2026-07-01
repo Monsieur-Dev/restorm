@@ -1,33 +1,29 @@
 import type { BadgeType } from '../components/common/Badge'
 import type { Request } from '../../../shared/types/requests'
+import { protocolSpec } from '../../../shared/protocolRegistry'
 
 /**
- * Badge for a saved request, by protocol — mirrors the per-protocol choice
- * the workbench tab title makes (method for HTTP/auth, call type for gRPC,
- * sub-protocol for WebSocket, fixed badge for GraphQL/SOAP/OData).
+ * Badge for a saved request, by protocol — driven by the protocol registry's
+ * badge spec: a `fixed` capsule (GraphQL → `GQL`, SOAP → `SOAP`, …) or a value
+ * read from a discriminating `field` (HTTP → `method`, gRPC → `callType`,
+ * WebSocket → `protocol`) and mapped through {@link mapToBadgeType}.
  */
 export function requestBadgeType(request: Request): BadgeType {
-  switch (request.type) {
-    case 'http': return mapToBadgeType(request.method)
-    case 'auth': return 'AUTH'
-    case 'graphql': return 'GQL'
-    case 'grpc': return mapToBadgeType(request.callType)
-    case 'soap': return 'SOAP'
-    case 'websocket': return mapToBadgeType(request.protocol)
-    case 'odata': return 'ODATA'
-    default: return 'GET'
-  }
+  const badge = protocolSpec(request.type).badge
+  if (badge.kind === 'fixed') return badge.value as BadgeType
+  const raw = (request as unknown as Record<string, unknown>)[badge.field]
+  return typeof raw === 'string' ? mapToBadgeType(raw) : 'GET'
 }
 
 /**
  * Badge `mode` for a saved request: `server` when restorm HOSTS the protocol
  * (a WebSocket/Socket.IO/MQTT server, an HTTP mock server, a gRPC mock server,
  * a SOAP / GraphQL mock server, or an OData mock service), otherwise `client`. Any
- * request whose `server` flag is set renders the uniform SRV capsule variant of its
- * protocol badge — pair with {@link requestBadgeType}.
+ * server-capable request whose `server` flag is set renders the uniform SRV
+ * capsule variant of its protocol badge — pair with {@link requestBadgeType}.
  */
 export function requestBadgeMode(request: Request): 'client' | 'server' {
-  return (request.type === 'websocket' || request.type === 'http' || request.type === 'grpc' || request.type === 'soap' || request.type === 'graphql' || request.type === 'odata')
+  return protocolSpec(request.type).serverCapable === true
     && (request as { server?: boolean }).server === true
     ? 'server'
     : 'client'

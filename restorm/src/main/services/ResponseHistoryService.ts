@@ -350,111 +350,36 @@ class ResponseHistoryService {
     const now = result.timings.startedAt
     const guid = randomUUID()
 
-    switch (type) {
-      case 'http': {
-        const httpResult = result as HTTPExecutionResult
-        const response = this.buildHttpResponse(requestId, httpResult)
-        if (!response) return null
-        const outcome = httpOutcome(httpResult)
-        return {
-          guid,
-          requestId,
-          type,
-          success: outcomeToSuccess(outcome),
-          outcome,
-          timestamp: now,
-          pinned: false,
-          ...(requestMeta !== undefined ? { requestMeta } : {}),
-          response
-        }
-      }
-      case 'odata': {
-        const httpResult = result as HTTPExecutionResult
-        const response = this.buildOdataResponse(requestId, httpResult)
-        if (!response) return null
-        const outcome = httpOutcome(httpResult)
-        return {
-          guid,
-          requestId,
-          type,
-          success: outcomeToSuccess(outcome),
-          outcome,
-          timestamp: now,
-          pinned: false,
-          ...(requestMeta !== undefined ? { requestMeta } : {}),
-          response
-        }
-      }
-      case 'graphql': {
-        const gqlResult = result as GraphQLExecutionResult
-        const response = this.buildGraphqlResponse(requestId, gqlResult)
-        if (!response) return null
-        const outcome = httpOutcome(gqlResult)
-        return {
-          guid,
-          requestId,
-          type,
-          success: outcomeToSuccess(outcome),
-          outcome,
-          timestamp: now,
-          pinned: false,
-          ...(requestMeta !== undefined ? { requestMeta } : {}),
-          response
-        }
-      }
-      case 'grpc': {
-        const grpcResult = result as GRPCExecutionResult
-        const response = this.buildGrpcResponse(requestId, grpcResult)
-        if (!response) return null
-        const outcome = grpcOutcome(grpcResult)
-        return {
-          guid,
-          requestId,
-          type,
-          success: outcomeToSuccess(outcome),
-          outcome,
-          timestamp: now,
-          pinned: false,
-          ...(requestMeta !== undefined ? { requestMeta } : {}),
-          response
-        }
-      }
-      case 'soap': {
-        const soapResult = result as SOAPExecutionResult
-        const response = this.buildSoapResponse(requestId, soapResult)
-        if (!response) return null
-        const outcome = httpOutcome(soapResult)
-        return {
-          guid,
-          requestId,
-          type,
-          success: outcomeToSuccess(outcome),
-          outcome,
-          timestamp: now,
-          pinned: false,
-          ...(requestMeta !== undefined ? { requestMeta } : {}),
-          response
-        }
-      }
-      case 'websocket': {
-        const wsResult = result as WebSocketExecutionResult
-        const response = this.buildWebSocketResponse(requestId, wsResult)
-        if (!response) return null
-        const outcome = webSocketOutcome(wsResult)
-        return {
-          guid,
-          requestId,
-          type,
-          success: outcomeToSuccess(outcome),
-          outcome,
-          timestamp: now,
-          pinned: false,
-          ...(requestMeta !== undefined ? { requestMeta } : {}),
-          response
-        }
-      }
-      default:
-        return null
+    // Append-only per-protocol builder table: each row picks the protocol's
+    // `response` builder + `outcome` classifier; the detail envelope
+    // (guid/success/timestamp/…) is identical across protocols and is assembled
+    // once below. A new protocol adds ONE row here — no `switch` case.
+    const builders: Record<ResponseHistoryRequestType, {
+      build: (id: string, r: ExecutionResult) => ResponseHistoryDetail['response'] | null
+      outcome: (r: ExecutionResult) => ReturnType<typeof httpOutcome>
+    }> = {
+      http: { build: (id, r) => this.buildHttpResponse(id, r as HTTPExecutionResult), outcome: (r) => httpOutcome(r as HTTPExecutionResult) },
+      odata: { build: (id, r) => this.buildOdataResponse(id, r as HTTPExecutionResult), outcome: (r) => httpOutcome(r as HTTPExecutionResult) },
+      graphql: { build: (id, r) => this.buildGraphqlResponse(id, r as GraphQLExecutionResult), outcome: (r) => httpOutcome(r as GraphQLExecutionResult) },
+      grpc: { build: (id, r) => this.buildGrpcResponse(id, r as GRPCExecutionResult), outcome: (r) => grpcOutcome(r as GRPCExecutionResult) },
+      soap: { build: (id, r) => this.buildSoapResponse(id, r as SOAPExecutionResult), outcome: (r) => httpOutcome(r as SOAPExecutionResult) },
+      websocket: { build: (id, r) => this.buildWebSocketResponse(id, r as WebSocketExecutionResult), outcome: (r) => webSocketOutcome(r as WebSocketExecutionResult) }
+    }
+
+    const builder = builders[type]
+    const response = builder.build(requestId, result)
+    if (!response) return null
+    const outcome = builder.outcome(result)
+    return {
+      guid,
+      requestId,
+      type,
+      success: outcomeToSuccess(outcome),
+      outcome,
+      timestamp: now,
+      pinned: false,
+      ...(requestMeta !== undefined ? { requestMeta } : {}),
+      response
     }
   }
 
@@ -795,31 +720,30 @@ class ResponseHistoryService {
     const type = request['type']
     if (typeof type !== 'string') return undefined
 
-    switch (type) {
-      case 'http':
-        return { method: typeof request['method'] === 'string' ? request['method'] : '' }
-      case 'graphql':
-        return { method: 'POST' }
-      case 'grpc':
-        return {
-          service: typeof request['service'] === 'string' ? request['service'] : '',
-          method: typeof request['method'] === 'string' ? request['method'] : '',
-          callType: typeof request['callType'] === 'string' ? request['callType'] : ''
-        }
-      case 'soap':
-        return {
-          service: typeof request['service'] === 'string' ? request['service'] : '',
-          operation: typeof request['operation'] === 'string' ? request['operation'] : '',
-          soapAction: typeof request['soapAction'] === 'string' ? request['soapAction'] : ''
-        }
-      case 'websocket':
-        return {
-          protocol: typeof request['protocol'] === 'string' ? request['protocol'] : '',
-          event: typeof request['event'] === 'string' ? request['event'] : ''
-        }
-      default:
-        return undefined
+    // Append-only per-protocol metadata extractors: each protocol surfaces a
+    // different request-meta shape (HTTP → method, gRPC → service/method/
+    // callType, …). Protocols absent from the table (odata/auth) carry no
+    // history meta, matching the prior default. A new protocol adds ONE row.
+    const extractors: Record<string, (r: Record<string, unknown>) => ResponseHistoryRequestMeta> = {
+      http: (r) => ({ method: typeof r['method'] === 'string' ? r['method'] : '' }),
+      graphql: () => ({ method: 'POST' }),
+      grpc: (r) => ({
+        service: typeof r['service'] === 'string' ? r['service'] : '',
+        method: typeof r['method'] === 'string' ? r['method'] : '',
+        callType: typeof r['callType'] === 'string' ? r['callType'] : ''
+      }),
+      soap: (r) => ({
+        service: typeof r['service'] === 'string' ? r['service'] : '',
+        operation: typeof r['operation'] === 'string' ? r['operation'] : '',
+        soapAction: typeof r['soapAction'] === 'string' ? r['soapAction'] : ''
+      }),
+      websocket: (r) => ({
+        protocol: typeof r['protocol'] === 'string' ? r['protocol'] : '',
+        event: typeof r['event'] === 'string' ? r['event'] : ''
+      })
     }
+    const extractor = extractors[type]
+    return extractor ? extractor(request) : undefined
   }
 
   private getResolvedKeyValues(requestId: string, groupName: string): ResponseHistoryKeyValue[] {

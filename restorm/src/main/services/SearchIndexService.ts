@@ -19,6 +19,7 @@ import {
   type DocumentDeletedPayload
 } from './DocumentEvents'
 import { pubsub, PUBSUB_TOPICS } from './CollectionStore'
+import { protocolSpec } from '../../shared/protocolRegistry'
 
 /** Search categories configuration for Restorm */
 const RESTORM_SEARCH_CATEGORIES: Record<string, CategoryMeta> = {
@@ -167,24 +168,14 @@ function requestToSearchDocument(
   if (request.message) keywordParts.push(request.message)
   if (request.metadata) keywordParts.push(...request.metadata.map((m) => `${m.key} ${m.value}`))
 
-  // Determine icon based on request type
+  // Determine icon based on request type. HTTP derives its icon from the
+  // method; every other protocol declares a fixed `searchIcon` in the registry
+  // (any protocol without one falls back to the generic `file` icon).
   let icon = 'file'
-  switch (request.type) {
-    case 'http':
-      icon = request.method?.toLowerCase() ?? 'get'
-      break
-    case 'graphql':
-      icon = 'graphql'
-      break
-    case 'grpc':
-      icon = 'grpc'
-      break
-    case 'soap':
-      icon = 'soap'
-      break
-    case 'websocket':
-      icon = 'websocket'
-      break
+  if (request.type === 'http') {
+    icon = request.method?.toLowerCase() ?? 'get'
+  } else {
+    icon = protocolSpec(request.type).searchIcon ?? 'file'
   }
 
   return {
