@@ -30,21 +30,21 @@ vi.mock('electron', () => ({
   BrowserWindow: {
     getAllWindows: () => [{
       isDestroyed: () => false,
-      webContents: { send: () => {} }
+      webContents: { send: () => undefined }
     }]
   }
 }))
 
 vi.mock('../../src/main/services/import/ImportManager', () => ({
-  importFrom: (url: string, opts: any) => mockState.importFrom(url, opts)
+  importFrom: (url: string, opts: Record<string, unknown>) => mockState.importFrom(url, opts) as unknown
 }))
 
 vi.mock('../../src/main/services/CollectionStore', () => ({
   collectionStore: {
-    findById: (id: string) => mockState.findById(id)
+    findById: (id: string) => mockState.findById(id) as unknown
   },
   pubsub: {
-    publish: () => {}
+    publish: () => undefined
   },
   PUBSUB_TOPICS: {
     ENVIRONMENT_CREATED: 'env-created'
@@ -53,7 +53,7 @@ vi.mock('../../src/main/services/CollectionStore', () => ({
 
 vi.mock('electron-core-ui/main', () => ({
   eventBusService: {
-    emit: async () => {}
+    emit: () => Promise.resolve()
   }
 }))
 
@@ -64,7 +64,7 @@ vi.mock('../../src/main/services/DocumentEvents', () => ({
 }))
 
 vi.mock('../../src/main/utils/urlSecurity', () => ({
-  assertSafeFetchUrl: () => {}
+  assertSafeFetchUrl: () => undefined
 }))
 
 import { registerImportTools } from '../../src/main/mcp/tools/import'
@@ -83,7 +83,7 @@ describe('import_from_url tool', () => {
   })
 
   it('should invoke importFrom with extraHeaders when headers provided', async () => {
-    registerImportTools(fakeService as any)
+    registerImportTools(fakeService as unknown as Parameters<typeof registerImportTools>[0])
 
     const result = await fakeService.invoke('import_from_url', {
       url: 'https://example.com/swagger.json',
@@ -98,7 +98,7 @@ describe('import_from_url tool', () => {
   })
 
   it('should invoke importFrom with undefined extraHeaders when headers omitted', async () => {
-    registerImportTools(fakeService as any)
+    registerImportTools(fakeService as unknown as Parameters<typeof registerImportTools>[0])
 
     const result = await fakeService.invoke('import_from_url', {
       url: 'https://example.com/swagger.json'
@@ -112,7 +112,7 @@ describe('import_from_url tool', () => {
   })
 
   it('should handle importFrom error and return error reply', async () => {
-    registerImportTools(fakeService as any)
+    registerImportTools(fakeService as unknown as Parameters<typeof registerImportTools>[0])
     mockState.importFrom.mockResolvedValue({
       success: false,
       error: 'Unauthorized',
@@ -122,7 +122,7 @@ describe('import_from_url tool', () => {
     const result = await fakeService.invoke('import_from_url', {
       url: 'https://example.com/swagger.json',
       headers: { Authorization: 'Bearer invalid' }
-    }) as any
+    }) as { isError: boolean; content: { text: string }[] }
 
     expect(result.isError).toBe(true)
     expect(result.content[0].text).toContain('HTTP 401')
