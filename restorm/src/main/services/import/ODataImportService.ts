@@ -983,3 +983,22 @@ export async function importODataFromUrl(url: string, options: ODataImportOption
 export function importODataFromString(content: string, options: ODataImportOptions = {}): EnvironmentFolder {
   return importOData(content, options)
 }
+
+// ============================================================================
+// Provider registration
+// ============================================================================
+
+import { importProviders } from './registry'
+
+function canImport(content: string, filePath?: string): boolean {
+  if (filePath?.endsWith('.edmx') || filePath?.endsWith('$metadata')) return true
+  const trimmed = content.trim()
+  if (trimmed.includes('<edmx:Edmx') || trimmed.includes('<Edmx ')) return true
+  try {
+    const json: unknown = JSON.parse(trimmed)
+    return typeof json === 'object' && json !== null && '$Version' in json
+  } catch { /* not JSON */ }
+  return false
+}
+
+importProviders.push({ format: 'odata', canImport, parse: (content, opts) => importOData(content, opts) })

@@ -372,3 +372,17 @@ export function importGraphQL(schemaString: string, options: GraphQLImportOption
 export function importGraphQLFromString(content: string, options: GraphQLImportOptions = {}): EnvironmentFolder {
   return importGraphQL(content, options)
 }
+
+// ============================================================================
+// Provider registration
+// ============================================================================
+
+import { importProviders } from './registry'
+
+function canImport(content: string, filePath?: string): boolean {
+  if (filePath?.endsWith('.graphql') || filePath?.endsWith('.gql')) return true
+  const trimmed = content.trim()
+  return trimmed.includes('type Query') || trimmed.includes('type Mutation') || trimmed.includes('schema {')
+}
+
+importProviders.push({ format: 'graphql', canImport, parse: (content, opts) => importGraphQL(content, opts) })

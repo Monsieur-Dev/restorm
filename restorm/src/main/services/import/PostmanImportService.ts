@@ -662,3 +662,26 @@ export async function importPostmanFromUrl(
   const collection = (await response.json()) as PostmanCollection
   return importPostman(collection, options)
 }
+
+// ============================================================================
+// Provider registration
+// ============================================================================
+
+import { importProviders } from './registry'
+
+function canImport(content: string, _filePath?: string): boolean {
+  const trimmed = content.trim()
+  try {
+    const json: unknown = JSON.parse(trimmed)
+    if (typeof json === 'object' && json !== null && 'info' in json) {
+      const info = (json as Record<string, unknown>).info
+      if (typeof info === 'object' && info !== null && 'schema' in info) {
+        const schema = (info as Record<string, unknown>).schema
+        return typeof schema === 'string' && schema.includes('postman')
+      }
+    }
+  } catch { /* not JSON */ }
+  return false
+}
+
+importProviders.push({ format: 'postman', canImport, parse: (content, opts) => importPostmanFromJson(content, opts) })

@@ -1,11 +1,15 @@
 /**
  * ImportManager - Orchestrates all import services
- * 
+ *
  * This service:
  * - Reads files from filesystem or fetches from URLs
- * - Detects the format (Swagger, Postman, Insomnia, curl, etc.)
- * - Dispatches to the appropriate import service
+ * - Detects the format via the provider registry (each *ImportService.ts
+ *   self-registers a canImport + parse pair; zero hardcoded branches here)
+ * - Dispatches to the matching provider's parse()
  * - Returns parsed results
+ *
+ * Adding a new import format requires no changes to this file — add a
+ * self-registering *ImportService.ts and one line in providers.ts.
  */
 
 import { createHash } from 'node:crypto'
@@ -16,6 +20,10 @@ import { isRequest, isAnyFolder, isHTTPRequest, isAuthenticationRequest, isGraph
 import { disableEmptyKeyValues } from '../../../shared/utils/emptyKeyValueHelper'
 import { withFirewallBypass } from 'electron-core-ui'
 import { assertSafeFetchUrl } from '../../utils/urlSecurity'
+
+// Side-effect import: triggers all provider self-registrations before any
+// dispatch call can reach detectFormat or importFromContent.
+import { importProviders } from './providers'
 
 // ============================================================================
 // Types
@@ -90,118 +98,18 @@ export async function fetchFollowingSafeRedirects(url: string, init: RequestInit
 // Format Detection
 // ============================================================================
 
-/** Detect format from content. Exported for unit-test coverage; production
- * call sites stay inside this module (`importFrom`, `tryAllImports`). */
+/**
+ * Detect format from content by asking each registered provider in turn.
+ * Returns the format string of the first provider whose `canImport` returns
+ * `true`, or `null` when none matches.
+ *
+ * Exported for unit-test coverage; production call sites stay inside this
+ * module (`importFrom`, `tryAllImports`).
+ */
 export function detectFormat(content: string, filePath?: string): string | null {
-  const trimmed = content.trim()
-  
-  // Detect curl commands
-  if (trimmed.startsWith('curl ') || trimmed.includes('\ncurl ')) {
-    return 'curl'
+  for (const provider of importProviders) {
+    if (provider.canImport(content, filePath)) return provider.format
   }
-  
-  // Detect PowerShell commands
-  if (/Invoke-(RestMethod|WebRequest)/.exec(trimmed)) {
-    return 'powershell'
-  }
-  
-  // Try to parse as JSON
-  try {
-    const json: unknown = JSON.parse(trimmed)
-    
-    // Detect Swagger 2.0 vs OpenAPI 3.0 / 3.1. Each ships its own
-    // version-specific transformer and folder builder; sniffing here means
-    // a 3.x spec never falls through to the 2.0 importer (which would
-    // silently produce broken folders, missing bodies, empty schemas).
-    if (typeof json === 'object' && json !== null) {
-      const obj = json as Record<string, unknown>
-      if ('swagger' in obj && typeof obj.swagger === 'string' && obj.swagger.startsWith('2.')) {
-        return 'swagger'
-      }
-      if ('openapi' in obj && typeof obj.openapi === 'string') {
-        if (obj.openapi.startsWith('3.0')) return 'openapi-3.0'
-        if (obj.openapi.startsWith('3.1')) return 'openapi-3.1'
-        // Future major versions fall through to no-detection so we surface
-        // a clean error instead of mis-importing.
-      }
-    }
-    
-    // Detect Postman Collection
-    if (typeof json === 'object' && json !== null && 'info' in json) {
-      const info = (json as Record<string, unknown>).info
-      if (typeof info === 'object' && info !== null && 'schema' in info && typeof info.schema === 'string' && info.schema.includes('postman')) {
-        return 'postman'
-      }
-    }
-    
-    // Detect Insomnia Export
-    if (typeof json === 'object' && json !== null && '_type' in json && 'resources' in json && (json as Record<string, unknown>)._type === 'export') {
-      return 'insomnia'
-    }
-    
-    // Detect Bruno Collection
-    if (typeof json === 'object' && json !== null && 'version' in json && 'name' in json) {
-      const jsonObj = json as Record<string, unknown>
-      if (jsonObj.type === 'collection' || filePath?.endsWith('.json')) {
-        return 'bruno'
-      }
-    }
-    
-    // Detect AsyncAPI
-    if (typeof json === 'object' && json !== null && 'asyncapi' in json) {
-      return 'asyncapi'
-    }
-
-    // Detect OData JSON-CSDL (v4). Every JSON-CSDL document starts
-    // with a top-level `$Version` discriminator ("4.0" or "4.01").
-    if (typeof json === 'object' && json !== null && '$Version' in json) {
-      return 'odata'
-    }
-  } catch {
-    // Not JSON, try other formats
-  }
-  
-  // Try YAML formats
-  if (trimmed.startsWith('asyncapi:') || trimmed.includes('\nasyncapi:')) {
-    return 'asyncapi'
-  }
-  
-  // Detect GraphQL schema
-  if (trimmed.includes('type Query') || trimmed.includes('type Mutation') || 
-      trimmed.includes('schema {') || filePath?.endsWith('.graphql') || filePath?.endsWith('.gql')) {
-    return 'graphql'
-  }
-  
-  // Detect gRPC proto files. Parenthesise the `&&` group explicitly:
-  // `A || B && C || D` parses as `A || (B && C) || D` — correct, but the
-  // implicit precedence is a foot-gun on edit, so make it visible.
-  if (trimmed.includes('syntax = "proto') || (trimmed.includes('service ') && trimmed.includes('rpc ')) ||
-      filePath?.endsWith('.proto')) {
-    return 'grpc'
-  }
-
-  // Detect SOAP WSDL. Same explicit grouping: a bare `<definitions` only
-  // counts as SOAP when it ALSO mentions `wsdl`.
-  if (trimmed.includes('<wsdl:definitions') || (trimmed.includes('<definitions') && trimmed.includes('wsdl')) ||
-      filePath?.endsWith('.wsdl')) {
-    return 'soap'
-  }
-
-  // Detect OData EDMX CSDL (v2/v3/v4). All versions wrap the schema
-  // in an `edmx:Edmx` root element. A filename or URL ending with
-  // `$metadata` or `.edmx` is also a strong hint.
-  if (trimmed.includes('<edmx:Edmx') || trimmed.includes('<Edmx ')) {
-    return 'odata'
-  }
-  if (filePath?.endsWith('.edmx') || filePath?.endsWith('$metadata')) {
-    return 'odata'
-  }
-  
-  // Detect Bruno .bru files
-  if (filePath?.endsWith('.bru')) {
-    return 'bruno'
-  }
-  
   return null
 }
 
@@ -254,94 +162,21 @@ export async function importFromContent(
   try {
     logger.info(`[ImportManager] Importing from ${source} as ${format}`)
 
-    let folder: EnvironmentFolder | null = null
-    const urlOpt = sourceUrl !== undefined ? { sourceUrl } : {}
-
-    switch (format) {
-      case 'swagger': {
-        const { importSwaggerFromJson } = await import('./SwaggerImportService')
-        folder = importSwaggerFromJson(content, urlOpt)
-        break
+    const provider = importProviders.find(p => p.format === format)
+    if (!provider) {
+      return {
+        success: false,
+        items: [],
+        source,
+        error: `Unsupported format: ${format}`
       }
-
-      case 'openapi-3.0':
-      case 'openapi-3.1': {
-        const { importOpenAPIFromJson } = await import('./OpenAPIImportService')
-        folder = importOpenAPIFromJson(content, urlOpt)
-        break
-      }
-
-      case 'curl': {
-        const { importCurl } = await import('./CurlImportService')
-        folder = importCurl(content)
-        break
-      }
-
-      case 'powershell': {
-        const { importPowerShell } = await import('./PowerShellImportService')
-        folder = importPowerShell(content)
-        break
-      }
-
-      case 'postman': {
-        const { importPostman } = await import('./PostmanImportService')
-        const json: unknown = JSON.parse(content)
-        folder = importPostman(json as Record<string, unknown>, urlOpt)
-        break
-      }
-
-      case 'insomnia': {
-        const { importInsomnia } = await import('./InsomniaImportService')
-        const json: unknown = JSON.parse(content)
-        folder = importInsomnia(json as Record<string, unknown>, urlOpt)
-        break
-      }
-
-      case 'bruno': {
-        const { importBrunoFromJson } = await import('./BrunoImportService')
-        folder = importBrunoFromJson(content, urlOpt)
-        break
-      }
-
-      case 'asyncapi': {
-        const { importAsyncAPI } = await import('./AsyncAPIImportService')
-        folder = importAsyncAPI(content, urlOpt)
-        break
-      }
-
-      case 'graphql': {
-        const { importGraphQL } = await import('./GraphQLImportService')
-        folder = importGraphQL(content, urlOpt)
-        break
-      }
-
-      case 'grpc': {
-        const { importGrpc } = await import('./GrpcImportService')
-        folder = importGrpc(content, urlOpt)
-        break
-      }
-
-      case 'soap': {
-        const { importSoap } = await import('./SoapImportService')
-        folder = importSoap(content, urlOpt)
-        break
-      }
-
-      case 'odata': {
-        const { importOData } = await import('./ODataImportService')
-        folder = importOData(content, urlOpt)
-        break
-      }
-
-      default:
-        return {
-          success: false,
-          items: [],
-          source,
-          error: `Unsupported format: ${format}`
-        }
     }
-    
+
+    const opts = sourceUrl !== undefined ? { sourceUrl } : {}
+    // Await the parse result so this function stays genuinely async — callers
+    // can rely on the Promise-based API even if all current parsers are sync.
+    const folder: EnvironmentFolder = await Promise.resolve(provider.parse(content, opts))
+
     // Auto-disable empty rows across the freshly-imported tree. Most
     // specs (OpenAPI parameters with no `example` / no `default`,
     // generated headers like `Authorization: ""` waiting for the user
@@ -451,7 +286,7 @@ export async function importFrom(
       // Treat as file path
       logger.info(`[ImportManager] Reading from file: ${input}`)
       source = input
-      
+
       try {
         content = await fs.readFile(input, 'utf-8')
       } catch (error) {
@@ -464,10 +299,10 @@ export async function importFrom(
         }
       }
     }
-    
+
     // Detect format
     detectedFormat = detectFormat(content, input)
-    
+
     if (!detectedFormat) {
       logger.warn(`[ImportManager] Could not detect format for: ${source}`)
       return {
@@ -477,7 +312,7 @@ export async function importFrom(
         error: 'Could not detect file format'
       }
     }
-    
+
     // Import using detected format
     const result = await importFromContent(content, detectedFormat, source, isUrl ? input : undefined)
     if (result.success) {
@@ -507,7 +342,7 @@ export async function tryAllImports(
   _options: ImportOptions = {}
 ): Promise<ImportResult[]> {
   logger.info(`[ImportManager] Trying all import formats for: ${input}`)
-  
+
   // Try to determine if it's a URL or file path
   let content: string
   let source: string
@@ -539,27 +374,14 @@ export async function tryAllImports(
       error: error instanceof Error ? error.message : String(error)
     }]
   }
-  
-  // Try all formats in parallel
-  const formats = [
-    'swagger',
-    'openapi-3.0',
-    'openapi-3.1',
-    'postman',
-    'insomnia',
-    'bruno',
-    'asyncapi',
-    'graphql',
-    'grpc',
-    'soap',
-    'curl',
-    'powershell'
-  ]
-  
+
+  // Try all registered formats in parallel (registration order = detection priority)
+  const formats = importProviders.map(p => p.format)
+
   const results = await Promise.all(
     formats.map(format => importFromContent(content, format, source, isUrl ? input : undefined))
   )
-  
+
   // Return only successful results
   return results.filter(r => r.success && r.items.length > 0)
 }

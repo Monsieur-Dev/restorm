@@ -380,3 +380,18 @@ export function importGrpc(protoContent: string, options: GrpcImportOptions = {}
 export function importGrpcFromString(content: string, options: GrpcImportOptions = {}): EnvironmentFolder {
   return importGrpc(content, options)
 }
+
+// ============================================================================
+// Provider registration
+// ============================================================================
+
+import { importProviders } from './registry'
+
+function canImport(content: string, filePath?: string): boolean {
+  if (filePath?.endsWith('.proto')) return true
+  const trimmed = content.trim()
+  return trimmed.includes('syntax = "proto') ||
+         (trimmed.includes('service ') && trimmed.includes('rpc '))
+}
+
+importProviders.push({ format: 'grpc', canImport, parse: (content, opts) => importGrpc(content, opts) })
