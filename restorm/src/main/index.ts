@@ -111,6 +111,7 @@ import { loadFolderStructure, loadProjectIntoStore, attachDraftStoreForFolder, a
 import { runScenarioHeadless } from './cli/headlessRunner'
 import { DEFAULT_UI_DELAY_MS } from '../shared/config/constants'
 import { applyUserDataOverride } from './userDataOverride'
+import { registerDeepLinkSchemes, handleDeepLinkUrl, isDeepLinkUrl } from './deepLink'
 // DocumentEvents are handled by FileService internally for dirty state tracking
 
 // Test-isolation hook. When `RESTORM_USER_DATA_OVERRIDE` is set,
@@ -134,6 +135,51 @@ app.commandLine.appendSwitch('enable-unsafe-swiftshader')
 // Set the app name for proper taskbar icon on Linux
 // Without this, Electron 38+ may use the default "Electron" identity
 app.name = 'restorm'
+
+// ── Deep-link scheme registration (packaged OAuth callback) ─────────────────
+//
+// Register restorm:// (and restorm-preview:// for preview builds) as the OS
+// default protocol client so the system browser can route the WorkOS callback
+// back to the running packaged app. Must run before app.whenReady().
+registerDeepLinkSchemes(app, app.getVersion())
+
+// Single-instance lock for Windows/Linux protocol-handler routing.
+// On those platforms the OS launches a NEW process with the deep-link URL in
+// argv; `requestSingleInstanceLock` ensures the existing instance gets a
+// `second-instance` event, handles the URL, and the OS-launched process exits.
+//
+// Multi-instance caveat: restorm supports concurrent windows (the MCP
+// `create_instance` tool spawns additional processes). Spawned instances that
+// fail the lock check are NOT exited — they continue without the lock unless
+// their argv contains a deep-link URL (which identifies them as OS-launched
+// protocol handlers, not user-requested new windows).
+const deepLinkArgvUrl = process.argv.find((a) => isDeepLinkUrl(a))
+const gotSingleInstanceLock = app.requestSingleInstanceLock()
+if (!gotSingleInstanceLock && deepLinkArgvUrl !== undefined) {
+  // This process was launched by the OS to handle a deep-link URL. The primary
+  // instance received the `second-instance` event and will dispatch the URL —
+  // nothing more for this process to do.
+  app.exit(0)
+}
+
+// macOS: `open-url` fires on the ALREADY RUNNING instance; no single-instance
+// lock is required.
+app.on('open-url', (event, url) => {
+  event.preventDefault()
+  if (isDeepLinkUrl(url)) {
+    handleDeepLinkUrl(url)
+  }
+})
+
+// Windows / Linux: the OS launches a second process with the deep-link URL in
+// argv. That process exits early (see above); the primary instance receives the
+// `second-instance` event carrying the second instance's argv.
+app.on('second-instance', (_event, argv) => {
+  const url = argv.find((a) => isDeepLinkUrl(a))
+  if (url !== undefined) {
+    handleDeepLinkUrl(url)
+  }
+})
 
 const cliArgs = parseCliArgs()
 if (cliArgs.clearSettings) {
