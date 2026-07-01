@@ -23,6 +23,7 @@ import './InsomniaImportService'
 import './BrunoImportService'
 import './AsyncAPIImportService'
 import './ODataImportService'
+import './HarImportService'
 
 // Non-JSON text/XML formats
 import './GraphQLImportService'

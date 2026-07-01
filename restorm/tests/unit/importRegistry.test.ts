@@ -60,6 +60,9 @@ const fixtures: Record<string, { content: string; filePath?: string }> = {
   },
   soap: {
     content: readFileSync(join(UNIT, 'soap-petstore.wsdl'), 'utf-8')
+  },
+  har: {
+    content: readFileSync(join(FIXTURES, 'har', 'petstore.har'), 'utf-8')
   }
 }
 
