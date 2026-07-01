@@ -60,12 +60,6 @@ Given('a new single-file YAML collection for OData import', async ({ launchApp }
   await expect(page.locator('[data-testid="titlebar-menu-item-new"]').first()).toBeVisible({ timeout: 2000 })
   await page.locator('[data-testid="titlebar-menu-item-new"]').first().click()
 
-  const saveOptionsModal = page.locator('[data-testid="save-options-modal"]')
-  await expect(saveOptionsModal).toBeVisible({ timeout: 2000 })
-  await page.locator('[data-testid="save-mode-file"]').click()
-  await page.locator('[data-testid="save-format-yaml"]').click()
-  await page.locator('[data-testid="save-confirm-button"]').click()
-  await expect(saveOptionsModal).not.toBeVisible({ timeout: 2000 })
   await page.waitForTimeout(500)
 })
 

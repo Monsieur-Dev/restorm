@@ -147,13 +147,6 @@ When(
 
     await clickFileMenuItem(page, 'titlebar-menu-item-new')
 
-    // SaveOptionsModal → file mode + yaml format → confirm.
-    const modal = page.locator('[data-testid="save-options-modal"]')
-    await expect(modal).toBeVisible({ timeout: 5000 })
-    await page.locator('[data-testid="save-mode-file"]').click()
-    await page.locator('[data-testid="save-format-yaml"]').click()
-    await page.locator('[data-testid="save-confirm-button"]').click()
-
     // Wait for the file to land on disk (mocked dialog → main process writes).
     await expect(async () => {
       expect(existsSync(filePath)).toBe(true)
