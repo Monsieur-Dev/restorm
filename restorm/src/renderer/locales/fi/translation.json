@@ -874,6 +874,10 @@
         "description": "Bruno-tyyppisiä .bru-tiedostoja tai kansion vienti — Restorm lukee .bru-tekstimuodon skriptilohkoineen ja luo jokaisen pyynnön ensiluokkaisena Restorm-solmuna, joka on valmis lähetettäväksi.",
         "trademark": "Bruno on avoimen lähdekoodin ohjelmisto (MIT) tekijänä Anoop M. D., käytetään tässä sen ehtojen mukaisesti."
       },
+      "thunderclient": {
+        "description": "Tuletko Thunder Clientista? Pudota viety collection-JSON — Restorm lukee jokaisen pyynnön, kansion, otsikon ja rungon, ja rakentaa kokoelman uudelleen ajovalmiina Restorm-puuna.",
+        "trademark": "Thunder Client on omistajansa tavaramerkki, jota käytetään tässä vain yhteensopivuusviittauksena."
+      },
       "graphql": {
         "description": "Liitä GraphQL SDL (.graphql / .gql / liitos GraphQL-asiakkaastasi), niin Restorm rakentaa yhden pyynnön per operaatio, kytkettynä oikeaan query-/mutation-/subscription-tyyppiin valmiiksi rakennetuilla muuttujilla.",
         "trademark": "GraphQL on GraphQL Foundationin tavaramerkki, joka on Joint Development Foundationin projekti."

@@ -221,6 +221,15 @@ const postmanImportTestDir = defineBddConfig({
   outputDir: '.features-gen/postman-import'
 })
 
+const thunderClientImportTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/thunder-client-import/features/**/*.feature',
+  steps: [
+    'tests/e2e/bdd/thunder-client-import/steps/**/*.ts',
+    'tests/e2e/bdd/fixtures/thunder-client-import.fixture.ts'
+  ],
+  outputDir: '.features-gen/thunder-client-import'
+})
+
 const secretsSourcesTestDir = defineBddConfig({
   features: 'tests/e2e/bdd/secrets-sources/features/**/*.feature',
   steps: [
@@ -485,6 +494,10 @@ export default defineConfig({
       name: 'postman-import',
       testDir: postmanImportTestDir,
       timeout: 180 * 1000 // 3 min — opens a fresh app, imports + runs the workflow against docker
+    },
+    {
+      name: 'thunder-client-import',
+      testDir: thunderClientImportTestDir
     },
     {
       name: 'secrets-sources',

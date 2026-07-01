@@ -33,6 +33,7 @@ const SOURCE_CONFIG: Record<string, { logo?: string; icon?: string; label: strin
   postman: { icon: 'mail', label: 'Collection Import', color: '#ff6c37' },
   insomnia: { icon: 'globe', label: 'Collection Import', color: '#4000bf' },
   bruno: { icon: 'beaker', label: 'Collection Import', color: '#f4aa41' },
+  'thunder-client': { icon: 'zap', label: 'Collection Import', color: '#3423a6' },
   curl: { icon: 'terminal', label: 'cURL', color: '#073551' },
   powershell: { icon: 'terminal-powershell', label: 'PowerShell', color: '#012456' },
   url: { icon: 'link', label: 'URL Import', color: '#888' }

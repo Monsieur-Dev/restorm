@@ -874,6 +874,10 @@
         "description": "Bruno tadında .bru dosyaları veya bir klasör dışa aktarımı — Restorm betikleme blokları dahil .bru metin biçimini okur ve her isteği gönderilmeye hazır birinci sınıf bir Restorm düğümü olarak yeniden oluşturur.",
         "trademark": "Bruno, Anoop M. D. tarafından geliştirilen açık kaynaklı bir yazılımdır (MIT) ve burada kendi koşulları altında kullanılmaktadır."
       },
+      "thunderclient": {
+        "description": "Thunder Client'tan mı geliyorsun? Dışa aktarılan koleksiyon JSON'unu bırak — Restorm her isteği, klasörü, başlığı ve gövdeyi okur, ardından koleksiyonu çalıştırmaya hazır bir Restorm ağacı olarak yeniden oluşturur.",
+        "trademark": "Thunder Client, ilgili sahibinin ticari markasıdır ve burada yalnızca uyumluluk referansı olarak kullanılmaktadır."
+      },
       "graphql": {
         "description": "Bir GraphQL SDL (.graphql / .gql / GraphQL istemcinizden bir yapıştırma) yapıştırın ve Restorm her işlem için bir istek iskeleti oluşturur, doğru query / mutation / subscription tipine bağlanmış ve değişkenleri yapılandırılmış olarak.",
         "trademark": "GraphQL, Joint Development Foundation projesi olan GraphQL Foundation'ın markasıdır."

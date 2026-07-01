@@ -873,6 +873,10 @@
         "description": "Bruno 형식의 .bru 파일이나 폴더 내보내기 — restorm은 스크립트 블록까지 포함하여 .bru 텍스트 형식을 읽고, 각 요청을 바로 전송할 수 있는 restorm의 일급 노드로 재구성합니다.",
         "trademark": "Bruno는 Anoop M. D.가 만든 오픈 소스 소프트웨어(MIT)로, 해당 약관에 따라 사용됩니다."
       },
+      "thunderclient": {
+        "description": "Thunder Client에서 넘어오셨나요? 내보낸 컬렉션 JSON을 가져다 놓으세요 — restorm이 모든 요청, 폴더, 헤더, 본문을 읽어, 바로 실행할 수 있는 restorm 트리로 컬렉션을 재구성합니다.",
+        "trademark": "Thunder Client는 각 소유자의 상표이며, 여기서는 호환성 참조 목적으로만 사용됩니다."
+      },
       "graphql": {
         "description": "GraphQL SDL(.graphql / .gql 또는 GraphQL 클라이언트에서 복사한 내용)을 붙여넣으면, restorm이 오퍼레이션마다 요청을 하나씩 생성하고, 알맞은 query / mutation / subscription 타입에 연결하여 변수까지 구조화해 둡니다.",
         "trademark": "GraphQL은 Joint Development Foundation의 프로젝트인 GraphQL Foundation의 상표입니다."

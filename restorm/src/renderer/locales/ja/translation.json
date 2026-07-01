@@ -873,6 +873,10 @@
         "description": "Bruno 形式の .bru ファイルやフォルダエクスポート——restorm は .bru テキスト形式（スクリプトブロックを含む）を読み取り、それぞれのリクエストを送信準備が整った restorm の一級ノードとして再現します。",
         "trademark": "Bruno は Anoop M. D. によるオープンソースソフトウェア（MIT）で、その条項に基づき使用しています。"
       },
+      "thunderclient": {
+        "description": "Thunder Client から移ってきましたか？エクスポートしたコレクションの JSON を投入してください——restorm はすべてのリクエスト、フォルダ、ヘッダー、ボディを読み取り、実行準備が整った restorm のツリーとしてコレクションを再構築します。",
+        "trademark": "Thunder Client はそれぞれの権利者の商標であり、ここでは互換性の参照としてのみ使用しています。"
+      },
       "graphql": {
         "description": "GraphQL SDL（.graphql / .gql、または GraphQL クライアントからの貼り付け）を貼り付けると、restorm はオペレーションごとに 1 つのリクエストを作成し、適切な query / mutation / subscription 型に接続して、変数まで構造化します。",
         "trademark": "GraphQL は Joint Development Foundation のプロジェクト GraphQL Foundation の商標です。"

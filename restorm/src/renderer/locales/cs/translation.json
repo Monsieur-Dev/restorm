@@ -876,6 +876,10 @@
         "description": "Soubory .bru Bruno nebo export složky — Restorm čte textový formát .bru včetně skriptovacích bloků a každý požadavek znovu vytvoří jako prvotřídní uzel Restorm připravený k odeslání.",
         "trademark": "Bruno je open source software (MIT) Anoopa M. D., použitý zde dle jeho podmínek."
       },
+      "thunderclient": {
+        "description": "Přicházíte z Thunder Clientu? Přetáhněte exportovaný JSON kolekce — Restorm načte každý požadavek, složku, hlavičku i tělo a znovu sestaví kolekci jako strom Restorm připravený ke spuštění.",
+        "trademark": "Thunder Client je ochranná známka svého příslušného vlastníka, zde použitá pouze jako odkaz na kompatibilitu."
+      },
       "graphql": {
         "description": "Vložte GraphQL SDL (.graphql / .gql / vložení z vašeho GraphQL klienta) a Restorm připraví jeden požadavek na každou operaci, navázaný na správný typ query / mutation / subscription s předem strukturovanými proměnnými.",
         "trademark": "GraphQL je ochranná známka GraphQL Foundation, projektu Joint Development Foundation."

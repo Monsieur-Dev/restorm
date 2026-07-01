@@ -874,6 +874,10 @@
         "description": "Bruno-stílusú .bru fájlok vagy mappa-export — a Restorm beolvassa a .bru szöveges formátumot, beleértve a szkriptblokkokat is, és minden kérést elsőosztályú Restorm-csomóponttá épít újra, küldésre készen.",
         "trademark": "A Bruno nyílt forráskódú szoftver (MIT), Anoop M. D. által, itt a feltételei szerint használva."
       },
+      "thunderclient": {
+        "description": "A Thunder Clientből érkezel? Húzd be az exportált kollekció JSON-t — a Restorm beolvas minden kérést, mappát, fejlécet és törzset, majd újraépíti a kollekciót futtatásra kész Restorm-fává.",
+        "trademark": "A Thunder Client a mindenkori tulajdonosának védjegye, itt kizárólag kompatibilitási hivatkozásként szerepel."
+      },
       "graphql": {
         "description": "Illesszen be egy GraphQL SDL-t (.graphql / .gql / egy beillesztést a GraphQL-kliensből), és a Restorm műveletenként egy kérést állít fel, a megfelelő query / mutation / subscription típushoz kötve, már strukturált változókkal.",
         "trademark": "A GraphQL a GraphQL Foundation védjegye, amely a Joint Development Foundation projektje."

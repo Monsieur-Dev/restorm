@@ -874,6 +874,10 @@
         "description": "Bruno-formaterade .bru-filer eller en mappexport — Restorm läser textformatet .bru, inklusive dess skriptblock, och återskapar varje förfrågan som en förstklassig Restorm-nod redo att skickas.",
         "trademark": "Bruno är öppen källkod (MIT) av Anoop M. D., används här på dess villkor."
       },
+      "thunderclient": {
+        "description": "Kommer du från Thunder Client? Släpp den exporterade collection-JSON:en — Restorm läser varje förfrågan, mapp, header och body, och bygger sedan upp collectionen som ett körklart Restorm-träd.",
+        "trademark": "Thunder Client är ett varumärke som tillhör sin respektive ägare, använt här enbart som kompatibilitetsreferens."
+      },
       "graphql": {
         "description": "Klistra in en GraphQL SDL (.graphql / .gql / en kopiering från din GraphQL-klient) och Restorm bygger en förfrågan per operation, kopplad till rätt query/mutation/subscription-typ med variablerna redan strukturerade.",
         "trademark": "GraphQL är ett varumärke som tillhör GraphQL Foundation, ett projekt inom Joint Development Foundation."

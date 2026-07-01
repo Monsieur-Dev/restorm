@@ -11,6 +11,7 @@ route incoming files / URLs / pasted content to the right adapter.
 | OData v2 / v3 / v4 (EDMX + JSON-CSDL) | [`odata.md`](./odata.md) |
 | HAR (HTTP Archive) | [`har.md`](./har.md) |
 | REST Client (`.http` / `.rest`) | [`rest-client.md`](./rest-client.md) |
+| Thunder Client collections | [`thunder-client.md`](./thunder-client.md) |
 
 For periodic re-checks of an already-imported spec (Swagger,
 OpenAPI 3, GraphQL, Postman, Insomnia, Bruno, AsyncAPI, gRPC, SOAP,

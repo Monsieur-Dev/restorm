@@ -873,6 +873,10 @@
         "description": "File .bru rasa Bruno atau ekspor folder — Restorm membaca format teks .bru, termasuk blok skripnya, dan membuat ulang setiap permintaan sebagai simpul Restorm kelas satu yang siap dikirim.",
         "trademark": "Bruno adalah perangkat lunak sumber terbuka (MIT) oleh Anoop M. D., digunakan di sini berdasarkan ketentuannya."
       },
+      "thunderclient": {
+        "description": "Berasal dari Thunder Client? Jatuhkan JSON koleksi yang diekspor — Restorm membaca setiap permintaan, folder, header, dan body, lalu membangun ulang koleksi tersebut sebagai pohon Restorm yang siap dijalankan.",
+        "trademark": "Thunder Client adalah merek dagang milik pemiliknya masing-masing, digunakan di sini hanya sebagai referensi kompatibilitas."
+      },
       "graphql": {
         "description": "Tempel SDL GraphQL (.graphql / .gql / tempelan dari klien GraphQL Anda) dan Restorm membuat kerangka satu permintaan per operasi, terhubung ke tipe query / mutation / subscription yang tepat dengan variabel yang sudah terstruktur.",
         "trademark": "GraphQL adalah merek dagang dari GraphQL Foundation, sebuah proyek dari Joint Development Foundation."

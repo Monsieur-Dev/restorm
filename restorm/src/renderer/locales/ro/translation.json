@@ -875,6 +875,10 @@
         "description": "Fișiere .bru în stil Bruno sau un export de folder — Restorm citește formatul text .bru, inclusiv blocurile de scripting, și recreează fiecare cerere ca un nod Restorm de primă clasă, gata de trimis.",
         "trademark": "Bruno este software open source (MIT) de Anoop M. D., folosit aici conform termenilor săi."
       },
+      "thunderclient": {
+        "description": "Vii din Thunder Client? Plasează JSON-ul colecției exportate — Restorm citește fiecare cerere, folder, antet și corp, apoi reconstruiește colecția ca un arbore Restorm gata de rulare.",
+        "trademark": "Thunder Client este o marcă înregistrată a proprietarului său respectiv, folosită aici doar ca referință de compatibilitate."
+      },
       "graphql": {
         "description": "Lipiți un SDL GraphQL (.graphql / .gql / un text lipit din clientul dvs. GraphQL) și Restorm generează câte o cerere per operațiune, conectată la tipul potrivit query / mutation / subscription, cu variabile deja structurate.",
         "trademark": "GraphQL este o marcă a GraphQL Foundation, un proiect al Joint Development Foundation."

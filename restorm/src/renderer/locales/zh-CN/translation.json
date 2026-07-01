@@ -873,6 +873,10 @@
         "description": "Bruno 的 .bru 文件或文件夹导出——restorm 会读取 .bru 文本格式（包括其脚本块），并将每个请求重建为一流的、可立即发送的 restorm 节点。",
         "trademark": "Bruno 是 Anoop M. D. 开发的开源软件（MIT），在此按其许可证条款使用。"
       },
+      "thunderclient": {
+        "description": "从 Thunder Client 迁移过来？拖入导出的集合 JSON——restorm 会读取每个请求、文件夹、请求头和请求体，然后将集合重建为可立即运行的 restorm 树。",
+        "trademark": "Thunder Client 是其各自所有者的商标，此处仅用于兼容性参考。"
+      },
       "graphql": {
         "description": "粘贴 GraphQL SDL（.graphql / .gql 或从您的 GraphQL 客户端复制的内容），restorm 会为每个操作搭建一个请求，准确连接到对应的 query / mutation / subscription 类型，并已结构化变量。",
         "trademark": "GraphQL 是 Joint Development Foundation 项目 GraphQL Foundation 的商标。"

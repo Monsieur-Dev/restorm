@@ -873,6 +873,10 @@
         "description": "Tệp .bru kiểu Bruno hoặc xuất thư mục — Restorm đọc định dạng văn bản .bru, bao gồm các khối scripting, và tái tạo mỗi yêu cầu thành nút Restorm hạng nhất sẵn sàng gửi.",
         "trademark": "Bruno là phần mềm mã nguồn mở (MIT) của Anoop M. D., được sử dụng ở đây theo các điều khoản của nó."
       },
+      "thunderclient": {
+        "description": "Bạn đang chuyển từ Thunder Client? Thả tệp JSON của bộ sưu tập đã xuất — Restorm đọc từng yêu cầu, thư mục, tiêu đề và nội dung, sau đó dựng lại bộ sưu tập thành cây Restorm sẵn sàng chạy.",
+        "trademark": "Thunder Client là thương hiệu của chủ sở hữu tương ứng, được sử dụng ở đây chỉ nhằm mục đích tham chiếu tương thích."
+      },
       "graphql": {
         "description": "Dán SDL GraphQL (.graphql / .gql / một bản dán từ client GraphQL của bạn) và Restorm tạo khung một yêu cầu cho mỗi thao tác, được kết nối đúng với kiểu query / mutation / subscription với các biến đã được cấu trúc sẵn.",
         "trademark": "GraphQL là nhãn hiệu của GraphQL Foundation, một dự án của Joint Development Foundation."

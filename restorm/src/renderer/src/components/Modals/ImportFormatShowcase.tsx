@@ -246,6 +246,15 @@ const IMPORT_FORMATS: readonly ImportFormat[] = [
     isPro: true
   },
   {
+    id: 'thunderclient',
+    title: 'Thunder Client',
+    logoSrc: null,
+    iconCodicon: 'zap',
+    descriptionKey: 'import.formats.thunderclient.description',
+    trademarkKey: 'import.formats.thunderclient.trademark',
+    isPro: true
+  },
+  {
     id: 'graphql',
     title: 'GraphQL',
     logoSrc: new URL('../../../../../assets/imgs/import-sources/graphql.svg', import.meta.url).href,

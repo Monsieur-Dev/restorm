@@ -25,6 +25,7 @@ import './BrunoImportService'
 import './AsyncAPIImportService'
 import './ODataImportService'
 import './HarImportService'
+import './ThunderClientImportService'
 
 // Non-JSON text/XML formats
 import './GraphQLImportService'

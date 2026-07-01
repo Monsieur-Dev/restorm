@@ -874,6 +874,10 @@
         "description": "Bruno-flavored .bru files or a folder export — Restorm reads the .bru text format, including its scripting blocks, and recreates each request as a first-class Restorm node ready to send.",
         "trademark": "Bruno is open source software (MIT) by Anoop M. D., used here under its terms."
       },
+      "thunderclient": {
+        "description": "Coming from Thunder Client? Drop the exported collection JSON — Restorm reads every request, folder, header, and body, then rebuilds the collection as a Restorm tree ready to run.",
+        "trademark": "Thunder Client is a trademark of its respective owner, used here for compatibility reference only."
+      },
       "graphql": {
         "description": "Paste a GraphQL SDL (.graphql / .gql / a paste from your GraphQL client) and Restorm scaffolds one request per operation, wired to the right query / mutation / subscription type with variables already structured.",
         "trademark": "GraphQL is a trademark of the GraphQL Foundation, a project of the Joint Development Foundation."
