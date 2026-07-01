@@ -1,6 +1,5 @@
 import { createBdd } from 'playwright-bdd'
 import { join, resolve } from 'path'
-import { readFileSync } from 'fs'
 import type { ElectronApplication, Page, Locator } from '@playwright/test'
 import { test, expect, configureNextSaveFileDialogForE2E, THRIFT_IMPORT_TEMP_DIR } from '../../fixtures/thrift-import.fixture'
 
@@ -66,9 +65,13 @@ When('I import the Thrift fixture file {string}', async ({}, fileName: string) =
   await importViaModal(join(THRIFT_FIXTURES_DIR, fileName))
 })
 
-When('I paste the Thrift fixture file {string} into the import source', async ({}, fileName: string) => {
-  const content = readFileSync(join(THRIFT_FIXTURES_DIR, fileName), 'utf-8')
-  await openImportModalWith(content)
+When('I provide the Thrift fixture file {string} as the import source', async ({}, fileName: string) => {
+  // The import-source field always resolves its value as a file path /
+  // URL (see ImportManager.importFrom) — there's no raw-content-paste
+  // parse path anywhere in the importer pipeline yet, matching the
+  // existing "paste ... into the import source" steps elsewhere in the
+  // suite, which also fill a path rather than file content.
+  await openImportModalWith(join(THRIFT_FIXTURES_DIR, fileName))
 })
 
 Then('the sidebar should show the imported folder {string}', async ({}, name: string) => {
@@ -76,7 +79,7 @@ Then('the sidebar should show the imported folder {string}', async ({}, name: st
   await expect(sidebarRowsByName(p, name).first()).toBeVisible({ timeout: 10000 })
 })
 
-Then('exactly {int} folder named {string} should be in the sidebar', async ({}, count: number, name: string) => {
+Then('exactly {int} folders named {string} should be in the sidebar', async ({}, count: number, name: string) => {
   const p = requirePage()
   await expect(sidebarRowsByName(p, name)).toHaveCount(count, { timeout: 10000 })
 })

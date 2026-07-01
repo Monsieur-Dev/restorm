@@ -276,4 +276,33 @@ describe('walkImportTreeWithKeys', () => {
       'request:sse:PetUpdated'
     ])
   })
+
+  it('filterImportTreeBySelection keeps a documentation-only folder (no requests at all) when its own key is selected', () => {
+    // A documentation-only importer (e.g. Thrift) produces folders with
+    // `items: []` — no requests to individually select. The folder's
+    // own natural key stands in as the sole leaf (see
+    // `collectSelectableLeafKeys`), and the prune must honour it or the
+    // folder would be dropped regardless of the user's selection.
+    const tree: FolderItem[] = [folder('PetService', [])]
+    const keep = new Set([importNaturalKeyForFolder(['PetService'])])
+    const filtered = filterImportTreeBySelection(tree, keep)
+    expect(filtered).toHaveLength(1)
+    expect((filtered[0] as Folder).name).toBe('PetService')
+    expect((filtered[0] as Folder).items).toEqual([])
+  })
+
+  it('filterImportTreeBySelection drops a documentation-only folder when its own key is NOT selected', () => {
+    const tree: FolderItem[] = [folder('PetService', [])]
+    const filtered = filterImportTreeBySelection(tree, new Set())
+    expect(filtered).toHaveLength(0)
+  })
+
+  it('filterImportTreeBySelection does not use the empty-folder fallback when the folder actually has requests', () => {
+    // A folder with real (but all-deselected) requests must still be
+    // dropped like before — the fallback only kicks in for a folder
+    // with literally zero items.
+    const tree: FolderItem[] = [folder('pet', [http('GET', '/pet/{petId}')])]
+    const filtered = filterImportTreeBySelection(tree, new Set([importNaturalKeyForFolder(['pet'])]))
+    expect(filtered).toHaveLength(0)
+  })
 })

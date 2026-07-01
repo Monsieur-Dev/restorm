@@ -13,6 +13,7 @@ import type { Scenario } from '../../../../shared/types/collections'
 import { isAnyFolder, isRequest, isScenario } from '../../../../shared/types/collections'
 import { mapToBadgeType } from '../../utils/badgeUtils'
 import { Badge } from '../common/Badge'
+import { collectSelectableLeafKeys } from './importSelectionHelpers'
 
 export interface ImportSelectionTreeProps {
   /**
@@ -76,23 +77,6 @@ function folderStateFromSelection(
     if (anySelected && anyUnselected) return 'indeterminate'
   }
   return anySelected ? 'checked' : 'unchecked'
-}
-
-/**
- * Collect the natural keys of every LEAF descendant of a folder
- * subtree (in iteration order). Folder keys are skipped — the
- * selection set tracks leaves only.
- */
-function collectLeafKeys(items: readonly FolderItem[]): string[] {
-  const out: string[] = []
-  for (const item of items) {
-    if (isAnyFolder(item)) {
-      out.push(...collectLeafKeys(item.items))
-    } else if (isRequest(item)) {
-      out.push(importNaturalKeyForRequest(item))
-    }
-  }
-  return out
 }
 
 /**
@@ -196,7 +180,13 @@ export const ImportSelectionTree: React.FC<ImportSelectionTreeProps> = ({
       for (const item of subtree) {
         if (isAnyFolder(item)) {
           const childPath = [...path, item.name]
-          map.set(importNaturalKeyForFolder(childPath), collectLeafKeys(item.items))
+          // Wrap `item` in a single-element list so `collectSelectableLeafKeys`
+          // applies its own empty-folder-falls-back-to-its-own-key rule for
+          // THIS folder too — calling it directly on `item.items` would miss
+          // that substitution and leave a documentation-only folder mapped to
+          // `[]`, which renders permanently unchecked and makes its Toggle a
+          // no-op (see `importSelectionHelpers.ts`).
+          map.set(importNaturalKeyForFolder(childPath), collectSelectableLeafKeys([item], path))
           walk(item.items, childPath)
         }
       }

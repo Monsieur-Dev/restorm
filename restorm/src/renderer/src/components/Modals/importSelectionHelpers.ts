@@ -1,9 +1,41 @@
 import {
+  importNaturalKeyForFolder,
   importNaturalKeyForRequest,
   walkImportTreeWithKeys
 } from '../../../../shared/utils/importNaturalKey'
 import type { FolderItem } from '../../../../shared/types/folderTypes'
 import { isAnyFolder, isRequest } from '../../../../shared/types/collections'
+
+/**
+ * Selectable-leaf keys for a subtree: every Request descendant, or —
+ * when a folder's own subtree carries none at all (a documentation-only
+ * importer like Thrift, whose services/methods have no executable
+ * request behind them) — the folder's own natural key stands in as
+ * the sole leaf. Without this fallback a pure-docs import would
+ * default to an empty selection and the Import button could never
+ * enable, since nothing in the tree would ever be "selected".
+ *
+ * Shared by `allLeafKeys` (default selection) and the selection
+ * tree's tri-state / toggle logic (`ImportSelectionTree.tsx`) so both
+ * agree on what counts as a leaf.
+ */
+export function collectSelectableLeafKeys(items: readonly FolderItem[], path: readonly string[] = []): string[] {
+  const out: string[] = []
+  for (const item of items) {
+    if (isAnyFolder(item)) {
+      const childPath = [...path, item.name]
+      const childLeaves = collectSelectableLeafKeys(item.items, childPath)
+      if (childLeaves.length === 0) {
+        out.push(importNaturalKeyForFolder(childPath))
+      } else {
+        out.push(...childLeaves)
+      }
+    } else if (isRequest(item)) {
+      out.push(importNaturalKeyForRequest(item))
+    }
+  }
+  return out
+}
 
 /**
  * Compute the initial selection set for a parsed import preview —
@@ -12,15 +44,7 @@ import { isAnyFolder, isRequest } from '../../../../shared/types/collections'
  * use it as a "Select all" reset.
  */
 export function allLeafKeys(items: readonly FolderItem[]): Set<string> {
-  const out = new Set<string>()
-  const walk = (subtree: readonly FolderItem[]): void => {
-    for (const item of subtree) {
-      if (isAnyFolder(item)) walk(item.items)
-      else if (isRequest(item)) out.add(importNaturalKeyForRequest(item))
-    }
-  }
-  walk(items)
-  return out
+  return new Set(collectSelectableLeafKeys(items))
 }
 
 /**

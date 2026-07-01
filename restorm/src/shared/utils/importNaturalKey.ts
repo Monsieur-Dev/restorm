@@ -118,22 +118,33 @@ export function filterImportTreeBySelection(
   items: readonly FolderItem[],
   selection: ReadonlySet<string>
 ): FolderItem[] {
-  return dropOrphanWorkflowScenarios(pruneBySelection(items, selection))
+  return dropOrphanWorkflowScenarios(pruneBySelection(items, selection, []))
 }
 
 function pruneBySelection(
   items: readonly FolderItem[],
-  selection: ReadonlySet<string>
+  selection: ReadonlySet<string>,
+  parentPath: readonly string[]
 ): FolderItem[] {
   const out: FolderItem[] = []
   for (const item of items) {
     if (isAnyFolder(item)) {
       const folder: Folder | EnvironmentFolder = item
-      const filteredChildren = pruneBySelection(folder.items, selection)
+      const path = [...parentPath, folder.name]
+      const filteredChildren = pruneBySelection(folder.items, selection, path)
       // Keep the folder when at least one REAL (request) descendant survived. A
       // workflow scenario rides along with its sibling requests but never by
       // itself keeps an otherwise-emptied folder alive.
-      if (filteredChildren.some((c) => !isScenario(c))) {
+      //
+      // A folder with NO descendants at all (a documentation-only importer
+      // like Thrift, whose services carry no executable request) has nothing
+      // to individually select — `collectSelectableLeafKeys` falls back to
+      // the folder's own natural key as its sole leaf, so honour that key
+      // here too, or the folder would always be dropped regardless of the
+      // user's selection.
+      const survives = filteredChildren.some((c) => !isScenario(c)) ||
+        (folder.items.length === 0 && selection.has(importNaturalKeyForFolder(path)))
+      if (survives) {
         out.push({ ...folder, items: filteredChildren })
       }
     } else if (isScenario(item)) {
