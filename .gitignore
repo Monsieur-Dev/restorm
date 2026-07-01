@@ -16,3 +16,6 @@ restorm/tests/e2e/samples/scenarios-e2e-reference-tests.writefile-out.json
 
 # Superpowers working docs (plans, not shipped)
 /docs/
+
+# local stage-e2e run-time creds (never commit)
+.stage-e2e.env
