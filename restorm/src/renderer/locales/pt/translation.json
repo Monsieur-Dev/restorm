@@ -1580,7 +1580,25 @@
       "code": "código",
       "modalTitle": "Editar código",
       "result": "resultado",
-      "timeout": "Tempo limite (s)"
+      "timeout": "Tempo limite (s)",
+      "deps": {
+        "downloading": "A transferir {{count}} pacote(s): {{packages}}"
+      },
+      "packages": {
+        "title": "Pacotes",
+        "caption": "Dependências",
+        "manage": "Gerir pacotes",
+        "count": "{{count}} deps",
+        "addShort": "Adicionar",
+        "hint": "Pacotes externos fixados, resolvidos e colocados em cache na primeira execução e depois carregados offline. Apenas são suportados pacotes de linguagem pura (Python: wheels de Python puro); fixe a versão exata.",
+        "empty": "Ainda não foram adicionados pacotes.",
+        "remove": "Remover {{package}}",
+        "name": "Nome do pacote",
+        "namePlaceholder": "nome do pacote",
+        "version": "Versão",
+        "versionPlaceholder": "versão",
+        "add": "Adicionar pacote"
+      }
     },
     "help": {
       "input": "Injeta os parâmetros de entrada do cenário e constantes no grafo.",

@@ -1580,7 +1580,25 @@
       "code": "koodi",
       "modalTitle": "Muokkaa koodia",
       "result": "tulos",
-      "timeout": "Aikakatkaisu (s)"
+      "timeout": "Aikakatkaisu (s)",
+      "deps": {
+        "downloading": "Ladataan {{count}} pakettia: {{packages}}"
+      },
+      "packages": {
+        "title": "Paketit",
+        "caption": "Riippuvuudet",
+        "manage": "Hallitse paketteja",
+        "count": "{{count}} riip.",
+        "addShort": "Lisää",
+        "hint": "Kiinnitetyt ulkoiset paketit, jotka ratkaistaan ja tallennetaan välimuistiin ensimmäisellä ajokerralla ja ladataan sen jälkeen offline-tilassa. Vain puhtaat kielipaketit ovat tuettuja (Python: puhtaat Python-wheelit); kiinnitä tarkka versio.",
+        "empty": "Paketteja ei ole vielä lisätty.",
+        "remove": "Poista {{package}}",
+        "name": "Paketin nimi",
+        "namePlaceholder": "paketin nimi",
+        "version": "Versio",
+        "versionPlaceholder": "versio",
+        "add": "Lisää paketti"
+      }
     },
     "help": {
       "input": "Syöttää skenaarion syöteparametrit ja vakiot graafiin.",

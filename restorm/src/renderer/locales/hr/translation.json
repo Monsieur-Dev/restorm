@@ -1581,7 +1581,25 @@
       "code": "kôd",
       "modalTitle": "Uredi kôd",
       "result": "rezultat",
-      "timeout": "Vremensko ograničenje (s)"
+      "timeout": "Vremensko ograničenje (s)",
+      "deps": {
+        "downloading": "Preuzimanje {{count}} paketa: {{packages}}"
+      },
+      "packages": {
+        "title": "Paketi",
+        "caption": "Ovisnosti",
+        "manage": "Upravljanje paketima",
+        "count": "{{count}} ovis.",
+        "addShort": "Dodaj",
+        "hint": "Prikvačeni vanjski paketi, razriješeni i spremljeni u predmemoriju pri prvom pokretanju, zatim učitani izvanmrežno. Podržani su samo čisto jezični paketi (Python: čisti Python wheelovi); prikvačite točnu verziju.",
+        "empty": "Još nema dodanih paketa.",
+        "remove": "Ukloni {{package}}",
+        "name": "Naziv paketa",
+        "namePlaceholder": "naziv paketa",
+        "version": "Verzija",
+        "versionPlaceholder": "verzija",
+        "add": "Dodaj paket"
+      }
     },
     "help": {
       "input": "Ubacuje ulazne parametre scenarija i konstante u graf.",

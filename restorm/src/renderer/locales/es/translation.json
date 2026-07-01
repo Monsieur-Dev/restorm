@@ -1580,7 +1580,25 @@
       "code": "código",
       "modalTitle": "Editar código",
       "result": "resultado",
-      "timeout": "Tiempo límite (s)"
+      "timeout": "Tiempo límite (s)",
+      "deps": {
+        "downloading": "Descargando {{count}} paquete(s): {{packages}}"
+      },
+      "packages": {
+        "title": "Paquetes",
+        "caption": "Dependencias",
+        "manage": "Gestionar paquetes",
+        "count": "{{count}} deps",
+        "addShort": "Añadir",
+        "hint": "Paquetes externos fijados, resueltos y almacenados en caché en la primera ejecución, y luego cargados sin conexión. Solo se admiten paquetes de lenguaje puro (Python: wheels puros de Python); fija la versión exacta.",
+        "empty": "Aún no se han añadido paquetes.",
+        "remove": "Eliminar {{package}}",
+        "name": "Nombre del paquete",
+        "namePlaceholder": "nombre del paquete",
+        "version": "Versión",
+        "versionPlaceholder": "versión",
+        "add": "Añadir paquete"
+      }
     },
     "help": {
       "input": "Inyecta los parámetros de entrada del escenario y constantes en el grafo.",

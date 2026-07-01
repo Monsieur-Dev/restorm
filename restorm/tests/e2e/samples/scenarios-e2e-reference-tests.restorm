@@ -17796,6 +17796,75 @@ collections:
                 tags: []
                 params: []
                 nodes:
+                  - id: c0de0dep-0000-4000-8000-000000000002
+                    kind: code
+                    config:
+                      language: python
+                      code: |-
+                        # code-deps chain — Python link. Imports the pinned pure-Python wheel
+                        # (installed OFFLINE from the code-deps cache) to prove install+mount worked,
+                        # then adds its marker to the pass-through dict for the next link.
+                        import restormpydep
+                        prev = input if isinstance(input, dict) else {}
+                        print("python: restormpydep", restormpydep.__version__, "loaded")
+                        {**prev, "python": restormpydep.__version__}
+                      packages:
+                        - name: restormpydep
+                          version: 1.0.0
+                    inputs:
+                      - id: in
+                        name: ""
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: input
+                        dataType: any
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: any
+                        flow: both
+                    position:
+                      x: 0
+                      y: 40
+                  - id: c0de0dep-0000-4000-8000-000000000003
+                    kind: log
+                    config:
+                      level: info
+                      message:
+                        type: expression
+                        value: code-deps chain result
+                    inputs:
+                      - id: in
+                        name: ""
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 360
+                      y: 40
+                edges:
+                  - id: c0de0dep-0000-4000-8000-000000000004
+                    from:
+                      nodeId: c0de0dep-0000-4000-8000-000000000002
+                      portId: result
+                    to:
+                      nodeId: c0de0dep-0000-4000-8000-000000000003
+                      portId: data
+                    selector: .
+                id: c0de0dep-0000-4000-8000-000000000001
+                name: code-deps-chain
+                items: []
+              - type: scenario
+                tags: []
+                params: []
+                nodes:
                   - id: 0a6895e4-2d05-4010-bc8b-8750dd6f4199
                     kind: code
                     config:

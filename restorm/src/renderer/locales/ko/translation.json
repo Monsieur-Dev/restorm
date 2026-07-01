@@ -1579,7 +1579,25 @@
       "code": "코드",
       "modalTitle": "코드 편집",
       "result": "결과",
-      "timeout": "시간 제한 (초)"
+      "timeout": "시간 제한 (초)",
+      "deps": {
+        "downloading": "{{count}}개 패키지 다운로드 중: {{packages}}"
+      },
+      "packages": {
+        "title": "패키지",
+        "caption": "종속성",
+        "manage": "패키지 관리",
+        "count": "종속성 {{count}}개",
+        "addShort": "추가",
+        "hint": "고정된 외부 패키지로, 첫 실행 시 확인 후 캐시되며 이후에는 오프라인으로 로드됩니다. 순수 언어 패키지만 지원됩니다(Python: 순수 Python 휠). 정확한 버전을 고정하세요.",
+        "empty": "아직 추가된 패키지가 없습니다.",
+        "remove": "{{package}} 제거",
+        "name": "패키지 이름",
+        "namePlaceholder": "패키지 이름",
+        "version": "버전",
+        "versionPlaceholder": "버전",
+        "add": "패키지 추가"
+      }
     },
     "help": {
       "input": "시나리오의 입력 파라미터와 상수를 그래프에 주입합니다.",

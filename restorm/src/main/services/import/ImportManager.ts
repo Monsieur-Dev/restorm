@@ -19,7 +19,7 @@ import type { EnvironmentFolder, FolderItem } from '../../../shared/models'
 import { isRequest, isAnyFolder, isHTTPRequest, isAuthenticationRequest, isGraphQLRequest, isGrpcRequest, isSoapRequest, isWebSocketRequest, isODataRequest } from '../../../shared/types/collections'
 import { disableEmptyKeyValues } from '../../../shared/utils/emptyKeyValueHelper'
 import { withFirewallBypass } from 'electron-core-ui'
-import { assertSafeFetchUrl } from '../../utils/urlSecurity'
+import { assertSafeFetchUrl, fetchFollowingSafeRedirects } from '../../utils/urlSecurity'
 
 // Side-effect import: triggers all provider self-registrations before any
 // dispatch call can reach detectFormat or importFromContent.
@@ -61,38 +61,6 @@ export interface ImportOptions {
 // ============================================================================
 // Safe redirect-following fetch
 // ============================================================================
-
-/** Cap on import redirect hops — generous for real APIs, bounded vs. a loop. */
-const MAX_IMPORT_REDIRECTS = 5
-
-/**
- * Fetch `url`, following redirects MANUALLY so every hop is re-validated by the
- * SSRF guard in STRICT mode (`allowPrivateHosts` is NOT carried past the first
- * URL). The top-level import URL may be loopback/private (the user typed it),
- * but a redirect must never be able to pivot to an internal / cloud-metadata
- * target — that is the real SSRF vector. `node-fetch`/undici default to
- * following redirects opaquely, which would bypass the per-hop check.
- *
- * Exported for unit-test coverage; the production call site is `importFrom`.
- */
-export async function fetchFollowingSafeRedirects(url: string, init: RequestInit): Promise<Response> {
-  let current = url
-  for (let hop = 0; hop <= MAX_IMPORT_REDIRECTS; hop++) {
-    const response = await fetch(current, { ...init, redirect: 'manual' })
-    // 3xx with a Location → a redirect we must re-validate before following.
-    const location = response.status >= 300 && response.status < 400
-      ? response.headers.get('location')
-      : null
-    if (location === null) return response
-    // Resolve relative redirects against the current URL, then re-assert
-    // STRICTLY (no allowPrivateHosts) so the hop can't reach loopback/private/
-    // metadata even though the original explicit URL was allowed to.
-    const next = new URL(location, current).toString()
-    assertSafeFetchUrl(next)
-    current = next
-  }
-  throw new Error(`Too many redirects following the import URL (>${MAX_IMPORT_REDIRECTS})`)
-}
 
 // ============================================================================
 // Format Detection

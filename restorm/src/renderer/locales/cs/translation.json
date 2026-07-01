@@ -1582,7 +1582,25 @@
       "code": "kód",
       "modalTitle": "Upravit kód",
       "result": "výsledek",
-      "timeout": "Časový limit (s)"
+      "timeout": "Časový limit (s)",
+      "deps": {
+        "downloading": "Stahování {{count}} balíčku(ů): {{packages}}"
+      },
+      "packages": {
+        "title": "Balíčky",
+        "caption": "Závislosti",
+        "manage": "Spravovat balíčky",
+        "count": "{{count}} záv.",
+        "addShort": "Přidat",
+        "hint": "Připnuté externí balíčky, vyřešené a uložené do mezipaměti při prvním spuštění, poté načítané offline. Podporovány jsou pouze čistě jazykové balíčky (Python: čistě pythonovská kola); připněte přesnou verzi.",
+        "empty": "Zatím nebyly přidány žádné balíčky.",
+        "remove": "Odebrat {{package}}",
+        "name": "Název balíčku",
+        "namePlaceholder": "název balíčku",
+        "version": "Verze",
+        "versionPlaceholder": "verze",
+        "add": "Přidat balíček"
+      }
     },
     "help": {
       "input": "Vkládá vstupní parametry scénáře a konstanty do grafu.",

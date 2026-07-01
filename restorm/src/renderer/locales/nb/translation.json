@@ -1580,7 +1580,25 @@
       "code": "kode",
       "modalTitle": "Rediger kode",
       "result": "resultat",
-      "timeout": "Tidsavbrudd (s)"
+      "timeout": "Tidsavbrudd (s)",
+      "deps": {
+        "downloading": "Laster ned {{count}} pakke(r): {{packages}}"
+      },
+      "packages": {
+        "title": "Pakker",
+        "caption": "Avhengigheter",
+        "manage": "Behandle pakker",
+        "count": "{{count}} avh.",
+        "addShort": "Legg til",
+        "hint": "Festede eksterne pakker som løses og bufres ved første kjøring, og deretter lastes inn frakoblet. Bare rene språkpakker støttes (Python: rene Python-wheels); fest den nøyaktige versjonen.",
+        "empty": "Ingen pakker lagt til ennå.",
+        "remove": "Fjern {{package}}",
+        "name": "Pakkenavn",
+        "namePlaceholder": "pakkenavn",
+        "version": "Versjon",
+        "versionPlaceholder": "versjon",
+        "add": "Legg til pakke"
+      }
     },
     "help": {
       "input": "Injiserer scenariets inngangsparametere og konstanter i grafen.",

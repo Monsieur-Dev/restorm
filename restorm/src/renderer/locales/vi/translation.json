@@ -1579,7 +1579,25 @@
       "code": "mã",
       "modalTitle": "Sửa mã",
       "result": "kết quả",
-      "timeout": "Thời gian chờ (s)"
+      "timeout": "Thời gian chờ (s)",
+      "deps": {
+        "downloading": "Đang tải {{count}} gói: {{packages}}"
+      },
+      "packages": {
+        "title": "Gói",
+        "caption": "Phụ thuộc",
+        "manage": "Quản lý gói",
+        "count": "{{count}} phụ thuộc",
+        "addShort": "Thêm",
+        "hint": "Các gói bên ngoài được ghim, được phân giải và lưu vào bộ nhớ đệm trong lần chạy đầu tiên, sau đó tải ngoại tuyến. Chỉ hỗ trợ các gói thuần ngôn ngữ (Python: wheel thuần Python); hãy ghim phiên bản chính xác.",
+        "empty": "Chưa có gói nào được thêm.",
+        "remove": "Xóa {{package}}",
+        "name": "Tên gói",
+        "namePlaceholder": "tên gói",
+        "version": "Phiên bản",
+        "versionPlaceholder": "phiên bản",
+        "add": "Thêm gói"
+      }
     },
     "help": {
       "input": "Tiêm các tham số đầu vào của kịch bản và các hằng số vào đồ thị.",

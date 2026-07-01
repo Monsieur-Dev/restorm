@@ -1579,7 +1579,25 @@
       "code": "程式碼",
       "modalTitle": "編輯程式碼",
       "result": "結果",
-      "timeout": "逾時 (秒)"
+      "timeout": "逾時 (秒)",
+      "deps": {
+        "downloading": "正在下載 {{count}} 個套件：{{packages}}"
+      },
+      "packages": {
+        "title": "套件",
+        "caption": "相依性",
+        "manage": "管理套件",
+        "count": "{{count}} 個相依",
+        "addShort": "新增",
+        "hint": "已釘選的外部套件，於首次執行時解析並快取，之後離線載入。僅支援純語言套件（Python：純 Python wheel）；請釘選確切版本。",
+        "empty": "尚未新增套件。",
+        "remove": "移除 {{package}}",
+        "name": "套件名稱",
+        "namePlaceholder": "套件名稱",
+        "version": "版本",
+        "versionPlaceholder": "版本",
+        "add": "新增套件"
+      }
     },
     "help": {
       "input": "將情境的輸入參數和常數注入圖中。",

@@ -1580,7 +1580,25 @@
       "code": "kód",
       "modalTitle": "Kód szerkesztése",
       "result": "eredmény",
-      "timeout": "Időkorlát (s)"
+      "timeout": "Időkorlát (s)",
+      "deps": {
+        "downloading": "{{count}} csomag letöltése: {{packages}}"
+      },
+      "packages": {
+        "title": "Csomagok",
+        "caption": "Függőségek",
+        "manage": "Csomagok kezelése",
+        "count": "{{count}} függ.",
+        "addShort": "Hozzáadás",
+        "hint": "Rögzített külső csomagok, amelyek az első futtatáskor feloldódnak és gyorsítótárba kerülnek, majd offline töltődnek be. Csak tiszta nyelvi csomagok támogatottak (Python: tiszta Python wheelek); rögzítse a pontos verziót.",
+        "empty": "Még nincs hozzáadva csomag.",
+        "remove": "{{package}} eltávolítása",
+        "name": "Csomag neve",
+        "namePlaceholder": "csomag neve",
+        "version": "Verzió",
+        "versionPlaceholder": "verzió",
+        "add": "Csomag hozzáadása"
+      }
     },
     "help": {
       "input": "Beilleszti a forgatókönyv bemeneti paramétereit és állandóit a gráfba.",

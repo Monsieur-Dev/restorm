@@ -1579,7 +1579,25 @@
       "code": "代码",
       "modalTitle": "编辑代码",
       "result": "结果",
-      "timeout": "超时 (秒)"
+      "timeout": "超时 (秒)",
+      "deps": {
+        "downloading": "正在下载 {{count}} 个软件包：{{packages}}"
+      },
+      "packages": {
+        "title": "软件包",
+        "caption": "依赖项",
+        "manage": "管理软件包",
+        "count": "{{count}} 个依赖",
+        "addShort": "添加",
+        "hint": "固定的外部软件包，在首次运行时解析并缓存，之后离线加载。仅支持纯语言软件包（Python：纯 Python wheel）；请固定确切版本。",
+        "empty": "尚未添加软件包。",
+        "remove": "移除 {{package}}",
+        "name": "软件包名称",
+        "namePlaceholder": "软件包名称",
+        "version": "版本",
+        "versionPlaceholder": "版本",
+        "add": "添加软件包"
+      }
     },
     "help": {
       "input": "将场景的输入参数和常量注入图中。",

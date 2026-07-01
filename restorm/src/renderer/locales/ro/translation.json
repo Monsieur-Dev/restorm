@@ -1581,7 +1581,25 @@
       "code": "cod",
       "modalTitle": "Editează codul",
       "result": "rezultat",
-      "timeout": "Timp limită (s)"
+      "timeout": "Timp limită (s)",
+      "deps": {
+        "downloading": "Se descarcă {{count}} pachet(e): {{packages}}"
+      },
+      "packages": {
+        "title": "Pachete",
+        "caption": "Dependențe",
+        "manage": "Gestionează pachetele",
+        "count": "{{count}} dep.",
+        "addShort": "Adaugă",
+        "hint": "Pachete externe fixate, rezolvate și stocate în cache la prima rulare, apoi încărcate offline. Sunt acceptate doar pachetele pur lingvistice (Python: wheel-uri pur Python); fixează versiunea exactă.",
+        "empty": "Niciun pachet adăugat încă.",
+        "remove": "Elimină {{package}}",
+        "name": "Numele pachetului",
+        "namePlaceholder": "numele pachetului",
+        "version": "Versiune",
+        "versionPlaceholder": "versiune",
+        "add": "Adaugă pachet"
+      }
     },
     "help": {
       "input": "Injectează parametrii de intrare ai scenariului și constantele în graf.",

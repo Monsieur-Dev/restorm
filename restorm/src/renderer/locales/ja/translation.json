@@ -1579,7 +1579,25 @@
       "code": "コード",
       "modalTitle": "コードを編集",
       "result": "結果",
-      "timeout": "タイムアウト (秒)"
+      "timeout": "タイムアウト (秒)",
+      "deps": {
+        "downloading": "{{count}} 個のパッケージをダウンロード中: {{packages}}"
+      },
+      "packages": {
+        "title": "パッケージ",
+        "caption": "依存関係",
+        "manage": "パッケージの管理",
+        "count": "{{count}} 個の依存",
+        "addShort": "追加",
+        "hint": "ピン留めした外部パッケージ。初回実行時に解決してキャッシュし、以降はオフラインで読み込みます。純粋な言語パッケージのみ対応します（Python: ピュア Python ホイール）。正確なバージョンをピン留めしてください。",
+        "empty": "まだパッケージが追加されていません。",
+        "remove": "{{package}} を削除",
+        "name": "パッケージ名",
+        "namePlaceholder": "パッケージ名",
+        "version": "バージョン",
+        "versionPlaceholder": "バージョン",
+        "add": "パッケージを追加"
+      }
     },
     "help": {
       "input": "シナリオの入力パラメータと定数をグラフに注入します。",

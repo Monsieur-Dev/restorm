@@ -1582,7 +1582,25 @@
       "code": "kod",
       "modalTitle": "Edytuj kod",
       "result": "wynik",
-      "timeout": "Limit czasu (s)"
+      "timeout": "Limit czasu (s)",
+      "deps": {
+        "downloading": "Pobieranie {{count}} pakietu/ów: {{packages}}"
+      },
+      "packages": {
+        "title": "Pakiety",
+        "caption": "Zależności",
+        "manage": "Zarządzaj pakietami",
+        "count": "{{count}} zal.",
+        "addShort": "Dodaj",
+        "hint": "Przypięte pakiety zewnętrzne, rozwiązywane i buforowane przy pierwszym uruchomieniu, a potem ładowane offline. Obsługiwane są tylko pakiety czysto językowe (Python: czyste koła Pythona); przypnij dokładną wersję.",
+        "empty": "Nie dodano jeszcze żadnych pakietów.",
+        "remove": "Usuń {{package}}",
+        "name": "Nazwa pakietu",
+        "namePlaceholder": "nazwa pakietu",
+        "version": "Wersja",
+        "versionPlaceholder": "wersja",
+        "add": "Dodaj pakiet"
+      }
     },
     "help": {
       "input": "Wstrzykuje parametry wejściowe scenariusza oraz stałe do grafu.",

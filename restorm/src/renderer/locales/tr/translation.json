@@ -1580,7 +1580,25 @@
       "code": "kod",
       "modalTitle": "Kodu düzenle",
       "result": "sonuç",
-      "timeout": "Zaman aşımı (sn)"
+      "timeout": "Zaman aşımı (sn)",
+      "deps": {
+        "downloading": "{{count}} paket indiriliyor: {{packages}}"
+      },
+      "packages": {
+        "title": "Paketler",
+        "caption": "Bağımlılıklar",
+        "manage": "Paketleri yönet",
+        "count": "{{count}} bağ.",
+        "addShort": "Ekle",
+        "hint": "Sabitlenmiş harici paketler, ilk çalıştırmada çözümlenip önbelleğe alınır, sonrasında çevrimdışı yüklenir. Yalnızca saf dil paketleri desteklenir (Python: saf Python wheel’leri); tam sürümü sabitleyin.",
+        "empty": "Henüz paket eklenmedi.",
+        "remove": "{{package}} öğesini kaldır",
+        "name": "Paket adı",
+        "namePlaceholder": "paket adı",
+        "version": "Sürüm",
+        "versionPlaceholder": "sürüm",
+        "add": "Paket ekle"
+      }
     },
     "help": {
       "input": "Senaryonun giriş parametrelerini ve sabitlerini grafiğe enjekte eder.",

@@ -1579,7 +1579,25 @@
       "code": "kode",
       "modalTitle": "Edit kode",
       "result": "hasil",
-      "timeout": "Batas waktu (s)"
+      "timeout": "Batas waktu (s)",
+      "deps": {
+        "downloading": "Mengunduh {{count}} paket: {{packages}}"
+      },
+      "packages": {
+        "title": "Paket",
+        "caption": "Dependensi",
+        "manage": "Kelola paket",
+        "count": "{{count}} dep.",
+        "addShort": "Tambah",
+        "hint": "Paket eksternal yang disematkan, diselesaikan dan di-cache saat pertama kali dijalankan, lalu dimuat secara offline. Hanya paket berbasis bahasa murni yang didukung (Python: wheel Python murni); sematkan versi yang tepat.",
+        "empty": "Belum ada paket yang ditambahkan.",
+        "remove": "Hapus {{package}}",
+        "name": "Nama paket",
+        "namePlaceholder": "nama paket",
+        "version": "Versi",
+        "versionPlaceholder": "versi",
+        "add": "Tambah paket"
+      }
     },
     "help": {
       "input": "Menyuntikkan parameter masukan skenario dan konstanta ke dalam graf.",

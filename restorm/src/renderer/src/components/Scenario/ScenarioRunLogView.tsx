@@ -159,10 +159,15 @@ export const ScenarioRunLogView: React.FC<ScenarioRunLogViewProps> = ({ logs, te
   const logItems: ListViewItemData[] = visibleLogs.map((e, i) => {
     const level = e.level ?? 'info'
     if (e.nodeId) emitterByRow.set(`log-${i}`, { nodeId: e.nodeId, ...(e.scenarioId !== undefined ? { scenarioId: e.scenarioId } : {}) })
+    // An entry may carry an i18n key (main emits no translations); translate it
+    // for display, falling back to the English `message`. Copy/CLI keep `message`.
+    const display = e.messageKey
+      ? t(e.messageKey, { ...(e.messageArgs ?? {}), defaultValue: asText(e.message) })
+      : asText(e.message)
     const item: ListViewItemData = {
       id: `log-${i}`,
       icon: <span className={`scn-log-dot scn-log-dot-${level}`} aria-hidden="true" />,
-      title: <LogMessageCell ts={logTs(e.ts)} message={asText(e.message)} />
+      title: <LogMessageCell ts={logTs(e.ts)} message={display} />
     }
     if (e.data !== undefined) {
       const tree = buildScenarioPathTree(typeof e.data === 'object' && e.data !== null ? (e.data as Record<string, unknown>) : { value: e.data })

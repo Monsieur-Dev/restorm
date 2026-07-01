@@ -1,0 +1,90 @@
+/* External-dependencies editor for the `code` node (ScenarioPackagesModal). */
+
+.scn-packages-body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 420px;
+}
+
+.scn-packages-hint {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--vscode-descriptionForeground);
+}
+
+.scn-packages-list {
+  /* Bounded, scrollable list: fills the dialog width, caps its own height so
+   * a long package list scrolls rather than growing the dialog off-screen. */
+  width: 100%;
+  max-height: 40vh;
+  border: 1px solid var(--vscode-widget-border, var(--vscode-editorWidget-border));
+  border-radius: 4px;
+}
+
+.scn-packages-empty {
+  padding: 12px;
+  font-size: 12px;
+  color: var(--vscode-descriptionForeground);
+  text-align: center;
+}
+
+.scn-packages-items {
+  list-style: none;
+  margin: 0;
+  padding: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.scn-packages-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 4px 6px;
+  border-radius: 4px;
+}
+
+.scn-packages-item:hover {
+  background: var(--vscode-list-hoverBackground);
+}
+
+.scn-packages-item-label {
+  font-family: var(--vscode-editor-font-family, monospace);
+  font-size: 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.scn-packages-item-at {
+  opacity: 0.5;
+  margin: 0 1px;
+}
+
+.scn-packages-item-version {
+  color: var(--vscode-descriptionForeground);
+}
+
+.scn-packages-add {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.scn-packages-add > :first-child {
+  flex: 2 1 0;
+  min-width: 0;
+}
+
+.scn-packages-add > :nth-child(2) {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.scn-packages-add-button {
+  flex: 0 0 auto;
+}

@@ -1580,7 +1580,25 @@
       "code": "kod",
       "modalTitle": "Redigera kod",
       "result": "resultat",
-      "timeout": "Tidsgräns (s)"
+      "timeout": "Tidsgräns (s)",
+      "deps": {
+        "downloading": "Laddar ner {{count}} paket: {{packages}}"
+      },
+      "packages": {
+        "title": "Paket",
+        "caption": "Beroenden",
+        "manage": "Hantera paket",
+        "count": "{{count}} ber.",
+        "addShort": "Lägg till",
+        "hint": "Fästa externa paket som löses och cachas vid första körningen och sedan läses in offline. Endast rena språkpaket stöds (Python: rena Python-wheels); fäst den exakta versionen.",
+        "empty": "Inga paket har lagts till ännu.",
+        "remove": "Ta bort {{package}}",
+        "name": "Paketnamn",
+        "namePlaceholder": "paketnamn",
+        "version": "Version",
+        "versionPlaceholder": "version",
+        "add": "Lägg till paket"
+      }
     },
     "help": {
       "input": "Injicerar scenariots indataparametrar och konstanter i grafen.",

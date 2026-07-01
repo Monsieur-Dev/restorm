@@ -38,6 +38,14 @@ export interface CodeRunContext {
   /** Optional bridge for `bru.runRequest(name)` (resolve + execute a named
    * request, return its response). JS runtime only. */
   runRequest?: (name: string, signal: AbortSignal) => Promise<SandboxHttpResponse>
+  /** External packages to mount before the script runs (the node's pinned
+   * `config.packages`). Already fetched into {@link packagesCacheDir} by the
+   * executor's `installPackages` call, so the runtime only has to mount them
+   * (offline). Empty / absent → no packages. */
+  packages?: PackageSpec[]
+  /** The runtime's per-language cache root (`<os-temp>/restorm-code-deps/<lang>`)
+   * holding the artifacts for {@link packages}. Set together with `packages`. */
+  packagesCacheDir?: string
 }
 
 export interface CodeRunResult {
@@ -50,12 +58,45 @@ export interface CodeRunResult {
   postman?: SandboxScriptOutcome
 }
 
+/**
+ * A single external dependency the user pinned on a `code` node
+ * (`config.packages`). The version is PIN-EXACT — it is part of the cache key
+ * (`<name>@<version>`), so two nodes asking for the same `name@version` share one
+ * cached artifact and a re-run is offline. Transitive dependencies are resolved
+ * automatically by the runtime; the user pins only the top-level packages.
+ */
+export interface PackageSpec {
+  /** The package name in its ecosystem's registry (PyPI, npm, RubyGems, …). */
+  name: string
+  /** An exact version (no ranges) — the cache key and the resolved artifact. */
+  version: string
+}
+
 export interface CodeRuntime {
   /** The languages this runtime serves (e.g. `['typescript', 'javascript']`). */
   readonly languages: readonly string[]
   /** Run `code` with the given context, resolving to its result + logs, or
    * rejecting on a script error / timeout. */
   run(code: string, ctx: CodeRunContext): Promise<CodeRunResult>
+  /**
+   * Optional — fetch the given packages' artifacts into `cacheDir` (the runtime's
+   * per-language cache root, `<os-temp>/restorm-code-deps/<lang>`), ready for `run` to
+   * mount them. Runs in the MAIN process and downloads OUTSIDE the app firewall
+   * (a dependency fetch is a trusted, user-initiated operation, not sandbox
+   * traffic — see {@link ../depsInstaller}). Idempotent: an already-cached
+   * artifact is a no-op. Rejects with a user-readable message when a package /
+   * version can't be resolved or the only available artifact is incompatible
+   * with the WASM runtime (e.g. a C-extension wheel); the executor routes that to
+   * the node's `error` port. Runtimes with no external-package support omit it. */
+  installPackages?(specs: PackageSpec[], cacheDir: string): Promise<void>
+  /**
+   * Optional — make the artifacts cached under `cacheDir` importable inside a
+   * loaded `engine` instance (e.g. `micropip.install` / `loadPackage` of the
+   * cached wheels into a Pyodide instance). Called where the engine lives; for a
+   * worker-backed runtime the equivalent mount happens inside the worker before
+   * the user code runs, and this method is the same logic exposed for a
+   * main-hosted engine + tests. Omitted by runtimes with no package support. */
+  mountPackages?(engine: unknown, cacheDir: string): Promise<void>
   /** Optional teardown (dispose pooled workers). Not required for correctness —
    * the engine never assumes a runtime is reusable across runs. */
   terminate?(): void | Promise<void>

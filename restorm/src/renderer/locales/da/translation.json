@@ -1580,7 +1580,25 @@
       "code": "kode",
       "modalTitle": "Rediger kode",
       "result": "resultat",
-      "timeout": "Timeout (s)"
+      "timeout": "Timeout (s)",
+      "deps": {
+        "downloading": "Downloader {{count}} pakke(r): {{packages}}"
+      },
+      "packages": {
+        "title": "Pakker",
+        "caption": "Afhængigheder",
+        "manage": "Administrer pakker",
+        "count": "{{count}} afh.",
+        "addShort": "Tilføj",
+        "hint": "Fastgjorte eksterne pakker, der løses og caches ved første kørsel og derefter indlæses offline. Kun rene sprogpakker understøttes (Python: rene Python-wheels); fastgør den nøjagtige version.",
+        "empty": "Ingen pakker tilføjet endnu.",
+        "remove": "Fjern {{package}}",
+        "name": "Pakkenavn",
+        "namePlaceholder": "pakkenavn",
+        "version": "Version",
+        "versionPlaceholder": "version",
+        "add": "Tilføj pakke"
+      }
     },
     "help": {
       "input": "Injicerer scenariets inputparametre og konstanter i grafen.",

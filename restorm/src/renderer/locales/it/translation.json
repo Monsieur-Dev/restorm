@@ -1580,7 +1580,25 @@
       "code": "codice",
       "modalTitle": "Modifica codice",
       "result": "risultato",
-      "timeout": "Timeout (s)"
+      "timeout": "Timeout (s)",
+      "deps": {
+        "downloading": "Download di {{count}} pacchetto/i: {{packages}}"
+      },
+      "packages": {
+        "title": "Pacchetti",
+        "caption": "Dipendenze",
+        "manage": "Gestisci pacchetti",
+        "count": "{{count}} dip.",
+        "addShort": "Aggiungi",
+        "hint": "Pacchetti esterni fissati, risolti e memorizzati nella cache alla prima esecuzione, poi caricati offline. Sono supportati solo i pacchetti in puro linguaggio (Python: wheel puri Python); fissa la versione esatta.",
+        "empty": "Nessun pacchetto ancora aggiunto.",
+        "remove": "Rimuovi {{package}}",
+        "name": "Nome del pacchetto",
+        "namePlaceholder": "nome del pacchetto",
+        "version": "Versione",
+        "versionPlaceholder": "versione",
+        "add": "Aggiungi pacchetto"
+      }
     },
     "help": {
       "input": "Inietta i parametri di ingresso dello scenario e le costanti nel grafo.",

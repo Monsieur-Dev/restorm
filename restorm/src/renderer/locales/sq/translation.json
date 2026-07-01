@@ -1580,7 +1580,25 @@
       "code": "kodi",
       "modalTitle": "Modifiko kodin",
       "result": "rezultati",
-      "timeout": "Afati kohor (s)"
+      "timeout": "Afati kohor (s)",
+      "deps": {
+        "downloading": "Po shkarkohen {{count}} paketa: {{packages}}"
+      },
+      "packages": {
+        "title": "Paketat",
+        "caption": "Varësitë",
+        "manage": "Menaxho paketat",
+        "count": "{{count}} var.",
+        "addShort": "Shto",
+        "hint": "Paketa të jashtme të fiksuara, të zgjidhura dhe të ruajtura në cache gjatë ekzekutimit të parë, pastaj të ngarkuara jashtë linje. Mbështeten vetëm paketat thjesht gjuhësore (Python: wheel-e thjesht Python); fikso versionin e saktë.",
+        "empty": "Ende nuk janë shtuar paketa.",
+        "remove": "Hiq {{package}}",
+        "name": "Emri i paketës",
+        "namePlaceholder": "emri i paketës",
+        "version": "Versioni",
+        "versionPlaceholder": "versioni",
+        "add": "Shto paketë"
+      }
     },
     "help": {
       "input": "Injekton parametrat hyrës të skenarit dhe konstantet në graf.",

@@ -1580,7 +1580,25 @@
       "code": "Code",
       "modalTitle": "Code bearbeiten",
       "result": "Ergebnis",
-      "timeout": "Zeitlimit (s)"
+      "timeout": "Zeitlimit (s)",
+      "deps": {
+        "downloading": "{{count}} Paket(e) werden heruntergeladen: {{packages}}"
+      },
+      "packages": {
+        "title": "Pakete",
+        "caption": "Abhängigkeiten",
+        "manage": "Pakete verwalten",
+        "count": "{{count}} Abh.",
+        "addShort": "Hinzufügen",
+        "hint": "Angeheftete externe Pakete, beim ersten Lauf aufgelöst und zwischengespeichert, danach offline geladen. Nur reine Sprachpakete werden unterstützt (Python: reine Python-Wheels); heften Sie die genaue Version an.",
+        "empty": "Noch keine Pakete hinzugefügt.",
+        "remove": "{{package}} entfernen",
+        "name": "Paketname",
+        "namePlaceholder": "Paketname",
+        "version": "Version",
+        "versionPlaceholder": "Version",
+        "add": "Paket hinzufügen"
+      }
     },
     "help": {
       "input": "Injiziert die Eingabeparameter des Szenarios und Konstanten in den Graphen.",

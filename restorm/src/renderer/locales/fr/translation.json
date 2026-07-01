@@ -1583,7 +1583,25 @@
       "code": "code",
       "modalTitle": "Éditer le code",
       "result": "résultat",
-      "timeout": "Délai max (s)"
+      "timeout": "Délai max (s)",
+      "deps": {
+        "downloading": "Téléchargement de {{count}} paquet(s) : {{packages}}"
+      },
+      "packages": {
+        "title": "Paquets",
+        "caption": "Dépendances",
+        "manage": "Gérer les paquets",
+        "count": "{{count}} dép.",
+        "addShort": "Ajouter",
+        "hint": "Paquets externes épinglés, résolus et mis en cache au premier lancement, puis chargés hors ligne. Seuls les paquets purement langage sont pris en charge (Python : wheels pur-Python) ; épinglez la version exacte.",
+        "empty": "Aucun paquet ajouté pour l’instant.",
+        "remove": "Supprimer {{package}}",
+        "name": "Nom du paquet",
+        "namePlaceholder": "nom du paquet",
+        "version": "Version",
+        "versionPlaceholder": "version",
+        "add": "Ajouter le paquet"
+      }
     },
     "help": {
       "input": "Injecte les paramètres d'entrée du scénario et des constantes dans le graphe.",

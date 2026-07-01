@@ -1580,7 +1580,25 @@
       "code": "code",
       "modalTitle": "Code bewerken",
       "result": "resultaat",
-      "timeout": "Time-out (s)"
+      "timeout": "Time-out (s)",
+      "deps": {
+        "downloading": "{{count}} pakket(ten) downloaden: {{packages}}"
+      },
+      "packages": {
+        "title": "Pakketten",
+        "caption": "Afhankelijkheden",
+        "manage": "Pakketten beheren",
+        "count": "{{count}} deps",
+        "addShort": "Toevoegen",
+        "hint": "Vastgezette externe pakketten, bij de eerste run opgelost en gecacht, daarna offline geladen. Alleen pure-taalpakketten worden ondersteund (Python: pure-Python-wheels); zet de exacte versie vast.",
+        "empty": "Nog geen pakketten toegevoegd.",
+        "remove": "{{package}} verwijderen",
+        "name": "Pakketnaam",
+        "namePlaceholder": "pakketnaam",
+        "version": "Versie",
+        "versionPlaceholder": "versie",
+        "add": "Pakket toevoegen"
+      }
     },
     "help": {
       "input": "Injecteert de invoerparameters van het scenario en constanten in de graaf.",

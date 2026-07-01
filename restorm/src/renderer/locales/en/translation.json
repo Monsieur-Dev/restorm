@@ -1583,7 +1583,25 @@
       "code": "code",
       "modalTitle": "Edit code",
       "result": "result",
-      "timeout": "Timeout (s)"
+      "timeout": "Timeout (s)",
+      "deps": {
+        "downloading": "Downloading {{count}} package(s): {{packages}}"
+      },
+      "packages": {
+        "title": "Packages",
+        "caption": "Dependencies",
+        "manage": "Manage packages",
+        "count": "{{count}} deps",
+        "addShort": "Add",
+        "hint": "Pinned external packages, resolved and cached on the first run, then loaded offline. Only pure-language packages are supported (Python: pure-Python wheels); pin the exact version.",
+        "empty": "No packages added yet.",
+        "remove": "Remove {{package}}",
+        "name": "Package name",
+        "namePlaceholder": "package name",
+        "version": "Version",
+        "versionPlaceholder": "version",
+        "add": "Add package"
+      }
     },
     "help": {
       "input": "Injects the scenario's input parameters and constants into the graph.",

@@ -29,6 +29,11 @@ export interface ScenarioRunLogLike {
   /** The (sub-)scenario the entry came from. */
   scenarioId?: string
   message: string
+  /** Optional i18n key the renderer translates for display; the serializer
+   * ignores it and emits `message` (the English fallback) so goldens are stable. */
+  messageKey?: string
+  /** Interpolation values for {@link messageKey}. */
+  messageArgs?: Record<string, string | number>
   data?: unknown
 }
 

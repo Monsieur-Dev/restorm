@@ -225,6 +225,15 @@ const scenarioRunlogTestDir = defineBddConfig({
   outputDir: '.features-gen/scenario-runlog'
 })
 
+const scenarioCodeDepsTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/scenario-code-deps/features/**/*.feature',
+  steps: [
+    'tests/e2e/bdd/scenario-code-deps/steps/**/*.ts',
+    'tests/e2e/bdd/fixtures/scenario-code-deps.fixture.ts'
+  ],
+  outputDir: '.features-gen/scenario-code-deps'
+})
+
 const scenarioSetVariableOverrideTestDir = defineBddConfig({
   features: 'tests/e2e/bdd/scenario-setvariable-override/features/**/*.feature',
   steps: [
@@ -539,6 +548,11 @@ export default defineConfig({
       name: 'scenario-runlog',
       testDir: scenarioRunlogTestDir,
       timeout: 180 * 1000 // 3 min — three scenarios, each opens a fresh app + runs the engine
+    },
+    {
+      name: 'scenario-code-deps',
+      testDir: scenarioCodeDepsTestDir,
+      timeout: 240 * 1000 // 4 min — one app, two engine runs incl. a cold Pyodide load + wheel mount
     },
     {
       name: 'scenario-setvariable-override',
