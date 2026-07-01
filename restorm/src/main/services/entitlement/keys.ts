@@ -26,15 +26,12 @@ MCowBQYDK2VwAyEA497icWt0Ipy90EdQU9v5iu8V4pK/BsrXE9XwciMjllc=
 -----END PUBLIC KEY-----`
 
 /**
- * PROD Ed25519 public key (SPKI PEM).
- * TODO(lead): generate the prod entitlement key pair, set the private half as the
- * prod Supabase `ENTITLEMENT_JWT_PRIVATE_KEY` secret, and paste the public half
- * here before the dev→prod promotion. Until then a prod build cannot verify an
- * entitlement (fails closed to community) — intentional, never ship prod with a
- * placeholder that verifies nothing real.
+ * PROD Ed25519 public key (SPKI PEM) — pairs with the private key held ONLY in
+ * the prod Supabase `ENTITLEMENT_JWT_PRIVATE_KEY` secret (generated for the
+ * go-live; the private half is archived in the owner's vault, never in the repo).
  */
 const PROD_ENTITLEMENT_PUBLIC_KEY = `-----BEGIN PUBLIC KEY-----
-<PROD_ENTITLEMENT_PUBLIC_KEY_SPKI>
+MCowBQYDK2VwAyEAYe6SneJJMzSDcypmO3ZZwIh7vZS1kScgOIgVEUjtAQw=
 -----END PUBLIC KEY-----`
 
 /** The SPKI PEM of the entitlement public key for a release channel. */

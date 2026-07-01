@@ -19,3 +19,7 @@ restorm/tests/e2e/samples/scenarios-e2e-reference-tests.writefile-out.json
 
 # local stage-e2e run-time creds (never commit)
 .stage-e2e.env
+
+# Entitlement signing keys — NEVER commit the private key
+entitlement_*.pem
+*.pem
