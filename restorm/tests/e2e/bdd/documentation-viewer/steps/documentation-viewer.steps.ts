@@ -67,12 +67,6 @@ Given('the docs viewer scenario is bootstrapped with the Petstore spec', async (
   await configureNextSaveFileDialogForE2E(requireApp(), { kind: 'saveFile', path: filePath })
   await page.locator('[data-testid="titlebar-menubar-item-file"]').click()
   await page.locator('[data-testid="titlebar-menu-item-new"]').first().click()
-  const saveModal = page.locator('[data-testid="save-options-modal"]')
-  await expect(saveModal).toBeVisible({ timeout: 5000 })
-  await page.locator('[data-testid="save-mode-file"]').click()
-  await page.locator('[data-testid="save-format-yaml"]').click()
-  await page.locator('[data-testid="save-confirm-button"]').click()
-  await expect(saveModal).not.toBeVisible({ timeout: 5000 })
   await expect(async () => { expect(existsSync(filePath)).toBe(true) }).toPass({ timeout: 10000 })
   await page.waitForTimeout(400)
 

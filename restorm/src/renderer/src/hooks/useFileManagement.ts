@@ -134,7 +134,9 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
   } = useFileService()
 
   const [showSaveOptionsModal, setShowSaveOptionsModal] = useState(false)
-  const [saveOptionsIntent, setSaveOptionsIntent] = useState<'saveAs' | 'new'>('saveAs')
+  // _setSaveOptionsIntent: intentionally unused while the modal path is bypassed — re-enable by
+  // replacing the performSave(...) calls in handleMenuSaveAs / handleMenuNew with the two commented lines.
+  const [saveOptionsIntent, _setSaveOptionsIntent] = useState<'saveAs' | 'new'>('saveAs')
   const [isOpenedAsFolder, setIsOpenedAsFolder] = useState(false)
   const [folderFormat, setFolderFormat] = useState<PersistenceFormat>('yaml')
   const [currentFolderPath, setCurrentFolderPath] = useState<string | null>(null)
@@ -652,20 +654,22 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
     return allOk
   }, [isOpenedAsFolder, currentFolderPath, rootItems, getOrBuildUnitMap, handleMenuSave, saveFile, filePath, buildFileModeDecomposition, collectSaveSubtreeIds])
 
-  const handleMenuSaveAs = useCallback(() => {
-    setSaveOptionsIntent('saveAs')
-    setShowSaveOptionsModal(true)
-  }, [])
-
-  const handleSaveWithOptions = useCallback(
-    async (saveOptions: SaveOptions) => {
-      const isNew = saveOptionsIntent === 'new'
+  /**
+   * Core save implementation shared by the direct-bypass path (File → New /
+   * File → Save as go straight here) and by the modal path (SaveOptionsModal
+   * calls handleSaveWithOptions which delegates here). Keeping both paths
+   * wired through a single function avoids duplicating the save logic and
+   * makes the modal path trivially re-activatable.
+   */
+  const performSave = useCallback(
+    async (intent: 'new' | 'saveAs', saveOptions: SaveOptions): Promise<void> => {
+      const isNew = intent === 'new'
       const plainData = isNew
         ? ({ collections: [] } as Record<string, unknown>)
         : (JSON.parse(JSON.stringify({ collections: rootItems })) as Record<string, unknown>)
 
       logger.info('[useFileManagement] Saving with options', {
-        intent: saveOptionsIntent,
+        intent,
         mode: saveOptions.mode,
         format: saveOptions.format
       })
@@ -723,7 +727,17 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
         logger.error('[useFileManagement] Save error', { error: String(error) })
       }
     },
-    [rootItems, saveOptionsIntent, setRootItems, clearTabDirtyState, closeFile, openFile]
+    [rootItems, setRootItems, clearTabDirtyState, closeFile, openFile]
+  )
+
+  const handleMenuSaveAs = useCallback(() => {
+    void performSave('saveAs', { mode: 'file', format: 'yaml' })
+    // modal path disabled: _setSaveOptionsIntent('saveAs'); setShowSaveOptionsModal(true)
+  }, [performSave])
+
+  const handleSaveWithOptions = useCallback(
+    async (saveOptions: SaveOptions) => performSave(saveOptionsIntent, saveOptions),
+    [saveOptionsIntent, performSave]
   )
 
   const checkUnsavedChanges = useCallback(async (): Promise<boolean> => {
@@ -765,10 +779,10 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
   const handleMenuNew = useCallback(async () => {
     const canProceed = await checkUnsavedChanges()
     if (canProceed) {
-      setSaveOptionsIntent('new')
-      setShowSaveOptionsModal(true)
+      void performSave('new', { mode: 'file', format: 'yaml' })
+      // modal path disabled: _setSaveOptionsIntent('new'); setShowSaveOptionsModal(true)
     }
-  }, [checkUnsavedChanges])
+  }, [checkUnsavedChanges, performSave])
 
   const handleMenuOpen = useCallback(async () => {
     const canProceed = await checkUnsavedChanges()

@@ -2,7 +2,7 @@ import { createBdd } from 'playwright-bdd'
 import { existsSync } from 'fs'
 import { join, resolve } from 'path'
 import type { ElectronApplication, Page, Locator } from '@playwright/test'
-import { configureNextOpenDialogForE2E, configureNextSaveFileDialogForE2E } from 'electron-core-ui/testing'
+import { configureNextSaveFileDialogForE2E } from 'electron-core-ui/testing'
 import { test, expect, DIRTY_STATE_TEMP_DIR, currentElectronApp } from '../../fixtures/dirty-state.fixture'
 
 const SAMPLES_DIR = resolve(__dirname, '../../../../unit')
@@ -55,44 +55,10 @@ Given(
     await page.locator('[data-testid="titlebar-menubar-item-file"]').click()
     await page.locator('[data-testid="titlebar-menu-item-new"]').first().click()
 
-    const modal = page.locator('[data-testid="save-options-modal"]')
-    await expect(modal).toBeVisible({ timeout: 5000 })
-    await page.locator('[data-testid="save-mode-file"]').click()
-    await page.locator('[data-testid="save-format-yaml"]').click()
-    await page.locator('[data-testid="save-confirm-button"]').click()
-
     await expect(async () => {
       expect(existsSync(filePath)).toBe(true)
     }).toPass({ timeout: 10000 })
-    await expect(modal).not.toBeVisible({ timeout: 5000 })
     // Give the registry its breath after first-save → file-opened → hydrate.
-    await page.waitForTimeout(500)
-  }
-)
-
-Given(
-  'a new folder YAML collection named {string}',
-  async ({ launchApp }, baseName: string) => {
-    const launched = await launchApp()
-    electronApp = launched.app
-    page = launched.page
-
-    const folderPath = join(DIRTY_STATE_TEMP_DIR, baseName)
-    await configureNextOpenDialogForE2E(electronApp, { kind: 'openFolder', path: folderPath })
-
-    await page.locator('[data-testid="titlebar-menubar-item-file"]').click()
-    await page.locator('[data-testid="titlebar-menu-item-new"]').first().click()
-
-    const modal = page.locator('[data-testid="save-options-modal"]')
-    await expect(modal).toBeVisible({ timeout: 5000 })
-    await page.locator('[data-testid="save-mode-folder"]').click()
-    await page.locator('[data-testid="save-format-yaml"]').click()
-    await page.locator('[data-testid="save-confirm-button"]').click()
-
-    await expect(async () => {
-      expect(existsSync(folderPath)).toBe(true)
-    }).toPass({ timeout: 10000 })
-    await expect(modal).not.toBeVisible({ timeout: 5000 })
     await page.waitForTimeout(500)
   }
 )

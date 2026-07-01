@@ -48,12 +48,6 @@ Given('a new single-file YAML collection seeded with the Petstore swagger', asyn
   await expect(page.locator('[data-testid="titlebar-menu-item-new"]').first()).toBeVisible({ timeout: 2000 })
   await page.locator('[data-testid="titlebar-menu-item-new"]').first().click()
 
-  const saveOptions = page.locator('[data-testid="save-options-modal"]')
-  await expect(saveOptions).toBeVisible({ timeout: 2000 })
-  await page.locator('[data-testid="save-mode-file"]').click()
-  await page.locator('[data-testid="save-format-yaml"]').click()
-  await page.locator('[data-testid="save-confirm-button"]').click()
-  await expect(saveOptions).not.toBeVisible({ timeout: 2000 })
   await page.waitForTimeout(500)
 
   expect(existsSync(PETSTORE_FIXTURE), `Petstore fixture missing at ${PETSTORE_FIXTURE}`).toBe(true)

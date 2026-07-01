@@ -75,12 +75,6 @@ Given('the fully-documented Petstore is loaded into the env-folder Docs tab', as
   await page.locator('[data-testid="titlebar-menubar-item-file"]').click()
   await expect(page.locator('[data-testid="titlebar-menu-item-new"]').first()).toBeVisible({ timeout: 5000 })
   await page.locator('[data-testid="titlebar-menu-item-new"]').first().click()
-  const saveModal = page.locator('[data-testid="save-options-modal"]')
-  await expect(saveModal).toBeVisible({ timeout: 5000 })
-  await page.locator('[data-testid="save-mode-file"]').click()
-  await page.locator('[data-testid="save-format-yaml"]').click()
-  await page.locator('[data-testid="save-confirm-button"]').click()
-  await expect(saveModal).not.toBeVisible({ timeout: 5000 })
   await expect(async () => { expect(existsSync(RESTORM_PATH)).toBe(true) }).toPass({ timeout: 10000 })
   await page.waitForTimeout(400)
 

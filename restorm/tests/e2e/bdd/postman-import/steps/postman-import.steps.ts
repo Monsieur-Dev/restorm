@@ -42,12 +42,6 @@ Given('a new single-file collection for Postman import', async ({ launchApp }) =
   await expect(p.locator('[data-testid="titlebar-menu-item-new"]').first()).toBeVisible({ timeout: 2000 })
   await p.locator('[data-testid="titlebar-menu-item-new"]').first().click()
 
-  const modal = p.locator('[data-testid="save-options-modal"]')
-  await expect(modal).toBeVisible({ timeout: 2000 })
-  await p.locator('[data-testid="save-mode-file"]').click()
-  await p.locator('[data-testid="save-format-json"]').click()
-  await p.locator('[data-testid="save-confirm-button"]').click()
-  await expect(modal).not.toBeVisible({ timeout: 2000 })
   await p.waitForTimeout(500)
 })
 
