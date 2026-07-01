@@ -332,6 +332,7 @@ export type ApiDocumentationSourceType =
   | 'smithy'
   | 'raml'
   | 'wadl'
+  | 'api-blueprint'
 
 /** Root documentation structure stored on the EnvironmentFolder that owns the API. */
 export interface ApiDocumentation {

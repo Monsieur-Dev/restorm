@@ -86,6 +86,9 @@ const fixtures: Record<string, { content: string; filePath?: string }> = {
   },
   wadl: {
     content: readFileSync(join(FIXTURES, 'wadl', 'petstore.wadl'), 'utf-8')
+  },
+  'api-blueprint': {
+    content: readFileSync(join(FIXTURES, 'api-blueprint', 'polls.apib'), 'utf-8')
   }
 }
 

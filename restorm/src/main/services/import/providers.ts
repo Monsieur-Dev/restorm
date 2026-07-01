@@ -40,4 +40,9 @@ import './RamlImportService'
 import './SmithyImportService'
 import './WadlImportService'
 
+// Markdown-based formats — registered last, after every JSON/XML sniff has
+// had first refusal, since a Markdown document has no discriminating root
+// field to check ahead of the others.
+import './ApiBlueprintImportService'
+
 export { importProviders } from './registry'

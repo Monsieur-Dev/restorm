@@ -68,6 +68,10 @@ const wadlImportTestDir = defineBddConfig({
   features: 'tests/e2e/bdd/wadl-import/features/**/*.feature',
   steps: ['tests/e2e/bdd/wadl-import/steps/**/*.ts', 'tests/e2e/bdd/fixtures/wadl-import.fixture.ts'],
   outputDir: '.features-gen/wadl-import'
+const apiBlueprintImportTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/api-blueprint-import/features/**/*.feature',
+  steps: ['tests/e2e/bdd/api-blueprint-import/steps/**/*.ts', 'tests/e2e/bdd/fixtures/api-blueprint-import.fixture.ts'],
+  outputDir: '.features-gen/api-blueprint-import'
 })
 
 const authLoginTestDir = defineBddConfig({
@@ -414,6 +418,8 @@ export default defineConfig({
       testDir: smithyImportTestDir
       name: 'wadl-import',
       testDir: wadlImportTestDir
+      name: 'api-blueprint-import',
+      testDir: apiBlueprintImportTestDir
     },
     {
       name: 'auth-login',

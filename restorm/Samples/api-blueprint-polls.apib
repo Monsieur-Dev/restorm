@@ -1,0 +1,55 @@
+FORMAT: 1A
+HOST: https://polls.apiblueprint.org/
+
+# Polls
+
+Polls is a simple API allowing consumers to view polls and vote in existing ones.
+
+# Group Question
+
+Resources related to polls in the API.
+
+## Questions Collection [/questions]
+
+### List All Questions [GET]
+
++ Response 200 (application/json)
+
+    + Attributes (array[Question])
+
+## Question [/questions/{question_id}]
+
++ Parameters
+    + question_id (number) - ID of the Question in the form of an integer
+
+### View a Question Detail [GET]
+
++ Response 200 (application/json)
+
+    + Attributes (Question)
+
+### Vote on a Question [POST]
+
++ Request (application/json)
+
+    + Attributes
+        + choice_id: 1 (number, required) - Choice ID to vote for
+
++ Response 200 (application/json)
+
+    + Headers
+
+            X-My-Header: yes
+
+    + Attributes (Question)
+
+# Data Structures
+
+## Question (object)
++ id: 1 (number)
++ question: What is your favorite programming language? (string)
++ choices (array[Choice])
+
+## Choice (object)
++ id: 1 (number)
++ choice: Ruby (string)
