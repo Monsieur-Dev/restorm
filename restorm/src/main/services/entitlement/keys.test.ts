@@ -13,7 +13,10 @@ describe('entitlement keys', () => {
     expect(isEntitlementPublicKeyConfigured('preview')).toBe(true)
   })
 
-  it('the prod key is still a placeholder (fails closed until generated)', () => {
-    expect(isEntitlementPublicKeyConfigured('prod')).toBe(false)
+  it('the embedded PROD key is a real, importable Ed25519 SPKI key', async () => {
+    const pem = entitlementPublicKeyPem('prod')
+    expect(pem).toContain('BEGIN PUBLIC KEY')
+    await expect(importEntitlementPublicKey(pem)).resolves.toBeDefined()
+    expect(isEntitlementPublicKeyConfigured('prod')).toBe(true)
   })
 })
