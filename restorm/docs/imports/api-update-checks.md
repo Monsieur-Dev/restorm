@@ -2,8 +2,8 @@
 
 Restorm can periodically re-fetch the source spec for any environment
 folder that was created from one (Swagger, OpenAPI 3, GraphQL,
-Postman, Insomnia, Bruno, AsyncAPI, gRPC, SOAP, OData) and surface
-changes as a non-destructive refresh. This page covers the
+Postman, Insomnia, Bruno, AsyncAPI, gRPC, SOAP, OData, Smithy) and
+surface changes as a non-destructive refresh. This page covers the
 operator-facing UX; the developer surface lives in
 [`adapter-interface.md`](./adapter-interface.md).
 

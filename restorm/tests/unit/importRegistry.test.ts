@@ -77,6 +77,9 @@ const fixtures: Record<string, { content: string; filePath?: string }> = {
   },
   paw: {
     content: readFileSync(join(FIXTURES, 'paw', 'paw-petstore.json'), 'utf-8')
+  },
+  smithy: {
+    content: readFileSync(join(FIXTURES, 'smithy', 'weather.json'), 'utf-8')
   }
 }
 

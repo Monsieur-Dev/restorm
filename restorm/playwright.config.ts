@@ -56,6 +56,12 @@ const odataImportTestDir = defineBddConfig({
   outputDir: '.features-gen/odata-import'
 })
 
+const smithyImportTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/smithy-import/features/**/*.feature',
+  steps: ['tests/e2e/bdd/smithy-import/steps/**/*.ts', 'tests/e2e/bdd/fixtures/smithy-import.fixture.ts'],
+  outputDir: '.features-gen/smithy-import'
+})
+
 const authLoginTestDir = defineBddConfig({
   features: 'tests/e2e/bdd/auth-login/features/**/*.feature',
   steps: ['tests/e2e/bdd/auth-login/steps/**/*.ts', 'tests/e2e/bdd/fixtures/auth-login.fixture.ts'],
@@ -392,6 +398,10 @@ export default defineConfig({
     {
       name: 'odata-import',
       testDir: odataImportTestDir
+    },
+    {
+      name: 'smithy-import',
+      testDir: smithyImportTestDir
     },
     {
       name: 'auth-login',

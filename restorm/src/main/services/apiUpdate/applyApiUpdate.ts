@@ -15,6 +15,7 @@ import { asyncapiImportAdapter } from '../import/idempotent/AsyncAPIAdapter'
 import { grpcImportAdapter } from '../import/idempotent/GrpcAdapter'
 import { soapImportAdapter } from '../import/idempotent/SoapAdapter'
 import { odataImportAdapter } from '../import/idempotent/ODataAdapter'
+import { smithyImportAdapter } from '../import/idempotent/SmithyAdapter'
 import { computeSpecHash } from './specHash'
 import { mergeHttpRequestShape } from './mergeRequestShape'
 
@@ -93,7 +94,8 @@ const ADAPTERS: Partial<Record<ImportSourceType, ImportAdapter>> = {
   asyncapi: asyncapiImportAdapter,
   grpc: grpcImportAdapter,
   wsdl: soapImportAdapter,
-  odata: odataImportAdapter
+  odata: odataImportAdapter,
+  smithy: smithyImportAdapter
 }
 
 /**

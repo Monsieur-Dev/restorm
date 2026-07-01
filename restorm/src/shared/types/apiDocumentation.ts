@@ -329,6 +329,7 @@ export type ApiDocumentationSourceType =
   | 'insomnia'
   | 'bruno'
   | 'odata'
+  | 'smithy'
 
 /** Root documentation structure stored on the EnvironmentFolder that owns the API. */
 export interface ApiDocumentation {

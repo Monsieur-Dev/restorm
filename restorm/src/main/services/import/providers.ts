@@ -34,4 +34,8 @@ import './GraphQLImportService'
 import './GrpcImportService'
 import './SoapImportService'
 
+// Modern API modeling formats (accept either a JSON-keyed AST or their own
+// text IDL — detection tries the JSON branch first, falls back to the IDL sniff)
+import './SmithyImportService'
+
 export { importProviders } from './registry'
