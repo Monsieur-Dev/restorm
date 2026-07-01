@@ -907,6 +907,10 @@
       "mqtt": {
         "description": "Bir MQTT broker URL'si veya bir topic kataloğu yapıştırın — Restorm topic başına publish / subscribe istek iskeletleri oluşturur, akış önizlemeleri için bağlantıyı canlı tutar ve daha sonra yeniden oynatabilmeniz için retained-message anlık görüntülerini hatırlar.",
         "trademark": "MQTT bir OASIS standardıdır; MQTT adı ve logosu OASIS Open'ın ticari markalarıdır."
+      },
+      "paw": {
+        "description": "Paw'dan mı geliyorsunuz? JSON dışa aktarmanızı bırakın (uygulamada File → Export → JSON — native .paw paketi doğrudan okunmaz). Restorm her isteği, başlığı, gövdeyi ve ortamı yeniden oluşturur ve Paw'ın dinamik değerlerini (zaman damgaları, rastgele dizeler, UUID'ler) en yakın Restorm karşılığına eşler.",
+        "trademark": "Paw, RapidAPI, Inc.'in tescilli markasıdır ve burada yalnızca uyumluluk referansı amacıyla kullanılmaktadır."
       }
     },
     "loading": "Analiz ediliyor...",

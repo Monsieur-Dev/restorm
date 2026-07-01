@@ -908,6 +908,10 @@
       "mqtt": {
         "description": "Zalijepite URL MQTT brokera ili katalog tema — Restorm gradi publish / subscribe zahtjeve po temi, održava vezu uživo za streaming previewa i pamti snapshotove zadržanih poruka kako biste ih kasnije mogli reproducirati.",
         "trademark": "MQTT je OASIS standard; naziv i logotip MQTT zaštitni su znakovi OASIS Open-a."
+      },
+      "paw": {
+        "description": "Dolazite iz Pawa? Ispustite svoj JSON izvoz (File → Export → JSON u aplikaciji — nativni .paw paket se ne čita izravno). Restorm ponovno gradi svaki zahtjev, zaglavlje, tijelo i okruženje, i mapira Pawove dinamičke vrijednosti (vremenske oznake, nasumične nizove, UUID-ove) na najbliži Restorm ekvivalent.",
+        "trademark": "Paw je registrirani zaštitni znak tvrtke RapidAPI, Inc., korišten ovdje samo kao referenca za kompatibilnost."
       }
     },
     "loading": "Analiziranje...",

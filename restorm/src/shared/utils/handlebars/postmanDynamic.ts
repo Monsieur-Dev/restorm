@@ -23,6 +23,10 @@ const DOMAINS = ['example.com', 'test.dev', 'mail.io', 'sample.org', 'demo.net']
 const pick = (arr: string[]): string => arr[Math.floor(Math.random() * arr.length)] ?? ''
 const randInt = (max: number): number => Math.floor(Math.random() * max)
 
+const ALPHANUMERIC_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
+const randomAlphaNumeric = (length = 8): string =>
+  Array.from({ length }, () => ALPHANUMERIC_CHARS[randInt(ALPHANUMERIC_CHARS.length)] ?? '0').join('')
+
 /** Each entry produces the string Postman would substitute for that variable. */
 const DYNAMIC_VARS: Record<string, () => string> = {
   $guid: () => crypto.randomUUID(),
@@ -30,6 +34,7 @@ const DYNAMIC_VARS: Record<string, () => string> = {
   $timestamp: () => String(Math.floor(Date.now() / 1000)),
   $isoTimestamp: () => new Date().toISOString(),
   $randomInt: () => String(randInt(1001)),
+  $randomAlphaNumeric: () => randomAlphaNumeric(),
   $randomBoolean: () => (Math.random() < 0.5 ? 'true' : 'false'),
   $randomFirstName: () => pick(FIRST_NAMES),
   $randomLastName: () => pick(LAST_NAMES),

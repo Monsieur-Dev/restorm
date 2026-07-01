@@ -909,6 +909,10 @@
       "mqtt": {
         "description": "Vložte URL MQTT brokeru nebo katalog topiků — Restorm vytvoří požadavky publish / subscribe pro každý topic, udržuje spojení živé pro náhledy streamování a pamatuje si snapshoty zachovaných zpráv, abyste je mohli později přehrát.",
         "trademark": "MQTT je standard OASIS; název a logo MQTT jsou ochranné známky OASIS Open."
+      },
+      "paw": {
+        "description": "Přicházíte z Paw? Pusťte svůj JSON export (File → Export → JSON v aplikaci — nativní balíček .paw se nečte přímo). Restorm přenese každý požadavek, hlavičku, tělo i prostředí a namapuje dynamické hodnoty Paw (časová razítka, náhodné řetězce, UUID) na nejbližší ekvivalent v Restormu.",
+        "trademark": "Paw je registrovaná ochranná známka společnosti RapidAPI, Inc., použitá zde pouze pro účely kompatibility."
       }
     },
     "loading": "Probíhá analýza...",

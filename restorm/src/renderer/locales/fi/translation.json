@@ -907,6 +907,10 @@
       "mqtt": {
         "description": "Liitä MQTT-välittäjän URL tai aiheluettelo — Restorm rakentaa publish-/subscribe-pyynnöt aiheittain, pitää yhteyden auki suoratoistoesikatseluja varten ja muistaa säilytettyjen viestien tilannekuvat, jotta voit toistaa ne myöhemmin.",
         "trademark": "MQTT on OASIS-standardi; MQTT-nimi ja -logo ovat OASIS Openin tavaramerkkejä."
+      },
+      "paw": {
+        "description": "Tuletko Pawsta? Pudota JSON-vientitiedostosi (File → Export → JSON sovelluksessa — natiivia .paw-pakettia ei lueta suoraan). Restorm rakentaa uudelleen jokaisen pyynnön, otsakkeen, sisällön ja ympäristön, ja yhdistää Pawn dynaamiset arvot (aikaleimat, satunnaiset merkkijonot, UUID:t) lähimpään Restorm-vastineeseen.",
+        "trademark": "Paw on RapidAPI, Inc:n rekisteröity tavaramerkki, käytetään tässä vain yhteensopivuusviittauksena."
       }
     },
     "loading": "Analysoidaan...",

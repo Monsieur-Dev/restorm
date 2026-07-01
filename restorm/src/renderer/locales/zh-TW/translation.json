@@ -906,6 +906,10 @@
       "mqtt": {
         "description": "貼上 MQTT broker URL 或主題目錄——restorm 會為每個主題建立 publish / subscribe 請求，保持連線以提供串流預覽，並記住保留訊息的快照供日後重播。",
         "trademark": "MQTT 為 OASIS 標準；MQTT 名稱與標誌為 OASIS Open 的商標。"
+      },
+      "paw": {
+        "description": "從 Paw 過來？拖入您的 JSON 匯出檔（應用程式內 File → Export → JSON——不會直接讀取原生 .paw 包）。restorm 會重建每個請求、標頭、內文與環境，並將 Paw 的動態值（時間戳記、隨機字串、UUID）對應到最接近的 restorm 等效項。",
+        "trademark": "Paw 為 RapidAPI, Inc. 的註冊商標，此處僅作為相容性參考使用。"
       }
     },
     "loading": "正在分析...",

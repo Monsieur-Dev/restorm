@@ -319,6 +319,18 @@ const IMPORT_FORMATS: readonly ImportFormat[] = [
     descriptionKey: 'import.formats.mqtt.description',
     trademarkKey: 'import.formats.mqtt.trademark',
     isPro: true
+  },
+  {
+    // No first-party Paw logo asset is shipped yet — a generic codicon
+    // stands in until one is added, same fallback the `logoSrc: null` +
+    // `iconCodicon` combination was built for.
+    id: 'paw',
+    title: 'Paw',
+    logoSrc: null,
+    iconCodicon: 'package',
+    descriptionKey: 'import.formats.paw.description',
+    trademarkKey: 'import.formats.paw.trademark',
+    isPro: false
   }
 ]
 

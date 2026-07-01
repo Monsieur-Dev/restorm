@@ -906,6 +906,10 @@
       "mqtt": {
         "description": "MQTT 브로커 URL이나 토픽 카탈로그를 붙여넣으면, restorm이 토픽별로 publish / subscribe 요청을 구성하고, 스트리밍 미리 보기를 위해 연결을 유지하며, 보관된 메시지 스냅샷을 기억하여 나중에 다시 재생할 수 있게 합니다.",
         "trademark": "MQTT는 OASIS 표준이며, MQTT 이름과 로고는 OASIS Open의 상표입니다."
+      },
+      "paw": {
+        "description": "Paw에서 넘어오셨나요? JSON으로 내보낸 파일을 가져다 놓으면 됩니다(앱의 File → Export → JSON — 네이티브 .paw 번들은 직접 읽지 않습니다). restorm은 모든 요청, 헤더, 본문, 환경을 다시 구성하고, Paw의 동적 값(타임스탬프, 임의 문자열, UUID)을 가장 가까운 restorm 대응 값으로 매핑합니다.",
+        "trademark": "Paw는 RapidAPI, Inc.의 등록 상표이며, 여기서는 호환성 참조 목적으로만 사용됩니다."
       }
     },
     "loading": "분석 중...",

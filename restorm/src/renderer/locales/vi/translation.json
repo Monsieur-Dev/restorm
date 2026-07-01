@@ -906,6 +906,10 @@
       "mqtt": {
         "description": "Dán URL broker MQTT hoặc danh mục topic — Restorm tạo khung yêu cầu publish / subscribe cho mỗi topic, giữ kết nối hoạt động để xem trước trực tiếp, và ghi nhớ snapshot tin nhắn retained để bạn có thể phát lại sau.",
         "trademark": "MQTT là một tiêu chuẩn OASIS; tên và logo MQTT là nhãn hiệu của OASIS Open."
+      },
+      "paw": {
+        "description": "Đến từ Paw? Thả tệp xuất JSON của bạn (File → Export → JSON trong ứng dụng — gói .paw gốc không được đọc trực tiếp). Restorm dựng lại mọi yêu cầu, header, body và môi trường, đồng thời ánh xạ các giá trị động của Paw (dấu thời gian, chuỗi ngẫu nhiên, UUID) sang giá trị tương đương gần nhất trong Restorm.",
+        "trademark": "Paw là nhãn hiệu đã đăng ký của RapidAPI, Inc., được sử dụng ở đây chỉ để tham chiếu tương thích."
       }
     },
     "loading": "Đang phân tích...",

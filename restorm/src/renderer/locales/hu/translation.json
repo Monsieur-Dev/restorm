@@ -907,6 +907,10 @@
       "mqtt": {
         "description": "Illessze be egy MQTT-bróker URL-jét vagy egy témakatalógust — a Restorm témánként publish / subscribe kéréseket állít fel, élőben tartja a kapcsolatot a streaming-előnézetekhez, és megjegyzi a megtartott üzenetek pillanatképeit, hogy később újrajátszhatók legyenek.",
         "trademark": "Az MQTT egy OASIS szabvány; az MQTT név és logó az OASIS Open védjegyei."
+      },
+      "paw": {
+        "description": "Pawról érkezik? Dobja be a JSON exportját (File → Export → JSON az alkalmazásban — a natív .paw csomagot nem olvassuk közvetlenül). A Restorm újraépít minden kérést, fejlécet, törzset és környezetet, és a Paw dinamikus értékeit (időbélyegek, véletlen karakterláncok, UUID-k) a legközelebbi Restorm megfelelőjükre képezi le.",
+        "trademark": "A Paw a RapidAPI, Inc. bejegyzett védjegye, itt kizárólag kompatibilitási hivatkozásként használva."
       }
     },
     "loading": "Elemzés...",

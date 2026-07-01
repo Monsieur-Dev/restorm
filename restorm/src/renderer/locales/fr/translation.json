@@ -907,6 +907,10 @@
       "mqtt": {
         "description": "Collez l'URL d'un broker MQTT ou un catalogue de topics — Restorm fabrique les requêtes publish / subscribe par topic, garde la connexion ouverte pour les previews en streaming, et retient les snapshots des messages retained pour pouvoir les rejouer plus tard.",
         "trademark": "MQTT est un standard OASIS ; le nom et le logo MQTT sont des marques d'OASIS Open."
+      },
+      "paw": {
+        "description": "Vous venez de Paw ? Déposez votre export JSON (File → Export → JSON dans l'application — le bundle natif .paw n'est pas lu directement). Restorm reconstruit chaque requête, header, body et environnement, et convertit les valeurs dynamiques de Paw (horodatages, chaînes aléatoires, UUID) vers leur équivalent Restorm le plus proche.",
+        "trademark": "Paw est une marque déposée de RapidAPI, Inc., utilisée ici uniquement à titre de référence pour la compatibilité."
       }
     },
     "loading": "Analyse en cours...",

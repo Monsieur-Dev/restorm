@@ -907,6 +907,10 @@
       "mqtt": {
         "description": "Lim inn en MQTT-broker-URL eller en emnekatalog — Restorm lager publish-/subscribe-forespørsler per emne, holder forbindelsen i live for strømmingsforhåndsvisninger og husker øyeblikksbilder av retained messages slik at du kan spille dem av senere.",
         "trademark": "MQTT er en OASIS-standard; MQTT-navnet og -logoen er varemerker for OASIS Open."
+      },
+      "paw": {
+        "description": "Kommer du fra Paw? Slipp JSON-eksporten din (File → Export → JSON i appen — den native .paw-pakken leses ikke direkte). Restorm bygger opp igjen hver forespørsel, header, body og miljø, og mapper Paws dynamiske verdier (tidsstempler, tilfeldige strenger, UUID-er) til det nærmeste Restorm-motstykket.",
+        "trademark": "Paw er et registrert varemerke for RapidAPI, Inc., brukt her kun som kompatibilitetsreferanse."
       }
     },
     "loading": "Analyserer...",

@@ -69,6 +69,9 @@ const fixtures: Record<string, { content: string; filePath?: string }> = {
   },
   har: {
     content: readFileSync(join(FIXTURES, 'har', 'petstore.har'), 'utf-8')
+  },
+  paw: {
+    content: readFileSync(join(FIXTURES, 'paw', 'paw-petstore.json'), 'utf-8')
   }
 }
 

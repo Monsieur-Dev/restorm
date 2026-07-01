@@ -906,6 +906,10 @@
       "mqtt": {
         "description": "Tempel URL broker MQTT atau katalog topik — Restorm membuat kerangka permintaan publish / subscribe per topik, mempertahankan koneksi tetap hidup untuk pratinjau streaming, dan mengingat snapshot pesan retained sehingga Anda dapat memutarnya ulang nanti.",
         "trademark": "MQTT adalah standar OASIS; nama dan logo MQTT adalah merek dagang dari OASIS Open."
+      },
+      "paw": {
+        "description": "Datang dari Paw? Lepaskan ekspor JSON Anda (File → Export → JSON di aplikasi — bundel .paw native tidak dibaca langsung). Restorm membangun kembali setiap permintaan, header, body, dan lingkungan, serta memetakan nilai dinamis Paw (stempel waktu, string acak, UUID) ke padanan Restorm yang paling mendekati.",
+        "trademark": "Paw adalah merek dagang terdaftar dari RapidAPI, Inc., digunakan di sini hanya untuk referensi kompatibilitas."
       }
     },
     "loading": "Menganalisis...",

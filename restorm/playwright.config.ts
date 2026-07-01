@@ -275,6 +275,15 @@ const bodyTypeMigrationTestDir = defineBddConfig({
   outputDir: '.features-gen/body-type-migration'
 })
 
+const pawImportTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/paw-import/features/**/*.feature',
+  steps: [
+    'tests/e2e/bdd/paw-import/steps/**/*.ts',
+    'tests/e2e/bdd/fixtures/paw-import.fixture.ts'
+  ],
+  outputDir: '.features-gen/paw-import'
+})
+
 const sidebarSplitDropTestDir = defineBddConfig({
   features: 'tests/e2e/bdd/sidebar-split-drop/features/**/*.feature',
   steps: [
@@ -528,6 +537,11 @@ export default defineConfig({
       name: 'sidebar-split-drop',
       testDir: sidebarSplitDropTestDir,
       timeout: 120 * 1000 // opens the reference project; drags sidebar items onto tabs / a scenario
+    },
+    {
+      name: 'paw-import',
+      testDir: pawImportTestDir,
+      timeout: 120 * 1000 // opens a fresh app, imports the Paw JSON fixture, runs one request against the live docker petstore
     },
     {
       // Headless CLI runner — a plain spec (no BDD/UI) that spawns the built app

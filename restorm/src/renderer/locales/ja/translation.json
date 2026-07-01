@@ -906,6 +906,10 @@
       "mqtt": {
         "description": "MQTT ブローカーの URL やトピックカタログを貼り付けると、restorm はトピックごとに publish／subscribe リクエストを生成し、ストリーミングプレビューのために接続を保持し、保持メッセージのスナップショットを記憶して後で再生できるようにします。",
         "trademark": "MQTT は OASIS 標準です。MQTT の名称とロゴは OASIS Open の商標です。"
+      },
+      "paw": {
+        "description": "Paw から移ってきましたか？JSON エクスポートを投入してください（アプリの File → Export → JSON。ネイティブの .paw バンドルは直接読み込みません）。restorm はすべてのリクエスト、ヘッダー、ボディ、環境を再構築し、Paw の動的な値（タイムスタンプ、ランダム文字列、UUID）を最も近い restorm の等価物にマッピングします。",
+        "trademark": "Paw は RapidAPI, Inc. の登録商標で、ここでは互換性のための参照として使用しています。"
       }
     },
     "loading": "解析中...",
