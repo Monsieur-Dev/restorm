@@ -26,6 +26,12 @@ const openapiImportTestDir = defineBddConfig({
   outputDir: '.features-gen/openapi-import'
 })
 
+const restClientImportTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/rest-client-import/features/**/*.feature',
+  steps: ['tests/e2e/bdd/rest-client-import/steps/**/*.ts', 'tests/e2e/bdd/fixtures/rest-client-import.fixture.ts'],
+  outputDir: '.features-gen/rest-client-import'
+})
+
 const dirtyStateTestDir = defineBddConfig({
   features: 'tests/e2e/bdd/dirty-state/features/**/*.feature',
   steps: ['tests/e2e/bdd/dirty-state/steps/**/*.ts', 'tests/e2e/bdd/fixtures/dirty-state.fixture.ts'],
@@ -342,6 +348,10 @@ export default defineConfig({
     {
       name: 'openapi-import',
       testDir: openapiImportTestDir
+    },
+    {
+      name: 'rest-client-import',
+      testDir: restClientImportTestDir
     },
     {
       name: 'dirty-state',

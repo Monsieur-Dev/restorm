@@ -16,6 +16,7 @@ import { importInsomniaFromJson } from '../../src/main/services/import/InsomniaI
 import { importBrunoFromJson } from '../../src/main/services/import/BrunoImportService'
 import { importCurl } from '../../src/main/services/import/CurlImportService'
 import { importPowerShell } from '../../src/main/services/import/PowerShellImportService'
+import { importRestClient } from '../../src/main/services/import/RestClientImportService'
 import { CURRENT_FILE_FORMAT_VERSION } from '../../src/shared/config/fileFormatVersion'
 import type { Folder, EnvironmentFolder, HTTPRequest, GraphQLRequest, GrpcRequest, SoapRequest, WebSocketRequest } from '../../src/shared/types/collections'
 
@@ -1165,6 +1166,7 @@ describe('Import Services - Cross-validation', () => {
     const bruno = importBrunoFromJson(loadTestFile('bruno-petstore.json'))
     const curl = importCurl('curl https://example.com/api/items')
     const powershell = importPowerShell('Invoke-RestMethod -Uri https://example.com/api/items')
+    const restClient = importRestClient('GET https://example.com/api/items')
 
     const results: EnvironmentFolder[] = [
       swagger,
@@ -1176,7 +1178,8 @@ describe('Import Services - Cross-validation', () => {
       insomnia,
       bruno,
       curl,
-      powershell
+      powershell,
+      restClient
     ]
     for (const result of results) {
       expect(result.fileFormatVersion, `importer ${result.importSource ?? 'unknown'} missing fileFormatVersion`).toBe(CURRENT_FILE_FORMAT_VERSION)

@@ -1,0 +1,15 @@
+@baseUrl = https://api.example.com
+@token = abc123
+
+### Get users
+GET {{baseUrl}}/users
+Authorization: Bearer {{token}}
+
+### Create user
+# @name createUser
+POST {{baseUrl}}/users
+Content-Type: application/json
+
+{
+  "name": "Alice"
+}

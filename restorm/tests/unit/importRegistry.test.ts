@@ -23,6 +23,9 @@ const fixtures: Record<string, { content: string; filePath?: string }> = {
   powershell: {
     content: 'Invoke-RestMethod -Uri "https://petstore.example.com/pets" -Method GET'
   },
+  'rest-client': {
+    content: 'GET https://petstore.example.com/pets'
+  },
   swagger: {
     content: readFileSync(join(UNIT, 'swagger-petstore.json'), 'utf-8')
   },
@@ -72,8 +75,8 @@ describe('import provider registry', () => {
     expect(importProviders.length).toBeGreaterThan(0)
   })
 
-  it('has at least 13 registered providers (12 service files = 13 format entries)', () => {
-    expect(importProviders.length).toBeGreaterThanOrEqual(13)
+  it('has at least 14 registered providers (13 service files = 14 format entries)', () => {
+    expect(importProviders.length).toBeGreaterThanOrEqual(14)
   })
 
   for (const provider of importProviders) {

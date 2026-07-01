@@ -13,6 +13,7 @@
 // Text-prefix formats (cheapest detection — checked before JSON parsing)
 import './CurlImportService'
 import './PowerShellImportService'
+import './RestClientImportService'
 
 // JSON-keyed formats (detection requires JSON.parse — registered in the same
 // order the original switch tried them to preserve tiebreaking)
