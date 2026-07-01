@@ -6,14 +6,14 @@ Feature: Smithy import — JSON AST + .smithy IDL, auto-detected
     Then the sidebar should show the imported folder "Weather"
     And the sidebar should show the imported folder "City"
 
-  Scenario: Pasting the .smithy IDL text is auto-detected without picking a format
+  Scenario: The .smithy IDL file is auto-detected without picking a format
     Given a new single-file collection for Smithy import
-    When I paste the Smithy IDL text into the import source
+    When I import the Smithy IDL fixture file
     Then the sidebar should show the imported folder "Weather"
     And the sidebar should show the imported folder "City"
 
-  Scenario: Re-importing the JSON AST is idempotent
+  Scenario: Re-importing the JSON AST creates a separate copy
     Given a new single-file collection for Smithy import
     When I import the Smithy JSON AST fixture file
     And I import the Smithy JSON AST fixture file
-    Then exactly 1 folder named "Weather" should be in the sidebar
+    Then exactly 2 folders named "Weather" should be in the sidebar

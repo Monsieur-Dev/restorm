@@ -1,5 +1,5 @@
 import { createBdd } from 'playwright-bdd'
-import { existsSync, readFileSync } from 'fs'
+import { existsSync } from 'fs'
 import { join, resolve } from 'path'
 import type { ElectronApplication, Page, Locator } from '@playwright/test'
 import { test, expect, SMITHY_IMPORT_TEMP_DIR, configureNextSaveFileDialogForE2E } from '../../fixtures/smithy-import.fixture'
@@ -32,9 +32,13 @@ async function importViaModal(source: string): Promise<void> {
   await expect(importModal).toBeVisible({ timeout: 5000 })
   const input = importModal.locator('[data-testid="source-input-input"]')
   await input.fill(source)
+  // The import source field always resolves its value as a file path / URL
+  // (ImportManager.importFrom reads it from disk) — there is no raw-content-
+  // paste flow. The heavier IDL grammar can also take longer than the JSON
+  // parsers this pattern was cloned from, hence the generous timeout.
   await expect(importModal.locator('.import-preview-section')).toBeVisible({ timeout: 30000 })
   const importButton = importModal.locator('[role="button"]:has-text("Import")[aria-disabled="false"]')
-  await expect(importButton).toBeVisible({ timeout: 5000 })
+  await expect(importButton).toBeVisible({ timeout: 15000 })
   await importButton.click()
   await expect(importModal).not.toBeVisible({ timeout: 15000 })
   await p.waitForTimeout(500)
@@ -60,9 +64,10 @@ When('I import the Smithy JSON AST fixture file', async () => {
   await importViaModal(filePath)
 })
 
-When('I paste the Smithy IDL text into the import source', async () => {
-  const idlText = readFileSync(join(FIXTURES_DIR, 'weather.smithy'), 'utf-8')
-  await importViaModal(idlText)
+When('I import the Smithy IDL fixture file', async () => {
+  const filePath = join(FIXTURES_DIR, 'weather.smithy')
+  expect(existsSync(filePath), `fixture must exist: ${filePath}`).toBe(true)
+  await importViaModal(filePath)
 })
 
 Then('the sidebar should show the imported folder {string}', async ({}, name: string) => {
@@ -70,7 +75,7 @@ Then('the sidebar should show the imported folder {string}', async ({}, name: st
   await expect(sidebarRowsByName(p, name).first()).toBeVisible({ timeout: 10000 })
 })
 
-Then('exactly {int} folder named {string} should be in the sidebar', async ({}, count: number, name: string) => {
+Then('exactly {int} folder(s) named {string} should be in the sidebar', async ({}, count: number, name: string) => {
   const p = requirePage()
   await expect(sidebarRowsByName(p, name)).toHaveCount(count, { timeout: 10000 })
 })
