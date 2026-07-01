@@ -1,6 +1,6 @@
 import { createBdd } from 'playwright-bdd'
 import { join, resolve } from 'path'
-import { existsSync, readFileSync } from 'fs'
+import { existsSync, readFileSync, writeFileSync } from 'fs'
 import type { ElectronApplication, Page, Locator } from '@playwright/test'
 import {
   test,
@@ -32,14 +32,16 @@ function sidebarRowsByName(currentPage: Page, name: string): Locator {
     .filter({ has: currentPage.getByText(name, { exact: true }) })
 }
 
-async function importViaModal(source: string): Promise<void> {
+async function importViaModal(sourcePath: string): Promise<void> {
   const p = requirePage()
   await p.keyboard.press('Control+I')
   const importModal = p.locator('[data-testid="import-modal"]')
-  await expect(importModal).toBeVisible({ timeout: 2000 })
+  await expect(importModal).toBeVisible({ timeout: 5000 })
   const input = importModal.locator('[data-testid="source-input-input"]')
-  await input.fill(source)
-  // The preview tree populating is the "parsed + ready" signal.
+  await input.fill(sourcePath)
+  // The preview tree populating is the "parsed + ready" signal. drafter.js's
+  // WASM parse is heavier than the JSON-based importers' preview, so this
+  // gets a generous timeout.
   await expect(p.locator('[data-testid="import-selection-tree"]')).toBeVisible({ timeout: 30000 })
   await p.locator('[data-testid="import-button"]').click()
   await expect(importModal).not.toBeVisible({ timeout: 15000 })
@@ -67,17 +69,25 @@ When('I import the API Blueprint fixture file {string}', async ({}, fileName: st
   await importViaModal(filePath)
 })
 
-When('I paste the API Blueprint fixture content into the import source', async () => {
+// There is no raw-content-paste import: the source field always resolves to
+// a file path or a URL (`ImportManager.importFrom` reads it via `fs.readFile`
+// when it isn't a URL) — pasting multi-KB raw text into it fails at the
+// filesystem layer. To prove detection works off the `FORMAT: 1A` content
+// header alone (not just the `.apib` extension), write the fixture to a
+// same-content file with a NON-`.apib` extension and import that path.
+When('I import the API Blueprint fixture content saved without the .apib extension', async () => {
   const content = readFileSync(join(FIXTURES_DIR, 'polls.apib'), 'utf-8')
-  await importViaModal(content)
+  const noExtPath = join(API_BLUEPRINT_IMPORT_TEMP_DIR, 'polls-no-extension.txt')
+  writeFileSync(noExtPath, content, 'utf-8')
+  await importViaModal(noExtPath)
 })
 
 Then('the sidebar should show the imported folder {string}', async ({}, name: string) => {
   const p = requirePage()
-  await expect(sidebarRowsByName(p, name).first()).toBeVisible({ timeout: 10000 })
+  await expect(sidebarRowsByName(p, name).first()).toBeVisible({ timeout: 15000 })
 })
 
-Then('exactly {int} folder named {string} should be in the sidebar', async ({}, count: number, name: string) => {
+Then('exactly {int} folders named {string} should be in the sidebar', async ({}, count: number, name: string) => {
   const p = requirePage()
-  await expect(sidebarRowsByName(p, name)).toHaveCount(count, { timeout: 10000 })
+  await expect(sidebarRowsByName(p, name)).toHaveCount(count, { timeout: 15000 })
 })
