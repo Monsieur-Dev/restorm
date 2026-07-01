@@ -30,6 +30,10 @@ const restClientImportTestDir = defineBddConfig({
   features: 'tests/e2e/bdd/rest-client-import/features/**/*.feature',
   steps: ['tests/e2e/bdd/rest-client-import/steps/**/*.ts', 'tests/e2e/bdd/fixtures/rest-client-import.fixture.ts'],
   outputDir: '.features-gen/rest-client-import'
+const ramlImportTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/raml-import/features/**/*.feature',
+  steps: ['tests/e2e/bdd/raml-import/steps/**/*.ts', 'tests/e2e/bdd/fixtures/raml-import.fixture.ts'],
+  outputDir: '.features-gen/raml-import'
 })
 
 const dirtyStateTestDir = defineBddConfig({
@@ -382,6 +386,8 @@ export default defineConfig({
     {
       name: 'rest-client-import',
       testDir: restClientImportTestDir
+      name: 'raml-import',
+      testDir: ramlImportTestDir
     },
     {
       name: 'dirty-state',

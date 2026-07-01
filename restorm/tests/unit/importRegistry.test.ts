@@ -80,6 +80,9 @@ const fixtures: Record<string, { content: string; filePath?: string }> = {
   },
   smithy: {
     content: readFileSync(join(FIXTURES, 'smithy', 'weather.json'), 'utf-8')
+  },
+  raml: {
+    content: readFileSync(join(FIXTURES, 'raml', 'petstore.raml'), 'utf-8')
   }
 }
 

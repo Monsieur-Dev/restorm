@@ -330,6 +330,7 @@ export type ApiDocumentationSourceType =
   | 'bruno'
   | 'odata'
   | 'smithy'
+  | 'raml'
 
 /** Root documentation structure stored on the EnvironmentFolder that owns the API. */
 export interface ApiDocumentation {

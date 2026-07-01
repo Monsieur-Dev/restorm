@@ -93,6 +93,7 @@
     "nanoid": "^5.1.11",
     "pyodide": "^0.29.4",
     "quickjs-emscripten": "^0.32.0",
+    "raml-1-parser": "1.1.67",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
     "react-i18next": "^17.0.8",
