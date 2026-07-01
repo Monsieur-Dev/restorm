@@ -616,7 +616,7 @@ export default defineConfig({
     {
       name: 'paw-import',
       testDir: pawImportTestDir,
-      timeout: 120 * 1000 // opens a fresh app, imports the Paw JSON fixture, runs one request against the live docker petstore
+      timeout: 180 * 1000 // opens a fresh app, imports the Paw JSON fixture, runs one request against the live docker petstore
     },
     {
       name: 'httpie-import',

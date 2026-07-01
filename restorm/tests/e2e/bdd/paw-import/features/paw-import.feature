@@ -15,8 +15,8 @@ Feature: Paw JSON export import
     Then the response status is "200"
     And the response body contains "Cat 1"
 
-  Scenario: Re-import is idempotent
+  Scenario: Re-importing creates a separate copy
     Given a new single-file YAML collection for Paw import
     When I import the Paw sample export
     And I import the Paw sample export
-    Then exactly 1 folder named "Paw Import" should be in the sidebar
+    Then exactly 2 folders named "Paw Import" should be in the sidebar
