@@ -237,3 +237,15 @@ export function importPowerShell(
 
   return folder
 }
+
+// ============================================================================
+// Provider registration
+// ============================================================================
+
+import { importProviders } from './registry'
+
+function canImport(content: string, _filePath?: string): boolean {
+  return /Invoke-(RestMethod|WebRequest)/.test(content.trim())
+}
+
+importProviders.push({ format: 'powershell', canImport, parse: (content) => importPowerShell(content) })

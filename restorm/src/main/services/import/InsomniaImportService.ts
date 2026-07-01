@@ -578,3 +578,22 @@ export async function importInsomniaFromUrl(
   const exportData = (await response.json()) as InsomniaExport
   return importInsomnia(exportData, options)
 }
+
+// ============================================================================
+// Provider registration
+// ============================================================================
+
+import { importProviders } from './registry'
+
+function canImport(content: string, _filePath?: string): boolean {
+  const trimmed = content.trim()
+  try {
+    const json: unknown = JSON.parse(trimmed)
+    if (typeof json === 'object' && json !== null && '_type' in json && 'resources' in json) {
+      return (json as Record<string, unknown>)._type === 'export'
+    }
+  } catch { /* not JSON */ }
+  return false
+}
+
+importProviders.push({ format: 'insomnia', canImport, parse: (content, opts) => importInsomniaFromJson(content, opts) })

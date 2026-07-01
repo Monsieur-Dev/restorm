@@ -53,6 +53,19 @@ export type ImportSourceType =
   | 'curl'
   | 'powershell'
   | 'url'
+  // Formats reserved up-front so importer tickets never need to touch this
+  // file — each new ImportService self-registers independently.
+  | 'har'
+  | 'rest-client'
+  | 'thunder-client'
+  | 'paw'
+  | 'httpie'
+  | 'smithy'
+  | 'typespec'
+  | 'raml'
+  | 'wadl'
+  | 'thrift'
+  | 'api-blueprint'
 
 /**
  * Per-env-folder configuration tracking where the folder's spec was

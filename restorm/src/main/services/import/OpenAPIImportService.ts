@@ -956,3 +956,38 @@ export async function importOpenAPIValidated(
     throw new Error(`OpenAPI spec validation failed: ${message}`)
   }
 }
+
+// ============================================================================
+// Provider registration
+// ============================================================================
+
+import { importProviders } from './registry'
+
+function canImportOpenAPI30(content: string, _filePath?: string): boolean {
+  const trimmed = content.trim()
+  try {
+    const json: unknown = JSON.parse(trimmed)
+    if (typeof json === 'object' && json !== null) {
+      const obj = json as Record<string, unknown>
+      return 'openapi' in obj && typeof obj.openapi === 'string' && obj.openapi.startsWith('3.0')
+    }
+  } catch { /* not JSON */ }
+  return false
+}
+
+function canImportOpenAPI31(content: string, _filePath?: string): boolean {
+  const trimmed = content.trim()
+  try {
+    const json: unknown = JSON.parse(trimmed)
+    if (typeof json === 'object' && json !== null) {
+      const obj = json as Record<string, unknown>
+      return 'openapi' in obj && typeof obj.openapi === 'string' && obj.openapi.startsWith('3.1')
+    }
+  } catch { /* not JSON */ }
+  return false
+}
+
+importProviders.push(
+  { format: 'openapi-3.0', canImport: canImportOpenAPI30, parse: (content, opts) => importOpenAPIFromJson(content, opts) },
+  { format: 'openapi-3.1', canImport: canImportOpenAPI31, parse: (content, opts) => importOpenAPIFromJson(content, opts) }
+)

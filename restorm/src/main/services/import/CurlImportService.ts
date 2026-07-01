@@ -76,3 +76,16 @@ export function importCurl(
 
   return folder
 }
+
+// ============================================================================
+// Provider registration
+// ============================================================================
+
+import { importProviders } from './registry'
+
+function canImport(content: string, _filePath?: string): boolean {
+  const trimmed = content.trim()
+  return trimmed.startsWith('curl ') || trimmed.includes('\ncurl ')
+}
+
+importProviders.push({ format: 'curl', canImport, parse: (content) => importCurl(content) })

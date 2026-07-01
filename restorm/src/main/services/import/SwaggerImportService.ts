@@ -1000,3 +1000,23 @@ export function importSwaggerFromJson(json: string, options: SwaggerImportOption
   const spec = JSON.parse(json) as SwaggerSpec
   return importSwagger(spec, options)
 }
+
+// ============================================================================
+// Provider registration
+// ============================================================================
+
+import { importProviders } from './registry'
+
+function canImport(content: string, _filePath?: string): boolean {
+  const trimmed = content.trim()
+  try {
+    const json: unknown = JSON.parse(trimmed)
+    if (typeof json === 'object' && json !== null) {
+      const obj = json as Record<string, unknown>
+      return 'swagger' in obj && typeof obj.swagger === 'string' && obj.swagger.startsWith('2.')
+    }
+  } catch { /* not JSON */ }
+  return false
+}
+
+importProviders.push({ format: 'swagger', canImport, parse: (content, opts) => importSwaggerFromJson(content, opts) })

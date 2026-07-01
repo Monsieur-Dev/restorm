@@ -1024,3 +1024,24 @@ export function importBrunoFromJson(
 
   return rootFolder
 }
+
+// ============================================================================
+// Provider registration
+// ============================================================================
+
+import { importProviders } from './registry'
+
+function canImport(content: string, filePath?: string): boolean {
+  if (filePath?.endsWith('.bru')) return true
+  const trimmed = content.trim()
+  try {
+    const json: unknown = JSON.parse(trimmed)
+    if (typeof json === 'object' && json !== null && 'version' in json && 'name' in json) {
+      const jsonObj = json as Record<string, unknown>
+      return jsonObj.type === 'collection' || filePath?.endsWith('.json') === true
+    }
+  } catch { /* not JSON */ }
+  return false
+}
+
+importProviders.push({ format: 'bruno', canImport, parse: (content, opts) => importBrunoFromJson(content, opts) })

@@ -93,7 +93,13 @@ export interface GraphqlOperationShape {
 }
 
 export interface GenericOperationShape {
-  protocol: 'soap' | 'grpc' | 'asyncapi' | 'odata' | 'postman' | 'insomnia' | 'bruno' | 'curl' | 'powershell' | 'url'
+  protocol:
+    | 'soap' | 'grpc' | 'asyncapi' | 'odata'
+    | 'postman' | 'insomnia' | 'bruno' | 'curl' | 'powershell' | 'url'
+    // Formats reserved up-front so adapter tickets never need to touch this
+    // file — each new ImportAdapter is a single independent file.
+    | 'har' | 'rest-client' | 'thunder-client' | 'paw' | 'httpie'
+    | 'smithy' | 'typespec' | 'raml' | 'wadl' | 'thrift' | 'api-blueprint'
   /** Format-specific raw payload. The pipeline doesn't introspect
    * it — only the materialiser does. Idempotent merge for these
    * protocols is "additive only" (new ops added, missing ops

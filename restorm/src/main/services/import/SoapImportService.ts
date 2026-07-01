@@ -364,3 +364,18 @@ export function importSoap(wsdlContent: string, options: SoapImportOptions = {})
 export function importSoapFromString(content: string, options: SoapImportOptions = {}): EnvironmentFolder {
   return importSoap(content, options)
 }
+
+// ============================================================================
+// Provider registration
+// ============================================================================
+
+import { importProviders } from './registry'
+
+function canImport(content: string, filePath?: string): boolean {
+  if (filePath?.endsWith('.wsdl')) return true
+  const trimmed = content.trim()
+  return trimmed.includes('<wsdl:definitions') ||
+         (trimmed.includes('<definitions') && trimmed.includes('wsdl'))
+}
+
+importProviders.push({ format: 'soap', canImport, parse: (content, opts) => importSoap(content, opts) })

@@ -358,3 +358,21 @@ export function importAsyncAPI(specContent: string, options: AsyncAPIImportOptio
 export function importAsyncAPIFromString(content: string, options: AsyncAPIImportOptions = {}): EnvironmentFolder {
   return importAsyncAPI(content, options)
 }
+
+// ============================================================================
+// Provider registration
+// ============================================================================
+
+import { importProviders } from './registry'
+
+function canImport(content: string, _filePath?: string): boolean {
+  const trimmed = content.trim()
+  if (trimmed.startsWith('asyncapi:') || trimmed.includes('\nasyncapi:')) return true
+  try {
+    const json: unknown = JSON.parse(trimmed)
+    return typeof json === 'object' && json !== null && 'asyncapi' in json
+  } catch { /* not JSON */ }
+  return false
+}
+
+importProviders.push({ format: 'asyncapi', canImport, parse: (content, opts) => importAsyncAPI(content, opts) })
