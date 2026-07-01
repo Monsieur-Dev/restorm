@@ -8,7 +8,7 @@
 
 import { app, safeStorage, shell } from 'electron'
 import { join } from 'node:path'
-import { readFileSync, writeFileSync, rmSync } from 'node:fs'
+import { readFileSync, writeFileSync, rmSync, renameSync } from 'node:fs'
 import {
   logger,
   withFirewallBypass,
@@ -55,6 +55,34 @@ const ERROR_HTML =
   '<!doctype html><meta charset="utf-8"><title>Restorm</title>' +
   '<body style="font-family:system-ui;text-align:center;padding-top:3rem">' +
   '<h2>Login could not be completed</h2><p>Please return to the app and try again.</p></body>'
+
+/**
+ * The `openExternal` the login loopback uses to hand the WorkOS auth URL to a
+ * browser. Normally the system browser (`shell.openExternal`), which drives the
+ * hosted AuthKit sign-in.
+ *
+ * In an UNPACKAGED end-to-end run with `RESTORM_E2E_AUTH_URL_FILE` set, it
+ * instead writes the auth URL to that file (temp-write + atomic rename so a
+ * polling reader never sees a partial URL) and does NOT open a browser: a
+ * Playwright-driven browser context — which the test can automate, unlike the
+ * system browser — reads the URL and fills the sign-in form. The loopback
+ * callback capture + code→session exchange are unchanged. This is a hard NO-OP
+ * in any packaged build (the `app.isPackaged` guard), the same dev-only
+ * discipline as `seedEntitlementForE2E`.
+ */
+function makeLoginOpenExternal(): (url: string) => Promise<void> {
+  const e2eUrlFile = process.env['RESTORM_E2E_AUTH_URL_FILE']
+  if (!app.isPackaged && e2eUrlFile !== undefined && e2eUrlFile.length > 0) {
+    logger.warn('⚠️ TEST auth-URL capture ON — login URL written to file, system browser NOT opened (RESTORM_E2E_AUTH_URL_FILE is set)')
+    return (url: string): Promise<void> => {
+      const tmp = `${e2eUrlFile}.tmp`
+      writeFileSync(tmp, url, { mode: 0o600 })
+      renameSync(tmp, e2eUrlFile)
+      return Promise.resolve()
+    }
+  }
+  return (url: string) => shell.openExternal(url)
+}
 
 function makeStoragePort(): SecureStoragePort {
   return {
@@ -120,11 +148,26 @@ function broadcastAuthStateWithAvatarExemption(channel: string, state: AuthState
 }
 
 /**
+ * The app version that drives backend-channel resolution — normally
+ * `app.getVersion()`. In an UNPACKAGED e2e run the built app has no package.json
+ * beside its bundled main entry, so `app.getVersion()` loses the real
+ * `-preview` suffix and would resolve to the PROD backend; setting
+ * `RESTORM_E2E_BACKEND_VERSION` (dev-only) pins the version — and thus the
+ * channel — for the stage login e2e (pass any `-preview` version to target dev).
+ * A hard NO-OP in any packaged build, the same discipline as the other e2e seams.
+ */
+function resolveBackendVersion(): string {
+  const override = process.env['RESTORM_E2E_BACKEND_VERSION']
+  if (!app.isPackaged && override !== undefined && override.length > 0) return override
+  return app.getVersion()
+}
+
+/**
  * Build the EntitlementService for this launch's channel, register its IPC, and
  * kick off cache-restore + refresh. Call ONCE after `app.whenReady` (userData
  * must be resolvable). Idempotent: a second call returns the existing instance.
  */
-export function initEntitlementService(version: string = app.getVersion()): EntitlementService {
+export function initEntitlementService(version: string = resolveBackendVersion()): EntitlementService {
   if (instance) return instance
 
   const channel: ReleaseChannel = resolveChannel(version)
@@ -153,7 +196,7 @@ export function initEntitlementService(version: string = app.getVersion()): Enti
     login: (signal) => loopbackLogin({
       loginUrl: endpointUrl(channel, 'login'),
       sessionUrl: endpointUrl(channel, 'session'),
-      openExternal: (url) => shell.openExternal(url),
+      openExternal: makeLoginOpenExternal(),
       fetchImpl: backendFetch,
       log: (msg, fields) => { logger.info(msg, fields) },
       successHtml: SUCCESS_HTML,

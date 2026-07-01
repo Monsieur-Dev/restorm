@@ -512,6 +512,21 @@ export default defineConfig({
       name: 'scenario-cli',
       testDir: 'tests/e2e/scenario-cli',
       timeout: 180 * 1000
-    }
+    },
+    // Stage-only entitlement-gating lifecycle e2e. It hits REAL external deps
+    // (dev WorkOS + dev Supabase) with a live login, so it must NEVER run in the
+    // per-PR / pre-push suite. It is included ONLY when RESTORM_E2E_STAGE=1, so a
+    // plain `pnpm test:e2e` (and the pre-push hook) never even sees the project.
+    // Run it deliberately as a non-regression guard:
+    //   RESTORM_E2E_STAGE=1 xvfb-run -a pnpm exec playwright test --project stage-gating
+    ...(process.env.RESTORM_E2E_STAGE === '1'
+      ? [
+          {
+            name: 'stage-gating',
+            testDir: 'tests/e2e/stage-gating',
+            timeout: 300 * 1000 // a real WorkOS login round-trip + entitlement fetch
+          }
+        ]
+      : [])
   ]
 })
