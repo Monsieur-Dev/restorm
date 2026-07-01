@@ -16,20 +16,9 @@ export interface LaunchedApp {
   page: Page
 }
 
-export interface LaunchAppOptions {
-  /**
-   * Extra environment variables merged over the normal launch env — used by
-   * the "tsp CLI not found" scenario to strip `node_modules/.bin` (where the
-   * `@typespec/compiler` devDependency puts `tsp`) off `PATH` so the real
-   * production ENOENT path is exercised end to end, without uninstalling
-   * anything.
-   */
-  env?: Record<string, string>
-}
-
 export interface TypeSpecImportFixtures {
   restormRoot: string
-  launchApp: (options?: LaunchAppOptions) => Promise<LaunchedApp>
+  launchApp: () => Promise<LaunchedApp>
 }
 
 export const test = base.extend<TypeSpecImportFixtures>({
@@ -48,13 +37,12 @@ export const test = base.extend<TypeSpecImportFixtures>({
     // full rationale; bootstrap + real launch share the same dir.
     const isolatedUserDataDir = createIsolatedUserDataDir(restormRoot)
 
-    const launcher = async (options: LaunchAppOptions = {}): Promise<LaunchedApp> => {
+    const launcher = async (): Promise<LaunchedApp> => {
       const baseEnv = {
         ...withE2ECoverageEnv(restormRoot, process.env),
         NODE_ENV: 'development',
         RESTORM_USER_DATA_OVERRIDE: isolatedUserDataDir,
-        ECUI_DISABLE_GPU: '1',
-        ...options.env
+        ECUI_DISABLE_GPU: '1'
       }
 
       const bootstrap = await electron.launch({
