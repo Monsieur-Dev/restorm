@@ -27,6 +27,23 @@ function sidebarRowByName(p: Page, name: string): Locator {
     .first()
 }
 
+/** Expand a sidebar tree row by name if it's currently collapsed. Used to
+ * walk down to a leaf request nested several resource-folders deep — the
+ * RAML importer creates one folder per resource (even a leaf resource with
+ * a single method), so a request like "GET /pet/findByStatus" sits under
+ * "Pet" > "/findByStatus", both of which must be expanded before the
+ * request row is visible/clickable. */
+async function expandTreeItemIfCollapsed(p: Page, name: string): Promise<void> {
+  const sidebar = p.locator('[data-testid="sidebar-listview"]')
+  const row = sidebar.locator('[role="treeitem"]', { hasText: name }).first()
+  await expect(row).toBeVisible({ timeout: 15000 })
+  const expandedAttr = await row.getAttribute('aria-expanded')
+  if (expandedAttr === 'false') {
+    await row.locator('.list-view-item-title-toggle, [data-testid$="-toggle"]').first().click().catch(() => undefined)
+    await p.waitForTimeout(200)
+  }
+}
+
 Given('a new single-file collection for RAML import', async ({ launchApp }) => {
   const launched = await launchApp()
   electronApp = launched.app
@@ -49,9 +66,12 @@ async function importFixture(p: Page): Promise<void> {
   await expect(importModal).toBeVisible({ timeout: 5000 })
   const input = importModal.locator('textarea, input[type="text"]').first()
   await input.fill(FIXTURE)
-  await expect(importModal.locator('.import-preview-section')).toBeVisible({ timeout: 5000 })
+  // RAML parsing (raml-1-parser: temp-file write + its definition-system
+  // init) is heavier than the JSON-based importers this step's timeouts
+  // were modeled on — give the debounced preview more room.
+  await expect(importModal.locator('.import-preview-section')).toBeVisible({ timeout: 15000 })
   const importButton = importModal.locator('[role="button"]:has-text("Import")[aria-disabled="false"]')
-  await expect(importButton).toBeVisible({ timeout: 5000 })
+  await expect(importButton).toBeVisible({ timeout: 15000 })
   await importButton.click()
   await expect(importModal).not.toBeVisible({ timeout: 5000 })
   await p.waitForTimeout(500)
@@ -71,7 +91,7 @@ When('I open the import modal and paste the RAML petstore sample', async () => {
 })
 
 Then('the import preview should be visible', async () => {
-  await expect(requirePage().locator('[data-testid="import-modal"] .import-preview-section')).toBeVisible({ timeout: 5000 })
+  await expect(requirePage().locator('[data-testid="import-modal"] .import-preview-section')).toBeVisible({ timeout: 15000 })
 })
 
 Then('the sidebar should contain an environment folder named {string}', async ({}, name: string) => {
@@ -96,7 +116,7 @@ Then('the environment folder {string} should expose a sub-folder named {string}'
   await expect(sidebar.getByText(child, { exact: true }).first()).toBeVisible({ timeout: 5000 })
 })
 
-Then('exactly {int} root folder named {string} should be in the sidebar', async ({}, count: number, name: string) => {
+Then('exactly {int} root folders named {string} should be in the sidebar', async ({}, count: number, name: string) => {
   const sidebar = requirePage().locator('[data-testid="sidebar-listview"]')
   await expect(sidebar).toBeVisible({ timeout: 5000 })
   await expect(sidebar.getByText(name, { exact: true })).toHaveCount(count, { timeout: 5000 })
@@ -104,6 +124,14 @@ Then('exactly {int} root folder named {string} should be in the sidebar', async 
 
 When('I run the {string} request', async ({}, requestName: string) => {
   const p = requirePage()
+  // The request lives 2 resource-folders deep: root > "Pet" > "/findByStatus"
+  // (see fixtures/raml/petstore.raml — every resource gets its own folder,
+  // even a leaf resource with a single method). Expand the chain before
+  // looking for the request row.
+  for (const ancestor of ['Pet Store RAML API', 'Pet', '/findByStatus']) {
+    await expandTreeItemIfCollapsed(p, ancestor)
+  }
+
   const row = sidebarRowByName(p, requestName)
   await expect(row).toBeVisible({ timeout: 10000 })
   await row.click()
