@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test'
 import { spawn } from 'child_process'
-import { mkdtempSync } from 'fs'
+import { createHash, randomBytes } from 'crypto'
+import { mkdtempSync, rmSync } from 'fs'
 import { tmpdir } from 'os'
 import { join } from 'path'
 import electronPath from 'electron'
@@ -21,9 +22,16 @@ import { setupReferenceWorkingCopy } from '../bdd/scenario-runlog/runLogShared'
  *     "Pro or Enterprise") — the case that proves the PLAN gates, not just auth;
  *   - no token / a bogus token → refused (exit 3).
  *
- * Tokens are minted once on dev (persisted in `cli_tokens`) and provided via the
- * environment so no secret is committed. `RESTORM_E2E_BACKEND_VERSION` pins the
- * dev/preview channel (the unpackaged build can't read the `-preview` version).
+ * Tokens are minted fresh in beforeAll (via the Supabase PostgREST API, using
+ * the DEV_SUPABASE_SERVICE_ROLE_KEY) and deleted in afterAll — the test is
+ * fully self-contained and idempotent across runs. A throwaway community org
+ * (no subscription row → Community plan) is created and torn down the same way.
+ *
+ * Required env vars:
+ *   DEV_SUPABASE_URL              — https://ntxmtfngtfevisbylniz.supabase.co
+ *   DEV_SUPABASE_SERVICE_ROLE_KEY — dev project service_role JWT
+ *   RESTORM_E2E_BACKEND_VERSION   — set to '0.0.0-preview' pins the dev channel
+ *                                   (handled automatically in runHeadless)
  */
 
 const MAIN_JS = join(process.cwd(), 'dist/main/index.js')
@@ -31,6 +39,10 @@ const ELECTRON = electronPath as unknown as string
 
 /** A leaf scenario in the reference project (offline call-history replay). */
 const SCENARIO = 'Auth Service/Pet API/Main/Logs'
+
+/** The seeded Pro org on dev. Its subscription row is pre-existing and must NOT
+ * be modified by this test — only a cli_token row is added and deleted. */
+const DEV_PRO_ORG_ID = 'dbd056c0-9269-4b09-aaf4-2fb0a960326a'
 
 interface CliResult { code: number | null; stdout: string; stderr: string }
 
@@ -62,21 +74,107 @@ function runHeadless(project: string, token: string | undefined): Promise<CliRes
   })
 }
 
+/** Generate a random `rstk_` token + its SHA-256 hex hash (the value stored in
+ * `cli_tokens.token_hash`). The token itself is never committed — it lives only
+ * in memory for the duration of the test run. */
+function mintToken(): { token: string; hash: string } {
+  const token = `rstk_${randomBytes(24).toString('base64url')}`
+  const hash = createHash('sha256').update(token, 'utf8').digest('hex')
+  return { token, hash }
+}
+
+/** POST a row into a Supabase table via PostgREST (service_role bypasses RLS). */
+async function sbInsert(url: string, key: string, table: string, row: object): Promise<Response> {
+  const res = await fetch(`${url}/rest/v1/${table}`, {
+    method: 'POST',
+    headers: {
+      apikey: key,
+      Authorization: `Bearer ${key}`,
+      'Content-Type': 'application/json',
+      Prefer: 'return=representation'
+    },
+    body: JSON.stringify(row)
+  })
+  if (!res.ok) throw new Error(`Supabase INSERT ${table}: ${res.status} ${await res.text()}`)
+  return res
+}
+
+/** DELETE rows from a Supabase table via PostgREST (PostgREST filter syntax). */
+async function sbDelete(url: string, key: string, table: string, filter: string): Promise<void> {
+  const res = await fetch(`${url}/rest/v1/${table}?${filter}`, {
+    method: 'DELETE',
+    headers: {
+      apikey: key,
+      Authorization: `Bearer ${key}`
+    }
+  })
+  if (!res.ok) throw new Error(`Supabase DELETE ${table}?${filter}: ${res.status} ${await res.text()}`)
+}
+
 test.describe.configure({ mode: 'serial' })
 
 test.describe('headless CLI entitlement gating (dev backend)', () => {
-  const proToken = process.env.RESTORM_HEADLESS_PRO_TOKEN
-  const communityToken = process.env.RESTORM_HEADLESS_COMMUNITY_TOKEN
   let project: string
+  let proToken: string
+  let proTokenHash: string
+  let communityToken: string
+  let communityTokenHash: string
+  let communityOrgId: string
 
-  test.beforeAll(() => {
-    if (proToken === undefined || proToken === '' || communityToken === undefined || communityToken === '') {
+  test.beforeAll(async () => {
+    const supabaseUrl = process.env.DEV_SUPABASE_URL
+    const serviceRoleKey = process.env.DEV_SUPABASE_SERVICE_ROLE_KEY
+    if (!supabaseUrl || !serviceRoleKey) {
       throw new Error(
-        'RESTORM_HEADLESS_PRO_TOKEN and RESTORM_HEADLESS_COMMUNITY_TOKEN must be set ' +
-        '(rstk_ tokens minted on the dev Pro and community orgs) — stage-gating hits the real dev backend'
+        'DEV_SUPABASE_URL and DEV_SUPABASE_SERVICE_ROLE_KEY must be set — ' +
+        'headless-gating mints + cleans up tokens on the real dev backend'
       )
     }
+
     project = setupReferenceWorkingCopy(mkdtempSync(join(tmpdir(), 'restorm-headless-gating-')))
+
+    // Mint a fresh token for the dev Pro org. The token_hash is what is stored;
+    // the raw token string is kept in memory and provided to runHeadless.
+    const pro = mintToken()
+    proToken = pro.token
+    proTokenHash = pro.hash
+    await sbInsert(supabaseUrl, serviceRoleKey, 'cli_tokens', {
+      org_id: DEV_PRO_ORG_ID,
+      name: 'e2e-210-pro',
+      token_hash: proTokenHash
+    })
+
+    // Create a throwaway community org (no subscription row → Community plan).
+    const communityRes = await sbInsert(supabaseUrl, serviceRoleKey, 'organizations', {
+      name: 'e2e-210-community-throwaway',
+      workos_org_id: `e2e:org_${randomBytes(8).toString('hex')}`
+    })
+    const communityOrg = (await communityRes.json()) as { id: string }[]
+    communityOrgId = communityOrg[0].id
+
+    // Mint a fresh token for the throwaway community org.
+    const community = mintToken()
+    communityToken = community.token
+    communityTokenHash = community.hash
+    await sbInsert(supabaseUrl, serviceRoleKey, 'cli_tokens', {
+      org_id: communityOrgId,
+      name: 'e2e-210-community',
+      token_hash: communityTokenHash
+    })
+  })
+
+  test.afterAll(async () => {
+    const supabaseUrl = process.env.DEV_SUPABASE_URL
+    const serviceRoleKey = process.env.DEV_SUPABASE_SERVICE_ROLE_KEY
+    if (!supabaseUrl || !serviceRoleKey) return
+
+    // Delete tokens first (FK: cli_tokens → organizations), then the throwaway org.
+    if (proTokenHash) await sbDelete(supabaseUrl, serviceRoleKey, 'cli_tokens', `token_hash=eq.${proTokenHash}`)
+    if (communityTokenHash) await sbDelete(supabaseUrl, serviceRoleKey, 'cli_tokens', `token_hash=eq.${communityTokenHash}`)
+    if (communityOrgId) await sbDelete(supabaseUrl, serviceRoleKey, 'organizations', `id=eq.${communityOrgId}`)
+
+    // Remove the temp project copy.
+    if (project) rmSync(project, { recursive: true, force: true })
   })
 
   test('a PRO-org token grants scenario.headless — the run succeeds', async () => {
