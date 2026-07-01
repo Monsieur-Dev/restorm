@@ -27,6 +27,7 @@ import './ODataImportService'
 import './HarImportService'
 import './ThunderClientImportService'
 import './PawImportService'
+import './HttpieImportService'
 
 // Non-JSON text/XML formats
 import './GraphQLImportService'

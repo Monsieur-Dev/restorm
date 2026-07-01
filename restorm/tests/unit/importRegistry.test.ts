@@ -58,6 +58,11 @@ const fixtures: Record<string, { content: string; filePath?: string }> = {
   'thunder-client': {
     content: readFileSync(join(FIXTURES, 'thunder-client', 'thunder-collection-sample.json'), 'utf-8')
   },
+  httpie: {
+    // HTTPie Desktop collection export — the session-file shape is covered
+    // by HttpieImportService's own canImport tests.
+    content: readFileSync(join(FIXTURES, 'httpie', 'collection.json'), 'utf-8')
+  },
   graphql: {
     content: 'type Query { pet(id: ID!): Pet }\ntype Pet { id: ID! name: String }'
   },

@@ -1,0 +1,20 @@
+{
+  "app": "HTTPie Desktop",
+  "version": "2024.1.0",
+  "collections": [
+    {
+      "name": "Petstore",
+      "children": [
+        {
+          "type": "request",
+          "name": "Get pet",
+          "method": "GET",
+          "url": "http://localhost:8080/api/pet/1",
+          "headers": {
+            "Accept": "application/json"
+          }
+        }
+      ]
+    }
+  ]
+}

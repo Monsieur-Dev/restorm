@@ -293,6 +293,12 @@ const sidebarSplitDropTestDir = defineBddConfig({
   outputDir: '.features-gen/sidebar-split-drop'
 })
 
+const httpieImportTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/httpie-import/features/**/*.feature',
+  steps: ['tests/e2e/bdd/httpie-import/steps/**/*.ts', 'tests/e2e/bdd/fixtures/httpie-import.fixture.ts'],
+  outputDir: '.features-gen/httpie-import'
+})
+
 /**
  * Playwright configuration for Electron E2E tests using playwright-bdd.
  * Each test group has its own project with a dedicated fixture.
@@ -542,6 +548,9 @@ export default defineConfig({
       name: 'paw-import',
       testDir: pawImportTestDir,
       timeout: 120 * 1000 // opens a fresh app, imports the Paw JSON fixture, runs one request against the live docker petstore
+      name: 'httpie-import',
+      testDir: httpieImportTestDir,
+      timeout: 120 * 1000 // opens a fresh app, imports both HTTPie shapes, runs one request against docker
     },
     {
       // Headless CLI runner — a plain spec (no BDD/UI) that spawns the built app

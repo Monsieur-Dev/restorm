@@ -1,0 +1,44 @@
+{
+  "app": "HTTPie Desktop",
+  "version": "2024.1.0",
+  "collections": [
+    {
+      "name": "Petstore",
+      "children": [
+        {
+          "type": "request",
+          "name": "List pets",
+          "method": "GET",
+          "url": "https://petstore.example.com/pets",
+          "headers": {
+            "Accept": "application/json"
+          },
+          "params": {
+            "limit": "20"
+          }
+        },
+        {
+          "name": "Pet",
+          "children": [
+            {
+              "type": "request",
+              "name": "Create pet",
+              "method": "POST",
+              "url": "https://petstore.example.com/pets",
+              "headers": {
+                "Content-Type": "application/json"
+              },
+              "body": {
+                "contentType": "application/json",
+                "data": {
+                  "name": "Fido",
+                  "tag": "dog"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
