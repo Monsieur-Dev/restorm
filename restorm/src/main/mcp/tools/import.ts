@@ -131,11 +131,15 @@ export function registerImportTools(mcp: McpService): void {
         'and commit it into the open project. Format auto-detected from content. With ' +
         '`parentFolderId`, the imported items are nested under that folder; without, they are ' +
         'appended to the root collections. Returns counts so the caller can verify the import. ' +
-        'Triggers the renderer-side autosave so the new content persists immediately.',
+        'Triggers the renderer-side autosave so the new content persists immediately. ' +
+        'Use `headers` to pass auth headers to the spec endpoint (e.g. `{ headers: { Authorization: "Bearer …" } }`).',
       inputSchema: {
         url: z.string().min(1).describe('HTTP(S) URL of the spec to import.'),
         parentFolderId: z.string().min(1).optional().describe(
           'Optional folder id to nest the imported items under. Omit to import as root collections.'
+        ),
+        headers: z.record(z.string()).optional().describe(
+          'Optional HTTP headers to pass with the spec fetch (e.g. Authorization, custom tokens).'
         )
       } as Record<string, unknown>
     },
@@ -164,7 +168,12 @@ export function registerImportTools(mcp: McpService): void {
         }
       }
 
-      const result = await importFrom(url, { dryRun: false })
+      const headersRaw = argRecord['headers']
+      const extraHeaders = typeof headersRaw === 'object' && headersRaw !== null && !Array.isArray(headersRaw)
+        ? (headersRaw as Record<string, string>)
+        : undefined
+
+      const result = await importFrom(url, { dryRun: false, extraHeaders })
       if (!result.success) {
         return errorReply(`import failed: ${result.error ?? 'unknown error'}${result.statusCode !== undefined ? ` (HTTP ${result.statusCode})` : ''}`)
       }
