@@ -30,10 +30,12 @@ const restClientImportTestDir = defineBddConfig({
   features: 'tests/e2e/bdd/rest-client-import/features/**/*.feature',
   steps: ['tests/e2e/bdd/rest-client-import/steps/**/*.ts', 'tests/e2e/bdd/fixtures/rest-client-import.fixture.ts'],
   outputDir: '.features-gen/rest-client-import'
+})
 const ramlImportTestDir = defineBddConfig({
   features: 'tests/e2e/bdd/raml-import/features/**/*.feature',
   steps: ['tests/e2e/bdd/raml-import/steps/**/*.ts', 'tests/e2e/bdd/fixtures/raml-import.fixture.ts'],
   outputDir: '.features-gen/raml-import'
+})
 const thriftImportTestDir = defineBddConfig({
   features: 'tests/e2e/bdd/thrift-import/features/**/*.feature',
   steps: ['tests/e2e/bdd/thrift-import/steps/**/*.ts', 'tests/e2e/bdd/fixtures/thrift-import.fixture.ts'],
@@ -68,10 +70,12 @@ const smithyImportTestDir = defineBddConfig({
   features: 'tests/e2e/bdd/smithy-import/features/**/*.feature',
   steps: ['tests/e2e/bdd/smithy-import/steps/**/*.ts', 'tests/e2e/bdd/fixtures/smithy-import.fixture.ts'],
   outputDir: '.features-gen/smithy-import'
+})
 const wadlImportTestDir = defineBddConfig({
   features: 'tests/e2e/bdd/wadl-import/features/**/*.feature',
   steps: ['tests/e2e/bdd/wadl-import/steps/**/*.ts', 'tests/e2e/bdd/fixtures/wadl-import.fixture.ts'],
   outputDir: '.features-gen/wadl-import'
+})
 const apiBlueprintImportTestDir = defineBddConfig({
   features: 'tests/e2e/bdd/api-blueprint-import/features/**/*.feature',
   steps: ['tests/e2e/bdd/api-blueprint-import/steps/**/*.ts', 'tests/e2e/bdd/fixtures/api-blueprint-import.fixture.ts'],
@@ -328,6 +332,7 @@ const httpieImportTestDir = defineBddConfig({
   features: 'tests/e2e/bdd/httpie-import/features/**/*.feature',
   steps: ['tests/e2e/bdd/httpie-import/steps/**/*.ts', 'tests/e2e/bdd/fixtures/httpie-import.fixture.ts'],
   outputDir: '.features-gen/httpie-import'
+})
 const typespecImportTestDir = defineBddConfig({
   features: 'tests/e2e/bdd/typespec-import/features/**/*.feature',
   steps: ['tests/e2e/bdd/typespec-import/steps/**/*.ts', 'tests/e2e/bdd/fixtures/typespec-import.fixture.ts'],
@@ -411,8 +416,12 @@ export default defineConfig({
     {
       name: 'rest-client-import',
       testDir: restClientImportTestDir
+    },
+    {
       name: 'raml-import',
       testDir: ramlImportTestDir
+    },
+    {
       name: 'thrift-import',
       testDir: thriftImportTestDir
     },
@@ -435,10 +444,16 @@ export default defineConfig({
     {
       name: 'smithy-import',
       testDir: smithyImportTestDir
+    },
+    {
       name: 'wadl-import',
       testDir: wadlImportTestDir
+    },
+    {
       name: 'api-blueprint-import',
       testDir: apiBlueprintImportTestDir
+    },
+    {
       name: 'typespec-import',
       testDir: typespecImportTestDir
     },
@@ -602,6 +617,8 @@ export default defineConfig({
       name: 'paw-import',
       testDir: pawImportTestDir,
       timeout: 120 * 1000 // opens a fresh app, imports the Paw JSON fixture, runs one request against the live docker petstore
+    },
+    {
       name: 'httpie-import',
       testDir: httpieImportTestDir,
       timeout: 120 * 1000 // opens a fresh app, imports both HTTPie shapes, runs one request against docker
