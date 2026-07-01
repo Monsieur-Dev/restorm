@@ -54,6 +54,8 @@ export interface SashProps {
 }
 ```
 
+`Sash` (the component) and `SashProps` are both exported from `electron-core-ui/renderer`.
+
 ## Usage (vertical split)
 
 ```tsx

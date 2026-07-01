@@ -1687,7 +1687,7 @@
       "projectPlaceholder": "<project.restorm>",
       "tokenPlaceholder": "<token>",
       "tokenNote": "Başsız çalıştırma, Restorm Pro planı ve CI token gerektirir.",
-      "tokenLink": "Token al →"
+      "tokenLink": "Token al"
     },
     "socketio": {
       "connectionNameLabel": "Connection name",

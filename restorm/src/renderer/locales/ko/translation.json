@@ -1686,7 +1686,7 @@
       "projectPlaceholder": "<project.restorm>",
       "tokenPlaceholder": "<token>",
       "tokenNote": "헤드리스 실행에는 Restorm Pro 플랜과 CI 토큰이 필요합니다.",
-      "tokenLink": "토큰 받기 →"
+      "tokenLink": "토큰 받기"
     },
     "socketio": {
       "connectionNameLabel": "Connection name",

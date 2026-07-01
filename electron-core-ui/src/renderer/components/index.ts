@@ -111,7 +111,7 @@ export { ColorPicker } from './ColorPicker'
 export type { ColorPickerProps } from './ColorPicker'
 
 // Sash exports
-export { VerticalSashContainer, HorizontalSashContainer } from './Sash'
+export { Sash, VerticalSashContainer, HorizontalSashContainer } from './Sash'
 export type {
   SashOrientation,
   SashState,
@@ -119,6 +119,7 @@ export type {
   IVerticalSashLayoutProvider,
   IHorizontalSashLayoutProvider,
   SashLayoutProvider,
+  SashProps,
   SashConfig,
   VerticalSashContainerProps,
   HorizontalSashContainerProps

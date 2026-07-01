@@ -1686,7 +1686,7 @@
       "projectPlaceholder": "<project.restorm>",
       "tokenPlaceholder": "<token>",
       "tokenNote": "無頭執行需要 Restorm Pro 方案和 CI 權杖。",
-      "tokenLink": "取得權杖 →"
+      "tokenLink": "取得權杖"
     },
     "socketio": {
       "connectionNameLabel": "Connection name",

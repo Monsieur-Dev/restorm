@@ -1690,7 +1690,7 @@
       "projectPlaceholder": "<projet.restorm>",
       "tokenPlaceholder": "<votre_jeton>",
       "tokenNote": "Un run headless nécessite un plan Restorm Pro et un jeton CI.",
-      "tokenLink": "Obtenir un jeton →"
+      "tokenLink": "Obtenir un jeton"
     },
     "socketio": {
       "connectionNameLabel": "Nom de la connexion",

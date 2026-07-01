@@ -1686,7 +1686,7 @@
       "projectPlaceholder": "<project.restorm>",
       "tokenPlaceholder": "<token_anda>",
       "tokenNote": "Eksekusi headless memerlukan paket Restorm Pro dan token CI.",
-      "tokenLink": "Dapatkan token →"
+      "tokenLink": "Dapatkan token"
     },
     "socketio": {
       "connectionNameLabel": "Connection name",

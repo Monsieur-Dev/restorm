@@ -1687,7 +1687,7 @@
       "projectPlaceholder": "<project.restorm>",
       "tokenPlaceholder": "<token>",
       "tokenNote": "Μια εκτέλεση headless απαιτεί πλάνο Restorm Pro και CI token.",
-      "tokenLink": "Αποκτήστε token →"
+      "tokenLink": "Αποκτήστε token"
     },
     "socketio": {
       "connectionNameLabel": "Connection name",

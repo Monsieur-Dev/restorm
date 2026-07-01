@@ -1690,7 +1690,7 @@
       "projectPlaceholder": "<project.restorm>",
       "tokenPlaceholder": "<your_token>",
       "tokenNote": "A headless run requires a Restorm Pro plan and a CI token.",
-      "tokenLink": "Get a token →"
+      "tokenLink": "Get a token"
     },
     "socketio": {
       "connectionNameLabel": "Connection name",

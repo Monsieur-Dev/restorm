@@ -1687,7 +1687,7 @@
       "projectPlaceholder": "<project.restorm>",
       "tokenPlaceholder": "<token>",
       "tokenNote": "Headless-ajo vaatii Restorm Pro -suunnitelman ja CI-tokenin.",
-      "tokenLink": "Hanki token →"
+      "tokenLink": "Hanki token"
     },
     "socketio": {
       "connectionNameLabel": "Connection name",

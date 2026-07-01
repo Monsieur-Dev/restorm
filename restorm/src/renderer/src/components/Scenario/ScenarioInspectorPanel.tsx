@@ -1,6 +1,6 @@
-import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Button, GatedControl, ListView, usePlatform } from 'electron-core-ui/renderer'
+import { Button, GatedControl, ListView, Sash, usePlatform, type IVerticalSashLayoutProvider, type SashEvent, type SashState } from 'electron-core-ui/renderer'
 import { HeaderHoverTooltip } from '../MainView/HeaderHoverTooltip'
 import { useCapability } from '../../hooks/useCapability'
 import { subscribeToPro } from '../../services/subscribeToPro'
@@ -140,6 +140,12 @@ function scenarioRuntime(): ScenarioRuntime | undefined {
   return (window as { restorm?: { runtime?: ScenarioRuntime } }).restorm?.runtime
 }
 
+const INSPECTOR_DEFAULT_WIDTH = 450
+const INSPECTOR_MIN_WIDTH = 450
+/** Minimum width to leave for the graph canvas when the inspector is stretched. */
+const INSPECTOR_MIN_CANVAS_WIDTH = 200
+const INSPECTOR_WIDTH_KEY = 'scenario-inspector-width'
+
 /** Pick an output's value out of the node's run result. Results are keyed by
  * output port id when a node emits several; a single-output node stores its
  * value as the whole result. */
@@ -165,6 +171,89 @@ export const ScenarioInspectorPanel: React.FC<ScenarioInspectorPanelProps> = ({ 
   // would reset the "show all" toggle + level filters every run.
   const [showAllLogs, setShowAllLogs] = useState(false)
   const [logLevels, setLogLevels] = useState<LogLevelFilter>({ debug: true, info: true, warn: true, error: true })
+
+  // ── Inspector width (resizable sash) ──────────────────────────────────────
+  // Width persists in localStorage; the sash sits at the panel's left edge so
+  // dragging left grows the inspector and dragging right shrinks it.
+  const [inspectorWidth, setInspectorWidth] = useState<number>(() => {
+    try {
+      const stored = localStorage.getItem(INSPECTOR_WIDTH_KEY)
+      if (stored) {
+        const parsed = parseInt(stored, 10)
+        // Clamp UP rather than discard: a width persisted from before the
+        // minimum was raised should still open at the new floor, not silently
+        // reset to the default.
+        if (!isNaN(parsed)) return Math.max(parsed, INSPECTOR_MIN_WIDTH)
+      }
+    } catch { /* ignore */ }
+    return INSPECTOR_DEFAULT_WIDTH
+  })
+  useEffect(() => {
+    try { localStorage.setItem(INSPECTOR_WIDTH_KEY, String(inspectorWidth)) } catch { /* ignore */ }
+  }, [inspectorWidth])
+
+  // Track the editor container width so the sash can clamp the max inspector width.
+  const [editorWidth, setEditorWidth] = useState(0)
+  useEffect(() => {
+    const parent = panelRef.current?.parentElement
+    if (!parent) return
+    const obs = new ResizeObserver(() => { setEditorWidth(parent.clientWidth) })
+    setEditorWidth(parent.clientWidth)
+    obs.observe(parent)
+    return () => { obs.disconnect() }
+  }, [])
+
+  // Re-clamp a persisted/stale width whenever the editor is measured or resized —
+  // a width saved from a wider window (or a shrunk window since) would otherwise
+  // leave the inspector wider than the canvas, since the drag handler is the only
+  // other place that clamps.
+  useEffect(() => {
+    if (editorWidth <= 0) return
+    const maxWidth = editorWidth - 8 - INSPECTOR_MIN_CANVAS_WIDTH
+    setInspectorWidth((current) => Math.min(current, Math.max(INSPECTOR_MIN_WIDTH, maxWidth)))
+  }, [editorWidth])
+
+  // Sash layout provider: sash is anchored to the panel's left edge (left=0).
+  // getVerticalSashHeight is REQUIRED, not optional: the Sash component's own
+  // inline `style` prop sets `height: 'auto'` for a vertical sash, which wins
+  // over the CSS `.sash.vertical { height: 100% }` rule (inline beats
+  // stylesheet) — omitting it leaves the sash's actual height at 0 (no
+  // content), invisible and unhittable even though it's correctly positioned.
+  const sashLayoutProvider: IVerticalSashLayoutProvider = useMemo(
+    () => ({
+      getVerticalSashLeft: () => 0,
+      getVerticalSashTop: () => 0,
+      getVerticalSashHeight: () => panelRef.current?.clientHeight ?? 0
+    }),
+    []
+  )
+
+  const sashStartWidthRef = useRef(inspectorWidth)
+  const handleSashStart = useCallback((_event: SashEvent): void => {
+    sashStartWidthRef.current = inspectorWidth
+  }, [inspectorWidth])
+
+  const handleSashChange = useCallback((event: SashEvent): void => {
+    const delta = event.currentX - event.startX
+    // Dragging LEFT (negative delta) grows the right-anchored inspector.
+    const rawWidth = sashStartWidthRef.current - delta
+    const parentW = panelRef.current?.parentElement?.clientWidth ?? 0
+    const maxWidth = parentW > 0 ? parentW - 8 - INSPECTOR_MIN_CANVAS_WIDTH : 800
+    setInspectorWidth(Math.min(maxWidth, Math.max(INSPECTOR_MIN_WIDTH, rawWidth)))
+  }, [])
+
+  // Cursor state: sash cursor indicates which direction it can still move.
+  // The sash is at the LEFT edge of a RIGHT-anchored panel, so the semantics
+  // are inverted vs. a standard left-panel split.
+  const sashState: SashState = (() => {
+    if (inspectorWidth <= INSPECTOR_MIN_WIDTH) return 'atMaximum' // can only grow (drag left) → w-resize
+    if (editorWidth > 0) {
+      const maxWidth = editorWidth - 8 - INSPECTOR_MIN_CANVAS_WIDTH
+      if (inspectorWidth >= maxWidth) return 'atMinimum' // can only shrink (drag right) → e-resize
+    }
+    return 'enabled'
+  })()
+  // ─────────────────────────────────────────────────────────────────────────
 
   // The panel sizes to its content but never past the canvas — and a definite
   // pixel height is what lets the response tree's ListView scroll (a bare
@@ -349,7 +438,16 @@ export const ScenarioInspectorPanel: React.FC<ScenarioInspectorPanelProps> = ({ 
   const allLogs = runLog ?? []
 
   return (
-    <div ref={panelRef} className="scn-inspector nodrag nopan" data-testid="scenario-inspector-panel">
+    <div ref={panelRef} className="scn-inspector nodrag nopan" style={{ width: inspectorWidth }} data-testid="scenario-inspector-panel">
+      {/* Sash at the left edge — drag left to widen, drag right to narrow. */}
+      <Sash
+        orientation="vertical"
+        layoutProvider={sashLayoutProvider}
+        state={sashState}
+        onStart={handleSashStart}
+        onChange={handleSashChange}
+        data-testid="scenario-inspector-sash"
+      />
       {/* Run toolbar — Run flips the BorderBeam orbit on the selected node
        * (toggle: clicking again becomes Pause). Debug is a one-shot trigger
        * that fires a single travelling beam along every outgoing edge of

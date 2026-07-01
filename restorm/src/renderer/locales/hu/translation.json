@@ -1687,7 +1687,7 @@
       "projectPlaceholder": "<project.restorm>",
       "tokenPlaceholder": "<token>",
       "tokenNote": "A headless futtatáshoz Restorm Pro csomag és CI token szükséges.",
-      "tokenLink": "Token beszerzése →"
+      "tokenLink": "Token beszerzése"
     },
     "socketio": {
       "connectionNameLabel": "Connection name",

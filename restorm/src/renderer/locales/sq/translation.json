@@ -1687,7 +1687,7 @@
       "projectPlaceholder": "<project.restorm>",
       "tokenPlaceholder": "<token_juaj>",
       "tokenNote": "Një ekzekutim headless kërkon një plan Restorm Pro dhe një token CI.",
-      "tokenLink": "Merr një token →"
+      "tokenLink": "Merr një token"
     },
     "socketio": {
       "connectionNameLabel": "Connection name",

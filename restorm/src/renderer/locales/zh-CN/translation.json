@@ -1686,7 +1686,7 @@
       "projectPlaceholder": "<project.restorm>",
       "tokenPlaceholder": "<token>",
       "tokenNote": "无头运行需要 Restorm Pro 计划和 CI 令牌。",
-      "tokenLink": "获取令牌 →"
+      "tokenLink": "获取令牌"
     },
     "socketio": {
       "connectionNameLabel": "Connection name",

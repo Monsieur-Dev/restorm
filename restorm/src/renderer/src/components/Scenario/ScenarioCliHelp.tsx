@@ -77,7 +77,7 @@ export const ScenarioCliHelp: React.FC<{ scenarioName: string; scenarioId: strin
           rel="noopener noreferrer"
           className="scn-cli-help-link"
         >
-          {t('scenario.cli.tokenLink', 'Get a token →')}
+          {t('scenario.cli.tokenLink', 'Get a token')}
         </a>
       </p>
     </div>

@@ -1686,7 +1686,7 @@
       "projectPlaceholder": "<project.restorm>",
       "tokenPlaceholder": "<token>",
       "tokenNote": "Chạy headless yêu cầu gói Restorm Pro và token CI.",
-      "tokenLink": "Lấy token →"
+      "tokenLink": "Lấy token"
     },
     "socketio": {
       "connectionNameLabel": "Connection name",

@@ -1686,7 +1686,7 @@
       "projectPlaceholder": "<project.restorm>",
       "tokenPlaceholder": "<token>",
       "tokenNote": "ヘッドレス実行にはRestorm ProプランとCIトークンが必要です。",
-      "tokenLink": "トークンを取得 →"
+      "tokenLink": "トークンを取得"
     },
     "socketio": {
       "connectionNameLabel": "Connection name",

@@ -1688,7 +1688,7 @@
       "projectPlaceholder": "<project.restorm>",
       "tokenPlaceholder": "<token_dvs>",
       "tokenNote": "O rulare headless necesită un plan Restorm Pro și un token CI.",
-      "tokenLink": "Obțineți un token →"
+      "tokenLink": "Obțineți un token"
     },
     "socketio": {
       "connectionNameLabel": "Connection name",

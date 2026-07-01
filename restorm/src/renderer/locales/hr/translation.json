@@ -1688,7 +1688,7 @@
       "projectPlaceholder": "<project.restorm>",
       "tokenPlaceholder": "<vaš_token>",
       "tokenNote": "Headless pokretanje zahtijeva Restorm Pro plan i CI token.",
-      "tokenLink": "Dohvati token →"
+      "tokenLink": "Dohvati token"
     },
     "socketio": {
       "connectionNameLabel": "Connection name",

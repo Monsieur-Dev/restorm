@@ -1687,7 +1687,7 @@
       "projectPlaceholder": "<project.restorm>",
       "tokenPlaceholder": "<uw_token>",
       "tokenNote": "Een headless run vereist een Restorm Pro-plan en een CI-token.",
-      "tokenLink": "Token ophalen →"
+      "tokenLink": "Token ophalen"
     },
     "socketio": {
       "connectionNameLabel": "Connection name",

@@ -1689,7 +1689,7 @@
       "projectPlaceholder": "<project.restorm>",
       "tokenPlaceholder": "<токен>",
       "tokenNote": "Безголовий запуск вимагає плану Restorm Pro та CI-токена.",
-      "tokenLink": "Отримати токен →"
+      "tokenLink": "Отримати токен"
     },
     "socketio": {
       "connectionNameLabel": "Connection name",
