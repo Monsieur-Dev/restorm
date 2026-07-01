@@ -173,9 +173,12 @@ export async function importFromContent(
       }
     }
 
+    // filePath: prefer the explicit param (Thrift threads it); else derive from
+    // `source` for non-URL imports (compiler-based formats e.g. TypeSpec need disk locality).
+    const isUrlSource = source.startsWith('http://') || source.startsWith('https://')
     const opts = {
       ...(sourceUrl !== undefined ? { sourceUrl } : {}),
-      ...(filePath !== undefined ? { filePath } : {})
+      ...(filePath !== undefined ? { filePath } : !isUrlSource ? { filePath: source } : {})
     }
     // Await the parse result so this function stays genuinely async — callers
     // can rely on the Promise-based API even if all current parsers are sync.

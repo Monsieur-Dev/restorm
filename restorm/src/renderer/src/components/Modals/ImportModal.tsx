@@ -814,7 +814,7 @@ export function ImportModal({
             </div>
           )}
           {error && (
-            <div className="import-error" role="alert">
+            <div className="import-error" role="alert" data-testid="import-error-message">
               <i className="codicon codicon-error" aria-hidden="true" />
               <span style={{ flex: 1 }}>{error}</span>
             </div>

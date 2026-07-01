@@ -92,6 +92,13 @@ const fixtures: Record<string, { content: string; filePath?: string }> = {
   },
   thrift: {
     content: readFileSync(join(FIXTURES, 'thrift', 'petstore.thrift'), 'utf-8')
+  },
+  typespec: {
+    // canImport is extension-only (a .tsp file commonly needs its own
+    // node_modules to compile, so content sniffing isn't meaningful here) —
+    // the filePath is what the provider actually checks.
+    content: readFileSync(join(FIXTURES, 'typespec', 'petstore.tsp'), 'utf-8'),
+    filePath: 'main.tsp'
   }
 }
 

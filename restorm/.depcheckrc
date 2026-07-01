@@ -38,6 +38,7 @@
     "webr",
     "@ruby/*",
     "sharp",
-    "@img/sharp-linux-x64"
+    "@img/sharp-linux-x64",
+    "@typespec/*"
   ]
 }

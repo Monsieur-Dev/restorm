@@ -319,6 +319,10 @@ const httpieImportTestDir = defineBddConfig({
   features: 'tests/e2e/bdd/httpie-import/features/**/*.feature',
   steps: ['tests/e2e/bdd/httpie-import/steps/**/*.ts', 'tests/e2e/bdd/fixtures/httpie-import.fixture.ts'],
   outputDir: '.features-gen/httpie-import'
+const typespecImportTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/typespec-import/features/**/*.feature',
+  steps: ['tests/e2e/bdd/typespec-import/steps/**/*.ts', 'tests/e2e/bdd/fixtures/typespec-import.fixture.ts'],
+  outputDir: '.features-gen/typespec-import'
 })
 
 /**
@@ -426,6 +430,8 @@ export default defineConfig({
       testDir: wadlImportTestDir
       name: 'api-blueprint-import',
       testDir: apiBlueprintImportTestDir
+      name: 'typespec-import',
+      testDir: typespecImportTestDir
     },
     {
       name: 'auth-login',

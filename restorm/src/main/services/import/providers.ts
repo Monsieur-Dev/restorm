@@ -45,5 +45,6 @@ import './WadlImportService'
 // field to check ahead of the others.
 import './ApiBlueprintImportService'
 import './ThriftImportService'
+import './TypeSpecImportService'
 
 export { importProviders } from './registry'

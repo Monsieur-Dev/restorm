@@ -227,5 +227,6 @@ out a stripped-down version inline in the PR description:
 | OData EDMX | `ODataImportService.ts` | Reference for the Phase-1 EDMX v4 parser. |
 | cURL | `CurlImportService.ts` | Reference for single-request paste imports. |
 | PowerShell `Invoke-WebRequest` | `PowerShellImportService.ts` | Reference for shell-snippet paste imports. |
+| TypeSpec `.tsp` | `TypeSpecImportService.ts` | Reference for shelling out to an external compiler (`tsp compile`) and delegating to another importer's entry point instead of parsing the format directly; also the only file-based-only adapter (needs the real on-disk path, not just extracted content, for the compiler's own module resolution). |
 
 Pick the closest semantic match and use it as a structural guide.

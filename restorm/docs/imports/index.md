@@ -19,6 +19,7 @@ route incoming files / URLs / pasted content to the right adapter.
 | WADL (Web Application Description Language) | [`wadl.md`](./wadl.md) |
 | API Blueprint (`.apib`) | [`api-blueprint.md`](./api-blueprint.md) |
 | Apache Thrift IDL (`.thrift`, documentation only) | [`thrift.md`](./thrift.md) |
+| TypeSpec (`.tsp`, via `tsp compile` → OpenAPI) | [`typespec.md`](./typespec.md) |
 
 For periodic re-checks of an already-imported spec (Swagger,
 OpenAPI 3, GraphQL, Postman, Insomnia, Bruno, AsyncAPI, gRPC, SOAP,
