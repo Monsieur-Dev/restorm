@@ -16,6 +16,7 @@ route incoming files / URLs / pasted content to the right adapter.
 | HTTPie (Desktop collections + CLI sessions) | [`httpie.md`](./httpie.md) |
 | Smithy (AWS API modeling — JSON AST + `.smithy` IDL) | [`smithy.md`](./smithy.md) |
 | RAML 1.0 / 0.8 | [`raml.md`](./raml.md) |
+| WADL (Web Application Description Language) | [`wadl.md`](./wadl.md) |
 
 For periodic re-checks of an already-imported spec (Swagger,
 OpenAPI 3, GraphQL, Postman, Insomnia, Bruno, AsyncAPI, gRPC, SOAP,

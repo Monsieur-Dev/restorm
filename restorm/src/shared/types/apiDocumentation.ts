@@ -331,6 +331,7 @@ export type ApiDocumentationSourceType =
   | 'odata'
   | 'smithy'
   | 'raml'
+  | 'wadl'
 
 /** Root documentation structure stored on the EnvironmentFolder that owns the API. */
 export interface ApiDocumentation {

@@ -64,6 +64,10 @@ const smithyImportTestDir = defineBddConfig({
   features: 'tests/e2e/bdd/smithy-import/features/**/*.feature',
   steps: ['tests/e2e/bdd/smithy-import/steps/**/*.ts', 'tests/e2e/bdd/fixtures/smithy-import.fixture.ts'],
   outputDir: '.features-gen/smithy-import'
+const wadlImportTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/wadl-import/features/**/*.feature',
+  steps: ['tests/e2e/bdd/wadl-import/steps/**/*.ts', 'tests/e2e/bdd/fixtures/wadl-import.fixture.ts'],
+  outputDir: '.features-gen/wadl-import'
 })
 
 const authLoginTestDir = defineBddConfig({
@@ -408,6 +412,8 @@ export default defineConfig({
     {
       name: 'smithy-import',
       testDir: smithyImportTestDir
+      name: 'wadl-import',
+      testDir: wadlImportTestDir
     },
     {
       name: 'auth-login',

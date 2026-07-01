@@ -38,5 +38,6 @@ import './RamlImportService'
 // Modern API modeling formats (accept either a JSON-keyed AST or their own
 // text IDL — detection tries the JSON branch first, falls back to the IDL sniff)
 import './SmithyImportService'
+import './WadlImportService'
 
 export { importProviders } from './registry'

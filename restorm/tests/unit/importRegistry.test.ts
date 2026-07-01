@@ -83,6 +83,9 @@ const fixtures: Record<string, { content: string; filePath?: string }> = {
   },
   raml: {
     content: readFileSync(join(FIXTURES, 'raml', 'petstore.raml'), 'utf-8')
+  },
+  wadl: {
+    content: readFileSync(join(FIXTURES, 'wadl', 'petstore.wadl'), 'utf-8')
   }
 }
 
