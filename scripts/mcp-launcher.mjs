@@ -55,6 +55,15 @@ const HOST = '127.0.0.1'
 // stale lockfiles. The endpoint is local, so a healthy restorm answers
 // well under this; anything slower is treated as a stale carcass.
 const HTTP_PROBE_TIMEOUT_MS = 800
+// Socket-inactivity timeout on a forwarded request. Without it a restorm that
+// accepts the connection but never answers (a wedged renderer / stuck tool
+// handler) hangs the embedder indefinitely — the call sits in "Calling
+// restorm…" forever instead of failing. This is an INACTIVITY cap (node's
+// socket timeout), so a tool that streams progress keeps resetting it; only
+// total silence from the instance trips it. Generous by default (a healthy
+// local call answers in well under a second) and overridable for the rare tool
+// that legitimately computes in silence for longer.
+const FORWARD_IDLE_TIMEOUT_MS = Number(process.env.RESTORM_MCP_FORWARD_TIMEOUT_MS) || 90_000
 const PROTOCOL_VERSION = '2025-03-26'
 
 // Where running restorm instances drop their per-pid lockfile. Must match
@@ -691,10 +700,11 @@ async function forward(jsonRpcText) {
   try {
     return await rawForward(jsonRpcText)
   } catch (err) {
-    if (isConnectionError(err)) {
-      // Restorm went down between our last successful forward and
-      // now (user killed it / dev rebuild / crash). Flag the next
-      // request to reprobe + emit list_changed when it comes back.
+    if (isConnectionError(err) || err?.forwardTimeout) {
+      // Restorm went down between our last successful forward and now (user
+      // killed it / dev rebuild / crash), or it stopped responding (forward
+      // timeout). Flag the next request to reprobe + emit list_changed when it
+      // comes back, so a wedged instance doesn't pin a stale `currentPort`.
       lastSeenUp = false
     } else if (err && err.httpStatus === 401) {
       // Token mismatch: usually means restorm restarted on the same
@@ -728,7 +738,8 @@ function rawForward(jsonRpcText) {
         port: currentPort,
         path: '/',
         method: 'POST',
-        headers
+        headers,
+        timeout: FORWARD_IDLE_TIMEOUT_MS
       },
       (res) => {
         const chunks = []
@@ -760,6 +771,18 @@ function rawForward(jsonRpcText) {
         })
       }
     )
+    req.on('timeout', () => {
+      // Inactivity cap tripped: restorm accepted the connection but went silent.
+      // Destroy the socket so the request fails fast with a descriptive error
+      // instead of hanging the embedder forever. `req.destroy(err)` surfaces as
+      // the 'error' event below; the tag lets `forward()` force a rediscovery.
+      const err = new Error(
+        `MCP forward timed out: restorm (port ${currentPort}) sent no response within ${FORWARD_IDLE_TIMEOUT_MS}ms. ` +
+          'The instance may be wedged — retry, or restart restorm.'
+      )
+      err.forwardTimeout = true
+      req.destroy(err)
+    })
     req.on('error', rejectFn)
     req.write(jsonRpcText)
     req.end()
