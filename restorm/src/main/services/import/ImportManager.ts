@@ -75,6 +75,27 @@ export interface ImportOptions {
  * module (`importFrom`, `tryAllImports`).
  */
 export function detectFormat(content: string, filePath?: string): string | null {
+  // Phase 1 — extension-anchored match wins. A provider whose `canImport`
+  // accepts on the filename ALONE (probed here with empty content) has an
+  // unambiguous extension signal (e.g. `.thrift`, `.tsp`, `.smithy`, `.proto`)
+  // and must beat a greedier CONTENT sniff from an earlier-registered provider.
+  // Without this, Smithy's `namespace … service {` sniff steals `.thrift` files
+  // and Thrift's `^namespace` sniff steals `.tsp` files, purely because
+  // detection is registration-order (co-existence only happens once every
+  // importer is merged, so this never surfaces in a single-importer worktree).
+  // Content-gated extension checks (Bruno's `.json`, HAR's `.har`) parse first,
+  // so they return false on empty content and correctly fall through to Phase 2.
+  if (filePath) {
+    for (const provider of importProviders) {
+      try {
+        if (provider.canImport('', filePath)) return provider.format
+      } catch {
+        // A provider that assumes non-empty content is not an extension-anchored
+        // match — ignore and let the content sniff below decide.
+      }
+    }
+  }
+  // Phase 2 — content sniff, in registration order (original behaviour).
   for (const provider of importProviders) {
     if (provider.canImport(content, filePath)) return provider.format
   }

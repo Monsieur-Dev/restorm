@@ -5,7 +5,7 @@ import type { ElectronApplication, Page } from '@playwright/test'
 import { test, expect, REST_CLIENT_IMPORT_TEMP_DIR, configureNextSaveFileDialogForE2E } from '../../fixtures/rest-client-import.fixture'
 
 /** The committed `.http` fixture — the unit tests consume the same file, one source of truth. */
-const FIXTURE = resolve(__dirname, '../../../unit/fixtures/rest-client/sample.http')
+const FIXTURE = resolve(__dirname, '../../../../unit/fixtures/rest-client/sample.http')
 const SINGLE_FILE = join(REST_CLIENT_IMPORT_TEMP_DIR, 'rest-client-test.restorm')
 
 const { Given, When, Then } = createBdd(test)
