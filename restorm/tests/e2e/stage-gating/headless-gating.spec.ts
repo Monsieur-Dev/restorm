@@ -99,6 +99,15 @@ async function sbInsert(url: string, key: string, table: string, row: object): P
   return res
 }
 
+/** GET rows from a Supabase table via PostgREST (PostgREST filter syntax). */
+async function sbGet<T>(url: string, key: string, table: string, filter: string): Promise<T[]> {
+  const res = await fetch(`${url}/rest/v1/${table}?${filter}`, {
+    headers: { apikey: key, Authorization: `Bearer ${key}` }
+  })
+  if (!res.ok) throw new Error(`Supabase GET ${table}?${filter}: ${res.status} ${await res.text()}`)
+  return res.json() as Promise<T[]>
+}
+
 /** DELETE rows from a Supabase table via PostgREST (PostgREST filter syntax). */
 async function sbDelete(url: string, key: string, table: string, filter: string): Promise<void> {
   const res = await fetch(`${url}/rest/v1/${table}?${filter}`, {
@@ -132,6 +141,27 @@ test.describe('headless CLI entitlement gating (dev backend)', () => {
     }
 
     project = setupReferenceWorkingCopy(mkdtempSync(join(tmpdir(), 'restorm-headless-gating-')))
+
+    // --- Idempotency sweep: clean up any orphans from a prior crashed run -------
+    // If a previous run died before afterAll the orphan rows block this INSERT
+    // (unique token_hash, or a (org_id, name) constraint). Pre-delete by stable
+    // (org_id, name) so each run starts from a clean slate regardless.
+
+    // Pro token: stable (org_id, name=e2e-210-pro) — delete any leftover.
+    await sbDelete(supabaseUrl, serviceRoleKey, 'cli_tokens',
+      `org_id=eq.${DEV_PRO_ORG_ID}&name=eq.e2e-210-pro`)
+
+    // Throwaway community orgs: name is stable; sweep their tokens then the orgs.
+    const orphanOrgs = await sbGet<{ id: string }>(
+      supabaseUrl, serviceRoleKey, 'organizations', 'name=eq.e2e-210-community-throwaway'
+    )
+    for (const org of orphanOrgs) {
+      await sbDelete(supabaseUrl, serviceRoleKey, 'cli_tokens', `org_id=eq.${org.id}`)
+    }
+    if (orphanOrgs.length > 0) {
+      await sbDelete(supabaseUrl, serviceRoleKey, 'organizations', 'name=eq.e2e-210-community-throwaway')
+    }
+    // ---------------------------------------------------------------------------
 
     // Mint a fresh token for the dev Pro org. The token_hash is what is stored;
     // the raw token string is kept in memory and provided to runHeadless.
@@ -185,21 +215,21 @@ test.describe('headless CLI entitlement gating (dev backend)', () => {
 
   test('a COMMUNITY-org token is refused — plan does not grant scenario.headless', async () => {
     const res = await runHeadless(project, communityToken)
-    expect(res.code, `expected non-zero exit, got ${String(res.code)}`).not.toBe(0)
     // The gate-proving assertion: auth SUCCEEDED (valid token) but the PLAN refused.
+    expect(res.code, `expected exit 3 (plan-insufficient), got ${String(res.code)}\nstderr: ${res.stderr}`).toBe(3)
     expect(res.stderr).toMatch(/Pro or Enterprise/i)
     expect(res.stderr).toMatch(/scenario\.headless/)
   })
 
   test('no token is refused with the token-missing guidance', async () => {
     const res = await runHeadless(project, undefined)
-    expect(res.code, `expected non-zero exit, got ${String(res.code)}`).not.toBe(0)
+    expect(res.code, `expected exit 3 (token-missing), got ${String(res.code)}\nstderr: ${res.stderr}`).toBe(3)
     expect(res.stderr).toMatch(/require a Restorm Pro plan and a CI token/i)
   })
 
   test('a bogus token is refused', async () => {
     const res = await runHeadless(project, 'rstk_this-is-not-a-real-token')
-    expect(res.code, `expected non-zero exit, got ${String(res.code)}`).not.toBe(0)
+    expect(res.code, `expected exit 3 (token-invalid/fetch-error), got ${String(res.code)}\nstderr: ${res.stderr}`).toBe(3)
     expect(res.stderr.length).toBeGreaterThan(0)
   })
 })
