@@ -155,8 +155,10 @@ function broadcastAuthStateWithAvatarExemption(channel: string, state: AuthState
  * `RESTORM_E2E_BACKEND_VERSION` (dev-only) pins the version — and thus the
  * channel — for the stage login e2e (pass any `-preview` version to target dev).
  * A hard NO-OP in any packaged build, the same discipline as the other e2e seams.
+ * Exported so the headless CLI path resolves the SAME channel as the interactive
+ * one (it likewise reads `app.getVersion()` for its entitlement fetch).
  */
-function resolveBackendVersion(): string {
+export function resolveBackendVersion(): string {
   const override = process.env['RESTORM_E2E_BACKEND_VERSION']
   if (!app.isPackaged && override !== undefined && override.length > 0) return override
   return app.getVersion()

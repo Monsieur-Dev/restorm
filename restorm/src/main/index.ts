@@ -97,7 +97,7 @@ import { clearUserSettings, parseCliArgs } from './cli/args'
 import { checkHeadlessEntitlement } from './cli/headlessEntitlementFetch'
 import { setupGraphQL } from './GraphQLSetup'
 import { registerRestormIPC } from './IPCHandlers'
-import { initEntitlementService, stopEntitlementAutoRefresh, makeBackendFetch } from './services/auth/authComposition'
+import { initEntitlementService, stopEntitlementAutoRefresh, makeBackendFetch, resolveBackendVersion } from './services/auth/authComposition'
 import { createEntitlementEvaluator } from './services/entitlement/entitlementStrategy'
 import { installScenarioEngineIPC } from './scenarioEngine/ipcBridge'
 import { registerBuiltinSources } from './services/secrets/mainSourceRegistry'
@@ -1035,14 +1035,18 @@ if (cliArgs.cliRun && cliArgs.open !== undefined) {
       // for the interactive path (seedEntitlementForE2E); extend the same privilege
       // here so headless CLI e2e tests can run without a real token.  The
       // isPackaged guard ensures this is never reachable in a production build.
-      const channel = resolveChannel(app.getVersion())
+      // `resolveBackendVersion()` (not `app.getVersion()`) so a stage e2e can pin
+      // the DEV/preview channel: an unpackaged build loses the `-preview` package
+      // version and would otherwise resolve the PROD entitlement endpoint.
+      const backendVersion = resolveBackendVersion()
+      const channel = resolveChannel(backendVersion)
       const e2ePlan = process.env['RESTORM_E2E_ENTITLEMENT_PLAN']
       const skipGateForE2E = !app.isPackaged && (e2ePlan === 'pro' || e2ePlan === 'enterprise')
       const entResult = skipGateForE2E ? { granted: true as const } : await checkHeadlessEntitlement({
         entitlementUrl: endpointUrl(channel, 'entitlement'),
         publicKeyPem: entitlementPublicKeyPem(channel),
         publicKeyConfigured: isEntitlementPublicKeyConfigured(channel),
-        fetchImpl: makeBackendFetch(app.getVersion())
+        fetchImpl: makeBackendFetch(backendVersion)
       })
       if (!entResult.granted) {
         const upgradeUrl = pricingUrl(channel)
