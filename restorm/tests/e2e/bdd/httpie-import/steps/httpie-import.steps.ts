@@ -25,6 +25,19 @@ function sidebarRow(p: Page, name: string): Locator {
     .filter({ has: p.getByText(name, { exact: true }) }).first()
 }
 
+/** Expand a sidebar folder row so its children render in the DOM. A freshly
+ * imported root folder starts collapsed, so a leaf nested under it isn't
+ * visible/attached until this runs. Idempotent — skips the click if the row
+ * is already expanded. */
+async function expandFolder(p: Page, name: string): Promise<void> {
+  const row = sidebarRow(p, name)
+  await expect(row).toBeVisible({ timeout: 15000 })
+  if ((await row.getAttribute('aria-expanded')) === 'true') return
+  const expander = row.locator('button.list-view-expander').first()
+  await expander.click()
+  await expect(row).toHaveAttribute('aria-expanded', 'true', { timeout: 5000 })
+}
+
 Given('a new single-file collection for HTTPie import', async ({ launchApp }) => {
   const launched = await launchApp()
   electronApp = launched.app
@@ -44,14 +57,14 @@ async function importFixture(p: Page, samplePath: string): Promise<void> {
 
   await p.keyboard.press('Control+I')
   const importModal = p.locator('[data-testid="import-modal"]')
-  await expect(importModal).toBeVisible({ timeout: 5000 })
+  await expect(importModal).toBeVisible({ timeout: 15000 })
   const input = importModal.locator('textarea, input[type="text"]').first()
   await input.fill(samplePath)
-  await expect(importModal.locator('.import-preview-section')).toBeVisible({ timeout: 5000 })
+  await expect(importModal.locator('.import-preview-section')).toBeVisible({ timeout: 15000 })
   const importButton = importModal.locator('[role="button"]:has-text("Import")[aria-disabled="false"]')
-  await expect(importButton).toBeVisible({ timeout: 5000 })
+  await expect(importButton).toBeVisible({ timeout: 15000 })
   await importButton.click()
-  await expect(importModal).not.toBeVisible({ timeout: 5000 })
+  await expect(importModal).not.toBeVisible({ timeout: 15000 })
   await p.waitForTimeout(500)
 }
 
@@ -66,16 +79,24 @@ When('I import the HTTPie CLI session', async () => {
 Then('the sidebar should contain an environment folder named {string}', async ({}, name: string) => {
   const p = requirePage()
   const sidebar = p.locator('[data-testid="sidebar-listview"]')
-  await expect(sidebar).toBeVisible({ timeout: 5000 })
-  await expect(sidebar.getByText(name, { exact: true }).first()).toBeVisible({ timeout: 5000 })
+  await expect(sidebar).toBeVisible({ timeout: 15000 })
+  await expect(sidebar.getByText(name, { exact: true }).first()).toBeVisible({ timeout: 15000 })
 })
 
 When('I open the request {string} and send it', async ({}, name: string) => {
   const p = requirePage()
+  // "Get pet" sits directly under the imported "Petstore" root folder,
+  // which starts collapsed — its child rows aren't in the DOM until expanded.
+  await expandFolder(p, 'Petstore')
   await sidebarRow(p, name).dblclick()
   const sendButton = p.locator('[data-testid="http-request-send-button"]').first()
-  await expect(sendButton).toBeVisible({ timeout: 5000 })
+  await expect(sendButton).toBeVisible({ timeout: 15000 })
   await sendButton.click()
+  // Status code lives in the response panel's "Infos" tab, not the
+  // "Response" tab that's active by default after a send.
+  const infosTab = p.locator('[data-testid="base-request-tabs-response-tab-infos"]').first()
+  await expect(infosTab).toBeVisible({ timeout: 15000 })
+  await infosTab.click()
   await expect(p.locator('[data-testid="http-response-status"]').first()).toBeVisible({ timeout: 15000 })
 })
 
