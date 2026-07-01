@@ -67,3 +67,49 @@ describe('`in` fan-in join mode', () => {
     expect(await countSinkRuns(fanInScenario({ runOnEachEvent: true }))).toBe(2)
   })
 })
+
+// One producer feeds a log node on TWO ports at once: its `response` value into
+// the log's `data` port, and its universal `done` signal into the log's `in`
+// port. `done` fires only after the producer's whole data subtree drains — and
+// that subtree includes the log (via `response → data`). With a default
+// AND-join the log ALSO waits on `in`, so `done` waits for the log and the log
+// waits for `done`: a silent completion-cycle deadlock, the log never fires.
+// `runOnEachEvent` must fire the log per arriving event (each incoming wire is
+// an independent OR trigger), so the `response` event fires it regardless of
+// the never-yet-delivered `in`, which then lets the cycle resolve.
+function completionCycleScenario(logConfig: Record<string, unknown>): ScenarioModel {
+  return buildScenario(
+    [
+      { id: 'producer', kind: 'now', outputs: ['response'] },
+      { id: 'log', kind: 'now', inputs: ['in', 'data'], outputs: [], config: logConfig }
+    ],
+    [
+      { from: ['producer', 'response'], to: ['log', 'data'] },
+      { from: ['producer', 'done'], to: ['log', 'in'] }
+    ]
+  )
+}
+
+async function countLogRuns(scenario: ScenarioModel): Promise<number> {
+  let runs = 0
+  const executors = new Map<string, NodeExecutor>([
+    ['producer', () => ({ outputs: [{ port: 'response', value: { ok: true } }] })],
+    ['log', () => { runs += 1; return { outputs: [] } }]
+  ])
+  const s = new Scheduler({ scenario, executors })
+  await s.run()
+  expect(s.status().state).toBe('completed')
+  return runs
+}
+
+describe('`runOnEachEvent` with a completion-cycle wire (response → data + done → in)', () => {
+  it('default AND-join silently deadlocks: the log never fires', async () => {
+    expect(await countLogRuns(completionCycleScenario({}))).toBe(0)
+  })
+
+  it('runOnEachEvent fires the log on each event, breaking the cycle', async () => {
+    // `response → data` fires it once; the log then completes, the producer
+    // subtree drains, `done → in` arrives and fires it a second time.
+    expect(await countLogRuns(completionCycleScenario({ runOnEachEvent: true }))).toBe(2)
+  })
+})

@@ -1575,17 +1575,24 @@ export class Scheduler {
       const runOnEachEvent = (node.config as { runOnEachEvent?: unknown }).runOnEachEvent === true
       const spec: PortSpec[] = [...wired].map((portId) => {
         const sources = [...(sourcesByPort?.get(portId) ?? [])]
+        // OR gate (`runOnEachEvent`): EVERY wired input becomes a
+        // non-blocking OR trigger. The node fires on each arriving token on
+        // ANY port and consumes it (latch:false, fireOnArrival), never
+        // waiting on its other ports — so any one branch triggers it, every
+        // later event re-triggers it ("run every time an event is
+        // received"), and a wire that can only deliver AFTER this node
+        // completes (a completion cycle — e.g. an upstream `done → in` while
+        // the same upstream's `response → data` feeds this node) can't gate
+        // it into a deadlock. Sibling ports still contribute their latest
+        // latched value when present.
+        if (runOnEachEvent) {
+          return { portId, required: true, latch: false, fireOnArrival: true }
+        }
         // AND-join barrier: ONLY the launch trigger `in`, and only when
         // it's fed by several FORWARD edges (no cycle). Then the node
         // waits for every branch and fires once — "wait for several
         // actions to finish before continuing on a common path". Such
         // a barrier consumes its branch tokens (no latch).
-        //
-        // OR gate (`runOnEachEvent`): the SAME forward fan-in instead fires on
-        // EACH arriving token and consumes it (latch:false, NO `sources`
-        // barrier), so any one branch triggers the node and every later event
-        // re-triggers it — "run every time an event is received". A loop-back
-        // `in` is never a barrier in the first place, so the flag is moot there.
         //
         // Everything else keeps the classic withLatestFrom MERGE: a
         // port re-fires on each arrival, latching the other ports. This
@@ -1593,9 +1600,7 @@ export class Scheduler {
         // port — or into `in` — and must re-trigger, not deadlock
         // waiting for a token that only exists after it fires).
         if (portId === 'in' && sources.length > 1 && this.isForwardFanIn(node.id, sources)) {
-          return runOnEachEvent
-            ? { portId, required: true, latch: false }
-            : { portId, required: true, latch: false, sources }
+          return { portId, required: true, latch: false, sources }
         }
         return { portId, required: true, latch: true }
       })

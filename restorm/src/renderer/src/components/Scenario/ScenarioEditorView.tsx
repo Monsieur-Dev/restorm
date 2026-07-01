@@ -1262,12 +1262,12 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
       ?? derivedPortsOf(src)?.outputs.find((o) => o.id === e.from.portId)
     const stroke = e.color ?? edgeColorForHandle(e.from.portId, port)
     const styled = withSel(stroke ? { ...fe, style: { ...(fe.style ?? {}), stroke } } : fe)
-    // An OR-gate receiver ("run on each event") draws its `in` predecessor
+    // An OR-gate receiver ("run on each event") draws ALL of its incoming
     // links DASHED, so the non-blocking fire-on-each join reads at a glance vs
-    // the solid AND-join. View-only: derived from the target node's flag, never
-    // persisted on the edge (re-derived here on every reseed).
-    const targetRunsOnEach = e.to.portId === 'in'
-      && nodeStore.current.get(e.to.nodeId)?.config['runOnEachEvent'] === true
+    // the solid AND-join — every incoming wire is an independent OR trigger,
+    // not just the `in` port. View-only: derived from the target node's flag,
+    // never persisted on the edge (re-derived here on every reseed).
+    const targetRunsOnEach = nodeStore.current.get(e.to.nodeId)?.config['runOnEachEvent'] === true
     return targetRunsOnEach
       ? { ...styled, data: { ...(styled.data ?? {}), runOnEachReceiver: true }, style: { ...(styled.style ?? {}), strokeDasharray: '6 4' } }
       : styled
@@ -1416,15 +1416,17 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
     })
   }, [setNodes, setEdges, persist])
 
-  // Flip a node's `in` join mode: AND-join barrier (default) ⇄ OR gate (fire on
+  // Flip a node's join mode: AND-join barrier (default) ⇄ OR gate (fire on
   // each event). The flag is persisted in the node config (the scheduler reads
-  // it at run start); the dashed `in` predecessor links are view-only, restyled
-  // here in step with the toggle (and re-derived by `buildFlowEdge` on reseed).
+  // it at run start); ALL of the node's incoming links are view-only dashed —
+  // restyled here in step with the toggle (and re-derived by `buildFlowEdge` on
+  // reseed) — because in OR-gate mode every incoming wire is an independent
+  // trigger, not just the `in` port.
   const toggleRunOnEachEvent = useCallback((nodeId: string) => {
     const next = nodeStore.current.get(nodeId)?.config['runOnEachEvent'] !== true
     setNodeConfig(nodeId, { runOnEachEvent: next })
     setEdges((es) => es.map((fe) => {
-      if (fe.target !== nodeId || fe.targetHandle !== 'in' || fe.data?.['orphan'] === true) return fe
+      if (fe.target !== nodeId || fe.data?.['orphan'] === true) return fe
       const style = { ...(fe.style ?? {}) }
       if (next) style.strokeDasharray = '6 4'
       else delete style.strokeDasharray
@@ -1753,10 +1755,10 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
         propertyRename = { propertyId: connection.targetHandle }
       }
     }
-    // A link drawn ONTO an OR-gate receiver's `in` must be dashed too (the
-    // existing links got restyled when the flag flipped; a fresh one is born
-    // after, so it needs the same view-only dash here).
-    const targetRunsOnEach = connection.targetHandle === 'in' && tgt?.data.config?.['runOnEachEvent'] === true
+    // A link drawn ONTO an OR-gate receiver must be dashed too, whatever its
+    // target port (the existing links got restyled when the flag flipped; a
+    // fresh one is born after, so it needs the same view-only dash here).
+    const targetRunsOnEach = tgt?.data.config?.['runOnEachEvent'] === true
     const newStyle = { ...(stroke ? { stroke } : {}), ...(targetRunsOnEach ? { strokeDasharray: '6 4' } : {}) }
     const newData = { ...(selector ? { selector } : {}), ...(targetRunsOnEach ? { runOnEachReceiver: true } : {}) }
     setEdges((curr) => {
