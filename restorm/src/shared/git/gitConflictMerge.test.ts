@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { buildMergedProjectTree } from './gitConflictMerge'
-import type { FolderItem, Folder } from '../../../shared/types/folderTypes'
-import type { Request } from '../../../shared/types/requests'
+import type { FolderItem, Folder } from '../types/folderTypes'
+import type { Request } from '../types/requests'
 
 function makeRequest(id: string, name: string, extra: Record<string, unknown> = {}): Request {
   return { id, name, type: 'http', tags: [], ...extra } as unknown as Request

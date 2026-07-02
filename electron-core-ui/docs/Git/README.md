@@ -61,6 +61,11 @@ newer-remote-version detection, conflict-blob retrieval, and a debounced
   `{ title, body }` commit-message pair from a restorm-provided
   `CommitMessageTemplates` pair + an arbitrary context object. Knows nothing
   about requests/scenarios/diffs — see "Commit-message generation" below.
+  Process-neutral (`src/shared/CommitMessageEngine.ts`, pure Handlebars, no
+  DOM) and exported from BOTH `electron-core-ui` (main) and
+  `electron-core-ui/renderer` — the renderer's Push modal renders live
+  previews, a main-process MCP tool renders the same commit message for an
+  AI agent to review before it lands.
 - **`PushModal`** — the non-scoped (not tab-bound) commit + push UI: a
   language dropdown that regenerates both the title and body on change, an
   "apply this language by default" toggle, a commit-title field with a soft
@@ -101,16 +106,20 @@ decided above this layer.
 The Push modal's title/body are produced by a three-layer pipeline, split
 exactly along the ECUI/host line above:
 
-1. **The differ** (host-owned, restorm: `services/gitCommitDiff.ts`) —
-   `diffProjectEntities(beforeItems, afterItems)` does a deterministic
-   structural diff of the Restorm project tree, grouped ONE change per
-   entity (request / scenario / folder / environment folder) — never per
-   field, never per scenario-node reposition. Diffs by the entity's
-   persisted `id`, not array position, so a reorder alone is never a
-   change. `parseProjectYaml(rawYaml)` turns `window.api.git.getFileAtHead`'s
-   raw blob into the same `FolderItem[]` shape the live editor holds — the
-   "before" side of the diff; the live `rootItems` is the "after" side.
-2. **The context builder** (host-owned, restorm: `services/
+1. **The differ** (host-owned, restorm: `shared/git/gitCommitDiff.ts` —
+   process-neutral, see below) — `diffProjectEntities(beforeItems,
+   afterItems)` does a deterministic structural diff of the Restorm project
+   tree, grouped ONE change per entity (request / scenario / folder /
+   environment folder) — never per field, never per scenario-node
+   reposition. Diffs by the entity's persisted `id`, not array position, so
+   a reorder alone is never a change. `parseProjectYaml(rawYaml, rehydrate?)`
+   turns `window.api.git.getFileAtHead`'s raw blob into the same
+   `FolderItem[]` shape the live editor holds — the "before" side of the
+   diff; the live `rootItems` is the "after" side. `rehydrate` defaults to a
+   no-op (main-process / MCP callers only need JSON-safe data); the renderer
+   passes `processAfterDeserialization` explicitly to get real `ValueType`
+   class instances for the live UI.
+2. **The context builder** (host-owned, restorm: `shared/git/
    commitMessageContext.ts`) — `buildCommitMessageContext(changes, t)`
    turns the structural diff into `{ titleSummary, lines }`: a single
    changed entity gets a natural sentence ("Update to the request «X»"); several
@@ -119,11 +128,16 @@ exactly along the ECUI/host line above:
    language** (`i18n.getFixedT(lang)`) — deliberately independent of the
    app's own active UI language, so a French-UI user can still generate an
    English commit message (or vice versa) without switching the whole app.
-3. **The render engine** (ECUI-generic: `renderCommitMessage` +
-   `CommitMessageEngine`) — compiles restorm's Handlebars templates
-   (`services/commitMessageTemplates.ts`, one structural shape reused for
+3. **The render engine** (ECUI-generic, process-neutral: `renderCommitMessage`
+   + `CommitMessageEngine`) — compiles restorm's Handlebars templates
+   (`shared/git/commitMessageTemplates.ts`, one structural shape reused for
    every language — the localization already happened in step 2) against
    that context, producing the final `{ title, body }` pair.
+
+Both the renderer's Push modal and the main-process `git_commit_push` /
+`git_confirm_push` MCP routes drive the SAME three-layer pipeline — the only
+difference is which `t` / rehydrate callbacks they pass in (see the MCP
+routes' own file for its main-process-safe wiring).
 
 `usePushModal(filePath, rootItems)` (restorm) glues all three together +
 owns the modal's open/closed state, the "apply this language by default"
@@ -356,7 +370,7 @@ src/renderer/hooks/useGitState.ts                — React hook: live GitState
 src/renderer/hooks/useGitCliMissingToast.ts       — one-time "git not installed" toast
 src/main/services/GitSemiPullController.ts        — CRON schedule reading `git:semiPullFrequency`, calls checkForRemoteUpdate()
 src/renderer/hooks/useGitPullAvailableToast.tsx   — "a newer version exists" toast with a Pull-now action button
-src/renderer/services/CommitMessageEngine.ts      — renderCommitMessage (generic Handlebars render, cached per template)
+src/shared/CommitMessageEngine.ts                 — renderCommitMessage (generic Handlebars render, cached per template; exported from BOTH main + renderer)
 src/renderer/components/PushModal/PushModal.tsx   — the non-scoped commit + push UI (fully controlled)
 src/renderer/components/Settings/languages.ts     — AVAILABLE_LANGUAGES (shared by the UI-language switcher + PushModal)
 src/renderer/components/ConflictResolutionView/ConflictResolutionView.tsx — the 4-panel shell (list + user/server/resolved)
@@ -368,13 +382,18 @@ restorm's side of the commit-message pipeline (host-injected, not part of
 this library):
 
 ```
-src/renderer/src/services/gitCommitDiff.ts          — diffProjectEntities / parseProjectYaml (the semantic differ)
-src/renderer/src/services/commitMessageContext.ts   — buildCommitMessageContext (diff → { titleSummary, lines })
-src/renderer/src/services/commitMessageTemplates.ts — RESTORM_COMMIT_MESSAGE_TEMPLATE (the Handlebars templates)
-src/renderer/src/hooks/usePushModal.ts              — modal lifecycle + settings sync + stage/commit/push
+src/shared/git/gitCommitDiff.ts                     — diffProjectEntities / parseProjectYaml (the semantic differ; process-neutral, no rehydration by default — see below)
+src/shared/git/commitMessageContext.ts              — buildCommitMessageContext (diff → { titleSummary, lines })
+src/shared/git/commitMessageTemplates.ts            — RESTORM_COMMIT_MESSAGE_TEMPLATE (the Handlebars templates)
+src/shared/git/gitConflictModel.ts                  — identifyConflictingEntities (which entities genuinely conflict)
+src/shared/git/gitConflictMerge.ts                  — buildMergedProjectTree (the final write-back tree)
+src/shared/git/apiDocumentationConflict.ts          — resolveApiDocumentationConflict (version/timestamp auto-resolve)
+src/shared/utils/serialization.ts                   — generateId / stripIds / prepareForSerialization (the id-stripping slice; process-neutral)
+src/renderer/src/utils/serialization.ts             — generateIds / processAfterDeserialization (id-BACKFILL + ValueType rehydration; renderer-only, re-exports the shared slice above)
+src/renderer/src/hooks/usePushModal.ts              — modal lifecycle + settings sync + stage/commit/push (passes `processAfterDeserialization` as `parseProjectYaml`'s rehydrate callback)
+src/main/mcp/tools/git.ts                           — git_commit_push / git_confirm_push / git_pull / git_resolve_conflicts (main-process MCP routes, Pro-gated — no rehydration, JSON-safe payloads for an AI agent)
 resources/settings.yaml                             — the `git` settings group (applyCommitMessageLanguageByDefault, semiPullFrequency)
 src/renderer/locales/*/translation.json             — `git.diff.*`, `git.commitTitle.*`, `git.push{Failed,Succeeded}*` (all 27 locales)
-src/renderer/src/services/gitConflictModel.ts       — identifyConflictingEntities (which entities genuinely conflict)
 src/renderer/src/services/conflictEntityClone.ts    — cloneEntityForResolution (the editable resolved copy)
 src/renderer/src/components/GitConflict/ConflictEntityPanel.tsx — the entity→panel dispatcher
 src/shared/auth/authState.ts                        — the `git.client` entry in restorm's Capability union

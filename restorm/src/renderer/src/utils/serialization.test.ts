@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest'
-import { generateIds } from './serialization'
+import { generateIds, processAfterDeserialization } from './serialization'
+import { parseProjectYaml } from '../../../shared/git/gitCommitDiff'
 
 interface ReqItem { id?: string; type: string; name: string }
 interface FolderItem { name: string; configuration: Record<string, unknown>; items: ReqItem[] }
@@ -49,5 +50,25 @@ describe('generateIds — request-type id assignment', () => {
     })
     const ids = items.map((i) => i.id)
     expect(new Set(ids).size).toBe(ids.length)
+  })
+})
+
+describe('parseProjectYaml wired to processAfterDeserialization', () => {
+  it('backfills a missing id when the renderer passes processAfterDeserialization as the rehydrate callback', () => {
+    // `parseProjectYaml` (shared/git/gitCommitDiff.ts) itself does no
+    // rehydration by default (main-process / MCP callers only need
+    // JSON-safe data) — this is the renderer-side wiring check that
+    // `usePushModal.ts` / `useGitPullConflict.ts` rely on: passing
+    // `processAfterDeserialization` explicitly restores id-backfill.
+    const yaml = [
+      'collections:',
+      '  - name: Find pet by ID',
+      '    type: http',
+      '    tags: []'
+    ].join('\n')
+    const items = parseProjectYaml(yaml, processAfterDeserialization)
+    expect(items).toHaveLength(1)
+    expect(typeof items[0]?.id).toBe('string')
+    expect((items[0]?.id ?? '').length).toBeGreaterThan(0)
   })
 })

@@ -55,7 +55,7 @@ vi.mock('./ConflictEntityPanel', () => ({
 
 import { GitConflictResolutionModal } from './GitConflictResolutionModal'
 import type { UseConflictResolutionResult } from '../../hooks/useConflictResolution'
-import type { ConflictEntity } from '../../services/gitConflictModel'
+import type { ConflictEntity } from '../../../../shared/git/gitConflictModel'
 
 afterEach(() => { cleanup() })
 

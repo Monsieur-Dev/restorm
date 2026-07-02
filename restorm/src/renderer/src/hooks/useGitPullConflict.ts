@@ -3,9 +3,9 @@ import { useTranslation } from 'react-i18next'
 import { parse as yamlParse, stringify as yamlStringify } from 'yaml'
 import { toasterService, type GitConflictVersions, type GitConflictCommitTimestamps } from 'electron-core-ui/renderer'
 import { useConflictResolution, type UseConflictResolutionResult } from './useConflictResolution'
-import { parseProjectYaml } from '../services/gitCommitDiff'
-import { buildMergedProjectTree } from '../services/gitConflictMerge'
-import { prepareForSerialization } from '../utils/serialization'
+import { parseProjectYaml } from '../../../shared/git/gitCommitDiff'
+import { buildMergedProjectTree } from '../../../shared/git/gitConflictMerge'
+import { prepareForSerialization, processAfterDeserialization } from '../utils/serialization'
 
 export interface UseGitPullConflictResult {
   isOpen: boolean
@@ -57,8 +57,8 @@ export function useGitPullConflict(): UseGitPullConflictResult {
   const finishResolution = useCallback(async () => {
     if (!versions || !target) return
 
-    const oursItems = parseProjectYaml(versions.ours)
-    const theirsItems = parseProjectYaml(versions.theirs)
+    const oursItems = parseProjectYaml(versions.ours, processAfterDeserialization)
+    const theirsItems = parseProjectYaml(versions.theirs, processAfterDeserialization)
     const resolvedById: Record<string, ReturnType<typeof conflictResolution.getResolvedEntity>> = {}
     for (const conflict of conflictResolution.conflicts) {
       resolvedById[conflict.id] = conflictResolution.getResolvedEntity(conflict.id)

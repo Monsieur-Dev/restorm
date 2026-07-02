@@ -1,8 +1,8 @@
 import { describe, it, expect } from 'vitest'
 import { diffProjectEntities, parseProjectYaml } from './gitCommitDiff'
-import type { FolderItem, Folder, EnvironmentFolder } from '../../../shared/types/folderTypes'
-import type { Scenario } from '../../../shared/types/scenario'
-import type { Request } from '../../../shared/types/requests'
+import type { FolderItem, Folder, EnvironmentFolder } from '../types/folderTypes'
+import type { Scenario } from '../types/scenario'
+import type { Request } from '../types/requests'
 
 function makeRequest(id: string, name: string, extra: Record<string, unknown> = {}): Request {
   return { id, name, type: 'http', tags: [], ...extra } as unknown as Request
@@ -111,7 +111,7 @@ describe('parseProjectYaml', () => {
     expect(parseProjectYaml('someOtherKey: 1\n')).toEqual([])
   })
 
-  it('parses a real single-file project YAML into FolderItem[] with ids preserved', () => {
+  it('parses a real single-file project YAML into FolderItem[] with ids preserved, with no rehydration by default', () => {
     const yaml = [
       'collections:',
       '  - id: r1',
@@ -124,7 +124,7 @@ describe('parseProjectYaml', () => {
     expect(items[0]).toMatchObject({ id: 'r1', name: 'Find pet by ID' })
   })
 
-  it('backfills a missing id deterministically via processAfterDeserialization', () => {
+  it('does NOT backfill a missing id when no rehydrate callback is given (main-process / MCP callers only need JSON-safe data)', () => {
     const yaml = [
       'collections:',
       '  - name: Find pet by ID',
@@ -133,7 +133,19 @@ describe('parseProjectYaml', () => {
     ].join('\n')
     const items = parseProjectYaml(yaml)
     expect(items).toHaveLength(1)
-    expect(typeof items[0]?.id).toBe('string')
-    expect(items[0]?.id.length).toBeGreaterThan(0)
+    expect(items[0]?.id).toBeUndefined()
+  })
+
+  it('applies a given rehydrate callback to the parsed collections — the seam the renderer plugs `processAfterDeserialization` into', () => {
+    const yaml = [
+      'collections:',
+      '  - id: r1',
+      '    name: Find pet by ID',
+      '    type: http',
+      '    tags: []'
+    ].join('\n')
+    const rehydrate = (items: FolderItem[]): FolderItem[] => items.map((item) => ({ ...item, name: `rehydrated:${item.name}` }))
+    const items = parseProjectYaml(yaml, rehydrate)
+    expect(items[0]?.name).toBe('rehydrated:Find pet by ID')
   })
 })

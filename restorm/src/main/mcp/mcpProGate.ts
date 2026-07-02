@@ -1,33 +1,51 @@
 /**
- * The MCP per-tool Pro gate — the SINGLE source of truth for which MCP tools are
- * free (Community) and which require Restorm Pro, plus the refusal an agent gets
- * when it calls a Pro tool without the entitlement.
+ * The MCP per-tool capability gate — the SINGLE source of truth for which MCP
+ * tools are free (Community) and which require a paid capability, plus the
+ * refusal an agent gets when it calls a gated tool without the entitlement.
  *
  * Product model (Yoann, 2026-06-30): the MCP server stays available to EVERYONE
  * — Community uses an AI agent to drive REQUESTS for free (the adoption hook).
  * The advanced surface (scenarios, screenshots/screencast, low-level UI
- * automation, multi-instance) requires Pro. So we do NOT gate `--mcp` startup;
- * each Pro tool checks the live `mcp.pro` capability at call time and, if absent,
- * returns a clean `isError` tool-result (the JSON-RPC transport stays 200) that
+ * automation, multi-instance, and the git routes) requires a Pro-tier
+ * capability. So we do NOT gate `--mcp` startup; each gated tool
+ * checks its OWN required capability at call time and, if absent, returns a
+ * clean `isError` tool-result (the JSON-RPC transport stays 200) that
  * (a) tells the AI agent in plain English why it failed + how to fix it, and
- * (b) carries a machine-readable `payment_required` / 402 block.
+ * (b) carries a machine-readable `payment_required` / 402 block naming the
+ * specific capability it needs.
+ *
+ * Most gated tools require `mcp.pro` (`PRO_MCP_TOOLS`); the git routes
+ * require `git.client` instead (`GIT_CLIENT_MCP_TOOLS`) — both are Pro-tier
+ * entitlements, just gating different features, so a Community user without
+ * EITHER sees the same refusal shape on both. Per-tool
+ * capability is resolved via `TOOL_CAPABILITY` below; `McpService` only ever
+ * holds a SINGLE `McpToolGate`, so a second capability is added by widening
+ * this map rather than by composing a second gate.
  *
  * The classification below is exhaustive over every registered MCP tool (ECUI
  * built-ins + restorm domain tools); `mcpProGate.test.ts` asserts no registered
  * tool is left unclassified. An unknown / forgotten tool defaults to FREE at
  * runtime (never break a tool we failed to classify — the exhaustiveness test is
- * the real guard against a Pro tool slipping through as free).
+ * the real guard against a gated tool slipping through as free).
  */
 
 import type { McpToolGate, McpToolResult } from 'electron-core-ui'
 
 /**
- * The capability that the advanced MCP tools require. Minted into the entitlement
+ * The capability most advanced MCP tools require. Minted into the entitlement
  * JWT for `pro` + `enterprise` plans (never `community`) by the backend
  * `capabilitiesFor` (restorm-cloud `_shared/providers/capabilities.ts`). Mirrors
  * the `scenario.headless` gating machinery.
  */
 export const MCP_PRO_CAPABILITY = 'mcp.pro' as const
+
+/**
+ * The capability the git MCP routes require (`git.client`, LOCKED in the
+ * capability→UX gating map) — separate from `mcp.pro` because the git
+ * client is its own Pro-tier feature, gated the same way whether driven from
+ * the UI or from an MCP tool call.
+ */
+export const GIT_CLIENT_CAPABILITY = 'git.client' as const
 
 /** The `tools/list` description marker appended to a Pro-gated tool, so an agent
  * enumerating tools sees the tool exists but needs an upgrade (kept listed). */
@@ -180,38 +198,71 @@ export const PRO_MCP_TOOLS: ReadonlySet<string> = new Set([
   'set_workbench_layout'
 ])
 
-/** The plan a tool belongs to. `unknown` = not in either set (a tool we forgot
- * to classify — treated as free at runtime, caught by the exhaustiveness test). */
+/**
+ * The git MCP routes — Pro-gated behind `git.client` instead of `mcp.pro`
+ * (see the file-level doc). A 2-step commit+push confirm flow plus a pull
+ * flow with ZOD-validated conflict resolution; see `tools/git.ts`.
+ */
+export const GIT_CLIENT_MCP_TOOLS: ReadonlySet<string> = new Set([
+  'git_commit_push',
+  'git_confirm_push',
+  'git_pull',
+  'git_resolve_conflicts'
+])
+
+/**
+ * Per-tool required capability, for every tool gated behind ANY Pro-tier
+ * capability. `mcpToolPlan`/`isProMcpTool` stay capability-agnostic (both
+ * `mcp.pro` and `git.client` tools report `'pro'` / `true`) — call
+ * `requiredCapability` when the SPECIFIC capability matters (building the
+ * refusal, wiring the live entitlement check).
+ */
+const TOOL_CAPABILITY: ReadonlyMap<string, string> = new Map([
+  ...[...PRO_MCP_TOOLS].map((name): [string, string] => [name, MCP_PRO_CAPABILITY]),
+  ...[...GIT_CLIENT_MCP_TOOLS].map((name): [string, string] => [name, GIT_CLIENT_CAPABILITY])
+])
+
+/** The plan a tool belongs to. `unknown` = not in any gated set (a tool we
+ * forgot to classify — treated as free at runtime, caught by the
+ * exhaustiveness test). */
 export type McpToolPlan = 'free' | 'pro' | 'unknown'
 
 /** Classify a tool by name. */
 export function mcpToolPlan(toolName: string): McpToolPlan {
-  if (PRO_MCP_TOOLS.has(toolName)) return 'pro'
+  if (TOOL_CAPABILITY.has(toolName)) return 'pro'
   if (FREE_MCP_TOOLS.has(toolName)) return 'free'
   return 'unknown'
 }
 
-/** True when `toolName` is gated behind Pro. */
+/** True when `toolName` is gated behind SOME Pro-tier capability (`mcp.pro`
+ * OR `git.client`) — use {@link requiredCapability} for which one. */
 export function isProMcpTool(toolName: string): boolean {
-  return PRO_MCP_TOOLS.has(toolName)
+  return TOOL_CAPABILITY.has(toolName)
+}
+
+/** The specific capability `toolName` requires, or `null` when it's free /
+ * unclassified. */
+export function requiredCapability(toolName: string): string | null {
+  return TOOL_CAPABILITY.get(toolName) ?? null
 }
 
 /**
- * Build the `isError` refusal an agent gets when it calls a Pro tool without the
- * `mcp.pro` capability. The `content` text is the human/agent-readable English
- * explanation; `structuredContent` is the machine-readable block a tool-using
- * agent can branch on (`code` / `httpEquivalent` / `plan` / `upgradeUrl`).
+ * Build the `isError` refusal an agent gets when it calls a gated tool
+ * without `capability`. The `content` text is the human/agent-readable
+ * English explanation; `structuredContent` is the machine-readable block a
+ * tool-using agent can branch on (`code` / `httpEquivalent` / `plan` /
+ * `capability` / `upgradeUrl`).
  *
  * `pricingUrl` is the channel-resolved upgrade URL (dev site on preview builds,
  * restorm.app on release) — the SAME value the renderer's upsell link uses, so
  * an agent and the human are pointed at the same page. Resolved by the host
  * (`shared/config/site` `pricingUrl(resolveChannel(app.getVersion()))`).
  */
-export function buildProRefusal(toolName: string, pricingUrl: string): McpToolResult {
+export function buildProRefusal(toolName: string, capability: string, pricingUrl: string): McpToolResult {
   const message =
     `This tool ("${toolName}") requires Restorm Pro. The Community plan lets AI agents drive ` +
-    `requests for free; scenarios, screenshots/screencast, low-level UI automation and ` +
-    `multi-instance control require Pro. Ask the user to upgrade: ${pricingUrl}`
+    `requests for free; scenarios, screenshots/screencast, low-level UI automation, multi-instance ` +
+    `control, and the git client require Pro. Ask the user to upgrade: ${pricingUrl}`
   return {
     content: [{ type: 'text', text: message }],
     isError: true,
@@ -219,7 +270,7 @@ export function buildProRefusal(toolName: string, pricingUrl: string): McpToolRe
       code: 'payment_required',
       httpEquivalent: 402,
       plan: 'pro',
-      capability: MCP_PRO_CAPABILITY,
+      capability,
       upgradeUrl: pricingUrl
     }
   }
@@ -228,14 +279,15 @@ export function buildProRefusal(toolName: string, pricingUrl: string): McpToolRe
 /**
  * Create the {@link McpToolGate} restorm injects into ECUI's `McpService`.
  *
- * `hasProCapability` is read LIVE on every authorize() so the gate reflects the
+ * `hasCapability` is read LIVE on every authorize() so the gate reflects the
  * current entitlement (a login / logout / refresh flips it immediately, no
- * restart). The host wires it to
- * `hasCapability(getEntitlementService().getState(), MCP_PRO_CAPABILITY)`.
- * `pricingUrl` is the channel-resolved upgrade URL embedded in the refusal.
+ * restart) — checked against whichever capability THIS tool requires (not
+ * hardcoded to `mcp.pro`), via `hasCapability(getEntitlementService().getState(),
+ * requiredCapability(toolName))`. `pricingUrl` is the channel-resolved
+ * upgrade URL embedded in the refusal.
  */
 export function createMcpProGate(deps: {
-  hasProCapability: () => boolean
+  hasCapability: (capability: string) => boolean
   pricingUrl: string
 }): McpToolGate {
   return {
@@ -244,9 +296,10 @@ export function createMcpProGate(deps: {
       return isProMcpTool(toolName)
     },
     authorize(toolName: string): McpToolResult | null {
-      if (!isProMcpTool(toolName)) return null
-      if (deps.hasProCapability()) return null
-      return buildProRefusal(toolName, deps.pricingUrl)
+      const capability = requiredCapability(toolName)
+      if (capability === null) return null
+      if (deps.hasCapability(capability)) return null
+      return buildProRefusal(toolName, capability, deps.pricingUrl)
     }
   }
 }

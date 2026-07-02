@@ -2,7 +2,7 @@ import type { Folder, FolderItem } from '../../../shared/types/folderTypes'
 import { isAnyFolder, isRequest } from '../../../shared/types/folderTypes'
 import type { AuthenticationRequest, HTTPRequest, Request } from '../../../shared/types/requests'
 import type { QuickConfig } from '../../../shared/types/requests/QuickConfig'
-import type { GitEntityKind } from './gitCommitDiff'
+import type { GitEntityKind } from '../../../shared/git/gitCommitDiff'
 import { stripIds } from '../utils/serialization'
 
 /**

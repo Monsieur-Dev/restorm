@@ -1,6 +1,6 @@
-import type { FolderItem } from '../../../shared/types/folderTypes'
-import { isEnvironmentFolder } from '../../../shared/types/folderTypes'
-import type { QuickConfig } from '../../../shared/types/requests/QuickConfig'
+import type { FolderItem } from '../types/folderTypes'
+import { isEnvironmentFolder } from '../types/folderTypes'
+import type { QuickConfig } from '../types/requests/QuickConfig'
 import { resolveApiDocumentationConflict, type ApiDocumentationCommitTimestamps } from './apiDocumentationConflict'
 import { flattenEntities } from './gitCommitDiff'
 

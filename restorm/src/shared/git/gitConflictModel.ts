@@ -1,6 +1,6 @@
-import type { GitConflictVersions } from 'electron-core-ui/renderer'
-import type { FolderItem } from '../../../shared/types/folderTypes'
-import type { ApiDocumentation } from '../../../shared/types/apiDocumentation'
+import type { GitConflictVersions } from 'electron-core-ui'
+import type { FolderItem } from '../types/folderTypes'
+import type { ApiDocumentation } from '../types/apiDocumentation'
 import { flattenEntities, ownFieldsSnapshot, parseProjectYaml, type GitEntityKind } from './gitCommitDiff'
 
 export interface ConflictEntity {
@@ -45,11 +45,18 @@ function conflictSnapshot(item: FolderItem, kind: GitEntityKind): string {
  * same principle as a request's saved quick-configs (config added on one
  * side merges in by default). Only entities present on BOTH sides with
  * DIFFERENT own-field content are genuine conflicts.
+ *
+ * `rehydrate` is forwarded to each `parseProjectYaml` call — see that
+ * function's doc for why it defaults to a no-op (process-neutral module;
+ * only the renderer's 4-panel UI needs real `ValueType` class instances).
  */
-export function identifyConflictingEntities(versions: GitConflictVersions): ConflictEntity[] {
-  const ours = flattenEntities(parseProjectYaml(versions.ours))
-  const theirs = flattenEntities(parseProjectYaml(versions.theirs))
-  const base = flattenEntities(parseProjectYaml(versions.base))
+export function identifyConflictingEntities(
+  versions: GitConflictVersions,
+  rehydrate: (items: FolderItem[]) => FolderItem[] = (items) => items
+): ConflictEntity[] {
+  const ours = flattenEntities(parseProjectYaml(versions.ours, rehydrate))
+  const theirs = flattenEntities(parseProjectYaml(versions.theirs, rehydrate))
+  const base = flattenEntities(parseProjectYaml(versions.base, rehydrate))
 
   const conflicts: ConflictEntity[] = []
   for (const [id, oursEntity] of ours) {

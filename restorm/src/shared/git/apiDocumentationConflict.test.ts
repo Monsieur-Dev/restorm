@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { resolveApiDocumentationConflict } from './apiDocumentationConflict'
-import type { ApiDocumentation } from '../../../shared/types/apiDocumentation'
+import type { ApiDocumentation } from '../types/apiDocumentation'
 
 function makeDoc(version: string | undefined): ApiDocumentation {
   return {

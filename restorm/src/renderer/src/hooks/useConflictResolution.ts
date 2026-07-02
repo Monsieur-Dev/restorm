@@ -2,8 +2,9 @@ import { useCallback, useMemo, useState } from 'react'
 import type { GitConflictVersions } from 'electron-core-ui/renderer'
 import type { FolderItem } from '../../../shared/types/folderTypes'
 import type { Scenario } from '../../../shared/types/scenario'
-import { identifyConflictingEntities, type ConflictEntity } from '../services/gitConflictModel'
+import { identifyConflictingEntities, type ConflictEntity } from '../../../shared/git/gitConflictModel'
 import { cloneEntityForResolution } from '../services/conflictEntityClone'
+import { processAfterDeserialization } from '../utils/serialization'
 
 export interface UseConflictResolutionResult {
   conflicts: ConflictEntity[]
@@ -46,7 +47,7 @@ function buildInitialResolved(conflicts: ConflictEntity[]): Record<string, Folde
  */
 export function useConflictResolution(versions: GitConflictVersions | null): UseConflictResolutionResult {
   const conflicts = useMemo(
-    () => (versions ? identifyConflictingEntities(versions) : []),
+    () => (versions ? identifyConflictingEntities(versions, processAfterDeserialization) : []),
     [versions]
   )
 

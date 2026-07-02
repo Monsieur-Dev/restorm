@@ -294,6 +294,17 @@ const textWithParams = i18nService.t('file.message', { fileName: 'test.json' })
 // Language
 i18nService.setLanguage('fr')
 i18nService.getLanguage() // 'fr'
+
+// A translator FIXED to a given language, independent of the current one
+// (mirrors the renderer's i18next `i18n.getFixedT(lang)`) — for
+// main-process code that needs a specific language regardless of the
+// app's active UI language (e.g. rendering a commit message in the
+// user's configured commit-message-language setting).
+const fixedFr = i18nService.getFixedT('fr')
+fixedFr('file.message', { fileName: 'test.json' })
+// `count` params resolve the i18next-style plural suffix
+// (`${key}_one` / `${key}_other`) before falling back to the bare key.
+fixedFr('git.commitTitle.countRequest', { count: 3 })
 ```
 
 **Translation files:** `{localesPath}/{lang}/translation.json`

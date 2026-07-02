@@ -1,7 +1,7 @@
 import { parse as yamlParse } from 'yaml'
-import type { FolderItem } from '../../../shared/types/folderTypes'
-import { isEnvironmentFolder, isFolder, isScenario } from '../../../shared/types/folderTypes'
-import { prepareForSerialization, processAfterDeserialization, stripIds } from '../utils/serialization'
+import type { FolderItem } from '../types/folderTypes'
+import { isEnvironmentFolder, isFolder, isScenario } from '../types/folderTypes'
+import { prepareForSerialization, stripIds } from '../utils/serialization'
 
 export type GitEntityKind = 'folder' | 'environmentFolder' | 'request' | 'scenario'
 export type GitChangeAction = 'added' | 'modified' | 'deleted'
@@ -142,14 +142,24 @@ export function diffProjectEntities(beforeItems: FolderItem[], afterItems: Folde
 
 /**
  * Parse a project's raw single-file YAML text (e.g. `window.api.git.
- * getFileAtHead`'s blob content) into the same `FolderItem[]` shape the
- * live editor holds — the read-only "before" snapshot side of the diff.
- * Returns `[]` for a `null` blob (the file didn't exist at that commit
- * yet, e.g. the project's very first commit).
+ * getFileAtHead`'s blob content, or the same call's main-process
+ * `GitService.getFileAtHead` equivalent) into the same `FolderItem[]`
+ * shape the live editor holds — the read-only "before" snapshot side of
+ * the diff. Returns `[]` for a `null` blob (the file didn't exist at that
+ * commit yet, e.g. the project's very first commit).
+ *
+ * `rehydrate` turns the raw parsed POJOs into whatever shape the CALLER
+ * needs and defaults to a no-op — this module is shared by both processes
+ * (see `docs/Git/README.md`), and only the renderer's UI-facing call
+ * sites (`usePushModal`, `useGitPullConflict`) need real `ValueType` class
+ * instances (`processAfterDeserialization`, which pulls in
+ * `normalizeValueType` — a renderer-only dependency chain). A main-process
+ * caller (the git MCP tools) only needs JSON-safe data for a diff summary
+ * or a conflict payload and passes nothing.
  */
-export function parseProjectYaml(rawYaml: string | null): FolderItem[] {
+export function parseProjectYaml(rawYaml: string | null, rehydrate: (items: FolderItem[]) => FolderItem[] = (items) => items): FolderItem[] {
   if (rawYaml === null) return []
   const parsed = yamlParse(rawYaml) as { collections?: unknown } | null
   const collections = Array.isArray(parsed?.collections) ? (parsed.collections as FolderItem[]) : []
-  return processAfterDeserialization(collections)
+  return rehydrate(collections)
 }

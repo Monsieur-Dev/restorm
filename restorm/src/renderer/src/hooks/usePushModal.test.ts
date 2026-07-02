@@ -38,12 +38,16 @@ vi.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key: string) => key })
 }))
 
-vi.mock('../services/gitCommitDiff', () => ({
+vi.mock('../../../shared/git/gitCommitDiff', () => ({
   parseProjectYaml: vi.fn(() => []),
   diffProjectEntities: vi.fn(() => [{ kind: 'request', name: 'Find pet by ID', action: 'modified' }])
 }))
 
-vi.mock('../services/commitMessageContext', () => ({
+vi.mock('../utils/serialization', () => ({
+  processAfterDeserialization: (data: unknown) => data
+}))
+
+vi.mock('../../../shared/git/commitMessageContext', () => ({
   buildCommitMessageContext: (
     changes: { kind: string, name: string, action: string }[],
     t: (key: string, opts?: Record<string, unknown>) => string

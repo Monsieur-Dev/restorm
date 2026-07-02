@@ -142,15 +142,48 @@ class I18nService {
   }
 
   /**
-   * Get a translation by key path (e.g., "file.unsavedChanges.title")
+   * Get a translation by key path (e.g., "file.unsavedChanges.title"),
+   * resolved against the CURRENT language (+ fallback). See
+   * {@link getFixedT} for a translator fixed to an arbitrary language,
+   * independent of `currentLanguage`.
    * @param key Dot-separated key path
    * @param params Optional interpolation parameters
    */
   public t(key: string, params?: Record<string, string | number>): string {
-    // Try current language first, then fallback
-    let value = this.getValue(key, this.currentLanguage)
+    return this.translate(this.currentLanguage, key, params)
+  }
+
+  /**
+   * Return a translator function FIXED to `language`, independent of
+   * `currentLanguage` — the main-process equivalent of the renderer's
+   * i18next `i18n.getFixedT(lang)`. Used by main-process code that needs
+   * a specific language regardless of the app's active UI language (e.g.
+   * the git MCP tools rendering a commit message in the user's configured
+   * `git:commitMessageLanguage`, independent of whichever language the UI
+   * itself is currently showing). Still falls back to `fallbackLanguage`
+   * per key, same as `t()`.
+   */
+  public getFixedT(language: string): (key: string, params?: Record<string, string | number>) => string {
+    return (key: string, params?: Record<string, string | number>) => this.translate(language, key, params)
+  }
+
+  /**
+   * Resolve + interpolate `key` against `language` (+ fallback). When
+   * `params.count` is a number, tries the i18next-style plural-suffixed
+   * key first (`${key}_one` for `1`, `${key}_other` otherwise) before the
+   * bare key — enough to match the two-plural-form (en/fr) translation
+   * JSON this service loads; a language with more plural forms would need
+   * a richer rule, out of scope while `supportedLocales` stays en/fr-only.
+   */
+  private translate(language: string, key: string, params?: Record<string, string | number>): string {
+    const count = params?.['count']
+    const suffixedKey = typeof count === 'number' ? `${key}_${count === 1 ? 'one' : 'other'}` : undefined
+
+    let value = suffixedKey !== undefined ? this.getValue(suffixedKey, language) : undefined
+    value ??= this.getValue(key, language)
+    value ??= suffixedKey !== undefined ? this.getValue(suffixedKey, this.fallbackLanguage) : undefined
     value ??= this.getValue(key, this.fallbackLanguage)
-    
+
     if (value === undefined) {
       logger.warn(`[I18nService] Missing translation for key: ${key}`)
       return key

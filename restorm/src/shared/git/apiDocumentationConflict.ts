@@ -1,4 +1,4 @@
-import type { ApiDocumentation } from '../../../shared/types/apiDocumentation'
+import type { ApiDocumentation } from '../types/apiDocumentation'
 
 /** Commit timestamps (Unix seconds) for the two sides of the conflict —
  * `window.api.git.getConflictCommitTimestamps`'s result, threaded down

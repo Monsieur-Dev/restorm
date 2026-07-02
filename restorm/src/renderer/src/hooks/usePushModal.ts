@@ -3,9 +3,10 @@ import { i18n as ecuiI18n, renderCommitMessage, toasterService, useSetting, buil
 import { useTranslation } from 'react-i18next'
 import type { FolderItem } from '../../../shared/types/folderTypes'
 import { useGitFolder } from './useGitFolder'
-import { diffProjectEntities, parseProjectYaml, type GitEntityChange } from '../services/gitCommitDiff'
-import { buildCommitMessageContext } from '../services/commitMessageContext'
-import { RESTORM_COMMIT_MESSAGE_TEMPLATE } from '../services/commitMessageTemplates'
+import { diffProjectEntities, parseProjectYaml, type GitEntityChange } from '../../../shared/git/gitCommitDiff'
+import { buildCommitMessageContext } from '../../../shared/git/commitMessageContext'
+import { RESTORM_COMMIT_MESSAGE_TEMPLATE } from '../../../shared/git/commitMessageTemplates'
+import { processAfterDeserialization } from '../utils/serialization'
 
 // Both keys live in the `git` group declared in `resources/settings.yaml`
 // (only `applyCommitMessageLanguageByDefault` has a visible Settings→Git
@@ -74,7 +75,7 @@ export function usePushModal(filePath: string | null, rootItems: FolderItem[]): 
     if (!gitFolder || !filePath?.endsWith('.restorm')) return
     const relativePath = filePath.slice(gitFolder.length + 1)
     void window.api.git.getFileAtHead(gitFolder, relativePath).then((rawYaml) => {
-      const beforeItems = parseProjectYaml(rawYaml)
+      const beforeItems = parseProjectYaml(rawYaml, processAfterDeserialization)
       const entityChanges = diffProjectEntities(beforeItems, rootItems)
       setChanges(entityChanges)
       setLanguageState(defaultLanguage)

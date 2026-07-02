@@ -1,4 +1,4 @@
-import type { CommitMessageTemplates } from 'electron-core-ui/renderer'
+import type { CommitMessageTemplates } from 'electron-core-ui'
 
 /**
  * The restorm-provided Handlebars templates ECUI's generic
