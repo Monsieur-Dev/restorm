@@ -2,6 +2,7 @@ import { execSync } from 'child_process'
 import { rmSync } from 'fs'
 import { resolve } from 'path'
 import { isDockerAvailable, areContainersRunning, startDocker } from '../integration/docker-setup'
+import { seedGitServer } from '../integration/gitServerSeed'
 
 /**
  * Per-test workspace dir wiped at the start of every run so a previous
@@ -89,5 +90,16 @@ export default async function globalSetup(): Promise<void> {
         'Check your Docker daemon status and the compose file at tests/docker/docker-compose.yml.'
       ].join('\n'))
     }
+  }
+
+  // `git-server` itself always starts with the rest of the compose file
+  // (mirroring the `stomp`/activemq mock — a per-domain SKIP flag only
+  // excludes that domain's Playwright PROJECT, not its docker service).
+  // Seeding is a separate, riskier step (host-side git CLI against the
+  // bind-mounted repo) — skip it under SKIP_GIT_E2E=1 so a host opting out
+  // because its git-server mock is unreliable doesn't also fail unrelated
+  // suites' global-setup on a seed step nothing else depends on.
+  if (process.env.SKIP_GIT_E2E !== '1') {
+    seedGitServer()
   }
 }

@@ -1,0 +1,9 @@
+# This directory is a bind-mount target for the `git-server` docker
+# service — it holds the seeded BARE repos only (see tests/integration/
+# gitServerSeed.ts; the ephemeral clone workdir used to write the seed
+# commit lives in the OS temp dir, never here — see that module's own doc
+# comment for why). Contents are generated at test-setup time, not checked
+# in — only this .gitignore keeps the directory itself tracked so a fresh
+# checkout has the mount point ready before the first `docker compose up`.
+*
+!.gitignore

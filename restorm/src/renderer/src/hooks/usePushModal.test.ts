@@ -61,6 +61,7 @@ import { usePushModal } from './usePushModal'
 import type { FolderItem } from '../../../shared/types/folderTypes'
 
 const ROOT_ITEMS: FolderItem[] = []
+const saveBeforePushMock = vi.fn().mockResolvedValue(undefined)
 
 function stubGitApi(overrides: Partial<{
   getFileAtHead: ReturnType<typeof vi.fn>
@@ -99,7 +100,7 @@ async function flush(): Promise<void> {
 
 describe('usePushModal', () => {
   it('is closed by default with empty fields', () => {
-    const { result } = renderHook(() => usePushModal('/proj/api.restorm', ROOT_ITEMS))
+    const { result } = renderHook(() => usePushModal('/proj/api.restorm', ROOT_ITEMS, saveBeforePushMock))
     expect(result.current.isOpen).toBe(false)
     expect(result.current.title).toBe('')
     expect(result.current.body).toBe('')
@@ -107,7 +108,7 @@ describe('usePushModal', () => {
 
   it('openPushModal diffs against HEAD and opens with a generated title/body', async () => {
     const api = stubGitApi()
-    const { result } = renderHook(() => usePushModal('/proj/api.restorm', ROOT_ITEMS))
+    const { result } = renderHook(() => usePushModal('/proj/api.restorm', ROOT_ITEMS, saveBeforePushMock))
     act(() => { result.current.openPushModal() })
     await flush()
 
@@ -118,7 +119,7 @@ describe('usePushModal', () => {
 
   it('openPushModal is a no-op for a legacy folder-mode project (no single file to diff)', async () => {
     const api = stubGitApi()
-    const { result } = renderHook(() => usePushModal('/proj/folder', ROOT_ITEMS))
+    const { result } = renderHook(() => usePushModal('/proj/folder', ROOT_ITEMS, saveBeforePushMock))
     act(() => { result.current.openPushModal() })
     await flush()
     expect(api.getFileAtHead).not.toHaveBeenCalled()
@@ -127,7 +128,7 @@ describe('usePushModal', () => {
 
   it('defaults the language to English when no setting is persisted yet', async () => {
     stubGitApi()
-    const { result } = renderHook(() => usePushModal('/proj/api.restorm', ROOT_ITEMS))
+    const { result } = renderHook(() => usePushModal('/proj/api.restorm', ROOT_ITEMS, saveBeforePushMock))
     act(() => { result.current.openPushModal() })
     await flush()
     expect(result.current.language).toBe('en')
@@ -137,7 +138,7 @@ describe('usePushModal', () => {
   it('opens with the persisted default language when one is set', async () => {
     settingsStore.set('git:commitMessageLanguage', 'fr')
     stubGitApi()
-    const { result } = renderHook(() => usePushModal('/proj/api.restorm', ROOT_ITEMS))
+    const { result } = renderHook(() => usePushModal('/proj/api.restorm', ROOT_ITEMS, saveBeforePushMock))
     act(() => { result.current.openPushModal() })
     await flush()
     expect(result.current.language).toBe('fr')
@@ -146,7 +147,7 @@ describe('usePushModal', () => {
   it('setLanguage regenerates the title/body and persists the new default when "apply by default" is on', async () => {
     settingsStore.set('git:applyCommitMessageLanguageByDefault', true)
     stubGitApi()
-    const { result } = renderHook(() => usePushModal('/proj/api.restorm', ROOT_ITEMS))
+    const { result } = renderHook(() => usePushModal('/proj/api.restorm', ROOT_ITEMS, saveBeforePushMock))
     act(() => { result.current.openPushModal() })
     await flush()
 
@@ -159,7 +160,7 @@ describe('usePushModal', () => {
   it('setLanguage does NOT persist the new default when "apply by default" is off', async () => {
     settingsStore.set('git:applyCommitMessageLanguageByDefault', false)
     stubGitApi()
-    const { result } = renderHook(() => usePushModal('/proj/api.restorm', ROOT_ITEMS))
+    const { result } = renderHook(() => usePushModal('/proj/api.restorm', ROOT_ITEMS, saveBeforePushMock))
     act(() => { result.current.openPushModal() })
     await flush()
 
@@ -169,7 +170,7 @@ describe('usePushModal', () => {
   })
 
   it('setApplyLanguageByDefault persists the checkbox state', () => {
-    const { result } = renderHook(() => usePushModal('/proj/api.restorm', ROOT_ITEMS))
+    const { result } = renderHook(() => usePushModal('/proj/api.restorm', ROOT_ITEMS, saveBeforePushMock))
     act(() => { result.current.setApplyLanguageByDefault(false) })
     expect(settingsStore.get('git:applyCommitMessageLanguageByDefault')).toBe(false)
   })
@@ -183,7 +184,7 @@ describe('usePushModal', () => {
     // to a COLON-separated key — two different storage entries, silently
     // disconnected. Both sides must compute through the same
     // `buildSettingsStorageKey` helper so they can never diverge again.
-    const { result } = renderHook(() => usePushModal('/proj/api.restorm', ROOT_ITEMS))
+    const { result } = renderHook(() => usePushModal('/proj/api.restorm', ROOT_ITEMS, saveBeforePushMock))
     act(() => { result.current.setApplyLanguageByDefault(true) })
     const expectedKey = 'git:applyCommitMessageLanguageByDefault' // groupPath=['git'], settingId='applyCommitMessageLanguageByDefault'
     expect(settingsStore.has(expectedKey)).toBe(true)
@@ -192,7 +193,7 @@ describe('usePushModal', () => {
 
   it('push stages the file, commits with title+body, pushes, toasts success, and closes the modal', async () => {
     const api = stubGitApi()
-    const { result } = renderHook(() => usePushModal('/proj/api.restorm', ROOT_ITEMS))
+    const { result } = renderHook(() => usePushModal('/proj/api.restorm', ROOT_ITEMS, saveBeforePushMock))
     act(() => { result.current.openPushModal() })
     await flush()
     act(() => { result.current.setTitle('My title') })
@@ -207,9 +208,35 @@ describe('usePushModal', () => {
     expect(result.current.isOpen).toBe(false)
   })
 
+  it('awaits saveBeforePush and completes it BEFORE staging — regression guard against staging stale, pre-edit disk content', async () => {
+    // `git.stage` reads whatever's on disk; without an explicit save first,
+    // an edit made just before clicking Push could still be sitting
+    // unflushed in the renderer when git reads the file. Assert the ORDER,
+    // not just that both were called — a same-tick Promise.all would call
+    // both without proving `stage` waited for the save to actually finish.
+    const callOrder: string[] = []
+    const orderedSaveBeforePush = vi.fn(() => {
+      callOrder.push('saveBeforePush:start')
+      return Promise.resolve().then(() => { callOrder.push('saveBeforePush:done') })
+    })
+    const api = stubGitApi({
+      stage: vi.fn(() => { callOrder.push('stage'); return Promise.resolve(undefined) })
+    })
+    const { result } = renderHook(() => usePushModal('/proj/api.restorm', ROOT_ITEMS, orderedSaveBeforePush))
+    act(() => { result.current.openPushModal() })
+    await flush()
+
+    act(() => { result.current.push() })
+    await flush()
+
+    expect(orderedSaveBeforePush).toHaveBeenCalledTimes(1)
+    expect(api.stage).toHaveBeenCalledWith('/proj', ['api.restorm'])
+    expect(callOrder).toEqual(['saveBeforePush:start', 'saveBeforePush:done', 'stage'])
+  })
+
   it('push shows a failure toast and leaves the modal open when commit fails', async () => {
     const api = stubGitApi({ commit: vi.fn().mockResolvedValue({ success: false, error: 'nothing to commit' }) })
-    const { result } = renderHook(() => usePushModal('/proj/api.restorm', ROOT_ITEMS))
+    const { result } = renderHook(() => usePushModal('/proj/api.restorm', ROOT_ITEMS, saveBeforePushMock))
     act(() => { result.current.openPushModal() })
     await flush()
 
@@ -227,7 +254,7 @@ describe('usePushModal', () => {
 
   it('push shows a failure toast and leaves the modal open when the push itself fails', async () => {
     const api = stubGitApi({ push: vi.fn().mockResolvedValue({ success: false, error: 'rejected non-fast-forward' }) })
-    const { result } = renderHook(() => usePushModal('/proj/api.restorm', ROOT_ITEMS))
+    const { result } = renderHook(() => usePushModal('/proj/api.restorm', ROOT_ITEMS, saveBeforePushMock))
     act(() => { result.current.openPushModal() })
     await flush()
 
@@ -244,7 +271,7 @@ describe('usePushModal', () => {
   })
 
   it('closePushModal closes without touching git', () => {
-    const { result } = renderHook(() => usePushModal('/proj/api.restorm', ROOT_ITEMS))
+    const { result } = renderHook(() => usePushModal('/proj/api.restorm', ROOT_ITEMS, saveBeforePushMock))
     act(() => { result.current.closePushModal() })
     expect(result.current.isOpen).toBe(false)
   })

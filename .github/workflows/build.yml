@@ -282,6 +282,27 @@ jobs:
           docker cp kafka-seed.sh restorm-kafka:/kafka-seed.sh
           docker exec restorm-kafka /bin/sh /kafka-seed.sh
 
+      - name: Start git server (git daemon)
+        # Unauthenticated `git daemon` on :9418, mirroring
+        # tests/docker/docker-compose.yml. Alpine splits `git daemon` into its
+        # own `git-daemon` apk package — the base `git` package does not
+        # include it. Bind-mounts the SAME repos dir gitServerSeed.ts seeds
+        # host-side for local runs; not seeded with a full project here (this
+        # job only runs the vitest integration suite, not Playwright e2e —
+        # the local pre-push / ship.sh gate) — but DOES `git init --bare` an
+        # empty `healthcheck.git` so the wait-for-services check below can do
+        # a real `git ls-remote` (protocol-level, not just TCP-open — a cold
+        # `apk add` start has the port bound before git-daemon is actually
+        # ready to speak the protocol).
+        run: |
+          cd restorm/tests/docker
+          mkdir -p git-server/repos
+          git init --bare -b main git-server/repos/healthcheck.git
+          docker run -d --name restorm-git-server -p 9418:9418 \
+            -v "$(pwd)/git-server/repos:/srv/git" \
+            alpine:3.19 \
+            sh -c "apk add --no-cache git-daemon && git daemon --base-path=/srv/git --export-all --enable=receive-pack --reuseaddr --verbose"
+
       - name: Wait for services
         run: |
           cd restorm

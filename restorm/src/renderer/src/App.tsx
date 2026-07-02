@@ -59,8 +59,23 @@ import { Environment as EnvironmentClass } from '../../shared/models/Environment
 // (see handleScenarioChange). Module-scoped (single App instance) so the
 // debounced timer always invokes the current `handleMenuSaveAll` — capturing it
 // in the timer closure would save a stale `rootItems` snapshot.
+//
+// `usePushModal`'s `saveBeforePush` reuses this SAME latest-ref for the same
+// reason: `usePushModal(...)` is called before `handleMenuSaveAll` exists
+// yet (a few lines down in this component), so it can't take the callback
+// directly without reordering hooks — `latestSaveAll` already solves exactly
+// that "need the current callback despite an ordering constraint" problem.
 let scenarioSaveTimer: ReturnType<typeof setTimeout> | null = null
 let latestSaveAll: (() => Promise<boolean>) | null = null
+
+/** Adapter: `usePushModal`'s `saveBeforePush` wants `Promise<void>`;
+ * `handleMenuSaveAll` (via `latestSaveAll`) returns `Promise<boolean>`. A
+ * `null` ref (save-all not mounted yet) resolves immediately — `push()`
+ * only ever runs from a user click well after mount, so this is a
+ * defensive fallback, not an expected path. */
+function saveBeforePush(): Promise<void> {
+  return latestSaveAll ? latestSaveAll().then(() => undefined) : Promise.resolve()
+}
 
 /**
  * Cancel any pending scenario-edit autosave. MUST run on file-close and
@@ -408,7 +423,7 @@ const App: React.FC = () => {
   // The Push modal's whole lifecycle (diff-on-open, language-driven
   // regeneration, the setting sync, the actual stage+commit+push) —
   // `rootItems` is the "after" side of its structural diff.
-  const pushModal = usePushModal(filePath, rootItems)
+  const pushModal = usePushModal(filePath, rootItems, saveBeforePush)
   // The pull-conflict 4-panel resolution flow — opened by `useGitActions`
   // below when a pull comes back conflicted, instead of a plain toast.
   const pullConflict = useGitPullConflict()

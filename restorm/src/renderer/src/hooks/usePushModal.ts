@@ -44,8 +44,19 @@ export interface PushModalState {
  * language by default" setting sync, and the actual stage → commit →
  * push sequence. `rootItems` is the live in-memory project tree (the
  * "after" side of the diff) — pass whatever `App.tsx` already holds.
+ *
+ * `saveBeforePush` is awaited immediately before `git.stage` — `git.stage`
+ * reads whatever's CURRENTLY ON DISK, which is only as fresh as the last
+ * autosave flush (a debounced timer, `files:autoSaveDelay`). Without an
+ * explicit save here, a user who edits a field and pushes soon after — a
+ * completely normal flow — can silently commit stale, pre-edit content:
+ * the diff/generated message above already reflect the in-memory model
+ * correctly, but the git operation itself would not. `App.tsx` wires this
+ * to its existing `handleMenuSaveAll` (the same function the
+ * `file:autosave-trigger` IPC bridge already calls) — no new save
+ * mechanism, just calling the existing one at the point that matters.
  */
-export function usePushModal(filePath: string | null, rootItems: FolderItem[]): PushModalState {
+export function usePushModal(filePath: string | null, rootItems: FolderItem[], saveBeforePush: () => Promise<void>): PushModalState {
   const { t } = useTranslation()
   const gitFolder = useGitFolder(filePath)
   const [applyByDefaultSetting, setApplyByDefaultSetting] = useSetting(APPLY_DEFAULT_SETTING_KEY)
@@ -107,7 +118,10 @@ export function usePushModal(filePath: string | null, rootItems: FolderItem[]): 
     if (!gitFolder || !filePath?.endsWith('.restorm')) return
     const relativePath = filePath.slice(gitFolder.length + 1)
     const message = body ? `${title}\n\n${body}` : title
-    void window.api.git.stage(gitFolder, [relativePath])
+    // Flush the live in-memory model to disk FIRST — `git.stage` below reads
+    // whatever's on disk, not `rootItems` (see this hook's own doc comment).
+    void saveBeforePush()
+      .then(() => window.api.git.stage(gitFolder, [relativePath]))
       .then(() => window.api.git.commit(gitFolder, message))
       .then((commitResult) => {
         if (!commitResult.success) {
@@ -131,7 +145,7 @@ export function usePushModal(filePath: string | null, rootItems: FolderItem[]): 
           setIsOpen(false)
         })
       })
-  }, [gitFolder, filePath, title, body, t])
+  }, [gitFolder, filePath, title, body, t, saveBeforePush])
 
   return {
     isOpen,

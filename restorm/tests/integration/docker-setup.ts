@@ -68,6 +68,12 @@ export const SERVICES = {
     name: 'MQTT Broker (Mosquitto)',
     host: 'localhost:1883',
     wsHost: 'localhost:9001'
+  },
+  gitServer: {
+    /** Unauthenticated `git daemon` — see tests/integration/gitServerSeed.ts
+     * for the seeded repo + clone URL. */
+    name: 'Git server (git daemon)',
+    host: 'localhost:9418'
   }
 } as const
 
