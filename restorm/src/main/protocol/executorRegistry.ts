@@ -6,6 +6,7 @@ import { grpcExecutionService } from '../services/GRPCExecutionService'
 import { websocketExecutionService } from '../services/WebSocketExecutionService'
 import { jsonRpcExecutionService } from '../services/JsonRpcExecutionService'
 import { sseExecutionService } from '../services/SseExecutionService'
+import { amqpExecutionService } from '../services/AMQPExecutionService'
 
 /**
  * The MAIN-process execution dispatch for each protocol type — the main-only
@@ -43,7 +44,13 @@ export const PROTOCOL_EXECUTORS: Record<RequestType, ProtocolExecutor> = {
   websocket: { streaming: true, cancel: (id) => websocketExecutionService.disconnect(id) },
   jsonrpc: { streaming: false, cancel: (id) => jsonRpcExecutionService.cancel(id) },
   jsonrpcBatch: { streaming: false, cancel: (id) => jsonRpcExecutionService.cancel(id) },
-  sse: { streaming: true, cancel: (id) => sseExecutionService.disconnect(id) }
+  sse: { streaming: true, cancel: (id) => sseExecutionService.disconnect(id) },
+  // `streaming: false` even though `subscribe` mode is a long-lived connection:
+  // the MCP `run_request` streaming path is hardcoded to the WebSocket family
+  // (buffer polling + continuation tokens over `websocketExecutionService`) —
+  // same reason gRPC's streaming call types stay `false` here today. `cancel`
+  // still correctly disconnects an open subscribe connection.
+  amqp: { streaming: false, cancel: (id) => amqpExecutionService.disconnect(id) }
 }
 
 /** The execution dispatch for a protocol discriminant. */

@@ -65,6 +65,7 @@ export interface CompiledSnippetTemplates {
   jsonRpcSnippetTemplate: Handlebars.TemplateDelegate | null
   trpcSnippetTemplate: Handlebars.TemplateDelegate | null
   sseSnippetTemplate: Handlebars.TemplateDelegate | null
+  amqpSnippetTemplate: Handlebars.TemplateDelegate | null
 }
 
 /**
@@ -80,7 +81,8 @@ export function compileSnippetTemplates(): CompiledSnippetTemplates {
     soapSnippetTemplate: null,
     jsonRpcSnippetTemplate: null,
     trpcSnippetTemplate: null,
-    sseSnippetTemplate: null
+    sseSnippetTemplate: null,
+    amqpSnippetTemplate: null
   }
 
   try {
@@ -92,6 +94,7 @@ export function compileSnippetTemplates(): CompiledSnippetTemplates {
     const jsonRpcTemplate = loadTemplate('code-snippets-jsonrpc.hbs')
     const trpcTemplate = loadTemplate('code-snippets-trpc.hbs')
     const sseTemplate = loadTemplate('code-snippets-sse.hbs')
+    const amqpTemplate = loadTemplate('code-snippets-amqp.hbs')
 
     if (httpTemplate) templates.httpSnippetTemplate = Handlebars.compile(httpTemplate, { noEscape: true })
     if (graphqlTemplate) templates.graphqlSnippetTemplate = Handlebars.compile(graphqlTemplate, { noEscape: true })
@@ -101,6 +104,7 @@ export function compileSnippetTemplates(): CompiledSnippetTemplates {
     if (jsonRpcTemplate) templates.jsonRpcSnippetTemplate = Handlebars.compile(jsonRpcTemplate, { noEscape: true })
     if (trpcTemplate) templates.trpcSnippetTemplate = Handlebars.compile(trpcTemplate, { noEscape: true })
     if (sseTemplate) templates.sseSnippetTemplate = Handlebars.compile(sseTemplate, { noEscape: true })
+    if (amqpTemplate) templates.amqpSnippetTemplate = Handlebars.compile(amqpTemplate, { noEscape: true })
 
     logger.info('[CodeSnippetGenerator] Code snippet templates loaded and compiled')
   } catch (error) {
@@ -393,6 +397,28 @@ export function generateCodeSnippets(
           url: resolvedUrl,
           headers: headers.length > 0 ? headers : null,
           lastEventId: data.lastEventId ? transformValue(data.lastEventId, envContext) : null
+        })
+      }
+      break
+    }
+
+    case 'amqp': {
+      const mode = data.mode ?? 'publish'
+      const payload = data.payload ? transformValue(data.payload, envContext) : '{}'
+
+      if (templates.amqpSnippetTemplate) {
+        markdown = templates.amqpSnippetTemplate({
+          url: resolvedUrl,
+          isPublish: mode === 'publish',
+          isSubscribe: mode === 'subscribe',
+          isBrowse: mode === 'browse',
+          exchange: data.exchange ? transformValue(data.exchange, envContext) : '',
+          routingKey: data.routingKey ? transformValue(data.routingKey, envContext) : '',
+          payload,
+          queue: data.queue ? transformValue(data.queue, envContext) : '',
+          autoAck: data.autoAck !== false,
+          prefetch: data.prefetch ?? null,
+          browsePeekCount: data.browsePeekCount ?? 50
         })
       }
       break

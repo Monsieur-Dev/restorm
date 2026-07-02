@@ -1,0 +1,12 @@
+{
+  "rabbit_version": "3.13.0",
+  "queues": [
+    {
+      "name": "restorm-e2e-queue",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {}
+    }
+  ]
+}

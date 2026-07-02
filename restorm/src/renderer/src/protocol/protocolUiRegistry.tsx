@@ -12,7 +12,8 @@ import type {
   ODataRequest,
   JsonRpcRequest,
   JsonRpcBatchRequest,
-  TrpcRequest
+  TrpcRequest,
+  AmqpRequest
 } from '../../../shared/types/requests'
 import {
   HTTPRequestTabView,
@@ -25,7 +26,8 @@ import {
   ODataRequestTabView,
   JsonRpcRequestTabView,
   JsonRpcBatchRequestTabView,
-  TrpcRequestTabView
+  TrpcRequestTabView,
+  AmqpRequestTabView
 } from '../components/RequestTabViews'
 
 /**
@@ -57,7 +59,8 @@ export const PROTOCOL_TAB_VIEWS: Record<RequestType, (request: Request) => React
   odata: (request) => <ODataRequestTabView request={request as ODataRequest} />,
   jsonrpc: (request) => <JsonRpcRequestTabView request={request as JsonRpcRequest} />,
   jsonrpcBatch: (request) => <JsonRpcBatchRequestTabView request={request as JsonRpcBatchRequest} />,
-  trpc: (request) => <TrpcRequestTabView request={request as TrpcRequest} />
+  trpc: (request) => <TrpcRequestTabView request={request as TrpcRequest} />,
+  amqp: (request) => <AmqpRequestTabView request={request as AmqpRequest} />
 }
 
 /** Render the tab-view editor element for a request, chosen by its protocol. */

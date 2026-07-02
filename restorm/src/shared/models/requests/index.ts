@@ -13,6 +13,7 @@ export { ODataRequest, type ODataQueryOptions, type ODataOperationKind } from '.
 export { AuthenticationRequest } from './AuthenticationRequest'
 export { JsonRpcRequest, JsonRpcBatchRequest, type JsonRpcBatchCallSpec } from './JsonRpcRequest'
 export { TrpcRequest } from './TrpcRequest'
+export { AmqpRequest } from './AmqpRequest'
 
 // Union type of all request types
 import type { HTTPRequest } from './HTTPRequest'
@@ -26,5 +27,6 @@ import type { AuthenticationRequest } from './AuthenticationRequest'
 import type { JsonRpcRequest } from './JsonRpcRequest'
 import type { JsonRpcBatchRequest } from './JsonRpcRequest'
 import type { TrpcRequest } from './TrpcRequest'
+import type { AmqpRequest } from './AmqpRequest'
 
-export type Request = HTTPRequest | GraphQLRequest | GrpcRequest | SoapRequest | WebSocketRequest | SseRequest | ODataRequest | AuthenticationRequest | JsonRpcRequest | JsonRpcBatchRequest | TrpcRequest
+export type Request = HTTPRequest | GraphQLRequest | GrpcRequest | SoapRequest | WebSocketRequest | SseRequest | ODataRequest | AuthenticationRequest | JsonRpcRequest | JsonRpcBatchRequest | TrpcRequest | AmqpRequest

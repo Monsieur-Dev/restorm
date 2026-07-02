@@ -429,6 +429,28 @@ export const sseDisconnectArgs = z.tuple([requestIdArg])
 export const sseIsActiveArgs = z.tuple([requestIdArg])
 
 // ==========================================================================
+// AMQP Execution
+// ==========================================================================
+
+export const amqpExecuteArgs = z.tuple([
+  z.object({
+    requestId: z.string(),
+    timeout: z.number().optional()
+  }).loose()
+])
+
+export const amqpConnectArgs = z.tuple([
+  z.object({
+    requestId: z.string(),
+    timeout: z.number().optional()
+  }).loose()
+])
+export const amqpSendArgs = z.tuple([requestIdArg, z.string()])
+export const amqpDisconnectArgs = z.tuple([requestIdArg])
+export const amqpCancelArgs = z.tuple([requestIdArg])
+export const amqpIsActiveArgs = z.tuple([requestIdArg])
+
+// ==========================================================================
 // Responses History
 // ==========================================================================
 
@@ -652,6 +674,12 @@ export const websocketConnectResultSchema = z.object({
 })
 
 export const sseConnectResultSchema = z.object({
+  requestId: z.string(),
+  success: z.boolean(),
+  error: z.string().optional(),
+})
+
+export const amqpExecuteResultSchema = z.object({
   requestId: z.string(),
   success: z.boolean(),
   error: z.string().optional(),

@@ -41,6 +41,7 @@ import type { WebSocketExecutionResult } from './WebSocketExecutionService'
 import type { JsonRpcExecutionResult, JsonRpcBatchExecutionResult } from './JsonRpcExecutionService'
 import type { TrpcExecutionResult } from './TrpcExecutionService'
 import type { SseExecutionResult } from './SseExecutionService'
+import type { AmqpExecutionResult } from './AMQPExecutionService'
 import { normalizeODataResponse } from '../../shared/utils/odataResponse'
 import { redactTokensFromBody, collectTokenValues, redactTokensFromHeaders } from './AuthenticationRedaction'
 import { isAuthenticationRequest } from '../../shared/types/collections'
@@ -57,6 +58,7 @@ type ExecutionResult =
   | JsonRpcBatchExecutionResult
   | TrpcExecutionResult
   | SseExecutionResult
+  | AmqpExecutionResult
 
 /**
  * Compute the 3-way visual outcome (`ok` / `warning` / `failure`) for
@@ -99,6 +101,14 @@ function webSocketOutcome(result: WebSocketExecutionResult): ResponseHistoryOutc
  * either, only whether the stream ever connected and ended cleanly. */
 function sseOutcome(result: SseExecutionResult): ResponseHistoryOutcome {
   return result.success && result.connected ? 'ok' : 'failure'
+}
+
+/**
+ * AMQP has no per-message status either — publish/browse/subscribe each
+ * settle to a single success/failure the same way WebSocket does.
+ */
+function amqpOutcome(result: AmqpExecutionResult): ResponseHistoryOutcome {
+  return result.success ? 'ok' : 'failure'
 }
 
 function outcomeToSuccess(outcome: ResponseHistoryOutcome): boolean {
@@ -405,7 +415,8 @@ class ResponseHistoryService {
       jsonrpc: { build: (id, r) => this.buildJsonRpcResponse(id, r as JsonRpcExecutionResult), outcome: (r) => jsonRpcOutcome(r as JsonRpcExecutionResult) },
       jsonrpcBatch: { build: (id, r) => this.buildJsonRpcBatchResponse(id, r as JsonRpcBatchExecutionResult), outcome: (r) => jsonRpcBatchOutcome(r as JsonRpcBatchExecutionResult) },
       trpc: { build: (id, r) => this.buildTrpcResponse(id, r as TrpcExecutionResult), outcome: (r) => httpOutcome(r as TrpcExecutionResult) },
-      sse: { build: (id, r) => this.buildSseResponse(id, r as SseExecutionResult), outcome: (r) => sseOutcome(r as SseExecutionResult) }
+      sse: { build: (id, r) => this.buildSseResponse(id, r as SseExecutionResult), outcome: (r) => sseOutcome(r as SseExecutionResult) },
+      amqp: { build: (id, r) => this.buildAmqpResponse(id, r as AmqpExecutionResult), outcome: (r) => amqpOutcome(r as AmqpExecutionResult) }
     }
 
     const builder = builders[type]
@@ -757,6 +768,28 @@ class ResponseHistoryService {
         data: frame.data,
         id: frame.id,
         timestamp: frame.timestamp
+      })),
+      timings: result.timings,
+      ...(result.error ? { error: result.error } : {})
+    }
+  }
+
+  private buildAmqpResponse(requestId: string, result: AmqpExecutionResult): ResponseHistoryResponse | null {
+    const resolvedUrl = contextService.getResolvedUrl(requestId)?.resolvedUrl ?? result.requestUrl ?? ''
+
+    return {
+      type: 'amqp',
+      requestUrl: resolvedUrl,
+      mode: result.mode,
+      connected: result.connected,
+      messages: result.messages.map((msg) => ({
+        direction: msg.direction,
+        data: msg.data,
+        ...(msg.exchange !== undefined ? { exchange: msg.exchange } : {}),
+        ...(msg.routingKey !== undefined ? { routingKey: msg.routingKey } : {}),
+        ...(msg.deliveryTag !== undefined ? { deliveryTag: msg.deliveryTag } : {}),
+        ...(msg.peek !== undefined ? { peek: msg.peek } : {}),
+        timestamp: msg.timestamp
       })),
       timings: result.timings,
       ...(result.error ? { error: result.error } : {})

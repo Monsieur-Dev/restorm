@@ -10,3 +10,4 @@ export { ODataRequestTabView, type ODataRequestTabViewProps } from './ODataReque
 export { JsonRpcRequestTabView, type JsonRpcRequestTabViewProps } from './JsonRpcRequestTabView'
 export { JsonRpcBatchRequestTabView, type JsonRpcBatchRequestTabViewProps } from './JsonRpcBatchRequestTabView'
 export { TrpcRequestTabView, type TrpcRequestTabViewProps } from './TrpcRequestTabView'
+export { AmqpRequestTabView, type AmqpRequestTabViewProps } from './AmqpRequestTabView'

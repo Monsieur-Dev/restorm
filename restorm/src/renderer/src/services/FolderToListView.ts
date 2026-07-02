@@ -5,8 +5,8 @@
 import type { ListViewItemData } from 'electron-core-ui/renderer'
 import { IconView } from 'electron-core-ui/renderer'
 import type { Icon } from 'electron-core-ui/types'
-import type { Folder, FolderItem, HTTPRequest, EnvironmentFolder, GraphQLRequest, GrpcRequest, SoapRequest, WebSocketRequest, ODataRequest, AuthenticationRequest, Scenario, Environment } from '../../../shared/types/collections'
-import { isFolder, isRequest, isHTTPRequest, isEnvironmentFolder, isAnyFolder, isGraphQLRequest, isGrpcRequest, isSoapRequest, isWebSocketRequest, isODataRequest, isAuthenticationRequest, isScenario } from '../../../shared/types/collections'
+import type { Folder, FolderItem, HTTPRequest, EnvironmentFolder, GraphQLRequest, GrpcRequest, SoapRequest, WebSocketRequest, ODataRequest, AuthenticationRequest, AmqpRequest, Scenario, Environment } from '../../../shared/types/collections'
+import { isFolder, isRequest, isHTTPRequest, isEnvironmentFolder, isAnyFolder, isGraphQLRequest, isGrpcRequest, isSoapRequest, isWebSocketRequest, isODataRequest, isAuthenticationRequest, isAmqpRequest, isScenario } from '../../../shared/types/collections'
 import React, { type ReactNode } from 'react'
 import { ScenarioRunningBadge } from '../components/common/ScenarioRunningBadge'
 import { ServerListeningBadge } from '../components/common/ServerListeningBadge'
@@ -261,6 +261,23 @@ function authenticationRequestToListViewItem(
 }
 
 /**
+ * Convert an AmqpRequest to a ListViewItemData. Not server-capable (v1) —
+ * always the listening beam (lit only while a `subscribe` connection is
+ * open), never the SRV capsule.
+ */
+function amqpRequestToListViewItem(
+  request: AmqpRequest,
+  options: FolderToListViewOptions
+): ListViewItemData {
+  const badge = options.renderProtocolBadge?.('amqp', 'AMQP')
+  return {
+    id: request.id,
+    title: request.name,
+    icon: withListeningBeam(request.id, badge)
+  }
+}
+
+/**
  * Convert a Scenario to a ListViewItemData. Renders the circuit-board
  * scenario badge so dataflow graphs are visually distinct from requests.
  * A scenario doubles as a folder-like container: its `items` (requests +
@@ -310,6 +327,7 @@ export function folderItemToListViewItem(
     else if (isWebSocketRequest(item)) base = websocketRequestToListViewItem(item, options)
     else if (isODataRequest(item)) base = odataRequestToListViewItem(item, options)
     else if (isAuthenticationRequest(item)) base = authenticationRequestToListViewItem(item, options)
+    else if (isAmqpRequest(item)) base = amqpRequestToListViewItem(item, options)
     if (base) return { ...base, rightActions: secretBadges(item.id) }
   }
 

@@ -289,6 +289,11 @@ variables:
     value: "#f97316"
     description: "Auth badge background (orange)"
 
+  # ── AMQP ────────────────────────────────────────────────────────────────────
+  - id: badge-amqp-background
+    value: "#c62828"
+    description: "AMQP badge background (Material red — distinct from the SOAP/MQTT/OData/Auth orange cluster)"
+
   # ── Scenario badge ──────────────────────────────────────────────────────────
   - id: badge-scenario-background
     value: "#8b5cf6"

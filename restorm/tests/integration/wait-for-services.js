@@ -33,7 +33,18 @@ const SERVICES = [
   { name: 'Connect-RPC mock', url: 'http://localhost:8093/health' },
   // MQTT (eclipse-mosquitto) speaks the MQTT protocol on 1883 — not HTTP, so
   // probe the raw TCP port.
-  { name: 'MQTT (mosquitto)', tcp: { host: 'localhost', port: 1883 } }
+  { name: 'MQTT (mosquitto)', tcp: { host: 'localhost', port: 1883 } },
+  // RabbitMQ takes longer than mosquitto to become ready (broker + the
+  // management HTTP API both have to come up) — probe the management
+  // plugin's aliveness-test endpoint (does a real publish+consume against
+  // the default vhost `/`, not just a port-open check) rather than the raw
+  // AMQP port on :5672. Default guest/guest credentials only work for
+  // loopback connections, which is exactly what CI does here.
+  {
+    name: 'RabbitMQ (management)',
+    url: 'http://localhost:15672/api/aliveness-test/%2F',
+    headers: { Authorization: `Basic ${Buffer.from('guest:guest').toString('base64')}` }
+  }
 ]
 
 const MAX_RETRIES = 60

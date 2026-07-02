@@ -9,12 +9,13 @@ import type { ODataRequest, ODataQueryOptions, ODataOperationKind, ODataBatchFor
 import type { AuthenticationRequest } from './AuthenticationRequest'
 import type { JsonRpcRequest, JsonRpcBatchRequest, JsonRpcBatchCallSpec } from './JsonRpcRequest'
 import type { TrpcRequest } from './TrpcRequest'
+import type { AmqpRequest } from './AmqpRequest'
 import type { QuickConfig, QuickConfigStorageTarget } from './QuickConfig'
 
-export type { BaseRequest, ImportOrigin, HTTPRequest, GraphQLRequest, GrpcRequest, GrpcMockMethod, SoapRequest, WebSocketRequest, SseRequest, ODataRequest, ODataQueryOptions, ODataOperationKind, ODataBatchFormat, ODataBatchSubRequestSpec, ODataOperationParameterSpec, AuthenticationRequest, JsonRpcRequest, JsonRpcBatchRequest, JsonRpcBatchCallSpec, TrpcRequest }
+export type { BaseRequest, ImportOrigin, HTTPRequest, GraphQLRequest, GrpcRequest, GrpcMockMethod, SoapRequest, WebSocketRequest, SseRequest, ODataRequest, ODataQueryOptions, ODataOperationKind, ODataBatchFormat, ODataBatchSubRequestSpec, ODataOperationParameterSpec, AuthenticationRequest, JsonRpcRequest, JsonRpcBatchRequest, JsonRpcBatchCallSpec, TrpcRequest, AmqpRequest }
 export type { QuickConfig, QuickConfigStorageTarget }
 
-export type Request = HTTPRequest | GraphQLRequest | GrpcRequest | SoapRequest | WebSocketRequest | SseRequest | ODataRequest | AuthenticationRequest | JsonRpcRequest | JsonRpcBatchRequest | TrpcRequest
+export type Request = HTTPRequest | GraphQLRequest | GrpcRequest | SoapRequest | WebSocketRequest | SseRequest | ODataRequest | AuthenticationRequest | JsonRpcRequest | JsonRpcBatchRequest | TrpcRequest | AmqpRequest
 
 export function isHTTPRequest(request: Request): request is HTTPRequest {
   return request.type === 'http'
@@ -58,4 +59,8 @@ export function isJsonRpcBatchRequest(request: Request): request is JsonRpcBatch
 
 export function isTrpcRequest(request: Request): request is TrpcRequest {
   return request.type === 'trpc'
+}
+
+export function isAmqpRequest(request: Request): request is AmqpRequest {
+  return request.type === 'amqp'
 }

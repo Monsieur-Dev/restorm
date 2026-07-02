@@ -142,6 +142,12 @@ const sseExecutionTestDir = defineBddConfig({
   outputDir: '.features-gen/sse-execution'
 })
 
+const amqpExecutionTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/amqp-execution/features/**/*.feature',
+  steps: ['tests/e2e/bdd/amqp-execution/steps/**/*.ts', 'tests/e2e/bdd/fixtures/mcp-server.fixture.ts'],
+  outputDir: '.features-gen/amqp-execution'
+})
+
 const quickSettingsTestDir = defineBddConfig({
   features: 'tests/e2e/bdd/quick-settings/features/**/*.feature',
   steps: ['tests/e2e/bdd/quick-settings/steps/**/*.ts', 'tests/e2e/bdd/fixtures/mcp-server.fixture.ts'],
@@ -522,6 +528,11 @@ export default defineConfig({
     {
       name: 'sse-execution',
       testDir: sseExecutionTestDir,
+      timeout: 180 * 1000
+    },
+    {
+      name: 'amqp-execution',
+      testDir: amqpExecutionTestDir,
       timeout: 180 * 1000
     },
     {

@@ -60,7 +60,7 @@ export type HTTPRequestBody =
 /** Full request data for URL resolution and code snippet generation */
 export interface FullRequestData {
   id: string
-  requestType: 'http' | 'graphql' | 'grpc' | 'soap' | 'websocket' | 'sse' | 'odata' | 'auth' | 'jsonrpc' | 'jsonrpcBatch' | 'trpc'
+  requestType: 'http' | 'graphql' | 'grpc' | 'soap' | 'websocket' | 'sse' | 'odata' | 'auth' | 'jsonrpc' | 'jsonrpcBatch' | 'trpc' | 'amqp'
 
   // Common fields
   url: string
@@ -184,6 +184,28 @@ export interface FullRequestData {
   trpcProcedure?: string
   trpcInput?: string
   trpcKind?: 'query' | 'mutation'
+
+  // AMQP specific (requestType === 'amqp'; `username`/`password` above are
+  // shared with MQTT — only one protocol branch ever populates them on a
+  // given instance).
+  /** Virtual host (defaults to `/` when empty). */
+  vhost?: string
+  /** Which of the three interactions this request performs. */
+  mode?: 'publish' | 'subscribe' | 'browse'
+  /** PUBLISH: destination exchange (empty string = the default exchange). */
+  exchange?: string
+  /** PUBLISH: routing key. */
+  routingKey?: string
+  /** PUBLISH: message payload. */
+  payload?: string
+  /** SUBSCRIBE / BROWSE: source queue name. */
+  queue?: string
+  /** SUBSCRIBE: ack received messages automatically (default true). */
+  autoAck?: boolean
+  /** SUBSCRIBE: `channel.prefetch` — max unacked messages in flight. */
+  prefetch?: number
+  /** BROWSE: max messages to peek without acking (default 50). */
+  browsePeekCount?: number
 }
 
 /** Request context tracking with full data */

@@ -57,7 +57,7 @@ import {
 import { httpRequestExecutor } from './httpRequestExecutor'
 import { soapRequestExecutor } from './soapRequestExecutor'
 import { runScenarioExecutor } from './runScenarioExecutor'
-import { socketioConnectExecutor, socketioSendExecutor, socketioCloseExecutor, websocketConnectExecutor, websocketSendExecutor, websocketCloseExecutor, sseConnectExecutor, sseCloseExecutor, mqttConnectExecutor, mqttSendExecutor, mqttCloseExecutor, grpcConnectExecutor, grpcSendExecutor, grpcCloseExecutor, grpcListenExecutor, grpcServerCloseExecutor, httpListenExecutor, httpCloseExecutor, soapListenExecutor, soapCloseExecutor, graphqlListenExecutor, graphqlCloseExecutor, odataListenExecutor, odataCloseExecutor, graphqlSubscribeExecutor, graphqlUnsubscribeExecutor } from './socketioExecutors'
+import { socketioConnectExecutor, socketioSendExecutor, socketioCloseExecutor, websocketConnectExecutor, websocketSendExecutor, websocketCloseExecutor, sseConnectExecutor, sseCloseExecutor, mqttConnectExecutor, mqttSendExecutor, mqttCloseExecutor, amqpConnectExecutor, amqpPublishExecutor, amqpCloseExecutor, grpcConnectExecutor, grpcSendExecutor, grpcCloseExecutor, grpcListenExecutor, grpcServerCloseExecutor, httpListenExecutor, httpCloseExecutor, soapListenExecutor, soapCloseExecutor, graphqlListenExecutor, graphqlCloseExecutor, odataListenExecutor, odataCloseExecutor, graphqlSubscribeExecutor, graphqlUnsubscribeExecutor } from './socketioExecutors'
 import { concreteValue } from '../../../shared/utils/scenarioStaticPreview'
 import { coerceCliParamValue } from '../../../shared/scenarioCliParams'
 import { readInputParams, inputParamName } from '../../../shared/scenarioInputParams'
@@ -248,6 +248,9 @@ export function pickExecutor(kind: string): NodeExecutor {
     case 'mqttConnect': return mqttConnectExecutor
     case 'mqttSend': return mqttSendExecutor
     case 'mqttClose': return mqttCloseExecutor
+    case 'amqpConnect': return amqpConnectExecutor
+    case 'amqpPublish': return amqpPublishExecutor
+    case 'amqpClose': return amqpCloseExecutor
     case 'grpcConnect': return grpcConnectExecutor
     case 'grpcSend': return grpcSendExecutor
     case 'grpcClose': return grpcCloseExecutor

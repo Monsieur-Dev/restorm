@@ -1,4 +1,4 @@
-export type ResponseHistoryRequestType = 'http' | 'odata' | 'graphql' | 'grpc' | 'soap' | 'websocket' | 'sse' | 'jsonrpc' | 'jsonrpcBatch' | 'trpc'
+export type ResponseHistoryRequestType = 'http' | 'odata' | 'graphql' | 'grpc' | 'soap' | 'websocket' | 'sse' | 'jsonrpc' | 'jsonrpcBatch' | 'trpc' | 'amqp'
 
 /**
  * 3-way visual signal for the per-entry status dot in the history
@@ -268,6 +268,30 @@ export interface ResponseHistorySseResponse {
   error?: string
 }
 
+export interface ResponseHistoryAmqpMessage {
+  direction: 'sent' | 'received'
+  data: string
+  exchange?: string
+  routingKey?: string
+  deliveryTag?: number
+  /** Set on a `browse`-mode message: peeked without acking. */
+  peek?: boolean
+  timestamp: string
+}
+
+export interface ResponseHistoryAmqpResponse {
+  type: 'amqp'
+  requestUrl: string
+  mode: 'publish' | 'subscribe' | 'browse'
+  connected: boolean
+  messages: ResponseHistoryAmqpMessage[]
+  timings: {
+    startedAt: string
+    durationMs: number
+  }
+  error?: string
+}
+
 export type ResponseHistoryResponse =
   | ResponseHistoryHttpResponse
   | ResponseHistoryODataResponse
@@ -279,6 +303,7 @@ export type ResponseHistoryResponse =
   | ResponseHistoryJsonRpcBatchResponse
   | ResponseHistoryTrpcResponse
   | ResponseHistorySseResponse
+  | ResponseHistoryAmqpResponse
 
 export interface ResponseHistoryDetail {
   guid: string

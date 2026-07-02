@@ -48,6 +48,7 @@ import {
   isODataRequest,
   isAuthenticationRequest,
   isTrpcRequest,
+  isAmqpRequest,
   isEnvironmentFolder,
   isAnyFolder,
   isScenario
@@ -64,6 +65,7 @@ import type {
   ODataRequestTab,
   AuthenticationRequestTab,
   TrpcRequestTab,
+  AmqpRequestTab,
   ScenarioEditorTab,
   ConsoleTab,
   FirewallTab,
@@ -508,6 +510,9 @@ export function useWorkbenchTabs(options: UseWorkbenchTabsOptions): UseWorkbench
     } else if (isTrpcRequest(request)) {
       tabType = 'trpc-request'
       title = `tRPC ${request.name}`
+    } else if (isAmqpRequest(request)) {
+      tabType = 'amqp-request'
+      title = request.name
     } else {
       return // Unknown request type
     }
@@ -842,6 +847,18 @@ export function useWorkbenchTabs(options: UseWorkbenchTabsOptions): UseWorkbench
           environments,
           allowFullscreen: true
         } as TrpcRequestTab
+      }
+      if (isAmqpRequest(requestItem)) {
+        return {
+          id: tabId,
+          tabType: 'amqp-request',
+          title: requestItem.name,
+          titleString: requestItem.name,
+          request: requestItem,
+          breadcrumbs,
+          environments,
+          allowFullscreen: true
+        } as AmqpRequestTab
       }
     }
     return null

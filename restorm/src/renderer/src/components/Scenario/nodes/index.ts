@@ -45,6 +45,7 @@ import { SocketioConnectNodeBox, SocketioSendNodeBox, SocketioCloseNodeBox } fro
 import { WebsocketConnectNodeBox, WebsocketSendNodeBox, WebsocketCloseNodeBox } from './WebsocketNodeBoxes'
 import { SseConnectNodeBox, SseCloseNodeBox } from './SseNodeBoxes'
 import { MqttConnectNodeBox, MqttSendNodeBox, MqttCloseNodeBox } from './MqttNodeBoxes'
+import { AmqpConnectNodeBox, AmqpPublishNodeBox, AmqpCloseNodeBox } from './AmqpNodeBoxes'
 import { GrpcConnectNodeBox, GrpcSendNodeBox, GrpcCloseNodeBox } from './GrpcNodeBoxes'
 import { HttpListenNodeBox, HttpCloseNodeBox } from './HttpServerNodeBoxes'
 import { GrpcListenNodeBox, GrpcServerCloseNodeBox } from './GrpcServerNodeBoxes'
@@ -83,6 +84,9 @@ const SCENARIO_NODE_COMPONENTS: Record<ScenarioNodeKind, NodeBoxComponent> = {
   mqttConnect: MqttConnectNodeBox,
   mqttSend: MqttSendNodeBox,
   mqttClose: MqttCloseNodeBox,
+  amqpConnect: AmqpConnectNodeBox,
+  amqpPublish: AmqpPublishNodeBox,
+  amqpClose: AmqpCloseNodeBox,
   grpcConnect: GrpcConnectNodeBox,
   grpcSend: GrpcSendNodeBox,
   grpcClose: GrpcCloseNodeBox,

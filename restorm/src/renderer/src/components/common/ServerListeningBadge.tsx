@@ -1,6 +1,7 @@
 import React from 'react'
 import { useIsWebsocketListening } from '../../services/websocketListeningStore'
 import { useIsSseListening } from '../../services/sseListeningStore'
+import { useIsAmqpListening } from '../../services/amqpListeningStore'
 import { useIsGrpcListening } from '../../services/grpcListeningStore'
 import { useIsGrpcServerListening } from '../../services/grpcServerListeningStore'
 import { useIsHttpListening } from '../../services/httpListeningStore'
@@ -19,10 +20,10 @@ export interface ServerListeningBadgeProps {
 /**
  * Wraps a long-running / server request badge and runs the border-beam around it
  * while the request is listening — an HTTP / GraphQL / SOAP mock host, a raw-WS /
- * Socket.IO / MQTT server, an open gRPC stream, or an open SSE client
- * connection. The same orbiting trail a running scenario shows, so an active
- * listener is visible BOTH in the sidebar tree AND on the workbench tab
- * without opening the request.
+ * Socket.IO / MQTT server, an open gRPC stream, an open SSE client
+ * connection, or an open AMQP `subscribe` connection. The same orbiting trail
+ * a running scenario shows, so an active listener is visible BOTH in the
+ * sidebar tree AND on the workbench tab without opening the request.
  *
  * A `requestId` belongs to exactly one protocol, so ORing every protocol's
  * listening store is safe — at most one is ever `true` for a given id — and
@@ -37,8 +38,9 @@ export const ServerListeningBadge: React.FC<ServerListeningBadgeProps> = ({ requ
   const soapListening = useIsSoapListening(requestId)
   const graphqlListening = useIsGraphqlListening(requestId)
   const odataListening = useIsODataListening(requestId)
+  const amqpListening = useIsAmqpListening(requestId)
   return (
-    <BeamWrap active={wsListening || sseListening || grpcListening || grpcServerListening || httpListening || soapListening || graphqlListening || odataListening} size={16} borderWidth={1.5}>
+    <BeamWrap active={wsListening || sseListening || grpcListening || grpcServerListening || httpListening || soapListening || graphqlListening || odataListening || amqpListening} size={16} borderWidth={1.5}>
       {children}
     </BeamWrap>
   )

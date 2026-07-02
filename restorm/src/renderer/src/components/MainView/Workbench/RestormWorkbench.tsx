@@ -16,6 +16,7 @@ import {
   isODataRequestTab,
   isAuthenticationRequestTab,
   isTrpcRequestTab,
+  isAmqpRequestTab,
   isAnyRequestTab,
   isScenarioEditorTab,
   isConsoleTab,
@@ -366,7 +367,8 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
       isSseRequestTab(tab) ||
       isODataRequestTab(tab) ||
       isAuthenticationRequestTab(tab) ||
-      isTrpcRequestTab(tab)
+      isTrpcRequestTab(tab) ||
+      isAmqpRequestTab(tab)
     ) {
       return tab.request.id
     }
@@ -589,6 +591,22 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
       return (
         <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
           <Badge type="tRPC" />
+          <span>{restormTab.request.name}</span>
+          <ItemSecretBadges itemId={restormTab.request.id} />
+          {renderDirtyIndicator(restormTab)}
+        </span>
+      )
+    }
+
+    // AMQP request tab. Not server-capable (v1) — the listening beam only ever
+    // reflects an open `subscribe` connection, the same beam the sidebar tree
+    // paints, driven by the same listening state.
+    if (isAmqpRequestTab(restormTab)) {
+      return (
+        <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <ServerListeningBadge requestId={restormTab.request.id}>
+            <Badge type="AMQP" />
+          </ServerListeningBadge>
           <span>{restormTab.request.name}</span>
           <ItemSecretBadges itemId={restormTab.request.id} />
           {renderDirtyIndicator(restormTab)}
@@ -1386,6 +1404,43 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
     // Authentication request tab — reuses HTTPRequestTabView, which
     // injects an extra "Configuration" tab when it sees type === 'auth'.
     if (isAuthenticationRequestTab(effectiveTab)) {
+      // Prefer the live reactive request proxy (so in-place mutations — quick-
+      // config Load, MCP update_request — re-render this tab) and fall back to
+      // the tab's static snapshot only when the tree lookup misses. Mirrors the
+      // HTTP branch above; without it a non-HTTP tab edits a detached snapshot.
+      // The lookup returns a `Request`; this branch's type guard fixed the
+      // concrete kind, and the reactive node shares the tab request's id, so the
+      // cast to the tab request's type is sound.
+      const reactive = getRequestById?.(effectiveTab.request.id)
+      const request = reactive?.type === effectiveTab.request.type ? reactive : effectiveTab.request
+      return (
+        <EnvironmentProvider environments={liveEnvironments} tagColors={requestTagColors} persistenceKey={envPersistenceKey(effectiveTab.request.id)} folderRequestIds={envFolderRequestIds}>
+          <RestormWorkbenchTab
+            breadcrumbs={breadcrumbs}
+            onBreadcrumbClick={onBreadcrumbClick}
+            onBreadcrumbAuxClick={onBreadcrumbAuxClick}
+            onBreadcrumbRename={onItemRename}
+            onBreadcrumbIconChange={onItemIconChange}
+            tags={request.tags}
+            onTagsChange={(nextTags) => { onTagsChange?.(request.id, nextTags) }}
+            tagColors={requestTagColors}
+            onTagColorChange={handleRequestTagColorChange}
+            tabId={effectiveTab.id}
+            {...favoritePropsFor(request.id)}
+            headerActions={requestHeaderActionsFor(request.id, request)}
+            topRightAction={scenarioUsageActionFor(request.id)}
+            starLeftAction={starLeftActionFor(request)}
+          >
+            <div style={{ flex: 1, minHeight: 0, minWidth: 0, padding: '0 16px 8px 16px' }}>
+              {renderProtocolTabView(request)}
+            </div>
+          </RestormWorkbenchTab>
+        </EnvironmentProvider>
+      )
+    }
+
+    // AMQP request tab
+    if (isAmqpRequestTab(effectiveTab)) {
       // Prefer the live reactive request proxy (so in-place mutations — quick-
       // config Load, MCP update_request — re-render this tab) and fall back to
       // the tab's static snapshot only when the tree lookup misses. Mirrors the

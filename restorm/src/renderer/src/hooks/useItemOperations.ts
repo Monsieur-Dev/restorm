@@ -18,7 +18,8 @@ import {
   SseRequest,
   ODataRequest,
   AuthenticationRequest,
-  TrpcRequest
+  TrpcRequest,
+  AmqpRequest
 } from '../../../shared/models/requests'
 import type { HTTPMethod } from '../../../shared/models/types'
 import { findItemById, findItemWithBreadcrumbs, getFolderIcon, getNearestEnvironmentsForBreadcrumbs } from '../utils/treeSearch'
@@ -476,6 +477,7 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
       case 'sse': return 'New SSE request'
       case 'odata': return 'New OData request'
       case 'odata-server': return 'New OData mock server'
+      case 'amqp': return 'New AMQP request'
       case 'auth': return 'New auth request'
       case 'trpc': return 'New tRPC request'
       case 'scenario': return 'New scenario'
@@ -686,6 +688,11 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
         })
       } else if (kind === 'trpc') {
         built = new TrpcRequest({ id, name })
+      } else if (kind === 'amqp') {
+        // AMQP: one request type covers publish / subscribe / browse (picked
+        // via the tab's mode selector) — default to publish against a local
+        // broker, mirroring the MQTT client default.
+        built = new AmqpRequest({ id, name, url: 'amqp://localhost:5672' })
       } else {
         built = new AuthenticationRequest({ id, name })
       }

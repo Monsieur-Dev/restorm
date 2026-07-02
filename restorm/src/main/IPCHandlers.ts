@@ -28,6 +28,7 @@ import { trpcExecutionService } from './services/TrpcExecutionService'
 import { websocketExecutionService, type WebSocketExecutionInput } from './services/WebSocketExecutionService'
 import { jsonRpcExecutionService } from './services/JsonRpcExecutionService'
 import { sseExecutionService, type SseExecutionInput } from './services/SseExecutionService'
+import { amqpExecutionService, type AmqpExecutionInput } from './services/AMQPExecutionService'
 import { scenarioEngine } from './scenarioEngine/engine'
 import { importFrom } from './services/import/ImportManager'
 import { importGrpcFromReflection, findExistingGrpcReflectionFolder, reimportGrpcReflection } from './services/import/GrpcReflectionImportService'
@@ -60,6 +61,7 @@ import {
   odataListenArgs, odataStopArgs, odataIsListeningArgs,
   websocketConnectArgs, websocketDisconnectArgs, websocketSendArgs, websocketIsActiveArgs,
   sseConnectArgs, sseDisconnectArgs, sseIsActiveArgs,
+  amqpExecuteArgs, amqpConnectArgs, amqpSendArgs, amqpDisconnectArgs, amqpCancelArgs, amqpIsActiveArgs,
   responsesHistoryListArgs, responsesHistoryGetArgs,
   responsesHistoryTogglePinArgs,
   requestUsageGetArgs,
@@ -796,6 +798,9 @@ export function registerRestormIPC(deps: {
     await websocketExecutionService.closeAll()
     // File close — same for any open SSE connections (client-only, no port).
     sseExecutionService.closeAll()
+    // File close — same for any open AMQP subscribe connection (not
+    // server-capable, so no port to release — just drop the broker client).
+    await amqpExecutionService.closeAll()
     // File close — same for any hosted gRPC mock server (its own grpc.Server on
     // its own port): release the port so it doesn't keep listening past the file.
     grpcMockServerService.closeAll()
@@ -1399,6 +1404,52 @@ export function registerRestormIPC(deps: {
 
   validatedHandle('sse:is-active', sseIsActiveArgs, (_event, [requestId]) => {
     return sseExecutionService.isActive(requestId)
+  })
+
+  // ==========================================================================
+  // AMQP Execution IPC Handlers
+  // ==========================================================================
+
+  validatedHandle('amqp:execute', amqpExecuteArgs, async (_event, [input]) => {
+    // `execute()` persists publish/browse to history itself (mirrors gRPC —
+    // see the comment on `grpc:execute` above); the handler only records usage.
+    const result = await amqpExecutionService.execute(input as AmqpExecutionInput)
+    setImmediate(() => {
+      requestUsageService.recordSend(input.requestId)
+    })
+    return result
+  })
+
+  validatedHandle('amqp:connect', amqpConnectArgs, (_event, [input]) => {
+    // Open a long-lived subscribe connection. Frames + lifecycle reach the
+    // renderer via the `amqp:message` / `amqp:connection-progress` broadcasts
+    // the service fires internally, so the callbacks are no-ops.
+    const noop = (): void => { /* lifecycle is delivered via the IPC broadcasts */ }
+    amqpExecutionService.connectStreaming({
+      requestId: input.requestId,
+      onConnect: noop,
+      onMessage: noop,
+      onClose: noop,
+      ...(input.timeout !== undefined ? { timeout: input.timeout } : {})
+    })
+    setImmediate(() => { requestUsageService.recordSend(input.requestId) })
+    return { started: true }
+  })
+
+  validatedHandle('amqp:send', amqpSendArgs, (_event, [requestId, payload]) => {
+    return amqpExecutionService.send(requestId, payload)
+  })
+
+  validatedHandle('amqp:disconnect', amqpDisconnectArgs, (_event, [requestId]) => {
+    return amqpExecutionService.disconnect(requestId)
+  })
+
+  validatedHandle('amqp:cancel', amqpCancelArgs, (_event, [requestId]) => {
+    return amqpExecutionService.cancel(requestId)
+  })
+
+  validatedHandle('amqp:is-active', amqpIsActiveArgs, (_event, [requestId]) => {
+    return amqpExecutionService.isActive(requestId)
   })
 
   // ==========================================================================

@@ -46,3 +46,5 @@ export type WebSocketProtocol = 'websocket' | 'socketio' | 'mqtt'
 export type ODataVersion = 'v2' | 'v3' | 'v4' | 'v4.01'
 
 export type TrpcCallKind = 'query' | 'mutation'
+
+export type AmqpMode = 'publish' | 'subscribe' | 'browse'

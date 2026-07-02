@@ -447,6 +447,10 @@ colors:
     value: "#ff9800"
     description: "Auth badge (HC dark)"
 
+  - id: badge-amqp-background
+    value: "#ef5350"
+    description: "AMQP badge (HC dark)"
+
   - id: badge-scenario-background
     value: "#7c4dff"
     description: "Scenario badge (HC dark)"

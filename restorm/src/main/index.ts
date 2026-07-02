@@ -104,6 +104,7 @@ import { registerBuiltinSources } from './services/secrets/mainSourceRegistry'
 import { secretHydrationService } from './services/secrets/SecretHydrationService'
 import { websocketExecutionService } from './services/WebSocketExecutionService'
 import { sseExecutionService } from './services/SseExecutionService'
+import { amqpExecutionService } from './services/AMQPExecutionService'
 import { grpcMockServerService } from './services/GRPCMockServerService'
 import { odataMockServerService } from './services/ODataMockServerService'
 import { registerApiUpdateIPC } from './services/apiUpdate/registerApiUpdateIPC'
@@ -544,6 +545,8 @@ app.on('before-quit', () => {
   void websocketExecutionService.closeAll()
   // Same for any open SSE connections (no server/port to release — client-only).
   sseExecutionService.closeAll()
+  // Same for any open AMQP subscribe connection.
+  void amqpExecutionService.closeAll()
   // Same for any hosted gRPC mock server (its own grpc.Server / port).
   grpcMockServerService.closeAll()
   // Same for any hosted OData mock service (its routes on the shared HTTP host).

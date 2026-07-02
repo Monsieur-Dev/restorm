@@ -108,6 +108,26 @@ services:
       #     -c "mosquitto_passwd -b -c /tmp/pw restorm restorm && cat /tmp/pw"
       - ./mosquitto-passwd:/mosquitto/config/passwd:ro
 
+  # AMQP - RabbitMQ (management plugin enabled for the aliveness-test probe
+  # below + the web UI at :15672 for manual local inspection). The image
+  # takes longer than mosquitto to become ready (broker + management HTTP
+  # API both have to come up), hence the generous start_period.
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: restorm-rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - ./rabbitmq.conf:/etc/rabbitmq/conf.d/10-restorm-e2e.conf:ro
+      - ./rabbitmq-definitions.json:/etc/rabbitmq/definitions.json:ro
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 20s
+
   # SOAP - Castle Mock server (kept for manual local testing via the web UI).
   # The E2E suite targets the soap-server mock below (:8091), which requires
   # no seeding and starts instantly — Castle Mock is NOT used by the tests.

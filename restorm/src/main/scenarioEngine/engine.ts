@@ -19,6 +19,7 @@ import { graphqlSubscriptionService } from '../services/GraphQLSubscriptionServi
 import { grpcExecutionService } from '../services/GRPCExecutionService'
 import { grpcMockServerService } from '../services/GRPCMockServerService'
 import { odataMockServerService } from '../services/ODataMockServerService'
+import { amqpExecutionService } from '../services/AMQPExecutionService'
 import { flushRequestStateToContext } from '../mcp/tools/execute'
 import { installScenarioValueResolvers } from '../../shared/scenarioValueResolvers'
 import { setSecretPreviewResolver } from '../../shared/utils/scenarioStaticPreview'
@@ -255,6 +256,9 @@ export class ScenarioEngine {
         // each served request on `served`; `done` fires when it stops. No client
         // branch — an odataListen node only ever hosts.
         if (req.transport === 'odata-server') return odataMockServerService.connectStreamingODataServer(req)
+        // AMQP: not server-capable (v1, see class doc) — always a client,
+        // consuming the bound request's queue (subscribe mode).
+        if (req.transport === 'amqp') return amqpExecutionService.connectStreaming(req)
         // A request flagged `server` HOSTS the server / broker (restorm acts as
         // the server); otherwise it connects as a client — same split for raw WS,
         // Socket.IO and MQTT.

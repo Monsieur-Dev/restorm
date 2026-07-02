@@ -99,6 +99,10 @@ function routeFromRequest(request: Request): CompilableRoute {
       // the switch exhaustive; no compiled docs will match until the
       // compiler gains an SSE discriminant.
       return { type: 'sse', url: request.url, tags: request.tags }
+    case 'amqp':
+      // Same treatment as OData: no compiler branch for AMQP yet (no import
+      // adapter feeds it), so this never matches — kept exhaustive for TS.
+      return { type: 'odata', url: request.url, tags: request.tags }
   }
 }
 

@@ -31,6 +31,7 @@ import {
   grpcExecuteResultSchema,
   websocketConnectResultSchema,
   sseConnectResultSchema,
+  amqpExecuteResultSchema,
   authPrefetchResultSchema,
   importPreviewResultSchema,
   importImportResultSchema,
@@ -190,7 +191,7 @@ interface AvailableVariablesResult {
 /** Full request data for backend processing */
 interface FullRequestData {
   id: string
-  requestType: 'http' | 'graphql' | 'grpc' | 'soap' | 'websocket' | 'odata' | 'auth' | 'jsonrpc' | 'jsonrpcBatch'
+  requestType: 'http' | 'graphql' | 'grpc' | 'soap' | 'websocket' | 'odata' | 'auth' | 'jsonrpc' | 'jsonrpcBatch' | 'amqp'
   url: string
   headers: { id?: string; key: string; value: string }[]
   method?: string
@@ -240,6 +241,17 @@ interface FullRequestData {
   jsonRpcId?: string
   jsonRpcNotificationMode?: boolean
   jsonRpcChildren?: { childId: string; method: string; params: string; rpcId: string; notificationMode?: boolean }[]
+  // AMQP specific (requestType === 'amqp'; `username`/`password` above are
+  // shared with MQTT)
+  vhost?: string
+  mode?: 'publish' | 'subscribe' | 'browse'
+  exchange?: string
+  routingKey?: string
+  payload?: string
+  queue?: string
+  autoAck?: boolean
+  prefetch?: number
+  browsePeekCount?: number
 }
 
 /** Save result type */
@@ -1414,6 +1426,79 @@ contextBridge.exposeInMainWorld('restorm', {
       ipcRenderer.on('sse:message', handler)
       return () => {
         ipcRenderer.removeListener('sse:message', handler)
+      }
+    }
+  },
+  amqp: {
+    /** One-shot publish / browse (`mode` on the request decides which). */
+    execute: async (input: { requestId: string; timeout?: number }): Promise<{
+      requestId: string
+      success: boolean
+      connected: boolean
+      mode: 'publish' | 'subscribe' | 'browse'
+      messages: { direction: 'sent' | 'received'; data: string; exchange?: string; routingKey?: string; deliveryTag?: number; peek?: boolean; timestamp: string }[]
+      error?: string
+      timings: { startedAt: string; durationMs: number }
+      requestUrl?: string
+    }> => {
+      const result: unknown = await ipcRenderer.invoke('amqp:execute', input)
+      warnOnOutputMismatch('amqp:execute', amqpExecuteResultSchema, result)
+      return result as {
+        requestId: string
+        success: boolean
+        connected: boolean
+        mode: 'publish' | 'subscribe' | 'browse'
+        messages: { direction: 'sent' | 'received'; data: string; exchange?: string; routingKey?: string; deliveryTag?: number; peek?: boolean; timestamp: string }[]
+        error?: string
+        timings: { startedAt: string; durationMs: number }
+        requestUrl?: string
+      }
+    },
+    /** Open a long-lived subscribe connection. Frames + lifecycle arrive via
+     * `onMessage` / `onProgress`. */
+    connect: async (input: { requestId: string; timeout?: number }): Promise<{ started: boolean }> => {
+      const result: unknown = await ipcRenderer.invoke('amqp:connect', input)
+      return result as { started: boolean }
+    },
+    /** Publish on the open subscribe connection (to the bound request's own
+     * exchange/routingKey). */
+    send: async (requestId: string, payload: string): Promise<boolean> => {
+      const result: unknown = await ipcRenderer.invoke('amqp:send', requestId, payload)
+      return result as boolean
+    },
+    /** Close an active subscribe connection. */
+    disconnect: async (requestId: string): Promise<boolean> => {
+      const result: unknown = await ipcRenderer.invoke('amqp:disconnect', requestId)
+      return result as boolean
+    },
+    /** Cancel an in-flight execution (same as `disconnect` for this protocol). */
+    cancel: async (requestId: string): Promise<boolean> => {
+      const result: unknown = await ipcRenderer.invoke('amqp:cancel', requestId)
+      return result as boolean
+    },
+    /** Check if a subscribe connection is currently active. */
+    isActive: async (requestId: string): Promise<boolean> => {
+      const result: unknown = await ipcRenderer.invoke('amqp:is-active', requestId)
+      return result as boolean
+    },
+    /** Listen for connection progress updates (subscribe mode). */
+    onProgress: (callback: (data: { requestId: string; status: 'started' | 'completed' | 'cancelled' | 'error' }) => void): (() => void) => {
+      const handler = (_event: Electron.IpcRendererEvent, data: { requestId: string; status: 'started' | 'completed' | 'cancelled' | 'error' }): void => {
+        callback(data)
+      }
+      ipcRenderer.on('amqp:connection-progress', handler)
+      return () => {
+        ipcRenderer.removeListener('amqp:connection-progress', handler)
+      }
+    },
+    /** Listen for incoming / sent frames. */
+    onMessage: (callback: (data: { requestId: string; message: { direction: 'sent' | 'received'; data: string; exchange?: string; routingKey?: string; deliveryTag?: number; peek?: boolean; timestamp: string } }) => void): (() => void) => {
+      const handler = (_event: Electron.IpcRendererEvent, data: { requestId: string; message: { direction: 'sent' | 'received'; data: string; exchange?: string; routingKey?: string; deliveryTag?: number; peek?: boolean; timestamp: string } }): void => {
+        callback(data)
+      }
+      ipcRenderer.on('amqp:message', handler)
+      return () => {
+        ipcRenderer.removeListener('amqp:message', handler)
       }
     }
   },

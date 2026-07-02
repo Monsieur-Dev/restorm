@@ -187,6 +187,54 @@ export const mqttCloseExecutor: NodeExecutor = (_act, ctx) => {
   return { outputs: [] }
 }
 
+/** A (amqpConnect): AMQP — same handoff as mqttConnect (no events; every
+ * received/delivered message routes to the single `message` port). The
+ * bridge subscribes to the bound request's queue on connect (the request's
+ * `mode` must be `subscribe`). */
+export const amqpConnectExecutor: NodeExecutor = (_act, ctx) => {
+  const cfg = ctx.node.config as { requestId?: unknown; connectionName?: unknown }
+  if (typeof cfg.requestId !== 'string' || cfg.requestId === '') {
+    throw new Error(`amqpConnect node ${ctx.node.id} has no bound requestId`)
+  }
+  const connectionName = typeof cfg.connectionName === 'string' && cfg.connectionName.trim() !== ''
+    ? cfg.connectionName.trim()
+    : cfg.requestId
+  return {
+    outputs: [],
+    scopeAction: { type: 'openSocketioConnect', transport: 'amqp', requestId: cfg.requestId, events: [], connectionName, ...(overrideConfigFrom(ctx.node.config) ? { overrideConfig: overrideConfigFrom(ctx.node.config) } : {}) }
+  }
+}
+
+/** B (amqpPublish): publish a payload on the referenced connection (to the
+ * bound request's own exchange/routing key — see `AMQPExecutionService.send`). */
+export const amqpPublishExecutor: NodeExecutor = (act, ctx) => {
+  const cfg = ctx.node.config as { connectionNodeId?: unknown; payload?: unknown }
+  const connectionNodeId = typeof cfg.connectionNodeId === 'string' ? cfg.connectionNodeId : ''
+  if (connectionNodeId === '') throw new Error('amqpPublish: no connection selected')
+  if (!ctx.socketio) throw new Error('amqpPublish: socket bridge unavailable')
+  if (!ctx.socketio.has(connectionNodeId)) {
+    throw new Error('amqpPublish: the referenced connection does not exist in this run')
+  }
+  const payload = toWire(resolveOperand(act.inputs['payload'], cfg.payload, ctx.variables))
+  // Empty channel → publish to the connection's own exchange/routingKey (set at connect).
+  const ok = ctx.socketio.send(connectionNodeId, '', payload)
+  if (!ok) throw new Error('amqpPublish: the referenced connection is not open')
+  return { outputs: [] }
+}
+
+/** C (amqpClose): close the referenced connection (same as mqttClose). */
+export const amqpCloseExecutor: NodeExecutor = (_act, ctx) => {
+  const cfg = ctx.node.config as { connectionNodeId?: unknown }
+  const connectionNodeId = typeof cfg.connectionNodeId === 'string' ? cfg.connectionNodeId : ''
+  if (connectionNodeId === '') throw new Error('amqpClose: no connection selected')
+  if (!ctx.socketio) throw new Error('amqpClose: socket bridge unavailable')
+  if (!ctx.socketio.has(connectionNodeId)) {
+    throw new Error('amqpClose: the referenced connection does not exist in this run')
+  }
+  ctx.socketio.close(connectionNodeId)
+  return { outputs: [] }
+}
+
 /** A (grpcConnect): gRPC streaming — same handoff as websocketConnect. The
  * call type (server / client / bidi) is inferred from the bound request, so
  * every received frame routes to the single `message` port. */

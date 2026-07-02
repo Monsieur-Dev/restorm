@@ -140,7 +140,7 @@ function shouldHaveId(obj: Record<string, unknown>): boolean {
   // regenerated on copy-paste, colliding in every UUID-keyed
   // per-request store.
   if ('name' in obj && 'type' in obj) {
-    const requestTypes = ['http', 'graphql', 'grpc', 'soap', 'websocket', 'sse', 'odata', 'auth']
+    const requestTypes = ['http', 'graphql', 'grpc', 'soap', 'websocket', 'sse', 'odata', 'auth', 'amqp']
     if (requestTypes.includes(obj['type'] as string)) {
       return true
     }

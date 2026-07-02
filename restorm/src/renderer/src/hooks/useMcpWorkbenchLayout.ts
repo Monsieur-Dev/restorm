@@ -72,7 +72,8 @@ const REQUEST_TAB_TYPES = new Set([
   'sse-request',
   'odata-request',
   'auth-request',
-  'trpc-request'
+  'trpc-request',
+  'amqp-request'
 ])
 
 /**

@@ -25,6 +25,8 @@ export type BadgeType =
   | 'tRPC'
   // Authentication
   | 'AUTH'
+  // AMQP (RabbitMQ)
+  | 'AMQP'
   // Scenario (dataflow graph) — renders a circuit-board codicon
   | 'SCENARIO'
   // Marketing tier — shown next to import-format names that require a

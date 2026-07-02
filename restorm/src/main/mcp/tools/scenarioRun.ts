@@ -341,6 +341,7 @@ const previewResolvers: Partial<Record<ScenarioNode['kind'], PreviewResolver>> =
   websocketConnect: resolveStreamConnectPreview,
   sseConnect: resolveStreamConnectPreview,
   mqttConnect: resolveStreamConnectPreview,
+  amqpConnect: resolveStreamConnectPreview,
   grpcConnect: resolveStreamConnectPreview,
   code: resolveCodePreview
 }

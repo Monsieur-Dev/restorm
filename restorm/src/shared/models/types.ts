@@ -43,6 +43,12 @@ export type WebSocketProtocol = (typeof WEBSOCKET_PROTOCOLS)[number]
 export const TRPC_CALL_KINDS = ['query', 'mutation'] as const
 export type TrpcCallKind = (typeof TRPC_CALL_KINDS)[number]
 
+/** AMQP interaction mode — a single request type switches its tab-view pane
+ * (and, for `subscribe`, its scenario binding) on this discriminant, the way
+ * gRPC switches on `callType`. */
+export const AMQP_MODES = ['publish', 'subscribe', 'browse'] as const
+export type AmqpMode = (typeof AMQP_MODES)[number]
+
 /** Request type discriminator. Both the runtime tuple and the union are derived
  * from the single-source-of-truth {@link PROTOCOL_REGISTRY}; re-exported here so
  * the long-standing `models/types` import path keeps working. Adding a protocol

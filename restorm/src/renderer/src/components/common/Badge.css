@@ -221,6 +221,15 @@
   font-size: 14px !important;
 }
 
+/* ============================================================================
+ * AMQP
+ * ============================================================================ */
+
+.badge-amqp {
+  background-color: var(--badge-amqp-background);
+  color: var(--badge-on-accent, #ffffff);
+}
+
 /* Scenario badge — a violet pill with a circuit-board glyph, distinct
  * from the protocol/method palette so dataflow graphs read at a glance. */
 .badge-scenario {

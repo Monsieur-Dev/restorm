@@ -275,6 +275,31 @@ export const SCENARIO_KIND_REGISTRY = {
       config: { connectionNodeId: 'Id of the mqttConnect node whose connection to close.' }
     }
   },
+  amqpConnect: {
+    labelKey: 'scenario.nodes.amqpConnect', defaultLabel: 'AMQP connect', icon: 'plug', category: 'composition',
+    requestBinding: true,
+    ports: { inputs: [], outputs: [{ id: 'connected', name: 'connected', flow: 'signal' }, { id: 'message', name: 'message', flow: 'both' }] },
+    doc: {
+      summary: 'Opens a long-lived AMQP connection from a bound request (`mode: subscribe`) and consumes its queue. `connected` fires once the consumer is registered; EVERY received/delivered message re-emits on the single `message` output. The connection stays open until an amqpClose targets it (or the run is stopped), then `done` fires. A CHANNEL protocol error (bad queue) is recovered in place; a CONNECTION drop is terminal.',
+      config: { requestId: 'Id of the AMQP request to connect (its resolved URL/vhost/auth/queue/prefetch).', connectionName: 'Unique-per-scenario name an amqpPublish/amqpClose references for display (defaults to the request name).', label: 'Display label on the box.' }
+    }
+  },
+  amqpPublish: {
+    labelKey: 'scenario.nodes.amqpPublish', defaultLabel: 'AMQP publish', icon: 'arrow-up', category: 'composition',
+    ports: { inputs: [{ id: 'payload', name: 'payload' }], outputs: [] },
+    doc: {
+      summary: 'Publishes a payload on an already-open AMQP connection (declared by an amqpConnect node), to that connection\'s bound request\'s own exchange/routing key. Pure-event action: triggered on `in`, sequences the next node via `done`. Errors (to `error`) when no connection is selected or it is not open.',
+      config: { connectionNodeId: 'Id of the amqpConnect node whose connection to publish on.', payload: 'Message payload (a code editor; or wire `payload`).' }
+    }
+  },
+  amqpClose: {
+    labelKey: 'scenario.nodes.amqpClose', defaultLabel: 'AMQP close', icon: 'debug-disconnect', category: 'composition',
+    ports: { inputs: [], outputs: [] },
+    doc: {
+      summary: 'Closes an already-open AMQP connection (declared by an amqpConnect node), firing that node\'s `done`. Pure-event action: triggered on `in`, sequences via its own `done`. Errors (to `error`) when no connection is selected.',
+      config: { connectionNodeId: 'Id of the amqpConnect node whose connection to close.' }
+    }
+  },
   grpcConnect: {
     labelKey: 'scenario.nodes.grpcConnect', defaultLabel: 'gRPC connect', icon: 'plug', category: 'composition',
     requestBinding: true,

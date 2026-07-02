@@ -14,6 +14,7 @@ import type {
   JsonRpcRequest,
   JsonRpcBatchRequest,
   TrpcRequest,
+  AmqpRequest,
   Environment,
   Scenario
 } from './collections'
@@ -146,6 +147,15 @@ export interface AuthenticationRequestTab extends BaseRestormTab {
   environments?: Environment[] | undefined
 }
 
+/** Tab displaying an AMQP request */
+export interface AmqpRequestTab extends BaseRestormTab {
+  tabType: 'amqp-request'
+  /** The AMQP request data to display */
+  request: AmqpRequest
+  /** Environments available for this request */
+  environments?: Environment[] | undefined
+}
+
 /** Tab hosting the scenario (dataflow graph) editor. */
 export interface ScenarioEditorTab extends BaseRestormTab {
   tabType: 'scenario-editor'
@@ -224,6 +234,7 @@ export type RestormEditorTab =
   | JsonRpcBatchRequestTab
   | AuthenticationRequestTab
   | TrpcRequestTab
+  | AmqpRequestTab
   | ScenarioEditorTab
   | ConsoleTab
   | FirewallTab
@@ -328,6 +339,11 @@ export function isTrpcRequestTab(tab: RestormEditorTab): tab is TrpcRequestTab {
   return tab.tabType === 'trpc-request'
 }
 
+/** Type guard for AmqpRequestTab */
+export function isAmqpRequestTab(tab: RestormEditorTab): tab is AmqpRequestTab {
+  return tab.tabType === 'amqp-request'
+}
+
 /** Any protocol's request tab (carries a backing `request`). */
 export type AnyRequestTab =
   | HTTPRequestTab
@@ -341,10 +357,11 @@ export type AnyRequestTab =
   | JsonRpcBatchRequestTab
   | AuthenticationRequestTab
   | TrpcRequestTab
+  | AmqpRequestTab
 
 const REQUEST_TAB_TYPES: ReadonlySet<string> = new Set([
   'http-request', 'graphql-request', 'grpc-request', 'soap-request',
-  'websocket-request', 'sse-request', 'odata-request', 'jsonrpc-request', 'jsonrpc-batch-request', 'auth-request', 'trpc-request'
+  'websocket-request', 'sse-request', 'odata-request', 'jsonrpc-request', 'jsonrpc-batch-request', 'auth-request', 'trpc-request', 'amqp-request'
 ])
 
 /** Type guard for ANY request tab (any protocol). Use this instead of a

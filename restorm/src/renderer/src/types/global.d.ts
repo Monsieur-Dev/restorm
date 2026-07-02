@@ -267,6 +267,16 @@ declare global {
         onProgress: (callback: (data: RequestProgressData) => void) => (() => void)
         onMessage: (callback: (data: SseMessageData) => void) => (() => void)
       }
+      amqp: {
+        execute: (input: AmqpExecutionInput) => Promise<AmqpExecutionResult>
+        connect: (input: AmqpExecutionInput) => Promise<{ started: boolean }>
+        send: (requestId: string, payload: string) => Promise<boolean>
+        disconnect: (requestId: string) => Promise<boolean>
+        cancel: (requestId: string) => Promise<boolean>
+        isActive: (requestId: string) => Promise<boolean>
+        onProgress: (callback: (data: RequestProgressData) => void) => (() => void)
+        onMessage: (callback: (data: AmqpMessageData) => void) => (() => void)
+      }
       odata: {
         execute: (input: ODataExecutionInput) => Promise<HTTPExecutionResult>
         cancel: (requestId: string) => Promise<boolean>
@@ -787,7 +797,7 @@ export interface SseMessageData {
 /** Full request data for backend processing */
 export interface FullRequestData {
   id: string
-  requestType: 'http' | 'graphql' | 'grpc' | 'soap' | 'websocket' | 'sse' | 'odata' | 'auth' | 'jsonrpc' | 'jsonrpcBatch' | 'trpc'
+  requestType: 'http' | 'graphql' | 'grpc' | 'soap' | 'websocket' | 'sse' | 'odata' | 'auth' | 'jsonrpc' | 'jsonrpcBatch' | 'trpc' | 'amqp'
   url: string
   headers: KeyValueData[]
   method?: string | undefined
@@ -883,6 +893,56 @@ export interface FullRequestData {
   trpcProcedure?: string | undefined
   trpcInput?: string | undefined
   trpcKind?: 'query' | 'mutation' | undefined
+  // AMQP specific (requestType === 'amqp'; `username`/`password` above are
+  // shared with MQTT)
+  vhost?: string | undefined
+  mode?: 'publish' | 'subscribe' | 'browse' | undefined
+  exchange?: string | undefined
+  routingKey?: string | undefined
+  payload?: string | undefined
+  queue?: string | undefined
+  autoAck?: boolean | undefined
+  prefetch?: number | undefined
+  browsePeekCount?: number | undefined
+}
+
+/** AMQP execution input */
+export interface AmqpExecutionInput {
+  requestId: string
+  timeout?: number
+}
+
+/** One AMQP frame — a sent publish or a received/peeked delivery. */
+export interface AmqpMessageItem {
+  direction: 'sent' | 'received'
+  data: string
+  exchange?: string | undefined
+  routingKey?: string | undefined
+  deliveryTag?: number | undefined
+  /** Set on a `browse`-mode frame: peeked without acking, the queue is unchanged. */
+  peek?: boolean | undefined
+  timestamp: string
+}
+
+/** AMQP execution result */
+export interface AmqpExecutionResult {
+  requestId: string
+  success: boolean
+  connected: boolean
+  mode: 'publish' | 'subscribe' | 'browse'
+  messages: AmqpMessageItem[]
+  error?: string
+  timings: {
+    startedAt: string
+    durationMs: number
+  }
+  requestUrl?: string
+}
+
+/** AMQP message data for streaming */
+export interface AmqpMessageData {
+  requestId: string
+  message: AmqpMessageItem
 }
 
 export {}

@@ -31,7 +31,8 @@ const templates: CompiledSnippetTemplates = {
   grpcSnippetTemplate: compile('code-snippets-grpc.hbs'),
   jsonRpcSnippetTemplate: compile('code-snippets-jsonrpc.hbs'),
   trpcSnippetTemplate: compile('code-snippets-trpc.hbs'),
-  sseSnippetTemplate: compile('code-snippets-sse.hbs')
+  sseSnippetTemplate: compile('code-snippets-sse.hbs'),
+  amqpSnippetTemplate: compile('code-snippets-amqp.hbs')
 } as unknown as CompiledSnippetTemplates
 
 // Identity transform (no env vars needed for these structural assertions).
@@ -253,5 +254,53 @@ describe('CodeSnippetGenerator — SSE', () => {
   it('omits the Last-Event-ID curl header when the request has none', () => {
     const md = run(base, 'http://localhost:8097/events')
     expect(md).not.toContain('-H "Last-Event-ID')
+  })
+})
+
+describe('CodeSnippetGenerator — AMQP', () => {
+  // Guards the same casing/flag trap as MQTT: the template branches on
+  // `isPublish` / `isSubscribe` / `isBrowse` (derived from `mode`), so a
+  // generator that forgets to pass one renders an empty block for that mode.
+  it('renders a non-empty publish snippet with the resolved exchange/routingKey/payload', () => {
+    const md = run({
+      requestType: 'amqp', url: 'amqp://localhost:5672', headers: [],
+      mode: 'publish', exchange: 'orders', routingKey: 'orders.created', payload: '{"id":1}'
+    }, 'amqp://localhost:5672')
+    expect(md.trim().length).toBeGreaterThan(0)
+    expect(md).toContain("require('amqplib')")
+    expect(md).toContain("channel.publish('orders', 'orders.created'")
+    expect(md).toContain('{"id":1}')
+    // Subscribe/browse sections must NOT leak into a publish-mode snippet.
+    expect(md).not.toContain('channel.consume(')
+  })
+
+  it('renders a non-empty subscribe snippet with the queue + autoAck + prefetch', () => {
+    const md = run({
+      requestType: 'amqp', url: 'amqp://localhost:5672', headers: [],
+      mode: 'subscribe', queue: 'orders.q', autoAck: false, prefetch: 5
+    }, 'amqp://localhost:5672')
+    expect(md).toContain("channel.consume('orders.q'")
+    expect(md).toContain('channel.prefetch(5)')
+    expect(md).toContain('channel.ack(msg)')
+    expect(md).not.toContain('channel.publish(')
+  })
+
+  it('omits the manual ack call when autoAck is on', () => {
+    const md = run({
+      requestType: 'amqp', url: 'amqp://localhost:5672', headers: [],
+      mode: 'subscribe', queue: 'orders.q', autoAck: true
+    }, 'amqp://localhost:5672')
+    expect(md).toContain('{ noAck: true }')
+    expect(md).not.toContain('channel.ack(msg)')
+  })
+
+  it('renders a non-empty browse snippet with the peek-without-ack loop', () => {
+    const md = run({
+      requestType: 'amqp', url: 'amqp://localhost:5672', headers: [],
+      mode: 'browse', queue: 'orders.q', browsePeekCount: 10
+    }, 'amqp://localhost:5672')
+    expect(md).toContain("channel.get('orders.q'")
+    expect(md).toContain('i < 10')
+    expect(md).not.toContain('channel.consume(')
   })
 })

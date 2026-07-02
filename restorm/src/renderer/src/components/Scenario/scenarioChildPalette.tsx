@@ -61,6 +61,10 @@ export const SCENARIO_ADD_REQUEST_GROUPS: ScenarioAddEntry[][] = [
     // SSE: receive-only streaming, no server mode — a single client entry
     // (mirrors the sidebar's "Add" submenu).
     { kind: 'sse', badge: 'SSE', labelKey: 'sidebar.contextMenu.add.sse', defaultLabel: 'SSE request' },
+    // AMQP is not server-capable (v1) — one entry, no `-server` twin. Only its
+    // `subscribe` mode drops a bound `amqpConnect`; `publish`/`browse` mode
+    // drops a one-shot request node (see ScenarioEditorView's onDrop / addNode).
+    { kind: 'amqp', badge: 'AMQP', labelKey: 'sidebar.contextMenu.add.amqp', defaultLabel: 'AMQP request' },
     // HTTP mock server is server-only (a one-shot HTTP request already has its own
     // method entries above): dropping it creates a server: true request + a bound
     // httpListen node.
@@ -154,6 +158,20 @@ export interface ScenarioAddMqttActionEntry {
 export const SCENARIO_ADD_MQTT_ACTIONS: ScenarioAddMqttActionEntry[] = [
   { kind: 'mqttSend', icon: 'arrow-up', labelKey: 'scenario.nodes.mqttSend', defaultLabel: 'MQTT publish' },
   { kind: 'mqttClose', icon: 'debug-disconnect', labelKey: 'scenario.nodes.mqttClose', defaultLabel: 'MQTT close' }
+]
+
+/** AMQP action entries — publish / close (connect comes from the request entry,
+ * `subscribe` mode only), badged AMQP. */
+export interface ScenarioAddAmqpActionEntry {
+  kind: 'amqpPublish' | 'amqpClose'
+  icon: string
+  labelKey: string
+  defaultLabel: string
+}
+
+export const SCENARIO_ADD_AMQP_ACTIONS: ScenarioAddAmqpActionEntry[] = [
+  { kind: 'amqpPublish', icon: 'arrow-up', labelKey: 'scenario.nodes.amqpPublish', defaultLabel: 'AMQP publish' },
+  { kind: 'amqpClose', icon: 'debug-disconnect', labelKey: 'scenario.nodes.amqpClose', defaultLabel: 'AMQP close' }
 ]
 
 /** gRPC streaming action entries — send / close only (badged GRPC). The CONNECT
@@ -259,6 +277,11 @@ export function scenarioAddGrpcIcon(icon: string): ReactNode {
 /** The "MQTT" badge with the action's codicon inside (MQTT section). */
 export function scenarioAddMqttIcon(icon: string): ReactNode {
   return React.createElement(Badge, { type: 'MQTT', icon })
+}
+
+/** The "AMQP" badge with the action's codicon inside (AMQP section). */
+export function scenarioAddAmqpIcon(icon: string): ReactNode {
+  return React.createElement(Badge, { type: 'AMQP', icon })
 }
 
 /** The server-pill HTTP badge with the action's codicon inside (HTTP section). */

@@ -66,5 +66,9 @@ export function routeFromRequest(request: Request): RouteLike {
       // No dedicated matcher branch yet (SSE has no import/spec adapter) —
       // aliased to HTTP like odata/auth above.
       return { type: 'http', url: request.url, tags: request.tags }
+    case 'amqp':
+      // No documentation-matcher branch for AMQP yet (no import adapter feeds
+      // it) — alias to HTTP like odata/auth, matched by URL only.
+      return { type: 'http', url: request.url, tags: request.tags }
   }
 }

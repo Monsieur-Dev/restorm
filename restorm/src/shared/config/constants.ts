@@ -4,6 +4,20 @@ export const DEFAULT_REQUEST_TIMEOUT_MS = 30_000
 /** Default WebSocket connection timeout in milliseconds */
 export const DEFAULT_WS_TIMEOUT_MS = 5_000
 
+/** Default AMQP broker connection timeout in milliseconds */
+export const DEFAULT_AMQP_TIMEOUT_MS = 5_000
+
+/** Default `browsePeekCount` when an AmqpRequest in `browse` mode leaves it
+ * unset — bounds the `channel.get()` peek loop so a large queue can't block
+ * the channel indefinitely. */
+export const DEFAULT_AMQP_BROWSE_PEEK_COUNT = 50
+
+/** Lifetime cap on amqplib's built-in connection-recovery attempts for a
+ * streaming (subscribe) AMQP connection, mirroring {@link makeReconnectBudget}
+ * for MQTT — a broker that never comes back must eventually settle with an
+ * error instead of retrying forever. */
+export const AMQP_MAX_RECONNECT_ATTEMPTS = 10
+
 /** Default UI debounce/delay in milliseconds */
 export const DEFAULT_UI_DELAY_MS = 3_000
 

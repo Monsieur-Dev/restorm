@@ -34,8 +34,8 @@ import type { FullRequestData } from '../../services/ContextServiceTypes'
 import { responseHistoryService } from '../../services'
 import { websocketExecutionService } from '../../services/WebSocketExecutionService'
 import { PROTOCOL_EXECUTORS } from '../../protocol/executorRegistry'
-import { isHTTPRequest, isGraphQLRequest, isGrpcRequest, isSoapRequest, isODataRequest, isAuthenticationRequest, isWebSocketRequest, isSseRequest, isJsonRpcRequest, isJsonRpcBatchRequest, isTrpcRequest, isEnvironmentFolder } from '../../../shared/types/collections'
-import type { HTTPRequest, GraphQLRequest, GrpcRequest, SoapRequest, WebSocketRequest, SseRequest, AuthenticationRequest, ODataRequest, JsonRpcRequest, JsonRpcBatchRequest, TrpcRequest, KeyValue, EnvironmentFolder } from '../../../shared/types/collections'
+import { isHTTPRequest, isGraphQLRequest, isGrpcRequest, isSoapRequest, isODataRequest, isAuthenticationRequest, isWebSocketRequest, isSseRequest, isJsonRpcRequest, isJsonRpcBatchRequest, isTrpcRequest, isAmqpRequest, isEnvironmentFolder } from '../../../shared/types/collections'
+import type { HTTPRequest, GraphQLRequest, GrpcRequest, SoapRequest, WebSocketRequest, SseRequest, AuthenticationRequest, ODataRequest, JsonRpcRequest, JsonRpcBatchRequest, TrpcRequest, AmqpRequest, KeyValue, EnvironmentFolder } from '../../../shared/types/collections'
 import { isRequest, type FolderItem, type Request } from '../../../shared/models'
 
 function jsonReply(value: unknown): { content: { type: 'text'; text: string }[] } {
@@ -434,6 +434,20 @@ export function flushRequestStateToContext(req: Request, scenarioVariables?: Rea
     // a scenario-driven sseConnect only ever goes through this flush, so without
     // it a request's saved `lastEventId` silently never reaches the wire.
     if (sse.lastEventId !== undefined) data.lastEventId = sse.lastEventId
+  } else if (isAmqpRequest(req)) {
+    const amqp = req as AmqpRequest
+    data.requestType = 'amqp'
+    data.mode = amqp.mode
+    if (amqp.vhost !== undefined) data.vhost = amqp.vhost
+    if (amqp.exchange !== undefined) data.exchange = amqp.exchange
+    if (amqp.routingKey !== undefined) data.routingKey = amqp.routingKey
+    if (amqp.payload !== undefined) data.payload = amqp.payload
+    if (amqp.queue !== undefined) data.queue = amqp.queue
+    if (amqp.autoAck !== undefined) data.autoAck = amqp.autoAck
+    if (amqp.prefetch !== undefined) data.prefetch = amqp.prefetch
+    if (amqp.browsePeekCount !== undefined) data.browsePeekCount = amqp.browsePeekCount
+    if (amqp.username !== undefined) data.username = amqp.username
+    if (amqp.password !== undefined) data.password = amqp.password
   }
   // If the request isn't registered with ContextService yet, register
   // it inline. Until recently we bailed out here on the assumption

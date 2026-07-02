@@ -28,6 +28,7 @@ import { WebSocketRequest } from '../../../shared/models/requests/WebSocketReque
 import { SseRequest } from '../../../shared/models/requests/SseRequest'
 import { ODataRequest } from '../../../shared/models/requests/ODataRequest'
 import { AuthenticationRequest } from '../../../shared/models/requests/AuthenticationRequest'
+import { AmqpRequest } from '../../../shared/models/requests/AmqpRequest'
 
 /**
  * Class resolver for `decomposeForPersistence` — maps each walked item
@@ -55,6 +56,7 @@ const restormClassResolver = (item: Record<string, unknown>, parentClass: object
   if (type === 'sse') return SseRequest
   if (type === 'odata') return ODataRequest
   if (type === 'auth') return AuthenticationRequest
+  if (type === 'amqp') return AmqpRequest
   // Everything without a `type` discriminator is a folder-like node.
   // Descendants of an EnvironmentFolder are regular Folders; everything
   // under a Folder stays a Folder.

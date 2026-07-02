@@ -52,7 +52,8 @@ export const PROTOCOL_CONFIG_FIELDS: Record<Protocol, readonly string[]> = {
   auth: ['documentation', 'method', 'url', 'headers', 'params', 'pathParams', 'body', 'producedHeaders', 'expirationExpression', 'authErrorCodes'],
   jsonrpc: ['documentation', 'url', 'headers', 'method', 'params', 'rpcId', 'notificationMode'],
   jsonrpcBatch: ['documentation', 'url', 'headers', 'children'],
-  trpc: ['documentation', 'url', 'procedure', 'input', 'kind', 'headers']
+  trpc: ['documentation', 'url', 'procedure', 'input', 'kind', 'headers'],
+  amqp: ['documentation', 'url', 'vhost', 'mode', 'exchange', 'routingKey', 'payload', 'queue', 'autoAck', 'prefetch', 'browsePeekCount', 'username', 'password']
 }
 
 /** Read a request's protocol (`type`), narrowed to a known protocol or null. */

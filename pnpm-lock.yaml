@@ -416,6 +416,9 @@ importers:
       ajv-formats:
         specifier: ^3.0.1
         version: 3.0.1(ajv@8.20.0)
+      amqplib:
+        specifier: ^2.0.1
+        version: 2.0.1
       axios:
         specifier: ^1.16.1
         version: 1.16.1
@@ -3509,6 +3512,10 @@ packages:
   amdefine@0.0.8:
     resolution: {integrity: sha512-mDPHAbiIk4wSDjZFz0YFuwquVPJMj1vm9n6QONCN2bL0WOtNiTRHldplTWlyhJrDlpqe7lAc7MJfSyZJ4sqYhg==}
     engines: {node: '>=0.4.2'}
+
+  amqplib@2.0.1:
+    resolution: {integrity: sha512-a3P2MgfCf9nzVis12VxWEn0dS6hcqve7dlEAhXDtIWR27BlhtMkILOc+H9aeHjDi6i6r94dYKc2Kx2OFe3avvg==}
+    engines: {node: '>=18'}
 
   ansi-regex@5.0.1:
     resolution: {integrity: sha512-quJQXlTSUGL2LH9SUXo8VwsY4soanhgo6LNSm84E1LBcE8s3O0wpdiRzyR9z/ZZJMlMWv37qOOb9pdJlMUEKFQ==}
@@ -11902,6 +11909,8 @@ snapshots:
       require-from-string: 2.0.2
 
   amdefine@0.0.8: {}
+
+  amqplib@2.0.1: {}
 
   ansi-regex@5.0.1: {}
 

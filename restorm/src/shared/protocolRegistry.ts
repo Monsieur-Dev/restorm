@@ -165,6 +165,13 @@ export const PROTOCOL_REGISTRY = {
     // A tRPC call binds to the existing `httpRequest` scenario node (like
     // GraphQL / gRPC unary / OData), so it contributes no `scenarioKinds`.
     badge: { kind: 'fixed', value: 'tRPC' }
+  },
+  amqp: {
+    graphqlTypeName: 'AmqpRequest',
+    tabType: 'amqp-request',
+    ipcNamespace: 'amqp',
+    badge: { kind: 'fixed', value: 'AMQP' },
+    scenarioKinds: ['amqpConnect', 'amqpPublish', 'amqpClose']
   }
 } satisfies Record<string, ProtocolSpec>
 

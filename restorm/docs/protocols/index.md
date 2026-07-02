@@ -18,6 +18,7 @@ a page yet — this index only lists the ones that do.
 | gRPC-Web / Connect-RPC transports | [`grpc-web.md`](./grpc-web.md) |
 | tRPC (typed RPC over HTTP) | [`trpc.md`](./trpc.md) |
 | Server-Sent Events (SSE) | [`sse.md`](./sse.md) |
+| AMQP 0-9-1 (RabbitMQ) | [`amqp.md`](./amqp.md) |
 
 For the underlying import-adapter pipeline that turns an external API
 specification (OpenAPI, WSDL, `.proto`, OpenRPC, …) into a ready-to-run

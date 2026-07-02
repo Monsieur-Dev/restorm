@@ -52,6 +52,7 @@ export type AddChildKind =
   | 'graphql-server'
   | 'odata'
   | 'odata-server'
+  | 'amqp'
   | 'auth'
   | 'trpc'
   | 'scenario'
@@ -266,6 +267,16 @@ export const buildAddSubmenu = (
     label: t('sidebar.contextMenu.add.trpc'),
     icon: React.createElement(Badge, { type: 'tRPC' }),
     onClick: () => { onAddChildItem(parentId, 'trpc') }
+  },
+  { id: `sep-add-amqp-${parentId}`, isSeparator: true, label: '' },
+  // AMQP (RabbitMQ): one request type covers publish / subscribe / browse
+  // (picked via a mode selector inside the tab), so a single menu entry
+  // suffices — unlike WS/MQTT there's no separate client/server pair.
+  {
+    id: `add-amqp-${parentId}`,
+    label: t('sidebar.contextMenu.add.amqp'),
+    icon: React.createElement(Badge, { type: 'AMQP' }),
+    onClick: () => { onAddChildItem(parentId, 'amqp') }
   },
   { id: `sep-add-proto-${parentId}`, isSeparator: true, label: '' },
   {
