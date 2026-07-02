@@ -241,6 +241,50 @@ import { StatusbarMcpIndicator } from 'electron-core-ui/renderer'
 `data-testid`s: `statusbar-mcp-indicator` (the cell), `statusbar-mcp-popover`
 (the popover body), `statusbar-mcp-popover-session` (the session line).
 
+### `StatusbarGitIndicator` (git status entry)
+
+One compound cell for a host that embeds electron-core-ui's `GitService`: a
+fixed, untranslated `GIT` label (reads identically in every locale, like the
+`mcp` label above) followed by two independently-clickable codicon buttons —
+`repo-push` and `repo-pull` — each with its own hover tooltip (translated via
+the `statusbar.git.pushTooltip` / `statusbar.git.pullTooltip` i18n keys
+shipped with electron-core-ui) and an optional **pastille** (a plain dot,
+never a count — see the props table). Purely presentational: the host reads
+its own `useGitState()` snapshot, derives the two booleans, and wires the two
+click callbacks; visibility (only on a git-backed project) is the host's
+decision too — this component doesn't know about `GitState`.
+
+| Prop | Type | Notes |
+| --- | --- | --- |
+| `pushPending` | `boolean` | Shows the push pastille. Set when there are local changes not yet pushed (uncommitted OR local commits to sweep in). |
+| `pullPending` | `boolean` | Shows the pull pastille. Set when a semi-pull (fetch + compare, no merge) detected a newer remote version. |
+| `onPush` | `() => void` | Repo-push click. |
+| `onPull` | `() => void` | Repo-pull click. |
+| `data-testid` | `string?` | Root test id. Default `statusbar-git-indicator`. |
+
+```tsx
+import { StatusbarGitIndicator, useGitState } from 'electron-core-ui/renderer'
+
+function GitStatusCell(): JSX.Element | null {
+  const { isRepo, status, remoteHasNewerVersion } = useGitState()
+  if (!isRepo) return null
+  const pushPending = (status?.files.length ?? 0) > 0 || (status?.ahead ?? 0) > 0
+  return (
+    <StatusbarGitIndicator
+      pushPending={pushPending}
+      pullPending={remoteHasNewerVersion}
+      onPush={openPushModal}
+      onPull={runPull}
+    />
+  )
+}
+```
+
+`data-testid`s: `statusbar-git-indicator` (the cell), `-label` (the "GIT"
+span), `-push` / `-pull` (each action's clickable span), `-push-icon` /
+`-pull-icon`, `-push-pastille` / `-pull-pastille` (present only while
+pending), `-push-tooltip` / `-pull-tooltip`.
+
 ## Behavior
 
 - `Statusbar` lays out its children horizontally; a CSS `gap` + separator

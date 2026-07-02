@@ -341,6 +341,10 @@
       "stopServer": "MCP szerver leállítása",
       "resumeServer": "MCP szerver folytatása",
       "serverStopped": "leállítva"
+    },
+    "git": {
+      "pushTooltip": "Küldés a tárolóba",
+      "pullTooltip": "Letöltés a tárolóból"
     }
   },
   "mcpToolTitles": {

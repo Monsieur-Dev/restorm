@@ -341,6 +341,10 @@
       "stopServer": "Stop MCP-server",
       "resumeServer": "Genoptag MCP-server",
       "serverStopped": "stoppet"
+    },
+    "git": {
+      "pushTooltip": "Push til repositoriet",
+      "pullTooltip": "Hent fra repositoriet"
     }
   },
   "mcpToolTitles": {

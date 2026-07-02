@@ -228,7 +228,10 @@
     "exportOpenApi": "Eksporto në OpenAPI",
     "clearAuthCache": "Pastro memorien e vërtetimit",
     "openLogsFolder": "Hap dosjen e regjistrave",
-    "mcpLogs": "Regjistrat MCP"
+    "mcpLogs": "Regjistrat MCP",
+    "git": "Git",
+    "gitPush": "Dërgo",
+    "gitPull": "Merr"
   },
   "sidebar": {
     "addRequest": "Shto kërkesë",
@@ -2362,5 +2365,11 @@
   },
   "server": {
     "configLockedWhileRunning": "Konfigurimi i kyçur ndërsa serveri po ekzekutohet"
+  },
+  "git": {
+    "pushComingSoonTitle": "Dërgimi nuk është ende i disponueshëm",
+    "pushComingSoonBody": "Rrjedha e commit + push do të vijë në një përditësim të ardhshëm.",
+    "pullFailedTitle": "Marrja dështoi",
+    "pullFailedBody": "Nuk u arrit të merren ndryshimet më të fundit."
   }
 }

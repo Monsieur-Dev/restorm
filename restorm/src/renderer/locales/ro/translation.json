@@ -229,7 +229,10 @@
     "exportOpenApi": "Exportă în OpenAPI",
     "clearAuthCache": "Golește memoria cache de autentificare",
     "openLogsFolder": "Deschide folderul de jurnale",
-    "mcpLogs": "Jurnale MCP"
+    "mcpLogs": "Jurnale MCP",
+    "git": "Git",
+    "gitPush": "Trimite",
+    "gitPull": "Extrage"
   },
   "sidebar": {
     "addRequest": "Adaugă cerere",
@@ -2363,5 +2366,11 @@
   },
   "server": {
     "configLockedWhileRunning": "Configurație blocată în timp ce serverul rulează"
+  },
+  "git": {
+    "pushComingSoonTitle": "Trimiterea nu este încă disponibilă",
+    "pushComingSoonBody": "Fluxul de commit și trimitere va veni într-o actualizare viitoare.",
+    "pullFailedTitle": "Preluarea a eșuat",
+    "pullFailedBody": "Nu s-au putut prelua cele mai recente modificări."
   }
 }

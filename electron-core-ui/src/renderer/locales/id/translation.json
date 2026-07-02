@@ -341,6 +341,10 @@
       "stopServer": "Hentikan server MCP",
       "resumeServer": "Lanjutkan server MCP",
       "serverStopped": "dihentikan"
+    },
+    "git": {
+      "pushTooltip": "Push ke repositori",
+      "pullTooltip": "Tarik dari repositori"
     }
   },
   "mcpToolTitles": {

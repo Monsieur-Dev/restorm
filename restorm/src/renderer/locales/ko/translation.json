@@ -227,7 +227,10 @@
     "exportOpenApi": "OpenAPI로 내보내기",
     "clearAuthCache": "인증 캐시 지우기",
     "openLogsFolder": "로그 폴더 열기",
-    "mcpLogs": "MCP 로그"
+    "mcpLogs": "MCP 로그",
+    "git": "Git",
+    "gitPush": "푸시",
+    "gitPull": "풀"
   },
   "sidebar": {
     "addRequest": "요청 추가",
@@ -2361,5 +2364,11 @@
   },
   "server": {
     "configLockedWhileRunning": "서버 실행 중에는 설정이 잠깁니다"
+  },
+  "git": {
+    "pushComingSoonTitle": "아직 푸시를 사용할 수 없습니다",
+    "pushComingSoonBody": "커밋 + 푸시 흐름은 이후 업데이트에서 제공됩니다.",
+    "pullFailedTitle": "풀 실패",
+    "pullFailedBody": "최신 변경 사항을 가져올 수 없습니다."
   }
 }

@@ -593,6 +593,10 @@ export const createCoreUIAPI = (): CoreUiApi => ({
       const result: unknown = await ipcRenderer.invoke('git:get-conflict-versions', folder, filePath)
       return result as GitConflictVersions
     },
+    getFileAtHead: async (folder: string, filePath: string): Promise<string | null> => {
+      const result: unknown = await ipcRenderer.invoke('git:get-file-at-head', folder, filePath)
+      return result as string | null
+    },
     writeResolvedConflict: async (folder: string, filePath: string, content: string): Promise<void> => {
       await ipcRenderer.invoke('git:write-resolved-conflict', folder, filePath, content)
     },

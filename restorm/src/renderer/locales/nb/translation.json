@@ -228,7 +228,10 @@
     "exportOpenApi": "Eksporter til OpenAPI",
     "clearAuthCache": "Tøm autentiseringsbuffer",
     "openLogsFolder": "Åpne loggmappe",
-    "mcpLogs": "MCP-logger"
+    "mcpLogs": "MCP-logger",
+    "git": "Git",
+    "gitPush": "Push",
+    "gitPull": "Hent"
   },
   "sidebar": {
     "addRequest": "Legg til forespørsel",
@@ -2362,5 +2365,11 @@
   },
   "server": {
     "configLockedWhileRunning": "Konfigurasjon låst mens serveren kjører"
+  },
+  "git": {
+    "pushComingSoonTitle": "Push er ikke tilgjengelig ennå",
+    "pushComingSoonBody": "Commit- og push-flyten kommer i en fremtidig oppdatering.",
+    "pullFailedTitle": "Pull mislyktes",
+    "pullFailedBody": "Kunne ikke hente de nyeste endringene."
   }
 }

@@ -341,6 +341,10 @@
       "stopServer": "Зупинити MCP-сервер",
       "resumeServer": "Відновити MCP-сервер",
       "serverStopped": "зупинено"
+    },
+    "git": {
+      "pushTooltip": "Надіслати в репозиторій",
+      "pullTooltip": "Отримати з репозиторію"
     }
   },
   "mcpToolTitles": {

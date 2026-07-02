@@ -227,7 +227,10 @@
     "exportOpenApi": "导出为 OpenAPI",
     "clearAuthCache": "清除身份验证缓存",
     "openLogsFolder": "打开日志文件夹",
-    "mcpLogs": "MCP 日志"
+    "mcpLogs": "MCP 日志",
+    "git": "Git",
+    "gitPush": "推送",
+    "gitPull": "拉取"
   },
   "sidebar": {
     "addRequest": "添加请求",
@@ -2361,5 +2364,11 @@
   },
   "server": {
     "configLockedWhileRunning": "服务器运行时配置已锁定"
+  },
+  "git": {
+    "pushComingSoonTitle": "推送功能尚未开放",
+    "pushComingSoonBody": "提交 + 推送流程将在后续更新中提供。",
+    "pullFailedTitle": "拉取失败",
+    "pullFailedBody": "无法拉取最新更改。"
   }
 }

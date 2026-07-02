@@ -341,6 +341,10 @@
       "stopServer": "Zaustavi MCP poslužitelj",
       "resumeServer": "Nastavi MCP poslužitelj",
       "serverStopped": "zaustavljeno"
+    },
+    "git": {
+      "pushTooltip": "Pošalji u repozitorij",
+      "pullTooltip": "Preuzmi iz repozitorija"
     }
   },
   "mcpToolTitles": {

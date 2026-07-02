@@ -228,7 +228,10 @@
     "exportOpenApi": "Exporter en OpenAPI",
     "clearAuthCache": "Vider le cache d'authentification",
     "openLogsFolder": "Ouvrir le dossier de logs",
-    "mcpLogs": "Journaux MCP"
+    "mcpLogs": "Journaux MCP",
+    "git": "Git",
+    "gitPush": "Pousser",
+    "gitPull": "Récupérer"
   },
   "sidebar": {
     "addRequest": "Ajouter une requête",
@@ -2362,5 +2365,11 @@
   },
   "server": {
     "configLockedWhileRunning": "Configuration verrouillée pendant l’exécution du serveur"
+  },
+  "git": {
+    "pushComingSoonTitle": "La publication n'est pas encore disponible",
+    "pushComingSoonBody": "Le flux de validation + publication arrivera dans une prochaine mise à jour.",
+    "pullFailedTitle": "Échec de la récupération",
+    "pullFailedBody": "Impossible de récupérer les dernières modifications."
   }
 }

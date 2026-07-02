@@ -341,6 +341,10 @@
       "stopServer": "MCP-server stoppen",
       "resumeServer": "MCP-server hervatten",
       "serverStopped": "gestopt"
+    },
+    "git": {
+      "pushTooltip": "Pushen naar de repository",
+      "pullTooltip": "Pullen vanuit de repository"
     }
   },
   "mcpToolTitles": {

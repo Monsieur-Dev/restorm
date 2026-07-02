@@ -341,6 +341,10 @@
       "stopServer": "Stop MCP server",
       "resumeServer": "Resume MCP server",
       "serverStopped": "stopped"
+    },
+    "git": {
+      "pushTooltip": "Push to the repository",
+      "pullTooltip": "Pull from the repository"
     }
   },
   "mcpToolTitles": {

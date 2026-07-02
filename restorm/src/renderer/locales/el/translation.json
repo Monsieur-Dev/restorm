@@ -228,7 +228,10 @@
     "exportOpenApi": "Εξαγωγή σε OpenAPI",
     "clearAuthCache": "Εκκαθάριση μνήμης ταυτοποίησης",
     "openLogsFolder": "Άνοιγμα φακέλου καταγραφών",
-    "mcpLogs": "Αρχεία καταγραφής MCP"
+    "mcpLogs": "Αρχεία καταγραφής MCP",
+    "git": "Git",
+    "gitPush": "Αποστολή",
+    "gitPull": "Λήψη"
   },
   "sidebar": {
     "addRequest": "Προσθήκη αιτήματος",
@@ -2362,5 +2365,11 @@
   },
   "server": {
     "configLockedWhileRunning": "Η διαμόρφωση είναι κλειδωμένη ενώ εκτελείται ο διακομιστής"
+  },
+  "git": {
+    "pushComingSoonTitle": "Η αποστολή δεν είναι ακόμη διαθέσιμη",
+    "pushComingSoonBody": "Η ροή commit + push θα έρθει σε μελλοντική ενημέρωση.",
+    "pullFailedTitle": "Η λήψη απέτυχε",
+    "pullFailedBody": "Δεν ήταν δυνατή η λήψη των πιο πρόσφατων αλλαγών."
   }
 }

@@ -230,7 +230,10 @@
     "exportOpenApi": "Eksportuj do OpenAPI",
     "clearAuthCache": "Wyczyść pamięć podręczną uwierzytelniania",
     "openLogsFolder": "Otwórz folder dzienników",
-    "mcpLogs": "Dzienniki MCP"
+    "mcpLogs": "Dzienniki MCP",
+    "git": "Git",
+    "gitPush": "Wypchnij",
+    "gitPull": "Pobierz"
   },
   "sidebar": {
     "addRequest": "Dodaj żądanie",
@@ -2364,5 +2367,11 @@
   },
   "server": {
     "configLockedWhileRunning": "Konfiguracja zablokowana podczas działania serwera"
+  },
+  "git": {
+    "pushComingSoonTitle": "Wypychanie nie jest jeszcze dostępne",
+    "pushComingSoonBody": "Przepływ commit + push pojawi się w przyszłej aktualizacji.",
+    "pullFailedTitle": "Nie udało się pobrać zmian",
+    "pullFailedBody": "Nie można pobrać najnowszych zmian."
   }
 }

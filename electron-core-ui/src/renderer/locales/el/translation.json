@@ -341,6 +341,10 @@
       "stopServer": "Διακοπή διακομιστή MCP",
       "resumeServer": "Συνέχιση διακομιστή MCP",
       "serverStopped": "σταματημένος"
+    },
+    "git": {
+      "pushTooltip": "Αποστολή στο αποθετήριο",
+      "pullTooltip": "Λήψη από το αποθετήριο"
     }
   },
   "mcpToolTitles": {

@@ -227,7 +227,10 @@
     "exportOpenApi": "Ekspor ke OpenAPI",
     "clearAuthCache": "Bersihkan cache autentikasi",
     "openLogsFolder": "Buka folder log",
-    "mcpLogs": "Log MCP"
+    "mcpLogs": "Log MCP",
+    "git": "Git",
+    "gitPush": "Push",
+    "gitPull": "Tarik"
   },
   "sidebar": {
     "addRequest": "Tambah permintaan",
@@ -2361,5 +2364,11 @@
   },
   "server": {
     "configLockedWhileRunning": "Konfigurasi terkunci saat server berjalan"
+  },
+  "git": {
+    "pushComingSoonTitle": "Push belum tersedia",
+    "pushComingSoonBody": "Alur commit + push akan hadir di pembaruan mendatang.",
+    "pullFailedTitle": "Pull gagal",
+    "pullFailedBody": "Tidak dapat menarik perubahan terbaru."
   }
 }

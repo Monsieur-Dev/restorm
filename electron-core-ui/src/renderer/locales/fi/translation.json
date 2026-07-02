@@ -341,6 +341,10 @@
       "stopServer": "Pysäytä MCP-palvelin",
       "resumeServer": "Jatka MCP-palvelinta",
       "serverStopped": "pysäytetty"
+    },
+    "git": {
+      "pushTooltip": "Työnnä repositorioon",
+      "pullTooltip": "Nouda repositoriosta"
     }
   },
   "mcpToolTitles": {

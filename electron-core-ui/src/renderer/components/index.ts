@@ -220,8 +220,8 @@ export { SearchBar } from './SearchBar/index'
 export type { SearchBarProps } from './SearchBar/index'
 
 // Statusbar exports
-export { Statusbar, StatusbarElement, StatusbarMcpIndicator, useStatusbarTooltip } from './Statusbar/index'
-export type { StatusbarProps, StatusbarElementProps, StatusbarMcpIndicatorProps, StatusbarTooltipContextValue } from './Statusbar/index'
+export { Statusbar, StatusbarElement, StatusbarMcpIndicator, StatusbarGitIndicator, useStatusbarTooltip } from './Statusbar/index'
+export type { StatusbarProps, StatusbarElementProps, StatusbarMcpIndicatorProps, StatusbarGitIndicatorProps, StatusbarTooltipContextValue } from './Statusbar/index'
 
 // Tooltip exports
 export { Tooltip } from './Tooltip/index'

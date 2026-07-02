@@ -11,7 +11,9 @@ newer-remote-version detection, conflict-blob retrieval, and a debounced
   `FileService`'s single active file) wrapping `simple-git`: `isGitRepo`,
   `getStatus`, `stage`, `commit`, `push`, `pull`, `fetchAndCompare` (the
   semi-pull), `getConflictVersions` (`:1`/`:2`/`:3` index stages),
-  `writeResolvedConflict`, `abortMerge`.
+  `getFileAtHead` (the last-committed content of a path, `null` if it didn't
+  exist at `HEAD` — for diffing the working copy against the last commit
+  without touching the index), `writeResolvedConflict`, `abortMerge`.
 - **IPC bridge** — `git:*` channels registered on the main process and
   exposed via `window.api.git` in the renderer preload (no host-specific
   wiring needed — every primitive takes its folder path as an argument).

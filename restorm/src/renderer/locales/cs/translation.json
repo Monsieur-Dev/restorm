@@ -230,7 +230,10 @@
     "exportOpenApi": "Exportovat do OpenAPI",
     "clearAuthCache": "Vymazat mezipaměť ověření",
     "openLogsFolder": "Otevřít složku s logy",
-    "mcpLogs": "Protokoly MCP"
+    "mcpLogs": "Protokoly MCP",
+    "git": "Git",
+    "gitPush": "Odeslat",
+    "gitPull": "Stáhnout"
   },
   "sidebar": {
     "addRequest": "Přidat požadavek",
@@ -2364,5 +2367,11 @@
   },
   "server": {
     "configLockedWhileRunning": "Konfigurace uzamčena během běhu serveru"
+  },
+  "git": {
+    "pushComingSoonTitle": "Odeslání zatím není k dispozici",
+    "pushComingSoonBody": "Postup commit + push přibude v budoucí aktualizaci.",
+    "pullFailedTitle": "Stažení se nezdařilo",
+    "pullFailedBody": "Nejnovější změny se nepodařilo stáhnout."
   }
 }

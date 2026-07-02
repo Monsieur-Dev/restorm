@@ -60,6 +60,12 @@ export interface RestormTitlebarProps {
    * otherwise). Wired to `View → MCP logs`; the entry is disabled when
    * the embedded MCP server isn't running. */
   onOpenMcpLogs: () => void
+  /** Repo-push, same effect + codicon as the statusbar `GIT` entry's push
+   * button. Wired to `Git → Push`. */
+  onGitPush: () => void
+  /** Repo-pull, same effect + codicon as the statusbar `GIT` entry's pull
+   * button. Wired to `Git → Pull`. */
+  onGitPull: () => void
   /** Whether a workbench (an open file) is currently active. When
    * true, the gear button and `View → Settings` open Settings as a
    * singleton workbench tab; when false they fall back to the
@@ -93,6 +99,8 @@ export const RestormTitlebar: React.FC<RestormTitlebarProps> = ({
   onOpenFirewall,
   onOpenMiniBrowser,
   onOpenMcpLogs,
+  onGitPush,
+  onGitPull,
   workbenchActive,
   onOpenSettingsTab
 }) => {
@@ -304,6 +312,24 @@ export const RestormTitlebar: React.FC<RestormTitlebarProps> = ({
             <MenuItem data-testid="titlebar-menu-item-clear-auth-cache" title={t('menuBar.clearAuthCache')} disabled />
             <MenuItemSeparator data-testid="titlebar-menu-separator-tools-1" />
             <MenuItem data-testid="titlebar-menu-item-open-logs" title={t('menuBar.openLogsFolder')} disabled />
+          </MenuBarItem>
+          <MenuBarItem title={t('menuBar.git')} data-testid="titlebar-menubar-item-git">
+            {/* Community-disabled state + the "Pro" badge after the root
+             * label are wired by the Pro-gating ticket, applied once
+             * across every built git surface — this menu ships fully
+             * enabled until then. */}
+            <MenuItem
+              data-testid="titlebar-menu-item-git-push"
+              title={t('menuBar.gitPush')}
+              icon={<span className="codicon codicon-repo-push" aria-hidden="true" />}
+              onClick={onGitPush}
+            />
+            <MenuItem
+              data-testid="titlebar-menu-item-git-pull"
+              title={t('menuBar.gitPull')}
+              icon={<span className="codicon codicon-repo-pull" aria-hidden="true" />}
+              onClick={onGitPull}
+            />
           </MenuBarItem>
           <MenuBarItem title={t('menuBar.help')} data-testid="titlebar-menubar-item-help">
             <MenuItem data-testid="titlebar-menu-item-about" title={t('menuBar.about')} disabled />

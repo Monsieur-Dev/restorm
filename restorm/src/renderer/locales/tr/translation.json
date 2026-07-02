@@ -228,7 +228,10 @@
     "exportOpenApi": "OpenAPI'a dışa aktar",
     "clearAuthCache": "Kimlik doğrulama önbelleğini temizle",
     "openLogsFolder": "Günlük klasörünü aç",
-    "mcpLogs": "MCP günlükleri"
+    "mcpLogs": "MCP günlükleri",
+    "git": "Git",
+    "gitPush": "Gönder",
+    "gitPull": "Çek"
   },
   "sidebar": {
     "addRequest": "İstek ekle",
@@ -2362,5 +2365,11 @@
   },
   "server": {
     "configLockedWhileRunning": "Sunucu çalışırken yapılandırma kilitli"
+  },
+  "git": {
+    "pushComingSoonTitle": "Gönderme henüz kullanılamıyor",
+    "pushComingSoonBody": "Commit + gönderme akışı ileride bir güncellemeyle gelecek.",
+    "pullFailedTitle": "Çekme başarısız oldu",
+    "pullFailedBody": "En son değişiklikler alınamadı."
   }
 }

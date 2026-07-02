@@ -152,6 +152,46 @@
 	margin-left: auto;
 }
 
+/* Git indicator — one compound cell holding a fixed "GIT" label + two
+   independently-clickable action icons (push/pull). Each action gets its
+   own small hover surface + rounded corners so the pair reads as two
+   distinct buttons within the single bordered cell, rather than one big
+   click target (unlike every other `.statusbar-item`, which is ONE click
+   target end to end). */
+.statusbar-git-action {
+	display: inline-flex;
+	align-items: center;
+	position: relative;
+	padding: 0 2px;
+	border-radius: 3px;
+	cursor: pointer;
+}
+
+.statusbar-git-action:hover {
+	background-color: var(--statusBarItem-hoverBackground);
+	color: var(--statusBarItem-hoverForeground);
+}
+
+.statusbar-git-action:focus {
+	outline: none;
+}
+
+/* A dot, never a count (v1 commit+push is atomic, so there is no
+   meaningful "ahead N" to show) — reuses the same prominent accent token
+   as the activity-pulse wave above so it reads as "something to act on"
+   rather than an error. */
+.statusbar-git-pastille {
+	position: absolute;
+	top: 1px;
+	right: 0;
+	width: 6px;
+	height: 6px;
+	border-radius: 50%;
+	background-color: var(--statusBar-prominentBackground, var(--focusBorder));
+	box-shadow: 0 0 0 1px var(--statusBar-background, transparent);
+	pointer-events: none;
+}
+
 /* Ripple animation portal (driven by `pulseSignal` on StatusbarElement).
  * Lives in `document.body` so the wave can overflow the statusbar's
  * clipping region. The cell's codicon is hidden under

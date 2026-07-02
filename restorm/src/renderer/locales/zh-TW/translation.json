@@ -227,7 +227,10 @@
     "exportOpenApi": "匯出為 OpenAPI",
     "clearAuthCache": "清除驗證快取",
     "openLogsFolder": "開啟記錄檔資料夾",
-    "mcpLogs": "MCP 記錄"
+    "mcpLogs": "MCP 記錄",
+    "git": "Git",
+    "gitPush": "推送",
+    "gitPull": "提取"
   },
   "sidebar": {
     "addRequest": "新增請求",
@@ -2361,5 +2364,11 @@
   },
   "server": {
     "configLockedWhileRunning": "伺服器執行時設定已鎖定"
+  },
+  "git": {
+    "pushComingSoonTitle": "推送功能尚未開放",
+    "pushComingSoonBody": "提交 + 推送流程將在後續更新中提供。",
+    "pullFailedTitle": "提取失敗",
+    "pullFailedBody": "無法提取最新變更。"
   }
 }

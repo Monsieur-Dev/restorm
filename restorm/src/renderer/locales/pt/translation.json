@@ -228,7 +228,10 @@
     "exportOpenApi": "Exportar para OpenAPI",
     "clearAuthCache": "Limpar cache de autenticação",
     "openLogsFolder": "Abrir pasta de registos",
-    "mcpLogs": "Registos MCP"
+    "mcpLogs": "Registos MCP",
+    "git": "Git",
+    "gitPush": "Enviar",
+    "gitPull": "Obter"
   },
   "sidebar": {
     "addRequest": "Adicionar pedido",
@@ -2362,5 +2365,11 @@
   },
   "server": {
     "configLockedWhileRunning": "Configuração bloqueada enquanto o servidor está em execução"
+  },
+  "git": {
+    "pushComingSoonTitle": "Enviar ainda não está disponível",
+    "pushComingSoonBody": "O fluxo de commit e envio chegará numa atualização futura.",
+    "pullFailedTitle": "Falha ao obter alterações",
+    "pullFailedBody": "Não foi possível obter as alterações mais recentes."
   }
 }

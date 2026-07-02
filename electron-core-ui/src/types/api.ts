@@ -210,6 +210,7 @@ export interface CoreUiGitApi {
   pull: (folder: string) => Promise<GitPullResult>
   fetchAndCompare: (folder: string) => Promise<GitFetchCompareResult>
   getConflictVersions: (folder: string, filePath: string) => Promise<GitConflictVersions>
+  getFileAtHead: (folder: string, filePath: string) => Promise<string | null>
   writeResolvedConflict: (folder: string, filePath: string, content: string) => Promise<void>
   abortMerge: (folder: string) => Promise<void>
   setActiveFolder: (folder: string | null) => Promise<void>

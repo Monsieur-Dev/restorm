@@ -227,7 +227,10 @@
     "exportOpenApi": "Xuất sang OpenAPI",
     "clearAuthCache": "Xóa bộ nhớ đệm xác thực",
     "openLogsFolder": "Mở thư mục nhật ký",
-    "mcpLogs": "Nhật ký MCP"
+    "mcpLogs": "Nhật ký MCP",
+    "git": "Git",
+    "gitPush": "Đẩy",
+    "gitPull": "Kéo"
   },
   "sidebar": {
     "addRequest": "Thêm yêu cầu",
@@ -2361,5 +2364,11 @@
   },
   "server": {
     "configLockedWhileRunning": "Đã khóa cấu hình khi máy chủ đang chạy"
+  },
+  "git": {
+    "pushComingSoonTitle": "Đẩy chưa khả dụng",
+    "pushComingSoonBody": "Luồng commit + đẩy sẽ có trong bản cập nhật sau.",
+    "pullFailedTitle": "Kéo thất bại",
+    "pullFailedBody": "Không thể kéo các thay đổi mới nhất."
   }
 }

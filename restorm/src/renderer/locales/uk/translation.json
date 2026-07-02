@@ -230,7 +230,10 @@
     "exportOpenApi": "Експортувати в OpenAPI",
     "clearAuthCache": "Очистити кеш автентифікації",
     "openLogsFolder": "Відкрити теку журналів",
-    "mcpLogs": "Журнали MCP"
+    "mcpLogs": "Журнали MCP",
+    "git": "Git",
+    "gitPush": "Надіслати",
+    "gitPull": "Отримати"
   },
   "sidebar": {
     "addRequest": "Додати запит",
@@ -2364,5 +2367,11 @@
   },
   "server": {
     "configLockedWhileRunning": "Конфігурацію заблоковано під час роботи сервера"
+  },
+  "git": {
+    "pushComingSoonTitle": "Надсилання ще недоступне",
+    "pushComingSoonBody": "Потік commit + push з'явиться в майбутньому оновленні.",
+    "pullFailedTitle": "Не вдалося виконати pull",
+    "pullFailedBody": "Не вдалося отримати останні зміни."
   }
 }

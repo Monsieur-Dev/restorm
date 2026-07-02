@@ -215,6 +215,26 @@ describe('GitService', () => {
     })
   })
 
+  describe('getFileAtHead', () => {
+    it('reads the file content at HEAD', async () => {
+      mockGit.show.mockResolvedValue('collections:\n  - name: foo\n')
+      const result = await service.getFileAtHead('/proj', 'api.restorm')
+      expect(mockGit.show).toHaveBeenCalledWith(['HEAD:api.restorm'])
+      expect(result).toBe('collections:\n  - name: foo\n')
+    })
+
+    it('resolves to null for a path that does not exist at HEAD (never committed)', async () => {
+      mockGit.show.mockRejectedValue(new Error('path does not exist in HEAD'))
+      const result = await service.getFileAtHead('/proj', 'api.restorm')
+      expect(result).toBeNull()
+    })
+
+    it('rejects a filePath that escapes the repo folder', async () => {
+      await expect(service.getFileAtHead('/proj', '../../../../etc/cron.d/x')).rejects.toThrow('escapes the repo folder')
+      expect(mockGit.show).not.toHaveBeenCalled()
+    })
+  })
+
   describe('writeResolvedConflict', () => {
     it('writes the resolved content to disk and stages it', async () => {
       await service.writeResolvedConflict('/proj', 'requests/foo.yaml', 'resolved: true')

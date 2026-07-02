@@ -228,7 +228,10 @@
     "exportOpenApi": "Exportera till OpenAPI",
     "clearAuthCache": "Rensa autentiseringscache",
     "openLogsFolder": "Öppna loggmapp",
-    "mcpLogs": "MCP-loggar"
+    "mcpLogs": "MCP-loggar",
+    "git": "Git",
+    "gitPush": "Push",
+    "gitPull": "Hämta"
   },
   "sidebar": {
     "addRequest": "Lägg till förfrågan",
@@ -2362,5 +2365,11 @@
   },
   "server": {
     "configLockedWhileRunning": "Konfiguration låst medan servern körs"
+  },
+  "git": {
+    "pushComingSoonTitle": "Push är inte tillgängligt än",
+    "pushComingSoonBody": "Flödet för commit och push kommer i en framtida uppdatering.",
+    "pullFailedTitle": "Pull misslyckades",
+    "pullFailedBody": "Det gick inte att hämta de senaste ändringarna."
   }
 }

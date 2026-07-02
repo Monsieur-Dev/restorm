@@ -341,6 +341,10 @@
       "stopServer": "Ndalo serverin MCP",
       "resumeServer": "Rifillo serverin MCP",
       "serverStopped": "ndaluar"
+    },
+    "git": {
+      "pushTooltip": "Dërgo te depozitari",
+      "pullTooltip": "Merr nga depozitari"
     }
   },
   "mcpToolTitles": {

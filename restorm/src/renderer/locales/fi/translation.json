@@ -228,7 +228,10 @@
     "exportOpenApi": "Vie OpenAPI-muotoon",
     "clearAuthCache": "Tyhjennä todennusvälimuisti",
     "openLogsFolder": "Avaa lokikansio",
-    "mcpLogs": "MCP-lokit"
+    "mcpLogs": "MCP-lokit",
+    "git": "Git",
+    "gitPush": "Työnnä",
+    "gitPull": "Nouda"
   },
   "sidebar": {
     "addRequest": "Lisää pyyntö",
@@ -2362,5 +2365,11 @@
   },
   "server": {
     "configLockedWhileRunning": "Asetukset lukittu palvelimen ollessa käynnissä"
+  },
+  "git": {
+    "pushComingSoonTitle": "Työntäminen ei ole vielä käytettävissä",
+    "pushComingSoonBody": "Commit- ja push-toiminto tulee tulevassa päivityksessä.",
+    "pullFailedTitle": "Nouto epäonnistui",
+    "pullFailedBody": "Uusimpia muutoksia ei voitu noutaa."
   }
 }

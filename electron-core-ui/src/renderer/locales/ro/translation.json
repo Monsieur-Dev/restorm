@@ -341,6 +341,10 @@
       "stopServer": "Oprește serverul MCP",
       "resumeServer": "Reia serverul MCP",
       "serverStopped": "oprit"
+    },
+    "git": {
+      "pushTooltip": "Trimite spre depozit",
+      "pullTooltip": "Extrage din depozit"
     }
   },
   "mcpToolTitles": {

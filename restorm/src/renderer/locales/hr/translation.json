@@ -229,7 +229,10 @@
     "exportOpenApi": "Izvezi u OpenAPI",
     "clearAuthCache": "Očisti predmemoriju autentifikacije",
     "openLogsFolder": "Otvori mapu zapisa",
-    "mcpLogs": "MCP zapisi"
+    "mcpLogs": "MCP zapisi",
+    "git": "Git",
+    "gitPush": "Pošalji",
+    "gitPull": "Preuzmi"
   },
   "sidebar": {
     "addRequest": "Dodaj zahtjev",
@@ -2363,5 +2366,11 @@
   },
   "server": {
     "configLockedWhileRunning": "Konfiguracija zaključana dok se poslužitelj izvodi"
+  },
+  "git": {
+    "pushComingSoonTitle": "Slanje još nije dostupno",
+    "pushComingSoonBody": "Tijek commit + push stiže u budućem ažuriranju.",
+    "pullFailedTitle": "Povlačenje nije uspjelo",
+    "pullFailedBody": "Nije moguće povući najnovije promjene."
   }
 }

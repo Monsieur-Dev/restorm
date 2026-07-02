@@ -228,7 +228,10 @@
     "exportOpenApi": "Exporteren naar OpenAPI",
     "clearAuthCache": "Authenticatiecache wissen",
     "openLogsFolder": "Logbestandenmap openen",
-    "mcpLogs": "MCP-logboeken"
+    "mcpLogs": "MCP-logboeken",
+    "git": "Git",
+    "gitPush": "Pushen",
+    "gitPull": "Pullen"
   },
   "sidebar": {
     "addRequest": "Verzoek toevoegen",
@@ -2362,5 +2365,11 @@
   },
   "server": {
     "configLockedWhileRunning": "Configuratie vergrendeld terwijl de server draait"
+  },
+  "git": {
+    "pushComingSoonTitle": "Pushen is nog niet beschikbaar",
+    "pushComingSoonBody": "De commit-en-push-flow komt in een toekomstige update.",
+    "pullFailedTitle": "Pullen mislukt",
+    "pullFailedBody": "Kon de nieuwste wijzigingen niet ophalen."
   }
 }

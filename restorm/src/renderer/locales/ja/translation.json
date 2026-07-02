@@ -227,7 +227,10 @@
     "exportOpenApi": "OpenAPI にエクスポート",
     "clearAuthCache": "認証キャッシュをクリア",
     "openLogsFolder": "ログフォルダを開く",
-    "mcpLogs": "MCP ログ"
+    "mcpLogs": "MCP ログ",
+    "git": "Git",
+    "gitPush": "プッシュ",
+    "gitPull": "プル"
   },
   "sidebar": {
     "addRequest": "リクエストを追加",
@@ -2361,5 +2364,11 @@
   },
   "server": {
     "configLockedWhileRunning": "サーバーの実行中は設定がロックされます"
+  },
+  "git": {
+    "pushComingSoonTitle": "プッシュはまだ利用できません",
+    "pushComingSoonBody": "コミット + プッシュのフローは今後のアップデートで提供予定です。",
+    "pullFailedTitle": "プルに失敗しました",
+    "pullFailedBody": "最新の変更を取得できませんでした。"
   }
 }

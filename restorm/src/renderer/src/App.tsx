@@ -125,10 +125,12 @@ const tabMatchesItem = (tab: EditorTab, itemId: string): boolean => {
 import { Onboarding } from './components/MainView/Workbench/Onboarding'
 import { RestormTitlebar } from './components/MainView/Titlebar/RestormTitlebar'
 import { StatusbarMcpIndicator } from './components/MainView/StatusbarMcpIndicator'
+import { StatusbarGitIndicator } from './components/MainView/StatusbarGitIndicator'
 import { ScenarioToastBody, ScenarioToastTitle } from './components/ScenarioToastBody'
 import { useMcpEnabled } from './hooks/useMcpEnabled'
 import { useMcpActiveStateBridge } from './hooks/useMcpActiveStateBridge'
 import { useMcpNavigation } from './hooks/useMcpNavigation'
+import { useGitActions } from './hooks/useGitActions'
 import { useMcpTreeReplace } from './hooks/useMcpTreeReplace'
 import { useMcpRunRequest } from './hooks/useMcpRunRequest'
 import { useMcpRequestPatch } from './hooks/useMcpRequestPatch'
@@ -351,6 +353,10 @@ const App: React.FC = () => {
   // lazily on the first repo check and fires this at most once per
   // process lifetime.
   useGitCliMissingToast()
+
+  // Repo-push / repo-pull click actions, shared verbatim by the statusbar
+  // `GIT` entry and the title-bar `Git` menu (see `useGitActions`).
+  const { onPush: handleGitPush, onPull: handleGitPull } = useGitActions(filePath)
 
   const handleMenuExit = useCallback(() => {
     void window.api.closeWindow()
@@ -2709,6 +2715,8 @@ const App: React.FC = () => {
         onOpenFirewall={handleOpenFirewall}
         onOpenMiniBrowser={handleOpenMiniBrowser}
         onOpenMcpLogs={handleOpenMcpLogs}
+        onGitPush={handleGitPush}
+        onGitPull={handleGitPull}
         workbenchActive={fileName !== null}
         onOpenSettingsTab={handleOpenSettingsTab}
       />
@@ -2926,7 +2934,8 @@ const App: React.FC = () => {
           ALWAYS mounts (even when the server is stopped/disabled — it
           stays reachable so the user can re-enable it), so it is always
           the leftmost-of-the-right cell and always owns the auto margin;
-          the bell, which follows it, must never carry `right-aligned`. */}
+          the git entry and the bell, which follow it, must never carry
+          `right-aligned`. */}
       <Statusbar data-testid="app-statusbar">
         <StatusbarVersionPlan />
         {filePath && <StatusbarElement data-testid="app-statusbar-element" title={filePath} />}
@@ -2936,6 +2945,8 @@ const App: React.FC = () => {
          * MCP indicator carries the `right-aligned` auto margin in every
          * state (running and stopped/disabled) since it always renders. */}
         <StatusbarMcpIndicator rightAligned onViewLogs={handleOpenMcpLogs} />
+        {/* Renders nothing unless the open file's folder is a git repo. */}
+        <StatusbarGitIndicator onPush={handleGitPush} onPull={handleGitPull} />
         <StatusBarBellButton toasterId="app" />
       </Statusbar>
 

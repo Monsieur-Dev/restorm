@@ -228,7 +228,10 @@
     "exportOpenApi": "Export to OpenAPI",
     "clearAuthCache": "Clear Authentication Cache",
     "openLogsFolder": "Open Logs Folder",
-    "mcpLogs": "MCP logs"
+    "mcpLogs": "MCP logs",
+    "git": "Git",
+    "gitPush": "Push",
+    "gitPull": "Pull"
   },
   "sidebar": {
     "addRequest": "Add request",
@@ -2362,5 +2365,11 @@
   },
   "server": {
     "configLockedWhileRunning": "Config locked while the server is running"
+  },
+  "git": {
+    "pushComingSoonTitle": "Push isn't available yet",
+    "pushComingSoonBody": "The commit + push flow is coming in a future update.",
+    "pullFailedTitle": "Pull failed",
+    "pullFailedBody": "Could not pull the latest changes."
   }
 }

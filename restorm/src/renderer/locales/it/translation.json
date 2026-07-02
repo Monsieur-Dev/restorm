@@ -228,7 +228,10 @@
     "exportOpenApi": "Esporta come OpenAPI",
     "clearAuthCache": "Svuota cache di autenticazione",
     "openLogsFolder": "Apri cartella dei log",
-    "mcpLogs": "Log MCP"
+    "mcpLogs": "Log MCP",
+    "git": "Git",
+    "gitPush": "Push",
+    "gitPull": "Pull"
   },
   "sidebar": {
     "addRequest": "Aggiungi richiesta",
@@ -2362,5 +2365,11 @@
   },
   "server": {
     "configLockedWhileRunning": "Configurazione bloccata mentre il server è in esecuzione"
+  },
+  "git": {
+    "pushComingSoonTitle": "Il push non è ancora disponibile",
+    "pushComingSoonBody": "Il flusso di commit e push arriverà in un futuro aggiornamento.",
+    "pullFailedTitle": "Pull non riuscito",
+    "pullFailedBody": "Impossibile recuperare le ultime modifiche."
   }
 }

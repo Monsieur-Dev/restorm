@@ -341,6 +341,10 @@
       "stopServer": "停止 MCP 服务器",
       "resumeServer": "恢复 MCP 服务器",
       "serverStopped": "已停止"
+    },
+    "git": {
+      "pushTooltip": "推送到仓库",
+      "pullTooltip": "从仓库拉取"
     }
   },
   "mcpToolTitles": {

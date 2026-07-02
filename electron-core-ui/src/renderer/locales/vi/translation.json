@@ -341,6 +341,10 @@
       "stopServer": "Dừng máy chủ MCP",
       "resumeServer": "Tiếp tục máy chủ MCP",
       "serverStopped": "đã dừng"
+    },
+    "git": {
+      "pushTooltip": "Đẩy lên kho lưu trữ",
+      "pullTooltip": "Kéo từ kho lưu trữ"
     }
   },
   "mcpToolTitles": {

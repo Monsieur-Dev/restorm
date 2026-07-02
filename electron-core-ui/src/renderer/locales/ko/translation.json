@@ -341,6 +341,10 @@
       "stopServer": "MCP 서버 중지",
       "resumeServer": "MCP 서버 재개",
       "serverStopped": "중지됨"
+    },
+    "git": {
+      "pushTooltip": "저장소에 푸시",
+      "pullTooltip": "저장소에서 풀"
     }
   },
   "mcpToolTitles": {

@@ -228,7 +228,10 @@
     "exportOpenApi": "Exportar a OpenAPI",
     "clearAuthCache": "Vaciar caché de autenticación",
     "openLogsFolder": "Abrir carpeta de logs",
-    "mcpLogs": "Registros MCP"
+    "mcpLogs": "Registros MCP",
+    "git": "Git",
+    "gitPush": "Subir",
+    "gitPull": "Descargar"
   },
   "sidebar": {
     "addRequest": "Añadir petición",
@@ -2362,5 +2365,11 @@
   },
   "server": {
     "configLockedWhileRunning": "Configuración bloqueada mientras el servidor se está ejecutando"
+  },
+  "git": {
+    "pushComingSoonTitle": "Subir cambios aún no está disponible",
+    "pushComingSoonBody": "El flujo de confirmar y subir llegará en una futura actualización.",
+    "pullFailedTitle": "Error al obtener los cambios",
+    "pullFailedBody": "No se pudieron obtener los últimos cambios."
   }
 }

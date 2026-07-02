@@ -228,7 +228,10 @@
     "exportOpenApi": "Exportálás OpenAPI-ba",
     "clearAuthCache": "Hitelesítési gyorsítótár ürítése",
     "openLogsFolder": "Naplók mappa megnyitása",
-    "mcpLogs": "MCP-naplók"
+    "mcpLogs": "MCP-naplók",
+    "git": "Git",
+    "gitPush": "Küldés",
+    "gitPull": "Letöltés"
   },
   "sidebar": {
     "addRequest": "Kérés hozzáadása",
@@ -2362,5 +2365,11 @@
   },
   "server": {
     "configLockedWhileRunning": "A konfiguráció zárolva, amíg a szerver fut"
+  },
+  "git": {
+    "pushComingSoonTitle": "A küldés még nem érhető el",
+    "pushComingSoonBody": "A commit + push folyamat egy jövőbeli frissítésben érkezik.",
+    "pullFailedTitle": "A lehívás sikertelen",
+    "pullFailedBody": "A legújabb módosítások lehívása nem sikerült."
   }
 }

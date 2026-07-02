@@ -45,6 +45,12 @@ export function registerGitHandlers(): void {
     return service.getConflictVersions(folder, filePath)
   })
 
+  // Same `[folder, filePath]` shape as `getConflictVersions` — reused rather
+  // than declaring a duplicate schema.
+  validatedHandle('git:get-file-at-head', gitConflictVersionsArgs, async (_event, [folder, filePath]) => {
+    return service.getFileAtHead(folder, filePath)
+  })
+
   validatedHandle('git:write-resolved-conflict', gitWriteResolvedConflictArgs, async (_event, [folder, filePath, content]) => {
     await service.writeResolvedConflict(folder, filePath, content)
   })

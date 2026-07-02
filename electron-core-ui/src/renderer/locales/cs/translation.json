@@ -341,6 +341,10 @@
       "stopServer": "Zastavit MCP server",
       "resumeServer": "Obnovit MCP server",
       "serverStopped": "zastaveno"
+    },
+    "git": {
+      "pushTooltip": "Odeslat do repozitáře",
+      "pullTooltip": "Stáhnout z repozitáře"
     }
   },
   "mcpToolTitles": {

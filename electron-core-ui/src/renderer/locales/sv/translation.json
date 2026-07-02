@@ -341,6 +341,10 @@
       "stopServer": "Stoppa MCP-server",
       "resumeServer": "Återuppta MCP-server",
       "serverStopped": "stoppad"
+    },
+    "git": {
+      "pushTooltip": "Push:a till förvaret",
+      "pullTooltip": "Hämta från förvaret"
     }
   },
   "mcpToolTitles": {

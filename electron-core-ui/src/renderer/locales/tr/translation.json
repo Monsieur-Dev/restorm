@@ -341,6 +341,10 @@
       "stopServer": "MCP sunucusunu durdur",
       "resumeServer": "MCP sunucusunu devam ettir",
       "serverStopped": "durduruldu"
+    },
+    "git": {
+      "pushTooltip": "Depoya gönder",
+      "pullTooltip": "Depodan çek"
     }
   },
   "mcpToolTitles": {

@@ -341,6 +341,10 @@
       "stopServer": "MCPサーバーを停止",
       "resumeServer": "MCPサーバーを再開",
       "serverStopped": "停止中"
+    },
+    "git": {
+      "pushTooltip": "リポジトリにプッシュ",
+      "pullTooltip": "リポジトリからプル"
     }
   },
   "mcpToolTitles": {

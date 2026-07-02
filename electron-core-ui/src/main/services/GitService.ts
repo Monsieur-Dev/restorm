@@ -232,6 +232,26 @@ export class GitService {
     return { path: filePath, base, ours, theirs }
   }
 
+  /**
+   * Read `filePath`'s content at the last commit (`HEAD`), for a normal
+   * (non-conflicted) repo — the "before" side of a before/after diff
+   * (e.g. a commit-message generator comparing the working tree against
+   * what's already committed). Distinct from `getConflictVersions`, which
+   * only makes sense mid-merge. Resolves to `null` when the path doesn't
+   * exist at `HEAD` yet (a brand-new, never-committed file) rather than
+   * rejecting.
+   */
+  public async getFileAtHead(folder: string, filePath: string): Promise<string | null> {
+    if (!this.isPathWithinFolder(folder, filePath)) {
+      throw new Error(`getFileAtHead: filePath escapes the repo folder: ${filePath}`)
+    }
+    try {
+      return await this.git(folder).show([`HEAD:${filePath}`])
+    } catch {
+      return null
+    }
+  }
+
   /** Write the user's resolved content to disk and stage it (marks the
    * conflict resolved from git's point of view). Finalising the merge
    * (committing) is a separate `commit()` call once every conflict in the
