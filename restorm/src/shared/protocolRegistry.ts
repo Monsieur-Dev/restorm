@@ -127,6 +127,7 @@ export const PROTOCOL_REGISTRY = {
     badge: { kind: 'fixed', value: 'SSE' },
     searchIcon: 'sse',
     scenarioKinds: ['sseConnect', 'sseClose']
+  },
   stomp: {
     graphqlTypeName: 'StompRequest',
     tabType: 'stomp-request',
@@ -185,6 +186,7 @@ export const PROTOCOL_REGISTRY = {
     ipcNamespace: 'amqp',
     badge: { kind: 'fixed', value: 'AMQP' },
     scenarioKinds: ['amqpConnect', 'amqpPublish', 'amqpClose']
+  },
   kafka: {
     graphqlTypeName: 'KafkaRequest',
     tabType: 'kafka-request',

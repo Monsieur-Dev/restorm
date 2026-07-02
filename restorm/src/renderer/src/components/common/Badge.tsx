@@ -16,10 +16,9 @@ export type BadgeType =
   // SOAP
   | 'SOAP'
   // WebSocket protocols
-  | 'WS' | 'MQTT' | 'SIO'
+  | 'WS' | 'MQTT' | 'SIO' | 'STOMP'
   // Server-Sent Events
   | 'SSE'
-  | 'WS' | 'MQTT' | 'SIO' | 'STOMP'
   // Kafka
   | 'KAFKA'
   // OData

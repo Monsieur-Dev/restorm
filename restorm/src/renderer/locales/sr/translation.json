@@ -283,7 +283,7 @@
         "trpc": "tRPC zahtev",
         "amqp": "AMQP zahtev",
         "redis": "Redis zahtev",
-        "stomp": "STOMP захтев"
+        "stomp": "STOMP захтев",
         "kafkaProduce": "Kafka zahtev – Proizvedi",
         "kafkaConsume": "Kafka zahtev – Potroši"
       }
@@ -621,6 +621,7 @@
       "channels": "Kanali",
       "command": "Komanda"
     }
+  },
   "kafka": {
     "brokersPlaceholder": "Lista brokera (host:port,host:port)",
     "clientId": "ID klijenta",
@@ -1250,7 +1251,7 @@
       "graphqlUnsubscribe": "Откажи GraphQL претплату",
       "stompConnect": "STOMP веза",
       "stompSend": "STOMP слање",
-      "stompClose": "Затварање STOMP"
+      "stompClose": "Затварање STOMP",
       "kafkaProduce": "Kafka produce",
       "kafkaConsume": "Kafka consume",
       "kafkaClose": "Kafka close"
@@ -1854,7 +1855,7 @@
       "graphqlUnsubscribe": "Зауставља већ отворену GraphQL претплату (декларисану GraphQL претплатним чвором) и затвара њен SSE ток.",
       "stompConnect": "Отвара дуготрајну STOMP везу преко WebSocket-а: обавља CONNECT/CONNECTED руковање, затим се претплаћује на свако конфигурисано одредиште и поново емитује сваки примљени оквир на свом порту.",
       "stompSend": "Шаље SEND оквир на већ отвореној STOMP вези.",
-      "stompClose": "Шаље DISCONNECT и затвара већ отворену STOMP везу."
+      "stompClose": "Шаље DISCONNECT и затвара већ отворену STOMP везу.",
       "kafkaProduce": "Покреће повезани Kafka захтев као једнократну производњу и емитује резултат (тема/партиција/offset) као `response`.",
       "kafkaConsume": "Отвара дуготрајног Kafka потрошача из повезаног захтева и поново емитује сваку примљену поруку на свом `message` порту.",
       "kafkaClose": "Затвара већ отвореног Kafka потрошача."

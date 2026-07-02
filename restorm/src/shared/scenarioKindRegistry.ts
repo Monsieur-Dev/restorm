@@ -248,6 +248,8 @@ export const SCENARIO_KIND_REGISTRY = {
     doc: {
       summary: 'Closes an already-open SSE connection (declared by an sseConnect node), firing that node\'s `done`. Pure-event action: triggered on `in`, sequences via its own `done`. Errors (to `error`) when no connection is selected.',
       config: { connectionNodeId: 'Id of the sseConnect node whose connection to close.' }
+    }
+  },
   stompConnect: {
     labelKey: 'scenario.nodes.stompConnect', defaultLabel: 'STOMP connect', icon: 'plug', category: 'composition',
     requestBinding: true,
@@ -347,6 +349,8 @@ export const SCENARIO_KIND_REGISTRY = {
     doc: {
       summary: 'Runs a bound Redis request (command mode) — a single command on a fresh connection, then disconnects — and emits its `response` (the raw reply). Sequence it via the `in` trigger. Never runs the same request as a redisSubscribe (a client in subscriber mode cannot issue regular commands).',
       config: { requestId: 'Id of the Redis (command-mode) request to execute.', label: 'Display label on the box.' }
+    }
+  },
   kafkaProduce: {
     labelKey: 'scenario.nodes.kafkaProduce', defaultLabel: 'Kafka produce', icon: 'arrow-up', category: 'composition',
     requestBinding: true,

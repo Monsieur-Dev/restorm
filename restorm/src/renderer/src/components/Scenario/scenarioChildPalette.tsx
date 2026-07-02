@@ -152,6 +152,11 @@ export const SCENARIO_ADD_WEBSOCKET_ACTIONS: ScenarioAddWsActionEntry[] = [
  * action — mirrors the HTTP/SOAP/GraphQL server sections' close-only shape. */
 export interface ScenarioAddSseActionEntry {
   kind: 'sseClose'
+  icon: string
+  labelKey: string
+  defaultLabel: string
+}
+
 /** STOMP action entries — same shape as the raw-WebSocket section, badged
  * STOMP (send / close only; connect comes from the request entry above). */
 export interface ScenarioAddStompActionEntry {
@@ -163,6 +168,8 @@ export interface ScenarioAddStompActionEntry {
 
 export const SCENARIO_ADD_SSE_ACTIONS: ScenarioAddSseActionEntry[] = [
   { kind: 'sseClose', icon: 'debug-disconnect', labelKey: 'scenario.nodes.sseClose', defaultLabel: 'SSE close' }
+]
+
 export const SCENARIO_ADD_STOMP_ACTIONS: ScenarioAddStompActionEntry[] = [
   { kind: 'stompSend', icon: 'arrow-up', labelKey: 'scenario.nodes.stompSend', defaultLabel: 'STOMP send' },
   { kind: 'stompClose', icon: 'debug-disconnect', labelKey: 'scenario.nodes.stompClose', defaultLabel: 'STOMP close' }
@@ -185,6 +192,11 @@ export const SCENARIO_ADD_MQTT_ACTIONS: ScenarioAddMqttActionEntry[] = [
  * `subscribe` mode only), badged AMQP. */
 export interface ScenarioAddAmqpActionEntry {
   kind: 'amqpPublish' | 'amqpClose'
+  icon: string
+  labelKey: string
+  defaultLabel: string
+}
+
 /** Kafka action entries — CLOSE only (produce is one-shot and never needs
  * closing; the consume connect comes from the Kafka request entries above),
  * badged KAFKA. */
@@ -214,6 +226,8 @@ export const SCENARIO_ADD_AMQP_ACTIONS: ScenarioAddAmqpActionEntry[] = [
 
 export const SCENARIO_ADD_REDIS_ACTIONS: ScenarioAddRedisActionEntry[] = [
   { kind: 'redisClose', icon: 'debug-disconnect', labelKey: 'scenario.nodes.redisClose', defaultLabel: 'Redis close' }
+]
+
 export const SCENARIO_ADD_KAFKA_ACTIONS: ScenarioAddKafkaActionEntry[] = [
   { kind: 'kafkaClose', icon: 'debug-disconnect', labelKey: 'scenario.nodes.kafkaClose', defaultLabel: 'Kafka close' }
 ]
@@ -331,9 +345,13 @@ export function scenarioAddAmqpIcon(icon: string): ReactNode {
 /** The "REDIS" badge with the action's codicon inside (Redis section). */
 export function scenarioAddRedisIcon(icon: string): ReactNode {
   return React.createElement(Badge, { type: 'REDIS', icon })
+}
+
 /** The "STOMP" badge with the action's codicon inside (STOMP section). */
 export function scenarioAddStompIcon(icon: string): ReactNode {
   return React.createElement(Badge, { type: 'STOMP', icon })
+}
+
 /** The "KAFKA" badge with the action's codicon inside (Kafka section). */
 export function scenarioAddKafkaIcon(icon: string): ReactNode {
   return React.createElement(Badge, { type: 'KAFKA', icon })

@@ -281,7 +281,7 @@
         "trpc": "Yêu cầu tRPC",
         "amqp": "Yêu cầu AMQP",
         "redis": "Yêu cầu Redis",
-        "stomp": "Yêu cầu STOMP"
+        "stomp": "Yêu cầu STOMP",
         "kafkaProduce": "Yêu cầu Kafka – Tạo",
         "kafkaConsume": "Yêu cầu Kafka – Tiêu thụ"
       }
@@ -619,6 +619,7 @@
       "channels": "Kênh",
       "command": "Lệnh"
     }
+  },
   "kafka": {
     "brokersPlaceholder": "Danh sách broker (host:port,host:port)",
     "clientId": "ID máy khách",
@@ -1248,7 +1249,7 @@
       "graphqlUnsubscribe": "Hủy đăng ký GraphQL",
       "stompConnect": "Kết nối STOMP",
       "stompSend": "Gửi STOMP",
-      "stompClose": "Đóng STOMP"
+      "stompClose": "Đóng STOMP",
       "kafkaProduce": "Kafka produce",
       "kafkaConsume": "Kafka consume",
       "kafkaClose": "Kafka close"
@@ -1852,7 +1853,7 @@
       "graphqlUnsubscribe": "Dừng một đăng ký GraphQL đang mở (được khai báo bởi nút đăng ký GraphQL), đóng luồng SSE của nó.",
       "stompConnect": "Mở một kết nối STOMP qua WebSocket lâu dài: thực hiện bắt tay CONNECT/CONNECTED, sau đó đăng ký từng đích đã cấu hình và phát lại mỗi khung nhận được trên cổng của nó.",
       "stompSend": "Gửi một khung SEND trên kết nối STOMP đã mở.",
-      "stompClose": "Gửi DISCONNECT và đóng kết nối STOMP đã mở."
+      "stompClose": "Gửi DISCONNECT và đóng kết nối STOMP đã mở.",
       "kafkaProduce": "Chạy một yêu cầu Kafka đã gắn dưới dạng sản xuất một lần và phát ra kết quả (chủ đề/phân vùng/offset) dưới dạng `response`.",
       "kafkaConsume": "Mở một trình tiêu thụ Kafka lâu dài từ một yêu cầu đã gắn và phát lại mỗi thông điệp nhận được trên cổng `message` của nó.",
       "kafkaClose": "Đóng một trình tiêu thụ Kafka đang mở."

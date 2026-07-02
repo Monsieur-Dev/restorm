@@ -279,6 +279,7 @@ const resolveStreamConnectPreview: PreviewResolver = async (_scenarioId, node) =
   // stored frame IS a received one, so wrap them before reusing the same helper.
   if (resp?.type === 'sse') {
     return socketioPreviewFromMessages(resp.frames.map((f) => ({ direction: 'received', data: f.data, event: f.event })), [])
+  }
   // Kafka consume: messages carry `value` (not `data`) and no `event` — every
   // consumed record is a plain received frame, so the latest one wins.
   if (resp?.type === 'kafka') {

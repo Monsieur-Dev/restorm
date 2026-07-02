@@ -18,8 +18,7 @@ import { resolveUrlAgainstEnv, flattenEnvVars } from '../../../shared/utils/reso
 // ---------- Route discriminants per request type ----------
 
 interface CompilableRoute {
-  type: 'http' | 'graphql' | 'grpc' | 'soap' | 'websocket' | 'sse' | 'odata' | 'trpc' | 'redis'
-  type: 'http' | 'graphql' | 'grpc' | 'soap' | 'websocket' | 'odata' | 'kafka'
+  type: 'http' | 'graphql' | 'grpc' | 'soap' | 'websocket' | 'sse' | 'odata' | 'trpc' | 'redis' | 'kafka'
   url?: string
   method?: string
   operationType?: string

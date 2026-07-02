@@ -14,10 +14,8 @@ import type {
   JsonRpcBatchRequest,
   TrpcRequest,
   AmqpRequest,
-  RedisRequest
+  RedisRequest,
   StompRequest,
-  ODataRequest
-  ODataRequest,
   KafkaRequest
 } from '../../../shared/types/requests'
 import {
@@ -33,10 +31,8 @@ import {
   JsonRpcBatchRequestTabView,
   TrpcRequestTabView,
   AmqpRequestTabView,
-  RedisRequestTabView
+  RedisRequestTabView,
   StompRequestTabView,
-  ODataRequestTabView
-  ODataRequestTabView,
   KafkaRequestTabView
 } from '../components/RequestTabViews'
 
@@ -71,10 +67,8 @@ export const PROTOCOL_TAB_VIEWS: Record<RequestType, (request: Request) => React
   jsonrpcBatch: (request) => <JsonRpcBatchRequestTabView request={request as JsonRpcBatchRequest} />,
   trpc: (request) => <TrpcRequestTabView request={request as TrpcRequest} />,
   amqp: (request) => <AmqpRequestTabView request={request as AmqpRequest} />,
-  redis: (request) => <RedisRequestTabView request={request as RedisRequest} />
+  redis: (request) => <RedisRequestTabView request={request as RedisRequest} />,
   stomp: (request) => <StompRequestTabView request={request as StompRequest} />,
-  odata: (request) => <ODataRequestTabView request={request as ODataRequest} />
-  odata: (request) => <ODataRequestTabView request={request as ODataRequest} />,
   kafka: (request) => <KafkaRequestTabView request={request as KafkaRequest} />
 }
 

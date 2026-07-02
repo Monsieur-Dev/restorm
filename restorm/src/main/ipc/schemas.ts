@@ -419,6 +419,16 @@ export const websocketIsActiveArgs = z.tuple([requestIdArg])
 // ==========================================================================
 
 export const sseConnectArgs = z.tuple([
+  z.object({
+    requestId: z.string(),
+    timeout: z.number().optional()
+  }).loose()
+])
+
+export const sseDisconnectArgs = z.tuple([requestIdArg])
+export const sseIsActiveArgs = z.tuple([requestIdArg])
+
+// ==========================================================================
 // STOMP Execution
 // ==========================================================================
 
@@ -429,8 +439,11 @@ export const stompConnectArgs = z.tuple([
   }).loose()
 ])
 
-export const sseDisconnectArgs = z.tuple([requestIdArg])
-export const sseIsActiveArgs = z.tuple([requestIdArg])
+export const stompDisconnectArgs = z.tuple([requestIdArg])
+export const stompSendArgs = z.tuple([requestIdArg, z.string()])
+export const stompAckArgs = z.tuple([requestIdArg, z.string(), z.string()])
+export const stompNackArgs = z.tuple([requestIdArg, z.string(), z.string()])
+export const stompIsActiveArgs = z.tuple([requestIdArg])
 
 // ==========================================================================
 // AMQP Execution
@@ -459,6 +472,23 @@ export const amqpIsActiveArgs = z.tuple([requestIdArg])
 // ==========================================================================
 
 export const redisSubscribeArgs = z.tuple([
+  z.object({
+    requestId: z.string(),
+    timeout: z.number().optional()
+  }).loose()
+])
+
+export const redisCommandArgs = z.tuple([
+  z.object({
+    requestId: z.string(),
+    timeout: z.number().optional()
+  }).loose()
+])
+
+export const redisDisconnectArgs = z.tuple([requestIdArg])
+export const redisIsActiveArgs = z.tuple([requestIdArg])
+
+// ==========================================================================
 // Kafka Execution
 // ==========================================================================
 
@@ -469,7 +499,6 @@ export const kafkaProduceArgs = z.tuple([
   }).loose()
 ])
 
-export const redisCommandArgs = z.tuple([
 export const kafkaBrowseArgs = z.tuple([
   z.object({
     requestId: z.string(),
@@ -477,13 +506,6 @@ export const kafkaBrowseArgs = z.tuple([
   }).loose()
 ])
 
-export const redisDisconnectArgs = z.tuple([requestIdArg])
-export const redisIsActiveArgs = z.tuple([requestIdArg])
-export const stompDisconnectArgs = z.tuple([requestIdArg])
-export const stompSendArgs = z.tuple([requestIdArg, z.string()])
-export const stompAckArgs = z.tuple([requestIdArg, z.string(), z.string()])
-export const stompNackArgs = z.tuple([requestIdArg, z.string(), z.string()])
-export const stompIsActiveArgs = z.tuple([requestIdArg])
 export const kafkaConsumeStartArgs = z.tuple([requestIdArg])
 export const kafkaCancelArgs = z.tuple([requestIdArg])
 export const kafkaIsActiveArgs = z.tuple([requestIdArg])
@@ -712,6 +734,11 @@ export const websocketConnectResultSchema = z.object({
 })
 
 export const sseConnectResultSchema = z.object({
+  requestId: z.string(),
+  success: z.boolean(),
+  error: z.string().optional(),
+})
+
 export const stompConnectResultSchema = z.object({
   requestId: z.string(),
   success: z.boolean(),
@@ -729,6 +756,8 @@ export const redisResultSchema = z.object({
   success: z.boolean(),
   mode: z.enum(['subscribe', 'command']),
   error: z.string().optional(),
+})
+
 export const kafkaProduceResultSchema = z.object({
   requestId: z.string(),
   success: z.boolean(),

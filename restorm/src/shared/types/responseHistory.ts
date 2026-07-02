@@ -1,6 +1,4 @@
-export type ResponseHistoryRequestType = 'http' | 'odata' | 'graphql' | 'grpc' | 'soap' | 'websocket' | 'sse' | 'jsonrpc' | 'jsonrpcBatch' | 'trpc' | 'amqp' | 'redis'
-export type ResponseHistoryRequestType = 'http' | 'odata' | 'graphql' | 'grpc' | 'soap' | 'websocket' | 'stomp'
-export type ResponseHistoryRequestType = 'http' | 'odata' | 'graphql' | 'grpc' | 'soap' | 'websocket' | 'kafka'
+export type ResponseHistoryRequestType = 'http' | 'odata' | 'graphql' | 'grpc' | 'soap' | 'websocket' | 'sse' | 'stomp' | 'jsonrpc' | 'jsonrpcBatch' | 'trpc' | 'amqp' | 'redis' | 'kafka'
 
 /**
  * 3-way visual signal for the per-entry status dot in the history
@@ -317,6 +315,13 @@ export interface ResponseHistoryRedisResponse {
   command?: string
   args?: string[]
   reply?: string
+  timings: {
+    startedAt: string
+    durationMs: number
+  }
+  error?: string
+}
+
 export interface ResponseHistoryStompMessage {
   direction: 'sent' | 'received'
   command: string
@@ -332,6 +337,13 @@ export interface ResponseHistoryStompResponse {
   requestUrl: string
   connected: boolean
   messages: ResponseHistoryStompMessage[]
+  timings: {
+    startedAt: string
+    durationMs: number
+  }
+  error?: string
+}
+
 /** One produced/consumed/browsed Kafka record. `direction` mirrors the
  * WebSocket message shape (`received` for consume/browse frames; produce has
  * no message list — its single result lives in the `produced*` fields). */

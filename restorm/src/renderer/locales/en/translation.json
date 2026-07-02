@@ -282,7 +282,7 @@
         "trpc": "tRPC request",
         "amqp": "AMQP request",
         "redis": "Redis request",
-        "stomp": "STOMP request"
+        "stomp": "STOMP request",
         "kafkaProduce": "Kafka request – Produce",
         "kafkaConsume": "Kafka request – Consume"
       }
@@ -620,6 +620,7 @@
       "channels": "Channels",
       "command": "Command"
     }
+  },
   "kafka": {
     "brokersPlaceholder": "Broker list (host:port,host:port)",
     "clientId": "Client ID",
@@ -1249,7 +1250,7 @@
       "graphqlUnsubscribe": "GraphQL unsubscribe",
       "stompConnect": "STOMP connect",
       "stompSend": "STOMP send",
-      "stompClose": "STOMP close"
+      "stompClose": "STOMP close",
       "kafkaProduce": "Kafka produce",
       "kafkaConsume": "Kafka consume",
       "kafkaClose": "Kafka close"
@@ -1856,7 +1857,7 @@
       "graphqlUnsubscribe": "Stops an already-open GraphQL subscription (declared by a GraphQL subscribe node), tearing down its SSE stream.",
       "stompConnect": "Opens a long-lived STOMP-over-WebSocket connection: performs the CONNECT/CONNECTED handshake, then subscribes to every configured destination, and re-emits each received frame on its port.",
       "stompSend": "Sends a SEND frame on an already-open STOMP connection.",
-      "stompClose": "Sends DISCONNECT and closes an already-open STOMP connection."
+      "stompClose": "Sends DISCONNECT and closes an already-open STOMP connection.",
       "kafkaProduce": "Runs a bound Kafka request as a one-shot produce and emits the result (topic/partition/offset) as `response`.",
       "kafkaConsume": "Opens a long-lived Kafka consumer from a bound request and re-emits each received message on its `message` port.",
       "kafkaClose": "Closes an already-open Kafka consumer."

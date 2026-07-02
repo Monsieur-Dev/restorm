@@ -284,7 +284,7 @@
         "trpc": "Požadavek tRPC",
         "amqp": "Požadavek AMQP",
         "redis": "Požadavek Redis",
-        "stomp": "Požadavek STOMP"
+        "stomp": "Požadavek STOMP",
         "kafkaProduce": "Požadavek Kafka – Produkovat",
         "kafkaConsume": "Požadavek Kafka – Konzumovat"
       }
@@ -622,6 +622,7 @@
       "channels": "Kanály",
       "command": "Příkaz"
     }
+  },
   "kafka": {
     "brokersPlaceholder": "Seznam brokerů (host:port,host:port)",
     "clientId": "ID klienta",
@@ -1251,7 +1252,7 @@
       "graphqlUnsubscribe": "Zrušení odběru GraphQL",
       "stompConnect": "Připojení STOMP",
       "stompSend": "Odeslání STOMP",
-      "stompClose": "Uzavření STOMP"
+      "stompClose": "Uzavření STOMP",
       "kafkaProduce": "Kafka produce",
       "kafkaConsume": "Kafka consume",
       "kafkaClose": "Kafka close"
@@ -1855,7 +1856,7 @@
       "graphqlUnsubscribe": "Zastaví již otevřený odběr GraphQL (deklarovaný uzlem odběru GraphQL) a uzavře jeho SSE proud.",
       "stompConnect": "Otevře dlouhodobé připojení STOMP přes WebSocket: provede handshake CONNECT/CONNECTED, poté se přihlásí ke každému nakonfigurovanému cíli a znovu odešle každý přijatý rámec na svém portu.",
       "stompSend": "Odešle rámec SEND přes již otevřené připojení STOMP.",
-      "stompClose": "Odešle DISCONNECT a uzavře již otevřené připojení STOMP."
+      "stompClose": "Odešle DISCONNECT a uzavře již otevřené připojení STOMP.",
       "kafkaProduce": "Spustí navázaný Kafka požadavek jako jednorázové odeslání a vrátí výsledek (téma/partition/offset) jako `response`.",
       "kafkaConsume": "Otevře dlouhodobého Kafka konzumenta z navázaného požadavku a znovu vysílá každou přijatou zprávu na svém portu `message`.",
       "kafkaClose": "Uzavře již otevřeného Kafka konzumenta."

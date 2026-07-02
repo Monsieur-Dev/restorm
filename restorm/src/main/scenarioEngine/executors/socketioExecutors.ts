@@ -118,15 +118,6 @@ export const sseConnectExecutor: NodeExecutor = (_act, ctx) => {
   const cfg = ctx.node.config as { requestId?: unknown; connectionName?: unknown }
   if (typeof cfg.requestId !== 'string' || cfg.requestId === '') {
     throw new Error(`sseConnect node ${ctx.node.id} has no bound requestId`)
-/** A (stompConnect): STOMP-over-WebSocket — same handoff as websocketConnect
- * (no events; every received MESSAGE/ERROR frame routes to the single
- * `message` port). The bridge performs the CONNECT/CONNECTED handshake and
- * SUBSCRIBEs to the bound request's configured destinations before firing
- * `connected`. */
-export const stompConnectExecutor: NodeExecutor = (_act, ctx) => {
-  const cfg = ctx.node.config as { requestId?: unknown; connectionName?: unknown }
-  if (typeof cfg.requestId !== 'string' || cfg.requestId === '') {
-    throw new Error(`stompConnect node ${ctx.node.id} has no bound requestId`)
   }
   const connectionName = typeof cfg.connectionName === 'string' && cfg.connectionName.trim() !== ''
     ? cfg.connectionName.trim()
@@ -145,6 +136,26 @@ export const sseCloseExecutor: NodeExecutor = (_act, ctx) => {
   if (!ctx.socketio) throw new Error('sseClose: socket bridge unavailable')
   if (!ctx.socketio.has(connectionNodeId)) {
     throw new Error('sseClose: the referenced connection does not exist in this run')
+  }
+  ctx.socketio.close(connectionNodeId)
+  return { outputs: [] }
+}
+
+/** A (stompConnect): STOMP-over-WebSocket — same handoff as websocketConnect
+ * (no events; every received MESSAGE/ERROR frame routes to the single
+ * `message` port). The bridge performs the CONNECT/CONNECTED handshake and
+ * SUBSCRIBEs to the bound request's configured destinations before firing
+ * `connected`. */
+export const stompConnectExecutor: NodeExecutor = (_act, ctx) => {
+  const cfg = ctx.node.config as { requestId?: unknown; connectionName?: unknown }
+  if (typeof cfg.requestId !== 'string' || cfg.requestId === '') {
+    throw new Error(`stompConnect node ${ctx.node.id} has no bound requestId`)
+  }
+  const connectionName = typeof cfg.connectionName === 'string' && cfg.connectionName.trim() !== ''
+    ? cfg.connectionName.trim()
+    : cfg.requestId
+  return {
+    outputs: [],
     scopeAction: { type: 'openSocketioConnect', transport: 'stomp', requestId: cfg.requestId, events: [], connectionName, ...(overrideConfigFrom(ctx.node.config) ? { overrideConfig: overrideConfigFrom(ctx.node.config) } : {}) }
   }
 }
@@ -233,15 +244,6 @@ export const amqpConnectExecutor: NodeExecutor = (_act, ctx) => {
   const cfg = ctx.node.config as { requestId?: unknown; connectionName?: unknown }
   if (typeof cfg.requestId !== 'string' || cfg.requestId === '') {
     throw new Error(`amqpConnect node ${ctx.node.id} has no bound requestId`)
-/** A (kafkaConsume): Kafka — same handoff as mqttConnect (no events; every
- * consumed message routes to the single `message` port). The bridge opens a
- * fresh consumer-group subscribe on connect (Kafka has no persistent
- * per-request connection to reuse, unlike socketio/websocket/mqtt/grpc — but
- * the scope-action handoff shape is identical, so it reuses the same bridge). */
-export const kafkaConsumeExecutor: NodeExecutor = (_act, ctx) => {
-  const cfg = ctx.node.config as { requestId?: unknown; connectionName?: unknown }
-  if (typeof cfg.requestId !== 'string' || cfg.requestId === '') {
-    throw new Error(`kafkaConsume node ${ctx.node.id} has no bound requestId`)
   }
   const connectionName = typeof cfg.connectionName === 'string' && cfg.connectionName.trim() !== ''
     ? cfg.connectionName.trim()
@@ -277,6 +279,26 @@ export const amqpCloseExecutor: NodeExecutor = (_act, ctx) => {
   if (!ctx.socketio) throw new Error('amqpClose: socket bridge unavailable')
   if (!ctx.socketio.has(connectionNodeId)) {
     throw new Error('amqpClose: the referenced connection does not exist in this run')
+  }
+  ctx.socketio.close(connectionNodeId)
+  return { outputs: [] }
+}
+
+/** A (kafkaConsume): Kafka — same handoff as mqttConnect (no events; every
+ * consumed message routes to the single `message` port). The bridge opens a
+ * fresh consumer-group subscribe on connect (Kafka has no persistent
+ * per-request connection to reuse, unlike socketio/websocket/mqtt/grpc — but
+ * the scope-action handoff shape is identical, so it reuses the same bridge). */
+export const kafkaConsumeExecutor: NodeExecutor = (_act, ctx) => {
+  const cfg = ctx.node.config as { requestId?: unknown; connectionName?: unknown }
+  if (typeof cfg.requestId !== 'string' || cfg.requestId === '') {
+    throw new Error(`kafkaConsume node ${ctx.node.id} has no bound requestId`)
+  }
+  const connectionName = typeof cfg.connectionName === 'string' && cfg.connectionName.trim() !== ''
+    ? cfg.connectionName.trim()
+    : cfg.requestId
+  return {
+    outputs: [],
     scopeAction: { type: 'openSocketioConnect', transport: 'kafka', requestId: cfg.requestId, events: [], connectionName, ...(overrideConfigFrom(ctx.node.config) ? { overrideConfig: overrideConfigFrom(ctx.node.config) } : {}) }
   }
 }

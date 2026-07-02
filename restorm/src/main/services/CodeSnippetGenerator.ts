@@ -88,7 +88,7 @@ export function compileSnippetTemplates(): CompiledSnippetTemplates {
     trpcSnippetTemplate: null,
     sseSnippetTemplate: null,
     amqpSnippetTemplate: null,
-    redisSnippetTemplate: null
+    redisSnippetTemplate: null,
     kafkaSnippetTemplate: null
   }
 
@@ -496,6 +496,11 @@ export function generateCodeSnippets(
           commandParts: commandParts.length > 0 ? commandParts : null,
           commandLine: commandLine || null,
           password: password || null
+        })
+      }
+      break
+    }
+
     case 'kafka': {
       // `resolvedUrl` IS the broker list here (kafka's `url` carries
       // `host:port,host:port`, not an HTTP URL) — the host/path parse above

@@ -33,8 +33,8 @@ const templates: CompiledSnippetTemplates = {
   trpcSnippetTemplate: compile('code-snippets-trpc.hbs'),
   sseSnippetTemplate: compile('code-snippets-sse.hbs'),
   amqpSnippetTemplate: compile('code-snippets-amqp.hbs'),
-  redisSnippetTemplate: compile('code-snippets-redis.hbs')
-  stompSnippetTemplate: compile('code-snippets-stomp.hbs')
+  redisSnippetTemplate: compile('code-snippets-redis.hbs'),
+  stompSnippetTemplate: compile('code-snippets-stomp.hbs'),
   kafkaSnippetTemplate: compile('code-snippets-kafka.hbs')
 } as unknown as CompiledSnippetTemplates
 
@@ -350,6 +350,9 @@ describe('CodeSnippetGenerator — Redis', () => {
       resolveEnvVar
     ).markdown
     expect(md).not.toContain('{{host}}')
+  })
+})
+
 describe('CodeSnippetGenerator — STOMP', () => {
   const base: Partial<FullRequestData> = {
     requestType: 'stomp',
@@ -393,6 +396,9 @@ describe('CodeSnippetGenerator — STOMP', () => {
   it('omits the send block entirely when no send destination is configured', () => {
     const md = run({ ...base, sendDestination: '' }, 'ws://localhost:61614')
     expect(md).not.toContain('client.publish(')
+  })
+})
+
 describe('CodeSnippetGenerator — Kafka', () => {
   const base: Partial<FullRequestData> = {
     requestType: 'kafka', url: 'localhost:9092', headers: [],

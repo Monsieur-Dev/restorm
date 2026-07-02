@@ -447,8 +447,8 @@ class ResponseHistoryService {
       trpc: { build: (id, r) => this.buildTrpcResponse(id, r as TrpcExecutionResult), outcome: (r) => httpOutcome(r as TrpcExecutionResult) },
       sse: { build: (id, r) => this.buildSseResponse(id, r as SseExecutionResult), outcome: (r) => sseOutcome(r as SseExecutionResult) },
       amqp: { build: (id, r) => this.buildAmqpResponse(id, r as AmqpExecutionResult), outcome: (r) => amqpOutcome(r as AmqpExecutionResult) },
-      redis: { build: (id, r) => this.buildRedisResponse(id, r as RedisExecutionResult), outcome: (r) => redisOutcome(r as RedisExecutionResult) }
-      stomp: { build: (id, r) => this.buildStompResponse(id, r as StompExecutionResult), outcome: (r) => stompOutcome(r as StompExecutionResult) }
+      redis: { build: (id, r) => this.buildRedisResponse(id, r as RedisExecutionResult), outcome: (r) => redisOutcome(r as RedisExecutionResult) },
+      stomp: { build: (id, r) => this.buildStompResponse(id, r as StompExecutionResult), outcome: (r) => stompOutcome(r as StompExecutionResult) },
       kafka: { build: (id, r) => this.buildKafkaResponse(id, r as KafkaExecutionResult), outcome: (r) => kafkaOutcome(r as KafkaExecutionResult) }
     }
 
@@ -855,6 +855,13 @@ class ResponseHistoryService {
         ...(msg.routingKey !== undefined ? { routingKey: msg.routingKey } : {}),
         ...(msg.deliveryTag !== undefined ? { deliveryTag: msg.deliveryTag } : {}),
         ...(msg.peek !== undefined ? { peek: msg.peek } : {}),
+        timestamp: msg.timestamp
+      })),
+      timings: result.timings,
+      ...(result.error ? { error: result.error } : {})
+    }
+  }
+
   private buildStompResponse(requestId: string, result: StompExecutionResult): ResponseHistoryResponse | null {
     const resolvedUrl = contextService.getResolvedUrl(requestId)?.resolvedUrl ?? result.requestUrl ?? ''
 
@@ -1028,7 +1035,7 @@ class ResponseHistoryService {
       redis: (r) => ({
         protocol: typeof r['mode'] === 'string' ? r['mode'] : '',
         method: typeof r['command'] === 'string' ? r['command'] : ''
-      })
+      }),
       kafka: (r) => ({ topic: typeof r['topic'] === 'string' ? r['topic'] : '' })
     }
     const extractor = extractors[type]

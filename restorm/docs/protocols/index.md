@@ -18,34 +18,11 @@ a page yet — this index only lists the ones that do.
 | gRPC-Web / Connect-RPC transports | [`grpc-web.md`](./grpc-web.md) |
 | tRPC (typed RPC over HTTP) | [`trpc.md`](./trpc.md) |
 | Server-Sent Events (SSE) | [`sse.md`](./sse.md) |
+| STOMP over WebSocket (ActiveMQ, Spring brokers) | [`stomp.md`](./stomp.md) |
 | AMQP 0-9-1 (RabbitMQ) | [`amqp.md`](./amqp.md) |
 | Redis (pub/sub + common commands) | [`redis.md`](./redis.md) |
+| Apache Kafka (produce / consume / browse) | [`kafka.md`](./kafka.md) |
 
 For the underlying import-adapter pipeline that turns an external API
 specification (OpenAPI, WSDL, `.proto`, OpenRPC, …) into a ready-to-run
 Restorm collection, see [`../imports/index.md`](../imports/index.md).
-# Execution protocols
-
-User-facing documentation for each request/execution protocol Restorm
-supports. This directory is new as of the STOMP ticket — earlier protocols
-(HTTP, GraphQL, gRPC, SOAP, WebSocket, Socket.IO, MQTT, OData) don't have a
-doc here yet; add one under the same convention (`<protocol>.md`) when you
-touch one of them next, per
-[`docs/contributing/adding-a-protocol.md`](../contributing/adding-a-protocol.md).
-
-- [STOMP](./stomp.md) — Simple Text Oriented Messaging Protocol over
-  WebSocket (ActiveMQ, Spring brokers).
-Restorm speaks each execution protocol through a request type in
-`src/shared/protocolRegistry.ts`, an execution service in
-`src/main/services/`, and a `<*RequestTabView>` in
-`src/renderer/src/components/RequestTabViews/`. This index lists the
-user-facing doc for each protocol that has one.
-
-| Protocol | Doc |
-| --- | --- |
-| Apache Kafka (produce / consume / browse) | [`kafka.md`](./kafka.md) |
-
-For the full playbook on adding a new execution protocol (architecture
-decision tree, mandatory UI/Handlebars/debounce rules, Docker mock
-conventions, the E2E scenario matrix, scenario-graph integration), see
-[`../contributing/adding-a-protocol.md`](../contributing/adding-a-protocol.md).

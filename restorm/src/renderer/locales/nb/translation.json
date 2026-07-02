@@ -282,7 +282,7 @@
         "trpc": "tRPC-forespørsel",
         "amqp": "AMQP-forespørsel",
         "redis": "Redis-forespørsel",
-        "stomp": "STOMP-forespørsel"
+        "stomp": "STOMP-forespørsel",
         "kafkaProduce": "Kafka-forespørsel – Produser",
         "kafkaConsume": "Kafka-forespørsel – Konsumer"
       }
@@ -620,6 +620,7 @@
       "channels": "Kanaler",
       "command": "Kommando"
     }
+  },
   "kafka": {
     "brokersPlaceholder": "Brokerliste (host:port,host:port)",
     "clientId": "Klient-ID",
@@ -1249,7 +1250,7 @@
       "graphqlUnsubscribe": "Si opp GraphQL-abonnement",
       "stompConnect": "STOMP-tilkobling",
       "stompSend": "STOMP-sending",
-      "stompClose": "Lukk STOMP"
+      "stompClose": "Lukk STOMP",
       "kafkaProduce": "Kafka produce",
       "kafkaConsume": "Kafka consume",
       "kafkaClose": "Kafka close"
@@ -1853,7 +1854,7 @@
       "graphqlUnsubscribe": "Stopper et allerede åpent GraphQL-abonnement (erklært av en GraphQL-abonnementsnode) og river ned dets SSE-strøm.",
       "stompConnect": "Åpner en langvarig STOMP-over-WebSocket-tilkobling: utfører CONNECT/CONNECTED-håndtrykket, abonnerer deretter på hver konfigurerte destinasjon og sender hver mottatte ramme videre på porten sin.",
       "stompSend": "Sender en SEND-ramme på en allerede åpen STOMP-tilkobling.",
-      "stompClose": "Sender DISCONNECT og lukker en allerede åpen STOMP-tilkobling."
+      "stompClose": "Sender DISCONNECT og lukker en allerede åpen STOMP-tilkobling.",
       "kafkaProduce": "Kjører en bundet Kafka-forespørsel som en engangsproduksjon og sender resultatet (emne/partisjon/offset) som `response`.",
       "kafkaConsume": "Åpner en langlivet Kafka-forbruker fra en bundet forespørsel og sender hver mottatt melding på nytt på sin `message`-port.",
       "kafkaClose": "Lukker en allerede-åpen Kafka-forbruker."

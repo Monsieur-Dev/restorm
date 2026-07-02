@@ -281,7 +281,7 @@
         "trpc": "tRPC リクエスト",
         "amqp": "AMQP リクエスト",
         "redis": "Redis リクエスト",
-        "stomp": "STOMPリクエスト"
+        "stomp": "STOMPリクエスト",
         "kafkaProduce": "Kafka リクエスト – 生成",
         "kafkaConsume": "Kafka リクエスト – 消費"
       }
@@ -619,6 +619,7 @@
       "channels": "チャンネル",
       "command": "コマンド"
     }
+  },
   "kafka": {
     "brokersPlaceholder": "ブローカーリスト (host:port,host:port)",
     "clientId": "クライアントID",
@@ -1248,7 +1249,7 @@
       "graphqlUnsubscribe": "GraphQL サブスクライブ解除",
       "stompConnect": "STOMP接続",
       "stompSend": "STOMP送信",
-      "stompClose": "STOMPを閉じる"
+      "stompClose": "STOMPを閉じる",
       "kafkaProduce": "Kafka produce",
       "kafkaConsume": "Kafka consume",
       "kafkaClose": "Kafka close"
@@ -1852,7 +1853,7 @@
       "graphqlUnsubscribe": "すでに開いている GraphQL サブスクリプション（GraphQL サブスクライブノードで宣言）を停止し、その SSE ストリームを破棄します。",
       "stompConnect": "長期間有効なSTOMP over WebSocket接続を開きます。CONNECT/CONNECTEDハンドシェイクを実行し、設定された各宛先を購読して、受信した各フレームをそのポートに再送出します。",
       "stompSend": "すでに開いているSTOMP接続でSENDフレームを送信します。",
-      "stompClose": "DISCONNECTを送信し、すでに開いているSTOMP接続を閉じます。"
+      "stompClose": "DISCONNECTを送信し、すでに開いているSTOMP接続を閉じます。",
       "kafkaProduce": "バインドされた Kafka リクエストを一度限りの produce として実行し、結果（トピック/パーティション/オフセット）を `response` として送出します。",
       "kafkaConsume": "バインドされたリクエストから持続的な Kafka コンシューマーを開き、受信した各メッセージを `message` ポートに再送出します。",
       "kafkaClose": "すでに開いている Kafka コンシューマーを閉じます。"

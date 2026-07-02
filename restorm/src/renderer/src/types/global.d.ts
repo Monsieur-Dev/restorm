@@ -284,6 +284,7 @@ declare global {
         isActive: (requestId: string) => Promise<boolean>
         onProgress: (callback: (data: RequestProgressData) => void) => (() => void)
         onMessage: (callback: (data: RedisMessageData) => void) => (() => void)
+      }
       stomp: {
         connect: (input: StompExecutionInput) => Promise<StompExecutionResult>
         disconnect: (requestId: string) => Promise<boolean>
@@ -293,6 +294,7 @@ declare global {
         isActive: (requestId: string) => Promise<boolean>
         onProgress: (callback: (data: RequestProgressData) => void) => (() => void)
         onMessage: (callback: (data: StompMessageData) => void) => (() => void)
+      }
       kafka: {
         /** Produce: one-shot connect -> send -> disconnect. */
         produce: (input: KafkaExecutionInput) => Promise<KafkaProduceResult>
@@ -790,8 +792,16 @@ export interface WebSocketMessageData {
 
 /** SSE execution input */
 export interface SseExecutionInput {
+  requestId: string
+  timeout?: number
+}
+
 /** STOMP execution input */
 export interface StompExecutionInput {
+  requestId: string
+  timeout?: number
+}
+
 /** Kafka execution input — shared shape for `produce` / `browse`. */
 export interface KafkaExecutionInput {
   requestId: string
@@ -846,6 +856,14 @@ export interface RedisExecutionResult {
   command?: string
   args?: string[]
   reply?: string
+  error?: string
+  timings: {
+    startedAt: string
+    durationMs: number
+  }
+  requestUrl?: string
+}
+
 /** One STOMP frame exchanged on the connection (sent or received). */
 export interface StompMessageItem {
   direction: 'sent' | 'received'
@@ -881,10 +899,14 @@ export interface SseMessageData {
 export interface RedisMessageData {
   requestId: string
   message: RedisMessageItem
+}
+
 /** Payload of the `stomp:message` broadcast (one streamed frame for a request). */
 export interface StompMessageData {
   requestId: string
   message: StompMessageItem
+}
+
 /** One produced/consumed/browsed Kafka record. */
 export interface KafkaMessageItem {
   direction: 'received'
@@ -941,9 +963,7 @@ export interface KafkaMessageData {
 /** Full request data for backend processing */
 export interface FullRequestData {
   id: string
-  requestType: 'http' | 'graphql' | 'grpc' | 'soap' | 'websocket' | 'sse' | 'odata' | 'auth' | 'jsonrpc' | 'jsonrpcBatch' | 'trpc' | 'amqp' | 'redis'
-  requestType: 'http' | 'graphql' | 'grpc' | 'soap' | 'websocket' | 'stomp' | 'odata' | 'auth'
-  requestType: 'http' | 'graphql' | 'grpc' | 'soap' | 'websocket' | 'odata' | 'auth' | 'kafka'
+  requestType: 'http' | 'graphql' | 'grpc' | 'soap' | 'websocket' | 'sse' | 'stomp' | 'odata' | 'auth' | 'jsonrpc' | 'jsonrpcBatch' | 'trpc' | 'amqp' | 'redis' | 'kafka'
   url: string
   headers: KeyValueData[]
   method?: string | undefined

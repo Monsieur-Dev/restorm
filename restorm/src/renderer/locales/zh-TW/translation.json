@@ -281,7 +281,7 @@
         "trpc": "tRPC 請求",
         "amqp": "AMQP 請求",
         "redis": "Redis 請求",
-        "stomp": "STOMP 請求"
+        "stomp": "STOMP 請求",
         "kafkaProduce": "Kafka 請求 – 產生",
         "kafkaConsume": "Kafka 請求 – 消費"
       }
@@ -619,6 +619,7 @@
       "channels": "頻道",
       "command": "命令"
     }
+  },
   "kafka": {
     "brokersPlaceholder": "Broker 清單 (host:port,host:port)",
     "clientId": "客戶端 ID",
@@ -1248,7 +1249,7 @@
       "graphqlUnsubscribe": "GraphQL 取消訂閱",
       "stompConnect": "STOMP 連線",
       "stompSend": "STOMP 傳送",
-      "stompClose": "STOMP 關閉"
+      "stompClose": "STOMP 關閉",
       "kafkaProduce": "Kafka produce",
       "kafkaConsume": "Kafka consume",
       "kafkaClose": "Kafka close"
@@ -1852,7 +1853,7 @@
       "graphqlUnsubscribe": "停止一個已開啟的 GraphQL 訂閱（由 GraphQL 訂閱節點宣告），並拆除其 SSE 串流。",
       "stompConnect": "建立一個長期的基於 WebSocket 的 STOMP 連線：執行 CONNECT/CONNECTED 交握，然後訂閱每個已設定的目的地，並在其連接埠上重新發出每個接收到的訊框。",
       "stompSend": "在已開啟的 STOMP 連線上傳送一個 SEND 訊框。",
-      "stompClose": "傳送 DISCONNECT 並關閉已開啟的 STOMP 連線。"
+      "stompClose": "傳送 DISCONNECT 並關閉已開啟的 STOMP 連線。",
       "kafkaProduce": "將繫結的 Kafka 請求作為一次性產生執行，並將結果（主題/分割區/偏移量）作為 `response` 發出。",
       "kafkaConsume": "從繫結的請求開啟一個持久的 Kafka 消費者，並在其 `message` 連接埠上重新發出每個收到的訊息。",
       "kafkaClose": "關閉一個已開啟的 Kafka 消費者。"

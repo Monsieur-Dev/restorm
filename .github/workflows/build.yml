@@ -146,6 +146,15 @@ jobs:
         ports:
           - 9000:9000
           - 9002:9001
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 3s
+          --health-timeout 3s
+          --health-retries 10
 
     steps:
       - name: Checkout code
@@ -178,15 +187,19 @@ jobs:
           cd restorm
           pnpm install --frozen-lockfile
 
-      - name: Start GraphQL, Socket.IO, raw-WebSocket, HTTP-util, SOAP, OData-v2 and Connect-RPC mock servers
+      - name: Start GraphQL, Socket.IO, raw-WebSocket, HTTP-util, SOAP, OData-v2, JSON-RPC, tRPC, SSE and Connect-RPC mock servers
         run: |
           cd restorm/tests/docker/graphql-server && npm install && node server.js &
           cd restorm/tests/docker/socketio-server && npm install && node server.js &
           cd restorm/tests/docker/ws-echo-server && npm install && node server.js &
-          # http-util, soap-server, odata-v2-petstore and connect-server are
-          # zero-dependency (pure node:http) — no npm install needed.
+          # http-util, soap-server, odata-v2-petstore, jsonrpc-server,
+          # trpc-server, sse-server and connect-server are zero-dependency
+          # (pure node:http) — no npm install needed.
           cd restorm/tests/docker/http-util && node server.js &
           cd restorm/tests/docker/soap-server && node server.js &
+          cd restorm/tests/docker/jsonrpc-server && node server.js &
+          cd restorm/tests/docker/trpc-server && node server.js &
+          cd restorm/tests/docker/sse-server && node server.js &
           cd restorm/tests/docker/odata-v2-petstore && node server.js &
           cd restorm/tests/docker/connect-server && node server.js &
           sleep 10

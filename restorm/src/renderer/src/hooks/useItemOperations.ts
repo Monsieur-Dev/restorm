@@ -21,7 +21,7 @@ import {
   AuthenticationRequest,
   TrpcRequest,
   AmqpRequest,
-  RedisRequest
+  RedisRequest,
   KafkaRequest
 } from '../../../shared/models/requests'
 import type { HTTPMethod } from '../../../shared/models/types'

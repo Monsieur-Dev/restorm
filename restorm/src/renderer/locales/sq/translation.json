@@ -282,7 +282,7 @@
         "trpc": "Kërkesë tRPC",
         "amqp": "Kërkesë AMQP",
         "redis": "Kërkesë Redis",
-        "stomp": "Kërkesë STOMP"
+        "stomp": "Kërkesë STOMP",
         "kafkaProduce": "Kërkesë Kafka – Prodho",
         "kafkaConsume": "Kërkesë Kafka – Konsumo"
       }
@@ -620,6 +620,7 @@
       "channels": "Kanale",
       "command": "Komandë"
     }
+  },
   "kafka": {
     "brokersPlaceholder": "Lista e brokerave (host:port,host:port)",
     "clientId": "ID i klientit",
@@ -1249,7 +1250,7 @@
       "graphqlUnsubscribe": "Çabonim GraphQL",
       "stompConnect": "Lidhje STOMP",
       "stompSend": "Dërgim STOMP",
-      "stompClose": "Mbyllje STOMP"
+      "stompClose": "Mbyllje STOMP",
       "kafkaProduce": "Kafka produce",
       "kafkaConsume": "Kafka consume",
       "kafkaClose": "Kafka close"
@@ -1853,7 +1854,7 @@
       "graphqlUnsubscribe": "Ndalon një abonim GraphQL tashmë të hapur (deklaruar nga një nyje abonimi GraphQL), duke mbyllur rrjedhën e tij SSE.",
       "stompConnect": "Hap një lidhje afatgjatë STOMP-mbi-WebSocket: kryen shtrëngimin e duarve CONNECT/CONNECTED, më pas abonohet në çdo destinacion të konfiguruar dhe ritransmeton çdo kornizë të marrë në portën e vet.",
       "stompSend": "Dërgon një kornizë SEND në një lidhje STOMP tashmë të hapur.",
-      "stompClose": "Dërgon DISCONNECT dhe mbyll një lidhje STOMP tashmë të hapur."
+      "stompClose": "Dërgon DISCONNECT dhe mbyll një lidhje STOMP tashmë të hapur.",
       "kafkaProduce": "Ekzekuton një kërkesë Kafka të lidhur si një prodhim një-herësh dhe lëshon rezultatin (tema/ndarja/offset) si `response`.",
       "kafkaConsume": "Hap një konsumator Kafka afatgjatë nga një kërkesë e lidhur dhe rilëshon çdo mesazh të marrë në portin e tij `message`.",
       "kafkaClose": "Mbyll një konsumator Kafka tashmë të hapur."

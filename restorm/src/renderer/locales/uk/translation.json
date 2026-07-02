@@ -284,7 +284,7 @@
         "trpc": "Запит tRPC",
         "amqp": "Запит AMQP",
         "redis": "Запит Redis",
-        "stomp": "Запит STOMP"
+        "stomp": "Запит STOMP",
         "kafkaProduce": "Запит Kafka – Виробити",
         "kafkaConsume": "Запит Kafka – Споживати"
       }
@@ -622,6 +622,7 @@
       "channels": "Канали",
       "command": "Команда"
     }
+  },
   "kafka": {
     "brokersPlaceholder": "Список брокерів (host:port,host:port)",
     "clientId": "ID клієнта",
@@ -1251,7 +1252,7 @@
       "graphqlUnsubscribe": "Скасувати підписку GraphQL",
       "stompConnect": "З'єднання STOMP",
       "stompSend": "Надсилання STOMP",
-      "stompClose": "Закриття STOMP"
+      "stompClose": "Закриття STOMP",
       "kafkaProduce": "Kafka produce",
       "kafkaConsume": "Kafka consume",
       "kafkaClose": "Kafka close"
@@ -1855,7 +1856,7 @@
       "graphqlUnsubscribe": "Зупиняє вже відкриту підписку GraphQL (оголошену вузлом підписки GraphQL), закриваючи її потік SSE.",
       "stompConnect": "Відкриває тривале з'єднання STOMP через WebSocket: виконує узгодження CONNECT/CONNECTED, потім підписується на кожен налаштований пункт призначення та повторно надсилає кожен отриманий фрейм на своєму порту.",
       "stompSend": "Надсилає фрейм SEND через уже відкрите з'єднання STOMP.",
-      "stompClose": "Надсилає DISCONNECT і закриває вже відкрите з'єднання STOMP."
+      "stompClose": "Надсилає DISCONNECT і закриває вже відкрите з'єднання STOMP.",
       "kafkaProduce": "Виконує прив’язаний запит Kafka як одноразове виробництво та передає результат (тема/партиція/offset) як `response`.",
       "kafkaConsume": "Відкриває тривалого споживача Kafka із прив’язаного запиту та повторно випромінює кожне отримане повідомлення на своєму порту `message`.",
       "kafkaClose": "Закриває вже відкритого споживача Kafka."

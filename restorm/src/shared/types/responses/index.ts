@@ -5,12 +5,8 @@ import type { GrpcResponse } from './GrpcResponse'
 import type { SoapResponse } from './SoapResponse'
 import type { WebSocketMessage, WebSocketResponse } from './WebSocketResponse'
 import type { SseFrame, SseResponse } from './SseResponse'
-
-export type { BaseResponse, HTTPTimings, HTTPNetworkInfo, HTTPResponse, GraphQLResponse, GrpcResponse, SoapResponse, WebSocketMessage, WebSocketResponse, SseFrame, SseResponse }
-
-export type Response = HTTPResponse | GraphQLResponse | GrpcResponse | SoapResponse | WebSocketResponse | SseResponse
 import type { StompMessage, StompResponse } from './StompResponse'
 
-export type { BaseResponse, HTTPTimings, HTTPNetworkInfo, HTTPResponse, GraphQLResponse, GrpcResponse, SoapResponse, WebSocketMessage, WebSocketResponse, StompMessage, StompResponse }
+export type { BaseResponse, HTTPTimings, HTTPNetworkInfo, HTTPResponse, GraphQLResponse, GrpcResponse, SoapResponse, WebSocketMessage, WebSocketResponse, SseFrame, SseResponse, StompMessage, StompResponse }
 
-export type Response = HTTPResponse | GraphQLResponse | GrpcResponse | SoapResponse | WebSocketResponse | StompResponse
+export type Response = HTTPResponse | GraphQLResponse | GrpcResponse | SoapResponse | WebSocketResponse | SseResponse | StompResponse

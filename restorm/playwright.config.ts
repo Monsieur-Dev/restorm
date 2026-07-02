@@ -146,10 +146,14 @@ const amqpExecutionTestDir = defineBddConfig({
   features: 'tests/e2e/bdd/amqp-execution/features/**/*.feature',
   steps: ['tests/e2e/bdd/amqp-execution/steps/**/*.ts', 'tests/e2e/bdd/fixtures/mcp-server.fixture.ts'],
   outputDir: '.features-gen/amqp-execution'
+})
+
 const stompExecutionTestDir = defineBddConfig({
   features: 'tests/e2e/bdd/stomp-execution/features/**/*.feature',
   steps: ['tests/e2e/bdd/stomp-execution/steps/**/*.ts', 'tests/e2e/bdd/fixtures/mcp-server.fixture.ts'],
   outputDir: '.features-gen/stomp-execution'
+})
+
 const kafkaExecutionTestDir = defineBddConfig({
   features: 'tests/e2e/bdd/kafka-execution/features/**/*.feature',
   steps: ['tests/e2e/bdd/kafka-execution/steps/**/*.ts', 'tests/e2e/bdd/fixtures/mcp-server.fixture.ts'],

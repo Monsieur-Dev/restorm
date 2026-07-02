@@ -282,7 +282,7 @@
         "trpc": "tRPC isteği",
         "amqp": "AMQP isteği",
         "redis": "Redis isteği",
-        "stomp": "STOMP isteği"
+        "stomp": "STOMP isteği",
         "kafkaProduce": "Kafka isteği – Üret",
         "kafkaConsume": "Kafka isteği – Tüket"
       }
@@ -620,6 +620,7 @@
       "channels": "Kanallar",
       "command": "Komut"
     }
+  },
   "kafka": {
     "brokersPlaceholder": "Broker listesi (host:port,host:port)",
     "clientId": "İstemci Kimliği",
@@ -1249,7 +1250,7 @@
       "graphqlUnsubscribe": "GraphQL abonelikten çık",
       "stompConnect": "STOMP bağlantısı",
       "stompSend": "STOMP gönder",
-      "stompClose": "STOMP kapat"
+      "stompClose": "STOMP kapat",
       "kafkaProduce": "Kafka produce",
       "kafkaConsume": "Kafka consume",
       "kafkaClose": "Kafka close"
@@ -1853,7 +1854,7 @@
       "graphqlUnsubscribe": "Zaten açık olan bir GraphQL aboneliğini (bir GraphQL abone ol düğümü tarafından bildirilen) durdurur ve SSE akışını kapatır.",
       "stompConnect": "Kalıcı bir STOMP-WebSocket-üzerinden bağlantısı açar: CONNECT/CONNECTED el sıkışmasını gerçekleştirir, ardından her yapılandırılmış hedefe abone olur ve alınan her çerçeveyi kendi bağlantı noktasında yeniden yayınlar.",
       "stompSend": "Zaten açık olan bir STOMP bağlantısında bir SEND çerçevesi gönderir.",
-      "stompClose": "DISCONNECT gönderir ve zaten açık olan bir STOMP bağlantısını kapatır."
+      "stompClose": "DISCONNECT gönderir ve zaten açık olan bir STOMP bağlantısını kapatır.",
       "kafkaProduce": "Bağlı bir Kafka isteğini tek seferlik bir üretim olarak çalıştırır ve sonucu (konu/bölüm/offset) `response` olarak yayınlar.",
       "kafkaConsume": "Bağlı bir istekten kalıcı bir Kafka tüketicisi açar ve alınan her mesajı `message` portu üzerinde yeniden yayınlar.",
       "kafkaClose": "Zaten açık olan bir Kafka tüketicisini kapatır."

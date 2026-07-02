@@ -54,7 +54,7 @@ export const REQUEST_CLASS_REGISTRY: Record<RequestType, RequestClassEntry> = {
   jsonrpcBatch: { fromPlain: (d) => JsonRpcBatchRequest.fromPlain(d as Parameters<typeof JsonRpcBatchRequest.fromPlain>[0]), ctor: JsonRpcBatchRequest as unknown as new (...args: unknown[]) => Request },
   trpc: { fromPlain: (d) => TrpcRequest.fromPlain(d as Parameters<typeof TrpcRequest.fromPlain>[0]), ctor: TrpcRequest as unknown as new (...args: unknown[]) => Request },
   amqp: { fromPlain: (d) => AmqpRequest.fromPlain(d as Parameters<typeof AmqpRequest.fromPlain>[0]), ctor: AmqpRequest as unknown as new (...args: unknown[]) => Request },
-  redis: { fromPlain: (d) => RedisRequest.fromPlain(d as Parameters<typeof RedisRequest.fromPlain>[0]), ctor: RedisRequest as unknown as new (...args: unknown[]) => Request }
+  redis: { fromPlain: (d) => RedisRequest.fromPlain(d as Parameters<typeof RedisRequest.fromPlain>[0]), ctor: RedisRequest as unknown as new (...args: unknown[]) => Request },
   kafka: { fromPlain: (d) => KafkaRequest.fromPlain(d as Parameters<typeof KafkaRequest.fromPlain>[0]), ctor: KafkaRequest as unknown as new (...args: unknown[]) => Request }
 }
 

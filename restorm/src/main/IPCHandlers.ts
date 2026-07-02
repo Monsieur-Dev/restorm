@@ -1492,6 +1492,9 @@ export function registerRestormIPC(deps: {
 
   validatedHandle('redis:is-active', redisIsActiveArgs, (_event, [requestId]) => {
     return redisExecutionService.isActive(requestId)
+  })
+
+  // ==========================================================================
   // STOMP Execution IPC Handlers
   // ==========================================================================
   // `stomp:connect` resolves only when the connection closes (same shape as
@@ -1523,6 +1526,9 @@ export function registerRestormIPC(deps: {
 
   validatedHandle('stomp:is-active', stompIsActiveArgs, (_event, [requestId]) => {
     return stompExecutionService.isActive(requestId)
+  })
+
+  // ==========================================================================
   // Kafka Execution IPC Handlers
   //
   // Unlike every other protocol, Kafka has THREE independent lifecycles

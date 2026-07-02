@@ -61,14 +61,14 @@ export const PROTOCOL_EXECUTORS: Record<RequestType, ProtocolExecutor> = {
   // Live per-message MCP polling (read_stream) is not wired for redis subscribe
   // — no AC requires it, and it would mean routing execute.ts's streaming path
   // through a Redis-specific branch instead of appending here.
-  redis: { streaming: false, cancel: (id) => redisExecutionService.cancel(id) }
+  redis: { streaming: false, cancel: (id) => redisExecutionService.cancel(id) },
   // STOMP's live connection is driven the same way as gRPC/SOAP from MCP's
   // perspective: `run_request` dispatches the panel's Connect button and waits
   // for a new history entry (persisted when the connection closes), rather
   // than the WS-only frame-polling path (`read_stream`/`send_message` are
   // hardcoded to `websocketExecutionService` today). The scenario engine's
   // `stompConnect` node still gets full streaming via `connectStreamingStomp`.
-  stomp: { streaming: false, cancel: (id) => stompExecutionService.disconnect(id) }
+  stomp: { streaming: false, cancel: (id) => stompExecutionService.disconnect(id) },
   // `streaming: false` even though consume mode is long-lived: the MCP
   // `run_request` streaming path (`runStreamingWebsocketRequest`) is
   // websocket-specific, not generic by transport — gRPC's own streaming call

@@ -35,7 +35,7 @@ import {
   AuthenticationRequest,
   TrpcRequest,
   AmqpRequest,
-  RedisRequest
+  RedisRequest,
   KafkaRequest
 } from '../../shared/models/requests'
 
@@ -97,15 +97,12 @@ function registerClasses(): void {
 function registerUnions(): void {
   graphQLSchemaGenerator.registerUnion('Request', [
     'HTTPRequest', 'GraphQLRequest', 'GrpcRequest', 'SoapRequest', 'WebSocketRequest', 'SseRequest',
-    'ODataRequest', 'AuthenticationRequest', 'TrpcRequest', 'AmqpRequest', 'RedisRequest'
-    'HTTPRequest', 'GraphQLRequest', 'GrpcRequest', 'SoapRequest', 'WebSocketRequest',
-    'ODataRequest', 'AuthenticationRequest', 'KafkaRequest'
+    'ODataRequest', 'AuthenticationRequest', 'TrpcRequest', 'AmqpRequest', 'RedisRequest', 'KafkaRequest'
   ])
 
   graphQLSchemaGenerator.registerUnion('FolderItem', [
     'Folder', 'EnvironmentFolder', 'HTTPRequest', 'GraphQLRequest',
-    'GrpcRequest', 'SoapRequest', 'WebSocketRequest', 'SseRequest', 'ODataRequest', 'AuthenticationRequest', 'TrpcRequest', 'AmqpRequest', 'RedisRequest'
-    'GrpcRequest', 'SoapRequest', 'WebSocketRequest', 'ODataRequest', 'AuthenticationRequest', 'KafkaRequest'
+    'GrpcRequest', 'SoapRequest', 'WebSocketRequest', 'SseRequest', 'ODataRequest', 'AuthenticationRequest', 'TrpcRequest', 'AmqpRequest', 'RedisRequest', 'KafkaRequest'
   ])
 }
 

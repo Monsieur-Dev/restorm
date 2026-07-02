@@ -1387,30 +1387,22 @@ contextBridge.exposeInMainWorld('restorm', {
   },
   sse: {
     /** Connect to an SSE endpoint (stays open until disconnect / reconnect budget exhausted) */
-  stomp: {
-    /** Connect (CONNECT/CONNECTED handshake + SUBSCRIBE every configured
-     * destination) — resolves only once the connection closes, same shape as
-     * `websocket.connect`. */
     connect: async (input: { requestId: string; timeout?: number }): Promise<{
       requestId: string
       success: boolean
       connected: boolean
       frames: { event: string; data: string; id?: string; timestamp: string }[]
-      messages: { direction: 'sent' | 'received'; command: string; subscription?: string; destination?: string; headers: Record<string, string>; body: string; timestamp: string }[]
       error?: string
       timings: { startedAt: string; durationMs: number }
       requestUrl?: string
     }> => {
       const result: unknown = await ipcRenderer.invoke('sse:connect', input)
       warnOnOutputMismatch('sse:connect', sseConnectResultSchema, result)
-      const result: unknown = await ipcRenderer.invoke('stomp:connect', input)
-      warnOnOutputMismatch('stomp:connect', stompConnectResultSchema, result)
       return result as {
         requestId: string
         success: boolean
         connected: boolean
         frames: { event: string; data: string; id?: string; timestamp: string }[]
-        messages: { direction: 'sent' | 'received'; command: string; subscription?: string; destination?: string; headers: Record<string, string>; body: string; timestamp: string }[]
         error?: string
         timings: { startedAt: string; durationMs: number }
         requestUrl?: string
@@ -1444,6 +1436,77 @@ contextBridge.exposeInMainWorld('restorm', {
       ipcRenderer.on('sse:message', handler)
       return () => {
         ipcRenderer.removeListener('sse:message', handler)
+      }
+    }
+  },
+  stomp: {
+    /** Connect (CONNECT/CONNECTED handshake + SUBSCRIBE every configured
+     * destination) — resolves only once the connection closes, same shape as
+     * `websocket.connect`. */
+    connect: async (input: { requestId: string; timeout?: number }): Promise<{
+      requestId: string
+      success: boolean
+      connected: boolean
+      messages: { direction: 'sent' | 'received'; command: string; subscription?: string; destination?: string; headers: Record<string, string>; body: string; timestamp: string }[]
+      error?: string
+      timings: { startedAt: string; durationMs: number }
+      requestUrl?: string
+    }> => {
+      const result: unknown = await ipcRenderer.invoke('stomp:connect', input)
+      warnOnOutputMismatch('stomp:connect', stompConnectResultSchema, result)
+      return result as {
+        requestId: string
+        success: boolean
+        connected: boolean
+        messages: { direction: 'sent' | 'received'; command: string; subscription?: string; destination?: string; headers: Record<string, string>; body: string; timestamp: string }[]
+        error?: string
+        timings: { startedAt: string; durationMs: number }
+        requestUrl?: string
+      }
+    },
+    /** Send DISCONNECT and close an active STOMP connection */
+    disconnect: async (requestId: string): Promise<boolean> => {
+      const result: unknown = await ipcRenderer.invoke('stomp:disconnect', requestId)
+      return result as boolean
+    },
+    /** SEND a frame on an active STOMP connection (to the request's own configured destination) */
+    send: async (requestId: string, body: string): Promise<boolean> => {
+      const result: unknown = await ipcRenderer.invoke('stomp:send', requestId, body)
+      return result as boolean
+    },
+    /** ACK a received MESSAGE frame (client / client-individual ack mode) */
+    ack: async (requestId: string, messageId: string, subscriptionId: string): Promise<boolean> => {
+      const result: unknown = await ipcRenderer.invoke('stomp:ack', requestId, messageId, subscriptionId)
+      return result as boolean
+    },
+    /** NACK a received MESSAGE frame (client / client-individual ack mode) */
+    nack: async (requestId: string, messageId: string, subscriptionId: string): Promise<boolean> => {
+      const result: unknown = await ipcRenderer.invoke('stomp:nack', requestId, messageId, subscriptionId)
+      return result as boolean
+    },
+    /** Check if a connection is currently active */
+    isActive: async (requestId: string): Promise<boolean> => {
+      const result: unknown = await ipcRenderer.invoke('stomp:is-active', requestId)
+      return result as boolean
+    },
+    /** Listen for connection progress updates */
+    onProgress: (callback: (data: { requestId: string; status: 'started' | 'completed' | 'cancelled' | 'error' }) => void): (() => void) => {
+      const handler = (_event: Electron.IpcRendererEvent, data: { requestId: string; status: 'started' | 'completed' | 'cancelled' | 'error' }): void => {
+        callback(data)
+      }
+      ipcRenderer.on('stomp:connection-progress', handler)
+      return () => {
+        ipcRenderer.removeListener('stomp:connection-progress', handler)
+      }
+    },
+    /** Listen for every sent/received STOMP frame */
+    onMessage: (callback: (data: { requestId: string; message: { direction: 'sent' | 'received'; command: string; subscription?: string; destination?: string; headers: Record<string, string>; body: string; timestamp: string } }) => void): (() => void) => {
+      const handler = (_event: Electron.IpcRendererEvent, data: { requestId: string; message: { direction: 'sent' | 'received'; command: string; subscription?: string; destination?: string; headers: Record<string, string>; body: string; timestamp: string } }): void => {
+        callback(data)
+      }
+      ipcRenderer.on('stomp:message', handler)
+      return () => {
+        ipcRenderer.removeListener('stomp:message', handler)
       }
     }
   },
@@ -1500,71 +1563,6 @@ contextBridge.exposeInMainWorld('restorm', {
       return result as boolean
     },
     /** Listen for connection progress updates (subscribe mode). */
-  kafka: {
-    /** Produce: one-shot connect -> send -> disconnect. */
-    produce: async (input: { requestId: string; timeout?: number }): Promise<{
-      requestId: string
-      success: boolean
-      kafkaMode: 'produce'
-      requestTopic: string
-      requestUrl: string
-      partition?: number
-      offset?: string
-      error?: string
-      timings: { startedAt: string; durationMs: number }
-    }> => {
-      const result: unknown = await ipcRenderer.invoke('kafka:produce', input)
-      warnOnOutputMismatch('kafka:produce', kafkaProduceResultSchema, result)
-      return result as {
-        requestId: string
-        success: boolean
-        kafkaMode: 'produce'
-        requestTopic: string
-        requestUrl: string
-        partition?: number
-        offset?: string
-        error?: string
-        timings: { startedAt: string; durationMs: number }
-      }
-    },
-    /** Browse: one-shot peek via an ephemeral consumer group. */
-    browse: async (input: { requestId: string; timeout?: number }): Promise<{
-      requestId: string
-      success: boolean
-      kafkaMode: 'browse'
-      requestTopic: string
-      requestUrl: string
-      messages: { direction: 'received'; topic: string; partition: number; offset: string; key?: string; value: string; headers?: Record<string, string>; timestamp: string }[]
-      error?: string
-      timings: { startedAt: string; durationMs: number }
-    }> => {
-      const result: unknown = await ipcRenderer.invoke('kafka:browse', input)
-      warnOnOutputMismatch('kafka:browse', kafkaBrowseResultSchema, result)
-      return result as {
-        requestId: string
-        success: boolean
-        kafkaMode: 'browse'
-        requestTopic: string
-        requestUrl: string
-        messages: { direction: 'received'; topic: string; partition: number; offset: string; key?: string; value: string; headers?: Record<string, string>; timestamp: string }[]
-        error?: string
-        timings: { startedAt: string; durationMs: number }
-      }
-    },
-    /** Consume: start the long-lived subscribe; messages stream over `onMessage`. */
-    consumeStart: async (requestId: string): Promise<{ started: boolean }> => {
-      const result: unknown = await ipcRenderer.invoke('kafka:consume-start', requestId)
-      return result as { started: boolean }
-    },
-    cancel: async (requestId: string): Promise<boolean> => {
-      const result: unknown = await ipcRenderer.invoke('kafka:cancel', requestId)
-      return result as boolean
-    },
-    isActive: async (requestId: string): Promise<boolean> => {
-      const result: unknown = await ipcRenderer.invoke('kafka:is-active', requestId)
-      return result as boolean
-    },
-    /** Listen for produce/browse/consume lifecycle updates. */
     onProgress: (callback: (data: { requestId: string; status: 'started' | 'completed' | 'cancelled' | 'error' }) => void): (() => void) => {
       const handler = (_event: Electron.IpcRendererEvent, data: { requestId: string; status: 'started' | 'completed' | 'cancelled' | 'error' }): void => {
         callback(data)
@@ -1650,32 +1648,6 @@ contextBridge.exposeInMainWorld('restorm', {
       return result as boolean
     },
     /** Listen for connection progress updates. */
-    /** Send DISCONNECT and close an active STOMP connection */
-    disconnect: async (requestId: string): Promise<boolean> => {
-      const result: unknown = await ipcRenderer.invoke('stomp:disconnect', requestId)
-      return result as boolean
-    },
-    /** SEND a frame on an active STOMP connection (to the request's own configured destination) */
-    send: async (requestId: string, body: string): Promise<boolean> => {
-      const result: unknown = await ipcRenderer.invoke('stomp:send', requestId, body)
-      return result as boolean
-    },
-    /** ACK a received MESSAGE frame (client / client-individual ack mode) */
-    ack: async (requestId: string, messageId: string, subscriptionId: string): Promise<boolean> => {
-      const result: unknown = await ipcRenderer.invoke('stomp:ack', requestId, messageId, subscriptionId)
-      return result as boolean
-    },
-    /** NACK a received MESSAGE frame (client / client-individual ack mode) */
-    nack: async (requestId: string, messageId: string, subscriptionId: string): Promise<boolean> => {
-      const result: unknown = await ipcRenderer.invoke('stomp:nack', requestId, messageId, subscriptionId)
-      return result as boolean
-    },
-    /** Check if a connection is currently active */
-    isActive: async (requestId: string): Promise<boolean> => {
-      const result: unknown = await ipcRenderer.invoke('stomp:is-active', requestId)
-      return result as boolean
-    },
-    /** Listen for connection progress updates */
     onProgress: (callback: (data: { requestId: string; status: 'started' | 'completed' | 'cancelled' | 'error' }) => void): (() => void) => {
       const handler = (_event: Electron.IpcRendererEvent, data: { requestId: string; status: 'started' | 'completed' | 'cancelled' | 'error' }): void => {
         callback(data)
@@ -1693,19 +1665,78 @@ contextBridge.exposeInMainWorld('restorm', {
       ipcRenderer.on('redis:message', handler)
       return () => {
         ipcRenderer.removeListener('redis:message', handler)
-      ipcRenderer.on('stomp:connection-progress', handler)
-      return () => {
-        ipcRenderer.removeListener('stomp:connection-progress', handler)
+      }
+    }
+  },
+  kafka: {
+    /** Produce: one-shot connect -> send -> disconnect. */
+    produce: async (input: { requestId: string; timeout?: number }): Promise<{
+      requestId: string
+      success: boolean
+      kafkaMode: 'produce'
+      requestTopic: string
+      requestUrl: string
+      partition?: number
+      offset?: string
+      error?: string
+      timings: { startedAt: string; durationMs: number }
+    }> => {
+      const result: unknown = await ipcRenderer.invoke('kafka:produce', input)
+      warnOnOutputMismatch('kafka:produce', kafkaProduceResultSchema, result)
+      return result as {
+        requestId: string
+        success: boolean
+        kafkaMode: 'produce'
+        requestTopic: string
+        requestUrl: string
+        partition?: number
+        offset?: string
+        error?: string
+        timings: { startedAt: string; durationMs: number }
       }
     },
-    /** Listen for every sent/received STOMP frame */
-    onMessage: (callback: (data: { requestId: string; message: { direction: 'sent' | 'received'; command: string; subscription?: string; destination?: string; headers: Record<string, string>; body: string; timestamp: string } }) => void): (() => void) => {
-      const handler = (_event: Electron.IpcRendererEvent, data: { requestId: string; message: { direction: 'sent' | 'received'; command: string; subscription?: string; destination?: string; headers: Record<string, string>; body: string; timestamp: string } }): void => {
+    /** Browse: one-shot peek via an ephemeral consumer group. */
+    browse: async (input: { requestId: string; timeout?: number }): Promise<{
+      requestId: string
+      success: boolean
+      kafkaMode: 'browse'
+      requestTopic: string
+      requestUrl: string
+      messages: { direction: 'received'; topic: string; partition: number; offset: string; key?: string; value: string; headers?: Record<string, string>; timestamp: string }[]
+      error?: string
+      timings: { startedAt: string; durationMs: number }
+    }> => {
+      const result: unknown = await ipcRenderer.invoke('kafka:browse', input)
+      warnOnOutputMismatch('kafka:browse', kafkaBrowseResultSchema, result)
+      return result as {
+        requestId: string
+        success: boolean
+        kafkaMode: 'browse'
+        requestTopic: string
+        requestUrl: string
+        messages: { direction: 'received'; topic: string; partition: number; offset: string; key?: string; value: string; headers?: Record<string, string>; timestamp: string }[]
+        error?: string
+        timings: { startedAt: string; durationMs: number }
+      }
+    },
+    /** Consume: start the long-lived subscribe; messages stream over `onMessage`. */
+    consumeStart: async (requestId: string): Promise<{ started: boolean }> => {
+      const result: unknown = await ipcRenderer.invoke('kafka:consume-start', requestId)
+      return result as { started: boolean }
+    },
+    cancel: async (requestId: string): Promise<boolean> => {
+      const result: unknown = await ipcRenderer.invoke('kafka:cancel', requestId)
+      return result as boolean
+    },
+    isActive: async (requestId: string): Promise<boolean> => {
+      const result: unknown = await ipcRenderer.invoke('kafka:is-active', requestId)
+      return result as boolean
+    },
+    /** Listen for produce/browse/consume lifecycle updates. */
+    onProgress: (callback: (data: { requestId: string; status: 'started' | 'completed' | 'cancelled' | 'error' }) => void): (() => void) => {
+      const handler = (_event: Electron.IpcRendererEvent, data: { requestId: string; status: 'started' | 'completed' | 'cancelled' | 'error' }): void => {
         callback(data)
       }
-      ipcRenderer.on('stomp:message', handler)
-      return () => {
-        ipcRenderer.removeListener('stomp:message', handler)
       ipcRenderer.on('kafka:request-progress', handler)
       return () => {
         ipcRenderer.removeListener('kafka:request-progress', handler)

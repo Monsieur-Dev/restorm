@@ -282,7 +282,7 @@
         "trpc": "tRPC-kérés",
         "amqp": "AMQP-kérés",
         "redis": "Redis-kérés",
-        "stomp": "STOMP kérés"
+        "stomp": "STOMP kérés",
         "kafkaProduce": "Kafka-kérés – Előállítás",
         "kafkaConsume": "Kafka-kérés – Fogyasztás"
       }
@@ -620,6 +620,7 @@
       "channels": "Csatornák",
       "command": "Parancs"
     }
+  },
   "kafka": {
     "brokersPlaceholder": "Broker lista (host:port,host:port)",
     "clientId": "Kliensazonosító",
@@ -1249,7 +1250,7 @@
       "graphqlUnsubscribe": "GraphQL leiratkozás",
       "stompConnect": "STOMP kapcsolódás",
       "stompSend": "STOMP küldés",
-      "stompClose": "STOMP bezárása"
+      "stompClose": "STOMP bezárása",
       "kafkaProduce": "Kafka produce",
       "kafkaConsume": "Kafka consume",
       "kafkaClose": "Kafka close"
@@ -1853,7 +1854,7 @@
       "graphqlUnsubscribe": "Leállít egy már nyitott GraphQL-feliratkozást (amelyet egy GraphQL-feliratkozás csomópont deklarált), lebontva annak SSE-folyamát.",
       "stompConnect": "Tartós STOMP-a-WebSocketen-keresztül kapcsolatot nyit: elvégzi a CONNECT/CONNECTED kézfogást, majd feliratkozik minden konfigurált célra, és minden fogadott keretet újra kibocsát a portján.",
       "stompSend": "SEND keretet küld egy már megnyitott STOMP kapcsolaton.",
-      "stompClose": "DISCONNECT-et küld, és lezár egy már megnyitott STOMP kapcsolatot."
+      "stompClose": "DISCONNECT-et küld, és lezár egy már megnyitott STOMP kapcsolatot.",
       "kafkaProduce": "Egy kötött Kafka-kérést egyszeri előállításként futtat le, és az eredményt (téma/partíció/offset) `response`-ként küldi ki.",
       "kafkaConsume": "Tartós Kafka-fogyasztót nyit egy kötött kérésből, és minden fogadott üzenetet újraküld a `message` portján.",
       "kafkaClose": "Lezár egy már nyitott Kafka-fogyasztót."

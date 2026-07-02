@@ -47,12 +47,12 @@ const SERVICES = [
   },
   // Redis speaks the RESP protocol on 6379 — not HTTP, so probe the raw TCP
   // port (mirrors the MQTT / gRPC probes above).
-  { name: 'Redis', tcp: { host: 'localhost', port: 6379 } }
+  { name: 'Redis', tcp: { host: 'localhost', port: 6379 } },
   // STOMP (rmohr/activemq) speaks STOMP-over-WebSocket on 61614 — not plain
   // HTTP, so probe the raw TCP port (a WS handshake needs the `Upgrade`
   // header dance, which a plain HTTP GET would fail even once the broker is
   // actually ready).
-  { name: 'STOMP (activemq)', tcp: { host: 'localhost', port: 61614 } }
+  { name: 'STOMP (activemq)', tcp: { host: 'localhost', port: 61614 } },
   // Kafka speaks its own wire protocol on 9092 — not HTTP, so probe the raw
   // TCP port. The `kafka-seed` one-shot job (topic + 3 messages) runs after
   // the broker's own compose healthcheck, independent of this poll.
