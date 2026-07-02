@@ -216,7 +216,12 @@ class StompExecutionService {
     const wsOptions = resolvedUrl.startsWith('wss://') ? { rejectUnauthorized: false } : {}
     // User-initiated connect — pre-authorise it so the firewall interceptor
     // sees the raw-socket connect as `allow`, mirroring the HTTP/WS runners.
-    const ws = withFirewallBypassSync(() => new WebSocket(resolvedUrl, wsOptions))
+    // Must OFFER the STOMP subprotocol: ActiveMQ / Spring brokers negotiate a
+    // `vNN.stomp` subprotocol on their STOMP-over-WebSocket connector, and `ws`
+    // hard-rejects a server-offered subprotocol the client never requested
+    // ("Server sent a subprotocol but none was requested" → close 1006) —
+    // without this the handshake never reaches CONNECTED.
+    const ws = withFirewallBypassSync(() => new WebSocket(resolvedUrl, ['v12.stomp', 'v11.stomp', 'v10.stomp'], wsOptions))
     const conn: ActiveStompConnection = { requestId, ws, connected: false, subscriptions: resolved.subscriptions, startTime: resolved.startTime, messages: [] }
     this.activeConnections.set(requestId, conn)
 

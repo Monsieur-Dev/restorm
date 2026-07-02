@@ -92,7 +92,9 @@ async function waitFor(pred: () => boolean, ms = 6000): Promise<void> {
  * independent of the service under test. */
 function rawStompPublisher(): Promise<{ send: (destination: string, body: string) => void; close: () => void }> {
   return new Promise((resolve, reject) => {
-    const ws = new WebSocket(BROKER_URL)
+    // Same subprotocol requirement as `StompExecutionService.open` — ActiveMQ
+    // offers `vNN.stomp` and `ws` rejects an unrequested server subprotocol.
+    const ws = new WebSocket(BROKER_URL, ['v12.stomp', 'v11.stomp', 'v10.stomp'])
     ws.on('open', () => {
       ws.send(encodeStompFrame({ command: 'CONNECT', headers: { 'accept-version': '1.2', host: '/' }, body: '' }))
     })

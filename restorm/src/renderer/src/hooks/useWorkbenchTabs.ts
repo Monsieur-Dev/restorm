@@ -45,11 +45,15 @@ import {
   isSoapRequest,
   isWebSocketRequest,
   isSseRequest,
+  isStompRequest,
   isODataRequest,
   isAuthenticationRequest,
+  isJsonRpcRequest,
+  isJsonRpcBatchRequest,
   isTrpcRequest,
   isAmqpRequest,
   isRedisRequest,
+  isKafkaRequest,
   isEnvironmentFolder,
   isAnyFolder,
   isScenario
@@ -63,11 +67,15 @@ import type {
   SoapRequestTab,
   WebSocketRequestTab,
   SseRequestTab,
+  StompRequestTab,
   ODataRequestTab,
+  JsonRpcRequestTab,
+  JsonRpcBatchRequestTab,
   AuthenticationRequestTab,
   TrpcRequestTab,
   AmqpRequestTab,
   RedisRequestTab,
+  KafkaRequestTab,
   ScenarioEditorTab,
   ConsoleTab,
   FirewallTab,
@@ -503,12 +511,21 @@ export function useWorkbenchTabs(options: UseWorkbenchTabsOptions): UseWorkbench
     } else if (isSseRequest(request)) {
       tabType = 'sse-request'
       title = `SSE ${request.name}`
+    } else if (isStompRequest(request)) {
+      tabType = 'stomp-request'
+      title = `STOMP ${request.name}`
     } else if (isODataRequest(request)) {
       tabType = 'odata-request'
       title = request.name
     } else if (isAuthenticationRequest(request)) {
       tabType = 'auth-request'
       title = request.name
+    } else if (isJsonRpcRequest(request)) {
+      tabType = 'jsonrpc-request'
+      title = `JSON-RPC ${request.name}`
+    } else if (isJsonRpcBatchRequest(request)) {
+      tabType = 'jsonrpc-batch-request'
+      title = `JSON-RPC Batch ${request.name}`
     } else if (isTrpcRequest(request)) {
       tabType = 'trpc-request'
       title = `tRPC ${request.name}`
@@ -517,6 +534,9 @@ export function useWorkbenchTabs(options: UseWorkbenchTabsOptions): UseWorkbench
       title = request.name
     } else if (isRedisRequest(request)) {
       tabType = 'redis-request'
+      title = request.name
+    } else if (isKafkaRequest(request)) {
+      tabType = 'kafka-request'
       title = request.name
     } else {
       return // Unknown request type
@@ -817,6 +837,18 @@ export function useWorkbenchTabs(options: UseWorkbenchTabsOptions): UseWorkbench
           allowFullscreen: true
         } as SseRequestTab
       }
+      if (isStompRequest(requestItem)) {
+        return {
+          id: tabId,
+          tabType: 'stomp-request',
+          title: `STOMP ${requestItem.name}`,
+          titleString: `STOMP ${requestItem.name}`,
+          request: requestItem,
+          breadcrumbs,
+          environments,
+          allowFullscreen: true
+        } as StompRequestTab
+      }
       if (isODataRequest(requestItem)) {
         return {
           id: tabId,
@@ -840,6 +872,30 @@ export function useWorkbenchTabs(options: UseWorkbenchTabsOptions): UseWorkbench
           environments,
           allowFullscreen: true
         } as AuthenticationRequestTab
+      }
+      if (isJsonRpcRequest(requestItem)) {
+        return {
+          id: tabId,
+          tabType: 'jsonrpc-request',
+          title: `JSON-RPC ${requestItem.name}`,
+          titleString: `JSON-RPC ${requestItem.name}`,
+          request: requestItem,
+          breadcrumbs,
+          environments,
+          allowFullscreen: true
+        } as JsonRpcRequestTab
+      }
+      if (isJsonRpcBatchRequest(requestItem)) {
+        return {
+          id: tabId,
+          tabType: 'jsonrpc-batch-request',
+          title: `JSON-RPC Batch ${requestItem.name}`,
+          titleString: `JSON-RPC Batch ${requestItem.name}`,
+          request: requestItem,
+          breadcrumbs,
+          environments,
+          allowFullscreen: true
+        } as JsonRpcBatchRequestTab
       }
       if (isTrpcRequest(requestItem)) {
         return {
@@ -876,6 +932,18 @@ export function useWorkbenchTabs(options: UseWorkbenchTabsOptions): UseWorkbench
           environments,
           allowFullscreen: true
         } as RedisRequestTab
+      }
+      if (isKafkaRequest(requestItem)) {
+        return {
+          id: tabId,
+          tabType: 'kafka-request',
+          title: requestItem.name,
+          titleString: requestItem.name,
+          request: requestItem,
+          breadcrumbs,
+          environments,
+          allowFullscreen: true
+        } as KafkaRequestTab
       }
     }
     return null

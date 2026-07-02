@@ -8441,4 +8441,73 @@
 - message: ⚪ [<time>] done runScenario
   data:
     result: {}
+- message: ⚪ [<time>] start runScenario
+  data:
+    scenarioId: <uuid>
+    label: SSE
+    in: true
+- message: 🔵 [<time>] ▶ SSE
+- message: ⚪ [<time>] start sseConnect
+  data:
+    requestId: <uuid>
+    connectionName: Frames
+    label: SSE connect
+- message: ⚪ [<time>] done sseConnect
+- message: ⚪ [<time>] sse "Frames" connecting
+- message: ⚪ [<time>] sse "Frames" connected
+- message: ⚪ [<time>] start wait
+  data:
+    durationMs: <dynamic-time>
+    label: let the frames arrive
+    in: true
+- message: ⚪ [<time>] start log
+  data:
+    message: frame SSE reçue
+    level: info
+    data: 1
+- message: 🔵 [<time>] frame SSE reçue
+  data: 1
+- message: ⚪ [<time>] done log
+  data:
+    value: 1
+- message: ⚪ [<time>] start log
+  data:
+    message: frame SSE reçue
+    level: info
+    data: 2
+- message: 🔵 [<time>] frame SSE reçue
+  data: 2
+- message: ⚪ [<time>] done log
+  data:
+    value: 2
+- message: ⚪ [<time>] start log
+  data:
+    message: frame SSE reçue
+    level: info
+    data: 3
+- message: 🔵 [<time>] frame SSE reçue
+  data: 3
+- message: ⚪ [<time>] done log
+  data:
+    value: 3
+- message: ⚪ [<time>] done wait
+- message: ⚪ [<time>] start sseClose
+  data:
+    connectionNodeId: <uuid>
+    label: close Frames
+    in: true
+- message: ⚪ [<time>] sse "Frames" closed
+- message: ⚪ [<time>] start log
+  data:
+    message: stream SSE fermé
+    level: info
+    in: true
+- message: 🔵 [<time>] stream SSE fermé
+- message: ⚪ [<time>] done log
+  data: {}
+- message: ⚪ [<time>] done sseClose
+- message: 🔵 [<time>] ■ SSE
+- message: ⚪ [<time>] done runScenario
+  data:
+    result: {}
 - message: 🔵 [<time>] ■ Main

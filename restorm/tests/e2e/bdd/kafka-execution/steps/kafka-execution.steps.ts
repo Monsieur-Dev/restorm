@@ -30,7 +30,7 @@ let requestsByName = new Map<string, string>()
 let currentRequestId: string | null = null
 
 const MODE_SELECT = '[data-testid="kafka-mode-select"]:visible'
-const URL_INPUT = '[data-testid="kafka-url-input"] input:visible'
+const URL_INPUT = '[data-testid="kafka-url-input"]:visible'
 const PRODUCE_BTN = '[data-testid="kafka-produce-button"]:visible'
 const CONSUME_BTN = '[data-testid="kafka-consume-button"]:visible'
 
@@ -157,7 +157,7 @@ When(/^I type (\d+) characters into the Kafka broker URL field within (\d+) ms$/
   await p.evaluate(() => { (window as unknown as DocUpdateCounterWindow).__e2eResetDocUpdateCount?.() })
   const delay = Math.max(0, Math.floor(windowMs / Math.max(1, count - 1)))
   const input = p.locator(URL_INPUT).first()
-  await input.focus()
+  await input.click()
   const text = 'abcdefghijklmnopqrstuvwxyz'.slice(0, count)
   await input.pressSequentially(text, { delay })
 })
