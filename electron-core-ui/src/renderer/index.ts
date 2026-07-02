@@ -91,6 +91,12 @@ export type {
 export { NO_GIT_STATE } from '../types/git'
 export type { SettingRendererProps } from './components/Settings/renderers/types'
 export { registerSettingRenderer, unregisterSettingRenderer } from './components/Settings/renderers/registry'
+// The canonical settings storage-key builder — any renderer code hardcoding
+// a settings key outside the YAML-driven `useSetting()` path (e.g. a host
+// hook like restorm's `usePushModal.ts`) must go through this rather than
+// re-deriving the `<group>:<id>` format by hand, or it silently reads/
+// writes a DIFFERENT storage entry than the one the Settings UI row uses.
+export { buildSettingsStorageKey } from '../types/settings'
 
 // Save-unit pure helpers — safe to import from renderer code (no FS access).
 export { decomposeForPersistence, cleanseForPersistence } from '../main/services/saveUnit/decomposer'

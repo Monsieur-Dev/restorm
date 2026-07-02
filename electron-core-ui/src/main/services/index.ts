@@ -24,6 +24,13 @@ export {
 export { getGitService, resetGitService, GitService } from './GitService'
 export type { GitServiceConfig } from './GitService'
 
+export {
+  GitSemiPullController,
+  initGitSemiPullController,
+  getGitSemiPullController
+} from './GitSemiPullController'
+export type { GitSemiPullFrequency, GitSemiPullControllerOptions } from './GitSemiPullController'
+
 export { eventBusService } from './EventBusService'
 export type { EventHandler, Subscription } from './EventBusService'
 

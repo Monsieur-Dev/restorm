@@ -2411,6 +2411,17 @@
       "countEnvironmentFolder_one": "{{count}} folder de mediu",
       "countEnvironmentFolder_other": "{{count}} foldere de mediu",
       "multiple": "Actualizare: {{parts}}"
+    },
+    "semiPullFrequencyTitle": "Frecvența verificării automate a actualizărilor",
+    "semiPullFrequencyDescription": "Cât de des verifică Restorm în fundal dacă există o versiune mai nouă a acestui fișier în depozit (doar extragere și comparare — nu îmbină niciodată automat).",
+    "semiPullFrequency": {
+      "off": "Dezactivat",
+      "15m": "La fiecare 15 minute",
+      "30m": "La fiecare 30 de minute",
+      "1h": "În fiecare oră",
+      "4h": "La fiecare 4 ore",
+      "12h": "La fiecare 12 ore",
+      "24h": "La fiecare 24 de ore"
     }
   }
 }

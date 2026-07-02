@@ -632,6 +632,15 @@ export const createCoreUIAPI = (): CoreUiApi => ({
       return () => {
         ipcRenderer.removeListener('git:cli-missing', handler)
       }
+    },
+    onPullAvailable: (callback: () => void): (() => void) => {
+      const handler = (): void => {
+        callback()
+      }
+      ipcRenderer.on('git:pull-available', handler)
+      return () => {
+        ipcRenderer.removeListener('git:pull-available', handler)
+      }
     }
   }
 })

@@ -419,6 +419,11 @@
     "cliMissing": {
       "title": "Git가 설치되어 있지 않습니다",
       "body": "Git 통합 기능을 사용하려면 Git을 설치하고 PATH에 추가하세요."
+    },
+    "pullAvailable": {
+      "title": "업데이트 사용 가능",
+      "body": "이 파일의 최신 버전을 리포지토리에서 사용할 수 있습니다.",
+      "pullNow": "지금 풀"
     }
   },
   "pushModal": {

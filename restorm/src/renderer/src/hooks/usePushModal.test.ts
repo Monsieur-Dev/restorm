@@ -25,7 +25,13 @@ vi.mock('electron-core-ui/renderer', () => ({
   useSetting: (key: string) => {
     const setValue = vi.fn((v: unknown) => { settingsStore.set(key, v); return Promise.resolve() })
     return [settingsStore.get(key), setValue, false]
-  }
+  },
+  // The REAL implementation (types/settings.ts), not a stub — this test
+  // exercises the actual `<groupPath>:<settingId>` format usePushModal.ts
+  // relies on, the same one SettingsService.buildStorageKey produces for
+  // the `git` group's registered `applyCommitMessageLanguageByDefault` row.
+  buildSettingsStorageKey: (groupPath: string[], settingId: string) =>
+    (groupPath.length > 0 ? `${groupPath.join('.')}:${settingId}` : settingId)
 }))
 
 vi.mock('react-i18next', () => ({
@@ -125,7 +131,7 @@ describe('usePushModal', () => {
   })
 
   it('opens with the persisted default language when one is set', async () => {
-    settingsStore.set('git.commitMessageLanguage', 'fr')
+    settingsStore.set('git:commitMessageLanguage', 'fr')
     stubGitApi()
     const { result } = renderHook(() => usePushModal('/proj/api.restorm', ROOT_ITEMS))
     act(() => { result.current.openPushModal() })
@@ -134,7 +140,7 @@ describe('usePushModal', () => {
   })
 
   it('setLanguage regenerates the title/body and persists the new default when "apply by default" is on', async () => {
-    settingsStore.set('git.applyCommitMessageLanguageByDefault', true)
+    settingsStore.set('git:applyCommitMessageLanguageByDefault', true)
     stubGitApi()
     const { result } = renderHook(() => usePushModal('/proj/api.restorm', ROOT_ITEMS))
     act(() => { result.current.openPushModal() })
@@ -143,11 +149,11 @@ describe('usePushModal', () => {
     act(() => { result.current.setLanguage('ja') })
     expect(result.current.language).toBe('ja')
     expect(getFixedTMock).toHaveBeenCalledWith('ja')
-    expect(settingsStore.get('git.commitMessageLanguage')).toBe('ja')
+    expect(settingsStore.get('git:commitMessageLanguage')).toBe('ja')
   })
 
   it('setLanguage does NOT persist the new default when "apply by default" is off', async () => {
-    settingsStore.set('git.applyCommitMessageLanguageByDefault', false)
+    settingsStore.set('git:applyCommitMessageLanguageByDefault', false)
     stubGitApi()
     const { result } = renderHook(() => usePushModal('/proj/api.restorm', ROOT_ITEMS))
     act(() => { result.current.openPushModal() })
@@ -155,13 +161,29 @@ describe('usePushModal', () => {
 
     act(() => { result.current.setLanguage('ja') })
     expect(result.current.language).toBe('ja')
-    expect(settingsStore.has('git.commitMessageLanguage')).toBe(false)
+    expect(settingsStore.has('git:commitMessageLanguage')).toBe(false)
   })
 
   it('setApplyLanguageByDefault persists the checkbox state', () => {
     const { result } = renderHook(() => usePushModal('/proj/api.restorm', ROOT_ITEMS))
     act(() => { result.current.setApplyLanguageByDefault(false) })
-    expect(settingsStore.get('git.applyCommitMessageLanguageByDefault')).toBe(false)
+    expect(settingsStore.get('git:applyCommitMessageLanguageByDefault')).toBe(false)
+  })
+
+  it('the "apply by default" toggle resolves to the SAME storage key the Settings→Git row uses (no silent drift)', () => {
+    // Regression test: this key used to be hand-written as
+    // `'git.applyCommitMessageLanguageByDefault'` (a dot), while
+    // `resources/settings.yaml`'s registered `git` group +
+    // `applyCommitMessageLanguageByDefault` setting resolves via
+    // `SettingsService.buildStorageKey(['git'], 'applyCommitMessageLanguageByDefault')`
+    // to a COLON-separated key — two different storage entries, silently
+    // disconnected. Both sides must compute through the same
+    // `buildSettingsStorageKey` helper so they can never diverge again.
+    const { result } = renderHook(() => usePushModal('/proj/api.restorm', ROOT_ITEMS))
+    act(() => { result.current.setApplyLanguageByDefault(true) })
+    const expectedKey = 'git:applyCommitMessageLanguageByDefault' // groupPath=['git'], settingId='applyCommitMessageLanguageByDefault'
+    expect(settingsStore.has(expectedKey)).toBe(true)
+    expect(settingsStore.get(expectedKey)).toBe(true)
   })
 
   it('push stages the file, commits with title+body, pushes, toasts success, and closes the modal', async () => {

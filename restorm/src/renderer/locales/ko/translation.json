@@ -2409,6 +2409,17 @@
       "countEnvironmentFolder_one": "환경 폴더 {{count}}개",
       "countEnvironmentFolder_other": "환경 폴더 {{count}}개",
       "multiple": "{{parts}} 업데이트"
+    },
+    "semiPullFrequencyTitle": "자동 풀 확인 빈도",
+    "semiPullFrequencyDescription": "Restorm이 백그라운드에서 저장소에 이 파일의 최신 버전이 있는지 확인하는 빈도입니다(가져오기 및 비교만 수행하며 자동으로 병합하지 않음).",
+    "semiPullFrequency": {
+      "off": "끄기",
+      "15m": "15분마다",
+      "30m": "30분마다",
+      "1h": "매시간",
+      "4h": "4시간마다",
+      "12h": "12시간마다",
+      "24h": "24시간마다"
     }
   }
 }

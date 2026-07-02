@@ -419,6 +419,11 @@
     "cliMissing": {
       "title": "Git chưa được cài đặt",
       "body": "Cài đặt Git và thêm vào PATH của bạn để sử dụng tính năng tích hợp Git."
+    },
+    "pullAvailable": {
+      "title": "Có bản cập nhật",
+      "body": "Phiên bản mới hơn của tệp này có sẵn trên kho lưu trữ.",
+      "pullNow": "Kéo về ngay"
     }
   },
   "pushModal": {

@@ -419,6 +419,11 @@
     "cliMissing": {
       "title": "A Git nincs telepítve",
       "body": "Telepítse a Gitet, és adja hozzá a PATH-hoz a Git-integráció használatához."
+    },
+    "pullAvailable": {
+      "title": "Elérhető frissítés",
+      "body": "A fájl újabb verziója érhető el a tárolóban.",
+      "pullNow": "Lehívás most"
     }
   },
   "pushModal": {

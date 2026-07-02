@@ -2410,6 +2410,17 @@
       "countEnvironmentFolder_one": "{{count}} miljømappe",
       "countEnvironmentFolder_other": "{{count}} miljømapper",
       "multiple": "Opdatering af {{parts}}"
+    },
+    "semiPullFrequencyTitle": "Hyppighed for automatisk pull-tjek",
+    "semiPullFrequencyDescription": "Hvor ofte Restorm i baggrunden tjekker, om der findes en nyere version af denne fil i repositoriet (kun hentning og sammenligning — fletter aldrig automatisk).",
+    "semiPullFrequency": {
+      "off": "Fra",
+      "15m": "Hvert 15. minut",
+      "30m": "Hvert 30. minut",
+      "1h": "Hver time",
+      "4h": "Hver 4. time",
+      "12h": "Hver 12. time",
+      "24h": "Hver 24. time"
     }
   }
 }

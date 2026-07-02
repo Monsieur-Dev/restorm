@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react'
-import { i18n as ecuiI18n, renderCommitMessage, toasterService, useSetting } from 'electron-core-ui/renderer'
+import { i18n as ecuiI18n, renderCommitMessage, toasterService, useSetting, buildSettingsStorageKey } from 'electron-core-ui/renderer'
 import { useTranslation } from 'react-i18next'
 import type { FolderItem } from '../../../shared/types/folderTypes'
 import { useGitFolder } from './useGitFolder'
@@ -7,8 +7,16 @@ import { diffProjectEntities, parseProjectYaml, type GitEntityChange } from '../
 import { buildCommitMessageContext } from '../services/commitMessageContext'
 import { RESTORM_COMMIT_MESSAGE_TEMPLATE } from '../services/commitMessageTemplates'
 
-const LANGUAGE_SETTING_KEY = 'git.commitMessageLanguage'
-const APPLY_DEFAULT_SETTING_KEY = 'git.applyCommitMessageLanguageByDefault'
+// Both keys live in the `git` group declared in `resources/settings.yaml`
+// (only `applyCommitMessageLanguageByDefault` has a visible Settings→Git
+// row today — `commitMessageLanguage` is Push-modal-only). Computed via
+// `buildSettingsStorageKey` rather than hand-written so this can never
+// drift from the key `SettingsService` itself resolves for the same
+// group/id pair — a hand-rolled key here previously used `.` instead of
+// `:`, silently reading/writing a DIFFERENT storage entry than the one
+// the Settings UI row used.
+const LANGUAGE_SETTING_KEY = buildSettingsStorageKey(['git'], 'commitMessageLanguage')
+const APPLY_DEFAULT_SETTING_KEY = buildSettingsStorageKey(['git'], 'applyCommitMessageLanguageByDefault')
 const DEFAULT_LANGUAGE = 'en'
 
 export interface PushModalState {

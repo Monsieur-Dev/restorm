@@ -2410,6 +2410,17 @@
       "countEnvironmentFolder_one": "{{count}} Umgebungsordner",
       "countEnvironmentFolder_other": "{{count}} Umgebungsordner",
       "multiple": "Aktualisierung von {{parts}}"
+    },
+    "semiPullFrequencyTitle": "Häufigkeit der automatischen Pull-Prüfung",
+    "semiPullFrequencyDescription": "Wie oft Restorm im Hintergrund prüft, ob im Repository eine neuere Version dieser Datei vorhanden ist (nur Abruf und Vergleich – niemals automatisches Zusammenführen).",
+    "semiPullFrequency": {
+      "off": "Aus",
+      "15m": "Alle 15 Minuten",
+      "30m": "Alle 30 Minuten",
+      "1h": "Stündlich",
+      "4h": "Alle 4 Stunden",
+      "12h": "Alle 12 Stunden",
+      "24h": "Alle 24 Stunden"
     }
   }
 }

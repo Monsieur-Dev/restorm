@@ -2410,6 +2410,17 @@
       "countEnvironmentFolder_one": "{{count}} dosje mjedisi",
       "countEnvironmentFolder_other": "{{count}} dosje mjedisi",
       "multiple": "Përditësim: {{parts}}"
+    },
+    "semiPullFrequencyTitle": "Shpeshtësia e kontrollit automatik të përditësimeve",
+    "semiPullFrequencyDescription": "Sa shpesh Restorm kontrollon në sfond nëse ekziston një version më i ri i këtij skedari në depo (vetëm marrje dhe krahasim — asnjëherë bashkim automatik).",
+    "semiPullFrequency": {
+      "off": "Çaktivizuar",
+      "15m": "Çdo 15 minuta",
+      "30m": "Çdo 30 minuta",
+      "1h": "Çdo orë",
+      "4h": "Çdo 4 orë",
+      "12h": "Çdo 12 orë",
+      "24h": "Çdo 24 orë"
     }
   }
 }

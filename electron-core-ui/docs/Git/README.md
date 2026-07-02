@@ -29,6 +29,33 @@ newer-remote-version detection, conflict-blob retrieval, and a debounced
 - **Folder watch** — a debounced watch on `.git/HEAD`, `.git/index`, and
   `.git/refs/**` (NOT the whole `.git` tree, which would also churn on
   `objects/**`) triggers a status refresh + a semi-pull check.
+- **Semi-pull triggers** — `GitService.checkForRemoteUpdate()` is the ONE
+  implementation shared by all three triggers the folder-watch/check-on-
+  open/CRON design calls for: the folder watch above, an immediate
+  check-on-open inside `setActiveFolder()` (so a just-opened file with a
+  stale local copy surfaces the toast right away), and
+  `GitSemiPullController`'s periodic schedule. It no-ops unless the active
+  folder is a repo, so every caller can invoke it unconditionally. Fires
+  `onPullAvailable()` (→ `git:pull-available`) only on the false→true edge
+  of `remoteHasNewerVersion` — a repeat check that still finds the same
+  undetected pull pending does not re-toast.
+- **`GitSemiPullController`** (main process) — reads the `git:
+  semiPullFrequency` setting (presets `15m`/`30m`/`1h`/`4h`/`12h`/`24h`/
+  `off`, default `1h` — the setting itself is host-registered, e.g.
+  restorm's `resources/settings.yaml`, same split as `AutoSaveController`'s
+  `files:autoSave`) and calls `checkForRemoteUpdate()` on that schedule.
+  Reschedules immediately on a setting change. Mirrors
+  `AutoSaveController`'s shape (`start()`/`stop()`, a settings
+  subscription, a singleton `initGitSemiPullController()`/
+  `getGitSemiPullController()` pair).
+- **`useGitPullAvailableToast(onPull)`** — surfaces every
+  `git:pull-available` detection as an `app`-toaster toast with a "Pull
+  now" action button. Unlike `useGitCliMissingToast`, this can fire more
+  than once per session; a fixed toast id means a re-detection updates the
+  existing toast rather than stacking a duplicate. `onPull` is the host's
+  injection point — this hook only knows a newer version was detected,
+  never how to actually pull (conflict handling belongs to the host's own
+  pull flow, e.g. restorm's `useGitActions`/`useGitPullConflict`).
 - **`renderCommitMessage`** (`CommitMessageEngine`) — a thin Handlebars
   wrapper (`Handlebars.compile`, cached per template string) that renders a
   `{ title, body }` commit-message pair from a restorm-provided
@@ -61,7 +88,9 @@ at a **higher layer**, not on the service itself:
 | Parsing the single-file YAML project into entities | host app | the conflict-resolution UI (per-entity 4-panel view) |
 | Semantic diff / commit-message generation | host app + a generic ECUI templating engine | `renderCommitMessage` (generic) + restorm's differ/context builder (host) |
 | Per-entity conflict rendering (request / scenario / folder tab-views) | host app | the conflict-resolution UI |
-| Toast wording | ECUI, self-contained | `git.cliMissing.*` i18n keys in ECUI's own `locales/` |
+| Toast wording | ECUI, self-contained | `git.cliMissing.*` / `git.pullAvailable.*` i18n keys in ECUI's own `locales/` |
+| Reacting to "Pull now" (plain pull vs. opening conflict resolution) | host app | `useGitPullAvailableToast(onPull)`'s `onPull` callback |
+| The CRON frequency setting's visible YAML registration | host app | restorm's `resources/settings.yaml` `git` group (`GitSemiPullController` just reads the `git:semiPullFrequency` key, wherever it's registered) |
 
 `GitServiceConfig.watchDebounceMs` is the one generic tuning knob (default
 500ms) — everything else about *what* changed and *how to show it* is
@@ -124,12 +153,16 @@ const pushModal = usePushModal(filePath, rootItems)
 ```
 
 Two settings persist the language preference (`useSetting`, restorm's
-`resources/settings.yaml` under the `git` group): `git.commitMessageLanguage`
-(the default, English) and `git.applyCommitMessageLanguageByDefault` (a
+`resources/settings.yaml` under the `git` group): `commitMessageLanguage`
+(the default, English) and `applyCommitMessageLanguageByDefault` (a
 toggle — when on, picking a language in the Push modal also updates the
 default for future pushes; when off, a pick only affects the commit being
-edited right now). The SAME toggle is exposed in Settings→Git — both read
-and write the identical setting key, so they can never drift out of sync.
+edited right now). The SAME toggle is exposed in Settings→Git — both sides
+compute their storage key via `buildSettingsStorageKey(['git'], settingId)`
+(exported from `electron-core-ui/renderer`, the same function
+`SettingsService.buildStorageKey` delegates to on the main-process side)
+rather than hand-writing the `<group>:<id>` format, so they can never
+silently drift onto two different storage entries.
 
 ## Conflict resolution (4-panel shell)
 
@@ -253,19 +286,26 @@ this panel in the first place.
 ```ts
 // main process — no init call needed beyond IPC registration, which
 // happens automatically via IPCManager's setupIPC(). Host apps only need
-// to wire the active-folder lifecycle:
-import { getGitService, getFileService } from 'electron-core-ui/main'
+// to wire the active-folder lifecycle, register a `git:semiPullFrequency`
+// setting (in the host's own settings config — see "CRON semi-pull"
+// below), and start the CRON controller once SettingsService is ready:
+import { getGitService, getFileService, getSettingsService, initGitSemiPullController } from 'electron-core-ui/main'
 import { dirname } from 'path'
 
 const gitService = getGitService()
 getFileService().onStateChanged((state) => {
   void gitService.setActiveFolder(state.currentFile.path ? dirname(state.currentFile.path) : null)
 })
+
+// After app.whenReady() (SettingsService is initialized inside setupIPC,
+// scheduled asynchronously by initializeApp — same indirection
+// AutoSaveController's own wiring needs):
+initGitSemiPullController({ settings: getSettingsService(), gitService })
 ```
 
 ```tsx
 // renderer
-import { useGitState, useGitCliMissingToast } from 'electron-core-ui/renderer'
+import { useGitState, useGitCliMissingToast, useGitPullAvailableToast } from 'electron-core-ui/renderer'
 
 function GitStatusPill(): JSX.Element | null {
   const { isRepo, status, remoteHasNewerVersion } = useGitState()
@@ -276,6 +316,7 @@ function GitStatusPill(): JSX.Element | null {
 
 function AppRoot(): JSX.Element {
   useGitCliMissingToast() // mount once near the app root
+  useGitPullAvailableToast(() => { /* the host's own pull flow, e.g. useGitActions().onPull */ })
   return <GitStatusPill />
 }
 ```
@@ -284,6 +325,7 @@ function AppRoot(): JSX.Element {
 
 ```
 src/types/git.ts                                — GitState, GitStatus, GitFileEntry, result types
+src/types/settings.ts                           — buildSettingsStorageKey (canonical <group>:<id> key builder, shared main+renderer)
 src/main/services/GitService.ts                  — the service (simple-git wrapper + watch + broadcast)
 src/main/managers/ipc/gitHandlers.ts             — `git:*` IPC channel registration
 src/main/ipc/schemas.ts                          — zod arg schemas (git* entries)
@@ -291,12 +333,14 @@ src/preload/api.ts                               — `window.api.git` exposure
 src/types/api.ts, src/renderer/types/global.d.ts — CoreUiGitApi / WindowApiGit contracts
 src/renderer/hooks/useGitState.ts                — React hook: live GitState
 src/renderer/hooks/useGitCliMissingToast.ts       — one-time "git not installed" toast
+src/main/services/GitSemiPullController.ts        — CRON schedule reading `git:semiPullFrequency`, calls checkForRemoteUpdate()
+src/renderer/hooks/useGitPullAvailableToast.tsx   — "a newer version exists" toast with a Pull-now action button
 src/renderer/services/CommitMessageEngine.ts      — renderCommitMessage (generic Handlebars render, cached per template)
 src/renderer/components/PushModal/PushModal.tsx   — the non-scoped commit + push UI (fully controlled)
 src/renderer/components/Settings/languages.ts     — AVAILABLE_LANGUAGES (shared by the UI-language switcher + PushModal)
 src/renderer/components/ConflictResolutionView/ConflictResolutionView.tsx — the 4-panel shell (list + user/server/resolved)
 src/renderer/components/ConflictResolutionView/fieldDiffStyle.ts          — the diff-highlight style helper
-src/renderer/locales/*/translation.json          — `git.cliMissing.*` + `pushModal.*` + `conflictResolution.*` (all 27 locales)
+src/renderer/locales/*/translation.json          — `git.cliMissing.*` + `git.pullAvailable.*` + `pushModal.*` + `conflictResolution.*` (all 27 locales)
 ```
 
 restorm's side of the commit-message pipeline (host-injected, not part of
@@ -307,7 +351,7 @@ src/renderer/src/services/gitCommitDiff.ts          — diffProjectEntities / pa
 src/renderer/src/services/commitMessageContext.ts   — buildCommitMessageContext (diff → { titleSummary, lines })
 src/renderer/src/services/commitMessageTemplates.ts — RESTORM_COMMIT_MESSAGE_TEMPLATE (the Handlebars templates)
 src/renderer/src/hooks/usePushModal.ts              — modal lifecycle + settings sync + stage/commit/push
-resources/settings.yaml                             — the `git` settings group (applyCommitMessageLanguageByDefault)
+resources/settings.yaml                             — the `git` settings group (applyCommitMessageLanguageByDefault, semiPullFrequency)
 src/renderer/locales/*/translation.json             — `git.diff.*`, `git.commitTitle.*`, `git.push{Failed,Succeeded}*` (all 27 locales)
 src/renderer/src/services/gitConflictModel.ts       — identifyConflictingEntities (which entities genuinely conflict)
 src/renderer/src/services/conflictEntityClone.ts    — cloneEntityForResolution (the editable resolved copy)

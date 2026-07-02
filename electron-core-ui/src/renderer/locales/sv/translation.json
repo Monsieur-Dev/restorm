@@ -419,6 +419,11 @@
     "cliMissing": {
       "title": "Git är inte installerat",
       "body": "Installera Git och lägg till det i din PATH för att använda Git-integrationen."
+    },
+    "pullAvailable": {
+      "title": "Uppdatering tillgänglig",
+      "body": "En nyare version av den här filen finns tillgänglig i repot.",
+      "pullNow": "Hämta nu"
     }
   },
   "pushModal": {

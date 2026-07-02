@@ -2409,6 +2409,17 @@
       "countEnvironmentFolder_one": "{{count}} 个环境文件夹",
       "countEnvironmentFolder_other": "{{count}} 个环境文件夹",
       "multiple": "更新 {{parts}}"
+    },
+    "semiPullFrequencyTitle": "自动拉取检查频率",
+    "semiPullFrequencyDescription": "Restorm 在后台检查仓库中是否有此文件更新版本的频率(仅获取并比较,绝不会自动合并)。",
+    "semiPullFrequency": {
+      "off": "关闭",
+      "15m": "每 15 分钟",
+      "30m": "每 30 分钟",
+      "1h": "每小时",
+      "4h": "每 4 小时",
+      "12h": "每 12 小时",
+      "24h": "每 24 小时"
     }
   }
 }

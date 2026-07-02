@@ -419,6 +419,11 @@
     "cliMissing": {
       "title": "Git belum terpasang",
       "body": "Pasang Git dan tambahkan ke PATH Anda untuk menggunakan integrasi Git."
+    },
+    "pullAvailable": {
+      "title": "Pembaruan tersedia",
+      "body": "Versi file ini yang lebih baru tersedia di repositori.",
+      "pullNow": "Tarik sekarang"
     }
   },
   "pushModal": {

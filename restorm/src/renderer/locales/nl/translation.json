@@ -2410,6 +2410,17 @@
       "countEnvironmentFolder_one": "{{count}} omgevingsmap",
       "countEnvironmentFolder_other": "{{count}} omgevingsmappen",
       "multiple": "Update van {{parts}}"
+    },
+    "semiPullFrequencyTitle": "Frequentie van automatische pull-controle",
+    "semiPullFrequencyDescription": "Hoe vaak Restorm op de achtergrond controleert of er een nieuwere versie van dit bestand in de repository staat (alleen ophalen en vergelijken — nooit automatisch samenvoegen).",
+    "semiPullFrequency": {
+      "off": "Uit",
+      "15m": "Elke 15 minuten",
+      "30m": "Elke 30 minuten",
+      "1h": "Elk uur",
+      "4h": "Elke 4 uur",
+      "12h": "Elke 12 uur",
+      "24h": "Elke 24 uur"
     }
   }
 }

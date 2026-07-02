@@ -119,3 +119,23 @@ export function isSettingItem(item: SettingsGroupItem): item is { setting: Setti
 export function isGroupItem(item: SettingsGroupItem): item is { group: SettingsGroup } {
   return 'group' in item
 }
+
+// ==========================================================================
+// Storage keys
+// ==========================================================================
+
+/**
+ * The canonical storage-key format: `<group1>.<group2>.<groupN>:<settingId>`
+ * — a flat (single-level) group produces just `<groupId>:<settingId>`.
+ * `SettingsService.buildStorageKey` (main process) delegates to this
+ * exact function; any renderer code that needs to read/write a setting
+ * outside the `useSetting()`/YAML-driven path (e.g. a host hook that
+ * hardcodes a settings key, like `usePushModal.ts`'s Push-modal
+ * settings) MUST use this too rather than re-deriving the format by
+ * hand — a hand-rolled key that doesn't match what the registered YAML
+ * setting resolves to silently reads/writes a DIFFERENT storage entry
+ * than the one the visible Settings UI row uses.
+ */
+export function buildSettingsStorageKey(groupPath: string[], settingId: string): string {
+  return groupPath.length > 0 ? `${groupPath.join('.')}:${settingId}` : settingId
+}

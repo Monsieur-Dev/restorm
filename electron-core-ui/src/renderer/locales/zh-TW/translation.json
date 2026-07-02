@@ -419,6 +419,11 @@
     "cliMissing": {
       "title": "尚未安裝 Git",
       "body": "請安裝 Git 並將其加入 PATH，以使用 Git 整合功能。"
+    },
+    "pullAvailable": {
+      "title": "有可用更新",
+      "body": "儲存庫中有此檔案的更新版本。",
+      "pullNow": "立即拉取"
     }
   },
   "pushModal": {

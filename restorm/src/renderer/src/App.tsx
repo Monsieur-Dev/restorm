@@ -180,7 +180,7 @@ import { RequestCreationProvider } from './contexts/RequestCreationContext'
 import { useNavigation } from './hooks/useNavigation'
 import { useWorkbenchUpdates } from './hooks/useWorkbenchUpdates'
 import { useWorkbenchTabs } from './hooks/useWorkbenchTabs'
-import { useFirewallPromptToasts, useGitCliMissingToast, PushModal, AVAILABLE_LANGUAGES } from 'electron-core-ui/renderer'
+import { useFirewallPromptToasts, useGitCliMissingToast, useGitPullAvailableToast, PushModal, AVAILABLE_LANGUAGES } from 'electron-core-ui/renderer'
 import { useFirewallProjectOriginsSync } from './hooks/useFirewallProjectOriginsSync'
 import { useSidebarState } from './hooks/useSidebarState'
 import {
@@ -416,6 +416,11 @@ const App: React.FC = () => {
   // `GIT` entry and the title-bar `Git` menu (see `useGitActions`).
   // repo-push opens the modal above; the actual push happens from there.
   const { onPush: handleGitPush, onPull: handleGitPull } = useGitActions(filePath, pushModal.openPushModal, pullConflict.openFromPull)
+  // Semi-pull detection → "Pull now" toast (91.6). Reuses the SAME click
+  // handler as the statusbar/title-bar pull actions above, so accepting
+  // the toast goes through the identical conflict-aware pull flow — no
+  // separate pull path to keep in sync.
+  useGitPullAvailableToast(handleGitPull)
 
   // Sidebar expansion is persisted per-project under
   // `restorm-main-sidebar:<projectUuid>`. The UUID is stamped into the

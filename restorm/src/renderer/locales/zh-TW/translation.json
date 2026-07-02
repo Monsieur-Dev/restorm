@@ -2409,6 +2409,17 @@
       "countEnvironmentFolder_one": "{{count}} 個環境資料夾",
       "countEnvironmentFolder_other": "{{count}} 個環境資料夾",
       "multiple": "更新 {{parts}}"
+    },
+    "semiPullFrequencyTitle": "自動提取檢查頻率",
+    "semiPullFrequencyDescription": "Restorm 在背景檢查儲存庫中是否有此檔案更新版本的頻率(僅擷取並比較,絕不會自動合併)。",
+    "semiPullFrequency": {
+      "off": "關閉",
+      "15m": "每 15 分鐘",
+      "30m": "每 30 分鐘",
+      "1h": "每小時",
+      "4h": "每 4 小時",
+      "12h": "每 12 小時",
+      "24h": "每 24 小時"
     }
   }
 }

@@ -2410,6 +2410,17 @@
       "countEnvironmentFolder_one": "{{count}} környezeti mappa",
       "countEnvironmentFolder_other": "{{count}} környezeti mappa",
       "multiple": "{{parts}} frissítése"
+    },
+    "semiPullFrequencyTitle": "Automatikus frissítésellenőrzés gyakorisága",
+    "semiPullFrequencyDescription": "Milyen gyakran ellenőrzi a Restorm a háttérben, hogy elérhető-e a fájl újabb verziója a tárolóban (csak letöltés és összehasonlítás — soha nem egyesít automatikusan).",
+    "semiPullFrequency": {
+      "off": "Ki",
+      "15m": "15 percenként",
+      "30m": "30 percenként",
+      "1h": "Óránként",
+      "4h": "4 óránként",
+      "12h": "12 óránként",
+      "24h": "24 óránként"
     }
   }
 }

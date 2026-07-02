@@ -115,6 +115,7 @@ declare global {
         getState: () => Promise<GitState>
         onStateChanged: (callback: (state: GitState) => void) => () => void
         onCliMissing: (callback: () => void) => () => void
+        onPullAvailable: (callback: () => void) => () => void
       }
     }
     // Mirrors the preload's createElectronAPI() surface. Keep in sync with

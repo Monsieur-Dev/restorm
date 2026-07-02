@@ -2412,6 +2412,17 @@
       "countEnvironmentFolder_one": "{{count}} složka prostředí",
       "countEnvironmentFolder_other": "{{count}} složek prostředí",
       "multiple": "Aktualizace: {{parts}}"
+    },
+    "semiPullFrequencyTitle": "Frekvence automatické kontroly aktualizací",
+    "semiPullFrequencyDescription": "Jak často Restorm na pozadí kontroluje, zda je v repozitáři k dispozici novější verze tohoto souboru (pouze stažení a porovnání — nikdy automatické sloučení).",
+    "semiPullFrequency": {
+      "off": "Vypnuto",
+      "15m": "Každých 15 minut",
+      "30m": "Každých 30 minut",
+      "1h": "Každou hodinu",
+      "4h": "Každé 4 hodiny",
+      "12h": "Každých 12 hodin",
+      "24h": "Každých 24 hodin"
     }
   }
 }

@@ -2410,6 +2410,17 @@
       "countEnvironmentFolder_one": "{{count}} environment folder",
       "countEnvironmentFolder_other": "{{count}} environment folders",
       "multiple": "Update to {{parts}}"
+    },
+    "semiPullFrequencyTitle": "Automatic pull check frequency",
+    "semiPullFrequencyDescription": "How often Restorm checks the repository in the background for a newer version of this file (fetch + compare only — never merges automatically).",
+    "semiPullFrequency": {
+      "off": "Off",
+      "15m": "Every 15 minutes",
+      "30m": "Every 30 minutes",
+      "1h": "Every hour",
+      "4h": "Every 4 hours",
+      "12h": "Every 12 hours",
+      "24h": "Every 24 hours"
     }
   }
 }

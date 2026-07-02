@@ -419,6 +419,11 @@
     "cliMissing": {
       "title": "Git nuk është i instaluar",
       "body": "Instaloni Git-in dhe shtojeni në PATH për të përdorur integrimin e Git-ut."
+    },
+    "pullAvailable": {
+      "title": "Përditësim i disponueshëm",
+      "body": "Një version më i ri i këtij skedari është i disponueshëm në depo.",
+      "pullNow": "Tërhiq tani"
     }
   },
   "pushModal": {

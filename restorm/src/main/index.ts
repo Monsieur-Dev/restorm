@@ -68,7 +68,7 @@ installHardenInterceptor()
 import { app, BrowserWindow, ipcMain, shell } from 'electron'
 import { randomBytes } from 'node:crypto'
 import { MainWindow } from './windows/MainWindow'
-import { initializeApp, logger, initFileService, getFileService, isFileServiceInitialized, i18nService, initPersistenceService, isPersistenceServiceInitialized, FileService, getSettingsService, isSettingsServiceInitialized, getStorageService, initAutoSaveController, McpService, resolveMcpDiscoveryDir, writeMcpDiscoveryFile, cleanupMcpDiscoveryFile, firewallService, permissionService, registerFirewallIpc, installWorkerPatcher, getGitService } from 'electron-core-ui'
+import { initializeApp, logger, initFileService, getFileService, isFileServiceInitialized, i18nService, initPersistenceService, isPersistenceServiceInitialized, FileService, getSettingsService, isSettingsServiceInitialized, getStorageService, initAutoSaveController, McpService, resolveMcpDiscoveryDir, writeMcpDiscoveryFile, cleanupMcpDiscoveryFile, firewallService, permissionService, registerFirewallIpc, installWorkerPatcher, getGitService, initGitSemiPullController } from 'electron-core-ui'
 import { REOPEN_LAST_FILE_SETTING_KEY, REOPEN_LAST_FILE_STORAGE_KEY } from '../shared/config/reopenLastFile'
 import { resolveChannel, endpointUrl } from '../shared/config/backend'
 import { entitlementPublicKeyPem, isEntitlementPublicKeyConfigured } from './services/entitlement/keys'
@@ -663,6 +663,20 @@ void app.whenReady().then(() => {
     fileService: getFileService()
   })
   logger.info('AutoSave controller initialized')
+})
+
+// Wire the GitSemiPullController the same way — reads the `git:
+// semiPullFrequency` setting (`resources/settings.yaml`'s `git` group)
+// and calls `GitService.checkForRemoteUpdate()` on that schedule. The
+// active-folder wiring above already covers check-on-open + the folder
+// watch; this covers the unattended periodic check (AC#4/#5 of the
+// semi-pull CRON ticket).
+void app.whenReady().then(() => {
+  initGitSemiPullController({
+    settings: getSettingsService(),
+    gitService: getGitService()
+  })
+  logger.info('Git semi-pull CRON controller initialized')
 })
 
 // Auth + entitlement: the reactive capability source of truth

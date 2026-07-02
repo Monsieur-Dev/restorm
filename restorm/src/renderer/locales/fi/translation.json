@@ -2410,6 +2410,17 @@
       "countEnvironmentFolder_one": "{{count}} ympäristökansio",
       "countEnvironmentFolder_other": "{{count}} ympäristökansiota",
       "multiple": "Päivitys: {{parts}}"
+    },
+    "semiPullFrequencyTitle": "Automaattisen päivitystarkistuksen tiheys",
+    "semiPullFrequencyDescription": "Kuinka usein Restorm tarkistaa taustalla, onko tiedostosta saatavilla uudempi versio tietovarastossa (vain nouto ja vertailu — ei koskaan automaattista yhdistämistä).",
+    "semiPullFrequency": {
+      "off": "Pois käytöstä",
+      "15m": "15 minuutin välein",
+      "30m": "30 minuutin välein",
+      "1h": "Joka tunti",
+      "4h": "4 tunnin välein",
+      "12h": "12 tunnin välein",
+      "24h": "24 tunnin välein"
     }
   }
 }

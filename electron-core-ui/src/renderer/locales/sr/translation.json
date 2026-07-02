@@ -419,6 +419,11 @@
     "cliMissing": {
       "title": "Git nije instaliran",
       "body": "Instalirajte Git i dodajte ga u PATH da biste koristili Git integraciju."
+    },
+    "pullAvailable": {
+      "title": "Доступно ажурирање",
+      "body": "Новија верзија ове датотеке је доступна у репозиторијуму.",
+      "pullNow": "Повуци сада"
     }
   },
   "pushModal": {

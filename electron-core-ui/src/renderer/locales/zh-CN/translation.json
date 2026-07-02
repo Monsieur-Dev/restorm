@@ -419,6 +419,11 @@
     "cliMissing": {
       "title": "未安装 Git",
       "body": "请安装 Git 并将其添加到 PATH 中以使用 Git 集成功能。"
+    },
+    "pullAvailable": {
+      "title": "有可用更新",
+      "body": "仓库中有此文件的更新版本。",
+      "pullNow": "立即拉取"
     }
   },
   "pushModal": {

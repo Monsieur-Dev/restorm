@@ -2411,6 +2411,17 @@
       "countEnvironmentFolder_one": "{{count}} mapa okruženja",
       "countEnvironmentFolder_other": "{{count}} mapa okruženja",
       "multiple": "Ažuriranje: {{parts}}"
+    },
+    "semiPullFrequencyTitle": "Učestalost automatske provjere ažuriranja",
+    "semiPullFrequencyDescription": "Koliko često Restorm u pozadini provjerava postoji li novija verzija ove datoteke u repozitoriju (samo dohvaćanje i usporedba — nikada automatsko spajanje).",
+    "semiPullFrequency": {
+      "off": "Isključeno",
+      "15m": "Svakih 15 minuta",
+      "30m": "Svakih 30 minuta",
+      "1h": "Svaki sat",
+      "4h": "Svaka 4 sata",
+      "12h": "Svakih 12 sati",
+      "24h": "Svakih 24 sata"
     }
   }
 }

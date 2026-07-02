@@ -2410,6 +2410,17 @@
       "countEnvironmentFolder_one": "{{count}} miljömapp",
       "countEnvironmentFolder_other": "{{count}} miljömappar",
       "multiple": "Uppdatering av {{parts}}"
+    },
+    "semiPullFrequencyTitle": "Frekvens för automatisk pull-kontroll",
+    "semiPullFrequencyDescription": "Hur ofta Restorm i bakgrunden kontrollerar om det finns en nyare version av den här filen i repot (endast hämtning och jämförelse — sammanfogar aldrig automatiskt).",
+    "semiPullFrequency": {
+      "off": "Av",
+      "15m": "Var 15:e minut",
+      "30m": "Var 30:e minut",
+      "1h": "Varje timme",
+      "4h": "Var 4:e timme",
+      "12h": "Var 12:e timme",
+      "24h": "Var 24:e timme"
     }
   }
 }

@@ -2410,6 +2410,17 @@
       "countEnvironmentFolder_one": "{{count}} dossier d'environnement",
       "countEnvironmentFolder_other": "{{count}} dossiers d'environnement",
       "multiple": "Mise à jour de {{parts}}"
+    },
+    "semiPullFrequencyTitle": "Fréquence de vérification automatique des mises à jour",
+    "semiPullFrequencyDescription": "À quelle fréquence Restorm vérifie en arrière-plan si une version plus récente de ce fichier existe sur le dépôt (récupération et comparaison uniquement — jamais de fusion automatique).",
+    "semiPullFrequency": {
+      "off": "Désactivé",
+      "15m": "Toutes les 15 minutes",
+      "30m": "Toutes les 30 minutes",
+      "1h": "Toutes les heures",
+      "4h": "Toutes les 4 heures",
+      "12h": "Toutes les 12 heures",
+      "24h": "Toutes les 24 heures"
     }
   }
 }

@@ -32,6 +32,14 @@ export {
 export { getGitService, resetGitService, GitService } from './services'
 export type { GitServiceConfig } from './services'
 
+// Git semi-pull CRON controller
+export {
+  GitSemiPullController,
+  initGitSemiPullController,
+  getGitSemiPullController
+} from './services'
+export type { GitSemiPullFrequency, GitSemiPullControllerOptions } from './services'
+
 // GraphQL runtime
 export {
   graphQLService,

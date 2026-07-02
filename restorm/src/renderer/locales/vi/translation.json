@@ -2409,6 +2409,17 @@
       "countEnvironmentFolder_one": "{{count}} thư mục môi trường",
       "countEnvironmentFolder_other": "{{count}} thư mục môi trường",
       "multiple": "Cập nhật {{parts}}"
+    },
+    "semiPullFrequencyTitle": "Tần suất kiểm tra cập nhật tự động",
+    "semiPullFrequencyDescription": "Tần suất Restorm kiểm tra ngầm xem có phiên bản mới hơn của tệp này trên kho lưu trữ hay không (chỉ lấy về và so sánh — không bao giờ tự động hợp nhất).",
+    "semiPullFrequency": {
+      "off": "Tắt",
+      "15m": "Mỗi 15 phút",
+      "30m": "Mỗi 30 phút",
+      "1h": "Mỗi giờ",
+      "4h": "Mỗi 4 giờ",
+      "12h": "Mỗi 12 giờ",
+      "24h": "Mỗi 24 giờ"
     }
   }
 }

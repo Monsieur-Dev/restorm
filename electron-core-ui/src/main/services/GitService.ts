@@ -73,6 +73,7 @@ export class GitService {
   private cliMissingToastFired = false
   private readonly stateChangeCallbacks = new Set<(state: GitState) => void>()
   private readonly cliMissingCallbacks = new Set<() => void>()
+  private readonly pullAvailableCallbacks = new Set<() => void>()
 
   constructor(config: GitServiceConfig = {}) {
     this.config = { watchDebounceMs: config.watchDebounceMs ?? DEFAULT_WATCH_DEBOUNCE_MS }
@@ -299,6 +300,13 @@ export class GitService {
    * containing folder" and calls this on every `file:opened` /
    * `file:closed` — GitService itself has no notion of a project file.
    * Passing `null` clears the active folder and stops watching.
+   *
+   * Check-on-open: once the repo status is known, run the semi-pull check
+   * immediately (awaited, not fire-and-forget) so a newly-opened file that
+   * already has a newer remote version surfaces the pull-available toast
+   * right away, rather than waiting for the next watch event or CRON tick.
+   * `checkForRemoteUpdate()` itself gates on `isRepo`, so this is a no-op
+   * for a non-git folder.
    */
   public async setActiveFolder(folder: string | null): Promise<void> {
     if (folder === this.activeFolder) return
@@ -311,6 +319,7 @@ export class GitService {
     }
     await this.refresh()
     if (this.state.isRepo) this.startWatching(folder)
+    await this.checkForRemoteUpdate()
   }
 
   public getActiveFolder(): string | null {
@@ -363,7 +372,7 @@ export class GitService {
       if (this.watchTimer) clearTimeout(this.watchTimer)
       this.watchTimer = setTimeout(() => {
         void this.refresh()
-        void this.runSemiPull()
+        void this.checkForRemoteUpdate()
       }, this.config.watchDebounceMs)
     }
     this.watcher.on('all', trigger)
@@ -380,13 +389,28 @@ export class GitService {
     }
   }
 
-  private async runSemiPull(): Promise<void> {
+  /**
+   * Run the semi-pull check against the active folder and fold the result
+   * into reactive state — the single implementation shared by the folder
+   * watch (91.1), check-on-open, and the CRON schedule (`GitSemiPullController`,
+   * 91.6), so "only when the folder is a git dir" (AC#3) is enforced here
+   * once rather than duplicated in every caller. A no-op when there is no
+   * active folder or the active folder isn't a repo — safe to call
+   * unconditionally on a timer.
+   *
+   * Fires the one-shot `git:pull-available` broadcast (see
+   * `onPullAvailable`) only on the false→true EDGE of `remoteHasNewerVersion`
+   * — a caller polling on a schedule while the flag is already true (the
+   * user hasn't pulled yet) must not re-toast on every tick.
+   */
+  public async checkForRemoteUpdate(): Promise<void> {
     const folder = this.activeFolder
-    if (!folder) return
+    if (!folder || !this.state.isRepo) return
     const result = await this.fetchAndCompare(folder)
     if (this.state.remoteHasNewerVersion !== result.remoteHasNewerVersion) {
       this.state = { ...this.state, remoteHasNewerVersion: result.remoteHasNewerVersion }
       this.notifyStateChange()
+      if (result.remoteHasNewerVersion) this.notifyPullAvailable()
     }
   }
 
@@ -412,6 +436,18 @@ export class GitService {
     }
   }
 
+  /** Fires on every false→true edge of `state.remoteHasNewerVersion` (see
+   * `checkForRemoteUpdate`) — the renderer turns it into a toast offering
+   * the real pull (`useGitPullAvailableToast`). Unlike `onCliMissing`,
+   * this can fire more than once per process lifetime: pull, then a later
+   * remote commit re-arms the edge. */
+  public onPullAvailable(callback: () => void): () => void {
+    this.pullAvailableCallbacks.add(callback)
+    return () => {
+      this.pullAvailableCallbacks.delete(callback)
+    }
+  }
+
   private notifyStateChange(): void {
     const state = this.getState()
     for (const callback of this.stateChangeCallbacks) {
@@ -433,6 +469,17 @@ export class GitService {
       }
     }
     this.broadcastEvent('git:cli-missing')
+  }
+
+  private notifyPullAvailable(): void {
+    for (const callback of this.pullAvailableCallbacks) {
+      try {
+        callback()
+      } catch (error) {
+        logger.error('[GitService] pull-available callback threw', { error: String(error) })
+      }
+    }
+    this.broadcastEvent('git:pull-available')
   }
 
   private broadcastEvent(channel: string, ...args: unknown[]): void {

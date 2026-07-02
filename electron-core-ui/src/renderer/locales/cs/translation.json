@@ -419,6 +419,11 @@
     "cliMissing": {
       "title": "Git není nainstalován",
       "body": "Nainstalujte Git a přidejte jej do proměnné PATH, abyste mohli používat integraci Git."
+    },
+    "pullAvailable": {
+      "title": "Dostupná aktualizace",
+      "body": "V repozitáři je k dispozici novější verze tohoto souboru.",
+      "pullNow": "Stáhnout nyní"
     }
   },
   "pushModal": {

@@ -168,6 +168,7 @@ interface WindowApiGit {
   getState: () => Promise<GitState>
   onStateChanged: (callback: (state: GitState) => void) => () => void
   onCliMissing: (callback: () => void) => () => void
+  onPullAvailable: (callback: () => void) => () => void
 }
 
 interface WindowApi {

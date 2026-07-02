@@ -2410,6 +2410,17 @@
       "countEnvironmentFolder_one": "{{count}} ortam klasörü",
       "countEnvironmentFolder_other": "{{count}} ortam klasörü",
       "multiple": "{{parts}} güncellemesi"
+    },
+    "semiPullFrequencyTitle": "Otomatik güncelleme kontrolü sıklığı",
+    "semiPullFrequencyDescription": "Restorm'un arka planda bu dosyanın depoda daha yeni bir sürümü olup olmadığını ne sıklıkla kontrol edeceği (yalnızca alma ve karşılaştırma — asla otomatik birleştirme yapmaz).",
+    "semiPullFrequency": {
+      "off": "Kapalı",
+      "15m": "Her 15 dakikada bir",
+      "30m": "Her 30 dakikada bir",
+      "1h": "Her saat",
+      "4h": "Her 4 saatte bir",
+      "12h": "Her 12 saatte bir",
+      "24h": "Her 24 saatte bir"
     }
   }
 }

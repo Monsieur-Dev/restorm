@@ -743,6 +743,9 @@ export function ensureCoreUiWebApiShim(): void {
     },
     onCliMissing: (): (() => void) => {
       return () => { /* noop in web shim: git is never "installed" to probe */ }
+    },
+    onPullAvailable: (): (() => void) => {
+      return () => { /* noop in web shim: a stateless build never detects a newer remote version */ }
     }
   }
 

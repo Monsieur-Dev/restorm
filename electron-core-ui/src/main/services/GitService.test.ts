@@ -340,6 +340,93 @@ describe('GitService', () => {
       expect(service.getState()).toMatchObject({ isRepo: false, status: null })
       expect(mockWatcher.close).toHaveBeenCalled()
     })
+
+    it('check-on-open: runs a semi-pull immediately when opening a repo folder that already has a newer remote version', async () => {
+      mockGit.checkIsRepo.mockResolvedValue(true)
+      mockGit.status.mockResolvedValue(emptyStatus({ behind: 3 }))
+
+      await service.setActiveFolder('/proj')
+
+      expect(mockGit.fetch).toHaveBeenCalledTimes(1)
+      expect(service.getState().remoteHasNewerVersion).toBe(true)
+    })
+
+    it('check-on-open: does not run a semi-pull when the folder is not a repo', async () => {
+      mockGit.checkIsRepo.mockResolvedValue(false)
+
+      await service.setActiveFolder('/proj')
+
+      expect(mockGit.fetch).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('checkForRemoteUpdate (AC#1/#3/#4 shared implementation)', () => {
+    it('is a no-op with no active folder', async () => {
+      await service.checkForRemoteUpdate()
+      expect(mockGit.fetch).not.toHaveBeenCalled()
+    })
+
+    it('is a no-op when the active folder is not a repo', async () => {
+      mockGit.checkIsRepo.mockResolvedValue(false)
+      await service.setActiveFolder('/proj')
+      mockGit.fetch.mockClear()
+
+      await service.checkForRemoteUpdate()
+
+      expect(mockGit.fetch).not.toHaveBeenCalled()
+    })
+
+    it('fires onPullAvailable only on the false→true edge, never on a repeat true→true check', async () => {
+      mockGit.checkIsRepo.mockResolvedValue(true)
+      mockGit.status.mockResolvedValue(emptyStatus({ behind: 0 }))
+      await service.setActiveFolder('/proj')
+
+      const onPullAvailable = vi.fn()
+      service.onPullAvailable(onPullAvailable)
+
+      mockGit.status.mockResolvedValue(emptyStatus({ behind: 2 }))
+      await service.checkForRemoteUpdate()
+      expect(onPullAvailable).toHaveBeenCalledTimes(1)
+
+      // Still behind — a repeat check (e.g. the next CRON tick) must not
+      // re-fire the toast for the same still-unpulled remote commit.
+      await service.checkForRemoteUpdate()
+      expect(onPullAvailable).toHaveBeenCalledTimes(1)
+    })
+
+    it('does not fire onPullAvailable on the true→false edge (after the user pulls)', async () => {
+      mockGit.checkIsRepo.mockResolvedValue(true)
+      mockGit.status.mockResolvedValue(emptyStatus({ behind: 2 }))
+      await service.setActiveFolder('/proj')
+      expect(service.getState().remoteHasNewerVersion).toBe(true)
+
+      const onPullAvailable = vi.fn()
+      service.onPullAvailable(onPullAvailable)
+
+      mockGit.status.mockResolvedValue(emptyStatus({ behind: 0 }))
+      await service.checkForRemoteUpdate()
+
+      expect(service.getState().remoteHasNewerVersion).toBe(false)
+      expect(onPullAvailable).not.toHaveBeenCalled()
+    })
+
+    it('can re-fire onPullAvailable on a LATER false→true edge (pull, then a new remote commit)', async () => {
+      mockGit.checkIsRepo.mockResolvedValue(true)
+      mockGit.status.mockResolvedValue(emptyStatus({ behind: 0 }))
+      await service.setActiveFolder('/proj')
+
+      const onPullAvailable = vi.fn()
+      service.onPullAvailable(onPullAvailable)
+
+      mockGit.status.mockResolvedValue(emptyStatus({ behind: 1 }))
+      await service.checkForRemoteUpdate()
+      mockGit.status.mockResolvedValue(emptyStatus({ behind: 0 }))
+      await service.checkForRemoteUpdate()
+      mockGit.status.mockResolvedValue(emptyStatus({ behind: 4 }))
+      await service.checkForRemoteUpdate()
+
+      expect(onPullAvailable).toHaveBeenCalledTimes(2)
+    })
   })
 
   describe('reactive state', () => {
