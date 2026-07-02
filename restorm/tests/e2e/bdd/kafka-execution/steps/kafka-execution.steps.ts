@@ -19,6 +19,7 @@
 
 import { createBdd } from 'playwright-bdd'
 import { join } from 'path'
+import { execSync } from 'child_process'
 import type { Page } from '@playwright/test'
 import { test, expect, type McpDiscovery, type McpToolReply } from '../../fixtures/mcp-server.fixture'
 
@@ -84,6 +85,51 @@ Given('I open the Kafka sample via MCP', async ({ callMcpTool, restormRoot }) =>
   }
   requestsByName = new Map(reqs.map((r) => [r.name, r.id]))
   expect(requestsByName.get('Kafka Produce'), 'Kafka sample requests not loaded').toBeTruthy()
+})
+
+/** `restorm-kafka` has no data volume (see `docker-compose.yml`), and the
+ * `restorm-test` topic is shared by "Kafka Produce"/"Handlebars substitution"
+ * (writers) and "Kafka Consume" (an earliest-offset reader asserting an
+ * EXACT frame count). Kafka is a durable, replayable log — unlike the
+ * pub/sub or drain-on-read brokers the sibling protocols use — so every
+ * Produce scenario that already ran (this file, or a prior local run
+ * against this long-lived container) permanently inflates the log the
+ * Consume scenario replays. Delete+recreate the topic right before it runs:
+ * that also invalidates `restorm-e2e-consumer`'s committed offset (tied to
+ * the old topic incarnation), so the group falls back to `earliest` on the
+ * fresh, exactly-3-message log regardless of what ran before it. */
+Given('the restorm-test Kafka topic is freshly reseeded', () => {
+  const broker = 'localhost:9092'
+  const topic = 'restorm-test'
+  const kafkaBin = '/opt/kafka/bin'
+  const dockerExec = (cmd: string): void => {
+    execSync(`docker exec restorm-kafka ${cmd}`, { stdio: 'pipe' })
+  }
+
+  try {
+    dockerExec(`${kafkaBin}/kafka-topics.sh --bootstrap-server ${broker} --delete --topic ${topic}`)
+  } catch {
+    // No topic yet on a pristine broker — fine, --create below handles it.
+  }
+
+  // KRaft topic deletion is async; poll until it's actually gone before
+  // recreating, else --create can race a "still exists" transient state.
+  const deadline = Date.now() + 15_000
+  while (Date.now() < deadline) {
+    const out = execSync(
+      `docker exec restorm-kafka ${kafkaBin}/kafka-topics.sh --bootstrap-server ${broker} --list`,
+      { encoding: 'utf-8' }
+    )
+    if (!out.split('\n').includes(topic)) break
+  }
+
+  dockerExec(
+    `${kafkaBin}/kafka-topics.sh --bootstrap-server ${broker} --create --if-not-exists --topic ${topic} --partitions 1 --replication-factor 1`
+  )
+  execSync(`docker exec -i restorm-kafka ${kafkaBin}/kafka-console-producer.sh --bootstrap-server ${broker} --topic ${topic}`, {
+    input: 'seed-message-1\nseed-message-2\nseed-message-3\n',
+    stdio: ['pipe', 'pipe', 'pipe']
+  })
 })
 
 When('I open the {string} request tab via MCP', async ({ callMcpTool }, name: string) => {

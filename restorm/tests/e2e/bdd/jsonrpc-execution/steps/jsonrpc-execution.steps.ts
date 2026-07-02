@@ -120,9 +120,18 @@ When('I import the JSON-RPC mock\'s OpenRPC document via MCP', async ({ callMcpT
   // import that races the still-in-flight empty-project load can land in the
   // main store and then get wiped by the late load. Same stabilise-across-
   // several-reads dance as `graphql-operation-name.steps.ts`'s fresh-project
-  // helper: re-import from scratch if a read comes back empty.
-  const projectPath = `/tmp/jsonrpc-import-e2e-${String(Date.now())}.restorm`
-  expect((await callMcpTool(disco, 'create_project', { filePath: projectPath })).isError ?? false).toBe(false)
+  // helper: re-import from scratch if a read comes back empty. Unlike that
+  // sibling, this flow DOES re-call `create_project` on a retry — and
+  // `create_project` writes with the `wx` flag (fails on an existing file,
+  // by design, to never clobber a real project), so retrying against the
+  // same path is guaranteed EEXIST. Mint a fresh path per attempt.
+  let attempt = 0
+  const freshProject = async (): Promise<void> => {
+    attempt++
+    const projectPath = `/tmp/jsonrpc-import-e2e-${String(Date.now())}-${String(attempt)}.restorm`
+    expect((await callMcpTool(disco, 'create_project', { filePath: projectPath })).isError ?? false).toBe(false)
+  }
+  await freshProject()
 
   const deadline = Date.now() + 20_000
   let stable = false
@@ -142,16 +151,19 @@ When('I import the JSON-RPC mock\'s OpenRPC document via MCP', async ({ callMcpT
       await pg.waitForTimeout(250)
     }
     stable = consecutive >= 4
-    if (!stable) {
-      expect((await callMcpTool(disco, 'create_project', { filePath: projectPath })).isError ?? false).toBe(false)
-    }
+    if (!stable) await freshProject()
   }
   expect(stable, 'import never stabilised after create_project').toBe(true)
 })
 
 Then('the MCP reply reports a successful import', () => {
   expect(lastImportReply, 'no import was attempted').not.toBeNull()
-  expect(lastImportReply?.isError ?? true).toBe(false)
+  // `?? false`, not `?? true`: an absent `isError` field means the MCP call
+  // returned cleanly (same convention as every other reply check in this
+  // file, e.g. the `create_project`/`import_from_url` guards above) — the
+  // inverted default here is what made this assertion fail even on a
+  // genuinely successful, non-raced import.
+  expect(lastImportReply?.isError ?? false).toBe(false)
 })
 
 When('I open the {string} request tab via MCP', async ({ callMcpTool }, name: string) => {

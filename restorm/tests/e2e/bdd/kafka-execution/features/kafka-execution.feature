@@ -25,6 +25,10 @@ Feature: Kafka execution end-to-end
     And that history entry succeeded
 
   Scenario: Consume replays the seeded messages from the earliest offset
+    # The prior two scenarios already produced to this shared topic — reseed
+    # it so this scenario deterministically sees exactly the 3 seed messages,
+    # regardless of run order or of leftovers from earlier local runs.
+    Given the restorm-test Kafka topic is freshly reseeded
     When I open the "Kafka Consume" request tab via MCP
     And I click the Kafka Consume button
     Then the Kafka response panel shows 3 message frames
