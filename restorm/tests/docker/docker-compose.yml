@@ -181,16 +181,39 @@ services:
       retries: 10
       start_period: 5s
 
-  # gRPC - gRPCbin echo server. Also answers gRPC-Web on :9002 (mapped from
-  # the container's :9001, grpcbin's HTTP/1.1 endpoint) — no separate
-  # gRPC-Web image needed, the gRPC-Web transport E2E scenarios target the
-  # same container as native gRPC, just the other port.
+  # gRPC - gRPCbin echo server (native gRPC only, port 9000). Its second port
+  # (9001, TLS-secured) is native gRPC too, NOT gRPC-Web — plain HTTP/1.1
+  # there gets "Client sent an HTTP request to an HTTPS server". gRPC-Web has
+  # its own dedicated mock below.
   grpc:
     image: moul/grpcbin
     container_name: restorm-grpc
     ports:
       - "9000:9000"
-      - "9002:9001"
+
+  # gRPC-Web mock - zero-dependency Node server used by the `grpc-execution`
+  # E2E suite's gRPC-Web-transport scenario. gRPC-Web normally needs an
+  # Envoy/grpc-web-proxy sidecar translating to a real gRPC backend — there's
+  # no ready-made local image for that either, so this hand-rolled server
+  # answers the same `grpcbin.GRPCBin/DummyUnary` RPC directly (see
+  # `grpcweb-server/server.js`), same precedent as `connect-mock` below.
+  # Listens on :9002 (the port the gRPC-Web transport scenario's sample
+  # request already points at).
+  grpcweb-mock:
+    image: node:20-alpine
+    container_name: restorm-grpcweb-mock
+    working_dir: /app
+    volumes:
+      - ./grpcweb-server:/app
+    command: node server.js
+    ports:
+      - "9002:9002"
+    healthcheck:
+      test: ["CMD", "sh", "-c", "wget -qO- http://localhost:9002/health | grep -q ok"]
+      interval: 3s
+      timeout: 3s
+      retries: 10
+      start_period: 5s
 
   # Connect-RPC mock - zero-dependency Node server used by the
   # `grpc-execution` E2E suite's Connect-transport scenarios. There's no

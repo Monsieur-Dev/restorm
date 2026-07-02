@@ -6,9 +6,9 @@ Feature: gRPC execution end-to-end
   A streaming RPC has no event names — every received frame is a plain message.
 
   It also covers the wire-transport toggle: the same DummyUnary call dispatched
-  over gRPC-Web (binary framing, grpcbin's HTTP/1.1 port) and over Connect-RPC
-  (JSON over HTTP, a dedicated mock container), plus the transport SelectBox
-  itself cycling through all three options.
+  over gRPC-Web (binary framing, a dedicated mock container) and over
+  Connect-RPC (JSON over HTTP, a dedicated mock container), plus the
+  transport SelectBox itself cycling through all three options.
 
   Background:
     Given I launch restorm with the MCP server enabled
@@ -81,7 +81,8 @@ Feature: gRPC execution end-to-end
 
   Scenario: Invoke a unary call over gRPC-Web and see the decoded response
     # Same DummyUnary call as "gRPC Unary", framed for plain HTTP/1.1 against
-    # the same grpcbin container's HTTP/1.1 port (9002).
+    # the dedicated `grpcweb-mock` container (9002) — grpcbin itself doesn't
+    # speak gRPC-Web on any port.
     When I open the "gRPC-Web Unary" request tab via MCP
     And I click the gRPC Invoke button
     Then the gRPC response shows a message matching "web-ping"

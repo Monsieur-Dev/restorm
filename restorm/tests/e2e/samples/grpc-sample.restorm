@@ -15,9 +15,9 @@ collections:
 
       **gRPC-Web Unary** and **Connect Unary** exercise the `transport` toggle:
       the same `DummyUnary` call, framed for plain HTTP/1.1 instead of native
-      HTTP/2. gRPC-Web targets the same grpcbin container on its HTTP/1.1 port
-      (9002); Connect targets the dedicated `connect-mock` container (8093),
-      since there's no local Connect-RPC image to reuse.
+      HTTP/2. Neither wire format is spoken by grpcbin itself, so each has its
+      own dedicated mock: gRPC-Web targets `grpcweb-mock` (9002), Connect
+      targets `connect-mock` (8093) — there's no local image for either.
     tags: []
     configuration: {}
     environments:
@@ -126,7 +126,8 @@ collections:
         documentation: |-
           The same DummyUnary call as "gRPC Unary", but dispatched over the
           gRPC-Web transport (binary framing over plain HTTP/1.1) against the
-          same grpcbin container's HTTP/1.1 port (9002 → container 9001).
+          dedicated `grpcweb-mock` container (9002) — grpcbin itself doesn't
+          speak gRPC-Web on any port.
         tags:
           - grpc
           - unary

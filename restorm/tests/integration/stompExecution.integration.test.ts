@@ -90,11 +90,14 @@ async function waitFor(pred: () => boolean, ms = 6000): Promise<void> {
 
 /** A throwaway raw STOMP client used to push messages at the broker,
  * independent of the service under test. */
-function rawStompPublisher(): Promise<{ send: (destination: string, body: string) => void; close: () => void }> {
+function rawStompPublisher(connectTimeoutMs = 4000): Promise<{ send: (destination: string, body: string) => void; close: () => void }> {
   return new Promise((resolve, reject) => {
     // Same subprotocol requirement as `StompExecutionService.open` — ActiveMQ
     // offers `vNN.stomp` and `ws` rejects an unrequested server subprotocol.
     const ws = new WebSocket(BROKER_URL, ['v12.stomp', 'v11.stomp', 'v10.stomp'])
+    // Bound the handshake so a not-yet-ready broker (socket open but STOMP
+    // transport still warming up) rejects promptly instead of hanging the caller.
+    const timer = setTimeout(() => { try { ws.close() } catch { /* noop */ } reject(new Error('STOMP connect timeout')) }, connectTimeoutMs)
     ws.on('open', () => {
       ws.send(encodeStompFrame({ command: 'CONNECT', headers: { 'accept-version': '1.2', host: '/' }, body: '' }))
     })
@@ -111,15 +114,16 @@ function rawStompPublisher(): Promise<{ send: (destination: string, body: string
             : Buffer.from(data).toString('utf8')
       for (const frame of parseStompFrames(text)) {
         if (frame.command === 'CONNECTED') {
+          clearTimeout(timer)
           resolve({
             send: (destination, body) => { ws.send(encodeStompFrame({ command: 'SEND', headers: { destination }, body })) },
             close: () => { ws.close() }
           })
         }
-        if (frame.command === 'ERROR') reject(new Error(frame.body || 'CONNECT rejected'))
+        if (frame.command === 'ERROR') { clearTimeout(timer); reject(new Error(frame.body || 'CONNECT rejected')) }
       }
     })
-    ws.on('error', reject)
+    ws.on('error', (err) => { clearTimeout(timer); reject(err) })
   })
 }
 
@@ -139,7 +143,26 @@ function brokerReachable(): Promise<boolean> {
 describe('StompExecutionService — STOMP execution', () => {
   let brokerAvailable = false
   const publishers: { close: () => void }[] = []
-  beforeAll(async () => { brokerAvailable = await brokerReachable() })
+  beforeAll(async () => {
+    // TCP-reachable != STOMP-ready: a freshly (re)started ActiveMQ (e.g. a cold
+    // CI mock) accepts the socket seconds before its STOMP transport can
+    // complete a CONNECT, and a SUBSCRIBE against that not-yet-ready broker is
+    // silently dropped. Poll a real CONNECT/CONNECTED handshake until it
+    // succeeds (bounded) so the suite runs against a genuinely ready broker
+    // instead of racing its warm-up.
+    if (!(await brokerReachable())) return
+    const deadline = Date.now() + 25000
+    while (Date.now() < deadline) {
+      try {
+        const probe = await rawStompPublisher(3000)
+        probe.close()
+        brokerAvailable = true
+        return
+      } catch {
+        await new Promise((r) => setTimeout(r, 500))
+      }
+    }
+  }, 30000)
   afterEach(async () => {
     for (const id of [...stubbed.keys()]) { try { stompExecutionService.disconnect(id) } catch { /* noop */ } }
     for (const p of publishers) { try { p.close() } catch { /* noop */ } }
@@ -165,16 +188,26 @@ describe('StompExecutionService — STOMP execution', () => {
     installStubs()
     const destination = `/topic/restorm-it-${Date.now()}`
     stub('s2', { subscriptions: [{ id: 'sub-0', destination, ackMode: 'auto' }] })
-    const run = stompExecutionService.execute({ requestId: 's2', timeout: 6000 })
+    const run = stompExecutionService.execute({ requestId: 's2', timeout: 10000 })
     await waitFor(() => stompExecutionService.isActive('s2'))
 
     const publisher = await rawStompPublisher()
     publishers.push(publisher)
-    publisher.send(destination, 'hello-from-integration-test')
 
-    await waitFor(() => (stompExecutionService.getMessages('s2')?.frames ?? []).some(
+    // A STOMP topic drops any message published before the broker finishes
+    // registering the SUBSCRIBE; `isActive('s2')` only confirms the client SENT
+    // the subscribe frame, not that the broker processed it. Re-publish on a
+    // short interval until the message is observed, so a cold broker's
+    // subscription-registration lag can't swallow a single race-y send.
+    const frameArrived = (): boolean => (stompExecutionService.getMessages('s2')?.frames ?? []).some(
       (m) => m.direction === 'received' && m.command === 'MESSAGE' && m.body === 'hello-from-integration-test'
-    ))
+    )
+    const publishStart = Date.now()
+    while (!frameArrived()) {
+      if (Date.now() - publishStart > 8000) throw new Error('waitFor timed out')
+      publisher.send(destination, 'hello-from-integration-test')
+      await new Promise((r) => setTimeout(r, 200))
+    }
     stompExecutionService.disconnect('s2')
     const result = await run
     const received = result.messages.find((m) => m.direction === 'received' && m.command === 'MESSAGE')

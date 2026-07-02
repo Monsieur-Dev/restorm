@@ -11,6 +11,11 @@ Feature: gRPC reflection import — discover a live server's services without a 
   Scenario: Import via reflection against grpcbin, then run a discovered method
     When I open the Import dialog and switch to the gRPC reflection card
     And I connect to "localhost:9000" via gRPC reflection
-    Then the sidebar should contain an environment folder named "grpcbin"
+    # grpcbin's reflection surface spans several DIFFERENT proto packages
+    # (addsvc, examplepb, grpcbin, hello) bundled into one demo binary, so
+    # the top-level env folder gets the generic "no single package" fallback
+    # name rather than "grpcbin" — asserting on the discovered service
+    # folder instead proves reflection actually found GRPCBin.
+    Then the sidebar should contain an environment folder named "grpcbin.GRPCBin"
     When I open the imported "DummyUnary" request and invoke it
     Then the gRPC response shows a non-error status

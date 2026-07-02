@@ -15,7 +15,7 @@ const { Given, When, Then } = createBdd(test)
 let discovery: McpDiscovery | null = null
 let page: Page | null = null
 
-const INVOKE_BTN = '[data-testid="grpc-send-button"]'
+const INVOKE_BTN = '[data-testid="grpc-send-button"]:visible'
 const RESPONSE_STATUS = '[data-testid="grpc-response-status"]'
 
 function requirePage(): Page {
@@ -119,11 +119,13 @@ Then('the sidebar should contain an environment folder named {string}', async ({
 
 When('I open the imported {string} request and invoke it', async ({}, name: string) => {
   const p = requirePage()
-  // Tree shape from a reflection import: env folder "grpcbin" > service
-  // folder "GRPCBin" > one request per RPC method (see
-  // `buildEnvironmentFolderFromParsedProto` in `GrpcImportService.ts`).
-  await expandFolder(p, 'grpcbin')
-  await expandFolder(p, 'GRPCBin')
+  // Tree shape from a reflection import: env folder (generic "gRPC API" —
+  // grpcbin's reflection surface spans several packages, so there's no
+  // single package name to use) > service folder "grpcbin.GRPCBin" > one
+  // request per RPC method (see `buildEnvironmentFolderFromParsedProto` in
+  // `GrpcImportService.ts`).
+  await expandFolder(p, 'gRPC API')
+  await expandFolder(p, 'grpcbin.GRPCBin')
   await sidebarRow(p, name).dblclick()
   const invokeButton = p.locator(INVOKE_BTN).first()
   await expect(invokeButton).toBeVisible({ timeout: 15000 })
@@ -132,6 +134,15 @@ When('I open the imported {string} request and invoke it', async ({}, name: stri
 
 Then('the gRPC response shows a non-error status', async () => {
   const p = requirePage()
+  // `grpc-response-status` lives in the response panel's "Infos" tab, which
+  // is NOT the default-selected tab once a response body also exists (see
+  // `BaseRequestTabView.tsx`'s `responseTabs` — it defaults to `'response'`)
+  // — select it explicitly before asserting, mirroring
+  // `grpc-execution.steps.ts`'s `openInfosTab`.
+  const infosTab = p.locator('[data-testid="base-request-tabs-response-tab-infos"]:visible').first()
+  await infosTab.waitFor({ state: 'visible', timeout: 15000 })
+  await infosTab.click()
+  await p.locator('[data-testid="base-request-tabs-response-tabpanel-infos"]').first().waitFor({ state: 'visible', timeout: 10000 })
   await expect(p.locator(`${RESPONSE_STATUS}[data-status-code="0"]`).first()).toBeVisible({ timeout: 15000 })
   await expect(p.locator('[data-testid="grpc-response-error"]')).toHaveCount(0)
 })

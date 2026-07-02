@@ -75,6 +75,10 @@ function buildAmqpFullData(fields: {
   return {
     url: fields.url,
     requestType: 'amqp',
+    // AMQP has no HTTP-style headers concept in its UI, but `headers` is a
+    // required common field on `FullRequestData` — ContextService.updateFullRequestData
+    // reads `data.headers.length` unconditionally, so an omitted field throws.
+    headers: [],
     mode: fields.mode,
     ...(fields.vhost ? { vhost: fields.vhost } : {}),
     ...(fields.exchange ? { exchange: fields.exchange } : {}),

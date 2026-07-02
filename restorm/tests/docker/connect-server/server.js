@@ -2,12 +2,13 @@
  * Connect-RPC mock server for the restorm gRPC-execution E2E suite's Connect
  * transport scenarios.
  *
- * There's no ready-made local Connect-RPC container to reuse (unlike
- * `moul/grpcbin`, which already answers gRPC-Web on :9002 for the gRPC-Web
- * scenarios) — `connectrpc/eliza` is a public demo, not a local image. This
- * is a tiny zero-dependency Node server instead, mirroring the `soap-server`
- * / `http-util` precedent: pure `node:http`, no npm install, boots the
- * instant the container starts.
+ * There's no ready-made local Connect-RPC container to reuse
+ * (`connectrpc/eliza` is a public demo, not a local image) — same situation
+ * as the gRPC-Web scenario, which gets its own hand-rolled mock
+ * (`grpcweb-server/server.js`; `moul/grpcbin` doesn't speak gRPC-Web on any
+ * port). This is a tiny zero-dependency Node server instead, mirroring the
+ * `soap-server` / `http-util` precedent: pure `node:http`, no npm install,
+ * boots the instant the container starts.
  *
  * It answers the same `grpcbin.GRPCBin` service/method names the bundled
  * fallback proto (`GRPCBIN_PROTO` in `grpcProtoLoader.ts`) declares, so an

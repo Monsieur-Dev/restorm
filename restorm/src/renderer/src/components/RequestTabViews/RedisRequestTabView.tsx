@@ -173,6 +173,10 @@ export const RedisRequestTabView: React.FC<RedisRequestTabViewProps> = ({
   }): Record<string, unknown> => ({
     url: values.url,
     requestType: 'redis',
+    // Redis has no HTTP-style headers concept in its UI, but `headers` is a
+    // required common field on `FullRequestData` — ContextService.updateFullRequestData
+    // reads `data.headers.length` unconditionally, so an omitted field throws.
+    headers: [],
     password: values.password ? values.password : undefined,
     redisMode: values.mode,
     channels: values.channels,

@@ -142,10 +142,12 @@ jobs:
         ports:
           - 8090:8080
       grpc:
+        # Native gRPC only (port 9000). Its second port is TLS-secured
+        # native gRPC too, not gRPC-Web — the gRPC-Web mock (started
+        # below alongside the other zero-dependency mocks) owns :9002.
         image: moul/grpcbin
         ports:
           - 9000:9000
-          - 9002:9001
       redis:
         image: redis:7-alpine
         ports:
@@ -187,14 +189,14 @@ jobs:
           cd restorm
           pnpm install --frozen-lockfile
 
-      - name: Start GraphQL, Socket.IO, raw-WebSocket, HTTP-util, SOAP, OData-v2, JSON-RPC, tRPC, SSE and Connect-RPC mock servers
+      - name: Start GraphQL, Socket.IO, raw-WebSocket, HTTP-util, SOAP, OData-v2, JSON-RPC, tRPC, SSE, Connect-RPC and gRPC-Web mock servers
         run: |
           cd restorm/tests/docker/graphql-server && npm install && node server.js &
           cd restorm/tests/docker/socketio-server && npm install && node server.js &
           cd restorm/tests/docker/ws-echo-server && npm install && node server.js &
           # http-util, soap-server, odata-v2-petstore, jsonrpc-server,
-          # trpc-server, sse-server and connect-server are zero-dependency
-          # (pure node:http) — no npm install needed.
+          # trpc-server, sse-server, connect-server and grpcweb-server are
+          # zero-dependency (pure node:http) — no npm install needed.
           cd restorm/tests/docker/http-util && node server.js &
           cd restorm/tests/docker/soap-server && node server.js &
           cd restorm/tests/docker/jsonrpc-server && node server.js &
@@ -202,6 +204,7 @@ jobs:
           cd restorm/tests/docker/sse-server && node server.js &
           cd restorm/tests/docker/odata-v2-petstore && node server.js &
           cd restorm/tests/docker/connect-server && node server.js &
+          cd restorm/tests/docker/grpcweb-server && node server.js &
           sleep 10
 
       - name: Start OData Pet Store
