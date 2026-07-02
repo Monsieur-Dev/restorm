@@ -1042,6 +1042,41 @@
       "paw": {
         "description": "Paw'dan mı geliyorsunuz? JSON dışa aktarmanızı bırakın (uygulamada File → Export → JSON — native .paw paketi doğrudan okunmaz). Restorm her isteği, başlığı, gövdeyi ve ortamı yeniden oluşturur ve Paw'ın dinamik değerlerini (zaman damgaları, rastgele dizeler, UUID'ler) en yakın Restorm karşılığına eşler.",
         "trademark": "Paw, RapidAPI, Inc.'in tescilli markasıdır ve burada yalnızca uyumluluk referansı amacıyla kullanılmaktadır."
+      },
+      "har": {
+        "description": "Tarayıcınızın devtools'undan bir ağ izi mi yakaladınız? Dışa aktarılan .har dosyasını bırakın — Restorm kaydedilen her çağrıyı gezerek onu, başlıklar ve gövde dahil olmak üzere tekrarlanabilir bir isteğe dönüştürür."
+      },
+      "restClient": {
+        "description": "VS Code REST Client eklentisinden mi geliyorsunuz? .http / .rest dosyasını yapıştırın veya bırakın — Restorm her istek bloğunu ayrıştırır, @variables değişkenlerini çözer ve bunları bir Restorm ağacı olarak yeniden oluşturur.",
+        "trademark": "REST Client, ilgili sahibinin ticari markasıdır ve burada yalnızca uyumluluk referansı olarak kullanılmaktadır."
+      },
+      "httpie": {
+        "description": "Bir HTTPie Desktop koleksiyon dışa aktarımı veya bir CLI oturum dosyası bırakın — Restorm her isteği (ve bir oturum için kalıcı başlıklarını) okur ve çalışmaya hazır şekilde yeniden oluşturur.",
+        "trademark": "HTTPie, ilgili sahibinin ticari markasıdır ve burada yalnızca uyumluluk referansı olarak kullanılmaktadır."
+      },
+      "smithy": {
+        "description": "Bir Smithy modeli yapıştırın — JSON AST'i veya elle yazılmış IDL'yi — Restorm her servisi, kaynağı ve işlemi gezerek çalışmaya hazır isteklerden oluşan uygun bir klasör oluşturur.",
+        "trademark": "Smithy, Amazon Web Services'in bir projesidir."
+      },
+      "typespec": {
+        "description": "TypeSpec tanımınızı (.tsp) yapıştırın — Restorm bunu arka planda OpenAPI'ye derler ve tam olarak elle yazılmış bir spesifikasyon gibi içe aktarır: işlemler, parametreler ve şemalar dahil.",
+        "trademark": "TypeSpec, Microsoft'un bir projesidir."
+      },
+      "raml": {
+        "description": "Bir RAML 1.0 veya 0.8 belgesi yapıştırın — Restorm kaynak ağacını iç içe klasörlere yansıtır, metot başına bir istek, modellenen türler de dahil.",
+        "trademark": "RAML, RAML Workgroup tarafından sürdürülen bir spesifikasyondur."
+      },
+      "wadl": {
+        "description": "Hâlâ bir WADL belgesi mi sürdürüyorsunuz? XML'i yapıştırın — Restorm iç içe geçmiş <resource> ağacını gezerek metotlar ve parametreler dahil, uygun bir istek klasörü oluşturur.",
+        "trademark": "WADL, Sun Microsystems tarafından bir Member Submission olarak W3C'ye sunuldu."
+      },
+      "thrift": {
+        "description": "Bir Apache Thrift IDL (.thrift) dosyası yapıştırın — Restorm, API'nin yapısını inceleyebilmeniz için her servisi, metodu, struct'ı ve enum'u okur. Thrift'in ikili tel protokolü henüz Restorm'dan çalıştırılamıyor, bu yüzden bu içe aktarma yalnızca belgeleme amaçlıdır.",
+        "trademark": "Apache Thrift, Apache Software Foundation'ın ticari markasıdır."
+      },
+      "apiBlueprint": {
+        "description": "Bir API Blueprint (.apib) belgesi yapıştırın — Restorm her kaynak grubunu ve geçişi, belgelenen her metot/yanıt çifti için bir istek klasörüne ayrıştırır.",
+        "trademark": "API Blueprint, aslen Apiary tarafından oluşturulmuş bir spesifikasyondur."
       }
     },
     "grpcReflection": {

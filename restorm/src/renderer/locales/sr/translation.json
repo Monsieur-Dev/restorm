@@ -1043,6 +1043,41 @@
       "paw": {
         "description": "Dolazite iz Paw-a? Ubacite svoj JSON izvoz (File → Export → JSON u aplikaciji — nativni .paw paket se ne čita direktno). Restorm ponovo gradi svaki zahtev, zaglavlje, telo i okruženje, i mapira Paw-ove dinamičke vrednosti (vremenske oznake, nasumične nizove, UUID) na najbliži Restorm ekvivalent.",
         "trademark": "Paw je registrovani zaštitni znak kompanije RapidAPI, Inc., korišćen ovde samo kao referenca za kompatibilnost."
+      },
+      "har": {
+        "description": "Snimili ste mrežni trag iz devtools-a svog pregledača? Ubacite izvezeni .har fajl — Restorm prolazi kroz svaki zabeleženi poziv i pretvara ga u zahtev koji se može ponoviti, uključujući zaglavlja i telo."
+      },
+      "restClient": {
+        "description": "Dolazite iz ekstenzije REST Client za VS Code? Nalepite ili ubacite .http / .rest fajl — Restorm parsira svaki blok zahteva, razrešava @variables i ponovo ih gradi kao Restorm stablo.",
+        "trademark": "REST Client je zaštitni znak odgovarajućeg vlasnika, korišćen ovde samo kao referenca za kompatibilnost."
+      },
+      "httpie": {
+        "description": "Ubacite izvoz kolekcije HTTPie Desktop ili fajl CLI sesije — Restorm čita svaki zahtev (a za sesiju i njena trajna zaglavlja) i ponovo ih gradi spremne za pokretanje.",
+        "trademark": "HTTPie je zaštitni znak odgovarajućeg vlasnika, korišćen ovde samo kao referenca za kompatibilnost."
+      },
+      "smithy": {
+        "description": "Nalepite Smithy model — JSON AST ili ručno pisani IDL — a Restorm prolazi kroz svaki servis, resurs i operaciju kako bi napravio odgovarajući folder zahteva spremnih za pokretanje.",
+        "trademark": "Smithy je projekat kompanije Amazon Web Services."
+      },
+      "typespec": {
+        "description": "Nalepite svoju TypeSpec definiciju (.tsp) — Restorm je u pozadini kompajlira u OpenAPI i uvozi je potpuno kao ručno pisanu specifikaciju: uključujući operacije, parametre i šeme.",
+        "trademark": "TypeSpec je projekat kompanije Microsoft."
+      },
+      "raml": {
+        "description": "Nalepite RAML 1.0 ili 0.8 dokument — Restorm preslikava njegovo stablo resursa u ugnježdene foldere, jedan zahtev po metodi, uključujući modelirane tipove.",
+        "trademark": "RAML je specifikacija koju održava RAML Workgroup."
+      },
+      "wadl": {
+        "description": "I dalje održavate WADL dokument? Nalepite XML — Restorm prolazi kroz njegovo ugnježdeno <resource> stablo i pravi odgovarajući folder zahteva, uključujući metode i parametre.",
+        "trademark": "WADL je Sun Microsystems podneo W3C-u kao Member Submission."
+      },
+      "thrift": {
+        "description": "Nalepite Apache Thrift IDL (.thrift) fajl — Restorm čita svaki servis, metodu, struct i enum kako biste mogli da pregledate oblik API-ja. Binarni protokol Thrift-a još se ne može izvršavati iz Restorm-a, pa je ovaj uvoz samo dokumentacioni.",
+        "trademark": "Apache Thrift je zaštitni znak Apache Software Foundation-a."
+      },
+      "apiBlueprint": {
+        "description": "Nalepite API Blueprint (.apib) dokument — Restorm analizira svaku grupu resursa i prelaz u folder zahteva, jedan po dokumentovanom paru metoda/odgovor.",
+        "trademark": "API Blueprint je specifikacija koju je originalno napravio Apiary."
       }
     },
     "grpcReflection": {

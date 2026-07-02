@@ -1042,6 +1042,41 @@
       "paw": {
         "description": "Tuletko Pawsta? Pudota JSON-vientitiedostosi (File → Export → JSON sovelluksessa — natiivia .paw-pakettia ei lueta suoraan). Restorm rakentaa uudelleen jokaisen pyynnön, otsakkeen, sisällön ja ympäristön, ja yhdistää Pawn dynaamiset arvot (aikaleimat, satunnaiset merkkijonot, UUID:t) lähimpään Restorm-vastineeseen.",
         "trademark": "Paw on RapidAPI, Inc:n rekisteröity tavaramerkki, käytetään tässä vain yhteensopivuusviittauksena."
+      },
+      "har": {
+        "description": "Tallensitko verkkoliikennejäljen selaimesi devtools-työkalusta? Pudota viety .har-tiedosto — Restorm käy läpi jokaisen tallennetun kutsun ja muuttaa sen toistettavaksi pyynnöksi, otsakkeet ja sisältö mukaan lukien."
+      },
+      "restClient": {
+        "description": "Tuletko REST Client -VS Code -laajennuksesta? Liitä tai pudota .http-/.rest-tiedosto — Restorm jäsentää jokaisen pyyntölohkon, ratkaisee @variables-muuttujat ja rakentaa ne uudelleen Restorm-puuksi.",
+        "trademark": "REST Client on sen omistajan tavaramerkki, käytetään tässä vain yhteensopivuusviittauksena."
+      },
+      "httpie": {
+        "description": "Pudota HTTPie Desktopin kokoelmavienti tai CLI-istuntotiedosto — Restorm lukee jokaisen pyynnön (ja istunnon tapauksessa sen pysyvät otsakkeet) ja rakentaa ne uudelleen käyttövalmiiksi.",
+        "trademark": "HTTPie on sen omistajan tavaramerkki, käytetään tässä vain yhteensopivuusviittauksena."
+      },
+      "smithy": {
+        "description": "Liitä Smithy-malli — JSON-AST tai käsin kirjoitettu IDL — ja Restorm käy läpi jokaisen palvelun, resurssin ja operaation tuottaakseen vastaavan kansion käyttövalmiita pyyntöjä.",
+        "trademark": "Smithy on Amazon Web Servicesin projekti."
+      },
+      "typespec": {
+        "description": "Liitä TypeSpec-määrittelysi (.tsp) — Restorm kääntää sen taustalla OpenAPI-muotoon ja tuo sen aivan kuten käsin kirjoitetun määrittelyn: operaatiot, parametrit ja skeemat mukaan lukien.",
+        "trademark": "TypeSpec on Microsoftin projekti."
+      },
+      "raml": {
+        "description": "Liitä RAML 1.0- tai 0.8-dokumentti — Restorm heijastaa sen resurssipuun sisäkkäisiin kansioihin, yksi pyyntö per metodi, mallinnetut tyypit mukaan lukien.",
+        "trademark": "RAML on RAML Workgroupin ylläpitämä määrittely."
+      },
+      "wadl": {
+        "description": "Ylläpidätkö yhä WADL-dokumenttia? Liitä XML — Restorm käy läpi sen sisäkkäisen <resource>-puun ja tuottaa vastaavan kansion pyyntöjä, metodit ja parametrit mukaan lukien.",
+        "trademark": "Sun Microsystems toimitti WADL:n W3C:lle Member Submission -muodossa."
+      },
+      "thrift": {
+        "description": "Liitä Apache Thrift IDL -tiedosto (.thrift) — Restorm lukee jokaisen palvelun, metodin, structin ja enumin, jotta voit selata API:n rakennetta. Thriftin binaarista siirtoprotokollaa ei voi vielä suorittaa Restormista, joten tämä tuonti on vain dokumentaatiota varten.",
+        "trademark": "Apache Thrift on Apache Software Foundationin tavaramerkki."
+      },
+      "apiBlueprint": {
+        "description": "Liitä API Blueprint -dokumentti (.apib) — Restorm jäsentää jokaisen resurssiryhmän ja siirtymän pyyntökansioksi, yksi per dokumentoitu metodi-/vastauspari.",
+        "trademark": "API Blueprint on alun perin Apiaryn luoma määrittely."
       }
     },
     "grpcReflection": {

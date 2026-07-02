@@ -1041,6 +1041,41 @@
       "paw": {
         "description": "从 Paw 迁移过来？拖入您的 JSON 导出文件（应用内 File → Export → JSON——不会直接读取原生 .paw 包）。restorm 会重建每个请求、请求头、正文和环境，并将 Paw 的动态值（时间戳、随机字符串、UUID）映射到最接近的 restorm 等效项。",
         "trademark": "Paw 是 RapidAPI, Inc. 的注册商标，此处仅用于兼容性参考。"
+      },
+      "har": {
+        "description": "从浏览器的 devtools 中捕获了网络跟踪？拖入导出的 .har 文件——restorm 会遍历每个记录的调用，将其转化为可重放的请求，包含请求头和正文。"
+      },
+      "restClient": {
+        "description": "从 VS Code 的 REST Client 扩展迁移过来？粘贴或拖入 .http / .rest 文件——restorm 会解析每个请求块，解析 @variables，并将其重建为 restorm 树。",
+        "trademark": "REST Client 是其各自所有者的商标，此处仅用于兼容性参考。"
+      },
+      "httpie": {
+        "description": "拖入 HTTPie Desktop 的集合导出文件或 CLI 会话文件——restorm 会读取每个请求（对于会话，还包括其持久化的请求头），并将它们重建为可直接运行的状态。",
+        "trademark": "HTTPie 是其各自所有者的商标，此处仅用于兼容性参考。"
+      },
+      "smithy": {
+        "description": "粘贴一个 Smithy 模型——JSON AST 或手写的 IDL——restorm 会遍历每个 service、resource 和 operation，生成对应的、可直接运行的请求文件夹。",
+        "trademark": "Smithy 是 Amazon Web Services 的项目。"
+      },
+      "typespec": {
+        "description": "粘贴您的 TypeSpec（.tsp）定义——restorm 会在后台将其编译为 OpenAPI，并像导入手写规范一样导入它：包含操作、参数和 schema。",
+        "trademark": "TypeSpec 是 Microsoft 的项目。"
+      },
+      "raml": {
+        "description": "粘贴一个 RAML 1.0 或 0.8 文档——restorm 会将其资源树映射为嵌套文件夹，每个方法对应一个请求，并包含建模的类型。",
+        "trademark": "RAML 是由 RAML Workgroup 维护的规范。"
+      },
+      "wadl": {
+        "description": "仍在维护 WADL 文档？粘贴 XML——restorm 会遍历其嵌套的 <resource> 树，生成对应的请求文件夹，包含方法和参数。",
+        "trademark": "WADL 由 Sun Microsystems 作为 Member Submission 提交给 W3C。"
+      },
+      "thrift": {
+        "description": "粘贴一个 Apache Thrift IDL（.thrift）文件——restorm 会读取每个 service、method、struct 和 enum，方便您浏览该 API 的结构。Thrift 的二进制线协议目前还无法从 restorm 执行，因此此导入仅用于文档浏览。",
+        "trademark": "Apache Thrift 是 Apache Software Foundation 的商标。"
+      },
+      "apiBlueprint": {
+        "description": "粘贴一个 API Blueprint（.apib）文档——restorm 会将每个资源组和 transition 解析为请求文件夹，每个已记录的方法/响应对生成一个请求。",
+        "trademark": "API Blueprint 最初是由 Apiary 创建的规范。"
       }
     },
     "grpcReflection": {

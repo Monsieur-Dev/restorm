@@ -1042,6 +1042,41 @@
       "paw": {
         "description": "Kommer du fra Paw? Slip din JSON-eksport (File → Export → JSON i appen — den native .paw-pakke læses ikke direkte). Restorm genopbygger hver anmodning, header, body og miljø, og mapper Paws dynamiske værdier (tidsstempler, tilfældige strenge, UUID'er) til deres nærmeste Restorm-modstykke.",
         "trademark": "Paw er et registreret varemærke tilhørende RapidAPI, Inc., anvendt her udelukkende som kompatibilitetsreference."
+      },
+      "har": {
+        "description": "Har du fanget en netværkssporing fra din browsers devtools? Slip den eksporterede .har-fil — Restorm gennemgår hvert registreret kald og gør det til en gentagelig anmodning, headers og body inkluderet."
+      },
+      "restClient": {
+        "description": "Kommer du fra REST Client-udvidelsen til VS Code? Indsæt eller slip .http-/.rest-filen — Restorm parser hver anmodningsblok, løser @variables og genopbygger dem som et Restorm-træ.",
+        "trademark": "REST Client er et varemærke tilhørende den respektive ejer, anvendt her udelukkende som kompatibilitetsreference."
+      },
+      "httpie": {
+        "description": "Slip en HTTPie Desktop-samlingseksport eller en CLI-sessionsfil — Restorm læser hver anmodning (og for en session dens vedvarende headers) og genopbygger dem klar til brug.",
+        "trademark": "HTTPie er et varemærke tilhørende den respektive ejer, anvendt her udelukkende som kompatibilitetsreference."
+      },
+      "smithy": {
+        "description": "Indsæt en Smithy-model — JSON-AST'en eller den håndskrevne IDL — og Restorm gennemgår hver service, ressource og operation for at danne en tilsvarende mappe med brugsklare anmodninger.",
+        "trademark": "Smithy er et projekt fra Amazon Web Services."
+      },
+      "typespec": {
+        "description": "Indsæt din TypeSpec-definition (.tsp) — Restorm kompilerer den til OpenAPI bag kulisserne og importerer den præcis som en håndskrevet spec: operationer, parametre og skemaer inkluderet.",
+        "trademark": "TypeSpec er et projekt fra Microsoft."
+      },
+      "raml": {
+        "description": "Indsæt et RAML 1.0- eller 0.8-dokument — Restorm spejler dets ressourcetræ i indlejrede mapper, én anmodning pr. metode, med de modellerede typer inkluderet.",
+        "trademark": "RAML er en specifikation vedligeholdt af RAML Workgroup."
+      },
+      "wadl": {
+        "description": "Vedligeholder du stadig et WADL-dokument? Indsæt XML'en — Restorm gennemgår dets indlejrede <resource>-træ og danner en tilsvarende mappe med anmodninger, metoder og parametre inkluderet.",
+        "trademark": "WADL blev indsendt til W3C af Sun Microsystems som en Member Submission."
+      },
+      "thrift": {
+        "description": "Indsæt en Apache Thrift IDL-fil (.thrift) — Restorm læser hver service, metode, struct og enum, så du kan udforske API'ets form. Thrifts binære wire-protokol kan endnu ikke køres fra Restorm, så denne import er kun dokumenterende.",
+        "trademark": "Apache Thrift er et varemærke tilhørende Apache Software Foundation."
+      },
+      "apiBlueprint": {
+        "description": "Indsæt et API Blueprint-dokument (.apib) — Restorm parser hver ressourcegruppe og overgang til en mappe med anmodninger, én pr. dokumenteret metode-/svarpar.",
+        "trademark": "API Blueprint er en specifikation, der oprindeligt blev skabt af Apiary."
       }
     },
     "grpcReflection": {

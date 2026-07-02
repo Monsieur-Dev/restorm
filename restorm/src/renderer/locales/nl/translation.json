@@ -1042,6 +1042,41 @@
       "paw": {
         "description": "Komt u van Paw? Sleep uw JSON-export erin (File → Export → JSON in de app — de native .paw-bundel wordt niet direct gelezen). Restorm herbouwt elk verzoek, elke header, body en omgeving, en koppelt Paws dynamische waarden (tijdstempels, willekeurige strings, UUID's) aan hun dichtstbijzijnde Restorm-equivalent.",
         "trademark": "Paw is een gedeponeerd handelsmerk van RapidAPI, Inc., hier alleen ter referentie voor compatibiliteit gebruikt."
+      },
+      "har": {
+        "description": "Heeft u een netwerktrace vastgelegd via de devtools van uw browser? Sleep het geëxporteerde .har-bestand erin — Restorm loopt elke geregistreerde aanroep na en zet die om in een herhaalbaar verzoek, headers en body inbegrepen."
+      },
+      "restClient": {
+        "description": "Komt u van de REST Client-extensie voor VS Code? Plak of sleep het .http-/.rest-bestand — Restorm parseert elk verzoekblok, lost de @variables op en bouwt ze weer op als een Restorm-boom.",
+        "trademark": "REST Client is een handelsmerk van de betreffende eigenaar, hier alleen ter referentie voor compatibiliteit gebruikt."
+      },
+      "httpie": {
+        "description": "Sleep een HTTPie Desktop-collectie-export of een CLI-sessiebestand erin — Restorm leest elk verzoek (en, bij een sessie, de blijvende headers ervan) en bouwt ze gebruiksklaar weer op.",
+        "trademark": "HTTPie is een handelsmerk van de betreffende eigenaar, hier alleen ter referentie voor compatibiliteit gebruikt."
+      },
+      "smithy": {
+        "description": "Plak een Smithy-model — de JSON-AST of de handgeschreven IDL — en Restorm loopt elke service, resource en operatie na om er een map met gebruiksklare verzoeken van te maken.",
+        "trademark": "Smithy is een project van Amazon Web Services."
+      },
+      "typespec": {
+        "description": "Plak uw TypeSpec-definitie (.tsp) — Restorm compileert die achter de schermen naar OpenAPI en importeert ze precies zoals een handgeschreven spec: operaties, parameters en schema's inbegrepen.",
+        "trademark": "TypeSpec is een project van Microsoft."
+      },
+      "raml": {
+        "description": "Plak een RAML 1.0- of 0.8-document — Restorm zet de resourceboom om in geneste mappen, één verzoek per methode, met de gemodelleerde types erbij.",
+        "trademark": "RAML is een specificatie die wordt onderhouden door de RAML Workgroup."
+      },
+      "wadl": {
+        "description": "Onderhoudt u nog een WADL-document? Plak de XML — Restorm loopt de geneste <resource>-boom na en maakt er een overeenkomstige map met verzoeken van, methoden en parameters inbegrepen.",
+        "trademark": "WADL is door Sun Microsystems als Member Submission ingediend bij het W3C."
+      },
+      "thrift": {
+        "description": "Plak een Apache Thrift IDL-bestand (.thrift) — Restorm leest elke service, methode, struct en enum, zodat u de vorm van de API kunt verkennen. Het binaire wire-protocol van Thrift is nog niet uitvoerbaar vanuit Restorm, dus deze import is alleen documentair.",
+        "trademark": "Apache Thrift is een handelsmerk van de Apache Software Foundation."
+      },
+      "apiBlueprint": {
+        "description": "Plak een API Blueprint-document (.apib) — Restorm parseert elke resourcegroep en overgang tot een map met verzoeken, één per gedocumenteerd methode-/antwoordpaar.",
+        "trademark": "API Blueprint is een specificatie die oorspronkelijk door Apiary is gemaakt."
       }
     },
     "grpcReflection": {

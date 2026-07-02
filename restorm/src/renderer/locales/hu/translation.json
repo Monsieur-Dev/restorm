@@ -1042,6 +1042,41 @@
       "paw": {
         "description": "Pawról érkezik? Dobja be a JSON exportját (File → Export → JSON az alkalmazásban — a natív .paw csomagot nem olvassuk közvetlenül). A Restorm újraépít minden kérést, fejlécet, törzset és környezetet, és a Paw dinamikus értékeit (időbélyegek, véletlen karakterláncok, UUID-k) a legközelebbi Restorm megfelelőjükre képezi le.",
         "trademark": "A Paw a RapidAPI, Inc. bejegyzett védjegye, itt kizárólag kompatibilitási hivatkozásként használva."
+      },
+      "har": {
+        "description": "Rögzített egy hálózati nyomkövetést a böngészője fejlesztői eszközeiből? Dobja be az exportált .har fájlt — a Restorm végigmegy minden rögzített híváson, és lejátszható kéréssé alakítja, fejlécekkel és törzzsel együtt."
+      },
+      "restClient": {
+        "description": "A VS Code REST Client bővítményéből érkezik? Illessze be vagy dobja be a .http / .rest fájlt — a Restorm elemzi az összes kérésblokkot, feloldja a @variables-eket, és Restorm-fává építi újra őket.",
+        "trademark": "A REST Client a megfelelő tulajdonos védjegye, itt kizárólag kompatibilitási hivatkozásként használva."
+      },
+      "httpie": {
+        "description": "Dobja be a HTTPie Desktop gyűjteményexportját vagy egy CLI-munkamenet fájlt — a Restorm beolvassa az összes kérést (munkamenet esetén annak tartós fejléceit is), és használatra készen újraépíti őket.",
+        "trademark": "A HTTPie a megfelelő tulajdonos védjegye, itt kizárólag kompatibilitási hivatkozásként használva."
+      },
+      "smithy": {
+        "description": "Illesszen be egy Smithy modellt — a JSON AST-ot vagy a kézzel írt IDL-t —, és a Restorm végigmegy minden szolgáltatáson, erőforráson és műveleten, hogy egy megfelelő mappát hozzon létre használatra kész kérésekből.",
+        "trademark": "A Smithy az Amazon Web Services projektje."
+      },
+      "typespec": {
+        "description": "Illessze be a TypeSpec definícióját (.tsp) — a Restorm a háttérben OpenAPI-vá fordítja, és pontosan úgy importálja, mint egy kézzel írt specifikációt: műveletek, paraméterek és sémák beleértve.",
+        "trademark": "A TypeSpec a Microsoft projektje."
+      },
+      "raml": {
+        "description": "Illesszen be egy RAML 1.0 vagy 0.8 dokumentumot — a Restorm leképezi az erőforrásfáját egymásba ágyazott mappákba, metódusonként egy kéréssel, a modellezett típusokkal együtt.",
+        "trademark": "A RAML a RAML Workgroup által karbantartott specifikáció."
+      },
+      "wadl": {
+        "description": "Még mindig karbantart egy WADL dokumentumot? Illessze be az XML-t — a Restorm végigmegy az egymásba ágyazott <resource> fáján, és létrehoz egy megfelelő mappát kérésekből, metódusokkal és paraméterekkel együtt.",
+        "trademark": "A WADL-t a Sun Microsystems nyújtotta be a W3C-nek Member Submission-ként."
+      },
+      "thrift": {
+        "description": "Illesszen be egy Apache Thrift IDL (.thrift) fájlt — a Restorm beolvas minden szolgáltatást, metódust, structot és enumot, hogy böngészhesse az API felépítését. A Thrift bináris protokollja még nem futtatható a Restormból, ezért ez az importálás csak dokumentációs célú.",
+        "trademark": "Az Apache Thrift az Apache Software Foundation védjegye."
+      },
+      "apiBlueprint": {
+        "description": "Illesszen be egy API Blueprint (.apib) dokumentumot — a Restorm minden erőforráscsoportot és átmenetet egy kérésmappává elemez, dokumentált metódus-/válaszpáronként eggyel.",
+        "trademark": "Az API Blueprint egy eredetileg az Apiary által létrehozott specifikáció."
       }
     },
     "grpcReflection": {

@@ -238,7 +238,7 @@ const IMPORT_FORMATS: readonly ImportFormat[] = [
     inlineSvg: postmanSvgRaw,
     descriptionKey: 'import.formats.postman.description',
     trademarkKey: 'import.formats.postman.trademark',
-    isPro: true
+    isPro: false
   },
   {
     id: 'insomnia',
@@ -247,7 +247,7 @@ const IMPORT_FORMATS: readonly ImportFormat[] = [
     inlineSvg: insomniaSvgRaw,
     descriptionKey: 'import.formats.insomnia.description',
     trademarkKey: 'import.formats.insomnia.trademark',
-    isPro: true
+    isPro: false
   },
   {
     id: 'bruno',
@@ -256,7 +256,7 @@ const IMPORT_FORMATS: readonly ImportFormat[] = [
     inlineSvg: brunoSvgRaw,
     descriptionKey: 'import.formats.bruno.description',
     trademarkKey: 'import.formats.bruno.trademark',
-    isPro: true
+    isPro: false
   },
   {
     id: 'thunderclient',
@@ -265,7 +265,7 @@ const IMPORT_FORMATS: readonly ImportFormat[] = [
     iconCodicon: 'zap',
     descriptionKey: 'import.formats.thunderclient.description',
     trademarkKey: 'import.formats.thunderclient.trademark',
-    isPro: true
+    isPro: false
   },
   {
     id: 'graphql',
@@ -273,7 +273,7 @@ const IMPORT_FORMATS: readonly ImportFormat[] = [
     logoSrc: new URL('../../../../../assets/imgs/import-sources/graphql.svg', import.meta.url).href,
     descriptionKey: 'import.formats.graphql.description',
     trademarkKey: 'import.formats.graphql.trademark',
-    isPro: true
+    isPro: false
   },
   {
     id: 'grpc',
@@ -281,7 +281,7 @@ const IMPORT_FORMATS: readonly ImportFormat[] = [
     logoSrc: new URL('../../../../../assets/imgs/import-sources/grpc.svg', import.meta.url).href,
     descriptionKey: 'import.formats.grpc.description',
     trademarkKey: 'import.formats.grpc.trademark',
-    isPro: true
+    isPro: false
   },
   {
     id: 'grpc-reflection',
@@ -291,7 +291,7 @@ const IMPORT_FORMATS: readonly ImportFormat[] = [
     trademarkKey: 'import.formats.grpc.trademark',
     actionId: 'grpc-reflection',
     actionLabelKey: 'import.formats.grpcReflection.action',
-    isPro: true
+    isPro: false
   },
   {
     id: 'soap',
@@ -299,7 +299,7 @@ const IMPORT_FORMATS: readonly ImportFormat[] = [
     logoSrc: null,
     inlineSvg: soapSvgRaw,
     descriptionKey: 'import.formats.soap.description',
-    isPro: true
+    isPro: false
   },
   {
     id: 'websocket',
@@ -308,7 +308,7 @@ const IMPORT_FORMATS: readonly ImportFormat[] = [
     inlineSvg: websocketSvgRaw,
     descriptionKey: 'import.formats.websocket.description',
     trademarkKey: 'import.formats.websocket.trademark',
-    isPro: true
+    isPro: false
   },
   {
     id: 'kafka',
@@ -317,7 +317,7 @@ const IMPORT_FORMATS: readonly ImportFormat[] = [
     inlineSvg: kafkaSvgRaw,
     descriptionKey: 'import.formats.kafka.description',
     trademarkKey: 'import.formats.kafka.trademark',
-    isPro: true
+    isPro: false
   },
   {
     id: 'socketio',
@@ -326,14 +326,14 @@ const IMPORT_FORMATS: readonly ImportFormat[] = [
     inlineSvg: socketioSvgRaw,
     descriptionKey: 'import.formats.socketio.description',
     trademarkKey: 'import.formats.socketio.trademark',
-    isPro: true
+    isPro: false
   },
   {
     id: 'odata',
     title: 'OData',
     logoSrc: new URL('../../../../../assets/imgs/import-sources/odata.svg', import.meta.url).href,
     descriptionKey: 'import.formats.odata.description',
-    isPro: true
+    isPro: false
   },
   {
     id: 'mqtt',
@@ -341,7 +341,7 @@ const IMPORT_FORMATS: readonly ImportFormat[] = [
     logoSrc: new URL('../../../../../assets/imgs/import-sources/mqtt.svg', import.meta.url).href,
     descriptionKey: 'import.formats.mqtt.description',
     trademarkKey: 'import.formats.mqtt.trademark',
-    isPro: true
+    isPro: false
   },
   {
     // No first-party Paw logo asset is shipped yet — a generic codicon
@@ -353,6 +353,90 @@ const IMPORT_FORMATS: readonly ImportFormat[] = [
     iconCodicon: 'package',
     descriptionKey: 'import.formats.paw.description',
     trademarkKey: 'import.formats.paw.trademark',
+    isPro: false
+  },
+  // The next nine formats (HAR through API Blueprint) all lack a
+  // first-party logo asset — same situation as Paw above — so they use
+  // a codicon glyph picked for a loose visual match to what the format
+  // represents until a real SVG pass replaces them.
+  {
+    id: 'har',
+    title: 'HAR',
+    logoSrc: null,
+    iconCodicon: 'browser',
+    descriptionKey: 'import.formats.har.description',
+    isPro: false
+  },
+  {
+    id: 'rest-client',
+    title: 'REST Client',
+    logoSrc: null,
+    iconCodicon: 'extensions',
+    descriptionKey: 'import.formats.restClient.description',
+    trademarkKey: 'import.formats.restClient.trademark',
+    isPro: false
+  },
+  {
+    id: 'httpie',
+    title: 'HTTPie',
+    logoSrc: null,
+    iconCodicon: 'send',
+    descriptionKey: 'import.formats.httpie.description',
+    trademarkKey: 'import.formats.httpie.trademark',
+    isPro: false
+  },
+  {
+    id: 'smithy',
+    title: 'Smithy',
+    logoSrc: null,
+    iconCodicon: 'symbol-namespace',
+    descriptionKey: 'import.formats.smithy.description',
+    trademarkKey: 'import.formats.smithy.trademark',
+    isPro: false
+  },
+  {
+    id: 'typespec',
+    title: 'TypeSpec',
+    logoSrc: null,
+    iconCodicon: 'symbol-interface',
+    descriptionKey: 'import.formats.typespec.description',
+    trademarkKey: 'import.formats.typespec.trademark',
+    isPro: false
+  },
+  {
+    id: 'raml',
+    title: 'RAML',
+    logoSrc: null,
+    iconCodicon: 'list-tree',
+    descriptionKey: 'import.formats.raml.description',
+    trademarkKey: 'import.formats.raml.trademark',
+    isPro: false
+  },
+  {
+    id: 'wadl',
+    title: 'WADL',
+    logoSrc: null,
+    iconCodicon: 'file-code',
+    descriptionKey: 'import.formats.wadl.description',
+    trademarkKey: 'import.formats.wadl.trademark',
+    isPro: false
+  },
+  {
+    id: 'thrift',
+    title: 'Thrift',
+    logoSrc: null,
+    iconCodicon: 'type-hierarchy',
+    descriptionKey: 'import.formats.thrift.description',
+    trademarkKey: 'import.formats.thrift.trademark',
+    isPro: false
+  },
+  {
+    id: 'api-blueprint',
+    title: 'API Blueprint',
+    logoSrc: null,
+    iconCodicon: 'markdown',
+    descriptionKey: 'import.formats.apiBlueprint.description',
+    trademarkKey: 'import.formats.apiBlueprint.trademark',
     isPro: false
   }
 ]

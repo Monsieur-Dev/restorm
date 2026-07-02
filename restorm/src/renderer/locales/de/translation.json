@@ -1042,6 +1042,41 @@
       "paw": {
         "description": "Kommen Sie von Paw? Werfen Sie Ihren JSON-Export hinein (File → Export → JSON in der App — das native .paw-Bundle wird nicht direkt gelesen). Restorm baut jede Anfrage, jeden Header, jeden Body und jede Umgebung wieder auf und ordnet Paws dynamische Werte (Zeitstempel, Zufallszeichenfolgen, UUIDs) dem nächstliegenden Restorm-Äquivalent zu.",
         "trademark": "Paw ist eine eingetragene Marke von RapidAPI, Inc., hier nur als Kompatibilitätsreferenz verwendet."
+      },
+      "har": {
+        "description": "Haben Sie einen Netzwerk-Trace aus den DevTools Ihres Browsers aufgezeichnet? Werfen Sie die exportierte .har-Datei hinein — Restorm durchläuft jeden aufgezeichneten Aufruf und verwandelt ihn in eine wiederholbare Anfrage, Header und Body inklusive."
+      },
+      "restClient": {
+        "description": "Kommen Sie von der REST-Client-Erweiterung für VS Code? Fügen Sie die .http-/.rest-Datei ein oder werfen Sie sie hinein — Restorm parst jeden Anfrageblock, löst die @variables auf und baut sie als Restorm-Baum wieder auf.",
+        "trademark": "REST Client ist eine Marke ihres jeweiligen Inhabers, hier nur als Kompatibilitätsreferenz verwendet."
+      },
+      "httpie": {
+        "description": "Werfen Sie einen HTTPie-Desktop-Sammlungsexport oder eine CLI-Sitzungsdatei hinein — Restorm liest jede Anfrage (und bei einer Sitzung deren dauerhafte Header) und baut sie einsatzbereit wieder auf.",
+        "trademark": "HTTPie ist eine Marke ihres jeweiligen Inhabers, hier nur als Kompatibilitätsreferenz verwendet."
+      },
+      "smithy": {
+        "description": "Fügen Sie ein Smithy-Modell ein — den JSON-AST oder die handgeschriebene IDL — und Restorm durchläuft jeden Service, jede Ressource und jede Operation und erstellt daraus einen passenden Ordner einsatzbereiter Anfragen.",
+        "trademark": "Smithy ist ein Projekt von Amazon Web Services."
+      },
+      "typespec": {
+        "description": "Fügen Sie Ihre TypeSpec-Definition (.tsp) ein — Restorm kompiliert sie im Hintergrund zu OpenAPI und importiert sie genau wie eine handgeschriebene Spezifikation: Operationen, Parameter und Schemata inklusive.",
+        "trademark": "TypeSpec ist ein Projekt von Microsoft."
+      },
+      "raml": {
+        "description": "Fügen Sie ein RAML-1.0- oder -0.8-Dokument ein — Restorm bildet dessen Ressourcenbaum in verschachtelten Ordnern ab, eine Anfrage pro Methode, samt der modellierten Typen.",
+        "trademark": "RAML ist eine Spezifikation, die von der RAML Workgroup gepflegt wird."
+      },
+      "wadl": {
+        "description": "Pflegen Sie noch ein WADL-Dokument? Fügen Sie das XML ein — Restorm durchläuft dessen verschachtelten <resource>-Baum und erstellt einen passenden Ordner von Anfragen, Methoden und Parameter inklusive.",
+        "trademark": "WADL wurde von Sun Microsystems als Member Submission beim W3C eingereicht."
+      },
+      "thrift": {
+        "description": "Fügen Sie eine Apache-Thrift-IDL-Datei (.thrift) ein — Restorm liest jeden Service, jede Methode, jedes Struct und jedes Enum, damit Sie die Struktur der API durchsuchen können. Das binäre Wire-Protokoll von Thrift ist von Restorm aus noch nicht ausführbar, dieser Import dient daher nur der Dokumentation.",
+        "trademark": "Apache Thrift ist eine Marke der Apache Software Foundation."
+      },
+      "apiBlueprint": {
+        "description": "Fügen Sie ein API-Blueprint-Dokument (.apib) ein — Restorm parst jede Ressourcengruppe und jeden Übergang zu einem Ordner von Anfragen, eine pro dokumentiertem Methoden-/Antwortpaar.",
+        "trademark": "API Blueprint ist eine Spezifikation, die ursprünglich von Apiary erstellt wurde."
       }
     },
     "grpcReflection": {

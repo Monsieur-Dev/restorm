@@ -1041,6 +1041,41 @@
       "paw": {
         "description": "Paw から移ってきましたか？JSON エクスポートを投入してください（アプリの File → Export → JSON。ネイティブの .paw バンドルは直接読み込みません）。restorm はすべてのリクエスト、ヘッダー、ボディ、環境を再構築し、Paw の動的な値（タイムスタンプ、ランダム文字列、UUID）を最も近い restorm の等価物にマッピングします。",
         "trademark": "Paw は RapidAPI, Inc. の登録商標で、ここでは互換性のための参照として使用しています。"
+      },
+      "har": {
+        "description": "ブラウザの devtools からネットワークトレースをキャプチャしましたか？エクスポートした .har ファイルを投入してください。restorm は記録されたすべての呼び出しをたどり、ヘッダーとボディを含む再生可能なリクエストに変換します。"
+      },
+      "restClient": {
+        "description": "VS Code の REST Client 拡張機能から移ってきましたか？.http / .rest ファイルを貼り付けるか投入してください。restorm はすべてのリクエストブロックを解析し、@variables を解決して、restorm のツリーとして再構築します。",
+        "trademark": "REST Client はそれぞれの権利者の商標であり、ここでは互換性のための参照として使用しています。"
+      },
+      "httpie": {
+        "description": "HTTPie Desktop のコレクションエクスポート、または CLI のセッションファイルを投入してください。restorm はすべてのリクエスト（セッションの場合はその永続的なヘッダーも）を読み取り、すぐに実行できる状態に再構築します。",
+        "trademark": "HTTPie はそれぞれの権利者の商標であり、ここでは互換性のための参照として使用しています。"
+      },
+      "smithy": {
+        "description": "Smithy モデル（JSON AST または手書きの IDL）を貼り付けてください。restorm はすべてのサービス、リソース、オペレーションをたどり、すぐに実行できるリクエストの対応するフォルダーを生成します。",
+        "trademark": "Smithy は Amazon Web Services のプロジェクトです。"
+      },
+      "typespec": {
+        "description": "TypeSpec 定義（.tsp）を貼り付けてください。restorm は内部でそれを OpenAPI にコンパイルし、手書きの仕様と全く同じようにインポートします（オペレーション、パラメーター、スキーマを含む）。",
+        "trademark": "TypeSpec は Microsoft のプロジェクトです。"
+      },
+      "raml": {
+        "description": "RAML 1.0 または 0.8 のドキュメントを貼り付けてください。restorm はそのリソースツリーをネストされたフォルダーに反映し、メソッドごとに1つのリクエストとして、モデル化された型も含めて再現します。",
+        "trademark": "RAML は RAML Workgroup が維持している仕様です。"
+      },
+      "wadl": {
+        "description": "まだ WADL ドキュメントを保守していますか？XML を貼り付けてください。restorm はネストされた <resource> ツリーをたどり、メソッドとパラメーターを含む対応するリクエストのフォルダーを生成します。",
+        "trademark": "WADL は Sun Microsystems によって Member Submission として W3C に提出されました。"
+      },
+      "thrift": {
+        "description": "Apache Thrift の IDL ファイル（.thrift）を貼り付けてください。restorm はすべてのサービス、メソッド、struct、enum を読み取り、API の構造を閲覧できるようにします。Thrift のバイナリワイヤープロトコルはまだ restorm から実行できないため、このインポートはドキュメント閲覧のみを目的としています。",
+        "trademark": "Apache Thrift は Apache Software Foundation の商標です。"
+      },
+      "apiBlueprint": {
+        "description": "API Blueprint ドキュメント（.apib）を貼り付けてください。restorm はすべてのリソースグループとトランジションを、ドキュメント化されたメソッド／レスポンスのペアごとに1つのリクエストフォルダーへと解析します。",
+        "trademark": "API Blueprint はもともと Apiary によって作成された仕様です。"
       }
     },
     "grpcReflection": {

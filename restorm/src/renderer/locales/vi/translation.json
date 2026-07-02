@@ -1041,6 +1041,41 @@
       "paw": {
         "description": "Đến từ Paw? Thả tệp xuất JSON của bạn (File → Export → JSON trong ứng dụng — gói .paw gốc không được đọc trực tiếp). Restorm dựng lại mọi yêu cầu, header, body và môi trường, đồng thời ánh xạ các giá trị động của Paw (dấu thời gian, chuỗi ngẫu nhiên, UUID) sang giá trị tương đương gần nhất trong Restorm.",
         "trademark": "Paw là nhãn hiệu đã đăng ký của RapidAPI, Inc., được sử dụng ở đây chỉ để tham chiếu tương thích."
+      },
+      "har": {
+        "description": "Bạn đã ghi lại một bản trace mạng từ devtools của trình duyệt? Thả tệp .har đã xuất ra — Restorm duyệt qua mọi lệnh gọi được ghi lại và biến nó thành một yêu cầu có thể phát lại, bao gồm cả header và body."
+      },
+      "restClient": {
+        "description": "Bạn đến từ tiện ích mở rộng REST Client của VS Code? Dán hoặc thả tệp .http / .rest — Restorm phân tích từng khối yêu cầu, giải quyết các @variables và dựng lại chúng thành một cây Restorm.",
+        "trademark": "REST Client là nhãn hiệu của chủ sở hữu tương ứng, được sử dụng ở đây chỉ để tham chiếu tương thích."
+      },
+      "httpie": {
+        "description": "Thả một tệp xuất bộ sưu tập HTTPie Desktop hoặc tệp phiên CLI — Restorm đọc từng yêu cầu (và với một phiên, các header liên tục của nó) và dựng lại chúng sẵn sàng để chạy.",
+        "trademark": "HTTPie là nhãn hiệu của chủ sở hữu tương ứng, được sử dụng ở đây chỉ để tham chiếu tương thích."
+      },
+      "smithy": {
+        "description": "Dán một mô hình Smithy — AST JSON hoặc IDL viết tay — và Restorm duyệt qua từng service, resource và operation để tạo ra một thư mục yêu cầu sẵn sàng chạy tương ứng.",
+        "trademark": "Smithy là một dự án của Amazon Web Services."
+      },
+      "typespec": {
+        "description": "Dán định nghĩa TypeSpec (.tsp) của bạn — Restorm biên dịch nó thành OpenAPI ở hậu trường và nhập nó chính xác như một spec viết tay: bao gồm operations, parameters và schemas.",
+        "trademark": "TypeSpec là một dự án của Microsoft."
+      },
+      "raml": {
+        "description": "Dán một tài liệu RAML 1.0 hoặc 0.8 — Restorm phản ánh cây resource của nó thành các thư mục lồng nhau, một yêu cầu cho mỗi phương thức, cùng với các kiểu đã được mô hình hóa.",
+        "trademark": "RAML là một đặc tả được duy trì bởi RAML Workgroup."
+      },
+      "wadl": {
+        "description": "Bạn vẫn đang duy trì một tài liệu WADL? Dán XML — Restorm duyệt qua cây <resource> lồng nhau của nó và tạo ra một thư mục yêu cầu tương ứng, bao gồm cả phương thức và tham số.",
+        "trademark": "WADL đã được Sun Microsystems trình lên W3C dưới dạng Member Submission."
+      },
+      "thrift": {
+        "description": "Dán một tệp IDL Apache Thrift (.thrift) — Restorm đọc từng service, method, struct và enum để bạn có thể duyệt qua cấu trúc của API. Giao thức nhị phân của Thrift chưa thể thực thi được từ Restorm, vì vậy việc nhập này chỉ mang tính tài liệu.",
+        "trademark": "Apache Thrift là nhãn hiệu của Apache Software Foundation."
+      },
+      "apiBlueprint": {
+        "description": "Dán một tài liệu API Blueprint (.apib) — Restorm phân tích từng resource group và transition thành một thư mục yêu cầu, một cho mỗi cặp phương thức/phản hồi đã được ghi tài liệu.",
+        "trademark": "API Blueprint là một đặc tả ban đầu được tạo ra bởi Apiary."
       }
     },
     "grpcReflection": {

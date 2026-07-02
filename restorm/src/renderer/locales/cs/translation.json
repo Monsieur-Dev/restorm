@@ -1044,6 +1044,41 @@
       "paw": {
         "description": "Přicházíte z Paw? Pusťte svůj JSON export (File → Export → JSON v aplikaci — nativní balíček .paw se nečte přímo). Restorm přenese každý požadavek, hlavičku, tělo i prostředí a namapuje dynamické hodnoty Paw (časová razítka, náhodné řetězce, UUID) na nejbližší ekvivalent v Restormu.",
         "trademark": "Paw je registrovaná ochranná známka společnosti RapidAPI, Inc., použitá zde pouze pro účely kompatibility."
+      },
+      "har": {
+        "description": "Zachytili jste síťovou stopu z devtools svého prohlížeče? Přetáhněte exportovaný soubor .har — Restorm projde každé zaznamenané volání a promění je v opakovatelný požadavek, včetně hlaviček a těla."
+      },
+      "restClient": {
+        "description": "Přicházíte z rozšíření REST Client pro VS Code? Vložte nebo přetáhněte soubor .http / .rest — Restorm rozebere každý blok požadavku, vyřeší @variables a znovu je sestaví jako strom Restormu.",
+        "trademark": "REST Client je ochranná známka příslušného vlastníka, použitá zde pouze jako odkaz na kompatibilitu."
+      },
+      "httpie": {
+        "description": "Přetáhněte export kolekce HTTPie Desktop nebo soubor relace CLI — Restorm načte každý požadavek (a u relace i její trvalé hlavičky) a znovu je sestaví připravené ke spuštění.",
+        "trademark": "HTTPie je ochranná známka příslušného vlastníka, použitá zde pouze jako odkaz na kompatibilitu."
+      },
+      "smithy": {
+        "description": "Vložte model Smithy — JSON AST nebo ručně psaný IDL — a Restorm projde každou službu, zdroj a operaci a vytvoří odpovídající složku požadavků připravených ke spuštění.",
+        "trademark": "Smithy je projekt Amazon Web Services."
+      },
+      "typespec": {
+        "description": "Vložte svou definici TypeSpec (.tsp) — Restorm ji na pozadí zkompiluje do OpenAPI a importuje přesně jako ručně psanou specifikaci: včetně operací, parametrů a schémat.",
+        "trademark": "TypeSpec je projekt společnosti Microsoft."
+      },
+      "raml": {
+        "description": "Vložte dokument RAML 1.0 nebo 0.8 — Restorm zrcadlí jeho strom zdrojů do vnořených složek, jeden požadavek na metodu, včetně modelovaných typů.",
+        "trademark": "RAML je specifikace udržovaná RAML Workgroup."
+      },
+      "wadl": {
+        "description": "Stále udržujete dokument WADL? Vložte XML — Restorm projde jeho vnořený strom <resource> a vytvoří odpovídající složku požadavků, včetně metod a parametrů.",
+        "trademark": "WADL byl předložen W3C společností Sun Microsystems jako Member Submission."
+      },
+      "thrift": {
+        "description": "Vložte soubor IDL Apache Thrift (.thrift) — Restorm načte každou službu, metodu, strukturu a výčet, abyste mohli procházet tvar API. Binární síťový protokol Thrift zatím z Restormu nelze spustit, takže tento import slouží pouze k dokumentaci.",
+        "trademark": "Apache Thrift je ochranná známka Apache Software Foundation."
+      },
+      "apiBlueprint": {
+        "description": "Vložte dokument API Blueprint (.apib) — Restorm rozebere každou skupinu zdrojů a přechod do složky požadavků, jeden na každou zdokumentovanou dvojici metoda/odpověď.",
+        "trademark": "API Blueprint je specifikace původně vytvořená společností Apiary."
       }
     },
     "grpcReflection": {

@@ -1042,6 +1042,41 @@
       "paw": {
         "description": "Coming from Paw? Drop your JSON export (File → Export → JSON in the app — the native .paw bundle isn't read directly). Restorm rebuilds every request, header, body, and environment, and maps Paw's dynamic values (timestamps, random strings, UUIDs) to their closest Restorm equivalent.",
         "trademark": "Paw is a registered trademark of RapidAPI, Inc., used here for compatibility reference only."
+      },
+      "har": {
+        "description": "Captured a network trace from your browser's devtools? Drop the exported .har file — Restorm walks every recorded call and turns it into a replayable request, headers and body included."
+      },
+      "restClient": {
+        "description": "Coming from the REST Client VS Code extension? Paste or drop the .http / .rest file — Restorm parses every request block, resolves the @variables, and rebuilds them as a Restorm tree.",
+        "trademark": "REST Client is a trademark of its respective owner, used here for compatibility reference only."
+      },
+      "httpie": {
+        "description": "Drop an HTTPie Desktop collection export or a CLI session file — Restorm reads every request (and, for a session, its persistent headers) and rebuilds them ready to run.",
+        "trademark": "HTTPie is a trademark of its respective owner, used here for compatibility reference only."
+      },
+      "smithy": {
+        "description": "Paste a Smithy model — the JSON AST or the human-authored IDL — and Restorm walks every service, resource, and operation into a matching folder of ready-to-run requests.",
+        "trademark": "Smithy is a project of Amazon Web Services."
+      },
+      "typespec": {
+        "description": "Paste your TypeSpec (.tsp) definition — Restorm compiles it to OpenAPI under the hood and imports it exactly like a hand-written spec: operations, parameters, and schemas included.",
+        "trademark": "TypeSpec is a project of Microsoft."
+      },
+      "raml": {
+        "description": "Paste a RAML 1.0 or 0.8 document — Restorm mirrors its resource tree into nested folders, one request per method, with the modeled types along for the ride.",
+        "trademark": "RAML is a specification maintained by the RAML Workgroup."
+      },
+      "wadl": {
+        "description": "Still maintaining a WADL document? Paste the XML — Restorm walks its nested <resource> tree into a matching folder of requests, methods and parameters included.",
+        "trademark": "WADL was submitted to the W3C by Sun Microsystems as a Member Submission."
+      },
+      "thrift": {
+        "description": "Paste an Apache Thrift IDL (.thrift) file — Restorm reads every service, method, struct, and enum so you can browse the API's shape. Thrift's binary wire protocol isn't executable from Restorm yet, so this import is documentation-only.",
+        "trademark": "Apache Thrift is a trademark of the Apache Software Foundation."
+      },
+      "apiBlueprint": {
+        "description": "Paste an API Blueprint (.apib) document — Restorm parses every resource group and transition into a folder of requests, one per documented method and response pair.",
+        "trademark": "API Blueprint is a specification originally created by Apiary."
       }
     },
     "grpcReflection": {

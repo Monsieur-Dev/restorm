@@ -1041,6 +1041,41 @@
       "paw": {
         "description": "Datang dari Paw? Lepaskan ekspor JSON Anda (File → Export → JSON di aplikasi — bundel .paw native tidak dibaca langsung). Restorm membangun kembali setiap permintaan, header, body, dan lingkungan, serta memetakan nilai dinamis Paw (stempel waktu, string acak, UUID) ke padanan Restorm yang paling mendekati.",
         "trademark": "Paw adalah merek dagang terdaftar dari RapidAPI, Inc., digunakan di sini hanya untuk referensi kompatibilitas."
+      },
+      "har": {
+        "description": "Menangkap network trace dari devtools browser Anda? Lepaskan file .har yang diekspor — Restorm menelusuri setiap panggilan yang tercatat dan mengubahnya menjadi permintaan yang dapat diputar ulang, termasuk header dan body."
+      },
+      "restClient": {
+        "description": "Datang dari ekstensi REST Client VS Code? Tempel atau lepaskan file .http / .rest — Restorm mengurai setiap blok permintaan, menyelesaikan @variables, dan membangunnya kembali sebagai pohon Restorm.",
+        "trademark": "REST Client adalah merek dagang dari pemiliknya masing-masing, digunakan di sini hanya untuk referensi kompatibilitas."
+      },
+      "httpie": {
+        "description": "Lepaskan ekspor koleksi HTTPie Desktop atau file sesi CLI — Restorm membaca setiap permintaan (dan, untuk sesi, header persistennya) dan membangunnya kembali siap dijalankan.",
+        "trademark": "HTTPie adalah merek dagang dari pemiliknya masing-masing, digunakan di sini hanya untuk referensi kompatibilitas."
+      },
+      "smithy": {
+        "description": "Tempel model Smithy — JSON AST atau IDL yang ditulis manual — dan Restorm menelusuri setiap service, resource, dan operation untuk menghasilkan folder permintaan siap jalan yang sesuai.",
+        "trademark": "Smithy adalah proyek dari Amazon Web Services."
+      },
+      "typespec": {
+        "description": "Tempel definisi TypeSpec (.tsp) Anda — Restorm mengompilasinya menjadi OpenAPI di belakang layar dan mengimpornya persis seperti spec yang ditulis manual: termasuk operations, parameters, dan schemas.",
+        "trademark": "TypeSpec adalah proyek dari Microsoft."
+      },
+      "raml": {
+        "description": "Tempel dokumen RAML 1.0 atau 0.8 — Restorm mencerminkan resource tree-nya ke dalam folder bersarang, satu permintaan per metode, lengkap dengan tipe yang dimodelkan.",
+        "trademark": "RAML adalah spesifikasi yang dikelola oleh RAML Workgroup."
+      },
+      "wadl": {
+        "description": "Masih memelihara dokumen WADL? Tempel XML-nya — Restorm menelusuri <resource> tree bersarangnya dan menghasilkan folder permintaan yang sesuai, lengkap dengan metode dan parameter.",
+        "trademark": "WADL diajukan ke W3C oleh Sun Microsystems sebagai Member Submission."
+      },
+      "thrift": {
+        "description": "Tempel file IDL Apache Thrift (.thrift) — Restorm membaca setiap service, method, struct, dan enum agar Anda dapat menjelajahi struktur API. Protokol biner Thrift belum bisa dieksekusi dari Restorm, sehingga impor ini hanya bersifat dokumentasi.",
+        "trademark": "Apache Thrift adalah merek dagang dari Apache Software Foundation."
+      },
+      "apiBlueprint": {
+        "description": "Tempel dokumen API Blueprint (.apib) — Restorm mengurai setiap resource group dan transition menjadi folder permintaan, satu untuk setiap pasangan metode/respons yang terdokumentasi.",
+        "trademark": "API Blueprint adalah spesifikasi yang awalnya dibuat oleh Apiary."
       }
     },
     "grpcReflection": {

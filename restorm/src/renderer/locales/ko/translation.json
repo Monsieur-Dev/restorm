@@ -1041,6 +1041,41 @@
       "paw": {
         "description": "Paw에서 넘어오셨나요? JSON으로 내보낸 파일을 가져다 놓으면 됩니다(앱의 File → Export → JSON — 네이티브 .paw 번들은 직접 읽지 않습니다). restorm은 모든 요청, 헤더, 본문, 환경을 다시 구성하고, Paw의 동적 값(타임스탬프, 임의 문자열, UUID)을 가장 가까운 restorm 대응 값으로 매핑합니다.",
         "trademark": "Paw는 RapidAPI, Inc.의 등록 상표이며, 여기서는 호환성 참조 목적으로만 사용됩니다."
+      },
+      "har": {
+        "description": "브라우저의 devtools에서 네트워크 트레이스를 캡처하셨나요? 내보낸 .har 파일을 가져다 놓으세요 — restorm이 기록된 모든 호출을 살펴보고 헤더와 본문을 포함한 재생 가능한 요청으로 변환합니다."
+      },
+      "restClient": {
+        "description": "VS Code의 REST Client 확장에서 넘어오셨나요? .http / .rest 파일을 붙여넣거나 가져다 놓으세요 — restorm이 모든 요청 블록을 파싱하고 @variables를 해석하여 restorm 트리로 다시 구성합니다.",
+        "trademark": "REST Client는 해당 소유자의 상표이며, 여기서는 호환성 참조 목적으로만 사용됩니다."
+      },
+      "httpie": {
+        "description": "HTTPie Desktop 컬렉션 내보내기 파일이나 CLI 세션 파일을 가져다 놓으세요 — restorm이 모든 요청(세션의 경우 지속적인 헤더 포함)을 읽어 바로 실행할 수 있게 다시 구성합니다.",
+        "trademark": "HTTPie는 해당 소유자의 상표이며, 여기서는 호환성 참조 목적으로만 사용됩니다."
+      },
+      "smithy": {
+        "description": "Smithy 모델(JSON AST 또는 직접 작성한 IDL)을 붙여넣으세요 — restorm이 모든 서비스, 리소스, 오퍼레이션을 살펴보고 바로 실행할 수 있는 요청으로 구성된 대응 폴더를 만듭니다.",
+        "trademark": "Smithy는 Amazon Web Services의 프로젝트입니다."
+      },
+      "typespec": {
+        "description": "TypeSpec 정의(.tsp)를 붙여넣으세요 — restorm이 내부적으로 이를 OpenAPI로 컴파일하여, 직접 작성한 스펙과 똑같이 오퍼레이션, 파라미터, 스키마를 포함해 가져옵니다.",
+        "trademark": "TypeSpec은 Microsoft의 프로젝트입니다."
+      },
+      "raml": {
+        "description": "RAML 1.0 또는 0.8 문서를 붙여넣으세요 — restorm이 리소스 트리를 중첩된 폴더로 반영하며, 메서드당 하나의 요청과 모델링된 타입을 함께 구성합니다.",
+        "trademark": "RAML은 RAML Workgroup이 관리하는 사양입니다."
+      },
+      "wadl": {
+        "description": "아직 WADL 문서를 유지하고 계신가요? XML을 붙여넣으세요 — restorm이 중첩된 <resource> 트리를 살펴보고 메서드와 파라미터를 포함한 대응 요청 폴더를 만듭니다.",
+        "trademark": "WADL은 Sun Microsystems가 Member Submission으로 W3C에 제출했습니다."
+      },
+      "thrift": {
+        "description": "Apache Thrift IDL(.thrift) 파일을 붙여넣으세요 — restorm이 모든 서비스, 메서드, struct, enum을 읽어 API의 구조를 살펴볼 수 있게 합니다. Thrift의 바이너리 와이어 프로토콜은 아직 restorm에서 실행할 수 없으므로, 이 가져오기는 문서화 용도로만 사용됩니다.",
+        "trademark": "Apache Thrift는 Apache Software Foundation의 상표입니다."
+      },
+      "apiBlueprint": {
+        "description": "API Blueprint(.apib) 문서를 붙여넣으세요 — restorm이 모든 리소스 그룹과 전환을 문서화된 메서드/응답 쌍마다 하나씩 요청 폴더로 분석합니다.",
+        "trademark": "API Blueprint는 원래 Apiary가 만든 사양입니다."
       }
     },
     "grpcReflection": {

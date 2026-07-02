@@ -1041,6 +1041,41 @@
       "paw": {
         "description": "從 Paw 過來？拖入您的 JSON 匯出檔（應用程式內 File → Export → JSON——不會直接讀取原生 .paw 包）。restorm 會重建每個請求、標頭、內文與環境，並將 Paw 的動態值（時間戳記、隨機字串、UUID）對應到最接近的 restorm 等效項。",
         "trademark": "Paw 為 RapidAPI, Inc. 的註冊商標，此處僅作為相容性參考使用。"
+      },
+      "har": {
+        "description": "從瀏覽器的 devtools 擷取了網路追蹤？拖入匯出的 .har 檔案——restorm 會遍歷每個記錄的呼叫，將其轉化為可重播的請求，包含標頭與內文。"
+      },
+      "restClient": {
+        "description": "從 VS Code 的 REST Client 擴充功能過來？貼上或拖入 .http / .rest 檔案——restorm 會解析每個請求區塊，解析 @variables，並將其重建為 restorm 樹。",
+        "trademark": "REST Client 為其各自擁有者的商標，此處僅作為相容性參考使用。"
+      },
+      "httpie": {
+        "description": "拖入 HTTPie Desktop 的集合匯出檔或 CLI 工作階段檔——restorm 會讀取每個請求（對於工作階段，還包括其持久化的標頭），並將它們重建為可直接執行的狀態。",
+        "trademark": "HTTPie 為其各自擁有者的商標，此處僅作為相容性參考使用。"
+      },
+      "smithy": {
+        "description": "貼上一個 Smithy 模型——JSON AST 或手寫的 IDL——restorm 會遍歷每個 service、resource 與 operation，產生對應且可直接執行的請求資料夾。",
+        "trademark": "Smithy 為 Amazon Web Services 的專案。"
+      },
+      "typespec": {
+        "description": "貼上您的 TypeSpec（.tsp）定義——restorm 會在背景將其編譯為 OpenAPI，並像匯入手寫規格一樣匯入它：包含操作、參數與 schema。",
+        "trademark": "TypeSpec 為 Microsoft 的專案。"
+      },
+      "raml": {
+        "description": "貼上一個 RAML 1.0 或 0.8 文件——restorm 會將其資源樹映射為巢狀資料夾，每個方法對應一個請求，並包含建模的型別。",
+        "trademark": "RAML 為 RAML Workgroup 維護的規範。"
+      },
+      "wadl": {
+        "description": "仍在維護 WADL 文件？貼上 XML——restorm 會遍歷其巢狀的 <resource> 樹，產生對應的請求資料夾，包含方法與參數。",
+        "trademark": "WADL 由 Sun Microsystems 以 Member Submission 的形式提交給 W3C。"
+      },
+      "thrift": {
+        "description": "貼上一個 Apache Thrift IDL（.thrift）檔案——restorm 會讀取每個 service、method、struct 與 enum，方便您瀏覽該 API 的結構。Thrift 的二進位線路協定目前尚無法從 restorm 執行，因此此匯入僅用於文件瀏覽。",
+        "trademark": "Apache Thrift 為 Apache Software Foundation 的商標。"
+      },
+      "apiBlueprint": {
+        "description": "貼上一個 API Blueprint（.apib）文件——restorm 會將每個資源群組與 transition 解析為請求資料夾，每個已記錄的方法/回應配對產生一個請求。",
+        "trademark": "API Blueprint 最初為 Apiary 所建立的規範。"
       }
     },
     "grpcReflection": {
