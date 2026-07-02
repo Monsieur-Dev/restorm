@@ -39,6 +39,7 @@ import {
   authPrefetchResultSchema,
   importPreviewResultSchema,
   importImportResultSchema,
+  importPostImportSeedResultSchema,
   grpcReflectImportResultSchema,
   grpcReflectQueryResultSchema,
   apiUpdateRefreshFetchResultSchema,
@@ -2162,6 +2163,22 @@ contextBridge.exposeInMainWorld('restorm', {
         format?: string
         error?: string
       }
+    },
+    /** Run the imported format's post-import side effect (e.g. HAR's
+     * response-history seeding) with the FINAL ids the tree landed with
+     * after the renderer's id-regeneration pass. Fire-and-forget from the
+     * caller's perspective — a failure here never blocks the visible
+     * import, it just means history wasn't seeded. */
+    postImportSeed: async (payload: {
+      source: string
+      format: string
+      idMap: Record<string, string>
+      extraHeaders?: Record<string, string>
+      expectedChecksum?: string
+    }): Promise<{ success: boolean; error?: string }> => {
+      const result: unknown = await ipcRenderer.invoke('import:postImportSeed', payload)
+      warnOnOutputMismatch('import:postImportSeed', importPostImportSeedResultSchema, result)
+      return result as { success: boolean; error?: string }
     }
   },
   apiUpdate: {

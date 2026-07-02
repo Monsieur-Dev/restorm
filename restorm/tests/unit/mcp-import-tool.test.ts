@@ -22,6 +22,7 @@ class FakeMcpService {
 
 const mockState = {
   importFrom: vi.fn(),
+  runPostImportSeed: vi.fn(),
   findById: vi.fn()
 }
 
@@ -36,12 +37,20 @@ vi.mock('electron', () => ({
 }))
 
 vi.mock('../../src/main/services/import/ImportManager', () => ({
-  importFrom: (url: string, opts: Record<string, unknown>) => mockState.importFrom(url, opts) as unknown
+  importFrom: (url: string, opts: Record<string, unknown>) => mockState.importFrom(url, opts) as unknown,
+  runPostImportSeed: (
+    source: string,
+    format: string,
+    idMap: Record<string, string> | undefined,
+    opts: Record<string, unknown>
+  ) => mockState.runPostImportSeed(source, format, idMap, opts) as unknown
 }))
 
 vi.mock('../../src/main/services/CollectionStore', () => ({
   collectionStore: {
-    findById: (id: string) => mockState.findById(id) as unknown
+    findById: (id: string) => mockState.findById(id) as unknown,
+    getCollections: () => [],
+    setCollections: () => undefined
   },
   pubsub: {
     publish: () => undefined
@@ -54,7 +63,8 @@ vi.mock('../../src/main/services/CollectionStore', () => ({
 vi.mock('electron-core-ui/main', () => ({
   eventBusService: {
     emit: () => Promise.resolve()
-  }
+  },
+  logger: { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn() }
 }))
 
 vi.mock('../../src/main/services/DocumentEvents', () => ({
@@ -79,6 +89,7 @@ describe('import_from_url tool', () => {
       success: true,
       items: []
     })
+    mockState.runPostImportSeed.mockResolvedValue({ success: true })
     mockState.findById.mockReturnValue(null)
   })
 
@@ -126,5 +137,62 @@ describe('import_from_url tool', () => {
 
     expect(result.isError).toBe(true)
     expect(result.content[0].text).toContain('HTTP 401')
+  })
+
+  describe('postImportSeed wiring', () => {
+    const envFolder = {
+      id: 'env-1',
+      name: 'Imported',
+      folderType: 'environment',
+      fileFormatVersion: 1,
+      tags: [],
+      configuration: {},
+      items: [],
+      environments: []
+    }
+
+    it('runs runPostImportSeed with the detected format, no id map (ids land unchanged), and extraHeaders/checksum forwarded', async () => {
+      registerImportTools(fakeService as unknown as Parameters<typeof registerImportTools>[0])
+      mockState.importFrom.mockResolvedValue({
+        success: true,
+        items: [envFolder],
+        format: 'har',
+        payloadChecksum: 'sha256:abc'
+      })
+
+      await fakeService.invoke('import_from_url', {
+        url: 'https://example.com/capture.har',
+        headers: { Authorization: 'Bearer secret-token' }
+      })
+
+      expect(mockState.runPostImportSeed).toHaveBeenCalledWith(
+        'https://example.com/capture.har',
+        'har',
+        undefined,
+        { extraHeaders: { Authorization: 'Bearer secret-token' }, expectedChecksum: 'sha256:abc' }
+      )
+    })
+
+    it('does not call runPostImportSeed when the import produced no items', async () => {
+      registerImportTools(fakeService as unknown as Parameters<typeof registerImportTools>[0])
+      mockState.importFrom.mockResolvedValue({ success: true, items: [], format: 'har' })
+
+      await fakeService.invoke('import_from_url', { url: 'https://example.com/capture.har' })
+
+      expect(mockState.runPostImportSeed).not.toHaveBeenCalled()
+    })
+
+    it('a seed failure is logged but never fails the tool reply — the tree already landed', async () => {
+      registerImportTools(fakeService as unknown as Parameters<typeof registerImportTools>[0])
+      mockState.importFrom.mockResolvedValue({ success: true, items: [envFolder], format: 'har' })
+      mockState.runPostImportSeed.mockResolvedValue({ success: false, error: 'source changed since import' })
+
+      const result = await fakeService.invoke('import_from_url', {
+        url: 'https://example.com/capture.har'
+      }) as { isError?: boolean; content: { text: string }[] }
+
+      expect(result.isError).toBeUndefined()
+      expect(result.content[0].text).toContain('"imported"')
+    })
   })
 })

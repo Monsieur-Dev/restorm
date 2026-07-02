@@ -367,6 +367,13 @@ declare global {
           format?: string
           error?: string
         }>
+        postImportSeed: (payload: {
+          source: string
+          format: string
+          idMap: Record<string, string>
+          extraHeaders?: Record<string, string>
+          expectedChecksum?: string
+        }) => Promise<{ success: boolean; error?: string }>
       }
       responsesHistory: {
         list: (requestId: string) => Promise<ResponseHistoryEntry[]>

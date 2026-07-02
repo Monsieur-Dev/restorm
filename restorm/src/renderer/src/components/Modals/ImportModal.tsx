@@ -28,6 +28,7 @@ import { GrpcReflectionImportModal } from './GrpcReflectionImportModal'
 import { ImportSelectionTree } from './ImportSelectionTree'
 import { allLeafKeys } from './importSelectionHelpers'
 import { filterImportTreeBySelection } from '../../../../shared/utils/importNaturalKey'
+import type { ImportMeta } from '../../hooks/useImport'
 import './ImportModal.css'
 
 /**
@@ -74,7 +75,14 @@ export interface RefreshContext {
 export interface ImportModalProps {
   isOpen: boolean
   onClose: () => void
-  onImport: (items: FolderItem[]) => void
+  /**
+   * `meta` is set for a fresh (non-refresh) import when the preview
+   * succeeded — it lets the host re-run the imported format's
+   * post-import seed step (see `useImport.ts`'s `ImportMeta`) once the
+   * tree lands with its final ids. Absent for imports with no tracked
+   * format (e.g. the gRPC reflection sub-modal).
+   */
+  onImport: (items: FolderItem[], meta?: ImportMeta) => void
   refreshContext?: RefreshContext
 }
 
@@ -137,6 +145,13 @@ export function ImportModal({
   // commit-import time so a later Refresh can confirm "no change
   // since this import" by comparing checksums.
   const [previewChecksum, setPreviewChecksum] = useState<string | undefined>(undefined)
+  // Format `import.preview` detected + the extraHeaders composed for that
+  // fetch, threaded to `onImport` at commit time so `useImport` can re-run
+  // the format's `postImportSeed` step (see `ImportManager.runPostImportSeed`)
+  // with the same source. Unset for the refresh-from-source bootstrap below
+  // (that path never calls `onImport`, it goes through `apiUpdate.apply`).
+  const [previewFormat, setPreviewFormat] = useState<string | undefined>(undefined)
+  const [previewExtraHeaders, setPreviewExtraHeaders] = useState<Record<string, string> | undefined>(undefined)
   /**
    * Set of leaf natural keys the user wants to import. Initialised
    * to the full leaf set whenever a fresh preview lands so the
@@ -256,6 +271,8 @@ export function ImportModal({
     if (!value.trim()) {
       logger.warn('[ImportModal] Clearing preview items - input is empty', { value })
       setPreviewItems([])
+      setPreviewFormat(undefined)
+      setPreviewExtraHeaders(undefined)
       setSelection(new Set())
       setSearchFilter('')
       setIsLoading(false)
@@ -293,15 +310,21 @@ export function ImportModal({
             logger.info('[import.preview] captured checksum', { hasChecksum: ck !== undefined, checksum: ck })
             setPreviewItems(result.items as FolderItem[])
             setPreviewChecksum(ck)
+            setPreviewFormat(result.format)
+            setPreviewExtraHeaders(composed ?? undefined)
             setError(null)
           } else {
             setPreviewItems([])
             setPreviewChecksum(undefined)
+            setPreviewFormat(undefined)
+            setPreviewExtraHeaders(undefined)
             setError(result?.error ?? t('import.error.unknown'))
           }
         } catch (err) {
           setPreviewItems([])
           setPreviewChecksum(undefined)
+          setPreviewFormat(undefined)
+          setPreviewExtraHeaders(undefined)
           setError(err instanceof Error ? err.message : String(err))
         } finally {
           setIsLoading(false)
@@ -589,11 +612,21 @@ export function ImportModal({
     // picker (and the per-import "new folder" creation that went with
     // it) is gone until the import-screen redesign defines a path
     // that's actually wired through the persistence layer.
-    onImport(finalItems)
+    // `previewFormat` is unset only when the preview never succeeded,
+    // in which case the Import button is disabled anyway (see the
+    // `disabled` prop below) — this branch runs only after a live preview.
+    onImport(finalItems, previewFormat !== undefined
+      ? {
+          source: sourceUrlAtImport,
+          format: previewFormat,
+          ...(previewExtraHeaders !== undefined ? { extraHeaders: previewExtraHeaders } : {}),
+          ...(previewChecksum !== undefined ? { expectedChecksum: previewChecksum } : {})
+        }
+      : undefined)
 
     // Close modal (useEffect will clear state when modal closes)
     onClose()
-  }, [previewItems, previewChecksum, selection, input, onImport, onClose, attachedAuth, manualHeaders, refreshContext])
+  }, [previewItems, previewChecksum, previewFormat, previewExtraHeaders, selection, input, onImport, onClose, attachedAuth, manualHeaders, refreshContext])
 
   // Refresh-from-source bootstrap. When `refreshContext` is provided
   // we pre-fill the URL display + the auth pill from the env folder's

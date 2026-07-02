@@ -539,6 +539,26 @@ export const importPreviewArgs = z.tuple([
 ])
 export const importImportArgs = z.tuple([z.string()])
 
+export const importPostImportSeedArgs = z.tuple([
+  z.object({
+    /** Same `source` string `import:preview` was called with (URL or file path). */
+    source: z.string(),
+    /** Format `import:preview` detected — selects which provider's
+     * `postImportSeed` (if any) to run. */
+    format: z.string(),
+    /** `parserId → finalId` map built while the renderer regenerated ids
+     * to avoid tree collisions. Identity-mapped by MCP-driven imports,
+     * which insert the parser's ids unchanged. */
+    idMap: z.record(z.string(), z.string()),
+    /** Optional extra headers re-sent on the re-fetch (resolved auth
+     * headers), mirroring `import:preview`'s `extraHeaders`. */
+    extraHeaders: z.record(z.string(), z.string()).optional(),
+    /** `payloadChecksum` from the original `import:preview` result — guards
+     * against the source having changed since, see `runPostImportSeed`. */
+    expectedChecksum: z.string().optional()
+  })
+])
+
 // ==========================================================================
 // API Update (per-folder on-demand spec re-import)
 // ==========================================================================
@@ -784,6 +804,11 @@ export const importPreviewResultSchema = z.object({
 
 export const importImportResultSchema = z.object({
   imported: z.number(),
+})
+
+export const importPostImportSeedResultSchema = z.object({
+  success: z.boolean(),
+  error: z.string().optional()
 })
 
 export const grpcReflectImportResultSchema = z.looseObject({ success: z.boolean() })

@@ -151,6 +151,84 @@ describe('useImport.handleImport — empty-file root requests', () => {
   })
 })
 
+describe('useImport.handleImport — postImportSeed', () => {
+  beforeEach(() => {
+    captured.length = 0
+  })
+
+  it('fires import:postImportSeed with the final idMap when meta is given', async () => {
+    const postImportSeed = vi.fn().mockResolvedValue({ success: true })
+    Object.defineProperty(window, 'restorm', {
+      configurable: true,
+      value: { import: { postImportSeed } }
+    })
+
+    const setRootItems = vi.fn()
+    const setExpandedIds = vi.fn()
+    const { result } = renderHook(() =>
+      useImport({
+        rootItems: [] as (EnvironmentFolder | Folder | Request)[],
+        setRootItems,
+        setExpandedIds
+      })
+    )
+
+    const request = makeRequest('parser-req-id', 'A request')
+
+    await act(async () => {
+      result.current.handleImport([request] as FolderItem[], {
+        source: '/tmp/fixture.har',
+        format: 'har',
+        extraHeaders: { Authorization: 'Bearer x' },
+        expectedChecksum: 'sha256:abc'
+      })
+      await Promise.resolve()
+    })
+
+    expect(postImportSeed).toHaveBeenCalledTimes(1)
+    const payload = postImportSeed.mock.calls[0]?.[0] as {
+      source: string
+      format: string
+      idMap: Record<string, string>
+      extraHeaders?: Record<string, string>
+      expectedChecksum?: string
+    }
+    expect(payload.source).toBe('/tmp/fixture.har')
+    expect(payload.format).toBe('har')
+    expect(payload.extraHeaders).toEqual({ Authorization: 'Bearer x' })
+    expect(payload.expectedChecksum).toBe('sha256:abc')
+    // The map's only key is the parser's original id; its value is
+    // whatever id the request actually landed with (regenerated).
+    expect(Object.keys(payload.idMap)).toEqual(['parser-req-id'])
+    expect(payload.idMap['parser-req-id']).not.toBe('parser-req-id')
+  })
+
+  it('does not fire import:postImportSeed when meta is omitted', async () => {
+    const postImportSeed = vi.fn().mockResolvedValue({ success: true })
+    Object.defineProperty(window, 'restorm', {
+      configurable: true,
+      value: { import: { postImportSeed } }
+    })
+
+    const setRootItems = vi.fn()
+    const setExpandedIds = vi.fn()
+    const { result } = renderHook(() =>
+      useImport({
+        rootItems: [] as (EnvironmentFolder | Folder | Request)[],
+        setRootItems,
+        setExpandedIds
+      })
+    )
+
+    await act(async () => {
+      result.current.handleImport([makeRequest('req-id', 'A request')] as FolderItem[])
+      await Promise.resolve()
+    })
+
+    expect(postImportSeed).not.toHaveBeenCalled()
+  })
+})
+
 describe('useImport.handleImport — authenticationRequestId remap', () => {
   beforeEach(() => {
     captured.length = 0

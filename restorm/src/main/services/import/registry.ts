@@ -48,6 +48,23 @@ export interface ImportProvider {
    * `TypeSpecImportService.ts`'s Trust model note for why.
    */
   parse(content: string, opts: { sourceUrl?: string; filePath?: string }): EnvironmentFolder
+
+  /**
+   * Optional post-import side effect, run AFTER the imported items have
+   * landed in the collection store with their real ids. `idMap` maps every
+   * id `parse()` originally stamped to the id the item actually got — omit
+   * it when a caller (e.g. the MCP import tool) inserts `parse()`'s output
+   * unchanged, pass one when a caller (e.g. the renderer's File → Import
+   * flow) regenerates ids with `crypto.randomUUID()` to avoid tree
+   * collisions. Formats that need to seed request-keyed side data (HAR's
+   * recorded responses → response history) implement this instead of
+   * reaching into `ResponseHistoryService` from `parse()`, which must stay
+   * a pure, synchronous function. Re-derives its own ids from `content`
+   * (same deterministic scheme `parse()` used) rather than walking the
+   * parsed tree, so it works whether the caller kept the original ids or
+   * remapped them.
+   */
+  postImportSeed?(content: string, idMap?: Record<string, string>): Promise<void>
 }
 
 /**

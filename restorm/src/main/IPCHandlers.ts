@@ -33,7 +33,7 @@ import { redisExecutionService, type RedisExecutionInput } from './services/Redi
 import { stompExecutionService, type StompExecutionInput } from './services/StompExecutionService'
 import { kafkaExecutionService } from './services/KafkaExecutionService'
 import { scenarioEngine } from './scenarioEngine/engine'
-import { importFrom } from './services/import/ImportManager'
+import { importFrom, runPostImportSeed } from './services/import/ImportManager'
 import { importGrpcFromReflection, findExistingGrpcReflectionFolder, reimportGrpcReflection } from './services/import/GrpcReflectionImportService'
 import { queryReflection, GrpcReflectionUnsupportedError } from './services/grpc/grpcReflectionClient'
 import {
@@ -72,7 +72,7 @@ import {
   responsesHistoryTogglePinArgs,
   requestUsageGetArgs,
   scenarioUsageGetArgs,
-  importPreviewArgs, importImportArgs,
+  importPreviewArgs, importImportArgs, importPostImportSeedArgs,
   miniBrowserCreateArgs, miniBrowserDestroyArgs, miniBrowserSetBoundsArgs,
   miniBrowserNavigateArgs, miniBrowserReloadArgs,
   miniBrowserGoBackArgs, miniBrowserGoForwardArgs, miniBrowserGetStateArgs,
@@ -1638,6 +1638,23 @@ export function registerRestormIPC(deps: {
         error: error instanceof Error ? error.message : String(error)
       }
     }
+  })
+
+  // Fired from `useImport.ts` right after the renderer commits the imported
+  // tree with its FINAL ids (ids the human File → Import flow regenerates
+  // to avoid collisions with the existing project). Lets a format's
+  // `ImportProvider.postImportSeed` (e.g. HAR's recorded responses →
+  // response history) run with ids that actually resolve in the collection
+  // store — see `registry.ts` for why this can't happen from `import:preview`
+  // or from inside `parse()` itself.
+  validatedHandle('import:postImportSeed', importPostImportSeedArgs, async (_event, [args]) => {
+    logger.info('[IPC] Import postImportSeed requested:', { source: args.source, format: args.format })
+    const result = await runPostImportSeed(args.source, args.format, args.idMap, {
+      ...(args.extraHeaders !== undefined ? { extraHeaders: args.extraHeaders } : {}),
+      ...(args.expectedChecksum !== undefined ? { expectedChecksum: args.expectedChecksum } : {})
+    })
+    logger.info('[IPC] Import postImportSeed result:', result)
+    return result
   })
 
   // ==========================================================================

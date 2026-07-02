@@ -25,8 +25,25 @@ export interface UseImportOptions {
   onImportComplete?: () => void
 }
 
+/**
+ * Threaded from `ImportModal`'s last successful `import:preview` call, so
+ * `handleImport` can fire the post-import seed IPC once the tree's final
+ * ids are known. Absent for import paths that don't carry a format (e.g.
+ * the gRPC reflection import, which isn't a registered `ImportProvider`) —
+ * `handleImport` just skips seeding in that case.
+ */
+export interface ImportMeta {
+  /** Same `source` string passed to `import:preview` (URL or file path). */
+  source: string
+  format: string
+  extraHeaders?: Record<string, string>
+  /** `payloadChecksum` from the preview result, see `runPostImportSeed`
+   * in `ImportManager.ts`. */
+  expectedChecksum?: string
+}
+
 export interface UseImportReturn {
-  handleImport: (items: FolderItem[]) => void
+  handleImport: (items: FolderItem[], meta?: ImportMeta) => void
   pendingEnvFolderIds: string[]
   clearPendingEnvFolderIds: () => void
 }
@@ -50,7 +67,7 @@ export function useImport(options: UseImportOptions): UseImportReturn {
   const clearPendingEnvFolderIds = useCallback(() => { setPendingEnvFolderIds([]) }, [])
 
   const handleImport = useCallback(
-    (items: FolderItem[]) => {
+    (items: FolderItem[], meta?: ImportMeta) => {
       logger.debug('[useImport] Importing items', {
         count: items.length,
         rootItemsCount: rootItems.length
@@ -228,6 +245,28 @@ export function useImport(options: UseImportOptions): UseImportReturn {
       const itemsWithNewIds = regenerated.map((item) => remapAuthRefs(item))
 
       logger.debug('[useImport] Items with new IDs', { count: itemsWithNewIds.length })
+
+      // Let the imported format run its post-import side effect (e.g.
+      // HAR's response-history seeding) now that every item has the id it
+      // will actually keep — `idMap` maps the parser's original id to the
+      // final one `regenerateIds` just stamped. Fire-and-forget: this is a
+      // best-effort enhancement (recorded responses show up in history),
+      // never a reason to hold up the visible import, and `meta` is absent
+      // for import paths with no registered `ImportProvider` (e.g. gRPC
+      // reflection) — nothing to seed there.
+      if (meta) {
+        void window.restorm?.import
+          .postImportSeed({
+            source: meta.source,
+            format: meta.format,
+            idMap: Object.fromEntries(idMap),
+            ...(meta.extraHeaders !== undefined ? { extraHeaders: meta.extraHeaders } : {}),
+            ...(meta.expectedChecksum !== undefined ? { expectedChecksum: meta.expectedChecksum } : {})
+          })
+          .catch((error: unknown) => {
+            logger.error('[useImport] postImportSeed failed', { error: error instanceof Error ? error.message : String(error) })
+          })
+      }
 
       // Expand every folder we just imported (and every sub-folder inside
       // them) so the user sees the full imported structure in the sidebar.

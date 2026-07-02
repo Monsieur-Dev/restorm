@@ -41,6 +41,11 @@ const thriftImportTestDir = defineBddConfig({
   steps: ['tests/e2e/bdd/thrift-import/steps/**/*.ts', 'tests/e2e/bdd/fixtures/thrift-import.fixture.ts'],
   outputDir: '.features-gen/thrift-import'
 })
+const harImportTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/har-import/features/**/*.feature',
+  steps: ['tests/e2e/bdd/har-import/steps/**/*.ts', 'tests/e2e/bdd/fixtures/har-import.fixture.ts'],
+  outputDir: '.features-gen/har-import'
+})
 
 const dirtyStateTestDir = defineBddConfig({
   features: 'tests/e2e/bdd/dirty-state/features/**/*.feature',
@@ -466,6 +471,10 @@ export default defineConfig({
     {
       name: 'thrift-import',
       testDir: thriftImportTestDir
+    },
+    {
+      name: 'har-import',
+      testDir: harImportTestDir
     },
     {
       name: 'dirty-state',

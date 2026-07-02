@@ -220,4 +220,31 @@ describe('seedResponseHistoryFromHar', () => {
     await seedResponseHistoryFromHar(har)
     expect(storeExecutionResult).not.toHaveBeenCalled()
   })
+
+  it('remaps every request id through idMap when one is given', async () => {
+    storeExecutionResult.mockClear()
+    const har = JSON.parse(fixture) as HarFile
+    const pairs = pairHarEntriesWithRequestIds(har)
+    const idMap: Record<string, string> = {}
+    for (const { requestId } of pairs) idMap[requestId] = `final-${requestId}`
+
+    await seedResponseHistoryFromHar(har, idMap)
+
+    expect(storeExecutionResult).toHaveBeenCalledTimes(pairs.length)
+    const getPair = expectPresent(pairs[0], 'pairs[0]')
+    expect(storeExecutionResult).toHaveBeenCalledWith(
+      `final-${getPair.requestId}`,
+      'http',
+      expect.objectContaining({ requestId: `final-${getPair.requestId}` })
+    )
+  })
+
+  it('skips entries whose parser id has no entry in idMap (dropped by the import selection picker)', async () => {
+    storeExecutionResult.mockClear()
+    const har = JSON.parse(fixture) as HarFile
+    // Empty map: every entry's parser id is "unmapped" — as if the user
+    // deselected every request before committing the import.
+    await seedResponseHistoryFromHar(har, {})
+    expect(storeExecutionResult).not.toHaveBeenCalled()
+  })
 })
