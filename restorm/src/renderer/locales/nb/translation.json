@@ -493,6 +493,12 @@
       "notListening": "Lytter ikke",
       "listenFailed": "gRPC-serveren kunne ikke startes",
       "snippetsUnavailable": "Kodesnutter er ikke tilgjengelige for en mockserver."
+    },
+    "reflection": {
+      "refresh": "Oppdater fra reflection",
+      "refreshFailed": "Oppdatering via gRPC-reflection mislyktes",
+      "unsupported": "Denne serveren støtter ikke gRPC-reflection — importer en .proto-fil i stedet.",
+      "unknownError": "Ukjent feil"
     }
   },
   "soap": {
@@ -886,6 +892,10 @@
         "description": "Slipp en .proto-fil (eller en mappe med dem), og Restorm går gjennom hver tjeneste, hver RPC, hver melding — hver metode blir en typet forespørsel du kan sende via gRPC-utføreren uten å røre codegen.",
         "trademark": "gRPC er et prosjekt i Cloud Native Computing Foundation."
       },
+      "grpcReflection": {
+        "description": "Ingen .proto-fil? Pek Restorm mot en kjørende gRPC-server som støtter reflection — den spør grpc.reflection.v1alpha.ServerReflection, oppdager hver tjeneste og metode, og bygger det samme typede forespørselstreet som en proto-filimport, bufret lokalt for offline bruk.",
+        "action": "Koble til en server…"
+      },
       "soap": {
         "description": "Har du en WSDL? Lim den inn (eller URL-en) — Restorm parser hver <port> og <operation> og produserer SOAP-konvolutter klare til å sendes med riktig SOAPAction-header, skjematypede body-skjeletter og auth-ordningen WSDL-en deklarerer."
       },
@@ -912,6 +922,21 @@
         "description": "Kommer du fra Paw? Slipp JSON-eksporten din (File → Export → JSON i appen — den native .paw-pakken leses ikke direkte). Restorm bygger opp igjen hver forespørsel, header, body og miljø, og mapper Paws dynamiske verdier (tidsstempler, tilfeldige strenger, UUID-er) til det nærmeste Restorm-motstykket.",
         "trademark": "Paw er et registrert varemerke for RapidAPI, Inc., brukt her kun som kompatibilitetsreferanse."
       }
+    },
+    "grpcReflection": {
+      "title": "gRPC-server (reflection)",
+      "hint": "Spør reflection-tjenesten til en kjørende gRPC-server for å oppdage tjenestene og metodene uten en .proto-fil.",
+      "addressLabel": "Serveradresse (vert:port)",
+      "addressPlaceholder": "localhost:9000",
+      "tlsLabel": "Bruk TLS",
+      "metadataLabel": "Metadata (valgfrie auth-headere)",
+      "connecting": "Kobler til…",
+      "import": "Importer",
+      "reimportedTitle": "gRPC-reflection importert på nytt",
+      "reimportedNoop": "Allerede oppdatert — ingen endringer på serveren.",
+      "reimportedSummary": "+{{added}} / -{{removed}} / ↻{{merged}} — last inn prosjektet på nytt for å se endringene.",
+      "unsupported": "Denne serveren støtter ikke gRPC-reflection — importer en .proto-fil i stedet.",
+      "unknownError": "Ukjent feil"
     },
     "loading": "Analyserer...",
     "noResults": "Ingen forespørsler funnet",

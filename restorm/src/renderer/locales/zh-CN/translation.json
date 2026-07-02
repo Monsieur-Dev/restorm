@@ -492,6 +492,12 @@
       "notListening": "未在监听",
       "listenFailed": "gRPC 服务器启动失败",
       "snippetsUnavailable": "模拟服务器不提供代码片段。"
+    },
+    "reflection": {
+      "refresh": "从 reflection 刷新",
+      "refreshFailed": "通过 gRPC reflection 刷新失败",
+      "unsupported": "该服务器不支持 gRPC reflection —— 请改为导入 .proto 文件。",
+      "unknownError": "未知错误"
     }
   },
   "soap": {
@@ -885,6 +891,10 @@
         "description": "拖入 .proto 文件（或其所在目录），restorm 会遍历每个 service、每个 RPC、每个 message——将每个方法转化为一个类型化请求，通过 gRPC 执行器即可发送，无需任何 codegen。",
         "trademark": "gRPC 是 Cloud Native Computing Foundation 的项目。"
       },
+      "grpcReflection": {
+        "description": "没有 .proto 文件？将 Restorm 指向一个正在运行且开放 reflection 的 gRPC 服务器——它会查询 grpc.reflection.v1alpha.ServerReflection，发现每个服务和方法，并构建与 proto 文件导入相同的类型化请求树，并在本地缓存以供离线使用。",
+        "action": "连接到服务器…"
+      },
       "soap": {
         "description": "有 WSDL？粘贴它（或其 URL）——restorm 会解析每个 <port> 和 <operation>，生成附带正确 SOAPAction 请求头、Schema 类型化正文骨架和 WSDL 声明的认证方案的、即发即用的 SOAP 信封。"
       },
@@ -911,6 +921,21 @@
         "description": "从 Paw 迁移过来？拖入您的 JSON 导出文件（应用内 File → Export → JSON——不会直接读取原生 .paw 包）。restorm 会重建每个请求、请求头、正文和环境，并将 Paw 的动态值（时间戳、随机字符串、UUID）映射到最接近的 restorm 等效项。",
         "trademark": "Paw 是 RapidAPI, Inc. 的注册商标，此处仅用于兼容性参考。"
       }
+    },
+    "grpcReflection": {
+      "title": "gRPC 服务器（reflection）",
+      "hint": "查询正在运行的 gRPC 服务器的 reflection 服务，无需 .proto 文件即可发现其服务和方法。",
+      "addressLabel": "服务器地址（host:port）",
+      "addressPlaceholder": "localhost:9000",
+      "tlsLabel": "使用 TLS",
+      "metadataLabel": "元数据（可选的身份验证请求头）",
+      "connecting": "连接中…",
+      "import": "导入",
+      "reimportedTitle": "gRPC reflection 已重新导入",
+      "reimportedNoop": "已是最新 — 服务器上没有变更。",
+      "reimportedSummary": "+{{added}} / -{{removed}} / ↻{{merged}} — 重新加载项目以查看变更。",
+      "unsupported": "该服务器不支持 gRPC reflection —— 请改为导入 .proto 文件。",
+      "unknownError": "未知错误"
     },
     "loading": "正在分析...",
     "noResults": "未找到请求",

@@ -142,20 +142,43 @@ function loadFromPath(path: string): grpc.GrpcObject {
 
 /** Source of a request's proto descriptor (resolved by the execution service). */
 export interface ProtoSource {
+  /** Base64-encoded, serialized `google.protobuf.FileDescriptorSet` fetched
+   * via gRPC server reflection. Takes precedence over `protoContent`/
+   * `protoPath` — it's the freshest, most specific source when present (a
+   * reflection refresh should win over a stale inline proto). */
+  protoDescriptorSet?: string | undefined
   /** Inline proto file content. */
   protoContent?: string | undefined
   /** Path to a `.proto` file on disk. */
   protoPath?: string | undefined
 }
 
+/** Materialise a base64 `FileDescriptorSet` (cached by content hash, same
+ * cache as `loadFromContent`/`loadFromPath`) via proto-loader's own decoder —
+ * the same one `grpcReflectionClient.ts` uses to interpret the descriptor. */
+function loadFromDescriptorSet(base64: string): grpc.GrpcObject {
+  const hash = createHash('sha1').update(base64).digest('hex')
+  const cached = definitionCache.get(hash)
+  if (cached) return cached
+  const pkgDef = protoLoader.loadFileDescriptorSetFromBuffer(Buffer.from(base64, 'base64'), LOAD_OPTIONS)
+  const grpcObj = grpc.loadPackageDefinition(pkgDef)
+  definitionCache.set(hash, grpcObj)
+  return grpcObj
+}
+
 /**
  * Resolve a {@link ProtoSource} into the loaded gRPC package object, applying
- * the same precedence as the client path: inline `protoContent` first, then a
- * `.proto` file at `protoPath`, then the bundled grpcbin fallback. Shared by the
- * client (`resolveGrpcMethod`) and the mock SERVER (which walks every service /
- * method to build its `ServiceDefinition`s) so both parse a proto identically.
+ * the same precedence as the client path: a reflected `protoDescriptorSet`
+ * first (freshest / most specific), then inline `protoContent`, then a
+ * `.proto` file at `protoPath`, then the bundled grpcbin fallback. Shared by
+ * the client (`resolveGrpcMethod`) and the mock SERVER (which walks every
+ * service / method to build its `ServiceDefinition`s) so both parse a proto
+ * identically.
  */
 export function loadGrpcPackage(source: ProtoSource): grpc.GrpcObject {
+  if (source.protoDescriptorSet && source.protoDescriptorSet.trim() !== '') {
+    return loadFromDescriptorSet(source.protoDescriptorSet)
+  }
   if (source.protoContent && source.protoContent.trim() !== '') {
     return loadFromContent(source.protoContent)
   }

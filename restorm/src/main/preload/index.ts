@@ -30,6 +30,8 @@ import {
   authPrefetchResultSchema,
   importPreviewResultSchema,
   importImportResultSchema,
+  grpcReflectImportResultSchema,
+  grpcReflectQueryResultSchema,
   apiUpdateRefreshFetchResultSchema,
 } from '../ipc/schemas'
 import type { z } from 'zod/v4'
@@ -978,6 +980,52 @@ contextBridge.exposeInMainWorld('restorm', {
       return () => {
         ipcRenderer.removeListener('grpc:server-served', handler)
       }
+    },
+    /** Query a live server's reflection service and build an `EnvironmentFolder`
+     * of its services/methods (the reflection equivalent of a `.proto` import).
+     * `folder` is set on a FRESH import. When `address` was already imported
+     * via reflection, this is instead an idempotent RE-import: `merged` is
+     * `true`, `folder` is omitted, and `diff` summarises what changed in the
+     * existing folder (same `GrpcAdapter` contract every other importer's
+     * "Refresh from source" uses) — re-fetching an unchanged server yields
+     * an all-zero diff. `unsupported` distinguishes "the server doesn't
+     * implement reflection" from any other error. */
+    reflectImport: async (input: {
+      address: string
+      tls?: boolean
+      metadata?: { key: string; value: string }[]
+      name?: string
+    }): Promise<{
+      success: boolean
+      folder?: unknown
+      merged?: boolean
+      folderId?: string
+      diff?: { added: number; removed: number; merged: number; deprecated: number }
+      unsupported?: boolean
+      error?: string
+    }> => {
+      const result: unknown = await ipcRenderer.invoke('grpc:reflect-import', input)
+      warnOnOutputMismatch('grpc:reflect-import', grpcReflectImportResultSchema, result)
+      return result as {
+        success: boolean
+        folder?: unknown
+        merged?: boolean
+        folderId?: string
+        diff?: { added: number; removed: number; merged: number; deprecated: number }
+        unsupported?: boolean
+        error?: string
+      }
+    },
+    /** Re-query a live server's reflection service for just the descriptor
+     * bundle — backs the request tab's "Refresh from reflection" button. */
+    reflectQuery: async (input: {
+      address: string
+      tls?: boolean
+      metadata?: { key: string; value: string }[]
+    }): Promise<{ success: boolean; services?: string[]; protoDescriptorSet?: string; unsupported?: boolean; error?: string }> => {
+      const result: unknown = await ipcRenderer.invoke('grpc:reflect-query', input)
+      warnOnOutputMismatch('grpc:reflect-query', grpcReflectQueryResultSchema, result)
+      return result as { success: boolean; services?: string[]; protoDescriptorSet?: string; unsupported?: boolean; error?: string }
     }
   },
   odata: {

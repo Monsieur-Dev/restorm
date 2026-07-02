@@ -493,6 +493,12 @@
       "notListening": "Hört nicht zu",
       "listenFailed": "gRPC-Server konnte nicht gestartet werden",
       "snippetsUnavailable": "Für einen Mock-Server sind keine Code-Snippets verfügbar."
+    },
+    "reflection": {
+      "refresh": "Von Reflection aktualisieren",
+      "refreshFailed": "Aktualisierung per gRPC-Reflection fehlgeschlagen",
+      "unsupported": "Dieser Server unterstützt keine gRPC-Reflection — importieren Sie stattdessen eine .proto-Datei.",
+      "unknownError": "Unbekannter Fehler"
     }
   },
   "soap": {
@@ -886,6 +892,10 @@
         "description": "Werfen Sie eine .proto-Datei (oder ein Verzeichnis davon) hinein, und Restorm geht jeden Service, jede RPC, jede Message durch — und macht aus jeder Methode eine typisierte Anfrage, die Sie über den gRPC-Executor senden können, ohne Codegen anzufassen.",
         "trademark": "gRPC ist ein Projekt der Cloud Native Computing Foundation."
       },
+      "grpcReflection": {
+        "description": "Keine .proto-Datei? Verbinden Sie Restorm mit einem laufenden gRPC-Server, der Reflection unterstützt — er fragt grpc.reflection.v1alpha.ServerReflection ab, ermittelt jeden Dienst und jede Methode und erstellt denselben typisierten Anfragebaum wie ein Proto-Datei-Import, lokal zwischengespeichert für die Offline-Nutzung.",
+        "action": "Mit Server verbinden…"
+      },
       "soap": {
         "description": "Sie haben ein WSDL? Fügen Sie es (oder seine URL) ein — Restorm parst jeden <port> und jede <operation> und erzeugt sendebereite SOAP-Envelopes mit dem korrekten SOAPAction-Header, schemabasierten Body-Gerüsten und dem im WSDL deklarierten Auth-Schema."
       },
@@ -912,6 +922,21 @@
         "description": "Kommen Sie von Paw? Werfen Sie Ihren JSON-Export hinein (File → Export → JSON in der App — das native .paw-Bundle wird nicht direkt gelesen). Restorm baut jede Anfrage, jeden Header, jeden Body und jede Umgebung wieder auf und ordnet Paws dynamische Werte (Zeitstempel, Zufallszeichenfolgen, UUIDs) dem nächstliegenden Restorm-Äquivalent zu.",
         "trademark": "Paw ist eine eingetragene Marke von RapidAPI, Inc., hier nur als Kompatibilitätsreferenz verwendet."
       }
+    },
+    "grpcReflection": {
+      "title": "gRPC-Server (Reflection)",
+      "hint": "Fragen Sie den Reflection-Dienst eines laufenden gRPC-Servers ab, um dessen Dienste und Methoden ohne .proto-Datei zu ermitteln.",
+      "addressLabel": "Serveradresse (Host:Port)",
+      "addressPlaceholder": "localhost:9000",
+      "tlsLabel": "TLS verwenden",
+      "metadataLabel": "Metadaten (optionale Auth-Header)",
+      "connecting": "Verbindung wird hergestellt…",
+      "import": "Importieren",
+      "reimportedTitle": "gRPC-Reflection erneut importiert",
+      "reimportedNoop": "Bereits aktuell — keine Änderungen auf dem Server.",
+      "reimportedSummary": "+{{added}} / -{{removed}} / ↻{{merged}} — laden Sie das Projekt neu, um die Änderungen zu sehen.",
+      "unsupported": "Dieser Server unterstützt keine gRPC-Reflection — importieren Sie stattdessen eine .proto-Datei.",
+      "unknownError": "Unbekannter Fehler"
     },
     "loading": "Analyse läuft...",
     "noResults": "Keine Anfragen gefunden",

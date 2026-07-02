@@ -339,6 +339,18 @@ export const grpcListenArgs = z.tuple([requestIdArg])
 export const grpcStopArgs = z.tuple([requestIdArg])
 export const grpcIsListeningArgs = z.tuple([requestIdArg])
 
+// gRPC server reflection: import a live server's services/methods, or
+// re-fetch just the descriptor bundle for one already-imported request.
+const grpcReflectionOptionsArg = z.object({
+  address: z.string(),
+  tls: z.boolean().optional(),
+  metadata: z.array(z.object({ key: z.string(), value: z.string() })).optional()
+})
+export const grpcReflectImportArgs = z.tuple([
+  grpcReflectionOptionsArg.extend({ name: z.string().optional() })
+])
+export const grpcReflectQueryArgs = z.tuple([grpcReflectionOptionsArg])
+
 // OData mock server (server mode): start/stop hosting + listening check.
 export const odataListenArgs = z.tuple([requestIdArg])
 export const odataStopArgs = z.tuple([requestIdArg])
@@ -549,6 +561,9 @@ export const importPreviewResultSchema = z.object({
 export const importImportResultSchema = z.object({
   imported: z.number(),
 })
+
+export const grpcReflectImportResultSchema = z.looseObject({ success: z.boolean() })
+export const grpcReflectQueryResultSchema = z.looseObject({ success: z.boolean() })
 
 export const apiUpdateRefreshFetchResultSchema = z.discriminatedUnion('ok', [
   z.object({ ok: z.literal(true), spec: z.string() }),

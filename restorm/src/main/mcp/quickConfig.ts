@@ -44,7 +44,7 @@ type Protocol = typeof REQUEST_TYPES[number]
 export const PROTOCOL_CONFIG_FIELDS: Record<Protocol, readonly string[]> = {
   http: ['documentation', 'method', 'url', 'headers', 'params', 'pathParams', 'body', 'server', 'mockStatus', 'timeout', 'followRedirects'],
   graphql: ['documentation', 'url', 'operationType', 'query', 'variables', 'operationName', 'headers', 'server', 'schema', 'mockResolvers', 'resolverScript'],
-  grpc: ['documentation', 'url', 'service', 'method', 'callType', 'requestMessage', 'metadata', 'server', 'mockMethods', 'protoContent', 'protoPath', 'reflection', 'tls', 'tlsCertPem', 'tlsKeyPem'],
+  grpc: ['documentation', 'url', 'service', 'method', 'callType', 'requestMessage', 'metadata', 'server', 'mockMethods', 'protoContent', 'protoPath', 'protoDescriptorSet', 'reflection', 'tls', 'tlsCertPem', 'tlsKeyPem'],
   soap: ['documentation', 'url', 'soapAction', 'service', 'operation', 'body', 'headers', 'server', 'mockOperations'],
   websocket: ['documentation', 'url', 'protocol', 'event', 'message', 'headers', 'server', 'qos', 'retain', 'clientId', 'username', 'password', 'keepalive', 'mqttSubscribe', 'lwtTopic', 'lwtPayload', 'lwtQos', 'lwtRetain'],
   odata: ['documentation', 'url', 'odataVersion', 'operationKind', 'headers', 'params', 'queryOptions', 'actionBody', 'batchSubRequests', 'batchFormat', 'entityTypeRef', 'allowGetInChangeSet', 'forceAbsoluteBatchUrls', 'entitySetProperties', 'navigationProperties', 'operationParameters', 'server', 'mockMetadata', 'mockData'],

@@ -493,6 +493,12 @@
       "notListening": "Nem figyel",
       "listenFailed": "A gRPC-kiszolgáló indítása nem sikerült",
       "snippetsUnavailable": "Mock-kiszolgálóhoz nem érhetők el kódrészletek."
+    },
+    "reflection": {
+      "refresh": "Frissítés reflectionből",
+      "refreshFailed": "A gRPC reflection általi frissítés sikertelen",
+      "unsupported": "Ez a szerver nem támogatja a gRPC reflectiont — importáljon helyette egy .proto fájlt.",
+      "unknownError": "Ismeretlen hiba"
     }
   },
   "soap": {
@@ -886,6 +892,10 @@
         "description": "Dobjon be egy .proto fájlt (vagy egy mappát belőlük), és a Restorm végigjárja minden szolgáltatást, minden RPC-t, minden üzenetet — minden metódusból típusos kérést készít, amelyet a gRPC-végrehajtón keresztül küldhet, codegen érintése nélkül.",
         "trademark": "A gRPC a Cloud Native Computing Foundation projektje."
       },
+      "grpcReflection": {
+        "description": "Nincs .proto fájlja? Irányítsa a Restormot egy futó gRPC-szerverre, amely reflectiont kínál — lekérdezi a grpc.reflection.v1alpha.ServerReflection szolgáltatást, felfedezi az összes szolgáltatást és metódust, és ugyanazt a típusos kéréslistát építi fel, mint egy proto fájl importálása, helyben gyorsítótárazva az offline használathoz.",
+        "action": "Csatlakozás egy szerverhez…"
+      },
       "soap": {
         "description": "Van egy WSDL-je? Illessze be (vagy az URL-jét) — a Restorm elemzi minden <port>-ot és <operation>-t, és küldésre kész SOAP-borítékokat hoz létre a megfelelő SOAPAction fejléccel, séma-típusos törzsvázakkal és a WSDL által deklarált hitelesítési sémával."
       },
@@ -912,6 +922,21 @@
         "description": "Pawról érkezik? Dobja be a JSON exportját (File → Export → JSON az alkalmazásban — a natív .paw csomagot nem olvassuk közvetlenül). A Restorm újraépít minden kérést, fejlécet, törzset és környezetet, és a Paw dinamikus értékeit (időbélyegek, véletlen karakterláncok, UUID-k) a legközelebbi Restorm megfelelőjükre képezi le.",
         "trademark": "A Paw a RapidAPI, Inc. bejegyzett védjegye, itt kizárólag kompatibilitási hivatkozásként használva."
       }
+    },
+    "grpcReflection": {
+      "title": "gRPC-szerver (reflection)",
+      "hint": "Kérdezze le egy futó gRPC-szerver reflection szolgáltatását, hogy .proto fájl nélkül felfedezze a szolgáltatásait és metódusait.",
+      "addressLabel": "Szerver címe (gazdagép:port)",
+      "addressPlaceholder": "localhost:9000",
+      "tlsLabel": "TLS használata",
+      "metadataLabel": "Metaadatok (opcionális hitelesítési fejlécek)",
+      "connecting": "Csatlakozás…",
+      "import": "Importálás",
+      "reimportedTitle": "gRPC reflection újraimportálva",
+      "reimportedNoop": "Már naprakész — nincs változás a szerveren.",
+      "reimportedSummary": "+{{added}} / -{{removed}} / ↻{{merged}} — töltse be újra a projektet a változások megtekintéséhez.",
+      "unsupported": "Ez a szerver nem támogatja a gRPC reflectiont — importáljon helyette egy .proto fájlt.",
+      "unknownError": "Ismeretlen hiba"
     },
     "loading": "Elemzés...",
     "noResults": "Nem található kérés",

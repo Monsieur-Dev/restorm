@@ -183,11 +183,23 @@
   color: var(--editorWidget-foreground);
 }
 
+.import-format-showcase-text {
+  /* Sibling of the logo inside the row-direction `.import-format-showcase-body`;
+   * its own children (description + optional action button) stack
+   * vertically via normal block flow — no `flex-direction: column`
+   * needed for a plain `<div>`. */
+  min-width: 0;
+}
+
 .import-format-showcase-description {
   margin: 0;
   font-size: 13px;
   line-height: 1.45;
   color: var(--descriptionForeground);
+}
+
+.import-format-showcase-action {
+  margin-top: 10px;
 }
 
 .import-format-showcase-trademark {

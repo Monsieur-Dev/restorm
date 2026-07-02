@@ -492,6 +492,12 @@
       "notListening": "リッスンしていません",
       "listenFailed": "gRPC サーバーの起動に失敗しました",
       "snippetsUnavailable": "モックサーバーではコードスニペットは利用できません。"
+    },
+    "reflection": {
+      "refresh": "reflection から更新",
+      "refreshFailed": "gRPC reflection による更新に失敗しました",
+      "unsupported": "このサーバーは gRPC reflection をサポートしていません — 代わりに .proto ファイルをインポートしてください。",
+      "unknownError": "不明なエラー"
     }
   },
   "soap": {
@@ -885,6 +891,10 @@
         "description": ".proto ファイル（またはそのディレクトリ）を投入してください。restorm はすべての service、すべての RPC、すべての message を辿り、各メソッドを gRPC エグゼキューターから送信できる型付きリクエストに変換します。codegen は不要です。",
         "trademark": "gRPC は Cloud Native Computing Foundation のプロジェクトです。"
       },
+      "grpcReflection": {
+        "description": ".proto ファイルがありませんか？稼働中の gRPC サーバーが reflection を公開していれば、Restorm をそこに向けるだけで済みます — grpc.reflection.v1alpha.ServerReflection に問い合わせてすべてのサービスとメソッドを検出し、proto ファイルのインポートと同じ型付きリクエストツリーを構築し、オフライン利用のためにローカルにキャッシュします。",
+        "action": "サーバーに接続…"
+      },
       "soap": {
         "description": "WSDL がありますか？貼り付け（または URL の指定）だけで、restorm は各 <port> と <operation> を解析し、適切な SOAPAction ヘッダー、スキーマで型付けされたボディの雛形、WSDL が宣言する認証スキームを備えた、即送信可能な SOAP エンベロープを生成します。"
       },
@@ -911,6 +921,21 @@
         "description": "Paw から移ってきましたか？JSON エクスポートを投入してください（アプリの File → Export → JSON。ネイティブの .paw バンドルは直接読み込みません）。restorm はすべてのリクエスト、ヘッダー、ボディ、環境を再構築し、Paw の動的な値（タイムスタンプ、ランダム文字列、UUID）を最も近い restorm の等価物にマッピングします。",
         "trademark": "Paw は RapidAPI, Inc. の登録商標で、ここでは互換性のための参照として使用しています。"
       }
+    },
+    "grpcReflection": {
+      "title": "gRPC サーバー（reflection）",
+      "hint": "稼働中の gRPC サーバーの reflection サービスに問い合わせ、.proto ファイルなしでそのサービスとメソッドを検出します。",
+      "addressLabel": "サーバーアドレス（ホスト:ポート）",
+      "addressPlaceholder": "localhost:9000",
+      "tlsLabel": "TLS を使用",
+      "metadataLabel": "メタデータ（任意の認証ヘッダー）",
+      "connecting": "接続中…",
+      "import": "インポート",
+      "reimportedTitle": "gRPC reflection を再インポートしました",
+      "reimportedNoop": "既に最新です — サーバー上に変更はありません。",
+      "reimportedSummary": "+{{added}} / -{{removed}} / ↻{{merged}} — 変更を確認するにはプロジェクトを再読み込みしてください。",
+      "unsupported": "このサーバーは gRPC reflection をサポートしていません — 代わりに .proto ファイルをインポートしてください。",
+      "unknownError": "不明なエラー"
     },
     "loading": "解析中...",
     "noResults": "リクエストが見つかりません",

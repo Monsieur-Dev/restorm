@@ -374,6 +374,7 @@ export function flushRequestStateToContext(req: Request, scenarioVariables?: Rea
     // request fails with "service not found".
     data.protoContent = grpc.protoContent
     data.protoPath = grpc.protoPath
+    data.protoDescriptorSet = grpc.protoDescriptorSet
     if (Array.isArray(metadata)) data.metadata = metadata as FullRequestData['metadata']
   } else if (isSoapRequest(req)) {
     const soap = req as SoapRequest

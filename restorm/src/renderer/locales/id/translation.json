@@ -492,6 +492,12 @@
       "notListening": "Tidak mendengarkan",
       "listenFailed": "Server gRPC gagal dimulai",
       "snippetsUnavailable": "Cuplikan kode tidak tersedia untuk server mock."
+    },
+    "reflection": {
+      "refresh": "Segarkan dari reflection",
+      "refreshFailed": "Gagal menyegarkan melalui gRPC reflection",
+      "unsupported": "Server ini tidak mendukung gRPC reflection — sebagai gantinya impor file .proto.",
+      "unknownError": "Kesalahan tidak diketahui"
     }
   },
   "soap": {
@@ -885,6 +891,10 @@
         "description": "Lepaskan file .proto (atau direktori yang berisinya) dan Restorm menelusuri setiap layanan, setiap RPC, setiap pesan — mengubah setiap metode menjadi permintaan bertipe yang dapat Anda kirim melalui eksekutor gRPC tanpa menyentuh codegen.",
         "trademark": "gRPC adalah proyek dari Cloud Native Computing Foundation."
       },
+      "grpcReflection": {
+        "description": "Tidak punya file .proto? Arahkan Restorm ke server gRPC yang berjalan dan menyediakan reflection — Restorm akan meminta grpc.reflection.v1alpha.ServerReflection, menemukan setiap layanan dan metode, lalu membangun pohon permintaan bertipe yang sama seperti impor file proto, di-cache secara lokal untuk penggunaan offline.",
+        "action": "Sambungkan ke server…"
+      },
       "soap": {
         "description": "Punya WSDL? Tempel (atau URL-nya) — Restorm mengurai setiap <port> dan <operation> dan menghasilkan amplop SOAP yang siap dikirim dengan header SOAPAction yang benar, kerangka body bertipe skema, dan skema autentikasi yang dideklarasikan oleh WSDL."
       },
@@ -911,6 +921,21 @@
         "description": "Datang dari Paw? Lepaskan ekspor JSON Anda (File → Export → JSON di aplikasi — bundel .paw native tidak dibaca langsung). Restorm membangun kembali setiap permintaan, header, body, dan lingkungan, serta memetakan nilai dinamis Paw (stempel waktu, string acak, UUID) ke padanan Restorm yang paling mendekati.",
         "trademark": "Paw adalah merek dagang terdaftar dari RapidAPI, Inc., digunakan di sini hanya untuk referensi kompatibilitas."
       }
+    },
+    "grpcReflection": {
+      "title": "Server gRPC (reflection)",
+      "hint": "Minta layanan reflection dari server gRPC yang sedang berjalan untuk menemukan layanan dan metodenya tanpa file .proto.",
+      "addressLabel": "Alamat server (host:port)",
+      "addressPlaceholder": "localhost:9000",
+      "tlsLabel": "Gunakan TLS",
+      "metadataLabel": "Metadata (header autentikasi opsional)",
+      "connecting": "Menyambungkan…",
+      "import": "Impor",
+      "reimportedTitle": "gRPC reflection diimpor ulang",
+      "reimportedNoop": "Sudah terbaru — tidak ada perubahan di server.",
+      "reimportedSummary": "+{{added}} / -{{removed}} / ↻{{merged}} — muat ulang proyek untuk melihat perubahannya.",
+      "unsupported": "Server ini tidak mendukung gRPC reflection — sebagai gantinya impor file .proto.",
+      "unknownError": "Kesalahan tidak diketahui"
     },
     "loading": "Menganalisis...",
     "noResults": "Tidak ada permintaan ditemukan",

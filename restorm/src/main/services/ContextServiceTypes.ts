@@ -98,6 +98,9 @@ export interface FullRequestData {
    * the bundled grpcbin proto when absent). */
   protoContent?: string
   protoPath?: string
+  /** Base64 `FileDescriptorSet` fetched via gRPC server reflection; takes
+   * precedence over `protoContent`/`protoPath` (see `grpcProtoLoader.ts`). */
+  protoDescriptorSet?: string
   metadata?: KeyValue[]
 
   // SOAP specific

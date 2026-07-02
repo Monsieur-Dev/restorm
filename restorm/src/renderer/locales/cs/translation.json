@@ -495,6 +495,12 @@
       "notListening": "Nenaslouchá",
       "listenFailed": "Server gRPC se nepodařilo spustit",
       "snippetsUnavailable": "Ukázky kódu nejsou pro mock server k dispozici."
+    },
+    "reflection": {
+      "refresh": "Obnovit z reflection",
+      "refreshFailed": "Obnovení přes gRPC reflection selhalo",
+      "unsupported": "Tento server nepodporuje gRPC reflection — místo toho importujte soubor .proto.",
+      "unknownError": "Neznámá chyba"
     }
   },
   "soap": {
@@ -888,6 +894,10 @@
         "description": "Pusťte soubor .proto (nebo celý adresář s nimi) a Restorm projde každou službu, každé RPC, každou zprávu — z každé metody udělá typovaný požadavek, který lze odeslat přes gRPC exekutor bez nutnosti dotýkat se codegenu.",
         "trademark": "gRPC je projekt Cloud Native Computing Foundation."
       },
+      "grpcReflection": {
+        "description": "Nemáte soubor .proto? Nasměrujte Restorm na běžící gRPC server, který nabízí reflection — dotáže se na grpc.reflection.v1alpha.ServerReflection, zjistí každou službu a metodu a vytvoří stejný typovaný strom požadavků jako import ze souboru proto, uložený lokálně do mezipaměti pro offline použití.",
+        "action": "Připojit k serveru…"
+      },
       "soap": {
         "description": "Máte WSDL? Vložte ho (nebo jeho URL) — Restorm naparsuje každý <port> a každou <operation> a vytvoří SOAP obálky připravené k odeslání se správnou hlavičkou SOAPAction, skelety těla typované schématem a se schématem ověření, které WSDL deklaruje."
       },
@@ -914,6 +924,21 @@
         "description": "Přicházíte z Paw? Pusťte svůj JSON export (File → Export → JSON v aplikaci — nativní balíček .paw se nečte přímo). Restorm přenese každý požadavek, hlavičku, tělo i prostředí a namapuje dynamické hodnoty Paw (časová razítka, náhodné řetězce, UUID) na nejbližší ekvivalent v Restormu.",
         "trademark": "Paw je registrovaná ochranná známka společnosti RapidAPI, Inc., použitá zde pouze pro účely kompatibility."
       }
+    },
+    "grpcReflection": {
+      "title": "gRPC server (Reflexe)",
+      "hint": "Dotažte se na službu reflection běžícího gRPC serveru a zjistěte jeho služby a metody bez souboru .proto.",
+      "addressLabel": "Adresa serveru (hostitel:port)",
+      "addressPlaceholder": "localhost:9000",
+      "tlsLabel": "Použít TLS",
+      "metadataLabel": "Metadata (volitelné autentizační hlavičky)",
+      "connecting": "Připojování…",
+      "import": "Importovat",
+      "reimportedTitle": "gRPC reflection znovu importována",
+      "reimportedNoop": "Již aktuální — na serveru nejsou žádné změny.",
+      "reimportedSummary": "+{{added}} / -{{removed}} / ↻{{merged}} — pro zobrazení změn znovu načtěte projekt.",
+      "unsupported": "Tento server nepodporuje gRPC reflection — místo toho importujte soubor .proto.",
+      "unknownError": "Neznámá chyba"
     },
     "loading": "Probíhá analýza...",
     "noResults": "Nebyly nalezeny žádné požadavky",

@@ -51,6 +51,13 @@ export interface GrpcRequest extends BaseRequest {
   protoContent?: string
   /** Path to a `.proto` file on disk the mock server loads (server mode). */
   protoPath?: string
+  /** Base64-encoded, serialized `google.protobuf.FileDescriptorSet` fetched
+   * via gRPC server reflection (client mode). Set on import via reflection
+   * and refreshed by "Refresh from reflection" so the request executes — and
+   * its methods stay browsable — offline, from the exact bundle the server
+   * returned. Takes precedence over `protoContent`/`protoPath` when
+   * resolving the proto for execution (see `grpcProtoLoader.loadGrpcPackage`). */
+  protoDescriptorSet?: string
   /** Serve the standard gRPC ServerReflection service so a client can discover
    * methods without the `.proto` (server mode; defaults to true). */
   reflection?: boolean

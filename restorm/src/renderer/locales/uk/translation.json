@@ -495,6 +495,12 @@
       "notListening": "Не прослуховує",
       "listenFailed": "Не вдалося запустити сервер gRPC",
       "snippetsUnavailable": "Фрагменти коду недоступні для mock-сервера."
+    },
+    "reflection": {
+      "refresh": "Оновити з reflection",
+      "refreshFailed": "Оновлення через gRPC reflection не вдалося",
+      "unsupported": "Цей сервер не підтримує gRPC reflection — натомість імпортуйте файл .proto.",
+      "unknownError": "Невідома помилка"
     }
   },
   "soap": {
@@ -888,6 +894,10 @@
         "description": "Перетягніть файл .proto (або теку з ними), і Restorm пройде кожний сервіс, кожний RPC, кожне повідомлення — перетворюючи кожний метод на типізований запит, який можна надіслати через виконавця gRPC, не торкаючись codegen.",
         "trademark": "gRPC — проєкт Cloud Native Computing Foundation."
       },
+      "grpcReflection": {
+        "description": "Немає файлу .proto? Спрямуйте Restorm на запущений сервер gRPC, який підтримує reflection — він опитує grpc.reflection.v1alpha.ServerReflection, виявляє кожен сервіс і метод та будує те саме типізоване дерево запитів, що й імпорт proto-файлу, кешоване локально для офлайн-використання.",
+        "action": "Підключитися до сервера…"
+      },
       "soap": {
         "description": "Маєте WSDL? Вставте його (або його URL) — Restorm розбере кожний <port> і <operation> та згенерує готові до надсилання SOAP-конверти з правильним заголовком SOAPAction, схематизованими скелетами тіла та схемою автентифікації, оголошеною в WSDL."
       },
@@ -914,6 +924,21 @@
         "description": "Переходите з Paw? Перетягніть свій JSON-експорт (File → Export → JSON у застосунку — нативний пакет .paw не читається напряму). Restorm відновлює кожен запит, заголовок, тіло та середовище, і зіставляє динамічні значення Paw (мітки часу, випадкові рядки, UUID) з найближчим відповідником Restorm.",
         "trademark": "Paw є зареєстрованим товарним знаком RapidAPI, Inc., використовується тут лише як посилання на сумісність."
       }
+    },
+    "grpcReflection": {
+      "title": "Сервер gRPC (reflection)",
+      "hint": "Опитайте службу reflection запущеного сервера gRPC, щоб виявити його сервіси та методи без файлу .proto.",
+      "addressLabel": "Адреса сервера (хост:порт)",
+      "addressPlaceholder": "localhost:9000",
+      "tlsLabel": "Використовувати TLS",
+      "metadataLabel": "Метадані (необов'язкові заголовки автентифікації)",
+      "connecting": "Підключення…",
+      "import": "Імпортувати",
+      "reimportedTitle": "gRPC reflection повторно імпортовано",
+      "reimportedNoop": "Вже актуально — на сервері немає змін.",
+      "reimportedSummary": "+{{added}} / -{{removed}} / ↻{{merged}} — перезавантажте проєкт, щоб побачити зміни.",
+      "unsupported": "Цей сервер не підтримує gRPC reflection — натомість імпортуйте файл .proto.",
+      "unknownError": "Невідома помилка"
     },
     "loading": "Аналізування...",
     "noResults": "Запитів не знайдено",

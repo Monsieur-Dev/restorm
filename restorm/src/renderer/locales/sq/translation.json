@@ -493,6 +493,12 @@
       "notListening": "Nuk po dëgjon",
       "listenFailed": "Serveri gRPC nuk u nis",
       "snippetsUnavailable": "Copëzat e kodit nuk janë të disponueshme për një server mock."
+    },
+    "reflection": {
+      "refresh": "Rifresko nga reflection",
+      "refreshFailed": "Rifreskimi përmes gRPC reflection dështoi",
+      "unsupported": "Ky server nuk mbështet gRPC reflection — importo në vend të tij një skedar .proto.",
+      "unknownError": "Gabim i panjohur"
     }
   },
   "soap": {
@@ -886,6 +892,10 @@
         "description": "Hidhni një skedar .proto (ose një direktori të tyre) dhe Restorm përshkon çdo shërbim, çdo RPC, çdo mesazh — duke e kthyer çdo metodë në një kërkesë të tipizuar që mund ta dërgoni përmes ekzekutorit gRPC pa prekur codegen.",
         "trademark": "gRPC është një projekt i Cloud Native Computing Foundation."
       },
+      "grpcReflection": {
+        "description": "Nuk keni skedar .proto? Drejtoni Restorm te një server gRPC në funksionim që ofron reflection — ai pyet grpc.reflection.v1alpha.ServerReflection, zbulon çdo shërbim dhe metodë, dhe ndërton të njëjtën pemë kërkesash të tipizuara si një import skedari proto, i ruajtur lokalisht për përdorim jashtë linje.",
+        "action": "Lidhu me një server…"
+      },
       "soap": {
         "description": "Keni një WSDL? Ngjiteni (ose URL-në e tij) — Restorm parsezon çdo <port> dhe <operation> dhe prodhon zarfe SOAP gati për t'u dërguar me kokën e duhur SOAPAction, skelete trupi të tipizuara sipas skemës dhe skemën e vërtetimit që deklaron WSDL-ja."
       },
@@ -912,6 +922,21 @@
         "description": "Vini nga Paw? Hidhni eksportin tuaj JSON (File → Export → JSON në aplikacion — paketa native .paw nuk lexohet drejtpërdrejt). Restorm rindërton çdo kërkesë, kokë, trup dhe mjedis, dhe harton vlerat dinamike të Paw (vula kohore, vargje të rastësishme, UUID) me ekuivalentin më të afërt në Restorm.",
         "trademark": "Paw është një markë tregtare e regjistruar e RapidAPI, Inc., e përdorur këtu vetëm si referencë për përputhshmëri."
       }
+    },
+    "grpcReflection": {
+      "title": "Server gRPC (reflection)",
+      "hint": "Pyet shërbimin e reflection të një serveri gRPC në punë për të zbuluar shërbimet dhe metodat e tij pa skedar .proto.",
+      "addressLabel": "Adresa e serverit (host:port)",
+      "addressPlaceholder": "localhost:9000",
+      "tlsLabel": "Përdor TLS",
+      "metadataLabel": "Metadata (headers opsionale autentikimi)",
+      "connecting": "Duke u lidhur…",
+      "import": "Importo",
+      "reimportedTitle": "Reflection gRPC u riimportua",
+      "reimportedNoop": "Tashmë i përditësuar — asnjë ndryshim në server.",
+      "reimportedSummary": "+{{added}} / -{{removed}} / ↻{{merged}} — ringarko projektin për të parë ndryshimet.",
+      "unsupported": "Ky server nuk mbështet gRPC reflection — importo në vend të tij një skedar .proto.",
+      "unknownError": "Gabim i panjohur"
     },
     "loading": "Po analizohet...",
     "noResults": "Nuk u gjet asnjë kërkesë",

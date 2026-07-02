@@ -231,6 +231,25 @@ declare global {
         isServerListening: (requestId: string) => Promise<boolean>
         onServerProgress: (callback: (data: RequestProgressData) => void) => (() => void)
         onServerServed: (callback: (data: { requestId: string; count: number }) => void) => (() => void)
+        reflectImport: (input: {
+          address: string
+          tls?: boolean
+          metadata?: { key: string; value: string }[]
+          name?: string
+        }) => Promise<{
+          success: boolean
+          folder?: unknown
+          merged?: boolean
+          folderId?: string
+          diff?: { added: number; removed: number; merged: number; deprecated: number }
+          unsupported?: boolean
+          error?: string
+        }>
+        reflectQuery: (input: {
+          address: string
+          tls?: boolean
+          metadata?: { key: string; value: string }[]
+        }) => Promise<{ success: boolean; services?: string[]; protoDescriptorSet?: string; unsupported?: boolean; error?: string }>
       }
       websocket: {
         connect: (input: WebSocketExecutionInput) => Promise<WebSocketExecutionResult>
@@ -662,6 +681,9 @@ export interface FullRequestData {
    * to the bundled grpcbin proto when absent). */
   protoContent?: string | undefined
   protoPath?: string | undefined
+  /** gRPC: base64 FileDescriptorSet fetched via server reflection; takes
+   * precedence over protoContent/protoPath (see grpcProtoLoader.ts). */
+  protoDescriptorSet?: string | undefined
   metadata?: KeyValueData[] | undefined
   soapAction?: string | undefined
   soapService?: string | undefined

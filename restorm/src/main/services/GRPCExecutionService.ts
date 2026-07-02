@@ -97,8 +97,10 @@ interface ActiveCall {
   messages: GrpcMessage[]
 }
 
-/** Strip a URL scheme + trailing slash, returning a bare `host:port` for grpc-js. */
-function normalizeAddress(url: string): { address: string; secure: boolean } {
+/** Strip a URL scheme + trailing slash, returning a bare `host:port` for
+ * grpc-js. Exported so the reflection IPC handlers can apply the same
+ * `grpcs://` → secure-channel convention a request already executes with. */
+export function normalizeAddress(url: string): { address: string; secure: boolean } {
   let secure = false
   let address = url.trim()
   const schemeMatch = /^([a-z][a-z0-9+.-]*):\/\//i.exec(address)
@@ -233,6 +235,7 @@ class GRPCExecutionService {
     const message = (full?.requestMessage) ?? '{}'
     const resolvedMessage = contextService.resolveValue(message, requestId)
     const protoSource: ProtoSource = {
+      protoDescriptorSet: full?.protoDescriptorSet,
       protoContent: full?.protoContent,
       protoPath: full?.protoPath
     }

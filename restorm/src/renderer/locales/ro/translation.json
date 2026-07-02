@@ -494,6 +494,12 @@
       "notListening": "Nu ascultă",
       "listenFailed": "Pornirea serverului gRPC a eșuat",
       "snippetsUnavailable": "Fragmentele de cod nu sunt disponibile pentru un server simulat."
+    },
+    "reflection": {
+      "refresh": "Actualizează din reflection",
+      "refreshFailed": "Actualizarea prin gRPC reflection a eșuat",
+      "unsupported": "Acest server nu acceptă gRPC reflection — importați în schimb un fișier .proto.",
+      "unknownError": "Eroare necunoscută"
     }
   },
   "soap": {
@@ -887,6 +893,10 @@
         "description": "Aruncați un fișier .proto (sau un director cu astfel de fișiere) și Restorm parcurge fiecare serviciu, fiecare RPC, fiecare mesaj — transformând fiecare metodă într-o cerere tipizată pe care o puteți trimite prin executorul gRPC fără a atinge codegen-ul.",
         "trademark": "gRPC este un proiect al Cloud Native Computing Foundation."
       },
+      "grpcReflection": {
+        "description": "Nu aveți un fișier .proto? Îndreptați Restorm către un server gRPC care rulează și expune reflection — acesta interoghează grpc.reflection.v1alpha.ServerReflection, descoperă fiecare serviciu și metodă și construiește același arbore de cereri tipizate ca la importul unui fișier proto, memorat local în cache pentru utilizare offline.",
+        "action": "Conectare la un server…"
+      },
       "soap": {
         "description": "Aveți un WSDL? Lipiți-l (sau URL-ul său) — Restorm parsează fiecare <port> și <operation> și produce plicuri SOAP gata de trimis, cu antetul SOAPAction corect, schelete de corp tipizate prin schemă și schema de autentificare declarată de WSDL."
       },
@@ -913,6 +923,21 @@
         "description": "Veniți de la Paw? Aruncați exportul dvs. JSON (File → Export → JSON în aplicație — pachetul nativ .paw nu este citit direct). Restorm reconstruiește fiecare cerere, antet, corp și mediu, și mapează valorile dinamice ale Paw (marcaje temporale, șiruri aleatorii, UUID-uri) la cel mai apropiat echivalent Restorm.",
         "trademark": "Paw este o marcă înregistrată a RapidAPI, Inc., folosită aici doar ca referință de compatibilitate."
       }
+    },
+    "grpcReflection": {
+      "title": "Server gRPC (reflection)",
+      "hint": "Interogați serviciul de reflection al unui server gRPC activ pentru a-i descoperi serviciile și metodele fără un fișier .proto.",
+      "addressLabel": "Adresa serverului (host:port)",
+      "addressPlaceholder": "localhost:9000",
+      "tlsLabel": "Utilizați TLS",
+      "metadataLabel": "Metadate (antete de autentificare opționale)",
+      "connecting": "Se conectează…",
+      "import": "Importă",
+      "reimportedTitle": "Reflection gRPC reimportat",
+      "reimportedNoop": "Deja actualizat — nicio modificare pe server.",
+      "reimportedSummary": "+{{added}} / -{{removed}} / ↻{{merged}} — reîncărcați proiectul pentru a vedea modificările.",
+      "unsupported": "Acest server nu acceptă gRPC reflection — importați în schimb un fișier .proto.",
+      "unknownError": "Eroare necunoscută"
     },
     "loading": "Se analizează...",
     "noResults": "Nicio cerere găsită",

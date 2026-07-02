@@ -112,6 +112,12 @@ export class GrpcRequest extends BaseRequest {
   @TreatEmptyAsUndefined()
   protoPath?: string
 
+  /** Base64-encoded, serialized `FileDescriptorSet` fetched via gRPC server
+   * reflection (client mode) — see the type-level doc for the full contract. */
+  @graphqlField({ type: 'String', nullable: true })
+  @TreatEmptyAsUndefined()
+  protoDescriptorSet?: string
+
   /** Serve the standard gRPC ServerReflection service (server mode; default true). */
   @graphqlField({ type: 'Boolean', nullable: true })
   @TreatEmptyAsUndefined()
@@ -171,6 +177,7 @@ export class GrpcRequest extends BaseRequest {
     mockMethods?: Partial<GrpcMockMethod>[]
     protoContent?: string
     protoPath?: string
+    protoDescriptorSet?: string
     reflection?: boolean
     tls?: boolean
     tlsCertPem?: string
@@ -195,6 +202,7 @@ export class GrpcRequest extends BaseRequest {
       ...(obj.mockMethods !== undefined && { mockMethods: obj.mockMethods.map(m => mockMethodFromPlain(m)) }),
       ...(obj.protoContent !== undefined && { protoContent: obj.protoContent }),
       ...(obj.protoPath !== undefined && { protoPath: obj.protoPath }),
+      ...(obj.protoDescriptorSet !== undefined && { protoDescriptorSet: obj.protoDescriptorSet }),
       ...(obj.reflection !== undefined && { reflection: obj.reflection }),
       ...(obj.tls !== undefined && { tls: obj.tls }),
       ...(obj.tlsCertPem !== undefined && { tlsCertPem: obj.tlsCertPem }),
@@ -226,6 +234,7 @@ export class GrpcRequest extends BaseRequest {
       ...(this.mockMethods !== undefined && { mockMethods: this.mockMethods.map(m => mockMethodToPlain(m)) }),
       ...(this.protoContent !== undefined && { protoContent: this.protoContent }),
       ...(this.protoPath !== undefined && { protoPath: this.protoPath }),
+      ...(this.protoDescriptorSet !== undefined && { protoDescriptorSet: this.protoDescriptorSet }),
       ...(this.reflection !== undefined && { reflection: this.reflection }),
       ...(this.tls !== undefined && { tls: this.tls }),
       ...(this.tlsCertPem !== undefined && { tlsCertPem: this.tlsCertPem }),

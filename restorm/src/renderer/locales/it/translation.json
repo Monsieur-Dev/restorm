@@ -493,6 +493,12 @@
       "notListening": "Non in ascolto",
       "listenFailed": "Avvio del server gRPC non riuscito",
       "snippetsUnavailable": "Gli snippet di codice non sono disponibili per un server mock."
+    },
+    "reflection": {
+      "refresh": "Aggiorna dalla reflection",
+      "refreshFailed": "Aggiornamento tramite reflection gRPC non riuscito",
+      "unsupported": "Questo server non supporta la reflection gRPC — importa invece un file .proto.",
+      "unknownError": "Errore sconosciuto"
     }
   },
   "soap": {
@@ -886,6 +892,10 @@
         "description": "Lasci un file .proto (o una directory di .proto) e Restorm percorre ogni servizio, ogni RPC, ogni messaggio — trasformando ogni metodo in una richiesta tipizzata inviabile tramite l'esecutore gRPC senza toccare codegen.",
         "trademark": "gRPC è un progetto della Cloud Native Computing Foundation."
       },
+      "grpcReflection": {
+        "description": "Niente file .proto? Punta Restorm verso un server gRPC in esecuzione che espone reflection: interroga grpc.reflection.v1alpha.ServerReflection, scopre ogni servizio e metodo e crea lo stesso albero di richieste tipizzate di un import da file proto, memorizzato in cache localmente per l'uso offline.",
+        "action": "Connetti a un server…"
+      },
       "soap": {
         "description": "Ha un WSDL? Lo incolli (o il suo URL) — Restorm analizza ogni <port> e ogni <operation> e produce buste SOAP pronte da inviare con l'header SOAPAction corretto, scheletri di body tipizzati dallo schema e lo schema di auth dichiarato dal WSDL."
       },
@@ -912,6 +922,21 @@
         "description": "Viene da Paw? Lasci il Suo export JSON (File → Export → JSON nell'app — il bundle nativo .paw non viene letto direttamente). Restorm ricostruisce ogni richiesta, header, body e ambiente, e mappa i valori dinamici di Paw (timestamp, stringhe casuali, UUID) sull'equivalente Restorm più vicino.",
         "trademark": "Paw è un marchio registrato di RapidAPI, Inc., utilizzato qui solo come riferimento di compatibilità."
       }
+    },
+    "grpcReflection": {
+      "title": "Server gRPC (reflection)",
+      "hint": "Interroga il servizio di reflection di un server gRPC in esecuzione per scoprirne servizi e metodi senza un file .proto.",
+      "addressLabel": "Indirizzo del server (host:porta)",
+      "addressPlaceholder": "localhost:9000",
+      "tlsLabel": "Usa TLS",
+      "metadataLabel": "Metadati (header di autenticazione opzionali)",
+      "connecting": "Connessione…",
+      "import": "Importa",
+      "reimportedTitle": "Reflection gRPC reimportata",
+      "reimportedNoop": "Già aggiornato — nessuna modifica sul server.",
+      "reimportedSummary": "+{{added}} / -{{removed}} / ↻{{merged}} — ricarica il progetto per vedere le modifiche.",
+      "unsupported": "Questo server non supporta la reflection gRPC — importa invece un file .proto.",
+      "unknownError": "Errore sconosciuto"
     },
     "loading": "Analisi in corso...",
     "noResults": "Nessuna richiesta trovata",

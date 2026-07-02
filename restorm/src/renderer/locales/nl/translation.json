@@ -493,6 +493,12 @@
       "notListening": "Luistert niet",
       "listenFailed": "gRPC-server kon niet worden gestart",
       "snippetsUnavailable": "Codefragmenten zijn niet beschikbaar voor een mockserver."
+    },
+    "reflection": {
+      "refresh": "Vernieuwen vanuit reflection",
+      "refreshFailed": "Vernieuwen via gRPC-reflection mislukt",
+      "unsupported": "Deze server ondersteunt geen gRPC-reflection — importeer in plaats daarvan een .proto-bestand.",
+      "unknownError": "Onbekende fout"
     }
   },
   "soap": {
@@ -886,6 +892,10 @@
         "description": "Sleep een .proto-bestand (of een map vol .proto-bestanden) en Restorm doorloopt elke service, elke RPC en elk bericht — en zet elke methode om in een getypeerd verzoek dat u via de gRPC-executor kunt verzenden zonder aan codegen te raken.",
         "trademark": "gRPC is een project van de Cloud Native Computing Foundation."
       },
+      "grpcReflection": {
+        "description": "Geen .proto-bestand? Verwijs Restorm naar een actieve gRPC-server die reflection aanbiedt — het bevraagt grpc.reflection.v1alpha.ServerReflection, ontdekt elke service en methode, en bouwt dezelfde getypeerde requestboom als een proto-bestandsimport, lokaal gecachet voor offline gebruik.",
+        "action": "Verbinden met een server…"
+      },
       "soap": {
         "description": "Een WSDL? Plak hem (of zijn URL) — Restorm parseert elke <port> en elke <operation> en produceert kant-en-klare SOAP-enveloppen met de juiste SOAPAction-header, schema-getypeerde body-skeletten en het door de WSDL gedeclareerde authenticatieschema."
       },
@@ -912,6 +922,21 @@
         "description": "Komt u van Paw? Sleep uw JSON-export erin (File → Export → JSON in de app — de native .paw-bundel wordt niet direct gelezen). Restorm herbouwt elk verzoek, elke header, body en omgeving, en koppelt Paws dynamische waarden (tijdstempels, willekeurige strings, UUID's) aan hun dichtstbijzijnde Restorm-equivalent.",
         "trademark": "Paw is een gedeponeerd handelsmerk van RapidAPI, Inc., hier alleen ter referentie voor compatibiliteit gebruikt."
       }
+    },
+    "grpcReflection": {
+      "title": "gRPC-server (reflection)",
+      "hint": "Bevraag de reflection-service van een actieve gRPC-server om de services en methoden te ontdekken zonder .proto-bestand.",
+      "addressLabel": "Serveradres (host:poort)",
+      "addressPlaceholder": "localhost:9000",
+      "tlsLabel": "TLS gebruiken",
+      "metadataLabel": "Metadata (optionele auth-headers)",
+      "connecting": "Verbinden…",
+      "import": "Importeren",
+      "reimportedTitle": "gRPC-reflection opnieuw geïmporteerd",
+      "reimportedNoop": "Al up-to-date — geen wijzigingen op de server.",
+      "reimportedSummary": "+{{added}} / -{{removed}} / ↻{{merged}} — herlaad het project om de wijzigingen te zien.",
+      "unsupported": "Deze server ondersteunt geen gRPC-reflection — importeer in plaats daarvan een .proto-bestand.",
+      "unknownError": "Onbekende fout"
     },
     "loading": "Analyseren...",
     "noResults": "Geen verzoeken gevonden",

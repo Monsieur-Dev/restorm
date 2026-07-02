@@ -494,6 +494,12 @@
       "notListening": "Не слуша",
       "listenFailed": "Покретање gRPC сервера није успело",
       "snippetsUnavailable": "Исечци кода нису доступни за mock сервер."
+    },
+    "reflection": {
+      "refresh": "Osveži iz reflectiona",
+      "refreshFailed": "Osvežavanje putem gRPC reflectiona nije uspelo",
+      "unsupported": "Ovaj server ne podržava gRPC reflection — umesto toga uvezite .proto fajl.",
+      "unknownError": "Nepoznata greška"
     }
   },
   "soap": {
@@ -887,6 +893,10 @@
         "description": "Ubacite .proto datoteku (ili direktorijum sa njima) i Restorm prolazi kroz svaki servis, svaki RPC, svaku poruku — pretvarajući svaku metodu u tipizovan zahtev koji možete slati preko gRPC izvršioca bez doticanja codegen-a.",
         "trademark": "gRPC je projekat Cloud Native Computing fondacije."
       },
+      "grpcReflection": {
+        "description": "Nemate .proto fajl? Usmerite Restorm na gRPC server koji radi i izlaže reflection — on ispituje grpc.reflection.v1alpha.ServerReflection, otkriva svaki servis i metodu i pravi isto tipizirano stablo zahteva kao uvoz proto fajla, keširano lokalno za rad van mreže.",
+        "action": "Poveži se sa serverom…"
+      },
       "soap": {
         "description": "Imate WSDL? Nalepite ga (ili njegov URL) — Restorm parsira svaki <port> i <operation> i proizvodi SOAP koverte spremne za slanje sa pravim SOAPAction zaglavljem, skeletima tela tipizovanim po šemi i šemom autentifikacije koju WSDL deklariše."
       },
@@ -913,6 +923,21 @@
         "description": "Dolazite iz Paw-a? Ubacite svoj JSON izvoz (File → Export → JSON u aplikaciji — nativni .paw paket se ne čita direktno). Restorm ponovo gradi svaki zahtev, zaglavlje, telo i okruženje, i mapira Paw-ove dinamičke vrednosti (vremenske oznake, nasumične nizove, UUID) na najbliži Restorm ekvivalent.",
         "trademark": "Paw je registrovani zaštitni znak kompanije RapidAPI, Inc., korišćen ovde samo kao referenca za kompatibilnost."
       }
+    },
+    "grpcReflection": {
+      "title": "gRPC server (Рефлексија)",
+      "hint": "Ispitajte reflection servis pokrenutog gRPC servera da otkrijete njegove servise i metode bez .proto fajla.",
+      "addressLabel": "Adresa servera (host:port)",
+      "addressPlaceholder": "localhost:9000",
+      "tlsLabel": "Koristi TLS",
+      "metadataLabel": "Metapodaci (opciona autentikaciona zaglavlja)",
+      "connecting": "Povezivanje…",
+      "import": "Uvezi",
+      "reimportedTitle": "gRPC reflection ponovo uvezen",
+      "reimportedNoop": "Već ažurirano — nema promena na serveru.",
+      "reimportedSummary": "+{{added}} / -{{removed}} / ↻{{merged}} — ponovo učitajte projekat da vidite promene.",
+      "unsupported": "Ovaj server ne podržava gRPC reflection — umesto toga uvezite .proto fajl.",
+      "unknownError": "Nepoznata greška"
     },
     "loading": "Analiziranje...",
     "noResults": "Nije pronađen nijedan zahtev",

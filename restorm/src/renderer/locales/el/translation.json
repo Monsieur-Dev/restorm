@@ -493,6 +493,12 @@
       "notListening": "Δεν ακούει",
       "listenFailed": "Αποτυχία εκκίνησης διακομιστή gRPC",
       "snippetsUnavailable": "Τα αποσπάσματα κώδικα δεν είναι διαθέσιμα για διακομιστή mock."
+    },
+    "reflection": {
+      "refresh": "Ανανέωση από reflection",
+      "refreshFailed": "Η ανανέωση μέσω gRPC reflection απέτυχε",
+      "unsupported": "Αυτός ο server δεν υποστηρίζει gRPC reflection — εισαγάγετε αντ' αυτού ένα αρχείο .proto.",
+      "unknownError": "Άγνωστο σφάλμα"
     }
   },
   "soap": {
@@ -886,6 +892,10 @@
         "description": "Ρίξτε ένα αρχείο .proto (ή έναν κατάλογό τους) και το Restorm διασχίζει κάθε υπηρεσία, κάθε RPC, κάθε μήνυμα — μετατρέποντας κάθε μέθοδο σε τυποποιημένο αίτημα που μπορείτε να στείλετε μέσω του εκτελεστή gRPC χωρίς να αγγίξετε codegen.",
         "trademark": "Το gRPC είναι έργο του Cloud Native Computing Foundation."
       },
+      "grpcReflection": {
+        "description": "Δεν έχετε αρχείο .proto; Κατευθύνετε το Restorm σε έναν server gRPC που εκτελείται και εκθέτει reflection — ρωτά το grpc.reflection.v1alpha.ServerReflection, ανακαλύπτει κάθε υπηρεσία και μέθοδο, και δημιουργεί το ίδιο τυποποιημένο δέντρο αιτημάτων όπως μια εισαγωγή αρχείου proto, αποθηκευμένο τοπικά για χρήση εκτός σύνδεσης.",
+        "action": "Σύνδεση σε server…"
+      },
       "soap": {
         "description": "Έχετε ένα WSDL; Επικολλήστε το (ή το URL του) — το Restorm αναλύει κάθε <port> και <operation> και παράγει φακέλους SOAP έτοιμους προς αποστολή με τη σωστή κεφαλίδα SOAPAction, σκελετούς σώματος τυποποιημένους από το σχήμα και το σχήμα ταυτοποίησης που δηλώνει το WSDL."
       },
@@ -912,6 +922,21 @@
         "description": "Έρχεστε από το Paw; Ρίξτε την εξαγωγή JSON σας (File → Export → JSON στην εφαρμογή — το εγγενές πακέτο .paw δεν διαβάζεται απευθείας). Το Restorm ανακατασκευάζει κάθε αίτημα, κεφαλίδα, σώμα και περιβάλλον, και αντιστοιχίζει τις δυναμικές τιμές του Paw (χρονοσφραγίδες, τυχαίες συμβολοσειρές, UUID) στο πλησιέστερο αντίστοιχο του Restorm.",
         "trademark": "Το Paw είναι σήμα κατατεθέν της RapidAPI, Inc., χρησιμοποιείται εδώ μόνο ως αναφορά συμβατότητας."
       }
+    },
+    "grpcReflection": {
+      "title": "Server gRPC (reflection)",
+      "hint": "Ρωτήστε την υπηρεσία reflection ενός server gRPC που εκτελείται για να ανακαλύψετε τις υπηρεσίες και τις μεθόδους του χωρίς αρχείο .proto.",
+      "addressLabel": "Διεύθυνση server (host:port)",
+      "addressPlaceholder": "localhost:9000",
+      "tlsLabel": "Χρήση TLS",
+      "metadataLabel": "Μεταδεδομένα (προαιρετικές κεφαλίδες ταυτοποίησης)",
+      "connecting": "Σύνδεση…",
+      "import": "Εισαγωγή",
+      "reimportedTitle": "Το gRPC reflection επανεισήχθη",
+      "reimportedNoop": "Ήδη ενημερωμένο — καμία αλλαγή στον server.",
+      "reimportedSummary": "+{{added}} / -{{removed}} / ↻{{merged}} — φορτώστε ξανά το έργο για να δείτε τις αλλαγές.",
+      "unsupported": "Αυτός ο server δεν υποστηρίζει gRPC reflection — εισαγάγετε αντ' αυτού ένα αρχείο .proto.",
+      "unknownError": "Άγνωστο σφάλμα"
     },
     "loading": "Ανάλυση...",
     "noResults": "Δεν βρέθηκαν αιτήματα",

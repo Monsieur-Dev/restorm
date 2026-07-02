@@ -24,6 +24,7 @@ import { logger } from 'electron-core-ui/renderer'
 import { AuthenticationSetupModal } from './AuthenticationSetupModal'
 import { DocumentationHost } from '../documentation/DocumentationHost'
 import { ImportFormatShowcase } from './ImportFormatShowcase'
+import { GrpcReflectionImportModal } from './GrpcReflectionImportModal'
 import { ImportSelectionTree } from './ImportSelectionTree'
 import { allLeafKeys } from './importSelectionHelpers'
 import { filterImportTreeBySelection } from '../../../../shared/utils/importNaturalKey'
@@ -152,6 +153,11 @@ export function ImportModal({
   // (React state updates batch, so a closure would see `null`).
   const attachedAuthHeadersRef = useRef<Record<string, string> | null>(null)
   const [showAuthSetupModal, setShowAuthSetupModal] = useState(false)
+  // gRPC reflection doesn't fit the paste/file/URL auto-detect flow the
+  // source input drives (its "source" is a live host:port connection, not
+  // text to sniff) — it gets its own dedicated form, launched from the
+  // showcase bubble's action button (see `handleShowcaseAction` below).
+  const [showGrpcReflectionModal, setShowGrpcReflectionModal] = useState(false)
   /**
    * One-shot manual headers attached to the spec fetch. Used when
    * the user just wants to paste an `Authorization: Bearer …` token
@@ -678,6 +684,25 @@ export function ImportModal({
     return () => { token.cancelled = true }
   }, [isOpen, refreshContext, t])
 
+  // Dispatches a showcase bubble's action button (see `ImportFormat.actionId`
+  // in `ImportFormatShowcase.tsx`). Only `grpc-reflection` sets one today.
+  const handleShowcaseAction = useCallback((actionId: string) => {
+    if (actionId === 'grpc-reflection') setShowGrpcReflectionModal(true)
+  }, [])
+
+  // The reflection import already produces a fully-formed `EnvironmentFolder`
+  // (same shape `buildEnvironmentFolderFromParsedProto` gives a proto-file
+  // import) — hand it straight to the same `onImport` this modal received,
+  // then close both modals. No selection tree / apiUpdate stamping applies:
+  // there's no partial-selection UX for a live connection, and a reflection
+  // import tracks its own refresh via `protoDescriptorSet` + the request
+  // tab's "Refresh from reflection" button, not `apiUpdate`.
+  const handleGrpcReflectionImport = useCallback((items: FolderItem[]) => {
+    setShowGrpcReflectionModal(false)
+    onImport(items)
+    onClose()
+  }, [onImport, onClose])
+
   const handleAuthAttach = useCallback((authRequest: AuthenticationRequest, resolvedHeaders: Record<string, string>) => {
     setAttachedAuth(authRequest)
     attachedAuthHeadersRef.current = resolvedHeaders
@@ -946,7 +971,7 @@ export function ImportModal({
                 from index 0 instead of resuming mid-cycle. */}
             {displayedSection === 'showcase' && !refreshContext && !isDraggingOver && (
               <div className={`import-section-fade${transitionPhase !== null ? ` import-section-fade--${transitionPhase}` : ''}`}>
-                <ImportFormatShowcase key={showcaseMountSeq} />
+                <ImportFormatShowcase key={showcaseMountSeq} onAction={handleShowcaseAction} />
               </div>
             )}
 
@@ -1008,6 +1033,12 @@ export function ImportModal({
         onClose={() => { setShowAuthSetupModal(false) }}
         onAttach={handleAuthAttach}
         {...(attachedAuth ? { initialRequest: attachedAuth } : {})}
+      />
+
+      <GrpcReflectionImportModal
+        isOpen={showGrpcReflectionModal}
+        onClose={() => { setShowGrpcReflectionModal(false) }}
+        onImport={handleGrpcReflectionImport}
       />
 
       {/* Manual headers sub-modal. Editing happens on the parent's

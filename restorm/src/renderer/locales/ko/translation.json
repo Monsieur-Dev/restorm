@@ -492,6 +492,12 @@
       "notListening": "수신 대기 안 함",
       "listenFailed": "gRPC 서버를 시작하지 못했습니다",
       "snippetsUnavailable": "목 서버에는 코드 스니펫을 사용할 수 없습니다."
+    },
+    "reflection": {
+      "refresh": "reflection에서 새로고침",
+      "refreshFailed": "gRPC reflection을 통한 새로고침 실패",
+      "unsupported": "이 서버는 gRPC reflection을 지원하지 않습니다 — 대신 .proto 파일을 가져오세요.",
+      "unknownError": "알 수 없는 오류"
     }
   },
   "soap": {
@@ -885,6 +891,10 @@
         "description": ".proto 파일(또는 해당 디렉터리)을 가져다 놓으면, restorm이 모든 service, 모든 RPC, 모든 message를 순회하며 각 메서드를 codegen 없이 gRPC 실행기로 보낼 수 있는 타입화된 요청으로 변환합니다.",
         "trademark": "gRPC는 Cloud Native Computing Foundation의 프로젝트입니다."
       },
+      "grpcReflection": {
+        "description": ".proto 파일이 없나요? Restorm을 reflection을 제공하는 실행 중인 gRPC 서버로 연결하세요 — grpc.reflection.v1alpha.ServerReflection을 조회하여 모든 서비스와 메서드를 찾아내고, proto 파일 가져오기와 동일한 형식의 요청 트리를 만들어 오프라인 사용을 위해 로컬에 캐시합니다.",
+        "action": "서버에 연결…"
+      },
       "soap": {
         "description": "WSDL이 있나요? 붙여넣기(또는 URL 입력)만으로 restorm이 각 <port>와 <operation>을 분석하여, 올바른 SOAPAction 헤더, 스키마로 타입화된 본문 스켈레톤, WSDL이 선언한 인증 스킴이 적용된 바로 보낼 수 있는 SOAP 엔벨로프를 생성합니다."
       },
@@ -911,6 +921,21 @@
         "description": "Paw에서 넘어오셨나요? JSON으로 내보낸 파일을 가져다 놓으면 됩니다(앱의 File → Export → JSON — 네이티브 .paw 번들은 직접 읽지 않습니다). restorm은 모든 요청, 헤더, 본문, 환경을 다시 구성하고, Paw의 동적 값(타임스탬프, 임의 문자열, UUID)을 가장 가까운 restorm 대응 값으로 매핑합니다.",
         "trademark": "Paw는 RapidAPI, Inc.의 등록 상표이며, 여기서는 호환성 참조 목적으로만 사용됩니다."
       }
+    },
+    "grpcReflection": {
+      "title": "gRPC 서버 (reflection)",
+      "hint": "실행 중인 gRPC 서버의 reflection 서비스를 조회하여 .proto 파일 없이 서비스와 메서드를 찾습니다.",
+      "addressLabel": "서버 주소 (호스트:포트)",
+      "addressPlaceholder": "localhost:9000",
+      "tlsLabel": "TLS 사용",
+      "metadataLabel": "메타데이터 (선택적 인증 헤더)",
+      "connecting": "연결 중…",
+      "import": "가져오기",
+      "reimportedTitle": "gRPC reflection을 다시 가져왔습니다",
+      "reimportedNoop": "이미 최신 상태입니다 — 서버에 변경 사항이 없습니다.",
+      "reimportedSummary": "+{{added}} / -{{removed}} / ↻{{merged}} — 변경 사항을 보려면 프로젝트를 다시 불러오세요.",
+      "unsupported": "이 서버는 gRPC reflection을 지원하지 않습니다 — 대신 .proto 파일을 가져오세요.",
+      "unknownError": "알 수 없는 오류"
     },
     "loading": "분석 중...",
     "noResults": "요청을 찾을 수 없습니다",

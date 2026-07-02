@@ -493,6 +493,12 @@
       "notListening": "Ei kuuntele",
       "listenFailed": "gRPC-palvelimen käynnistys epäonnistui",
       "snippetsUnavailable": "Koodikatkelmat eivät ole käytettävissä mock-palvelimelle."
+    },
+    "reflection": {
+      "refresh": "Päivitä reflectionista",
+      "refreshFailed": "Päivitys gRPC-reflectionilla epäonnistui",
+      "unsupported": "Tämä palvelin ei tue gRPC-reflectionia — tuo sen sijaan .proto-tiedosto.",
+      "unknownError": "Tuntematon virhe"
     }
   },
   "soap": {
@@ -886,6 +892,10 @@
         "description": "Pudota .proto-tiedosto (tai kokonainen kansio sellaisia), niin Restorm käy läpi jokaisen palvelun, jokaisen RPC:n ja jokaisen viestin — jokaisesta menetelmästä tulee tyypitetty pyyntö, jonka voit lähettää gRPC-suorittimen kautta ilman codegeniä.",
         "trademark": "gRPC on Cloud Native Computing Foundationin projekti."
       },
+      "grpcReflection": {
+        "description": "Eikö .proto-tiedostoa? Osoita Restorm käynnissä olevaan gRPC-palvelimeen, joka tarjoaa reflectionin — se kysyy grpc.reflection.v1alpha.ServerReflection-palvelua, löytää jokaisen palvelun ja metodin ja rakentaa saman tyypitetyn pyyntöpuun kuin proto-tiedoston tuonti, tallennettuna paikallisesti offline-käyttöä varten.",
+        "action": "Yhdistä palvelimeen…"
+      },
       "soap": {
         "description": "Onko WSDL? Liitä se (tai sen URL) — Restorm jäsentää jokaisen <port>- ja <operation>-elementin ja tuottaa lähetysvalmiit SOAP-kuoret oikealla SOAPAction-otsakkeella, skeeman mukaan tyypitetyillä sisältöluonnoksilla ja WSDL:n ilmoittamalla todennusmenetelmällä."
       },
@@ -912,6 +922,21 @@
         "description": "Tuletko Pawsta? Pudota JSON-vientitiedostosi (File → Export → JSON sovelluksessa — natiivia .paw-pakettia ei lueta suoraan). Restorm rakentaa uudelleen jokaisen pyynnön, otsakkeen, sisällön ja ympäristön, ja yhdistää Pawn dynaamiset arvot (aikaleimat, satunnaiset merkkijonot, UUID:t) lähimpään Restorm-vastineeseen.",
         "trademark": "Paw on RapidAPI, Inc:n rekisteröity tavaramerkki, käytetään tässä vain yhteensopivuusviittauksena."
       }
+    },
+    "grpcReflection": {
+      "title": "gRPC-palvelin (reflection)",
+      "hint": "Kysy käynnissä olevan gRPC-palvelimen reflection-palvelua sen palveluiden ja metodien löytämiseksi ilman .proto-tiedostoa.",
+      "addressLabel": "Palvelimen osoite (host:portti)",
+      "addressPlaceholder": "localhost:9000",
+      "tlsLabel": "Käytä TLS:ää",
+      "metadataLabel": "Metatiedot (valinnaiset todennusotsikot)",
+      "connecting": "Yhdistetään…",
+      "import": "Tuo",
+      "reimportedTitle": "gRPC-reflection tuotu uudelleen",
+      "reimportedNoop": "Jo ajan tasalla — ei muutoksia palvelimella.",
+      "reimportedSummary": "+{{added}} / -{{removed}} / ↻{{merged}} — lataa projekti uudelleen nähdäksesi muutokset.",
+      "unsupported": "Tämä palvelin ei tue gRPC-reflectionia — tuo sen sijaan .proto-tiedosto.",
+      "unknownError": "Tuntematon virhe"
     },
     "loading": "Analysoidaan...",
     "noResults": "Pyyntöjä ei löytynyt",

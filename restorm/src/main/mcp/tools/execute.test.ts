@@ -85,6 +85,10 @@ vi.mock('../../services/WebSocketExecutionService', () => ({
 }))
 
 vi.mock('electron', () => ({
+  // `app.isPackaged` backs electron-core-ui's logger level check; without it
+  // ContextService's registerRequest/updateFullRequestData throw on their
+  // logger calls and the new proto-flush test below can't observe any state.
+  app: { isPackaged: false, getPath: () => '/tmp', getName: () => 'restorm', on: () => undefined },
   BrowserWindow: {
     getAllWindows: () => [{
       isDestroyed: () => false,
@@ -94,6 +98,7 @@ vi.mock('electron', () => ({
 }))
 
 import { registerExecutionTools } from './execute'
+import { contextService } from '../../services/ContextService'
 
 interface ReplyText { content: { type: 'text'; text: string }[]; isError?: true }
 function parseReply(reply: unknown): { text: string; isError: boolean; payload: unknown } {
@@ -250,6 +255,52 @@ describe('execute tools — run_request (unary)', () => {
     await vi.advanceTimersByTimeAsync(700)
     const { payload } = parseReply(await promise) as { payload: { body?: unknown } }
     expect(payload.body).toEqual({ reply: 'pong' })
+  })
+
+  it('flushes protoDescriptorSet into ContextService for a reflection-imported request', async () => {
+    // A reflection-imported request carries ONLY protoDescriptorSet (no
+    // protoContent/protoPath). If the flush step drops that field, the
+    // dynamic client falls back to the bundled grpcbin proto instead of
+    // the real server's schema — the bug this test guards against.
+    vi.useFakeTimers()
+    mockState.findById.mockReturnValue({
+      id: 'r1',
+      name: 'r',
+      type: 'grpc',
+      service: 'real.Service',
+      method: 'Ping',
+      callType: 'unary',
+      requestMessage: '{}',
+      protoDescriptorSet: 'BASE64_DESCRIPTOR_SET'
+    })
+    mockState.list
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([{ guid: 'g-new' }])
+    mockState.getDetail.mockResolvedValue({
+      requestId: 'r1',
+      success: true,
+      response: {
+        type: 'grpc',
+        statusCode: 0,
+        responseHeaders: [],
+        responseMessage: '{}',
+        timings: { startedAt: '2026-05-11T00:00:00.000Z', durationMs: 1 },
+        requestUrl: 'grpc://api/real.Service/Ping',
+        requestMethod: 'Ping',
+        requestMetadata: []
+      }
+    })
+
+    const mcp = new FakeMcpService()
+    registerExecutionTools(mcp as unknown as McpService)
+    const promise = mcp.invoke('run_request', { id: 'r1' }) as Promise<unknown>
+    // The flush (flushRequestStateToContext) fires right after the 400ms
+    // tab-activation delay, ahead of the renderer Send dispatch.
+    await vi.advanceTimersByTimeAsync(450)
+    expect(contextService.getRequestContext('r1')?.fullData?.protoDescriptorSet).toBe('BASE64_DESCRIPTOR_SET')
+
+    await vi.advanceTimersByTimeAsync(700)
+    await promise
   })
 
   it('opens the tab + clicks Send via the renderer broadcasts', async () => {

@@ -15,6 +15,8 @@ import {
   eventBus,
   logger,
   getContrastColor,
+  toasterService,
+  useDebouncedCallback,
   type ISelectData,
   type VariableDefinition
 } from 'electron-core-ui/renderer'
@@ -88,6 +90,7 @@ const GrpcClientTabView: React.FC<GrpcRequestTabViewProps> = ({
   const [requestMessage, setRequestMessageState] = useState(request.requestMessage)
   const [callType, setCallTypeState] = useState<GrpcCallType>(request.callType)
   const [isSending, setIsSending] = useState(false)
+  const [isRefreshingReflection, setIsRefreshingReflection] = useState(false)
   const [response, setResponse] = useState<GrpcResponse | null>(null)
   const [liveMessages, setLiveMessages] = useState<GrpcFrameItem[]>([])
   const [historyRefreshKey, setHistoryRefreshKey] = useState(0)
@@ -182,9 +185,10 @@ const GrpcClientTabView: React.FC<GrpcRequestTabViewProps> = ({
       callType: currentRequest.callType,
       requestMessage: currentRequest.requestMessage,
       // The execution service resolves the dynamic client from the request's own
-      // proto (inline content or a `.proto` path); omitting these falls back to
-      // the bundled grpcbin proto, so a custom-proto request fails with "service
-      // not found".
+      // proto (a reflected descriptor set, inline content, or a `.proto` path,
+      // in that precedence order); omitting all three falls back to the bundled
+      // grpcbin proto, so a custom-proto request fails with "service not found".
+      protoDescriptorSet: currentRequest.protoDescriptorSet,
       protoContent: currentRequest.protoContent,
       protoPath: currentRequest.protoPath,
       headers: toKeyValueData(currentRequest.metadata),
@@ -249,14 +253,16 @@ const GrpcClientTabView: React.FC<GrpcRequestTabViewProps> = ({
       callType,
       requestMessage,
       // Keep the proto on every refresh — this effect re-runs on URL/message
-      // edits and would otherwise clobber the proto set on mount, leaving the
-      // execution service to fall back to the bundled grpcbin proto.
+      // edits (and on a "Refresh from reflection" descriptor-set update) and
+      // would otherwise clobber the proto set on mount, leaving the execution
+      // service to fall back to the bundled grpcbin proto.
+      protoDescriptorSet: request.protoDescriptorSet,
       protoContent: request.protoContent,
       protoPath: request.protoPath,
       headers: toKeyValueData(request.metadata),
       body: { type: 'text', content: requestMessage }
     }, sourceIdRef.current)
-  }, [request.id, request.service, request.method, callType, request.metadata, url, requestMessage, request.protoContent, request.protoPath])
+  }, [request.id, request.service, request.method, callType, request.metadata, url, requestMessage, request.protoDescriptorSet, request.protoContent, request.protoPath])
 
   // Sync state changes to reactive request object
   const setUrl = useCallback((value: string): void => {
@@ -365,6 +371,31 @@ const GrpcClientTabView: React.FC<GrpcRequestTabViewProps> = ({
   const handleStreamSend = (): void => {
     void window.restorm?.grpc.send(request.id, requestMessage)
   }
+
+  // "Refresh from reflection": re-query the live server (offline caching —
+  // AC keeps the request runnable from the last-fetched bundle otherwise)
+  // and stamp the fresh descriptor set onto the request, mirroring how a
+  // reflection import first populated `protoDescriptorSet`. Debounced +
+  // gated on `isRefreshingReflection` so rapid clicks can't overlap.
+  const handleRefreshFromReflection = useDebouncedCallback((): void => {
+    if (isRefreshingReflection) return
+    setIsRefreshingReflection(true)
+    void window.restorm?.grpc.reflectQuery({ address: resolvedUrl || url })
+      .then((result) => {
+        if (!result.success || !result.protoDescriptorSet) {
+          toasterService.push('app', {
+            title: t('grpc.reflection.refreshFailed', 'gRPC reflection refresh failed'),
+            body: result.unsupported
+              ? t('grpc.reflection.unsupported', 'This server does not support gRPC reflection — import a .proto file instead.')
+              : (result.error ?? t('grpc.reflection.unknownError', 'Unknown error')),
+            durationMs: 10000
+          })
+          return
+        }
+        updateReactiveProperty(request, 'protoDescriptorSet', result.protoDescriptorSet)
+      })
+      .finally(() => { setIsRefreshingReflection(false) })
+  }, 250)
 
   // Request content (SplitView with Message, Metadata)
   const requestContent = (
@@ -632,8 +663,18 @@ const GrpcClientTabView: React.FC<GrpcRequestTabViewProps> = ({
           )}
         </SendButtonEnvSwitcher>
       </ControlGroup>
-      <div style={{ fontSize: 12, color: 'var(--descriptionForeground)' }}>
-        {request.service}/{request.method}
+      <div style={{ fontSize: 12, color: 'var(--descriptionForeground)', display: 'flex', alignItems: 'center', gap: 6 }}>
+        <span>{request.service}/{request.method}</span>
+        <HeaderHoverTooltip label={t('grpc.reflection.refresh', 'Refresh from reflection')}>
+          <Button
+            small
+            icon="sync"
+            disabled={isRefreshingReflection}
+            onClick={handleRefreshFromReflection}
+            options={{ ariaLabel: t('grpc.reflection.refresh', 'Refresh from reflection') }}
+            data-testid="grpc-reflection-refresh-button"
+          />
+        </HeaderHoverTooltip>
       </div>
     </>
   )

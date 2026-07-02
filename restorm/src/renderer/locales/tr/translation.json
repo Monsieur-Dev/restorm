@@ -493,6 +493,12 @@
       "notListening": "Dinlemiyor",
       "listenFailed": "gRPC sunucusu başlatılamadı",
       "snippetsUnavailable": "Mock sunucu için kod parçacıkları kullanılamaz."
+    },
+    "reflection": {
+      "refresh": "Reflection'dan yenile",
+      "refreshFailed": "gRPC reflection ile yenileme başarısız oldu",
+      "unsupported": "Bu sunucu gRPC reflection'ı desteklemiyor — bunun yerine bir .proto dosyası içe aktarın.",
+      "unknownError": "Bilinmeyen hata"
     }
   },
   "soap": {
@@ -886,6 +892,10 @@
         "description": "Bir .proto dosyasını (veya bir dizinini) bırakın ve Restorm her servisi, her RPC'yi, her mesajı gezerek her yöntemi kod üretimine dokunmadan gRPC yürütücüsü üzerinden gönderebileceğiniz tipli bir isteğe dönüştürür.",
         "trademark": "gRPC, Cloud Native Computing Foundation'ın bir projesidir."
       },
+      "grpcReflection": {
+        "description": ".proto dosyanız yok mu? Restorm'u reflection sunan çalışan bir gRPC sunucusuna yönlendirin — grpc.reflection.v1alpha.ServerReflection'ı sorgular, her servisi ve metodu keşfeder ve bir proto dosyası içe aktarmayla aynı tipli istek ağacını oluşturur; çevrimdışı kullanım için yerel olarak önbelleğe alınır.",
+        "action": "Bir sunucuya bağlan…"
+      },
       "soap": {
         "description": "Bir WSDL'iniz mi var? Yapıştırın (veya URL'sini) — Restorm her <port> ve <operation>'ı ayrıştırır ve doğru SOAPAction başlığı, şema tipli gövde iskeletleri ve WSDL'in beyan ettiği kimlik doğrulama şeması ile birlikte gönderilmeye hazır SOAP zarfları üretir."
       },
@@ -912,6 +922,21 @@
         "description": "Paw'dan mı geliyorsunuz? JSON dışa aktarmanızı bırakın (uygulamada File → Export → JSON — native .paw paketi doğrudan okunmaz). Restorm her isteği, başlığı, gövdeyi ve ortamı yeniden oluşturur ve Paw'ın dinamik değerlerini (zaman damgaları, rastgele dizeler, UUID'ler) en yakın Restorm karşılığına eşler.",
         "trademark": "Paw, RapidAPI, Inc.'in tescilli markasıdır ve burada yalnızca uyumluluk referansı amacıyla kullanılmaktadır."
       }
+    },
+    "grpcReflection": {
+      "title": "gRPC sunucusu (reflection)",
+      "hint": "Çalışan bir gRPC sunucusunun servislerini ve metodlarını .proto dosyası olmadan keşfetmek için reflection servisini sorgulayın.",
+      "addressLabel": "Sunucu adresi (host:port)",
+      "addressPlaceholder": "localhost:9000",
+      "tlsLabel": "TLS kullan",
+      "metadataLabel": "Meta veri (isteğe bağlı kimlik doğrulama başlıkları)",
+      "connecting": "Bağlanıyor…",
+      "import": "İçe aktar",
+      "reimportedTitle": "gRPC reflection yeniden içe aktarıldı",
+      "reimportedNoop": "Zaten güncel — sunucuda değişiklik yok.",
+      "reimportedSummary": "+{{added}} / -{{removed}} / ↻{{merged}} — değişiklikleri görmek için projeyi yeniden yükleyin.",
+      "unsupported": "Bu sunucu gRPC reflection'ı desteklemiyor — bunun yerine bir .proto dosyası içe aktarın.",
+      "unknownError": "Bilinmeyen hata"
     },
     "loading": "Analiz ediliyor...",
     "noResults": "İstek bulunamadı",

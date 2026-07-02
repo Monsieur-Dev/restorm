@@ -21,12 +21,14 @@ import { graphqlExecutionService, type GraphQLExecutionInput } from './services/
 import { graphqlMockServerService } from './services/GraphQLMockServerService'
 import { graphqlSubscriptionService } from './services/GraphQLSubscriptionService'
 import { soapExecutionService, type SOAPExecutionInput } from './services/SOAPExecutionService'
-import { grpcExecutionService, type GRPCExecutionInput } from './services/GRPCExecutionService'
+import { grpcExecutionService, normalizeAddress as normalizeGrpcAddress, type GRPCExecutionInput } from './services/GRPCExecutionService'
 import { grpcMockServerService } from './services/GRPCMockServerService'
 import { odataMockServerService } from './services/ODataMockServerService'
 import { websocketExecutionService, type WebSocketExecutionInput } from './services/WebSocketExecutionService'
 import { scenarioEngine } from './scenarioEngine/engine'
 import { importFrom } from './services/import/ImportManager'
+import { importGrpcFromReflection, findExistingGrpcReflectionFolder, reimportGrpcReflection } from './services/import/GrpcReflectionImportService'
+import { queryReflection, GrpcReflectionUnsupportedError } from './services/grpc/grpcReflectionClient'
 import {
   openEditorArgs,
   saveAsFileArgs, saveAsFolderArgs,
@@ -49,6 +51,7 @@ import {
   graphqlSubscribeArgs, graphqlUnsubscribeArgs, graphqlIsSubscribingArgs,
   grpcExecuteArgs, grpcConnectArgs, grpcSendArgs, grpcDisconnectArgs, grpcCancelArgs, grpcIsActiveArgs,
   grpcListenArgs, grpcStopArgs, grpcIsListeningArgs,
+  grpcReflectImportArgs, grpcReflectQueryArgs,
   odataListenArgs, odataStopArgs, odataIsListeningArgs,
   websocketConnectArgs, websocketDisconnectArgs, websocketSendArgs, websocketIsActiveArgs,
   responsesHistoryListArgs, responsesHistoryGetArgs,
@@ -1187,6 +1190,73 @@ export function registerRestormIPC(deps: {
 
   validatedHandle('grpc:is-listening', grpcIsListeningArgs, (_event, [requestId]) => {
     return grpcMockServerService.isListening(requestId)
+  })
+
+  // gRPC server reflection: import a live server's services/methods without a
+  // `.proto` file, or re-fetch just the descriptor bundle for the "Refresh
+  // from reflection" button on an already-imported request.
+  validatedHandle('grpc:reflect-import', grpcReflectImportArgs, async (_event, [input]) => {
+    const { address, secure } = normalizeGrpcAddress(input.address)
+    try {
+      // Idempotent re-import (same GrpcAdapter contract every other
+      // importer's "Refresh from source" uses, see
+      // `main/services/import/idempotent/GrpcAdapter.ts`): connecting to a
+      // server already imported via reflection merges into that folder
+      // instead of creating a duplicate. Re-fetching an unchanged server
+      // yields an empty diff — no added/removed/merged operations.
+      const existing = findExistingGrpcReflectionFolder(address)
+      if (existing) {
+        const { diff, protoDescriptorSet } = await reimportGrpcReflection(existing, address, {
+          tls: input.tls ?? secure,
+          metadata: input.metadata
+        })
+        return {
+          success: true,
+          merged: true,
+          folderId: existing.id,
+          protoDescriptorSet,
+          diff: {
+            added: diff.added.length,
+            removed: diff.removed.length,
+            merged: diff.merged.length,
+            deprecated: diff.deprecated.length
+          }
+        }
+      }
+      const { folder } = await importGrpcFromReflection(address, {
+        tls: input.tls ?? secure,
+        metadata: input.metadata,
+        name: input.name
+      })
+      return { success: true, folder }
+    } catch (error) {
+      const unsupported = error instanceof GrpcReflectionUnsupportedError
+      logger.error('[IPC] gRPC reflection import error:', error)
+      return {
+        success: false,
+        unsupported,
+        error: error instanceof Error ? error.message : String(error)
+      }
+    }
+  })
+
+  validatedHandle('grpc:reflect-query', grpcReflectQueryArgs, async (_event, [input]) => {
+    const { address, secure } = normalizeGrpcAddress(input.address)
+    try {
+      const { services, fileDescriptorSet } = await queryReflection(address, {
+        tls: input.tls ?? secure,
+        metadata: input.metadata
+      })
+      return { success: true, services, protoDescriptorSet: fileDescriptorSet.toString('base64') }
+    } catch (error) {
+      const unsupported = error instanceof GrpcReflectionUnsupportedError
+      logger.error('[IPC] gRPC reflection query error:', error)
+      return {
+        success: false,
+        unsupported,
+        error: error instanceof Error ? error.message : String(error)
+      }
+    }
   })
 
   // OData mock server (server mode): host a local OData v4 service on the shared

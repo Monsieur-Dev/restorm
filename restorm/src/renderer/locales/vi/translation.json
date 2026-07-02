@@ -492,6 +492,12 @@
       "notListening": "Không lắng nghe",
       "listenFailed": "Không thể khởi động máy chủ gRPC",
       "snippetsUnavailable": "Đoạn mã không khả dụng cho máy chủ giả lập."
+    },
+    "reflection": {
+      "refresh": "Làm mới từ reflection",
+      "refreshFailed": "Làm mới qua gRPC reflection thất bại",
+      "unsupported": "Máy chủ này không hỗ trợ gRPC reflection — hãy nhập tệp .proto thay thế.",
+      "unknownError": "Lỗi không xác định"
     }
   },
   "soap": {
@@ -885,6 +891,10 @@
         "description": "Thả tệp .proto (hoặc một thư mục chứa chúng) và Restorm đi qua mọi dịch vụ, mọi RPC, mọi thông điệp — biến mỗi phương thức thành yêu cầu kiểu mà bạn có thể gửi qua trình thực thi gRPC mà không cần chạm vào codegen.",
         "trademark": "gRPC là dự án của Cloud Native Computing Foundation."
       },
+      "grpcReflection": {
+        "description": "Không có tệp .proto? Trỏ Restorm đến một máy chủ gRPC đang chạy có hỗ trợ reflection — nó truy vấn grpc.reflection.v1alpha.ServerReflection, khám phá từng dịch vụ và phương thức, rồi dựng cùng một cây yêu cầu có kiểu như khi nhập tệp proto, được lưu đệm cục bộ để dùng ngoại tuyến.",
+        "action": "Kết nối đến máy chủ…"
+      },
       "soap": {
         "description": "Có WSDL? Dán nó (hoặc URL của nó) — Restorm phân tích mỗi <port> và <operation> và tạo các phong bì SOAP sẵn sàng gửi với header SOAPAction phù hợp, khung body kiểu sơ đồ và sơ đồ xác thực mà WSDL khai báo."
       },
@@ -911,6 +921,21 @@
         "description": "Đến từ Paw? Thả tệp xuất JSON của bạn (File → Export → JSON trong ứng dụng — gói .paw gốc không được đọc trực tiếp). Restorm dựng lại mọi yêu cầu, header, body và môi trường, đồng thời ánh xạ các giá trị động của Paw (dấu thời gian, chuỗi ngẫu nhiên, UUID) sang giá trị tương đương gần nhất trong Restorm.",
         "trademark": "Paw là nhãn hiệu đã đăng ký của RapidAPI, Inc., được sử dụng ở đây chỉ để tham chiếu tương thích."
       }
+    },
+    "grpcReflection": {
+      "title": "Máy chủ gRPC (reflection)",
+      "hint": "Truy vấn dịch vụ reflection của một máy chủ gRPC đang chạy để khám phá các dịch vụ và phương thức của nó mà không cần tệp .proto.",
+      "addressLabel": "Địa chỉ máy chủ (host:port)",
+      "addressPlaceholder": "localhost:9000",
+      "tlsLabel": "Dùng TLS",
+      "metadataLabel": "Siêu dữ liệu (tiêu đề xác thực tùy chọn)",
+      "connecting": "Đang kết nối…",
+      "import": "Nhập",
+      "reimportedTitle": "Đã nhập lại gRPC reflection",
+      "reimportedNoop": "Đã cập nhật — không có thay đổi trên máy chủ.",
+      "reimportedSummary": "+{{added}} / -{{removed}} / ↻{{merged}} — tải lại dự án để xem các thay đổi.",
+      "unsupported": "Máy chủ này không hỗ trợ gRPC reflection — hãy nhập tệp .proto thay thế.",
+      "unknownError": "Lỗi không xác định"
     },
     "loading": "Đang phân tích...",
     "noResults": "Không tìm thấy yêu cầu",

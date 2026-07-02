@@ -493,6 +493,12 @@
       "notListening": "Not listening",
       "listenFailed": "gRPC server failed to start",
       "snippetsUnavailable": "Code snippets are not available for a mock server."
+    },
+    "reflection": {
+      "refresh": "Refresh from reflection",
+      "refreshFailed": "gRPC reflection refresh failed",
+      "unsupported": "This server does not support gRPC reflection — import a .proto file instead.",
+      "unknownError": "Unknown error"
     }
   },
   "soap": {
@@ -886,6 +892,10 @@
         "description": "Drop a .proto file (or a directory of them) and Restorm walks every service, every RPC, every message — turning each method into a typed request you can send through the gRPC executor without touching codegen.",
         "trademark": "gRPC is a project of the Cloud Native Computing Foundation."
       },
+      "grpcReflection": {
+        "description": "No .proto file? Point Restorm at a running gRPC server that exposes reflection — it queries grpc.reflection.v1alpha.ServerReflection, discovers every service and method, and builds the same typed request tree as a proto-file import, cached locally for offline use.",
+        "action": "Connect to a server…"
+      },
       "soap": {
         "description": "Got a WSDL? Paste it (or its URL) — Restorm parses every <port> and <operation> and produces ready-to-send SOAP envelopes with the right SOAPAction header, schema-typed body skeletons, and the auth scheme the WSDL declares."
       },
@@ -912,6 +922,21 @@
         "description": "Coming from Paw? Drop your JSON export (File → Export → JSON in the app — the native .paw bundle isn't read directly). Restorm rebuilds every request, header, body, and environment, and maps Paw's dynamic values (timestamps, random strings, UUIDs) to their closest Restorm equivalent.",
         "trademark": "Paw is a registered trademark of RapidAPI, Inc., used here for compatibility reference only."
       }
+    },
+    "grpcReflection": {
+      "title": "gRPC server (reflection)",
+      "hint": "Query a running gRPC server's reflection service to discover its services and methods without a .proto file.",
+      "addressLabel": "Server address (host:port)",
+      "addressPlaceholder": "localhost:9000",
+      "tlsLabel": "Use TLS",
+      "metadataLabel": "Metadata (optional auth headers)",
+      "connecting": "Connecting…",
+      "import": "Import",
+      "reimportedTitle": "gRPC reflection re-imported",
+      "reimportedNoop": "Already up to date — no changes on the server.",
+      "reimportedSummary": "+{{added}} / -{{removed}} / ↻{{merged}} — reload the project to see the changes.",
+      "unsupported": "This server does not support gRPC reflection — import a .proto file instead.",
+      "unknownError": "Unknown error"
     },
     "loading": "Analyzing...",
     "noResults": "No requests found",
