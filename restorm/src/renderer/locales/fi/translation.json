@@ -553,6 +553,38 @@
     "clientsConnected": "{{count}} asiakas/asiakkaita yhdistetty",
     "notListening": "Ei kuuntele"
   },
+  "jsonrpc": {
+    "send": "Lähetä",
+    "urlPlaceholder": "JSON-RPC-päätepisteen URL",
+    "methodPlaceholder": "metodi",
+    "idPlaceholder": "id (auto)",
+    "notificationModeTooltip": "Ilmoitustila — ei id:tä, ei vastausta odoteta",
+    "tabs": {
+      "params": "Parametrit",
+      "headers": "Otsakkeet"
+    },
+    "response": {
+      "notificationSent": "Ilmoitus lähetetty",
+      "errorLabel": "JSON-RPC-virhe {{code}}:"
+    }
+  },
+  "jsonrpcBatch": {
+    "send": "Lähetä erä",
+    "tabs": {
+      "calls": "Kutsut"
+    },
+    "empty": "Ei kutsuja vielä. Lisää yksi alle.",
+    "methodPlaceholder": "metodi",
+    "idPlaceholder": "id (auto)",
+    "moveUp": "Siirrä ylös",
+    "moveDown": "Siirrä alas",
+    "remove": "Poista kutsu",
+    "paramsLabel": "Parametrit (JSON)",
+    "add": "Lisää kutsu",
+    "response": {
+      "unmatched": "Ei vastaavaa vastausmerkintää."
+    }
+  },
   "search": {
     "placeholder": "Etsi...",
     "noResults": "Tuloksia ei löytynyt",

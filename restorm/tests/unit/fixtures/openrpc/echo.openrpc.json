@@ -1,0 +1,56 @@
+{
+  "openrpc": "1.2.6",
+  "info": {
+    "title": "Echo JSON-RPC API",
+    "version": "1.0.0"
+  },
+  "servers": [
+    { "name": "default", "url": "http://localhost:8080/rpc" }
+  ],
+  "methods": [
+    {
+      "name": "echo",
+      "summary": "Echoes back its positional arguments.",
+      "paramStructure": "by-position",
+      "params": [
+        { "name": "message", "schema": { "type": "string" } },
+        { "name": "count", "schema": { "type": "integer" } }
+      ],
+      "result": {
+        "name": "result",
+        "schema": { "type": "string" }
+      }
+    },
+    {
+      "name": "namedEcho",
+      "summary": "Echoes back a named user object.",
+      "paramStructure": "by-name",
+      "params": [
+        { "name": "user", "schema": { "$ref": "#/components/schemas/User" } }
+      ],
+      "result": {
+        "name": "result",
+        "schema": { "$ref": "#/components/schemas/User" }
+      }
+    },
+    {
+      "name": "failMethod",
+      "summary": "Always returns a JSON-RPC error — useful for the mock's error-path coverage.",
+      "deprecated": true,
+      "params": [],
+      "result": { "name": "result", "schema": { "type": "null" } }
+    }
+  ],
+  "components": {
+    "schemas": {
+      "User": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "age": { "type": "integer" },
+          "active": { "type": "boolean" }
+        }
+      }
+    }
+  }
+}

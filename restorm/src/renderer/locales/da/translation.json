@@ -553,6 +553,38 @@
     "clientsConnected": "{{count}} klient(er) forbundet",
     "notListening": "Lytter ikke"
   },
+  "jsonrpc": {
+    "send": "Send",
+    "urlPlaceholder": "JSON-RPC-endpoint-URL",
+    "methodPlaceholder": "metode",
+    "idPlaceholder": "id (auto)",
+    "notificationModeTooltip": "Notifikationstilstand — intet id, intet svar forventes",
+    "tabs": {
+      "params": "Parametre",
+      "headers": "Headere"
+    },
+    "response": {
+      "notificationSent": "Notifikation sendt",
+      "errorLabel": "JSON-RPC-fejl {{code}}:"
+    }
+  },
+  "jsonrpcBatch": {
+    "send": "Send batch",
+    "tabs": {
+      "calls": "Kald"
+    },
+    "empty": "Ingen kald endnu. Tilføj et nedenfor.",
+    "methodPlaceholder": "metode",
+    "idPlaceholder": "id (auto)",
+    "moveUp": "Flyt op",
+    "moveDown": "Flyt ned",
+    "remove": "Fjern kald",
+    "paramsLabel": "Parametre (JSON)",
+    "add": "Tilføj kald",
+    "response": {
+      "unmatched": "Ingen matchende svarpost."
+    }
+  },
   "search": {
     "placeholder": "Søg...",
     "noResults": "Ingen resultater fundet",

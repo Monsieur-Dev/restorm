@@ -94,7 +94,8 @@ class ContextService {
     graphqlSnippetTemplate: null,
     websocketSnippetTemplate: null,
     grpcSnippetTemplate: null,
-    soapSnippetTemplate: null
+    soapSnippetTemplate: null,
+    jsonRpcSnippetTemplate: null
   }
 
   /**

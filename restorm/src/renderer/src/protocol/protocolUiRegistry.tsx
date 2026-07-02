@@ -8,7 +8,9 @@ import type {
   GrpcRequest,
   SoapRequest,
   WebSocketRequest,
-  ODataRequest
+  ODataRequest,
+  JsonRpcRequest,
+  JsonRpcBatchRequest
 } from '../../../shared/types/requests'
 import {
   HTTPRequestTabView,
@@ -17,7 +19,9 @@ import {
   SoapRequestTabView,
   SoapServerRequestTabView,
   WebSocketRequestTabView,
-  ODataRequestTabView
+  ODataRequestTabView,
+  JsonRpcRequestTabView,
+  JsonRpcBatchRequestTabView
 } from '../components/RequestTabViews'
 
 /**
@@ -45,7 +49,9 @@ export const PROTOCOL_TAB_VIEWS: Record<RequestType, (request: Request) => React
     ? <SoapServerRequestTabView request={request as SoapRequest} />
     : <SoapRequestTabView request={request as SoapRequest} />),
   websocket: (request) => <WebSocketRequestTabView request={request as WebSocketRequest} />,
-  odata: (request) => <ODataRequestTabView request={request as ODataRequest} />
+  odata: (request) => <ODataRequestTabView request={request as ODataRequest} />,
+  jsonrpc: (request) => <JsonRpcRequestTabView request={request as JsonRpcRequest} />,
+  jsonrpcBatch: (request) => <JsonRpcBatchRequestTabView request={request as JsonRpcBatchRequest} />
 }
 
 /** Render the tab-view editor element for a request, chosen by its protocol. */

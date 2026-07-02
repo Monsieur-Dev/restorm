@@ -61,6 +61,7 @@ export interface CompiledSnippetTemplates {
   websocketSnippetTemplate: Handlebars.TemplateDelegate | null
   grpcSnippetTemplate: Handlebars.TemplateDelegate | null
   soapSnippetTemplate: Handlebars.TemplateDelegate | null
+  jsonRpcSnippetTemplate: Handlebars.TemplateDelegate | null
 }
 
 /**
@@ -73,7 +74,8 @@ export function compileSnippetTemplates(): CompiledSnippetTemplates {
     graphqlSnippetTemplate: null,
     websocketSnippetTemplate: null,
     grpcSnippetTemplate: null,
-    soapSnippetTemplate: null
+    soapSnippetTemplate: null,
+    jsonRpcSnippetTemplate: null
   }
 
   try {
@@ -82,12 +84,14 @@ export function compileSnippetTemplates(): CompiledSnippetTemplates {
     const websocketTemplate = loadTemplate('code-snippets-websocket.hbs')
     const grpcTemplate = loadTemplate('code-snippets-grpc.hbs')
     const soapTemplate = loadTemplate('code-snippets-soap.hbs')
+    const jsonRpcTemplate = loadTemplate('code-snippets-jsonrpc.hbs')
 
     if (httpTemplate) templates.httpSnippetTemplate = Handlebars.compile(httpTemplate, { noEscape: true })
     if (graphqlTemplate) templates.graphqlSnippetTemplate = Handlebars.compile(graphqlTemplate, { noEscape: true })
     if (websocketTemplate) templates.websocketSnippetTemplate = Handlebars.compile(websocketTemplate, { noEscape: true })
     if (grpcTemplate) templates.grpcSnippetTemplate = Handlebars.compile(grpcTemplate, { noEscape: true })
     if (soapTemplate) templates.soapSnippetTemplate = Handlebars.compile(soapTemplate, { noEscape: true })
+    if (jsonRpcTemplate) templates.jsonRpcSnippetTemplate = Handlebars.compile(jsonRpcTemplate, { noEscape: true })
 
     logger.info('[CodeSnippetGenerator] Code snippet templates loaded and compiled')
   } catch (error) {
@@ -100,6 +104,35 @@ export function compileSnippetTemplates(): CompiledSnippetTemplates {
 // ============================================================================
 // Code Snippet Generation
 // ============================================================================
+
+/**
+ * Compose one `{ jsonrpc: '2.0', method, params, id }` envelope for the
+ * snippet templates — mirrors `JsonRpcExecutionService.composeEnvelope`'s
+ * shape (minus the parse-error/notification-mode branches, which don't apply
+ * to a static snippet preview). `params` falls back to an empty object when
+ * it doesn't parse as JSON so the snippet still renders instead of throwing.
+ */
+function buildJsonRpcSnippetEnvelope(
+  call: { method: string; params: string; rpcId: string },
+  envContext: TransformedContext,
+  transformValue: TransformValueFn
+): Record<string, unknown> {
+  const method = transformValue(call.method, envContext)
+  const rawParams = call.params.trim()
+  let params: unknown
+  if (rawParams.length > 0) {
+    try {
+      params = JSON.parse(transformValue(rawParams, envContext))
+    } catch {
+      params = {}
+    }
+  }
+  const id = transformValue(call.rpcId, envContext) || 1
+  const envelope: Record<string, unknown> = { jsonrpc: '2.0', method }
+  if (params !== undefined) envelope.params = params
+  envelope.id = id
+  return envelope
+}
 
 /**
  * Generate code snippets for a request.
@@ -278,6 +311,38 @@ export function generateCodeSnippets(
           service: data.soapService ?? '',
           operation: data.operation ?? '',
           body: soapBody,
+          headers: headers.length > 0 ? headers : null
+        })
+      }
+      break
+    }
+
+    case 'jsonrpc': {
+      const envelope = buildJsonRpcSnippetEnvelope(
+        { method: data.jsonRpcMethod ?? '', params: data.jsonRpcParams ?? '', rpcId: data.jsonRpcId ?? '' },
+        envContext,
+        transformValue
+      )
+      if (templates.jsonRpcSnippetTemplate) {
+        markdown = templates.jsonRpcSnippetTemplate({
+          url: resolvedUrl,
+          envelope: JSON.stringify(envelope),
+          isBatch: false,
+          headers: headers.length > 0 ? headers : null
+        })
+      }
+      break
+    }
+
+    case 'jsonrpcBatch': {
+      const envelope = (data.jsonRpcChildren ?? []).map((child) =>
+        buildJsonRpcSnippetEnvelope(child, envContext, transformValue)
+      )
+      if (templates.jsonRpcSnippetTemplate) {
+        markdown = templates.jsonRpcSnippetTemplate({
+          url: resolvedUrl,
+          envelope: JSON.stringify(envelope),
+          isBatch: true,
           headers: headers.length > 0 ? headers : null
         })
       }

@@ -55,6 +55,10 @@ const fixtures: Record<string, { content: string; filePath?: string }> = {
     // JSON-CSDL (v4) — top-level $Version discriminator
     content: readFileSync(join(FIXTURES, 'odata', 'v4-csdl.json'), 'utf-8')
   },
+  openrpc: {
+    // Top-level `openrpc` + `methods` discriminator
+    content: readFileSync(join(FIXTURES, 'openrpc', 'echo.openrpc.json'), 'utf-8')
+  },
   'thunder-client': {
     content: readFileSync(join(FIXTURES, 'thunder-client', 'thunder-collection-sample.json'), 'utf-8')
   },

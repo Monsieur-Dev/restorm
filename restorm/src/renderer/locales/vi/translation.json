@@ -552,6 +552,38 @@
     "clientsConnected": "{{count}} máy khách đã kết nối",
     "notListening": "Không lắng nghe"
   },
+  "jsonrpc": {
+    "send": "Gửi",
+    "urlPlaceholder": "URL điểm cuối JSON-RPC",
+    "methodPlaceholder": "phương thức",
+    "idPlaceholder": "id (tự động)",
+    "notificationModeTooltip": "Chế độ thông báo — không có id, không chờ phản hồi",
+    "tabs": {
+      "params": "Tham số",
+      "headers": "Header"
+    },
+    "response": {
+      "notificationSent": "Đã gửi thông báo",
+      "errorLabel": "Lỗi JSON-RPC {{code}}:"
+    }
+  },
+  "jsonrpcBatch": {
+    "send": "Gửi lô",
+    "tabs": {
+      "calls": "Lệnh gọi"
+    },
+    "empty": "Chưa có lệnh gọi nào. Thêm một lệnh bên dưới.",
+    "methodPlaceholder": "phương thức",
+    "idPlaceholder": "id (tự động)",
+    "moveUp": "Di chuyển lên",
+    "moveDown": "Di chuyển xuống",
+    "remove": "Xóa lệnh gọi",
+    "paramsLabel": "Tham số (JSON)",
+    "add": "Thêm lệnh gọi",
+    "response": {
+      "unmatched": "Không có mục phản hồi khớp."
+    }
+  },
   "search": {
     "placeholder": "Tìm kiếm...",
     "noResults": "Không tìm thấy kết quả",

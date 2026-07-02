@@ -553,6 +553,38 @@
     "clientsConnected": "{{count}} klient(er) tilkoblet",
     "notListening": "Lytter ikke"
   },
+  "jsonrpc": {
+    "send": "Send",
+    "urlPlaceholder": "JSON-RPC-endepunkt-URL",
+    "methodPlaceholder": "metode",
+    "idPlaceholder": "id (auto)",
+    "notificationModeTooltip": "Varselmodus — ingen id, ingen respons forventet",
+    "tabs": {
+      "params": "Parametre",
+      "headers": "Headere"
+    },
+    "response": {
+      "notificationSent": "Varsel sendt",
+      "errorLabel": "JSON-RPC-feil {{code}}:"
+    }
+  },
+  "jsonrpcBatch": {
+    "send": "Send batch",
+    "tabs": {
+      "calls": "Kall"
+    },
+    "empty": "Ingen kall ennå. Legg til ett under.",
+    "methodPlaceholder": "metode",
+    "idPlaceholder": "id (auto)",
+    "moveUp": "Flytt opp",
+    "moveDown": "Flytt ned",
+    "remove": "Fjern kall",
+    "paramsLabel": "Parametre (JSON)",
+    "add": "Legg til kall",
+    "response": {
+      "unmatched": "Ingen samsvarende svarpost."
+    }
+  },
   "search": {
     "placeholder": "Søk...",
     "noResults": "Ingen resultater funnet",

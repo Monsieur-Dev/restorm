@@ -10,6 +10,8 @@ import type {
   WebSocketRequest,
   ODataRequest,
   AuthenticationRequest,
+  JsonRpcRequest,
+  JsonRpcBatchRequest,
   Environment,
   Scenario
 } from './collections'
@@ -97,6 +99,24 @@ export interface ODataRequestTab extends BaseRestormTab {
   environments?: Environment[] | undefined
 }
 
+/** Tab displaying a single JSON-RPC 2.0 call */
+export interface JsonRpcRequestTab extends BaseRestormTab {
+  tabType: 'jsonrpc-request'
+  /** The JSON-RPC request data to display */
+  request: JsonRpcRequest
+  /** Environments available for this request */
+  environments?: Environment[] | undefined
+}
+
+/** Tab displaying a `jsonrpc-batch` request */
+export interface JsonRpcBatchRequestTab extends BaseRestormTab {
+  tabType: 'jsonrpc-batch-request'
+  /** The JSON-RPC batch request data to display */
+  request: JsonRpcBatchRequest
+  /** Environments available for this request */
+  environments?: Environment[] | undefined
+}
+
 /** Tab displaying an Authentication request (HTTP + auth config tab) */
 export interface AuthenticationRequestTab extends BaseRestormTab {
   tabType: 'auth-request'
@@ -179,6 +199,8 @@ export type RestormEditorTab =
   | SoapRequestTab
   | WebSocketRequestTab
   | ODataRequestTab
+  | JsonRpcRequestTab
+  | JsonRpcBatchRequestTab
   | AuthenticationRequestTab
   | ScenarioEditorTab
   | ConsoleTab
@@ -259,6 +281,16 @@ export function isODataRequestTab(tab: RestormEditorTab): tab is ODataRequestTab
   return tab.tabType === 'odata-request'
 }
 
+/** Type guard for JsonRpcRequestTab */
+export function isJsonRpcRequestTab(tab: RestormEditorTab): tab is JsonRpcRequestTab {
+  return tab.tabType === 'jsonrpc-request'
+}
+
+/** Type guard for JsonRpcBatchRequestTab */
+export function isJsonRpcBatchRequestTab(tab: RestormEditorTab): tab is JsonRpcBatchRequestTab {
+  return tab.tabType === 'jsonrpc-batch-request'
+}
+
 /** Type guard for AuthenticationRequestTab */
 export function isAuthenticationRequestTab(tab: RestormEditorTab): tab is AuthenticationRequestTab {
   return tab.tabType === 'auth-request'
@@ -272,11 +304,13 @@ export type AnyRequestTab =
   | SoapRequestTab
   | WebSocketRequestTab
   | ODataRequestTab
+  | JsonRpcRequestTab
+  | JsonRpcBatchRequestTab
   | AuthenticationRequestTab
 
 const REQUEST_TAB_TYPES: ReadonlySet<string> = new Set([
   'http-request', 'graphql-request', 'grpc-request', 'soap-request',
-  'websocket-request', 'odata-request', 'auth-request'
+  'websocket-request', 'odata-request', 'jsonrpc-request', 'jsonrpc-batch-request', 'auth-request'
 ])
 
 /** Type guard for ANY request tab (any protocol). Use this instead of a

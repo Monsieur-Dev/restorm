@@ -54,6 +54,21 @@ services:
     ports:
       - "5102:5102"
 
+  # JSON-RPC 2.0 - tiny zero-dependency node:http mock used by the
+  # `jsonrpc-execution` E2E suite. Single POST endpoint (/rpc) dispatches on
+  # `method`: echo/namedEcho (positional/named params), add (batch mix),
+  # failMethod (error path). Pure `node:http`, mounted like http-util — no
+  # npm install, boots instantly. Listens on :8095.
+  jsonrpc:
+    image: node:20-alpine
+    container_name: restorm-jsonrpc
+    working_dir: /app
+    volumes:
+      - ./jsonrpc-server:/app
+    command: node server.js
+    ports:
+      - "8095:8095"
+
   # GraphQL - Custom test server
   graphql:
     image: node:20-alpine

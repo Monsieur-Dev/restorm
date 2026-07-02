@@ -553,6 +553,38 @@
     "clientsConnected": "{{count}} Client(s) verbunden",
     "notListening": "Hört nicht zu"
   },
+  "jsonrpc": {
+    "send": "Senden",
+    "urlPlaceholder": "JSON-RPC-Endpunkt-URL",
+    "methodPlaceholder": "Methode",
+    "idPlaceholder": "Id (automatisch)",
+    "notificationModeTooltip": "Benachrichtigungsmodus — keine Id, keine Antwort erwartet",
+    "tabs": {
+      "params": "Parameter",
+      "headers": "Header"
+    },
+    "response": {
+      "notificationSent": "Benachrichtigung gesendet",
+      "errorLabel": "JSON-RPC-Fehler {{code}}:"
+    }
+  },
+  "jsonrpcBatch": {
+    "send": "Stapel senden",
+    "tabs": {
+      "calls": "Aufrufe"
+    },
+    "empty": "Noch keine Aufrufe. Fügen Sie unten einen hinzu.",
+    "methodPlaceholder": "Methode",
+    "idPlaceholder": "Id (automatisch)",
+    "moveUp": "Nach oben",
+    "moveDown": "Nach unten",
+    "remove": "Aufruf entfernen",
+    "paramsLabel": "Parameter (JSON)",
+    "add": "Aufruf hinzufügen",
+    "response": {
+      "unmatched": "Kein passender Antworteintrag."
+    }
+  },
   "search": {
     "placeholder": "Suchen...",
     "noResults": "Keine Ergebnisse gefunden",

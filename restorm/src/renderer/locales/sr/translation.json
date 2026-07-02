@@ -554,6 +554,38 @@
     "clientsConnected": "{{count}} клијент(а) повезано",
     "notListening": "Не слуша"
   },
+  "jsonrpc": {
+    "send": "Pošalji",
+    "urlPlaceholder": "URL JSON-RPC крајње тачке",
+    "methodPlaceholder": "метода",
+    "idPlaceholder": "ид (аутоматски)",
+    "notificationModeTooltip": "Режим обавештења — без ид-а, без очекиваног одговора",
+    "tabs": {
+      "params": "Parametri",
+      "headers": "Zaglavlja"
+    },
+    "response": {
+      "notificationSent": "Обавештење послато",
+      "errorLabel": "JSON-RPC грешка {{code}}:"
+    }
+  },
+  "jsonrpcBatch": {
+    "send": "Пошаљи пакет",
+    "tabs": {
+      "calls": "Позиви"
+    },
+    "empty": "Још нема позива. Додајте један испод.",
+    "methodPlaceholder": "метода",
+    "idPlaceholder": "ид (аутоматски)",
+    "moveUp": "Помери горе",
+    "moveDown": "Помери доле",
+    "remove": "Уклони позив",
+    "paramsLabel": "Параметри (JSON)",
+    "add": "Додај позив",
+    "response": {
+      "unmatched": "Нема одговарајућег уноса одговора."
+    }
+  },
   "search": {
     "placeholder": "Pretraži...",
     "noResults": "Nema rezultata",

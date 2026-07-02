@@ -34,8 +34,8 @@ import type { FullRequestData } from '../../services/ContextServiceTypes'
 import { responseHistoryService } from '../../services'
 import { websocketExecutionService } from '../../services/WebSocketExecutionService'
 import { PROTOCOL_EXECUTORS } from '../../protocol/executorRegistry'
-import { isHTTPRequest, isGraphQLRequest, isGrpcRequest, isSoapRequest, isODataRequest, isAuthenticationRequest, isWebSocketRequest, isEnvironmentFolder } from '../../../shared/types/collections'
-import type { HTTPRequest, GraphQLRequest, GrpcRequest, SoapRequest, WebSocketRequest, AuthenticationRequest, ODataRequest, KeyValue, EnvironmentFolder } from '../../../shared/types/collections'
+import { isHTTPRequest, isGraphQLRequest, isGrpcRequest, isSoapRequest, isODataRequest, isAuthenticationRequest, isWebSocketRequest, isJsonRpcRequest, isJsonRpcBatchRequest, isEnvironmentFolder } from '../../../shared/types/collections'
+import type { HTTPRequest, GraphQLRequest, GrpcRequest, SoapRequest, WebSocketRequest, AuthenticationRequest, ODataRequest, JsonRpcRequest, JsonRpcBatchRequest, KeyValue, EnvironmentFolder } from '../../../shared/types/collections'
 import { isRequest, type FolderItem, type Request } from '../../../shared/models'
 
 function jsonReply(value: unknown): { content: { type: 'text'; text: string }[] } {
@@ -408,6 +408,17 @@ export function flushRequestStateToContext(req: Request, scenarioVariables?: Rea
     data.protocol = ws.protocol
     if ('event' in ws) (data as { event?: unknown }).event = (ws as { event?: unknown }).event
     if ('message' in ws) (data as { message?: unknown }).message = (ws as { message?: unknown }).message
+  } else if (isJsonRpcRequest(req)) {
+    const rpc = req as JsonRpcRequest
+    data.requestType = 'jsonrpc'
+    data.jsonRpcMethod = rpc.method
+    data.jsonRpcParams = rpc.params
+    data.jsonRpcId = rpc.rpcId
+    if (rpc.notificationMode !== undefined) data.jsonRpcNotificationMode = rpc.notificationMode
+  } else if (isJsonRpcBatchRequest(req)) {
+    const batch = req as JsonRpcBatchRequest
+    data.requestType = 'jsonrpcBatch'
+    data.jsonRpcChildren = batch.children
   }
   // If the request isn't registered with ContextService yet, register
   // it inline. Until recently we bailed out here on the assumption

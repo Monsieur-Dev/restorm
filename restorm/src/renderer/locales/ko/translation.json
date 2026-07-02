@@ -552,6 +552,38 @@
     "clientsConnected": "{{count}}개 클라이언트 연결됨",
     "notListening": "수신 안 함"
   },
+  "jsonrpc": {
+    "send": "보내기",
+    "urlPlaceholder": "JSON-RPC 엔드포인트 URL",
+    "methodPlaceholder": "메서드",
+    "idPlaceholder": "id (자동)",
+    "notificationModeTooltip": "알림 모드 — id 없음, 응답 대기 안 함",
+    "tabs": {
+      "params": "매개변수",
+      "headers": "헤더"
+    },
+    "response": {
+      "notificationSent": "알림 전송됨",
+      "errorLabel": "JSON-RPC 오류 {{code}}:"
+    }
+  },
+  "jsonrpcBatch": {
+    "send": "배치 보내기",
+    "tabs": {
+      "calls": "호출"
+    },
+    "empty": "아직 호출이 없습니다. 아래에 하나를 추가하세요.",
+    "methodPlaceholder": "메서드",
+    "idPlaceholder": "id (자동)",
+    "moveUp": "위로 이동",
+    "moveDown": "아래로 이동",
+    "remove": "호출 제거",
+    "paramsLabel": "매개변수 (JSON)",
+    "add": "호출 추가",
+    "response": {
+      "unmatched": "일치하는 응답 항목이 없습니다."
+    }
+  },
   "search": {
     "placeholder": "검색...",
     "noResults": "결과를 찾을 수 없습니다",

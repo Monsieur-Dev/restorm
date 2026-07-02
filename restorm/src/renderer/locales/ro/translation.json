@@ -554,6 +554,38 @@
     "clientsConnected": "{{count}} client(i) conectat(i)",
     "notListening": "Nu ascultă"
   },
+  "jsonrpc": {
+    "send": "Trimite",
+    "urlPlaceholder": "URL punct final JSON-RPC",
+    "methodPlaceholder": "metodă",
+    "idPlaceholder": "id (automat)",
+    "notificationModeTooltip": "Mod notificare — fără id, fără răspuns așteptat",
+    "tabs": {
+      "params": "Parametri",
+      "headers": "Antete"
+    },
+    "response": {
+      "notificationSent": "Notificare trimisă",
+      "errorLabel": "Eroare JSON-RPC {{code}}:"
+    }
+  },
+  "jsonrpcBatch": {
+    "send": "Trimite lotul",
+    "tabs": {
+      "calls": "Apeluri"
+    },
+    "empty": "Niciun apel încă. Adaugă unul mai jos.",
+    "methodPlaceholder": "metodă",
+    "idPlaceholder": "id (automat)",
+    "moveUp": "Mută în sus",
+    "moveDown": "Mută în jos",
+    "remove": "Elimină apelul",
+    "paramsLabel": "Parametri (JSON)",
+    "add": "Adaugă apel",
+    "response": {
+      "unmatched": "Nicio intrare de răspuns corespunzătoare."
+    }
+  },
   "search": {
     "placeholder": "Caută...",
     "noResults": "Niciun rezultat găsit",

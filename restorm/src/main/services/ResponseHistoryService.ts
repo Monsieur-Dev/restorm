@@ -30,13 +30,15 @@ import type {
   ResponseHistoryOutcome,
   ResponseHistoryRequestMeta,
   ResponseHistoryRequestType,
-  ResponseHistoryResponse
+  ResponseHistoryResponse,
+  ResponseHistoryJsonRpcBatchChild
 } from '../../shared/types/collections'
 import type { HTTPExecutionResult } from './HTTPExecutionService'
 import type { GraphQLExecutionResult } from './GraphQLExecutionService'
 import type { GRPCExecutionResult } from './GRPCExecutionService'
 import type { SOAPExecutionResult } from './SOAPExecutionService'
 import type { WebSocketExecutionResult } from './WebSocketExecutionService'
+import type { JsonRpcExecutionResult, JsonRpcBatchExecutionResult } from './JsonRpcExecutionService'
 import { normalizeODataResponse } from '../../shared/utils/odataResponse'
 import { redactTokensFromBody, collectTokenValues, redactTokensFromHeaders } from './AuthenticationRedaction'
 import { isAuthenticationRequest } from '../../shared/types/collections'
@@ -49,6 +51,8 @@ type ExecutionResult =
   | GRPCExecutionResult
   | SOAPExecutionResult
   | WebSocketExecutionResult
+  | JsonRpcExecutionResult
+  | JsonRpcBatchExecutionResult
 
 /**
  * Compute the 3-way visual outcome (`ok` / `warning` / `failure`) for
@@ -89,6 +93,30 @@ function webSocketOutcome(result: WebSocketExecutionResult): ResponseHistoryOutc
 
 function outcomeToSuccess(outcome: ResponseHistoryOutcome): boolean {
   return outcome !== 'failure'
+}
+
+/**
+ * A JSON-RPC call can transport-succeed (HTTP 200) while the envelope
+ * reports an application-level `error` — that's still a failed call from
+ * the user's perspective, so it collapses to `failure` here (no separate
+ * `warning` state, mirroring gRPC/WebSocket rather than the HTTP redirect
+ * 3-way).
+ */
+function jsonRpcOutcome(result: JsonRpcExecutionResult): ResponseHistoryOutcome {
+  if (!result.success || result.error !== undefined) return 'failure'
+  return 'ok'
+}
+
+/**
+ * A batch outcome is `ok` only when every child resolved with a `result`;
+ * one or more child `error` / unmatched entries downgrades to `warning`
+ * (the batch itself still transported and got A response) — full transport
+ * failure is `failure`.
+ */
+function jsonRpcBatchOutcome(result: JsonRpcBatchExecutionResult): ResponseHistoryOutcome {
+  if (!result.success) return 'failure'
+  const hasIssue = result.children.some((c) => c.error !== undefined || c.unmatched === true)
+  return hasIssue ? 'warning' : 'ok'
 }
 
 class ResponseHistoryService {
@@ -363,7 +391,9 @@ class ResponseHistoryService {
       graphql: { build: (id, r) => this.buildGraphqlResponse(id, r as GraphQLExecutionResult), outcome: (r) => httpOutcome(r as GraphQLExecutionResult) },
       grpc: { build: (id, r) => this.buildGrpcResponse(id, r as GRPCExecutionResult), outcome: (r) => grpcOutcome(r as GRPCExecutionResult) },
       soap: { build: (id, r) => this.buildSoapResponse(id, r as SOAPExecutionResult), outcome: (r) => httpOutcome(r as SOAPExecutionResult) },
-      websocket: { build: (id, r) => this.buildWebSocketResponse(id, r as WebSocketExecutionResult), outcome: (r) => webSocketOutcome(r as WebSocketExecutionResult) }
+      websocket: { build: (id, r) => this.buildWebSocketResponse(id, r as WebSocketExecutionResult), outcome: (r) => webSocketOutcome(r as WebSocketExecutionResult) },
+      jsonrpc: { build: (id, r) => this.buildJsonRpcResponse(id, r as JsonRpcExecutionResult), outcome: (r) => jsonRpcOutcome(r as JsonRpcExecutionResult) },
+      jsonrpcBatch: { build: (id, r) => this.buildJsonRpcBatchResponse(id, r as JsonRpcBatchExecutionResult), outcome: (r) => jsonRpcBatchOutcome(r as JsonRpcBatchExecutionResult) }
     }
 
     const builder = builders[type]
@@ -549,6 +579,60 @@ class ResponseHistoryService {
       responseHeaders,
       timings: result.timings,
       ...(result.error ? { error: result.error } : {})
+    }
+  }
+
+  private buildJsonRpcResponse(requestId: string, result: JsonRpcExecutionResult): ResponseHistoryResponse | null {
+    const resolvedUrl = contextService.getResolvedUrl(requestId)?.resolvedUrl ?? result.requestUrl ?? ''
+    const requestHeaders = this.getResolvedKeyValues(requestId, 'headers')
+    const fullData = this.getRequestFullData(requestId)
+    const method = typeof fullData?.['jsonRpcMethod'] === 'string' ? fullData['jsonRpcMethod'] : ''
+
+    return {
+      type: 'jsonrpc',
+      requestUrl: resolvedUrl,
+      requestHeaders,
+      method,
+      statusCode: result.statusCode ?? 0,
+      statusText: result.statusText ?? '',
+      ...(result.notificationSent !== undefined ? { notificationSent: result.notificationSent } : {}),
+      ...(result.result !== undefined ? { result: result.result } : {}),
+      ...(result.error !== undefined ? { rpcError: result.error } : {}),
+      timings: result.timings,
+      ...(result.transportError !== undefined ? { error: result.transportError } : {})
+    }
+  }
+
+  private buildJsonRpcBatchResponse(requestId: string, result: JsonRpcBatchExecutionResult): ResponseHistoryResponse | null {
+    const resolvedUrl = contextService.getResolvedUrl(requestId)?.resolvedUrl ?? result.requestUrl ?? ''
+    const requestHeaders = this.getResolvedKeyValues(requestId, 'headers')
+    const fullData = this.getRequestFullData(requestId)
+    const childMethodById = new Map<string, string>()
+    const rawChildren = fullData?.['jsonRpcChildren']
+    if (Array.isArray(rawChildren)) {
+      for (const c of rawChildren) {
+        if (this.isRecord(c) && typeof c['childId'] === 'string' && typeof c['method'] === 'string') {
+          childMethodById.set(c['childId'], c['method'])
+        }
+      }
+    }
+    const children: ResponseHistoryJsonRpcBatchChild[] = result.children.map((c) => ({
+      childId: c.childId,
+      rpcId: c.rpcId,
+      method: childMethodById.get(c.childId) ?? '',
+      ...(c.result !== undefined ? { result: c.result } : {}),
+      ...(c.error !== undefined ? { error: c.error } : {}),
+      ...(c.unmatched !== undefined ? { unmatched: c.unmatched } : {})
+    }))
+
+    return {
+      type: 'jsonrpcBatch',
+      requestUrl: resolvedUrl,
+      requestHeaders,
+      statusCode: result.statusCode ?? 0,
+      children,
+      timings: result.timings,
+      ...(result.transportError !== undefined ? { error: result.transportError } : {})
     }
   }
 

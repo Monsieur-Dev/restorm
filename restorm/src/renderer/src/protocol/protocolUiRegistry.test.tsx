@@ -12,7 +12,9 @@ vi.mock('../components/RequestTabViews', () => {
     SoapRequestTabView: stub,
     SoapServerRequestTabView: stub,
     WebSocketRequestTabView: stub,
-    ODataRequestTabView: stub
+    ODataRequestTabView: stub,
+    JsonRpcRequestTabView: stub,
+    JsonRpcBatchRequestTabView: stub
   }
 })
 

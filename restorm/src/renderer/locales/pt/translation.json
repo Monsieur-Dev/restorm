@@ -553,6 +553,38 @@
     "clientsConnected": "{{count}} cliente(s) conectado(s)",
     "notListening": "Sem escutar"
   },
+  "jsonrpc": {
+    "send": "Enviar",
+    "urlPlaceholder": "URL do endpoint JSON-RPC",
+    "methodPlaceholder": "método",
+    "idPlaceholder": "id (automático)",
+    "notificationModeTooltip": "Modo notificação — sem id, sem resposta esperada",
+    "tabs": {
+      "params": "Parâmetros",
+      "headers": "Cabeçalhos"
+    },
+    "response": {
+      "notificationSent": "Notificação enviada",
+      "errorLabel": "Erro JSON-RPC {{code}}:"
+    }
+  },
+  "jsonrpcBatch": {
+    "send": "Enviar lote",
+    "tabs": {
+      "calls": "Chamadas"
+    },
+    "empty": "Ainda sem chamadas. Adicione uma abaixo.",
+    "methodPlaceholder": "método",
+    "idPlaceholder": "id (automático)",
+    "moveUp": "Mover para cima",
+    "moveDown": "Mover para baixo",
+    "remove": "Remover chamada",
+    "paramsLabel": "Parâmetros (JSON)",
+    "add": "Adicionar chamada",
+    "response": {
+      "unmatched": "Nenhuma entrada de resposta correspondente."
+    }
+  },
   "search": {
     "placeholder": "Pesquisar...",
     "noResults": "Nenhum resultado encontrado",

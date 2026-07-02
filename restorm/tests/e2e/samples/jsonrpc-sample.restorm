@@ -1,0 +1,157 @@
+collections:
+  - folderType: environment
+    name: JSON-RPC Playground
+    documentation: |-
+      # JSON-RPC Playground
+
+      Connects to the local JSON-RPC mock server (tests/docker/jsonrpc-server,
+      port 8095). The mock is a zero-dependency node:http server exposing a
+      single POST /rpc endpoint dispatching on `method`.
+
+      Each request exercises a distinct E2E scenario:
+        - Echo: positional params + Handlebars-on-wire (the resolved value
+          appears in the response body, not the literal template).
+        - Echo with env URL: proves the URL itself resolves env variables.
+        - Named Echo: named (object) params round-trip.
+        - Fail: JSON-RPC error surfaced distinctly from a transport error.
+        - Notification: no id, no response body — "Notification sent".
+        - Slow (cancel): 8-second delay — used for the cancellation scenario.
+        - Batch: three child calls in one POST, matched back by id.
+    tags: []
+    configuration: {}
+    environments:
+      - name: Default
+        variables:
+          - key: rpcBase
+            value:
+              type: string
+              value: 'http://localhost:8095/rpc'
+            enabled: true
+          - key: echoMessage
+            value:
+              type: string
+              value: hello-handlebars-42
+            enabled: true
+        id: a1b2c3d4-e5f6-4071-8293-a4b5c6d7e8f9
+    items:
+      - type: jsonrpc
+        name: JSON-RPC Echo
+        documentation: |-
+          Sends `["{{echoMessage}}", 2]` as positional params. The mock
+          echoes the array back in `result`. Asserting the response
+          contains the resolved value (not "{{echoMessage}}") proves
+          Handlebars substitution reached the wire.
+        tags:
+          - jsonrpc
+          - echo
+        url: 'http://localhost:8095/rpc'
+        method: echo
+        params: '["{{echoMessage}}", 2]'
+        rpcId: ''
+        headers: []
+        id: b2c3d4e5-f607-4182-9304-b5c6d7e8f901
+      - type: jsonrpc
+        name: JSON-RPC Echo (env URL)
+        documentation: |-
+          Same echo method but the URL comes from the {{rpcBase}} env
+          variable. Proves URL Handlebars substitution works alongside
+          the params substitution.
+        tags:
+          - jsonrpc
+          - echo
+          - env
+        url: '{{rpcBase}}'
+        method: echo
+        params: '["env-url-test"]'
+        rpcId: ''
+        headers: []
+        id: c3d4e5f6-0718-4293-a4b5-c6d7e8f90213
+      - type: jsonrpc
+        name: JSON-RPC Named Echo
+        documentation: |-
+          Sends `{"name": "restorm"}` as named params. Exercises the
+          object-shaped (not array-shaped) params path.
+        tags:
+          - jsonrpc
+          - named
+        url: 'http://localhost:8095/rpc'
+        method: namedEcho
+        params: '{"name": "restorm"}'
+        rpcId: ''
+        headers: []
+        id: d4e5f607-1829-43a4-b5c6-d7e8f9012345
+      - type: jsonrpc
+        name: JSON-RPC Fail
+        documentation: |-
+          Always returns a JSON-RPC error (code -32000). Asserts the
+          error block is surfaced distinctly from a transport error even
+          though the HTTP call itself succeeds.
+        tags:
+          - jsonrpc
+          - error
+        url: 'http://localhost:8095/rpc'
+        method: failMethod
+        params: ''
+        rpcId: ''
+        headers: []
+        id: e5f60718-2930-44b5-c6d7-e8f901234567
+      - type: jsonrpc
+        name: JSON-RPC Notification
+        documentation: |-
+          Notification mode on — the envelope carries no `id` and no
+          response body is expected. Asserts the panel shows
+          "Notification sent" instead of a result.
+        tags:
+          - jsonrpc
+          - notification
+        url: 'http://localhost:8095/rpc'
+        method: echo
+        params: '["fire-and-forget"]'
+        rpcId: ''
+        notificationMode: true
+        headers: []
+        id: f6071829-3041-45c6-d7e8-f90123456789
+      - type: jsonrpc
+        name: JSON-RPC Slow (cancel)
+        documentation: |-
+          The mock waits 8 seconds before responding. Used by the
+          cancellation scenario: click Send, immediately click Cancel,
+          and assert the panel returns to the idle state.
+        tags:
+          - jsonrpc
+          - cancel
+        url: 'http://localhost:8095/rpc'
+        method: slow
+        params: ''
+        rpcId: ''
+        headers: []
+        id: 07182930-4152-46d7-e8f9-012345678901
+      - type: jsonrpcBatch
+        name: JSON-RPC Batch
+        documentation: |-
+          Three child calls (echo, namedEcho, failMethod) composed into
+          one POST. Asserts the response panel renders exactly three
+          per-child blocks (`response-batch-child-0/1/2`), one of which
+          is an error.
+        tags:
+          - jsonrpc
+          - batch
+        url: 'http://localhost:8095/rpc'
+        headers: []
+        children:
+          - childId: child-1
+            method: echo
+            params: '[1]'
+            rpcId: ''
+          - childId: child-2
+            method: namedEcho
+            params: '{"x": 1}'
+            rpcId: ''
+          - childId: child-3
+            method: failMethod
+            params: ''
+            rpcId: ''
+        id: 18293041-5263-47e8-f901-234567890123
+    id: 29304152-6374-48f9-0123-456789012345
+    fileFormatVersion: 1
+_projectUuid: 3a415263-7485-49f9-1234-567890123456

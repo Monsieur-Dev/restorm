@@ -124,6 +124,12 @@ const soapExecutionTestDir = defineBddConfig({
   outputDir: '.features-gen/soap-execution'
 })
 
+const jsonrpcExecutionTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/jsonrpc-execution/features/**/*.feature',
+  steps: ['tests/e2e/bdd/jsonrpc-execution/steps/**/*.ts', 'tests/e2e/bdd/fixtures/mcp-server.fixture.ts'],
+  outputDir: '.features-gen/jsonrpc-execution'
+})
+
 const mqttExecutionTestDir = defineBddConfig({
   features: 'tests/e2e/bdd/mqtt-execution/features/**/*.feature',
   steps: ['tests/e2e/bdd/mqtt-execution/steps/**/*.ts', 'tests/e2e/bdd/fixtures/mcp-server.fixture.ts'],
@@ -489,6 +495,11 @@ export default defineConfig({
     {
       name: 'soap-execution',
       testDir: soapExecutionTestDir,
+      timeout: 180 * 1000
+    },
+    {
+      name: 'jsonrpc-execution',
+      testDir: jsonrpcExecutionTestDir,
       timeout: 180 * 1000
     },
     {

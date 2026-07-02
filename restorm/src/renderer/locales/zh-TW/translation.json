@@ -552,6 +552,38 @@
     "clientsConnected": "{{count}} 個用戶端已連線",
     "notListening": "未在監聽"
   },
+  "jsonrpc": {
+    "send": "傳送",
+    "urlPlaceholder": "JSON-RPC 端點 URL",
+    "methodPlaceholder": "方法",
+    "idPlaceholder": "id（自動）",
+    "notificationModeTooltip": "通知模式 — 無 id，不等待回應",
+    "tabs": {
+      "params": "參數",
+      "headers": "標頭"
+    },
+    "response": {
+      "notificationSent": "通知已傳送",
+      "errorLabel": "JSON-RPC 錯誤 {{code}}："
+    }
+  },
+  "jsonrpcBatch": {
+    "send": "傳送批次",
+    "tabs": {
+      "calls": "呼叫"
+    },
+    "empty": "尚無呼叫。請在下方新增一個。",
+    "methodPlaceholder": "方法",
+    "idPlaceholder": "id（自動）",
+    "moveUp": "上移",
+    "moveDown": "下移",
+    "remove": "移除呼叫",
+    "paramsLabel": "參數（JSON）",
+    "add": "新增呼叫",
+    "response": {
+      "unmatched": "沒有相符的回應項目。"
+    }
+  },
   "search": {
     "placeholder": "搜尋...",
     "noResults": "找不到結果",

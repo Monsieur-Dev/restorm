@@ -24,6 +24,8 @@ import {
 import {
   httpExecuteResultSchema,
   graphqlExecuteResultSchema,
+  jsonrpcExecuteResultSchema,
+  jsonrpcExecuteBatchResultSchema,
   soapExecuteResultSchema,
   grpcExecuteResultSchema,
   websocketConnectResultSchema,
@@ -186,7 +188,7 @@ interface AvailableVariablesResult {
 /** Full request data for backend processing */
 interface FullRequestData {
   id: string
-  requestType: 'http' | 'graphql' | 'grpc' | 'soap' | 'websocket' | 'odata' | 'auth'
+  requestType: 'http' | 'graphql' | 'grpc' | 'soap' | 'websocket' | 'odata' | 'auth' | 'jsonrpc' | 'jsonrpcBatch'
   url: string
   headers: { id?: string; key: string; value: string }[]
   method?: string
@@ -230,6 +232,12 @@ interface FullRequestData {
   // OData mock service (server === true)
   mockMetadata?: string
   mockData?: Record<string, Record<string, unknown>[]>
+  // JSON-RPC specific
+  jsonRpcMethod?: string
+  jsonRpcParams?: string
+  jsonRpcId?: string
+  jsonRpcNotificationMode?: boolean
+  jsonRpcChildren?: { childId: string; method: string; params: string; rpcId: string; notificationMode?: boolean }[]
 }
 
 /** Save result type */
@@ -1110,6 +1118,77 @@ contextBridge.exposeInMainWorld('restorm', {
       return () => {
         ipcRenderer.removeListener('odata:server-served', handler)
       }
+    }
+  },
+  jsonrpc: {
+    /** Execute a single JSON-RPC 2.0 call. Reuses the HTTP dispatcher under
+     * the hood — `JsonRpcExecutionService` composes the envelope and unwraps
+     * `result` / `error` from the response body. */
+    execute: async (input: { requestId: string; timeout?: number }): Promise<{
+      requestId: string
+      success: boolean
+      statusCode?: number
+      statusText?: string
+      notificationSent?: boolean
+      result?: unknown
+      error?: { code: number; message: string; data?: unknown }
+      transportError?: string
+      rawBody?: string
+      timings: { startedAt: string; durationMs: number }
+      requestUrl?: string
+      requestHeaders?: Record<string, string>
+    }> => {
+      const result: unknown = await ipcRenderer.invoke('jsonrpc:execute', input)
+      warnOnOutputMismatch('jsonrpc:execute', jsonrpcExecuteResultSchema, result)
+      return result as {
+        requestId: string
+        success: boolean
+        statusCode?: number
+        statusText?: string
+        notificationSent?: boolean
+        result?: unknown
+        error?: { code: number; message: string; data?: unknown }
+        transportError?: string
+        rawBody?: string
+        timings: { startedAt: string; durationMs: number }
+        requestUrl?: string
+        requestHeaders?: Record<string, string>
+      }
+    },
+    /** Execute a `jsonrpc-batch` request: every child composed into one JSON
+     * array POST, results matched back to their child by `id`. */
+    executeBatch: async (input: { requestId: string; timeout?: number }): Promise<{
+      requestId: string
+      success: boolean
+      statusCode?: number
+      transportError?: string
+      rawBody?: string
+      children: { childId: string; rpcId: string; result?: unknown; error?: { code: number; message: string; data?: unknown }; unmatched?: boolean }[]
+      timings: { startedAt: string; durationMs: number }
+      requestUrl?: string
+    }> => {
+      const result: unknown = await ipcRenderer.invoke('jsonrpc:execute-batch', input)
+      warnOnOutputMismatch('jsonrpc:execute-batch', jsonrpcExecuteBatchResultSchema, result)
+      return result as {
+        requestId: string
+        success: boolean
+        statusCode?: number
+        transportError?: string
+        rawBody?: string
+        children: { childId: string; rpcId: string; result?: unknown; error?: { code: number; message: string; data?: unknown }; unmatched?: boolean }[]
+        timings: { startedAt: string; durationMs: number }
+        requestUrl?: string
+      }
+    },
+    /** Cancel an in-flight JSON-RPC call (single or batch). */
+    cancel: async (requestId: string): Promise<boolean> => {
+      const result: unknown = await ipcRenderer.invoke('jsonrpc:cancel', requestId)
+      return result as boolean
+    },
+    /** Check whether a JSON-RPC call is currently in flight. */
+    isActive: async (requestId: string): Promise<boolean> => {
+      const result: unknown = await ipcRenderer.invoke('jsonrpc:is-active', requestId)
+      return result as boolean
     }
   },
   auth: {

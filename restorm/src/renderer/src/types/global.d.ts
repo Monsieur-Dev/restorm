@@ -270,6 +270,12 @@ declare global {
         isListening: (requestId: string) => Promise<boolean>
         onServerServed: (callback: (data: { requestId: string; count: number }) => void) => (() => void)
       }
+      jsonrpc: {
+        execute: (input: { requestId: string; timeout?: number }) => Promise<JsonRpcExecutionResult>
+        executeBatch: (input: { requestId: string; timeout?: number }) => Promise<JsonRpcBatchExecutionResult>
+        cancel: (requestId: string) => Promise<boolean>
+        isActive: (requestId: string) => Promise<boolean>
+      }
       auth: {
         prefetch: (input: {
           method: string
@@ -558,6 +564,58 @@ export interface GraphQLExecutionResult {
   requestUrl?: string
 }
 
+/** One JSON-RPC 2.0 error object, per spec section 5.1. */
+export interface JsonRpcErrorShape {
+  code: number
+  message: string
+  data?: unknown
+}
+
+/** JSON-RPC execution result — `result` on success, `error` when the
+ * envelope reports a JSON-RPC-level failure (still a successful HTTP call). */
+export interface JsonRpcExecutionResult {
+  requestId: string
+  success: boolean
+  statusCode?: number
+  statusText?: string
+  notificationSent?: boolean
+  result?: unknown
+  error?: JsonRpcErrorShape
+  transportError?: string
+  rawBody?: string
+  timings: {
+    startedAt: string
+    durationMs: number
+  }
+  requestUrl?: string
+  requestHeaders?: Record<string, string>
+}
+
+/** One child result inside a `jsonrpc-batch` response, matched back to its
+ * originating call by `rpcId`. */
+export interface JsonRpcBatchChildResult {
+  childId: string
+  rpcId: string
+  result?: unknown
+  error?: JsonRpcErrorShape
+  unmatched?: boolean
+}
+
+/** JSON-RPC batch execution result. */
+export interface JsonRpcBatchExecutionResult {
+  requestId: string
+  success: boolean
+  statusCode?: number
+  transportError?: string
+  rawBody?: string
+  children: JsonRpcBatchChildResult[]
+  timings: {
+    startedAt: string
+    durationMs: number
+  }
+  requestUrl?: string
+}
+
 /** SOAP execution input */
 export interface SOAPExecutionInput {
   requestId: string
@@ -655,7 +713,7 @@ export interface WebSocketMessageData {
 /** Full request data for backend processing */
 export interface FullRequestData {
   id: string
-  requestType: 'http' | 'graphql' | 'grpc' | 'soap' | 'websocket' | 'odata' | 'auth'
+  requestType: 'http' | 'graphql' | 'grpc' | 'soap' | 'websocket' | 'odata' | 'auth' | 'jsonrpc' | 'jsonrpcBatch'
   url: string
   headers: KeyValueData[]
   method?: string | undefined
@@ -729,6 +787,19 @@ export interface FullRequestData {
   } | undefined
   mockMetadata?: string | undefined
   mockData?: Record<string, Record<string, unknown>[]> | undefined
+  // JSON-RPC specific (requestType === 'jsonrpc' / 'jsonrpcBatch').
+  // Mirrors the main-side ContextServiceTypes shape.
+  jsonRpcMethod?: string | undefined
+  jsonRpcParams?: string | undefined
+  jsonRpcId?: string | undefined
+  jsonRpcNotificationMode?: boolean | undefined
+  jsonRpcChildren?: {
+    childId: string
+    method: string
+    params: string
+    rpcId: string
+    notificationMode?: boolean | undefined
+  }[] | undefined
 }
 
 export {}

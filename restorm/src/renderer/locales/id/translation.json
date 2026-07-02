@@ -552,6 +552,38 @@
     "clientsConnected": "{{count}} klien terhubung",
     "notListening": "Tidak mendengarkan"
   },
+  "jsonrpc": {
+    "send": "Kirim",
+    "urlPlaceholder": "URL endpoint JSON-RPC",
+    "methodPlaceholder": "metode",
+    "idPlaceholder": "id (otomatis)",
+    "notificationModeTooltip": "Mode notifikasi — tanpa id, tanpa respons yang diharapkan",
+    "tabs": {
+      "params": "Parameter",
+      "headers": "Header"
+    },
+    "response": {
+      "notificationSent": "Notifikasi terkirim",
+      "errorLabel": "Kesalahan JSON-RPC {{code}}:"
+    }
+  },
+  "jsonrpcBatch": {
+    "send": "Kirim batch",
+    "tabs": {
+      "calls": "Panggilan"
+    },
+    "empty": "Belum ada panggilan. Tambahkan satu di bawah.",
+    "methodPlaceholder": "metode",
+    "idPlaceholder": "id (otomatis)",
+    "moveUp": "Naikkan",
+    "moveDown": "Turunkan",
+    "remove": "Hapus panggilan",
+    "paramsLabel": "Parameter (JSON)",
+    "add": "Tambah panggilan",
+    "response": {
+      "unmatched": "Tidak ada entri respons yang cocok."
+    }
+  },
   "search": {
     "placeholder": "Cari...",
     "noResults": "Tidak ada hasil ditemukan",

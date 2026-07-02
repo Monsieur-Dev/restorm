@@ -555,6 +555,38 @@
     "clientsConnected": "{{count}} клієнт(ів) підключено",
     "notListening": "Не слухає"
   },
+  "jsonrpc": {
+    "send": "Надіслати",
+    "urlPlaceholder": "URL кінцевої точки JSON-RPC",
+    "methodPlaceholder": "метод",
+    "idPlaceholder": "id (авто)",
+    "notificationModeTooltip": "Режим сповіщення — без id, без очікуваної відповіді",
+    "tabs": {
+      "params": "Параметри",
+      "headers": "Заголовки"
+    },
+    "response": {
+      "notificationSent": "Сповіщення надіслано",
+      "errorLabel": "Помилка JSON-RPC {{code}}:"
+    }
+  },
+  "jsonrpcBatch": {
+    "send": "Надіслати пакет",
+    "tabs": {
+      "calls": "Виклики"
+    },
+    "empty": "Поки що немає викликів. Додайте один нижче.",
+    "methodPlaceholder": "метод",
+    "idPlaceholder": "id (авто)",
+    "moveUp": "Перемістити вгору",
+    "moveDown": "Перемістити вниз",
+    "remove": "Видалити виклик",
+    "paramsLabel": "Параметри (JSON)",
+    "add": "Додати виклик",
+    "response": {
+      "unmatched": "Немає відповідного запису відповіді."
+    }
+  },
   "search": {
     "placeholder": "Пошук...",
     "noResults": "Нічого не знайдено",

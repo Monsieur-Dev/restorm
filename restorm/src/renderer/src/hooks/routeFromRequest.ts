@@ -49,6 +49,13 @@ export function routeFromRequest(request: Request): RouteLike {
       // Mirrors the matcher's HTTP-aliased handling — once the matcher
       // gains an OData branch this can be revisited.
       return { type: 'http', url: request.url, tags: request.tags }
+    case 'jsonrpc':
+    case 'jsonrpcBatch':
+      // JSON-RPC has no REST-like path/method — every call is a POST
+      // to the same URL with the method name in the body. Alias to a
+      // minimal HTTP route (mirrors 'odata') until the matcher gains a
+      // JSON-RPC branch that matches on `method` instead of URL.
+      return { type: 'http', url: request.url, tags: request.tags }
     case 'auth':
       return { type: 'http', url: request.url, method: request.method, tags: request.tags }
   }

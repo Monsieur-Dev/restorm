@@ -133,6 +133,22 @@ export const PROTOCOL_REGISTRY = {
     tabType: 'auth-request',
     ipcNamespace: 'auth',
     badge: { kind: 'fixed', value: 'AUTH' }
+  },
+  jsonrpc: {
+    graphqlTypeName: 'JsonRpcRequest',
+    tabType: 'jsonrpc-request',
+    ipcNamespace: 'jsonrpc',
+    badge: { kind: 'fixed', value: 'RPC' }
+  },
+  // Note: the discriminant is camelCase (not `jsonrpc-batch`) because
+  // `RequestType` feeds `graphQLSchemaGenerator.registerEnum('RequestType', …)`
+  // verbatim as GraphQL enum member names — a hyphen there produces invalid
+  // SDL. The user-facing / doc / file-naming spelling stays "JSON-RPC batch".
+  jsonrpcBatch: {
+    graphqlTypeName: 'JsonRpcBatchRequest',
+    tabType: 'jsonrpc-batch-request',
+    ipcNamespace: 'jsonrpc',
+    badge: { kind: 'fixed', value: 'RPC[]' }
   }
 } satisfies Record<string, ProtocolSpec>
 

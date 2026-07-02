@@ -553,6 +553,38 @@
     "clientsConnected": "{{count}} klient të lidhur",
     "notListening": "Nuk dëgjon"
   },
+  "jsonrpc": {
+    "send": "Dërgo",
+    "urlPlaceholder": "URL i pikës fundore JSON-RPC",
+    "methodPlaceholder": "metoda",
+    "idPlaceholder": "id (automatik)",
+    "notificationModeTooltip": "Modaliteti njoftim — pa id, pa përgjigje të pritur",
+    "tabs": {
+      "params": "Parametrat",
+      "headers": "Kokat"
+    },
+    "response": {
+      "notificationSent": "Njoftimi u dërgua",
+      "errorLabel": "Gabim JSON-RPC {{code}}:"
+    }
+  },
+  "jsonrpcBatch": {
+    "send": "Dërgo grupin",
+    "tabs": {
+      "calls": "Thirrjet"
+    },
+    "empty": "Ende pa thirrje. Shto një më poshtë.",
+    "methodPlaceholder": "metoda",
+    "idPlaceholder": "id (automatik)",
+    "moveUp": "Lëviz lart",
+    "moveDown": "Lëviz poshtë",
+    "remove": "Hiq thirrjen",
+    "paramsLabel": "Parametrat (JSON)",
+    "add": "Shto thirrje",
+    "response": {
+      "unmatched": "Asnjë hyrje përgjigjeje përputhëse."
+    }
+  },
   "search": {
     "placeholder": "Kërko...",
     "noResults": "Nuk u gjet asnjë rezultat",

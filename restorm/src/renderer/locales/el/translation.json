@@ -553,6 +553,38 @@
     "clientsConnected": "{{count}} πελάτης/ες συνδεδεμένος/οι",
     "notListening": "Δεν ακούει"
   },
+  "jsonrpc": {
+    "send": "Αποστολή",
+    "urlPlaceholder": "URL τελικού σημείου JSON-RPC",
+    "methodPlaceholder": "μέθοδος",
+    "idPlaceholder": "id (αυτόματο)",
+    "notificationModeTooltip": "Λειτουργία ειδοποίησης — χωρίς id, χωρίς αναμενόμενη απόκριση",
+    "tabs": {
+      "params": "Παράμετροι",
+      "headers": "Κεφαλίδες"
+    },
+    "response": {
+      "notificationSent": "Η ειδοποίηση εστάλη",
+      "errorLabel": "Σφάλμα JSON-RPC {{code}}:"
+    }
+  },
+  "jsonrpcBatch": {
+    "send": "Αποστολή παρτίδας",
+    "tabs": {
+      "calls": "Κλήσεις"
+    },
+    "empty": "Δεν υπάρχουν ακόμη κλήσεις. Προσθέστε μία παρακάτω.",
+    "methodPlaceholder": "μέθοδος",
+    "idPlaceholder": "id (αυτόματο)",
+    "moveUp": "Μετακίνηση επάνω",
+    "moveDown": "Μετακίνηση κάτω",
+    "remove": "Αφαίρεση κλήσης",
+    "paramsLabel": "Παράμετροι (JSON)",
+    "add": "Προσθήκη κλήσης",
+    "response": {
+      "unmatched": "Καμία αντίστοιχη καταχώριση απόκρισης."
+    }
+  },
   "search": {
     "placeholder": "Αναζήτηση...",
     "noResults": "Δεν βρέθηκαν αποτελέσματα",

@@ -1,9 +1,21 @@
-# Protocol docs
+# Protocols — index
 
-User-facing docs for individual execution protocols, one file per protocol
-(or per protocol *variant*, when it layers on top of an existing one instead
-of adding a new request type — see [`grpc-web.md`](./grpc-web.md)).
+Restorm executes each request type through a dedicated `*ExecutionService` in
+`src/main/services/`, with a matching `<Protocol>RequestTabView` in the
+renderer. Several protocols compose on top of `HTTPExecutionService` rather
+than owning their own transport (JSON-RPC is HTTP POST + a JSON envelope;
+OData is HTTP + query-option/`$batch` serialization) — see
+[`../contributing/adding-a-protocol.md`](../contributing/adding-a-protocol.md)
+for the full playbook new protocols follow. Protocol *variants* that layer on
+top of an existing request type instead of adding a new one (e.g. an
+alternate wire transport) get their own doc too — see
+[`grpc-web.md`](./grpc-web.md) for an example.
 
-- [gRPC-Web / Connect-RPC transports](./grpc-web.md) — the `grpc` / `grpc-web`
-  / `connect` transport toggle on gRPC requests: when to use each, their
-  streaming limitations, and the wire framing each one speaks.
+| Protocol | Doc |
+| --- | --- |
+| JSON-RPC 2.0 (single call + batch) | [`jsonrpc.md`](./jsonrpc.md) |
+| gRPC-Web / Connect-RPC transports | [`grpc-web.md`](./grpc-web.md) |
+
+For the underlying import-adapter pipeline that turns an external API
+specification (OpenAPI, WSDL, `.proto`, OpenRPC, …) into a ready-to-run
+Restorm collection, see [`../imports/index.md`](../imports/index.md).

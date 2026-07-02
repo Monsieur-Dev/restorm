@@ -231,6 +231,27 @@ export const odataCancelArgs = z.tuple([requestIdArg])
 export const odataIsActiveArgs = z.tuple([requestIdArg])
 
 // ==========================================================================
+// JSON-RPC Execution (reuses httpExecutionService under the hood)
+// ==========================================================================
+
+export const jsonrpcExecuteArgs = z.tuple([
+  z.object({
+    requestId: z.string(),
+    timeout: z.number().optional()
+  })
+])
+
+export const jsonrpcExecuteBatchArgs = z.tuple([
+  z.object({
+    requestId: z.string(),
+    timeout: z.number().optional()
+  })
+])
+
+export const jsonrpcCancelArgs = z.tuple([requestIdArg])
+export const jsonrpcIsActiveArgs = z.tuple([requestIdArg])
+
+// ==========================================================================
 // Authentication routes
 // --------------------------------------------------------------------------
 // `auth:prefetch` runs an ephemeral AuthenticationRequest (typically
@@ -519,6 +540,44 @@ export const graphqlExecuteResultSchema = z.object({
   body: z.string().optional(),
   error: z.string().optional(),
   timings: timingsSchema,
+})
+
+const jsonRpcErrorSchema = z.object({
+  code: z.number(),
+  message: z.string(),
+  data: z.unknown().optional()
+})
+
+export const jsonrpcExecuteResultSchema = z.object({
+  requestId: z.string(),
+  success: z.boolean(),
+  statusCode: z.number().optional(),
+  statusText: z.string().optional(),
+  notificationSent: z.boolean().optional(),
+  result: z.unknown().optional(),
+  error: jsonRpcErrorSchema.optional(),
+  transportError: z.string().optional(),
+  rawBody: z.string().optional(),
+  timings: timingsSchema,
+  requestUrl: z.string().optional(),
+  requestHeaders: z.record(z.string(), z.string()).optional()
+})
+
+export const jsonrpcExecuteBatchResultSchema = z.object({
+  requestId: z.string(),
+  success: z.boolean(),
+  statusCode: z.number().optional(),
+  transportError: z.string().optional(),
+  rawBody: z.string().optional(),
+  children: z.array(z.object({
+    childId: z.string(),
+    rpcId: z.string(),
+    result: z.unknown().optional(),
+    error: jsonRpcErrorSchema.optional(),
+    unmatched: z.boolean().optional()
+  })),
+  timings: timingsSchema,
+  requestUrl: z.string().optional()
 })
 
 export const soapExecuteResultSchema = z.object({

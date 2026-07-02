@@ -17,6 +17,7 @@ import { grpcImportAdapter } from '../import/idempotent/GrpcAdapter'
 import { soapImportAdapter } from '../import/idempotent/SoapAdapter'
 import { odataImportAdapter } from '../import/idempotent/ODataAdapter'
 import { smithyImportAdapter } from '../import/idempotent/SmithyAdapter'
+import { openrpcImportAdapter } from '../import/idempotent/OpenRpcAdapter'
 import { computeSpecHash } from './specHash'
 import { resolveAuthHeadersForFolder } from './resolveAuthHeaders'
 import { specKeyToImportSelectionKey } from './specKeyTranslator'
@@ -66,12 +67,13 @@ const ADAPTER_BY_SOURCE: Partial<Record<ImportSourceType, typeof swaggerImportAd
   grpc: grpcImportAdapter,
   wsdl: soapImportAdapter,
   odata: odataImportAdapter,
-  smithy: smithyImportAdapter
+  smithy: smithyImportAdapter,
+  openrpc: openrpcImportAdapter
 }
 
 function isImportSource(value: string | undefined): value is ImportSourceType {
   if (!value) return false
-  return ['swagger', 'graphql', 'grpc', 'wsdl', 'asyncapi', 'postman', 'insomnia', 'bruno', 'curl', 'powershell', 'url', 'smithy'].includes(value)
+  return ['swagger', 'graphql', 'grpc', 'wsdl', 'asyncapi', 'postman', 'insomnia', 'bruno', 'curl', 'powershell', 'url', 'smithy', 'openrpc'].includes(value)
 }
 
 function extractStringValue(v: unknown): string | undefined {

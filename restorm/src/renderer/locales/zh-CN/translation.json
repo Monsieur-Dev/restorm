@@ -552,6 +552,38 @@
     "clientsConnected": "{{count}} 个客户端已连接",
     "notListening": "未在监听"
   },
+  "jsonrpc": {
+    "send": "发送",
+    "urlPlaceholder": "JSON-RPC 端点 URL",
+    "methodPlaceholder": "方法",
+    "idPlaceholder": "id（自动）",
+    "notificationModeTooltip": "通知模式 — 无 id，不等待响应",
+    "tabs": {
+      "params": "参数",
+      "headers": "请求头"
+    },
+    "response": {
+      "notificationSent": "通知已发送",
+      "errorLabel": "JSON-RPC 错误 {{code}}："
+    }
+  },
+  "jsonrpcBatch": {
+    "send": "发送批次",
+    "tabs": {
+      "calls": "调用"
+    },
+    "empty": "还没有调用。请在下方添加一个。",
+    "methodPlaceholder": "方法",
+    "idPlaceholder": "id（自动）",
+    "moveUp": "上移",
+    "moveDown": "下移",
+    "remove": "移除调用",
+    "paramsLabel": "参数（JSON）",
+    "add": "添加调用",
+    "response": {
+      "unmatched": "没有匹配的响应条目。"
+    }
+  },
   "search": {
     "placeholder": "搜索...",
     "noResults": "未找到结果",

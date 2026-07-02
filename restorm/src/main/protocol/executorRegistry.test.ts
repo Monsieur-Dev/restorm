@@ -8,6 +8,7 @@ vi.mock('../services/GraphQLExecutionService', () => ({ graphqlExecutionService:
 vi.mock('../services/SOAPExecutionService', () => ({ soapExecutionService: { cancel: () => false } }))
 vi.mock('../services/GRPCExecutionService', () => ({ grpcExecutionService: { cancel: () => false } }))
 vi.mock('../services/WebSocketExecutionService', () => ({ websocketExecutionService: { disconnect: () => false } }))
+vi.mock('../services/JsonRpcExecutionService', () => ({ jsonRpcExecutionService: { cancel: () => false } }))
 
 describe('main protocol executor registry', () => {
   it('covers exactly the shared registry key set (no drift)', async () => {

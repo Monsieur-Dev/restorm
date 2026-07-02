@@ -21,9 +21,9 @@ export type {
   ODataVersion
 } from './requestPrimitives'
 
-export type { BaseRequest, HTTPRequest, GraphQLRequest, GrpcRequest, GrpcMockMethod, SoapRequest, WebSocketRequest, ODataRequest, ODataQueryOptions, ODataOperationKind, ODataBatchFormat, ODataBatchSubRequestSpec, ODataOperationParameterSpec, AuthenticationRequest, Request } from './requests/index'
+export type { BaseRequest, HTTPRequest, GraphQLRequest, GrpcRequest, GrpcMockMethod, SoapRequest, WebSocketRequest, ODataRequest, ODataQueryOptions, ODataOperationKind, ODataBatchFormat, ODataBatchSubRequestSpec, ODataOperationParameterSpec, AuthenticationRequest, JsonRpcRequest, JsonRpcBatchRequest, JsonRpcBatchCallSpec, Request } from './requests/index'
 export type { QuickConfig, QuickConfigStorageTarget } from './requests/index'
-export { isHTTPRequest, isGraphQLRequest, isGrpcRequest, isSoapRequest, isWebSocketRequest, isODataRequest, isAuthenticationRequest } from './requests/index'
+export { isHTTPRequest, isGraphQLRequest, isGrpcRequest, isSoapRequest, isWebSocketRequest, isODataRequest, isAuthenticationRequest, isJsonRpcRequest, isJsonRpcBatchRequest } from './requests/index'
 
 export type {
   BaseResponse,
@@ -53,7 +53,11 @@ export type {
   ResponseHistoryResponse,
   ResponseHistoryDetail,
   ResponseHistoryRequestType,
-  ResponseHistoryOutcome
+  ResponseHistoryOutcome,
+  ResponseHistoryJsonRpcError,
+  ResponseHistoryJsonRpcResponse,
+  ResponseHistoryJsonRpcBatchChild,
+  ResponseHistoryJsonRpcBatchResponse
 } from './responseHistory'
 
 export type { Folder, EnvironmentFolder, FolderItem } from './folderTypes'

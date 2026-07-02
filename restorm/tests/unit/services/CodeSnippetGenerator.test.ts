@@ -28,7 +28,8 @@ const templates: CompiledSnippetTemplates = {
   graphqlSnippetTemplate: null,
   soapSnippetTemplate: null,
   websocketSnippetTemplate: compile('code-snippets-websocket.hbs'),
-  grpcSnippetTemplate: compile('code-snippets-grpc.hbs')
+  grpcSnippetTemplate: compile('code-snippets-grpc.hbs'),
+  jsonRpcSnippetTemplate: compile('code-snippets-jsonrpc.hbs')
 } as unknown as CompiledSnippetTemplates
 
 // Identity transform (no env vars needed for these structural assertions).
@@ -134,5 +135,55 @@ describe('CodeSnippetGenerator — MQTT', () => {
   it('wires username/password into the paho auth call', () => {
     const md = run({ ...base, username: 'restorm', password: 'restorm' }, 'mqtt://localhost:1883')
     expect(md).toContain('client.username_pw_set("restorm", "restorm")')
+  })
+})
+
+describe('CodeSnippetGenerator — JSON-RPC', () => {
+  it('renders a non-empty single-call snippet with the envelope resolved', () => {
+    const md = run({
+      requestType: 'jsonrpc', url: 'http://localhost:8080/rpc', headers: [],
+      jsonRpcMethod: 'echo', jsonRpcParams: '[1, 2]', jsonRpcId: '1'
+    }, 'http://localhost:8080/rpc')
+
+    expect(md.trim().length).toBeGreaterThan(0)
+    expect(md).toContain('http://localhost:8080/rpc')
+    expect(md).toContain('"method":"echo"')
+    expect(md).toContain('"params":[1,2]')
+    expect(md).not.toContain('.forEach') // single-call branch, not the batch one
+  })
+
+  it('renders a non-empty batch snippet with every child envelope resolved', () => {
+    const md = run({
+      requestType: 'jsonrpcBatch', url: 'http://localhost:8080/rpc', headers: [],
+      jsonRpcChildren: [
+        { childId: 'c1', method: 'echo', params: '[1]', rpcId: 'a' },
+        { childId: 'c2', method: 'namedEcho', params: '{"x":1}', rpcId: 'b' }
+      ]
+    }, 'http://localhost:8080/rpc')
+
+    expect(md.trim().length).toBeGreaterThan(0)
+    expect(md).toContain('"method":"echo"')
+    expect(md).toContain('"method":"namedEcho"')
+    expect(md).toContain('.forEach') // batch-response branch
+  })
+
+  it('falls back to an empty params object when params JSON is malformed', () => {
+    const md = run({
+      requestType: 'jsonrpc', url: 'http://localhost:8080/rpc', headers: [],
+      jsonRpcMethod: 'echo', jsonRpcParams: '{not json', jsonRpcId: '1'
+    }, 'http://localhost:8080/rpc')
+
+    expect(md).toContain('"params":{}')
+  })
+
+  it('includes extra headers in both the curl and fetch snippets', () => {
+    const md = run({
+      requestType: 'jsonrpc', url: 'http://localhost:8080/rpc',
+      headers: [{ key: 'X-Api-Key', value: 'secret', enabled: true } as never],
+      jsonRpcMethod: 'echo', jsonRpcParams: '', jsonRpcId: '1'
+    }, 'http://localhost:8080/rpc')
+
+    expect(md).toContain("-H 'X-Api-Key: secret'")
+    expect(md).toContain("'X-Api-Key': 'secret'")
   })
 })

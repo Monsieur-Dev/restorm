@@ -553,6 +553,38 @@
     "clientsConnected": "{{count}} klient(er) anslutna",
     "notListening": "Lyssnar inte"
   },
+  "jsonrpc": {
+    "send": "Skicka",
+    "urlPlaceholder": "JSON-RPC-slutpunkts-URL",
+    "methodPlaceholder": "metod",
+    "idPlaceholder": "id (auto)",
+    "notificationModeTooltip": "Aviseringsläge — inget id, inget svar förväntas",
+    "tabs": {
+      "params": "Parametrar",
+      "headers": "Headers"
+    },
+    "response": {
+      "notificationSent": "Avisering skickad",
+      "errorLabel": "JSON-RPC-fel {{code}}:"
+    }
+  },
+  "jsonrpcBatch": {
+    "send": "Skicka batch",
+    "tabs": {
+      "calls": "Anrop"
+    },
+    "empty": "Inga anrop än. Lägg till ett nedan.",
+    "methodPlaceholder": "metod",
+    "idPlaceholder": "id (auto)",
+    "moveUp": "Flytta upp",
+    "moveDown": "Flytta ner",
+    "remove": "Ta bort anrop",
+    "paramsLabel": "Parametrar (JSON)",
+    "add": "Lägg till anrop",
+    "response": {
+      "unmatched": "Ingen matchande svarspost."
+    }
+  },
   "search": {
     "placeholder": "Sök...",
     "noResults": "Inga resultat hittades",

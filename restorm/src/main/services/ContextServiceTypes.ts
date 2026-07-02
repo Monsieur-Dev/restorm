@@ -60,7 +60,7 @@ export type HTTPRequestBody =
 /** Full request data for URL resolution and code snippet generation */
 export interface FullRequestData {
   id: string
-  requestType: 'http' | 'graphql' | 'grpc' | 'soap' | 'websocket' | 'odata' | 'auth'
+  requestType: 'http' | 'graphql' | 'grpc' | 'soap' | 'websocket' | 'odata' | 'auth' | 'jsonrpc' | 'jsonrpcBatch'
 
   // Common fields
   url: string
@@ -156,6 +156,23 @@ export interface FullRequestData {
   mockMetadata?: string
   /** OData mock service: served entity data keyed by entity-set name. */
   mockData?: Record<string, Record<string, unknown>[]>
+
+  // JSON-RPC specific — read by JsonRpcExecutionService to compose the
+  // `{ jsonrpc: '2.0', method, params, id }` envelope. `jsonRpcParams` is
+  // raw JSON source (array or object), resolved through ContextService
+  // before being parsed.
+  jsonRpcMethod?: string
+  jsonRpcParams?: string
+  jsonRpcId?: string
+  jsonRpcNotificationMode?: boolean
+  /** JSON-RPC batch specific: child calls composed into the batch array. */
+  jsonRpcChildren?: {
+    childId: string
+    method: string
+    params: string
+    rpcId: string
+    notificationMode?: boolean
+  }[]
 }
 
 /** Request context tracking with full data */

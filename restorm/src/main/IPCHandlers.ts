@@ -25,6 +25,7 @@ import { grpcExecutionService, normalizeAddress as normalizeGrpcAddress, type GR
 import { grpcMockServerService } from './services/GRPCMockServerService'
 import { odataMockServerService } from './services/ODataMockServerService'
 import { websocketExecutionService, type WebSocketExecutionInput } from './services/WebSocketExecutionService'
+import { jsonRpcExecutionService } from './services/JsonRpcExecutionService'
 import { scenarioEngine } from './scenarioEngine/engine'
 import { importFrom } from './services/import/ImportManager'
 import { importGrpcFromReflection, findExistingGrpcReflectionFolder, reimportGrpcReflection } from './services/import/GrpcReflectionImportService'
@@ -44,6 +45,7 @@ import {
   httpExecuteArgs, httpCancelArgs, httpIsActiveArgs,
   httpListenArgs, httpStopArgs, httpIsListeningArgs,
   odataExecuteArgs, odataCancelArgs, odataIsActiveArgs,
+  jsonrpcExecuteArgs, jsonrpcExecuteBatchArgs, jsonrpcCancelArgs, jsonrpcIsActiveArgs,
   authPrefetchArgs,
   graphqlExecuteArgs, graphqlCancelArgs, graphqlIsActiveArgs,
   soapExecuteArgs, soapCancelArgs, soapIsActiveArgs, soapListenArgs, soapStopArgs, soapIsListeningArgs,
@@ -915,6 +917,42 @@ export function registerRestormIPC(deps: {
 
   validatedHandle('odata:is-active', odataIsActiveArgs, (_event, [requestId]) => {
     return httpExecutionService.isActive(requestId)
+  })
+
+  // ==========================================================================
+  // JSON-RPC Execution IPC Handlers
+  // --------------------------------------------------------------------------
+  // JSON-RPC calls compose `{ jsonrpc: '2.0', method, params, id }` and POST it
+  // through httpExecutionService, exactly like OData composes its own body —
+  // JsonRpcExecutionService reads method/params/id off the registered
+  // request's fullData (flushed by the tab view) and does the envelope
+  // shaping + result/error unwrap itself.
+  // ==========================================================================
+
+  validatedHandle('jsonrpc:execute', jsonrpcExecuteArgs, async (_event, [input]) => {
+    const result = await jsonRpcExecutionService.execute(input)
+    setImmediate(() => {
+      void responseHistoryService.storeExecutionResult(input.requestId, 'jsonrpc', result)
+      requestUsageService.recordSend(input.requestId)
+    })
+    return result
+  })
+
+  validatedHandle('jsonrpc:execute-batch', jsonrpcExecuteBatchArgs, async (_event, [input]) => {
+    const result = await jsonRpcExecutionService.executeBatch(input)
+    setImmediate(() => {
+      void responseHistoryService.storeExecutionResult(input.requestId, 'jsonrpcBatch', result)
+      requestUsageService.recordSend(input.requestId)
+    })
+    return result
+  })
+
+  validatedHandle('jsonrpc:cancel', jsonrpcCancelArgs, (_event, [requestId]) => {
+    return jsonRpcExecutionService.cancel(requestId)
+  })
+
+  validatedHandle('jsonrpc:is-active', jsonrpcIsActiveArgs, (_event, [requestId]) => {
+    return jsonRpcExecutionService.isActive(requestId)
   })
 
   // ==========================================================================

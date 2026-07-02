@@ -553,6 +553,38 @@
     "clientsConnected": "{{count}} kliens csatlakozva",
     "notListening": "Nem figyel"
   },
+  "jsonrpc": {
+    "send": "Küldés",
+    "urlPlaceholder": "JSON-RPC végpont URL",
+    "methodPlaceholder": "metódus",
+    "idPlaceholder": "id (automatikus)",
+    "notificationModeTooltip": "Értesítési mód — nincs id, nincs várt válasz",
+    "tabs": {
+      "params": "Paraméterek",
+      "headers": "Fejlécek"
+    },
+    "response": {
+      "notificationSent": "Értesítés elküldve",
+      "errorLabel": "JSON-RPC hiba {{code}}:"
+    }
+  },
+  "jsonrpcBatch": {
+    "send": "Köteg küldése",
+    "tabs": {
+      "calls": "Hívások"
+    },
+    "empty": "Még nincs hívás. Adjon hozzá egyet alább.",
+    "methodPlaceholder": "metódus",
+    "idPlaceholder": "id (automatikus)",
+    "moveUp": "Feljebb",
+    "moveDown": "Lejjebb",
+    "remove": "Hívás eltávolítása",
+    "paramsLabel": "Paraméterek (JSON)",
+    "add": "Hívás hozzáadása",
+    "response": {
+      "unmatched": "Nincs egyező válaszbejegyzés."
+    }
+  },
   "search": {
     "placeholder": "Keresés...",
     "noResults": "Nincs találat",

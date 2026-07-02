@@ -555,6 +555,38 @@
     "clientsConnected": "{{count}} klient(ů) připojeno",
     "notListening": "Neposlouchá"
   },
+  "jsonrpc": {
+    "send": "Odeslat",
+    "urlPlaceholder": "URL koncového bodu JSON-RPC",
+    "methodPlaceholder": "metoda",
+    "idPlaceholder": "id (auto)",
+    "notificationModeTooltip": "Režim oznámení — bez id, bez očekávané odpovědi",
+    "tabs": {
+      "params": "Parametry",
+      "headers": "Hlavičky"
+    },
+    "response": {
+      "notificationSent": "Oznámení odesláno",
+      "errorLabel": "Chyba JSON-RPC {{code}}:"
+    }
+  },
+  "jsonrpcBatch": {
+    "send": "Odeslat dávku",
+    "tabs": {
+      "calls": "Volání"
+    },
+    "empty": "Zatím žádná volání. Přidejte jedno níže.",
+    "methodPlaceholder": "metoda",
+    "idPlaceholder": "id (auto)",
+    "moveUp": "Posunout nahoru",
+    "moveDown": "Posunout dolů",
+    "remove": "Odebrat volání",
+    "paramsLabel": "Parametry (JSON)",
+    "add": "Přidat volání",
+    "response": {
+      "unmatched": "Žádná odpovídající položka odpovědi."
+    }
+  },
   "search": {
     "placeholder": "Hledat...",
     "noResults": "Nenalezeny žádné výsledky",

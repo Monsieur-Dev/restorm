@@ -16,6 +16,7 @@ import { grpcImportAdapter } from '../import/idempotent/GrpcAdapter'
 import { soapImportAdapter } from '../import/idempotent/SoapAdapter'
 import { odataImportAdapter } from '../import/idempotent/ODataAdapter'
 import { smithyImportAdapter } from '../import/idempotent/SmithyAdapter'
+import { openrpcImportAdapter } from '../import/idempotent/OpenRpcAdapter'
 import { computeSpecHash } from './specHash'
 import { mergeHttpRequestShape } from './mergeRequestShape'
 
@@ -95,7 +96,8 @@ const ADAPTERS: Partial<Record<ImportSourceType, ImportAdapter>> = {
   grpc: grpcImportAdapter,
   wsdl: soapImportAdapter,
   odata: odataImportAdapter,
-  smithy: smithyImportAdapter
+  smithy: smithyImportAdapter,
+  openrpc: openrpcImportAdapter
 }
 
 /**

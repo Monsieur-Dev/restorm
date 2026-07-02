@@ -555,6 +555,38 @@
     "clientsConnected": "{{count}} klient(ów) połączono",
     "notListening": "Nie nasłuchuje"
   },
+  "jsonrpc": {
+    "send": "Wyślij",
+    "urlPlaceholder": "Adres URL punktu końcowego JSON-RPC",
+    "methodPlaceholder": "metoda",
+    "idPlaceholder": "id (auto)",
+    "notificationModeTooltip": "Tryb powiadomienia — brak id, brak oczekiwanej odpowiedzi",
+    "tabs": {
+      "params": "Parametry",
+      "headers": "Nagłówki"
+    },
+    "response": {
+      "notificationSent": "Powiadomienie wysłane",
+      "errorLabel": "Błąd JSON-RPC {{code}}:"
+    }
+  },
+  "jsonrpcBatch": {
+    "send": "Wyślij paczkę",
+    "tabs": {
+      "calls": "Wywołania"
+    },
+    "empty": "Brak wywołań. Dodaj jedno poniżej.",
+    "methodPlaceholder": "metoda",
+    "idPlaceholder": "id (auto)",
+    "moveUp": "Przesuń w górę",
+    "moveDown": "Przesuń w dół",
+    "remove": "Usuń wywołanie",
+    "paramsLabel": "Parametry (JSON)",
+    "add": "Dodaj wywołanie",
+    "response": {
+      "unmatched": "Brak pasującego wpisu odpowiedzi."
+    }
+  },
   "search": {
     "placeholder": "Szukaj...",
     "noResults": "Brak wyników",

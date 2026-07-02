@@ -552,6 +552,38 @@
     "clientsConnected": "{{count}} クライアント接続中",
     "notListening": "リッスンしていません"
   },
+  "jsonrpc": {
+    "send": "送信",
+    "urlPlaceholder": "JSON-RPC エンドポイント URL",
+    "methodPlaceholder": "メソッド",
+    "idPlaceholder": "id（自動）",
+    "notificationModeTooltip": "通知モード — id なし、応答は待機されません",
+    "tabs": {
+      "params": "パラメータ",
+      "headers": "ヘッダー"
+    },
+    "response": {
+      "notificationSent": "通知を送信しました",
+      "errorLabel": "JSON-RPC エラー {{code}}:"
+    }
+  },
+  "jsonrpcBatch": {
+    "send": "バッチを送信",
+    "tabs": {
+      "calls": "呼び出し"
+    },
+    "empty": "まだ呼び出しがありません。下に追加してください。",
+    "methodPlaceholder": "メソッド",
+    "idPlaceholder": "id（自動）",
+    "moveUp": "上に移動",
+    "moveDown": "下に移動",
+    "remove": "呼び出しを削除",
+    "paramsLabel": "パラメータ（JSON）",
+    "add": "呼び出しを追加",
+    "response": {
+      "unmatched": "一致する応答エントリがありません。"
+    }
+  },
   "search": {
     "placeholder": "検索...",
     "noResults": "結果が見つかりません",

@@ -553,6 +553,38 @@
     "clientsConnected": "{{count}} istemci bağlı",
     "notListening": "Dinlemiyor"
   },
+  "jsonrpc": {
+    "send": "Gönder",
+    "urlPlaceholder": "JSON-RPC uç nokta URL'si",
+    "methodPlaceholder": "yöntem",
+    "idPlaceholder": "id (otomatik)",
+    "notificationModeTooltip": "Bildirim modu — id yok, yanıt beklenmiyor",
+    "tabs": {
+      "params": "Parametreler",
+      "headers": "Başlıklar"
+    },
+    "response": {
+      "notificationSent": "Bildirim gönderildi",
+      "errorLabel": "JSON-RPC hatası {{code}}:"
+    }
+  },
+  "jsonrpcBatch": {
+    "send": "Toplu gönder",
+    "tabs": {
+      "calls": "Çağrılar"
+    },
+    "empty": "Henüz çağrı yok. Aşağıya bir tane ekleyin.",
+    "methodPlaceholder": "yöntem",
+    "idPlaceholder": "id (otomatik)",
+    "moveUp": "Yukarı taşı",
+    "moveDown": "Aşağı taşı",
+    "remove": "Çağrıyı kaldır",
+    "paramsLabel": "Parametreler (JSON)",
+    "add": "Çağrı ekle",
+    "response": {
+      "unmatched": "Eşleşen yanıt girdisi yok."
+    }
+  },
   "search": {
     "placeholder": "Ara...",
     "noResults": "Sonuç bulunamadı",

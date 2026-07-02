@@ -553,6 +553,38 @@
     "clientsConnected": "{{count}} client connessi",
     "notListening": "Non in ascolto"
   },
+  "jsonrpc": {
+    "send": "Invia",
+    "urlPlaceholder": "URL dell'endpoint JSON-RPC",
+    "methodPlaceholder": "metodo",
+    "idPlaceholder": "id (auto)",
+    "notificationModeTooltip": "Modalità notifica — nessun id, nessuna risposta attesa",
+    "tabs": {
+      "params": "Parametri",
+      "headers": "Header"
+    },
+    "response": {
+      "notificationSent": "Notifica inviata",
+      "errorLabel": "Errore JSON-RPC {{code}}:"
+    }
+  },
+  "jsonrpcBatch": {
+    "send": "Invia il batch",
+    "tabs": {
+      "calls": "Chiamate"
+    },
+    "empty": "Nessuna chiamata ancora. Aggiungine una qui sotto.",
+    "methodPlaceholder": "metodo",
+    "idPlaceholder": "id (auto)",
+    "moveUp": "Sposta su",
+    "moveDown": "Sposta giù",
+    "remove": "Rimuovi chiamata",
+    "paramsLabel": "Parametri (JSON)",
+    "add": "Aggiungi chiamata",
+    "response": {
+      "unmatched": "Nessuna voce di risposta corrispondente."
+    }
+  },
   "search": {
     "placeholder": "Cerca...",
     "noResults": "Nessun risultato trovato",

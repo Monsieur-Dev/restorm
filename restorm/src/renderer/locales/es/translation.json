@@ -553,6 +553,38 @@
     "clientsConnected": "{{count}} cliente(s) conectado(s)",
     "notListening": "Sin escuchar"
   },
+  "jsonrpc": {
+    "send": "Enviar",
+    "urlPlaceholder": "URL del punto de conexión JSON-RPC",
+    "methodPlaceholder": "método",
+    "idPlaceholder": "id (auto)",
+    "notificationModeTooltip": "Modo notificación — sin id, sin respuesta esperada",
+    "tabs": {
+      "params": "Parámetros",
+      "headers": "Cabeceras"
+    },
+    "response": {
+      "notificationSent": "Notificación enviada",
+      "errorLabel": "Error JSON-RPC {{code}}:"
+    }
+  },
+  "jsonrpcBatch": {
+    "send": "Enviar lote",
+    "tabs": {
+      "calls": "Llamadas"
+    },
+    "empty": "Aún no hay llamadas. Añade una debajo.",
+    "methodPlaceholder": "método",
+    "idPlaceholder": "id (auto)",
+    "moveUp": "Subir",
+    "moveDown": "Bajar",
+    "remove": "Eliminar llamada",
+    "paramsLabel": "Parámetros (JSON)",
+    "add": "Añadir llamada",
+    "response": {
+      "unmatched": "Ninguna entrada de respuesta coincidente."
+    }
+  },
   "search": {
     "placeholder": "Buscar...",
     "noResults": "No se han encontrado resultados",

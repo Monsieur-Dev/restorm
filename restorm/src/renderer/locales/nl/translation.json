@@ -553,6 +553,38 @@
     "clientsConnected": "{{count}} client(s) verbonden",
     "notListening": "Luistert niet"
   },
+  "jsonrpc": {
+    "send": "Verzenden",
+    "urlPlaceholder": "JSON-RPC-eindpunt-URL",
+    "methodPlaceholder": "methode",
+    "idPlaceholder": "id (automatisch)",
+    "notificationModeTooltip": "Meldingsmodus — geen id, geen antwoord verwacht",
+    "tabs": {
+      "params": "Parameters",
+      "headers": "Headers"
+    },
+    "response": {
+      "notificationSent": "Melding verzonden",
+      "errorLabel": "JSON-RPC-fout {{code}}:"
+    }
+  },
+  "jsonrpcBatch": {
+    "send": "Batch verzenden",
+    "tabs": {
+      "calls": "Aanroepen"
+    },
+    "empty": "Nog geen aanroepen. Voeg er hieronder een toe.",
+    "methodPlaceholder": "methode",
+    "idPlaceholder": "id (automatisch)",
+    "moveUp": "Omhoog",
+    "moveDown": "Omlaag",
+    "remove": "Aanroep verwijderen",
+    "paramsLabel": "Parameters (JSON)",
+    "add": "Aanroep toevoegen",
+    "response": {
+      "unmatched": "Geen overeenkomende antwoordinvoer."
+    }
+  },
   "search": {
     "placeholder": "Zoeken...",
     "noResults": "Geen resultaten gevonden",

@@ -553,6 +553,38 @@
     "clientsConnected": "{{count}} client(s) connected",
     "notListening": "Not listening"
   },
+  "jsonrpc": {
+    "send": "Send",
+    "urlPlaceholder": "JSON-RPC endpoint URL",
+    "methodPlaceholder": "method",
+    "idPlaceholder": "id (auto)",
+    "notificationModeTooltip": "Notification mode — no id, no response awaited",
+    "tabs": {
+      "params": "Params",
+      "headers": "Headers"
+    },
+    "response": {
+      "notificationSent": "Notification sent",
+      "errorLabel": "JSON-RPC error {{code}}:"
+    }
+  },
+  "jsonrpcBatch": {
+    "send": "Send batch",
+    "tabs": {
+      "calls": "Calls"
+    },
+    "empty": "No calls yet. Add one below.",
+    "methodPlaceholder": "method",
+    "idPlaceholder": "id (auto)",
+    "moveUp": "Move up",
+    "moveDown": "Move down",
+    "remove": "Remove call",
+    "paramsLabel": "Params (JSON)",
+    "add": "Add call",
+    "response": {
+      "unmatched": "No matching response entry."
+    }
+  },
   "search": {
     "placeholder": "Search...",
     "noResults": "No results found",

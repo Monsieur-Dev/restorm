@@ -1,4 +1,4 @@
-export type ResponseHistoryRequestType = 'http' | 'odata' | 'graphql' | 'grpc' | 'soap' | 'websocket'
+export type ResponseHistoryRequestType = 'http' | 'odata' | 'graphql' | 'grpc' | 'soap' | 'websocket' | 'jsonrpc' | 'jsonrpcBatch'
 
 /**
  * 3-way visual signal for the per-entry status dot in the history
@@ -181,6 +181,53 @@ export interface ResponseHistoryWebSocketResponse {
   error?: string
 }
 
+/** One JSON-RPC 2.0 error object, per spec section 5.1. */
+export interface ResponseHistoryJsonRpcError {
+  code: number
+  message: string
+  data?: unknown
+}
+
+export interface ResponseHistoryJsonRpcResponse {
+  type: 'jsonrpc'
+  requestUrl: string
+  requestHeaders: ResponseHistoryKeyValue[]
+  method: string
+  rpcId?: string
+  notificationSent?: boolean
+  statusCode: number
+  statusText: string
+  result?: unknown
+  rpcError?: ResponseHistoryJsonRpcError
+  timings: {
+    startedAt: string
+    durationMs: number
+  }
+  error?: string
+}
+
+export interface ResponseHistoryJsonRpcBatchChild {
+  childId: string
+  rpcId: string
+  method: string
+  result?: unknown
+  error?: ResponseHistoryJsonRpcError
+  unmatched?: boolean
+}
+
+export interface ResponseHistoryJsonRpcBatchResponse {
+  type: 'jsonrpcBatch'
+  requestUrl: string
+  requestHeaders: ResponseHistoryKeyValue[]
+  statusCode: number
+  children: ResponseHistoryJsonRpcBatchChild[]
+  timings: {
+    startedAt: string
+    durationMs: number
+  }
+  error?: string
+}
+
 export type ResponseHistoryResponse =
   | ResponseHistoryHttpResponse
   | ResponseHistoryODataResponse
@@ -188,6 +235,8 @@ export type ResponseHistoryResponse =
   | ResponseHistoryGrpcResponse
   | ResponseHistorySoapResponse
   | ResponseHistoryWebSocketResponse
+  | ResponseHistoryJsonRpcResponse
+  | ResponseHistoryJsonRpcBatchResponse
 
 export interface ResponseHistoryDetail {
   guid: string

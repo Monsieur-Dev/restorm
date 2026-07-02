@@ -6,12 +6,13 @@ import type { SoapRequest } from './SoapRequest'
 import type { WebSocketRequest } from './WebSocketRequest'
 import type { ODataRequest, ODataQueryOptions, ODataOperationKind, ODataBatchFormat, ODataBatchSubRequestSpec, ODataOperationParameterSpec } from './ODataRequest'
 import type { AuthenticationRequest } from './AuthenticationRequest'
+import type { JsonRpcRequest, JsonRpcBatchRequest, JsonRpcBatchCallSpec } from './JsonRpcRequest'
 import type { QuickConfig, QuickConfigStorageTarget } from './QuickConfig'
 
-export type { BaseRequest, ImportOrigin, HTTPRequest, GraphQLRequest, GrpcRequest, GrpcMockMethod, SoapRequest, WebSocketRequest, ODataRequest, ODataQueryOptions, ODataOperationKind, ODataBatchFormat, ODataBatchSubRequestSpec, ODataOperationParameterSpec, AuthenticationRequest }
+export type { BaseRequest, ImportOrigin, HTTPRequest, GraphQLRequest, GrpcRequest, GrpcMockMethod, SoapRequest, WebSocketRequest, ODataRequest, ODataQueryOptions, ODataOperationKind, ODataBatchFormat, ODataBatchSubRequestSpec, ODataOperationParameterSpec, AuthenticationRequest, JsonRpcRequest, JsonRpcBatchRequest, JsonRpcBatchCallSpec }
 export type { QuickConfig, QuickConfigStorageTarget }
 
-export type Request = HTTPRequest | GraphQLRequest | GrpcRequest | SoapRequest | WebSocketRequest | ODataRequest | AuthenticationRequest
+export type Request = HTTPRequest | GraphQLRequest | GrpcRequest | SoapRequest | WebSocketRequest | ODataRequest | AuthenticationRequest | JsonRpcRequest | JsonRpcBatchRequest
 
 export function isHTTPRequest(request: Request): request is HTTPRequest {
   return request.type === 'http'
@@ -39,4 +40,12 @@ export function isODataRequest(request: Request): request is ODataRequest {
 
 export function isAuthenticationRequest(request: Request): request is AuthenticationRequest {
   return request.type === 'auth'
+}
+
+export function isJsonRpcRequest(request: Request): request is JsonRpcRequest {
+  return request.type === 'jsonrpc'
+}
+
+export function isJsonRpcBatchRequest(request: Request): request is JsonRpcBatchRequest {
+  return request.type === 'jsonrpcBatch'
 }
