@@ -85,7 +85,7 @@ done
 REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
 GIT_DIR="$(git rev-parse --absolute-git-dir 2>/dev/null || echo "${REPO_ROOT}/.git")"
 LOG_FILE="${GIT_DIR}/ship.log"
-TIMEOUT_SEC=1200
+TIMEOUT_SEC=1800
 
 # The flake-history journal + its lock live ONCE at the main working-tree root
 # (shared across every worktree), exactly like git-commit-timeout.sh — so ships
