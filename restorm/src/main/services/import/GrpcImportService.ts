@@ -9,7 +9,8 @@ import {
   GrpcRequest,
   type GrpcCallType
 } from '../../../shared/models'
-import type { EnumDefinition } from '../../../shared/types/collections'
+import type { EnumDefinition, FolderItem } from '../../../shared/types/collections'
+import { isAnyFolder, isRequest, isGrpcRequest } from '../../../shared/types/collections'
 import { createTypedKeyValue } from '../../../shared/utils/createTypedKeyValue'
 import { grpcToApiDocumentation } from './transformers/grpcToApiDocumentation'
 import { CURRENT_FILE_FORMAT_VERSION } from '../../../shared/config/fileFormatVersion'
@@ -391,11 +392,29 @@ export function buildEnvironmentFolderFromParsedProto(parsed: ParsedProto, optio
   return rootFolder
 }
 
+/** Stamp the imported `.proto` source onto every gRPC request in the tree, so
+ * execution (`grpcProtoLoader.loadGrpcPackage`) resolves ITS OWN descriptor
+ * instead of falling back to the bundled grpcbin proto. Mirrors
+ * `GrpcReflectionImportService`'s `stampDescriptorSet` for the reflection path —
+ * kept here rather than in `buildEnvironmentFolderFromParsedProto` because that
+ * builder is shared with reflection import, which has no raw `.proto` text to stamp. */
+function stampProtoContent(items: FolderItem[], protoContent: string): void {
+  for (const item of items) {
+    if (isAnyFolder(item)) {
+      stampProtoContent(item.items, protoContent)
+    } else if (isRequest(item) && isGrpcRequest(item)) {
+      item.protoContent = protoContent
+    }
+  }
+}
+
 /**
  * Import a proto file and convert it to a Folder structure
  */
 export function importGrpc(protoContent: string, options: GrpcImportOptions = {}): EnvironmentFolder {
-  return buildEnvironmentFolderFromParsedProto(parseProto(protoContent), options)
+  const folder = buildEnvironmentFolderFromParsedProto(parseProto(protoContent), options)
+  stampProtoContent(folder.items, protoContent)
+  return folder
 }
 
 /**
