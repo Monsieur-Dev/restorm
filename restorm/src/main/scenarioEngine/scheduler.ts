@@ -155,6 +155,15 @@ export interface SocketioConnectRequest {
    * request / call / operation re-emits on `served`). */
   transport: 'socketio' | 'websocket' | 'sse' | 'grpc' | 'mqtt' | 'amqp' | 'redis-subscribe' | 'graphql-subscribe' | 'http-server' | 'grpc-server' | 'soap-server' | 'graphql-server' | 'odata-server'
   transport: 'socketio' | 'websocket' | 'stomp' | 'grpc' | 'mqtt' | 'graphql-subscribe' | 'http-server' | 'grpc-server' | 'soap-server' | 'graphql-server' | 'odata-server'
+   * `grpc` a streaming RPC (server / client / bidi), `mqtt` an MQTT subscribe,
+   * `kafka` a consumer-group subscribe (receive-only, like `mqtt` — the
+   * producer side is a separate one-shot `kafkaProduce` node, never this
+   * bridge), `graphql-subscribe` a GraphQL subscription over SSE (receive-only;
+   * each pushed payload re-emits on `message`), `http-server` HOSTS a local
+   * HTTP mock, `grpc-server` a local gRPC mock, `soap-server` a local SOAP mock
+   * and `graphql-server` a local GraphQL mock (each served request / call /
+   * operation re-emits on `served`). */
+  transport: 'socketio' | 'websocket' | 'grpc' | 'mqtt' | 'kafka' | 'graphql-subscribe' | 'http-server' | 'grpc-server' | 'soap-server' | 'graphql-server' | 'odata-server'
   /** The bound node's quick-config + static field overrides (see
    * `shared/scenarioActionOverride`). The bridge applies them to the bound
    * request before flushing, so a streaming connect / mock-server listen honours
@@ -1238,6 +1247,7 @@ export class Scheduler {
     act: InternalActivation,
     action: { transport: 'socketio' | 'websocket' | 'sse' | 'grpc' | 'mqtt' | 'amqp' | 'redis-subscribe' | 'graphql-subscribe' | 'http-server' | 'grpc-server' | 'soap-server' | 'graphql-server' | 'odata-server'; requestId: string; events: string[]; connectionName: string; overrideConfig?: Record<string, unknown> }
     action: { transport: 'socketio' | 'websocket' | 'stomp' | 'grpc' | 'mqtt' | 'graphql-subscribe' | 'http-server' | 'grpc-server' | 'soap-server' | 'graphql-server' | 'odata-server'; requestId: string; events: string[]; connectionName: string; overrideConfig?: Record<string, unknown> }
+    action: { transport: 'socketio' | 'websocket' | 'grpc' | 'mqtt' | 'kafka' | 'graphql-subscribe' | 'http-server' | 'grpc-server' | 'soap-server' | 'graphql-server' | 'odata-server'; requestId: string; events: string[]; connectionName: string; overrideConfig?: Record<string, unknown> }
   ): void {
     if (!this.socketioConnectBridge) { this.fail('socketio bridge not wired'); return }
     let iter = 0
@@ -1318,6 +1328,7 @@ export class Scheduler {
           port = 'served'
         } else if (action.transport === 'websocket' || action.transport === 'sse' || action.transport === 'grpc' || action.transport === 'mqtt' || action.transport === 'amqp' || action.transport === 'redis-subscribe' || action.transport === 'graphql-subscribe') {
         } else if (action.transport === 'websocket' || action.transport === 'stomp' || action.transport === 'grpc' || action.transport === 'mqtt' || action.transport === 'graphql-subscribe') {
+        } else if (action.transport === 'websocket' || action.transport === 'grpc' || action.transport === 'mqtt' || action.transport === 'kafka' || action.transport === 'graphql-subscribe') {
           port = 'message'
         } else {
           const named = eventName !== undefined && action.events.includes(eventName)

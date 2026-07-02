@@ -20,6 +20,8 @@ export type BadgeType =
   // Server-Sent Events
   | 'SSE'
   | 'WS' | 'MQTT' | 'SIO' | 'STOMP'
+  // Kafka
+  | 'KAFKA'
   // OData
   | 'ODATA'
   // tRPC

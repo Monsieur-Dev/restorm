@@ -233,6 +233,15 @@ export const amqpConnectExecutor: NodeExecutor = (_act, ctx) => {
   const cfg = ctx.node.config as { requestId?: unknown; connectionName?: unknown }
   if (typeof cfg.requestId !== 'string' || cfg.requestId === '') {
     throw new Error(`amqpConnect node ${ctx.node.id} has no bound requestId`)
+/** A (kafkaConsume): Kafka — same handoff as mqttConnect (no events; every
+ * consumed message routes to the single `message` port). The bridge opens a
+ * fresh consumer-group subscribe on connect (Kafka has no persistent
+ * per-request connection to reuse, unlike socketio/websocket/mqtt/grpc — but
+ * the scope-action handoff shape is identical, so it reuses the same bridge). */
+export const kafkaConsumeExecutor: NodeExecutor = (_act, ctx) => {
+  const cfg = ctx.node.config as { requestId?: unknown; connectionName?: unknown }
+  if (typeof cfg.requestId !== 'string' || cfg.requestId === '') {
+    throw new Error(`kafkaConsume node ${ctx.node.id} has no bound requestId`)
   }
   const connectionName = typeof cfg.connectionName === 'string' && cfg.connectionName.trim() !== ''
     ? cfg.connectionName.trim()
@@ -268,6 +277,19 @@ export const amqpCloseExecutor: NodeExecutor = (_act, ctx) => {
   if (!ctx.socketio) throw new Error('amqpClose: socket bridge unavailable')
   if (!ctx.socketio.has(connectionNodeId)) {
     throw new Error('amqpClose: the referenced connection does not exist in this run')
+    scopeAction: { type: 'openSocketioConnect', transport: 'kafka', requestId: cfg.requestId, events: [], connectionName, ...(overrideConfigFrom(ctx.node.config) ? { overrideConfig: overrideConfigFrom(ctx.node.config) } : {}) }
+  }
+}
+
+/** C (kafkaClose): close the referenced consumer (same as mqttClose — there is
+ * no `kafkaSend`, produce is its own one-shot `kafkaProduce` node). */
+export const kafkaCloseExecutor: NodeExecutor = (_act, ctx) => {
+  const cfg = ctx.node.config as { connectionNodeId?: unknown }
+  const connectionNodeId = typeof cfg.connectionNodeId === 'string' ? cfg.connectionNodeId : ''
+  if (connectionNodeId === '') throw new Error('kafkaClose: no connection selected')
+  if (!ctx.socketio) throw new Error('kafkaClose: socket bridge unavailable')
+  if (!ctx.socketio.has(connectionNodeId)) {
+    throw new Error('kafkaClose: the referenced connection does not exist in this run')
   }
   ctx.socketio.close(connectionNodeId)
   return { outputs: [] }

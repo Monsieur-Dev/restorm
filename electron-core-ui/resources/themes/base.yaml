@@ -276,6 +276,9 @@ variables:
   - id: badge-stomp-background
     value: "#455a64"
     description: "STOMP badge background (Material blue-grey)"
+  - id: badge-kafka-background
+    value: "#37474f"
+    description: "Kafka badge background (Material blue-grey)"
 
   # ── OData ───────────────────────────────────────────────────────────────────
   - id: badge-odata-background

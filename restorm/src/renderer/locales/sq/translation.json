@@ -283,6 +283,8 @@
         "amqp": "Kërkesë AMQP",
         "redis": "Kërkesë Redis",
         "stomp": "Kërkesë STOMP"
+        "kafkaProduce": "Kërkesë Kafka – Prodho",
+        "kafkaConsume": "Kërkesë Kafka – Konsumo"
       }
     },
     "deleteConfirm": {
@@ -618,6 +620,52 @@
       "channels": "Kanale",
       "command": "Komandë"
     }
+  "kafka": {
+    "brokersPlaceholder": "Lista e brokerave (host:port,host:port)",
+    "clientId": "ID i klientit",
+    "clientIdPlaceholder": "restorm",
+    "mode": {
+      "produce": "Prodho",
+      "consume": "Konsumo",
+      "browse": "Shfleto"
+    },
+    "auth": {
+      "title": "Vërtetimi",
+      "mechanism": "SASL",
+      "username": "Emri i përdoruesit",
+      "password": "Fjalëkalimi",
+      "tls": "TLS"
+    },
+    "topic": "Tema",
+    "topicPlaceholder": "emri-i-temës",
+    "key": "Çelësi",
+    "keyPlaceholder": "çelësi i mesazhit (opsionale)",
+    "value": "Vlera",
+    "headers": "Headers",
+    "partition": "Ndarja",
+    "partitionPlaceholder": "auto",
+    "groupId": "ID i grupit",
+    "groupIdPlaceholder": "restorm-consumer",
+    "fromOffsetLabel": "Fillo nga",
+    "fromOffset": {
+      "earliest": "Më i hershmi",
+      "latest": "Më i fundit",
+      "specific": "Specifik"
+    },
+    "specificOffset": "Offset",
+    "partitions": "Ndarjet",
+    "partitionsPlaceholder": "0,1,2 (bosh = të gjitha)",
+    "peekCount": "Numri i mesazheve",
+    "produce": "Prodho",
+    "startConsuming": "Fillo konsumin",
+    "stopConsuming": "Ndalo konsumin",
+    "peek": "Shiko",
+    "noMessages": "Ende nuk ka mesazhe",
+    "connected": "I lidhur",
+    "disconnected": "I shkëputur",
+    "producedTo": "Prodhuar te",
+    "offset": "Offset",
+    "messages": "Mesazhet"
   },
   "search": {
     "placeholder": "Kërko...",
@@ -1202,6 +1250,9 @@
       "stompConnect": "Lidhje STOMP",
       "stompSend": "Dërgim STOMP",
       "stompClose": "Mbyllje STOMP"
+      "kafkaProduce": "Kafka produce",
+      "kafkaConsume": "Kafka consume",
+      "kafkaClose": "Kafka close"
     },
     "comparator": {
       "result": "rezultati"
@@ -1803,6 +1854,9 @@
       "stompConnect": "Hap një lidhje afatgjatë STOMP-mbi-WebSocket: kryen shtrëngimin e duarve CONNECT/CONNECTED, më pas abonohet në çdo destinacion të konfiguruar dhe ritransmeton çdo kornizë të marrë në portën e vet.",
       "stompSend": "Dërgon një kornizë SEND në një lidhje STOMP tashmë të hapur.",
       "stompClose": "Dërgon DISCONNECT dhe mbyll një lidhje STOMP tashmë të hapur."
+      "kafkaProduce": "Ekzekuton një kërkesë Kafka të lidhur si një prodhim një-herësh dhe lëshon rezultatin (tema/ndarja/offset) si `response`.",
+      "kafkaConsume": "Hap një konsumator Kafka afatgjatë nga një kërkesë e lidhur dhe rilëshon çdo mesazh të marrë në portin e tij `message`.",
+      "kafkaClose": "Mbyll një konsumator Kafka tashmë të hapur."
     },
     "legend": {
       "title": "Legjenda",

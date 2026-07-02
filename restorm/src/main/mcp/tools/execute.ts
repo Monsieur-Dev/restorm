@@ -38,6 +38,8 @@ import { isHTTPRequest, isGraphQLRequest, isGrpcRequest, isSoapRequest, isODataR
 import type { HTTPRequest, GraphQLRequest, GrpcRequest, SoapRequest, WebSocketRequest, SseRequest, AuthenticationRequest, ODataRequest, JsonRpcRequest, JsonRpcBatchRequest, TrpcRequest, AmqpRequest, RedisRequest, KeyValue, EnvironmentFolder } from '../../../shared/types/collections'
 import { isHTTPRequest, isGraphQLRequest, isGrpcRequest, isSoapRequest, isODataRequest, isAuthenticationRequest, isWebSocketRequest, isStompRequest, isEnvironmentFolder } from '../../../shared/types/collections'
 import type { HTTPRequest, GraphQLRequest, GrpcRequest, SoapRequest, WebSocketRequest, StompRequest, AuthenticationRequest, ODataRequest, KeyValue, EnvironmentFolder } from '../../../shared/types/collections'
+import { isHTTPRequest, isGraphQLRequest, isGrpcRequest, isSoapRequest, isODataRequest, isAuthenticationRequest, isWebSocketRequest, isKafkaRequest, isEnvironmentFolder } from '../../../shared/types/collections'
+import type { HTTPRequest, GraphQLRequest, GrpcRequest, SoapRequest, WebSocketRequest, AuthenticationRequest, ODataRequest, KafkaRequest, KeyValue, EnvironmentFolder } from '../../../shared/types/collections'
 import { isRequest, type FolderItem, type Request } from '../../../shared/models'
 
 function jsonReply(value: unknown): { content: { type: 'text'; text: string }[] } {
@@ -468,6 +470,27 @@ export function flushRequestStateToContext(req: Request, scenarioVariables?: Rea
     data.sendDestination = stomp.sendDestination
     data.sendBody = stomp.sendBody
     data.sendHeaders = stomp.sendHeaders
+  } else if (isKafkaRequest(req)) {
+    const kafka = req as KafkaRequest
+    // Prefixed to avoid colliding with the generic `clientId` / near-generic
+    // fields other protocols already claim — mirrors the renderer tab view's
+    // own `updateFullRequestData` payload (see `ContextServiceTypes.ts`).
+    data.requestType = 'kafka'
+    data.kafkaMode = kafka.mode
+    data.kafkaTopic = kafka.topic
+    if (kafka.key !== undefined) data.kafkaKey = kafka.key
+    data.kafkaValue = kafka.value
+    if (kafka.partition !== undefined) data.kafkaPartition = kafka.partition
+    if (kafka.groupId !== undefined) data.kafkaGroupId = kafka.groupId
+    data.kafkaFromOffset = kafka.fromOffset
+    if (kafka.specificOffset !== undefined) data.kafkaSpecificOffset = kafka.specificOffset
+    if (kafka.partitions !== undefined) data.kafkaPartitions = kafka.partitions
+    if (kafka.browsePeekCount !== undefined) data.kafkaBrowsePeekCount = kafka.browsePeekCount
+    data.kafkaClientId = kafka.clientId
+    data.kafkaSaslMechanism = kafka.saslMechanism
+    if (kafka.saslUsername !== undefined) data.kafkaSaslUsername = kafka.saslUsername
+    if (kafka.saslPassword !== undefined) data.kafkaSaslPassword = kafka.saslPassword
+    if (kafka.tlsEnabled !== undefined) data.kafkaTlsEnabled = kafka.tlsEnabled
   }
   // If the request isn't registered with ContextService yet, register
   // it inline. Until recently we bailed out here on the assumption

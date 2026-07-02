@@ -282,6 +282,8 @@
         "amqp": "Permintaan AMQP",
         "redis": "Permintaan Redis",
         "stomp": "Permintaan STOMP"
+        "kafkaProduce": "Permintaan Kafka – Hasilkan",
+        "kafkaConsume": "Permintaan Kafka – Konsumsi"
       }
     },
     "deleteConfirm": {
@@ -617,6 +619,52 @@
       "channels": "Saluran",
       "command": "Perintah"
     }
+  "kafka": {
+    "brokersPlaceholder": "Daftar broker (host:port,host:port)",
+    "clientId": "ID klien",
+    "clientIdPlaceholder": "restorm",
+    "mode": {
+      "produce": "Hasilkan",
+      "consume": "Konsumsi",
+      "browse": "Jelajahi"
+    },
+    "auth": {
+      "title": "Autentikasi",
+      "mechanism": "SASL",
+      "username": "Nama pengguna",
+      "password": "Kata sandi",
+      "tls": "TLS"
+    },
+    "topic": "Topik",
+    "topicPlaceholder": "nama-topik",
+    "key": "Kunci",
+    "keyPlaceholder": "kunci pesan (opsional)",
+    "value": "Nilai",
+    "headers": "Header",
+    "partition": "Partisi",
+    "partitionPlaceholder": "otomatis",
+    "groupId": "ID grup",
+    "groupIdPlaceholder": "restorm-consumer",
+    "fromOffsetLabel": "Mulai dari",
+    "fromOffset": {
+      "earliest": "Paling awal",
+      "latest": "Terbaru",
+      "specific": "Tertentu"
+    },
+    "specificOffset": "Offset",
+    "partitions": "Partisi",
+    "partitionsPlaceholder": "0,1,2 (kosong = semua)",
+    "peekCount": "Jumlah pesan",
+    "produce": "Hasilkan",
+    "startConsuming": "Mulai konsumsi",
+    "stopConsuming": "Hentikan konsumsi",
+    "peek": "Intip",
+    "noMessages": "Belum ada pesan",
+    "connected": "Terhubung",
+    "disconnected": "Terputus",
+    "producedTo": "Dihasilkan ke",
+    "offset": "Offset",
+    "messages": "Pesan"
   },
   "search": {
     "placeholder": "Cari...",
@@ -1201,6 +1249,9 @@
       "stompConnect": "Koneksi STOMP",
       "stompSend": "Kirim STOMP",
       "stompClose": "Tutup STOMP"
+      "kafkaProduce": "Kafka produce",
+      "kafkaConsume": "Kafka consume",
+      "kafkaClose": "Kafka close"
     },
     "comparator": {
       "result": "hasil"
@@ -1802,6 +1853,9 @@
       "stompConnect": "Membuka koneksi STOMP melalui WebSocket yang berumur panjang: melakukan jabat tangan CONNECT/CONNECTED, lalu berlangganan ke setiap tujuan yang dikonfigurasi, dan memancarkan ulang setiap frame yang diterima pada portnya.",
       "stompSend": "Mengirim frame SEND pada koneksi STOMP yang sudah terbuka.",
       "stompClose": "Mengirim DISCONNECT dan menutup koneksi STOMP yang sudah terbuka."
+      "kafkaProduce": "Menjalankan permintaan Kafka terikat sebagai produksi satu kali dan memancarkan hasilnya (topik/partisi/offset) sebagai `response`.",
+      "kafkaConsume": "Membuka konsumen Kafka yang tahan lama dari permintaan terikat dan memancarkan ulang setiap pesan yang diterima pada port `message`-nya.",
+      "kafkaClose": "Menutup konsumen Kafka yang sudah terbuka."
     },
     "legend": {
       "title": "Legenda",

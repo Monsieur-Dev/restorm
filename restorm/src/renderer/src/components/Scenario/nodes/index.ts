@@ -55,6 +55,7 @@ import { SoapListenNodeBox, SoapCloseNodeBox } from './SoapServerNodeBoxes'
 import { GraphqlListenNodeBox, GraphqlCloseNodeBox } from './GraphqlServerNodeBoxes'
 import { ODataListenNodeBox, ODataCloseNodeBox } from './ODataServerNodeBoxes'
 import { GraphqlSubscribeNodeBox, GraphqlUnsubscribeNodeBox } from './GraphqlSubscriptionNodeBoxes'
+import { KafkaConsumeNodeBox, KafkaCloseNodeBox } from './KafkaNodeBoxes'
 
 export type { ScenarioNodeBoxData, ScenarioNodeBoxType, ScenarioNodeCell } from './ScenarioNodeBoxBase'
 export { ScenarioNodeBoxBase } from './ScenarioNodeBoxBase'
@@ -80,6 +81,11 @@ const SCENARIO_NODE_COMPONENTS: Record<ScenarioNodeKind, NodeBoxComponent> = {
   // Redis command mode is unary too (one command → one reply, then
   // disconnect) — same protocol-agnostic request box.
   redisCommand: RequestNodeBox,
+  // Kafka produce is a one-shot request too (connect -> send -> disconnect,
+  // no persistent per-request connection) — same protocol-agnostic request box.
+  kafkaProduce: RequestNodeBox,
+  kafkaConsume: KafkaConsumeNodeBox,
+  kafkaClose: KafkaCloseNodeBox,
   runScenario: RunScenarioNodeBox,
   websocketConnect: WebsocketConnectNodeBox,
   websocketSend: WebsocketSendNodeBox,

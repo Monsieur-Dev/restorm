@@ -13,6 +13,7 @@ import { JsonRpcRequest, JsonRpcBatchRequest } from './JsonRpcRequest'
 import { TrpcRequest } from './TrpcRequest'
 import { AmqpRequest } from './AmqpRequest'
 import { RedisRequest } from './RedisRequest'
+import { KafkaRequest } from './KafkaRequest'
 
 /**
  * The runtime `type → Request class` factory — the class-bearing sibling of the
@@ -54,6 +55,7 @@ export const REQUEST_CLASS_REGISTRY: Record<RequestType, RequestClassEntry> = {
   trpc: { fromPlain: (d) => TrpcRequest.fromPlain(d as Parameters<typeof TrpcRequest.fromPlain>[0]), ctor: TrpcRequest as unknown as new (...args: unknown[]) => Request },
   amqp: { fromPlain: (d) => AmqpRequest.fromPlain(d as Parameters<typeof AmqpRequest.fromPlain>[0]), ctor: AmqpRequest as unknown as new (...args: unknown[]) => Request },
   redis: { fromPlain: (d) => RedisRequest.fromPlain(d as Parameters<typeof RedisRequest.fromPlain>[0]), ctor: RedisRequest as unknown as new (...args: unknown[]) => Request }
+  kafka: { fromPlain: (d) => KafkaRequest.fromPlain(d as Parameters<typeof KafkaRequest.fromPlain>[0]), ctor: KafkaRequest as unknown as new (...args: unknown[]) => Request }
 }
 
 /**

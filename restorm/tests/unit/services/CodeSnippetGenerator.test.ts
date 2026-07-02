@@ -35,6 +35,7 @@ const templates: CompiledSnippetTemplates = {
   amqpSnippetTemplate: compile('code-snippets-amqp.hbs'),
   redisSnippetTemplate: compile('code-snippets-redis.hbs')
   stompSnippetTemplate: compile('code-snippets-stomp.hbs')
+  kafkaSnippetTemplate: compile('code-snippets-kafka.hbs')
 } as unknown as CompiledSnippetTemplates
 
 // Identity transform (no env vars needed for these structural assertions).
@@ -392,5 +393,52 @@ describe('CodeSnippetGenerator — STOMP', () => {
   it('omits the send block entirely when no send destination is configured', () => {
     const md = run({ ...base, sendDestination: '' }, 'ws://localhost:61614')
     expect(md).not.toContain('client.publish(')
+describe('CodeSnippetGenerator — Kafka', () => {
+  const base: Partial<FullRequestData> = {
+    requestType: 'kafka', url: 'localhost:9092', headers: [],
+    kafkaTopic: 'restorm-test', kafkaValue: '{"hello":"world"}', kafkaFromOffset: 'latest'
+  }
+
+  it('renders a non-empty produce snippet with the resolved topic/value, no literal {{var}}', () => {
+    const md = run({ ...base, kafkaMode: 'produce', kafkaKey: 'k1' }, 'localhost:9092')
+    expect(md.trim().length).toBeGreaterThan(0)
+    expect(md).not.toContain('{{')
+    expect(md).toContain("brokers: 'localhost:9092'.split(',')")
+    expect(md).toContain("topic: 'restorm-test'")
+    expect(md).toContain("key: 'k1'")
+    expect(md).toContain('value: {"hello":"world"}')
+    expect(md).toContain('kcat -P -b localhost:9092 -t restorm-test')
+  })
+
+  it('renders the consume snippet with the group id and an earliest fromBeginning', () => {
+    const md = run({ ...base, kafkaMode: 'consume', kafkaGroupId: 'my-group', kafkaFromOffset: 'earliest' }, 'localhost:9092')
+    expect(md).toContain("groupId: 'my-group'")
+    expect(md).toContain('fromBeginning: true')
+    expect(md).toContain('kcat -C -b localhost:9092 -t restorm-test -G my-group -o beginning')
+  })
+
+  it('renders the seek-and-drop idiom for a specific-offset consume', () => {
+    const md = run({ ...base, kafkaMode: 'consume', kafkaGroupId: 'my-group', kafkaFromOffset: 'specific', kafkaSpecificOffset: '42' }, 'localhost:9092')
+    expect(md).toContain("consumer.seek({ topic, partition, offset: '42' })")
+    expect(md).toContain('-o 42')
+  })
+
+  it('renders the browse snippet as a group-less kcat peek (-e)', () => {
+    const md = run({ ...base, kafkaMode: 'browse', kafkaPartition: 0 }, 'localhost:9092')
+    expect(md).toContain('kcat -C -b localhost:9092 -t restorm-test -p 0')
+    expect(md).toContain('-e')
+    expect(md).not.toContain('-G')
+  })
+
+  it('wires SASL + TLS flags into the kcat examples', () => {
+    const md = run({
+      ...base, kafkaMode: 'produce', kafkaSaslMechanism: 'plain', kafkaSaslUsername: 'alice',
+      kafkaSaslPassword: 'secret', kafkaTlsEnabled: true
+    }, 'localhost:9092')
+    expect(md).toContain('security.protocol=SASL_SSL')
+    expect(md).toContain('sasl.mechanisms=plain')
+    expect(md).toContain('sasl.username=alice')
+    expect(md).toContain("sasl: { mechanism: 'plain', username: 'alice', password: 'secret' }")
+    expect(md).toContain('ssl: true')
   })
 })

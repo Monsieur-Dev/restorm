@@ -9,6 +9,7 @@ import { sseExecutionService } from '../services/SseExecutionService'
 import { amqpExecutionService } from '../services/AMQPExecutionService'
 import { redisExecutionService } from '../services/RedisExecutionService'
 import { stompExecutionService } from '../services/StompExecutionService'
+import { kafkaExecutionService } from '../services/KafkaExecutionService'
 
 /**
  * The MAIN-process execution dispatch for each protocol type — the main-only
@@ -68,6 +69,12 @@ export const PROTOCOL_EXECUTORS: Record<RequestType, ProtocolExecutor> = {
   // hardcoded to `websocketExecutionService` today). The scenario engine's
   // `stompConnect` node still gets full streaming via `connectStreamingStomp`.
   stomp: { streaming: false, cancel: (id) => stompExecutionService.disconnect(id) }
+  // `streaming: false` even though consume mode is long-lived: the MCP
+  // `run_request` streaming path (`runStreamingWebsocketRequest`) is
+  // websocket-specific, not generic by transport — gRPC's own streaming call
+  // types made the same choice here for the same reason. `cancel` still
+  // uniformly aborts whichever of produce/browse/consume is in flight.
+  kafka: { streaming: false, cancel: (id) => kafkaExecutionService.cancel(id) }
 }
 
 /** The execution dispatch for a protocol discriminant. */

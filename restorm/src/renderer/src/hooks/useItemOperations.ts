@@ -22,6 +22,7 @@ import {
   TrpcRequest,
   AmqpRequest,
   RedisRequest
+  KafkaRequest
 } from '../../../shared/models/requests'
 import type { HTTPMethod } from '../../../shared/models/types'
 import { findItemById, findItemWithBreadcrumbs, getFolderIcon, getNearestEnvironmentsForBreadcrumbs } from '../utils/treeSearch'
@@ -478,6 +479,8 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
       case 'mqtt': return 'New MQTT request'
       case 'mqtt-server': return 'New MQTT broker'
       case 'sse': return 'New SSE request'
+      case 'kafka-produce': return 'New Kafka produce request'
+      case 'kafka-consume': return 'New Kafka consume request'
       case 'odata': return 'New OData request'
       case 'odata-server': return 'New OData mock server'
       case 'amqp': return 'New AMQP request'
@@ -690,6 +693,14 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
         built = new WebSocketRequest({ id, name, protocol: 'mqtt', server: true, url: 'mqtt://localhost:1883', event: '#' })
       } else if (kind === 'sse') {
         built = new SseRequest({ id, name })
+      } else if (kind === 'kafka-produce') {
+        // Kafka has no persistent per-request connection: a "produce" child is
+        // a one-shot request (connect -> send -> disconnect).
+        built = new KafkaRequest({ id, name, mode: 'produce', url: 'localhost:9092' })
+      } else if (kind === 'kafka-consume') {
+        // A "consume" child defaults to a fresh consumer group starting at the
+        // latest offset — the long-lived `kafkaConsume` node binds to it.
+        built = new KafkaRequest({ id, name, mode: 'consume', url: 'localhost:9092', groupId: 'restorm-consumer' })
       } else if (kind === 'odata') {
         built = new ODataRequest({ id, name })
       } else if (kind === 'odata-server') {

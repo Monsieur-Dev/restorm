@@ -282,6 +282,8 @@
         "amqp": "AMQP 请求",
         "redis": "Redis 请求",
         "stomp": "STOMP 请求"
+        "kafkaProduce": "Kafka 请求 – 生产",
+        "kafkaConsume": "Kafka 请求 – 消费"
       }
     },
     "deleteConfirm": {
@@ -617,6 +619,52 @@
       "channels": "频道",
       "command": "命令"
     }
+  "kafka": {
+    "brokersPlaceholder": "Broker 列表 (host:port,host:port)",
+    "clientId": "客户端 ID",
+    "clientIdPlaceholder": "restorm",
+    "mode": {
+      "produce": "生产",
+      "consume": "消费",
+      "browse": "浏览"
+    },
+    "auth": {
+      "title": "身份验证",
+      "mechanism": "SASL",
+      "username": "用户名",
+      "password": "密码",
+      "tls": "TLS"
+    },
+    "topic": "主题",
+    "topicPlaceholder": "主题名称",
+    "key": "键",
+    "keyPlaceholder": "消息键（可选）",
+    "value": "值",
+    "headers": "消息头",
+    "partition": "分区",
+    "partitionPlaceholder": "自动",
+    "groupId": "组 ID",
+    "groupIdPlaceholder": "restorm-consumer",
+    "fromOffsetLabel": "起始位置",
+    "fromOffset": {
+      "earliest": "最早",
+      "latest": "最新",
+      "specific": "指定"
+    },
+    "specificOffset": "偏移量",
+    "partitions": "分区",
+    "partitionsPlaceholder": "0,1,2（留空=全部）",
+    "peekCount": "消息数量",
+    "produce": "生产",
+    "startConsuming": "开始消费",
+    "stopConsuming": "停止消费",
+    "peek": "预览",
+    "noMessages": "暂无消息",
+    "connected": "已连接",
+    "disconnected": "已断开连接",
+    "producedTo": "已生产至",
+    "offset": "偏移量",
+    "messages": "消息"
   },
   "search": {
     "placeholder": "搜索...",
@@ -1201,6 +1249,9 @@
       "stompConnect": "STOMP 连接",
       "stompSend": "STOMP 发送",
       "stompClose": "STOMP 关闭"
+      "kafkaProduce": "Kafka produce",
+      "kafkaConsume": "Kafka consume",
+      "kafkaClose": "Kafka close"
     },
     "comparator": {
       "result": "结果"
@@ -1802,6 +1853,9 @@
       "stompConnect": "建立一个长期的基于 WebSocket 的 STOMP 连接：执行 CONNECT/CONNECTED 握手，然后订阅每个已配置的目的地，并在其端口上重新发出每个接收到的帧。",
       "stompSend": "在已打开的 STOMP 连接上发送一个 SEND 帧。",
       "stompClose": "发送 DISCONNECT 并关闭已打开的 STOMP 连接。"
+      "kafkaProduce": "将绑定的 Kafka 请求作为一次性生产执行，并将结果（主题/分区/偏移量）作为 `response` 发出。",
+      "kafkaConsume": "从绑定的请求打开一个持久的 Kafka 消费者，并在其 `message` 端口上重新发出每个收到的消息。",
+      "kafkaClose": "关闭一个已打开的 Kafka 消费者。"
     },
     "legend": {
       "title": "图例",

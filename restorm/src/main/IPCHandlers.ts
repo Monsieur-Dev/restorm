@@ -31,6 +31,7 @@ import { sseExecutionService, type SseExecutionInput } from './services/SseExecu
 import { amqpExecutionService, type AmqpExecutionInput } from './services/AMQPExecutionService'
 import { redisExecutionService, type RedisExecutionInput } from './services/RedisExecutionService'
 import { stompExecutionService, type StompExecutionInput } from './services/StompExecutionService'
+import { kafkaExecutionService } from './services/KafkaExecutionService'
 import { scenarioEngine } from './scenarioEngine/engine'
 import { importFrom } from './services/import/ImportManager'
 import { importGrpcFromReflection, findExistingGrpcReflectionFolder, reimportGrpcReflection } from './services/import/GrpcReflectionImportService'
@@ -66,6 +67,7 @@ import {
   amqpExecuteArgs, amqpConnectArgs, amqpSendArgs, amqpDisconnectArgs, amqpCancelArgs, amqpIsActiveArgs,
   redisSubscribeArgs, redisCommandArgs, redisDisconnectArgs, redisIsActiveArgs,
   stompConnectArgs, stompDisconnectArgs, stompSendArgs, stompAckArgs, stompNackArgs, stompIsActiveArgs,
+  kafkaProduceArgs, kafkaBrowseArgs, kafkaConsumeStartArgs, kafkaCancelArgs, kafkaIsActiveArgs,
   responsesHistoryListArgs, responsesHistoryGetArgs,
   responsesHistoryTogglePinArgs,
   requestUsageGetArgs,
@@ -1521,6 +1523,55 @@ export function registerRestormIPC(deps: {
 
   validatedHandle('stomp:is-active', stompIsActiveArgs, (_event, [requestId]) => {
     return stompExecutionService.isActive(requestId)
+  // Kafka Execution IPC Handlers
+  //
+  // Unlike every other protocol, Kafka has THREE independent lifecycles
+  // instead of one execute channel — `produce` / `browse` are one-shot and
+  // self-persist their history entry (see `KafkaExecutionService`, mirroring
+  // `WebSocketExecutionService.connectStreamingMqtt`'s self-persist rather
+  // than the caller-persists pattern `soap:execute` uses above), so this
+  // handler does NOT call `responseHistoryService.storeExecutionResult`
+  // again. `consume-start` fires the long-lived subscribe and returns
+  // immediately — live progress/messages stream over the existing
+  // `kafka:request-progress` / `kafka:message` broadcast channels, exactly
+  // like the scenario engine's `kafkaConsume` path.
+  // ==========================================================================
+
+  validatedHandle('kafka:produce', kafkaProduceArgs, async (_event, [input]) => {
+    const result = await kafkaExecutionService.produce(input)
+    requestUsageService.recordSend(input.requestId)
+    return result
+  })
+
+  validatedHandle('kafka:browse', kafkaBrowseArgs, async (_event, [input]) => {
+    const result = await kafkaExecutionService.browse(input)
+    requestUsageService.recordSend(input.requestId)
+    return result
+  })
+
+  validatedHandle('kafka:consume-start', kafkaConsumeStartArgs, (_event, [requestId]) => {
+    if (kafkaExecutionService.isActive(requestId)) return { started: false }
+    // These three callbacks feed the SCENARIO-ENGINE bridge (`engine.ts`'s
+    // `transport: 'kafka'` branch); the request-panel path below doesn't need
+    // them — it already gets connect/message/close via the service's own
+    // `kafka:request-progress` / `kafka:message` broadcasts, which the
+    // renderer subscribes to directly.
+    kafkaExecutionService.connectStreamingConsumer({
+      requestId,
+      onConnect: () => { /* renderer uses the progress broadcast instead */ },
+      onMessage: () => { /* renderer uses the message broadcast instead */ },
+      onClose: () => { /* renderer uses the progress broadcast instead */ }
+    })
+    requestUsageService.recordSend(requestId)
+    return { started: true }
+  })
+
+  validatedHandle('kafka:cancel', kafkaCancelArgs, (_event, [requestId]) => {
+    return kafkaExecutionService.cancel(requestId)
+  })
+
+  validatedHandle('kafka:is-active', kafkaIsActiveArgs, (_event, [requestId]) => {
+    return kafkaExecutionService.isActive(requestId)
   })
 
   // ==========================================================================

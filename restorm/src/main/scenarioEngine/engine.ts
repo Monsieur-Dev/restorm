@@ -22,6 +22,7 @@ import { redisExecutionService } from '../services/RedisExecutionService'
 import { grpcMockServerService } from '../services/GRPCMockServerService'
 import { odataMockServerService } from '../services/ODataMockServerService'
 import { amqpExecutionService } from '../services/AMQPExecutionService'
+import { kafkaExecutionService } from '../services/KafkaExecutionService'
 import { flushRequestStateToContext } from '../mcp/tools/execute'
 import { installScenarioValueResolvers } from '../../shared/scenarioValueResolvers'
 import { setSecretPreviewResolver } from '../../shared/utils/scenarioStaticPreview'
@@ -236,6 +237,10 @@ export class ScenarioEngine {
           })
           return { send: () => false, close: handle.close, isOpen: handle.isOpen }
         }
+        // Kafka consume: a receive-only streaming subscribe, like MQTT — the
+        // producer side is a separate one-shot `kafkaProduce` node that never
+        // goes through this bridge, and Kafka has no server-mode variant here.
+        if (req.transport === 'kafka') return kafkaExecutionService.connectStreamingConsumer(req)
         // HTTP mock server: a DISTINCT long-lived listener with its OWN path (an
         // `httpListen` node, never a one-shot `httpRequest`). It HOSTS the bound
         // `server: true` request's METHOD+PATH+port and re-emits each served

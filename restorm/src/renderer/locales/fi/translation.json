@@ -283,6 +283,8 @@
         "amqp": "AMQP-pyyntö",
         "redis": "Redis-pyyntö",
         "stomp": "STOMP-pyyntö"
+        "kafkaProduce": "Kafka-pyyntö – Tuota",
+        "kafkaConsume": "Kafka-pyyntö – Kuluta"
       }
     },
     "deleteConfirm": {
@@ -618,6 +620,52 @@
       "channels": "Kanavat",
       "command": "Komento"
     }
+  "kafka": {
+    "brokersPlaceholder": "Broker-luettelo (host:port,host:port)",
+    "clientId": "Asiakastunnus",
+    "clientIdPlaceholder": "restorm",
+    "mode": {
+      "produce": "Tuota",
+      "consume": "Kuluta",
+      "browse": "Selaa"
+    },
+    "auth": {
+      "title": "Todennus",
+      "mechanism": "SASL",
+      "username": "Käyttäjätunnus",
+      "password": "Salasana",
+      "tls": "TLS"
+    },
+    "topic": "Aihe",
+    "topicPlaceholder": "aiheen-nimi",
+    "key": "Avain",
+    "keyPlaceholder": "viestin avain (valinnainen)",
+    "value": "Arvo",
+    "headers": "Otsikot",
+    "partition": "Partitio",
+    "partitionPlaceholder": "auto",
+    "groupId": "Ryhmätunnus",
+    "groupIdPlaceholder": "restorm-consumer",
+    "fromOffsetLabel": "Aloita kohdasta",
+    "fromOffset": {
+      "earliest": "Vanhin",
+      "latest": "Uusin",
+      "specific": "Tietty"
+    },
+    "specificOffset": "Offset",
+    "partitions": "Partitiot",
+    "partitionsPlaceholder": "0,1,2 (tyhjä = kaikki)",
+    "peekCount": "Viestien määrä",
+    "produce": "Tuota",
+    "startConsuming": "Aloita kulutus",
+    "stopConsuming": "Lopeta kulutus",
+    "peek": "Kurkistus",
+    "noMessages": "Ei vielä viestejä",
+    "connected": "Yhdistetty",
+    "disconnected": "Yhteys katkaistu",
+    "producedTo": "Tuotettu kohteeseen",
+    "offset": "Offset",
+    "messages": "Viestit"
   },
   "search": {
     "placeholder": "Etsi...",
@@ -1202,6 +1250,9 @@
       "stompConnect": "STOMP-yhteys",
       "stompSend": "STOMP-lähetys",
       "stompClose": "Sulje STOMP"
+      "kafkaProduce": "Kafka produce",
+      "kafkaConsume": "Kafka consume",
+      "kafkaClose": "Kafka close"
     },
     "comparator": {
       "result": "tulos"
@@ -1803,6 +1854,9 @@
       "stompConnect": "Avaa pitkäkestoisen STOMP-yhteyden WebSocketin yli: suorittaa CONNECT/CONNECTED-kättelyn, tilaa sitten jokaisen määritetyn kohteen ja lähettää jokaisen vastaanotetun kehyksen uudelleen portistaan.",
       "stompSend": "Lähettää SEND-kehyksen jo avoinna olevassa STOMP-yhteydessä.",
       "stompClose": "Lähettää DISCONNECT-viestin ja sulkee jo avoinna olevan STOMP-yhteyden."
+      "kafkaProduce": "Suorittaa sidotun Kafka-pyynnön kertaluonteisena tuottamisena ja lähettää tuloksen (aihe/partitio/offset) `response`-arvona.",
+      "kafkaConsume": "Avaa pitkäkestoisen Kafka-kuluttajan sidotusta pyynnöstä ja lähettää jokaisen vastaanotetun viestin uudelleen `message`-portissaan.",
+      "kafkaClose": "Sulkee jo avoimen Kafka-kuluttajan."
     },
     "legend": {
       "title": "Selite",

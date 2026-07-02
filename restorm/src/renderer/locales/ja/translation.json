@@ -282,6 +282,8 @@
         "amqp": "AMQP リクエスト",
         "redis": "Redis リクエスト",
         "stomp": "STOMPリクエスト"
+        "kafkaProduce": "Kafka リクエスト – 生成",
+        "kafkaConsume": "Kafka リクエスト – 消費"
       }
     },
     "deleteConfirm": {
@@ -617,6 +619,52 @@
       "channels": "チャンネル",
       "command": "コマンド"
     }
+  "kafka": {
+    "brokersPlaceholder": "ブローカーリスト (host:port,host:port)",
+    "clientId": "クライアントID",
+    "clientIdPlaceholder": "restorm",
+    "mode": {
+      "produce": "生成",
+      "consume": "消費",
+      "browse": "閲覧"
+    },
+    "auth": {
+      "title": "認証",
+      "mechanism": "SASL",
+      "username": "ユーザー名",
+      "password": "パスワード",
+      "tls": "TLS"
+    },
+    "topic": "トピック",
+    "topicPlaceholder": "トピック名",
+    "key": "キー",
+    "keyPlaceholder": "メッセージキー（任意）",
+    "value": "値",
+    "headers": "ヘッダー",
+    "partition": "パーティション",
+    "partitionPlaceholder": "自動",
+    "groupId": "グループID",
+    "groupIdPlaceholder": "restorm-consumer",
+    "fromOffsetLabel": "開始位置",
+    "fromOffset": {
+      "earliest": "最古",
+      "latest": "最新",
+      "specific": "指定"
+    },
+    "specificOffset": "オフセット",
+    "partitions": "パーティション",
+    "partitionsPlaceholder": "0,1,2（空欄=すべて）",
+    "peekCount": "取得件数",
+    "produce": "生成",
+    "startConsuming": "消費を開始",
+    "stopConsuming": "消費を停止",
+    "peek": "プレビュー",
+    "noMessages": "メッセージはまだありません",
+    "connected": "接続済み",
+    "disconnected": "切断されました",
+    "producedTo": "送信先",
+    "offset": "オフセット",
+    "messages": "メッセージ"
   },
   "search": {
     "placeholder": "検索...",
@@ -1201,6 +1249,9 @@
       "stompConnect": "STOMP接続",
       "stompSend": "STOMP送信",
       "stompClose": "STOMPを閉じる"
+      "kafkaProduce": "Kafka produce",
+      "kafkaConsume": "Kafka consume",
+      "kafkaClose": "Kafka close"
     },
     "comparator": {
       "result": "結果"
@@ -1802,6 +1853,9 @@
       "stompConnect": "長期間有効なSTOMP over WebSocket接続を開きます。CONNECT/CONNECTEDハンドシェイクを実行し、設定された各宛先を購読して、受信した各フレームをそのポートに再送出します。",
       "stompSend": "すでに開いているSTOMP接続でSENDフレームを送信します。",
       "stompClose": "DISCONNECTを送信し、すでに開いているSTOMP接続を閉じます。"
+      "kafkaProduce": "バインドされた Kafka リクエストを一度限りの produce として実行し、結果（トピック/パーティション/オフセット）を `response` として送出します。",
+      "kafkaConsume": "バインドされたリクエストから持続的な Kafka コンシューマーを開き、受信した各メッセージを `message` ポートに再送出します。",
+      "kafkaClose": "すでに開いている Kafka コンシューマーを閉じます。"
     },
     "legend": {
       "title": "凡例",

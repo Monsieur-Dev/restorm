@@ -19,6 +19,7 @@ describe('protocol registry socle', () => {
   it('keeps the canonical protocol order in REQUEST_TYPES', () => {
     expect(REQUEST_TYPES).toEqual(['http', 'graphql', 'grpc', 'soap', 'websocket', 'sse', 'odata', 'redis', 'auth', 'jsonrpc', 'jsonrpcBatch', 'trpc', 'amqp'])
     expect(REQUEST_TYPES).toEqual(['http', 'graphql', 'grpc', 'soap', 'websocket', 'stomp', 'odata', 'auth'])
+    expect(REQUEST_TYPES).toEqual(['http', 'graphql', 'grpc', 'soap', 'websocket', 'odata', 'auth', 'kafka'])
   })
 
   it('has a request-class factory entry for every protocol', () => {

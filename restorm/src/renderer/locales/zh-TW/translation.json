@@ -282,6 +282,8 @@
         "amqp": "AMQP 請求",
         "redis": "Redis 請求",
         "stomp": "STOMP 請求"
+        "kafkaProduce": "Kafka 請求 – 產生",
+        "kafkaConsume": "Kafka 請求 – 消費"
       }
     },
     "deleteConfirm": {
@@ -617,6 +619,52 @@
       "channels": "頻道",
       "command": "命令"
     }
+  "kafka": {
+    "brokersPlaceholder": "Broker 清單 (host:port,host:port)",
+    "clientId": "客戶端 ID",
+    "clientIdPlaceholder": "restorm",
+    "mode": {
+      "produce": "產生",
+      "consume": "消費",
+      "browse": "瀏覽"
+    },
+    "auth": {
+      "title": "身分驗證",
+      "mechanism": "SASL",
+      "username": "使用者名稱",
+      "password": "密碼",
+      "tls": "TLS"
+    },
+    "topic": "主題",
+    "topicPlaceholder": "主題名稱",
+    "key": "鍵",
+    "keyPlaceholder": "訊息鍵（選填）",
+    "value": "值",
+    "headers": "訊息標頭",
+    "partition": "分割區",
+    "partitionPlaceholder": "自動",
+    "groupId": "群組 ID",
+    "groupIdPlaceholder": "restorm-consumer",
+    "fromOffsetLabel": "起始位置",
+    "fromOffset": {
+      "earliest": "最早",
+      "latest": "最新",
+      "specific": "指定"
+    },
+    "specificOffset": "偏移量",
+    "partitions": "分割區",
+    "partitionsPlaceholder": "0,1,2（留空=全部）",
+    "peekCount": "訊息數量",
+    "produce": "產生",
+    "startConsuming": "開始消費",
+    "stopConsuming": "停止消費",
+    "peek": "預覽",
+    "noMessages": "尚無訊息",
+    "connected": "已連線",
+    "disconnected": "已中斷連線",
+    "producedTo": "已產生至",
+    "offset": "偏移量",
+    "messages": "訊息"
   },
   "search": {
     "placeholder": "搜尋...",
@@ -1201,6 +1249,9 @@
       "stompConnect": "STOMP 連線",
       "stompSend": "STOMP 傳送",
       "stompClose": "STOMP 關閉"
+      "kafkaProduce": "Kafka produce",
+      "kafkaConsume": "Kafka consume",
+      "kafkaClose": "Kafka close"
     },
     "comparator": {
       "result": "結果"
@@ -1802,6 +1853,9 @@
       "stompConnect": "建立一個長期的基於 WebSocket 的 STOMP 連線：執行 CONNECT/CONNECTED 交握，然後訂閱每個已設定的目的地，並在其連接埠上重新發出每個接收到的訊框。",
       "stompSend": "在已開啟的 STOMP 連線上傳送一個 SEND 訊框。",
       "stompClose": "傳送 DISCONNECT 並關閉已開啟的 STOMP 連線。"
+      "kafkaProduce": "將繫結的 Kafka 請求作為一次性產生執行，並將結果（主題/分割區/偏移量）作為 `response` 發出。",
+      "kafkaConsume": "從繫結的請求開啟一個持久的 Kafka 消費者，並在其 `message` 連接埠上重新發出每個收到的訊息。",
+      "kafkaClose": "關閉一個已開啟的 Kafka 消費者。"
     },
     "legend": {
       "title": "圖例",

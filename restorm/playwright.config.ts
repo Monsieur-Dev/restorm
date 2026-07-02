@@ -150,6 +150,10 @@ const stompExecutionTestDir = defineBddConfig({
   features: 'tests/e2e/bdd/stomp-execution/features/**/*.feature',
   steps: ['tests/e2e/bdd/stomp-execution/steps/**/*.ts', 'tests/e2e/bdd/fixtures/mcp-server.fixture.ts'],
   outputDir: '.features-gen/stomp-execution'
+const kafkaExecutionTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/kafka-execution/features/**/*.feature',
+  steps: ['tests/e2e/bdd/kafka-execution/steps/**/*.ts', 'tests/e2e/bdd/fixtures/mcp-server.fixture.ts'],
+  outputDir: '.features-gen/kafka-execution'
 })
 
 const quickSettingsTestDir = defineBddConfig({
@@ -551,6 +555,11 @@ export default defineConfig({
     {
       name: 'amqp-execution',
       testDir: amqpExecutionTestDir,
+      timeout: 180 * 1000
+    },
+    {
+      name: 'kafka-execution',
+      testDir: kafkaExecutionTestDir,
       timeout: 180 * 1000
     },
     {

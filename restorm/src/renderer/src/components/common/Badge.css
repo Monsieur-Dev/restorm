@@ -154,6 +154,8 @@
   background-color: var(--badge-sse-background);
 .badge-stomp {
   background-color: var(--badge-stomp-background);
+.badge-kafka {
+  background-color: var(--badge-kafka-background);
   color: var(--badge-on-accent, #ffffff);
 }
 

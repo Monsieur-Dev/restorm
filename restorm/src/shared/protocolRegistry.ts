@@ -185,6 +185,12 @@ export const PROTOCOL_REGISTRY = {
     ipcNamespace: 'amqp',
     badge: { kind: 'fixed', value: 'AMQP' },
     scenarioKinds: ['amqpConnect', 'amqpPublish', 'amqpClose']
+  kafka: {
+    graphqlTypeName: 'KafkaRequest',
+    tabType: 'kafka-request',
+    ipcNamespace: 'kafka',
+    badge: { kind: 'fixed', value: 'KAFKA' },
+    scenarioKinds: ['kafkaProduce', 'kafkaConsume', 'kafkaClose']
   }
 } satisfies Record<string, ProtocolSpec>
 

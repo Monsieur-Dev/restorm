@@ -69,6 +69,7 @@ export interface CompiledSnippetTemplates {
   sseSnippetTemplate: Handlebars.TemplateDelegate | null
   amqpSnippetTemplate: Handlebars.TemplateDelegate | null
   redisSnippetTemplate: Handlebars.TemplateDelegate | null
+  kafkaSnippetTemplate: Handlebars.TemplateDelegate | null
 }
 
 /**
@@ -88,6 +89,7 @@ export function compileSnippetTemplates(): CompiledSnippetTemplates {
     sseSnippetTemplate: null,
     amqpSnippetTemplate: null,
     redisSnippetTemplate: null
+    kafkaSnippetTemplate: null
   }
 
   try {
@@ -102,6 +104,7 @@ export function compileSnippetTemplates(): CompiledSnippetTemplates {
     const sseTemplate = loadTemplate('code-snippets-sse.hbs')
     const amqpTemplate = loadTemplate('code-snippets-amqp.hbs')
     const redisTemplate = loadTemplate('code-snippets-redis.hbs')
+    const kafkaTemplate = loadTemplate('code-snippets-kafka.hbs')
 
     if (httpTemplate) templates.httpSnippetTemplate = Handlebars.compile(httpTemplate, { noEscape: true })
     if (graphqlTemplate) templates.graphqlSnippetTemplate = Handlebars.compile(graphqlTemplate, { noEscape: true })
@@ -114,6 +117,7 @@ export function compileSnippetTemplates(): CompiledSnippetTemplates {
     if (sseTemplate) templates.sseSnippetTemplate = Handlebars.compile(sseTemplate, { noEscape: true })
     if (amqpTemplate) templates.amqpSnippetTemplate = Handlebars.compile(amqpTemplate, { noEscape: true })
     if (redisTemplate) templates.redisSnippetTemplate = Handlebars.compile(redisTemplate, { noEscape: true })
+    if (kafkaTemplate) templates.kafkaSnippetTemplate = Handlebars.compile(kafkaTemplate, { noEscape: true })
 
     logger.info('[CodeSnippetGenerator] Code snippet templates loaded and compiled')
   } catch (error) {
@@ -492,6 +496,35 @@ export function generateCodeSnippets(
           commandParts: commandParts.length > 0 ? commandParts : null,
           commandLine: commandLine || null,
           password: password || null
+    case 'kafka': {
+      // `resolvedUrl` IS the broker list here (kafka's `url` carries
+      // `host:port,host:port`, not an HTTP URL) — the host/path parse above
+      // never applies, so read it straight.
+      const mode = data.kafkaMode ?? 'produce'
+      const fromOffset = data.kafkaFromOffset ?? 'latest'
+      const saslMechanism = data.kafkaSaslMechanism ?? 'none'
+
+      if (templates.kafkaSnippetTemplate) {
+        markdown = templates.kafkaSnippetTemplate({
+          brokers: resolvedUrl,
+          topic: data.kafkaTopic ? transformValue(data.kafkaTopic, envContext) : '',
+          key: data.kafkaKey ? transformValue(data.kafkaKey, envContext) : null,
+          value: data.kafkaValue ? transformValue(data.kafkaValue, envContext) : '""',
+          // Stringified: a raw `0` is falsy to Handlebars' `{{#if}}`, which
+          // would silently drop partition 0 from every snippet.
+          partition: data.kafkaPartition !== undefined ? String(data.kafkaPartition) : null,
+          isProduce: mode === 'produce',
+          isConsume: mode === 'consume',
+          isBrowse: mode === 'browse',
+          groupId: data.kafkaGroupId ? transformValue(data.kafkaGroupId, envContext) : 'restorm-consumer',
+          isEarliest: fromOffset === 'earliest',
+          isSpecific: fromOffset === 'specific',
+          specificOffset: data.kafkaSpecificOffset ? transformValue(data.kafkaSpecificOffset, envContext) : '0',
+          hasSasl: saslMechanism !== 'none',
+          saslMechanism,
+          saslUsername: data.kafkaSaslUsername ? transformValue(data.kafkaSaslUsername, envContext) : '',
+          saslPassword: data.kafkaSaslPassword ? transformValue(data.kafkaSaslPassword, envContext) : '',
+          tlsEnabled: data.kafkaTlsEnabled === true
         })
       }
       break

@@ -293,6 +293,17 @@ declare global {
         isActive: (requestId: string) => Promise<boolean>
         onProgress: (callback: (data: RequestProgressData) => void) => (() => void)
         onMessage: (callback: (data: StompMessageData) => void) => (() => void)
+      kafka: {
+        /** Produce: one-shot connect -> send -> disconnect. */
+        produce: (input: KafkaExecutionInput) => Promise<KafkaProduceResult>
+        /** Browse: one-shot peek via an ephemeral consumer group. */
+        browse: (input: KafkaExecutionInput) => Promise<KafkaBrowseResult>
+        /** Consume: start the long-lived subscribe; messages stream over `onMessage`. */
+        consumeStart: (requestId: string) => Promise<{ started: boolean }>
+        cancel: (requestId: string) => Promise<boolean>
+        isActive: (requestId: string) => Promise<boolean>
+        onProgress: (callback: (data: RequestProgressData) => void) => (() => void)
+        onMessage: (callback: (data: KafkaMessageData) => void) => (() => void)
       }
       odata: {
         execute: (input: ODataExecutionInput) => Promise<HTTPExecutionResult>
@@ -781,6 +792,8 @@ export interface WebSocketMessageData {
 export interface SseExecutionInput {
 /** STOMP execution input */
 export interface StompExecutionInput {
+/** Kafka execution input — shared shape for `produce` / `browse`. */
+export interface KafkaExecutionInput {
   requestId: string
   timeout?: number
 }
@@ -872,6 +885,57 @@ export interface RedisMessageData {
 export interface StompMessageData {
   requestId: string
   message: StompMessageItem
+/** One produced/consumed/browsed Kafka record. */
+export interface KafkaMessageItem {
+  direction: 'received'
+  topic: string
+  partition: number
+  offset: string
+  key?: string
+  value: string
+  headers?: Record<string, string>
+  timestamp: string
+}
+
+export interface KafkaProduceResult {
+  requestId: string
+  success: boolean
+  kafkaMode: 'produce'
+  requestTopic: string
+  requestUrl: string
+  partition?: number
+  offset?: string
+  error?: string
+  timings: { startedAt: string; durationMs: number }
+}
+
+export interface KafkaBrowseResult {
+  requestId: string
+  success: boolean
+  kafkaMode: 'browse'
+  requestTopic: string
+  requestUrl: string
+  messages: KafkaMessageItem[]
+  error?: string
+  timings: { startedAt: string; durationMs: number }
+}
+
+export interface KafkaConsumeResult {
+  requestId: string
+  success: boolean
+  kafkaMode: 'consume'
+  requestTopic: string
+  requestUrl: string
+  connected: boolean
+  messages: KafkaMessageItem[]
+  error?: string
+  timings: { startedAt: string; durationMs: number }
+}
+
+/** Payload of the `kafka:message` broadcast (a streamed/peeked frame). */
+export interface KafkaMessageData {
+  requestId: string
+  message: KafkaMessageItem
 }
 
 /** Full request data for backend processing */
@@ -879,6 +943,7 @@ export interface FullRequestData {
   id: string
   requestType: 'http' | 'graphql' | 'grpc' | 'soap' | 'websocket' | 'sse' | 'odata' | 'auth' | 'jsonrpc' | 'jsonrpcBatch' | 'trpc' | 'amqp' | 'redis'
   requestType: 'http' | 'graphql' | 'grpc' | 'soap' | 'websocket' | 'stomp' | 'odata' | 'auth'
+  requestType: 'http' | 'graphql' | 'grpc' | 'soap' | 'websocket' | 'odata' | 'auth' | 'kafka'
   url: string
   headers: KeyValueData[]
   method?: string | undefined
@@ -1041,6 +1106,24 @@ export interface AmqpExecutionResult {
 export interface AmqpMessageData {
   requestId: string
   message: AmqpMessageItem
+  // Kafka specific (requestType === 'kafka'). Mirrors the main-side
+  // ContextServiceTypes shape. `url` (common field above) carries the
+  // comma-separated broker list.
+  kafkaMode?: 'produce' | 'consume' | 'browse' | undefined
+  kafkaTopic?: string | undefined
+  kafkaKey?: string | undefined
+  kafkaValue?: string | undefined
+  kafkaPartition?: number | undefined
+  kafkaGroupId?: string | undefined
+  kafkaFromOffset?: 'earliest' | 'latest' | 'specific' | undefined
+  kafkaSpecificOffset?: string | undefined
+  kafkaPartitions?: number[] | undefined
+  kafkaBrowsePeekCount?: number | undefined
+  kafkaClientId?: string | undefined
+  kafkaSaslMechanism?: 'none' | 'plain' | 'scram-sha-256' | 'scram-sha-512' | undefined
+  kafkaSaslUsername?: string | undefined
+  kafkaSaslPassword?: string | undefined
+  kafkaTlsEnabled?: boolean | undefined
 }
 
 export {}

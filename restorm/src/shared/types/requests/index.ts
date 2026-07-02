@@ -22,6 +22,13 @@ export type { BaseRequest, ImportOrigin, HTTPRequest, GraphQLRequest, GrpcReques
 export type { QuickConfig, QuickConfigStorageTarget }
 
 export type Request = HTTPRequest | GraphQLRequest | GrpcRequest | SoapRequest | WebSocketRequest | StompRequest | ODataRequest | AuthenticationRequest
+import type { KafkaRequest, KafkaMode, KafkaFromOffset, KafkaSaslMechanism } from './KafkaRequest'
+import type { QuickConfig, QuickConfigStorageTarget } from './QuickConfig'
+
+export type { BaseRequest, ImportOrigin, HTTPRequest, GraphQLRequest, GrpcRequest, GrpcMockMethod, SoapRequest, WebSocketRequest, ODataRequest, ODataQueryOptions, ODataOperationKind, ODataBatchFormat, ODataBatchSubRequestSpec, ODataOperationParameterSpec, AuthenticationRequest, KafkaRequest, KafkaMode, KafkaFromOffset, KafkaSaslMechanism }
+export type { QuickConfig, QuickConfigStorageTarget }
+
+export type Request = HTTPRequest | GraphQLRequest | GrpcRequest | SoapRequest | WebSocketRequest | ODataRequest | AuthenticationRequest | KafkaRequest
 
 export function isHTTPRequest(request: Request): request is HTTPRequest {
   return request.type === 'http'
@@ -75,4 +82,6 @@ export function isAmqpRequest(request: Request): request is AmqpRequest {
 
 export function isRedisRequest(request: Request): request is RedisRequest {
   return request.type === 'redis'
+export function isKafkaRequest(request: Request): request is KafkaRequest {
+  return request.type === 'kafka'
 }

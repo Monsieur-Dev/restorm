@@ -31,6 +31,9 @@ export { isHTTPRequest, isGraphQLRequest, isGrpcRequest, isSoapRequest, isWebSoc
 export type { BaseRequest, HTTPRequest, GraphQLRequest, GrpcRequest, GrpcMockMethod, SoapRequest, WebSocketRequest, StompRequest, StompVersion, StompAckMode, StompSubscription, ODataRequest, ODataQueryOptions, ODataOperationKind, ODataBatchFormat, ODataBatchSubRequestSpec, ODataOperationParameterSpec, AuthenticationRequest, Request } from './requests/index'
 export type { QuickConfig, QuickConfigStorageTarget } from './requests/index'
 export { isHTTPRequest, isGraphQLRequest, isGrpcRequest, isSoapRequest, isWebSocketRequest, isStompRequest, isODataRequest, isAuthenticationRequest } from './requests/index'
+export type { BaseRequest, HTTPRequest, GraphQLRequest, GrpcRequest, GrpcMockMethod, SoapRequest, WebSocketRequest, ODataRequest, ODataQueryOptions, ODataOperationKind, ODataBatchFormat, ODataBatchSubRequestSpec, ODataOperationParameterSpec, AuthenticationRequest, KafkaRequest, KafkaMode, KafkaFromOffset, KafkaSaslMechanism, Request } from './requests/index'
+export type { QuickConfig, QuickConfigStorageTarget } from './requests/index'
+export { isHTTPRequest, isGraphQLRequest, isGrpcRequest, isSoapRequest, isWebSocketRequest, isODataRequest, isAuthenticationRequest, isKafkaRequest } from './requests/index'
 
 export type {
   BaseResponse,

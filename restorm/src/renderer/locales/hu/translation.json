@@ -283,6 +283,8 @@
         "amqp": "AMQP-kérés",
         "redis": "Redis-kérés",
         "stomp": "STOMP kérés"
+        "kafkaProduce": "Kafka-kérés – Előállítás",
+        "kafkaConsume": "Kafka-kérés – Fogyasztás"
       }
     },
     "deleteConfirm": {
@@ -618,6 +620,52 @@
       "channels": "Csatornák",
       "command": "Parancs"
     }
+  "kafka": {
+    "brokersPlaceholder": "Broker lista (host:port,host:port)",
+    "clientId": "Kliensazonosító",
+    "clientIdPlaceholder": "restorm",
+    "mode": {
+      "produce": "Előállítás",
+      "consume": "Fogyasztás",
+      "browse": "Böngészés"
+    },
+    "auth": {
+      "title": "Hitelesítés",
+      "mechanism": "SASL",
+      "username": "Felhasználónév",
+      "password": "Jelszó",
+      "tls": "TLS"
+    },
+    "topic": "Téma",
+    "topicPlaceholder": "téma-neve",
+    "key": "Kulcs",
+    "keyPlaceholder": "üzenetkulcs (opcionális)",
+    "value": "Érték",
+    "headers": "Fejlécek",
+    "partition": "Partíció",
+    "partitionPlaceholder": "auto",
+    "groupId": "Csoportazonosító",
+    "groupIdPlaceholder": "restorm-consumer",
+    "fromOffsetLabel": "Kezdés innen",
+    "fromOffset": {
+      "earliest": "Legkorábbi",
+      "latest": "Legújabb",
+      "specific": "Meghatározott"
+    },
+    "specificOffset": "Offset",
+    "partitions": "Partíciók",
+    "partitionsPlaceholder": "0,1,2 (üres = összes)",
+    "peekCount": "Üzenetek száma",
+    "produce": "Előállítás",
+    "startConsuming": "Fogyasztás indítása",
+    "stopConsuming": "Fogyasztás leállítása",
+    "peek": "Betekintés",
+    "noMessages": "Még nincsenek üzenetek",
+    "connected": "Csatlakoztatva",
+    "disconnected": "Lecsatlakozva",
+    "producedTo": "Előállítva ide",
+    "offset": "Offset",
+    "messages": "Üzenetek"
   },
   "search": {
     "placeholder": "Keresés...",
@@ -1202,6 +1250,9 @@
       "stompConnect": "STOMP kapcsolódás",
       "stompSend": "STOMP küldés",
       "stompClose": "STOMP bezárása"
+      "kafkaProduce": "Kafka produce",
+      "kafkaConsume": "Kafka consume",
+      "kafkaClose": "Kafka close"
     },
     "comparator": {
       "result": "eredmény"
@@ -1803,6 +1854,9 @@
       "stompConnect": "Tartós STOMP-a-WebSocketen-keresztül kapcsolatot nyit: elvégzi a CONNECT/CONNECTED kézfogást, majd feliratkozik minden konfigurált célra, és minden fogadott keretet újra kibocsát a portján.",
       "stompSend": "SEND keretet küld egy már megnyitott STOMP kapcsolaton.",
       "stompClose": "DISCONNECT-et küld, és lezár egy már megnyitott STOMP kapcsolatot."
+      "kafkaProduce": "Egy kötött Kafka-kérést egyszeri előállításként futtat le, és az eredményt (téma/partíció/offset) `response`-ként küldi ki.",
+      "kafkaConsume": "Tartós Kafka-fogyasztót nyit egy kötött kérésből, és minden fogadott üzenetet újraküld a `message` portján.",
+      "kafkaClose": "Lezár egy már nyitott Kafka-fogyasztót."
     },
     "legend": {
       "title": "Jelmagyarázat",

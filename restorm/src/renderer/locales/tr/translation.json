@@ -283,6 +283,8 @@
         "amqp": "AMQP isteği",
         "redis": "Redis isteği",
         "stomp": "STOMP isteği"
+        "kafkaProduce": "Kafka isteği – Üret",
+        "kafkaConsume": "Kafka isteği – Tüket"
       }
     },
     "deleteConfirm": {
@@ -618,6 +620,52 @@
       "channels": "Kanallar",
       "command": "Komut"
     }
+  "kafka": {
+    "brokersPlaceholder": "Broker listesi (host:port,host:port)",
+    "clientId": "İstemci Kimliği",
+    "clientIdPlaceholder": "restorm",
+    "mode": {
+      "produce": "Üret",
+      "consume": "Tüket",
+      "browse": "Gözat"
+    },
+    "auth": {
+      "title": "Kimlik Doğrulama",
+      "mechanism": "SASL",
+      "username": "Kullanıcı Adı",
+      "password": "Parola",
+      "tls": "TLS"
+    },
+    "topic": "Konu",
+    "topicPlaceholder": "konu-adı",
+    "key": "Anahtar",
+    "keyPlaceholder": "mesaj anahtarı (isteğe bağlı)",
+    "value": "Değer",
+    "headers": "Başlıklar",
+    "partition": "Partisyon",
+    "partitionPlaceholder": "otomatik",
+    "groupId": "Grup Kimliği",
+    "groupIdPlaceholder": "restorm-consumer",
+    "fromOffsetLabel": "Başlangıç noktası",
+    "fromOffset": {
+      "earliest": "En eski",
+      "latest": "En yeni",
+      "specific": "Belirli"
+    },
+    "specificOffset": "Offset",
+    "partitions": "Partisyonlar",
+    "partitionsPlaceholder": "0,1,2 (boş = tümü)",
+    "peekCount": "Mesaj sayısı",
+    "produce": "Üret",
+    "startConsuming": "Tüketmeye başla",
+    "stopConsuming": "Tüketmeyi durdur",
+    "peek": "Göz at",
+    "noMessages": "Henüz mesaj yok",
+    "connected": "Bağlandı",
+    "disconnected": "Bağlantı kesildi",
+    "producedTo": "Şuraya üretildi",
+    "offset": "Offset",
+    "messages": "Mesajlar"
   },
   "search": {
     "placeholder": "Ara...",
@@ -1202,6 +1250,9 @@
       "stompConnect": "STOMP bağlantısı",
       "stompSend": "STOMP gönder",
       "stompClose": "STOMP kapat"
+      "kafkaProduce": "Kafka produce",
+      "kafkaConsume": "Kafka consume",
+      "kafkaClose": "Kafka close"
     },
     "comparator": {
       "result": "sonuç"
@@ -1803,6 +1854,9 @@
       "stompConnect": "Kalıcı bir STOMP-WebSocket-üzerinden bağlantısı açar: CONNECT/CONNECTED el sıkışmasını gerçekleştirir, ardından her yapılandırılmış hedefe abone olur ve alınan her çerçeveyi kendi bağlantı noktasında yeniden yayınlar.",
       "stompSend": "Zaten açık olan bir STOMP bağlantısında bir SEND çerçevesi gönderir.",
       "stompClose": "DISCONNECT gönderir ve zaten açık olan bir STOMP bağlantısını kapatır."
+      "kafkaProduce": "Bağlı bir Kafka isteğini tek seferlik bir üretim olarak çalıştırır ve sonucu (konu/bölüm/offset) `response` olarak yayınlar.",
+      "kafkaConsume": "Bağlı bir istekten kalıcı bir Kafka tüketicisi açar ve alınan her mesajı `message` portu üzerinde yeniden yayınlar.",
+      "kafkaClose": "Zaten açık olan bir Kafka tüketicisini kapatır."
     },
     "legend": {
       "title": "Gösterge",

@@ -284,6 +284,8 @@
         "amqp": "Cerere AMQP",
         "redis": "Cerere Redis",
         "stomp": "Cerere STOMP"
+        "kafkaProduce": "Cerere Kafka – Produce",
+        "kafkaConsume": "Cerere Kafka – Consumă"
       }
     },
     "deleteConfirm": {
@@ -619,6 +621,52 @@
       "channels": "Canale",
       "command": "Comandă"
     }
+  "kafka": {
+    "brokersPlaceholder": "Listă de brokeri (host:port,host:port)",
+    "clientId": "ID client",
+    "clientIdPlaceholder": "restorm",
+    "mode": {
+      "produce": "Produce",
+      "consume": "Consumă",
+      "browse": "Răsfoiește"
+    },
+    "auth": {
+      "title": "Autentificare",
+      "mechanism": "SASL",
+      "username": "Nume de utilizator",
+      "password": "Parolă",
+      "tls": "TLS"
+    },
+    "topic": "Subiect",
+    "topicPlaceholder": "nume-subiect",
+    "key": "Cheie",
+    "keyPlaceholder": "cheia mesajului (opțional)",
+    "value": "Valoare",
+    "headers": "Anteturi",
+    "partition": "Partiție",
+    "partitionPlaceholder": "auto",
+    "groupId": "ID grup",
+    "groupIdPlaceholder": "restorm-consumer",
+    "fromOffsetLabel": "Începe de la",
+    "fromOffset": {
+      "earliest": "Cel mai vechi",
+      "latest": "Cel mai recent",
+      "specific": "Specific"
+    },
+    "specificOffset": "Offset",
+    "partitions": "Partiții",
+    "partitionsPlaceholder": "0,1,2 (gol = toate)",
+    "peekCount": "Număr de mesaje",
+    "produce": "Produce",
+    "startConsuming": "Începe consumul",
+    "stopConsuming": "Oprește consumul",
+    "peek": "Previzualizare",
+    "noMessages": "Încă nu există mesaje",
+    "connected": "Conectat",
+    "disconnected": "Deconectat",
+    "producedTo": "Produs către",
+    "offset": "Offset",
+    "messages": "Mesaje"
   },
   "search": {
     "placeholder": "Caută...",
@@ -1203,6 +1251,9 @@
       "stompConnect": "Conectare STOMP",
       "stompSend": "Trimitere STOMP",
       "stompClose": "Închidere STOMP"
+      "kafkaProduce": "Kafka produce",
+      "kafkaConsume": "Kafka consume",
+      "kafkaClose": "Kafka close"
     },
     "comparator": {
       "result": "rezultat"
@@ -1804,6 +1855,9 @@
       "stompConnect": "Deschide o conexiune STOMP-peste-WebSocket de lungă durată: efectuează handshake-ul CONNECT/CONNECTED, apoi se abonează la fiecare destinație configurată și retransmite fiecare cadru primit pe portul său.",
       "stompSend": "Trimite un cadru SEND pe o conexiune STOMP deja deschisă.",
       "stompClose": "Trimite DISCONNECT și închide o conexiune STOMP deja deschisă."
+      "kafkaProduce": "Execută o cerere Kafka asociată ca o producție unică și emite rezultatul (subiect/partiție/offset) ca `response`.",
+      "kafkaConsume": "Deschide un consumator Kafka de lungă durată dintr-o cerere asociată și reemite fiecare mesaj primit pe portul său `message`.",
+      "kafkaClose": "Închide un consumator Kafka deja deschis."
     },
     "legend": {
       "title": "Legendă",

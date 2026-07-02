@@ -284,6 +284,8 @@
         "amqp": "AMQP zahtev",
         "redis": "Redis zahtev",
         "stomp": "STOMP захтев"
+        "kafkaProduce": "Kafka zahtev – Proizvedi",
+        "kafkaConsume": "Kafka zahtev – Potroši"
       }
     },
     "deleteConfirm": {
@@ -619,6 +621,52 @@
       "channels": "Kanali",
       "command": "Komanda"
     }
+  "kafka": {
+    "brokersPlaceholder": "Lista brokera (host:port,host:port)",
+    "clientId": "ID klijenta",
+    "clientIdPlaceholder": "restorm",
+    "mode": {
+      "produce": "Proizvedi",
+      "consume": "Potroši",
+      "browse": "Pregledaj"
+    },
+    "auth": {
+      "title": "Autentifikacija",
+      "mechanism": "SASL",
+      "username": "Korisničko ime",
+      "password": "Lozinka",
+      "tls": "TLS"
+    },
+    "topic": "Tema",
+    "topicPlaceholder": "naziv-teme",
+    "key": "Ključ",
+    "keyPlaceholder": "ključ poruke (opciono)",
+    "value": "Vrednost",
+    "headers": "Zaglavlja",
+    "partition": "Particija",
+    "partitionPlaceholder": "auto",
+    "groupId": "ID grupe",
+    "groupIdPlaceholder": "restorm-consumer",
+    "fromOffsetLabel": "Počni od",
+    "fromOffset": {
+      "earliest": "Najstariji",
+      "latest": "Najnoviji",
+      "specific": "Određeni"
+    },
+    "specificOffset": "Offset",
+    "partitions": "Particije",
+    "partitionsPlaceholder": "0,1,2 (prazno = sve)",
+    "peekCount": "Broj poruka",
+    "produce": "Proizvedi",
+    "startConsuming": "Pokreni potrošnju",
+    "stopConsuming": "Zaustavi potrošnju",
+    "peek": "Pregled",
+    "noMessages": "Još nema poruka",
+    "connected": "Povezano",
+    "disconnected": "Prekinuto",
+    "producedTo": "Proizvedeno u",
+    "offset": "Offset",
+    "messages": "Poruke"
   },
   "search": {
     "placeholder": "Pretraži...",
@@ -1203,6 +1251,9 @@
       "stompConnect": "STOMP веза",
       "stompSend": "STOMP слање",
       "stompClose": "Затварање STOMP"
+      "kafkaProduce": "Kafka produce",
+      "kafkaConsume": "Kafka consume",
+      "kafkaClose": "Kafka close"
     },
     "comparator": {
       "result": "резултат"
@@ -1804,6 +1855,9 @@
       "stompConnect": "Отвара дуготрајну STOMP везу преко WebSocket-а: обавља CONNECT/CONNECTED руковање, затим се претплаћује на свако конфигурисано одредиште и поново емитује сваки примљени оквир на свом порту.",
       "stompSend": "Шаље SEND оквир на већ отвореној STOMP вези.",
       "stompClose": "Шаље DISCONNECT и затвара већ отворену STOMP везу."
+      "kafkaProduce": "Покреће повезани Kafka захтев као једнократну производњу и емитује резултат (тема/партиција/offset) као `response`.",
+      "kafkaConsume": "Отвара дуготрајног Kafka потрошача из повезаног захтева и поново емитује сваку примљену поруку на свом `message` порту.",
+      "kafkaClose": "Затвара већ отвореног Kafka потрошача."
     },
     "legend": {
       "title": "Легенда",

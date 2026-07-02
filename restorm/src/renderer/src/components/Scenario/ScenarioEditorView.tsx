@@ -21,6 +21,7 @@ import { Button, ContextMenu, Tooltip, ColorPicker, Modal, MarkdownEditor, Graph
 import type { Scenario, ScenarioNode, ScenarioEdge, ScenarioNodeKind, ScenarioPort } from '../../../../shared/types/collections'
 import { isRequest, isScenario, isWebSocketRequest, isSseRequest, isGrpcRequest, isSoapRequest, isAmqpRequest, isRedisRequest } from '../../../../shared/types/collections'
 import { isRequest, isScenario, isWebSocketRequest, isStompRequest, isGrpcRequest, isSoapRequest } from '../../../../shared/types/collections'
+import { isRequest, isScenario, isWebSocketRequest, isGrpcRequest, isSoapRequest, isKafkaRequest } from '../../../../shared/types/collections'
 import { Badge } from '../common/Badge'
 import { requestBadgeType, requestBadgeMode } from '../../utils/badgeUtils'
 import { ScenarioBoundResolverContext, ScenarioRequestEnvContext, type ResolveBoundItem, type ResolveRequestEnv } from './scenarioBoundResolver'
@@ -49,6 +50,7 @@ import { useSecretPreviewVersion } from './scenarioSecretPreview'
 import { layoutScenarioGraph, scenarioGraphNeedsPlacement, SCENARIO_NODE_FALLBACK_WIDTH, SCENARIO_NODE_FALLBACK_HEIGHT } from '../../../../shared/scenarioGraphLayout'
 import { SCENARIO_ADD_REQUEST_GROUPS, SCENARIO_ADD_SCENARIO_ENTRY, SCENARIO_ADD_SOCKETIO_ACTIONS, SCENARIO_ADD_WEBSOCKET_ACTIONS, SCENARIO_ADD_SSE_ACTIONS, SCENARIO_ADD_MQTT_ACTIONS, SCENARIO_ADD_AMQP_ACTIONS, SCENARIO_ADD_REDIS_ACTIONS, SCENARIO_ADD_GRPC_ACTIONS, SCENARIO_ADD_HTTP_ACTIONS, SCENARIO_ADD_GRPC_SERVER_ACTIONS, SCENARIO_ADD_SOAP_ACTIONS, SCENARIO_ADD_GRAPHQL_ACTIONS, scenarioAddIcon, scenarioAddSocketioIcon, scenarioAddWebsocketIcon, scenarioAddSseIcon, scenarioAddMqttIcon, scenarioAddAmqpIcon, scenarioAddRedisIcon, scenarioAddGrpcIcon, scenarioAddHttpIcon, scenarioAddSoapIcon, scenarioAddGraphqlIcon } from './scenarioChildPalette'
 import { SCENARIO_ADD_REQUEST_GROUPS, SCENARIO_ADD_SCENARIO_ENTRY, SCENARIO_ADD_SOCKETIO_ACTIONS, SCENARIO_ADD_WEBSOCKET_ACTIONS, SCENARIO_ADD_STOMP_ACTIONS, SCENARIO_ADD_MQTT_ACTIONS, SCENARIO_ADD_GRPC_ACTIONS, SCENARIO_ADD_HTTP_ACTIONS, SCENARIO_ADD_GRPC_SERVER_ACTIONS, SCENARIO_ADD_SOAP_ACTIONS, SCENARIO_ADD_GRAPHQL_ACTIONS, scenarioAddIcon, scenarioAddSocketioIcon, scenarioAddWebsocketIcon, scenarioAddStompIcon, scenarioAddMqttIcon, scenarioAddGrpcIcon, scenarioAddHttpIcon, scenarioAddSoapIcon, scenarioAddGraphqlIcon } from './scenarioChildPalette'
+import { SCENARIO_ADD_REQUEST_GROUPS, SCENARIO_ADD_SCENARIO_ENTRY, SCENARIO_ADD_SOCKETIO_ACTIONS, SCENARIO_ADD_WEBSOCKET_ACTIONS, SCENARIO_ADD_MQTT_ACTIONS, SCENARIO_ADD_KAFKA_ACTIONS, SCENARIO_ADD_GRPC_ACTIONS, SCENARIO_ADD_HTTP_ACTIONS, SCENARIO_ADD_GRPC_SERVER_ACTIONS, SCENARIO_ADD_SOAP_ACTIONS, SCENARIO_ADD_GRAPHQL_ACTIONS, scenarioAddIcon, scenarioAddSocketioIcon, scenarioAddWebsocketIcon, scenarioAddMqttIcon, scenarioAddKafkaIcon, scenarioAddGrpcIcon, scenarioAddHttpIcon, scenarioAddSoapIcon, scenarioAddGraphqlIcon } from './scenarioChildPalette'
 import type { AddChildKind } from '../MainView/Sidebar/contextMenuBuilder'
 import type { TFunction } from 'i18next'
 import { ScenarioGraphPreview } from '../MainView/Titlebar/ScenarioGraphPreview'
@@ -128,6 +130,11 @@ const STREAM_CONNECT_FOR_CHILD: Partial<Record<AddChildKind, ScenarioNodeKind>> 
   'mqtt-server': 'mqttConnect',
   // AMQP is not server-capable (v1) — one entry, no `-server` twin.
   amqp: 'amqpConnect',
+  // Kafka has no persistent per-request connection and no server variant: the
+  // "produce" child creates the one-shot `kafkaProduce` node, "consume" the
+  // long-lived `kafkaConsume` listener (browse has no scenario node).
+  'kafka-produce': 'kafkaProduce',
+  'kafka-consume': 'kafkaConsume',
   // The HTTP mock server is a server-only kind: dropping it creates a
   // `server: true` HTTP request + a bound `httpListen` node (a long-lived
   // listener), never a one-shot httpRequest node.
@@ -312,6 +319,7 @@ function buildScenarioPaletteItems(p: PaletteBuildParams): ContextMenuItem[] {
     // The Socket.IO actions fold into the "Add" submenu (their own section) too.
     if (p.withAddSubmenu && (e.kind === 'socketioConnect' || e.kind === 'socketioSend' || e.kind === 'socketioClose' || e.kind === 'websocketConnect' || e.kind === 'websocketSend' || e.kind === 'websocketClose' || e.kind === 'sseConnect' || e.kind === 'sseClose' || e.kind === 'mqttConnect' || e.kind === 'mqttSend' || e.kind === 'mqttClose' || e.kind === 'amqpConnect' || e.kind === 'amqpPublish' || e.kind === 'amqpClose' || e.kind === 'grpcConnect' || e.kind === 'grpcSend' || e.kind === 'grpcClose' || e.kind === 'httpListen' || e.kind === 'httpClose' || e.kind === 'grpcListen' || e.kind === 'grpcServerClose' || e.kind === 'soapListen' || e.kind === 'soapClose' || e.kind === 'graphqlListen' || e.kind === 'graphqlClose' || e.kind === 'odataListen' || e.kind === 'odataClose' || e.kind === 'redisSubscribe' || e.kind === 'redisClose')) return []
     if (p.withAddSubmenu && (e.kind === 'socketioConnect' || e.kind === 'socketioSend' || e.kind === 'socketioClose' || e.kind === 'websocketConnect' || e.kind === 'websocketSend' || e.kind === 'websocketClose' || e.kind === 'stompConnect' || e.kind === 'stompSend' || e.kind === 'stompClose' || e.kind === 'mqttConnect' || e.kind === 'mqttSend' || e.kind === 'mqttClose' || e.kind === 'grpcConnect' || e.kind === 'grpcSend' || e.kind === 'grpcClose' || e.kind === 'httpListen' || e.kind === 'httpClose' || e.kind === 'grpcListen' || e.kind === 'grpcServerClose' || e.kind === 'soapListen' || e.kind === 'soapClose' || e.kind === 'graphqlListen' || e.kind === 'graphqlClose' || e.kind === 'odataListen' || e.kind === 'odataClose')) return []
+    if (p.withAddSubmenu && (e.kind === 'socketioConnect' || e.kind === 'socketioSend' || e.kind === 'socketioClose' || e.kind === 'websocketConnect' || e.kind === 'websocketSend' || e.kind === 'websocketClose' || e.kind === 'mqttConnect' || e.kind === 'mqttSend' || e.kind === 'mqttClose' || e.kind === 'kafkaProduce' || e.kind === 'kafkaConsume' || e.kind === 'kafkaClose' || e.kind === 'grpcConnect' || e.kind === 'grpcSend' || e.kind === 'grpcClose' || e.kind === 'httpListen' || e.kind === 'httpClose' || e.kind === 'grpcListen' || e.kind === 'grpcServerClose' || e.kind === 'soapListen' || e.kind === 'soapClose' || e.kind === 'graphqlListen' || e.kind === 'graphqlClose' || e.kind === 'odataListen' || e.kind === 'odataClose')) return []
     if (p.withAddSubmenu && e.kind === 'httpRequest') {
       const groupItems = (group: typeof SCENARIO_ADD_REQUEST_GROUPS[number]): ContextMenuItem[] =>
         group.flatMap((c): ContextMenuItem[] => {
@@ -368,6 +376,12 @@ function buildScenarioPaletteItems(p: PaletteBuildParams): ContextMenuItem[] {
       const redisItems = SCENARIO_ADD_REDIS_ACTIONS.flatMap((a): ContextMenuItem[] => {
         const cb = p.pickNode(a.kind)
         return cb ? [{ id: `add-${a.kind}`, label: p.t(a.labelKey, a.defaultLabel), icon: scenarioAddRedisIcon(a.icon), onClick: cb }] : []
+      // Kafka close action — closes an already-declared kafkaConsume connection
+      // (produce is one-shot and never needs closing; the consume connect comes
+      // from the Kafka request entries above).
+      const kafkaItems = SCENARIO_ADD_KAFKA_ACTIONS.flatMap((a): ContextMenuItem[] => {
+        const cb = p.pickNode(a.kind)
+        return cb ? [{ id: `add-${a.kind}`, label: p.t(a.labelKey, a.defaultLabel), icon: scenarioAddKafkaIcon(a.icon), onClick: cb }] : []
       })
       // HTTP mock-server close action (the listen comes from the "HTTP server"
       // request entry above, which drops a bound httpListen node).
@@ -405,6 +419,7 @@ function buildScenarioPaletteItems(p: PaletteBuildParams): ContextMenuItem[] {
       // send/close actions), Socket.IO actions, raw WebSocket actions, auth,
       // scenario — each separated by a divider (orphans tidied).
       const sections = [...requestGroups, sioItems, wsItems, stompItems, mqttItems, httpItems, grpcServerItems, soapItems, graphqlItems, authItems, scnItems].filter((s) => s.length > 0)
+      const sections = [...requestGroups, sioItems, wsItems, mqttItems, kafkaItems, httpItems, grpcServerItems, soapItems, graphqlItems, authItems, scnItems].filter((s) => s.length > 0)
       const sub = sections.flatMap((section, si) => (si > 0 ? [sep(`add-sec-${si}`), ...section] : section))
       return sub.length > 0 ? [{ id: 'scenario-add', label: p.t('sidebar.contextMenu.add.title', 'Add'), icon: 'add', items: sub }] : []
     }
@@ -2089,6 +2104,18 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
       config = { requestId: item.id, connectionName: item.name, label: item.name }
     }
     else if (isRequest(item) && isRedisRequest(item)) { kind = 'redisCommand'; config = { requestId: item.id, label: item.name } }
+    else if (isRequest(item) && isKafkaRequest(item)) {
+      // Kafka has no persistent per-request connection: `produce` maps to the
+      // one-shot `kafkaProduce` node; `consume` AND `browse` (which has no
+      // dedicated scenario node) map to the long-lived `kafkaConsume` listener.
+      if (item.mode === 'produce') {
+        kind = 'kafkaProduce'
+        config = { requestId: item.id, label: item.name }
+      } else {
+        kind = 'kafkaConsume'
+        config = { requestId: item.id, connectionName: item.name, label: item.name }
+      }
+    }
     else if (isRequest(item)) { kind = 'httpRequest'; config = { requestId: item.id, label: item.name } }
     else if (isScenario(item)) { kind = 'runScenario'; config = { scenarioId: item.id, label: item.name } }
     else return
@@ -2599,14 +2626,16 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
       }
     } else if (n.data.kind === 'httpRequest' || n.data.kind === 'soapRequest' || n.data.kind === 'redisCommand' || n.data.kind === 'socketioConnect' || n.data.kind === 'websocketConnect' || n.data.kind === 'sseConnect' || n.data.kind === 'mqttConnect' || n.data.kind === 'amqpConnect' || n.data.kind === 'redisSubscribe' || n.data.kind === 'grpcConnect' || n.data.kind === 'httpListen' || n.data.kind === 'grpcListen' || n.data.kind === 'soapListen' || n.data.kind === 'graphqlListen' || n.data.kind === 'odataListen') {
     } else if (n.data.kind === 'httpRequest' || n.data.kind === 'soapRequest' || n.data.kind === 'socketioConnect' || n.data.kind === 'websocketConnect' || n.data.kind === 'stompConnect' || n.data.kind === 'mqttConnect' || n.data.kind === 'grpcConnect' || n.data.kind === 'httpListen' || n.data.kind === 'grpcListen' || n.data.kind === 'soapListen' || n.data.kind === 'graphqlListen' || n.data.kind === 'odataListen') {
+    } else if (n.data.kind === 'httpRequest' || n.data.kind === 'soapRequest' || n.data.kind === 'kafkaProduce' || n.data.kind === 'kafkaConsume' || n.data.kind === 'socketioConnect' || n.data.kind === 'websocketConnect' || n.data.kind === 'mqttConnect' || n.data.kind === 'grpcConnect' || n.data.kind === 'httpListen' || n.data.kind === 'grpcListen' || n.data.kind === 'soapListen' || n.data.kind === 'graphqlListen' || n.data.kind === 'odataListen') {
       const boundId = typeof cfg['requestId'] === 'string' ? cfg['requestId'] : null
       const boundItem = boundId ? (resolveBoundItem?.(boundId) ?? null) : null
       if (boundItem && isRequest(boundItem)) {
         title = boundItem.name
         // An httpListen / grpcListen / soapListen / graphqlListen / odataListen
         // node always HOSTS a server — force the SRV capsule even if the bound
-        // request's badge mode resolves to client. soapRequest is a CLIENT call,
-        // so it keeps the request's own badge mode.
+        // request's badge mode resolves to client. soapRequest / kafkaProduce /
+        // kafkaConsume are CLIENT calls (Kafka has no server/hosting variant at
+        // all), so they keep the request's own badge mode.
         const alwaysServer = n.data.kind === 'httpListen' || n.data.kind === 'grpcListen' || n.data.kind === 'soapListen' || n.data.kind === 'graphqlListen' || n.data.kind === 'odataListen'
         titleBadge = <Badge type={requestBadgeType(boundItem)} mode={alwaysServer ? 'server' : requestBadgeMode(boundItem)} />
         if ((n.data.kind === 'socketioConnect' || n.data.kind === 'websocketConnect' || n.data.kind === 'mqttConnect') && requestBadgeMode(boundItem) === 'server') {
@@ -2614,6 +2643,7 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
         }
       }
     } else if (n.data.kind === 'socketioSend' || n.data.kind === 'socketioClose' || n.data.kind === 'websocketSend' || n.data.kind === 'websocketClose' || n.data.kind === 'sseClose' || n.data.kind === 'mqttSend' || n.data.kind === 'mqttClose' || n.data.kind === 'httpClose' || n.data.kind === 'grpcServerClose' || n.data.kind === 'soapClose' || n.data.kind === 'graphqlClose' || n.data.kind === 'odataClose') {
+    } else if (n.data.kind === 'socketioSend' || n.data.kind === 'socketioClose' || n.data.kind === 'websocketSend' || n.data.kind === 'websocketClose' || n.data.kind === 'mqttSend' || n.data.kind === 'mqttClose' || n.data.kind === 'kafkaClose' || n.data.kind === 'httpClose' || n.data.kind === 'grpcServerClose' || n.data.kind === 'soapClose' || n.data.kind === 'graphqlClose' || n.data.kind === 'odataClose') {
       // Send/close reference a connection NODE — if that node hosts a server,
       // the blurb should read "broadcast to clients" / "stop the server".
       const connId = typeof cfg['connectionNodeId'] === 'string' ? cfg['connectionNodeId'] : null
@@ -2626,6 +2656,11 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
       // their plain help key — only the WS/SIO/MQTT send/close kinds have a
       // distinct server-variant blurb.
       if (n.data.kind !== 'httpClose' && n.data.kind !== 'grpcServerClose' && n.data.kind !== 'soapClose' && n.data.kind !== 'graphqlClose' && n.data.kind !== 'odataClose' && n.data.kind !== 'sseClose' && connReq && isRequest(connReq) && requestBadgeMode(connReq) === 'server') {
+      // kafkaClose have a single meaning (an httpListen / grpcListen /
+      // soapListen / graphqlListen / odataListen ALWAYS hosts; Kafka never
+      // does), so they use their plain help key — only the WS/SIO/MQTT
+      // send/close kinds have a distinct server-variant blurb.
+      if (n.data.kind !== 'httpClose' && n.data.kind !== 'grpcServerClose' && n.data.kind !== 'soapClose' && n.data.kind !== 'graphqlClose' && n.data.kind !== 'odataClose' && n.data.kind !== 'kafkaClose' && connReq && isRequest(connReq) && requestBadgeMode(connReq) === 'server') {
         helpKey = `${n.data.kind}Server`
       }
     }
@@ -2687,6 +2722,7 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
     let openItemKind: 'request' | 'scenario' | undefined
     if (n.data.kind === 'httpRequest' || n.data.kind === 'soapRequest' || n.data.kind === 'redisCommand' || n.data.kind === 'socketioConnect' || n.data.kind === 'websocketConnect' || n.data.kind === 'sseConnect' || n.data.kind === 'mqttConnect' || n.data.kind === 'amqpConnect' || n.data.kind === 'redisSubscribe' || n.data.kind === 'grpcConnect' || n.data.kind === 'httpListen' || n.data.kind === 'grpcListen' || n.data.kind === 'soapListen' || n.data.kind === 'graphqlListen' || n.data.kind === 'odataListen') {
     if (n.data.kind === 'httpRequest' || n.data.kind === 'soapRequest' || n.data.kind === 'socketioConnect' || n.data.kind === 'websocketConnect' || n.data.kind === 'stompConnect' || n.data.kind === 'mqttConnect' || n.data.kind === 'grpcConnect' || n.data.kind === 'httpListen' || n.data.kind === 'grpcListen' || n.data.kind === 'soapListen' || n.data.kind === 'graphqlListen' || n.data.kind === 'odataListen') {
+    if (n.data.kind === 'httpRequest' || n.data.kind === 'soapRequest' || n.data.kind === 'kafkaProduce' || n.data.kind === 'kafkaConsume' || n.data.kind === 'socketioConnect' || n.data.kind === 'websocketConnect' || n.data.kind === 'mqttConnect' || n.data.kind === 'grpcConnect' || n.data.kind === 'httpListen' || n.data.kind === 'grpcListen' || n.data.kind === 'soapListen' || n.data.kind === 'graphqlListen' || n.data.kind === 'odataListen') {
       // A streaming connect / httpListen / grpcListen / soapListen / graphqlListen
       // / odataListen node binds a request the same way httpRequest does
       // (`config.requestId`), so it gets the same open-the-request navigation.
@@ -2856,6 +2892,7 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
     for (const node of scenario.nodes) {
       if (node.kind !== 'socketioConnect' && node.kind !== 'websocketConnect' && node.kind !== 'sseConnect' && node.kind !== 'mqttConnect' && node.kind !== 'amqpConnect' && node.kind !== 'redisSubscribe' && node.kind !== 'grpcConnect' && node.kind !== 'httpListen' && node.kind !== 'grpcListen' && node.kind !== 'soapListen' && node.kind !== 'graphqlListen' && node.kind !== 'odataListen') continue
       if (node.kind !== 'socketioConnect' && node.kind !== 'websocketConnect' && node.kind !== 'stompConnect' && node.kind !== 'mqttConnect' && node.kind !== 'grpcConnect' && node.kind !== 'httpListen' && node.kind !== 'grpcListen' && node.kind !== 'soapListen' && node.kind !== 'graphqlListen' && node.kind !== 'odataListen') continue
+      if (node.kind !== 'socketioConnect' && node.kind !== 'websocketConnect' && node.kind !== 'mqttConnect' && node.kind !== 'kafkaConsume' && node.kind !== 'grpcConnect' && node.kind !== 'httpListen' && node.kind !== 'grpcListen' && node.kind !== 'soapListen' && node.kind !== 'graphqlListen' && node.kind !== 'odataListen') continue
       const cfg = node.config as { connectionName?: unknown; requestId?: unknown }
       const name = typeof cfg.connectionName === 'string' && cfg.connectionName.trim() !== '' ? cfg.connectionName.trim() : node.id
       // Pull the linked request's event + message so a send node can pre-fill its

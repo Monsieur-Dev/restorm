@@ -49,6 +49,8 @@ export type AddChildKind =
   | 'mqtt'
   | 'mqtt-server'
   | 'sse'
+  | 'kafka-produce'
+  | 'kafka-consume'
   | 'http-server'
   | 'graphql-server'
   | 'odata'
@@ -258,6 +260,20 @@ export const buildAddSubmenu = (
     label: t('sidebar.contextMenu.add.sse'),
     icon: React.createElement(Badge, { type: 'SSE' }),
     onClick: () => { onAddChildItem(parentId, 'sse') }
+  { id: `sep-add-kafka-${parentId}`, isSeparator: true, label: '' },
+  // Kafka group: no server variant (restorm never hosts a broker) — produce
+  // (one-shot) + consume (long-lived consumer group) instead.
+  {
+    id: `add-kafka-produce-${parentId}`,
+    label: t('sidebar.contextMenu.add.kafkaProduce'),
+    icon: React.createElement(Badge, { type: 'KAFKA', icon: 'arrow-up' }),
+    onClick: () => { onAddChildItem(parentId, 'kafka-produce') }
+  },
+  {
+    id: `add-kafka-consume-${parentId}`,
+    label: t('sidebar.contextMenu.add.kafkaConsume'),
+    icon: React.createElement(Badge, { type: 'KAFKA', icon: 'plug' }),
+    onClick: () => { onAddChildItem(parentId, 'kafka-consume') }
   },
   { id: `sep-add-odata-${parentId}`, isSeparator: true, label: '' },
   {

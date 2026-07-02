@@ -459,6 +459,10 @@ export const amqpIsActiveArgs = z.tuple([requestIdArg])
 // ==========================================================================
 
 export const redisSubscribeArgs = z.tuple([
+// Kafka Execution
+// ==========================================================================
+
+export const kafkaProduceArgs = z.tuple([
   z.object({
     requestId: z.string(),
     timeout: z.number().optional()
@@ -466,6 +470,7 @@ export const redisSubscribeArgs = z.tuple([
 ])
 
 export const redisCommandArgs = z.tuple([
+export const kafkaBrowseArgs = z.tuple([
   z.object({
     requestId: z.string(),
     timeout: z.number().optional()
@@ -479,6 +484,9 @@ export const stompSendArgs = z.tuple([requestIdArg, z.string()])
 export const stompAckArgs = z.tuple([requestIdArg, z.string(), z.string()])
 export const stompNackArgs = z.tuple([requestIdArg, z.string(), z.string()])
 export const stompIsActiveArgs = z.tuple([requestIdArg])
+export const kafkaConsumeStartArgs = z.tuple([requestIdArg])
+export const kafkaCancelArgs = z.tuple([requestIdArg])
+export const kafkaIsActiveArgs = z.tuple([requestIdArg])
 
 // ==========================================================================
 // Responses History
@@ -721,6 +729,18 @@ export const redisResultSchema = z.object({
   success: z.boolean(),
   mode: z.enum(['subscribe', 'command']),
   error: z.string().optional(),
+export const kafkaProduceResultSchema = z.object({
+  requestId: z.string(),
+  success: z.boolean(),
+  error: z.string().optional(),
+  timings: timingsSchema,
+})
+
+export const kafkaBrowseResultSchema = z.object({
+  requestId: z.string(),
+  success: z.boolean(),
+  error: z.string().optional(),
+  timings: timingsSchema,
 })
 
 export const authPrefetchResultSchema = z.object({

@@ -53,6 +53,10 @@ const SERVICES = [
   // header dance, which a plain HTTP GET would fail even once the broker is
   // actually ready).
   { name: 'STOMP (activemq)', tcp: { host: 'localhost', port: 61614 } }
+  // Kafka speaks its own wire protocol on 9092 — not HTTP, so probe the raw
+  // TCP port. The `kafka-seed` one-shot job (topic + 3 messages) runs after
+  // the broker's own compose healthcheck, independent of this poll.
+  { name: 'Kafka', tcp: { host: 'localhost', port: 9092 } }
 ]
 
 const MAX_RETRIES = 60

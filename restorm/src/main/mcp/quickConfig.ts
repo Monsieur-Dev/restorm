@@ -56,6 +56,7 @@ export const PROTOCOL_CONFIG_FIELDS: Record<Protocol, readonly string[]> = {
   trpc: ['documentation', 'url', 'procedure', 'input', 'kind', 'headers'],
   amqp: ['documentation', 'url', 'vhost', 'mode', 'exchange', 'routingKey', 'payload', 'queue', 'autoAck', 'prefetch', 'browsePeekCount', 'username', 'password'],
   redis: ['documentation', 'url', 'password', 'mode', 'channels', 'command', 'args', 'freeformCommand']
+  kafka: ['documentation', 'url', 'clientId', 'mode', 'topic', 'key', 'value', 'headers', 'partition', 'groupId', 'fromOffset', 'specificOffset', 'partitions', 'browsePeekCount', 'saslMechanism', 'saslUsername', 'saslPassword', 'tlsEnabled']
 }
 
 /** Read a request's protocol (`type`), narrowed to a known protocol or null. */

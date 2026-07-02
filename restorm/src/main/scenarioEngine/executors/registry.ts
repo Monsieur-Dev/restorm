@@ -56,10 +56,12 @@ import {
 } from './timeAndFlowExecutors'
 import { httpRequestExecutor } from './httpRequestExecutor'
 import { soapRequestExecutor } from './soapRequestExecutor'
+import { kafkaProduceExecutor } from './kafkaRequestExecutor'
 import { runScenarioExecutor } from './runScenarioExecutor'
 import { socketioConnectExecutor, socketioSendExecutor, socketioCloseExecutor, websocketConnectExecutor, websocketSendExecutor, websocketCloseExecutor, sseConnectExecutor, sseCloseExecutor, mqttConnectExecutor, mqttSendExecutor, mqttCloseExecutor, amqpConnectExecutor, amqpPublishExecutor, amqpCloseExecutor, grpcConnectExecutor, grpcSendExecutor, grpcCloseExecutor, grpcListenExecutor, grpcServerCloseExecutor, httpListenExecutor, httpCloseExecutor, soapListenExecutor, soapCloseExecutor, graphqlListenExecutor, graphqlCloseExecutor, odataListenExecutor, odataCloseExecutor, graphqlSubscribeExecutor, graphqlUnsubscribeExecutor } from './socketioExecutors'
 import { redisSubscribeExecutor, redisCloseExecutor, redisCommandExecutor } from './redisExecutors'
 import { socketioConnectExecutor, socketioSendExecutor, socketioCloseExecutor, websocketConnectExecutor, websocketSendExecutor, websocketCloseExecutor, stompConnectExecutor, stompSendExecutor, stompCloseExecutor, mqttConnectExecutor, mqttSendExecutor, mqttCloseExecutor, grpcConnectExecutor, grpcSendExecutor, grpcCloseExecutor, grpcListenExecutor, grpcServerCloseExecutor, httpListenExecutor, httpCloseExecutor, soapListenExecutor, soapCloseExecutor, graphqlListenExecutor, graphqlCloseExecutor, odataListenExecutor, odataCloseExecutor, graphqlSubscribeExecutor, graphqlUnsubscribeExecutor } from './socketioExecutors'
+import { socketioConnectExecutor, socketioSendExecutor, socketioCloseExecutor, websocketConnectExecutor, websocketSendExecutor, websocketCloseExecutor, mqttConnectExecutor, mqttSendExecutor, mqttCloseExecutor, kafkaConsumeExecutor, kafkaCloseExecutor, grpcConnectExecutor, grpcSendExecutor, grpcCloseExecutor, grpcListenExecutor, grpcServerCloseExecutor, httpListenExecutor, httpCloseExecutor, soapListenExecutor, soapCloseExecutor, graphqlListenExecutor, graphqlCloseExecutor, odataListenExecutor, odataCloseExecutor, graphqlSubscribeExecutor, graphqlUnsubscribeExecutor } from './socketioExecutors'
 import { concreteValue } from '../../../shared/utils/scenarioStaticPreview'
 import { coerceCliParamValue } from '../../../shared/scenarioCliParams'
 import { readInputParams, inputParamName } from '../../../shared/scenarioInputParams'
@@ -256,6 +258,9 @@ export function pickExecutor(kind: string): NodeExecutor {
     case 'amqpConnect': return amqpConnectExecutor
     case 'amqpPublish': return amqpPublishExecutor
     case 'amqpClose': return amqpCloseExecutor
+    case 'kafkaProduce': return kafkaProduceExecutor
+    case 'kafkaConsume': return kafkaConsumeExecutor
+    case 'kafkaClose': return kafkaCloseExecutor
     case 'grpcConnect': return grpcConnectExecutor
     case 'grpcSend': return grpcSendExecutor
     case 'grpcClose': return grpcCloseExecutor

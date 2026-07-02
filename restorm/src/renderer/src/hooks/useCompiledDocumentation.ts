@@ -19,6 +19,7 @@ import { resolveUrlAgainstEnv, flattenEnvVars } from '../../../shared/utils/reso
 
 interface CompilableRoute {
   type: 'http' | 'graphql' | 'grpc' | 'soap' | 'websocket' | 'sse' | 'odata' | 'trpc' | 'redis'
+  type: 'http' | 'graphql' | 'grpc' | 'soap' | 'websocket' | 'odata' | 'kafka'
   url?: string
   method?: string
   operationType?: string
@@ -112,6 +113,11 @@ function routeFromRequest(request: Request): CompilableRoute {
       // (not an HTTP-shaped route). Minimal route keeps the switch
       // exhaustive; no compiled docs will ever match.
       return { type: 'redis', url: request.url, tags: request.tags }
+    case 'kafka':
+      // Same rationale as 'odata': no `ApiDocumentation` discriminant exists
+      // for Kafka yet, so this keeps the switch exhaustive without ever
+      // matching (`compileForRoute` has no 'kafka' branch either).
+      return { type: 'kafka', url: request.url, tags: request.tags }
   }
 }
 

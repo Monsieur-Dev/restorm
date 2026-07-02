@@ -283,6 +283,8 @@
         "amqp": "Αίτημα AMQP",
         "redis": "Αίτημα Redis",
         "stomp": "Αίτημα STOMP"
+        "kafkaProduce": "Αίτημα Kafka – Παραγωγή",
+        "kafkaConsume": "Αίτημα Kafka – Κατανάλωση"
       }
     },
     "deleteConfirm": {
@@ -618,6 +620,52 @@
       "channels": "Κανάλια",
       "command": "Εντολή"
     }
+  "kafka": {
+    "brokersPlaceholder": "Λίστα broker (host:port,host:port)",
+    "clientId": "Αναγνωριστικό πελάτη",
+    "clientIdPlaceholder": "restorm",
+    "mode": {
+      "produce": "Παραγωγή",
+      "consume": "Κατανάλωση",
+      "browse": "Περιήγηση"
+    },
+    "auth": {
+      "title": "Πιστοποίηση",
+      "mechanism": "SASL",
+      "username": "Όνομα χρήστη",
+      "password": "Κωδικός πρόσβασης",
+      "tls": "TLS"
+    },
+    "topic": "Θέμα",
+    "topicPlaceholder": "όνομα-θέματος",
+    "key": "Κλειδί",
+    "keyPlaceholder": "κλειδί μηνύματος (προαιρετικό)",
+    "value": "Τιμή",
+    "headers": "Κεφαλίδες",
+    "partition": "Διαμέριση",
+    "partitionPlaceholder": "αυτόματο",
+    "groupId": "Αναγνωριστικό ομάδας",
+    "groupIdPlaceholder": "restorm-consumer",
+    "fromOffsetLabel": "Έναρξη από",
+    "fromOffset": {
+      "earliest": "Παλαιότερο",
+      "latest": "Πιο πρόσφατο",
+      "specific": "Συγκεκριμένο"
+    },
+    "specificOffset": "Offset",
+    "partitions": "Διαμερίσεις",
+    "partitionsPlaceholder": "0,1,2 (κενό = όλα)",
+    "peekCount": "Αριθμός μηνυμάτων",
+    "produce": "Παραγωγή",
+    "startConsuming": "Έναρξη κατανάλωσης",
+    "stopConsuming": "Διακοπή κατανάλωσης",
+    "peek": "Προεπισκόπηση",
+    "noMessages": "Δεν υπάρχουν ακόμα μηνύματα",
+    "connected": "Συνδεδεμένο",
+    "disconnected": "Αποσυνδεδεμένο",
+    "producedTo": "Παρήχθη σε",
+    "offset": "Offset",
+    "messages": "Μηνύματα"
   },
   "search": {
     "placeholder": "Αναζήτηση...",
@@ -1202,6 +1250,9 @@
       "stompConnect": "Σύνδεση STOMP",
       "stompSend": "Αποστολή STOMP",
       "stompClose": "Κλείσιμο STOMP"
+      "kafkaProduce": "Kafka produce",
+      "kafkaConsume": "Kafka consume",
+      "kafkaClose": "Kafka close"
     },
     "comparator": {
       "result": "αποτέλεσμα"
@@ -1803,6 +1854,9 @@
       "stompConnect": "Ανοίγει μια μακροχρόνια σύνδεση STOMP μέσω WebSocket: εκτελεί τη χειραψία CONNECT/CONNECTED, στη συνέχεια εγγράφεται σε κάθε ρυθμισμένο προορισμό και αναμεταδίδει κάθε ληφθέν πλαίσιο στη θύρα του.",
       "stompSend": "Στέλνει ένα πλαίσιο SEND σε μια ήδη ανοιχτή σύνδεση STOMP.",
       "stompClose": "Στέλνει DISCONNECT και κλείνει μια ήδη ανοιχτή σύνδεση STOMP."
+      "kafkaProduce": "Εκτελεί ένα συνδεδεμένο αίτημα Kafka ως εφάπαξ παραγωγή και εκπέμπει το αποτέλεσμα (θέμα/διαμέριση/offset) ως `response`.",
+      "kafkaConsume": "Ανοίγει έναν μακρόβιο καταναλωτή Kafka από ένα συνδεδεμένο αίτημα και επανεκπέμπει κάθε ληφθέν μήνυμα στη θύρα `message` του.",
+      "kafkaClose": "Κλείνει έναν ήδη ανοιχτό καταναλωτή Kafka."
     },
     "legend": {
       "title": "Υπόμνημα",

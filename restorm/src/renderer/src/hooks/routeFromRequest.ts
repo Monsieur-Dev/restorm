@@ -77,6 +77,11 @@ export function routeFromRequest(request: Request): RouteLike {
     case 'redis':
       // No imported-API-documentation matcher for Redis (not an HTTP-shaped
       // route) — mirrors the odata/auth aliasing, a harmless non-match.
+    case 'kafka':
+      // Kafka has no import format and no `ApiDocumentation` discriminant —
+      // aliasing to 'http' (like 'odata') keeps the switch exhaustive; the
+      // broker list never parses as an HTTP path, so `matchHttpOperation`
+      // always returns no match, which is the correct "no docs" outcome.
       return { type: 'http', url: request.url, tags: request.tags }
   }
 }

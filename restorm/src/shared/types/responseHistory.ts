@@ -1,5 +1,6 @@
 export type ResponseHistoryRequestType = 'http' | 'odata' | 'graphql' | 'grpc' | 'soap' | 'websocket' | 'sse' | 'jsonrpc' | 'jsonrpcBatch' | 'trpc' | 'amqp' | 'redis'
 export type ResponseHistoryRequestType = 'http' | 'odata' | 'graphql' | 'grpc' | 'soap' | 'websocket' | 'stomp'
+export type ResponseHistoryRequestType = 'http' | 'odata' | 'graphql' | 'grpc' | 'soap' | 'websocket' | 'kafka'
 
 /**
  * 3-way visual signal for the per-entry status dot in the history
@@ -46,6 +47,7 @@ export interface ResponseHistoryRequestMeta {
   callType?: string
   protocol?: string
   event?: string
+  topic?: string
 }
 
 export interface ResponseHistoryHttpBody {
@@ -330,6 +332,37 @@ export interface ResponseHistoryStompResponse {
   requestUrl: string
   connected: boolean
   messages: ResponseHistoryStompMessage[]
+/** One produced/consumed/browsed Kafka record. `direction` mirrors the
+ * WebSocket message shape (`received` for consume/browse frames; produce has
+ * no message list — its single result lives in the `produced*` fields). */
+export interface ResponseHistoryKafkaMessage {
+  direction: 'received'
+  topic: string
+  partition: number
+  offset: string
+  key?: string
+  value: string
+  headers?: ResponseHistoryKeyValue[]
+  timestamp: string
+}
+
+export interface ResponseHistoryKafkaResponse {
+  type: 'kafka'
+  /** Which lifecycle produced this entry — the three modes have distinct
+   * result shapes (a single RecordMetadata vs. a peeked/streamed message
+   * list), so the renderer branches on this rather than guessing from the
+   * populated fields. */
+  kafkaMode: 'produce' | 'consume' | 'browse'
+  requestUrl: string
+  requestTopic: string
+  /** Produce only: the RecordMetadata kafkajs returned. */
+  producedPartition?: number
+  producedOffset?: string
+  /** Consume (streamed, one entry per frame while running) / browse (all N
+   * peeked messages in one entry) — never populated for produce. */
+  messages?: ResponseHistoryKafkaMessage[]
+  /** Consume only: whether the consumer connected + subscribed. */
+  connected?: boolean
   timings: {
     startedAt: string
     durationMs: number
@@ -351,6 +384,7 @@ export type ResponseHistoryResponse =
   | ResponseHistoryAmqpResponse
   | ResponseHistoryRedisResponse
   | ResponseHistoryStompResponse
+  | ResponseHistoryKafkaResponse
 
 export interface ResponseHistoryDetail {
   guid: string

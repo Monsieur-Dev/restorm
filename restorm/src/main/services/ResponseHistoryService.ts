@@ -44,6 +44,7 @@ import type { SseExecutionResult } from './SseExecutionService'
 import type { AmqpExecutionResult } from './AMQPExecutionService'
 import type { RedisExecutionResult } from './RedisExecutionService'
 import type { StompExecutionResult } from './StompExecutionService'
+import type { KafkaExecutionResult } from './KafkaExecutionService'
 import { normalizeODataResponse } from '../../shared/utils/odataResponse'
 import { redactTokensFromBody, collectTokenValues, redactTokensFromHeaders } from './AuthenticationRedaction'
 import { isAuthenticationRequest } from '../../shared/types/collections'
@@ -63,6 +64,7 @@ type ExecutionResult =
   | AmqpExecutionResult
   | RedisExecutionResult
   | StompExecutionResult
+  | KafkaExecutionResult
 
 /**
  * Compute the 3-way visual outcome (`ok` / `warning` / `failure`) for
@@ -130,6 +132,13 @@ function redisOutcome(result: RedisExecutionResult): ResponseHistoryOutcome {
  * (CONNECT/CONNECTED settled) or not. */
 function stompOutcome(result: StompExecutionResult): ResponseHistoryOutcome {
   return result.success && result.connected ? 'ok' : 'failure'
+}
+
+/** Kafka has no per-message status like HTTP, and unlike WebSocket a produce/
+ * browse result carries no "connected" concept — the execution result's own
+ * `success` is authoritative for all three modes. */
+function kafkaOutcome(result: KafkaExecutionResult): ResponseHistoryOutcome {
+  return result.success ? 'ok' : 'failure'
 }
 
 function outcomeToSuccess(outcome: ResponseHistoryOutcome): boolean {
@@ -440,6 +449,7 @@ class ResponseHistoryService {
       amqp: { build: (id, r) => this.buildAmqpResponse(id, r as AmqpExecutionResult), outcome: (r) => amqpOutcome(r as AmqpExecutionResult) },
       redis: { build: (id, r) => this.buildRedisResponse(id, r as RedisExecutionResult), outcome: (r) => redisOutcome(r as RedisExecutionResult) }
       stomp: { build: (id, r) => this.buildStompResponse(id, r as StompExecutionResult), outcome: (r) => stompOutcome(r as StompExecutionResult) }
+      kafka: { build: (id, r) => this.buildKafkaResponse(id, r as KafkaExecutionResult), outcome: (r) => kafkaOutcome(r as KafkaExecutionResult) }
     }
 
     const builder = builders[type]
@@ -759,6 +769,39 @@ class ResponseHistoryService {
     }
   }
 
+  /** The three Kafka modes have distinct result shapes (a single RecordMetadata
+   * vs. a peeked/streamed message list) — `kafkaMode` on the stored response
+   * lets the renderer branch without inspecting which optional fields are
+   * populated. */
+  private buildKafkaResponse(_requestId: string, result: KafkaExecutionResult): ResponseHistoryResponse | null {
+    const messages = result.kafkaMode !== 'produce'
+      ? result.messages.map((m) => ({
+          direction: m.direction,
+          topic: m.topic,
+          partition: m.partition,
+          offset: m.offset,
+          ...(m.key !== undefined ? { key: m.key } : {}),
+          value: m.value,
+          ...(m.headers ? { headers: this.headersRecordToKeyValues(m.headers) } : {}),
+          timestamp: m.timestamp
+        }))
+      : undefined
+
+    return {
+      type: 'kafka',
+      kafkaMode: result.kafkaMode,
+      requestUrl: result.requestUrl,
+      requestTopic: result.requestTopic,
+      ...(result.kafkaMode === 'produce'
+        ? { ...(result.partition !== undefined ? { producedPartition: result.partition } : {}), ...(result.offset !== undefined ? { producedOffset: result.offset } : {}) }
+        : {}),
+      ...(messages ? { messages } : {}),
+      ...(result.kafkaMode === 'consume' ? { connected: result.connected } : {}),
+      timings: result.timings,
+      ...(result.error ? { error: result.error } : {})
+    }
+  }
+
   private buildWebSocketResponse(requestId: string, result: WebSocketExecutionResult): ResponseHistoryResponse | null {
     const resolvedUrl = contextService.getResolvedUrl(requestId)?.resolvedUrl ?? result.requestUrl ?? ''
     const protocol = this.getRequestMeta(requestId)?.protocol ?? ''
@@ -986,6 +1029,7 @@ class ResponseHistoryService {
         protocol: typeof r['mode'] === 'string' ? r['mode'] : '',
         method: typeof r['command'] === 'string' ? r['command'] : ''
       })
+      kafka: (r) => ({ topic: typeof r['topic'] === 'string' ? r['topic'] : '' })
     }
     const extractor = extractors[type]
     return extractor ? extractor(request) : undefined

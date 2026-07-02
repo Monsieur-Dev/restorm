@@ -21,6 +21,8 @@ vi.mock('../components/RequestTabViews', () => {
     RedisRequestTabView: stub
     StompRequestTabView: stub,
     ODataRequestTabView: stub
+    ODataRequestTabView: stub,
+    KafkaRequestTabView: stub
   }
 })
 

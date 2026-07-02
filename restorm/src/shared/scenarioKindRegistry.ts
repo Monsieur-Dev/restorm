@@ -347,6 +347,30 @@ export const SCENARIO_KIND_REGISTRY = {
     doc: {
       summary: 'Runs a bound Redis request (command mode) — a single command on a fresh connection, then disconnects — and emits its `response` (the raw reply). Sequence it via the `in` trigger. Never runs the same request as a redisSubscribe (a client in subscriber mode cannot issue regular commands).',
       config: { requestId: 'Id of the Redis (command-mode) request to execute.', label: 'Display label on the box.' }
+  kafkaProduce: {
+    labelKey: 'scenario.nodes.kafkaProduce', defaultLabel: 'Kafka produce', icon: 'arrow-up', category: 'composition',
+    requestBinding: true,
+    ports: { inputs: [{ id: 'env', name: 'env', flow: 'value' }], outputs: [{ id: 'response', name: 'response', dataType: 'response', role: 'response', flow: 'both' }] },
+    doc: {
+      summary: 'Runs a bound Kafka request as a one-shot produce (connect -> send -> disconnect — Kafka has no persistent per-request connection, so this fires regardless of the request\'s own `mode`) and emits the RecordMetadata (topic/partition/offset) as `response`. Sequence it via the `in` trigger.',
+      config: { requestId: 'Id of the Kafka request to produce from (its resolved brokers/topic/key/value/headers/partition/auth).', label: 'Display label on the box.' }
+    }
+  },
+  kafkaConsume: {
+    labelKey: 'scenario.nodes.kafkaConsume', defaultLabel: 'Kafka consume', icon: 'plug', category: 'composition',
+    requestBinding: true,
+    ports: { inputs: [], outputs: [{ id: 'connected', name: 'connected', flow: 'signal' }, { id: 'message', name: 'message', flow: 'both' }] },
+    doc: {
+      summary: 'Opens a long-lived Kafka consumer from a bound request (a fresh consumer-group subscribe — Kafka has no persistent per-request connection, so this fires regardless of the request\'s own `mode`) per the configured group id + from-offset (earliest/latest/specific). `connected` fires once subscribed; EVERY consumed message re-emits on the single `message` output. The consumer stays open until a kafkaClose targets it (or the run is stopped), then `done` fires.',
+      config: { requestId: 'Id of the Kafka request to consume from (its resolved brokers/topic/groupId/fromOffset/partitions/auth).', connectionName: 'Unique-per-scenario name a kafkaClose references for display (defaults to the request name).', label: 'Display label on the box.' }
+    }
+  },
+  kafkaClose: {
+    labelKey: 'scenario.nodes.kafkaClose', defaultLabel: 'Kafka close', icon: 'debug-disconnect', category: 'composition',
+    ports: { inputs: [], outputs: [] },
+    doc: {
+      summary: 'Stops an already-open Kafka consumer (declared by a kafkaConsume node), firing that node\'s `done`. Pure-event action: triggered on `in`, sequences via its own `done`. Errors (to `error`) when no connection is selected.',
+      config: { connectionNodeId: 'Id of the kafkaConsume node whose consumer to close.' }
     }
   },
   grpcConnect: {

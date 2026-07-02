@@ -13,3 +13,4 @@ export { JsonRpcBatchRequestTabView, type JsonRpcBatchRequestTabViewProps } from
 export { TrpcRequestTabView, type TrpcRequestTabViewProps } from './TrpcRequestTabView'
 export { AmqpRequestTabView, type AmqpRequestTabViewProps } from './AmqpRequestTabView'
 export { RedisRequestTabView, type RedisRequestTabViewProps } from './RedisRequestTabView'
+export { KafkaRequestTabView, type KafkaRequestTabViewProps } from './KafkaRequestTabView'

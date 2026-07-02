@@ -35,3 +35,17 @@ touch one of them next, per
 
 - [STOMP](./stomp.md) — Simple Text Oriented Messaging Protocol over
   WebSocket (ActiveMQ, Spring brokers).
+Restorm speaks each execution protocol through a request type in
+`src/shared/protocolRegistry.ts`, an execution service in
+`src/main/services/`, and a `<*RequestTabView>` in
+`src/renderer/src/components/RequestTabViews/`. This index lists the
+user-facing doc for each protocol that has one.
+
+| Protocol | Doc |
+| --- | --- |
+| Apache Kafka (produce / consume / browse) | [`kafka.md`](./kafka.md) |
+
+For the full playbook on adding a new execution protocol (architecture
+decision tree, mandatory UI/Handlebars/debounce rules, Docker mock
+conventions, the E2E scenario matrix, scenario-graph integration), see
+[`../contributing/adding-a-protocol.md`](../contributing/adding-a-protocol.md).

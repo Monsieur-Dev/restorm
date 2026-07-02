@@ -285,6 +285,8 @@
         "amqp": "Запит AMQP",
         "redis": "Запит Redis",
         "stomp": "Запит STOMP"
+        "kafkaProduce": "Запит Kafka – Виробити",
+        "kafkaConsume": "Запит Kafka – Споживати"
       }
     },
     "deleteConfirm": {
@@ -620,6 +622,52 @@
       "channels": "Канали",
       "command": "Команда"
     }
+  "kafka": {
+    "brokersPlaceholder": "Список брокерів (host:port,host:port)",
+    "clientId": "ID клієнта",
+    "clientIdPlaceholder": "restorm",
+    "mode": {
+      "produce": "Виробити",
+      "consume": "Споживати",
+      "browse": "Переглянути"
+    },
+    "auth": {
+      "title": "Автентифікація",
+      "mechanism": "SASL",
+      "username": "Ім’я користувача",
+      "password": "Пароль",
+      "tls": "TLS"
+    },
+    "topic": "Тема",
+    "topicPlaceholder": "назва-теми",
+    "key": "Ключ",
+    "keyPlaceholder": "ключ повідомлення (необов’язково)",
+    "value": "Значення",
+    "headers": "Заголовки",
+    "partition": "Партиція",
+    "partitionPlaceholder": "авто",
+    "groupId": "ID групи",
+    "groupIdPlaceholder": "restorm-consumer",
+    "fromOffsetLabel": "Почати з",
+    "fromOffset": {
+      "earliest": "Найдавніший",
+      "latest": "Найновіший",
+      "specific": "Конкретний"
+    },
+    "specificOffset": "Offset",
+    "partitions": "Партиції",
+    "partitionsPlaceholder": "0,1,2 (порожньо = усі)",
+    "peekCount": "Кількість повідомлень",
+    "produce": "Виробити",
+    "startConsuming": "Почати споживання",
+    "stopConsuming": "Зупинити споживання",
+    "peek": "Перегляд",
+    "noMessages": "Повідомлень ще немає",
+    "connected": "З’єднано",
+    "disconnected": "Роз’єднано",
+    "producedTo": "Вироблено до",
+    "offset": "Offset",
+    "messages": "Повідомлення"
   },
   "search": {
     "placeholder": "Пошук...",
@@ -1204,6 +1252,9 @@
       "stompConnect": "З'єднання STOMP",
       "stompSend": "Надсилання STOMP",
       "stompClose": "Закриття STOMP"
+      "kafkaProduce": "Kafka produce",
+      "kafkaConsume": "Kafka consume",
+      "kafkaClose": "Kafka close"
     },
     "comparator": {
       "result": "результат"
@@ -1805,6 +1856,9 @@
       "stompConnect": "Відкриває тривале з'єднання STOMP через WebSocket: виконує узгодження CONNECT/CONNECTED, потім підписується на кожен налаштований пункт призначення та повторно надсилає кожен отриманий фрейм на своєму порту.",
       "stompSend": "Надсилає фрейм SEND через уже відкрите з'єднання STOMP.",
       "stompClose": "Надсилає DISCONNECT і закриває вже відкрите з'єднання STOMP."
+      "kafkaProduce": "Виконує прив’язаний запит Kafka як одноразове виробництво та передає результат (тема/партиція/offset) як `response`.",
+      "kafkaConsume": "Відкриває тривалого споживача Kafka із прив’язаного запиту та повторно випромінює кожне отримане повідомлення на своєму порту `message`.",
+      "kafkaClose": "Закриває вже відкритого споживача Kafka."
     },
     "legend": {
       "title": "Легенда",

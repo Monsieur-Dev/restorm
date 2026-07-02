@@ -17,6 +17,8 @@ import type {
   RedisRequest
   StompRequest,
   ODataRequest
+  ODataRequest,
+  KafkaRequest
 } from '../../../shared/types/requests'
 import {
   HTTPRequestTabView,
@@ -34,6 +36,8 @@ import {
   RedisRequestTabView
   StompRequestTabView,
   ODataRequestTabView
+  ODataRequestTabView,
+  KafkaRequestTabView
 } from '../components/RequestTabViews'
 
 /**
@@ -70,6 +74,8 @@ export const PROTOCOL_TAB_VIEWS: Record<RequestType, (request: Request) => React
   redis: (request) => <RedisRequestTabView request={request as RedisRequest} />
   stomp: (request) => <StompRequestTabView request={request as StompRequest} />,
   odata: (request) => <ODataRequestTabView request={request as ODataRequest} />
+  odata: (request) => <ODataRequestTabView request={request as ODataRequest} />,
+  kafka: (request) => <KafkaRequestTabView request={request as KafkaRequest} />
 }
 
 /** Render the tab-view editor element for a request, chosen by its protocol. */

@@ -437,6 +437,9 @@ colors:
   - id: badge-stomp-background
     value: "#78909c"
     description: "STOMP badge (HC dark)"
+  - id: badge-kafka-background
+    value: "#607d8b"
+    description: "Kafka badge (HC dark)"
 
   - id: badge-odata-background
     value: "#ff5722"

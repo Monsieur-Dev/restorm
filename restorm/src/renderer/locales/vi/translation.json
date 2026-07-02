@@ -282,6 +282,8 @@
         "amqp": "Yêu cầu AMQP",
         "redis": "Yêu cầu Redis",
         "stomp": "Yêu cầu STOMP"
+        "kafkaProduce": "Yêu cầu Kafka – Tạo",
+        "kafkaConsume": "Yêu cầu Kafka – Tiêu thụ"
       }
     },
     "deleteConfirm": {
@@ -617,6 +619,52 @@
       "channels": "Kênh",
       "command": "Lệnh"
     }
+  "kafka": {
+    "brokersPlaceholder": "Danh sách broker (host:port,host:port)",
+    "clientId": "ID máy khách",
+    "clientIdPlaceholder": "restorm",
+    "mode": {
+      "produce": "Tạo",
+      "consume": "Tiêu thụ",
+      "browse": "Duyệt"
+    },
+    "auth": {
+      "title": "Xác thực",
+      "mechanism": "SASL",
+      "username": "Tên người dùng",
+      "password": "Mật khẩu",
+      "tls": "TLS"
+    },
+    "topic": "Chủ đề",
+    "topicPlaceholder": "tên-chủ-đề",
+    "key": "Khóa",
+    "keyPlaceholder": "khóa tin nhắn (tùy chọn)",
+    "value": "Giá trị",
+    "headers": "Tiêu đề",
+    "partition": "Phân vùng",
+    "partitionPlaceholder": "tự động",
+    "groupId": "ID nhóm",
+    "groupIdPlaceholder": "restorm-consumer",
+    "fromOffsetLabel": "Bắt đầu từ",
+    "fromOffset": {
+      "earliest": "Cũ nhất",
+      "latest": "Mới nhất",
+      "specific": "Cụ thể"
+    },
+    "specificOffset": "Offset",
+    "partitions": "Phân vùng",
+    "partitionsPlaceholder": "0,1,2 (trống = tất cả)",
+    "peekCount": "Số lượng tin nhắn",
+    "produce": "Tạo",
+    "startConsuming": "Bắt đầu tiêu thụ",
+    "stopConsuming": "Dừng tiêu thụ",
+    "peek": "Xem trước",
+    "noMessages": "Chưa có tin nhắn nào",
+    "connected": "Đã kết nối",
+    "disconnected": "Đã ngắt kết nối",
+    "producedTo": "Đã tạo tới",
+    "offset": "Offset",
+    "messages": "Tin nhắn"
   },
   "search": {
     "placeholder": "Tìm kiếm...",
@@ -1201,6 +1249,9 @@
       "stompConnect": "Kết nối STOMP",
       "stompSend": "Gửi STOMP",
       "stompClose": "Đóng STOMP"
+      "kafkaProduce": "Kafka produce",
+      "kafkaConsume": "Kafka consume",
+      "kafkaClose": "Kafka close"
     },
     "comparator": {
       "result": "kết quả"
@@ -1802,6 +1853,9 @@
       "stompConnect": "Mở một kết nối STOMP qua WebSocket lâu dài: thực hiện bắt tay CONNECT/CONNECTED, sau đó đăng ký từng đích đã cấu hình và phát lại mỗi khung nhận được trên cổng của nó.",
       "stompSend": "Gửi một khung SEND trên kết nối STOMP đã mở.",
       "stompClose": "Gửi DISCONNECT và đóng kết nối STOMP đã mở."
+      "kafkaProduce": "Chạy một yêu cầu Kafka đã gắn dưới dạng sản xuất một lần và phát ra kết quả (chủ đề/phân vùng/offset) dưới dạng `response`.",
+      "kafkaConsume": "Mở một trình tiêu thụ Kafka lâu dài từ một yêu cầu đã gắn và phát lại mỗi thông điệp nhận được trên cổng `message` của nó.",
+      "kafkaClose": "Đóng một trình tiêu thụ Kafka đang mở."
     },
     "legend": {
       "title": "Chú giải",

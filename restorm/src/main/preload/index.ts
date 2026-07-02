@@ -34,6 +34,8 @@ import {
   amqpExecuteResultSchema,
   redisResultSchema,
   stompConnectResultSchema,
+  kafkaProduceResultSchema,
+  kafkaBrowseResultSchema,
   authPrefetchResultSchema,
   importPreviewResultSchema,
   importImportResultSchema,
@@ -1498,6 +1500,71 @@ contextBridge.exposeInMainWorld('restorm', {
       return result as boolean
     },
     /** Listen for connection progress updates (subscribe mode). */
+  kafka: {
+    /** Produce: one-shot connect -> send -> disconnect. */
+    produce: async (input: { requestId: string; timeout?: number }): Promise<{
+      requestId: string
+      success: boolean
+      kafkaMode: 'produce'
+      requestTopic: string
+      requestUrl: string
+      partition?: number
+      offset?: string
+      error?: string
+      timings: { startedAt: string; durationMs: number }
+    }> => {
+      const result: unknown = await ipcRenderer.invoke('kafka:produce', input)
+      warnOnOutputMismatch('kafka:produce', kafkaProduceResultSchema, result)
+      return result as {
+        requestId: string
+        success: boolean
+        kafkaMode: 'produce'
+        requestTopic: string
+        requestUrl: string
+        partition?: number
+        offset?: string
+        error?: string
+        timings: { startedAt: string; durationMs: number }
+      }
+    },
+    /** Browse: one-shot peek via an ephemeral consumer group. */
+    browse: async (input: { requestId: string; timeout?: number }): Promise<{
+      requestId: string
+      success: boolean
+      kafkaMode: 'browse'
+      requestTopic: string
+      requestUrl: string
+      messages: { direction: 'received'; topic: string; partition: number; offset: string; key?: string; value: string; headers?: Record<string, string>; timestamp: string }[]
+      error?: string
+      timings: { startedAt: string; durationMs: number }
+    }> => {
+      const result: unknown = await ipcRenderer.invoke('kafka:browse', input)
+      warnOnOutputMismatch('kafka:browse', kafkaBrowseResultSchema, result)
+      return result as {
+        requestId: string
+        success: boolean
+        kafkaMode: 'browse'
+        requestTopic: string
+        requestUrl: string
+        messages: { direction: 'received'; topic: string; partition: number; offset: string; key?: string; value: string; headers?: Record<string, string>; timestamp: string }[]
+        error?: string
+        timings: { startedAt: string; durationMs: number }
+      }
+    },
+    /** Consume: start the long-lived subscribe; messages stream over `onMessage`. */
+    consumeStart: async (requestId: string): Promise<{ started: boolean }> => {
+      const result: unknown = await ipcRenderer.invoke('kafka:consume-start', requestId)
+      return result as { started: boolean }
+    },
+    cancel: async (requestId: string): Promise<boolean> => {
+      const result: unknown = await ipcRenderer.invoke('kafka:cancel', requestId)
+      return result as boolean
+    },
+    isActive: async (requestId: string): Promise<boolean> => {
+      const result: unknown = await ipcRenderer.invoke('kafka:is-active', requestId)
+      return result as boolean
+    },
+    /** Listen for produce/browse/consume lifecycle updates. */
     onProgress: (callback: (data: { requestId: string; status: 'started' | 'completed' | 'cancelled' | 'error' }) => void): (() => void) => {
       const handler = (_event: Electron.IpcRendererEvent, data: { requestId: string; status: 'started' | 'completed' | 'cancelled' | 'error' }): void => {
         callback(data)
@@ -1639,6 +1706,19 @@ contextBridge.exposeInMainWorld('restorm', {
       ipcRenderer.on('stomp:message', handler)
       return () => {
         ipcRenderer.removeListener('stomp:message', handler)
+      ipcRenderer.on('kafka:request-progress', handler)
+      return () => {
+        ipcRenderer.removeListener('kafka:request-progress', handler)
+      }
+    },
+    /** Listen for incoming (consumed/browsed) messages. */
+    onMessage: (callback: (data: { requestId: string; message: { direction: 'received'; topic: string; partition: number; offset: string; key?: string; value: string; headers?: Record<string, string>; timestamp: string } }) => void): (() => void) => {
+      const handler = (_event: Electron.IpcRendererEvent, data: { requestId: string; message: { direction: 'received'; topic: string; partition: number; offset: string; key?: string; value: string; headers?: Record<string, string>; timestamp: string } }): void => {
+        callback(data)
+      }
+      ipcRenderer.on('kafka:message', handler)
+      return () => {
+        ipcRenderer.removeListener('kafka:message', handler)
       }
     }
   },

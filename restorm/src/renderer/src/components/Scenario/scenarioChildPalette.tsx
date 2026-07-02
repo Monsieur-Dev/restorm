@@ -68,6 +68,11 @@ export const SCENARIO_ADD_REQUEST_GROUPS: ScenarioAddEntry[][] = [
     // `subscribe` mode drops a bound `amqpConnect`; `publish`/`browse` mode
     // drops a one-shot request node (see ScenarioEditorView's onDrop / addNode).
     { kind: 'amqp', badge: 'AMQP', labelKey: 'sidebar.contextMenu.add.amqp', defaultLabel: 'AMQP request' },
+    // Kafka has no server variant (restorm never hosts a broker) and no single
+    // request→response shape: produce (one-shot) and consume (long-lived
+    // consumer group) get their own entries, mirroring the gRPC call-type split.
+    { kind: 'kafka-produce', badge: 'KAFKA', labelKey: 'sidebar.contextMenu.add.kafkaProduce', defaultLabel: 'Kafka request – Produce' },
+    { kind: 'kafka-consume', badge: 'KAFKA', labelKey: 'sidebar.contextMenu.add.kafkaConsume', defaultLabel: 'Kafka request – Consume' },
     // HTTP mock server is server-only (a one-shot HTTP request already has its own
     // method entries above): dropping it creates a server: true request + a bound
     // httpListen node.
@@ -180,6 +185,11 @@ export const SCENARIO_ADD_MQTT_ACTIONS: ScenarioAddMqttActionEntry[] = [
  * `subscribe` mode only), badged AMQP. */
 export interface ScenarioAddAmqpActionEntry {
   kind: 'amqpPublish' | 'amqpClose'
+/** Kafka action entries — CLOSE only (produce is one-shot and never needs
+ * closing; the consume connect comes from the Kafka request entries above),
+ * badged KAFKA. */
+export interface ScenarioAddKafkaActionEntry {
+  kind: 'kafkaClose'
   icon: string
   labelKey: string
   defaultLabel: string
@@ -204,6 +214,8 @@ export const SCENARIO_ADD_AMQP_ACTIONS: ScenarioAddAmqpActionEntry[] = [
 
 export const SCENARIO_ADD_REDIS_ACTIONS: ScenarioAddRedisActionEntry[] = [
   { kind: 'redisClose', icon: 'debug-disconnect', labelKey: 'scenario.nodes.redisClose', defaultLabel: 'Redis close' }
+export const SCENARIO_ADD_KAFKA_ACTIONS: ScenarioAddKafkaActionEntry[] = [
+  { kind: 'kafkaClose', icon: 'debug-disconnect', labelKey: 'scenario.nodes.kafkaClose', defaultLabel: 'Kafka close' }
 ]
 
 /** gRPC streaming action entries — send / close only (badged GRPC). The CONNECT
@@ -322,6 +334,9 @@ export function scenarioAddRedisIcon(icon: string): ReactNode {
 /** The "STOMP" badge with the action's codicon inside (STOMP section). */
 export function scenarioAddStompIcon(icon: string): ReactNode {
   return React.createElement(Badge, { type: 'STOMP', icon })
+/** The "KAFKA" badge with the action's codicon inside (Kafka section). */
+export function scenarioAddKafkaIcon(icon: string): ReactNode {
+  return React.createElement(Badge, { type: 'KAFKA', icon })
 }
 
 /** The server-pill HTTP badge with the action's codicon inside (HTTP section). */

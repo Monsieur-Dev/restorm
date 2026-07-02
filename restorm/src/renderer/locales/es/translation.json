@@ -283,6 +283,8 @@
         "amqp": "Petición AMQP",
         "redis": "Petición Redis",
         "stomp": "Solicitud STOMP"
+        "kafkaProduce": "Petición Kafka – Producir",
+        "kafkaConsume": "Petición Kafka – Consumir"
       }
     },
     "deleteConfirm": {
@@ -618,6 +620,52 @@
       "channels": "Canales",
       "command": "Comando"
     }
+  "kafka": {
+    "brokersPlaceholder": "Lista de brokers (host:port,host:port)",
+    "clientId": "ID de cliente",
+    "clientIdPlaceholder": "restorm",
+    "mode": {
+      "produce": "Producir",
+      "consume": "Consumir",
+      "browse": "Explorar"
+    },
+    "auth": {
+      "title": "Autenticación",
+      "mechanism": "SASL",
+      "username": "Nombre de usuario",
+      "password": "Contraseña",
+      "tls": "TLS"
+    },
+    "topic": "Tema",
+    "topicPlaceholder": "nombre-del-tema",
+    "key": "Clave",
+    "keyPlaceholder": "clave del mensaje (opcional)",
+    "value": "Valor",
+    "headers": "Cabeceras",
+    "partition": "Partición",
+    "partitionPlaceholder": "auto",
+    "groupId": "ID de grupo",
+    "groupIdPlaceholder": "restorm-consumer",
+    "fromOffsetLabel": "Empezar desde",
+    "fromOffset": {
+      "earliest": "Más antiguo",
+      "latest": "Más reciente",
+      "specific": "Específico"
+    },
+    "specificOffset": "Offset",
+    "partitions": "Particiones",
+    "partitionsPlaceholder": "0,1,2 (vacío = todas)",
+    "peekCount": "Número de mensajes",
+    "produce": "Producir",
+    "startConsuming": "Iniciar consumo",
+    "stopConsuming": "Detener consumo",
+    "peek": "Vistazo",
+    "noMessages": "Aún no hay mensajes",
+    "connected": "Conectado",
+    "disconnected": "Desconectado",
+    "producedTo": "Producido en",
+    "offset": "Offset",
+    "messages": "Mensajes"
   },
   "search": {
     "placeholder": "Buscar...",
@@ -1202,6 +1250,9 @@
       "stompConnect": "Conectar STOMP",
       "stompSend": "Enviar STOMP",
       "stompClose": "Cerrar STOMP"
+      "kafkaProduce": "Kafka produce",
+      "kafkaConsume": "Kafka consume",
+      "kafkaClose": "Kafka close"
     },
     "comparator": {
       "result": "resultado"
@@ -1803,6 +1854,9 @@
       "stompConnect": "Abre una conexión STOMP sobre WebSocket persistente: realiza el protocolo CONNECT/CONNECTED, se suscribe a cada destino configurado y reemite cada trama recibida en su puerto.",
       "stompSend": "Envía una trama SEND en una conexión STOMP ya abierta.",
       "stompClose": "Envía DISCONNECT y cierra una conexión STOMP ya abierta."
+      "kafkaProduce": "Ejecuta una solicitud Kafka vinculada como una producción puntual y emite el resultado (tema/partición/offset) como `response`.",
+      "kafkaConsume": "Abre un consumidor Kafka duradero desde una solicitud vinculada y reemite cada mensaje recibido en su puerto `message`.",
+      "kafkaClose": "Cierra un consumidor Kafka ya abierto."
     },
     "legend": {
       "title": "Leyenda",

@@ -62,6 +62,7 @@ export interface FullRequestData {
   id: string
   requestType: 'http' | 'graphql' | 'grpc' | 'soap' | 'websocket' | 'sse' | 'odata' | 'auth' | 'jsonrpc' | 'jsonrpcBatch' | 'trpc' | 'amqp' | 'redis'
   requestType: 'http' | 'graphql' | 'grpc' | 'soap' | 'websocket' | 'stomp' | 'odata' | 'auth'
+  requestType: 'http' | 'graphql' | 'grpc' | 'soap' | 'websocket' | 'odata' | 'auth' | 'kafka'
 
   // Common fields
   url: string
@@ -227,6 +228,24 @@ export interface FullRequestData {
   command?: string
   args?: string[]
   freeformCommand?: string
+  // Kafka specific (requestType === 'kafka'). `url` (common field above) carries
+  // the comma-separated broker list. Prefixed to avoid colliding with the
+  // generic `clientId` / near-generic fields other protocols already claim.
+  kafkaMode?: 'produce' | 'consume' | 'browse'
+  kafkaTopic?: string
+  kafkaKey?: string
+  kafkaValue?: string
+  kafkaPartition?: number
+  kafkaGroupId?: string
+  kafkaFromOffset?: 'earliest' | 'latest' | 'specific'
+  kafkaSpecificOffset?: string
+  kafkaPartitions?: number[]
+  kafkaBrowsePeekCount?: number
+  kafkaClientId?: string
+  kafkaSaslMechanism?: 'none' | 'plain' | 'scram-sha-256' | 'scram-sha-512'
+  kafkaSaslUsername?: string
+  kafkaSaslPassword?: string
+  kafkaTlsEnabled?: boolean
 }
 
 /** Request context tracking with full data */
