@@ -8,6 +8,7 @@ import type {
   GrpcRequest,
   SoapRequest,
   WebSocketRequest,
+  SseRequest,
   ODataRequest,
   JsonRpcRequest,
   JsonRpcBatchRequest,
@@ -20,6 +21,7 @@ import {
   SoapRequestTabView,
   SoapServerRequestTabView,
   WebSocketRequestTabView,
+  SseRequestTabView,
   ODataRequestTabView,
   JsonRpcRequestTabView,
   JsonRpcBatchRequestTabView,
@@ -51,6 +53,7 @@ export const PROTOCOL_TAB_VIEWS: Record<RequestType, (request: Request) => React
     ? <SoapServerRequestTabView request={request as SoapRequest} />
     : <SoapRequestTabView request={request as SoapRequest} />),
   websocket: (request) => <WebSocketRequestTabView request={request as WebSocketRequest} />,
+  sse: (request) => <SseRequestTabView request={request as SseRequest} />,
   odata: (request) => <ODataRequestTabView request={request as ODataRequest} />,
   jsonrpc: (request) => <JsonRpcRequestTabView request={request as JsonRpcRequest} />,
   jsonrpcBatch: (request) => <JsonRpcBatchRequestTabView request={request as JsonRpcBatchRequest} />,

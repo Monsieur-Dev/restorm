@@ -273,6 +273,7 @@
         "socketio": "Socket.IO リクエスト",
         "mqtt": "MQTT request",
         "mqttServer": "MQTT ブローカー",
+        "sse": "SSE リクエスト",
         "grpcServer": "gRPC モックサーバー",
         "soapServer": "SOAP モックサーバー",
         "graphqlServer": "GraphQL モックサーバー",
@@ -584,6 +585,13 @@
     "response": {
       "unmatched": "一致する応答エントリがありません。"
     }
+  },
+  "sse": {
+    "headers": "ヘッダー",
+    "noFrames": "イベントはまだありません",
+    "urlPlaceholder": "SSE URL",
+    "framesTruncated": "最新の{{total}}件中{{shown}}件を表示中",
+    "showAllFrames": "すべて表示"
   },
   "search": {
     "placeholder": "検索...",
@@ -1138,8 +1146,10 @@
       "socketioSend": "Socket.IO send",
       "socketioClose": "Socket.IO close",
       "websocketConnect": "WebSocket connect",
+      "sseConnect": "SSE connect",
       "websocketSend": "WebSocket send",
       "websocketClose": "WebSocket close",
+      "sseClose": "SSE close",
       "grpcConnect": "gRPC connect",
       "grpcSend": "gRPC send",
       "grpcClose": "gRPC close",
@@ -1717,8 +1727,10 @@
       "socketioSend": "すでに開いている Socket.IO 接続でメッセージを送信します。",
       "socketioClose": "すでに開いている Socket.IO 接続を閉じます。",
       "websocketConnect": "生の WebSocket 接続を開き、受信した各メッセージをそのポートに再送出します。",
+      "sseConnect": "長時間持続する SSE (Server-Sent Events) 接続を開き、受信した各フレームをそのポートに再送出します。",
       "websocketSend": "すでに開いている WebSocket 接続でペイロードを送信します。",
       "websocketClose": "すでに開いている WebSocket 接続を閉じます。",
+      "sseClose": "すでに開いている SSE 接続を閉じます。",
       "grpcConnect": "ストリーミング gRPC 呼び出しを開き、受信した各フレームを message ポートに再送出します。",
       "grpcSend": "すでに開いているストリーミング gRPC 呼び出しにリクエストメッセージを書き込みます。",
       "grpcClose": "すでに開いているストリーミング gRPC 呼び出しをハーフクローズします。",
@@ -1793,6 +1805,9 @@
       "started": "起動済み"
     },
     "websocket": {
+      "message": "message"
+    },
+    "sse": {
       "message": "message"
     },
     "grpc": {

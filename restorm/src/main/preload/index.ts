@@ -30,6 +30,7 @@ import {
   soapExecuteResultSchema,
   grpcExecuteResultSchema,
   websocketConnectResultSchema,
+  sseConnectResultSchema,
   authPrefetchResultSchema,
   importPreviewResultSchema,
   importImportResultSchema,
@@ -1359,6 +1360,60 @@ contextBridge.exposeInMainWorld('restorm', {
       ipcRenderer.on('websocket:server-clients', handler)
       return () => {
         ipcRenderer.removeListener('websocket:server-clients', handler)
+      }
+    }
+  },
+  sse: {
+    /** Connect to an SSE endpoint (stays open until disconnect / reconnect budget exhausted) */
+    connect: async (input: { requestId: string; timeout?: number }): Promise<{
+      requestId: string
+      success: boolean
+      connected: boolean
+      frames: { event: string; data: string; id?: string; timestamp: string }[]
+      error?: string
+      timings: { startedAt: string; durationMs: number }
+      requestUrl?: string
+    }> => {
+      const result: unknown = await ipcRenderer.invoke('sse:connect', input)
+      warnOnOutputMismatch('sse:connect', sseConnectResultSchema, result)
+      return result as {
+        requestId: string
+        success: boolean
+        connected: boolean
+        frames: { event: string; data: string; id?: string; timestamp: string }[]
+        error?: string
+        timings: { startedAt: string; durationMs: number }
+        requestUrl?: string
+      }
+    },
+    /** Disconnect an active SSE connection */
+    disconnect: async (requestId: string): Promise<boolean> => {
+      const result: unknown = await ipcRenderer.invoke('sse:disconnect', requestId)
+      return result as boolean
+    },
+    /** Check if a connection is currently active */
+    isActive: async (requestId: string): Promise<boolean> => {
+      const result: unknown = await ipcRenderer.invoke('sse:is-active', requestId)
+      return result as boolean
+    },
+    /** Listen for connection progress updates */
+    onProgress: (callback: (data: { requestId: string; status: 'started' | 'completed' | 'cancelled' | 'error' }) => void): (() => void) => {
+      const handler = (_event: Electron.IpcRendererEvent, data: { requestId: string; status: 'started' | 'completed' | 'cancelled' | 'error' }): void => {
+        callback(data)
+      }
+      ipcRenderer.on('sse:connection-progress', handler)
+      return () => {
+        ipcRenderer.removeListener('sse:connection-progress', handler)
+      }
+    },
+    /** Listen for incoming frames */
+    onMessage: (callback: (data: { requestId: string; message: { event: string; data: string; id?: string; timestamp: string } }) => void): (() => void) => {
+      const handler = (_event: Electron.IpcRendererEvent, data: { requestId: string; message: { event: string; data: string; id?: string; timestamp: string } }): void => {
+        callback(data)
+      }
+      ipcRenderer.on('sse:message', handler)
+      return () => {
+        ipcRenderer.removeListener('sse:message', handler)
       }
     }
   },

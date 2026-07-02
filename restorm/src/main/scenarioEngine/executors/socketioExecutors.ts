@@ -111,6 +111,36 @@ export const websocketCloseExecutor: NodeExecutor = (_act, ctx) => {
   return { outputs: [] }
 }
 
+/** A (sseConnect): SSE — same handoff as websocketConnect, but there is no send
+ * direction at all (no B executor): every received frame routes to the single
+ * `message` port. */
+export const sseConnectExecutor: NodeExecutor = (_act, ctx) => {
+  const cfg = ctx.node.config as { requestId?: unknown; connectionName?: unknown }
+  if (typeof cfg.requestId !== 'string' || cfg.requestId === '') {
+    throw new Error(`sseConnect node ${ctx.node.id} has no bound requestId`)
+  }
+  const connectionName = typeof cfg.connectionName === 'string' && cfg.connectionName.trim() !== ''
+    ? cfg.connectionName.trim()
+    : cfg.requestId
+  return {
+    outputs: [],
+    scopeAction: { type: 'openSocketioConnect', transport: 'sse', requestId: cfg.requestId, events: [], connectionName, ...(overrideConfigFrom(ctx.node.config) ? { overrideConfig: overrideConfigFrom(ctx.node.config) } : {}) }
+  }
+}
+
+/** C (sseClose): close the referenced connection (same as websocketClose). */
+export const sseCloseExecutor: NodeExecutor = (_act, ctx) => {
+  const cfg = ctx.node.config as { connectionNodeId?: unknown }
+  const connectionNodeId = typeof cfg.connectionNodeId === 'string' ? cfg.connectionNodeId : ''
+  if (connectionNodeId === '') throw new Error('sseClose: no connection selected')
+  if (!ctx.socketio) throw new Error('sseClose: socket bridge unavailable')
+  if (!ctx.socketio.has(connectionNodeId)) {
+    throw new Error('sseClose: the referenced connection does not exist in this run')
+  }
+  ctx.socketio.close(connectionNodeId)
+  return { outputs: [] }
+}
+
 /** A (mqttConnect): MQTT — same handoff as websocketConnect (no events; every
  * received message routes to the single `message` port). The bridge subscribes
  * to the bound request's topic on connect. */

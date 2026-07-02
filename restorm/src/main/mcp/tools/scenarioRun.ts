@@ -275,6 +275,11 @@ const resolveStreamConnectPreview: PreviewResolver = async (_scenarioId, node) =
   if (resp?.type === 'grpc') {
     return socketioPreviewFromMessages(resp.messages ?? [], [])
   }
+  // SSE: receive-only, no `direction` field on its frames (unlike WS/gRPC) — every
+  // stored frame IS a received one, so wrap them before reusing the same helper.
+  if (resp?.type === 'sse') {
+    return socketioPreviewFromMessages(resp.frames.map((f) => ({ direction: 'received', data: f.data, event: f.event })), [])
+  }
   return null
 }
 
@@ -334,6 +339,7 @@ const previewResolvers: Partial<Record<ScenarioNode['kind'], PreviewResolver>> =
   soapRequest: resolveSoapPreview,
   socketioConnect: resolveStreamConnectPreview,
   websocketConnect: resolveStreamConnectPreview,
+  sseConnect: resolveStreamConnectPreview,
   mqttConnect: resolveStreamConnectPreview,
   grpcConnect: resolveStreamConnectPreview,
   code: resolveCodePreview

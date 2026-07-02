@@ -15,6 +15,7 @@ import {
   GrpcRequest,
   SoapRequest,
   WebSocketRequest,
+  SseRequest,
   ODataRequest,
   AuthenticationRequest,
   TrpcRequest
@@ -472,6 +473,7 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
       case 'websocket-server': return 'New WebSocket server'
       case 'mqtt': return 'New MQTT request'
       case 'mqtt-server': return 'New MQTT broker'
+      case 'sse': return 'New SSE request'
       case 'odata': return 'New OData request'
       case 'odata-server': return 'New OData mock server'
       case 'auth': return 'New auth request'
@@ -666,6 +668,8 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
         // forced to localhost, default broker port pre-filled. The topic on the
         // request is the filter the broker surfaces in the chat (default `#`).
         built = new WebSocketRequest({ id, name, protocol: 'mqtt', server: true, url: 'mqtt://localhost:1883', event: '#' })
+      } else if (kind === 'sse') {
+        built = new SseRequest({ id, name })
       } else if (kind === 'odata') {
         built = new ODataRequest({ id, name })
       } else if (kind === 'odata-server') {

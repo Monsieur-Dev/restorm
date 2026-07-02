@@ -274,6 +274,7 @@
         "socketio": "Socket.IO-begäran",
         "mqtt": "MQTT request",
         "mqttServer": "MQTT-mäklare",
+        "sse": "SSE-förfrågan",
         "grpcServer": "gRPC-mockserver",
         "soapServer": "SOAP-mockserver",
         "graphqlServer": "GraphQL-mockserver",
@@ -585,6 +586,13 @@
     "response": {
       "unmatched": "Ingen matchande svarspost."
     }
+  },
+  "sse": {
+    "headers": "Headers",
+    "noFrames": "Inga händelser än",
+    "urlPlaceholder": "SSE-URL",
+    "framesTruncated": "Visar de senaste {{shown}} av {{total}} bildrutorna",
+    "showAllFrames": "Visa alla"
   },
   "search": {
     "placeholder": "Sök...",
@@ -1139,8 +1147,10 @@
       "socketioSend": "Socket.IO send",
       "socketioClose": "Socket.IO close",
       "websocketConnect": "WebSocket connect",
+      "sseConnect": "SSE connect",
       "websocketSend": "WebSocket send",
       "websocketClose": "WebSocket close",
+      "sseClose": "SSE close",
       "grpcConnect": "gRPC connect",
       "grpcSend": "gRPC send",
       "grpcClose": "gRPC close",
@@ -1718,8 +1728,10 @@
       "socketioSend": "Skickar ett meddelande på en redan-öppen Socket.IO-anslutning.",
       "socketioClose": "Stänger en redan-öppen Socket.IO-anslutning.",
       "websocketConnect": "Öppnar en rå WebSocket-anslutning och återsänder varje mottaget meddelande på sin port.",
+      "sseConnect": "Öppnar en långvarig SSE (Server-Sent Events)-anslutning och skickar vidare varje mottagen ram på sin port.",
       "websocketSend": "Skickar en payload på en redan-öppen WebSocket-anslutning.",
       "websocketClose": "Stänger en redan-öppen WebSocket-anslutning.",
+      "sseClose": "Stänger en redan öppen SSE-anslutning.",
       "grpcConnect": "Öppnar ett streaming-gRPC-anrop och återsänder varje mottagen ram på sin message-port.",
       "grpcSend": "Skriver ett begäranmeddelande till ett redan-öppet streaming-gRPC-anrop.",
       "grpcClose": "Halvstänger (half-close) ett redan-öppet streaming-gRPC-anrop.",
@@ -1794,6 +1806,9 @@
       "started": "startad"
     },
     "websocket": {
+      "message": "message"
+    },
+    "sse": {
       "message": "message"
     },
     "grpc": {

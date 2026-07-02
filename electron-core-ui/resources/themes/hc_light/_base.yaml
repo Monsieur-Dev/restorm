@@ -445,6 +445,10 @@ colors:
     value: "#006064"
     description: "Socket.IO badge (HC light)"
 
+  - id: badge-sse-background
+    value: "#1a237e"
+    description: "Server-Sent Events badge (HC light)"
+
   - id: badge-odata-background
     value: "#bf360c"
     description: "OData badge (HC light)"

@@ -4,16 +4,17 @@ import type { GraphQLRequest } from './GraphQLRequest'
 import type { GrpcRequest, GrpcMockMethod } from './GrpcRequest'
 import type { SoapRequest } from './SoapRequest'
 import type { WebSocketRequest } from './WebSocketRequest'
+import type { SseRequest } from './SseRequest'
 import type { ODataRequest, ODataQueryOptions, ODataOperationKind, ODataBatchFormat, ODataBatchSubRequestSpec, ODataOperationParameterSpec } from './ODataRequest'
 import type { AuthenticationRequest } from './AuthenticationRequest'
 import type { JsonRpcRequest, JsonRpcBatchRequest, JsonRpcBatchCallSpec } from './JsonRpcRequest'
 import type { TrpcRequest } from './TrpcRequest'
 import type { QuickConfig, QuickConfigStorageTarget } from './QuickConfig'
 
-export type { BaseRequest, ImportOrigin, HTTPRequest, GraphQLRequest, GrpcRequest, GrpcMockMethod, SoapRequest, WebSocketRequest, ODataRequest, ODataQueryOptions, ODataOperationKind, ODataBatchFormat, ODataBatchSubRequestSpec, ODataOperationParameterSpec, AuthenticationRequest, JsonRpcRequest, JsonRpcBatchRequest, JsonRpcBatchCallSpec, TrpcRequest }
+export type { BaseRequest, ImportOrigin, HTTPRequest, GraphQLRequest, GrpcRequest, GrpcMockMethod, SoapRequest, WebSocketRequest, SseRequest, ODataRequest, ODataQueryOptions, ODataOperationKind, ODataBatchFormat, ODataBatchSubRequestSpec, ODataOperationParameterSpec, AuthenticationRequest, JsonRpcRequest, JsonRpcBatchRequest, JsonRpcBatchCallSpec, TrpcRequest }
 export type { QuickConfig, QuickConfigStorageTarget }
 
-export type Request = HTTPRequest | GraphQLRequest | GrpcRequest | SoapRequest | WebSocketRequest | ODataRequest | AuthenticationRequest | JsonRpcRequest | JsonRpcBatchRequest | TrpcRequest
+export type Request = HTTPRequest | GraphQLRequest | GrpcRequest | SoapRequest | WebSocketRequest | SseRequest | ODataRequest | AuthenticationRequest | JsonRpcRequest | JsonRpcBatchRequest | TrpcRequest
 
 export function isHTTPRequest(request: Request): request is HTTPRequest {
   return request.type === 'http'
@@ -33,6 +34,10 @@ export function isSoapRequest(request: Request): request is SoapRequest {
 
 export function isWebSocketRequest(request: Request): request is WebSocketRequest {
   return request.type === 'websocket'
+}
+
+export function isSseRequest(request: Request): request is SseRequest {
+  return request.type === 'sse'
 }
 
 export function isODataRequest(request: Request): request is ODataRequest {

@@ -1,4 +1,4 @@
-export type ResponseHistoryRequestType = 'http' | 'odata' | 'graphql' | 'grpc' | 'soap' | 'websocket' | 'jsonrpc' | 'jsonrpcBatch' | 'trpc'
+export type ResponseHistoryRequestType = 'http' | 'odata' | 'graphql' | 'grpc' | 'soap' | 'websocket' | 'sse' | 'jsonrpc' | 'jsonrpcBatch' | 'trpc'
 
 /**
  * 3-way visual signal for the per-entry status dot in the history
@@ -249,6 +249,25 @@ export interface ResponseHistoryTrpcResponse {
   error?: string
 }
 
+export interface ResponseHistorySseFrame {
+  event: string
+  data: string
+  id?: string
+  timestamp: string
+}
+
+export interface ResponseHistorySseResponse {
+  type: 'sse'
+  requestUrl: string
+  connected: boolean
+  frames: ResponseHistorySseFrame[]
+  timings: {
+    startedAt: string
+    durationMs: number
+  }
+  error?: string
+}
+
 export type ResponseHistoryResponse =
   | ResponseHistoryHttpResponse
   | ResponseHistoryODataResponse
@@ -259,6 +278,7 @@ export type ResponseHistoryResponse =
   | ResponseHistoryJsonRpcResponse
   | ResponseHistoryJsonRpcBatchResponse
   | ResponseHistoryTrpcResponse
+  | ResponseHistorySseResponse
 
 export interface ResponseHistoryDetail {
   guid: string

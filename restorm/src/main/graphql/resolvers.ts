@@ -117,7 +117,7 @@ export const resolvers = {
     request: (_: unknown, { id }: { id: string }): unknown => {
       const item = collectionStore.findById(id)
       const obj = item as Record<string, unknown> | null
-      if (obj?.type && ['http', 'graphql', 'grpc', 'soap', 'websocket'].includes(obj.type as string)) {
+      if (obj?.type && ['http', 'graphql', 'grpc', 'soap', 'websocket', 'sse'].includes(obj.type as string)) {
         return item
       }
       return null

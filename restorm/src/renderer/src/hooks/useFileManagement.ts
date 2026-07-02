@@ -25,6 +25,7 @@ import { SoapRequest } from '../../../shared/models/requests/SoapRequest'
 import { GrpcRequest } from '../../../shared/models/requests/GrpcRequest'
 import { GraphQLRequest } from '../../../shared/models/requests/GraphQLRequest'
 import { WebSocketRequest } from '../../../shared/models/requests/WebSocketRequest'
+import { SseRequest } from '../../../shared/models/requests/SseRequest'
 import { ODataRequest } from '../../../shared/models/requests/ODataRequest'
 import { AuthenticationRequest } from '../../../shared/models/requests/AuthenticationRequest'
 
@@ -51,6 +52,7 @@ const restormClassResolver = (item: Record<string, unknown>, parentClass: object
   if (type === 'grpc') return GrpcRequest
   if (type === 'graphql') return GraphQLRequest
   if (type === 'websocket') return WebSocketRequest
+  if (type === 'sse') return SseRequest
   if (type === 'odata') return ODataRequest
   if (type === 'auth') return AuthenticationRequest
   // Everything without a `type` discriminator is a folder-like node.

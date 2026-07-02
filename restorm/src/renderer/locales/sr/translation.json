@@ -275,6 +275,7 @@
         "socketio": "Socket.IO захтев",
         "mqtt": "MQTT request",
         "mqttServer": "MQTT broker",
+        "sse": "SSE zahtev",
         "grpcServer": "gRPC mock сервер",
         "soapServer": "SOAP mock сервер",
         "graphqlServer": "GraphQL mock сервер",
@@ -586,6 +587,13 @@
     "response": {
       "unmatched": "Нема одговарајућег уноса одговора."
     }
+  },
+  "sse": {
+    "headers": "Zaglavlja",
+    "noFrames": "Još nema događaja",
+    "urlPlaceholder": "SSE URL",
+    "framesTruncated": "Prikazano poslednjih {{shown}} od {{total}} okvira",
+    "showAllFrames": "Prikaži sve"
   },
   "search": {
     "placeholder": "Pretraži...",
@@ -1140,8 +1148,10 @@
       "socketioSend": "Socket.IO send",
       "socketioClose": "Socket.IO close",
       "websocketConnect": "WebSocket connect",
+      "sseConnect": "SSE connect",
       "websocketSend": "WebSocket send",
       "websocketClose": "WebSocket close",
+      "sseClose": "SSE close",
       "grpcConnect": "gRPC connect",
       "grpcSend": "gRPC send",
       "grpcClose": "gRPC close",
@@ -1719,8 +1729,10 @@
       "socketioSend": "Шаље поруку на већ отвореној Socket.IO вези.",
       "socketioClose": "Затвара већ отворену Socket.IO везу.",
       "websocketConnect": "Отвара сирову WebSocket везу и поново емитује сваку примљену поруку на свом порту.",
+      "sseConnect": "Otvara dugotrajnu SSE (Server-Sent Events) vezu i ponovo emituje svaki primljeni okvir na svom portu.",
       "websocketSend": "Шаље payload на већ отвореној WebSocket вези.",
       "websocketClose": "Затвара већ отворену WebSocket везу.",
+      "sseClose": "Zatvara već otvorenu SSE vezu.",
       "grpcConnect": "Отвара streaming gRPC позив и поново емитује сваки примљени оквир на свом message порту.",
       "grpcSend": "Уписује поруку захтева у већ отворен streaming gRPC позив.",
       "grpcClose": "Делимично затвара (half-close) већ отворен streaming gRPC позив.",
@@ -1795,6 +1807,9 @@
       "started": "покренуто"
     },
     "websocket": {
+      "message": "message"
+    },
+    "sse": {
       "message": "message"
     },
     "grpc": {

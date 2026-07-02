@@ -47,6 +47,7 @@ export type AddChildKind =
   | 'websocket-server'
   | 'mqtt'
   | 'mqtt-server'
+  | 'sse'
   | 'http-server'
   | 'graphql-server'
   | 'odata'
@@ -237,6 +238,14 @@ export const buildAddSubmenu = (
     label: t('sidebar.contextMenu.add.mqttServer'),
     icon: React.createElement(Badge, { type: 'MQTT', mode: 'server' }),
     onClick: () => { onAddChildItem(parentId, 'mqtt-server') }
+  },
+  { id: `sep-add-sse-${parentId}`, isSeparator: true, label: '' },
+  // SSE: receive-only streaming, no server mode — a single client entry.
+  {
+    id: `add-sse-${parentId}`,
+    label: t('sidebar.contextMenu.add.sse'),
+    icon: React.createElement(Badge, { type: 'SSE' }),
+    onClick: () => { onAddChildItem(parentId, 'sse') }
   },
   { id: `sep-add-odata-${parentId}`, isSeparator: true, label: '' },
   {

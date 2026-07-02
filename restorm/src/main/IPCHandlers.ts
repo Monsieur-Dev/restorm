@@ -27,6 +27,7 @@ import { odataMockServerService } from './services/ODataMockServerService'
 import { trpcExecutionService } from './services/TrpcExecutionService'
 import { websocketExecutionService, type WebSocketExecutionInput } from './services/WebSocketExecutionService'
 import { jsonRpcExecutionService } from './services/JsonRpcExecutionService'
+import { sseExecutionService, type SseExecutionInput } from './services/SseExecutionService'
 import { scenarioEngine } from './scenarioEngine/engine'
 import { importFrom } from './services/import/ImportManager'
 import { importGrpcFromReflection, findExistingGrpcReflectionFolder, reimportGrpcReflection } from './services/import/GrpcReflectionImportService'
@@ -58,6 +59,7 @@ import {
   grpcReflectImportArgs, grpcReflectQueryArgs,
   odataListenArgs, odataStopArgs, odataIsListeningArgs,
   websocketConnectArgs, websocketDisconnectArgs, websocketSendArgs, websocketIsActiveArgs,
+  sseConnectArgs, sseDisconnectArgs, sseIsActiveArgs,
   responsesHistoryListArgs, responsesHistoryGetArgs,
   responsesHistoryTogglePinArgs,
   requestUsageGetArgs,
@@ -792,6 +794,8 @@ export function registerRestormIPC(deps: {
     // Await it so the OS socket is fully released before this round-trip
     // resolves — a reopen that rebinds the same port can't race EADDRINUSE.
     await websocketExecutionService.closeAll()
+    // File close — same for any open SSE connections (client-only, no port).
+    sseExecutionService.closeAll()
     // File close — same for any hosted gRPC mock server (its own grpc.Server on
     // its own port): release the port so it doesn't keep listening past the file.
     grpcMockServerService.closeAll()
@@ -1372,6 +1376,29 @@ export function registerRestormIPC(deps: {
 
   validatedHandle('websocket:is-active', websocketIsActiveArgs, (_event, [requestId]) => {
     return websocketExecutionService.isActive(requestId)
+  })
+
+  // ==========================================================================
+  // SSE (Server-Sent Events) Execution IPC Handlers
+  // ==========================================================================
+
+  validatedHandle('sse:connect', sseConnectArgs, async (_event, [input]) => {
+    // Unlike `websocket:connect`, `sseExecutionService.execute` persists its
+    // own history entry on close (mirroring the streaming scenario path) —
+    // storing it again here would duplicate the entry.
+    const result = await sseExecutionService.execute(input as SseExecutionInput)
+    setImmediate(() => {
+      requestUsageService.recordSend(input.requestId)
+    })
+    return result
+  })
+
+  validatedHandle('sse:disconnect', sseDisconnectArgs, (_event, [requestId]) => {
+    return sseExecutionService.disconnect(requestId)
+  })
+
+  validatedHandle('sse:is-active', sseIsActiveArgs, (_event, [requestId]) => {
+    return sseExecutionService.isActive(requestId)
   })
 
   // ==========================================================================

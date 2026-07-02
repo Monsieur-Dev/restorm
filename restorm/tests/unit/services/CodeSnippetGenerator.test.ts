@@ -30,7 +30,8 @@ const templates: CompiledSnippetTemplates = {
   websocketSnippetTemplate: compile('code-snippets-websocket.hbs'),
   grpcSnippetTemplate: compile('code-snippets-grpc.hbs'),
   jsonRpcSnippetTemplate: compile('code-snippets-jsonrpc.hbs'),
-  trpcSnippetTemplate: compile('code-snippets-trpc.hbs')
+  trpcSnippetTemplate: compile('code-snippets-trpc.hbs'),
+  sseSnippetTemplate: compile('code-snippets-sse.hbs')
 } as unknown as CompiledSnippetTemplates
 
 // Identity transform (no env vars needed for these structural assertions).
@@ -223,5 +224,34 @@ describe('CodeSnippetGenerator — tRPC', () => {
       'http://localhost:3010/ping'
     )
     expect(md).toContain('{"0":{}}')
+  })
+})
+
+describe('CodeSnippetGenerator — SSE', () => {
+  const base: Partial<FullRequestData> = {
+    requestType: 'sse', url: 'http://localhost:8097/events', headers: []
+  }
+
+  it('renders a non-empty snippet with curl --no-buffer and browser EventSource', () => {
+    const md = run(base, 'http://localhost:8097/events')
+    expect(md.trim().length).toBeGreaterThan(0)
+    expect(md).toContain('curl --no-buffer')
+    expect(md).toContain('new EventSource')
+    expect(md).toContain('http://localhost:8097/events')
+  })
+
+  it('renders resolved header values as curl -H flags, not literal {{handlebars}}', () => {
+    const md = run({ ...base, headers: [{ key: 'X-Token', value: 'abc123', enabled: true } as never] }, 'http://localhost:8097/events')
+    expect(md).toContain('-H "X-Token: abc123"')
+  })
+
+  it('seeds Last-Event-ID on the curl example when the request has one', () => {
+    const md = run({ ...base, lastEventId: '42' }, 'http://localhost:8097/events')
+    expect(md).toContain('-H "Last-Event-ID: 42"')
+  })
+
+  it('omits the Last-Event-ID curl header when the request has none', () => {
+    const md = run(base, 'http://localhost:8097/events')
+    expect(md).not.toContain('-H "Last-Event-ID')
   })
 })

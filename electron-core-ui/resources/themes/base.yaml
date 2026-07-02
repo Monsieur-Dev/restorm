@@ -270,6 +270,10 @@ variables:
     value: "#00897b"
     description: "Socket.IO badge background (Material teal)"
 
+  - id: badge-sse-background
+    value: "#3949ab"
+    description: "Server-Sent Events badge background (Material indigo)"
+
   # ── OData ───────────────────────────────────────────────────────────────────
   - id: badge-odata-background
     value: "#ff6a00"

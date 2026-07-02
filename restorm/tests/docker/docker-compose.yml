@@ -139,6 +139,28 @@ services:
       retries: 10
       start_period: 5s
 
+  # SSE mock server — zero-dependency Node server used by the `sse-execution`
+  # E2E suite. `/events` streams deterministic labelled frames (`event: ping`)
+  # then holds the connection open on heartbeats; `/reconnect-test` exercises
+  # `Last-Event-ID` reconnect by dropping the connection once. Pure
+  # `node:http`, no npm install, boots the instant the container starts.
+  # Listens on :8097.
+  sse-server:
+    image: node:20-alpine
+    container_name: restorm-sse-server
+    working_dir: /app
+    volumes:
+      - ./sse-server:/app
+    command: node server.js
+    ports:
+      - "8097:8097"
+    healthcheck:
+      test: ["CMD", "sh", "-c", "wget -qO- http://localhost:8097/health | grep -q ok"]
+      interval: 3s
+      timeout: 3s
+      retries: 10
+      start_period: 5s
+
   # gRPC - gRPCbin echo server. Also answers gRPC-Web on :9002 (mapped from
   # the container's :9001, grpcbin's HTTP/1.1 endpoint) — no separate
   # gRPC-Web image needed, the gRPC-Web transport E2E scenarios target the

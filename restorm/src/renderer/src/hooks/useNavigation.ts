@@ -6,7 +6,7 @@ import { useEffect, useCallback } from 'react'
 import { navigationService } from 'electron-core-ui/renderer'
 import type { NavigationEvent, SearchResult } from 'electron-core-ui/renderer'
 import type { Folder, EnvironmentFolder, Request, Environment, FolderItem, Scenario } from '../../../shared/types/collections'
-import { isFolder, isRequest, isScenario, isEnvironmentFolder, isHTTPRequest, isGraphQLRequest, isGrpcRequest, isSoapRequest, isWebSocketRequest, isODataRequest, isTrpcRequest } from '../../../shared/types/collections'
+import { isFolder, isRequest, isScenario, isEnvironmentFolder, isHTTPRequest, isGraphQLRequest, isGrpcRequest, isSoapRequest, isWebSocketRequest, isSseRequest, isODataRequest, isTrpcRequest } from '../../../shared/types/collections'
 import { findFolderById, findItemWithBreadcrumbs } from '../utils/treeSearch'
 import type { BreadcrumbItem } from '../../../shared/types/editor'
 
@@ -111,9 +111,9 @@ export function useNavigation(options: UseNavigationOptions): UseNavigationRetur
             openFolderTab(folder, breadcrumbs)
           }
         }
-      } else if (params.type === 'http-request' || params.type === 'graphql-request' || 
-                 params.type === 'grpc-request' || params.type === 'soap-request' || 
-                 params.type === 'websocket-request') {
+      } else if (params.type === 'http-request' || params.type === 'graphql-request' ||
+                 params.type === 'grpc-request' || params.type === 'soap-request' ||
+                 params.type === 'websocket-request' || params.type === 'sse-request') {
         const { item, breadcrumbs } = findItemWithBreadcrumbs(rootItems, key)
         if (item && isRequest(item)) {
           const environments = getNearestEnvironmentsForBreadcrumbs(rootItems, breadcrumbs)
@@ -163,6 +163,8 @@ export function useNavigation(options: UseNavigationOptions): UseNavigationRetur
         navigationService.navigateTo(itemId, 'sidebar', { type: 'soap-request' })
       } else if (isWebSocketRequest(item)) {
         navigationService.navigateTo(itemId, 'sidebar', { type: 'websocket-request' })
+      } else if (isSseRequest(item)) {
+        navigationService.navigateTo(itemId, 'sidebar', { type: 'sse-request' })
       } else if (isODataRequest(item)) {
         navigationService.navigateTo(itemId, 'sidebar', { type: 'odata-request' })
       } else if (isTrpcRequest(item)) {
@@ -272,6 +274,8 @@ export function useNavigation(options: UseNavigationOptions): UseNavigationRetur
           navigationService.navigateTo(itemId, 'breadcrumb', { type: 'soap-request' })
         } else if (isWebSocketRequest(foundItem)) {
           navigationService.navigateTo(itemId, 'breadcrumb', { type: 'websocket-request' })
+        } else if (isSseRequest(foundItem)) {
+          navigationService.navigateTo(itemId, 'breadcrumb', { type: 'sse-request' })
         } else if (isODataRequest(foundItem)) {
           navigationService.navigateTo(itemId, 'breadcrumb', { type: 'odata-request' })
         } else if (isTrpcRequest(foundItem)) {

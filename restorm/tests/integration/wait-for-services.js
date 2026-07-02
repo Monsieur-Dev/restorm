@@ -19,6 +19,7 @@ const SERVICES = [
   // manual-start step (no seeding required).
   { name: 'SOAP mock server', url: 'http://localhost:8091/health' },
   { name: 'SOAP (Castle Mock)', url: 'http://localhost:8090/castlemock/web' },
+  { name: 'SSE mock server', url: 'http://localhost:8097/health' },
   // No Socket.IO / WS mock: restorm self-hosts those servers in-instance.
   { name: 'OData PetStore', url: 'http://localhost:5100/health' },
   { name: 'OData v2 PetStore', url: 'http://localhost:5102/health' },

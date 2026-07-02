@@ -276,6 +276,7 @@
         "socketio": "Запит Socket.IO",
         "mqtt": "MQTT request",
         "mqttServer": "MQTT-брокер",
+        "sse": "Запит SSE",
         "grpcServer": "gRPC mock-сервер",
         "soapServer": "Макетний сервер SOAP",
         "graphqlServer": "GraphQL mock-сервер",
@@ -587,6 +588,13 @@
     "response": {
       "unmatched": "Немає відповідного запису відповіді."
     }
+  },
+  "sse": {
+    "headers": "Заголовки",
+    "noFrames": "Поки що немає подій",
+    "urlPlaceholder": "URL SSE",
+    "framesTruncated": "Показано останні {{shown}} із {{total}} кадрів",
+    "showAllFrames": "Показати всі"
   },
   "search": {
     "placeholder": "Пошук...",
@@ -1141,8 +1149,10 @@
       "socketioSend": "Socket.IO send",
       "socketioClose": "Socket.IO close",
       "websocketConnect": "WebSocket connect",
+      "sseConnect": "SSE connect",
       "websocketSend": "WebSocket send",
       "websocketClose": "WebSocket close",
+      "sseClose": "SSE close",
       "grpcConnect": "gRPC connect",
       "grpcSend": "gRPC send",
       "grpcClose": "gRPC close",
@@ -1720,8 +1730,10 @@
       "socketioSend": "Надсилає повідомлення у вже відкритому з'єднанні Socket.IO.",
       "socketioClose": "Закриває вже відкрите з'єднання Socket.IO.",
       "websocketConnect": "Відкриває необроблене з'єднання WebSocket і повторно випромінює кожне отримане повідомлення на своєму порту.",
+      "sseConnect": "Відкриває довготривале з'єднання SSE (Server-Sent Events) і повторно передає кожен отриманий кадр на свій порт.",
       "websocketSend": "Надсилає payload у вже відкритому з'єднанні WebSocket.",
       "websocketClose": "Закриває вже відкрите з'єднання WebSocket.",
+      "sseClose": "Закриває вже відкрите з'єднання SSE.",
       "grpcConnect": "Відкриває потоковий виклик gRPC і повторно випромінює кожен отриманий кадр на своєму порту message.",
       "grpcSend": "Записує повідомлення запиту у вже відкритий потоковий виклик gRPC.",
       "grpcClose": "Частково закриває (half-close) вже відкритий потоковий виклик gRPC.",
@@ -1796,6 +1808,9 @@
       "started": "запущено"
     },
     "websocket": {
+      "message": "message"
+    },
+    "sse": {
       "message": "message"
     },
     "grpc": {

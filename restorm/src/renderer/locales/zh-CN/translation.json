@@ -273,6 +273,7 @@
         "socketio": "Socket.IO 请求",
         "mqtt": "MQTT request",
         "mqttServer": "MQTT 代理",
+        "sse": "SSE 请求",
         "grpcServer": "gRPC 模拟服务器",
         "soapServer": "SOAP 模拟服务器",
         "graphqlServer": "GraphQL 模拟服务器",
@@ -584,6 +585,13 @@
     "response": {
       "unmatched": "没有匹配的响应条目。"
     }
+  },
+  "sse": {
+    "headers": "请求头",
+    "noFrames": "暂无事件",
+    "urlPlaceholder": "SSE URL",
+    "framesTruncated": "正在显示最新 {{shown}} / {{total}} 帧",
+    "showAllFrames": "显示全部"
   },
   "search": {
     "placeholder": "搜索...",
@@ -1138,8 +1146,10 @@
       "socketioSend": "Socket.IO send",
       "socketioClose": "Socket.IO close",
       "websocketConnect": "WebSocket connect",
+      "sseConnect": "SSE connect",
       "websocketSend": "WebSocket send",
       "websocketClose": "WebSocket close",
+      "sseClose": "SSE close",
       "grpcConnect": "gRPC connect",
       "grpcSend": "gRPC send",
       "grpcClose": "gRPC close",
@@ -1717,8 +1727,10 @@
       "socketioSend": "在一个已打开的 Socket.IO 连接上发送一条消息。",
       "socketioClose": "关闭一个已打开的 Socket.IO 连接。",
       "websocketConnect": "打开一个原始 WebSocket 连接，并在其端口上重新发出每个收到的消息。",
+      "sseConnect": "打开一个长期存在的 SSE（Server-Sent Events）连接，并在其端口上重新发出每个收到的帧。",
       "websocketSend": "在一个已打开的 WebSocket 连接上发送负载。",
       "websocketClose": "关闭一个已打开的 WebSocket 连接。",
+      "sseClose": "关闭一个已打开的 SSE 连接。",
       "grpcConnect": "打开一个流式 gRPC 调用，并在其 message 端口上重新发出每个收到的帧。",
       "grpcSend": "在一个已打开的流式 gRPC 调用上写入请求消息。",
       "grpcClose": "半关闭一个已打开的流式 gRPC 调用。",
@@ -1793,6 +1805,9 @@
       "started": "已启动"
     },
     "websocket": {
+      "message": "message"
+    },
+    "sse": {
       "message": "message"
     },
     "grpc": {

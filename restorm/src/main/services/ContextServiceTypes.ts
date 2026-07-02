@@ -60,7 +60,7 @@ export type HTTPRequestBody =
 /** Full request data for URL resolution and code snippet generation */
 export interface FullRequestData {
   id: string
-  requestType: 'http' | 'graphql' | 'grpc' | 'soap' | 'websocket' | 'odata' | 'auth' | 'jsonrpc' | 'jsonrpcBatch' | 'trpc'
+  requestType: 'http' | 'graphql' | 'grpc' | 'soap' | 'websocket' | 'sse' | 'odata' | 'auth' | 'jsonrpc' | 'jsonrpcBatch' | 'trpc'
 
   // Common fields
   url: string
@@ -134,6 +134,10 @@ export interface FullRequestData {
   lwtPayload?: string
   lwtQos?: number
   lwtRetain?: boolean
+
+  // SSE specific
+  /** Seed for the `Last-Event-ID` header on the first connect. */
+  lastEventId?: string
 
   // OData specific — carried verbatim through URLResolver, which
   // appends the system query options ($filter / $select / $top /

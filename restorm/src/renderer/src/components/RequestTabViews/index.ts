@@ -5,6 +5,7 @@ export { GrpcRequestTabView, type GrpcRequestTabViewProps } from './GrpcRequestT
 export { SoapRequestTabView, type SoapRequestTabViewProps } from './SoapRequestTabView'
 export { SoapServerRequestTabView, type SoapServerRequestTabViewProps } from './SoapServerRequestTabView'
 export { WebSocketRequestTabView, type WebSocketRequestTabViewProps } from './WebSocketRequestTabView'
+export { SseRequestTabView, type SseRequestTabViewProps } from './SseRequestTabView'
 export { ODataRequestTabView, type ODataRequestTabViewProps } from './ODataRequestTabView'
 export { JsonRpcRequestTabView, type JsonRpcRequestTabViewProps } from './JsonRpcRequestTabView'
 export { JsonRpcBatchRequestTabView, type JsonRpcBatchRequestTabViewProps } from './JsonRpcBatchRequestTabView'

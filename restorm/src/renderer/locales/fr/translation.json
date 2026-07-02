@@ -274,6 +274,7 @@
         "socketio": "Requête Socket.IO",
         "mqtt": "Requête MQTT",
         "mqttServer": "Courtier MQTT",
+        "sse": "Requête SSE",
         "grpcServer": "Serveur gRPC fictif",
         "soapServer": "Serveur mock SOAP",
         "graphqlServer": "Serveur GraphQL fictif",
@@ -585,6 +586,13 @@
     "response": {
       "unmatched": "Aucune entrée de réponse correspondante."
     }
+  },
+  "sse": {
+    "headers": "En-têtes",
+    "noFrames": "Aucun événement pour l'instant",
+    "urlPlaceholder": "URL SSE",
+    "framesTruncated": "Affichage des {{shown}} dernières trames sur {{total}}",
+    "showAllFrames": "Tout afficher"
   },
   "search": {
     "placeholder": "Rechercher...",
@@ -1139,8 +1147,10 @@
       "socketioSend": "Socket.IO envoi",
       "socketioClose": "Socket.IO fermeture",
       "websocketConnect": "WebSocket connexion",
+      "sseConnect": "SSE connexion",
       "websocketSend": "WebSocket envoi",
       "websocketClose": "WebSocket fermeture",
+      "sseClose": "SSE fermeture",
       "grpcConnect": "Connexion gRPC",
       "grpcSend": "Envoi gRPC",
       "grpcClose": "Fermeture gRPC",
@@ -1721,8 +1731,10 @@
       "socketioSend": "Envoie un message sur une connexion Socket.IO déjà ouverte.",
       "socketioClose": "Ferme une connexion Socket.IO déjà ouverte.",
       "websocketConnect": "Ouvre une connexion WebSocket brute et réémet chaque message reçu sur son port.",
+      "sseConnect": "Ouvre une connexion SSE (Server-Sent Events) longue durée et réémet chaque trame reçue sur son port.",
       "websocketSend": "Envoie un payload sur une connexion WebSocket déjà ouverte.",
       "websocketClose": "Ferme une connexion WebSocket déjà ouverte.",
+      "sseClose": "Ferme une connexion SSE déjà ouverte.",
       "grpcConnect": "Ouvre un appel gRPC en streaming et réémet chaque trame reçue sur son port message.",
       "grpcSend": "Écrit un message de requête sur un appel gRPC en streaming déjà ouvert.",
       "grpcClose": "Ferme partiellement (half-close) un appel gRPC en streaming déjà ouvert.",
@@ -1797,6 +1809,9 @@
       "started": "démarré"
     },
     "websocket": {
+      "message": "message"
+    },
+    "sse": {
       "message": "message"
     },
     "grpc": {

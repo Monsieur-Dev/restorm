@@ -1,0 +1,78 @@
+collections:
+  - folderType: environment
+    name: SSE Playground
+    documentation: |-
+      # SSE Playground
+
+      Connects to the local SSE mock server (docker-compose service
+      `sse-server`, a zero-dependency `node:http` server, exposed on port
+      8097). `{{sseHost}}` resolves to that host — every request builds its
+      URL from it so the env-var substitution scenario has something real to
+      prove.
+
+      **SSE Frames** streams a short, deterministic burst of labelled
+      `event: ping` frames then holds on heartbeats. **SSE Headers (echo)**
+      exercises the `X-Echo` header, which the mock echoes back as the first
+      frame — proof that a Handlebars-resolved header value reached the wire.
+      **SSE Reconnect** hits the mock's `/reconnect-test` route, which drops
+      the connection once after two frames — proof the `Last-Event-ID`
+      reconnect resumes the stream instead of just failing.
+    tags: []
+    configuration: {}
+    environments:
+      - name: Default
+        variables:
+          - key: sseHost
+            value:
+              type: string
+              value: localhost:8097
+            enabled: true
+          - key: echoval
+            value:
+              type: string
+              value: echo-substituted-42
+            enabled: true
+        id: 2a3b4c5d-6e7f-4809-91a2-b3c4d5e6f708
+    items:
+      - type: sse
+        name: SSE Frames
+        documentation: |-
+          Connects to `/events`, which streams 3 labelled `event: ping`
+          frames 50ms apart then holds the connection open on heartbeats.
+        tags:
+          - sse
+        url: http://{{sseHost}}/events?count=3&intervalMs=50
+        headers: []
+        id: 3b4c5d6e-7f80-4901-a2b3-c4d5e6f70819
+      - type: sse
+        name: SSE Headers (echo)
+        documentation: |-
+          Sends an `X-Echo` header resolved from `{{echoval}}`. The mock
+          echoes it back as the very first frame (`event: echo`), proving
+          the resolved value — not the literal template — reached the wire.
+        tags:
+          - sse
+          - substitution
+        url: http://{{sseHost}}/events?count=1&intervalMs=50
+        headers:
+          - key: X-Echo
+            value:
+              type: expression
+              value: '{{echoval}}'
+            enabled: true
+        id: 4c5d6e7f-8091-4a2b-b3c4-d5e6f7081920
+      - type: sse
+        name: SSE Reconnect
+        documentation: |-
+          Connects to `/reconnect-test`, which sends frames id=1..2 then
+          destroys the connection. The client must reconnect with
+          `Last-Event-ID: 2` and resume from id=3, completing frames 3..5.
+        tags:
+          - sse
+          - reconnect
+        url: http://{{sseHost}}/reconnect-test
+        headers: []
+        id: 5d6e7f80-9192-4b3c-c4d5-e6f708192031
+    id: 6e7f8091-a2b3-4c4d-d5e6-f70819203142
+    fileFormatVersion: 1
+_projectUuid: 7f809192-b3c4-4d5e-e6f7-081920314253

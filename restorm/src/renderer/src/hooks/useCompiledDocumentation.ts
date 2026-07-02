@@ -18,7 +18,7 @@ import { resolveUrlAgainstEnv, flattenEnvVars } from '../../../shared/utils/reso
 // ---------- Route discriminants per request type ----------
 
 interface CompilableRoute {
-  type: 'http' | 'graphql' | 'grpc' | 'soap' | 'websocket' | 'odata' | 'trpc'
+  type: 'http' | 'graphql' | 'grpc' | 'soap' | 'websocket' | 'sse' | 'odata' | 'trpc'
   url?: string
   method?: string
   operationType?: string
@@ -94,6 +94,11 @@ function routeFromRequest(request: Request): CompilableRoute {
       // `ApiDocumentation` discriminant for tRPC yet, so this keeps the
       // switch exhaustive without ever matching a compiled operation.
       return { type: 'trpc', url: request.url, tags: request.tags }
+    case 'sse':
+      // Same "no compiler branch yet" situation as OData above — keeps
+      // the switch exhaustive; no compiled docs will match until the
+      // compiler gains an SSE discriminant.
+      return { type: 'sse', url: request.url, tags: request.tags }
   }
 }
 

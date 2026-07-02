@@ -58,6 +58,9 @@ export const SCENARIO_ADD_REQUEST_GROUPS: ScenarioAddEntry[][] = [
     { kind: 'socketio-server', badge: 'SIO', mode: 'server', labelKey: 'sidebar.contextMenu.add.socketioServer', defaultLabel: 'Socket.IO server' },
     { kind: 'mqtt', badge: 'MQTT', labelKey: 'sidebar.contextMenu.add.mqtt', defaultLabel: 'MQTT request' },
     { kind: 'mqtt-server', badge: 'MQTT', mode: 'server', labelKey: 'sidebar.contextMenu.add.mqttServer', defaultLabel: 'MQTT broker' },
+    // SSE: receive-only streaming, no server mode — a single client entry
+    // (mirrors the sidebar's "Add" submenu).
+    { kind: 'sse', badge: 'SSE', labelKey: 'sidebar.contextMenu.add.sse', defaultLabel: 'SSE request' },
     // HTTP mock server is server-only (a one-shot HTTP request already has its own
     // method entries above): dropping it creates a server: true request + a bound
     // httpListen node.
@@ -124,6 +127,20 @@ export interface ScenarioAddWsActionEntry {
 export const SCENARIO_ADD_WEBSOCKET_ACTIONS: ScenarioAddWsActionEntry[] = [
   { kind: 'websocketSend', icon: 'arrow-up', labelKey: 'scenario.nodes.websocketSend', defaultLabel: 'WebSocket send' },
   { kind: 'websocketClose', icon: 'debug-disconnect', labelKey: 'scenario.nodes.websocketClose', defaultLabel: 'WebSocket close' }
+]
+
+/** SSE action entries — CLOSE only (the connect comes from the request entry,
+ * which drops a bound sseConnect). SSE is receive-only, so there is no send
+ * action — mirrors the HTTP/SOAP/GraphQL server sections' close-only shape. */
+export interface ScenarioAddSseActionEntry {
+  kind: 'sseClose'
+  icon: string
+  labelKey: string
+  defaultLabel: string
+}
+
+export const SCENARIO_ADD_SSE_ACTIONS: ScenarioAddSseActionEntry[] = [
+  { kind: 'sseClose', icon: 'debug-disconnect', labelKey: 'scenario.nodes.sseClose', defaultLabel: 'SSE close' }
 ]
 
 /** MQTT action entries — publish / close (connect comes from the request entry), badged MQTT. */
@@ -227,6 +244,11 @@ export function scenarioAddSocketioIcon(icon: string): ReactNode {
 /** The "WS" badge with the action's codicon inside (raw WebSocket section). */
 export function scenarioAddWebsocketIcon(icon: string): ReactNode {
   return React.createElement(Badge, { type: 'WS', icon })
+}
+
+/** The "SSE" badge with the action's codicon inside (SSE section). */
+export function scenarioAddSseIcon(icon: string): ReactNode {
+  return React.createElement(Badge, { type: 'SSE', icon })
 }
 
 /** The "GRPC" badge with the action's codicon inside (gRPC streaming section). */

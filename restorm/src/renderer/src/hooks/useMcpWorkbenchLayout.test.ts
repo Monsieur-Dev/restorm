@@ -30,6 +30,7 @@ describe('resolveRebuildTabId', () => {
     expect(resolveRebuildTabId({ id: 'x', tabType: 'grpc-request', title: '', itemId: 'r3' })).toBe('request-id:r3')
     expect(resolveRebuildTabId({ id: 'x', tabType: 'soap-request', title: '', itemId: 'r4' })).toBe('request-id:r4')
     expect(resolveRebuildTabId({ id: 'x', tabType: 'websocket-request', title: '', itemId: 'r5' })).toBe('request-id:r5')
+    expect(resolveRebuildTabId({ id: 'x', tabType: 'sse-request', title: '', itemId: 'r8' })).toBe('request-id:r8')
     expect(resolveRebuildTabId({ id: 'x', tabType: 'odata-request', title: '', itemId: 'r6' })).toBe('request-id:r6')
     expect(resolveRebuildTabId({ id: 'x', tabType: 'auth-request', title: '', itemId: 'r7' })).toBe('request-id:r7')
   })

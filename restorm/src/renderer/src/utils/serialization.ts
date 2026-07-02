@@ -118,7 +118,7 @@ export function generateIds<T>(obj: T): T {
  * This matches known collection types:
  * - KeyValue: has 'key' and 'value' properties
  * - Environment: has 'name' and 'variables' properties
- * - Request types: has 'name' and 'type' properties (http, graphql, grpc, soap, websocket, odata, auth)
+ * - Request types: has 'name' and 'type' properties (http, graphql, grpc, soap, websocket, sse, odata, auth)
  * - Folder: has 'name', 'items', and 'configuration' properties
  * - Response types: has 'requestId' property
  */
@@ -140,7 +140,7 @@ function shouldHaveId(obj: Record<string, unknown>): boolean {
   // regenerated on copy-paste, colliding in every UUID-keyed
   // per-request store.
   if ('name' in obj && 'type' in obj) {
-    const requestTypes = ['http', 'graphql', 'grpc', 'soap', 'websocket', 'odata', 'auth']
+    const requestTypes = ['http', 'graphql', 'grpc', 'soap', 'websocket', 'sse', 'odata', 'auth']
     if (requestTypes.includes(obj['type'] as string)) {
       return true
     }

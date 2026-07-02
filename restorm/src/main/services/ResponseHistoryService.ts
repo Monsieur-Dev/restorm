@@ -40,6 +40,7 @@ import type { SOAPExecutionResult } from './SOAPExecutionService'
 import type { WebSocketExecutionResult } from './WebSocketExecutionService'
 import type { JsonRpcExecutionResult, JsonRpcBatchExecutionResult } from './JsonRpcExecutionService'
 import type { TrpcExecutionResult } from './TrpcExecutionService'
+import type { SseExecutionResult } from './SseExecutionService'
 import { normalizeODataResponse } from '../../shared/utils/odataResponse'
 import { redactTokensFromBody, collectTokenValues, redactTokensFromHeaders } from './AuthenticationRedaction'
 import { isAuthenticationRequest } from '../../shared/types/collections'
@@ -55,6 +56,7 @@ type ExecutionResult =
   | JsonRpcExecutionResult
   | JsonRpcBatchExecutionResult
   | TrpcExecutionResult
+  | SseExecutionResult
 
 /**
  * Compute the 3-way visual outcome (`ok` / `warning` / `failure`) for
@@ -90,6 +92,12 @@ function grpcOutcome(result: GRPCExecutionResult): ResponseHistoryOutcome {
  * `connected` + `success`; we treat both as required for `ok`.
  */
 function webSocketOutcome(result: WebSocketExecutionResult): ResponseHistoryOutcome {
+  return result.success && result.connected ? 'ok' : 'failure'
+}
+
+/** Same binary shape as {@link webSocketOutcome} — SSE has no per-frame status
+ * either, only whether the stream ever connected and ended cleanly. */
+function sseOutcome(result: SseExecutionResult): ResponseHistoryOutcome {
   return result.success && result.connected ? 'ok' : 'failure'
 }
 
@@ -396,7 +404,8 @@ class ResponseHistoryService {
       websocket: { build: (id, r) => this.buildWebSocketResponse(id, r as WebSocketExecutionResult), outcome: (r) => webSocketOutcome(r as WebSocketExecutionResult) },
       jsonrpc: { build: (id, r) => this.buildJsonRpcResponse(id, r as JsonRpcExecutionResult), outcome: (r) => jsonRpcOutcome(r as JsonRpcExecutionResult) },
       jsonrpcBatch: { build: (id, r) => this.buildJsonRpcBatchResponse(id, r as JsonRpcBatchExecutionResult), outcome: (r) => jsonRpcBatchOutcome(r as JsonRpcBatchExecutionResult) },
-      trpc: { build: (id, r) => this.buildTrpcResponse(id, r as TrpcExecutionResult), outcome: (r) => httpOutcome(r as TrpcExecutionResult) }
+      trpc: { build: (id, r) => this.buildTrpcResponse(id, r as TrpcExecutionResult), outcome: (r) => httpOutcome(r as TrpcExecutionResult) },
+      sse: { build: (id, r) => this.buildSseResponse(id, r as SseExecutionResult), outcome: (r) => sseOutcome(r as SseExecutionResult) }
     }
 
     const builder = builders[type]
@@ -730,6 +739,24 @@ class ResponseHistoryService {
         data: msg.data,
         event: msg.event,
         timestamp: msg.timestamp
+      })),
+      timings: result.timings,
+      ...(result.error ? { error: result.error } : {})
+    }
+  }
+
+  private buildSseResponse(requestId: string, result: SseExecutionResult): ResponseHistoryResponse | null {
+    const resolvedUrl = contextService.getResolvedUrl(requestId)?.resolvedUrl ?? result.requestUrl ?? ''
+
+    return {
+      type: 'sse',
+      requestUrl: resolvedUrl,
+      connected: result.connected,
+      frames: result.frames.map((frame) => ({
+        event: frame.event,
+        data: frame.data,
+        id: frame.id,
+        timestamp: frame.timestamp
       })),
       timings: result.timings,
       ...(result.error ? { error: result.error } : {})

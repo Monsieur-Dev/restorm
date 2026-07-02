@@ -150,6 +150,11 @@
   color: var(--badge-on-accent, #ffffff);
 }
 
+.badge-sse {
+  background-color: var(--badge-sse-background);
+  color: var(--badge-on-accent, #ffffff);
+}
+
 /* Server mode (restorm HOSTS the protocol): a two-part "capsule" norm shared by
  * every hosted protocol. A dark "SRV" segment (rounded LEFT only) glued to the
  * protocol's normal coloured badge (rounded RIGHT only), no radius where they

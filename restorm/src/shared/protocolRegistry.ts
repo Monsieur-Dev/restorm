@@ -120,6 +120,14 @@ export const PROTOCOL_REGISTRY = {
       'mqttConnect', 'mqttSend', 'mqttClose'
     ]
   },
+  sse: {
+    graphqlTypeName: 'SseRequest',
+    tabType: 'sse-request',
+    ipcNamespace: 'sse',
+    badge: { kind: 'fixed', value: 'SSE' },
+    searchIcon: 'sse',
+    scenarioKinds: ['sseConnect', 'sseClose']
+  },
   odata: {
     graphqlTypeName: 'ODataRequest',
     tabType: 'odata-request',

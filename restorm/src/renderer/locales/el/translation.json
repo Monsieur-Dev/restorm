@@ -274,6 +274,7 @@
         "socketio": "Αίτημα Socket.IO",
         "mqtt": "MQTT request",
         "mqttServer": "MQTT broker",
+        "sse": "Αίτημα SSE",
         "grpcServer": "Διακομιστής gRPC mock",
         "soapServer": "Διακομιστής εικονικού SOAP",
         "graphqlServer": "Διακομιστής GraphQL mock",
@@ -585,6 +586,13 @@
     "response": {
       "unmatched": "Καμία αντίστοιχη καταχώριση απόκρισης."
     }
+  },
+  "sse": {
+    "headers": "Κεφαλίδες",
+    "noFrames": "Δεν υπάρχουν ακόμη συμβάντα",
+    "urlPlaceholder": "URL SSE",
+    "framesTruncated": "Εμφάνιση των τελευταίων {{shown}} από {{total}} καρέ",
+    "showAllFrames": "Εμφάνιση όλων"
   },
   "search": {
     "placeholder": "Αναζήτηση...",
@@ -1139,8 +1147,10 @@
       "socketioSend": "Socket.IO send",
       "socketioClose": "Socket.IO close",
       "websocketConnect": "WebSocket connect",
+      "sseConnect": "SSE connect",
       "websocketSend": "WebSocket send",
       "websocketClose": "WebSocket close",
+      "sseClose": "SSE close",
       "grpcConnect": "gRPC connect",
       "grpcSend": "gRPC send",
       "grpcClose": "gRPC close",
@@ -1718,8 +1728,10 @@
       "socketioSend": "Στέλνει ένα μήνυμα σε μια ήδη ανοιχτή σύνδεση Socket.IO.",
       "socketioClose": "Κλείνει μια ήδη ανοιχτή σύνδεση Socket.IO.",
       "websocketConnect": "Ανοίγει μια ακατέργαστη σύνδεση WebSocket και επανεκπέμπει κάθε ληφθέν μήνυμα στη θύρα του.",
+      "sseConnect": "Ανοίγει μια μακροχρόνια σύνδεση SSE (Server-Sent Events) και επανεκπέμπει κάθε ληφθέν πλαίσιο στη θύρα της.",
       "websocketSend": "Στέλνει ένα ωφέλιμο φορτίο σε μια ήδη ανοιχτή σύνδεση WebSocket.",
       "websocketClose": "Κλείνει μια ήδη ανοιχτή σύνδεση WebSocket.",
+      "sseClose": "Κλείνει μια ήδη ανοιχτή σύνδεση SSE.",
       "grpcConnect": "Ανοίγει μια κλήση streaming gRPC και επανεκπέμπει κάθε ληφθέν πλαίσιο στη θύρα message του.",
       "grpcSend": "Γράφει ένα μήνυμα αιτήματος σε μια ήδη ανοιχτή κλήση streaming gRPC.",
       "grpcClose": "Κλείνει μερικώς (half-close) μια ήδη ανοιχτή κλήση streaming gRPC.",
@@ -1794,6 +1806,9 @@
       "started": "ξεκίνησε"
     },
     "websocket": {
+      "message": "message"
+    },
+    "sse": {
       "message": "message"
     },
     "grpc": {

@@ -142,7 +142,7 @@ export interface ExecResult {
     // `message` port (`events` is empty).
     | {
         type: 'openSocketioConnect'
-        transport: 'socketio' | 'websocket' | 'grpc' | 'mqtt' | 'graphql-subscribe' | 'http-server' | 'grpc-server' | 'soap-server' | 'graphql-server' | 'odata-server'
+        transport: 'socketio' | 'websocket' | 'sse' | 'grpc' | 'mqtt' | 'graphql-subscribe' | 'http-server' | 'grpc-server' | 'soap-server' | 'graphql-server' | 'odata-server'
         requestId: string
         events: string[]
         connectionName: string

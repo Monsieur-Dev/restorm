@@ -27,6 +27,7 @@ import {
   GrpcRequest,
   SoapRequest,
   WebSocketRequest,
+  SseRequest,
   ODataRequest,
   AuthenticationRequest,
   TrpcRequest
@@ -71,6 +72,7 @@ function registerClasses(): void {
   graphQLSchemaGenerator.registerClassAuto(GrpcRequest, skipGeneric)
   graphQLSchemaGenerator.registerClassAuto(SoapRequest, skipGeneric)
   graphQLSchemaGenerator.registerClassAuto(WebSocketRequest, skipGeneric)
+  graphQLSchemaGenerator.registerClassAuto(SseRequest, skipGeneric)
   graphQLSchemaGenerator.registerClassAuto(ODataRequest, skipGeneric)
   graphQLSchemaGenerator.registerClassAuto(AuthenticationRequest, skipGeneric)
   graphQLSchemaGenerator.registerClassAuto(TrpcRequest, skipGeneric)
@@ -82,13 +84,13 @@ function registerClasses(): void {
 
 function registerUnions(): void {
   graphQLSchemaGenerator.registerUnion('Request', [
-    'HTTPRequest', 'GraphQLRequest', 'GrpcRequest', 'SoapRequest', 'WebSocketRequest',
+    'HTTPRequest', 'GraphQLRequest', 'GrpcRequest', 'SoapRequest', 'WebSocketRequest', 'SseRequest',
     'ODataRequest', 'AuthenticationRequest', 'TrpcRequest'
   ])
 
   graphQLSchemaGenerator.registerUnion('FolderItem', [
     'Folder', 'EnvironmentFolder', 'HTTPRequest', 'GraphQLRequest',
-    'GrpcRequest', 'SoapRequest', 'WebSocketRequest', 'ODataRequest', 'AuthenticationRequest', 'TrpcRequest'
+    'GrpcRequest', 'SoapRequest', 'WebSocketRequest', 'SseRequest', 'ODataRequest', 'AuthenticationRequest', 'TrpcRequest'
   ])
 }
 

@@ -275,6 +275,7 @@
         "socketio": "Socket.IO zahtjev",
         "mqtt": "MQTT request",
         "mqttServer": "MQTT broker",
+        "sse": "SSE zahtjev",
         "grpcServer": "gRPC mock poslužitelj",
         "soapServer": "SOAP mock poslužitelj",
         "graphqlServer": "GraphQL mock poslužitelj",
@@ -586,6 +587,13 @@
     "response": {
       "unmatched": "Nema odgovarajućeg unosa odgovora."
     }
+  },
+  "sse": {
+    "headers": "Zaglavlja",
+    "noFrames": "Još nema događaja",
+    "urlPlaceholder": "SSE URL",
+    "framesTruncated": "Prikazano zadnjih {{shown}} od {{total}} okvira",
+    "showAllFrames": "Prikaži sve"
   },
   "search": {
     "placeholder": "Pretraži...",
@@ -1140,8 +1148,10 @@
       "socketioSend": "Socket.IO send",
       "socketioClose": "Socket.IO close",
       "websocketConnect": "WebSocket connect",
+      "sseConnect": "SSE connect",
       "websocketSend": "WebSocket send",
       "websocketClose": "WebSocket close",
+      "sseClose": "SSE close",
       "grpcConnect": "gRPC connect",
       "grpcSend": "gRPC send",
       "grpcClose": "gRPC close",
@@ -1719,8 +1729,10 @@
       "socketioSend": "Šalje poruku na već otvorenoj Socket.IO vezi.",
       "socketioClose": "Zatvara već otvorenu Socket.IO vezu.",
       "websocketConnect": "Otvara neobrađenu WebSocket vezu i ponovno emitira svaku primljenu poruku na svom portu.",
+      "sseConnect": "Otvara dugotrajnu SSE (Server-Sent Events) vezu i ponovno emitira svaki primljeni okvir na svom portu.",
       "websocketSend": "Šalje payload na već otvorenoj WebSocket vezi.",
       "websocketClose": "Zatvara već otvorenu WebSocket vezu.",
+      "sseClose": "Zatvara već otvorenu SSE vezu.",
       "grpcConnect": "Otvara streaming gRPC poziv i ponovno emitira svaki primljeni okvir na svom message portu.",
       "grpcSend": "Zapisuje poruku zahtjeva u već otvoren streaming gRPC poziv.",
       "grpcClose": "Djelomično zatvara (half-close) već otvoren streaming gRPC poziv.",
@@ -1795,6 +1807,9 @@
       "started": "pokrenuto"
     },
     "websocket": {
+      "message": "message"
+    },
+    "sse": {
       "message": "message"
     },
     "grpc": {

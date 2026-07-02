@@ -276,6 +276,7 @@
         "socketio": "Požadavek Socket.IO",
         "mqtt": "MQTT request",
         "mqttServer": "MQTT broker",
+        "sse": "Požadavek SSE",
         "grpcServer": "Mock server gRPC",
         "soapServer": "Server SOAP mock",
         "graphqlServer": "Server GraphQL mock",
@@ -587,6 +588,13 @@
     "response": {
       "unmatched": "Žádná odpovídající položka odpovědi."
     }
+  },
+  "sse": {
+    "headers": "Hlavičky",
+    "noFrames": "Zatím žádné události",
+    "urlPlaceholder": "URL SSE",
+    "framesTruncated": "Zobrazeno posledních {{shown}} z {{total}} rámců",
+    "showAllFrames": "Zobrazit vše"
   },
   "search": {
     "placeholder": "Hledat...",
@@ -1141,8 +1149,10 @@
       "socketioSend": "Socket.IO send",
       "socketioClose": "Socket.IO close",
       "websocketConnect": "WebSocket connect",
+      "sseConnect": "SSE connect",
       "websocketSend": "WebSocket send",
       "websocketClose": "WebSocket close",
+      "sseClose": "SSE close",
       "grpcConnect": "gRPC connect",
       "grpcSend": "gRPC send",
       "grpcClose": "gRPC close",
@@ -1720,8 +1730,10 @@
       "socketioSend": "Odešle zprávu do již otevřeného připojení Socket.IO.",
       "socketioClose": "Uzavře již otevřené připojení Socket.IO.",
       "websocketConnect": "Otevře surové připojení WebSocket a znovu vysílá každou přijatou zprávu na svém portu.",
+      "sseConnect": "Otevře dlouhotrvající SSE (Server-Sent Events) připojení a znovu odešle každý přijatý rámec na svůj port.",
       "websocketSend": "Odešle payload do již otevřeného připojení WebSocket.",
       "websocketClose": "Uzavře již otevřené připojení WebSocket.",
+      "sseClose": "Zavře již otevřené SSE připojení.",
       "grpcConnect": "Otevře streamovací volání gRPC a znovu vysílá každý přijatý rámec na svém portu message.",
       "grpcSend": "Zapíše zprávu požadavku do již otevřeného streamovacího volání gRPC.",
       "grpcClose": "Částečně uzavře (half-close) již otevřené streamovací volání gRPC.",
@@ -1796,6 +1808,9 @@
       "started": "spuštěno"
     },
     "websocket": {
+      "message": "message"
+    },
+    "sse": {
       "message": "message"
     },
     "grpc": {

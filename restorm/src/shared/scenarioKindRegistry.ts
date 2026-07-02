@@ -233,6 +233,23 @@ export const SCENARIO_KIND_REGISTRY = {
       config: { connectionNodeId: 'Id of the websocketConnect node whose connection to close.' }
     }
   },
+  sseConnect: {
+    labelKey: 'scenario.nodes.sseConnect', defaultLabel: 'SSE connect', icon: 'plug', category: 'composition',
+    requestBinding: true,
+    ports: { inputs: [], outputs: [{ id: 'connected', name: 'connected', flow: 'signal' }, { id: 'message', name: 'message', flow: 'both' }] },
+    doc: {
+      summary: 'Opens a long-lived SSE (Server-Sent Events) connection from a bound request and listens. `connected` fires once the stream is open; EVERY received frame re-emits on the single `message` output. Receive-only — there is no send node. The connection stays open until an sseClose targets it (or the run is stopped), then `done` fires.',
+      config: { requestId: 'Id of the SSE request to connect (its resolved URL/headers).', connectionName: 'Unique-per-scenario name an sseClose references for display (defaults to the request name).', label: 'Display label on the box.' }
+    }
+  },
+  sseClose: {
+    labelKey: 'scenario.nodes.sseClose', defaultLabel: 'SSE close', icon: 'debug-disconnect', category: 'composition',
+    ports: { inputs: [], outputs: [] },
+    doc: {
+      summary: 'Closes an already-open SSE connection (declared by an sseConnect node), firing that node\'s `done`. Pure-event action: triggered on `in`, sequences via its own `done`. Errors (to `error`) when no connection is selected.',
+      config: { connectionNodeId: 'Id of the sseConnect node whose connection to close.' }
+    }
+  },
   mqttConnect: {
     labelKey: 'scenario.nodes.mqttConnect', defaultLabel: 'MQTT connect', icon: 'plug', category: 'composition',
     requestBinding: true,

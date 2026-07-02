@@ -103,6 +103,7 @@ import { installScenarioEngineIPC } from './scenarioEngine/ipcBridge'
 import { registerBuiltinSources } from './services/secrets/mainSourceRegistry'
 import { secretHydrationService } from './services/secrets/SecretHydrationService'
 import { websocketExecutionService } from './services/WebSocketExecutionService'
+import { sseExecutionService } from './services/SseExecutionService'
 import { grpcMockServerService } from './services/GRPCMockServerService'
 import { odataMockServerService } from './services/ODataMockServerService'
 import { registerApiUpdateIPC } from './services/apiUpdate/registerApiUpdateIPC'
@@ -541,6 +542,8 @@ app.on('before-quit', () => {
   // but this flushes history + closes clients cleanly). Fire-and-forget: the
   // process is exiting, so we don't await the OS socket release here.
   void websocketExecutionService.closeAll()
+  // Same for any open SSE connections (no server/port to release — client-only).
+  sseExecutionService.closeAll()
   // Same for any hosted gRPC mock server (its own grpc.Server / port).
   grpcMockServerService.closeAll()
   // Same for any hosted OData mock service (its routes on the shared HTTP host).

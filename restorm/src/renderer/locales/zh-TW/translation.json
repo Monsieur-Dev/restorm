@@ -273,6 +273,7 @@
         "socketio": "Socket.IO 要求",
         "mqtt": "MQTT request",
         "mqttServer": "MQTT 代理",
+        "sse": "SSE 請求",
         "grpcServer": "gRPC 模擬伺服器",
         "soapServer": "SOAP 模擬伺服器",
         "graphqlServer": "GraphQL 模擬伺服器",
@@ -584,6 +585,13 @@
     "response": {
       "unmatched": "沒有相符的回應項目。"
     }
+  },
+  "sse": {
+    "headers": "標頭",
+    "noFrames": "尚無事件",
+    "urlPlaceholder": "SSE URL",
+    "framesTruncated": "正在顯示最新 {{shown}} / {{total}} 幀",
+    "showAllFrames": "顯示全部"
   },
   "search": {
     "placeholder": "搜尋...",
@@ -1138,8 +1146,10 @@
       "socketioSend": "Socket.IO send",
       "socketioClose": "Socket.IO close",
       "websocketConnect": "WebSocket connect",
+      "sseConnect": "SSE connect",
       "websocketSend": "WebSocket send",
       "websocketClose": "WebSocket close",
+      "sseClose": "SSE close",
       "grpcConnect": "gRPC connect",
       "grpcSend": "gRPC send",
       "grpcClose": "gRPC close",
@@ -1717,8 +1727,10 @@
       "socketioSend": "在一個已開啟的 Socket.IO 連線上傳送一則訊息。",
       "socketioClose": "關閉一個已開啟的 Socket.IO 連線。",
       "websocketConnect": "開啟一個原始 WebSocket 連線，並在其連接埠上重新發出每個收到的訊息。",
+      "sseConnect": "開啟一個長期存在的 SSE（Server-Sent Events）連線，並在其連接埠上重新發出每個收到的訊框。",
       "websocketSend": "在一個已開啟的 WebSocket 連線上傳送負載。",
       "websocketClose": "關閉一個已開啟的 WebSocket 連線。",
+      "sseClose": "關閉一個已開啟的 SSE 連線。",
       "grpcConnect": "開啟一個串流 gRPC 呼叫，並在其 message 連接埠上重新發出每個收到的訊框。",
       "grpcSend": "在一個已開啟的串流 gRPC 呼叫上寫入請求訊息。",
       "grpcClose": "半關閉一個已開啟的串流 gRPC 呼叫。",
@@ -1793,6 +1805,9 @@
       "started": "已啟動"
     },
     "websocket": {
+      "message": "message"
+    },
+    "sse": {
       "message": "message"
     },
     "grpc": {

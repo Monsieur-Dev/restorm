@@ -274,6 +274,7 @@
         "socketio": "Socket.IO-verzoek",
         "mqtt": "MQTT request",
         "mqttServer": "MQTT-broker",
+        "sse": "SSE-verzoek",
         "grpcServer": "gRPC-mockserver",
         "soapServer": "SOAP-mockserver",
         "graphqlServer": "GraphQL-mockserver",
@@ -585,6 +586,13 @@
     "response": {
       "unmatched": "Geen overeenkomende antwoordinvoer."
     }
+  },
+  "sse": {
+    "headers": "Headers",
+    "noFrames": "Nog geen gebeurtenissen",
+    "urlPlaceholder": "SSE-URL",
+    "framesTruncated": "Laatste {{shown}} van {{total}} frames weergegeven",
+    "showAllFrames": "Alles weergeven"
   },
   "search": {
     "placeholder": "Zoeken...",
@@ -1139,8 +1147,10 @@
       "socketioSend": "Socket.IO send",
       "socketioClose": "Socket.IO close",
       "websocketConnect": "WebSocket connect",
+      "sseConnect": "SSE connect",
       "websocketSend": "WebSocket send",
       "websocketClose": "WebSocket close",
+      "sseClose": "SSE close",
       "grpcConnect": "gRPC connect",
       "grpcSend": "gRPC send",
       "grpcClose": "gRPC close",
@@ -1718,8 +1728,10 @@
       "socketioSend": "Verzendt een bericht op een al-open Socket.IO-verbinding.",
       "socketioClose": "Sluit een al-open Socket.IO-verbinding.",
       "websocketConnect": "Opent een ruwe WebSocket-verbinding en zendt elk ontvangen bericht opnieuw uit op zijn poort.",
+      "sseConnect": "Opent een langdurige SSE (Server-Sent Events)-verbinding en zendt elk ontvangen frame opnieuw uit op zijn poort.",
       "websocketSend": "Verzendt een payload op een al-open WebSocket-verbinding.",
       "websocketClose": "Sluit een al-open WebSocket-verbinding.",
+      "sseClose": "Sluit een reeds geopende SSE-verbinding.",
       "grpcConnect": "Opent een streaming-gRPC-aanroep en zendt elke ontvangen frame opnieuw uit op zijn message-poort.",
       "grpcSend": "Schrijft een verzoekbericht naar een al-open streaming-gRPC-aanroep.",
       "grpcClose": "Sluit een al-open streaming-gRPC-aanroep half (half-close).",
@@ -1794,6 +1806,9 @@
       "started": "gestart"
     },
     "websocket": {
+      "message": "message"
+    },
+    "sse": {
       "message": "message"
     },
     "grpc": {

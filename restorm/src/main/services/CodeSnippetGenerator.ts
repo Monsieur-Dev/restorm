@@ -64,6 +64,7 @@ export interface CompiledSnippetTemplates {
   soapSnippetTemplate: Handlebars.TemplateDelegate | null
   jsonRpcSnippetTemplate: Handlebars.TemplateDelegate | null
   trpcSnippetTemplate: Handlebars.TemplateDelegate | null
+  sseSnippetTemplate: Handlebars.TemplateDelegate | null
 }
 
 /**
@@ -78,7 +79,8 @@ export function compileSnippetTemplates(): CompiledSnippetTemplates {
     grpcSnippetTemplate: null,
     soapSnippetTemplate: null,
     jsonRpcSnippetTemplate: null,
-    trpcSnippetTemplate: null
+    trpcSnippetTemplate: null,
+    sseSnippetTemplate: null
   }
 
   try {
@@ -89,6 +91,7 @@ export function compileSnippetTemplates(): CompiledSnippetTemplates {
     const soapTemplate = loadTemplate('code-snippets-soap.hbs')
     const jsonRpcTemplate = loadTemplate('code-snippets-jsonrpc.hbs')
     const trpcTemplate = loadTemplate('code-snippets-trpc.hbs')
+    const sseTemplate = loadTemplate('code-snippets-sse.hbs')
 
     if (httpTemplate) templates.httpSnippetTemplate = Handlebars.compile(httpTemplate, { noEscape: true })
     if (graphqlTemplate) templates.graphqlSnippetTemplate = Handlebars.compile(graphqlTemplate, { noEscape: true })
@@ -97,6 +100,7 @@ export function compileSnippetTemplates(): CompiledSnippetTemplates {
     if (soapTemplate) templates.soapSnippetTemplate = Handlebars.compile(soapTemplate, { noEscape: true })
     if (jsonRpcTemplate) templates.jsonRpcSnippetTemplate = Handlebars.compile(jsonRpcTemplate, { noEscape: true })
     if (trpcTemplate) templates.trpcSnippetTemplate = Handlebars.compile(trpcTemplate, { noEscape: true })
+    if (sseTemplate) templates.sseSnippetTemplate = Handlebars.compile(sseTemplate, { noEscape: true })
 
     logger.info('[CodeSnippetGenerator] Code snippet templates loaded and compiled')
   } catch (error) {
@@ -378,6 +382,17 @@ export function generateCodeSnippets(
           input: resolvedInput ?? 'undefined',
           body: composed.rawBody ?? null,
           headers: headers.length > 0 ? headers : null
+        })
+      }
+      break
+    }
+
+    case 'sse': {
+      if (templates.sseSnippetTemplate) {
+        markdown = templates.sseSnippetTemplate({
+          url: resolvedUrl,
+          headers: headers.length > 0 ? headers : null,
+          lastEventId: data.lastEventId ? transformValue(data.lastEventId, envContext) : null
         })
       }
       break

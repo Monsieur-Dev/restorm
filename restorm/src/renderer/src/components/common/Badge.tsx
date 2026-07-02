@@ -17,6 +17,8 @@ export type BadgeType =
   | 'SOAP'
   // WebSocket protocols
   | 'WS' | 'MQTT' | 'SIO'
+  // Server-Sent Events
+  | 'SSE'
   // OData
   | 'ODATA'
   // tRPC

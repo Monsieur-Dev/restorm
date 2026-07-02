@@ -274,6 +274,7 @@
         "socketio": "Socket.IO-kérés",
         "mqtt": "MQTT request",
         "mqttServer": "MQTT broker",
+        "sse": "SSE-kérés",
         "grpcServer": "gRPC mock-kiszolgáló",
         "soapServer": "SOAP mock-kiszolgáló",
         "graphqlServer": "GraphQL mock-kiszolgáló",
@@ -585,6 +586,13 @@
     "response": {
       "unmatched": "Nincs egyező válaszbejegyzés."
     }
+  },
+  "sse": {
+    "headers": "Fejlécek",
+    "noFrames": "Még nincsenek események",
+    "urlPlaceholder": "SSE URL",
+    "framesTruncated": "A legutóbbi {{shown}} keret megjelenítve a(z) {{total}} közül",
+    "showAllFrames": "Összes megjelenítése"
   },
   "search": {
     "placeholder": "Keresés...",
@@ -1139,8 +1147,10 @@
       "socketioSend": "Socket.IO send",
       "socketioClose": "Socket.IO close",
       "websocketConnect": "WebSocket connect",
+      "sseConnect": "SSE connect",
       "websocketSend": "WebSocket send",
       "websocketClose": "WebSocket close",
+      "sseClose": "SSE close",
       "grpcConnect": "gRPC connect",
       "grpcSend": "gRPC send",
       "grpcClose": "gRPC close",
@@ -1718,8 +1728,10 @@
       "socketioSend": "Üzenetet küld egy már nyitott Socket.IO-kapcsolaton.",
       "socketioClose": "Lezár egy már nyitott Socket.IO-kapcsolatot.",
       "websocketConnect": "Megnyit egy nyers WebSocket-kapcsolatot, és minden fogadott üzenetet újraküld a portján.",
+      "sseConnect": "Megnyit egy hosszú élettartamú SSE (Server-Sent Events) kapcsolatot, és minden fogadott keretet újra kibocsát a portján.",
       "websocketSend": "Adatot küld egy már nyitott WebSocket-kapcsolaton.",
       "websocketClose": "Lezár egy már nyitott WebSocket-kapcsolatot.",
+      "sseClose": "Bezár egy már nyitott SSE-kapcsolatot.",
       "grpcConnect": "Megnyit egy streaming gRPC-hívást, és minden fogadott keretet újraküld a message portján.",
       "grpcSend": "Kérésüzenetet ír egy már nyitott streaming gRPC-hívásra.",
       "grpcClose": "Félig lezár (half-close) egy már nyitott streaming gRPC-hívást.",
@@ -1794,6 +1806,9 @@
       "started": "elindítva"
     },
     "websocket": {
+      "message": "message"
+    },
+    "sse": {
       "message": "message"
     },
     "grpc": {

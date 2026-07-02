@@ -5,6 +5,7 @@ import { GraphQLRequest } from './GraphQLRequest'
 import { GrpcRequest } from './GrpcRequest'
 import { SoapRequest } from './SoapRequest'
 import { WebSocketRequest } from './WebSocketRequest'
+import { SseRequest } from './SseRequest'
 import { ODataRequest } from './ODataRequest'
 import { AuthenticationRequest } from './AuthenticationRequest'
 import { JsonRpcRequest, JsonRpcBatchRequest } from './JsonRpcRequest'
@@ -41,6 +42,7 @@ export const REQUEST_CLASS_REGISTRY: Record<RequestType, RequestClassEntry> = {
   grpc: { fromPlain: (d) => GrpcRequest.fromPlain(d as Parameters<typeof GrpcRequest.fromPlain>[0]), ctor: GrpcRequest as unknown as new (...args: unknown[]) => Request },
   soap: { fromPlain: (d) => SoapRequest.fromPlain(d as Parameters<typeof SoapRequest.fromPlain>[0]), ctor: SoapRequest as unknown as new (...args: unknown[]) => Request },
   websocket: { fromPlain: (d) => WebSocketRequest.fromPlain(d as Parameters<typeof WebSocketRequest.fromPlain>[0]), ctor: WebSocketRequest as unknown as new (...args: unknown[]) => Request },
+  sse: { fromPlain: (d) => SseRequest.fromPlain(d as Parameters<typeof SseRequest.fromPlain>[0]), ctor: SseRequest as unknown as new (...args: unknown[]) => Request },
   odata: { fromPlain: (d) => ODataRequest.fromPlain(d as Parameters<typeof ODataRequest.fromPlain>[0]), ctor: ODataRequest as unknown as new (...args: unknown[]) => Request },
   auth: { fromPlain: (d) => AuthenticationRequest.fromPlain(d as Parameters<typeof AuthenticationRequest.fromPlain>[0]), ctor: AuthenticationRequest as unknown as new (...args: unknown[]) => Request },
   jsonrpc: { fromPlain: (d) => JsonRpcRequest.fromPlain(d as Parameters<typeof JsonRpcRequest.fromPlain>[0]), ctor: JsonRpcRequest as unknown as new (...args: unknown[]) => Request },

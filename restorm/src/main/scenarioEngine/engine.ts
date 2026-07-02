@@ -11,6 +11,7 @@
 import { logger, getSettingsService, isSettingsServiceInitialized } from 'electron-core-ui/main'
 import { collectionStore } from '../services/CollectionStore'
 import { websocketExecutionService } from '../services/WebSocketExecutionService'
+import { sseExecutionService } from '../services/SseExecutionService'
 import { httpExecutionService } from '../services/HTTPExecutionService'
 import { soapExecutionService } from '../services/SOAPExecutionService'
 import { graphqlMockServerService } from '../services/GraphQLMockServerService'
@@ -211,6 +212,18 @@ export class ScenarioEngine {
             requestId: req.requestId,
             onConnect: req.onConnect,
             onMessage: (payload) => { req.onMessage(undefined, payload) },
+            onClose: req.onClose
+          })
+          return { send: () => false, close: handle.close, isOpen: handle.isOpen }
+        }
+        // SSE: a long-lived, receive-only CLIENT connection (an `sseConnect`
+        // node). No send direction and no server mode — every received frame
+        // re-emits on `message`; `done` fires on close / stop.
+        if (req.transport === 'sse') {
+          const handle = sseExecutionService.connectStreamingSse({
+            requestId: req.requestId,
+            onConnect: req.onConnect,
+            onMessage: req.onMessage,
             onClose: req.onClose
           })
           return { send: () => false, close: handle.close, isOpen: handle.isOpen }

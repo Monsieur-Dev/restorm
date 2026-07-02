@@ -8,6 +8,7 @@ import type {
   GrpcRequest,
   SoapRequest,
   WebSocketRequest,
+  SseRequest,
   ODataRequest,
   AuthenticationRequest,
   JsonRpcRequest,
@@ -87,6 +88,15 @@ export interface WebSocketRequestTab extends BaseRestormTab {
   tabType: 'websocket-request'
   /** The WebSocket request data to display */
   request: WebSocketRequest
+  /** Environments available for this request */
+  environments?: Environment[] | undefined
+}
+
+/** Tab displaying an SSE (Server-Sent Events) request */
+export interface SseRequestTab extends BaseRestormTab {
+  tabType: 'sse-request'
+  /** The SSE request data to display */
+  request: SseRequest
   /** Environments available for this request */
   environments?: Environment[] | undefined
 }
@@ -208,6 +218,7 @@ export type RestormEditorTab =
   | GrpcRequestTab
   | SoapRequestTab
   | WebSocketRequestTab
+  | SseRequestTab
   | ODataRequestTab
   | JsonRpcRequestTab
   | JsonRpcBatchRequestTab
@@ -287,6 +298,11 @@ export function isWebSocketRequestTab(tab: RestormEditorTab): tab is WebSocketRe
   return tab.tabType === 'websocket-request'
 }
 
+/** Type guard for SseRequestTab */
+export function isSseRequestTab(tab: RestormEditorTab): tab is SseRequestTab {
+  return tab.tabType === 'sse-request'
+}
+
 /** Type guard for ODataRequestTab */
 export function isODataRequestTab(tab: RestormEditorTab): tab is ODataRequestTab {
   return tab.tabType === 'odata-request'
@@ -319,6 +335,7 @@ export type AnyRequestTab =
   | GrpcRequestTab
   | SoapRequestTab
   | WebSocketRequestTab
+  | SseRequestTab
   | ODataRequestTab
   | JsonRpcRequestTab
   | JsonRpcBatchRequestTab
@@ -327,7 +344,7 @@ export type AnyRequestTab =
 
 const REQUEST_TAB_TYPES: ReadonlySet<string> = new Set([
   'http-request', 'graphql-request', 'grpc-request', 'soap-request',
-  'websocket-request', 'odata-request', 'jsonrpc-request', 'jsonrpc-batch-request', 'auth-request', 'trpc-request'
+  'websocket-request', 'sse-request', 'odata-request', 'jsonrpc-request', 'jsonrpc-batch-request', 'auth-request', 'trpc-request'
 ])
 
 /** Type guard for ANY request tab (any protocol). Use this instead of a

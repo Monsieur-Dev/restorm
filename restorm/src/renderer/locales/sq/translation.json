@@ -274,6 +274,7 @@
         "socketio": "Kërkesë Socket.IO",
         "mqtt": "MQTT request",
         "mqttServer": "Broker MQTT",
+        "sse": "Kërkesë SSE",
         "grpcServer": "Server gRPC mock",
         "soapServer": "Server mock SOAP",
         "graphqlServer": "Server GraphQL mock",
@@ -585,6 +586,13 @@
     "response": {
       "unmatched": "Asnjë hyrje përgjigjeje përputhëse."
     }
+  },
+  "sse": {
+    "headers": "Kokat",
+    "noFrames": "Ende asnjë ngjarje",
+    "urlPlaceholder": "URL SSE",
+    "framesTruncated": "Po shfaqen {{shown}} kuadrot e fundit nga {{total}}",
+    "showAllFrames": "Shfaq të gjitha"
   },
   "search": {
     "placeholder": "Kërko...",
@@ -1139,8 +1147,10 @@
       "socketioSend": "Socket.IO send",
       "socketioClose": "Socket.IO close",
       "websocketConnect": "WebSocket connect",
+      "sseConnect": "SSE connect",
       "websocketSend": "WebSocket send",
       "websocketClose": "WebSocket close",
+      "sseClose": "SSE close",
       "grpcConnect": "gRPC connect",
       "grpcSend": "gRPC send",
       "grpcClose": "gRPC close",
@@ -1718,8 +1728,10 @@
       "socketioSend": "Dërgon një mesazh në një lidhje Socket.IO tashmë të hapur.",
       "socketioClose": "Mbyll një lidhje Socket.IO tashmë të hapur.",
       "websocketConnect": "Hap një lidhje WebSocket të papërpunuar dhe rilëshon çdo mesazh të marrë në portin e tij.",
+      "sseConnect": "Hap një lidhje SSE (Server-Sent Events) afatgjatë dhe ritransmeton çdo kuadër të marrë në portën e tij.",
       "websocketSend": "Dërgon një payload në një lidhje WebSocket tashmë të hapur.",
       "websocketClose": "Mbyll një lidhje WebSocket tashmë të hapur.",
+      "sseClose": "Mbyll një lidhje SSE tashmë të hapur.",
       "grpcConnect": "Hap një thirrje streaming gRPC dhe rilëshon çdo kuadër të marrë në portin e tij message.",
       "grpcSend": "Shkruan një mesazh kërkese në një thirrje streaming gRPC tashmë të hapur.",
       "grpcClose": "Mbyll pjesërisht (half-close) një thirrje streaming gRPC tashmë të hapur.",
@@ -1794,6 +1806,9 @@
       "started": "filloi"
     },
     "websocket": {
+      "message": "message"
+    },
+    "sse": {
       "message": "message"
     },
     "grpc": {

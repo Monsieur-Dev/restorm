@@ -44,6 +44,7 @@ import {
   isGrpcRequest,
   isSoapRequest,
   isWebSocketRequest,
+  isSseRequest,
   isODataRequest,
   isAuthenticationRequest,
   isTrpcRequest,
@@ -59,6 +60,7 @@ import type {
   GrpcRequestTab,
   SoapRequestTab,
   WebSocketRequestTab,
+  SseRequestTab,
   ODataRequestTab,
   AuthenticationRequestTab,
   TrpcRequestTab,
@@ -494,6 +496,9 @@ export function useWorkbenchTabs(options: UseWorkbenchTabsOptions): UseWorkbench
     } else if (isWebSocketRequest(request)) {
       tabType = 'websocket-request'
       title = `WS ${request.name}`
+    } else if (isSseRequest(request)) {
+      tabType = 'sse-request'
+      title = `SSE ${request.name}`
     } else if (isODataRequest(request)) {
       tabType = 'odata-request'
       title = request.name
@@ -789,6 +794,18 @@ export function useWorkbenchTabs(options: UseWorkbenchTabsOptions): UseWorkbench
           environments,
           allowFullscreen: true
         } as WebSocketRequestTab
+      }
+      if (isSseRequest(requestItem)) {
+        return {
+          id: tabId,
+          tabType: 'sse-request',
+          title: `SSE ${requestItem.name}`,
+          titleString: `SSE ${requestItem.name}`,
+          request: requestItem,
+          breadcrumbs,
+          environments,
+          allowFullscreen: true
+        } as SseRequestTab
       }
       if (isODataRequest(requestItem)) {
         return {

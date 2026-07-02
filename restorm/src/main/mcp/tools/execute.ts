@@ -34,8 +34,8 @@ import type { FullRequestData } from '../../services/ContextServiceTypes'
 import { responseHistoryService } from '../../services'
 import { websocketExecutionService } from '../../services/WebSocketExecutionService'
 import { PROTOCOL_EXECUTORS } from '../../protocol/executorRegistry'
-import { isHTTPRequest, isGraphQLRequest, isGrpcRequest, isSoapRequest, isODataRequest, isAuthenticationRequest, isWebSocketRequest, isJsonRpcRequest, isJsonRpcBatchRequest, isTrpcRequest, isEnvironmentFolder } from '../../../shared/types/collections'
-import type { HTTPRequest, GraphQLRequest, GrpcRequest, SoapRequest, WebSocketRequest, AuthenticationRequest, ODataRequest, JsonRpcRequest, JsonRpcBatchRequest, TrpcRequest, KeyValue, EnvironmentFolder } from '../../../shared/types/collections'
+import { isHTTPRequest, isGraphQLRequest, isGrpcRequest, isSoapRequest, isODataRequest, isAuthenticationRequest, isWebSocketRequest, isSseRequest, isJsonRpcRequest, isJsonRpcBatchRequest, isTrpcRequest, isEnvironmentFolder } from '../../../shared/types/collections'
+import type { HTTPRequest, GraphQLRequest, GrpcRequest, SoapRequest, WebSocketRequest, SseRequest, AuthenticationRequest, ODataRequest, JsonRpcRequest, JsonRpcBatchRequest, TrpcRequest, KeyValue, EnvironmentFolder } from '../../../shared/types/collections'
 import { isRequest, type FolderItem, type Request } from '../../../shared/models'
 
 function jsonReply(value: unknown): { content: { type: 'text'; text: string }[] } {
@@ -425,6 +425,15 @@ export function flushRequestStateToContext(req: Request, scenarioVariables?: Rea
     data.trpcProcedure = trpc.procedure
     data.trpcInput = trpc.input
     data.trpcKind = trpc.kind
+  } else if (isSseRequest(req)) {
+    const sse = req as SseRequest
+    data.requestType = 'sse'
+    // The reconnect seed the request carries: SseExecutionService.resolveExecution
+    // reads it off `fullData.lastEventId` on the FIRST connect. The interactive
+    // tab pushes this via its own `updateFullRequestData` call on mount/change —
+    // a scenario-driven sseConnect only ever goes through this flush, so without
+    // it a request's saved `lastEventId` silently never reaches the wire.
+    if (sse.lastEventId !== undefined) data.lastEventId = sse.lastEventId
   }
   // If the request isn't registered with ContextService yet, register
   // it inline. Until recently we bailed out here on the assumption

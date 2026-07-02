@@ -124,7 +124,7 @@ function triggerSave(): void {
   }
 }
 
-const REQUEST_TYPES = ['http', 'graphql', 'grpc', 'soap', 'websocket', 'odata', 'auth'] as const
+const REQUEST_TYPES = ['http', 'graphql', 'grpc', 'soap', 'websocket', 'sse', 'odata', 'auth'] as const
 
 export function registerWriteTools(mcp: McpService): void {
   mcp.registerTool(
@@ -170,7 +170,7 @@ export function registerWriteTools(mcp: McpService): void {
       title: 'Create request',
       description:
         'Create a new request in a folder. `protocol` picks the request type (http / graphql / ' +
-        'grpc / soap / websocket / odata / auth). Returns `{ id, name, protocol, parentId }`. The ' +
+        'grpc / soap / websocket / sse / odata / auth). Returns `{ id, name, protocol, parentId }`. The ' +
         'created request is bare — fill in URL / method / headers via `update_request` or ' +
         'in the UI.',
       inputSchema: {

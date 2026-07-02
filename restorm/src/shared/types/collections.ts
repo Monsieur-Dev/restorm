@@ -22,9 +22,9 @@ export type {
   TrpcCallKind
 } from './requestPrimitives'
 
-export type { BaseRequest, HTTPRequest, GraphQLRequest, GrpcRequest, GrpcMockMethod, SoapRequest, WebSocketRequest, ODataRequest, ODataQueryOptions, ODataOperationKind, ODataBatchFormat, ODataBatchSubRequestSpec, ODataOperationParameterSpec, AuthenticationRequest, JsonRpcRequest, JsonRpcBatchRequest, JsonRpcBatchCallSpec, TrpcRequest, Request } from './requests/index'
+export type { BaseRequest, HTTPRequest, GraphQLRequest, GrpcRequest, GrpcMockMethod, SoapRequest, WebSocketRequest, SseRequest, ODataRequest, ODataQueryOptions, ODataOperationKind, ODataBatchFormat, ODataBatchSubRequestSpec, ODataOperationParameterSpec, AuthenticationRequest, JsonRpcRequest, JsonRpcBatchRequest, JsonRpcBatchCallSpec, TrpcRequest, Request } from './requests/index'
 export type { QuickConfig, QuickConfigStorageTarget } from './requests/index'
-export { isHTTPRequest, isGraphQLRequest, isGrpcRequest, isSoapRequest, isWebSocketRequest, isODataRequest, isAuthenticationRequest, isJsonRpcRequest, isJsonRpcBatchRequest, isTrpcRequest } from './requests/index'
+export { isHTTPRequest, isGraphQLRequest, isGrpcRequest, isSoapRequest, isWebSocketRequest, isSseRequest, isODataRequest, isAuthenticationRequest, isJsonRpcRequest, isJsonRpcBatchRequest, isTrpcRequest } from './requests/index'
 
 export type {
   BaseResponse,
@@ -36,6 +36,8 @@ export type {
   SoapResponse,
   WebSocketMessage,
   WebSocketResponse,
+  SseFrame,
+  SseResponse,
   Response
 } from './responses/index'
 
@@ -52,6 +54,8 @@ export type {
   ResponseHistoryWebSocketMessage,
   ResponseHistoryWebSocketResponse,
   ResponseHistoryTrpcResponse,
+  ResponseHistorySseFrame,
+  ResponseHistorySseResponse,
   ResponseHistoryResponse,
   ResponseHistoryDetail,
   ResponseHistoryRequestType,

@@ -273,6 +273,7 @@
         "socketio": "Yêu cầu Socket.IO",
         "mqtt": "MQTT request",
         "mqttServer": "MQTT broker",
+        "sse": "Yêu cầu SSE",
         "grpcServer": "Máy chủ gRPC giả lập",
         "soapServer": "Máy chủ mô phỏng SOAP",
         "graphqlServer": "Máy chủ GraphQL giả lập",
@@ -584,6 +585,13 @@
     "response": {
       "unmatched": "Không có mục phản hồi khớp."
     }
+  },
+  "sse": {
+    "headers": "Header",
+    "noFrames": "Chưa có sự kiện nào",
+    "urlPlaceholder": "URL SSE",
+    "framesTruncated": "Đang hiển thị {{shown}} khung hình mới nhất trong tổng số {{total}}",
+    "showAllFrames": "Hiện tất cả"
   },
   "search": {
     "placeholder": "Tìm kiếm...",
@@ -1138,8 +1146,10 @@
       "socketioSend": "Socket.IO send",
       "socketioClose": "Socket.IO close",
       "websocketConnect": "WebSocket connect",
+      "sseConnect": "SSE connect",
       "websocketSend": "WebSocket send",
       "websocketClose": "WebSocket close",
+      "sseClose": "SSE close",
       "grpcConnect": "gRPC connect",
       "grpcSend": "gRPC send",
       "grpcClose": "gRPC close",
@@ -1717,8 +1727,10 @@
       "socketioSend": "Gửi một thông điệp trên một kết nối Socket.IO đang mở.",
       "socketioClose": "Đóng một kết nối Socket.IO đang mở.",
       "websocketConnect": "Mở một kết nối WebSocket thô và phát lại mỗi thông điệp nhận được trên cổng của nó.",
+      "sseConnect": "Mở một kết nối SSE (Server-Sent Events) dài hạn và phát lại mỗi khung nhận được trên cổng của nó.",
       "websocketSend": "Gửi một payload trên một kết nối WebSocket đang mở.",
       "websocketClose": "Đóng một kết nối WebSocket đang mở.",
+      "sseClose": "Đóng một kết nối SSE đã mở.",
       "grpcConnect": "Mở một lệnh gọi gRPC streaming và phát lại mỗi khung nhận được trên cổng message của nó.",
       "grpcSend": "Ghi một thông điệp yêu cầu lên một lệnh gọi gRPC streaming đang mở.",
       "grpcClose": "Đóng một nửa (half-close) một lệnh gọi gRPC streaming đang mở.",
@@ -1793,6 +1805,9 @@
       "started": "đã khởi động"
     },
     "websocket": {
+      "message": "message"
+    },
+    "sse": {
       "message": "message"
     },
     "grpc": {

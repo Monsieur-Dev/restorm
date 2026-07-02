@@ -70,5 +70,6 @@ Feature: Scenario run-log end-to-end
       | OData Server   |
       | GraphQL Subscription |
       | GraphQL unary  |
+      | SSE            |
       | Quick config   |
       | Main           |

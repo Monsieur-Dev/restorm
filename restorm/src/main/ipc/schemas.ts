@@ -415,6 +415,20 @@ export const websocketSendArgs = z.tuple([
 export const websocketIsActiveArgs = z.tuple([requestIdArg])
 
 // ==========================================================================
+// SSE (Server-Sent Events) Execution
+// ==========================================================================
+
+export const sseConnectArgs = z.tuple([
+  z.object({
+    requestId: z.string(),
+    timeout: z.number().optional()
+  }).loose()
+])
+
+export const sseDisconnectArgs = z.tuple([requestIdArg])
+export const sseIsActiveArgs = z.tuple([requestIdArg])
+
+// ==========================================================================
 // Responses History
 // ==========================================================================
 
@@ -632,6 +646,12 @@ export const grpcExecuteResultSchema = z.object({
 })
 
 export const websocketConnectResultSchema = z.object({
+  requestId: z.string(),
+  success: z.boolean(),
+  error: z.string().optional(),
+})
+
+export const sseConnectResultSchema = z.object({
   requestId: z.string(),
   success: z.boolean(),
   error: z.string().optional(),

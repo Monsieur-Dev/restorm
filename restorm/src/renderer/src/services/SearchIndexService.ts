@@ -14,8 +14,8 @@ import {
   type CategoryMeta,
   logger
 } from 'electron-core-ui/renderer'
-import type { Folder, Scenario, HTTPRequest, GraphQLRequest, GrpcRequest, SoapRequest, WebSocketRequest, ODataRequest, AuthenticationRequest, Request } from '../../../shared/types/collections'
-import { isHTTPRequest, isGraphQLRequest, isGrpcRequest, isSoapRequest, isWebSocketRequest, isODataRequest, isAuthenticationRequest, isRequest, isScenario } from '../../../shared/types/collections'
+import type { Folder, Scenario, HTTPRequest, GraphQLRequest, GrpcRequest, SoapRequest, WebSocketRequest, SseRequest, ODataRequest, AuthenticationRequest, Request } from '../../../shared/types/collections'
+import { isHTTPRequest, isGraphQLRequest, isGrpcRequest, isSoapRequest, isWebSocketRequest, isSseRequest, isODataRequest, isAuthenticationRequest, isRequest, isScenario } from '../../../shared/types/collections'
 
 /** Search categories configuration for Restorm */
 const RESTORM_SEARCH_CATEGORIES: Record<string, CategoryMeta> = {
@@ -525,6 +525,53 @@ function websocketRequestToSearchDocument(
   }
 }
 
+function sseRequestToSearchDocument(
+  request: SseRequest,
+  parentFolderId: string,
+  parentPath: string[] = [],
+  parentNames: string[] = []
+): {
+  id: string
+  title: string
+  description?: string
+  category: string
+  icon: string
+  keywords: string
+  navigation: Record<string, unknown>
+  metadata: Record<string, unknown>
+} {
+  const keywords = [
+    'sse',
+    'server-sent events',
+    request.url,
+    ...request.tags,
+    ...request.headers.map((h) => `${h.key} ${h.value.toString()}`),
+    request.notes ?? ''
+  ].join(' ')
+
+  return {
+    id: request.id,
+    title: request.name,
+    category: 'request',
+    icon: 'sse',
+    keywords,
+    navigation: {
+      type: 'request',
+      folderId: parentFolderId,
+      requestId: request.id,
+      path: [...parentPath, request.id]
+    },
+    metadata: {
+      requestType: 'sse',
+      url: request.url,
+      headers: request.headers.map((h) => ({ key: h.key, value: h.value })),
+      tags: request.tags,
+      ...(request.notes ? { notes: request.notes } : {}),
+      ...(parentNames.length > 0 ? { breadcrumb: parentNames } : {})
+    }
+  }
+}
+
 function odataRequestToSearchDocument(
   request: ODataRequest,
   parentFolderId: string,
@@ -604,6 +651,8 @@ function requestToSearchDocument(
     return soapRequestToSearchDocument(request, parentFolderId, parentPath, parentNames)
   } else if (isWebSocketRequest(request)) {
     return websocketRequestToSearchDocument(request, parentFolderId, parentPath, parentNames)
+  } else if (isSseRequest(request)) {
+    return sseRequestToSearchDocument(request, parentFolderId, parentPath, parentNames)
   } else if (isODataRequest(request)) {
     return odataRequestToSearchDocument(request, parentFolderId, parentPath, parentNames)
   } else if (isAuthenticationRequest(request)) {

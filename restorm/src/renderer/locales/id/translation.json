@@ -273,6 +273,7 @@
         "socketio": "Permintaan Socket.IO",
         "mqtt": "MQTT request",
         "mqttServer": "Broker MQTT",
+        "sse": "Permintaan SSE",
         "grpcServer": "Server mock gRPC",
         "soapServer": "Server tiruan SOAP",
         "graphqlServer": "Server mock GraphQL",
@@ -584,6 +585,13 @@
     "response": {
       "unmatched": "Tidak ada entri respons yang cocok."
     }
+  },
+  "sse": {
+    "headers": "Header",
+    "noFrames": "Belum ada event",
+    "urlPlaceholder": "URL SSE",
+    "framesTruncated": "Menampilkan {{shown}} terbaru dari {{total}} bingkai",
+    "showAllFrames": "Tampilkan semua"
   },
   "search": {
     "placeholder": "Cari...",
@@ -1138,8 +1146,10 @@
       "socketioSend": "Socket.IO send",
       "socketioClose": "Socket.IO close",
       "websocketConnect": "WebSocket connect",
+      "sseConnect": "SSE connect",
       "websocketSend": "WebSocket send",
       "websocketClose": "WebSocket close",
+      "sseClose": "SSE close",
       "grpcConnect": "gRPC connect",
       "grpcSend": "gRPC send",
       "grpcClose": "gRPC close",
@@ -1717,8 +1727,10 @@
       "socketioSend": "Mengirim sebuah pesan pada koneksi Socket.IO yang sudah terbuka.",
       "socketioClose": "Menutup koneksi Socket.IO yang sudah terbuka.",
       "websocketConnect": "Membuka koneksi WebSocket mentah dan memancarkan ulang setiap pesan yang diterima pada port-nya.",
+      "sseConnect": "Membuka koneksi SSE (Server-Sent Events) yang berlangsung lama dan memancarkan ulang setiap frame yang diterima pada portnya.",
       "websocketSend": "Mengirim sebuah payload pada koneksi WebSocket yang sudah terbuka.",
       "websocketClose": "Menutup koneksi WebSocket yang sudah terbuka.",
+      "sseClose": "Menutup koneksi SSE yang sudah terbuka.",
       "grpcConnect": "Membuka panggilan streaming gRPC dan memancarkan ulang setiap frame yang diterima pada port message-nya.",
       "grpcSend": "Menulis sebuah pesan permintaan pada panggilan streaming gRPC yang sudah terbuka.",
       "grpcClose": "Menutup sebagian (half-close) panggilan streaming gRPC yang sudah terbuka.",
@@ -1793,6 +1805,9 @@
       "started": "dimulai"
     },
     "websocket": {
+      "message": "message"
+    },
+    "sse": {
       "message": "message"
     },
     "grpc": {

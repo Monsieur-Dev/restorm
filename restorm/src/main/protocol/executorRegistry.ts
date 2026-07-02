@@ -5,6 +5,7 @@ import { soapExecutionService } from '../services/SOAPExecutionService'
 import { grpcExecutionService } from '../services/GRPCExecutionService'
 import { websocketExecutionService } from '../services/WebSocketExecutionService'
 import { jsonRpcExecutionService } from '../services/JsonRpcExecutionService'
+import { sseExecutionService } from '../services/SseExecutionService'
 
 /**
  * The MAIN-process execution dispatch for each protocol type — the main-only
@@ -41,7 +42,8 @@ export const PROTOCOL_EXECUTORS: Record<RequestType, ProtocolExecutor> = {
   grpc: { streaming: false, cancel: (id) => grpcExecutionService.cancel(id) },
   websocket: { streaming: true, cancel: (id) => websocketExecutionService.disconnect(id) },
   jsonrpc: { streaming: false, cancel: (id) => jsonRpcExecutionService.cancel(id) },
-  jsonrpcBatch: { streaming: false, cancel: (id) => jsonRpcExecutionService.cancel(id) }
+  jsonrpcBatch: { streaming: false, cancel: (id) => jsonRpcExecutionService.cancel(id) },
+  sse: { streaming: true, cancel: (id) => sseExecutionService.disconnect(id) }
 }
 
 /** The execution dispatch for a protocol discriminant. */

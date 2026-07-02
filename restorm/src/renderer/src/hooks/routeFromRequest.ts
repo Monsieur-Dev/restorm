@@ -62,5 +62,9 @@ export function routeFromRequest(request: Request): RouteLike {
       // No import format wires an API document for tRPC yet (no docs to
       // match against) — same HTTP-aliased fallback as OData above.
       return { type: 'http', url: request.url, tags: request.tags }
+    case 'sse':
+      // No dedicated matcher branch yet (SSE has no import/spec adapter) —
+      // aliased to HTTP like odata/auth above.
+      return { type: 'http', url: request.url, tags: request.tags }
   }
 }

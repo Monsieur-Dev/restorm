@@ -260,6 +260,13 @@ declare global {
         onMessage: (callback: (data: WebSocketMessageData) => void) => (() => void)
         onServerClients: (callback: (data: { requestId: string; count: number }) => void) => (() => void)
       }
+      sse: {
+        connect: (input: SseExecutionInput) => Promise<SseExecutionResult>
+        disconnect: (requestId: string) => Promise<boolean>
+        isActive: (requestId: string) => Promise<boolean>
+        onProgress: (callback: (data: RequestProgressData) => void) => (() => void)
+        onMessage: (callback: (data: SseMessageData) => void) => (() => void)
+      }
       odata: {
         execute: (input: ODataExecutionInput) => Promise<HTTPExecutionResult>
         cancel: (requestId: string) => Promise<boolean>
@@ -743,10 +750,44 @@ export interface WebSocketMessageData {
   message: WebSocketMessageItem
 }
 
+/** SSE execution input */
+export interface SseExecutionInput {
+  requestId: string
+  timeout?: number
+}
+
+/** One parsed SSE frame (`event:`/`data:`/`id:` per the W3C EventSource spec). */
+export interface SseFrameItem {
+  event: string
+  data: string
+  id?: string
+  timestamp: string
+}
+
+/** SSE execution result */
+export interface SseExecutionResult {
+  requestId: string
+  success: boolean
+  connected: boolean
+  frames: SseFrameItem[]
+  error?: string
+  timings: {
+    startedAt: string
+    durationMs: number
+  }
+  requestUrl?: string
+}
+
+/** SSE frame data for streaming */
+export interface SseMessageData {
+  requestId: string
+  message: SseFrameItem
+}
+
 /** Full request data for backend processing */
 export interface FullRequestData {
   id: string
-  requestType: 'http' | 'graphql' | 'grpc' | 'soap' | 'websocket' | 'odata' | 'auth' | 'jsonrpc' | 'jsonrpcBatch' | 'trpc'
+  requestType: 'http' | 'graphql' | 'grpc' | 'soap' | 'websocket' | 'sse' | 'odata' | 'auth' | 'jsonrpc' | 'jsonrpcBatch' | 'trpc'
   url: string
   headers: KeyValueData[]
   method?: string | undefined
@@ -801,6 +842,9 @@ export interface FullRequestData {
   lwtPayload?: string | undefined
   lwtQos?: number | undefined
   lwtRetain?: boolean | undefined
+  // SSE specific (requestType === 'sse'): seed for the `Last-Event-ID`
+  // header on the first connect. Mirrors the main-side ContextServiceTypes shape.
+  lastEventId?: string | undefined
   // OData specific (requestType === 'odata'). The main ContextService
   // appends the system query options ($filter / $select / …) to the
   // resolved URL. Mirrors the main-side ContextServiceTypes shape.

@@ -274,6 +274,7 @@
         "socketio": "Socket.IO-Anfrage",
         "mqtt": "MQTT request",
         "mqttServer": "MQTT-Broker",
+        "sse": "SSE-Anfrage",
         "grpcServer": "gRPC-Mock-Server",
         "soapServer": "SOAP-Mock-Server",
         "graphqlServer": "GraphQL-Mock-Server",
@@ -585,6 +586,13 @@
     "response": {
       "unmatched": "Kein passender Antworteintrag."
     }
+  },
+  "sse": {
+    "headers": "Header",
+    "noFrames": "Noch keine Ereignisse",
+    "urlPlaceholder": "SSE-URL",
+    "framesTruncated": "Anzeige der letzten {{shown}} von {{total}} Frames",
+    "showAllFrames": "Alle anzeigen"
   },
   "search": {
     "placeholder": "Suchen...",
@@ -1139,8 +1147,10 @@
       "socketioSend": "Socket.IO send",
       "socketioClose": "Socket.IO close",
       "websocketConnect": "WebSocket connect",
+      "sseConnect": "SSE connect",
       "websocketSend": "WebSocket send",
       "websocketClose": "WebSocket close",
+      "sseClose": "SSE close",
       "grpcConnect": "gRPC connect",
       "grpcSend": "gRPC send",
       "grpcClose": "gRPC close",
@@ -1718,8 +1728,10 @@
       "socketioSend": "Sendet eine Nachricht auf einer bereits offenen Socket.IO-Verbindung.",
       "socketioClose": "Schließt eine bereits offene Socket.IO-Verbindung.",
       "websocketConnect": "Öffnet eine rohe WebSocket-Verbindung und sendet jede empfangene Nachricht erneut über ihren Port aus.",
+      "sseConnect": "Öffnet eine langlebige SSE-Verbindung (Server-Sent Events) und sendet jeden empfangenen Frame erneut über ihren Port aus.",
       "websocketSend": "Sendet eine Payload auf einer bereits offenen WebSocket-Verbindung.",
       "websocketClose": "Schließt eine bereits offene WebSocket-Verbindung.",
+      "sseClose": "Schließt eine bereits offene SSE-Verbindung.",
       "grpcConnect": "Öffnet einen Streaming-gRPC-Aufruf und sendet jeden empfangenen Frame erneut über seinen message-Port aus.",
       "grpcSend": "Schreibt eine Anfragenachricht auf einen bereits offenen Streaming-gRPC-Aufruf.",
       "grpcClose": "Schließt einen bereits offenen Streaming-gRPC-Aufruf halb (half-close).",
@@ -1794,6 +1806,9 @@
       "started": "gestartet"
     },
     "websocket": {
+      "message": "message"
+    },
+    "sse": {
       "message": "message"
     },
     "grpc": {

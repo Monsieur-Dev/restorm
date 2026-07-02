@@ -275,6 +275,7 @@
         "socketio": "Cerere Socket.IO",
         "mqtt": "MQTT request",
         "mqttServer": "Broker MQTT",
+        "sse": "Cerere SSE",
         "grpcServer": "Server gRPC simulat",
         "soapServer": "Server mock SOAP",
         "graphqlServer": "Server GraphQL simulat",
@@ -586,6 +587,13 @@
     "response": {
       "unmatched": "Nicio intrare de răspuns corespunzătoare."
     }
+  },
+  "sse": {
+    "headers": "Antete",
+    "noFrames": "Niciun eveniment încă",
+    "urlPlaceholder": "URL SSE",
+    "framesTruncated": "Se afișează ultimele {{shown}} din {{total}} cadre",
+    "showAllFrames": "Afișează tot"
   },
   "search": {
     "placeholder": "Caută...",
@@ -1140,8 +1148,10 @@
       "socketioSend": "Socket.IO send",
       "socketioClose": "Socket.IO close",
       "websocketConnect": "WebSocket connect",
+      "sseConnect": "SSE connect",
       "websocketSend": "WebSocket send",
       "websocketClose": "WebSocket close",
+      "sseClose": "SSE close",
       "grpcConnect": "gRPC connect",
       "grpcSend": "gRPC send",
       "grpcClose": "gRPC close",
@@ -1719,8 +1729,10 @@
       "socketioSend": "Trimite un mesaj pe o conexiune Socket.IO deja deschisă.",
       "socketioClose": "Închide o conexiune Socket.IO deja deschisă.",
       "websocketConnect": "Deschide o conexiune WebSocket brută și reemite fiecare mesaj primit pe portul său.",
+      "sseConnect": "Deschide o conexiune SSE (Server-Sent Events) de lungă durată și retransmite fiecare cadru primit pe portul său.",
       "websocketSend": "Trimite un payload pe o conexiune WebSocket deja deschisă.",
       "websocketClose": "Închide o conexiune WebSocket deja deschisă.",
+      "sseClose": "Închide o conexiune SSE deja deschisă.",
       "grpcConnect": "Deschide un apel gRPC în streaming și reemite fiecare cadru primit pe portul său de mesaje.",
       "grpcSend": "Scrie un mesaj de cerere pe un apel gRPC în streaming deja deschis.",
       "grpcClose": "Închide parțial (half-close) un apel gRPC în streaming deja deschis.",
@@ -1795,6 +1807,9 @@
       "started": "pornit"
     },
     "websocket": {
+      "message": "message"
+    },
+    "sse": {
       "message": "message"
     },
     "grpc": {
