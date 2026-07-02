@@ -71,6 +71,10 @@ function routeFromRequest(request: Request): CompilableRoute {
       if (request.event !== undefined) route.event = request.event
       return route
     }
+    case 'stomp':
+      // STOMP is websocket-transported and the compiler has no dedicated
+      // STOMP discriminant — mirrors `routeFromRequest.ts`'s aliasing.
+      return { type: 'websocket', url: request.url, tags: request.tags }
     case 'odata':
       // The main-process `DocumentationCompiler.matchOperation()`
       // currently returns `null` for `type: 'odata'` — the

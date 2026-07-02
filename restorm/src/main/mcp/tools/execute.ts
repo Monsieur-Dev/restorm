@@ -36,6 +36,8 @@ import { websocketExecutionService } from '../../services/WebSocketExecutionServ
 import { PROTOCOL_EXECUTORS } from '../../protocol/executorRegistry'
 import { isHTTPRequest, isGraphQLRequest, isGrpcRequest, isSoapRequest, isODataRequest, isAuthenticationRequest, isWebSocketRequest, isSseRequest, isJsonRpcRequest, isJsonRpcBatchRequest, isTrpcRequest, isAmqpRequest, isRedisRequest, isEnvironmentFolder } from '../../../shared/types/collections'
 import type { HTTPRequest, GraphQLRequest, GrpcRequest, SoapRequest, WebSocketRequest, SseRequest, AuthenticationRequest, ODataRequest, JsonRpcRequest, JsonRpcBatchRequest, TrpcRequest, AmqpRequest, RedisRequest, KeyValue, EnvironmentFolder } from '../../../shared/types/collections'
+import { isHTTPRequest, isGraphQLRequest, isGrpcRequest, isSoapRequest, isODataRequest, isAuthenticationRequest, isWebSocketRequest, isStompRequest, isEnvironmentFolder } from '../../../shared/types/collections'
+import type { HTTPRequest, GraphQLRequest, GrpcRequest, SoapRequest, WebSocketRequest, StompRequest, AuthenticationRequest, ODataRequest, KeyValue, EnvironmentFolder } from '../../../shared/types/collections'
 import { isRequest, type FolderItem, type Request } from '../../../shared/models'
 
 function jsonReply(value: unknown): { content: { type: 'text'; text: string }[] } {
@@ -457,6 +459,15 @@ export function flushRequestStateToContext(req: Request, scenarioVariables?: Rea
     if (redis.command !== undefined) data.command = redis.command
     data.args = redis.args
     if (redis.freeformCommand !== undefined) data.freeformCommand = redis.freeformCommand
+  } else if (isStompRequest(req)) {
+    const stomp = req as StompRequest
+    data.requestType = 'stomp'
+    data.stompVersion = stomp.stompVersion
+    data.connectHeaders = stomp.connectHeaders
+    data.subscriptions = stomp.subscriptions
+    data.sendDestination = stomp.sendDestination
+    data.sendBody = stomp.sendBody
+    data.sendHeaders = stomp.sendHeaders
   }
   // If the request isn't registered with ContextService yet, register
   // it inline. Until recently we bailed out here on the assumption

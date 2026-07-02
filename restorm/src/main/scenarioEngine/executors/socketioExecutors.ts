@@ -118,6 +118,15 @@ export const sseConnectExecutor: NodeExecutor = (_act, ctx) => {
   const cfg = ctx.node.config as { requestId?: unknown; connectionName?: unknown }
   if (typeof cfg.requestId !== 'string' || cfg.requestId === '') {
     throw new Error(`sseConnect node ${ctx.node.id} has no bound requestId`)
+/** A (stompConnect): STOMP-over-WebSocket — same handoff as websocketConnect
+ * (no events; every received MESSAGE/ERROR frame routes to the single
+ * `message` port). The bridge performs the CONNECT/CONNECTED handshake and
+ * SUBSCRIBEs to the bound request's configured destinations before firing
+ * `connected`. */
+export const stompConnectExecutor: NodeExecutor = (_act, ctx) => {
+  const cfg = ctx.node.config as { requestId?: unknown; connectionName?: unknown }
+  if (typeof cfg.requestId !== 'string' || cfg.requestId === '') {
+    throw new Error(`stompConnect node ${ctx.node.id} has no bound requestId`)
   }
   const connectionName = typeof cfg.connectionName === 'string' && cfg.connectionName.trim() !== ''
     ? cfg.connectionName.trim()
@@ -136,6 +145,35 @@ export const sseCloseExecutor: NodeExecutor = (_act, ctx) => {
   if (!ctx.socketio) throw new Error('sseClose: socket bridge unavailable')
   if (!ctx.socketio.has(connectionNodeId)) {
     throw new Error('sseClose: the referenced connection does not exist in this run')
+    scopeAction: { type: 'openSocketioConnect', transport: 'stomp', requestId: cfg.requestId, events: [], connectionName, ...(overrideConfigFrom(ctx.node.config) ? { overrideConfig: overrideConfigFrom(ctx.node.config) } : {}) }
+  }
+}
+
+/** B (stompSend): send a SEND frame (to the request's own configured
+ * destination — no channel input) on the referenced connection. */
+export const stompSendExecutor: NodeExecutor = (act, ctx) => {
+  const cfg = ctx.node.config as { connectionNodeId?: unknown; payload?: unknown }
+  const connectionNodeId = typeof cfg.connectionNodeId === 'string' ? cfg.connectionNodeId : ''
+  if (connectionNodeId === '') throw new Error('stompSend: no connection selected')
+  if (!ctx.socketio) throw new Error('stompSend: socket bridge unavailable')
+  if (!ctx.socketio.has(connectionNodeId)) {
+    throw new Error('stompSend: the referenced connection does not exist in this run')
+  }
+  const payload = toWire(resolveOperand(act.inputs['payload'], cfg.payload, ctx.variables))
+  const ok = ctx.socketio.send(connectionNodeId, '', payload)
+  if (!ok) throw new Error('stompSend: the referenced connection is not open')
+  return { outputs: [] }
+}
+
+/** C (stompClose): send DISCONNECT and close the referenced connection (same
+ * as websocketClose). */
+export const stompCloseExecutor: NodeExecutor = (_act, ctx) => {
+  const cfg = ctx.node.config as { connectionNodeId?: unknown }
+  const connectionNodeId = typeof cfg.connectionNodeId === 'string' ? cfg.connectionNodeId : ''
+  if (connectionNodeId === '') throw new Error('stompClose: no connection selected')
+  if (!ctx.socketio) throw new Error('stompClose: socket bridge unavailable')
+  if (!ctx.socketio.has(connectionNodeId)) {
+    throw new Error('stompClose: the referenced connection does not exist in this run')
   }
   ctx.socketio.close(connectionNodeId)
   return { outputs: [] }

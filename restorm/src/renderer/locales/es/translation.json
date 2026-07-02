@@ -281,7 +281,8 @@
         "odataServer": "Servidor OData simulado",
         "trpc": "Petición tRPC",
         "amqp": "Petición AMQP",
-        "redis": "Petición Redis"
+        "redis": "Petición Redis",
+        "stomp": "Solicitud STOMP"
       }
     },
     "deleteConfirm": {
@@ -1197,7 +1198,10 @@
       "odataListen": "OData server",
       "odataClose": "OData close",
       "graphqlSubscribe": "Suscripción GraphQL",
-      "graphqlUnsubscribe": "Cancelar suscripción GraphQL"
+      "graphqlUnsubscribe": "Cancelar suscripción GraphQL",
+      "stompConnect": "Conectar STOMP",
+      "stompSend": "Enviar STOMP",
+      "stompClose": "Cerrar STOMP"
     },
     "comparator": {
       "result": "resultado"
@@ -1795,7 +1799,10 @@
       "odataListen": "Aloja un servicio simulado OData v4 local y escucha indefinidamente. `connected` se activa en cuanto está escuchando; cada solicitud atendida reemite sus datos por el puerto `served`. El servidor permanece activo hasta un cierre OData (o un Stop), luego se activa `done`. Sin salida response — sirve, no llama hacia fuera.",
       "odataClose": "Detiene un servicio simulado OData que ya está escuchando (declarado por un nodo de servidor OData) y libera su puerto.",
       "graphqlSubscribe": "Abre una suscripción GraphQL de larga duración como cliente a través de SSE y escucha. `connected` se dispara cuando el flujo está abierto; cada carga útil recibida se reemite en el puerto `message` (una suscripción es de solo recepción, sin eventos con nombre). El flujo permanece abierto hasta una cancelación de suscripción GraphQL (o una parada), o hasta que el servidor lo complete, luego se dispara `done`.",
-      "graphqlUnsubscribe": "Detiene una suscripción GraphQL ya abierta (declarada por un nodo de suscripción GraphQL), cerrando su flujo SSE."
+      "graphqlUnsubscribe": "Detiene una suscripción GraphQL ya abierta (declarada por un nodo de suscripción GraphQL), cerrando su flujo SSE.",
+      "stompConnect": "Abre una conexión STOMP sobre WebSocket persistente: realiza el protocolo CONNECT/CONNECTED, se suscribe a cada destino configurado y reemite cada trama recibida en su puerto.",
+      "stompSend": "Envía una trama SEND en una conexión STOMP ya abierta.",
+      "stompClose": "Envía DISCONNECT y cierra una conexión STOMP ya abierta."
     },
     "legend": {
       "title": "Leyenda",
@@ -2201,5 +2208,29 @@
       "headers": "Cabeceras",
       "body": "Cuerpo"
     }
+  },
+  "stomp": {
+    "connect": "Conectar",
+    "disconnect": "Desconectar",
+    "connected": "Conectado",
+    "disconnected": "Desconectado",
+    "noMessages": "Aún no hay tramas",
+    "version": "Versión STOMP",
+    "tabs": {
+      "connect": "Conexión",
+      "subscriptions": "Suscripciones",
+      "send": "Enviar"
+    },
+    "ackMode": {
+      "auto": "auto",
+      "client": "client",
+      "clientIndividual": "client-individual"
+    },
+    "subscriptionIdLabel": "ID de suscripción",
+    "removeSubscription": "Eliminar suscripción",
+    "addSubscription": "Añadir suscripción",
+    "sendDestination": "Destino",
+    "ack": "ACK",
+    "nack": "NACK"
   }
 }

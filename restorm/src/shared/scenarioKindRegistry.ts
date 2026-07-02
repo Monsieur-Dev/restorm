@@ -248,6 +248,29 @@ export const SCENARIO_KIND_REGISTRY = {
     doc: {
       summary: 'Closes an already-open SSE connection (declared by an sseConnect node), firing that node\'s `done`. Pure-event action: triggered on `in`, sequences via its own `done`. Errors (to `error`) when no connection is selected.',
       config: { connectionNodeId: 'Id of the sseConnect node whose connection to close.' }
+  stompConnect: {
+    labelKey: 'scenario.nodes.stompConnect', defaultLabel: 'STOMP connect', icon: 'plug', category: 'composition',
+    requestBinding: true,
+    ports: { inputs: [], outputs: [{ id: 'connected', name: 'connected', flow: 'signal' }, { id: 'message', name: 'message', flow: 'both' }] },
+    doc: {
+      summary: 'Opens a long-lived STOMP-over-WebSocket connection from a bound request: performs the CONNECT/CONNECTED handshake, then SUBSCRIBEs to every configured subscription. `connected` fires once CONNECTED; EVERY received MESSAGE (and ERROR) frame re-emits on the single `message` output (subscription id + destination + headers + body). The connection stays open until a stompClose targets it (or the run is stopped), then `done` fires.',
+      config: { requestId: 'Id of the STOMP request to connect (its resolved URL/connect headers/subscriptions).', connectionName: 'Unique-per-scenario name a stompSend/stompClose references for display (defaults to the request name).', label: 'Display label on the box.' }
+    }
+  },
+  stompSend: {
+    labelKey: 'scenario.nodes.stompSend', defaultLabel: 'STOMP send', icon: 'arrow-up', category: 'composition',
+    ports: { inputs: [{ id: 'payload', name: 'payload' }], outputs: [] },
+    doc: {
+      summary: 'Sends a SEND frame (to the request\'s configured destination) on an already-open STOMP connection (declared by a stompConnect node). Pure-event action: triggered on `in`, sequences the next node via `done`. Errors (to `error`) when no connection is selected or it is not open.',
+      config: { connectionNodeId: 'Id of the stompConnect node whose connection to send on.', payload: 'SEND frame body (a code editor; or wire `payload`).' }
+    }
+  },
+  stompClose: {
+    labelKey: 'scenario.nodes.stompClose', defaultLabel: 'STOMP close', icon: 'debug-disconnect', category: 'composition',
+    ports: { inputs: [], outputs: [] },
+    doc: {
+      summary: 'Sends DISCONNECT and closes an already-open STOMP connection (declared by a stompConnect node), firing that node\'s `done`. Pure-event action: triggered on `in`, sequences via its own `done`. Errors (to `error`) when no connection is selected.',
+      config: { connectionNodeId: 'Id of the stompConnect node whose connection to close.' }
     }
   },
   mqttConnect: {

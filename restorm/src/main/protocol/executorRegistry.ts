@@ -8,6 +8,7 @@ import { jsonRpcExecutionService } from '../services/JsonRpcExecutionService'
 import { sseExecutionService } from '../services/SseExecutionService'
 import { amqpExecutionService } from '../services/AMQPExecutionService'
 import { redisExecutionService } from '../services/RedisExecutionService'
+import { stompExecutionService } from '../services/StompExecutionService'
 
 /**
  * The MAIN-process execution dispatch for each protocol type — the main-only
@@ -60,6 +61,13 @@ export const PROTOCOL_EXECUTORS: Record<RequestType, ProtocolExecutor> = {
   // — no AC requires it, and it would mean routing execute.ts's streaming path
   // through a Redis-specific branch instead of appending here.
   redis: { streaming: false, cancel: (id) => redisExecutionService.cancel(id) }
+  // STOMP's live connection is driven the same way as gRPC/SOAP from MCP's
+  // perspective: `run_request` dispatches the panel's Connect button and waits
+  // for a new history entry (persisted when the connection closes), rather
+  // than the WS-only frame-polling path (`read_stream`/`send_message` are
+  // hardcoded to `websocketExecutionService` today). The scenario engine's
+  // `stompConnect` node still gets full streaming via `connectStreamingStomp`.
+  stomp: { streaming: false, cancel: (id) => stompExecutionService.disconnect(id) }
 }
 
 /** The execution dispatch for a protocol discriminant. */

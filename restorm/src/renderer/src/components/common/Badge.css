@@ -152,6 +152,8 @@
 
 .badge-sse {
   background-color: var(--badge-sse-background);
+.badge-stomp {
+  background-color: var(--badge-stomp-background);
   color: var(--badge-on-accent, #ffffff);
 }
 

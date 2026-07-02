@@ -419,6 +419,10 @@ export const websocketIsActiveArgs = z.tuple([requestIdArg])
 // ==========================================================================
 
 export const sseConnectArgs = z.tuple([
+// STOMP Execution
+// ==========================================================================
+
+export const stompConnectArgs = z.tuple([
   z.object({
     requestId: z.string(),
     timeout: z.number().optional()
@@ -470,6 +474,11 @@ export const redisCommandArgs = z.tuple([
 
 export const redisDisconnectArgs = z.tuple([requestIdArg])
 export const redisIsActiveArgs = z.tuple([requestIdArg])
+export const stompDisconnectArgs = z.tuple([requestIdArg])
+export const stompSendArgs = z.tuple([requestIdArg, z.string()])
+export const stompAckArgs = z.tuple([requestIdArg, z.string(), z.string()])
+export const stompNackArgs = z.tuple([requestIdArg, z.string(), z.string()])
+export const stompIsActiveArgs = z.tuple([requestIdArg])
 
 // ==========================================================================
 // Responses History
@@ -695,6 +704,7 @@ export const websocketConnectResultSchema = z.object({
 })
 
 export const sseConnectResultSchema = z.object({
+export const stompConnectResultSchema = z.object({
   requestId: z.string(),
   success: z.boolean(),
   error: z.string().optional(),

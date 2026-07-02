@@ -280,7 +280,8 @@
         "odataServer": "Server mock OData",
         "trpc": "Permintaan tRPC",
         "amqp": "Permintaan AMQP",
-        "redis": "Permintaan Redis"
+        "redis": "Permintaan Redis",
+        "stomp": "Permintaan STOMP"
       }
     },
     "deleteConfirm": {
@@ -1196,7 +1197,10 @@
       "odataListen": "OData server",
       "odataClose": "OData close",
       "graphqlSubscribe": "Langganan GraphQL",
-      "graphqlUnsubscribe": "Batalkan langganan GraphQL"
+      "graphqlUnsubscribe": "Batalkan langganan GraphQL",
+      "stompConnect": "Koneksi STOMP",
+      "stompSend": "Kirim STOMP",
+      "stompClose": "Tutup STOMP"
     },
     "comparator": {
       "result": "hasil"
@@ -1794,7 +1798,10 @@
       "odataListen": "Menghosting layanan tiruan OData v4 lokal dan mendengarkan tanpa batas. `connected` terpicu begitu mulai mendengarkan; setiap permintaan yang dilayani memancarkan ulang datanya pada port `served`. Server tetap aktif hingga penutupan OData (atau Stop), lalu `done` terpicu. Tanpa keluaran response — ia melayani, bukan memanggil keluar.",
       "odataClose": "Menghentikan layanan tiruan OData yang sudah mendengarkan (dideklarasikan oleh node server OData), membebaskan portnya.",
       "graphqlSubscribe": "Membuka langganan GraphQL berumur panjang sebagai klien melalui SSE dan mendengarkan. `connected` terpicu segera setelah aliran terbuka; setiap payload yang dikirim dipancarkan ulang pada porta `message` (langganan hanya menerima, tanpa peristiwa bernama). Aliran tetap terbuka hingga pembatalan langganan GraphQL (atau penghentian), atau hingga server menyelesaikannya, lalu `done` terpicu.",
-      "graphqlUnsubscribe": "Menghentikan langganan GraphQL yang sudah terbuka (dideklarasikan oleh node langganan GraphQL), menutup aliran SSE-nya."
+      "graphqlUnsubscribe": "Menghentikan langganan GraphQL yang sudah terbuka (dideklarasikan oleh node langganan GraphQL), menutup aliran SSE-nya.",
+      "stompConnect": "Membuka koneksi STOMP melalui WebSocket yang berumur panjang: melakukan jabat tangan CONNECT/CONNECTED, lalu berlangganan ke setiap tujuan yang dikonfigurasi, dan memancarkan ulang setiap frame yang diterima pada portnya.",
+      "stompSend": "Mengirim frame SEND pada koneksi STOMP yang sudah terbuka.",
+      "stompClose": "Mengirim DISCONNECT dan menutup koneksi STOMP yang sudah terbuka."
     },
     "legend": {
       "title": "Legenda",
@@ -2200,5 +2207,29 @@
       "headers": "Header",
       "body": "Body"
     }
+  },
+  "stomp": {
+    "connect": "Hubungkan",
+    "disconnect": "Putuskan",
+    "connected": "Terhubung",
+    "disconnected": "Terputus",
+    "noMessages": "Belum ada frame",
+    "version": "Versi STOMP",
+    "tabs": {
+      "connect": "Koneksi",
+      "subscriptions": "Langganan",
+      "send": "Kirim"
+    },
+    "ackMode": {
+      "auto": "auto",
+      "client": "client",
+      "clientIndividual": "client-individual"
+    },
+    "subscriptionIdLabel": "ID langganan",
+    "removeSubscription": "Hapus langganan",
+    "addSubscription": "Tambah langganan",
+    "sendDestination": "Tujuan",
+    "ack": "ACK",
+    "nack": "NACK"
   }
 }

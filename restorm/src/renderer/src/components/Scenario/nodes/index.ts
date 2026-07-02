@@ -44,6 +44,7 @@ import { CodeNodeBox } from './CodeNodeBox'
 import { SocketioConnectNodeBox, SocketioSendNodeBox, SocketioCloseNodeBox } from './SocketioNodeBoxes'
 import { WebsocketConnectNodeBox, WebsocketSendNodeBox, WebsocketCloseNodeBox } from './WebsocketNodeBoxes'
 import { SseConnectNodeBox, SseCloseNodeBox } from './SseNodeBoxes'
+import { StompConnectNodeBox, StompSendNodeBox, StompCloseNodeBox } from './StompNodeBoxes'
 import { MqttConnectNodeBox, MqttSendNodeBox, MqttCloseNodeBox } from './MqttNodeBoxes'
 import { AmqpConnectNodeBox, AmqpPublishNodeBox, AmqpCloseNodeBox } from './AmqpNodeBoxes'
 import { RedisSubscribeNodeBox, RedisCloseNodeBox } from './RedisNodeBoxes'
@@ -85,6 +86,9 @@ const SCENARIO_NODE_COMPONENTS: Record<ScenarioNodeKind, NodeBoxComponent> = {
   websocketClose: WebsocketCloseNodeBox,
   sseConnect: SseConnectNodeBox,
   sseClose: SseCloseNodeBox,
+  stompConnect: StompConnectNodeBox,
+  stompSend: StompSendNodeBox,
+  stompClose: StompCloseNodeBox,
   mqttConnect: MqttConnectNodeBox,
   mqttSend: MqttSendNodeBox,
   mqttClose: MqttCloseNodeBox,

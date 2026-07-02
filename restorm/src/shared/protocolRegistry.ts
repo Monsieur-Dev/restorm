@@ -127,6 +127,12 @@ export const PROTOCOL_REGISTRY = {
     badge: { kind: 'fixed', value: 'SSE' },
     searchIcon: 'sse',
     scenarioKinds: ['sseConnect', 'sseClose']
+  stomp: {
+    graphqlTypeName: 'StompRequest',
+    tabType: 'stomp-request',
+    ipcNamespace: 'stomp',
+    badge: { kind: 'fixed', value: 'STOMP' },
+    scenarioKinds: ['stompConnect', 'stompSend', 'stompClose']
   },
   odata: {
     graphqlTypeName: 'ODataRequest',

@@ -19,6 +19,8 @@ vi.mock('../components/RequestTabViews', () => {
     TrpcRequestTabView: stub,
     AmqpRequestTabView: stub,
     RedisRequestTabView: stub
+    StompRequestTabView: stub,
+    ODataRequestTabView: stub
   }
 })
 

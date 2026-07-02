@@ -281,7 +281,8 @@
         "odataServer": "OData-mockserver",
         "trpc": "tRPC-förfrågan",
         "amqp": "AMQP-förfrågan",
-        "redis": "Redis-förfrågan"
+        "redis": "Redis-förfrågan",
+        "stomp": "STOMP-förfrågan"
       }
     },
     "deleteConfirm": {
@@ -1197,7 +1198,10 @@
       "odataListen": "OData server",
       "odataClose": "OData close",
       "graphqlSubscribe": "GraphQL-prenumeration",
-      "graphqlUnsubscribe": "Avsluta GraphQL-prenumeration"
+      "graphqlUnsubscribe": "Avsluta GraphQL-prenumeration",
+      "stompConnect": "STOMP-anslutning",
+      "stompSend": "STOMP-sändning",
+      "stompClose": "Stäng STOMP"
     },
     "comparator": {
       "result": "resultat"
@@ -1795,7 +1799,10 @@
       "odataListen": "Är värd för en lokal OData v4-mocktjänst och lyssnar i all oändlighet. `connected` utlöses så snart den lyssnar; varje betjänad begäran sänder sina data på nytt på `served`-porten. Servern är aktiv tills en OData-stängning (eller ett Stopp), sedan utlöses `done`. Ingen response-utdata — den betjänar, den ringer inte ut.",
       "odataClose": "Stoppar en redan lyssnande OData-mocktjänst (deklarerad av en OData-servernod) och frigör dess port.",
       "graphqlSubscribe": "Öppnar en långlivad GraphQL-prenumeration som klient via SSE och lyssnar. `connected` utlöses så snart strömmen är öppen; varje mottagen nyttolast återutsänds på `message`-porten (en prenumeration är endast mottagande, utan namngivna händelser). Strömmen förblir öppen tills en GraphQL-avprenumeration (eller ett stopp), eller tills servern slutför den, sedan utlöses `done`.",
-      "graphqlUnsubscribe": "Stoppar en redan öppen GraphQL-prenumeration (deklarerad av en GraphQL-prenumerationsnod) och river ner dess SSE-ström."
+      "graphqlUnsubscribe": "Stoppar en redan öppen GraphQL-prenumeration (deklarerad av en GraphQL-prenumerationsnod) och river ner dess SSE-ström.",
+      "stompConnect": "Öppnar en långvarig STOMP-över-WebSocket-anslutning: utför CONNECT/CONNECTED-handskakningen, prenumererar sedan på varje konfigurerad destination och sänder vidare varje mottagen ram på sin port.",
+      "stompSend": "Skickar en SEND-ram på en redan öppen STOMP-anslutning.",
+      "stompClose": "Skickar DISCONNECT och stänger en redan öppen STOMP-anslutning."
     },
     "legend": {
       "title": "Förklaring",
@@ -2201,5 +2208,29 @@
       "headers": "Headers",
       "body": "Kropp"
     }
+  },
+  "stomp": {
+    "connect": "Anslut",
+    "disconnect": "Koppla från",
+    "connected": "Ansluten",
+    "disconnected": "Frånkopplad",
+    "noMessages": "Inga ramar ännu",
+    "version": "STOMP-version",
+    "tabs": {
+      "connect": "Anslutning",
+      "subscriptions": "Prenumerationer",
+      "send": "Skicka"
+    },
+    "ackMode": {
+      "auto": "auto",
+      "client": "client",
+      "clientIndividual": "client-individual"
+    },
+    "subscriptionIdLabel": "Prenumerations-id",
+    "removeSubscription": "Ta bort prenumeration",
+    "addSubscription": "Lägg till prenumeration",
+    "sendDestination": "Destination",
+    "ack": "ACK",
+    "nack": "NACK"
   }
 }

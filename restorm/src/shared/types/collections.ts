@@ -28,6 +28,9 @@ export type {
 export type { BaseRequest, HTTPRequest, GraphQLRequest, GrpcRequest, GrpcMockMethod, SoapRequest, WebSocketRequest, SseRequest, ODataRequest, ODataQueryOptions, ODataOperationKind, ODataBatchFormat, ODataBatchSubRequestSpec, ODataOperationParameterSpec, AuthenticationRequest, JsonRpcRequest, JsonRpcBatchRequest, JsonRpcBatchCallSpec, TrpcRequest, AmqpRequest, RedisRequest, Request } from './requests/index'
 export type { QuickConfig, QuickConfigStorageTarget } from './requests/index'
 export { isHTTPRequest, isGraphQLRequest, isGrpcRequest, isSoapRequest, isWebSocketRequest, isSseRequest, isODataRequest, isAuthenticationRequest, isJsonRpcRequest, isJsonRpcBatchRequest, isTrpcRequest, isAmqpRequest, isRedisRequest } from './requests/index'
+export type { BaseRequest, HTTPRequest, GraphQLRequest, GrpcRequest, GrpcMockMethod, SoapRequest, WebSocketRequest, StompRequest, StompVersion, StompAckMode, StompSubscription, ODataRequest, ODataQueryOptions, ODataOperationKind, ODataBatchFormat, ODataBatchSubRequestSpec, ODataOperationParameterSpec, AuthenticationRequest, Request } from './requests/index'
+export type { QuickConfig, QuickConfigStorageTarget } from './requests/index'
+export { isHTTPRequest, isGraphQLRequest, isGrpcRequest, isSoapRequest, isWebSocketRequest, isStompRequest, isODataRequest, isAuthenticationRequest } from './requests/index'
 
 export type {
   BaseResponse,
@@ -41,6 +44,8 @@ export type {
   WebSocketResponse,
   SseFrame,
   SseResponse,
+  StompMessage,
+  StompResponse,
   Response
 } from './responses/index'
 
@@ -63,6 +68,8 @@ export type {
   ResponseHistoryAmqpResponse,
   ResponseHistoryRedisMessage,
   ResponseHistoryRedisResponse,
+  ResponseHistoryStompMessage,
+  ResponseHistoryStompResponse,
   ResponseHistoryResponse,
   ResponseHistoryDetail,
   ResponseHistoryRequestType,

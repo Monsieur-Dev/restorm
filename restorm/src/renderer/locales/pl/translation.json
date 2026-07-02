@@ -283,7 +283,8 @@
         "odataServer": "Serwer mock OData",
         "trpc": "Żądanie tRPC",
         "amqp": "Żądanie AMQP",
-        "redis": "Żądanie Redis"
+        "redis": "Żądanie Redis",
+        "stomp": "Żądanie STOMP"
       }
     },
     "deleteConfirm": {
@@ -1199,7 +1200,10 @@
       "odataListen": "OData server",
       "odataClose": "OData close",
       "graphqlSubscribe": "Subskrypcja GraphQL",
-      "graphqlUnsubscribe": "Anuluj subskrypcję GraphQL"
+      "graphqlUnsubscribe": "Anuluj subskrypcję GraphQL",
+      "stompConnect": "Połączenie STOMP",
+      "stompSend": "Wysyłanie STOMP",
+      "stompClose": "Zamknięcie STOMP"
     },
     "comparator": {
       "result": "wynik"
@@ -1797,7 +1801,10 @@
       "odataListen": "Hostuje lokalną usługę próbną OData v4 i nasłuchuje bezterminowo. Port `connected` uruchamia się, gdy tylko zacznie nasłuchiwać; każde obsłużone żądanie ponownie wysyła swoje dane na porcie `served`. Serwer działa aż do zamknięcia OData (lub zatrzymania), po czym uruchamia się port `done`. Brak wyjścia response — obsługuje, nie wywołuje na zewnątrz.",
       "odataClose": "Zatrzymuje już nasłuchującą usługę próbną OData (zadeklarowaną przez węzeł serwera OData) i zwalnia jej port.",
       "graphqlSubscribe": "Otwiera długotrwałą subskrypcję GraphQL jako klient przez SSE i nasłuchuje. `connected` uruchamia się, gdy strumień jest otwarty; każdy odebrany ładunek jest ponownie emitowany na porcie `message` (subskrypcja tylko odbiera, bez nazwanych zdarzeń). Strumień pozostaje otwarty do anulowania subskrypcji GraphQL (lub zatrzymania), albo dopóki serwer go nie zakończy, a następnie uruchamia się `done`.",
-      "graphqlUnsubscribe": "Zatrzymuje już otwartą subskrypcję GraphQL (zadeklarowaną przez węzeł subskrypcji GraphQL), zamykając jej strumień SSE."
+      "graphqlUnsubscribe": "Zatrzymuje już otwartą subskrypcję GraphQL (zadeklarowaną przez węzeł subskrypcji GraphQL), zamykając jej strumień SSE.",
+      "stompConnect": "Otwiera długotrwałe połączenie STOMP przez WebSocket: wykonuje uzgadnianie CONNECT/CONNECTED, następnie subskrybuje każdy skonfigurowany cel i ponownie emituje każdą otrzymaną ramkę na swoim porcie.",
+      "stompSend": "Wysyła ramkę SEND w już otwartym połączeniu STOMP.",
+      "stompClose": "Wysyła DISCONNECT i zamyka już otwarte połączenie STOMP."
     },
     "legend": {
       "title": "Legenda",
@@ -2203,5 +2210,29 @@
       "headers": "Nagłówki",
       "body": "Treść"
     }
+  },
+  "stomp": {
+    "connect": "Połącz",
+    "disconnect": "Rozłącz",
+    "connected": "Połączono",
+    "disconnected": "Rozłączono",
+    "noMessages": "Brak ramek",
+    "version": "Wersja STOMP",
+    "tabs": {
+      "connect": "Połączenie",
+      "subscriptions": "Subskrypcje",
+      "send": "Wyślij"
+    },
+    "ackMode": {
+      "auto": "auto",
+      "client": "client",
+      "clientIndividual": "client-individual"
+    },
+    "subscriptionIdLabel": "Identyfikator subskrypcji",
+    "removeSubscription": "Usuń subskrypcję",
+    "addSubscription": "Dodaj subskrypcję",
+    "sendDestination": "Cel",
+    "ack": "ACK",
+    "nack": "NACK"
   }
 }

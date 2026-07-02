@@ -280,7 +280,8 @@
         "odataServer": "OData モックサーバー",
         "trpc": "tRPC リクエスト",
         "amqp": "AMQP リクエスト",
-        "redis": "Redis リクエスト"
+        "redis": "Redis リクエスト",
+        "stomp": "STOMPリクエスト"
       }
     },
     "deleteConfirm": {
@@ -1196,7 +1197,10 @@
       "odataListen": "OData server",
       "odataClose": "OData close",
       "graphqlSubscribe": "GraphQL サブスクライブ",
-      "graphqlUnsubscribe": "GraphQL サブスクライブ解除"
+      "graphqlUnsubscribe": "GraphQL サブスクライブ解除",
+      "stompConnect": "STOMP接続",
+      "stompSend": "STOMP送信",
+      "stompClose": "STOMPを閉じる"
     },
     "comparator": {
       "result": "結果"
@@ -1794,7 +1798,10 @@
       "odataListen": "ローカルの OData v4 モックサービスをホストし、無期限に待ち受けます。待ち受けを開始すると `connected` が発火し、処理した各リクエストはそのデータを `served` ポートに再送出します。サーバーは OData のクローズ（または停止）まで稼働を続け、その後 `done` が発火します。response 出力はありません。提供するだけで、外部を呼び出すことはありません。",
       "odataClose": "すでに待ち受けている OData モックサービス（OData サーバーノードで宣言されたもの）を停止し、そのポートを解放します。",
       "graphqlSubscribe": "SSE を介してクライアントとして長寿命の GraphQL サブスクリプションを開いてリッスンします。ストリームが開くと `connected` が発火します。プッシュされた各ペイロードは `message` ポートに再出力されます（サブスクリプションは受信専用で、名前付きイベントはありません）。ストリームは GraphQL サブスクライブ解除（または停止）まで、あるいはサーバーが完了するまで開いたままで、その後 `done` が発火します。",
-      "graphqlUnsubscribe": "すでに開いている GraphQL サブスクリプション（GraphQL サブスクライブノードで宣言）を停止し、その SSE ストリームを破棄します。"
+      "graphqlUnsubscribe": "すでに開いている GraphQL サブスクリプション（GraphQL サブスクライブノードで宣言）を停止し、その SSE ストリームを破棄します。",
+      "stompConnect": "長期間有効なSTOMP over WebSocket接続を開きます。CONNECT/CONNECTEDハンドシェイクを実行し、設定された各宛先を購読して、受信した各フレームをそのポートに再送出します。",
+      "stompSend": "すでに開いているSTOMP接続でSENDフレームを送信します。",
+      "stompClose": "DISCONNECTを送信し、すでに開いているSTOMP接続を閉じます。"
     },
     "legend": {
       "title": "凡例",
@@ -2200,5 +2207,29 @@
       "headers": "ヘッダー",
       "body": "ボディ"
     }
+  },
+  "stomp": {
+    "connect": "接続",
+    "disconnect": "切断",
+    "connected": "接続済み",
+    "disconnected": "切断済み",
+    "noMessages": "まだフレームはありません",
+    "version": "STOMPバージョン",
+    "tabs": {
+      "connect": "接続",
+      "subscriptions": "サブスクリプション",
+      "send": "送信"
+    },
+    "ackMode": {
+      "auto": "auto",
+      "client": "client",
+      "clientIndividual": "client-individual"
+    },
+    "subscriptionIdLabel": "サブスクリプションID",
+    "removeSubscription": "サブスクリプションを削除",
+    "addSubscription": "サブスクリプションを追加",
+    "sendDestination": "宛先",
+    "ack": "ACK",
+    "nack": "NACK"
   }
 }

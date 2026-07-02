@@ -281,7 +281,8 @@
         "odataServer": "Server OData mock",
         "trpc": "Kërkesë tRPC",
         "amqp": "Kërkesë AMQP",
-        "redis": "Kërkesë Redis"
+        "redis": "Kërkesë Redis",
+        "stomp": "Kërkesë STOMP"
       }
     },
     "deleteConfirm": {
@@ -1197,7 +1198,10 @@
       "odataListen": "OData server",
       "odataClose": "OData close",
       "graphqlSubscribe": "Abonim GraphQL",
-      "graphqlUnsubscribe": "Çabonim GraphQL"
+      "graphqlUnsubscribe": "Çabonim GraphQL",
+      "stompConnect": "Lidhje STOMP",
+      "stompSend": "Dërgim STOMP",
+      "stompClose": "Mbyllje STOMP"
     },
     "comparator": {
       "result": "rezultati"
@@ -1795,7 +1799,10 @@
       "odataListen": "Pret një shërbim lokal imitues OData v4 dhe dëgjon pafundësisht. `connected` aktivizohet sapo fillon të dëgjojë; çdo kërkesë e shërbyer riemeton të dhënat e saj në portën `served`. Serveri qëndron aktiv deri në një mbyllje OData (ose një Stop), pastaj aktivizohet `done`. Pa dalje response — shërben, nuk thërret nga jashtë.",
       "odataClose": "Ndalon një shërbim imitues OData që po dëgjon tashmë (i deklaruar nga një nyje serveri OData), duke liruar portën e tij.",
       "graphqlSubscribe": "Hap një abonim GraphQL afatgjatë si klient përmes SSE dhe dëgjon. `connected` aktivizohet sapo rrjedha të hapet; çdo ngarkesë e marrë riemetohet në portën `message` (një abonim është vetëm marrës, pa ngjarje të emërtuara). Rrjedha mbetet e hapur deri në një çabonim GraphQL (ose një ndalim), ose derisa serveri ta përfundojë, pastaj aktivizohet `done`.",
-      "graphqlUnsubscribe": "Ndalon një abonim GraphQL tashmë të hapur (deklaruar nga një nyje abonimi GraphQL), duke mbyllur rrjedhën e tij SSE."
+      "graphqlUnsubscribe": "Ndalon një abonim GraphQL tashmë të hapur (deklaruar nga një nyje abonimi GraphQL), duke mbyllur rrjedhën e tij SSE.",
+      "stompConnect": "Hap një lidhje afatgjatë STOMP-mbi-WebSocket: kryen shtrëngimin e duarve CONNECT/CONNECTED, më pas abonohet në çdo destinacion të konfiguruar dhe ritransmeton çdo kornizë të marrë në portën e vet.",
+      "stompSend": "Dërgon një kornizë SEND në një lidhje STOMP tashmë të hapur.",
+      "stompClose": "Dërgon DISCONNECT dhe mbyll një lidhje STOMP tashmë të hapur."
     },
     "legend": {
       "title": "Legjenda",
@@ -2201,5 +2208,29 @@
       "headers": "Kokat",
       "body": "Trupi"
     }
+  },
+  "stomp": {
+    "connect": "Lidhu",
+    "disconnect": "Shkëput",
+    "connected": "I lidhur",
+    "disconnected": "I shkëputur",
+    "noMessages": "Ende pa korniza",
+    "version": "Versioni STOMP",
+    "tabs": {
+      "connect": "Lidhja",
+      "subscriptions": "Abonimet",
+      "send": "Dërgo"
+    },
+    "ackMode": {
+      "auto": "auto",
+      "client": "client",
+      "clientIndividual": "client-individual"
+    },
+    "subscriptionIdLabel": "ID e abonimit",
+    "removeSubscription": "Hiq abonimin",
+    "addSubscription": "Shto abonim",
+    "sendDestination": "Destinacioni",
+    "ack": "ACK",
+    "nack": "NACK"
   }
 }

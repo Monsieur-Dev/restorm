@@ -281,7 +281,8 @@
         "odataServer": "Servidor OData simulado",
         "trpc": "Pedido tRPC",
         "amqp": "Pedido AMQP",
-        "redis": "Pedido Redis"
+        "redis": "Pedido Redis",
+        "stomp": "Pedido STOMP"
       }
     },
     "deleteConfirm": {
@@ -1197,7 +1198,10 @@
       "odataListen": "OData server",
       "odataClose": "OData close",
       "graphqlSubscribe": "Subscrição GraphQL",
-      "graphqlUnsubscribe": "Cancelar subscrição GraphQL"
+      "graphqlUnsubscribe": "Cancelar subscrição GraphQL",
+      "stompConnect": "Conexão STOMP",
+      "stompSend": "Envio STOMP",
+      "stompClose": "Fechar STOMP"
     },
     "comparator": {
       "result": "resultado"
@@ -1795,7 +1799,10 @@
       "odataListen": "Hospeda um serviço fictício OData v4 local e escuta indefinidamente. `connected` é acionado assim que está a escutar; cada pedido servido reemite os seus dados na porta `served`. O servidor permanece ativo até um fecho OData (ou um Stop), depois `done` é acionado. Sem saída response — ele serve, não chama para fora.",
       "odataClose": "Para um serviço fictício OData que já está a escutar (declarado por um nó de servidor OData), libertando a sua porta.",
       "graphqlSubscribe": "Abre uma subscrição GraphQL de longa duração como cliente através de SSE e escuta. `connected` dispara assim que o fluxo está aberto; cada payload recebido é reemitido na porta `message` (uma subscrição é apenas de receção, sem eventos nomeados). O fluxo permanece aberto até um cancelamento de subscrição GraphQL (ou uma paragem), ou até o servidor o concluir, e então `done` dispara.",
-      "graphqlUnsubscribe": "Para uma subscrição GraphQL já aberta (declarada por um nó de subscrição GraphQL), encerrando o seu fluxo SSE."
+      "graphqlUnsubscribe": "Para uma subscrição GraphQL já aberta (declarada por um nó de subscrição GraphQL), encerrando o seu fluxo SSE.",
+      "stompConnect": "Abre uma conexão STOMP sobre WebSocket de longa duração: realiza o handshake CONNECT/CONNECTED, subscreve cada destino configurado e reemite cada quadro recebido na sua porta.",
+      "stompSend": "Envia um quadro SEND numa conexão STOMP já aberta.",
+      "stompClose": "Envia DISCONNECT e fecha uma conexão STOMP já aberta."
     },
     "legend": {
       "title": "Legenda",
@@ -2201,5 +2208,29 @@
       "headers": "Cabeçalhos",
       "body": "Corpo"
     }
+  },
+  "stomp": {
+    "connect": "Conectar",
+    "disconnect": "Desconectar",
+    "connected": "Conectado",
+    "disconnected": "Desconectado",
+    "noMessages": "Ainda sem quadros",
+    "version": "Versão STOMP",
+    "tabs": {
+      "connect": "Conexão",
+      "subscriptions": "Subscrições",
+      "send": "Enviar"
+    },
+    "ackMode": {
+      "auto": "auto",
+      "client": "client",
+      "clientIndividual": "client-individual"
+    },
+    "subscriptionIdLabel": "ID da subscrição",
+    "removeSubscription": "Remover subscrição",
+    "addSubscription": "Adicionar subscrição",
+    "sendDestination": "Destino",
+    "ack": "ACK",
+    "nack": "NACK"
   }
 }

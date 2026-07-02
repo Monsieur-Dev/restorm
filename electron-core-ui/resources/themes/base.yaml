@@ -273,6 +273,9 @@ variables:
   - id: badge-sse-background
     value: "#3949ab"
     description: "Server-Sent Events badge background (Material indigo)"
+  - id: badge-stomp-background
+    value: "#455a64"
+    description: "STOMP badge background (Material blue-grey)"
 
   # ── OData ───────────────────────────────────────────────────────────────────
   - id: badge-odata-background

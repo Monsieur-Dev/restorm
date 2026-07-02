@@ -434,6 +434,9 @@ colors:
   - id: badge-sse-background
     value: "#7986cb"
     description: "Server-Sent Events badge (HC dark)"
+  - id: badge-stomp-background
+    value: "#78909c"
+    description: "STOMP badge (HC dark)"
 
   - id: badge-odata-background
     value: "#ff5722"

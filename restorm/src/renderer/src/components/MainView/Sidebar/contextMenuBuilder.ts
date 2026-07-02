@@ -45,6 +45,7 @@ export type AddChildKind =
   | 'socketio'
   | 'socketio-server'
   | 'websocket-server'
+  | 'stomp'
   | 'mqtt'
   | 'mqtt-server'
   | 'sse'
@@ -226,6 +227,15 @@ export const buildAddSubmenu = (
     label: t('sidebar.contextMenu.add.socketioServer'),
     icon: React.createElement(Badge, { type: 'SIO', mode: 'server' }),
     onClick: () => { onAddChildItem(parentId, 'socketio-server') }
+  },
+  { id: `sep-add-stomp-${parentId}`, isSeparator: true, label: '' },
+  // STOMP: client only — connects to an external broker (e.g. ActiveMQ), no
+  // restorm-hosted server mode.
+  {
+    id: `add-stomp-${parentId}`,
+    label: t('sidebar.contextMenu.add.stomp'),
+    icon: React.createElement(Badge, { type: 'STOMP' }),
+    onClick: () => { onAddChildItem(parentId, 'stomp') }
   },
   { id: `sep-add-mqtt-${parentId}`, isSeparator: true, label: '' },
   // MQTT group: client (connects to a broker) + server (restorm hosts a broker).

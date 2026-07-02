@@ -281,7 +281,8 @@
         "odataServer": "Διακομιστής OData mock",
         "trpc": "Αίτημα tRPC",
         "amqp": "Αίτημα AMQP",
-        "redis": "Αίτημα Redis"
+        "redis": "Αίτημα Redis",
+        "stomp": "Αίτημα STOMP"
       }
     },
     "deleteConfirm": {
@@ -1197,7 +1198,10 @@
       "odataListen": "OData server",
       "odataClose": "OData close",
       "graphqlSubscribe": "Συνδρομή GraphQL",
-      "graphqlUnsubscribe": "Κατάργηση συνδρομής GraphQL"
+      "graphqlUnsubscribe": "Κατάργηση συνδρομής GraphQL",
+      "stompConnect": "Σύνδεση STOMP",
+      "stompSend": "Αποστολή STOMP",
+      "stompClose": "Κλείσιμο STOMP"
     },
     "comparator": {
       "result": "αποτέλεσμα"
@@ -1795,7 +1799,10 @@
       "odataListen": "Φιλοξενεί μια τοπική εικονική υπηρεσία OData v4 και ακούει επ’ αόριστον. Η θύρα `connected` ενεργοποιείται μόλις αρχίσει να ακούει· κάθε εξυπηρετούμενο αίτημα επανεκπέμπει τα δεδομένα του στη θύρα `served`. Ο διακομιστής παραμένει ενεργός μέχρι ένα κλείσιμο OData (ή ένα Stop), οπότε ενεργοποιείται η θύρα `done`. Καμία έξοδος response — εξυπηρετεί, δεν καλεί προς τα έξω.",
       "odataClose": "Σταματά μια ήδη ενεργή εικονική υπηρεσία OData (που δηλώθηκε από έναν κόμβο διακομιστή OData), απελευθερώνοντας τη θύρα της.",
       "graphqlSubscribe": "Ανοίγει μια μακρόβια συνδρομή GraphQL ως πελάτης μέσω SSE και ακούει. Το `connected` ενεργοποιείται μόλις ανοίξει η ροή· κάθε ωθούμενο φορτίο αναμεταδίδεται στη θύρα `message` (η συνδρομή είναι μόνο λήψης, χωρίς ονοματισμένα συμβάντα). Η ροή παραμένει ανοιχτή μέχρι μια κατάργηση συνδρομής GraphQL (ή μια διακοπή), ή μέχρι ο διακομιστής να την ολοκληρώσει, και μετά ενεργοποιείται το `done`.",
-      "graphqlUnsubscribe": "Σταματά μια ήδη ανοιχτή συνδρομή GraphQL (δηλωμένη από κόμβο συνδρομής GraphQL), κλείνοντας τη ροή SSE της."
+      "graphqlUnsubscribe": "Σταματά μια ήδη ανοιχτή συνδρομή GraphQL (δηλωμένη από κόμβο συνδρομής GraphQL), κλείνοντας τη ροή SSE της.",
+      "stompConnect": "Ανοίγει μια μακροχρόνια σύνδεση STOMP μέσω WebSocket: εκτελεί τη χειραψία CONNECT/CONNECTED, στη συνέχεια εγγράφεται σε κάθε ρυθμισμένο προορισμό και αναμεταδίδει κάθε ληφθέν πλαίσιο στη θύρα του.",
+      "stompSend": "Στέλνει ένα πλαίσιο SEND σε μια ήδη ανοιχτή σύνδεση STOMP.",
+      "stompClose": "Στέλνει DISCONNECT και κλείνει μια ήδη ανοιχτή σύνδεση STOMP."
     },
     "legend": {
       "title": "Υπόμνημα",
@@ -2201,5 +2208,29 @@
       "headers": "Κεφαλίδες",
       "body": "Σώμα"
     }
+  },
+  "stomp": {
+    "connect": "Σύνδεση",
+    "disconnect": "Αποσύνδεση",
+    "connected": "Συνδεδεμένο",
+    "disconnected": "Αποσυνδεδεμένο",
+    "noMessages": "Δεν υπάρχουν ακόμη πλαίσια",
+    "version": "Έκδοση STOMP",
+    "tabs": {
+      "connect": "Σύνδεση",
+      "subscriptions": "Συνδρομές",
+      "send": "Αποστολή"
+    },
+    "ackMode": {
+      "auto": "auto",
+      "client": "client",
+      "clientIndividual": "client-individual"
+    },
+    "subscriptionIdLabel": "Αναγνωριστικό συνδρομής",
+    "removeSubscription": "Αφαίρεση συνδρομής",
+    "addSubscription": "Προσθήκη συνδρομής",
+    "sendDestination": "Προορισμός",
+    "ack": "ACK",
+    "nack": "NACK"
   }
 }

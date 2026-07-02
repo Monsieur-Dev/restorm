@@ -448,6 +448,9 @@ colors:
   - id: badge-sse-background
     value: "#1a237e"
     description: "Server-Sent Events badge (HC light)"
+  - id: badge-stomp-background
+    value: "#263238"
+    description: "STOMP badge (HC light)"
 
   - id: badge-odata-background
     value: "#bf360c"

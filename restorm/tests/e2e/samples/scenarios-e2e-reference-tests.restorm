@@ -22630,6 +22630,62 @@ collections:
                 position:
                   x: 1000
                   'y': 4180
+              - id: 19361166-c02a-4e1f-96b8-006d802b916f
+                kind: stompConnect
+                config:
+                  connectionName: Echo
+                  label: STOMP connect
+                inputs:
+                  - id: in
+                    name: ''
+                    dataType: any
+                    flow: signal
+                outputs:
+                  - id: connected
+                    name: connected
+                    dataType: any
+                    flow: signal
+                  - id: message
+                    name: message
+                    dataType: any
+                    flow: both
+                position:
+                  x: 40
+                  'y': 5600
+              - id: 662b7de3-ac32-43d6-8dd4-6aa7fb8f0d2a
+                kind: stompSend
+                config:
+                  connectionNodeId: 19361166-c02a-4e1f-96b8-006d802b916f
+                  payload:
+                    type: string
+                    value: '{"hello":"world"}'
+                  label: STOMP send
+                inputs:
+                  - id: in
+                    name: ''
+                    dataType: any
+                    flow: signal
+                  - id: payload
+                    name: payload
+                    dataType: any
+                outputs: []
+                position:
+                  x: 520
+                  'y': 5600
+              - id: 7f3bebd7-b950-4c78-9ff2-97212d30e196
+                kind: stompClose
+                config:
+                  connectionNodeId: 19361166-c02a-4e1f-96b8-006d802b916f
+                  label: STOMP close
+                inputs:
+                  - id: in
+                    name: ''
+                    dataType: any
+                    flow: signal
+                outputs: []
+                position:
+                  x: 1000
+                  'y': 5600
               - id: d480bb07-5505-4dc2-989e-c25acd9c7097
                 kind: grpcConnect
                 config:

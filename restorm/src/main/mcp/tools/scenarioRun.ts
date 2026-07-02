@@ -340,6 +340,7 @@ const previewResolvers: Partial<Record<ScenarioNode['kind'], PreviewResolver>> =
   socketioConnect: resolveStreamConnectPreview,
   websocketConnect: resolveStreamConnectPreview,
   sseConnect: resolveStreamConnectPreview,
+  stompConnect: resolveStreamConnectPreview,
   mqttConnect: resolveStreamConnectPreview,
   amqpConnect: resolveStreamConnectPreview,
   grpcConnect: resolveStreamConnectPreview,

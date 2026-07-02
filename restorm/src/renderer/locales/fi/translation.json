@@ -281,7 +281,8 @@
         "odataServer": "OData-mock-palvelin",
         "trpc": "tRPC-pyyntö",
         "amqp": "AMQP-pyyntö",
-        "redis": "Redis-pyyntö"
+        "redis": "Redis-pyyntö",
+        "stomp": "STOMP-pyyntö"
       }
     },
     "deleteConfirm": {
@@ -1197,7 +1198,10 @@
       "odataListen": "OData server",
       "odataClose": "OData close",
       "graphqlSubscribe": "GraphQL-tilaus",
-      "graphqlUnsubscribe": "Peruuta GraphQL-tilaus"
+      "graphqlUnsubscribe": "Peruuta GraphQL-tilaus",
+      "stompConnect": "STOMP-yhteys",
+      "stompSend": "STOMP-lähetys",
+      "stompClose": "Sulje STOMP"
     },
     "comparator": {
       "result": "tulos"
@@ -1795,7 +1799,10 @@
       "odataListen": "Isännöi paikallista OData v4 -näennäispalvelua ja kuuntelee loputtomiin. `connected` laukeaa heti kun palvelu kuuntelee; jokainen palveltu pyyntö lähettää tietonsa uudelleen `served`-porttiin. Palvelin pysyy käynnissä OData-sulkemiseen (tai pysäytykseen) asti, minkä jälkeen `done` laukeaa. Ei response-tulostetta — se palvelee, se ei kutsu ulospäin.",
       "odataClose": "Pysäyttää jo kuuntelevan OData-näennäispalvelun (jonka OData-palvelinsolmu on määrittänyt) ja vapauttaa sen portin.",
       "graphqlSubscribe": "Avaa pitkäkestoisen GraphQL-tilauksen asiakkaana SSE:n kautta ja kuuntelee. `connected` laukeaa heti kun virta on auki; jokainen vastaanotettu hyötykuorma lähetetään uudelleen `message`-porttiin (tilaus on vain vastaanottava, ilman nimettyjä tapahtumia). Virta pysyy auki, kunnes GraphQL-tilaus perutaan (tai pysäytys), tai kunnes palvelin päättää sen, jolloin `done` laukeaa.",
-      "graphqlUnsubscribe": "Pysäyttää jo avoimen GraphQL-tilauksen (jonka GraphQL-tilaussolmu on määrittänyt) ja purkaa sen SSE-virran."
+      "graphqlUnsubscribe": "Pysäyttää jo avoimen GraphQL-tilauksen (jonka GraphQL-tilaussolmu on määrittänyt) ja purkaa sen SSE-virran.",
+      "stompConnect": "Avaa pitkäkestoisen STOMP-yhteyden WebSocketin yli: suorittaa CONNECT/CONNECTED-kättelyn, tilaa sitten jokaisen määritetyn kohteen ja lähettää jokaisen vastaanotetun kehyksen uudelleen portistaan.",
+      "stompSend": "Lähettää SEND-kehyksen jo avoinna olevassa STOMP-yhteydessä.",
+      "stompClose": "Lähettää DISCONNECT-viestin ja sulkee jo avoinna olevan STOMP-yhteyden."
     },
     "legend": {
       "title": "Selite",
@@ -2201,5 +2208,29 @@
       "headers": "Otsakkeet",
       "body": "Sisältö"
     }
+  },
+  "stomp": {
+    "connect": "Yhdistä",
+    "disconnect": "Katkaise yhteys",
+    "connected": "Yhdistetty",
+    "disconnected": "Ei yhdistetty",
+    "noMessages": "Ei vielä kehyksiä",
+    "version": "STOMP-versio",
+    "tabs": {
+      "connect": "Yhteys",
+      "subscriptions": "Tilaukset",
+      "send": "Lähetä"
+    },
+    "ackMode": {
+      "auto": "auto",
+      "client": "client",
+      "clientIndividual": "client-individual"
+    },
+    "subscriptionIdLabel": "Tilauksen tunnus",
+    "removeSubscription": "Poista tilaus",
+    "addSubscription": "Lisää tilaus",
+    "sendDestination": "Kohde",
+    "ack": "ACK",
+    "nack": "NACK"
   }
 }

@@ -282,7 +282,8 @@
         "odataServer": "OData mock poslužitelj",
         "trpc": "tRPC zahtjev",
         "amqp": "AMQP zahtjev",
-        "redis": "Redis zahtjev"
+        "redis": "Redis zahtjev",
+        "stomp": "STOMP zahtjev"
       }
     },
     "deleteConfirm": {
@@ -1198,7 +1199,10 @@
       "odataListen": "OData server",
       "odataClose": "OData close",
       "graphqlSubscribe": "GraphQL pretplata",
-      "graphqlUnsubscribe": "Otkaži GraphQL pretplatu"
+      "graphqlUnsubscribe": "Otkaži GraphQL pretplatu",
+      "stompConnect": "STOMP povezivanje",
+      "stompSend": "STOMP slanje",
+      "stompClose": "Zatvaranje STOMP"
     },
     "comparator": {
       "result": "rezultat"
@@ -1796,7 +1800,10 @@
       "odataListen": "Hostira lokalnu lažnu OData v4 uslugu i sluša neograničeno. `connected` se aktivira čim počne slušati; svaki posluženi zahtjev ponovno emitira svoje podatke na priključku `served`. Poslužitelj ostaje aktivan do OData zatvaranja (ili zaustavljanja), nakon čega se aktivira `done`. Bez response izlaza — poslužuje, ne poziva prema van.",
       "odataClose": "Zaustavlja lažnu OData uslugu koja već sluša (deklariranu OData poslužiteljskim čvorom) i oslobađa njezin priključak.",
       "graphqlSubscribe": "Otvara dugotrajnu GraphQL pretplatu kao klijent putem SSE-a i sluša. `connected` se pokreće čim je tok otvoren; svaki primljeni teret ponovno se emitira na priključku `message` (pretplata samo prima, bez imenovanih događaja). Tok ostaje otvoren do otkazivanja GraphQL pretplate (ili zaustavljanja), ili dok ga poslužitelj ne dovrši, a zatim se pokreće `done`.",
-      "graphqlUnsubscribe": "Zaustavlja već otvorenu GraphQL pretplatu (deklariranu GraphQL pretplatnim čvorom) i zatvara njezin SSE tok."
+      "graphqlUnsubscribe": "Zaustavlja već otvorenu GraphQL pretplatu (deklariranu GraphQL pretplatnim čvorom) i zatvara njezin SSE tok.",
+      "stompConnect": "Otvara dugotrajnu STOMP vezu preko WebSocketa: izvodi CONNECT/CONNECTED rukovanje, zatim se pretplaćuje na svako konfigurirano odredište i ponovno emitira svaki primljeni okvir na svom priključku.",
+      "stompSend": "Šalje SEND okvir na već otvorenoj STOMP vezi.",
+      "stompClose": "Šalje DISCONNECT i zatvara već otvorenu STOMP vezu."
     },
     "legend": {
       "title": "Legenda",
@@ -2202,5 +2209,29 @@
       "headers": "Zaglavlja",
       "body": "Tijelo"
     }
+  },
+  "stomp": {
+    "connect": "Poveži",
+    "disconnect": "Prekini vezu",
+    "connected": "Povezano",
+    "disconnected": "Nije povezano",
+    "noMessages": "Još nema okvira",
+    "version": "STOMP verzija",
+    "tabs": {
+      "connect": "Veza",
+      "subscriptions": "Pretplate",
+      "send": "Pošalji"
+    },
+    "ackMode": {
+      "auto": "auto",
+      "client": "client",
+      "clientIndividual": "client-individual"
+    },
+    "subscriptionIdLabel": "ID pretplate",
+    "removeSubscription": "Ukloni pretplatu",
+    "addSubscription": "Dodaj pretplatu",
+    "sendDestination": "Odredište",
+    "ack": "ACK",
+    "nack": "NACK"
   }
 }

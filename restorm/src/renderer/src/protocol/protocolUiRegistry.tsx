@@ -15,6 +15,8 @@ import type {
   TrpcRequest,
   AmqpRequest,
   RedisRequest
+  StompRequest,
+  ODataRequest
 } from '../../../shared/types/requests'
 import {
   HTTPRequestTabView,
@@ -30,6 +32,8 @@ import {
   TrpcRequestTabView,
   AmqpRequestTabView,
   RedisRequestTabView
+  StompRequestTabView,
+  ODataRequestTabView
 } from '../components/RequestTabViews'
 
 /**
@@ -64,6 +68,8 @@ export const PROTOCOL_TAB_VIEWS: Record<RequestType, (request: Request) => React
   trpc: (request) => <TrpcRequestTabView request={request as TrpcRequest} />,
   amqp: (request) => <AmqpRequestTabView request={request as AmqpRequest} />,
   redis: (request) => <RedisRequestTabView request={request as RedisRequest} />
+  stomp: (request) => <StompRequestTabView request={request as StompRequest} />,
+  odata: (request) => <ODataRequestTabView request={request as ODataRequest} />
 }
 
 /** Render the tab-view editor element for a request, chosen by its protocol. */

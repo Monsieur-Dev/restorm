@@ -281,7 +281,8 @@
         "odataServer": "OData mock sunucusu",
         "trpc": "tRPC isteği",
         "amqp": "AMQP isteği",
-        "redis": "Redis isteği"
+        "redis": "Redis isteği",
+        "stomp": "STOMP isteği"
       }
     },
     "deleteConfirm": {
@@ -1197,7 +1198,10 @@
       "odataListen": "OData server",
       "odataClose": "OData close",
       "graphqlSubscribe": "GraphQL abone ol",
-      "graphqlUnsubscribe": "GraphQL abonelikten çık"
+      "graphqlUnsubscribe": "GraphQL abonelikten çık",
+      "stompConnect": "STOMP bağlantısı",
+      "stompSend": "STOMP gönder",
+      "stompClose": "STOMP kapat"
     },
     "comparator": {
       "result": "sonuç"
@@ -1795,7 +1799,10 @@
       "odataListen": "Yerel bir OData v4 sahte hizmetini barındırır ve süresiz olarak dinler. Dinlemeye başlar başlamaz `connected` tetiklenir; sunulan her istek verisini `served` bağlantı noktasında yeniden yayar. Sunucu bir OData kapatmaya (veya bir Stop'a) kadar açık kalır, ardından `done` tetiklenir. response çıktısı yoktur — hizmet verir, dışarıyı çağırmaz.",
       "odataClose": "Halihazırda dinlemekte olan bir OData sahte hizmetini (bir OData sunucu düğümü tarafından bildirilen) durdurur ve bağlantı noktasını serbest bırakır.",
       "graphqlSubscribe": "SSE üzerinden istemci olarak uzun ömürlü bir GraphQL aboneliği açar ve dinler. Akış açılır açılmaz `connected` tetiklenir; gönderilen her yük `message` bağlantı noktasında yeniden yayılır (abonelik yalnızca alır, adlandırılmış olaylar yoktur). Akış, bir GraphQL abonelikten çıkmaya (veya bir durdurmaya) kadar ya da sunucu onu tamamlayana kadar açık kalır, ardından `done` tetiklenir.",
-      "graphqlUnsubscribe": "Zaten açık olan bir GraphQL aboneliğini (bir GraphQL abone ol düğümü tarafından bildirilen) durdurur ve SSE akışını kapatır."
+      "graphqlUnsubscribe": "Zaten açık olan bir GraphQL aboneliğini (bir GraphQL abone ol düğümü tarafından bildirilen) durdurur ve SSE akışını kapatır.",
+      "stompConnect": "Kalıcı bir STOMP-WebSocket-üzerinden bağlantısı açar: CONNECT/CONNECTED el sıkışmasını gerçekleştirir, ardından her yapılandırılmış hedefe abone olur ve alınan her çerçeveyi kendi bağlantı noktasında yeniden yayınlar.",
+      "stompSend": "Zaten açık olan bir STOMP bağlantısında bir SEND çerçevesi gönderir.",
+      "stompClose": "DISCONNECT gönderir ve zaten açık olan bir STOMP bağlantısını kapatır."
     },
     "legend": {
       "title": "Gösterge",
@@ -2201,5 +2208,29 @@
       "headers": "Başlıklar",
       "body": "Gövde"
     }
+  },
+  "stomp": {
+    "connect": "Bağlan",
+    "disconnect": "Bağlantıyı kes",
+    "connected": "Bağlandı",
+    "disconnected": "Bağlantı kesildi",
+    "noMessages": "Henüz çerçeve yok",
+    "version": "STOMP sürümü",
+    "tabs": {
+      "connect": "Bağlantı",
+      "subscriptions": "Abonelikler",
+      "send": "Gönder"
+    },
+    "ackMode": {
+      "auto": "auto",
+      "client": "client",
+      "clientIndividual": "client-individual"
+    },
+    "subscriptionIdLabel": "Abonelik kimliği",
+    "removeSubscription": "Aboneliği kaldır",
+    "addSubscription": "Abonelik ekle",
+    "sendDestination": "Hedef",
+    "ack": "ACK",
+    "nack": "NACK"
   }
 }

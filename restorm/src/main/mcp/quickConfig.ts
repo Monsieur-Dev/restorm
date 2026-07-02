@@ -48,6 +48,7 @@ export const PROTOCOL_CONFIG_FIELDS: Record<Protocol, readonly string[]> = {
   soap: ['documentation', 'url', 'soapAction', 'service', 'operation', 'body', 'headers', 'server', 'mockOperations'],
   websocket: ['documentation', 'url', 'protocol', 'event', 'message', 'headers', 'server', 'qos', 'retain', 'clientId', 'username', 'password', 'keepalive', 'mqttSubscribe', 'lwtTopic', 'lwtPayload', 'lwtQos', 'lwtRetain'],
   sse: ['documentation', 'url', 'headers', 'lastEventId'],
+  stomp: ['documentation', 'url', 'stompVersion', 'connectHeaders', 'subscriptions', 'sendDestination', 'sendBody', 'sendHeaders'],
   odata: ['documentation', 'url', 'odataVersion', 'operationKind', 'headers', 'params', 'queryOptions', 'actionBody', 'batchSubRequests', 'batchFormat', 'entityTypeRef', 'allowGetInChangeSet', 'forceAbsoluteBatchUrls', 'entitySetProperties', 'navigationProperties', 'operationParameters', 'server', 'mockMetadata', 'mockData'],
   auth: ['documentation', 'method', 'url', 'headers', 'params', 'pathParams', 'body', 'producedHeaders', 'expirationExpression', 'authErrorCodes'],
   jsonrpc: ['documentation', 'url', 'headers', 'method', 'params', 'rpcId', 'notificationMode'],

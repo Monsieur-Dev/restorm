@@ -45,6 +45,10 @@ export function routeFromRequest(request: Request): RouteLike {
       if (request.event !== undefined) route.event = request.event
       return route
     }
+    case 'stomp':
+      // Mirrors the matcher's websocket-aliased handling — STOMP is
+      // websocket-transported and the matcher has no dedicated STOMP branch.
+      return { type: 'websocket', url: request.url, tags: request.tags }
     case 'odata':
       // Mirrors the matcher's HTTP-aliased handling — once the matcher
       // gains an OData branch this can be revisited.

@@ -9,3 +9,8 @@ import type { SseFrame, SseResponse } from './SseResponse'
 export type { BaseResponse, HTTPTimings, HTTPNetworkInfo, HTTPResponse, GraphQLResponse, GrpcResponse, SoapResponse, WebSocketMessage, WebSocketResponse, SseFrame, SseResponse }
 
 export type Response = HTTPResponse | GraphQLResponse | GrpcResponse | SoapResponse | WebSocketResponse | SseResponse
+import type { StompMessage, StompResponse } from './StompResponse'
+
+export type { BaseResponse, HTTPTimings, HTTPNetworkInfo, HTTPResponse, GraphQLResponse, GrpcResponse, SoapResponse, WebSocketMessage, WebSocketResponse, StompMessage, StompResponse }
+
+export type Response = HTTPResponse | GraphQLResponse | GrpcResponse | SoapResponse | WebSocketResponse | StompResponse

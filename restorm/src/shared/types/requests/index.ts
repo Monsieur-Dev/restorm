@@ -5,6 +5,7 @@ import type { GrpcRequest, GrpcMockMethod } from './GrpcRequest'
 import type { SoapRequest } from './SoapRequest'
 import type { WebSocketRequest } from './WebSocketRequest'
 import type { SseRequest } from './SseRequest'
+import type { StompRequest, StompVersion, StompAckMode, StompSubscription } from './StompRequest'
 import type { ODataRequest, ODataQueryOptions, ODataOperationKind, ODataBatchFormat, ODataBatchSubRequestSpec, ODataOperationParameterSpec } from './ODataRequest'
 import type { AuthenticationRequest } from './AuthenticationRequest'
 import type { JsonRpcRequest, JsonRpcBatchRequest, JsonRpcBatchCallSpec } from './JsonRpcRequest'
@@ -17,6 +18,10 @@ export type { BaseRequest, ImportOrigin, HTTPRequest, GraphQLRequest, GrpcReques
 export type { QuickConfig, QuickConfigStorageTarget }
 
 export type Request = HTTPRequest | GraphQLRequest | GrpcRequest | SoapRequest | WebSocketRequest | SseRequest | ODataRequest | AuthenticationRequest | JsonRpcRequest | JsonRpcBatchRequest | TrpcRequest | AmqpRequest | RedisRequest
+export type { BaseRequest, ImportOrigin, HTTPRequest, GraphQLRequest, GrpcRequest, GrpcMockMethod, SoapRequest, WebSocketRequest, StompRequest, StompVersion, StompAckMode, StompSubscription, ODataRequest, ODataQueryOptions, ODataOperationKind, ODataBatchFormat, ODataBatchSubRequestSpec, ODataOperationParameterSpec, AuthenticationRequest }
+export type { QuickConfig, QuickConfigStorageTarget }
+
+export type Request = HTTPRequest | GraphQLRequest | GrpcRequest | SoapRequest | WebSocketRequest | StompRequest | ODataRequest | AuthenticationRequest
 
 export function isHTTPRequest(request: Request): request is HTTPRequest {
   return request.type === 'http'
@@ -40,6 +45,8 @@ export function isWebSocketRequest(request: Request): request is WebSocketReques
 
 export function isSseRequest(request: Request): request is SseRequest {
   return request.type === 'sse'
+export function isStompRequest(request: Request): request is StompRequest {
+  return request.type === 'stomp'
 }
 
 export function isODataRequest(request: Request): request is ODataRequest {

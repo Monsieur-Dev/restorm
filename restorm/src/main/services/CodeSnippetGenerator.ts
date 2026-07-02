@@ -61,6 +61,7 @@ export interface CompiledSnippetTemplates {
   httpSnippetTemplate: Handlebars.TemplateDelegate | null
   graphqlSnippetTemplate: Handlebars.TemplateDelegate | null
   websocketSnippetTemplate: Handlebars.TemplateDelegate | null
+  stompSnippetTemplate: Handlebars.TemplateDelegate | null
   grpcSnippetTemplate: Handlebars.TemplateDelegate | null
   soapSnippetTemplate: Handlebars.TemplateDelegate | null
   jsonRpcSnippetTemplate: Handlebars.TemplateDelegate | null
@@ -79,6 +80,7 @@ export function compileSnippetTemplates(): CompiledSnippetTemplates {
     httpSnippetTemplate: null,
     graphqlSnippetTemplate: null,
     websocketSnippetTemplate: null,
+    stompSnippetTemplate: null,
     grpcSnippetTemplate: null,
     soapSnippetTemplate: null,
     jsonRpcSnippetTemplate: null,
@@ -92,6 +94,7 @@ export function compileSnippetTemplates(): CompiledSnippetTemplates {
     const httpTemplate = loadTemplate('code-snippets-httprequests.hbs')
     const graphqlTemplate = loadTemplate('code-snippets-graphql.hbs')
     const websocketTemplate = loadTemplate('code-snippets-websocket.hbs')
+    const stompTemplate = loadTemplate('code-snippets-stomp.hbs')
     const grpcTemplate = loadTemplate('code-snippets-grpc.hbs')
     const soapTemplate = loadTemplate('code-snippets-soap.hbs')
     const jsonRpcTemplate = loadTemplate('code-snippets-jsonrpc.hbs')
@@ -103,6 +106,7 @@ export function compileSnippetTemplates(): CompiledSnippetTemplates {
     if (httpTemplate) templates.httpSnippetTemplate = Handlebars.compile(httpTemplate, { noEscape: true })
     if (graphqlTemplate) templates.graphqlSnippetTemplate = Handlebars.compile(graphqlTemplate, { noEscape: true })
     if (websocketTemplate) templates.websocketSnippetTemplate = Handlebars.compile(websocketTemplate, { noEscape: true })
+    if (stompTemplate) templates.stompSnippetTemplate = Handlebars.compile(stompTemplate, { noEscape: true })
     if (grpcTemplate) templates.grpcSnippetTemplate = Handlebars.compile(grpcTemplate, { noEscape: true })
     if (soapTemplate) templates.soapSnippetTemplate = Handlebars.compile(soapTemplate, { noEscape: true })
     if (jsonRpcTemplate) templates.jsonRpcSnippetTemplate = Handlebars.compile(jsonRpcTemplate, { noEscape: true })
@@ -287,6 +291,40 @@ export function generateCodeSnippets(
           password: data.password ? transformValue(data.password, envContext) : '',
           host: mqttHost,
           port: mqttPort
+        })
+      }
+      break
+    }
+
+    case 'stomp': {
+      const stompVersion = data.stompVersion ?? '1.2'
+      const connectHeaders = (data.connectHeaders ?? [])
+        .filter(h => h.key && h.enabled !== false)
+        .map(h => ({ key: transformValue(h.key, envContext), value: transformValue(h.value.toString(), envContext) }))
+      const sendHeaders = (data.sendHeaders ?? [])
+        .filter(h => h.key && h.enabled !== false)
+        .map(h => ({ key: transformValue(h.key, envContext), value: transformValue(h.value.toString(), envContext) }))
+      const subscriptions = (data.subscriptions ?? [])
+        .filter((s): s is { id: string; destination: string; ackMode?: string } => typeof s.destination === 'string' && s.destination !== '')
+        .map(s => ({
+          id: s.id && s.id !== '' ? s.id : 'sub-0',
+          destination: transformValue(s.destination, envContext),
+          ackMode: s.ackMode ?? 'auto',
+          needsAck: s.ackMode === 'client' || s.ackMode === 'client-individual'
+        }))
+      const sendDestination = data.sendDestination ? transformValue(data.sendDestination, envContext) : ''
+      const sendBody = data.sendBody ? transformValue(data.sendBody, envContext) : ''
+
+      if (templates.stompSnippetTemplate) {
+        markdown = templates.stompSnippetTemplate({
+          url: resolvedUrl,
+          host,
+          stompVersion,
+          connectHeaders: connectHeaders.length > 0 ? connectHeaders : null,
+          subscriptions: subscriptions.length > 0 ? subscriptions : null,
+          sendDestination: sendDestination || null,
+          sendBody: sendBody || '{}',
+          sendHeaders: sendHeaders.length > 0 ? sendHeaders : null
         })
       }
       break

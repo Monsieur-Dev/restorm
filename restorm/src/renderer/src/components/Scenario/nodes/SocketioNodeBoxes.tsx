@@ -148,6 +148,7 @@ function isBlankValue(v: unknown): boolean {
  * channel/payload from the connect node's linked request (only when blank, so a
  * user edit is never clobbered). */
 export const ConnectionPicker: React.FC<{ id: string; data: ScenarioNodeBoxType['data']; kind: 'socketioConnect' | 'websocketConnect' | 'sseConnect' | 'grpcConnect' | 'mqttConnect' | 'amqpConnect' | 'redisSubscribe' | 'httpListen' | 'grpcListen' | 'soapListen' | 'graphqlListen' | 'odataListen' | 'graphqlSubscribe'; prefill?: boolean }> = ({ id, data, kind, prefill }) => {
+export const ConnectionPicker: React.FC<{ id: string; data: ScenarioNodeBoxType['data']; kind: 'socketioConnect' | 'websocketConnect' | 'stompConnect' | 'grpcConnect' | 'mqttConnect' | 'httpListen' | 'grpcListen' | 'soapListen' | 'graphqlListen' | 'odataListen' | 'graphqlSubscribe'; prefill?: boolean }> = ({ id, data, kind, prefill }) => {
   const { t } = useTranslation()
   const connections = useScenarioConnections().filter((c) => c.kind === kind)
   const config = data.config ?? {}

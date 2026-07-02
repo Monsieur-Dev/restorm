@@ -281,7 +281,8 @@
         "odataServer": "OData mock-kiszolgáló",
         "trpc": "tRPC-kérés",
         "amqp": "AMQP-kérés",
-        "redis": "Redis-kérés"
+        "redis": "Redis-kérés",
+        "stomp": "STOMP kérés"
       }
     },
     "deleteConfirm": {
@@ -1197,7 +1198,10 @@
       "odataListen": "OData server",
       "odataClose": "OData close",
       "graphqlSubscribe": "GraphQL feliratkozás",
-      "graphqlUnsubscribe": "GraphQL leiratkozás"
+      "graphqlUnsubscribe": "GraphQL leiratkozás",
+      "stompConnect": "STOMP kapcsolódás",
+      "stompSend": "STOMP küldés",
+      "stompClose": "STOMP bezárása"
     },
     "comparator": {
       "result": "eredmény"
@@ -1795,7 +1799,10 @@
       "odataListen": "Helyi OData v4 mock szolgáltatást üzemeltet, és határozatlan ideig figyel. A `connected` akkor aktiválódik, amint figyel; minden kiszolgált kérés újraküldi az adatait a `served` porton. A kiszolgáló az OData lezárásig (vagy egy Stopig) fut, majd a `done` aktiválódik. Nincs response kimenet — kiszolgál, nem hív kifelé.",
       "odataClose": "Leállít egy már figyelő OData mock szolgáltatást (amelyet egy OData kiszolgáló csomópont deklarált), és felszabadítja a portját.",
       "graphqlSubscribe": "Hosszú életű GraphQL-feliratkozást nyit ügyfélként SSE-n keresztül és figyel. A `connected` akkor sül el, amikor a folyam megnyílik; minden beérkező hasznos teher újra kibocsátódik a `message` porton (a feliratkozás csak fogadó, megnevezett események nélkül). A folyam nyitva marad egy GraphQL-leiratkozásig (vagy leállításig), illetve amíg a kiszolgáló be nem fejezi, majd a `done` sül el.",
-      "graphqlUnsubscribe": "Leállít egy már nyitott GraphQL-feliratkozást (amelyet egy GraphQL-feliratkozás csomópont deklarált), lebontva annak SSE-folyamát."
+      "graphqlUnsubscribe": "Leállít egy már nyitott GraphQL-feliratkozást (amelyet egy GraphQL-feliratkozás csomópont deklarált), lebontva annak SSE-folyamát.",
+      "stompConnect": "Tartós STOMP-a-WebSocketen-keresztül kapcsolatot nyit: elvégzi a CONNECT/CONNECTED kézfogást, majd feliratkozik minden konfigurált célra, és minden fogadott keretet újra kibocsát a portján.",
+      "stompSend": "SEND keretet küld egy már megnyitott STOMP kapcsolaton.",
+      "stompClose": "DISCONNECT-et küld, és lezár egy már megnyitott STOMP kapcsolatot."
     },
     "legend": {
       "title": "Jelmagyarázat",
@@ -2201,5 +2208,29 @@
       "headers": "Fejlécek",
       "body": "Törzs"
     }
+  },
+  "stomp": {
+    "connect": "Kapcsolódás",
+    "disconnect": "Leválasztás",
+    "connected": "Kapcsolódva",
+    "disconnected": "Leválasztva",
+    "noMessages": "Még nincsenek keretek",
+    "version": "STOMP verzió",
+    "tabs": {
+      "connect": "Kapcsolat",
+      "subscriptions": "Feliratkozások",
+      "send": "Küldés"
+    },
+    "ackMode": {
+      "auto": "auto",
+      "client": "client",
+      "clientIndividual": "client-individual"
+    },
+    "subscriptionIdLabel": "Feliratkozás azonosítója",
+    "removeSubscription": "Feliratkozás eltávolítása",
+    "addSubscription": "Feliratkozás hozzáadása",
+    "sendDestination": "Cél",
+    "ack": "ACK",
+    "nack": "NACK"
   }
 }

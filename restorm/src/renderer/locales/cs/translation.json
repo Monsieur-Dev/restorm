@@ -283,7 +283,8 @@
         "odataServer": "Fiktivní server OData",
         "trpc": "Požadavek tRPC",
         "amqp": "Požadavek AMQP",
-        "redis": "Požadavek Redis"
+        "redis": "Požadavek Redis",
+        "stomp": "Požadavek STOMP"
       }
     },
     "deleteConfirm": {
@@ -1199,7 +1200,10 @@
       "odataListen": "OData server",
       "odataClose": "OData close",
       "graphqlSubscribe": "Odběr GraphQL",
-      "graphqlUnsubscribe": "Zrušení odběru GraphQL"
+      "graphqlUnsubscribe": "Zrušení odběru GraphQL",
+      "stompConnect": "Připojení STOMP",
+      "stompSend": "Odeslání STOMP",
+      "stompClose": "Uzavření STOMP"
     },
     "comparator": {
       "result": "výsledek"
@@ -1797,7 +1801,10 @@
       "odataListen": "Hostuje místní fiktivní službu OData v4 a naslouchá neomezeně. Port `connected` se aktivuje, jakmile služba naslouchá; každý obsloužený požadavek znovu vyšle svá data na portu `served`. Server běží až do uzavření OData (nebo do zastavení), poté se aktivuje port `done`. Žádný výstup response — pouze obsluhuje, sám nevolá ven.",
       "odataClose": "Zastaví již naslouchající fiktivní službu OData (deklarovanou uzlem serveru OData) a uvolní její port.",
       "graphqlSubscribe": "Otevře dlouhotrvající odběr GraphQL jako klient přes SSE a naslouchá. `connected` se spustí, jakmile je proud otevřen; každá přijatá zpráva se znovu vyšle na port `message` (odběr pouze přijímá, bez pojmenovaných událostí). Proud zůstává otevřený až do zrušení odběru GraphQL (nebo zastavení), případně dokud jej server nedokončí, poté se spustí `done`.",
-      "graphqlUnsubscribe": "Zastaví již otevřený odběr GraphQL (deklarovaný uzlem odběru GraphQL) a uzavře jeho SSE proud."
+      "graphqlUnsubscribe": "Zastaví již otevřený odběr GraphQL (deklarovaný uzlem odběru GraphQL) a uzavře jeho SSE proud.",
+      "stompConnect": "Otevře dlouhodobé připojení STOMP přes WebSocket: provede handshake CONNECT/CONNECTED, poté se přihlásí ke každému nakonfigurovanému cíli a znovu odešle každý přijatý rámec na svém portu.",
+      "stompSend": "Odešle rámec SEND přes již otevřené připojení STOMP.",
+      "stompClose": "Odešle DISCONNECT a uzavře již otevřené připojení STOMP."
     },
     "legend": {
       "title": "Legenda",
@@ -2203,5 +2210,29 @@
       "headers": "Hlavičky",
       "body": "Tělo"
     }
+  },
+  "stomp": {
+    "connect": "Připojit",
+    "disconnect": "Odpojit",
+    "connected": "Připojeno",
+    "disconnected": "Odpojeno",
+    "noMessages": "Zatím žádné rámce",
+    "version": "Verze STOMP",
+    "tabs": {
+      "connect": "Připojení",
+      "subscriptions": "Odběry",
+      "send": "Odeslat"
+    },
+    "ackMode": {
+      "auto": "auto",
+      "client": "client",
+      "clientIndividual": "client-individual"
+    },
+    "subscriptionIdLabel": "ID odběru",
+    "removeSubscription": "Odebrat odběr",
+    "addSubscription": "Přidat odběr",
+    "sendDestination": "Cíl",
+    "ack": "ACK",
+    "nack": "NACK"
   }
 }

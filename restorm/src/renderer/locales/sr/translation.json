@@ -282,7 +282,8 @@
         "odataServer": "OData mock сервер",
         "trpc": "tRPC zahtev",
         "amqp": "AMQP zahtev",
-        "redis": "Redis zahtev"
+        "redis": "Redis zahtev",
+        "stomp": "STOMP захтев"
       }
     },
     "deleteConfirm": {
@@ -1198,7 +1199,10 @@
       "odataListen": "OData server",
       "odataClose": "OData close",
       "graphqlSubscribe": "GraphQL претплата",
-      "graphqlUnsubscribe": "Откажи GraphQL претплату"
+      "graphqlUnsubscribe": "Откажи GraphQL претплату",
+      "stompConnect": "STOMP веза",
+      "stompSend": "STOMP слање",
+      "stompClose": "Затварање STOMP"
     },
     "comparator": {
       "result": "резултат"
@@ -1796,7 +1800,10 @@
       "odataListen": "Хостује локалну лажну OData v4 услугу и слуша неограничено. `connected` се активира чим почне да слуша; сваки опслужени захтев поново емитује своје податке на порту `served`. Сервер остаје активан до OData затварања (или заустављања), након чега се активира `done`. Без response излаза — опслужује, не позива ка споља.",
       "odataClose": "Зауставља лажну OData услугу која већ слуша (декларисану OData серверским чвором) и ослобађа њен порт.",
       "graphqlSubscribe": "Отвара дуготрајну GraphQL претплату као клијент преко SSE и слуша. `connected` се покреће чим се ток отвори; сваки примљени терет се поново емитује на порту `message` (претплата само прима, без именованих догађаја). Ток остаје отворен до отказивања GraphQL претплате (или заустављања), или док га сервер не доврши, а затим се покреће `done`.",
-      "graphqlUnsubscribe": "Зауставља већ отворену GraphQL претплату (декларисану GraphQL претплатним чвором) и затвара њен SSE ток."
+      "graphqlUnsubscribe": "Зауставља већ отворену GraphQL претплату (декларисану GraphQL претплатним чвором) и затвара њен SSE ток.",
+      "stompConnect": "Отвара дуготрајну STOMP везу преко WebSocket-а: обавља CONNECT/CONNECTED руковање, затим се претплаћује на свако конфигурисано одредиште и поново емитује сваки примљени оквир на свом порту.",
+      "stompSend": "Шаље SEND оквир на већ отвореној STOMP вези.",
+      "stompClose": "Шаље DISCONNECT и затвара већ отворену STOMP везу."
     },
     "legend": {
       "title": "Легенда",
@@ -2202,5 +2209,29 @@
       "headers": "Zaglavlja",
       "body": "Telo"
     }
+  },
+  "stomp": {
+    "connect": "Повежи",
+    "disconnect": "Прекини везу",
+    "connected": "Повезано",
+    "disconnected": "Није повезано",
+    "noMessages": "Још нема оквира",
+    "version": "STOMP верзија",
+    "tabs": {
+      "connect": "Веза",
+      "subscriptions": "Претплате",
+      "send": "Пошаљи"
+    },
+    "ackMode": {
+      "auto": "auto",
+      "client": "client",
+      "clientIndividual": "client-individual"
+    },
+    "subscriptionIdLabel": "ID претплате",
+    "removeSubscription": "Уклони претплату",
+    "addSubscription": "Додај претплату",
+    "sendDestination": "Одредиште",
+    "ack": "ACK",
+    "nack": "NACK"
   }
 }

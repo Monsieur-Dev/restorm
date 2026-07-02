@@ -16,6 +16,7 @@ import {
   SoapRequest,
   WebSocketRequest,
   SseRequest,
+  StompRequest,
   ODataRequest,
   AuthenticationRequest,
   TrpcRequest,
@@ -473,6 +474,7 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
       case 'socketio': return 'New Socket.IO request'
       case 'socketio-server': return 'New Socket.IO server'
       case 'websocket-server': return 'New WebSocket server'
+      case 'stomp': return 'New STOMP request'
       case 'mqtt': return 'New MQTT request'
       case 'mqtt-server': return 'New MQTT broker'
       case 'sse': return 'New SSE request'
@@ -664,6 +666,20 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
         // restorm acts as a raw WebSocket server: websocket protocol + server
         // flag, host forced to localhost, default port pre-filled.
         built = new WebSocketRequest({ id, name, protocol: 'websocket', server: true, url: 'localhost:3002' })
+      } else if (kind === 'stomp') {
+        // STOMP CLIENT request (connects to a broker, e.g. the docker ActiveMQ
+        // mock's STOMP-over-WebSocket port) — pre-seeded with one subscription
+        // + a matching send destination so it is runnable the moment it is
+        // created.
+        built = new StompRequest({
+          id,
+          name,
+          url: 'ws://localhost:61614',
+          stompVersion: '1.2',
+          subscriptions: [{ id: 'sub-0', destination: '/topic/demo', ackMode: 'auto' }],
+          sendDestination: '/topic/demo',
+          sendBody: '{\n  "message": "Hello from restorm"\n}'
+        })
       } else if (kind === 'mqtt') {
         // MQTT CLIENT request (connects to a broker); default subscribe-on-connect.
         built = new WebSocketRequest({ id, name, protocol: 'mqtt', url: 'mqtt://localhost:1883' })

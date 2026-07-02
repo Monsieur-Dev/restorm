@@ -281,7 +281,8 @@
         "odataServer": "Server mock OData",
         "trpc": "Richiesta tRPC",
         "amqp": "Richiesta AMQP",
-        "redis": "Richiesta Redis"
+        "redis": "Richiesta Redis",
+        "stomp": "Richiesta STOMP"
       }
     },
     "deleteConfirm": {
@@ -1197,7 +1198,10 @@
       "odataListen": "OData server",
       "odataClose": "OData close",
       "graphqlSubscribe": "Sottoscrizione GraphQL",
-      "graphqlUnsubscribe": "Annulla sottoscrizione GraphQL"
+      "graphqlUnsubscribe": "Annulla sottoscrizione GraphQL",
+      "stompConnect": "Connessione STOMP",
+      "stompSend": "Invio STOMP",
+      "stompClose": "Chiusura STOMP"
     },
     "comparator": {
       "result": "risultato"
@@ -1795,7 +1799,10 @@
       "odataListen": "Ospita un servizio mock OData v4 locale e resta in ascolto indefinitamente. `connected` si attiva non appena è in ascolto; ogni richiesta servita riemette i suoi dati sulla porta `served`. Il server resta attivo fino a una chiusura OData (o uno Stop), poi si attiva `done`. Nessun output response — serve, non chiama verso l’esterno.",
       "odataClose": "Arresta un servizio mock OData già in ascolto (dichiarato da un nodo server OData), liberandone la porta.",
       "graphqlSubscribe": "Apre una sottoscrizione GraphQL di lunga durata come client tramite SSE e ascolta. `connected` si attiva quando lo stream è aperto; ogni payload ricevuto viene riemesso sulla porta `message` (una sottoscrizione è di sola ricezione, senza eventi denominati). Lo stream resta aperto fino a un annullamento della sottoscrizione GraphQL (o uno stop), o finché il server non lo completa, poi si attiva `done`.",
-      "graphqlUnsubscribe": "Ferma una sottoscrizione GraphQL già aperta (dichiarata da un nodo di sottoscrizione GraphQL), chiudendo il suo stream SSE."
+      "graphqlUnsubscribe": "Ferma una sottoscrizione GraphQL già aperta (dichiarata da un nodo di sottoscrizione GraphQL), chiudendo il suo stream SSE.",
+      "stompConnect": "Apre una connessione STOMP su WebSocket persistente: esegue l'handshake CONNECT/CONNECTED, quindi si iscrive a ogni destinazione configurata e ritrasmette ogni frame ricevuto sulla propria porta.",
+      "stompSend": "Invia un frame SEND su una connessione STOMP già aperta.",
+      "stompClose": "Invia DISCONNECT e chiude una connessione STOMP già aperta."
     },
     "legend": {
       "title": "Legenda",
@@ -2201,5 +2208,29 @@
       "headers": "Header",
       "body": "Corpo"
     }
+  },
+  "stomp": {
+    "connect": "Connetti",
+    "disconnect": "Disconnetti",
+    "connected": "Connesso",
+    "disconnected": "Disconnesso",
+    "noMessages": "Nessun frame ancora",
+    "version": "Versione STOMP",
+    "tabs": {
+      "connect": "Connessione",
+      "subscriptions": "Iscrizioni",
+      "send": "Invia"
+    },
+    "ackMode": {
+      "auto": "auto",
+      "client": "client",
+      "clientIndividual": "client-individual"
+    },
+    "subscriptionIdLabel": "ID iscrizione",
+    "removeSubscription": "Rimuovi iscrizione",
+    "addSubscription": "Aggiungi iscrizione",
+    "sendDestination": "Destinazione",
+    "ack": "ACK",
+    "nack": "NACK"
   }
 }

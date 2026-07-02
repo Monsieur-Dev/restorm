@@ -30,6 +30,7 @@ import { jsonRpcExecutionService } from './services/JsonRpcExecutionService'
 import { sseExecutionService, type SseExecutionInput } from './services/SseExecutionService'
 import { amqpExecutionService, type AmqpExecutionInput } from './services/AMQPExecutionService'
 import { redisExecutionService, type RedisExecutionInput } from './services/RedisExecutionService'
+import { stompExecutionService, type StompExecutionInput } from './services/StompExecutionService'
 import { scenarioEngine } from './scenarioEngine/engine'
 import { importFrom } from './services/import/ImportManager'
 import { importGrpcFromReflection, findExistingGrpcReflectionFolder, reimportGrpcReflection } from './services/import/GrpcReflectionImportService'
@@ -64,6 +65,7 @@ import {
   sseConnectArgs, sseDisconnectArgs, sseIsActiveArgs,
   amqpExecuteArgs, amqpConnectArgs, amqpSendArgs, amqpDisconnectArgs, amqpCancelArgs, amqpIsActiveArgs,
   redisSubscribeArgs, redisCommandArgs, redisDisconnectArgs, redisIsActiveArgs,
+  stompConnectArgs, stompDisconnectArgs, stompSendArgs, stompAckArgs, stompNackArgs, stompIsActiveArgs,
   responsesHistoryListArgs, responsesHistoryGetArgs,
   responsesHistoryTogglePinArgs,
   requestUsageGetArgs,
@@ -179,7 +181,11 @@ function rehydrateFullRequestData(data: unknown): unknown {
   if (typeof data !== 'object' || data === null) return data
   const record = data as Record<string, unknown>
   const out: Record<string, unknown> = { ...record }
-  for (const group of ['headers', 'params', 'pathParams', 'metadata'] as const) {
+  // `connectHeaders` / `sendHeaders` (STOMP) get the same treatment as
+  // `headers` — they're read back by `StompExecutionService` through
+  // `resolveKeyValueForRequest`, which needs a real `ValueType` instance to
+  // gate handlebars resolution (see the docstring above).
+  for (const group of ['headers', 'params', 'pathParams', 'metadata', 'connectHeaders', 'sendHeaders'] as const) {
     const rows = record[group]
     if (Array.isArray(rows)) {
       out[group] = rows.map((row) => rehydrateKeyValueRow(row as KeyValueRowFromIpc))
@@ -805,6 +811,9 @@ export function registerRestormIPC(deps: {
     await amqpExecutionService.closeAll()
     // File close — same for any open Redis subscribe connection.
     await redisExecutionService.closeAll()
+    // File close — same for any live STOMP connection (no port to release, just
+    // DISCONNECT + close the socket).
+    stompExecutionService.closeAll()
     // File close — same for any hosted gRPC mock server (its own grpc.Server on
     // its own port): release the port so it doesn't keep listening past the file.
     grpcMockServerService.closeAll()
@@ -1481,6 +1490,37 @@ export function registerRestormIPC(deps: {
 
   validatedHandle('redis:is-active', redisIsActiveArgs, (_event, [requestId]) => {
     return redisExecutionService.isActive(requestId)
+  // STOMP Execution IPC Handlers
+  // ==========================================================================
+  // `stomp:connect` resolves only when the connection closes (same shape as
+  // `websocket:connect`) — `StompExecutionService.execute` persists the
+  // history entry itself (see its `persistHistory` call), so this handler
+  // only needs to record usage, not store the result a second time.
+
+  validatedHandle('stomp:connect', stompConnectArgs, async (_event, [input]) => {
+    const result = await stompExecutionService.execute(input as StompExecutionInput)
+    setImmediate(() => { requestUsageService.recordSend(input.requestId) })
+    return result
+  })
+
+  validatedHandle('stomp:disconnect', stompDisconnectArgs, (_event, [requestId]) => {
+    return stompExecutionService.disconnect(requestId)
+  })
+
+  validatedHandle('stomp:send', stompSendArgs, (_event, [requestId, body]) => {
+    return stompExecutionService.send(requestId, body)
+  })
+
+  validatedHandle('stomp:ack', stompAckArgs, (_event, [requestId, messageId, subscriptionId]) => {
+    return stompExecutionService.ack(requestId, messageId, subscriptionId)
+  })
+
+  validatedHandle('stomp:nack', stompNackArgs, (_event, [requestId, messageId, subscriptionId]) => {
+    return stompExecutionService.nack(requestId, messageId, subscriptionId)
+  })
+
+  validatedHandle('stomp:is-active', stompIsActiveArgs, (_event, [requestId]) => {
+    return stompExecutionService.isActive(requestId)
   })
 
   // ==========================================================================

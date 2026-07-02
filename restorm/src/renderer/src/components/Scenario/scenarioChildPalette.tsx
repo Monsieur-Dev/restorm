@@ -56,6 +56,9 @@ export const SCENARIO_ADD_REQUEST_GROUPS: ScenarioAddEntry[][] = [
     { kind: 'websocket-server', badge: 'WS', mode: 'server', labelKey: 'sidebar.contextMenu.add.websocketServer', defaultLabel: 'WebSocket server' },
     { kind: 'socketio', badge: 'SIO', labelKey: 'sidebar.contextMenu.add.socketio', defaultLabel: 'Socket.IO request' },
     { kind: 'socketio-server', badge: 'SIO', mode: 'server', labelKey: 'sidebar.contextMenu.add.socketioServer', defaultLabel: 'Socket.IO server' },
+    // STOMP is client-only — it connects to an external broker (e.g.
+    // ActiveMQ), no restorm-hosted server mode.
+    { kind: 'stomp', badge: 'STOMP', labelKey: 'sidebar.contextMenu.add.stomp', defaultLabel: 'STOMP request' },
     { kind: 'mqtt', badge: 'MQTT', labelKey: 'sidebar.contextMenu.add.mqtt', defaultLabel: 'MQTT request' },
     { kind: 'mqtt-server', badge: 'MQTT', mode: 'server', labelKey: 'sidebar.contextMenu.add.mqttServer', defaultLabel: 'MQTT broker' },
     // SSE: receive-only streaming, no server mode — a single client entry
@@ -144,6 +147,10 @@ export const SCENARIO_ADD_WEBSOCKET_ACTIONS: ScenarioAddWsActionEntry[] = [
  * action — mirrors the HTTP/SOAP/GraphQL server sections' close-only shape. */
 export interface ScenarioAddSseActionEntry {
   kind: 'sseClose'
+/** STOMP action entries — same shape as the raw-WebSocket section, badged
+ * STOMP (send / close only; connect comes from the request entry above). */
+export interface ScenarioAddStompActionEntry {
+  kind: 'stompSend' | 'stompClose'
   icon: string
   labelKey: string
   defaultLabel: string
@@ -151,6 +158,9 @@ export interface ScenarioAddSseActionEntry {
 
 export const SCENARIO_ADD_SSE_ACTIONS: ScenarioAddSseActionEntry[] = [
   { kind: 'sseClose', icon: 'debug-disconnect', labelKey: 'scenario.nodes.sseClose', defaultLabel: 'SSE close' }
+export const SCENARIO_ADD_STOMP_ACTIONS: ScenarioAddStompActionEntry[] = [
+  { kind: 'stompSend', icon: 'arrow-up', labelKey: 'scenario.nodes.stompSend', defaultLabel: 'STOMP send' },
+  { kind: 'stompClose', icon: 'debug-disconnect', labelKey: 'scenario.nodes.stompClose', defaultLabel: 'STOMP close' }
 ]
 
 /** MQTT action entries — publish / close (connect comes from the request entry), badged MQTT. */
@@ -309,6 +319,9 @@ export function scenarioAddAmqpIcon(icon: string): ReactNode {
 /** The "REDIS" badge with the action's codicon inside (Redis section). */
 export function scenarioAddRedisIcon(icon: string): ReactNode {
   return React.createElement(Badge, { type: 'REDIS', icon })
+/** The "STOMP" badge with the action's codicon inside (STOMP section). */
+export function scenarioAddStompIcon(icon: string): ReactNode {
+  return React.createElement(Badge, { type: 'STOMP', icon })
 }
 
 /** The server-pill HTTP badge with the action's codicon inside (HTTP section). */

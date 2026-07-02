@@ -146,6 +146,10 @@ const amqpExecutionTestDir = defineBddConfig({
   features: 'tests/e2e/bdd/amqp-execution/features/**/*.feature',
   steps: ['tests/e2e/bdd/amqp-execution/steps/**/*.ts', 'tests/e2e/bdd/fixtures/mcp-server.fixture.ts'],
   outputDir: '.features-gen/amqp-execution'
+const stompExecutionTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/stomp-execution/features/**/*.feature',
+  steps: ['tests/e2e/bdd/stomp-execution/steps/**/*.ts', 'tests/e2e/bdd/fixtures/mcp-server.fixture.ts'],
+  outputDir: '.features-gen/stomp-execution'
 })
 
 const quickSettingsTestDir = defineBddConfig({
@@ -525,6 +529,20 @@ export default defineConfig({
       testDir: mqttExecutionTestDir,
       timeout: 180 * 1000
     },
+    // STOMP is client-only (no restorm-hosted broker mode), so this suite
+    // depends on the docker `rmohr/activemq` mock being up — unlike
+    // WebSocket/Socket.IO/MQTT, which self-host. Opt out with
+    // SKIP_STOMP_E2E=1 when the broker isn't available (e.g. a host without
+    // docker), mirroring the `stage-gating` opt-IN pattern below but inverted.
+    ...(process.env.SKIP_STOMP_E2E === '1'
+      ? []
+      : [
+          {
+            name: 'stomp-execution',
+            testDir: stompExecutionTestDir,
+            timeout: 180 * 1000
+          }
+        ]),
     {
       name: 'sse-execution',
       testDir: sseExecutionTestDir,

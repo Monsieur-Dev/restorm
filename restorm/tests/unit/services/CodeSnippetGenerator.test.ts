@@ -34,6 +34,7 @@ const templates: CompiledSnippetTemplates = {
   sseSnippetTemplate: compile('code-snippets-sse.hbs'),
   amqpSnippetTemplate: compile('code-snippets-amqp.hbs'),
   redisSnippetTemplate: compile('code-snippets-redis.hbs')
+  stompSnippetTemplate: compile('code-snippets-stomp.hbs')
 } as unknown as CompiledSnippetTemplates
 
 // Identity transform (no env vars needed for these structural assertions).
@@ -348,5 +349,48 @@ describe('CodeSnippetGenerator — Redis', () => {
       resolveEnvVar
     ).markdown
     expect(md).not.toContain('{{host}}')
+describe('CodeSnippetGenerator — STOMP', () => {
+  const base: Partial<FullRequestData> = {
+    requestType: 'stomp',
+    url: 'ws://localhost:61614',
+    headers: [],
+    stompVersion: '1.2',
+    connectHeaders: [{ key: 'login', value: 'guest', enabled: true } as never],
+    subscriptions: [{ id: 'sub-0', destination: '/topic/test', ackMode: 'client' }],
+    sendDestination: '/topic/test',
+    sendBody: '{"hello":"world"}',
+    sendHeaders: [{ key: 'priority', value: '5', enabled: true } as never]
+  }
+
+  // Guards the same "renders an empty block" trap the MQTT test above
+  // guards: the template branches on connectHeaders / subscriptions /
+  // sendDestination / needsAck, so a generator that forgets to resolve one
+  // renders a plausible-looking but silently incomplete snippet.
+  it('renders a non-empty STOMP snippet with the resolved connect + subscribe + send blocks', () => {
+    const md = run(base, 'ws://localhost:61614')
+    expect(md.trim().length).toBeGreaterThan(0)
+    expect(md).toContain("import { Client } from '@stomp/stompjs'")
+    expect(md).toContain("brokerURL: 'ws://localhost:61614'")
+    expect(md).toContain("stompVersions: ['1.2']")
+    expect(md).toContain("'login': 'guest'")
+    expect(md).toContain("client.subscribe('/topic/test'")
+    expect(md).toContain("id: 'sub-0', ack: 'client'")
+    expect(md).toContain('message.ack()') // client ack mode → the ack() call is emitted
+    expect(md).toContain("destination: '/topic/test'")
+    expect(md).toContain('JSON.stringify({"hello":"world"})')
+    expect(md).toContain("'priority': '5'")
+    // The wscat (shell) fallback example also carries the resolved values.
+    expect(md).toContain("npx wscat -c 'ws://localhost:61614'")
+  })
+
+  it('omits the ack() call for an auto-ack subscription', () => {
+    const md = run({ ...base, subscriptions: [{ id: 'sub-0', destination: '/topic/test', ackMode: 'auto' }] }, 'ws://localhost:61614')
+    expect(md).not.toContain('message.ack()')
+    expect(md).toContain("client.subscribe('/topic/test'")
+  })
+
+  it('omits the send block entirely when no send destination is configured', () => {
+    const md = run({ ...base, sendDestination: '' }, 'ws://localhost:61614')
+    expect(md).not.toContain('client.publish(')
   })
 })

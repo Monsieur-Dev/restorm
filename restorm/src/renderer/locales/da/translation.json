@@ -281,7 +281,8 @@
         "odataServer": "OData-mockserver",
         "trpc": "tRPC-anmodning",
         "amqp": "AMQP-anmodning",
-        "redis": "Redis-anmodning"
+        "redis": "Redis-anmodning",
+        "stomp": "STOMP-anmodning"
       }
     },
     "deleteConfirm": {
@@ -1197,7 +1198,10 @@
       "odataListen": "OData server",
       "odataClose": "OData close",
       "graphqlSubscribe": "GraphQL-abonnement",
-      "graphqlUnsubscribe": "Opsig GraphQL-abonnement"
+      "graphqlUnsubscribe": "Opsig GraphQL-abonnement",
+      "stompConnect": "STOMP-forbindelse",
+      "stompSend": "STOMP-afsendelse",
+      "stompClose": "Luk STOMP"
     },
     "comparator": {
       "result": "resultat"
@@ -1795,7 +1799,10 @@
       "odataListen": "Hoster en lokal OData v4-mockservice og lytter i det uendelige. `connected` udløses, så snart den lytter; hver betjent forespørgsel sender sine data igen på `served`-porten. Serveren kører, indtil en OData-lukning (eller et Stop), hvorefter `done` udløses. Intet response-output — den betjener, den kalder ikke ud.",
       "odataClose": "Stopper en allerede lyttende OData-mockservice (erklæret af en OData-serverknude) og frigiver dens port.",
       "graphqlSubscribe": "Åbner et langlivet GraphQL-abonnement som klient via SSE og lytter. `connected` udløses, så snart streamen er åben; hver modtaget nyttelast genudsendes på `message`-porten (et abonnement er kun modtagende, uden navngivne hændelser). Streamen forbliver åben indtil en GraphQL-opsigelse (eller et stop), eller indtil serveren fuldfører den, hvorefter `done` udløses.",
-      "graphqlUnsubscribe": "Stopper et allerede åbent GraphQL-abonnement (erklæret af en GraphQL-abonnementsknude) og lukker dets SSE-stream."
+      "graphqlUnsubscribe": "Stopper et allerede åbent GraphQL-abonnement (erklæret af en GraphQL-abonnementsknude) og lukker dets SSE-stream.",
+      "stompConnect": "Åbner en langvarig STOMP-over-WebSocket-forbindelse: udfører CONNECT/CONNECTED-handshaket, abonnerer derefter på hver konfigureret destination og genudsender hver modtaget frame på sin port.",
+      "stompSend": "Sender en SEND-frame på en allerede åben STOMP-forbindelse.",
+      "stompClose": "Sender DISCONNECT og lukker en allerede åben STOMP-forbindelse."
     },
     "legend": {
       "title": "Forklaring",
@@ -2201,5 +2208,29 @@
       "headers": "Headere",
       "body": "Body"
     }
+  },
+  "stomp": {
+    "connect": "Opret forbindelse",
+    "disconnect": "Afbryd forbindelse",
+    "connected": "Forbundet",
+    "disconnected": "Ikke forbundet",
+    "noMessages": "Ingen frames endnu",
+    "version": "STOMP-version",
+    "tabs": {
+      "connect": "Forbindelse",
+      "subscriptions": "Abonnementer",
+      "send": "Send"
+    },
+    "ackMode": {
+      "auto": "auto",
+      "client": "client",
+      "clientIndividual": "client-individual"
+    },
+    "subscriptionIdLabel": "Abonnement-id",
+    "removeSubscription": "Fjern abonnement",
+    "addSubscription": "Tilføj abonnement",
+    "sendDestination": "Destination",
+    "ack": "ACK",
+    "nack": "NACK"
   }
 }

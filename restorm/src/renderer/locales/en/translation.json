@@ -281,7 +281,8 @@
         "odataServer": "OData mock server",
         "trpc": "tRPC request",
         "amqp": "AMQP request",
-        "redis": "Redis request"
+        "redis": "Redis request",
+        "stomp": "STOMP request"
       }
     },
     "deleteConfirm": {
@@ -1197,7 +1198,10 @@
       "odataListen": "OData server",
       "odataClose": "OData close",
       "graphqlSubscribe": "GraphQL subscribe",
-      "graphqlUnsubscribe": "GraphQL unsubscribe"
+      "graphqlUnsubscribe": "GraphQL unsubscribe",
+      "stompConnect": "STOMP connect",
+      "stompSend": "STOMP send",
+      "stompClose": "STOMP close"
     },
     "comparator": {
       "result": "result"
@@ -1798,7 +1802,10 @@
       "odataListen": "Hosts a local OData v4 mock service and listens indefinitely. `connected` fires once it is listening; each served request re-emits its data on the `served` port. The server stays up until an OData close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
       "odataClose": "Stops an already-listening OData mock service (declared by an OData server node), freeing its port.",
       "graphqlSubscribe": "Opens a long-lived GraphQL subscription as a client over SSE and listens. `connected` fires once the stream is open; every pushed payload re-emits on the `message` port (a subscription is receive-only, with no named events). The stream stays open until a GraphQL unsubscribe (or a Stop), or the server completes it, then `done` fires.",
-      "graphqlUnsubscribe": "Stops an already-open GraphQL subscription (declared by a GraphQL subscribe node), tearing down its SSE stream."
+      "graphqlUnsubscribe": "Stops an already-open GraphQL subscription (declared by a GraphQL subscribe node), tearing down its SSE stream.",
+      "stompConnect": "Opens a long-lived STOMP-over-WebSocket connection: performs the CONNECT/CONNECTED handshake, then subscribes to every configured destination, and re-emits each received frame on its port.",
+      "stompSend": "Sends a SEND frame on an already-open STOMP connection.",
+      "stompClose": "Sends DISCONNECT and closes an already-open STOMP connection."
     },
     "legend": {
       "title": "Legend",
@@ -2201,5 +2208,29 @@
       "headers": "Headers",
       "body": "Body"
     }
+  },
+  "stomp": {
+    "connect": "Connect",
+    "disconnect": "Disconnect",
+    "connected": "Connected",
+    "disconnected": "Disconnected",
+    "noMessages": "No frames yet",
+    "version": "STOMP version",
+    "tabs": {
+      "connect": "Connect",
+      "subscriptions": "Subscriptions",
+      "send": "Send"
+    },
+    "ackMode": {
+      "auto": "auto",
+      "client": "client",
+      "clientIndividual": "client-individual"
+    },
+    "subscriptionIdLabel": "Subscription id",
+    "removeSubscription": "Remove subscription",
+    "addSubscription": "Add subscription",
+    "sendDestination": "Destination",
+    "ack": "ACK",
+    "nack": "NACK"
   }
 }

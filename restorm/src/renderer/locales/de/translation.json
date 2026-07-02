@@ -281,7 +281,8 @@
         "odataServer": "OData-Mock-Server",
         "trpc": "tRPC-Anfrage",
         "amqp": "AMQP-Anfrage",
-        "redis": "Redis-Anfrage"
+        "redis": "Redis-Anfrage",
+        "stomp": "STOMP-Anfrage"
       }
     },
     "deleteConfirm": {
@@ -1197,7 +1198,10 @@
       "odataListen": "OData server",
       "odataClose": "OData close",
       "graphqlSubscribe": "GraphQL abonnieren",
-      "graphqlUnsubscribe": "GraphQL abbestellen"
+      "graphqlUnsubscribe": "GraphQL abbestellen",
+      "stompConnect": "STOMP verbinden",
+      "stompSend": "STOMP senden",
+      "stompClose": "STOMP schließen"
     },
     "comparator": {
       "result": "Ergebnis"
@@ -1795,7 +1799,10 @@
       "odataListen": "Hostet einen lokalen OData-v4-Mock-Dienst und lauscht unbegrenzt. `connected` wird ausgelöst, sobald gelauscht wird; jede bediente Anfrage sendet ihre Daten erneut über den Port `served`. Der Server bleibt aktiv, bis ein OData-Schließen (oder ein Stopp) erfolgt, dann wird `done` ausgelöst. Keine response-Ausgabe — er bedient, er ruft nicht nach außen.",
       "odataClose": "Stoppt einen bereits lauschenden OData-Mock-Dienst (deklariert durch einen OData-Server-Knoten) und gibt dessen Port frei.",
       "graphqlSubscribe": "Öffnet ein langlebiges GraphQL-Abonnement als Client über SSE und hört zu. `connected` wird ausgelöst, sobald der Stream offen ist; jede gesendete Nutzlast wird am `message`-Port erneut ausgegeben (ein Abonnement ist nur empfangend, ohne benannte Ereignisse). Der Stream bleibt offen, bis ein GraphQL-Abbestellen (oder ein Stopp) erfolgt oder der Server ihn abschließt, dann wird `done` ausgelöst.",
-      "graphqlUnsubscribe": "Stoppt ein bereits offenes GraphQL-Abonnement (deklariert durch einen GraphQL-Abonnieren-Knoten) und baut dessen SSE-Stream ab."
+      "graphqlUnsubscribe": "Stoppt ein bereits offenes GraphQL-Abonnement (deklariert durch einen GraphQL-Abonnieren-Knoten) und baut dessen SSE-Stream ab.",
+      "stompConnect": "Öffnet eine dauerhafte STOMP-über-WebSocket-Verbindung: führt den CONNECT/CONNECTED-Handshake aus, abonniert dann jedes konfigurierte Ziel und gibt jeden empfangenen Frame an seinem Port weiter.",
+      "stompSend": "Sendet einen SEND-Frame über eine bereits geöffnete STOMP-Verbindung.",
+      "stompClose": "Sendet DISCONNECT und schließt eine bereits geöffnete STOMP-Verbindung."
     },
     "legend": {
       "title": "Legende",
@@ -2201,5 +2208,29 @@
       "headers": "Header",
       "body": "Body"
     }
+  },
+  "stomp": {
+    "connect": "Verbinden",
+    "disconnect": "Trennen",
+    "connected": "Verbunden",
+    "disconnected": "Getrennt",
+    "noMessages": "Noch keine Frames",
+    "version": "STOMP-Version",
+    "tabs": {
+      "connect": "Verbindung",
+      "subscriptions": "Abonnements",
+      "send": "Senden"
+    },
+    "ackMode": {
+      "auto": "auto",
+      "client": "client",
+      "clientIndividual": "client-individual"
+    },
+    "subscriptionIdLabel": "Abonnement-ID",
+    "removeSubscription": "Abonnement entfernen",
+    "addSubscription": "Abonnement hinzufügen",
+    "sendDestination": "Ziel",
+    "ack": "ACK",
+    "nack": "NACK"
   }
 }

@@ -284,6 +284,15 @@ declare global {
         isActive: (requestId: string) => Promise<boolean>
         onProgress: (callback: (data: RequestProgressData) => void) => (() => void)
         onMessage: (callback: (data: RedisMessageData) => void) => (() => void)
+      stomp: {
+        connect: (input: StompExecutionInput) => Promise<StompExecutionResult>
+        disconnect: (requestId: string) => Promise<boolean>
+        send: (requestId: string, body: string) => Promise<boolean>
+        ack: (requestId: string, messageId: string, subscriptionId: string) => Promise<boolean>
+        nack: (requestId: string, messageId: string, subscriptionId: string) => Promise<boolean>
+        isActive: (requestId: string) => Promise<boolean>
+        onProgress: (callback: (data: RequestProgressData) => void) => (() => void)
+        onMessage: (callback: (data: StompMessageData) => void) => (() => void)
       }
       odata: {
         execute: (input: ODataExecutionInput) => Promise<HTTPExecutionResult>
@@ -770,6 +779,8 @@ export interface WebSocketMessageData {
 
 /** SSE execution input */
 export interface SseExecutionInput {
+/** STOMP execution input */
+export interface StompExecutionInput {
   requestId: string
   timeout?: number
 }
@@ -822,6 +833,23 @@ export interface RedisExecutionResult {
   command?: string
   args?: string[]
   reply?: string
+/** One STOMP frame exchanged on the connection (sent or received). */
+export interface StompMessageItem {
+  direction: 'sent' | 'received'
+  command: string
+  subscription?: string
+  destination?: string
+  headers: Record<string, string>
+  body: string
+  timestamp: string
+}
+
+/** STOMP execution result */
+export interface StompExecutionResult {
+  requestId: string
+  success: boolean
+  connected: boolean
+  messages: StompMessageItem[]
   error?: string
   timings: {
     startedAt: string
@@ -840,12 +868,17 @@ export interface SseMessageData {
 export interface RedisMessageData {
   requestId: string
   message: RedisMessageItem
+/** Payload of the `stomp:message` broadcast (one streamed frame for a request). */
+export interface StompMessageData {
+  requestId: string
+  message: StompMessageItem
 }
 
 /** Full request data for backend processing */
 export interface FullRequestData {
   id: string
   requestType: 'http' | 'graphql' | 'grpc' | 'soap' | 'websocket' | 'sse' | 'odata' | 'auth' | 'jsonrpc' | 'jsonrpcBatch' | 'trpc' | 'amqp' | 'redis'
+  requestType: 'http' | 'graphql' | 'grpc' | 'soap' | 'websocket' | 'stomp' | 'odata' | 'auth'
   url: string
   headers: KeyValueData[]
   method?: string | undefined
@@ -903,6 +936,17 @@ export interface FullRequestData {
   // SSE specific (requestType === 'sse'): seed for the `Last-Event-ID`
   // header on the first connect. Mirrors the main-side ContextServiceTypes shape.
   lastEventId?: string | undefined
+  // STOMP specific (requestType === 'stomp'). `connectHeaders` + `sendHeaders`
+  // are ALSO merged into the top-level `headers` field above (so
+  // `collectRequestSecrets` sees both for pre-hydration) — these two carry the
+  // same rows split by which frame they belong to, for `StompExecutionService`
+  // to read separately.
+  stompVersion?: '1.1' | '1.2' | undefined
+  connectHeaders?: KeyValueData[] | undefined
+  subscriptions?: { id?: string; destination?: string; ackMode?: string }[] | undefined
+  sendDestination?: string | undefined
+  sendBody?: string | undefined
+  sendHeaders?: KeyValueData[] | undefined
   // OData specific (requestType === 'odata'). The main ContextService
   // appends the system query options ($filter / $select / …) to the
   // resolved URL. Mirrors the main-side ContextServiceTypes shape.

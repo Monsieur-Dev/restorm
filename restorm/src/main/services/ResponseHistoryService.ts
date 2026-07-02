@@ -43,6 +43,7 @@ import type { TrpcExecutionResult } from './TrpcExecutionService'
 import type { SseExecutionResult } from './SseExecutionService'
 import type { AmqpExecutionResult } from './AMQPExecutionService'
 import type { RedisExecutionResult } from './RedisExecutionService'
+import type { StompExecutionResult } from './StompExecutionService'
 import { normalizeODataResponse } from '../../shared/utils/odataResponse'
 import { redactTokensFromBody, collectTokenValues, redactTokensFromHeaders } from './AuthenticationRedaction'
 import { isAuthenticationRequest } from '../../shared/types/collections'
@@ -61,6 +62,7 @@ type ExecutionResult =
   | SseExecutionResult
   | AmqpExecutionResult
   | RedisExecutionResult
+  | StompExecutionResult
 
 /**
  * Compute the 3-way visual outcome (`ok` / `warning` / `failure`) for
@@ -122,6 +124,12 @@ function redisOutcome(result: RedisExecutionResult): ResponseHistoryOutcome {
   if (!result.success) return 'failure'
   if (result.mode === 'subscribe') return result.connected === true ? 'ok' : 'failure'
   return 'ok'
+}
+
+/** Same binary shape as WebSocket: a STOMP connection is either established
+ * (CONNECT/CONNECTED settled) or not. */
+function stompOutcome(result: StompExecutionResult): ResponseHistoryOutcome {
+  return result.success && result.connected ? 'ok' : 'failure'
 }
 
 function outcomeToSuccess(outcome: ResponseHistoryOutcome): boolean {
@@ -431,6 +439,7 @@ class ResponseHistoryService {
       sse: { build: (id, r) => this.buildSseResponse(id, r as SseExecutionResult), outcome: (r) => sseOutcome(r as SseExecutionResult) },
       amqp: { build: (id, r) => this.buildAmqpResponse(id, r as AmqpExecutionResult), outcome: (r) => amqpOutcome(r as AmqpExecutionResult) },
       redis: { build: (id, r) => this.buildRedisResponse(id, r as RedisExecutionResult), outcome: (r) => redisOutcome(r as RedisExecutionResult) }
+      stomp: { build: (id, r) => this.buildStompResponse(id, r as StompExecutionResult), outcome: (r) => stompOutcome(r as StompExecutionResult) }
     }
 
     const builder = builders[type]
@@ -803,6 +812,20 @@ class ResponseHistoryService {
         ...(msg.routingKey !== undefined ? { routingKey: msg.routingKey } : {}),
         ...(msg.deliveryTag !== undefined ? { deliveryTag: msg.deliveryTag } : {}),
         ...(msg.peek !== undefined ? { peek: msg.peek } : {}),
+  private buildStompResponse(requestId: string, result: StompExecutionResult): ResponseHistoryResponse | null {
+    const resolvedUrl = contextService.getResolvedUrl(requestId)?.resolvedUrl ?? result.requestUrl ?? ''
+
+    return {
+      type: 'stomp',
+      requestUrl: resolvedUrl,
+      connected: result.connected,
+      messages: result.messages.map((msg) => ({
+        direction: msg.direction,
+        command: msg.command,
+        subscription: msg.subscription,
+        destination: msg.destination,
+        headers: this.headersRecordToKeyValues(msg.headers),
+        body: msg.body,
         timestamp: msg.timestamp
       })),
       timings: result.timings,

@@ -24,3 +24,14 @@ a page yet — this index only lists the ones that do.
 For the underlying import-adapter pipeline that turns an external API
 specification (OpenAPI, WSDL, `.proto`, OpenRPC, …) into a ready-to-run
 Restorm collection, see [`../imports/index.md`](../imports/index.md).
+# Execution protocols
+
+User-facing documentation for each request/execution protocol Restorm
+supports. This directory is new as of the STOMP ticket — earlier protocols
+(HTTP, GraphQL, gRPC, SOAP, WebSocket, Socket.IO, MQTT, OData) don't have a
+doc here yet; add one under the same convention (`<protocol>.md`) when you
+touch one of them next, per
+[`docs/contributing/adding-a-protocol.md`](../contributing/adding-a-protocol.md).
+
+- [STOMP](./stomp.md) — Simple Text Oriented Messaging Protocol over
+  WebSocket (ActiveMQ, Spring brokers).

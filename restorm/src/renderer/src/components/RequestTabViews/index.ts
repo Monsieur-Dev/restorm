@@ -6,6 +6,7 @@ export { SoapRequestTabView, type SoapRequestTabViewProps } from './SoapRequestT
 export { SoapServerRequestTabView, type SoapServerRequestTabViewProps } from './SoapServerRequestTabView'
 export { WebSocketRequestTabView, type WebSocketRequestTabViewProps } from './WebSocketRequestTabView'
 export { SseRequestTabView, type SseRequestTabViewProps } from './SseRequestTabView'
+export { StompRequestTabView, type StompRequestTabViewProps } from './StompRequestTabView'
 export { ODataRequestTabView, type ODataRequestTabViewProps } from './ODataRequestTabView'
 export { JsonRpcRequestTabView, type JsonRpcRequestTabViewProps } from './JsonRpcRequestTabView'
 export { JsonRpcBatchRequestTabView, type JsonRpcBatchRequestTabViewProps } from './JsonRpcBatchRequestTabView'

@@ -280,7 +280,8 @@
         "odataServer": "OData 模擬伺服器",
         "trpc": "tRPC 請求",
         "amqp": "AMQP 請求",
-        "redis": "Redis 請求"
+        "redis": "Redis 請求",
+        "stomp": "STOMP 請求"
       }
     },
     "deleteConfirm": {
@@ -1196,7 +1197,10 @@
       "odataListen": "OData server",
       "odataClose": "OData close",
       "graphqlSubscribe": "GraphQL 訂閱",
-      "graphqlUnsubscribe": "GraphQL 取消訂閱"
+      "graphqlUnsubscribe": "GraphQL 取消訂閱",
+      "stompConnect": "STOMP 連線",
+      "stompSend": "STOMP 傳送",
+      "stompClose": "STOMP 關閉"
     },
     "comparator": {
       "result": "結果"
@@ -1794,7 +1798,10 @@
       "odataListen": "託管本地 OData v4 模擬服務並無限期監聽。一旦開始監聽便觸發 `connected`；每個被服務的請求都會在 `served` 連接埠重新發出其資料。伺服器持續執行，直到 OData 關閉（或 Stop），然後觸發 `done`。無 response 輸出——它只提供服務，不向外呼叫。",
       "odataClose": "停止一個已在監聽的 OData 模擬服務（由 OData 伺服器節點宣告），釋放其連接埠。",
       "graphqlSubscribe": "作為用戶端透過 SSE 開啟一個長期的 GraphQL 訂閱並監聽。串流一旦開啟，`connected` 即觸發；每個推送的酬載都會在 `message` 連接埠重新發出（訂閱僅接收，沒有具名事件）。串流會一直保持開啟，直到 GraphQL 取消訂閱（或停止），或伺服器將其完成，然後觸發 `done`。",
-      "graphqlUnsubscribe": "停止一個已開啟的 GraphQL 訂閱（由 GraphQL 訂閱節點宣告），並拆除其 SSE 串流。"
+      "graphqlUnsubscribe": "停止一個已開啟的 GraphQL 訂閱（由 GraphQL 訂閱節點宣告），並拆除其 SSE 串流。",
+      "stompConnect": "建立一個長期的基於 WebSocket 的 STOMP 連線：執行 CONNECT/CONNECTED 交握，然後訂閱每個已設定的目的地，並在其連接埠上重新發出每個接收到的訊框。",
+      "stompSend": "在已開啟的 STOMP 連線上傳送一個 SEND 訊框。",
+      "stompClose": "傳送 DISCONNECT 並關閉已開啟的 STOMP 連線。"
     },
     "legend": {
       "title": "圖例",
@@ -2200,5 +2207,29 @@
       "headers": "標頭",
       "body": "內文"
     }
+  },
+  "stomp": {
+    "connect": "連線",
+    "disconnect": "中斷連線",
+    "connected": "已連線",
+    "disconnected": "已中斷",
+    "noMessages": "尚無訊框",
+    "version": "STOMP 版本",
+    "tabs": {
+      "connect": "連線",
+      "subscriptions": "訂閱",
+      "send": "傳送"
+    },
+    "ackMode": {
+      "auto": "auto",
+      "client": "client",
+      "clientIndividual": "client-individual"
+    },
+    "subscriptionIdLabel": "訂閱 ID",
+    "removeSubscription": "移除訂閱",
+    "addSubscription": "新增訂閱",
+    "sendDestination": "目的地",
+    "ack": "ACK",
+    "nack": "NACK"
   }
 }

@@ -61,6 +61,7 @@ export type HTTPRequestBody =
 export interface FullRequestData {
   id: string
   requestType: 'http' | 'graphql' | 'grpc' | 'soap' | 'websocket' | 'sse' | 'odata' | 'auth' | 'jsonrpc' | 'jsonrpcBatch' | 'trpc' | 'amqp' | 'redis'
+  requestType: 'http' | 'graphql' | 'grpc' | 'soap' | 'websocket' | 'stomp' | 'odata' | 'auth'
 
   // Common fields
   url: string
@@ -138,6 +139,16 @@ export interface FullRequestData {
   // SSE specific
   /** Seed for the `Last-Event-ID` header on the first connect. */
   lastEventId?: string
+  // STOMP specific (requestType === 'stomp'). `connectHeaders` + `sendHeaders`
+  // are ALSO merged into the top-level `headers` field above (so
+  // `collectRequestSecrets` sees both for pre-hydration) — these two carry the
+  // same rows split by which frame they belong to.
+  stompVersion?: '1.1' | '1.2'
+  connectHeaders?: KeyValue[]
+  subscriptions?: { id?: string; destination?: string; ackMode?: string }[]
+  sendDestination?: string
+  sendBody?: string
+  sendHeaders?: KeyValue[]
 
   // OData specific — carried verbatim through URLResolver, which
   // appends the system query options ($filter / $select / $top /

@@ -12,6 +12,7 @@ import { logger, getSettingsService, isSettingsServiceInitialized } from 'electr
 import { collectionStore } from '../services/CollectionStore'
 import { websocketExecutionService } from '../services/WebSocketExecutionService'
 import { sseExecutionService } from '../services/SseExecutionService'
+import { stompExecutionService } from '../services/StompExecutionService'
 import { httpExecutionService } from '../services/HTTPExecutionService'
 import { soapExecutionService } from '../services/SOAPExecutionService'
 import { graphqlMockServerService } from '../services/GraphQLMockServerService'
@@ -281,6 +282,11 @@ export class ScenarioEngine {
             ? websocketExecutionService.connectStreamingRawServer(req)
             : websocketExecutionService.connectStreamingRaw(req)
         }
+        // STOMP: a client only (no server mode) — connects, does the
+        // CONNECT/CONNECTED handshake, SUBSCRIBEs to the bound request's
+        // configured destinations; every received MESSAGE/ERROR frame
+        // re-emits on `message`.
+        if (req.transport === 'stomp') return stompExecutionService.connectStreamingStomp(req)
         return isServer
           ? websocketExecutionService.connectStreamingServer(req)
           : websocketExecutionService.connectStreaming(req)

@@ -214,6 +214,24 @@ services:
       timeout: 3s
       retries: 10
       start_period: 5s
+  # STOMP - ActiveMQ (classic 5.x) broker used by the `stomp-execution` E2E
+  # suite. `rmohr/activemq` ships a `stomp+ws` transport connector on :61614
+  # out of the box (no custom `activemq.xml` needed) — unlike
+  # `apache/activemq-artemis`, whose default config only exposes plain STOMP
+  # (:61613) and needs an extra acceptor for STOMP-over-WebSocket, and whose
+  # first-boot time is noticeably slower in CI. `rmohr/activemq` starts in a
+  # few seconds, which is why it was picked over Artemis for this ticket.
+  activemq:
+    image: rmohr/activemq:5.15.9
+    container_name: restorm-activemq
+    ports:
+      - "61614:61614"
+    healthcheck:
+      test: ["CMD", "sh", "-c", "exec 3<>/dev/tcp/localhost/61614 && echo -en 'GET / HTTP/1.1\\r\\nHost: localhost\\r\\n\\r\\n' >&3"]
+      interval: 3s
+      timeout: 3s
+      retries: 15
+      start_period: 10s
 
   # NOTE: there is intentionally no Socket.IO nor raw-WebSocket mock service.
   # restorm hosts its OWN Socket.IO + raw-WebSocket servers (a "server mode"

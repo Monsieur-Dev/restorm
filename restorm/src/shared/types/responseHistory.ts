@@ -1,4 +1,5 @@
 export type ResponseHistoryRequestType = 'http' | 'odata' | 'graphql' | 'grpc' | 'soap' | 'websocket' | 'sse' | 'jsonrpc' | 'jsonrpcBatch' | 'trpc' | 'amqp' | 'redis'
+export type ResponseHistoryRequestType = 'http' | 'odata' | 'graphql' | 'grpc' | 'soap' | 'websocket' | 'stomp'
 
 /**
  * 3-way visual signal for the per-entry status dot in the history
@@ -314,6 +315,21 @@ export interface ResponseHistoryRedisResponse {
   command?: string
   args?: string[]
   reply?: string
+export interface ResponseHistoryStompMessage {
+  direction: 'sent' | 'received'
+  command: string
+  subscription?: string
+  destination?: string
+  headers: ResponseHistoryKeyValue[]
+  body: string
+  timestamp: string
+}
+
+export interface ResponseHistoryStompResponse {
+  type: 'stomp'
+  requestUrl: string
+  connected: boolean
+  messages: ResponseHistoryStompMessage[]
   timings: {
     startedAt: string
     durationMs: number
@@ -334,6 +350,7 @@ export type ResponseHistoryResponse =
   | ResponseHistorySseResponse
   | ResponseHistoryAmqpResponse
   | ResponseHistoryRedisResponse
+  | ResponseHistoryStompResponse
 
 export interface ResponseHistoryDetail {
   guid: string

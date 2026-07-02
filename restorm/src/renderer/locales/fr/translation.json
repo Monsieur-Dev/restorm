@@ -281,7 +281,8 @@
         "odataServer": "Serveur OData fictif",
         "trpc": "Requête tRPC",
         "amqp": "Requête AMQP",
-        "redis": "Requête Redis"
+        "redis": "Requête Redis",
+        "stomp": "Requête STOMP"
       }
     },
     "deleteConfirm": {
@@ -1197,7 +1198,10 @@
       "odataListen": "Serveur OData",
       "odataClose": "Fermeture OData",
       "graphqlSubscribe": "Abonnement GraphQL",
-      "graphqlUnsubscribe": "Désabonnement GraphQL"
+      "graphqlUnsubscribe": "Désabonnement GraphQL",
+      "stompConnect": "Connexion STOMP",
+      "stompSend": "Envoi STOMP",
+      "stompClose": "Fermeture STOMP"
     },
     "comparator": {
       "result": "résultat"
@@ -1798,7 +1802,10 @@
       "odataListen": "Héberge un service OData v4 fictif local et écoute indéfiniment. « connected » se déclenche une fois le service démarré ; chaque requête servie réémet ses données sur le port « served ». Le service reste actif jusqu’à une fermeture OData (ou un Stop), puis « done » se déclenche. Pas de sortie response — il sert, il n’appelle pas.",
       "odataClose": "Arrête un service OData fictif déjà en écoute (déclaré par un nœud serveur OData) et libère son port.",
       "graphqlSubscribe": "Ouvre un abonnement GraphQL persistant côté client via SSE et écoute. `connected` se déclenche dès que le flux est ouvert ; chaque charge utile reçue est réémise sur le port `message` (un abonnement est en lecture seule, sans événements nommés). Le flux reste ouvert jusqu’à un désabonnement GraphQL (ou un arrêt), ou jusqu’à ce que le serveur le termine, puis `done` se déclenche.",
-      "graphqlUnsubscribe": "Arrête un abonnement GraphQL déjà ouvert (déclaré par un nœud d’abonnement GraphQL) en fermant son flux SSE."
+      "graphqlUnsubscribe": "Arrête un abonnement GraphQL déjà ouvert (déclaré par un nœud d’abonnement GraphQL) en fermant son flux SSE.",
+      "stompConnect": "Ouvre une connexion STOMP-sur-WebSocket persistante : effectue la négociation CONNECT/CONNECTED, puis s'abonne à chaque destination configurée et réémet chaque trame reçue sur son port.",
+      "stompSend": "Envoie une trame SEND sur une connexion STOMP déjà ouverte.",
+      "stompClose": "Envoie DISCONNECT et ferme une connexion STOMP déjà ouverte."
     },
     "legend": {
       "title": "Légende",
@@ -2201,5 +2208,29 @@
       "headers": "En-têtes",
       "body": "Corps"
     }
+  },
+  "stomp": {
+    "connect": "Connecter",
+    "disconnect": "Déconnecter",
+    "connected": "Connecté",
+    "disconnected": "Déconnecté",
+    "noMessages": "Aucune trame pour le moment",
+    "version": "Version STOMP",
+    "tabs": {
+      "connect": "Connexion",
+      "subscriptions": "Abonnements",
+      "send": "Envoi"
+    },
+    "ackMode": {
+      "auto": "auto",
+      "client": "client",
+      "clientIndividual": "client-individuel"
+    },
+    "subscriptionIdLabel": "Identifiant d'abonnement",
+    "removeSubscription": "Supprimer l'abonnement",
+    "addSubscription": "Ajouter un abonnement",
+    "sendDestination": "Destination",
+    "ack": "ACK",
+    "nack": "NACK"
   }
 }

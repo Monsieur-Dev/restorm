@@ -19,6 +19,7 @@ export type BadgeType =
   | 'WS' | 'MQTT' | 'SIO'
   // Server-Sent Events
   | 'SSE'
+  | 'WS' | 'MQTT' | 'SIO' | 'STOMP'
   // OData
   | 'ODATA'
   // tRPC
