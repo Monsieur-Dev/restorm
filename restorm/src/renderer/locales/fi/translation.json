@@ -874,6 +874,10 @@
         "description": "Bruno-tyyppisiä .bru-tiedostoja tai kansion vienti — Restorm lukee .bru-tekstimuodon skriptilohkoineen ja luo jokaisen pyynnön ensiluokkaisena Restorm-solmuna, joka on valmis lähetettäväksi.",
         "trademark": "Bruno on avoimen lähdekoodin ohjelmisto (MIT) tekijänä Anoop M. D., käytetään tässä sen ehtojen mukaisesti."
       },
+      "thunderclient": {
+        "description": "Tuletko Thunder Clientista? Pudota viety collection-JSON — Restorm lukee jokaisen pyynnön, kansion, otsikon ja rungon, ja rakentaa kokoelman uudelleen ajovalmiina Restorm-puuna.",
+        "trademark": "Thunder Client on omistajansa tavaramerkki, jota käytetään tässä vain yhteensopivuusviittauksena."
+      },
       "graphql": {
         "description": "Liitä GraphQL SDL (.graphql / .gql / liitos GraphQL-asiakkaastasi), niin Restorm rakentaa yhden pyynnön per operaatio, kytkettynä oikeaan query-/mutation-/subscription-tyyppiin valmiiksi rakennetuilla muuttujilla.",
         "trademark": "GraphQL on GraphQL Foundationin tavaramerkki, joka on Joint Development Foundationin projekti."
@@ -903,6 +907,10 @@
       "mqtt": {
         "description": "Liitä MQTT-välittäjän URL tai aiheluettelo — Restorm rakentaa publish-/subscribe-pyynnöt aiheittain, pitää yhteyden auki suoratoistoesikatseluja varten ja muistaa säilytettyjen viestien tilannekuvat, jotta voit toistaa ne myöhemmin.",
         "trademark": "MQTT on OASIS-standardi; MQTT-nimi ja -logo ovat OASIS Openin tavaramerkkejä."
+      },
+      "paw": {
+        "description": "Tuletko Pawsta? Pudota JSON-vientitiedostosi (File → Export → JSON sovelluksessa — natiivia .paw-pakettia ei lueta suoraan). Restorm rakentaa uudelleen jokaisen pyynnön, otsakkeen, sisällön ja ympäristön, ja yhdistää Pawn dynaamiset arvot (aikaleimat, satunnaiset merkkijonot, UUID:t) lähimpään Restorm-vastineeseen.",
+        "trademark": "Paw on RapidAPI, Inc:n rekisteröity tavaramerkki, käytetään tässä vain yhteensopivuusviittauksena."
       }
     },
     "loading": "Analysoidaan...",
@@ -1572,7 +1580,25 @@
       "code": "koodi",
       "modalTitle": "Muokkaa koodia",
       "result": "tulos",
-      "timeout": "Aikakatkaisu (s)"
+      "timeout": "Aikakatkaisu (s)",
+      "deps": {
+        "downloading": "Ladataan {{count}} pakettia: {{packages}}"
+      },
+      "packages": {
+        "title": "Paketit",
+        "caption": "Riippuvuudet",
+        "manage": "Hallitse paketteja",
+        "count": "{{count}} riip.",
+        "addShort": "Lisää",
+        "hint": "Kiinnitetyt ulkoiset paketit, jotka ratkaistaan ja tallennetaan välimuistiin ensimmäisellä ajokerralla ja ladataan sen jälkeen offline-tilassa. Vain puhtaat kielipaketit ovat tuettuja (Python: puhtaat Python-wheelit); kiinnitä tarkka versio.",
+        "empty": "Paketteja ei ole vielä lisätty.",
+        "remove": "Poista {{package}}",
+        "name": "Paketin nimi",
+        "namePlaceholder": "paketin nimi",
+        "version": "Versio",
+        "versionPlaceholder": "versio",
+        "add": "Lisää paketti"
+      }
     },
     "help": {
       "input": "Syöttää skenaarion syöteparametrit ja vakiot graafiin.",
@@ -1687,7 +1713,7 @@
       "projectPlaceholder": "<project.restorm>",
       "tokenPlaceholder": "<token>",
       "tokenNote": "Headless-ajo vaatii Restorm Pro -suunnitelman ja CI-tokenin.",
-      "tokenLink": "Hanki token →"
+      "tokenLink": "Hanki token"
     },
     "socketio": {
       "connectionNameLabel": "Connection name",

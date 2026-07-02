@@ -246,6 +246,15 @@ const IMPORT_FORMATS: readonly ImportFormat[] = [
     isPro: true
   },
   {
+    id: 'thunderclient',
+    title: 'Thunder Client',
+    logoSrc: null,
+    iconCodicon: 'zap',
+    descriptionKey: 'import.formats.thunderclient.description',
+    trademarkKey: 'import.formats.thunderclient.trademark',
+    isPro: true
+  },
+  {
     id: 'graphql',
     title: 'GraphQL',
     logoSrc: new URL('../../../../../assets/imgs/import-sources/graphql.svg', import.meta.url).href,
@@ -310,6 +319,18 @@ const IMPORT_FORMATS: readonly ImportFormat[] = [
     descriptionKey: 'import.formats.mqtt.description',
     trademarkKey: 'import.formats.mqtt.trademark',
     isPro: true
+  },
+  {
+    // No first-party Paw logo asset is shipped yet — a generic codicon
+    // stands in until one is added, same fallback the `logoSrc: null` +
+    // `iconCodicon` combination was built for.
+    id: 'paw',
+    title: 'Paw',
+    logoSrc: null,
+    iconCodicon: 'package',
+    descriptionKey: 'import.formats.paw.description',
+    trademarkKey: 'import.formats.paw.trademark',
+    isPro: false
   }
 ]
 

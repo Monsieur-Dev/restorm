@@ -875,6 +875,10 @@
         "description": ".bru datoteke u Bruno stilu ili izvoz mape — Restorm čita .bru tekstualni format, uključujući njegove blokove skripti, i ponovno stvara svaki zahtjev kao prvorazredni Restorm čvor spreman za slanje.",
         "trademark": "Bruno je softver otvorenog koda (MIT) autora Anoopa M. D., korišten ovdje pod njegovim uvjetima."
       },
+      "thunderclient": {
+        "description": "Dolazite iz Thunder Clienta? Ispustite izvezeni JSON kolekcije — Restorm čita svaki zahtjev, mapu, zaglavlje i tijelo, te ponovno izgrađuje kolekciju kao Restorm stablo spremno za pokretanje.",
+        "trademark": "Thunder Client je zaštitni znak svog vlasnika, ovdje korišten isključivo kao referenca kompatibilnosti."
+      },
       "graphql": {
         "description": "Zalijepite GraphQL SDL (.graphql / .gql / kopiranje iz vašeg GraphQL klijenta) i Restorm gradi jedan zahtjev po operaciji, povezan s ispravnim tipom query / mutation / subscription i sa strukturiranim varijablama.",
         "trademark": "GraphQL je zaštitni znak GraphQL zaklade, projekta Joint Development Foundation."
@@ -904,6 +908,10 @@
       "mqtt": {
         "description": "Zalijepite URL MQTT brokera ili katalog tema — Restorm gradi publish / subscribe zahtjeve po temi, održava vezu uživo za streaming previewa i pamti snapshotove zadržanih poruka kako biste ih kasnije mogli reproducirati.",
         "trademark": "MQTT je OASIS standard; naziv i logotip MQTT zaštitni su znakovi OASIS Open-a."
+      },
+      "paw": {
+        "description": "Dolazite iz Pawa? Ispustite svoj JSON izvoz (File → Export → JSON u aplikaciji — nativni .paw paket se ne čita izravno). Restorm ponovno gradi svaki zahtjev, zaglavlje, tijelo i okruženje, i mapira Pawove dinamičke vrijednosti (vremenske oznake, nasumične nizove, UUID-ove) na najbliži Restorm ekvivalent.",
+        "trademark": "Paw je registrirani zaštitni znak tvrtke RapidAPI, Inc., korišten ovdje samo kao referenca za kompatibilnost."
       }
     },
     "loading": "Analiziranje...",
@@ -1573,7 +1581,25 @@
       "code": "kôd",
       "modalTitle": "Uredi kôd",
       "result": "rezultat",
-      "timeout": "Vremensko ograničenje (s)"
+      "timeout": "Vremensko ograničenje (s)",
+      "deps": {
+        "downloading": "Preuzimanje {{count}} paketa: {{packages}}"
+      },
+      "packages": {
+        "title": "Paketi",
+        "caption": "Ovisnosti",
+        "manage": "Upravljanje paketima",
+        "count": "{{count}} ovis.",
+        "addShort": "Dodaj",
+        "hint": "Prikvačeni vanjski paketi, razriješeni i spremljeni u predmemoriju pri prvom pokretanju, zatim učitani izvanmrežno. Podržani su samo čisto jezični paketi (Python: čisti Python wheelovi); prikvačite točnu verziju.",
+        "empty": "Još nema dodanih paketa.",
+        "remove": "Ukloni {{package}}",
+        "name": "Naziv paketa",
+        "namePlaceholder": "naziv paketa",
+        "version": "Verzija",
+        "versionPlaceholder": "verzija",
+        "add": "Dodaj paket"
+      }
     },
     "help": {
       "input": "Ubacuje ulazne parametre scenarija i konstante u graf.",
@@ -1688,7 +1714,7 @@
       "projectPlaceholder": "<project.restorm>",
       "tokenPlaceholder": "<vaš_token>",
       "tokenNote": "Headless pokretanje zahtijeva Restorm Pro plan i CI token.",
-      "tokenLink": "Dohvati token →"
+      "tokenLink": "Dohvati token"
     },
     "socketio": {
       "connectionNameLabel": "Connection name",

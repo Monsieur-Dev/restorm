@@ -1,0 +1,39 @@
+- message: 🔵 [<time>] ▶ code-deps-chain
+- message: ⚪ [<time>] start code
+  data:
+    language: python
+    code: >-
+      # code-deps chain — Python link. Imports the pinned pure-Python wheel
+
+      # (installed OFFLINE from the code-deps cache) to prove install+mount
+      worked,
+
+      # then adds its marker to the pass-through dict for the next link.
+
+      import restormpydep
+
+      prev = input if isinstance(input, dict) else {}
+
+      print("python: restormpydep", restormpydep.__version__, "loaded")
+
+      {**prev, "python": restormpydep.__version__}
+- message: "🔵 [<time>] Downloading 1 package(s): restormpydep@1.0.0"
+- message: "🔵 [<time>] python: restormpydep 1.0.0 loaded"
+- message: ⚪ [<time>] done code
+  data:
+    result:
+      python: 1.0.0
+- message: ⚪ [<time>] start log
+  data:
+    level: info
+    message: code-deps chain result
+    data:
+      python: 1.0.0
+- message: 🔵 [<time>] code-deps chain result
+  data:
+    python: 1.0.0
+- message: ⚪ [<time>] done log
+  data:
+    value:
+      python: 1.0.0
+- message: 🔵 [<time>] ■ code-deps-chain

@@ -20,27 +20,40 @@ const LogMessageCell: React.FC<{ ts: string; message: string }> = ({ ts, message
   const [hover, setHover] = useState(false)
   const [truncated, setTruncated] = useState(false)
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const showTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  // Track whether the message overflows its container via ResizeObserver.
+  // This replaces the old 600ms delayed measurement, which was unreliable
+  // because it fired before the list item was fully laid out (or when the
+  // msgRef was null/stale due to virtualization). ResizeObserver fires on
+  // mount and whenever the element's border-box changes (e.g. the inspector
+  // panel is resized), keeping `truncated` always current.
+  useEffect(() => {
+    const el = msgRef.current
+    if (!el) return
+    const check = (): void => { setTruncated(el.scrollWidth > el.clientWidth) }
+    check()
+    const obs = new ResizeObserver(check)
+    obs.observe(el)
+    return () => { obs.disconnect() }
+  }, []) // mount/unmount only — ResizeObserver covers layout-driven size changes
+
+  // Re-check when the message text itself changes: scrollWidth can change even
+  // when the element's clientWidth (observed by ResizeObserver) stays the same.
+  useEffect(() => {
+    const el = msgRef.current
+    if (!el) return
+    setTruncated(el.scrollWidth > el.clientWidth)
+  }, [message])
+
   useEffect(() => () => {
     if (closeTimer.current) clearTimeout(closeTimer.current)
-    if (showTimer.current) clearTimeout(showTimer.current)
   }, [])
 
   const open = (): void => {
     if (closeTimer.current) { clearTimeout(closeTimer.current); closeTimer.current = null }
-    if (hover || showTimer.current) return // already shown, or appearance pending
-    // Delay before the tooltip appears, so a quick pass over the row doesn't
-    // flash it. Measuring happens when it actually shows.
-    showTimer.current = setTimeout(() => {
-      showTimer.current = null
-      const el = msgRef.current
-      setTruncated(el !== null && el.scrollWidth > el.clientWidth)
-      setHover(true)
-    }, 600)
+    setHover(true)
   }
   const scheduleClose = (): void => {
-    // Cancel a still-pending appearance (the user left before it showed).
-    if (showTimer.current) { clearTimeout(showTimer.current); showTimer.current = null }
     if (closeTimer.current) clearTimeout(closeTimer.current)
     closeTimer.current = setTimeout(() => { setHover(false) }, 160)
   }
@@ -146,10 +159,15 @@ export const ScenarioRunLogView: React.FC<ScenarioRunLogViewProps> = ({ logs, te
   const logItems: ListViewItemData[] = visibleLogs.map((e, i) => {
     const level = e.level ?? 'info'
     if (e.nodeId) emitterByRow.set(`log-${i}`, { nodeId: e.nodeId, ...(e.scenarioId !== undefined ? { scenarioId: e.scenarioId } : {}) })
+    // An entry may carry an i18n key (main emits no translations); translate it
+    // for display, falling back to the English `message`. Copy/CLI keep `message`.
+    const display = e.messageKey
+      ? t(e.messageKey, { ...(e.messageArgs ?? {}), defaultValue: asText(e.message) })
+      : asText(e.message)
     const item: ListViewItemData = {
       id: `log-${i}`,
       icon: <span className={`scn-log-dot scn-log-dot-${level}`} aria-hidden="true" />,
-      title: <LogMessageCell ts={logTs(e.ts)} message={asText(e.message)} />
+      title: <LogMessageCell ts={logTs(e.ts)} message={display} />
     }
     if (e.data !== undefined) {
       const tree = buildScenarioPathTree(typeof e.data === 'object' && e.data !== null ? (e.data as Record<string, unknown>) : { value: e.data })

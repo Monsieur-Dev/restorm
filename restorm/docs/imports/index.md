@@ -9,6 +9,17 @@ route incoming files / URLs / pasted content to the right adapter.
 | --- | --- |
 | OpenAPI 2.0 / 3.0 / 3.1 (Swagger) | [`openapi.md`](./openapi.md) |
 | OData v2 / v3 / v4 (EDMX + JSON-CSDL) | [`odata.md`](./odata.md) |
+| HAR (HTTP Archive) | [`har.md`](./har.md) |
+| REST Client (`.http` / `.rest`) | [`rest-client.md`](./rest-client.md) |
+| Thunder Client collections | [`thunder-client.md`](./thunder-client.md) |
+| Paw (JSON export) | [`paw.md`](./paw.md) |
+| HTTPie (Desktop collections + CLI sessions) | [`httpie.md`](./httpie.md) |
+| Smithy (AWS API modeling — JSON AST + `.smithy` IDL) | [`smithy.md`](./smithy.md) |
+| RAML 1.0 / 0.8 | [`raml.md`](./raml.md) |
+| WADL (Web Application Description Language) | [`wadl.md`](./wadl.md) |
+| API Blueprint (`.apib`) | [`api-blueprint.md`](./api-blueprint.md) |
+| Apache Thrift IDL (`.thrift`, documentation only) | [`thrift.md`](./thrift.md) |
+| TypeSpec (`.tsp`, via `tsp compile` → OpenAPI) | [`typespec.md`](./typespec.md) |
 
 For periodic re-checks of an already-imported spec (Swagger,
 OpenAPI 3, GraphQL, Postman, Insomnia, Bruno, AsyncAPI, gRPC, SOAP,

@@ -32,11 +32,8 @@ import { collectionStore } from '../../services/CollectionStore'
 import { contextService } from '../../services/ContextService'
 import type { FullRequestData } from '../../services/ContextServiceTypes'
 import { responseHistoryService } from '../../services'
-import { httpExecutionService } from '../../services/HTTPExecutionService'
-import { graphqlExecutionService } from '../../services/GraphQLExecutionService'
-import { soapExecutionService } from '../../services/SOAPExecutionService'
-import { grpcExecutionService } from '../../services/GRPCExecutionService'
 import { websocketExecutionService } from '../../services/WebSocketExecutionService'
+import { PROTOCOL_EXECUTORS } from '../../protocol/executorRegistry'
 import { isHTTPRequest, isGraphQLRequest, isGrpcRequest, isSoapRequest, isODataRequest, isAuthenticationRequest, isWebSocketRequest, isEnvironmentFolder } from '../../../shared/types/collections'
 import type { HTTPRequest, GraphQLRequest, GrpcRequest, SoapRequest, WebSocketRequest, AuthenticationRequest, ODataRequest, KeyValue, EnvironmentFolder } from '../../../shared/types/collections'
 import { isRequest, type FolderItem, type Request } from '../../../shared/models'
@@ -581,19 +578,12 @@ export function registerExecutionTools(mcp: McpService): void {
       const req = target
       const timeoutMs = typeof argRecord['timeoutMs'] === 'number' ? argRecord['timeoutMs'] : null
 
-      switch (req.type) {
-        case 'http':
-        case 'odata':
-        case 'graphql':
-        case 'soap':
-        case 'grpc':
-        case 'auth':
-          return jsonReply(await runUnaryRequest(req, timeoutMs ?? 30_000))
-        case 'websocket':
-          return jsonReply(await runStreamingWebsocketRequest(req, timeoutMs ?? 2_000))
-        default:
-          return errorReply(`run_request: unknown protocol "${(req as { type?: string }).type ?? '?'}"`)
-      }
+      const executor = PROTOCOL_EXECUTORS[req.type]
+      return jsonReply(
+        executor.streaming
+          ? await runStreamingWebsocketRequest(req, timeoutMs ?? 2_000)
+          : await runUnaryRequest(req, timeoutMs ?? 30_000)
+      )
     }
   )
 
@@ -624,28 +614,7 @@ export function registerExecutionTools(mcp: McpService): void {
       }
       const req = target
 
-      let cancelled: boolean
-      switch (req.type) {
-        case 'http':
-        case 'odata':
-        case 'auth':
-          cancelled = httpExecutionService.cancel(id)
-          break
-        case 'graphql':
-          cancelled = graphqlExecutionService.cancel(id)
-          break
-        case 'soap':
-          cancelled = soapExecutionService.cancel(id)
-          break
-        case 'grpc':
-          cancelled = grpcExecutionService.cancel(id)
-          break
-        case 'websocket':
-          cancelled = websocketExecutionService.disconnect(id)
-          break
-        default:
-          return errorReply(`cancel_request: unknown protocol "${(req as { type?: string }).type ?? '?'}"`)
-      }
+      const cancelled = PROTOCOL_EXECUTORS[req.type].cancel(id)
       return jsonReply({ requestId: id, protocol: req.type, cancelled })
     }
   )
@@ -689,22 +658,10 @@ export function registerExecutionTools(mcp: McpService): void {
           })
         }
         const req = target
-        let result: unknown
-        switch (req.type) {
-          case 'http':
-          case 'odata':
-          case 'graphql':
-          case 'soap':
-          case 'grpc':
-          case 'auth':
-            result = await runUnaryRequest(req, timeoutMs ?? 30_000)
-            break
-          case 'websocket':
-            result = await runStreamingWebsocketRequest(req, 2_000)
-            break
-          default:
-            result = { error: { code: 'UNKNOWN_PROTOCOL', message: `protocol "${(req as { type?: string }).type ?? '?'}" not supported by run_request_batch` } }
-        }
+        const executor = PROTOCOL_EXECUTORS[req.type]
+        const result: unknown = executor.streaming
+          ? await runStreamingWebsocketRequest(req, 2_000)
+          : await runUnaryRequest(req, timeoutMs ?? 30_000)
         results.push(result)
       }
       return jsonReply({ ranCount: results.length, requestedCount: ids.length, results })

@@ -874,6 +874,10 @@
         "description": "File .bru singoli o un export di cartella — Restorm legge il formato testuale .bru, blocchi di scripting inclusi, e ricrea ogni richiesta come nodo Restorm di prima classe pronto da inviare.",
         "trademark": "Bruno è software open source (MIT) di Anoop M. D., utilizzato qui secondo i suoi termini."
       },
+      "thunderclient": {
+        "description": "Vieni da Thunder Client? Trascina il JSON della collezione esportata — Restorm legge ogni richiesta, cartella, header e body, quindi ricostruisce la collezione come un albero Restorm pronto all'uso.",
+        "trademark": "Thunder Client è un marchio del rispettivo proprietario, usato qui solo come riferimento di compatibilità."
+      },
       "graphql": {
         "description": "Incolli un SDL GraphQL (.graphql / .gql / un copia-incolla dal Suo client GraphQL) e Restorm genera una richiesta per operazione, già collegata al tipo query / mutation / subscription corretto con le variabili strutturate.",
         "trademark": "GraphQL è un marchio della GraphQL Foundation, progetto della Joint Development Foundation."
@@ -903,6 +907,10 @@
       "mqtt": {
         "description": "Incolli l'URL di un broker MQTT o un catalogo di topic — Restorm genera richieste publish / subscribe per topic, mantiene la connessione attiva per le anteprime in streaming e conserva gli snapshot dei messaggi retained in modo da poterli riprodurre più tardi.",
         "trademark": "MQTT è uno standard OASIS; il nome e il logo MQTT sono marchi di OASIS Open."
+      },
+      "paw": {
+        "description": "Viene da Paw? Lasci il Suo export JSON (File → Export → JSON nell'app — il bundle nativo .paw non viene letto direttamente). Restorm ricostruisce ogni richiesta, header, body e ambiente, e mappa i valori dinamici di Paw (timestamp, stringhe casuali, UUID) sull'equivalente Restorm più vicino.",
+        "trademark": "Paw è un marchio registrato di RapidAPI, Inc., utilizzato qui solo come riferimento di compatibilità."
       }
     },
     "loading": "Analisi in corso...",
@@ -1572,7 +1580,25 @@
       "code": "codice",
       "modalTitle": "Modifica codice",
       "result": "risultato",
-      "timeout": "Timeout (s)"
+      "timeout": "Timeout (s)",
+      "deps": {
+        "downloading": "Download di {{count}} pacchetto/i: {{packages}}"
+      },
+      "packages": {
+        "title": "Pacchetti",
+        "caption": "Dipendenze",
+        "manage": "Gestisci pacchetti",
+        "count": "{{count}} dip.",
+        "addShort": "Aggiungi",
+        "hint": "Pacchetti esterni fissati, risolti e memorizzati nella cache alla prima esecuzione, poi caricati offline. Sono supportati solo i pacchetti in puro linguaggio (Python: wheel puri Python); fissa la versione esatta.",
+        "empty": "Nessun pacchetto ancora aggiunto.",
+        "remove": "Rimuovi {{package}}",
+        "name": "Nome del pacchetto",
+        "namePlaceholder": "nome del pacchetto",
+        "version": "Versione",
+        "versionPlaceholder": "versione",
+        "add": "Aggiungi pacchetto"
+      }
     },
     "help": {
       "input": "Inietta i parametri di ingresso dello scenario e le costanti nel grafo.",
@@ -1687,7 +1713,7 @@
       "projectPlaceholder": "<project.restorm>",
       "tokenPlaceholder": "<il_tuo_token>",
       "tokenNote": "Un'esecuzione headless richiede un piano Restorm Pro e un token CI.",
-      "tokenLink": "Ottieni un token →"
+      "tokenLink": "Ottieni un token"
     },
     "socketio": {
       "connectionNameLabel": "Connection name",

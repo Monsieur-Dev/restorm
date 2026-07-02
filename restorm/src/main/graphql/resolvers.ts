@@ -10,6 +10,7 @@ import { searchService, logger } from 'electron-core-ui/main'
 import { contextService, responseHistoryService } from '../services'
 import { collectionStore, pubsub, PUBSUB_TOPICS } from '../services/CollectionStore'
 import { REQUEST_TYPES } from '../../shared/models/types'
+import { graphqlTypeNameForRequestType } from '../../shared/protocolRegistry'
 
 // ---------------------------------------------------------------------------
 // Mutation input validation
@@ -60,30 +61,16 @@ export function getCollectionsStore(): unknown[] {
   return collectionStore.getCollections()
 }
 
-/**
- * Map a request `type` discriminant to its GraphQL union member name. Returns
- * `null` for an unknown discriminant so the caller can throw with context — a
- * silent default (the old `'HTTPRequest'` fallback) made an odata/auth request
- * resolve as HTTPRequest and drop its protocol-specific fields.
- */
-function resolveRequestType(type: unknown): string | null {
-  switch (type) {
-    case 'http': return 'HTTPRequest'
-    case 'graphql': return 'GraphQLRequest'
-    case 'grpc': return 'GrpcRequest'
-    case 'soap': return 'SoapRequest'
-    case 'websocket': return 'WebSocketRequest'
-    case 'odata': return 'ODataRequest'
-    case 'auth': return 'AuthenticationRequest'
-    default: return null
-  }
-}
-
 // Type resolver for union types
 const typeResolvers = {
   Request: {
     __resolveType(obj: Record<string, unknown>): string {
-      const resolved = resolveRequestType(obj.type)
+      // Map the `type` discriminant to its GraphQL union member name via the
+      // protocol registry. `null` for an unknown discriminant so we throw with
+      // context — a silent default (the old `'HTTPRequest'` fallback) made an
+      // odata/auth request resolve as HTTPRequest and drop protocol-specific
+      // fields.
+      const resolved = graphqlTypeNameForRequestType(obj.type)
       if (resolved === null) {
         throw new Error(`Cannot resolve GraphQL Request type for discriminant "${String(obj.type)}"`)
       }
@@ -94,7 +81,7 @@ const typeResolvers = {
     __resolveType(obj: Record<string, unknown>): string {
       if (obj.folderType === 'environment') return 'EnvironmentFolder'
       if (obj.items !== undefined && obj.type === undefined) return 'Folder'
-      const resolved = resolveRequestType(obj.type)
+      const resolved = graphqlTypeNameForRequestType(obj.type)
       if (resolved === null) {
         throw new Error(`Cannot resolve GraphQL FolderItem type for discriminant "${String(obj.type)}"`)
       }

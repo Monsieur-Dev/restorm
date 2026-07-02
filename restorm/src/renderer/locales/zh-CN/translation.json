@@ -873,6 +873,10 @@
         "description": "Bruno 的 .bru 文件或文件夹导出——restorm 会读取 .bru 文本格式（包括其脚本块），并将每个请求重建为一流的、可立即发送的 restorm 节点。",
         "trademark": "Bruno 是 Anoop M. D. 开发的开源软件（MIT），在此按其许可证条款使用。"
       },
+      "thunderclient": {
+        "description": "从 Thunder Client 迁移过来？拖入导出的集合 JSON——restorm 会读取每个请求、文件夹、请求头和请求体，然后将集合重建为可立即运行的 restorm 树。",
+        "trademark": "Thunder Client 是其各自所有者的商标，此处仅用于兼容性参考。"
+      },
       "graphql": {
         "description": "粘贴 GraphQL SDL（.graphql / .gql 或从您的 GraphQL 客户端复制的内容），restorm 会为每个操作搭建一个请求，准确连接到对应的 query / mutation / subscription 类型，并已结构化变量。",
         "trademark": "GraphQL 是 Joint Development Foundation 项目 GraphQL Foundation 的商标。"
@@ -902,6 +906,10 @@
       "mqtt": {
         "description": "粘贴 MQTT broker URL 或主题目录——restorm 会按主题搭建 publish / subscribe 请求，保持连接以进行流式预览，并记住保留消息快照供日后回放。",
         "trademark": "MQTT 是 OASIS 标准；MQTT 名称和标志是 OASIS Open 的商标。"
+      },
+      "paw": {
+        "description": "从 Paw 迁移过来？拖入您的 JSON 导出文件（应用内 File → Export → JSON——不会直接读取原生 .paw 包）。restorm 会重建每个请求、请求头、正文和环境，并将 Paw 的动态值（时间戳、随机字符串、UUID）映射到最接近的 restorm 等效项。",
+        "trademark": "Paw 是 RapidAPI, Inc. 的注册商标，此处仅用于兼容性参考。"
       }
     },
     "loading": "正在分析...",
@@ -1571,7 +1579,25 @@
       "code": "代码",
       "modalTitle": "编辑代码",
       "result": "结果",
-      "timeout": "超时 (秒)"
+      "timeout": "超时 (秒)",
+      "deps": {
+        "downloading": "正在下载 {{count}} 个软件包：{{packages}}"
+      },
+      "packages": {
+        "title": "软件包",
+        "caption": "依赖项",
+        "manage": "管理软件包",
+        "count": "{{count}} 个依赖",
+        "addShort": "添加",
+        "hint": "固定的外部软件包，在首次运行时解析并缓存，之后离线加载。仅支持纯语言软件包（Python：纯 Python wheel）；请固定确切版本。",
+        "empty": "尚未添加软件包。",
+        "remove": "移除 {{package}}",
+        "name": "软件包名称",
+        "namePlaceholder": "软件包名称",
+        "version": "版本",
+        "versionPlaceholder": "版本",
+        "add": "添加软件包"
+      }
     },
     "help": {
       "input": "将场景的输入参数和常量注入图中。",
@@ -1686,7 +1712,7 @@
       "projectPlaceholder": "<project.restorm>",
       "tokenPlaceholder": "<token>",
       "tokenNote": "无头运行需要 Restorm Pro 计划和 CI 令牌。",
-      "tokenLink": "获取令牌 →"
+      "tokenLink": "获取令牌"
     },
     "socketio": {
       "connectionNameLabel": "Connection name",

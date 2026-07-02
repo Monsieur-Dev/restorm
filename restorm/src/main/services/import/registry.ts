@@ -23,8 +23,20 @@ export interface ImportProvider {
    * provider).
    */
   canImport(content: string, filePath?: string): boolean
-  /** Full parse → EnvironmentFolder. Called only after `canImport` returned true. */
-  parse(content: string, opts: { sourceUrl?: string }): EnvironmentFolder
+  /**
+   * Full parse → EnvironmentFolder. Called only after `canImport` returned
+   * true. `opts.filePath` carries the real on-disk path for file-based
+   * imports (unset for URL imports) — most adapters are self-contained and
+   * ignore it, but a format whose own compiler needs disk locality to
+   * resolve ITS imports (e.g. a sibling format's compiler resolving a
+   * relative `import` via Node module resolution from the file's
+   * directory) needs the real path, not just the extracted `content`
+   * string. TypeSpec's importer also reads `opts.filePath`, but only to
+   * gate its file-based-only scope decision (paste/URL rejected) — it
+   * deliberately does NOT compile at that real path; see
+   * `TypeSpecImportService.ts`'s Trust model note for why.
+   */
+  parse(content: string, opts: { sourceUrl?: string; filePath?: string }): EnvironmentFolder
 }
 
 /**

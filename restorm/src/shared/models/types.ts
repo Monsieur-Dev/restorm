@@ -38,9 +38,12 @@ export type GrpcCallType = (typeof GRPC_CALL_TYPES)[number]
 export const WEBSOCKET_PROTOCOLS = ['websocket', 'socketio', 'mqtt'] as const
 export type WebSocketProtocol = (typeof WEBSOCKET_PROTOCOLS)[number]
 
-/** Request type discriminator */
-export const REQUEST_TYPES = ['http', 'graphql', 'grpc', 'soap', 'websocket', 'odata', 'auth'] as const
-export type RequestType = (typeof REQUEST_TYPES)[number]
+/** Request type discriminator. Both the runtime tuple and the union are derived
+ * from the single-source-of-truth {@link PROTOCOL_REGISTRY}; re-exported here so
+ * the long-standing `models/types` import path keeps working. Adding a protocol
+ * is one entry in `shared/protocolRegistry.ts`. */
+export { REQUEST_TYPES } from '../protocolRegistry'
+export type { RequestType } from '../protocolRegistry'
 
 /** OData protocol version. The type keeps all three versions so the
  * persisted shape is stable across phases; the execution engine only

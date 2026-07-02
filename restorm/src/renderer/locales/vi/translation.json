@@ -873,6 +873,10 @@
         "description": "Tệp .bru kiểu Bruno hoặc xuất thư mục — Restorm đọc định dạng văn bản .bru, bao gồm các khối scripting, và tái tạo mỗi yêu cầu thành nút Restorm hạng nhất sẵn sàng gửi.",
         "trademark": "Bruno là phần mềm mã nguồn mở (MIT) của Anoop M. D., được sử dụng ở đây theo các điều khoản của nó."
       },
+      "thunderclient": {
+        "description": "Bạn đang chuyển từ Thunder Client? Thả tệp JSON của bộ sưu tập đã xuất — Restorm đọc từng yêu cầu, thư mục, tiêu đề và nội dung, sau đó dựng lại bộ sưu tập thành cây Restorm sẵn sàng chạy.",
+        "trademark": "Thunder Client là thương hiệu của chủ sở hữu tương ứng, được sử dụng ở đây chỉ nhằm mục đích tham chiếu tương thích."
+      },
       "graphql": {
         "description": "Dán SDL GraphQL (.graphql / .gql / một bản dán từ client GraphQL của bạn) và Restorm tạo khung một yêu cầu cho mỗi thao tác, được kết nối đúng với kiểu query / mutation / subscription với các biến đã được cấu trúc sẵn.",
         "trademark": "GraphQL là nhãn hiệu của GraphQL Foundation, một dự án của Joint Development Foundation."
@@ -902,6 +906,10 @@
       "mqtt": {
         "description": "Dán URL broker MQTT hoặc danh mục topic — Restorm tạo khung yêu cầu publish / subscribe cho mỗi topic, giữ kết nối hoạt động để xem trước trực tiếp, và ghi nhớ snapshot tin nhắn retained để bạn có thể phát lại sau.",
         "trademark": "MQTT là một tiêu chuẩn OASIS; tên và logo MQTT là nhãn hiệu của OASIS Open."
+      },
+      "paw": {
+        "description": "Đến từ Paw? Thả tệp xuất JSON của bạn (File → Export → JSON trong ứng dụng — gói .paw gốc không được đọc trực tiếp). Restorm dựng lại mọi yêu cầu, header, body và môi trường, đồng thời ánh xạ các giá trị động của Paw (dấu thời gian, chuỗi ngẫu nhiên, UUID) sang giá trị tương đương gần nhất trong Restorm.",
+        "trademark": "Paw là nhãn hiệu đã đăng ký của RapidAPI, Inc., được sử dụng ở đây chỉ để tham chiếu tương thích."
       }
     },
     "loading": "Đang phân tích...",
@@ -1571,7 +1579,25 @@
       "code": "mã",
       "modalTitle": "Sửa mã",
       "result": "kết quả",
-      "timeout": "Thời gian chờ (s)"
+      "timeout": "Thời gian chờ (s)",
+      "deps": {
+        "downloading": "Đang tải {{count}} gói: {{packages}}"
+      },
+      "packages": {
+        "title": "Gói",
+        "caption": "Phụ thuộc",
+        "manage": "Quản lý gói",
+        "count": "{{count}} phụ thuộc",
+        "addShort": "Thêm",
+        "hint": "Các gói bên ngoài được ghim, được phân giải và lưu vào bộ nhớ đệm trong lần chạy đầu tiên, sau đó tải ngoại tuyến. Chỉ hỗ trợ các gói thuần ngôn ngữ (Python: wheel thuần Python); hãy ghim phiên bản chính xác.",
+        "empty": "Chưa có gói nào được thêm.",
+        "remove": "Xóa {{package}}",
+        "name": "Tên gói",
+        "namePlaceholder": "tên gói",
+        "version": "Phiên bản",
+        "versionPlaceholder": "phiên bản",
+        "add": "Thêm gói"
+      }
     },
     "help": {
       "input": "Tiêm các tham số đầu vào của kịch bản và các hằng số vào đồ thị.",
@@ -1686,7 +1712,7 @@
       "projectPlaceholder": "<project.restorm>",
       "tokenPlaceholder": "<token>",
       "tokenNote": "Chạy headless yêu cầu gói Restorm Pro và token CI.",
-      "tokenLink": "Lấy token →"
+      "tokenLink": "Lấy token"
     },
     "socketio": {
       "connectionNameLabel": "Connection name",

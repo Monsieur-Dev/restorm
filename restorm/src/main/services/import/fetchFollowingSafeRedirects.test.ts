@@ -1,11 +1,8 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 
-// Mock the ECUI logger so importing ImportManager doesn't need the Electron
-// runtime. assertSafeFetchUrl stays REAL — it's the per-hop guard under test.
-vi.mock('electron-core-ui/main', () => ({ logger: { info: vi.fn(), debug: vi.fn(), warn: vi.fn(), error: vi.fn() } }))
-vi.mock('electron-core-ui', () => ({ withFirewallBypass: <T>(fn: () => T): T => fn() }))
-
-import { fetchFollowingSafeRedirects } from './ImportManager'
+// `fetchFollowingSafeRedirects` lives in the leaf `utils/urlSecurity` (no
+// Electron deps), alongside the real `assertSafeFetchUrl` per-hop guard it uses.
+import { fetchFollowingSafeRedirects } from '../../utils/urlSecurity'
 
 function redirect(location: string): Response {
   return new Response(null, { status: 302, headers: { location } })

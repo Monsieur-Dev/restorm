@@ -94,17 +94,17 @@
 }
 
 /* Editor side panel: a run toolbar, the workflow errors, and the selected-box
- * preview — stacked sections split by separators, anchored top-right. */
+ * preview — stacked sections split by separators, anchored top-right.
+ * Width is managed in JS (draggable sash, persisted in localStorage); the
+ * min-width here is a CSS fallback matching the JS enforcement. Height is
+ * set in JS to min(content, available) so the response tree's ListView can
+ * scroll (max-height alone leaves height `auto`; height:100% never resolves). */
 .scn-inspector {
   position: absolute;
   top: 8px;
   right: 8px;
   z-index: 5;
-  width: 320px;
-  /* Height is set in JS to min(content, available) — a definite pixel height,
-   * which is what lets the response tree's ListView scroll (max-height alone
-   * leaves the computed height `auto`, so height:100% never resolves). The
-   * max-height is a pre-measure fallback. */
+  min-width: 450px;
   max-height: calc(100% - 16px);
   display: flex;
   flex-direction: column;

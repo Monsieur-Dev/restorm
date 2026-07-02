@@ -1,0 +1,103 @@
+{
+  "clientName": "Thunder Client",
+  "collectionName": "Thunder Client Sample",
+  "collectionId": "col-abc123",
+  "dateExported": "2026-01-01T00:00:00.000Z",
+  "version": "1.1",
+  "folders": [
+    { "id": "folder-pets", "name": "Pets", "containerId": "", "sortNum": 10000 },
+    { "id": "folder-pets-admin", "name": "Admin", "containerId": "folder-pets", "sortNum": 10000 }
+  ],
+  "requests": [
+    {
+      "id": "req-list-pets",
+      "name": "List pets",
+      "url": "{{baseUrl}}/pets",
+      "method": "GET",
+      "containerId": "folder-pets",
+      "sortNum": 10000,
+      "headers": [
+        { "name": "Accept", "value": "application/json" }
+      ],
+      "params": [
+        { "name": "limit", "value": "10", "isPath": false },
+        { "name": "petId", "value": "1", "isPath": true }
+      ],
+      "docs": "Returns the list of pets."
+    },
+    {
+      "id": "req-create-pet",
+      "name": "Create pet",
+      "url": "{{baseUrl}}/pets",
+      "method": "POST",
+      "containerId": "folder-pets",
+      "sortNum": 20000,
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" }
+      ],
+      "body": {
+        "type": "json",
+        "raw": "{\"name\": \"Rex\"}"
+      },
+      "tests": [
+        { "type": "res-code", "action": "equal", "value": "201" }
+      ]
+    },
+    {
+      "id": "req-upload-photo",
+      "name": "Upload photo",
+      "url": "{{baseUrl}}/pets/1/photo",
+      "method": "POST",
+      "containerId": "folder-pets-admin",
+      "sortNum": 10000,
+      "body": {
+        "type": "formdata",
+        "formdata": [
+          { "name": "file", "type": "file", "value": "photo.png" },
+          { "name": "caption", "type": "text", "value": "Profile" }
+        ]
+      }
+    },
+    {
+      "id": "req-login",
+      "name": "Login",
+      "url": "{{baseUrl}}/auth/login",
+      "method": "POST",
+      "containerId": "",
+      "sortNum": 10000,
+      "body": {
+        "type": "form-encoded",
+        "form": [
+          { "name": "username", "value": "demo" },
+          { "name": "password", "value": "secret", "isDisabled": false }
+        ]
+      }
+    },
+    {
+      "id": "req-graphql",
+      "name": "Pets GraphQL",
+      "url": "{{baseUrl}}/graphql",
+      "method": "POST",
+      "containerId": "",
+      "sortNum": 20000,
+      "body": {
+        "type": "graphql",
+        "graphql": {
+          "query": "query GetPets { pets { id name } }",
+          "variables": "{}"
+        }
+      }
+    },
+    {
+      "id": "req-delete-pet",
+      "name": "Delete pet",
+      "url": "{{baseUrl}}/pets/1",
+      "method": "DELETE",
+      "containerId": "",
+      "sortNum": 30000,
+      "body": {
+        "type": "none"
+      }
+    }
+  ]
+}

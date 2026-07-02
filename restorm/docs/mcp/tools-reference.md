@@ -97,9 +97,15 @@ Source: [`restorm/src/main/mcp/tools/write.ts`](../../src/main/mcp/tools/write.t
 
 | Tool | Summary |
 |---|---|
-| `import_from_url` | Fetch a Swagger / OpenAPI / GraphQL SDL / Postman / Bruno / curl spec from a URL and commit it into the open project. With `parentFolderId`, nests the imports under that folder; without, appends as a root collection. |
+| `import_from_url` | Fetch a Swagger / OpenAPI / GraphQL SDL / Postman / Bruno / curl spec from a URL and commit it into the open project. With `parentFolderId`, nests the imports under that folder; without, appends as a root collection. Optional `headers` map can pass auth headers (e.g. `Authorization: Bearer <token>`) to the spec endpoint. |
 
 The tool fires `ENVIRONMENT_CREATED` for every imported environment so `ContextService` loads the variables before any subsequent `run_request` resolves Handlebars.
+
+### `import_from_url` parameters
+
+- `url` (required): HTTP(S) URL of the spec to import.
+- `parentFolderId` (optional): Folder id to nest the imported items under. Omit to import as root collections.
+- `headers` (optional): HTTP headers map to pass with the spec fetch. Useful for gated specs that require authentication (e.g. `{ "Authorization": "Bearer <token>" }`). The import fetch's diagnostic log redacts Authorization/Cookie header values.
 
 Source: [`restorm/src/main/mcp/tools/import.ts`](../../src/main/mcp/tools/import.ts).
 

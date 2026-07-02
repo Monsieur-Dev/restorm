@@ -27,6 +27,7 @@ import {
   getFeatureService,
   isFeatureServiceInitialized
 } from 'electron-core-ui/main'
+import { deepLinkLogin } from '../../deepLink'
 import type { AuthState } from '../../../shared/auth/authState'
 import {
   endpointUrl,
@@ -187,6 +188,32 @@ export function initEntitlementService(version: string = resolveBackendVersion()
     (msg, fields) => { logger.warn(msg, fields) }
   )
 
+  // Packaged builds receive the OAuth callback via a custom URL scheme registered
+  // with the OS — no local HTTP listener required. Dev/unpackaged builds keep the
+  // loopback flow (RFC 8252) which works without OS-level scheme registration.
+  const makeLogin = app.isPackaged
+    ? (signal?: AbortSignal): Promise<string> =>
+        deepLinkLogin({
+          loginUrl: endpointUrl(channel, 'login'),
+          sessionUrl: endpointUrl(channel, 'session'),
+          scheme: channel === 'preview' ? 'restorm-preview' : 'restorm',
+          openExternal: makeLoginOpenExternal(),
+          fetchImpl: backendFetch,
+          log: (msg, fields) => { logger.info(msg, fields) },
+          ...(signal ? { signal } : {})
+        })
+    : (signal?: AbortSignal): Promise<string> =>
+        loopbackLogin({
+          loginUrl: endpointUrl(channel, 'login'),
+          sessionUrl: endpointUrl(channel, 'session'),
+          openExternal: makeLoginOpenExternal(),
+          fetchImpl: backendFetch,
+          log: (msg, fields) => { logger.info(msg, fields) },
+          successHtml: SUCCESS_HTML,
+          errorHtml: ERROR_HTML,
+          ...(signal ? { signal } : {})
+        })
+
   instance = new EntitlementService({
     store,
     entitlementUrl: endpointUrl(channel, 'entitlement'),
@@ -195,16 +222,7 @@ export function initEntitlementService(version: string = resolveBackendVersion()
     publicKeyPem: entitlementPublicKeyPem(channel),
     publicKeyConfigured: isEntitlementPublicKeyConfigured(channel),
     fetchImpl: backendFetch,
-    login: (signal) => loopbackLogin({
-      loginUrl: endpointUrl(channel, 'login'),
-      sessionUrl: endpointUrl(channel, 'session'),
-      openExternal: makeLoginOpenExternal(),
-      fetchImpl: backendFetch,
-      log: (msg, fields) => { logger.info(msg, fields) },
-      successHtml: SUCCESS_HTML,
-      errorHtml: ERROR_HTML,
-      ...(signal ? { signal } : {})
-    }),
+    login: makeLogin,
     broadcast: broadcastAuthStateWithAvatarExemption,
     entitlementAudience: RESTORM_ENTITLEMENT_AUDIENCE,
     sessionAudience: RESTORM_SESSION_AUDIENCE,

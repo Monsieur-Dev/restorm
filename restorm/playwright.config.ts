@@ -26,6 +26,22 @@ const openapiImportTestDir = defineBddConfig({
   outputDir: '.features-gen/openapi-import'
 })
 
+const restClientImportTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/rest-client-import/features/**/*.feature',
+  steps: ['tests/e2e/bdd/rest-client-import/steps/**/*.ts', 'tests/e2e/bdd/fixtures/rest-client-import.fixture.ts'],
+  outputDir: '.features-gen/rest-client-import'
+})
+const ramlImportTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/raml-import/features/**/*.feature',
+  steps: ['tests/e2e/bdd/raml-import/steps/**/*.ts', 'tests/e2e/bdd/fixtures/raml-import.fixture.ts'],
+  outputDir: '.features-gen/raml-import'
+})
+const thriftImportTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/thrift-import/features/**/*.feature',
+  steps: ['tests/e2e/bdd/thrift-import/steps/**/*.ts', 'tests/e2e/bdd/fixtures/thrift-import.fixture.ts'],
+  outputDir: '.features-gen/thrift-import'
+})
+
 const dirtyStateTestDir = defineBddConfig({
   features: 'tests/e2e/bdd/dirty-state/features/**/*.feature',
   steps: ['tests/e2e/bdd/dirty-state/steps/**/*.ts', 'tests/e2e/bdd/fixtures/dirty-state.fixture.ts'],
@@ -48,6 +64,22 @@ const odataImportTestDir = defineBddConfig({
   features: 'tests/e2e/bdd/odata-import/features/**/*.feature',
   steps: ['tests/e2e/bdd/odata-import/steps/**/*.ts', 'tests/e2e/bdd/fixtures/odata-petstore.fixture.ts'],
   outputDir: '.features-gen/odata-import'
+})
+
+const smithyImportTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/smithy-import/features/**/*.feature',
+  steps: ['tests/e2e/bdd/smithy-import/steps/**/*.ts', 'tests/e2e/bdd/fixtures/smithy-import.fixture.ts'],
+  outputDir: '.features-gen/smithy-import'
+})
+const wadlImportTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/wadl-import/features/**/*.feature',
+  steps: ['tests/e2e/bdd/wadl-import/steps/**/*.ts', 'tests/e2e/bdd/fixtures/wadl-import.fixture.ts'],
+  outputDir: '.features-gen/wadl-import'
+})
+const apiBlueprintImportTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/api-blueprint-import/features/**/*.feature',
+  steps: ['tests/e2e/bdd/api-blueprint-import/steps/**/*.ts', 'tests/e2e/bdd/fixtures/api-blueprint-import.fixture.ts'],
+  outputDir: '.features-gen/api-blueprint-import'
 })
 
 const authLoginTestDir = defineBddConfig({
@@ -197,6 +229,15 @@ const scenarioRunlogTestDir = defineBddConfig({
   outputDir: '.features-gen/scenario-runlog'
 })
 
+const scenarioCodeDepsTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/scenario-code-deps/features/**/*.feature',
+  steps: [
+    'tests/e2e/bdd/scenario-code-deps/steps/**/*.ts',
+    'tests/e2e/bdd/fixtures/scenario-code-deps.fixture.ts'
+  ],
+  outputDir: '.features-gen/scenario-code-deps'
+})
+
 const scenarioSetVariableOverrideTestDir = defineBddConfig({
   features: 'tests/e2e/bdd/scenario-setvariable-override/features/**/*.feature',
   steps: [
@@ -213,6 +254,15 @@ const postmanImportTestDir = defineBddConfig({
     'tests/e2e/bdd/fixtures/postman-import.fixture.ts'
   ],
   outputDir: '.features-gen/postman-import'
+})
+
+const thunderClientImportTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/thunder-client-import/features/**/*.feature',
+  steps: [
+    'tests/e2e/bdd/thunder-client-import/steps/**/*.ts',
+    'tests/e2e/bdd/fixtures/thunder-client-import.fixture.ts'
+  ],
+  outputDir: '.features-gen/thunder-client-import'
 })
 
 const secretsSourcesTestDir = defineBddConfig({
@@ -260,6 +310,15 @@ const bodyTypeMigrationTestDir = defineBddConfig({
   outputDir: '.features-gen/body-type-migration'
 })
 
+const pawImportTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/paw-import/features/**/*.feature',
+  steps: [
+    'tests/e2e/bdd/paw-import/steps/**/*.ts',
+    'tests/e2e/bdd/fixtures/paw-import.fixture.ts'
+  ],
+  outputDir: '.features-gen/paw-import'
+})
+
 const sidebarSplitDropTestDir = defineBddConfig({
   features: 'tests/e2e/bdd/sidebar-split-drop/features/**/*.feature',
   steps: [
@@ -267,6 +326,17 @@ const sidebarSplitDropTestDir = defineBddConfig({
     'tests/e2e/bdd/fixtures/sidebar-split-drop.fixture.ts'
   ],
   outputDir: '.features-gen/sidebar-split-drop'
+})
+
+const httpieImportTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/httpie-import/features/**/*.feature',
+  steps: ['tests/e2e/bdd/httpie-import/steps/**/*.ts', 'tests/e2e/bdd/fixtures/httpie-import.fixture.ts'],
+  outputDir: '.features-gen/httpie-import'
+})
+const typespecImportTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/typespec-import/features/**/*.feature',
+  steps: ['tests/e2e/bdd/typespec-import/steps/**/*.ts', 'tests/e2e/bdd/fixtures/typespec-import.fixture.ts'],
+  outputDir: '.features-gen/typespec-import'
 })
 
 /**
@@ -344,6 +414,18 @@ export default defineConfig({
       testDir: openapiImportTestDir
     },
     {
+      name: 'rest-client-import',
+      testDir: restClientImportTestDir
+    },
+    {
+      name: 'raml-import',
+      testDir: ramlImportTestDir
+    },
+    {
+      name: 'thrift-import',
+      testDir: thriftImportTestDir
+    },
+    {
       name: 'dirty-state',
       testDir: dirtyStateTestDir
     },
@@ -358,6 +440,22 @@ export default defineConfig({
     {
       name: 'odata-import',
       testDir: odataImportTestDir
+    },
+    {
+      name: 'smithy-import',
+      testDir: smithyImportTestDir
+    },
+    {
+      name: 'wadl-import',
+      testDir: wadlImportTestDir
+    },
+    {
+      name: 'api-blueprint-import',
+      testDir: apiBlueprintImportTestDir
+    },
+    {
+      name: 'typespec-import',
+      testDir: typespecImportTestDir
     },
     {
       name: 'auth-login',
@@ -467,6 +565,11 @@ export default defineConfig({
       timeout: 180 * 1000 // 3 min — three scenarios, each opens a fresh app + runs the engine
     },
     {
+      name: 'scenario-code-deps',
+      testDir: scenarioCodeDepsTestDir,
+      timeout: 240 * 1000 // 4 min — one app, two engine runs incl. a cold Pyodide load + wheel mount
+    },
+    {
       name: 'scenario-setvariable-override',
       testDir: scenarioSetVariableOverrideTestDir,
       timeout: 120 * 1000 // 2 min — opens a fresh app + runs one scenario against the petstore mock
@@ -475,6 +578,10 @@ export default defineConfig({
       name: 'postman-import',
       testDir: postmanImportTestDir,
       timeout: 180 * 1000 // 3 min — opens a fresh app, imports + runs the workflow against docker
+    },
+    {
+      name: 'thunder-client-import',
+      testDir: thunderClientImportTestDir
     },
     {
       name: 'secrets-sources',
@@ -505,6 +612,16 @@ export default defineConfig({
       name: 'sidebar-split-drop',
       testDir: sidebarSplitDropTestDir,
       timeout: 120 * 1000 // opens the reference project; drags sidebar items onto tabs / a scenario
+    },
+    {
+      name: 'paw-import',
+      testDir: pawImportTestDir,
+      timeout: 180 * 1000 // opens a fresh app, imports the Paw JSON fixture, runs one request against the live docker petstore
+    },
+    {
+      name: 'httpie-import',
+      testDir: httpieImportTestDir,
+      timeout: 120 * 1000 // opens a fresh app, imports both HTTPie shapes, runs one request against docker
     },
     {
       // Headless CLI runner — a plain spec (no BDD/UI) that spawns the built app

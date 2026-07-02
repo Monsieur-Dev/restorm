@@ -873,6 +873,10 @@
         "description": "File .bru rasa Bruno atau ekspor folder — Restorm membaca format teks .bru, termasuk blok skripnya, dan membuat ulang setiap permintaan sebagai simpul Restorm kelas satu yang siap dikirim.",
         "trademark": "Bruno adalah perangkat lunak sumber terbuka (MIT) oleh Anoop M. D., digunakan di sini berdasarkan ketentuannya."
       },
+      "thunderclient": {
+        "description": "Berasal dari Thunder Client? Jatuhkan JSON koleksi yang diekspor — Restorm membaca setiap permintaan, folder, header, dan body, lalu membangun ulang koleksi tersebut sebagai pohon Restorm yang siap dijalankan.",
+        "trademark": "Thunder Client adalah merek dagang milik pemiliknya masing-masing, digunakan di sini hanya sebagai referensi kompatibilitas."
+      },
       "graphql": {
         "description": "Tempel SDL GraphQL (.graphql / .gql / tempelan dari klien GraphQL Anda) dan Restorm membuat kerangka satu permintaan per operasi, terhubung ke tipe query / mutation / subscription yang tepat dengan variabel yang sudah terstruktur.",
         "trademark": "GraphQL adalah merek dagang dari GraphQL Foundation, sebuah proyek dari Joint Development Foundation."
@@ -902,6 +906,10 @@
       "mqtt": {
         "description": "Tempel URL broker MQTT atau katalog topik — Restorm membuat kerangka permintaan publish / subscribe per topik, mempertahankan koneksi tetap hidup untuk pratinjau streaming, dan mengingat snapshot pesan retained sehingga Anda dapat memutarnya ulang nanti.",
         "trademark": "MQTT adalah standar OASIS; nama dan logo MQTT adalah merek dagang dari OASIS Open."
+      },
+      "paw": {
+        "description": "Datang dari Paw? Lepaskan ekspor JSON Anda (File → Export → JSON di aplikasi — bundel .paw native tidak dibaca langsung). Restorm membangun kembali setiap permintaan, header, body, dan lingkungan, serta memetakan nilai dinamis Paw (stempel waktu, string acak, UUID) ke padanan Restorm yang paling mendekati.",
+        "trademark": "Paw adalah merek dagang terdaftar dari RapidAPI, Inc., digunakan di sini hanya untuk referensi kompatibilitas."
       }
     },
     "loading": "Menganalisis...",
@@ -1571,7 +1579,25 @@
       "code": "kode",
       "modalTitle": "Edit kode",
       "result": "hasil",
-      "timeout": "Batas waktu (s)"
+      "timeout": "Batas waktu (s)",
+      "deps": {
+        "downloading": "Mengunduh {{count}} paket: {{packages}}"
+      },
+      "packages": {
+        "title": "Paket",
+        "caption": "Dependensi",
+        "manage": "Kelola paket",
+        "count": "{{count}} dep.",
+        "addShort": "Tambah",
+        "hint": "Paket eksternal yang disematkan, diselesaikan dan di-cache saat pertama kali dijalankan, lalu dimuat secara offline. Hanya paket berbasis bahasa murni yang didukung (Python: wheel Python murni); sematkan versi yang tepat.",
+        "empty": "Belum ada paket yang ditambahkan.",
+        "remove": "Hapus {{package}}",
+        "name": "Nama paket",
+        "namePlaceholder": "nama paket",
+        "version": "Versi",
+        "versionPlaceholder": "versi",
+        "add": "Tambah paket"
+      }
     },
     "help": {
       "input": "Menyuntikkan parameter masukan skenario dan konstanta ke dalam graf.",
@@ -1686,7 +1712,7 @@
       "projectPlaceholder": "<project.restorm>",
       "tokenPlaceholder": "<token_anda>",
       "tokenNote": "Eksekusi headless memerlukan paket Restorm Pro dan token CI.",
-      "tokenLink": "Dapatkan token →"
+      "tokenLink": "Dapatkan token"
     },
     "socketio": {
       "connectionNameLabel": "Connection name",

@@ -874,6 +874,10 @@
         "description": "Bruno-baserte .bru-filer eller en mappeeksport — Restorm leser .bru-tekstformatet, inkludert dets skriptingblokker, og gjenoppretter hver forespørsel som en førsteklasses Restorm-node klar til å sendes.",
         "trademark": "Bruno er åpen kildekode-programvare (MIT) av Anoop M. D., brukt her under dets vilkår."
       },
+      "thunderclient": {
+        "description": "Kommer du fra Thunder Client? Slipp den eksporterte collection-JSON-en — Restorm leser hver forespørsel, mappe, header og body, og bygger deretter opp collectionen som et Restorm-tre klart til å kjøre.",
+        "trademark": "Thunder Client er et varemerke tilhørende sin respektive eier, brukt her kun som kompatibilitetsreferanse."
+      },
       "graphql": {
         "description": "Lim inn en GraphQL-SDL (.graphql/.gql/lim-inn fra GraphQL-klienten din), og Restorm lager én forespørsel per operasjon, koblet til riktig query-/mutation-/subscription-type med variabler allerede strukturert.",
         "trademark": "GraphQL er et varemerke for GraphQL Foundation, et prosjekt i Joint Development Foundation."
@@ -903,6 +907,10 @@
       "mqtt": {
         "description": "Lim inn en MQTT-broker-URL eller en emnekatalog — Restorm lager publish-/subscribe-forespørsler per emne, holder forbindelsen i live for strømmingsforhåndsvisninger og husker øyeblikksbilder av retained messages slik at du kan spille dem av senere.",
         "trademark": "MQTT er en OASIS-standard; MQTT-navnet og -logoen er varemerker for OASIS Open."
+      },
+      "paw": {
+        "description": "Kommer du fra Paw? Slipp JSON-eksporten din (File → Export → JSON i appen — den native .paw-pakken leses ikke direkte). Restorm bygger opp igjen hver forespørsel, header, body og miljø, og mapper Paws dynamiske verdier (tidsstempler, tilfeldige strenger, UUID-er) til det nærmeste Restorm-motstykket.",
+        "trademark": "Paw er et registrert varemerke for RapidAPI, Inc., brukt her kun som kompatibilitetsreferanse."
       }
     },
     "loading": "Analyserer...",
@@ -1572,7 +1580,25 @@
       "code": "kode",
       "modalTitle": "Rediger kode",
       "result": "resultat",
-      "timeout": "Tidsavbrudd (s)"
+      "timeout": "Tidsavbrudd (s)",
+      "deps": {
+        "downloading": "Laster ned {{count}} pakke(r): {{packages}}"
+      },
+      "packages": {
+        "title": "Pakker",
+        "caption": "Avhengigheter",
+        "manage": "Behandle pakker",
+        "count": "{{count}} avh.",
+        "addShort": "Legg til",
+        "hint": "Festede eksterne pakker som løses og bufres ved første kjøring, og deretter lastes inn frakoblet. Bare rene språkpakker støttes (Python: rene Python-wheels); fest den nøyaktige versjonen.",
+        "empty": "Ingen pakker lagt til ennå.",
+        "remove": "Fjern {{package}}",
+        "name": "Pakkenavn",
+        "namePlaceholder": "pakkenavn",
+        "version": "Versjon",
+        "versionPlaceholder": "versjon",
+        "add": "Legg til pakke"
+      }
     },
     "help": {
       "input": "Injiserer scenariets inngangsparametere og konstanter i grafen.",
@@ -1687,7 +1713,7 @@
       "projectPlaceholder": "<project.restorm>",
       "tokenPlaceholder": "<ditt_token>",
       "tokenNote": "En headless-kjøring krever en Restorm Pro-plan og et CI-token.",
-      "tokenLink": "Hent token →"
+      "tokenLink": "Hent token"
     },
     "socketio": {
       "connectionNameLabel": "Connection name",

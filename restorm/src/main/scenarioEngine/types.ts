@@ -205,6 +205,12 @@ export interface RunLogEntry {
   nodeId?: RuntimeId
   scope?: ScopeStack
   message: string
+  /** Optional i18n key the renderer translates for DISPLAY (main has no i18n).
+   * `message` stays the English fallback — it's what the copy / CLI / snapshot
+   * serializers emit, so goldens are unaffected by translation. */
+  messageKey?: string
+  /** Interpolation values for {@link messageKey}. */
+  messageArgs?: Record<string, string | number>
   data?: unknown
 }
 

@@ -406,3 +406,99 @@ the grid so it does **not** overlap its neighbours (the existing boxes sit on a
 deliberately excluded from the run-log feature + goldens. The easiest way to add
 one is via the MCP `create_scenario_node` tool against the Bestiary's scenario id,
 or by dragging the box in from the add-node menu and saving.
+
+## External dependencies (code-node runtimes only)
+
+This section is **not** about adding a scenario kind — it is the contract a
+`code`-node **language runtime** (`src/main/scenarioEngine/codeRuntimes/`)
+implements to let the user pin external packages (`config.packages`) that get
+fetched, cached, and mounted into the WASM engine before the script runs. Only
+the `code` node has this; a normal action node ignores everything here.
+
+### The two optional hooks on `CodeRuntime`
+
+`codeRuntimes/types.ts` declares two **optional** methods; a runtime with no
+package support simply omits them (nothing else changes):
+
+```ts
+installPackages?(specs: PackageSpec[], cacheDir: string): Promise<void>
+mountPackages?(engine: unknown, cacheDir: string): Promise<void>
+```
+
+- `PackageSpec` is `{ name, version }`. The **version is pin-exact** — it is the
+  cache key, so ranges aren't accepted (the executor drops a rangey entry). The
+  user pins only top-level packages; transitive dependencies are resolved by the
+  runtime.
+- **`installPackages`** runs in the MAIN process and populates `cacheDir` with the
+  artifacts (and their whole transitive closure). It is **idempotent** — an
+  already-cached artifact is a no-op — and must **reject with a user-readable
+  message** when a package/version can't be resolved or the only available
+  artifact is incompatible with the WASM runtime (e.g. a C-extension Python
+  wheel). The executor routes that rejection to the node's `error` port.
+- **`mountPackages`** makes the cached artifacts importable inside a *loaded*
+  engine instance (the main-hosted engine used by tests). For a worker-backed
+  runtime (Python), the equivalent mount runs *inside the worker* before the user
+  code executes; keep the two in step (the Python runtime inlines the same
+  `loadPackage`-of-cached-wheels logic in its worker source).
+
+### Cache convention
+
+The on-disk cache (`codeRuntimes/depsCache.ts`) is language-agnostic and lives in
+the OS temp directory (so it is auto-reclaimed and never grows userData
+unbounded):
+
+```
+<os-temp>/restorm-code-deps/<lang>/<name>@<version>/<artifact-files>
+```
+
+`codeDepsCacheDir(lang)` returns the `cacheDir` the executor passes to both hooks.
+A cache hit skips **all** network activity, so any re-run of a pinned package is
+offline within a session; the OS may clear temp between sessions, which merely
+triggers a re-download (fine for a cache). Name/version/filename segments are
+path-sanitised (they come from user config + a registry, so are untrusted for
+filesystem use). Presence of an artifact file is the atomic "cached" marker — the
+installer only writes it after a complete, validated download.
+
+### The shared installer + firewall bypass
+
+`codeRuntimes/depsInstaller.ts` owns everything language-agnostic around the
+fetch: idempotency, a per-artifact concurrency lock (a module-level
+`Map<key, Promise>` so two parallel `code` nodes requesting the same package
+collapse onto one download), an optional offline mirror, and the firewall bypass.
+A runtime supplies only an **`ArtifactFetcher`** (`(spec) => Promise<FetchedArtifact[]>`)
+that turns a `name@version` into the bytes to cache, and calls
+`ensurePackagesCached(lang, cacheDir, specs, fetcher, onDownloadStart?)`.
+
+A dependency download is **trusted, user-initiated provisioning, NOT sandbox
+traffic** — so the fetch runs under `withFirewallBypass` (exactly like the import
+flow and the mini-browser) and never pops a firewall prompt. This is the
+deliberate **opposite** of the sandbox's own `fetch`/`pm.sendRequest`
+(`codeNetworkBridge`), which stays firewall-governed: user *script* network is
+gated, dependency *provisioning* is not. Use the `httpGetText` / `httpGetBytes`
+helpers from the installer inside your fetcher — they inherit the bypass and cap
+the body at `MAX_RESPONSE_BYTES`.
+
+### Implementing a new runtime's package support (checklist)
+
+1. Write a `<lang>Deps.ts` next to the runtime with an `ArtifactFetcher` that
+   resolves a `name@version` to the artifact bytes from the ecosystem's registry
+   (query metadata → pick the compatible artifact → download). Reject with a
+   clear, error-port-bound message when nothing compatible exists.
+2. Resolve transitive dependencies in main (read the fetched artifact's manifest
+   — e.g. a wheel's `METADATA` — for the next frontier; honour an exact pin, else
+   take the newest compatible release; skip marker/extra-gated optionals).
+   Record each top-level spec's closure so a run mounts exactly its artifacts,
+   not every artifact ever cached for the language.
+3. Implement `installPackages` = drive `ensurePackagesCached` breadth-first over
+   the closure; `mountPackages` = load the cached artifacts into the engine
+   offline.
+4. In `run`, read `ctx.packages` + `ctx.packagesCacheDir` and mount that run's
+   closure before executing the user code.
+
+### Testing without a live registry
+
+`ensurePackagesCached` honours `RESTORM_CODE_DEPS_OFFLINE_DIR`: a pre-provisioned
+mirror laid out exactly like the cache (`<dir>/<lang>/<name>@<version>/<artifact>`).
+A package found there is copied in with **zero network**. Point it at a committed
+fixture artifact so deps tests (unit + the run-log golden) are deterministic and
+never touch a live registry.

@@ -1,0 +1,24 @@
+{
+  "pawVersion": 3,
+  "requestGroups": {
+    "grp-pets": {
+      "id": "grp-pets",
+      "name": "Pets",
+      "parentId": null,
+      "order": 0
+    }
+  },
+  "requests": {
+    "req-get-pet": {
+      "id": "req-get-pet",
+      "name": "Get pet by id",
+      "method": "GET",
+      "urlBase": "http://localhost:8080/api/pet/1",
+      "headers": [
+        { "key": "Accept", "value": "application/json" }
+      ],
+      "parentId": "grp-pets",
+      "order": 0
+    }
+  }
+}

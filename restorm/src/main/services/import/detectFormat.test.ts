@@ -29,3 +29,31 @@ describe('detectFormat — operator grouping (gRPC / SOAP)', () => {
     expect(detectFormat('<definitions><term>hello</term></definitions>')).not.toBe('soap')
   })
 })
+
+describe('detectFormat — extension-anchored match beats greedy content sniffs', () => {
+  // Regression: with every importer merged, Smithy's `namespace … service {`
+  // sniff (registered before Thrift) claimed `.thrift` files, and Thrift's
+  // `^namespace` sniff (registered before TypeSpec) claimed `.tsp` files —
+  // because detection was registration-order. A known file extension is an
+  // unambiguous signal and must win.
+  const thriftIdl = 'namespace com.example.petstore\n\nservice PetService {\n  Pet getPet(1: i64 id)\n}'
+  const typespecSrc = 'import "@typespec/http";\n\n@service(#{ title: "Pet Store" })\nnamespace PetStore;'
+
+  it('routes a .thrift file to Thrift even though Smithy would sniff it', () => {
+    // Sanity: Smithy's sniff genuinely matches this content when unanchored.
+    expect(detectFormat(thriftIdl)).toBe('smithy')
+    // …but the extension anchors it to Thrift.
+    expect(detectFormat(thriftIdl, '/x/petstore.thrift')).toBe('thrift')
+  })
+
+  it('routes a .tsp file to TypeSpec even though Thrift would sniff it', () => {
+    // Sanity: Thrift's `^namespace` sniff matches this content when unanchored.
+    expect(detectFormat(typespecSrc)).toBe('thrift')
+    // …but the extension anchors it to TypeSpec.
+    expect(detectFormat(typespecSrc, '/x/petstore.tsp')).toBe('typespec')
+  })
+
+  it('routes a .smithy file to Smithy', () => {
+    expect(detectFormat(thriftIdl, '/x/model.smithy')).toBe('smithy')
+  })
+})

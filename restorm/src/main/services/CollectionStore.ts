@@ -14,19 +14,13 @@ import {
   Scenario,
   Environment,
   KeyValue,
-  HTTPRequest,
-  GraphQLRequest,
-  GrpcRequest,
-  SoapRequest,
-  WebSocketRequest,
-  ODataRequest,
-  AuthenticationRequest,
   isEnvironmentFolder,
   isAnyFolder,
   isScenario,
   type FolderItem,
   type Request
 } from '../../shared/models'
+import { createRequestFromPlain, getRequestConstructor as resolveRequestConstructor } from '../../shared/models/requests/requestFactory'
 
 // ============================================================================
 // PubSub Topics
@@ -828,38 +822,11 @@ class CollectionStore {
   }
 
   private createRequestInstance(data: Partial<Request> & { type: Request['type'] }): Request {
-    switch (data.type) {
-      case 'http':
-        return HTTPRequest.fromPlain(data as Parameters<typeof HTTPRequest.fromPlain>[0])
-      case 'graphql':
-        return GraphQLRequest.fromPlain(data as Parameters<typeof GraphQLRequest.fromPlain>[0])
-      case 'grpc':
-        return GrpcRequest.fromPlain(data as Parameters<typeof GrpcRequest.fromPlain>[0])
-      case 'soap':
-        return SoapRequest.fromPlain(data as Parameters<typeof SoapRequest.fromPlain>[0])
-      case 'websocket':
-        return WebSocketRequest.fromPlain(data as Parameters<typeof WebSocketRequest.fromPlain>[0])
-      case 'odata':
-        return ODataRequest.fromPlain(data as Parameters<typeof ODataRequest.fromPlain>[0])
-      case 'auth':
-        return AuthenticationRequest.fromPlain(data as Parameters<typeof AuthenticationRequest.fromPlain>[0])
-      default:
-        // Default to HTTPRequest
-        return HTTPRequest.fromPlain(data as Parameters<typeof HTTPRequest.fromPlain>[0])
-    }
+    return createRequestFromPlain(data)
   }
 
   private getRequestConstructor(type: Request['type']): new (...args: unknown[]) => Request {
-    switch (type) {
-      case 'http': return HTTPRequest as new (...args: unknown[]) => Request
-      case 'graphql': return GraphQLRequest as new (...args: unknown[]) => Request
-      case 'grpc': return GrpcRequest as new (...args: unknown[]) => Request
-      case 'soap': return SoapRequest as new (...args: unknown[]) => Request
-      case 'websocket': return WebSocketRequest as new (...args: unknown[]) => Request
-      case 'odata': return ODataRequest as new (...args: unknown[]) => Request
-      case 'auth': return AuthenticationRequest as new (...args: unknown[]) => Request
-      default: return HTTPRequest as new (...args: unknown[]) => Request
-    }
+    return resolveRequestConstructor(type)
   }
 
   // ==========================================================================

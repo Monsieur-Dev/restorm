@@ -874,6 +874,10 @@
         "description": "Bruno tadında .bru dosyaları veya bir klasör dışa aktarımı — Restorm betikleme blokları dahil .bru metin biçimini okur ve her isteği gönderilmeye hazır birinci sınıf bir Restorm düğümü olarak yeniden oluşturur.",
         "trademark": "Bruno, Anoop M. D. tarafından geliştirilen açık kaynaklı bir yazılımdır (MIT) ve burada kendi koşulları altında kullanılmaktadır."
       },
+      "thunderclient": {
+        "description": "Thunder Client'tan mı geliyorsun? Dışa aktarılan koleksiyon JSON'unu bırak — Restorm her isteği, klasörü, başlığı ve gövdeyi okur, ardından koleksiyonu çalıştırmaya hazır bir Restorm ağacı olarak yeniden oluşturur.",
+        "trademark": "Thunder Client, ilgili sahibinin ticari markasıdır ve burada yalnızca uyumluluk referansı olarak kullanılmaktadır."
+      },
       "graphql": {
         "description": "Bir GraphQL SDL (.graphql / .gql / GraphQL istemcinizden bir yapıştırma) yapıştırın ve Restorm her işlem için bir istek iskeleti oluşturur, doğru query / mutation / subscription tipine bağlanmış ve değişkenleri yapılandırılmış olarak.",
         "trademark": "GraphQL, Joint Development Foundation projesi olan GraphQL Foundation'ın markasıdır."
@@ -903,6 +907,10 @@
       "mqtt": {
         "description": "Bir MQTT broker URL'si veya bir topic kataloğu yapıştırın — Restorm topic başına publish / subscribe istek iskeletleri oluşturur, akış önizlemeleri için bağlantıyı canlı tutar ve daha sonra yeniden oynatabilmeniz için retained-message anlık görüntülerini hatırlar.",
         "trademark": "MQTT bir OASIS standardıdır; MQTT adı ve logosu OASIS Open'ın ticari markalarıdır."
+      },
+      "paw": {
+        "description": "Paw'dan mı geliyorsunuz? JSON dışa aktarmanızı bırakın (uygulamada File → Export → JSON — native .paw paketi doğrudan okunmaz). Restorm her isteği, başlığı, gövdeyi ve ortamı yeniden oluşturur ve Paw'ın dinamik değerlerini (zaman damgaları, rastgele dizeler, UUID'ler) en yakın Restorm karşılığına eşler.",
+        "trademark": "Paw, RapidAPI, Inc.'in tescilli markasıdır ve burada yalnızca uyumluluk referansı amacıyla kullanılmaktadır."
       }
     },
     "loading": "Analiz ediliyor...",
@@ -1572,7 +1580,25 @@
       "code": "kod",
       "modalTitle": "Kodu düzenle",
       "result": "sonuç",
-      "timeout": "Zaman aşımı (sn)"
+      "timeout": "Zaman aşımı (sn)",
+      "deps": {
+        "downloading": "{{count}} paket indiriliyor: {{packages}}"
+      },
+      "packages": {
+        "title": "Paketler",
+        "caption": "Bağımlılıklar",
+        "manage": "Paketleri yönet",
+        "count": "{{count}} bağ.",
+        "addShort": "Ekle",
+        "hint": "Sabitlenmiş harici paketler, ilk çalıştırmada çözümlenip önbelleğe alınır, sonrasında çevrimdışı yüklenir. Yalnızca saf dil paketleri desteklenir (Python: saf Python wheel’leri); tam sürümü sabitleyin.",
+        "empty": "Henüz paket eklenmedi.",
+        "remove": "{{package}} öğesini kaldır",
+        "name": "Paket adı",
+        "namePlaceholder": "paket adı",
+        "version": "Sürüm",
+        "versionPlaceholder": "sürüm",
+        "add": "Paket ekle"
+      }
     },
     "help": {
       "input": "Senaryonun giriş parametrelerini ve sabitlerini grafiğe enjekte eder.",
@@ -1687,7 +1713,7 @@
       "projectPlaceholder": "<project.restorm>",
       "tokenPlaceholder": "<token>",
       "tokenNote": "Başsız çalıştırma, Restorm Pro planı ve CI token gerektirir.",
-      "tokenLink": "Token al →"
+      "tokenLink": "Token al"
     },
     "socketio": {
       "connectionNameLabel": "Connection name",

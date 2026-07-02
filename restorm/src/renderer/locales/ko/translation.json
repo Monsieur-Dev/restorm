@@ -873,6 +873,10 @@
         "description": "Bruno 형식의 .bru 파일이나 폴더 내보내기 — restorm은 스크립트 블록까지 포함하여 .bru 텍스트 형식을 읽고, 각 요청을 바로 전송할 수 있는 restorm의 일급 노드로 재구성합니다.",
         "trademark": "Bruno는 Anoop M. D.가 만든 오픈 소스 소프트웨어(MIT)로, 해당 약관에 따라 사용됩니다."
       },
+      "thunderclient": {
+        "description": "Thunder Client에서 넘어오셨나요? 내보낸 컬렉션 JSON을 가져다 놓으세요 — restorm이 모든 요청, 폴더, 헤더, 본문을 읽어, 바로 실행할 수 있는 restorm 트리로 컬렉션을 재구성합니다.",
+        "trademark": "Thunder Client는 각 소유자의 상표이며, 여기서는 호환성 참조 목적으로만 사용됩니다."
+      },
       "graphql": {
         "description": "GraphQL SDL(.graphql / .gql 또는 GraphQL 클라이언트에서 복사한 내용)을 붙여넣으면, restorm이 오퍼레이션마다 요청을 하나씩 생성하고, 알맞은 query / mutation / subscription 타입에 연결하여 변수까지 구조화해 둡니다.",
         "trademark": "GraphQL은 Joint Development Foundation의 프로젝트인 GraphQL Foundation의 상표입니다."
@@ -902,6 +906,10 @@
       "mqtt": {
         "description": "MQTT 브로커 URL이나 토픽 카탈로그를 붙여넣으면, restorm이 토픽별로 publish / subscribe 요청을 구성하고, 스트리밍 미리 보기를 위해 연결을 유지하며, 보관된 메시지 스냅샷을 기억하여 나중에 다시 재생할 수 있게 합니다.",
         "trademark": "MQTT는 OASIS 표준이며, MQTT 이름과 로고는 OASIS Open의 상표입니다."
+      },
+      "paw": {
+        "description": "Paw에서 넘어오셨나요? JSON으로 내보낸 파일을 가져다 놓으면 됩니다(앱의 File → Export → JSON — 네이티브 .paw 번들은 직접 읽지 않습니다). restorm은 모든 요청, 헤더, 본문, 환경을 다시 구성하고, Paw의 동적 값(타임스탬프, 임의 문자열, UUID)을 가장 가까운 restorm 대응 값으로 매핑합니다.",
+        "trademark": "Paw는 RapidAPI, Inc.의 등록 상표이며, 여기서는 호환성 참조 목적으로만 사용됩니다."
       }
     },
     "loading": "분석 중...",
@@ -1571,7 +1579,25 @@
       "code": "코드",
       "modalTitle": "코드 편집",
       "result": "결과",
-      "timeout": "시간 제한 (초)"
+      "timeout": "시간 제한 (초)",
+      "deps": {
+        "downloading": "{{count}}개 패키지 다운로드 중: {{packages}}"
+      },
+      "packages": {
+        "title": "패키지",
+        "caption": "종속성",
+        "manage": "패키지 관리",
+        "count": "종속성 {{count}}개",
+        "addShort": "추가",
+        "hint": "고정된 외부 패키지로, 첫 실행 시 확인 후 캐시되며 이후에는 오프라인으로 로드됩니다. 순수 언어 패키지만 지원됩니다(Python: 순수 Python 휠). 정확한 버전을 고정하세요.",
+        "empty": "아직 추가된 패키지가 없습니다.",
+        "remove": "{{package}} 제거",
+        "name": "패키지 이름",
+        "namePlaceholder": "패키지 이름",
+        "version": "버전",
+        "versionPlaceholder": "버전",
+        "add": "패키지 추가"
+      }
     },
     "help": {
       "input": "시나리오의 입력 파라미터와 상수를 그래프에 주입합니다.",
@@ -1686,7 +1712,7 @@
       "projectPlaceholder": "<project.restorm>",
       "tokenPlaceholder": "<token>",
       "tokenNote": "헤드리스 실행에는 Restorm Pro 플랜과 CI 토큰이 필요합니다.",
-      "tokenLink": "토큰 받기 →"
+      "tokenLink": "토큰 받기"
     },
     "socketio": {
       "connectionNameLabel": "Connection name",

@@ -304,11 +304,17 @@ const SashInner: React.FC<SashProps> = ({
 		className
 	].filter(Boolean).join(' ');
 
-	// Set size styles
-	const style: React.CSSProperties = {
-		width: orientation === 'vertical' ? `${size}px` : 'auto',
-		height: orientation === 'horizontal' ? `${size}px` : 'auto'
-	};
+	// Set size styles. Only the fixed axis (width for vertical, height for
+	// horizontal) is set here; the cross axis is intentionally left unset
+	// rather than forced to 'auto'. An inline value there would beat
+	// sash.css's `.sash.vertical { height: 100% }` / `.sash.horizontal
+	// { width: 100% }` fallback even when the consumer's layoutProvider
+	// omits the optional getVerticalSashHeight / getHorizontalSashWidth
+	// hook — silently collapsing the sash to 0px, present but unhittable.
+	// `layout()` above sets a concrete pixel value on the element directly
+	// when the hook IS provided, which still wins over the CSS default.
+	const style: React.CSSProperties =
+		orientation === 'vertical' ? { width: `${size}px` } : { height: `${size}px` };
 
 	return (
 		<div

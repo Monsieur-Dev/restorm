@@ -874,6 +874,10 @@
         "description": "Bruno-stílusú .bru fájlok vagy mappa-export — a Restorm beolvassa a .bru szöveges formátumot, beleértve a szkriptblokkokat is, és minden kérést elsőosztályú Restorm-csomóponttá épít újra, küldésre készen.",
         "trademark": "A Bruno nyílt forráskódú szoftver (MIT), Anoop M. D. által, itt a feltételei szerint használva."
       },
+      "thunderclient": {
+        "description": "A Thunder Clientből érkezel? Húzd be az exportált kollekció JSON-t — a Restorm beolvas minden kérést, mappát, fejlécet és törzset, majd újraépíti a kollekciót futtatásra kész Restorm-fává.",
+        "trademark": "A Thunder Client a mindenkori tulajdonosának védjegye, itt kizárólag kompatibilitási hivatkozásként szerepel."
+      },
       "graphql": {
         "description": "Illesszen be egy GraphQL SDL-t (.graphql / .gql / egy beillesztést a GraphQL-kliensből), és a Restorm műveletenként egy kérést állít fel, a megfelelő query / mutation / subscription típushoz kötve, már strukturált változókkal.",
         "trademark": "A GraphQL a GraphQL Foundation védjegye, amely a Joint Development Foundation projektje."
@@ -903,6 +907,10 @@
       "mqtt": {
         "description": "Illessze be egy MQTT-bróker URL-jét vagy egy témakatalógust — a Restorm témánként publish / subscribe kéréseket állít fel, élőben tartja a kapcsolatot a streaming-előnézetekhez, és megjegyzi a megtartott üzenetek pillanatképeit, hogy később újrajátszhatók legyenek.",
         "trademark": "Az MQTT egy OASIS szabvány; az MQTT név és logó az OASIS Open védjegyei."
+      },
+      "paw": {
+        "description": "Pawról érkezik? Dobja be a JSON exportját (File → Export → JSON az alkalmazásban — a natív .paw csomagot nem olvassuk közvetlenül). A Restorm újraépít minden kérést, fejlécet, törzset és környezetet, és a Paw dinamikus értékeit (időbélyegek, véletlen karakterláncok, UUID-k) a legközelebbi Restorm megfelelőjükre képezi le.",
+        "trademark": "A Paw a RapidAPI, Inc. bejegyzett védjegye, itt kizárólag kompatibilitási hivatkozásként használva."
       }
     },
     "loading": "Elemzés...",
@@ -1572,7 +1580,25 @@
       "code": "kód",
       "modalTitle": "Kód szerkesztése",
       "result": "eredmény",
-      "timeout": "Időkorlát (s)"
+      "timeout": "Időkorlát (s)",
+      "deps": {
+        "downloading": "{{count}} csomag letöltése: {{packages}}"
+      },
+      "packages": {
+        "title": "Csomagok",
+        "caption": "Függőségek",
+        "manage": "Csomagok kezelése",
+        "count": "{{count}} függ.",
+        "addShort": "Hozzáadás",
+        "hint": "Rögzített külső csomagok, amelyek az első futtatáskor feloldódnak és gyorsítótárba kerülnek, majd offline töltődnek be. Csak tiszta nyelvi csomagok támogatottak (Python: tiszta Python wheelek); rögzítse a pontos verziót.",
+        "empty": "Még nincs hozzáadva csomag.",
+        "remove": "{{package}} eltávolítása",
+        "name": "Csomag neve",
+        "namePlaceholder": "csomag neve",
+        "version": "Verzió",
+        "versionPlaceholder": "verzió",
+        "add": "Csomag hozzáadása"
+      }
     },
     "help": {
       "input": "Beilleszti a forgatókönyv bemeneti paramétereit és állandóit a gráfba.",
@@ -1687,7 +1713,7 @@
       "projectPlaceholder": "<project.restorm>",
       "tokenPlaceholder": "<token>",
       "tokenNote": "A headless futtatáshoz Restorm Pro csomag és CI token szükséges.",
-      "tokenLink": "Token beszerzése →"
+      "tokenLink": "Token beszerzése"
     },
     "socketio": {
       "connectionNameLabel": "Connection name",

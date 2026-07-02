@@ -173,3 +173,36 @@ export function isSafeFetchUrl(rawUrl: string, options: AssertSafeFetchUrlOption
     return false
   }
 }
+
+/** Hard cap on redirect hops for a safe-following fetch. */
+const MAX_SAFE_REDIRECTS = 5
+
+/**
+ * SSRF-safe `fetch` that follows redirects MANUALLY, re-validating every hop's
+ * `Location` with {@link assertSafeFetchUrl} (STRICT — no `allowPrivateHosts`)
+ * before following it. Use this for any main-process fetch that runs
+ * firewall-BYPASSED (spec imports, code-node dependency downloads, …): the
+ * firewall socket-interceptor backstop is off, and a plain `fetch(url, {
+ * redirect: 'follow' })` would let a 3xx bounce to a loopback / RFC1918 /
+ * link-local / cloud-metadata host. The caller must have already validated the
+ * INITIAL `url` (the initial validation is the caller's choice of
+ * `allowPrivateHosts`; every subsequent hop is forced strict here).
+ */
+export async function fetchFollowingSafeRedirects(url: string, init: RequestInit): Promise<Response> {
+  let current = url
+  for (let hop = 0; hop <= MAX_SAFE_REDIRECTS; hop++) {
+    const response = await fetch(current, { ...init, redirect: 'manual' })
+    // 3xx with a Location → a redirect we must re-validate before following.
+    const location = response.status >= 300 && response.status < 400
+      ? response.headers.get('location')
+      : null
+    if (location === null) return response
+    // Resolve relative redirects against the current URL, then re-assert
+    // STRICTLY (no allowPrivateHosts) so the hop can't reach loopback/private/
+    // metadata even though the original explicit URL was allowed to.
+    const next = new URL(location, current).toString()
+    assertSafeFetchUrl(next)
+    current = next
+  }
+  throw new Error(`Too many redirects following the URL (>${MAX_SAFE_REDIRECTS})`)
+}

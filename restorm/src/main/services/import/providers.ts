@@ -13,6 +13,7 @@
 // Text-prefix formats (cheapest detection — checked before JSON parsing)
 import './CurlImportService'
 import './PowerShellImportService'
+import './RestClientImportService'
 
 // JSON-keyed formats (detection requires JSON.parse — registered in the same
 // order the original switch tried them to preserve tiebreaking)
@@ -23,10 +24,27 @@ import './InsomniaImportService'
 import './BrunoImportService'
 import './AsyncAPIImportService'
 import './ODataImportService'
+import './HarImportService'
+import './ThunderClientImportService'
+import './PawImportService'
+import './HttpieImportService'
 
 // Non-JSON text/XML formats
 import './GraphQLImportService'
 import './GrpcImportService'
 import './SoapImportService'
+import './RamlImportService'
+
+// Modern API modeling formats (accept either a JSON-keyed AST or their own
+// text IDL — detection tries the JSON branch first, falls back to the IDL sniff)
+import './SmithyImportService'
+import './WadlImportService'
+
+// Markdown-based formats — registered last, after every JSON/XML sniff has
+// had first refusal, since a Markdown document has no discriminating root
+// field to check ahead of the others.
+import './ApiBlueprintImportService'
+import './ThriftImportService'
+import './TypeSpecImportService'
 
 export { importProviders } from './registry'

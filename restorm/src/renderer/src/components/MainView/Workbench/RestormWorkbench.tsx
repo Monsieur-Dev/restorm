@@ -23,15 +23,7 @@ import {
   isMcpLogsTab
 } from '../../../../../shared/types/editor'
 import { FIREWALL_TEST_BUTTON_FEATURE } from '../../../../../main/featureFlags'
-import {
-  HTTPRequestTabView,
-  GraphQLRequestTabView,
-  GrpcRequestTabView,
-  SoapRequestTabView,
-  SoapServerRequestTabView,
-  WebSocketRequestTabView,
-  ODataRequestTabView
-} from '../../RequestTabViews'
+import { renderProtocolTabView } from '../../../protocol/protocolUiRegistry'
 import { EnvironmentProvider } from '../../../contexts/EnvironmentContext'
 import { WorkbenchActiveTabContext } from '../../../contexts/WorkbenchActiveTabContext'
 import { ScenarioEditorView } from '../../Scenario/ScenarioEditorView'
@@ -1093,9 +1085,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
             starLeftAction={starLeftActionFor(request)}
           >
             <div style={{ flex: 1, minHeight: 0, minWidth: 0, padding: '0 16px 8px 16px' }}>
-              <HTTPRequestTabView
-                request={request}
-              />
+              {renderProtocolTabView(request)}
             </div>
           </DeprecationAwareRequestTab>
         </EnvironmentProvider>
@@ -1132,9 +1122,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
             starLeftAction={starLeftActionFor(request)}
           >
             <div style={{ flex: 1, minHeight: 0, minWidth: 0, padding: '0 16px 8px 16px' }}>
-              <GraphQLRequestTabView
-                request={request}
-              />
+              {renderProtocolTabView(request)}
             </div>
           </RestormWorkbenchTab>
         </EnvironmentProvider>
@@ -1171,9 +1159,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
             starLeftAction={starLeftActionFor(request)}
           >
             <div style={{ flex: 1, minHeight: 0, minWidth: 0, padding: '0 16px 8px 16px' }}>
-              <GrpcRequestTabView
-                request={request}
-              />
+              {renderProtocolTabView(request)}
             </div>
           </RestormWorkbenchTab>
         </EnvironmentProvider>
@@ -1210,9 +1196,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
             starLeftAction={starLeftActionFor(request)}
           >
             <div style={{ flex: 1, minHeight: 0, minWidth: 0, padding: '0 16px 8px 16px' }}>
-              {request.server === true
-                ? <SoapServerRequestTabView request={request} />
-                : <SoapRequestTabView request={request} />}
+              {renderProtocolTabView(request)}
             </div>
           </RestormWorkbenchTab>
         </EnvironmentProvider>
@@ -1249,9 +1233,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
             starLeftAction={starLeftActionFor(request)}
           >
             <div style={{ flex: 1, minHeight: 0, minWidth: 0, padding: '0 16px 8px 16px' }}>
-              <WebSocketRequestTabView
-                request={request}
-              />
+              {renderProtocolTabView(request)}
             </div>
           </RestormWorkbenchTab>
         </EnvironmentProvider>
@@ -1288,7 +1270,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
             starLeftAction={starLeftActionFor(request)}
           >
             <div style={{ flex: 1, minHeight: 0, minWidth: 0, padding: '0 16px 8px 16px' }}>
-              <ODataRequestTabView request={request} />
+              {renderProtocolTabView(request)}
             </div>
           </RestormWorkbenchTab>
         </EnvironmentProvider>
@@ -1326,9 +1308,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
             starLeftAction={starLeftActionFor(request)}
           >
             <div style={{ flex: 1, minHeight: 0, minWidth: 0, padding: '0 16px 8px 16px' }}>
-              <HTTPRequestTabView
-                request={request}
-              />
+              {renderProtocolTabView(request)}
             </div>
           </RestormWorkbenchTab>
         </EnvironmentProvider>

@@ -874,6 +874,10 @@
         "description": "Skedarë .bru në stilin Bruno ose eksport i një dosjeje — Restorm lexon formatin tekstual .bru, përfshirë blloqet e skriptimit, dhe rikrijon çdo kërkesë si një nyje Restorm të nivelit të parë gati për t'u dërguar.",
         "trademark": "Bruno është software me kod të hapur (MIT) nga Anoop M. D., i përdorur këtu sipas kushteve të tij."
       },
+      "thunderclient": {
+        "description": "Vini nga Thunder Client? Lëshoni JSON-in e koleksionit të eksportuar — Restorm lexon çdo kërkesë, dosje, header dhe body, dhe më pas rindërton koleksionin si një pemë Restorm gati për t'u ekzekutuar.",
+        "trademark": "Thunder Client është një markë tregtare e pronarit të saj përkatës, përdorur këtu vetëm si referencë përputhshmërie."
+      },
       "graphql": {
         "description": "Ngjisni një SDL GraphQL (.graphql / .gql / një ngjitje nga klienti juaj GraphQL) dhe Restorm ndërton një kërkesë për operacion, e lidhur me llojin e duhur query / mutation / subscription me variablat tashmë të strukturuara.",
         "trademark": "GraphQL është një markë tregtare e GraphQL Foundation, projekt i Joint Development Foundation."
@@ -903,6 +907,10 @@
       "mqtt": {
         "description": "Ngjisni një URL të një broker-i MQTT ose një katalog temash — Restorm ndërton kërkesa publish / subscribe për temë, e mban lidhjen të gjallë për pamje paraprake në streaming dhe mban mend snapshot-et e mesazheve të mbajtura për t'i riluajtur më vonë.",
         "trademark": "MQTT është një standard OASIS; emri dhe logoja MQTT janë marka tregtare të OASIS Open."
+      },
+      "paw": {
+        "description": "Vini nga Paw? Hidhni eksportin tuaj JSON (File → Export → JSON në aplikacion — paketa native .paw nuk lexohet drejtpërdrejt). Restorm rindërton çdo kërkesë, kokë, trup dhe mjedis, dhe harton vlerat dinamike të Paw (vula kohore, vargje të rastësishme, UUID) me ekuivalentin më të afërt në Restorm.",
+        "trademark": "Paw është një markë tregtare e regjistruar e RapidAPI, Inc., e përdorur këtu vetëm si referencë për përputhshmëri."
       }
     },
     "loading": "Po analizohet...",
@@ -1572,7 +1580,25 @@
       "code": "kodi",
       "modalTitle": "Modifiko kodin",
       "result": "rezultati",
-      "timeout": "Afati kohor (s)"
+      "timeout": "Afati kohor (s)",
+      "deps": {
+        "downloading": "Po shkarkohen {{count}} paketa: {{packages}}"
+      },
+      "packages": {
+        "title": "Paketat",
+        "caption": "Varësitë",
+        "manage": "Menaxho paketat",
+        "count": "{{count}} var.",
+        "addShort": "Shto",
+        "hint": "Paketa të jashtme të fiksuara, të zgjidhura dhe të ruajtura në cache gjatë ekzekutimit të parë, pastaj të ngarkuara jashtë linje. Mbështeten vetëm paketat thjesht gjuhësore (Python: wheel-e thjesht Python); fikso versionin e saktë.",
+        "empty": "Ende nuk janë shtuar paketa.",
+        "remove": "Hiq {{package}}",
+        "name": "Emri i paketës",
+        "namePlaceholder": "emri i paketës",
+        "version": "Versioni",
+        "versionPlaceholder": "versioni",
+        "add": "Shto paketë"
+      }
     },
     "help": {
       "input": "Injekton parametrat hyrës të skenarit dhe konstantet në graf.",
@@ -1687,7 +1713,7 @@
       "projectPlaceholder": "<project.restorm>",
       "tokenPlaceholder": "<token_juaj>",
       "tokenNote": "Një ekzekutim headless kërkon një plan Restorm Pro dhe një token CI.",
-      "tokenLink": "Merr një token →"
+      "tokenLink": "Merr një token"
     },
     "socketio": {
       "connectionNameLabel": "Connection name",

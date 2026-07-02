@@ -6,9 +6,31 @@ import { SKIP_REQUEST_SENTINEL } from '../scriptSentinels'
 import { collectionStore } from '../../services/CollectionStore'
 import { isHTTPRequest } from '../../../shared/types/collections'
 import { resolveRequestByName } from './resolveRequestByName'
+import type { PackageSpec } from '../codeRuntimes/types'
 
 /** Hard cap on a code node's run time, regardless of the configured timeout. */
 const CODE_MAX_TIMEOUT_MS = 60_000
+
+/** Extra time granted, on top of the user's timeout, when a node has external
+ * packages — the FIRST run mounts them into the WASM engine (cold Pyodide load +
+ * `loadPackage`), which must not eat into the script's own budget. */
+const PACKAGE_MOUNT_BUDGET_MS = 120_000
+
+/** Read a node's pinned external dependencies (`config.packages`), tolerating a
+ * malformed bag. Each entry needs a non-empty `name` + exact `version` (the
+ * version is the cache key, so ranges are rejected — silently dropped here). */
+function readPackages(cfg: { packages?: unknown }): PackageSpec[] {
+  if (!Array.isArray(cfg.packages)) return []
+  const out: PackageSpec[] = []
+  for (const entry of cfg.packages) {
+    if (!entry || typeof entry !== 'object') continue
+    const { name, version } = entry as { name?: unknown; version?: unknown }
+    if (typeof name === 'string' && name.trim() !== '' && typeof version === 'string' && version.trim() !== '') {
+      out.push({ name: name.trim(), version: version.trim() })
+    }
+  }
+  return out
+}
 
 /** Resolve a Bruno `bru.runRequest(target)` reference (id / name / `folder/req`
  * path) to a concrete request in the open project. Matches the most specific
@@ -95,7 +117,7 @@ export function toScriptContext(input: unknown): SandboxScriptContext {
  * node of that language actually executes.
  */
 export const codeExecutor: NodeExecutor = async (act, ctx) => {
-  const cfg = ctx.node.config as { code?: unknown; timeout?: unknown; language?: unknown; scriptMode?: unknown; requestId?: unknown }
+  const cfg = ctx.node.config as { code?: unknown; timeout?: unknown; language?: unknown; scriptMode?: unknown; requestId?: unknown; packages?: unknown }
   // A wired `code` input (the script text supplied by an upstream node) wins over
   // the inline editor's code.
   const wiredCode = act.inputs['code']
@@ -152,6 +174,38 @@ export const codeExecutor: NodeExecutor = async (act, ctx) => {
   const runtime = getCodeRuntime(language)
   if (runtime === undefined) throw new Error(`code node: no runtime for language '${language}'`)
 
+  // External dependencies (`config.packages`): fetch + cache them in the main
+  // process BEFORE the script runs (a trusted, firewall-exempt provisioning step
+  // — see codeRuntimes/depsInstaller). A missing package / incompatible artifact
+  // throws here, which the scheduler routes to the node's `error` port.
+  const packages = readPackages(cfg)
+  let packagesCacheDir: string | undefined
+  if (packages.length > 0 && runtime.installPackages) {
+    const { codeDepsCacheDir, isCached } = await import('../codeRuntimes/depsCache')
+    const cacheDir = codeDepsCacheDir(language)
+    packagesCacheDir = cacheDir
+    // Only surface the "Downloading…" indicator when something is actually
+    // fetched — a fully-cached re-run stays silent (and offline).
+    const toFetch = packages.filter((p) => !isCached(cacheDir, p))
+    if (toFetch.length > 0) {
+      const names = toFetch.map((p) => `${p.name}@${p.version}`).join(', ')
+      ctx.log({
+        level: 'info',
+        source: 'user',
+        nodeId: act.nodeId,
+        scope: act.scope,
+        message: `Downloading ${toFetch.length} package(s): ${names}`,
+        messageKey: 'scenario.code.deps.downloading',
+        messageArgs: { count: toFetch.length, packages: names }
+      })
+    }
+    try {
+      await runtime.installPackages(packages, cacheDir)
+    } catch (err) {
+      throw new Error(err instanceof Error ? err.message : String(err))
+    }
+  }
+
   const { codeNetworkBridge } = await import('../codeNetworkBridge')
   // Read/WRITE view of the run's live variable map, so a script (or an imported
   // pm/bru script) that sets a variable persists it to the run for later nodes.
@@ -192,10 +246,16 @@ export const codeExecutor: NodeExecutor = async (act, ctx) => {
     }
   }
 
+  // The mount of a node's packages (cold WASM engine load + `loadPackage`) runs
+  // inside the runtime's timeout, so grant extra budget when packages are present
+  // — the script itself still only gets its configured slice.
+  const runTimeoutMs = packages.length > 0 ? timeoutMs + PACKAGE_MOUNT_BUDGET_MS : timeoutMs
+
   const { result, logs, postman } = await runtime.run(code, {
     input,
     variables,
-    timeoutMs,
+    timeoutMs: runTimeoutMs,
+    ...(packages.length > 0 && packagesCacheDir !== undefined ? { packages, packagesCacheDir } : {}),
     // `fetch` / `pm.sendRequest` route through the firewall (codeNetworkBridge)
     // for runtimes that support it (JS); others ignore it.
     network: codeNetworkBridge,

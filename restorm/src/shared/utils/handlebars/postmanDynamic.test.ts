@@ -24,6 +24,10 @@ describe('Postman dynamic variables via {{$...}}', () => {
     expect(n).toBeLessThanOrEqual(1000)
   })
 
+  it('resolves {{$randomAlphaNumeric}} to a non-empty alphanumeric string', () => {
+    expect(resolveTemplate('{{$randomAlphaNumeric}}', {})).toMatch(/^[A-Za-z0-9]+$/)
+  })
+
   it('resolves faker-style vars to non-empty values', () => {
     expect(resolveTemplate('{{$randomFirstName}}', {})).not.toBe('')
     expect(resolveTemplate('{{$randomEmail}}', {})).toMatch(/@/)

@@ -1,0 +1,17 @@
+{
+  "__version__": "3.2.2",
+  "__meta__": {
+    "about": "HTTPie session file",
+    "help": "https://httpie.io/docs#sessions"
+  },
+  "headers": {
+    "Accept": "application/json",
+    "X-Api-Key": "sk_test_12345"
+  },
+  "auth": {
+    "type": "basic",
+    "username": "demo",
+    "password": "demo-password"
+  },
+  "cookies": {}
+}

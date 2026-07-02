@@ -1,0 +1,102 @@
+#%RAML 1.0
+title: Pet Store RAML API
+version: v1
+baseUri: http://localhost:8080/api
+
+securitySchemes:
+  basicAuth:
+    type: Basic Authentication
+    describedBy:
+      headers:
+        Authorization:
+          type: string
+  petstoreOAuth:
+    type: OAuth 2.0
+    describedBy:
+      headers:
+        Authorization:
+          type: string
+    settings:
+      accessTokenUri: https://petstore.example.com/oauth/token
+      authorizationGrants: [client_credentials]
+      scopes: [read:pets, write:pets]
+
+types:
+  Pet:
+    type: object
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+      status:
+        type: string
+        enum: [available, pending, sold]
+        default: available
+      tags:
+        type: Tag[]
+        required: false
+  Tag:
+    type: object
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+
+resourceTypes:
+  collection:
+    post:
+      description: Create a new <<resourcePathName|!singularize>>
+
+traits:
+  secured:
+    headers:
+      Authorization:
+        type: string
+        required: true
+
+/pet:
+  displayName: Pet
+  type: collection
+  post:
+    securedBy: [petstoreOAuth]
+    body:
+      application/json:
+        type: Pet
+    responses:
+      200:
+        body:
+          application/json:
+            type: Pet
+  /findByStatus:
+    get:
+      is: [secured]
+      queryParameters:
+        status:
+          type: string
+          required: false
+          enum: [available, pending, sold]
+      responses:
+        200:
+          body:
+            application/json:
+              type: Pet[]
+  /{petId}:
+    uriParameters:
+      petId:
+        type: integer
+    get:
+      securedBy: [basicAuth]
+      responses:
+        200:
+          body:
+            application/json:
+              type: Pet
+        404:
+          description: Pet not found
+    delete:
+      securedBy: [basicAuth]
+      responses:
+        204:
+          description: Deleted

@@ -113,6 +113,62 @@ ship it in core-ui from day one (Section 2).
 
 ---
 
+### 1.5 — Register the protocol type (the registry socle)
+
+The per-request-type dispatch that used to be a `switch` in a dozen shared files
+now runs through an **append-only protocol registry**, mirroring the scenario-node
+registry. Adding a protocol type means **appending one entry to each of three
+sibling registries** — no shared `switch` to hunt down and edit:
+
+1. **`src/shared/protocolRegistry.ts`** — the single source of truth. Add one
+   `PROTOCOL_REGISTRY` entry keyed by your `type` discriminant. This is
+   deliberately **class-free / executor-free / component-free** (it derives the
+   `RequestType` union from its keys, so it can't import the request classes,
+   the execution services, or the React tab views without a cycle / bundle
+   leak). The entry carries: `graphqlTypeName`, `tabType`, `ipcNamespace`,
+   `badge` (`{ kind: 'fixed', value }` or `{ kind: 'field', field }`),
+   `serverCapable?`, `searchIcon?`, `scenarioKinds?`. Adding the key here
+   automatically extends `REQUEST_TYPES`, the GraphQL `RequestType` enum, every
+   `z.enum(REQUEST_TYPES)` validator, and the badge / search-icon lookups.
+
+2. **`src/shared/models/requests/requestFactory.ts`** — the class-bearing
+   sibling map. Add one `REQUEST_CLASS_REGISTRY` row: your class's `fromPlain`
+   (persistence / collection-reify path) + its constructor. `CollectionStore`
+   deserialisation dispatches through this — no `switch`.
+
+3. **`src/main/protocol/executorRegistry.ts`** — the main-only execution map
+   (kept out of the renderer bundle because it imports the execution services).
+   Add one `PROTOCOL_EXECUTORS` row: `streaming` (long-lived stream vs. one-shot)
+   + `cancel` (route to your service's `cancel`/`disconnect`). The MCP
+   `run_request` / `cancel_request` / `run_request_batch` tools dispatch through
+   this. `auth` and `odata` **compose** onto the HTTP service here rather than
+   duplicating it — do the same if your protocol layers on an existing one.
+
+**Drift guards** (`src/shared/protocolRegistry.test.ts`,
+`src/main/protocol/executorRegistry.test.ts`) assert all three registries cover
+the same key set + a compile-time exhaustive `Record<RequestType, …>` — so a
+protocol added to one registry but not the others fails the build or the test
+rather than misbehaving at runtime.
+
+**Protocol-specific glue that stays in its own file** (each carries a documented
+append point, not a hidden `switch`):
+- **Response shaping** — add a `build<Protocol>Response` method + one row in the
+  `buildDetail` builder table and (if it surfaces request metadata) the
+  `getRequestMeta` extractor table in `ResponseHistoryService.ts`.
+- **IPC channels** — register your `<ns>:execute` (+ `<ns>:listen/stop/is-listening`
+  for a server, + any streaming channels) in `IPCHandlers.ts`; the input schema
+  is protocol-specific, so this is one dedicated registration block per protocol.
+- **Create-request defaults** — add your menu variants + seeded defaults in
+  `useItemOperations.ts` (`defaultNameFor` + `handleAddChildItem`).
+- **Workbench tab** — add your `<Protocol>RequestTabView` render branch in
+  `RestormWorkbench.tsx` (the wrapper differs per protocol — HTTP wraps in
+  `DeprecationAwareRequestTab`, SOAP has a server variant).
+- **Scenario nodes** — see Section 13 + `adding-a-scenario-node.md` (the scenario
+  registry is its own append-only source of truth; the protocol descriptor only
+  *references* the kinds a protocol owns via `scenarioKinds`).
+
+---
+
 ## Section 2 — Mandatory UI component reuse (hard rule)
 
 > **Reviewers reject PRs that introduce bespoke buttons, modals, inputs, or

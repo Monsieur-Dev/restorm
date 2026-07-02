@@ -874,6 +874,10 @@
         "description": "Bruno-achtige .bru-bestanden of een mapexport — Restorm leest het .bru-tekstformaat, inclusief de scriptblokken, en bouwt elk verzoek opnieuw op als een eersteklas Restorm-knooppunt dat klaar is om te verzenden.",
         "trademark": "Bruno is opensourcesoftware (MIT) van Anoop M. D., hier gebruikt onder de bijbehorende voorwaarden."
       },
+      "thunderclient": {
+        "description": "Kom je van Thunder Client? Zet de geëxporteerde collection-JSON neer — Restorm leest elk verzoek, elke map, header en body, en bouwt de collectie vervolgens weer op als een startklare Restorm-boom.",
+        "trademark": "Thunder Client is een handelsmerk van de betreffende eigenaar, hier uitsluitend gebruikt ter referentie van compatibiliteit."
+      },
       "graphql": {
         "description": "Plak een GraphQL SDL (.graphql / .gql / een plakwerk uit je GraphQL-client) en Restorm steigert één verzoek per operatie, gekoppeld aan het juiste query/mutation/subscription-type met al gestructureerde variabelen.",
         "trademark": "GraphQL is een handelsmerk van de GraphQL Foundation, een project van de Joint Development Foundation."
@@ -903,6 +907,10 @@
       "mqtt": {
         "description": "Plak de URL van een MQTT-broker of een topiccatalogus — Restorm steigert publish-/subscribe-verzoeken per topic, houdt de verbinding open voor streaming-previews en onthoudt snapshots van retained messages zodat u ze later kunt afspelen.",
         "trademark": "MQTT is een OASIS-standaard; de naam en het logo van MQTT zijn handelsmerken van OASIS Open."
+      },
+      "paw": {
+        "description": "Komt u van Paw? Sleep uw JSON-export erin (File → Export → JSON in de app — de native .paw-bundel wordt niet direct gelezen). Restorm herbouwt elk verzoek, elke header, body en omgeving, en koppelt Paws dynamische waarden (tijdstempels, willekeurige strings, UUID's) aan hun dichtstbijzijnde Restorm-equivalent.",
+        "trademark": "Paw is een gedeponeerd handelsmerk van RapidAPI, Inc., hier alleen ter referentie voor compatibiliteit gebruikt."
       }
     },
     "loading": "Analyseren...",
@@ -1572,7 +1580,25 @@
       "code": "code",
       "modalTitle": "Code bewerken",
       "result": "resultaat",
-      "timeout": "Time-out (s)"
+      "timeout": "Time-out (s)",
+      "deps": {
+        "downloading": "{{count}} pakket(ten) downloaden: {{packages}}"
+      },
+      "packages": {
+        "title": "Pakketten",
+        "caption": "Afhankelijkheden",
+        "manage": "Pakketten beheren",
+        "count": "{{count}} deps",
+        "addShort": "Toevoegen",
+        "hint": "Vastgezette externe pakketten, bij de eerste run opgelost en gecacht, daarna offline geladen. Alleen pure-taalpakketten worden ondersteund (Python: pure-Python-wheels); zet de exacte versie vast.",
+        "empty": "Nog geen pakketten toegevoegd.",
+        "remove": "{{package}} verwijderen",
+        "name": "Pakketnaam",
+        "namePlaceholder": "pakketnaam",
+        "version": "Versie",
+        "versionPlaceholder": "versie",
+        "add": "Pakket toevoegen"
+      }
     },
     "help": {
       "input": "Injecteert de invoerparameters van het scenario en constanten in de graaf.",
@@ -1687,7 +1713,7 @@
       "projectPlaceholder": "<project.restorm>",
       "tokenPlaceholder": "<uw_token>",
       "tokenNote": "Een headless run vereist een Restorm Pro-plan en een CI-token.",
-      "tokenLink": "Token ophalen →"
+      "tokenLink": "Token ophalen"
     },
     "socketio": {
       "connectionNameLabel": "Connection name",

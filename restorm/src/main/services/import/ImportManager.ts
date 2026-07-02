@@ -19,7 +19,7 @@ import type { EnvironmentFolder, FolderItem } from '../../../shared/models'
 import { isRequest, isAnyFolder, isHTTPRequest, isAuthenticationRequest, isGraphQLRequest, isGrpcRequest, isSoapRequest, isWebSocketRequest, isODataRequest } from '../../../shared/types/collections'
 import { disableEmptyKeyValues } from '../../../shared/utils/emptyKeyValueHelper'
 import { withFirewallBypass } from 'electron-core-ui'
-import { assertSafeFetchUrl } from '../../utils/urlSecurity'
+import { assertSafeFetchUrl, fetchFollowingSafeRedirects } from '../../utils/urlSecurity'
 
 // Side-effect import: triggers all provider self-registrations before any
 // dispatch call can reach detectFormat or importFromContent.
@@ -62,38 +62,6 @@ export interface ImportOptions {
 // Safe redirect-following fetch
 // ============================================================================
 
-/** Cap on import redirect hops — generous for real APIs, bounded vs. a loop. */
-const MAX_IMPORT_REDIRECTS = 5
-
-/**
- * Fetch `url`, following redirects MANUALLY so every hop is re-validated by the
- * SSRF guard in STRICT mode (`allowPrivateHosts` is NOT carried past the first
- * URL). The top-level import URL may be loopback/private (the user typed it),
- * but a redirect must never be able to pivot to an internal / cloud-metadata
- * target — that is the real SSRF vector. `node-fetch`/undici default to
- * following redirects opaquely, which would bypass the per-hop check.
- *
- * Exported for unit-test coverage; the production call site is `importFrom`.
- */
-export async function fetchFollowingSafeRedirects(url: string, init: RequestInit): Promise<Response> {
-  let current = url
-  for (let hop = 0; hop <= MAX_IMPORT_REDIRECTS; hop++) {
-    const response = await fetch(current, { ...init, redirect: 'manual' })
-    // 3xx with a Location → a redirect we must re-validate before following.
-    const location = response.status >= 300 && response.status < 400
-      ? response.headers.get('location')
-      : null
-    if (location === null) return response
-    // Resolve relative redirects against the current URL, then re-assert
-    // STRICTLY (no allowPrivateHosts) so the hop can't reach loopback/private/
-    // metadata even though the original explicit URL was allowed to.
-    const next = new URL(location, current).toString()
-    assertSafeFetchUrl(next)
-    current = next
-  }
-  throw new Error(`Too many redirects following the import URL (>${MAX_IMPORT_REDIRECTS})`)
-}
-
 // ============================================================================
 // Format Detection
 // ============================================================================
@@ -107,6 +75,27 @@ export async function fetchFollowingSafeRedirects(url: string, init: RequestInit
  * module (`importFrom`, `tryAllImports`).
  */
 export function detectFormat(content: string, filePath?: string): string | null {
+  // Phase 1 — extension-anchored match wins. A provider whose `canImport`
+  // accepts on the filename ALONE (probed here with empty content) has an
+  // unambiguous extension signal (e.g. `.thrift`, `.tsp`, `.smithy`, `.proto`)
+  // and must beat a greedier CONTENT sniff from an earlier-registered provider.
+  // Without this, Smithy's `namespace … service {` sniff steals `.thrift` files
+  // and Thrift's `^namespace` sniff steals `.tsp` files, purely because
+  // detection is registration-order (co-existence only happens once every
+  // importer is merged, so this never surfaces in a single-importer worktree).
+  // Content-gated extension checks (Bruno's `.json`, HAR's `.har`) parse first,
+  // so they return false on empty content and correctly fall through to Phase 2.
+  if (filePath) {
+    for (const provider of importProviders) {
+      try {
+        if (provider.canImport('', filePath)) return provider.format
+      } catch {
+        // A provider that assumes non-empty content is not an extension-anchored
+        // match — ignore and let the content sniff below decide.
+      }
+    }
+  }
+  // Phase 2 — content sniff, in registration order (original behaviour).
   for (const provider of importProviders) {
     if (provider.canImport(content, filePath)) return provider.format
   }
@@ -157,7 +146,8 @@ export async function importFromContent(
   content: string,
   format: string,
   source: string,
-  sourceUrl?: string
+  sourceUrl?: string,
+  filePath?: string
 ): Promise<ImportResult> {
   try {
     logger.info(`[ImportManager] Importing from ${source} as ${format}`)
@@ -172,7 +162,13 @@ export async function importFromContent(
       }
     }
 
-    const opts = sourceUrl !== undefined ? { sourceUrl } : {}
+    // filePath: prefer the explicit param (Thrift threads it); else derive from
+    // `source` for non-URL imports (compiler-based formats e.g. TypeSpec need disk locality).
+    const isUrlSource = source.startsWith('http://') || source.startsWith('https://')
+    const opts = {
+      ...(sourceUrl !== undefined ? { sourceUrl } : {}),
+      ...(filePath !== undefined ? { filePath } : !isUrlSource ? { filePath: source } : {})
+    }
     // Await the parse result so this function stays genuinely async — callers
     // can rely on the Promise-based API even if all current parsers are sync.
     const folder: EnvironmentFolder = await Promise.resolve(provider.parse(content, opts))
@@ -314,7 +310,7 @@ export async function importFrom(
     }
 
     // Import using detected format
-    const result = await importFromContent(content, detectedFormat, source, isUrl ? input : undefined)
+    const result = await importFromContent(content, detectedFormat, source, isUrl ? input : undefined, isUrl ? undefined : input)
     if (result.success) {
       // Stamp the payload checksum on every successful import — the
       // env folder's `apiUpdate.payloadChecksum` is what the Refresh
@@ -379,7 +375,7 @@ export async function tryAllImports(
   const formats = importProviders.map(p => p.format)
 
   const results = await Promise.all(
-    formats.map(format => importFromContent(content, format, source, isUrl ? input : undefined))
+    formats.map(format => importFromContent(content, format, source, isUrl ? input : undefined, isUrl ? undefined : input))
   )
 
   // Return only successful results

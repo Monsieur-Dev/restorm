@@ -23,6 +23,9 @@ const fixtures: Record<string, { content: string; filePath?: string }> = {
   powershell: {
     content: 'Invoke-RestMethod -Uri "https://petstore.example.com/pets" -Method GET'
   },
+  'rest-client': {
+    content: 'GET https://petstore.example.com/pets'
+  },
   swagger: {
     content: readFileSync(join(UNIT, 'swagger-petstore.json'), 'utf-8')
   },
@@ -52,6 +55,14 @@ const fixtures: Record<string, { content: string; filePath?: string }> = {
     // JSON-CSDL (v4) — top-level $Version discriminator
     content: readFileSync(join(FIXTURES, 'odata', 'v4-csdl.json'), 'utf-8')
   },
+  'thunder-client': {
+    content: readFileSync(join(FIXTURES, 'thunder-client', 'thunder-collection-sample.json'), 'utf-8')
+  },
+  httpie: {
+    // HTTPie Desktop collection export — the session-file shape is covered
+    // by HttpieImportService's own canImport tests.
+    content: readFileSync(join(FIXTURES, 'httpie', 'collection.json'), 'utf-8')
+  },
   graphql: {
     content: 'type Query { pet(id: ID!): Pet }\ntype Pet { id: ID! name: String }'
   },
@@ -60,6 +71,34 @@ const fixtures: Record<string, { content: string; filePath?: string }> = {
   },
   soap: {
     content: readFileSync(join(UNIT, 'soap-petstore.wsdl'), 'utf-8')
+  },
+  har: {
+    content: readFileSync(join(FIXTURES, 'har', 'petstore.har'), 'utf-8')
+  },
+  paw: {
+    content: readFileSync(join(FIXTURES, 'paw', 'paw-petstore.json'), 'utf-8')
+  },
+  smithy: {
+    content: readFileSync(join(FIXTURES, 'smithy', 'weather.json'), 'utf-8')
+  },
+  raml: {
+    content: readFileSync(join(FIXTURES, 'raml', 'petstore.raml'), 'utf-8')
+  },
+  wadl: {
+    content: readFileSync(join(FIXTURES, 'wadl', 'petstore.wadl'), 'utf-8')
+  },
+  'api-blueprint': {
+    content: readFileSync(join(FIXTURES, 'api-blueprint', 'polls.apib'), 'utf-8')
+  },
+  thrift: {
+    content: readFileSync(join(FIXTURES, 'thrift', 'petstore.thrift'), 'utf-8')
+  },
+  typespec: {
+    // canImport is extension-only (a .tsp file commonly needs its own
+    // node_modules to compile, so content sniffing isn't meaningful here) —
+    // the filePath is what the provider actually checks.
+    content: readFileSync(join(FIXTURES, 'typespec', 'petstore.tsp'), 'utf-8'),
+    filePath: 'main.tsp'
   }
 }
 
@@ -69,8 +108,8 @@ describe('import provider registry', () => {
     expect(importProviders.length).toBeGreaterThan(0)
   })
 
-  it('has at least 13 registered providers (12 service files = 13 format entries)', () => {
-    expect(importProviders.length).toBeGreaterThanOrEqual(13)
+  it('has at least 14 registered providers (13 service files = 14 format entries)', () => {
+    expect(importProviders.length).toBeGreaterThanOrEqual(14)
   })
 
   for (const provider of importProviders) {
