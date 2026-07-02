@@ -14,7 +14,8 @@ import type {
   GitPushResult,
   GitPullResult,
   GitFetchCompareResult,
-  GitConflictVersions
+  GitConflictVersions,
+  GitConflictCommitTimestamps
 } from '../../types/git'
 import { NO_GIT_STATE } from '../../types/git'
 
@@ -262,6 +263,26 @@ export class GitService {
     }
     await writeFile(join(folder, filePath), content, 'utf-8')
     await this.git(folder).add([filePath])
+  }
+
+  /** Commit timestamps (Unix seconds) for the two sides of an in-progress
+   * merge conflict — `HEAD` (ours) and `MERGE_HEAD` (theirs). Either
+   * resolves to `null` if the ref can't be read (e.g. `MERGE_HEAD` absent
+   * outside a merge) rather than rejecting the whole call — a caller using
+   * this as a tie-breaker should treat `null` as "no signal", not an
+   * error. */
+  public async getConflictCommitTimestamps(folder: string): Promise<GitConflictCommitTimestamps> {
+    const commitTime = async (ref: string): Promise<number | null> => {
+      try {
+        const raw = await this.git(folder).show([`--no-patch`, `--format=%ct`, ref])
+        const seconds = Number(raw.trim())
+        return Number.isFinite(seconds) ? seconds : null
+      } catch {
+        return null
+      }
+    }
+    const [ours, theirs] = await Promise.all([commitTime('HEAD'), commitTime('MERGE_HEAD')])
+    return { ours, theirs }
   }
 
   public async abortMerge(folder: string): Promise<void> {

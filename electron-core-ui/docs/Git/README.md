@@ -13,7 +13,12 @@ newer-remote-version detection, conflict-blob retrieval, and a debounced
   semi-pull), `getConflictVersions` (`:1`/`:2`/`:3` index stages),
   `getFileAtHead` (the last-committed content of a path, `null` if it didn't
   exist at `HEAD` — for diffing the working copy against the last commit
-  without touching the index), `writeResolvedConflict`, `abortMerge`.
+  without touching the index), `writeResolvedConflict`, `abortMerge`,
+  `getConflictCommitTimestamps` (`HEAD`/`MERGE_HEAD` commit times, Unix
+  seconds, `null` when a ref can't be read — a generic tie-breaker a host's
+  conflict UI can use when two conflicting versions carry no other
+  ordering signal, e.g. two content versions with no version number of
+  their own).
 - **IPC bridge** — `git:*` channels registered on the main process and
   exposed via `window.api.git` in the renderer preload (no host-specific
   wiring needed — every primitive takes its folder path as an argument).
@@ -36,6 +41,12 @@ newer-remote-version detection, conflict-blob retrieval, and a debounced
   and Cancel/Push buttons. Fully controlled — the host owns every value and
   the actual git calls; see "Commit-message generation" below for how
   restorm drives it.
+- **`ConflictResolutionView`** + **`fieldDiffStyle`** — the conflict-
+  resolution 4-panel shell + diff-highlight framework. See "Conflict
+  resolution" below. **WIP** — the shell + list/empty-state behavior are
+  built and tested; the restorm-side entity→tab-view wiring (read-only
+  panels, field-level diff computation, per-entity YAML isolation) is not
+  yet implemented.
 
 ## Generalisation contract
 
@@ -120,6 +131,123 @@ default for future pushes; when off, a pick only affects the commit being
 edited right now). The SAME toggle is exposed in Settings→Git — both read
 and write the identical setting key, so they can never drift out of sync.
 
+## Conflict resolution (4-panel shell)
+
+**Status: WIP.** The shell, the diff-highlight framework, and restorm's
+entity dispatcher are built and tested. Field-level diff + tab preselect
+(`conflictFieldDiff.ts`) are wired for folders/environment-folders (the
+`notes` field), HTTP/auth requests (a bespoke, per-field breakdown: url/
+method/notes/auth-config discrete; headers/params/pathParams/body/
+producedHeaders/authErrorCodes coarse whole-section), and the other 5
+request protocols — GraphQL/gRPC/SOAP/WebSocket/OData — via a coarser
+generic breakdown (url/notes discrete, everything else one `requestConfig`
+boolean). The saved-quick-config whole-config merge rule and API-
+documentation auto-resolve (`apiDocumentationConflict.ts`) are both
+implemented. Still open: an interactive per-quick-config picker (the
+merge is correct/lossless today, just not interactively resolvable — the
+live quick-config UI isn't mounted inside this view at all — deferred to
+a follow-up ticket by design).
+
+`ConflictResolutionView` lays out, left to right: an optional conflict
+LIST (master-detail, shown only when there's more than one conflicting
+entity — built on `SplitView`/`Pane` + `ListView`), then three fixed
+panels — user/ours, server/theirs, resolved — each populated entirely by a
+host-supplied render prop:
+
+```tsx
+import { ConflictResolutionView } from 'electron-core-ui/renderer'
+
+<ConflictResolutionView
+  conflicts={conflicts}                      // [{ id, label }] — one per conflicting entity
+  selectedConflictId={selectedConflictId}     // null until the user picks one (only reachable when the list shows)
+  onSelectConflict={setSelectedConflictId}
+  renderUserPanel={(id) => <MyEntityPanel entity={usersVersionOf(id)} mode="readOnly" />}
+  renderServerPanel={(id) => <MyEntityPanel entity={serversVersionOf(id)} mode="readOnly" />}
+  renderResolvedPanel={(id) => <MyEntityPanel entity={resolvedVersionOf(id)} mode="editable" />}
+  onUseUserVersion={() => copyIntoResolved('ours')}     // optional — omit to hide the button
+  onUseServerVersion={() => copyIntoResolved('theirs')} // same
+/>
+```
+
+The shell owns: which panels are visible, the list's selection, the
+optional "use this version" header button on the user/server panels
+(renders nothing if the corresponding `onUse*Version` prop is omitted),
+and falling back to a "select a conflict" empty state in all three
+content panels before a selection exists. It owns NOTHING about what an
+"entity" is — rendering the right tab-view per entity type, read-only vs.
+editable, tab highlighting/hiding, and what "use this version" actually
+copies are entirely the host's job, per the same ECUI/restorm split as
+the rest of this feature.
+
+`fieldDiffStyle(differs: boolean)` is the companion diff-highlight
+framework: a plain style-computation helper (not a wrapper component,
+since every field component in the app already accepts a `style` prop the
+same way `NumberInput.tsx`'s `outOfRange` check does) returning the SAME
+`var(--inputValidation-errorBorder)` border color every other field-level
+error state already uses — spread it onto a field's `style` whenever the
+host's own diff computation says that field differs between the user and
+server versions.
+
+`ReadOnlyOverlay` is how restorm's `MyEntityPanel` above achieves "EXACTLY
+the normal entity panel, read-only" without a bespoke `readOnly` prop
+threaded through every protocol view: it renders the host's UNMODIFIED
+panel wrapped in a CSS class that disables `pointer-events` on every
+interactive descendant (input/textarea/select/button/…), leaving scrolling
+and text selection untouched. restorm's actual dispatcher
+(`restorm/src/renderer/src/components/GitConflict/ConflictEntityPanel.tsx`)
+picks the right panel per entity kind — folder / environment-folder /
+scenario / every request protocol (HTTP, auth, GraphQL, gRPC, SOAP,
+WebSocket, OData) reuses its exact live tab-view component; only a
+request-shaped entity with an unrecognized `type` (a defensive runtime
+fallback, not a real code path) falls back to the Monaco 3-pane view.
+`conflictEntityClone.ts` produces the editable resolved copy (reactive-
+proxy-wrapped for folders/requests, plain-cloned for scenarios, which are
+controlled via `onScenarioChange` instead). `gitConflictModel.ts`
+identifies which entities actually conflict from `getConflictVersions`'s
+3 git stages — an entity added on only one side merges in automatically,
+never flagged.
+
+Every request protocol's TabView also gets a `conflictMode` prop forced
+`true` from `ConflictEntityPanel` (`conflictSafeLiveState.ts`'s blanket
+safety rule): a conflict panel is a STATIC historical snapshot, never a
+live session, so `conflictMode` forces every "is this request currently
+listening/subscribing" read to `false` and skips every live event-stream
+subscription (GraphQL subscriptions, gRPC/WebSocket streaming frames,
+every protocol's server-mode listening beam) — regardless of whether the
+SAME request id happens to be genuinely connected in a real workbench tab
+at that moment. GraphQL additionally uses it to disable an auto
+`setOperationName` effect that otherwise mutates the request + the global
+collections store with no user click — the clone must never silently
+diverge from the ours/theirs/resolved snapshot the user is looking at.
+
+`conflictFieldDiff.ts` is restorm's field-diff computation half of AC#9:
+`computeEntityFieldDiff(kind, ours, theirs)` returns `{ fields, preselectTabId }`
+for kinds it knows how to diff, or `undefined` for scenarios (never, by
+design). `GitConflictResolutionModal` computes it ONCE per conflict (ours
+vs theirs) and passes the same result to all 3 panels via
+`ConflictEntityPanel`'s `fieldDiff` prop: the `fields` red-border map only
+applies in `readOnly` mode (user/server, per AC#4), while `preselectTabId`
+applies to every panel regardless of mode (AC#5).
+For folders/environment-folders this surfaces as `notesDiffers` +
+`defaultActiveTabId` passthrough props on `FolderView`/
+`EnvironmentFolderView` → `BaseFolderView`, which borders the notes editor
+and defaults to the `notes` tab when it's the one that differs. The same
+`defaultActiveTabId` pattern (plus `conflictFieldDiff`/`showCodeSnippets`)
+extends to `HTTPRequestTabView` for HTTP/auth requests.
+
+An environment-folder's `apiDocumentation` is a special case: it never
+becomes a manual pick. `gitConflictModel.ts` excludes it from the
+equality check that decides whether an environment-folder conflicts at
+all (a diff on `apiDocumentation` ALONE is invisible to the conflict
+list); `apiDocumentationConflict.ts`'s `resolveApiDocumentationConflict`
+picks a winner by dotted-numeric `api.version` compare, falling back to
+`GitService.getConflictCommitTimestamps`'s `HEAD`/`MERGE_HEAD` commit
+times when versions are equal/absent, and `gitConflictMerge.ts` applies
+that winner at write-back time for every environment-folder pair —
+independently of whatever the user resolved for the entity's OTHER
+fields (e.g. `notes`), since `apiDocumentation` isn't user-editable in
+this panel in the first place.
+
 ## Quick start
 
 ```ts
@@ -166,7 +294,9 @@ src/renderer/hooks/useGitCliMissingToast.ts       — one-time "git not installe
 src/renderer/services/CommitMessageEngine.ts      — renderCommitMessage (generic Handlebars render, cached per template)
 src/renderer/components/PushModal/PushModal.tsx   — the non-scoped commit + push UI (fully controlled)
 src/renderer/components/Settings/languages.ts     — AVAILABLE_LANGUAGES (shared by the UI-language switcher + PushModal)
-src/renderer/locales/*/translation.json          — `git.cliMissing.*` + `pushModal.*` (all 27 locales)
+src/renderer/components/ConflictResolutionView/ConflictResolutionView.tsx — the 4-panel shell (list + user/server/resolved)
+src/renderer/components/ConflictResolutionView/fieldDiffStyle.ts          — the diff-highlight style helper
+src/renderer/locales/*/translation.json          — `git.cliMissing.*` + `pushModal.*` + `conflictResolution.*` (all 27 locales)
 ```
 
 restorm's side of the commit-message pipeline (host-injected, not part of
@@ -179,4 +309,7 @@ src/renderer/src/services/commitMessageTemplates.ts — RESTORM_COMMIT_MESSAGE_T
 src/renderer/src/hooks/usePushModal.ts              — modal lifecycle + settings sync + stage/commit/push
 resources/settings.yaml                             — the `git` settings group (applyCommitMessageLanguageByDefault)
 src/renderer/locales/*/translation.json             — `git.diff.*`, `git.commitTitle.*`, `git.push{Failed,Succeeded}*` (all 27 locales)
+src/renderer/src/services/gitConflictModel.ts       — identifyConflictingEntities (which entities genuinely conflict)
+src/renderer/src/services/conflictEntityClone.ts    — cloneEntityForResolution (the editable resolved copy)
+src/renderer/src/components/GitConflict/ConflictEntityPanel.tsx — the entity→panel dispatcher
 ```

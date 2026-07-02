@@ -8,7 +8,7 @@ import type { FeaturePlatform } from '../types/feature'
 import type { FileServiceState, FileMetadata } from '../types/file'
 import type { CoreUiApi, CoreUiThemeApi, CoreUiStorageApi, CoreUiFeatureApi, CoreUiFileApi, CoreUiEventBusApi, CoreUiI18nApi, CoreUiSearchApi, CoreUiSettingsApi, CoreUiGitApi, CoreUiSearchDocument, CoreUiSearchResult, CoreUiSearchResultGroup } from '../types/api'
 import type { SettingValue, ResolvedSetting, SettingsGroup } from '../types/settings'
-import type { GitStatus, GitCommitResult, GitPushResult, GitPullResult, GitFetchCompareResult, GitConflictVersions, GitState } from '../types/git'
+import type { GitStatus, GitCommitResult, GitPushResult, GitPullResult, GitFetchCompareResult, GitConflictVersions, GitConflictCommitTimestamps, GitState } from '../types/git'
 import { NO_GIT_STATE } from '../types/git'
 import yaml from 'js-yaml'
 import themeIndexJson from '../../resources/themes/index.json'
@@ -735,6 +735,7 @@ export function ensureCoreUiWebApiShim(): void {
     getFileAtHead: (): Promise<string | null> => Promise.resolve(null),
     writeResolvedConflict: (): Promise<void> => Promise.resolve(),
     abortMerge: (): Promise<void> => Promise.resolve(),
+    getConflictCommitTimestamps: (): Promise<GitConflictCommitTimestamps> => Promise.resolve({ ours: null, theirs: null }),
     setActiveFolder: (): Promise<void> => Promise.resolve(),
     getState: (): Promise<GitState> => Promise.resolve(NO_GIT_STATE),
     onStateChanged: (): (() => void) => {

@@ -59,6 +59,13 @@ export interface EnvironmentFolderViewProps {
   /** Middle-click variant of `onRequestClick`. Opens the request tab
    *  without focusing it — the "open in background" gesture. */
   onRequestAuxClick?: (requestId: string) => void
+  /** Conflict-resolution passthrough — see `BaseFolderView`'s matching
+   * prop. Only ever set by `ConflictEntityPanel`. */
+  notesDiffers?: boolean
+  /** Conflict-resolution passthrough — preselects the conflict-bearing
+   * tab (AC#5), overriding the `'home'` default below. Only ever set by
+   * `ConflictEntityPanel`. */
+  defaultActiveTabId?: string
 }
 
 /** Convert environments to ListView items */
@@ -880,7 +887,7 @@ const ContextVariablesSection = React.memo<{ envId: string | null; secretVariabl
 
 ContextVariablesSection.displayName = 'ContextVariablesSection'
 
-const EnvironmentFolderViewInner: React.FC<EnvironmentFolderViewProps> = ({ folder, onFolderChange, onRequestClick, onRequestAuxClick }) => {
+const EnvironmentFolderViewInner: React.FC<EnvironmentFolderViewProps> = ({ folder, onFolderChange, onRequestClick, onRequestAuxClick, notesDiffers, defaultActiveTabId }) => {
   const { t } = useTranslation()
   const switchTabFnRef = useRef<((tabId: string) => void) | null>(null)
   const handleSwitchTab = useCallback((tabId: string) => { switchTabFnRef.current?.(tabId) }, [])
@@ -970,8 +977,9 @@ const EnvironmentFolderViewInner: React.FC<EnvironmentFolderViewProps> = ({ fold
       folder={folder}
       additionalTabs={[homeTab, environmentsTab, customValuesTab]}
       {...(docsContent !== undefined ? { docsContent } : {})}
-      defaultActiveTabId="home"
+      defaultActiveTabId={defaultActiveTabId ?? 'home'}
       onSwitchTabReady={handleSwitchTabReady}
+      {...(notesDiffers !== undefined ? { notesDiffers } : {})}
     />
   )
 }

@@ -429,5 +429,13 @@
     "bodyFieldLabel": "Opis",
     "cancel": "Otkaži",
     "push": "Pošalji"
+  },
+  "conflictResolution": {
+    "listTitle": "Sukobi",
+    "userTitle": "Vaša verzija",
+    "serverTitle": "Verzija servera",
+    "resolvedTitle": "Rešeno",
+    "selectAConflict": "Izaberite sukob da biste ga rešili",
+    "useThisVersion": "Koristi ovu verziju"
   }
 }

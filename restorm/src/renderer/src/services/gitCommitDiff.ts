@@ -1,7 +1,7 @@
 import { parse as yamlParse } from 'yaml'
 import type { FolderItem } from '../../../shared/types/folderTypes'
 import { isEnvironmentFolder, isFolder, isScenario } from '../../../shared/types/folderTypes'
-import { prepareForSerialization, processAfterDeserialization } from '../utils/serialization'
+import { prepareForSerialization, processAfterDeserialization, stripIds } from '../utils/serialization'
 
 export type GitEntityKind = 'folder' | 'environmentFolder' | 'request' | 'scenario'
 export type GitChangeAction = 'added' | 'modified' | 'deleted'
@@ -12,11 +12,64 @@ export interface GitEntityChange {
   action: GitChangeAction
 }
 
-function kindOf(item: FolderItem): GitEntityKind {
+export function kindOf(item: FolderItem): GitEntityKind {
   if (isEnvironmentFolder(item)) return 'environmentFolder'
   if (isFolder(item)) return 'folder'
   if (isScenario(item)) return 'scenario'
   return 'request'
+}
+
+/**
+ * Flatten a project tree into a `Map<id, entity>` — every request,
+ * scenario, folder, and environment-folder at any depth, keyed by its
+ * persisted id. Shared by `diffProjectEntities` (which only needs the
+ * `kind`/`name`/an own-fields snapshot for comparison) and the conflict
+ * model (`gitConflictModel.ts`, which needs the actual `FolderItem` to
+ * hand to an entity panel).
+ */
+export function flattenEntities(items: FolderItem[]): Map<string, { kind: GitEntityKind, name: string, item: FolderItem }> {
+  const out = new Map<string, { kind: GitEntityKind, name: string, item: FolderItem }>()
+  const walk = (nodes: FolderItem[]): void => {
+    for (const item of nodes) {
+      out.set(item.id, { kind: kindOf(item), name: item.name, item })
+      const children = (item as FolderItem & { items?: FolderItem[] }).items
+      if (children && children.length > 0) {
+        walk(children)
+      }
+    }
+  }
+  walk(items)
+  return out
+}
+
+/**
+ * JSON snapshot of an entity's OWN fields, with its child-container
+ * (`items` — a folder/env-folder/scenario's nested requests/sub-folders)
+ * excluded. Shared by the diff engine and the conflict model: a child
+ * add/remove/change is always reported as its OWN separate entity change,
+ * never bubbled up as "the parent folder was modified". A scenario's
+ * `nodes`/`edges` are NOT a child container in this sense — they stay
+ * part of the scenario's own snapshot, matching AC's decision that
+ * scenario conflicts are shown (not field-diffed) as a whole.
+ *
+ * `stripIds` clears the runtime-only ids `processAfterDeserialization`
+ * assigns to key-value rows (headers / params / pathParams /
+ * producedHeaders) on EVERY independent parse — without it, two byte-
+ * identical requests parsed from `ours`/`theirs` YAML each get their own
+ * `crypto.randomUUID()` per header row, so the raw JSON.stringify would
+ * report a spurious diff on any request that merely HAS headers, whether
+ * or not their content actually changed. `diffProjectEntities` below
+ * dodges this by running its two in-memory sides through the full
+ * `prepareForSerialization` upstream; `identifyConflictingEntities`
+ * (`gitConflictModel.ts`) hands `flattenEntities` the freshly-parsed
+ * items (ids intact, so `RestormKeyValueTable` rows keep stable React
+ * keys when rendered) and relies on THIS function to normalize away the
+ * id churn for comparison only — the returned `FolderItem` itself is
+ * never mutated.
+ */
+export function ownFieldsSnapshot(item: FolderItem): string {
+  const { items: _children, ...own } = item as FolderItem & { items?: FolderItem[] }
+  return JSON.stringify(stripIds(own))
 }
 
 interface CollectedEntity {
@@ -30,8 +83,8 @@ interface CollectedEntity {
 
 function collectEntities(items: FolderItem[], out: Map<string, CollectedEntity>): void {
   for (const item of items) {
-    const { items: children, ...own } = item as FolderItem & { items?: FolderItem[] }
-    out.set(item.id, { kind: kindOf(item), name: item.name, ownSnapshot: JSON.stringify(own) })
+    const children = (item as FolderItem & { items?: FolderItem[] }).items
+    out.set(item.id, { kind: kindOf(item), name: item.name, ownSnapshot: ownFieldsSnapshot(item) })
     if (children && children.length > 0) {
       collectEntities(children, out)
     }

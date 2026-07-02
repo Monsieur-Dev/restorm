@@ -429,5 +429,13 @@
     "bodyFieldLabel": "Descriere",
     "cancel": "Anulează",
     "push": "Trimite"
+  },
+  "conflictResolution": {
+    "listTitle": "Conflicte",
+    "userTitle": "Versiunea dvs.",
+    "serverTitle": "Versiunea serverului",
+    "resolvedTitle": "Rezolvat",
+    "selectAConflict": "Selectați un conflict pentru a-l rezolva",
+    "useThisVersion": "Utilizează această versiune"
   }
 }

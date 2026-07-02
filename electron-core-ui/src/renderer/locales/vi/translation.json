@@ -429,5 +429,13 @@
     "bodyFieldLabel": "Mô tả",
     "cancel": "Hủy",
     "push": "Đẩy"
+  },
+  "conflictResolution": {
+    "listTitle": "Xung đột",
+    "userTitle": "Phiên bản của bạn",
+    "serverTitle": "Phiên bản máy chủ",
+    "resolvedTitle": "Đã giải quyết",
+    "selectAConflict": "Chọn một xung đột để giải quyết",
+    "useThisVersion": "Dùng phiên bản này"
   }
 }

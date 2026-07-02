@@ -429,5 +429,13 @@
     "bodyFieldLabel": "설명",
     "cancel": "취소",
     "push": "푸시"
+  },
+  "conflictResolution": {
+    "listTitle": "충돌",
+    "userTitle": "내 버전",
+    "serverTitle": "서버 버전",
+    "resolvedTitle": "해결됨",
+    "selectAConflict": "해결할 충돌을 선택하세요",
+    "useThisVersion": "이 버전 사용"
   }
 }

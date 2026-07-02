@@ -85,6 +85,7 @@ export type {
   GitPullResult,
   GitFetchCompareResult,
   GitConflictVersions,
+  GitConflictCommitTimestamps,
   GitState
 } from '../types/git'
 export { NO_GIT_STATE } from '../types/git'

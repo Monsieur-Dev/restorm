@@ -429,5 +429,13 @@
     "bodyFieldLabel": "描述",
     "cancel": "取消",
     "push": "推送"
+  },
+  "conflictResolution": {
+    "listTitle": "冲突",
+    "userTitle": "您的版本",
+    "serverTitle": "服务器版本",
+    "resolvedTitle": "已解决",
+    "selectAConflict": "选择一个冲突以解决它",
+    "useThisVersion": "使用此版本"
   }
 }

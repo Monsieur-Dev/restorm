@@ -429,5 +429,13 @@
     "bodyFieldLabel": "Περιγραφή",
     "cancel": "Ακύρωση",
     "push": "Αποστολή"
+  },
+  "conflictResolution": {
+    "listTitle": "Συγκρούσεις",
+    "userTitle": "Η έκδοσή σας",
+    "serverTitle": "Έκδοση διακομιστή",
+    "resolvedTitle": "Επιλύθηκε",
+    "selectAConflict": "Επιλέξτε μια σύγκρουση για να την επιλύσετε",
+    "useThisVersion": "Χρήση αυτής της έκδοσης"
   }
 }

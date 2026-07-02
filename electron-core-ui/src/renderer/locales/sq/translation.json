@@ -429,5 +429,13 @@
     "bodyFieldLabel": "Përshkrimi",
     "cancel": "Anulo",
     "push": "Dërgo"
+  },
+  "conflictResolution": {
+    "listTitle": "Konfliktet",
+    "userTitle": "Versioni juaj",
+    "serverTitle": "Versioni i serverit",
+    "resolvedTitle": "Zgjidhur",
+    "selectAConflict": "Zgjidhni një konflikt për ta zgjidhur",
+    "useThisVersion": "Përdor këtë version"
   }
 }

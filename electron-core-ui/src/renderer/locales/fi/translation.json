@@ -429,5 +429,13 @@
     "bodyFieldLabel": "Kuvaus",
     "cancel": "Peruuta",
     "push": "Push"
+  },
+  "conflictResolution": {
+    "listTitle": "Ristiriidat",
+    "userTitle": "Oma versiosi",
+    "serverTitle": "Palvelimen versio",
+    "resolvedTitle": "Ratkaistu",
+    "selectAConflict": "Valitse ristiriita ratkaistaksesi sen",
+    "useThisVersion": "Käytä tätä versiota"
   }
 }

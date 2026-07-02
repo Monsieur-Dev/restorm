@@ -12,6 +12,7 @@ import type {
   GitPullResult,
   GitFetchCompareResult,
   GitConflictVersions,
+  GitConflictCommitTimestamps,
   GitState
 } from '../../types/git'
 
@@ -162,6 +163,7 @@ interface WindowApiGit {
   getFileAtHead: (folder: string, filePath: string) => Promise<string | null>
   writeResolvedConflict: (folder: string, filePath: string, content: string) => Promise<void>
   abortMerge: (folder: string) => Promise<void>
+  getConflictCommitTimestamps: (folder: string) => Promise<GitConflictCommitTimestamps>
   setActiveFolder: (folder: string | null) => Promise<void>
   getState: () => Promise<GitState>
   onStateChanged: (callback: (state: GitState) => void) => () => void

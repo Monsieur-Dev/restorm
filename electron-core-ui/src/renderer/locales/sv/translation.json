@@ -429,5 +429,13 @@
     "bodyFieldLabel": "Beskrivning",
     "cancel": "Avbryt",
     "push": "Push"
+  },
+  "conflictResolution": {
+    "listTitle": "Konflikter",
+    "userTitle": "Din version",
+    "serverTitle": "Serverversion",
+    "resolvedTitle": "Löst",
+    "selectAConflict": "Välj en konflikt för att lösa den",
+    "useThisVersion": "Använd den här versionen"
   }
 }

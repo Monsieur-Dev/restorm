@@ -429,5 +429,13 @@
     "bodyFieldLabel": "Beschrijving",
     "cancel": "Annuleren",
     "push": "Push"
+  },
+  "conflictResolution": {
+    "listTitle": "Conflicten",
+    "userTitle": "Uw versie",
+    "serverTitle": "Serverversie",
+    "resolvedTitle": "Opgelost",
+    "selectAConflict": "Selecteer een conflict om het op te lossen",
+    "useThisVersion": "Deze versie gebruiken"
   }
 }

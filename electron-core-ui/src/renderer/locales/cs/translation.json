@@ -429,5 +429,13 @@
     "bodyFieldLabel": "Popis",
     "cancel": "Zrušit",
     "push": "Odeslat"
+  },
+  "conflictResolution": {
+    "listTitle": "Konflikty",
+    "userTitle": "Vaše verze",
+    "serverTitle": "Verze serveru",
+    "resolvedTitle": "Vyřešeno",
+    "selectAConflict": "Vyberte konflikt, který chcete vyřešit",
+    "useThisVersion": "Použít tuto verzi"
   }
 }

@@ -429,5 +429,13 @@
     "bodyFieldLabel": "Опис",
     "cancel": "Скасувати",
     "push": "Надіслати"
+  },
+  "conflictResolution": {
+    "listTitle": "Конфлікти",
+    "userTitle": "Ваша версія",
+    "serverTitle": "Версія сервера",
+    "resolvedTitle": "Вирішено",
+    "selectAConflict": "Виберіть конфлікт, щоб вирішити його",
+    "useThisVersion": "Використати цю версію"
   }
 }

@@ -18,6 +18,7 @@ vi.mock('react-i18next', () => ({
 import { useGitActions } from './useGitActions'
 
 const onOpenPush = vi.fn()
+const onConflict = vi.fn()
 
 afterEach(() => {
   cleanup()
@@ -40,28 +41,44 @@ function stubGitApi(pullResult?: {
 
 describe('useGitActions', () => {
   it('onPush delegates to the injected openPushModal callback', () => {
-    const { result } = renderHook(() => useGitActions('/home/user/demo/api.restorm', onOpenPush))
+    const { result } = renderHook(() => useGitActions('/home/user/demo/api.restorm', onOpenPush, onConflict))
     act(() => { result.current.onPush() })
     expect(onOpenPush).toHaveBeenCalledTimes(1)
   })
 
   it('onPull calls window.api.git.pull with the folder derived from the open .restorm file', () => {
     const { pull } = stubGitApi()
-    const { result } = renderHook(() => useGitActions('/home/user/demo/api.restorm', onOpenPush))
+    const { result } = renderHook(() => useGitActions('/home/user/demo/api.restorm', onOpenPush, onConflict))
     act(() => { result.current.onPull() })
     expect(pull).toHaveBeenCalledWith('/home/user/demo')
   })
 
   it('onPull is a no-op when no file is open (no folder to pull into)', () => {
     const { pull } = stubGitApi()
-    const { result } = renderHook(() => useGitActions(null, onOpenPush))
+    const { result } = renderHook(() => useGitActions(null, onOpenPush, onConflict))
     act(() => { result.current.onPull() })
     expect(pull).not.toHaveBeenCalled()
   })
 
+  it('onPull is a no-op for a legacy folder-mode project (no single file to identify conflicts against)', () => {
+    const { pull } = stubGitApi()
+    const { result } = renderHook(() => useGitActions('/home/user/demo/folder', onOpenPush, onConflict))
+    act(() => { result.current.onPull() })
+    expect(pull).not.toHaveBeenCalled()
+  })
+
+  it('onPull hands off to onConflict (with the derived folder + relative path) instead of a toast when the pull conflicts', async () => {
+    stubGitApi({ success: false, conflicted: true, conflictFiles: ['api.restorm'] })
+    const { result } = renderHook(() => useGitActions('/home/user/demo/api.restorm', onOpenPush, onConflict))
+    act(() => { result.current.onPull() })
+    await act(async () => { await Promise.resolve() })
+    expect(onConflict).toHaveBeenCalledWith('/home/user/demo', 'api.restorm')
+    expect(toasterPushMock).not.toHaveBeenCalled()
+  })
+
   it('onPull shows a failure toast with the git error when the pull fails', async () => {
     stubGitApi({ success: false, conflicted: false, conflictFiles: [], error: 'fatal: could not read from remote' })
-    const { result } = renderHook(() => useGitActions('/home/user/demo/api.restorm', onOpenPush))
+    const { result } = renderHook(() => useGitActions('/home/user/demo/api.restorm', onOpenPush, onConflict))
     act(() => { result.current.onPull() })
     await act(async () => { await Promise.resolve() })
     expect(toasterPushMock).toHaveBeenCalledWith('app', {
@@ -73,7 +90,7 @@ describe('useGitActions', () => {
 
   it('onPull falls back to a generic failure body when the git error is missing', async () => {
     stubGitApi({ success: false, conflicted: false, conflictFiles: [] })
-    const { result } = renderHook(() => useGitActions('/home/user/demo/api.restorm', onOpenPush))
+    const { result } = renderHook(() => useGitActions('/home/user/demo/api.restorm', onOpenPush, onConflict))
     act(() => { result.current.onPull() })
     await act(async () => { await Promise.resolve() })
     expect(toasterPushMock).toHaveBeenCalledWith('app', {
@@ -85,7 +102,7 @@ describe('useGitActions', () => {
 
   it('onPull shows no toast on success', async () => {
     stubGitApi({ success: true, conflicted: false, conflictFiles: [] })
-    const { result } = renderHook(() => useGitActions('/home/user/demo/api.restorm', onOpenPush))
+    const { result } = renderHook(() => useGitActions('/home/user/demo/api.restorm', onOpenPush, onConflict))
     act(() => { result.current.onPull() })
     await act(async () => { await Promise.resolve() })
     expect(toasterPushMock).not.toHaveBeenCalled()

@@ -20,6 +20,11 @@ import { ServerConfigLockedHint } from '../common/ServerConfigLockedHint'
 
 export interface SoapServerRequestTabViewProps {
   request: SoapRequest
+  /** Blanket conflict-mode safety rule (AC#2/#5, see
+   * `conflictSafeLiveState.ts`): skips the listening/served-count
+   * subscription — a conflict panel is a static historical snapshot,
+   * never a live mock server. Only ever set by `ConflictEntityPanel`. */
+  conflictMode?: boolean
 }
 
 // SERVER MODE URL-section pieces — mirror the HTTP mock server layout.
@@ -45,7 +50,7 @@ function parseServerUrl(raw: string): { port: string; route: string } {
  * SOAP-specific operations editor (the canned responses dispatched by SOAPAction
  * / body operation name).
  */
-export const SoapServerRequestTabView: React.FC<SoapServerRequestTabViewProps> = ({ request }) => {
+export const SoapServerRequestTabView: React.FC<SoapServerRequestTabViewProps> = ({ request, conflictMode }) => {
   const { t } = useTranslation()
   const { selectedEnvId, environments } = useEnvironmentContext()
 
@@ -98,7 +103,10 @@ export const SoapServerRequestTabView: React.FC<SoapServerRequestTabViewProps> =
   }, [request.id, request.headers, url, operations])
 
   // Track listening state + served count for the hosted mock route.
+  // Skipped entirely in conflict mode (see `conflictSafeLiveState.ts`) — a
+  // static historical snapshot must never pick up another tab's live state.
   useEffect(() => {
+    if (conflictMode) return undefined
     const requestId = request.id
     let cancelled = false
     void window.restorm?.soap.isListening(requestId).then((listening) => {
@@ -114,7 +122,7 @@ export const SoapServerRequestTabView: React.FC<SoapServerRequestTabViewProps> =
       setServedCount(count)
     })
     return () => { cancelled = true; unsubProgress?.(); unsubServed?.() }
-  }, [request.id])
+  }, [request.id, conflictMode])
 
   const handleListen = useCallback((): void => {
     const requestId = request.id

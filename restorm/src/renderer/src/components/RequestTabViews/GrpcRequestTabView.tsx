@@ -18,6 +18,7 @@ import {
   toasterService,
   useDebouncedCallback,
   useDebouncedValue,
+  fieldDiffStyle,
   type ISelectData,
   type VariableDefinition
 } from 'electron-core-ui/renderer'
@@ -39,6 +40,8 @@ import { findOperationForRoute } from '../../../../shared/utils/findOperationFor
 import { SendButtonEnvSwitcher } from './SendButtonEnvSwitcher'
 import { BeamWrap } from '../common/BeamWrap'
 import { useIsGrpcListening } from '../../services/grpcListeningStore'
+import { conflictSafeBoolean } from '../../services/conflictSafeLiveState'
+import type { EntityFieldDiff } from '../../services/conflictFieldDiff'
 import { HeaderHoverTooltip } from '../MainView/HeaderHoverTooltip'
 import { GrpcServerTabView } from './GrpcServerTabView'
 import './WebSocketChat.css'
@@ -57,23 +60,42 @@ const CLIENT_WRITE_CALL_TYPES: ReadonlySet<GrpcCallType> = new Set<GrpcCallType>
 
 export interface GrpcRequestTabViewProps {
   request: GrpcRequest
+  /** Conflict-resolution field-diff (AC#4) — `computeEntityFieldDiff`'s
+   * result. Red-borders the URL input when `url` differs; coarse-borders
+   * the message editor + metadata table when `requestConfig` differs.
+   * Only ever set by `ConflictEntityPanel`; ignored in server mode (no
+   * field-diff wiring there, matching the HTTP/OData server-mode
+   * precedent). */
+  conflictFieldDiff?: EntityFieldDiff
+  /** Preselects the tab holding the conflicting field (AC#5). */
+  defaultActiveTabId?: string
+  /** Hides the (non-editable, generated) Code Snippets tab (AC#5). */
+  showCodeSnippets?: boolean
+  /** Blanket conflict-mode safety rule (AC#2/#5, see
+   * `conflictSafeLiveState.ts`): forces `isListening` to `false` and skips
+   * the live message/progress stream subscription — a conflict panel is a
+   * static historical snapshot, never a live call. */
+  conflictMode?: boolean
 }
 
-export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({
-  request
-}) => {
+export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = (props) => {
   // SERVER MODE: restorm HOSTS a local gRPC mock server (a wholly different
   // surface from the client request — Start/Stop + per-method mock editor), so
   // it renders its own component rather than threading branches through here.
-  if (request.server === true) {
-    return <GrpcServerTabView request={request} />
+  if (props.request.server === true) {
+    return <GrpcServerTabView request={props.request} {...(props.conflictMode !== undefined ? { conflictMode: props.conflictMode } : {})} />
   }
-  return <GrpcClientTabView request={request} />
+  return <GrpcClientTabView {...props} />
 }
 
 const GrpcClientTabView: React.FC<GrpcRequestTabViewProps> = ({
-  request
+  request,
+  conflictFieldDiff,
+  defaultActiveTabId,
+  showCodeSnippets = true,
+  conflictMode
 }) => {
+  const conflictFields = conflictFieldDiff?.fields
   const [historyModalOpen, setHistoryModalOpen] = useState(false)
   const { t } = useTranslation()
   // See HTTPRequestTabView — `projectUuid` from the env context is
@@ -105,7 +127,7 @@ const GrpcClientTabView: React.FC<GrpcRequestTabViewProps> = ({
   const showSendButton = CLIENT_WRITE_CALL_TYPES.has(callType)
   // The connection-listening beam (a streaming call is open) — drives the
   // Connect↔Disconnect toggle + the Send button's enabled state.
-  const isListening = useIsGrpcListening(request.id)
+  const isListening = conflictSafeBoolean(useIsGrpcListening(request.id), conflictMode)
 
   // See HTTPRequestTabView for the contract.
   const [panelCollapsed, setPanelCollapsed] = useState<{ message: boolean; metadata: boolean }>(() => {
@@ -305,8 +327,11 @@ const GrpcClientTabView: React.FC<GrpcRequestTabViewProps> = ({
 
   // Stream lifecycle + frames: subscribe to the gRPC progress + message streams
   // so a live streaming call (server / client / bidi) shows its frames as they
-  // arrive, mirroring the WebSocket chat. Unary calls don't use these.
+  // arrive, mirroring the WebSocket chat. Unary calls don't use these. Skipped
+  // entirely in conflict mode (see `conflictSafeLiveState.ts`) — a static
+  // historical snapshot must never pick up another tab's live frames.
   useEffect(() => {
+    if (conflictMode) return undefined
     const requestId = request.id
     const unsubMsg = window.restorm?.grpc.onMessage((data) => {
       const { requestId: rid, message: m } = data as { requestId: string; message: GrpcFrameItem }
@@ -322,7 +347,7 @@ const GrpcClientTabView: React.FC<GrpcRequestTabViewProps> = ({
       }
     })
     return () => { unsubMsg?.(); unsubProg?.() }
-  }, [request.id])
+  }, [request.id, conflictMode])
   
   // Stable empty array for components that get variables via their own variableId
   const emptyVariables = useMemo<VariableDefinition[]>(() => [], [])
@@ -434,7 +459,7 @@ const GrpcClientTabView: React.FC<GrpcRequestTabViewProps> = ({
       onCollapsedChange={handlePanelCollapsedChange}
     >
       <Pane title={t('grpc.tabs.message')} initialSize={0.7} minSize={150} collapsed={panelCollapsed.message} data-testid="grpc-message-pane">
-        <div style={{ height: '100%', border: '1px solid var(--panel-border)', borderRadius: 3 }}>
+        <div style={{ height: '100%', border: '1px solid var(--panel-border)', borderRadius: 3, ...fieldDiffStyle(!!conflictFields?.['requestConfig']) }}>
           <CodeEditor
             key={`message-${transportEpoch}`}
             height="100%"
@@ -466,16 +491,18 @@ const GrpcClientTabView: React.FC<GrpcRequestTabViewProps> = ({
           />
         )}
       >
-        <RestormKeyValueTable
-          key={`metadata-${transportEpoch}`}
-          ref={metadataRef}
-          variables={emptyVariables}
-          helpers={handlebarsHelpers}
-          initialRows={request.metadata}
-          onRowsChange={handleMetadataChange}
-          persistenceId={`grpc-metadata:${request.id}`}
-          data-testid="grpc-metadata-table"
-        />
+        <div style={{ height: '100%', boxSizing: 'border-box', border: '1px solid transparent', ...fieldDiffStyle(!!conflictFields?.['requestConfig']) }}>
+          <RestormKeyValueTable
+            key={`metadata-${transportEpoch}`}
+            ref={metadataRef}
+            variables={emptyVariables}
+            helpers={handlebarsHelpers}
+            initialRows={request.metadata}
+            onRowsChange={handleMetadataChange}
+            persistenceId={`grpc-metadata:${request.id}`}
+            data-testid="grpc-metadata-table"
+          />
+        </div>
       </Pane>
     </SplitView>
   )
@@ -637,7 +664,12 @@ const GrpcClientTabView: React.FC<GrpcRequestTabViewProps> = ({
     <>
       <ControlGroup data-testid="grpc-url-section">
         <HeaderHoverTooltip label={resolvedUrl || url} suppressed={!(resolvedUrl || url)} className="url-container-stretch">
-          <div style={{ flex: 1, minWidth: 0 }} data-testid="url-container" data-url-resolved={resolvedUrl ? 'true' : 'false'} data-resolved-url={resolvedUrl || url}>
+          <div
+            style={{ flex: 1, minWidth: 0, boxSizing: 'border-box', border: '1px solid transparent', ...fieldDiffStyle(!!conflictFields?.['url']) }}
+            data-testid="url-container"
+            data-url-resolved={resolvedUrl ? 'true' : 'false'}
+            data-resolved-url={resolvedUrl || url}
+          >
             <RestormVariableInputBox
               value={url}
               onChange={setUrl}
@@ -770,6 +802,9 @@ const GrpcClientTabView: React.FC<GrpcRequestTabViewProps> = ({
         infosContent={effectiveInfosContent}
         responseContent={effectiveResponseContent}
         jsonData={effectiveJsonData}
+        showCodeSnippets={showCodeSnippets}
+        notesDiffers={!!conflictFields?.['notes']}
+        {...(defaultActiveTabId !== undefined ? { defaultActiveTabId } : {})}
       />
       <ResponseHistoryModal
         isOpen={historyModalOpen}

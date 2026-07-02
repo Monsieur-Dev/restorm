@@ -17,6 +17,7 @@ import {
   eventBus,
   logger,
   getContrastColor,
+  fieldDiffStyle,
   type ISelectData,
   type VariableDefinition
 } from 'electron-core-ui/renderer'
@@ -39,12 +40,29 @@ import { findOperationForRoute } from '../../../../shared/utils/findOperationFor
 import { DEFAULT_WS_TIMEOUT_MS } from '../../../../shared/config/constants'
 import { SendButtonEnvSwitcher } from './SendButtonEnvSwitcher'
 import { useIsWebsocketListening } from '../../services/websocketListeningStore'
+import { conflictSafeBoolean } from '../../services/conflictSafeLiveState'
+import type { EntityFieldDiff } from '../../services/conflictFieldDiff'
 import { BeamWrap } from '../common/BeamWrap'
 import { HeaderHoverTooltip } from '../MainView/HeaderHoverTooltip'
 import './WebSocketChat.css'
 
 export interface WebSocketRequestTabViewProps {
   request: WebSocketRequest
+  /** Conflict-resolution field-diff (AC#4) — `computeEntityFieldDiff`'s
+   * result. Red-borders the URL input when `url` differs; coarse-borders
+   * the message/options area when `requestConfig` differs. Only ever set
+   * by `ConflictEntityPanel`. */
+  conflictFieldDiff?: EntityFieldDiff
+  /** Preselects the tab holding the conflicting field (AC#5). */
+  defaultActiveTabId?: string
+  /** Hides the (non-editable, generated) Code Snippets tab (AC#5). */
+  showCodeSnippets?: boolean
+  /** Blanket conflict-mode safety rule (AC#2/#5, see
+   * `conflictSafeLiveState.ts`): forces `isListening` to `false` and skips
+   * the live message/progress/server-clients stream subscription — a
+   * conflict panel is a static historical snapshot, never a live
+   * connection. */
+  conflictMode?: boolean
 }
 
 /** The MQTT-specific slice of `fullData` (only for `protocol === 'mqtt'`).
@@ -67,8 +85,13 @@ function buildMqttFullData(req: WebSocketRequest): Record<string, unknown> {
 }
 
 export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = ({
-  request
+  request,
+  conflictFieldDiff,
+  defaultActiveTabId,
+  showCodeSnippets = true,
+  conflictMode
 }) => {
+  const conflictFields = conflictFieldDiff?.fields
   const [historyModalOpen, setHistoryModalOpen] = useState(false)
   const { t } = useTranslation()
   // See HTTPRequestTabView — `projectUuid` from the env context is
@@ -96,7 +119,7 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
   const [serverClientCount, setServerClientCount] = useState(0)
   // Whether this request currently holds an open connection (drives the
   // Connect↔Disconnect toggle, the Send button, and the listening beam).
-  const isListening = useIsWebsocketListening(request.id)
+  const isListening = conflictSafeBoolean(useIsWebsocketListening(request.id), conflictMode)
 
   // See HTTPRequestTabView for the contract.
   const [panelCollapsed, setPanelCollapsed] = useState<{ message: boolean; headers: boolean }>(() => {
@@ -252,7 +275,10 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
 
   // Live message + connection stream for this request: append frames as they
   // arrive (chat updates in real time) and refresh history when it closes.
+  // Skipped entirely in conflict mode (see `conflictSafeLiveState.ts`) — a
+  // static historical snapshot must never pick up another tab's live frames.
   useEffect(() => {
+    if (conflictMode) return undefined
     const requestId = request.id
     const unsubMsg = window.restorm?.websocket.onMessage(({ requestId: rid, message: m }) => {
       if (rid !== requestId) return
@@ -272,7 +298,7 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
       setServerClientCount(count)
     })
     return () => { unsubMsg?.(); unsubProg?.(); unsubClients?.() }
-  }, [request.id])
+  }, [request.id, conflictMode])
 
   // Sync state changes to reactive request object
   const setUrl = useCallback((value: string): void => {
@@ -422,7 +448,7 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
           {request.protocol === 'mqtt' && (
             <MqttOptionsPanel key={`mqtt-${transportEpoch}`} request={request} variables={envVariables} helpers={handlebarsHelpers} server={isServer} />
           )}
-          <div style={{ flex: 1, border: '1px solid var(--panel-border)', borderRadius: 3 }}>
+          <div style={{ flex: 1, border: '1px solid var(--panel-border)', borderRadius: 3, ...fieldDiffStyle(!!conflictFields?.['requestConfig']) }}>
             <CodeEditor
               key={`message-${transportEpoch}`}
               height="100%"
@@ -455,16 +481,18 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
           />
         )}
       >
-        <RestormKeyValueTable
-          key={`headers-${transportEpoch}`}
-          ref={headersRef}
-          variables={emptyVariables}
-          helpers={handlebarsHelpers}
-          initialRows={request.headers}
-          onRowsChange={handleHeadersChange}
-          persistenceId={`websocket-headers:${request.id}`}
-          data-testid="websocket-headers-table"
-        />
+        <div style={{ height: '100%', boxSizing: 'border-box', border: '1px solid transparent', ...fieldDiffStyle(!!conflictFields?.['requestConfig']) }}>
+          <RestormKeyValueTable
+            key={`headers-${transportEpoch}`}
+            ref={headersRef}
+            variables={emptyVariables}
+            helpers={handlebarsHelpers}
+            initialRows={request.headers}
+            onRowsChange={handleHeadersChange}
+            persistenceId={`websocket-headers:${request.id}`}
+            data-testid="websocket-headers-table"
+          />
+        </div>
       </Pane>
     </SplitView>
   )
@@ -742,7 +770,12 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
       ) : (
         <>
           <HeaderHoverTooltip label={resolvedUrl || url} suppressed={!(resolvedUrl || url)} className="url-container-stretch">
-            <div style={{ flex: 1, minWidth: 0 }} data-testid="url-container" data-url-resolved={resolvedUrl ? 'true' : 'false'} data-resolved-url={resolvedUrl || url}>
+            <div
+              style={{ flex: 1, minWidth: 0, boxSizing: 'border-box', border: '1px solid transparent', ...fieldDiffStyle(!!conflictFields?.['url']) }}
+              data-testid="url-container"
+              data-url-resolved={resolvedUrl ? 'true' : 'false'}
+              data-resolved-url={resolvedUrl || url}
+            >
               <RestormVariableInputBox
                 value={url}
                 onChange={setUrl}
@@ -798,6 +831,9 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
         showResponse={isListening || liveMessages.length > 0 || response !== null}
         infosContent={infosContent}
         responseContent={serverResponseContent}
+        showCodeSnippets={showCodeSnippets}
+        notesDiffers={!!conflictFields?.['notes']}
+        {...(defaultActiveTabId !== undefined ? { defaultActiveTabId } : {})}
       />
       <ResponseHistoryModal
         isOpen={historyModalOpen}

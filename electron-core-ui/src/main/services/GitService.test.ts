@@ -215,6 +215,29 @@ describe('GitService', () => {
     })
   })
 
+  describe('getConflictCommitTimestamps', () => {
+    it('reads the HEAD and MERGE_HEAD commit timestamps', async () => {
+      mockGit.show.mockImplementation((args: string[]) => {
+        const ref = args[args.length - 1] ?? ''
+        if (ref === 'HEAD') return Promise.resolve('1700000000\n')
+        if (ref === 'MERGE_HEAD') return Promise.resolve('1700003600\n')
+        return Promise.reject(new Error('unexpected ref'))
+      })
+      const result = await service.getConflictCommitTimestamps('/proj')
+      expect(result).toEqual({ ours: 1700000000, theirs: 1700003600 })
+    })
+
+    it('resolves to null for a ref that cannot be read (e.g. MERGE_HEAD outside a merge)', async () => {
+      mockGit.show.mockImplementation((args: string[]) => {
+        const ref = args[args.length - 1] ?? ''
+        if (ref === 'HEAD') return Promise.resolve('1700000000\n')
+        return Promise.reject(new Error('unknown revision: MERGE_HEAD'))
+      })
+      const result = await service.getConflictCommitTimestamps('/proj')
+      expect(result).toEqual({ ours: 1700000000, theirs: null })
+    })
+  })
+
   describe('getFileAtHead', () => {
     it('reads the file content at HEAD', async () => {
       mockGit.show.mockResolvedValue('collections:\n  - name: foo\n')

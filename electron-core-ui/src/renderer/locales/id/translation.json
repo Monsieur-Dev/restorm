@@ -429,5 +429,13 @@
     "bodyFieldLabel": "Deskripsi",
     "cancel": "Batal",
     "push": "Push"
+  },
+  "conflictResolution": {
+    "listTitle": "Konflik",
+    "userTitle": "Versi Anda",
+    "serverTitle": "Versi server",
+    "resolvedTitle": "Terselesaikan",
+    "selectAConflict": "Pilih konflik untuk menyelesaikannya",
+    "useThisVersion": "Gunakan versi ini"
   }
 }

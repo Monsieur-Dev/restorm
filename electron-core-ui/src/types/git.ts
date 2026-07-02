@@ -82,6 +82,19 @@ export interface GitConflictVersions {
   theirs: string | null
 }
 
+/**
+ * Commit timestamps (Unix seconds) for the two sides of an in-progress
+ * merge conflict — `ours` is `HEAD` (the current branch tip), `theirs` is
+ * `MERGE_HEAD` (the commit being merged in). `null` when the ref can't be
+ * resolved (e.g. `MERGE_HEAD` absent outside a merge). A generic git
+ * primitive; a host's conflict-resolution UI uses it as a tie-breaker when
+ * two conflicting versions of some content carry no other ordering signal.
+ */
+export interface GitConflictCommitTimestamps {
+  ours: number | null
+  theirs: number | null
+}
+
 /** Reactive snapshot broadcast on every `git:state-changed` push. */
 export interface GitState {
   /** Whether the active folder is inside a git working tree. */

@@ -14,6 +14,7 @@ import {
   eventBus,
   logger,
   getContrastColor,
+  fieldDiffStyle,
   type VariableDefinition
 } from 'electron-core-ui/renderer'
 import { DocumentEvents, type RequestHistoryEventPayload } from '../../services/DocumentEvents'
@@ -38,14 +39,28 @@ import { SendButtonEnvSwitcher } from './SendButtonEnvSwitcher'
 import { BeamWrap } from '../common/BeamWrap'
 import { toasterService } from 'electron-core-ui/renderer'
 import { HeaderHoverTooltip } from '../MainView/HeaderHoverTooltip'
+import type { EntityFieldDiff } from '../../services/conflictFieldDiff'
 
 export interface SoapRequestTabViewProps {
   request: SoapRequest
+  /** Conflict-resolution field-diff (AC#4) — `computeEntityFieldDiff`'s
+   * result. Red-borders the URL input when `url` differs; coarse-borders
+   * the body/headers area when `requestConfig` differs. Only ever set by
+   * `ConflictEntityPanel`. */
+  conflictFieldDiff?: EntityFieldDiff
+  /** Preselects the tab holding the conflicting field (AC#5). */
+  defaultActiveTabId?: string
+  /** Hides the (non-editable, generated) Code Snippets tab (AC#5). */
+  showCodeSnippets?: boolean
 }
 
 export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({
-  request
+  request,
+  conflictFieldDiff,
+  defaultActiveTabId,
+  showCodeSnippets = true
 }) => {
+  const conflictFields = conflictFieldDiff?.fields
   const [historyModalOpen, setHistoryModalOpen] = useState(false)
   const { t } = useTranslation()
   // See HTTPRequestTabView — `projectUuid` from the env context is
@@ -280,7 +295,7 @@ export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({
       onCollapsedChange={handlePanelCollapsedChange}
     >
       <Pane title={t('soap.tabs.body')} initialSize={0.7} minSize={150} collapsed={panelCollapsed.body} data-testid="soap-request-body-pane">
-        <div style={{ height: '100%', border: '1px solid var(--panel-border)', borderRadius: 3 }}>
+        <div style={{ height: '100%', border: '1px solid var(--panel-border)', borderRadius: 3, ...fieldDiffStyle(!!conflictFields?.['requestConfig']) }}>
           <CodeEditor
             key={`body-${transportEpoch}`}
             height="100%"
@@ -312,16 +327,18 @@ export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({
           />
         )}
       >
-        <RestormKeyValueTable
-          key={`headers-${transportEpoch}`}
-          ref={headersRef}
-          variables={emptyVariables}
-          helpers={handlebarsHelpers}
-          initialRows={request.headers}
-          onRowsChange={handleHeadersChange}
-          persistenceId={`soap-headers:${request.id}`}
-          data-testid="soap-request-headers-table"
-        />
+        <div style={{ height: '100%', boxSizing: 'border-box', border: '1px solid transparent', ...fieldDiffStyle(!!conflictFields?.['requestConfig']) }}>
+          <RestormKeyValueTable
+            key={`headers-${transportEpoch}`}
+            ref={headersRef}
+            variables={emptyVariables}
+            helpers={handlebarsHelpers}
+            initialRows={request.headers}
+            onRowsChange={handleHeadersChange}
+            persistenceId={`soap-headers:${request.id}`}
+            data-testid="soap-request-headers-table"
+          />
+        </div>
       </Pane>
     </SplitView>
   )
@@ -487,7 +504,12 @@ export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({
       )}
       <ControlGroup data-testid="soap-url-section">
         <HeaderHoverTooltip label={resolvedUrl || url} suppressed={!(resolvedUrl || url)} className="url-container-stretch">
-          <div style={{ flex: 1, minWidth: 0 }} data-testid="url-container" data-url-resolved={resolvedUrl ? 'true' : 'false'} data-resolved-url={resolvedUrl || url}>
+          <div
+            style={{ flex: 1, minWidth: 0, boxSizing: 'border-box', border: '1px solid transparent', ...fieldDiffStyle(!!conflictFields?.['url']) }}
+            data-testid="url-container"
+            data-url-resolved={resolvedUrl ? 'true' : 'false'}
+            data-resolved-url={resolvedUrl || url}
+          >
             <RestormVariableInputBox
               value={url}
               onChange={setUrl}
@@ -548,6 +570,9 @@ export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({
         showResponse={response !== null}
         infosContent={infosContent}
         responseContent={responseContent}
+        showCodeSnippets={showCodeSnippets}
+        notesDiffers={!!conflictFields?.['notes']}
+        {...(defaultActiveTabId !== undefined ? { defaultActiveTabId } : {})}
       />
       <ResponseHistoryModal
         isOpen={historyModalOpen}

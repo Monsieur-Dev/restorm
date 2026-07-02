@@ -429,5 +429,13 @@
     "bodyFieldLabel": "説明",
     "cancel": "キャンセル",
     "push": "プッシュ"
+  },
+  "conflictResolution": {
+    "listTitle": "競合",
+    "userTitle": "あなたのバージョン",
+    "serverTitle": "サーバーのバージョン",
+    "resolvedTitle": "解決済み",
+    "selectAConflict": "解決する競合を選択してください",
+    "useThisVersion": "このバージョンを使用"
   }
 }

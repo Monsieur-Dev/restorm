@@ -429,5 +429,13 @@
     "bodyFieldLabel": "Leírás",
     "cancel": "Mégse",
     "push": "Push"
+  },
+  "conflictResolution": {
+    "listTitle": "Ütközések",
+    "userTitle": "Az Ön verziója",
+    "serverTitle": "Kiszolgáló verziója",
+    "resolvedTitle": "Megoldva",
+    "selectAConflict": "Válasszon egy ütközést a feloldásához",
+    "useThisVersion": "Ennek a verziónak a használata"
   }
 }

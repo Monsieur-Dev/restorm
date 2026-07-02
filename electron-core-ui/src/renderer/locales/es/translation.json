@@ -429,5 +429,13 @@
     "bodyFieldLabel": "Descripción",
     "cancel": "Cancelar",
     "push": "Subir cambios"
+  },
+  "conflictResolution": {
+    "listTitle": "Conflictos",
+    "userTitle": "Su versión",
+    "serverTitle": "Versión del servidor",
+    "resolvedTitle": "Resuelto",
+    "selectAConflict": "Seleccione un conflicto para resolverlo",
+    "useThisVersion": "Usar esta versión"
   }
 }

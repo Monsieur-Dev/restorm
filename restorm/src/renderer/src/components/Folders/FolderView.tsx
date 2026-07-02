@@ -17,6 +17,12 @@ export interface FolderViewProps {
   folder: Folder
   /** Called when folder data changes */
   onFolderChange?: (folder: Folder) => void
+  /** Conflict-resolution passthrough — see `BaseFolderView`'s matching
+   * prop. Only ever set by `ConflictEntityPanel`. */
+  notesDiffers?: boolean
+  /** Conflict-resolution passthrough — preselects the conflict-bearing
+   * tab (AC#5). Only ever set by `ConflictEntityPanel`. */
+  defaultActiveTabId?: string
 }
 
 /**
@@ -57,7 +63,7 @@ function apiDocFromItem(item: unknown): ApiDocumentation | undefined {
  * filter, and `DocumentationHost` renders the deduplicated set of
  * matching operations + their transitive model closure.
  */
-export const FolderView: React.FC<FolderViewProps> = ({ folder, onFolderChange }) => {
+export const FolderView: React.FC<FolderViewProps> = ({ folder, onFolderChange, notesDiffers, defaultActiveTabId }) => {
   void onFolderChange
 
   const findOwningEnvironmentFolder = useRestormStore(state => state.findOwningEnvironmentFolder)
@@ -115,6 +121,8 @@ export const FolderView: React.FC<FolderViewProps> = ({ folder, onFolderChange }
     <BaseFolderView
       folder={folder}
       {...(docsContent !== undefined ? { docsContent } : {})}
+      {...(notesDiffers !== undefined ? { notesDiffers } : {})}
+      {...(defaultActiveTabId !== undefined ? { defaultActiveTabId } : {})}
     />
   )
 }

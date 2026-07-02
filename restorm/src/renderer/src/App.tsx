@@ -132,6 +132,8 @@ import { useMcpActiveStateBridge } from './hooks/useMcpActiveStateBridge'
 import { useMcpNavigation } from './hooks/useMcpNavigation'
 import { useGitActions } from './hooks/useGitActions'
 import { usePushModal } from './hooks/usePushModal'
+import { useGitPullConflict } from './hooks/useGitPullConflict'
+import { GitConflictResolutionModal } from './components/GitConflict/GitConflictResolutionModal'
 import { useMcpTreeReplace } from './hooks/useMcpTreeReplace'
 import { useMcpRunRequest } from './hooks/useMcpRunRequest'
 import { useMcpRequestPatch } from './hooks/useMcpRequestPatch'
@@ -407,10 +409,13 @@ const App: React.FC = () => {
   // regeneration, the setting sync, the actual stage+commit+push) —
   // `rootItems` is the "after" side of its structural diff.
   const pushModal = usePushModal(filePath, rootItems)
+  // The pull-conflict 4-panel resolution flow — opened by `useGitActions`
+  // below when a pull comes back conflicted, instead of a plain toast.
+  const pullConflict = useGitPullConflict()
   // Repo-push / repo-pull click actions, shared verbatim by the statusbar
   // `GIT` entry and the title-bar `Git` menu (see `useGitActions`).
   // repo-push opens the modal above; the actual push happens from there.
-  const { onPush: handleGitPush, onPull: handleGitPull } = useGitActions(filePath, pushModal.openPushModal)
+  const { onPush: handleGitPush, onPull: handleGitPull } = useGitActions(filePath, pushModal.openPushModal, pullConflict.openFromPull)
 
   // Sidebar expansion is persisted per-project under
   // `restorm-main-sidebar:<projectUuid>`. The UUID is stamped into the
@@ -2984,6 +2989,16 @@ const App: React.FC = () => {
         body={pushModal.body}
         onBodyChange={pushModal.setBody}
         onPush={pushModal.push}
+      />
+
+      {/* Pull-conflict 4-panel resolution — opened when a repo-pull comes
+          back conflicted instead of a plain failure toast (see
+          `useGitPullConflict`). */}
+      <GitConflictResolutionModal
+        isOpen={pullConflict.isOpen}
+        conflictResolution={pullConflict.conflictResolution}
+        onClose={pullConflict.close}
+        onFinish={() => { void pullConflict.finishResolution() }}
       />
 
       {/* MCP call-logs viewer — full-screen modal shown on the welcome

@@ -429,5 +429,13 @@
     "bodyFieldLabel": "Açıklama",
     "cancel": "İptal",
     "push": "Gönder"
+  },
+  "conflictResolution": {
+    "listTitle": "Çakışmalar",
+    "userTitle": "Sizin sürümünüz",
+    "serverTitle": "Sunucu sürümü",
+    "resolvedTitle": "Çözüldü",
+    "selectAConflict": "Çözmek için bir çakışma seçin",
+    "useThisVersion": "Bu sürümü kullan"
   }
 }

@@ -1,0 +1,13 @@
+.ecui-read-only-overlay {
+	width: 100%;
+	height: 100%;
+}
+
+.ecui-read-only-overlay input,
+.ecui-read-only-overlay textarea,
+.ecui-read-only-overlay select,
+.ecui-read-only-overlay button,
+.ecui-read-only-overlay [role="button"],
+.ecui-read-only-overlay [contenteditable="true"] {
+	pointer-events: none;
+}

@@ -59,6 +59,10 @@ export function registerGitHandlers(): void {
     await service.abortMerge(folder)
   })
 
+  validatedHandle('git:get-conflict-commit-timestamps', gitFolderArgs, async (_event, [folder]) => {
+    return service.getConflictCommitTimestamps(folder)
+  })
+
   validatedHandle('git:set-active-folder', gitSetActiveFolderArgs, async (_event, [folder]) => {
     await service.setActiveFolder(folder)
   })

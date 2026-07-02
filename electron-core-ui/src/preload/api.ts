@@ -10,6 +10,7 @@ import type {
   GitPullResult,
   GitFetchCompareResult,
   GitConflictVersions,
+  GitConflictCommitTimestamps,
   GitState
 } from '../types/git'
 import type { CoreUiApi } from '../types/api'
@@ -602,6 +603,10 @@ export const createCoreUIAPI = (): CoreUiApi => ({
     },
     abortMerge: async (folder: string): Promise<void> => {
       await ipcRenderer.invoke('git:abort-merge', folder)
+    },
+    getConflictCommitTimestamps: async (folder: string): Promise<GitConflictCommitTimestamps> => {
+      const result: unknown = await ipcRenderer.invoke('git:get-conflict-commit-timestamps', folder)
+      return result as GitConflictCommitTimestamps
     },
     setActiveFolder: async (folder: string | null): Promise<void> => {
       await ipcRenderer.invoke('git:set-active-folder', folder)
