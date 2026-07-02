@@ -816,6 +816,9 @@ export function registerRestormIPC(deps: {
     // File close — same for any live STOMP connection (no port to release, just
     // DISCONNECT + close the socket).
     stompExecutionService.closeAll()
+    // File close — same for any live Kafka browse peek / long-lived consume
+    // (produce is one-shot and never registers; no port to release).
+    await kafkaExecutionService.closeAll()
     // File close — same for any hosted gRPC mock server (its own grpc.Server on
     // its own port): release the port so it doesn't keep listening past the file.
     grpcMockServerService.closeAll()

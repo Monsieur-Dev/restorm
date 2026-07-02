@@ -285,6 +285,11 @@ const resolveStreamConnectPreview: PreviewResolver = async (_scenarioId, node) =
   if (resp?.type === 'kafka') {
     return socketioPreviewFromMessages((resp.messages ?? []).map((m) => ({ direction: m.direction, data: m.value })), [])
   }
+  // STOMP: frames carry `body` (not `data`) and no `event` (destinations are not
+  // listenable event names here) — same no-event-names shape as gRPC/Kafka.
+  if (resp?.type === 'stomp') {
+    return socketioPreviewFromMessages(resp.messages.map((m) => ({ direction: m.direction, data: m.body })), [])
+  }
   return null
 }
 

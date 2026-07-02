@@ -516,6 +516,18 @@ export class KafkaExecutionService {
     return this.activeOperations.has(requestId)
   }
 
+  /** Tear down every active operation (browse peek / long-lived consume —
+   * produce is one-shot and never registers) — called on project close / app
+   * quit, mirroring `RedisExecutionService.closeAll`. Kept `Promise<void>` to
+   * match the other protocols' `closeAll` signature callers `await`/`void`
+   * uniformly. */
+  closeAll(): Promise<void> {
+    for (const requestId of [...this.activeOperations.keys()]) {
+      try { this.cancel(requestId) } catch { /* best-effort teardown */ }
+    }
+    return Promise.resolve()
+  }
+
   private broadcastProgress(requestId: string, status: 'started' | 'completed' | 'cancelled' | 'error'): void {
     for (const win of BrowserWindow.getAllWindows()) {
       win.webContents.send('kafka:request-progress', { requestId, status })

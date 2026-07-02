@@ -154,6 +154,12 @@ const stompExecutionTestDir = defineBddConfig({
   outputDir: '.features-gen/stomp-execution'
 })
 
+const redisExecutionTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/redis-execution/features/**/*.feature',
+  steps: ['tests/e2e/bdd/redis-execution/steps/**/*.ts', 'tests/e2e/bdd/fixtures/mcp-server.fixture.ts'],
+  outputDir: '.features-gen/redis-execution'
+})
+
 const kafkaExecutionTestDir = defineBddConfig({
   features: 'tests/e2e/bdd/kafka-execution/features/**/*.feature',
   steps: ['tests/e2e/bdd/kafka-execution/steps/**/*.ts', 'tests/e2e/bdd/fixtures/mcp-server.fixture.ts'],
@@ -559,6 +565,11 @@ export default defineConfig({
     {
       name: 'amqp-execution',
       testDir: amqpExecutionTestDir,
+      timeout: 180 * 1000
+    },
+    {
+      name: 'redis-execution',
+      testDir: redisExecutionTestDir,
       timeout: 180 * 1000
     },
     {
