@@ -410,5 +410,11 @@
   "gatedControl": {
     "proLabel": "Pro verzió",
     "subscribe": "Előfizetés"
+  },
+  "git": {
+    "cliMissing": {
+      "title": "A Git nincs telepítve",
+      "body": "Telepítse a Gitet, és adja hozzá a PATH-hoz a Git-integráció használatához."
+    }
   }
 }

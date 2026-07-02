@@ -410,5 +410,11 @@
   "gatedControl": {
     "proLabel": "Phiên bản Pro",
     "subscribe": "Đăng ký"
+  },
+  "git": {
+    "cliMissing": {
+      "title": "Git chưa được cài đặt",
+      "body": "Cài đặt Git và thêm vào PATH của bạn để sử dụng tính năng tích hợp Git."
+    }
   }
 }

@@ -410,5 +410,11 @@
   "gatedControl": {
     "proLabel": "Versi Pro",
     "subscribe": "Berlangganan"
+  },
+  "git": {
+    "cliMissing": {
+      "title": "Git belum terpasang",
+      "body": "Pasang Git dan tambahkan ke PATH Anda untuk menggunakan integrasi Git."
+    }
   }
 }

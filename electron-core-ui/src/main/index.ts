@@ -28,6 +28,10 @@ export {
   FileService
 } from './services'
 
+// Git service
+export { getGitService, resetGitService, GitService } from './services'
+export type { GitServiceConfig } from './services'
+
 // GraphQL runtime
 export {
   graphQLService,
@@ -258,6 +262,20 @@ export type {
   FileServiceState,
   FileServiceApi
 } from '../types/file'
+
+// Re-export git types
+export type {
+  GitFileState,
+  GitFileEntry,
+  GitStatus,
+  GitCommitResult,
+  GitPushResult,
+  GitPullResult,
+  GitFetchCompareResult,
+  GitConflictVersions,
+  GitState
+} from '../types/git'
+export { NO_GIT_STATE } from '../types/git'
 
 // ── Auth / entitlement ─────────────────────────────────────────────────────
 // Shared auth types (AuthState, AUTH_IPC, CheckoutResult, PlanTier …)

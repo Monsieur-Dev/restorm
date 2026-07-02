@@ -410,5 +410,11 @@
   "gatedControl": {
     "proLabel": "Pro版",
     "subscribe": "申し込む"
+  },
+  "git": {
+    "cliMissing": {
+      "title": "Gitがインストールされていません",
+      "body": "Git統合機能を使用するには、GitをインストールしてPATHに追加してください。"
+    }
   }
 }

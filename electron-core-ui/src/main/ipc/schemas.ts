@@ -161,3 +161,13 @@ export const settingsGetArgs = z.tuple([z.string()])
 export const settingsSetArgs = z.tuple([z.string(), z.union([z.string(), z.number(), z.boolean()])])
 export const settingsSearchArgs = z.tuple([z.string()])
 export const settingsResetArgs = z.tuple([z.string()])
+
+// ==========================================================================
+// Git
+// ==========================================================================
+export const gitFolderArgs = z.tuple([z.string()])
+export const gitSetActiveFolderArgs = z.tuple([z.string().nullable()])
+export const gitStageArgs = z.tuple([z.string(), z.array(z.string())])
+export const gitCommitArgs = z.tuple([z.string(), z.string()])
+export const gitConflictVersionsArgs = z.tuple([z.string(), z.string()])
+export const gitWriteResolvedConflictArgs = z.tuple([z.string(), z.string(), z.string()])

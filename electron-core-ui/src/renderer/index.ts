@@ -76,6 +76,18 @@ export type {
   WebFileEntry
 } from '../types/file'
 export type { PersistenceFormat } from '../main/services/PersistenceService'
+export type {
+  GitFileState,
+  GitFileEntry,
+  GitStatus,
+  GitCommitResult,
+  GitPushResult,
+  GitPullResult,
+  GitFetchCompareResult,
+  GitConflictVersions,
+  GitState
+} from '../types/git'
+export { NO_GIT_STATE } from '../types/git'
 export type { SettingRendererProps } from './components/Settings/renderers/types'
 export { registerSettingRenderer, unregisterSettingRenderer } from './components/Settings/renderers/registry'
 

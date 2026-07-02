@@ -410,5 +410,11 @@
   "gatedControl": {
     "proLabel": "Pro sürüm",
     "subscribe": "Abone ol"
+  },
+  "git": {
+    "cliMissing": {
+      "title": "Git yüklü değil",
+      "body": "Git entegrasyonunu kullanmak için Git'i yükleyin ve PATH değişkeninize ekleyin."
+    }
   }
 }

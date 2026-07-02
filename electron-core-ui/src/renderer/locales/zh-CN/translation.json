@@ -410,5 +410,11 @@
   "gatedControl": {
     "proLabel": "专业版",
     "subscribe": "订阅"
+  },
+  "git": {
+    "cliMissing": {
+      "title": "未安装 Git",
+      "body": "请安装 Git 并将其添加到 PATH 中以使用 Git 集成功能。"
+    }
   }
 }

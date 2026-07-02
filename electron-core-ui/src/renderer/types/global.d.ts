@@ -5,6 +5,15 @@ import type { FeaturePlatform } from '../../types/feature'
 import type { FileServiceState, FileMetadata, SerializationFormat } from '../../types/file'
 import type { SettingValue, ResolvedSetting, SettingsGroup } from '../../types/settings'
 import type { AuthState, CheckoutResult, PortalResult } from '../../shared/auth/authState'
+import type {
+  GitStatus,
+  GitCommitResult,
+  GitPushResult,
+  GitPullResult,
+  GitFetchCompareResult,
+  GitConflictVersions,
+  GitState
+} from '../../types/git'
 
 interface WindowApiTheme {
   list: () => Promise<ThemeInfo[]>
@@ -141,6 +150,23 @@ interface WindowApiSettings {
   onWorkspaceChanged: (callback: (path: string | null) => void) => () => void
 }
 
+interface WindowApiGit {
+  isRepo: (folder: string) => Promise<boolean>
+  getStatus: (folder: string) => Promise<GitStatus>
+  stage: (folder: string, paths: string[]) => Promise<void>
+  commit: (folder: string, message: string) => Promise<GitCommitResult>
+  push: (folder: string) => Promise<GitPushResult>
+  pull: (folder: string) => Promise<GitPullResult>
+  fetchAndCompare: (folder: string) => Promise<GitFetchCompareResult>
+  getConflictVersions: (folder: string, filePath: string) => Promise<GitConflictVersions>
+  writeResolvedConflict: (folder: string, filePath: string, content: string) => Promise<void>
+  abortMerge: (folder: string) => Promise<void>
+  setActiveFolder: (folder: string | null) => Promise<void>
+  getState: () => Promise<GitState>
+  onStateChanged: (callback: (state: GitState) => void) => () => void
+  onCliMissing: (callback: () => void) => () => void
+}
+
 interface WindowApi {
   platform: string
   theme: WindowApiTheme
@@ -156,6 +182,7 @@ interface WindowApi {
   settings: WindowApiSettings
   /** Cloud account: session login/logout + live entitlement state. */
   account: WindowApiAccount
+  git: WindowApiGit
   minimizeWindow: () => Promise<void>
   maximizeWindow: () => Promise<void>
   closeWindow: () => Promise<void>

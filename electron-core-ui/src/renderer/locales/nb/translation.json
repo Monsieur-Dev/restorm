@@ -410,5 +410,11 @@
   "gatedControl": {
     "proLabel": "Pro-versjon",
     "subscribe": "Abonner"
+  },
+  "git": {
+    "cliMissing": {
+      "title": "Git er ikke installert",
+      "body": "Installer Git og legg det til i PATH-en din for å bruke Git-integrasjonen."
+    }
   }
 }

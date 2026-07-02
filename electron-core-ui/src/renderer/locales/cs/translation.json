@@ -410,5 +410,11 @@
   "gatedControl": {
     "proLabel": "Verze Pro",
     "subscribe": "Předplatit"
+  },
+  "git": {
+    "cliMissing": {
+      "title": "Git není nainstalován",
+      "body": "Nainstalujte Git a přidejte jej do proměnné PATH, abyste mohli používat integraci Git."
+    }
   }
 }

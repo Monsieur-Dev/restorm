@@ -33,7 +33,8 @@ vi.mock('./ipc', () => ({
   registerSearchHandlers: vi.fn(),
   registerWindowHandlers: vi.fn(),
   registerMiscHandlers: vi.fn(),
-  registerSettingsHandlers: vi.fn()
+  registerSettingsHandlers: vi.fn(),
+  registerGitHandlers: vi.fn()
 }))
 
 vi.mock('./SplashWindow', () => ({ createSplashWindow: vi.fn() }))

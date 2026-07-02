@@ -175,7 +175,7 @@ import { RequestCreationProvider } from './contexts/RequestCreationContext'
 import { useNavigation } from './hooks/useNavigation'
 import { useWorkbenchUpdates } from './hooks/useWorkbenchUpdates'
 import { useWorkbenchTabs } from './hooks/useWorkbenchTabs'
-import { useFirewallPromptToasts } from 'electron-core-ui/renderer'
+import { useFirewallPromptToasts, useGitCliMissingToast } from 'electron-core-ui/renderer'
 import { useFirewallProjectOriginsSync } from './hooks/useFirewallProjectOriginsSync'
 import { useSidebarState } from './hooks/useSidebarState'
 import {
@@ -346,6 +346,11 @@ const App: React.FC = () => {
   // choice back to main, which fans the verdict out to every
   // queued caller waiting on this destination.
   useFirewallPromptToasts()
+
+  // One-time "git isn't installed" notice — GitService probes the CLI
+  // lazily on the first repo check and fires this at most once per
+  // process lifetime.
+  useGitCliMissingToast()
 
   const handleMenuExit = useCallback(() => {
     void window.api.closeWindow()

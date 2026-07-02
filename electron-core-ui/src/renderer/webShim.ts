@@ -6,8 +6,10 @@
 import type { ThemeInfo, ThemeDefinition, ThemeVariables } from '../types/theme'
 import type { FeaturePlatform } from '../types/feature'
 import type { FileServiceState, FileMetadata } from '../types/file'
-import type { CoreUiApi, CoreUiThemeApi, CoreUiStorageApi, CoreUiFeatureApi, CoreUiFileApi, CoreUiEventBusApi, CoreUiI18nApi, CoreUiSearchApi, CoreUiSettingsApi, CoreUiSearchDocument, CoreUiSearchResult, CoreUiSearchResultGroup } from '../types/api'
+import type { CoreUiApi, CoreUiThemeApi, CoreUiStorageApi, CoreUiFeatureApi, CoreUiFileApi, CoreUiEventBusApi, CoreUiI18nApi, CoreUiSearchApi, CoreUiSettingsApi, CoreUiGitApi, CoreUiSearchDocument, CoreUiSearchResult, CoreUiSearchResultGroup } from '../types/api'
 import type { SettingValue, ResolvedSetting, SettingsGroup } from '../types/settings'
+import type { GitStatus, GitCommitResult, GitPushResult, GitPullResult, GitFetchCompareResult, GitConflictVersions, GitState } from '../types/git'
+import { NO_GIT_STATE } from '../types/git'
 import yaml from 'js-yaml'
 import themeIndexJson from '../../resources/themes/index.json'
 
@@ -716,6 +718,32 @@ export function ensureCoreUiWebApiShim(): void {
     }
   }
 
+  // Git isn't meaningful in a stateless web build — there is no local
+  // filesystem or git CLI to shell out to. Surface a flat "never a repo"
+  // shim so shared UI code (status bar pastilles, `useGitState`, …)
+  // doesn't crash; every mutating call resolves to a failure result
+  // instead of throwing.
+  const gitApi: CoreUiGitApi = {
+    isRepo: (): Promise<boolean> => Promise.resolve(false),
+    getStatus: (): Promise<GitStatus> => Promise.resolve({ branch: null, ahead: 0, behind: 0, files: [] }),
+    stage: (): Promise<void> => Promise.resolve(),
+    commit: (): Promise<GitCommitResult> => Promise.resolve({ success: false, error: 'Git is not available in the web build' }),
+    push: (): Promise<GitPushResult> => Promise.resolve({ success: false, error: 'Git is not available in the web build' }),
+    pull: (): Promise<GitPullResult> => Promise.resolve({ success: false, conflicted: false, conflictFiles: [], error: 'Git is not available in the web build' }),
+    fetchAndCompare: (): Promise<GitFetchCompareResult> => Promise.resolve({ remoteHasNewerVersion: false, behind: 0 }),
+    getConflictVersions: (_folder: string, filePath: string): Promise<GitConflictVersions> => Promise.resolve({ path: filePath, base: null, ours: null, theirs: null }),
+    writeResolvedConflict: (): Promise<void> => Promise.resolve(),
+    abortMerge: (): Promise<void> => Promise.resolve(),
+    setActiveFolder: (): Promise<void> => Promise.resolve(),
+    getState: (): Promise<GitState> => Promise.resolve(NO_GIT_STATE),
+    onStateChanged: (): (() => void) => {
+      return () => { /* noop in web shim: git state never changes */ }
+    },
+    onCliMissing: (): (() => void) => {
+      return () => { /* noop in web shim: git is never "installed" to probe */ }
+    }
+  }
+
   const api: CoreUiApi = {
     platform: (navigator as { userAgentData?: { platform?: string } }).userAgentData?.platform ?? 'web',
     theme: themeApi,
@@ -731,6 +759,7 @@ export function ensureCoreUiWebApiShim(): void {
     eventBus: eventBusApi,
     search: searchApi,
     settings: settingsApi,
+    git: gitApi,
     minimizeWindow: () => Promise.resolve(),
     maximizeWindow: () => Promise.resolve(),
     closeWindow: () => Promise.resolve(),

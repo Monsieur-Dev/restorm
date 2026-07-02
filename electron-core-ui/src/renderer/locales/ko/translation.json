@@ -410,5 +410,11 @@
   "gatedControl": {
     "proLabel": "Pro 버전",
     "subscribe": "구독하기"
+  },
+  "git": {
+    "cliMissing": {
+      "title": "Git가 설치되어 있지 않습니다",
+      "body": "Git 통합 기능을 사용하려면 Git을 설치하고 PATH에 추가하세요."
+    }
   }
 }

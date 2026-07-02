@@ -21,6 +21,9 @@ export {
   FileService
 } from './FileService'
 
+export { getGitService, resetGitService, GitService } from './GitService'
+export type { GitServiceConfig } from './GitService'
+
 export { eventBusService } from './EventBusService'
 export type { EventHandler, Subscription } from './EventBusService'
 

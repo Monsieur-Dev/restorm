@@ -9,6 +9,15 @@ import type { ThemeInfo, ThemeDefinition, ThemeVariables } from './theme'
 import type { FeatureEnvironment, FeaturePlatform } from './feature'
 import type { FileServiceState, FileMetadata, SerializationFormat } from './file'
 import type { SettingValue, ResolvedSetting, SettingsGroup } from './settings'
+import type {
+  GitStatus,
+  GitCommitResult,
+  GitPushResult,
+  GitPullResult,
+  GitFetchCompareResult,
+  GitConflictVersions,
+  GitState
+} from './git'
 
 export interface CoreUiThemeApi {
   list: () => Promise<ThemeInfo[]>
@@ -192,6 +201,23 @@ export interface CoreUiSettingsApi {
   onWorkspaceChanged: (callback: (path: string | null) => void) => () => void
 }
 
+export interface CoreUiGitApi {
+  isRepo: (folder: string) => Promise<boolean>
+  getStatus: (folder: string) => Promise<GitStatus>
+  stage: (folder: string, paths: string[]) => Promise<void>
+  commit: (folder: string, message: string) => Promise<GitCommitResult>
+  push: (folder: string) => Promise<GitPushResult>
+  pull: (folder: string) => Promise<GitPullResult>
+  fetchAndCompare: (folder: string) => Promise<GitFetchCompareResult>
+  getConflictVersions: (folder: string, filePath: string) => Promise<GitConflictVersions>
+  writeResolvedConflict: (folder: string, filePath: string, content: string) => Promise<void>
+  abortMerge: (folder: string) => Promise<void>
+  setActiveFolder: (folder: string | null) => Promise<void>
+  getState: () => Promise<GitState>
+  onStateChanged: (callback: (state: GitState) => void) => () => void
+  onCliMissing: (callback: () => void) => () => void
+}
+
 export interface CoreUiApi {
   platform: string
   theme: CoreUiThemeApi
@@ -203,6 +229,7 @@ export interface CoreUiApi {
   eventBus: CoreUiEventBusApi
   search: CoreUiSearchApi
   settings: CoreUiSettingsApi
+  git: CoreUiGitApi
   minimizeWindow: () => Promise<void>
   maximizeWindow: () => Promise<void>
   closeWindow: () => Promise<void>

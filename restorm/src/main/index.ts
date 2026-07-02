@@ -68,7 +68,7 @@ installHardenInterceptor()
 import { app, BrowserWindow, ipcMain, shell } from 'electron'
 import { randomBytes } from 'node:crypto'
 import { MainWindow } from './windows/MainWindow'
-import { initializeApp, logger, initFileService, getFileService, isFileServiceInitialized, i18nService, initPersistenceService, isPersistenceServiceInitialized, FileService, getSettingsService, isSettingsServiceInitialized, getStorageService, initAutoSaveController, McpService, resolveMcpDiscoveryDir, writeMcpDiscoveryFile, cleanupMcpDiscoveryFile, firewallService, permissionService, registerFirewallIpc, installWorkerPatcher } from 'electron-core-ui'
+import { initializeApp, logger, initFileService, getFileService, isFileServiceInitialized, i18nService, initPersistenceService, isPersistenceServiceInitialized, FileService, getSettingsService, isSettingsServiceInitialized, getStorageService, initAutoSaveController, McpService, resolveMcpDiscoveryDir, writeMcpDiscoveryFile, cleanupMcpDiscoveryFile, firewallService, permissionService, registerFirewallIpc, installWorkerPatcher, getGitService } from 'electron-core-ui'
 import { REOPEN_LAST_FILE_SETTING_KEY, REOPEN_LAST_FILE_STORAGE_KEY } from '../shared/config/reopenLastFile'
 import { resolveChannel, endpointUrl } from '../shared/config/backend'
 import { entitlementPublicKeyPem, isEntitlementPublicKeyConfigured } from './services/entitlement/keys'
@@ -470,6 +470,24 @@ logger.info('File Service initialized')
     const format = (state.currentFile.format as PersistenceFormat | undefined) ?? 'yaml'
     void attachDraftStoreForFile(path, format).catch((err: unknown) => {
       logger.warn('attachDraftStoreForFile failed', { path, error: String(err) })
+    })
+  })
+}
+
+// Git wiring: GitService has no notion of "the open project file" — it
+// only tracks a folder. Map the open file's containing folder the same
+// way the workspace-path resolution above does (file mode: dirname of the
+// `.restorm` path; folder mode: the path itself) and hand it to
+// `setActiveFolder`, which starts (or stops) the repo status + watch.
+{
+  let lastGitFolder: string | null = null
+  getFileService().onStateChanged((state) => {
+    const path = state.currentFile.path
+    const folder = !path ? null : path.endsWith('.restorm') ? dirname(path) : path
+    if (folder === lastGitFolder) return
+    lastGitFolder = folder
+    void getGitService().setActiveFolder(folder).catch((err: unknown) => {
+      logger.warn('GitService.setActiveFolder failed', { folder, error: String(err) })
     })
   })
 }
