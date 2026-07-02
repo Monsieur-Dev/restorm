@@ -2421,6 +2421,9 @@
       "4h": "Her 4 saatte bir",
       "12h": "Her 12 saatte bir",
       "24h": "Her 24 saatte bir"
+    },
+    "gate": {
+      "initGitFolder": "Bu özelliği kullanmak için git klasörünüzü başlatın."
     }
   }
 }

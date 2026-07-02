@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react'
 import { ThemeProvider } from '../contexts'
 import { SettingsProvider } from '../contexts/SettingsContext'
+import type { CapabilityGate } from '../contexts/settingsContextDef'
 import { SettingsModalProvider } from './Settings'
 import { useSetting } from '../hooks/useSettings'
 import Workbench, { type WorkbenchProps } from './Workbench/Workbench'
@@ -28,6 +29,11 @@ const AdvancedEffectsManager: React.FC = () => {
 
 export interface ElectronCoreUiProviderProps extends Omit<WorkbenchProps, 'children'> {
   children: React.ReactNode
+  /** See {@link CapabilityGate}. Threaded down to `SettingsProvider` so a
+   * `SettingDefinition.capability`-tagged setting can render greyed +
+   * upsold in Community. Omit for a host with no capability/entitlement
+   * concept — capability-tagged settings then simply render unlocked. */
+  capabilityGate?: CapabilityGate | undefined
 }
 
 /**
@@ -38,11 +44,12 @@ export interface ElectronCoreUiProviderProps extends Omit<WorkbenchProps, 'child
  */
 export const ElectronCoreUiProvider: React.FC<ElectronCoreUiProviderProps> = ({
   children,
+  capabilityGate,
   ...workbenchProps
 }) => {
   return (
     <ThemeProvider>
-      <SettingsProvider>
+      <SettingsProvider capabilityGate={capabilityGate}>
         <AdvancedEffectsManager />
         <SettingsModalProvider>
           <Workbench {...workbenchProps}>

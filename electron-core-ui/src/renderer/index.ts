@@ -91,6 +91,7 @@ export type {
 export { NO_GIT_STATE } from '../types/git'
 export type { SettingRendererProps } from './components/Settings/renderers/types'
 export { registerSettingRenderer, unregisterSettingRenderer } from './components/Settings/renderers/registry'
+export type { CapabilityGate } from './contexts/settingsContextDef'
 // The canonical settings storage-key builder — any renderer code hardcoding
 // a settings key outside the YAML-driven `useSetting()` path (e.g. a host
 // hook like restorm's `usePushModal.ts`) must go through this rather than

@@ -38,7 +38,8 @@ import {
  * (isPackaged or wrong envPlan). The return value is used for logging.
  */
 export const E2E_PRO_CAPABILITIES: readonly string[] = [
-  'mcp.pro'
+  'mcp.pro',
+  'git.client'
   // NOTE: extend here if new Pro-feature e2e suites require additional caps.
 ]
 

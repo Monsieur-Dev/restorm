@@ -23,6 +23,16 @@ export interface GatedControlProps {
   proLabel?: string
   /** Upsell link label. Defaults to the translated « S'abonner ». */
   subscribeLabel?: string
+  /**
+   * When false, the tooltip renders `proLabel` as a plain informational
+   * message with NO « S'abonner » link/button. For a control that is
+   * locked for a reason OTHER than missing entitlement — e.g. a
+   * Pro-entitled user whose current context doesn't support the feature
+   * yet (no git repo initialised, etc.) — there is nothing to buy, so
+   * showing a subscribe CTA would be misleading. Defaults to `true`
+   * (the original entitlement-upsell behavior).
+   */
+  showSubscribeLink?: boolean
   /** Extra class on the inline-flex anchor wrapper. */
   className?: string
   /** Vertical placement of the upsell tooltip (default below). */
@@ -46,6 +56,7 @@ export const GatedControl: React.FC<GatedControlProps> = ({
   onSubscribe,
   proLabel,
   subscribeLabel,
+  showSubscribeLink = true,
   className,
   placement = 'below',
   'data-testid': dataTestId
@@ -106,14 +117,16 @@ export const GatedControl: React.FC<GatedControlProps> = ({
               <i className="codicon codicon-lock" aria-hidden="true" />
               {resolvedProLabel}
             </span>
-            <Button
-              externalLink
-              onClick={() => { onSubscribe?.() }}
-              className="ecu-gated-upsell-link"
-              {...(dataTestId ? { 'data-testid': `${dataTestId}-subscribe` } : {})}
-            >
-              {resolvedSubscribeLabel}
-            </Button>
+            {showSubscribeLink && (
+              <Button
+                externalLink
+                onClick={() => { onSubscribe?.() }}
+                className="ecu-gated-upsell-link"
+                {...(dataTestId ? { 'data-testid': `${dataTestId}-subscribe` } : {})}
+              >
+                {resolvedSubscribeLabel}
+              </Button>
+            )}
           </span>
         }
       />

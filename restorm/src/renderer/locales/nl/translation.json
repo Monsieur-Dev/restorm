@@ -2421,6 +2421,9 @@
       "4h": "Elke 4 uur",
       "12h": "Elke 12 uur",
       "24h": "Elke 24 uur"
+    },
+    "gate": {
+      "initGitFolder": "Initialiseer uw git-map om deze functie te gebruiken."
     }
   }
 }

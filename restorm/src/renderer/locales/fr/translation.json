@@ -2421,6 +2421,9 @@
       "4h": "Toutes les 4 heures",
       "12h": "Toutes les 12 heures",
       "24h": "Toutes les 24 heures"
+    },
+    "gate": {
+      "initGitFolder": "Initialisez votre dossier Git pour profiter de la fonctionnalité."
     }
   }
 }

@@ -2423,6 +2423,9 @@
       "4h": "Každé 4 hodiny",
       "12h": "Každých 12 hodin",
       "24h": "Každých 24 hodin"
+    },
+    "gate": {
+      "initGitFolder": "Inicializujte svou složku git, abyste mohli tuto funkci používat."
     }
   }
 }

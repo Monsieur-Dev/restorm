@@ -2423,6 +2423,9 @@
       "4h": "Co 4 godziny",
       "12h": "Co 12 godzin",
       "24h": "Co 24 godziny"
+    },
+    "gate": {
+      "initGitFolder": "Zainicjuj folder Git, aby korzystać z tej funkcji."
     }
   }
 }

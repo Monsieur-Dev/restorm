@@ -54,6 +54,17 @@ export interface SettingDefinition {
    * `false`: every setting is workspace-overridable unless flagged.
    */
   userOnly?: boolean | undefined
+  /**
+   * Capability id that gates this setting via the host's entitlement
+   * system — distinct from `feature` above (an environment-driven
+   * feature flag that HIDES the setting when off). When set, and the
+   * host's `SettingsProvider`/`ElectronCoreUiProvider` `capabilityGate`
+   * prop reports it locked, the setting's control renders greyed through
+   * `GatedControl` with an upsell instead of being hidden — a locked
+   * setting stays VISIBLE, matching the rest of the app's "visible but
+   * disabled" gating convention (`GatedControl`'s own contract).
+   */
+  capability?: string | undefined
 }
 
 // ==========================================================================

@@ -416,7 +416,7 @@ const App: React.FC = () => {
   // `GIT` entry and the title-bar `Git` menu (see `useGitActions`).
   // repo-push opens the modal above; the actual push happens from there.
   const { onPush: handleGitPush, onPull: handleGitPull } = useGitActions(filePath, pushModal.openPushModal, pullConflict.openFromPull)
-  // Semi-pull detection → "Pull now" toast (91.6). Reuses the SAME click
+  // Semi-pull detection → "Pull now" toast. Reuses the SAME click
   // handler as the statusbar/title-bar pull actions above, so accepting
   // the toast goes through the identical conflict-aware pull flow — no
   // separate pull path to keep in sync.
@@ -2961,8 +2961,10 @@ const App: React.FC = () => {
          * MCP indicator carries the `right-aligned` auto margin in every
          * state (running and stopped/disabled) since it always renders. */}
         <StatusbarMcpIndicator rightAligned onViewLogs={handleOpenMcpLogs} />
-        {/* Renders nothing unless the open file's folder is a git repo. */}
-        <StatusbarGitIndicator onPush={handleGitPush} onPull={handleGitPull} />
+        {/* Renders nothing unless a project is open; visible-but-locked (the
+         * 3-state gate) rather than hidden once one is, regardless of
+         * whether the folder happens to be a git repo. */}
+        <StatusbarGitIndicator filePath={filePath} onPush={handleGitPush} onPull={handleGitPull} />
         <StatusBarBellButton toasterId="app" />
       </Statusbar>
 

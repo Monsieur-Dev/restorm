@@ -2421,6 +2421,9 @@
       "4h": "4 tunnin välein",
       "12h": "12 tunnin välein",
       "24h": "24 tunnin välein"
+    },
+    "gate": {
+      "initGitFolder": "Alusta git-kansiosi käyttääksesi tätä ominaisuutta."
     }
   }
 }

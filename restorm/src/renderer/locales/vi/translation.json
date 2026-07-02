@@ -2420,6 +2420,9 @@
       "4h": "Mỗi 4 giờ",
       "12h": "Mỗi 12 giờ",
       "24h": "Mỗi 24 giờ"
+    },
+    "gate": {
+      "initGitFolder": "Khởi tạo thư mục git của bạn để sử dụng tính năng này."
     }
   }
 }

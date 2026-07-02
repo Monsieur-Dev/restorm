@@ -2421,6 +2421,9 @@
       "4h": "A cada 4 horas",
       "12h": "A cada 12 horas",
       "24h": "A cada 24 horas"
+    },
+    "gate": {
+      "initGitFolder": "Inicialize sua pasta Git para usar este recurso."
     }
   }
 }

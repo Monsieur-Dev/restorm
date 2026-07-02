@@ -2421,6 +2421,9 @@
       "4h": "Hver 4. time",
       "12h": "Hver 12. time",
       "24h": "Hver 24. time"
+    },
+    "gate": {
+      "initGitFolder": "Initialiser din git-mappe for at bruge denne funktion."
     }
   }
 }

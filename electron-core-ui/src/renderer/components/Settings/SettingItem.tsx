@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Button } from '../Button'
+import { GatedControl } from '../GatedControl'
 import { ContextMenu } from '../ContextMenu/ContextMenu'
 import type { ContextMenuItem } from '../ContextMenu/ContextMenu'
 import { ToggleRenderer } from './renderers/ToggleRenderer'
@@ -9,6 +10,7 @@ import { TextInput } from './renderers/TextInput'
 import { EnumRenderer } from './renderers/EnumRenderer'
 import { ThemeRenderer } from './renderers/ThemeRenderer'
 import { getCustomRenderer } from './renderers/registry'
+import { useSettings } from '../../hooks/useSettings'
 import logger from '../../services/logger'
 import type { ResolvedSetting, SettingValue } from '../../../types/settings'
 
@@ -26,7 +28,16 @@ export const SettingItem: React.FC<SettingItemProps> = ({
   onReset
 }) => {
   const { t } = useTranslation()
+  const { capabilityGate } = useSettings()
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number } | null>(null)
+
+  // `SettingDefinition.capability` gates via the host's entitlement system
+  // (distinct from `feature`, which HIDES the row instead — see that
+  // field's own doc). No `capability` tag → never locked. A `capability`
+  // tag with no `capabilityGate` wired by the host → also never locked
+  // (fails open to "unlocked" rather than silently hiding every
+  // capability-tagged setting for a host that hasn't wired the gate yet).
+  const capabilityLocked = setting.capability !== undefined && (capabilityGate?.isLocked(setting.capability) ?? false)
 
   const handleChange = useCallback((v: SettingValue) => {
     onChange(setting.storageKey, v)
@@ -122,7 +133,13 @@ export const SettingItem: React.FC<SettingItemProps> = ({
       )}
       {control && (
         <div className="setting-item-control">
-          {control}
+          <GatedControl
+            locked={capabilityLocked}
+            {...(capabilityGate ? { onSubscribe: capabilityGate.onSubscribe } : {})}
+            data-testid={`setting-gate-${setting.storageKey}`}
+          >
+            {control}
+          </GatedControl>
         </div>
       )}
       {contextMenu && (

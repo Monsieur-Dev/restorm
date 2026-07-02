@@ -73,12 +73,14 @@ groups:
           descriptionKey: "git.applyCommitMessageLanguageByDefaultDescription"
           type: "toggle"
           default: true
+          capability: "git.client"
       - setting:
           id: "semiPullFrequency"
           titleKey: "git.semiPullFrequencyTitle"
           descriptionKey: "git.semiPullFrequencyDescription"
           type: "enum"
           default: "1h"
+          capability: "git.client"
           params:
             values:
               - value: "off"

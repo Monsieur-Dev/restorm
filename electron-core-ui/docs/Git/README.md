@@ -281,6 +281,27 @@ independently of whatever the user resolved for the entity's OTHER
 fields (e.g. `notes`), since `apiDocumentation` isn't user-editable in
 this panel in the first place.
 
+## Pro gating
+
+The whole feature is gated behind a `git.client` entitlement capability —
+generic infrastructure, restorm-specific wiring, same split as everywhere
+else in this doc:
+
+- `GatedControl`'s `showSubscribeLink` prop (generic, ECUI) distinguishes
+  two locked reasons: missing entitlement (the normal upsell, subscribe
+  link shown) vs. entitled-but-context-doesn't-apply (e.g. Pro but the
+  open folder isn't a git repo — an informational message, no subscribe
+  link, since there's nothing to buy).
+- Capability-gated Settings rows (generic, ECUI — see `docs/
+  Architecture/Settings.md`'s "Capability-gated settings" section) grey
+  out `resources/settings.yaml`'s `git` group in Community via the same
+  `GatedControl`.
+- restorm's `useGitGateState()` hook computes the 3-state model (Pro+git
+  → enabled; Pro+no-git → informational lock; Community, regardless of
+  the folder → the standard Pro upsell) that drives the status-bar entry,
+  the title-bar Git menu, and the Settings→Git capability check alike —
+  one source of truth so they can never disagree.
+
 ## Quick start
 
 ```ts
@@ -356,4 +377,10 @@ src/renderer/locales/*/translation.json             — `git.diff.*`, `git.commi
 src/renderer/src/services/gitConflictModel.ts       — identifyConflictingEntities (which entities genuinely conflict)
 src/renderer/src/services/conflictEntityClone.ts    — cloneEntityForResolution (the editable resolved copy)
 src/renderer/src/components/GitConflict/ConflictEntityPanel.tsx — the entity→panel dispatcher
+src/shared/auth/authState.ts                        — the `git.client` entry in restorm's Capability union
+src/renderer/src/hooks/useGitGateState.ts           — the 3-state Pro-gate
+src/renderer/src/components/GitCapabilityGateHost.tsx — reactive CapabilityGate builder, mounted in main.tsx
+src/renderer/src/components/MainView/StatusbarGitIndicator.tsx      — GatedControl wrapping
+src/renderer/src/components/MainView/Titlebar/RestormTitlebar.tsx   — Git menu disable + Pro badge
+src/renderer/locales/*/translation.json             — `git.gate.initGitFolder` (all 27 locales)
 ```

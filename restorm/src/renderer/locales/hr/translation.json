@@ -2422,6 +2422,9 @@
       "4h": "Svaka 4 sata",
       "12h": "Svakih 12 sati",
       "24h": "Svakih 24 sata"
+    },
+    "gate": {
+      "initGitFolder": "Inicijalizirajte svoju git mapu da biste koristili ovu značajku."
     }
   }
 }

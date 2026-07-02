@@ -2421,6 +2421,9 @@
       "4h": "4 óránként",
       "12h": "12 óránként",
       "24h": "24 óránként"
+    },
+    "gate": {
+      "initGitFolder": "Inicializálja a git mappáját a funkció használatához."
     }
   }
 }

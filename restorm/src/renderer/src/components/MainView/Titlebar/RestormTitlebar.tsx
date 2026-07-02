@@ -18,6 +18,7 @@ import { HeaderHoverTooltip } from '../HeaderHoverTooltip'
 import { Badge } from '../../common/Badge'
 import { mapToBadgeType } from '../../../utils/badgeUtils'
 import { useMcpEnabled } from '../../../hooks/useMcpEnabled'
+import { useGitGateState } from '../../../hooks/useGitGateState'
 
 /** Categories whose search results render with the single-line badge
  * layout (method/protocol pill + title + breadcrumb on one row). The
@@ -110,6 +111,11 @@ export const RestormTitlebar: React.FC<RestormTitlebarProps> = ({
   // The MCP-logs menu entry is disabled when the embedded MCP server isn't
   // running — there'd be nothing to view.
   const mcpEnabled = useMcpEnabled()
+  // The Git menu's root + both sub-items are disabled whenever the
+  // 3-state gate says locked (Community OR Pro-without-a-git-folder); the
+  // "Pro" badge next to the root label is Community-specific — a Pro user
+  // without a git folder has nothing to buy, so no badge for them.
+  const gitGate = useGitGateState()
 
   // Settings opens as a workbench tab when a file is open, or as the
   // full-screen modal on the welcome screen (no workbench).
@@ -313,22 +319,34 @@ export const RestormTitlebar: React.FC<RestormTitlebarProps> = ({
             <MenuItemSeparator data-testid="titlebar-menu-separator-tools-1" />
             <MenuItem data-testid="titlebar-menu-item-open-logs" title={t('menuBar.openLogsFolder')} disabled />
           </MenuBarItem>
-          <MenuBarItem title={t('menuBar.git')} data-testid="titlebar-menubar-item-git">
-            {/* Community-disabled state + the "Pro" badge after the root
-             * label are wired by the Pro-gating ticket, applied once
-             * across every built git surface — this menu ships fully
-             * enabled until then. */}
+          <MenuBarItem
+            // A plain string, not a rich `<Badge>` node: `MenuBar`'s
+            // overflow/hamburger conversion (`menuBarItemToMenuItem`)
+            // renders a top-level item's title through ECUI's `MenuItem`,
+            // whose own `title` prop is `string`-only (used in a
+            // `${title}…` template literal for the opensDialog ellipsis)
+            // — a JSX title silently renders as an EMPTY row there once
+            // the bar collapses to overflow (confirmed live). "(Pro)"
+            // keeps the untranslated "Pro" wording AC#5 asks for without
+            // that regression; the styled `Badge` pill stays reserved for
+            // surfaces that don't feed through this conversion (the
+            // status bar already uses it via `GatedControl`).
+            title={gitGate.kind === 'community' ? `${t('menuBar.git')} (Pro)` : t('menuBar.git')}
+            data-testid="titlebar-menubar-item-git"
+          >
             <MenuItem
               data-testid="titlebar-menu-item-git-push"
               title={t('menuBar.gitPush')}
               icon={<span className="codicon codicon-repo-push" aria-hidden="true" />}
               onClick={onGitPush}
+              disabled={gitGate.locked}
             />
             <MenuItem
               data-testid="titlebar-menu-item-git-pull"
               title={t('menuBar.gitPull')}
               icon={<span className="codicon codicon-repo-pull" aria-hidden="true" />}
               onClick={onGitPull}
+              disabled={gitGate.locked}
             />
           </MenuBarItem>
           <MenuBarItem title={t('menuBar.help')} data-testid="titlebar-menubar-item-help">

@@ -2420,6 +2420,9 @@
       "4h": "Setiap 4 jam",
       "12h": "Setiap 12 jam",
       "24h": "Setiap 24 jam"
+    },
+    "gate": {
+      "initGitFolder": "Inisialisasi folder git Anda untuk menggunakan fitur ini."
     }
   }
 }

@@ -2,6 +2,7 @@ import React, { Suspense, lazy } from 'react'
 import ReactDOM from 'react-dom/client'
 import type { i18n as I18nType } from 'i18next'
 import * as ElectronCoreUi from 'electron-core-ui/renderer'
+import type { CapabilityGate } from 'electron-core-ui/renderer'
 import '@vscode/codicons/dist/codicon.css'
 import '../assets/fonts/restorm-brand.css'
 import '../assets/fonts/restorm-wordmark.css'
@@ -9,6 +10,7 @@ import './httpMethods.css'
 import './app.css'
 import './components/common/registryBadge.css'
 import LoadingScreen from './components/Welcome/LoadingScreen'
+import { GitCapabilityGateHost } from './components/GitCapabilityGateHost'
 import { initializeGraphQL } from './services/GraphQLIntegration'
 import { registerRendererSources } from './secrets/registerRendererSources'
 import { DEFAULT_UI_DELAY_MS } from '../../shared/config/constants'
@@ -34,6 +36,7 @@ const graphqlReady = initializeGraphQL().catch((error: unknown) => {
 type ElectronCoreUiProviderComponent = React.ComponentType<{
   children: React.ReactNode
   fontAliasing?: 'auto' | 'antialiased' | 'none'
+  capabilityGate?: CapabilityGate
 }>
 
 const { ElectronCoreUiProvider } = ElectronCoreUi as unknown as { ElectronCoreUiProvider: ElectronCoreUiProviderComponent }
@@ -383,11 +386,15 @@ void Promise.all([initI18n(), graphqlReady])
 
     ReactDOM.createRoot(rootElement).render(
       <React.StrictMode>
-        <ElectronCoreUiProvider fontAliasing="auto" data-testid="electron-core-ui-provider">
-          <Suspense fallback={<LoadingScreen />}>
-            <App />
-          </Suspense>
-        </ElectronCoreUiProvider>
+        <GitCapabilityGateHost>
+          {(capabilityGate) => (
+            <ElectronCoreUiProvider fontAliasing="auto" data-testid="electron-core-ui-provider" capabilityGate={capabilityGate}>
+              <Suspense fallback={<LoadingScreen />}>
+                <App />
+              </Suspense>
+            </ElectronCoreUiProvider>
+          )}
+        </GitCapabilityGateHost>
       </React.StrictMode>
     )
   })

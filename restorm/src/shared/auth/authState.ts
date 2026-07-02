@@ -45,3 +45,11 @@ export type Capability =
   // the MCP server itself is NOT gated — only Pro tools refuse at call time.
   // Backend contract: minted into `pro` + `enterprise`, never `community`.
   | 'mcp.pro'
+  // Gates the git integration entirely (status-bar buttons, title-bar Git
+  // menu, Push modal, Settings→Git, the future MCP git routes). Not yet
+  // minted by the backend (`cloud/supabase/functions/_shared/providers/
+  // capabilities.ts` needs a matching update, tracked separately — a
+  // cross-repo/deploy change) — until then this capability is granted to
+  // nobody, which is the safe default (git surfaces stay locked, never
+  // silently unlocked).
+  | 'git.client'
