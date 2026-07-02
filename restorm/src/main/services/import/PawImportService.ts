@@ -313,13 +313,16 @@ function isPlainDict(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value)
 }
 
-function canImport(content: string, _filePath?: string): boolean {
-  const trimmed = content.trim()
+function canImport(content: string, _filePath?: string, parsed?: unknown): boolean {
   let json: unknown
-  try {
-    json = JSON.parse(trimmed)
-  } catch {
-    return false
+  if (parsed !== undefined) {
+    json = parsed
+  } else {
+    try {
+      json = JSON.parse(content.trim())
+    } catch {
+      return false
+    }
   }
   if (!isPlainDict(json)) return false
 

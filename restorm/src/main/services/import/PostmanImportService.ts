@@ -669,10 +669,9 @@ export async function importPostmanFromUrl(
 
 import { importProviders } from './registry'
 
-function canImport(content: string, _filePath?: string): boolean {
-  const trimmed = content.trim()
+function canImport(content: string, _filePath?: string, parsed?: unknown): boolean {
   try {
-    const json: unknown = JSON.parse(trimmed)
+    const json: unknown = parsed !== undefined ? parsed : JSON.parse(content.trim())
     if (typeof json === 'object' && json !== null && 'info' in json) {
       const info = (json as Record<string, unknown>).info
       if (typeof info === 'object' && info !== null && 'schema' in info) {

@@ -460,13 +460,16 @@ export async function seedResponseHistoryFromHar(har: HarFile): Promise<void> {
 
 import { importProviders } from './registry'
 
-function canImport(content: string, filePath?: string): boolean {
-  const trimmed = content.trim()
+function canImport(content: string, filePath?: string, parsed?: unknown): boolean {
   let json: unknown
-  try {
-    json = JSON.parse(trimmed)
-  } catch {
-    return false
+  if (parsed !== undefined) {
+    json = parsed
+  } else {
+    try {
+      json = JSON.parse(content.trim())
+    } catch {
+      return false
+    }
   }
   if (typeof json !== 'object' || json === null || !('log' in json)) return false
   const log = (json as Record<string, unknown>).log

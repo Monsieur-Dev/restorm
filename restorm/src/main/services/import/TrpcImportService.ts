@@ -125,15 +125,19 @@ import { importProviders } from './registry'
  * narrow overall — a false-positive match against an unrelated JSON document
  * (e.g. a Postman/Bruno export that happens to have a `procedures` key) is
  * worse than refusing and falling through to "unsupported format". */
-function canImport(content: string): boolean {
-  let parsed: unknown
-  try {
-    parsed = JSON.parse(content)
-  } catch {
-    return false
+function canImport(content: string, _filePath?: string, parsed?: unknown): boolean {
+  let json: unknown
+  if (parsed !== undefined) {
+    json = parsed
+  } else {
+    try {
+      json = JSON.parse(content)
+    } catch {
+      return false
+    }
   }
-  if (!parsed || typeof parsed !== 'object' || !('procedures' in parsed)) return false
-  const procedures = (parsed as TrpcSchemaDocument).procedures
+  if (!json || typeof json !== 'object' || !('procedures' in json)) return false
+  const procedures = (json as TrpcSchemaDocument).procedures
   if (!procedures || typeof procedures !== 'object' || Array.isArray(procedures)) return false
   const entries = Object.values(procedures)
   return entries.some((p) => p.kind === 'query' || p.kind === 'mutation')

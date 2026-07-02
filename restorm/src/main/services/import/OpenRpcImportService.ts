@@ -240,11 +240,11 @@ function generateId(seed?: string): string {
 
 import { importProviders } from './registry'
 
-function canImport(content: string, filePath?: string): boolean {
+function canImport(content: string, filePath?: string, parsed?: unknown): boolean {
   if (filePath?.endsWith('openrpc.json')) return true
   try {
-    const parsed: unknown = JSON.parse(content)
-    return !!parsed && typeof parsed === 'object' && 'openrpc' in parsed && 'methods' in parsed
+    const json: unknown = parsed !== undefined ? parsed : JSON.parse(content)
+    return !!json && typeof json === 'object' && 'openrpc' in json && 'methods' in json
   } catch {
     return false
   }

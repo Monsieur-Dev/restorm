@@ -585,10 +585,9 @@ export async function importInsomniaFromUrl(
 
 import { importProviders } from './registry'
 
-function canImport(content: string, _filePath?: string): boolean {
-  const trimmed = content.trim()
+function canImport(content: string, _filePath?: string, parsed?: unknown): boolean {
   try {
-    const json: unknown = JSON.parse(trimmed)
+    const json: unknown = parsed !== undefined ? parsed : JSON.parse(content.trim())
     if (typeof json === 'object' && json !== null && '_type' in json && 'resources' in json) {
       return (json as Record<string, unknown>)._type === 'export'
     }

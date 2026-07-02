@@ -21,8 +21,19 @@ export interface ImportProvider {
    * Return `true` only when this provider is confident it can handle
    * the content; return `false` if unsure (the registry tries the next
    * provider).
+   *
+   * `parsed` is a best-effort `JSON.parse(content)` result the registry
+   * computes ONCE per detection pass and hands to every provider, so a
+   * JSON-format provider's sniff doesn't re-parse the same payload once per
+   * candidate. It's `undefined` when `content` isn't valid JSON (or wasn't
+   * parsed at all, e.g. the extension-anchored probe in `detectFormat` that
+   * calls `canImport('', filePath)`). A JSON-format provider should read
+   * `parsed` when present and fall back to parsing `content` itself
+   * otherwise — the fallback keeps direct/unit-test calls (which don't pass
+   * a third argument) behaviour-identical. Text/XML-format providers ignore
+   * this parameter entirely.
    */
-  canImport(content: string, filePath?: string): boolean
+  canImport(content: string, filePath?: string, parsed?: unknown): boolean
   /**
    * Full parse → EnvironmentFolder. Called only after `canImport` returned
    * true. `opts.filePath` carries the real on-disk path for file-based

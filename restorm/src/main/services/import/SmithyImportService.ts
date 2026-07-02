@@ -715,12 +715,12 @@ export function importSmithyModel(model: SmithyModel, options: SmithyImportOptio
   return rootFolder
 }
 
-function isJsonAstContent(content: string): boolean {
+function isJsonAstContent(content: string, parsed?: unknown): boolean {
   const trimmed = content.trim()
   if (!trimmed.startsWith('{')) return false
   try {
-    const parsed = JSON.parse(trimmed) as Record<string, unknown>
-    return typeof parsed.smithy === 'string'
+    const json = (parsed !== undefined ? parsed : JSON.parse(trimmed)) as Record<string, unknown>
+    return typeof json.smithy === 'string'
   } catch {
     return false
   }
@@ -743,10 +743,10 @@ export function importSmithyFromString(content: string, options: SmithyImportOpt
 
 import { importProviders } from './registry'
 
-function canImport(content: string, filePath?: string): boolean {
+function canImport(content: string, filePath?: string, parsed?: unknown): boolean {
   if (filePath?.endsWith('.smithy')) return true
   const trimmed = content.trim()
-  if (trimmed.startsWith('{')) return isJsonAstContent(trimmed)
+  if (trimmed.startsWith('{')) return isJsonAstContent(trimmed, parsed)
   return /^\s*\$version\s*:/m.test(trimmed) ||
     (/\bnamespace\s+[\w.]+/.test(trimmed) && /\b(operation|resource|service)\s+\w+\s*\{/.test(trimmed))
 }

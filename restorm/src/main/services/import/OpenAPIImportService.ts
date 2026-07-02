@@ -963,10 +963,9 @@ export async function importOpenAPIValidated(
 
 import { importProviders } from './registry'
 
-function canImportOpenAPI30(content: string, _filePath?: string): boolean {
-  const trimmed = content.trim()
+function canImportOpenAPI30(content: string, _filePath?: string, parsed?: unknown): boolean {
   try {
-    const json: unknown = JSON.parse(trimmed)
+    const json: unknown = parsed !== undefined ? parsed : JSON.parse(content.trim())
     if (typeof json === 'object' && json !== null) {
       const obj = json as Record<string, unknown>
       return 'openapi' in obj && typeof obj.openapi === 'string' && obj.openapi.startsWith('3.0')
@@ -975,10 +974,9 @@ function canImportOpenAPI30(content: string, _filePath?: string): boolean {
   return false
 }
 
-function canImportOpenAPI31(content: string, _filePath?: string): boolean {
-  const trimmed = content.trim()
+function canImportOpenAPI31(content: string, _filePath?: string, parsed?: unknown): boolean {
   try {
-    const json: unknown = JSON.parse(trimmed)
+    const json: unknown = parsed !== undefined ? parsed : JSON.parse(content.trim())
     if (typeof json === 'object' && json !== null) {
       const obj = json as Record<string, unknown>
       return 'openapi' in obj && typeof obj.openapi === 'string' && obj.openapi.startsWith('3.1')

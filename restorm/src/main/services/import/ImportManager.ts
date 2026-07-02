@@ -96,8 +96,19 @@ export function detectFormat(content: string, filePath?: string): string | null 
     }
   }
   // Phase 2 — content sniff, in registration order (original behaviour).
+  // JSON is parsed at most ONCE per pass (not once per JSON-capable
+  // provider) and handed to every `canImport` call as `parsed`; providers
+  // that sniff a JSON shape read it instead of re-parsing `content`
+  // themselves. `undefined` when `content` isn't valid JSON — providers
+  // fall back to their own (identical, so identically-failing) parse.
+  let parsed: unknown
+  try {
+    parsed = JSON.parse(content)
+  } catch {
+    parsed = undefined
+  }
   for (const provider of importProviders) {
-    if (provider.canImport(content, filePath)) return provider.format
+    if (provider.canImport(content, filePath, parsed)) return provider.format
   }
   return null
 }
