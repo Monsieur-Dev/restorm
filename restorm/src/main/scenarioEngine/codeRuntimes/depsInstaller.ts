@@ -50,8 +50,15 @@ export interface FetchedArtifact {
  * the package/version can't be resolved or the only artifact is incompatible
  * with the WASM runtime (e.g. a C-extension wheel) — that message reaches the
  * node's `error` port verbatim.
+ *
+ * `cacheDir` (the runtime's per-language root) is handed to the fetcher too, for
+ * a runtime that needs to write a SIDE artifact of its own during the fetch —
+ * e.g. the npm runtime persists the raw tarball under a `packageSubDir` while
+ * returning the derived `bundle.js` as the artifact this module writes at the
+ * package root. A fetcher with no such need simply ignores the parameter (a
+ * function of fewer parameters satisfies this type, e.g. `pythonWheelFetcher`).
  */
-export type ArtifactFetcher = (spec: PackageSpec) => Promise<FetchedArtifact[]>
+export type ArtifactFetcher = (spec: PackageSpec, cacheDir: string) => Promise<FetchedArtifact[]>
 
 /** Fired once per package that actually triggers a network download (never on a
  * cache hit / offline copy) — drives the run-log "Downloading…" indicator. */
@@ -95,7 +102,7 @@ function ensureOne(
     if (copyFromOfflineMirror(lang, cacheDir, spec)) return
     onDownloadStart?.(spec)
     // All of the fetcher's network inherits the bypass via AsyncLocalStorage.
-    const artifacts = await withFirewallBypass(() => fetcher(spec))
+    const artifacts = await withFirewallBypass(() => fetcher(spec, cacheDir))
     if (artifacts.length === 0) {
       throw new Error(`code deps: no artifact produced for ${spec.name}@${spec.version}`)
     }

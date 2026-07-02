@@ -19,6 +19,7 @@
 
 import { build as esbuild, transform as esbuildTransform, type Plugin } from 'esbuild'
 import { getQuickJS, shouldInterruptAfterDeadline, type QuickJSContext, type QuickJSHandle } from 'quickjs-emscripten'
+import type { PackageSpec } from './codeRuntimes/types'
 
 /** The curated, pure-JS standard library exposed inside the sandbox (a superset
  * of what Postman and Bruno bundle). Each entry is `globalThis.<global> = <pkg>`
@@ -44,8 +45,10 @@ const SANDBOX_LIBS: { global: string; module: string; requireNames: string[] }[]
 /** A handful of Node core modules a couple of the bundled libs (xml2js → sax)
  * pull in. QuickJS is browser-grade ES2020, so esbuild can't resolve them — we
  * substitute tiny CJS shims at bundle time. Deliberately minimal: just the
- * surface the curated libs touch, not a Node emulation layer. */
-const NODE_BUILTIN_SHIMS: Record<string, string> = {
+ * surface the curated libs touch, not a Node emulation layer. Exported so a
+ * user-pinned package (bundled separately by `codeRuntimes/npmBundle.ts`) gets
+ * the SAME shim set, not a second drifting copy. */
+export const NODE_BUILTIN_SHIMS: Record<string, string> = {
   events: `
     function EventEmitter(){ if(!this._e) this._e = {}; }
     EventEmitter.prototype.on = function(t,f){ (this._e[t]=this._e[t]||[]).push(f); return this; };
@@ -77,8 +80,9 @@ const NODE_BUILTIN_SHIMS: Record<string, string> = {
 
 /** esbuild plugin substituting {@link NODE_BUILTIN_SHIMS} for the Node core
  * modules a few curated libs import (otherwise unresolvable under
- * `platform: 'browser'`). */
-const nodeBuiltinShimPlugin: Plugin = {
+ * `platform: 'browser'`). Exported for reuse by `codeRuntimes/npmBundle.ts`,
+ * which bundles user-pinned npm packages the same way. */
+export const nodeBuiltinShimPlugin: Plugin = {
   name: 'sandbox-node-builtin-shims',
   setup(build) {
     const filter = new RegExp(`^(${Object.keys(NODE_BUILTIN_SHIMS).join('|')})$`)
@@ -625,6 +629,16 @@ export interface RunCodeOptions {
    * by name in the collection, execute it, and resolve to its response. When
    * absent, `bru.runRequest` just records the target (mapped to an edge later). */
   runRequest?: (name: string, signal: AbortSignal) => Promise<SandboxHttpResponse>
+  /** The node's pinned external packages (`config.packages`), already fetched +
+   * esbuild-bundled into `packagesCacheDir` by the executor's `installPackages`
+   * call — this only INJECTS the cached bundles, it never bundles here. Built
+   * into a second prelude evaluated after the (cached, singleton) curated
+   * stdlib prelude; unlike that singleton, this one is rebuilt fresh on every
+   * run from THIS node's packages, since different nodes pin different sets. */
+  packages?: PackageSpec[]
+  /** The runtime's per-language cache root holding {@link packages}' bundles
+   * (set together with `packages`; see `CodeRunContext.packagesCacheDir`). */
+  packagesCacheDir?: string
   /** The run's cooperative-cancellation signal (user Stop / scope abort). When
    * it fires, any in-flight host network request is aborted immediately rather
    * than lingering until the wall-clock timeout. */
@@ -680,7 +694,7 @@ export interface RunCodeResult {
 /** Transpile + run user code in the QuickJS sandbox. Rejects with a normal
  * Error (message from the sandboxed throw) on a script error or timeout. */
 export async function runCodeInSandbox(opts: RunCodeOptions): Promise<RunCodeResult> {
-  const { code, input, variables = {}, timeoutMs = 5000, network, variableBridge, postman, bruno, runRequest, signal } = opts
+  const { code, input, variables = {}, timeoutMs = 5000, network, variableBridge, postman, bruno, runRequest, packages, packagesCacheDir, signal } = opts
   // A Postman or Bruno script shares one request/response/test context.
   const scriptCtx = postman ?? bruno
   // 1. Transpile TS -> JS (types stripped; isolatedModules-safe single file).
@@ -732,6 +746,19 @@ export async function runCodeInSandbox(opts: RunCodeOptions): Promise<RunCodeRes
     const pre = ctx.evalCode(prelude)
     if (pre.error) { const e: unknown = ctx.dump(pre.error); pre.error.dispose(); throw new Error(`sandbox prelude failed: ${stringifyErr(e)}`) }
     pre.value.dispose()
+
+    // 2a. User-pinned npm packages (only when the node has `config.packages`):
+    //     a SECOND prelude, evaluated AFTER the stdlib one so it can layer on
+    //     top of (never replace) the curated globals/require() — see
+    //     codeRuntimes/npmBundle.ts. Bundling already happened at install time;
+    //     this only reads + injects the cached `bundle.js` files.
+    if (packages && packages.length > 0 && packagesCacheDir) {
+      const { buildUserPackagesPrelude } = await import('./codeRuntimes/npmBundle')
+      const userPrelude = buildUserPackagesPrelude(packagesCacheDir, packages)
+      const userPre = ctx.evalCode(userPrelude)
+      if (userPre.error) { const e: unknown = ctx.dump(userPre.error); userPre.error.dispose(); throw new Error(`sandbox user packages failed: ${stringifyErr(e)}`) }
+      userPre.value.dispose()
+    }
 
     // 2b. Network bridge (only when a host bridge is supplied): expose the single
     //     async host primitive `__hostFetch(reqJson) -> Promise<respJson>`, then

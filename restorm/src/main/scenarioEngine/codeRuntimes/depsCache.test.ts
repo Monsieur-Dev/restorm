@@ -7,7 +7,8 @@ import { join } from 'node:path'
 let tempDir = ''
 vi.mock('electron', () => ({ app: { getPath: (): string => tempDir } }))
 
-import { cacheKey, cachedArtifacts, codeDepsCacheDir, codeDepsRoot, isCached, packageDir, writeArtifact } from './depsCache'
+import { existsSync } from 'node:fs'
+import { cacheKey, cachedArtifacts, codeDepsCacheDir, codeDepsRoot, isCached, packageDir, packageSubDir, writeArtifact, writeFileAt } from './depsCache'
 
 describe('depsCache', () => {
   let dir = ''
@@ -41,5 +42,24 @@ describe('depsCache', () => {
 
   it('reports an absent package as not cached without throwing', () => {
     expect(cachedArtifacts(dir, { name: 'nope', version: '9.9.9' })).toEqual([])
+  })
+
+  it('a raw artifact tucked into a packageSubDir does NOT count as a package-root cache hit', () => {
+    const spec = { name: 'just-snake-case', version: '1.0.0' }
+    writeFileAt(packageSubDir(dir, spec, 'tarball'), 'just-snake-case-1.0.0.tgz', new Uint8Array([1]))
+    // The raw tarball is on disk, in its own sub-directory…
+    expect(existsSync(join(packageSubDir(dir, spec, 'tarball'), 'just-snake-case-1.0.0.tgz'))).toBe(true)
+    // …but isCached (which only scans the package ROOT) still reports false —
+    // this is what lets a derived artifact (e.g. npm's bundle.js) written at the
+    // package root double as the single "fully cached" signal.
+    expect(isCached(dir, spec)).toBe(false)
+    expect(cachedArtifacts(dir, spec)).toEqual([])
+    // Once the derived artifact lands at the package root, it's a cache hit.
+    writeArtifact(dir, spec, 'bundle.js', new Uint8Array([2]))
+    expect(isCached(dir, spec)).toBe(true)
+  })
+
+  it('packageSubDir rejects an unsafe sub-directory name', () => {
+    expect(() => packageSubDir(dir, { name: 'ok', version: '1.0' }, '..')).toThrow(/unsafe/)
   })
 })

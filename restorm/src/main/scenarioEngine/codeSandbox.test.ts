@@ -1,6 +1,11 @@
 // @vitest-environment node
-import { describe, it, expect } from 'vitest'
+import { afterEach, beforeEach, describe, it, expect } from 'vitest'
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
 import { runCodeInSandbox, SKIP_REQUEST_SENTINEL, type SandboxNetworkBridge, type SandboxHttpResponse, type SandboxVariableBridge } from './codeSandbox'
+import { packageDir } from './codeRuntimes/depsCache'
+import type { PackageSpec } from './codeRuntimes/types'
 
 /** A variable bridge backed by a plain Map — the test stand-in for the
  * executor's live run-variable map. */
@@ -562,5 +567,57 @@ describe('codeSandbox network bridge', () => {
       const { result } = await runCodeInSandbox({ variableBridge: bridge, code: `return typeof bru` })
       expect(result).toBe('undefined')
     })
+  })
+})
+
+describe('codeSandbox user-pinned npm packages (config.packages)', () => {
+  let cacheDir = ''
+  beforeEach(() => { cacheDir = mkdtempSync(join(tmpdir(), 'code-deps-js-')) })
+  afterEach(() => { rmSync(cacheDir, { recursive: true, force: true }) })
+
+  // installPackages/npmBundle.ts already produced the cached bundle by the time
+  // `run` is called — this exercises only the INJECTION side, exactly what
+  // codeSandbox.ts is responsible for.
+  const writeBundle = (spec: PackageSpec, exportsSrc: string): void => {
+    mkdirSync(packageDir(cacheDir, spec), { recursive: true })
+    writeFileSync(join(packageDir(cacheDir, spec), 'bundle.js'), `var __pkgExports = ${exportsSrc};`)
+  }
+
+  it('exposes a pinned package via require() AND a bare global', async () => {
+    const spec: PackageSpec = { name: 'just-snake-case', version: '1.0.0' }
+    writeBundle(spec, "(function(s){ return s.replace(/-/g, '_') })")
+    const { result } = await runCodeInSandbox({
+      code: `return { viaRequire: require('just-snake-case')('a-b-c'), viaGlobal: just_snake_case('x-y') }`,
+      packages: [spec],
+      packagesCacheDir: cacheDir
+    })
+    expect(result).toEqual({ viaRequire: 'a_b_c', viaGlobal: 'x_y' })
+  })
+
+  it('leaves the curated stdlib untouched when no packages are pinned', async () => {
+    const { result } = await runCodeInSandbox({ code: `return typeof _` })
+    expect(result).toBe('function')
+  })
+
+  it('a user package overlapping a curated global name does not break either side', async () => {
+    // "lodash" collides with the curated global; require('lodash') should
+    // resolve to the USER's pinned bundle, while the curated `lodash`/`_`
+    // globals keep pointing at the real curated library.
+    const spec: PackageSpec = { name: 'lodash', version: '9.9.9' }
+    writeBundle(spec, "'USER_LODASH'")
+    const { result } = await runCodeInSandbox({
+      code: `return { curatedGlobalIsFunction: typeof lodash.chunk === 'function', viaRequire: require('lodash') }`,
+      packages: [spec],
+      packagesCacheDir: cacheDir
+    })
+    expect(result).toEqual({ curatedGlobalIsFunction: true, viaRequire: 'USER_LODASH' })
+  })
+
+  it('rejects with a clear error when a pinned package has no cached bundle', async () => {
+    await expect(runCodeInSandbox({
+      code: `return 1`,
+      packages: [{ name: 'never-installed', version: '1.0.0' }],
+      packagesCacheDir: cacheDir
+    })).rejects.toThrow(/no cached bundle/)
   })
 })

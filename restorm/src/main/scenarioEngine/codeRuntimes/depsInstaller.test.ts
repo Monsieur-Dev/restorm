@@ -76,6 +76,13 @@ describe('ensurePackagesCached', () => {
     await expect(ensurePackagesCached('python', cacheDir, [spec], fetcher)).rejects.toThrow(/no artifact produced/)
   })
 
+  it('passes the cacheDir through to the fetcher (a runtime writing a side artifact of its own)', async () => {
+    const spec = { name: 'side-artifact', version: '1.0.0' }
+    const fetcher = vi.fn<ArtifactFetcher>((s) => Promise.resolve([{ filename: wheelName(s), data: new Uint8Array([1]) }]))
+    await ensurePackagesCached('python', cacheDir, [spec], fetcher)
+    expect(fetcher).toHaveBeenCalledWith(spec, cacheDir)
+  })
+
   it('fires onDownloadStart only for packages that actually fetch (not offline/cache hits)', async () => {
     const spec = { name: 'hooked', version: '1.0.0' }
     const fetcher = vi.fn<ArtifactFetcher>((s) => Promise.resolve([{ filename: wheelName(s), data: new Uint8Array([1]) }]))

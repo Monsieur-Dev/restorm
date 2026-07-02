@@ -84,6 +84,7 @@ export const CodeNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, data
           modalTitle={t('scenario.code.modalTitle', 'Edit code')}
           placeholder={DEFAULT_CODE}
           dataTestId={`scn-code-${id}`}
+          packageNames={packages.map((p) => p.name)}
         />
       )
     },

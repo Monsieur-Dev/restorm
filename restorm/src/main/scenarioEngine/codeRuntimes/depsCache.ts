@@ -64,17 +64,37 @@ export function cachedArtifacts(cacheDir: string, spec: PackageSpec): string[] {
 }
 
 /**
- * Write one artifact into a package's cache directory and return its absolute
- * path. Creates the directory tree as needed. The caller only writes AFTER a
- * complete, validated download, so the presence of the file is the atomic
- * "cached" marker {@link isCached} relies on.
+ * A named sub-directory inside a package's cache dir, sanitised like every
+ * other path segment. {@link isCached} / {@link cachedArtifacts} only scan the
+ * package dir itself (not its sub-directories), so a runtime that keeps a raw
+ * fetched artifact separate from a derived one it caches at the package root
+ * (e.g. the npm runtime's fetched tarball vs. its esbuild `bundle.js`) can tuck
+ * the raw artifact away here without it counting as a "ready" cache-hit signal
+ * on its own — only the derived, package-root artifact does.
  */
-export function writeArtifact(cacheDir: string, spec: PackageSpec, filename: string, data: Uint8Array): string {
-  const dir = packageDir(cacheDir, spec)
+export function packageSubDir(cacheDir: string, spec: PackageSpec, sub: string): string {
+  return join(packageDir(cacheDir, spec), sanitizeSegment(sub))
+}
+
+/**
+ * Write one file into an already-resolved directory (creating it as needed),
+ * sanitising the filename segment. The primitive behind {@link writeArtifact};
+ * also used directly by a runtime writing into a {@link packageSubDir}.
+ */
+export function writeFileAt(dir: string, filename: string, data: Uint8Array): string {
   mkdirSync(dir, { recursive: true })
   const dest = join(dir, sanitizeSegment(filename))
   writeFileSync(dest, data)
   return dest
+}
+
+/**
+ * Write one artifact into a package's cache directory and return its absolute
+ * path. The caller only writes AFTER a complete, validated download, so the
+ * presence of the file is the atomic "cached" marker {@link isCached} relies on.
+ */
+export function writeArtifact(cacheDir: string, spec: PackageSpec, filename: string, data: Uint8Array): string {
+  return writeFileAt(packageDir(cacheDir, spec), filename, data)
 }
 
 /** Reject path-traversal / separator characters in a name, version or filename
