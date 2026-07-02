@@ -238,6 +238,50 @@ jobs:
             -v "$(pwd)/mosquitto-passwd:/mosquitto/config/passwd:ro" \
             eclipse-mosquitto:2
 
+      - name: Start ActiveMQ broker (STOMP)
+        # rmohr/activemq:5.15.9 ships a stomp+ws transport connector on
+        # :61614 out of the box, mirroring tests/docker/docker-compose.yml.
+        run: |
+          docker run -d --name restorm-activemq -p 61614:61614 rmohr/activemq:5.15.9
+
+      - name: Start RabbitMQ broker (AMQP)
+        # rabbitmq:3-management with the definitions import that seeds the
+        # `/` vhost, `guest` user and `restorm-e2e-queue` — mirroring
+        # tests/docker/docker-compose.yml (a bare rabbitmq would 403 without
+        # it; see rabbitmq.conf for why the default bootstrap is skipped).
+        run: |
+          cd restorm/tests/docker
+          docker run -d --name restorm-rabbitmq -p 5672:5672 -p 15672:15672 \
+            -v "$(pwd)/rabbitmq.conf:/etc/rabbitmq/conf.d/10-restorm-e2e.conf:ro" \
+            -v "$(pwd)/rabbitmq-definitions.json:/etc/rabbitmq/definitions.json:ro" \
+            rabbitmq:3-management
+
+      - name: Start and seed Kafka broker
+        # Single-node KRaft broker, mirroring tests/docker/docker-compose.yml.
+        # Polls the broker with the same command the compose healthcheck
+        # uses, then runs kafka-seed.sh unmodified INSIDE the broker
+        # container (docker cp + exec) — simpler than the compose
+        # kafka-seed job's separate --network host container, since
+        # localhost:9092 already resolves correctly from inside
+        # restorm-kafka itself.
+        run: |
+          cd restorm/tests/docker
+          docker run -d --name restorm-kafka -p 9092:9092 \
+            -e KAFKA_NODE_ID=1 \
+            -e KAFKA_PROCESS_ROLES=broker,controller \
+            -e KAFKA_LISTENERS=PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093 \
+            -e KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://localhost:9092 \
+            -e KAFKA_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT \
+            -e KAFKA_CONTROLLER_QUORUM_VOTERS=1@localhost:9093 \
+            -e KAFKA_CONTROLLER_LISTENER_NAMES=CONTROLLER \
+            -e KAFKA_INTER_BROKER_LISTENER_NAME=PLAINTEXT \
+            -e KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1 \
+            -e KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS=0 \
+            apache/kafka:3.7.1
+          timeout 90 sh -c 'until docker exec restorm-kafka /opt/kafka/bin/kafka-broker-api-versions.sh --bootstrap-server localhost:9092 >/dev/null 2>&1; do sleep 3; done'
+          docker cp kafka-seed.sh restorm-kafka:/kafka-seed.sh
+          docker exec restorm-kafka /bin/sh /kafka-seed.sh
+
       - name: Wait for services
         run: |
           cd restorm
