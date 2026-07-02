@@ -420,5 +420,14 @@
       "title": "Git nie jest zainstalowany",
       "body": "Zainstaluj Git i dodaj go do zmiennej PATH, aby korzystać z integracji Git."
     }
+  },
+  "pushModal": {
+    "title": "Wypchnij",
+    "languageLabel": "Język wiadomości commit",
+    "applyLanguageByDefault": "Ustaw ten język jako domyślny dla przyszłych wypchnięć",
+    "titleFieldLabel": "Tytuł commita",
+    "bodyFieldLabel": "Opis",
+    "cancel": "Anuluj",
+    "push": "Wypchnij"
   }
 }

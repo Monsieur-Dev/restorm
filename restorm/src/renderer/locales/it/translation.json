@@ -2367,9 +2367,43 @@
     "configLockedWhileRunning": "Configurazione bloccata mentre il server è in esecuzione"
   },
   "git": {
-    "pushComingSoonTitle": "Il push non è ancora disponibile",
-    "pushComingSoonBody": "Il flusso di commit e push arriverà in un futuro aggiornamento.",
     "pullFailedTitle": "Pull non riuscito",
-    "pullFailedBody": "Impossibile recuperare le ultime modifiche."
+    "pullFailedBody": "Impossibile recuperare le ultime modifiche.",
+    "pushFailedTitle": "Push non riuscito",
+    "pushFailedBody": "Non è stato possibile eseguire il push delle modifiche.",
+    "pushSucceededTitle": "Push eseguito",
+    "pushSucceededBody": "Le modifiche sono state inviate al repository.",
+    "settingsTitle": "Git",
+    "applyCommitMessageLanguageByDefaultTitle": "Applica la lingua del messaggio di commit come predefinita",
+    "applyCommitMessageLanguageByDefaultDescription": "Se attivo, la lingua scelta nella finestra di push diventa quella predefinita per i prossimi push.",
+    "diff": {
+      "addedRequest": "Aggiunta la richiesta \"{{name}}\"",
+      "modifiedRequest": "Modificata la richiesta \"{{name}}\"",
+      "deletedRequest": "Eliminata la richiesta \"{{name}}\"",
+      "addedScenario": "Aggiunto lo scenario \"{{name}}\"",
+      "modifiedScenario": "Modificato lo scenario \"{{name}}\"",
+      "deletedScenario": "Eliminato lo scenario \"{{name}}\"",
+      "addedFolder": "Aggiunta la cartella \"{{name}}\"",
+      "modifiedFolder": "Modificata la cartella \"{{name}}\"",
+      "deletedFolder": "Eliminata la cartella \"{{name}}\"",
+      "addedEnvironmentFolder": "Aggiunta la cartella di ambiente \"{{name}}\"",
+      "modifiedEnvironmentFolder": "Modificata la cartella di ambiente \"{{name}}\"",
+      "deletedEnvironmentFolder": "Eliminata la cartella di ambiente \"{{name}}\""
+    },
+    "commitTitle": {
+      "singleRequest": "Aggiornamento della richiesta \"{{name}}\"",
+      "singleScenario": "Aggiornamento dello scenario \"{{name}}\"",
+      "singleFolder": "Aggiornamento della cartella \"{{name}}\"",
+      "singleEnvironmentFolder": "Aggiornamento della cartella di ambiente \"{{name}}\"",
+      "countRequest_one": "{{count}} richiesta",
+      "countRequest_other": "{{count}} richieste",
+      "countScenario_one": "{{count}} scenario",
+      "countScenario_other": "{{count}} scenari",
+      "countFolder_one": "{{count}} cartella",
+      "countFolder_other": "{{count}} cartelle",
+      "countEnvironmentFolder_one": "{{count}} cartella di ambiente",
+      "countEnvironmentFolder_other": "{{count}} cartelle di ambiente",
+      "multiple": "Aggiornamento di {{parts}}"
+    }
   }
 }

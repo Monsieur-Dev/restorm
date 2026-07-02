@@ -2367,9 +2367,43 @@
     "configLockedWhileRunning": "Configuratie vergrendeld terwijl de server draait"
   },
   "git": {
-    "pushComingSoonTitle": "Pushen is nog niet beschikbaar",
-    "pushComingSoonBody": "De commit-en-push-flow komt in een toekomstige update.",
     "pullFailedTitle": "Pullen mislukt",
-    "pullFailedBody": "Kon de nieuwste wijzigingen niet ophalen."
+    "pullFailedBody": "Kon de nieuwste wijzigingen niet ophalen.",
+    "pushFailedTitle": "Push mislukt",
+    "pushFailedBody": "Kon de wijzigingen niet pushen.",
+    "pushSucceededTitle": "Gepusht",
+    "pushSucceededBody": "Uw wijzigingen zijn naar de repository gepusht.",
+    "settingsTitle": "Git",
+    "applyCommitMessageLanguageByDefaultTitle": "Taal van het commitbericht standaard toepassen",
+    "applyCommitMessageLanguageByDefaultDescription": "Indien ingeschakeld wordt de in het pushvenster gekozen taal de standaard voor toekomstige pushes.",
+    "diff": {
+      "addedRequest": "Verzoek \"{{name}}\" toegevoegd",
+      "modifiedRequest": "Verzoek \"{{name}}\" gewijzigd",
+      "deletedRequest": "Verzoek \"{{name}}\" verwijderd",
+      "addedScenario": "Scenario \"{{name}}\" toegevoegd",
+      "modifiedScenario": "Scenario \"{{name}}\" gewijzigd",
+      "deletedScenario": "Scenario \"{{name}}\" verwijderd",
+      "addedFolder": "Map \"{{name}}\" toegevoegd",
+      "modifiedFolder": "Map \"{{name}}\" gewijzigd",
+      "deletedFolder": "Map \"{{name}}\" verwijderd",
+      "addedEnvironmentFolder": "Omgevingsmap \"{{name}}\" toegevoegd",
+      "modifiedEnvironmentFolder": "Omgevingsmap \"{{name}}\" gewijzigd",
+      "deletedEnvironmentFolder": "Omgevingsmap \"{{name}}\" verwijderd"
+    },
+    "commitTitle": {
+      "singleRequest": "Update van verzoek \"{{name}}\"",
+      "singleScenario": "Update van scenario \"{{name}}\"",
+      "singleFolder": "Update van map \"{{name}}\"",
+      "singleEnvironmentFolder": "Update van omgevingsmap \"{{name}}\"",
+      "countRequest_one": "{{count}} verzoek",
+      "countRequest_other": "{{count}} verzoeken",
+      "countScenario_one": "{{count}} scenario",
+      "countScenario_other": "{{count}} scenario's",
+      "countFolder_one": "{{count}} map",
+      "countFolder_other": "{{count}} mappen",
+      "countEnvironmentFolder_one": "{{count}} omgevingsmap",
+      "countEnvironmentFolder_other": "{{count}} omgevingsmappen",
+      "multiple": "Update van {{parts}}"
+    }
   }
 }

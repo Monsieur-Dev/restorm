@@ -17,6 +17,8 @@ vi.mock('react-i18next', () => ({
 
 import { useGitActions } from './useGitActions'
 
+const onOpenPush = vi.fn()
+
 afterEach(() => {
   cleanup()
   vi.clearAllMocks()
@@ -37,32 +39,29 @@ function stubGitApi(pullResult?: {
 }
 
 describe('useGitActions', () => {
-  it('onPush shows the "not available yet" toast instead of calling git.push', () => {
-    const { result } = renderHook(() => useGitActions('/home/user/demo/api.restorm'))
+  it('onPush delegates to the injected openPushModal callback', () => {
+    const { result } = renderHook(() => useGitActions('/home/user/demo/api.restorm', onOpenPush))
     act(() => { result.current.onPush() })
-    expect(toasterPushMock).toHaveBeenCalledWith('app', {
-      title: 'git.pushComingSoonTitle',
-      body: 'git.pushComingSoonBody'
-    })
+    expect(onOpenPush).toHaveBeenCalledTimes(1)
   })
 
   it('onPull calls window.api.git.pull with the folder derived from the open .restorm file', () => {
     const { pull } = stubGitApi()
-    const { result } = renderHook(() => useGitActions('/home/user/demo/api.restorm'))
+    const { result } = renderHook(() => useGitActions('/home/user/demo/api.restorm', onOpenPush))
     act(() => { result.current.onPull() })
     expect(pull).toHaveBeenCalledWith('/home/user/demo')
   })
 
   it('onPull is a no-op when no file is open (no folder to pull into)', () => {
     const { pull } = stubGitApi()
-    const { result } = renderHook(() => useGitActions(null))
+    const { result } = renderHook(() => useGitActions(null, onOpenPush))
     act(() => { result.current.onPull() })
     expect(pull).not.toHaveBeenCalled()
   })
 
   it('onPull shows a failure toast with the git error when the pull fails', async () => {
     stubGitApi({ success: false, conflicted: false, conflictFiles: [], error: 'fatal: could not read from remote' })
-    const { result } = renderHook(() => useGitActions('/home/user/demo/api.restorm'))
+    const { result } = renderHook(() => useGitActions('/home/user/demo/api.restorm', onOpenPush))
     act(() => { result.current.onPull() })
     await act(async () => { await Promise.resolve() })
     expect(toasterPushMock).toHaveBeenCalledWith('app', {
@@ -74,7 +73,7 @@ describe('useGitActions', () => {
 
   it('onPull falls back to a generic failure body when the git error is missing', async () => {
     stubGitApi({ success: false, conflicted: false, conflictFiles: [] })
-    const { result } = renderHook(() => useGitActions('/home/user/demo/api.restorm'))
+    const { result } = renderHook(() => useGitActions('/home/user/demo/api.restorm', onOpenPush))
     act(() => { result.current.onPull() })
     await act(async () => { await Promise.resolve() })
     expect(toasterPushMock).toHaveBeenCalledWith('app', {
@@ -86,7 +85,7 @@ describe('useGitActions', () => {
 
   it('onPull shows no toast on success', async () => {
     stubGitApi({ success: true, conflicted: false, conflictFiles: [] })
-    const { result } = renderHook(() => useGitActions('/home/user/demo/api.restorm'))
+    const { result } = renderHook(() => useGitActions('/home/user/demo/api.restorm', onOpenPush))
     act(() => { result.current.onPull() })
     await act(async () => { await Promise.resolve() })
     expect(toasterPushMock).not.toHaveBeenCalled()

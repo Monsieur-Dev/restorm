@@ -420,5 +420,14 @@
       "title": "Git не встановлено",
       "body": "Встановіть Git і додайте його до PATH, щоб використовувати інтеграцію з Git."
     }
+  },
+  "pushModal": {
+    "title": "Надіслати",
+    "languageLabel": "Мова повідомлення commit",
+    "applyLanguageByDefault": "Використовувати цю мову за замовчуванням для майбутніх надсилань",
+    "titleFieldLabel": "Заголовок commit",
+    "bodyFieldLabel": "Опис",
+    "cancel": "Скасувати",
+    "push": "Надіслати"
   }
 }

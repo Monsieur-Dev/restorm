@@ -420,5 +420,14 @@
       "title": "Git is niet geïnstalleerd",
       "body": "Installeer Git en voeg het toe aan uw PATH om de Git-integratie te gebruiken."
     }
+  },
+  "pushModal": {
+    "title": "Push",
+    "languageLabel": "Taal van het commitbericht",
+    "applyLanguageByDefault": "Deze taal standaard gebruiken voor toekomstige pushes",
+    "titleFieldLabel": "Commit-titel",
+    "bodyFieldLabel": "Beschrijving",
+    "cancel": "Annuleren",
+    "push": "Push"
   }
 }

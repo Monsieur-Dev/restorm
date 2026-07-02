@@ -420,5 +420,14 @@
       "title": "Git가 설치되어 있지 않습니다",
       "body": "Git 통합 기능을 사용하려면 Git을 설치하고 PATH에 추가하세요."
     }
+  },
+  "pushModal": {
+    "title": "푸시",
+    "languageLabel": "커밋 메시지 언어",
+    "applyLanguageByDefault": "앞으로의 푸시에도 이 언어를 기본값으로 적용",
+    "titleFieldLabel": "커밋 제목",
+    "bodyFieldLabel": "설명",
+    "cancel": "취소",
+    "push": "푸시"
   }
 }

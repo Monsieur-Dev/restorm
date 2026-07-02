@@ -2367,9 +2367,43 @@
     "configLockedWhileRunning": "Konfiguration låst medan servern körs"
   },
   "git": {
-    "pushComingSoonTitle": "Push är inte tillgängligt än",
-    "pushComingSoonBody": "Flödet för commit och push kommer i en framtida uppdatering.",
     "pullFailedTitle": "Pull misslyckades",
-    "pullFailedBody": "Det gick inte att hämta de senaste ändringarna."
+    "pullFailedBody": "Det gick inte att hämta de senaste ändringarna.",
+    "pushFailedTitle": "Push misslyckades",
+    "pushFailedBody": "Det gick inte att pusha ändringarna.",
+    "pushSucceededTitle": "Push klar",
+    "pushSucceededBody": "Dina ändringar pushades till repot.",
+    "settingsTitle": "Git",
+    "applyCommitMessageLanguageByDefaultTitle": "Använd detta commit-meddelandespråk som standard",
+    "applyCommitMessageLanguageByDefaultDescription": "När aktiverat blir språket du väljer i push-rutan standard för framtida pushar.",
+    "diff": {
+      "addedRequest": "La till förfrågan \"{{name}}\"",
+      "modifiedRequest": "Ändrade förfrågan \"{{name}}\"",
+      "deletedRequest": "Tog bort förfrågan \"{{name}}\"",
+      "addedScenario": "La till scenariot \"{{name}}\"",
+      "modifiedScenario": "Ändrade scenariot \"{{name}}\"",
+      "deletedScenario": "Tog bort scenariot \"{{name}}\"",
+      "addedFolder": "La till mappen \"{{name}}\"",
+      "modifiedFolder": "Ändrade mappen \"{{name}}\"",
+      "deletedFolder": "Tog bort mappen \"{{name}}\"",
+      "addedEnvironmentFolder": "La till miljömappen \"{{name}}\"",
+      "modifiedEnvironmentFolder": "Ändrade miljömappen \"{{name}}\"",
+      "deletedEnvironmentFolder": "Tog bort miljömappen \"{{name}}\""
+    },
+    "commitTitle": {
+      "singleRequest": "Uppdatering av förfrågan \"{{name}}\"",
+      "singleScenario": "Uppdatering av scenariot \"{{name}}\"",
+      "singleFolder": "Uppdatering av mappen \"{{name}}\"",
+      "singleEnvironmentFolder": "Uppdatering av miljömappen \"{{name}}\"",
+      "countRequest_one": "{{count}} förfrågan",
+      "countRequest_other": "{{count}} förfrågningar",
+      "countScenario_one": "{{count}} scenario",
+      "countScenario_other": "{{count}} scenarier",
+      "countFolder_one": "{{count}} mapp",
+      "countFolder_other": "{{count}} mappar",
+      "countEnvironmentFolder_one": "{{count}} miljömapp",
+      "countEnvironmentFolder_other": "{{count}} miljömappar",
+      "multiple": "Uppdatering av {{parts}}"
+    }
   }
 }

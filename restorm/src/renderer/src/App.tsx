@@ -131,6 +131,7 @@ import { useMcpEnabled } from './hooks/useMcpEnabled'
 import { useMcpActiveStateBridge } from './hooks/useMcpActiveStateBridge'
 import { useMcpNavigation } from './hooks/useMcpNavigation'
 import { useGitActions } from './hooks/useGitActions'
+import { usePushModal } from './hooks/usePushModal'
 import { useMcpTreeReplace } from './hooks/useMcpTreeReplace'
 import { useMcpRunRequest } from './hooks/useMcpRunRequest'
 import { useMcpRequestPatch } from './hooks/useMcpRequestPatch'
@@ -177,7 +178,7 @@ import { RequestCreationProvider } from './contexts/RequestCreationContext'
 import { useNavigation } from './hooks/useNavigation'
 import { useWorkbenchUpdates } from './hooks/useWorkbenchUpdates'
 import { useWorkbenchTabs } from './hooks/useWorkbenchTabs'
-import { useFirewallPromptToasts, useGitCliMissingToast } from 'electron-core-ui/renderer'
+import { useFirewallPromptToasts, useGitCliMissingToast, PushModal, AVAILABLE_LANGUAGES } from 'electron-core-ui/renderer'
 import { useFirewallProjectOriginsSync } from './hooks/useFirewallProjectOriginsSync'
 import { useSidebarState } from './hooks/useSidebarState'
 import {
@@ -354,10 +355,6 @@ const App: React.FC = () => {
   // process lifetime.
   useGitCliMissingToast()
 
-  // Repo-push / repo-pull click actions, shared verbatim by the statusbar
-  // `GIT` entry and the title-bar `Git` menu (see `useGitActions`).
-  const { onPush: handleGitPush, onPull: handleGitPull } = useGitActions(filePath)
-
   const handleMenuExit = useCallback(() => {
     void window.api.closeWindow()
   }, [])
@@ -405,6 +402,15 @@ const App: React.FC = () => {
   // firewall on every tree change. The PermissionService treats
   // these as known destinations alongside the user's whitelist.
   useFirewallProjectOriginsSync(rootItems)
+
+  // The Push modal's whole lifecycle (diff-on-open, language-driven
+  // regeneration, the setting sync, the actual stage+commit+push) —
+  // `rootItems` is the "after" side of its structural diff.
+  const pushModal = usePushModal(filePath, rootItems)
+  // Repo-push / repo-pull click actions, shared verbatim by the statusbar
+  // `GIT` entry and the title-bar `Git` menu (see `useGitActions`).
+  // repo-push opens the modal above; the actual push happens from there.
+  const { onPush: handleGitPush, onPull: handleGitPull } = useGitActions(filePath, pushModal.openPushModal)
 
   // Sidebar expansion is persisted per-project under
   // `restorm-main-sidebar:<projectUuid>`. The UUID is stamped into the
@@ -2960,6 +2966,24 @@ const App: React.FC = () => {
         isFolder={deleteConfirmation.isFolder}
         onConfirm={confirmDelete}
         onCancel={cancelDelete}
+      />
+
+      {/* Push modal — triggered by the statusbar repo-push button / the
+          title-bar Git menu (see `usePushModal`). Non-scoped (not bound to
+          any tab). */}
+      <PushModal
+        isOpen={pushModal.isOpen}
+        onClose={pushModal.closePushModal}
+        languages={AVAILABLE_LANGUAGES}
+        language={pushModal.language}
+        onLanguageChange={pushModal.setLanguage}
+        applyLanguageByDefault={pushModal.applyLanguageByDefault}
+        onApplyLanguageByDefaultChange={pushModal.setApplyLanguageByDefault}
+        title={pushModal.title}
+        onTitleChange={pushModal.setTitle}
+        body={pushModal.body}
+        onBodyChange={pushModal.setBody}
+        onPush={pushModal.push}
       />
 
       {/* MCP call-logs viewer — full-screen modal shown on the welcome

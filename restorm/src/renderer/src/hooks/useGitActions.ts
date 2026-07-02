@@ -13,25 +13,15 @@ export interface GitActions {
  * title-bar `Git` menu (repo-push / repo-pull) — a single source of truth so
  * both surfaces trigger the exact same behavior instead of each re-deriving
  * the folder + wiring the calls independently.
+ *
+ * `onOpenPush` is `usePushModal`'s `openPushModal` — repo-push's whole job
+ * here is to open that modal (title/body prefill, language picker, the
+ * actual stage+commit+push all live there); this hook only owns the click
+ * wiring + the (unrelated) plain pull.
  */
-export function useGitActions(filePath: string | null): GitActions {
+export function useGitActions(filePath: string | null, onOpenPush: () => void): GitActions {
   const { t } = useTranslation()
   const gitFolder = useGitFolder(filePath)
-
-  const onPush = useCallback(() => {
-    // The atomic stage+commit+push flow — title/body fields, a generated
-    // commit message, the language picker — lives in a dedicated
-    // commit-message-engine + modal ticket, not built yet. A bare
-    // `git push` here would be actively misleading: it only sweeps in
-    // already-committed local commits, never the uncommitted changes the
-    // statusbar pastille also tracks, so clicking it wouldn't do what the
-    // pastille promises. Surface an honest "not available yet" toast
-    // instead of a silent no-op or a half-correct push.
-    toasterService.push('app', {
-      title: t('git.pushComingSoonTitle'),
-      body: t('git.pushComingSoonBody')
-    })
-  }, [t])
 
   const onPull = useCallback(() => {
     if (!gitFolder) return
@@ -46,5 +36,5 @@ export function useGitActions(filePath: string | null): GitActions {
     })
   }, [gitFolder, t])
 
-  return { onPush, onPull }
+  return { onPush: onOpenPush, onPull }
 }

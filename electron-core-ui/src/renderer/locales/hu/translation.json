@@ -420,5 +420,14 @@
       "title": "A Git nincs telepítve",
       "body": "Telepítse a Gitet, és adja hozzá a PATH-hoz a Git-integráció használatához."
     }
+  },
+  "pushModal": {
+    "title": "Push",
+    "languageLabel": "A commit üzenet nyelve",
+    "applyLanguageByDefault": "Ez legyen az alapértelmezett nyelv a jövőbeli push-oknál",
+    "titleFieldLabel": "Commit címe",
+    "bodyFieldLabel": "Leírás",
+    "cancel": "Mégse",
+    "push": "Push"
   }
 }

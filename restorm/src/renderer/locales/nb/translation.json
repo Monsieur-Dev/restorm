@@ -2367,9 +2367,43 @@
     "configLockedWhileRunning": "Konfigurasjon låst mens serveren kjører"
   },
   "git": {
-    "pushComingSoonTitle": "Push er ikke tilgjengelig ennå",
-    "pushComingSoonBody": "Commit- og push-flyten kommer i en fremtidig oppdatering.",
     "pullFailedTitle": "Pull mislyktes",
-    "pullFailedBody": "Kunne ikke hente de nyeste endringene."
+    "pullFailedBody": "Kunne ikke hente de nyeste endringene.",
+    "pushFailedTitle": "Push mislyktes",
+    "pushFailedBody": "Kunne ikke pushe endringene.",
+    "pushSucceededTitle": "Pushet",
+    "pushSucceededBody": "Endringene dine ble pushet til repositoriet.",
+    "settingsTitle": "Git",
+    "applyCommitMessageLanguageByDefaultTitle": "Bruk dette commit-meldingsspråket som standard",
+    "applyCommitMessageLanguageByDefaultDescription": "Når aktivert blir språket valgt i push-vinduet standard for fremtidige pushar.",
+    "diff": {
+      "addedRequest": "La til forespørselen \"{{name}}\"",
+      "modifiedRequest": "Endret forespørselen \"{{name}}\"",
+      "deletedRequest": "Slettet forespørselen \"{{name}}\"",
+      "addedScenario": "La til scenarioet \"{{name}}\"",
+      "modifiedScenario": "Endret scenarioet \"{{name}}\"",
+      "deletedScenario": "Slettet scenarioet \"{{name}}\"",
+      "addedFolder": "La til mappen \"{{name}}\"",
+      "modifiedFolder": "Endret mappen \"{{name}}\"",
+      "deletedFolder": "Slettet mappen \"{{name}}\"",
+      "addedEnvironmentFolder": "La til miljømappen \"{{name}}\"",
+      "modifiedEnvironmentFolder": "Endret miljømappen \"{{name}}\"",
+      "deletedEnvironmentFolder": "Slettet miljømappen \"{{name}}\""
+    },
+    "commitTitle": {
+      "singleRequest": "Oppdatering av forespørselen \"{{name}}\"",
+      "singleScenario": "Oppdatering av scenarioet \"{{name}}\"",
+      "singleFolder": "Oppdatering av mappen \"{{name}}\"",
+      "singleEnvironmentFolder": "Oppdatering av miljømappen \"{{name}}\"",
+      "countRequest_one": "{{count}} forespørsel",
+      "countRequest_other": "{{count}} forespørsler",
+      "countScenario_one": "{{count}} scenario",
+      "countScenario_other": "{{count}} scenarioer",
+      "countFolder_one": "{{count}} mappe",
+      "countFolder_other": "{{count}} mapper",
+      "countEnvironmentFolder_one": "{{count}} miljømappe",
+      "countEnvironmentFolder_other": "{{count}} miljømapper",
+      "multiple": "Oppdatering av {{parts}}"
+    }
   }
 }

@@ -2367,9 +2367,43 @@
     "configLockedWhileRunning": "A konfiguráció zárolva, amíg a szerver fut"
   },
   "git": {
-    "pushComingSoonTitle": "A küldés még nem érhető el",
-    "pushComingSoonBody": "A commit + push folyamat egy jövőbeli frissítésben érkezik.",
     "pullFailedTitle": "A lehívás sikertelen",
-    "pullFailedBody": "A legújabb módosítások lehívása nem sikerült."
+    "pullFailedBody": "A legújabb módosítások lehívása nem sikerült.",
+    "pushFailedTitle": "A push sikertelen",
+    "pushFailedBody": "A módosításokat nem sikerült push-olni.",
+    "pushSucceededTitle": "Push-olva",
+    "pushSucceededBody": "A módosításai push-olva lettek a tárolóba.",
+    "settingsTitle": "Git",
+    "applyCommitMessageLanguageByDefaultTitle": "A commit-üzenet nyelvének alkalmazása alapértelmezettként",
+    "applyCommitMessageLanguageByDefaultDescription": "Ha be van kapcsolva, a Push ablakban választott nyelv lesz az alapértelmezett a jövőbeli push-oknál.",
+    "diff": {
+      "addedRequest": "Hozzáadva a(z) „{{name}}” kérés",
+      "modifiedRequest": "Módosítva a(z) „{{name}}” kérés",
+      "deletedRequest": "Törölve a(z) „{{name}}” kérés",
+      "addedScenario": "Hozzáadva a(z) „{{name}}” forgatókönyv",
+      "modifiedScenario": "Módosítva a(z) „{{name}}” forgatókönyv",
+      "deletedScenario": "Törölve a(z) „{{name}}” forgatókönyv",
+      "addedFolder": "Hozzáadva a(z) „{{name}}” mappa",
+      "modifiedFolder": "Módosítva a(z) „{{name}}” mappa",
+      "deletedFolder": "Törölve a(z) „{{name}}” mappa",
+      "addedEnvironmentFolder": "Hozzáadva a(z) „{{name}}” környezeti mappa",
+      "modifiedEnvironmentFolder": "Módosítva a(z) „{{name}}” környezeti mappa",
+      "deletedEnvironmentFolder": "Törölve a(z) „{{name}}” környezeti mappa"
+    },
+    "commitTitle": {
+      "singleRequest": "A(z) „{{name}}” kérés frissítése",
+      "singleScenario": "A(z) „{{name}}” forgatókönyv frissítése",
+      "singleFolder": "A(z) „{{name}}” mappa frissítése",
+      "singleEnvironmentFolder": "A(z) „{{name}}” környezeti mappa frissítése",
+      "countRequest_one": "{{count}} kérés",
+      "countRequest_other": "{{count}} kérés",
+      "countScenario_one": "{{count}} forgatókönyv",
+      "countScenario_other": "{{count}} forgatókönyv",
+      "countFolder_one": "{{count}} mappa",
+      "countFolder_other": "{{count}} mappa",
+      "countEnvironmentFolder_one": "{{count}} környezeti mappa",
+      "countEnvironmentFolder_other": "{{count}} környezeti mappa",
+      "multiple": "{{parts}} frissítése"
+    }
   }
 }

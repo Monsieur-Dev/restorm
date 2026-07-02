@@ -2367,9 +2367,43 @@
     "configLockedWhileRunning": "Config locked while the server is running"
   },
   "git": {
-    "pushComingSoonTitle": "Push isn't available yet",
-    "pushComingSoonBody": "The commit + push flow is coming in a future update.",
     "pullFailedTitle": "Pull failed",
-    "pullFailedBody": "Could not pull the latest changes."
+    "pullFailedBody": "Could not pull the latest changes.",
+    "pushFailedTitle": "Push failed",
+    "pushFailedBody": "Could not push the changes.",
+    "pushSucceededTitle": "Pushed",
+    "pushSucceededBody": "Your changes were pushed to the repository.",
+    "settingsTitle": "Git",
+    "applyCommitMessageLanguageByDefaultTitle": "Apply the commit-message language by default",
+    "applyCommitMessageLanguageByDefaultDescription": "When enabled, the language picked in the Push modal becomes the default for future pushes.",
+    "diff": {
+      "addedRequest": "Added the request \"{{name}}\"",
+      "modifiedRequest": "Modified the request \"{{name}}\"",
+      "deletedRequest": "Deleted the request \"{{name}}\"",
+      "addedScenario": "Added the scenario \"{{name}}\"",
+      "modifiedScenario": "Modified the scenario \"{{name}}\"",
+      "deletedScenario": "Deleted the scenario \"{{name}}\"",
+      "addedFolder": "Added the folder \"{{name}}\"",
+      "modifiedFolder": "Modified the folder \"{{name}}\"",
+      "deletedFolder": "Deleted the folder \"{{name}}\"",
+      "addedEnvironmentFolder": "Added the environment folder \"{{name}}\"",
+      "modifiedEnvironmentFolder": "Modified the environment folder \"{{name}}\"",
+      "deletedEnvironmentFolder": "Deleted the environment folder \"{{name}}\""
+    },
+    "commitTitle": {
+      "singleRequest": "Update to the request \"{{name}}\"",
+      "singleScenario": "Update to the scenario \"{{name}}\"",
+      "singleFolder": "Update to the folder \"{{name}}\"",
+      "singleEnvironmentFolder": "Update to the environment folder \"{{name}}\"",
+      "countRequest_one": "{{count}} request",
+      "countRequest_other": "{{count}} requests",
+      "countScenario_one": "{{count}} scenario",
+      "countScenario_other": "{{count}} scenarios",
+      "countFolder_one": "{{count}} folder",
+      "countFolder_other": "{{count}} folders",
+      "countEnvironmentFolder_one": "{{count}} environment folder",
+      "countEnvironmentFolder_other": "{{count}} environment folders",
+      "multiple": "Update to {{parts}}"
+    }
   }
 }

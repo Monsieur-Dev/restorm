@@ -420,5 +420,14 @@
       "title": "Git nije instaliran",
       "body": "Instalirajte Git i dodajte ga u PATH da biste koristili Git integraciju."
     }
+  },
+  "pushModal": {
+    "title": "Pošalji",
+    "languageLabel": "Jezik poruke commita",
+    "applyLanguageByDefault": "Podesi ovaj jezik kao podrazumevani za buduća slanja",
+    "titleFieldLabel": "Naslov commita",
+    "bodyFieldLabel": "Opis",
+    "cancel": "Otkaži",
+    "push": "Pošalji"
   }
 }

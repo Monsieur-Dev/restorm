@@ -420,5 +420,14 @@
       "title": "Git er ikke installert",
       "body": "Installer Git og legg det til i PATH-en din for å bruke Git-integrasjonen."
     }
+  },
+  "pushModal": {
+    "title": "Push",
+    "languageLabel": "Språk for commit-meldingen",
+    "applyLanguageByDefault": "Bruk dette språket som standard for fremtidige pushar",
+    "titleFieldLabel": "Commit-tittel",
+    "bodyFieldLabel": "Beskrivelse",
+    "cancel": "Avbryt",
+    "push": "Push"
   }
 }

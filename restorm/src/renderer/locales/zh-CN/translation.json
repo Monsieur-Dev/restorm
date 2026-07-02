@@ -2366,9 +2366,43 @@
     "configLockedWhileRunning": "服务器运行时配置已锁定"
   },
   "git": {
-    "pushComingSoonTitle": "推送功能尚未开放",
-    "pushComingSoonBody": "提交 + 推送流程将在后续更新中提供。",
     "pullFailedTitle": "拉取失败",
-    "pullFailedBody": "无法拉取最新更改。"
+    "pullFailedBody": "无法拉取最新更改。",
+    "pushFailedTitle": "推送失败",
+    "pushFailedBody": "无法推送更改。",
+    "pushSucceededTitle": "已推送",
+    "pushSucceededBody": "您的更改已推送到仓库。",
+    "settingsTitle": "Git",
+    "applyCommitMessageLanguageByDefaultTitle": "默认应用此提交信息语言",
+    "applyCommitMessageLanguageByDefaultDescription": "启用后，推送窗口中选择的语言将成为以后推送的默认语言。",
+    "diff": {
+      "addedRequest": "已添加请求 \"{{name}}\"",
+      "modifiedRequest": "已修改请求 \"{{name}}\"",
+      "deletedRequest": "已删除请求 \"{{name}}\"",
+      "addedScenario": "已添加场景 \"{{name}}\"",
+      "modifiedScenario": "已修改场景 \"{{name}}\"",
+      "deletedScenario": "已删除场景 \"{{name}}\"",
+      "addedFolder": "已添加文件夹 \"{{name}}\"",
+      "modifiedFolder": "已修改文件夹 \"{{name}}\"",
+      "deletedFolder": "已删除文件夹 \"{{name}}\"",
+      "addedEnvironmentFolder": "已添加环境文件夹 \"{{name}}\"",
+      "modifiedEnvironmentFolder": "已修改环境文件夹 \"{{name}}\"",
+      "deletedEnvironmentFolder": "已删除环境文件夹 \"{{name}}\""
+    },
+    "commitTitle": {
+      "singleRequest": "更新请求 \"{{name}}\"",
+      "singleScenario": "更新场景 \"{{name}}\"",
+      "singleFolder": "更新文件夹 \"{{name}}\"",
+      "singleEnvironmentFolder": "更新环境文件夹 \"{{name}}\"",
+      "countRequest_one": "{{count}} 个请求",
+      "countRequest_other": "{{count}} 个请求",
+      "countScenario_one": "{{count}} 个场景",
+      "countScenario_other": "{{count}} 个场景",
+      "countFolder_one": "{{count}} 个文件夹",
+      "countFolder_other": "{{count}} 个文件夹",
+      "countEnvironmentFolder_one": "{{count}} 个环境文件夹",
+      "countEnvironmentFolder_other": "{{count}} 个环境文件夹",
+      "multiple": "更新 {{parts}}"
+    }
   }
 }

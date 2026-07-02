@@ -2367,9 +2367,43 @@
     "configLockedWhileRunning": "Konfiguration gesperrt, während der Server läuft"
   },
   "git": {
-    "pushComingSoonTitle": "Push ist noch nicht verfügbar",
-    "pushComingSoonBody": "Der Commit-und-Push-Ablauf kommt in einem zukünftigen Update.",
-    "pullFailedTitle": "Pull fehlgeschlagen",
-    "pullFailedBody": "Die neuesten Änderungen konnten nicht abgerufen werden."
+    "pullFailedTitle": "Abruf fehlgeschlagen",
+    "pullFailedBody": "Die neuesten Änderungen konnten nicht abgerufen werden.",
+    "pushFailedTitle": "Push fehlgeschlagen",
+    "pushFailedBody": "Die Änderungen konnten nicht gepusht werden.",
+    "pushSucceededTitle": "Gepusht",
+    "pushSucceededBody": "Ihre Änderungen wurden in das Repository gepusht.",
+    "settingsTitle": "Git",
+    "applyCommitMessageLanguageByDefaultTitle": "Sprache der Commit-Nachricht standardmäßig anwenden",
+    "applyCommitMessageLanguageByDefaultDescription": "Wenn aktiviert, wird die im Push-Dialog gewählte Sprache zum Standard für zukünftige Pushs.",
+    "diff": {
+      "addedRequest": "Anfrage „{{name}}“ hinzugefügt",
+      "modifiedRequest": "Anfrage „{{name}}“ geändert",
+      "deletedRequest": "Anfrage „{{name}}“ gelöscht",
+      "addedScenario": "Szenario „{{name}}“ hinzugefügt",
+      "modifiedScenario": "Szenario „{{name}}“ geändert",
+      "deletedScenario": "Szenario „{{name}}“ gelöscht",
+      "addedFolder": "Ordner „{{name}}“ hinzugefügt",
+      "modifiedFolder": "Ordner „{{name}}“ geändert",
+      "deletedFolder": "Ordner „{{name}}“ gelöscht",
+      "addedEnvironmentFolder": "Umgebungsordner „{{name}}“ hinzugefügt",
+      "modifiedEnvironmentFolder": "Umgebungsordner „{{name}}“ geändert",
+      "deletedEnvironmentFolder": "Umgebungsordner „{{name}}“ gelöscht"
+    },
+    "commitTitle": {
+      "singleRequest": "Aktualisierung der Anfrage „{{name}}“",
+      "singleScenario": "Aktualisierung des Szenarios „{{name}}“",
+      "singleFolder": "Aktualisierung des Ordners „{{name}}“",
+      "singleEnvironmentFolder": "Aktualisierung des Umgebungsordners „{{name}}“",
+      "countRequest_one": "{{count}} Anfrage",
+      "countRequest_other": "{{count}} Anfragen",
+      "countScenario_one": "{{count}} Szenario",
+      "countScenario_other": "{{count}} Szenarien",
+      "countFolder_one": "{{count}} Ordner",
+      "countFolder_other": "{{count}} Ordner",
+      "countEnvironmentFolder_one": "{{count}} Umgebungsordner",
+      "countEnvironmentFolder_other": "{{count}} Umgebungsordner",
+      "multiple": "Aktualisierung von {{parts}}"
+    }
   }
 }

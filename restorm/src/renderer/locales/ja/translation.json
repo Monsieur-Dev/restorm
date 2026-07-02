@@ -2366,9 +2366,43 @@
     "configLockedWhileRunning": "サーバーの実行中は設定がロックされます"
   },
   "git": {
-    "pushComingSoonTitle": "プッシュはまだ利用できません",
-    "pushComingSoonBody": "コミット + プッシュのフローは今後のアップデートで提供予定です。",
     "pullFailedTitle": "プルに失敗しました",
-    "pullFailedBody": "最新の変更を取得できませんでした。"
+    "pullFailedBody": "最新の変更を取得できませんでした。",
+    "pushFailedTitle": "プッシュに失敗しました",
+    "pushFailedBody": "変更をプッシュできませんでした。",
+    "pushSucceededTitle": "プッシュしました",
+    "pushSucceededBody": "変更をリポジトリにプッシュしました。",
+    "settingsTitle": "Git",
+    "applyCommitMessageLanguageByDefaultTitle": "このコミットメッセージの言語を既定にする",
+    "applyCommitMessageLanguageByDefaultDescription": "有効にすると、プッシュ画面で選んだ言語が今後のプッシュの既定になります。",
+    "diff": {
+      "addedRequest": "リクエスト「{{name}}」を追加",
+      "modifiedRequest": "リクエスト「{{name}}」を変更",
+      "deletedRequest": "リクエスト「{{name}}」を削除",
+      "addedScenario": "シナリオ「{{name}}」を追加",
+      "modifiedScenario": "シナリオ「{{name}}」を変更",
+      "deletedScenario": "シナリオ「{{name}}」を削除",
+      "addedFolder": "フォルダー「{{name}}」を追加",
+      "modifiedFolder": "フォルダー「{{name}}」を変更",
+      "deletedFolder": "フォルダー「{{name}}」を削除",
+      "addedEnvironmentFolder": "環境フォルダー「{{name}}」を追加",
+      "modifiedEnvironmentFolder": "環境フォルダー「{{name}}」を変更",
+      "deletedEnvironmentFolder": "環境フォルダー「{{name}}」を削除"
+    },
+    "commitTitle": {
+      "singleRequest": "リクエスト「{{name}}」の更新",
+      "singleScenario": "シナリオ「{{name}}」の更新",
+      "singleFolder": "フォルダー「{{name}}」の更新",
+      "singleEnvironmentFolder": "環境フォルダー「{{name}}」の更新",
+      "countRequest_one": "リクエスト{{count}}件",
+      "countRequest_other": "リクエスト{{count}}件",
+      "countScenario_one": "シナリオ{{count}}件",
+      "countScenario_other": "シナリオ{{count}}件",
+      "countFolder_one": "フォルダー{{count}}件",
+      "countFolder_other": "フォルダー{{count}}件",
+      "countEnvironmentFolder_one": "環境フォルダー{{count}}件",
+      "countEnvironmentFolder_other": "環境フォルダー{{count}}件",
+      "multiple": "{{parts}}の更新"
+    }
   }
 }

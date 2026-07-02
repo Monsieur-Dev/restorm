@@ -2367,9 +2367,43 @@
     "configLockedWhileRunning": "Asetukset lukittu palvelimen ollessa käynnissä"
   },
   "git": {
-    "pushComingSoonTitle": "Työntäminen ei ole vielä käytettävissä",
-    "pushComingSoonBody": "Commit- ja push-toiminto tulee tulevassa päivityksessä.",
     "pullFailedTitle": "Nouto epäonnistui",
-    "pullFailedBody": "Uusimpia muutoksia ei voitu noutaa."
+    "pullFailedBody": "Uusimpia muutoksia ei voitu noutaa.",
+    "pushFailedTitle": "Työntäminen epäonnistui",
+    "pushFailedBody": "Muutoksia ei voitu työntää.",
+    "pushSucceededTitle": "Työnnetty",
+    "pushSucceededBody": "Muutoksesi työnnettiin repositorioon.",
+    "settingsTitle": "Git",
+    "applyCommitMessageLanguageByDefaultTitle": "Käytä tätä commit-viestin kieltä oletuksena",
+    "applyCommitMessageLanguageByDefaultDescription": "Kun käytössä, push-ikkunassa valittu kieli tulee oletukseksi tuleville puskuille.",
+    "diff": {
+      "addedRequest": "Lisättiin pyyntö \"{{name}}\"",
+      "modifiedRequest": "Muutettiin pyyntöä \"{{name}}\"",
+      "deletedRequest": "Poistettiin pyyntö \"{{name}}\"",
+      "addedScenario": "Lisättiin skenaario \"{{name}}\"",
+      "modifiedScenario": "Muutettiin skenaariota \"{{name}}\"",
+      "deletedScenario": "Poistettiin skenaario \"{{name}}\"",
+      "addedFolder": "Lisättiin kansio \"{{name}}\"",
+      "modifiedFolder": "Muutettiin kansiota \"{{name}}\"",
+      "deletedFolder": "Poistettiin kansio \"{{name}}\"",
+      "addedEnvironmentFolder": "Lisättiin ympäristökansio \"{{name}}\"",
+      "modifiedEnvironmentFolder": "Muutettiin ympäristökansiota \"{{name}}\"",
+      "deletedEnvironmentFolder": "Poistettiin ympäristökansio \"{{name}}\""
+    },
+    "commitTitle": {
+      "singleRequest": "Päivitys pyyntöön \"{{name}}\"",
+      "singleScenario": "Päivitys skenaarioon \"{{name}}\"",
+      "singleFolder": "Päivitys kansioon \"{{name}}\"",
+      "singleEnvironmentFolder": "Päivitys ympäristökansioon \"{{name}}\"",
+      "countRequest_one": "{{count}} pyyntö",
+      "countRequest_other": "{{count}} pyyntöä",
+      "countScenario_one": "{{count}} skenaario",
+      "countScenario_other": "{{count}} skenaariota",
+      "countFolder_one": "{{count}} kansio",
+      "countFolder_other": "{{count}} kansiota",
+      "countEnvironmentFolder_one": "{{count}} ympäristökansio",
+      "countEnvironmentFolder_other": "{{count}} ympäristökansiota",
+      "multiple": "Päivitys: {{parts}}"
+    }
   }
 }

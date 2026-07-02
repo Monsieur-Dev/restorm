@@ -2369,9 +2369,43 @@
     "configLockedWhileRunning": "Konfigurace uzamčena během běhu serveru"
   },
   "git": {
-    "pushComingSoonTitle": "Odeslání zatím není k dispozici",
-    "pushComingSoonBody": "Postup commit + push přibude v budoucí aktualizaci.",
     "pullFailedTitle": "Stažení se nezdařilo",
-    "pullFailedBody": "Nejnovější změny se nepodařilo stáhnout."
+    "pullFailedBody": "Nejnovější změny se nepodařilo stáhnout.",
+    "pushFailedTitle": "Odeslání se nezdařilo",
+    "pushFailedBody": "Změny se nepodařilo odeslat.",
+    "pushSucceededTitle": "Odesláno",
+    "pushSucceededBody": "Vaše změny byly odeslány do repozitáře.",
+    "settingsTitle": "Git",
+    "applyCommitMessageLanguageByDefaultTitle": "Použít tento jazyk zprávy commitu jako výchozí",
+    "applyCommitMessageLanguageByDefaultDescription": "Po zapnutí se jazyk zvolený v okně odeslání stane výchozím pro budoucí odeslání.",
+    "diff": {
+      "addedRequest": "Přidán požadavek „{{name}}“",
+      "modifiedRequest": "Upraven požadavek „{{name}}“",
+      "deletedRequest": "Odstraněn požadavek „{{name}}“",
+      "addedScenario": "Přidán scénář „{{name}}“",
+      "modifiedScenario": "Upraven scénář „{{name}}“",
+      "deletedScenario": "Odstraněn scénář „{{name}}“",
+      "addedFolder": "Přidána složka „{{name}}“",
+      "modifiedFolder": "Upravena složka „{{name}}“",
+      "deletedFolder": "Odstraněna složka „{{name}}“",
+      "addedEnvironmentFolder": "Přidána složka prostředí „{{name}}“",
+      "modifiedEnvironmentFolder": "Upravena složka prostředí „{{name}}“",
+      "deletedEnvironmentFolder": "Odstraněna složka prostředí „{{name}}“"
+    },
+    "commitTitle": {
+      "singleRequest": "Aktualizace požadavku „{{name}}“",
+      "singleScenario": "Aktualizace scénáře „{{name}}“",
+      "singleFolder": "Aktualizace složky „{{name}}“",
+      "singleEnvironmentFolder": "Aktualizace složky prostředí „{{name}}“",
+      "countRequest_one": "{{count}} požadavek",
+      "countRequest_other": "{{count}} požadavků",
+      "countScenario_one": "{{count}} scénář",
+      "countScenario_other": "{{count}} scénářů",
+      "countFolder_one": "{{count}} složka",
+      "countFolder_other": "{{count}} složek",
+      "countEnvironmentFolder_one": "{{count}} složka prostředí",
+      "countEnvironmentFolder_other": "{{count}} složek prostředí",
+      "multiple": "Aktualizace: {{parts}}"
+    }
   }
 }

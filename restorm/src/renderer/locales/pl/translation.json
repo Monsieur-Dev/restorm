@@ -2369,9 +2369,43 @@
     "configLockedWhileRunning": "Konfiguracja zablokowana podczas działania serwera"
   },
   "git": {
-    "pushComingSoonTitle": "Wypychanie nie jest jeszcze dostępne",
-    "pushComingSoonBody": "Przepływ commit + push pojawi się w przyszłej aktualizacji.",
     "pullFailedTitle": "Nie udało się pobrać zmian",
-    "pullFailedBody": "Nie można pobrać najnowszych zmian."
+    "pullFailedBody": "Nie można pobrać najnowszych zmian.",
+    "pushFailedTitle": "Wypchnięcie nie powiodło się",
+    "pushFailedBody": "Nie można wypchnąć zmian.",
+    "pushSucceededTitle": "Wypchnięto",
+    "pushSucceededBody": "Twoje zmiany zostały wypchnięte do repozytorium.",
+    "settingsTitle": "Git",
+    "applyCommitMessageLanguageByDefaultTitle": "Stosuj ten język wiadomości commit domyślnie",
+    "applyCommitMessageLanguageByDefaultDescription": "Po włączeniu język wybrany w oknie wypychania staje się domyślny dla przyszłych wypchnięć.",
+    "diff": {
+      "addedRequest": "Dodano żądanie „{{name}}”",
+      "modifiedRequest": "Zmodyfikowano żądanie „{{name}}”",
+      "deletedRequest": "Usunięto żądanie „{{name}}”",
+      "addedScenario": "Dodano scenariusz „{{name}}”",
+      "modifiedScenario": "Zmodyfikowano scenariusz „{{name}}”",
+      "deletedScenario": "Usunięto scenariusz „{{name}}”",
+      "addedFolder": "Dodano folder „{{name}}”",
+      "modifiedFolder": "Zmodyfikowano folder „{{name}}”",
+      "deletedFolder": "Usunięto folder „{{name}}”",
+      "addedEnvironmentFolder": "Dodano folder środowiska „{{name}}”",
+      "modifiedEnvironmentFolder": "Zmodyfikowano folder środowiska „{{name}}”",
+      "deletedEnvironmentFolder": "Usunięto folder środowiska „{{name}}”"
+    },
+    "commitTitle": {
+      "singleRequest": "Aktualizacja żądania „{{name}}”",
+      "singleScenario": "Aktualizacja scenariusza „{{name}}”",
+      "singleFolder": "Aktualizacja folderu „{{name}}”",
+      "singleEnvironmentFolder": "Aktualizacja folderu środowiska „{{name}}”",
+      "countRequest_one": "{{count}} żądanie",
+      "countRequest_other": "{{count}} żądań",
+      "countScenario_one": "{{count}} scenariusz",
+      "countScenario_other": "{{count}} scenariuszy",
+      "countFolder_one": "{{count}} folder",
+      "countFolder_other": "{{count}} folderów",
+      "countEnvironmentFolder_one": "{{count}} folder środowiska",
+      "countEnvironmentFolder_other": "{{count}} folderów środowiska",
+      "multiple": "Aktualizacja: {{parts}}"
+    }
   }
 }

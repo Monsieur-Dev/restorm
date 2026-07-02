@@ -420,5 +420,14 @@
       "title": "Git belum terpasang",
       "body": "Pasang Git dan tambahkan ke PATH Anda untuk menggunakan integrasi Git."
     }
+  },
+  "pushModal": {
+    "title": "Push",
+    "languageLabel": "Bahasa pesan commit",
+    "applyLanguageByDefault": "Jadikan bahasa ini default untuk push berikutnya",
+    "titleFieldLabel": "Judul commit",
+    "bodyFieldLabel": "Deskripsi",
+    "cancel": "Batal",
+    "push": "Push"
   }
 }

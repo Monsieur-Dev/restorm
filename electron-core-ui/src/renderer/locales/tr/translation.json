@@ -420,5 +420,14 @@
       "title": "Git yüklü değil",
       "body": "Git entegrasyonunu kullanmak için Git'i yükleyin ve PATH değişkeninize ekleyin."
     }
+  },
+  "pushModal": {
+    "title": "Gönder",
+    "languageLabel": "Commit mesajı dili",
+    "applyLanguageByDefault": "Bu dili gelecekteki göndermeler için varsayılan yap",
+    "titleFieldLabel": "Commit başlığı",
+    "bodyFieldLabel": "Açıklama",
+    "cancel": "İptal",
+    "push": "Gönder"
   }
 }

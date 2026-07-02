@@ -2368,9 +2368,43 @@
     "configLockedWhileRunning": "Konfiguracija zaključana dok se poslužitelj izvodi"
   },
   "git": {
-    "pushComingSoonTitle": "Slanje još nije dostupno",
-    "pushComingSoonBody": "Tijek commit + push stiže u budućem ažuriranju.",
     "pullFailedTitle": "Povlačenje nije uspjelo",
-    "pullFailedBody": "Nije moguće povući najnovije promjene."
+    "pullFailedBody": "Nije moguće povući najnovije promjene.",
+    "pushFailedTitle": "Slanje nije uspjelo",
+    "pushFailedBody": "Nije moguće poslati promjene.",
+    "pushSucceededTitle": "Poslano",
+    "pushSucceededBody": "Vaše promjene poslane su u repozitorij.",
+    "settingsTitle": "Git",
+    "applyCommitMessageLanguageByDefaultTitle": "Primijeni ovaj jezik poruke commita kao zadani",
+    "applyCommitMessageLanguageByDefaultDescription": "Kada je uključeno, jezik odabran u prozoru slanja postaje zadani za buduća slanja.",
+    "diff": {
+      "addedRequest": "Dodan zahtjev „{{name}}”",
+      "modifiedRequest": "Izmijenjen zahtjev „{{name}}”",
+      "deletedRequest": "Uklonjen zahtjev „{{name}}”",
+      "addedScenario": "Dodan scenarij „{{name}}”",
+      "modifiedScenario": "Izmijenjen scenarij „{{name}}”",
+      "deletedScenario": "Uklonjen scenarij „{{name}}”",
+      "addedFolder": "Dodana mapa „{{name}}”",
+      "modifiedFolder": "Izmijenjena mapa „{{name}}”",
+      "deletedFolder": "Uklonjena mapa „{{name}}”",
+      "addedEnvironmentFolder": "Dodana mapa okruženja „{{name}}”",
+      "modifiedEnvironmentFolder": "Izmijenjena mapa okruženja „{{name}}”",
+      "deletedEnvironmentFolder": "Uklonjena mapa okruženja „{{name}}”"
+    },
+    "commitTitle": {
+      "singleRequest": "Ažuriranje zahtjeva „{{name}}”",
+      "singleScenario": "Ažuriranje scenarija „{{name}}”",
+      "singleFolder": "Ažuriranje mape „{{name}}”",
+      "singleEnvironmentFolder": "Ažuriranje mape okruženja „{{name}}”",
+      "countRequest_one": "{{count}} zahtjev",
+      "countRequest_other": "{{count}} zahtjeva",
+      "countScenario_one": "{{count}} scenarij",
+      "countScenario_other": "{{count}} scenarija",
+      "countFolder_one": "{{count}} mapa",
+      "countFolder_other": "{{count}} mapa",
+      "countEnvironmentFolder_one": "{{count}} mapa okruženja",
+      "countEnvironmentFolder_other": "{{count}} mapa okruženja",
+      "multiple": "Ažuriranje: {{parts}}"
+    }
   }
 }

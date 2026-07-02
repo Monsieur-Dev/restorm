@@ -420,5 +420,14 @@
       "title": "尚未安裝 Git",
       "body": "請安裝 Git 並將其加入 PATH，以使用 Git 整合功能。"
     }
+  },
+  "pushModal": {
+    "title": "推送",
+    "languageLabel": "提交訊息語言",
+    "applyLanguageByDefault": "將此語言設為日後推送的預設語言",
+    "titleFieldLabel": "提交標題",
+    "bodyFieldLabel": "描述",
+    "cancel": "取消",
+    "push": "推送"
   }
 }

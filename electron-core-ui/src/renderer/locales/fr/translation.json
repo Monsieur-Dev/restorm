@@ -420,5 +420,14 @@
       "title": "Git n'est pas installé",
       "body": "Installez Git et ajoutez-le à votre PATH pour utiliser l'intégration Git."
     }
+  },
+  "pushModal": {
+    "title": "Publier",
+    "languageLabel": "Langue du message de commit",
+    "applyLanguageByDefault": "Appliquer cette langue par défaut pour les prochaines publications",
+    "titleFieldLabel": "Titre du commit",
+    "bodyFieldLabel": "Description",
+    "cancel": "Annuler",
+    "push": "Publier"
   }
 }

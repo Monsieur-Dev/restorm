@@ -2368,9 +2368,43 @@
     "configLockedWhileRunning": "Configurație blocată în timp ce serverul rulează"
   },
   "git": {
-    "pushComingSoonTitle": "Trimiterea nu este încă disponibilă",
-    "pushComingSoonBody": "Fluxul de commit și trimitere va veni într-o actualizare viitoare.",
     "pullFailedTitle": "Preluarea a eșuat",
-    "pullFailedBody": "Nu s-au putut prelua cele mai recente modificări."
+    "pullFailedBody": "Nu s-au putut prelua cele mai recente modificări.",
+    "pushFailedTitle": "Trimiterea a eșuat",
+    "pushFailedBody": "Modificările nu au putut fi trimise.",
+    "pushSucceededTitle": "Trimis",
+    "pushSucceededBody": "Modificările au fost trimise în repozitoriu.",
+    "settingsTitle": "Git",
+    "applyCommitMessageLanguageByDefaultTitle": "Aplică implicit această limbă a mesajului de commit",
+    "applyCommitMessageLanguageByDefaultDescription": "Când este activă, limba aleasă în fereastra de trimitere devine implicită pentru trimiterile viitoare.",
+    "diff": {
+      "addedRequest": "Adăugată cererea „{{name}}”",
+      "modifiedRequest": "Modificată cererea „{{name}}”",
+      "deletedRequest": "Ștearsă cererea „{{name}}”",
+      "addedScenario": "Adăugat scenariul „{{name}}”",
+      "modifiedScenario": "Modificat scenariul „{{name}}”",
+      "deletedScenario": "Șters scenariul „{{name}}”",
+      "addedFolder": "Adăugat folderul „{{name}}”",
+      "modifiedFolder": "Modificat folderul „{{name}}”",
+      "deletedFolder": "Șters folderul „{{name}}”",
+      "addedEnvironmentFolder": "Adăugat folderul de mediu „{{name}}”",
+      "modifiedEnvironmentFolder": "Modificat folderul de mediu „{{name}}”",
+      "deletedEnvironmentFolder": "Șters folderul de mediu „{{name}}”"
+    },
+    "commitTitle": {
+      "singleRequest": "Actualizare a cererii „{{name}}”",
+      "singleScenario": "Actualizare a scenariului „{{name}}”",
+      "singleFolder": "Actualizare a folderului „{{name}}”",
+      "singleEnvironmentFolder": "Actualizare a folderului de mediu „{{name}}”",
+      "countRequest_one": "{{count}} cerere",
+      "countRequest_other": "{{count}} cereri",
+      "countScenario_one": "{{count}} scenariu",
+      "countScenario_other": "{{count}} scenarii",
+      "countFolder_one": "{{count}} folder",
+      "countFolder_other": "{{count}} foldere",
+      "countEnvironmentFolder_one": "{{count}} folder de mediu",
+      "countEnvironmentFolder_other": "{{count}} foldere de mediu",
+      "multiple": "Actualizare: {{parts}}"
+    }
   }
 }

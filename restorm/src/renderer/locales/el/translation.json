@@ -2367,9 +2367,43 @@
     "configLockedWhileRunning": "Η διαμόρφωση είναι κλειδωμένη ενώ εκτελείται ο διακομιστής"
   },
   "git": {
-    "pushComingSoonTitle": "Η αποστολή δεν είναι ακόμη διαθέσιμη",
-    "pushComingSoonBody": "Η ροή commit + push θα έρθει σε μελλοντική ενημέρωση.",
     "pullFailedTitle": "Η λήψη απέτυχε",
-    "pullFailedBody": "Δεν ήταν δυνατή η λήψη των πιο πρόσφατων αλλαγών."
+    "pullFailedBody": "Δεν ήταν δυνατή η λήψη των πιο πρόσφατων αλλαγών.",
+    "pushFailedTitle": "Η αποστολή απέτυχε",
+    "pushFailedBody": "Δεν ήταν δυνατή η αποστολή των αλλαγών.",
+    "pushSucceededTitle": "Στάλθηκε",
+    "pushSucceededBody": "Οι αλλαγές σας στάλθηκαν στο αποθετήριο.",
+    "settingsTitle": "Git",
+    "applyCommitMessageLanguageByDefaultTitle": "Εφαρμογή αυτής της γλώσσας μηνύματος commit ως προεπιλογή",
+    "applyCommitMessageLanguageByDefaultDescription": "Όταν είναι ενεργό, η γλώσσα που επιλέγεται στο παράθυρο αποστολής γίνεται η προεπιλογή για μελλοντικές αποστολές.",
+    "diff": {
+      "addedRequest": "Προστέθηκε το αίτημα «{{name}}»",
+      "modifiedRequest": "Τροποποιήθηκε το αίτημα «{{name}}»",
+      "deletedRequest": "Διαγράφηκε το αίτημα «{{name}}»",
+      "addedScenario": "Προστέθηκε το σενάριο «{{name}}»",
+      "modifiedScenario": "Τροποποιήθηκε το σενάριο «{{name}}»",
+      "deletedScenario": "Διαγράφηκε το σενάριο «{{name}}»",
+      "addedFolder": "Προστέθηκε ο φάκελος «{{name}}»",
+      "modifiedFolder": "Τροποποιήθηκε ο φάκελος «{{name}}»",
+      "deletedFolder": "Διαγράφηκε ο φάκελος «{{name}}»",
+      "addedEnvironmentFolder": "Προστέθηκε ο φάκελος περιβάλλοντος «{{name}}»",
+      "modifiedEnvironmentFolder": "Τροποποιήθηκε ο φάκελος περιβάλλοντος «{{name}}»",
+      "deletedEnvironmentFolder": "Διαγράφηκε ο φάκελος περιβάλλοντος «{{name}}»"
+    },
+    "commitTitle": {
+      "singleRequest": "Ενημέρωση του αιτήματος «{{name}}»",
+      "singleScenario": "Ενημέρωση του σεναρίου «{{name}}»",
+      "singleFolder": "Ενημέρωση του φακέλου «{{name}}»",
+      "singleEnvironmentFolder": "Ενημέρωση του φακέλου περιβάλλοντος «{{name}}»",
+      "countRequest_one": "{{count}} αίτημα",
+      "countRequest_other": "{{count}} αιτήματα",
+      "countScenario_one": "{{count}} σενάριο",
+      "countScenario_other": "{{count}} σενάρια",
+      "countFolder_one": "{{count}} φάκελος",
+      "countFolder_other": "{{count}} φάκελοι",
+      "countEnvironmentFolder_one": "{{count}} φάκελος περιβάλλοντος",
+      "countEnvironmentFolder_other": "{{count}} φάκελοι περιβάλλοντος",
+      "multiple": "Ενημέρωση: {{parts}}"
+    }
   }
 }

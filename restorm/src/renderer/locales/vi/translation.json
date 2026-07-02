@@ -2366,9 +2366,43 @@
     "configLockedWhileRunning": "Đã khóa cấu hình khi máy chủ đang chạy"
   },
   "git": {
-    "pushComingSoonTitle": "Đẩy chưa khả dụng",
-    "pushComingSoonBody": "Luồng commit + đẩy sẽ có trong bản cập nhật sau.",
     "pullFailedTitle": "Kéo thất bại",
-    "pullFailedBody": "Không thể kéo các thay đổi mới nhất."
+    "pullFailedBody": "Không thể kéo các thay đổi mới nhất.",
+    "pushFailedTitle": "Đẩy thất bại",
+    "pushFailedBody": "Không thể đẩy các thay đổi.",
+    "pushSucceededTitle": "Đã đẩy",
+    "pushSucceededBody": "Các thay đổi của bạn đã được đẩy lên kho lưu trữ.",
+    "settingsTitle": "Git",
+    "applyCommitMessageLanguageByDefaultTitle": "Áp dụng ngôn ngữ thông điệp commit này theo mặc định",
+    "applyCommitMessageLanguageByDefaultDescription": "Khi bật, ngôn ngữ chọn trong cửa sổ đẩy sẽ trở thành mặc định cho các lần đẩy sau.",
+    "diff": {
+      "addedRequest": "Đã thêm yêu cầu \"{{name}}\"",
+      "modifiedRequest": "Đã sửa yêu cầu \"{{name}}\"",
+      "deletedRequest": "Đã xóa yêu cầu \"{{name}}\"",
+      "addedScenario": "Đã thêm kịch bản \"{{name}}\"",
+      "modifiedScenario": "Đã sửa kịch bản \"{{name}}\"",
+      "deletedScenario": "Đã xóa kịch bản \"{{name}}\"",
+      "addedFolder": "Đã thêm thư mục \"{{name}}\"",
+      "modifiedFolder": "Đã sửa thư mục \"{{name}}\"",
+      "deletedFolder": "Đã xóa thư mục \"{{name}}\"",
+      "addedEnvironmentFolder": "Đã thêm thư mục môi trường \"{{name}}\"",
+      "modifiedEnvironmentFolder": "Đã sửa thư mục môi trường \"{{name}}\"",
+      "deletedEnvironmentFolder": "Đã xóa thư mục môi trường \"{{name}}\""
+    },
+    "commitTitle": {
+      "singleRequest": "Cập nhật yêu cầu \"{{name}}\"",
+      "singleScenario": "Cập nhật kịch bản \"{{name}}\"",
+      "singleFolder": "Cập nhật thư mục \"{{name}}\"",
+      "singleEnvironmentFolder": "Cập nhật thư mục môi trường \"{{name}}\"",
+      "countRequest_one": "{{count}} yêu cầu",
+      "countRequest_other": "{{count}} yêu cầu",
+      "countScenario_one": "{{count}} kịch bản",
+      "countScenario_other": "{{count}} kịch bản",
+      "countFolder_one": "{{count}} thư mục",
+      "countFolder_other": "{{count}} thư mục",
+      "countEnvironmentFolder_one": "{{count}} thư mục môi trường",
+      "countEnvironmentFolder_other": "{{count}} thư mục môi trường",
+      "multiple": "Cập nhật {{parts}}"
+    }
   }
 }

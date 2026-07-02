@@ -2368,9 +2368,43 @@
     "configLockedWhileRunning": "Конфигурација закључана док се сервер извршава"
   },
   "git": {
-    "pushComingSoonTitle": "Slanje još uvek nije dostupno",
-    "pushComingSoonBody": "Tok commit + push stiže u budućem ažuriranju.",
     "pullFailedTitle": "Preuzimanje nije uspelo",
-    "pullFailedBody": "Nije moguće preuzeti najnovije izmene."
+    "pullFailedBody": "Nije moguće preuzeti najnovije izmene.",
+    "pushFailedTitle": "Slanje nije uspelo",
+    "pushFailedBody": "Nije moguće poslati izmene.",
+    "pushSucceededTitle": "Poslato",
+    "pushSucceededBody": "Vaše izmene su poslate u repozitorijum.",
+    "settingsTitle": "Git",
+    "applyCommitMessageLanguageByDefaultTitle": "Primeni ovaj jezik poruke commita kao podrazumevani",
+    "applyCommitMessageLanguageByDefaultDescription": "Kada je uključeno, jezik izabran u prozoru slanja postaje podrazumevani za buduća slanja.",
+    "diff": {
+      "addedRequest": "Dodat zahtev „{{name}}”",
+      "modifiedRequest": "Izmenjen zahtev „{{name}}”",
+      "deletedRequest": "Uklonjen zahtev „{{name}}”",
+      "addedScenario": "Dodat scenario „{{name}}”",
+      "modifiedScenario": "Izmenjen scenario „{{name}}”",
+      "deletedScenario": "Uklonjen scenario „{{name}}”",
+      "addedFolder": "Dodata fascikla „{{name}}”",
+      "modifiedFolder": "Izmenjena fascikla „{{name}}”",
+      "deletedFolder": "Uklonjena fascikla „{{name}}”",
+      "addedEnvironmentFolder": "Dodata fascikla okruženja „{{name}}”",
+      "modifiedEnvironmentFolder": "Izmenjena fascikla okruženja „{{name}}”",
+      "deletedEnvironmentFolder": "Uklonjena fascikla okruženja „{{name}}”"
+    },
+    "commitTitle": {
+      "singleRequest": "Ažuriranje zahteva „{{name}}”",
+      "singleScenario": "Ažuriranje scenarija „{{name}}”",
+      "singleFolder": "Ažuriranje fascikle „{{name}}”",
+      "singleEnvironmentFolder": "Ažuriranje fascikle okruženja „{{name}}”",
+      "countRequest_one": "{{count}} zahtev",
+      "countRequest_other": "{{count}} zahteva",
+      "countScenario_one": "{{count}} scenario",
+      "countScenario_other": "{{count}} scenarija",
+      "countFolder_one": "{{count}} fascikla",
+      "countFolder_other": "{{count}} fascikli",
+      "countEnvironmentFolder_one": "{{count}} fascikla okruženja",
+      "countEnvironmentFolder_other": "{{count}} fascikli okruženja",
+      "multiple": "Ažuriranje: {{parts}}"
+    }
   }
 }

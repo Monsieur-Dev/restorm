@@ -420,5 +420,14 @@
       "title": "Git ei ole asennettu",
       "body": "Asenna Git ja lisää se PATH-muuttujaan käyttääksesi Git-integraatiota."
     }
+  },
+  "pushModal": {
+    "title": "Push",
+    "languageLabel": "Commit-viestin kieli",
+    "applyLanguageByDefault": "Käytä tätä kieltä oletuksena tulevissa pusheissa",
+    "titleFieldLabel": "Commitin otsikko",
+    "bodyFieldLabel": "Kuvaus",
+    "cancel": "Peruuta",
+    "push": "Push"
   }
 }

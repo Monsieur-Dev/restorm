@@ -2367,9 +2367,43 @@
     "configLockedWhileRunning": "Configuración bloqueada mientras el servidor se está ejecutando"
   },
   "git": {
-    "pushComingSoonTitle": "Subir cambios aún no está disponible",
-    "pushComingSoonBody": "El flujo de confirmar y subir llegará en una futura actualización.",
     "pullFailedTitle": "Error al obtener los cambios",
-    "pullFailedBody": "No se pudieron obtener los últimos cambios."
+    "pullFailedBody": "No se pudieron obtener los últimos cambios.",
+    "pushFailedTitle": "Error al subir cambios",
+    "pushFailedBody": "No se pudieron subir los cambios.",
+    "pushSucceededTitle": "Cambios subidos",
+    "pushSucceededBody": "Sus cambios se subieron al repositorio.",
+    "settingsTitle": "Git",
+    "applyCommitMessageLanguageByDefaultTitle": "Aplicar el idioma del mensaje de commit por defecto",
+    "applyCommitMessageLanguageByDefaultDescription": "Al activarlo, el idioma elegido en la ventana de subida de cambios se convierte en el predeterminado para las próximas subidas.",
+    "diff": {
+      "addedRequest": "Se agregó la solicitud \"{{name}}\"",
+      "modifiedRequest": "Se modificó la solicitud \"{{name}}\"",
+      "deletedRequest": "Se eliminó la solicitud \"{{name}}\"",
+      "addedScenario": "Se agregó el escenario \"{{name}}\"",
+      "modifiedScenario": "Se modificó el escenario \"{{name}}\"",
+      "deletedScenario": "Se eliminó el escenario \"{{name}}\"",
+      "addedFolder": "Se agregó la carpeta \"{{name}}\"",
+      "modifiedFolder": "Se modificó la carpeta \"{{name}}\"",
+      "deletedFolder": "Se eliminó la carpeta \"{{name}}\"",
+      "addedEnvironmentFolder": "Se agregó la carpeta de entorno \"{{name}}\"",
+      "modifiedEnvironmentFolder": "Se modificó la carpeta de entorno \"{{name}}\"",
+      "deletedEnvironmentFolder": "Se eliminó la carpeta de entorno \"{{name}}\""
+    },
+    "commitTitle": {
+      "singleRequest": "Actualización de la solicitud \"{{name}}\"",
+      "singleScenario": "Actualización del escenario \"{{name}}\"",
+      "singleFolder": "Actualización de la carpeta \"{{name}}\"",
+      "singleEnvironmentFolder": "Actualización de la carpeta de entorno \"{{name}}\"",
+      "countRequest_one": "{{count}} solicitud",
+      "countRequest_other": "{{count}} solicitudes",
+      "countScenario_one": "{{count}} escenario",
+      "countScenario_other": "{{count}} escenarios",
+      "countFolder_one": "{{count}} carpeta",
+      "countFolder_other": "{{count}} carpetas",
+      "countEnvironmentFolder_one": "{{count}} carpeta de entorno",
+      "countEnvironmentFolder_other": "{{count}} carpetas de entorno",
+      "multiple": "Actualización de {{parts}}"
+    }
   }
 }

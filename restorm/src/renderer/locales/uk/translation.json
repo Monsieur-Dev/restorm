@@ -2369,9 +2369,43 @@
     "configLockedWhileRunning": "Конфігурацію заблоковано під час роботи сервера"
   },
   "git": {
-    "pushComingSoonTitle": "Надсилання ще недоступне",
-    "pushComingSoonBody": "Потік commit + push з'явиться в майбутньому оновленні.",
     "pullFailedTitle": "Не вдалося виконати pull",
-    "pullFailedBody": "Не вдалося отримати останні зміни."
+    "pullFailedBody": "Не вдалося отримати останні зміни.",
+    "pushFailedTitle": "Не вдалося виконати push",
+    "pushFailedBody": "Не вдалося надіслати зміни.",
+    "pushSucceededTitle": "Надіслано",
+    "pushSucceededBody": "Ваші зміни надіслано до репозиторію.",
+    "settingsTitle": "Git",
+    "applyCommitMessageLanguageByDefaultTitle": "Застосовувати цю мову повідомлення commit за замовчуванням",
+    "applyCommitMessageLanguageByDefaultDescription": "Якщо увімкнено, мова, обрана у вікні надсилання, стає типовою для майбутніх надсилань.",
+    "diff": {
+      "addedRequest": "Додано запит «{{name}}»",
+      "modifiedRequest": "Змінено запит «{{name}}»",
+      "deletedRequest": "Видалено запит «{{name}}»",
+      "addedScenario": "Додано сценарій «{{name}}»",
+      "modifiedScenario": "Змінено сценарій «{{name}}»",
+      "deletedScenario": "Видалено сценарій «{{name}}»",
+      "addedFolder": "Додано теку «{{name}}»",
+      "modifiedFolder": "Змінено теку «{{name}}»",
+      "deletedFolder": "Видалено теку «{{name}}»",
+      "addedEnvironmentFolder": "Додано теку середовища «{{name}}»",
+      "modifiedEnvironmentFolder": "Змінено теку середовища «{{name}}»",
+      "deletedEnvironmentFolder": "Видалено теку середовища «{{name}}»"
+    },
+    "commitTitle": {
+      "singleRequest": "Оновлення запиту «{{name}}»",
+      "singleScenario": "Оновлення сценарію «{{name}}»",
+      "singleFolder": "Оновлення теки «{{name}}»",
+      "singleEnvironmentFolder": "Оновлення теки середовища «{{name}}»",
+      "countRequest_one": "{{count}} запит",
+      "countRequest_other": "{{count}} запитів",
+      "countScenario_one": "{{count}} сценарій",
+      "countScenario_other": "{{count}} сценаріїв",
+      "countFolder_one": "{{count}} тека",
+      "countFolder_other": "{{count}} тек",
+      "countEnvironmentFolder_one": "{{count}} тека середовища",
+      "countEnvironmentFolder_other": "{{count}} тек середовища",
+      "multiple": "Оновлення: {{parts}}"
+    }
   }
 }

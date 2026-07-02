@@ -2366,9 +2366,43 @@
     "configLockedWhileRunning": "서버 실행 중에는 설정이 잠깁니다"
   },
   "git": {
-    "pushComingSoonTitle": "아직 푸시를 사용할 수 없습니다",
-    "pushComingSoonBody": "커밋 + 푸시 흐름은 이후 업데이트에서 제공됩니다.",
     "pullFailedTitle": "풀 실패",
-    "pullFailedBody": "최신 변경 사항을 가져올 수 없습니다."
+    "pullFailedBody": "최신 변경 사항을 가져올 수 없습니다.",
+    "pushFailedTitle": "푸시 실패",
+    "pushFailedBody": "변경 사항을 푸시할 수 없습니다.",
+    "pushSucceededTitle": "푸시됨",
+    "pushSucceededBody": "변경 사항이 저장소에 푸시되었습니다.",
+    "settingsTitle": "Git",
+    "applyCommitMessageLanguageByDefaultTitle": "이 커밋 메시지 언어를 기본값으로 적용",
+    "applyCommitMessageLanguageByDefaultDescription": "활성화하면 푸시 창에서 선택한 언어가 이후 푸시의 기본값이 됩니다.",
+    "diff": {
+      "addedRequest": "요청 \"{{name}}\" 추가됨",
+      "modifiedRequest": "요청 \"{{name}}\" 수정됨",
+      "deletedRequest": "요청 \"{{name}}\" 삭제됨",
+      "addedScenario": "시나리오 \"{{name}}\" 추가됨",
+      "modifiedScenario": "시나리오 \"{{name}}\" 수정됨",
+      "deletedScenario": "시나리오 \"{{name}}\" 삭제됨",
+      "addedFolder": "폴더 \"{{name}}\" 추가됨",
+      "modifiedFolder": "폴더 \"{{name}}\" 수정됨",
+      "deletedFolder": "폴더 \"{{name}}\" 삭제됨",
+      "addedEnvironmentFolder": "환경 폴더 \"{{name}}\" 추가됨",
+      "modifiedEnvironmentFolder": "환경 폴더 \"{{name}}\" 수정됨",
+      "deletedEnvironmentFolder": "환경 폴더 \"{{name}}\" 삭제됨"
+    },
+    "commitTitle": {
+      "singleRequest": "요청 \"{{name}}\" 업데이트",
+      "singleScenario": "시나리오 \"{{name}}\" 업데이트",
+      "singleFolder": "폴더 \"{{name}}\" 업데이트",
+      "singleEnvironmentFolder": "환경 폴더 \"{{name}}\" 업데이트",
+      "countRequest_one": "요청 {{count}}개",
+      "countRequest_other": "요청 {{count}}개",
+      "countScenario_one": "시나리오 {{count}}개",
+      "countScenario_other": "시나리오 {{count}}개",
+      "countFolder_one": "폴더 {{count}}개",
+      "countFolder_other": "폴더 {{count}}개",
+      "countEnvironmentFolder_one": "환경 폴더 {{count}}개",
+      "countEnvironmentFolder_other": "환경 폴더 {{count}}개",
+      "multiple": "{{parts}} 업데이트"
+    }
   }
 }

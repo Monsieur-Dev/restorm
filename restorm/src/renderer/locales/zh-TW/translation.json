@@ -2366,9 +2366,43 @@
     "configLockedWhileRunning": "伺服器執行時設定已鎖定"
   },
   "git": {
-    "pushComingSoonTitle": "推送功能尚未開放",
-    "pushComingSoonBody": "提交 + 推送流程將在後續更新中提供。",
-    "pullFailedTitle": "提取失敗",
-    "pullFailedBody": "無法提取最新變更。"
+    "pullFailedTitle": "拉取失敗",
+    "pullFailedBody": "無法拉取最新變更。",
+    "pushFailedTitle": "推送失敗",
+    "pushFailedBody": "無法推送變更。",
+    "pushSucceededTitle": "已推送",
+    "pushSucceededBody": "您的變更已推送到儲存庫。",
+    "settingsTitle": "Git",
+    "applyCommitMessageLanguageByDefaultTitle": "預設套用此提交訊息語言",
+    "applyCommitMessageLanguageByDefaultDescription": "啟用後，推送視窗中選擇的語言將成為日後推送的預設語言。",
+    "diff": {
+      "addedRequest": "已新增請求 \"{{name}}\"",
+      "modifiedRequest": "已修改請求 \"{{name}}\"",
+      "deletedRequest": "已刪除請求 \"{{name}}\"",
+      "addedScenario": "已新增情境 \"{{name}}\"",
+      "modifiedScenario": "已修改情境 \"{{name}}\"",
+      "deletedScenario": "已刪除情境 \"{{name}}\"",
+      "addedFolder": "已新增資料夾 \"{{name}}\"",
+      "modifiedFolder": "已修改資料夾 \"{{name}}\"",
+      "deletedFolder": "已刪除資料夾 \"{{name}}\"",
+      "addedEnvironmentFolder": "已新增環境資料夾 \"{{name}}\"",
+      "modifiedEnvironmentFolder": "已修改環境資料夾 \"{{name}}\"",
+      "deletedEnvironmentFolder": "已刪除環境資料夾 \"{{name}}\""
+    },
+    "commitTitle": {
+      "singleRequest": "更新請求 \"{{name}}\"",
+      "singleScenario": "更新情境 \"{{name}}\"",
+      "singleFolder": "更新資料夾 \"{{name}}\"",
+      "singleEnvironmentFolder": "更新環境資料夾 \"{{name}}\"",
+      "countRequest_one": "{{count}} 個請求",
+      "countRequest_other": "{{count}} 個請求",
+      "countScenario_one": "{{count}} 個情境",
+      "countScenario_other": "{{count}} 個情境",
+      "countFolder_one": "{{count}} 個資料夾",
+      "countFolder_other": "{{count}} 個資料夾",
+      "countEnvironmentFolder_one": "{{count}} 個環境資料夾",
+      "countEnvironmentFolder_other": "{{count}} 個環境資料夾",
+      "multiple": "更新 {{parts}}"
+    }
   }
 }

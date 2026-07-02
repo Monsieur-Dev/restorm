@@ -420,5 +420,14 @@
       "title": "未安装 Git",
       "body": "请安装 Git 并将其添加到 PATH 中以使用 Git 集成功能。"
     }
+  },
+  "pushModal": {
+    "title": "推送",
+    "languageLabel": "提交信息语言",
+    "applyLanguageByDefault": "将此语言设为以后推送的默认语言",
+    "titleFieldLabel": "提交标题",
+    "bodyFieldLabel": "描述",
+    "cancel": "取消",
+    "push": "推送"
   }
 }

@@ -420,5 +420,14 @@
       "title": "Gitがインストールされていません",
       "body": "Git統合機能を使用するには、GitをインストールしてPATHに追加してください。"
     }
+  },
+  "pushModal": {
+    "title": "プッシュ",
+    "languageLabel": "コミットメッセージの言語",
+    "applyLanguageByDefault": "今後のプッシュでもこの言語を既定にする",
+    "titleFieldLabel": "コミットタイトル",
+    "bodyFieldLabel": "説明",
+    "cancel": "キャンセル",
+    "push": "プッシュ"
   }
 }

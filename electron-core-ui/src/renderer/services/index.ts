@@ -41,3 +41,6 @@ export {
   JITTER_FACTOR,
   FAILED_AFTER_RECONNECTING_MS
 } from './graphqlLinkStatus'
+
+export { renderCommitMessage } from './CommitMessageEngine'
+export type { CommitMessageTemplates, RenderedCommitMessage } from './CommitMessageEngine'

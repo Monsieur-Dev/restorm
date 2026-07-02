@@ -64,3 +64,12 @@ groups:
             min: 0
             max: 10000
             integer: true
+  - id: "git"
+    titleKey: "git.settingsTitle"
+    items:
+      - setting:
+          id: "applyCommitMessageLanguageByDefault"
+          titleKey: "git.applyCommitMessageLanguageByDefaultTitle"
+          descriptionKey: "git.applyCommitMessageLanguageByDefaultDescription"
+          type: "toggle"
+          default: true

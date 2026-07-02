@@ -2367,9 +2367,43 @@
     "configLockedWhileRunning": "Configuration verrouillée pendant l’exécution du serveur"
   },
   "git": {
-    "pushComingSoonTitle": "La publication n'est pas encore disponible",
-    "pushComingSoonBody": "Le flux de validation + publication arrivera dans une prochaine mise à jour.",
     "pullFailedTitle": "Échec de la récupération",
-    "pullFailedBody": "Impossible de récupérer les dernières modifications."
+    "pullFailedBody": "Impossible de récupérer les dernières modifications.",
+    "pushFailedTitle": "Échec de la publication",
+    "pushFailedBody": "Impossible de publier les modifications.",
+    "pushSucceededTitle": "Publié",
+    "pushSucceededBody": "Vos modifications ont été publiées sur le dépôt.",
+    "settingsTitle": "Git",
+    "applyCommitMessageLanguageByDefaultTitle": "Appliquer la langue du message de commit par défaut",
+    "applyCommitMessageLanguageByDefaultDescription": "Une fois activé, la langue choisie dans la fenêtre de publication devient la langue par défaut des prochaines publications.",
+    "diff": {
+      "addedRequest": "Ajout de la requête « {{name}} »",
+      "modifiedRequest": "Modification de la requête « {{name}} »",
+      "deletedRequest": "Suppression de la requête « {{name}} »",
+      "addedScenario": "Ajout du scénario « {{name}} »",
+      "modifiedScenario": "Modification du scénario « {{name}} »",
+      "deletedScenario": "Suppression du scénario « {{name}} »",
+      "addedFolder": "Ajout du dossier « {{name}} »",
+      "modifiedFolder": "Modification du dossier « {{name}} »",
+      "deletedFolder": "Suppression du dossier « {{name}} »",
+      "addedEnvironmentFolder": "Ajout du dossier d'environnement « {{name}} »",
+      "modifiedEnvironmentFolder": "Modification du dossier d'environnement « {{name}} »",
+      "deletedEnvironmentFolder": "Suppression du dossier d'environnement « {{name}} »"
+    },
+    "commitTitle": {
+      "singleRequest": "Mise à jour de la requête « {{name}} »",
+      "singleScenario": "Mise à jour du scénario « {{name}} »",
+      "singleFolder": "Mise à jour du dossier « {{name}} »",
+      "singleEnvironmentFolder": "Mise à jour du dossier d'environnement « {{name}} »",
+      "countRequest_one": "{{count}} requête",
+      "countRequest_other": "{{count}} requêtes",
+      "countScenario_one": "{{count}} scénario",
+      "countScenario_other": "{{count}} scénarios",
+      "countFolder_one": "{{count}} dossier",
+      "countFolder_other": "{{count}} dossiers",
+      "countEnvironmentFolder_one": "{{count}} dossier d'environnement",
+      "countEnvironmentFolder_other": "{{count}} dossiers d'environnement",
+      "multiple": "Mise à jour de {{parts}}"
+    }
   }
 }

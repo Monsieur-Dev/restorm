@@ -1,0 +1,74 @@
+import type { TFunction } from 'i18next'
+import type { GitEntityChange, GitEntityKind } from './gitCommitDiff'
+
+const DIFF_KEYS: Record<GitEntityKind, Record<'added' | 'modified' | 'deleted', string>> = {
+  request: { added: 'git.diff.addedRequest', modified: 'git.diff.modifiedRequest', deleted: 'git.diff.deletedRequest' },
+  scenario: { added: 'git.diff.addedScenario', modified: 'git.diff.modifiedScenario', deleted: 'git.diff.deletedScenario' },
+  folder: { added: 'git.diff.addedFolder', modified: 'git.diff.modifiedFolder', deleted: 'git.diff.deletedFolder' },
+  environmentFolder: {
+    added: 'git.diff.addedEnvironmentFolder',
+    modified: 'git.diff.modifiedEnvironmentFolder',
+    deleted: 'git.diff.deletedEnvironmentFolder'
+  }
+}
+
+const SINGLE_TITLE_KEYS: Record<GitEntityKind, string> = {
+  request: 'git.commitTitle.singleRequest',
+  scenario: 'git.commitTitle.singleScenario',
+  folder: 'git.commitTitle.singleFolder',
+  environmentFolder: 'git.commitTitle.singleEnvironmentFolder'
+}
+
+const COUNT_KEYS: Record<GitEntityKind, string> = {
+  request: 'git.commitTitle.countRequest',
+  scenario: 'git.commitTitle.countScenario',
+  folder: 'git.commitTitle.countFolder',
+  environmentFolder: 'git.commitTitle.countEnvironmentFolder'
+}
+
+// Folders/environment folders read first (structural), then requests,
+// then scenarios — matches the diff-line sort order in `gitCommitDiff`.
+const KIND_ORDER: GitEntityKind[] = ['folder', 'environmentFolder', 'request', 'scenario']
+
+// Extends `Record<string, unknown>` (rather than a plain interface) so it
+// slots straight into `renderCommitMessage`'s generic Handlebars context
+// param without a cast at the call site.
+export interface CommitMessageContext extends Record<string, unknown> {
+  titleSummary: string
+  lines: string[]
+}
+
+/**
+ * Build the Handlebars render context (`{ titleSummary, lines }`, see
+ * `renderCommitMessage`) from the structural diff, in the TARGET
+ * commit-message language. `t` must be a translator FIXED to that
+ * language (`i18n.getFixedT(lang)`) — independent of the app's own active
+ * UI language, per `docs/Git/README.md`'s host-owned-i18n note.
+ *
+ * Title format (per spec): a single changed entity gets a natural
+ * sentence ("Update to the request «X»"); several get an aggregate count
+ * per kind ("Update to 3 requests, 1 scenario") — the aggregate never
+ * distinguishes added/modified/deleted, only the per-entity detail lines
+ * do. Body = one line per entity, in the same order as the diff.
+ */
+export function buildCommitMessageContext(changes: GitEntityChange[], t: TFunction): CommitMessageContext {
+  const lines = changes.map((change) => t(DIFF_KEYS[change.kind][change.action], { name: change.name }))
+
+  if (changes.length === 0) {
+    return { titleSummary: '', lines }
+  }
+
+  const [only] = changes
+  if (changes.length === 1 && only) {
+    return { titleSummary: t(SINGLE_TITLE_KEYS[only.kind], { name: only.name }), lines }
+  }
+
+  const counts = new Map<GitEntityKind, number>()
+  for (const change of changes) {
+    counts.set(change.kind, (counts.get(change.kind) ?? 0) + 1)
+  }
+  const parts = KIND_ORDER
+    .filter((kind) => counts.has(kind))
+    .map((kind) => t(COUNT_KEYS[kind], { count: counts.get(kind) }))
+  return { titleSummary: t('git.commitTitle.multiple', { parts: parts.join(', ') }), lines }
+}

@@ -2367,9 +2367,43 @@
     "configLockedWhileRunning": "Sunucu çalışırken yapılandırma kilitli"
   },
   "git": {
-    "pushComingSoonTitle": "Gönderme henüz kullanılamıyor",
-    "pushComingSoonBody": "Commit + gönderme akışı ileride bir güncellemeyle gelecek.",
     "pullFailedTitle": "Çekme başarısız oldu",
-    "pullFailedBody": "En son değişiklikler alınamadı."
+    "pullFailedBody": "En son değişiklikler alınamadı.",
+    "pushFailedTitle": "Gönderme başarısız oldu",
+    "pushFailedBody": "Değişiklikler gönderilemedi.",
+    "pushSucceededTitle": "Gönderildi",
+    "pushSucceededBody": "Değişiklikleriniz depoya gönderildi.",
+    "settingsTitle": "Git",
+    "applyCommitMessageLanguageByDefaultTitle": "Bu commit mesajı dilini varsayılan olarak uygula",
+    "applyCommitMessageLanguageByDefaultDescription": "Etkinleştirildiğinde, gönderme penceresinde seçilen dil gelecekteki göndermeler için varsayılan olur.",
+    "diff": {
+      "addedRequest": "\"{{name}}\" isteği eklendi",
+      "modifiedRequest": "\"{{name}}\" isteği değiştirildi",
+      "deletedRequest": "\"{{name}}\" isteği silindi",
+      "addedScenario": "\"{{name}}\" senaryosu eklendi",
+      "modifiedScenario": "\"{{name}}\" senaryosu değiştirildi",
+      "deletedScenario": "\"{{name}}\" senaryosu silindi",
+      "addedFolder": "\"{{name}}\" klasörü eklendi",
+      "modifiedFolder": "\"{{name}}\" klasörü değiştirildi",
+      "deletedFolder": "\"{{name}}\" klasörü silindi",
+      "addedEnvironmentFolder": "\"{{name}}\" ortam klasörü eklendi",
+      "modifiedEnvironmentFolder": "\"{{name}}\" ortam klasörü değiştirildi",
+      "deletedEnvironmentFolder": "\"{{name}}\" ortam klasörü silindi"
+    },
+    "commitTitle": {
+      "singleRequest": "\"{{name}}\" isteğinde güncelleme",
+      "singleScenario": "\"{{name}}\" senaryosunda güncelleme",
+      "singleFolder": "\"{{name}}\" klasöründe güncelleme",
+      "singleEnvironmentFolder": "\"{{name}}\" ortam klasöründe güncelleme",
+      "countRequest_one": "{{count}} istek",
+      "countRequest_other": "{{count}} istek",
+      "countScenario_one": "{{count}} senaryo",
+      "countScenario_other": "{{count}} senaryo",
+      "countFolder_one": "{{count}} klasör",
+      "countFolder_other": "{{count}} klasör",
+      "countEnvironmentFolder_one": "{{count}} ortam klasörü",
+      "countEnvironmentFolder_other": "{{count}} ortam klasörü",
+      "multiple": "{{parts}} güncellemesi"
+    }
   }
 }

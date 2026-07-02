@@ -2367,9 +2367,43 @@
     "configLockedWhileRunning": "Konfiguration låst, mens serveren kører"
   },
   "git": {
-    "pushComingSoonTitle": "Push er ikke tilgængeligt endnu",
-    "pushComingSoonBody": "Commit- og push-flowet kommer i en fremtidig opdatering.",
     "pullFailedTitle": "Pull mislykkedes",
-    "pullFailedBody": "Kunne ikke hente de seneste ændringer."
+    "pullFailedBody": "Kunne ikke hente de seneste ændringer.",
+    "pushFailedTitle": "Push mislykkedes",
+    "pushFailedBody": "Kunne ikke pushe ændringerne.",
+    "pushSucceededTitle": "Pushet",
+    "pushSucceededBody": "Dine ændringer blev pushet til repositoriet.",
+    "settingsTitle": "Git",
+    "applyCommitMessageLanguageByDefaultTitle": "Anvend dette commit-besked-sprog som standard",
+    "applyCommitMessageLanguageByDefaultDescription": "Når aktiveret bliver sproget valgt i push-vinduet standard for fremtidige pushes.",
+    "diff": {
+      "addedRequest": "Tilføjede forespørgslen \"{{name}}\"",
+      "modifiedRequest": "Ændrede forespørgslen \"{{name}}\"",
+      "deletedRequest": "Slettede forespørgslen \"{{name}}\"",
+      "addedScenario": "Tilføjede scenariet \"{{name}}\"",
+      "modifiedScenario": "Ændrede scenariet \"{{name}}\"",
+      "deletedScenario": "Slettede scenariet \"{{name}}\"",
+      "addedFolder": "Tilføjede mappen \"{{name}}\"",
+      "modifiedFolder": "Ændrede mappen \"{{name}}\"",
+      "deletedFolder": "Slettede mappen \"{{name}}\"",
+      "addedEnvironmentFolder": "Tilføjede miljømappen \"{{name}}\"",
+      "modifiedEnvironmentFolder": "Ændrede miljømappen \"{{name}}\"",
+      "deletedEnvironmentFolder": "Slettede miljømappen \"{{name}}\""
+    },
+    "commitTitle": {
+      "singleRequest": "Opdatering af forespørgslen \"{{name}}\"",
+      "singleScenario": "Opdatering af scenariet \"{{name}}\"",
+      "singleFolder": "Opdatering af mappen \"{{name}}\"",
+      "singleEnvironmentFolder": "Opdatering af miljømappen \"{{name}}\"",
+      "countRequest_one": "{{count}} forespørgsel",
+      "countRequest_other": "{{count}} forespørgsler",
+      "countScenario_one": "{{count}} scenarie",
+      "countScenario_other": "{{count}} scenarier",
+      "countFolder_one": "{{count}} mappe",
+      "countFolder_other": "{{count}} mapper",
+      "countEnvironmentFolder_one": "{{count}} miljømappe",
+      "countEnvironmentFolder_other": "{{count}} miljømapper",
+      "multiple": "Opdatering af {{parts}}"
+    }
   }
 }

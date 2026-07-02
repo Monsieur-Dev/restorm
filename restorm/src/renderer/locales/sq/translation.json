@@ -2367,9 +2367,43 @@
     "configLockedWhileRunning": "Konfigurimi i kyçur ndërsa serveri po ekzekutohet"
   },
   "git": {
-    "pushComingSoonTitle": "Dërgimi nuk është ende i disponueshëm",
-    "pushComingSoonBody": "Rrjedha e commit + push do të vijë në një përditësim të ardhshëm.",
     "pullFailedTitle": "Marrja dështoi",
-    "pullFailedBody": "Nuk u arrit të merren ndryshimet më të fundit."
+    "pullFailedBody": "Nuk u arrit të merren ndryshimet më të fundit.",
+    "pushFailedTitle": "Dërgimi dështoi",
+    "pushFailedBody": "Nuk u arrit të dërgohen ndryshimet.",
+    "pushSucceededTitle": "U dërgua",
+    "pushSucceededBody": "Ndryshimet tuaja u dërguan te depoja.",
+    "settingsTitle": "Git",
+    "applyCommitMessageLanguageByDefaultTitle": "Zbato këtë gjuhë të mesazhit të commit si të parazgjedhur",
+    "applyCommitMessageLanguageByDefaultDescription": "Kur aktivizohet, gjuha e zgjedhur në dritaren e dërgimit bëhet e parazgjedhura për dërgimet e ardhshme.",
+    "diff": {
+      "addedRequest": "U shtua kërkesa \"{{name}}\"",
+      "modifiedRequest": "U modifikua kërkesa \"{{name}}\"",
+      "deletedRequest": "U fshi kërkesa \"{{name}}\"",
+      "addedScenario": "U shtua skenari \"{{name}}\"",
+      "modifiedScenario": "U modifikua skenari \"{{name}}\"",
+      "deletedScenario": "U fshi skenari \"{{name}}\"",
+      "addedFolder": "U shtua dosja \"{{name}}\"",
+      "modifiedFolder": "U modifikua dosja \"{{name}}\"",
+      "deletedFolder": "U fshi dosja \"{{name}}\"",
+      "addedEnvironmentFolder": "U shtua dosja e mjedisit \"{{name}}\"",
+      "modifiedEnvironmentFolder": "U modifikua dosja e mjedisit \"{{name}}\"",
+      "deletedEnvironmentFolder": "U fshi dosja e mjedisit \"{{name}}\""
+    },
+    "commitTitle": {
+      "singleRequest": "Përditësim i kërkesës \"{{name}}\"",
+      "singleScenario": "Përditësim i skenarit \"{{name}}\"",
+      "singleFolder": "Përditësim i dosjes \"{{name}}\"",
+      "singleEnvironmentFolder": "Përditësim i dosjes së mjedisit \"{{name}}\"",
+      "countRequest_one": "{{count}} kërkesë",
+      "countRequest_other": "{{count}} kërkesa",
+      "countScenario_one": "{{count}} skenar",
+      "countScenario_other": "{{count}} skenarë",
+      "countFolder_one": "{{count}} dosje",
+      "countFolder_other": "{{count}} dosje",
+      "countEnvironmentFolder_one": "{{count}} dosje mjedisi",
+      "countEnvironmentFolder_other": "{{count}} dosje mjedisi",
+      "multiple": "Përditësim: {{parts}}"
+    }
   }
 }

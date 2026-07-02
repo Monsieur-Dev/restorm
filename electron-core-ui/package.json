@@ -136,6 +136,7 @@
     "graphql": "^16.14.0",
     "graphql-sse": "^2.6.0",
     "graphql-yoga": "^5.21.0",
+    "handlebars": "^4.7.9",
     "i18next": "^26.2.0",
     "iconoir-react": "^7.11.0",
     "jose": "^6.2.3",

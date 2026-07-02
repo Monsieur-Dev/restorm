@@ -420,5 +420,14 @@
       "title": "Git nu este instalat",
       "body": "Instalați Git și adăugați-l în PATH pentru a utiliza integrarea Git."
     }
+  },
+  "pushModal": {
+    "title": "Trimite",
+    "languageLabel": "Limba mesajului de commit",
+    "applyLanguageByDefault": "Aplică această limbă implicit pentru trimiterile viitoare",
+    "titleFieldLabel": "Titlul commit-ului",
+    "bodyFieldLabel": "Descriere",
+    "cancel": "Anulează",
+    "push": "Trimite"
   }
 }

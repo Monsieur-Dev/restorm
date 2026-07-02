@@ -420,5 +420,14 @@
       "title": "Git není nainstalován",
       "body": "Nainstalujte Git a přidejte jej do proměnné PATH, abyste mohli používat integraci Git."
     }
+  },
+  "pushModal": {
+    "title": "Odeslat",
+    "languageLabel": "Jazyk zprávy commitu",
+    "applyLanguageByDefault": "Použít tento jazyk jako výchozí pro budoucí odeslání",
+    "titleFieldLabel": "Název commitu",
+    "bodyFieldLabel": "Popis",
+    "cancel": "Zrušit",
+    "push": "Odeslat"
   }
 }
