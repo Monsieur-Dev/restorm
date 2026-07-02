@@ -403,6 +403,10 @@ const TabsInner: React.FC<TabsProps> = ({
         isOpen={fullscreenTabId !== null}
         onClose={handleFullscreenClose}
         title={fullscreenTab?.fullscreenModalTitle ?? fullscreenTab?.label ?? ''}
+        // This wraps the SAME tab content bigger, not a dialog over it — a
+        // maximized editor/console must keep whatever focus it already had
+        // instead of jumping to the close button.
+        trapFocus={false}
       >
         {fullscreenTab?.content}
       </Modal>

@@ -1365,6 +1365,11 @@ export const EditorWorkbench = forwardRef<EditorWorkbenchHandle, EditorWorkbench
 				onClose={() => { setFullscreenTabId(null); }}
 				onClosed={handleModalClosed}
 				title={fullscreenTab?.fullscreenModalTitle ?? (fullscreenTab ? getTabTitleString(fullscreenTab, '') : '')}
+				// This wraps the SAME tab instance bigger (relocated via
+				// `appendChild`, never remounted) — not a dialog over it. A
+				// maximized editor/console must keep whatever focus it
+				// already had instead of jumping to the close button.
+				trapFocus={false}
 			>
 				{/*
 				 * Empty mount point. The maximized tab's `TabContentHost`

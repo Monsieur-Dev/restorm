@@ -37,6 +37,20 @@ export interface ModalProps {
    * Falls back to the full-window behaviour when no matching ancestor exists.
    */
   scopeToSelector?: string
+  /**
+   * Move focus into the dialog on open, trap Tab inside it, and restore focus
+   * to the previously-focused element on close. Defaults to `true` — the
+   * correct behaviour for an actual dialog (confirmation prompts, settings,
+   * forms, …).
+   *
+   * Set to `false` when `Modal` is reused as a bare "show this existing
+   * content bigger" wrapper rather than a real dialog — e.g. a workbench
+   * tab's maximize view, where the content never remounts and the user's
+   * focus (mid-edit in an embedded editor, a console, …) must stay put
+   * across the maximize/restore toggle instead of jumping to the close
+   * button.
+   */
+  trapFocus?: boolean
 }
 
 const ModalInner: React.FC<ModalProps> = ({
@@ -47,7 +61,8 @@ const ModalInner: React.FC<ModalProps> = ({
   size = 'full',
   onClosed,
   'data-testid': dataTestId,
-  scopeToSelector
+  scopeToSelector,
+  trapFocus = true
 }) => {
   const [isRendered, setIsRendered] = useState(isOpen)
   // Scoped mode: resolve the nearest ancestor matching `scopeToSelector` from
@@ -143,9 +158,22 @@ const ModalInner: React.FC<ModalProps> = ({
   // Focus management for the dialog (role=dialog aria-modal): move focus IN on
   // open, TRAP Tab inside it, and RESTORE focus to the previously-focused
   // element on close. Without this, keyboard + screen-reader users stay on the
-  // element behind the overlay.
+  // element behind the overlay. Gated by `trapFocus` — a maximize-style
+  // wrapper around pre-existing content opts out (see the prop doc) since
+  // there is no "previously focused element outside the dialog" to move away
+  // from, only the same content now shown bigger.
+  //
+  // Depends on `isRendered`, not just `isOpen`: on the render where `isOpen`
+  // first flips true, the dialog hasn't mounted yet (`isRendered` only
+  // catches up a frame later via the open/close orchestration effect above),
+  // so `dialogRef.current` is still null. Without `isRendered` in the deps
+  // this effect would bail out on that first pass and never get a second
+  // chance to run — since `isOpen` doesn't change again, its dependency
+  // array never fires it a second time — silently skipping the initial
+  // focus, the Tab trap, AND the close-time restore (whose cleanup never
+  // got registered in the first place).
   useEffect(() => {
-    if (!isOpen || typeof document === 'undefined') return
+    if (!isOpen || !isRendered || !trapFocus || typeof document === 'undefined') return
     const dialog = dialogRef.current
     if (!dialog) return
 
@@ -190,7 +218,7 @@ const ModalInner: React.FC<ModalProps> = ({
         previouslyFocused.focus()
       }
     }
-  }, [isOpen])
+  }, [isOpen, isRendered, trapFocus])
 
   // Re-resolve the scoped container each time the modal OPENS. The anchor's
   // ref callback only fires on mount; without this, a container that was
