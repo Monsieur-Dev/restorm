@@ -241,6 +241,22 @@ services:
       retries: 10
       start_period: 15s
 
+  # Redis - official image, default port (nothing else in this compose file
+  # uses 6379). Covers pub/sub (SUBSCRIBE/PUBLISH) and common commands
+  # (GET/SET/DEL/HGET/HSET/LPUSH/RPUSH/LRANGE/XADD/XREAD) out of the box — no
+  # seed data needed.
+  redis:
+    image: redis:7-alpine
+    container_name: restorm-redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 3s
+      timeout: 3s
+      retries: 10
+      start_period: 5s
+
   # OData v4 - Custom Pet Store (AspNetCoreOData)
   # Multi-stage Dockerfile builds the .NET 9 service and serves it on :5100.
   # Provides Pets/Categories/Tags/Owners entity sets, a bound `AdoptPet`

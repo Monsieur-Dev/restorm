@@ -6,7 +6,7 @@ import { useEffect, useCallback } from 'react'
 import { navigationService } from 'electron-core-ui/renderer'
 import type { NavigationEvent, SearchResult } from 'electron-core-ui/renderer'
 import type { Folder, EnvironmentFolder, Request, Environment, FolderItem, Scenario } from '../../../shared/types/collections'
-import { isFolder, isRequest, isScenario, isEnvironmentFolder, isHTTPRequest, isGraphQLRequest, isGrpcRequest, isSoapRequest, isWebSocketRequest, isSseRequest, isODataRequest, isTrpcRequest, isAmqpRequest } from '../../../shared/types/collections'
+import { isFolder, isRequest, isScenario, isEnvironmentFolder, isHTTPRequest, isGraphQLRequest, isGrpcRequest, isSoapRequest, isWebSocketRequest, isSseRequest, isODataRequest, isTrpcRequest, isAmqpRequest, isRedisRequest } from '../../../shared/types/collections'
 import { findFolderById, findItemWithBreadcrumbs } from '../utils/treeSearch'
 import type { BreadcrumbItem } from '../../../shared/types/editor'
 
@@ -113,7 +113,8 @@ export function useNavigation(options: UseNavigationOptions): UseNavigationRetur
         }
       } else if (params.type === 'http-request' || params.type === 'graphql-request' ||
                  params.type === 'grpc-request' || params.type === 'soap-request' ||
-                 params.type === 'websocket-request' || params.type === 'sse-request') {
+                 params.type === 'websocket-request' || params.type === 'sse-request' ||
+                 params.type === 'redis-request') {
         const { item, breadcrumbs } = findItemWithBreadcrumbs(rootItems, key)
         if (item && isRequest(item)) {
           const environments = getNearestEnvironmentsForBreadcrumbs(rootItems, breadcrumbs)
@@ -171,6 +172,8 @@ export function useNavigation(options: UseNavigationOptions): UseNavigationRetur
         navigationService.navigateTo(itemId, 'sidebar', { type: 'trpc-request' })
       } else if (isAmqpRequest(item)) {
         navigationService.navigateTo(itemId, 'sidebar', { type: 'amqp-request' })
+      } else if (isRedisRequest(item)) {
+        navigationService.navigateTo(itemId, 'sidebar', { type: 'redis-request' })
       }
     }
   }, [rootItems, setSelectedItemId, openFolderTab, openScenarioEditorTab, openEnvironmentFolderTab, openAnyRequestTab, getNearestEnvironmentsForBreadcrumbs])
@@ -284,6 +287,8 @@ export function useNavigation(options: UseNavigationOptions): UseNavigationRetur
           navigationService.navigateTo(itemId, 'breadcrumb', { type: 'trpc-request' })
         } else if (isAmqpRequest(foundItem)) {
           navigationService.navigateTo(itemId, 'breadcrumb', { type: 'amqp-request' })
+        } else if (isRedisRequest(foundItem)) {
+          navigationService.navigateTo(itemId, 'breadcrumb', { type: 'redis-request' })
         }
       }
     },

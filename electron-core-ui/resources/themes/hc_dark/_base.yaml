@@ -443,6 +443,10 @@ colors:
     value: "#448aff"
     description: "tRPC badge (HC dark)"
 
+  - id: badge-redis-background
+    value: "#e53935"
+    description: "Redis badge (HC dark)"
+
   - id: badge-auth-background
     value: "#ff9800"
     description: "Auth badge (HC dark)"

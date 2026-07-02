@@ -280,7 +280,8 @@
         "graphqlServer": "Διακομιστής GraphQL mock",
         "odataServer": "Διακομιστής OData mock",
         "trpc": "Αίτημα tRPC",
-        "amqp": "Αίτημα AMQP"
+        "amqp": "Αίτημα AMQP",
+        "redis": "Αίτημα Redis"
       }
     },
     "deleteConfirm": {
@@ -594,6 +595,28 @@
     "urlPlaceholder": "URL SSE",
     "framesTruncated": "Εμφάνιση των τελευταίων {{shown}} από {{total}} καρέ",
     "showAllFrames": "Εμφάνιση όλων"
+  },
+  "redis": {
+    "connected": "Συνδεδεμένο",
+    "disconnected": "Αποσυνδεδεμένο",
+    "noMessages": "Δεν υπάρχουν ακόμη μηνύματα",
+    "noCommandsYet": "Δεν έχουν εκτελεστεί ακόμη εντολές",
+    "urlPlaceholder": "URL Redis (redis:// ή rediss://)",
+    "passwordPlaceholder": "Κωδικός πρόσβασης (προαιρετικό)",
+    "subscribe": "Εγγραφή",
+    "unsubscribe": "Κατάργηση εγγραφής",
+    "run": "Εκτέλεση",
+    "subscribeMode": "Εγγραφή",
+    "commandMode": "Εντολή",
+    "command": "Εντολή",
+    "args": "Ορίσματα",
+    "argsPlaceholder": "Ορίσματα εντολής",
+    "freeform": "Ελεύθερη",
+    "freeformPlaceholder": "Ελεύθερη εντολή (αντικαθιστά την επιλογή)",
+    "tabs": {
+      "channels": "Κανάλια",
+      "command": "Εντολή"
+    }
   },
   "search": {
     "placeholder": "Αναζήτηση...",
@@ -1161,6 +1184,9 @@
       "amqpConnect": "Σύνδεση AMQP",
       "amqpPublish": "Δημοσίευση AMQP",
       "amqpClose": "Κλείσιμο AMQP",
+      "redisSubscribe": "Redis subscribe",
+      "redisClose": "Redis close",
+      "redisCommand": "Redis command",
       "httpListen": "HTTP server",
       "httpClose": "HTTP close",
       "grpcServerClose": "Κλείσιμο διακομιστή gRPC",
@@ -1754,6 +1780,9 @@
       "mqttConnectServer": "Εκκινεί έναν τοπικό μεσίτη MQTT (θύρα + φίλτρο θέματος)· εγγράφεται στο φίλτρο θέματός του και επανεκπέμπει κάθε ληφθέν μήνυμα στη θύρα `message` του. Η αποστολή δημοσιεύει στους συνδεδεμένους συνδρομητές.",
       "mqttSendServer": "Δημοσιεύει ένα μήνυμα σε κάθε συνδρομητή του αναφερόμενου μεσίτη MQTT.",
       "mqttCloseServer": "Σταματά τον αναφερόμενο μεσίτη MQTT και αποσυνδέει τους πελάτες του.",
+      "redisSubscribe": "Ανοίγει μια μακρόβια σύνδεση συνδρομής Redis από ένα συνδεδεμένο αίτημα και ακούει τα κανάλια του· επανεκπέμπει κάθε ληφθέν μήνυμα στη θύρα `message` του.",
+      "redisClose": "Κλείνει μια ήδη ανοιχτή σύνδεση συνδρομής Redis.",
+      "redisCommand": "Εκτελεί μια συνδεδεμένη εντολή Redis (μία εντολή σε νέα σύνδεση, στη συνέχεια αποσύνδεση) και εκπέμπει την απόκρισή της.",
       "toast": "Εμφανίζει μια ειδοποίηση toast στο περιβάλλον Restorm όσο εκτελείται το σενάριο.",
       "httpListen": "Hosts a local HTTP mock server and listens indefinitely. `connected` fires once it is listening; each served request re-emits its data on the `served` port. The server stays up until an HTTP close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
       "httpClose": "Σταματά έναν ήδη ακροαζόμενο εικονικό διακομιστή HTTP (που δηλώνεται από έναν κόμβο διακομιστή HTTP) και απελευθερώνει τη θύρα του.",

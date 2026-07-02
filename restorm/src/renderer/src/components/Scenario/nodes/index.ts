@@ -46,6 +46,7 @@ import { WebsocketConnectNodeBox, WebsocketSendNodeBox, WebsocketCloseNodeBox } 
 import { SseConnectNodeBox, SseCloseNodeBox } from './SseNodeBoxes'
 import { MqttConnectNodeBox, MqttSendNodeBox, MqttCloseNodeBox } from './MqttNodeBoxes'
 import { AmqpConnectNodeBox, AmqpPublishNodeBox, AmqpCloseNodeBox } from './AmqpNodeBoxes'
+import { RedisSubscribeNodeBox, RedisCloseNodeBox } from './RedisNodeBoxes'
 import { GrpcConnectNodeBox, GrpcSendNodeBox, GrpcCloseNodeBox } from './GrpcNodeBoxes'
 import { HttpListenNodeBox, HttpCloseNodeBox } from './HttpServerNodeBoxes'
 import { GrpcListenNodeBox, GrpcServerCloseNodeBox } from './GrpcServerNodeBoxes'
@@ -75,6 +76,9 @@ const SCENARIO_NODE_COMPONENTS: Record<ScenarioNodeKind, NodeBoxComponent> = {
   // (header badge + collapsible slots + a single `response` output), exactly
   // like httpRequest — no bespoke box needed.
   soapRequest: RequestNodeBox,
+  // Redis command mode is unary too (one command → one reply, then
+  // disconnect) — same protocol-agnostic request box.
+  redisCommand: RequestNodeBox,
   runScenario: RunScenarioNodeBox,
   websocketConnect: WebsocketConnectNodeBox,
   websocketSend: WebsocketSendNodeBox,
@@ -87,6 +91,8 @@ const SCENARIO_NODE_COMPONENTS: Record<ScenarioNodeKind, NodeBoxComponent> = {
   amqpConnect: AmqpConnectNodeBox,
   amqpPublish: AmqpPublishNodeBox,
   amqpClose: AmqpCloseNodeBox,
+  redisSubscribe: RedisSubscribeNodeBox,
+  redisClose: RedisCloseNodeBox,
   grpcConnect: GrpcConnectNodeBox,
   grpcSend: GrpcSendNodeBox,
   grpcClose: GrpcCloseNodeBox,

@@ -279,7 +279,8 @@
         "graphqlServer": "Server mock GraphQL",
         "odataServer": "Server mock OData",
         "trpc": "Permintaan tRPC",
-        "amqp": "Permintaan AMQP"
+        "amqp": "Permintaan AMQP",
+        "redis": "Permintaan Redis"
       }
     },
     "deleteConfirm": {
@@ -593,6 +594,28 @@
     "urlPlaceholder": "URL SSE",
     "framesTruncated": "Menampilkan {{shown}} terbaru dari {{total}} bingkai",
     "showAllFrames": "Tampilkan semua"
+  },
+  "redis": {
+    "connected": "Terhubung",
+    "disconnected": "Terputus",
+    "noMessages": "Belum ada pesan",
+    "noCommandsYet": "Belum ada perintah yang dijalankan",
+    "urlPlaceholder": "URL Redis (redis:// atau rediss://)",
+    "passwordPlaceholder": "Kata sandi (opsional)",
+    "subscribe": "Berlangganan",
+    "unsubscribe": "Batalkan langganan",
+    "run": "Jalankan",
+    "subscribeMode": "Berlangganan",
+    "commandMode": "Perintah",
+    "command": "Perintah",
+    "args": "Argumen",
+    "argsPlaceholder": "Argumen perintah",
+    "freeform": "Bebas",
+    "freeformPlaceholder": "Perintah bebas (menggantikan pilihan)",
+    "tabs": {
+      "channels": "Saluran",
+      "command": "Perintah"
+    }
   },
   "search": {
     "placeholder": "Cari...",
@@ -1160,6 +1183,9 @@
       "amqpConnect": "Koneksi AMQP",
       "amqpPublish": "Publikasi AMQP",
       "amqpClose": "Penutupan AMQP",
+      "redisSubscribe": "Redis subscribe",
+      "redisClose": "Redis close",
+      "redisCommand": "Redis command",
       "httpListen": "HTTP server",
       "httpClose": "HTTP close",
       "grpcServerClose": "Tutup server gRPC",
@@ -1753,6 +1779,9 @@
       "mqttConnectServer": "Memulai broker MQTT lokal (port + filter topik); berlangganan ke filter topiknya dan memancarkan ulang setiap pesan yang diterima pada port `message`-nya. Mengirim akan mempublikasikan ke pelanggan yang terhubung.",
       "mqttSendServer": "Mempublikasikan sebuah pesan ke setiap pelanggan broker MQTT yang dirujuk.",
       "mqttCloseServer": "Menghentikan broker MQTT yang dirujuk dan memutus koneksi klien-kliennya.",
+      "redisSubscribe": "Membuka koneksi langganan Redis yang tahan lama dari permintaan terikat dan mendengarkan kanal-kanalnya; memancarkan ulang setiap pesan yang diterima pada port `message`-nya.",
+      "redisClose": "Menutup koneksi langganan Redis yang sudah terbuka.",
+      "redisCommand": "Menjalankan perintah Redis terikat (satu perintah pada koneksi baru, lalu terputus) dan memancarkan responsnya.",
       "toast": "Memancarkan notifikasi toast di antarmuka Restorm selama skenario berjalan.",
       "httpListen": "Hosts a local HTTP mock server and listens indefinitely. `connected` fires once it is listening; each served request re-emits its data on the `served` port. The server stays up until an HTTP close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
       "httpClose": "Menghentikan server tiruan HTTP yang sudah mendengarkan (dideklarasikan oleh node server HTTP), membebaskan port-nya.",

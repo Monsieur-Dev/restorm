@@ -48,6 +48,13 @@ export type TrpcCallKind = (typeof TRPC_CALL_KINDS)[number]
  * gRPC switches on `callType`. */
 export const AMQP_MODES = ['publish', 'subscribe', 'browse'] as const
 export type AmqpMode = (typeof AMQP_MODES)[number]
+/** Redis request execution mode — subscribe (streaming) or command (unary). */
+export const REDIS_MODES = ['subscribe', 'command'] as const
+export type RedisMode = (typeof REDIS_MODES)[number]
+
+/** Redis command palette. Anything else goes through `freeformCommand`. */
+export const REDIS_COMMANDS = ['GET', 'SET', 'DEL', 'HGET', 'HSET', 'LPUSH', 'RPUSH', 'LRANGE', 'PUBLISH', 'XADD', 'XREAD'] as const
+export type RedisCommandName = (typeof REDIS_COMMANDS)[number]
 
 /** Request type discriminator. Both the runtime tuple and the union are derived
  * from the single-source-of-truth {@link PROTOCOL_REGISTRY}; re-exported here so

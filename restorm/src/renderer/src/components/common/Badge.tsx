@@ -23,6 +23,8 @@ export type BadgeType =
   | 'ODATA'
   // tRPC
   | 'tRPC'
+  // Redis
+  | 'REDIS'
   // Authentication
   | 'AUTH'
   // AMQP (RabbitMQ)

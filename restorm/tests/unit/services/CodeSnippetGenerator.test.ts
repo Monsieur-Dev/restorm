@@ -32,7 +32,8 @@ const templates: CompiledSnippetTemplates = {
   jsonRpcSnippetTemplate: compile('code-snippets-jsonrpc.hbs'),
   trpcSnippetTemplate: compile('code-snippets-trpc.hbs'),
   sseSnippetTemplate: compile('code-snippets-sse.hbs'),
-  amqpSnippetTemplate: compile('code-snippets-amqp.hbs')
+  amqpSnippetTemplate: compile('code-snippets-amqp.hbs'),
+  redisSnippetTemplate: compile('code-snippets-redis.hbs')
 } as unknown as CompiledSnippetTemplates
 
 // Identity transform (no env vars needed for these structural assertions).
@@ -302,5 +303,50 @@ describe('CodeSnippetGenerator — AMQP', () => {
     expect(md).toContain("channel.get('orders.q'")
     expect(md).toContain('i < 10')
     expect(md).not.toContain('channel.consume(')
+  })
+})
+
+describe('CodeSnippetGenerator — Redis', () => {
+  it('renders a non-empty subscribe snippet with the resolved channels', () => {
+    const md = run({
+      requestType: 'redis', url: 'redis://localhost:6379', headers: [],
+      redisMode: 'subscribe', channels: ['news', 'alerts']
+    }, 'redis://localhost:6379')
+    expect(md.trim().length).toBeGreaterThan(0)
+    expect(md).toContain("new Redis('redis://localhost:6379'")
+    expect(md).toContain("subscriber.subscribe('news', 'alerts'")
+    expect(md).toContain('SUBSCRIBE news alerts')
+  })
+
+  it('renders a non-empty command snippet from the palette command + args', () => {
+    const md = run({
+      requestType: 'redis', url: 'redis://localhost:6379', headers: [],
+      redisMode: 'command', command: 'GET', args: ['foo']
+    }, 'redis://localhost:6379')
+    expect(md.trim().length).toBeGreaterThan(0)
+    expect(md).toContain("redis.call('GET', 'foo')")
+    expect(md).toContain('redis-cli')
+    expect(md).toContain('GET foo')
+  })
+
+  it('prefers the freeform command override over the palette when both are set', () => {
+    const md = run({
+      requestType: 'redis', url: 'redis://localhost:6379', headers: [],
+      redisMode: 'command', command: 'GET', args: ['ignored'], freeformCommand: 'SET foo bar'
+    }, 'redis://localhost:6379')
+    expect(md).toContain("redis.call('SET', 'foo', 'bar')")
+    expect(md).not.toContain('ignored')
+  })
+
+  it('resolves a Handlebars value in the URL/password through transformValue', () => {
+    const resolveEnvVar = (v: string): string => v.replace('{{host}}', 'redis.example.com')
+    const md = generateCodeSnippets(
+      { requestType: 'redis', url: '{{host}}:6379', headers: [], redisMode: 'command', command: 'PING', args: [] } as FullRequestData,
+      envContext,
+      { resolvedUrl: 'redis.example.com:6379' } as never,
+      templates,
+      resolveEnvVar
+    ).markdown
+    expect(md).not.toContain('{{host}}')
   })
 })

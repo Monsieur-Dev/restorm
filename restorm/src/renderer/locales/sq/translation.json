@@ -280,7 +280,8 @@
         "graphqlServer": "Server GraphQL mock",
         "odataServer": "Server OData mock",
         "trpc": "Kërkesë tRPC",
-        "amqp": "Kërkesë AMQP"
+        "amqp": "Kërkesë AMQP",
+        "redis": "Kërkesë Redis"
       }
     },
     "deleteConfirm": {
@@ -594,6 +595,28 @@
     "urlPlaceholder": "URL SSE",
     "framesTruncated": "Po shfaqen {{shown}} kuadrot e fundit nga {{total}}",
     "showAllFrames": "Shfaq të gjitha"
+  },
+  "redis": {
+    "connected": "I lidhur",
+    "disconnected": "I shkëputur",
+    "noMessages": "Ende asnjë mesazh",
+    "noCommandsYet": "Ende asnjë komandë e ekzekutuar",
+    "urlPlaceholder": "URL Redis (redis:// ose rediss://)",
+    "passwordPlaceholder": "Fjalëkalimi (opsionale)",
+    "subscribe": "Abonohu",
+    "unsubscribe": "Çabonohu",
+    "run": "Ekzekuto",
+    "subscribeMode": "Abonim",
+    "commandMode": "Komandë",
+    "command": "Komandë",
+    "args": "Argumente",
+    "argsPlaceholder": "Argumentet e komandës",
+    "freeform": "E lirë",
+    "freeformPlaceholder": "Komandë e lirë (anulon zgjedhjen)",
+    "tabs": {
+      "channels": "Kanale",
+      "command": "Komandë"
+    }
   },
   "search": {
     "placeholder": "Kërko...",
@@ -1161,6 +1184,9 @@
       "amqpConnect": "Lidhje AMQP",
       "amqpPublish": "Publikim AMQP",
       "amqpClose": "Mbyllje AMQP",
+      "redisSubscribe": "Redis subscribe",
+      "redisClose": "Redis close",
+      "redisCommand": "Redis command",
       "httpListen": "HTTP server",
       "httpClose": "HTTP close",
       "grpcServerClose": "Mbyll serverin gRPC",
@@ -1754,6 +1780,9 @@
       "mqttConnectServer": "Nis një broker MQTT lokal (port + filtër teme); abonohet në filtrin e temës së tij dhe rilëshon çdo mesazh të marrë në portin e tij `message`. Dërgimi publikon te abonentët e lidhur.",
       "mqttSendServer": "Publikon një mesazh te çdo abonent i broker-it MQTT të referuar.",
       "mqttCloseServer": "Ndalon broker-in MQTT të referuar dhe shkëput klientët e tij.",
+      "redisSubscribe": "Hap një lidhje pajtimi Redis afatgjatë nga një kërkesë e lidhur dhe dëgjon kanalet e saj; rilëshon çdo mesazh të marrë në portin e tij `message`.",
+      "redisClose": "Mbyll një lidhje pajtimi Redis tashmë të hapur.",
+      "redisCommand": "Ekzekuton një komandë Redis të lidhur (një komandë e vetme në një lidhje të re, pastaj shkëputet) dhe lëshon përgjigjen e saj.",
       "toast": "Shfaq një njoftim toast në ndërfaqen Restorm gjatë ekzekutimit të skenarit.",
       "httpListen": "Hosts a local HTTP mock server and listens indefinitely. `connected` fires once it is listening; each served request re-emits its data on the `served` port. The server stays up until an HTTP close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
       "httpClose": "Ndalon një server fiktiv HTTP që tashmë po dëgjon (i deklaruar nga një nyje HTTP server) dhe çliron portin e tij.",

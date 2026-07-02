@@ -282,7 +282,8 @@
         "graphqlServer": "Server GraphQL mock",
         "odataServer": "Fiktivní server OData",
         "trpc": "Požadavek tRPC",
-        "amqp": "Požadavek AMQP"
+        "amqp": "Požadavek AMQP",
+        "redis": "Požadavek Redis"
       }
     },
     "deleteConfirm": {
@@ -596,6 +597,28 @@
     "urlPlaceholder": "URL SSE",
     "framesTruncated": "Zobrazeno posledních {{shown}} z {{total}} rámců",
     "showAllFrames": "Zobrazit vše"
+  },
+  "redis": {
+    "connected": "Připojeno",
+    "disconnected": "Odpojeno",
+    "noMessages": "Zatím žádné zprávy",
+    "noCommandsYet": "Zatím žádné spuštěné příkazy",
+    "urlPlaceholder": "Redis URL (redis:// nebo rediss://)",
+    "passwordPlaceholder": "Heslo (volitelné)",
+    "subscribe": "Odebírat",
+    "unsubscribe": "Zrušit odběr",
+    "run": "Spustit",
+    "subscribeMode": "Odběr",
+    "commandMode": "Příkaz",
+    "command": "Příkaz",
+    "args": "Argumenty",
+    "argsPlaceholder": "Argumenty příkazu",
+    "freeform": "Volný",
+    "freeformPlaceholder": "Volný příkaz (nahrazuje výběr)",
+    "tabs": {
+      "channels": "Kanály",
+      "command": "Příkaz"
+    }
   },
   "search": {
     "placeholder": "Hledat...",
@@ -1163,6 +1186,9 @@
       "amqpConnect": "Připojení AMQP",
       "amqpPublish": "Publikace AMQP",
       "amqpClose": "Uzavření AMQP",
+      "redisSubscribe": "Redis subscribe",
+      "redisClose": "Redis close",
+      "redisCommand": "Redis command",
       "httpListen": "HTTP server",
       "httpClose": "HTTP close",
       "grpcServerClose": "Zavřít server gRPC",
@@ -1756,6 +1782,9 @@
       "mqttConnectServer": "Spustí místního brokera MQTT (port + filtr tématu); přihlásí se k jeho filtru tématu a znovu vysílá každou přijatou zprávu na svém portu `message`. Odeslání publikuje připojeným odběratelům.",
       "mqttSendServer": "Publikuje zprávu každému odběrateli odkazovaného brokera MQTT.",
       "mqttCloseServer": "Zastaví odkazovaného brokera MQTT a odpojí jeho klienty.",
+      "redisSubscribe": "Otevře dlouhodobé odběratelské připojení Redis z navázaného požadavku a naslouchá jeho kanálům; znovu vysílá každou přijatou zprávu na svém portu `message`.",
+      "redisClose": "Uzavře již otevřené odběratelské připojení Redis.",
+      "redisCommand": "Spustí navázaný příkaz Redis (jeden příkaz na novém připojení, poté odpojení) a vydá jeho odpověď.",
       "toast": "Zobrazí toast notifikaci v rozhraní Restorm během běhu scénáře.",
       "httpListen": "Hosts a local HTTP mock server and listens indefinitely. `connected` fires once it is listening; each served request re-emits its data on the `served` port. The server stays up until an HTTP close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
       "httpClose": "Zastaví již naslouchající fiktivní server HTTP (deklarovaný uzlem HTTP server) a uvolní jeho port.",

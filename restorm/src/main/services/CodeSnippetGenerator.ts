@@ -1,5 +1,5 @@
 /**
- * CodeSnippetGenerator - Generates code snippets for HTTP, GraphQL, WebSocket, gRPC and SOAP requests
+ * CodeSnippetGenerator - Generates code snippets for HTTP, GraphQL, WebSocket, gRPC, SOAP and Redis requests
  *
  * Extracted from ContextService to isolate code snippet generation logic.
  */
@@ -17,6 +17,7 @@ import type {
   TransformValueFn
 } from './ContextServiceTypes'
 import { composeTrpcRequestBody } from '../../shared/utils/trpcRequestBody'
+import { parseFreeformCommand } from '../../shared/utils/redisCommand'
 
 // ============================================================================
 // Template Loading
@@ -66,6 +67,7 @@ export interface CompiledSnippetTemplates {
   trpcSnippetTemplate: Handlebars.TemplateDelegate | null
   sseSnippetTemplate: Handlebars.TemplateDelegate | null
   amqpSnippetTemplate: Handlebars.TemplateDelegate | null
+  redisSnippetTemplate: Handlebars.TemplateDelegate | null
 }
 
 /**
@@ -82,7 +84,8 @@ export function compileSnippetTemplates(): CompiledSnippetTemplates {
     jsonRpcSnippetTemplate: null,
     trpcSnippetTemplate: null,
     sseSnippetTemplate: null,
-    amqpSnippetTemplate: null
+    amqpSnippetTemplate: null,
+    redisSnippetTemplate: null
   }
 
   try {
@@ -95,6 +98,7 @@ export function compileSnippetTemplates(): CompiledSnippetTemplates {
     const trpcTemplate = loadTemplate('code-snippets-trpc.hbs')
     const sseTemplate = loadTemplate('code-snippets-sse.hbs')
     const amqpTemplate = loadTemplate('code-snippets-amqp.hbs')
+    const redisTemplate = loadTemplate('code-snippets-redis.hbs')
 
     if (httpTemplate) templates.httpSnippetTemplate = Handlebars.compile(httpTemplate, { noEscape: true })
     if (graphqlTemplate) templates.graphqlSnippetTemplate = Handlebars.compile(graphqlTemplate, { noEscape: true })
@@ -105,6 +109,7 @@ export function compileSnippetTemplates(): CompiledSnippetTemplates {
     if (trpcTemplate) templates.trpcSnippetTemplate = Handlebars.compile(trpcTemplate, { noEscape: true })
     if (sseTemplate) templates.sseSnippetTemplate = Handlebars.compile(sseTemplate, { noEscape: true })
     if (amqpTemplate) templates.amqpSnippetTemplate = Handlebars.compile(amqpTemplate, { noEscape: true })
+    if (redisTemplate) templates.redisSnippetTemplate = Handlebars.compile(redisTemplate, { noEscape: true })
 
     logger.info('[CodeSnippetGenerator] Code snippet templates loaded and compiled')
   } catch (error) {
@@ -419,6 +424,36 @@ export function generateCodeSnippets(
           autoAck: data.autoAck !== false,
           prefetch: data.prefetch ?? null,
           browsePeekCount: data.browsePeekCount ?? 50
+        })
+      }
+      break
+    }
+
+    case 'redis': {
+      const isSubscribe = data.redisMode === 'subscribe'
+      const channels = (data.channels ?? []).map((c) => transformValue(c, envContext))
+      const freeformCommand = data.freeformCommand ? transformValue(data.freeformCommand, envContext) : ''
+      const args = (data.args ?? []).map((a) => transformValue(a, envContext))
+      // The freeform override takes precedence over the palette command,
+      // mirroring RedisExecutionService's own dispatch — the snippet must
+      // show whichever the request will actually run. Pre-split into tokens
+      // (rather than passing one string) so the template never needs a
+      // custom Handlebars helper to re-tokenize a quoted command line.
+      const commandParts = freeformCommand
+        ? parseFreeformCommand(freeformCommand)
+        : [data.command ?? '', ...args].filter((p) => p !== '')
+      const commandLine = commandParts.join(' ')
+      const password = data.password ? transformValue(data.password, envContext) : ''
+
+      if (templates.redisSnippetTemplate) {
+        markdown = templates.redisSnippetTemplate({
+          url: resolvedUrl,
+          isSubscribe,
+          isCommand: !isSubscribe,
+          channels: channels.length > 0 ? channels : null,
+          commandParts: commandParts.length > 0 ? commandParts : null,
+          commandLine: commandLine || null,
+          password: password || null
         })
       }
       break

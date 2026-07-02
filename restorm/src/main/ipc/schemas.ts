@@ -451,6 +451,27 @@ export const amqpCancelArgs = z.tuple([requestIdArg])
 export const amqpIsActiveArgs = z.tuple([requestIdArg])
 
 // ==========================================================================
+// Redis Execution
+// ==========================================================================
+
+export const redisSubscribeArgs = z.tuple([
+  z.object({
+    requestId: z.string(),
+    timeout: z.number().optional()
+  }).loose()
+])
+
+export const redisCommandArgs = z.tuple([
+  z.object({
+    requestId: z.string(),
+    timeout: z.number().optional()
+  }).loose()
+])
+
+export const redisDisconnectArgs = z.tuple([requestIdArg])
+export const redisIsActiveArgs = z.tuple([requestIdArg])
+
+// ==========================================================================
 // Responses History
 // ==========================================================================
 
@@ -682,6 +703,13 @@ export const sseConnectResultSchema = z.object({
 export const amqpExecuteResultSchema = z.object({
   requestId: z.string(),
   success: z.boolean(),
+  error: z.string().optional(),
+})
+
+export const redisResultSchema = z.object({
+  requestId: z.string(),
+  success: z.boolean(),
+  mode: z.enum(['subscribe', 'command']),
   error: z.string().optional(),
 })
 

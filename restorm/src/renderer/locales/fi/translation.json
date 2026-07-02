@@ -280,7 +280,8 @@
         "graphqlServer": "GraphQL-mock-palvelin",
         "odataServer": "OData-mock-palvelin",
         "trpc": "tRPC-pyyntö",
-        "amqp": "AMQP-pyyntö"
+        "amqp": "AMQP-pyyntö",
+        "redis": "Redis-pyyntö"
       }
     },
     "deleteConfirm": {
@@ -594,6 +595,28 @@
     "urlPlaceholder": "SSE-URL",
     "framesTruncated": "Näytetään {{shown}} viimeisintä / {{total}} kehystä",
     "showAllFrames": "Näytä kaikki"
+  },
+  "redis": {
+    "connected": "Yhdistetty",
+    "disconnected": "Yhteys katkaistu",
+    "noMessages": "Ei vielä viestejä",
+    "noCommandsYet": "Ei vielä suoritettuja komentoja",
+    "urlPlaceholder": "Redis-URL (redis:// tai rediss://)",
+    "passwordPlaceholder": "Salasana (valinnainen)",
+    "subscribe": "Tilaa",
+    "unsubscribe": "Peru tilaus",
+    "run": "Suorita",
+    "subscribeMode": "Tilaus",
+    "commandMode": "Komento",
+    "command": "Komento",
+    "args": "Argumentit",
+    "argsPlaceholder": "Komennon argumentit",
+    "freeform": "Vapaa",
+    "freeformPlaceholder": "Vapaamuotoinen komento (ohittaa valinnan)",
+    "tabs": {
+      "channels": "Kanavat",
+      "command": "Komento"
+    }
   },
   "search": {
     "placeholder": "Etsi...",
@@ -1161,6 +1184,9 @@
       "amqpConnect": "AMQP-yhteys",
       "amqpPublish": "AMQP-julkaisu",
       "amqpClose": "AMQP-sulkeminen",
+      "redisSubscribe": "Redis subscribe",
+      "redisClose": "Redis close",
+      "redisCommand": "Redis command",
       "httpListen": "HTTP server",
       "httpClose": "HTTP close",
       "grpcServerClose": "Sulje gRPC-palvelin",
@@ -1754,6 +1780,9 @@
       "mqttConnectServer": "Käynnistää paikallisen MQTT-välittäjän (portti + aihesuodatin); tilaa sen aihesuodattimen ja lähettää jokaisen vastaanotetun viestin uudelleen `message`-portissaan. Lähetys julkaisee yhdistetyille tilaajille.",
       "mqttSendServer": "Julkaisee viestin viitatun MQTT-välittäjän jokaiselle tilaajalle.",
       "mqttCloseServer": "Pysäyttää viitatun MQTT-välittäjän ja katkaisee sen asiakkaiden yhteydet.",
+      "redisSubscribe": "Avaa pitkäkestoisen Redis-tilausyhteyden sidotusta pyynnöstä ja kuuntelee sen kanavia; lähettää jokaisen vastaanotetun viestin uudelleen `message`-portissaan.",
+      "redisClose": "Sulkee jo avoimen Redis-tilausyhteyden.",
+      "redisCommand": "Suorittaa sidotun Redis-komennon (yksi komento uudessa yhteydessä, sitten katkaisu) ja lähettää sen vastauksen.",
       "toast": "Näyttää toast-ilmoituksen Restorm-käyttöliittymässä skenaarion suorituksen aikana.",
       "httpListen": "Hosts a local HTTP mock server and listens indefinitely. `connected` fires once it is listening; each served request re-emits its data on the `served` port. The server stays up until an HTTP close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
       "httpClose": "Pysäyttää jo kuuntelevan HTTP-mock-palvelimen (jonka HTTP-palvelinsolmu on määritellyt) ja vapauttaa sen portin.",

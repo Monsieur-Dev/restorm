@@ -53,6 +53,7 @@ export type AddChildKind =
   | 'odata'
   | 'odata-server'
   | 'amqp'
+  | 'redis'
   | 'auth'
   | 'trpc'
   | 'scenario'
@@ -277,6 +278,13 @@ export const buildAddSubmenu = (
     label: t('sidebar.contextMenu.add.amqp'),
     icon: React.createElement(Badge, { type: 'AMQP' }),
     onClick: () => { onAddChildItem(parentId, 'amqp') }
+  },
+  { id: `sep-add-redis-${parentId}`, isSeparator: true, label: '' },
+  {
+    id: `add-redis-${parentId}`,
+    label: t('sidebar.contextMenu.add.redis'),
+    icon: React.createElement(Badge, { type: 'REDIS' }),
+    onClick: () => { onAddChildItem(parentId, 'redis') }
   },
   { id: `sep-add-proto-${parentId}`, isSeparator: true, label: '' },
   {

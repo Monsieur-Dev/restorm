@@ -19,7 +19,9 @@ import {
   WEBSOCKET_PROTOCOLS,
   HTTP_BODY_TYPE_ENUM_NAMES,
   TRPC_CALL_KINDS,
-  AMQP_MODES
+  AMQP_MODES,
+  REDIS_MODES,
+  REDIS_COMMANDS
 } from '../../shared/models'
 
 import {
@@ -32,7 +34,8 @@ import {
   ODataRequest,
   AuthenticationRequest,
   TrpcRequest,
-  AmqpRequest
+  AmqpRequest,
+  RedisRequest
 } from '../../shared/models/requests'
 
 // =============================================================================
@@ -47,6 +50,8 @@ function registerEnums(): void {
   graphQLSchemaGenerator.registerEnum('WebSocketProtocol', [...WEBSOCKET_PROTOCOLS])
   graphQLSchemaGenerator.registerEnum('TrpcCallKind', [...TRPC_CALL_KINDS])
   graphQLSchemaGenerator.registerEnum('AmqpMode', [...AMQP_MODES])
+  graphQLSchemaGenerator.registerEnum('RedisMode', [...REDIS_MODES])
+  graphQLSchemaGenerator.registerEnum('RedisCommandName', [...REDIS_COMMANDS])
   // The canonical body-type values are kebab-case (`form-data`), which
   // are not valid GraphQL enum identifiers — register the SCREAMING_SNAKE
   // member names that map 1:1 onto them.
@@ -80,6 +85,7 @@ function registerClasses(): void {
   graphQLSchemaGenerator.registerClassAuto(AuthenticationRequest, skipGeneric)
   graphQLSchemaGenerator.registerClassAuto(TrpcRequest, skipGeneric)
   graphQLSchemaGenerator.registerClassAuto(AmqpRequest, skipGeneric)
+  graphQLSchemaGenerator.registerClassAuto(RedisRequest, skipGeneric)
 }
 
 // =============================================================================
@@ -89,12 +95,12 @@ function registerClasses(): void {
 function registerUnions(): void {
   graphQLSchemaGenerator.registerUnion('Request', [
     'HTTPRequest', 'GraphQLRequest', 'GrpcRequest', 'SoapRequest', 'WebSocketRequest', 'SseRequest',
-    'ODataRequest', 'AuthenticationRequest', 'TrpcRequest', 'AmqpRequest'
+    'ODataRequest', 'AuthenticationRequest', 'TrpcRequest', 'AmqpRequest', 'RedisRequest'
   ])
 
   graphQLSchemaGenerator.registerUnion('FolderItem', [
     'Folder', 'EnvironmentFolder', 'HTTPRequest', 'GraphQLRequest',
-    'GrpcRequest', 'SoapRequest', 'WebSocketRequest', 'SseRequest', 'ODataRequest', 'AuthenticationRequest', 'TrpcRequest', 'AmqpRequest'
+    'GrpcRequest', 'SoapRequest', 'WebSocketRequest', 'SseRequest', 'ODataRequest', 'AuthenticationRequest', 'TrpcRequest', 'AmqpRequest', 'RedisRequest'
   ])
 }
 

@@ -18,7 +18,7 @@ import { resolveUrlAgainstEnv, flattenEnvVars } from '../../../shared/utils/reso
 // ---------- Route discriminants per request type ----------
 
 interface CompilableRoute {
-  type: 'http' | 'graphql' | 'grpc' | 'soap' | 'websocket' | 'sse' | 'odata' | 'trpc'
+  type: 'http' | 'graphql' | 'grpc' | 'soap' | 'websocket' | 'sse' | 'odata' | 'trpc' | 'redis'
   url?: string
   method?: string
   operationType?: string
@@ -103,6 +103,11 @@ function routeFromRequest(request: Request): CompilableRoute {
       // Same treatment as OData: no compiler branch for AMQP yet (no import
       // adapter feeds it), so this never matches — kept exhaustive for TS.
       return { type: 'odata', url: request.url, tags: request.tags }
+    case 'redis':
+      // Same story as OData: no `ApiDocumentation` discriminant for Redis
+      // (not an HTTP-shaped route). Minimal route keeps the switch
+      // exhaustive; no compiled docs will ever match.
+      return { type: 'redis', url: request.url, tags: request.tags }
   }
 }
 

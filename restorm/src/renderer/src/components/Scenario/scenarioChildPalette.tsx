@@ -85,7 +85,13 @@ export const SCENARIO_ADD_REQUEST_GROUPS: ScenarioAddEntry[][] = [
     { kind: 'odata', badge: 'ODATA', labelKey: 'sidebar.contextMenu.add.odata', defaultLabel: 'OData request' },
     // OData mock server is server-only: dropping it creates a server: true OData
     // request + a bound odataListen node.
-    { kind: 'odata-server', badge: 'ODATA', mode: 'server', labelKey: 'sidebar.contextMenu.add.odataServer', defaultLabel: 'OData server' }
+    { kind: 'odata-server', badge: 'ODATA', mode: 'server', labelKey: 'sidebar.contextMenu.add.odataServer', defaultLabel: 'OData server' },
+    // A freshly-created Redis request always starts in command mode, so it
+    // drops the one-shot `redisCommand` node (like soap/odata above) — never
+    // a connect node. Dragging an EXISTING subscribe-mode request instead maps
+    // to `redisSubscribe` (see ScenarioEditorView's onDrop); the redisClose
+    // action below drives that already-open connection.
+    { kind: 'redis', badge: 'REDIS', labelKey: 'sidebar.contextMenu.add.redis', defaultLabel: 'Redis request' }
   ],
   [
     { kind: 'auth', badge: 'AUTH', labelKey: 'sidebar.contextMenu.add.auth', defaultLabel: 'Authentication HTTP request' }
@@ -169,9 +175,25 @@ export interface ScenarioAddAmqpActionEntry {
   defaultLabel: string
 }
 
+/** Redis action entries — CLOSE only (there is no publish/send action: PUBLISH
+ * is a command-mode run, not part of the subscribe connection). The connect
+ * comes from dragging an existing subscribe-mode request onto the canvas —
+ * see `ScenarioEditorView`'s `onDrop`, since (unlike MQTT/WS/SIO) a freshly
+ * created Redis request always starts in command mode. */
+export interface ScenarioAddRedisActionEntry {
+  kind: 'redisClose'
+  icon: string
+  labelKey: string
+  defaultLabel: string
+}
+
 export const SCENARIO_ADD_AMQP_ACTIONS: ScenarioAddAmqpActionEntry[] = [
   { kind: 'amqpPublish', icon: 'arrow-up', labelKey: 'scenario.nodes.amqpPublish', defaultLabel: 'AMQP publish' },
   { kind: 'amqpClose', icon: 'debug-disconnect', labelKey: 'scenario.nodes.amqpClose', defaultLabel: 'AMQP close' }
+]
+
+export const SCENARIO_ADD_REDIS_ACTIONS: ScenarioAddRedisActionEntry[] = [
+  { kind: 'redisClose', icon: 'debug-disconnect', labelKey: 'scenario.nodes.redisClose', defaultLabel: 'Redis close' }
 ]
 
 /** gRPC streaming action entries — send / close only (badged GRPC). The CONNECT
@@ -282,6 +304,11 @@ export function scenarioAddMqttIcon(icon: string): ReactNode {
 /** The "AMQP" badge with the action's codicon inside (AMQP section). */
 export function scenarioAddAmqpIcon(icon: string): ReactNode {
   return React.createElement(Badge, { type: 'AMQP', icon })
+}
+
+/** The "REDIS" badge with the action's codicon inside (Redis section). */
+export function scenarioAddRedisIcon(icon: string): ReactNode {
+  return React.createElement(Badge, { type: 'REDIS', icon })
 }
 
 /** The server-pill HTTP badge with the action's codicon inside (HTTP section). */

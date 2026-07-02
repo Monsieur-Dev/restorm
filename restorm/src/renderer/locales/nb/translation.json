@@ -280,7 +280,8 @@
         "graphqlServer": "GraphQL-mockserver",
         "odataServer": "OData-mockserver",
         "trpc": "tRPC-forespørsel",
-        "amqp": "AMQP-forespørsel"
+        "amqp": "AMQP-forespørsel",
+        "redis": "Redis-forespørsel"
       }
     },
     "deleteConfirm": {
@@ -594,6 +595,28 @@
     "urlPlaceholder": "SSE-URL",
     "framesTruncated": "Viser de siste {{shown}} av {{total}} rammene",
     "showAllFrames": "Vis alle"
+  },
+  "redis": {
+    "connected": "Tilkoblet",
+    "disconnected": "Frakoblet",
+    "noMessages": "Ingen meldinger ennå",
+    "noCommandsYet": "Ingen kommandoer kjørt ennå",
+    "urlPlaceholder": "Redis-URL (redis:// eller rediss://)",
+    "passwordPlaceholder": "Passord (valgfritt)",
+    "subscribe": "Abonner",
+    "unsubscribe": "Avslutt abonnement",
+    "run": "Kjør",
+    "subscribeMode": "Abonnement",
+    "commandMode": "Kommando",
+    "command": "Kommando",
+    "args": "Argumenter",
+    "argsPlaceholder": "Kommandoargumenter",
+    "freeform": "Fritt",
+    "freeformPlaceholder": "Fri kommando (overstyrer valget)",
+    "tabs": {
+      "channels": "Kanaler",
+      "command": "Kommando"
+    }
   },
   "search": {
     "placeholder": "Søk...",
@@ -1161,6 +1184,9 @@
       "amqpConnect": "AMQP-tilkobling",
       "amqpPublish": "AMQP-publisering",
       "amqpClose": "AMQP-lukking",
+      "redisSubscribe": "Redis subscribe",
+      "redisClose": "Redis close",
+      "redisCommand": "Redis command",
       "httpListen": "HTTP server",
       "httpClose": "HTTP close",
       "grpcServerClose": "Lukk gRPC-server",
@@ -1754,6 +1780,9 @@
       "mqttConnectServer": "Starter en lokal MQTT-broker (port + topicfilter); abonnerer på sitt topicfilter og sender hver mottatt melding på nytt på sin `message`-port. Send publiserer til tilkoblede abonnenter.",
       "mqttSendServer": "Publiserer en melding til hver abonnent på den refererte MQTT-brokeren.",
       "mqttCloseServer": "Stopper den refererte MQTT-brokeren og kobler fra klientene.",
+      "redisSubscribe": "Åpner en langlivet Redis-abonnementstilkobling fra en bundet forespørsel og lytter på dens kanaler; sender hver mottatt melding på nytt på sin `message`-port.",
+      "redisClose": "Lukker en allerede-åpen Redis-abonnementstilkobling.",
+      "redisCommand": "Kjører en bundet Redis-kommando (én kommando på en ny tilkobling, deretter frakobling) og sender ut svaret.",
       "toast": "Viser et toast-varsel i Restorm-grensesnittet mens scenariet kjører.",
       "httpListen": "Hosts a local HTTP mock server and listens indefinitely. `connected` fires once it is listening; each served request re-emits its data on the `served` port. The server stays up until an HTTP close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
       "httpClose": "Stopper en allerede-lyttende HTTP-mockserver (deklarert av en HTTP-servernode) og frigjør porten.",

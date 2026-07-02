@@ -20,12 +20,14 @@ export type {
   WebSocketProtocol,
   ODataVersion,
   TrpcCallKind,
-  AmqpMode
+  AmqpMode,
+  RedisMode,
+  RedisCommandName
 } from './requestPrimitives'
 
-export type { BaseRequest, HTTPRequest, GraphQLRequest, GrpcRequest, GrpcMockMethod, SoapRequest, WebSocketRequest, SseRequest, ODataRequest, ODataQueryOptions, ODataOperationKind, ODataBatchFormat, ODataBatchSubRequestSpec, ODataOperationParameterSpec, AuthenticationRequest, JsonRpcRequest, JsonRpcBatchRequest, JsonRpcBatchCallSpec, TrpcRequest, AmqpRequest, Request } from './requests/index'
+export type { BaseRequest, HTTPRequest, GraphQLRequest, GrpcRequest, GrpcMockMethod, SoapRequest, WebSocketRequest, SseRequest, ODataRequest, ODataQueryOptions, ODataOperationKind, ODataBatchFormat, ODataBatchSubRequestSpec, ODataOperationParameterSpec, AuthenticationRequest, JsonRpcRequest, JsonRpcBatchRequest, JsonRpcBatchCallSpec, TrpcRequest, AmqpRequest, RedisRequest, Request } from './requests/index'
 export type { QuickConfig, QuickConfigStorageTarget } from './requests/index'
-export { isHTTPRequest, isGraphQLRequest, isGrpcRequest, isSoapRequest, isWebSocketRequest, isSseRequest, isODataRequest, isAuthenticationRequest, isJsonRpcRequest, isJsonRpcBatchRequest, isTrpcRequest, isAmqpRequest } from './requests/index'
+export { isHTTPRequest, isGraphQLRequest, isGrpcRequest, isSoapRequest, isWebSocketRequest, isSseRequest, isODataRequest, isAuthenticationRequest, isJsonRpcRequest, isJsonRpcBatchRequest, isTrpcRequest, isAmqpRequest, isRedisRequest } from './requests/index'
 
 export type {
   BaseResponse,
@@ -59,6 +61,8 @@ export type {
   ResponseHistorySseResponse,
   ResponseHistoryAmqpMessage,
   ResponseHistoryAmqpResponse,
+  ResponseHistoryRedisMessage,
+  ResponseHistoryRedisResponse,
   ResponseHistoryResponse,
   ResponseHistoryDetail,
   ResponseHistoryRequestType,

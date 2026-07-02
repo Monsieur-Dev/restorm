@@ -277,6 +277,14 @@ declare global {
         onProgress: (callback: (data: RequestProgressData) => void) => (() => void)
         onMessage: (callback: (data: AmqpMessageData) => void) => (() => void)
       }
+      redis: {
+        subscribe: (input: RedisExecutionInput) => Promise<RedisExecutionResult>
+        command: (input: RedisExecutionInput) => Promise<RedisExecutionResult>
+        disconnect: (requestId: string) => Promise<boolean>
+        isActive: (requestId: string) => Promise<boolean>
+        onProgress: (callback: (data: RequestProgressData) => void) => (() => void)
+        onMessage: (callback: (data: RedisMessageData) => void) => (() => void)
+      }
       odata: {
         execute: (input: ODataExecutionInput) => Promise<HTTPExecutionResult>
         cancel: (requestId: string) => Promise<boolean>
@@ -766,6 +774,12 @@ export interface SseExecutionInput {
   timeout?: number
 }
 
+/** Redis request execution input */
+export interface RedisExecutionInput {
+  requestId: string
+  timeout?: number
+}
+
 /** One parsed SSE frame (`event:`/`data:`/`id:` per the W3C EventSource spec). */
 export interface SseFrameItem {
   event: string
@@ -788,16 +802,50 @@ export interface SseExecutionResult {
   requestUrl?: string
 }
 
+/** One Redis pub/sub message (subscribe mode) */
+export interface RedisMessageItem {
+  direction: 'sent' | 'received'
+  channel?: string | undefined
+  data: string
+  timestamp: string
+}
+
+/** Redis execution result — covers BOTH modes; `mode` discriminates which
+ * fields apply. */
+export interface RedisExecutionResult {
+  requestId: string
+  success: boolean
+  mode: 'subscribe' | 'command'
+  connected?: boolean
+  channels?: string[]
+  messages?: RedisMessageItem[]
+  command?: string
+  args?: string[]
+  reply?: string
+  error?: string
+  timings: {
+    startedAt: string
+    durationMs: number
+  }
+  requestUrl?: string
+}
+
 /** SSE frame data for streaming */
 export interface SseMessageData {
   requestId: string
   message: SseFrameItem
 }
 
+/** Redis message data for streaming */
+export interface RedisMessageData {
+  requestId: string
+  message: RedisMessageItem
+}
+
 /** Full request data for backend processing */
 export interface FullRequestData {
   id: string
-  requestType: 'http' | 'graphql' | 'grpc' | 'soap' | 'websocket' | 'sse' | 'odata' | 'auth' | 'jsonrpc' | 'jsonrpcBatch' | 'trpc' | 'amqp'
+  requestType: 'http' | 'graphql' | 'grpc' | 'soap' | 'websocket' | 'sse' | 'odata' | 'auth' | 'jsonrpc' | 'jsonrpcBatch' | 'trpc' | 'amqp' | 'redis'
   url: string
   headers: KeyValueData[]
   method?: string | undefined
@@ -904,6 +952,12 @@ export interface FullRequestData {
   autoAck?: boolean | undefined
   prefetch?: number | undefined
   browsePeekCount?: number | undefined
+  // Redis specific (`password` above doubles as the Redis auth password)
+  redisMode?: 'subscribe' | 'command' | undefined
+  channels?: string[] | undefined
+  command?: string | undefined
+  args?: string[] | undefined
+  freeformCommand?: string | undefined
 }
 
 /** AMQP execution input */

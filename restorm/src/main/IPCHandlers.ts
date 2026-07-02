@@ -29,6 +29,7 @@ import { websocketExecutionService, type WebSocketExecutionInput } from './servi
 import { jsonRpcExecutionService } from './services/JsonRpcExecutionService'
 import { sseExecutionService, type SseExecutionInput } from './services/SseExecutionService'
 import { amqpExecutionService, type AmqpExecutionInput } from './services/AMQPExecutionService'
+import { redisExecutionService, type RedisExecutionInput } from './services/RedisExecutionService'
 import { scenarioEngine } from './scenarioEngine/engine'
 import { importFrom } from './services/import/ImportManager'
 import { importGrpcFromReflection, findExistingGrpcReflectionFolder, reimportGrpcReflection } from './services/import/GrpcReflectionImportService'
@@ -62,6 +63,7 @@ import {
   websocketConnectArgs, websocketDisconnectArgs, websocketSendArgs, websocketIsActiveArgs,
   sseConnectArgs, sseDisconnectArgs, sseIsActiveArgs,
   amqpExecuteArgs, amqpConnectArgs, amqpSendArgs, amqpDisconnectArgs, amqpCancelArgs, amqpIsActiveArgs,
+  redisSubscribeArgs, redisCommandArgs, redisDisconnectArgs, redisIsActiveArgs,
   responsesHistoryListArgs, responsesHistoryGetArgs,
   responsesHistoryTogglePinArgs,
   requestUsageGetArgs,
@@ -801,6 +803,8 @@ export function registerRestormIPC(deps: {
     // File close — same for any open AMQP subscribe connection (not
     // server-capable, so no port to release — just drop the broker client).
     await amqpExecutionService.closeAll()
+    // File close — same for any open Redis subscribe connection.
+    await redisExecutionService.closeAll()
     // File close — same for any hosted gRPC mock server (its own grpc.Server on
     // its own port): release the port so it doesn't keep listening past the file.
     grpcMockServerService.closeAll()
@@ -1450,6 +1454,33 @@ export function registerRestormIPC(deps: {
 
   validatedHandle('amqp:is-active', amqpIsActiveArgs, (_event, [requestId]) => {
     return amqpExecutionService.isActive(requestId)
+  })
+
+  // ==========================================================================
+  // Redis Execution IPC Handlers
+  // ==========================================================================
+
+  // Subscribe mode: long-lived, resolves once the session ends. Persists its
+  // own history entries (connect + terminal) — no double-store here.
+  validatedHandle('redis:subscribe', redisSubscribeArgs, async (_event, [input]) => {
+    const result = await redisExecutionService.subscribe(input as RedisExecutionInput)
+    setImmediate(() => { requestUsageService.recordSend(input.requestId) })
+    return result
+  })
+
+  // Command mode: one-shot, resolves once the command settles.
+  validatedHandle('redis:command', redisCommandArgs, async (_event, [input]) => {
+    const result = await redisExecutionService.runCommand(input as RedisExecutionInput)
+    setImmediate(() => { requestUsageService.recordSend(input.requestId) })
+    return result
+  })
+
+  validatedHandle('redis:disconnect', redisDisconnectArgs, (_event, [requestId]) => {
+    return redisExecutionService.disconnect(requestId)
+  })
+
+  validatedHandle('redis:is-active', redisIsActiveArgs, (_event, [requestId]) => {
+    return redisExecutionService.isActive(requestId)
   })
 
   // ==========================================================================

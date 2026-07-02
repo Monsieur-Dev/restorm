@@ -284,6 +284,11 @@ variables:
     value: "#3178c6"
     description: "tRPC badge background (TypeScript blue)"
 
+  # ── Redis ───────────────────────────────────────────────────────────────────
+  - id: badge-redis-background
+    value: "#a41e11"
+    description: "Redis badge background (Redis brand red)"
+
   # ── Auth badge ──────────────────────────────────────────────────────────────
   - id: badge-auth-background
     value: "#f97316"

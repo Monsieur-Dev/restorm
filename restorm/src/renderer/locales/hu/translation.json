@@ -280,7 +280,8 @@
         "graphqlServer": "GraphQL mock-kiszolgáló",
         "odataServer": "OData mock-kiszolgáló",
         "trpc": "tRPC-kérés",
-        "amqp": "AMQP-kérés"
+        "amqp": "AMQP-kérés",
+        "redis": "Redis-kérés"
       }
     },
     "deleteConfirm": {
@@ -594,6 +595,28 @@
     "urlPlaceholder": "SSE URL",
     "framesTruncated": "A legutóbbi {{shown}} keret megjelenítve a(z) {{total}} közül",
     "showAllFrames": "Összes megjelenítése"
+  },
+  "redis": {
+    "connected": "Csatlakoztatva",
+    "disconnected": "Lecsatlakozva",
+    "noMessages": "Még nincsenek üzenetek",
+    "noCommandsYet": "Még nem futott le parancs",
+    "urlPlaceholder": "Redis URL (redis:// vagy rediss://)",
+    "passwordPlaceholder": "Jelszó (opcionális)",
+    "subscribe": "Feliratkozás",
+    "unsubscribe": "Leiratkozás",
+    "run": "Futtatás",
+    "subscribeMode": "Feliratkozás",
+    "commandMode": "Parancs",
+    "command": "Parancs",
+    "args": "Argumentumok",
+    "argsPlaceholder": "Parancs argumentumai",
+    "freeform": "Szabad",
+    "freeformPlaceholder": "Szabad parancs (felülírja a kiválasztást)",
+    "tabs": {
+      "channels": "Csatornák",
+      "command": "Parancs"
+    }
   },
   "search": {
     "placeholder": "Keresés...",
@@ -1161,6 +1184,9 @@
       "amqpConnect": "AMQP-kapcsolat",
       "amqpPublish": "AMQP-közzététel",
       "amqpClose": "AMQP-lezárás",
+      "redisSubscribe": "Redis subscribe",
+      "redisClose": "Redis close",
+      "redisCommand": "Redis command",
       "httpListen": "HTTP server",
       "httpClose": "HTTP close",
       "grpcServerClose": "gRPC-kiszolgáló bezárása",
@@ -1754,6 +1780,9 @@
       "mqttConnectServer": "Elindít egy helyi MQTT-brókert (port + témaszűrő); feliratkozik a témaszűrőjére, és minden fogadott üzenetet újraküld a `message` portján. A küldés a csatlakozott feliratkozóknak publikál.",
       "mqttSendServer": "Üzenetet publikál a hivatkozott MQTT-bróker minden feliratkozójának.",
       "mqttCloseServer": "Leállítja a hivatkozott MQTT-brókert, és lekapcsolja az ügyfeleit.",
+      "redisSubscribe": "Tartós Redis feliratkozási kapcsolatot nyit egy kötött kérésből, és figyeli a csatornáit; minden fogadott üzenetet újraküld a `message` portján.",
+      "redisClose": "Lezár egy már nyitott Redis feliratkozási kapcsolatot.",
+      "redisCommand": "Lefuttat egy kötött Redis parancsot (egyetlen parancs egy új kapcsolaton, majd bontás), és kibocsátja a válaszát.",
       "toast": "Toast-értesítést jelenít meg a Restorm felületén, miközben a forgatókönyv fut.",
       "httpListen": "Hosts a local HTTP mock server and listens indefinitely. `connected` fires once it is listening; each served request re-emits its data on the `served` port. The server stays up until an HTTP close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
       "httpClose": "Leállít egy már figyelő HTTP-mockkiszolgálót (amelyet egy HTTP-kiszolgálócsomópont deklarál), és felszabadítja a portját.",

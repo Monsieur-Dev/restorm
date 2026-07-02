@@ -14,6 +14,7 @@ export { AuthenticationRequest } from './AuthenticationRequest'
 export { JsonRpcRequest, JsonRpcBatchRequest, type JsonRpcBatchCallSpec } from './JsonRpcRequest'
 export { TrpcRequest } from './TrpcRequest'
 export { AmqpRequest } from './AmqpRequest'
+export { RedisRequest } from './RedisRequest'
 
 // Union type of all request types
 import type { HTTPRequest } from './HTTPRequest'
@@ -28,5 +29,6 @@ import type { JsonRpcRequest } from './JsonRpcRequest'
 import type { JsonRpcBatchRequest } from './JsonRpcRequest'
 import type { TrpcRequest } from './TrpcRequest'
 import type { AmqpRequest } from './AmqpRequest'
+import type { RedisRequest } from './RedisRequest'
 
-export type Request = HTTPRequest | GraphQLRequest | GrpcRequest | SoapRequest | WebSocketRequest | SseRequest | ODataRequest | AuthenticationRequest | JsonRpcRequest | JsonRpcBatchRequest | TrpcRequest | AmqpRequest
+export type Request = HTTPRequest | GraphQLRequest | GrpcRequest | SoapRequest | WebSocketRequest | SseRequest | ODataRequest | AuthenticationRequest | JsonRpcRequest | JsonRpcBatchRequest | TrpcRequest | AmqpRequest | RedisRequest

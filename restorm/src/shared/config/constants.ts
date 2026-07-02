@@ -18,6 +18,15 @@ export const DEFAULT_AMQP_BROWSE_PEEK_COUNT = 50
  * error instead of retrying forever. */
 export const AMQP_MAX_RECONNECT_ATTEMPTS = 10
 
+/** Default Redis connection timeout in milliseconds */
+export const DEFAULT_REDIS_TIMEOUT_MS = 5_000
+
+/** Hard cap on a blocking Redis command (`XREAD BLOCK <ms>`) so a `BLOCK 0`
+ * (wait forever) or an over-long block can't pin a command-mode client
+ * indefinitely — the client is one-shot (connect → execute → disconnect), not
+ * a long-lived stream, so an unbounded block would silently hang the run. */
+export const DEFAULT_REDIS_XREAD_BLOCK_CAP_MS = 5_000
+
 /** Default UI debounce/delay in milliseconds */
 export const DEFAULT_UI_DELAY_MS = 3_000
 

@@ -280,7 +280,8 @@
         "graphqlServer": "GraphQL mock server",
         "odataServer": "OData mock server",
         "trpc": "tRPC request",
-        "amqp": "AMQP request"
+        "amqp": "AMQP request",
+        "redis": "Redis request"
       }
     },
     "deleteConfirm": {
@@ -594,6 +595,28 @@
     "urlPlaceholder": "SSE URL",
     "framesTruncated": "Showing the latest {{shown}} of {{total}} frames",
     "showAllFrames": "Show all"
+  },
+  "redis": {
+    "connected": "Connected",
+    "disconnected": "Disconnected",
+    "noMessages": "No messages yet",
+    "noCommandsYet": "No commands run yet",
+    "urlPlaceholder": "Redis URL (redis:// or rediss://)",
+    "passwordPlaceholder": "Password (optional)",
+    "subscribe": "Subscribe",
+    "unsubscribe": "Unsubscribe",
+    "run": "Run",
+    "subscribeMode": "Subscribe",
+    "commandMode": "Command",
+    "command": "Command",
+    "args": "Args",
+    "argsPlaceholder": "Command arguments",
+    "freeform": "Freeform",
+    "freeformPlaceholder": "Freeform command override",
+    "tabs": {
+      "channels": "Channels",
+      "command": "Command"
+    }
   },
   "search": {
     "placeholder": "Search...",
@@ -1161,6 +1184,9 @@
       "amqpConnect": "AMQP connect",
       "amqpPublish": "AMQP publish",
       "amqpClose": "AMQP close",
+      "redisSubscribe": "Redis subscribe",
+      "redisClose": "Redis close",
+      "redisCommand": "Redis command",
       "httpListen": "HTTP server",
       "httpClose": "HTTP close",
       "grpcServerClose": "gRPC server close",
@@ -1757,6 +1783,9 @@
       "mqttConnectServer": "Starts a local MQTT broker (port + topic filter); subscribes to its topic filter and re-emits each received message on its `message` port. Send publishes to connected subscribers.",
       "mqttSendServer": "Publishes a message to every subscriber of the referenced MQTT broker.",
       "mqttCloseServer": "Stops the referenced MQTT broker and disconnects its clients.",
+      "redisSubscribe": "Opens a long-lived Redis subscriber connection from a bound request and listens on its channels; re-emits each received message on its `message` port.",
+      "redisClose": "Closes an already-open Redis subscribe connection.",
+      "redisCommand": "Runs a bound Redis command (a single command on a fresh connection, then disconnects) and emits its response.",
       "toast": "Emits a toast notification in the Restorm UI while the scenario runs.",
       "httpListen": "Hosts a local HTTP mock server and listens indefinitely. `connected` fires once it is listening; each served request re-emits its data on the `served` port. The server stays up until an HTTP close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
       "httpClose": "Stops an already-listening HTTP mock server (declared by an HTTP server node), freeing its port.",

@@ -34,8 +34,8 @@ import type { FullRequestData } from '../../services/ContextServiceTypes'
 import { responseHistoryService } from '../../services'
 import { websocketExecutionService } from '../../services/WebSocketExecutionService'
 import { PROTOCOL_EXECUTORS } from '../../protocol/executorRegistry'
-import { isHTTPRequest, isGraphQLRequest, isGrpcRequest, isSoapRequest, isODataRequest, isAuthenticationRequest, isWebSocketRequest, isSseRequest, isJsonRpcRequest, isJsonRpcBatchRequest, isTrpcRequest, isAmqpRequest, isEnvironmentFolder } from '../../../shared/types/collections'
-import type { HTTPRequest, GraphQLRequest, GrpcRequest, SoapRequest, WebSocketRequest, SseRequest, AuthenticationRequest, ODataRequest, JsonRpcRequest, JsonRpcBatchRequest, TrpcRequest, AmqpRequest, KeyValue, EnvironmentFolder } from '../../../shared/types/collections'
+import { isHTTPRequest, isGraphQLRequest, isGrpcRequest, isSoapRequest, isODataRequest, isAuthenticationRequest, isWebSocketRequest, isSseRequest, isJsonRpcRequest, isJsonRpcBatchRequest, isTrpcRequest, isAmqpRequest, isRedisRequest, isEnvironmentFolder } from '../../../shared/types/collections'
+import type { HTTPRequest, GraphQLRequest, GrpcRequest, SoapRequest, WebSocketRequest, SseRequest, AuthenticationRequest, ODataRequest, JsonRpcRequest, JsonRpcBatchRequest, TrpcRequest, AmqpRequest, RedisRequest, KeyValue, EnvironmentFolder } from '../../../shared/types/collections'
 import { isRequest, type FolderItem, type Request } from '../../../shared/models'
 
 function jsonReply(value: unknown): { content: { type: 'text'; text: string }[] } {
@@ -448,6 +448,15 @@ export function flushRequestStateToContext(req: Request, scenarioVariables?: Rea
     if (amqp.browsePeekCount !== undefined) data.browsePeekCount = amqp.browsePeekCount
     if (amqp.username !== undefined) data.username = amqp.username
     if (amqp.password !== undefined) data.password = amqp.password
+  } else if (isRedisRequest(req)) {
+    const redis = req as RedisRequest
+    data.requestType = 'redis'
+    if (redis.password !== undefined) data.password = redis.password
+    data.redisMode = redis.mode
+    data.channels = redis.channels
+    if (redis.command !== undefined) data.command = redis.command
+    data.args = redis.args
+    if (redis.freeformCommand !== undefined) data.freeformCommand = redis.freeformCommand
   }
   // If the request isn't registered with ContextService yet, register
   // it inline. Until recently we bailed out here on the assumption

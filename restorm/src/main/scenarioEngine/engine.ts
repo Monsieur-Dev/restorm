@@ -17,6 +17,7 @@ import { soapExecutionService } from '../services/SOAPExecutionService'
 import { graphqlMockServerService } from '../services/GraphQLMockServerService'
 import { graphqlSubscriptionService } from '../services/GraphQLSubscriptionService'
 import { grpcExecutionService } from '../services/GRPCExecutionService'
+import { redisExecutionService } from '../services/RedisExecutionService'
 import { grpcMockServerService } from '../services/GRPCMockServerService'
 import { odataMockServerService } from '../services/ODataMockServerService'
 import { amqpExecutionService } from '../services/AMQPExecutionService'
@@ -204,6 +205,11 @@ export class ScenarioEngine {
           flushRequestStateToContext(bound as unknown as Parameters<typeof flushRequestStateToContext>[0])
         }
         if (req.transport === 'grpc') return grpcExecutionService.connectStreaming(req)
+        // Redis subscribe: a long-lived subscriber connection (every message
+        // re-emits channel + payload on `message`). No send from this handle —
+        // PUBLISH is a one-shot `redisCommand` run, never part of the
+        // subscribe connection (mirrors the GraphQL-subscription branch below).
+        if (req.transport === 'redis-subscribe') return redisExecutionService.connectStreaming(req)
         // GraphQL subscription: a long-lived CLIENT consumer of a subscription
         // over SSE (a `graphqlSubscribe` node). Receive-only — every pushed
         // payload re-emits on `message`; there is no send, so the handle exposes

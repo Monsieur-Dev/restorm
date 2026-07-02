@@ -77,8 +77,10 @@ import type { ScenarioNodeKind } from '../../../../../shared/types/collections'
 // the "every spec port has a cell" invariant doesn't hold for them by design
 // (cells drive the handles, so a spec port with no cell simply draws no handle):
 //   - runScenario : ports derived from the referenced sub-scenario, not the spec.
-//   - httpRequest : the `env` cell renders only when the request sits under an
-//                   environment folder; body inputs are dynamic (config-driven).
+//   - httpRequest, soapRequest, redisCommand : all render via the shared
+//                   `RequestNodeBox` — its `env` cell renders only when the
+//                   bound request sits under an environment folder; httpRequest's
+//                   body inputs are also dynamic (config-driven).
 //   - output      : renders config-driven output-declaration rows, not a fixed
 //                   `value` cell.
 // All still get their launch-trigger checked below.
@@ -86,7 +88,7 @@ import type { ScenarioNodeKind } from '../../../../../shared/types/collections'
 // default render shows every spec input port: `datetime` (amount add/subtract
 // XOR other diff), `objectOp` (path get/set), `listOp` (key sort/unique/groupBy),
 // `timer` (frequency XOR cron by mode; duration/endDate only when bounded).
-const SPEC_DRIVEN_CELLS_EXEMPT = new Set<ScenarioNodeKind>(['runScenario', 'httpRequest', 'soapRequest', 'output', 'datetime', 'objectOp', 'listOp', 'timer'])
+const SPEC_DRIVEN_CELLS_EXEMPT = new Set<ScenarioNodeKind>(['runScenario', 'httpRequest', 'soapRequest', 'redisCommand', 'output', 'datetime', 'objectOp', 'listOp', 'timer'])
 
 function propsFor(kind: ScenarioNodeKind): Record<string, unknown> {
   const { inputs, outputs } = defaultPortsForKind(kind)

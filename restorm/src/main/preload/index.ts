@@ -32,6 +32,7 @@ import {
   websocketConnectResultSchema,
   sseConnectResultSchema,
   amqpExecuteResultSchema,
+  redisResultSchema,
   authPrefetchResultSchema,
   importPreviewResultSchema,
   importImportResultSchema,
@@ -191,7 +192,7 @@ interface AvailableVariablesResult {
 /** Full request data for backend processing */
 interface FullRequestData {
   id: string
-  requestType: 'http' | 'graphql' | 'grpc' | 'soap' | 'websocket' | 'odata' | 'auth' | 'jsonrpc' | 'jsonrpcBatch' | 'amqp'
+  requestType: 'http' | 'graphql' | 'grpc' | 'soap' | 'websocket' | 'odata' | 'auth' | 'jsonrpc' | 'jsonrpcBatch' | 'amqp' | 'redis'
   url: string
   headers: { id?: string; key: string; value: string }[]
   method?: string
@@ -252,6 +253,12 @@ interface FullRequestData {
   autoAck?: boolean
   prefetch?: number
   browsePeekCount?: number
+  // Redis specific (`password` above doubles as the Redis auth password)
+  redisMode?: 'subscribe' | 'command'
+  channels?: string[]
+  command?: string
+  args?: string[]
+  freeformCommand?: string
 }
 
 /** Save result type */
@@ -1499,6 +1506,91 @@ contextBridge.exposeInMainWorld('restorm', {
       ipcRenderer.on('amqp:message', handler)
       return () => {
         ipcRenderer.removeListener('amqp:message', handler)
+      }
+    }
+  },
+  redis: {
+    /** Subscribe mode: open a subscriber connection. Resolves once the
+     * session ends — live messages arrive via `onMessage` in the meantime. */
+    subscribe: async (input: { requestId: string; timeout?: number }): Promise<{
+      requestId: string
+      success: boolean
+      mode: 'subscribe'
+      connected?: boolean
+      channels?: string[]
+      messages?: { direction: 'sent' | 'received'; channel?: string; data: string; timestamp: string }[]
+      error?: string
+      timings: { startedAt: string; durationMs: number }
+      requestUrl?: string
+    }> => {
+      const result: unknown = await ipcRenderer.invoke('redis:subscribe', input)
+      warnOnOutputMismatch('redis:subscribe', redisResultSchema, result)
+      return result as {
+        requestId: string
+        success: boolean
+        mode: 'subscribe'
+        connected?: boolean
+        channels?: string[]
+        messages?: { direction: 'sent' | 'received'; channel?: string; data: string; timestamp: string }[]
+        error?: string
+        timings: { startedAt: string; durationMs: number }
+        requestUrl?: string
+      }
+    },
+    /** Command mode: run one command on a fresh client, then disconnect. */
+    command: async (input: { requestId: string; timeout?: number }): Promise<{
+      requestId: string
+      success: boolean
+      mode: 'command'
+      command?: string
+      args?: string[]
+      reply?: string
+      error?: string
+      timings: { startedAt: string; durationMs: number }
+      requestUrl?: string
+    }> => {
+      const result: unknown = await ipcRenderer.invoke('redis:command', input)
+      warnOnOutputMismatch('redis:command', redisResultSchema, result)
+      return result as {
+        requestId: string
+        success: boolean
+        mode: 'command'
+        command?: string
+        args?: string[]
+        reply?: string
+        error?: string
+        timings: { startedAt: string; durationMs: number }
+        requestUrl?: string
+      }
+    },
+    /** Close an open subscribe connection (or abort an in-flight command). */
+    disconnect: async (requestId: string): Promise<boolean> => {
+      const result: unknown = await ipcRenderer.invoke('redis:disconnect', requestId)
+      return result as boolean
+    },
+    /** Check if a subscribe connection is currently open. */
+    isActive: async (requestId: string): Promise<boolean> => {
+      const result: unknown = await ipcRenderer.invoke('redis:is-active', requestId)
+      return result as boolean
+    },
+    /** Listen for connection progress updates. */
+    onProgress: (callback: (data: { requestId: string; status: 'started' | 'completed' | 'cancelled' | 'error' }) => void): (() => void) => {
+      const handler = (_event: Electron.IpcRendererEvent, data: { requestId: string; status: 'started' | 'completed' | 'cancelled' | 'error' }): void => {
+        callback(data)
+      }
+      ipcRenderer.on('redis:connection-progress', handler)
+      return () => {
+        ipcRenderer.removeListener('redis:connection-progress', handler)
+      }
+    },
+    /** Listen for incoming pub/sub messages. */
+    onMessage: (callback: (data: { requestId: string; message: { direction: 'sent' | 'received'; channel?: string; data: string; timestamp: string } }) => void): (() => void) => {
+      const handler = (_event: Electron.IpcRendererEvent, data: { requestId: string; message: { direction: 'sent' | 'received'; channel?: string; data: string; timestamp: string } }): void => {
+        callback(data)
+      }
+      ipcRenderer.on('redis:message', handler)
+      return () => {
+        ipcRenderer.removeListener('redis:message', handler)
       }
     }
   },

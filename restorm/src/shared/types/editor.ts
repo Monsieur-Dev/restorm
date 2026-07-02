@@ -15,6 +15,7 @@ import type {
   JsonRpcBatchRequest,
   TrpcRequest,
   AmqpRequest,
+  RedisRequest,
   Environment,
   Scenario
 } from './collections'
@@ -138,6 +139,15 @@ export interface TrpcRequestTab extends BaseRestormTab {
   environments?: Environment[] | undefined
 }
 
+/** Tab displaying a Redis request (subscribe or command mode) */
+export interface RedisRequestTab extends BaseRestormTab {
+  tabType: 'redis-request'
+  /** The Redis request data to display */
+  request: RedisRequest
+  /** Environments available for this request */
+  environments?: Environment[] | undefined
+}
+
 /** Tab displaying an Authentication request (HTTP + auth config tab) */
 export interface AuthenticationRequestTab extends BaseRestormTab {
   tabType: 'auth-request'
@@ -235,6 +245,7 @@ export type RestormEditorTab =
   | AuthenticationRequestTab
   | TrpcRequestTab
   | AmqpRequestTab
+  | RedisRequestTab
   | ScenarioEditorTab
   | ConsoleTab
   | FirewallTab
@@ -344,6 +355,11 @@ export function isAmqpRequestTab(tab: RestormEditorTab): tab is AmqpRequestTab {
   return tab.tabType === 'amqp-request'
 }
 
+/** Type guard for RedisRequestTab */
+export function isRedisRequestTab(tab: RestormEditorTab): tab is RedisRequestTab {
+  return tab.tabType === 'redis-request'
+}
+
 /** Any protocol's request tab (carries a backing `request`). */
 export type AnyRequestTab =
   | HTTPRequestTab
@@ -358,10 +374,11 @@ export type AnyRequestTab =
   | AuthenticationRequestTab
   | TrpcRequestTab
   | AmqpRequestTab
+  | RedisRequestTab
 
 const REQUEST_TAB_TYPES: ReadonlySet<string> = new Set([
   'http-request', 'graphql-request', 'grpc-request', 'soap-request',
-  'websocket-request', 'sse-request', 'odata-request', 'jsonrpc-request', 'jsonrpc-batch-request', 'auth-request', 'trpc-request', 'amqp-request'
+  'websocket-request', 'sse-request', 'odata-request', 'jsonrpc-request', 'jsonrpc-batch-request', 'auth-request', 'trpc-request', 'amqp-request', 'redis-request'
 ])
 
 /** Type guard for ANY request tab (any protocol). Use this instead of a

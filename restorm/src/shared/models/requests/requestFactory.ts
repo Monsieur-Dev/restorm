@@ -11,6 +11,7 @@ import { AuthenticationRequest } from './AuthenticationRequest'
 import { JsonRpcRequest, JsonRpcBatchRequest } from './JsonRpcRequest'
 import { TrpcRequest } from './TrpcRequest'
 import { AmqpRequest } from './AmqpRequest'
+import { RedisRequest } from './RedisRequest'
 
 /**
  * The runtime `type → Request class` factory — the class-bearing sibling of the
@@ -49,7 +50,8 @@ export const REQUEST_CLASS_REGISTRY: Record<RequestType, RequestClassEntry> = {
   jsonrpc: { fromPlain: (d) => JsonRpcRequest.fromPlain(d as Parameters<typeof JsonRpcRequest.fromPlain>[0]), ctor: JsonRpcRequest as unknown as new (...args: unknown[]) => Request },
   jsonrpcBatch: { fromPlain: (d) => JsonRpcBatchRequest.fromPlain(d as Parameters<typeof JsonRpcBatchRequest.fromPlain>[0]), ctor: JsonRpcBatchRequest as unknown as new (...args: unknown[]) => Request },
   trpc: { fromPlain: (d) => TrpcRequest.fromPlain(d as Parameters<typeof TrpcRequest.fromPlain>[0]), ctor: TrpcRequest as unknown as new (...args: unknown[]) => Request },
-  amqp: { fromPlain: (d) => AmqpRequest.fromPlain(d as Parameters<typeof AmqpRequest.fromPlain>[0]), ctor: AmqpRequest as unknown as new (...args: unknown[]) => Request }
+  amqp: { fromPlain: (d) => AmqpRequest.fromPlain(d as Parameters<typeof AmqpRequest.fromPlain>[0]), ctor: AmqpRequest as unknown as new (...args: unknown[]) => Request },
+  redis: { fromPlain: (d) => RedisRequest.fromPlain(d as Parameters<typeof RedisRequest.fromPlain>[0]), ctor: RedisRequest as unknown as new (...args: unknown[]) => Request }
 }
 
 /**

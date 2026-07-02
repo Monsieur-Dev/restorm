@@ -10,6 +10,7 @@ vi.mock('../services/GRPCExecutionService', () => ({ grpcExecutionService: { can
 vi.mock('../services/WebSocketExecutionService', () => ({ websocketExecutionService: { disconnect: () => false } }))
 vi.mock('../services/JsonRpcExecutionService', () => ({ jsonRpcExecutionService: { cancel: () => false } }))
 vi.mock('../services/SseExecutionService', () => ({ sseExecutionService: { disconnect: () => false } }))
+vi.mock('../services/RedisExecutionService', () => ({ redisExecutionService: { cancel: () => false } }))
 
 describe('main protocol executor registry', () => {
   it('covers exactly the shared registry key set (no drift)', async () => {

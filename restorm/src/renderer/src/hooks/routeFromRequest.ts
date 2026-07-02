@@ -70,5 +70,9 @@ export function routeFromRequest(request: Request): RouteLike {
       // No documentation-matcher branch for AMQP yet (no import adapter feeds
       // it) — alias to HTTP like odata/auth, matched by URL only.
       return { type: 'http', url: request.url, tags: request.tags }
+    case 'redis':
+      // No imported-API-documentation matcher for Redis (not an HTTP-shaped
+      // route) — mirrors the odata/auth aliasing, a harmless non-match.
+      return { type: 'http', url: request.url, tags: request.tags }
   }
 }

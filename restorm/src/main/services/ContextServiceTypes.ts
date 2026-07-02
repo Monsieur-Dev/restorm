@@ -60,7 +60,7 @@ export type HTTPRequestBody =
 /** Full request data for URL resolution and code snippet generation */
 export interface FullRequestData {
   id: string
-  requestType: 'http' | 'graphql' | 'grpc' | 'soap' | 'websocket' | 'sse' | 'odata' | 'auth' | 'jsonrpc' | 'jsonrpcBatch' | 'trpc' | 'amqp'
+  requestType: 'http' | 'graphql' | 'grpc' | 'soap' | 'websocket' | 'sse' | 'odata' | 'auth' | 'jsonrpc' | 'jsonrpcBatch' | 'trpc' | 'amqp' | 'redis'
 
   // Common fields
   url: string
@@ -206,6 +206,16 @@ export interface FullRequestData {
   prefetch?: number
   /** BROWSE: max messages to peek without acking (default 50). */
   browsePeekCount?: number
+
+  // Redis specific. `password` (above, shared with MQTT) doubles as the Redis
+  // auth password. `redisMode` is prefixed (unlike the other bare names below)
+  // because `mode` is generic enough that a future protocol could plausibly
+  // want the bare name too.
+  redisMode?: 'subscribe' | 'command'
+  channels?: string[]
+  command?: string
+  args?: string[]
+  freeformCommand?: string
 }
 
 /** Request context tracking with full data */

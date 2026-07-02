@@ -280,7 +280,8 @@
         "graphqlServer": "Serveur GraphQL fictif",
         "odataServer": "Serveur OData fictif",
         "trpc": "Requête tRPC",
-        "amqp": "Requête AMQP"
+        "amqp": "Requête AMQP",
+        "redis": "Requête Redis"
       }
     },
     "deleteConfirm": {
@@ -594,6 +595,28 @@
     "urlPlaceholder": "URL SSE",
     "framesTruncated": "Affichage des {{shown}} dernières trames sur {{total}}",
     "showAllFrames": "Tout afficher"
+  },
+  "redis": {
+    "connected": "Connecté",
+    "disconnected": "Déconnecté",
+    "noMessages": "Aucun message pour l'instant",
+    "noCommandsYet": "Aucune commande exécutée pour l'instant",
+    "urlPlaceholder": "URL Redis (redis:// ou rediss://)",
+    "passwordPlaceholder": "Mot de passe (facultatif)",
+    "subscribe": "S'abonner",
+    "unsubscribe": "Se désabonner",
+    "run": "Exécuter",
+    "subscribeMode": "Abonnement",
+    "commandMode": "Commande",
+    "command": "Commande",
+    "args": "Arguments",
+    "argsPlaceholder": "Arguments de la commande",
+    "freeform": "Libre",
+    "freeformPlaceholder": "Commande libre (remplace la sélection)",
+    "tabs": {
+      "channels": "Canaux",
+      "command": "Commande"
+    }
   },
   "search": {
     "placeholder": "Rechercher...",
@@ -1161,6 +1184,9 @@
       "amqpConnect": "Connexion AMQP",
       "amqpPublish": "Publication AMQP",
       "amqpClose": "Fermeture AMQP",
+      "redisSubscribe": "Abonnement Redis",
+      "redisClose": "Fermeture Redis",
+      "redisCommand": "Commande Redis",
       "httpListen": "Serveur HTTP",
       "httpClose": "Fermeture HTTP",
       "grpcServerClose": "Fermeture serveur gRPC",
@@ -1757,6 +1783,9 @@
       "mqttConnectServer": "Démarre un courtier MQTT local (port + filtre de sujet) ; s’abonne à son filtre de sujet et ré-émet chaque message reçu sur son port `message`. L’envoi publie aux abonnés connectés.",
       "mqttSendServer": "Publie un message à chaque abonné du courtier MQTT référencé.",
       "mqttCloseServer": "Arrête le courtier MQTT référencé et déconnecte ses clients.",
+      "redisSubscribe": "Ouvre une connexion d’abonnement Redis durable depuis une requête liée et écoute ses canaux ; ré-émet chaque message reçu sur son port `message`.",
+      "redisClose": "Ferme une connexion d’abonnement Redis déjà ouverte.",
+      "redisCommand": "Exécute une commande Redis liée (une seule commande sur une nouvelle connexion, puis déconnexion) et émet sa réponse.",
       "toast": "Affiche une notification toast dans l'interface Restorm pendant l'exécution du scénario.",
       "httpListen": "Héberge un serveur HTTP fictif local et écoute indéfiniment. « connected » se déclenche une fois le serveur démarré ; chaque requête servie réémet ses données sur le port « served ». Le serveur reste actif jusqu’à une fermeture HTTP (ou un Stop), puis « done » se déclenche. Pas de sortie response — il sert, il n’appelle pas.",
       "httpClose": "Arrête un serveur HTTP fictif déjà en écoute (déclaré par un nœud serveur HTTP) et libère son port.",

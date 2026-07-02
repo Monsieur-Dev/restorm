@@ -42,6 +42,7 @@ import type { JsonRpcExecutionResult, JsonRpcBatchExecutionResult } from './Json
 import type { TrpcExecutionResult } from './TrpcExecutionService'
 import type { SseExecutionResult } from './SseExecutionService'
 import type { AmqpExecutionResult } from './AMQPExecutionService'
+import type { RedisExecutionResult } from './RedisExecutionService'
 import { normalizeODataResponse } from '../../shared/utils/odataResponse'
 import { redactTokensFromBody, collectTokenValues, redactTokensFromHeaders } from './AuthenticationRedaction'
 import { isAuthenticationRequest } from '../../shared/types/collections'
@@ -59,6 +60,7 @@ type ExecutionResult =
   | TrpcExecutionResult
   | SseExecutionResult
   | AmqpExecutionResult
+  | RedisExecutionResult
 
 /**
  * Compute the 3-way visual outcome (`ok` / `warning` / `failure`) for
@@ -109,6 +111,17 @@ function sseOutcome(result: SseExecutionResult): ResponseHistoryOutcome {
  */
 function amqpOutcome(result: AmqpExecutionResult): ResponseHistoryOutcome {
   return result.success ? 'ok' : 'failure'
+}
+
+/**
+ * Redis command mode carries no connection concept — a command either
+ * succeeded or errored. Subscribe mode reuses the WebSocket rule (`success`
+ * AND `connected` are both required for `ok`).
+ */
+function redisOutcome(result: RedisExecutionResult): ResponseHistoryOutcome {
+  if (!result.success) return 'failure'
+  if (result.mode === 'subscribe') return result.connected === true ? 'ok' : 'failure'
+  return 'ok'
 }
 
 function outcomeToSuccess(outcome: ResponseHistoryOutcome): boolean {
@@ -416,7 +429,8 @@ class ResponseHistoryService {
       jsonrpcBatch: { build: (id, r) => this.buildJsonRpcBatchResponse(id, r as JsonRpcBatchExecutionResult), outcome: (r) => jsonRpcBatchOutcome(r as JsonRpcBatchExecutionResult) },
       trpc: { build: (id, r) => this.buildTrpcResponse(id, r as TrpcExecutionResult), outcome: (r) => httpOutcome(r as TrpcExecutionResult) },
       sse: { build: (id, r) => this.buildSseResponse(id, r as SseExecutionResult), outcome: (r) => sseOutcome(r as SseExecutionResult) },
-      amqp: { build: (id, r) => this.buildAmqpResponse(id, r as AmqpExecutionResult), outcome: (r) => amqpOutcome(r as AmqpExecutionResult) }
+      amqp: { build: (id, r) => this.buildAmqpResponse(id, r as AmqpExecutionResult), outcome: (r) => amqpOutcome(r as AmqpExecutionResult) },
+      redis: { build: (id, r) => this.buildRedisResponse(id, r as RedisExecutionResult), outcome: (r) => redisOutcome(r as RedisExecutionResult) }
     }
 
     const builder = builders[type]
@@ -796,6 +810,33 @@ class ResponseHistoryService {
     }
   }
 
+  /** Covers BOTH Redis modes — `result.mode` decides which optional fields are
+   * populated (mirrors the discriminated `ResponseHistoryRedisResponse`). */
+  private buildRedisResponse(requestId: string, result: RedisExecutionResult): ResponseHistoryResponse | null {
+    const resolvedUrl = contextService.getResolvedUrl(requestId)?.resolvedUrl ?? result.requestUrl ?? ''
+
+    return {
+      type: 'redis',
+      requestUrl: resolvedUrl,
+      mode: result.mode,
+      ...(result.channels !== undefined ? { channels: result.channels } : {}),
+      ...(result.connected !== undefined ? { connected: result.connected } : {}),
+      ...(result.messages !== undefined ? {
+        messages: result.messages.map((msg) => ({
+          direction: msg.direction,
+          channel: msg.channel,
+          data: msg.data,
+          timestamp: msg.timestamp
+        }))
+      } : {}),
+      ...(result.command !== undefined ? { command: result.command } : {}),
+      ...(result.args !== undefined ? { args: result.args } : {}),
+      ...(result.reply !== undefined ? { reply: result.reply } : {}),
+      timings: result.timings,
+      ...(result.error ? { error: result.error } : {})
+    }
+  }
+
   private buildHttpBody(
     requestId: string,
     body: { type?: string; content?: string; path?: string; fields?: unknown[] } | undefined
@@ -917,6 +958,10 @@ class ResponseHistoryService {
       trpc: (r) => ({
         operation: typeof r['procedure'] === 'string' ? r['procedure'] : '',
         method: r['kind'] === 'mutation' ? 'POST' : 'GET'
+      }),
+      redis: (r) => ({
+        protocol: typeof r['mode'] === 'string' ? r['mode'] : '',
+        method: typeof r['command'] === 'string' ? r['command'] : ''
       })
     }
     const extractor = extractors[type]

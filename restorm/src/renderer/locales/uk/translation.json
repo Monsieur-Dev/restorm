@@ -282,7 +282,8 @@
         "graphqlServer": "GraphQL mock-сервер",
         "odataServer": "OData mock-сервер",
         "trpc": "Запит tRPC",
-        "amqp": "Запит AMQP"
+        "amqp": "Запит AMQP",
+        "redis": "Запит Redis"
       }
     },
     "deleteConfirm": {
@@ -596,6 +597,28 @@
     "urlPlaceholder": "URL SSE",
     "framesTruncated": "Показано останні {{shown}} із {{total}} кадрів",
     "showAllFrames": "Показати всі"
+  },
+  "redis": {
+    "connected": "З'єднано",
+    "disconnected": "Роз'єднано",
+    "noMessages": "Поки що немає повідомлень",
+    "noCommandsYet": "Поки що жодної команди не виконано",
+    "urlPlaceholder": "URL-адреса Redis (redis:// або rediss://)",
+    "passwordPlaceholder": "Пароль (необов'язково)",
+    "subscribe": "Підписатися",
+    "unsubscribe": "Відписатися",
+    "run": "Виконати",
+    "subscribeMode": "Підписка",
+    "commandMode": "Команда",
+    "command": "Команда",
+    "args": "Аргументи",
+    "argsPlaceholder": "Аргументи команди",
+    "freeform": "Довільна",
+    "freeformPlaceholder": "Довільна команда (замінює вибір)",
+    "tabs": {
+      "channels": "Канали",
+      "command": "Команда"
+    }
   },
   "search": {
     "placeholder": "Пошук...",
@@ -1163,6 +1186,9 @@
       "amqpConnect": "З’єднання AMQP",
       "amqpPublish": "Публікація AMQP",
       "amqpClose": "Закриття AMQP",
+      "redisSubscribe": "Redis subscribe",
+      "redisClose": "Redis close",
+      "redisCommand": "Redis command",
       "httpListen": "HTTP server",
       "httpClose": "HTTP close",
       "grpcServerClose": "Закрити сервер gRPC",
@@ -1756,6 +1782,9 @@
       "mqttConnectServer": "Запускає локальний брокер MQTT (порт + фільтр теми); підписується на його фільтр теми та повторно випромінює кожне отримане повідомлення на своєму порту `message`. Надсилання публікує підключеним підписникам.",
       "mqttSendServer": "Публікує повідомлення кожному підписнику вказаного брокера MQTT.",
       "mqttCloseServer": "Зупиняє вказаний брокер MQTT і відключає його клієнтів.",
+      "redisSubscribe": "Відкриває тривале з'єднання підписки Redis із прив'язаного запиту та прослуховує його канали; повторно випромінює кожне отримане повідомлення на своєму порту `message`.",
+      "redisClose": "Закриває вже відкрите з'єднання підписки Redis.",
+      "redisCommand": "Виконує прив'язану команду Redis (одна команда на новому з'єднанні, потім відключення) і видає її відповідь.",
       "toast": "Показує toast-сповіщення в інтерфейсі Restorm під час виконання сценарію.",
       "httpListen": "Hosts a local HTTP mock server and listens indefinitely. `connected` fires once it is listening; each served request re-emits its data on the `served` port. The server stays up until an HTTP close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
       "httpClose": "Зупиняє вже активний фіктивний сервер HTTP (оголошений вузлом HTTP server) і звільняє його порт.",

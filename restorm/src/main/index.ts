@@ -105,6 +105,7 @@ import { secretHydrationService } from './services/secrets/SecretHydrationServic
 import { websocketExecutionService } from './services/WebSocketExecutionService'
 import { sseExecutionService } from './services/SseExecutionService'
 import { amqpExecutionService } from './services/AMQPExecutionService'
+import { redisExecutionService } from './services/RedisExecutionService'
 import { grpcMockServerService } from './services/GRPCMockServerService'
 import { odataMockServerService } from './services/ODataMockServerService'
 import { registerApiUpdateIPC } from './services/apiUpdate/registerApiUpdateIPC'
@@ -547,6 +548,8 @@ app.on('before-quit', () => {
   sseExecutionService.closeAll()
   // Same for any open AMQP subscribe connection.
   void amqpExecutionService.closeAll()
+  // Same for any open Redis subscribe connection.
+  void redisExecutionService.closeAll()
   // Same for any hosted gRPC mock server (its own grpc.Server / port).
   grpcMockServerService.closeAll()
   // Same for any hosted OData mock service (its routes on the shared HTTP host).

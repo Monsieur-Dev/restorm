@@ -280,7 +280,8 @@
         "graphqlServer": "GraphQL-Mock-Server",
         "odataServer": "OData-Mock-Server",
         "trpc": "tRPC-Anfrage",
-        "amqp": "AMQP-Anfrage"
+        "amqp": "AMQP-Anfrage",
+        "redis": "Redis-Anfrage"
       }
     },
     "deleteConfirm": {
@@ -594,6 +595,28 @@
     "urlPlaceholder": "SSE-URL",
     "framesTruncated": "Anzeige der letzten {{shown}} von {{total}} Frames",
     "showAllFrames": "Alle anzeigen"
+  },
+  "redis": {
+    "connected": "Verbunden",
+    "disconnected": "Getrennt",
+    "noMessages": "Noch keine Nachrichten",
+    "noCommandsYet": "Noch keine Befehle ausgeführt",
+    "urlPlaceholder": "Redis-URL (redis:// oder rediss://)",
+    "passwordPlaceholder": "Passwort (optional)",
+    "subscribe": "Abonnieren",
+    "unsubscribe": "Abbestellen",
+    "run": "Ausführen",
+    "subscribeMode": "Abonnieren",
+    "commandMode": "Befehl",
+    "command": "Befehl",
+    "args": "Argumente",
+    "argsPlaceholder": "Befehlsargumente",
+    "freeform": "Frei",
+    "freeformPlaceholder": "Freier Befehl (überschreibt die Auswahl)",
+    "tabs": {
+      "channels": "Kanäle",
+      "command": "Befehl"
+    }
   },
   "search": {
     "placeholder": "Suchen...",
@@ -1161,6 +1184,9 @@
       "amqpConnect": "AMQP verbinden",
       "amqpPublish": "AMQP veröffentlichen",
       "amqpClose": "AMQP schließen",
+      "redisSubscribe": "Redis subscribe",
+      "redisClose": "Redis close",
+      "redisCommand": "Redis command",
       "httpListen": "HTTP server",
       "httpClose": "HTTP close",
       "grpcServerClose": "gRPC-Server schließen",
@@ -1754,6 +1780,9 @@
       "mqttConnectServer": "Startet einen lokalen MQTT-Broker (Port + Topic-Filter); abonniert seinen Topic-Filter und sendet jede empfangene Nachricht erneut über ihren `message`-Port aus. Senden publiziert an verbundene Abonnenten.",
       "mqttSendServer": "Veröffentlicht eine Nachricht an jeden Abonnenten des referenzierten MQTT-Brokers.",
       "mqttCloseServer": "Stoppt den referenzierten MQTT-Broker und trennt seine Clients.",
+      "redisSubscribe": "Öffnet eine langlebige Redis-Abonnement-Verbindung aus einer gebundenen Anfrage und hört auf ihre Kanäle; sendet jede empfangene Nachricht erneut über ihren `message`-Port aus.",
+      "redisClose": "Schließt eine bereits offene Redis-Abonnement-Verbindung.",
+      "redisCommand": "Führt einen gebundenen Redis-Befehl aus (ein einzelner Befehl auf einer neuen Verbindung, danach Trennung) und gibt seine Antwort aus.",
       "toast": "Zeigt eine Toast-Benachrichtigung in der Restorm-Oberfläche, während das Szenario läuft.",
       "httpListen": "Hosts a local HTTP mock server and listens indefinitely. `connected` fires once it is listening; each served request re-emits its data on the `served` port. The server stays up until an HTTP close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
       "httpClose": "Stoppt einen bereits lauschenden HTTP-Mock-Server (von einem HTTP-Server-Knoten deklariert) und gibt seinen Port frei.",

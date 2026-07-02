@@ -17,7 +17,8 @@ vi.mock('../components/RequestTabViews', () => {
     JsonRpcRequestTabView: stub,
     JsonRpcBatchRequestTabView: stub,
     TrpcRequestTabView: stub,
-    AmqpRequestTabView: stub
+    AmqpRequestTabView: stub,
+    RedisRequestTabView: stub
   }
 })
 

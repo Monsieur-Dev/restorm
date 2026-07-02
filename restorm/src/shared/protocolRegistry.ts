@@ -136,6 +136,13 @@ export const PROTOCOL_REGISTRY = {
     serverCapable: true,
     scenarioKinds: ['odataListen', 'odataClose']
   },
+  redis: {
+    graphqlTypeName: 'RedisRequest',
+    tabType: 'redis-request',
+    ipcNamespace: 'redis',
+    badge: { kind: 'fixed', value: 'REDIS' },
+    scenarioKinds: ['redisSubscribe', 'redisClose', 'redisCommand']
+  },
   auth: {
     graphqlTypeName: 'AuthenticationRequest',
     tabType: 'auth-request',

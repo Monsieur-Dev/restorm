@@ -58,6 +58,7 @@ import { httpRequestExecutor } from './httpRequestExecutor'
 import { soapRequestExecutor } from './soapRequestExecutor'
 import { runScenarioExecutor } from './runScenarioExecutor'
 import { socketioConnectExecutor, socketioSendExecutor, socketioCloseExecutor, websocketConnectExecutor, websocketSendExecutor, websocketCloseExecutor, sseConnectExecutor, sseCloseExecutor, mqttConnectExecutor, mqttSendExecutor, mqttCloseExecutor, amqpConnectExecutor, amqpPublishExecutor, amqpCloseExecutor, grpcConnectExecutor, grpcSendExecutor, grpcCloseExecutor, grpcListenExecutor, grpcServerCloseExecutor, httpListenExecutor, httpCloseExecutor, soapListenExecutor, soapCloseExecutor, graphqlListenExecutor, graphqlCloseExecutor, odataListenExecutor, odataCloseExecutor, graphqlSubscribeExecutor, graphqlUnsubscribeExecutor } from './socketioExecutors'
+import { redisSubscribeExecutor, redisCloseExecutor, redisCommandExecutor } from './redisExecutors'
 import { concreteValue } from '../../../shared/utils/scenarioStaticPreview'
 import { coerceCliParamValue } from '../../../shared/scenarioCliParams'
 import { readInputParams, inputParamName } from '../../../shared/scenarioInputParams'
@@ -266,6 +267,9 @@ export function pickExecutor(kind: string): NodeExecutor {
     case 'odataClose': return odataCloseExecutor
     case 'graphqlSubscribe': return graphqlSubscribeExecutor
     case 'graphqlUnsubscribe': return graphqlUnsubscribeExecutor
+    case 'redisSubscribe': return redisSubscribeExecutor
+    case 'redisClose': return redisCloseExecutor
+    case 'redisCommand': return redisCommandExecutor
     case 'input': return inputExecutor
     case 'output': return outputPassthroughExecutor
     default: return assertNever(k)

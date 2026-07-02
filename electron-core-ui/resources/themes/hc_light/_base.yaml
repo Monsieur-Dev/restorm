@@ -457,6 +457,10 @@ colors:
     value: "#0d47a1"
     description: "tRPC badge (HC light)"
 
+  - id: badge-redis-background
+    value: "#b71c1c"
+    description: "Redis badge (HC light)"
+
   - id: badge-auth-background
     value: "#e65100"
     description: "Auth badge (HC light)"

@@ -281,7 +281,8 @@
         "graphqlServer": "GraphQL mock сервер",
         "odataServer": "OData mock сервер",
         "trpc": "tRPC zahtev",
-        "amqp": "AMQP zahtev"
+        "amqp": "AMQP zahtev",
+        "redis": "Redis zahtev"
       }
     },
     "deleteConfirm": {
@@ -595,6 +596,28 @@
     "urlPlaceholder": "SSE URL",
     "framesTruncated": "Prikazano poslednjih {{shown}} od {{total}} okvira",
     "showAllFrames": "Prikaži sve"
+  },
+  "redis": {
+    "connected": "Povezano",
+    "disconnected": "Prekinuto",
+    "noMessages": "Još nema poruka",
+    "noCommandsYet": "Još nema izvršenih komandi",
+    "urlPlaceholder": "Redis URL (redis:// ili rediss://)",
+    "passwordPlaceholder": "Lozinka (opciono)",
+    "subscribe": "Pretplati se",
+    "unsubscribe": "Otkaži pretplatu",
+    "run": "Pokreni",
+    "subscribeMode": "Pretplata",
+    "commandMode": "Komanda",
+    "command": "Komanda",
+    "args": "Argumenti",
+    "argsPlaceholder": "Argumenti komande",
+    "freeform": "Slobodno",
+    "freeformPlaceholder": "Slobodna komanda (zamenjuje izbor)",
+    "tabs": {
+      "channels": "Kanali",
+      "command": "Komanda"
+    }
   },
   "search": {
     "placeholder": "Pretraži...",
@@ -1162,6 +1185,9 @@
       "amqpConnect": "AMQP veza",
       "amqpPublish": "AMQP objava",
       "amqpClose": "AMQP zatvaranje",
+      "redisSubscribe": "Redis subscribe",
+      "redisClose": "Redis close",
+      "redisCommand": "Redis command",
       "httpListen": "HTTP server",
       "httpClose": "HTTP close",
       "grpcServerClose": "Затвори gRPC сервер",
@@ -1755,6 +1781,9 @@
       "mqttConnectServer": "Покреће локални MQTT broker (порт + филтер теме); претплаћује се на његов филтер теме и поново емитује сваку примљену поруку на свом `message` порту. Слање објављује повезаним претплатницима.",
       "mqttSendServer": "Објављује поруку сваком претплатнику референцираног MQTT broker-а.",
       "mqttCloseServer": "Зауставља референцирани MQTT broker и прекида везу са његовим клијентима.",
+      "redisSubscribe": "Отвара дуготрајну Redis претплатничку везу из повезаног захтева и слуша његове канале; поново емитује сваку примљену поруку на свом `message` порту.",
+      "redisClose": "Затвара већ отворену Redis претплатничку везу.",
+      "redisCommand": "Извршава повезану Redis команду (једна команда на новој вези, затим прекид) и емитује њен одговор.",
       "toast": "Приказује toast обавештење у Restorm интерфејсу током извршавања сценарија.",
       "httpListen": "Hosts a local HTTP mock server and listens indefinitely. `connected` fires once it is listening; each served request re-emits its data on the `served` port. The server stays up until an HTTP close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
       "httpClose": "Зауставља већ активни лажни HTTP сервер (декларисан чвором HTTP server) и ослобађа његов порт.",

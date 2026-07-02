@@ -279,7 +279,8 @@
         "graphqlServer": "GraphQL 模擬伺服器",
         "odataServer": "OData 模擬伺服器",
         "trpc": "tRPC 請求",
-        "amqp": "AMQP 請求"
+        "amqp": "AMQP 請求",
+        "redis": "Redis 請求"
       }
     },
     "deleteConfirm": {
@@ -593,6 +594,28 @@
     "urlPlaceholder": "SSE URL",
     "framesTruncated": "正在顯示最新 {{shown}} / {{total}} 幀",
     "showAllFrames": "顯示全部"
+  },
+  "redis": {
+    "connected": "已連線",
+    "disconnected": "已中斷連線",
+    "noMessages": "尚無訊息",
+    "noCommandsYet": "尚未執行任何命令",
+    "urlPlaceholder": "Redis URL（redis:// 或 rediss://）",
+    "passwordPlaceholder": "密碼（選填）",
+    "subscribe": "訂閱",
+    "unsubscribe": "取消訂閱",
+    "run": "執行",
+    "subscribeMode": "訂閱",
+    "commandMode": "命令",
+    "command": "命令",
+    "args": "參數",
+    "argsPlaceholder": "命令參數",
+    "freeform": "自由輸入",
+    "freeformPlaceholder": "自由輸入命令（覆蓋所選項目）",
+    "tabs": {
+      "channels": "頻道",
+      "command": "命令"
+    }
   },
   "search": {
     "placeholder": "搜尋...",
@@ -1160,6 +1183,9 @@
       "amqpConnect": "AMQP 連線",
       "amqpPublish": "AMQP 發布",
       "amqpClose": "AMQP 關閉",
+      "redisSubscribe": "Redis subscribe",
+      "redisClose": "Redis close",
+      "redisCommand": "Redis command",
       "httpListen": "HTTP server",
       "httpClose": "HTTP close",
       "grpcServerClose": "關閉 gRPC 伺服器",
@@ -1753,6 +1779,9 @@
       "mqttConnectServer": "啟動一個本機 MQTT broker (連接埠 + 主題篩選器)；訂閱其主題篩選器並在其 `message` 連接埠上重新發出每個收到的訊息。Send 會發佈給已連線的訂閱者。",
       "mqttSendServer": "向所參照的 MQTT broker 的每個訂閱者發佈一則訊息。",
       "mqttCloseServer": "停止所參照的 MQTT broker 並中斷其用戶端。",
+      "redisSubscribe": "從繫結的請求開啟一個持久的 Redis 訂閱連線並監聽其頻道；在其 `message` 連接埠上重新發出每個收到的訊息。",
+      "redisClose": "關閉一個已開啟的 Redis 訂閱連線。",
+      "redisCommand": "執行一個已繫結的 Redis 命令（在新連線上執行單一命令，然後中斷連線）並輸出其回應。",
       "toast": "在情境執行時於 Restorm 介面中顯示一則 toast 通知。",
       "httpListen": "Hosts a local HTTP mock server and listens indefinitely. `connected` fires once it is listening; each served request re-emits its data on the `served` port. The server stays up until an HTTP close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
       "httpClose": "停止一個已在監聽的 HTTP 模擬伺服器 (由 HTTP 伺服器節點宣告)，釋放其連接埠。",

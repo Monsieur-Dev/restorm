@@ -279,7 +279,8 @@
         "graphqlServer": "GraphQL モックサーバー",
         "odataServer": "OData モックサーバー",
         "trpc": "tRPC リクエスト",
-        "amqp": "AMQP リクエスト"
+        "amqp": "AMQP リクエスト",
+        "redis": "Redis リクエスト"
       }
     },
     "deleteConfirm": {
@@ -593,6 +594,28 @@
     "urlPlaceholder": "SSE URL",
     "framesTruncated": "最新の{{total}}件中{{shown}}件を表示中",
     "showAllFrames": "すべて表示"
+  },
+  "redis": {
+    "connected": "接続済み",
+    "disconnected": "切断されました",
+    "noMessages": "メッセージはまだありません",
+    "noCommandsYet": "まだコマンドが実行されていません",
+    "urlPlaceholder": "Redis URL（redis:// または rediss://）",
+    "passwordPlaceholder": "パスワード（任意）",
+    "subscribe": "購読",
+    "unsubscribe": "購読解除",
+    "run": "実行",
+    "subscribeMode": "購読",
+    "commandMode": "コマンド",
+    "command": "コマンド",
+    "args": "引数",
+    "argsPlaceholder": "コマンドの引数",
+    "freeform": "自由入力",
+    "freeformPlaceholder": "自由入力コマンド（選択を上書き）",
+    "tabs": {
+      "channels": "チャンネル",
+      "command": "コマンド"
+    }
   },
   "search": {
     "placeholder": "検索...",
@@ -1160,6 +1183,9 @@
       "amqpConnect": "AMQP 接続",
       "amqpPublish": "AMQP パブリッシュ",
       "amqpClose": "AMQP クローズ",
+      "redisSubscribe": "Redis subscribe",
+      "redisClose": "Redis close",
+      "redisCommand": "Redis command",
       "httpListen": "HTTP server",
       "httpClose": "HTTP close",
       "grpcServerClose": "gRPC サーバーを閉じる",
@@ -1753,6 +1779,9 @@
       "mqttConnectServer": "ローカル MQTT ブローカーを起動し (ポート + トピックフィルター)、そのトピックフィルターを購読して受信した各メッセージを `message` ポートに再送出します。Send は接続中の購読者に配信します。",
       "mqttSendServer": "参照先の MQTT ブローカーのすべての購読者にメッセージをパブリッシュします。",
       "mqttCloseServer": "参照先の MQTT ブローカーを停止し、そのクライアントを切断します。",
+      "redisSubscribe": "バインドされたリクエストから持続的な Redis 購読接続を開いてそのチャンネルを購読し、受信した各メッセージを `message` ポートに再送出します。",
+      "redisClose": "すでに開いている Redis 購読接続を閉じます。",
+      "redisCommand": "バインドされた Redis コマンドを実行し (新しい接続で単一のコマンドを実行後に切断)、そのレスポンスを出力します。",
       "toast": "シナリオ実行中に Restorm の UI にトースト通知を表示します。",
       "httpListen": "Hosts a local HTTP mock server and listens indefinitely. `connected` fires once it is listening; each served request re-emits its data on the `served` port. The server stays up until an HTTP close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
       "httpClose": "すでに待ち受け中の HTTP モックサーバー (HTTP サーバーノードで宣言) を停止し、ポートを解放します。",

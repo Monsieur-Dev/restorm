@@ -7,6 +7,7 @@ import { websocketExecutionService } from '../services/WebSocketExecutionService
 import { jsonRpcExecutionService } from '../services/JsonRpcExecutionService'
 import { sseExecutionService } from '../services/SseExecutionService'
 import { amqpExecutionService } from '../services/AMQPExecutionService'
+import { redisExecutionService } from '../services/RedisExecutionService'
 
 /**
  * The MAIN-process execution dispatch for each protocol type — the main-only
@@ -50,7 +51,15 @@ export const PROTOCOL_EXECUTORS: Record<RequestType, ProtocolExecutor> = {
   // (buffer polling + continuation tokens over `websocketExecutionService`) —
   // same reason gRPC's streaming call types stay `false` here today. `cancel`
   // still correctly disconnects an open subscribe connection.
-  amqp: { streaming: false, cancel: (id) => amqpExecutionService.disconnect(id) }
+  amqp: { streaming: false, cancel: (id) => amqpExecutionService.disconnect(id) },
+  // `streaming: false` even though subscribe mode is long-lived: command mode
+  // is naturally unary, and subscribe mode's "run" stores ONE history entry on
+  // connect (mirroring websocket's connect-time store), so the generic
+  // run_request MCP tool's wait-for-history-entry path resolves for both modes.
+  // Live per-message MCP polling (read_stream) is not wired for redis subscribe
+  // — no AC requires it, and it would mean routing execute.ts's streaming path
+  // through a Redis-specific branch instead of appending here.
+  redis: { streaming: false, cancel: (id) => redisExecutionService.cancel(id) }
 }
 
 /** The execution dispatch for a protocol discriminant. */

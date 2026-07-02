@@ -300,6 +300,32 @@ export const SCENARIO_KIND_REGISTRY = {
       config: { connectionNodeId: 'Id of the amqpConnect node whose connection to close.' }
     }
   },
+  redisSubscribe: {
+    labelKey: 'scenario.nodes.redisSubscribe', defaultLabel: 'Redis subscribe', icon: 'plug', category: 'composition',
+    requestBinding: true,
+    ports: { inputs: [], outputs: [{ id: 'connected', name: 'connected', flow: 'signal' }, { id: 'message', name: 'message', flow: 'both' }] },
+    doc: {
+      summary: 'Opens a long-lived Redis subscriber connection from a bound request (subscribe mode) and listens on its channels. `connected` fires once subscribed; EVERY received message re-emits on the single `message` output (channel + payload — Redis pub/sub has no named events beyond the channel itself). The connection stays open until a redisClose targets it (or the run is stopped), then `done` fires.',
+      config: { requestId: 'Id of the Redis (subscribe-mode) request to connect (its resolved URL/password/channels).', connectionName: 'Unique-per-scenario name a redisClose references for display (defaults to the request name).', label: 'Display label on the box.' }
+    }
+  },
+  redisClose: {
+    labelKey: 'scenario.nodes.redisClose', defaultLabel: 'Redis close', icon: 'debug-disconnect', category: 'composition',
+    ports: { inputs: [], outputs: [] },
+    doc: {
+      summary: 'Closes an already-open Redis subscribe connection (declared by a redisSubscribe node), firing that node\'s `done`. Pure-event action: triggered on `in`, sequences via its own `done`. Errors (to `error`) when no connection is selected.',
+      config: { connectionNodeId: 'Id of the redisSubscribe node whose connection to close.' }
+    }
+  },
+  redisCommand: {
+    labelKey: 'scenario.nodes.redisCommand', defaultLabel: 'Redis command', icon: 'terminal', category: 'composition',
+    requestBinding: true,
+    ports: { inputs: [{ id: 'env', name: 'env', flow: 'value' }], outputs: [{ id: 'response', name: 'response', dataType: 'response', role: 'response', flow: 'both' }] },
+    doc: {
+      summary: 'Runs a bound Redis request (command mode) — a single command on a fresh connection, then disconnects — and emits its `response` (the raw reply). Sequence it via the `in` trigger. Never runs the same request as a redisSubscribe (a client in subscriber mode cannot issue regular commands).',
+      config: { requestId: 'Id of the Redis (command-mode) request to execute.', label: 'Display label on the box.' }
+    }
+  },
   grpcConnect: {
     labelKey: 'scenario.nodes.grpcConnect', defaultLabel: 'gRPC connect', icon: 'plug', category: 'composition',
     requestBinding: true,

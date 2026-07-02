@@ -280,7 +280,8 @@
         "graphqlServer": "GraphQL mock sunucusu",
         "odataServer": "OData mock sunucusu",
         "trpc": "tRPC isteği",
-        "amqp": "AMQP isteği"
+        "amqp": "AMQP isteği",
+        "redis": "Redis isteği"
       }
     },
     "deleteConfirm": {
@@ -594,6 +595,28 @@
     "urlPlaceholder": "SSE URL'si",
     "framesTruncated": "Son {{shown}} / {{total}} kare gösteriliyor",
     "showAllFrames": "Tümünü göster"
+  },
+  "redis": {
+    "connected": "Bağlandı",
+    "disconnected": "Bağlantı kesildi",
+    "noMessages": "Henüz mesaj yok",
+    "noCommandsYet": "Henüz çalıştırılan komut yok",
+    "urlPlaceholder": "Redis URL'si (redis:// veya rediss://)",
+    "passwordPlaceholder": "Parola (isteğe bağlı)",
+    "subscribe": "Abone ol",
+    "unsubscribe": "Abonelikten çık",
+    "run": "Çalıştır",
+    "subscribeMode": "Abonelik",
+    "commandMode": "Komut",
+    "command": "Komut",
+    "args": "Bağımsız değişkenler",
+    "argsPlaceholder": "Komut bağımsız değişkenleri",
+    "freeform": "Serbest",
+    "freeformPlaceholder": "Serbest komut (seçimi geçersiz kılar)",
+    "tabs": {
+      "channels": "Kanallar",
+      "command": "Komut"
+    }
   },
   "search": {
     "placeholder": "Ara...",
@@ -1161,6 +1184,9 @@
       "amqpConnect": "AMQP bağlantısı",
       "amqpPublish": "AMQP yayını",
       "amqpClose": "AMQP kapatma",
+      "redisSubscribe": "Redis subscribe",
+      "redisClose": "Redis close",
+      "redisCommand": "Redis command",
       "httpListen": "HTTP server",
       "httpClose": "HTTP close",
       "grpcServerClose": "gRPC sunucusunu kapat",
@@ -1754,6 +1780,9 @@
       "mqttConnectServer": "Yerel bir MQTT aracısı başlatır (port + konu filtresi); konu filtresine abone olur ve alınan her mesajı `message` portu üzerinde yeniden yayınlar. Gönderme, bağlı abonelere yayımlar.",
       "mqttSendServer": "Başvurulan MQTT aracısının her abonesine bir mesaj yayımlar.",
       "mqttCloseServer": "Başvurulan MQTT aracısını durdurur ve istemcilerinin bağlantısını keser.",
+      "redisSubscribe": "Bağlı bir istekten kalıcı bir Redis abonelik bağlantısı açar ve kanallarını dinler; alınan her mesajı `message` portu üzerinde yeniden yayınlar.",
+      "redisClose": "Zaten açık olan bir Redis abonelik bağlantısını kapatır.",
+      "redisCommand": "Bağlı bir Redis komutunu çalıştırır (yeni bir bağlantıda tek bir komut, ardından bağlantı kesilir) ve yanıtını yayınlar.",
       "toast": "Senaryo çalışırken Restorm arayüzünde bir toast bildirimi yayınlar.",
       "httpListen": "Hosts a local HTTP mock server and listens indefinitely. `connected` fires once it is listening; each served request re-emits its data on the `served` port. The server stays up until an HTTP close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
       "httpClose": "Zaten dinleyen bir sahte HTTP sunucusunu (bir HTTP sunucu düğümü tarafından bildirilen) durdurur ve portunu serbest bırakır.",

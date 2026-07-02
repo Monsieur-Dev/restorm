@@ -13,7 +13,8 @@ import type {
   JsonRpcRequest,
   JsonRpcBatchRequest,
   TrpcRequest,
-  AmqpRequest
+  AmqpRequest,
+  RedisRequest
 } from '../../../shared/types/requests'
 import {
   HTTPRequestTabView,
@@ -27,7 +28,8 @@ import {
   JsonRpcRequestTabView,
   JsonRpcBatchRequestTabView,
   TrpcRequestTabView,
-  AmqpRequestTabView
+  AmqpRequestTabView,
+  RedisRequestTabView
 } from '../components/RequestTabViews'
 
 /**
@@ -60,7 +62,8 @@ export const PROTOCOL_TAB_VIEWS: Record<RequestType, (request: Request) => React
   jsonrpc: (request) => <JsonRpcRequestTabView request={request as JsonRpcRequest} />,
   jsonrpcBatch: (request) => <JsonRpcBatchRequestTabView request={request as JsonRpcBatchRequest} />,
   trpc: (request) => <TrpcRequestTabView request={request as TrpcRequest} />,
-  amqp: (request) => <AmqpRequestTabView request={request as AmqpRequest} />
+  amqp: (request) => <AmqpRequestTabView request={request as AmqpRequest} />,
+  redis: (request) => <RedisRequestTabView request={request as RedisRequest} />
 }
 
 /** Render the tab-view editor element for a request, chosen by its protocol. */

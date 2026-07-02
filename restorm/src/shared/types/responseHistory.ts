@@ -1,4 +1,4 @@
-export type ResponseHistoryRequestType = 'http' | 'odata' | 'graphql' | 'grpc' | 'soap' | 'websocket' | 'sse' | 'jsonrpc' | 'jsonrpcBatch' | 'trpc' | 'amqp'
+export type ResponseHistoryRequestType = 'http' | 'odata' | 'graphql' | 'grpc' | 'soap' | 'websocket' | 'sse' | 'jsonrpc' | 'jsonrpcBatch' | 'trpc' | 'amqp' | 'redis'
 
 /**
  * 3-way visual signal for the per-entry status dot in the history
@@ -292,6 +292,35 @@ export interface ResponseHistoryAmqpResponse {
   error?: string
 }
 
+export interface ResponseHistoryRedisMessage {
+  direction: 'sent' | 'received'
+  channel?: string
+  data: string
+  timestamp: string
+}
+
+/** A Redis history entry covers BOTH modes — `mode` discriminates which fields
+ * apply. Subscribe mode carries `channels` + the streamed `messages`; command
+ * mode carries the resolved `command`/`args` + the raw reply. */
+export interface ResponseHistoryRedisResponse {
+  type: 'redis'
+  requestUrl: string
+  mode: 'subscribe' | 'command'
+  // Subscribe mode.
+  channels?: string[]
+  connected?: boolean
+  messages?: ResponseHistoryRedisMessage[]
+  // Command mode.
+  command?: string
+  args?: string[]
+  reply?: string
+  timings: {
+    startedAt: string
+    durationMs: number
+  }
+  error?: string
+}
+
 export type ResponseHistoryResponse =
   | ResponseHistoryHttpResponse
   | ResponseHistoryODataResponse
@@ -304,6 +333,7 @@ export type ResponseHistoryResponse =
   | ResponseHistoryTrpcResponse
   | ResponseHistorySseResponse
   | ResponseHistoryAmqpResponse
+  | ResponseHistoryRedisResponse
 
 export interface ResponseHistoryDetail {
   guid: string

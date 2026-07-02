@@ -49,6 +49,7 @@ import {
   isAuthenticationRequest,
   isTrpcRequest,
   isAmqpRequest,
+  isRedisRequest,
   isEnvironmentFolder,
   isAnyFolder,
   isScenario
@@ -66,6 +67,7 @@ import type {
   AuthenticationRequestTab,
   TrpcRequestTab,
   AmqpRequestTab,
+  RedisRequestTab,
   ScenarioEditorTab,
   ConsoleTab,
   FirewallTab,
@@ -513,6 +515,9 @@ export function useWorkbenchTabs(options: UseWorkbenchTabsOptions): UseWorkbench
     } else if (isAmqpRequest(request)) {
       tabType = 'amqp-request'
       title = request.name
+    } else if (isRedisRequest(request)) {
+      tabType = 'redis-request'
+      title = request.name
     } else {
       return // Unknown request type
     }
@@ -859,6 +864,18 @@ export function useWorkbenchTabs(options: UseWorkbenchTabsOptions): UseWorkbench
           environments,
           allowFullscreen: true
         } as AmqpRequestTab
+      }
+      if (isRedisRequest(requestItem)) {
+        return {
+          id: tabId,
+          tabType: 'redis-request',
+          title: requestItem.name,
+          titleString: requestItem.name,
+          request: requestItem,
+          breadcrumbs,
+          environments,
+          allowFullscreen: true
+        } as RedisRequestTab
       }
     }
     return null

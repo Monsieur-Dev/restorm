@@ -281,7 +281,8 @@
         "graphqlServer": "Server GraphQL simulat",
         "odataServer": "Server OData simulat",
         "trpc": "Cerere tRPC",
-        "amqp": "Cerere AMQP"
+        "amqp": "Cerere AMQP",
+        "redis": "Cerere Redis"
       }
     },
     "deleteConfirm": {
@@ -595,6 +596,28 @@
     "urlPlaceholder": "URL SSE",
     "framesTruncated": "Se afișează ultimele {{shown}} din {{total}} cadre",
     "showAllFrames": "Afișează tot"
+  },
+  "redis": {
+    "connected": "Conectat",
+    "disconnected": "Deconectat",
+    "noMessages": "Niciun mesaj încă",
+    "noCommandsYet": "Nicio comandă executată încă",
+    "urlPlaceholder": "URL Redis (redis:// sau rediss://)",
+    "passwordPlaceholder": "Parolă (opțional)",
+    "subscribe": "Abonează-te",
+    "unsubscribe": "Dezabonează-te",
+    "run": "Rulează",
+    "subscribeMode": "Abonare",
+    "commandMode": "Comandă",
+    "command": "Comandă",
+    "args": "Argumente",
+    "argsPlaceholder": "Argumentele comenzii",
+    "freeform": "Liberă",
+    "freeformPlaceholder": "Comandă liberă (înlocuiește selecția)",
+    "tabs": {
+      "channels": "Canale",
+      "command": "Comandă"
+    }
   },
   "search": {
     "placeholder": "Caută...",
@@ -1162,6 +1185,9 @@
       "amqpConnect": "Conexiune AMQP",
       "amqpPublish": "Publicare AMQP",
       "amqpClose": "Închidere AMQP",
+      "redisSubscribe": "Redis subscribe",
+      "redisClose": "Redis close",
+      "redisCommand": "Redis command",
       "httpListen": "HTTP server",
       "httpClose": "HTTP close",
       "grpcServerClose": "Închide serverul gRPC",
@@ -1755,6 +1781,9 @@
       "mqttConnectServer": "Pornește un broker MQTT local (port + filtru de subiect); se abonează la filtrul său de subiect și reemite fiecare mesaj primit pe portul său `message`. Trimiterea publică către abonații conectați.",
       "mqttSendServer": "Publică un mesaj către fiecare abonat al brokerului MQTT referențiat.",
       "mqttCloseServer": "Oprește brokerul MQTT referențiat și deconectează clienții săi.",
+      "redisSubscribe": "Deschide o conexiune de abonare Redis de lungă durată dintr-o cerere asociată și ascultă canalele sale; reemite fiecare mesaj primit pe portul său `message`.",
+      "redisClose": "Închide o conexiune de abonare Redis deja deschisă.",
+      "redisCommand": "Execută o comandă Redis asociată (o singură comandă pe o conexiune nouă, apoi deconectare) și emite răspunsul ei.",
       "toast": "Emite o notificare toast în interfața Restorm în timp ce scenariul rulează.",
       "httpListen": "Hosts a local HTTP mock server and listens indefinitely. `connected` fires once it is listening; each served request re-emits its data on the `served` port. The server stays up until an HTTP close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
       "httpClose": "Oprește un server fals HTTP care ascultă deja (declarat de un nod server HTTP), eliberându-i portul.",

@@ -48,3 +48,10 @@ export type ODataVersion = 'v2' | 'v3' | 'v4' | 'v4.01'
 export type TrpcCallKind = 'query' | 'mutation'
 
 export type AmqpMode = 'publish' | 'subscribe' | 'browse'
+/** Which execution path a Redis request runs — the mode selector is the source
+ * of truth for dispatch (never run subscribe AND command on the same request). */
+export type RedisMode = 'subscribe' | 'command'
+
+/** The command palette's built-in operations. Anything else goes through
+ * `freeformCommand`. */
+export type RedisCommandName = 'GET' | 'SET' | 'DEL' | 'HGET' | 'HSET' | 'LPUSH' | 'RPUSH' | 'LRANGE' | 'PUBLISH' | 'XADD' | 'XREAD'

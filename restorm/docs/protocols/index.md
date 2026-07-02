@@ -19,6 +19,7 @@ a page yet — this index only lists the ones that do.
 | tRPC (typed RPC over HTTP) | [`trpc.md`](./trpc.md) |
 | Server-Sent Events (SSE) | [`sse.md`](./sse.md) |
 | AMQP 0-9-1 (RabbitMQ) | [`amqp.md`](./amqp.md) |
+| Redis (pub/sub + common commands) | [`redis.md`](./redis.md) |
 
 For the underlying import-adapter pipeline that turns an external API
 specification (OpenAPI, WSDL, `.proto`, OpenRPC, …) into a ready-to-run

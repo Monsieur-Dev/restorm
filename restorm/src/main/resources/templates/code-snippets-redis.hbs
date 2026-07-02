@@ -1,0 +1,106 @@
+{{!-- Code snippets template for Redis requests --}}
+{{!-- Generates markdown with code examples in multiple languages, mode-aware:
+     subscribe (pub/sub) vs command (single-shot). --}}
+
+{{#if isSubscribe}}
+<details open>
+<summary><strong>JavaScript - ioredis (subscribe)</strong></summary>
+
+```javascript
+import Redis from 'ioredis';
+
+const subscriber = new Redis('{{url}}'{{#if password}}, { password: '{{password}}' }{{/if}});
+
+{{#if channels}}
+subscriber.subscribe({{#each channels}}'{{this}}'{{#unless @last}}, {{/unless}}{{/each}}, (err, count) => {
+  if (err) {
+    console.error('Subscribe error:', err);
+  } else {
+    console.log(`Subscribed to ${count} channel(s)`);
+  }
+});
+{{/if}}
+
+subscriber.on('message', (channel, message) => {
+  console.log(`Received on ${channel}:`, message);
+});
+
+// Unsubscribe:
+// subscriber.unsubscribe();
+// subscriber.disconnect();
+```
+
+</details>
+
+<details>
+<summary><strong>Shell - redis-cli (subscribe)</strong></summary>
+
+```bash
+redis-cli -u '{{url}}'{{#if password}} -a '{{password}}'{{/if}} SUBSCRIBE{{#each channels}} {{this}}{{/each}}
+```
+
+</details>
+
+<details>
+<summary><strong>Python - redis-py (subscribe)</strong></summary>
+
+```python
+import redis
+
+r = redis.Redis.from_url('{{url}}'{{#if password}}, password='{{password}}'{{/if}})
+pubsub = r.pubsub()
+{{#if channels}}
+pubsub.subscribe({{#each channels}}'{{this}}'{{#unless @last}}, {{/unless}}{{/each}})
+{{/if}}
+
+for message in pubsub.listen():
+    if message['type'] == 'message':
+        print(f"Received on {message['channel']}: {message['data']}")
+```
+
+</details>
+{{/if}}
+
+{{#if isCommand}}
+<details open>
+<summary><strong>JavaScript - ioredis (command)</strong></summary>
+
+```javascript
+import Redis from 'ioredis';
+
+const redis = new Redis('{{url}}'{{#if password}}, { password: '{{password}}' }{{/if}});
+
+{{#if commandParts}}
+const reply = await redis.call({{#each commandParts}}'{{this}}'{{#unless @last}}, {{/unless}}{{/each}});
+console.log('Reply:', reply);
+{{/if}}
+
+await redis.quit();
+```
+
+</details>
+
+<details>
+<summary><strong>Shell - redis-cli (command)</strong></summary>
+
+```bash
+redis-cli -u '{{url}}'{{#if password}} -a '{{password}}'{{/if}} {{commandLine}}
+```
+
+</details>
+
+<details>
+<summary><strong>Python - redis-py (command)</strong></summary>
+
+```python
+import redis
+
+r = redis.Redis.from_url('{{url}}'{{#if password}}, password='{{password}}'{{/if}})
+{{#if commandLine}}
+reply = r.execute_command('{{commandLine}}')
+print('Reply:', reply)
+{{/if}}
+```
+
+</details>
+{{/if}}

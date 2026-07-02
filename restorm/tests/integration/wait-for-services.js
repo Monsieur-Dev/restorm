@@ -44,7 +44,10 @@ const SERVICES = [
     name: 'RabbitMQ (management)',
     url: 'http://localhost:15672/api/aliveness-test/%2F',
     headers: { Authorization: `Basic ${Buffer.from('guest:guest').toString('base64')}` }
-  }
+  },
+  // Redis speaks the RESP protocol on 6379 — not HTTP, so probe the raw TCP
+  // port (mirrors the MQTT / gRPC probes above).
+  { name: 'Redis', tcp: { host: 'localhost', port: 6379 } }
 ]
 
 const MAX_RETRIES = 60
