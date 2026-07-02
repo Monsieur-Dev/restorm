@@ -277,7 +277,8 @@
         "grpcServer": "Διακομιστής gRPC mock",
         "soapServer": "Διακομιστής εικονικού SOAP",
         "graphqlServer": "Διακομιστής GraphQL mock",
-        "odataServer": "Διακομιστής OData mock"
+        "odataServer": "Διακομιστής OData mock",
+        "trpc": "Αίτημα tRPC"
       }
     },
     "deleteConfirm": {
@@ -2105,6 +2106,19 @@
     "portal": {
       "noSubscription": "Δεν υπάρχει ενεργή συνδρομή για διαχείριση.",
       "error": "Δεν ήταν δυνατό το άνοιγμα της πύλης συνδρομής. Δοκιμάστε ξανά."
+    }
+  },
+  "trpc": {
+    "send": "Αποστολή",
+    "urlPlaceholder": "Διεύθυνση URL διακομιστή tRPC",
+    "procedurePlaceholder": "Διαδικασία (π.χ. user.get)",
+    "kindQuery": "Ερώτημα",
+    "kindMutation": "Μετάλλαξη",
+    "showRawEnvelope": "Εμφάνιση ακατέργαστου φακέλου",
+    "kindSelectLabel": "Τύπος κλήσης",
+    "tabs": {
+      "headers": "Κεφαλίδες",
+      "body": "Σώμα"
     }
   }
 }

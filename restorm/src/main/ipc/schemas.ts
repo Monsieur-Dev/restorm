@@ -252,6 +252,24 @@ export const jsonrpcCancelArgs = z.tuple([requestIdArg])
 export const jsonrpcIsActiveArgs = z.tuple([requestIdArg])
 
 // ==========================================================================
+// tRPC Execution (reuses httpExecutionService under the hood, like OData)
+// ==========================================================================
+
+export const trpcExecuteArgs = z.tuple([
+  z.object({
+    requestId: z.string(),
+    timeout: z.number().optional(),
+    /** Attached AuthenticationRequest POJO — re-validated in the handler
+     * via isPlainAuthPayload + fromPlain (that guard stays authoritative),
+     * so opaque here. */
+    authRequest: z.unknown().optional()
+  })
+])
+
+export const trpcCancelArgs = z.tuple([requestIdArg])
+export const trpcIsActiveArgs = z.tuple([requestIdArg])
+
+// ==========================================================================
 // Authentication routes
 // --------------------------------------------------------------------------
 // `auth:prefetch` runs an ephemeral AuthenticationRequest (typically
@@ -578,6 +596,18 @@ export const jsonrpcExecuteBatchResultSchema = z.object({
   })),
   timings: timingsSchema,
   requestUrl: z.string().optional()
+})
+
+export const trpcExecuteResultSchema = z.object({
+  requestId: z.string(),
+  success: z.boolean(),
+  statusCode: z.number().optional(),
+  statusText: z.string().optional(),
+  headers: z.record(z.string(), z.union([z.string(), z.array(z.string())])).optional(),
+  data: z.unknown().optional(),
+  rawBody: z.string().optional(),
+  error: z.string().optional(),
+  timings: timingsSchema,
 })
 
 export const soapExecuteResultSchema = z.object({

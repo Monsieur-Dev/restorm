@@ -12,6 +12,7 @@ const SERVICES = [
   { name: 'Petstore', url: 'http://localhost:8080/api/pet/findByStatus?status=available' },
   { name: 'Petstore OpenAPI 3.0', url: 'http://localhost:8081/openapi.json' },
   { name: 'GraphQL', url: 'http://localhost:4000', method: 'POST', body: '{"query":"{ __typename }"}', headers: { 'Content-Type': 'application/json' } },
+  { name: 'tRPC mock server', url: 'http://localhost:8096/health' },
   { name: 'HTTP util', url: 'http://localhost:8082/health' },
   // The E2E suite uses the soap-server mock (:8091), not Castle Mock (:8090).
   // soap-server is a zero-dependency node:http server started by the CI

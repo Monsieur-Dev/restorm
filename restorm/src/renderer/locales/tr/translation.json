@@ -277,7 +277,8 @@
         "grpcServer": "gRPC mock sunucusu",
         "soapServer": "SOAP sahte sunucusu",
         "graphqlServer": "GraphQL mock sunucusu",
-        "odataServer": "OData mock sunucusu"
+        "odataServer": "OData mock sunucusu",
+        "trpc": "tRPC isteği"
       }
     },
     "deleteConfirm": {
@@ -2105,6 +2106,19 @@
     "portal": {
       "noSubscription": "Yönetilecek etkin abonelik yok.",
       "error": "Abonelik portalı açılamadı. Lütfen tekrar deneyin."
+    }
+  },
+  "trpc": {
+    "send": "Gönder",
+    "urlPlaceholder": "tRPC sunucu URL'si",
+    "procedurePlaceholder": "Prosedür (ör. user.get)",
+    "kindQuery": "Sorgu",
+    "kindMutation": "Mutasyon",
+    "showRawEnvelope": "Ham zarfı göster",
+    "kindSelectLabel": "Çağrı türü",
+    "tabs": {
+      "headers": "Başlıklar",
+      "body": "Gövde"
     }
   }
 }

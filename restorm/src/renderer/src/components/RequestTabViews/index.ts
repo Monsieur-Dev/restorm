@@ -8,3 +8,4 @@ export { WebSocketRequestTabView, type WebSocketRequestTabViewProps } from './We
 export { ODataRequestTabView, type ODataRequestTabViewProps } from './ODataRequestTabView'
 export { JsonRpcRequestTabView, type JsonRpcRequestTabViewProps } from './JsonRpcRequestTabView'
 export { JsonRpcBatchRequestTabView, type JsonRpcBatchRequestTabViewProps } from './JsonRpcBatchRequestTabView'
+export { TrpcRequestTabView, type TrpcRequestTabViewProps } from './TrpcRequestTabView'

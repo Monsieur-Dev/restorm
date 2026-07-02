@@ -277,7 +277,8 @@
         "grpcServer": "gRPC-mockserver",
         "soapServer": "SOAP-mockserver",
         "graphqlServer": "GraphQL-mockserver",
-        "odataServer": "OData-mockserver"
+        "odataServer": "OData-mockserver",
+        "trpc": "tRPC-verzoek"
       }
     },
     "deleteConfirm": {
@@ -2105,6 +2106,19 @@
     "portal": {
       "noSubscription": "Geen actief abonnement om te beheren.",
       "error": "Kan het abonnementsportaal niet openen. Probeer het opnieuw."
+    }
+  },
+  "trpc": {
+    "send": "Verzenden",
+    "urlPlaceholder": "tRPC-server-URL",
+    "procedurePlaceholder": "Procedure (bijv. user.get)",
+    "kindQuery": "Query",
+    "kindMutation": "Mutatie",
+    "showRawEnvelope": "Ruwe envelop tonen",
+    "kindSelectLabel": "Type aanroep",
+    "tabs": {
+      "headers": "Headers",
+      "body": "Body"
     }
   }
 }

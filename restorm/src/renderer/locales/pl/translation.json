@@ -279,7 +279,8 @@
         "grpcServer": "Serwer mock gRPC",
         "soapServer": "Serwer mock SOAP",
         "graphqlServer": "Serwer mock GraphQL",
-        "odataServer": "Serwer mock OData"
+        "odataServer": "Serwer mock OData",
+        "trpc": "Żądanie tRPC"
       }
     },
     "deleteConfirm": {
@@ -2107,6 +2108,19 @@
     "portal": {
       "noSubscription": "Brak aktywnej subskrypcji do zarządzania.",
       "error": "Nie udało się otworzyć portalu subskrypcji. Spróbuj ponownie."
+    }
+  },
+  "trpc": {
+    "send": "Wyślij",
+    "urlPlaceholder": "Adres URL serwera tRPC",
+    "procedurePlaceholder": "Procedura (np. user.get)",
+    "kindQuery": "Zapytanie",
+    "kindMutation": "Mutacja",
+    "showRawEnvelope": "Pokaż surową kopertę",
+    "kindSelectLabel": "Typ wywołania",
+    "tabs": {
+      "headers": "Nagłówki",
+      "body": "Treść"
     }
   }
 }

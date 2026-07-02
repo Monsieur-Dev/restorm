@@ -1,4 +1,4 @@
-export type ResponseHistoryRequestType = 'http' | 'odata' | 'graphql' | 'grpc' | 'soap' | 'websocket' | 'jsonrpc' | 'jsonrpcBatch'
+export type ResponseHistoryRequestType = 'http' | 'odata' | 'graphql' | 'grpc' | 'soap' | 'websocket' | 'jsonrpc' | 'jsonrpcBatch' | 'trpc'
 
 /**
  * 3-way visual signal for the per-entry status dot in the history
@@ -228,6 +228,27 @@ export interface ResponseHistoryJsonRpcBatchResponse {
   error?: string
 }
 
+export interface ResponseHistoryTrpcResponse {
+  type: 'trpc'
+  requestUrl: string
+  requestProcedure: string
+  requestKind: 'query' | 'mutation'
+  requestHeaders: ResponseHistoryKeyValue[]
+  statusCode: number
+  statusText: string
+  /** Unwrapped `result.data` from the v10 non-batch envelope. */
+  data?: unknown
+  /** The full `[{ result: { data } }]` (or `[{ error }]`) wire envelope — the
+   * "Show raw envelope" toggle's source. */
+  rawEnvelope: string
+  responseHeaders: ResponseHistoryKeyValue[]
+  timings: {
+    startedAt: string
+    durationMs: number
+  }
+  error?: string
+}
+
 export type ResponseHistoryResponse =
   | ResponseHistoryHttpResponse
   | ResponseHistoryODataResponse
@@ -237,6 +258,7 @@ export type ResponseHistoryResponse =
   | ResponseHistoryWebSocketResponse
   | ResponseHistoryJsonRpcResponse
   | ResponseHistoryJsonRpcBatchResponse
+  | ResponseHistoryTrpcResponse
 
 export interface ResponseHistoryDetail {
   guid: string

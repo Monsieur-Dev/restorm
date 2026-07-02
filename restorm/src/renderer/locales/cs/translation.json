@@ -279,7 +279,8 @@
         "grpcServer": "Mock server gRPC",
         "soapServer": "Server SOAP mock",
         "graphqlServer": "Server GraphQL mock",
-        "odataServer": "Fiktivní server OData"
+        "odataServer": "Fiktivní server OData",
+        "trpc": "Požadavek tRPC"
       }
     },
     "deleteConfirm": {
@@ -2107,6 +2108,19 @@
     "portal": {
       "noSubscription": "Žádné aktivní předplatné ke správě.",
       "error": "Portál předplatného se nepodařilo otevřít. Zkuste to znovu."
+    }
+  },
+  "trpc": {
+    "send": "Odeslat",
+    "urlPlaceholder": "URL serveru tRPC",
+    "procedurePlaceholder": "Procedura (např. user.get)",
+    "kindQuery": "Dotaz",
+    "kindMutation": "Mutace",
+    "showRawEnvelope": "Zobrazit surovou obálku",
+    "kindSelectLabel": "Typ volání",
+    "tabs": {
+      "headers": "Hlavičky",
+      "body": "Tělo"
     }
   }
 }

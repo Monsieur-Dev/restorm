@@ -24,6 +24,7 @@ import { soapExecutionService, type SOAPExecutionInput } from './services/SOAPEx
 import { grpcExecutionService, normalizeAddress as normalizeGrpcAddress, type GRPCExecutionInput } from './services/GRPCExecutionService'
 import { grpcMockServerService } from './services/GRPCMockServerService'
 import { odataMockServerService } from './services/ODataMockServerService'
+import { trpcExecutionService } from './services/TrpcExecutionService'
 import { websocketExecutionService, type WebSocketExecutionInput } from './services/WebSocketExecutionService'
 import { jsonRpcExecutionService } from './services/JsonRpcExecutionService'
 import { scenarioEngine } from './scenarioEngine/engine'
@@ -46,6 +47,7 @@ import {
   httpListenArgs, httpStopArgs, httpIsListeningArgs,
   odataExecuteArgs, odataCancelArgs, odataIsActiveArgs,
   jsonrpcExecuteArgs, jsonrpcExecuteBatchArgs, jsonrpcCancelArgs, jsonrpcIsActiveArgs,
+  trpcExecuteArgs, trpcCancelArgs, trpcIsActiveArgs,
   authPrefetchArgs,
   graphqlExecuteArgs, graphqlCancelArgs, graphqlIsActiveArgs,
   soapExecuteArgs, soapCancelArgs, soapIsActiveArgs, soapListenArgs, soapStopArgs, soapIsListeningArgs,
@@ -953,6 +955,40 @@ export function registerRestormIPC(deps: {
 
   validatedHandle('jsonrpc:is-active', jsonrpcIsActiveArgs, (_event, [requestId]) => {
     return jsonRpcExecutionService.isActive(requestId)
+  })
+
+  // ==========================================================================
+  // tRPC Execution IPC Handlers
+  // --------------------------------------------------------------------------
+  // tRPC reuses `httpExecutionService` under the hood, like OData — a thin
+  // `TrpcExecutionService` composes the v10 wire format (URL already carries
+  // the procedure + `?input=` from URLResolver) and unwraps the response
+  // envelope before returning.
+  // ==========================================================================
+
+  validatedHandle('trpc:execute', trpcExecuteArgs, async (_event, [input]) => {
+    const authRequestPayload = (input as { authRequest?: unknown }).authRequest
+    const authRequest = isPlainAuthPayload(authRequestPayload)
+      ? AuthenticationRequest.fromPlain(authRequestPayload)
+      : undefined
+    const result = await trpcExecutionService.execute({
+      requestId: input.requestId,
+      ...(typeof input.timeout === 'number' ? { timeout: input.timeout } : {}),
+      ...(authRequest ? { authRequest } : {})
+    })
+    setImmediate(() => {
+      void responseHistoryService.storeExecutionResult(input.requestId, 'trpc', result)
+      requestUsageService.recordSend(input.requestId)
+    })
+    return result
+  })
+
+  validatedHandle('trpc:cancel', trpcCancelArgs, (_event, [requestId]) => {
+    return trpcExecutionService.cancel(requestId)
+  })
+
+  validatedHandle('trpc:is-active', trpcIsActiveArgs, (_event, [requestId]) => {
+    return trpcExecutionService.isActive(requestId)
   })
 
   // ==========================================================================

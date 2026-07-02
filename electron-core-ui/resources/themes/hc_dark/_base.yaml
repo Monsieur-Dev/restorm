@@ -435,6 +435,10 @@ colors:
     value: "#ff5722"
     description: "OData badge (HC dark)"
 
+  - id: badge-trpc-background
+    value: "#448aff"
+    description: "tRPC badge (HC dark)"
+
   - id: badge-auth-background
     value: "#ff9800"
     description: "Auth badge (HC dark)"

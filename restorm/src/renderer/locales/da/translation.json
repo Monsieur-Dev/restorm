@@ -277,7 +277,8 @@
         "grpcServer": "gRPC-mockserver",
         "soapServer": "SOAP-mockserver",
         "graphqlServer": "GraphQL-mockserver",
-        "odataServer": "OData-mockserver"
+        "odataServer": "OData-mockserver",
+        "trpc": "tRPC-anmodning"
       }
     },
     "deleteConfirm": {
@@ -2105,6 +2106,19 @@
     "portal": {
       "noSubscription": "Intet aktivt abonnement at administrere.",
       "error": "Abonnementsportalen kunne ikke åbnes. Prøv igen."
+    }
+  },
+  "trpc": {
+    "send": "Send",
+    "urlPlaceholder": "tRPC-serverens URL",
+    "procedurePlaceholder": "Procedure (f.eks. user.get)",
+    "kindQuery": "Forespørgsel",
+    "kindMutation": "Mutation",
+    "showRawEnvelope": "Vis rå konvolut",
+    "kindSelectLabel": "Kaldetype",
+    "tabs": {
+      "headers": "Headere",
+      "body": "Body"
     }
   }
 }

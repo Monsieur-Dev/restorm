@@ -59,6 +59,11 @@ const fixtures: Record<string, { content: string; filePath?: string }> = {
     // Top-level `openrpc` + `methods` discriminator
     content: readFileSync(join(FIXTURES, 'openrpc', 'echo.openrpc.json'), 'utf-8')
   },
+  trpc: {
+    // The restorm-specific `<base>/.trpc/_schema` shape — a `procedures`
+    // object with at least one recognised `kind`.
+    content: JSON.stringify({ procedures: { 'user.get': { kind: 'query', input: { id: 'number' }, output: {} } } })
+  },
   'thunder-client': {
     content: readFileSync(join(FIXTURES, 'thunder-client', 'thunder-collection-sample.json'), 'utf-8')
   },

@@ -38,6 +38,11 @@ export type GrpcCallType = (typeof GRPC_CALL_TYPES)[number]
 export const WEBSOCKET_PROTOCOLS = ['websocket', 'socketio', 'mqtt'] as const
 export type WebSocketProtocol = (typeof WEBSOCKET_PROTOCOLS)[number]
 
+/** tRPC call kind. Subscriptions ride a WebSocket transport and are out of
+ * scope — this protocol only speaks the HTTP-shaped query/mutation calls. */
+export const TRPC_CALL_KINDS = ['query', 'mutation'] as const
+export type TrpcCallKind = (typeof TRPC_CALL_KINDS)[number]
+
 /** Request type discriminator. Both the runtime tuple and the union are derived
  * from the single-source-of-truth {@link PROTOCOL_REGISTRY}; re-exported here so
  * the long-standing `models/types` import path keeps working. Adding a protocol

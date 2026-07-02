@@ -16,7 +16,7 @@
 import { useEffect } from 'react'
 import { navigationService } from 'electron-core-ui/renderer'
 import type { FolderItem, Folder, EnvironmentFolder, Request, Environment, Scenario } from '../../../shared/types/collections'
-import { isHTTPRequest, isGraphQLRequest, isGrpcRequest, isSoapRequest, isWebSocketRequest, isODataRequest } from '../../../shared/types/collections'
+import { isHTTPRequest, isGraphQLRequest, isGrpcRequest, isSoapRequest, isWebSocketRequest, isODataRequest, isTrpcRequest } from '../../../shared/types/collections'
 import { findFolderById, findEnvironmentFolderById, findRequestById, findScenarioById, findItemWithBreadcrumbs, getNearestEnvironmentsForBreadcrumbs } from '../utils/treeSearch'
 import type { BreadcrumbItem } from '../../../shared/types/editor'
 import type { OpenTabOptions } from './useWorkbenchTabs'
@@ -54,6 +54,7 @@ function navTypeForRequest(req: Request): string {
   if (isSoapRequest(req)) return 'soap-request'
   if (isWebSocketRequest(req)) return 'websocket-request'
   if (isODataRequest(req)) return 'odata-request'
+  if (isTrpcRequest(req)) return 'trpc-request'
   return 'http-request'
 }
 

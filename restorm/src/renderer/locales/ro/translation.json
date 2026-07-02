@@ -278,7 +278,8 @@
         "grpcServer": "Server gRPC simulat",
         "soapServer": "Server mock SOAP",
         "graphqlServer": "Server GraphQL simulat",
-        "odataServer": "Server OData simulat"
+        "odataServer": "Server OData simulat",
+        "trpc": "Cerere tRPC"
       }
     },
     "deleteConfirm": {
@@ -2106,6 +2107,19 @@
     "portal": {
       "noSubscription": "Niciun abonament activ de gestionat.",
       "error": "Portalul de abonament nu a putut fi deschis. Încearcă din nou."
+    }
+  },
+  "trpc": {
+    "send": "Trimite",
+    "urlPlaceholder": "URL-ul serverului tRPC",
+    "procedurePlaceholder": "Procedură (ex. user.get)",
+    "kindQuery": "Interogare",
+    "kindMutation": "Mutație",
+    "showRawEnvelope": "Afișează plicul brut",
+    "kindSelectLabel": "Tip de apel",
+    "tabs": {
+      "headers": "Antete",
+      "body": "Corp"
     }
   }
 }

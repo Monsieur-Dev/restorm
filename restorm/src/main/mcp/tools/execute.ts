@@ -34,8 +34,8 @@ import type { FullRequestData } from '../../services/ContextServiceTypes'
 import { responseHistoryService } from '../../services'
 import { websocketExecutionService } from '../../services/WebSocketExecutionService'
 import { PROTOCOL_EXECUTORS } from '../../protocol/executorRegistry'
-import { isHTTPRequest, isGraphQLRequest, isGrpcRequest, isSoapRequest, isODataRequest, isAuthenticationRequest, isWebSocketRequest, isJsonRpcRequest, isJsonRpcBatchRequest, isEnvironmentFolder } from '../../../shared/types/collections'
-import type { HTTPRequest, GraphQLRequest, GrpcRequest, SoapRequest, WebSocketRequest, AuthenticationRequest, ODataRequest, JsonRpcRequest, JsonRpcBatchRequest, KeyValue, EnvironmentFolder } from '../../../shared/types/collections'
+import { isHTTPRequest, isGraphQLRequest, isGrpcRequest, isSoapRequest, isODataRequest, isAuthenticationRequest, isWebSocketRequest, isJsonRpcRequest, isJsonRpcBatchRequest, isTrpcRequest, isEnvironmentFolder } from '../../../shared/types/collections'
+import type { HTTPRequest, GraphQLRequest, GrpcRequest, SoapRequest, WebSocketRequest, AuthenticationRequest, ODataRequest, JsonRpcRequest, JsonRpcBatchRequest, TrpcRequest, KeyValue, EnvironmentFolder } from '../../../shared/types/collections'
 import { isRequest, type FolderItem, type Request } from '../../../shared/models'
 
 function jsonReply(value: unknown): { content: { type: 'text'; text: string }[] } {
@@ -419,6 +419,12 @@ export function flushRequestStateToContext(req: Request, scenarioVariables?: Rea
     const batch = req as JsonRpcBatchRequest
     data.requestType = 'jsonrpcBatch'
     data.jsonRpcChildren = batch.children
+  } else if (isTrpcRequest(req)) {
+    const trpc = req as TrpcRequest
+    data.requestType = 'trpc'
+    data.trpcProcedure = trpc.procedure
+    data.trpcInput = trpc.input
+    data.trpcKind = trpc.kind
   }
   // If the request isn't registered with ContextService yet, register
   // it inline. Until recently we bailed out here on the assumption

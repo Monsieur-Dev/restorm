@@ -276,7 +276,8 @@
         "grpcServer": "gRPC 목 서버",
         "soapServer": "SOAP 모의 서버",
         "graphqlServer": "GraphQL 목 서버",
-        "odataServer": "OData 목 서버"
+        "odataServer": "OData 목 서버",
+        "trpc": "tRPC 요청"
       }
     },
     "deleteConfirm": {
@@ -2104,6 +2105,19 @@
     "portal": {
       "noSubscription": "관리할 활성 구독이 없습니다.",
       "error": "구독 포털을 열 수 없습니다. 다시 시도해 주세요."
+    }
+  },
+  "trpc": {
+    "send": "보내기",
+    "urlPlaceholder": "tRPC 서버 URL",
+    "procedurePlaceholder": "프로시저 (예: user.get)",
+    "kindQuery": "쿼리",
+    "kindMutation": "뮤테이션",
+    "showRawEnvelope": "원시 엔벨로프 표시",
+    "kindSelectLabel": "호출 종류",
+    "tabs": {
+      "headers": "헤더",
+      "body": "본문"
     }
   }
 }

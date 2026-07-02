@@ -277,7 +277,8 @@
         "grpcServer": "gRPC mock-kiszolgáló",
         "soapServer": "SOAP mock-kiszolgáló",
         "graphqlServer": "GraphQL mock-kiszolgáló",
-        "odataServer": "OData mock-kiszolgáló"
+        "odataServer": "OData mock-kiszolgáló",
+        "trpc": "tRPC-kérés"
       }
     },
     "deleteConfirm": {
@@ -2105,6 +2106,19 @@
     "portal": {
       "noSubscription": "Nincs kezelhető aktív előfizetés.",
       "error": "Az előfizetési portál nem nyitható meg. Próbálja újra."
+    }
+  },
+  "trpc": {
+    "send": "Küldés",
+    "urlPlaceholder": "tRPC szerver URL-je",
+    "procedurePlaceholder": "Eljárás (pl. user.get)",
+    "kindQuery": "Lekérdezés",
+    "kindMutation": "Mutáció",
+    "showRawEnvelope": "Nyers boríték megjelenítése",
+    "kindSelectLabel": "Hívás típusa",
+    "tabs": {
+      "headers": "Fejlécek",
+      "body": "Törzs"
     }
   }
 }

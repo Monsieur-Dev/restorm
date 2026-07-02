@@ -16,7 +16,8 @@ import {
   SoapRequest,
   WebSocketRequest,
   ODataRequest,
-  AuthenticationRequest
+  AuthenticationRequest,
+  TrpcRequest
 } from '../../../shared/models/requests'
 import type { HTTPMethod } from '../../../shared/models/types'
 import { findItemById, findItemWithBreadcrumbs, getFolderIcon, getNearestEnvironmentsForBreadcrumbs } from '../utils/treeSearch'
@@ -474,6 +475,7 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
       case 'odata': return 'New OData request'
       case 'odata-server': return 'New OData mock server'
       case 'auth': return 'New auth request'
+      case 'trpc': return 'New tRPC request'
       case 'scenario': return 'New scenario'
     }
   }, [t])
@@ -678,6 +680,8 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
           mockMetadata: ODATA_MOCK_STARTER_METADATA,
           mockData: ODATA_MOCK_STARTER_DATA
         })
+      } else if (kind === 'trpc') {
+        built = new TrpcRequest({ id, name })
       } else {
         built = new AuthenticationRequest({ id, name })
       }

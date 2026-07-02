@@ -275,6 +275,11 @@ variables:
     value: "#ff6a00"
     description: "OData badge background (orange)"
 
+  # ── tRPC ────────────────────────────────────────────────────────────────────
+  - id: badge-trpc-background
+    value: "#3178c6"
+    description: "tRPC badge background (TypeScript blue)"
+
   # ── Auth badge ──────────────────────────────────────────────────────────────
   - id: badge-auth-background
     value: "#f97316"

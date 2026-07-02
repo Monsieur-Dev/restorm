@@ -277,7 +277,8 @@
         "grpcServer": "gRPC mock server",
         "soapServer": "SOAP mock server",
         "graphqlServer": "GraphQL mock server",
-        "odataServer": "OData mock server"
+        "odataServer": "OData mock server",
+        "trpc": "tRPC request"
       }
     },
     "deleteConfirm": {
@@ -2105,6 +2106,19 @@
     "portal": {
       "noSubscription": "No active subscription to manage.",
       "error": "Couldn't open the subscription portal. Please try again."
+    }
+  },
+  "trpc": {
+    "send": "Send",
+    "urlPlaceholder": "tRPC server URL",
+    "procedurePlaceholder": "Procedure (e.g. user.get)",
+    "kindQuery": "Query",
+    "kindMutation": "Mutation",
+    "showRawEnvelope": "Show raw envelope",
+    "kindSelectLabel": "Call kind",
+    "tabs": {
+      "headers": "Headers",
+      "body": "Body"
     }
   }
 }

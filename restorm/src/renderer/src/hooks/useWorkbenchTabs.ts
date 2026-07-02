@@ -46,6 +46,7 @@ import {
   isWebSocketRequest,
   isODataRequest,
   isAuthenticationRequest,
+  isTrpcRequest,
   isEnvironmentFolder,
   isAnyFolder,
   isScenario
@@ -60,6 +61,7 @@ import type {
   WebSocketRequestTab,
   ODataRequestTab,
   AuthenticationRequestTab,
+  TrpcRequestTab,
   ScenarioEditorTab,
   ConsoleTab,
   FirewallTab,
@@ -498,6 +500,9 @@ export function useWorkbenchTabs(options: UseWorkbenchTabsOptions): UseWorkbench
     } else if (isAuthenticationRequest(request)) {
       tabType = 'auth-request'
       title = request.name
+    } else if (isTrpcRequest(request)) {
+      tabType = 'trpc-request'
+      title = `tRPC ${request.name}`
     } else {
       return // Unknown request type
     }
@@ -808,6 +813,18 @@ export function useWorkbenchTabs(options: UseWorkbenchTabsOptions): UseWorkbench
           environments,
           allowFullscreen: true
         } as AuthenticationRequestTab
+      }
+      if (isTrpcRequest(requestItem)) {
+        return {
+          id: tabId,
+          tabType: 'trpc-request',
+          title: `tRPC ${requestItem.name}`,
+          titleString: `tRPC ${requestItem.name}`,
+          request: requestItem,
+          breadcrumbs,
+          environments,
+          allowFullscreen: true
+        } as TrpcRequestTab
       }
     }
     return null

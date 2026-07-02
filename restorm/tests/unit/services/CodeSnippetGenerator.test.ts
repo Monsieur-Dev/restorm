@@ -29,7 +29,8 @@ const templates: CompiledSnippetTemplates = {
   soapSnippetTemplate: null,
   websocketSnippetTemplate: compile('code-snippets-websocket.hbs'),
   grpcSnippetTemplate: compile('code-snippets-grpc.hbs'),
-  jsonRpcSnippetTemplate: compile('code-snippets-jsonrpc.hbs')
+  jsonRpcSnippetTemplate: compile('code-snippets-jsonrpc.hbs'),
+  trpcSnippetTemplate: compile('code-snippets-trpc.hbs')
 } as unknown as CompiledSnippetTemplates
 
 // Identity transform (no env vars needed for these structural assertions).
@@ -185,5 +186,42 @@ describe('CodeSnippetGenerator — JSON-RPC', () => {
 
     expect(md).toContain("-H 'X-Api-Key: secret'")
     expect(md).toContain("'X-Api-Key': 'secret'")
+  })
+})
+
+describe('CodeSnippetGenerator — tRPC', () => {
+  const queryBase: Partial<FullRequestData> = {
+    requestType: 'trpc', url: 'http://localhost:3010', headers: [],
+    trpcProcedure: 'user.get', trpcInput: '{"id":1}', trpcKind: 'query'
+  }
+
+  it('renders a GET snippet for a query, with the resolved wire URL', () => {
+    const md = run(queryBase, 'http://localhost:3010/user.get?input=%7B%22id%22%3A1%7D')
+    expect(md).toContain("curl -X GET 'http://localhost:3010/user.get?input=%7B%22id%22%3A1%7D'")
+    expect(md).toContain("fetch('http://localhost:3010/user.get?input=%7B%22id%22%3A1%7D'")
+    expect(md).not.toContain('{{')
+  })
+
+  it('renders a POST snippet with the v10 mutation envelope', () => {
+    const md = run(
+      { ...queryBase, trpcProcedure: 'post.create', trpcInput: '{"title":"hi"}', trpcKind: 'mutation' },
+      'http://localhost:3010/post.create'
+    )
+    expect(md).toContain("curl -X POST 'http://localhost:3010/post.create'")
+    expect(md).toContain('{"0":{"json":{"title":"hi"}}}')
+    expect(md).not.toContain('{{')
+  })
+
+  it('the @trpc/client sample chains the dot-separated procedure path', () => {
+    const md = run(queryBase, 'http://localhost:3010/user.get?input=%7B%22id%22%3A1%7D')
+    expect(md).toContain('client.user.get.query({"id":1})')
+  })
+
+  it('composes a no-input mutation as an empty JSON object', () => {
+    const md = run(
+      { ...queryBase, trpcProcedure: 'ping', trpcInput: undefined, trpcKind: 'mutation' },
+      'http://localhost:3010/ping'
+    )
+    expect(md).toContain('{"0":{}}')
   })
 })

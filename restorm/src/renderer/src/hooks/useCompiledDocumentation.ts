@@ -18,7 +18,7 @@ import { resolveUrlAgainstEnv, flattenEnvVars } from '../../../shared/utils/reso
 // ---------- Route discriminants per request type ----------
 
 interface CompilableRoute {
-  type: 'http' | 'graphql' | 'grpc' | 'soap' | 'websocket' | 'odata'
+  type: 'http' | 'graphql' | 'grpc' | 'soap' | 'websocket' | 'odata' | 'trpc'
   url?: string
   method?: string
   operationType?: string
@@ -89,6 +89,11 @@ function routeFromRequest(request: Request): CompilableRoute {
       // Auth requests mirror HTTP requests for documentation-matching
       // purposes — they have a URL + method like any HTTP call.
       return { type: 'http', url: request.url, method: request.method, tags: request.tags }
+    case 'trpc':
+      // Same rationale as OData above: no import format wires an
+      // `ApiDocumentation` discriminant for tRPC yet, so this keeps the
+      // switch exhaustive without ever matching a compiled operation.
+      return { type: 'trpc', url: request.url, tags: request.tags }
   }
 }
 

@@ -17,7 +17,8 @@ import {
   GRAPHQL_OPERATION_TYPES,
   GRPC_CALL_TYPES,
   WEBSOCKET_PROTOCOLS,
-  HTTP_BODY_TYPE_ENUM_NAMES
+  HTTP_BODY_TYPE_ENUM_NAMES,
+  TRPC_CALL_KINDS
 } from '../../shared/models'
 
 import {
@@ -27,7 +28,8 @@ import {
   SoapRequest,
   WebSocketRequest,
   ODataRequest,
-  AuthenticationRequest
+  AuthenticationRequest,
+  TrpcRequest
 } from '../../shared/models/requests'
 
 // =============================================================================
@@ -40,6 +42,7 @@ function registerEnums(): void {
   graphQLSchemaGenerator.registerEnum('GraphQLOperationType', [...GRAPHQL_OPERATION_TYPES])
   graphQLSchemaGenerator.registerEnum('GrpcCallType', [...GRPC_CALL_TYPES])
   graphQLSchemaGenerator.registerEnum('WebSocketProtocol', [...WEBSOCKET_PROTOCOLS])
+  graphQLSchemaGenerator.registerEnum('TrpcCallKind', [...TRPC_CALL_KINDS])
   // The canonical body-type values are kebab-case (`form-data`), which
   // are not valid GraphQL enum identifiers — register the SCREAMING_SNAKE
   // member names that map 1:1 onto them.
@@ -70,6 +73,7 @@ function registerClasses(): void {
   graphQLSchemaGenerator.registerClassAuto(WebSocketRequest, skipGeneric)
   graphQLSchemaGenerator.registerClassAuto(ODataRequest, skipGeneric)
   graphQLSchemaGenerator.registerClassAuto(AuthenticationRequest, skipGeneric)
+  graphQLSchemaGenerator.registerClassAuto(TrpcRequest, skipGeneric)
 }
 
 // =============================================================================
@@ -79,12 +83,12 @@ function registerClasses(): void {
 function registerUnions(): void {
   graphQLSchemaGenerator.registerUnion('Request', [
     'HTTPRequest', 'GraphQLRequest', 'GrpcRequest', 'SoapRequest', 'WebSocketRequest',
-    'ODataRequest', 'AuthenticationRequest'
+    'ODataRequest', 'AuthenticationRequest', 'TrpcRequest'
   ])
 
   graphQLSchemaGenerator.registerUnion('FolderItem', [
     'Folder', 'EnvironmentFolder', 'HTTPRequest', 'GraphQLRequest',
-    'GrpcRequest', 'SoapRequest', 'WebSocketRequest', 'ODataRequest', 'AuthenticationRequest'
+    'GrpcRequest', 'SoapRequest', 'WebSocketRequest', 'ODataRequest', 'AuthenticationRequest', 'TrpcRequest'
   ])
 }
 

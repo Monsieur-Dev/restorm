@@ -6,7 +6,7 @@ import { useEffect, useCallback } from 'react'
 import { navigationService } from 'electron-core-ui/renderer'
 import type { NavigationEvent, SearchResult } from 'electron-core-ui/renderer'
 import type { Folder, EnvironmentFolder, Request, Environment, FolderItem, Scenario } from '../../../shared/types/collections'
-import { isFolder, isRequest, isScenario, isEnvironmentFolder, isHTTPRequest, isGraphQLRequest, isGrpcRequest, isSoapRequest, isWebSocketRequest, isODataRequest } from '../../../shared/types/collections'
+import { isFolder, isRequest, isScenario, isEnvironmentFolder, isHTTPRequest, isGraphQLRequest, isGrpcRequest, isSoapRequest, isWebSocketRequest, isODataRequest, isTrpcRequest } from '../../../shared/types/collections'
 import { findFolderById, findItemWithBreadcrumbs } from '../utils/treeSearch'
 import type { BreadcrumbItem } from '../../../shared/types/editor'
 
@@ -165,6 +165,8 @@ export function useNavigation(options: UseNavigationOptions): UseNavigationRetur
         navigationService.navigateTo(itemId, 'sidebar', { type: 'websocket-request' })
       } else if (isODataRequest(item)) {
         navigationService.navigateTo(itemId, 'sidebar', { type: 'odata-request' })
+      } else if (isTrpcRequest(item)) {
+        navigationService.navigateTo(itemId, 'sidebar', { type: 'trpc-request' })
       }
     }
   }, [rootItems, setSelectedItemId, openFolderTab, openScenarioEditorTab, openEnvironmentFolderTab, openAnyRequestTab, getNearestEnvironmentsForBreadcrumbs])
@@ -272,6 +274,8 @@ export function useNavigation(options: UseNavigationOptions): UseNavigationRetur
           navigationService.navigateTo(itemId, 'breadcrumb', { type: 'websocket-request' })
         } else if (isODataRequest(foundItem)) {
           navigationService.navigateTo(itemId, 'breadcrumb', { type: 'odata-request' })
+        } else if (isTrpcRequest(foundItem)) {
+          navigationService.navigateTo(itemId, 'breadcrumb', { type: 'trpc-request' })
         }
       }
     },

@@ -276,7 +276,8 @@
         "grpcServer": "gRPC 模擬伺服器",
         "soapServer": "SOAP 模擬伺服器",
         "graphqlServer": "GraphQL 模擬伺服器",
-        "odataServer": "OData 模擬伺服器"
+        "odataServer": "OData 模擬伺服器",
+        "trpc": "tRPC 請求"
       }
     },
     "deleteConfirm": {
@@ -2104,6 +2105,19 @@
     "portal": {
       "noSubscription": "沒有可管理的有效訂閱。",
       "error": "無法開啟訂閱入口。請重試。"
+    }
+  },
+  "trpc": {
+    "send": "傳送",
+    "urlPlaceholder": "tRPC 伺服器 URL",
+    "procedurePlaceholder": "程序（例如 user.get）",
+    "kindQuery": "查詢",
+    "kindMutation": "變更",
+    "showRawEnvelope": "顯示原始信封",
+    "kindSelectLabel": "呼叫類型",
+    "tabs": {
+      "headers": "標頭",
+      "body": "內文"
     }
   }
 }

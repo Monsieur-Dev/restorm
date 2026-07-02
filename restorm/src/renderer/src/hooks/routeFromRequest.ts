@@ -58,5 +58,9 @@ export function routeFromRequest(request: Request): RouteLike {
       return { type: 'http', url: request.url, tags: request.tags }
     case 'auth':
       return { type: 'http', url: request.url, method: request.method, tags: request.tags }
+    case 'trpc':
+      // No import format wires an API document for tRPC yet (no docs to
+      // match against) — same HTTP-aliased fallback as OData above.
+      return { type: 'http', url: request.url, tags: request.tags }
   }
 }

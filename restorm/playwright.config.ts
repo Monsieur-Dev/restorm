@@ -190,6 +190,12 @@ const graphqlExecutionTestDir = defineBddConfig({
   outputDir: '.features-gen/graphql-execution'
 })
 
+const trpcExecutionTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/trpc-execution/features/**/*.feature',
+  steps: ['tests/e2e/bdd/trpc-execution/steps/**/*.ts', 'tests/e2e/bdd/fixtures/mcp-server.fixture.ts'],
+  outputDir: '.features-gen/trpc-execution'
+})
+
 const fullyDocumentedPetstoreTestDir = defineBddConfig({
   features: 'tests/e2e/bdd/fully-documented-petstore/features/**/*.feature',
   steps: [
@@ -550,6 +556,11 @@ export default defineConfig({
     {
       name: 'graphql-execution',
       testDir: graphqlExecutionTestDir,
+      timeout: 180 * 1000
+    },
+    {
+      name: 'trpc-execution',
+      testDir: trpcExecutionTestDir,
       timeout: 180 * 1000
     },
     {

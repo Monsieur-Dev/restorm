@@ -80,6 +80,19 @@ services:
     ports:
       - "4000:4000"
 
+  # tRPC - hand-rolled zero-dependency node:http mock (v10 non-batch wire
+  # format). Mirrors the http-util / odata-v2-petstore precedent — no
+  # `npm install`, boots instantly. Listens on :8096.
+  trpc:
+    image: node:20-alpine
+    container_name: restorm-trpc
+    working_dir: /app
+    volumes:
+      - ./trpc-server:/app
+    command: node server.js
+    ports:
+      - "8096:8096"
+
   # MQTT - Eclipse Mosquitto broker
   mqtt:
     image: eclipse-mosquitto:2

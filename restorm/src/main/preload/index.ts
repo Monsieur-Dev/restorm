@@ -26,6 +26,7 @@ import {
   graphqlExecuteResultSchema,
   jsonrpcExecuteResultSchema,
   jsonrpcExecuteBatchResultSchema,
+  trpcExecuteResultSchema,
   soapExecuteResultSchema,
   grpcExecuteResultSchema,
   websocketConnectResultSchema,
@@ -1188,6 +1189,54 @@ contextBridge.exposeInMainWorld('restorm', {
     /** Check whether a JSON-RPC call is currently in flight. */
     isActive: async (requestId: string): Promise<boolean> => {
       const result: unknown = await ipcRenderer.invoke('jsonrpc:is-active', requestId)
+      return result as boolean
+    }
+  },
+  trpc: {
+    /**
+     * Execute a tRPC request. Reuses the HTTP dispatcher: the URL (with the
+     * procedure path + `?input=` already appended by URLResolver) is
+     * dispatched as a plain HTTP call; `data` carries the UNWRAPPED
+     * `result.data`, `rawBody` the full wire envelope (for the "Show raw
+     * envelope" toggle).
+     */
+    execute: async (input: { requestId: string; timeout?: number; authRequest?: unknown }): Promise<{
+      requestId: string
+      success: boolean
+      statusCode?: number
+      statusText?: string
+      headers?: Record<string, string | string[]>
+      data?: unknown
+      rawBody?: string
+      error?: string
+      timings: { startedAt: string; durationMs: number }
+      requestUrl?: string
+      requestHeaders?: Record<string, string>
+    }> => {
+      const result: unknown = await ipcRenderer.invoke('trpc:execute', input)
+      warnOnOutputMismatch('trpc:execute', trpcExecuteResultSchema, result)
+      return result as {
+        requestId: string
+        success: boolean
+        statusCode?: number
+        statusText?: string
+        headers?: Record<string, string | string[]>
+        data?: unknown
+        rawBody?: string
+        error?: string
+        timings: { startedAt: string; durationMs: number }
+        requestUrl?: string
+        requestHeaders?: Record<string, string>
+      }
+    },
+    /** Cancel an in-flight tRPC request. */
+    cancel: async (requestId: string): Promise<boolean> => {
+      const result: unknown = await ipcRenderer.invoke('trpc:cancel', requestId)
+      return result as boolean
+    },
+    /** Check whether a tRPC request is currently in flight. */
+    isActive: async (requestId: string): Promise<boolean> => {
+      const result: unknown = await ipcRenderer.invoke('trpc:is-active', requestId)
       return result as boolean
     }
   },

@@ -277,7 +277,8 @@
         "grpcServer": "gRPC-Mock-Server",
         "soapServer": "SOAP-Mock-Server",
         "graphqlServer": "GraphQL-Mock-Server",
-        "odataServer": "OData-Mock-Server"
+        "odataServer": "OData-Mock-Server",
+        "trpc": "tRPC-Anfrage"
       }
     },
     "deleteConfirm": {
@@ -2105,6 +2106,19 @@
     "portal": {
       "noSubscription": "Kein aktives Abonnement zum Verwalten.",
       "error": "Das Abonnementportal konnte nicht geöffnet werden. Bitte versuchen Sie es erneut."
+    }
+  },
+  "trpc": {
+    "send": "Senden",
+    "urlPlaceholder": "tRPC-Server-URL",
+    "procedurePlaceholder": "Prozedur (z. B. user.get)",
+    "kindQuery": "Query",
+    "kindMutation": "Mutation",
+    "showRawEnvelope": "Rohe Hülle anzeigen",
+    "kindSelectLabel": "Aufruftyp",
+    "tabs": {
+      "headers": "Header",
+      "body": "Body"
     }
   }
 }

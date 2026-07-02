@@ -7,12 +7,13 @@ import type { WebSocketRequest } from './WebSocketRequest'
 import type { ODataRequest, ODataQueryOptions, ODataOperationKind, ODataBatchFormat, ODataBatchSubRequestSpec, ODataOperationParameterSpec } from './ODataRequest'
 import type { AuthenticationRequest } from './AuthenticationRequest'
 import type { JsonRpcRequest, JsonRpcBatchRequest, JsonRpcBatchCallSpec } from './JsonRpcRequest'
+import type { TrpcRequest } from './TrpcRequest'
 import type { QuickConfig, QuickConfigStorageTarget } from './QuickConfig'
 
-export type { BaseRequest, ImportOrigin, HTTPRequest, GraphQLRequest, GrpcRequest, GrpcMockMethod, SoapRequest, WebSocketRequest, ODataRequest, ODataQueryOptions, ODataOperationKind, ODataBatchFormat, ODataBatchSubRequestSpec, ODataOperationParameterSpec, AuthenticationRequest, JsonRpcRequest, JsonRpcBatchRequest, JsonRpcBatchCallSpec }
+export type { BaseRequest, ImportOrigin, HTTPRequest, GraphQLRequest, GrpcRequest, GrpcMockMethod, SoapRequest, WebSocketRequest, ODataRequest, ODataQueryOptions, ODataOperationKind, ODataBatchFormat, ODataBatchSubRequestSpec, ODataOperationParameterSpec, AuthenticationRequest, JsonRpcRequest, JsonRpcBatchRequest, JsonRpcBatchCallSpec, TrpcRequest }
 export type { QuickConfig, QuickConfigStorageTarget }
 
-export type Request = HTTPRequest | GraphQLRequest | GrpcRequest | SoapRequest | WebSocketRequest | ODataRequest | AuthenticationRequest | JsonRpcRequest | JsonRpcBatchRequest
+export type Request = HTTPRequest | GraphQLRequest | GrpcRequest | SoapRequest | WebSocketRequest | ODataRequest | AuthenticationRequest | JsonRpcRequest | JsonRpcBatchRequest | TrpcRequest
 
 export function isHTTPRequest(request: Request): request is HTTPRequest {
   return request.type === 'http'
@@ -48,4 +49,8 @@ export function isJsonRpcRequest(request: Request): request is JsonRpcRequest {
 
 export function isJsonRpcBatchRequest(request: Request): request is JsonRpcBatchRequest {
   return request.type === 'jsonrpcBatch'
+}
+
+export function isTrpcRequest(request: Request): request is TrpcRequest {
+  return request.type === 'trpc'
 }

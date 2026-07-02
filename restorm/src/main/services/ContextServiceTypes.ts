@@ -60,7 +60,7 @@ export type HTTPRequestBody =
 /** Full request data for URL resolution and code snippet generation */
 export interface FullRequestData {
   id: string
-  requestType: 'http' | 'graphql' | 'grpc' | 'soap' | 'websocket' | 'odata' | 'auth' | 'jsonrpc' | 'jsonrpcBatch'
+  requestType: 'http' | 'graphql' | 'grpc' | 'soap' | 'websocket' | 'odata' | 'auth' | 'jsonrpc' | 'jsonrpcBatch' | 'trpc'
 
   // Common fields
   url: string
@@ -173,6 +173,13 @@ export interface FullRequestData {
     rpcId: string
     notificationMode?: boolean
   }[]
+
+  // tRPC specific — `url` carries the BASE server url; URLResolver appends
+  // `/<trpcProcedure>` (and, for a query, `?input=<encoded>`) as a final step,
+  // mirroring the OData system-query-option append above.
+  trpcProcedure?: string
+  trpcInput?: string
+  trpcKind?: 'query' | 'mutation'
 }
 
 /** Request context tracking with full data */

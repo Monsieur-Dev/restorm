@@ -70,7 +70,8 @@ const REQUEST_TAB_TYPES = new Set([
   'soap-request',
   'websocket-request',
   'odata-request',
-  'auth-request'
+  'auth-request',
+  'trpc-request'
 ])
 
 /**

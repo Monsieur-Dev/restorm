@@ -14,6 +14,7 @@ import {
   isWebSocketRequestTab,
   isODataRequestTab,
   isAuthenticationRequestTab,
+  isTrpcRequestTab,
   isAnyRequestTab,
   isScenarioEditorTab,
   isConsoleTab,
@@ -362,7 +363,8 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
       isSoapRequestTab(tab) ||
       isWebSocketRequestTab(tab) ||
       isODataRequestTab(tab) ||
-      isAuthenticationRequestTab(tab)
+      isAuthenticationRequestTab(tab) ||
+      isTrpcRequestTab(tab)
     ) {
       return tab.request.id
     }
@@ -557,6 +559,19 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
       return (
         <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
           <Badge type="AUTH" />
+          <span>{restormTab.request.name}</span>
+          <ItemSecretBadges itemId={restormTab.request.id} />
+          {renderDirtyIndicator(restormTab)}
+        </span>
+      )
+    }
+
+    // tRPC request tab. Every call kind (query/mutation) shares the fixed
+    // 'tRPC' badge — mirrors the OData badge, no server mode.
+    if (isTrpcRequestTab(restormTab)) {
+      return (
+        <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <Badge type="tRPC" />
           <span>{restormTab.request.name}</span>
           <ItemSecretBadges itemId={restormTab.request.id} />
           {renderDirtyIndicator(restormTab)}
@@ -1242,6 +1257,43 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
 
     // OData request tab
     if (isODataRequestTab(effectiveTab)) {
+      // Prefer the live reactive request proxy (so in-place mutations — quick-
+      // config Load, MCP update_request — re-render this tab) and fall back to
+      // the tab's static snapshot only when the tree lookup misses. Mirrors the
+      // HTTP branch above; without it a non-HTTP tab edits a detached snapshot.
+      // The lookup returns a `Request`; this branch's type guard fixed the
+      // concrete kind, and the reactive node shares the tab request's id, so the
+      // cast to the tab request's type is sound.
+      const reactive = getRequestById?.(effectiveTab.request.id)
+      const request = reactive?.type === effectiveTab.request.type ? reactive : effectiveTab.request
+      return (
+        <EnvironmentProvider environments={liveEnvironments} tagColors={requestTagColors} persistenceKey={envPersistenceKey(effectiveTab.request.id)} folderRequestIds={envFolderRequestIds}>
+          <RestormWorkbenchTab
+            breadcrumbs={breadcrumbs}
+            onBreadcrumbClick={onBreadcrumbClick}
+            onBreadcrumbAuxClick={onBreadcrumbAuxClick}
+            onBreadcrumbRename={onItemRename}
+            onBreadcrumbIconChange={onItemIconChange}
+            tags={request.tags}
+            onTagsChange={(nextTags) => { onTagsChange?.(request.id, nextTags) }}
+            tagColors={requestTagColors}
+            onTagColorChange={handleRequestTagColorChange}
+            tabId={effectiveTab.id}
+            {...favoritePropsFor(request.id)}
+            headerActions={requestHeaderActionsFor(request.id, request)}
+            topRightAction={scenarioUsageActionFor(request.id)}
+            starLeftAction={starLeftActionFor(request)}
+          >
+            <div style={{ flex: 1, minHeight: 0, minWidth: 0, padding: '0 16px 8px 16px' }}>
+              {renderProtocolTabView(request)}
+            </div>
+          </RestormWorkbenchTab>
+        </EnvironmentProvider>
+      )
+    }
+
+    // tRPC request tab
+    if (isTrpcRequestTab(effectiveTab)) {
       // Prefer the live reactive request proxy (so in-place mutations — quick-
       // config Load, MCP update_request — re-render this tab) and fall back to
       // the tab's static snapshot only when the tree lookup misses. Mirrors the

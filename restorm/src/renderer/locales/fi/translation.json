@@ -277,7 +277,8 @@
         "grpcServer": "gRPC-mock-palvelin",
         "soapServer": "SOAP-mock-palvelin",
         "graphqlServer": "GraphQL-mock-palvelin",
-        "odataServer": "OData-mock-palvelin"
+        "odataServer": "OData-mock-palvelin",
+        "trpc": "tRPC-pyyntö"
       }
     },
     "deleteConfirm": {
@@ -2105,6 +2106,19 @@
     "portal": {
       "noSubscription": "Ei aktiivista tilausta hallittavaksi.",
       "error": "Tilausportaalin avaaminen epäonnistui. Yritä uudelleen."
+    }
+  },
+  "trpc": {
+    "send": "Lähetä",
+    "urlPlaceholder": "tRPC-palvelimen URL-osoite",
+    "procedurePlaceholder": "Toimenpide (esim. user.get)",
+    "kindQuery": "Kysely",
+    "kindMutation": "Mutaatio",
+    "showRawEnvelope": "Näytä raaka kirjekuori",
+    "kindSelectLabel": "Kutsun tyyppi",
+    "tabs": {
+      "headers": "Otsakkeet",
+      "body": "Sisältö"
     }
   }
 }

@@ -279,7 +279,8 @@
         "grpcServer": "gRPC mock-сервер",
         "soapServer": "Макетний сервер SOAP",
         "graphqlServer": "GraphQL mock-сервер",
-        "odataServer": "OData mock-сервер"
+        "odataServer": "OData mock-сервер",
+        "trpc": "Запит tRPC"
       }
     },
     "deleteConfirm": {
@@ -2107,6 +2108,19 @@
     "portal": {
       "noSubscription": "Немає активної підписки для керування.",
       "error": "Не вдалося відкрити портал підписки. Спробуйте ще раз."
+    }
+  },
+  "trpc": {
+    "send": "Надіслати",
+    "urlPlaceholder": "URL-адреса сервера tRPC",
+    "procedurePlaceholder": "Процедура (напр. user.get)",
+    "kindQuery": "Запит",
+    "kindMutation": "Мутація",
+    "showRawEnvelope": "Показати необроблений конверт",
+    "kindSelectLabel": "Тип виклику",
+    "tabs": {
+      "headers": "Заголовки",
+      "body": "Тіло"
     }
   }
 }

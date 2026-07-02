@@ -12,6 +12,7 @@ import type {
   AuthenticationRequest,
   JsonRpcRequest,
   JsonRpcBatchRequest,
+  TrpcRequest,
   Environment,
   Scenario
 } from './collections'
@@ -117,6 +118,15 @@ export interface JsonRpcBatchRequestTab extends BaseRestormTab {
   environments?: Environment[] | undefined
 }
 
+/** Tab displaying a tRPC request */
+export interface TrpcRequestTab extends BaseRestormTab {
+  tabType: 'trpc-request'
+  /** The tRPC request data to display */
+  request: TrpcRequest
+  /** Environments available for this request */
+  environments?: Environment[] | undefined
+}
+
 /** Tab displaying an Authentication request (HTTP + auth config tab) */
 export interface AuthenticationRequestTab extends BaseRestormTab {
   tabType: 'auth-request'
@@ -202,6 +212,7 @@ export type RestormEditorTab =
   | JsonRpcRequestTab
   | JsonRpcBatchRequestTab
   | AuthenticationRequestTab
+  | TrpcRequestTab
   | ScenarioEditorTab
   | ConsoleTab
   | FirewallTab
@@ -296,6 +307,11 @@ export function isAuthenticationRequestTab(tab: RestormEditorTab): tab is Authen
   return tab.tabType === 'auth-request'
 }
 
+/** Type guard for TrpcRequestTab */
+export function isTrpcRequestTab(tab: RestormEditorTab): tab is TrpcRequestTab {
+  return tab.tabType === 'trpc-request'
+}
+
 /** Any protocol's request tab (carries a backing `request`). */
 export type AnyRequestTab =
   | HTTPRequestTab
@@ -307,10 +323,11 @@ export type AnyRequestTab =
   | JsonRpcRequestTab
   | JsonRpcBatchRequestTab
   | AuthenticationRequestTab
+  | TrpcRequestTab
 
 const REQUEST_TAB_TYPES: ReadonlySet<string> = new Set([
   'http-request', 'graphql-request', 'grpc-request', 'soap-request',
-  'websocket-request', 'odata-request', 'jsonrpc-request', 'jsonrpc-batch-request', 'auth-request'
+  'websocket-request', 'odata-request', 'jsonrpc-request', 'jsonrpc-batch-request', 'auth-request', 'trpc-request'
 ])
 
 /** Type guard for ANY request tab (any protocol). Use this instead of a

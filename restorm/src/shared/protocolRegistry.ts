@@ -149,6 +149,14 @@ export const PROTOCOL_REGISTRY = {
     tabType: 'jsonrpc-batch-request',
     ipcNamespace: 'jsonrpc',
     badge: { kind: 'fixed', value: 'RPC[]' }
+  },
+  trpc: {
+    graphqlTypeName: 'TrpcRequest',
+    tabType: 'trpc-request',
+    ipcNamespace: 'trpc',
+    // A tRPC call binds to the existing `httpRequest` scenario node (like
+    // GraphQL / gRPC unary / OData), so it contributes no `scenarioKinds`.
+    badge: { kind: 'fixed', value: 'tRPC' }
   }
 } satisfies Record<string, ProtocolSpec>
 

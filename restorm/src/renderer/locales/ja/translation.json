@@ -276,7 +276,8 @@
         "grpcServer": "gRPC モックサーバー",
         "soapServer": "SOAP モックサーバー",
         "graphqlServer": "GraphQL モックサーバー",
-        "odataServer": "OData モックサーバー"
+        "odataServer": "OData モックサーバー",
+        "trpc": "tRPC リクエスト"
       }
     },
     "deleteConfirm": {
@@ -2104,6 +2105,19 @@
     "portal": {
       "noSubscription": "管理できる有効なサブスクリプションがありません。",
       "error": "サブスクリプションポータルを開けませんでした。もう一度お試しください。"
+    }
+  },
+  "trpc": {
+    "send": "送信",
+    "urlPlaceholder": "tRPC サーバーの URL",
+    "procedurePlaceholder": "プロシージャ（例: user.get）",
+    "kindQuery": "クエリ",
+    "kindMutation": "ミューテーション",
+    "showRawEnvelope": "生のエンベロープを表示",
+    "kindSelectLabel": "呼び出し種別",
+    "tabs": {
+      "headers": "ヘッダー",
+      "body": "ボディ"
     }
   }
 }

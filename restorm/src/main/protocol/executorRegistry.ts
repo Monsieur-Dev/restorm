@@ -15,8 +15,9 @@ import { jsonRpcExecutionService } from '../services/JsonRpcExecutionService'
  * without an executor entry fails the test rather than falling through a
  * `switch` default at runtime.
  *
- * `auth` and `odata` deliberately COMPOSE onto the HTTP execution service (auth
- * is an HTTP prefetch; OData is HTTP with `$`-query serialisation) — the same
+ * `auth`, `odata`, and `trpc` deliberately COMPOSE onto the HTTP execution
+ * service (auth is an HTTP prefetch; OData is HTTP with `$`-query
+ * serialisation; tRPC is HTTP with a v10 wire-format envelope) — the same
  * mapping the previous per-tool `switch` statements encoded.
  *
  * A new protocol appends ONE entry here — no execute/cancel `switch` to touch.
@@ -34,6 +35,7 @@ export const PROTOCOL_EXECUTORS: Record<RequestType, ProtocolExecutor> = {
   http: { streaming: false, cancel: (id) => httpExecutionService.cancel(id) },
   odata: { streaming: false, cancel: (id) => httpExecutionService.cancel(id) },
   auth: { streaming: false, cancel: (id) => httpExecutionService.cancel(id) },
+  trpc: { streaming: false, cancel: (id) => httpExecutionService.cancel(id) },
   graphql: { streaming: false, cancel: (id) => graphqlExecutionService.cancel(id) },
   soap: { streaming: false, cancel: (id) => soapExecutionService.cancel(id) },
   grpc: { streaming: false, cancel: (id) => grpcExecutionService.cancel(id) },

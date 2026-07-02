@@ -16,6 +16,7 @@ import type {
   TransformedContext,
   TransformValueFn
 } from './ContextServiceTypes'
+import { composeTrpcRequestBody } from '../../shared/utils/trpcRequestBody'
 
 // ============================================================================
 // Template Loading
@@ -62,6 +63,7 @@ export interface CompiledSnippetTemplates {
   grpcSnippetTemplate: Handlebars.TemplateDelegate | null
   soapSnippetTemplate: Handlebars.TemplateDelegate | null
   jsonRpcSnippetTemplate: Handlebars.TemplateDelegate | null
+  trpcSnippetTemplate: Handlebars.TemplateDelegate | null
 }
 
 /**
@@ -75,7 +77,8 @@ export function compileSnippetTemplates(): CompiledSnippetTemplates {
     websocketSnippetTemplate: null,
     grpcSnippetTemplate: null,
     soapSnippetTemplate: null,
-    jsonRpcSnippetTemplate: null
+    jsonRpcSnippetTemplate: null,
+    trpcSnippetTemplate: null
   }
 
   try {
@@ -85,6 +88,7 @@ export function compileSnippetTemplates(): CompiledSnippetTemplates {
     const grpcTemplate = loadTemplate('code-snippets-grpc.hbs')
     const soapTemplate = loadTemplate('code-snippets-soap.hbs')
     const jsonRpcTemplate = loadTemplate('code-snippets-jsonrpc.hbs')
+    const trpcTemplate = loadTemplate('code-snippets-trpc.hbs')
 
     if (httpTemplate) templates.httpSnippetTemplate = Handlebars.compile(httpTemplate, { noEscape: true })
     if (graphqlTemplate) templates.graphqlSnippetTemplate = Handlebars.compile(graphqlTemplate, { noEscape: true })
@@ -92,6 +96,7 @@ export function compileSnippetTemplates(): CompiledSnippetTemplates {
     if (grpcTemplate) templates.grpcSnippetTemplate = Handlebars.compile(grpcTemplate, { noEscape: true })
     if (soapTemplate) templates.soapSnippetTemplate = Handlebars.compile(soapTemplate, { noEscape: true })
     if (jsonRpcTemplate) templates.jsonRpcSnippetTemplate = Handlebars.compile(jsonRpcTemplate, { noEscape: true })
+    if (trpcTemplate) templates.trpcSnippetTemplate = Handlebars.compile(trpcTemplate, { noEscape: true })
 
     logger.info('[CodeSnippetGenerator] Code snippet templates loaded and compiled')
   } catch (error) {
@@ -343,6 +348,35 @@ export function generateCodeSnippets(
           url: resolvedUrl,
           envelope: JSON.stringify(envelope),
           isBatch: true,
+          headers: headers.length > 0 ? headers : null
+        })
+      }
+      break
+    }
+
+    case 'trpc': {
+      // `resolvedUrl` already carries `<base>/<procedure>` (+ `?input=` for a
+      // query, appended by URLResolver) — the same composition the wire call
+      // uses. `composeTrpcRequestBody` is the single source of truth for the
+      // verb + body shared with `TrpcExecutionService`, so the snippet can
+      // never drift from what actually gets sent.
+      const resolvedInput = data.trpcInput ? transformValue(data.trpcInput, envContext) : undefined
+      const composed = composeTrpcRequestBody({ kind: data.trpcKind, input: resolvedInput })
+      // `host` for the @trpc/client sample is the BASE server url (no
+      // procedure/query string) — re-resolve it directly rather than parsing
+      // the wire URL apart.
+      const baseUrl = transformValue(data.url, envContext)
+
+      if (templates.trpcSnippetTemplate) {
+        markdown = templates.trpcSnippetTemplate({
+          method: composed.method,
+          lowerMethod: composed.method.toLowerCase(),
+          url: resolvedUrl,
+          host: baseUrl,
+          isMutation: data.trpcKind === 'mutation',
+          procedurePath: data.trpcProcedure ?? '',
+          input: resolvedInput ?? 'undefined',
+          body: composed.rawBody ?? null,
           headers: headers.length > 0 ? headers : null
         })
       }

@@ -277,7 +277,8 @@
         "grpcServer": "Servidor gRPC simulado",
         "soapServer": "Servidor SOAP de prueba",
         "graphqlServer": "Servidor GraphQL simulado",
-        "odataServer": "Servidor OData simulado"
+        "odataServer": "Servidor OData simulado",
+        "trpc": "Petición tRPC"
       }
     },
     "deleteConfirm": {
@@ -2105,6 +2106,19 @@
     "portal": {
       "noSubscription": "No hay ninguna suscripción activa que gestionar.",
       "error": "No se pudo abrir el portal de suscripción. Inténtalo de nuevo."
+    }
+  },
+  "trpc": {
+    "send": "Enviar",
+    "urlPlaceholder": "URL del servidor tRPC",
+    "procedurePlaceholder": "Procedimiento (p. ej. user.get)",
+    "kindQuery": "Consulta",
+    "kindMutation": "Mutación",
+    "showRawEnvelope": "Mostrar sobre en bruto",
+    "kindSelectLabel": "Tipo de llamada",
+    "tabs": {
+      "headers": "Cabeceras",
+      "body": "Cuerpo"
     }
   }
 }

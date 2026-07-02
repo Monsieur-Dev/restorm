@@ -39,6 +39,7 @@ import type { GRPCExecutionResult } from './GRPCExecutionService'
 import type { SOAPExecutionResult } from './SOAPExecutionService'
 import type { WebSocketExecutionResult } from './WebSocketExecutionService'
 import type { JsonRpcExecutionResult, JsonRpcBatchExecutionResult } from './JsonRpcExecutionService'
+import type { TrpcExecutionResult } from './TrpcExecutionService'
 import { normalizeODataResponse } from '../../shared/utils/odataResponse'
 import { redactTokensFromBody, collectTokenValues, redactTokensFromHeaders } from './AuthenticationRedaction'
 import { isAuthenticationRequest } from '../../shared/types/collections'
@@ -53,6 +54,7 @@ type ExecutionResult =
   | WebSocketExecutionResult
   | JsonRpcExecutionResult
   | JsonRpcBatchExecutionResult
+  | TrpcExecutionResult
 
 /**
  * Compute the 3-way visual outcome (`ok` / `warning` / `failure`) for
@@ -393,7 +395,8 @@ class ResponseHistoryService {
       soap: { build: (id, r) => this.buildSoapResponse(id, r as SOAPExecutionResult), outcome: (r) => httpOutcome(r as SOAPExecutionResult) },
       websocket: { build: (id, r) => this.buildWebSocketResponse(id, r as WebSocketExecutionResult), outcome: (r) => webSocketOutcome(r as WebSocketExecutionResult) },
       jsonrpc: { build: (id, r) => this.buildJsonRpcResponse(id, r as JsonRpcExecutionResult), outcome: (r) => jsonRpcOutcome(r as JsonRpcExecutionResult) },
-      jsonrpcBatch: { build: (id, r) => this.buildJsonRpcBatchResponse(id, r as JsonRpcBatchExecutionResult), outcome: (r) => jsonRpcBatchOutcome(r as JsonRpcBatchExecutionResult) }
+      jsonrpcBatch: { build: (id, r) => this.buildJsonRpcBatchResponse(id, r as JsonRpcBatchExecutionResult), outcome: (r) => jsonRpcBatchOutcome(r as JsonRpcBatchExecutionResult) },
+      trpc: { build: (id, r) => this.buildTrpcResponse(id, r as TrpcExecutionResult), outcome: (r) => httpOutcome(r as TrpcExecutionResult) }
     }
 
     const builder = builders[type]
@@ -636,6 +639,32 @@ class ResponseHistoryService {
     }
   }
 
+  private buildTrpcResponse(requestId: string, result: TrpcExecutionResult): ResponseHistoryResponse | null {
+    const resolvedUrl = contextService.getResolvedUrl(requestId)?.resolvedUrl ?? result.requestUrl ?? ''
+    const requestHeaders = this.getResolvedKeyValues(requestId, 'headers')
+    const responseHeaders = this.headersRecordToKeyValues(result.headers)
+    const fullData = this.getRequestFullData(requestId)
+    const requestProcedure = typeof fullData?.['trpcProcedure'] === 'string' ? fullData['trpcProcedure'] : ''
+    const requestKind = fullData?.['trpcKind'] === 'mutation' ? 'mutation' : 'query'
+
+    return {
+      type: 'trpc',
+      requestUrl: resolvedUrl,
+      requestProcedure,
+      requestKind,
+      requestHeaders,
+      statusCode: result.statusCode ?? 0,
+      statusText: result.statusText ?? '',
+      data: result.data,
+      // The full `[{ result: { data } }]` (or error) wire envelope — the
+      // "Show raw envelope" toggle's source.
+      rawEnvelope: result.rawBody ?? '',
+      responseHeaders,
+      timings: result.timings,
+      ...(result.error ? { error: result.error } : {})
+    }
+  }
+
   private buildGrpcResponse(requestId: string, result: GRPCExecutionResult): ResponseHistoryResponse | null {
     const resolvedUrl = contextService.getResolvedUrl(requestId)?.resolvedUrl ?? result.requestUrl ?? ''
     const requestMessage = this.getRequestBodyContent(requestId)
@@ -824,6 +853,10 @@ class ResponseHistoryService {
       websocket: (r) => ({
         protocol: typeof r['protocol'] === 'string' ? r['protocol'] : '',
         event: typeof r['event'] === 'string' ? r['event'] : ''
+      }),
+      trpc: (r) => ({
+        operation: typeof r['procedure'] === 'string' ? r['procedure'] : '',
+        method: r['kind'] === 'mutation' ? 'POST' : 'GET'
       })
     }
     const extractor = extractors[type]

@@ -276,7 +276,8 @@
         "grpcServer": "gRPC 模拟服务器",
         "soapServer": "SOAP 模拟服务器",
         "graphqlServer": "GraphQL 模拟服务器",
-        "odataServer": "OData 模拟服务器"
+        "odataServer": "OData 模拟服务器",
+        "trpc": "tRPC 请求"
       }
     },
     "deleteConfirm": {
@@ -2104,6 +2105,19 @@
     "portal": {
       "noSubscription": "没有可管理的有效订阅。",
       "error": "无法打开订阅门户。请重试。"
+    }
+  },
+  "trpc": {
+    "send": "发送",
+    "urlPlaceholder": "tRPC 服务器 URL",
+    "procedurePlaceholder": "过程（例如 user.get）",
+    "kindQuery": "查询",
+    "kindMutation": "变更",
+    "showRawEnvelope": "显示原始信封",
+    "kindSelectLabel": "调用类型",
+    "tabs": {
+      "headers": "请求头",
+      "body": "正文"
     }
   }
 }

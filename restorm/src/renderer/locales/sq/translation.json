@@ -277,7 +277,8 @@
         "grpcServer": "Server gRPC mock",
         "soapServer": "Server mock SOAP",
         "graphqlServer": "Server GraphQL mock",
-        "odataServer": "Server OData mock"
+        "odataServer": "Server OData mock",
+        "trpc": "Kërkesë tRPC"
       }
     },
     "deleteConfirm": {
@@ -2105,6 +2106,19 @@
     "portal": {
       "noSubscription": "Nuk ka abonim aktiv për të menaxhuar.",
       "error": "Portali i abonimit nuk u hap dot. Provo përsëri."
+    }
+  },
+  "trpc": {
+    "send": "Dërgo",
+    "urlPlaceholder": "URL-ja e serverit tRPC",
+    "procedurePlaceholder": "Procedura (p.sh. user.get)",
+    "kindQuery": "Pyetja",
+    "kindMutation": "Mutacion",
+    "showRawEnvelope": "Shfaq zarfin e papërpunuar",
+    "kindSelectLabel": "Lloji i thirrjes",
+    "tabs": {
+      "headers": "Kokat",
+      "body": "Trupi"
     }
   }
 }

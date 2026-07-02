@@ -22,9 +22,10 @@ import { httpExecutionService, type HTTPExecutionInput } from '../../services/HT
 import { grpcExecutionService } from '../../services/GRPCExecutionService'
 import { graphqlExecutionService } from '../../services/GraphQLExecutionService'
 import { jsonRpcExecutionService } from '../../services/JsonRpcExecutionService'
+import { trpcExecutionService } from '../../services/TrpcExecutionService'
 import { responseHistoryService } from '../../services/ResponseHistoryService'
 import { flushRequestStateToContext } from '../../mcp/tools/execute'
-import { isHTTPRequest, isAuthenticationRequest, isGrpcRequest, isGraphQLRequest, isODataRequest, isJsonRpcRequest, isJsonRpcBatchRequest } from '../../../shared/types/collections'
+import { isHTTPRequest, isAuthenticationRequest, isGrpcRequest, isGraphQLRequest, isODataRequest, isJsonRpcRequest, isJsonRpcBatchRequest, isTrpcRequest } from '../../../shared/types/collections'
 import { composeODataRequestBody, type ODataBodySource } from '../../../shared/utils/odataRequestBody'
 import type { Request } from '../../../shared/types/collections'
 import type { NodeExecutor, ExecResult } from '../types'
@@ -55,6 +56,13 @@ export const httpRequestExecutor: NodeExecutor = async (act, ctx) => {
   // request-panel Send does.
   if (isJsonRpcRequest(req)) return runJsonRpcUnary(req, ctx)
   if (isJsonRpcBatchRequest(req)) return runJsonRpcBatch(req, ctx)
+  // A tRPC request (query/mutation, non-streaming) binds to this generic
+  // request node like httpRequest; it runs through `TrpcExecutionService`
+  // (a thin shaping layer over `httpExecutionService`) and emits the same
+  // `{ request, response }` shape, the response body carrying the UNWRAPPED
+  // `result.data` payload so picker selectors (`response.body.…`) resolve
+  // against the data the user actually cares about.
+  if (isTrpcRequest(req)) return runTrpcUnary(req, ctx)
   // An OData request binds to this generic request node like HTTP: it executes
   // through the SAME httpExecutionService (the `odata:execute` IPC path does too),
   // and URLResolver composes its system query options into the resolved URL from
@@ -279,6 +287,42 @@ async function runJsonRpcBatch(req: Request, ctx: Parameters<NodeExecutor>[1]): 
             durationMs: result.timings.durationMs,
             success: result.success,
             ...(result.transportError !== undefined ? { error: result.transportError } : {})
+          }
+        }
+      }
+    ]
+  }
+}
+
+/** Run a bound tRPC request (query/mutation, non-streaming) and shape its
+ * result onto the `response` port like an HTTP request node. Like GraphQL,
+ * `trpcExecutionService.execute()` does NOT persist history itself, so we
+ * store it here (mirroring the `trpc:execute` IPC handler). `body` carries
+ * the UNWRAPPED `result.data` — the same value the response panel shows by
+ * default — so a picker selector like `response.body.name` resolves against
+ * the data, not the `[{ result: { data } }]` wire envelope. */
+async function runTrpcUnary(req: Request, ctx: Parameters<NodeExecutor>[1]): Promise<ExecResult> {
+  flushRequestStateToContext(req, ctx.variables)
+  const onAbort = (): void => { trpcExecutionService.cancel(req.id) }
+  if (ctx.signal.aborted) onAbort()
+  else ctx.signal.addEventListener('abort', onAbort, { once: true })
+  const result = await trpcExecutionService.execute({ requestId: req.id })
+  ctx.signal.removeEventListener('abort', onAbort)
+  await responseHistoryService.storeExecutionResult(req.id, 'trpc', result)
+  return {
+    outputs: [
+      {
+        port: 'response',
+        value: {
+          request: { url: result.requestUrl ?? '', method: '', headers: result.requestHeaders ?? {} },
+          response: {
+            status: result.statusCode ?? 0,
+            statusText: result.statusText ?? '',
+            headers: result.headers ?? {},
+            body: JSON.stringify(result.data !== undefined ? result.data : null),
+            durationMs: result.timings.durationMs,
+            success: result.success,
+            ...(result.error !== undefined ? { error: result.error } : {})
           }
         }
       }

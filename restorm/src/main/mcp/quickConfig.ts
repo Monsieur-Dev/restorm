@@ -50,7 +50,8 @@ export const PROTOCOL_CONFIG_FIELDS: Record<Protocol, readonly string[]> = {
   odata: ['documentation', 'url', 'odataVersion', 'operationKind', 'headers', 'params', 'queryOptions', 'actionBody', 'batchSubRequests', 'batchFormat', 'entityTypeRef', 'allowGetInChangeSet', 'forceAbsoluteBatchUrls', 'entitySetProperties', 'navigationProperties', 'operationParameters', 'server', 'mockMetadata', 'mockData'],
   auth: ['documentation', 'method', 'url', 'headers', 'params', 'pathParams', 'body', 'producedHeaders', 'expirationExpression', 'authErrorCodes'],
   jsonrpc: ['documentation', 'url', 'headers', 'method', 'params', 'rpcId', 'notificationMode'],
-  jsonrpcBatch: ['documentation', 'url', 'headers', 'children']
+  jsonrpcBatch: ['documentation', 'url', 'headers', 'children'],
+  trpc: ['documentation', 'url', 'procedure', 'input', 'kind', 'headers']
 }
 
 /** Read a request's protocol (`type`), narrowed to a known protocol or null. */

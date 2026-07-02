@@ -52,6 +52,7 @@ export type AddChildKind =
   | 'odata'
   | 'odata-server'
   | 'auth'
+  | 'trpc'
   | 'scenario'
 
 export type AddChildHandler = (parentId: string, kind: AddChildKind) => void
@@ -249,6 +250,13 @@ export const buildAddSubmenu = (
     label: t('sidebar.contextMenu.add.odataServer'),
     icon: React.createElement(Badge, { type: 'ODATA', mode: 'server' }),
     onClick: () => { onAddChildItem(parentId, 'odata-server') }
+  },
+  { id: `sep-add-trpc-${parentId}`, isSeparator: true, label: '' },
+  {
+    id: `add-trpc-${parentId}`,
+    label: t('sidebar.contextMenu.add.trpc'),
+    icon: React.createElement(Badge, { type: 'tRPC' }),
+    onClick: () => { onAddChildItem(parentId, 'trpc') }
   },
   { id: `sep-add-proto-${parentId}`, isSeparator: true, label: '' },
   {

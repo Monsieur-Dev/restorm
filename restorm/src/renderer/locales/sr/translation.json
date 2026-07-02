@@ -278,7 +278,8 @@
         "grpcServer": "gRPC mock сервер",
         "soapServer": "SOAP mock сервер",
         "graphqlServer": "GraphQL mock сервер",
-        "odataServer": "OData mock сервер"
+        "odataServer": "OData mock сервер",
+        "trpc": "tRPC zahtev"
       }
     },
     "deleteConfirm": {
@@ -2106,6 +2107,19 @@
     "portal": {
       "noSubscription": "Нема активне претплате за управљање.",
       "error": "Портал за претплату није могуће отворити. Покушајте поново."
+    }
+  },
+  "trpc": {
+    "send": "Pošalji",
+    "urlPlaceholder": "URL tRPC servera",
+    "procedurePlaceholder": "Procedura (npr. user.get)",
+    "kindQuery": "Upit",
+    "kindMutation": "Mutacija",
+    "showRawEnvelope": "Prikaži sirovu omotnicu",
+    "kindSelectLabel": "Vrsta poziva",
+    "tabs": {
+      "headers": "Zaglavlja",
+      "body": "Telo"
     }
   }
 }

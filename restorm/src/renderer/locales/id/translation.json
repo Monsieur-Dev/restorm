@@ -276,7 +276,8 @@
         "grpcServer": "Server mock gRPC",
         "soapServer": "Server tiruan SOAP",
         "graphqlServer": "Server mock GraphQL",
-        "odataServer": "Server mock OData"
+        "odataServer": "Server mock OData",
+        "trpc": "Permintaan tRPC"
       }
     },
     "deleteConfirm": {
@@ -2104,6 +2105,19 @@
     "portal": {
       "noSubscription": "Tidak ada langganan aktif untuk dikelola.",
       "error": "Tidak dapat membuka portal langganan. Silakan coba lagi."
+    }
+  },
+  "trpc": {
+    "send": "Kirim",
+    "urlPlaceholder": "URL server tRPC",
+    "procedurePlaceholder": "Prosedur (mis. user.get)",
+    "kindQuery": "Kueri",
+    "kindMutation": "Mutasi",
+    "showRawEnvelope": "Tampilkan amplop mentah",
+    "kindSelectLabel": "Jenis panggilan",
+    "tabs": {
+      "headers": "Header",
+      "body": "Body"
     }
   }
 }

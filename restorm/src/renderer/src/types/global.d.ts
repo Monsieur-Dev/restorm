@@ -276,6 +276,11 @@ declare global {
         cancel: (requestId: string) => Promise<boolean>
         isActive: (requestId: string) => Promise<boolean>
       }
+      trpc: {
+        execute: (input: TrpcExecutionInput) => Promise<TrpcExecutionResult>
+        cancel: (requestId: string) => Promise<boolean>
+        isActive: (requestId: string) => Promise<boolean>
+      }
       auth: {
         prefetch: (input: {
           method: string
@@ -616,6 +621,34 @@ export interface JsonRpcBatchExecutionResult {
   requestUrl?: string
 }
 
+/** tRPC execution input */
+export interface TrpcExecutionInput {
+  requestId: string
+  timeout?: number
+  /** Attached AuthenticationRequest as a plain object (re-hydrated main-side). */
+  authRequest?: unknown
+}
+
+/** tRPC execution result. `data` is the UNWRAPPED `result.data` payload the
+ * response panel shows by default; `rawBody` is the full `[{ result: { data
+ * } }]` wire envelope, for the "Show raw envelope" toggle. */
+export interface TrpcExecutionResult {
+  requestId: string
+  success: boolean
+  statusCode?: number
+  statusText?: string
+  headers?: Record<string, string | string[]>
+  data?: unknown
+  rawBody?: string
+  error?: string
+  timings: {
+    startedAt: string
+    durationMs: number
+  }
+  requestUrl?: string
+  requestHeaders?: Record<string, string>
+}
+
 /** SOAP execution input */
 export interface SOAPExecutionInput {
   requestId: string
@@ -713,7 +746,7 @@ export interface WebSocketMessageData {
 /** Full request data for backend processing */
 export interface FullRequestData {
   id: string
-  requestType: 'http' | 'graphql' | 'grpc' | 'soap' | 'websocket' | 'odata' | 'auth' | 'jsonrpc' | 'jsonrpcBatch'
+  requestType: 'http' | 'graphql' | 'grpc' | 'soap' | 'websocket' | 'odata' | 'auth' | 'jsonrpc' | 'jsonrpcBatch' | 'trpc'
   url: string
   headers: KeyValueData[]
   method?: string | undefined
@@ -800,6 +833,12 @@ export interface FullRequestData {
     rpcId: string
     notificationMode?: boolean | undefined
   }[] | undefined
+  // tRPC specific (requestType === 'trpc') — mirrors the main-side
+  // ContextServiceTypes shape; `url` carries the BASE server url, the
+  // procedure path (+ `?input=` for a query) is appended by URLResolver.
+  trpcProcedure?: string | undefined
+  trpcInput?: string | undefined
+  trpcKind?: 'query' | 'mutation' | undefined
 }
 
 export {}

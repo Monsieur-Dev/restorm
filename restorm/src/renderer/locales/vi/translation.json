@@ -276,7 +276,8 @@
         "grpcServer": "Máy chủ gRPC giả lập",
         "soapServer": "Máy chủ mô phỏng SOAP",
         "graphqlServer": "Máy chủ GraphQL giả lập",
-        "odataServer": "Máy chủ OData giả lập"
+        "odataServer": "Máy chủ OData giả lập",
+        "trpc": "Yêu cầu tRPC"
       }
     },
     "deleteConfirm": {
@@ -2104,6 +2105,19 @@
     "portal": {
       "noSubscription": "Không có gói đăng ký nào đang hoạt động để quản lý.",
       "error": "Không thể mở cổng quản lý đăng ký. Vui lòng thử lại."
+    }
+  },
+  "trpc": {
+    "send": "Gửi",
+    "urlPlaceholder": "URL máy chủ tRPC",
+    "procedurePlaceholder": "Thủ tục (vd: user.get)",
+    "kindQuery": "Truy vấn",
+    "kindMutation": "Mutation",
+    "showRawEnvelope": "Hiển thị phong bì thô",
+    "kindSelectLabel": "Loại lệnh gọi",
+    "tabs": {
+      "headers": "Header",
+      "body": "Body"
     }
   }
 }

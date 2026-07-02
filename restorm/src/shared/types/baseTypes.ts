@@ -67,6 +67,7 @@ export type ImportSourceType =
   | 'wadl'
   | 'thrift'
   | 'api-blueprint'
+  | 'trpc'
 
 /**
  * Per-env-folder configuration tracking where the folder's spec was

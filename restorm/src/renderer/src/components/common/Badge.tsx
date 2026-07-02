@@ -19,6 +19,8 @@ export type BadgeType =
   | 'WS' | 'MQTT' | 'SIO'
   // OData
   | 'ODATA'
+  // tRPC
+  | 'tRPC'
   // Authentication
   | 'AUTH'
   // Scenario (dataflow graph) — renders a circuit-board codicon

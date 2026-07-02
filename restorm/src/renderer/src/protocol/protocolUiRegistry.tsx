@@ -10,7 +10,8 @@ import type {
   WebSocketRequest,
   ODataRequest,
   JsonRpcRequest,
-  JsonRpcBatchRequest
+  JsonRpcBatchRequest,
+  TrpcRequest
 } from '../../../shared/types/requests'
 import {
   HTTPRequestTabView,
@@ -21,7 +22,8 @@ import {
   WebSocketRequestTabView,
   ODataRequestTabView,
   JsonRpcRequestTabView,
-  JsonRpcBatchRequestTabView
+  JsonRpcBatchRequestTabView,
+  TrpcRequestTabView
 } from '../components/RequestTabViews'
 
 /**
@@ -51,7 +53,8 @@ export const PROTOCOL_TAB_VIEWS: Record<RequestType, (request: Request) => React
   websocket: (request) => <WebSocketRequestTabView request={request as WebSocketRequest} />,
   odata: (request) => <ODataRequestTabView request={request as ODataRequest} />,
   jsonrpc: (request) => <JsonRpcRequestTabView request={request as JsonRpcRequest} />,
-  jsonrpcBatch: (request) => <JsonRpcBatchRequestTabView request={request as JsonRpcBatchRequest} />
+  jsonrpcBatch: (request) => <JsonRpcBatchRequestTabView request={request as JsonRpcBatchRequest} />,
+  trpc: (request) => <TrpcRequestTabView request={request as TrpcRequest} />
 }
 
 /** Render the tab-view editor element for a request, chosen by its protocol. */
