@@ -63,6 +63,7 @@ export interface MenuItemSeparatorProps {
 - **children** (`React.ReactNode`) : MenuItem components for dropdown
 - **isFocused** (`boolean`) : Internal focus state (managed by MenuBar)
 - **isActive** (`boolean`) : Internal active state (managed by MenuBar)
+- **isTabStop** (`boolean`) : Whether this item is the bar's roving-tabindex stop — the one item reachable via `Tab` from the rest of the UI (managed by MenuBar; see "Keyboard Navigation" below)
 - **onMouseEnter** (`() => void`) : Mouse enter handler (managed by MenuBar)
 - **onMouseLeave** (`() => void`) : Mouse leave handler (managed by MenuBar)
 - **onClick** (`() => void`) : Click handler (managed by MenuBar)
@@ -273,6 +274,10 @@ Container layout note: hosting layouts must let the MenuBar's slot shrink. The b
 
 ### Top-level MenuBar
 
+`tabindex="0"` sits on whichever item is the current roving-tabindex stop
+(`File` here, since it's the default / first item) — it moves to a different
+item once the user focuses/opens one, see "Keyboard Navigation" above.
+
 ```html
 <div class="menubar" role="menubar">
   <div class="menubar-menu-button" role="menuitem" tabindex="0" aria-haspopup="true">
@@ -388,15 +393,28 @@ The component uses the following CSS variables:
 
 ## Keyboard Navigation
 
+### Roving tabindex
+
+Only ONE top-level item is ever a `Tab` stop (`tabIndex={0}`) — the rest carry
+`tabIndex={-1}`, per the standard [ARIA menubar
+pattern](https://www.w3.org/WAI/ARIA/apg/patterns/menubar/). That item is the
+first one on initial render, then tracks whichever item was last
+focused/opened (mouse click, hover-follow while a menu is open, or keyboard),
+so re-entering the bar with `Tab` resumes where the user left off. Because
+only one item is ever tabbable, `Tab` / `Shift+Tab` naturally move focus to
+the next/previous focusable element *outside* the bar — the bar never traps
+keyboard focus.
+
 ### MenuBar Navigation
-- **Arrow Left/Right** : Navigate between top-level menu items
-- **Arrow Down/Enter/Space** : Open focused menu
+- **Tab** : Enter the bar at the current roving-tabindex stop; from there, `Tab` again leaves the bar for the next focusable element in the rest of the UI (arrow keys, not `Tab`, move *within* the bar — see below)
+- **Arrow Left/Right** : Navigate between top-level menu items. If a menu is currently open, the sibling's menu opens in its place
+- **Arrow Down / Enter / Space** : Open the focused menu. `ArrowDown` additionally moves focus onto the dropdown's first item once it renders
+- **Arrow Up** : Open the focused menu with focus on its LAST item
 - **Escape** : Close menu and return focus
-- **Tab** : Cycle through menu items
 - **Alt + Key** : Open menu by mnemonic (e.g., Alt+F for File)
 
 ### Menu Navigation
-- **Arrow Up/Down** : Navigate menu items
+- **Arrow Up/Down** : Navigate between sibling items of the open menu (wraps at either end)
 - **Arrow Right** : Open submenu
 - **Arrow Left** : Close submenu
 - **Enter/Space** : Activate menu item
@@ -561,6 +579,14 @@ Core steps:
 - `Then menu bar submenu {string} should be visible`
 - `When I press keys {string} in menu bar {string}` (comma-separated, ex: `ArrowRight,ArrowDown,Escape`)
 - `When I trigger menu shortcut {string}` (ex: `Ctrl+O`)
+
+Roving-tabindex steps (generic — not scoped to a single menu bar):
+
+- `When I focus {string}` (calls `.focus()` on any element by `data-testid`, for a deterministic starting point)
+- `When I press the {string} key` (a single raw key press wherever focus currently sits, ex: `Tab`)
+- `Then the focused element should be {string}`
+- `Then the focused element should not be inside {string}`
+- `Then menu bar {string} tab-reachable item should be {string}` (asserts exactly one top-level item carries `tabindex="0"`, and which one)
 
 ### Wrapping `ScrollableElement`
 

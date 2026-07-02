@@ -38,7 +38,10 @@ interface PageLike {
   locator: (selector: string) => LocatorLike
   keyboard: KeyboardLike
   mouse: MouseLike
-  evaluate: <T>(fn: (args: EvaluateArgs) => T, arg: EvaluateArgs) => Promise<T>
+  // Generic like Playwright's real `Page.evaluate` — most steps below reuse
+  // the two-field `EvaluateArgs` shape, but the roving-tabindex steps need
+  // their own argument shapes.
+  evaluate: <T, A = EvaluateArgs>(fn: (args: A) => T, arg: A) => Promise<T>
 }
 
 function asPage(value: unknown): PageLike {
@@ -219,5 +222,63 @@ export function defineMenuBarBddSteps({ When, Then }: BddFnsWithPage): void {
   Then('menu bar {string} hamburger button should be visible', async ({ page }, testId: unknown) => {
     if (typeof testId !== 'string') throw new Error('Invalid menu bar id')
     await asPage(page).locator(menuBarHamburgerButtonSelector(testId)).waitFor({ state: 'attached', timeout: 5000 })
+  })
+
+  // ── Roving tabindex (Tab reaches the bar; arrows navigate inside it) ──
+
+  When('I focus {string}', async ({ page }, testId: unknown) => {
+    if (typeof testId !== 'string') throw new Error('Invalid element id')
+    const focused = await asPage(page).evaluate<boolean, string>((elementTestId) => {
+      const el = document.querySelector(`[data-testid="${elementTestId}"]`)
+      if (!(el instanceof HTMLElement)) return false
+      el.focus()
+      return true
+    }, testId)
+    if (!focused) throw new Error(`Could not find a focusable element "${testId}"`)
+  })
+
+  When('I press the {string} key', async ({ page }, key: unknown) => {
+    if (typeof key !== 'string') throw new Error('Invalid key')
+    await asPage(page).keyboard.press(key)
+  })
+
+  Then('the focused element should be {string}', async ({ page }, testId: unknown) => {
+    if (typeof testId !== 'string') throw new Error('Invalid element id')
+    const matches = await asPage(page).evaluate<boolean, string>((expected) => {
+      const active = document.activeElement
+      return active instanceof HTMLElement && active.getAttribute('data-testid') === expected
+    }, testId)
+    if (!matches) throw new Error(`Expected the focused element to be "${testId}"`)
+  })
+
+  Then('the focused element should not be inside {string}', async ({ page }, testId: unknown) => {
+    if (typeof testId !== 'string') throw new Error('Invalid element id')
+    const stillInside = await asPage(page).evaluate<boolean, string>((rootTestId) => {
+      const root = document.querySelector(`[data-testid="${rootTestId}"]`)
+      return !!(root && document.activeElement && root.contains(document.activeElement))
+    }, testId)
+    if (stillInside) throw new Error(`Expected focus to have left "${testId}", but it's still inside`)
+  })
+
+  Then('menu bar {string} tab-reachable item should be {string}', async ({ page }, testId: unknown, expectedItemId: unknown) => {
+    if (typeof testId !== 'string' || typeof expectedItemId !== 'string') throw new Error('Invalid menu bar params')
+    const result = await asPage(page).evaluate<{ count: number; matchesExpected: boolean }, { testId: string; expectedItemId: string }>(
+      ({ testId: rootTestId, expectedItemId: expected }) => {
+        const root = document.querySelector(`[data-testid="${rootTestId}"]`)
+        const tabbable = root
+          ? Array.from(root.querySelectorAll(':scope > [role="menuitem"]')).filter((el) => el.getAttribute('tabindex') === '0')
+          : []
+        return {
+          count: tabbable.length,
+          matchesExpected: tabbable.length === 1 && tabbable[0]?.getAttribute('data-testid') === expected
+        }
+      },
+      { testId, expectedItemId }
+    )
+    if (result.count !== 1 || !result.matchesExpected) {
+      throw new Error(
+        `Expected menu bar "${testId}" to have exactly one tab-reachable item ("${expectedItemId}"), found ${result.count} tab-reachable item(s)`
+      )
+    }
   })
 }

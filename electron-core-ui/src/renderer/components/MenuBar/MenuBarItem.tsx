@@ -14,6 +14,14 @@ interface MenuBarItemProps {
   children?: React.ReactNode
   isFocused?: boolean
   isActive?: boolean
+  /**
+   * Whether THIS item is the bar's current roving-tabindex stop (see
+   * `MenuBarState.tabStopIndex`). Drives `tabIndex` directly — unlike
+   * `isFocused`, it stays true for the last-active item even while nothing
+   * has actual DOM/keyboard focus, so the bar always has exactly one Tab
+   * stop reachable from the rest of the UI.
+   */
+  isTabStop?: boolean
   onClick?: () => void
   onMouseEnter?: () => void
   className?: string
@@ -64,6 +72,7 @@ const MenuBarItem = forwardRef<HTMLDivElement, MenuBarItemProps>(({
   children,
   isFocused = false,
   isActive = false,
+  isTabStop = false,
   onClick,
   onMouseEnter,
   className = '',
@@ -198,7 +207,7 @@ const MenuBarItem = forwardRef<HTMLDivElement, MenuBarItemProps>(({
       id={id}
       className={buttonClasses}
       role="menuitem"
-      tabIndex={isFocused ? 0 : -1}
+      tabIndex={isTabStop ? 0 : -1}
       aria-haspopup={!!children}
       aria-expanded={isActive}
       {...(ariaLabel ? { 'aria-label': ariaLabel } : {})}
