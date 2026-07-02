@@ -22,12 +22,15 @@
 import { BrowserWindow } from 'electron'
 import * as grpc from '@grpc/grpc-js'
 import type { ClientReadableStream, ClientWritableStream, ClientDuplexStream } from '@grpc/grpc-js'
-import { logger } from 'electron-core-ui/main'
+import { logger, withFirewallBypass } from 'electron-core-ui/main'
 import { contextService } from './ContextService'
 import { responseHistoryService } from './ResponseHistoryService'
 import { secretHydrationService } from './secrets/SecretHydrationService'
 import { collectRequestSecrets } from './secrets/collectRequestSecrets'
 import { resolveGrpcMethod, grpcStatusName, type ProtoSource } from './grpc/grpcProtoLoader'
+import { encodeGrpcWebFrame } from './grpc/grpcWebCodec'
+import { executeGrpcWebRequest, grpcWebStatus } from './grpc/grpcWebTransport'
+import { executeConnectUnary, executeConnectStream, connectStatusFromError } from './grpc/connectTransport'
 import { DEFAULT_WS_TIMEOUT_MS } from '../../shared/config/constants'
 
 /** gRPC request execution input */
@@ -68,6 +71,9 @@ export interface GRPCExecutionResult {
 /** A gRPC call type (mirrors the request model union). */
 type GrpcCallType = 'unary' | 'server-stream' | 'client-stream' | 'bidirectional-stream'
 
+/** The wire transport (mirrors the request model union). */
+type GrpcTransport = 'grpc' | 'grpc-web' | 'connect'
+
 /** Everything-resolved shape both one-shot `execute()` and streaming need. */
 interface ResolvedGrpcExecution {
   requestId: string
@@ -79,6 +85,9 @@ interface ResolvedGrpcExecution {
   service: string
   method: string
   callType: GrpcCallType
+  /** Absent on any request saved before this field existed — defaults to
+   * the native transport, so backward compatibility needs no migration. */
+  transport: GrpcTransport
   metadata: grpc.Metadata
   /** The resolved request message (JSON string). */
   resolvedMessage: string
@@ -93,6 +102,16 @@ interface ActiveCall {
   callType: GrpcCallType
   /** The underlying grpc call object (one of the four stream shapes). */
   stream: ClientReadableStream<object> | ClientWritableStream<object> | ClientDuplexStream<object, object>
+  open: boolean
+  messages: GrpcMessage[]
+}
+
+/** A live gRPC-Web/Connect streaming call — the HTTP-framed counterpart of
+ * {@link ActiveCall}. Server-stream only (client/bidi need native gRPC), so
+ * there's no writable stream to model: closing/cancelling is always an abort
+ * of the underlying HTTP request. */
+interface ActiveHttpFramedCall {
+  controller: AbortController
   open: boolean
   messages: GrpcMessage[]
 }
@@ -164,6 +183,18 @@ function reconcileCallType(
   return actual
 }
 
+/** Flatten gRPC metadata to plain HTTP headers — gRPC-Web / Connect map custom
+ * metadata directly onto HTTP headers, one-to-one. Binary (`-bin` suffixed)
+ * metadata values aren't produced by this app's metadata editor, so a `Buffer`
+ * value (defensive) is base64-encoded rather than dropped silently. */
+function metadataToHeaders(metadata: grpc.Metadata): Record<string, string> {
+  const headers: Record<string, string> = {}
+  for (const [key, values] of Object.entries(metadata.getMap())) {
+    headers[key] = Buffer.isBuffer(values) ? values.toString('base64') : values
+  }
+  return headers
+}
+
 /** Close a gRPC client (releasing its channel + sockets); best-effort. Each
  * call builds a fresh client, so it must be closed when the call settles or the
  * channel + keepalive timers leak for the process lifetime. */
@@ -190,8 +221,10 @@ function stringifyMessage(value: unknown): string {
 class GRPCExecutionService {
   /** Unary cancellation handles (one-shot execute). */
   private activeRequests = new Map<string, () => void>()
-  /** Long-lived streaming calls (scenario engine / panel Connect). */
+  /** Long-lived streaming calls (scenario engine / panel Connect) — native gRPC. */
   private activeCalls = new Map<string, ActiveCall>()
+  /** Long-lived streaming calls over the gRPC-Web / Connect HTTP transports. */
+  private activeHttpFramedCalls = new Map<string, ActiveHttpFramedCall>()
 
   /** Resolve a request into the everything-resolved shape, hydrating secrets. */
   private async resolveExecution(requestId: string, timeout: number): Promise<ResolvedGrpcExecution> {
@@ -232,6 +265,9 @@ class GRPCExecutionService {
     const service = (full?.service) ?? ''
     const method = (full?.grpcMethod) ?? (full?.method) ?? ''
     const callType = ((full?.callType) ?? 'unary') as GrpcCallType
+    // Absent (any request saved before this field existed) means the native
+    // transport — never silently reinterpreted as gRPC-Web/Connect.
+    const transport = ((full?.transport) ?? 'grpc') as GrpcTransport
     const message = (full?.requestMessage) ?? '{}'
     const resolvedMessage = contextService.resolveValue(message, requestId)
     const protoSource: ProtoSource = {
@@ -250,6 +286,7 @@ class GRPCExecutionService {
       service,
       method,
       callType,
+      transport,
       metadata,
       resolvedMessage,
       protoSource,
@@ -292,6 +329,7 @@ class GRPCExecutionService {
     this.broadcastProgress(requestId, 'started')
 
     try {
+      if (resolved.transport !== 'grpc') return await this.runHttpFramedOneShot(resolved)
       if (resolved.callType === 'unary') return await this.executeUnary(resolved)
       return await this.executeStreamingOneShot(resolved)
     } catch (err) {
@@ -525,6 +563,162 @@ class GRPCExecutionService {
   }
 
   /**
+   * Core gRPC-Web dispatch shared by the one-shot `execute()` path and the
+   * long-lived `connectStreaming()` path: resolves the method from the
+   * request's proto, serialises the one configured request message, POSTs the
+   * gRPC-Web-framed body, and reports each decoded response frame via
+   * `onFrame` as it arrives. Resolves with the final gRPC status once the
+   * HTTP response ends (trailers parsed); throws on a hard failure (proto
+   * resolution, invalid JSON message, a proto-declared client/bidi method the
+   * transport can't carry, or a network/timeout error) — callers shape that
+   * into a `GRPCExecutionResult` or a `fireClose(error)` as appropriate.
+   */
+  private async dispatchGrpcWeb(
+    resolved: ResolvedGrpcExecution,
+    callbacks: { onSent: (data: string) => void; onFrame: (payload: object) => void },
+    signal: AbortSignal
+  ): Promise<{ statusCode: grpc.status; statusMessage: string }> {
+    const resolvedMethod = resolveGrpcMethod(resolved.protoSource, resolved.address, resolved.service, resolved.method, this.credentials(resolved.secure))
+    // The proto is ground truth: gRPC-Web can carry unary + server-stream
+    // only, regardless of what the (possibly stale) saved callType claims.
+    const actualCallType = reconcileCallType(resolved.callType, resolvedMethod.requestStream, resolvedMethod.responseStream)
+    if (actualCallType === 'client-stream' || actualCallType === 'bidirectional-stream') {
+      throw new Error(`proto declares '${actualCallType}', which gRPC-Web cannot carry over HTTP/1.1 — use the native gRPC transport`)
+    }
+    const reqObj = parseMessage(resolved.resolvedMessage)
+    callbacks.onSent(resolved.resolvedMessage)
+    // Same trust tier as the Send button dispatching a plain HTTP request
+    // (see `HTTPExecutionService.dispatchOnce`): the user already authorised
+    // this call by clicking Send/Connect, so it bypasses the firewall rather
+    // than re-prompting (or hanging, off the e2e-only bypass flag) on a host
+    // not yet on the whitelist.
+    const httpResult = await withFirewallBypass(() => executeGrpcWebRequest({
+      address: resolved.address,
+      secure: resolved.secure,
+      path: resolvedMethod.path,
+      headers: metadataToHeaders(resolved.metadata),
+      body: encodeGrpcWebFrame(resolvedMethod.requestSerialize(reqObj)),
+      timeoutMs: resolved.timeout,
+      signal,
+      onData: (payload) => { callbacks.onFrame(resolvedMethod.responseDeserialize(payload)) }
+    }))
+    return grpcWebStatus(httpResult)
+  }
+
+  /**
+   * Core Connect-RPC dispatch, mirroring `dispatchGrpcWeb`: resolves the
+   * proto method for its path + streaming shape only (Connect speaks JSON
+   * on the wire, so there's no protobuf serialize/deserialize step — the
+   * already-parsed request/response JSON goes straight through), then
+   * dispatches to the unary or server-streaming HTTP call depending on the
+   * reconciled call type.
+   */
+  private async dispatchConnect(
+    resolved: ResolvedGrpcExecution,
+    callbacks: { onSent: (data: string) => void; onFrame: (payload: object) => void },
+    signal: AbortSignal
+  ): Promise<{ statusCode: grpc.status; statusMessage: string }> {
+    const resolvedMethod = resolveGrpcMethod(resolved.protoSource, resolved.address, resolved.service, resolved.method, this.credentials(resolved.secure))
+    // Same rationale as gRPC-Web: the proto is ground truth, and Connect over
+    // plain HTTP/1.1 can carry unary + server-stream only.
+    const actualCallType = reconcileCallType(resolved.callType, resolvedMethod.requestStream, resolvedMethod.responseStream)
+    if (actualCallType === 'client-stream' || actualCallType === 'bidirectional-stream') {
+      throw new Error(`proto declares '${actualCallType}', which this Connect implementation cannot carry over HTTP/1.1 — use the native gRPC transport`)
+    }
+    // Validate the message is well-formed JSON before dispatch (Connect sends
+    // it verbatim, no protobuf hop) — same fail-fast contract as gRPC-Web.
+    parseMessage(resolved.resolvedMessage)
+    callbacks.onSent(resolved.resolvedMessage)
+    const requestOptions = {
+      address: resolved.address,
+      secure: resolved.secure,
+      path: resolvedMethod.path,
+      headers: metadataToHeaders(resolved.metadata),
+      timeoutMs: resolved.timeout,
+      signal
+    }
+    // Same rationale as `dispatchGrpcWeb`: the user already authorised this
+    // call by clicking Send/Connect, so it bypasses the firewall.
+    if (actualCallType === 'unary') {
+      const result = await withFirewallBypass(() => executeConnectUnary({ ...requestOptions, body: resolved.resolvedMessage }))
+      if (result.ok) callbacks.onFrame((result.message ?? {}) as object)
+      return connectStatusFromError(result.error)
+    }
+    const streamResult = await withFirewallBypass(() => executeConnectStream({
+      ...requestOptions,
+      body: resolved.resolvedMessage,
+      onMessage: (payload) => { callbacks.onFrame(payload as object) }
+    }))
+    return connectStatusFromError(streamResult.error)
+  }
+
+  /** Bind the transport-appropriate dispatch function — shared by the
+   * one-shot `execute()` path and the long-lived `connectStreaming()` path
+   * so neither has to duplicate the `transport === 'grpc-web' ? … : …` check. */
+  private httpFramedDispatch(transport: GrpcTransport): (
+    resolved: ResolvedGrpcExecution,
+    callbacks: { onSent: (data: string) => void; onFrame: (payload: object) => void },
+    signal: AbortSignal
+  ) => Promise<{ statusCode: grpc.status; statusMessage: string }> {
+    return transport === 'grpc-web' ? this.dispatchGrpcWeb.bind(this) : this.dispatchConnect.bind(this)
+  }
+
+  /** One-shot HTTP-framed call (gRPC-Web or Connect; unary or server-stream —
+   * see `dispatchGrpcWeb` / `dispatchConnect`). */
+  private async runHttpFramedOneShot(resolved: ResolvedGrpcExecution): Promise<GRPCExecutionResult> {
+    const { requestId } = resolved
+    const messages: GrpcMessage[] = []
+    const onSent = (data: string): void => {
+      const sent: GrpcMessage = { direction: 'sent', data, timestamp: new Date().toISOString() }
+      messages.push(sent)
+      this.broadcastMessage(requestId, sent)
+    }
+    const onFrame = (payload: object): void => {
+      const recv: GrpcMessage = { direction: 'received', data: stringifyMessage(payload), timestamp: new Date().toISOString() }
+      messages.push(recv)
+      this.broadcastMessage(requestId, recv)
+    }
+    const controller = new AbortController()
+    this.activeRequests.set(requestId, () => { controller.abort() })
+
+    let status: { statusCode: grpc.status; statusMessage: string }
+    try {
+      status = await this.httpFramedDispatch(resolved.transport)(resolved, { onSent, onFrame }, controller.signal)
+    } catch (err) {
+      this.activeRequests.delete(requestId)
+      this.broadcastProgress(requestId, 'error')
+      const result: GRPCExecutionResult = {
+        ...this.resultBase(resolved),
+        success: false,
+        connected: messages.length > 0,
+        messages,
+        error: (err as Error).message,
+        timings: { startedAt: resolved.startedAt, durationMs: Date.now() - resolved.startTime }
+      }
+      this.persistHistory(requestId, result)
+      return result
+    }
+
+    this.activeRequests.delete(requestId)
+    const success = status.statusCode === grpc.status.OK
+    const received = messages.filter((m) => m.direction === 'received')
+    const result: GRPCExecutionResult = {
+      ...this.resultBase(resolved),
+      success,
+      connected: true,
+      statusCode: status.statusCode,
+      statusMessage: status.statusMessage,
+      ...(received.length > 0 ? { responseMessage: received[received.length - 1]?.data } : {}),
+      messages,
+      ...(success ? {} : { error: status.statusMessage }),
+      timings: { startedAt: resolved.startedAt, durationMs: Date.now() - resolved.startTime }
+    }
+    this.broadcastProgress(requestId, success ? 'completed' : 'error')
+    this.persistHistory(requestId, result)
+    return result
+  }
+
+  /**
    * Open a long-lived streaming call for the scenario engine + the panel's
    * Connect button, streaming its lifecycle through callbacks: `onConnect` once
    * the call is open, `onMessage(undefined, payload)` for every received frame
@@ -585,6 +779,47 @@ class GRPCExecutionService {
       ctl.url = resolved.address
       ctl.method = `${resolved.service}/${resolved.method}`
 
+      const recordSent = (data: string): void => {
+        const sent: GrpcMessage = { direction: 'sent', data, timestamp: new Date().toISOString() }
+        frames.push(sent)
+        this.broadcastMessage(requestId, sent)
+      }
+      const recordReceived = (response: object): void => {
+        const recv: GrpcMessage = { direction: 'received', data: stringifyMessage(response), timestamp: new Date().toISOString() }
+        frames.push(recv)
+        this.broadcastMessage(requestId, recv)
+        input.onMessage(undefined, response)
+      }
+
+      if (resolved.transport !== 'grpc') {
+        // gRPC-Web / Connect: only server-stream can carry over HTTP/1.1
+        // (`dispatchGrpcWeb`/`dispatchConnect` throw for client/bidi — the
+        // panel UI already disables the Connect button for those, but a
+        // scenario graph bound to `grpcConnect` could still ask for one).
+        // Reuses the same dispatch helpers the one-shot `execute()` path
+        // calls, forwarding each frame live via `recordReceived` instead of
+        // batching, and tracks the call in `activeHttpFramedCalls` (not
+        // `activeCalls`, which is shaped around a native grpc-js stream) so
+        // `send` (no-op) / `disconnect` (abort) / the UI badge beam work.
+        const controller = new AbortController()
+        this.activeHttpFramedCalls.set(requestId, { controller, open: true, messages: frames })
+        this.broadcastProgress(requestId, 'started')
+        ctl.connected = true
+        input.onConnect()
+        try {
+          const status = await this.httpFramedDispatch(resolved.transport)(resolved, { onSent: recordSent, onFrame: recordReceived }, controller.signal)
+          statusCode = status.statusCode
+          this.activeHttpFramedCalls.delete(requestId)
+          this.broadcastProgress(requestId, statusCode === grpc.status.OK ? 'completed' : 'error')
+          fireClose(statusCode === grpc.status.OK ? undefined : status.statusMessage)
+        } catch (err) {
+          this.activeHttpFramedCalls.delete(requestId)
+          this.broadcastProgress(requestId, 'error')
+          fireClose((err as Error).message)
+        }
+        return
+      }
+
       let client: ReturnType<typeof resolveGrpcMethod>['client']
       let reconciledCallType = resolved.callType
       try {
@@ -600,17 +835,6 @@ class GRPCExecutionService {
         return
       }
 
-      const recordSent = (data: string): void => {
-        const sent: GrpcMessage = { direction: 'sent', data, timestamp: new Date().toISOString() }
-        frames.push(sent)
-        this.broadcastMessage(requestId, sent)
-      }
-      const recordReceived = (response: object): void => {
-        const recv: GrpcMessage = { direction: 'received', data: stringifyMessage(response), timestamp: new Date().toISOString() }
-        frames.push(recv)
-        this.broadcastMessage(requestId, recv)
-        input.onMessage(undefined, response)
-      }
       const onErr = (err: grpc.ServiceError): void => {
         statusCode = err.code
         this.activeCalls.delete(requestId)
@@ -677,6 +901,9 @@ class GRPCExecutionService {
    * Server-stream has no client writes, so this is a no-op (returns false).
    */
   send(requestId: string, message: string): boolean {
+    // The HTTP-framed transports never accept a client write (server-stream
+    // only): a no-op, same as native server-stream below.
+    if (this.activeHttpFramedCalls.has(requestId)) return false
     const call = this.activeCalls.get(requestId)
     if (!call?.open) return false
     if (call.callType === 'server-stream') return false
@@ -707,6 +934,12 @@ class GRPCExecutionService {
    * server-stream it cancels. The `end`/`error` listener fires `onClose`.
    */
   disconnect(requestId: string): boolean {
+    const httpFramedCall = this.activeHttpFramedCalls.get(requestId)
+    if (httpFramedCall) {
+      logger.info('[GRPCExecutionService] Closing HTTP-framed streaming call', { requestId })
+      httpFramedCall.controller.abort()
+      return true
+    }
     const call = this.activeCalls.get(requestId)
     if (!call) return false
     logger.info('[GRPCExecutionService] Closing streaming call', { requestId, callType: call.callType })
@@ -746,6 +979,12 @@ class GRPCExecutionService {
       }
       return true
     }
+    const httpFramedCall = this.activeHttpFramedCalls.get(requestId)
+    if (httpFramedCall) {
+      this.broadcastProgress(requestId, 'cancelled')
+      httpFramedCall.controller.abort()
+      return true
+    }
     return false
   }
 
@@ -753,6 +992,8 @@ class GRPCExecutionService {
   isActive(requestId: string): boolean {
     const call = this.activeCalls.get(requestId)
     if (call) return call.open
+    const httpFramedCall = this.activeHttpFramedCalls.get(requestId)
+    if (httpFramedCall) return httpFramedCall.open
     return this.activeRequests.has(requestId)
   }
 
@@ -762,7 +1003,7 @@ class GRPCExecutionService {
    * call is no longer tracked.
    */
   getMessages(requestId: string, afterIndex = 0): { frames: GrpcMessage[]; total: number } | null {
-    const call = this.activeCalls.get(requestId)
+    const call = this.activeCalls.get(requestId) ?? this.activeHttpFramedCalls.get(requestId)
     if (!call) return null
     const total = call.messages.length
     const start = Math.max(0, Math.min(afterIndex, total))

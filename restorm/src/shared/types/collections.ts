@@ -16,6 +16,7 @@ export type {
   HTTPRequestBodyXWwwFormUrlEncoded,
   GraphQLOperationType,
   GrpcCallType,
+  GrpcTransport,
   WebSocketProtocol,
   ODataVersion
 } from './requestPrimitives'

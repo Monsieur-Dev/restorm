@@ -474,6 +474,12 @@
       "clientStream": "Client streaming",
       "bidi": "Bidirectional streaming"
     },
+    "transport": {
+      "grpc": "gRPC",
+      "grpcWeb": "gRPC-Web",
+      "connect": "Connect",
+      "streamingUnsupported": "このトランスポートはHTTP/1.1経由のクライアントストリーミングまたは双方向ストリーミングをサポートしていません。代わりにネイティブのgRPCトランスポートを使用してください。"
+    },
     "server": {
       "proto": "Proto",
       "methods": "モックメソッド",

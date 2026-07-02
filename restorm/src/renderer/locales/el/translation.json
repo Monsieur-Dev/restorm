@@ -475,6 +475,12 @@
       "clientStream": "Client streaming",
       "bidi": "Bidirectional streaming"
     },
+    "transport": {
+      "grpc": "gRPC",
+      "grpcWeb": "gRPC-Web",
+      "connect": "Connect",
+      "streamingUnsupported": "Αυτή η μεταφορά δεν υποστηρίζει ροή δεδομένων πελάτη ή αμφίδρομη ροή μέσω HTTP/1.1. Χρησιμοποιήστε αντ' αυτού την εγγενή μεταφορά gRPC."
+    },
     "server": {
       "proto": "Proto",
       "methods": "Μέθοδοι mock",

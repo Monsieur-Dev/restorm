@@ -474,6 +474,12 @@
       "clientStream": "Client streaming",
       "bidi": "Bidirectional streaming"
     },
+    "transport": {
+      "grpc": "gRPC",
+      "grpcWeb": "gRPC-Web",
+      "connect": "Connect",
+      "streamingUnsupported": "이 전송 방식은 HTTP/1.1을 통한 클라이언트 또는 양방향 스트리밍을 지원하지 않습니다. 대신 네이티브 gRPC 전송을 사용하세요."
+    },
     "server": {
       "proto": "Proto",
       "methods": "목 메서드",

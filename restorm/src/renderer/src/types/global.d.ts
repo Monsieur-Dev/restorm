@@ -676,6 +676,8 @@ export interface FullRequestData {
   service?: string | undefined
   grpcMethod?: string | undefined
   callType?: string | undefined
+  /** Wire transport ('grpc' | 'grpc-web' | 'connect'); absent means native gRPC. */
+  transport?: string | undefined
   requestMessage?: string | undefined
   /** gRPC: the request's own proto, used to build the dynamic client (falls back
    * to the bundled grpcbin proto when absent). */

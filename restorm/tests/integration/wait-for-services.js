@@ -25,6 +25,9 @@ const SERVICES = [
   // gRPC (moul/grpcbin) speaks HTTP/2 on 9000 — not HTTP/1, so probe the raw TCP
   // port instead of an HTTP endpoint.
   { name: 'gRPC (grpcbin)', tcp: { host: 'localhost', port: 9000 } },
+  // gRPC-Web (same grpcbin container, its HTTP/1.1 endpoint mapped to 9002).
+  { name: 'gRPC-Web (grpcbin)', tcp: { host: 'localhost', port: 9002 } },
+  { name: 'Connect-RPC mock', url: 'http://localhost:8093/health' },
   // MQTT (eclipse-mosquitto) speaks the MQTT protocol on 1883 — not HTTP, so
   // probe the raw TCP port.
   { name: 'MQTT (mosquitto)', tcp: { host: 'localhost', port: 1883 } }

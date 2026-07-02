@@ -474,6 +474,12 @@
       "clientStream": "Client streaming",
       "bidi": "Bidirectional streaming"
     },
+    "transport": {
+      "grpc": "gRPC",
+      "grpcWeb": "gRPC-Web",
+      "connect": "Connect",
+      "streamingUnsupported": "Giao vận này không hỗ trợ truyền phát dạng client hoặc hai chiều qua HTTP/1.1. Hãy sử dụng giao vận gRPC gốc thay thế."
+    },
     "server": {
       "proto": "Proto",
       "methods": "Phương thức giả lập",

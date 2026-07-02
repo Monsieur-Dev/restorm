@@ -22,6 +22,11 @@ const CONNECT_BTN = '[data-testid="grpc-connect-button"]'
 const STREAM_SEND_BTN = '[data-testid="grpc-stream-send-button"]'
 const INVOKE_BTN = '[data-testid="grpc-send-button"]'
 const RESPONSE_EDITOR = '[data-testid="grpc-response-message-editor"]'
+const TRANSPORT_SELECT = '[data-testid="grpc-transport-select"]'
+
+/** Display label → option index, matching `grpcTransportOptions` in
+ * `GrpcRequestTabView.tsx` (order: gRPC, gRPC-Web, Connect). */
+const TRANSPORT_OPTION_INDEX: Record<string, number> = { gRPC: 0, 'gRPC-Web': 1, Connect: 2 }
 
 function parsedReply(reply: McpToolReply): unknown {
   const text = reply.content?.[0]?.text ?? ''
@@ -172,6 +177,30 @@ Then(
     await expect(statusEl).toBeVisible({ timeout: 15_000 })
   }
 )
+
+Then('the gRPC response shows an OK status', async () => {
+  if (page === null) throw new Error('launch first')
+  // gRPC status code 0 is OK, regardless of which transport dispatched the call.
+  const statusEl = page.locator('[data-testid="grpc-response-status"][data-status-code="0"]').first()
+  await expect(statusEl).toBeVisible({ timeout: 15_000 })
+})
+
+When('I set the gRPC transport to {string}', async ({}, label: string) => {
+  if (page === null) throw new Error('launch first')
+  const index = TRANSPORT_OPTION_INDEX[label]
+  expect(index, `unknown transport label "${label}"`).toBeDefined()
+  await page.locator(`${TRANSPORT_SELECT}-trigger`).first().click({ force: true })
+  await page.locator(`${TRANSPORT_SELECT}-option-${index}`).first().click({ force: true })
+  // The reactive-object write (and the downstream ContextService push) is
+  // debounced at ≤250ms — wait one debounce window so a subsequent Invoke
+  // dispatches the settled transport, not a mid-flight one.
+  await page.waitForTimeout(400)
+})
+
+Then('the gRPC transport select shows {string}', async ({}, label: string) => {
+  if (page === null) throw new Error('launch first')
+  await expect(page.locator(`${TRANSPORT_SELECT}-trigger .select-text`).first()).toHaveText(label, { timeout: 10_000 })
+})
 
 Then(
   'the gRPC response shows the status label {string}',

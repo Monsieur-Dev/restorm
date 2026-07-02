@@ -201,6 +201,8 @@ interface FullRequestData {
   service?: string
   grpcMethod?: string
   callType?: string
+  /** Wire transport ('grpc' | 'grpc-web' | 'connect'); absent means native gRPC. */
+  transport?: string
   requestMessage?: string
   metadata?: { id?: string; key: string; value: string }[]
   soapAction?: string

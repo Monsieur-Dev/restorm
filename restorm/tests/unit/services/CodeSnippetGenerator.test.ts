@@ -66,6 +66,25 @@ describe('CodeSnippetGenerator — gRPC', () => {
     const md = run({ ...base, metadata: [{ key: 'x-token', value: 'abc', enabled: true } as never] }, 'localhost:9000')
     expect(md).toContain("-H 'x-token: abc'")
   })
+
+  it('renders a non-empty gRPC-Web grpcurl snippet with resolved values', () => {
+    const md = run(base, 'localhost:9000')
+    expect(md).toContain('grpcurl -grpc-web')
+    expect(md).toContain('grpcbin.GRPCBin/DummyUnary')
+    expect(md).toContain('{"f_string":"hi"}')
+  })
+
+  it('renders a non-empty Connect-RPC curl snippet with resolved values', () => {
+    const md = run(base, 'localhost:9000')
+    expect(md).toContain("Content-Type: application/connect+json")
+    expect(md).toContain('http://localhost:9000/grpcbin.GRPCBin/DummyUnary')
+    expect(md).toContain("--data '{\"f_string\":\"hi\"}'")
+  })
+
+  it('addresses the Connect-RPC curl snippet over https for a TLS server', () => {
+    const md = run({ ...base, url: 'https://secure:8443' }, 'https://secure:8443')
+    expect(md).toContain('https://secure:8443/grpcbin.GRPCBin/DummyUnary')
+  })
 })
 
 describe('CodeSnippetGenerator — WebSocket / Socket.IO', () => {

@@ -475,6 +475,12 @@
       "clientStream": "Client streaming",
       "bidi": "Bidirectional streaming"
     },
+    "transport": {
+      "grpc": "gRPC",
+      "grpcWeb": "gRPC-Web",
+      "connect": "Connect",
+      "streamingUnsupported": "Dit transport ondersteunt geen client- of bidirectionele streaming via HTTP/1.1. Gebruik in plaats daarvan het native gRPC-transport."
+    },
     "server": {
       "proto": "Proto",
       "methods": "Mockmethoden",

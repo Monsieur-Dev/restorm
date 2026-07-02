@@ -111,13 +111,39 @@ services:
       retries: 10
       start_period: 5s
 
-  # gRPC - gRPCbin echo server
+  # gRPC - gRPCbin echo server. Also answers gRPC-Web on :9002 (mapped from
+  # the container's :9001, grpcbin's HTTP/1.1 endpoint) — no separate
+  # gRPC-Web image needed, the gRPC-Web transport E2E scenarios target the
+  # same container as native gRPC, just the other port.
   grpc:
     image: moul/grpcbin
     container_name: restorm-grpc
     ports:
       - "9000:9000"
       - "9002:9001"
+
+  # Connect-RPC mock - zero-dependency Node server used by the
+  # `grpc-execution` E2E suite's Connect-transport scenarios. There's no
+  # ready-made local Connect-RPC image (`connectrpc/eliza` is a public demo,
+  # not a container); this hand-rolled server answers the same
+  # `grpcbin.GRPCBin` service/method names as the bundled fallback proto, so
+  # a Connect request needs no custom `.proto`. Pure `node:http`, no npm
+  # install, boots instantly. Listens on :8093.
+  connect-mock:
+    image: node:20-alpine
+    container_name: restorm-connect-mock
+    working_dir: /app
+    volumes:
+      - ./connect-server:/app
+    command: node server.js
+    ports:
+      - "8093:8093"
+    healthcheck:
+      test: ["CMD", "sh", "-c", "wget -qO- http://localhost:8093/health | grep -q ok"]
+      interval: 3s
+      timeout: 3s
+      retries: 10
+      start_period: 5s
 
   # NOTE: there is intentionally no Socket.IO nor raw-WebSocket mock service.
   # restorm hosts its OWN Socket.IO + raw-WebSocket servers (a "server mode"

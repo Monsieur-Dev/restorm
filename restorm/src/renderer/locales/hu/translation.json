@@ -475,6 +475,12 @@
       "clientStream": "Client streaming",
       "bidi": "Bidirectional streaming"
     },
+    "transport": {
+      "grpc": "gRPC",
+      "grpcWeb": "gRPC-Web",
+      "connect": "Connect",
+      "streamingUnsupported": "Ez az átviteli mód nem támogatja a kliens- vagy kétirányú streamelést HTTP/1.1 protokollon keresztül. Használja helyette a natív gRPC átvitelt."
+    },
     "server": {
       "proto": "Proto",
       "methods": "Mock metódusok",

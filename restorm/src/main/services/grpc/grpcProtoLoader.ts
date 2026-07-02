@@ -273,6 +273,17 @@ export interface ResolvedGrpcMethod {
   client: grpc.Client & Record<string, (...args: unknown[]) => unknown>
   requestStream: boolean
   responseStream: boolean
+  /** The gRPC path (`/package.Service/Method`) — identical to the path a
+   * gRPC-Web or Connect-RPC HTTP request targets, so the HTTP-framed
+   * transports address the same endpoint the native client would. */
+  path: string
+  /** The proto-loader's own protobuf encoder/decoder for this method's
+   * request/response message types. gRPC-Web reuses these directly so its
+   * binary framing carries a real protobuf payload — built from the exact
+   * same descriptor as the native client — instead of needing a second
+   * codec pipeline. */
+  requestSerialize: (value: object) => Buffer
+  responseDeserialize: (bytes: Buffer) => object
 }
 
 /**
@@ -303,7 +314,10 @@ export function resolveGrpcMethod(
   return {
     client: client as ResolvedGrpcMethod['client'],
     requestStream: methodDef.requestStream,
-    responseStream: methodDef.responseStream
+    responseStream: methodDef.responseStream,
+    path: methodDef.path,
+    requestSerialize: methodDef.requestSerialize,
+    responseDeserialize: methodDef.responseDeserialize
   }
 }
 

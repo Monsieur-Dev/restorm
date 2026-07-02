@@ -474,6 +474,12 @@
       "clientStream": "Client streaming",
       "bidi": "Bidirectional streaming"
     },
+    "transport": {
+      "grpc": "gRPC",
+      "grpcWeb": "gRPC-Web",
+      "connect": "Connect",
+      "streamingUnsupported": "此傳輸方式不支援透過 HTTP/1.1 進行用戶端或雙向串流。請改用原生 gRPC 傳輸。"
+    },
     "server": {
       "proto": "Proto",
       "methods": "模擬方法",

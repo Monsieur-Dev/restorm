@@ -477,6 +477,12 @@
       "clientStream": "Client streaming",
       "bidi": "Bidirectional streaming"
     },
+    "transport": {
+      "grpc": "gRPC",
+      "grpcWeb": "gRPC-Web",
+      "connect": "Connect",
+      "streamingUnsupported": "Tento transport nepodporuje klientský ani obousměrný streaming přes HTTP/1.1. Použijte místo toho nativní transport gRPC."
+    },
     "server": {
       "proto": "Proto",
       "methods": "Mock metody",

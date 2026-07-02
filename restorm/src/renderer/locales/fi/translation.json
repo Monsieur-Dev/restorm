@@ -475,6 +475,12 @@
       "clientStream": "Client streaming",
       "bidi": "Bidirectional streaming"
     },
+    "transport": {
+      "grpc": "gRPC",
+      "grpcWeb": "gRPC-Web",
+      "connect": "Connect",
+      "streamingUnsupported": "Tämä siirtotapa ei tue asiakas- tai kaksisuuntaista suoratoistoa HTTP/1.1:n kautta. Käytä sen sijaan natiivia gRPC-siirtotapaa."
+    },
     "server": {
       "proto": "Proto",
       "methods": "Mock-metodit",

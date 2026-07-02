@@ -475,6 +475,12 @@
       "clientStream": "Client streaming",
       "bidi": "Bidirectional streaming"
     },
+    "transport": {
+      "grpc": "gRPC",
+      "grpcWeb": "gRPC-Web",
+      "connect": "Connect",
+      "streamingUnsupported": "Bu taşıma, HTTP/1.1 üzerinden istemci veya çift yönlü akışı desteklemez. Bunun yerine yerel gRPC taşımasını kullanın."
+    },
     "server": {
       "proto": "Proto",
       "methods": "Mock yöntemleri",
