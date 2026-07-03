@@ -172,13 +172,28 @@ describe('GitService', () => {
   describe('pull', () => {
     it('succeeds cleanly with no conflicts', async () => {
       mockGit.pull.mockResolvedValue({})
+      mockGit.status.mockResolvedValue(emptyStatus())
       expect(await service.pull('/proj')).toEqual({ success: true, conflicted: false, conflictFiles: [] })
     })
 
     it('always pins --no-rebase — a bare `git pull` errors out asking for a strategy on divergent branches when the host has no pull.rebase configured (git default), silently preventing the conflict-resolution feature from ever triggering', async () => {
       mockGit.pull.mockResolvedValue({})
+      mockGit.status.mockResolvedValue(emptyStatus())
       await service.pull('/proj')
       expect(mockGit.pull).toHaveBeenCalledWith(['--no-rebase'])
+    })
+
+    it('reports conflicted when pull() resolves "successfully" but the merge it ran actually left the worktree mid-conflict', async () => {
+      // simple-git's pull() keys its resolved/rejected outcome off whether
+      // the fetch step succeeded, not off the merge outcome. When the
+      // remote-tracking ref was already current before pull() ran (a prior
+      // background fetch got there first), pull() can resolve cleanly even
+      // though the merge it attempted stopped on conflicts. Re-reading
+      // status() on the success path is the only way to catch this.
+      mockGit.pull.mockResolvedValue({})
+      mockGit.status.mockResolvedValue(emptyStatus({ conflicted: ['a.yaml'] }))
+      const result = await service.pull('/proj')
+      expect(result).toEqual({ success: false, conflicted: true, conflictFiles: ['a.yaml'] })
     })
 
     it('surfaces conflicted paths by re-reading status after the rejection', async () => {
@@ -207,6 +222,50 @@ describe('GitService', () => {
     it('reports up to date when behind is 0', async () => {
       mockGit.status.mockResolvedValue(emptyStatus({ behind: 0 }))
       expect(await service.fetchAndCompare('/proj')).toEqual({ remoteHasNewerVersion: false, behind: 0 })
+    })
+
+    it('fails (rather than hangs forever) when fetch never resolves, and releases the folder queue for the next operation', async () => {
+      vi.useFakeTimers()
+      try {
+        mockGit.fetch.mockImplementation(() => new Promise((resolve) => {
+          // Intentionally never call `resolve` — simulates an unresponsive
+          // remote whose fetch never completes.
+          void resolve
+        }))
+        mockGit.status.mockResolvedValue(emptyStatus())
+
+        const fetchAndComparePromise = service.fetchAndCompare('/proj')
+
+        let getStatusSettled = false
+        const getStatusPromise = service.getStatus('/proj').then((result) => {
+          getStatusSettled = true
+          return result
+        })
+
+        await vi.advanceTimersByTimeAsync(0)
+        expect(getStatusSettled).toBe(false) // still queued behind the hung fetch
+
+        await vi.advanceTimersByTimeAsync(10_000)
+
+        const fetchResult = await fetchAndComparePromise
+        expect(fetchResult.remoteHasNewerVersion).toBe(false)
+        expect(fetchResult.behind).toBe(0)
+        expect(fetchResult.error).toContain('timed out')
+
+        // The queued getStatus was unblocked once the timeout released the
+        // lock — the whole point of bounding fetchAndCompare's wait.
+        await getStatusPromise
+        expect(getStatusSettled).toBe(true)
+      } finally {
+        vi.useRealTimers()
+        // `clearAllMocks()` (the global beforeEach) only wipes call history,
+        // not a mock's implementation — left as-is, the never-resolving
+        // `mockImplementation` set above would silently hang every LATER
+        // test in this file that calls `fetch()`. Reset it back to a plain
+        // mock with no implementation (fetch() resolving `undefined`),
+        // matching the module's initial state.
+        mockGit.fetch.mockReset()
+      }
     })
   })
 
@@ -297,6 +356,83 @@ describe('GitService', () => {
     })
   })
 
+  describe('per-folder serialization (mutex)', () => {
+    it('serializes two operations on the SAME folder — the second does not start until the first settles', async () => {
+      const order: string[] = []
+      let resolveStatus: (() => void) | undefined
+      mockGit.status.mockImplementationOnce(() => {
+        order.push('status:start')
+        return new Promise((resolve) => {
+          resolveStatus = () => {
+            order.push('status:end')
+            resolve(emptyStatus())
+          }
+        })
+      })
+      mockGit.commit.mockImplementation(() => {
+        order.push('commit:start')
+        return Promise.resolve({ commit: 'abc123' })
+      })
+
+      const statusPromise = service.getStatus('/proj')
+      const commitPromise = service.commit('/proj', 'msg')
+
+      // Flush pending microtasks without letting `resolveStatus` fire — if
+      // commit ran concurrently instead of queueing, its "start" would
+      // already be in `order` even though status hasn't resolved yet.
+      await Promise.resolve()
+      await Promise.resolve()
+      expect(order).toEqual(['status:start'])
+
+      resolveStatus?.()
+      await statusPromise
+      await commitPromise
+
+      expect(order).toEqual(['status:start', 'status:end', 'commit:start'])
+    })
+
+    it('runs operations on DIFFERENT folders concurrently — no cross-folder contention', async () => {
+      const order: string[] = []
+      let resolveA: (() => void) | undefined
+      mockGit.status.mockImplementationOnce(() => {
+        order.push('a:start')
+        return new Promise((resolve) => {
+          resolveA = () => {
+            order.push('a:end')
+            resolve(emptyStatus())
+          }
+        })
+      })
+      mockGit.commit.mockImplementation(() => {
+        order.push('b:start')
+        return Promise.resolve({ commit: 'abc123' })
+      })
+
+      const aPromise = service.getStatus('/proj-a')
+      const bPromise = service.commit('/proj-b', 'msg')
+
+      await Promise.resolve()
+      await Promise.resolve()
+      // b already started even though a hasn't resolved — different
+      // folders queue independently.
+      expect(order).toEqual(['a:start', 'b:start'])
+
+      resolveA?.()
+      await aPromise
+      await bPromise
+    })
+
+    it('a rejected operation still propagates to its own caller but does not permanently wedge the queue for later operations on the same folder', async () => {
+      mockGit.add.mockRejectedValueOnce(new Error('add failed'))
+      mockGit.status.mockResolvedValue(emptyStatus())
+
+      await expect(service.stage('/proj', ['a.yaml'])).rejects.toThrow('add failed')
+      const status = await service.getStatus('/proj')
+
+      expect(status).toEqual({ branch: 'main', ahead: 0, behind: 0, files: [] })
+    })
+  })
+
   describe('setActiveFolder + watch', () => {
     beforeEach(() => {
       vi.useFakeTimers()
@@ -370,6 +506,56 @@ describe('GitService', () => {
       await service.setActiveFolder('/proj')
 
       expect(mockGit.fetch).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('watch-trigger sequencing', () => {
+    beforeEach(() => {
+      vi.useFakeTimers()
+    })
+
+    afterEach(() => {
+      vi.useRealTimers()
+    })
+
+    it('a debounced watch event runs refresh to completion before starting the semi-pull check — never interleaved', async () => {
+      mockGit.checkIsRepo.mockResolvedValue(true)
+      mockGit.status.mockResolvedValue(emptyStatus())
+      await service.setActiveFolder('/proj')
+      const trigger = mockWatcher.on.mock.calls.find(([event]) => event === 'all')?.[1] as (() => void) | undefined
+      expect(trigger).toBeDefined()
+
+      const order: string[] = []
+      let resolveStatus: (() => void) | undefined
+      // Only refresh()'s OWN getStatus() call should hang on this — later
+      // status() calls (fetchAndCompare's internal one) fall back to the
+      // instant default set right after.
+      mockGit.status.mockImplementationOnce(() => {
+        order.push('status:start')
+        return new Promise((resolve) => {
+          resolveStatus = () => {
+            order.push('status:end')
+            resolve(emptyStatus())
+          }
+        })
+      })
+      mockGit.status.mockResolvedValue(emptyStatus())
+      mockGit.fetch.mockImplementation(() => {
+        order.push('fetch:start')
+        return Promise.resolve()
+      })
+
+      trigger?.()
+      await vi.advanceTimersByTimeAsync(500)
+
+      // The debounced callback is mid-refresh(); checkForRemoteUpdate()'s
+      // fetch must not have started yet.
+      expect(order).toEqual(['status:start'])
+
+      resolveStatus?.()
+      await vi.advanceTimersByTimeAsync(0)
+
+      expect(order).toEqual(['status:start', 'status:end', 'fetch:start'])
     })
   })
 

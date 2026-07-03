@@ -22,6 +22,36 @@ import { NO_GIT_STATE } from '../../types/git'
 /** Debounce window for folder-watch-triggered refreshes, tunable per host. */
 const DEFAULT_WATCH_DEBOUNCE_MS = 500
 
+/**
+ * Ceiling on a single background `fetch` inside {@link GitService.fetchAndCompare}.
+ * That call runs unattended (folder watch, check-on-open, the semi-pull
+ * CRON) and holds this folder's serialization queue (see `withFolderLock`)
+ * while it's in flight — an unresponsive remote must not wedge every other
+ * git operation on this folder behind it forever. User-driven operations
+ * (`pull`, `push`, `commit`, …) are left unbounded on purpose: a hang there
+ * is already visible to the user (a pending UI action), whereas a hung
+ * background fetch would silently freeze unrelated operations with no
+ * on-screen indication anything is wrong.
+ */
+const FETCH_TIMEOUT_MS = 10_000
+
+/** Rejects with a timeout error if `promise` hasn't settled within `timeoutMs`.
+ * Doesn't cancel the underlying operation (simple-git/git has no cancellation
+ * hook) — it only bounds how long this promise makes its caller wait. */
+async function withTimeout<T>(promise: Promise<T>, timeoutMs: number, label: string): Promise<T> {
+  let timer: ReturnType<typeof setTimeout> | undefined
+  const timedOut = new Promise<never>((_, reject) => {
+    timer = setTimeout(() => {
+      reject(new Error(`${label} timed out after ${timeoutMs}ms`))
+    }, timeoutMs)
+  })
+  try {
+    return await Promise.race([promise, timedOut])
+  } finally {
+    if (timer) clearTimeout(timer)
+  }
+}
+
 export interface GitServiceConfig {
   /** Debounce window (ms) between a `.git` change and the resulting
    * status refresh + semi-pull. Defaults to 500ms. */
@@ -75,12 +105,54 @@ export class GitService {
   private readonly cliMissingCallbacks = new Set<() => void>()
   private readonly pullAvailableCallbacks = new Set<() => void>()
 
+  /**
+   * Per-folder serialization queue. Every primitive that runs a real `git`
+   * process on a folder (the 12 methods below that call `this.git(folder)`)
+   * goes through {@link withFolderLock} keyed on that folder — two git
+   * invocations against the same working tree at once is how a background
+   * fetch (folder watch, check-on-open, the semi-pull CRON) can corrupt an
+   * explicit user-driven pull's outcome (a fetched ref moving mid-pull, or a
+   * bare git ref-update rejection). Different folders never contend — the
+   * map holds one entry per folder ever touched and is deliberately never
+   * pruned: a session opens a handful of folders at most, and a stale
+   * entry is just an already-settled promise (the next operation on that
+   * folder chains behind it instantly, at zero cost) — far simpler and
+   * safer than precisely detecting "is this folder done for good".
+   */
+  private readonly folderLocks = new Map<string, Promise<unknown>>()
+
   constructor(config: GitServiceConfig = {}) {
     this.config = { watchDebounceMs: config.watchDebounceMs ?? DEFAULT_WATCH_DEBOUNCE_MS }
   }
 
   private git(folder: string): SimpleGit {
     return simpleGit({ baseDir: folder })
+  }
+
+  /**
+   * Run `operation` after every previously-queued operation on the same
+   * folder has settled, whether that prior operation succeeded or failed.
+   * A hand-rolled promise chain rather than a lock object: no acquire/
+   * release pairing to get wrong, no risk of a caller forgetting to
+   * release. `operation` itself must not call back into `withFolderLock`
+   * for the SAME folder (it would deadlock, awaiting a queue slot behind
+   * itself) — none of the 12 primitives below call each other, so this
+   * never nests. Orchestrators (`refresh`, `checkForRemoteUpdate`,
+   * `setActiveFolder`) are safe too: they `await` one locked primitive to
+   * completion (releasing the queue) before calling the next, never
+   * holding the queue across two primitive calls.
+   */
+  private withFolderLock<T>(folder: string, operation: () => Promise<T>): Promise<T> {
+    const key = resolve(folder)
+    const previous = this.folderLocks.get(key) ?? Promise.resolve()
+    const result = previous.then(operation, operation)
+    // The stored tail must settle right after `operation` does (so the
+    // NEXT queued operation waits exactly as long as this one takes) but
+    // must never itself reject — a rejection would otherwise reject every
+    // future `.then` chained onto it for this folder, permanently wedging
+    // the queue after the first failure.
+    this.folderLocks.set(key, result.catch(() => undefined))
+    return result
   }
 
   // ==========================================================================
@@ -127,21 +199,25 @@ export class GitService {
    * the tree root). */
   public async isGitRepo(folder: string): Promise<boolean> {
     if (!(await this.ensureGitInstalled())) return false
-    try {
-      return await this.git(folder).checkIsRepo()
-    } catch (error) {
-      logger.warn('[GitService] isGitRepo failed', { folder, error: String(error) })
-      return false
-    }
+    return this.withFolderLock(folder, async () => {
+      try {
+        return await this.git(folder).checkIsRepo()
+      } catch (error) {
+        logger.warn('[GitService] isGitRepo failed', { folder, error: String(error) })
+        return false
+      }
+    })
   }
 
   public async getStatus(folder: string): Promise<GitStatus> {
-    const result = await this.git(folder).status()
-    return toGitStatus(result)
+    return this.withFolderLock(folder, async () => {
+      const result = await this.git(folder).status()
+      return toGitStatus(result)
+    })
   }
 
   public async stage(folder: string, paths: string[]): Promise<void> {
-    await this.git(folder).add(paths)
+    await this.withFolderLock(folder, () => this.git(folder).add(paths))
   }
 
   /**
@@ -156,26 +232,30 @@ export class GitService {
    * write.
    */
   public async commit(folder: string, message: string): Promise<GitCommitResult> {
-    try {
-      const result = await this.git(folder).commit(message)
-      if (!result.commit) {
-        return { success: false, error: 'Nothing to commit — no changes are staged.' }
+    return this.withFolderLock(folder, async () => {
+      try {
+        const result = await this.git(folder).commit(message)
+        if (!result.commit) {
+          return { success: false, error: 'Nothing to commit — no changes are staged.' }
+        }
+        return { success: true, commit: result.commit }
+      } catch (error) {
+        logger.error('[GitService] commit failed', { folder, error: String(error) })
+        return { success: false, error: String(error) }
       }
-      return { success: true, commit: result.commit }
-    } catch (error) {
-      logger.error('[GitService] commit failed', { folder, error: String(error) })
-      return { success: false, error: String(error) }
-    }
+    })
   }
 
   public async push(folder: string): Promise<GitPushResult> {
-    try {
-      await this.git(folder).push()
-      return { success: true }
-    } catch (error) {
-      logger.error('[GitService] push failed', { folder, error: String(error) })
-      return { success: false, error: String(error) }
-    }
+    return this.withFolderLock(folder, async () => {
+      try {
+        await this.git(folder).push()
+        return { success: true }
+      } catch (error) {
+        logger.error('[GitService] push failed', { folder, error: String(error) })
+        return { success: false, error: String(error) }
+      }
+    })
   }
 
   /**
@@ -198,32 +278,53 @@ export class GitService {
    * regardless of host config, not a workaround.
    */
   public async pull(folder: string): Promise<GitPullResult> {
-    try {
-      await this.git(folder).pull(['--no-rebase'])
-      return { success: true, conflicted: false, conflictFiles: [] }
-    } catch (error) {
-      const status = await this.git(folder).status().catch(() => null)
-      const conflictFiles = status?.conflicted ?? []
-      if (conflictFiles.length > 0) {
-        return { success: false, conflicted: true, conflictFiles }
+    return this.withFolderLock(folder, async () => {
+      try {
+        await this.git(folder).pull(['--no-rebase'])
+        // simple-git's pull() resolves as long as the fetch step succeeded --
+        // it does not independently confirm the merge it just attempted went
+        // through cleanly. When the remote-tracking ref was already current
+        // (e.g. a background fetch beat this call to it), pull() can resolve
+        // "successfully" while the merge it ran left the worktree mid-conflict.
+        // Re-read status() to catch that case rather than trust the resolved
+        // promise alone.
+        const postPullStatus = await this.git(folder).status().catch(() => null)
+        const postPullConflicts = postPullStatus?.conflicted ?? []
+        if (postPullConflicts.length > 0) {
+          return { success: false, conflicted: true, conflictFiles: postPullConflicts }
+        }
+        return { success: true, conflicted: false, conflictFiles: [] }
+      } catch (error) {
+        const status = await this.git(folder).status().catch(() => null)
+        const conflictFiles = status?.conflicted ?? []
+        if (conflictFiles.length > 0) {
+          return { success: false, conflicted: true, conflictFiles }
+        }
+        logger.error('[GitService] pull failed', { folder, error: String(error) })
+        return { success: false, conflicted: false, conflictFiles: [], error: String(error) }
       }
-      logger.error('[GitService] pull failed', { folder, error: String(error) })
-      return { success: false, conflicted: false, conflictFiles: [], error: String(error) }
-    }
+    })
   }
 
   /** Semi-pull: fetch the remote without merging, then compare. Used by the
    * folder watch here and by the CRON schedule / check-on-open added on
-   * top of this foundation. */
+   * top of this foundation. Runs through the same per-folder queue as
+   * every other primitive, but — unlike them — is itself triggered
+   * unattended (no user is waiting on it), so its `fetch` is bounded by
+   * {@link FETCH_TIMEOUT_MS}: an unresponsive remote must fail this one
+   * background check, not wedge the queue for every other operation on
+   * this folder behind it indefinitely. */
   public async fetchAndCompare(folder: string): Promise<GitFetchCompareResult> {
-    try {
-      await this.git(folder).fetch()
-      const status = await this.git(folder).status()
-      return { remoteHasNewerVersion: status.behind > 0, behind: status.behind }
-    } catch (error) {
-      logger.warn('[GitService] fetchAndCompare failed', { folder, error: String(error) })
-      return { remoteHasNewerVersion: false, behind: 0, error: String(error) }
-    }
+    return this.withFolderLock(folder, async () => {
+      try {
+        await withTimeout(this.git(folder).fetch(), FETCH_TIMEOUT_MS, 'fetch')
+        const status = await this.git(folder).status()
+        return { remoteHasNewerVersion: status.behind > 0, behind: status.behind }
+      } catch (error) {
+        logger.warn('[GitService] fetchAndCompare failed', { folder, error: String(error) })
+        return { remoteHasNewerVersion: false, behind: 0, error: String(error) }
+      }
+    })
   }
 
   /**
@@ -250,15 +351,17 @@ export class GitService {
     if (!this.isPathWithinFolder(folder, filePath)) {
       throw new Error(`getConflictVersions: filePath escapes the repo folder: ${filePath}`)
     }
-    const showStage = async (stage: 1 | 2 | 3): Promise<string | null> => {
-      try {
-        return await this.git(folder).show([`:${stage}:${filePath}`])
-      } catch {
-        return null
+    return this.withFolderLock(folder, async () => {
+      const showStage = async (stage: 1 | 2 | 3): Promise<string | null> => {
+        try {
+          return await this.git(folder).show([`:${stage}:${filePath}`])
+        } catch {
+          return null
+        }
       }
-    }
-    const [base, ours, theirs] = await Promise.all([showStage(1), showStage(2), showStage(3)])
-    return { path: filePath, base, ours, theirs }
+      const [base, ours, theirs] = await Promise.all([showStage(1), showStage(2), showStage(3)])
+      return { path: filePath, base, ours, theirs }
+    })
   }
 
   /**
@@ -274,11 +377,13 @@ export class GitService {
     if (!this.isPathWithinFolder(folder, filePath)) {
       throw new Error(`getFileAtHead: filePath escapes the repo folder: ${filePath}`)
     }
-    try {
-      return await this.git(folder).show([`HEAD:${filePath}`])
-    } catch {
-      return null
-    }
+    return this.withFolderLock(folder, async () => {
+      try {
+        return await this.git(folder).show([`HEAD:${filePath}`])
+      } catch {
+        return null
+      }
+    })
   }
 
   /** Write the user's resolved content to disk and stage it (marks the
@@ -289,8 +394,10 @@ export class GitService {
     if (!this.isPathWithinFolder(folder, filePath)) {
       throw new Error(`writeResolvedConflict: filePath escapes the repo folder: ${filePath}`)
     }
-    await writeFile(join(folder, filePath), content, 'utf-8')
-    await this.git(folder).add([filePath])
+    await this.withFolderLock(folder, async () => {
+      await writeFile(join(folder, filePath), content, 'utf-8')
+      await this.git(folder).add([filePath])
+    })
   }
 
   /** Commit timestamps (Unix seconds) for the two sides of an in-progress
@@ -300,21 +407,23 @@ export class GitService {
    * this as a tie-breaker should treat `null` as "no signal", not an
    * error. */
   public async getConflictCommitTimestamps(folder: string): Promise<GitConflictCommitTimestamps> {
-    const commitTime = async (ref: string): Promise<number | null> => {
-      try {
-        const raw = await this.git(folder).show([`--no-patch`, `--format=%ct`, ref])
-        const seconds = Number(raw.trim())
-        return Number.isFinite(seconds) ? seconds : null
-      } catch {
-        return null
+    return this.withFolderLock(folder, async () => {
+      const commitTime = async (ref: string): Promise<number | null> => {
+        try {
+          const raw = await this.git(folder).show([`--no-patch`, `--format=%ct`, ref])
+          const seconds = Number(raw.trim())
+          return Number.isFinite(seconds) ? seconds : null
+        } catch {
+          return null
+        }
       }
-    }
-    const [ours, theirs] = await Promise.all([commitTime('HEAD'), commitTime('MERGE_HEAD')])
-    return { ours, theirs }
+      const [ours, theirs] = await Promise.all([commitTime('HEAD'), commitTime('MERGE_HEAD')])
+      return { ours, theirs }
+    })
   }
 
   public async abortMerge(folder: string): Promise<void> {
-    await this.git(folder).merge(['--abort'])
+    await this.withFolderLock(folder, () => this.git(folder).merge(['--abort']))
   }
 
   // ==========================================================================
@@ -398,8 +507,17 @@ export class GitService {
     const trigger = (): void => {
       if (this.watchTimer) clearTimeout(this.watchTimer)
       this.watchTimer = setTimeout(() => {
-        void this.refresh()
-        void this.checkForRemoteUpdate()
+        // Sequential, not concurrent: `refresh()` and `checkForRemoteUpdate()`
+        // each run their own locked primitives (isGitRepo/getStatus, then
+        // fetchAndCompare) — the per-folder queue would already keep their
+        // underlying git processes from overlapping even fired concurrently,
+        // but chaining them here keeps `state` updates in a predictable
+        // order (status reflects the pre-fetch tree before the semi-pull
+        // check runs) rather than interleaving two independent call chains.
+        void (async () => {
+          await this.refresh()
+          await this.checkForRemoteUpdate()
+        })()
       }, this.config.watchDebounceMs)
     }
     this.watcher.on('all', trigger)
