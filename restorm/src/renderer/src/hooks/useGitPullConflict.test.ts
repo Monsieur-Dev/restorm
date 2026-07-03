@@ -43,11 +43,13 @@ function stubGitApi(overrides: Partial<{
   getConflictCommitTimestamps: ReturnType<typeof vi.fn>
   writeResolvedConflict: ReturnType<typeof vi.fn>
   commit: ReturnType<typeof vi.fn>
+  abortMerge: ReturnType<typeof vi.fn>
 }> = {}): {
   getConflictVersions: ReturnType<typeof vi.fn>
   getConflictCommitTimestamps: ReturnType<typeof vi.fn>
   writeResolvedConflict: ReturnType<typeof vi.fn>
   commit: ReturnType<typeof vi.fn>
+  abortMerge: ReturnType<typeof vi.fn>
 } {
   const api = {
     getConflictVersions: overrides.getConflictVersions ?? vi.fn().mockResolvedValue({
@@ -55,7 +57,8 @@ function stubGitApi(overrides: Partial<{
     }),
     getConflictCommitTimestamps: overrides.getConflictCommitTimestamps ?? vi.fn().mockResolvedValue({ ours: null, theirs: null }),
     writeResolvedConflict: overrides.writeResolvedConflict ?? vi.fn().mockResolvedValue(undefined),
-    commit: overrides.commit ?? vi.fn().mockResolvedValue({ success: true, commit: 'abc123' })
+    commit: overrides.commit ?? vi.fn().mockResolvedValue({ success: true, commit: 'abc123' }),
+    abortMerge: overrides.abortMerge ?? vi.fn().mockResolvedValue(undefined)
   }
   ;(window as unknown as { api: unknown }).api = { git: api }
   return api
@@ -96,11 +99,22 @@ describe('useGitPullConflict', () => {
     expect(api.getConflictCommitTimestamps).toHaveBeenCalledWith('/proj')
   })
 
-  it('close hides the UI without touching git', async () => {
-    stubGitApi()
+  it('close aborts the in-progress merge before hiding the UI — cancelling has no resume path, so leaving MERGE_HEAD behind would strand the user mid-merge', async () => {
+    const api = stubGitApi()
     const { result } = renderHook(() => useGitPullConflict())
     await act(async () => { await result.current.openFromPull('/proj', 'api.restorm') })
     act(() => { result.current.close() })
+
+    expect(api.abortMerge).toHaveBeenCalledWith('/proj')
+    expect(result.current.isOpen).toBe(false)
+  })
+
+  it('close is a no-op before openFromPull has run (no folder to abort a merge in)', () => {
+    const api = stubGitApi()
+    const { result } = renderHook(() => useGitPullConflict())
+    act(() => { result.current.close() })
+
+    expect(api.abortMerge).not.toHaveBeenCalled()
     expect(result.current.isOpen).toBe(false)
   })
 

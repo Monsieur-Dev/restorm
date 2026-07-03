@@ -1,7 +1,7 @@
 import { test as base } from 'playwright-bdd'
 import { _electron as electron, type ElectronApplication, type Page, expect } from '@playwright/test'
 import { execSync } from 'child_process'
-import { mkdirSync, rmSync, writeFileSync } from 'fs'
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'fs'
 import { tmpdir } from 'os'
 import { join, resolve } from 'path'
 import electronPath from 'electron'
@@ -11,21 +11,6 @@ import { createIsolatedUserDataDir } from '../../helpers/userdata-isolation'
 import { collectBlockingRendererMessages, summariseBlockingMessages } from '../../helpers/renderer-log-guard'
 import { GIT_SERVER_URL, seedFreshRepo, gitServerUrlFor, gitEnv } from '../../../integration/gitServerSeed'
 
-/**
- * Scratch root for this suite's per-scenario git working copies. Wiped on
- * every scenario start (mirrors `DIRTY_STATE_TEMP_DIR`'s wipe-on-launch
- * lifecycle) — lives in the OS temp dir, NOT under this repo, as secondary
- * hygiene (unlike `DIRTY_STATE_TEMP_DIR`, which never runs git commands
- * against its contents). This is NOT the real defense, though: the actual
- * incident (see `gitServerSeed.ts`'s doc comment) was a git HOOK
- * (pre-commit/pre-push) leaking `GIT_DIR`/`GIT_INDEX_FILE` into this
- * process's env, which redirects EVERY `git` subprocess here regardless of
- * cwd/`-C`/workdir location — `run()` below scrubs that env via `gitEnv()`
- * on every invocation, which is what actually makes the collaborator
- * `git add`/`commit`/`push` (git-push-pull.steps.ts) and the clones below
- * safe under a hook.
- */
-export const GIT_INTEGRATION_TEMP_DIR = join(tmpdir(), 'restorm-git-integration')
 const RESTORM_ROOT = resolve(__dirname, '../../../..')
 
 export interface LaunchedApp {
@@ -36,9 +21,21 @@ export interface LaunchedApp {
 
 export interface GitIntegrationFixtures {
   restormRoot: string
+  /** A fresh, uniquely-named scratch root for THIS scenario's git working
+   * copies (`mkdtempSync`, torn down after the scenario). Was previously
+   * ONE fixed path shared across the whole run, wiped-and-recreated at
+   * every scenario's start — safe for a single scenario in isolation, but
+   * a real cross-worker incident once ≥2 git-suite projects run together
+   * (the default `pnpm test:e2e`/CI/pre-push shape): scenario B starting
+   * wipes the shared root out from under scenario A, still mid-flight in
+   * a different worker, deleting its already-built clones. Per-test
+   * isolation (same pattern as `gitServerSeed.ts`'s workDir fix) removes
+   * the shared mutable state entirely — no scenario can ever touch
+   * another's root, regardless of scheduling. */
+  gitIntegrationRoot: string
   launchApp: () => Promise<LaunchedApp>
   /** Clone the SHARED, read-only `seed-project.git` remote into a fresh
-   * directory under `GIT_INTEGRATION_TEMP_DIR` (one clone per call, named
+   * directory under `gitIntegrationRoot` (one clone per call, named
    * `dirName`) and return the absolute path to its `.restorm` file —
    * restorm's git surfaces track "the folder containing the open file",
    * so this is the one path every scenario needs to open. ONLY safe for
@@ -46,7 +43,7 @@ export interface GitIntegrationFixtures {
    * checks) — see `seedFreshRepo` for anything that writes. */
   cloneSeedRepo: (dirName: string) => Promise<string>
   /** Seed a FRESH, scenario-scoped remote (named `repoName`) and clone it
-   * into `GIT_INTEGRATION_TEMP_DIR/<repoName>`, returning the `.restorm`
+   * into `gitIntegrationRoot/<repoName>`, returning the `.restorm`
    * path to open. Every scenario that pushes, or that has a collaborator
    * push a conflicting change, MUST use its own fresh repo via this rather
    * than the shared `cloneSeedRepo` — two mutating scenarios racing on the
@@ -80,28 +77,34 @@ function run(command: string, cwd?: string): void {
 export const test = base.extend<GitIntegrationFixtures>({
   restormRoot: [RESTORM_ROOT, { option: true }],
 
-  cloneSeedRepo: async ({}, use) => {
+  gitIntegrationRoot: async ({}, use) => {
+    const root = mkdtempSync(join(tmpdir(), 'restorm-git-integration-'))
+    await use(root)
+    rmSync(root, { recursive: true, force: true })
+  },
+
+  cloneSeedRepo: async ({ gitIntegrationRoot }, use) => {
     await use((dirName: string) => {
-      const workingCopy = join(GIT_INTEGRATION_TEMP_DIR, dirName)
+      const workingCopy = join(gitIntegrationRoot, dirName)
       rmSync(workingCopy, { recursive: true, force: true })
       run(`git clone "${GIT_SERVER_URL}" "${workingCopy}"`)
       return Promise.resolve(join(workingCopy, 'api.restorm'))
     })
   },
 
-  seedFreshRepo: async ({}, use) => {
+  seedFreshRepo: async ({ gitIntegrationRoot }, use) => {
     await use((repoName: string) => {
       const url = seedFreshRepo(repoName)
-      const workingCopy = join(GIT_INTEGRATION_TEMP_DIR, repoName)
+      const workingCopy = join(gitIntegrationRoot, repoName)
       rmSync(workingCopy, { recursive: true, force: true })
       run(`git clone "${url}" "${workingCopy}"`)
       return Promise.resolve(join(workingCopy, 'api.restorm'))
     })
   },
 
-  cloneNamedRepo: async ({}, use) => {
+  cloneNamedRepo: async ({ gitIntegrationRoot }, use) => {
     await use((repoName: string, dirName: string) => {
-      const workingCopy = join(GIT_INTEGRATION_TEMP_DIR, dirName)
+      const workingCopy = join(gitIntegrationRoot, dirName)
       rmSync(workingCopy, { recursive: true, force: true })
       run(`git clone "${gitServerUrlFor(repoName)}" "${workingCopy}"`)
       return Promise.resolve(workingCopy)
@@ -111,9 +114,6 @@ export const test = base.extend<GitIntegrationFixtures>({
   launchApp: async ({ restormRoot }, use, testInfo) => {
     const launched: { app: ElectronApplication; logs: string[] }[] = []
     let configPath: string | null = null
-
-    rmSync(GIT_INTEGRATION_TEMP_DIR, { recursive: true, force: true })
-    mkdirSync(GIT_INTEGRATION_TEMP_DIR, { recursive: true })
 
     const electronExePath = electronPath as unknown as string
     const mainJsPath = join(restormRoot, 'dist/main/index.js')

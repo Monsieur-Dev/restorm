@@ -168,6 +168,12 @@ describe('GitService', () => {
       expect(await service.pull('/proj')).toEqual({ success: true, conflicted: false, conflictFiles: [] })
     })
 
+    it('always pins --no-rebase — a bare `git pull` errors out asking for a strategy on divergent branches when the host has no pull.rebase configured (git default), silently preventing the conflict-resolution feature from ever triggering', async () => {
+      mockGit.pull.mockResolvedValue({})
+      await service.pull('/proj')
+      expect(mockGit.pull).toHaveBeenCalledWith(['--no-rebase'])
+    })
+
     it('surfaces conflicted paths by re-reading status after the rejection', async () => {
       mockGit.pull.mockRejectedValue(new Error('merge conflict'))
       mockGit.status.mockResolvedValue(emptyStatus({ conflicted: ['a.yaml', 'b.yaml'] }))

@@ -56,11 +56,13 @@ export const GIT_SERVER_URL = `git://localhost:9418/${SEED_REPO_NAME}`
 const DEFAULT_BRANCH = 'main'
 
 /**
- * A minimal single-file Restorm project: one environment-folder holding
- * one request. Enough to exercise "detect repo / push / pull-clean" (wave
- * 1); the conflict suite (wave 2) extends this with a folder, a scenario,
- * and a second environment-folder so every entity type has real conflict
- * material.
+ * A single-file Restorm project with one of each conflictable entity kind
+ * (`GitEntityKind` — see `restorm/src/shared/git/gitCommitDiff.ts`): the
+ * environment folder itself, a plain folder, the request, and a scenario.
+ * Wave 1 only ever touches the request; wave 2's conflict suite (AC#5,
+ * "conflict coverage across ALL element types") needs real material for
+ * the other three too, so every entity is here from the start rather than
+ * added later — one shared seed shape for both waves.
  */
 const SEED_PROJECT_YAML = `_projectUuid: e2e-seed-project-uuid
 collections:
@@ -81,6 +83,18 @@ collections:
         headers: []
         params: []
         pathParams: []
+  - id: e2e-seed-folder
+    name: Legacy Endpoints
+    tags: []
+    configuration: {}
+    items: []
+  - id: e2e-seed-scenario
+    name: Smoke Test
+    type: scenario
+    tags: []
+    params: []
+    nodes: []
+    edges: []
 `
 
 function run(command: string, cwd?: string): void {

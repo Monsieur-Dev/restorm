@@ -169,10 +169,23 @@ export class GitService {
    * conflicts, `git pull` exits non-zero and simple-git rejects — the
    * version-agnostic way to recover the conflict list is to re-read
    * `status()` afterwards rather than parse the rejected error shape.
+   *
+   * `--no-rebase` is explicit, not optional: git (≥2.27ish) refuses a bare
+   * `git pull` on divergent branches when `pull.rebase`/`pull.ff` aren't
+   * configured — it errors out asking the user to choose a strategy
+   * instead of attempting anything. Left to the host's ambient config,
+   * that error looks identical to a real failure from here (no merge is
+   * ever attempted, so `status().conflicted` is empty) — meaning the
+   * ENTIRE conflict-resolution feature silently never triggers on any
+   * host without `pull.rebase` configured (git's default, unconfigured
+   * state). This whole feature is merge-based (`MERGE_HEAD`,
+   * `status().conflicted`, `abortMerge`'s `merge --abort`) — pinning
+   * `--no-rebase` is the objectively correct strategy for this app
+   * regardless of host config, not a workaround.
    */
   public async pull(folder: string): Promise<GitPullResult> {
     try {
-      await this.git(folder).pull()
+      await this.git(folder).pull(['--no-rebase'])
       return { success: true, conflicted: false, conflictFiles: [] }
     } catch (error) {
       const status = await this.git(folder).status().catch(() => null)

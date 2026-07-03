@@ -4,7 +4,7 @@ import { readFileSync, writeFileSync, rmSync } from 'fs'
 import { join } from 'path'
 import type { ElectronApplication, Locator, Page } from '@playwright/test'
 import { configureNextOpenDialogForE2E } from 'electron-core-ui/testing'
-import { test, expect, currentElectronApp, GIT_INTEGRATION_TEMP_DIR } from '../../fixtures/git-integration.fixture'
+import { test, expect, currentElectronApp } from '../../fixtures/git-integration.fixture'
 import { gitServerUrlFor, gitEnv } from '../../../../integration/gitServerSeed'
 
 const { Given, When, Then } = createBdd(test)
@@ -120,9 +120,9 @@ When('I change the request\'s URL and push', async () => {
   await expect(modal).not.toBeVisible({ timeout: 10000 })
 })
 
-Then('the remote has the pushed change', async () => {
+Then('the remote has the pushed change', async ({ gitIntegrationRoot }) => {
   if (!activeRepoName) throw new Error('no active repo — "I open a project..." must run first')
-  const verifyDir = join(GIT_INTEGRATION_TEMP_DIR, 'push-verify-clone')
+  const verifyDir = join(gitIntegrationRoot, 'push-verify-clone')
   rmSync(verifyDir, { recursive: true, force: true })
   execSync(`git clone "${gitServerUrlFor(activeRepoName)}" "${verifyDir}"`, { stdio: 'ignore', env: gitEnv() })
   const content = readFileSync(join(verifyDir, 'api.restorm'), 'utf-8')

@@ -52,7 +52,17 @@ export function useGitPullConflict(): UseGitPullConflictResult {
     setIsOpen(true)
   }, [])
 
-  const close = useCallback(() => { setIsOpen(false) }, [])
+  // Cancelling out of conflict resolution has no "resume later" path — the
+  // repo is left mid-merge (`MERGE_HEAD` + conflict markers in the working
+  // tree) with no UI to get back into this screen. Just closing the modal
+  // would strand the user there with no visible way to recover short of
+  // raw git CLI, so Cancel aborts the merge (`git merge --abort`, which
+  // returns to the pre-merge branch tip — the user's own committed work is
+  // untouched, only the in-progress merge is undone) before closing.
+  const close = useCallback(() => {
+    if (target) void window.api.git.abortMerge(target.folder)
+    setIsOpen(false)
+  }, [target])
 
   const finishResolution = useCallback(async () => {
     if (!versions || !target) return
