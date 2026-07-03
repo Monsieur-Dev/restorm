@@ -423,8 +423,15 @@ export default defineConfig({
    * surfaces as flaky `waitFor`/`toBeVisible` timeouts on menu/submenu
    * rendering (the failure mode was NOT CPU-bound — load stayed ~11%). Two
    * workers keep the peak resident set within physical RAM; a full run is
-   * slower than at 4 but stable. CI runners with dedicated RAM can raise this. */
-  workers: 2,
+   * slower than at 4 but stable. CI runners with dedicated RAM can raise this.
+   *
+   * Dropped to 1 (serial) on this RAM-constrained no-swap host: even 2 workers
+   * intermittently thrashed and starved renderer timers, surfacing as flaky
+   * `waitFor` timeouts on the MCP-driven "open the request tab via MCP" steps
+   * (kafka/jsonrpc lost the lottery on different pushes). Serial is ~2x slower
+   * but deterministic — no cross-worker MCP contention. Raise again (or make
+   * env-conditional for CI) once the host has more RAM. */
+  workers: 1,
 
   /* Reporter */
   reporter: [

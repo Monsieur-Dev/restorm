@@ -23,7 +23,7 @@
 #
 # Gating: only ONE ship runs at a time on this RAM-bound host (an flock on the
 # shared git common dir serializes concurrent ships). The push step is wrapped
-# in the same 20-minute hard timeout as scripts/git-commit-timeout.sh so a hung
+# in the same 60-minute hard timeout as scripts/git-commit-timeout.sh so a hung
 # Monaco/e2e flake can't pin an agent for an hour, and every attempt is recorded
 # in the shared `.commit-flake-history.log` journal (stamped SHIP) so a flaky
 # ship is attributable and answerable from one file.
@@ -60,7 +60,7 @@
 #   0    shipped (or already merged / merge skipped with --no-merge after green)
 #   1    CI not green or merge refused — details printed to stderr
 #   2    bad arguments
-#   124  the push step hit the 20-min timeout — investigate flakiness
+#   124  the push step hit the 60-min timeout — investigate flakiness
 #   *    the failing step's exit code (rebase conflict, e2e fail, CI red, …)
 
 set -uo pipefail
@@ -85,7 +85,7 @@ done
 REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
 GIT_DIR="$(git rev-parse --absolute-git-dir 2>/dev/null || echo "${REPO_ROOT}/.git")"
 LOG_FILE="${GIT_DIR}/ship.log"
-TIMEOUT_SEC=1800
+TIMEOUT_SEC=3600
 
 # The flake-history journal + its lock live ONCE at the main working-tree root
 # (shared across every worktree), exactly like git-commit-timeout.sh — so ships
@@ -191,7 +191,7 @@ pnpm run build:core-ui || die "build:core-ui failed after rebase."
 pnpm run build:restorm || die "build:restorm failed after rebase."
 
 # ── 2. Push → the pre-push hook runs the FULL e2e under xvfb ────────────
-# Wrap in the same 20-min hard timeout + journal mechanics as the commit
+# Wrap in the same 60-min hard timeout + journal mechanics as the commit
 # wrapper. `--force-with-lease` is safe + required after a rebase. The hook's
 # e2e output is captured to LOG_FILE for the journal tail.
 #
