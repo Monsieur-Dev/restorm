@@ -14,3 +14,8 @@ Feature: Git MCP routes
     Then it returns a resolution token and the conflict list, without completing the merge
     When I call git_resolve_conflicts picking my own version for every conflict over MCP
     Then the merge is committed locally with my version of the content
+
+  Scenario: An MCP write immediately after opening a project still reaches disk
+    Given a freshly opened project with no prior edits, over MCP
+    When I call update_request with no delay after opening
+    Then the edit reaches disk

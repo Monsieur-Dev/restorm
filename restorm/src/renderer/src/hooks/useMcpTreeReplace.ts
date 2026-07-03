@@ -2,11 +2,23 @@
  * Listen for `mcp:tree-replace` IPC pushes and replace the renderer's
  * `rootItems` state with the fresh tree. Used by the main-side MCP
  * mutation tools (`import_from_url`, `create_folder`, `create_request`,
- * `rename_item`, `delete_item`) so the user sees changes in the
- * sidebar immediately, without waiting for the autosave round-trip.
+ * `rename_item`, `delete_item`, `update_request`, ...) so the user sees
+ * changes in the sidebar immediately, without waiting for the autosave
+ * round-trip.
  *
- * Disabled outside MCP mode — when `mcpEnabled` is false the listener
- * is never registered.
+ * Registered unconditionally from mount — NOT gated on `mcpEnabled`.
+ * `mcpEnabled` only resolves after an async main round-trip
+ * (`useMcpEnabled`'s `getConfig()` IPC `invoke`), so gating this
+ * listener on it left a real startup window where a fast MCP client
+ * (open_project immediately followed by a write tool, well within an
+ * automated agent's reach) could fire `mcp:tree-replace` before the
+ * listener existed. Electron doesn't replay a dropped IPC message once
+ * a listener registers late, so that edit would never reach `rootItems`
+ * — and every downstream save check (which reads `rootItems`) would see
+ * "nothing changed" for the rest of the session. Registering the
+ * listener on mount instead removes that window entirely: it's a no-op
+ * subscription (no messages arrive) until an MCP tool actually runs,
+ * which itself can't happen before MCP is enabled main-side.
  *
  * Items arrive as plain JSON (lost their class prototype across the
  * IPC boundary). We walk the tree and reify each leaf via
@@ -25,7 +37,6 @@ interface RestormTreeBridge {
 }
 
 export interface UseMcpTreeReplaceInput {
-  enabled: boolean
   setRootItems: React.Dispatch<React.SetStateAction<FolderItem[]>>
   /**
    * Mutable ref the renderer flips to `true` immediately before applying
@@ -86,10 +97,9 @@ export function readTreeReplacePayload(payload: unknown): { items: unknown[]; mc
 }
 
 export function useMcpTreeReplace(input: UseMcpTreeReplaceInput): void {
-  const { enabled, setRootItems, mcpDrivenRef, lastMcpVersionRef, bumpAllTabContentVersions } = input
+  const { setRootItems, mcpDrivenRef, lastMcpVersionRef, bumpAllTabContentVersions } = input
 
   useEffect(() => {
-    if (!enabled) return
     const root = window as { restorm?: { runtime?: RestormTreeBridge } }
     const api = root.restorm?.runtime
     if (!api) return
@@ -116,5 +126,5 @@ export function useMcpTreeReplace(input: UseMcpTreeReplaceInput): void {
       bumpAllTabContentVersions()
     })
     return off
-  }, [enabled, setRootItems, mcpDrivenRef, lastMcpVersionRef, bumpAllTabContentVersions])
+  }, [setRootItems, mcpDrivenRef, lastMcpVersionRef, bumpAllTabContentVersions])
 }

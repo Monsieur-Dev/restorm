@@ -21,6 +21,7 @@ let lastReply: Record<string, unknown> | null = null
 const LOCAL_AUTHOR = { email: 'e2e@restorm.test', name: 'Restorm E2E' }
 const COLLABORATOR_AUTHOR = { email: 'collaborator@restorm.test', name: 'Other Collaborator' }
 const MCP_EDITED_URL = 'https://mcp-edited.example.com/pets/1'
+const RACE_EDITED_URL = 'https://mcp-race-edited.example.com/pets/1'
 
 function requireDiscovery(): McpDiscovery {
   if (!discovery) throw new Error('app must be launched via MCP before calling tools')
@@ -57,6 +58,31 @@ function parsedReply(reply: McpToolReply): Record<string, unknown> {
 
 function headOf(dir: string): string {
   return execSync('git rev-parse HEAD', { cwd: dir, encoding: 'utf-8', env: gitEnv() }).trim()
+}
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms))
+}
+
+/**
+ * Poll the request's URL on disk until it matches `expectedUrl` or the
+ * timeout elapses. Once a project is genuinely open and its tree-replace
+ * listener registered, the save round-trip (tree-replace → rootItems →
+ * the pendingAutoSave effect → handleMenuSaveAll → disk) still spans a
+ * few React render/effect cycles plus real file I/O — this waits out
+ * that legitimate async chain, not a race.
+ */
+async function waitForRequestUrlOnDisk(dir: string, expectedUrl: string, timeoutMs = 10_000): Promise<void> {
+  const deadline = Date.now() + timeoutMs
+  let lastSeen: unknown
+  while (Date.now() < deadline) {
+    const doc = readSeedDocument(dir)
+    const entity = findEntity(doc.collections, 'e2e-seed-request')
+    lastSeen = entity?.['url']
+    if (lastSeen === expectedUrl) return
+    await sleep(100)
+  }
+  throw new Error(`Timed out waiting for the request URL edit to reach disk at ${join(dir, 'api.restorm')} (last seen url: ${JSON.stringify(lastSeen)})`)
 }
 
 // ---------------------------------------------------------------------------
@@ -205,4 +231,42 @@ Then('the merge is committed locally with my version of the content', () => {
   const doc = readSeedDocument(dir)
   const entity = findEntity(doc.collections, 'e2e-seed-request')
   expect(entity?.['url']).toBe('https://mcp-local.example.com/pets/1')
+})
+
+// ---------------------------------------------------------------------------
+// Scenario 3 — a write immediately after opening must still reach disk
+// ---------------------------------------------------------------------------
+
+Given('a freshly opened project with no prior edits, over MCP', async ({ seedFreshRepo, launchAppWithMcp, callMcpTool }) => {
+  activeRepoName = `git-mcp-race-${Date.now()}`
+  localFilePath = await seedFreshRepo(activeRepoName)
+  localCloneDir = dirname(localFilePath)
+
+  const launched = await launchAppWithMcp()
+  discovery = launched.discovery
+
+  const reply = await callMcpTool(discovery, 'open_project', { filePath: localFilePath })
+  const parsed = parsedReply(reply)
+  expect(parsed['opened']).toBe(true)
+})
+
+// Deliberately no wait, no poll, no settle time between open and write —
+// the whole point is to hit the renderer the instant it's technically
+// possible to, the same way a fast automated MCP client would.
+When('I call update_request with no delay after opening', async ({ callMcpTool }) => {
+  const reply = await callMcpTool(requireDiscovery(), 'update_request', {
+    id: 'e2e-seed-request',
+    patch: { url: RACE_EDITED_URL }
+  })
+  // The write call itself must not have errored (a Pro-gate rejection or a
+  // bad patch would also leave the file unedited, but for a different,
+  // uninteresting reason) — rule that out before trusting the disk poll.
+  // Checked on the RAW reply: `parsedReply` only extracts the JSON payload
+  // text, it doesn't carry the envelope's own `isError` flag.
+  expect(reply.isError ?? false).toBe(false)
+  lastReply = parsedReply(reply)
+})
+
+Then('the edit reaches disk', async () => {
+  await waitForRequestUrlOnDisk(requireLocalCloneDir(), RACE_EDITED_URL)
 })

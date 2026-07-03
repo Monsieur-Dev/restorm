@@ -14,6 +14,64 @@ import { promises as fs } from 'node:fs'
 import { isAbsolute, dirname } from 'node:path'
 import { McpService, getFileService, isFileServiceInitialized } from 'electron-core-ui/main'
 import { BrowserWindow } from 'electron'
+import { collectionStore } from '../../services/CollectionStore'
+import { isEnvironmentFolder } from '../../../shared/types/folderTypes'
+
+/**
+ * Bounded wait for main's `CollectionStore` to actually reflect the
+ * project `open_project` just opened, before replying. Without this, a
+ * fast MCP write tool call immediately after `open_project` can race
+ * ahead of the renderer→main mirror (`file:opened` → renderer populates
+ * its tree → renderer mirrors it back over `collections:sync`, several
+ * render/effect cycles + an IPC round trip later) and fail to find any
+ * entity in the just-opened project.
+ *
+ * Polls `CollectionStore` directly against the file's OWN just-read
+ * content, rather than reacting to a `collections:sync` event: that
+ * event's payload is `rootItems.filter(isEnvironmentFolder)` (only
+ * environment folders + their nested contents — see
+ * `App.tsx`'s `environmentFolderCollections`), and the effect that fires
+ * it runs unconditionally on every renderer mount, including the very
+ * first one before any project is open. An event-based "wait for the
+ * next sync" can resolve on that unrelated initial-mount sync instead of
+ * the real one. Polling the store's actual content sidesteps that
+ * entirely, and handles the empty-project case naturally: a file with no
+ * environment folders has nothing to wait for, so it doesn't block at all.
+ *
+ * Bounded so `open_project` can NEVER hang: on timeout, reply anyway with
+ * a `warning` field rather than block indefinitely.
+ */
+const OPEN_PROJECT_COLLECTIONS_READY_TIMEOUT_MS = 3_000
+const OPEN_PROJECT_COLLECTIONS_READY_POLL_INTERVAL_MS = 50
+
+/** The ids `CollectionStore` needs to contain for `filePath`'s content to
+ * be considered "landed" — the top-level environment folders, since
+ * that's the only thing the renderer's mirror-back actually syncs (see
+ * the constant's doc comment above). A file with none of these has
+ * nothing to wait for. */
+export function expectedTopLevelEnvironmentFolderIds(content: unknown): string[] {
+  const collections = (content as { collections?: unknown } | null)?.collections
+  if (!Array.isArray(collections)) return []
+  return collections.filter(isEnvironmentFolder).map((folder) => folder.id)
+}
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => { setTimeout(resolve, ms) })
+}
+
+/** Resolves `true` once every id in `expectedIds` is present in
+ * `CollectionStore`, or `false` once `timeoutMs` elapses first —
+ * this NEVER hangs. An empty `expectedIds` resolves `true` immediately
+ * without polling at all. */
+export async function waitForCollectionStoreReady(expectedIds: string[], timeoutMs: number): Promise<boolean> {
+  if (expectedIds.length === 0) return true
+  const deadline = Date.now() + timeoutMs
+  for (;;) {
+    if (expectedIds.every((id) => collectionStore.findById(id) !== null)) return true
+    if (Date.now() >= deadline) return false
+    await sleep(OPEN_PROJECT_COLLECTIONS_READY_POLL_INTERVAL_MS)
+  }
+}
 
 function jsonReply(value: unknown): { content: { type: 'text'; text: string }[] } {
   return { content: [{ type: 'text', text: JSON.stringify(value, null, 2) }] }
@@ -114,7 +172,10 @@ export function registerProjectTools(mcp: McpService): void {
       description:
         'Open an existing .restorm file (single-file or folder-structure). Triggers the same ' +
         '`file:opened` flow as the File menu, so the renderer reloads the sidebar / workbench / ' +
-        'recent-files. Errors out cleanly when the path doesn\'t exist or isn\'t a valid project.',
+        'recent-files. Errors out cleanly when the path doesn\'t exist or isn\'t a valid project. ' +
+        'Waits briefly for the renderer to confirm the project is loaded before replying, so an ' +
+        'immediate follow-up write tool call reliably finds the newly-opened entities; a `warning` ' +
+        'field means that confirmation didn\'t arrive in time and a follow-up call may need a retry.',
       inputSchema: {
         filePath: z.string().min(1).describe('Absolute path to the .restorm file or folder to open.')
       } as Record<string, unknown>
@@ -127,7 +188,13 @@ export function registerProjectTools(mcp: McpService): void {
       try {
         const result = await getFileService().open(filePath)
         if (!result.success) return errorReply(`FileService.open failed for ${filePath}`)
-        return jsonReply({ filePath, opened: true, isDirectory: result.isDirectory === true })
+        const payload: Record<string, unknown> = { filePath, opened: true, isDirectory: result.isDirectory === true }
+        const expectedIds = expectedTopLevelEnvironmentFolderIds(result.content)
+        const ready = await waitForCollectionStoreReady(expectedIds, OPEN_PROJECT_COLLECTIONS_READY_TIMEOUT_MS)
+        if (!ready) {
+          payload['warning'] = `Project opened, but main's collection store wasn't confirmed synced within ${String(OPEN_PROJECT_COLLECTIONS_READY_TIMEOUT_MS)}ms — an immediate follow-up write tool call may not find newly-opened entities yet.`
+        }
+        return jsonReply(payload)
       } catch (err) {
         return errorReply(`open_project failed: ${err instanceof Error ? err.message : String(err)}`)
       }

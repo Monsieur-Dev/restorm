@@ -24,6 +24,13 @@ vi.mock('electron-core-ui/main', () => ({
   isFileServiceInitialized: () => fileServiceReady,
   getFileService: () => ({ open: (p: string) => openMock(p), getRecentFiles: () => [] })
 }))
+// `project.ts` now also imports `collectionStore` (open_project's
+// readiness poll) — that module pulls in `createPubSub` from
+// `electron-core-ui/main`, which this file's own mock above doesn't
+// provide. None of THESE tests (create_project's filesystem hardening)
+// touch collections at all, so stub the whole module out rather than
+// widen the electron-core-ui/main mock for an unrelated dependency.
+vi.mock('../../services/CollectionStore', () => ({ collectionStore: { findById: vi.fn() } }))
 
 import { registerProjectTools } from './project'
 

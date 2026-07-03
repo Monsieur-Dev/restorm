@@ -1595,7 +1595,7 @@ const App: React.FC = () => {
   const lastMcpVersionRef = useRef(0)
   const bumpAllTabContentVersionsRef = useRef<() => void>(() => { /* not yet wired */ })
   const bumpAllTabContentVersionsStable = useCallback((): void => { bumpAllTabContentVersionsRef.current() }, [])
-  useMcpTreeReplace({ enabled: mcpEnabled, setRootItems, mcpDrivenRef, lastMcpVersionRef, bumpAllTabContentVersions: bumpAllTabContentVersionsStable })
+  useMcpTreeReplace({ setRootItems, mcpDrivenRef, lastMcpVersionRef, bumpAllTabContentVersions: bumpAllTabContentVersionsStable })
   useMcpRunRequest({ enabled: mcpEnabled })
   // Read-only e2e automation hook: exposes window.__restormSuggestions to pull
   // each action's inspector data suggestion for a scenario from the running app.
