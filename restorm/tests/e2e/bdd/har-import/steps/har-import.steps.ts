@@ -96,7 +96,10 @@ Then('the imported request {string} should have response history', async ({}, re
   await expect(requestRow).toBeVisible({ timeout: 10000 })
   await requestRow.click()
 
-  const historyButton = p.locator('[data-testid="request-header-history-button"]')
+  // The history button carries a per-tab id suffix (`…-<requestId>`) so an
+  // inactive `display:none` tab's copy can't be resolved by a flat testid;
+  // `:visible` pins the locator to the active tab's on-screen button.
+  const historyButton = p.locator('[data-testid^="request-header-history-button-"]:visible')
   await expect(historyButton).toBeVisible({ timeout: 5000 })
   await historyButton.click()
 

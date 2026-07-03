@@ -21,12 +21,12 @@ export const RequestHeaderHistoryButton: React.FC<RequestHeaderHistoryButtonProp
   const { t } = useTranslation()
   const label = t('statusbar.requestHistory')
   return (
-    <HeaderHoverTooltip label={label} data-testid="request-header-history-tooltip">
+    <HeaderHoverTooltip label={label} data-testid={`request-header-history-tooltip-${requestId}`}>
       <Button
         small
         icon="history"
         className="request-header-history-button"
-        data-testid="request-header-history-button"
+        data-testid={`request-header-history-button-${requestId}`}
         onClick={(e) => {
           e.stopPropagation()
           eventBus.emitLocalSync(DocumentEvents.REQUEST_HISTORY_OPEN, { requestId } as RequestHistoryEventPayload)
