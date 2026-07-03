@@ -3,7 +3,7 @@ import { execSync } from 'child_process'
 import { readFileSync, writeFileSync, rmSync } from 'fs'
 import { join } from 'path'
 import type { ElectronApplication, Locator, Page } from '@playwright/test'
-import { configureNextOpenDialogForE2E } from 'electron-core-ui/testing'
+import { configureNextOpenDialogForE2E, listViewRowSelectorByTitle } from 'electron-core-ui/testing'
 import { test, expect, currentElectronApp } from '../../fixtures/git-integration.fixture'
 import { gitServerUrlFor, gitEnv } from '../../../../integration/gitServerSeed'
 
@@ -35,10 +35,7 @@ function requireApp(): ElectronApplication {
 }
 
 function sidebarRowByName(p: Page, name: string): Locator {
-  return p
-    .locator('[data-testid="sidebar-listview"] .list-view-row')
-    .filter({ has: p.getByText(name, { exact: true }) })
-    .first()
+  return p.locator(listViewRowSelectorByTitle('sidebar-listview', name))
 }
 
 Given('I open a project cloned from a freshly seeded git remote', async ({ launchApp, seedFreshRepo }) => {

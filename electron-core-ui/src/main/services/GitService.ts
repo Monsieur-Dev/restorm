@@ -144,9 +144,23 @@ export class GitService {
     await this.git(folder).add(paths)
   }
 
+  /**
+   * simple-git's `commit()` doesn't always reject when there's nothing
+   * staged — depending on the installed git/simple-git version, a
+   * no-op commit (nothing added since the last commit) can resolve with
+   * an EMPTY `result.commit` instead of throwing. Treat that as a
+   * failure explicitly rather than trusting the promise's resolution:
+   * every caller (the Push modal, the MCP `git_confirm_push` route)
+   * reports `success` straight to the user/agent as "it's committed" —
+   * a false positive there is a silent no-op passed off as a real
+   * write.
+   */
   public async commit(folder: string, message: string): Promise<GitCommitResult> {
     try {
       const result = await this.git(folder).commit(message)
+      if (!result.commit) {
+        return { success: false, error: 'Nothing to commit — no changes are staged.' }
+      }
       return { success: true, commit: result.commit }
     } catch (error) {
       logger.error('[GitService] commit failed', { folder, error: String(error) })

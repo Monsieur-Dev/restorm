@@ -1,4 +1,4 @@
-import { describe, it, expect, afterEach } from 'vitest'
+import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import { execSync } from 'child_process'
 import { existsSync, mkdtempSync, rmSync, writeFileSync } from 'fs'
 import { tmpdir } from 'os'
@@ -19,6 +19,17 @@ const BARE_REPO_PATH = join(__dirname, '../docker/git-server/repos', SEED_REPO_N
 // un-scrubbed `git -C <bare> ...` would read/write the WORKTREE instead of
 // the bare repo path it was explicitly pointed at — corrupting both the
 // setup AND the assertions in this file, not just `seedGitServer` itself.
+//
+// `isGitServerSeeded`/`seedGitServer` check REAL FILESYSTEM state at the
+// default `REPOS_DIR` — the same bind-mounted directory the e2e suite's
+// `global-setup.ts` unconditionally seeds on every `pnpm test:e2e` run. No
+// amount of test-runner process/module isolation protects against that: an
+// e2e run on this host any time before `test:all` leaves `seed-project.git`
+// sitting there, and "is not seeded before the first call" would fail on a
+// dirty start it has no way to detect. Reset BEFORE every test too (not
+// just after) so this suite is self-contained regardless of what ran on
+// this host earlier.
+beforeEach(() => { resetGitServerSeed() })
 afterEach(() => { resetGitServerSeed() })
 
 describe('gitServerSeed', () => {

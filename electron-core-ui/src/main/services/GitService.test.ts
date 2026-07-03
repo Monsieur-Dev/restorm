@@ -154,6 +154,13 @@ describe('GitService', () => {
       expect(result.error).toContain('nothing to commit')
     })
 
+    it('commit reports failure when simple-git resolves with an empty commit hash (nothing was actually staged)', async () => {
+      mockGit.commit.mockResolvedValue({ commit: '' })
+      const result = await service.commit('/proj', 'msg')
+      expect(result.success).toBe(false)
+      expect(result.error).toContain('Nothing to commit')
+    })
+
     it('push reports failure without throwing', async () => {
       mockGit.push.mockRejectedValue(new Error('rejected'))
       const result = await service.push('/proj')

@@ -148,6 +148,7 @@ When `data-testid="my-split"` is provided:
 - `splitViewPaneSelector(testId, paneIdOrIndex)`
 - `splitViewPaneHeaderSelector(testId, paneIdOrIndex)`
 - `splitViewPaneBodySelector(testId, paneIdOrIndex)`
+- `splitViewPaneSelectorByHeaderTitle(testId, title)` — locate a pane by its rendered header text instead of `paneIdOrIndex`. Use this when the pane count varies at runtime (e.g. a master list pane that only renders once there's more than one item), since `paneIdOrIndex` shifts positionally whenever a sibling pane is conditionally shown/hidden.
 - `splitViewSashTestId(testId, index)`
 - `splitViewSashSelector(testId, index)`
 

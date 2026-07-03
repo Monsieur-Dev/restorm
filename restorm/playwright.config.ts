@@ -413,6 +413,12 @@ const gitConflictTestDir = defineBddConfig({
   outputDir: '.features-gen/git-conflict'
 })
 
+const gitMcpTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/git-mcp/features/**/*.feature',
+  steps: ['tests/e2e/bdd/git-mcp/steps/**/*.ts', 'tests/e2e/bdd/fixtures/git-mcp.fixture.ts'],
+  outputDir: '.features-gen/git-mcp'
+})
+
 /**
  * Playwright configuration for Electron E2E tests using playwright-bdd.
  * Each test group has its own project with a dedicated fixture.
@@ -763,6 +769,11 @@ export default defineConfig({
             name: 'git-conflict',
             testDir: gitConflictTestDir,
             timeout: 180 * 1000 // multiple diverging clones per scenario + the 4-panel resolution UI
+          },
+          {
+            name: 'git-mcp',
+            testDir: gitMcpTestDir,
+            timeout: 120 * 1000
           }
         ]),
     {

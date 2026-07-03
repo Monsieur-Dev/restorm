@@ -14,31 +14,29 @@
 
 import { test as base } from 'playwright-bdd'
 import { _electron as electron, type ElectronApplication, type Page, expect } from '@playwright/test'
-import { mkdirSync, mkdtempSync, writeFileSync, readFileSync, existsSync, rmSync } from 'fs'
+import { mkdirSync, mkdtempSync, writeFileSync, rmSync } from 'fs'
 import { join, resolve } from 'path'
 import { tmpdir } from 'os'
 import electronPath from 'electron'
-import { installSystemModalsMockingForE2E } from 'electron-core-ui/testing'
+import {
+  installSystemModalsMockingForE2E,
+  postMcpJsonRpc,
+  callMcpToolOverJsonRpc,
+  readMcpDiscoveryWithRetry,
+  type McpDiscovery,
+  type McpJsonRpcResponse,
+  type McpToolReply
+} from 'electron-core-ui/testing'
 import { withE2ECoverageEnv } from '../../helpers/coverage'
 import { createIsolatedUserDataDir } from '../../helpers/userdata-isolation'
 
-export interface McpDiscovery {
-  port: number
-  token: string
-  projectPath: string | null
-  pid: number
-  startedAt: string
-}
+export type { McpDiscovery, McpJsonRpcResponse, McpToolReply }
 
-export interface McpJsonRpcResponse {
-  id: number | string
-  result?: unknown
-  error?: { code: number; message: string }
-}
+export const MCP_SERVER_TEMP_DIR = resolve(__dirname, '../../.tmp/mcp-server')
 
-export interface McpToolReply {
-  content?: { type: string; text?: string }[]
-  isError?: boolean
+function resetTempDir(): void {
+  rmSync(MCP_SERVER_TEMP_DIR, { recursive: true, force: true })
+  mkdirSync(MCP_SERVER_TEMP_DIR, { recursive: true })
 }
 
 export interface LaunchedMcpApp {
@@ -77,57 +75,6 @@ export interface McpServerFixtures {
    * roundtrips that don't fit the `tools/call` shape.
    */
   rawJsonRpc: (discovery: McpDiscovery, body: Record<string, unknown>) => Promise<McpJsonRpcResponse>
-}
-
-let nextRpcId = 1
-
-async function postJsonRpc(discovery: McpDiscovery, body: Record<string, unknown>): Promise<McpJsonRpcResponse> {
-  // The MCP Streamable-HTTP transport accepts JSON-RPC over POST. The
-  // SDK negotiates a session via headers; for a stateless server one
-  // request = one response is fine. Accept both `application/json` and
-  // `text/event-stream` so the SDK's negotiation doesn't 406.
-  const url = `http://127.0.0.1:${String(discovery.port)}/mcp`
-  const response = await fetch(url, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Accept': 'application/json, text/event-stream',
-      'Authorization': `Bearer ${discovery.token}`
-    },
-    body: JSON.stringify({ jsonrpc: '2.0', id: nextRpcId++, ...body })
-  })
-  if (!response.ok) {
-    throw new Error(`MCP HTTP error ${String(response.status)}: ${await response.text()}`)
-  }
-  // Streamable HTTP can reply as SSE-framed `event: message\ndata: …` or
-  // as a single JSON object. Detect by content-type and parse the right
-  // shape — the JSON-RPC envelope is the same either way.
-  const ct = response.headers.get('content-type') ?? ''
-  if (ct.includes('text/event-stream')) {
-    const raw = await response.text()
-    const dataLine = raw.split('\n').find((l) => l.startsWith('data:'))
-    if (!dataLine) throw new Error(`MCP SSE reply had no data frame: ${raw.slice(0, 200)}`)
-    return JSON.parse(dataLine.slice(5).trim()) as McpJsonRpcResponse
-  }
-  return await response.json() as McpJsonRpcResponse
-}
-
-async function readDiscoveryWithRetry(path: string, timeoutMs = 15_000): Promise<McpDiscovery> {
-  const deadline = Date.now() + timeoutMs
-  let lastError: unknown = null
-  while (Date.now() < deadline) {
-    try {
-      if (existsSync(path)) {
-        const raw = readFileSync(path, 'utf-8')
-        const parsed = JSON.parse(raw) as McpDiscovery
-        if (parsed.port && parsed.token) return parsed
-      }
-    } catch (err) {
-      lastError = err
-    }
-    await new Promise((resolve) => setTimeout(resolve, 200))
-  }
-  throw new Error(`Timed out reading MCP discovery file at ${path}: ${String(lastError)}`)
 }
 
 export const test = base.extend<McpServerFixtures>({
@@ -202,7 +149,7 @@ export const test = base.extend<McpServerFixtures>({
         window.alert = () => undefined
       })
       // Allow main-process boot to finish writing the discovery file.
-      const discovery = await readDiscoveryWithRetry(discoveryPath)
+      const discovery = await readMcpDiscoveryWithRetry(discoveryPath)
       launched.push({ app, logs })
       return { app, page, discovery }
     }
@@ -223,18 +170,11 @@ export const test = base.extend<McpServerFixtures>({
   },
 
   callMcpTool: async ({}, use) => {
-    await use(async (discovery, name, args = {}) => {
-      const reply = await postJsonRpc(discovery, {
-        method: 'tools/call',
-        params: { name, arguments: args }
-      })
-      if (reply.error) throw new Error(`MCP tool ${name} failed: ${reply.error.message}`)
-      return (reply.result ?? {}) as McpToolReply
-    })
+    await use((discovery, name, args = {}) => callMcpToolOverJsonRpc(discovery, name, args))
   },
 
   rawJsonRpc: async ({}, use) => {
-    await use((discovery, body) => postJsonRpc(discovery, body))
+    await use((discovery, body) => postMcpJsonRpc(discovery, body))
   }
 })
 

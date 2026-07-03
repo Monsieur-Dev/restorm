@@ -1,11 +1,11 @@
 import { createBdd } from 'playwright-bdd'
 import { execSync } from 'child_process'
-import { existsSync, readFileSync, writeFileSync } from 'fs'
+import { existsSync } from 'fs'
 import { dirname, join } from 'path'
-import { parse as yamlParse, stringify as yamlStringify } from 'yaml'
 import type { ElectronApplication, Locator, Page } from '@playwright/test'
-import { configureNextOpenDialogForE2E } from 'electron-core-ui/testing'
+import { configureNextOpenDialogForE2E, listViewRowSelectorByTitle, splitViewPaneSelectorByHeaderTitle } from 'electron-core-ui/testing'
 import { test, expect, currentElectronApp } from '../../fixtures/git-integration.fixture'
+import { readSeedDocument, findEntity, setEntityField, gitCommit, gitPush, type SeedEntity } from '../../../helpers/gitSeedHelpers'
 import { gitEnv } from '../../../../integration/gitServerSeed'
 
 const { Given, When, Then } = createBdd(test)
@@ -39,17 +39,11 @@ function requireLocalCloneDir(): string {
 }
 
 function sidebarRowByName(p: Page, name: string): Locator {
-  return p
-    .locator('[data-testid="sidebar-listview"] .list-view-row')
-    .filter({ has: p.getByText(name, { exact: true }) })
-    .first()
+  return p.locator(listViewRowSelectorByTitle('sidebar-listview', name))
 }
 
 function conflictRowByName(p: Page, name: string): Locator {
-  return p
-    .locator('[data-testid="conflict-resolution-view-list"] .list-view-row')
-    .filter({ has: p.getByText(name, { exact: true }) })
-    .first()
+  return p.locator(listViewRowSelectorByTitle('conflict-resolution-view-list', name))
 }
 
 /** Scopes into one of the 3 conflict-resolution panes by its header title
@@ -60,7 +54,7 @@ function conflictRowByName(p: Page, name: string): Locator {
  * whether the conflict list is shown, so header text is the only stable
  * way to disambiguate. */
 function conflictPaneByTitle(p: Page, title: string): Locator {
-  return p.locator('.split-view-view').filter({ has: p.locator('.split-view-view-header-title', { hasText: title }) })
+  return p.locator(splitViewPaneSelectorByHeaderTitle('conflict-resolution-view-split', title))
 }
 
 async function activateRequestSubTab(p: Page): Promise<void> {
@@ -70,52 +64,6 @@ async function activateRequestSubTab(p: Page): Promise<void> {
   if (alreadySelected === 'true') return
   await tab.click()
   await p.waitForTimeout(200)
-}
-
-interface SeedEntity { id: string, items?: SeedEntity[], [key: string]: unknown }
-interface SeedDocument { collections: SeedEntity[] }
-
-function readSeedDocument(dir: string): SeedDocument {
-  return yamlParse(readFileSync(join(dir, 'api.restorm'), 'utf-8')) as SeedDocument
-}
-
-function writeSeedDocument(dir: string, doc: SeedDocument): void {
-  writeFileSync(join(dir, 'api.restorm'), yamlStringify(doc), 'utf-8')
-}
-
-/** `e2e-seed-request` lives INSIDE the env folder's `items` (a request is a
- * tree child, not a sibling top-level collection) — search recursively
- * rather than assuming every entity sits at the top level of `collections`. */
-function findEntity(items: SeedEntity[], entityId: string): SeedEntity | undefined {
-  for (const item of items) {
-    if (item.id === entityId) return item
-    if (item.items) {
-      const found = findEntity(item.items, entityId)
-      if (found) return found
-    }
-  }
-  return undefined
-}
-
-/** Raw (non-UI) edit of one field on one seeded entity — used to construct
- * the "other side" of a conflict (a collaborator's clone, or this
- * scenario's own local clone before restorm ever opens it) without going
- * through the app. */
-function setEntityField(dir: string, entityId: string, field: string, value: unknown): void {
-  const doc = readSeedDocument(dir)
-  const entity = findEntity(doc.collections, entityId)
-  if (!entity) throw new Error(`seed entity "${entityId}" not found in ${dir}/api.restorm`)
-  entity[field] = value
-  writeSeedDocument(dir, doc)
-}
-
-function gitCommit(dir: string, author: { email: string, name: string }, message: string): void {
-  execSync('git add api.restorm', { cwd: dir, stdio: 'ignore', env: gitEnv() })
-  execSync(`git -c user.email=${author.email} -c user.name="${author.name}" commit -m "${message}"`, { cwd: dir, stdio: 'ignore', env: gitEnv() })
-}
-
-function gitPush(dir: string): void {
-  execSync('git push origin main', { cwd: dir, stdio: 'ignore', env: gitEnv() })
 }
 
 async function openProject(filePath: string, launchApp: () => Promise<{ page: Page }>): Promise<void> {
