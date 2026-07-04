@@ -2384,6 +2384,7 @@
     "conflictResolutionTitle": "Rezolvă conflictele",
     "conflictCancel": "Anulează",
     "conflictFinish": "Finalizează",
+    "conflictReadOnlyEntityNotice": "Acest tip de entitate nu poate fi editat aici. Alegeți mai sus versiunea dvs. sau a lor.",
     "settingsTitle": "Git",
     "applyCommitMessageLanguageByDefaultTitle": "Aplică implicit această limbă a mesajului de commit",
     "applyCommitMessageLanguageByDefaultDescription": "Când este activă, limba aleasă în fereastra de trimitere devine implicită pentru trimiterile viitoare.",

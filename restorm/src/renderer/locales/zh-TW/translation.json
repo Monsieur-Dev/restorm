@@ -2382,6 +2382,7 @@
     "conflictResolutionTitle": "解決衝突",
     "conflictCancel": "取消",
     "conflictFinish": "完成",
+    "conflictReadOnlyEntityNotice": "此實體類型無法在此處編輯。請在上方選擇你的版本或他們的版本。",
     "settingsTitle": "Git",
     "applyCommitMessageLanguageByDefaultTitle": "預設套用此提交訊息語言",
     "applyCommitMessageLanguageByDefaultDescription": "啟用後，推送視窗中選擇的語言將成為日後推送的預設語言。",

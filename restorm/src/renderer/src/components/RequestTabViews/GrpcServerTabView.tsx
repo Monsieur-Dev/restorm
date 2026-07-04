@@ -118,7 +118,7 @@ export const GrpcServerTabView: React.FC<GrpcServerTabViewProps> = ({ request, c
   // Listen = start hosting the gRPC mock server. It stays up until Stop / file
   // close / quit. The lifecycle beam is fed by grpc:server-progress.
   const handleListen = useCallback((): void => {
-    if (!request.id || isListening) return
+    if (!request.id || isListening || conflictMode) return
     setServedCount(0)
     void window.restorm?.grpc.listen(request.id)
       .then((res) => {
@@ -128,7 +128,7 @@ export const GrpcServerTabView: React.FC<GrpcServerTabViewProps> = ({ request, c
         }
       })
       .catch((err: unknown) => { logger.error('gRPC mock server listen error', { error: String(err) }) })
-  }, [request.id, isListening, t])
+  }, [request.id, isListening, conflictMode, t])
 
   const handleStop = useCallback((): void => {
     void window.restorm?.grpc.stopServer(request.id)
@@ -314,6 +314,7 @@ export const GrpcServerTabView: React.FC<GrpcServerTabViewProps> = ({ request, c
         <Button
           icon={isListening ? 'debug-disconnect' : 'plug'}
           onClick={isListening ? handleStop : handleListen}
+          disabled={!!conflictMode}
           {...(isListening ? {} : { emphasis: 1 })}
           options={{
             title: isListening ? t('grpc.server.stopListening', 'Stop server') : t('grpc.server.startListening', 'Start server'),

@@ -238,9 +238,13 @@ server versions.
 `ReadOnlyOverlay` is how restorm's `MyEntityPanel` above achieves "EXACTLY
 the normal entity panel, read-only" without a bespoke `readOnly` prop
 threaded through every protocol view: it renders the host's UNMODIFIED
-panel wrapped in a CSS class that disables `pointer-events` on every
-interactive descendant (input/textarea/select/button/…), leaving scrolling
-and text selection untouched. restorm's actual dispatcher
+panel wrapped in a div carrying the DOM `inert` attribute, which takes the
+whole subtree out of the tab order and blocks focus, typing, clicks and
+pointer events — so the panel can't be mutated by mouse OR keyboard.
+Wheel/trackpad scrolling still works (`inert` doesn't gate scrolling), so a
+tall panel stays browsable; text selection and interaction are intentionally
+off. A scoped `pointer-events: none` CSS rule is retained as a fallback for
+any environment that doesn't honour `inert`. restorm's actual dispatcher
 (`restorm/src/renderer/src/components/GitConflict/ConflictEntityPanel.tsx`)
 picks the right panel per entity kind — folder / environment-folder /
 scenario / every request protocol (HTTP, auth, GraphQL, gRPC, SOAP,

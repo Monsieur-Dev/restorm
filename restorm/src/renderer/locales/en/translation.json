@@ -2383,6 +2383,7 @@
     "conflictResolutionTitle": "Resolve conflicts",
     "conflictCancel": "Cancel",
     "conflictFinish": "Finish",
+    "conflictReadOnlyEntityNotice": "This entity type can't be edited here. Pick your version or theirs above.",
     "settingsTitle": "Git",
     "applyCommitMessageLanguageByDefaultTitle": "Apply the commit-message language by default",
     "applyCommitMessageLanguageByDefaultDescription": "When enabled, the language picked in the Push modal becomes the default for future pushes.",

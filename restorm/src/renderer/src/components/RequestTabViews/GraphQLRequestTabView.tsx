@@ -403,7 +403,7 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
 
   const handleListen = useCallback((): void => {
     const requestId = request.id
-    if (!requestId || isListening) return
+    if (!requestId || isListening || conflictMode) return
     // Flush the debounced schema / resolver push so the main-process mock
     // hosts the current SDL — not the pre-debounce (possibly empty) one.
     flushUpdate()
@@ -416,7 +416,7 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
         }
       })
       .catch((err: unknown) => { logger.error('GraphQL mock server listen error', { error: String(err) }) })
-  }, [request.id, isListening, t, flushUpdate])
+  }, [request.id, isListening, conflictMode, t, flushUpdate])
 
   const handleStop = useCallback((): void => {
     void window.restorm?.graphql.stop(request.id)
@@ -560,11 +560,12 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
   // Subscription client: open the SSE subscription (clears the prior event list)
   // / stop it. Pushed payloads + lifecycle arrive via the streaming effect below.
   const handleSubscribe = useCallback((): void => {
+    if (conflictMode) return
     setSubscriptionEvents([])
     setExpandedEvents(new Set())
     void window.restorm?.graphql.subscribe({ requestId: request.id })
       .catch((err: unknown) => { logger.error('GraphQL subscribe failed', { error: String(err) }) })
-  }, [request.id])
+  }, [request.id, conflictMode])
 
   const handleUnsubscribe = useCallback((): void => {
     void window.restorm?.graphql.unsubscribe(request.id)
@@ -917,6 +918,7 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
             <Button
               icon={isListening ? 'debug-disconnect' : 'plug'}
               onClick={isListening ? handleStop : handleListen}
+              disabled={!!conflictMode}
               {...(isListening ? {} : { emphasis: 1 })}
               options={{
                 title: isListening ? t('graphql.server.stopListening') : t('graphql.server.startListening'),
@@ -968,6 +970,7 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
                 <Button
                   icon={isSubscribing ? 'debug-disconnect' : 'broadcast'}
                   onClick={isSubscribing ? handleUnsubscribe : handleSubscribe}
+                  disabled={!!conflictMode}
                   {...(isSubscribing ? { emphasis: 0 } : sendButtonStyle ? { style: sendButtonStyle } : { emphasis: 1 })}
                   options={{
                     title: isSubscribing ? t('graphql.subscription.stop') : t('graphql.subscription.subscribe'),

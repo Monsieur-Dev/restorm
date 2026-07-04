@@ -2385,6 +2385,7 @@
     "conflictResolutionTitle": "Vyřešit konflikty",
     "conflictCancel": "Zrušit",
     "conflictFinish": "Dokončit",
+    "conflictReadOnlyEntityNotice": "Tento typ entity zde nelze upravovat. Vyberte výše svou verzi nebo jejich.",
     "settingsTitle": "Git",
     "applyCommitMessageLanguageByDefaultTitle": "Použít tento jazyk zprávy commitu jako výchozí",
     "applyCommitMessageLanguageByDefaultDescription": "Po zapnutí se jazyk zvolený v okně odeslání stane výchozím pro budoucí odeslání.",

@@ -2383,6 +2383,7 @@
     "conflictResolutionTitle": "Risolvi i conflitti",
     "conflictCancel": "Annulla",
     "conflictFinish": "Fine",
+    "conflictReadOnlyEntityNotice": "Questo tipo di entità non può essere modificato qui. Scegli sopra la tua versione o la loro.",
     "settingsTitle": "Git",
     "applyCommitMessageLanguageByDefaultTitle": "Applica la lingua del messaggio di commit come predefinita",
     "applyCommitMessageLanguageByDefaultDescription": "Se attivo, la lingua scelta nella finestra di push diventa quella predefinita per i prossimi push.",

@@ -897,7 +897,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
   // file close / quit; the promise resolves when the route stops.
   const handleListen = useCallback((): void => {
     const requestId = request.id
-    if (!requestId || isListening) return
+    if (!requestId || isListening || conflictMode) return
     setServedCount(0)
     void window.restorm?.http.listen(requestId)
       .then((res) => {
@@ -907,7 +907,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
         }
       })
       .catch((err: unknown) => { logger.error('HTTP mock server listen error', { error: String(err) }) })
-  }, [request.id, isListening, t])
+  }, [request.id, isListening, conflictMode, t])
 
   const handleStop = useCallback((): void => {
     void window.restorm?.http.stop(request.id)
@@ -1188,6 +1188,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
           <Button
             icon={isListening ? 'debug-disconnect' : 'plug'}
             onClick={isListening ? handleStop : handleListen}
+            disabled={!!conflictMode}
             {...(isListening ? {} : { emphasis: 1 })}
             options={{
               title: isListening ? t('http.server.stopListening') : t('http.server.startListening'),

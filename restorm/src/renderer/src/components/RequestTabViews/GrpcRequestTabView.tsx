@@ -412,6 +412,7 @@ const GrpcClientTabView: React.FC<GrpcRequestTabViewProps> = ({
   // Streaming controls (server / client / bidi). Connect opens a long-lived call;
   // Send writes a request message (client / bidi); Disconnect half-closes it.
   const handleConnect = (): void => {
+    if (conflictMode) return
     setLiveMessages([])
     void window.restorm?.grpc.connect({
       requestId: request.id,
@@ -717,7 +718,7 @@ const GrpcClientTabView: React.FC<GrpcRequestTabViewProps> = ({
                 >
                   <Button
                     icon={isListening ? 'debug-disconnect' : 'plug'}
-                    disabled={duplexBlockedByTransport}
+                    disabled={duplexBlockedByTransport || !!conflictMode}
                     onClick={isListening ? handleDisconnect : handleConnect}
                     {...(isListening ? { emphasis: 0 } : sendButtonStyle ? { style: sendButtonStyle } : { emphasis: 1 })}
                     options={{

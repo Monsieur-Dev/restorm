@@ -2383,6 +2383,7 @@
     "conflictResolutionTitle": "Çakışmaları çöz",
     "conflictCancel": "İptal",
     "conflictFinish": "Bitir",
+    "conflictReadOnlyEntityNotice": "Bu varlık türü burada düzenlenemez. Yukarıdan kendi sürümünüzü veya onlarınkini seçin.",
     "settingsTitle": "Git",
     "applyCommitMessageLanguageByDefaultTitle": "Bu commit mesajı dilini varsayılan olarak uygula",
     "applyCommitMessageLanguageByDefaultDescription": "Etkinleştirildiğinde, gönderme penceresinde seçilen dil gelecekteki göndermeler için varsayılan olur.",

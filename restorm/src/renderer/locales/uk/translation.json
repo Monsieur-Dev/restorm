@@ -2385,6 +2385,7 @@
     "conflictResolutionTitle": "Вирішити конфлікти",
     "conflictCancel": "Скасувати",
     "conflictFinish": "Завершити",
+    "conflictReadOnlyEntityNotice": "Цей тип сутності не можна редагувати тут. Виберіть вище свою або їхню версію.",
     "settingsTitle": "Git",
     "applyCommitMessageLanguageByDefaultTitle": "Застосовувати цю мову повідомлення commit за замовчуванням",
     "applyCommitMessageLanguageByDefaultDescription": "Якщо увімкнено, мова, обрана у вікні надсилання, стає типовою для майбутніх надсилань.",

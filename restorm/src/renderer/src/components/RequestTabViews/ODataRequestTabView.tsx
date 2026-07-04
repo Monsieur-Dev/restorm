@@ -954,7 +954,7 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({
   // file close / quit; the promise resolves when the routes stop.
   const handleListen = useCallback((): void => {
     const requestId = request.id
-    if (!requestId || isListening) return
+    if (!requestId || isListening || conflictMode) return
     setServedCount(0)
     void window.restorm?.odata.listen(requestId)
       .then((res) => {
@@ -964,7 +964,7 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({
         }
       })
       .catch((err: unknown) => { logger.error('OData mock server listen error', { error: String(err) }) })
-  }, [request.id, isListening, t])
+  }, [request.id, isListening, conflictMode, t])
 
   const handleStop = useCallback((): void => {
     void window.restorm?.odata.stop(request.id)
@@ -1020,6 +1020,7 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({
             <Button
               icon={isListening ? 'debug-disconnect' : 'plug'}
               onClick={isListening ? handleStop : handleListen}
+              disabled={!!conflictMode}
               {...(isListening ? {} : { emphasis: 1 })}
               options={{
                 title: isListening ? t('odata.server.stopListening', 'Stop listening') : t('odata.server.startListening', 'Start listening'),

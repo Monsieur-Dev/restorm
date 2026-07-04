@@ -1,4 +1,5 @@
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import { stringify as yamlStringify } from 'yaml'
 import { CodeEditor, ReadOnlyOverlay } from 'electron-core-ui/renderer'
 import { isEnvironmentFolder, isFolder, isScenario, isRequest, type FolderItem, type EnvironmentFolder, type Folder } from '../../../../shared/types/folderTypes'
@@ -201,14 +202,35 @@ function renderRequest(request: Request, mode: ConflictPanelMode, fieldDiff?: En
   }
 }
 
+/**
+ * Fallback for entity kinds with no dedicated editor: a YAML view of the raw
+ * object. It is **always read-only** — including the editable (resolved) pane —
+ * because there is no structured writer to feed free-form YAML edits back into
+ * the resolved snapshot, so the only safe resolution for these kinds is the
+ * whole-entity pick-ours / pick-theirs above. The editable pane carries a short
+ * notice saying exactly that, so the read-only Monaco doesn't read as a bug.
+ */
 const MonacoFallback: React.FC<{ entity: FolderItem, mode: ConflictPanelMode }> = ({ entity, mode }) => {
+  const { t } = useTranslation()
   return (
-    <CodeEditor
-      value={yamlStringify(entity)}
-      language="yaml"
-      options={{ readOnly: mode === 'readOnly' }}
-      data-testid="conflict-monaco-fallback"
-    />
+    <div style={{ display: 'flex', flexDirection: 'column', width: '100%', height: '100%' }}>
+      {mode === 'editable' && (
+        <div
+          style={{ padding: '6px 10px', fontSize: 12, opacity: 0.8 }}
+          data-testid="conflict-monaco-fallback-notice"
+        >
+          {t('git.conflictReadOnlyEntityNotice')}
+        </div>
+      )}
+      <div style={{ flex: 1, minHeight: 0 }}>
+        <CodeEditor
+          value={yamlStringify(entity)}
+          language="yaml"
+          options={{ readOnly: true }}
+          data-testid="conflict-monaco-fallback"
+        />
+      </div>
+    </div>
   )
 }
 

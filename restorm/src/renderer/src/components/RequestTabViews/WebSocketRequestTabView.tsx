@@ -372,7 +372,7 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
   // the user disconnects; the promise resolves on close. Emitting is a separate
   // action (the Send button).
   const handleConnect = (): void => {
-    if (isListening) return
+    if (isListening || conflictMode) return
     setLiveMessages([])
     setResponse(null)
 
@@ -692,6 +692,7 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
       <Button
         icon={isListening ? 'debug-disconnect' : 'plug'}
         onClick={isListening ? handleDisconnect : handleConnect}
+        disabled={!!conflictMode}
         {...(isListening ? { emphasis: 0 } : (!isServer && sendButtonStyle) ? { style: sendButtonStyle } : { emphasis: 1 })}
         options={{
           title: isServer

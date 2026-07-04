@@ -2384,6 +2384,7 @@
     "conflictResolutionTitle": "Riješi sukobe",
     "conflictCancel": "Odustani",
     "conflictFinish": "Završi",
+    "conflictReadOnlyEntityNotice": "Ova se vrsta entiteta ovdje ne može uređivati. Gore odaberite svoju ili njihovu verziju.",
     "settingsTitle": "Git",
     "applyCommitMessageLanguageByDefaultTitle": "Primijeni ovaj jezik poruke commita kao zadani",
     "applyCommitMessageLanguageByDefaultDescription": "Kada je uključeno, jezik odabran u prozoru slanja postaje zadani za buduća slanja.",

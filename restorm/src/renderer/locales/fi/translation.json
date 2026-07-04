@@ -2383,6 +2383,7 @@
     "conflictResolutionTitle": "Ratkaise ristiriidat",
     "conflictCancel": "Peruuta",
     "conflictFinish": "Valmis",
+    "conflictReadOnlyEntityNotice": "Tätä entiteettityyppiä ei voi muokata tässä. Valitse yllä oma tai heidän versionsa.",
     "settingsTitle": "Git",
     "applyCommitMessageLanguageByDefaultTitle": "Käytä tätä commit-viestin kieltä oletuksena",
     "applyCommitMessageLanguageByDefaultDescription": "Kun käytössä, push-ikkunassa valittu kieli tulee oletukseksi tuleville puskuille.",

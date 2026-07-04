@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
-import { describe, it, expect, afterEach, vi } from 'vitest'
-import { render, cleanup, fireEvent, screen } from '@testing-library/react'
+import { describe, it, expect, afterEach } from 'vitest'
+import { render, cleanup, screen } from '@testing-library/react'
 import { ReadOnlyOverlay } from './ReadOnlyOverlay'
 
 afterEach(() => { cleanup() })
@@ -18,33 +18,30 @@ describe('ReadOnlyOverlay', () => {
     expect(screen.getByTestId<HTMLInputElement>('the-input').value).toBe('hello')
   })
 
-  it('blocks pointer-events on interactive descendants (input/button) so clicks/typing cannot mutate them', () => {
+  it('marks the wrapper `inert` so the whole subtree is keyboard- and pointer-inert', () => {
     render(
-      <ReadOnlyOverlay>
+      <ReadOnlyOverlay data-testid="overlay">
         <input data-testid="the-input" defaultValue="hello" />
         <button data-testid="the-button" type="button">Click me</button>
       </ReadOnlyOverlay>
     )
-    const input = screen.getByTestId<HTMLInputElement>('the-input')
-    const button = screen.getByTestId<HTMLButtonElement>('the-button')
-    // jsdom doesn't enforce CSS pointer-events on synthetic events, so this
-    // asserts the STYLING contract (the class + the CSS rule it maps to)
-    // rather than simulating a real browser hit-test.
-    expect(input.closest('.ecui-read-only-overlay')).toBeTruthy()
-    expect(button.closest('.ecui-read-only-overlay')).toBeTruthy()
+    // `inert` on the wrapper takes the whole subtree out of the tab order and
+    // blocks focus/typing/clicks — the keyboard gap that pointer-events alone
+    // left open. jsdom reflects the attribute even though it doesn't simulate
+    // the hit-test, so assert the attribute is present on the wrapper.
+    const overlay = screen.getByTestId('overlay')
+    expect(overlay.hasAttribute('inert')).toBe(true)
   })
 
-  it('does not block clicks on the container itself (scrolling / non-form interactions keep working)', () => {
-    const onContainerClick = vi.fn()
+  it('keeps the scoped pointer-events fallback class on the wrapper', () => {
     render(
       <ReadOnlyOverlay>
-        <div data-testid="scrollable" onClick={onContainerClick}>
-          <span>content</span>
-        </div>
+        <input data-testid="the-input" defaultValue="hello" />
       </ReadOnlyOverlay>
     )
-    fireEvent.click(screen.getByTestId('scrollable'))
-    expect(onContainerClick).toHaveBeenCalledTimes(1)
+    // The CSS `pointer-events: none` rule is retained as a fallback for any
+    // environment that doesn't honour `inert`; it hangs off this class.
+    expect(screen.getByTestId<HTMLInputElement>('the-input').closest('.ecui-read-only-overlay')).toBeTruthy()
   })
 
   it('supports a data-testid on the overlay wrapper', () => {

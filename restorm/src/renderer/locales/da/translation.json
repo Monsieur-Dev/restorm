@@ -2383,6 +2383,7 @@
     "conflictResolutionTitle": "Løs konflikter",
     "conflictCancel": "Annuller",
     "conflictFinish": "Afslut",
+    "conflictReadOnlyEntityNotice": "Denne entitetstype kan ikke redigeres her. Vælg din version eller deres ovenfor.",
     "settingsTitle": "Git",
     "applyCommitMessageLanguageByDefaultTitle": "Anvend dette commit-besked-sprog som standard",
     "applyCommitMessageLanguageByDefaultDescription": "Når aktiveret bliver sproget valgt i push-vinduet standard for fremtidige pushes.",

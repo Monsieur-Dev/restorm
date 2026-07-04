@@ -2382,6 +2382,7 @@
     "conflictResolutionTitle": "競合を解決",
     "conflictCancel": "キャンセル",
     "conflictFinish": "完了",
+    "conflictReadOnlyEntityNotice": "この種類のエンティティはここでは編集できません。上で自分のバージョンか相手のバージョンを選択してください。",
     "settingsTitle": "Git",
     "applyCommitMessageLanguageByDefaultTitle": "このコミットメッセージの言語を既定にする",
     "applyCommitMessageLanguageByDefaultDescription": "有効にすると、プッシュ画面で選んだ言語が今後のプッシュの既定になります。",

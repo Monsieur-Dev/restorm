@@ -2383,6 +2383,7 @@
     "conflictResolutionTitle": "Konflikte auflösen",
     "conflictCancel": "Abbrechen",
     "conflictFinish": "Fertig",
+    "conflictReadOnlyEntityNotice": "Dieser Entitätstyp kann hier nicht bearbeitet werden. Wählen Sie oben Ihre oder deren Version.",
     "settingsTitle": "Git",
     "applyCommitMessageLanguageByDefaultTitle": "Sprache der Commit-Nachricht standardmäßig anwenden",
     "applyCommitMessageLanguageByDefaultDescription": "Wenn aktiviert, wird die im Push-Dialog gewählte Sprache zum Standard für zukünftige Pushs.",

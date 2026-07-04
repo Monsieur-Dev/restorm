@@ -126,7 +126,7 @@ export const SoapServerRequestTabView: React.FC<SoapServerRequestTabViewProps> =
 
   const handleListen = useCallback((): void => {
     const requestId = request.id
-    if (!requestId || isListening) return
+    if (!requestId || isListening || conflictMode) return
     setServedCount(0)
     void window.restorm?.soap.listen(requestId)
       .then((res) => {
@@ -136,7 +136,7 @@ export const SoapServerRequestTabView: React.FC<SoapServerRequestTabViewProps> =
         }
       })
       .catch((err: unknown) => { logger.error('SOAP mock server listen error', { error: String(err) }) })
-  }, [request.id, isListening, t])
+  }, [request.id, isListening, conflictMode, t])
 
   const handleStop = useCallback((): void => { void window.restorm?.soap.stop(request.id) }, [request.id])
 
@@ -177,6 +177,7 @@ export const SoapServerRequestTabView: React.FC<SoapServerRequestTabViewProps> =
         <Button
           icon={isListening ? 'debug-disconnect' : 'plug'}
           onClick={isListening ? handleStop : handleListen}
+          disabled={!!conflictMode}
           {...(isListening ? {} : { emphasis: 1 })}
           options={{
             title: isListening ? t('soap.server.stopListening', 'Stop the SOAP mock server') : t('soap.server.startListening', 'Start the SOAP mock server'),

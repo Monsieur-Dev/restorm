@@ -7,7 +7,9 @@ import { render, cleanup, screen } from '@testing-library/react'
 // logic (right component for the right entity kind, readOnly wrapping),
 // so every leaf is mocked to a simple marker.
 vi.mock('electron-core-ui/renderer', () => ({
-  CodeEditor: ({ value }: { value: string }) => <div data-testid="mock-code-editor">{value}</div>,
+  CodeEditor: ({ value, options }: { value: string, options?: { readOnly?: boolean } }) => (
+    <div data-testid="mock-code-editor" data-readonly={String(options?.readOnly)}>{value}</div>
+  ),
   ReadOnlyOverlay: ({ children, 'data-testid': testId }: { children: React.ReactNode, 'data-testid'?: string }) => (
     <div data-testid={testId ?? 'mock-read-only-overlay'} data-role="read-only-overlay">{children}</div>
   )
@@ -173,6 +175,19 @@ describe('ConflictEntityPanel', () => {
     render(<ConflictEntityPanel entity={makeUnknownEntity()} mode="editable" />)
     expect(screen.getByTestId('mock-code-editor')).toBeTruthy()
     expect(screen.getByTestId('mock-code-editor').textContent).toContain('Mystery')
+  })
+
+  it('keeps the Monaco fallback read-only in BOTH modes (no structured writer to feed free-form edits back), with a pick-a-side notice only in the editable pane', () => {
+    // Editable (resolved) pane: read-only editor + the notice explaining that
+    // only whole-entity pick-ours/theirs applies to this entity kind.
+    const { rerender } = render(<ConflictEntityPanel entity={makeUnknownEntity()} mode="editable" />)
+    expect(screen.getByTestId('mock-code-editor').getAttribute('data-readonly')).toBe('true')
+    expect(screen.getByTestId('conflict-monaco-fallback-notice')).toBeTruthy()
+
+    // Read-only (user/server) pane: read-only editor, no notice.
+    rerender(<ConflictEntityPanel entity={makeUnknownEntity()} mode="readOnly" />)
+    expect(screen.getByTestId('mock-code-editor').getAttribute('data-readonly')).toBe('true')
+    expect(screen.queryByTestId('conflict-monaco-fallback-notice')).toBeNull()
   })
 
   it('wraps the panel in ReadOnlyOverlay when mode is readOnly, and does not when editable', () => {

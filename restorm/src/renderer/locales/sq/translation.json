@@ -2383,6 +2383,7 @@
     "conflictResolutionTitle": "Zgjidh konfliktet",
     "conflictCancel": "Anulo",
     "conflictFinish": "Përfundo",
+    "conflictReadOnlyEntityNotice": "Ky lloj entiteti nuk mund të modifikohet këtu. Zgjidhni më lart versionin tuaj ose të tyre.",
     "settingsTitle": "Git",
     "applyCommitMessageLanguageByDefaultTitle": "Zbato këtë gjuhë të mesazhit të commit si të parazgjedhur",
     "applyCommitMessageLanguageByDefaultDescription": "Kur aktivizohet, gjuha e zgjedhur në dritaren e dërgimit bëhet e parazgjedhura për dërgimet e ardhshme.",

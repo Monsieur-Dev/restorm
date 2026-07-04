@@ -2385,6 +2385,7 @@
     "conflictResolutionTitle": "Rozwiąż konflikty",
     "conflictCancel": "Anuluj",
     "conflictFinish": "Zakończ",
+    "conflictReadOnlyEntityNotice": "Tego typu encji nie można tutaj edytować. Wybierz powyżej swoją wersję lub ich.",
     "settingsTitle": "Git",
     "applyCommitMessageLanguageByDefaultTitle": "Stosuj ten język wiadomości commit domyślnie",
     "applyCommitMessageLanguageByDefaultDescription": "Po włączeniu język wybrany w oknie wypychania staje się domyślny dla przyszłych wypchnięć.",

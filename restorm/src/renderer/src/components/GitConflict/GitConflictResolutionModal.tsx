@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Modal, Button, ConflictResolutionView } from 'electron-core-ui/renderer'
 import type { UseConflictResolutionResult } from '../../hooks/useConflictResolution'
@@ -28,6 +28,16 @@ export const GitConflictResolutionModal: React.FC<GitConflictResolutionModalProp
   const { t } = useTranslation()
   const { conflicts, selectedConflictId, selectConflict, getResolvedEntity, pickOursVersion, pickTheirsVersion, onScenarioChange } = conflictResolution
 
+  // ECUI's `ConflictResolutionView` always renders all three panels for the
+  // SAME (selected) conflict, so the field-diff is identical across them.
+  // Compute it once here (keyed on the selected conflict) instead of letting
+  // each render prop recompute it — three passes of `computeEntityFieldDiff`
+  // per render otherwise.
+  const activeFieldDiff = useMemo(() => {
+    const conflict = conflicts.find((c) => c.id === selectedConflictId)
+    return conflict ? computeEntityFieldDiff(conflict.kind, conflict.ours, conflict.theirs) : undefined
+  }, [conflicts, selectedConflictId])
+
   return (
     <Modal
       isOpen={isOpen}
@@ -44,23 +54,19 @@ export const GitConflictResolutionModal: React.FC<GitConflictResolutionModalProp
             renderUserPanel={(id) => {
               const conflict = conflicts.find((c) => c.id === id)
               if (!conflict) return null
-              const fieldDiff = computeEntityFieldDiff(conflict.kind, conflict.ours, conflict.theirs)
-              return <ConflictEntityPanel entity={conflict.ours} mode="readOnly" {...(fieldDiff ? { fieldDiff } : {})} />
+              return <ConflictEntityPanel entity={conflict.ours} mode="readOnly" {...(activeFieldDiff ? { fieldDiff: activeFieldDiff } : {})} />
             }}
             renderServerPanel={(id) => {
               const conflict = conflicts.find((c) => c.id === id)
               if (!conflict) return null
-              const fieldDiff = computeEntityFieldDiff(conflict.kind, conflict.ours, conflict.theirs)
-              return <ConflictEntityPanel entity={conflict.theirs} mode="readOnly" {...(fieldDiff ? { fieldDiff } : {})} />
+              return <ConflictEntityPanel entity={conflict.theirs} mode="readOnly" {...(activeFieldDiff ? { fieldDiff: activeFieldDiff } : {})} />
             }}
             renderResolvedPanel={(id) => {
-              const conflict = conflicts.find((c) => c.id === id)
-              const fieldDiff = conflict ? computeEntityFieldDiff(conflict.kind, conflict.ours, conflict.theirs) : undefined
               return (
                 <ConflictEntityPanel
                   entity={getResolvedEntity(id)}
                   mode="editable"
-                  {...(fieldDiff ? { fieldDiff } : {})}
+                  {...(activeFieldDiff ? { fieldDiff: activeFieldDiff } : {})}
                   onScenarioChange={(_scenarioId, patch) => { onScenarioChange(id, patch) }}
                 />
               )

@@ -2382,6 +2382,7 @@
     "conflictResolutionTitle": "Giải quyết xung đột",
     "conflictCancel": "Hủy",
     "conflictFinish": "Hoàn tất",
+    "conflictReadOnlyEntityNotice": "Không thể chỉnh sửa loại thực thể này ở đây. Hãy chọn phiên bản của bạn hoặc của họ ở trên.",
     "settingsTitle": "Git",
     "applyCommitMessageLanguageByDefaultTitle": "Áp dụng ngôn ngữ thông điệp commit này theo mặc định",
     "applyCommitMessageLanguageByDefaultDescription": "Khi bật, ngôn ngữ chọn trong cửa sổ đẩy sẽ trở thành mặc định cho các lần đẩy sau.",
