@@ -273,6 +273,41 @@ Then('my folder notes were kept, the request URL reflects my tweak, and the unto
 })
 
 // ---------------------------------------------------------------------------
+// Scenario — live-action controls disabled inside the conflict panel
+// ---------------------------------------------------------------------------
+
+Given('a remote has diverged on a mock-server request', async ({ seedFreshRepo, cloneNamedRepo }) => {
+  activeRepoName = `git-conflict-server-${Date.now()}`
+  localFilePath = await seedFreshRepo(activeRepoName)
+  localCloneDir = dirname(localFilePath)
+
+  // Turn the request into a mock server on BOTH sides (so the conflict
+  // panel renders HTTPRequestTabView in server mode → the Listen button
+  // exists) and diverge its URL so the entity is a genuine conflict.
+  setEntityField(localCloneDir, 'e2e-seed-request', 'server', true)
+  setEntityField(localCloneDir, 'e2e-seed-request', 'url', 'https://local.example.com/mock/pets')
+  gitCommit(localCloneDir, LOCAL_AUTHOR, 'My local edit turns the request into a mock server')
+
+  const collaboratorDir = await cloneNamedRepo(activeRepoName, 'git-conflict-server-collaborator')
+  setEntityField(collaboratorDir, 'e2e-seed-request', 'server', true)
+  setEntityField(collaboratorDir, 'e2e-seed-request', 'url', 'https://collaborator.example.com/mock/pets')
+  gitCommit(collaboratorDir, COLLABORATOR_AUTHOR, 'Collaborator turns the request into a mock server')
+  gitPush(collaboratorDir)
+})
+
+Then('the mock server\'s start button in the resolved panel is disabled', async () => {
+  const p = requirePage()
+  // The editable Resolved panel is the one live-action risk (a click there
+  // could open a real mock server keyed by request.id while viewing a static
+  // conflict snapshot). ECUI's Button renders an <a role="button"> with
+  // `aria-disabled` (not a native `disabled`), so assert that attribute.
+  const resolvedPane = conflictPaneByTitle(p, 'Resolved')
+  const listenButton = resolvedPane.locator('[data-testid="http-server-listen-button"]')
+  await expect(listenButton).toBeVisible({ timeout: 10000 })
+  await expect(listenButton).toHaveAttribute('aria-disabled', 'true')
+})
+
+// ---------------------------------------------------------------------------
 // Scenario 3 — cancel aborts the merge, keeps local work
 // ---------------------------------------------------------------------------
 

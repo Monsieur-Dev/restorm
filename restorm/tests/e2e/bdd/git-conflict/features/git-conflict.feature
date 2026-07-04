@@ -21,6 +21,13 @@ Feature: Git conflict resolution
     And I finish resolving the conflicts
     Then my folder notes were kept, the request URL reflects my tweak, and the untouched entities default to my version
 
+  Scenario: Live-action controls stay disabled while resolving a conflict
+    Given a remote has diverged on a mock-server request
+    And I open my own conflicting clone of that remote
+    When I pull
+    Then the conflict-resolution screen appears
+    And the mock server's start button in the resolved panel is disabled
+
   Scenario: Cancelling conflict resolution aborts the merge and keeps local work intact
     Given a remote has diverged on the request
     And I open my own conflicting clone of that remote

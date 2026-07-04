@@ -20,6 +20,7 @@ Comprehensive documentation is available in the `/docs` folder:
 - **[Getting Started](./docs/stack-setup/GETTING_STARTED.md)** - Step-by-step guide for development
 - **[Molecule Integration](./docs/stack-setup/MOLECULE_INTEGRATION.md)** - UI framework integration notes
 - **[MCP server](./docs/mcp/README.md)** - Drive Restorm from Claude Code / Cursor: tool reference, runbook, security model
+- **[Git integration](./docs/git-integration.md)** - Track a `.restorm` project in git: status bar, commit-message generator, 4-panel conflict resolution, semi-pull settings, MCP routes (Restorm Pro)
 
 ## 🛠️ Technology Stack
 
