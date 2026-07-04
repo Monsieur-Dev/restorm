@@ -397,6 +397,7 @@
         "graph": "Grafiku"
       },
       "loading": "Po dërgohet kërkesa...",
+      "noResponseBody": "Pa trup përgjigjeje — shih Infos për detaje",
       "noResponse": "Klikoni Dërgo për të ekzekutuar kërkesën",
       "history": {
         "list": "Lista e historikut të përgjigjeve",

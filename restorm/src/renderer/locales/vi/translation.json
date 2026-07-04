@@ -396,6 +396,7 @@
         "graph": "Đồ thị"
       },
       "loading": "Đang gửi yêu cầu...",
+      "noResponseBody": "Không có nội dung phản hồi — xem Infos để biết chi tiết",
       "noResponse": "Nhấp Gửi để thực thi yêu cầu",
       "history": {
         "list": "Danh sách lịch sử phản hồi",

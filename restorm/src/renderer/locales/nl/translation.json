@@ -397,6 +397,7 @@
         "graph": "Grafiek"
       },
       "loading": "Verzoek wordt verzonden...",
+      "noResponseBody": "Geen response-body — zie Infos voor details",
       "noResponse": "Klik op Verzenden om het verzoek uit te voeren",
       "history": {
         "list": "Lijst met antwoordgeschiedenis",

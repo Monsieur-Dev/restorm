@@ -397,6 +397,7 @@
         "graph": "Grafo"
       },
       "loading": "A enviar pedido...",
+      "noResponseBody": "Sem corpo de resposta — consulte Infos para detalhes",
       "noResponse": "Clique em Enviar para executar o pedido",
       "history": {
         "list": "Lista do histórico de respostas",

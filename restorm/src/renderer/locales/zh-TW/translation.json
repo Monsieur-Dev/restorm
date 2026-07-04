@@ -396,6 +396,7 @@
         "graph": "圖表"
       },
       "loading": "正在傳送請求...",
+      "noResponseBody": "無回應內容 — 詳情請見 Infos",
       "noResponse": "點擊「傳送」以執行請求",
       "history": {
         "list": "回應歷史紀錄清單",

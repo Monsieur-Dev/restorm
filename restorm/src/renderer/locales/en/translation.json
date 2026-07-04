@@ -397,6 +397,7 @@
         "graph": "Graph"
       },
       "loading": "Sending request...",
+      "noResponseBody": "No response body — see Infos for details",
       "noResponse": "Click Send to execute the request",
       "history": {
         "list": "Responses history list",

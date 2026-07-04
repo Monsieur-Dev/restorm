@@ -397,6 +397,7 @@
         "graph": "Graf"
       },
       "loading": "Skickar förfrågan...",
+      "noResponseBody": "Ingen svarstext — se Infos för detaljer",
       "noResponse": "Klicka på Skicka för att köra förfrågan",
       "history": {
         "list": "Lista över svarshistorik",

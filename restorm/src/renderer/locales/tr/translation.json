@@ -397,6 +397,7 @@
         "graph": "Grafik"
       },
       "loading": "İstek gönderiliyor...",
+      "noResponseBody": "Yanıt gövdesi yok — ayrıntılar için Infos'a bakın",
       "noResponse": "İsteği yürütmek için Gönder'e tıklayın",
       "history": {
         "list": "Yanıt geçmişi listesi",

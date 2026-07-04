@@ -398,6 +398,7 @@
         "graph": "Graf"
       },
       "loading": "Slanje zahtjeva...",
+      "noResponseBody": "Nema tijela odgovora — pojedinosti pogledajte u Infos",
       "noResponse": "Pritisnite Pošalji za izvršavanje zahtjeva",
       "history": {
         "list": "Popis povijesti odgovora",

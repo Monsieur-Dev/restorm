@@ -337,6 +337,26 @@ export const BaseRequestTabView: React.FC<BaseRequestTabViewProps> = ({
       </div>
     )
 
+    // Shown on the body-bearing tabs (Response / Graph) once the request has
+    // resolved but produced no body — e.g. a connection error or an empty
+    // response. Distinct from `loadingPlaceholder`: the "Sending…" text must
+    // never linger past resolution, and the error details live on Infos.
+    const noResponseBodyPlaceholder = (
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        height: '100%',
+        color: 'var(--descriptionForeground)'
+      }}>
+        {t('requestTab.responses.noResponseBody')}
+      </div>
+    )
+
+    // A resolved-but-empty body shows the no-body notice; the "Sending…"
+    // placeholder is reserved for a genuinely in-flight request.
+    const emptyBodyPlaceholder = isLoading ? loadingPlaceholder : noResponseBodyPlaceholder
+
     const tabs: Tab[] = []
 
     // Show Response tab once it has been seen at least once
@@ -352,7 +372,7 @@ export const BaseRequestTabView: React.FC<BaseRequestTabViewProps> = ({
           // plain `height: 100%` wrapper leaks the flex child's natural
           // minimum, which is what was pushing Monaco below the frame.
           <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', boxSizing: 'border-box', padding: '8px 0px 0px 8px' }}>
-            {responseContent ?? loadingPlaceholder}
+            {responseContent ?? emptyBodyPlaceholder}
           </div>
         )
       })
@@ -395,7 +415,7 @@ export const BaseRequestTabView: React.FC<BaseRequestTabViewProps> = ({
             minimapToggleLabel={t('scenario.minimap.toggle')}
             data-testid="base-request-graph"
           />
-        ) : loadingPlaceholder
+        ) : emptyBodyPlaceholder
       })
     }
 

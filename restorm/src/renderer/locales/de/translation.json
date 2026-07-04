@@ -397,6 +397,7 @@
         "graph": "Graph"
       },
       "loading": "Anfrage wird gesendet...",
+      "noResponseBody": "Kein Antworttext — Details siehe Infos",
       "noResponse": "Klicken Sie auf Senden, um die Anfrage auszuführen",
       "history": {
         "list": "Liste des Antwortverlaufs",
