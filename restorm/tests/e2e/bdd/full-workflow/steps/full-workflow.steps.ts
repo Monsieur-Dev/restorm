@@ -3,7 +3,7 @@ import { existsSync, readFileSync, readdirSync, writeFileSync, mkdirSync } from 
 import { dirname, join, resolve } from 'path'
 import type { ElectronApplication, Page, Locator } from '@playwright/test'
 import { configureNextConfirmationDialogForE2E, configureNextOpenDialogForE2E, configureNextSaveFileDialogForE2E, listViewRowSelectorByTitle } from 'electron-core-ui/testing'
-import { test, expect, readSavedMainBounds, FULL_WORKFLOW_TEMP_DIR, currentElectronApp } from '../../fixtures/full-workflow.fixture'
+import { test, expect, readSavedMainBounds, currentElectronApp } from '../../fixtures/full-workflow.fixture'
 
 /** Absolute path to the repo's shared e2e sample directory (tests/unit). */
 const SAMPLES_DIR = resolve(__dirname, '../../../../unit')
@@ -136,9 +136,9 @@ async function clickFileMenuItem(currentPage: Page, itemTestId: string): Promise
 
 When(
   'I create a new single-file YAML collection named {string}',
-  async ({}, baseName: string) => {
+  async ({ fullWorkflowTempDir }, baseName: string) => {
     if (!page) throw new Error('app must be launched before creating a file')
-    const filePath = join(FULL_WORKFLOW_TEMP_DIR, `${baseName}.restorm`)
+    const filePath = join(fullWorkflowTempDir, `${baseName}.restorm`)
     const electronApp = currentElectronApp()
     if (!electronApp) throw new Error('no running electron app')
     // Use the shared system-modals mock so an unexpected save dialog
@@ -156,8 +156,8 @@ When(
 
 Then(
   'the file {string} should exist in the temp dir',
-  async ({}, fileName: string) => {
-    expect(existsSync(join(FULL_WORKFLOW_TEMP_DIR, fileName))).toBe(true)
+  async ({ fullWorkflowTempDir }, fileName: string) => {
+    expect(existsSync(join(fullWorkflowTempDir, fileName))).toBe(true)
   }
 )
 
@@ -377,15 +377,15 @@ When(
 
 Then(
   'the imported tree should not contain any {string} routes',
-  async ({}, segment: string) => {
+  async ({ fullWorkflowTempDir }, segment: string) => {
     if (!page) throw new Error('app must be launched')
     // After save-all, the single-file YAML collection at
-    // `FULL_WORKFLOW_TEMP_DIR/selective-import.restorm` carries every
+    // `<fullWorkflowTempDir>/selective-import.restorm` carries every
     // imported request inline. Read it and assert no `url:` line
     // mentions the unchecked group's path segment. Folders may
     // persist as empty arrays; we anchor on the request URL so the
     // assertion stays insensitive to surrounding scaffolding.
-    const filePath = join(FULL_WORKFLOW_TEMP_DIR, 'selective-import.restorm')
+    const filePath = join(fullWorkflowTempDir, 'selective-import.restorm')
     expect(existsSync(filePath), `${filePath} must exist`).toBe(true)
     const content = readFileSync(filePath, 'utf-8')
     const re = new RegExp(`url:\\s*[^\\n]*\\b${segment}\\b`, 'g')
@@ -1391,12 +1391,12 @@ When(
 
 When(
   'I seed the workbench with the recorded folder and request tabs side-by-side',
-  async () => {
+  async ({ fullWorkflowTempDir }) => {
     if (!page) throw new Error('app must be launched')
     if (!recordedFolderTabId || !recordedRequestTabId) {
       throw new Error('recorded tab ids missing — run the "record the tab ids" step first')
     }
-    const filePath = join(FULL_WORKFLOW_TEMP_DIR, 'workflow-collection.restorm')
+    const filePath = join(fullWorkflowTempDir, 'workflow-collection.restorm')
     // Workbench state is keyed by `_projectUuid` since the filePath →
     // UUID migration. We grep the UUID directly out of the YAML (a
     // top-level `_projectUuid: <uuid>` line stamped by `ensureFileUuid`)
@@ -2034,9 +2034,9 @@ When('I wait for sidebar expansion to persist', async () => {
 // File open via Ctrl+O (with mocked system open dialog)
 // ---------------------------------------------------------------------------
 
-When('I open the {string} file via Ctrl+O', async ({}, fileName: string) => {
+When('I open the {string} file via Ctrl+O', async ({ fullWorkflowTempDir }, fileName: string) => {
   if (!page || !app) throw new Error('app must be launched')
-  const filePath = join(FULL_WORKFLOW_TEMP_DIR, fileName)
+  const filePath = join(fullWorkflowTempDir, fileName)
   await configureNextOpenDialogForE2E(app, { kind: 'openFile', path: filePath })
   await page.keyboard.press('Control+o')
   await expect(page.locator('[data-testid="sidebar-listview"] .list-view-row').first())
@@ -2472,8 +2472,8 @@ When('I pick a non-current theme in the settings page', async () => {
 
 Then(
   'the workspace settings file for {string} should contain key {string}',
-  async ({}, fileBaseName: string, key: string) => {
-    const filePath = join(FULL_WORKFLOW_TEMP_DIR, `${fileBaseName}.restorm`)
+  async ({ fullWorkflowTempDir }, fileBaseName: string, key: string) => {
+    const filePath = join(fullWorkflowTempDir, `${fileBaseName}.restorm`)
     const workspaceFile = join(dirname(filePath), '.restorm', 'settings.json')
     // The workspace write is debounced ~200 ms in SettingsService.
     // Poll instead of asserting once so a slow disk doesn't race
@@ -2825,12 +2825,12 @@ function cvlSidebarRow(p: Page, name: string): Locator {
     .first()
 }
 
-Given('I open the custom-value-lists sample collection', async () => {
+Given('I open the custom-value-lists sample collection', async ({ fullWorkflowTempDir }) => {
   if (!page) throw new Error('app must be launched')
   const electronApp = currentElectronApp()
   if (!electronApp) throw new Error('app must be launched')
-  mkdirSync(FULL_WORKFLOW_TEMP_DIR, { recursive: true })
-  const workingCopy = join(FULL_WORKFLOW_TEMP_DIR, 'custom-value-lists.restorm')
+  mkdirSync(fullWorkflowTempDir, { recursive: true })
+  const workingCopy = join(fullWorkflowTempDir, 'custom-value-lists.restorm')
   writeFileSync(workingCopy, CVL_SAMPLE_RESTORM, 'utf-8')
   await configureNextOpenDialogForE2E(electronApp, { kind: 'openFile', path: workingCopy })
   await page.locator('[data-testid="titlebar-menubar-item-file"]').click()
