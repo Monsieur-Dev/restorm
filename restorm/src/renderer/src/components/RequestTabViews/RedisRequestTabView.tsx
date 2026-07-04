@@ -21,6 +21,7 @@ import {
 import { DocumentEvents, type RequestHistoryEventPayload } from '../../services/DocumentEvents'
 import { RestormVariableInputBox } from '../RestormVariableInputBox'
 import { useEnvVariables } from '../../hooks/useEnvVariables'
+import { useEmitRequestExecution } from '../../services/requestExecutingStore'
 import type { RedisRequest, ResponseHistoryDetail } from '../../../../shared/types/collections'
 import { REDIS_COMMANDS } from '../../../../shared/models/types'
 import { useEnvironmentContext } from '../../contexts/useEnvironmentContext'
@@ -366,6 +367,9 @@ export const RedisRequestTabView: React.FC<RedisRequestTabViewProps> = ({
 
   const handleRun = mode === 'subscribe' ? handleSubscribe : handleRunCommand
   const isRunning = mode === 'subscribe' ? isSubscribing : isRunningCommand
+  // Publish the activity into the shared request-activity store so the
+  // sidebar and tab badges beam in sync with the run button.
+  useEmitRequestExecution(request.id, isRunning)
 
   // Command-aware field layout for the selected command — fixed positional
   // fields (e.g. SET -> key + value) plus an optional repeatable tail for

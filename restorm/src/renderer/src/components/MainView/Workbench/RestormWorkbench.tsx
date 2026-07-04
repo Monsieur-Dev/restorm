@@ -45,6 +45,7 @@ import { getFolderIcon } from '../../../utils/treeSearch'
 import { Badge } from '../../common/Badge'
 import { ScenarioRunningBadge } from '../../common/ScenarioRunningBadge'
 import { ServerListeningBadge } from '../../common/ServerListeningBadge'
+import { RequestExecutingBadge } from '../../common/RequestExecutingBadge'
 import { SecretResolvingSpinner } from '../../common/SecretResolvingSpinner'
 import { SecretErrorIndicator } from '../../common/SecretErrorIndicator'
 import { ItemSecretBadges } from '../../common/ItemSecretBadges'
@@ -464,9 +465,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
       const badge = <Badge type={mapToBadgeType(restormTab.request.method)} mode={isServer ? 'server' : undefined} />
       return (
         <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-          {isServer
-            ? <ServerListeningBadge requestId={restormTab.request.id}>{badge}</ServerListeningBadge>
-            : badge}
+          <RequestExecutingBadge requestId={restormTab.request.id}>{badge}</RequestExecutingBadge>
           <span>{restormTab.request.name}</span>
           <ItemSecretBadges itemId={restormTab.request.id} />
           {renderDirtyIndicator(restormTab)}
@@ -483,9 +482,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
       const badge = <Badge type="GQL" mode={isServer ? 'server' : undefined} />
       return (
         <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-          {isServer
-            ? <ServerListeningBadge requestId={restormTab.request.id}>{badge}</ServerListeningBadge>
-            : badge}
+          <RequestExecutingBadge requestId={restormTab.request.id}>{badge}</RequestExecutingBadge>
           <span>{restormTab.request.name}</span>
           <ItemSecretBadges itemId={restormTab.request.id} />
           {renderDirtyIndicator(restormTab)}
@@ -500,13 +497,11 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
       const isGrpcServer = restormTab.request.server === true
       return (
         <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-          {isGrpcServer ? (
-            <ServerListeningBadge requestId={restormTab.request.id}>
-              <Badge type="GRPC" mode="server" />
-            </ServerListeningBadge>
-          ) : (
-            <Badge type={mapToBadgeType(restormTab.request.callType)} />
-          )}
+          <RequestExecutingBadge requestId={restormTab.request.id}>
+            {isGrpcServer
+              ? <Badge type="GRPC" mode="server" />
+              : <Badge type={mapToBadgeType(restormTab.request.callType)} />}
+          </RequestExecutingBadge>
           <span>{restormTab.request.name}</span>
           <ItemSecretBadges itemId={restormTab.request.id} />
           {renderDirtyIndicator(restormTab)}
@@ -522,9 +517,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
       const badge = <Badge type="SOAP" mode={isServer ? 'server' : undefined} />
       return (
         <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-          {isServer
-            ? <ServerListeningBadge requestId={restormTab.request.id}>{badge}</ServerListeningBadge>
-            : badge}
+          <RequestExecutingBadge requestId={restormTab.request.id}>{badge}</RequestExecutingBadge>
           <span>{restormTab.request.name}</span>
           <ItemSecretBadges itemId={restormTab.request.id} />
           {renderDirtyIndicator(restormTab)}
@@ -589,9 +582,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
       const badge = <Badge type="ODATA" mode={isServer ? 'server' : undefined} />
       return (
         <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-          {isServer
-            ? <ServerListeningBadge requestId={restormTab.request.id}>{badge}</ServerListeningBadge>
-            : badge}
+          <RequestExecutingBadge requestId={restormTab.request.id}>{badge}</RequestExecutingBadge>
           <span>{restormTab.request.name}</span>
           <ItemSecretBadges itemId={restormTab.request.id} />
           {renderDirtyIndicator(restormTab)}
@@ -602,7 +593,9 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
     if (isAuthenticationRequestTab(restormTab)) {
       return (
         <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-          <Badge type="AUTH" />
+          <RequestExecutingBadge requestId={restormTab.request.id}>
+            <Badge type="AUTH" />
+          </RequestExecutingBadge>
           <span>{restormTab.request.name}</span>
           <ItemSecretBadges itemId={restormTab.request.id} />
           {renderDirtyIndicator(restormTab)}
@@ -616,7 +609,9 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
     if (isJsonRpcRequestTab(restormTab)) {
       return (
         <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-          <Badge type={requestBadgeType(restormTab.request)} />
+          <RequestExecutingBadge requestId={restormTab.request.id}>
+            <Badge type={requestBadgeType(restormTab.request)} />
+          </RequestExecutingBadge>
           <span>{restormTab.request.name}</span>
           <ItemSecretBadges itemId={restormTab.request.id} />
           {renderDirtyIndicator(restormTab)}
@@ -628,7 +623,9 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
     if (isJsonRpcBatchRequestTab(restormTab)) {
       return (
         <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-          <Badge type={requestBadgeType(restormTab.request)} />
+          <RequestExecutingBadge requestId={restormTab.request.id}>
+            <Badge type={requestBadgeType(restormTab.request)} />
+          </RequestExecutingBadge>
           <span>{restormTab.request.name}</span>
           <ItemSecretBadges itemId={restormTab.request.id} />
           {renderDirtyIndicator(restormTab)}
@@ -641,7 +638,9 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
     if (isTrpcRequestTab(restormTab)) {
       return (
         <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-          <Badge type="tRPC" />
+          <RequestExecutingBadge requestId={restormTab.request.id}>
+            <Badge type="tRPC" />
+          </RequestExecutingBadge>
           <span>{restormTab.request.name}</span>
           <ItemSecretBadges itemId={restormTab.request.id} />
           {renderDirtyIndicator(restormTab)}
@@ -665,13 +664,15 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
       )
     }
 
-    // Redis request tab. Not server-capable (no hosted mode), so no
-    // ServerListeningBadge capsule — unlike WebSocket/OData, this badge never
-    // orbits a listening beam.
+    // Redis request tab. Not server-capable (no hosted mode); the beam orbits
+    // the badge while a command runs or a subscribe session is open, fed by
+    // the request-activity store.
     if (isRedisRequestTab(restormTab)) {
       return (
         <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-          <Badge type="REDIS" />
+          <RequestExecutingBadge requestId={restormTab.request.id}>
+            <Badge type="REDIS" />
+          </RequestExecutingBadge>
           <span>{restormTab.request.name}</span>
           <ItemSecretBadges itemId={restormTab.request.id} />
           {renderDirtyIndicator(restormTab)}
@@ -680,13 +681,16 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
     }
 
     // Kafka request tab. Mixed one-shot (produce/browse) + long-lived
-    // (consume) modes, like Redis — no ServerListeningBadge capsule. The mode
-    // rides on the badge as a glyph (the same one the Add menu + sidebar show)
-    // so produce/consume/browse stay distinguishable at a glance.
+    // (consume) modes, like Redis. The mode rides on the badge as a glyph
+    // (the same one the Add menu + sidebar show) so produce/consume/browse
+    // stay distinguishable at a glance; the beam orbits it while any of the
+    // three is active.
     if (isKafkaRequestTab(restormTab)) {
       return (
         <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-          <Badge type={requestBadgeType(restormTab.request)} icon={requestBadgeIcon(restormTab.request)} />
+          <RequestExecutingBadge requestId={restormTab.request.id}>
+            <Badge type={requestBadgeType(restormTab.request)} icon={requestBadgeIcon(restormTab.request)} />
+          </RequestExecutingBadge>
           <span>{restormTab.request.name}</span>
           <ItemSecretBadges itemId={restormTab.request.id} />
           {renderDirtyIndicator(restormTab)}

@@ -167,6 +167,21 @@ Then('the Kafka Consume button reverts to the idle state', async () => {
  * `debug-disconnect` icon persists) instead of self-reverting to idle a few
  * seconds after the group join completes. Assert it, wait past the join
  * window, then assert it is STILL consuming. */
+
+Then('the activity beam runs on the consume button, the tab badge and the sidebar badge', async () => {
+  if (page === null) throw new Error('launch first')
+  const p = page
+  // One activity truth, three surfaces: the border-beam overlay must orbit
+  // (1) the consume/run button, (2) the workbench tab badge, (3) the sidebar
+  // tree badge, for as long as the consumer is live.
+  const buttonBeam = p.locator('.scn-running-badge:has([data-testid="kafka-consume-button"]) .ecu-border-beam').first()
+  await expect(buttonBeam).toBeVisible({ timeout: 10_000 })
+  const tabBeam = p.locator('.tab[role="tab"][aria-selected="true"] .ecu-border-beam').first()
+  await expect(tabBeam).toBeVisible({ timeout: 10_000 })
+  const sidebarBeam = p.locator('[data-testid="sidebar-listview"] .ecu-border-beam').first()
+  await expect(sidebarBeam).toBeVisible({ timeout: 10_000 })
+})
+
 Then('the Kafka Consume button stays in the consuming state', async () => {
   if (page === null) throw new Error('launch first')
   const activeIcon = page.locator(`${CONSUME_BTN} .codicon-debug-disconnect`)

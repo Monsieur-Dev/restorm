@@ -44,6 +44,7 @@ Feature: Kafka execution end-to-end
     When I open the "Kafka Consume Latest" request tab via MCP
     And I click the Kafka Consume button
     Then the Kafka Consume button stays in the consuming state
+    And the activity beam runs on the consume button, the tab badge and the sidebar badge
     And the Kafka response panel shows 0 message frames
     When a record is produced to the restorm-test topic
     Then the Kafka response panel shows at least 1 message frame

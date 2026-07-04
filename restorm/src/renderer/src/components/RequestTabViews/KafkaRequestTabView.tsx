@@ -24,6 +24,7 @@ import {
 import { DocumentEvents, type RequestHistoryEventPayload } from '../../services/DocumentEvents'
 import { RestormVariableInputBox } from '../RestormVariableInputBox'
 import { useEnvVariables } from '../../hooks/useEnvVariables'
+import { useEmitRequestExecution } from '../../services/requestExecutingStore'
 import { RestormKeyValueTable, type KeyValueTableHandle } from '../RestormKeyValueTable'
 import type {
   KafkaRequest,
@@ -39,6 +40,7 @@ import { BaseRequestTabView } from './BaseRequestTabView'
 import { ResponseHistoryModal } from '../Modals/ResponseHistoryModal'
 import { updateReactiveProperty } from './requestTabViewUtils'
 import { SendButtonEnvSwitcher } from './SendButtonEnvSwitcher'
+import { BeamWrap } from '../common/BeamWrap'
 import { HeaderHoverTooltip } from '../MainView/HeaderHoverTooltip'
 import { DEFAULT_REQUEST_TIMEOUT_MS } from '../../../../shared/config/constants'
 import './WebSocketChat.css'
@@ -173,6 +175,12 @@ export const KafkaRequestTabView: React.FC<KafkaRequestTabViewProps> = ({ reques
   const [produceResponse, setProduceResponse] = useState<KafkaLocalResponse | null>(null)
   const [browseResponse, setBrowseResponse] = useState<KafkaLocalResponse | null>(null)
   const [isConsuming, setIsConsuming] = useState(false)
+  // A consume is long-lived and doesn't flow through the base view's
+  // isLoading (that would fake the 'Sending…' placeholder) — feed the shared
+  // request-activity store directly so sidebar + tab badges beam while the
+  // consumer is live. A Kafka request has a single mode, so this never
+  // overlaps the produce/browse signal the base view emits.
+  useEmitRequestExecution(request.id, isConsuming)
   const [consumeMessages, setConsumeMessages] = useState<KafkaMessageItem[]>([])
   const [consumeError, setConsumeError] = useState<string | undefined>(undefined)
   const [isProducing, setIsProducing] = useState(false)
@@ -687,33 +695,39 @@ export const KafkaRequestTabView: React.FC<KafkaRequestTabViewProps> = ({ reques
   // ---- Primary action button, one per mode --------------------------------
   const actionButton = mode === 'produce' ? (
     <SendButtonEnvSwitcher>
-      <Button
-        icon="send" onClick={handleProduce} disabled={isProducing}
-        {...(sendButtonStyle ? { style: sendButtonStyle } : { emphasis: 1 })}
-        options={{ title: t('kafka.produce'), ariaLabel: t('kafka.produce') }}
-        data-testid="kafka-produce-button"
-      />
+      <BeamWrap active={isProducing} size={22} borderWidth={1.5}>
+        <Button
+          icon="send" onClick={handleProduce} disabled={isProducing}
+          {...(sendButtonStyle ? { style: sendButtonStyle } : { emphasis: 1 })}
+          options={{ title: t('kafka.produce'), ariaLabel: t('kafka.produce') }}
+          data-testid="kafka-produce-button"
+        />
+      </BeamWrap>
     </SendButtonEnvSwitcher>
   ) : mode === 'browse' ? (
     <SendButtonEnvSwitcher>
-      <Button
-        icon="search" onClick={handleBrowse} disabled={isBrowsing}
-        {...(sendButtonStyle ? { style: sendButtonStyle } : { emphasis: 1 })}
-        options={{ title: t('kafka.peek'), ariaLabel: t('kafka.peek') }}
-        data-testid="kafka-browse-button"
-      />
+      <BeamWrap active={isBrowsing} size={22} borderWidth={1.5}>
+        <Button
+          icon="search" onClick={handleBrowse} disabled={isBrowsing}
+          {...(sendButtonStyle ? { style: sendButtonStyle } : { emphasis: 1 })}
+          options={{ title: t('kafka.peek'), ariaLabel: t('kafka.peek') }}
+          data-testid="kafka-browse-button"
+        />
+      </BeamWrap>
     </SendButtonEnvSwitcher>
   ) : (
-    <Button
-      icon={isConsuming ? 'debug-disconnect' : 'plug'}
-      onClick={isConsuming ? handleConsumeStop : handleConsumeStart}
-      {...(isConsuming ? { emphasis: 0 } : sendButtonStyle ? { style: sendButtonStyle } : { emphasis: 1 })}
-      options={{
-        title: isConsuming ? t('kafka.stopConsuming') : t('kafka.startConsuming'),
-        ariaLabel: isConsuming ? t('kafka.stopConsuming') : t('kafka.startConsuming')
-      }}
-      data-testid="kafka-consume-button"
-    />
+    <BeamWrap active={isConsuming} size={22} borderWidth={1.5}>
+      <Button
+        icon={isConsuming ? 'debug-disconnect' : 'plug'}
+        onClick={isConsuming ? handleConsumeStop : handleConsumeStart}
+        {...(isConsuming ? { emphasis: 0 } : sendButtonStyle ? { style: sendButtonStyle } : { emphasis: 1 })}
+        options={{
+          title: isConsuming ? t('kafka.stopConsuming') : t('kafka.startConsuming'),
+          ariaLabel: isConsuming ? t('kafka.stopConsuming') : t('kafka.startConsuming')
+        }}
+        data-testid="kafka-consume-button"
+      />
+    </BeamWrap>
   )
 
   const urlSection = (

@@ -18,6 +18,7 @@ import {
 } from 'electron-core-ui/renderer'
 import { DocumentEvents, type RequestHistoryEventPayload } from '../../services/DocumentEvents'
 import { RestormVariableInputBox } from '../RestormVariableInputBox'
+import { useEmitRequestExecution } from '../../services/requestExecutingStore'
 import { useEnvVariables } from '../../hooks/useEnvVariables'
 import type { AmqpRequest, AmqpMode, ResponseHistoryDetail } from '../../../../shared/types/collections'
 import { useEnvironmentContext } from '../../contexts/useEnvironmentContext'
@@ -127,6 +128,11 @@ export const AmqpRequestTabView: React.FC<AmqpRequestTabViewProps> = ({ request 
   const [browsePeekCount, setBrowsePeekCountState] = useState(request.browsePeekCount !== undefined ? String(request.browsePeekCount) : '')
 
   const [response, setResponse] = useState<AmqpResponse | null>(null)
+  const [isExecuting, setIsExecuting] = useState(false)
+  // Publish/browse activity into the shared request-activity store so the
+  // sidebar + tab badges beam during a one-shot execute; the open subscribe
+  // connection is covered by the AMQP listening store.
+  useEmitRequestExecution(request.id, isExecuting)
   const [historyRefreshKey, setHistoryRefreshKey] = useState(0)
   // Live frames for the current connection/execution — appended as they
   // arrive so the list updates in real time.
@@ -321,7 +327,9 @@ export const AmqpRequestTabView: React.FC<AmqpRequestTabViewProps> = ({ request 
   const handleExecute = useCallback((): void => {
     setLiveMessages([])
     setResponse(null)
+    setIsExecuting(true)
     window.restorm?.amqp.execute({ requestId: request.id, timeout: DEFAULT_AMQP_TIMEOUT_MS })
+      .finally(() => { setIsExecuting(false) })
       .then((res: AmqpExecutionResult) => {
         setResponse({
           connected: res.connected,
@@ -583,26 +591,30 @@ export const AmqpRequestTabView: React.FC<AmqpRequestTabViewProps> = ({ request 
       </HeaderHoverTooltip>
       {mode === 'publish' && (
         <SendButtonEnvSwitcher>
-          <Button
-            icon="send"
-            onClick={handleExecute}
-            emphasis={1}
-            {...(sendButtonStyle ? { style: sendButtonStyle } : {})}
-            options={{ title: t('amqp.send'), ariaLabel: t('amqp.send') }}
-            data-testid="amqp-send-button"
-          />
+          <BeamWrap active={isExecuting} size={22} borderWidth={1.5}>
+            <Button
+              icon="send"
+              onClick={handleExecute}
+              emphasis={1}
+              {...(sendButtonStyle ? { style: sendButtonStyle } : {})}
+              options={{ title: t('amqp.send'), ariaLabel: t('amqp.send') }}
+              data-testid="amqp-send-button"
+            />
+          </BeamWrap>
         </SendButtonEnvSwitcher>
       )}
       {mode === 'browse' && (
         <SendButtonEnvSwitcher>
-          <Button
-            icon="search"
-            onClick={handleExecute}
-            emphasis={1}
-            {...(sendButtonStyle ? { style: sendButtonStyle } : {})}
-            options={{ title: t('amqp.browseButton'), ariaLabel: t('amqp.browseButton') }}
-            data-testid="amqp-browse-button"
-          />
+          <BeamWrap active={isExecuting} size={22} borderWidth={1.5}>
+            <Button
+              icon="search"
+              onClick={handleExecute}
+              emphasis={1}
+              {...(sendButtonStyle ? { style: sendButtonStyle } : {})}
+              options={{ title: t('amqp.browseButton'), ariaLabel: t('amqp.browseButton') }}
+              data-testid="amqp-browse-button"
+            />
+          </BeamWrap>
         </SendButtonEnvSwitcher>
       )}
       {mode === 'subscribe' && (
