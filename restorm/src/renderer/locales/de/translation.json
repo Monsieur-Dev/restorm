@@ -2322,5 +2322,8 @@
     "sendDestination": "Ziel",
     "ack": "ACK",
     "nack": "NACK"
+  },
+  "server": {
+    "configLockedWhileRunning": "Konfiguration gesperrt, während der Server läuft"
   }
 }

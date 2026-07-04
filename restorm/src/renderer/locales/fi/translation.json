@@ -2322,5 +2322,8 @@
     "sendDestination": "Kohde",
     "ack": "ACK",
     "nack": "NACK"
+  },
+  "server": {
+    "configLockedWhileRunning": "Asetukset lukittu palvelimen ollessa käynnissä"
   }
 }

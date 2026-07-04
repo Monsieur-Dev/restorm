@@ -2322,5 +2322,8 @@
     "sendDestination": "Destinacioni",
     "ack": "ACK",
     "nack": "NACK"
+  },
+  "server": {
+    "configLockedWhileRunning": "Konfigurimi i kyçur ndërsa serveri po ekzekutohet"
   }
 }

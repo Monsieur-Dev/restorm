@@ -15,6 +15,9 @@ export interface MqttOptionsPanelProps {
    * subscribe-on-connect / Last Will) are hidden, as the broker doesn't connect
    * as a client. */
   server?: boolean
+  /** Locks every control in the panel (e.g. the broker is listening and its
+   * config was snapshotted on start). */
+  disabled?: boolean
 }
 
 const QOS_OPTIONS = [{ text: '0', label: 'QoS 0' }, { text: '1', label: 'QoS 1' }, { text: '2', label: 'QoS 2' }]
@@ -34,7 +37,7 @@ const Field: React.FC<{ label: string; children: React.ReactNode }> = ({ label, 
  * `fullData` exactly like the topic / message. QoS + retain drive both the
  * on-connect subscribe and the Send-button publish.
  */
-export const MqttOptionsPanel: React.FC<MqttOptionsPanelProps> = ({ request, variables, helpers, server = false }) => {
+export const MqttOptionsPanel: React.FC<MqttOptionsPanelProps> = ({ request, variables, helpers, server = false, disabled = false }) => {
   const { t } = useTranslation()
 
   const [qos, setQosState] = useState(request.qos ?? 0)
@@ -76,15 +79,16 @@ export const MqttOptionsPanel: React.FC<MqttOptionsPanelProps> = ({ request, var
             selected={qos}
             onDidSelect={(d: ISelectData) => { setQos(d.index) }}
             data-testid="mqtt-qos-select"
+            disabled={disabled}
           />
         </Field>
         <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12 }}>
-          <Toggle checked={retain} onChange={setRetain} aria-label={t('mqtt.retain')} data-testid="mqtt-retain-toggle" />
+          <Toggle checked={retain} onChange={setRetain} aria-label={t('mqtt.retain')} data-testid="mqtt-retain-toggle" disabled={disabled} />
           {t('mqtt.retain')}
         </label>
         {!server && (
           <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12 }}>
-            <Toggle checked={subscribe} onChange={setSubscribe} aria-label={t('mqtt.subscribeOnConnect')} data-testid="mqtt-subscribe-toggle" />
+            <Toggle checked={subscribe} onChange={setSubscribe} aria-label={t('mqtt.subscribeOnConnect')} data-testid="mqtt-subscribe-toggle" disabled={disabled} />
             {t('mqtt.subscribeOnConnect')}
           </label>
         )}
@@ -102,7 +106,7 @@ export const MqttOptionsPanel: React.FC<MqttOptionsPanelProps> = ({ request, var
             <RestormVariableInputBox value={password} onChange={setPassword} variables={variables} helpers={helpers} placeholder={t('mqtt.password')} data-testid="mqtt-password-input" />
           </Field>
           <Field label={t('mqtt.keepalive')}>
-            <InputBox value={keepalive} onChange={setKeepalive} options={{ placeholder: '60' }} data-testid="mqtt-keepalive-input" />
+            <InputBox value={keepalive} onChange={setKeepalive} options={{ placeholder: '60' }} data-testid="mqtt-keepalive-input" disabled={disabled} />
           </Field>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginTop: 2, paddingTop: 6, borderTop: '1px solid var(--panel-border)' }}>
@@ -122,10 +126,11 @@ export const MqttOptionsPanel: React.FC<MqttOptionsPanelProps> = ({ request, var
                   selected={lwtQos}
                   onDidSelect={(d: ISelectData) => { setLwtQos(d.index) }}
                   data-testid="mqtt-lwt-qos-select"
+                  disabled={disabled}
                 />
               </Field>
               <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12 }}>
-                <Toggle checked={lwtRetain} onChange={setLwtRetain} aria-label={t('mqtt.retain')} data-testid="mqtt-lwt-retain-toggle" />
+                <Toggle checked={lwtRetain} onChange={setLwtRetain} aria-label={t('mqtt.retain')} data-testid="mqtt-lwt-retain-toggle" disabled={disabled} />
                 {t('mqtt.retain')}
               </label>
             </div>

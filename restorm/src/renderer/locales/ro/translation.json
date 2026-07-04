@@ -2323,5 +2323,8 @@
     "sendDestination": "Destinație",
     "ack": "ACK",
     "nack": "NACK"
+  },
+  "server": {
+    "configLockedWhileRunning": "Configurație blocată în timp ce serverul rulează"
   }
 }

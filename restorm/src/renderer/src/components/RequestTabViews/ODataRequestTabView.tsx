@@ -90,6 +90,7 @@ import { useApiDocumentationFromRequest } from '../../hooks/useApiDocumentationF
 import { buildRequestPath } from '../../utils/requestPath'
 import { SendButtonEnvSwitcher } from './SendButtonEnvSwitcher'
 import { BeamWrap } from '../common/BeamWrap'
+import { ServerConfigLockedHint } from '../common/ServerConfigLockedHint'
 
 const urlRowStyle: CSSProperties = { display: 'flex', gap: 8, alignItems: 'center' }
 const urlInputWrapperStyle: CSSProperties = { flex: 1, minWidth: 0 }
@@ -971,6 +972,7 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
             onChange={setServerPort}
             options={{ placeholder: '8081' }}
             data-testid="odata-server-port"
+            disabled={isListening}
           />
         </div>
         <span style={labelStyle}>/</span>
@@ -980,6 +982,7 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
             onChange={setServerRoot}
             options={{ placeholder: 'odata' }}
             data-testid="odata-server-root"
+            disabled={isListening}
           />
         </div>
         <div style={sendButtonWrapperStyle}>
@@ -1001,45 +1004,48 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
   )
 
   const serverRequestContent = (
-    <SplitView
-      orientation="vertical"
-      style={{ width: '100%', height: '100%' }}
-      data-testid="odata-server-split-view"
-      onCollapsedChange={handleServerPanelCollapsedChange}
-    >
-      <Pane
-        title={t('odata.server.metadataLabel', '$metadata (CSDL)')}
-        initialSize={0.5}
-        collapsed={serverPanelCollapsed.metadata}
-        minSize={120}
-        data-testid="odata-server-metadata-pane"
+    <div style={{ display: 'flex', flexDirection: 'column', width: '100%', height: '100%' }}>
+      {isListening && <ServerConfigLockedHint data-testid="odata-server-locked-hint" />}
+      <SplitView
+        orientation="vertical"
+        style={{ width: '100%', flex: 1, minHeight: 0 }}
+        data-testid="odata-server-split-view"
+        onCollapsedChange={handleServerPanelCollapsedChange}
       >
-        <CodeEditor
-          value={(request).mockMetadata ?? ''}
-          language="xml"
-          onChange={setMockMetadata}
-          height="100%"
-          options={{ minimap: { enabled: false }, wordWrap: 'on', automaticLayout: true }}
-          data-testid="odata-server-metadata"
-        />
-      </Pane>
-      <Pane
-        title={t('odata.server.dataLabel', 'Served entity data (by entity set)')}
-        initialSize={0.5}
-        collapsed={serverPanelCollapsed.data}
-        minSize={120}
-        data-testid="odata-server-data-pane"
-      >
-        <CodeEditor
-          value={mockDataText}
-          language="json"
-          onChange={setMockData}
-          height="100%"
-          options={{ minimap: { enabled: false }, wordWrap: 'on', automaticLayout: true }}
-          data-testid="odata-server-data"
-        />
-      </Pane>
-    </SplitView>
+        <Pane
+          title={t('odata.server.metadataLabel', '$metadata (CSDL)')}
+          initialSize={0.5}
+          collapsed={serverPanelCollapsed.metadata}
+          minSize={120}
+          data-testid="odata-server-metadata-pane"
+        >
+          <CodeEditor
+            value={(request).mockMetadata ?? ''}
+            language="xml"
+            onChange={setMockMetadata}
+            height="100%"
+            options={{ minimap: { enabled: false }, wordWrap: 'on', automaticLayout: true, readOnly: isListening }}
+            data-testid="odata-server-metadata"
+          />
+        </Pane>
+        <Pane
+          title={t('odata.server.dataLabel', 'Served entity data (by entity set)')}
+          initialSize={0.5}
+          collapsed={serverPanelCollapsed.data}
+          minSize={120}
+          data-testid="odata-server-data-pane"
+        >
+          <CodeEditor
+            value={mockDataText}
+            language="json"
+            onChange={setMockData}
+            height="100%"
+            options={{ minimap: { enabled: false }, wordWrap: 'on', automaticLayout: true, readOnly: isListening }}
+            data-testid="odata-server-data"
+          />
+        </Pane>
+      </SplitView>
+    </div>
   )
 
   const serverResponseContent = (

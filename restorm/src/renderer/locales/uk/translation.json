@@ -2324,5 +2324,8 @@
     "sendDestination": "Призначення",
     "ack": "ACK",
     "nack": "NACK"
+  },
+  "server": {
+    "configLockedWhileRunning": "Конфігурацію заблоковано під час роботи сервера"
   }
 }

@@ -2321,5 +2321,8 @@
     "sendDestination": "Đích",
     "ack": "ACK",
     "nack": "NACK"
+  },
+  "server": {
+    "configLockedWhileRunning": "Đã khóa cấu hình khi máy chủ đang chạy"
   }
 }

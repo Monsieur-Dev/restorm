@@ -2322,5 +2322,8 @@
     "sendDestination": "Cél",
     "ack": "ACK",
     "nack": "NACK"
+  },
+  "server": {
+    "configLockedWhileRunning": "A konfiguráció zárolva, amíg a szerver fut"
   }
 }

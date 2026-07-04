@@ -2322,5 +2322,8 @@
     "sendDestination": "Προορισμός",
     "ack": "ACK",
     "nack": "NACK"
+  },
+  "server": {
+    "configLockedWhileRunning": "Η διαμόρφωση είναι κλειδωμένη ενώ εκτελείται ο διακομιστής"
   }
 }

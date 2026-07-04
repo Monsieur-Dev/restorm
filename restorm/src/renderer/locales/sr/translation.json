@@ -2323,5 +2323,8 @@
     "sendDestination": "Одредиште",
     "ack": "ACK",
     "nack": "NACK"
+  },
+  "server": {
+    "configLockedWhileRunning": "Конфигурација закључана док се сервер извршава"
   }
 }

@@ -2321,5 +2321,8 @@
     "sendDestination": "Tujuan",
     "ack": "ACK",
     "nack": "NACK"
+  },
+  "server": {
+    "configLockedWhileRunning": "Konfigurasi terkunci saat server berjalan"
   }
 }

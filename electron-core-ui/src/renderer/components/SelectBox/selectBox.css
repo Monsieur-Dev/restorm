@@ -47,13 +47,16 @@
   outline-offset: -1px;
 }
 
-/* Disabled state */
-.select-box:disabled {
+/* Disabled state — native `:disabled` for the real <select>, `.disabled` for
+ * the custom-drawn trigger div (which can't carry the native attribute). */
+.select-box:disabled,
+.select-box.disabled {
   opacity: 0.6;
   cursor: not-allowed;
+  pointer-events: none;
 }
 
 /* Hover state */
-.select-box:hover:not(:disabled) {
+.select-box:hover:not(:disabled, .disabled) {
   background-color: var(--settings-dropdownHoverBackground);
 }

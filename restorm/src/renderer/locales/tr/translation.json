@@ -2322,5 +2322,8 @@
     "sendDestination": "Hedef",
     "ack": "ACK",
     "nack": "NACK"
+  },
+  "server": {
+    "configLockedWhileRunning": "Sunucu çalışırken yapılandırma kilitli"
   }
 }

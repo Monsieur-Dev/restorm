@@ -32,6 +32,9 @@ export interface HTTPRequestBodySectionProps {
   onBodyFieldsChange: (rows: KeyValue[]) => void
   variables: VariableDefinition[]
   helpers: TranslatedHelperDefinition[]
+  /** Locks every control in the section (e.g. a mock server hosting this
+   * body was snapshotted on start and is currently listening). */
+  disabled?: boolean
 }
 
 interface BodyFieldsTableProps {
@@ -40,6 +43,7 @@ interface BodyFieldsTableProps {
   initialRows: KeyValue[] | undefined
   onRowsChange: (rows: KeyValue[]) => void
   persistenceId: string
+  disabled?: boolean
 }
 
 /** Small wrapper around RestormKeyValueTable that adds an "Add row"
@@ -51,7 +55,8 @@ const BodyFieldsTable: React.FC<BodyFieldsTableProps> = ({
   helpers,
   initialRows,
   onRowsChange,
-  persistenceId
+  persistenceId,
+  disabled = false
 }) => {
   const { t } = useTranslation()
   const tableRef = useRef<KeyValueTableHandle | null>(null)
@@ -61,6 +66,7 @@ const BodyFieldsTable: React.FC<BodyFieldsTableProps> = ({
         <Button
           small
           icon="add"
+          disabled={disabled}
           options={{
             ariaLabel: t('requestTab.body.addField', 'Add field'),
             title: t('requestTab.body.addField', 'Add field')
@@ -80,6 +86,7 @@ const BodyFieldsTable: React.FC<BodyFieldsTableProps> = ({
           onRowsChange={onRowsChange}
           persistenceId={persistenceId}
           data-testid="http-request-body-fields-table"
+          disabled={disabled}
         />
       </div>
     </div>
@@ -96,7 +103,8 @@ export const HTTPRequestBodySection: React.FC<HTTPRequestBodySectionProps> = ({
   request,
   onBodyFieldsChange,
   variables,
-  helpers
+  helpers,
+  disabled = false
 }) => {
   const { t } = useTranslation()
 
@@ -105,8 +113,8 @@ export const HTTPRequestBodySection: React.FC<HTTPRequestBodySectionProps> = ({
   }, [onBodyModeChange])
 
   const radioItems = useMemo(() => ({
-    items: BODY_MODES.map((mode) => ({ text: mode, isActive: bodyMode === mode }))
-  }), [bodyMode])
+    items: BODY_MODES.map((mode) => ({ text: mode, isActive: bodyMode === mode, disabled }))
+  }), [bodyMode, disabled])
 
   return (
     <div style={bodyContainerStyle}>
@@ -123,7 +131,7 @@ export const HTTPRequestBodySection: React.FC<HTTPRequestBodySectionProps> = ({
               language="json"
               value={body}
               onChange={(value) => { onBodyChange(value ?? '') }}
-              options={{ minimap: { enabled: false }, wordWrap: 'on', scrollBeyondLastLine: false, automaticLayout: true }}
+              options={{ minimap: { enabled: false }, wordWrap: 'on', scrollBeyondLastLine: false, automaticLayout: true, readOnly: disabled }}
               data-testid="http-request-body-editor"
             />
           </div>
@@ -135,15 +143,16 @@ export const HTTPRequestBodySection: React.FC<HTTPRequestBodySectionProps> = ({
             initialRows={request.body?.type === 'form-data' || request.body?.type === 'x-www-form-urlencoded' ? request.body.fields : []}
             onRowsChange={onBodyFieldsChange}
             persistenceId={`http-body-fields:${request.id}`}
+            disabled={disabled}
           />
         )}
         {bodyMode === 'file' && (
           <div style={fileRowStyle}>
             <span style={fileLabelStyle}>{t('requestTab.body.fileLabel')}</span>
             <div style={fileInputWrapperStyle}>
-              <InputBox options={{ placeholder: '', type: 'text' }} value={bodyFilePath} onChange={(value: string) => { onBodyFilePathChange(value) }} data-testid="http-request-body-file-input" />
+              <InputBox options={{ placeholder: '', type: 'text' }} value={bodyFilePath} onChange={(value: string) => { onBodyFilePathChange(value) }} data-testid="http-request-body-file-input" disabled={disabled} />
             </div>
-            <Button options={{ ariaLabel: t('requestTab.body.browse'), title: t('requestTab.body.browse') }} data-testid="http-request-body-browse-button">
+            <Button options={{ ariaLabel: t('requestTab.body.browse'), title: t('requestTab.body.browse') }} data-testid="http-request-body-browse-button" disabled={disabled}>
               {t('requestTab.body.browse')}
             </Button>
           </div>
