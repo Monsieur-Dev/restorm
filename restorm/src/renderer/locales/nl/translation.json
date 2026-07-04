@@ -664,6 +664,7 @@
     "noMessages": "Nog geen berichten",
     "connected": "Verbonden",
     "disconnected": "Verbinding verbroken",
+    "consumeError": "Consumentfout",
     "producedTo": "Geproduceerd naar",
     "offset": "Offset",
     "messages": "Berichten"

@@ -163,6 +163,39 @@ Then('the Kafka Consume button reverts to the idle state', async () => {
   await expect(page.locator(`${CONSUME_BTN} .codicon-plug`)).toBeVisible({ timeout: 15_000 })
 })
 
+/** The regression guard: a consumer with no new records must STAY live (the
+ * `debug-disconnect` icon persists) instead of self-reverting to idle a few
+ * seconds after the group join completes. Assert it, wait past the join
+ * window, then assert it is STILL consuming. */
+Then('the Kafka Consume button stays in the consuming state', async () => {
+  if (page === null) throw new Error('launch first')
+  const activeIcon = page.locator(`${CONSUME_BTN} .codicon-debug-disconnect`)
+  await expect(activeIcon).toBeVisible({ timeout: 15_000 })
+  await page.waitForTimeout(5_000)
+  await expect(activeIcon).toBeVisible()
+  await expect(page.locator(`${CONSUME_BTN} .codicon-plug`)).toHaveCount(0)
+})
+
+Then('the Kafka response panel shows at least {int} message frame', async ({}, count: number) => {
+  if (page === null) throw new Error('launch first')
+  const p = page
+  await openResponseTab(p)
+  await expect(async () => {
+    const frames = p.locator('[data-testid^="response-stream-frame-"]:visible')
+    expect(await frames.count()).toBeGreaterThanOrEqual(count)
+  }).toPass({ timeout: 20_000 })
+})
+
+/** Produce one record straight to the broker (no restorm UI involved) so the
+ * consumer tab under test stays put and receives it live — mirrors the reseed
+ * step's `kafka-console-producer` path. */
+When('a record is produced to the restorm-test topic', () => {
+  execSync(
+    'docker exec -i restorm-kafka /opt/kafka/bin/kafka-console-producer.sh --bootstrap-server localhost:9092 --topic restorm-test',
+    { input: 'live-message-after-consume-start\n', stdio: ['pipe', 'pipe', 'pipe'] }
+  )
+})
+
 Then('the Kafka response panel shows {int} message frames', async ({}, count: number) => {
   if (page === null) throw new Error('launch first')
   const p = page

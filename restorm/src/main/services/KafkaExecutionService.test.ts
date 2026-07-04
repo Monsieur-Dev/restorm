@@ -62,6 +62,9 @@ interface MockConsumer {
   stop: ReturnType<typeof vi.fn>
   disconnect: ReturnType<typeof vi.fn>
   seek: ReturnType<typeof vi.fn>
+  on: ReturnType<typeof vi.fn>
+  /** kafkajs exposes the event-name registry on the consumer instance. */
+  events: { CRASH: string }
   /** The group id the service constructed this consumer with. */
   groupId?: string
   /** Captured from the last `run({ eachMessage })` call. */
@@ -70,6 +73,9 @@ interface MockConsumer {
     partition: number
     message: { offset: string; key?: Buffer; value?: Buffer; headers?: Record<string, unknown>; timestamp: string }
   }) => Promise<void>
+  /** Test helper: fire the CRASH instrumentation event at every listener the
+   * service registered (kafkajs delivers `{ payload }` to `on` listeners). */
+  emitCrash: (payload: { error: Error; groupId: string; restart: boolean }) => void
 }
 
 function createMockProducer(): MockProducer {
@@ -81,20 +87,28 @@ function createMockProducer(): MockProducer {
 }
 
 function createMockConsumer(): MockConsumer {
-  let resolveRun: (() => void) | undefined
+  const crashListeners: ((event: { payload: { error: Error; groupId: string; restart: boolean } }) => void)[] = []
   const consumer: MockConsumer = {
     connect: vi.fn().mockResolvedValue(undefined),
     subscribe: vi.fn().mockResolvedValue(undefined),
     run: vi.fn((opts: { eachMessage: MockConsumer['eachMessage'] }) => {
       consumer.eachMessage = opts.eachMessage
-      // Real kafkajs `run()` resolves once the consumer stops — either an
-      // explicit `stop()` (used by `browse`) or `disconnect()` (used by
-      // `connectStreamingConsumer`'s cancel path) unblocks it.
-      return new Promise<void>((resolve) => { resolveRun = resolve })
+      // Real kafkajs `run()` resolves as soon as the consumer has JOINED the
+      // group; the fetch loop then runs in the BACKGROUND (kafkajs never blocks
+      // `run()` until stop). `browse` stops the consumer explicitly and awaits
+      // its own timer, and `connectStreamingConsumer` stays live on its own
+      // terminal signal — neither relies on `run()` pending until teardown.
+      return Promise.resolve()
     }),
-    stop: vi.fn(() => { resolveRun?.(); return Promise.resolve() }),
-    disconnect: vi.fn(() => { resolveRun?.(); return Promise.resolve() }),
-    seek: vi.fn()
+    stop: vi.fn().mockResolvedValue(undefined),
+    disconnect: vi.fn().mockResolvedValue(undefined),
+    seek: vi.fn(),
+    events: { CRASH: 'consumer.crash' },
+    on: vi.fn((eventName: string, listener: (event: { payload: { error: Error; groupId: string; restart: boolean } }) => void) => {
+      if (eventName === consumer.events.CRASH) crashListeners.push(listener)
+      return () => { /* removeListener — unused in tests */ }
+    }),
+    emitCrash: (payload) => { for (const l of crashListeners) l({ payload }) }
   }
   return consumer
 }
@@ -275,14 +289,65 @@ describe('KafkaExecutionService', () => {
 
       handle.close()
       await vi.waitFor(() => { expect(onClose).toHaveBeenCalledTimes(1) })
+      // Clean leave: stop the fetch loop, THEN disconnect (kafkajs sends the
+      // LeaveGroup request on disconnect) so no stale member lingers.
+      expect(nextConsumer.stop).toHaveBeenCalled()
       expect(nextConsumer.disconnect).toHaveBeenCalled()
       expect(kafkaExecutionService.isActive('req-1')).toBe(false)
+    })
+
+    it('stays active after run() resolves and only reports completion on an explicit stop', async () => {
+      // Real kafkajs `run()` resolves after the group JOIN, not on stop — the
+      // consume must stay live until the caller stops it, never self-complete a
+      // few seconds after start (which reverted the panel to idle + orphaned a
+      // never-disconnected group member).
+      stubRequestContext({ kafkaGroupId: 'my-group' } as Partial<FullRequestData>)
+      const onClose = vi.fn()
+      const handle = kafkaExecutionService.connectStreamingConsumer({ requestId: 'req-1', onConnect: vi.fn(), onMessage: vi.fn(), onClose })
+
+      await vi.waitFor(() => { expect(nextConsumer.run).toHaveBeenCalledTimes(1) })
+      // run() has resolved, yet the consume is still live and has NOT closed.
+      await Promise.resolve()
+      expect(kafkaExecutionService.isActive('req-1')).toBe(true)
+      expect(onClose).not.toHaveBeenCalled()
+      expect(nextConsumer.disconnect).not.toHaveBeenCalled()
+
+      handle.close()
+      await vi.waitFor(() => { expect(onClose).toHaveBeenCalledTimes(1) })
+      expect(kafkaExecutionService.isActive('req-1')).toBe(false)
+    })
+
+    it('ends the consume with the error when the consumer crashes unrecoverably', async () => {
+      stubRequestContext({ kafkaGroupId: 'my-group' } as Partial<FullRequestData>)
+      const onClose = vi.fn()
+      kafkaExecutionService.connectStreamingConsumer({ requestId: 'req-1', onConnect: vi.fn(), onMessage: vi.fn(), onClose })
+      await vi.waitFor(() => { expect(nextConsumer.on).toHaveBeenCalledWith('consumer.crash', expect.any(Function)) })
+
+      nextConsumer.emitCrash({ error: new Error('broker gone'), groupId: 'my-group', restart: false })
+      await vi.waitFor(() => { expect(onClose).toHaveBeenCalledWith('broker gone') })
+      // Even a crash leaves the group cleanly.
+      expect(nextConsumer.stop).toHaveBeenCalled()
+      expect(nextConsumer.disconnect).toHaveBeenCalled()
+      expect(kafkaExecutionService.isActive('req-1')).toBe(false)
+    })
+
+    it('keeps consuming through a crash kafkajs will auto-restart', async () => {
+      stubRequestContext({ kafkaGroupId: 'my-group' } as Partial<FullRequestData>)
+      const onClose = vi.fn()
+      const handle = kafkaExecutionService.connectStreamingConsumer({ requestId: 'req-1', onConnect: vi.fn(), onMessage: vi.fn(), onClose })
+      await vi.waitFor(() => { expect(nextConsumer.on).toHaveBeenCalledWith('consumer.crash', expect.any(Function)) })
+
+      nextConsumer.emitCrash({ error: new Error('transient'), groupId: 'my-group', restart: true })
+      await Promise.resolve()
+      expect(onClose).not.toHaveBeenCalled()
+      expect(kafkaExecutionService.isActive('req-1')).toBe(true)
+      handle.close()
     })
 
     it('seeks to the specific offset on the first message per partition, then drops it', async () => {
       stubRequestContext({ kafkaFromOffset: 'specific', kafkaSpecificOffset: '100' } as Partial<FullRequestData>)
       const onMessage = vi.fn()
-      kafkaExecutionService.connectStreamingConsumer({ requestId: 'req-1', onConnect: vi.fn(), onMessage, onClose: vi.fn() })
+      const handle = kafkaExecutionService.connectStreamingConsumer({ requestId: 'req-1', onConnect: vi.fn(), onMessage, onClose: vi.fn() })
       await vi.waitFor(() => { expect(nextConsumer.eachMessage).toBeDefined() })
 
       await nextConsumer.eachMessage?.({
@@ -297,6 +362,7 @@ describe('KafkaExecutionService', () => {
         message: { offset: '100', value: Buffer.from('real-message'), timestamp: '1700000000001' }
       })
       expect(onMessage).toHaveBeenCalledWith(undefined, 'real-message')
+      handle.close()
     })
   })
 

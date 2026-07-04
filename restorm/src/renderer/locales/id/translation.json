@@ -663,6 +663,7 @@
     "noMessages": "Belum ada pesan",
     "connected": "Terhubung",
     "disconnected": "Terputus",
+    "consumeError": "Kesalahan konsumen",
     "producedTo": "Dihasilkan ke",
     "offset": "Offset",
     "messages": "Pesan"

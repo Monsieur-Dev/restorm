@@ -664,6 +664,7 @@
     "noMessages": "Henüz mesaj yok",
     "connected": "Bağlandı",
     "disconnected": "Bağlantı kesildi",
+    "consumeError": "Tüketici hatası",
     "producedTo": "Şuraya üretildi",
     "offset": "Offset",
     "messages": "Mesajlar"

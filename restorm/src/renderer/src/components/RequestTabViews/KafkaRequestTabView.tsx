@@ -301,16 +301,17 @@ export const KafkaRequestTabView: React.FC<KafkaRequestTabViewProps> = ({ reques
       if (rid !== requestId) return
       setConsumeMessages((prev) => [...prev, m])
     })
-    const unsubProg = window.restorm?.kafka.onProgress(({ requestId: rid, status }) => {
+    const unsubProg = window.restorm?.kafka.onProgress(({ requestId: rid, status, error }) => {
       if (rid !== requestId) return
       if (status === 'started') { setConsumeMessages([]); setConsumeError(undefined) }
+      if (status === 'error') { setConsumeError(error ?? t('kafka.consumeError')) }
       if (status === 'completed' || status === 'cancelled' || status === 'error') {
         setIsConsuming(false)
         setHistoryRefreshKey((k) => k + 1)
       }
     })
     return () => { unsubMsg?.(); unsubProg?.() }
-  }, [request.id])
+  }, [request.id, t])
 
   // ---- Sync state changes to the reactive request object ------------------
   const setUrl = useCallback((v: string): void => { setUrlState(v); updateReactiveProperty(request, 'url', v) }, [request])

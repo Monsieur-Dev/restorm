@@ -664,6 +664,7 @@
     "noMessages": "Ingen beskeder endnu",
     "connected": "Forbundet",
     "disconnected": "Afbrudt",
+    "consumeError": "Forbrugerfejl",
     "producedTo": "Produceret til",
     "offset": "Offset",
     "messages": "Beskeder"

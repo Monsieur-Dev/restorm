@@ -664,6 +664,7 @@
     "noMessages": "Noch keine Nachrichten",
     "connected": "Verbunden",
     "disconnected": "Getrennt",
+    "consumeError": "Consumer-Fehler",
     "producedTo": "Erzeugt in",
     "offset": "Offset",
     "messages": "Nachrichten"
