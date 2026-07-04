@@ -47,6 +47,10 @@ import websocketSvgRaw from '../../../../../assets/imgs/import-sources/websocket
 import kafkaSvgRaw from '../../../../../assets/imgs/import-sources/kafka.svg?raw'
 import socketioSvgRaw from '../../../../../assets/imgs/import-sources/socketio.svg?raw'
 import soapSvgRaw from '../../../../../assets/imgs/import-sources/soap.svg?raw'
+import harSvgRaw from '../../../../../assets/imgs/import-sources/har.svg?raw'
+import httpieSvgRaw from '../../../../../assets/imgs/import-sources/httpie.svg?raw'
+import wadlSvgRaw from '../../../../../assets/imgs/import-sources/wadl.svg?raw'
+import thriftSvgRaw from '../../../../../assets/imgs/import-sources/thrift.svg?raw'
 import './ImportFormatShowcase.css'
 
 /** Time spent on each format before rotating to the next one. */
@@ -261,8 +265,7 @@ const IMPORT_FORMATS: readonly ImportFormat[] = [
   {
     id: 'thunderclient',
     title: 'Thunder Client',
-    logoSrc: null,
-    iconCodicon: 'zap',
+    logoSrc: new URL('../../../../../assets/imgs/import-sources/thunderclient.png', import.meta.url).href,
     descriptionKey: 'import.formats.thunderclient.description',
     trademarkKey: 'import.formats.thunderclient.trademark',
     isPro: false
@@ -344,34 +347,25 @@ const IMPORT_FORMATS: readonly ImportFormat[] = [
     isPro: false
   },
   {
-    // No first-party Paw logo asset is shipped yet — a generic codicon
-    // stands in until one is added, same fallback the `logoSrc: null` +
-    // `iconCodicon` combination was built for.
     id: 'paw',
     title: 'Paw',
-    logoSrc: null,
-    iconCodicon: 'package',
+    logoSrc: new URL('../../../../../assets/imgs/import-sources/paw.png', import.meta.url).href,
     descriptionKey: 'import.formats.paw.description',
     trademarkKey: 'import.formats.paw.trademark',
     isPro: false
   },
-  // The next nine formats (HAR through API Blueprint) all lack a
-  // first-party logo asset — same situation as Paw above — so they use
-  // a codicon glyph picked for a loose visual match to what the format
-  // represents until a real SVG pass replaces them.
   {
     id: 'har',
     title: 'HAR',
     logoSrc: null,
-    iconCodicon: 'browser',
+    inlineSvg: harSvgRaw,
     descriptionKey: 'import.formats.har.description',
     isPro: false
   },
   {
     id: 'rest-client',
     title: 'REST Client',
-    logoSrc: null,
-    iconCodicon: 'extensions',
+    logoSrc: new URL('../../../../../assets/imgs/import-sources/rest-client.png', import.meta.url).href,
     descriptionKey: 'import.formats.restClient.description',
     trademarkKey: 'import.formats.restClient.trademark',
     isPro: false
@@ -380,7 +374,7 @@ const IMPORT_FORMATS: readonly ImportFormat[] = [
     id: 'httpie',
     title: 'HTTPie',
     logoSrc: null,
-    iconCodicon: 'send',
+    inlineSvg: httpieSvgRaw,
     descriptionKey: 'import.formats.httpie.description',
     trademarkKey: 'import.formats.httpie.trademark',
     isPro: false
@@ -388,8 +382,7 @@ const IMPORT_FORMATS: readonly ImportFormat[] = [
   {
     id: 'smithy',
     title: 'Smithy',
-    logoSrc: null,
-    iconCodicon: 'symbol-namespace',
+    logoSrc: new URL('../../../../../assets/imgs/import-sources/smithy.svg', import.meta.url).href,
     descriptionKey: 'import.formats.smithy.description',
     trademarkKey: 'import.formats.smithy.trademark',
     isPro: false
@@ -397,8 +390,7 @@ const IMPORT_FORMATS: readonly ImportFormat[] = [
   {
     id: 'typespec',
     title: 'TypeSpec',
-    logoSrc: null,
-    iconCodicon: 'symbol-interface',
+    logoSrc: new URL('../../../../../assets/imgs/import-sources/typespec.svg', import.meta.url).href,
     descriptionKey: 'import.formats.typespec.description',
     trademarkKey: 'import.formats.typespec.trademark',
     isPro: false
@@ -406,8 +398,7 @@ const IMPORT_FORMATS: readonly ImportFormat[] = [
   {
     id: 'raml',
     title: 'RAML',
-    logoSrc: null,
-    iconCodicon: 'list-tree',
+    logoSrc: new URL('../../../../../assets/imgs/import-sources/raml.svg', import.meta.url).href,
     descriptionKey: 'import.formats.raml.description',
     trademarkKey: 'import.formats.raml.trademark',
     isPro: false
@@ -416,7 +407,7 @@ const IMPORT_FORMATS: readonly ImportFormat[] = [
     id: 'wadl',
     title: 'WADL',
     logoSrc: null,
-    iconCodicon: 'file-code',
+    inlineSvg: wadlSvgRaw,
     descriptionKey: 'import.formats.wadl.description',
     trademarkKey: 'import.formats.wadl.trademark',
     isPro: false
@@ -425,7 +416,7 @@ const IMPORT_FORMATS: readonly ImportFormat[] = [
     id: 'thrift',
     title: 'Thrift',
     logoSrc: null,
-    iconCodicon: 'type-hierarchy',
+    inlineSvg: thriftSvgRaw,
     descriptionKey: 'import.formats.thrift.description',
     trademarkKey: 'import.formats.thrift.trademark',
     isPro: false
@@ -433,8 +424,7 @@ const IMPORT_FORMATS: readonly ImportFormat[] = [
   {
     id: 'api-blueprint',
     title: 'API Blueprint',
-    logoSrc: null,
-    iconCodicon: 'markdown',
+    logoSrc: new URL('../../../../../assets/imgs/import-sources/api-blueprint.svg', import.meta.url).href,
     descriptionKey: 'import.formats.apiBlueprint.description',
     trademarkKey: 'import.formats.apiBlueprint.trademark',
     isPro: false
