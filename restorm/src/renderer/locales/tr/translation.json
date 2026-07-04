@@ -274,10 +274,17 @@
         "socketio": "Socket.IO isteği",
         "mqtt": "MQTT request",
         "mqttServer": "MQTT aracısı",
+        "sse": "SSE isteği",
         "grpcServer": "gRPC mock sunucusu",
         "soapServer": "SOAP sahte sunucusu",
         "graphqlServer": "GraphQL mock sunucusu",
-        "odataServer": "OData mock sunucusu"
+        "odataServer": "OData mock sunucusu",
+        "trpc": "tRPC isteği",
+        "amqp": "AMQP isteği",
+        "redis": "Redis isteği",
+        "stomp": "STOMP isteği",
+        "kafkaProduce": "Kafka isteği – Üret",
+        "kafkaConsume": "Kafka isteği – Tüket"
       }
     },
     "deleteConfirm": {
@@ -475,6 +482,12 @@
       "clientStream": "Client streaming",
       "bidi": "Bidirectional streaming"
     },
+    "transport": {
+      "grpc": "gRPC",
+      "grpcWeb": "gRPC-Web",
+      "connect": "Connect",
+      "streamingUnsupported": "Bu taşıma, HTTP/1.1 üzerinden istemci veya çift yönlü akışı desteklemez. Bunun yerine yerel gRPC taşımasını kullanın."
+    },
     "server": {
       "proto": "Proto",
       "methods": "Mock yöntemleri",
@@ -493,6 +506,12 @@
       "notListening": "Dinlemiyor",
       "listenFailed": "gRPC sunucusu başlatılamadı",
       "snippetsUnavailable": "Mock sunucu için kod parçacıkları kullanılamaz."
+    },
+    "reflection": {
+      "refresh": "Reflection'dan yenile",
+      "refreshFailed": "gRPC reflection ile yenileme başarısız oldu",
+      "unsupported": "Bu sunucu gRPC reflection'ı desteklemiyor — bunun yerine bir .proto dosyası içe aktarın.",
+      "unknownError": "Bilinmeyen hata"
     }
   },
   "soap": {
@@ -540,6 +559,114 @@
     "routePlaceholder": "Rota (isteğe bağlı)",
     "clientsConnected": "{{count}} istemci bağlı",
     "notListening": "Dinlemiyor"
+  },
+  "jsonrpc": {
+    "send": "Gönder",
+    "urlPlaceholder": "JSON-RPC uç nokta URL'si",
+    "methodPlaceholder": "yöntem",
+    "idPlaceholder": "id (otomatik)",
+    "notificationModeTooltip": "Bildirim modu — id yok, yanıt beklenmiyor",
+    "tabs": {
+      "params": "Parametreler",
+      "headers": "Başlıklar"
+    },
+    "response": {
+      "notificationSent": "Bildirim gönderildi",
+      "errorLabel": "JSON-RPC hatası {{code}}:"
+    }
+  },
+  "jsonrpcBatch": {
+    "send": "Toplu gönder",
+    "tabs": {
+      "calls": "Çağrılar"
+    },
+    "empty": "Henüz çağrı yok. Aşağıya bir tane ekleyin.",
+    "methodPlaceholder": "yöntem",
+    "idPlaceholder": "id (otomatik)",
+    "moveUp": "Yukarı taşı",
+    "moveDown": "Aşağı taşı",
+    "remove": "Çağrıyı kaldır",
+    "paramsLabel": "Parametreler (JSON)",
+    "add": "Çağrı ekle",
+    "response": {
+      "unmatched": "Eşleşen yanıt girdisi yok."
+    }
+  },
+  "sse": {
+    "headers": "Başlıklar",
+    "noFrames": "Henüz olay yok",
+    "urlPlaceholder": "SSE URL'si",
+    "framesTruncated": "Son {{shown}} / {{total}} kare gösteriliyor",
+    "showAllFrames": "Tümünü göster"
+  },
+  "redis": {
+    "connected": "Bağlandı",
+    "disconnected": "Bağlantı kesildi",
+    "noMessages": "Henüz mesaj yok",
+    "noCommandsYet": "Henüz çalıştırılan komut yok",
+    "urlPlaceholder": "Redis URL'si (redis:// veya rediss://)",
+    "passwordPlaceholder": "Parola (isteğe bağlı)",
+    "subscribe": "Abone ol",
+    "unsubscribe": "Abonelikten çık",
+    "run": "Çalıştır",
+    "subscribeMode": "Abonelik",
+    "commandMode": "Komut",
+    "command": "Komut",
+    "args": "Bağımsız değişkenler",
+    "argsPlaceholder": "Komut bağımsız değişkenleri",
+    "freeform": "Serbest",
+    "freeformPlaceholder": "Serbest komut (seçimi geçersiz kılar)",
+    "tabs": {
+      "channels": "Kanallar",
+      "command": "Komut"
+    }
+  },
+  "kafka": {
+    "brokersPlaceholder": "Broker listesi (host:port,host:port)",
+    "clientId": "İstemci Kimliği",
+    "clientIdPlaceholder": "restorm",
+    "mode": {
+      "produce": "Üret",
+      "consume": "Tüket",
+      "browse": "Gözat"
+    },
+    "auth": {
+      "title": "Kimlik Doğrulama",
+      "mechanism": "SASL",
+      "username": "Kullanıcı Adı",
+      "password": "Parola",
+      "tls": "TLS"
+    },
+    "topic": "Konu",
+    "topicPlaceholder": "konu-adı",
+    "key": "Anahtar",
+    "keyPlaceholder": "mesaj anahtarı (isteğe bağlı)",
+    "value": "Değer",
+    "headers": "Başlıklar",
+    "partition": "Partisyon",
+    "partitionPlaceholder": "otomatik",
+    "groupId": "Grup Kimliği",
+    "groupIdPlaceholder": "restorm-consumer",
+    "fromOffsetLabel": "Başlangıç noktası",
+    "fromOffset": {
+      "earliest": "En eski",
+      "latest": "En yeni",
+      "specific": "Belirli"
+    },
+    "specificOffset": "Offset",
+    "partitions": "Partisyonlar",
+    "partitionsPlaceholder": "0,1,2 (boş = tümü)",
+    "peekCount": "Mesaj sayısı",
+    "produce": "Üret",
+    "startConsuming": "Tüketmeye başla",
+    "stopConsuming": "Tüketmeyi durdur",
+    "peek": "Göz at",
+    "noMessages": "Henüz mesaj yok",
+    "connected": "Bağlandı",
+    "disconnected": "Bağlantı kesildi",
+    "producedTo": "Şuraya üretildi",
+    "offset": "Offset",
+    "messages": "Mesajlar"
   },
   "search": {
     "placeholder": "Ara...",
@@ -886,6 +1013,10 @@
         "description": "Bir .proto dosyasını (veya bir dizinini) bırakın ve Restorm her servisi, her RPC'yi, her mesajı gezerek her yöntemi kod üretimine dokunmadan gRPC yürütücüsü üzerinden gönderebileceğiniz tipli bir isteğe dönüştürür.",
         "trademark": "gRPC, Cloud Native Computing Foundation'ın bir projesidir."
       },
+      "grpcReflection": {
+        "description": ".proto dosyanız yok mu? Restorm'u reflection sunan çalışan bir gRPC sunucusuna yönlendirin — grpc.reflection.v1alpha.ServerReflection'ı sorgular, her servisi ve metodu keşfeder ve bir proto dosyası içe aktarmayla aynı tipli istek ağacını oluşturur; çevrimdışı kullanım için yerel olarak önbelleğe alınır.",
+        "action": "Bir sunucuya bağlan…"
+      },
       "soap": {
         "description": "Bir WSDL'iniz mi var? Yapıştırın (veya URL'sini) — Restorm her <port> ve <operation>'ı ayrıştırır ve doğru SOAPAction başlığı, şema tipli gövde iskeletleri ve WSDL'in beyan ettiği kimlik doğrulama şeması ile birlikte gönderilmeye hazır SOAP zarfları üretir."
       },
@@ -911,7 +1042,57 @@
       "paw": {
         "description": "Paw'dan mı geliyorsunuz? JSON dışa aktarmanızı bırakın (uygulamada File → Export → JSON — native .paw paketi doğrudan okunmaz). Restorm her isteği, başlığı, gövdeyi ve ortamı yeniden oluşturur ve Paw'ın dinamik değerlerini (zaman damgaları, rastgele dizeler, UUID'ler) en yakın Restorm karşılığına eşler.",
         "trademark": "Paw, RapidAPI, Inc.'in tescilli markasıdır ve burada yalnızca uyumluluk referansı amacıyla kullanılmaktadır."
+      },
+      "har": {
+        "description": "Tarayıcınızın devtools'undan bir ağ izi mi yakaladınız? Dışa aktarılan .har dosyasını bırakın — Restorm kaydedilen her çağrıyı gezerek onu, başlıklar ve gövde dahil olmak üzere tekrarlanabilir bir isteğe dönüştürür."
+      },
+      "restClient": {
+        "description": "VS Code REST Client eklentisinden mi geliyorsunuz? .http / .rest dosyasını yapıştırın veya bırakın — Restorm her istek bloğunu ayrıştırır, @variables değişkenlerini çözer ve bunları bir Restorm ağacı olarak yeniden oluşturur.",
+        "trademark": "REST Client, ilgili sahibinin ticari markasıdır ve burada yalnızca uyumluluk referansı olarak kullanılmaktadır."
+      },
+      "httpie": {
+        "description": "Bir HTTPie Desktop koleksiyon dışa aktarımı veya bir CLI oturum dosyası bırakın — Restorm her isteği (ve bir oturum için kalıcı başlıklarını) okur ve çalışmaya hazır şekilde yeniden oluşturur.",
+        "trademark": "HTTPie, ilgili sahibinin ticari markasıdır ve burada yalnızca uyumluluk referansı olarak kullanılmaktadır."
+      },
+      "smithy": {
+        "description": "Bir Smithy modeli yapıştırın — JSON AST'i veya elle yazılmış IDL'yi — Restorm her servisi, kaynağı ve işlemi gezerek çalışmaya hazır isteklerden oluşan uygun bir klasör oluşturur.",
+        "trademark": "Smithy, Amazon Web Services'in bir projesidir."
+      },
+      "typespec": {
+        "description": "TypeSpec tanımınızı (.tsp) yapıştırın — Restorm bunu arka planda OpenAPI'ye derler ve tam olarak elle yazılmış bir spesifikasyon gibi içe aktarır: işlemler, parametreler ve şemalar dahil.",
+        "trademark": "TypeSpec, Microsoft'un bir projesidir."
+      },
+      "raml": {
+        "description": "Bir RAML 1.0 veya 0.8 belgesi yapıştırın — Restorm kaynak ağacını iç içe klasörlere yansıtır, metot başına bir istek, modellenen türler de dahil.",
+        "trademark": "RAML, RAML Workgroup tarafından sürdürülen bir spesifikasyondur."
+      },
+      "wadl": {
+        "description": "Hâlâ bir WADL belgesi mi sürdürüyorsunuz? XML'i yapıştırın — Restorm iç içe geçmiş <resource> ağacını gezerek metotlar ve parametreler dahil, uygun bir istek klasörü oluşturur.",
+        "trademark": "WADL, Sun Microsystems tarafından bir Member Submission olarak W3C'ye sunuldu."
+      },
+      "thrift": {
+        "description": "Bir Apache Thrift IDL (.thrift) dosyası yapıştırın — Restorm, API'nin yapısını inceleyebilmeniz için her servisi, metodu, struct'ı ve enum'u okur. Thrift'in ikili tel protokolü henüz Restorm'dan çalıştırılamıyor, bu yüzden bu içe aktarma yalnızca belgeleme amaçlıdır.",
+        "trademark": "Apache Thrift, Apache Software Foundation'ın ticari markasıdır."
+      },
+      "apiBlueprint": {
+        "description": "Bir API Blueprint (.apib) belgesi yapıştırın — Restorm her kaynak grubunu ve geçişi, belgelenen her metot/yanıt çifti için bir istek klasörüne ayrıştırır.",
+        "trademark": "API Blueprint, aslen Apiary tarafından oluşturulmuş bir spesifikasyondur."
       }
+    },
+    "grpcReflection": {
+      "title": "gRPC sunucusu (reflection)",
+      "hint": "Çalışan bir gRPC sunucusunun servislerini ve metodlarını .proto dosyası olmadan keşfetmek için reflection servisini sorgulayın.",
+      "addressLabel": "Sunucu adresi (host:port)",
+      "addressPlaceholder": "localhost:9000",
+      "tlsLabel": "TLS kullan",
+      "metadataLabel": "Meta veri (isteğe bağlı kimlik doğrulama başlıkları)",
+      "connecting": "Bağlanıyor…",
+      "import": "İçe aktar",
+      "reimportedTitle": "gRPC reflection yeniden içe aktarıldı",
+      "reimportedNoop": "Zaten güncel — sunucuda değişiklik yok.",
+      "reimportedSummary": "+{{added}} / -{{removed}} / ↻{{merged}} — değişiklikleri görmek için projeyi yeniden yükleyin.",
+      "unsupported": "Bu sunucu gRPC reflection'ı desteklemiyor — bunun yerine bir .proto dosyası içe aktarın.",
+      "unknownError": "Bilinmeyen hata"
     },
     "loading": "Analiz ediliyor...",
     "noResults": "İstek bulunamadı",
@@ -1075,14 +1256,22 @@
       "socketioSend": "Socket.IO send",
       "socketioClose": "Socket.IO close",
       "websocketConnect": "WebSocket connect",
+      "sseConnect": "SSE connect",
       "websocketSend": "WebSocket send",
       "websocketClose": "WebSocket close",
+      "sseClose": "SSE close",
       "grpcConnect": "gRPC connect",
       "grpcSend": "gRPC send",
       "grpcClose": "gRPC close",
       "mqttConnect": "MQTT connect",
       "mqttSend": "MQTT publish",
       "mqttClose": "MQTT close",
+      "amqpConnect": "AMQP bağlantısı",
+      "amqpPublish": "AMQP yayını",
+      "amqpClose": "AMQP kapatma",
+      "redisSubscribe": "Redis subscribe",
+      "redisClose": "Redis close",
+      "redisCommand": "Redis command",
       "httpListen": "HTTP server",
       "httpClose": "HTTP close",
       "grpcServerClose": "gRPC sunucusunu kapat",
@@ -1093,7 +1282,13 @@
       "odataListen": "OData server",
       "odataClose": "OData close",
       "graphqlSubscribe": "GraphQL abone ol",
-      "graphqlUnsubscribe": "GraphQL abonelikten çık"
+      "graphqlUnsubscribe": "GraphQL abonelikten çık",
+      "stompConnect": "STOMP bağlantısı",
+      "stompSend": "STOMP gönder",
+      "stompClose": "STOMP kapat",
+      "kafkaProduce": "Kafka produce",
+      "kafkaConsume": "Kafka consume",
+      "kafkaClose": "Kafka close"
     },
     "comparator": {
       "result": "sonuç"
@@ -1654,8 +1849,10 @@
       "socketioSend": "Zaten açık olan bir Socket.IO bağlantısı üzerinde bir mesaj gönderir.",
       "socketioClose": "Zaten açık olan bir Socket.IO bağlantısını kapatır.",
       "websocketConnect": "Ham bir WebSocket bağlantısı açar ve alınan her mesajı portu üzerinde yeniden yayınlar.",
+      "sseConnect": "Uzun süreli bir SSE (Server-Sent Events) bağlantısı açar ve alınan her çerçeveyi kendi portundan yeniden yayınlar.",
       "websocketSend": "Zaten açık olan bir WebSocket bağlantısı üzerinde bir yük gönderir.",
       "websocketClose": "Zaten açık olan bir WebSocket bağlantısını kapatır.",
+      "sseClose": "Zaten açık olan bir SSE bağlantısını kapatır.",
       "grpcConnect": "Bir akış tabanlı gRPC çağrısı açar ve alınan her çerçeveyi message portu üzerinde yeniden yayınlar.",
       "grpcSend": "Zaten açık olan bir akış tabanlı gRPC çağrısına bir istek mesajı yazar.",
       "grpcClose": "Zaten açık olan bir akış tabanlı gRPC çağrısını yarı kapatır (half-close).",
@@ -1668,9 +1865,15 @@
       "mqttConnect": "Bağlı bir istekten kalıcı bir MQTT bağlantısı açar ve konusuna abone olur; alınan her mesajı `message` portu üzerinde yeniden yayınlar.",
       "mqttSend": "Zaten açık olan bir MQTT bağlantısı üzerinde (konusuna) bir yük yayımlar.",
       "mqttClose": "Zaten açık olan bir MQTT bağlantısını kapatır.",
+      "amqpConnect": "Bağlı bir istekten kalıcı bir AMQP bağlantısı açar ve kuyruğunu tüketir; alınan her mesajı `message` portunda yeniden yayınlar.",
+      "amqpPublish": "Zaten açık olan bir AMQP bağlantısında bir yük yayınlar (bağlı isteğin exchange/routing key'ine).",
+      "amqpClose": "Zaten açık olan bir AMQP bağlantısını kapatır.",
       "mqttConnectServer": "Yerel bir MQTT aracısı başlatır (port + konu filtresi); konu filtresine abone olur ve alınan her mesajı `message` portu üzerinde yeniden yayınlar. Gönderme, bağlı abonelere yayımlar.",
       "mqttSendServer": "Başvurulan MQTT aracısının her abonesine bir mesaj yayımlar.",
       "mqttCloseServer": "Başvurulan MQTT aracısını durdurur ve istemcilerinin bağlantısını keser.",
+      "redisSubscribe": "Bağlı bir istekten kalıcı bir Redis abonelik bağlantısı açar ve kanallarını dinler; alınan her mesajı `message` portu üzerinde yeniden yayınlar.",
+      "redisClose": "Zaten açık olan bir Redis abonelik bağlantısını kapatır.",
+      "redisCommand": "Bağlı bir Redis komutunu çalıştırır (yeni bir bağlantıda tek bir komut, ardından bağlantı kesilir) ve yanıtını yayınlar.",
       "toast": "Senaryo çalışırken Restorm arayüzünde bir toast bildirimi yayınlar.",
       "httpListen": "Hosts a local HTTP mock server and listens indefinitely. `connected` fires once it is listening; each served request re-emits its data on the `served` port. The server stays up until an HTTP close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
       "httpClose": "Zaten dinleyen bir sahte HTTP sunucusunu (bir HTTP sunucu düğümü tarafından bildirilen) durdurur ve portunu serbest bırakır.",
@@ -1683,7 +1886,13 @@
       "odataListen": "Yerel bir OData v4 sahte hizmetini barındırır ve süresiz olarak dinler. Dinlemeye başlar başlamaz `connected` tetiklenir; sunulan her istek verisini `served` bağlantı noktasında yeniden yayar. Sunucu bir OData kapatmaya (veya bir Stop'a) kadar açık kalır, ardından `done` tetiklenir. response çıktısı yoktur — hizmet verir, dışarıyı çağırmaz.",
       "odataClose": "Halihazırda dinlemekte olan bir OData sahte hizmetini (bir OData sunucu düğümü tarafından bildirilen) durdurur ve bağlantı noktasını serbest bırakır.",
       "graphqlSubscribe": "SSE üzerinden istemci olarak uzun ömürlü bir GraphQL aboneliği açar ve dinler. Akış açılır açılmaz `connected` tetiklenir; gönderilen her yük `message` bağlantı noktasında yeniden yayılır (abonelik yalnızca alır, adlandırılmış olaylar yoktur). Akış, bir GraphQL abonelikten çıkmaya (veya bir durdurmaya) kadar ya da sunucu onu tamamlayana kadar açık kalır, ardından `done` tetiklenir.",
-      "graphqlUnsubscribe": "Zaten açık olan bir GraphQL aboneliğini (bir GraphQL abone ol düğümü tarafından bildirilen) durdurur ve SSE akışını kapatır."
+      "graphqlUnsubscribe": "Zaten açık olan bir GraphQL aboneliğini (bir GraphQL abone ol düğümü tarafından bildirilen) durdurur ve SSE akışını kapatır.",
+      "stompConnect": "Kalıcı bir STOMP-WebSocket-üzerinden bağlantısı açar: CONNECT/CONNECTED el sıkışmasını gerçekleştirir, ardından her yapılandırılmış hedefe abone olur ve alınan her çerçeveyi kendi bağlantı noktasında yeniden yayınlar.",
+      "stompSend": "Zaten açık olan bir STOMP bağlantısında bir SEND çerçevesi gönderir.",
+      "stompClose": "DISCONNECT gönderir ve zaten açık olan bir STOMP bağlantısını kapatır.",
+      "kafkaProduce": "Bağlı bir Kafka isteğini tek seferlik bir üretim olarak çalıştırır ve sonucu (konu/bölüm/offset) `response` olarak yayınlar.",
+      "kafkaConsume": "Bağlı bir istekten kalıcı bir Kafka tüketicisi açar ve alınan her mesajı `message` portu üzerinde yeniden yayınlar.",
+      "kafkaClose": "Zaten açık olan bir Kafka tüketicisini kapatır."
     },
     "legend": {
       "title": "Gösterge",
@@ -1732,6 +1941,9 @@
     "websocket": {
       "message": "message"
     },
+    "sse": {
+      "message": "message"
+    },
     "grpc": {
       "message": "message"
     },
@@ -1777,6 +1989,36 @@
     "lwtTopicPlaceholder": "will/topic",
     "lwtPayload": "Payload",
     "lwtPayloadPlaceholder": "will message"
+  },
+  "amqp": {
+    "urlPlaceholder": "AMQP URL'si (amqp:// veya amqps://)",
+    "vhost": "Sanal ana bilgisayar",
+    "vhostPlaceholder": "/",
+    "username": "Kullanıcı adı",
+    "password": "Parola",
+    "mode": "Mod",
+    "modePublish": "Yayınla",
+    "modeSubscribe": "Abone ol",
+    "modeBrowse": "Göz at",
+    "exchange": "Exchange",
+    "exchangePlaceholder": "(varsayılan exchange)",
+    "routingKey": "Routing key",
+    "routingKeyPlaceholder": "routing.key",
+    "queue": "Kuyruk",
+    "queuePlaceholder": "kuyruk adı",
+    "autoAck": "Otomatik onay",
+    "prefetch": "Prefetch",
+    "browsePeekCount": "Önizleme sayısı",
+    "connect": "Bağlan",
+    "connecting": "Bağlanıyor…",
+    "disconnect": "Bağlantıyı kes",
+    "connected": "Bağlandı",
+    "disconnected": "Bağlantı kesildi",
+    "send": "Gönder",
+    "browseButton": "Göz at",
+    "noMessages": "Henüz mesaj yok",
+    "peeked": "Önizlendi",
+    "messages": "Mesajlar"
   },
   "mcpLogs": {
     "title": "MCP günlükleri",
@@ -2043,5 +2285,42 @@
       "noSubscription": "Yönetilecek etkin abonelik yok.",
       "error": "Abonelik portalı açılamadı. Lütfen tekrar deneyin."
     }
+  },
+  "trpc": {
+    "send": "Gönder",
+    "urlPlaceholder": "tRPC sunucu URL'si",
+    "procedurePlaceholder": "Prosedür (ör. user.get)",
+    "kindQuery": "Sorgu",
+    "kindMutation": "Mutasyon",
+    "showRawEnvelope": "Ham zarfı göster",
+    "kindSelectLabel": "Çağrı türü",
+    "tabs": {
+      "headers": "Başlıklar",
+      "body": "Gövde"
+    }
+  },
+  "stomp": {
+    "connect": "Bağlan",
+    "disconnect": "Bağlantıyı kes",
+    "connected": "Bağlandı",
+    "disconnected": "Bağlantı kesildi",
+    "noMessages": "Henüz çerçeve yok",
+    "version": "STOMP sürümü",
+    "tabs": {
+      "connect": "Bağlantı",
+      "subscriptions": "Abonelikler",
+      "send": "Gönder"
+    },
+    "ackMode": {
+      "auto": "auto",
+      "client": "client",
+      "clientIndividual": "client-individual"
+    },
+    "subscriptionIdLabel": "Abonelik kimliği",
+    "removeSubscription": "Aboneliği kaldır",
+    "addSubscription": "Abonelik ekle",
+    "sendDestination": "Hedef",
+    "ack": "ACK",
+    "nack": "NACK"
   }
 }

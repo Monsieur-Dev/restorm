@@ -30,13 +30,21 @@ import type {
   ResponseHistoryOutcome,
   ResponseHistoryRequestMeta,
   ResponseHistoryRequestType,
-  ResponseHistoryResponse
+  ResponseHistoryResponse,
+  ResponseHistoryJsonRpcBatchChild
 } from '../../shared/types/collections'
 import type { HTTPExecutionResult } from './HTTPExecutionService'
 import type { GraphQLExecutionResult } from './GraphQLExecutionService'
 import type { GRPCExecutionResult } from './GRPCExecutionService'
 import type { SOAPExecutionResult } from './SOAPExecutionService'
 import type { WebSocketExecutionResult } from './WebSocketExecutionService'
+import type { JsonRpcExecutionResult, JsonRpcBatchExecutionResult } from './JsonRpcExecutionService'
+import type { TrpcExecutionResult } from './TrpcExecutionService'
+import type { SseExecutionResult } from './SseExecutionService'
+import type { AmqpExecutionResult } from './AMQPExecutionService'
+import type { RedisExecutionResult } from './RedisExecutionService'
+import type { StompExecutionResult } from './StompExecutionService'
+import type { KafkaExecutionResult } from './KafkaExecutionService'
 import { normalizeODataResponse } from '../../shared/utils/odataResponse'
 import { redactTokensFromBody, collectTokenValues, redactTokensFromHeaders } from './AuthenticationRedaction'
 import { isAuthenticationRequest } from '../../shared/types/collections'
@@ -49,6 +57,14 @@ type ExecutionResult =
   | GRPCExecutionResult
   | SOAPExecutionResult
   | WebSocketExecutionResult
+  | JsonRpcExecutionResult
+  | JsonRpcBatchExecutionResult
+  | TrpcExecutionResult
+  | SseExecutionResult
+  | AmqpExecutionResult
+  | RedisExecutionResult
+  | StompExecutionResult
+  | KafkaExecutionResult
 
 /**
  * Compute the 3-way visual outcome (`ok` / `warning` / `failure`) for
@@ -87,8 +103,70 @@ function webSocketOutcome(result: WebSocketExecutionResult): ResponseHistoryOutc
   return result.success && result.connected ? 'ok' : 'failure'
 }
 
+/** Same binary shape as {@link webSocketOutcome} — SSE has no per-frame status
+ * either, only whether the stream ever connected and ended cleanly. */
+function sseOutcome(result: SseExecutionResult): ResponseHistoryOutcome {
+  return result.success && result.connected ? 'ok' : 'failure'
+}
+
+/**
+ * AMQP has no per-message status either — publish/browse/subscribe each
+ * settle to a single success/failure the same way WebSocket does.
+ */
+function amqpOutcome(result: AmqpExecutionResult): ResponseHistoryOutcome {
+  return result.success ? 'ok' : 'failure'
+}
+
+/**
+ * Redis command mode carries no connection concept — a command either
+ * succeeded or errored. Subscribe mode reuses the WebSocket rule (`success`
+ * AND `connected` are both required for `ok`).
+ */
+function redisOutcome(result: RedisExecutionResult): ResponseHistoryOutcome {
+  if (!result.success) return 'failure'
+  if (result.mode === 'subscribe') return result.connected === true ? 'ok' : 'failure'
+  return 'ok'
+}
+
+/** Same binary shape as WebSocket: a STOMP connection is either established
+ * (CONNECT/CONNECTED settled) or not. */
+function stompOutcome(result: StompExecutionResult): ResponseHistoryOutcome {
+  return result.success && result.connected ? 'ok' : 'failure'
+}
+
+/** Kafka has no per-message status like HTTP, and unlike WebSocket a produce/
+ * browse result carries no "connected" concept — the execution result's own
+ * `success` is authoritative for all three modes. */
+function kafkaOutcome(result: KafkaExecutionResult): ResponseHistoryOutcome {
+  return result.success ? 'ok' : 'failure'
+}
+
 function outcomeToSuccess(outcome: ResponseHistoryOutcome): boolean {
   return outcome !== 'failure'
+}
+
+/**
+ * A JSON-RPC call can transport-succeed (HTTP 200) while the envelope
+ * reports an application-level `error` — that's still a failed call from
+ * the user's perspective, so it collapses to `failure` here (no separate
+ * `warning` state, mirroring gRPC/WebSocket rather than the HTTP redirect
+ * 3-way).
+ */
+function jsonRpcOutcome(result: JsonRpcExecutionResult): ResponseHistoryOutcome {
+  if (!result.success || result.error !== undefined) return 'failure'
+  return 'ok'
+}
+
+/**
+ * A batch outcome is `ok` only when every child resolved with a `result`;
+ * one or more child `error` / unmatched entries downgrades to `warning`
+ * (the batch itself still transported and got A response) — full transport
+ * failure is `failure`.
+ */
+function jsonRpcBatchOutcome(result: JsonRpcBatchExecutionResult): ResponseHistoryOutcome {
+  if (!result.success) return 'failure'
+  const hasIssue = result.children.some((c) => c.error !== undefined || c.unmatched === true)
+  return hasIssue ? 'warning' : 'ok'
 }
 
 class ResponseHistoryService {
@@ -363,7 +441,15 @@ class ResponseHistoryService {
       graphql: { build: (id, r) => this.buildGraphqlResponse(id, r as GraphQLExecutionResult), outcome: (r) => httpOutcome(r as GraphQLExecutionResult) },
       grpc: { build: (id, r) => this.buildGrpcResponse(id, r as GRPCExecutionResult), outcome: (r) => grpcOutcome(r as GRPCExecutionResult) },
       soap: { build: (id, r) => this.buildSoapResponse(id, r as SOAPExecutionResult), outcome: (r) => httpOutcome(r as SOAPExecutionResult) },
-      websocket: { build: (id, r) => this.buildWebSocketResponse(id, r as WebSocketExecutionResult), outcome: (r) => webSocketOutcome(r as WebSocketExecutionResult) }
+      websocket: { build: (id, r) => this.buildWebSocketResponse(id, r as WebSocketExecutionResult), outcome: (r) => webSocketOutcome(r as WebSocketExecutionResult) },
+      jsonrpc: { build: (id, r) => this.buildJsonRpcResponse(id, r as JsonRpcExecutionResult), outcome: (r) => jsonRpcOutcome(r as JsonRpcExecutionResult) },
+      jsonrpcBatch: { build: (id, r) => this.buildJsonRpcBatchResponse(id, r as JsonRpcBatchExecutionResult), outcome: (r) => jsonRpcBatchOutcome(r as JsonRpcBatchExecutionResult) },
+      trpc: { build: (id, r) => this.buildTrpcResponse(id, r as TrpcExecutionResult), outcome: (r) => httpOutcome(r as TrpcExecutionResult) },
+      sse: { build: (id, r) => this.buildSseResponse(id, r as SseExecutionResult), outcome: (r) => sseOutcome(r as SseExecutionResult) },
+      amqp: { build: (id, r) => this.buildAmqpResponse(id, r as AmqpExecutionResult), outcome: (r) => amqpOutcome(r as AmqpExecutionResult) },
+      redis: { build: (id, r) => this.buildRedisResponse(id, r as RedisExecutionResult), outcome: (r) => redisOutcome(r as RedisExecutionResult) },
+      stomp: { build: (id, r) => this.buildStompResponse(id, r as StompExecutionResult), outcome: (r) => stompOutcome(r as StompExecutionResult) },
+      kafka: { build: (id, r) => this.buildKafkaResponse(id, r as KafkaExecutionResult), outcome: (r) => kafkaOutcome(r as KafkaExecutionResult) }
     }
 
     const builder = builders[type]
@@ -552,6 +638,86 @@ class ResponseHistoryService {
     }
   }
 
+  private buildJsonRpcResponse(requestId: string, result: JsonRpcExecutionResult): ResponseHistoryResponse | null {
+    const resolvedUrl = contextService.getResolvedUrl(requestId)?.resolvedUrl ?? result.requestUrl ?? ''
+    const requestHeaders = this.getResolvedKeyValues(requestId, 'headers')
+    const fullData = this.getRequestFullData(requestId)
+    const method = typeof fullData?.['jsonRpcMethod'] === 'string' ? fullData['jsonRpcMethod'] : ''
+
+    return {
+      type: 'jsonrpc',
+      requestUrl: resolvedUrl,
+      requestHeaders,
+      method,
+      statusCode: result.statusCode ?? 0,
+      statusText: result.statusText ?? '',
+      ...(result.notificationSent !== undefined ? { notificationSent: result.notificationSent } : {}),
+      ...(result.result !== undefined ? { result: result.result } : {}),
+      ...(result.error !== undefined ? { rpcError: result.error } : {}),
+      timings: result.timings,
+      ...(result.transportError !== undefined ? { error: result.transportError } : {})
+    }
+  }
+
+  private buildJsonRpcBatchResponse(requestId: string, result: JsonRpcBatchExecutionResult): ResponseHistoryResponse | null {
+    const resolvedUrl = contextService.getResolvedUrl(requestId)?.resolvedUrl ?? result.requestUrl ?? ''
+    const requestHeaders = this.getResolvedKeyValues(requestId, 'headers')
+    const fullData = this.getRequestFullData(requestId)
+    const childMethodById = new Map<string, string>()
+    const rawChildren = fullData?.['jsonRpcChildren']
+    if (Array.isArray(rawChildren)) {
+      for (const c of rawChildren) {
+        if (this.isRecord(c) && typeof c['childId'] === 'string' && typeof c['method'] === 'string') {
+          childMethodById.set(c['childId'], c['method'])
+        }
+      }
+    }
+    const children: ResponseHistoryJsonRpcBatchChild[] = result.children.map((c) => ({
+      childId: c.childId,
+      rpcId: c.rpcId,
+      method: childMethodById.get(c.childId) ?? '',
+      ...(c.result !== undefined ? { result: c.result } : {}),
+      ...(c.error !== undefined ? { error: c.error } : {}),
+      ...(c.unmatched !== undefined ? { unmatched: c.unmatched } : {})
+    }))
+
+    return {
+      type: 'jsonrpcBatch',
+      requestUrl: resolvedUrl,
+      requestHeaders,
+      statusCode: result.statusCode ?? 0,
+      children,
+      timings: result.timings,
+      ...(result.transportError !== undefined ? { error: result.transportError } : {})
+    }
+  }
+
+  private buildTrpcResponse(requestId: string, result: TrpcExecutionResult): ResponseHistoryResponse | null {
+    const resolvedUrl = contextService.getResolvedUrl(requestId)?.resolvedUrl ?? result.requestUrl ?? ''
+    const requestHeaders = this.getResolvedKeyValues(requestId, 'headers')
+    const responseHeaders = this.headersRecordToKeyValues(result.headers)
+    const fullData = this.getRequestFullData(requestId)
+    const requestProcedure = typeof fullData?.['trpcProcedure'] === 'string' ? fullData['trpcProcedure'] : ''
+    const requestKind = fullData?.['trpcKind'] === 'mutation' ? 'mutation' : 'query'
+
+    return {
+      type: 'trpc',
+      requestUrl: resolvedUrl,
+      requestProcedure,
+      requestKind,
+      requestHeaders,
+      statusCode: result.statusCode ?? 0,
+      statusText: result.statusText ?? '',
+      data: result.data,
+      // The full `[{ result: { data } }]` (or error) wire envelope — the
+      // "Show raw envelope" toggle's source.
+      rawEnvelope: result.rawBody ?? '',
+      responseHeaders,
+      timings: result.timings,
+      ...(result.error ? { error: result.error } : {})
+    }
+  }
+
   private buildGrpcResponse(requestId: string, result: GRPCExecutionResult): ResponseHistoryResponse | null {
     const resolvedUrl = contextService.getResolvedUrl(requestId)?.resolvedUrl ?? result.requestUrl ?? ''
     const requestMessage = this.getRequestBodyContent(requestId)
@@ -603,6 +769,39 @@ class ResponseHistoryService {
     }
   }
 
+  /** The three Kafka modes have distinct result shapes (a single RecordMetadata
+   * vs. a peeked/streamed message list) — `kafkaMode` on the stored response
+   * lets the renderer branch without inspecting which optional fields are
+   * populated. */
+  private buildKafkaResponse(_requestId: string, result: KafkaExecutionResult): ResponseHistoryResponse | null {
+    const messages = result.kafkaMode !== 'produce'
+      ? result.messages.map((m) => ({
+          direction: m.direction,
+          topic: m.topic,
+          partition: m.partition,
+          offset: m.offset,
+          ...(m.key !== undefined ? { key: m.key } : {}),
+          value: m.value,
+          ...(m.headers ? { headers: this.headersRecordToKeyValues(m.headers) } : {}),
+          timestamp: m.timestamp
+        }))
+      : undefined
+
+    return {
+      type: 'kafka',
+      kafkaMode: result.kafkaMode,
+      requestUrl: result.requestUrl,
+      requestTopic: result.requestTopic,
+      ...(result.kafkaMode === 'produce'
+        ? { ...(result.partition !== undefined ? { producedPartition: result.partition } : {}), ...(result.offset !== undefined ? { producedOffset: result.offset } : {}) }
+        : {}),
+      ...(messages ? { messages } : {}),
+      ...(result.kafkaMode === 'consume' ? { connected: result.connected } : {}),
+      timings: result.timings,
+      ...(result.error ? { error: result.error } : {})
+    }
+  }
+
   private buildWebSocketResponse(requestId: string, result: WebSocketExecutionResult): ResponseHistoryResponse | null {
     const resolvedUrl = contextService.getResolvedUrl(requestId)?.resolvedUrl ?? result.requestUrl ?? ''
     const protocol = this.getRequestMeta(requestId)?.protocol ?? ''
@@ -618,6 +817,94 @@ class ResponseHistoryService {
         event: msg.event,
         timestamp: msg.timestamp
       })),
+      timings: result.timings,
+      ...(result.error ? { error: result.error } : {})
+    }
+  }
+
+  private buildSseResponse(requestId: string, result: SseExecutionResult): ResponseHistoryResponse | null {
+    const resolvedUrl = contextService.getResolvedUrl(requestId)?.resolvedUrl ?? result.requestUrl ?? ''
+
+    return {
+      type: 'sse',
+      requestUrl: resolvedUrl,
+      connected: result.connected,
+      frames: result.frames.map((frame) => ({
+        event: frame.event,
+        data: frame.data,
+        id: frame.id,
+        timestamp: frame.timestamp
+      })),
+      timings: result.timings,
+      ...(result.error ? { error: result.error } : {})
+    }
+  }
+
+  private buildAmqpResponse(requestId: string, result: AmqpExecutionResult): ResponseHistoryResponse | null {
+    const resolvedUrl = contextService.getResolvedUrl(requestId)?.resolvedUrl ?? result.requestUrl ?? ''
+
+    return {
+      type: 'amqp',
+      requestUrl: resolvedUrl,
+      mode: result.mode,
+      connected: result.connected,
+      messages: result.messages.map((msg) => ({
+        direction: msg.direction,
+        data: msg.data,
+        ...(msg.exchange !== undefined ? { exchange: msg.exchange } : {}),
+        ...(msg.routingKey !== undefined ? { routingKey: msg.routingKey } : {}),
+        ...(msg.deliveryTag !== undefined ? { deliveryTag: msg.deliveryTag } : {}),
+        ...(msg.peek !== undefined ? { peek: msg.peek } : {}),
+        timestamp: msg.timestamp
+      })),
+      timings: result.timings,
+      ...(result.error ? { error: result.error } : {})
+    }
+  }
+
+  private buildStompResponse(requestId: string, result: StompExecutionResult): ResponseHistoryResponse | null {
+    const resolvedUrl = contextService.getResolvedUrl(requestId)?.resolvedUrl ?? result.requestUrl ?? ''
+
+    return {
+      type: 'stomp',
+      requestUrl: resolvedUrl,
+      connected: result.connected,
+      messages: result.messages.map((msg) => ({
+        direction: msg.direction,
+        command: msg.command,
+        subscription: msg.subscription,
+        destination: msg.destination,
+        headers: this.headersRecordToKeyValues(msg.headers),
+        body: msg.body,
+        timestamp: msg.timestamp
+      })),
+      timings: result.timings,
+      ...(result.error ? { error: result.error } : {})
+    }
+  }
+
+  /** Covers BOTH Redis modes — `result.mode` decides which optional fields are
+   * populated (mirrors the discriminated `ResponseHistoryRedisResponse`). */
+  private buildRedisResponse(requestId: string, result: RedisExecutionResult): ResponseHistoryResponse | null {
+    const resolvedUrl = contextService.getResolvedUrl(requestId)?.resolvedUrl ?? result.requestUrl ?? ''
+
+    return {
+      type: 'redis',
+      requestUrl: resolvedUrl,
+      mode: result.mode,
+      ...(result.channels !== undefined ? { channels: result.channels } : {}),
+      ...(result.connected !== undefined ? { connected: result.connected } : {}),
+      ...(result.messages !== undefined ? {
+        messages: result.messages.map((msg) => ({
+          direction: msg.direction,
+          channel: msg.channel,
+          data: msg.data,
+          timestamp: msg.timestamp
+        }))
+      } : {}),
+      ...(result.command !== undefined ? { command: result.command } : {}),
+      ...(result.args !== undefined ? { args: result.args } : {}),
+      ...(result.reply !== undefined ? { reply: result.reply } : {}),
       timings: result.timings,
       ...(result.error ? { error: result.error } : {})
     }
@@ -740,7 +1027,16 @@ class ResponseHistoryService {
       websocket: (r) => ({
         protocol: typeof r['protocol'] === 'string' ? r['protocol'] : '',
         event: typeof r['event'] === 'string' ? r['event'] : ''
-      })
+      }),
+      trpc: (r) => ({
+        operation: typeof r['procedure'] === 'string' ? r['procedure'] : '',
+        method: r['kind'] === 'mutation' ? 'POST' : 'GET'
+      }),
+      redis: (r) => ({
+        protocol: typeof r['mode'] === 'string' ? r['mode'] : '',
+        method: typeof r['command'] === 'string' ? r['command'] : ''
+      }),
+      kafka: (r) => ({ topic: typeof r['topic'] === 'string' ? r['topic'] : '' })
     }
     const extractor = extractors[type]
     return extractor ? extractor(request) : undefined

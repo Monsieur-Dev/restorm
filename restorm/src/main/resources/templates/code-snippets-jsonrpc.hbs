@@ -1,0 +1,39 @@
+{{!-- Code snippets template for JSON-RPC 2.0 requests (single call + batch) --}}
+
+<details open>
+<summary><strong>cURL</strong></summary>
+
+```bash
+curl -X POST '{{url}}' \
+  -H 'Content-Type: application/json'{{#if headers}}{{#each headers}} \
+  -H '{{key}}: {{value}}'{{/each}}{{/if}} \
+  -d '{{envelope}}'
+```
+
+</details>
+
+<details>
+<summary><strong>JavaScript - Fetch</strong></summary>
+
+```javascript
+const body = {{envelope}};
+
+fetch('{{url}}', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json'{{#if headers}},
+{{#each headers}}    '{{key}}': '{{value}}'{{#unless @last}},{{/unless}}
+{{/each}}{{/if}}
+  },
+  body: JSON.stringify(body)
+})
+  .then(response => response.json())
+{{#if isBatch}}
+  .then(results => results.forEach(r => console.log(r.id, r.result ?? r.error)))
+{{else}}
+  .then(data => console.log(data.result ?? data.error))
+{{/if}}
+  .catch(error => console.error('Error:', error));
+```
+
+</details>

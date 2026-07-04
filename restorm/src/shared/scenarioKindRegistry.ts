@@ -233,6 +233,48 @@ export const SCENARIO_KIND_REGISTRY = {
       config: { connectionNodeId: 'Id of the websocketConnect node whose connection to close.' }
     }
   },
+  sseConnect: {
+    labelKey: 'scenario.nodes.sseConnect', defaultLabel: 'SSE connect', icon: 'plug', category: 'composition',
+    requestBinding: true,
+    ports: { inputs: [], outputs: [{ id: 'connected', name: 'connected', flow: 'signal' }, { id: 'message', name: 'message', flow: 'both' }] },
+    doc: {
+      summary: 'Opens a long-lived SSE (Server-Sent Events) connection from a bound request and listens. `connected` fires once the stream is open; EVERY received frame re-emits on the single `message` output. Receive-only — there is no send node. The connection stays open until an sseClose targets it (or the run is stopped), then `done` fires.',
+      config: { requestId: 'Id of the SSE request to connect (its resolved URL/headers).', connectionName: 'Unique-per-scenario name an sseClose references for display (defaults to the request name).', label: 'Display label on the box.' }
+    }
+  },
+  sseClose: {
+    labelKey: 'scenario.nodes.sseClose', defaultLabel: 'SSE close', icon: 'debug-disconnect', category: 'composition',
+    ports: { inputs: [], outputs: [] },
+    doc: {
+      summary: 'Closes an already-open SSE connection (declared by an sseConnect node), firing that node\'s `done`. Pure-event action: triggered on `in`, sequences via its own `done`. Errors (to `error`) when no connection is selected.',
+      config: { connectionNodeId: 'Id of the sseConnect node whose connection to close.' }
+    }
+  },
+  stompConnect: {
+    labelKey: 'scenario.nodes.stompConnect', defaultLabel: 'STOMP connect', icon: 'plug', category: 'composition',
+    requestBinding: true,
+    ports: { inputs: [], outputs: [{ id: 'connected', name: 'connected', flow: 'signal' }, { id: 'message', name: 'message', flow: 'both' }] },
+    doc: {
+      summary: 'Opens a long-lived STOMP-over-WebSocket connection from a bound request: performs the CONNECT/CONNECTED handshake, then SUBSCRIBEs to every configured subscription. `connected` fires once CONNECTED; EVERY received MESSAGE (and ERROR) frame re-emits on the single `message` output (subscription id + destination + headers + body). The connection stays open until a stompClose targets it (or the run is stopped), then `done` fires.',
+      config: { requestId: 'Id of the STOMP request to connect (its resolved URL/connect headers/subscriptions).', connectionName: 'Unique-per-scenario name a stompSend/stompClose references for display (defaults to the request name).', label: 'Display label on the box.' }
+    }
+  },
+  stompSend: {
+    labelKey: 'scenario.nodes.stompSend', defaultLabel: 'STOMP send', icon: 'arrow-up', category: 'composition',
+    ports: { inputs: [{ id: 'payload', name: 'payload' }], outputs: [] },
+    doc: {
+      summary: 'Sends a SEND frame (to the request\'s configured destination) on an already-open STOMP connection (declared by a stompConnect node). Pure-event action: triggered on `in`, sequences the next node via `done`. Errors (to `error`) when no connection is selected or it is not open.',
+      config: { connectionNodeId: 'Id of the stompConnect node whose connection to send on.', payload: 'SEND frame body (a code editor; or wire `payload`).' }
+    }
+  },
+  stompClose: {
+    labelKey: 'scenario.nodes.stompClose', defaultLabel: 'STOMP close', icon: 'debug-disconnect', category: 'composition',
+    ports: { inputs: [], outputs: [] },
+    doc: {
+      summary: 'Sends DISCONNECT and closes an already-open STOMP connection (declared by a stompConnect node), firing that node\'s `done`. Pure-event action: triggered on `in`, sequences via its own `done`. Errors (to `error`) when no connection is selected.',
+      config: { connectionNodeId: 'Id of the stompConnect node whose connection to close.' }
+    }
+  },
   mqttConnect: {
     labelKey: 'scenario.nodes.mqttConnect', defaultLabel: 'MQTT connect', icon: 'plug', category: 'composition',
     requestBinding: true,
@@ -256,6 +298,83 @@ export const SCENARIO_KIND_REGISTRY = {
     doc: {
       summary: 'Closes an already-open MQTT connection (declared by an mqttConnect node), firing that node\'s `done`. Pure-event action: triggered on `in`, sequences via its own `done`. Errors (to `error`) when no connection is selected.',
       config: { connectionNodeId: 'Id of the mqttConnect node whose connection to close.' }
+    }
+  },
+  amqpConnect: {
+    labelKey: 'scenario.nodes.amqpConnect', defaultLabel: 'AMQP connect', icon: 'plug', category: 'composition',
+    requestBinding: true,
+    ports: { inputs: [], outputs: [{ id: 'connected', name: 'connected', flow: 'signal' }, { id: 'message', name: 'message', flow: 'both' }] },
+    doc: {
+      summary: 'Opens a long-lived AMQP connection from a bound request (`mode: subscribe`) and consumes its queue. `connected` fires once the consumer is registered; EVERY received/delivered message re-emits on the single `message` output. The connection stays open until an amqpClose targets it (or the run is stopped), then `done` fires. A CHANNEL protocol error (bad queue) is recovered in place; a CONNECTION drop is terminal.',
+      config: { requestId: 'Id of the AMQP request to connect (its resolved URL/vhost/auth/queue/prefetch).', connectionName: 'Unique-per-scenario name an amqpPublish/amqpClose references for display (defaults to the request name).', label: 'Display label on the box.' }
+    }
+  },
+  amqpPublish: {
+    labelKey: 'scenario.nodes.amqpPublish', defaultLabel: 'AMQP publish', icon: 'arrow-up', category: 'composition',
+    ports: { inputs: [{ id: 'payload', name: 'payload' }], outputs: [] },
+    doc: {
+      summary: 'Publishes a payload on an already-open AMQP connection (declared by an amqpConnect node), to that connection\'s bound request\'s own exchange/routing key. Pure-event action: triggered on `in`, sequences the next node via `done`. Errors (to `error`) when no connection is selected or it is not open.',
+      config: { connectionNodeId: 'Id of the amqpConnect node whose connection to publish on.', payload: 'Message payload (a code editor; or wire `payload`).' }
+    }
+  },
+  amqpClose: {
+    labelKey: 'scenario.nodes.amqpClose', defaultLabel: 'AMQP close', icon: 'debug-disconnect', category: 'composition',
+    ports: { inputs: [], outputs: [] },
+    doc: {
+      summary: 'Closes an already-open AMQP connection (declared by an amqpConnect node), firing that node\'s `done`. Pure-event action: triggered on `in`, sequences via its own `done`. Errors (to `error`) when no connection is selected.',
+      config: { connectionNodeId: 'Id of the amqpConnect node whose connection to close.' }
+    }
+  },
+  redisSubscribe: {
+    labelKey: 'scenario.nodes.redisSubscribe', defaultLabel: 'Redis subscribe', icon: 'plug', category: 'composition',
+    requestBinding: true,
+    ports: { inputs: [], outputs: [{ id: 'connected', name: 'connected', flow: 'signal' }, { id: 'message', name: 'message', flow: 'both' }] },
+    doc: {
+      summary: 'Opens a long-lived Redis subscriber connection from a bound request (subscribe mode) and listens on its channels. `connected` fires once subscribed; EVERY received message re-emits on the single `message` output (channel + payload — Redis pub/sub has no named events beyond the channel itself). The connection stays open until a redisClose targets it (or the run is stopped), then `done` fires.',
+      config: { requestId: 'Id of the Redis (subscribe-mode) request to connect (its resolved URL/password/channels).', connectionName: 'Unique-per-scenario name a redisClose references for display (defaults to the request name).', label: 'Display label on the box.' }
+    }
+  },
+  redisClose: {
+    labelKey: 'scenario.nodes.redisClose', defaultLabel: 'Redis close', icon: 'debug-disconnect', category: 'composition',
+    ports: { inputs: [], outputs: [] },
+    doc: {
+      summary: 'Closes an already-open Redis subscribe connection (declared by a redisSubscribe node), firing that node\'s `done`. Pure-event action: triggered on `in`, sequences via its own `done`. Errors (to `error`) when no connection is selected.',
+      config: { connectionNodeId: 'Id of the redisSubscribe node whose connection to close.' }
+    }
+  },
+  redisCommand: {
+    labelKey: 'scenario.nodes.redisCommand', defaultLabel: 'Redis command', icon: 'terminal', category: 'composition',
+    requestBinding: true,
+    ports: { inputs: [{ id: 'env', name: 'env', flow: 'value' }], outputs: [{ id: 'response', name: 'response', dataType: 'response', role: 'response', flow: 'both' }] },
+    doc: {
+      summary: 'Runs a bound Redis request (command mode) — a single command on a fresh connection, then disconnects — and emits its `response` (the raw reply). Sequence it via the `in` trigger. Never runs the same request as a redisSubscribe (a client in subscriber mode cannot issue regular commands).',
+      config: { requestId: 'Id of the Redis (command-mode) request to execute.', label: 'Display label on the box.' }
+    }
+  },
+  kafkaProduce: {
+    labelKey: 'scenario.nodes.kafkaProduce', defaultLabel: 'Kafka produce', icon: 'arrow-up', category: 'composition',
+    requestBinding: true,
+    ports: { inputs: [{ id: 'env', name: 'env', flow: 'value' }], outputs: [{ id: 'response', name: 'response', dataType: 'response', role: 'response', flow: 'both' }] },
+    doc: {
+      summary: 'Runs a bound Kafka request as a one-shot produce (connect -> send -> disconnect — Kafka has no persistent per-request connection, so this fires regardless of the request\'s own `mode`) and emits the RecordMetadata (topic/partition/offset) as `response`. Sequence it via the `in` trigger.',
+      config: { requestId: 'Id of the Kafka request to produce from (its resolved brokers/topic/key/value/headers/partition/auth).', label: 'Display label on the box.' }
+    }
+  },
+  kafkaConsume: {
+    labelKey: 'scenario.nodes.kafkaConsume', defaultLabel: 'Kafka consume', icon: 'plug', category: 'composition',
+    requestBinding: true,
+    ports: { inputs: [], outputs: [{ id: 'connected', name: 'connected', flow: 'signal' }, { id: 'message', name: 'message', flow: 'both' }] },
+    doc: {
+      summary: 'Opens a long-lived Kafka consumer from a bound request (a fresh consumer-group subscribe — Kafka has no persistent per-request connection, so this fires regardless of the request\'s own `mode`) per the configured group id + from-offset (earliest/latest/specific). `connected` fires once subscribed; EVERY consumed message re-emits on the single `message` output. The consumer stays open until a kafkaClose targets it (or the run is stopped), then `done` fires.',
+      config: { requestId: 'Id of the Kafka request to consume from (its resolved brokers/topic/groupId/fromOffset/partitions/auth).', connectionName: 'Unique-per-scenario name a kafkaClose references for display (defaults to the request name).', label: 'Display label on the box.' }
+    }
+  },
+  kafkaClose: {
+    labelKey: 'scenario.nodes.kafkaClose', defaultLabel: 'Kafka close', icon: 'debug-disconnect', category: 'composition',
+    ports: { inputs: [], outputs: [] },
+    doc: {
+      summary: 'Stops an already-open Kafka consumer (declared by a kafkaConsume node), firing that node\'s `done`. Pure-event action: triggered on `in`, sequences via its own `done`. Errors (to `error`) when no connection is selected.',
+      config: { connectionNodeId: 'Id of the kafkaConsume node whose consumer to close.' }
     }
   },
   grpcConnect: {
@@ -612,7 +731,7 @@ export const SCENARIO_KIND_REGISTRY = {
     labelKey: 'scenario.nodes.code', defaultLabel: 'Code (sandbox)', icon: 'code', category: 'algorithmie',
     ports: { inputs: [{ id: 'value', name: 'input' }, { id: 'code', name: 'code', dataType: 'string' }], outputs: [{ id: 'result', name: 'result', flow: 'both' }] },
     doc: {
-      summary: 'Runs the user `code` in a per-language WASM runtime selected by `language` (TypeScript/JavaScript → QuickJS, Python → Pyodide, Lua → wasmoon, Ruby → ruby.wasm, R → WebR) — no host / filesystem / network access. The wired `value` input is exposed as `input`, the run variables as `vars`, and (JS only) a curated standard library as globals + `require()` (lodash/`_`, moment, uuid, nanoid, CryptoJS, Ajv). For JS the body runs as an async function, so a top-level `return` and `await` both work; the other languages return their last expression. Whatever the script returns flows out of `result`; `console.log` / `print` / `puts` / `cat` lines appear in the run log; a script error or timeout routes to `error`. External dependencies: pin packages via the box\'s Packages editor (`packages`) — pure-language packages only (Python: pure-Python wheels; a C-extension wheel is rejected on `error`). They are fetched + their transitive closure resolved on the first run, cached under the OS temp dir (`<os-temp>/restorm-code-deps`) and mounted offline on every later run.',
+      summary: 'Runs the user `code` in a per-language WASM runtime selected by `language` (TypeScript/JavaScript → QuickJS, Python → Pyodide, Lua → wasmoon, Ruby → ruby.wasm, R → WebR) — no host / filesystem / network access. The wired `value` input is exposed as `input`, the run variables as `vars`, and (JS only) a curated standard library as globals + `require()` (lodash/`_`, moment, uuid, nanoid, CryptoJS, Ajv). For JS the body runs as an async function, so a top-level `return` and `await` both work; the other languages return their last expression. Whatever the script returns flows out of `result`; `console.log` / `print` / `puts` / `cat` lines appear in the run log; a script error or timeout routes to `error`. External dependencies: pin packages via the box\'s Packages editor (`packages`) — pure-language packages only (Python: pure-Python wheels; Ruby: pure-Ruby gems; a C-extension wheel/gem is rejected on `error`). They are fetched + their transitive closure resolved on the first run, cached under the OS temp dir (`<os-temp>/restorm-code-deps`) and mounted offline on every later run.',
       config: { language: 'typescript | javascript | python | lua | ruby | r (default typescript).', code: 'Source for the chosen language — a body that returns/yields the result. Can also be supplied via the `code` input port (a wired script text wins over this inline value).', timeout: 'Execution budget in seconds (default 5, max 60).', packages: 'Pinned external dependencies as `[{ name, version }]` (exact versions — the cache key). Downloaded + cached on first run, loaded offline after. Pure-language packages only.' }
     }
   },

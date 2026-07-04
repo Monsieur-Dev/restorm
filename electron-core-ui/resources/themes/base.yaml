@@ -270,15 +270,40 @@ variables:
     value: "#00897b"
     description: "Socket.IO badge background (Material teal)"
 
+  - id: badge-sse-background
+    value: "#3949ab"
+    description: "Server-Sent Events badge background (Material indigo)"
+  - id: badge-stomp-background
+    value: "#455a64"
+    description: "STOMP badge background (Material blue-grey)"
+  - id: badge-kafka-background
+    value: "#37474f"
+    description: "Kafka badge background (Material blue-grey)"
+
   # ── OData ───────────────────────────────────────────────────────────────────
   - id: badge-odata-background
     value: "#ff6a00"
     description: "OData badge background (orange)"
 
+  # ── tRPC ────────────────────────────────────────────────────────────────────
+  - id: badge-trpc-background
+    value: "#3178c6"
+    description: "tRPC badge background (TypeScript blue)"
+
+  # ── Redis ───────────────────────────────────────────────────────────────────
+  - id: badge-redis-background
+    value: "#a41e11"
+    description: "Redis badge background (Redis brand red)"
+
   # ── Auth badge ──────────────────────────────────────────────────────────────
   - id: badge-auth-background
     value: "#f97316"
     description: "Auth badge background (orange)"
+
+  # ── AMQP ────────────────────────────────────────────────────────────────────
+  - id: badge-amqp-background
+    value: "#c62828"
+    description: "AMQP badge background (Material red — distinct from the SOAP/MQTT/OData/Auth orange cluster)"
 
   # ── Scenario badge ──────────────────────────────────────────────────────────
   - id: badge-scenario-background

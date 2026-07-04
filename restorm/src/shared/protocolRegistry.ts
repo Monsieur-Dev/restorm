@@ -120,6 +120,21 @@ export const PROTOCOL_REGISTRY = {
       'mqttConnect', 'mqttSend', 'mqttClose'
     ]
   },
+  sse: {
+    graphqlTypeName: 'SseRequest',
+    tabType: 'sse-request',
+    ipcNamespace: 'sse',
+    badge: { kind: 'fixed', value: 'SSE' },
+    searchIcon: 'sse',
+    scenarioKinds: ['sseConnect', 'sseClose']
+  },
+  stomp: {
+    graphqlTypeName: 'StompRequest',
+    tabType: 'stomp-request',
+    ipcNamespace: 'stomp',
+    badge: { kind: 'fixed', value: 'STOMP' },
+    scenarioKinds: ['stompConnect', 'stompSend', 'stompClose']
+  },
   odata: {
     graphqlTypeName: 'ODataRequest',
     tabType: 'odata-request',
@@ -128,11 +143,56 @@ export const PROTOCOL_REGISTRY = {
     serverCapable: true,
     scenarioKinds: ['odataListen', 'odataClose']
   },
+  redis: {
+    graphqlTypeName: 'RedisRequest',
+    tabType: 'redis-request',
+    ipcNamespace: 'redis',
+    badge: { kind: 'fixed', value: 'REDIS' },
+    scenarioKinds: ['redisSubscribe', 'redisClose', 'redisCommand']
+  },
   auth: {
     graphqlTypeName: 'AuthenticationRequest',
     tabType: 'auth-request',
     ipcNamespace: 'auth',
     badge: { kind: 'fixed', value: 'AUTH' }
+  },
+  jsonrpc: {
+    graphqlTypeName: 'JsonRpcRequest',
+    tabType: 'jsonrpc-request',
+    ipcNamespace: 'jsonrpc',
+    badge: { kind: 'fixed', value: 'RPC' }
+  },
+  // Note: the discriminant is camelCase (not `jsonrpc-batch`) because
+  // `RequestType` feeds `graphQLSchemaGenerator.registerEnum('RequestType', …)`
+  // verbatim as GraphQL enum member names — a hyphen there produces invalid
+  // SDL. The user-facing / doc / file-naming spelling stays "JSON-RPC batch".
+  jsonrpcBatch: {
+    graphqlTypeName: 'JsonRpcBatchRequest',
+    tabType: 'jsonrpc-batch-request',
+    ipcNamespace: 'jsonrpc',
+    badge: { kind: 'fixed', value: 'RPC[]' }
+  },
+  trpc: {
+    graphqlTypeName: 'TrpcRequest',
+    tabType: 'trpc-request',
+    ipcNamespace: 'trpc',
+    // A tRPC call binds to the existing `httpRequest` scenario node (like
+    // GraphQL / gRPC unary / OData), so it contributes no `scenarioKinds`.
+    badge: { kind: 'fixed', value: 'tRPC' }
+  },
+  amqp: {
+    graphqlTypeName: 'AmqpRequest',
+    tabType: 'amqp-request',
+    ipcNamespace: 'amqp',
+    badge: { kind: 'fixed', value: 'AMQP' },
+    scenarioKinds: ['amqpConnect', 'amqpPublish', 'amqpClose']
+  },
+  kafka: {
+    graphqlTypeName: 'KafkaRequest',
+    tabType: 'kafka-request',
+    ipcNamespace: 'kafka',
+    badge: { kind: 'fixed', value: 'KAFKA' },
+    scenarioKinds: ['kafkaProduce', 'kafkaConsume', 'kafkaClose']
   }
 } satisfies Record<string, ProtocolSpec>
 

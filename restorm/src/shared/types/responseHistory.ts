@@ -1,4 +1,4 @@
-export type ResponseHistoryRequestType = 'http' | 'odata' | 'graphql' | 'grpc' | 'soap' | 'websocket'
+export type ResponseHistoryRequestType = 'http' | 'odata' | 'graphql' | 'grpc' | 'soap' | 'websocket' | 'sse' | 'stomp' | 'jsonrpc' | 'jsonrpcBatch' | 'trpc' | 'amqp' | 'redis' | 'kafka'
 
 /**
  * 3-way visual signal for the per-entry status dot in the history
@@ -45,6 +45,7 @@ export interface ResponseHistoryRequestMeta {
   callType?: string
   protocol?: string
   event?: string
+  topic?: string
 }
 
 export interface ResponseHistoryHttpBody {
@@ -181,6 +182,206 @@ export interface ResponseHistoryWebSocketResponse {
   error?: string
 }
 
+/** One JSON-RPC 2.0 error object, per spec section 5.1. */
+export interface ResponseHistoryJsonRpcError {
+  code: number
+  message: string
+  data?: unknown
+}
+
+export interface ResponseHistoryJsonRpcResponse {
+  type: 'jsonrpc'
+  requestUrl: string
+  requestHeaders: ResponseHistoryKeyValue[]
+  method: string
+  rpcId?: string
+  notificationSent?: boolean
+  statusCode: number
+  statusText: string
+  result?: unknown
+  rpcError?: ResponseHistoryJsonRpcError
+  timings: {
+    startedAt: string
+    durationMs: number
+  }
+  error?: string
+}
+
+export interface ResponseHistoryJsonRpcBatchChild {
+  childId: string
+  rpcId: string
+  method: string
+  result?: unknown
+  error?: ResponseHistoryJsonRpcError
+  unmatched?: boolean
+}
+
+export interface ResponseHistoryJsonRpcBatchResponse {
+  type: 'jsonrpcBatch'
+  requestUrl: string
+  requestHeaders: ResponseHistoryKeyValue[]
+  statusCode: number
+  children: ResponseHistoryJsonRpcBatchChild[]
+  timings: {
+    startedAt: string
+    durationMs: number
+  }
+  error?: string
+}
+
+export interface ResponseHistoryTrpcResponse {
+  type: 'trpc'
+  requestUrl: string
+  requestProcedure: string
+  requestKind: 'query' | 'mutation'
+  requestHeaders: ResponseHistoryKeyValue[]
+  statusCode: number
+  statusText: string
+  /** Unwrapped `result.data` from the v10 non-batch envelope. */
+  data?: unknown
+  /** The full `[{ result: { data } }]` (or `[{ error }]`) wire envelope — the
+   * "Show raw envelope" toggle's source. */
+  rawEnvelope: string
+  responseHeaders: ResponseHistoryKeyValue[]
+  timings: {
+    startedAt: string
+    durationMs: number
+  }
+  error?: string
+}
+
+export interface ResponseHistorySseFrame {
+  event: string
+  data: string
+  id?: string
+  timestamp: string
+}
+
+export interface ResponseHistorySseResponse {
+  type: 'sse'
+  requestUrl: string
+  connected: boolean
+  frames: ResponseHistorySseFrame[]
+  timings: {
+    startedAt: string
+    durationMs: number
+  }
+  error?: string
+}
+
+export interface ResponseHistoryAmqpMessage {
+  direction: 'sent' | 'received'
+  data: string
+  exchange?: string
+  routingKey?: string
+  deliveryTag?: number
+  /** Set on a `browse`-mode message: peeked without acking. */
+  peek?: boolean
+  timestamp: string
+}
+
+export interface ResponseHistoryAmqpResponse {
+  type: 'amqp'
+  requestUrl: string
+  mode: 'publish' | 'subscribe' | 'browse'
+  connected: boolean
+  messages: ResponseHistoryAmqpMessage[]
+  timings: {
+    startedAt: string
+    durationMs: number
+  }
+  error?: string
+}
+
+export interface ResponseHistoryRedisMessage {
+  direction: 'sent' | 'received'
+  channel?: string
+  data: string
+  timestamp: string
+}
+
+/** A Redis history entry covers BOTH modes — `mode` discriminates which fields
+ * apply. Subscribe mode carries `channels` + the streamed `messages`; command
+ * mode carries the resolved `command`/`args` + the raw reply. */
+export interface ResponseHistoryRedisResponse {
+  type: 'redis'
+  requestUrl: string
+  mode: 'subscribe' | 'command'
+  // Subscribe mode.
+  channels?: string[]
+  connected?: boolean
+  messages?: ResponseHistoryRedisMessage[]
+  // Command mode.
+  command?: string
+  args?: string[]
+  reply?: string
+  timings: {
+    startedAt: string
+    durationMs: number
+  }
+  error?: string
+}
+
+export interface ResponseHistoryStompMessage {
+  direction: 'sent' | 'received'
+  command: string
+  subscription?: string
+  destination?: string
+  headers: ResponseHistoryKeyValue[]
+  body: string
+  timestamp: string
+}
+
+export interface ResponseHistoryStompResponse {
+  type: 'stomp'
+  requestUrl: string
+  connected: boolean
+  messages: ResponseHistoryStompMessage[]
+  timings: {
+    startedAt: string
+    durationMs: number
+  }
+  error?: string
+}
+
+/** One produced/consumed/browsed Kafka record. `direction` mirrors the
+ * WebSocket message shape (`received` for consume/browse frames; produce has
+ * no message list — its single result lives in the `produced*` fields). */
+export interface ResponseHistoryKafkaMessage {
+  direction: 'received'
+  topic: string
+  partition: number
+  offset: string
+  key?: string
+  value: string
+  headers?: ResponseHistoryKeyValue[]
+  timestamp: string
+}
+
+export interface ResponseHistoryKafkaResponse {
+  type: 'kafka'
+  /** Which lifecycle produced this entry — the three modes have distinct
+   * result shapes (a single RecordMetadata vs. a peeked/streamed message
+   * list), so the renderer branches on this rather than guessing from the
+   * populated fields. */
+  kafkaMode: 'produce' | 'consume' | 'browse'
+  requestUrl: string
+  requestTopic: string
+  /** Produce only: the RecordMetadata kafkajs returned. */
+  producedPartition?: number
+  producedOffset?: string
+  /** Consume (streamed, one entry per frame while running) / browse (all N
+   * peeked messages in one entry) — never populated for produce. */
+  messages?: ResponseHistoryKafkaMessage[]
+  /** Consume only: whether the consumer connected + subscribed. */
+  connected?: boolean
+  timings: {
+    startedAt: string
+    durationMs: number
+  }
+  error?: string
+}
+
 export type ResponseHistoryResponse =
   | ResponseHistoryHttpResponse
   | ResponseHistoryODataResponse
@@ -188,6 +389,14 @@ export type ResponseHistoryResponse =
   | ResponseHistoryGrpcResponse
   | ResponseHistorySoapResponse
   | ResponseHistoryWebSocketResponse
+  | ResponseHistoryJsonRpcResponse
+  | ResponseHistoryJsonRpcBatchResponse
+  | ResponseHistoryTrpcResponse
+  | ResponseHistorySseResponse
+  | ResponseHistoryAmqpResponse
+  | ResponseHistoryRedisResponse
+  | ResponseHistoryStompResponse
+  | ResponseHistoryKafkaResponse
 
 export interface ResponseHistoryDetail {
   guid: string

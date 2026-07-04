@@ -56,8 +56,23 @@ export const SCENARIO_ADD_REQUEST_GROUPS: ScenarioAddEntry[][] = [
     { kind: 'websocket-server', badge: 'WS', mode: 'server', labelKey: 'sidebar.contextMenu.add.websocketServer', defaultLabel: 'WebSocket server' },
     { kind: 'socketio', badge: 'SIO', labelKey: 'sidebar.contextMenu.add.socketio', defaultLabel: 'Socket.IO request' },
     { kind: 'socketio-server', badge: 'SIO', mode: 'server', labelKey: 'sidebar.contextMenu.add.socketioServer', defaultLabel: 'Socket.IO server' },
+    // STOMP is client-only — it connects to an external broker (e.g.
+    // ActiveMQ), no restorm-hosted server mode.
+    { kind: 'stomp', badge: 'STOMP', labelKey: 'sidebar.contextMenu.add.stomp', defaultLabel: 'STOMP request' },
     { kind: 'mqtt', badge: 'MQTT', labelKey: 'sidebar.contextMenu.add.mqtt', defaultLabel: 'MQTT request' },
     { kind: 'mqtt-server', badge: 'MQTT', mode: 'server', labelKey: 'sidebar.contextMenu.add.mqttServer', defaultLabel: 'MQTT broker' },
+    // SSE: receive-only streaming, no server mode — a single client entry
+    // (mirrors the sidebar's "Add" submenu).
+    { kind: 'sse', badge: 'SSE', labelKey: 'sidebar.contextMenu.add.sse', defaultLabel: 'SSE request' },
+    // AMQP is not server-capable (v1) — one entry, no `-server` twin. Only its
+    // `subscribe` mode drops a bound `amqpConnect`; `publish`/`browse` mode
+    // drops a one-shot request node (see ScenarioEditorView's onDrop / addNode).
+    { kind: 'amqp', badge: 'AMQP', labelKey: 'sidebar.contextMenu.add.amqp', defaultLabel: 'AMQP request' },
+    // Kafka has no server variant (restorm never hosts a broker) and no single
+    // request→response shape: produce (one-shot) and consume (long-lived
+    // consumer group) get their own entries, mirroring the gRPC call-type split.
+    { kind: 'kafka-produce', badge: 'KAFKA', labelKey: 'sidebar.contextMenu.add.kafkaProduce', defaultLabel: 'Kafka request – Produce' },
+    { kind: 'kafka-consume', badge: 'KAFKA', labelKey: 'sidebar.contextMenu.add.kafkaConsume', defaultLabel: 'Kafka request – Consume' },
     // HTTP mock server is server-only (a one-shot HTTP request already has its own
     // method entries above): dropping it creates a server: true request + a bound
     // httpListen node.
@@ -78,7 +93,13 @@ export const SCENARIO_ADD_REQUEST_GROUPS: ScenarioAddEntry[][] = [
     { kind: 'odata', badge: 'ODATA', labelKey: 'sidebar.contextMenu.add.odata', defaultLabel: 'OData request' },
     // OData mock server is server-only: dropping it creates a server: true OData
     // request + a bound odataListen node.
-    { kind: 'odata-server', badge: 'ODATA', mode: 'server', labelKey: 'sidebar.contextMenu.add.odataServer', defaultLabel: 'OData server' }
+    { kind: 'odata-server', badge: 'ODATA', mode: 'server', labelKey: 'sidebar.contextMenu.add.odataServer', defaultLabel: 'OData server' },
+    // A freshly-created Redis request always starts in command mode, so it
+    // drops the one-shot `redisCommand` node (like soap/odata above) — never
+    // a connect node. Dragging an EXISTING subscribe-mode request instead maps
+    // to `redisSubscribe` (see ScenarioEditorView's onDrop); the redisClose
+    // action below drives that already-open connection.
+    { kind: 'redis', badge: 'REDIS', labelKey: 'sidebar.contextMenu.add.redis', defaultLabel: 'Redis request' }
   ],
   [
     { kind: 'auth', badge: 'AUTH', labelKey: 'sidebar.contextMenu.add.auth', defaultLabel: 'Authentication HTTP request' }
@@ -126,6 +147,34 @@ export const SCENARIO_ADD_WEBSOCKET_ACTIONS: ScenarioAddWsActionEntry[] = [
   { kind: 'websocketClose', icon: 'debug-disconnect', labelKey: 'scenario.nodes.websocketClose', defaultLabel: 'WebSocket close' }
 ]
 
+/** SSE action entries — CLOSE only (the connect comes from the request entry,
+ * which drops a bound sseConnect). SSE is receive-only, so there is no send
+ * action — mirrors the HTTP/SOAP/GraphQL server sections' close-only shape. */
+export interface ScenarioAddSseActionEntry {
+  kind: 'sseClose'
+  icon: string
+  labelKey: string
+  defaultLabel: string
+}
+
+/** STOMP action entries — same shape as the raw-WebSocket section, badged
+ * STOMP (send / close only; connect comes from the request entry above). */
+export interface ScenarioAddStompActionEntry {
+  kind: 'stompSend' | 'stompClose'
+  icon: string
+  labelKey: string
+  defaultLabel: string
+}
+
+export const SCENARIO_ADD_SSE_ACTIONS: ScenarioAddSseActionEntry[] = [
+  { kind: 'sseClose', icon: 'debug-disconnect', labelKey: 'scenario.nodes.sseClose', defaultLabel: 'SSE close' }
+]
+
+export const SCENARIO_ADD_STOMP_ACTIONS: ScenarioAddStompActionEntry[] = [
+  { kind: 'stompSend', icon: 'arrow-up', labelKey: 'scenario.nodes.stompSend', defaultLabel: 'STOMP send' },
+  { kind: 'stompClose', icon: 'debug-disconnect', labelKey: 'scenario.nodes.stompClose', defaultLabel: 'STOMP close' }
+]
+
 /** MQTT action entries — publish / close (connect comes from the request entry), badged MQTT. */
 export interface ScenarioAddMqttActionEntry {
   kind: 'mqttSend' | 'mqttClose'
@@ -137,6 +186,50 @@ export interface ScenarioAddMqttActionEntry {
 export const SCENARIO_ADD_MQTT_ACTIONS: ScenarioAddMqttActionEntry[] = [
   { kind: 'mqttSend', icon: 'arrow-up', labelKey: 'scenario.nodes.mqttSend', defaultLabel: 'MQTT publish' },
   { kind: 'mqttClose', icon: 'debug-disconnect', labelKey: 'scenario.nodes.mqttClose', defaultLabel: 'MQTT close' }
+]
+
+/** AMQP action entries — publish / close (connect comes from the request entry,
+ * `subscribe` mode only), badged AMQP. */
+export interface ScenarioAddAmqpActionEntry {
+  kind: 'amqpPublish' | 'amqpClose'
+  icon: string
+  labelKey: string
+  defaultLabel: string
+}
+
+/** Kafka action entries — CLOSE only (produce is one-shot and never needs
+ * closing; the consume connect comes from the Kafka request entries above),
+ * badged KAFKA. */
+export interface ScenarioAddKafkaActionEntry {
+  kind: 'kafkaClose'
+  icon: string
+  labelKey: string
+  defaultLabel: string
+}
+
+/** Redis action entries — CLOSE only (there is no publish/send action: PUBLISH
+ * is a command-mode run, not part of the subscribe connection). The connect
+ * comes from dragging an existing subscribe-mode request onto the canvas —
+ * see `ScenarioEditorView`'s `onDrop`, since (unlike MQTT/WS/SIO) a freshly
+ * created Redis request always starts in command mode. */
+export interface ScenarioAddRedisActionEntry {
+  kind: 'redisClose'
+  icon: string
+  labelKey: string
+  defaultLabel: string
+}
+
+export const SCENARIO_ADD_AMQP_ACTIONS: ScenarioAddAmqpActionEntry[] = [
+  { kind: 'amqpPublish', icon: 'arrow-up', labelKey: 'scenario.nodes.amqpPublish', defaultLabel: 'AMQP publish' },
+  { kind: 'amqpClose', icon: 'debug-disconnect', labelKey: 'scenario.nodes.amqpClose', defaultLabel: 'AMQP close' }
+]
+
+export const SCENARIO_ADD_REDIS_ACTIONS: ScenarioAddRedisActionEntry[] = [
+  { kind: 'redisClose', icon: 'debug-disconnect', labelKey: 'scenario.nodes.redisClose', defaultLabel: 'Redis close' }
+]
+
+export const SCENARIO_ADD_KAFKA_ACTIONS: ScenarioAddKafkaActionEntry[] = [
+  { kind: 'kafkaClose', icon: 'debug-disconnect', labelKey: 'scenario.nodes.kafkaClose', defaultLabel: 'Kafka close' }
 ]
 
 /** gRPC streaming action entries — send / close only (badged GRPC). The CONNECT
@@ -229,6 +322,11 @@ export function scenarioAddWebsocketIcon(icon: string): ReactNode {
   return React.createElement(Badge, { type: 'WS', icon })
 }
 
+/** The "SSE" badge with the action's codicon inside (SSE section). */
+export function scenarioAddSseIcon(icon: string): ReactNode {
+  return React.createElement(Badge, { type: 'SSE', icon })
+}
+
 /** The "GRPC" badge with the action's codicon inside (gRPC streaming section). */
 export function scenarioAddGrpcIcon(icon: string): ReactNode {
   return React.createElement(Badge, { type: 'GRPC', icon })
@@ -237,6 +335,26 @@ export function scenarioAddGrpcIcon(icon: string): ReactNode {
 /** The "MQTT" badge with the action's codicon inside (MQTT section). */
 export function scenarioAddMqttIcon(icon: string): ReactNode {
   return React.createElement(Badge, { type: 'MQTT', icon })
+}
+
+/** The "AMQP" badge with the action's codicon inside (AMQP section). */
+export function scenarioAddAmqpIcon(icon: string): ReactNode {
+  return React.createElement(Badge, { type: 'AMQP', icon })
+}
+
+/** The "REDIS" badge with the action's codicon inside (Redis section). */
+export function scenarioAddRedisIcon(icon: string): ReactNode {
+  return React.createElement(Badge, { type: 'REDIS', icon })
+}
+
+/** The "STOMP" badge with the action's codicon inside (STOMP section). */
+export function scenarioAddStompIcon(icon: string): ReactNode {
+  return React.createElement(Badge, { type: 'STOMP', icon })
+}
+
+/** The "KAFKA" badge with the action's codicon inside (Kafka section). */
+export function scenarioAddKafkaIcon(icon: string): ReactNode {
+  return React.createElement(Badge, { type: 'KAFKA', icon })
 }
 
 /** The server-pill HTTP badge with the action's codicon inside (HTTP section). */

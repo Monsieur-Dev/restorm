@@ -1,0 +1,112 @@
+{{!-- Code snippets template for Kafka requests --}}
+{{!-- Generates markdown with code examples for the request's active mode (produce / consume / browse) --}}
+
+{{#if isProduce}}
+<details open>
+<summary><strong>JavaScript - kafkajs (produce)</strong></summary>
+
+```javascript
+const { Kafka } = require('kafkajs')
+
+const kafka = new Kafka({
+  clientId: 'restorm',
+  brokers: '{{brokers}}'.split(',').map((b) => b.trim()){{#if tlsEnabled}},
+  ssl: true{{/if}}{{#if hasSasl}},
+  sasl: { mechanism: '{{saslMechanism}}', username: '{{saslUsername}}', password: '{{saslPassword}}' }{{/if}}
+})
+
+async function produce() {
+  const producer = kafka.producer()
+  await producer.connect()
+  const result = await producer.send({
+    topic: '{{topic}}',
+    messages: [{
+{{#if key}}      key: '{{key}}',
+{{/if}}      value: {{value}}{{#if partition}},
+      partition: {{partition}}{{/if}}
+    }]
+  })
+  console.log('Produced:', result)
+  await producer.disconnect()
+}
+
+produce().catch(console.error)
+```
+
+</details>
+
+<details>
+<summary><strong>Shell - kcat (produce)</strong></summary>
+
+```bash
+echo '{{value}}' | kcat -P -b {{brokers}} -t {{topic}}{{#if key}} -k '{{key}}'{{/if}}{{#if partition}} -p {{partition}}{{/if}}{{#if tlsEnabled}} -X security.protocol=SSL{{/if}}{{#if hasSasl}} -X security.protocol=SASL_{{#if tlsEnabled}}SSL{{else}}PLAINTEXT{{/if}} -X sasl.mechanisms={{saslMechanism}} -X sasl.username={{saslUsername}} -X sasl.password={{saslPassword}}{{/if}}
+```
+
+</details>
+{{/if}}
+
+{{#if isConsume}}
+<details open>
+<summary><strong>JavaScript - kafkajs (consume)</strong></summary>
+
+```javascript
+const { Kafka } = require('kafkajs')
+
+const kafka = new Kafka({
+  clientId: 'restorm',
+  brokers: '{{brokers}}'.split(',').map((b) => b.trim()){{#if tlsEnabled}},
+  ssl: true{{/if}}{{#if hasSasl}},
+  sasl: { mechanism: '{{saslMechanism}}', username: '{{saslUsername}}', password: '{{saslPassword}}' }{{/if}}
+})
+
+async function consume() {
+  const consumer = kafka.consumer({ groupId: '{{groupId}}' })
+  await consumer.connect()
+  await consumer.subscribe({ topic: '{{topic}}', fromBeginning: {{isEarliest}} })
+{{#if isSpecific}}
+  const seeked = new Set()
+{{/if}}
+
+  await consumer.run({
+    eachMessage: async ({ topic, partition, message }) => {
+{{#if isSpecific}}
+      // Seek to the specific offset on the first message per partition, then
+      // drop that message (kafkajs' documented seek-before-read idiom).
+      if (!seeked.has(partition)) {
+        seeked.add(partition)
+        consumer.seek({ topic, partition, offset: '{{specificOffset}}' })
+        return
+      }
+{{/if}}
+      console.log(`Received [partition ${partition}, offset ${message.offset}]:`, message.value.toString())
+    }
+  })
+}
+
+consume().catch(console.error)
+```
+
+</details>
+
+<details>
+<summary><strong>Shell - kcat (consume)</strong></summary>
+
+```bash
+kcat -C -b {{brokers}} -t {{topic}} -G {{groupId}}{{#if isEarliest}} -o beginning{{/if}}{{#if isSpecific}} -o {{specificOffset}}{{/if}}{{#if tlsEnabled}} -X security.protocol=SSL{{/if}}{{#if hasSasl}} -X security.protocol=SASL_{{#if tlsEnabled}}SSL{{else}}PLAINTEXT{{/if}} -X sasl.mechanisms={{saslMechanism}} -X sasl.username={{saslUsername}} -X sasl.password={{saslPassword}}{{/if}}
+```
+
+</details>
+{{/if}}
+
+{{#if isBrowse}}
+<details open>
+<summary><strong>Shell - kcat (browse, no consumer group)</strong></summary>
+
+```bash
+kcat -C -b {{brokers}} -t {{topic}}{{#if partition}} -p {{partition}}{{/if}}{{#if isEarliest}} -o beginning{{/if}}{{#if isSpecific}} -o {{specificOffset}}{{/if}} -e{{#if tlsEnabled}} -X security.protocol=SSL{{/if}}{{#if hasSasl}} -X security.protocol=SASL_{{#if tlsEnabled}}SSL{{else}}PLAINTEXT{{/if}} -X sasl.mechanisms={{saslMechanism}} -X sasl.username={{saslUsername}} -X sasl.password={{saslPassword}}{{/if}}
+```
+
+`-e` exits kcat after the last available message — a peek, never joining a consumer group.
+
+</details>
+{{/if}}

@@ -11,13 +11,18 @@
 import { logger, getSettingsService, isSettingsServiceInitialized } from 'electron-core-ui/main'
 import { collectionStore } from '../services/CollectionStore'
 import { websocketExecutionService } from '../services/WebSocketExecutionService'
+import { sseExecutionService } from '../services/SseExecutionService'
+import { stompExecutionService } from '../services/StompExecutionService'
 import { httpExecutionService } from '../services/HTTPExecutionService'
 import { soapExecutionService } from '../services/SOAPExecutionService'
 import { graphqlMockServerService } from '../services/GraphQLMockServerService'
 import { graphqlSubscriptionService } from '../services/GraphQLSubscriptionService'
 import { grpcExecutionService } from '../services/GRPCExecutionService'
+import { redisExecutionService } from '../services/RedisExecutionService'
 import { grpcMockServerService } from '../services/GRPCMockServerService'
 import { odataMockServerService } from '../services/ODataMockServerService'
+import { amqpExecutionService } from '../services/AMQPExecutionService'
+import { kafkaExecutionService } from '../services/KafkaExecutionService'
 import { flushRequestStateToContext } from '../mcp/tools/execute'
 import { installScenarioValueResolvers } from '../../shared/scenarioValueResolvers'
 import { setSecretPreviewResolver } from '../../shared/utils/scenarioStaticPreview'
@@ -202,6 +207,11 @@ export class ScenarioEngine {
           flushRequestStateToContext(bound as unknown as Parameters<typeof flushRequestStateToContext>[0])
         }
         if (req.transport === 'grpc') return grpcExecutionService.connectStreaming(req)
+        // Redis subscribe: a long-lived subscriber connection (every message
+        // re-emits channel + payload on `message`). No send from this handle —
+        // PUBLISH is a one-shot `redisCommand` run, never part of the
+        // subscribe connection (mirrors the GraphQL-subscription branch below).
+        if (req.transport === 'redis-subscribe') return redisExecutionService.connectStreaming(req)
         // GraphQL subscription: a long-lived CLIENT consumer of a subscription
         // over SSE (a `graphqlSubscribe` node). Receive-only — every pushed
         // payload re-emits on `message`; there is no send, so the handle exposes
@@ -215,6 +225,22 @@ export class ScenarioEngine {
           })
           return { send: () => false, close: handle.close, isOpen: handle.isOpen }
         }
+        // SSE: a long-lived, receive-only CLIENT connection (an `sseConnect`
+        // node). No send direction and no server mode — every received frame
+        // re-emits on `message`; `done` fires on close / stop.
+        if (req.transport === 'sse') {
+          const handle = sseExecutionService.connectStreamingSse({
+            requestId: req.requestId,
+            onConnect: req.onConnect,
+            onMessage: req.onMessage,
+            onClose: req.onClose
+          })
+          return { send: () => false, close: handle.close, isOpen: handle.isOpen }
+        }
+        // Kafka consume: a receive-only streaming subscribe, like MQTT — the
+        // producer side is a separate one-shot `kafkaProduce` node that never
+        // goes through this bridge, and Kafka has no server-mode variant here.
+        if (req.transport === 'kafka') return kafkaExecutionService.connectStreamingConsumer(req)
         // HTTP mock server: a DISTINCT long-lived listener with its OWN path (an
         // `httpListen` node, never a one-shot `httpRequest`). It HOSTS the bound
         // `server: true` request's METHOD+PATH+port and re-emits each served
@@ -242,6 +268,9 @@ export class ScenarioEngine {
         // each served request on `served`; `done` fires when it stops. No client
         // branch — an odataListen node only ever hosts.
         if (req.transport === 'odata-server') return odataMockServerService.connectStreamingODataServer(req)
+        // AMQP: not server-capable (v1, see class doc) — always a client,
+        // consuming the bound request's queue (subscribe mode).
+        if (req.transport === 'amqp') return amqpExecutionService.connectStreaming(req)
         // A request flagged `server` HOSTS the server / broker (restorm acts as
         // the server); otherwise it connects as a client — same split for raw WS,
         // Socket.IO and MQTT.
@@ -258,6 +287,11 @@ export class ScenarioEngine {
             ? websocketExecutionService.connectStreamingRawServer(req)
             : websocketExecutionService.connectStreamingRaw(req)
         }
+        // STOMP: a client only (no server mode) — connects, does the
+        // CONNECT/CONNECTED handshake, SUBSCRIBEs to the bound request's
+        // configured destinations; every received MESSAGE/ERROR frame
+        // re-emits on `message`.
+        if (req.transport === 'stomp') return stompExecutionService.connectStreamingStomp(req)
         return isServer
           ? websocketExecutionService.connectStreamingServer(req)
           : websocketExecutionService.connectStreaming(req)

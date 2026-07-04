@@ -273,10 +273,17 @@
         "socketio": "Socket.IO リクエスト",
         "mqtt": "MQTT request",
         "mqttServer": "MQTT ブローカー",
+        "sse": "SSE リクエスト",
         "grpcServer": "gRPC モックサーバー",
         "soapServer": "SOAP モックサーバー",
         "graphqlServer": "GraphQL モックサーバー",
-        "odataServer": "OData モックサーバー"
+        "odataServer": "OData モックサーバー",
+        "trpc": "tRPC リクエスト",
+        "amqp": "AMQP リクエスト",
+        "redis": "Redis リクエスト",
+        "stomp": "STOMPリクエスト",
+        "kafkaProduce": "Kafka リクエスト – 生成",
+        "kafkaConsume": "Kafka リクエスト – 消費"
       }
     },
     "deleteConfirm": {
@@ -474,6 +481,12 @@
       "clientStream": "Client streaming",
       "bidi": "Bidirectional streaming"
     },
+    "transport": {
+      "grpc": "gRPC",
+      "grpcWeb": "gRPC-Web",
+      "connect": "Connect",
+      "streamingUnsupported": "このトランスポートはHTTP/1.1経由のクライアントストリーミングまたは双方向ストリーミングをサポートしていません。代わりにネイティブのgRPCトランスポートを使用してください。"
+    },
     "server": {
       "proto": "Proto",
       "methods": "モックメソッド",
@@ -492,6 +505,12 @@
       "notListening": "リッスンしていません",
       "listenFailed": "gRPC サーバーの起動に失敗しました",
       "snippetsUnavailable": "モックサーバーではコードスニペットは利用できません。"
+    },
+    "reflection": {
+      "refresh": "reflection から更新",
+      "refreshFailed": "gRPC reflection による更新に失敗しました",
+      "unsupported": "このサーバーは gRPC reflection をサポートしていません — 代わりに .proto ファイルをインポートしてください。",
+      "unknownError": "不明なエラー"
     }
   },
   "soap": {
@@ -539,6 +558,114 @@
     "routePlaceholder": "ルート (任意)",
     "clientsConnected": "{{count}} クライアント接続中",
     "notListening": "リッスンしていません"
+  },
+  "jsonrpc": {
+    "send": "送信",
+    "urlPlaceholder": "JSON-RPC エンドポイント URL",
+    "methodPlaceholder": "メソッド",
+    "idPlaceholder": "id（自動）",
+    "notificationModeTooltip": "通知モード — id なし、応答は待機されません",
+    "tabs": {
+      "params": "パラメータ",
+      "headers": "ヘッダー"
+    },
+    "response": {
+      "notificationSent": "通知を送信しました",
+      "errorLabel": "JSON-RPC エラー {{code}}:"
+    }
+  },
+  "jsonrpcBatch": {
+    "send": "バッチを送信",
+    "tabs": {
+      "calls": "呼び出し"
+    },
+    "empty": "まだ呼び出しがありません。下に追加してください。",
+    "methodPlaceholder": "メソッド",
+    "idPlaceholder": "id（自動）",
+    "moveUp": "上に移動",
+    "moveDown": "下に移動",
+    "remove": "呼び出しを削除",
+    "paramsLabel": "パラメータ（JSON）",
+    "add": "呼び出しを追加",
+    "response": {
+      "unmatched": "一致する応答エントリがありません。"
+    }
+  },
+  "sse": {
+    "headers": "ヘッダー",
+    "noFrames": "イベントはまだありません",
+    "urlPlaceholder": "SSE URL",
+    "framesTruncated": "最新の{{total}}件中{{shown}}件を表示中",
+    "showAllFrames": "すべて表示"
+  },
+  "redis": {
+    "connected": "接続済み",
+    "disconnected": "切断されました",
+    "noMessages": "メッセージはまだありません",
+    "noCommandsYet": "まだコマンドが実行されていません",
+    "urlPlaceholder": "Redis URL（redis:// または rediss://）",
+    "passwordPlaceholder": "パスワード（任意）",
+    "subscribe": "購読",
+    "unsubscribe": "購読解除",
+    "run": "実行",
+    "subscribeMode": "購読",
+    "commandMode": "コマンド",
+    "command": "コマンド",
+    "args": "引数",
+    "argsPlaceholder": "コマンドの引数",
+    "freeform": "自由入力",
+    "freeformPlaceholder": "自由入力コマンド（選択を上書き）",
+    "tabs": {
+      "channels": "チャンネル",
+      "command": "コマンド"
+    }
+  },
+  "kafka": {
+    "brokersPlaceholder": "ブローカーリスト (host:port,host:port)",
+    "clientId": "クライアントID",
+    "clientIdPlaceholder": "restorm",
+    "mode": {
+      "produce": "生成",
+      "consume": "消費",
+      "browse": "閲覧"
+    },
+    "auth": {
+      "title": "認証",
+      "mechanism": "SASL",
+      "username": "ユーザー名",
+      "password": "パスワード",
+      "tls": "TLS"
+    },
+    "topic": "トピック",
+    "topicPlaceholder": "トピック名",
+    "key": "キー",
+    "keyPlaceholder": "メッセージキー（任意）",
+    "value": "値",
+    "headers": "ヘッダー",
+    "partition": "パーティション",
+    "partitionPlaceholder": "自動",
+    "groupId": "グループID",
+    "groupIdPlaceholder": "restorm-consumer",
+    "fromOffsetLabel": "開始位置",
+    "fromOffset": {
+      "earliest": "最古",
+      "latest": "最新",
+      "specific": "指定"
+    },
+    "specificOffset": "オフセット",
+    "partitions": "パーティション",
+    "partitionsPlaceholder": "0,1,2（空欄=すべて）",
+    "peekCount": "取得件数",
+    "produce": "生成",
+    "startConsuming": "消費を開始",
+    "stopConsuming": "消費を停止",
+    "peek": "プレビュー",
+    "noMessages": "メッセージはまだありません",
+    "connected": "接続済み",
+    "disconnected": "切断されました",
+    "producedTo": "送信先",
+    "offset": "オフセット",
+    "messages": "メッセージ"
   },
   "search": {
     "placeholder": "検索...",
@@ -885,6 +1012,10 @@
         "description": ".proto ファイル（またはそのディレクトリ）を投入してください。restorm はすべての service、すべての RPC、すべての message を辿り、各メソッドを gRPC エグゼキューターから送信できる型付きリクエストに変換します。codegen は不要です。",
         "trademark": "gRPC は Cloud Native Computing Foundation のプロジェクトです。"
       },
+      "grpcReflection": {
+        "description": ".proto ファイルがありませんか？稼働中の gRPC サーバーが reflection を公開していれば、Restorm をそこに向けるだけで済みます — grpc.reflection.v1alpha.ServerReflection に問い合わせてすべてのサービスとメソッドを検出し、proto ファイルのインポートと同じ型付きリクエストツリーを構築し、オフライン利用のためにローカルにキャッシュします。",
+        "action": "サーバーに接続…"
+      },
       "soap": {
         "description": "WSDL がありますか？貼り付け（または URL の指定）だけで、restorm は各 <port> と <operation> を解析し、適切な SOAPAction ヘッダー、スキーマで型付けされたボディの雛形、WSDL が宣言する認証スキームを備えた、即送信可能な SOAP エンベロープを生成します。"
       },
@@ -910,7 +1041,57 @@
       "paw": {
         "description": "Paw から移ってきましたか？JSON エクスポートを投入してください（アプリの File → Export → JSON。ネイティブの .paw バンドルは直接読み込みません）。restorm はすべてのリクエスト、ヘッダー、ボディ、環境を再構築し、Paw の動的な値（タイムスタンプ、ランダム文字列、UUID）を最も近い restorm の等価物にマッピングします。",
         "trademark": "Paw は RapidAPI, Inc. の登録商標で、ここでは互換性のための参照として使用しています。"
+      },
+      "har": {
+        "description": "ブラウザの devtools からネットワークトレースをキャプチャしましたか？エクスポートした .har ファイルを投入してください。restorm は記録されたすべての呼び出しをたどり、ヘッダーとボディを含む再生可能なリクエストに変換します。"
+      },
+      "restClient": {
+        "description": "VS Code の REST Client 拡張機能から移ってきましたか？.http / .rest ファイルを貼り付けるか投入してください。restorm はすべてのリクエストブロックを解析し、@variables を解決して、restorm のツリーとして再構築します。",
+        "trademark": "REST Client はそれぞれの権利者の商標であり、ここでは互換性のための参照として使用しています。"
+      },
+      "httpie": {
+        "description": "HTTPie Desktop のコレクションエクスポート、または CLI のセッションファイルを投入してください。restorm はすべてのリクエスト（セッションの場合はその永続的なヘッダーも）を読み取り、すぐに実行できる状態に再構築します。",
+        "trademark": "HTTPie はそれぞれの権利者の商標であり、ここでは互換性のための参照として使用しています。"
+      },
+      "smithy": {
+        "description": "Smithy モデル（JSON AST または手書きの IDL）を貼り付けてください。restorm はすべてのサービス、リソース、オペレーションをたどり、すぐに実行できるリクエストの対応するフォルダーを生成します。",
+        "trademark": "Smithy は Amazon Web Services のプロジェクトです。"
+      },
+      "typespec": {
+        "description": "TypeSpec 定義（.tsp）を貼り付けてください。restorm は内部でそれを OpenAPI にコンパイルし、手書きの仕様と全く同じようにインポートします（オペレーション、パラメーター、スキーマを含む）。",
+        "trademark": "TypeSpec は Microsoft のプロジェクトです。"
+      },
+      "raml": {
+        "description": "RAML 1.0 または 0.8 のドキュメントを貼り付けてください。restorm はそのリソースツリーをネストされたフォルダーに反映し、メソッドごとに1つのリクエストとして、モデル化された型も含めて再現します。",
+        "trademark": "RAML は RAML Workgroup が維持している仕様です。"
+      },
+      "wadl": {
+        "description": "まだ WADL ドキュメントを保守していますか？XML を貼り付けてください。restorm はネストされた <resource> ツリーをたどり、メソッドとパラメーターを含む対応するリクエストのフォルダーを生成します。",
+        "trademark": "WADL は Sun Microsystems によって Member Submission として W3C に提出されました。"
+      },
+      "thrift": {
+        "description": "Apache Thrift の IDL ファイル（.thrift）を貼り付けてください。restorm はすべてのサービス、メソッド、struct、enum を読み取り、API の構造を閲覧できるようにします。Thrift のバイナリワイヤープロトコルはまだ restorm から実行できないため、このインポートはドキュメント閲覧のみを目的としています。",
+        "trademark": "Apache Thrift は Apache Software Foundation の商標です。"
+      },
+      "apiBlueprint": {
+        "description": "API Blueprint ドキュメント（.apib）を貼り付けてください。restorm はすべてのリソースグループとトランジションを、ドキュメント化されたメソッド／レスポンスのペアごとに1つのリクエストフォルダーへと解析します。",
+        "trademark": "API Blueprint はもともと Apiary によって作成された仕様です。"
       }
+    },
+    "grpcReflection": {
+      "title": "gRPC サーバー（reflection）",
+      "hint": "稼働中の gRPC サーバーの reflection サービスに問い合わせ、.proto ファイルなしでそのサービスとメソッドを検出します。",
+      "addressLabel": "サーバーアドレス（ホスト:ポート）",
+      "addressPlaceholder": "localhost:9000",
+      "tlsLabel": "TLS を使用",
+      "metadataLabel": "メタデータ（任意の認証ヘッダー）",
+      "connecting": "接続中…",
+      "import": "インポート",
+      "reimportedTitle": "gRPC reflection を再インポートしました",
+      "reimportedNoop": "既に最新です — サーバー上に変更はありません。",
+      "reimportedSummary": "+{{added}} / -{{removed}} / ↻{{merged}} — 変更を確認するにはプロジェクトを再読み込みしてください。",
+      "unsupported": "このサーバーは gRPC reflection をサポートしていません — 代わりに .proto ファイルをインポートしてください。",
+      "unknownError": "不明なエラー"
     },
     "loading": "解析中...",
     "noResults": "リクエストが見つかりません",
@@ -1074,14 +1255,22 @@
       "socketioSend": "Socket.IO send",
       "socketioClose": "Socket.IO close",
       "websocketConnect": "WebSocket connect",
+      "sseConnect": "SSE connect",
       "websocketSend": "WebSocket send",
       "websocketClose": "WebSocket close",
+      "sseClose": "SSE close",
       "grpcConnect": "gRPC connect",
       "grpcSend": "gRPC send",
       "grpcClose": "gRPC close",
       "mqttConnect": "MQTT connect",
       "mqttSend": "MQTT publish",
       "mqttClose": "MQTT close",
+      "amqpConnect": "AMQP 接続",
+      "amqpPublish": "AMQP パブリッシュ",
+      "amqpClose": "AMQP クローズ",
+      "redisSubscribe": "Redis subscribe",
+      "redisClose": "Redis close",
+      "redisCommand": "Redis command",
       "httpListen": "HTTP server",
       "httpClose": "HTTP close",
       "grpcServerClose": "gRPC サーバーを閉じる",
@@ -1092,7 +1281,13 @@
       "odataListen": "OData server",
       "odataClose": "OData close",
       "graphqlSubscribe": "GraphQL サブスクライブ",
-      "graphqlUnsubscribe": "GraphQL サブスクライブ解除"
+      "graphqlUnsubscribe": "GraphQL サブスクライブ解除",
+      "stompConnect": "STOMP接続",
+      "stompSend": "STOMP送信",
+      "stompClose": "STOMPを閉じる",
+      "kafkaProduce": "Kafka produce",
+      "kafkaConsume": "Kafka consume",
+      "kafkaClose": "Kafka close"
     },
     "comparator": {
       "result": "結果"
@@ -1653,8 +1848,10 @@
       "socketioSend": "すでに開いている Socket.IO 接続でメッセージを送信します。",
       "socketioClose": "すでに開いている Socket.IO 接続を閉じます。",
       "websocketConnect": "生の WebSocket 接続を開き、受信した各メッセージをそのポートに再送出します。",
+      "sseConnect": "長時間持続する SSE (Server-Sent Events) 接続を開き、受信した各フレームをそのポートに再送出します。",
       "websocketSend": "すでに開いている WebSocket 接続でペイロードを送信します。",
       "websocketClose": "すでに開いている WebSocket 接続を閉じます。",
+      "sseClose": "すでに開いている SSE 接続を閉じます。",
       "grpcConnect": "ストリーミング gRPC 呼び出しを開き、受信した各フレームを message ポートに再送出します。",
       "grpcSend": "すでに開いているストリーミング gRPC 呼び出しにリクエストメッセージを書き込みます。",
       "grpcClose": "すでに開いているストリーミング gRPC 呼び出しをハーフクローズします。",
@@ -1667,9 +1864,15 @@
       "mqttConnect": "バインドされたリクエストから持続的な MQTT 接続を開いてそのトピックを購読し、受信した各メッセージを `message` ポートに再送出します。",
       "mqttSend": "すでに開いている MQTT 接続でペイロードを (そのトピックへ) パブリッシュします。",
       "mqttClose": "すでに開いている MQTT 接続を閉じます。",
+      "amqpConnect": "バインドされたリクエストから永続的な AMQP 接続を開き、そのキューを消費します。受信した各メッセージは `message` ポートに再送信されます。",
+      "amqpPublish": "既に開いている AMQP 接続でペイロードをパブリッシュします（バインドされたリクエストの exchange/routing key 宛て）。",
+      "amqpClose": "既に開いている AMQP 接続を閉じます。",
       "mqttConnectServer": "ローカル MQTT ブローカーを起動し (ポート + トピックフィルター)、そのトピックフィルターを購読して受信した各メッセージを `message` ポートに再送出します。Send は接続中の購読者に配信します。",
       "mqttSendServer": "参照先の MQTT ブローカーのすべての購読者にメッセージをパブリッシュします。",
       "mqttCloseServer": "参照先の MQTT ブローカーを停止し、そのクライアントを切断します。",
+      "redisSubscribe": "バインドされたリクエストから持続的な Redis 購読接続を開いてそのチャンネルを購読し、受信した各メッセージを `message` ポートに再送出します。",
+      "redisClose": "すでに開いている Redis 購読接続を閉じます。",
+      "redisCommand": "バインドされた Redis コマンドを実行し (新しい接続で単一のコマンドを実行後に切断)、そのレスポンスを出力します。",
       "toast": "シナリオ実行中に Restorm の UI にトースト通知を表示します。",
       "httpListen": "Hosts a local HTTP mock server and listens indefinitely. `connected` fires once it is listening; each served request re-emits its data on the `served` port. The server stays up until an HTTP close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
       "httpClose": "すでに待ち受け中の HTTP モックサーバー (HTTP サーバーノードで宣言) を停止し、ポートを解放します。",
@@ -1682,7 +1885,13 @@
       "odataListen": "ローカルの OData v4 モックサービスをホストし、無期限に待ち受けます。待ち受けを開始すると `connected` が発火し、処理した各リクエストはそのデータを `served` ポートに再送出します。サーバーは OData のクローズ（または停止）まで稼働を続け、その後 `done` が発火します。response 出力はありません。提供するだけで、外部を呼び出すことはありません。",
       "odataClose": "すでに待ち受けている OData モックサービス（OData サーバーノードで宣言されたもの）を停止し、そのポートを解放します。",
       "graphqlSubscribe": "SSE を介してクライアントとして長寿命の GraphQL サブスクリプションを開いてリッスンします。ストリームが開くと `connected` が発火します。プッシュされた各ペイロードは `message` ポートに再出力されます（サブスクリプションは受信専用で、名前付きイベントはありません）。ストリームは GraphQL サブスクライブ解除（または停止）まで、あるいはサーバーが完了するまで開いたままで、その後 `done` が発火します。",
-      "graphqlUnsubscribe": "すでに開いている GraphQL サブスクリプション（GraphQL サブスクライブノードで宣言）を停止し、その SSE ストリームを破棄します。"
+      "graphqlUnsubscribe": "すでに開いている GraphQL サブスクリプション（GraphQL サブスクライブノードで宣言）を停止し、その SSE ストリームを破棄します。",
+      "stompConnect": "長期間有効なSTOMP over WebSocket接続を開きます。CONNECT/CONNECTEDハンドシェイクを実行し、設定された各宛先を購読して、受信した各フレームをそのポートに再送出します。",
+      "stompSend": "すでに開いているSTOMP接続でSENDフレームを送信します。",
+      "stompClose": "DISCONNECTを送信し、すでに開いているSTOMP接続を閉じます。",
+      "kafkaProduce": "バインドされた Kafka リクエストを一度限りの produce として実行し、結果（トピック/パーティション/オフセット）を `response` として送出します。",
+      "kafkaConsume": "バインドされたリクエストから持続的な Kafka コンシューマーを開き、受信した各メッセージを `message` ポートに再送出します。",
+      "kafkaClose": "すでに開いている Kafka コンシューマーを閉じます。"
     },
     "legend": {
       "title": "凡例",
@@ -1731,6 +1940,9 @@
     "websocket": {
       "message": "message"
     },
+    "sse": {
+      "message": "message"
+    },
     "grpc": {
       "message": "message"
     },
@@ -1776,6 +1988,36 @@
     "lwtTopicPlaceholder": "will/topic",
     "lwtPayload": "Payload",
     "lwtPayloadPlaceholder": "will message"
+  },
+  "amqp": {
+    "urlPlaceholder": "AMQP URL（amqp:// または amqps://）",
+    "vhost": "仮想ホスト",
+    "vhostPlaceholder": "/",
+    "username": "ユーザー名",
+    "password": "パスワード",
+    "mode": "モード",
+    "modePublish": "パブリッシュ",
+    "modeSubscribe": "サブスクライブ",
+    "modeBrowse": "ブラウズ",
+    "exchange": "Exchange",
+    "exchangePlaceholder": "（デフォルトの exchange）",
+    "routingKey": "ルーティングキー",
+    "routingKeyPlaceholder": "routing.key",
+    "queue": "キュー",
+    "queuePlaceholder": "キュー名",
+    "autoAck": "自動確認応答",
+    "prefetch": "Prefetch",
+    "browsePeekCount": "プレビュー件数",
+    "connect": "接続",
+    "connecting": "接続中…",
+    "disconnect": "切断",
+    "connected": "接続済み",
+    "disconnected": "切断されました",
+    "send": "送信",
+    "browseButton": "ブラウズ",
+    "noMessages": "まだメッセージはありません",
+    "peeked": "プレビュー済み",
+    "messages": "メッセージ"
   },
   "mcpLogs": {
     "title": "MCP ログ",
@@ -2042,5 +2284,42 @@
       "noSubscription": "管理できる有効なサブスクリプションがありません。",
       "error": "サブスクリプションポータルを開けませんでした。もう一度お試しください。"
     }
+  },
+  "trpc": {
+    "send": "送信",
+    "urlPlaceholder": "tRPC サーバーの URL",
+    "procedurePlaceholder": "プロシージャ（例: user.get）",
+    "kindQuery": "クエリ",
+    "kindMutation": "ミューテーション",
+    "showRawEnvelope": "生のエンベロープを表示",
+    "kindSelectLabel": "呼び出し種別",
+    "tabs": {
+      "headers": "ヘッダー",
+      "body": "ボディ"
+    }
+  },
+  "stomp": {
+    "connect": "接続",
+    "disconnect": "切断",
+    "connected": "接続済み",
+    "disconnected": "切断済み",
+    "noMessages": "まだフレームはありません",
+    "version": "STOMPバージョン",
+    "tabs": {
+      "connect": "接続",
+      "subscriptions": "サブスクリプション",
+      "send": "送信"
+    },
+    "ackMode": {
+      "auto": "auto",
+      "client": "client",
+      "clientIndividual": "client-individual"
+    },
+    "subscriptionIdLabel": "サブスクリプションID",
+    "removeSubscription": "サブスクリプションを削除",
+    "addSubscription": "サブスクリプションを追加",
+    "sendDestination": "宛先",
+    "ack": "ACK",
+    "nack": "NACK"
   }
 }

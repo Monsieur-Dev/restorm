@@ -1,0 +1,97 @@
+{{!-- Code snippets template for STOMP (over WebSocket) requests --}}
+{{!-- Generates markdown with code examples in multiple languages --}}
+
+<details open>
+<summary><strong>Node.js - @stomp/stompjs</strong></summary>
+
+```javascript
+import { Client } from '@stomp/stompjs';
+import WebSocket from 'ws';
+
+const client = new Client({
+  brokerURL: '{{url}}',
+  webSocketFactory: () => new WebSocket('{{url}}'),
+  stompVersions: ['{{stompVersion}}'],
+{{#if connectHeaders}}
+  connectHeaders: {
+{{#each connectHeaders}}    '{{key}}': '{{value}}'{{#unless @last}},{{/unless}}
+{{/each}}  },
+{{/if}}
+  onConnect: () => {
+    console.log('Connected');
+{{#each subscriptions}}
+    client.subscribe('{{destination}}', (message) => {
+      console.log('Received on {{destination}}:', message.body);
+{{#if needsAck}}
+      message.ack();
+{{/if}}
+    }, { id: '{{id}}', ack: '{{ackMode}}' });
+{{/each}}
+{{#if sendDestination}}
+    client.publish({
+      destination: '{{sendDestination}}',
+      body: JSON.stringify({{sendBody}}){{#if sendHeaders}},
+      headers: {
+{{#each sendHeaders}}        '{{key}}': '{{value}}'{{#unless @last}},{{/unless}}
+{{/each}}      }{{/if}}
+    });
+{{/if}}
+  },
+  onStompError: (frame) => {
+    console.error('Broker error:', frame.headers['message'], frame.body);
+  },
+  onWebSocketError: (event) => {
+    console.error('WebSocket error:', event);
+  }
+});
+
+client.activate();
+
+// To disconnect:
+// client.deactivate();
+```
+
+</details>
+
+<details>
+<summary><strong>Shell - wscat</strong></summary>
+
+```bash
+# wscat speaks raw WebSocket — connect, then type the STOMP frames yourself,
+# each terminated by a NUL byte (Ctrl-@ / \0 on most terminals).
+npx wscat -c '{{url}}'
+
+# Once connected, send the CONNECT frame:
+CONNECT
+accept-version:{{stompVersion}}
+host:{{host}}
+{{#each connectHeaders}}{{key}}:{{value}}
+{{/each}}
+
+^@
+{{#each subscriptions}}
+# Subscribe to {{destination}}:
+SUBSCRIBE
+id:{{id}}
+destination:{{destination}}
+ack:{{ackMode}}
+
+^@
+{{/each}}
+{{#if sendDestination}}
+# Send a message to {{sendDestination}}:
+SEND
+destination:{{sendDestination}}
+{{#each sendHeaders}}{{key}}:{{value}}
+{{/each}}
+
+{{sendBody}}
+^@
+{{/if}}
+# Disconnect:
+DISCONNECT
+
+^@
+```
+
+</details>

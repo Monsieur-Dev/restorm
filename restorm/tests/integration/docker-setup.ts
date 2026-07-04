@@ -60,6 +60,8 @@ export const SERVICES = {
   grpc: {
     name: 'gRPC Server (grpcbin)',
     host: 'localhost:9000',
+    // :9002 is the dedicated gRPC-Web mock (`grpcweb-server`), not another
+    // grpcbin port — grpcbin itself doesn't speak gRPC-Web on any port.
     webHost: 'localhost:9002'
   },
   mqtt: {

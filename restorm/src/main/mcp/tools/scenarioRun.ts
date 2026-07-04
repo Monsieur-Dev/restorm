@@ -275,6 +275,21 @@ const resolveStreamConnectPreview: PreviewResolver = async (_scenarioId, node) =
   if (resp?.type === 'grpc') {
     return socketioPreviewFromMessages(resp.messages ?? [], [])
   }
+  // SSE: receive-only, no `direction` field on its frames (unlike WS/gRPC) — every
+  // stored frame IS a received one, so wrap them before reusing the same helper.
+  if (resp?.type === 'sse') {
+    return socketioPreviewFromMessages(resp.frames.map((f) => ({ direction: 'received', data: f.data, event: f.event })), [])
+  }
+  // Kafka consume: messages carry `value` (not `data`) and no `event` — every
+  // consumed record is a plain received frame, so the latest one wins.
+  if (resp?.type === 'kafka') {
+    return socketioPreviewFromMessages((resp.messages ?? []).map((m) => ({ direction: m.direction, data: m.value })), [])
+  }
+  // STOMP: frames carry `body` (not `data`) and no `event` (destinations are not
+  // listenable event names here) — same no-event-names shape as gRPC/Kafka.
+  if (resp?.type === 'stomp') {
+    return socketioPreviewFromMessages(resp.messages.map((m) => ({ direction: m.direction, data: m.body })), [])
+  }
   return null
 }
 
@@ -316,6 +331,37 @@ const resolveSoapPreview: PreviewResolver = async (_scenarioId, node) => {
   }
 }
 
+/** `kafkaProduce`: the bound Kafka request's last SUCCESSFUL one-shot produce —
+ * resolved request, raw restorm model, and the RecordMetadata (partition/offset)
+ * kafkajs returned — from history. The one-shot analogue of `resolveRequestPreview`
+ * for a response shape that isn't `type: 'http'`. */
+const resolveKafkaProducePreview: PreviewResolver = async (_scenarioId, node) => {
+  const requestId = boundRequestId(node)
+  if (!requestId) return null
+  const entries = await responseHistoryService.list(requestId)
+  const entry = freshestSuccessfulEntry(entries)
+  if (!entry) return null
+  const detail = await responseHistoryService.getDetail(entry.guid)
+  if (detail?.response.type !== 'kafka' || detail.response.kafkaMode !== 'produce') return null
+  const r = detail.response
+  const raw = collectionStore.findById(requestId)
+  return {
+    nodeId: node.id,
+    requestId,
+    historyGuid: detail.guid,
+    timestamp: detail.timestamp,
+    request: { url: r.requestUrl, topic: r.requestTopic },
+    restormRequest: raw ?? null,
+    response: {
+      topic: r.requestTopic,
+      ...(r.producedPartition !== undefined ? { partition: r.producedPartition } : {}),
+      ...(r.producedOffset !== undefined ? { offset: r.producedOffset } : {}),
+      durationMs: r.timings.durationMs,
+      ...(r.error ? { error: r.error } : {})
+    }
+  }
+}
+
 /** `code`: the box's last run output (result + captured logs). Unlike a request
  * there's no on-disk history, so the executor caches each run in memory and we
  * read the freshest record back here. Null until the box has actually run. */
@@ -334,8 +380,13 @@ const previewResolvers: Partial<Record<ScenarioNode['kind'], PreviewResolver>> =
   soapRequest: resolveSoapPreview,
   socketioConnect: resolveStreamConnectPreview,
   websocketConnect: resolveStreamConnectPreview,
+  sseConnect: resolveStreamConnectPreview,
+  stompConnect: resolveStreamConnectPreview,
   mqttConnect: resolveStreamConnectPreview,
+  amqpConnect: resolveStreamConnectPreview,
   grpcConnect: resolveStreamConnectPreview,
+  kafkaProduce: resolveKafkaProducePreview,
+  kafkaConsume: resolveStreamConnectPreview,
   code: resolveCodePreview
 }
 

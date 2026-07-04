@@ -8,8 +8,16 @@ import type {
   GrpcRequest,
   SoapRequest,
   WebSocketRequest,
+  SseRequest,
+  StompRequest,
   ODataRequest,
   AuthenticationRequest,
+  JsonRpcRequest,
+  JsonRpcBatchRequest,
+  TrpcRequest,
+  AmqpRequest,
+  RedisRequest,
+  KafkaRequest,
   Environment,
   Scenario
 } from './collections'
@@ -88,6 +96,24 @@ export interface WebSocketRequestTab extends BaseRestormTab {
   environments?: Environment[] | undefined
 }
 
+/** Tab displaying an SSE (Server-Sent Events) request */
+export interface SseRequestTab extends BaseRestormTab {
+  tabType: 'sse-request'
+  /** The SSE request data to display */
+  request: SseRequest
+  /** Environments available for this request */
+  environments?: Environment[] | undefined
+}
+
+/** Tab displaying a STOMP request */
+export interface StompRequestTab extends BaseRestormTab {
+  tabType: 'stomp-request'
+  /** The STOMP request data to display */
+  request: StompRequest
+  /** Environments available for this request */
+  environments?: Environment[] | undefined
+}
+
 /** Tab displaying an OData request */
 export interface ODataRequestTab extends BaseRestormTab {
   tabType: 'odata-request'
@@ -97,11 +123,65 @@ export interface ODataRequestTab extends BaseRestormTab {
   environments?: Environment[] | undefined
 }
 
+/** Tab displaying a single JSON-RPC 2.0 call */
+export interface JsonRpcRequestTab extends BaseRestormTab {
+  tabType: 'jsonrpc-request'
+  /** The JSON-RPC request data to display */
+  request: JsonRpcRequest
+  /** Environments available for this request */
+  environments?: Environment[] | undefined
+}
+
+/** Tab displaying a `jsonrpc-batch` request */
+export interface JsonRpcBatchRequestTab extends BaseRestormTab {
+  tabType: 'jsonrpc-batch-request'
+  /** The JSON-RPC batch request data to display */
+  request: JsonRpcBatchRequest
+  /** Environments available for this request */
+  environments?: Environment[] | undefined
+}
+
+/** Tab displaying a tRPC request */
+export interface TrpcRequestTab extends BaseRestormTab {
+  tabType: 'trpc-request'
+  /** The tRPC request data to display */
+  request: TrpcRequest
+  /** Environments available for this request */
+  environments?: Environment[] | undefined
+}
+
+/** Tab displaying a Redis request (subscribe or command mode) */
+export interface RedisRequestTab extends BaseRestormTab {
+  tabType: 'redis-request'
+  /** The Redis request data to display */
+  request: RedisRequest
+  /** Environments available for this request */
+  environments?: Environment[] | undefined
+}
+
 /** Tab displaying an Authentication request (HTTP + auth config tab) */
 export interface AuthenticationRequestTab extends BaseRestormTab {
   tabType: 'auth-request'
   /** The authentication request data to display */
   request: AuthenticationRequest
+  /** Environments available for this request */
+  environments?: Environment[] | undefined
+}
+
+/** Tab displaying an AMQP request */
+export interface AmqpRequestTab extends BaseRestormTab {
+  tabType: 'amqp-request'
+  /** The AMQP request data to display */
+  request: AmqpRequest
+  /** Environments available for this request */
+  environments?: Environment[] | undefined
+}
+
+/** Tab displaying a Kafka request (produce, consume or browse mode) */
+export interface KafkaRequestTab extends BaseRestormTab {
+  tabType: 'kafka-request'
+  /** The Kafka request data to display */
+  request: KafkaRequest
   /** Environments available for this request */
   environments?: Environment[] | undefined
 }
@@ -178,8 +258,16 @@ export type RestormEditorTab =
   | GrpcRequestTab
   | SoapRequestTab
   | WebSocketRequestTab
+  | SseRequestTab
+  | StompRequestTab
   | ODataRequestTab
+  | JsonRpcRequestTab
+  | JsonRpcBatchRequestTab
   | AuthenticationRequestTab
+  | TrpcRequestTab
+  | AmqpRequestTab
+  | RedisRequestTab
+  | KafkaRequestTab
   | ScenarioEditorTab
   | ConsoleTab
   | FirewallTab
@@ -254,14 +342,54 @@ export function isWebSocketRequestTab(tab: RestormEditorTab): tab is WebSocketRe
   return tab.tabType === 'websocket-request'
 }
 
+/** Type guard for SseRequestTab */
+export function isSseRequestTab(tab: RestormEditorTab): tab is SseRequestTab {
+  return tab.tabType === 'sse-request'
+}
+
+/** Type guard for StompRequestTab */
+export function isStompRequestTab(tab: RestormEditorTab): tab is StompRequestTab {
+  return tab.tabType === 'stomp-request'
+}
+
 /** Type guard for ODataRequestTab */
 export function isODataRequestTab(tab: RestormEditorTab): tab is ODataRequestTab {
   return tab.tabType === 'odata-request'
 }
 
+/** Type guard for JsonRpcRequestTab */
+export function isJsonRpcRequestTab(tab: RestormEditorTab): tab is JsonRpcRequestTab {
+  return tab.tabType === 'jsonrpc-request'
+}
+
+/** Type guard for JsonRpcBatchRequestTab */
+export function isJsonRpcBatchRequestTab(tab: RestormEditorTab): tab is JsonRpcBatchRequestTab {
+  return tab.tabType === 'jsonrpc-batch-request'
+}
+
 /** Type guard for AuthenticationRequestTab */
 export function isAuthenticationRequestTab(tab: RestormEditorTab): tab is AuthenticationRequestTab {
   return tab.tabType === 'auth-request'
+}
+
+/** Type guard for TrpcRequestTab */
+export function isTrpcRequestTab(tab: RestormEditorTab): tab is TrpcRequestTab {
+  return tab.tabType === 'trpc-request'
+}
+
+/** Type guard for AmqpRequestTab */
+export function isAmqpRequestTab(tab: RestormEditorTab): tab is AmqpRequestTab {
+  return tab.tabType === 'amqp-request'
+}
+
+/** Type guard for RedisRequestTab */
+export function isRedisRequestTab(tab: RestormEditorTab): tab is RedisRequestTab {
+  return tab.tabType === 'redis-request'
+}
+
+/** Type guard for KafkaRequestTab */
+export function isKafkaRequestTab(tab: RestormEditorTab): tab is KafkaRequestTab {
+  return tab.tabType === 'kafka-request'
 }
 
 /** Any protocol's request tab (carries a backing `request`). */
@@ -271,12 +399,20 @@ export type AnyRequestTab =
   | GrpcRequestTab
   | SoapRequestTab
   | WebSocketRequestTab
+  | SseRequestTab
+  | StompRequestTab
   | ODataRequestTab
+  | JsonRpcRequestTab
+  | JsonRpcBatchRequestTab
   | AuthenticationRequestTab
+  | TrpcRequestTab
+  | AmqpRequestTab
+  | RedisRequestTab
+  | KafkaRequestTab
 
 const REQUEST_TAB_TYPES: ReadonlySet<string> = new Set([
   'http-request', 'graphql-request', 'grpc-request', 'soap-request',
-  'websocket-request', 'odata-request', 'auth-request'
+  'websocket-request', 'sse-request', 'stomp-request', 'odata-request', 'jsonrpc-request', 'jsonrpc-batch-request', 'auth-request', 'trpc-request', 'amqp-request', 'redis-request', 'kafka-request'
 ])
 
 /** Type guard for ANY request tab (any protocol). Use this instead of a

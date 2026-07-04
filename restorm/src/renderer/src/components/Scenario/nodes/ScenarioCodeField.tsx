@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { Button, CodeEditor, Modal } from 'electron-core-ui/renderer'
 import { loader, type OnMount } from '@monaco-editor/react'
 import type * as Monaco from 'monaco-editor'
+import { npmPackageGlobalName } from '../../../../../shared/codeNodePackages'
 
 /** Ambient declarations of everything the `code` node injects into the sandbox,
  * so Monaco's TypeScript service stops red-underlining `input`, `_`, `CryptoJS`,
@@ -41,7 +42,16 @@ interface TsLanguageDefaults {
   addExtraLib: (content: string, filePath?: string) => void
 }
 
-function configureTsDefaults(monaco: typeof Monaco): void {
+/** Build `declare const <global>: any;` for every user-pinned npm package, so
+ * Monaco doesn't red-underline a global it can't statically know the shape of.
+ * Uses the SAME name transform the sandbox injects the global under
+ * ({@link npmPackageGlobalName}) so the declared name always matches the real
+ * one at runtime. */
+function userPackagesDts(packageNames: readonly string[]): string {
+  return packageNames.map((name) => `declare const ${npmPackageGlobalName(name)}: any; // npm: ${name}`).join('\n')
+}
+
+function configureTsDefaults(monaco: typeof Monaco, packageNames: readonly string[] = []): void {
   const ts = (monaco.languages as unknown as { typescript?: { typescriptDefaults: TsLanguageDefaults; javascriptDefaults: TsLanguageDefaults } }).typescript
   if (!ts) return
   for (const defaults of [ts.typescriptDefaults, ts.javascriptDefaults]) {
@@ -51,6 +61,12 @@ function configureTsDefaults(monaco: typeof Monaco): void {
     const ignore = new Set([...(current.diagnosticCodesToIgnore ?? []), 1108, 1308, 1375, 1378])
     defaults.setDiagnosticsOptions({ ...current, diagnosticCodesToIgnore: [...ignore] })
     defaults.addExtraLib(CODE_NODE_GLOBALS_DTS, 'restorm-code-node-globals.d.ts')
+    // A SEPARATE extra lib, keyed by a stable path so re-adding it REPLACES the
+    // previous content (Monaco's `addExtraLib` behaviour) rather than piling up
+    // stale globals from whichever code node was open before this one —
+    // typescriptDefaults is a process-wide singleton, but restorm only ever has
+    // one code-node editor mounted at a time (the modal is full-screen/exclusive).
+    defaults.addExtraLib(userPackagesDts(packageNames), 'restorm-code-node-user-packages.d.ts')
   }
 }
 
@@ -61,7 +77,12 @@ function configureTsDefaults(monaco: typeof Monaco): void {
 // real `monaco-editor` shape that `configureTsDefaults` consumes.)
 void loader.init().then((monaco) => { configureTsDefaults(monaco as typeof Monaco) }).catch(() => undefined)
 
-const configureMonacoForCodeNode: OnMount = (_editor, monaco) => { configureTsDefaults(monaco as typeof Monaco) }
+/** Build the editor's `onMount`, capturing which packages ARE pinned on the
+ * node currently being edited (`config.packages`) so the user-packages extra
+ * lib reflects the right globals for THIS editor session. */
+function makeConfigureMonacoForCodeNode(packageNames: readonly string[]): OnMount {
+  return (_editor, monaco) => { configureTsDefaults(monaco as typeof Monaco, packageNames) }
+}
 
 /** Languages the embedded editor knows how to highlight. Kept as a closed union
  * so callers pick a sensible Monaco mode for the content they edit. */
@@ -85,6 +106,10 @@ export interface ScenarioCodeEditorModalProps {
   language?: ScenarioCodeLanguage
   title: string
   dataTestId?: string
+  /** Names of the packages pinned on THIS code node (`config.packages`), so the
+   * TS/JS editor declares their globals instead of red-underlining them. Only
+   * meaningful for `language: 'typescript' | 'javascript'`. */
+  packageNames?: readonly string[]
 }
 
 /** A workbench-scoped, full-screen modal hosting the ECUI `CodeEditor` (Monaco).
@@ -97,7 +122,8 @@ export const ScenarioCodeEditorModal: React.FC<ScenarioCodeEditorModalProps> = (
   onChange,
   language = 'plaintext',
   title,
-  dataTestId
+  dataTestId,
+  packageNames = []
 }) => (
   <Modal
     title={title}
@@ -114,7 +140,7 @@ export const ScenarioCodeEditorModal: React.FC<ScenarioCodeEditorModalProps> = (
         height="100%"
         onChange={(next) => { onChange(next ?? '') }}
         options={{ wordWrap: 'on', automaticLayout: true }}
-        {...((language === 'typescript' || language === 'javascript') && { onMount: configureMonacoForCodeNode })}
+        {...((language === 'typescript' || language === 'javascript') && { onMount: makeConfigureMonacoForCodeNode(packageNames) })}
         {...(dataTestId && { 'data-testid': `${dataTestId}-editor` })}
       />
     </div>
@@ -244,6 +270,9 @@ export interface ScenarioCodeFieldProps {
   invalid?: boolean
   /** Base test id; the preview, button and editor derive suffixed ids. */
   dataTestId?: string
+  /** Names of the packages pinned on THIS code node (`config.packages`) — see
+   * {@link ScenarioCodeEditorModalProps.packageNames}. */
+  packageNames?: readonly string[]
 }
 
 /**
@@ -261,7 +290,8 @@ export const ScenarioCodeField: React.FC<ScenarioCodeFieldProps> = ({
   modalTitle,
   placeholder = '',
   invalid,
-  dataTestId
+  dataTestId,
+  packageNames
 }) => {
   const { t } = useTranslation()
   const [isOpen, setIsOpen] = useState(false)
@@ -297,6 +327,7 @@ export const ScenarioCodeField: React.FC<ScenarioCodeFieldProps> = ({
         language={language}
         title={title}
         {...(dataTestId && { dataTestId })}
+        {...(packageNames && { packageNames })}
       />
     </div>
   )

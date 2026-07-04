@@ -1,0 +1,127 @@
+collections:
+  - folderType: environment
+    name: tRPC Playground
+    documentation: |-
+      # tRPC Playground
+
+      A self-contained tRPC execution matrix against the local hand-rolled mock
+      server (port 8096, `tests/docker/trpc-server/`). Covers a query, a
+      mutation, a tRPC-level error, Handlebars env-var substitution (header),
+      cancellation, and response history.
+
+      The `Default` environment defines `serverUrl` and `token` so the
+      substitution surfaces are exercised end-to-end.
+    tags: []
+    configuration: {}
+    environments:
+      - name: Default
+        variables:
+          - key: serverUrl
+            value:
+              type: string
+              value: http://localhost:8096
+            description: tRPC mock server base URL
+            enabled: true
+          - key: token
+            value:
+              type: string
+              value: env-secret-token
+            description: Substituted into the X-Test-Token header
+            enabled: true
+        id: c1d2e3f4-a5b6-4071-8293-b4c5d6e7f8c1
+    items:
+      - type: trpc
+        name: Get user
+        documentation: |-
+          `user.get` query with `{"id": 1}`. Proves the basic GET round-trip +
+          `result.data` unwrapping against the mock server at `{{serverUrl}}`.
+        tags:
+          - query
+        url: '{{serverUrl}}'
+        procedure: user.get
+        input: '{"id": 1}'
+        kind: query
+        headers: []
+        id: d2e3f4a5-b607-4182-9a3b-c4d5e6f7d182
+      - type: trpc
+        name: Missing user
+        documentation: |-
+          `user.get` query with an id the mock doesn't know about. Proves a
+          tRPC-level error (`NOT_FOUND`) surfaces cleanly rather than crashing.
+        tags:
+          - query
+          - error
+        url: '{{serverUrl}}'
+        procedure: user.get
+        input: '{"id": 999}'
+        kind: query
+        headers: []
+        id: d2e3f4a5-b607-4283-9a3b-c4d5e6f7d283
+      - type: trpc
+        name: Create post
+        documentation: |-
+          `post.create` mutation. Proves the POST round-trip + the v10
+          `{"0":{"json":...}}` mutation envelope against the mock server.
+        tags:
+          - mutation
+        url: '{{serverUrl}}'
+        procedure: post.create
+        input: '{"title": "Hello from restorm"}'
+        kind: mutation
+        headers: []
+        id: d2e3f4a5-b607-4384-9a3b-c4d5e6f7d384
+      - type: trpc
+        name: Echo header auth
+        documentation: |-
+          `echo.header` query reading back the `X-Test-Token` header, whose
+          value is `{{token}}`. Proves the env-resolved header reached the
+          wire (the response must contain `env-secret-token`, not the literal
+          `{{token}}`).
+        tags:
+          - query
+          - handlebars
+          - auth
+        url: '{{serverUrl}}'
+        procedure: echo.header
+        input: '{"name": "x-test-token"}'
+        kind: query
+        headers:
+          - key: X-Test-Token
+            value:
+              type: expression
+              value: '{{token}}'
+            enabled: true
+            id: e3f4a5b6-c7d8-4e9f-a0b1-c2d3e4f5a6b7
+        id: d2e3f4a5-b607-4485-9a3b-c4d5e6f7d485
+      - type: trpc
+        name: Slow cancel
+        documentation: |-
+          `slow.echo` mutation with a 3 s delay. The cancellation e2e scenario
+          clicks Send then Cancel within that window and asserts 'Request
+          cancelled' surfaces in the response panel.
+        tags:
+          - mutation
+          - cancel
+        url: '{{serverUrl}}'
+        procedure: slow.echo
+        input: '{"delayMs": 3000, "message": "should-not-arrive"}'
+        kind: mutation
+        headers: []
+        id: d2e3f4a5-b607-4586-9a3b-c4d5e6f7d586
+      - type: trpc
+        name: Always fails
+        documentation: |-
+          `error.fail` — always returns a `BAD_REQUEST` tRPC error. Proves the
+          error envelope surfaces without crashing the response panel.
+        tags:
+          - mutation
+          - error
+        url: '{{serverUrl}}'
+        procedure: error.fail
+        input: ''
+        kind: mutation
+        headers: []
+        id: d2e3f4a5-b607-4687-9a3b-c4d5e6f7d687
+    id: d2e3f4a5-b607-4788-9a3c-c4d5e6f7d788
+    fileFormatVersion: 1
+_projectUuid: e3f4a5b6-c708-4899-9a3d-c4d5e6f7d899

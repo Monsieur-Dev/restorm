@@ -372,6 +372,16 @@ describe('GrpcImportService', () => {
 
       expect(new Set(ids).size).toBe(ids.length)
     })
+
+    it('should stamp the source proto onto every request so execution resolves the imported descriptor, not the grpcbin fallback', () => {
+      const result = importGrpcFromString(protoFile, { name: 'gRPC Test' }) as EnvironmentFolder
+      const requests = findAllRequests(result, isGrpcRequest)
+
+      expect(requests.length).toBeGreaterThan(0)
+      requests.forEach((req) => {
+        expect(req.protoContent).toBe(protoFile)
+      })
+    })
   })
 })
 

@@ -1,0 +1,161 @@
+{{!-- Code snippets template for AMQP (RabbitMQ) requests --}}
+{{!-- Generates markdown with code examples in multiple languages, branching on `mode` (publish / subscribe / browse) --}}
+
+{{#if isPublish}}
+<details open>
+<summary><strong>JavaScript - amqplib (Node.js)</strong></summary>
+
+```javascript
+const amqp = require('amqplib');
+
+async function main() {
+  const connection = await amqp.connect('{{url}}');
+  const channel = await connection.createChannel();
+
+  channel.publish('{{exchange}}', '{{routingKey}}', Buffer.from(JSON.stringify({{payload}})));
+  console.log('Published to exchange "{{exchange}}" with routing key "{{routingKey}}"');
+
+  await channel.close();
+  await connection.close();
+}
+
+main().catch(console.error);
+```
+
+</details>
+
+<details>
+<summary><strong>Python - pika</strong></summary>
+
+```python
+import pika
+import json
+
+connection = pika.BlockingConnection(pika.URLParameters('{{url}}'))
+channel = connection.channel()
+
+payload = json.dumps({{payload}})
+channel.basic_publish(exchange='{{exchange}}', routing_key='{{routingKey}}', body=payload)
+print(f'Published to exchange "{{exchange}}" with routing key "{{routingKey}}"')
+
+connection.close()
+```
+
+</details>
+
+<details>
+<summary><strong>Shell - amqp-publish (amqp-tools)</strong></summary>
+
+```bash
+amqp-publish --url='{{url}}' \
+  --exchange='{{exchange}}' \
+  --routing-key='{{routingKey}}' \
+  --body='{{payload}}'
+```
+
+</details>
+{{/if}}
+
+{{#if isSubscribe}}
+<details open>
+<summary><strong>JavaScript - amqplib (Node.js)</strong></summary>
+
+```javascript
+const amqp = require('amqplib');
+
+async function main() {
+  const connection = await amqp.connect('{{url}}');
+  const channel = await connection.createChannel();
+{{#if prefetch}}
+  await channel.prefetch({{prefetch}});
+{{/if}}
+
+  await channel.consume('{{queue}}', (msg) => {
+    if (msg === null) return;
+    console.log('Received:', msg.content.toString());
+{{#unless autoAck}}
+    channel.ack(msg);
+{{/unless}}
+  }, { noAck: {{autoAck}} });
+
+  console.log('Consuming from queue "{{queue}}"...');
+}
+
+main().catch(console.error);
+```
+
+</details>
+
+<details>
+<summary><strong>Python - pika</strong></summary>
+
+```python
+import pika
+
+connection = pika.BlockingConnection(pika.URLParameters('{{url}}'))
+channel = connection.channel()
+{{#if prefetch}}
+channel.basic_qos(prefetch_count={{prefetch}})
+{{/if}}
+
+def on_message(ch, method, properties, body):
+    print(f'Received: {body.decode()}')
+{{#unless autoAck}}
+    ch.basic_ack(delivery_tag=method.delivery_tag)
+{{/unless}}
+
+channel.basic_consume(queue='{{queue}}', on_message_callback=on_message, auto_ack={{#if autoAck}}True{{else}}False{{/if}})
+print('Consuming from queue "{{queue}}"...')
+channel.start_consuming()
+```
+
+</details>
+
+<details>
+<summary><strong>Shell - amqp-consume (amqp-tools)</strong></summary>
+
+```bash
+amqp-consume --url='{{url}}' --queue='{{queue}}' -- cat
+```
+
+</details>
+{{/if}}
+
+{{#if isBrowse}}
+<details open>
+<summary><strong>JavaScript - amqplib (Node.js)</strong></summary>
+
+```javascript
+const amqp = require('amqplib');
+
+async function main() {
+  const connection = await amqp.connect('{{url}}');
+  const channel = await connection.createChannel();
+
+  // Peek without consuming: get + nack(requeue: true) puts each message back.
+  const peeked = [];
+  for (let i = 0; i < {{browsePeekCount}}; i++) {
+    const msg = await channel.get('{{queue}}', { noAck: false });
+    if (msg === false) break;
+    peeked.push(msg.content.toString());
+  }
+  console.log('Peeked messages:', peeked);
+
+  await channel.close();
+  await connection.close();
+}
+
+main().catch(console.error);
+```
+
+</details>
+
+<details>
+<summary><strong>Shell - rabbitmqadmin</strong></summary>
+
+```bash
+rabbitmqadmin get queue='{{queue}}' count={{browsePeekCount}} requeue=true
+```
+
+</details>
+{{/if}}

@@ -14,11 +14,11 @@ export interface ScenarioConnectionRef {
   id: string
   name: string
   /** The connect node's kind — a send/close picker shows only its own transport's
-   * connections (`socketioConnect` vs `websocketConnect` vs `grpcConnect`;
-   * `httpListen` for a hosted HTTP mock server, `grpcListen` for a gRPC one,
-   * `soapListen` for a SOAP one, `graphqlListen` for a GraphQL one, `odataListen`
-   * for an OData one). */
-  kind: 'socketioConnect' | 'websocketConnect' | 'grpcConnect' | 'mqttConnect' | 'httpListen' | 'grpcListen' | 'soapListen' | 'graphqlListen' | 'odataListen'
+   * connections (`socketioConnect` vs `websocketConnect` vs `stompConnect` vs
+   * `grpcConnect` vs `mqttConnect` vs `kafkaConsume`; `httpListen` for a hosted
+   * HTTP mock server, `grpcListen` for a gRPC one, `soapListen` for a SOAP one,
+   * `graphqlListen` for a GraphQL one, `odataListen` for an OData one). */
+  kind: 'socketioConnect' | 'websocketConnect' | 'stompConnect' | 'sseConnect' | 'grpcConnect' | 'mqttConnect' | 'amqpConnect' | 'redisSubscribe' | 'kafkaConsume' | 'httpListen' | 'grpcListen' | 'soapListen' | 'graphqlListen' | 'odataListen'
   /** The connect node's linked request event — pre-fills a send node's channel. */
   defaultChannel?: string
   /** The connect node's linked request message — pre-fills a send node's payload. */

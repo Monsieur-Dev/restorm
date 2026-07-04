@@ -18,7 +18,7 @@ import { resolveUrlAgainstEnv, flattenEnvVars } from '../../../shared/utils/reso
 // ---------- Route discriminants per request type ----------
 
 interface CompilableRoute {
-  type: 'http' | 'graphql' | 'grpc' | 'soap' | 'websocket' | 'odata'
+  type: 'http' | 'graphql' | 'grpc' | 'soap' | 'websocket' | 'sse' | 'odata' | 'trpc' | 'redis' | 'kafka'
   url?: string
   method?: string
   operationType?: string
@@ -71,6 +71,10 @@ function routeFromRequest(request: Request): CompilableRoute {
       if (request.event !== undefined) route.event = request.event
       return route
     }
+    case 'stomp':
+      // STOMP is websocket-transported and the compiler has no dedicated
+      // STOMP discriminant — mirrors `routeFromRequest.ts`'s aliasing.
+      return { type: 'websocket', url: request.url, tags: request.tags }
     case 'odata':
       // The main-process `DocumentationCompiler.matchOperation()`
       // currently returns `null` for `type: 'odata'` — the
@@ -79,10 +83,40 @@ function routeFromRequest(request: Request): CompilableRoute {
       // doesn't complain, but no compiled docs will ever match until
       // the compiler gains an OData branch (tracked outside Phase 1).
       return { type: 'odata', url: request.url, tags: request.tags }
+    case 'jsonrpc':
+    case 'jsonrpcBatch':
+      // Same rationale as 'odata' above: no compiled-docs branch for
+      // JSON-RPC yet, so this keeps the switch exhaustive without
+      // matching anything.
+      return { type: 'odata', url: request.url, tags: request.tags }
     case 'auth':
       // Auth requests mirror HTTP requests for documentation-matching
       // purposes — they have a URL + method like any HTTP call.
       return { type: 'http', url: request.url, method: request.method, tags: request.tags }
+    case 'trpc':
+      // Same rationale as OData above: no import format wires an
+      // `ApiDocumentation` discriminant for tRPC yet, so this keeps the
+      // switch exhaustive without ever matching a compiled operation.
+      return { type: 'trpc', url: request.url, tags: request.tags }
+    case 'sse':
+      // Same "no compiler branch yet" situation as OData above — keeps
+      // the switch exhaustive; no compiled docs will match until the
+      // compiler gains an SSE discriminant.
+      return { type: 'sse', url: request.url, tags: request.tags }
+    case 'amqp':
+      // Same treatment as OData: no compiler branch for AMQP yet (no import
+      // adapter feeds it), so this never matches — kept exhaustive for TS.
+      return { type: 'odata', url: request.url, tags: request.tags }
+    case 'redis':
+      // Same story as OData: no `ApiDocumentation` discriminant for Redis
+      // (not an HTTP-shaped route). Minimal route keeps the switch
+      // exhaustive; no compiled docs will ever match.
+      return { type: 'redis', url: request.url, tags: request.tags }
+    case 'kafka':
+      // Same rationale as 'odata': no `ApiDocumentation` discriminant exists
+      // for Kafka yet, so this keeps the switch exhaustive without ever
+      // matching (`compileForRoute` has no 'kafka' branch either).
+      return { type: 'kafka', url: request.url, tags: request.tags }
   }
 }
 

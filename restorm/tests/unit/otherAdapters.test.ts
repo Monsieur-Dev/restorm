@@ -7,6 +7,7 @@ import { asyncapiImportAdapter } from '../../src/main/services/import/idempotent
 import { grpcImportAdapter } from '../../src/main/services/import/idempotent/GrpcAdapter'
 import { soapImportAdapter } from '../../src/main/services/import/idempotent/SoapAdapter'
 import { odataImportAdapter } from '../../src/main/services/import/idempotent/ODataAdapter'
+import { openrpcImportAdapter } from '../../src/main/services/import/idempotent/OpenRpcAdapter'
 
 describe('openapi3ImportAdapter', () => {
   it('produces one operation per (path × method) pair with naturalKey "METHOD path"', () => {
@@ -187,6 +188,41 @@ describe('odataImportAdapter', () => {
   })
 })
 
+describe('openrpcImportAdapter', () => {
+  it('produces one operation per method, keyed by the method name', () => {
+    const spec = {
+      methods: [
+        { name: 'echo', summary: 'Echoes back its arguments' },
+        { name: 'failMethod', deprecated: true }
+      ]
+    }
+    const out = openrpcImportAdapter.extractNormalizedSpec(spec, {})
+    expect(out.operations.map((o) => o.naturalKey).sort()).toEqual(['echo', 'failMethod'])
+    expect(out.operations.find((o) => o.naturalKey === 'failMethod')?.deprecated).toBe(true)
+  })
+
+  it('extracts components.schemas as models and pulls enums', () => {
+    const spec = {
+      methods: [],
+      components: {
+        schemas: {
+          User: {
+            type: 'object',
+            properties: {
+              name: { type: 'string' },
+              status: { type: 'string', enum: ['active', 'inactive'] }
+            },
+            required: ['name']
+          }
+        }
+      }
+    }
+    const out = openrpcImportAdapter.extractNormalizedSpec(spec, {})
+    expect(out.models[0]?.name).toBe('User')
+    expect(out.enums.find((e) => e.values.includes('active'))).toBeTruthy()
+  })
+})
+
 describe('all adapters are byte-identical on two parses', () => {
   // Adapter idempotency is the foundational invariant — without it,
   // the pipeline's "same spec → empty diff" guarantee bubbles up to
@@ -200,7 +236,8 @@ describe('all adapters are byte-identical on two parses', () => {
     { adapter: asyncapiImportAdapter, spec: { channels: { 'a': { publish: { operationId: 'p' } } } } },
     { adapter: grpcImportAdapter, spec: { services: [{ name: 'S', methods: [{ name: 'M' }] }] } },
     { adapter: soapImportAdapter, spec: { portTypes: [{ name: 'P', operations: [{ name: 'op' }] }] } },
-    { adapter: odataImportAdapter, spec: { entitySets: [{ name: 'Pets' }] } }
+    { adapter: odataImportAdapter, spec: { entitySets: [{ name: 'Pets' }] } },
+    { adapter: openrpcImportAdapter, spec: { methods: [{ name: 'echo' }] } }
   ]
   for (const { adapter, spec } of cases) {
     it(`${adapter.format} adapter is idempotent`, () => {

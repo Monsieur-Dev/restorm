@@ -17,7 +17,11 @@ import {
   GRAPHQL_OPERATION_TYPES,
   GRPC_CALL_TYPES,
   WEBSOCKET_PROTOCOLS,
-  HTTP_BODY_TYPE_ENUM_NAMES
+  HTTP_BODY_TYPE_ENUM_NAMES,
+  TRPC_CALL_KINDS,
+  AMQP_MODES,
+  REDIS_MODES,
+  REDIS_COMMANDS
 } from '../../shared/models'
 
 import {
@@ -26,8 +30,14 @@ import {
   GrpcRequest,
   SoapRequest,
   WebSocketRequest,
+  SseRequest,
+  StompRequest,
   ODataRequest,
-  AuthenticationRequest
+  AuthenticationRequest,
+  TrpcRequest,
+  AmqpRequest,
+  RedisRequest,
+  KafkaRequest
 } from '../../shared/models/requests'
 
 // =============================================================================
@@ -40,6 +50,10 @@ function registerEnums(): void {
   graphQLSchemaGenerator.registerEnum('GraphQLOperationType', [...GRAPHQL_OPERATION_TYPES])
   graphQLSchemaGenerator.registerEnum('GrpcCallType', [...GRPC_CALL_TYPES])
   graphQLSchemaGenerator.registerEnum('WebSocketProtocol', [...WEBSOCKET_PROTOCOLS])
+  graphQLSchemaGenerator.registerEnum('TrpcCallKind', [...TRPC_CALL_KINDS])
+  graphQLSchemaGenerator.registerEnum('AmqpMode', [...AMQP_MODES])
+  graphQLSchemaGenerator.registerEnum('RedisMode', [...REDIS_MODES])
+  graphQLSchemaGenerator.registerEnum('RedisCommandName', [...REDIS_COMMANDS])
   // The canonical body-type values are kebab-case (`form-data`), which
   // are not valid GraphQL enum identifiers — register the SCREAMING_SNAKE
   // member names that map 1:1 onto them.
@@ -68,8 +82,14 @@ function registerClasses(): void {
   graphQLSchemaGenerator.registerClassAuto(GrpcRequest, skipGeneric)
   graphQLSchemaGenerator.registerClassAuto(SoapRequest, skipGeneric)
   graphQLSchemaGenerator.registerClassAuto(WebSocketRequest, skipGeneric)
+  graphQLSchemaGenerator.registerClassAuto(SseRequest, skipGeneric)
+  graphQLSchemaGenerator.registerClassAuto(StompRequest, skipGeneric)
   graphQLSchemaGenerator.registerClassAuto(ODataRequest, skipGeneric)
   graphQLSchemaGenerator.registerClassAuto(AuthenticationRequest, skipGeneric)
+  graphQLSchemaGenerator.registerClassAuto(TrpcRequest, skipGeneric)
+  graphQLSchemaGenerator.registerClassAuto(AmqpRequest, skipGeneric)
+  graphQLSchemaGenerator.registerClassAuto(RedisRequest, skipGeneric)
+  graphQLSchemaGenerator.registerClassAuto(KafkaRequest, skipGeneric)
 }
 
 // =============================================================================
@@ -78,13 +98,13 @@ function registerClasses(): void {
 
 function registerUnions(): void {
   graphQLSchemaGenerator.registerUnion('Request', [
-    'HTTPRequest', 'GraphQLRequest', 'GrpcRequest', 'SoapRequest', 'WebSocketRequest',
-    'ODataRequest', 'AuthenticationRequest'
+    'HTTPRequest', 'GraphQLRequest', 'GrpcRequest', 'SoapRequest', 'WebSocketRequest', 'SseRequest', 'StompRequest',
+    'ODataRequest', 'AuthenticationRequest', 'TrpcRequest', 'AmqpRequest', 'RedisRequest', 'KafkaRequest'
   ])
 
   graphQLSchemaGenerator.registerUnion('FolderItem', [
     'Folder', 'EnvironmentFolder', 'HTTPRequest', 'GraphQLRequest',
-    'GrpcRequest', 'SoapRequest', 'WebSocketRequest', 'ODataRequest', 'AuthenticationRequest'
+    'GrpcRequest', 'SoapRequest', 'WebSocketRequest', 'SseRequest', 'StompRequest', 'ODataRequest', 'AuthenticationRequest', 'TrpcRequest', 'AmqpRequest', 'RedisRequest', 'KafkaRequest'
   ])
 }
 

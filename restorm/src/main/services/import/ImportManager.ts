@@ -96,8 +96,19 @@ export function detectFormat(content: string, filePath?: string): string | null 
     }
   }
   // Phase 2 — content sniff, in registration order (original behaviour).
+  // JSON is parsed at most ONCE per pass (not once per JSON-capable
+  // provider) and handed to every `canImport` call as `parsed`; providers
+  // that sniff a JSON shape read it instead of re-parsing `content`
+  // themselves. `undefined` when `content` isn't valid JSON — providers
+  // fall back to their own (identical, so identically-failing) parse.
+  let parsed: unknown
+  try {
+    parsed = JSON.parse(content)
+  } catch {
+    parsed = undefined
+  }
   for (const provider of importProviders) {
-    if (provider.canImport(content, filePath)) return provider.format
+    if (provider.canImport(content, filePath, parsed)) return provider.format
   }
   return null
 }
@@ -201,103 +212,124 @@ export async function importFromContent(
   }
 }
 
+interface ReadSourceResult {
+  success: true
+  content: string
+  isUrl: boolean
+}
+
+interface ReadSourceError {
+  success: false
+  error: string
+  statusCode?: number
+  isAuthError?: boolean
+}
+
+/**
+ * Fetch (URL) or read (file path) the raw content behind an import
+ * `source`. Shared by `importFrom` (initial parse) and `runPostImportSeed`
+ * (re-reads the same source once the imported items have their final ids,
+ * to recover the exact bytes a format's `postImportSeed` needs — see
+ * `ImportProvider.postImportSeed` in `registry.ts`).
+ */
+async function readImportSource(
+  input: string,
+  extraHeaders?: Record<string, string>
+): Promise<ReadSourceResult | ReadSourceError> {
+  const isUrl = input.startsWith('http://') || input.startsWith('https://')
+  if (isUrl) {
+    let lastStatusCode: number | undefined
+    try {
+      // SSRF guard. The top-level import URL is EXPLICIT (the user/agent
+      // typed it), so loopback/private hosts are allowed — importing a spec
+      // from a local dev server is legitimate — but link-local /
+      // cloud-metadata is still blocked. Redirect hops are re-checked
+      // STRICTLY below so the explicit URL can't pivot to an internal /
+      // metadata target (the real SSRF vector).
+      assertSafeFetchUrl(input, { allowPrivateHosts: true })
+      const fetchInit: RequestInit = extraHeaders && Object.keys(extraHeaders).length > 0
+        ? { headers: extraHeaders }
+        : {}
+      // Log the full dispatched request (headers redacted for
+      // Authorization / Cookie) so auth flows can be diagnosed end
+      // to end — which headers reached the target vs. were lost
+      // along the way.
+      const redactedHeaders: Record<string, string> = {}
+      if (extraHeaders) {
+        for (const [k, v] of Object.entries(extraHeaders)) {
+          redactedHeaders[k] = /authorization|cookie/i.test(k) ? `${v.slice(0, 12)}…(redacted)` : v
+        }
+      }
+      logger.info('[ImportManager] dispatching fetch', {
+        url: input,
+        method: 'GET',
+        headers: redactedHeaders,
+        headerCount: Object.keys(extraHeaders ?? {}).length
+      })
+      // Import is user-initiated (URL paste / drag-drop on the
+      // Import modal) — bypass the firewall so we don't ask the
+      // user to authorise the very fetch they just typed a URL
+      // for, and so a fresh project with empty `projectOrigins`
+      // doesn't dead-end on auto-deny.
+      const response = await withFirewallBypass(() => fetchFollowingSafeRedirects(input, fetchInit))
+      logger.info('[ImportManager] fetch response', {
+        url: input,
+        status: response.status,
+        statusText: response.statusText
+      })
+      lastStatusCode = response.status
+      if (!response.ok) {
+        const isAuthError = response.status === 401 || response.status === 403
+        return {
+          success: false,
+          statusCode: response.status,
+          ...(isAuthError ? { isAuthError: true } : {}),
+          error: `HTTP ${response.status}: ${response.statusText}`
+        }
+      }
+      return { success: true, content: await response.text(), isUrl: true }
+    } catch (error) {
+      logger.error(`[ImportManager] Failed to fetch URL:`, error)
+      return {
+        success: false,
+        ...(lastStatusCode !== undefined ? { statusCode: lastStatusCode } : {}),
+        error: error instanceof Error ? error.message : String(error)
+      }
+    }
+  }
+
+  // Treat as file path
+  logger.info(`[ImportManager] Reading from file: ${input}`)
+  try {
+    return { success: true, content: await fs.readFile(input, 'utf-8'), isUrl: false }
+  } catch (error) {
+    logger.error(`[ImportManager] Failed to read file:`, error)
+    return { success: false, error: error instanceof Error ? error.message : String(error) }
+  }
+}
+
 /** Import from file path or URL */
 export async function importFrom(
   input: string,
   options: ImportOptions = {}
 ): Promise<ImportResult> {
   try {
-    let content: string
-    let source: string
-    let detectedFormat: string | null = null
-    let lastStatusCode: number | undefined
-
-    const isUrl = input.startsWith('http://') || input.startsWith('https://')
-    // Check if input is a URL
-    if (isUrl) {
-      source = input
-
-      try {
-        // SSRF guard. The top-level import URL is EXPLICIT (the user/agent
-        // typed it), so loopback/private hosts are allowed — importing a spec
-        // from a local dev server is legitimate — but link-local /
-        // cloud-metadata is still blocked. Redirect hops are re-checked
-        // STRICTLY below so the explicit URL can't pivot to an internal /
-        // metadata target (the real SSRF vector).
-        assertSafeFetchUrl(input, { allowPrivateHosts: true })
-        const fetchInit: RequestInit = options.extraHeaders && Object.keys(options.extraHeaders).length > 0
-          ? { headers: options.extraHeaders }
-          : {}
-        // Log the full dispatched request (headers redacted for
-        // Authorization / Cookie) so auth flows can be diagnosed end
-        // to end — which headers reached the target vs. were lost
-        // along the way.
-        const redactedHeaders: Record<string, string> = {}
-        if (options.extraHeaders) {
-          for (const [k, v] of Object.entries(options.extraHeaders)) {
-            redactedHeaders[k] = /authorization|cookie/i.test(k) ? `${v.slice(0, 12)}…(redacted)` : v
-          }
-        }
-        logger.info('[ImportManager] dispatching fetch', {
-          url: input,
-          method: 'GET',
-          headers: redactedHeaders,
-          headerCount: Object.keys(options.extraHeaders ?? {}).length
-        })
-        // Import is user-initiated (URL paste / drag-drop on the
-        // Import modal) — bypass the firewall so we don't ask the
-        // user to authorise the very fetch they just typed a URL
-        // for, and so a fresh project with empty `projectOrigins`
-        // doesn't dead-end on auto-deny.
-        const response = await withFirewallBypass(() => fetchFollowingSafeRedirects(input, fetchInit))
-        logger.info('[ImportManager] fetch response', {
-          url: input,
-          status: response.status,
-          statusText: response.statusText
-        })
-        lastStatusCode = response.status
-        if (!response.ok) {
-          const isAuthError = response.status === 401 || response.status === 403
-          return {
-            success: false,
-            items: [],
-            source,
-            statusCode: response.status,
-            ...(isAuthError ? { isAuthError: true } : {}),
-            error: `HTTP ${response.status}: ${response.statusText}`
-          }
-        }
-        content = await response.text()
-      } catch (error) {
-        logger.error(`[ImportManager] Failed to fetch URL:`, error)
-        return {
-          success: false,
-          items: [],
-          source,
-          ...(lastStatusCode !== undefined ? { statusCode: lastStatusCode } : {}),
-          error: error instanceof Error ? error.message : String(error)
-        }
-      }
-    } else {
-      // Treat as file path
-      logger.info(`[ImportManager] Reading from file: ${input}`)
-      source = input
-
-      try {
-        content = await fs.readFile(input, 'utf-8')
-      } catch (error) {
-        logger.error(`[ImportManager] Failed to read file:`, error)
-        return {
-          success: false,
-          items: [],
-          source,
-          error: error instanceof Error ? error.message : String(error)
-        }
+    const source = input
+    const read = await readImportSource(input, options.extraHeaders)
+    if (!read.success) {
+      return {
+        success: false,
+        items: [],
+        source,
+        ...(read.statusCode !== undefined ? { statusCode: read.statusCode } : {}),
+        ...(read.isAuthError ? { isAuthError: true } : {}),
+        error: read.error
       }
     }
+    const { content, isUrl } = read
 
     // Detect format
-    detectedFormat = detectFormat(content, input)
+    const detectedFormat = detectFormat(content, input)
 
     if (!detectedFormat) {
       logger.warn(`[ImportManager] Could not detect format for: ${source}`)
@@ -329,6 +361,66 @@ export async function importFrom(
       source: input,
       error: error instanceof Error ? error.message : String(error)
     }
+  }
+}
+
+export interface PostImportSeedResult {
+  success: boolean
+  error?: string
+}
+
+/**
+ * Run a format's optional `ImportProvider.postImportSeed` step after the
+ * imported items have landed with their FINAL ids. Re-reads/re-fetches
+ * `source` (the same one `importFrom` originally parsed) instead of caching
+ * the raw payload in memory across the preview → commit gap — no
+ * session-lifetime state to clean up, and it reuses the same trust model
+ * "Refresh from source" already relies on (re-fetching the same URL is
+ * assumed safe/idempotent for a spec endpoint).
+ *
+ * `expectedChecksum` — the `payloadChecksum` the original `importFrom` call
+ * stamped — guards against the source having changed in between: a mismatch
+ * means the freshly re-read content's parser ids may not line up with
+ * `idMap` (which was built against the ORIGINAL preview), so seeding is
+ * skipped rather than risk writing history against the wrong request.
+ *
+ * `idMap` is omitted by callers that inserted `parse()`'s output unchanged
+ * (the MCP import tool calls this directly, in-process, with no id
+ * regeneration) — the provider's `postImportSeed` treats a missing map as
+ * identity.
+ *
+ * A format with no `postImportSeed` (i.e. every format except HAR today) is
+ * a silent no-op success — most importers have nothing to seed.
+ */
+export async function runPostImportSeed(
+  source: string,
+  format: string,
+  idMap?: Record<string, string>,
+  options: { extraHeaders?: Record<string, string>; expectedChecksum?: string } = {}
+): Promise<PostImportSeedResult> {
+  const provider = importProviders.find((p) => p.format === format)
+  if (!provider?.postImportSeed) return { success: true }
+
+  const read = await readImportSource(source, options.extraHeaders)
+  if (!read.success) {
+    logger.warn('[ImportManager] postImportSeed: re-read of source failed, skipping', { source, format, error: read.error })
+    return { success: false, error: read.error }
+  }
+
+  if (options.expectedChecksum !== undefined) {
+    const checksum = `sha256:${createHash('sha256').update(read.content).digest('hex')}`
+    if (checksum !== options.expectedChecksum) {
+      logger.warn('[ImportManager] postImportSeed: source changed since import, skipping seed', { source, format })
+      return { success: false, error: 'source content changed since import' }
+    }
+  }
+
+  try {
+    await provider.postImportSeed(read.content, idMap)
+    return { success: true }
+  } catch (error) {
+    logger.error('[ImportManager] postImportSeed failed', { source, format, error })
+    return { success: false, error: error instanceof Error ? error.message : String(error) }
   }
 }
 

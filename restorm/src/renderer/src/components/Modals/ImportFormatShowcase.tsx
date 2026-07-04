@@ -15,6 +15,7 @@ import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Badge } from '../common/Badge'
 import {
+  Button,
   ElectricBorder,
   MagicCard,
   pickRandomBorderBeamProps,
@@ -183,6 +184,18 @@ interface ImportFormat {
   trademarkKey?: string
   /** Whether the marketing tier requires a paid plan. */
   isPro: boolean
+  /**
+   * When set, the bubble renders a small action button under the
+   * description. Unlike every other format here — which is a pure
+   * pitch for the paste/file/URL auto-detect flow the modal's source
+   * input already drives — this format's import needs its own form
+   * (e.g. gRPC reflection's host:port + TLS + metadata), so the
+   * button hands off to `onAction(actionId)` on the showcase's parent
+   * instead of describing what to paste.
+   */
+  actionId?: string
+  /** Translation key for the action button's label. */
+  actionLabelKey?: string
 }
 
 const IMPORT_FORMATS: readonly ImportFormat[] = [
@@ -225,7 +238,7 @@ const IMPORT_FORMATS: readonly ImportFormat[] = [
     inlineSvg: postmanSvgRaw,
     descriptionKey: 'import.formats.postman.description',
     trademarkKey: 'import.formats.postman.trademark',
-    isPro: true
+    isPro: false
   },
   {
     id: 'insomnia',
@@ -234,7 +247,7 @@ const IMPORT_FORMATS: readonly ImportFormat[] = [
     inlineSvg: insomniaSvgRaw,
     descriptionKey: 'import.formats.insomnia.description',
     trademarkKey: 'import.formats.insomnia.trademark',
-    isPro: true
+    isPro: false
   },
   {
     id: 'bruno',
@@ -243,7 +256,7 @@ const IMPORT_FORMATS: readonly ImportFormat[] = [
     inlineSvg: brunoSvgRaw,
     descriptionKey: 'import.formats.bruno.description',
     trademarkKey: 'import.formats.bruno.trademark',
-    isPro: true
+    isPro: false
   },
   {
     id: 'thunderclient',
@@ -252,7 +265,7 @@ const IMPORT_FORMATS: readonly ImportFormat[] = [
     iconCodicon: 'zap',
     descriptionKey: 'import.formats.thunderclient.description',
     trademarkKey: 'import.formats.thunderclient.trademark',
-    isPro: true
+    isPro: false
   },
   {
     id: 'graphql',
@@ -260,7 +273,7 @@ const IMPORT_FORMATS: readonly ImportFormat[] = [
     logoSrc: new URL('../../../../../assets/imgs/import-sources/graphql.svg', import.meta.url).href,
     descriptionKey: 'import.formats.graphql.description',
     trademarkKey: 'import.formats.graphql.trademark',
-    isPro: true
+    isPro: false
   },
   {
     id: 'grpc',
@@ -268,7 +281,17 @@ const IMPORT_FORMATS: readonly ImportFormat[] = [
     logoSrc: new URL('../../../../../assets/imgs/import-sources/grpc.svg', import.meta.url).href,
     descriptionKey: 'import.formats.grpc.description',
     trademarkKey: 'import.formats.grpc.trademark',
-    isPro: true
+    isPro: false
+  },
+  {
+    id: 'grpc-reflection',
+    title: 'gRPC (reflection)',
+    logoSrc: new URL('../../../../../assets/imgs/import-sources/grpc.svg', import.meta.url).href,
+    descriptionKey: 'import.formats.grpcReflection.description',
+    trademarkKey: 'import.formats.grpc.trademark',
+    actionId: 'grpc-reflection',
+    actionLabelKey: 'import.formats.grpcReflection.action',
+    isPro: false
   },
   {
     id: 'soap',
@@ -276,7 +299,7 @@ const IMPORT_FORMATS: readonly ImportFormat[] = [
     logoSrc: null,
     inlineSvg: soapSvgRaw,
     descriptionKey: 'import.formats.soap.description',
-    isPro: true
+    isPro: false
   },
   {
     id: 'websocket',
@@ -285,7 +308,7 @@ const IMPORT_FORMATS: readonly ImportFormat[] = [
     inlineSvg: websocketSvgRaw,
     descriptionKey: 'import.formats.websocket.description',
     trademarkKey: 'import.formats.websocket.trademark',
-    isPro: true
+    isPro: false
   },
   {
     id: 'kafka',
@@ -294,7 +317,7 @@ const IMPORT_FORMATS: readonly ImportFormat[] = [
     inlineSvg: kafkaSvgRaw,
     descriptionKey: 'import.formats.kafka.description',
     trademarkKey: 'import.formats.kafka.trademark',
-    isPro: true
+    isPro: false
   },
   {
     id: 'socketio',
@@ -303,14 +326,14 @@ const IMPORT_FORMATS: readonly ImportFormat[] = [
     inlineSvg: socketioSvgRaw,
     descriptionKey: 'import.formats.socketio.description',
     trademarkKey: 'import.formats.socketio.trademark',
-    isPro: true
+    isPro: false
   },
   {
     id: 'odata',
     title: 'OData',
     logoSrc: new URL('../../../../../assets/imgs/import-sources/odata.svg', import.meta.url).href,
     descriptionKey: 'import.formats.odata.description',
-    isPro: true
+    isPro: false
   },
   {
     id: 'mqtt',
@@ -318,7 +341,7 @@ const IMPORT_FORMATS: readonly ImportFormat[] = [
     logoSrc: new URL('../../../../../assets/imgs/import-sources/mqtt.svg', import.meta.url).href,
     descriptionKey: 'import.formats.mqtt.description',
     trademarkKey: 'import.formats.mqtt.trademark',
-    isPro: true
+    isPro: false
   },
   {
     // No first-party Paw logo asset is shipped yet — a generic codicon
@@ -331,6 +354,90 @@ const IMPORT_FORMATS: readonly ImportFormat[] = [
     descriptionKey: 'import.formats.paw.description',
     trademarkKey: 'import.formats.paw.trademark',
     isPro: false
+  },
+  // The next nine formats (HAR through API Blueprint) all lack a
+  // first-party logo asset — same situation as Paw above — so they use
+  // a codicon glyph picked for a loose visual match to what the format
+  // represents until a real SVG pass replaces them.
+  {
+    id: 'har',
+    title: 'HAR',
+    logoSrc: null,
+    iconCodicon: 'browser',
+    descriptionKey: 'import.formats.har.description',
+    isPro: false
+  },
+  {
+    id: 'rest-client',
+    title: 'REST Client',
+    logoSrc: null,
+    iconCodicon: 'extensions',
+    descriptionKey: 'import.formats.restClient.description',
+    trademarkKey: 'import.formats.restClient.trademark',
+    isPro: false
+  },
+  {
+    id: 'httpie',
+    title: 'HTTPie',
+    logoSrc: null,
+    iconCodicon: 'send',
+    descriptionKey: 'import.formats.httpie.description',
+    trademarkKey: 'import.formats.httpie.trademark',
+    isPro: false
+  },
+  {
+    id: 'smithy',
+    title: 'Smithy',
+    logoSrc: null,
+    iconCodicon: 'symbol-namespace',
+    descriptionKey: 'import.formats.smithy.description',
+    trademarkKey: 'import.formats.smithy.trademark',
+    isPro: false
+  },
+  {
+    id: 'typespec',
+    title: 'TypeSpec',
+    logoSrc: null,
+    iconCodicon: 'symbol-interface',
+    descriptionKey: 'import.formats.typespec.description',
+    trademarkKey: 'import.formats.typespec.trademark',
+    isPro: false
+  },
+  {
+    id: 'raml',
+    title: 'RAML',
+    logoSrc: null,
+    iconCodicon: 'list-tree',
+    descriptionKey: 'import.formats.raml.description',
+    trademarkKey: 'import.formats.raml.trademark',
+    isPro: false
+  },
+  {
+    id: 'wadl',
+    title: 'WADL',
+    logoSrc: null,
+    iconCodicon: 'file-code',
+    descriptionKey: 'import.formats.wadl.description',
+    trademarkKey: 'import.formats.wadl.trademark',
+    isPro: false
+  },
+  {
+    id: 'thrift',
+    title: 'Thrift',
+    logoSrc: null,
+    iconCodicon: 'type-hierarchy',
+    descriptionKey: 'import.formats.thrift.description',
+    trademarkKey: 'import.formats.thrift.trademark',
+    isPro: false
+  },
+  {
+    id: 'api-blueprint',
+    title: 'API Blueprint',
+    logoSrc: null,
+    iconCodicon: 'markdown',
+    descriptionKey: 'import.formats.apiBlueprint.description',
+    trademarkKey: 'import.formats.apiBlueprint.trademark',
+    isPro: false
   }
 ]
 
@@ -339,6 +446,7 @@ type Phase = 'in' | 'out' | 'gap'
 interface ShowcaseBubbleProps {
   format: ImportFormat
   phase: 'in' | 'out'
+  onAction?: ((actionId: string) => void) | undefined
 }
 
 /**
@@ -351,8 +459,14 @@ interface ShowcaseBubbleProps {
  * silhouette-with-tail variant; MagicCard runs as the stock component
  * since its radial gradient fades naturally past the silhouette.
  */
-const ShowcaseBubble: React.FC<ShowcaseBubbleProps> = ({ format, phase }) => {
+const ShowcaseBubble: React.FC<ShowcaseBubbleProps> = ({ format, phase, onAction }) => {
   const { t } = useTranslation()
+  // Narrowed once to a local `const` so the `onClick` closure below keeps
+  // the "defined" narrowing from the `actionId !== undefined` check — a
+  // repeated `format.actionId` property read inside a nested closure loses
+  // that narrowing (TS treats object properties as re-widenable across
+  // function boundaries, plain `const` bindings aren't).
+  const { actionId } = format
   const bubbleRef = useRef<HTMLDivElement | null>(null)
   const [silhouette, setSilhouette] = useState<{ offsetPath: string; mask: string } | null>(null)
   // Pick one of the four ECUI border effects (and a coherent set of
@@ -435,9 +549,25 @@ const ShowcaseBubble: React.FC<ShowcaseBubbleProps> = ({ format, phase }) => {
             aria-label={`${format.title} logo`}
           />
         ) : null}
-        <p className="import-format-showcase-description">
-          {t(format.descriptionKey)}
-        </p>
+        {/* Text column, separate from the row-level flex the logo sits
+            in — the description and (when present) the action button
+            below it need to stack vertically, which a bare sibling
+            `<p>` of the logo couldn't do inside a row-direction flex
+            container. */}
+        <div className="import-format-showcase-text">
+          <p className="import-format-showcase-description">
+            {t(format.descriptionKey)}
+          </p>
+          {actionId !== undefined && (
+            <Button
+              className="import-format-showcase-action"
+              onClick={() => { onAction?.(actionId) }}
+              data-testid={`import-format-showcase-action-${actionId}`}
+            >
+              {t(format.actionLabelKey ?? '', format.title)}
+            </Button>
+          )}
+        </div>
       </div>
       {format.trademarkKey !== undefined && (
         <footer className="import-format-showcase-trademark">
@@ -579,7 +709,17 @@ function renderProBorderEffect(
   return <ElectricBorder {...proEffect.electric} borderRadius="12px" />
 }
 
-export const ImportFormatShowcase: React.FC = () => {
+export interface ImportFormatShowcaseProps {
+  /**
+   * Fired when the visible bubble's action button is clicked (see
+   * `ImportFormat.actionId`). Only the `grpc-reflection` entry sets one
+   * today — the parent `ImportModal` uses it to open the dedicated
+   * `GrpcReflectionImportModal` form.
+   */
+  onAction?: ((actionId: string) => void) | undefined
+}
+
+export const ImportFormatShowcase: React.FC<ImportFormatShowcaseProps> = ({ onAction }) => {
   const [index, setIndex] = useState(0)
   // `phase` drives the bubble's lifecycle:
   //   'in'  → bubble mounted, fade-in animation, stays full-opacity for STEADY_MS
@@ -617,6 +757,23 @@ export const ImportFormatShowcase: React.FC = () => {
     }
   }, [])
 
+  // e2e-only escape hatch: the 15s-per-card rotation makes waiting for a
+  // specific format (e.g. `grpc-reflection`, whose action button an e2e
+  // scenario needs to click) impractically slow and flaky. Jump straight to
+  // a format by id instead of waiting out the cycle. Inert in production —
+  // nothing calls it outside a test. Mirrors `useE2eDocumentUpdateBridge`.
+  useEffect(() => {
+    const w = window as unknown as { __e2eSetImportFormatShowcaseIndex?: (id: string) => boolean }
+    w.__e2eSetImportFormatShowcaseIndex = (id: string): boolean => {
+      const idx = IMPORT_FORMATS.findIndex((f) => f.id === id)
+      if (idx === -1) return false
+      setIndex(idx)
+      setPhase('in')
+      return true
+    }
+    return () => { delete w.__e2eSetImportFormatShowcaseIndex }
+  }, [])
+
   const format = IMPORT_FORMATS[index]
   if (format === undefined) return null
 
@@ -631,7 +788,7 @@ export const ImportFormatShowcase: React.FC = () => {
           `key={format.id}` is redundant with the unmount but keeps
           things safe if we ever shorten the gap to zero. */}
       {phase !== 'gap' && (
-        <ShowcaseBubble key={format.id} format={format} phase={phase} />
+        <ShowcaseBubble key={format.id} format={format} phase={phase} onAction={onAction} />
       )}
     </div>
   )

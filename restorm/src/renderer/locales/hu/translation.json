@@ -274,10 +274,17 @@
         "socketio": "Socket.IO-kérés",
         "mqtt": "MQTT request",
         "mqttServer": "MQTT broker",
+        "sse": "SSE-kérés",
         "grpcServer": "gRPC mock-kiszolgáló",
         "soapServer": "SOAP mock-kiszolgáló",
         "graphqlServer": "GraphQL mock-kiszolgáló",
-        "odataServer": "OData mock-kiszolgáló"
+        "odataServer": "OData mock-kiszolgáló",
+        "trpc": "tRPC-kérés",
+        "amqp": "AMQP-kérés",
+        "redis": "Redis-kérés",
+        "stomp": "STOMP kérés",
+        "kafkaProduce": "Kafka-kérés – Előállítás",
+        "kafkaConsume": "Kafka-kérés – Fogyasztás"
       }
     },
     "deleteConfirm": {
@@ -475,6 +482,12 @@
       "clientStream": "Client streaming",
       "bidi": "Bidirectional streaming"
     },
+    "transport": {
+      "grpc": "gRPC",
+      "grpcWeb": "gRPC-Web",
+      "connect": "Connect",
+      "streamingUnsupported": "Ez az átviteli mód nem támogatja a kliens- vagy kétirányú streamelést HTTP/1.1 protokollon keresztül. Használja helyette a natív gRPC átvitelt."
+    },
     "server": {
       "proto": "Proto",
       "methods": "Mock metódusok",
@@ -493,6 +506,12 @@
       "notListening": "Nem figyel",
       "listenFailed": "A gRPC-kiszolgáló indítása nem sikerült",
       "snippetsUnavailable": "Mock-kiszolgálóhoz nem érhetők el kódrészletek."
+    },
+    "reflection": {
+      "refresh": "Frissítés reflectionből",
+      "refreshFailed": "A gRPC reflection általi frissítés sikertelen",
+      "unsupported": "Ez a szerver nem támogatja a gRPC reflectiont — importáljon helyette egy .proto fájlt.",
+      "unknownError": "Ismeretlen hiba"
     }
   },
   "soap": {
@@ -540,6 +559,114 @@
     "routePlaceholder": "Útvonal (nem kötelező)",
     "clientsConnected": "{{count}} kliens csatlakozva",
     "notListening": "Nem figyel"
+  },
+  "jsonrpc": {
+    "send": "Küldés",
+    "urlPlaceholder": "JSON-RPC végpont URL",
+    "methodPlaceholder": "metódus",
+    "idPlaceholder": "id (automatikus)",
+    "notificationModeTooltip": "Értesítési mód — nincs id, nincs várt válasz",
+    "tabs": {
+      "params": "Paraméterek",
+      "headers": "Fejlécek"
+    },
+    "response": {
+      "notificationSent": "Értesítés elküldve",
+      "errorLabel": "JSON-RPC hiba {{code}}:"
+    }
+  },
+  "jsonrpcBatch": {
+    "send": "Köteg küldése",
+    "tabs": {
+      "calls": "Hívások"
+    },
+    "empty": "Még nincs hívás. Adjon hozzá egyet alább.",
+    "methodPlaceholder": "metódus",
+    "idPlaceholder": "id (automatikus)",
+    "moveUp": "Feljebb",
+    "moveDown": "Lejjebb",
+    "remove": "Hívás eltávolítása",
+    "paramsLabel": "Paraméterek (JSON)",
+    "add": "Hívás hozzáadása",
+    "response": {
+      "unmatched": "Nincs egyező válaszbejegyzés."
+    }
+  },
+  "sse": {
+    "headers": "Fejlécek",
+    "noFrames": "Még nincsenek események",
+    "urlPlaceholder": "SSE URL",
+    "framesTruncated": "A legutóbbi {{shown}} keret megjelenítve a(z) {{total}} közül",
+    "showAllFrames": "Összes megjelenítése"
+  },
+  "redis": {
+    "connected": "Csatlakoztatva",
+    "disconnected": "Lecsatlakozva",
+    "noMessages": "Még nincsenek üzenetek",
+    "noCommandsYet": "Még nem futott le parancs",
+    "urlPlaceholder": "Redis URL (redis:// vagy rediss://)",
+    "passwordPlaceholder": "Jelszó (opcionális)",
+    "subscribe": "Feliratkozás",
+    "unsubscribe": "Leiratkozás",
+    "run": "Futtatás",
+    "subscribeMode": "Feliratkozás",
+    "commandMode": "Parancs",
+    "command": "Parancs",
+    "args": "Argumentumok",
+    "argsPlaceholder": "Parancs argumentumai",
+    "freeform": "Szabad",
+    "freeformPlaceholder": "Szabad parancs (felülírja a kiválasztást)",
+    "tabs": {
+      "channels": "Csatornák",
+      "command": "Parancs"
+    }
+  },
+  "kafka": {
+    "brokersPlaceholder": "Broker lista (host:port,host:port)",
+    "clientId": "Kliensazonosító",
+    "clientIdPlaceholder": "restorm",
+    "mode": {
+      "produce": "Előállítás",
+      "consume": "Fogyasztás",
+      "browse": "Böngészés"
+    },
+    "auth": {
+      "title": "Hitelesítés",
+      "mechanism": "SASL",
+      "username": "Felhasználónév",
+      "password": "Jelszó",
+      "tls": "TLS"
+    },
+    "topic": "Téma",
+    "topicPlaceholder": "téma-neve",
+    "key": "Kulcs",
+    "keyPlaceholder": "üzenetkulcs (opcionális)",
+    "value": "Érték",
+    "headers": "Fejlécek",
+    "partition": "Partíció",
+    "partitionPlaceholder": "auto",
+    "groupId": "Csoportazonosító",
+    "groupIdPlaceholder": "restorm-consumer",
+    "fromOffsetLabel": "Kezdés innen",
+    "fromOffset": {
+      "earliest": "Legkorábbi",
+      "latest": "Legújabb",
+      "specific": "Meghatározott"
+    },
+    "specificOffset": "Offset",
+    "partitions": "Partíciók",
+    "partitionsPlaceholder": "0,1,2 (üres = összes)",
+    "peekCount": "Üzenetek száma",
+    "produce": "Előállítás",
+    "startConsuming": "Fogyasztás indítása",
+    "stopConsuming": "Fogyasztás leállítása",
+    "peek": "Betekintés",
+    "noMessages": "Még nincsenek üzenetek",
+    "connected": "Csatlakoztatva",
+    "disconnected": "Lecsatlakozva",
+    "producedTo": "Előállítva ide",
+    "offset": "Offset",
+    "messages": "Üzenetek"
   },
   "search": {
     "placeholder": "Keresés...",
@@ -886,6 +1013,10 @@
         "description": "Dobjon be egy .proto fájlt (vagy egy mappát belőlük), és a Restorm végigjárja minden szolgáltatást, minden RPC-t, minden üzenetet — minden metódusból típusos kérést készít, amelyet a gRPC-végrehajtón keresztül küldhet, codegen érintése nélkül.",
         "trademark": "A gRPC a Cloud Native Computing Foundation projektje."
       },
+      "grpcReflection": {
+        "description": "Nincs .proto fájlja? Irányítsa a Restormot egy futó gRPC-szerverre, amely reflectiont kínál — lekérdezi a grpc.reflection.v1alpha.ServerReflection szolgáltatást, felfedezi az összes szolgáltatást és metódust, és ugyanazt a típusos kéréslistát építi fel, mint egy proto fájl importálása, helyben gyorsítótárazva az offline használathoz.",
+        "action": "Csatlakozás egy szerverhez…"
+      },
       "soap": {
         "description": "Van egy WSDL-je? Illessze be (vagy az URL-jét) — a Restorm elemzi minden <port>-ot és <operation>-t, és küldésre kész SOAP-borítékokat hoz létre a megfelelő SOAPAction fejléccel, séma-típusos törzsvázakkal és a WSDL által deklarált hitelesítési sémával."
       },
@@ -911,7 +1042,57 @@
       "paw": {
         "description": "Pawról érkezik? Dobja be a JSON exportját (File → Export → JSON az alkalmazásban — a natív .paw csomagot nem olvassuk közvetlenül). A Restorm újraépít minden kérést, fejlécet, törzset és környezetet, és a Paw dinamikus értékeit (időbélyegek, véletlen karakterláncok, UUID-k) a legközelebbi Restorm megfelelőjükre képezi le.",
         "trademark": "A Paw a RapidAPI, Inc. bejegyzett védjegye, itt kizárólag kompatibilitási hivatkozásként használva."
+      },
+      "har": {
+        "description": "Rögzített egy hálózati nyomkövetést a böngészője fejlesztői eszközeiből? Dobja be az exportált .har fájlt — a Restorm végigmegy minden rögzített híváson, és lejátszható kéréssé alakítja, fejlécekkel és törzzsel együtt."
+      },
+      "restClient": {
+        "description": "A VS Code REST Client bővítményéből érkezik? Illessze be vagy dobja be a .http / .rest fájlt — a Restorm elemzi az összes kérésblokkot, feloldja a @variables-eket, és Restorm-fává építi újra őket.",
+        "trademark": "A REST Client a megfelelő tulajdonos védjegye, itt kizárólag kompatibilitási hivatkozásként használva."
+      },
+      "httpie": {
+        "description": "Dobja be a HTTPie Desktop gyűjteményexportját vagy egy CLI-munkamenet fájlt — a Restorm beolvassa az összes kérést (munkamenet esetén annak tartós fejléceit is), és használatra készen újraépíti őket.",
+        "trademark": "A HTTPie a megfelelő tulajdonos védjegye, itt kizárólag kompatibilitási hivatkozásként használva."
+      },
+      "smithy": {
+        "description": "Illesszen be egy Smithy modellt — a JSON AST-ot vagy a kézzel írt IDL-t —, és a Restorm végigmegy minden szolgáltatáson, erőforráson és műveleten, hogy egy megfelelő mappát hozzon létre használatra kész kérésekből.",
+        "trademark": "A Smithy az Amazon Web Services projektje."
+      },
+      "typespec": {
+        "description": "Illessze be a TypeSpec definícióját (.tsp) — a Restorm a háttérben OpenAPI-vá fordítja, és pontosan úgy importálja, mint egy kézzel írt specifikációt: műveletek, paraméterek és sémák beleértve.",
+        "trademark": "A TypeSpec a Microsoft projektje."
+      },
+      "raml": {
+        "description": "Illesszen be egy RAML 1.0 vagy 0.8 dokumentumot — a Restorm leképezi az erőforrásfáját egymásba ágyazott mappákba, metódusonként egy kéréssel, a modellezett típusokkal együtt.",
+        "trademark": "A RAML a RAML Workgroup által karbantartott specifikáció."
+      },
+      "wadl": {
+        "description": "Még mindig karbantart egy WADL dokumentumot? Illessze be az XML-t — a Restorm végigmegy az egymásba ágyazott <resource> fáján, és létrehoz egy megfelelő mappát kérésekből, metódusokkal és paraméterekkel együtt.",
+        "trademark": "A WADL-t a Sun Microsystems nyújtotta be a W3C-nek Member Submission-ként."
+      },
+      "thrift": {
+        "description": "Illesszen be egy Apache Thrift IDL (.thrift) fájlt — a Restorm beolvas minden szolgáltatást, metódust, structot és enumot, hogy böngészhesse az API felépítését. A Thrift bináris protokollja még nem futtatható a Restormból, ezért ez az importálás csak dokumentációs célú.",
+        "trademark": "Az Apache Thrift az Apache Software Foundation védjegye."
+      },
+      "apiBlueprint": {
+        "description": "Illesszen be egy API Blueprint (.apib) dokumentumot — a Restorm minden erőforráscsoportot és átmenetet egy kérésmappává elemez, dokumentált metódus-/válaszpáronként eggyel.",
+        "trademark": "Az API Blueprint egy eredetileg az Apiary által létrehozott specifikáció."
       }
+    },
+    "grpcReflection": {
+      "title": "gRPC-szerver (reflection)",
+      "hint": "Kérdezze le egy futó gRPC-szerver reflection szolgáltatását, hogy .proto fájl nélkül felfedezze a szolgáltatásait és metódusait.",
+      "addressLabel": "Szerver címe (gazdagép:port)",
+      "addressPlaceholder": "localhost:9000",
+      "tlsLabel": "TLS használata",
+      "metadataLabel": "Metaadatok (opcionális hitelesítési fejlécek)",
+      "connecting": "Csatlakozás…",
+      "import": "Importálás",
+      "reimportedTitle": "gRPC reflection újraimportálva",
+      "reimportedNoop": "Már naprakész — nincs változás a szerveren.",
+      "reimportedSummary": "+{{added}} / -{{removed}} / ↻{{merged}} — töltse be újra a projektet a változások megtekintéséhez.",
+      "unsupported": "Ez a szerver nem támogatja a gRPC reflectiont — importáljon helyette egy .proto fájlt.",
+      "unknownError": "Ismeretlen hiba"
     },
     "loading": "Elemzés...",
     "noResults": "Nem található kérés",
@@ -1075,14 +1256,22 @@
       "socketioSend": "Socket.IO send",
       "socketioClose": "Socket.IO close",
       "websocketConnect": "WebSocket connect",
+      "sseConnect": "SSE connect",
       "websocketSend": "WebSocket send",
       "websocketClose": "WebSocket close",
+      "sseClose": "SSE close",
       "grpcConnect": "gRPC connect",
       "grpcSend": "gRPC send",
       "grpcClose": "gRPC close",
       "mqttConnect": "MQTT connect",
       "mqttSend": "MQTT publish",
       "mqttClose": "MQTT close",
+      "amqpConnect": "AMQP-kapcsolat",
+      "amqpPublish": "AMQP-közzététel",
+      "amqpClose": "AMQP-lezárás",
+      "redisSubscribe": "Redis subscribe",
+      "redisClose": "Redis close",
+      "redisCommand": "Redis command",
       "httpListen": "HTTP server",
       "httpClose": "HTTP close",
       "grpcServerClose": "gRPC-kiszolgáló bezárása",
@@ -1093,7 +1282,13 @@
       "odataListen": "OData server",
       "odataClose": "OData close",
       "graphqlSubscribe": "GraphQL feliratkozás",
-      "graphqlUnsubscribe": "GraphQL leiratkozás"
+      "graphqlUnsubscribe": "GraphQL leiratkozás",
+      "stompConnect": "STOMP kapcsolódás",
+      "stompSend": "STOMP küldés",
+      "stompClose": "STOMP bezárása",
+      "kafkaProduce": "Kafka produce",
+      "kafkaConsume": "Kafka consume",
+      "kafkaClose": "Kafka close"
     },
     "comparator": {
       "result": "eredmény"
@@ -1654,8 +1849,10 @@
       "socketioSend": "Üzenetet küld egy már nyitott Socket.IO-kapcsolaton.",
       "socketioClose": "Lezár egy már nyitott Socket.IO-kapcsolatot.",
       "websocketConnect": "Megnyit egy nyers WebSocket-kapcsolatot, és minden fogadott üzenetet újraküld a portján.",
+      "sseConnect": "Megnyit egy hosszú élettartamú SSE (Server-Sent Events) kapcsolatot, és minden fogadott keretet újra kibocsát a portján.",
       "websocketSend": "Adatot küld egy már nyitott WebSocket-kapcsolaton.",
       "websocketClose": "Lezár egy már nyitott WebSocket-kapcsolatot.",
+      "sseClose": "Bezár egy már nyitott SSE-kapcsolatot.",
       "grpcConnect": "Megnyit egy streaming gRPC-hívást, és minden fogadott keretet újraküld a message portján.",
       "grpcSend": "Kérésüzenetet ír egy már nyitott streaming gRPC-hívásra.",
       "grpcClose": "Félig lezár (half-close) egy már nyitott streaming gRPC-hívást.",
@@ -1668,9 +1865,15 @@
       "mqttConnect": "Tartós MQTT-kapcsolatot nyit egy kötött kérésből, és feliratkozik a témájára; minden fogadott üzenetet újraküld a `message` portján.",
       "mqttSend": "Adatot publikál egy már nyitott MQTT-kapcsolaton (a témájára).",
       "mqttClose": "Lezár egy már nyitott MQTT-kapcsolatot.",
+      "amqpConnect": "Tartós AMQP-kapcsolatot nyit egy kötött kérésből, és fogyasztja annak várólistáját; minden fogadott üzenetet újra kibocsát a `message` porton.",
+      "amqpPublish": "Egy hasznos adatot tesz közzé egy már megnyitott AMQP-kapcsolaton (a kötött kérés exchange-ére/routing key-jére).",
+      "amqpClose": "Lezár egy már megnyitott AMQP-kapcsolatot.",
       "mqttConnectServer": "Elindít egy helyi MQTT-brókert (port + témaszűrő); feliratkozik a témaszűrőjére, és minden fogadott üzenetet újraküld a `message` portján. A küldés a csatlakozott feliratkozóknak publikál.",
       "mqttSendServer": "Üzenetet publikál a hivatkozott MQTT-bróker minden feliratkozójának.",
       "mqttCloseServer": "Leállítja a hivatkozott MQTT-brókert, és lekapcsolja az ügyfeleit.",
+      "redisSubscribe": "Tartós Redis feliratkozási kapcsolatot nyit egy kötött kérésből, és figyeli a csatornáit; minden fogadott üzenetet újraküld a `message` portján.",
+      "redisClose": "Lezár egy már nyitott Redis feliratkozási kapcsolatot.",
+      "redisCommand": "Lefuttat egy kötött Redis parancsot (egyetlen parancs egy új kapcsolaton, majd bontás), és kibocsátja a válaszát.",
       "toast": "Toast-értesítést jelenít meg a Restorm felületén, miközben a forgatókönyv fut.",
       "httpListen": "Hosts a local HTTP mock server and listens indefinitely. `connected` fires once it is listening; each served request re-emits its data on the `served` port. The server stays up until an HTTP close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
       "httpClose": "Leállít egy már figyelő HTTP-mockkiszolgálót (amelyet egy HTTP-kiszolgálócsomópont deklarál), és felszabadítja a portját.",
@@ -1683,7 +1886,13 @@
       "odataListen": "Helyi OData v4 mock szolgáltatást üzemeltet, és határozatlan ideig figyel. A `connected` akkor aktiválódik, amint figyel; minden kiszolgált kérés újraküldi az adatait a `served` porton. A kiszolgáló az OData lezárásig (vagy egy Stopig) fut, majd a `done` aktiválódik. Nincs response kimenet — kiszolgál, nem hív kifelé.",
       "odataClose": "Leállít egy már figyelő OData mock szolgáltatást (amelyet egy OData kiszolgáló csomópont deklarált), és felszabadítja a portját.",
       "graphqlSubscribe": "Hosszú életű GraphQL-feliratkozást nyit ügyfélként SSE-n keresztül és figyel. A `connected` akkor sül el, amikor a folyam megnyílik; minden beérkező hasznos teher újra kibocsátódik a `message` porton (a feliratkozás csak fogadó, megnevezett események nélkül). A folyam nyitva marad egy GraphQL-leiratkozásig (vagy leállításig), illetve amíg a kiszolgáló be nem fejezi, majd a `done` sül el.",
-      "graphqlUnsubscribe": "Leállít egy már nyitott GraphQL-feliratkozást (amelyet egy GraphQL-feliratkozás csomópont deklarált), lebontva annak SSE-folyamát."
+      "graphqlUnsubscribe": "Leállít egy már nyitott GraphQL-feliratkozást (amelyet egy GraphQL-feliratkozás csomópont deklarált), lebontva annak SSE-folyamát.",
+      "stompConnect": "Tartós STOMP-a-WebSocketen-keresztül kapcsolatot nyit: elvégzi a CONNECT/CONNECTED kézfogást, majd feliratkozik minden konfigurált célra, és minden fogadott keretet újra kibocsát a portján.",
+      "stompSend": "SEND keretet küld egy már megnyitott STOMP kapcsolaton.",
+      "stompClose": "DISCONNECT-et küld, és lezár egy már megnyitott STOMP kapcsolatot.",
+      "kafkaProduce": "Egy kötött Kafka-kérést egyszeri előállításként futtat le, és az eredményt (téma/partíció/offset) `response`-ként küldi ki.",
+      "kafkaConsume": "Tartós Kafka-fogyasztót nyit egy kötött kérésből, és minden fogadott üzenetet újraküld a `message` portján.",
+      "kafkaClose": "Lezár egy már nyitott Kafka-fogyasztót."
     },
     "legend": {
       "title": "Jelmagyarázat",
@@ -1732,6 +1941,9 @@
     "websocket": {
       "message": "message"
     },
+    "sse": {
+      "message": "message"
+    },
     "grpc": {
       "message": "message"
     },
@@ -1777,6 +1989,36 @@
     "lwtTopicPlaceholder": "will/topic",
     "lwtPayload": "Payload",
     "lwtPayloadPlaceholder": "will message"
+  },
+  "amqp": {
+    "urlPlaceholder": "AMQP URL (amqp:// vagy amqps://)",
+    "vhost": "Virtuális gazda",
+    "vhostPlaceholder": "/",
+    "username": "Felhasználónév",
+    "password": "Jelszó",
+    "mode": "Mód",
+    "modePublish": "Közzététel",
+    "modeSubscribe": "Feliratkozás",
+    "modeBrowse": "Böngészés",
+    "exchange": "Exchange",
+    "exchangePlaceholder": "(alapértelmezett exchange)",
+    "routingKey": "Routing key",
+    "routingKeyPlaceholder": "routing.key",
+    "queue": "Várólista",
+    "queuePlaceholder": "várólista neve",
+    "autoAck": "Automatikus nyugtázás",
+    "prefetch": "Prefetch",
+    "browsePeekCount": "Előnézeti darabszám",
+    "connect": "Csatlakozás",
+    "connecting": "Csatlakozás…",
+    "disconnect": "Leválasztás",
+    "connected": "Csatlakoztatva",
+    "disconnected": "Lecsatlakozva",
+    "send": "Küldés",
+    "browseButton": "Böngészés",
+    "noMessages": "Még nincsenek üzenetek",
+    "peeked": "Megtekintve",
+    "messages": "Üzenetek"
   },
   "mcpLogs": {
     "title": "MCP naplók",
@@ -2043,5 +2285,42 @@
       "noSubscription": "Nincs kezelhető aktív előfizetés.",
       "error": "Az előfizetési portál nem nyitható meg. Próbálja újra."
     }
+  },
+  "trpc": {
+    "send": "Küldés",
+    "urlPlaceholder": "tRPC szerver URL-je",
+    "procedurePlaceholder": "Eljárás (pl. user.get)",
+    "kindQuery": "Lekérdezés",
+    "kindMutation": "Mutáció",
+    "showRawEnvelope": "Nyers boríték megjelenítése",
+    "kindSelectLabel": "Hívás típusa",
+    "tabs": {
+      "headers": "Fejlécek",
+      "body": "Törzs"
+    }
+  },
+  "stomp": {
+    "connect": "Kapcsolódás",
+    "disconnect": "Leválasztás",
+    "connected": "Kapcsolódva",
+    "disconnected": "Leválasztva",
+    "noMessages": "Még nincsenek keretek",
+    "version": "STOMP verzió",
+    "tabs": {
+      "connect": "Kapcsolat",
+      "subscriptions": "Feliratkozások",
+      "send": "Küldés"
+    },
+    "ackMode": {
+      "auto": "auto",
+      "client": "client",
+      "clientIndividual": "client-individual"
+    },
+    "subscriptionIdLabel": "Feliratkozás azonosítója",
+    "removeSubscription": "Feliratkozás eltávolítása",
+    "addSubscription": "Feliratkozás hozzáadása",
+    "sendDestination": "Cél",
+    "ack": "ACK",
+    "nack": "NACK"
   }
 }

@@ -21,8 +21,19 @@ export interface ImportProvider {
    * Return `true` only when this provider is confident it can handle
    * the content; return `false` if unsure (the registry tries the next
    * provider).
+   *
+   * `parsed` is a best-effort `JSON.parse(content)` result the registry
+   * computes ONCE per detection pass and hands to every provider, so a
+   * JSON-format provider's sniff doesn't re-parse the same payload once per
+   * candidate. It's `undefined` when `content` isn't valid JSON (or wasn't
+   * parsed at all, e.g. the extension-anchored probe in `detectFormat` that
+   * calls `canImport('', filePath)`). A JSON-format provider should read
+   * `parsed` when present and fall back to parsing `content` itself
+   * otherwise — the fallback keeps direct/unit-test calls (which don't pass
+   * a third argument) behaviour-identical. Text/XML-format providers ignore
+   * this parameter entirely.
    */
-  canImport(content: string, filePath?: string): boolean
+  canImport(content: string, filePath?: string, parsed?: unknown): boolean
   /**
    * Full parse → EnvironmentFolder. Called only after `canImport` returned
    * true. `opts.filePath` carries the real on-disk path for file-based
@@ -37,6 +48,23 @@ export interface ImportProvider {
    * `TypeSpecImportService.ts`'s Trust model note for why.
    */
   parse(content: string, opts: { sourceUrl?: string; filePath?: string }): EnvironmentFolder
+
+  /**
+   * Optional post-import side effect, run AFTER the imported items have
+   * landed in the collection store with their real ids. `idMap` maps every
+   * id `parse()` originally stamped to the id the item actually got — omit
+   * it when a caller (e.g. the MCP import tool) inserts `parse()`'s output
+   * unchanged, pass one when a caller (e.g. the renderer's File → Import
+   * flow) regenerates ids with `crypto.randomUUID()` to avoid tree
+   * collisions. Formats that need to seed request-keyed side data (HAR's
+   * recorded responses → response history) implement this instead of
+   * reaching into `ResponseHistoryService` from `parse()`, which must stay
+   * a pure, synchronous function. Re-derives its own ids from `content`
+   * (same deterministic scheme `parse()` used) rather than walking the
+   * parsed tree, so it works whether the caller kept the original ids or
+   * remapped them.
+   */
+  postImportSeed?(content: string, idMap?: Record<string, string>): Promise<void>
 }
 
 /**

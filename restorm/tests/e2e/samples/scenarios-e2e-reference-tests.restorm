@@ -1091,6 +1091,25 @@ collections:
                 position:
                   x: 1800
                   'y': 2140
+              - id: 667a33c2-174f-4675-88b1-3d1a9e8d01bc
+                kind: runScenario
+                config:
+                  scenarioId: 0bc14494-21b9-4015-986d-ebdc990b93b0
+                  label: SSE
+                inputs:
+                  - id: in
+                    name: ''
+                    dataType: any
+                    flow: signal
+                outputs:
+                  - id: result
+                    name: result
+                    dataType: any
+                    role: response
+                    flow: both
+                position:
+                  x: 2080
+                  'y': 2140
             edges:
               - id: e-1780418276241-f2q3hz
                 from:
@@ -1436,6 +1455,13 @@ collections:
                   portId: done
                 to:
                   nodeId: e418f9fe-0d7e-4b8b-8b54-ba3ce8239e5a
+                  portId: in
+              - id: d380fab7-7a94-4194-ab4e-160d6d0c38fb
+                from:
+                  nodeId: e418f9fe-0d7e-4b8b-8b54-ba3ce8239e5a
+                  portId: done
+                to:
+                  nodeId: 667a33c2-174f-4675-88b1-3d1a9e8d01bc
                   portId: in
             id: c1573ce0-985c-44b5-b5d4-e081de2d4303
             name: Main
@@ -19533,6 +19559,138 @@ collections:
                 tags: []
                 params: []
                 nodes:
+                  - id: 015223d1-5cee-4016-8bb7-2a7dde6a215b
+                    kind: sseConnect
+                    config:
+                      requestId: b7f32945-65fb-477b-bdba-d8d56303bd31
+                      connectionName: Frames
+                      label: SSE connect
+                      id: f6c1ffd8-69cd-42dd-b84b-2e5765d45ec3
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                    outputs:
+                      - id: connected
+                        name: connected
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: any
+                        flow: both
+                    position:
+                      x: -120
+                      'y': 80
+                  - id: e19cfe0f-dc85-468a-ba26-c661868c188f
+                    kind: log
+                    config:
+                      message: frame SSE reçue
+                      level: info
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: -120
+                      'y': 240
+                  - id: 7daead0b-dfbb-4a6c-807f-c4c12576d30e
+                    kind: wait
+                    config:
+                      durationMs: 500
+                      label: let the frames arrive
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: duration
+                        name: duration
+                        dataType: duration
+                    outputs: []
+                    position:
+                      x: 220
+                      'y': 80
+                  - id: 6b8282cb-b08b-4d94-b779-617e081a8e81
+                    kind: sseClose
+                    config:
+                      connectionNodeId: 015223d1-5cee-4016-8bb7-2a7dde6a215b
+                      label: close Frames
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                    outputs: []
+                    position:
+                      x: 520
+                      'y': 80
+                  - id: 58022134-3027-409b-b235-7cd05716b084
+                    kind: log
+                    config:
+                      message: stream SSE fermé
+                      level: info
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 520
+                      'y': 240
+                edges:
+                  - id: 8b58cd9c-2e94-46bf-a5b0-0ae1381ba1bb
+                    from:
+                      nodeId: 015223d1-5cee-4016-8bb7-2a7dde6a215b
+                      portId: connected
+                    to:
+                      nodeId: 7daead0b-dfbb-4a6c-807f-c4c12576d30e
+                      portId: in
+                  - id: a3c82d92-e434-431c-9d3e-cad4be939b58
+                    from:
+                      nodeId: 015223d1-5cee-4016-8bb7-2a7dde6a215b
+                      portId: message
+                    to:
+                      nodeId: e19cfe0f-dc85-468a-ba26-c661868c188f
+                      portId: data
+                    selector: .
+                  - id: 3a49b9c4-2300-429b-88a1-7e3e276a6419
+                    from:
+                      nodeId: 015223d1-5cee-4016-8bb7-2a7dde6a215b
+                      portId: done
+                    to:
+                      nodeId: 58022134-3027-409b-b235-7cd05716b084
+                      portId: in
+                  - id: efdaa2ed-6aac-492c-8a4e-4f5d0218197b
+                    from:
+                      nodeId: 7daead0b-dfbb-4a6c-807f-c4c12576d30e
+                      portId: done
+                    to:
+                      nodeId: 6b8282cb-b08b-4d94-b779-617e081a8e81
+                      portId: in
+                id: 0bc14494-21b9-4015-986d-ebdc990b93b0
+                name: SSE
+                items: []
+              - type: scenario
+                tags: []
+                params: []
+                nodes:
                   - id: 23af045a-5282-45f2-9bdf-86cb17c0c42c
                     kind: mqttConnect
                     config:
@@ -22472,6 +22630,62 @@ collections:
                 position:
                   x: 1000
                   'y': 4180
+              - id: 19361166-c02a-4e1f-96b8-006d802b916f
+                kind: stompConnect
+                config:
+                  connectionName: Echo
+                  label: STOMP connect
+                inputs:
+                  - id: in
+                    name: ''
+                    dataType: any
+                    flow: signal
+                outputs:
+                  - id: connected
+                    name: connected
+                    dataType: any
+                    flow: signal
+                  - id: message
+                    name: message
+                    dataType: any
+                    flow: both
+                position:
+                  x: 40
+                  'y': 5600
+              - id: 662b7de3-ac32-43d6-8dd4-6aa7fb8f0d2a
+                kind: stompSend
+                config:
+                  connectionNodeId: 19361166-c02a-4e1f-96b8-006d802b916f
+                  payload:
+                    type: string
+                    value: '{"hello":"world"}'
+                  label: STOMP send
+                inputs:
+                  - id: in
+                    name: ''
+                    dataType: any
+                    flow: signal
+                  - id: payload
+                    name: payload
+                    dataType: any
+                outputs: []
+                position:
+                  x: 520
+                  'y': 5600
+              - id: 7f3bebd7-b950-4c78-9ff2-97212d30e196
+                kind: stompClose
+                config:
+                  connectionNodeId: 19361166-c02a-4e1f-96b8-006d802b916f
+                  label: STOMP close
+                inputs:
+                  - id: in
+                    name: ''
+                    dataType: any
+                    flow: signal
+                outputs: []
+                position:
+                  x: 1000
+                  'y': 5600
               - id: d480bb07-5505-4dc2-989e-c25acd9c7097
                 kind: grpcConnect
                 config:
@@ -22616,6 +22830,42 @@ collections:
                 position:
                   x: 1000
                   'y': 5160
+              - id: 6676196a-546c-432a-b5ce-f9274ba29f2f
+                kind: sseConnect
+                config:
+                  connectionName: Frames
+                  label: SSE connect
+                inputs:
+                  - id: in
+                    name: ''
+                    dataType: any
+                    flow: signal
+                outputs:
+                  - id: connected
+                    name: connected
+                    dataType: any
+                    flow: signal
+                  - id: message
+                    name: message
+                    dataType: any
+                    flow: both
+                position:
+                  x: 40
+                  'y': 5620
+              - id: 8a900bca-e99f-4506-bb8e-24ce316bf8a7
+                kind: sseClose
+                config:
+                  connectionNodeId: 6676196a-546c-432a-b5ce-f9274ba29f2f
+                  label: SSE close
+                inputs:
+                  - id: in
+                    name: ''
+                    dataType: any
+                    flow: signal
+                outputs: []
+                position:
+                  x: 1000
+                  'y': 5620
               - id: 13a9c033-0526-4d73-9c9d-800508787774
                 kind: toast
                 config:
@@ -23031,6 +23281,13 @@ collections:
             requestMessage: '{"f_string":"chunk"}'
             metadata: []
             type: grpc
+          - documentation: ''
+            tags: []
+            id: b7f32945-65fb-477b-bdba-d8d56303bd31
+            name: SSE Frames
+            url: http://localhost:8097/events?count=3&intervalMs=50
+            headers: []
+            type: sse
           - documentation: ''
             tags: []
             id: 10f2163c-de61-4a3a-b7ff-c63a1914f067

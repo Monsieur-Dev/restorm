@@ -44,8 +44,16 @@ import {
   isGrpcRequest,
   isSoapRequest,
   isWebSocketRequest,
+  isSseRequest,
+  isStompRequest,
   isODataRequest,
   isAuthenticationRequest,
+  isJsonRpcRequest,
+  isJsonRpcBatchRequest,
+  isTrpcRequest,
+  isAmqpRequest,
+  isRedisRequest,
+  isKafkaRequest,
   isEnvironmentFolder,
   isAnyFolder,
   isScenario
@@ -58,8 +66,16 @@ import type {
   GrpcRequestTab,
   SoapRequestTab,
   WebSocketRequestTab,
+  SseRequestTab,
+  StompRequestTab,
   ODataRequestTab,
+  JsonRpcRequestTab,
+  JsonRpcBatchRequestTab,
   AuthenticationRequestTab,
+  TrpcRequestTab,
+  AmqpRequestTab,
+  RedisRequestTab,
+  KafkaRequestTab,
   ScenarioEditorTab,
   ConsoleTab,
   FirewallTab,
@@ -492,11 +508,35 @@ export function useWorkbenchTabs(options: UseWorkbenchTabsOptions): UseWorkbench
     } else if (isWebSocketRequest(request)) {
       tabType = 'websocket-request'
       title = `WS ${request.name}`
+    } else if (isSseRequest(request)) {
+      tabType = 'sse-request'
+      title = `SSE ${request.name}`
+    } else if (isStompRequest(request)) {
+      tabType = 'stomp-request'
+      title = `STOMP ${request.name}`
     } else if (isODataRequest(request)) {
       tabType = 'odata-request'
       title = request.name
     } else if (isAuthenticationRequest(request)) {
       tabType = 'auth-request'
+      title = request.name
+    } else if (isJsonRpcRequest(request)) {
+      tabType = 'jsonrpc-request'
+      title = `JSON-RPC ${request.name}`
+    } else if (isJsonRpcBatchRequest(request)) {
+      tabType = 'jsonrpc-batch-request'
+      title = `JSON-RPC Batch ${request.name}`
+    } else if (isTrpcRequest(request)) {
+      tabType = 'trpc-request'
+      title = `tRPC ${request.name}`
+    } else if (isAmqpRequest(request)) {
+      tabType = 'amqp-request'
+      title = request.name
+    } else if (isRedisRequest(request)) {
+      tabType = 'redis-request'
+      title = request.name
+    } else if (isKafkaRequest(request)) {
+      tabType = 'kafka-request'
       title = request.name
     } else {
       return // Unknown request type
@@ -785,6 +825,30 @@ export function useWorkbenchTabs(options: UseWorkbenchTabsOptions): UseWorkbench
           allowFullscreen: true
         } as WebSocketRequestTab
       }
+      if (isSseRequest(requestItem)) {
+        return {
+          id: tabId,
+          tabType: 'sse-request',
+          title: `SSE ${requestItem.name}`,
+          titleString: `SSE ${requestItem.name}`,
+          request: requestItem,
+          breadcrumbs,
+          environments,
+          allowFullscreen: true
+        } as SseRequestTab
+      }
+      if (isStompRequest(requestItem)) {
+        return {
+          id: tabId,
+          tabType: 'stomp-request',
+          title: `STOMP ${requestItem.name}`,
+          titleString: `STOMP ${requestItem.name}`,
+          request: requestItem,
+          breadcrumbs,
+          environments,
+          allowFullscreen: true
+        } as StompRequestTab
+      }
       if (isODataRequest(requestItem)) {
         return {
           id: tabId,
@@ -808,6 +872,78 @@ export function useWorkbenchTabs(options: UseWorkbenchTabsOptions): UseWorkbench
           environments,
           allowFullscreen: true
         } as AuthenticationRequestTab
+      }
+      if (isJsonRpcRequest(requestItem)) {
+        return {
+          id: tabId,
+          tabType: 'jsonrpc-request',
+          title: `JSON-RPC ${requestItem.name}`,
+          titleString: `JSON-RPC ${requestItem.name}`,
+          request: requestItem,
+          breadcrumbs,
+          environments,
+          allowFullscreen: true
+        } as JsonRpcRequestTab
+      }
+      if (isJsonRpcBatchRequest(requestItem)) {
+        return {
+          id: tabId,
+          tabType: 'jsonrpc-batch-request',
+          title: `JSON-RPC Batch ${requestItem.name}`,
+          titleString: `JSON-RPC Batch ${requestItem.name}`,
+          request: requestItem,
+          breadcrumbs,
+          environments,
+          allowFullscreen: true
+        } as JsonRpcBatchRequestTab
+      }
+      if (isTrpcRequest(requestItem)) {
+        return {
+          id: tabId,
+          tabType: 'trpc-request',
+          title: `tRPC ${requestItem.name}`,
+          titleString: `tRPC ${requestItem.name}`,
+          request: requestItem,
+          breadcrumbs,
+          environments,
+          allowFullscreen: true
+        } as TrpcRequestTab
+      }
+      if (isAmqpRequest(requestItem)) {
+        return {
+          id: tabId,
+          tabType: 'amqp-request',
+          title: requestItem.name,
+          titleString: requestItem.name,
+          request: requestItem,
+          breadcrumbs,
+          environments,
+          allowFullscreen: true
+        } as AmqpRequestTab
+      }
+      if (isRedisRequest(requestItem)) {
+        return {
+          id: tabId,
+          tabType: 'redis-request',
+          title: requestItem.name,
+          titleString: requestItem.name,
+          request: requestItem,
+          breadcrumbs,
+          environments,
+          allowFullscreen: true
+        } as RedisRequestTab
+      }
+      if (isKafkaRequest(requestItem)) {
+        return {
+          id: tabId,
+          tabType: 'kafka-request',
+          title: requestItem.name,
+          titleString: requestItem.name,
+          request: requestItem,
+          breadcrumbs,
+          environments,
+          allowFullscreen: true
+        } as KafkaRequestTab
       }
     }
     return null

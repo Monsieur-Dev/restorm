@@ -12,8 +12,16 @@ import {
   isGrpcRequestTab,
   isSoapRequestTab,
   isWebSocketRequestTab,
+  isSseRequestTab,
+  isStompRequestTab,
   isODataRequestTab,
   isAuthenticationRequestTab,
+  isJsonRpcRequestTab,
+  isJsonRpcBatchRequestTab,
+  isTrpcRequestTab,
+  isAmqpRequestTab,
+  isRedisRequestTab,
+  isKafkaRequestTab,
   isAnyRequestTab,
   isScenarioEditorTab,
   isConsoleTab,
@@ -41,7 +49,7 @@ import { SecretResolvingSpinner } from '../../common/SecretResolvingSpinner'
 import { SecretErrorIndicator } from '../../common/SecretErrorIndicator'
 import { ItemSecretBadges } from '../../common/ItemSecretBadges'
 import { collectFolderEnvIds } from '../../../services/FolderToListView'
-import { mapToBadgeType } from '../../../utils/badgeUtils'
+import { mapToBadgeType, requestBadgeType } from '../../../utils/badgeUtils'
 import { useTranslation } from 'react-i18next'
 import { RestormWorkbenchTab } from './RestormWorkbenchTab'
 import { DeprecationAwareRequestTab } from './DeprecationAwareRequestTab'
@@ -361,8 +369,16 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
       isGrpcRequestTab(tab) ||
       isSoapRequestTab(tab) ||
       isWebSocketRequestTab(tab) ||
+      isSseRequestTab(tab) ||
+      isStompRequestTab(tab) ||
       isODataRequestTab(tab) ||
-      isAuthenticationRequestTab(tab)
+      isAuthenticationRequestTab(tab) ||
+      isJsonRpcRequestTab(tab) ||
+      isJsonRpcBatchRequestTab(tab) ||
+      isTrpcRequestTab(tab) ||
+      isAmqpRequestTab(tab) ||
+      isRedisRequestTab(tab) ||
+      isKafkaRequestTab(tab)
     ) {
       return tab.request.id
     }
@@ -533,6 +549,36 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
       )
     }
 
+    // SSE request tab. Receive-only client, no server mode — the listening
+    // beam orbits the badge while a connection is open, mirroring WebSocket.
+    if (isSseRequestTab(restormTab)) {
+      return (
+        <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <ServerListeningBadge requestId={restormTab.request.id}>
+            <Badge type="SSE" />
+          </ServerListeningBadge>
+          <span>{restormTab.request.name}</span>
+          <ItemSecretBadges itemId={restormTab.request.id} />
+          {renderDirtyIndicator(restormTab)}
+        </span>
+      )
+    }
+
+    // STOMP request tab. Client only, no server mode — the listening beam
+    // orbits the badge while a connection is open, mirroring SSE.
+    if (isStompRequestTab(restormTab)) {
+      return (
+        <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <ServerListeningBadge requestId={restormTab.request.id}>
+            <Badge type="STOMP" />
+          </ServerListeningBadge>
+          <span>{restormTab.request.name}</span>
+          <ItemSecretBadges itemId={restormTab.request.id} />
+          {renderDirtyIndicator(restormTab)}
+        </span>
+      )
+    }
+
     // OData request tab. All OData operations share the 'ODATA' badge today;
     // once an `operationKind` discriminator ('entity-set' | 'function' |
     // 'action') exists, functions / actions could get their own badges. A mock
@@ -557,6 +603,88 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
       return (
         <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
           <Badge type="AUTH" />
+          <span>{restormTab.request.name}</span>
+          <ItemSecretBadges itemId={restormTab.request.id} />
+          {renderDirtyIndicator(restormTab)}
+        </span>
+      )
+    }
+
+    // JSON-RPC request tab (single call). No server mode — badge comes from
+    // the protocol registry (`requestBadgeType`), not a hardcoded literal,
+    // since the fixed 'RPC' value isn't itself a distinct `BadgeType` variant.
+    if (isJsonRpcRequestTab(restormTab)) {
+      return (
+        <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <Badge type={requestBadgeType(restormTab.request)} />
+          <span>{restormTab.request.name}</span>
+          <ItemSecretBadges itemId={restormTab.request.id} />
+          {renderDirtyIndicator(restormTab)}
+        </span>
+      )
+    }
+
+    // JSON-RPC batch request tab. Same shape as the single-call tab above.
+    if (isJsonRpcBatchRequestTab(restormTab)) {
+      return (
+        <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <Badge type={requestBadgeType(restormTab.request)} />
+          <span>{restormTab.request.name}</span>
+          <ItemSecretBadges itemId={restormTab.request.id} />
+          {renderDirtyIndicator(restormTab)}
+        </span>
+      )
+    }
+
+    // tRPC request tab. Every call kind (query/mutation) shares the fixed
+    // 'tRPC' badge — mirrors the OData badge, no server mode.
+    if (isTrpcRequestTab(restormTab)) {
+      return (
+        <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <Badge type="tRPC" />
+          <span>{restormTab.request.name}</span>
+          <ItemSecretBadges itemId={restormTab.request.id} />
+          {renderDirtyIndicator(restormTab)}
+        </span>
+      )
+    }
+
+    // AMQP request tab. Not server-capable (v1) — the listening beam only ever
+    // reflects an open `subscribe` connection, the same beam the sidebar tree
+    // paints, driven by the same listening state.
+    if (isAmqpRequestTab(restormTab)) {
+      return (
+        <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <ServerListeningBadge requestId={restormTab.request.id}>
+            <Badge type="AMQP" />
+          </ServerListeningBadge>
+          <span>{restormTab.request.name}</span>
+          <ItemSecretBadges itemId={restormTab.request.id} />
+          {renderDirtyIndicator(restormTab)}
+        </span>
+      )
+    }
+
+    // Redis request tab. Not server-capable (no hosted mode), so no
+    // ServerListeningBadge capsule — unlike WebSocket/OData, this badge never
+    // orbits a listening beam.
+    if (isRedisRequestTab(restormTab)) {
+      return (
+        <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <Badge type="REDIS" />
+          <span>{restormTab.request.name}</span>
+          <ItemSecretBadges itemId={restormTab.request.id} />
+          {renderDirtyIndicator(restormTab)}
+        </span>
+      )
+    }
+
+    // Kafka request tab. Mixed one-shot (produce/browse) + long-lived
+    // (consume) modes, like Redis — no ServerListeningBadge capsule.
+    if (isKafkaRequestTab(restormTab)) {
+      return (
+        <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <Badge type="KAFKA" />
           <span>{restormTab.request.name}</span>
           <ItemSecretBadges itemId={restormTab.request.id} />
           {renderDirtyIndicator(restormTab)}
@@ -1240,8 +1368,119 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
       )
     }
 
+    // SSE request tab
+    if (isSseRequestTab(effectiveTab)) {
+      // Prefer the live reactive request proxy (so in-place mutations — quick-
+      // config Load, MCP update_request — re-render this tab) and fall back to
+      // the tab's static snapshot only when the tree lookup misses. Mirrors the
+      // HTTP branch above; without it a non-HTTP tab edits a detached snapshot.
+      // The lookup returns a `Request`; this branch's type guard fixed the
+      // concrete kind, and the reactive node shares the tab request's id, so the
+      // cast to the tab request's type is sound.
+      const reactive = getRequestById?.(effectiveTab.request.id)
+      const request = reactive?.type === effectiveTab.request.type ? reactive : effectiveTab.request
+      return (
+        <EnvironmentProvider environments={liveEnvironments} tagColors={requestTagColors} persistenceKey={envPersistenceKey(effectiveTab.request.id)} folderRequestIds={envFolderRequestIds}>
+          <RestormWorkbenchTab
+            breadcrumbs={breadcrumbs}
+            onBreadcrumbClick={onBreadcrumbClick}
+            onBreadcrumbAuxClick={onBreadcrumbAuxClick}
+            onBreadcrumbRename={onItemRename}
+            onBreadcrumbIconChange={onItemIconChange}
+            tags={request.tags}
+            onTagsChange={(nextTags) => { onTagsChange?.(request.id, nextTags) }}
+            tagColors={requestTagColors}
+            onTagColorChange={handleRequestTagColorChange}
+            tabId={effectiveTab.id}
+            {...favoritePropsFor(request.id)}
+            headerActions={requestHeaderActionsFor(request.id, request)}
+            topRightAction={scenarioUsageActionFor(request.id)}
+            starLeftAction={starLeftActionFor(request)}
+          >
+            <div style={{ flex: 1, minHeight: 0, minWidth: 0, padding: '0 16px 8px 16px' }}>
+              {renderProtocolTabView(request)}
+            </div>
+          </RestormWorkbenchTab>
+        </EnvironmentProvider>
+      )
+    }
+
+    // STOMP request tab
+    if (isStompRequestTab(effectiveTab)) {
+      // Prefer the live reactive request proxy (so in-place mutations — quick-
+      // config Load, MCP update_request — re-render this tab) and fall back to
+      // the tab's static snapshot only when the tree lookup misses. Mirrors the
+      // HTTP branch above; without it a non-HTTP tab edits a detached snapshot.
+      // The lookup returns a `Request`; this branch's type guard fixed the
+      // concrete kind, and the reactive node shares the tab request's id, so the
+      // cast to the tab request's type is sound.
+      const reactive = getRequestById?.(effectiveTab.request.id)
+      const request = reactive?.type === effectiveTab.request.type ? reactive : effectiveTab.request
+      return (
+        <EnvironmentProvider environments={liveEnvironments} tagColors={requestTagColors} persistenceKey={envPersistenceKey(effectiveTab.request.id)} folderRequestIds={envFolderRequestIds}>
+          <RestormWorkbenchTab
+            breadcrumbs={breadcrumbs}
+            onBreadcrumbClick={onBreadcrumbClick}
+            onBreadcrumbAuxClick={onBreadcrumbAuxClick}
+            onBreadcrumbRename={onItemRename}
+            onBreadcrumbIconChange={onItemIconChange}
+            tags={request.tags}
+            onTagsChange={(nextTags) => { onTagsChange?.(request.id, nextTags) }}
+            tagColors={requestTagColors}
+            onTagColorChange={handleRequestTagColorChange}
+            tabId={effectiveTab.id}
+            {...favoritePropsFor(request.id)}
+            headerActions={requestHeaderActionsFor(request.id, request)}
+            topRightAction={scenarioUsageActionFor(request.id)}
+            starLeftAction={starLeftActionFor(request)}
+          >
+            <div style={{ flex: 1, minHeight: 0, minWidth: 0, padding: '0 16px 8px 16px' }}>
+              {renderProtocolTabView(request)}
+            </div>
+          </RestormWorkbenchTab>
+        </EnvironmentProvider>
+      )
+    }
+
     // OData request tab
     if (isODataRequestTab(effectiveTab)) {
+      // Prefer the live reactive request proxy (so in-place mutations — quick-
+      // config Load, MCP update_request — re-render this tab) and fall back to
+      // the tab's static snapshot only when the tree lookup misses. Mirrors the
+      // HTTP branch above; without it a non-HTTP tab edits a detached snapshot.
+      // The lookup returns a `Request`; this branch's type guard fixed the
+      // concrete kind, and the reactive node shares the tab request's id, so the
+      // cast to the tab request's type is sound.
+      const reactive = getRequestById?.(effectiveTab.request.id)
+      const request = reactive?.type === effectiveTab.request.type ? reactive : effectiveTab.request
+      return (
+        <EnvironmentProvider environments={liveEnvironments} tagColors={requestTagColors} persistenceKey={envPersistenceKey(effectiveTab.request.id)} folderRequestIds={envFolderRequestIds}>
+          <RestormWorkbenchTab
+            breadcrumbs={breadcrumbs}
+            onBreadcrumbClick={onBreadcrumbClick}
+            onBreadcrumbAuxClick={onBreadcrumbAuxClick}
+            onBreadcrumbRename={onItemRename}
+            onBreadcrumbIconChange={onItemIconChange}
+            tags={request.tags}
+            onTagsChange={(nextTags) => { onTagsChange?.(request.id, nextTags) }}
+            tagColors={requestTagColors}
+            onTagColorChange={handleRequestTagColorChange}
+            tabId={effectiveTab.id}
+            {...favoritePropsFor(request.id)}
+            headerActions={requestHeaderActionsFor(request.id, request)}
+            topRightAction={scenarioUsageActionFor(request.id)}
+            starLeftAction={starLeftActionFor(request)}
+          >
+            <div style={{ flex: 1, minHeight: 0, minWidth: 0, padding: '0 16px 8px 16px' }}>
+              {renderProtocolTabView(request)}
+            </div>
+          </RestormWorkbenchTab>
+        </EnvironmentProvider>
+      )
+    }
+
+    // tRPC request tab
+    if (isTrpcRequestTab(effectiveTab)) {
       // Prefer the live reactive request proxy (so in-place mutations — quick-
       // config Load, MCP update_request — re-render this tab) and fall back to
       // the tab's static snapshot only when the tree lookup misses. Mirrors the
@@ -1280,6 +1519,191 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
     // Authentication request tab — reuses HTTPRequestTabView, which
     // injects an extra "Configuration" tab when it sees type === 'auth'.
     if (isAuthenticationRequestTab(effectiveTab)) {
+      // Prefer the live reactive request proxy (so in-place mutations — quick-
+      // config Load, MCP update_request — re-render this tab) and fall back to
+      // the tab's static snapshot only when the tree lookup misses. Mirrors the
+      // HTTP branch above; without it a non-HTTP tab edits a detached snapshot.
+      // The lookup returns a `Request`; this branch's type guard fixed the
+      // concrete kind, and the reactive node shares the tab request's id, so the
+      // cast to the tab request's type is sound.
+      const reactive = getRequestById?.(effectiveTab.request.id)
+      const request = reactive?.type === effectiveTab.request.type ? reactive : effectiveTab.request
+      return (
+        <EnvironmentProvider environments={liveEnvironments} tagColors={requestTagColors} persistenceKey={envPersistenceKey(effectiveTab.request.id)} folderRequestIds={envFolderRequestIds}>
+          <RestormWorkbenchTab
+            breadcrumbs={breadcrumbs}
+            onBreadcrumbClick={onBreadcrumbClick}
+            onBreadcrumbAuxClick={onBreadcrumbAuxClick}
+            onBreadcrumbRename={onItemRename}
+            onBreadcrumbIconChange={onItemIconChange}
+            tags={request.tags}
+            onTagsChange={(nextTags) => { onTagsChange?.(request.id, nextTags) }}
+            tagColors={requestTagColors}
+            onTagColorChange={handleRequestTagColorChange}
+            tabId={effectiveTab.id}
+            {...favoritePropsFor(request.id)}
+            headerActions={requestHeaderActionsFor(request.id, request)}
+            topRightAction={scenarioUsageActionFor(request.id)}
+            starLeftAction={starLeftActionFor(request)}
+          >
+            <div style={{ flex: 1, minHeight: 0, minWidth: 0, padding: '0 16px 8px 16px' }}>
+              {renderProtocolTabView(request)}
+            </div>
+          </RestormWorkbenchTab>
+        </EnvironmentProvider>
+      )
+    }
+
+    // JSON-RPC request tab (single call)
+    if (isJsonRpcRequestTab(effectiveTab)) {
+      // Prefer the live reactive request proxy (so in-place mutations — quick-
+      // config Load, MCP update_request — re-render this tab) and fall back to
+      // the tab's static snapshot only when the tree lookup misses. Mirrors the
+      // HTTP branch above; without it a non-HTTP tab edits a detached snapshot.
+      // The lookup returns a `Request`; this branch's type guard fixed the
+      // concrete kind, and the reactive node shares the tab request's id, so the
+      // cast to the tab request's type is sound.
+      const reactive = getRequestById?.(effectiveTab.request.id)
+      const request = reactive?.type === effectiveTab.request.type ? reactive : effectiveTab.request
+      return (
+        <EnvironmentProvider environments={liveEnvironments} tagColors={requestTagColors} persistenceKey={envPersistenceKey(effectiveTab.request.id)} folderRequestIds={envFolderRequestIds}>
+          <RestormWorkbenchTab
+            breadcrumbs={breadcrumbs}
+            onBreadcrumbClick={onBreadcrumbClick}
+            onBreadcrumbAuxClick={onBreadcrumbAuxClick}
+            onBreadcrumbRename={onItemRename}
+            onBreadcrumbIconChange={onItemIconChange}
+            tags={request.tags}
+            onTagsChange={(nextTags) => { onTagsChange?.(request.id, nextTags) }}
+            tagColors={requestTagColors}
+            onTagColorChange={handleRequestTagColorChange}
+            tabId={effectiveTab.id}
+            {...favoritePropsFor(request.id)}
+            headerActions={requestHeaderActionsFor(request.id, request)}
+            topRightAction={scenarioUsageActionFor(request.id)}
+            starLeftAction={starLeftActionFor(request)}
+          >
+            <div style={{ flex: 1, minHeight: 0, minWidth: 0, padding: '0 16px 8px 16px' }}>
+              {renderProtocolTabView(request)}
+            </div>
+          </RestormWorkbenchTab>
+        </EnvironmentProvider>
+      )
+    }
+
+    // JSON-RPC batch request tab
+    if (isJsonRpcBatchRequestTab(effectiveTab)) {
+      // Prefer the live reactive request proxy (so in-place mutations — quick-
+      // config Load, MCP update_request — re-render this tab) and fall back to
+      // the tab's static snapshot only when the tree lookup misses. Mirrors the
+      // HTTP branch above; without it a non-HTTP tab edits a detached snapshot.
+      // The lookup returns a `Request`; this branch's type guard fixed the
+      // concrete kind, and the reactive node shares the tab request's id, so the
+      // cast to the tab request's type is sound.
+      const reactive = getRequestById?.(effectiveTab.request.id)
+      const request = reactive?.type === effectiveTab.request.type ? reactive : effectiveTab.request
+      return (
+        <EnvironmentProvider environments={liveEnvironments} tagColors={requestTagColors} persistenceKey={envPersistenceKey(effectiveTab.request.id)} folderRequestIds={envFolderRequestIds}>
+          <RestormWorkbenchTab
+            breadcrumbs={breadcrumbs}
+            onBreadcrumbClick={onBreadcrumbClick}
+            onBreadcrumbAuxClick={onBreadcrumbAuxClick}
+            onBreadcrumbRename={onItemRename}
+            onBreadcrumbIconChange={onItemIconChange}
+            tags={request.tags}
+            onTagsChange={(nextTags) => { onTagsChange?.(request.id, nextTags) }}
+            tagColors={requestTagColors}
+            onTagColorChange={handleRequestTagColorChange}
+            tabId={effectiveTab.id}
+            {...favoritePropsFor(request.id)}
+            headerActions={requestHeaderActionsFor(request.id, request)}
+            topRightAction={scenarioUsageActionFor(request.id)}
+            starLeftAction={starLeftActionFor(request)}
+          >
+            <div style={{ flex: 1, minHeight: 0, minWidth: 0, padding: '0 16px 8px 16px' }}>
+              {renderProtocolTabView(request)}
+            </div>
+          </RestormWorkbenchTab>
+        </EnvironmentProvider>
+      )
+    }
+
+    // AMQP request tab
+    if (isAmqpRequestTab(effectiveTab)) {
+      // Prefer the live reactive request proxy (so in-place mutations — quick-
+      // config Load, MCP update_request — re-render this tab) and fall back to
+      // the tab's static snapshot only when the tree lookup misses. Mirrors the
+      // HTTP branch above; without it a non-HTTP tab edits a detached snapshot.
+      // The lookup returns a `Request`; this branch's type guard fixed the
+      // concrete kind, and the reactive node shares the tab request's id, so the
+      // cast to the tab request's type is sound.
+      const reactive = getRequestById?.(effectiveTab.request.id)
+      const request = reactive?.type === effectiveTab.request.type ? reactive : effectiveTab.request
+      return (
+        <EnvironmentProvider environments={liveEnvironments} tagColors={requestTagColors} persistenceKey={envPersistenceKey(effectiveTab.request.id)} folderRequestIds={envFolderRequestIds}>
+          <RestormWorkbenchTab
+            breadcrumbs={breadcrumbs}
+            onBreadcrumbClick={onBreadcrumbClick}
+            onBreadcrumbAuxClick={onBreadcrumbAuxClick}
+            onBreadcrumbRename={onItemRename}
+            onBreadcrumbIconChange={onItemIconChange}
+            tags={request.tags}
+            onTagsChange={(nextTags) => { onTagsChange?.(request.id, nextTags) }}
+            tagColors={requestTagColors}
+            onTagColorChange={handleRequestTagColorChange}
+            tabId={effectiveTab.id}
+            {...favoritePropsFor(request.id)}
+            headerActions={requestHeaderActionsFor(request.id, request)}
+            topRightAction={scenarioUsageActionFor(request.id)}
+            starLeftAction={starLeftActionFor(request)}
+          >
+            <div style={{ flex: 1, minHeight: 0, minWidth: 0, padding: '0 16px 8px 16px' }}>
+              {renderProtocolTabView(request)}
+            </div>
+          </RestormWorkbenchTab>
+        </EnvironmentProvider>
+      )
+    }
+
+    // Redis request tab
+    if (isRedisRequestTab(effectiveTab)) {
+      // Prefer the live reactive request proxy (so in-place mutations — quick-
+      // config Load, MCP update_request — re-render this tab) and fall back to
+      // the tab's static snapshot only when the tree lookup misses. Mirrors the
+      // HTTP branch above; without it a non-HTTP tab edits a detached snapshot.
+      // The lookup returns a `Request`; this branch's type guard fixed the
+      // concrete kind, and the reactive node shares the tab request's id, so the
+      // cast to the tab request's type is sound.
+      const reactive = getRequestById?.(effectiveTab.request.id)
+      const request = reactive?.type === effectiveTab.request.type ? reactive : effectiveTab.request
+      return (
+        <EnvironmentProvider environments={liveEnvironments} tagColors={requestTagColors} persistenceKey={envPersistenceKey(effectiveTab.request.id)} folderRequestIds={envFolderRequestIds}>
+          <RestormWorkbenchTab
+            breadcrumbs={breadcrumbs}
+            onBreadcrumbClick={onBreadcrumbClick}
+            onBreadcrumbAuxClick={onBreadcrumbAuxClick}
+            onBreadcrumbRename={onItemRename}
+            onBreadcrumbIconChange={onItemIconChange}
+            tags={request.tags}
+            onTagsChange={(nextTags) => { onTagsChange?.(request.id, nextTags) }}
+            tagColors={requestTagColors}
+            onTagColorChange={handleRequestTagColorChange}
+            tabId={effectiveTab.id}
+            {...favoritePropsFor(request.id)}
+            headerActions={requestHeaderActionsFor(request.id, request)}
+            topRightAction={scenarioUsageActionFor(request.id)}
+            starLeftAction={starLeftActionFor(request)}
+          >
+            <div style={{ flex: 1, minHeight: 0, minWidth: 0, padding: '0 16px 8px 16px' }}>
+              {renderProtocolTabView(request)}
+            </div>
+          </RestormWorkbenchTab>
+        </EnvironmentProvider>
+      )
+    }
+
+    // Kafka request tab
+    if (isKafkaRequestTab(effectiveTab)) {
       // Prefer the live reactive request proxy (so in-place mutations — quick-
       // config Load, MCP update_request — re-render this tab) and fall back to
       // the tab's static snapshot only when the tree lookup misses. Mirrors the

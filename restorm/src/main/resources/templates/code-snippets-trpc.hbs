@@ -1,0 +1,117 @@
+{{!-- Code snippets template for tRPC requests --}}
+{{!-- `url` is the fully-resolved wire URL (base + `/<procedure>`, plus --}}
+{{!-- `?input=<encoded>` for a query — composed by URLResolver). `body` is --}}
+{{!-- the v10 non-batch mutation envelope `{"0":{"json":<input>}}`, already --}}
+{{!-- resolved through Handlebars — present only for a mutation. --}}
+
+<details open>
+<summary><strong>cURL</strong></summary>
+
+```bash
+curl -X {{method}} '{{url}}'{{#if headers}} \
+{{#each headers}}  -H '{{key}}: {{value}}'{{#unless @last}} \
+{{/unless}}{{/each}}{{/if}}{{#if body}} \
+  -H 'Content-Type: application/json' \
+  -d '{{body}}'{{/if}}
+```
+
+</details>
+
+<details>
+<summary><strong>JavaScript - Fetch</strong></summary>
+
+```javascript
+fetch('{{url}}', {
+  method: '{{method}}'{{#if headers}},
+  headers: {
+{{#each headers}}    '{{key}}': '{{value}}'{{#unless @last}},{{/unless}}
+{{/each}}  }{{/if}}{{#if body}},
+  headers: { 'Content-Type': 'application/json' },
+  body: '{{body}}'{{/if}}
+})
+  .then(response => response.json())
+  // Non-batch tRPC responses are `[{ result: { data } }]` — unwrap it.
+  .then(([{ result }]) => console.log(result.data))
+  .catch(error => console.error('Error:', error));
+```
+
+</details>
+
+<details>
+<summary><strong>TypeScript - @trpc/client</strong></summary>
+
+```typescript
+import { createTRPCProxyClient, httpBatchLink } from '@trpc/client';
+// import type { AppRouter } from '../server'; // your server's router type
+
+const client = createTRPCProxyClient<AppRouter>({
+  links: [httpBatchLink({ url: '{{host}}' })]
+});
+
+{{#if isMutation}}
+const result = await client.{{procedurePath}}.mutate({{input}});
+{{else}}
+const result = await client.{{procedurePath}}.query({{input}});
+{{/if}}
+console.log(result);
+```
+
+</details>
+
+<details>
+<summary><strong>Python - requests</strong></summary>
+
+```python
+import requests
+
+response = requests.{{lowerMethod}}(
+    '{{url}}'{{#if headers}},
+    headers={
+{{#each headers}}        '{{key}}': '{{value}}'{{#unless @last}},{{/unless}}
+{{/each}}    }{{/if}}{{#if body}},
+    json={{body}}{{/if}}
+)
+
+# Non-batch tRPC responses are `[{ result: { data } }]` — unwrap it.
+print(response.json()[0]['result']['data'])
+```
+
+</details>
+
+<details>
+<summary><strong>Go</strong></summary>
+
+```go
+package main
+
+import (
+    "fmt"
+    "io"
+    "net/http"{{#if body}}
+    "strings"{{/if}}
+)
+
+func main() {
+    {{#if body}}body := strings.NewReader(`{{body}}`)
+    req, err := http.NewRequest("{{method}}", "{{url}}", body){{else}}req, err := http.NewRequest("{{method}}", "{{url}}", nil){{/if}}
+    if err != nil {
+        panic(err)
+    }
+{{#if body}}    req.Header.Set("Content-Type", "application/json")
+{{/if}}
+{{#each headers}}    req.Header.Set("{{key}}", "{{value}}")
+{{/each}}
+    client := &http.Client{}
+    resp, err := client.Do(req)
+    if err != nil {
+        panic(err)
+    }
+    defer resp.Body.Close()
+
+    respBody, _ := io.ReadAll(resp.Body)
+    // Non-batch tRPC responses are `[{ result: { data } }]` — unwrap it.
+    fmt.Println(string(respBody))
+}
+```
+
+</details>

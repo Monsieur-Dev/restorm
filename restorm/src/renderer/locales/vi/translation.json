@@ -273,10 +273,17 @@
         "socketio": "Yêu cầu Socket.IO",
         "mqtt": "MQTT request",
         "mqttServer": "MQTT broker",
+        "sse": "Yêu cầu SSE",
         "grpcServer": "Máy chủ gRPC giả lập",
         "soapServer": "Máy chủ mô phỏng SOAP",
         "graphqlServer": "Máy chủ GraphQL giả lập",
-        "odataServer": "Máy chủ OData giả lập"
+        "odataServer": "Máy chủ OData giả lập",
+        "trpc": "Yêu cầu tRPC",
+        "amqp": "Yêu cầu AMQP",
+        "redis": "Yêu cầu Redis",
+        "stomp": "Yêu cầu STOMP",
+        "kafkaProduce": "Yêu cầu Kafka – Tạo",
+        "kafkaConsume": "Yêu cầu Kafka – Tiêu thụ"
       }
     },
     "deleteConfirm": {
@@ -474,6 +481,12 @@
       "clientStream": "Client streaming",
       "bidi": "Bidirectional streaming"
     },
+    "transport": {
+      "grpc": "gRPC",
+      "grpcWeb": "gRPC-Web",
+      "connect": "Connect",
+      "streamingUnsupported": "Giao vận này không hỗ trợ truyền phát dạng client hoặc hai chiều qua HTTP/1.1. Hãy sử dụng giao vận gRPC gốc thay thế."
+    },
     "server": {
       "proto": "Proto",
       "methods": "Phương thức giả lập",
@@ -492,6 +505,12 @@
       "notListening": "Không lắng nghe",
       "listenFailed": "Không thể khởi động máy chủ gRPC",
       "snippetsUnavailable": "Đoạn mã không khả dụng cho máy chủ giả lập."
+    },
+    "reflection": {
+      "refresh": "Làm mới từ reflection",
+      "refreshFailed": "Làm mới qua gRPC reflection thất bại",
+      "unsupported": "Máy chủ này không hỗ trợ gRPC reflection — hãy nhập tệp .proto thay thế.",
+      "unknownError": "Lỗi không xác định"
     }
   },
   "soap": {
@@ -539,6 +558,114 @@
     "routePlaceholder": "Tuyến (tùy chọn)",
     "clientsConnected": "{{count}} máy khách đã kết nối",
     "notListening": "Không lắng nghe"
+  },
+  "jsonrpc": {
+    "send": "Gửi",
+    "urlPlaceholder": "URL điểm cuối JSON-RPC",
+    "methodPlaceholder": "phương thức",
+    "idPlaceholder": "id (tự động)",
+    "notificationModeTooltip": "Chế độ thông báo — không có id, không chờ phản hồi",
+    "tabs": {
+      "params": "Tham số",
+      "headers": "Header"
+    },
+    "response": {
+      "notificationSent": "Đã gửi thông báo",
+      "errorLabel": "Lỗi JSON-RPC {{code}}:"
+    }
+  },
+  "jsonrpcBatch": {
+    "send": "Gửi lô",
+    "tabs": {
+      "calls": "Lệnh gọi"
+    },
+    "empty": "Chưa có lệnh gọi nào. Thêm một lệnh bên dưới.",
+    "methodPlaceholder": "phương thức",
+    "idPlaceholder": "id (tự động)",
+    "moveUp": "Di chuyển lên",
+    "moveDown": "Di chuyển xuống",
+    "remove": "Xóa lệnh gọi",
+    "paramsLabel": "Tham số (JSON)",
+    "add": "Thêm lệnh gọi",
+    "response": {
+      "unmatched": "Không có mục phản hồi khớp."
+    }
+  },
+  "sse": {
+    "headers": "Header",
+    "noFrames": "Chưa có sự kiện nào",
+    "urlPlaceholder": "URL SSE",
+    "framesTruncated": "Đang hiển thị {{shown}} khung hình mới nhất trong tổng số {{total}}",
+    "showAllFrames": "Hiện tất cả"
+  },
+  "redis": {
+    "connected": "Đã kết nối",
+    "disconnected": "Đã ngắt kết nối",
+    "noMessages": "Chưa có thông điệp",
+    "noCommandsYet": "Chưa có lệnh nào được chạy",
+    "urlPlaceholder": "URL Redis (redis:// hoặc rediss://)",
+    "passwordPlaceholder": "Mật khẩu (tùy chọn)",
+    "subscribe": "Đăng ký",
+    "unsubscribe": "Hủy đăng ký",
+    "run": "Chạy",
+    "subscribeMode": "Đăng ký",
+    "commandMode": "Lệnh",
+    "command": "Lệnh",
+    "args": "Đối số",
+    "argsPlaceholder": "Đối số lệnh",
+    "freeform": "Tự do",
+    "freeformPlaceholder": "Lệnh tự do (ghi đè lựa chọn)",
+    "tabs": {
+      "channels": "Kênh",
+      "command": "Lệnh"
+    }
+  },
+  "kafka": {
+    "brokersPlaceholder": "Danh sách broker (host:port,host:port)",
+    "clientId": "ID máy khách",
+    "clientIdPlaceholder": "restorm",
+    "mode": {
+      "produce": "Tạo",
+      "consume": "Tiêu thụ",
+      "browse": "Duyệt"
+    },
+    "auth": {
+      "title": "Xác thực",
+      "mechanism": "SASL",
+      "username": "Tên người dùng",
+      "password": "Mật khẩu",
+      "tls": "TLS"
+    },
+    "topic": "Chủ đề",
+    "topicPlaceholder": "tên-chủ-đề",
+    "key": "Khóa",
+    "keyPlaceholder": "khóa tin nhắn (tùy chọn)",
+    "value": "Giá trị",
+    "headers": "Tiêu đề",
+    "partition": "Phân vùng",
+    "partitionPlaceholder": "tự động",
+    "groupId": "ID nhóm",
+    "groupIdPlaceholder": "restorm-consumer",
+    "fromOffsetLabel": "Bắt đầu từ",
+    "fromOffset": {
+      "earliest": "Cũ nhất",
+      "latest": "Mới nhất",
+      "specific": "Cụ thể"
+    },
+    "specificOffset": "Offset",
+    "partitions": "Phân vùng",
+    "partitionsPlaceholder": "0,1,2 (trống = tất cả)",
+    "peekCount": "Số lượng tin nhắn",
+    "produce": "Tạo",
+    "startConsuming": "Bắt đầu tiêu thụ",
+    "stopConsuming": "Dừng tiêu thụ",
+    "peek": "Xem trước",
+    "noMessages": "Chưa có tin nhắn nào",
+    "connected": "Đã kết nối",
+    "disconnected": "Đã ngắt kết nối",
+    "producedTo": "Đã tạo tới",
+    "offset": "Offset",
+    "messages": "Tin nhắn"
   },
   "search": {
     "placeholder": "Tìm kiếm...",
@@ -885,6 +1012,10 @@
         "description": "Thả tệp .proto (hoặc một thư mục chứa chúng) và Restorm đi qua mọi dịch vụ, mọi RPC, mọi thông điệp — biến mỗi phương thức thành yêu cầu kiểu mà bạn có thể gửi qua trình thực thi gRPC mà không cần chạm vào codegen.",
         "trademark": "gRPC là dự án của Cloud Native Computing Foundation."
       },
+      "grpcReflection": {
+        "description": "Không có tệp .proto? Trỏ Restorm đến một máy chủ gRPC đang chạy có hỗ trợ reflection — nó truy vấn grpc.reflection.v1alpha.ServerReflection, khám phá từng dịch vụ và phương thức, rồi dựng cùng một cây yêu cầu có kiểu như khi nhập tệp proto, được lưu đệm cục bộ để dùng ngoại tuyến.",
+        "action": "Kết nối đến máy chủ…"
+      },
       "soap": {
         "description": "Có WSDL? Dán nó (hoặc URL của nó) — Restorm phân tích mỗi <port> và <operation> và tạo các phong bì SOAP sẵn sàng gửi với header SOAPAction phù hợp, khung body kiểu sơ đồ và sơ đồ xác thực mà WSDL khai báo."
       },
@@ -910,7 +1041,57 @@
       "paw": {
         "description": "Đến từ Paw? Thả tệp xuất JSON của bạn (File → Export → JSON trong ứng dụng — gói .paw gốc không được đọc trực tiếp). Restorm dựng lại mọi yêu cầu, header, body và môi trường, đồng thời ánh xạ các giá trị động của Paw (dấu thời gian, chuỗi ngẫu nhiên, UUID) sang giá trị tương đương gần nhất trong Restorm.",
         "trademark": "Paw là nhãn hiệu đã đăng ký của RapidAPI, Inc., được sử dụng ở đây chỉ để tham chiếu tương thích."
+      },
+      "har": {
+        "description": "Bạn đã ghi lại một bản trace mạng từ devtools của trình duyệt? Thả tệp .har đã xuất ra — Restorm duyệt qua mọi lệnh gọi được ghi lại và biến nó thành một yêu cầu có thể phát lại, bao gồm cả header và body."
+      },
+      "restClient": {
+        "description": "Bạn đến từ tiện ích mở rộng REST Client của VS Code? Dán hoặc thả tệp .http / .rest — Restorm phân tích từng khối yêu cầu, giải quyết các @variables và dựng lại chúng thành một cây Restorm.",
+        "trademark": "REST Client là nhãn hiệu của chủ sở hữu tương ứng, được sử dụng ở đây chỉ để tham chiếu tương thích."
+      },
+      "httpie": {
+        "description": "Thả một tệp xuất bộ sưu tập HTTPie Desktop hoặc tệp phiên CLI — Restorm đọc từng yêu cầu (và với một phiên, các header liên tục của nó) và dựng lại chúng sẵn sàng để chạy.",
+        "trademark": "HTTPie là nhãn hiệu của chủ sở hữu tương ứng, được sử dụng ở đây chỉ để tham chiếu tương thích."
+      },
+      "smithy": {
+        "description": "Dán một mô hình Smithy — AST JSON hoặc IDL viết tay — và Restorm duyệt qua từng service, resource và operation để tạo ra một thư mục yêu cầu sẵn sàng chạy tương ứng.",
+        "trademark": "Smithy là một dự án của Amazon Web Services."
+      },
+      "typespec": {
+        "description": "Dán định nghĩa TypeSpec (.tsp) của bạn — Restorm biên dịch nó thành OpenAPI ở hậu trường và nhập nó chính xác như một spec viết tay: bao gồm operations, parameters và schemas.",
+        "trademark": "TypeSpec là một dự án của Microsoft."
+      },
+      "raml": {
+        "description": "Dán một tài liệu RAML 1.0 hoặc 0.8 — Restorm phản ánh cây resource của nó thành các thư mục lồng nhau, một yêu cầu cho mỗi phương thức, cùng với các kiểu đã được mô hình hóa.",
+        "trademark": "RAML là một đặc tả được duy trì bởi RAML Workgroup."
+      },
+      "wadl": {
+        "description": "Bạn vẫn đang duy trì một tài liệu WADL? Dán XML — Restorm duyệt qua cây <resource> lồng nhau của nó và tạo ra một thư mục yêu cầu tương ứng, bao gồm cả phương thức và tham số.",
+        "trademark": "WADL đã được Sun Microsystems trình lên W3C dưới dạng Member Submission."
+      },
+      "thrift": {
+        "description": "Dán một tệp IDL Apache Thrift (.thrift) — Restorm đọc từng service, method, struct và enum để bạn có thể duyệt qua cấu trúc của API. Giao thức nhị phân của Thrift chưa thể thực thi được từ Restorm, vì vậy việc nhập này chỉ mang tính tài liệu.",
+        "trademark": "Apache Thrift là nhãn hiệu của Apache Software Foundation."
+      },
+      "apiBlueprint": {
+        "description": "Dán một tài liệu API Blueprint (.apib) — Restorm phân tích từng resource group và transition thành một thư mục yêu cầu, một cho mỗi cặp phương thức/phản hồi đã được ghi tài liệu.",
+        "trademark": "API Blueprint là một đặc tả ban đầu được tạo ra bởi Apiary."
       }
+    },
+    "grpcReflection": {
+      "title": "Máy chủ gRPC (reflection)",
+      "hint": "Truy vấn dịch vụ reflection của một máy chủ gRPC đang chạy để khám phá các dịch vụ và phương thức của nó mà không cần tệp .proto.",
+      "addressLabel": "Địa chỉ máy chủ (host:port)",
+      "addressPlaceholder": "localhost:9000",
+      "tlsLabel": "Dùng TLS",
+      "metadataLabel": "Siêu dữ liệu (tiêu đề xác thực tùy chọn)",
+      "connecting": "Đang kết nối…",
+      "import": "Nhập",
+      "reimportedTitle": "Đã nhập lại gRPC reflection",
+      "reimportedNoop": "Đã cập nhật — không có thay đổi trên máy chủ.",
+      "reimportedSummary": "+{{added}} / -{{removed}} / ↻{{merged}} — tải lại dự án để xem các thay đổi.",
+      "unsupported": "Máy chủ này không hỗ trợ gRPC reflection — hãy nhập tệp .proto thay thế.",
+      "unknownError": "Lỗi không xác định"
     },
     "loading": "Đang phân tích...",
     "noResults": "Không tìm thấy yêu cầu",
@@ -1074,14 +1255,22 @@
       "socketioSend": "Socket.IO send",
       "socketioClose": "Socket.IO close",
       "websocketConnect": "WebSocket connect",
+      "sseConnect": "SSE connect",
       "websocketSend": "WebSocket send",
       "websocketClose": "WebSocket close",
+      "sseClose": "SSE close",
       "grpcConnect": "gRPC connect",
       "grpcSend": "gRPC send",
       "grpcClose": "gRPC close",
       "mqttConnect": "MQTT connect",
       "mqttSend": "MQTT publish",
       "mqttClose": "MQTT close",
+      "amqpConnect": "Kết nối AMQP",
+      "amqpPublish": "Xuất bản AMQP",
+      "amqpClose": "Đóng AMQP",
+      "redisSubscribe": "Redis subscribe",
+      "redisClose": "Redis close",
+      "redisCommand": "Redis command",
       "httpListen": "HTTP server",
       "httpClose": "HTTP close",
       "grpcServerClose": "Đóng máy chủ gRPC",
@@ -1092,7 +1281,13 @@
       "odataListen": "OData server",
       "odataClose": "OData close",
       "graphqlSubscribe": "Đăng ký GraphQL",
-      "graphqlUnsubscribe": "Hủy đăng ký GraphQL"
+      "graphqlUnsubscribe": "Hủy đăng ký GraphQL",
+      "stompConnect": "Kết nối STOMP",
+      "stompSend": "Gửi STOMP",
+      "stompClose": "Đóng STOMP",
+      "kafkaProduce": "Kafka produce",
+      "kafkaConsume": "Kafka consume",
+      "kafkaClose": "Kafka close"
     },
     "comparator": {
       "result": "kết quả"
@@ -1653,8 +1848,10 @@
       "socketioSend": "Gửi một thông điệp trên một kết nối Socket.IO đang mở.",
       "socketioClose": "Đóng một kết nối Socket.IO đang mở.",
       "websocketConnect": "Mở một kết nối WebSocket thô và phát lại mỗi thông điệp nhận được trên cổng của nó.",
+      "sseConnect": "Mở một kết nối SSE (Server-Sent Events) dài hạn và phát lại mỗi khung nhận được trên cổng của nó.",
       "websocketSend": "Gửi một payload trên một kết nối WebSocket đang mở.",
       "websocketClose": "Đóng một kết nối WebSocket đang mở.",
+      "sseClose": "Đóng một kết nối SSE đã mở.",
       "grpcConnect": "Mở một lệnh gọi gRPC streaming và phát lại mỗi khung nhận được trên cổng message của nó.",
       "grpcSend": "Ghi một thông điệp yêu cầu lên một lệnh gọi gRPC streaming đang mở.",
       "grpcClose": "Đóng một nửa (half-close) một lệnh gọi gRPC streaming đang mở.",
@@ -1667,9 +1864,15 @@
       "mqttConnect": "Mở một kết nối MQTT lâu dài từ một yêu cầu đã gắn và đăng ký vào chủ đề của nó; phát lại mỗi thông điệp nhận được trên cổng `message` của nó.",
       "mqttSend": "Phát một payload trên một kết nối MQTT đang mở (tới chủ đề của nó).",
       "mqttClose": "Đóng một kết nối MQTT đang mở.",
+      "amqpConnect": "Mở một kết nối AMQP lâu dài từ một yêu cầu được liên kết và tiêu thụ hàng đợi của nó; phát lại mỗi tin nhắn nhận được trên cổng `message`.",
+      "amqpPublish": "Xuất bản một payload trên một kết nối AMQP đã mở (đến exchange/routing key của yêu cầu được liên kết).",
+      "amqpClose": "Đóng một kết nối AMQP đã mở.",
       "mqttConnectServer": "Khởi động một broker MQTT cục bộ (cổng + bộ lọc chủ đề); đăng ký vào bộ lọc chủ đề của nó và phát lại mỗi thông điệp nhận được trên cổng `message` của nó. Gửi sẽ phát tới các bên đăng ký đã kết nối.",
       "mqttSendServer": "Phát một thông điệp tới mọi bên đăng ký của broker MQTT được tham chiếu.",
       "mqttCloseServer": "Dừng broker MQTT được tham chiếu và ngắt kết nối các client của nó.",
+      "redisSubscribe": "Mở một kết nối đăng ký Redis lâu dài từ một yêu cầu đã gắn và lắng nghe các kênh của nó; phát lại mỗi thông điệp nhận được trên cổng `message` của nó.",
+      "redisClose": "Đóng một kết nối đăng ký Redis đang mở.",
+      "redisCommand": "Chạy một lệnh Redis đã gắn (một lệnh duy nhất trên kết nối mới, sau đó ngắt kết nối) và phát ra phản hồi của nó.",
       "toast": "Phát ra một thông báo toast trong giao diện Restorm khi kịch bản chạy.",
       "httpListen": "Hosts a local HTTP mock server and listens indefinitely. `connected` fires once it is listening; each served request re-emits its data on the `served` port. The server stays up until an HTTP close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
       "httpClose": "Dừng một máy chủ giả lập HTTP đang lắng nghe (được khai báo bởi một nút máy chủ HTTP), giải phóng cổng của nó.",
@@ -1682,7 +1885,13 @@
       "odataListen": "Lưu trữ một dịch vụ mô phỏng OData v4 cục bộ và lắng nghe vô thời hạn. `connected` kích hoạt ngay khi bắt đầu lắng nghe; mỗi yêu cầu được phục vụ phát lại dữ liệu của nó trên cổng `served`. Máy chủ vẫn hoạt động cho đến khi đóng OData (hoặc Stop), sau đó `done` kích hoạt. Không có đầu ra response — nó phục vụ, không gọi ra ngoài.",
       "odataClose": "Dừng một dịch vụ mô phỏng OData đang lắng nghe (được khai báo bởi một nút máy chủ OData), giải phóng cổng của nó.",
       "graphqlSubscribe": "Mở một đăng ký GraphQL lâu dài với tư cách máy khách qua SSE và lắng nghe. `connected` kích hoạt ngay khi luồng được mở; mỗi tải trọng được đẩy sẽ phát lại trên cổng `message` (một đăng ký chỉ nhận, không có sự kiện được đặt tên). Luồng vẫn mở cho đến khi hủy đăng ký GraphQL (hoặc dừng), hoặc cho đến khi máy chủ hoàn tất, sau đó `done` kích hoạt.",
-      "graphqlUnsubscribe": "Dừng một đăng ký GraphQL đang mở (được khai báo bởi nút đăng ký GraphQL), đóng luồng SSE của nó."
+      "graphqlUnsubscribe": "Dừng một đăng ký GraphQL đang mở (được khai báo bởi nút đăng ký GraphQL), đóng luồng SSE của nó.",
+      "stompConnect": "Mở một kết nối STOMP qua WebSocket lâu dài: thực hiện bắt tay CONNECT/CONNECTED, sau đó đăng ký từng đích đã cấu hình và phát lại mỗi khung nhận được trên cổng của nó.",
+      "stompSend": "Gửi một khung SEND trên kết nối STOMP đã mở.",
+      "stompClose": "Gửi DISCONNECT và đóng kết nối STOMP đã mở.",
+      "kafkaProduce": "Chạy một yêu cầu Kafka đã gắn dưới dạng sản xuất một lần và phát ra kết quả (chủ đề/phân vùng/offset) dưới dạng `response`.",
+      "kafkaConsume": "Mở một trình tiêu thụ Kafka lâu dài từ một yêu cầu đã gắn và phát lại mỗi thông điệp nhận được trên cổng `message` của nó.",
+      "kafkaClose": "Đóng một trình tiêu thụ Kafka đang mở."
     },
     "legend": {
       "title": "Chú giải",
@@ -1731,6 +1940,9 @@
     "websocket": {
       "message": "message"
     },
+    "sse": {
+      "message": "message"
+    },
     "grpc": {
       "message": "message"
     },
@@ -1776,6 +1988,36 @@
     "lwtTopicPlaceholder": "will/topic",
     "lwtPayload": "Payload",
     "lwtPayloadPlaceholder": "will message"
+  },
+  "amqp": {
+    "urlPlaceholder": "URL AMQP (amqp:// hoặc amqps://)",
+    "vhost": "Máy chủ ảo",
+    "vhostPlaceholder": "/",
+    "username": "Tên người dùng",
+    "password": "Mật khẩu",
+    "mode": "Chế độ",
+    "modePublish": "Xuất bản",
+    "modeSubscribe": "Đăng ký",
+    "modeBrowse": "Duyệt",
+    "exchange": "Exchange",
+    "exchangePlaceholder": "(exchange mặc định)",
+    "routingKey": "Routing key",
+    "routingKeyPlaceholder": "routing.key",
+    "queue": "Hàng đợi",
+    "queuePlaceholder": "tên hàng đợi",
+    "autoAck": "Tự động xác nhận",
+    "prefetch": "Prefetch",
+    "browsePeekCount": "Số lượng xem trước",
+    "connect": "Kết nối",
+    "connecting": "Đang kết nối…",
+    "disconnect": "Ngắt kết nối",
+    "connected": "Đã kết nối",
+    "disconnected": "Đã ngắt kết nối",
+    "send": "Gửi",
+    "browseButton": "Duyệt",
+    "noMessages": "Chưa có tin nhắn nào",
+    "peeked": "Đã xem trước",
+    "messages": "Tin nhắn"
   },
   "mcpLogs": {
     "title": "Nhật ký MCP",
@@ -2042,5 +2284,42 @@
       "noSubscription": "Không có gói đăng ký nào đang hoạt động để quản lý.",
       "error": "Không thể mở cổng quản lý đăng ký. Vui lòng thử lại."
     }
+  },
+  "trpc": {
+    "send": "Gửi",
+    "urlPlaceholder": "URL máy chủ tRPC",
+    "procedurePlaceholder": "Thủ tục (vd: user.get)",
+    "kindQuery": "Truy vấn",
+    "kindMutation": "Mutation",
+    "showRawEnvelope": "Hiển thị phong bì thô",
+    "kindSelectLabel": "Loại lệnh gọi",
+    "tabs": {
+      "headers": "Header",
+      "body": "Body"
+    }
+  },
+  "stomp": {
+    "connect": "Kết nối",
+    "disconnect": "Ngắt kết nối",
+    "connected": "Đã kết nối",
+    "disconnected": "Đã ngắt kết nối",
+    "noMessages": "Chưa có khung nào",
+    "version": "Phiên bản STOMP",
+    "tabs": {
+      "connect": "Kết nối",
+      "subscriptions": "Đăng ký",
+      "send": "Gửi"
+    },
+    "ackMode": {
+      "auto": "auto",
+      "client": "client",
+      "clientIndividual": "client-individual"
+    },
+    "subscriptionIdLabel": "Mã đăng ký",
+    "removeSubscription": "Xóa đăng ký",
+    "addSubscription": "Thêm đăng ký",
+    "sendDestination": "Đích",
+    "ack": "ACK",
+    "nack": "NACK"
   }
 }

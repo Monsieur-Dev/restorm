@@ -274,10 +274,17 @@
         "socketio": "Socket.IO-pyyntö",
         "mqtt": "MQTT request",
         "mqttServer": "MQTT-välittäjä",
+        "sse": "SSE-pyyntö",
         "grpcServer": "gRPC-mock-palvelin",
         "soapServer": "SOAP-mock-palvelin",
         "graphqlServer": "GraphQL-mock-palvelin",
-        "odataServer": "OData-mock-palvelin"
+        "odataServer": "OData-mock-palvelin",
+        "trpc": "tRPC-pyyntö",
+        "amqp": "AMQP-pyyntö",
+        "redis": "Redis-pyyntö",
+        "stomp": "STOMP-pyyntö",
+        "kafkaProduce": "Kafka-pyyntö – Tuota",
+        "kafkaConsume": "Kafka-pyyntö – Kuluta"
       }
     },
     "deleteConfirm": {
@@ -475,6 +482,12 @@
       "clientStream": "Client streaming",
       "bidi": "Bidirectional streaming"
     },
+    "transport": {
+      "grpc": "gRPC",
+      "grpcWeb": "gRPC-Web",
+      "connect": "Connect",
+      "streamingUnsupported": "Tämä siirtotapa ei tue asiakas- tai kaksisuuntaista suoratoistoa HTTP/1.1:n kautta. Käytä sen sijaan natiivia gRPC-siirtotapaa."
+    },
     "server": {
       "proto": "Proto",
       "methods": "Mock-metodit",
@@ -493,6 +506,12 @@
       "notListening": "Ei kuuntele",
       "listenFailed": "gRPC-palvelimen käynnistys epäonnistui",
       "snippetsUnavailable": "Koodikatkelmat eivät ole käytettävissä mock-palvelimelle."
+    },
+    "reflection": {
+      "refresh": "Päivitä reflectionista",
+      "refreshFailed": "Päivitys gRPC-reflectionilla epäonnistui",
+      "unsupported": "Tämä palvelin ei tue gRPC-reflectionia — tuo sen sijaan .proto-tiedosto.",
+      "unknownError": "Tuntematon virhe"
     }
   },
   "soap": {
@@ -540,6 +559,114 @@
     "routePlaceholder": "Reitti (valinnainen)",
     "clientsConnected": "{{count}} asiakas/asiakkaita yhdistetty",
     "notListening": "Ei kuuntele"
+  },
+  "jsonrpc": {
+    "send": "Lähetä",
+    "urlPlaceholder": "JSON-RPC-päätepisteen URL",
+    "methodPlaceholder": "metodi",
+    "idPlaceholder": "id (auto)",
+    "notificationModeTooltip": "Ilmoitustila — ei id:tä, ei vastausta odoteta",
+    "tabs": {
+      "params": "Parametrit",
+      "headers": "Otsakkeet"
+    },
+    "response": {
+      "notificationSent": "Ilmoitus lähetetty",
+      "errorLabel": "JSON-RPC-virhe {{code}}:"
+    }
+  },
+  "jsonrpcBatch": {
+    "send": "Lähetä erä",
+    "tabs": {
+      "calls": "Kutsut"
+    },
+    "empty": "Ei kutsuja vielä. Lisää yksi alle.",
+    "methodPlaceholder": "metodi",
+    "idPlaceholder": "id (auto)",
+    "moveUp": "Siirrä ylös",
+    "moveDown": "Siirrä alas",
+    "remove": "Poista kutsu",
+    "paramsLabel": "Parametrit (JSON)",
+    "add": "Lisää kutsu",
+    "response": {
+      "unmatched": "Ei vastaavaa vastausmerkintää."
+    }
+  },
+  "sse": {
+    "headers": "Otsakkeet",
+    "noFrames": "Ei vielä tapahtumia",
+    "urlPlaceholder": "SSE-URL",
+    "framesTruncated": "Näytetään {{shown}} viimeisintä / {{total}} kehystä",
+    "showAllFrames": "Näytä kaikki"
+  },
+  "redis": {
+    "connected": "Yhdistetty",
+    "disconnected": "Yhteys katkaistu",
+    "noMessages": "Ei vielä viestejä",
+    "noCommandsYet": "Ei vielä suoritettuja komentoja",
+    "urlPlaceholder": "Redis-URL (redis:// tai rediss://)",
+    "passwordPlaceholder": "Salasana (valinnainen)",
+    "subscribe": "Tilaa",
+    "unsubscribe": "Peru tilaus",
+    "run": "Suorita",
+    "subscribeMode": "Tilaus",
+    "commandMode": "Komento",
+    "command": "Komento",
+    "args": "Argumentit",
+    "argsPlaceholder": "Komennon argumentit",
+    "freeform": "Vapaa",
+    "freeformPlaceholder": "Vapaamuotoinen komento (ohittaa valinnan)",
+    "tabs": {
+      "channels": "Kanavat",
+      "command": "Komento"
+    }
+  },
+  "kafka": {
+    "brokersPlaceholder": "Broker-luettelo (host:port,host:port)",
+    "clientId": "Asiakastunnus",
+    "clientIdPlaceholder": "restorm",
+    "mode": {
+      "produce": "Tuota",
+      "consume": "Kuluta",
+      "browse": "Selaa"
+    },
+    "auth": {
+      "title": "Todennus",
+      "mechanism": "SASL",
+      "username": "Käyttäjätunnus",
+      "password": "Salasana",
+      "tls": "TLS"
+    },
+    "topic": "Aihe",
+    "topicPlaceholder": "aiheen-nimi",
+    "key": "Avain",
+    "keyPlaceholder": "viestin avain (valinnainen)",
+    "value": "Arvo",
+    "headers": "Otsikot",
+    "partition": "Partitio",
+    "partitionPlaceholder": "auto",
+    "groupId": "Ryhmätunnus",
+    "groupIdPlaceholder": "restorm-consumer",
+    "fromOffsetLabel": "Aloita kohdasta",
+    "fromOffset": {
+      "earliest": "Vanhin",
+      "latest": "Uusin",
+      "specific": "Tietty"
+    },
+    "specificOffset": "Offset",
+    "partitions": "Partitiot",
+    "partitionsPlaceholder": "0,1,2 (tyhjä = kaikki)",
+    "peekCount": "Viestien määrä",
+    "produce": "Tuota",
+    "startConsuming": "Aloita kulutus",
+    "stopConsuming": "Lopeta kulutus",
+    "peek": "Kurkistus",
+    "noMessages": "Ei vielä viestejä",
+    "connected": "Yhdistetty",
+    "disconnected": "Yhteys katkaistu",
+    "producedTo": "Tuotettu kohteeseen",
+    "offset": "Offset",
+    "messages": "Viestit"
   },
   "search": {
     "placeholder": "Etsi...",
@@ -886,6 +1013,10 @@
         "description": "Pudota .proto-tiedosto (tai kokonainen kansio sellaisia), niin Restorm käy läpi jokaisen palvelun, jokaisen RPC:n ja jokaisen viestin — jokaisesta menetelmästä tulee tyypitetty pyyntö, jonka voit lähettää gRPC-suorittimen kautta ilman codegeniä.",
         "trademark": "gRPC on Cloud Native Computing Foundationin projekti."
       },
+      "grpcReflection": {
+        "description": "Eikö .proto-tiedostoa? Osoita Restorm käynnissä olevaan gRPC-palvelimeen, joka tarjoaa reflectionin — se kysyy grpc.reflection.v1alpha.ServerReflection-palvelua, löytää jokaisen palvelun ja metodin ja rakentaa saman tyypitetyn pyyntöpuun kuin proto-tiedoston tuonti, tallennettuna paikallisesti offline-käyttöä varten.",
+        "action": "Yhdistä palvelimeen…"
+      },
       "soap": {
         "description": "Onko WSDL? Liitä se (tai sen URL) — Restorm jäsentää jokaisen <port>- ja <operation>-elementin ja tuottaa lähetysvalmiit SOAP-kuoret oikealla SOAPAction-otsakkeella, skeeman mukaan tyypitetyillä sisältöluonnoksilla ja WSDL:n ilmoittamalla todennusmenetelmällä."
       },
@@ -911,7 +1042,57 @@
       "paw": {
         "description": "Tuletko Pawsta? Pudota JSON-vientitiedostosi (File → Export → JSON sovelluksessa — natiivia .paw-pakettia ei lueta suoraan). Restorm rakentaa uudelleen jokaisen pyynnön, otsakkeen, sisällön ja ympäristön, ja yhdistää Pawn dynaamiset arvot (aikaleimat, satunnaiset merkkijonot, UUID:t) lähimpään Restorm-vastineeseen.",
         "trademark": "Paw on RapidAPI, Inc:n rekisteröity tavaramerkki, käytetään tässä vain yhteensopivuusviittauksena."
+      },
+      "har": {
+        "description": "Tallensitko verkkoliikennejäljen selaimesi devtools-työkalusta? Pudota viety .har-tiedosto — Restorm käy läpi jokaisen tallennetun kutsun ja muuttaa sen toistettavaksi pyynnöksi, otsakkeet ja sisältö mukaan lukien."
+      },
+      "restClient": {
+        "description": "Tuletko REST Client -VS Code -laajennuksesta? Liitä tai pudota .http-/.rest-tiedosto — Restorm jäsentää jokaisen pyyntölohkon, ratkaisee @variables-muuttujat ja rakentaa ne uudelleen Restorm-puuksi.",
+        "trademark": "REST Client on sen omistajan tavaramerkki, käytetään tässä vain yhteensopivuusviittauksena."
+      },
+      "httpie": {
+        "description": "Pudota HTTPie Desktopin kokoelmavienti tai CLI-istuntotiedosto — Restorm lukee jokaisen pyynnön (ja istunnon tapauksessa sen pysyvät otsakkeet) ja rakentaa ne uudelleen käyttövalmiiksi.",
+        "trademark": "HTTPie on sen omistajan tavaramerkki, käytetään tässä vain yhteensopivuusviittauksena."
+      },
+      "smithy": {
+        "description": "Liitä Smithy-malli — JSON-AST tai käsin kirjoitettu IDL — ja Restorm käy läpi jokaisen palvelun, resurssin ja operaation tuottaakseen vastaavan kansion käyttövalmiita pyyntöjä.",
+        "trademark": "Smithy on Amazon Web Servicesin projekti."
+      },
+      "typespec": {
+        "description": "Liitä TypeSpec-määrittelysi (.tsp) — Restorm kääntää sen taustalla OpenAPI-muotoon ja tuo sen aivan kuten käsin kirjoitetun määrittelyn: operaatiot, parametrit ja skeemat mukaan lukien.",
+        "trademark": "TypeSpec on Microsoftin projekti."
+      },
+      "raml": {
+        "description": "Liitä RAML 1.0- tai 0.8-dokumentti — Restorm heijastaa sen resurssipuun sisäkkäisiin kansioihin, yksi pyyntö per metodi, mallinnetut tyypit mukaan lukien.",
+        "trademark": "RAML on RAML Workgroupin ylläpitämä määrittely."
+      },
+      "wadl": {
+        "description": "Ylläpidätkö yhä WADL-dokumenttia? Liitä XML — Restorm käy läpi sen sisäkkäisen <resource>-puun ja tuottaa vastaavan kansion pyyntöjä, metodit ja parametrit mukaan lukien.",
+        "trademark": "Sun Microsystems toimitti WADL:n W3C:lle Member Submission -muodossa."
+      },
+      "thrift": {
+        "description": "Liitä Apache Thrift IDL -tiedosto (.thrift) — Restorm lukee jokaisen palvelun, metodin, structin ja enumin, jotta voit selata API:n rakennetta. Thriftin binaarista siirtoprotokollaa ei voi vielä suorittaa Restormista, joten tämä tuonti on vain dokumentaatiota varten.",
+        "trademark": "Apache Thrift on Apache Software Foundationin tavaramerkki."
+      },
+      "apiBlueprint": {
+        "description": "Liitä API Blueprint -dokumentti (.apib) — Restorm jäsentää jokaisen resurssiryhmän ja siirtymän pyyntökansioksi, yksi per dokumentoitu metodi-/vastauspari.",
+        "trademark": "API Blueprint on alun perin Apiaryn luoma määrittely."
       }
+    },
+    "grpcReflection": {
+      "title": "gRPC-palvelin (reflection)",
+      "hint": "Kysy käynnissä olevan gRPC-palvelimen reflection-palvelua sen palveluiden ja metodien löytämiseksi ilman .proto-tiedostoa.",
+      "addressLabel": "Palvelimen osoite (host:portti)",
+      "addressPlaceholder": "localhost:9000",
+      "tlsLabel": "Käytä TLS:ää",
+      "metadataLabel": "Metatiedot (valinnaiset todennusotsikot)",
+      "connecting": "Yhdistetään…",
+      "import": "Tuo",
+      "reimportedTitle": "gRPC-reflection tuotu uudelleen",
+      "reimportedNoop": "Jo ajan tasalla — ei muutoksia palvelimella.",
+      "reimportedSummary": "+{{added}} / -{{removed}} / ↻{{merged}} — lataa projekti uudelleen nähdäksesi muutokset.",
+      "unsupported": "Tämä palvelin ei tue gRPC-reflectionia — tuo sen sijaan .proto-tiedosto.",
+      "unknownError": "Tuntematon virhe"
     },
     "loading": "Analysoidaan...",
     "noResults": "Pyyntöjä ei löytynyt",
@@ -1075,14 +1256,22 @@
       "socketioSend": "Socket.IO send",
       "socketioClose": "Socket.IO close",
       "websocketConnect": "WebSocket connect",
+      "sseConnect": "SSE connect",
       "websocketSend": "WebSocket send",
       "websocketClose": "WebSocket close",
+      "sseClose": "SSE close",
       "grpcConnect": "gRPC connect",
       "grpcSend": "gRPC send",
       "grpcClose": "gRPC close",
       "mqttConnect": "MQTT connect",
       "mqttSend": "MQTT publish",
       "mqttClose": "MQTT close",
+      "amqpConnect": "AMQP-yhteys",
+      "amqpPublish": "AMQP-julkaisu",
+      "amqpClose": "AMQP-sulkeminen",
+      "redisSubscribe": "Redis subscribe",
+      "redisClose": "Redis close",
+      "redisCommand": "Redis command",
       "httpListen": "HTTP server",
       "httpClose": "HTTP close",
       "grpcServerClose": "Sulje gRPC-palvelin",
@@ -1093,7 +1282,13 @@
       "odataListen": "OData server",
       "odataClose": "OData close",
       "graphqlSubscribe": "GraphQL-tilaus",
-      "graphqlUnsubscribe": "Peruuta GraphQL-tilaus"
+      "graphqlUnsubscribe": "Peruuta GraphQL-tilaus",
+      "stompConnect": "STOMP-yhteys",
+      "stompSend": "STOMP-lähetys",
+      "stompClose": "Sulje STOMP",
+      "kafkaProduce": "Kafka produce",
+      "kafkaConsume": "Kafka consume",
+      "kafkaClose": "Kafka close"
     },
     "comparator": {
       "result": "tulos"
@@ -1654,8 +1849,10 @@
       "socketioSend": "Lähettää viestin jo avoimeen Socket.IO-yhteyteen.",
       "socketioClose": "Sulkee jo avoimen Socket.IO-yhteyden.",
       "websocketConnect": "Avaa raa'an WebSocket-yhteyden ja lähettää jokaisen vastaanotetun viestin uudelleen portistaan.",
+      "sseConnect": "Avaa pitkäkestoisen SSE (Server-Sent Events) -yhteyden ja lähettää jokaisen vastaanotetun kehyksen uudelleen portistaan.",
       "websocketSend": "Lähettää hyötykuorman jo avoimeen WebSocket-yhteyteen.",
       "websocketClose": "Sulkee jo avoimen WebSocket-yhteyden.",
+      "sseClose": "Sulkee jo avoinna olevan SSE-yhteyden.",
       "grpcConnect": "Avaa streaming-gRPC-kutsun ja lähettää jokaisen vastaanotetun kehyksen uudelleen message-portissaan.",
       "grpcSend": "Kirjoittaa pyyntöviestin jo avoimeen gRPC-streaming-kutsuun.",
       "grpcClose": "Sulkee osittain (half-close) jo avoimen gRPC-streaming-kutsun.",
@@ -1668,9 +1865,15 @@
       "mqttConnect": "Avaa pitkäkestoisen MQTT-yhteyden sidotusta pyynnöstä ja tilaa sen aiheen; lähettää jokaisen vastaanotetun viestin uudelleen `message`-portissaan.",
       "mqttSend": "Julkaisee hyötykuorman jo avoimeen MQTT-yhteyteen (sen aiheeseen).",
       "mqttClose": "Sulkee jo avoimen MQTT-yhteyden.",
+      "amqpConnect": "Avaa pysyvän AMQP-yhteyden sidotusta pyynnöstä ja kuluttaa sen jonoa; välittää jokaisen vastaanotetun viestin uudelleen `message`-porttiin.",
+      "amqpPublish": "Julkaisee hyötykuorman jo avoinna olevaan AMQP-yhteyteen (sidotun pyynnön exchangeen/routing keyhin).",
+      "amqpClose": "Sulkee jo avoinna olevan AMQP-yhteyden.",
       "mqttConnectServer": "Käynnistää paikallisen MQTT-välittäjän (portti + aihesuodatin); tilaa sen aihesuodattimen ja lähettää jokaisen vastaanotetun viestin uudelleen `message`-portissaan. Lähetys julkaisee yhdistetyille tilaajille.",
       "mqttSendServer": "Julkaisee viestin viitatun MQTT-välittäjän jokaiselle tilaajalle.",
       "mqttCloseServer": "Pysäyttää viitatun MQTT-välittäjän ja katkaisee sen asiakkaiden yhteydet.",
+      "redisSubscribe": "Avaa pitkäkestoisen Redis-tilausyhteyden sidotusta pyynnöstä ja kuuntelee sen kanavia; lähettää jokaisen vastaanotetun viestin uudelleen `message`-portissaan.",
+      "redisClose": "Sulkee jo avoimen Redis-tilausyhteyden.",
+      "redisCommand": "Suorittaa sidotun Redis-komennon (yksi komento uudessa yhteydessä, sitten katkaisu) ja lähettää sen vastauksen.",
       "toast": "Näyttää toast-ilmoituksen Restorm-käyttöliittymässä skenaarion suorituksen aikana.",
       "httpListen": "Hosts a local HTTP mock server and listens indefinitely. `connected` fires once it is listening; each served request re-emits its data on the `served` port. The server stays up until an HTTP close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
       "httpClose": "Pysäyttää jo kuuntelevan HTTP-mock-palvelimen (jonka HTTP-palvelinsolmu on määritellyt) ja vapauttaa sen portin.",
@@ -1683,7 +1886,13 @@
       "odataListen": "Isännöi paikallista OData v4 -näennäispalvelua ja kuuntelee loputtomiin. `connected` laukeaa heti kun palvelu kuuntelee; jokainen palveltu pyyntö lähettää tietonsa uudelleen `served`-porttiin. Palvelin pysyy käynnissä OData-sulkemiseen (tai pysäytykseen) asti, minkä jälkeen `done` laukeaa. Ei response-tulostetta — se palvelee, se ei kutsu ulospäin.",
       "odataClose": "Pysäyttää jo kuuntelevan OData-näennäispalvelun (jonka OData-palvelinsolmu on määrittänyt) ja vapauttaa sen portin.",
       "graphqlSubscribe": "Avaa pitkäkestoisen GraphQL-tilauksen asiakkaana SSE:n kautta ja kuuntelee. `connected` laukeaa heti kun virta on auki; jokainen vastaanotettu hyötykuorma lähetetään uudelleen `message`-porttiin (tilaus on vain vastaanottava, ilman nimettyjä tapahtumia). Virta pysyy auki, kunnes GraphQL-tilaus perutaan (tai pysäytys), tai kunnes palvelin päättää sen, jolloin `done` laukeaa.",
-      "graphqlUnsubscribe": "Pysäyttää jo avoimen GraphQL-tilauksen (jonka GraphQL-tilaussolmu on määrittänyt) ja purkaa sen SSE-virran."
+      "graphqlUnsubscribe": "Pysäyttää jo avoimen GraphQL-tilauksen (jonka GraphQL-tilaussolmu on määrittänyt) ja purkaa sen SSE-virran.",
+      "stompConnect": "Avaa pitkäkestoisen STOMP-yhteyden WebSocketin yli: suorittaa CONNECT/CONNECTED-kättelyn, tilaa sitten jokaisen määritetyn kohteen ja lähettää jokaisen vastaanotetun kehyksen uudelleen portistaan.",
+      "stompSend": "Lähettää SEND-kehyksen jo avoinna olevassa STOMP-yhteydessä.",
+      "stompClose": "Lähettää DISCONNECT-viestin ja sulkee jo avoinna olevan STOMP-yhteyden.",
+      "kafkaProduce": "Suorittaa sidotun Kafka-pyynnön kertaluonteisena tuottamisena ja lähettää tuloksen (aihe/partitio/offset) `response`-arvona.",
+      "kafkaConsume": "Avaa pitkäkestoisen Kafka-kuluttajan sidotusta pyynnöstä ja lähettää jokaisen vastaanotetun viestin uudelleen `message`-portissaan.",
+      "kafkaClose": "Sulkee jo avoimen Kafka-kuluttajan."
     },
     "legend": {
       "title": "Selite",
@@ -1732,6 +1941,9 @@
     "websocket": {
       "message": "message"
     },
+    "sse": {
+      "message": "message"
+    },
     "grpc": {
       "message": "message"
     },
@@ -1777,6 +1989,36 @@
     "lwtTopicPlaceholder": "will/topic",
     "lwtPayload": "Payload",
     "lwtPayloadPlaceholder": "will message"
+  },
+  "amqp": {
+    "urlPlaceholder": "AMQP-URL (amqp:// tai amqps://)",
+    "vhost": "Virtuaalipalvelin (vhost)",
+    "vhostPlaceholder": "/",
+    "username": "Käyttäjätunnus",
+    "password": "Salasana",
+    "mode": "Tila",
+    "modePublish": "Julkaise",
+    "modeSubscribe": "Tilaa",
+    "modeBrowse": "Selaa",
+    "exchange": "Exchange",
+    "exchangePlaceholder": "(oletus-exchange)",
+    "routingKey": "Routing key",
+    "routingKeyPlaceholder": "routing.key",
+    "queue": "Jono",
+    "queuePlaceholder": "jonon nimi",
+    "autoAck": "Automaattinen kuittaus",
+    "prefetch": "Prefetch",
+    "browsePeekCount": "Esikatselumäärä",
+    "connect": "Yhdistä",
+    "connecting": "Yhdistetään…",
+    "disconnect": "Katkaise yhteys",
+    "connected": "Yhdistetty",
+    "disconnected": "Yhteys katkaistu",
+    "send": "Lähetä",
+    "browseButton": "Selaa",
+    "noMessages": "Ei vielä viestejä",
+    "peeked": "Esikatseltu",
+    "messages": "Viestit"
   },
   "mcpLogs": {
     "title": "MCP-lokit",
@@ -2043,5 +2285,42 @@
       "noSubscription": "Ei aktiivista tilausta hallittavaksi.",
       "error": "Tilausportaalin avaaminen epäonnistui. Yritä uudelleen."
     }
+  },
+  "trpc": {
+    "send": "Lähetä",
+    "urlPlaceholder": "tRPC-palvelimen URL-osoite",
+    "procedurePlaceholder": "Toimenpide (esim. user.get)",
+    "kindQuery": "Kysely",
+    "kindMutation": "Mutaatio",
+    "showRawEnvelope": "Näytä raaka kirjekuori",
+    "kindSelectLabel": "Kutsun tyyppi",
+    "tabs": {
+      "headers": "Otsakkeet",
+      "body": "Sisältö"
+    }
+  },
+  "stomp": {
+    "connect": "Yhdistä",
+    "disconnect": "Katkaise yhteys",
+    "connected": "Yhdistetty",
+    "disconnected": "Ei yhdistetty",
+    "noMessages": "Ei vielä kehyksiä",
+    "version": "STOMP-versio",
+    "tabs": {
+      "connect": "Yhteys",
+      "subscriptions": "Tilaukset",
+      "send": "Lähetä"
+    },
+    "ackMode": {
+      "auto": "auto",
+      "client": "client",
+      "clientIndividual": "client-individual"
+    },
+    "subscriptionIdLabel": "Tilauksen tunnus",
+    "removeSubscription": "Poista tilaus",
+    "addSubscription": "Lisää tilaus",
+    "sendDestination": "Kohde",
+    "ack": "ACK",
+    "nack": "NACK"
   }
 }

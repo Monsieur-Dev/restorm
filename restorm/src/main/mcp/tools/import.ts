@@ -18,10 +18,10 @@
 import { z } from 'zod'
 import { BrowserWindow } from 'electron'
 import { McpService } from 'electron-core-ui'
-import { eventBusService } from 'electron-core-ui/main'
+import { eventBusService, logger } from 'electron-core-ui/main'
 import { collectionStore, pubsub, PUBSUB_TOPICS } from '../../services/CollectionStore'
 import { DocumentEvents, type DocumentChangedPayload } from '../../services/DocumentEvents'
-import { importFrom } from '../../services/import/ImportManager'
+import { importFrom, runPostImportSeed } from '../../services/import/ImportManager'
 import { isAnyFolder, isEnvironmentFolder, isRequest, isScenario, type FolderItem, type EnvironmentFolder, type Environment } from '../../../shared/models'
 import { cloneForEventBus } from '../../../shared/utils/cloneForEventBus'
 import { assertSafeFetchUrl } from '../../utils/urlSecurity'
@@ -254,6 +254,25 @@ export function registerImportTools(mcp: McpService): void {
       emitEnvironmentEvents(result.items)
       broadcastTreeReplace()
       triggerSave()
+
+      // Best-effort: seed response history for formats that recorded one
+      // (currently HAR only — see `HarImportService.ts`'s `postImportSeed`).
+      // Ids are unchanged from `parse()` here (the items above were pushed
+      // as-is, unlike the renderer's File → Import flow which regenerates
+      // them), so no id map is needed. A failure — e.g. the spec no longer
+      // resolves on the re-fetch `runPostImportSeed` does to recover the
+      // raw payload — never fails the import itself; the tree already
+      // landed above.
+      if (result.format) {
+        const seedOutcome = await runPostImportSeed(url, result.format, undefined, {
+          ...(extraHeaders !== undefined ? { extraHeaders } : {}),
+          ...(result.payloadChecksum !== undefined ? { expectedChecksum: result.payloadChecksum } : {})
+        })
+        if (!seedOutcome.success) {
+          logger.warn('[import_from_url] postImportSeed skipped', { url, format: result.format, error: seedOutcome.error })
+        }
+      }
+
       return jsonReply({
         url,
         format: result.format ?? null,

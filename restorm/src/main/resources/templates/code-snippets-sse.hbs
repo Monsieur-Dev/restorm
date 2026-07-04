@@ -1,0 +1,84 @@
+{{!-- Code snippets template for SSE (Server-Sent Events) requests --}}
+{{!-- Generates markdown with code examples in multiple languages --}}
+
+<details open>
+<summary><strong>cURL</strong></summary>
+
+```bash
+curl --no-buffer \
+  -H "Accept: text/event-stream"{{#if headers}} \
+{{#each headers}}  -H "{{key}}: {{value}}"{{#unless @last}} \
+{{/unless}}
+{{/each}}{{/if}}{{#if lastEventId}} \
+  -H "Last-Event-ID: {{lastEventId}}"{{/if}} \
+  '{{url}}'
+```
+
+`--no-buffer` disables curl's output buffering so frames print as they
+arrive instead of only once the connection closes.
+
+</details>
+
+<details>
+<summary><strong>JavaScript - Browser EventSource</strong></summary>
+
+```javascript
+const source = new EventSource('{{url}}');
+
+source.onopen = () => {
+  console.log('Connected');
+};
+
+source.onmessage = (event) => {
+  console.log('Received:', event.lastEventId, event.data);
+};
+
+source.onerror = (error) => {
+  console.error('Error:', error);
+  // EventSource reconnects automatically (using Last-Event-ID) unless closed.
+};
+
+// Listen for a named event (anything other than the default "message"):
+// source.addEventListener('eventName', (event) => {
+//   console.log('Received eventName:', event.data);
+// });
+
+// To stop listening:
+// source.close();
+```
+
+{{#if headers}}
+> The native `EventSource` API does not support custom request headers.
+> Use the `eventsource` npm package (Node.js) or a `fetch`-based polyfill
+> when headers (auth, …) are required — see the cURL example above for the
+> raw header values.
+{{/if}}
+
+</details>
+
+<details>
+<summary><strong>Python - requests</strong></summary>
+
+```python
+import requests
+
+headers = {
+    'Accept': 'text/event-stream',
+{{#each headers}}    '{{key}}': '{{value}}',
+{{/each}}{{#if lastEventId}}    'Last-Event-ID': '{{lastEventId}}',
+{{/if}}
+}
+
+with requests.get('{{url}}', headers=headers, stream=True) as response:
+    event_type = 'message'
+    for line in response.iter_lines(decode_unicode=True):
+        if line is None or line == '':
+            event_type = 'message'
+            continue
+        if line.startswith('event:'):
+            event_type = line[len('event:'):].strip()
+        elif line.startswith('data:'):
+            print(f'Received {event_type}:', line[len('data:'):].strip())
+```
+
+</details>

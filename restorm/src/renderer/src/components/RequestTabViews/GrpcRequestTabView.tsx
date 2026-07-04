@@ -15,13 +15,16 @@ import {
   eventBus,
   logger,
   getContrastColor,
+  toasterService,
+  useDebouncedCallback,
+  useDebouncedValue,
   type ISelectData,
   type VariableDefinition
 } from 'electron-core-ui/renderer'
 import { DocumentEvents, type RequestHistoryEventPayload } from '../../services/DocumentEvents'
 import { RestormVariableInputBox } from '../RestormVariableInputBox'
 import { RestormKeyValueTable, type KeyValueTableHandle } from '../RestormKeyValueTable'
-import type { GrpcRequest, GrpcResponse, GrpcCallType, KeyValue, ResponseHistoryDetail } from '../../../../shared/types/collections'
+import type { GrpcRequest, GrpcResponse, GrpcCallType, GrpcTransport, KeyValue, ResponseHistoryDetail } from '../../../../shared/types/collections'
 import { useEnvironmentContext } from '../../contexts/useEnvironmentContext'
 import type { GRPCExecutionResult } from '../../types/global.d'
 import { BaseRequestTabView } from './BaseRequestTabView'
@@ -87,7 +90,12 @@ const GrpcClientTabView: React.FC<GrpcRequestTabViewProps> = ({
   const [url, setUrlState] = useState(request.url)
   const [requestMessage, setRequestMessageState] = useState(request.requestMessage)
   const [callType, setCallTypeState] = useState<GrpcCallType>(request.callType)
+  // Named `grpcTransport` (not `transport`) to avoid colliding with this file's
+  // unrelated "transport-replaced" quick-config-reload vocabulary below.
+  const [grpcTransport, setGrpcTransportState] = useState<GrpcTransport>(request.transport ?? 'grpc')
+  const debouncedGrpcTransport = useDebouncedValue(grpcTransport, 250)
   const [isSending, setIsSending] = useState(false)
+  const [isRefreshingReflection, setIsRefreshingReflection] = useState(false)
   const [response, setResponse] = useState<GrpcResponse | null>(null)
   const [liveMessages, setLiveMessages] = useState<GrpcFrameItem[]>([])
   const [historyRefreshKey, setHistoryRefreshKey] = useState(0)
@@ -133,6 +141,7 @@ const GrpcClientTabView: React.FC<GrpcRequestTabViewProps> = ({
     setUrlState(request.url)
     setRequestMessageState(request.requestMessage)
     setCallTypeState(request.callType)
+    setGrpcTransportState(request.transport ?? 'grpc')
     setResponse(null)
     setLiveMessages([])
   }, [request])
@@ -152,6 +161,7 @@ const GrpcClientTabView: React.FC<GrpcRequestTabViewProps> = ({
     setUrlState(current.url)
     setRequestMessageState(current.requestMessage)
     setCallTypeState(current.callType)
+    setGrpcTransportState(current.transport ?? 'grpc')
     // Remount the metadata table so it re-reads the restored rows.
     setTransportEpoch((n) => n + 1)
   }, [])
@@ -180,11 +190,13 @@ const GrpcClientTabView: React.FC<GrpcRequestTabViewProps> = ({
       service: currentRequest.service,
       grpcMethod: currentRequest.method,
       callType: currentRequest.callType,
+      transport: currentRequest.transport ?? 'grpc',
       requestMessage: currentRequest.requestMessage,
       // The execution service resolves the dynamic client from the request's own
-      // proto (inline content or a `.proto` path); omitting these falls back to
-      // the bundled grpcbin proto, so a custom-proto request fails with "service
-      // not found".
+      // proto (a reflected descriptor set, inline content, or a `.proto` path,
+      // in that precedence order); omitting all three falls back to the bundled
+      // grpcbin proto, so a custom-proto request fails with "service not found".
+      protoDescriptorSet: currentRequest.protoDescriptorSet,
       protoContent: currentRequest.protoContent,
       protoPath: currentRequest.protoPath,
       headers: toKeyValueData(currentRequest.metadata),
@@ -247,16 +259,28 @@ const GrpcClientTabView: React.FC<GrpcRequestTabViewProps> = ({
       service: request.service,
       grpcMethod: request.method,
       callType,
+      // Debounced (≤250ms) so cycling the transport SelectBox doesn't flood
+      // ContextService with a resolve/re-render per click.
+      transport: debouncedGrpcTransport,
       requestMessage,
       // Keep the proto on every refresh — this effect re-runs on URL/message
-      // edits and would otherwise clobber the proto set on mount, leaving the
-      // execution service to fall back to the bundled grpcbin proto.
+      // edits (and on a "Refresh from reflection" descriptor-set update) and
+      // would otherwise clobber the proto set on mount, leaving the execution
+      // service to fall back to the bundled grpcbin proto.
+      protoDescriptorSet: request.protoDescriptorSet,
       protoContent: request.protoContent,
       protoPath: request.protoPath,
       headers: toKeyValueData(request.metadata),
       body: { type: 'text', content: requestMessage }
     }, sourceIdRef.current)
-  }, [request.id, request.service, request.method, callType, request.metadata, url, requestMessage, request.protoContent, request.protoPath])
+  }, [request.id, request.service, request.method, callType, request.metadata, url, requestMessage, request.protoDescriptorSet, request.protoContent, request.protoPath, debouncedGrpcTransport])
+
+  // Persist the settled (debounced) transport pick into the reactive request
+  // object — mirrors the other `setXxx` writers but gated by the same
+  // debounce window so a rapid multi-click settles into a single write.
+  useEffect(() => {
+    updateReactiveProperty(request, 'transport', debouncedGrpcTransport)
+  }, [request, debouncedGrpcTransport])
 
   // Sync state changes to reactive request object
   const setUrl = useCallback((value: string): void => {
@@ -271,6 +295,12 @@ const GrpcClientTabView: React.FC<GrpcRequestTabViewProps> = ({
     setCallTypeState(value)
     updateReactiveProperty(request, 'callType', value)
   }, [request])
+  // Immediate local state (SelectBox reflects the pick right away); the
+  // reactive-object write + downstream ContextService push are debounced via
+  // `debouncedGrpcTransport` above.
+  const setGrpcTransport = useCallback((value: GrpcTransport): void => {
+    setGrpcTransportState(value)
+  }, [])
 
   // Stream lifecycle + frames: subscribe to the gRPC progress + message streams
   // so a live streaming call (server / client / bidi) shows its frames as they
@@ -365,6 +395,31 @@ const GrpcClientTabView: React.FC<GrpcRequestTabViewProps> = ({
   const handleStreamSend = (): void => {
     void window.restorm?.grpc.send(request.id, requestMessage)
   }
+
+  // "Refresh from reflection": re-query the live server (offline caching —
+  // AC keeps the request runnable from the last-fetched bundle otherwise)
+  // and stamp the fresh descriptor set onto the request, mirroring how a
+  // reflection import first populated `protoDescriptorSet`. Debounced +
+  // gated on `isRefreshingReflection` so rapid clicks can't overlap.
+  const handleRefreshFromReflection = useDebouncedCallback((): void => {
+    if (isRefreshingReflection) return
+    setIsRefreshingReflection(true)
+    void window.restorm?.grpc.reflectQuery({ address: resolvedUrl || url })
+      .then((result) => {
+        if (!result.success || !result.protoDescriptorSet) {
+          toasterService.push('app', {
+            title: t('grpc.reflection.refreshFailed', 'gRPC reflection refresh failed'),
+            body: result.unsupported
+              ? t('grpc.reflection.unsupported', 'This server does not support gRPC reflection — import a .proto file instead.')
+              : (result.error ?? t('grpc.reflection.unknownError', 'Unknown error')),
+            durationMs: 10000
+          })
+          return
+        }
+        updateReactiveProperty(request, 'protoDescriptorSet', result.protoDescriptorSet)
+      })
+      .finally(() => { setIsRefreshingReflection(false) })
+  }, 250)
 
   // Request content (SplitView with Message, Metadata)
   const requestContent = (
@@ -560,6 +615,19 @@ const GrpcClientTabView: React.FC<GrpcRequestTabViewProps> = ({
   ], [t])
   const callTypeIndex = Math.max(0, callTypeOptions.findIndex((o) => o.value === callType))
 
+  // Wire-transport options for the toggle (order = native gRPC → gRPC-Web → Connect).
+  const grpcTransportOptions = useMemo<{ value: GrpcTransport; label: string }[]>(() => [
+    { value: 'grpc', label: t('grpc.transport.grpc', 'gRPC') },
+    { value: 'grpc-web', label: t('grpc.transport.grpcWeb', 'gRPC-Web') },
+    { value: 'connect', label: t('grpc.transport.connect', 'Connect') }
+  ], [t])
+  const grpcTransportIndex = Math.max(0, grpcTransportOptions.findIndex((o) => o.value === grpcTransport))
+  // gRPC-Web and Connect both frame calls over plain HTTP/1.1 here, which the
+  // spec (gRPC-Web) or this implementation (Connect, pending HTTP/2 duplex)
+  // can't carry client/bidi streaming over — the Connect button is disabled
+  // with an explanatory tooltip rather than silently failing on click.
+  const duplexBlockedByTransport = grpcTransport !== 'grpc' && (callType === 'client-stream' || callType === 'bidirectional-stream')
+
   // URL section
   const urlSection = (
     <>
@@ -578,6 +646,19 @@ const GrpcClientTabView: React.FC<GrpcRequestTabViewProps> = ({
         </HeaderHoverTooltip>
         <div style={{ minWidth: 150 }}>
           <SelectBox
+            id={`grpc-transport-${request.id}`}
+            className=""
+            options={grpcTransportOptions.map((o) => ({ text: o.value, label: o.label }))}
+            selected={grpcTransportIndex}
+            onDidSelect={(d: ISelectData) => {
+              const picked = grpcTransportOptions[d.index]
+              if (picked) setGrpcTransport(picked.value)
+            }}
+            data-testid="grpc-transport-select"
+          />
+        </div>
+        <div style={{ minWidth: 150 }}>
+          <SelectBox
             id={`grpc-call-type-${request.id}`}
             className=""
             options={callTypeOptions.map((o) => ({ text: o.value, label: o.label }))}
@@ -593,16 +674,23 @@ const GrpcClientTabView: React.FC<GrpcRequestTabViewProps> = ({
           {isStreaming ? (
             <div style={{ display: 'flex', gap: 4 }}>
               <BeamWrap active={isListening} size={22} borderWidth={1.5}>
-                <Button
-                  icon={isListening ? 'debug-disconnect' : 'plug'}
-                  onClick={isListening ? handleDisconnect : handleConnect}
-                  {...(isListening ? { emphasis: 0 } : sendButtonStyle ? { style: sendButtonStyle } : { emphasis: 1 })}
-                  options={{
-                    title: isListening ? t('grpc.disconnect', 'Disconnect') : t('grpc.connect', 'Connect'),
-                    ariaLabel: isListening ? t('grpc.disconnect', 'Disconnect') : t('grpc.connect', 'Connect')
-                  }}
-                  data-testid="grpc-connect-button"
-                />
+                <HeaderHoverTooltip
+                  label={t('grpc.transport.streamingUnsupported', "This transport doesn't support client- or bidirectional-streaming over HTTP/1.1. Switch to the native gRPC transport instead.")}
+                  suppressed={!duplexBlockedByTransport}
+                  data-testid="grpc-connect-transport-tooltip"
+                >
+                  <Button
+                    icon={isListening ? 'debug-disconnect' : 'plug'}
+                    disabled={duplexBlockedByTransport}
+                    onClick={isListening ? handleDisconnect : handleConnect}
+                    {...(isListening ? { emphasis: 0 } : sendButtonStyle ? { style: sendButtonStyle } : { emphasis: 1 })}
+                    options={{
+                      title: isListening ? t('grpc.disconnect', 'Disconnect') : t('grpc.connect', 'Connect'),
+                      ariaLabel: isListening ? t('grpc.disconnect', 'Disconnect') : t('grpc.connect', 'Connect')
+                    }}
+                    data-testid="grpc-connect-button"
+                  />
+                </HeaderHoverTooltip>
               </BeamWrap>
               {/* Send appears only for client / bidi streaming (server-streaming has no
                   client writes) — and is enabled only while the call is open. */}
@@ -632,8 +720,18 @@ const GrpcClientTabView: React.FC<GrpcRequestTabViewProps> = ({
           )}
         </SendButtonEnvSwitcher>
       </ControlGroup>
-      <div style={{ fontSize: 12, color: 'var(--descriptionForeground)' }}>
-        {request.service}/{request.method}
+      <div style={{ fontSize: 12, color: 'var(--descriptionForeground)', display: 'flex', alignItems: 'center', gap: 6 }}>
+        <span>{request.service}/{request.method}</span>
+        <HeaderHoverTooltip label={t('grpc.reflection.refresh', 'Refresh from reflection')}>
+          <Button
+            small
+            icon="sync"
+            disabled={isRefreshingReflection}
+            onClick={handleRefreshFromReflection}
+            options={{ ariaLabel: t('grpc.reflection.refresh', 'Refresh from reflection') }}
+            data-testid="grpc-reflection-refresh-button"
+          />
+        </HeaderHoverTooltip>
       </div>
     </>
   )

@@ -1,5 +1,5 @@
 /**
- * CodeSnippetGenerator - Generates code snippets for HTTP, GraphQL, WebSocket, gRPC and SOAP requests
+ * CodeSnippetGenerator - Generates code snippets for HTTP, GraphQL, WebSocket, gRPC, SOAP and Redis requests
  *
  * Extracted from ContextService to isolate code snippet generation logic.
  */
@@ -16,6 +16,8 @@ import type {
   TransformedContext,
   TransformValueFn
 } from './ContextServiceTypes'
+import { composeTrpcRequestBody } from '../../shared/utils/trpcRequestBody'
+import { parseFreeformCommand } from '../../shared/utils/redisCommand'
 
 // ============================================================================
 // Template Loading
@@ -59,8 +61,15 @@ export interface CompiledSnippetTemplates {
   httpSnippetTemplate: Handlebars.TemplateDelegate | null
   graphqlSnippetTemplate: Handlebars.TemplateDelegate | null
   websocketSnippetTemplate: Handlebars.TemplateDelegate | null
+  stompSnippetTemplate: Handlebars.TemplateDelegate | null
   grpcSnippetTemplate: Handlebars.TemplateDelegate | null
   soapSnippetTemplate: Handlebars.TemplateDelegate | null
+  jsonRpcSnippetTemplate: Handlebars.TemplateDelegate | null
+  trpcSnippetTemplate: Handlebars.TemplateDelegate | null
+  sseSnippetTemplate: Handlebars.TemplateDelegate | null
+  amqpSnippetTemplate: Handlebars.TemplateDelegate | null
+  redisSnippetTemplate: Handlebars.TemplateDelegate | null
+  kafkaSnippetTemplate: Handlebars.TemplateDelegate | null
 }
 
 /**
@@ -72,22 +81,43 @@ export function compileSnippetTemplates(): CompiledSnippetTemplates {
     httpSnippetTemplate: null,
     graphqlSnippetTemplate: null,
     websocketSnippetTemplate: null,
+    stompSnippetTemplate: null,
     grpcSnippetTemplate: null,
-    soapSnippetTemplate: null
+    soapSnippetTemplate: null,
+    jsonRpcSnippetTemplate: null,
+    trpcSnippetTemplate: null,
+    sseSnippetTemplate: null,
+    amqpSnippetTemplate: null,
+    redisSnippetTemplate: null,
+    kafkaSnippetTemplate: null
   }
 
   try {
     const httpTemplate = loadTemplate('code-snippets-httprequests.hbs')
     const graphqlTemplate = loadTemplate('code-snippets-graphql.hbs')
     const websocketTemplate = loadTemplate('code-snippets-websocket.hbs')
+    const stompTemplate = loadTemplate('code-snippets-stomp.hbs')
     const grpcTemplate = loadTemplate('code-snippets-grpc.hbs')
     const soapTemplate = loadTemplate('code-snippets-soap.hbs')
+    const jsonRpcTemplate = loadTemplate('code-snippets-jsonrpc.hbs')
+    const trpcTemplate = loadTemplate('code-snippets-trpc.hbs')
+    const sseTemplate = loadTemplate('code-snippets-sse.hbs')
+    const amqpTemplate = loadTemplate('code-snippets-amqp.hbs')
+    const redisTemplate = loadTemplate('code-snippets-redis.hbs')
+    const kafkaTemplate = loadTemplate('code-snippets-kafka.hbs')
 
     if (httpTemplate) templates.httpSnippetTemplate = Handlebars.compile(httpTemplate, { noEscape: true })
     if (graphqlTemplate) templates.graphqlSnippetTemplate = Handlebars.compile(graphqlTemplate, { noEscape: true })
     if (websocketTemplate) templates.websocketSnippetTemplate = Handlebars.compile(websocketTemplate, { noEscape: true })
+    if (stompTemplate) templates.stompSnippetTemplate = Handlebars.compile(stompTemplate, { noEscape: true })
     if (grpcTemplate) templates.grpcSnippetTemplate = Handlebars.compile(grpcTemplate, { noEscape: true })
     if (soapTemplate) templates.soapSnippetTemplate = Handlebars.compile(soapTemplate, { noEscape: true })
+    if (jsonRpcTemplate) templates.jsonRpcSnippetTemplate = Handlebars.compile(jsonRpcTemplate, { noEscape: true })
+    if (trpcTemplate) templates.trpcSnippetTemplate = Handlebars.compile(trpcTemplate, { noEscape: true })
+    if (sseTemplate) templates.sseSnippetTemplate = Handlebars.compile(sseTemplate, { noEscape: true })
+    if (amqpTemplate) templates.amqpSnippetTemplate = Handlebars.compile(amqpTemplate, { noEscape: true })
+    if (redisTemplate) templates.redisSnippetTemplate = Handlebars.compile(redisTemplate, { noEscape: true })
+    if (kafkaTemplate) templates.kafkaSnippetTemplate = Handlebars.compile(kafkaTemplate, { noEscape: true })
 
     logger.info('[CodeSnippetGenerator] Code snippet templates loaded and compiled')
   } catch (error) {
@@ -100,6 +130,35 @@ export function compileSnippetTemplates(): CompiledSnippetTemplates {
 // ============================================================================
 // Code Snippet Generation
 // ============================================================================
+
+/**
+ * Compose one `{ jsonrpc: '2.0', method, params, id }` envelope for the
+ * snippet templates — mirrors `JsonRpcExecutionService.composeEnvelope`'s
+ * shape (minus the parse-error/notification-mode branches, which don't apply
+ * to a static snippet preview). `params` falls back to an empty object when
+ * it doesn't parse as JSON so the snippet still renders instead of throwing.
+ */
+function buildJsonRpcSnippetEnvelope(
+  call: { method: string; params: string; rpcId: string },
+  envContext: TransformedContext,
+  transformValue: TransformValueFn
+): Record<string, unknown> {
+  const method = transformValue(call.method, envContext)
+  const rawParams = call.params.trim()
+  let params: unknown
+  if (rawParams.length > 0) {
+    try {
+      params = JSON.parse(transformValue(rawParams, envContext))
+    } catch {
+      params = {}
+    }
+  }
+  const id = transformValue(call.rpcId, envContext) || 1
+  const envelope: Record<string, unknown> = { jsonrpc: '2.0', method }
+  if (params !== undefined) envelope.params = params
+  envelope.id = id
+  return envelope
+}
 
 /**
  * Generate code snippets for a request.
@@ -241,6 +300,40 @@ export function generateCodeSnippets(
       break
     }
 
+    case 'stomp': {
+      const stompVersion = data.stompVersion ?? '1.2'
+      const connectHeaders = (data.connectHeaders ?? [])
+        .filter(h => h.key && h.enabled !== false)
+        .map(h => ({ key: transformValue(h.key, envContext), value: transformValue(h.value.toString(), envContext) }))
+      const sendHeaders = (data.sendHeaders ?? [])
+        .filter(h => h.key && h.enabled !== false)
+        .map(h => ({ key: transformValue(h.key, envContext), value: transformValue(h.value.toString(), envContext) }))
+      const subscriptions = (data.subscriptions ?? [])
+        .filter((s): s is { id: string; destination: string; ackMode?: string } => typeof s.destination === 'string' && s.destination !== '')
+        .map(s => ({
+          id: s.id && s.id !== '' ? s.id : 'sub-0',
+          destination: transformValue(s.destination, envContext),
+          ackMode: s.ackMode ?? 'auto',
+          needsAck: s.ackMode === 'client' || s.ackMode === 'client-individual'
+        }))
+      const sendDestination = data.sendDestination ? transformValue(data.sendDestination, envContext) : ''
+      const sendBody = data.sendBody ? transformValue(data.sendBody, envContext) : ''
+
+      if (templates.stompSnippetTemplate) {
+        markdown = templates.stompSnippetTemplate({
+          url: resolvedUrl,
+          host,
+          stompVersion,
+          connectHeaders: connectHeaders.length > 0 ? connectHeaders : null,
+          subscriptions: subscriptions.length > 0 ? subscriptions : null,
+          sendDestination: sendDestination || null,
+          sendBody: sendBody || '{}',
+          sendHeaders: sendHeaders.length > 0 ? sendHeaders : null
+        })
+      }
+      break
+    }
+
     case 'grpc': {
       const requestMessage = data.requestMessage ? transformValue(data.requestMessage, envContext) : '{}'
       const metadata = (data.metadata ?? [])
@@ -279,6 +372,164 @@ export function generateCodeSnippets(
           operation: data.operation ?? '',
           body: soapBody,
           headers: headers.length > 0 ? headers : null
+        })
+      }
+      break
+    }
+
+    case 'jsonrpc': {
+      const envelope = buildJsonRpcSnippetEnvelope(
+        { method: data.jsonRpcMethod ?? '', params: data.jsonRpcParams ?? '', rpcId: data.jsonRpcId ?? '' },
+        envContext,
+        transformValue
+      )
+      if (templates.jsonRpcSnippetTemplate) {
+        markdown = templates.jsonRpcSnippetTemplate({
+          url: resolvedUrl,
+          envelope: JSON.stringify(envelope),
+          isBatch: false,
+          headers: headers.length > 0 ? headers : null
+        })
+      }
+      break
+    }
+
+    case 'jsonrpcBatch': {
+      const envelope = (data.jsonRpcChildren ?? []).map((child) =>
+        buildJsonRpcSnippetEnvelope(child, envContext, transformValue)
+      )
+      if (templates.jsonRpcSnippetTemplate) {
+        markdown = templates.jsonRpcSnippetTemplate({
+          url: resolvedUrl,
+          envelope: JSON.stringify(envelope),
+          isBatch: true,
+          headers: headers.length > 0 ? headers : null
+        })
+      }
+      break
+    }
+
+    case 'trpc': {
+      // `resolvedUrl` already carries `<base>/<procedure>` (+ `?input=` for a
+      // query, appended by URLResolver) — the same composition the wire call
+      // uses. `composeTrpcRequestBody` is the single source of truth for the
+      // verb + body shared with `TrpcExecutionService`, so the snippet can
+      // never drift from what actually gets sent.
+      const resolvedInput = data.trpcInput ? transformValue(data.trpcInput, envContext) : undefined
+      const composed = composeTrpcRequestBody({ kind: data.trpcKind, input: resolvedInput })
+      // `host` for the @trpc/client sample is the BASE server url (no
+      // procedure/query string) — re-resolve it directly rather than parsing
+      // the wire URL apart.
+      const baseUrl = transformValue(data.url, envContext)
+
+      if (templates.trpcSnippetTemplate) {
+        markdown = templates.trpcSnippetTemplate({
+          method: composed.method,
+          lowerMethod: composed.method.toLowerCase(),
+          url: resolvedUrl,
+          host: baseUrl,
+          isMutation: data.trpcKind === 'mutation',
+          procedurePath: data.trpcProcedure ?? '',
+          input: resolvedInput ?? 'undefined',
+          body: composed.rawBody ?? null,
+          headers: headers.length > 0 ? headers : null
+        })
+      }
+      break
+    }
+
+    case 'sse': {
+      if (templates.sseSnippetTemplate) {
+        markdown = templates.sseSnippetTemplate({
+          url: resolvedUrl,
+          headers: headers.length > 0 ? headers : null,
+          lastEventId: data.lastEventId ? transformValue(data.lastEventId, envContext) : null
+        })
+      }
+      break
+    }
+
+    case 'amqp': {
+      const mode = data.mode ?? 'publish'
+      const payload = data.payload ? transformValue(data.payload, envContext) : '{}'
+
+      if (templates.amqpSnippetTemplate) {
+        markdown = templates.amqpSnippetTemplate({
+          url: resolvedUrl,
+          isPublish: mode === 'publish',
+          isSubscribe: mode === 'subscribe',
+          isBrowse: mode === 'browse',
+          exchange: data.exchange ? transformValue(data.exchange, envContext) : '',
+          routingKey: data.routingKey ? transformValue(data.routingKey, envContext) : '',
+          payload,
+          queue: data.queue ? transformValue(data.queue, envContext) : '',
+          autoAck: data.autoAck !== false,
+          prefetch: data.prefetch ?? null,
+          browsePeekCount: data.browsePeekCount ?? 50
+        })
+      }
+      break
+    }
+
+    case 'redis': {
+      const isSubscribe = data.redisMode === 'subscribe'
+      const channels = (data.channels ?? []).map((c) => transformValue(c, envContext))
+      const freeformCommand = data.freeformCommand ? transformValue(data.freeformCommand, envContext) : ''
+      const args = (data.args ?? []).map((a) => transformValue(a, envContext))
+      // The freeform override takes precedence over the palette command,
+      // mirroring RedisExecutionService's own dispatch — the snippet must
+      // show whichever the request will actually run. Pre-split into tokens
+      // (rather than passing one string) so the template never needs a
+      // custom Handlebars helper to re-tokenize a quoted command line.
+      const commandParts = freeformCommand
+        ? parseFreeformCommand(freeformCommand)
+        : [data.command ?? '', ...args].filter((p) => p !== '')
+      const commandLine = commandParts.join(' ')
+      const password = data.password ? transformValue(data.password, envContext) : ''
+
+      if (templates.redisSnippetTemplate) {
+        markdown = templates.redisSnippetTemplate({
+          url: resolvedUrl,
+          isSubscribe,
+          isCommand: !isSubscribe,
+          channels: channels.length > 0 ? channels : null,
+          commandParts: commandParts.length > 0 ? commandParts : null,
+          commandLine: commandLine || null,
+          password: password || null
+        })
+      }
+      break
+    }
+
+    case 'kafka': {
+      // `resolvedUrl` IS the broker list here (kafka's `url` carries
+      // `host:port,host:port`, not an HTTP URL) — the host/path parse above
+      // never applies, so read it straight.
+      const mode = data.kafkaMode ?? 'produce'
+      const fromOffset = data.kafkaFromOffset ?? 'latest'
+      const saslMechanism = data.kafkaSaslMechanism ?? 'none'
+
+      if (templates.kafkaSnippetTemplate) {
+        markdown = templates.kafkaSnippetTemplate({
+          brokers: resolvedUrl,
+          topic: data.kafkaTopic ? transformValue(data.kafkaTopic, envContext) : '',
+          key: data.kafkaKey ? transformValue(data.kafkaKey, envContext) : null,
+          value: data.kafkaValue ? transformValue(data.kafkaValue, envContext) : '""',
+          // Stringified: a raw `0` is falsy to Handlebars' `{{#if}}`, which
+          // would silently drop partition 0 from every snippet.
+          partition: data.kafkaPartition !== undefined ? String(data.kafkaPartition) : null,
+          isProduce: mode === 'produce',
+          isConsume: mode === 'consume',
+          isBrowse: mode === 'browse',
+          groupId: data.kafkaGroupId ? transformValue(data.kafkaGroupId, envContext) : 'restorm-consumer',
+          isEarliest: fromOffset === 'earliest',
+          isSpecific: fromOffset === 'specific',
+          specificOffset: data.kafkaSpecificOffset ? transformValue(data.kafkaSpecificOffset, envContext) : '0',
+          hasSasl: saslMechanism !== 'none',
+          saslMechanism,
+          saslUsername: data.kafkaSaslUsername ? transformValue(data.kafkaSaslUsername, envContext) : '',
+          saslPassword: data.kafkaSaslPassword ? transformValue(data.kafkaSaslPassword, envContext) : '',
+          tlsEnabled: data.kafkaTlsEnabled === true
         })
       }
       break

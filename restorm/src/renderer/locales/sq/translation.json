@@ -274,10 +274,17 @@
         "socketio": "Kërkesë Socket.IO",
         "mqtt": "MQTT request",
         "mqttServer": "Broker MQTT",
+        "sse": "Kërkesë SSE",
         "grpcServer": "Server gRPC mock",
         "soapServer": "Server mock SOAP",
         "graphqlServer": "Server GraphQL mock",
-        "odataServer": "Server OData mock"
+        "odataServer": "Server OData mock",
+        "trpc": "Kërkesë tRPC",
+        "amqp": "Kërkesë AMQP",
+        "redis": "Kërkesë Redis",
+        "stomp": "Kërkesë STOMP",
+        "kafkaProduce": "Kërkesë Kafka – Prodho",
+        "kafkaConsume": "Kërkesë Kafka – Konsumo"
       }
     },
     "deleteConfirm": {
@@ -475,6 +482,12 @@
       "clientStream": "Client streaming",
       "bidi": "Bidirectional streaming"
     },
+    "transport": {
+      "grpc": "gRPC",
+      "grpcWeb": "gRPC-Web",
+      "connect": "Connect",
+      "streamingUnsupported": "Ky transport nuk mbështet transmetimin e klientit ose dydrejtimshëm nëpërmjet HTTP/1.1. Në vend të kësaj, përdorni transportin native gRPC."
+    },
     "server": {
       "proto": "Proto",
       "methods": "Metoda mock",
@@ -493,6 +506,12 @@
       "notListening": "Nuk po dëgjon",
       "listenFailed": "Serveri gRPC nuk u nis",
       "snippetsUnavailable": "Copëzat e kodit nuk janë të disponueshme për një server mock."
+    },
+    "reflection": {
+      "refresh": "Rifresko nga reflection",
+      "refreshFailed": "Rifreskimi përmes gRPC reflection dështoi",
+      "unsupported": "Ky server nuk mbështet gRPC reflection — importo në vend të tij një skedar .proto.",
+      "unknownError": "Gabim i panjohur"
     }
   },
   "soap": {
@@ -540,6 +559,114 @@
     "routePlaceholder": "Rruga (opsionale)",
     "clientsConnected": "{{count}} klient të lidhur",
     "notListening": "Nuk dëgjon"
+  },
+  "jsonrpc": {
+    "send": "Dërgo",
+    "urlPlaceholder": "URL i pikës fundore JSON-RPC",
+    "methodPlaceholder": "metoda",
+    "idPlaceholder": "id (automatik)",
+    "notificationModeTooltip": "Modaliteti njoftim — pa id, pa përgjigje të pritur",
+    "tabs": {
+      "params": "Parametrat",
+      "headers": "Kokat"
+    },
+    "response": {
+      "notificationSent": "Njoftimi u dërgua",
+      "errorLabel": "Gabim JSON-RPC {{code}}:"
+    }
+  },
+  "jsonrpcBatch": {
+    "send": "Dërgo grupin",
+    "tabs": {
+      "calls": "Thirrjet"
+    },
+    "empty": "Ende pa thirrje. Shto një më poshtë.",
+    "methodPlaceholder": "metoda",
+    "idPlaceholder": "id (automatik)",
+    "moveUp": "Lëviz lart",
+    "moveDown": "Lëviz poshtë",
+    "remove": "Hiq thirrjen",
+    "paramsLabel": "Parametrat (JSON)",
+    "add": "Shto thirrje",
+    "response": {
+      "unmatched": "Asnjë hyrje përgjigjeje përputhëse."
+    }
+  },
+  "sse": {
+    "headers": "Kokat",
+    "noFrames": "Ende asnjë ngjarje",
+    "urlPlaceholder": "URL SSE",
+    "framesTruncated": "Po shfaqen {{shown}} kuadrot e fundit nga {{total}}",
+    "showAllFrames": "Shfaq të gjitha"
+  },
+  "redis": {
+    "connected": "I lidhur",
+    "disconnected": "I shkëputur",
+    "noMessages": "Ende asnjë mesazh",
+    "noCommandsYet": "Ende asnjë komandë e ekzekutuar",
+    "urlPlaceholder": "URL Redis (redis:// ose rediss://)",
+    "passwordPlaceholder": "Fjalëkalimi (opsionale)",
+    "subscribe": "Abonohu",
+    "unsubscribe": "Çabonohu",
+    "run": "Ekzekuto",
+    "subscribeMode": "Abonim",
+    "commandMode": "Komandë",
+    "command": "Komandë",
+    "args": "Argumente",
+    "argsPlaceholder": "Argumentet e komandës",
+    "freeform": "E lirë",
+    "freeformPlaceholder": "Komandë e lirë (anulon zgjedhjen)",
+    "tabs": {
+      "channels": "Kanale",
+      "command": "Komandë"
+    }
+  },
+  "kafka": {
+    "brokersPlaceholder": "Lista e brokerave (host:port,host:port)",
+    "clientId": "ID i klientit",
+    "clientIdPlaceholder": "restorm",
+    "mode": {
+      "produce": "Prodho",
+      "consume": "Konsumo",
+      "browse": "Shfleto"
+    },
+    "auth": {
+      "title": "Vërtetimi",
+      "mechanism": "SASL",
+      "username": "Emri i përdoruesit",
+      "password": "Fjalëkalimi",
+      "tls": "TLS"
+    },
+    "topic": "Tema",
+    "topicPlaceholder": "emri-i-temës",
+    "key": "Çelësi",
+    "keyPlaceholder": "çelësi i mesazhit (opsionale)",
+    "value": "Vlera",
+    "headers": "Headers",
+    "partition": "Ndarja",
+    "partitionPlaceholder": "auto",
+    "groupId": "ID i grupit",
+    "groupIdPlaceholder": "restorm-consumer",
+    "fromOffsetLabel": "Fillo nga",
+    "fromOffset": {
+      "earliest": "Më i hershmi",
+      "latest": "Më i fundit",
+      "specific": "Specifik"
+    },
+    "specificOffset": "Offset",
+    "partitions": "Ndarjet",
+    "partitionsPlaceholder": "0,1,2 (bosh = të gjitha)",
+    "peekCount": "Numri i mesazheve",
+    "produce": "Prodho",
+    "startConsuming": "Fillo konsumin",
+    "stopConsuming": "Ndalo konsumin",
+    "peek": "Shiko",
+    "noMessages": "Ende nuk ka mesazhe",
+    "connected": "I lidhur",
+    "disconnected": "I shkëputur",
+    "producedTo": "Prodhuar te",
+    "offset": "Offset",
+    "messages": "Mesazhet"
   },
   "search": {
     "placeholder": "Kërko...",
@@ -886,6 +1013,10 @@
         "description": "Hidhni një skedar .proto (ose një direktori të tyre) dhe Restorm përshkon çdo shërbim, çdo RPC, çdo mesazh — duke e kthyer çdo metodë në një kërkesë të tipizuar që mund ta dërgoni përmes ekzekutorit gRPC pa prekur codegen.",
         "trademark": "gRPC është një projekt i Cloud Native Computing Foundation."
       },
+      "grpcReflection": {
+        "description": "Nuk keni skedar .proto? Drejtoni Restorm te një server gRPC në funksionim që ofron reflection — ai pyet grpc.reflection.v1alpha.ServerReflection, zbulon çdo shërbim dhe metodë, dhe ndërton të njëjtën pemë kërkesash të tipizuara si një import skedari proto, i ruajtur lokalisht për përdorim jashtë linje.",
+        "action": "Lidhu me një server…"
+      },
       "soap": {
         "description": "Keni një WSDL? Ngjiteni (ose URL-në e tij) — Restorm parsezon çdo <port> dhe <operation> dhe prodhon zarfe SOAP gati për t'u dërguar me kokën e duhur SOAPAction, skelete trupi të tipizuara sipas skemës dhe skemën e vërtetimit që deklaron WSDL-ja."
       },
@@ -911,7 +1042,57 @@
       "paw": {
         "description": "Vini nga Paw? Hidhni eksportin tuaj JSON (File → Export → JSON në aplikacion — paketa native .paw nuk lexohet drejtpërdrejt). Restorm rindërton çdo kërkesë, kokë, trup dhe mjedis, dhe harton vlerat dinamike të Paw (vula kohore, vargje të rastësishme, UUID) me ekuivalentin më të afërt në Restorm.",
         "trademark": "Paw është një markë tregtare e regjistruar e RapidAPI, Inc., e përdorur këtu vetëm si referencë për përputhshmëri."
+      },
+      "har": {
+        "description": "Kapët një gjurmë rrjeti nga devtools e shfletuesit tuaj? Hidhni skedarin e eksportuar .har — Restorm kalon nëpër çdo thirrje të regjistruar dhe e kthen atë në një kërkesë të riprodhueshme, me headers dhe body të përfshira."
+      },
+      "restClient": {
+        "description": "Vini nga shtesa REST Client për VS Code? Ngjitni ose hidhni skedarin .http / .rest — Restorm analizon çdo bllok kërkese, zgjidh @variables dhe i rindërton si një pemë Restorm.",
+        "trademark": "REST Client është markë tregtare e pronarit të tij përkatës, e përdorur këtu vetëm si referencë për përputhshmëri."
+      },
+      "httpie": {
+        "description": "Hidhni një eksport koleksioni HTTPie Desktop ose një skedar sesioni CLI — Restorm lexon çdo kërkesë (dhe, për një sesion, headers e tij të qëndrueshme) dhe i rindërton gati për t'u ekzekutuar.",
+        "trademark": "HTTPie është markë tregtare e pronarit të tij përkatës, e përdorur këtu vetëm si referencë për përputhshmëri."
+      },
+      "smithy": {
+        "description": "Ngjitni një model Smithy — AST-in JSON ose IDL-në e shkruar me dorë — dhe Restorm kalon nëpër çdo shërbim, burim dhe operacion për të prodhuar një dosje përkatëse kërkesash gati për t'u ekzekutuar.",
+        "trademark": "Smithy është një projekt i Amazon Web Services."
+      },
+      "typespec": {
+        "description": "Ngjitni përkufizimin tuaj TypeSpec (.tsp) — Restorm e kompilon atë në OpenAPI në sfond dhe e importon saktësisht si një spec të shkruar me dorë: operacione, parametra dhe skema të përfshira.",
+        "trademark": "TypeSpec është një projekt i Microsoft."
+      },
+      "raml": {
+        "description": "Ngjitni një dokument RAML 1.0 ose 0.8 — Restorm pasqyron pemën e tij të burimeve në dosje të ngërthyera, një kërkesë për çdo metodë, me tipet e modeluara të përfshira.",
+        "trademark": "RAML është një specifikim i mirëmbajtur nga RAML Workgroup."
+      },
+      "wadl": {
+        "description": "Ende mirëmbani një dokument WADL? Ngjitni XML-në — Restorm kalon nëpër pemën e tij të ngërthyer <resource> dhe prodhon një dosje përkatëse kërkesash, me metoda dhe parametra të përfshira.",
+        "trademark": "WADL u dorëzua në W3C nga Sun Microsystems si një Member Submission."
+      },
+      "thrift": {
+        "description": "Ngjitni një skedar IDL Apache Thrift (.thrift) — Restorm lexon çdo shërbim, metodë, struct dhe enum në mënyrë që të mund të shfletoni formën e API-së. Protokolli binar i Thrift ende nuk mund të ekzekutohet nga Restorm, kështu që ky import është vetëm dokumentar.",
+        "trademark": "Apache Thrift është markë tregtare e Apache Software Foundation."
+      },
+      "apiBlueprint": {
+        "description": "Ngjitni një dokument API Blueprint (.apib) — Restorm analizon çdo grup burimesh dhe kalim në një dosje kërkesash, një për çdo çift metodë/përgjigje të dokumentuar.",
+        "trademark": "API Blueprint është një specifikim i krijuar fillimisht nga Apiary."
       }
+    },
+    "grpcReflection": {
+      "title": "Server gRPC (reflection)",
+      "hint": "Pyet shërbimin e reflection të një serveri gRPC në punë për të zbuluar shërbimet dhe metodat e tij pa skedar .proto.",
+      "addressLabel": "Adresa e serverit (host:port)",
+      "addressPlaceholder": "localhost:9000",
+      "tlsLabel": "Përdor TLS",
+      "metadataLabel": "Metadata (headers opsionale autentikimi)",
+      "connecting": "Duke u lidhur…",
+      "import": "Importo",
+      "reimportedTitle": "Reflection gRPC u riimportua",
+      "reimportedNoop": "Tashmë i përditësuar — asnjë ndryshim në server.",
+      "reimportedSummary": "+{{added}} / -{{removed}} / ↻{{merged}} — ringarko projektin për të parë ndryshimet.",
+      "unsupported": "Ky server nuk mbështet gRPC reflection — importo në vend të tij një skedar .proto.",
+      "unknownError": "Gabim i panjohur"
     },
     "loading": "Po analizohet...",
     "noResults": "Nuk u gjet asnjë kërkesë",
@@ -1075,14 +1256,22 @@
       "socketioSend": "Socket.IO send",
       "socketioClose": "Socket.IO close",
       "websocketConnect": "WebSocket connect",
+      "sseConnect": "SSE connect",
       "websocketSend": "WebSocket send",
       "websocketClose": "WebSocket close",
+      "sseClose": "SSE close",
       "grpcConnect": "gRPC connect",
       "grpcSend": "gRPC send",
       "grpcClose": "gRPC close",
       "mqttConnect": "MQTT connect",
       "mqttSend": "MQTT publish",
       "mqttClose": "MQTT close",
+      "amqpConnect": "Lidhje AMQP",
+      "amqpPublish": "Publikim AMQP",
+      "amqpClose": "Mbyllje AMQP",
+      "redisSubscribe": "Redis subscribe",
+      "redisClose": "Redis close",
+      "redisCommand": "Redis command",
       "httpListen": "HTTP server",
       "httpClose": "HTTP close",
       "grpcServerClose": "Mbyll serverin gRPC",
@@ -1093,7 +1282,13 @@
       "odataListen": "OData server",
       "odataClose": "OData close",
       "graphqlSubscribe": "Abonim GraphQL",
-      "graphqlUnsubscribe": "Çabonim GraphQL"
+      "graphqlUnsubscribe": "Çabonim GraphQL",
+      "stompConnect": "Lidhje STOMP",
+      "stompSend": "Dërgim STOMP",
+      "stompClose": "Mbyllje STOMP",
+      "kafkaProduce": "Kafka produce",
+      "kafkaConsume": "Kafka consume",
+      "kafkaClose": "Kafka close"
     },
     "comparator": {
       "result": "rezultati"
@@ -1654,8 +1849,10 @@
       "socketioSend": "Dërgon një mesazh në një lidhje Socket.IO tashmë të hapur.",
       "socketioClose": "Mbyll një lidhje Socket.IO tashmë të hapur.",
       "websocketConnect": "Hap një lidhje WebSocket të papërpunuar dhe rilëshon çdo mesazh të marrë në portin e tij.",
+      "sseConnect": "Hap një lidhje SSE (Server-Sent Events) afatgjatë dhe ritransmeton çdo kuadër të marrë në portën e tij.",
       "websocketSend": "Dërgon një payload në një lidhje WebSocket tashmë të hapur.",
       "websocketClose": "Mbyll një lidhje WebSocket tashmë të hapur.",
+      "sseClose": "Mbyll një lidhje SSE tashmë të hapur.",
       "grpcConnect": "Hap një thirrje streaming gRPC dhe rilëshon çdo kuadër të marrë në portin e tij message.",
       "grpcSend": "Shkruan një mesazh kërkese në një thirrje streaming gRPC tashmë të hapur.",
       "grpcClose": "Mbyll pjesërisht (half-close) një thirrje streaming gRPC tashmë të hapur.",
@@ -1668,9 +1865,15 @@
       "mqttConnect": "Hap një lidhje MQTT afatgjatë nga një kërkesë e lidhur dhe abonohet në temën e saj; rilëshon çdo mesazh të marrë në portin e tij `message`.",
       "mqttSend": "Publikon një payload në një lidhje MQTT tashmë të hapur (në temën e saj).",
       "mqttClose": "Mbyll një lidhje MQTT tashmë të hapur.",
+      "amqpConnect": "Hap një lidhje AMQP të qëndrueshme nga një kërkesë e lidhur dhe konsumon radhën e saj; ritransmeton çdo mesazh të marrë te porta `message`.",
+      "amqpPublish": "Publikon një ngarkesë në një lidhje AMQP tashmë të hapur (te exchange/routing key i kërkesës së lidhur).",
+      "amqpClose": "Mbyll një lidhje AMQP tashmë të hapur.",
       "mqttConnectServer": "Nis një broker MQTT lokal (port + filtër teme); abonohet në filtrin e temës së tij dhe rilëshon çdo mesazh të marrë në portin e tij `message`. Dërgimi publikon te abonentët e lidhur.",
       "mqttSendServer": "Publikon një mesazh te çdo abonent i broker-it MQTT të referuar.",
       "mqttCloseServer": "Ndalon broker-in MQTT të referuar dhe shkëput klientët e tij.",
+      "redisSubscribe": "Hap një lidhje pajtimi Redis afatgjatë nga një kërkesë e lidhur dhe dëgjon kanalet e saj; rilëshon çdo mesazh të marrë në portin e tij `message`.",
+      "redisClose": "Mbyll një lidhje pajtimi Redis tashmë të hapur.",
+      "redisCommand": "Ekzekuton një komandë Redis të lidhur (një komandë e vetme në një lidhje të re, pastaj shkëputet) dhe lëshon përgjigjen e saj.",
       "toast": "Shfaq një njoftim toast në ndërfaqen Restorm gjatë ekzekutimit të skenarit.",
       "httpListen": "Hosts a local HTTP mock server and listens indefinitely. `connected` fires once it is listening; each served request re-emits its data on the `served` port. The server stays up until an HTTP close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
       "httpClose": "Ndalon një server fiktiv HTTP që tashmë po dëgjon (i deklaruar nga një nyje HTTP server) dhe çliron portin e tij.",
@@ -1683,7 +1886,13 @@
       "odataListen": "Pret një shërbim lokal imitues OData v4 dhe dëgjon pafundësisht. `connected` aktivizohet sapo fillon të dëgjojë; çdo kërkesë e shërbyer riemeton të dhënat e saj në portën `served`. Serveri qëndron aktiv deri në një mbyllje OData (ose një Stop), pastaj aktivizohet `done`. Pa dalje response — shërben, nuk thërret nga jashtë.",
       "odataClose": "Ndalon një shërbim imitues OData që po dëgjon tashmë (i deklaruar nga një nyje serveri OData), duke liruar portën e tij.",
       "graphqlSubscribe": "Hap një abonim GraphQL afatgjatë si klient përmes SSE dhe dëgjon. `connected` aktivizohet sapo rrjedha të hapet; çdo ngarkesë e marrë riemetohet në portën `message` (një abonim është vetëm marrës, pa ngjarje të emërtuara). Rrjedha mbetet e hapur deri në një çabonim GraphQL (ose një ndalim), ose derisa serveri ta përfundojë, pastaj aktivizohet `done`.",
-      "graphqlUnsubscribe": "Ndalon një abonim GraphQL tashmë të hapur (deklaruar nga një nyje abonimi GraphQL), duke mbyllur rrjedhën e tij SSE."
+      "graphqlUnsubscribe": "Ndalon një abonim GraphQL tashmë të hapur (deklaruar nga një nyje abonimi GraphQL), duke mbyllur rrjedhën e tij SSE.",
+      "stompConnect": "Hap një lidhje afatgjatë STOMP-mbi-WebSocket: kryen shtrëngimin e duarve CONNECT/CONNECTED, më pas abonohet në çdo destinacion të konfiguruar dhe ritransmeton çdo kornizë të marrë në portën e vet.",
+      "stompSend": "Dërgon një kornizë SEND në një lidhje STOMP tashmë të hapur.",
+      "stompClose": "Dërgon DISCONNECT dhe mbyll një lidhje STOMP tashmë të hapur.",
+      "kafkaProduce": "Ekzekuton një kërkesë Kafka të lidhur si një prodhim një-herësh dhe lëshon rezultatin (tema/ndarja/offset) si `response`.",
+      "kafkaConsume": "Hap një konsumator Kafka afatgjatë nga një kërkesë e lidhur dhe rilëshon çdo mesazh të marrë në portin e tij `message`.",
+      "kafkaClose": "Mbyll një konsumator Kafka tashmë të hapur."
     },
     "legend": {
       "title": "Legjenda",
@@ -1732,6 +1941,9 @@
     "websocket": {
       "message": "message"
     },
+    "sse": {
+      "message": "message"
+    },
     "grpc": {
       "message": "message"
     },
@@ -1777,6 +1989,36 @@
     "lwtTopicPlaceholder": "will/topic",
     "lwtPayload": "Payload",
     "lwtPayloadPlaceholder": "will message"
+  },
+  "amqp": {
+    "urlPlaceholder": "URL AMQP (amqp:// ose amqps://)",
+    "vhost": "Host virtual",
+    "vhostPlaceholder": "/",
+    "username": "Emri i përdoruesit",
+    "password": "Fjalëkalimi",
+    "mode": "Mënyra",
+    "modePublish": "Publiko",
+    "modeSubscribe": "Abonohu",
+    "modeBrowse": "Shfleto",
+    "exchange": "Exchange",
+    "exchangePlaceholder": "(exchange i parazgjedhur)",
+    "routingKey": "Routing key",
+    "routingKeyPlaceholder": "routing.key",
+    "queue": "Radha",
+    "queuePlaceholder": "emri i radhës",
+    "autoAck": "Konfirmim automatik",
+    "prefetch": "Prefetch",
+    "browsePeekCount": "Numri për shikim",
+    "connect": "Lidh",
+    "connecting": "Duke u lidhur…",
+    "disconnect": "Shkëput",
+    "connected": "I lidhur",
+    "disconnected": "I shkëputur",
+    "send": "Dërgo",
+    "browseButton": "Shfleto",
+    "noMessages": "Ende pa mesazhe",
+    "peeked": "Shikuar",
+    "messages": "Mesazhe"
   },
   "mcpLogs": {
     "title": "Regjistrat MCP",
@@ -2043,5 +2285,42 @@
       "noSubscription": "Nuk ka abonim aktiv për të menaxhuar.",
       "error": "Portali i abonimit nuk u hap dot. Provo përsëri."
     }
+  },
+  "trpc": {
+    "send": "Dërgo",
+    "urlPlaceholder": "URL-ja e serverit tRPC",
+    "procedurePlaceholder": "Procedura (p.sh. user.get)",
+    "kindQuery": "Pyetja",
+    "kindMutation": "Mutacion",
+    "showRawEnvelope": "Shfaq zarfin e papërpunuar",
+    "kindSelectLabel": "Lloji i thirrjes",
+    "tabs": {
+      "headers": "Kokat",
+      "body": "Trupi"
+    }
+  },
+  "stomp": {
+    "connect": "Lidhu",
+    "disconnect": "Shkëput",
+    "connected": "I lidhur",
+    "disconnected": "I shkëputur",
+    "noMessages": "Ende pa korniza",
+    "version": "Versioni STOMP",
+    "tabs": {
+      "connect": "Lidhja",
+      "subscriptions": "Abonimet",
+      "send": "Dërgo"
+    },
+    "ackMode": {
+      "auto": "auto",
+      "client": "client",
+      "clientIndividual": "client-individual"
+    },
+    "subscriptionIdLabel": "ID e abonimit",
+    "removeSubscription": "Hiq abonimin",
+    "addSubscription": "Shto abonim",
+    "sendDestination": "Destinacioni",
+    "ack": "ACK",
+    "nack": "NACK"
   }
 }

@@ -275,10 +275,17 @@
         "socketio": "Cerere Socket.IO",
         "mqtt": "MQTT request",
         "mqttServer": "Broker MQTT",
+        "sse": "Cerere SSE",
         "grpcServer": "Server gRPC simulat",
         "soapServer": "Server mock SOAP",
         "graphqlServer": "Server GraphQL simulat",
-        "odataServer": "Server OData simulat"
+        "odataServer": "Server OData simulat",
+        "trpc": "Cerere tRPC",
+        "amqp": "Cerere AMQP",
+        "redis": "Cerere Redis",
+        "stomp": "Cerere STOMP",
+        "kafkaProduce": "Cerere Kafka – Produce",
+        "kafkaConsume": "Cerere Kafka – Consumă"
       }
     },
     "deleteConfirm": {
@@ -476,6 +483,12 @@
       "clientStream": "Client streaming",
       "bidi": "Bidirectional streaming"
     },
+    "transport": {
+      "grpc": "gRPC",
+      "grpcWeb": "gRPC-Web",
+      "connect": "Connect",
+      "streamingUnsupported": "Acest transport nu acceptă streamingul client sau bidirecțional prin HTTP/1.1. Utilizați în schimb transportul gRPC nativ."
+    },
     "server": {
       "proto": "Proto",
       "methods": "Metode simulate",
@@ -494,6 +507,12 @@
       "notListening": "Nu ascultă",
       "listenFailed": "Pornirea serverului gRPC a eșuat",
       "snippetsUnavailable": "Fragmentele de cod nu sunt disponibile pentru un server simulat."
+    },
+    "reflection": {
+      "refresh": "Actualizează din reflection",
+      "refreshFailed": "Actualizarea prin gRPC reflection a eșuat",
+      "unsupported": "Acest server nu acceptă gRPC reflection — importați în schimb un fișier .proto.",
+      "unknownError": "Eroare necunoscută"
     }
   },
   "soap": {
@@ -541,6 +560,114 @@
     "routePlaceholder": "Rută (opțional)",
     "clientsConnected": "{{count}} client(i) conectat(i)",
     "notListening": "Nu ascultă"
+  },
+  "jsonrpc": {
+    "send": "Trimite",
+    "urlPlaceholder": "URL punct final JSON-RPC",
+    "methodPlaceholder": "metodă",
+    "idPlaceholder": "id (automat)",
+    "notificationModeTooltip": "Mod notificare — fără id, fără răspuns așteptat",
+    "tabs": {
+      "params": "Parametri",
+      "headers": "Antete"
+    },
+    "response": {
+      "notificationSent": "Notificare trimisă",
+      "errorLabel": "Eroare JSON-RPC {{code}}:"
+    }
+  },
+  "jsonrpcBatch": {
+    "send": "Trimite lotul",
+    "tabs": {
+      "calls": "Apeluri"
+    },
+    "empty": "Niciun apel încă. Adaugă unul mai jos.",
+    "methodPlaceholder": "metodă",
+    "idPlaceholder": "id (automat)",
+    "moveUp": "Mută în sus",
+    "moveDown": "Mută în jos",
+    "remove": "Elimină apelul",
+    "paramsLabel": "Parametri (JSON)",
+    "add": "Adaugă apel",
+    "response": {
+      "unmatched": "Nicio intrare de răspuns corespunzătoare."
+    }
+  },
+  "sse": {
+    "headers": "Antete",
+    "noFrames": "Niciun eveniment încă",
+    "urlPlaceholder": "URL SSE",
+    "framesTruncated": "Se afișează ultimele {{shown}} din {{total}} cadre",
+    "showAllFrames": "Afișează tot"
+  },
+  "redis": {
+    "connected": "Conectat",
+    "disconnected": "Deconectat",
+    "noMessages": "Niciun mesaj încă",
+    "noCommandsYet": "Nicio comandă executată încă",
+    "urlPlaceholder": "URL Redis (redis:// sau rediss://)",
+    "passwordPlaceholder": "Parolă (opțional)",
+    "subscribe": "Abonează-te",
+    "unsubscribe": "Dezabonează-te",
+    "run": "Rulează",
+    "subscribeMode": "Abonare",
+    "commandMode": "Comandă",
+    "command": "Comandă",
+    "args": "Argumente",
+    "argsPlaceholder": "Argumentele comenzii",
+    "freeform": "Liberă",
+    "freeformPlaceholder": "Comandă liberă (înlocuiește selecția)",
+    "tabs": {
+      "channels": "Canale",
+      "command": "Comandă"
+    }
+  },
+  "kafka": {
+    "brokersPlaceholder": "Listă de brokeri (host:port,host:port)",
+    "clientId": "ID client",
+    "clientIdPlaceholder": "restorm",
+    "mode": {
+      "produce": "Produce",
+      "consume": "Consumă",
+      "browse": "Răsfoiește"
+    },
+    "auth": {
+      "title": "Autentificare",
+      "mechanism": "SASL",
+      "username": "Nume de utilizator",
+      "password": "Parolă",
+      "tls": "TLS"
+    },
+    "topic": "Subiect",
+    "topicPlaceholder": "nume-subiect",
+    "key": "Cheie",
+    "keyPlaceholder": "cheia mesajului (opțional)",
+    "value": "Valoare",
+    "headers": "Anteturi",
+    "partition": "Partiție",
+    "partitionPlaceholder": "auto",
+    "groupId": "ID grup",
+    "groupIdPlaceholder": "restorm-consumer",
+    "fromOffsetLabel": "Începe de la",
+    "fromOffset": {
+      "earliest": "Cel mai vechi",
+      "latest": "Cel mai recent",
+      "specific": "Specific"
+    },
+    "specificOffset": "Offset",
+    "partitions": "Partiții",
+    "partitionsPlaceholder": "0,1,2 (gol = toate)",
+    "peekCount": "Număr de mesaje",
+    "produce": "Produce",
+    "startConsuming": "Începe consumul",
+    "stopConsuming": "Oprește consumul",
+    "peek": "Previzualizare",
+    "noMessages": "Încă nu există mesaje",
+    "connected": "Conectat",
+    "disconnected": "Deconectat",
+    "producedTo": "Produs către",
+    "offset": "Offset",
+    "messages": "Mesaje"
   },
   "search": {
     "placeholder": "Caută...",
@@ -887,6 +1014,10 @@
         "description": "Aruncați un fișier .proto (sau un director cu astfel de fișiere) și Restorm parcurge fiecare serviciu, fiecare RPC, fiecare mesaj — transformând fiecare metodă într-o cerere tipizată pe care o puteți trimite prin executorul gRPC fără a atinge codegen-ul.",
         "trademark": "gRPC este un proiect al Cloud Native Computing Foundation."
       },
+      "grpcReflection": {
+        "description": "Nu aveți un fișier .proto? Îndreptați Restorm către un server gRPC care rulează și expune reflection — acesta interoghează grpc.reflection.v1alpha.ServerReflection, descoperă fiecare serviciu și metodă și construiește același arbore de cereri tipizate ca la importul unui fișier proto, memorat local în cache pentru utilizare offline.",
+        "action": "Conectare la un server…"
+      },
       "soap": {
         "description": "Aveți un WSDL? Lipiți-l (sau URL-ul său) — Restorm parsează fiecare <port> și <operation> și produce plicuri SOAP gata de trimis, cu antetul SOAPAction corect, schelete de corp tipizate prin schemă și schema de autentificare declarată de WSDL."
       },
@@ -912,7 +1043,57 @@
       "paw": {
         "description": "Veniți de la Paw? Aruncați exportul dvs. JSON (File → Export → JSON în aplicație — pachetul nativ .paw nu este citit direct). Restorm reconstruiește fiecare cerere, antet, corp și mediu, și mapează valorile dinamice ale Paw (marcaje temporale, șiruri aleatorii, UUID-uri) la cel mai apropiat echivalent Restorm.",
         "trademark": "Paw este o marcă înregistrată a RapidAPI, Inc., folosită aici doar ca referință de compatibilitate."
+      },
+      "har": {
+        "description": "Ați capturat o urmă de rețea din devtools-ul browserului? Aruncați fișierul .har exportat — Restorm parcurge fiecare apel înregistrat și îl transformă într-o cerere reluabilă, cu antete și corp incluse."
+      },
+      "restClient": {
+        "description": "Veniți de la extensia REST Client pentru VS Code? Lipiți sau aruncați fișierul .http / .rest — Restorm analizează fiecare bloc de cerere, rezolvă @variables și le reconstruiește ca un arbore Restorm.",
+        "trademark": "REST Client este o marcă a proprietarului respectiv, folosită aici doar ca referință de compatibilitate."
+      },
+      "httpie": {
+        "description": "Aruncați un export de colecție HTTPie Desktop sau un fișier de sesiune CLI — Restorm citește fiecare cerere (și, pentru o sesiune, anteturile sale persistente) și le reconstruiește gata de utilizare.",
+        "trademark": "HTTPie este o marcă a proprietarului respectiv, folosită aici doar ca referință de compatibilitate."
+      },
+      "smithy": {
+        "description": "Lipiți un model Smithy — AST-ul JSON sau IDL-ul scris manual — iar Restorm parcurge fiecare serviciu, resursă și operațiune pentru a produce un folder corespunzător de cereri gata de utilizare.",
+        "trademark": "Smithy este un proiect al Amazon Web Services."
+      },
+      "typespec": {
+        "description": "Lipiți definiția dvs. TypeSpec (.tsp) — Restorm o compilează în OpenAPI în culise și o importă exact ca pe o specificație scrisă manual: operațiuni, parametri și scheme incluse.",
+        "trademark": "TypeSpec este un proiect al Microsoft."
+      },
+      "raml": {
+        "description": "Lipiți un document RAML 1.0 sau 0.8 — Restorm reflectă arborele său de resurse în foldere imbricate, câte o cerere pe metodă, cu tipurile modelate incluse.",
+        "trademark": "RAML este o specificație menținută de RAML Workgroup."
+      },
+      "wadl": {
+        "description": "Încă mențineți un document WADL? Lipiți XML-ul — Restorm parcurge arborele său imbricat de <resource> și produce un folder corespunzător de cereri, cu metode și parametri incluși.",
+        "trademark": "WADL a fost trimis către W3C de Sun Microsystems ca Member Submission."
+      },
+      "thrift": {
+        "description": "Lipiți un fișier IDL Apache Thrift (.thrift) — Restorm citește fiecare serviciu, metodă, struct și enum, astfel încât să puteți răsfoi forma API-ului. Protocolul binar al Thrift nu este încă executabil din Restorm, așa că această importare este doar documentară.",
+        "trademark": "Apache Thrift este o marcă a Apache Software Foundation."
+      },
+      "apiBlueprint": {
+        "description": "Lipiți un document API Blueprint (.apib) — Restorm analizează fiecare grup de resurse și tranziție într-un folder de cereri, câte una pentru fiecare pereche metodă/răspuns documentată.",
+        "trademark": "API Blueprint este o specificație creată inițial de Apiary."
       }
+    },
+    "grpcReflection": {
+      "title": "Server gRPC (reflection)",
+      "hint": "Interogați serviciul de reflection al unui server gRPC activ pentru a-i descoperi serviciile și metodele fără un fișier .proto.",
+      "addressLabel": "Adresa serverului (host:port)",
+      "addressPlaceholder": "localhost:9000",
+      "tlsLabel": "Utilizați TLS",
+      "metadataLabel": "Metadate (antete de autentificare opționale)",
+      "connecting": "Se conectează…",
+      "import": "Importă",
+      "reimportedTitle": "Reflection gRPC reimportat",
+      "reimportedNoop": "Deja actualizat — nicio modificare pe server.",
+      "reimportedSummary": "+{{added}} / -{{removed}} / ↻{{merged}} — reîncărcați proiectul pentru a vedea modificările.",
+      "unsupported": "Acest server nu acceptă gRPC reflection — importați în schimb un fișier .proto.",
+      "unknownError": "Eroare necunoscută"
     },
     "loading": "Se analizează...",
     "noResults": "Nicio cerere găsită",
@@ -1076,14 +1257,22 @@
       "socketioSend": "Socket.IO send",
       "socketioClose": "Socket.IO close",
       "websocketConnect": "WebSocket connect",
+      "sseConnect": "SSE connect",
       "websocketSend": "WebSocket send",
       "websocketClose": "WebSocket close",
+      "sseClose": "SSE close",
       "grpcConnect": "gRPC connect",
       "grpcSend": "gRPC send",
       "grpcClose": "gRPC close",
       "mqttConnect": "MQTT connect",
       "mqttSend": "MQTT publish",
       "mqttClose": "MQTT close",
+      "amqpConnect": "Conexiune AMQP",
+      "amqpPublish": "Publicare AMQP",
+      "amqpClose": "Închidere AMQP",
+      "redisSubscribe": "Redis subscribe",
+      "redisClose": "Redis close",
+      "redisCommand": "Redis command",
       "httpListen": "HTTP server",
       "httpClose": "HTTP close",
       "grpcServerClose": "Închide serverul gRPC",
@@ -1094,7 +1283,13 @@
       "odataListen": "OData server",
       "odataClose": "OData close",
       "graphqlSubscribe": "Abonare GraphQL",
-      "graphqlUnsubscribe": "Dezabonare GraphQL"
+      "graphqlUnsubscribe": "Dezabonare GraphQL",
+      "stompConnect": "Conectare STOMP",
+      "stompSend": "Trimitere STOMP",
+      "stompClose": "Închidere STOMP",
+      "kafkaProduce": "Kafka produce",
+      "kafkaConsume": "Kafka consume",
+      "kafkaClose": "Kafka close"
     },
     "comparator": {
       "result": "rezultat"
@@ -1655,8 +1850,10 @@
       "socketioSend": "Trimite un mesaj pe o conexiune Socket.IO deja deschisă.",
       "socketioClose": "Închide o conexiune Socket.IO deja deschisă.",
       "websocketConnect": "Deschide o conexiune WebSocket brută și reemite fiecare mesaj primit pe portul său.",
+      "sseConnect": "Deschide o conexiune SSE (Server-Sent Events) de lungă durată și retransmite fiecare cadru primit pe portul său.",
       "websocketSend": "Trimite un payload pe o conexiune WebSocket deja deschisă.",
       "websocketClose": "Închide o conexiune WebSocket deja deschisă.",
+      "sseClose": "Închide o conexiune SSE deja deschisă.",
       "grpcConnect": "Deschide un apel gRPC în streaming și reemite fiecare cadru primit pe portul său de mesaje.",
       "grpcSend": "Scrie un mesaj de cerere pe un apel gRPC în streaming deja deschis.",
       "grpcClose": "Închide parțial (half-close) un apel gRPC în streaming deja deschis.",
@@ -1669,9 +1866,15 @@
       "mqttConnect": "Deschide o conexiune MQTT de lungă durată dintr-o cerere asociată și se abonează la subiectul său; reemite fiecare mesaj primit pe portul său `message`.",
       "mqttSend": "Publică o sarcină utilă pe o conexiune MQTT deja deschisă (către subiectul său).",
       "mqttClose": "Închide o conexiune MQTT deja deschisă.",
+      "amqpConnect": "Deschide o conexiune AMQP persistentă dintr-o cerere asociată și consumă coada acesteia; retransmite fiecare mesaj primit pe portul `message`.",
+      "amqpPublish": "Publică o sarcină utilă pe o conexiune AMQP deja deschisă (către exchange/routing key al cererii asociate).",
+      "amqpClose": "Închide o conexiune AMQP deja deschisă.",
       "mqttConnectServer": "Pornește un broker MQTT local (port + filtru de subiect); se abonează la filtrul său de subiect și reemite fiecare mesaj primit pe portul său `message`. Trimiterea publică către abonații conectați.",
       "mqttSendServer": "Publică un mesaj către fiecare abonat al brokerului MQTT referențiat.",
       "mqttCloseServer": "Oprește brokerul MQTT referențiat și deconectează clienții săi.",
+      "redisSubscribe": "Deschide o conexiune de abonare Redis de lungă durată dintr-o cerere asociată și ascultă canalele sale; reemite fiecare mesaj primit pe portul său `message`.",
+      "redisClose": "Închide o conexiune de abonare Redis deja deschisă.",
+      "redisCommand": "Execută o comandă Redis asociată (o singură comandă pe o conexiune nouă, apoi deconectare) și emite răspunsul ei.",
       "toast": "Emite o notificare toast în interfața Restorm în timp ce scenariul rulează.",
       "httpListen": "Hosts a local HTTP mock server and listens indefinitely. `connected` fires once it is listening; each served request re-emits its data on the `served` port. The server stays up until an HTTP close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
       "httpClose": "Oprește un server fals HTTP care ascultă deja (declarat de un nod server HTTP), eliberându-i portul.",
@@ -1684,7 +1887,13 @@
       "odataListen": "Găzduiește un serviciu fictiv OData v4 local și ascultă la nesfârșit. `connected` se declanșează imediat ce ascultă; fiecare cerere servită își reemite datele pe portul `served`. Serverul rămâne activ până la o închidere OData (sau un Stop), apoi se declanșează `done`. Fără ieșire response — servește, nu apelează în exterior.",
       "odataClose": "Oprește un serviciu fictiv OData care ascultă deja (declarat de un nod server OData), eliberându-i portul.",
       "graphqlSubscribe": "Deschide o abonare GraphQL de lungă durată ca client prin SSE și ascultă. `connected` se declanșează când fluxul este deschis; fiecare sarcină utilă primită este reemisă pe portul `message` (o abonare este doar de recepție, fără evenimente cu nume). Fluxul rămâne deschis până la o dezabonare GraphQL (sau o oprire), ori până când serverul îl finalizează, apoi se declanșează `done`.",
-      "graphqlUnsubscribe": "Oprește o abonare GraphQL deja deschisă (declarată de un nod de abonare GraphQL), închizându-i fluxul SSE."
+      "graphqlUnsubscribe": "Oprește o abonare GraphQL deja deschisă (declarată de un nod de abonare GraphQL), închizându-i fluxul SSE.",
+      "stompConnect": "Deschide o conexiune STOMP-peste-WebSocket de lungă durată: efectuează handshake-ul CONNECT/CONNECTED, apoi se abonează la fiecare destinație configurată și retransmite fiecare cadru primit pe portul său.",
+      "stompSend": "Trimite un cadru SEND pe o conexiune STOMP deja deschisă.",
+      "stompClose": "Trimite DISCONNECT și închide o conexiune STOMP deja deschisă.",
+      "kafkaProduce": "Execută o cerere Kafka asociată ca o producție unică și emite rezultatul (subiect/partiție/offset) ca `response`.",
+      "kafkaConsume": "Deschide un consumator Kafka de lungă durată dintr-o cerere asociată și reemite fiecare mesaj primit pe portul său `message`.",
+      "kafkaClose": "Închide un consumator Kafka deja deschis."
     },
     "legend": {
       "title": "Legendă",
@@ -1733,6 +1942,9 @@
     "websocket": {
       "message": "message"
     },
+    "sse": {
+      "message": "message"
+    },
     "grpc": {
       "message": "message"
     },
@@ -1778,6 +1990,36 @@
     "lwtTopicPlaceholder": "will/topic",
     "lwtPayload": "Payload",
     "lwtPayloadPlaceholder": "will message"
+  },
+  "amqp": {
+    "urlPlaceholder": "URL AMQP (amqp:// sau amqps://)",
+    "vhost": "Gazdă virtuală",
+    "vhostPlaceholder": "/",
+    "username": "Nume utilizator",
+    "password": "Parolă",
+    "mode": "Mod",
+    "modePublish": "Publică",
+    "modeSubscribe": "Abonează-te",
+    "modeBrowse": "Răsfoiește",
+    "exchange": "Exchange",
+    "exchangePlaceholder": "(exchange implicit)",
+    "routingKey": "Routing key",
+    "routingKeyPlaceholder": "routing.key",
+    "queue": "Coadă",
+    "queuePlaceholder": "numele cozii",
+    "autoAck": "Confirmare automată",
+    "prefetch": "Prefetch",
+    "browsePeekCount": "Număr de previzualizat",
+    "connect": "Conectează",
+    "connecting": "Se conectează…",
+    "disconnect": "Deconectează",
+    "connected": "Conectat",
+    "disconnected": "Deconectat",
+    "send": "Trimite",
+    "browseButton": "Răsfoiește",
+    "noMessages": "Niciun mesaj încă",
+    "peeked": "Previzualizat",
+    "messages": "Mesaje"
   },
   "mcpLogs": {
     "title": "Jurnale MCP",
@@ -2044,5 +2286,42 @@
       "noSubscription": "Niciun abonament activ de gestionat.",
       "error": "Portalul de abonament nu a putut fi deschis. Încearcă din nou."
     }
+  },
+  "trpc": {
+    "send": "Trimite",
+    "urlPlaceholder": "URL-ul serverului tRPC",
+    "procedurePlaceholder": "Procedură (ex. user.get)",
+    "kindQuery": "Interogare",
+    "kindMutation": "Mutație",
+    "showRawEnvelope": "Afișează plicul brut",
+    "kindSelectLabel": "Tip de apel",
+    "tabs": {
+      "headers": "Antete",
+      "body": "Corp"
+    }
+  },
+  "stomp": {
+    "connect": "Conectare",
+    "disconnect": "Deconectare",
+    "connected": "Conectat",
+    "disconnected": "Deconectat",
+    "noMessages": "Încă niciun cadru",
+    "version": "Versiune STOMP",
+    "tabs": {
+      "connect": "Conexiune",
+      "subscriptions": "Abonamente",
+      "send": "Trimite"
+    },
+    "ackMode": {
+      "auto": "auto",
+      "client": "client",
+      "clientIndividual": "client-individual"
+    },
+    "subscriptionIdLabel": "ID abonament",
+    "removeSubscription": "Elimină abonamentul",
+    "addSubscription": "Adaugă abonament",
+    "sendDestination": "Destinație",
+    "ack": "ACK",
+    "nack": "NACK"
   }
 }

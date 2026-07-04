@@ -108,6 +108,28 @@ export const Toaster: React.FC<ToasterProps> = ({
     toasterService.hide(id)
   }, [id])
 
+  // ── Escape closes the framed panel + restores focus to the opener ──
+  // While the frame is open, Escape hides it (same as the "Hide" action),
+  // matching Modal / MenuBar keyboard behaviour. Focus returns to whatever
+  // opened the frame (a bell/tray trigger for the statusbar toaster), so a
+  // keyboard user isn't stranded. Only armed while `showFrame` is true — a
+  // transparent toast stack has no dismiss affordance to key off.
+  const frameOpenerRef = useRef<HTMLElement | null>(null)
+  useEffect(() => {
+    if (!showFrame || typeof window === 'undefined') return
+    // Snapshot the element focused when the frame opened; for a toggle
+    // trigger this is the trigger itself, so Escape can hand focus back.
+    const opener = typeof document !== 'undefined' ? document.activeElement : null
+    frameOpenerRef.current = opener instanceof HTMLElement ? opener : null
+    const handleKeyDown = (event: KeyboardEvent): void => {
+      if (event.key !== 'Escape') return
+      handleHide()
+      frameOpenerRef.current?.focus()
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => { window.removeEventListener('keydown', handleKeyDown) }
+  }, [showFrame, handleHide])
+
   const subscribeDnd = useCallback((onStoreChange: () => void) => {
     return toasterService.on('doNotDisturbChange', (toasterId) => {
       if (toasterId === id) onStoreChange()

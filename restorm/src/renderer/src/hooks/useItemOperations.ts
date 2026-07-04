@@ -15,8 +15,14 @@ import {
   GrpcRequest,
   SoapRequest,
   WebSocketRequest,
+  SseRequest,
+  StompRequest,
   ODataRequest,
-  AuthenticationRequest
+  AuthenticationRequest,
+  TrpcRequest,
+  AmqpRequest,
+  RedisRequest,
+  KafkaRequest
 } from '../../../shared/models/requests'
 import type { HTTPMethod } from '../../../shared/models/types'
 import { findItemById, findItemWithBreadcrumbs, getFolderIcon, getNearestEnvironmentsForBreadcrumbs } from '../utils/treeSearch'
@@ -469,11 +475,18 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
       case 'socketio': return 'New Socket.IO request'
       case 'socketio-server': return 'New Socket.IO server'
       case 'websocket-server': return 'New WebSocket server'
+      case 'stomp': return 'New STOMP request'
       case 'mqtt': return 'New MQTT request'
       case 'mqtt-server': return 'New MQTT broker'
+      case 'sse': return 'New SSE request'
+      case 'kafka-produce': return 'New Kafka produce request'
+      case 'kafka-consume': return 'New Kafka consume request'
       case 'odata': return 'New OData request'
       case 'odata-server': return 'New OData mock server'
+      case 'amqp': return 'New AMQP request'
+      case 'redis': return 'New Redis request'
       case 'auth': return 'New auth request'
+      case 'trpc': return 'New tRPC request'
       case 'scenario': return 'New scenario'
     }
   }, [t])
@@ -656,6 +669,20 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
         // restorm acts as a raw WebSocket server: websocket protocol + server
         // flag, host forced to localhost, default port pre-filled.
         built = new WebSocketRequest({ id, name, protocol: 'websocket', server: true, url: 'localhost:3002' })
+      } else if (kind === 'stomp') {
+        // STOMP CLIENT request (connects to a broker, e.g. the docker ActiveMQ
+        // mock's STOMP-over-WebSocket port) — pre-seeded with one subscription
+        // + a matching send destination so it is runnable the moment it is
+        // created.
+        built = new StompRequest({
+          id,
+          name,
+          url: 'ws://localhost:61614',
+          stompVersion: '1.2',
+          subscriptions: [{ id: 'sub-0', destination: '/topic/demo', ackMode: 'auto' }],
+          sendDestination: '/topic/demo',
+          sendBody: '{\n  "message": "Hello from restorm"\n}'
+        })
       } else if (kind === 'mqtt') {
         // MQTT CLIENT request (connects to a broker); default subscribe-on-connect.
         built = new WebSocketRequest({ id, name, protocol: 'mqtt', url: 'mqtt://localhost:1883' })
@@ -664,6 +691,16 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
         // forced to localhost, default broker port pre-filled. The topic on the
         // request is the filter the broker surfaces in the chat (default `#`).
         built = new WebSocketRequest({ id, name, protocol: 'mqtt', server: true, url: 'mqtt://localhost:1883', event: '#' })
+      } else if (kind === 'sse') {
+        built = new SseRequest({ id, name })
+      } else if (kind === 'kafka-produce') {
+        // Kafka has no persistent per-request connection: a "produce" child is
+        // a one-shot request (connect -> send -> disconnect).
+        built = new KafkaRequest({ id, name, mode: 'produce', url: 'localhost:9092' })
+      } else if (kind === 'kafka-consume') {
+        // A "consume" child defaults to a fresh consumer group starting at the
+        // latest offset — the long-lived `kafkaConsume` node binds to it.
+        built = new KafkaRequest({ id, name, mode: 'consume', url: 'localhost:9092', groupId: 'restorm-consumer' })
       } else if (kind === 'odata') {
         built = new ODataRequest({ id, name })
       } else if (kind === 'odata-server') {
@@ -678,6 +715,17 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
           mockMetadata: ODATA_MOCK_STARTER_METADATA,
           mockData: ODATA_MOCK_STARTER_DATA
         })
+      } else if (kind === 'trpc') {
+        built = new TrpcRequest({ id, name })
+      } else if (kind === 'amqp') {
+        // AMQP: one request type covers publish / subscribe / browse (picked
+        // via the tab's mode selector) — default to publish against a local
+        // broker, mirroring the MQTT client default.
+        built = new AmqpRequest({ id, name, url: 'amqp://localhost:5672' })
+      } else if (kind === 'redis') {
+        // Command mode by default — the lower-friction starting point (no
+        // channels to configure before the first run works).
+        built = new RedisRequest({ id, name, url: 'redis://localhost:6379', mode: 'command', command: 'GET' })
       } else {
         built = new AuthenticationRequest({ id, name })
       }

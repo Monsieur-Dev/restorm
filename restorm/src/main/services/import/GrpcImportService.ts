@@ -9,7 +9,8 @@ import {
   GrpcRequest,
   type GrpcCallType
 } from '../../../shared/models'
-import type { EnumDefinition } from '../../../shared/types/collections'
+import type { EnumDefinition, FolderItem } from '../../../shared/types/collections'
+import { isAnyFolder, isRequest, isGrpcRequest } from '../../../shared/types/collections'
 import { createTypedKeyValue } from '../../../shared/utils/createTypedKeyValue'
 import { grpcToApiDocumentation } from './transformers/grpcToApiDocumentation'
 import { CURRENT_FILE_FORMAT_VERSION } from '../../../shared/config/fileFormatVersion'
@@ -17,20 +18,25 @@ import { CURRENT_FILE_FORMAT_VERSION } from '../../../shared/config/fileFormatVe
 // ============================================================================
 // Proto Types
 // ============================================================================
+// Exported so other producers of a `ParsedProto` — currently the gRPC
+// reflection importer, which builds this shape from a live server's
+// `FileDescriptorSet` instead of parsing `.proto` text — can feed the same
+// `buildEnvironmentFolderFromParsedProto` builder below and get an identical
+// output shape to a text-based import.
 
-interface ProtoField {
+export interface ProtoField {
   name: string
   type: string
   number: number
   repeated: boolean
 }
 
-interface ProtoMessage {
+export interface ProtoMessage {
   name: string
   fields: ProtoField[]
 }
 
-interface ProtoMethod {
+export interface ProtoMethod {
   name: string
   inputType: string
   outputType: string
@@ -39,18 +45,18 @@ interface ProtoMethod {
   comment?: string | undefined
 }
 
-interface ProtoService {
+export interface ProtoService {
   name: string
   methods: ProtoMethod[]
   comment?: string | undefined
 }
 
-interface ProtoEnum {
+export interface ProtoEnum {
   name: string
   values: string[]
 }
 
-interface ParsedProto {
+export interface ParsedProto {
   package: string
   services: ProtoService[]
   messages: ProtoMessage[]
@@ -284,7 +290,7 @@ function methodToRequest(
   collectionName: string
 ): GrpcRequest {
   const fullServiceName = packageName ? `${packageName}.${service.name}` : service.name
-  
+
   return {
     type: 'grpc',
     id: generateId(`${collectionName}:grpc:${fullServiceName}:${method.name}`),
@@ -295,7 +301,15 @@ function methodToRequest(
     method: method.name,
     callType: getCallType(method),
     requestMessage: buildSampleMessage(method.inputType, messages),
-    metadata: []
+    metadata: [],
+    // Matches `grpcImportAdapter.extractNormalizedSpec`'s naturalKey
+    // (`main/services/import/idempotent/GrpcAdapter.ts`) exactly, so
+    // `runIdempotentImport` can match this request back to its source
+    // operation on a re-import (proto-file re-drop or a gRPC-reflection
+    // "re-import merge" — see `GrpcReflectionImportService.reimportGrpcReflection`).
+    // Without this, every re-import would look like an all-new spec and
+    // duplicate every request instead of merging.
+    importOrigin: { format: 'grpc', naturalKey: `${fullServiceName}/${method.name}` }
   }
 }
 
@@ -313,13 +327,17 @@ export interface GrpcImportOptions {
 }
 
 /**
- * Import a proto file and convert it to a Folder structure
+ * Build an `EnvironmentFolder` from an already-parsed proto descriptor. Both
+ * the text-based `.proto` importer (below) and the gRPC reflection importer
+ * (which assembles a `ParsedProto` from a live server's `FileDescriptorSet`
+ * instead of source text) funnel through this single builder, so a
+ * reflection-based import produces the exact same output shape as a
+ * proto-file import.
  */
-export function importGrpc(protoContent: string, options: GrpcImportOptions = {}): EnvironmentFolder {
+export function buildEnvironmentFolderFromParsedProto(parsed: ParsedProto, options: GrpcImportOptions = {}): EnvironmentFolder {
   const baseUrl = options.baseUrl ?? '{{baseUrl}}'
-  const parsed = parseProto(protoContent)
   const name = options.name ?? (parsed.package !== '' ? parsed.package : 'gRPC API')
-  
+
   // Create folders for each service
   const items: Folder['items'] = []
   
@@ -372,6 +390,31 @@ export function importGrpc(protoContent: string, options: GrpcImportOptions = {}
   }
 
   return rootFolder
+}
+
+/** Stamp the imported `.proto` source onto every gRPC request in the tree, so
+ * execution (`grpcProtoLoader.loadGrpcPackage`) resolves ITS OWN descriptor
+ * instead of falling back to the bundled grpcbin proto. Mirrors
+ * `GrpcReflectionImportService`'s `stampDescriptorSet` for the reflection path —
+ * kept here rather than in `buildEnvironmentFolderFromParsedProto` because that
+ * builder is shared with reflection import, which has no raw `.proto` text to stamp. */
+function stampProtoContent(items: FolderItem[], protoContent: string): void {
+  for (const item of items) {
+    if (isAnyFolder(item)) {
+      stampProtoContent(item.items, protoContent)
+    } else if (isRequest(item) && isGrpcRequest(item)) {
+      item.protoContent = protoContent
+    }
+  }
+}
+
+/**
+ * Import a proto file and convert it to a Folder structure
+ */
+export function importGrpc(protoContent: string, options: GrpcImportOptions = {}): EnvironmentFolder {
+  const folder = buildEnvironmentFolderFromParsedProto(parseProto(protoContent), options)
+  stampProtoContent(folder.items, protoContent)
+  return folder
 }
 
 /**

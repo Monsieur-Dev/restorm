@@ -8,7 +8,15 @@ import type {
   GrpcRequest,
   SoapRequest,
   WebSocketRequest,
-  ODataRequest
+  SseRequest,
+  ODataRequest,
+  JsonRpcRequest,
+  JsonRpcBatchRequest,
+  TrpcRequest,
+  AmqpRequest,
+  RedisRequest,
+  StompRequest,
+  KafkaRequest
 } from '../../../shared/types/requests'
 import {
   HTTPRequestTabView,
@@ -17,7 +25,15 @@ import {
   SoapRequestTabView,
   SoapServerRequestTabView,
   WebSocketRequestTabView,
-  ODataRequestTabView
+  SseRequestTabView,
+  ODataRequestTabView,
+  JsonRpcRequestTabView,
+  JsonRpcBatchRequestTabView,
+  TrpcRequestTabView,
+  AmqpRequestTabView,
+  RedisRequestTabView,
+  StompRequestTabView,
+  KafkaRequestTabView
 } from '../components/RequestTabViews'
 
 /**
@@ -45,7 +61,15 @@ export const PROTOCOL_TAB_VIEWS: Record<RequestType, (request: Request) => React
     ? <SoapServerRequestTabView request={request as SoapRequest} />
     : <SoapRequestTabView request={request as SoapRequest} />),
   websocket: (request) => <WebSocketRequestTabView request={request as WebSocketRequest} />,
-  odata: (request) => <ODataRequestTabView request={request as ODataRequest} />
+  sse: (request) => <SseRequestTabView request={request as SseRequest} />,
+  odata: (request) => <ODataRequestTabView request={request as ODataRequest} />,
+  jsonrpc: (request) => <JsonRpcRequestTabView request={request as JsonRpcRequest} />,
+  jsonrpcBatch: (request) => <JsonRpcBatchRequestTabView request={request as JsonRpcBatchRequest} />,
+  trpc: (request) => <TrpcRequestTabView request={request as TrpcRequest} />,
+  amqp: (request) => <AmqpRequestTabView request={request as AmqpRequest} />,
+  redis: (request) => <RedisRequestTabView request={request as RedisRequest} />,
+  stomp: (request) => <StompRequestTabView request={request as StompRequest} />,
+  kafka: (request) => <KafkaRequestTabView request={request as KafkaRequest} />
 }
 
 /** Render the tab-view editor element for a request, chosen by its protocol. */

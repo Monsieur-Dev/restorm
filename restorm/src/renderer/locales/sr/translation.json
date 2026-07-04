@@ -275,10 +275,17 @@
         "socketio": "Socket.IO захтев",
         "mqtt": "MQTT request",
         "mqttServer": "MQTT broker",
+        "sse": "SSE zahtev",
         "grpcServer": "gRPC mock сервер",
         "soapServer": "SOAP mock сервер",
         "graphqlServer": "GraphQL mock сервер",
-        "odataServer": "OData mock сервер"
+        "odataServer": "OData mock сервер",
+        "trpc": "tRPC zahtev",
+        "amqp": "AMQP zahtev",
+        "redis": "Redis zahtev",
+        "stomp": "STOMP захтев",
+        "kafkaProduce": "Kafka zahtev – Proizvedi",
+        "kafkaConsume": "Kafka zahtev – Potroši"
       }
     },
     "deleteConfirm": {
@@ -476,6 +483,12 @@
       "clientStream": "Client streaming",
       "bidi": "Bidirectional streaming"
     },
+    "transport": {
+      "grpc": "gRPC",
+      "grpcWeb": "gRPC-Web",
+      "connect": "Connect",
+      "streamingUnsupported": "Овај транспорт не подржава клијентски или двосмерни стриминг преко HTTP/1.1. Уместо тога користите нативни gRPC транспорт."
+    },
     "server": {
       "proto": "Proto",
       "methods": "Mock методе",
@@ -494,6 +507,12 @@
       "notListening": "Не слуша",
       "listenFailed": "Покретање gRPC сервера није успело",
       "snippetsUnavailable": "Исечци кода нису доступни за mock сервер."
+    },
+    "reflection": {
+      "refresh": "Osveži iz reflectiona",
+      "refreshFailed": "Osvežavanje putem gRPC reflectiona nije uspelo",
+      "unsupported": "Ovaj server ne podržava gRPC reflection — umesto toga uvezite .proto fajl.",
+      "unknownError": "Nepoznata greška"
     }
   },
   "soap": {
@@ -541,6 +560,114 @@
     "routePlaceholder": "Рута (опционо)",
     "clientsConnected": "{{count}} клијент(а) повезано",
     "notListening": "Не слуша"
+  },
+  "jsonrpc": {
+    "send": "Pošalji",
+    "urlPlaceholder": "URL JSON-RPC крајње тачке",
+    "methodPlaceholder": "метода",
+    "idPlaceholder": "ид (аутоматски)",
+    "notificationModeTooltip": "Режим обавештења — без ид-а, без очекиваног одговора",
+    "tabs": {
+      "params": "Parametri",
+      "headers": "Zaglavlja"
+    },
+    "response": {
+      "notificationSent": "Обавештење послато",
+      "errorLabel": "JSON-RPC грешка {{code}}:"
+    }
+  },
+  "jsonrpcBatch": {
+    "send": "Пошаљи пакет",
+    "tabs": {
+      "calls": "Позиви"
+    },
+    "empty": "Још нема позива. Додајте један испод.",
+    "methodPlaceholder": "метода",
+    "idPlaceholder": "ид (аутоматски)",
+    "moveUp": "Помери горе",
+    "moveDown": "Помери доле",
+    "remove": "Уклони позив",
+    "paramsLabel": "Параметри (JSON)",
+    "add": "Додај позив",
+    "response": {
+      "unmatched": "Нема одговарајућег уноса одговора."
+    }
+  },
+  "sse": {
+    "headers": "Zaglavlja",
+    "noFrames": "Još nema događaja",
+    "urlPlaceholder": "SSE URL",
+    "framesTruncated": "Prikazano poslednjih {{shown}} od {{total}} okvira",
+    "showAllFrames": "Prikaži sve"
+  },
+  "redis": {
+    "connected": "Povezano",
+    "disconnected": "Prekinuto",
+    "noMessages": "Još nema poruka",
+    "noCommandsYet": "Još nema izvršenih komandi",
+    "urlPlaceholder": "Redis URL (redis:// ili rediss://)",
+    "passwordPlaceholder": "Lozinka (opciono)",
+    "subscribe": "Pretplati se",
+    "unsubscribe": "Otkaži pretplatu",
+    "run": "Pokreni",
+    "subscribeMode": "Pretplata",
+    "commandMode": "Komanda",
+    "command": "Komanda",
+    "args": "Argumenti",
+    "argsPlaceholder": "Argumenti komande",
+    "freeform": "Slobodno",
+    "freeformPlaceholder": "Slobodna komanda (zamenjuje izbor)",
+    "tabs": {
+      "channels": "Kanali",
+      "command": "Komanda"
+    }
+  },
+  "kafka": {
+    "brokersPlaceholder": "Lista brokera (host:port,host:port)",
+    "clientId": "ID klijenta",
+    "clientIdPlaceholder": "restorm",
+    "mode": {
+      "produce": "Proizvedi",
+      "consume": "Potroši",
+      "browse": "Pregledaj"
+    },
+    "auth": {
+      "title": "Autentifikacija",
+      "mechanism": "SASL",
+      "username": "Korisničko ime",
+      "password": "Lozinka",
+      "tls": "TLS"
+    },
+    "topic": "Tema",
+    "topicPlaceholder": "naziv-teme",
+    "key": "Ključ",
+    "keyPlaceholder": "ključ poruke (opciono)",
+    "value": "Vrednost",
+    "headers": "Zaglavlja",
+    "partition": "Particija",
+    "partitionPlaceholder": "auto",
+    "groupId": "ID grupe",
+    "groupIdPlaceholder": "restorm-consumer",
+    "fromOffsetLabel": "Počni od",
+    "fromOffset": {
+      "earliest": "Najstariji",
+      "latest": "Najnoviji",
+      "specific": "Određeni"
+    },
+    "specificOffset": "Offset",
+    "partitions": "Particije",
+    "partitionsPlaceholder": "0,1,2 (prazno = sve)",
+    "peekCount": "Broj poruka",
+    "produce": "Proizvedi",
+    "startConsuming": "Pokreni potrošnju",
+    "stopConsuming": "Zaustavi potrošnju",
+    "peek": "Pregled",
+    "noMessages": "Još nema poruka",
+    "connected": "Povezano",
+    "disconnected": "Prekinuto",
+    "producedTo": "Proizvedeno u",
+    "offset": "Offset",
+    "messages": "Poruke"
   },
   "search": {
     "placeholder": "Pretraži...",
@@ -887,6 +1014,10 @@
         "description": "Ubacite .proto datoteku (ili direktorijum sa njima) i Restorm prolazi kroz svaki servis, svaki RPC, svaku poruku — pretvarajući svaku metodu u tipizovan zahtev koji možete slati preko gRPC izvršioca bez doticanja codegen-a.",
         "trademark": "gRPC je projekat Cloud Native Computing fondacije."
       },
+      "grpcReflection": {
+        "description": "Nemate .proto fajl? Usmerite Restorm na gRPC server koji radi i izlaže reflection — on ispituje grpc.reflection.v1alpha.ServerReflection, otkriva svaki servis i metodu i pravi isto tipizirano stablo zahteva kao uvoz proto fajla, keširano lokalno za rad van mreže.",
+        "action": "Poveži se sa serverom…"
+      },
       "soap": {
         "description": "Imate WSDL? Nalepite ga (ili njegov URL) — Restorm parsira svaki <port> i <operation> i proizvodi SOAP koverte spremne za slanje sa pravim SOAPAction zaglavljem, skeletima tela tipizovanim po šemi i šemom autentifikacije koju WSDL deklariše."
       },
@@ -912,7 +1043,57 @@
       "paw": {
         "description": "Dolazite iz Paw-a? Ubacite svoj JSON izvoz (File → Export → JSON u aplikaciji — nativni .paw paket se ne čita direktno). Restorm ponovo gradi svaki zahtev, zaglavlje, telo i okruženje, i mapira Paw-ove dinamičke vrednosti (vremenske oznake, nasumične nizove, UUID) na najbliži Restorm ekvivalent.",
         "trademark": "Paw je registrovani zaštitni znak kompanije RapidAPI, Inc., korišćen ovde samo kao referenca za kompatibilnost."
+      },
+      "har": {
+        "description": "Snimili ste mrežni trag iz devtools-a svog pregledača? Ubacite izvezeni .har fajl — Restorm prolazi kroz svaki zabeleženi poziv i pretvara ga u zahtev koji se može ponoviti, uključujući zaglavlja i telo."
+      },
+      "restClient": {
+        "description": "Dolazite iz ekstenzije REST Client za VS Code? Nalepite ili ubacite .http / .rest fajl — Restorm parsira svaki blok zahteva, razrešava @variables i ponovo ih gradi kao Restorm stablo.",
+        "trademark": "REST Client je zaštitni znak odgovarajućeg vlasnika, korišćen ovde samo kao referenca za kompatibilnost."
+      },
+      "httpie": {
+        "description": "Ubacite izvoz kolekcije HTTPie Desktop ili fajl CLI sesije — Restorm čita svaki zahtev (a za sesiju i njena trajna zaglavlja) i ponovo ih gradi spremne za pokretanje.",
+        "trademark": "HTTPie je zaštitni znak odgovarajućeg vlasnika, korišćen ovde samo kao referenca za kompatibilnost."
+      },
+      "smithy": {
+        "description": "Nalepite Smithy model — JSON AST ili ručno pisani IDL — a Restorm prolazi kroz svaki servis, resurs i operaciju kako bi napravio odgovarajući folder zahteva spremnih za pokretanje.",
+        "trademark": "Smithy je projekat kompanije Amazon Web Services."
+      },
+      "typespec": {
+        "description": "Nalepite svoju TypeSpec definiciju (.tsp) — Restorm je u pozadini kompajlira u OpenAPI i uvozi je potpuno kao ručno pisanu specifikaciju: uključujući operacije, parametre i šeme.",
+        "trademark": "TypeSpec je projekat kompanije Microsoft."
+      },
+      "raml": {
+        "description": "Nalepite RAML 1.0 ili 0.8 dokument — Restorm preslikava njegovo stablo resursa u ugnježdene foldere, jedan zahtev po metodi, uključujući modelirane tipove.",
+        "trademark": "RAML je specifikacija koju održava RAML Workgroup."
+      },
+      "wadl": {
+        "description": "I dalje održavate WADL dokument? Nalepite XML — Restorm prolazi kroz njegovo ugnježdeno <resource> stablo i pravi odgovarajući folder zahteva, uključujući metode i parametre.",
+        "trademark": "WADL je Sun Microsystems podneo W3C-u kao Member Submission."
+      },
+      "thrift": {
+        "description": "Nalepite Apache Thrift IDL (.thrift) fajl — Restorm čita svaki servis, metodu, struct i enum kako biste mogli da pregledate oblik API-ja. Binarni protokol Thrift-a još se ne može izvršavati iz Restorm-a, pa je ovaj uvoz samo dokumentacioni.",
+        "trademark": "Apache Thrift je zaštitni znak Apache Software Foundation-a."
+      },
+      "apiBlueprint": {
+        "description": "Nalepite API Blueprint (.apib) dokument — Restorm analizira svaku grupu resursa i prelaz u folder zahteva, jedan po dokumentovanom paru metoda/odgovor.",
+        "trademark": "API Blueprint je specifikacija koju je originalno napravio Apiary."
       }
+    },
+    "grpcReflection": {
+      "title": "gRPC server (Рефлексија)",
+      "hint": "Ispitajte reflection servis pokrenutog gRPC servera da otkrijete njegove servise i metode bez .proto fajla.",
+      "addressLabel": "Adresa servera (host:port)",
+      "addressPlaceholder": "localhost:9000",
+      "tlsLabel": "Koristi TLS",
+      "metadataLabel": "Metapodaci (opciona autentikaciona zaglavlja)",
+      "connecting": "Povezivanje…",
+      "import": "Uvezi",
+      "reimportedTitle": "gRPC reflection ponovo uvezen",
+      "reimportedNoop": "Već ažurirano — nema promena na serveru.",
+      "reimportedSummary": "+{{added}} / -{{removed}} / ↻{{merged}} — ponovo učitajte projekat da vidite promene.",
+      "unsupported": "Ovaj server ne podržava gRPC reflection — umesto toga uvezite .proto fajl.",
+      "unknownError": "Nepoznata greška"
     },
     "loading": "Analiziranje...",
     "noResults": "Nije pronađen nijedan zahtev",
@@ -1076,14 +1257,22 @@
       "socketioSend": "Socket.IO send",
       "socketioClose": "Socket.IO close",
       "websocketConnect": "WebSocket connect",
+      "sseConnect": "SSE connect",
       "websocketSend": "WebSocket send",
       "websocketClose": "WebSocket close",
+      "sseClose": "SSE close",
       "grpcConnect": "gRPC connect",
       "grpcSend": "gRPC send",
       "grpcClose": "gRPC close",
       "mqttConnect": "MQTT connect",
       "mqttSend": "MQTT publish",
       "mqttClose": "MQTT close",
+      "amqpConnect": "AMQP veza",
+      "amqpPublish": "AMQP objava",
+      "amqpClose": "AMQP zatvaranje",
+      "redisSubscribe": "Redis subscribe",
+      "redisClose": "Redis close",
+      "redisCommand": "Redis command",
       "httpListen": "HTTP server",
       "httpClose": "HTTP close",
       "grpcServerClose": "Затвори gRPC сервер",
@@ -1094,7 +1283,13 @@
       "odataListen": "OData server",
       "odataClose": "OData close",
       "graphqlSubscribe": "GraphQL претплата",
-      "graphqlUnsubscribe": "Откажи GraphQL претплату"
+      "graphqlUnsubscribe": "Откажи GraphQL претплату",
+      "stompConnect": "STOMP веза",
+      "stompSend": "STOMP слање",
+      "stompClose": "Затварање STOMP",
+      "kafkaProduce": "Kafka produce",
+      "kafkaConsume": "Kafka consume",
+      "kafkaClose": "Kafka close"
     },
     "comparator": {
       "result": "резултат"
@@ -1655,8 +1850,10 @@
       "socketioSend": "Шаље поруку на већ отвореној Socket.IO вези.",
       "socketioClose": "Затвара већ отворену Socket.IO везу.",
       "websocketConnect": "Отвара сирову WebSocket везу и поново емитује сваку примљену поруку на свом порту.",
+      "sseConnect": "Otvara dugotrajnu SSE (Server-Sent Events) vezu i ponovo emituje svaki primljeni okvir na svom portu.",
       "websocketSend": "Шаље payload на већ отвореној WebSocket вези.",
       "websocketClose": "Затвара већ отворену WebSocket везу.",
+      "sseClose": "Zatvara već otvorenu SSE vezu.",
       "grpcConnect": "Отвара streaming gRPC позив и поново емитује сваки примљени оквир на свом message порту.",
       "grpcSend": "Уписује поруку захтева у већ отворен streaming gRPC позив.",
       "grpcClose": "Делимично затвара (half-close) већ отворен streaming gRPC позив.",
@@ -1669,9 +1866,15 @@
       "mqttConnect": "Отвара дуготрајну MQTT везу из повезаног захтева и претплаћује се на његову тему; поново емитује сваку примљену поруку на свом `message` порту.",
       "mqttSend": "Објављује payload на већ отвореној MQTT вези (на њену тему).",
       "mqttClose": "Затвара већ отворену MQTT везу.",
+      "amqpConnect": "Otvara trajnu AMQP vezu iz povezanog zahteva i konzumira njegov red čekanja; ponovo emituje svaku primljenu poruku na portu `message`.",
+      "amqpPublish": "Objavljuje sadržaj na već otvorenoj AMQP vezi (na exchange/routing key povezanog zahteva).",
+      "amqpClose": "Zatvara već otvorenu AMQP vezu.",
       "mqttConnectServer": "Покреће локални MQTT broker (порт + филтер теме); претплаћује се на његов филтер теме и поново емитује сваку примљену поруку на свом `message` порту. Слање објављује повезаним претплатницима.",
       "mqttSendServer": "Објављује поруку сваком претплатнику референцираног MQTT broker-а.",
       "mqttCloseServer": "Зауставља референцирани MQTT broker и прекида везу са његовим клијентима.",
+      "redisSubscribe": "Отвара дуготрајну Redis претплатничку везу из повезаног захтева и слуша његове канале; поново емитује сваку примљену поруку на свом `message` порту.",
+      "redisClose": "Затвара већ отворену Redis претплатничку везу.",
+      "redisCommand": "Извршава повезану Redis команду (једна команда на новој вези, затим прекид) и емитује њен одговор.",
       "toast": "Приказује toast обавештење у Restorm интерфејсу током извршавања сценарија.",
       "httpListen": "Hosts a local HTTP mock server and listens indefinitely. `connected` fires once it is listening; each served request re-emits its data on the `served` port. The server stays up until an HTTP close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
       "httpClose": "Зауставља већ активни лажни HTTP сервер (декларисан чвором HTTP server) и ослобађа његов порт.",
@@ -1684,7 +1887,13 @@
       "odataListen": "Хостује локалну лажну OData v4 услугу и слуша неограничено. `connected` се активира чим почне да слуша; сваки опслужени захтев поново емитује своје податке на порту `served`. Сервер остаје активан до OData затварања (или заустављања), након чега се активира `done`. Без response излаза — опслужује, не позива ка споља.",
       "odataClose": "Зауставља лажну OData услугу која већ слуша (декларисану OData серверским чвором) и ослобађа њен порт.",
       "graphqlSubscribe": "Отвара дуготрајну GraphQL претплату као клијент преко SSE и слуша. `connected` се покреће чим се ток отвори; сваки примљени терет се поново емитује на порту `message` (претплата само прима, без именованих догађаја). Ток остаје отворен до отказивања GraphQL претплате (или заустављања), или док га сервер не доврши, а затим се покреће `done`.",
-      "graphqlUnsubscribe": "Зауставља већ отворену GraphQL претплату (декларисану GraphQL претплатним чвором) и затвара њен SSE ток."
+      "graphqlUnsubscribe": "Зауставља већ отворену GraphQL претплату (декларисану GraphQL претплатним чвором) и затвара њен SSE ток.",
+      "stompConnect": "Отвара дуготрајну STOMP везу преко WebSocket-а: обавља CONNECT/CONNECTED руковање, затим се претплаћује на свако конфигурисано одредиште и поново емитује сваки примљени оквир на свом порту.",
+      "stompSend": "Шаље SEND оквир на већ отвореној STOMP вези.",
+      "stompClose": "Шаље DISCONNECT и затвара већ отворену STOMP везу.",
+      "kafkaProduce": "Покреће повезани Kafka захтев као једнократну производњу и емитује резултат (тема/партиција/offset) као `response`.",
+      "kafkaConsume": "Отвара дуготрајног Kafka потрошача из повезаног захтева и поново емитује сваку примљену поруку на свом `message` порту.",
+      "kafkaClose": "Затвара већ отвореног Kafka потрошача."
     },
     "legend": {
       "title": "Легенда",
@@ -1733,6 +1942,9 @@
     "websocket": {
       "message": "message"
     },
+    "sse": {
+      "message": "message"
+    },
     "grpc": {
       "message": "message"
     },
@@ -1778,6 +1990,36 @@
     "lwtTopicPlaceholder": "will/topic",
     "lwtPayload": "Payload",
     "lwtPayloadPlaceholder": "will message"
+  },
+  "amqp": {
+    "urlPlaceholder": "AMQP URL (amqp:// ili amqps://)",
+    "vhost": "Virtuelni host",
+    "vhostPlaceholder": "/",
+    "username": "Korisničko ime",
+    "password": "Lozinka",
+    "mode": "Režim",
+    "modePublish": "Objavi",
+    "modeSubscribe": "Pretplati se",
+    "modeBrowse": "Pregledaj",
+    "exchange": "Exchange",
+    "exchangePlaceholder": "(podrazumevani exchange)",
+    "routingKey": "Routing key",
+    "routingKeyPlaceholder": "routing.key",
+    "queue": "Red čekanja",
+    "queuePlaceholder": "naziv reda čekanja",
+    "autoAck": "Automatska potvrda",
+    "prefetch": "Prefetch",
+    "browsePeekCount": "Broj za pregled",
+    "connect": "Poveži",
+    "connecting": "Povezivanje…",
+    "disconnect": "Прекини везу",
+    "connected": "Povezano",
+    "disconnected": "Prekinuto",
+    "send": "Pošalji",
+    "browseButton": "Pregledaj",
+    "noMessages": "Još nema poruka",
+    "peeked": "Pregledano",
+    "messages": "Poruke"
   },
   "mcpLogs": {
     "title": "MCP евиденције",
@@ -2044,5 +2286,42 @@
       "noSubscription": "Нема активне претплате за управљање.",
       "error": "Портал за претплату није могуће отворити. Покушајте поново."
     }
+  },
+  "trpc": {
+    "send": "Pošalji",
+    "urlPlaceholder": "URL tRPC servera",
+    "procedurePlaceholder": "Procedura (npr. user.get)",
+    "kindQuery": "Upit",
+    "kindMutation": "Mutacija",
+    "showRawEnvelope": "Prikaži sirovu omotnicu",
+    "kindSelectLabel": "Vrsta poziva",
+    "tabs": {
+      "headers": "Zaglavlja",
+      "body": "Telo"
+    }
+  },
+  "stomp": {
+    "connect": "Повежи",
+    "disconnect": "Прекини везу",
+    "connected": "Повезано",
+    "disconnected": "Није повезано",
+    "noMessages": "Још нема оквира",
+    "version": "STOMP верзија",
+    "tabs": {
+      "connect": "Веза",
+      "subscriptions": "Претплате",
+      "send": "Пошаљи"
+    },
+    "ackMode": {
+      "auto": "auto",
+      "client": "client",
+      "clientIndividual": "client-individual"
+    },
+    "subscriptionIdLabel": "ID претплате",
+    "removeSubscription": "Уклони претплату",
+    "addSubscription": "Додај претплату",
+    "sendDestination": "Одредиште",
+    "ack": "ACK",
+    "nack": "NACK"
   }
 }

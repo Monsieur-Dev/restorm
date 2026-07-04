@@ -51,6 +51,14 @@ export interface MenuBarState {
   focusedMenuIndex: number | null
   isOpen: boolean
   activeMenuIndex: number | null
+  /**
+   * Roving-tabindex anchor: the single top-level item that is a `Tab` stop
+   * when nothing inside the bar currently has keyboard focus. Starts at the
+   * first item and tracks whichever item was last focused/opened (mouse or
+   * keyboard), per the standard ARIA menubar roving-tabindex pattern — the
+   * other items always carry `tabIndex={-1}`.
+   */
+  tabStopIndex: number
 }
 
 export interface MenuItemState {

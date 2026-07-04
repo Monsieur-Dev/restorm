@@ -8,6 +8,9 @@ vi.mock('../services/GraphQLExecutionService', () => ({ graphqlExecutionService:
 vi.mock('../services/SOAPExecutionService', () => ({ soapExecutionService: { cancel: () => false } }))
 vi.mock('../services/GRPCExecutionService', () => ({ grpcExecutionService: { cancel: () => false } }))
 vi.mock('../services/WebSocketExecutionService', () => ({ websocketExecutionService: { disconnect: () => false } }))
+vi.mock('../services/JsonRpcExecutionService', () => ({ jsonRpcExecutionService: { cancel: () => false } }))
+vi.mock('../services/SseExecutionService', () => ({ sseExecutionService: { disconnect: () => false } }))
+vi.mock('../services/RedisExecutionService', () => ({ redisExecutionService: { cancel: () => false } }))
 
 describe('main protocol executor registry', () => {
   it('covers exactly the shared registry key set (no drift)', async () => {
@@ -15,10 +18,10 @@ describe('main protocol executor registry', () => {
     expect(Object.keys(PROTOCOL_EXECUTORS).sort()).toEqual([...REQUEST_TYPES].sort())
   })
 
-  it('marks only websocket as a streaming protocol', async () => {
+  it('marks websocket and sse as the streaming protocols', async () => {
     const { PROTOCOL_EXECUTORS } = await import('./executorRegistry')
     const streaming = REQUEST_TYPES.filter((t) => PROTOCOL_EXECUTORS[t].streaming)
-    expect(streaming).toEqual(['websocket'])
+    expect(streaming).toEqual(['websocket', 'sse'])
   })
 
   it('exposes a cancel function for every protocol', async () => {

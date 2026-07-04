@@ -1007,10 +1007,9 @@ export function importSwaggerFromJson(json: string, options: SwaggerImportOption
 
 import { importProviders } from './registry'
 
-function canImport(content: string, _filePath?: string): boolean {
-  const trimmed = content.trim()
+function canImport(content: string, _filePath?: string, parsed?: unknown): boolean {
   try {
-    const json: unknown = JSON.parse(trimmed)
+    const json: unknown = parsed !== undefined ? parsed : JSON.parse(content.trim())
     if (typeof json === 'object' && json !== null) {
       const obj = json as Record<string, unknown>
       return 'swagger' in obj && typeof obj.swagger === 'string' && obj.swagger.startsWith('2.')

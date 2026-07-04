@@ -94,3 +94,10 @@ tests/e2e/samples/http-server-sample.restorm.responses.zip
 tests/e2e/samples/graphql-server-sample.restorm.responses.zip
 tests/e2e/samples/graphql-sample.restorm.responses.zip
 tests/e2e/samples/odata-server-sample.restorm.responses.zip
+tests/e2e/samples/amqp-sample.restorm.responses.zip
+tests/e2e/samples/jsonrpc-sample.restorm.responses.zip
+tests/e2e/samples/kafka-sample.restorm.responses.zip
+tests/e2e/samples/redis-sample.restorm.responses.zip
+tests/e2e/samples/sse-sample.restorm.responses.zip
+tests/e2e/samples/stomp-sample.restorm.responses.zip
+tests/e2e/samples/trpc-sample.restorm.responses.zip

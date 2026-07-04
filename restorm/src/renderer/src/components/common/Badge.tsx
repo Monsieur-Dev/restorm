@@ -16,11 +16,21 @@ export type BadgeType =
   // SOAP
   | 'SOAP'
   // WebSocket protocols
-  | 'WS' | 'MQTT' | 'SIO'
+  | 'WS' | 'MQTT' | 'SIO' | 'STOMP'
+  // Server-Sent Events
+  | 'SSE'
+  // Kafka
+  | 'KAFKA'
   // OData
   | 'ODATA'
+  // tRPC
+  | 'tRPC'
+  // Redis
+  | 'REDIS'
   // Authentication
   | 'AUTH'
+  // AMQP (RabbitMQ)
+  | 'AMQP'
   // Scenario (dataflow graph) — renders a circuit-board codicon
   | 'SCENARIO'
   // Marketing tier — shown next to import-format names that require a

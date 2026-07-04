@@ -38,6 +38,24 @@ export type GrpcCallType = (typeof GRPC_CALL_TYPES)[number]
 export const WEBSOCKET_PROTOCOLS = ['websocket', 'socketio', 'mqtt'] as const
 export type WebSocketProtocol = (typeof WEBSOCKET_PROTOCOLS)[number]
 
+/** tRPC call kind. Subscriptions ride a WebSocket transport and are out of
+ * scope — this protocol only speaks the HTTP-shaped query/mutation calls. */
+export const TRPC_CALL_KINDS = ['query', 'mutation'] as const
+export type TrpcCallKind = (typeof TRPC_CALL_KINDS)[number]
+
+/** AMQP interaction mode — a single request type switches its tab-view pane
+ * (and, for `subscribe`, its scenario binding) on this discriminant, the way
+ * gRPC switches on `callType`. */
+export const AMQP_MODES = ['publish', 'subscribe', 'browse'] as const
+export type AmqpMode = (typeof AMQP_MODES)[number]
+/** Redis request execution mode — subscribe (streaming) or command (unary). */
+export const REDIS_MODES = ['subscribe', 'command'] as const
+export type RedisMode = (typeof REDIS_MODES)[number]
+
+/** Redis command palette. Anything else goes through `freeformCommand`. */
+export const REDIS_COMMANDS = ['GET', 'SET', 'DEL', 'HGET', 'HSET', 'LPUSH', 'RPUSH', 'LRANGE', 'PUBLISH', 'XADD', 'XREAD'] as const
+export type RedisCommandName = (typeof REDIS_COMMANDS)[number]
+
 /** Request type discriminator. Both the runtime tuple and the union are derived
  * from the single-source-of-truth {@link PROTOCOL_REGISTRY}; re-exported here so
  * the long-standing `models/types` import path keeps working. Adding a protocol

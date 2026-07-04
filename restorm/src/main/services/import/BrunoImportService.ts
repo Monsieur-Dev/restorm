@@ -1031,11 +1031,10 @@ export function importBrunoFromJson(
 
 import { importProviders } from './registry'
 
-function canImport(content: string, filePath?: string): boolean {
+function canImport(content: string, filePath?: string, parsed?: unknown): boolean {
   if (filePath?.endsWith('.bru')) return true
-  const trimmed = content.trim()
   try {
-    const json: unknown = JSON.parse(trimmed)
+    const json: unknown = parsed !== undefined ? parsed : JSON.parse(content.trim())
     if (typeof json === 'object' && json !== null && 'version' in json && 'name' in json) {
       const jsonObj = json as Record<string, unknown>
       return jsonObj.type === 'collection' || filePath?.endsWith('.json') === true

@@ -69,8 +69,16 @@ const REQUEST_TAB_TYPES = new Set([
   'grpc-request',
   'soap-request',
   'websocket-request',
+  'sse-request',
+  'stomp-request',
   'odata-request',
-  'auth-request'
+  'auth-request',
+  'jsonrpc-request',
+  'jsonrpc-batch-request',
+  'trpc-request',
+  'amqp-request',
+  'redis-request',
+  'kafka-request'
 ])
 
 /**

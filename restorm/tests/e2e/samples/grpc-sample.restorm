@@ -12,6 +12,12 @@ collections:
       (`DummyBidirectionalStreamStream`): each request message you send is echoed
       straight back as a received frame. **gRPC Echo (server stream)** opens a
       server stream (`DummyServerStream`): one request, a burst of echoed frames.
+
+      **gRPC-Web Unary** and **Connect Unary** exercise the `transport` toggle:
+      the same `DummyUnary` call, framed for plain HTTP/1.1 instead of native
+      HTTP/2. Neither wire format is spoken by grpcbin itself, so each has its
+      own dedicated mock: gRPC-Web targets `grpcweb-mock` (9002), Connect
+      targets `connect-mock` (8093) — there's no local image for either.
     tags: []
     configuration: {}
     environments:
@@ -115,6 +121,51 @@ collections:
           }
         metadata: []
         id: d2b3c4d5-e6f7-4081-9a2b-3c4d5e6f7081
+      - type: grpc
+        name: gRPC-Web Unary
+        documentation: |-
+          The same DummyUnary call as "gRPC Unary", but dispatched over the
+          gRPC-Web transport (binary framing over plain HTTP/1.1) against the
+          dedicated `grpcweb-mock` container (9002) — grpcbin itself doesn't
+          speak gRPC-Web on any port.
+        tags:
+          - grpc
+          - unary
+          - grpc-web
+        url: localhost:9002
+        service: grpcbin.GRPCBin
+        method: DummyUnary
+        callType: unary
+        transport: grpc-web
+        requestMessage: |-
+          {
+            "f_string": "web-ping"
+          }
+        metadata: []
+        id: f1a2b3c4-d5e6-4f70-8819-2a3b4c5d6e80
+      - type: grpc
+        name: Connect Unary
+        documentation: |-
+          The same DummyUnary call again, dispatched over the Connect-RPC
+          transport (JSON over plain HTTP) against the dedicated
+          `connect-mock` container (8093) — there's no local Connect-RPC
+          image to reuse, so this targets a hand-rolled mock instead of
+          grpcbin.
+        tags:
+          - grpc
+          - unary
+          - connect
+        url: localhost:8093
+        service: grpcbin.GRPCBin
+        method: DummyUnary
+        callType: unary
+        transport: connect
+        requestMessage: |-
+          {
+            "f_string": "connect-ping"
+          }
+        metadata: []
+        id: f2a3b4c5-d6e7-4f81-8920-3b4c5d6e7f81
       - type: grpc
         name: gRPC Error (SpecificError)
         documentation: |-

@@ -150,6 +150,21 @@
   color: var(--badge-on-accent, #ffffff);
 }
 
+.badge-sse {
+  background-color: var(--badge-sse-background);
+  color: var(--badge-on-accent, #ffffff);
+}
+
+.badge-stomp {
+  background-color: var(--badge-stomp-background);
+  color: var(--badge-on-accent, #ffffff);
+}
+
+.badge-kafka {
+  background-color: var(--badge-kafka-background);
+  color: var(--badge-on-accent, #ffffff);
+}
+
 /* Server mode (restorm HOSTS the protocol): a two-part "capsule" norm shared by
  * every hosted protocol. A dark "SRV" segment (rounded LEFT only) glued to the
  * protocol's normal coloured badge (rounded RIGHT only), no radius where they
@@ -191,6 +206,24 @@
 }
 
 /* ============================================================================
+ * tRPC
+ * ============================================================================ */
+
+.badge-trpc {
+  background-color: var(--badge-trpc-background);
+  color: var(--badge-on-accent, #ffffff);
+}
+
+/* ============================================================================
+ * Redis
+ * ============================================================================ */
+
+.badge-redis {
+  background-color: var(--badge-redis-background);
+  color: var(--badge-on-accent, #ffffff);
+}
+
+/* ============================================================================
  * Authentication
  * ============================================================================ */
 
@@ -205,6 +238,15 @@
    * the visual weight of the 10 px text badges ("GET", "POST", …)
    * sitting next to it — 12 px made the key dominate the pill. */
   font-size: 14px !important;
+}
+
+/* ============================================================================
+ * AMQP
+ * ============================================================================ */
+
+.badge-amqp {
+  background-color: var(--badge-amqp-background);
+  color: var(--badge-on-accent, #ffffff);
 }
 
 /* Scenario badge — a violet pill with a circuit-board glyph, distinct

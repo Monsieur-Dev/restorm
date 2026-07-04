@@ -365,11 +365,11 @@ export function importAsyncAPIFromString(content: string, options: AsyncAPIImpor
 
 import { importProviders } from './registry'
 
-function canImport(content: string, _filePath?: string): boolean {
+function canImport(content: string, _filePath?: string, parsed?: unknown): boolean {
   const trimmed = content.trim()
   if (trimmed.startsWith('asyncapi:') || trimmed.includes('\nasyncapi:')) return true
   try {
-    const json: unknown = JSON.parse(trimmed)
+    const json: unknown = parsed !== undefined ? parsed : JSON.parse(trimmed)
     return typeof json === 'object' && json !== null && 'asyncapi' in json
   } catch { /* not JSON */ }
   return false

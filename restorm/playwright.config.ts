@@ -41,6 +41,11 @@ const thriftImportTestDir = defineBddConfig({
   steps: ['tests/e2e/bdd/thrift-import/steps/**/*.ts', 'tests/e2e/bdd/fixtures/thrift-import.fixture.ts'],
   outputDir: '.features-gen/thrift-import'
 })
+const harImportTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/har-import/features/**/*.feature',
+  steps: ['tests/e2e/bdd/har-import/steps/**/*.ts', 'tests/e2e/bdd/fixtures/har-import.fixture.ts'],
+  outputDir: '.features-gen/har-import'
+})
 
 const dirtyStateTestDir = defineBddConfig({
   features: 'tests/e2e/bdd/dirty-state/features/**/*.feature',
@@ -124,10 +129,46 @@ const soapExecutionTestDir = defineBddConfig({
   outputDir: '.features-gen/soap-execution'
 })
 
+const jsonrpcExecutionTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/jsonrpc-execution/features/**/*.feature',
+  steps: ['tests/e2e/bdd/jsonrpc-execution/steps/**/*.ts', 'tests/e2e/bdd/fixtures/mcp-server.fixture.ts'],
+  outputDir: '.features-gen/jsonrpc-execution'
+})
+
 const mqttExecutionTestDir = defineBddConfig({
   features: 'tests/e2e/bdd/mqtt-execution/features/**/*.feature',
   steps: ['tests/e2e/bdd/mqtt-execution/steps/**/*.ts', 'tests/e2e/bdd/fixtures/mcp-server.fixture.ts'],
   outputDir: '.features-gen/mqtt-execution'
+})
+
+const sseExecutionTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/sse-execution/features/**/*.feature',
+  steps: ['tests/e2e/bdd/sse-execution/steps/**/*.ts', 'tests/e2e/bdd/fixtures/mcp-server.fixture.ts'],
+  outputDir: '.features-gen/sse-execution'
+})
+
+const amqpExecutionTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/amqp-execution/features/**/*.feature',
+  steps: ['tests/e2e/bdd/amqp-execution/steps/**/*.ts', 'tests/e2e/bdd/fixtures/mcp-server.fixture.ts'],
+  outputDir: '.features-gen/amqp-execution'
+})
+
+const stompExecutionTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/stomp-execution/features/**/*.feature',
+  steps: ['tests/e2e/bdd/stomp-execution/steps/**/*.ts', 'tests/e2e/bdd/fixtures/mcp-server.fixture.ts'],
+  outputDir: '.features-gen/stomp-execution'
+})
+
+const redisExecutionTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/redis-execution/features/**/*.feature',
+  steps: ['tests/e2e/bdd/redis-execution/steps/**/*.ts', 'tests/e2e/bdd/fixtures/mcp-server.fixture.ts'],
+  outputDir: '.features-gen/redis-execution'
+})
+
+const kafkaExecutionTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/kafka-execution/features/**/*.feature',
+  steps: ['tests/e2e/bdd/kafka-execution/steps/**/*.ts', 'tests/e2e/bdd/fixtures/mcp-server.fixture.ts'],
+  outputDir: '.features-gen/kafka-execution'
 })
 
 const quickSettingsTestDir = defineBddConfig({
@@ -182,6 +223,12 @@ const graphqlExecutionTestDir = defineBddConfig({
   features: 'tests/e2e/bdd/graphql-execution/features/**/*.feature',
   steps: ['tests/e2e/bdd/graphql-execution/steps/**/*.ts', 'tests/e2e/bdd/fixtures/mcp-server.fixture.ts'],
   outputDir: '.features-gen/graphql-execution'
+})
+
+const trpcExecutionTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/trpc-execution/features/**/*.feature',
+  steps: ['tests/e2e/bdd/trpc-execution/steps/**/*.ts', 'tests/e2e/bdd/fixtures/mcp-server.fixture.ts'],
+  outputDir: '.features-gen/trpc-execution'
 })
 
 const fullyDocumentedPetstoreTestDir = defineBddConfig({
@@ -376,8 +423,15 @@ export default defineConfig({
    * surfaces as flaky `waitFor`/`toBeVisible` timeouts on menu/submenu
    * rendering (the failure mode was NOT CPU-bound — load stayed ~11%). Two
    * workers keep the peak resident set within physical RAM; a full run is
-   * slower than at 4 but stable. CI runners with dedicated RAM can raise this. */
-  workers: 2,
+   * slower than at 4 but stable. CI runners with dedicated RAM can raise this.
+   *
+   * Dropped to 1 (serial) on this RAM-constrained no-swap host: even 2 workers
+   * intermittently thrashed and starved renderer timers, surfacing as flaky
+   * `waitFor` timeouts on the MCP-driven "open the request tab via MCP" steps
+   * (kafka/jsonrpc lost the lottery on different pushes). Serial is ~2x slower
+   * but deterministic — no cross-worker MCP contention. Raise again (or make
+   * env-conditional for CI) once the host has more RAM. */
+  workers: 1,
 
   /* Reporter */
   reporter: [
@@ -424,6 +478,10 @@ export default defineConfig({
     {
       name: 'thrift-import',
       testDir: thriftImportTestDir
+    },
+    {
+      name: 'har-import',
+      testDir: harImportTestDir
     },
     {
       name: 'dirty-state',
@@ -492,8 +550,47 @@ export default defineConfig({
       timeout: 180 * 1000
     },
     {
+      name: 'jsonrpc-execution',
+      testDir: jsonrpcExecutionTestDir,
+      timeout: 180 * 1000
+    },
+    {
       name: 'mqtt-execution',
       testDir: mqttExecutionTestDir,
+      timeout: 180 * 1000
+    },
+    // STOMP is client-only (no restorm-hosted broker mode), so this suite
+    // depends on the docker `rmohr/activemq` mock being up — unlike
+    // WebSocket/Socket.IO/MQTT, which self-host. Opt out with
+    // SKIP_STOMP_E2E=1 when the broker isn't available (e.g. a host without
+    // docker), mirroring the `stage-gating` opt-IN pattern below but inverted.
+    ...(process.env.SKIP_STOMP_E2E === '1'
+      ? []
+      : [
+          {
+            name: 'stomp-execution',
+            testDir: stompExecutionTestDir,
+            timeout: 180 * 1000
+          }
+        ]),
+    {
+      name: 'sse-execution',
+      testDir: sseExecutionTestDir,
+      timeout: 180 * 1000
+    },
+    {
+      name: 'amqp-execution',
+      testDir: amqpExecutionTestDir,
+      timeout: 180 * 1000
+    },
+    {
+      name: 'redis-execution',
+      testDir: redisExecutionTestDir,
+      timeout: 180 * 1000
+    },
+    {
+      name: 'kafka-execution',
+      testDir: kafkaExecutionTestDir,
       timeout: 180 * 1000
     },
     {
@@ -539,6 +636,11 @@ export default defineConfig({
     {
       name: 'graphql-execution',
       testDir: graphqlExecutionTestDir,
+      timeout: 180 * 1000
+    },
+    {
+      name: 'trpc-execution',
+      testDir: trpcExecutionTestDir,
       timeout: 180 * 1000
     },
     {

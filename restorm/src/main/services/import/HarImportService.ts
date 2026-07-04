@@ -437,6 +437,15 @@ function harEntryToExecutionResult(requestId: string, entry: HarEntry): HTTPExec
  * store (see the module doc above) — call this AFTER the imported items are
  * inserted, not from inside `parse()`.
  *
+ * `idMap` remaps the id `pairHarEntriesWithRequestIds` recomputes (the same
+ * one `importHar` originally stamped) to the id the request actually landed
+ * with — identity when a caller inserted `parse()`'s output unchanged (the
+ * MCP import tool), a fresh id per request when a caller regenerated ids to
+ * avoid tree collisions (the renderer's File → Import flow, via
+ * `postImportSeed` below). An entry with no matching key in `idMap` was
+ * dropped by the user's import-selection picker before the tree landed —
+ * there is no request to seed history against, so it's skipped.
+ *
  * `ResponseHistoryService` is imported dynamically (not at module top-level):
  * this file self-registers into the shared import-provider registry via a
  * side-effect import (`providers.ts`), so every consumer of that registry —
@@ -445,9 +454,14 @@ function harEntryToExecutionResult(requestId: string, entry: HarEntry): HTTPExec
  * module-load-time singletons; deferring the import here keeps that heavy
  * chain out of the registry's load path for callers that never seed history.
  */
-export async function seedResponseHistoryFromHar(har: HarFile): Promise<void> {
+export async function seedResponseHistoryFromHar(
+  har: HarFile,
+  idMap?: Record<string, string>
+): Promise<void> {
   const { responseHistoryService } = await import('../ResponseHistoryService')
-  for (const { requestId, entry } of pairHarEntriesWithRequestIds(har)) {
+  for (const { requestId: parsedId, entry } of pairHarEntriesWithRequestIds(har)) {
+    const requestId = idMap ? idMap[parsedId] : parsedId
+    if (!requestId) continue
     const result = harEntryToExecutionResult(requestId, entry)
     if (!result) continue
     await responseHistoryService.storeExecutionResult(requestId, 'http', result)
@@ -460,13 +474,16 @@ export async function seedResponseHistoryFromHar(har: HarFile): Promise<void> {
 
 import { importProviders } from './registry'
 
-function canImport(content: string, filePath?: string): boolean {
-  const trimmed = content.trim()
+function canImport(content: string, filePath?: string, parsed?: unknown): boolean {
   let json: unknown
-  try {
-    json = JSON.parse(trimmed)
-  } catch {
-    return false
+  if (parsed !== undefined) {
+    json = parsed
+  } else {
+    try {
+      json = JSON.parse(content.trim())
+    } catch {
+      return false
+    }
   }
   if (typeof json !== 'object' || json === null || !('log' in json)) return false
   const log = (json as Record<string, unknown>).log
@@ -478,4 +495,9 @@ function canImport(content: string, filePath?: string): boolean {
   return (filePath ?? '').toLowerCase().endsWith('.har') && Array.isArray(entries)
 }
 
-importProviders.push({ format: 'har', canImport, parse: (content, opts) => importHarFromJson(content, opts) })
+importProviders.push({
+  format: 'har',
+  canImport,
+  parse: (content, opts) => importHarFromJson(content, opts),
+  postImportSeed: (content, idMap) => seedResponseHistoryFromHar(JSON.parse(content) as HarFile, idMap)
+})

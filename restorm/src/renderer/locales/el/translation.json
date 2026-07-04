@@ -274,10 +274,17 @@
         "socketio": "Αίτημα Socket.IO",
         "mqtt": "MQTT request",
         "mqttServer": "MQTT broker",
+        "sse": "Αίτημα SSE",
         "grpcServer": "Διακομιστής gRPC mock",
         "soapServer": "Διακομιστής εικονικού SOAP",
         "graphqlServer": "Διακομιστής GraphQL mock",
-        "odataServer": "Διακομιστής OData mock"
+        "odataServer": "Διακομιστής OData mock",
+        "trpc": "Αίτημα tRPC",
+        "amqp": "Αίτημα AMQP",
+        "redis": "Αίτημα Redis",
+        "stomp": "Αίτημα STOMP",
+        "kafkaProduce": "Αίτημα Kafka – Παραγωγή",
+        "kafkaConsume": "Αίτημα Kafka – Κατανάλωση"
       }
     },
     "deleteConfirm": {
@@ -475,6 +482,12 @@
       "clientStream": "Client streaming",
       "bidi": "Bidirectional streaming"
     },
+    "transport": {
+      "grpc": "gRPC",
+      "grpcWeb": "gRPC-Web",
+      "connect": "Connect",
+      "streamingUnsupported": "Αυτή η μεταφορά δεν υποστηρίζει ροή δεδομένων πελάτη ή αμφίδρομη ροή μέσω HTTP/1.1. Χρησιμοποιήστε αντ' αυτού την εγγενή μεταφορά gRPC."
+    },
     "server": {
       "proto": "Proto",
       "methods": "Μέθοδοι mock",
@@ -493,6 +506,12 @@
       "notListening": "Δεν ακούει",
       "listenFailed": "Αποτυχία εκκίνησης διακομιστή gRPC",
       "snippetsUnavailable": "Τα αποσπάσματα κώδικα δεν είναι διαθέσιμα για διακομιστή mock."
+    },
+    "reflection": {
+      "refresh": "Ανανέωση από reflection",
+      "refreshFailed": "Η ανανέωση μέσω gRPC reflection απέτυχε",
+      "unsupported": "Αυτός ο server δεν υποστηρίζει gRPC reflection — εισαγάγετε αντ' αυτού ένα αρχείο .proto.",
+      "unknownError": "Άγνωστο σφάλμα"
     }
   },
   "soap": {
@@ -540,6 +559,114 @@
     "routePlaceholder": "Διαδρομή (προαιρετικό)",
     "clientsConnected": "{{count}} πελάτης/ες συνδεδεμένος/οι",
     "notListening": "Δεν ακούει"
+  },
+  "jsonrpc": {
+    "send": "Αποστολή",
+    "urlPlaceholder": "URL τελικού σημείου JSON-RPC",
+    "methodPlaceholder": "μέθοδος",
+    "idPlaceholder": "id (αυτόματο)",
+    "notificationModeTooltip": "Λειτουργία ειδοποίησης — χωρίς id, χωρίς αναμενόμενη απόκριση",
+    "tabs": {
+      "params": "Παράμετροι",
+      "headers": "Κεφαλίδες"
+    },
+    "response": {
+      "notificationSent": "Η ειδοποίηση εστάλη",
+      "errorLabel": "Σφάλμα JSON-RPC {{code}}:"
+    }
+  },
+  "jsonrpcBatch": {
+    "send": "Αποστολή παρτίδας",
+    "tabs": {
+      "calls": "Κλήσεις"
+    },
+    "empty": "Δεν υπάρχουν ακόμη κλήσεις. Προσθέστε μία παρακάτω.",
+    "methodPlaceholder": "μέθοδος",
+    "idPlaceholder": "id (αυτόματο)",
+    "moveUp": "Μετακίνηση επάνω",
+    "moveDown": "Μετακίνηση κάτω",
+    "remove": "Αφαίρεση κλήσης",
+    "paramsLabel": "Παράμετροι (JSON)",
+    "add": "Προσθήκη κλήσης",
+    "response": {
+      "unmatched": "Καμία αντίστοιχη καταχώριση απόκρισης."
+    }
+  },
+  "sse": {
+    "headers": "Κεφαλίδες",
+    "noFrames": "Δεν υπάρχουν ακόμη συμβάντα",
+    "urlPlaceholder": "URL SSE",
+    "framesTruncated": "Εμφάνιση των τελευταίων {{shown}} από {{total}} καρέ",
+    "showAllFrames": "Εμφάνιση όλων"
+  },
+  "redis": {
+    "connected": "Συνδεδεμένο",
+    "disconnected": "Αποσυνδεδεμένο",
+    "noMessages": "Δεν υπάρχουν ακόμη μηνύματα",
+    "noCommandsYet": "Δεν έχουν εκτελεστεί ακόμη εντολές",
+    "urlPlaceholder": "URL Redis (redis:// ή rediss://)",
+    "passwordPlaceholder": "Κωδικός πρόσβασης (προαιρετικό)",
+    "subscribe": "Εγγραφή",
+    "unsubscribe": "Κατάργηση εγγραφής",
+    "run": "Εκτέλεση",
+    "subscribeMode": "Εγγραφή",
+    "commandMode": "Εντολή",
+    "command": "Εντολή",
+    "args": "Ορίσματα",
+    "argsPlaceholder": "Ορίσματα εντολής",
+    "freeform": "Ελεύθερη",
+    "freeformPlaceholder": "Ελεύθερη εντολή (αντικαθιστά την επιλογή)",
+    "tabs": {
+      "channels": "Κανάλια",
+      "command": "Εντολή"
+    }
+  },
+  "kafka": {
+    "brokersPlaceholder": "Λίστα broker (host:port,host:port)",
+    "clientId": "Αναγνωριστικό πελάτη",
+    "clientIdPlaceholder": "restorm",
+    "mode": {
+      "produce": "Παραγωγή",
+      "consume": "Κατανάλωση",
+      "browse": "Περιήγηση"
+    },
+    "auth": {
+      "title": "Πιστοποίηση",
+      "mechanism": "SASL",
+      "username": "Όνομα χρήστη",
+      "password": "Κωδικός πρόσβασης",
+      "tls": "TLS"
+    },
+    "topic": "Θέμα",
+    "topicPlaceholder": "όνομα-θέματος",
+    "key": "Κλειδί",
+    "keyPlaceholder": "κλειδί μηνύματος (προαιρετικό)",
+    "value": "Τιμή",
+    "headers": "Κεφαλίδες",
+    "partition": "Διαμέριση",
+    "partitionPlaceholder": "αυτόματο",
+    "groupId": "Αναγνωριστικό ομάδας",
+    "groupIdPlaceholder": "restorm-consumer",
+    "fromOffsetLabel": "Έναρξη από",
+    "fromOffset": {
+      "earliest": "Παλαιότερο",
+      "latest": "Πιο πρόσφατο",
+      "specific": "Συγκεκριμένο"
+    },
+    "specificOffset": "Offset",
+    "partitions": "Διαμερίσεις",
+    "partitionsPlaceholder": "0,1,2 (κενό = όλα)",
+    "peekCount": "Αριθμός μηνυμάτων",
+    "produce": "Παραγωγή",
+    "startConsuming": "Έναρξη κατανάλωσης",
+    "stopConsuming": "Διακοπή κατανάλωσης",
+    "peek": "Προεπισκόπηση",
+    "noMessages": "Δεν υπάρχουν ακόμα μηνύματα",
+    "connected": "Συνδεδεμένο",
+    "disconnected": "Αποσυνδεδεμένο",
+    "producedTo": "Παρήχθη σε",
+    "offset": "Offset",
+    "messages": "Μηνύματα"
   },
   "search": {
     "placeholder": "Αναζήτηση...",
@@ -886,6 +1013,10 @@
         "description": "Ρίξτε ένα αρχείο .proto (ή έναν κατάλογό τους) και το Restorm διασχίζει κάθε υπηρεσία, κάθε RPC, κάθε μήνυμα — μετατρέποντας κάθε μέθοδο σε τυποποιημένο αίτημα που μπορείτε να στείλετε μέσω του εκτελεστή gRPC χωρίς να αγγίξετε codegen.",
         "trademark": "Το gRPC είναι έργο του Cloud Native Computing Foundation."
       },
+      "grpcReflection": {
+        "description": "Δεν έχετε αρχείο .proto; Κατευθύνετε το Restorm σε έναν server gRPC που εκτελείται και εκθέτει reflection — ρωτά το grpc.reflection.v1alpha.ServerReflection, ανακαλύπτει κάθε υπηρεσία και μέθοδο, και δημιουργεί το ίδιο τυποποιημένο δέντρο αιτημάτων όπως μια εισαγωγή αρχείου proto, αποθηκευμένο τοπικά για χρήση εκτός σύνδεσης.",
+        "action": "Σύνδεση σε server…"
+      },
       "soap": {
         "description": "Έχετε ένα WSDL; Επικολλήστε το (ή το URL του) — το Restorm αναλύει κάθε <port> και <operation> και παράγει φακέλους SOAP έτοιμους προς αποστολή με τη σωστή κεφαλίδα SOAPAction, σκελετούς σώματος τυποποιημένους από το σχήμα και το σχήμα ταυτοποίησης που δηλώνει το WSDL."
       },
@@ -911,7 +1042,57 @@
       "paw": {
         "description": "Έρχεστε από το Paw; Ρίξτε την εξαγωγή JSON σας (File → Export → JSON στην εφαρμογή — το εγγενές πακέτο .paw δεν διαβάζεται απευθείας). Το Restorm ανακατασκευάζει κάθε αίτημα, κεφαλίδα, σώμα και περιβάλλον, και αντιστοιχίζει τις δυναμικές τιμές του Paw (χρονοσφραγίδες, τυχαίες συμβολοσειρές, UUID) στο πλησιέστερο αντίστοιχο του Restorm.",
         "trademark": "Το Paw είναι σήμα κατατεθέν της RapidAPI, Inc., χρησιμοποιείται εδώ μόνο ως αναφορά συμβατότητας."
+      },
+      "har": {
+        "description": "Καταγράψατε ένα ίχνος δικτύου από τα devtools του browser σας; Ρίξτε το εξαγόμενο αρχείο .har — το Restorm διατρέχει κάθε καταγεγραμμένη κλήση και τη μετατρέπει σε ένα αίτημα που μπορεί να επαναληφθεί, με κεφαλίδες και σώμα."
+      },
+      "restClient": {
+        "description": "Έρχεστε από την επέκταση REST Client του VS Code; Επικολλήστε ή ρίξτε το αρχείο .http / .rest — το Restorm αναλύει κάθε μπλοκ αιτήματος, επιλύει τα @variables και τα ανακατασκευάζει ως δέντρο Restorm.",
+        "trademark": "Το REST Client είναι σήμα κατατεθέν του αντίστοιχου κατόχου, χρησιμοποιείται εδώ μόνο ως αναφορά συμβατότητας."
+      },
+      "httpie": {
+        "description": "Ρίξτε μια εξαγωγή συλλογής HTTPie Desktop ή ένα αρχείο συνεδρίας CLI — το Restorm διαβάζει κάθε αίτημα (και, για μια συνεδρία, τις μόνιμες κεφαλίδες της) και τα ανακατασκευάζει έτοιμα προς εκτέλεση.",
+        "trademark": "Το HTTPie είναι σήμα κατατεθέν του αντίστοιχου κατόχου, χρησιμοποιείται εδώ μόνο ως αναφορά συμβατότητας."
+      },
+      "smithy": {
+        "description": "Επικολλήστε ένα μοντέλο Smithy — το JSON AST ή το χειρόγραφο IDL — και το Restorm διατρέχει κάθε υπηρεσία, πόρο και λειτουργία για να παράξει έναν αντίστοιχο φάκελο με έτοιμα προς εκτέλεση αιτήματα.",
+        "trademark": "Το Smithy είναι ένα project της Amazon Web Services."
+      },
+      "typespec": {
+        "description": "Επικολλήστε τον ορισμό TypeSpec (.tsp) σας — το Restorm τον μεταγλωττίζει σε OpenAPI στο παρασκήνιο και τον εισάγει ακριβώς όπως μια χειρόγραφη προδιαγραφή: λειτουργίες, παραμέτρους και σχήματα συμπεριλαμβανομένα.",
+        "trademark": "Το TypeSpec είναι ένα project της Microsoft."
+      },
+      "raml": {
+        "description": "Επικολλήστε ένα έγγραφο RAML 1.0 ή 0.8 — το Restorm αντικατοπτρίζει το δέντρο πόρων του σε ένθετους φακέλους, ένα αίτημα ανά μέθοδο, μαζί με τους μοντελοποιημένους τύπους.",
+        "trademark": "Το RAML είναι μια προδιαγραφή που συντηρείται από το RAML Workgroup."
+      },
+      "wadl": {
+        "description": "Συντηρείτε ακόμα ένα έγγραφο WADL; Επικολλήστε το XML — το Restorm διατρέχει το ένθετο δέντρο <resource> του και παράγει έναν αντίστοιχο φάκελο αιτημάτων, με μεθόδους και παραμέτρους.",
+        "trademark": "Το WADL υποβλήθηκε στο W3C από τη Sun Microsystems ως Member Submission."
+      },
+      "thrift": {
+        "description": "Επικολλήστε ένα αρχείο IDL Apache Thrift (.thrift) — το Restorm διαβάζει κάθε υπηρεσία, μέθοδο, struct και enum ώστε να μπορείτε να περιηγηθείτε στη δομή του API. Το δυαδικό πρωτόκολλο του Thrift δεν είναι ακόμα εκτελέσιμο από το Restorm, οπότε αυτή η εισαγωγή είναι μόνο τεκμηριωτική.",
+        "trademark": "Το Apache Thrift είναι σήμα κατατεθέν της Apache Software Foundation."
+      },
+      "apiBlueprint": {
+        "description": "Επικολλήστε ένα έγγραφο API Blueprint (.apib) — το Restorm αναλύει κάθε ομάδα πόρων και μετάβαση σε έναν φάκελο αιτημάτων, ένα ανά τεκμηριωμένο ζεύγος μεθόδου/απόκρισης.",
+        "trademark": "Το API Blueprint είναι μια προδιαγραφή που δημιουργήθηκε αρχικά από την Apiary."
       }
+    },
+    "grpcReflection": {
+      "title": "Server gRPC (reflection)",
+      "hint": "Ρωτήστε την υπηρεσία reflection ενός server gRPC που εκτελείται για να ανακαλύψετε τις υπηρεσίες και τις μεθόδους του χωρίς αρχείο .proto.",
+      "addressLabel": "Διεύθυνση server (host:port)",
+      "addressPlaceholder": "localhost:9000",
+      "tlsLabel": "Χρήση TLS",
+      "metadataLabel": "Μεταδεδομένα (προαιρετικές κεφαλίδες ταυτοποίησης)",
+      "connecting": "Σύνδεση…",
+      "import": "Εισαγωγή",
+      "reimportedTitle": "Το gRPC reflection επανεισήχθη",
+      "reimportedNoop": "Ήδη ενημερωμένο — καμία αλλαγή στον server.",
+      "reimportedSummary": "+{{added}} / -{{removed}} / ↻{{merged}} — φορτώστε ξανά το έργο για να δείτε τις αλλαγές.",
+      "unsupported": "Αυτός ο server δεν υποστηρίζει gRPC reflection — εισαγάγετε αντ' αυτού ένα αρχείο .proto.",
+      "unknownError": "Άγνωστο σφάλμα"
     },
     "loading": "Ανάλυση...",
     "noResults": "Δεν βρέθηκαν αιτήματα",
@@ -1075,14 +1256,22 @@
       "socketioSend": "Socket.IO send",
       "socketioClose": "Socket.IO close",
       "websocketConnect": "WebSocket connect",
+      "sseConnect": "SSE connect",
       "websocketSend": "WebSocket send",
       "websocketClose": "WebSocket close",
+      "sseClose": "SSE close",
       "grpcConnect": "gRPC connect",
       "grpcSend": "gRPC send",
       "grpcClose": "gRPC close",
       "mqttConnect": "MQTT connect",
       "mqttSend": "MQTT publish",
       "mqttClose": "MQTT close",
+      "amqpConnect": "Σύνδεση AMQP",
+      "amqpPublish": "Δημοσίευση AMQP",
+      "amqpClose": "Κλείσιμο AMQP",
+      "redisSubscribe": "Redis subscribe",
+      "redisClose": "Redis close",
+      "redisCommand": "Redis command",
       "httpListen": "HTTP server",
       "httpClose": "HTTP close",
       "grpcServerClose": "Κλείσιμο διακομιστή gRPC",
@@ -1093,7 +1282,13 @@
       "odataListen": "OData server",
       "odataClose": "OData close",
       "graphqlSubscribe": "Συνδρομή GraphQL",
-      "graphqlUnsubscribe": "Κατάργηση συνδρομής GraphQL"
+      "graphqlUnsubscribe": "Κατάργηση συνδρομής GraphQL",
+      "stompConnect": "Σύνδεση STOMP",
+      "stompSend": "Αποστολή STOMP",
+      "stompClose": "Κλείσιμο STOMP",
+      "kafkaProduce": "Kafka produce",
+      "kafkaConsume": "Kafka consume",
+      "kafkaClose": "Kafka close"
     },
     "comparator": {
       "result": "αποτέλεσμα"
@@ -1654,8 +1849,10 @@
       "socketioSend": "Στέλνει ένα μήνυμα σε μια ήδη ανοιχτή σύνδεση Socket.IO.",
       "socketioClose": "Κλείνει μια ήδη ανοιχτή σύνδεση Socket.IO.",
       "websocketConnect": "Ανοίγει μια ακατέργαστη σύνδεση WebSocket και επανεκπέμπει κάθε ληφθέν μήνυμα στη θύρα του.",
+      "sseConnect": "Ανοίγει μια μακροχρόνια σύνδεση SSE (Server-Sent Events) και επανεκπέμπει κάθε ληφθέν πλαίσιο στη θύρα της.",
       "websocketSend": "Στέλνει ένα ωφέλιμο φορτίο σε μια ήδη ανοιχτή σύνδεση WebSocket.",
       "websocketClose": "Κλείνει μια ήδη ανοιχτή σύνδεση WebSocket.",
+      "sseClose": "Κλείνει μια ήδη ανοιχτή σύνδεση SSE.",
       "grpcConnect": "Ανοίγει μια κλήση streaming gRPC και επανεκπέμπει κάθε ληφθέν πλαίσιο στη θύρα message του.",
       "grpcSend": "Γράφει ένα μήνυμα αιτήματος σε μια ήδη ανοιχτή κλήση streaming gRPC.",
       "grpcClose": "Κλείνει μερικώς (half-close) μια ήδη ανοιχτή κλήση streaming gRPC.",
@@ -1668,9 +1865,15 @@
       "mqttConnect": "Ανοίγει μια μακρόβια σύνδεση MQTT από ένα συνδεδεμένο αίτημα και εγγράφεται στο θέμα του· επανεκπέμπει κάθε ληφθέν μήνυμα στη θύρα `message` του.",
       "mqttSend": "Δημοσιεύει ένα ωφέλιμο φορτίο σε μια ήδη ανοιχτή σύνδεση MQTT (στο θέμα του).",
       "mqttClose": "Κλείνει μια ήδη ανοιχτή σύνδεση MQTT.",
+      "amqpConnect": "Ανοίγει μια μόνιμη σύνδεση AMQP από ένα συνδεδεμένο αίτημα και καταναλώνει την ουρά του· επανεκπέμπει κάθε μήνυμα που λαμβάνεται στη θύρα `message`.",
+      "amqpPublish": "Δημοσιεύει ένα ωφέλιμο φορτίο σε μια ήδη ανοιχτή σύνδεση AMQP (στο exchange/routing key του συνδεδεμένου αιτήματος).",
+      "amqpClose": "Κλείνει μια ήδη ανοιχτή σύνδεση AMQP.",
       "mqttConnectServer": "Εκκινεί έναν τοπικό μεσίτη MQTT (θύρα + φίλτρο θέματος)· εγγράφεται στο φίλτρο θέματός του και επανεκπέμπει κάθε ληφθέν μήνυμα στη θύρα `message` του. Η αποστολή δημοσιεύει στους συνδεδεμένους συνδρομητές.",
       "mqttSendServer": "Δημοσιεύει ένα μήνυμα σε κάθε συνδρομητή του αναφερόμενου μεσίτη MQTT.",
       "mqttCloseServer": "Σταματά τον αναφερόμενο μεσίτη MQTT και αποσυνδέει τους πελάτες του.",
+      "redisSubscribe": "Ανοίγει μια μακρόβια σύνδεση συνδρομής Redis από ένα συνδεδεμένο αίτημα και ακούει τα κανάλια του· επανεκπέμπει κάθε ληφθέν μήνυμα στη θύρα `message` του.",
+      "redisClose": "Κλείνει μια ήδη ανοιχτή σύνδεση συνδρομής Redis.",
+      "redisCommand": "Εκτελεί μια συνδεδεμένη εντολή Redis (μία εντολή σε νέα σύνδεση, στη συνέχεια αποσύνδεση) και εκπέμπει την απόκρισή της.",
       "toast": "Εμφανίζει μια ειδοποίηση toast στο περιβάλλον Restorm όσο εκτελείται το σενάριο.",
       "httpListen": "Hosts a local HTTP mock server and listens indefinitely. `connected` fires once it is listening; each served request re-emits its data on the `served` port. The server stays up until an HTTP close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
       "httpClose": "Σταματά έναν ήδη ακροαζόμενο εικονικό διακομιστή HTTP (που δηλώνεται από έναν κόμβο διακομιστή HTTP) και απελευθερώνει τη θύρα του.",
@@ -1683,7 +1886,13 @@
       "odataListen": "Φιλοξενεί μια τοπική εικονική υπηρεσία OData v4 και ακούει επ’ αόριστον. Η θύρα `connected` ενεργοποιείται μόλις αρχίσει να ακούει· κάθε εξυπηρετούμενο αίτημα επανεκπέμπει τα δεδομένα του στη θύρα `served`. Ο διακομιστής παραμένει ενεργός μέχρι ένα κλείσιμο OData (ή ένα Stop), οπότε ενεργοποιείται η θύρα `done`. Καμία έξοδος response — εξυπηρετεί, δεν καλεί προς τα έξω.",
       "odataClose": "Σταματά μια ήδη ενεργή εικονική υπηρεσία OData (που δηλώθηκε από έναν κόμβο διακομιστή OData), απελευθερώνοντας τη θύρα της.",
       "graphqlSubscribe": "Ανοίγει μια μακρόβια συνδρομή GraphQL ως πελάτης μέσω SSE και ακούει. Το `connected` ενεργοποιείται μόλις ανοίξει η ροή· κάθε ωθούμενο φορτίο αναμεταδίδεται στη θύρα `message` (η συνδρομή είναι μόνο λήψης, χωρίς ονοματισμένα συμβάντα). Η ροή παραμένει ανοιχτή μέχρι μια κατάργηση συνδρομής GraphQL (ή μια διακοπή), ή μέχρι ο διακομιστής να την ολοκληρώσει, και μετά ενεργοποιείται το `done`.",
-      "graphqlUnsubscribe": "Σταματά μια ήδη ανοιχτή συνδρομή GraphQL (δηλωμένη από κόμβο συνδρομής GraphQL), κλείνοντας τη ροή SSE της."
+      "graphqlUnsubscribe": "Σταματά μια ήδη ανοιχτή συνδρομή GraphQL (δηλωμένη από κόμβο συνδρομής GraphQL), κλείνοντας τη ροή SSE της.",
+      "stompConnect": "Ανοίγει μια μακροχρόνια σύνδεση STOMP μέσω WebSocket: εκτελεί τη χειραψία CONNECT/CONNECTED, στη συνέχεια εγγράφεται σε κάθε ρυθμισμένο προορισμό και αναμεταδίδει κάθε ληφθέν πλαίσιο στη θύρα του.",
+      "stompSend": "Στέλνει ένα πλαίσιο SEND σε μια ήδη ανοιχτή σύνδεση STOMP.",
+      "stompClose": "Στέλνει DISCONNECT και κλείνει μια ήδη ανοιχτή σύνδεση STOMP.",
+      "kafkaProduce": "Εκτελεί ένα συνδεδεμένο αίτημα Kafka ως εφάπαξ παραγωγή και εκπέμπει το αποτέλεσμα (θέμα/διαμέριση/offset) ως `response`.",
+      "kafkaConsume": "Ανοίγει έναν μακρόβιο καταναλωτή Kafka από ένα συνδεδεμένο αίτημα και επανεκπέμπει κάθε ληφθέν μήνυμα στη θύρα `message` του.",
+      "kafkaClose": "Κλείνει έναν ήδη ανοιχτό καταναλωτή Kafka."
     },
     "legend": {
       "title": "Υπόμνημα",
@@ -1732,6 +1941,9 @@
     "websocket": {
       "message": "message"
     },
+    "sse": {
+      "message": "message"
+    },
     "grpc": {
       "message": "message"
     },
@@ -1777,6 +1989,36 @@
     "lwtTopicPlaceholder": "will/topic",
     "lwtPayload": "Payload",
     "lwtPayloadPlaceholder": "will message"
+  },
+  "amqp": {
+    "urlPlaceholder": "URL AMQP (amqp:// ή amqps://)",
+    "vhost": "Εικονικός κεντρικός υπολογιστής",
+    "vhostPlaceholder": "/",
+    "username": "Όνομα χρήστη",
+    "password": "Κωδικός πρόσβασης",
+    "mode": "Λειτουργία",
+    "modePublish": "Δημοσίευση",
+    "modeSubscribe": "Εγγραφή",
+    "modeBrowse": "Περιήγηση",
+    "exchange": "Exchange",
+    "exchangePlaceholder": "(προεπιλεγμένο exchange)",
+    "routingKey": "Routing key",
+    "routingKeyPlaceholder": "routing.key",
+    "queue": "Ουρά",
+    "queuePlaceholder": "όνομα ουράς",
+    "autoAck": "Αυτόματη επιβεβαίωση",
+    "prefetch": "Prefetch",
+    "browsePeekCount": "Αριθμός προεπισκόπησης",
+    "connect": "Σύνδεση",
+    "connecting": "Σύνδεση…",
+    "disconnect": "Αποσύνδεση",
+    "connected": "Συνδεδεμένο",
+    "disconnected": "Αποσυνδεδεμένο",
+    "send": "Αποστολή",
+    "browseButton": "Περιήγηση",
+    "noMessages": "Δεν υπάρχουν ακόμη μηνύματα",
+    "peeked": "Προεπισκόπηση",
+    "messages": "Μηνύματα"
   },
   "mcpLogs": {
     "title": "Αρχεία καταγραφής MCP",
@@ -2043,5 +2285,42 @@
       "noSubscription": "Δεν υπάρχει ενεργή συνδρομή για διαχείριση.",
       "error": "Δεν ήταν δυνατό το άνοιγμα της πύλης συνδρομής. Δοκιμάστε ξανά."
     }
+  },
+  "trpc": {
+    "send": "Αποστολή",
+    "urlPlaceholder": "Διεύθυνση URL διακομιστή tRPC",
+    "procedurePlaceholder": "Διαδικασία (π.χ. user.get)",
+    "kindQuery": "Ερώτημα",
+    "kindMutation": "Μετάλλαξη",
+    "showRawEnvelope": "Εμφάνιση ακατέργαστου φακέλου",
+    "kindSelectLabel": "Τύπος κλήσης",
+    "tabs": {
+      "headers": "Κεφαλίδες",
+      "body": "Σώμα"
+    }
+  },
+  "stomp": {
+    "connect": "Σύνδεση",
+    "disconnect": "Αποσύνδεση",
+    "connected": "Συνδεδεμένο",
+    "disconnected": "Αποσυνδεδεμένο",
+    "noMessages": "Δεν υπάρχουν ακόμη πλαίσια",
+    "version": "Έκδοση STOMP",
+    "tabs": {
+      "connect": "Σύνδεση",
+      "subscriptions": "Συνδρομές",
+      "send": "Αποστολή"
+    },
+    "ackMode": {
+      "auto": "auto",
+      "client": "client",
+      "clientIndividual": "client-individual"
+    },
+    "subscriptionIdLabel": "Αναγνωριστικό συνδρομής",
+    "removeSubscription": "Αφαίρεση συνδρομής",
+    "addSubscription": "Προσθήκη συνδρομής",
+    "sendDestination": "Προορισμός",
+    "ack": "ACK",
+    "nack": "NACK"
   }
 }

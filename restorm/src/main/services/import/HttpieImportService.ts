@@ -337,8 +337,8 @@ function isCliSession(json: unknown): json is HttpieSession {
   return '__meta__' in obj && 'headers' in obj && !('app' in obj) && !('collections' in obj)
 }
 
-function canImport(content: string, _filePath?: string): boolean {
-  const json = parseJson(content)
+function canImport(content: string, _filePath?: string, parsed?: unknown): boolean {
+  const json = parsed !== undefined ? parsed : parseJson(content)
   return isDesktopCollection(json) || isCliSession(json)
 }
 

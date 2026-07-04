@@ -1,0 +1,79 @@
+collections:
+  - folderType: environment
+    name: Redis Playground
+    documentation: |-
+      # Redis Playground
+
+      A self-contained Redis playground against the `redis:7-alpine` Docker
+      mock (`tests/docker/docker-compose.yml`, `redis://localhost:6379`).
+
+      - **Redis Subscribe** opens a subscribe-mode connection on
+        `restorm-e2e-chat` and listens for published messages.
+      - **Redis Publish** (command mode) publishes a payload to
+        `restorm-e2e-chat` — received by the subscribe connection above.
+      - **Redis Set** / **Redis Get** (command mode) round-trip a value
+        through a plain key, proving the command REPL read-back.
+    tags: []
+    configuration: {}
+    environments:
+      - name: Default
+        variables:
+          - key: redisUrl
+            value:
+              type: string
+              value: redis://localhost:6379
+            description: The Docker-mocked Redis instance
+        id: a5e80cd3-3341-4619-ba32-ac40976da796
+    items:
+      - type: redis
+        name: Redis Subscribe
+        documentation: Subscribe to `restorm-e2e-chat` and listen for published messages.
+        tags:
+          - redis
+        url: '{{redisUrl}}'
+        mode: subscribe
+        channels:
+          - restorm-e2e-chat
+        args: []
+        id: 277254d3-3090-4632-ae3a-b35e404cf0b2
+      - type: redis
+        name: Redis Publish
+        documentation: Publish a payload to `restorm-e2e-chat` (received by Redis Subscribe).
+        tags:
+          - redis
+        url: '{{redisUrl}}'
+        mode: command
+        channels: []
+        command: PUBLISH
+        args:
+          - restorm-e2e-chat
+          - hello from redis
+        id: 782c2cbb-716d-456d-a31c-27aefa9f4038
+      - type: redis
+        name: Redis Set
+        documentation: SET a key restorm-e2e-chat reads back with Redis Get.
+        tags:
+          - redis
+        url: '{{redisUrl}}'
+        mode: command
+        channels: []
+        command: SET
+        args:
+          - e2e-key
+          - e2e-value
+        id: e18b5204-0614-4edd-80ac-0f251a1b20ca
+      - type: redis
+        name: Redis Get
+        documentation: GET the key Redis Set wrote, proving the command REPL read-back.
+        tags:
+          - redis
+        url: '{{redisUrl}}'
+        mode: command
+        channels: []
+        command: GET
+        args:
+          - e2e-key
+        id: f5b48f07-dd24-465d-9e75-d4fcda51eac6
+    id: 97291ab6-5a05-4619-b550-ecc7e3b02a1e
+    fileFormatVersion: 1
+_projectUuid: 6e9c1d2a-4b7f-4c3a-9e8d-2f5a7b1c9d3e

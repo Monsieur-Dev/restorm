@@ -276,10 +276,17 @@
         "socketio": "Запит Socket.IO",
         "mqtt": "MQTT request",
         "mqttServer": "MQTT-брокер",
+        "sse": "Запит SSE",
         "grpcServer": "gRPC mock-сервер",
         "soapServer": "Макетний сервер SOAP",
         "graphqlServer": "GraphQL mock-сервер",
-        "odataServer": "OData mock-сервер"
+        "odataServer": "OData mock-сервер",
+        "trpc": "Запит tRPC",
+        "amqp": "Запит AMQP",
+        "redis": "Запит Redis",
+        "stomp": "Запит STOMP",
+        "kafkaProduce": "Запит Kafka – Виробити",
+        "kafkaConsume": "Запит Kafka – Споживати"
       }
     },
     "deleteConfirm": {
@@ -477,6 +484,12 @@
       "clientStream": "Client streaming",
       "bidi": "Bidirectional streaming"
     },
+    "transport": {
+      "grpc": "gRPC",
+      "grpcWeb": "gRPC-Web",
+      "connect": "Connect",
+      "streamingUnsupported": "Цей транспорт не підтримує клієнтську або двонапрямлену передачу потоку через HTTP/1.1. Замість цього використовуйте нативний транспорт gRPC."
+    },
     "server": {
       "proto": "Proto",
       "methods": "Mock-методи",
@@ -495,6 +508,12 @@
       "notListening": "Не прослуховує",
       "listenFailed": "Не вдалося запустити сервер gRPC",
       "snippetsUnavailable": "Фрагменти коду недоступні для mock-сервера."
+    },
+    "reflection": {
+      "refresh": "Оновити з reflection",
+      "refreshFailed": "Оновлення через gRPC reflection не вдалося",
+      "unsupported": "Цей сервер не підтримує gRPC reflection — натомість імпортуйте файл .proto.",
+      "unknownError": "Невідома помилка"
     }
   },
   "soap": {
@@ -542,6 +561,114 @@
     "routePlaceholder": "Маршрут (необов'язково)",
     "clientsConnected": "{{count}} клієнт(ів) підключено",
     "notListening": "Не слухає"
+  },
+  "jsonrpc": {
+    "send": "Надіслати",
+    "urlPlaceholder": "URL кінцевої точки JSON-RPC",
+    "methodPlaceholder": "метод",
+    "idPlaceholder": "id (авто)",
+    "notificationModeTooltip": "Режим сповіщення — без id, без очікуваної відповіді",
+    "tabs": {
+      "params": "Параметри",
+      "headers": "Заголовки"
+    },
+    "response": {
+      "notificationSent": "Сповіщення надіслано",
+      "errorLabel": "Помилка JSON-RPC {{code}}:"
+    }
+  },
+  "jsonrpcBatch": {
+    "send": "Надіслати пакет",
+    "tabs": {
+      "calls": "Виклики"
+    },
+    "empty": "Поки що немає викликів. Додайте один нижче.",
+    "methodPlaceholder": "метод",
+    "idPlaceholder": "id (авто)",
+    "moveUp": "Перемістити вгору",
+    "moveDown": "Перемістити вниз",
+    "remove": "Видалити виклик",
+    "paramsLabel": "Параметри (JSON)",
+    "add": "Додати виклик",
+    "response": {
+      "unmatched": "Немає відповідного запису відповіді."
+    }
+  },
+  "sse": {
+    "headers": "Заголовки",
+    "noFrames": "Поки що немає подій",
+    "urlPlaceholder": "URL SSE",
+    "framesTruncated": "Показано останні {{shown}} із {{total}} кадрів",
+    "showAllFrames": "Показати всі"
+  },
+  "redis": {
+    "connected": "З'єднано",
+    "disconnected": "Роз'єднано",
+    "noMessages": "Поки що немає повідомлень",
+    "noCommandsYet": "Поки що жодної команди не виконано",
+    "urlPlaceholder": "URL-адреса Redis (redis:// або rediss://)",
+    "passwordPlaceholder": "Пароль (необов'язково)",
+    "subscribe": "Підписатися",
+    "unsubscribe": "Відписатися",
+    "run": "Виконати",
+    "subscribeMode": "Підписка",
+    "commandMode": "Команда",
+    "command": "Команда",
+    "args": "Аргументи",
+    "argsPlaceholder": "Аргументи команди",
+    "freeform": "Довільна",
+    "freeformPlaceholder": "Довільна команда (замінює вибір)",
+    "tabs": {
+      "channels": "Канали",
+      "command": "Команда"
+    }
+  },
+  "kafka": {
+    "brokersPlaceholder": "Список брокерів (host:port,host:port)",
+    "clientId": "ID клієнта",
+    "clientIdPlaceholder": "restorm",
+    "mode": {
+      "produce": "Виробити",
+      "consume": "Споживати",
+      "browse": "Переглянути"
+    },
+    "auth": {
+      "title": "Автентифікація",
+      "mechanism": "SASL",
+      "username": "Ім’я користувача",
+      "password": "Пароль",
+      "tls": "TLS"
+    },
+    "topic": "Тема",
+    "topicPlaceholder": "назва-теми",
+    "key": "Ключ",
+    "keyPlaceholder": "ключ повідомлення (необов’язково)",
+    "value": "Значення",
+    "headers": "Заголовки",
+    "partition": "Партиція",
+    "partitionPlaceholder": "авто",
+    "groupId": "ID групи",
+    "groupIdPlaceholder": "restorm-consumer",
+    "fromOffsetLabel": "Почати з",
+    "fromOffset": {
+      "earliest": "Найдавніший",
+      "latest": "Найновіший",
+      "specific": "Конкретний"
+    },
+    "specificOffset": "Offset",
+    "partitions": "Партиції",
+    "partitionsPlaceholder": "0,1,2 (порожньо = усі)",
+    "peekCount": "Кількість повідомлень",
+    "produce": "Виробити",
+    "startConsuming": "Почати споживання",
+    "stopConsuming": "Зупинити споживання",
+    "peek": "Перегляд",
+    "noMessages": "Повідомлень ще немає",
+    "connected": "З’єднано",
+    "disconnected": "Роз’єднано",
+    "producedTo": "Вироблено до",
+    "offset": "Offset",
+    "messages": "Повідомлення"
   },
   "search": {
     "placeholder": "Пошук...",
@@ -888,6 +1015,10 @@
         "description": "Перетягніть файл .proto (або теку з ними), і Restorm пройде кожний сервіс, кожний RPC, кожне повідомлення — перетворюючи кожний метод на типізований запит, який можна надіслати через виконавця gRPC, не торкаючись codegen.",
         "trademark": "gRPC — проєкт Cloud Native Computing Foundation."
       },
+      "grpcReflection": {
+        "description": "Немає файлу .proto? Спрямуйте Restorm на запущений сервер gRPC, який підтримує reflection — він опитує grpc.reflection.v1alpha.ServerReflection, виявляє кожен сервіс і метод та будує те саме типізоване дерево запитів, що й імпорт proto-файлу, кешоване локально для офлайн-використання.",
+        "action": "Підключитися до сервера…"
+      },
       "soap": {
         "description": "Маєте WSDL? Вставте його (або його URL) — Restorm розбере кожний <port> і <operation> та згенерує готові до надсилання SOAP-конверти з правильним заголовком SOAPAction, схематизованими скелетами тіла та схемою автентифікації, оголошеною в WSDL."
       },
@@ -913,7 +1044,57 @@
       "paw": {
         "description": "Переходите з Paw? Перетягніть свій JSON-експорт (File → Export → JSON у застосунку — нативний пакет .paw не читається напряму). Restorm відновлює кожен запит, заголовок, тіло та середовище, і зіставляє динамічні значення Paw (мітки часу, випадкові рядки, UUID) з найближчим відповідником Restorm.",
         "trademark": "Paw є зареєстрованим товарним знаком RapidAPI, Inc., використовується тут лише як посилання на сумісність."
+      },
+      "har": {
+        "description": "Захопили мережевий трейс з devtools вашого браузера? Перетягніть експортований файл .har — Restorm проходить кожен записаний виклик і перетворює його на запит, який можна відтворити повторно, разом із заголовками та тілом."
+      },
+      "restClient": {
+        "description": "Переходите з розширення REST Client для VS Code? Вставте або перетягніть файл .http / .rest — Restorm розбирає кожен блок запиту, розв'язує @variables і відновлює їх як дерево Restorm.",
+        "trademark": "REST Client є товарним знаком відповідного власника, використовується тут лише як посилання на сумісність."
+      },
+      "httpie": {
+        "description": "Перетягніть експорт колекції HTTPie Desktop або файл сесії CLI — Restorm зчитує кожен запит (а для сесії — і її постійні заголовки) та відновлює їх готовими до запуску.",
+        "trademark": "HTTPie є товарним знаком відповідного власника, використовується тут лише як посилання на сумісність."
+      },
+      "smithy": {
+        "description": "Вставте модель Smithy — JSON AST або написаний вручну IDL — і Restorm пройде кожен сервіс, ресурс та операцію, щоб створити відповідну папку готових до запуску запитів.",
+        "trademark": "Smithy — проєкт Amazon Web Services."
+      },
+      "typespec": {
+        "description": "Вставте своє визначення TypeSpec (.tsp) — Restorm компілює його в OpenAPI під капотом і імпортує точно як написану вручну специфікацію: операції, параметри та схеми включно.",
+        "trademark": "TypeSpec — проєкт Microsoft."
+      },
+      "raml": {
+        "description": "Вставте документ RAML 1.0 або 0.8 — Restorm відображає його дерево ресурсів у вкладених папках, один запит на метод, разом із змодельованими типами.",
+        "trademark": "RAML — специфікація, яку підтримує RAML Workgroup."
+      },
+      "wadl": {
+        "description": "Все ще підтримуєте документ WADL? Вставте XML — Restorm проходить його вкладене дерево <resource> і створює відповідну папку запитів, разом із методами та параметрами.",
+        "trademark": "WADL було подано до W3C компанією Sun Microsystems як Member Submission."
+      },
+      "thrift": {
+        "description": "Вставте файл IDL Apache Thrift (.thrift) — Restorm зчитує кожен сервіс, метод, структуру та enum, щоб ви могли переглянути форму API. Бінарний протокол Thrift ще не можна виконати з Restorm, тому цей імпорт лише документальний.",
+        "trademark": "Apache Thrift є товарним знаком Apache Software Foundation."
+      },
+      "apiBlueprint": {
+        "description": "Вставте документ API Blueprint (.apib) — Restorm розбирає кожну групу ресурсів і перехід у папку запитів, один на кожну задокументовану пару метод/відповідь.",
+        "trademark": "API Blueprint — специфікація, спочатку створена Apiary."
       }
+    },
+    "grpcReflection": {
+      "title": "Сервер gRPC (reflection)",
+      "hint": "Опитайте службу reflection запущеного сервера gRPC, щоб виявити його сервіси та методи без файлу .proto.",
+      "addressLabel": "Адреса сервера (хост:порт)",
+      "addressPlaceholder": "localhost:9000",
+      "tlsLabel": "Використовувати TLS",
+      "metadataLabel": "Метадані (необов'язкові заголовки автентифікації)",
+      "connecting": "Підключення…",
+      "import": "Імпортувати",
+      "reimportedTitle": "gRPC reflection повторно імпортовано",
+      "reimportedNoop": "Вже актуально — на сервері немає змін.",
+      "reimportedSummary": "+{{added}} / -{{removed}} / ↻{{merged}} — перезавантажте проєкт, щоб побачити зміни.",
+      "unsupported": "Цей сервер не підтримує gRPC reflection — натомість імпортуйте файл .proto.",
+      "unknownError": "Невідома помилка"
     },
     "loading": "Аналізування...",
     "noResults": "Запитів не знайдено",
@@ -1077,14 +1258,22 @@
       "socketioSend": "Socket.IO send",
       "socketioClose": "Socket.IO close",
       "websocketConnect": "WebSocket connect",
+      "sseConnect": "SSE connect",
       "websocketSend": "WebSocket send",
       "websocketClose": "WebSocket close",
+      "sseClose": "SSE close",
       "grpcConnect": "gRPC connect",
       "grpcSend": "gRPC send",
       "grpcClose": "gRPC close",
       "mqttConnect": "MQTT connect",
       "mqttSend": "MQTT publish",
       "mqttClose": "MQTT close",
+      "amqpConnect": "З’єднання AMQP",
+      "amqpPublish": "Публікація AMQP",
+      "amqpClose": "Закриття AMQP",
+      "redisSubscribe": "Redis subscribe",
+      "redisClose": "Redis close",
+      "redisCommand": "Redis command",
       "httpListen": "HTTP server",
       "httpClose": "HTTP close",
       "grpcServerClose": "Закрити сервер gRPC",
@@ -1095,7 +1284,13 @@
       "odataListen": "OData server",
       "odataClose": "OData close",
       "graphqlSubscribe": "Підписка GraphQL",
-      "graphqlUnsubscribe": "Скасувати підписку GraphQL"
+      "graphqlUnsubscribe": "Скасувати підписку GraphQL",
+      "stompConnect": "З'єднання STOMP",
+      "stompSend": "Надсилання STOMP",
+      "stompClose": "Закриття STOMP",
+      "kafkaProduce": "Kafka produce",
+      "kafkaConsume": "Kafka consume",
+      "kafkaClose": "Kafka close"
     },
     "comparator": {
       "result": "результат"
@@ -1656,8 +1851,10 @@
       "socketioSend": "Надсилає повідомлення у вже відкритому з'єднанні Socket.IO.",
       "socketioClose": "Закриває вже відкрите з'єднання Socket.IO.",
       "websocketConnect": "Відкриває необроблене з'єднання WebSocket і повторно випромінює кожне отримане повідомлення на своєму порту.",
+      "sseConnect": "Відкриває довготривале з'єднання SSE (Server-Sent Events) і повторно передає кожен отриманий кадр на свій порт.",
       "websocketSend": "Надсилає payload у вже відкритому з'єднанні WebSocket.",
       "websocketClose": "Закриває вже відкрите з'єднання WebSocket.",
+      "sseClose": "Закриває вже відкрите з'єднання SSE.",
       "grpcConnect": "Відкриває потоковий виклик gRPC і повторно випромінює кожен отриманий кадр на своєму порту message.",
       "grpcSend": "Записує повідомлення запиту у вже відкритий потоковий виклик gRPC.",
       "grpcClose": "Частково закриває (half-close) вже відкритий потоковий виклик gRPC.",
@@ -1670,9 +1867,15 @@
       "mqttConnect": "Відкриває тривале з'єднання MQTT із прив'язаного запиту та підписується на його тему; повторно випромінює кожне отримане повідомлення на своєму порту `message`.",
       "mqttSend": "Публікує payload у вже відкритому з'єднанні MQTT (у його тему).",
       "mqttClose": "Закриває вже відкрите з'єднання MQTT.",
+      "amqpConnect": "Відкриває тривале з’єднання AMQP із прив’язаного запиту та споживає його чергу; повторно надсилає кожне отримане повідомлення через порт `message`.",
+      "amqpPublish": "Публікує корисне навантаження через уже відкрите з’єднання AMQP (до exchange/routing key прив’язаного запиту).",
+      "amqpClose": "Закриває вже відкрите з’єднання AMQP.",
       "mqttConnectServer": "Запускає локальний брокер MQTT (порт + фільтр теми); підписується на його фільтр теми та повторно випромінює кожне отримане повідомлення на своєму порту `message`. Надсилання публікує підключеним підписникам.",
       "mqttSendServer": "Публікує повідомлення кожному підписнику вказаного брокера MQTT.",
       "mqttCloseServer": "Зупиняє вказаний брокер MQTT і відключає його клієнтів.",
+      "redisSubscribe": "Відкриває тривале з'єднання підписки Redis із прив'язаного запиту та прослуховує його канали; повторно випромінює кожне отримане повідомлення на своєму порту `message`.",
+      "redisClose": "Закриває вже відкрите з'єднання підписки Redis.",
+      "redisCommand": "Виконує прив'язану команду Redis (одна команда на новому з'єднанні, потім відключення) і видає її відповідь.",
       "toast": "Показує toast-сповіщення в інтерфейсі Restorm під час виконання сценарію.",
       "httpListen": "Hosts a local HTTP mock server and listens indefinitely. `connected` fires once it is listening; each served request re-emits its data on the `served` port. The server stays up until an HTTP close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
       "httpClose": "Зупиняє вже активний фіктивний сервер HTTP (оголошений вузлом HTTP server) і звільняє його порт.",
@@ -1685,7 +1888,13 @@
       "odataListen": "Розміщує локальну фіктивну службу OData v4 і слухає необмежено. `connected` спрацьовує, щойно вона починає слухати; кожен обслужений запит повторно надсилає свої дані на порт `served`. Сервер працює до закриття OData (або зупинки), після чого спрацьовує `done`. Без виводу response — він обслуговує, а не викликає назовні.",
       "odataClose": "Зупиняє фіктивну службу OData, яка вже слухає (оголошену вузлом сервера OData), звільняючи її порт.",
       "graphqlSubscribe": "Відкриває довготривалу підписку GraphQL як клієнт через SSE та слухає. `connected` спрацьовує, щойно потік відкрито; кожне надіслане корисне навантаження повторно випромінюється на порт `message` (підписка лише приймає, без іменованих подій). Потік залишається відкритим до скасування підписки GraphQL (або зупинки), або доки сервер не завершить його, після чого спрацьовує `done`.",
-      "graphqlUnsubscribe": "Зупиняє вже відкриту підписку GraphQL (оголошену вузлом підписки GraphQL), закриваючи її потік SSE."
+      "graphqlUnsubscribe": "Зупиняє вже відкриту підписку GraphQL (оголошену вузлом підписки GraphQL), закриваючи її потік SSE.",
+      "stompConnect": "Відкриває тривале з'єднання STOMP через WebSocket: виконує узгодження CONNECT/CONNECTED, потім підписується на кожен налаштований пункт призначення та повторно надсилає кожен отриманий фрейм на своєму порту.",
+      "stompSend": "Надсилає фрейм SEND через уже відкрите з'єднання STOMP.",
+      "stompClose": "Надсилає DISCONNECT і закриває вже відкрите з'єднання STOMP.",
+      "kafkaProduce": "Виконує прив’язаний запит Kafka як одноразове виробництво та передає результат (тема/партиція/offset) як `response`.",
+      "kafkaConsume": "Відкриває тривалого споживача Kafka із прив’язаного запиту та повторно випромінює кожне отримане повідомлення на своєму порту `message`.",
+      "kafkaClose": "Закриває вже відкритого споживача Kafka."
     },
     "legend": {
       "title": "Легенда",
@@ -1734,6 +1943,9 @@
     "websocket": {
       "message": "message"
     },
+    "sse": {
+      "message": "message"
+    },
     "grpc": {
       "message": "message"
     },
@@ -1779,6 +1991,36 @@
     "lwtTopicPlaceholder": "will/topic",
     "lwtPayload": "Payload",
     "lwtPayloadPlaceholder": "will message"
+  },
+  "amqp": {
+    "urlPlaceholder": "URL-адреса AMQP (amqp:// або amqps://)",
+    "vhost": "Віртуальний хост",
+    "vhostPlaceholder": "/",
+    "username": "Ім’я користувача",
+    "password": "Пароль",
+    "mode": "Режим",
+    "modePublish": "Публікація",
+    "modeSubscribe": "Підписка",
+    "modeBrowse": "Перегляд",
+    "exchange": "Exchange",
+    "exchangePlaceholder": "(типовий exchange)",
+    "routingKey": "Routing key",
+    "routingKeyPlaceholder": "routing.key",
+    "queue": "Черга",
+    "queuePlaceholder": "назва черги",
+    "autoAck": "Автопідтвердження",
+    "prefetch": "Prefetch",
+    "browsePeekCount": "Кількість для перегляду",
+    "connect": "З’єднатися",
+    "connecting": "З’єднання…",
+    "disconnect": "Відключити",
+    "connected": "З’єднано",
+    "disconnected": "Роз’єднано",
+    "send": "Надіслати",
+    "browseButton": "Перегляд",
+    "noMessages": "Повідомлень поки немає",
+    "peeked": "Переглянуто",
+    "messages": "Повідомлення"
   },
   "mcpLogs": {
     "title": "Журнали MCP",
@@ -2045,5 +2287,42 @@
       "noSubscription": "Немає активної підписки для керування.",
       "error": "Не вдалося відкрити портал підписки. Спробуйте ще раз."
     }
+  },
+  "trpc": {
+    "send": "Надіслати",
+    "urlPlaceholder": "URL-адреса сервера tRPC",
+    "procedurePlaceholder": "Процедура (напр. user.get)",
+    "kindQuery": "Запит",
+    "kindMutation": "Мутація",
+    "showRawEnvelope": "Показати необроблений конверт",
+    "kindSelectLabel": "Тип виклику",
+    "tabs": {
+      "headers": "Заголовки",
+      "body": "Тіло"
+    }
+  },
+  "stomp": {
+    "connect": "Підключити",
+    "disconnect": "Відключити",
+    "connected": "Підключено",
+    "disconnected": "Відключено",
+    "noMessages": "Поки що немає фреймів",
+    "version": "Версія STOMP",
+    "tabs": {
+      "connect": "З'єднання",
+      "subscriptions": "Підписки",
+      "send": "Надіслати"
+    },
+    "ackMode": {
+      "auto": "auto",
+      "client": "client",
+      "clientIndividual": "client-individual"
+    },
+    "subscriptionIdLabel": "Ідентифікатор підписки",
+    "removeSubscription": "Видалити підписку",
+    "addSubscription": "Додати підписку",
+    "sendDestination": "Призначення",
+    "ack": "ACK",
+    "nack": "NACK"
   }
 }

@@ -6,7 +6,7 @@ import { useEffect, useCallback } from 'react'
 import { navigationService } from 'electron-core-ui/renderer'
 import type { NavigationEvent, SearchResult } from 'electron-core-ui/renderer'
 import type { Folder, EnvironmentFolder, Request, Environment, FolderItem, Scenario } from '../../../shared/types/collections'
-import { isFolder, isRequest, isScenario, isEnvironmentFolder, isHTTPRequest, isGraphQLRequest, isGrpcRequest, isSoapRequest, isWebSocketRequest, isODataRequest } from '../../../shared/types/collections'
+import { isFolder, isRequest, isScenario, isEnvironmentFolder, isHTTPRequest, isGraphQLRequest, isGrpcRequest, isSoapRequest, isWebSocketRequest, isSseRequest, isStompRequest, isODataRequest, isJsonRpcRequest, isJsonRpcBatchRequest, isTrpcRequest, isAmqpRequest, isRedisRequest, isKafkaRequest } from '../../../shared/types/collections'
 import { findFolderById, findItemWithBreadcrumbs } from '../utils/treeSearch'
 import type { BreadcrumbItem } from '../../../shared/types/editor'
 
@@ -111,9 +111,10 @@ export function useNavigation(options: UseNavigationOptions): UseNavigationRetur
             openFolderTab(folder, breadcrumbs)
           }
         }
-      } else if (params.type === 'http-request' || params.type === 'graphql-request' || 
-                 params.type === 'grpc-request' || params.type === 'soap-request' || 
-                 params.type === 'websocket-request') {
+      } else if (params.type === 'http-request' || params.type === 'graphql-request' ||
+                 params.type === 'grpc-request' || params.type === 'soap-request' ||
+                 params.type === 'websocket-request' || params.type === 'sse-request' ||
+                 params.type === 'redis-request') {
         const { item, breadcrumbs } = findItemWithBreadcrumbs(rootItems, key)
         if (item && isRequest(item)) {
           const environments = getNearestEnvironmentsForBreadcrumbs(rootItems, breadcrumbs)
@@ -163,8 +164,24 @@ export function useNavigation(options: UseNavigationOptions): UseNavigationRetur
         navigationService.navigateTo(itemId, 'sidebar', { type: 'soap-request' })
       } else if (isWebSocketRequest(item)) {
         navigationService.navigateTo(itemId, 'sidebar', { type: 'websocket-request' })
+      } else if (isSseRequest(item)) {
+        navigationService.navigateTo(itemId, 'sidebar', { type: 'sse-request' })
+      } else if (isStompRequest(item)) {
+        navigationService.navigateTo(itemId, 'sidebar', { type: 'stomp-request' })
       } else if (isODataRequest(item)) {
         navigationService.navigateTo(itemId, 'sidebar', { type: 'odata-request' })
+      } else if (isJsonRpcRequest(item)) {
+        navigationService.navigateTo(itemId, 'sidebar', { type: 'jsonrpc-request' })
+      } else if (isJsonRpcBatchRequest(item)) {
+        navigationService.navigateTo(itemId, 'sidebar', { type: 'jsonrpc-batch-request' })
+      } else if (isTrpcRequest(item)) {
+        navigationService.navigateTo(itemId, 'sidebar', { type: 'trpc-request' })
+      } else if (isAmqpRequest(item)) {
+        navigationService.navigateTo(itemId, 'sidebar', { type: 'amqp-request' })
+      } else if (isRedisRequest(item)) {
+        navigationService.navigateTo(itemId, 'sidebar', { type: 'redis-request' })
+      } else if (isKafkaRequest(item)) {
+        navigationService.navigateTo(itemId, 'sidebar', { type: 'kafka-request' })
       }
     }
   }, [rootItems, setSelectedItemId, openFolderTab, openScenarioEditorTab, openEnvironmentFolderTab, openAnyRequestTab, getNearestEnvironmentsForBreadcrumbs])
@@ -270,8 +287,24 @@ export function useNavigation(options: UseNavigationOptions): UseNavigationRetur
           navigationService.navigateTo(itemId, 'breadcrumb', { type: 'soap-request' })
         } else if (isWebSocketRequest(foundItem)) {
           navigationService.navigateTo(itemId, 'breadcrumb', { type: 'websocket-request' })
+        } else if (isSseRequest(foundItem)) {
+          navigationService.navigateTo(itemId, 'breadcrumb', { type: 'sse-request' })
+        } else if (isStompRequest(foundItem)) {
+          navigationService.navigateTo(itemId, 'breadcrumb', { type: 'stomp-request' })
         } else if (isODataRequest(foundItem)) {
           navigationService.navigateTo(itemId, 'breadcrumb', { type: 'odata-request' })
+        } else if (isJsonRpcRequest(foundItem)) {
+          navigationService.navigateTo(itemId, 'breadcrumb', { type: 'jsonrpc-request' })
+        } else if (isJsonRpcBatchRequest(foundItem)) {
+          navigationService.navigateTo(itemId, 'breadcrumb', { type: 'jsonrpc-batch-request' })
+        } else if (isTrpcRequest(foundItem)) {
+          navigationService.navigateTo(itemId, 'breadcrumb', { type: 'trpc-request' })
+        } else if (isAmqpRequest(foundItem)) {
+          navigationService.navigateTo(itemId, 'breadcrumb', { type: 'amqp-request' })
+        } else if (isRedisRequest(foundItem)) {
+          navigationService.navigateTo(itemId, 'breadcrumb', { type: 'redis-request' })
+        } else if (isKafkaRequest(foundItem)) {
+          navigationService.navigateTo(itemId, 'breadcrumb', { type: 'kafka-request' })
         }
       }
     },

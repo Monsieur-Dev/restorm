@@ -231,6 +231,25 @@ declare global {
         isServerListening: (requestId: string) => Promise<boolean>
         onServerProgress: (callback: (data: RequestProgressData) => void) => (() => void)
         onServerServed: (callback: (data: { requestId: string; count: number }) => void) => (() => void)
+        reflectImport: (input: {
+          address: string
+          tls?: boolean
+          metadata?: { key: string; value: string }[]
+          name?: string
+        }) => Promise<{
+          success: boolean
+          folder?: unknown
+          merged?: boolean
+          folderId?: string
+          diff?: { added: number; removed: number; merged: number; deprecated: number }
+          unsupported?: boolean
+          error?: string
+        }>
+        reflectQuery: (input: {
+          address: string
+          tls?: boolean
+          metadata?: { key: string; value: string }[]
+        }) => Promise<{ success: boolean; services?: string[]; protoDescriptorSet?: string; unsupported?: boolean; error?: string }>
       }
       websocket: {
         connect: (input: WebSocketExecutionInput) => Promise<WebSocketExecutionResult>
@@ -241,6 +260,53 @@ declare global {
         onMessage: (callback: (data: WebSocketMessageData) => void) => (() => void)
         onServerClients: (callback: (data: { requestId: string; count: number }) => void) => (() => void)
       }
+      sse: {
+        connect: (input: SseExecutionInput) => Promise<SseExecutionResult>
+        disconnect: (requestId: string) => Promise<boolean>
+        isActive: (requestId: string) => Promise<boolean>
+        onProgress: (callback: (data: RequestProgressData) => void) => (() => void)
+        onMessage: (callback: (data: SseMessageData) => void) => (() => void)
+      }
+      amqp: {
+        execute: (input: AmqpExecutionInput) => Promise<AmqpExecutionResult>
+        connect: (input: AmqpExecutionInput) => Promise<{ started: boolean }>
+        send: (requestId: string, payload: string) => Promise<boolean>
+        disconnect: (requestId: string) => Promise<boolean>
+        cancel: (requestId: string) => Promise<boolean>
+        isActive: (requestId: string) => Promise<boolean>
+        onProgress: (callback: (data: RequestProgressData) => void) => (() => void)
+        onMessage: (callback: (data: AmqpMessageData) => void) => (() => void)
+      }
+      redis: {
+        subscribe: (input: RedisExecutionInput) => Promise<RedisExecutionResult>
+        command: (input: RedisExecutionInput) => Promise<RedisExecutionResult>
+        disconnect: (requestId: string) => Promise<boolean>
+        isActive: (requestId: string) => Promise<boolean>
+        onProgress: (callback: (data: RequestProgressData) => void) => (() => void)
+        onMessage: (callback: (data: RedisMessageData) => void) => (() => void)
+      }
+      stomp: {
+        connect: (input: StompExecutionInput) => Promise<StompExecutionResult>
+        disconnect: (requestId: string) => Promise<boolean>
+        send: (requestId: string, body: string) => Promise<boolean>
+        ack: (requestId: string, messageId: string, subscriptionId: string) => Promise<boolean>
+        nack: (requestId: string, messageId: string, subscriptionId: string) => Promise<boolean>
+        isActive: (requestId: string) => Promise<boolean>
+        onProgress: (callback: (data: RequestProgressData) => void) => (() => void)
+        onMessage: (callback: (data: StompMessageData) => void) => (() => void)
+      }
+      kafka: {
+        /** Produce: one-shot connect -> send -> disconnect. */
+        produce: (input: KafkaExecutionInput) => Promise<KafkaProduceResult>
+        /** Browse: one-shot peek via an ephemeral consumer group. */
+        browse: (input: KafkaExecutionInput) => Promise<KafkaBrowseResult>
+        /** Consume: start the long-lived subscribe; messages stream over `onMessage`. */
+        consumeStart: (requestId: string) => Promise<{ started: boolean }>
+        cancel: (requestId: string) => Promise<boolean>
+        isActive: (requestId: string) => Promise<boolean>
+        onProgress: (callback: (data: RequestProgressData) => void) => (() => void)
+        onMessage: (callback: (data: KafkaMessageData) => void) => (() => void)
+      }
       odata: {
         execute: (input: ODataExecutionInput) => Promise<HTTPExecutionResult>
         cancel: (requestId: string) => Promise<boolean>
@@ -250,6 +316,17 @@ declare global {
         stop: (requestId: string) => Promise<boolean>
         isListening: (requestId: string) => Promise<boolean>
         onServerServed: (callback: (data: { requestId: string; count: number }) => void) => (() => void)
+      }
+      jsonrpc: {
+        execute: (input: { requestId: string; timeout?: number }) => Promise<JsonRpcExecutionResult>
+        executeBatch: (input: { requestId: string; timeout?: number }) => Promise<JsonRpcBatchExecutionResult>
+        cancel: (requestId: string) => Promise<boolean>
+        isActive: (requestId: string) => Promise<boolean>
+      }
+      trpc: {
+        execute: (input: TrpcExecutionInput) => Promise<TrpcExecutionResult>
+        cancel: (requestId: string) => Promise<boolean>
+        isActive: (requestId: string) => Promise<boolean>
       }
       auth: {
         prefetch: (input: {
@@ -290,6 +367,13 @@ declare global {
           format?: string
           error?: string
         }>
+        postImportSeed: (payload: {
+          source: string
+          format: string
+          idMap: Record<string, string>
+          extraHeaders?: Record<string, string>
+          expectedChecksum?: string
+        }) => Promise<{ success: boolean; error?: string }>
       }
       responsesHistory: {
         list: (requestId: string) => Promise<ResponseHistoryEntry[]>
@@ -539,6 +623,86 @@ export interface GraphQLExecutionResult {
   requestUrl?: string
 }
 
+/** One JSON-RPC 2.0 error object, per spec section 5.1. */
+export interface JsonRpcErrorShape {
+  code: number
+  message: string
+  data?: unknown
+}
+
+/** JSON-RPC execution result — `result` on success, `error` when the
+ * envelope reports a JSON-RPC-level failure (still a successful HTTP call). */
+export interface JsonRpcExecutionResult {
+  requestId: string
+  success: boolean
+  statusCode?: number
+  statusText?: string
+  notificationSent?: boolean
+  result?: unknown
+  error?: JsonRpcErrorShape
+  transportError?: string
+  rawBody?: string
+  timings: {
+    startedAt: string
+    durationMs: number
+  }
+  requestUrl?: string
+  requestHeaders?: Record<string, string>
+}
+
+/** One child result inside a `jsonrpc-batch` response, matched back to its
+ * originating call by `rpcId`. */
+export interface JsonRpcBatchChildResult {
+  childId: string
+  rpcId: string
+  result?: unknown
+  error?: JsonRpcErrorShape
+  unmatched?: boolean
+}
+
+/** JSON-RPC batch execution result. */
+export interface JsonRpcBatchExecutionResult {
+  requestId: string
+  success: boolean
+  statusCode?: number
+  transportError?: string
+  rawBody?: string
+  children: JsonRpcBatchChildResult[]
+  timings: {
+    startedAt: string
+    durationMs: number
+  }
+  requestUrl?: string
+}
+
+/** tRPC execution input */
+export interface TrpcExecutionInput {
+  requestId: string
+  timeout?: number
+  /** Attached AuthenticationRequest as a plain object (re-hydrated main-side). */
+  authRequest?: unknown
+}
+
+/** tRPC execution result. `data` is the UNWRAPPED `result.data` payload the
+ * response panel shows by default; `rawBody` is the full `[{ result: { data
+ * } }]` wire envelope, for the "Show raw envelope" toggle. */
+export interface TrpcExecutionResult {
+  requestId: string
+  success: boolean
+  statusCode?: number
+  statusText?: string
+  headers?: Record<string, string | string[]>
+  data?: unknown
+  rawBody?: string
+  error?: string
+  timings: {
+    startedAt: string
+    durationMs: number
+  }
+  requestUrl?: string
+  requestHeaders?: Record<string, string>
+}
+
 /** SOAP execution input */
 export interface SOAPExecutionInput {
   requestId: string
@@ -633,10 +797,180 @@ export interface WebSocketMessageData {
   message: WebSocketMessageItem
 }
 
+/** SSE execution input */
+export interface SseExecutionInput {
+  requestId: string
+  timeout?: number
+}
+
+/** STOMP execution input */
+export interface StompExecutionInput {
+  requestId: string
+  timeout?: number
+}
+
+/** Kafka execution input — shared shape for `produce` / `browse`. */
+export interface KafkaExecutionInput {
+  requestId: string
+  timeout?: number
+}
+
+/** Redis request execution input */
+export interface RedisExecutionInput {
+  requestId: string
+  timeout?: number
+}
+
+/** One parsed SSE frame (`event:`/`data:`/`id:` per the W3C EventSource spec). */
+export interface SseFrameItem {
+  event: string
+  data: string
+  id?: string
+  timestamp: string
+}
+
+/** SSE execution result */
+export interface SseExecutionResult {
+  requestId: string
+  success: boolean
+  connected: boolean
+  frames: SseFrameItem[]
+  error?: string
+  timings: {
+    startedAt: string
+    durationMs: number
+  }
+  requestUrl?: string
+}
+
+/** One Redis pub/sub message (subscribe mode) */
+export interface RedisMessageItem {
+  direction: 'sent' | 'received'
+  channel?: string | undefined
+  data: string
+  timestamp: string
+}
+
+/** Redis execution result — covers BOTH modes; `mode` discriminates which
+ * fields apply. */
+export interface RedisExecutionResult {
+  requestId: string
+  success: boolean
+  mode: 'subscribe' | 'command'
+  connected?: boolean
+  channels?: string[]
+  messages?: RedisMessageItem[]
+  command?: string
+  args?: string[]
+  reply?: string
+  error?: string
+  timings: {
+    startedAt: string
+    durationMs: number
+  }
+  requestUrl?: string
+}
+
+/** One STOMP frame exchanged on the connection (sent or received). */
+export interface StompMessageItem {
+  direction: 'sent' | 'received'
+  command: string
+  subscription?: string
+  destination?: string
+  headers: Record<string, string>
+  body: string
+  timestamp: string
+}
+
+/** STOMP execution result */
+export interface StompExecutionResult {
+  requestId: string
+  success: boolean
+  connected: boolean
+  messages: StompMessageItem[]
+  error?: string
+  timings: {
+    startedAt: string
+    durationMs: number
+  }
+  requestUrl?: string
+}
+
+/** SSE frame data for streaming */
+export interface SseMessageData {
+  requestId: string
+  message: SseFrameItem
+}
+
+/** Redis message data for streaming */
+export interface RedisMessageData {
+  requestId: string
+  message: RedisMessageItem
+}
+
+/** Payload of the `stomp:message` broadcast (one streamed frame for a request). */
+export interface StompMessageData {
+  requestId: string
+  message: StompMessageItem
+}
+
+/** One produced/consumed/browsed Kafka record. */
+export interface KafkaMessageItem {
+  direction: 'received'
+  topic: string
+  partition: number
+  offset: string
+  key?: string
+  value: string
+  headers?: Record<string, string>
+  timestamp: string
+}
+
+export interface KafkaProduceResult {
+  requestId: string
+  success: boolean
+  kafkaMode: 'produce'
+  requestTopic: string
+  requestUrl: string
+  partition?: number
+  offset?: string
+  error?: string
+  timings: { startedAt: string; durationMs: number }
+}
+
+export interface KafkaBrowseResult {
+  requestId: string
+  success: boolean
+  kafkaMode: 'browse'
+  requestTopic: string
+  requestUrl: string
+  messages: KafkaMessageItem[]
+  error?: string
+  timings: { startedAt: string; durationMs: number }
+}
+
+export interface KafkaConsumeResult {
+  requestId: string
+  success: boolean
+  kafkaMode: 'consume'
+  requestTopic: string
+  requestUrl: string
+  connected: boolean
+  messages: KafkaMessageItem[]
+  error?: string
+  timings: { startedAt: string; durationMs: number }
+}
+
+/** Payload of the `kafka:message` broadcast (a streamed/peeked frame). */
+export interface KafkaMessageData {
+  requestId: string
+  message: KafkaMessageItem
+}
+
 /** Full request data for backend processing */
 export interface FullRequestData {
   id: string
-  requestType: 'http' | 'graphql' | 'grpc' | 'soap' | 'websocket' | 'odata' | 'auth'
+  requestType: 'http' | 'graphql' | 'grpc' | 'soap' | 'websocket' | 'sse' | 'stomp' | 'odata' | 'auth' | 'jsonrpc' | 'jsonrpcBatch' | 'trpc' | 'amqp' | 'redis' | 'kafka'
   url: string
   headers: KeyValueData[]
   method?: string | undefined
@@ -657,11 +991,16 @@ export interface FullRequestData {
   service?: string | undefined
   grpcMethod?: string | undefined
   callType?: string | undefined
+  /** Wire transport ('grpc' | 'grpc-web' | 'connect'); absent means native gRPC. */
+  transport?: string | undefined
   requestMessage?: string | undefined
   /** gRPC: the request's own proto, used to build the dynamic client (falls back
    * to the bundled grpcbin proto when absent). */
   protoContent?: string | undefined
   protoPath?: string | undefined
+  /** gRPC: base64 FileDescriptorSet fetched via server reflection; takes
+   * precedence over protoContent/protoPath (see grpcProtoLoader.ts). */
+  protoDescriptorSet?: string | undefined
   metadata?: KeyValueData[] | undefined
   soapAction?: string | undefined
   soapService?: string | undefined
@@ -686,6 +1025,20 @@ export interface FullRequestData {
   lwtPayload?: string | undefined
   lwtQos?: number | undefined
   lwtRetain?: boolean | undefined
+  // SSE specific (requestType === 'sse'): seed for the `Last-Event-ID`
+  // header on the first connect. Mirrors the main-side ContextServiceTypes shape.
+  lastEventId?: string | undefined
+  // STOMP specific (requestType === 'stomp'). `connectHeaders` + `sendHeaders`
+  // are ALSO merged into the top-level `headers` field above (so
+  // `collectRequestSecrets` sees both for pre-hydration) — these two carry the
+  // same rows split by which frame they belong to, for `StompExecutionService`
+  // to read separately.
+  stompVersion?: '1.1' | '1.2' | undefined
+  connectHeaders?: KeyValueData[] | undefined
+  subscriptions?: { id?: string; destination?: string; ackMode?: string }[] | undefined
+  sendDestination?: string | undefined
+  sendBody?: string | undefined
+  sendHeaders?: KeyValueData[] | undefined
   // OData specific (requestType === 'odata'). The main ContextService
   // appends the system query options ($filter / $select / …) to the
   // resolved URL. Mirrors the main-side ContextServiceTypes shape.
@@ -705,6 +1058,99 @@ export interface FullRequestData {
   } | undefined
   mockMetadata?: string | undefined
   mockData?: Record<string, Record<string, unknown>[]> | undefined
+  // JSON-RPC specific (requestType === 'jsonrpc' / 'jsonrpcBatch').
+  // Mirrors the main-side ContextServiceTypes shape.
+  jsonRpcMethod?: string | undefined
+  jsonRpcParams?: string | undefined
+  jsonRpcId?: string | undefined
+  jsonRpcNotificationMode?: boolean | undefined
+  jsonRpcChildren?: {
+    childId: string
+    method: string
+    params: string
+    rpcId: string
+    notificationMode?: boolean | undefined
+  }[] | undefined
+  // tRPC specific (requestType === 'trpc') — mirrors the main-side
+  // ContextServiceTypes shape; `url` carries the BASE server url, the
+  // procedure path (+ `?input=` for a query) is appended by URLResolver.
+  trpcProcedure?: string | undefined
+  trpcInput?: string | undefined
+  trpcKind?: 'query' | 'mutation' | undefined
+  // AMQP specific (requestType === 'amqp'; `username`/`password` above are
+  // shared with MQTT)
+  vhost?: string | undefined
+  mode?: 'publish' | 'subscribe' | 'browse' | undefined
+  exchange?: string | undefined
+  routingKey?: string | undefined
+  payload?: string | undefined
+  queue?: string | undefined
+  autoAck?: boolean | undefined
+  prefetch?: number | undefined
+  browsePeekCount?: number | undefined
+  // Redis specific (`password` above doubles as the Redis auth password)
+  redisMode?: 'subscribe' | 'command' | undefined
+  channels?: string[] | undefined
+  command?: string | undefined
+  args?: string[] | undefined
+  freeformCommand?: string | undefined
+}
+
+/** AMQP execution input */
+export interface AmqpExecutionInput {
+  requestId: string
+  timeout?: number
+}
+
+/** One AMQP frame — a sent publish or a received/peeked delivery. */
+export interface AmqpMessageItem {
+  direction: 'sent' | 'received'
+  data: string
+  exchange?: string | undefined
+  routingKey?: string | undefined
+  deliveryTag?: number | undefined
+  /** Set on a `browse`-mode frame: peeked without acking, the queue is unchanged. */
+  peek?: boolean | undefined
+  timestamp: string
+}
+
+/** AMQP execution result */
+export interface AmqpExecutionResult {
+  requestId: string
+  success: boolean
+  connected: boolean
+  mode: 'publish' | 'subscribe' | 'browse'
+  messages: AmqpMessageItem[]
+  error?: string
+  timings: {
+    startedAt: string
+    durationMs: number
+  }
+  requestUrl?: string
+}
+
+/** AMQP message data for streaming */
+export interface AmqpMessageData {
+  requestId: string
+  message: AmqpMessageItem
+  // Kafka specific (requestType === 'kafka'). Mirrors the main-side
+  // ContextServiceTypes shape. `url` (common field above) carries the
+  // comma-separated broker list.
+  kafkaMode?: 'produce' | 'consume' | 'browse' | undefined
+  kafkaTopic?: string | undefined
+  kafkaKey?: string | undefined
+  kafkaValue?: string | undefined
+  kafkaPartition?: number | undefined
+  kafkaGroupId?: string | undefined
+  kafkaFromOffset?: 'earliest' | 'latest' | 'specific' | undefined
+  kafkaSpecificOffset?: string | undefined
+  kafkaPartitions?: number[] | undefined
+  kafkaBrowsePeekCount?: number | undefined
+  kafkaClientId?: string | undefined
+  kafkaSaslMechanism?: 'none' | 'plain' | 'scram-sha-256' | 'scram-sha-512' | undefined
+  kafkaSaslUsername?: string | undefined
+  kafkaSaslPassword?: string | undefined
+  kafkaTlsEnabled?: boolean | undefined
 }
 
 export {}

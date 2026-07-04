@@ -63,7 +63,7 @@ import { Statusbar, StatusBarBellButton } from 'electron-core-ui/renderer'
 
 `<StatusBarBellButton>` is a thin `<StatusbarElement>` wrapper that renders a `codicon-bell` glyph, calls `toasterService.toggleVisibility(toasterId)` on click, and overlays a small red badge at the bottom-right when at least one stored toast still has `seen === false`. The badge disappears automatically as soon as each toast has been rendered with opacity > 0.
 
-Clicking the bell toggles the framed panel; clicking the header's chevron collapses it back.
+Clicking the bell toggles the framed panel; clicking the header's chevron collapses it back. Pressing `Escape` while the framed panel is open also closes it (same effect as **Hide**) and returns focus to whatever opened it — the bell trigger, when paired with `<StatusBarBellButton>`.
 
 ## Props — `<StatusBarBellButton>`
 
@@ -100,6 +100,7 @@ Auto-dismiss timers pause while the pointer is over the toaster or keyboard focu
 - Each toast is `role="status"` with the configured `aria-live` (`polite` by default, opt-in `assertive`).
 - Close buttons carry `aria-label="Dismiss notification"`.
 - `Escape` while a toast has focus dismisses it.
+- `Escape` while the framed panel is open closes the whole panel (same as **Hide**) and restores focus to the element that opened it (the bell trigger), matching the app's other overlays.
 - Animations respect the component defaults; callers can override via `animationDurations`.
 
 ## Props — `<Toaster>`

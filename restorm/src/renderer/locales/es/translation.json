@@ -274,10 +274,17 @@
         "socketio": "Solicitud Socket.IO",
         "mqtt": "MQTT request",
         "mqttServer": "Broker MQTT",
+        "sse": "Petición SSE",
         "grpcServer": "Servidor gRPC simulado",
         "soapServer": "Servidor SOAP de prueba",
         "graphqlServer": "Servidor GraphQL simulado",
-        "odataServer": "Servidor OData simulado"
+        "odataServer": "Servidor OData simulado",
+        "trpc": "Petición tRPC",
+        "amqp": "Petición AMQP",
+        "redis": "Petición Redis",
+        "stomp": "Solicitud STOMP",
+        "kafkaProduce": "Petición Kafka – Producir",
+        "kafkaConsume": "Petición Kafka – Consumir"
       }
     },
     "deleteConfirm": {
@@ -475,6 +482,12 @@
       "clientStream": "Client streaming",
       "bidi": "Bidirectional streaming"
     },
+    "transport": {
+      "grpc": "gRPC",
+      "grpcWeb": "gRPC-Web",
+      "connect": "Connect",
+      "streamingUnsupported": "Este transporte no admite streaming de cliente ni bidireccional a través de HTTP/1.1. Utilice en su lugar el transporte gRPC nativo."
+    },
     "server": {
       "proto": "Proto",
       "methods": "Métodos simulados",
@@ -493,6 +506,12 @@
       "notListening": "Sin escuchar",
       "listenFailed": "No se pudo iniciar el servidor gRPC",
       "snippetsUnavailable": "Los fragmentos de código no están disponibles para un servidor simulado."
+    },
+    "reflection": {
+      "refresh": "Actualizar desde reflection",
+      "refreshFailed": "Error al actualizar mediante gRPC reflection",
+      "unsupported": "Este servidor no admite gRPC reflection: importe un archivo .proto en su lugar.",
+      "unknownError": "Error desconocido"
     }
   },
   "soap": {
@@ -540,6 +559,114 @@
     "routePlaceholder": "Ruta (opcional)",
     "clientsConnected": "{{count}} cliente(s) conectado(s)",
     "notListening": "Sin escuchar"
+  },
+  "jsonrpc": {
+    "send": "Enviar",
+    "urlPlaceholder": "URL del punto de conexión JSON-RPC",
+    "methodPlaceholder": "método",
+    "idPlaceholder": "id (auto)",
+    "notificationModeTooltip": "Modo notificación — sin id, sin respuesta esperada",
+    "tabs": {
+      "params": "Parámetros",
+      "headers": "Cabeceras"
+    },
+    "response": {
+      "notificationSent": "Notificación enviada",
+      "errorLabel": "Error JSON-RPC {{code}}:"
+    }
+  },
+  "jsonrpcBatch": {
+    "send": "Enviar lote",
+    "tabs": {
+      "calls": "Llamadas"
+    },
+    "empty": "Aún no hay llamadas. Añade una debajo.",
+    "methodPlaceholder": "método",
+    "idPlaceholder": "id (auto)",
+    "moveUp": "Subir",
+    "moveDown": "Bajar",
+    "remove": "Eliminar llamada",
+    "paramsLabel": "Parámetros (JSON)",
+    "add": "Añadir llamada",
+    "response": {
+      "unmatched": "Ninguna entrada de respuesta coincidente."
+    }
+  },
+  "sse": {
+    "headers": "Cabeceras",
+    "noFrames": "Aún no hay eventos",
+    "urlPlaceholder": "URL SSE",
+    "framesTruncated": "Mostrando los últimos {{shown}} de {{total}} fotogramas",
+    "showAllFrames": "Mostrar todo"
+  },
+  "redis": {
+    "connected": "Conectado",
+    "disconnected": "Desconectado",
+    "noMessages": "Aún no hay mensajes",
+    "noCommandsYet": "Aún no se han ejecutado comandos",
+    "urlPlaceholder": "URL de Redis (redis:// o rediss://)",
+    "passwordPlaceholder": "Contraseña (opcional)",
+    "subscribe": "Suscribirse",
+    "unsubscribe": "Cancelar suscripción",
+    "run": "Ejecutar",
+    "subscribeMode": "Suscripción",
+    "commandMode": "Comando",
+    "command": "Comando",
+    "args": "Argumentos",
+    "argsPlaceholder": "Argumentos del comando",
+    "freeform": "Libre",
+    "freeformPlaceholder": "Comando libre (anula la selección)",
+    "tabs": {
+      "channels": "Canales",
+      "command": "Comando"
+    }
+  },
+  "kafka": {
+    "brokersPlaceholder": "Lista de brokers (host:port,host:port)",
+    "clientId": "ID de cliente",
+    "clientIdPlaceholder": "restorm",
+    "mode": {
+      "produce": "Producir",
+      "consume": "Consumir",
+      "browse": "Explorar"
+    },
+    "auth": {
+      "title": "Autenticación",
+      "mechanism": "SASL",
+      "username": "Nombre de usuario",
+      "password": "Contraseña",
+      "tls": "TLS"
+    },
+    "topic": "Tema",
+    "topicPlaceholder": "nombre-del-tema",
+    "key": "Clave",
+    "keyPlaceholder": "clave del mensaje (opcional)",
+    "value": "Valor",
+    "headers": "Cabeceras",
+    "partition": "Partición",
+    "partitionPlaceholder": "auto",
+    "groupId": "ID de grupo",
+    "groupIdPlaceholder": "restorm-consumer",
+    "fromOffsetLabel": "Empezar desde",
+    "fromOffset": {
+      "earliest": "Más antiguo",
+      "latest": "Más reciente",
+      "specific": "Específico"
+    },
+    "specificOffset": "Offset",
+    "partitions": "Particiones",
+    "partitionsPlaceholder": "0,1,2 (vacío = todas)",
+    "peekCount": "Número de mensajes",
+    "produce": "Producir",
+    "startConsuming": "Iniciar consumo",
+    "stopConsuming": "Detener consumo",
+    "peek": "Vistazo",
+    "noMessages": "Aún no hay mensajes",
+    "connected": "Conectado",
+    "disconnected": "Desconectado",
+    "producedTo": "Producido en",
+    "offset": "Offset",
+    "messages": "Mensajes"
   },
   "search": {
     "placeholder": "Buscar...",
@@ -886,6 +1013,10 @@
         "description": "Suelte un archivo .proto (o un directorio con varios) y Restorm recorre cada servicio, cada RPC, cada mensaje — convirtiendo cada método en una petición tipada que puede enviar a través del ejecutor gRPC sin tocar codegen.",
         "trademark": "gRPC es un proyecto de la Cloud Native Computing Foundation."
       },
+      "grpcReflection": {
+        "description": "¿Sin archivo .proto? Apunte Restorm a un servidor gRPC en ejecución que exponga reflection: consulta grpc.reflection.v1alpha.ServerReflection, descubre cada servicio y método, y crea el mismo árbol de solicitudes tipadas que una importación de archivo proto, almacenado en caché localmente para uso sin conexión.",
+        "action": "Conectar a un servidor…"
+      },
       "soap": {
         "description": "¿Tiene un WSDL? Péguelo (o su URL) — Restorm parsea cada <port> y cada <operation> y produce envelopes SOAP listos para enviar con la cabecera SOAPAction correcta, esqueletos de cuerpo tipados por el esquema y el esquema de auth que declara el WSDL."
       },
@@ -911,7 +1042,57 @@
       "paw": {
         "description": "¿Viene de Paw? Suelte su export JSON (File → Export → JSON en la app — el paquete nativo .paw no se lee directamente). Restorm reconstruye cada petición, cabecera, cuerpo y entorno, y asigna los valores dinámicos de Paw (marcas de tiempo, cadenas aleatorias, UUID) a su equivalente más cercano en Restorm.",
         "trademark": "Paw es una marca registrada de RapidAPI, Inc., utilizada aquí solo como referencia de compatibilidad."
+      },
+      "har": {
+        "description": "¿Capturó una traza de red desde las devtools de su navegador? Suelte el archivo .har exportado — Restorm recorre cada llamada registrada y la convierte en una petición reproducible, con cabeceras y cuerpo incluidos."
+      },
+      "restClient": {
+        "description": "¿Viene de la extensión REST Client de VS Code? Pegue o suelte el archivo .http / .rest — Restorm analiza cada bloque de petición, resuelve las @variables y las reconstruye como un árbol Restorm.",
+        "trademark": "REST Client es una marca de su respectivo propietario, utilizada aquí solo como referencia de compatibilidad."
+      },
+      "httpie": {
+        "description": "Suelte un export de colección de HTTPie Desktop o un archivo de sesión de la CLI — Restorm lee cada petición (y, en el caso de una sesión, sus cabeceras persistentes) y las reconstruye listas para usar.",
+        "trademark": "HTTPie es una marca de su respectivo propietario, utilizada aquí solo como referencia de compatibilidad."
+      },
+      "smithy": {
+        "description": "Pegue un modelo Smithy — el AST JSON o el IDL escrito a mano — y Restorm recorre cada servicio, recurso y operación para generar una carpeta de peticiones lista para usar.",
+        "trademark": "Smithy es un proyecto de Amazon Web Services."
+      },
+      "typespec": {
+        "description": "Pegue su definición TypeSpec (.tsp) — Restorm la compila a OpenAPI internamente y la importa igual que una spec escrita a mano: operaciones, parámetros y esquemas incluidos.",
+        "trademark": "TypeSpec es un proyecto de Microsoft."
+      },
+      "raml": {
+        "description": "Pegue un documento RAML 1.0 o 0.8 — Restorm refleja su árbol de recursos en carpetas anidadas, una petición por método, con los tipos modelados incluidos.",
+        "trademark": "RAML es una especificación mantenida por el RAML Workgroup."
+      },
+      "wadl": {
+        "description": "¿Todavía mantiene un documento WADL? Pegue el XML — Restorm recorre su árbol anidado de <resource> y genera una carpeta de peticiones equivalente, con métodos y parámetros incluidos.",
+        "trademark": "WADL fue presentado al W3C por Sun Microsystems como Member Submission."
+      },
+      "thrift": {
+        "description": "Pegue un archivo IDL de Apache Thrift (.thrift) — Restorm lee cada servicio, método, struct y enum para que pueda explorar la forma de la API. El protocolo binario de Thrift aún no es ejecutable desde Restorm, por lo que esta importación es solo documental.",
+        "trademark": "Apache Thrift es una marca de la Apache Software Foundation."
+      },
+      "apiBlueprint": {
+        "description": "Pegue un documento API Blueprint (.apib) — Restorm analiza cada grupo de recursos y transición para generar una carpeta de peticiones, una por cada par de método y respuesta documentados.",
+        "trademark": "API Blueprint es una especificación creada originalmente por Apiary."
       }
+    },
+    "grpcReflection": {
+      "title": "Servidor gRPC (reflection)",
+      "hint": "Consulte el servicio de reflection de un servidor gRPC en ejecución para descubrir sus servicios y métodos sin un archivo .proto.",
+      "addressLabel": "Dirección del servidor (host:puerto)",
+      "addressPlaceholder": "localhost:9000",
+      "tlsLabel": "Usar TLS",
+      "metadataLabel": "Metadatos (cabeceras de autenticación opcionales)",
+      "connecting": "Conectando…",
+      "import": "Importar",
+      "reimportedTitle": "Reflection gRPC reimportada",
+      "reimportedNoop": "Ya está actualizado — no hay cambios en el servidor.",
+      "reimportedSummary": "+{{added}} / -{{removed}} / ↻{{merged}} — recargue el proyecto para ver los cambios.",
+      "unsupported": "Este servidor no admite gRPC reflection: importe un archivo .proto en su lugar.",
+      "unknownError": "Error desconocido"
     },
     "loading": "Analizando...",
     "noResults": "No se han encontrado peticiones",
@@ -1075,14 +1256,22 @@
       "socketioSend": "Socket.IO send",
       "socketioClose": "Socket.IO close",
       "websocketConnect": "WebSocket connect",
+      "sseConnect": "SSE connect",
       "websocketSend": "WebSocket send",
       "websocketClose": "WebSocket close",
+      "sseClose": "SSE close",
       "grpcConnect": "gRPC connect",
       "grpcSend": "gRPC send",
       "grpcClose": "gRPC close",
       "mqttConnect": "MQTT connect",
       "mqttSend": "MQTT publish",
       "mqttClose": "MQTT close",
+      "amqpConnect": "Conexión AMQP",
+      "amqpPublish": "Publicación AMQP",
+      "amqpClose": "Cierre AMQP",
+      "redisSubscribe": "Redis subscribe",
+      "redisClose": "Redis close",
+      "redisCommand": "Redis command",
       "httpListen": "HTTP server",
       "httpClose": "HTTP close",
       "grpcServerClose": "Cerrar servidor gRPC",
@@ -1093,7 +1282,13 @@
       "odataListen": "OData server",
       "odataClose": "OData close",
       "graphqlSubscribe": "Suscripción GraphQL",
-      "graphqlUnsubscribe": "Cancelar suscripción GraphQL"
+      "graphqlUnsubscribe": "Cancelar suscripción GraphQL",
+      "stompConnect": "Conectar STOMP",
+      "stompSend": "Enviar STOMP",
+      "stompClose": "Cerrar STOMP",
+      "kafkaProduce": "Kafka produce",
+      "kafkaConsume": "Kafka consume",
+      "kafkaClose": "Kafka close"
     },
     "comparator": {
       "result": "resultado"
@@ -1654,8 +1849,10 @@
       "socketioSend": "Envía un mensaje en una conexión Socket.IO ya abierta.",
       "socketioClose": "Cierra una conexión Socket.IO ya abierta.",
       "websocketConnect": "Abre una conexión WebSocket en bruto y reemite cada mensaje recibido en su puerto.",
+      "sseConnect": "Abre una conexión SSE (Server-Sent Events) de larga duración y reemite cada fotograma recibido en su puerto.",
       "websocketSend": "Envía un payload en una conexión WebSocket ya abierta.",
       "websocketClose": "Cierra una conexión WebSocket ya abierta.",
+      "sseClose": "Cierra una conexión SSE ya abierta.",
       "grpcConnect": "Abre una llamada gRPC en streaming y reemite cada trama recibida en su puerto de mensajes.",
       "grpcSend": "Escribe un mensaje de solicitud en una llamada gRPC en streaming ya abierta.",
       "grpcClose": "Cierra parcialmente (half-close) una llamada gRPC en streaming ya abierta.",
@@ -1668,9 +1865,15 @@
       "mqttConnect": "Abre una conexión MQTT duradera desde una solicitud vinculada y se suscribe a su tema; reemite cada mensaje recibido en su puerto `message`.",
       "mqttSend": "Publica una carga útil en una conexión MQTT ya abierta (a su tema).",
       "mqttClose": "Cierra una conexión MQTT ya abierta.",
+      "amqpConnect": "Abre una conexión AMQP persistente desde una solicitud vinculada y consume su cola; reemite cada mensaje recibido en su puerto `message`.",
+      "amqpPublish": "Publica una carga útil en una conexión AMQP ya abierta (al exchange/routing key de su solicitud vinculada).",
+      "amqpClose": "Cierra una conexión AMQP ya abierta.",
       "mqttConnectServer": "Inicia un broker MQTT local (puerto + filtro de tema); se suscribe a su filtro de tema y reemite cada mensaje recibido en su puerto `message`. El envío publica a los suscriptores conectados.",
       "mqttSendServer": "Publica un mensaje a cada suscriptor del broker MQTT referenciado.",
       "mqttCloseServer": "Detiene el broker MQTT referenciado y desconecta sus clientes.",
+      "redisSubscribe": "Abre una conexión de suscripción Redis duradera desde una solicitud vinculada y escucha sus canales; reemite cada mensaje recibido en su puerto `message`.",
+      "redisClose": "Cierra una conexión de suscripción Redis ya abierta.",
+      "redisCommand": "Ejecuta un comando Redis vinculado (un único comando en una conexión nueva, luego se desconecta) y emite su respuesta.",
       "toast": "Emite una notificación toast en la interfaz de Restorm mientras se ejecuta el escenario.",
       "httpListen": "Hosts a local HTTP mock server and listens indefinitely. `connected` fires once it is listening; each served request re-emits its data on the `served` port. The server stays up until an HTTP close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
       "httpClose": "Detiene un servidor simulado HTTP que ya está escuchando (declarado por un nodo servidor HTTP) y libera su puerto.",
@@ -1683,7 +1886,13 @@
       "odataListen": "Aloja un servicio simulado OData v4 local y escucha indefinidamente. `connected` se activa en cuanto está escuchando; cada solicitud atendida reemite sus datos por el puerto `served`. El servidor permanece activo hasta un cierre OData (o un Stop), luego se activa `done`. Sin salida response — sirve, no llama hacia fuera.",
       "odataClose": "Detiene un servicio simulado OData que ya está escuchando (declarado por un nodo de servidor OData) y libera su puerto.",
       "graphqlSubscribe": "Abre una suscripción GraphQL de larga duración como cliente a través de SSE y escucha. `connected` se dispara cuando el flujo está abierto; cada carga útil recibida se reemite en el puerto `message` (una suscripción es de solo recepción, sin eventos con nombre). El flujo permanece abierto hasta una cancelación de suscripción GraphQL (o una parada), o hasta que el servidor lo complete, luego se dispara `done`.",
-      "graphqlUnsubscribe": "Detiene una suscripción GraphQL ya abierta (declarada por un nodo de suscripción GraphQL), cerrando su flujo SSE."
+      "graphqlUnsubscribe": "Detiene una suscripción GraphQL ya abierta (declarada por un nodo de suscripción GraphQL), cerrando su flujo SSE.",
+      "stompConnect": "Abre una conexión STOMP sobre WebSocket persistente: realiza el protocolo CONNECT/CONNECTED, se suscribe a cada destino configurado y reemite cada trama recibida en su puerto.",
+      "stompSend": "Envía una trama SEND en una conexión STOMP ya abierta.",
+      "stompClose": "Envía DISCONNECT y cierra una conexión STOMP ya abierta.",
+      "kafkaProduce": "Ejecuta una solicitud Kafka vinculada como una producción puntual y emite el resultado (tema/partición/offset) como `response`.",
+      "kafkaConsume": "Abre un consumidor Kafka duradero desde una solicitud vinculada y reemite cada mensaje recibido en su puerto `message`.",
+      "kafkaClose": "Cierra un consumidor Kafka ya abierto."
     },
     "legend": {
       "title": "Leyenda",
@@ -1732,6 +1941,9 @@
     "websocket": {
       "message": "message"
     },
+    "sse": {
+      "message": "message"
+    },
     "grpc": {
       "message": "message"
     },
@@ -1777,6 +1989,36 @@
     "lwtTopicPlaceholder": "will/topic",
     "lwtPayload": "Payload",
     "lwtPayloadPlaceholder": "will message"
+  },
+  "amqp": {
+    "urlPlaceholder": "URL de AMQP (amqp:// o amqps://)",
+    "vhost": "Host virtual",
+    "vhostPlaceholder": "/",
+    "username": "Usuario",
+    "password": "Contraseña",
+    "mode": "Modo",
+    "modePublish": "Publicar",
+    "modeSubscribe": "Suscribirse",
+    "modeBrowse": "Explorar",
+    "exchange": "Exchange",
+    "exchangePlaceholder": "(exchange predeterminado)",
+    "routingKey": "Routing key",
+    "routingKeyPlaceholder": "routing.key",
+    "queue": "Cola",
+    "queuePlaceholder": "nombre de la cola",
+    "autoAck": "Confirmación automática",
+    "prefetch": "Prefetch",
+    "browsePeekCount": "Cantidad a explorar",
+    "connect": "Conectar",
+    "connecting": "Conectando…",
+    "disconnect": "Desconectar",
+    "connected": "Conectado",
+    "disconnected": "Desconectado",
+    "send": "Enviar",
+    "browseButton": "Explorar",
+    "noMessages": "Aún no hay mensajes",
+    "peeked": "Explorado",
+    "messages": "Mensajes"
   },
   "mcpLogs": {
     "title": "Registros MCP",
@@ -2043,5 +2285,42 @@
       "noSubscription": "No hay ninguna suscripción activa que gestionar.",
       "error": "No se pudo abrir el portal de suscripción. Inténtalo de nuevo."
     }
+  },
+  "trpc": {
+    "send": "Enviar",
+    "urlPlaceholder": "URL del servidor tRPC",
+    "procedurePlaceholder": "Procedimiento (p. ej. user.get)",
+    "kindQuery": "Consulta",
+    "kindMutation": "Mutación",
+    "showRawEnvelope": "Mostrar sobre en bruto",
+    "kindSelectLabel": "Tipo de llamada",
+    "tabs": {
+      "headers": "Cabeceras",
+      "body": "Cuerpo"
+    }
+  },
+  "stomp": {
+    "connect": "Conectar",
+    "disconnect": "Desconectar",
+    "connected": "Conectado",
+    "disconnected": "Desconectado",
+    "noMessages": "Aún no hay tramas",
+    "version": "Versión STOMP",
+    "tabs": {
+      "connect": "Conexión",
+      "subscriptions": "Suscripciones",
+      "send": "Enviar"
+    },
+    "ackMode": {
+      "auto": "auto",
+      "client": "client",
+      "clientIndividual": "client-individual"
+    },
+    "subscriptionIdLabel": "ID de suscripción",
+    "removeSubscription": "Eliminar suscripción",
+    "addSubscription": "Añadir suscripción",
+    "sendDestination": "Destino",
+    "ack": "ACK",
+    "nack": "NACK"
   }
 }

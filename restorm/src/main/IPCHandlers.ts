@@ -21,12 +21,21 @@ import { graphqlExecutionService, type GraphQLExecutionInput } from './services/
 import { graphqlMockServerService } from './services/GraphQLMockServerService'
 import { graphqlSubscriptionService } from './services/GraphQLSubscriptionService'
 import { soapExecutionService, type SOAPExecutionInput } from './services/SOAPExecutionService'
-import { grpcExecutionService, type GRPCExecutionInput } from './services/GRPCExecutionService'
+import { grpcExecutionService, normalizeAddress as normalizeGrpcAddress, type GRPCExecutionInput } from './services/GRPCExecutionService'
 import { grpcMockServerService } from './services/GRPCMockServerService'
 import { odataMockServerService } from './services/ODataMockServerService'
+import { trpcExecutionService } from './services/TrpcExecutionService'
 import { websocketExecutionService, type WebSocketExecutionInput } from './services/WebSocketExecutionService'
+import { jsonRpcExecutionService } from './services/JsonRpcExecutionService'
+import { sseExecutionService, type SseExecutionInput } from './services/SseExecutionService'
+import { amqpExecutionService, type AmqpExecutionInput } from './services/AMQPExecutionService'
+import { redisExecutionService, type RedisExecutionInput } from './services/RedisExecutionService'
+import { stompExecutionService, type StompExecutionInput } from './services/StompExecutionService'
+import { kafkaExecutionService } from './services/KafkaExecutionService'
 import { scenarioEngine } from './scenarioEngine/engine'
-import { importFrom } from './services/import/ImportManager'
+import { importFrom, runPostImportSeed } from './services/import/ImportManager'
+import { importGrpcFromReflection, findExistingGrpcReflectionFolder, reimportGrpcReflection } from './services/import/GrpcReflectionImportService'
+import { queryReflection, GrpcReflectionUnsupportedError } from './services/grpc/grpcReflectionClient'
 import {
   openEditorArgs,
   saveAsFileArgs, saveAsFolderArgs,
@@ -42,6 +51,8 @@ import {
   httpExecuteArgs, httpCancelArgs, httpIsActiveArgs,
   httpListenArgs, httpStopArgs, httpIsListeningArgs,
   odataExecuteArgs, odataCancelArgs, odataIsActiveArgs,
+  jsonrpcExecuteArgs, jsonrpcExecuteBatchArgs, jsonrpcCancelArgs, jsonrpcIsActiveArgs,
+  trpcExecuteArgs, trpcCancelArgs, trpcIsActiveArgs,
   authPrefetchArgs,
   graphqlExecuteArgs, graphqlCancelArgs, graphqlIsActiveArgs,
   soapExecuteArgs, soapCancelArgs, soapIsActiveArgs, soapListenArgs, soapStopArgs, soapIsListeningArgs,
@@ -49,13 +60,19 @@ import {
   graphqlSubscribeArgs, graphqlUnsubscribeArgs, graphqlIsSubscribingArgs,
   grpcExecuteArgs, grpcConnectArgs, grpcSendArgs, grpcDisconnectArgs, grpcCancelArgs, grpcIsActiveArgs,
   grpcListenArgs, grpcStopArgs, grpcIsListeningArgs,
+  grpcReflectImportArgs, grpcReflectQueryArgs,
   odataListenArgs, odataStopArgs, odataIsListeningArgs,
   websocketConnectArgs, websocketDisconnectArgs, websocketSendArgs, websocketIsActiveArgs,
+  sseConnectArgs, sseDisconnectArgs, sseIsActiveArgs,
+  amqpExecuteArgs, amqpConnectArgs, amqpSendArgs, amqpDisconnectArgs, amqpCancelArgs, amqpIsActiveArgs,
+  redisSubscribeArgs, redisCommandArgs, redisDisconnectArgs, redisIsActiveArgs,
+  stompConnectArgs, stompDisconnectArgs, stompSendArgs, stompAckArgs, stompNackArgs, stompIsActiveArgs,
+  kafkaProduceArgs, kafkaBrowseArgs, kafkaConsumeStartArgs, kafkaCancelArgs, kafkaIsActiveArgs,
   responsesHistoryListArgs, responsesHistoryGetArgs,
   responsesHistoryTogglePinArgs,
   requestUsageGetArgs,
   scenarioUsageGetArgs,
-  importPreviewArgs, importImportArgs,
+  importPreviewArgs, importImportArgs, importPostImportSeedArgs,
   miniBrowserCreateArgs, miniBrowserDestroyArgs, miniBrowserSetBoundsArgs,
   miniBrowserNavigateArgs, miniBrowserReloadArgs,
   miniBrowserGoBackArgs, miniBrowserGoForwardArgs, miniBrowserGetStateArgs,
@@ -166,7 +183,11 @@ function rehydrateFullRequestData(data: unknown): unknown {
   if (typeof data !== 'object' || data === null) return data
   const record = data as Record<string, unknown>
   const out: Record<string, unknown> = { ...record }
-  for (const group of ['headers', 'params', 'pathParams', 'metadata'] as const) {
+  // `connectHeaders` / `sendHeaders` (STOMP) get the same treatment as
+  // `headers` — they're read back by `StompExecutionService` through
+  // `resolveKeyValueForRequest`, which needs a real `ValueType` instance to
+  // gate handlebars resolution (see the docstring above).
+  for (const group of ['headers', 'params', 'pathParams', 'metadata', 'connectHeaders', 'sendHeaders'] as const) {
     const rows = record[group]
     if (Array.isArray(rows)) {
       out[group] = rows.map((row) => rehydrateKeyValueRow(row as KeyValueRowFromIpc))
@@ -785,6 +806,19 @@ export function registerRestormIPC(deps: {
     // Await it so the OS socket is fully released before this round-trip
     // resolves — a reopen that rebinds the same port can't race EADDRINUSE.
     await websocketExecutionService.closeAll()
+    // File close — same for any open SSE connections (client-only, no port).
+    sseExecutionService.closeAll()
+    // File close — same for any open AMQP subscribe connection (not
+    // server-capable, so no port to release — just drop the broker client).
+    await amqpExecutionService.closeAll()
+    // File close — same for any open Redis subscribe connection.
+    await redisExecutionService.closeAll()
+    // File close — same for any live STOMP connection (no port to release, just
+    // DISCONNECT + close the socket).
+    stompExecutionService.closeAll()
+    // File close — same for any live Kafka browse peek / long-lived consume
+    // (produce is one-shot and never registers; no port to release).
+    await kafkaExecutionService.closeAll()
     // File close — same for any hosted gRPC mock server (its own grpc.Server on
     // its own port): release the port so it doesn't keep listening past the file.
     grpcMockServerService.closeAll()
@@ -912,6 +946,76 @@ export function registerRestormIPC(deps: {
 
   validatedHandle('odata:is-active', odataIsActiveArgs, (_event, [requestId]) => {
     return httpExecutionService.isActive(requestId)
+  })
+
+  // ==========================================================================
+  // JSON-RPC Execution IPC Handlers
+  // --------------------------------------------------------------------------
+  // JSON-RPC calls compose `{ jsonrpc: '2.0', method, params, id }` and POST it
+  // through httpExecutionService, exactly like OData composes its own body —
+  // JsonRpcExecutionService reads method/params/id off the registered
+  // request's fullData (flushed by the tab view) and does the envelope
+  // shaping + result/error unwrap itself.
+  // ==========================================================================
+
+  validatedHandle('jsonrpc:execute', jsonrpcExecuteArgs, async (_event, [input]) => {
+    const result = await jsonRpcExecutionService.execute(input)
+    setImmediate(() => {
+      void responseHistoryService.storeExecutionResult(input.requestId, 'jsonrpc', result)
+      requestUsageService.recordSend(input.requestId)
+    })
+    return result
+  })
+
+  validatedHandle('jsonrpc:execute-batch', jsonrpcExecuteBatchArgs, async (_event, [input]) => {
+    const result = await jsonRpcExecutionService.executeBatch(input)
+    setImmediate(() => {
+      void responseHistoryService.storeExecutionResult(input.requestId, 'jsonrpcBatch', result)
+      requestUsageService.recordSend(input.requestId)
+    })
+    return result
+  })
+
+  validatedHandle('jsonrpc:cancel', jsonrpcCancelArgs, (_event, [requestId]) => {
+    return jsonRpcExecutionService.cancel(requestId)
+  })
+
+  validatedHandle('jsonrpc:is-active', jsonrpcIsActiveArgs, (_event, [requestId]) => {
+    return jsonRpcExecutionService.isActive(requestId)
+  })
+
+  // ==========================================================================
+  // tRPC Execution IPC Handlers
+  // --------------------------------------------------------------------------
+  // tRPC reuses `httpExecutionService` under the hood, like OData — a thin
+  // `TrpcExecutionService` composes the v10 wire format (URL already carries
+  // the procedure + `?input=` from URLResolver) and unwraps the response
+  // envelope before returning.
+  // ==========================================================================
+
+  validatedHandle('trpc:execute', trpcExecuteArgs, async (_event, [input]) => {
+    const authRequestPayload = (input as { authRequest?: unknown }).authRequest
+    const authRequest = isPlainAuthPayload(authRequestPayload)
+      ? AuthenticationRequest.fromPlain(authRequestPayload)
+      : undefined
+    const result = await trpcExecutionService.execute({
+      requestId: input.requestId,
+      ...(typeof input.timeout === 'number' ? { timeout: input.timeout } : {}),
+      ...(authRequest ? { authRequest } : {})
+    })
+    setImmediate(() => {
+      void responseHistoryService.storeExecutionResult(input.requestId, 'trpc', result)
+      requestUsageService.recordSend(input.requestId)
+    })
+    return result
+  })
+
+  validatedHandle('trpc:cancel', trpcCancelArgs, (_event, [requestId]) => {
+    return trpcExecutionService.cancel(requestId)
+  })
+
+  validatedHandle('trpc:is-active', trpcIsActiveArgs, (_event, [requestId]) => {
+    return trpcExecutionService.isActive(requestId)
   })
 
   // ==========================================================================
@@ -1189,6 +1293,73 @@ export function registerRestormIPC(deps: {
     return grpcMockServerService.isListening(requestId)
   })
 
+  // gRPC server reflection: import a live server's services/methods without a
+  // `.proto` file, or re-fetch just the descriptor bundle for the "Refresh
+  // from reflection" button on an already-imported request.
+  validatedHandle('grpc:reflect-import', grpcReflectImportArgs, async (_event, [input]) => {
+    const { address, secure } = normalizeGrpcAddress(input.address)
+    try {
+      // Idempotent re-import (same GrpcAdapter contract every other
+      // importer's "Refresh from source" uses, see
+      // `main/services/import/idempotent/GrpcAdapter.ts`): connecting to a
+      // server already imported via reflection merges into that folder
+      // instead of creating a duplicate. Re-fetching an unchanged server
+      // yields an empty diff — no added/removed/merged operations.
+      const existing = findExistingGrpcReflectionFolder(address)
+      if (existing) {
+        const { diff, protoDescriptorSet } = await reimportGrpcReflection(existing, address, {
+          tls: input.tls ?? secure,
+          metadata: input.metadata
+        })
+        return {
+          success: true,
+          merged: true,
+          folderId: existing.id,
+          protoDescriptorSet,
+          diff: {
+            added: diff.added.length,
+            removed: diff.removed.length,
+            merged: diff.merged.length,
+            deprecated: diff.deprecated.length
+          }
+        }
+      }
+      const { folder } = await importGrpcFromReflection(address, {
+        tls: input.tls ?? secure,
+        metadata: input.metadata,
+        name: input.name
+      })
+      return { success: true, folder }
+    } catch (error) {
+      const unsupported = error instanceof GrpcReflectionUnsupportedError
+      logger.error('[IPC] gRPC reflection import error:', error)
+      return {
+        success: false,
+        unsupported,
+        error: error instanceof Error ? error.message : String(error)
+      }
+    }
+  })
+
+  validatedHandle('grpc:reflect-query', grpcReflectQueryArgs, async (_event, [input]) => {
+    const { address, secure } = normalizeGrpcAddress(input.address)
+    try {
+      const { services, fileDescriptorSet } = await queryReflection(address, {
+        tls: input.tls ?? secure,
+        metadata: input.metadata
+      })
+      return { success: true, services, protoDescriptorSet: fileDescriptorSet.toString('base64') }
+    } catch (error) {
+      const unsupported = error instanceof GrpcReflectionUnsupportedError
+      logger.error('[IPC] gRPC reflection query error:', error)
+      return {
+        success: false,
+        unsupported,
+        error: error instanceof Error ? error.message : String(error)
+      }
+    }
+  })
+
   // OData mock server (server mode): host a local OData v4 service on the shared
   // HTTP PortHost (one matchPrefix route per method under the service root), stop
   // it, and check whether it is listening. `odata:listen` resolves once the
@@ -1228,6 +1399,188 @@ export function registerRestormIPC(deps: {
 
   validatedHandle('websocket:is-active', websocketIsActiveArgs, (_event, [requestId]) => {
     return websocketExecutionService.isActive(requestId)
+  })
+
+  // ==========================================================================
+  // SSE (Server-Sent Events) Execution IPC Handlers
+  // ==========================================================================
+
+  validatedHandle('sse:connect', sseConnectArgs, async (_event, [input]) => {
+    // Unlike `websocket:connect`, `sseExecutionService.execute` persists its
+    // own history entry on close (mirroring the streaming scenario path) —
+    // storing it again here would duplicate the entry.
+    const result = await sseExecutionService.execute(input as SseExecutionInput)
+    setImmediate(() => {
+      requestUsageService.recordSend(input.requestId)
+    })
+    return result
+  })
+
+  validatedHandle('sse:disconnect', sseDisconnectArgs, (_event, [requestId]) => {
+    return sseExecutionService.disconnect(requestId)
+  })
+
+  validatedHandle('sse:is-active', sseIsActiveArgs, (_event, [requestId]) => {
+    return sseExecutionService.isActive(requestId)
+  })
+
+  // ==========================================================================
+  // AMQP Execution IPC Handlers
+  // ==========================================================================
+
+  validatedHandle('amqp:execute', amqpExecuteArgs, async (_event, [input]) => {
+    // `execute()` persists publish/browse to history itself (mirrors gRPC —
+    // see the comment on `grpc:execute` above); the handler only records usage.
+    const result = await amqpExecutionService.execute(input as AmqpExecutionInput)
+    setImmediate(() => {
+      requestUsageService.recordSend(input.requestId)
+    })
+    return result
+  })
+
+  validatedHandle('amqp:connect', amqpConnectArgs, (_event, [input]) => {
+    // Open a long-lived subscribe connection. Frames + lifecycle reach the
+    // renderer via the `amqp:message` / `amqp:connection-progress` broadcasts
+    // the service fires internally, so the callbacks are no-ops.
+    const noop = (): void => { /* lifecycle is delivered via the IPC broadcasts */ }
+    amqpExecutionService.connectStreaming({
+      requestId: input.requestId,
+      onConnect: noop,
+      onMessage: noop,
+      onClose: noop,
+      ...(input.timeout !== undefined ? { timeout: input.timeout } : {})
+    })
+    setImmediate(() => { requestUsageService.recordSend(input.requestId) })
+    return { started: true }
+  })
+
+  validatedHandle('amqp:send', amqpSendArgs, (_event, [requestId, payload]) => {
+    return amqpExecutionService.send(requestId, payload)
+  })
+
+  validatedHandle('amqp:disconnect', amqpDisconnectArgs, (_event, [requestId]) => {
+    return amqpExecutionService.disconnect(requestId)
+  })
+
+  validatedHandle('amqp:cancel', amqpCancelArgs, (_event, [requestId]) => {
+    return amqpExecutionService.cancel(requestId)
+  })
+
+  validatedHandle('amqp:is-active', amqpIsActiveArgs, (_event, [requestId]) => {
+    return amqpExecutionService.isActive(requestId)
+  })
+
+  // ==========================================================================
+  // Redis Execution IPC Handlers
+  // ==========================================================================
+
+  // Subscribe mode: long-lived, resolves once the session ends. Persists its
+  // own history entries (connect + terminal) — no double-store here.
+  validatedHandle('redis:subscribe', redisSubscribeArgs, async (_event, [input]) => {
+    const result = await redisExecutionService.subscribe(input as RedisExecutionInput)
+    setImmediate(() => { requestUsageService.recordSend(input.requestId) })
+    return result
+  })
+
+  // Command mode: one-shot, resolves once the command settles.
+  validatedHandle('redis:command', redisCommandArgs, async (_event, [input]) => {
+    const result = await redisExecutionService.runCommand(input as RedisExecutionInput)
+    setImmediate(() => { requestUsageService.recordSend(input.requestId) })
+    return result
+  })
+
+  validatedHandle('redis:disconnect', redisDisconnectArgs, (_event, [requestId]) => {
+    return redisExecutionService.disconnect(requestId)
+  })
+
+  validatedHandle('redis:is-active', redisIsActiveArgs, (_event, [requestId]) => {
+    return redisExecutionService.isActive(requestId)
+  })
+
+  // ==========================================================================
+  // STOMP Execution IPC Handlers
+  // ==========================================================================
+  // `stomp:connect` resolves only when the connection closes (same shape as
+  // `websocket:connect`) — `StompExecutionService.execute` persists the
+  // history entry itself (see its `persistHistory` call), so this handler
+  // only needs to record usage, not store the result a second time.
+
+  validatedHandle('stomp:connect', stompConnectArgs, async (_event, [input]) => {
+    const result = await stompExecutionService.execute(input as StompExecutionInput)
+    setImmediate(() => { requestUsageService.recordSend(input.requestId) })
+    return result
+  })
+
+  validatedHandle('stomp:disconnect', stompDisconnectArgs, (_event, [requestId]) => {
+    return stompExecutionService.disconnect(requestId)
+  })
+
+  validatedHandle('stomp:send', stompSendArgs, (_event, [requestId, body]) => {
+    return stompExecutionService.send(requestId, body)
+  })
+
+  validatedHandle('stomp:ack', stompAckArgs, (_event, [requestId, messageId, subscriptionId]) => {
+    return stompExecutionService.ack(requestId, messageId, subscriptionId)
+  })
+
+  validatedHandle('stomp:nack', stompNackArgs, (_event, [requestId, messageId, subscriptionId]) => {
+    return stompExecutionService.nack(requestId, messageId, subscriptionId)
+  })
+
+  validatedHandle('stomp:is-active', stompIsActiveArgs, (_event, [requestId]) => {
+    return stompExecutionService.isActive(requestId)
+  })
+
+  // ==========================================================================
+  // Kafka Execution IPC Handlers
+  //
+  // Unlike every other protocol, Kafka has THREE independent lifecycles
+  // instead of one execute channel — `produce` / `browse` are one-shot and
+  // self-persist their history entry (see `KafkaExecutionService`, mirroring
+  // `WebSocketExecutionService.connectStreamingMqtt`'s self-persist rather
+  // than the caller-persists pattern `soap:execute` uses above), so this
+  // handler does NOT call `responseHistoryService.storeExecutionResult`
+  // again. `consume-start` fires the long-lived subscribe and returns
+  // immediately — live progress/messages stream over the existing
+  // `kafka:request-progress` / `kafka:message` broadcast channels, exactly
+  // like the scenario engine's `kafkaConsume` path.
+  // ==========================================================================
+
+  validatedHandle('kafka:produce', kafkaProduceArgs, async (_event, [input]) => {
+    const result = await kafkaExecutionService.produce(input)
+    requestUsageService.recordSend(input.requestId)
+    return result
+  })
+
+  validatedHandle('kafka:browse', kafkaBrowseArgs, async (_event, [input]) => {
+    const result = await kafkaExecutionService.browse(input)
+    requestUsageService.recordSend(input.requestId)
+    return result
+  })
+
+  validatedHandle('kafka:consume-start', kafkaConsumeStartArgs, (_event, [requestId]) => {
+    if (kafkaExecutionService.isActive(requestId)) return { started: false }
+    // These three callbacks feed the SCENARIO-ENGINE bridge (`engine.ts`'s
+    // `transport: 'kafka'` branch); the request-panel path below doesn't need
+    // them — it already gets connect/message/close via the service's own
+    // `kafka:request-progress` / `kafka:message` broadcasts, which the
+    // renderer subscribes to directly.
+    kafkaExecutionService.connectStreamingConsumer({
+      requestId,
+      onConnect: () => { /* renderer uses the progress broadcast instead */ },
+      onMessage: () => { /* renderer uses the message broadcast instead */ },
+      onClose: () => { /* renderer uses the progress broadcast instead */ }
+    })
+    requestUsageService.recordSend(requestId)
+    return { started: true }
+  })
+
+  validatedHandle('kafka:cancel', kafkaCancelArgs, (_event, [requestId]) => {
+    return kafkaExecutionService.cancel(requestId)
+  })
+
+  validatedHandle('kafka:is-active', kafkaIsActiveArgs, (_event, [requestId]) => {
+    return kafkaExecutionService.isActive(requestId)
   })
 
   // ==========================================================================
@@ -1285,6 +1638,23 @@ export function registerRestormIPC(deps: {
         error: error instanceof Error ? error.message : String(error)
       }
     }
+  })
+
+  // Fired from `useImport.ts` right after the renderer commits the imported
+  // tree with its FINAL ids (ids the human File → Import flow regenerates
+  // to avoid collisions with the existing project). Lets a format's
+  // `ImportProvider.postImportSeed` (e.g. HAR's recorded responses →
+  // response history) run with ids that actually resolve in the collection
+  // store — see `registry.ts` for why this can't happen from `import:preview`
+  // or from inside `parse()` itself.
+  validatedHandle('import:postImportSeed', importPostImportSeedArgs, async (_event, [args]) => {
+    logger.info('[IPC] Import postImportSeed requested:', { source: args.source, format: args.format })
+    const result = await runPostImportSeed(args.source, args.format, args.idMap, {
+      ...(args.extraHeaders !== undefined ? { extraHeaders: args.extraHeaders } : {}),
+      ...(args.expectedChecksum !== undefined ? { expectedChecksum: args.expectedChecksum } : {})
+    })
+    logger.info('[IPC] Import postImportSeed result:', result)
+    return result
   })
 
   // ==========================================================================

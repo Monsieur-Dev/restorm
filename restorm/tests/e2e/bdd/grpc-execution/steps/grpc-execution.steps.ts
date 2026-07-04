@@ -23,6 +23,30 @@ const STREAM_SEND_BTN = '[data-testid="grpc-stream-send-button"]'
 const INVOKE_BTN = '[data-testid="grpc-send-button"]'
 const RESPONSE_EDITOR = '[data-testid="grpc-response-message-editor"]'
 
+/** Display label → option index, matching `grpcTransportOptions` in
+ * `GrpcRequestTabView.tsx` (order: gRPC, gRPC-Web, Connect). */
+const TRANSPORT_OPTION_INDEX: Record<string, number> = { gRPC: 0, 'gRPC-Web': 1, Connect: 2 }
+
+/**
+ * `grpc-response-status` / `grpc-response-error` live in the response
+ * panel's "Infos" tab, which is NOT the default-selected tab whenever a
+ * response body also exists (see `BaseRequestTabView.tsx`'s `responseTabs` —
+ * it defaults to `'response'` and only falls back to `'infos'` when there's
+ * no response body to show, e.g. a call that errored before producing one).
+ * A successful unary call has both tabs, so Infos must be selected
+ * explicitly before asserting on status — mirrors `soap-execution.steps.ts`'s
+ * `openInfosTab`.
+ */
+async function openInfosTab(p: Page): Promise<void> {
+  const infosTab = p.locator('[data-testid="base-request-tabs-response-tab-infos"]:visible').first()
+  await infosTab.waitFor({ state: 'visible', timeout: 15_000 })
+  await infosTab.click()
+  await p
+    .locator('[data-testid="base-request-tabs-response-tabpanel-infos"]')
+    .first()
+    .waitFor({ state: 'visible', timeout: 10_000 })
+}
+
 function parsedReply(reply: McpToolReply): unknown {
   const text = reply.content?.[0]?.text ?? ''
   try { return JSON.parse(text) } catch { return text }
@@ -166,6 +190,7 @@ Then(
   'the gRPC response shows a non-OK status code {int}',
   async ({}, code: number) => {
     if (page === null) throw new Error('launch first')
+    await openInfosTab(page)
     // The response status span appears once the unary call completes (with or
     // without an error). Wait for the element carrying the expected raw code.
     const statusEl = page.locator(`[data-testid="grpc-response-status"][data-status-code="${code}"]`).first()
@@ -173,10 +198,36 @@ Then(
   }
 )
 
+Then('the gRPC response shows an OK status', async () => {
+  if (page === null) throw new Error('launch first')
+  await openInfosTab(page)
+  // gRPC status code 0 is OK, regardless of which transport dispatched the call.
+  const statusEl = page.locator('[data-testid="grpc-response-status"][data-status-code="0"]').first()
+  await expect(statusEl).toBeVisible({ timeout: 15_000 })
+})
+
+When('I set the gRPC transport to {string}', async ({}, label: string) => {
+  if (page === null) throw new Error('launch first')
+  const index = TRANSPORT_OPTION_INDEX[label]
+  expect(index, `unknown transport label "${label}"`).toBeDefined()
+  await page.locator('[data-testid="grpc-transport-select-trigger"]').first().click({ force: true })
+  await page.locator(`[data-testid="grpc-transport-select-option-${index}"]`).first().click({ force: true })
+  // The reactive-object write (and the downstream ContextService push) is
+  // debounced at ≤250ms — wait one debounce window so a subsequent Invoke
+  // dispatches the settled transport, not a mid-flight one.
+  await page.waitForTimeout(400)
+})
+
+Then('the gRPC transport select shows {string}', async ({}, label: string) => {
+  if (page === null) throw new Error('launch first')
+  await expect(page.locator('[data-testid="grpc-transport-select-trigger"] .select-text').first()).toHaveText(label, { timeout: 10_000 })
+})
+
 Then(
   'the gRPC response shows the status label {string}',
   async ({}, label: string) => {
     if (page === null) throw new Error('launch first')
+    await openInfosTab(page)
     // The status message attribute is set to the grpcStatusName() string.
     const statusEl = page.locator(`[data-testid="grpc-response-status"][data-status-message="${label}"]`).first()
     await expect(statusEl).toBeVisible({ timeout: 10_000 })
@@ -187,6 +238,7 @@ Then(
   'the gRPC response error text contains {string}',
   async ({}, needle: string) => {
     if (page === null) throw new Error('launch first')
+    await openInfosTab(page)
     // The error div appears when the response carries a non-OK error string.
     const errorEl = page.locator('[data-testid="grpc-response-error"]').first()
     await expect(errorEl).toBeVisible({ timeout: 10_000 })

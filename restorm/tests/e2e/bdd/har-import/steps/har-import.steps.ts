@@ -89,3 +89,29 @@ Then('exactly {int} folders named {string} should be in the sidebar', async ({},
   const p = requirePage()
   await expect(sidebarRowsByName(p, name)).toHaveCount(count, { timeout: 10000 })
 })
+
+Then('the imported request {string} should have response history', async ({}, requestName: string) => {
+  const p = requirePage()
+  const requestRow = sidebarRowsByName(p, requestName).first()
+  await expect(requestRow).toBeVisible({ timeout: 10000 })
+  await requestRow.click()
+
+  // The history button carries a per-tab id suffix (`…-<requestId>`) so an
+  // inactive `display:none` tab's copy can't be resolved by a flat testid;
+  // `:visible` pins the locator to the active tab's on-screen button.
+  const historyButton = p.locator('[data-testid^="request-header-history-button-"]:visible')
+  await expect(historyButton).toBeVisible({ timeout: 5000 })
+  await historyButton.click()
+
+  await expect(p.locator('[data-testid="response-history-modal"]')).toBeVisible({ timeout: 5000 })
+  // `HarImportService`'s `postImportSeed` writes history keyed by the
+  // request's FINAL id — the one `useImport.ts` regenerates AFTER the tree
+  // leaves main, threaded back through the `import:postImportSeed` IPC round
+  // trip. A wrong channel name, a preload-binding miss, or the id map never
+  // reaching main would leave this list empty while every unit test (which
+  // mocks the boundary it sits on) still passes — this is the assertion that
+  // actually exercises the real renderer → IPC → main → ResponseHistoryService
+  // chain end to end.
+  const rows = p.locator('[data-testid="response-history-list-view"] .list-view-row')
+  await expect(rows.first()).toBeVisible({ timeout: 10000 })
+})

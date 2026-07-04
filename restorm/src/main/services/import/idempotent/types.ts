@@ -100,6 +100,7 @@ export interface GenericOperationShape {
     // file — each new ImportAdapter is a single independent file.
     | 'har' | 'rest-client' | 'thunder-client' | 'paw' | 'httpie'
     | 'smithy' | 'typespec' | 'raml' | 'wadl' | 'thrift' | 'api-blueprint'
+    | 'openrpc'
   /** Format-specific raw payload. The pipeline doesn't introspect
    * it — only the materialiser does. Idempotent merge for these
    * protocols is "additive only" (new ops added, missing ops

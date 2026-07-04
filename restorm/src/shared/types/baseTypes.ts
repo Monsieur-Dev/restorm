@@ -53,6 +53,7 @@ export type ImportSourceType =
   | 'curl'
   | 'powershell'
   | 'url'
+  | 'openrpc'
   // Formats reserved up-front so importer tickets never need to touch this
   // file — each new ImportService self-registers independently.
   | 'har'
@@ -66,6 +67,7 @@ export type ImportSourceType =
   | 'wadl'
   | 'thrift'
   | 'api-blueprint'
+  | 'trpc'
 
 /**
  * Per-env-folder configuration tracking where the folder's spec was

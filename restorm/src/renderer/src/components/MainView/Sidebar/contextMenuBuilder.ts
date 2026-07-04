@@ -45,13 +45,20 @@ export type AddChildKind =
   | 'socketio'
   | 'socketio-server'
   | 'websocket-server'
+  | 'stomp'
   | 'mqtt'
   | 'mqtt-server'
+  | 'sse'
+  | 'kafka-produce'
+  | 'kafka-consume'
   | 'http-server'
   | 'graphql-server'
   | 'odata'
   | 'odata-server'
+  | 'amqp'
+  | 'redis'
   | 'auth'
+  | 'trpc'
   | 'scenario'
 
 export type AddChildHandler = (parentId: string, kind: AddChildKind) => void
@@ -223,6 +230,15 @@ export const buildAddSubmenu = (
     icon: React.createElement(Badge, { type: 'SIO', mode: 'server' }),
     onClick: () => { onAddChildItem(parentId, 'socketio-server') }
   },
+  { id: `sep-add-stomp-${parentId}`, isSeparator: true, label: '' },
+  // STOMP: client only — connects to an external broker (e.g. ActiveMQ), no
+  // restorm-hosted server mode.
+  {
+    id: `add-stomp-${parentId}`,
+    label: t('sidebar.contextMenu.add.stomp'),
+    icon: React.createElement(Badge, { type: 'STOMP' }),
+    onClick: () => { onAddChildItem(parentId, 'stomp') }
+  },
   { id: `sep-add-mqtt-${parentId}`, isSeparator: true, label: '' },
   // MQTT group: client (connects to a broker) + server (restorm hosts a broker).
   {
@@ -237,6 +253,29 @@ export const buildAddSubmenu = (
     icon: React.createElement(Badge, { type: 'MQTT', mode: 'server' }),
     onClick: () => { onAddChildItem(parentId, 'mqtt-server') }
   },
+  { id: `sep-add-sse-${parentId}`, isSeparator: true, label: '' },
+  // SSE: receive-only streaming, no server mode — a single client entry.
+  {
+    id: `add-sse-${parentId}`,
+    label: t('sidebar.contextMenu.add.sse'),
+    icon: React.createElement(Badge, { type: 'SSE' }),
+    onClick: () => { onAddChildItem(parentId, 'sse') }
+  },
+  { id: `sep-add-kafka-${parentId}`, isSeparator: true, label: '' },
+  // Kafka group: no server variant (restorm never hosts a broker) — produce
+  // (one-shot) + consume (long-lived consumer group) instead.
+  {
+    id: `add-kafka-produce-${parentId}`,
+    label: t('sidebar.contextMenu.add.kafkaProduce'),
+    icon: React.createElement(Badge, { type: 'KAFKA', icon: 'arrow-up' }),
+    onClick: () => { onAddChildItem(parentId, 'kafka-produce') }
+  },
+  {
+    id: `add-kafka-consume-${parentId}`,
+    label: t('sidebar.contextMenu.add.kafkaConsume'),
+    icon: React.createElement(Badge, { type: 'KAFKA', icon: 'plug' }),
+    onClick: () => { onAddChildItem(parentId, 'kafka-consume') }
+  },
   { id: `sep-add-odata-${parentId}`, isSeparator: true, label: '' },
   {
     id: `add-odata-${parentId}`,
@@ -249,6 +288,30 @@ export const buildAddSubmenu = (
     label: t('sidebar.contextMenu.add.odataServer'),
     icon: React.createElement(Badge, { type: 'ODATA', mode: 'server' }),
     onClick: () => { onAddChildItem(parentId, 'odata-server') }
+  },
+  { id: `sep-add-trpc-${parentId}`, isSeparator: true, label: '' },
+  {
+    id: `add-trpc-${parentId}`,
+    label: t('sidebar.contextMenu.add.trpc'),
+    icon: React.createElement(Badge, { type: 'tRPC' }),
+    onClick: () => { onAddChildItem(parentId, 'trpc') }
+  },
+  { id: `sep-add-amqp-${parentId}`, isSeparator: true, label: '' },
+  // AMQP (RabbitMQ): one request type covers publish / subscribe / browse
+  // (picked via a mode selector inside the tab), so a single menu entry
+  // suffices — unlike WS/MQTT there's no separate client/server pair.
+  {
+    id: `add-amqp-${parentId}`,
+    label: t('sidebar.contextMenu.add.amqp'),
+    icon: React.createElement(Badge, { type: 'AMQP' }),
+    onClick: () => { onAddChildItem(parentId, 'amqp') }
+  },
+  { id: `sep-add-redis-${parentId}`, isSeparator: true, label: '' },
+  {
+    id: `add-redis-${parentId}`,
+    label: t('sidebar.contextMenu.add.redis'),
+    icon: React.createElement(Badge, { type: 'REDIS' }),
+    onClick: () => { onAddChildItem(parentId, 'redis') }
   },
   { id: `sep-add-proto-${parentId}`, isSeparator: true, label: '' },
   {

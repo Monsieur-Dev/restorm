@@ -426,10 +426,9 @@ export async function importThunderClientFromUrl(
 
 import { importProviders } from './registry'
 
-function canImport(content: string, _filePath?: string): boolean {
-  const trimmed = content.trim()
+function canImport(content: string, _filePath?: string, parsed?: unknown): boolean {
   try {
-    const json: unknown = JSON.parse(trimmed)
+    const json: unknown = parsed !== undefined ? parsed : JSON.parse(content.trim())
     if (typeof json !== 'object' || json === null) return false
     const obj = json as Record<string, unknown>
     if (obj.clientName === 'Thunder Client' || obj.client === 'Thunder Client') return true

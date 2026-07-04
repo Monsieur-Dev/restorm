@@ -990,12 +990,12 @@ export function importODataFromString(content: string, options: ODataImportOptio
 
 import { importProviders } from './registry'
 
-function canImport(content: string, filePath?: string): boolean {
+function canImport(content: string, filePath?: string, parsed?: unknown): boolean {
   if (filePath?.endsWith('.edmx') || filePath?.endsWith('$metadata')) return true
   const trimmed = content.trim()
   if (trimmed.includes('<edmx:Edmx') || trimmed.includes('<Edmx ')) return true
   try {
-    const json: unknown = JSON.parse(trimmed)
+    const json: unknown = parsed !== undefined ? parsed : JSON.parse(trimmed)
     return typeof json === 'object' && json !== null && '$Version' in json
   } catch { /* not JSON */ }
   return false

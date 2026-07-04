@@ -111,6 +111,85 @@ export const websocketCloseExecutor: NodeExecutor = (_act, ctx) => {
   return { outputs: [] }
 }
 
+/** A (sseConnect): SSE — same handoff as websocketConnect, but there is no send
+ * direction at all (no B executor): every received frame routes to the single
+ * `message` port. */
+export const sseConnectExecutor: NodeExecutor = (_act, ctx) => {
+  const cfg = ctx.node.config as { requestId?: unknown; connectionName?: unknown }
+  if (typeof cfg.requestId !== 'string' || cfg.requestId === '') {
+    throw new Error(`sseConnect node ${ctx.node.id} has no bound requestId`)
+  }
+  const connectionName = typeof cfg.connectionName === 'string' && cfg.connectionName.trim() !== ''
+    ? cfg.connectionName.trim()
+    : cfg.requestId
+  return {
+    outputs: [],
+    scopeAction: { type: 'openSocketioConnect', transport: 'sse', requestId: cfg.requestId, events: [], connectionName, ...(overrideConfigFrom(ctx.node.config) ? { overrideConfig: overrideConfigFrom(ctx.node.config) } : {}) }
+  }
+}
+
+/** C (sseClose): close the referenced connection (same as websocketClose). */
+export const sseCloseExecutor: NodeExecutor = (_act, ctx) => {
+  const cfg = ctx.node.config as { connectionNodeId?: unknown }
+  const connectionNodeId = typeof cfg.connectionNodeId === 'string' ? cfg.connectionNodeId : ''
+  if (connectionNodeId === '') throw new Error('sseClose: no connection selected')
+  if (!ctx.socketio) throw new Error('sseClose: socket bridge unavailable')
+  if (!ctx.socketio.has(connectionNodeId)) {
+    throw new Error('sseClose: the referenced connection does not exist in this run')
+  }
+  ctx.socketio.close(connectionNodeId)
+  return { outputs: [] }
+}
+
+/** A (stompConnect): STOMP-over-WebSocket — same handoff as websocketConnect
+ * (no events; every received MESSAGE/ERROR frame routes to the single
+ * `message` port). The bridge performs the CONNECT/CONNECTED handshake and
+ * SUBSCRIBEs to the bound request's configured destinations before firing
+ * `connected`. */
+export const stompConnectExecutor: NodeExecutor = (_act, ctx) => {
+  const cfg = ctx.node.config as { requestId?: unknown; connectionName?: unknown }
+  if (typeof cfg.requestId !== 'string' || cfg.requestId === '') {
+    throw new Error(`stompConnect node ${ctx.node.id} has no bound requestId`)
+  }
+  const connectionName = typeof cfg.connectionName === 'string' && cfg.connectionName.trim() !== ''
+    ? cfg.connectionName.trim()
+    : cfg.requestId
+  return {
+    outputs: [],
+    scopeAction: { type: 'openSocketioConnect', transport: 'stomp', requestId: cfg.requestId, events: [], connectionName, ...(overrideConfigFrom(ctx.node.config) ? { overrideConfig: overrideConfigFrom(ctx.node.config) } : {}) }
+  }
+}
+
+/** B (stompSend): send a SEND frame (to the request's own configured
+ * destination — no channel input) on the referenced connection. */
+export const stompSendExecutor: NodeExecutor = (act, ctx) => {
+  const cfg = ctx.node.config as { connectionNodeId?: unknown; payload?: unknown }
+  const connectionNodeId = typeof cfg.connectionNodeId === 'string' ? cfg.connectionNodeId : ''
+  if (connectionNodeId === '') throw new Error('stompSend: no connection selected')
+  if (!ctx.socketio) throw new Error('stompSend: socket bridge unavailable')
+  if (!ctx.socketio.has(connectionNodeId)) {
+    throw new Error('stompSend: the referenced connection does not exist in this run')
+  }
+  const payload = toWire(resolveOperand(act.inputs['payload'], cfg.payload, ctx.variables))
+  const ok = ctx.socketio.send(connectionNodeId, '', payload)
+  if (!ok) throw new Error('stompSend: the referenced connection is not open')
+  return { outputs: [] }
+}
+
+/** C (stompClose): send DISCONNECT and close the referenced connection (same
+ * as websocketClose). */
+export const stompCloseExecutor: NodeExecutor = (_act, ctx) => {
+  const cfg = ctx.node.config as { connectionNodeId?: unknown }
+  const connectionNodeId = typeof cfg.connectionNodeId === 'string' ? cfg.connectionNodeId : ''
+  if (connectionNodeId === '') throw new Error('stompClose: no connection selected')
+  if (!ctx.socketio) throw new Error('stompClose: socket bridge unavailable')
+  if (!ctx.socketio.has(connectionNodeId)) {
+    throw new Error('stompClose: the referenced connection does not exist in this run')
+  }
+  ctx.socketio.close(connectionNodeId)
+  return { outputs: [] }
+}
+
 /** A (mqttConnect): MQTT — same handoff as websocketConnect (no events; every
  * received message routes to the single `message` port). The bridge subscribes
  * to the bound request's topic on connect. */
@@ -152,6 +231,87 @@ export const mqttCloseExecutor: NodeExecutor = (_act, ctx) => {
   if (!ctx.socketio) throw new Error('mqttClose: socket bridge unavailable')
   if (!ctx.socketio.has(connectionNodeId)) {
     throw new Error('mqttClose: the referenced connection does not exist in this run')
+  }
+  ctx.socketio.close(connectionNodeId)
+  return { outputs: [] }
+}
+
+/** A (amqpConnect): AMQP — same handoff as mqttConnect (no events; every
+ * received/delivered message routes to the single `message` port). The
+ * bridge subscribes to the bound request's queue on connect (the request's
+ * `mode` must be `subscribe`). */
+export const amqpConnectExecutor: NodeExecutor = (_act, ctx) => {
+  const cfg = ctx.node.config as { requestId?: unknown; connectionName?: unknown }
+  if (typeof cfg.requestId !== 'string' || cfg.requestId === '') {
+    throw new Error(`amqpConnect node ${ctx.node.id} has no bound requestId`)
+  }
+  const connectionName = typeof cfg.connectionName === 'string' && cfg.connectionName.trim() !== ''
+    ? cfg.connectionName.trim()
+    : cfg.requestId
+  return {
+    outputs: [],
+    scopeAction: { type: 'openSocketioConnect', transport: 'amqp', requestId: cfg.requestId, events: [], connectionName, ...(overrideConfigFrom(ctx.node.config) ? { overrideConfig: overrideConfigFrom(ctx.node.config) } : {}) }
+  }
+}
+
+/** B (amqpPublish): publish a payload on the referenced connection (to the
+ * bound request's own exchange/routing key — see `AMQPExecutionService.send`). */
+export const amqpPublishExecutor: NodeExecutor = (act, ctx) => {
+  const cfg = ctx.node.config as { connectionNodeId?: unknown; payload?: unknown }
+  const connectionNodeId = typeof cfg.connectionNodeId === 'string' ? cfg.connectionNodeId : ''
+  if (connectionNodeId === '') throw new Error('amqpPublish: no connection selected')
+  if (!ctx.socketio) throw new Error('amqpPublish: socket bridge unavailable')
+  if (!ctx.socketio.has(connectionNodeId)) {
+    throw new Error('amqpPublish: the referenced connection does not exist in this run')
+  }
+  const payload = toWire(resolveOperand(act.inputs['payload'], cfg.payload, ctx.variables))
+  // Empty channel → publish to the connection's own exchange/routingKey (set at connect).
+  const ok = ctx.socketio.send(connectionNodeId, '', payload)
+  if (!ok) throw new Error('amqpPublish: the referenced connection is not open')
+  return { outputs: [] }
+}
+
+/** C (amqpClose): close the referenced connection (same as mqttClose). */
+export const amqpCloseExecutor: NodeExecutor = (_act, ctx) => {
+  const cfg = ctx.node.config as { connectionNodeId?: unknown }
+  const connectionNodeId = typeof cfg.connectionNodeId === 'string' ? cfg.connectionNodeId : ''
+  if (connectionNodeId === '') throw new Error('amqpClose: no connection selected')
+  if (!ctx.socketio) throw new Error('amqpClose: socket bridge unavailable')
+  if (!ctx.socketio.has(connectionNodeId)) {
+    throw new Error('amqpClose: the referenced connection does not exist in this run')
+  }
+  ctx.socketio.close(connectionNodeId)
+  return { outputs: [] }
+}
+
+/** A (kafkaConsume): Kafka — same handoff as mqttConnect (no events; every
+ * consumed message routes to the single `message` port). The bridge opens a
+ * fresh consumer-group subscribe on connect (Kafka has no persistent
+ * per-request connection to reuse, unlike socketio/websocket/mqtt/grpc — but
+ * the scope-action handoff shape is identical, so it reuses the same bridge). */
+export const kafkaConsumeExecutor: NodeExecutor = (_act, ctx) => {
+  const cfg = ctx.node.config as { requestId?: unknown; connectionName?: unknown }
+  if (typeof cfg.requestId !== 'string' || cfg.requestId === '') {
+    throw new Error(`kafkaConsume node ${ctx.node.id} has no bound requestId`)
+  }
+  const connectionName = typeof cfg.connectionName === 'string' && cfg.connectionName.trim() !== ''
+    ? cfg.connectionName.trim()
+    : cfg.requestId
+  return {
+    outputs: [],
+    scopeAction: { type: 'openSocketioConnect', transport: 'kafka', requestId: cfg.requestId, events: [], connectionName, ...(overrideConfigFrom(ctx.node.config) ? { overrideConfig: overrideConfigFrom(ctx.node.config) } : {}) }
+  }
+}
+
+/** C (kafkaClose): close the referenced consumer (same as mqttClose — there is
+ * no `kafkaSend`, produce is its own one-shot `kafkaProduce` node). */
+export const kafkaCloseExecutor: NodeExecutor = (_act, ctx) => {
+  const cfg = ctx.node.config as { connectionNodeId?: unknown }
+  const connectionNodeId = typeof cfg.connectionNodeId === 'string' ? cfg.connectionNodeId : ''
+  if (connectionNodeId === '') throw new Error('kafkaClose: no connection selected')
+  if (!ctx.socketio) throw new Error('kafkaClose: socket bridge unavailable')
+  if (!ctx.socketio.has(connectionNodeId)) {
+    throw new Error('kafkaClose: the referenced connection does not exist in this run')
   }
   ctx.socketio.close(connectionNodeId)
   return { outputs: [] }

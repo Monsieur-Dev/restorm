@@ -1,5 +1,5 @@
 // @vitest-environment node
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import { detectFormat } from './ImportManager'
 
 describe('detectFormat — operator grouping (gRPC / SOAP)', () => {
@@ -55,5 +55,34 @@ describe('detectFormat — extension-anchored match beats greedy content sniffs'
 
   it('routes a .smithy file to Smithy', () => {
     expect(detectFormat(thriftIdl, '/x/model.smithy')).toBe('smithy')
+  })
+})
+
+describe('detectFormat — JSON parsed once per pass, not once per JSON-capable provider', () => {
+  // Every JSON-format provider (Swagger, OpenAPI, Postman, Insomnia, Bruno,
+  // AsyncAPI, OData, OpenRpc, Trpc, Har, ThunderClient, Paw, Httpie, Smithy)
+  // successfully JSON.parses a shape like this before rejecting it on its own
+  // discriminator field — the exact "parsed up to ~8-14x per pass" scenario
+  // the shared pre-parse in `detectFormat` eliminates.
+  it('calls JSON.parse exactly once for a JSON payload no provider claims', () => {
+    const spy = vi.spyOn(JSON, 'parse')
+    try {
+      const content = JSON.stringify({ foo: 'bar' })
+      expect(detectFormat(content)).toBeNull()
+      expect(spy).toHaveBeenCalledTimes(1)
+    } finally {
+      spy.mockRestore()
+    }
+  })
+
+  it('calls JSON.parse exactly once while still detecting the matching format', () => {
+    const spy = vi.spyOn(JSON, 'parse')
+    try {
+      const content = JSON.stringify({ swagger: '2.0', info: {}, paths: {} })
+      expect(detectFormat(content)).toBe('swagger')
+      expect(spy).toHaveBeenCalledTimes(1)
+    } finally {
+      spy.mockRestore()
+    }
   })
 })

@@ -65,7 +65,15 @@ export function resolveUrl(
   }
 
   // Transform the URL template
-  const baseUrl = transformValue(data.url, fullContext)
+  let baseUrl = transformValue(data.url, fullContext)
+
+  // tRPC: the persisted `url` is the BASE server url; the procedure path is
+  // appended here (byte-identical for the request-panel Send and the scenario
+  // engine, mirroring the `odataQueryOptions` append below for query strings).
+  if (data.requestType === 'trpc' && data.trpcProcedure) {
+    const procedure = transformValue(data.trpcProcedure, fullContext)
+    if (procedure) baseUrl = `${baseUrl.replace(/\/+$/, '')}/${procedure}`
+  }
 
   // Build query string from params with cumulative resolution
   const params = data.params ?? []
@@ -134,6 +142,17 @@ export function resolveUrl(
     const systemPairs = serializeODataQueryOptions(resolvedOptions, data.odataVersion ?? 'v4')
     for (const [key, value] of systemPairs) {
       queryParts.push(`${key}=${encodeURIComponent(value)}`)
+    }
+  }
+
+  // tRPC v10 non-batch GET: the resolved `input` JSON is a single query
+  // param. A query with no input (or a mutation, whose input rides the POST
+  // body instead — composed by `composeTrpcRequestBody`) contributes nothing.
+  if (data.requestType === 'trpc' && data.trpcKind !== 'mutation') {
+    const rawInput = (data.trpcInput ?? '').trim()
+    if (rawInput.length > 0) {
+      const resolvedInput = transformValue(rawInput, cumulativeParamsContext)
+      queryParts.push(`input=${encodeURIComponent(resolvedInput)}`)
     }
   }
 

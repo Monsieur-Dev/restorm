@@ -83,6 +83,9 @@ export function mapToBadgeType(value: string): BadgeType {
   // Authentication
   if (normalized === 'auth') return 'AUTH'
 
+  // AMQP (RabbitMQ)
+  if (normalized === 'amqp') return 'AMQP'
+
   // Scenario (dataflow graph)
   if (normalized === 'scenario') return 'SCENARIO'
 

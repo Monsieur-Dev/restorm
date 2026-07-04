@@ -273,10 +273,17 @@
         "socketio": "Socket.IO 요청",
         "mqtt": "MQTT request",
         "mqttServer": "MQTT 브로커",
+        "sse": "SSE 요청",
         "grpcServer": "gRPC 목 서버",
         "soapServer": "SOAP 모의 서버",
         "graphqlServer": "GraphQL 목 서버",
-        "odataServer": "OData 목 서버"
+        "odataServer": "OData 목 서버",
+        "trpc": "tRPC 요청",
+        "amqp": "AMQP 요청",
+        "redis": "Redis 요청",
+        "stomp": "STOMP 요청",
+        "kafkaProduce": "Kafka 요청 – 생성",
+        "kafkaConsume": "Kafka 요청 – 소비"
       }
     },
     "deleteConfirm": {
@@ -474,6 +481,12 @@
       "clientStream": "Client streaming",
       "bidi": "Bidirectional streaming"
     },
+    "transport": {
+      "grpc": "gRPC",
+      "grpcWeb": "gRPC-Web",
+      "connect": "Connect",
+      "streamingUnsupported": "이 전송 방식은 HTTP/1.1을 통한 클라이언트 또는 양방향 스트리밍을 지원하지 않습니다. 대신 네이티브 gRPC 전송을 사용하세요."
+    },
     "server": {
       "proto": "Proto",
       "methods": "목 메서드",
@@ -492,6 +505,12 @@
       "notListening": "수신 대기 안 함",
       "listenFailed": "gRPC 서버를 시작하지 못했습니다",
       "snippetsUnavailable": "목 서버에는 코드 스니펫을 사용할 수 없습니다."
+    },
+    "reflection": {
+      "refresh": "reflection에서 새로고침",
+      "refreshFailed": "gRPC reflection을 통한 새로고침 실패",
+      "unsupported": "이 서버는 gRPC reflection을 지원하지 않습니다 — 대신 .proto 파일을 가져오세요.",
+      "unknownError": "알 수 없는 오류"
     }
   },
   "soap": {
@@ -539,6 +558,114 @@
     "routePlaceholder": "경로 (선택)",
     "clientsConnected": "{{count}}개 클라이언트 연결됨",
     "notListening": "수신 안 함"
+  },
+  "jsonrpc": {
+    "send": "보내기",
+    "urlPlaceholder": "JSON-RPC 엔드포인트 URL",
+    "methodPlaceholder": "메서드",
+    "idPlaceholder": "id (자동)",
+    "notificationModeTooltip": "알림 모드 — id 없음, 응답 대기 안 함",
+    "tabs": {
+      "params": "매개변수",
+      "headers": "헤더"
+    },
+    "response": {
+      "notificationSent": "알림 전송됨",
+      "errorLabel": "JSON-RPC 오류 {{code}}:"
+    }
+  },
+  "jsonrpcBatch": {
+    "send": "배치 보내기",
+    "tabs": {
+      "calls": "호출"
+    },
+    "empty": "아직 호출이 없습니다. 아래에 하나를 추가하세요.",
+    "methodPlaceholder": "메서드",
+    "idPlaceholder": "id (자동)",
+    "moveUp": "위로 이동",
+    "moveDown": "아래로 이동",
+    "remove": "호출 제거",
+    "paramsLabel": "매개변수 (JSON)",
+    "add": "호출 추가",
+    "response": {
+      "unmatched": "일치하는 응답 항목이 없습니다."
+    }
+  },
+  "sse": {
+    "headers": "헤더",
+    "noFrames": "아직 이벤트가 없습니다",
+    "urlPlaceholder": "SSE URL",
+    "framesTruncated": "전체 {{total}}개 중 최신 {{shown}}개 표시 중",
+    "showAllFrames": "전체 보기"
+  },
+  "redis": {
+    "connected": "연결됨",
+    "disconnected": "연결 끊김",
+    "noMessages": "아직 메시지가 없습니다",
+    "noCommandsYet": "아직 실행된 명령이 없습니다",
+    "urlPlaceholder": "Redis URL(redis:// 또는 rediss://)",
+    "passwordPlaceholder": "비밀번호(선택 사항)",
+    "subscribe": "구독",
+    "unsubscribe": "구독 취소",
+    "run": "실행",
+    "subscribeMode": "구독",
+    "commandMode": "명령",
+    "command": "명령",
+    "args": "인수",
+    "argsPlaceholder": "명령 인수",
+    "freeform": "자유 입력",
+    "freeformPlaceholder": "자유 입력 명령(선택 항목을 덮어씀)",
+    "tabs": {
+      "channels": "채널",
+      "command": "명령"
+    }
+  },
+  "kafka": {
+    "brokersPlaceholder": "브로커 목록 (host:port,host:port)",
+    "clientId": "클라이언트 ID",
+    "clientIdPlaceholder": "restorm",
+    "mode": {
+      "produce": "생성",
+      "consume": "소비",
+      "browse": "찾아보기"
+    },
+    "auth": {
+      "title": "인증",
+      "mechanism": "SASL",
+      "username": "사용자 이름",
+      "password": "비밀번호",
+      "tls": "TLS"
+    },
+    "topic": "토픽",
+    "topicPlaceholder": "토픽-이름",
+    "key": "키",
+    "keyPlaceholder": "메시지 키(선택 사항)",
+    "value": "값",
+    "headers": "헤더",
+    "partition": "파티션",
+    "partitionPlaceholder": "자동",
+    "groupId": "그룹 ID",
+    "groupIdPlaceholder": "restorm-consumer",
+    "fromOffsetLabel": "시작 위치",
+    "fromOffset": {
+      "earliest": "가장 오래된",
+      "latest": "최신",
+      "specific": "특정"
+    },
+    "specificOffset": "오프셋",
+    "partitions": "파티션",
+    "partitionsPlaceholder": "0,1,2(비워두면 전체)",
+    "peekCount": "조회 개수",
+    "produce": "생성",
+    "startConsuming": "소비 시작",
+    "stopConsuming": "소비 중지",
+    "peek": "미리보기",
+    "noMessages": "아직 메시지가 없습니다",
+    "connected": "연결됨",
+    "disconnected": "연결 끊김",
+    "producedTo": "전송 위치",
+    "offset": "오프셋",
+    "messages": "메시지"
   },
   "search": {
     "placeholder": "검색...",
@@ -885,6 +1012,10 @@
         "description": ".proto 파일(또는 해당 디렉터리)을 가져다 놓으면, restorm이 모든 service, 모든 RPC, 모든 message를 순회하며 각 메서드를 codegen 없이 gRPC 실행기로 보낼 수 있는 타입화된 요청으로 변환합니다.",
         "trademark": "gRPC는 Cloud Native Computing Foundation의 프로젝트입니다."
       },
+      "grpcReflection": {
+        "description": ".proto 파일이 없나요? Restorm을 reflection을 제공하는 실행 중인 gRPC 서버로 연결하세요 — grpc.reflection.v1alpha.ServerReflection을 조회하여 모든 서비스와 메서드를 찾아내고, proto 파일 가져오기와 동일한 형식의 요청 트리를 만들어 오프라인 사용을 위해 로컬에 캐시합니다.",
+        "action": "서버에 연결…"
+      },
       "soap": {
         "description": "WSDL이 있나요? 붙여넣기(또는 URL 입력)만으로 restorm이 각 <port>와 <operation>을 분석하여, 올바른 SOAPAction 헤더, 스키마로 타입화된 본문 스켈레톤, WSDL이 선언한 인증 스킴이 적용된 바로 보낼 수 있는 SOAP 엔벨로프를 생성합니다."
       },
@@ -910,7 +1041,57 @@
       "paw": {
         "description": "Paw에서 넘어오셨나요? JSON으로 내보낸 파일을 가져다 놓으면 됩니다(앱의 File → Export → JSON — 네이티브 .paw 번들은 직접 읽지 않습니다). restorm은 모든 요청, 헤더, 본문, 환경을 다시 구성하고, Paw의 동적 값(타임스탬프, 임의 문자열, UUID)을 가장 가까운 restorm 대응 값으로 매핑합니다.",
         "trademark": "Paw는 RapidAPI, Inc.의 등록 상표이며, 여기서는 호환성 참조 목적으로만 사용됩니다."
+      },
+      "har": {
+        "description": "브라우저의 devtools에서 네트워크 트레이스를 캡처하셨나요? 내보낸 .har 파일을 가져다 놓으세요 — restorm이 기록된 모든 호출을 살펴보고 헤더와 본문을 포함한 재생 가능한 요청으로 변환합니다."
+      },
+      "restClient": {
+        "description": "VS Code의 REST Client 확장에서 넘어오셨나요? .http / .rest 파일을 붙여넣거나 가져다 놓으세요 — restorm이 모든 요청 블록을 파싱하고 @variables를 해석하여 restorm 트리로 다시 구성합니다.",
+        "trademark": "REST Client는 해당 소유자의 상표이며, 여기서는 호환성 참조 목적으로만 사용됩니다."
+      },
+      "httpie": {
+        "description": "HTTPie Desktop 컬렉션 내보내기 파일이나 CLI 세션 파일을 가져다 놓으세요 — restorm이 모든 요청(세션의 경우 지속적인 헤더 포함)을 읽어 바로 실행할 수 있게 다시 구성합니다.",
+        "trademark": "HTTPie는 해당 소유자의 상표이며, 여기서는 호환성 참조 목적으로만 사용됩니다."
+      },
+      "smithy": {
+        "description": "Smithy 모델(JSON AST 또는 직접 작성한 IDL)을 붙여넣으세요 — restorm이 모든 서비스, 리소스, 오퍼레이션을 살펴보고 바로 실행할 수 있는 요청으로 구성된 대응 폴더를 만듭니다.",
+        "trademark": "Smithy는 Amazon Web Services의 프로젝트입니다."
+      },
+      "typespec": {
+        "description": "TypeSpec 정의(.tsp)를 붙여넣으세요 — restorm이 내부적으로 이를 OpenAPI로 컴파일하여, 직접 작성한 스펙과 똑같이 오퍼레이션, 파라미터, 스키마를 포함해 가져옵니다.",
+        "trademark": "TypeSpec은 Microsoft의 프로젝트입니다."
+      },
+      "raml": {
+        "description": "RAML 1.0 또는 0.8 문서를 붙여넣으세요 — restorm이 리소스 트리를 중첩된 폴더로 반영하며, 메서드당 하나의 요청과 모델링된 타입을 함께 구성합니다.",
+        "trademark": "RAML은 RAML Workgroup이 관리하는 사양입니다."
+      },
+      "wadl": {
+        "description": "아직 WADL 문서를 유지하고 계신가요? XML을 붙여넣으세요 — restorm이 중첩된 <resource> 트리를 살펴보고 메서드와 파라미터를 포함한 대응 요청 폴더를 만듭니다.",
+        "trademark": "WADL은 Sun Microsystems가 Member Submission으로 W3C에 제출했습니다."
+      },
+      "thrift": {
+        "description": "Apache Thrift IDL(.thrift) 파일을 붙여넣으세요 — restorm이 모든 서비스, 메서드, struct, enum을 읽어 API의 구조를 살펴볼 수 있게 합니다. Thrift의 바이너리 와이어 프로토콜은 아직 restorm에서 실행할 수 없으므로, 이 가져오기는 문서화 용도로만 사용됩니다.",
+        "trademark": "Apache Thrift는 Apache Software Foundation의 상표입니다."
+      },
+      "apiBlueprint": {
+        "description": "API Blueprint(.apib) 문서를 붙여넣으세요 — restorm이 모든 리소스 그룹과 전환을 문서화된 메서드/응답 쌍마다 하나씩 요청 폴더로 분석합니다.",
+        "trademark": "API Blueprint는 원래 Apiary가 만든 사양입니다."
       }
+    },
+    "grpcReflection": {
+      "title": "gRPC 서버 (reflection)",
+      "hint": "실행 중인 gRPC 서버의 reflection 서비스를 조회하여 .proto 파일 없이 서비스와 메서드를 찾습니다.",
+      "addressLabel": "서버 주소 (호스트:포트)",
+      "addressPlaceholder": "localhost:9000",
+      "tlsLabel": "TLS 사용",
+      "metadataLabel": "메타데이터 (선택적 인증 헤더)",
+      "connecting": "연결 중…",
+      "import": "가져오기",
+      "reimportedTitle": "gRPC reflection을 다시 가져왔습니다",
+      "reimportedNoop": "이미 최신 상태입니다 — 서버에 변경 사항이 없습니다.",
+      "reimportedSummary": "+{{added}} / -{{removed}} / ↻{{merged}} — 변경 사항을 보려면 프로젝트를 다시 불러오세요.",
+      "unsupported": "이 서버는 gRPC reflection을 지원하지 않습니다 — 대신 .proto 파일을 가져오세요.",
+      "unknownError": "알 수 없는 오류"
     },
     "loading": "분석 중...",
     "noResults": "요청을 찾을 수 없습니다",
@@ -1074,14 +1255,22 @@
       "socketioSend": "Socket.IO send",
       "socketioClose": "Socket.IO close",
       "websocketConnect": "WebSocket connect",
+      "sseConnect": "SSE connect",
       "websocketSend": "WebSocket send",
       "websocketClose": "WebSocket close",
+      "sseClose": "SSE close",
       "grpcConnect": "gRPC connect",
       "grpcSend": "gRPC send",
       "grpcClose": "gRPC close",
       "mqttConnect": "MQTT connect",
       "mqttSend": "MQTT publish",
       "mqttClose": "MQTT close",
+      "amqpConnect": "AMQP 연결",
+      "amqpPublish": "AMQP 게시",
+      "amqpClose": "AMQP 닫기",
+      "redisSubscribe": "Redis subscribe",
+      "redisClose": "Redis close",
+      "redisCommand": "Redis command",
       "httpListen": "HTTP server",
       "httpClose": "HTTP close",
       "grpcServerClose": "gRPC 서버 닫기",
@@ -1092,7 +1281,13 @@
       "odataListen": "OData server",
       "odataClose": "OData close",
       "graphqlSubscribe": "GraphQL 구독",
-      "graphqlUnsubscribe": "GraphQL 구독 취소"
+      "graphqlUnsubscribe": "GraphQL 구독 취소",
+      "stompConnect": "STOMP 연결",
+      "stompSend": "STOMP 전송",
+      "stompClose": "STOMP 닫기",
+      "kafkaProduce": "Kafka produce",
+      "kafkaConsume": "Kafka consume",
+      "kafkaClose": "Kafka close"
     },
     "comparator": {
       "result": "결과"
@@ -1653,8 +1848,10 @@
       "socketioSend": "이미 열린 Socket.IO 연결에서 메시지를 보냅니다.",
       "socketioClose": "이미 열린 Socket.IO 연결을 닫습니다.",
       "websocketConnect": "원시 WebSocket 연결을 열고 수신한 각 메시지를 해당 포트로 다시 내보냅니다.",
+      "sseConnect": "장기간 유지되는 SSE(Server-Sent Events) 연결을 열고 수신된 각 프레임을 해당 포트로 다시 전송합니다.",
       "websocketSend": "이미 열린 WebSocket 연결에서 페이로드를 보냅니다.",
       "websocketClose": "이미 열린 WebSocket 연결을 닫습니다.",
+      "sseClose": "이미 열려 있는 SSE 연결을 닫습니다.",
       "grpcConnect": "스트리밍 gRPC 호출을 열고 수신한 각 프레임을 message 포트로 다시 내보냅니다.",
       "grpcSend": "이미 열린 스트리밍 gRPC 호출에 요청 메시지를 씁니다.",
       "grpcClose": "이미 열린 스트리밍 gRPC 호출을 하프 클로즈합니다.",
@@ -1667,9 +1864,15 @@
       "mqttConnect": "바인딩된 요청에서 지속적인 MQTT 연결을 열고 해당 토픽을 구독하며, 수신한 각 메시지를 `message` 포트로 다시 내보냅니다.",
       "mqttSend": "이미 열린 MQTT 연결에서 페이로드를 (해당 토픽으로) 발행합니다.",
       "mqttClose": "이미 열린 MQTT 연결을 닫습니다.",
+      "amqpConnect": "바인딩된 요청에서 지속적인 AMQP 연결을 열고 해당 큐를 소비합니다. 수신된 각 메시지는 `message` 포트에서 다시 전송됩니다.",
+      "amqpPublish": "이미 열려 있는 AMQP 연결에서 페이로드를 게시합니다(바인딩된 요청의 exchange/routing key로).",
+      "amqpClose": "이미 열려 있는 AMQP 연결을 닫습니다.",
       "mqttConnectServer": "로컬 MQTT 브로커를 시작하고 (포트 + 토픽 필터) 해당 토픽 필터를 구독하여 수신한 각 메시지를 `message` 포트로 다시 내보냅니다. Send는 연결된 구독자에게 발행합니다.",
       "mqttSendServer": "참조된 MQTT 브로커의 모든 구독자에게 메시지를 발행합니다.",
       "mqttCloseServer": "참조된 MQTT 브로커를 중지하고 해당 클라이언트를 연결 해제합니다.",
+      "redisSubscribe": "바인딩된 요청에서 지속적인 Redis 구독 연결을 열고 해당 채널을 구독하며, 수신한 각 메시지를 `message` 포트로 다시 내보냅니다.",
+      "redisClose": "이미 열린 Redis 구독 연결을 닫습니다.",
+      "redisCommand": "바인딩된 Redis 명령을 실행하고 (새 연결에서 단일 명령 실행 후 연결 해제) 그 응답을 내보냅니다.",
       "toast": "시나리오 실행 중 Restorm UI에 토스트 알림을 표시합니다.",
       "httpListen": "Hosts a local HTTP mock server and listens indefinitely. `connected` fires once it is listening; each served request re-emits its data on the `served` port. The server stays up until an HTTP close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
       "httpClose": "이미 수신 대기 중인 HTTP 목 서버 (HTTP 서버 노드가 선언)를 중지하고 포트를 해제합니다.",
@@ -1682,7 +1885,13 @@
       "odataListen": "로컬 OData v4 모의 서비스를 호스팅하고 무기한 수신 대기합니다. 수신을 시작하면 `connected`가 발생하며, 처리된 각 요청은 해당 데이터를 `served` 포트로 다시 내보냅니다. 서버는 OData 종료(또는 Stop)까지 유지되며, 그 후 `done`이 발생합니다. response 출력은 없습니다. 제공만 할 뿐 외부로 호출하지 않습니다.",
       "odataClose": "이미 수신 대기 중인 OData 모의 서비스(OData 서버 노드가 선언한)를 중지하고 해당 포트를 해제합니다.",
       "graphqlSubscribe": "SSE를 통해 클라이언트로서 오래 지속되는 GraphQL 구독을 열고 수신합니다. 스트림이 열리면 `connected`가 실행됩니다. 푸시된 각 페이로드는 `message` 포트로 다시 방출됩니다(구독은 수신 전용이며 명명된 이벤트가 없습니다). 스트림은 GraphQL 구독 취소(또는 중지)까지, 또는 서버가 완료할 때까지 열린 상태로 유지되며 그 후 `done`이 실행됩니다.",
-      "graphqlUnsubscribe": "이미 열린 GraphQL 구독(GraphQL 구독 노드로 선언됨)을 중지하고 해당 SSE 스트림을 해제합니다."
+      "graphqlUnsubscribe": "이미 열린 GraphQL 구독(GraphQL 구독 노드로 선언됨)을 중지하고 해당 SSE 스트림을 해제합니다.",
+      "stompConnect": "지속적인 STOMP over WebSocket 연결을 엽니다. CONNECT/CONNECTED 핸드셰이크를 수행한 다음 구성된 각 대상을 구독하고 수신된 각 프레임을 해당 포트로 다시 내보냅니다.",
+      "stompSend": "이미 열려 있는 STOMP 연결에서 SEND 프레임을 전송합니다.",
+      "stompClose": "DISCONNECT를 전송하고 이미 열려 있는 STOMP 연결을 닫습니다.",
+      "kafkaProduce": "바인딩된 Kafka 요청을 단발성 프로듀스로 실행하고 결과(토픽/파티션/오프셋)를 `response`로 내보냅니다.",
+      "kafkaConsume": "바인딩된 요청에서 지속적인 Kafka 컨슈머를 열고, 수신한 각 메시지를 `message` 포트로 다시 내보냅니다.",
+      "kafkaClose": "이미 열린 Kafka 컨슈머를 닫습니다."
     },
     "legend": {
       "title": "범례",
@@ -1731,6 +1940,9 @@
     "websocket": {
       "message": "message"
     },
+    "sse": {
+      "message": "message"
+    },
     "grpc": {
       "message": "message"
     },
@@ -1776,6 +1988,36 @@
     "lwtTopicPlaceholder": "will/topic",
     "lwtPayload": "Payload",
     "lwtPayloadPlaceholder": "will message"
+  },
+  "amqp": {
+    "urlPlaceholder": "AMQP URL (amqp:// 또는 amqps://)",
+    "vhost": "가상 호스트",
+    "vhostPlaceholder": "/",
+    "username": "사용자 이름",
+    "password": "비밀번호",
+    "mode": "모드",
+    "modePublish": "게시",
+    "modeSubscribe": "구독",
+    "modeBrowse": "찾아보기",
+    "exchange": "Exchange",
+    "exchangePlaceholder": "(기본 exchange)",
+    "routingKey": "라우팅 키",
+    "routingKeyPlaceholder": "routing.key",
+    "queue": "큐",
+    "queuePlaceholder": "큐 이름",
+    "autoAck": "자동 확인",
+    "prefetch": "Prefetch",
+    "browsePeekCount": "미리보기 개수",
+    "connect": "연결",
+    "connecting": "연결 중…",
+    "disconnect": "연결 끊기",
+    "connected": "연결됨",
+    "disconnected": "연결 끊김",
+    "send": "보내기",
+    "browseButton": "찾아보기",
+    "noMessages": "아직 메시지가 없습니다",
+    "peeked": "미리보기 완료",
+    "messages": "메시지"
   },
   "mcpLogs": {
     "title": "MCP 로그",
@@ -2042,5 +2284,42 @@
       "noSubscription": "관리할 활성 구독이 없습니다.",
       "error": "구독 포털을 열 수 없습니다. 다시 시도해 주세요."
     }
+  },
+  "trpc": {
+    "send": "보내기",
+    "urlPlaceholder": "tRPC 서버 URL",
+    "procedurePlaceholder": "프로시저 (예: user.get)",
+    "kindQuery": "쿼리",
+    "kindMutation": "뮤테이션",
+    "showRawEnvelope": "원시 엔벨로프 표시",
+    "kindSelectLabel": "호출 종류",
+    "tabs": {
+      "headers": "헤더",
+      "body": "본문"
+    }
+  },
+  "stomp": {
+    "connect": "연결",
+    "disconnect": "연결 해제",
+    "connected": "연결됨",
+    "disconnected": "연결 안 됨",
+    "noMessages": "아직 프레임이 없습니다",
+    "version": "STOMP 버전",
+    "tabs": {
+      "connect": "연결",
+      "subscriptions": "구독",
+      "send": "전송"
+    },
+    "ackMode": {
+      "auto": "auto",
+      "client": "client",
+      "clientIndividual": "client-individual"
+    },
+    "subscriptionIdLabel": "구독 ID",
+    "removeSubscription": "구독 제거",
+    "addSubscription": "구독 추가",
+    "sendDestination": "대상",
+    "ack": "ACK",
+    "nack": "NACK"
   }
 }

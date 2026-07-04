@@ -60,7 +60,9 @@ export type HTTPRequestBody =
 /** Full request data for URL resolution and code snippet generation */
 export interface FullRequestData {
   id: string
-  requestType: 'http' | 'graphql' | 'grpc' | 'soap' | 'websocket' | 'odata' | 'auth'
+  requestType: 'http' | 'graphql' | 'grpc' | 'soap' | 'websocket' | 'sse' | 'odata' | 'auth' | 'jsonrpc' | 'jsonrpcBatch' | 'trpc' | 'amqp' | 'redis'
+  requestType: 'http' | 'graphql' | 'grpc' | 'soap' | 'websocket' | 'stomp' | 'odata' | 'auth'
+  requestType: 'http' | 'graphql' | 'grpc' | 'soap' | 'websocket' | 'odata' | 'auth' | 'kafka'
 
   // Common fields
   url: string
@@ -93,11 +95,16 @@ export interface FullRequestData {
   service?: string
   grpcMethod?: string
   callType?: string
+  /** Wire transport ('grpc' | 'grpc-web' | 'connect'); absent means native gRPC. */
+  transport?: string
   requestMessage?: string
   /** The request's own proto, used to build the dynamic client (falls back to
    * the bundled grpcbin proto when absent). */
   protoContent?: string
   protoPath?: string
+  /** Base64 `FileDescriptorSet` fetched via gRPC server reflection; takes
+   * precedence over `protoContent`/`protoPath` (see `grpcProtoLoader.ts`). */
+  protoDescriptorSet?: string
   metadata?: KeyValue[]
 
   // SOAP specific
@@ -130,6 +137,20 @@ export interface FullRequestData {
   lwtQos?: number
   lwtRetain?: boolean
 
+  // SSE specific
+  /** Seed for the `Last-Event-ID` header on the first connect. */
+  lastEventId?: string
+  // STOMP specific (requestType === 'stomp'). `connectHeaders` + `sendHeaders`
+  // are ALSO merged into the top-level `headers` field above (so
+  // `collectRequestSecrets` sees both for pre-hydration) — these two carry the
+  // same rows split by which frame they belong to.
+  stompVersion?: '1.1' | '1.2'
+  connectHeaders?: KeyValue[]
+  subscriptions?: { id?: string; destination?: string; ackMode?: string }[]
+  sendDestination?: string
+  sendBody?: string
+  sendHeaders?: KeyValue[]
+
   // OData specific — carried verbatim through URLResolver, which
   // appends the system query options ($filter / $select / $top /
   // $skip / $count) to the resolved URL as a final step.
@@ -151,6 +172,80 @@ export interface FullRequestData {
   mockMetadata?: string
   /** OData mock service: served entity data keyed by entity-set name. */
   mockData?: Record<string, Record<string, unknown>[]>
+
+  // JSON-RPC specific — read by JsonRpcExecutionService to compose the
+  // `{ jsonrpc: '2.0', method, params, id }` envelope. `jsonRpcParams` is
+  // raw JSON source (array or object), resolved through ContextService
+  // before being parsed.
+  jsonRpcMethod?: string
+  jsonRpcParams?: string
+  jsonRpcId?: string
+  jsonRpcNotificationMode?: boolean
+  /** JSON-RPC batch specific: child calls composed into the batch array. */
+  jsonRpcChildren?: {
+    childId: string
+    method: string
+    params: string
+    rpcId: string
+    notificationMode?: boolean
+  }[]
+
+  // tRPC specific — `url` carries the BASE server url; URLResolver appends
+  // `/<trpcProcedure>` (and, for a query, `?input=<encoded>`) as a final step,
+  // mirroring the OData system-query-option append above.
+  trpcProcedure?: string
+  trpcInput?: string
+  trpcKind?: 'query' | 'mutation'
+
+  // AMQP specific (requestType === 'amqp'; `username`/`password` above are
+  // shared with MQTT — only one protocol branch ever populates them on a
+  // given instance).
+  /** Virtual host (defaults to `/` when empty). */
+  vhost?: string
+  /** Which of the three interactions this request performs. */
+  mode?: 'publish' | 'subscribe' | 'browse'
+  /** PUBLISH: destination exchange (empty string = the default exchange). */
+  exchange?: string
+  /** PUBLISH: routing key. */
+  routingKey?: string
+  /** PUBLISH: message payload. */
+  payload?: string
+  /** SUBSCRIBE / BROWSE: source queue name. */
+  queue?: string
+  /** SUBSCRIBE: ack received messages automatically (default true). */
+  autoAck?: boolean
+  /** SUBSCRIBE: `channel.prefetch` — max unacked messages in flight. */
+  prefetch?: number
+  /** BROWSE: max messages to peek without acking (default 50). */
+  browsePeekCount?: number
+
+  // Redis specific. `password` (above, shared with MQTT) doubles as the Redis
+  // auth password. `redisMode` is prefixed (unlike the other bare names below)
+  // because `mode` is generic enough that a future protocol could plausibly
+  // want the bare name too.
+  redisMode?: 'subscribe' | 'command'
+  channels?: string[]
+  command?: string
+  args?: string[]
+  freeformCommand?: string
+  // Kafka specific (requestType === 'kafka'). `url` (common field above) carries
+  // the comma-separated broker list. Prefixed to avoid colliding with the
+  // generic `clientId` / near-generic fields other protocols already claim.
+  kafkaMode?: 'produce' | 'consume' | 'browse'
+  kafkaTopic?: string
+  kafkaKey?: string
+  kafkaValue?: string
+  kafkaPartition?: number
+  kafkaGroupId?: string
+  kafkaFromOffset?: 'earliest' | 'latest' | 'specific'
+  kafkaSpecificOffset?: string
+  kafkaPartitions?: number[]
+  kafkaBrowsePeekCount?: number
+  kafkaClientId?: string
+  kafkaSaslMechanism?: 'none' | 'plain' | 'scram-sha-256' | 'scram-sha-512'
+  kafkaSaslUsername?: string
+  kafkaSaslPassword?: string
+  kafkaTlsEnabled?: boolean
 }
 
 /** Request context tracking with full data */

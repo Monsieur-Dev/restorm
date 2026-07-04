@@ -44,11 +44,19 @@ type Protocol = typeof REQUEST_TYPES[number]
 export const PROTOCOL_CONFIG_FIELDS: Record<Protocol, readonly string[]> = {
   http: ['documentation', 'method', 'url', 'headers', 'params', 'pathParams', 'body', 'server', 'mockStatus', 'timeout', 'followRedirects'],
   graphql: ['documentation', 'url', 'operationType', 'query', 'variables', 'operationName', 'headers', 'server', 'schema', 'mockResolvers', 'resolverScript'],
-  grpc: ['documentation', 'url', 'service', 'method', 'callType', 'requestMessage', 'metadata', 'server', 'mockMethods', 'protoContent', 'protoPath', 'reflection', 'tls', 'tlsCertPem', 'tlsKeyPem'],
+  grpc: ['documentation', 'url', 'service', 'method', 'callType', 'requestMessage', 'metadata', 'server', 'mockMethods', 'protoContent', 'protoPath', 'protoDescriptorSet', 'reflection', 'tls', 'tlsCertPem', 'tlsKeyPem'],
   soap: ['documentation', 'url', 'soapAction', 'service', 'operation', 'body', 'headers', 'server', 'mockOperations'],
   websocket: ['documentation', 'url', 'protocol', 'event', 'message', 'headers', 'server', 'qos', 'retain', 'clientId', 'username', 'password', 'keepalive', 'mqttSubscribe', 'lwtTopic', 'lwtPayload', 'lwtQos', 'lwtRetain'],
+  sse: ['documentation', 'url', 'headers', 'lastEventId'],
+  stomp: ['documentation', 'url', 'stompVersion', 'connectHeaders', 'subscriptions', 'sendDestination', 'sendBody', 'sendHeaders'],
   odata: ['documentation', 'url', 'odataVersion', 'operationKind', 'headers', 'params', 'queryOptions', 'actionBody', 'batchSubRequests', 'batchFormat', 'entityTypeRef', 'allowGetInChangeSet', 'forceAbsoluteBatchUrls', 'entitySetProperties', 'navigationProperties', 'operationParameters', 'server', 'mockMetadata', 'mockData'],
-  auth: ['documentation', 'method', 'url', 'headers', 'params', 'pathParams', 'body', 'producedHeaders', 'expirationExpression', 'authErrorCodes']
+  auth: ['documentation', 'method', 'url', 'headers', 'params', 'pathParams', 'body', 'producedHeaders', 'expirationExpression', 'authErrorCodes'],
+  jsonrpc: ['documentation', 'url', 'headers', 'method', 'params', 'rpcId', 'notificationMode'],
+  jsonrpcBatch: ['documentation', 'url', 'headers', 'children'],
+  trpc: ['documentation', 'url', 'procedure', 'input', 'kind', 'headers'],
+  amqp: ['documentation', 'url', 'vhost', 'mode', 'exchange', 'routingKey', 'payload', 'queue', 'autoAck', 'prefetch', 'browsePeekCount', 'username', 'password'],
+  redis: ['documentation', 'url', 'password', 'mode', 'channels', 'command', 'args', 'freeformCommand'],
+  kafka: ['documentation', 'url', 'clientId', 'mode', 'topic', 'key', 'value', 'headers', 'partition', 'groupId', 'fromOffset', 'specificOffset', 'partitions', 'browsePeekCount', 'saslMechanism', 'saslUsername', 'saslPassword', 'tlsEnabled']
 }
 
 /** Read a request's protocol (`type`), narrowed to a known protocol or null. */

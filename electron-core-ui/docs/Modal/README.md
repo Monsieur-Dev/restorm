@@ -52,6 +52,13 @@ export interface ModalProps {
    * matches. See "Scoping to a container" below.
    */
   scopeToSelector?: string
+  /**
+   * Move focus into the dialog on open, trap Tab inside it, and restore
+   * focus to the previously-focused element on close. Defaults to `true`.
+   * Set to `false` for a maximize-style wrapper around pre-existing content
+   * (see "Focus management" below).
+   */
+  trapFocus?: boolean
 }
 ```
 
@@ -60,6 +67,16 @@ export interface ModalProps {
   - When `isOpen` is `true`, a `keydown` listener is attached to `window`.
   - Pressing `Escape` invokes `onClose()`.
 - `onClose` vs `onClosed`: `onClose` fires when the user *requests* a close (start of the fade-out); `onClosed` fires after the fade-out animation completes and the content has unmounted. Most consumers only need `onClose`.
+
+## Focus management
+
+By default (`trapFocus={true}`), the dialog follows the standard `role="dialog" aria-modal="true"` contract for keyboard + screen-reader users:
+
+- **On open**, focus moves to the first focusable element inside the dialog (the close button, in DOM order), or the dialog container itself if it has no focusable children.
+- **While open**, `Tab` / `Shift+Tab` are trapped inside the dialog, wrapping last→first and first→last.
+- **On close**, focus is restored to whatever element had it before the dialog opened.
+
+Set `trapFocus={false}` when `Modal` is reused as a bare "show this existing content bigger" wrapper rather than an actual dialog — e.g. a workbench tab's maximize view (`EditorWorkbench`) or `Tabs`'s own `allowFullscreen` double-click. In that case the content isn't a separate interaction the user "entered"; it's the same instance, relocated to fill the screen, and the user's existing focus (mid-edit in an embedded editor, a console, …) must survive the maximize/restore toggle untouched instead of jumping to the close button. `Escape`-to-close still works with `trapFocus={false}` — it's handled by a separate, unconditional keydown listener.
 
 ## Basic Usage
 

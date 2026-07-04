@@ -32,6 +32,7 @@ const SEND_BUTTON_SELECTORS: readonly string[] = [
   '[data-testid="grpc-send-button"]',
   '[data-testid="soap-request-action-button"]',
   '[data-testid="websocket-connect-button"]',
+  '[data-testid="sse-connect-button"]',
   '[data-testid="odata-request-send"]',
   '[data-testid="local-auth-form-send-button"]'
 ]

@@ -24,6 +24,32 @@ grpc_cli call {{host}} {{service}}.{{method}} '{{requestMessage}}'{{#if metadata
 </details>
 
 <details>
+<summary><strong>grpcurl (gRPC-Web)</strong></summary>
+
+```bash
+grpcurl -grpc-web{{#if plaintext}} -plaintext{{/if}}{{#if metadata}}{{#each metadata}} \
+  -H '{{key}}: {{value}}'{{/each}}{{/if}} \
+  -d '{{requestMessage}}' \
+  {{host}} {{service}}/{{method}}
+```
+
+</details>
+
+<details>
+<summary><strong>curl (Connect-RPC)</strong></summary>
+
+```bash
+curl \
+  --header 'Content-Type: application/connect+json' \
+  --header 'Connect-Protocol-Version: 1'{{#if metadata}}{{#each metadata}} \
+  --header '{{key}}: {{value}}'{{/each}}{{/if}} \
+  --data '{{requestMessage}}' \
+  {{#if plaintext}}http{{else}}https{{/if}}://{{host}}/{{service}}/{{method}}
+```
+
+</details>
+
+<details>
 <summary><strong>JavaScript - @grpc/grpc-js</strong></summary>
 
 ```javascript

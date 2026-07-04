@@ -274,10 +274,17 @@
         "socketio": "Socket.IO-verzoek",
         "mqtt": "MQTT request",
         "mqttServer": "MQTT-broker",
+        "sse": "SSE-verzoek",
         "grpcServer": "gRPC-mockserver",
         "soapServer": "SOAP-mockserver",
         "graphqlServer": "GraphQL-mockserver",
-        "odataServer": "OData-mockserver"
+        "odataServer": "OData-mockserver",
+        "trpc": "tRPC-verzoek",
+        "amqp": "AMQP-verzoek",
+        "redis": "Redis-verzoek",
+        "stomp": "STOMP-verzoek",
+        "kafkaProduce": "Kafka-verzoek – Produceren",
+        "kafkaConsume": "Kafka-verzoek – Consumeren"
       }
     },
     "deleteConfirm": {
@@ -475,6 +482,12 @@
       "clientStream": "Client streaming",
       "bidi": "Bidirectional streaming"
     },
+    "transport": {
+      "grpc": "gRPC",
+      "grpcWeb": "gRPC-Web",
+      "connect": "Connect",
+      "streamingUnsupported": "Dit transport ondersteunt geen client- of bidirectionele streaming via HTTP/1.1. Gebruik in plaats daarvan het native gRPC-transport."
+    },
     "server": {
       "proto": "Proto",
       "methods": "Mockmethoden",
@@ -493,6 +506,12 @@
       "notListening": "Luistert niet",
       "listenFailed": "gRPC-server kon niet worden gestart",
       "snippetsUnavailable": "Codefragmenten zijn niet beschikbaar voor een mockserver."
+    },
+    "reflection": {
+      "refresh": "Vernieuwen vanuit reflection",
+      "refreshFailed": "Vernieuwen via gRPC-reflection mislukt",
+      "unsupported": "Deze server ondersteunt geen gRPC-reflection — importeer in plaats daarvan een .proto-bestand.",
+      "unknownError": "Onbekende fout"
     }
   },
   "soap": {
@@ -540,6 +559,114 @@
     "routePlaceholder": "Route (optioneel)",
     "clientsConnected": "{{count}} client(s) verbonden",
     "notListening": "Luistert niet"
+  },
+  "jsonrpc": {
+    "send": "Verzenden",
+    "urlPlaceholder": "JSON-RPC-eindpunt-URL",
+    "methodPlaceholder": "methode",
+    "idPlaceholder": "id (automatisch)",
+    "notificationModeTooltip": "Meldingsmodus — geen id, geen antwoord verwacht",
+    "tabs": {
+      "params": "Parameters",
+      "headers": "Headers"
+    },
+    "response": {
+      "notificationSent": "Melding verzonden",
+      "errorLabel": "JSON-RPC-fout {{code}}:"
+    }
+  },
+  "jsonrpcBatch": {
+    "send": "Batch verzenden",
+    "tabs": {
+      "calls": "Aanroepen"
+    },
+    "empty": "Nog geen aanroepen. Voeg er hieronder een toe.",
+    "methodPlaceholder": "methode",
+    "idPlaceholder": "id (automatisch)",
+    "moveUp": "Omhoog",
+    "moveDown": "Omlaag",
+    "remove": "Aanroep verwijderen",
+    "paramsLabel": "Parameters (JSON)",
+    "add": "Aanroep toevoegen",
+    "response": {
+      "unmatched": "Geen overeenkomende antwoordinvoer."
+    }
+  },
+  "sse": {
+    "headers": "Headers",
+    "noFrames": "Nog geen gebeurtenissen",
+    "urlPlaceholder": "SSE-URL",
+    "framesTruncated": "Laatste {{shown}} van {{total}} frames weergegeven",
+    "showAllFrames": "Alles weergeven"
+  },
+  "redis": {
+    "connected": "Verbonden",
+    "disconnected": "Verbinding verbroken",
+    "noMessages": "Nog geen berichten",
+    "noCommandsYet": "Nog geen opdrachten uitgevoerd",
+    "urlPlaceholder": "Redis-URL (redis:// of rediss://)",
+    "passwordPlaceholder": "Wachtwoord (optioneel)",
+    "subscribe": "Abonneren",
+    "unsubscribe": "Afmelden",
+    "run": "Uitvoeren",
+    "subscribeMode": "Abonneren",
+    "commandMode": "Opdracht",
+    "command": "Opdracht",
+    "args": "Argumenten",
+    "argsPlaceholder": "Opdrachtargumenten",
+    "freeform": "Vrij",
+    "freeformPlaceholder": "Vrije opdracht (overschrijft de selectie)",
+    "tabs": {
+      "channels": "Kanalen",
+      "command": "Opdracht"
+    }
+  },
+  "kafka": {
+    "brokersPlaceholder": "Brokerlijst (host:port,host:port)",
+    "clientId": "Client-ID",
+    "clientIdPlaceholder": "restorm",
+    "mode": {
+      "produce": "Produceren",
+      "consume": "Consumeren",
+      "browse": "Bladeren"
+    },
+    "auth": {
+      "title": "Authenticatie",
+      "mechanism": "SASL",
+      "username": "Gebruikersnaam",
+      "password": "Wachtwoord",
+      "tls": "TLS"
+    },
+    "topic": "Onderwerp",
+    "topicPlaceholder": "onderwerp-naam",
+    "key": "Sleutel",
+    "keyPlaceholder": "berichtsleutel (optioneel)",
+    "value": "Waarde",
+    "headers": "Headers",
+    "partition": "Partitie",
+    "partitionPlaceholder": "auto",
+    "groupId": "Groep-ID",
+    "groupIdPlaceholder": "restorm-consumer",
+    "fromOffsetLabel": "Beginnen vanaf",
+    "fromOffset": {
+      "earliest": "Oudste",
+      "latest": "Nieuwste",
+      "specific": "Specifiek"
+    },
+    "specificOffset": "Offset",
+    "partitions": "Partities",
+    "partitionsPlaceholder": "0,1,2 (leeg = alle)",
+    "peekCount": "Aantal berichten",
+    "produce": "Produceren",
+    "startConsuming": "Consumeren starten",
+    "stopConsuming": "Consumeren stoppen",
+    "peek": "Voorbeeld",
+    "noMessages": "Nog geen berichten",
+    "connected": "Verbonden",
+    "disconnected": "Verbinding verbroken",
+    "producedTo": "Geproduceerd naar",
+    "offset": "Offset",
+    "messages": "Berichten"
   },
   "search": {
     "placeholder": "Zoeken...",
@@ -886,6 +1013,10 @@
         "description": "Sleep een .proto-bestand (of een map vol .proto-bestanden) en Restorm doorloopt elke service, elke RPC en elk bericht — en zet elke methode om in een getypeerd verzoek dat u via de gRPC-executor kunt verzenden zonder aan codegen te raken.",
         "trademark": "gRPC is een project van de Cloud Native Computing Foundation."
       },
+      "grpcReflection": {
+        "description": "Geen .proto-bestand? Verwijs Restorm naar een actieve gRPC-server die reflection aanbiedt — het bevraagt grpc.reflection.v1alpha.ServerReflection, ontdekt elke service en methode, en bouwt dezelfde getypeerde requestboom als een proto-bestandsimport, lokaal gecachet voor offline gebruik.",
+        "action": "Verbinden met een server…"
+      },
       "soap": {
         "description": "Een WSDL? Plak hem (of zijn URL) — Restorm parseert elke <port> en elke <operation> en produceert kant-en-klare SOAP-enveloppen met de juiste SOAPAction-header, schema-getypeerde body-skeletten en het door de WSDL gedeclareerde authenticatieschema."
       },
@@ -911,7 +1042,57 @@
       "paw": {
         "description": "Komt u van Paw? Sleep uw JSON-export erin (File → Export → JSON in de app — de native .paw-bundel wordt niet direct gelezen). Restorm herbouwt elk verzoek, elke header, body en omgeving, en koppelt Paws dynamische waarden (tijdstempels, willekeurige strings, UUID's) aan hun dichtstbijzijnde Restorm-equivalent.",
         "trademark": "Paw is een gedeponeerd handelsmerk van RapidAPI, Inc., hier alleen ter referentie voor compatibiliteit gebruikt."
+      },
+      "har": {
+        "description": "Heeft u een netwerktrace vastgelegd via de devtools van uw browser? Sleep het geëxporteerde .har-bestand erin — Restorm loopt elke geregistreerde aanroep na en zet die om in een herhaalbaar verzoek, headers en body inbegrepen."
+      },
+      "restClient": {
+        "description": "Komt u van de REST Client-extensie voor VS Code? Plak of sleep het .http-/.rest-bestand — Restorm parseert elk verzoekblok, lost de @variables op en bouwt ze weer op als een Restorm-boom.",
+        "trademark": "REST Client is een handelsmerk van de betreffende eigenaar, hier alleen ter referentie voor compatibiliteit gebruikt."
+      },
+      "httpie": {
+        "description": "Sleep een HTTPie Desktop-collectie-export of een CLI-sessiebestand erin — Restorm leest elk verzoek (en, bij een sessie, de blijvende headers ervan) en bouwt ze gebruiksklaar weer op.",
+        "trademark": "HTTPie is een handelsmerk van de betreffende eigenaar, hier alleen ter referentie voor compatibiliteit gebruikt."
+      },
+      "smithy": {
+        "description": "Plak een Smithy-model — de JSON-AST of de handgeschreven IDL — en Restorm loopt elke service, resource en operatie na om er een map met gebruiksklare verzoeken van te maken.",
+        "trademark": "Smithy is een project van Amazon Web Services."
+      },
+      "typespec": {
+        "description": "Plak uw TypeSpec-definitie (.tsp) — Restorm compileert die achter de schermen naar OpenAPI en importeert ze precies zoals een handgeschreven spec: operaties, parameters en schema's inbegrepen.",
+        "trademark": "TypeSpec is een project van Microsoft."
+      },
+      "raml": {
+        "description": "Plak een RAML 1.0- of 0.8-document — Restorm zet de resourceboom om in geneste mappen, één verzoek per methode, met de gemodelleerde types erbij.",
+        "trademark": "RAML is een specificatie die wordt onderhouden door de RAML Workgroup."
+      },
+      "wadl": {
+        "description": "Onderhoudt u nog een WADL-document? Plak de XML — Restorm loopt de geneste <resource>-boom na en maakt er een overeenkomstige map met verzoeken van, methoden en parameters inbegrepen.",
+        "trademark": "WADL is door Sun Microsystems als Member Submission ingediend bij het W3C."
+      },
+      "thrift": {
+        "description": "Plak een Apache Thrift IDL-bestand (.thrift) — Restorm leest elke service, methode, struct en enum, zodat u de vorm van de API kunt verkennen. Het binaire wire-protocol van Thrift is nog niet uitvoerbaar vanuit Restorm, dus deze import is alleen documentair.",
+        "trademark": "Apache Thrift is een handelsmerk van de Apache Software Foundation."
+      },
+      "apiBlueprint": {
+        "description": "Plak een API Blueprint-document (.apib) — Restorm parseert elke resourcegroep en overgang tot een map met verzoeken, één per gedocumenteerd methode-/antwoordpaar.",
+        "trademark": "API Blueprint is een specificatie die oorspronkelijk door Apiary is gemaakt."
       }
+    },
+    "grpcReflection": {
+      "title": "gRPC-server (reflection)",
+      "hint": "Bevraag de reflection-service van een actieve gRPC-server om de services en methoden te ontdekken zonder .proto-bestand.",
+      "addressLabel": "Serveradres (host:poort)",
+      "addressPlaceholder": "localhost:9000",
+      "tlsLabel": "TLS gebruiken",
+      "metadataLabel": "Metadata (optionele auth-headers)",
+      "connecting": "Verbinden…",
+      "import": "Importeren",
+      "reimportedTitle": "gRPC-reflection opnieuw geïmporteerd",
+      "reimportedNoop": "Al up-to-date — geen wijzigingen op de server.",
+      "reimportedSummary": "+{{added}} / -{{removed}} / ↻{{merged}} — herlaad het project om de wijzigingen te zien.",
+      "unsupported": "Deze server ondersteunt geen gRPC-reflection — importeer in plaats daarvan een .proto-bestand.",
+      "unknownError": "Onbekende fout"
     },
     "loading": "Analyseren...",
     "noResults": "Geen verzoeken gevonden",
@@ -1075,14 +1256,22 @@
       "socketioSend": "Socket.IO send",
       "socketioClose": "Socket.IO close",
       "websocketConnect": "WebSocket connect",
+      "sseConnect": "SSE connect",
       "websocketSend": "WebSocket send",
       "websocketClose": "WebSocket close",
+      "sseClose": "SSE close",
       "grpcConnect": "gRPC connect",
       "grpcSend": "gRPC send",
       "grpcClose": "gRPC close",
       "mqttConnect": "MQTT connect",
       "mqttSend": "MQTT publish",
       "mqttClose": "MQTT close",
+      "amqpConnect": "AMQP-verbinding",
+      "amqpPublish": "AMQP-publicatie",
+      "amqpClose": "AMQP-sluiting",
+      "redisSubscribe": "Redis subscribe",
+      "redisClose": "Redis close",
+      "redisCommand": "Redis command",
       "httpListen": "HTTP server",
       "httpClose": "HTTP close",
       "grpcServerClose": "gRPC-server sluiten",
@@ -1093,7 +1282,13 @@
       "odataListen": "OData server",
       "odataClose": "OData close",
       "graphqlSubscribe": "GraphQL-abonnement",
-      "graphqlUnsubscribe": "GraphQL-abonnement opzeggen"
+      "graphqlUnsubscribe": "GraphQL-abonnement opzeggen",
+      "stompConnect": "STOMP-verbinding",
+      "stompSend": "STOMP verzenden",
+      "stompClose": "STOMP sluiten",
+      "kafkaProduce": "Kafka produce",
+      "kafkaConsume": "Kafka consume",
+      "kafkaClose": "Kafka close"
     },
     "comparator": {
       "result": "resultaat"
@@ -1654,8 +1849,10 @@
       "socketioSend": "Verzendt een bericht op een al-open Socket.IO-verbinding.",
       "socketioClose": "Sluit een al-open Socket.IO-verbinding.",
       "websocketConnect": "Opent een ruwe WebSocket-verbinding en zendt elk ontvangen bericht opnieuw uit op zijn poort.",
+      "sseConnect": "Opent een langdurige SSE (Server-Sent Events)-verbinding en zendt elk ontvangen frame opnieuw uit op zijn poort.",
       "websocketSend": "Verzendt een payload op een al-open WebSocket-verbinding.",
       "websocketClose": "Sluit een al-open WebSocket-verbinding.",
+      "sseClose": "Sluit een reeds geopende SSE-verbinding.",
       "grpcConnect": "Opent een streaming-gRPC-aanroep en zendt elke ontvangen frame opnieuw uit op zijn message-poort.",
       "grpcSend": "Schrijft een verzoekbericht naar een al-open streaming-gRPC-aanroep.",
       "grpcClose": "Sluit een al-open streaming-gRPC-aanroep half (half-close).",
@@ -1668,9 +1865,15 @@
       "mqttConnect": "Opent een langlevende MQTT-verbinding vanuit een gekoppeld verzoek en abonneert op zijn topic; zendt elk ontvangen bericht opnieuw uit op zijn `message`-poort.",
       "mqttSend": "Publiceert een payload op een al-open MQTT-verbinding (naar zijn topic).",
       "mqttClose": "Sluit een al-open MQTT-verbinding.",
+      "amqpConnect": "Opent een blijvende AMQP-verbinding vanuit een gekoppeld verzoek en consumeert de wachtrij ervan; zendt elk ontvangen bericht opnieuw uit op de `message`-poort.",
+      "amqpPublish": "Publiceert een payload op een reeds geopende AMQP-verbinding (naar de exchange/routing key van het gekoppelde verzoek).",
+      "amqpClose": "Sluit een reeds geopende AMQP-verbinding.",
       "mqttConnectServer": "Start een lokale MQTT-broker (poort + topicfilter); abonneert op zijn topicfilter en zendt elk ontvangen bericht opnieuw uit op zijn `message`-poort. Verzenden publiceert naar verbonden abonnees.",
       "mqttSendServer": "Publiceert een bericht naar elke abonnee van de gerefereerde MQTT-broker.",
       "mqttCloseServer": "Stopt de gerefereerde MQTT-broker en verbreekt zijn clients.",
+      "redisSubscribe": "Opent een langlevende Redis-abonneeverbinding vanuit een gekoppeld verzoek en luistert naar zijn kanalen; zendt elk ontvangen bericht opnieuw uit op zijn `message`-poort.",
+      "redisClose": "Sluit een al-open Redis-abonneeverbinding.",
+      "redisCommand": "Voert een gekoppeld Redis-commando uit (één commando op een nieuwe verbinding, daarna verbreken) en zendt zijn antwoord uit.",
       "toast": "Toont een toastmelding in de Restorm-UI terwijl het scenario draait.",
       "httpListen": "Hosts a local HTTP mock server and listens indefinitely. `connected` fires once it is listening; each served request re-emits its data on the `served` port. The server stays up until an HTTP close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
       "httpClose": "Stopt een al-luisterende HTTP-mockserver (gedeclareerd door een HTTP-servernode) en maakt zijn poort vrij.",
@@ -1683,7 +1886,13 @@
       "odataListen": "Host een lokale OData v4-mockservice en luistert oneindig. `connected` wordt geactiveerd zodra er geluisterd wordt; elk bediend verzoek zendt zijn gegevens opnieuw uit op de `served`-poort. De server blijft actief tot een OData-sluiting (of een Stop), waarna `done` wordt geactiveerd. Geen response-uitvoer — hij bedient, hij roept niet naar buiten.",
       "odataClose": "Stopt een al luisterende OData-mockservice (gedeclareerd door een OData-serverknooppunt) en maakt de poort vrij.",
       "graphqlSubscribe": "Opent een langlevend GraphQL-abonnement als client via SSE en luistert. `connected` wordt geactiveerd zodra de stream open is; elke ontvangen payload wordt opnieuw uitgezonden op de `message`-poort (een abonnement is alleen-ontvangen, zonder benoemde gebeurtenissen). De stream blijft open tot een GraphQL-opzegging (of een stop), of tot de server hem voltooit, daarna wordt `done` geactiveerd.",
-      "graphqlUnsubscribe": "Stopt een al geopend GraphQL-abonnement (gedeclareerd door een GraphQL-abonnementsknooppunt) en breekt zijn SSE-stream af."
+      "graphqlUnsubscribe": "Stopt een al geopend GraphQL-abonnement (gedeclareerd door een GraphQL-abonnementsknooppunt) en breekt zijn SSE-stream af.",
+      "stompConnect": "Opent een langdurige STOMP-over-WebSocket-verbinding: voert de CONNECT/CONNECTED-handshake uit, abonneert zich vervolgens op elke geconfigureerde bestemming en zendt elk ontvangen frame opnieuw uit op zijn poort.",
+      "stompSend": "Verstuurt een SEND-frame over een reeds geopende STOMP-verbinding.",
+      "stompClose": "Verstuurt DISCONNECT en sluit een reeds geopende STOMP-verbinding.",
+      "kafkaProduce": "Voert een gekoppeld Kafka-verzoek uit als eenmalige productie en zendt het resultaat (topic/partitie/offset) uit als `response`.",
+      "kafkaConsume": "Opent een langlevende Kafka-consumer vanuit een gekoppeld verzoek en zendt elk ontvangen bericht opnieuw uit op zijn `message`-poort.",
+      "kafkaClose": "Sluit een al-open Kafka-consumer."
     },
     "legend": {
       "title": "Legenda",
@@ -1732,6 +1941,9 @@
     "websocket": {
       "message": "message"
     },
+    "sse": {
+      "message": "message"
+    },
     "grpc": {
       "message": "message"
     },
@@ -1777,6 +1989,36 @@
     "lwtTopicPlaceholder": "will/topic",
     "lwtPayload": "Payload",
     "lwtPayloadPlaceholder": "will message"
+  },
+  "amqp": {
+    "urlPlaceholder": "AMQP-URL (amqp:// of amqps://)",
+    "vhost": "Virtuele host",
+    "vhostPlaceholder": "/",
+    "username": "Gebruikersnaam",
+    "password": "Wachtwoord",
+    "mode": "Modus",
+    "modePublish": "Publiceren",
+    "modeSubscribe": "Abonneren",
+    "modeBrowse": "Bladeren",
+    "exchange": "Exchange",
+    "exchangePlaceholder": "(standaard exchange)",
+    "routingKey": "Routing key",
+    "routingKeyPlaceholder": "routing.key",
+    "queue": "Wachtrij",
+    "queuePlaceholder": "naam van de wachtrij",
+    "autoAck": "Automatische bevestiging",
+    "prefetch": "Prefetch",
+    "browsePeekCount": "Aantal om te bekijken",
+    "connect": "Verbinden",
+    "connecting": "Verbinden…",
+    "disconnect": "Verbinding verbreken",
+    "connected": "Verbonden",
+    "disconnected": "Verbinding verbroken",
+    "send": "Verzenden",
+    "browseButton": "Bladeren",
+    "noMessages": "Nog geen berichten",
+    "peeked": "Bekeken",
+    "messages": "Berichten"
   },
   "mcpLogs": {
     "title": "MCP-logboeken",
@@ -2043,5 +2285,42 @@
       "noSubscription": "Geen actief abonnement om te beheren.",
       "error": "Kan het abonnementsportaal niet openen. Probeer het opnieuw."
     }
+  },
+  "trpc": {
+    "send": "Verzenden",
+    "urlPlaceholder": "tRPC-server-URL",
+    "procedurePlaceholder": "Procedure (bijv. user.get)",
+    "kindQuery": "Query",
+    "kindMutation": "Mutatie",
+    "showRawEnvelope": "Ruwe envelop tonen",
+    "kindSelectLabel": "Type aanroep",
+    "tabs": {
+      "headers": "Headers",
+      "body": "Body"
+    }
+  },
+  "stomp": {
+    "connect": "Verbinden",
+    "disconnect": "Verbinding verbreken",
+    "connected": "Verbonden",
+    "disconnected": "Niet verbonden",
+    "noMessages": "Nog geen frames",
+    "version": "STOMP-versie",
+    "tabs": {
+      "connect": "Verbinding",
+      "subscriptions": "Abonnementen",
+      "send": "Verzenden"
+    },
+    "ackMode": {
+      "auto": "auto",
+      "client": "client",
+      "clientIndividual": "client-individual"
+    },
+    "subscriptionIdLabel": "Abonnement-ID",
+    "removeSubscription": "Abonnement verwijderen",
+    "addSubscription": "Abonnement toevoegen",
+    "sendDestination": "Bestemming",
+    "ack": "ACK",
+    "nack": "NACK"
   }
 }

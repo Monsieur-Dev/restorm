@@ -33,6 +33,19 @@ const MenuBarTab: React.FC = () => {
       <h3 style={{ fontSize: 16, marginBottom: 0 }}>{t('menuBar.harness.title')}</h3>
 
       <div style={{ display: 'grid', gap: 10 }}>
+        {/* Programmatic focus anchor for the roving-tabindex e2e scenarios
+            only: `tabIndex={-1}` keeps it out of the real tab order, so a
+            keyboard user tabbing through the actual app never lands on it —
+            the e2e suite focuses it via script to get a deterministic
+            "just before the bar" starting point for asserting Tab reaches
+            the bar's first item. */}
+        <button
+          type="button"
+          data-testid="menubar-basic-focus-anchor"
+          aria-hidden="true"
+          tabIndex={-1}
+          style={{ position: 'absolute', width: 1, height: 1, opacity: 0, pointerEvents: 'none' }}
+        />
         <MenuBar data-testid="menubar-basic">
           <MenuBarItem data-testid="menubar-basic-file" title={t('menuBar.file')}>
             <MenuItem

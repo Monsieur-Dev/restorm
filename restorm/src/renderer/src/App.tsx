@@ -43,6 +43,7 @@ import { SoapRequest } from '../../shared/models/requests/SoapRequest'
 import { GrpcRequest } from '../../shared/models/requests/GrpcRequest'
 import { GraphQLRequest } from '../../shared/models/requests/GraphQLRequest'
 import { WebSocketRequest } from '../../shared/models/requests/WebSocketRequest'
+import { SseRequest } from '../../shared/models/requests/SseRequest'
 import { Folder as FolderClass } from '../../shared/models/Folder'
 import { EnvironmentFolder as EnvironmentFolderClass } from '../../shared/models/EnvironmentFolder'
 import { Environment as EnvironmentClass } from '../../shared/models/Environment'
@@ -82,6 +83,7 @@ const classForDocument = (type: 'folder' | 'request' | 'environment', doc: Recor
     if (t === 'grpc') return GrpcRequest
     if (t === 'graphql') return GraphQLRequest
     if (t === 'websocket') return WebSocketRequest
+    if (t === 'sse') return SseRequest
     return HTTPRequest
   }
   if (type === 'environment') return EnvironmentClass

@@ -231,6 +231,45 @@ export const odataCancelArgs = z.tuple([requestIdArg])
 export const odataIsActiveArgs = z.tuple([requestIdArg])
 
 // ==========================================================================
+// JSON-RPC Execution (reuses httpExecutionService under the hood)
+// ==========================================================================
+
+export const jsonrpcExecuteArgs = z.tuple([
+  z.object({
+    requestId: z.string(),
+    timeout: z.number().optional()
+  })
+])
+
+export const jsonrpcExecuteBatchArgs = z.tuple([
+  z.object({
+    requestId: z.string(),
+    timeout: z.number().optional()
+  })
+])
+
+export const jsonrpcCancelArgs = z.tuple([requestIdArg])
+export const jsonrpcIsActiveArgs = z.tuple([requestIdArg])
+
+// ==========================================================================
+// tRPC Execution (reuses httpExecutionService under the hood, like OData)
+// ==========================================================================
+
+export const trpcExecuteArgs = z.tuple([
+  z.object({
+    requestId: z.string(),
+    timeout: z.number().optional(),
+    /** Attached AuthenticationRequest POJO — re-validated in the handler
+     * via isPlainAuthPayload + fromPlain (that guard stays authoritative),
+     * so opaque here. */
+    authRequest: z.unknown().optional()
+  })
+])
+
+export const trpcCancelArgs = z.tuple([requestIdArg])
+export const trpcIsActiveArgs = z.tuple([requestIdArg])
+
+// ==========================================================================
 // Authentication routes
 // --------------------------------------------------------------------------
 // `auth:prefetch` runs an ephemeral AuthenticationRequest (typically
@@ -339,6 +378,18 @@ export const grpcListenArgs = z.tuple([requestIdArg])
 export const grpcStopArgs = z.tuple([requestIdArg])
 export const grpcIsListeningArgs = z.tuple([requestIdArg])
 
+// gRPC server reflection: import a live server's services/methods, or
+// re-fetch just the descriptor bundle for one already-imported request.
+const grpcReflectionOptionsArg = z.object({
+  address: z.string(),
+  tls: z.boolean().optional(),
+  metadata: z.array(z.object({ key: z.string(), value: z.string() })).optional()
+})
+export const grpcReflectImportArgs = z.tuple([
+  grpcReflectionOptionsArg.extend({ name: z.string().optional() })
+])
+export const grpcReflectQueryArgs = z.tuple([grpcReflectionOptionsArg])
+
 // OData mock server (server mode): start/stop hosting + listening check.
 export const odataListenArgs = z.tuple([requestIdArg])
 export const odataStopArgs = z.tuple([requestIdArg])
@@ -362,6 +413,102 @@ export const websocketSendArgs = z.tuple([
   z.string().optional()
 ])
 export const websocketIsActiveArgs = z.tuple([requestIdArg])
+
+// ==========================================================================
+// SSE (Server-Sent Events) Execution
+// ==========================================================================
+
+export const sseConnectArgs = z.tuple([
+  z.object({
+    requestId: z.string(),
+    timeout: z.number().optional()
+  }).loose()
+])
+
+export const sseDisconnectArgs = z.tuple([requestIdArg])
+export const sseIsActiveArgs = z.tuple([requestIdArg])
+
+// ==========================================================================
+// STOMP Execution
+// ==========================================================================
+
+export const stompConnectArgs = z.tuple([
+  z.object({
+    requestId: z.string(),
+    timeout: z.number().optional()
+  }).loose()
+])
+
+export const stompDisconnectArgs = z.tuple([requestIdArg])
+export const stompSendArgs = z.tuple([requestIdArg, z.string()])
+export const stompAckArgs = z.tuple([requestIdArg, z.string(), z.string()])
+export const stompNackArgs = z.tuple([requestIdArg, z.string(), z.string()])
+export const stompIsActiveArgs = z.tuple([requestIdArg])
+
+// ==========================================================================
+// AMQP Execution
+// ==========================================================================
+
+export const amqpExecuteArgs = z.tuple([
+  z.object({
+    requestId: z.string(),
+    timeout: z.number().optional()
+  }).loose()
+])
+
+export const amqpConnectArgs = z.tuple([
+  z.object({
+    requestId: z.string(),
+    timeout: z.number().optional()
+  }).loose()
+])
+export const amqpSendArgs = z.tuple([requestIdArg, z.string()])
+export const amqpDisconnectArgs = z.tuple([requestIdArg])
+export const amqpCancelArgs = z.tuple([requestIdArg])
+export const amqpIsActiveArgs = z.tuple([requestIdArg])
+
+// ==========================================================================
+// Redis Execution
+// ==========================================================================
+
+export const redisSubscribeArgs = z.tuple([
+  z.object({
+    requestId: z.string(),
+    timeout: z.number().optional()
+  }).loose()
+])
+
+export const redisCommandArgs = z.tuple([
+  z.object({
+    requestId: z.string(),
+    timeout: z.number().optional()
+  }).loose()
+])
+
+export const redisDisconnectArgs = z.tuple([requestIdArg])
+export const redisIsActiveArgs = z.tuple([requestIdArg])
+
+// ==========================================================================
+// Kafka Execution
+// ==========================================================================
+
+export const kafkaProduceArgs = z.tuple([
+  z.object({
+    requestId: z.string(),
+    timeout: z.number().optional()
+  }).loose()
+])
+
+export const kafkaBrowseArgs = z.tuple([
+  z.object({
+    requestId: z.string(),
+    timeout: z.number().optional()
+  }).loose()
+])
+
+export const kafkaConsumeStartArgs = z.tuple([requestIdArg])
+export const kafkaCancelArgs = z.tuple([requestIdArg])
+export const kafkaIsActiveArgs = z.tuple([requestIdArg])
 
 // ==========================================================================
 // Responses History
@@ -391,6 +538,26 @@ export const importPreviewArgs = z.tuple([
   }).optional()
 ])
 export const importImportArgs = z.tuple([z.string()])
+
+export const importPostImportSeedArgs = z.tuple([
+  z.object({
+    /** Same `source` string `import:preview` was called with (URL or file path). */
+    source: z.string(),
+    /** Format `import:preview` detected — selects which provider's
+     * `postImportSeed` (if any) to run. */
+    format: z.string(),
+    /** `parserId → finalId` map built while the renderer regenerated ids
+     * to avoid tree collisions. Identity-mapped by MCP-driven imports,
+     * which insert the parser's ids unchanged. */
+    idMap: z.record(z.string(), z.string()),
+    /** Optional extra headers re-sent on the re-fetch (resolved auth
+     * headers), mirroring `import:preview`'s `extraHeaders`. */
+    extraHeaders: z.record(z.string(), z.string()).optional(),
+    /** `payloadChecksum` from the original `import:preview` result — guards
+     * against the source having changed since, see `runPostImportSeed`. */
+    expectedChecksum: z.string().optional()
+  })
+])
 
 // ==========================================================================
 // API Update (per-folder on-demand spec re-import)
@@ -509,6 +676,56 @@ export const graphqlExecuteResultSchema = z.object({
   timings: timingsSchema,
 })
 
+const jsonRpcErrorSchema = z.object({
+  code: z.number(),
+  message: z.string(),
+  data: z.unknown().optional()
+})
+
+export const jsonrpcExecuteResultSchema = z.object({
+  requestId: z.string(),
+  success: z.boolean(),
+  statusCode: z.number().optional(),
+  statusText: z.string().optional(),
+  notificationSent: z.boolean().optional(),
+  result: z.unknown().optional(),
+  error: jsonRpcErrorSchema.optional(),
+  transportError: z.string().optional(),
+  rawBody: z.string().optional(),
+  timings: timingsSchema,
+  requestUrl: z.string().optional(),
+  requestHeaders: z.record(z.string(), z.string()).optional()
+})
+
+export const jsonrpcExecuteBatchResultSchema = z.object({
+  requestId: z.string(),
+  success: z.boolean(),
+  statusCode: z.number().optional(),
+  transportError: z.string().optional(),
+  rawBody: z.string().optional(),
+  children: z.array(z.object({
+    childId: z.string(),
+    rpcId: z.string(),
+    result: z.unknown().optional(),
+    error: jsonRpcErrorSchema.optional(),
+    unmatched: z.boolean().optional()
+  })),
+  timings: timingsSchema,
+  requestUrl: z.string().optional()
+})
+
+export const trpcExecuteResultSchema = z.object({
+  requestId: z.string(),
+  success: z.boolean(),
+  statusCode: z.number().optional(),
+  statusText: z.string().optional(),
+  headers: z.record(z.string(), z.union([z.string(), z.array(z.string())])).optional(),
+  data: z.unknown().optional(),
+  rawBody: z.string().optional(),
+  error: z.string().optional(),
+  timings: timingsSchema,
+})
+
 export const soapExecuteResultSchema = z.object({
   requestId: z.string(),
   success: z.boolean(),
@@ -536,6 +753,45 @@ export const websocketConnectResultSchema = z.object({
   error: z.string().optional(),
 })
 
+export const sseConnectResultSchema = z.object({
+  requestId: z.string(),
+  success: z.boolean(),
+  error: z.string().optional(),
+})
+
+export const stompConnectResultSchema = z.object({
+  requestId: z.string(),
+  success: z.boolean(),
+  error: z.string().optional(),
+})
+
+export const amqpExecuteResultSchema = z.object({
+  requestId: z.string(),
+  success: z.boolean(),
+  error: z.string().optional(),
+})
+
+export const redisResultSchema = z.object({
+  requestId: z.string(),
+  success: z.boolean(),
+  mode: z.enum(['subscribe', 'command']),
+  error: z.string().optional(),
+})
+
+export const kafkaProduceResultSchema = z.object({
+  requestId: z.string(),
+  success: z.boolean(),
+  error: z.string().optional(),
+  timings: timingsSchema,
+})
+
+export const kafkaBrowseResultSchema = z.object({
+  requestId: z.string(),
+  success: z.boolean(),
+  error: z.string().optional(),
+  timings: timingsSchema,
+})
+
 export const authPrefetchResultSchema = z.object({
   requestId: z.string(),
   success: z.boolean(),
@@ -549,6 +805,14 @@ export const importPreviewResultSchema = z.object({
 export const importImportResultSchema = z.object({
   imported: z.number(),
 })
+
+export const importPostImportSeedResultSchema = z.object({
+  success: z.boolean(),
+  error: z.string().optional()
+})
+
+export const grpcReflectImportResultSchema = z.looseObject({ success: z.boolean() })
+export const grpcReflectQueryResultSchema = z.looseObject({ success: z.boolean() })
 
 export const apiUpdateRefreshFetchResultSchema = z.discriminatedUnion('ok', [
   z.object({ ok: z.literal(true), spec: z.string() }),

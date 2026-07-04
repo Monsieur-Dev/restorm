@@ -5,6 +5,11 @@ Feature: gRPC execution end-to-end
   bidirectional call connects, sends a frame, receives the echo and disconnects.
   A streaming RPC has no event names — every received frame is a plain message.
 
+  It also covers the wire-transport toggle: the same DummyUnary call dispatched
+  over gRPC-Web (binary framing, a dedicated mock container) and over
+  Connect-RPC (JSON over HTTP, a dedicated mock container), plus the
+  transport SelectBox itself cycling through all three options.
+
   Background:
     Given I launch restorm with the MCP server enabled
     And I open the gRPC sample via MCP
@@ -73,3 +78,33 @@ Feature: gRPC execution end-to-end
 
     When I click the gRPC Disconnect button
     Then the gRPC Connect button shows the disconnected state
+
+  Scenario: Invoke a unary call over gRPC-Web and see the decoded response
+    # Same DummyUnary call as "gRPC Unary", framed for plain HTTP/1.1 against
+    # the dedicated `grpcweb-mock` container (9002) — grpcbin itself doesn't
+    # speak gRPC-Web on any port.
+    When I open the "gRPC-Web Unary" request tab via MCP
+    And I click the gRPC Invoke button
+    Then the gRPC response shows a message matching "web-ping"
+    And the gRPC response shows an OK status
+
+  Scenario: Invoke a unary call over Connect-RPC and see a green response
+    # Same DummyUnary call again, JSON-over-HTTP against the dedicated
+    # connect-mock container.
+    When I open the "Connect Unary" request tab via MCP
+    And I click the gRPC Invoke button
+    Then the gRPC response shows a message matching "connect-ping"
+    And the gRPC response shows an OK status
+
+  Scenario: The transport toggle cycles through gRPC, gRPC-Web and Connect
+    When I open the "gRPC Unary" request tab via MCP
+    Then the gRPC transport select shows "gRPC"
+
+    When I set the gRPC transport to "gRPC-Web"
+    Then the gRPC transport select shows "gRPC-Web"
+
+    When I set the gRPC transport to "Connect"
+    Then the gRPC transport select shows "Connect"
+
+    When I set the gRPC transport to "gRPC"
+    Then the gRPC transport select shows "gRPC"

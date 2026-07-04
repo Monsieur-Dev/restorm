@@ -445,13 +445,35 @@ colors:
     value: "#006064"
     description: "Socket.IO badge (HC light)"
 
+  - id: badge-sse-background
+    value: "#1a237e"
+    description: "Server-Sent Events badge (HC light)"
+  - id: badge-stomp-background
+    value: "#263238"
+    description: "STOMP badge (HC light)"
+  - id: badge-kafka-background
+    value: "#263238"
+    description: "Kafka badge (HC light)"
+
   - id: badge-odata-background
     value: "#bf360c"
     description: "OData badge (HC light)"
 
+  - id: badge-trpc-background
+    value: "#0d47a1"
+    description: "tRPC badge (HC light)"
+
+  - id: badge-redis-background
+    value: "#b71c1c"
+    description: "Redis badge (HC light)"
+
   - id: badge-auth-background
     value: "#e65100"
     description: "Auth badge (HC light)"
+
+  - id: badge-amqp-background
+    value: "#b71c1c"
+    description: "AMQP badge (HC light)"
 
   - id: badge-scenario-background
     value: "#4a148c"

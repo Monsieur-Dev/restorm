@@ -34,8 +34,12 @@ import type { FullRequestData } from '../../services/ContextServiceTypes'
 import { responseHistoryService } from '../../services'
 import { websocketExecutionService } from '../../services/WebSocketExecutionService'
 import { PROTOCOL_EXECUTORS } from '../../protocol/executorRegistry'
-import { isHTTPRequest, isGraphQLRequest, isGrpcRequest, isSoapRequest, isODataRequest, isAuthenticationRequest, isWebSocketRequest, isEnvironmentFolder } from '../../../shared/types/collections'
-import type { HTTPRequest, GraphQLRequest, GrpcRequest, SoapRequest, WebSocketRequest, AuthenticationRequest, ODataRequest, KeyValue, EnvironmentFolder } from '../../../shared/types/collections'
+import { isHTTPRequest, isGraphQLRequest, isGrpcRequest, isSoapRequest, isODataRequest, isAuthenticationRequest, isWebSocketRequest, isSseRequest, isJsonRpcRequest, isJsonRpcBatchRequest, isTrpcRequest, isAmqpRequest, isRedisRequest, isEnvironmentFolder } from '../../../shared/types/collections'
+import type { HTTPRequest, GraphQLRequest, GrpcRequest, SoapRequest, WebSocketRequest, SseRequest, AuthenticationRequest, ODataRequest, JsonRpcRequest, JsonRpcBatchRequest, TrpcRequest, AmqpRequest, RedisRequest, KeyValue, EnvironmentFolder } from '../../../shared/types/collections'
+import { isHTTPRequest, isGraphQLRequest, isGrpcRequest, isSoapRequest, isODataRequest, isAuthenticationRequest, isWebSocketRequest, isStompRequest, isEnvironmentFolder } from '../../../shared/types/collections'
+import type { HTTPRequest, GraphQLRequest, GrpcRequest, SoapRequest, WebSocketRequest, StompRequest, AuthenticationRequest, ODataRequest, KeyValue, EnvironmentFolder } from '../../../shared/types/collections'
+import { isHTTPRequest, isGraphQLRequest, isGrpcRequest, isSoapRequest, isODataRequest, isAuthenticationRequest, isWebSocketRequest, isKafkaRequest, isEnvironmentFolder } from '../../../shared/types/collections'
+import type { HTTPRequest, GraphQLRequest, GrpcRequest, SoapRequest, WebSocketRequest, AuthenticationRequest, ODataRequest, KafkaRequest, KeyValue, EnvironmentFolder } from '../../../shared/types/collections'
 import { isRequest, type FolderItem, type Request } from '../../../shared/models'
 
 function jsonReply(value: unknown): { content: { type: 'text'; text: string }[] } {
@@ -368,12 +372,14 @@ export function flushRequestStateToContext(req: Request, scenarioVariables?: Rea
     data.service = grpc.service
     data.grpcMethod = grpc.method
     data.callType = grpc.callType
+    if (grpc.transport !== undefined) data.transport = grpc.transport
     data.requestMessage = grpc.requestMessage
     // The dynamic client is built from the request's own proto; without it the
     // execution falls back to the bundled grpcbin proto and a custom-proto
     // request fails with "service not found".
     data.protoContent = grpc.protoContent
     data.protoPath = grpc.protoPath
+    data.protoDescriptorSet = grpc.protoDescriptorSet
     if (Array.isArray(metadata)) data.metadata = metadata as FullRequestData['metadata']
   } else if (isSoapRequest(req)) {
     const soap = req as SoapRequest
@@ -406,6 +412,85 @@ export function flushRequestStateToContext(req: Request, scenarioVariables?: Rea
     data.protocol = ws.protocol
     if ('event' in ws) (data as { event?: unknown }).event = (ws as { event?: unknown }).event
     if ('message' in ws) (data as { message?: unknown }).message = (ws as { message?: unknown }).message
+  } else if (isJsonRpcRequest(req)) {
+    const rpc = req as JsonRpcRequest
+    data.requestType = 'jsonrpc'
+    data.jsonRpcMethod = rpc.method
+    data.jsonRpcParams = rpc.params
+    data.jsonRpcId = rpc.rpcId
+    if (rpc.notificationMode !== undefined) data.jsonRpcNotificationMode = rpc.notificationMode
+  } else if (isJsonRpcBatchRequest(req)) {
+    const batch = req as JsonRpcBatchRequest
+    data.requestType = 'jsonrpcBatch'
+    data.jsonRpcChildren = batch.children
+  } else if (isTrpcRequest(req)) {
+    const trpc = req as TrpcRequest
+    data.requestType = 'trpc'
+    data.trpcProcedure = trpc.procedure
+    data.trpcInput = trpc.input
+    data.trpcKind = trpc.kind
+  } else if (isSseRequest(req)) {
+    const sse = req as SseRequest
+    data.requestType = 'sse'
+    // The reconnect seed the request carries: SseExecutionService.resolveExecution
+    // reads it off `fullData.lastEventId` on the FIRST connect. The interactive
+    // tab pushes this via its own `updateFullRequestData` call on mount/change —
+    // a scenario-driven sseConnect only ever goes through this flush, so without
+    // it a request's saved `lastEventId` silently never reaches the wire.
+    if (sse.lastEventId !== undefined) data.lastEventId = sse.lastEventId
+  } else if (isAmqpRequest(req)) {
+    const amqp = req as AmqpRequest
+    data.requestType = 'amqp'
+    data.mode = amqp.mode
+    if (amqp.vhost !== undefined) data.vhost = amqp.vhost
+    if (amqp.exchange !== undefined) data.exchange = amqp.exchange
+    if (amqp.routingKey !== undefined) data.routingKey = amqp.routingKey
+    if (amqp.payload !== undefined) data.payload = amqp.payload
+    if (amqp.queue !== undefined) data.queue = amqp.queue
+    if (amqp.autoAck !== undefined) data.autoAck = amqp.autoAck
+    if (amqp.prefetch !== undefined) data.prefetch = amqp.prefetch
+    if (amqp.browsePeekCount !== undefined) data.browsePeekCount = amqp.browsePeekCount
+    if (amqp.username !== undefined) data.username = amqp.username
+    if (amqp.password !== undefined) data.password = amqp.password
+  } else if (isRedisRequest(req)) {
+    const redis = req as RedisRequest
+    data.requestType = 'redis'
+    if (redis.password !== undefined) data.password = redis.password
+    data.redisMode = redis.mode
+    data.channels = redis.channels
+    if (redis.command !== undefined) data.command = redis.command
+    data.args = redis.args
+    if (redis.freeformCommand !== undefined) data.freeformCommand = redis.freeformCommand
+  } else if (isStompRequest(req)) {
+    const stomp = req as StompRequest
+    data.requestType = 'stomp'
+    data.stompVersion = stomp.stompVersion
+    data.connectHeaders = stomp.connectHeaders
+    data.subscriptions = stomp.subscriptions
+    data.sendDestination = stomp.sendDestination
+    data.sendBody = stomp.sendBody
+    data.sendHeaders = stomp.sendHeaders
+  } else if (isKafkaRequest(req)) {
+    const kafka = req as KafkaRequest
+    // Prefixed to avoid colliding with the generic `clientId` / near-generic
+    // fields other protocols already claim — mirrors the renderer tab view's
+    // own `updateFullRequestData` payload (see `ContextServiceTypes.ts`).
+    data.requestType = 'kafka'
+    data.kafkaMode = kafka.mode
+    data.kafkaTopic = kafka.topic
+    if (kafka.key !== undefined) data.kafkaKey = kafka.key
+    data.kafkaValue = kafka.value
+    if (kafka.partition !== undefined) data.kafkaPartition = kafka.partition
+    if (kafka.groupId !== undefined) data.kafkaGroupId = kafka.groupId
+    data.kafkaFromOffset = kafka.fromOffset
+    if (kafka.specificOffset !== undefined) data.kafkaSpecificOffset = kafka.specificOffset
+    if (kafka.partitions !== undefined) data.kafkaPartitions = kafka.partitions
+    if (kafka.browsePeekCount !== undefined) data.kafkaBrowsePeekCount = kafka.browsePeekCount
+    data.kafkaClientId = kafka.clientId
+    data.kafkaSaslMechanism = kafka.saslMechanism
+    if (kafka.saslUsername !== undefined) data.kafkaSaslUsername = kafka.saslUsername
+    if (kafka.saslPassword !== undefined) data.kafkaSaslPassword = kafka.saslPassword
+    if (kafka.tlsEnabled !== undefined) data.kafkaTlsEnabled = kafka.tlsEnabled
   }
   // If the request isn't registered with ContextService yet, register
   // it inline. Until recently we bailed out here on the assumption

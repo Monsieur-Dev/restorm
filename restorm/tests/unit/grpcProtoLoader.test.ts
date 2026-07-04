@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import * as grpc from '@grpc/grpc-js'
 import { resolveGrpcMethod, grpcStatusName, loadGrpcPackage, enumerateGrpcServices } from '../../src/main/services/grpc/grpcProtoLoader'
+import { buildDemoFileDescriptorSet } from './fixtures/grpcDescriptorProtoFixture'
 
 /**
  * The bundled grpcbin descriptor must resolve each call type's streaming flags
@@ -93,5 +94,19 @@ service Greeter {
   it('falls back to the bundled grpcbin descriptor when no source is given', () => {
     const services = enumerateGrpcServices(loadGrpcPackage({}))
     expect(services.some((s) => s.name === 'grpcbin.GRPCBin')).toBe(true)
+  })
+
+  it('prefers a reflected protoDescriptorSet over protoContent/protoPath (freshest source wins)', () => {
+    const base64 = buildDemoFileDescriptorSet().toString('base64')
+    const staleProto = 'syntax="proto3"; package stale; message E {} service S { rpc Ping (E) returns (E); }'
+    const services = enumerateGrpcServices(loadGrpcPackage({ protoDescriptorSet: base64, protoContent: staleProto }))
+    expect(services.some((s) => s.name === 'demo.Greeter')).toBe(true)
+    expect(services.some((s) => s.name === 'stale.S')).toBe(false)
+  })
+
+  it('falls through to protoContent when protoDescriptorSet is empty', () => {
+    const proto = 'syntax="proto3"; package demo2; message E {} service S { rpc Ping (E) returns (E); }'
+    const services = enumerateGrpcServices(loadGrpcPackage({ protoDescriptorSet: '', protoContent: proto }))
+    expect(services.some((s) => s.name === 'demo2.S')).toBe(true)
   })
 })

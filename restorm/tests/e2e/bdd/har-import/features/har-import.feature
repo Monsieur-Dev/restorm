@@ -17,3 +17,15 @@ Feature: HAR (HTTP Archive) import — auto-detection + request tree
     When I import the HAR fixture file "petstore.har"
     And I import the HAR fixture file "petstore.har"
     Then exactly 2 folders named "https://api.petstore.example/" should be in the sidebar
+
+  Scenario: Importing a HAR file seeds response history for the requests it captured
+    # A HAR is a RECORDING of request/response pairs, not just request
+    # definitions — the point of importing one is seeing what the capture
+    # already showed, without re-running every request first. This is the
+    # human "File → Import" path (real modal, real IPC, real preload
+    # binding): the renderer regenerates every item's id before the tree
+    # reaches main, so history must be seeded with the FINAL id, not the
+    # parser's original one.
+    Given a new single-file YAML collection for HAR import
+    When I import the HAR fixture file "petstore.har"
+    Then the imported request "GET /api/pets" should have response history

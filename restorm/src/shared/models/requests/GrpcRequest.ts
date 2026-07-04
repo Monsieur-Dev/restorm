@@ -15,7 +15,7 @@ import type { RequestType, RuntimeId, Icon } from '../types'
 // `GrpcCallType` from `requestPrimitives` (what the plain request interface,
 // the import service, the samples and the execution service all use). The
 // camelCase `GRPC_CALL_TYPES` in `../types` exists only for the GraphQL enum.
-import type { GrpcCallType } from '../../types/requestPrimitives'
+import type { GrpcCallType, GrpcTransport } from '../../types/requestPrimitives'
 import type { GrpcMockMethod } from '../../types/requests/GrpcRequest'
 import type { QuickConfig } from '../../types/requests/QuickConfig'
 
@@ -93,6 +93,13 @@ export class GrpcRequest extends BaseRequest {
   @graphqlField({ type: 'KeyValue', isArray: true })
   metadata: KeyValue[] = []
 
+  /** Wire transport (client mode only). Absent means the existing native
+   * HTTP/2 client, so a request saved before this field existed keeps its
+   * current behaviour untouched. */
+  @graphqlField({ type: 'String', nullable: true })
+  @TreatEmptyAsUndefined()
+  transport?: GrpcTransport
+
   /** When true, restorm ACTS AS a local gRPC mock server (hosts an
    * `@grpc/grpc-js` server on `localhost:<port>` and answers `mockMethods`). */
   @graphqlField({ type: 'Boolean', nullable: true })
@@ -111,6 +118,12 @@ export class GrpcRequest extends BaseRequest {
   @graphqlField({ type: 'String', nullable: true })
   @TreatEmptyAsUndefined()
   protoPath?: string
+
+  /** Base64-encoded, serialized `FileDescriptorSet` fetched via gRPC server
+   * reflection (client mode) — see the type-level doc for the full contract. */
+  @graphqlField({ type: 'String', nullable: true })
+  @TreatEmptyAsUndefined()
+  protoDescriptorSet?: string
 
   /** Serve the standard gRPC ServerReflection service (server mode; default true). */
   @graphqlField({ type: 'Boolean', nullable: true })
@@ -167,10 +180,12 @@ export class GrpcRequest extends BaseRequest {
     callType?: GrpcCallType
     requestMessage?: string
     metadata?: Parameters<typeof KeyValue.fromPlain>[0][]
+    transport?: GrpcTransport
     server?: boolean
     mockMethods?: Partial<GrpcMockMethod>[]
     protoContent?: string
     protoPath?: string
+    protoDescriptorSet?: string
     reflection?: boolean
     tls?: boolean
     tlsCertPem?: string
@@ -191,10 +206,12 @@ export class GrpcRequest extends BaseRequest {
       callType: obj.callType ?? 'unary',
       requestMessage: obj.requestMessage ?? '',
       metadata: (obj.metadata ?? []) as KeyValue[],
+      ...(obj.transport !== undefined && { transport: obj.transport }),
       ...(obj.server !== undefined && { server: obj.server }),
       ...(obj.mockMethods !== undefined && { mockMethods: obj.mockMethods.map(m => mockMethodFromPlain(m)) }),
       ...(obj.protoContent !== undefined && { protoContent: obj.protoContent }),
       ...(obj.protoPath !== undefined && { protoPath: obj.protoPath }),
+      ...(obj.protoDescriptorSet !== undefined && { protoDescriptorSet: obj.protoDescriptorSet }),
       ...(obj.reflection !== undefined && { reflection: obj.reflection }),
       ...(obj.tls !== undefined && { tls: obj.tls }),
       ...(obj.tlsCertPem !== undefined && { tlsCertPem: obj.tlsCertPem }),
@@ -222,10 +239,12 @@ export class GrpcRequest extends BaseRequest {
       callType: this.callType,
       requestMessage: this.requestMessage,
       metadata: this.metadata.map(m => m.toPlainObject()),
+      ...(this.transport !== undefined && { transport: this.transport }),
       ...(this.server !== undefined && { server: this.server }),
       ...(this.mockMethods !== undefined && { mockMethods: this.mockMethods.map(m => mockMethodToPlain(m)) }),
       ...(this.protoContent !== undefined && { protoContent: this.protoContent }),
       ...(this.protoPath !== undefined && { protoPath: this.protoPath }),
+      ...(this.protoDescriptorSet !== undefined && { protoDescriptorSet: this.protoDescriptorSet }),
       ...(this.reflection !== undefined && { reflection: this.reflection }),
       ...(this.tls !== undefined && { tls: this.tls }),
       ...(this.tlsCertPem !== undefined && { tlsCertPem: this.tlsCertPem }),

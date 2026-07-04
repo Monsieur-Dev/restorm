@@ -4,6 +4,7 @@ import MenuBarItem from './MenuBarItem'
 import MenuItem from './MenuItem'
 import { MenuBarProps, MenuBarState, MenuBarLayoutMode } from './types'
 import { computeMenuBarLayout } from './computeMenuBarLayout'
+import { listMenuItems, focusSiblingMenuItem } from './focusSiblingMenuItem'
 
 /** Default container-width threshold below which the bar fully
  * collapses into a single hamburger button. */
@@ -22,10 +23,11 @@ const MenuItemWrapper: React.FC<{
   setRef: (index: number, el: HTMLDivElement | null) => void
   isFocused: boolean
   isActive: boolean
+  isTabStop: boolean
   onClick: () => void
   onMouseEnter: () => void
   dataTestId: string
-}> = ({ child, index, setRef, isFocused, isActive, onClick, onMouseEnter, dataTestId }) => {
+}> = ({ child, index, setRef, isFocused, isActive, isTabStop, onClick, onMouseEnter, dataTestId }) => {
   const refCallback = useCallback((el: HTMLDivElement | null) => {
     setRef(index, el)
   }, [index, setRef])
@@ -37,6 +39,7 @@ const MenuItemWrapper: React.FC<{
     ref: refCallback,
     isFocused,
     isActive,
+    isTabStop,
     onClick,
     onMouseEnter,
     ...(childTestId === undefined && { 'data-testid': dataTestId })
@@ -78,12 +81,17 @@ const MenuBar: React.FC<MenuBarProps> = ({
   const [state, setState] = useState<MenuBarState>({
     focusedMenuIndex: null,
     isOpen: false,
-    activeMenuIndex: null
+    activeMenuIndex: null,
+    tabStopIndex: 0
   })
 
   const menubarRef = useRef<HTMLDivElement>(null)
   const measurementRef = useRef<HTMLDivElement>(null)
   const menuItemsRef = useRef<(HTMLDivElement | null)[]>([])
+  // Set by a keyboard open (ArrowDown/ArrowUp) to say which edge of the
+  // about-to-render dropdown should receive focus; consumed and cleared by
+  // the effect below once the dropdown is actually in the DOM.
+  const pendingItemFocusRef = useRef<'first' | 'last' | null>(null)
 
   // Container width (from ResizeObserver) and per-item natural widths
   // (measured once from the hidden mirror). Both feed the layout-mode
@@ -185,56 +193,97 @@ const MenuBar: React.FC<MenuBarProps> = ({
   const handleKeyDown = useCallback((event: React.KeyboardEvent) => {
     const { key } = event
 
+    // No `case 'Tab'` on purpose: with the roving tabindex below, exactly
+    // one item ever carries `tabIndex={0}`, so the browser's native Tab
+    // handling already does the right thing — it moves focus to the next
+    // focusable element *outside* the bar. Intercepting Tab here (an
+    // earlier version of this handler did) would trap keyboard focus,
+    // cycling forever through the bar's own items instead of letting the
+    // user Tab on to the rest of the UI.
     switch (key) {
+      // Left/Right always operate at the top level, even when the event
+      // bubbled up from deep inside an already-open dropdown — pressing
+      // Left/Right jumps to the sibling top-level menu and, if a menu is
+      // currently open, swaps it for the sibling's (standard menubar
+      // pattern). The `?? prev.tabStopIndex` fallback matters the very
+      // first time a key fires after `Tab` alone moved DOM focus onto the
+      // roving stop: `focusedMenuIndex` is still `null` at that point, so
+      // the press should land ON the already-focused item, not skip past it.
       case 'ArrowLeft':
         event.preventDefault()
-        setState(prev => ({
-          ...prev,
-          focusedMenuIndex: prev.focusedMenuIndex !== null
+        setState(prev => {
+          const nextIndex = prev.focusedMenuIndex !== null
             ? Math.max(0, prev.focusedMenuIndex - 1)
-            : visibleSetLength - 1
-        }))
+            : prev.tabStopIndex
+          return {
+            ...prev,
+            focusedMenuIndex: nextIndex,
+            tabStopIndex: nextIndex,
+            activeMenuIndex: prev.isOpen ? nextIndex : prev.activeMenuIndex
+          }
+        })
         break
 
       case 'ArrowRight':
         event.preventDefault()
-        setState(prev => ({
-          ...prev,
-          focusedMenuIndex: prev.focusedMenuIndex !== null
+        setState(prev => {
+          const nextIndex = prev.focusedMenuIndex !== null
             ? Math.min(visibleSetLength - 1, prev.focusedMenuIndex + 1)
-            : 0
-        }))
-        break
-
-      case 'ArrowDown':
-      case 'Enter':
-      case ' ':
-        event.preventDefault()
-        if (state.focusedMenuIndex !== null) {
-          setState(prev => ({
+            : prev.tabStopIndex
+          return {
             ...prev,
-            isOpen: true,
-            activeMenuIndex: prev.focusedMenuIndex
-          }))
-        }
-        break
-
-      case 'Escape':
-        event.preventDefault()
-        setState({
-          focusedMenuIndex: null,
-          isOpen: false,
-          activeMenuIndex: null
+            focusedMenuIndex: nextIndex,
+            tabStopIndex: nextIndex,
+            activeMenuIndex: prev.isOpen ? nextIndex : prev.activeMenuIndex
+          }
         })
         break
 
-      case 'Tab':
+      // Up/Down are dual-purpose depending on where the event originated:
+      // from a top-level button they open the focused menu (Down → first
+      // item, Up → last item, mirroring the ARIA menu-button pattern);
+      // from inside an already-open dropdown they move between sibling
+      // entries instead (roving focus within the open menu).
+      case 'ArrowDown':
+      case 'ArrowUp': {
         event.preventDefault()
+        const menuItemAnchor = (event.target as HTMLElement).closest<HTMLAnchorElement>('a[role="menuitem"]')
+        if (menuItemAnchor) {
+          focusSiblingMenuItem(menuItemAnchor, key === 'ArrowDown' ? 1 : -1)
+          break
+        }
+        const focusedIndex = state.focusedMenuIndex ?? state.tabStopIndex
+        pendingItemFocusRef.current = key === 'ArrowDown' ? 'first' : 'last'
         setState(prev => ({
           ...prev,
-          focusedMenuIndex: prev.focusedMenuIndex !== null
-            ? (prev.focusedMenuIndex + 1) % visibleSetLength
-            : 0
+          focusedMenuIndex: focusedIndex,
+          tabStopIndex: focusedIndex,
+          isOpen: true,
+          activeMenuIndex: focusedIndex
+        }))
+        break
+      }
+
+      case 'Enter':
+      case ' ': {
+        event.preventDefault()
+        const focusedIndex = state.focusedMenuIndex ?? state.tabStopIndex
+        setState(prev => ({
+          ...prev,
+          focusedMenuIndex: focusedIndex,
+          isOpen: true,
+          activeMenuIndex: focusedIndex
+        }))
+        break
+      }
+
+      case 'Escape':
+        event.preventDefault()
+        setState(prev => ({
+          focusedMenuIndex: null,
+          isOpen: false,
+          activeMenuIndex: null,
+          tabStopIndex: prev.tabStopIndex
         }))
         break
 
@@ -264,18 +313,20 @@ const MenuBar: React.FC<MenuBarProps> = ({
             setState({
               focusedMenuIndex: targetIndex,
               isOpen: true,
-              activeMenuIndex: targetIndex
+              activeMenuIndex: targetIndex,
+              tabStopIndex: targetIndex
             })
           }
         }
         break
     }
-  }, [childArray, state.focusedMenuIndex, visibleSetLength, mode, visibleCount])
+  }, [childArray, state.focusedMenuIndex, state.tabStopIndex, visibleSetLength, mode, visibleCount])
 
   const handleMenuClick = useCallback((index: number) => {
     setState(prev => ({
       ...prev,
       focusedMenuIndex: index,
+      tabStopIndex: index,
       isOpen: !prev.isOpen || prev.activeMenuIndex !== index,
       activeMenuIndex: !prev.isOpen || prev.activeMenuIndex !== index ? index : null
     }))
@@ -291,6 +342,7 @@ const MenuBar: React.FC<MenuBarProps> = ({
       return {
         ...prev,
         focusedMenuIndex: index,
+        tabStopIndex: index,
         isOpen: true,
         activeMenuIndex: index
       }
@@ -305,11 +357,12 @@ const MenuBar: React.FC<MenuBarProps> = ({
   useEffect(() => {
     const handleClickOutside = (event: PointerEvent): void => {
       if (menubarRef.current && !menubarRef.current.contains(event.target as Node)) {
-        setState({
+        setState(prev => ({
           focusedMenuIndex: null,
           isOpen: false,
-          activeMenuIndex: null
-        })
+          activeMenuIndex: null,
+          tabStopIndex: prev.tabStopIndex
+        }))
       }
     }
 
@@ -327,9 +380,25 @@ const MenuBar: React.FC<MenuBarProps> = ({
     }
   }, [state.focusedMenuIndex])
 
-  // Clamp focused / active indices when the visible-set length shrinks
-  // (e.g. window narrows from `full` to `overflow` while keyboard focus
-  // sat on a now-hidden item). Deferring through rAF moves the
+  // Once a keyboard-driven open (see the ArrowDown/ArrowUp/Enter/Space
+  // handling above) has actually rendered the dropdown, move focus onto its
+  // first or last item as requested. This has to be an effect — the anchor
+  // elements don't exist in the DOM until `isOpen`/`activeMenuIndex` commit —
+  // and it runs after the "Focus management" effect above so its
+  // `.focus()` call (which targets the top-level button) doesn't win.
+  useEffect(() => {
+    const edge = pendingItemFocusRef.current
+    if (!edge || !state.isOpen || state.activeMenuIndex === null) return
+    pendingItemFocusRef.current = null
+    const trigger = menuItemsRef.current[state.activeMenuIndex]
+    const items = listMenuItems(trigger?.querySelector('ul.actions-container[role="menu"]') ?? null)
+    const target = edge === 'first' ? items[0] : items[items.length - 1]
+    target?.focus()
+  }, [state.isOpen, state.activeMenuIndex])
+
+  // Clamp focused / active / tab-stop indices when the visible-set length
+  // shrinks (e.g. window narrows from `full` to `overflow` while keyboard
+  // focus sat on a now-hidden item). Deferring through rAF moves the
   // setState off the synchronous effect body — the React 19
   // set-state-in-effect rule rejects the synchronous form, even when
   // guarded — and avoids cascading renders. Without this, the
@@ -338,17 +407,20 @@ const MenuBar: React.FC<MenuBarProps> = ({
   useEffect(() => {
     const focusOOB = state.focusedMenuIndex !== null && state.focusedMenuIndex >= visibleSetLength
     const activeOOB = state.activeMenuIndex !== null && state.activeMenuIndex >= visibleSetLength
-    if (!focusOOB && !activeOOB) return undefined
+    const tabStopOOB = state.tabStopIndex >= visibleSetLength
+    if (!focusOOB && !activeOOB && !tabStopOOB) return undefined
     const collapsedIndex = visibleSetLength > 0 ? visibleSetLength - 1 : null
+    const collapsedTabStop = Math.max(0, visibleSetLength - 1)
     const raf = requestAnimationFrame(() => {
       setState(prev => ({
         ...prev,
         focusedMenuIndex: focusOOB ? collapsedIndex : prev.focusedMenuIndex,
-        activeMenuIndex: activeOOB ? collapsedIndex : prev.activeMenuIndex
+        activeMenuIndex: activeOOB ? collapsedIndex : prev.activeMenuIndex,
+        tabStopIndex: tabStopOOB ? collapsedTabStop : prev.tabStopIndex
       }))
     })
     return () => { cancelAnimationFrame(raf) }
-  }, [visibleSetLength, state.focusedMenuIndex, state.activeMenuIndex])
+  }, [visibleSetLength, state.focusedMenuIndex, state.activeMenuIndex, state.tabStopIndex])
 
   const menubarClasses = [
     'menubar',
@@ -457,6 +529,7 @@ const MenuBar: React.FC<MenuBarProps> = ({
             setRef={setMenuItemRef}
             isFocused={isFocused}
             isActive={isActive}
+            isTabStop={state.tabStopIndex === index}
             onClick={(): void => { handleMenuClick(index) }}
             onMouseEnter={(): void => { handleMenuMouseEnter(index) }}
             dataTestId={childTestId}
@@ -475,6 +548,7 @@ const MenuBar: React.FC<MenuBarProps> = ({
           data-testid={`${testId}-${overflowDataState}-button`}
           isFocused={state.focusedMenuIndex === overflowButtonIndex}
           isActive={state.activeMenuIndex === overflowButtonIndex}
+          isTabStop={state.tabStopIndex === overflowButtonIndex}
           onClick={(): void => { handleMenuClick(overflowButtonIndex) }}
           onMouseEnter={(): void => { handleMenuMouseEnter(overflowButtonIndex) }}
         >

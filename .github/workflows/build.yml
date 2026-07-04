@@ -142,10 +142,21 @@ jobs:
         ports:
           - 8090:8080
       grpc:
+        # Native gRPC only (port 9000). Its second port is TLS-secured
+        # native gRPC too, not gRPC-Web — the gRPC-Web mock (started
+        # below alongside the other zero-dependency mocks) owns :9002.
         image: moul/grpcbin
         ports:
           - 9000:9000
-          - 9002:9001
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 3s
+          --health-timeout 3s
+          --health-retries 10
 
     steps:
       - name: Checkout code
@@ -178,16 +189,22 @@ jobs:
           cd restorm
           pnpm install --frozen-lockfile
 
-      - name: Start GraphQL, Socket.IO, raw-WebSocket, HTTP-util, SOAP and OData-v2 mock servers
+      - name: Start GraphQL, Socket.IO, raw-WebSocket, HTTP-util, SOAP, OData-v2, JSON-RPC, tRPC, SSE, Connect-RPC and gRPC-Web mock servers
         run: |
           cd restorm/tests/docker/graphql-server && npm install && node server.js &
           cd restorm/tests/docker/socketio-server && npm install && node server.js &
           cd restorm/tests/docker/ws-echo-server && npm install && node server.js &
-          # http-util, soap-server and odata-v2-petstore are zero-dependency
-          # (pure node:http) — no npm install needed.
+          # http-util, soap-server, odata-v2-petstore, jsonrpc-server,
+          # trpc-server, sse-server, connect-server and grpcweb-server are
+          # zero-dependency (pure node:http) — no npm install needed.
           cd restorm/tests/docker/http-util && node server.js &
           cd restorm/tests/docker/soap-server && node server.js &
+          cd restorm/tests/docker/jsonrpc-server && node server.js &
+          cd restorm/tests/docker/trpc-server && node server.js &
+          cd restorm/tests/docker/sse-server && node server.js &
           cd restorm/tests/docker/odata-v2-petstore && node server.js &
+          cd restorm/tests/docker/connect-server && node server.js &
+          cd restorm/tests/docker/grpcweb-server && node server.js &
           sleep 10
 
       - name: Start OData Pet Store
@@ -220,6 +237,50 @@ jobs:
             -v "$(pwd)/mosquitto.conf:/mosquitto/config/mosquitto.conf" \
             -v "$(pwd)/mosquitto-passwd:/mosquitto/config/passwd:ro" \
             eclipse-mosquitto:2
+
+      - name: Start ActiveMQ broker (STOMP)
+        # rmohr/activemq:5.15.9 ships a stomp+ws transport connector on
+        # :61614 out of the box, mirroring tests/docker/docker-compose.yml.
+        run: |
+          docker run -d --name restorm-activemq -p 61614:61614 rmohr/activemq:5.15.9
+
+      - name: Start RabbitMQ broker (AMQP)
+        # rabbitmq:3-management with the definitions import that seeds the
+        # `/` vhost, `guest` user and `restorm-e2e-queue` — mirroring
+        # tests/docker/docker-compose.yml (a bare rabbitmq would 403 without
+        # it; see rabbitmq.conf for why the default bootstrap is skipped).
+        run: |
+          cd restorm/tests/docker
+          docker run -d --name restorm-rabbitmq -p 5672:5672 -p 15672:15672 \
+            -v "$(pwd)/rabbitmq.conf:/etc/rabbitmq/conf.d/10-restorm-e2e.conf:ro" \
+            -v "$(pwd)/rabbitmq-definitions.json:/etc/rabbitmq/definitions.json:ro" \
+            rabbitmq:3-management
+
+      - name: Start and seed Kafka broker
+        # Single-node KRaft broker, mirroring tests/docker/docker-compose.yml.
+        # Polls the broker with the same command the compose healthcheck
+        # uses, then runs kafka-seed.sh unmodified INSIDE the broker
+        # container (docker cp + exec) — simpler than the compose
+        # kafka-seed job's separate --network host container, since
+        # localhost:9092 already resolves correctly from inside
+        # restorm-kafka itself.
+        run: |
+          cd restorm/tests/docker
+          docker run -d --name restorm-kafka -p 9092:9092 \
+            -e KAFKA_NODE_ID=1 \
+            -e KAFKA_PROCESS_ROLES=broker,controller \
+            -e KAFKA_LISTENERS=PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093 \
+            -e KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://localhost:9092 \
+            -e KAFKA_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT \
+            -e KAFKA_CONTROLLER_QUORUM_VOTERS=1@localhost:9093 \
+            -e KAFKA_CONTROLLER_LISTENER_NAMES=CONTROLLER \
+            -e KAFKA_INTER_BROKER_LISTENER_NAME=PLAINTEXT \
+            -e KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1 \
+            -e KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS=0 \
+            apache/kafka:3.7.1
+          timeout 90 sh -c 'until docker exec restorm-kafka /opt/kafka/bin/kafka-broker-api-versions.sh --bootstrap-server localhost:9092 >/dev/null 2>&1; do sleep 3; done'
+          docker cp kafka-seed.sh restorm-kafka:/kafka-seed.sh
+          docker exec restorm-kafka /bin/sh /kafka-seed.sh
 
       - name: Wait for services
         run: |

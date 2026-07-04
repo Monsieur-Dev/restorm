@@ -47,6 +47,60 @@ Feature: MenuBar
     When I press keys "Escape" in menu bar "menubar-basic"
     Then menu bar "menubar-basic" menu "menubar-basic-file" should be closed
 
+  # Roving tabindex: exactly one top-level item is ever a Tab stop, so the
+  # bar is reachable from — and lets go back into — the rest of the UI via
+  # plain Tab, with no keyboard trap. "menubar-basic-focus-anchor" is a
+  # script-only sentinel immediately before the bar (see MenuBarTab.tsx) —
+  # it gives these scenarios a deterministic "just before the bar" starting
+  # point without depending on the rest of the page's tab order.
+  Scenario: Tab reaches the menu bar's first item, and Tab again leaves it
+    Given I open the menubar e2e tab
+    Then menu bar "menubar-basic" tab-reachable item should be "menubar-basic-file"
+    When I focus "menubar-basic-focus-anchor"
+    When I press the "Tab" key
+    Then the focused element should be "menubar-basic-file"
+    When I press the "Tab" key
+    Then the focused element should not be inside "menubar-basic"
+
+  Scenario: The roving tab stop follows the last-active top-level menu
+    Given I open the menubar e2e tab
+    When I click menu bar item "menubar-basic-edit"
+    When I click outside to close menu bar "menubar-basic"
+    Then menu bar "menubar-basic" tab-reachable item should be "menubar-basic-edit"
+    When I focus "menubar-basic-focus-anchor"
+    When I press the "Tab" key
+    Then the focused element should be "menubar-basic-edit"
+
+  Scenario: Arrow Left/Right move between top-level menus once the bar has keyboard focus
+    Given I open the menubar e2e tab
+    When I focus "menubar-basic-focus-anchor"
+    When I press the "Tab" key
+    Then the focused element should be "menubar-basic-file"
+    When I press the "ArrowRight" key
+    When I press the "ArrowRight" key
+    Then menu bar "menubar-basic" tab-reachable item should be "menubar-basic-edit"
+    When I press the "ArrowLeft" key
+    Then menu bar "menubar-basic" tab-reachable item should be "menubar-basic-file"
+
+  Scenario: Arrow Down opens the focused menu with focus on its first item
+    Given I open the menubar e2e tab
+    When I focus "menubar-basic-focus-anchor"
+    When I press the "Tab" key
+    When I press the "ArrowDown" key
+    Then menu bar "menubar-basic" menu "menubar-basic-file" should be open
+    Then the focused element should be "menubar-basic-file-new"
+
+  Scenario: Arrow Up/Down navigate between sibling items of the open menu
+    Given I open the menubar e2e tab
+    When I focus "menubar-basic-focus-anchor"
+    When I press the "Tab" key
+    When I press the "ArrowDown" key
+    Then the focused element should be "menubar-basic-file-new"
+    When I press the "ArrowDown" key
+    Then the focused element should be "menubar-basic-file-open"
+    When I press the "ArrowUp" key
+    Then the focused element should be "menubar-basic-file-new"
+
   Scenario: Shortcut triggers action while menu is closed
     Given I open the menubar e2e tab
     Then menubar action count should be 0

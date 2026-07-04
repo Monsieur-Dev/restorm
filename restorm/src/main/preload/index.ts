@@ -24,12 +24,24 @@ import {
 import {
   httpExecuteResultSchema,
   graphqlExecuteResultSchema,
+  jsonrpcExecuteResultSchema,
+  jsonrpcExecuteBatchResultSchema,
+  trpcExecuteResultSchema,
   soapExecuteResultSchema,
   grpcExecuteResultSchema,
   websocketConnectResultSchema,
+  sseConnectResultSchema,
+  amqpExecuteResultSchema,
+  redisResultSchema,
+  stompConnectResultSchema,
+  kafkaProduceResultSchema,
+  kafkaBrowseResultSchema,
   authPrefetchResultSchema,
   importPreviewResultSchema,
   importImportResultSchema,
+  importPostImportSeedResultSchema,
+  grpcReflectImportResultSchema,
+  grpcReflectQueryResultSchema,
   apiUpdateRefreshFetchResultSchema,
 } from '../ipc/schemas'
 import type { z } from 'zod/v4'
@@ -184,7 +196,7 @@ interface AvailableVariablesResult {
 /** Full request data for backend processing */
 interface FullRequestData {
   id: string
-  requestType: 'http' | 'graphql' | 'grpc' | 'soap' | 'websocket' | 'odata' | 'auth'
+  requestType: 'http' | 'graphql' | 'grpc' | 'soap' | 'websocket' | 'odata' | 'auth' | 'jsonrpc' | 'jsonrpcBatch' | 'amqp' | 'redis'
   url: string
   headers: { id?: string; key: string; value: string }[]
   method?: string
@@ -199,6 +211,8 @@ interface FullRequestData {
   service?: string
   grpcMethod?: string
   callType?: string
+  /** Wire transport ('grpc' | 'grpc-web' | 'connect'); absent means native gRPC. */
+  transport?: string
   requestMessage?: string
   metadata?: { id?: string; key: string; value: string }[]
   soapAction?: string
@@ -226,6 +240,29 @@ interface FullRequestData {
   // OData mock service (server === true)
   mockMetadata?: string
   mockData?: Record<string, Record<string, unknown>[]>
+  // JSON-RPC specific
+  jsonRpcMethod?: string
+  jsonRpcParams?: string
+  jsonRpcId?: string
+  jsonRpcNotificationMode?: boolean
+  jsonRpcChildren?: { childId: string; method: string; params: string; rpcId: string; notificationMode?: boolean }[]
+  // AMQP specific (requestType === 'amqp'; `username`/`password` above are
+  // shared with MQTT)
+  vhost?: string
+  mode?: 'publish' | 'subscribe' | 'browse'
+  exchange?: string
+  routingKey?: string
+  payload?: string
+  queue?: string
+  autoAck?: boolean
+  prefetch?: number
+  browsePeekCount?: number
+  // Redis specific (`password` above doubles as the Redis auth password)
+  redisMode?: 'subscribe' | 'command'
+  channels?: string[]
+  command?: string
+  args?: string[]
+  freeformCommand?: string
 }
 
 /** Save result type */
@@ -978,6 +1015,52 @@ contextBridge.exposeInMainWorld('restorm', {
       return () => {
         ipcRenderer.removeListener('grpc:server-served', handler)
       }
+    },
+    /** Query a live server's reflection service and build an `EnvironmentFolder`
+     * of its services/methods (the reflection equivalent of a `.proto` import).
+     * `folder` is set on a FRESH import. When `address` was already imported
+     * via reflection, this is instead an idempotent RE-import: `merged` is
+     * `true`, `folder` is omitted, and `diff` summarises what changed in the
+     * existing folder (same `GrpcAdapter` contract every other importer's
+     * "Refresh from source" uses) — re-fetching an unchanged server yields
+     * an all-zero diff. `unsupported` distinguishes "the server doesn't
+     * implement reflection" from any other error. */
+    reflectImport: async (input: {
+      address: string
+      tls?: boolean
+      metadata?: { key: string; value: string }[]
+      name?: string
+    }): Promise<{
+      success: boolean
+      folder?: unknown
+      merged?: boolean
+      folderId?: string
+      diff?: { added: number; removed: number; merged: number; deprecated: number }
+      unsupported?: boolean
+      error?: string
+    }> => {
+      const result: unknown = await ipcRenderer.invoke('grpc:reflect-import', input)
+      warnOnOutputMismatch('grpc:reflect-import', grpcReflectImportResultSchema, result)
+      return result as {
+        success: boolean
+        folder?: unknown
+        merged?: boolean
+        folderId?: string
+        diff?: { added: number; removed: number; merged: number; deprecated: number }
+        unsupported?: boolean
+        error?: string
+      }
+    },
+    /** Re-query a live server's reflection service for just the descriptor
+     * bundle — backs the request tab's "Refresh from reflection" button. */
+    reflectQuery: async (input: {
+      address: string
+      tls?: boolean
+      metadata?: { key: string; value: string }[]
+    }): Promise<{ success: boolean; services?: string[]; protoDescriptorSet?: string; unsupported?: boolean; error?: string }> => {
+      const result: unknown = await ipcRenderer.invoke('grpc:reflect-query', input)
+      warnOnOutputMismatch('grpc:reflect-query', grpcReflectQueryResultSchema, result)
+      return result as { success: boolean; services?: string[]; protoDescriptorSet?: string; unsupported?: boolean; error?: string }
     }
   },
   odata: {
@@ -1060,6 +1143,125 @@ contextBridge.exposeInMainWorld('restorm', {
       return () => {
         ipcRenderer.removeListener('odata:server-served', handler)
       }
+    }
+  },
+  jsonrpc: {
+    /** Execute a single JSON-RPC 2.0 call. Reuses the HTTP dispatcher under
+     * the hood — `JsonRpcExecutionService` composes the envelope and unwraps
+     * `result` / `error` from the response body. */
+    execute: async (input: { requestId: string; timeout?: number }): Promise<{
+      requestId: string
+      success: boolean
+      statusCode?: number
+      statusText?: string
+      notificationSent?: boolean
+      result?: unknown
+      error?: { code: number; message: string; data?: unknown }
+      transportError?: string
+      rawBody?: string
+      timings: { startedAt: string; durationMs: number }
+      requestUrl?: string
+      requestHeaders?: Record<string, string>
+    }> => {
+      const result: unknown = await ipcRenderer.invoke('jsonrpc:execute', input)
+      warnOnOutputMismatch('jsonrpc:execute', jsonrpcExecuteResultSchema, result)
+      return result as {
+        requestId: string
+        success: boolean
+        statusCode?: number
+        statusText?: string
+        notificationSent?: boolean
+        result?: unknown
+        error?: { code: number; message: string; data?: unknown }
+        transportError?: string
+        rawBody?: string
+        timings: { startedAt: string; durationMs: number }
+        requestUrl?: string
+        requestHeaders?: Record<string, string>
+      }
+    },
+    /** Execute a `jsonrpc-batch` request: every child composed into one JSON
+     * array POST, results matched back to their child by `id`. */
+    executeBatch: async (input: { requestId: string; timeout?: number }): Promise<{
+      requestId: string
+      success: boolean
+      statusCode?: number
+      transportError?: string
+      rawBody?: string
+      children: { childId: string; rpcId: string; result?: unknown; error?: { code: number; message: string; data?: unknown }; unmatched?: boolean }[]
+      timings: { startedAt: string; durationMs: number }
+      requestUrl?: string
+    }> => {
+      const result: unknown = await ipcRenderer.invoke('jsonrpc:execute-batch', input)
+      warnOnOutputMismatch('jsonrpc:execute-batch', jsonrpcExecuteBatchResultSchema, result)
+      return result as {
+        requestId: string
+        success: boolean
+        statusCode?: number
+        transportError?: string
+        rawBody?: string
+        children: { childId: string; rpcId: string; result?: unknown; error?: { code: number; message: string; data?: unknown }; unmatched?: boolean }[]
+        timings: { startedAt: string; durationMs: number }
+        requestUrl?: string
+      }
+    },
+    /** Cancel an in-flight JSON-RPC call (single or batch). */
+    cancel: async (requestId: string): Promise<boolean> => {
+      const result: unknown = await ipcRenderer.invoke('jsonrpc:cancel', requestId)
+      return result as boolean
+    },
+    /** Check whether a JSON-RPC call is currently in flight. */
+    isActive: async (requestId: string): Promise<boolean> => {
+      const result: unknown = await ipcRenderer.invoke('jsonrpc:is-active', requestId)
+      return result as boolean
+    }
+  },
+  trpc: {
+    /**
+     * Execute a tRPC request. Reuses the HTTP dispatcher: the URL (with the
+     * procedure path + `?input=` already appended by URLResolver) is
+     * dispatched as a plain HTTP call; `data` carries the UNWRAPPED
+     * `result.data`, `rawBody` the full wire envelope (for the "Show raw
+     * envelope" toggle).
+     */
+    execute: async (input: { requestId: string; timeout?: number; authRequest?: unknown }): Promise<{
+      requestId: string
+      success: boolean
+      statusCode?: number
+      statusText?: string
+      headers?: Record<string, string | string[]>
+      data?: unknown
+      rawBody?: string
+      error?: string
+      timings: { startedAt: string; durationMs: number }
+      requestUrl?: string
+      requestHeaders?: Record<string, string>
+    }> => {
+      const result: unknown = await ipcRenderer.invoke('trpc:execute', input)
+      warnOnOutputMismatch('trpc:execute', trpcExecuteResultSchema, result)
+      return result as {
+        requestId: string
+        success: boolean
+        statusCode?: number
+        statusText?: string
+        headers?: Record<string, string | string[]>
+        data?: unknown
+        rawBody?: string
+        error?: string
+        timings: { startedAt: string; durationMs: number }
+        requestUrl?: string
+        requestHeaders?: Record<string, string>
+      }
+    },
+    /** Cancel an in-flight tRPC request. */
+    cancel: async (requestId: string): Promise<boolean> => {
+      const result: unknown = await ipcRenderer.invoke('trpc:cancel', requestId)
+      return result as boolean
+    },
+    /** Check whether a tRPC request is currently in flight. */
+    isActive: async (requestId: string): Promise<boolean> => {
+      const result: unknown = await ipcRenderer.invoke('trpc:is-active', requestId)
+      return result as boolean
     }
   },
   auth: {
@@ -1181,6 +1383,374 @@ contextBridge.exposeInMainWorld('restorm', {
       ipcRenderer.on('websocket:server-clients', handler)
       return () => {
         ipcRenderer.removeListener('websocket:server-clients', handler)
+      }
+    }
+  },
+  sse: {
+    /** Connect to an SSE endpoint (stays open until disconnect / reconnect budget exhausted) */
+    connect: async (input: { requestId: string; timeout?: number }): Promise<{
+      requestId: string
+      success: boolean
+      connected: boolean
+      frames: { event: string; data: string; id?: string; timestamp: string }[]
+      error?: string
+      timings: { startedAt: string; durationMs: number }
+      requestUrl?: string
+    }> => {
+      const result: unknown = await ipcRenderer.invoke('sse:connect', input)
+      warnOnOutputMismatch('sse:connect', sseConnectResultSchema, result)
+      return result as {
+        requestId: string
+        success: boolean
+        connected: boolean
+        frames: { event: string; data: string; id?: string; timestamp: string }[]
+        error?: string
+        timings: { startedAt: string; durationMs: number }
+        requestUrl?: string
+      }
+    },
+    /** Disconnect an active SSE connection */
+    disconnect: async (requestId: string): Promise<boolean> => {
+      const result: unknown = await ipcRenderer.invoke('sse:disconnect', requestId)
+      return result as boolean
+    },
+    /** Check if a connection is currently active */
+    isActive: async (requestId: string): Promise<boolean> => {
+      const result: unknown = await ipcRenderer.invoke('sse:is-active', requestId)
+      return result as boolean
+    },
+    /** Listen for connection progress updates */
+    onProgress: (callback: (data: { requestId: string; status: 'started' | 'completed' | 'cancelled' | 'error' }) => void): (() => void) => {
+      const handler = (_event: Electron.IpcRendererEvent, data: { requestId: string; status: 'started' | 'completed' | 'cancelled' | 'error' }): void => {
+        callback(data)
+      }
+      ipcRenderer.on('sse:connection-progress', handler)
+      return () => {
+        ipcRenderer.removeListener('sse:connection-progress', handler)
+      }
+    },
+    /** Listen for incoming frames */
+    onMessage: (callback: (data: { requestId: string; message: { event: string; data: string; id?: string; timestamp: string } }) => void): (() => void) => {
+      const handler = (_event: Electron.IpcRendererEvent, data: { requestId: string; message: { event: string; data: string; id?: string; timestamp: string } }): void => {
+        callback(data)
+      }
+      ipcRenderer.on('sse:message', handler)
+      return () => {
+        ipcRenderer.removeListener('sse:message', handler)
+      }
+    }
+  },
+  stomp: {
+    /** Connect (CONNECT/CONNECTED handshake + SUBSCRIBE every configured
+     * destination) — resolves only once the connection closes, same shape as
+     * `websocket.connect`. */
+    connect: async (input: { requestId: string; timeout?: number }): Promise<{
+      requestId: string
+      success: boolean
+      connected: boolean
+      messages: { direction: 'sent' | 'received'; command: string; subscription?: string; destination?: string; headers: Record<string, string>; body: string; timestamp: string }[]
+      error?: string
+      timings: { startedAt: string; durationMs: number }
+      requestUrl?: string
+    }> => {
+      const result: unknown = await ipcRenderer.invoke('stomp:connect', input)
+      warnOnOutputMismatch('stomp:connect', stompConnectResultSchema, result)
+      return result as {
+        requestId: string
+        success: boolean
+        connected: boolean
+        messages: { direction: 'sent' | 'received'; command: string; subscription?: string; destination?: string; headers: Record<string, string>; body: string; timestamp: string }[]
+        error?: string
+        timings: { startedAt: string; durationMs: number }
+        requestUrl?: string
+      }
+    },
+    /** Send DISCONNECT and close an active STOMP connection */
+    disconnect: async (requestId: string): Promise<boolean> => {
+      const result: unknown = await ipcRenderer.invoke('stomp:disconnect', requestId)
+      return result as boolean
+    },
+    /** SEND a frame on an active STOMP connection (to the request's own configured destination) */
+    send: async (requestId: string, body: string): Promise<boolean> => {
+      const result: unknown = await ipcRenderer.invoke('stomp:send', requestId, body)
+      return result as boolean
+    },
+    /** ACK a received MESSAGE frame (client / client-individual ack mode) */
+    ack: async (requestId: string, messageId: string, subscriptionId: string): Promise<boolean> => {
+      const result: unknown = await ipcRenderer.invoke('stomp:ack', requestId, messageId, subscriptionId)
+      return result as boolean
+    },
+    /** NACK a received MESSAGE frame (client / client-individual ack mode) */
+    nack: async (requestId: string, messageId: string, subscriptionId: string): Promise<boolean> => {
+      const result: unknown = await ipcRenderer.invoke('stomp:nack', requestId, messageId, subscriptionId)
+      return result as boolean
+    },
+    /** Check if a connection is currently active */
+    isActive: async (requestId: string): Promise<boolean> => {
+      const result: unknown = await ipcRenderer.invoke('stomp:is-active', requestId)
+      return result as boolean
+    },
+    /** Listen for connection progress updates */
+    onProgress: (callback: (data: { requestId: string; status: 'started' | 'completed' | 'cancelled' | 'error' }) => void): (() => void) => {
+      const handler = (_event: Electron.IpcRendererEvent, data: { requestId: string; status: 'started' | 'completed' | 'cancelled' | 'error' }): void => {
+        callback(data)
+      }
+      ipcRenderer.on('stomp:connection-progress', handler)
+      return () => {
+        ipcRenderer.removeListener('stomp:connection-progress', handler)
+      }
+    },
+    /** Listen for every sent/received STOMP frame */
+    onMessage: (callback: (data: { requestId: string; message: { direction: 'sent' | 'received'; command: string; subscription?: string; destination?: string; headers: Record<string, string>; body: string; timestamp: string } }) => void): (() => void) => {
+      const handler = (_event: Electron.IpcRendererEvent, data: { requestId: string; message: { direction: 'sent' | 'received'; command: string; subscription?: string; destination?: string; headers: Record<string, string>; body: string; timestamp: string } }): void => {
+        callback(data)
+      }
+      ipcRenderer.on('stomp:message', handler)
+      return () => {
+        ipcRenderer.removeListener('stomp:message', handler)
+      }
+    }
+  },
+  amqp: {
+    /** One-shot publish / browse (`mode` on the request decides which). */
+    execute: async (input: { requestId: string; timeout?: number }): Promise<{
+      requestId: string
+      success: boolean
+      connected: boolean
+      mode: 'publish' | 'subscribe' | 'browse'
+      messages: { direction: 'sent' | 'received'; data: string; exchange?: string; routingKey?: string; deliveryTag?: number; peek?: boolean; timestamp: string }[]
+      error?: string
+      timings: { startedAt: string; durationMs: number }
+      requestUrl?: string
+    }> => {
+      const result: unknown = await ipcRenderer.invoke('amqp:execute', input)
+      warnOnOutputMismatch('amqp:execute', amqpExecuteResultSchema, result)
+      return result as {
+        requestId: string
+        success: boolean
+        connected: boolean
+        mode: 'publish' | 'subscribe' | 'browse'
+        messages: { direction: 'sent' | 'received'; data: string; exchange?: string; routingKey?: string; deliveryTag?: number; peek?: boolean; timestamp: string }[]
+        error?: string
+        timings: { startedAt: string; durationMs: number }
+        requestUrl?: string
+      }
+    },
+    /** Open a long-lived subscribe connection. Frames + lifecycle arrive via
+     * `onMessage` / `onProgress`. */
+    connect: async (input: { requestId: string; timeout?: number }): Promise<{ started: boolean }> => {
+      const result: unknown = await ipcRenderer.invoke('amqp:connect', input)
+      return result as { started: boolean }
+    },
+    /** Publish on the open subscribe connection (to the bound request's own
+     * exchange/routingKey). */
+    send: async (requestId: string, payload: string): Promise<boolean> => {
+      const result: unknown = await ipcRenderer.invoke('amqp:send', requestId, payload)
+      return result as boolean
+    },
+    /** Close an active subscribe connection. */
+    disconnect: async (requestId: string): Promise<boolean> => {
+      const result: unknown = await ipcRenderer.invoke('amqp:disconnect', requestId)
+      return result as boolean
+    },
+    /** Cancel an in-flight execution (same as `disconnect` for this protocol). */
+    cancel: async (requestId: string): Promise<boolean> => {
+      const result: unknown = await ipcRenderer.invoke('amqp:cancel', requestId)
+      return result as boolean
+    },
+    /** Check if a subscribe connection is currently active. */
+    isActive: async (requestId: string): Promise<boolean> => {
+      const result: unknown = await ipcRenderer.invoke('amqp:is-active', requestId)
+      return result as boolean
+    },
+    /** Listen for connection progress updates (subscribe mode). */
+    onProgress: (callback: (data: { requestId: string; status: 'started' | 'completed' | 'cancelled' | 'error' }) => void): (() => void) => {
+      const handler = (_event: Electron.IpcRendererEvent, data: { requestId: string; status: 'started' | 'completed' | 'cancelled' | 'error' }): void => {
+        callback(data)
+      }
+      ipcRenderer.on('amqp:connection-progress', handler)
+      return () => {
+        ipcRenderer.removeListener('amqp:connection-progress', handler)
+      }
+    },
+    /** Listen for incoming / sent frames. */
+    onMessage: (callback: (data: { requestId: string; message: { direction: 'sent' | 'received'; data: string; exchange?: string; routingKey?: string; deliveryTag?: number; peek?: boolean; timestamp: string } }) => void): (() => void) => {
+      const handler = (_event: Electron.IpcRendererEvent, data: { requestId: string; message: { direction: 'sent' | 'received'; data: string; exchange?: string; routingKey?: string; deliveryTag?: number; peek?: boolean; timestamp: string } }): void => {
+        callback(data)
+      }
+      ipcRenderer.on('amqp:message', handler)
+      return () => {
+        ipcRenderer.removeListener('amqp:message', handler)
+      }
+    }
+  },
+  redis: {
+    /** Subscribe mode: open a subscriber connection. Resolves once the
+     * session ends — live messages arrive via `onMessage` in the meantime. */
+    subscribe: async (input: { requestId: string; timeout?: number }): Promise<{
+      requestId: string
+      success: boolean
+      mode: 'subscribe'
+      connected?: boolean
+      channels?: string[]
+      messages?: { direction: 'sent' | 'received'; channel?: string; data: string; timestamp: string }[]
+      error?: string
+      timings: { startedAt: string; durationMs: number }
+      requestUrl?: string
+    }> => {
+      const result: unknown = await ipcRenderer.invoke('redis:subscribe', input)
+      warnOnOutputMismatch('redis:subscribe', redisResultSchema, result)
+      return result as {
+        requestId: string
+        success: boolean
+        mode: 'subscribe'
+        connected?: boolean
+        channels?: string[]
+        messages?: { direction: 'sent' | 'received'; channel?: string; data: string; timestamp: string }[]
+        error?: string
+        timings: { startedAt: string; durationMs: number }
+        requestUrl?: string
+      }
+    },
+    /** Command mode: run one command on a fresh client, then disconnect. */
+    command: async (input: { requestId: string; timeout?: number }): Promise<{
+      requestId: string
+      success: boolean
+      mode: 'command'
+      command?: string
+      args?: string[]
+      reply?: string
+      error?: string
+      timings: { startedAt: string; durationMs: number }
+      requestUrl?: string
+    }> => {
+      const result: unknown = await ipcRenderer.invoke('redis:command', input)
+      warnOnOutputMismatch('redis:command', redisResultSchema, result)
+      return result as {
+        requestId: string
+        success: boolean
+        mode: 'command'
+        command?: string
+        args?: string[]
+        reply?: string
+        error?: string
+        timings: { startedAt: string; durationMs: number }
+        requestUrl?: string
+      }
+    },
+    /** Close an open subscribe connection (or abort an in-flight command). */
+    disconnect: async (requestId: string): Promise<boolean> => {
+      const result: unknown = await ipcRenderer.invoke('redis:disconnect', requestId)
+      return result as boolean
+    },
+    /** Check if a subscribe connection is currently open. */
+    isActive: async (requestId: string): Promise<boolean> => {
+      const result: unknown = await ipcRenderer.invoke('redis:is-active', requestId)
+      return result as boolean
+    },
+    /** Listen for connection progress updates. */
+    onProgress: (callback: (data: { requestId: string; status: 'started' | 'completed' | 'cancelled' | 'error' }) => void): (() => void) => {
+      const handler = (_event: Electron.IpcRendererEvent, data: { requestId: string; status: 'started' | 'completed' | 'cancelled' | 'error' }): void => {
+        callback(data)
+      }
+      ipcRenderer.on('redis:connection-progress', handler)
+      return () => {
+        ipcRenderer.removeListener('redis:connection-progress', handler)
+      }
+    },
+    /** Listen for incoming pub/sub messages. */
+    onMessage: (callback: (data: { requestId: string; message: { direction: 'sent' | 'received'; channel?: string; data: string; timestamp: string } }) => void): (() => void) => {
+      const handler = (_event: Electron.IpcRendererEvent, data: { requestId: string; message: { direction: 'sent' | 'received'; channel?: string; data: string; timestamp: string } }): void => {
+        callback(data)
+      }
+      ipcRenderer.on('redis:message', handler)
+      return () => {
+        ipcRenderer.removeListener('redis:message', handler)
+      }
+    }
+  },
+  kafka: {
+    /** Produce: one-shot connect -> send -> disconnect. */
+    produce: async (input: { requestId: string; timeout?: number }): Promise<{
+      requestId: string
+      success: boolean
+      kafkaMode: 'produce'
+      requestTopic: string
+      requestUrl: string
+      partition?: number
+      offset?: string
+      error?: string
+      timings: { startedAt: string; durationMs: number }
+    }> => {
+      const result: unknown = await ipcRenderer.invoke('kafka:produce', input)
+      warnOnOutputMismatch('kafka:produce', kafkaProduceResultSchema, result)
+      return result as {
+        requestId: string
+        success: boolean
+        kafkaMode: 'produce'
+        requestTopic: string
+        requestUrl: string
+        partition?: number
+        offset?: string
+        error?: string
+        timings: { startedAt: string; durationMs: number }
+      }
+    },
+    /** Browse: one-shot peek via an ephemeral consumer group. */
+    browse: async (input: { requestId: string; timeout?: number }): Promise<{
+      requestId: string
+      success: boolean
+      kafkaMode: 'browse'
+      requestTopic: string
+      requestUrl: string
+      messages: { direction: 'received'; topic: string; partition: number; offset: string; key?: string; value: string; headers?: Record<string, string>; timestamp: string }[]
+      error?: string
+      timings: { startedAt: string; durationMs: number }
+    }> => {
+      const result: unknown = await ipcRenderer.invoke('kafka:browse', input)
+      warnOnOutputMismatch('kafka:browse', kafkaBrowseResultSchema, result)
+      return result as {
+        requestId: string
+        success: boolean
+        kafkaMode: 'browse'
+        requestTopic: string
+        requestUrl: string
+        messages: { direction: 'received'; topic: string; partition: number; offset: string; key?: string; value: string; headers?: Record<string, string>; timestamp: string }[]
+        error?: string
+        timings: { startedAt: string; durationMs: number }
+      }
+    },
+    /** Consume: start the long-lived subscribe; messages stream over `onMessage`. */
+    consumeStart: async (requestId: string): Promise<{ started: boolean }> => {
+      const result: unknown = await ipcRenderer.invoke('kafka:consume-start', requestId)
+      return result as { started: boolean }
+    },
+    cancel: async (requestId: string): Promise<boolean> => {
+      const result: unknown = await ipcRenderer.invoke('kafka:cancel', requestId)
+      return result as boolean
+    },
+    isActive: async (requestId: string): Promise<boolean> => {
+      const result: unknown = await ipcRenderer.invoke('kafka:is-active', requestId)
+      return result as boolean
+    },
+    /** Listen for produce/browse/consume lifecycle updates. */
+    onProgress: (callback: (data: { requestId: string; status: 'started' | 'completed' | 'cancelled' | 'error' }) => void): (() => void) => {
+      const handler = (_event: Electron.IpcRendererEvent, data: { requestId: string; status: 'started' | 'completed' | 'cancelled' | 'error' }): void => {
+        callback(data)
+      }
+      ipcRenderer.on('kafka:request-progress', handler)
+      return () => {
+        ipcRenderer.removeListener('kafka:request-progress', handler)
+      }
+    },
+    /** Listen for incoming (consumed/browsed) messages. */
+    onMessage: (callback: (data: { requestId: string; message: { direction: 'received'; topic: string; partition: number; offset: string; key?: string; value: string; headers?: Record<string, string>; timestamp: string } }) => void): (() => void) => {
+      const handler = (_event: Electron.IpcRendererEvent, data: { requestId: string; message: { direction: 'received'; topic: string; partition: number; offset: string; key?: string; value: string; headers?: Record<string, string>; timestamp: string } }): void => {
+        callback(data)
+      }
+      ipcRenderer.on('kafka:message', handler)
+      return () => {
+        ipcRenderer.removeListener('kafka:message', handler)
       }
     }
   },
@@ -1593,6 +2163,22 @@ contextBridge.exposeInMainWorld('restorm', {
         format?: string
         error?: string
       }
+    },
+    /** Run the imported format's post-import side effect (e.g. HAR's
+     * response-history seeding) with the FINAL ids the tree landed with
+     * after the renderer's id-regeneration pass. Fire-and-forget from the
+     * caller's perspective — a failure here never blocks the visible
+     * import, it just means history wasn't seeded. */
+    postImportSeed: async (payload: {
+      source: string
+      format: string
+      idMap: Record<string, string>
+      extraHeaders?: Record<string, string>
+      expectedChecksum?: string
+    }): Promise<{ success: boolean; error?: string }> => {
+      const result: unknown = await ipcRenderer.invoke('import:postImportSeed', payload)
+      warnOnOutputMismatch('import:postImportSeed', importPostImportSeedResultSchema, result)
+      return result as { success: boolean; error?: string }
     }
   },
   apiUpdate: {

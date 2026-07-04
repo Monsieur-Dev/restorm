@@ -274,10 +274,17 @@
         "socketio": "Socket.IO-anmodning",
         "mqtt": "MQTT request",
         "mqttServer": "MQTT-broker",
+        "sse": "SSE-anmodning",
         "grpcServer": "gRPC-mockserver",
         "soapServer": "SOAP-mockserver",
         "graphqlServer": "GraphQL-mockserver",
-        "odataServer": "OData-mockserver"
+        "odataServer": "OData-mockserver",
+        "trpc": "tRPC-anmodning",
+        "amqp": "AMQP-anmodning",
+        "redis": "Redis-anmodning",
+        "stomp": "STOMP-anmodning",
+        "kafkaProduce": "Kafka-anmodning – Producer",
+        "kafkaConsume": "Kafka-anmodning – Forbrug"
       }
     },
     "deleteConfirm": {
@@ -475,6 +482,12 @@
       "clientStream": "Client streaming",
       "bidi": "Bidirectional streaming"
     },
+    "transport": {
+      "grpc": "gRPC",
+      "grpcWeb": "gRPC-Web",
+      "connect": "Connect",
+      "streamingUnsupported": "Denne transport understøtter ikke klient- eller bidirektionel streaming over HTTP/1.1. Brug i stedet den native gRPC-transport."
+    },
     "server": {
       "proto": "Proto",
       "methods": "Mock-metoder",
@@ -493,6 +506,12 @@
       "notListening": "Lytter ikke",
       "listenFailed": "gRPC-serveren kunne ikke starte",
       "snippetsUnavailable": "Kodestumper er ikke tilgængelige for en mockserver."
+    },
+    "reflection": {
+      "refresh": "Opdater fra reflection",
+      "refreshFailed": "Opdatering via gRPC-reflection mislykkedes",
+      "unsupported": "Denne server understøtter ikke gRPC-reflection — importér i stedet en .proto-fil.",
+      "unknownError": "Ukendt fejl"
     }
   },
   "soap": {
@@ -540,6 +559,114 @@
     "routePlaceholder": "Rute (valgfri)",
     "clientsConnected": "{{count}} klient(er) forbundet",
     "notListening": "Lytter ikke"
+  },
+  "jsonrpc": {
+    "send": "Send",
+    "urlPlaceholder": "JSON-RPC-endpoint-URL",
+    "methodPlaceholder": "metode",
+    "idPlaceholder": "id (auto)",
+    "notificationModeTooltip": "Notifikationstilstand — intet id, intet svar forventes",
+    "tabs": {
+      "params": "Parametre",
+      "headers": "Headere"
+    },
+    "response": {
+      "notificationSent": "Notifikation sendt",
+      "errorLabel": "JSON-RPC-fejl {{code}}:"
+    }
+  },
+  "jsonrpcBatch": {
+    "send": "Send batch",
+    "tabs": {
+      "calls": "Kald"
+    },
+    "empty": "Ingen kald endnu. Tilføj et nedenfor.",
+    "methodPlaceholder": "metode",
+    "idPlaceholder": "id (auto)",
+    "moveUp": "Flyt op",
+    "moveDown": "Flyt ned",
+    "remove": "Fjern kald",
+    "paramsLabel": "Parametre (JSON)",
+    "add": "Tilføj kald",
+    "response": {
+      "unmatched": "Ingen matchende svarpost."
+    }
+  },
+  "sse": {
+    "headers": "Headere",
+    "noFrames": "Endnu ingen hændelser",
+    "urlPlaceholder": "SSE-URL",
+    "framesTruncated": "Viser de seneste {{shown}} af {{total}} frames",
+    "showAllFrames": "Vis alle"
+  },
+  "redis": {
+    "connected": "Forbundet",
+    "disconnected": "Afbrudt",
+    "noMessages": "Endnu ingen beskeder",
+    "noCommandsYet": "Endnu ingen kommandoer kørt",
+    "urlPlaceholder": "Redis-URL (redis:// eller rediss://)",
+    "passwordPlaceholder": "Adgangskode (valgfri)",
+    "subscribe": "Abonnér",
+    "unsubscribe": "Afmeld abonnement",
+    "run": "Kør",
+    "subscribeMode": "Abonnement",
+    "commandMode": "Kommando",
+    "command": "Kommando",
+    "args": "Argumenter",
+    "argsPlaceholder": "Kommandoargumenter",
+    "freeform": "Frit",
+    "freeformPlaceholder": "Frit kommando (tilsidesætter valget)",
+    "tabs": {
+      "channels": "Kanaler",
+      "command": "Kommando"
+    }
+  },
+  "kafka": {
+    "brokersPlaceholder": "Brokerliste (host:port,host:port)",
+    "clientId": "Klient-id",
+    "clientIdPlaceholder": "restorm",
+    "mode": {
+      "produce": "Producer",
+      "consume": "Forbrug",
+      "browse": "Gennemse"
+    },
+    "auth": {
+      "title": "Godkendelse",
+      "mechanism": "SASL",
+      "username": "Brugernavn",
+      "password": "Adgangskode",
+      "tls": "TLS"
+    },
+    "topic": "Emne",
+    "topicPlaceholder": "emne-navn",
+    "key": "Nøgle",
+    "keyPlaceholder": "beskednøgle (valgfrit)",
+    "value": "Værdi",
+    "headers": "Headers",
+    "partition": "Partition",
+    "partitionPlaceholder": "auto",
+    "groupId": "Gruppe-id",
+    "groupIdPlaceholder": "restorm-consumer",
+    "fromOffsetLabel": "Start fra",
+    "fromOffset": {
+      "earliest": "Ældste",
+      "latest": "Nyeste",
+      "specific": "Specifik"
+    },
+    "specificOffset": "Offset",
+    "partitions": "Partitioner",
+    "partitionsPlaceholder": "0,1,2 (tomt = alle)",
+    "peekCount": "Antal beskeder",
+    "produce": "Producer",
+    "startConsuming": "Start forbrug",
+    "stopConsuming": "Stop forbrug",
+    "peek": "Kig",
+    "noMessages": "Ingen beskeder endnu",
+    "connected": "Forbundet",
+    "disconnected": "Afbrudt",
+    "producedTo": "Produceret til",
+    "offset": "Offset",
+    "messages": "Beskeder"
   },
   "search": {
     "placeholder": "Søg...",
@@ -886,6 +1013,10 @@
         "description": "Slip en .proto-fil (eller en mappe med dem), og Restorm gennemgår hver service, hver RPC, hver besked — hver metode bliver en typet anmodning, du kan sende via gRPC-udføreren uden at røre ved codegen.",
         "trademark": "gRPC er et projekt under Cloud Native Computing Foundation."
       },
+      "grpcReflection": {
+        "description": "Ingen .proto-fil? Peg Restorm mod en kørende gRPC-server, der understøtter reflection — den forespørger grpc.reflection.v1alpha.ServerReflection, opdager alle tjenester og metoder og bygger det samme typede requesttræ som en proto-filimport, cachet lokalt til offlinebrug.",
+        "action": "Forbind til en server…"
+      },
       "soap": {
         "description": "Har du en WSDL? Indsæt den (eller dens URL) — Restorm parser hver <port> og <operation> og producerer klar-til-afsendelse SOAP-konvolutter med den rigtige SOAPAction-header, skema-typede body-skabeloner og den auth-ordning, som WSDL'en angiver."
       },
@@ -911,7 +1042,57 @@
       "paw": {
         "description": "Kommer du fra Paw? Slip din JSON-eksport (File → Export → JSON i appen — den native .paw-pakke læses ikke direkte). Restorm genopbygger hver anmodning, header, body og miljø, og mapper Paws dynamiske værdier (tidsstempler, tilfældige strenge, UUID'er) til deres nærmeste Restorm-modstykke.",
         "trademark": "Paw er et registreret varemærke tilhørende RapidAPI, Inc., anvendt her udelukkende som kompatibilitetsreference."
+      },
+      "har": {
+        "description": "Har du fanget en netværkssporing fra din browsers devtools? Slip den eksporterede .har-fil — Restorm gennemgår hvert registreret kald og gør det til en gentagelig anmodning, headers og body inkluderet."
+      },
+      "restClient": {
+        "description": "Kommer du fra REST Client-udvidelsen til VS Code? Indsæt eller slip .http-/.rest-filen — Restorm parser hver anmodningsblok, løser @variables og genopbygger dem som et Restorm-træ.",
+        "trademark": "REST Client er et varemærke tilhørende den respektive ejer, anvendt her udelukkende som kompatibilitetsreference."
+      },
+      "httpie": {
+        "description": "Slip en HTTPie Desktop-samlingseksport eller en CLI-sessionsfil — Restorm læser hver anmodning (og for en session dens vedvarende headers) og genopbygger dem klar til brug.",
+        "trademark": "HTTPie er et varemærke tilhørende den respektive ejer, anvendt her udelukkende som kompatibilitetsreference."
+      },
+      "smithy": {
+        "description": "Indsæt en Smithy-model — JSON-AST'en eller den håndskrevne IDL — og Restorm gennemgår hver service, ressource og operation for at danne en tilsvarende mappe med brugsklare anmodninger.",
+        "trademark": "Smithy er et projekt fra Amazon Web Services."
+      },
+      "typespec": {
+        "description": "Indsæt din TypeSpec-definition (.tsp) — Restorm kompilerer den til OpenAPI bag kulisserne og importerer den præcis som en håndskrevet spec: operationer, parametre og skemaer inkluderet.",
+        "trademark": "TypeSpec er et projekt fra Microsoft."
+      },
+      "raml": {
+        "description": "Indsæt et RAML 1.0- eller 0.8-dokument — Restorm spejler dets ressourcetræ i indlejrede mapper, én anmodning pr. metode, med de modellerede typer inkluderet.",
+        "trademark": "RAML er en specifikation vedligeholdt af RAML Workgroup."
+      },
+      "wadl": {
+        "description": "Vedligeholder du stadig et WADL-dokument? Indsæt XML'en — Restorm gennemgår dets indlejrede <resource>-træ og danner en tilsvarende mappe med anmodninger, metoder og parametre inkluderet.",
+        "trademark": "WADL blev indsendt til W3C af Sun Microsystems som en Member Submission."
+      },
+      "thrift": {
+        "description": "Indsæt en Apache Thrift IDL-fil (.thrift) — Restorm læser hver service, metode, struct og enum, så du kan udforske API'ets form. Thrifts binære wire-protokol kan endnu ikke køres fra Restorm, så denne import er kun dokumenterende.",
+        "trademark": "Apache Thrift er et varemærke tilhørende Apache Software Foundation."
+      },
+      "apiBlueprint": {
+        "description": "Indsæt et API Blueprint-dokument (.apib) — Restorm parser hver ressourcegruppe og overgang til en mappe med anmodninger, én pr. dokumenteret metode-/svarpar.",
+        "trademark": "API Blueprint er en specifikation, der oprindeligt blev skabt af Apiary."
       }
+    },
+    "grpcReflection": {
+      "title": "gRPC-server (reflection)",
+      "hint": "Forespørg reflection-tjenesten på en kørende gRPC-server for at opdage dens tjenester og metoder uden en .proto-fil.",
+      "addressLabel": "Serveradresse (host:port)",
+      "addressPlaceholder": "localhost:9000",
+      "tlsLabel": "Brug TLS",
+      "metadataLabel": "Metadata (valgfrie auth-headers)",
+      "connecting": "Forbinder…",
+      "import": "Importér",
+      "reimportedTitle": "gRPC-reflection genimporteret",
+      "reimportedNoop": "Allerede opdateret — ingen ændringer på serveren.",
+      "reimportedSummary": "+{{added}} / -{{removed}} / ↻{{merged}} — genindlæs projektet for at se ændringerne.",
+      "unsupported": "Denne server understøtter ikke gRPC-reflection — importér i stedet en .proto-fil.",
+      "unknownError": "Ukendt fejl"
     },
     "loading": "Analyserer...",
     "noResults": "Ingen anmodninger fundet",
@@ -1075,14 +1256,22 @@
       "socketioSend": "Socket.IO send",
       "socketioClose": "Socket.IO close",
       "websocketConnect": "WebSocket connect",
+      "sseConnect": "SSE connect",
       "websocketSend": "WebSocket send",
       "websocketClose": "WebSocket close",
+      "sseClose": "SSE close",
       "grpcConnect": "gRPC connect",
       "grpcSend": "gRPC send",
       "grpcClose": "gRPC close",
       "mqttConnect": "MQTT connect",
       "mqttSend": "MQTT publish",
       "mqttClose": "MQTT close",
+      "amqpConnect": "AMQP-forbindelse",
+      "amqpPublish": "AMQP-udgivelse",
+      "amqpClose": "AMQP-lukning",
+      "redisSubscribe": "Redis subscribe",
+      "redisClose": "Redis close",
+      "redisCommand": "Redis command",
       "httpListen": "HTTP server",
       "httpClose": "HTTP close",
       "grpcServerClose": "Luk gRPC-server",
@@ -1093,7 +1282,13 @@
       "odataListen": "OData server",
       "odataClose": "OData close",
       "graphqlSubscribe": "GraphQL-abonnement",
-      "graphqlUnsubscribe": "Opsig GraphQL-abonnement"
+      "graphqlUnsubscribe": "Opsig GraphQL-abonnement",
+      "stompConnect": "STOMP-forbindelse",
+      "stompSend": "STOMP-afsendelse",
+      "stompClose": "Luk STOMP",
+      "kafkaProduce": "Kafka produce",
+      "kafkaConsume": "Kafka consume",
+      "kafkaClose": "Kafka close"
     },
     "comparator": {
       "result": "resultat"
@@ -1654,8 +1849,10 @@
       "socketioSend": "Sender en besked på en allerede-åben Socket.IO-forbindelse.",
       "socketioClose": "Lukker en allerede-åben Socket.IO-forbindelse.",
       "websocketConnect": "Åbner en rå WebSocket-forbindelse og genudsender hver modtaget besked på sin port.",
+      "sseConnect": "Åbner en langvarig SSE (Server-Sent Events)-forbindelse og videresender hver modtaget frame på sin port.",
       "websocketSend": "Sender en payload på en allerede-åben WebSocket-forbindelse.",
       "websocketClose": "Lukker en allerede-åben WebSocket-forbindelse.",
+      "sseClose": "Lukker en allerede åben SSE-forbindelse.",
       "grpcConnect": "Åbner et streaming-gRPC-kald og genudsender hver modtaget frame på sin message-port.",
       "grpcSend": "Skriver en anmodningsbesked til et allerede-åbent streaming-gRPC-kald.",
       "grpcClose": "Halvlukker (half-close) et allerede-åbent streaming-gRPC-kald.",
@@ -1668,9 +1865,15 @@
       "mqttConnect": "Åbner en langlivet MQTT-forbindelse fra en bundet anmodning og abonnerer på dens topic; genudsender hver modtaget besked på sin `message`-port.",
       "mqttSend": "Publicerer en payload på en allerede-åben MQTT-forbindelse (til dens topic).",
       "mqttClose": "Lukker en allerede-åben MQTT-forbindelse.",
+      "amqpConnect": "Åbner en vedvarende AMQP-forbindelse fra en bundet anmodning og forbruger dens kø; genudsender hver modtaget besked på dens `message`-port.",
+      "amqpPublish": "Udgiver en nyttelast på en allerede åben AMQP-forbindelse (til dens bundne anmodnings exchange/routing key).",
+      "amqpClose": "Lukker en allerede åben AMQP-forbindelse.",
       "mqttConnectServer": "Starter en lokal MQTT-broker (port + topicfilter); abonnerer på sit topicfilter og genudsender hver modtaget besked på sin `message`-port. Send publicerer til forbundne abonnenter.",
       "mqttSendServer": "Publicerer en besked til hver abonnent på den refererede MQTT-broker.",
       "mqttCloseServer": "Stopper den refererede MQTT-broker og afbryder dens klienter.",
+      "redisSubscribe": "Åbner en langlivet Redis-abonnementsforbindelse fra en bundet anmodning og lytter på dens kanaler; genudsender hver modtaget besked på sin `message`-port.",
+      "redisClose": "Lukker en allerede-åben Redis-abonnementsforbindelse.",
+      "redisCommand": "Kører en bundet Redis-kommando (én kommando på en ny forbindelse, derefter afbrydelse) og udsender dens svar.",
       "toast": "Viser en toastnotifikation i Restorm-grænsefladen, mens scenariet kører.",
       "httpListen": "Hosts a local HTTP mock server and listens indefinitely. `connected` fires once it is listening; each served request re-emits its data on the `served` port. The server stays up until an HTTP close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
       "httpClose": "Stopper en allerede-lyttende HTTP-mockserver (deklareret af en HTTP-serverknude) og frigiver dens port.",
@@ -1683,7 +1886,13 @@
       "odataListen": "Hoster en lokal OData v4-mockservice og lytter i det uendelige. `connected` udløses, så snart den lytter; hver betjent forespørgsel sender sine data igen på `served`-porten. Serveren kører, indtil en OData-lukning (eller et Stop), hvorefter `done` udløses. Intet response-output — den betjener, den kalder ikke ud.",
       "odataClose": "Stopper en allerede lyttende OData-mockservice (erklæret af en OData-serverknude) og frigiver dens port.",
       "graphqlSubscribe": "Åbner et langlivet GraphQL-abonnement som klient via SSE og lytter. `connected` udløses, så snart streamen er åben; hver modtaget nyttelast genudsendes på `message`-porten (et abonnement er kun modtagende, uden navngivne hændelser). Streamen forbliver åben indtil en GraphQL-opsigelse (eller et stop), eller indtil serveren fuldfører den, hvorefter `done` udløses.",
-      "graphqlUnsubscribe": "Stopper et allerede åbent GraphQL-abonnement (erklæret af en GraphQL-abonnementsknude) og lukker dets SSE-stream."
+      "graphqlUnsubscribe": "Stopper et allerede åbent GraphQL-abonnement (erklæret af en GraphQL-abonnementsknude) og lukker dets SSE-stream.",
+      "stompConnect": "Åbner en langvarig STOMP-over-WebSocket-forbindelse: udfører CONNECT/CONNECTED-handshaket, abonnerer derefter på hver konfigureret destination og genudsender hver modtaget frame på sin port.",
+      "stompSend": "Sender en SEND-frame på en allerede åben STOMP-forbindelse.",
+      "stompClose": "Sender DISCONNECT og lukker en allerede åben STOMP-forbindelse.",
+      "kafkaProduce": "Kører en bundet Kafka-anmodning som en engangsproduktion og udsender resultatet (topic/partition/offset) som `response`.",
+      "kafkaConsume": "Åbner en langlivet Kafka-forbruger fra en bundet anmodning og genudsender hver modtaget besked på sin `message`-port.",
+      "kafkaClose": "Lukker en allerede-åben Kafka-forbruger."
     },
     "legend": {
       "title": "Forklaring",
@@ -1732,6 +1941,9 @@
     "websocket": {
       "message": "message"
     },
+    "sse": {
+      "message": "message"
+    },
     "grpc": {
       "message": "message"
     },
@@ -1777,6 +1989,36 @@
     "lwtTopicPlaceholder": "will/topic",
     "lwtPayload": "Payload",
     "lwtPayloadPlaceholder": "will message"
+  },
+  "amqp": {
+    "urlPlaceholder": "AMQP-URL (amqp:// eller amqps://)",
+    "vhost": "Virtuel host",
+    "vhostPlaceholder": "/",
+    "username": "Brugernavn",
+    "password": "Adgangskode",
+    "mode": "Tilstand",
+    "modePublish": "Udgiv",
+    "modeSubscribe": "Abonnér",
+    "modeBrowse": "Gennemse",
+    "exchange": "Exchange",
+    "exchangePlaceholder": "(standard-exchange)",
+    "routingKey": "Routing key",
+    "routingKeyPlaceholder": "routing.key",
+    "queue": "Kø",
+    "queuePlaceholder": "kønavn",
+    "autoAck": "Auto-ack",
+    "prefetch": "Prefetch",
+    "browsePeekCount": "Antal at kigge på",
+    "connect": "Forbind",
+    "connecting": "Forbinder…",
+    "disconnect": "Afbryd",
+    "connected": "Forbundet",
+    "disconnected": "Afbrudt",
+    "send": "Send",
+    "browseButton": "Gennemse",
+    "noMessages": "Ingen beskeder endnu",
+    "peeked": "Kigget",
+    "messages": "Beskeder"
   },
   "mcpLogs": {
     "title": "MCP-logge",
@@ -2043,5 +2285,42 @@
       "noSubscription": "Intet aktivt abonnement at administrere.",
       "error": "Abonnementsportalen kunne ikke åbnes. Prøv igen."
     }
+  },
+  "trpc": {
+    "send": "Send",
+    "urlPlaceholder": "tRPC-serverens URL",
+    "procedurePlaceholder": "Procedure (f.eks. user.get)",
+    "kindQuery": "Forespørgsel",
+    "kindMutation": "Mutation",
+    "showRawEnvelope": "Vis rå konvolut",
+    "kindSelectLabel": "Kaldetype",
+    "tabs": {
+      "headers": "Headere",
+      "body": "Body"
+    }
+  },
+  "stomp": {
+    "connect": "Opret forbindelse",
+    "disconnect": "Afbryd forbindelse",
+    "connected": "Forbundet",
+    "disconnected": "Ikke forbundet",
+    "noMessages": "Ingen frames endnu",
+    "version": "STOMP-version",
+    "tabs": {
+      "connect": "Forbindelse",
+      "subscriptions": "Abonnementer",
+      "send": "Send"
+    },
+    "ackMode": {
+      "auto": "auto",
+      "client": "client",
+      "clientIndividual": "client-individual"
+    },
+    "subscriptionIdLabel": "Abonnement-id",
+    "removeSubscription": "Fjern abonnement",
+    "addSubscription": "Tilføj abonnement",
+    "sendDestination": "Destination",
+    "ack": "ACK",
+    "nack": "NACK"
   }
 }
