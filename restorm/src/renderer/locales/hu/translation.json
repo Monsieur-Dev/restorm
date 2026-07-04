@@ -613,10 +613,22 @@
     "subscribeMode": "Feliratkozás",
     "commandMode": "Parancs",
     "command": "Parancs",
-    "args": "Argumentumok",
-    "argsPlaceholder": "Parancs argumentumai",
     "freeform": "Szabad",
     "freeformPlaceholder": "Szabad parancs (felülírja a kiválasztást)",
+    "fields": {
+      "key": "Kulcs",
+      "field": "Mező",
+      "value": "Érték",
+      "channel": "Csatorna",
+      "message": "Üzenet",
+      "start": "Kezdet",
+      "stop": "Vég",
+      "id": "ID",
+      "fieldOrValue": "Mező/Érték",
+      "argument": "Argumentum"
+    },
+    "addArgument": "Argumentum hozzáadása",
+    "removeArgument": "Argumentum eltávolítása",
     "tabs": {
       "channels": "Csatornák",
       "command": "Parancs"

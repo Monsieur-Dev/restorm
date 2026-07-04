@@ -612,10 +612,22 @@
     "subscribeMode": "Đăng ký",
     "commandMode": "Lệnh",
     "command": "Lệnh",
-    "args": "Đối số",
-    "argsPlaceholder": "Đối số lệnh",
     "freeform": "Tự do",
     "freeformPlaceholder": "Lệnh tự do (ghi đè lựa chọn)",
+    "fields": {
+      "key": "Khóa",
+      "field": "Trường",
+      "value": "Giá trị",
+      "channel": "Kênh",
+      "message": "Thông điệp",
+      "start": "Bắt đầu",
+      "stop": "Kết thúc",
+      "id": "ID",
+      "fieldOrValue": "Trường/Giá trị",
+      "argument": "Đối số"
+    },
+    "addArgument": "Thêm đối số",
+    "removeArgument": "Xóa đối số",
     "tabs": {
       "channels": "Kênh",
       "command": "Lệnh"

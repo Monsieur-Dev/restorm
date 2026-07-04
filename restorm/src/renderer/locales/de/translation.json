@@ -613,10 +613,22 @@
     "subscribeMode": "Abonnieren",
     "commandMode": "Befehl",
     "command": "Befehl",
-    "args": "Argumente",
-    "argsPlaceholder": "Befehlsargumente",
     "freeform": "Frei",
     "freeformPlaceholder": "Freier Befehl (überschreibt die Auswahl)",
+    "fields": {
+      "key": "Schlüssel",
+      "field": "Feld",
+      "value": "Wert",
+      "channel": "Kanal",
+      "message": "Nachricht",
+      "start": "Start",
+      "stop": "Ende",
+      "id": "ID",
+      "fieldOrValue": "Feld/Wert",
+      "argument": "Argument"
+    },
+    "addArgument": "Argument hinzufügen",
+    "removeArgument": "Argument entfernen",
     "tabs": {
       "channels": "Kanäle",
       "command": "Befehl"

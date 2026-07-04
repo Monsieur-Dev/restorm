@@ -612,10 +612,22 @@
     "subscribeMode": "購読",
     "commandMode": "コマンド",
     "command": "コマンド",
-    "args": "引数",
-    "argsPlaceholder": "コマンドの引数",
     "freeform": "自由入力",
     "freeformPlaceholder": "自由入力コマンド（選択を上書き）",
+    "fields": {
+      "key": "キー",
+      "field": "フィールド",
+      "value": "値",
+      "channel": "チャンネル",
+      "message": "メッセージ",
+      "start": "開始",
+      "stop": "終了",
+      "id": "ID",
+      "fieldOrValue": "フィールド/値",
+      "argument": "引数"
+    },
+    "addArgument": "引数を追加",
+    "removeArgument": "引数を削除",
     "tabs": {
       "channels": "チャンネル",
       "command": "コマンド"

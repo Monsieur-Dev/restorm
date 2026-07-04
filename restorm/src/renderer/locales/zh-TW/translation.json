@@ -612,10 +612,22 @@
     "subscribeMode": "訂閱",
     "commandMode": "命令",
     "command": "命令",
-    "args": "參數",
-    "argsPlaceholder": "命令參數",
     "freeform": "自由輸入",
     "freeformPlaceholder": "自由輸入命令（覆蓋所選項目）",
+    "fields": {
+      "key": "鍵",
+      "field": "欄位",
+      "value": "值",
+      "channel": "頻道",
+      "message": "訊息",
+      "start": "起始",
+      "stop": "結束",
+      "id": "ID",
+      "fieldOrValue": "欄位/值",
+      "argument": "參數"
+    },
+    "addArgument": "新增參數",
+    "removeArgument": "移除參數",
     "tabs": {
       "channels": "頻道",
       "command": "命令"

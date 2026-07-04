@@ -613,10 +613,22 @@
     "subscribeMode": "Subscribe",
     "commandMode": "Command",
     "command": "Command",
-    "args": "Args",
-    "argsPlaceholder": "Command arguments",
     "freeform": "Freeform",
     "freeformPlaceholder": "Freeform command override",
+    "fields": {
+      "key": "Key",
+      "field": "Field",
+      "value": "Value",
+      "channel": "Channel",
+      "message": "Message",
+      "start": "Start",
+      "stop": "Stop",
+      "id": "ID",
+      "fieldOrValue": "Field/Value",
+      "argument": "Argument"
+    },
+    "addArgument": "Add argument",
+    "removeArgument": "Remove argument",
     "tabs": {
       "channels": "Channels",
       "command": "Command"

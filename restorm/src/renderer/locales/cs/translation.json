@@ -615,10 +615,22 @@
     "subscribeMode": "Odběr",
     "commandMode": "Příkaz",
     "command": "Příkaz",
-    "args": "Argumenty",
-    "argsPlaceholder": "Argumenty příkazu",
     "freeform": "Volný",
     "freeformPlaceholder": "Volný příkaz (nahrazuje výběr)",
+    "fields": {
+      "key": "Klíč",
+      "field": "Pole",
+      "value": "Hodnota",
+      "channel": "Kanál",
+      "message": "Zpráva",
+      "start": "Počátek",
+      "stop": "Konec",
+      "id": "ID",
+      "fieldOrValue": "Pole/Hodnota",
+      "argument": "Argument"
+    },
+    "addArgument": "Přidat argument",
+    "removeArgument": "Odebrat argument",
     "tabs": {
       "channels": "Kanály",
       "command": "Příkaz"

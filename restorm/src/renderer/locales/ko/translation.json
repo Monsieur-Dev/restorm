@@ -612,10 +612,22 @@
     "subscribeMode": "구독",
     "commandMode": "명령",
     "command": "명령",
-    "args": "인수",
-    "argsPlaceholder": "명령 인수",
     "freeform": "자유 입력",
     "freeformPlaceholder": "자유 입력 명령(선택 항목을 덮어씀)",
+    "fields": {
+      "key": "키",
+      "field": "필드",
+      "value": "값",
+      "channel": "채널",
+      "message": "메시지",
+      "start": "시작",
+      "stop": "종료",
+      "id": "ID",
+      "fieldOrValue": "필드/값",
+      "argument": "인수"
+    },
+    "addArgument": "인수 추가",
+    "removeArgument": "인수 제거",
     "tabs": {
       "channels": "채널",
       "command": "명령"

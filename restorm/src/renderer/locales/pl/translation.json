@@ -615,10 +615,22 @@
     "subscribeMode": "Subskrypcja",
     "commandMode": "Polecenie",
     "command": "Polecenie",
-    "args": "Argumenty",
-    "argsPlaceholder": "Argumenty polecenia",
     "freeform": "Dowolne",
     "freeformPlaceholder": "Dowolne polecenie (zastępuje wybór)",
+    "fields": {
+      "key": "Klucz",
+      "field": "Pole",
+      "value": "Wartość",
+      "channel": "Kanał",
+      "message": "Wiadomość",
+      "start": "Początek",
+      "stop": "Koniec",
+      "id": "ID",
+      "fieldOrValue": "Pole/Wartość",
+      "argument": "Argument"
+    },
+    "addArgument": "Dodaj argument",
+    "removeArgument": "Usuń argument",
     "tabs": {
       "channels": "Kanały",
       "command": "Polecenie"

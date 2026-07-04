@@ -614,10 +614,22 @@
     "subscribeMode": "Pretplata",
     "commandMode": "Naredba",
     "command": "Naredba",
-    "args": "Argumenti",
-    "argsPlaceholder": "Argumenti naredbe",
     "freeform": "Slobodno",
     "freeformPlaceholder": "Slobodna naredba (zamjenjuje odabir)",
+    "fields": {
+      "key": "Ključ",
+      "field": "Polje",
+      "value": "Vrijednost",
+      "channel": "Kanal",
+      "message": "Poruka",
+      "start": "Početak",
+      "stop": "Kraj",
+      "id": "ID",
+      "fieldOrValue": "Polje/Vrijednost",
+      "argument": "Argument"
+    },
+    "addArgument": "Dodaj argument",
+    "removeArgument": "Ukloni argument",
     "tabs": {
       "channels": "Kanali",
       "command": "Naredba"

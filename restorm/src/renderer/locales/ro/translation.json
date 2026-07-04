@@ -614,10 +614,22 @@
     "subscribeMode": "Abonare",
     "commandMode": "Comandă",
     "command": "Comandă",
-    "args": "Argumente",
-    "argsPlaceholder": "Argumentele comenzii",
     "freeform": "Liberă",
     "freeformPlaceholder": "Comandă liberă (înlocuiește selecția)",
+    "fields": {
+      "key": "Cheie",
+      "field": "Câmp",
+      "value": "Valoare",
+      "channel": "Canal",
+      "message": "Mesaj",
+      "start": "Început",
+      "stop": "Sfârșit",
+      "id": "ID",
+      "fieldOrValue": "Câmp/Valoare",
+      "argument": "Argument"
+    },
+    "addArgument": "Adaugă argument",
+    "removeArgument": "Elimină argumentul",
     "tabs": {
       "channels": "Canale",
       "command": "Comandă"
