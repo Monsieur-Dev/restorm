@@ -397,6 +397,7 @@
         "graph": "Grafikon"
       },
       "loading": "Kérés küldése...",
+      "noResponseBody": "Nincs válasz-törzs — a részletekért lásd az Infos fület",
       "noResponse": "Kattintson a Küldés gombra a kérés végrehajtásához",
       "history": {
         "list": "Válaszok előzménylistája",

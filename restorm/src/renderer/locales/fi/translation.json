@@ -397,6 +397,7 @@
         "graph": "Kaavio"
       },
       "loading": "Lähetetään pyyntöä...",
+      "noResponseBody": "Ei vastausrunkoa — katso tiedot Infos-välilehdeltä",
       "noResponse": "Suorita pyyntö napsauttamalla Lähetä",
       "history": {
         "list": "Vastaushistorian luettelo",

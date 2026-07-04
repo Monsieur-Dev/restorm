@@ -399,6 +399,7 @@
         "graph": "Wykres"
       },
       "loading": "Wysyłanie żądania...",
+      "noResponseBody": "Brak treści odpowiedzi — szczegóły w zakładce Infos",
       "noResponse": "Kliknij Wyślij, aby wykonać żądanie",
       "history": {
         "list": "Lista historii odpowiedzi",

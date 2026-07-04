@@ -397,6 +397,7 @@
         "graph": "Graphe"
       },
       "loading": "Envoi de la requête...",
+      "noResponseBody": "Pas de corps de réponse — voir Infos pour le détail",
       "noResponse": "Cliquez sur Envoyer pour exécuter la requête",
       "history": {
         "list": "Liste de l'historique des réponses",

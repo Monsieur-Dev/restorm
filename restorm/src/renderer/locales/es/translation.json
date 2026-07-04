@@ -397,6 +397,7 @@
         "graph": "Gráfico"
       },
       "loading": "Enviando la petición...",
+      "noResponseBody": "Sin cuerpo de respuesta — consulta Infos para más detalles",
       "noResponse": "Pulsa Enviar para ejecutar la petición",
       "history": {
         "list": "Lista del historial de respuestas",

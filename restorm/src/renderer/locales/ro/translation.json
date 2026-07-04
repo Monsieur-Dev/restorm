@@ -398,6 +398,7 @@
         "graph": "Grafic"
       },
       "loading": "Se trimite cererea...",
+      "noResponseBody": "Fără corp de răspuns — vezi Infos pentru detalii",
       "noResponse": "Apăsați Trimite pentru a executa cererea",
       "history": {
         "list": "Listă a istoricului răspunsurilor",

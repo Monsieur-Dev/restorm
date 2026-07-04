@@ -399,6 +399,7 @@
         "graph": "Graf"
       },
       "loading": "Odesílání požadavku...",
+      "noResponseBody": "Bez těla odpovědi — podrobnosti viz Infos",
       "noResponse": "Klikněte na Odeslat pro spuštění požadavku",
       "history": {
         "list": "Seznam historie odpovědí",

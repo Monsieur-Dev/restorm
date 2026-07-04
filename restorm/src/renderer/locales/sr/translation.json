@@ -398,6 +398,7 @@
         "graph": "Graf"
       },
       "loading": "Slanje zahteva...",
+      "noResponseBody": "Нема тела одговора — погледајте Infos за детаље",
       "noResponse": "Kliknite Pošalji da biste izvršili zahtev",
       "history": {
         "list": "Lista istorije odgovora",

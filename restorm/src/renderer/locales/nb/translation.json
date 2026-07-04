@@ -397,6 +397,7 @@
         "graph": "Graf"
       },
       "loading": "Sender forespørsel...",
+      "noResponseBody": "Ingen svartekst — se Infos for detaljer",
       "noResponse": "Klikk Send for å utføre forespørselen",
       "history": {
         "list": "Liste over svarhistorikk",

@@ -397,6 +397,7 @@
         "graph": "Grafico"
       },
       "loading": "Invio della richiesta in corso...",
+      "noResponseBody": "Nessun corpo di risposta — vedi Infos per i dettagli",
       "noResponse": "Clicca su Invia per eseguire la richiesta",
       "history": {
         "list": "Elenco della cronologia delle risposte",

@@ -396,6 +396,7 @@
         "graph": "Grafik"
       },
       "loading": "Mengirim permintaan...",
+      "noResponseBody": "Tidak ada isi respons — lihat Infos untuk detail",
       "noResponse": "Klik Kirim untuk menjalankan permintaan",
       "history": {
         "list": "Daftar riwayat respons",

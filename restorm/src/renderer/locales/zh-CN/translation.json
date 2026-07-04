@@ -396,6 +396,7 @@
         "graph": "图表"
       },
       "loading": "正在发送请求...",
+      "noResponseBody": "无响应正文 — 详情请见 Infos",
       "noResponse": "点击“发送”以执行请求",
       "history": {
         "list": "响应历史列表",
