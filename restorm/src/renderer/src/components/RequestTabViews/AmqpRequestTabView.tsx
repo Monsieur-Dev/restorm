@@ -30,6 +30,7 @@ import { SendButtonEnvSwitcher } from './SendButtonEnvSwitcher'
 import { useIsAmqpListening } from '../../services/amqpListeningStore'
 import { BeamWrap } from '../common/BeamWrap'
 import { HeaderHoverTooltip } from '../MainView/HeaderHoverTooltip'
+import './WebSocketChat.css'
 
 export interface AmqpRequestTabViewProps {
   request: AmqpRequest
@@ -357,39 +358,29 @@ export const AmqpRequestTabView: React.FC<AmqpRequestTabViewProps> = ({ request 
   // frame gets a distinct indicator since the queue is left untouched).
   const renderFrames = useCallback((messages: AmqpMessageItem[]): React.ReactNode => {
     if (messages.length === 0) {
-      return <div style={{ padding: 12, color: 'var(--foreground-muted)', fontSize: 12 }}>{t('amqp.noMessages')}</div>
+      return <div className="ws-chat-empty">{t('amqp.noMessages')}</div>
     }
     return (
       <ScrollableElement
         options={{ vertical: 'auto', horizontal: 'hidden', useShadows: true }}
         style={{ flex: 1, minHeight: 0 }}
       >
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 4, padding: 8 }} data-testid="amqp-frame-list">
+        <div className="ws-chat" data-testid="amqp-frame-list">
           {messages.map((msg, i) => (
             <div
               key={i}
+              className={`ws-chat-bubble ${msg.direction === 'sent' ? 'sent' : 'received'}`}
               data-testid={`response-stream-frame-${i}`}
               data-direction={msg.direction}
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                gap: 2,
-                padding: '6px 8px',
-                borderRadius: 3,
-                border: '1px solid var(--panel-border)',
-                alignSelf: msg.direction === 'sent' ? 'flex-end' : 'flex-start',
-                maxWidth: '85%',
-                background: msg.direction === 'sent' ? 'var(--list-hoverBackground)' : 'transparent'
-              }}
             >
-              <div style={{ display: 'flex', gap: 8, fontSize: 11, color: 'var(--foreground-muted)', flexWrap: 'wrap' }}>
-                <span className={`codicon codicon-arrow-${msg.direction === 'sent' ? 'up' : 'down'}`} aria-hidden="true" />
-                {msg.exchange !== undefined && <span>exchange: {msg.exchange || '(default)'}</span>}
-                {msg.routingKey !== undefined && <span>routingKey: {msg.routingKey}</span>}
-                {msg.deliveryTag !== undefined && <span>deliveryTag: {msg.deliveryTag}</span>}
+              <span className="ws-chat-event">
+                <span className={`codicon codicon-arrow-${msg.direction === 'sent' ? 'up' : 'down'}`} aria-hidden="true" style={{ marginRight: 4 }} />
+                {msg.exchange !== undefined && <span style={{ marginRight: 8 }}>exchange: {msg.exchange || '(default)'}</span>}
+                {msg.routingKey !== undefined && <span style={{ marginRight: 8 }}>routingKey: {msg.routingKey}</span>}
+                {msg.deliveryTag !== undefined && <span style={{ marginRight: 8 }}>deliveryTag: {msg.deliveryTag}</span>}
                 {msg.peek === true && <span data-testid="amqp-frame-peek">{t('amqp.peeked')}</span>}
-              </div>
-              <div style={{ fontSize: 12, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{msg.data}</div>
+              </span>
+              {msg.data}
             </div>
           ))}
         </div>
