@@ -274,13 +274,16 @@ class HTTPExecutionService {
             break
           }
           case 'file': {
-            // Stream the file's bytes as the raw request body. The
-            // Content-Type is left to the user's headers (or omitted)
-            // — a single-file PUT/POST sends the file verbatim, not a
-            // multipart envelope.
+            // Stream the file's bytes as the raw request body — a
+            // single-file PUT/POST sends the file verbatim, not a
+            // multipart envelope. Content-Type is guessed from the
+            // extension (same map the multipart file part uses) and
+            // only applied if the user hasn't already set one.
             const resolvedPath = contextService.resolveValue(bodyData.path, requestId)
             if (resolvedPath && fs.existsSync(resolvedPath)) {
               body = fs.readFileSync(resolvedPath)
+              headers['Content-Type'] ??= this.guessFileContentType(basename(resolvedPath))
+              headers['Content-Length'] ??= String(body.length)
             } else if (resolvedPath) {
               return {
                 requestId,
@@ -1022,7 +1025,8 @@ class HTTPExecutionService {
     return { buffer: Buffer.concat(parts), boundary }
   }
 
-  /** Best-effort Content-Type for a multipart file part by extension. */
+  /** Best-effort Content-Type by extension, for a multipart file part
+   * or a standalone `file` body. */
   private guessFileContentType(filename: string): string {
     const ext = filename.slice(filename.lastIndexOf('.') + 1).toLowerCase()
     const map: Record<string, string> = {

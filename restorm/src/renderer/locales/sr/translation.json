@@ -377,7 +377,7 @@
       "switchTooltip": "Промени окружење"
     },
     "body": {
-      "fileLabel": "Datoteka ili URL:",
+      "fileLabel": "Datoteka:",
       "browse": "Pregledaj..."
     },
     "tabs": {

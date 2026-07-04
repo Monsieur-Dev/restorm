@@ -376,7 +376,7 @@
       "switchTooltip": "Skift miljø"
     },
     "body": {
-      "fileLabel": "Fil eller URL:",
+      "fileLabel": "Fil:",
       "browse": "Gennemse..."
     },
     "tabs": {

@@ -3,8 +3,9 @@ Feature: HTTP/REST execution end-to-end
   request panel against the Docker Petstore (:8080) and the local http-util mock
   (:8082). Each scenario opens a request tab by name, clicks Send, and asserts on
   the response panel — exercising methods, params, bodies (incl. multipart file
-  upload), response shapes (JSON / XML / binary), headers, auth, redirects,
-  cookies, errors, timeout, cancellation, handlebars on the wire, and history.
+  upload and standalone file body), response shapes (JSON / XML / binary),
+  headers, auth, redirects, cookies, errors, timeout, cancellation, handlebars
+  on the wire, and history.
 
   Background:
     Given I launch restorm with the MCP server enabled
@@ -60,6 +61,13 @@ Feature: HTTP/REST execution end-to-end
     When I open the "Pet image upload" request tab via MCP
     And I click Send
     Then the response status is "200"
+
+  Scenario: A standalone file body sends the file's raw bytes with an inferred Content-Type
+    When I open the "File body upload" request tab via MCP
+    And I click Send
+    Then the response status is "200"
+    And the response body contains "restorm upload fixture"
+    And the response body contains "\"content-type\": \"text/plain\""
 
   Scenario: Custom header round-trips
     When I open the "Custom header roundtrip" request tab via MCP

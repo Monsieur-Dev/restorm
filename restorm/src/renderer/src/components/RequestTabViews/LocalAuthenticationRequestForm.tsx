@@ -52,6 +52,7 @@ import { StringValue } from '../../../../shared/types/collections'
 import { KeyValue } from '../../../../shared/models'
 import { Badge } from '../common/Badge'
 import { mapToBadgeType } from '../../utils/badgeUtils'
+import { resolveFilePickerPath } from '../../utils/filePicker'
 import { BaseRequestTabView } from './BaseRequestTabView'
 import { buildHttpResponseViewData } from './HTTPResponsePanel'
 import { RestormVariableInputBox } from '../RestormVariableInputBox'
@@ -79,6 +80,7 @@ const editorContainerStyle: CSSProperties = { height: '100%', border: '1px solid
 const fileRowStyle: CSSProperties = { display: 'flex', alignItems: 'center', gap: 8 }
 const fileLabelStyle: CSSProperties = { flexShrink: 0, fontSize: 12 }
 const fileInputWrapperStyle: CSSProperties = { flex: 1, minWidth: 0 }
+const hiddenFilePickerStyle: CSSProperties = { display: 'none' }
 const configContainerStyle: CSSProperties = { display: 'flex', flexDirection: 'column', gap: 8 }
 const hintStyle: CSSProperties = { fontSize: 11, color: 'var(--descriptionForeground)', fontStyle: 'italic' }
 const configInputWrapperStyle: CSSProperties = { maxWidth: 360 }
@@ -408,6 +410,14 @@ export const LocalAuthenticationRequestForm: React.FC<LocalAuthenticationRequest
     setBodyFilePath(next)
     request.body = { type: 'file', path: next }
   }, [request])
+
+  const filePickerRef = useRef<HTMLInputElement | null>(null)
+
+  const handleFilePicked = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    event.target.value = ''
+    if (file) handleBodyFilePathChange(resolveFilePickerPath(file))
+  }, [handleBodyFilePathChange])
 
   const handleBodyFieldsChange = useCallback((rows: KeyValueTableRow[]) => {
     // The fields table is only shown for the two fields-modes, so bodyMode is
@@ -790,10 +800,18 @@ export const LocalAuthenticationRequestForm: React.FC<LocalAuthenticationRequest
               </div>
               <Button
                 options={{ ariaLabel: t('requestTab.body.browse', 'Browse'), title: t('requestTab.body.browse', 'Browse') }}
+                onClick={() => { filePickerRef.current?.click() }}
                 data-testid="local-auth-form-body-browse-button"
               >
                 {t('requestTab.body.browse', 'Browse')}
               </Button>
+              <input
+                ref={filePickerRef}
+                type="file"
+                style={hiddenFilePickerStyle}
+                onChange={handleFilePicked}
+                data-testid="local-auth-form-body-file-picker"
+              />
             </div>
           )}
         </StaticPane>

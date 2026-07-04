@@ -375,7 +375,7 @@
       "switchTooltip": "Ganti lingkungan"
     },
     "body": {
-      "fileLabel": "File atau URL:",
+      "fileLabel": "File:",
       "browse": "Telusuri..."
     },
     "tabs": {

@@ -375,7 +375,7 @@
       "switchTooltip": "環境を切り替え"
     },
     "body": {
-      "fileLabel": "ファイルまたは URL：",
+      "fileLabel": "ファイル：",
       "browse": "参照..."
     },
     "tabs": {

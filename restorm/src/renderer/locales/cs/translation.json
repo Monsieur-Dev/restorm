@@ -378,7 +378,7 @@
       "switchTooltip": "Přepnout prostředí"
     },
     "body": {
-      "fileLabel": "Soubor nebo URL:",
+      "fileLabel": "Soubor:",
       "browse": "Procházet..."
     },
     "tabs": {

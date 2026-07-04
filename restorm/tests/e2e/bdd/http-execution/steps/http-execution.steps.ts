@@ -85,21 +85,26 @@ Given(
 
     // Resolve the sample's environment id so steps that need a runtime
     // env value (e.g. the upload file path) can set it via MCP.
-    const envReply = await callMcpTool(discovery, 'list_environments', {})
-    const envs = parsedReply(envReply) as { id: string; name: string }[]
-    environmentId = envs[0]?.id ?? null
+    // `list_environments` is scoped to an env folder, so resolve the
+    // sample's top-level env folder first.
+    const foldersReply = await callMcpTool(discovery, 'list_folders', {})
+    const folders = parsedReply(foldersReply) as { id: string; kind: string }[]
+    const envFolderId = folders.find((f) => f.kind === 'env-folder')?.id
+    expect(envFolderId, 'sample env folder not found').toBeTruthy()
+    const envReply = await callMcpTool(discovery, 'list_environments', { envFolderId })
+    const envs = parsedReply(envReply) as { environments: { id: string; name: string }[] }
+    environmentId = envs.environments[0]?.id ?? null
+    expect(environmentId, 'sample environment not found').toBeTruthy()
 
-    // The multipart upload field points at `{{uploadPath}}`; bind it to
-    // the committed fixture's absolute path so the executor streams a
-    // real file part.
-    if (environmentId) {
-      const uploadPath = join(restormRoot, 'tests/e2e/samples/fixtures/upload.txt')
-      await callMcpTool(discovery, 'set_env_variable', {
-        envId: environmentId,
-        key: 'uploadPath',
-        value: { type: 'string', value: uploadPath }
-      })
-    }
+    // The multipart upload field and the standalone file body both point
+    // at `{{uploadPath}}`; bind it to the committed fixture's absolute
+    // path so the executor streams a real file.
+    const uploadPath = join(restormRoot, 'tests/e2e/samples/fixtures/upload.txt')
+    await callMcpTool(discovery, 'set_env_variable', {
+      envId: environmentId,
+      key: 'uploadPath',
+      value: { type: 'string', value: uploadPath }
+    })
   }
 )
 

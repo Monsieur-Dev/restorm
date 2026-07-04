@@ -376,7 +376,7 @@
       "switchTooltip": "Cambiar de entorno"
     },
     "body": {
-      "fileLabel": "Archivo o URL:",
+      "fileLabel": "Archivo:",
       "browse": "Examinar..."
     },
     "tabs": {

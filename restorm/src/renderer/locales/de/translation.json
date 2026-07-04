@@ -376,7 +376,7 @@
       "switchTooltip": "Umgebung wechseln"
     },
     "body": {
-      "fileLabel": "Datei oder URL:",
+      "fileLabel": "Datei:",
       "browse": "Durchsuchen..."
     },
     "tabs": {

@@ -1,6 +1,9 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import type http from 'http'
 import { EventEmitter } from 'events'
+import { mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
 
 // ---------------------------------------------------------------------------
 // Mocks – vi.mock factories are hoisted; they must not reference outer vars.
@@ -452,6 +455,72 @@ describe('HTTPExecutionService', () => {
     const bodyStr = Buffer.isBuffer(writtenBody) ? writtenBody.toString('utf-8') : String(writtenBody)
     expect(bodyStr).toContain('Content-Disposition: form-data; name="name"')
     expect(bodyStr).toContain('doggie')
+  })
+
+  describe('file body', () => {
+    let dir: string
+
+    beforeEach(() => { dir = mkdtempSync(join(tmpdir(), 'restorm-http-file-body-')) })
+    afterEach(() => { rmSync(dir, { recursive: true, force: true }) })
+
+    it('sends the file bytes verbatim, with Content-Type guessed from extension', async () => {
+      const filePath = join(dir, 'payload.json')
+      writeFileSync(filePath, '{"a":1}')
+      setupResolvedUrl('http://example.com/upload')
+      setupRequestContext({ fullData: { body: { type: 'file', path: filePath } } })
+
+      let writtenBody: unknown
+      let headers: http.OutgoingHttpHeaders | undefined
+      httpRequestSpy.mockImplementation((opts: http.RequestOptions, cb: (res: EventEmitter) => void) => {
+        headers = opts.headers
+        const req = createFakeRequest()
+        req.write = vi.fn((chunk: unknown) => { writtenBody = chunk })
+        queueMicrotask(() => { cb(buildFakeResponse(200, 'OK', 'ok')) })
+        return req
+      })
+
+      const result = await httpExecutionService.execute({ requestId: 'rf1', method: 'PUT' })
+
+      expect(result.success).toBe(true)
+      expect(Buffer.isBuffer(writtenBody)).toBe(true)
+      expect((writtenBody as Buffer).toString('utf-8')).toBe('{"a":1}')
+      expect(headers?.['Content-Type']).toBe('application/json')
+      expect(headers?.['Content-Length']).toBe(String(Buffer.byteLength('{"a":1}')))
+    })
+
+    it('does not override a Content-Type the user already set', async () => {
+      const filePath = join(dir, 'payload.bin')
+      writeFileSync(filePath, 'raw-bytes')
+      setupResolvedUrl('http://example.com/upload')
+      setupRequestContext({
+        keyValueGroups: new Map([['headers', [{ key: 'Content-Type', value: 'application/octet-stream; charset=x', enabled: true }]]]),
+        fullData: { body: { type: 'file', path: filePath } }
+      })
+
+      let headers: http.OutgoingHttpHeaders | undefined
+      httpRequestSpy.mockImplementation((opts: http.RequestOptions, cb: (res: EventEmitter) => void) => {
+        headers = opts.headers
+        queueMicrotask(() => { cb(buildFakeResponse(200, 'OK', 'ok')) })
+        return createFakeRequest()
+      })
+
+      const result = await httpExecutionService.execute({ requestId: 'rf2', method: 'PUT' })
+
+      expect(result.success).toBe(true)
+      expect(headers?.['Content-Type']).toBe('application/octet-stream; charset=x')
+    })
+
+    it('fails with a descriptive error when the file does not exist', async () => {
+      const missingPath = join(dir, 'does-not-exist.bin')
+      setupResolvedUrl('http://example.com/upload')
+      setupRequestContext({ fullData: { body: { type: 'file', path: missingPath } } })
+
+      const result = await httpExecutionService.execute({ requestId: 'rf3', method: 'PUT' })
+
+      expect(result.success).toBe(false)
+      expect(result.error).toContain(missingPath)
+      expect(httpRequestSpy).not.toHaveBeenCalled()
+    })
   })
 })
 
