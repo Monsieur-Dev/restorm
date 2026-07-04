@@ -22,6 +22,7 @@ import {
 } from 'electron-core-ui/renderer'
 import { DocumentEvents, type RequestHistoryEventPayload } from '../../services/DocumentEvents'
 import { RestormVariableInputBox } from '../RestormVariableInputBox'
+import { useEnvVariables } from '../../hooks/useEnvVariables'
 import { MqttOptionsPanel } from './MqttOptionsPanel'
 import { RestormKeyValueTable, type KeyValueTableHandle } from '../RestormKeyValueTable'
 import type { WebSocketRequest, WebSocketResponse, WebSocketMessage, KeyValue, ResponseHistoryDetail } from '../../../../shared/types/collections'
@@ -326,6 +327,9 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
 
   // Stable empty array for components that get variables via their own variableId
   const emptyVariables = useMemo<VariableDefinition[]>(() => [], [])
+  // Environment variables for scalar {{...}} fields so their autocomplete
+  // offers env vars alongside the helper functions.
+  const envVariables = useEnvVariables(request.id)
 
   // Callback for headers changes - notify both reactive object and ContextService
   const handleHeadersChange = useCallback((rows: KeyValue[]): void => {
@@ -407,7 +411,7 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
                   key={`event-${transportEpoch}`}
                   value={event}
                   onChange={setEvent}
-                  variables={emptyVariables}
+                  variables={envVariables}
                   helpers={handlebarsHelpers}
                   placeholder={request.protocol === 'mqtt' ? (isMqttServer ? 'restorm/demo/#' : 'topic/name') : 'event-name'}
                   data-testid="websocket-event-input"
@@ -416,7 +420,7 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
             </div>
           )}
           {request.protocol === 'mqtt' && (
-            <MqttOptionsPanel key={`mqtt-${transportEpoch}`} request={request} variables={emptyVariables} helpers={handlebarsHelpers} server={isServer} />
+            <MqttOptionsPanel key={`mqtt-${transportEpoch}`} request={request} variables={envVariables} helpers={handlebarsHelpers} server={isServer} />
           )}
           <div style={{ flex: 1, border: '1px solid var(--panel-border)', borderRadius: 3 }}>
             <CodeEditor
@@ -742,7 +746,7 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
               <RestormVariableInputBox
                 value={url}
                 onChange={setUrl}
-                variables={emptyVariables}
+                variables={envVariables}
                 helpers={handlebarsHelpers}
                 placeholder={t('websocket.urlPlaceholder')}
                 data-testid="websocket-url-input"

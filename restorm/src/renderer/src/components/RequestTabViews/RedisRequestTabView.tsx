@@ -20,6 +20,7 @@ import {
 } from 'electron-core-ui/renderer'
 import { DocumentEvents, type RequestHistoryEventPayload } from '../../services/DocumentEvents'
 import { RestormVariableInputBox } from '../RestormVariableInputBox'
+import { useEnvVariables } from '../../hooks/useEnvVariables'
 import type { RedisRequest, ResponseHistoryDetail } from '../../../../shared/types/collections'
 import { REDIS_COMMANDS } from '../../../../shared/models/types'
 import { useEnvironmentContext } from '../../contexts/useEnvironmentContext'
@@ -301,6 +302,9 @@ export const RedisRequestTabView: React.FC<RedisRequestTabViewProps> = ({
 
   // Stable empty array for components that get variables via their own variableId
   const emptyVariables = useMemo<VariableDefinition[]>(() => [], [])
+  // Environment variables for scalar {{...}} connection fields so their
+  // autocomplete offers env vars alongside the helper functions.
+  const envVariables = useEnvVariables(request.id)
 
   // SUBSCRIBE mode: open the connection and listen. Resolves once the
   // session ends (user unsubscribe, or the server drops it).
@@ -624,7 +628,7 @@ export const RedisRequestTabView: React.FC<RedisRequestTabViewProps> = ({
           <RestormVariableInputBox
             value={url}
             onChange={setUrl}
-            variables={emptyVariables}
+            variables={envVariables}
             helpers={handlebarsHelpers}
             placeholder={t('redis.urlPlaceholder')}
             data-testid="redis-url-input"
@@ -635,7 +639,7 @@ export const RedisRequestTabView: React.FC<RedisRequestTabViewProps> = ({
         <RestormVariableInputBox
           value={password}
           onChange={setPassword}
-          variables={emptyVariables}
+          variables={envVariables}
           helpers={handlebarsHelpers}
           placeholder={t('redis.passwordPlaceholder')}
           data-testid="redis-password-input"

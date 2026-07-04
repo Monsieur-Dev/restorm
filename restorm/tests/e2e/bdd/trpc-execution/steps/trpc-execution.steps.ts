@@ -96,6 +96,36 @@ When('I toggle the tRPC raw envelope switch', async () => {
   await page.locator(RAW_ENVELOPE_TOGGLE).first().click()
 })
 
+When('I trigger variable suggestions in the tRPC URL field', async () => {
+  if (page === null) throw new Error('open the project first')
+  const editor = page.locator('[data-testid="trpc-url-input"] .monaco-editor').first()
+  await editor.click()
+  await page.keyboard.press('Control+A')
+  await page.keyboard.press('Delete')
+  // The variable + helper completion providers trigger on `{`; type the
+  // opening braces then invoke suggest explicitly (quickSuggestions is off).
+  await page.keyboard.type('{{')
+})
+
+Then('the tRPC URL suggestion list contains {string}', async ({}, expected: string) => {
+  const p = page
+  if (p === null) throw new Error('open the project first')
+  // The env variables reach the field's completion provider asynchronously
+  // (ContextService broadcast after the tab registers). Monaco snapshots the
+  // provider's items when the widget opens, so a widget opened too early
+  // stays stale — re-trigger the suggest session on every retry instead of
+  // just re-querying the DOM. Variables rank above helpers in the list, so
+  // once present the row is within the rendered (virtualized) window.
+  await expect(async () => {
+    await p.keyboard.press('Escape')
+    await p.keyboard.press('Control+Space')
+    const widget = p.locator('.suggest-widget.visible').first()
+    await expect(widget).toBeVisible({ timeout: 1000 })
+    await expect(widget.locator('.monaco-list-row').filter({ hasText: expected }).first())
+      .toBeVisible({ timeout: 1000 })
+  }).toPass({ timeout: 15_000 })
+})
+
 Then('the tRPC response editor contains {string}', async ({}, needle: string) => {
   if (page === null) throw new Error('launch first')
   // The read-only Monaco editor only appears once a response arrives.

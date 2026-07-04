@@ -14,11 +14,11 @@ import {
   eventBus,
   logger,
   getContrastColor,
-  type ISelectData,
-  type VariableDefinition
+  type ISelectData
 } from 'electron-core-ui/renderer'
 import { DocumentEvents, type RequestHistoryEventPayload } from '../../services/DocumentEvents'
 import { RestormVariableInputBox } from '../RestormVariableInputBox'
+import { useEnvVariables } from '../../hooks/useEnvVariables'
 import type { AmqpRequest, AmqpMode, ResponseHistoryDetail } from '../../../../shared/types/collections'
 import { useEnvironmentContext } from '../../contexts/useEnvironmentContext'
 import type { AmqpExecutionResult, AmqpMessageItem } from '../../types/global.d'
@@ -313,8 +313,9 @@ export const AmqpRequestTabView: React.FC<AmqpRequestTabViewProps> = ({ request 
     updateReactiveProperty(request, 'browsePeekCount', value !== '' && Number.isFinite(n) ? n : undefined)
   }, [request])
 
-  // Stable empty array for components that get variables via their own variableId
-  const emptyVariables = useMemo<VariableDefinition[]>(() => [], [])
+  // Environment variables for scalar {{...}} fields so their autocomplete
+  // offers env vars alongside the helper functions.
+  const envVariables = useEnvVariables(request.id)
 
   // Publish / browse: one-shot `execute()`. Subscribe uses Connect below.
   const handleExecute = useCallback((): void => {
@@ -461,7 +462,7 @@ export const AmqpRequestTabView: React.FC<AmqpRequestTabViewProps> = ({ request 
       {(mode === 'subscribe' || mode === 'browse') && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6, padding: 4, border: '1px solid var(--panel-border)', borderRadius: 3 }} data-testid="amqp-subscribe-browse-options">
           <Field label={t('amqp.queue')}>
-            <RestormVariableInputBox key={`queue-${transportEpoch}`} value={queue} onChange={setQueue} variables={emptyVariables} helpers={handlebarsHelpers} placeholder={t('amqp.queuePlaceholder')} data-testid="amqp-queue-input" />
+            <RestormVariableInputBox key={`queue-${transportEpoch}`} value={queue} onChange={setQueue} variables={envVariables} helpers={handlebarsHelpers} placeholder={t('amqp.queuePlaceholder')} data-testid="amqp-queue-input" />
           </Field>
           {mode === 'subscribe' && (
             <>
@@ -486,12 +487,12 @@ export const AmqpRequestTabView: React.FC<AmqpRequestTabViewProps> = ({ request 
           <div style={{ display: 'flex', gap: 8 }}>
             <div style={{ flex: 1 }}>
               <Field label={t('amqp.exchange')}>
-                <RestormVariableInputBox key={`exchange-${transportEpoch}`} value={exchange} onChange={setExchange} variables={emptyVariables} helpers={handlebarsHelpers} placeholder={t('amqp.exchangePlaceholder')} data-testid="amqp-exchange-input" />
+                <RestormVariableInputBox key={`exchange-${transportEpoch}`} value={exchange} onChange={setExchange} variables={envVariables} helpers={handlebarsHelpers} placeholder={t('amqp.exchangePlaceholder')} data-testid="amqp-exchange-input" />
               </Field>
             </div>
             <div style={{ flex: 1 }}>
               <Field label={t('amqp.routingKey')}>
-                <RestormVariableInputBox key={`routingkey-${transportEpoch}`} value={routingKey} onChange={setRoutingKey} variables={emptyVariables} helpers={handlebarsHelpers} placeholder={t('amqp.routingKeyPlaceholder')} data-testid="amqp-routing-key-input" />
+                <RestormVariableInputBox key={`routingkey-${transportEpoch}`} value={routingKey} onChange={setRoutingKey} variables={envVariables} helpers={handlebarsHelpers} placeholder={t('amqp.routingKeyPlaceholder')} data-testid="amqp-routing-key-input" />
               </Field>
             </div>
           </div>
@@ -517,19 +518,19 @@ export const AmqpRequestTabView: React.FC<AmqpRequestTabViewProps> = ({ request 
         <div style={{ display: 'flex', gap: 8 }}>
           <div style={{ flex: 1 }}>
             <Field label={t('amqp.vhost')}>
-              <RestormVariableInputBox key={`vhost-${transportEpoch}`} value={vhost} onChange={setVhost} variables={emptyVariables} helpers={handlebarsHelpers} placeholder={t('amqp.vhostPlaceholder')} data-testid="amqp-vhost-input" />
+              <RestormVariableInputBox key={`vhost-${transportEpoch}`} value={vhost} onChange={setVhost} variables={envVariables} helpers={handlebarsHelpers} placeholder={t('amqp.vhostPlaceholder')} data-testid="amqp-vhost-input" />
             </Field>
           </div>
         </div>
         <div style={{ display: 'flex', gap: 8 }}>
           <div style={{ flex: 1 }}>
             <Field label={t('amqp.username')}>
-              <RestormVariableInputBox key={`username-${transportEpoch}`} value={username} onChange={setUsername} variables={emptyVariables} helpers={handlebarsHelpers} placeholder={t('amqp.username')} data-testid="amqp-username-input" />
+              <RestormVariableInputBox key={`username-${transportEpoch}`} value={username} onChange={setUsername} variables={envVariables} helpers={handlebarsHelpers} placeholder={t('amqp.username')} data-testid="amqp-username-input" />
             </Field>
           </div>
           <div style={{ flex: 1 }}>
             <Field label={t('amqp.password')}>
-              <RestormVariableInputBox key={`password-${transportEpoch}`} value={password} onChange={setPassword} variables={emptyVariables} helpers={handlebarsHelpers} placeholder={t('amqp.password')} data-testid="amqp-password-input" />
+              <RestormVariableInputBox key={`password-${transportEpoch}`} value={password} onChange={setPassword} variables={envVariables} helpers={handlebarsHelpers} placeholder={t('amqp.password')} data-testid="amqp-password-input" />
             </Field>
           </div>
         </div>
@@ -573,7 +574,7 @@ export const AmqpRequestTabView: React.FC<AmqpRequestTabViewProps> = ({ request 
           <RestormVariableInputBox
             value={url}
             onChange={setUrl}
-            variables={emptyVariables}
+            variables={envVariables}
             helpers={handlebarsHelpers}
             placeholder={t('amqp.urlPlaceholder')}
             data-testid="amqp-request-url-input"
