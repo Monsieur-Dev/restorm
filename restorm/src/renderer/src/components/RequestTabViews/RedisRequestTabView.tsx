@@ -34,6 +34,7 @@ import { parseFreeformCommand } from '../../../../shared/utils/redisCommand'
 import { SendButtonEnvSwitcher } from './SendButtonEnvSwitcher'
 import { BeamWrap } from '../common/BeamWrap'
 import { HeaderHoverTooltip } from '../MainView/HeaderHoverTooltip'
+import './WebSocketChat.css'
 
 export interface RedisRequestTabViewProps {
   request: RedisRequest
@@ -441,11 +442,16 @@ export const RedisRequestTabView: React.FC<RedisRequestTabViewProps> = ({
     }
     return (
       <ScrollableElement options={{ vertical: 'auto', horizontal: 'hidden', useShadows: true }} style={{ flex: 1, minHeight: 0 }}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 4, padding: 4 }}>
+        <div className="ws-chat">
           {messages.map((m, i) => (
-            <div key={i} data-testid={`response-stream-frame-${i}`} style={{ padding: 6, border: '1px solid var(--panel-border)', borderRadius: 3, fontSize: 12 }}>
-              <span style={{ fontWeight: 600, marginRight: 8 }}>{m.channel}</span>
-              <span>{m.data}</span>
+            <div
+              key={i}
+              className={`ws-chat-bubble ${m.direction === 'sent' ? 'sent' : 'received'}`}
+              data-testid={`response-stream-frame-${i}`}
+              data-direction={m.direction}
+            >
+              {m.channel && <span className="ws-chat-event">{m.channel}</span>}
+              {m.data}
             </div>
           ))}
         </div>
@@ -460,16 +466,26 @@ export const RedisRequestTabView: React.FC<RedisRequestTabViewProps> = ({
     }
     return (
       <ScrollableElement options={{ vertical: 'auto', horizontal: 'hidden', useShadows: true }} style={{ flex: 1, minHeight: 0 }}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 4, padding: 4 }}>
+        <div className="ws-chat">
           {entries.map((entry, i) => (
-            <div key={i} data-testid={`response-stream-frame-${i}`} style={{ padding: 6, border: '1px solid var(--panel-border)', borderRadius: 3, fontSize: 12 }}>
-              <div style={{ fontFamily: 'var(--monospace-font-family, monospace)', opacity: 0.8 }}>
-                {'> '}{entry.command} {entry.args.join(' ')}
+            <React.Fragment key={i}>
+              <div
+                className="ws-chat-bubble sent"
+                data-testid={`response-stream-frame-${i}`}
+                data-direction="sent"
+                style={{ fontFamily: 'var(--monospace-font-family, monospace)' }}
+              >
+                {entry.command} {entry.args.join(' ')}
               </div>
-              {entry.error
-                ? <div style={{ color: 'var(--testing-iconFailed)' }}>{entry.error}</div>
-                : <div>{entry.reply ?? '(nil)'}</div>}
-            </div>
+              <div
+                className="ws-chat-bubble received"
+                data-testid={`response-stream-frame-${i}-reply`}
+                data-direction="received"
+                style={entry.error ? { color: 'var(--testing-iconFailed)' } : undefined}
+              >
+                {entry.error ?? entry.reply ?? '(nil)'}
+              </div>
+            </React.Fragment>
           ))}
         </div>
       </ScrollableElement>

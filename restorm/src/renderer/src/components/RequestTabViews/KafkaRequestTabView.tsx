@@ -40,6 +40,7 @@ import { updateReactiveProperty } from './requestTabViewUtils'
 import { SendButtonEnvSwitcher } from './SendButtonEnvSwitcher'
 import { HeaderHoverTooltip } from '../MainView/HeaderHoverTooltip'
 import { DEFAULT_REQUEST_TIMEOUT_MS } from '../../../../shared/config/constants'
+import './WebSocketChat.css'
 
 export interface KafkaRequestTabViewProps {
   request: KafkaRequest
@@ -571,23 +572,24 @@ export const KafkaRequestTabView: React.FC<KafkaRequestTabViewProps> = ({ reques
 
   const renderMessages = useCallback((messages: KafkaMessageItem[]): React.ReactNode => {
     if (messages.length === 0) {
-      return <div data-testid="kafka-no-messages">{t('kafka.noMessages')}</div>
+      return <div className="ws-chat-empty" data-testid="kafka-no-messages">{t('kafka.noMessages')}</div>
     }
     return (
       <ScrollableElement options={{ vertical: 'auto', horizontal: 'hidden', useShadows: true }} style={{ flex: 1, minHeight: 0 }}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 6, padding: 4 }}>
+        <div className="ws-chat">
           {messages.map((m, i) => (
             <div
               key={i}
+              className="ws-chat-bubble received"
               data-testid={`response-stream-frame-${i}`}
-              style={{ padding: 6, border: '1px solid var(--panel-border)', borderRadius: 3, fontSize: 12 }}
+              data-direction="received"
             >
-              <div style={{ display: 'flex', gap: 8, color: 'var(--foreground-muted)' }}>
-                <span>{t('kafka.partition')}: {m.partition}</span>
-                <span>{t('kafka.offset')}: {m.offset}</span>
+              <span className="ws-chat-event">
+                <span style={{ marginRight: 8 }}>{t('kafka.partition')}: {m.partition}</span>
+                <span style={{ marginRight: 8 }}>{t('kafka.offset')}: {m.offset}</span>
                 {m.key && <span>{t('kafka.key')}: {m.key}</span>}
-              </div>
-              <div style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{m.value}</div>
+              </span>
+              {m.value}
             </div>
           ))}
         </div>
