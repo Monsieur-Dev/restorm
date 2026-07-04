@@ -12,7 +12,8 @@ import {
 import type { FolderItem } from '../../../shared/types/collections'
 import { folderItemToListViewItem } from '../services/FolderToListView'
 import { Badge } from '../components/common/Badge'
-import { mapToBadgeType } from '../utils/badgeUtils'
+import { mapToBadgeType, requestBadgeType, requestBadgeMode, requestBadgeIcon } from '../utils/badgeUtils'
+import type { Request } from '../../../shared/types/collections'
 import { findItemById } from '../utils/treeSearch'
 import { getFavorites } from '../services/favoritesStore'
 import {
@@ -117,6 +118,8 @@ export function useFavoritesAndOpenItems(
     renderMethodBadge: (method: string) => React.createElement(Badge, { type: mapToBadgeType(method) }),
     renderProtocolBadge: (protocol: string, label?: string, mode?: 'client' | 'server') =>
       React.createElement(Badge, { type: mapToBadgeType(protocol), label, mode }),
+    renderRequestBadge: (request: Request) =>
+      React.createElement(Badge, { type: requestBadgeType(request), mode: requestBadgeMode(request), icon: requestBadgeIcon(request) }),
     renderRemovedTitle: (name: string) =>
       React.createElement('span', { style: { textDecoration: 'line-through', opacity: 0.6 } }, name)
   }), [])

@@ -5,6 +5,7 @@
 import React from 'react'
 import type { ListViewItemData } from 'electron-core-ui/renderer'
 import { Badge } from '../../common/Badge'
+import { kafkaModeIcon } from '../../../utils/badgeUtils'
 
 export interface SidebarContextMenuItem {
   id: string
@@ -267,13 +268,13 @@ export const buildAddSubmenu = (
   {
     id: `add-kafka-produce-${parentId}`,
     label: t('sidebar.contextMenu.add.kafkaProduce'),
-    icon: React.createElement(Badge, { type: 'KAFKA', icon: 'arrow-up' }),
+    icon: React.createElement(Badge, { type: 'KAFKA', icon: kafkaModeIcon('produce') }),
     onClick: () => { onAddChildItem(parentId, 'kafka-produce') }
   },
   {
     id: `add-kafka-consume-${parentId}`,
     label: t('sidebar.contextMenu.add.kafkaConsume'),
-    icon: React.createElement(Badge, { type: 'KAFKA', icon: 'plug' }),
+    icon: React.createElement(Badge, { type: 'KAFKA', icon: kafkaModeIcon('consume') }),
     onClick: () => { onAddChildItem(parentId, 'kafka-consume') }
   },
   { id: `sep-add-odata-${parentId}`, isSeparator: true, label: '' },

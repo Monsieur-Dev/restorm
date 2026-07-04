@@ -306,7 +306,7 @@ h4.settings-group-title {
 .setting-item {
   position: relative;
   padding: 8px 12px;
-  cursor: pointer;
+  cursor: default;
   outline: none;
   transition: background-color 0.1s ease;
   overflow: visible;
@@ -326,11 +326,6 @@ h4.settings-group-title {
   width: 3px;
   border-radius: 2px;
   background-color: var(--button-background, #0e639c);
-}
-
-.setting-item--focused {
-  border: 1px solid var(--focusBorder, #0e639c);
-  padding: 7px 11px; /* compensate border */
 }
 
 .setting-item-header {
@@ -354,7 +349,9 @@ h4.settings-group-title {
   margin-bottom: 6px;
 }
 
-/* Gear icon: positioned outside the setting item, to its left */
+/* Gear icon: positioned outside the setting item, to its left. Hidden until the
+   row is hovered or holds focus (its input or the gear itself); it stays mounted
+   and tabbable so keyboard users can still reach it. */
 .setting-item-gear {
   position: absolute;
   left: -24px;
@@ -368,6 +365,13 @@ h4.settings-group-title {
   display: flex;
   align-items: center;
   z-index: 1;
+  opacity: 0;
+  transition: opacity 0.1s ease;
+}
+
+.setting-item:hover .setting-item-gear,
+.setting-item:focus-within .setting-item-gear {
+  opacity: 1;
 }
 
 .setting-item-gear:hover {

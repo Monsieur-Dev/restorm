@@ -49,7 +49,7 @@ import { SecretResolvingSpinner } from '../../common/SecretResolvingSpinner'
 import { SecretErrorIndicator } from '../../common/SecretErrorIndicator'
 import { ItemSecretBadges } from '../../common/ItemSecretBadges'
 import { collectFolderEnvIds } from '../../../services/FolderToListView'
-import { mapToBadgeType, requestBadgeType } from '../../../utils/badgeUtils'
+import { mapToBadgeType, requestBadgeType, requestBadgeIcon } from '../../../utils/badgeUtils'
 import { useTranslation } from 'react-i18next'
 import { RestormWorkbenchTab } from './RestormWorkbenchTab'
 import { DeprecationAwareRequestTab } from './DeprecationAwareRequestTab'
@@ -680,11 +680,13 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
     }
 
     // Kafka request tab. Mixed one-shot (produce/browse) + long-lived
-    // (consume) modes, like Redis — no ServerListeningBadge capsule.
+    // (consume) modes, like Redis — no ServerListeningBadge capsule. The mode
+    // rides on the badge as a glyph (the same one the Add menu + sidebar show)
+    // so produce/consume/browse stay distinguishable at a glance.
     if (isKafkaRequestTab(restormTab)) {
       return (
         <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-          <Badge type="KAFKA" />
+          <Badge type={requestBadgeType(restormTab.request)} icon={requestBadgeIcon(restormTab.request)} />
           <span>{restormTab.request.name}</span>
           <ItemSecretBadges itemId={restormTab.request.id} />
           {renderDirtyIndicator(restormTab)}

@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef, useMemo } from 'react'
+import React, { useState, useCallback, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Button } from '../Button'
 import { ContextMenu } from '../ContextMenu/ContextMenu'
@@ -26,23 +26,11 @@ export const SettingItem: React.FC<SettingItemProps> = ({
   onReset
 }) => {
   const { t } = useTranslation()
-  const [isFocused, setIsFocused] = useState(false)
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number } | null>(null)
-  const containerRef = useRef<HTMLDivElement>(null)
 
   const handleChange = useCallback((v: SettingValue) => {
     onChange(setting.storageKey, v)
   }, [onChange, setting.storageKey])
-
-  const handleClick = useCallback(() => {
-    setIsFocused(true)
-  }, [])
-
-  const handleBlur = useCallback((e: React.FocusEvent) => {
-    if (containerRef.current && !containerRef.current.contains(e.relatedTarget)) {
-      setIsFocused(false)
-    }
-  }, [])
 
   const handleGearClick = useCallback((e: React.MouseEvent) => {
     e.stopPropagation()
@@ -75,8 +63,7 @@ export const SettingItem: React.FC<SettingItemProps> = ({
 
   const classNames = [
     'setting-item',
-    setting.isModified ? 'setting-item--modified' : '',
-    isFocused ? 'setting-item--focused' : ''
+    setting.isModified ? 'setting-item--modified' : ''
   ].filter(Boolean).join(' ')
 
   const rendererProps = { setting, value, onChange: handleChange }
@@ -108,23 +95,21 @@ export const SettingItem: React.FC<SettingItemProps> = ({
 
   return (
     <div
-      ref={containerRef}
       className={classNames}
-      onClick={handleClick}
-      onBlur={handleBlur}
-      tabIndex={0}
       data-testid={`setting-item-${setting.storageKey}`}
     >
-      {isFocused && (
-        <Button
-          line
-          icon="gear"
-          className="setting-item-gear"
-          options={{ ariaLabel: t('settings.settingOptions', 'Setting options') }}
-          data-testid={`setting-gear-${setting.storageKey}`}
-          onClick={handleGearClick}
-        />
-      )}
+      {/* The gear stays mounted (revealed by the row's :hover / :focus-within in
+          CSS) so it remains a keyboard tab stop — the block container itself is
+          NOT focusable, so only the real controls (this gear + the setting's
+          input) are tab stops and the row never draws a focus ring. */}
+      <Button
+        line
+        icon="gear"
+        className="setting-item-gear"
+        options={{ ariaLabel: t('settings.settingOptions', 'Setting options') }}
+        data-testid={`setting-gear-${setting.storageKey}`}
+        onClick={handleGearClick}
+      />
       <div className="setting-item-header">
         <span className="setting-item-title">
           {t(setting.titleKey)}
