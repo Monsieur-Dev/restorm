@@ -40,6 +40,7 @@
     "test:e2e": "bddgen && node scripts/run-e2e.mjs",
     "headless": "node scripts/headless-run.mjs",
     "headless:main": "node scripts/headless-run.mjs \"Auth Service/Pet API/Main\"",
+    "test:e2e:real-deps": "cross-env RESTORM_E2E_REAL_DEPS=1 bddgen && cross-env RESTORM_E2E_REAL_DEPS=1 xvfb-run -a playwright test --project code-deps-real-registry",
     "test:e2e:ui": "bddgen && playwright test --ui",
     "test:e2e:debug": "bddgen && playwright test --debug",
     "coverage:clean": "node scripts/coverage/clean.js",

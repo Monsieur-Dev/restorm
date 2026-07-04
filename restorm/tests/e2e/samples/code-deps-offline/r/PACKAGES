@@ -1,0 +1,7 @@
+Package: praise
+Version: 1.0.0
+Suggests: testthat
+License: MIT + file LICENSE
+MD5sum: 3f845434c7475d48923355d5939a1380
+Built: R 4.6.0; ; 2026-05-13 20:25:33 UTC; unix
+File: praise_1.0.0.tgz

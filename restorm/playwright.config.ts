@@ -285,6 +285,15 @@ const scenarioCodeDepsTestDir = defineBddConfig({
   outputDir: '.features-gen/scenario-code-deps'
 })
 
+const scenarioCodeDepsRealTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/scenario-code-deps-real/features/**/*.feature',
+  steps: [
+    'tests/e2e/bdd/scenario-code-deps-real/steps/**/*.ts',
+    'tests/e2e/bdd/fixtures/scenario-code-deps-real.fixture.ts'
+  ],
+  outputDir: '.features-gen/scenario-code-deps-real'
+})
+
 const scenarioSetVariableOverrideTestDir = defineBddConfig({
   features: 'tests/e2e/bdd/scenario-setvariable-override/features/**/*.feature',
   steps: [
@@ -669,7 +678,7 @@ export default defineConfig({
     {
       name: 'scenario-code-deps',
       testDir: scenarioCodeDepsTestDir,
-      timeout: 240 * 1000 // 4 min — one app, two engine runs incl. a cold Pyodide load + wheel mount
+      timeout: 420 * 1000 // 7 min — one app; the offline chain installs + mounts a package in all five WASM runtimes (cold Pyodide + WebR + ruby.wasm + wasmoon + QuickJS), and the cache-reuse scenario runs it twice
     },
     {
       name: 'scenario-setvariable-override',
@@ -732,6 +741,22 @@ export default defineConfig({
       testDir: 'tests/e2e/scenario-cli',
       timeout: 180 * 1000
     },
+    // Real-registry code-deps e2e. It installs pinned packages from the LIVE
+    // registries (PyPI / npm / WebR-CRAN / RubyGems / LuaRocks), so it needs
+    // network + is non-deterministic — it must NEVER run in the per-PR / pre-push
+    // suite. Included ONLY when RESTORM_E2E_REAL_DEPS=1, so a plain `pnpm
+    // test:e2e` (and the pre-push hook) never even sees the project. Run it
+    // deliberately as a nightly / release guard:
+    //   RESTORM_E2E_REAL_DEPS=1 xvfb-run -a pnpm exec playwright test --project code-deps-real-registry
+    ...(process.env.RESTORM_E2E_REAL_DEPS === '1'
+      ? [
+          {
+            name: 'code-deps-real-registry',
+            testDir: scenarioCodeDepsRealTestDir,
+            timeout: 360 * 1000 // one app, two live-install runs across five cold WASM runtimes
+          }
+        ]
+      : []),
     // Stage-only entitlement-gating lifecycle e2e. It hits REAL external deps
     // (dev WorkOS + dev Supabase) with a live login, so it must NEVER run in the
     // per-PR / pre-push suite. It is included ONLY when RESTORM_E2E_STAGE=1, so a
