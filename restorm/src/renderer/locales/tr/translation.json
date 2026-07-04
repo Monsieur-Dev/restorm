@@ -612,10 +612,22 @@
     "subscribeMode": "Abonelik",
     "commandMode": "Komut",
     "command": "Komut",
-    "args": "Bağımsız değişkenler",
-    "argsPlaceholder": "Komut bağımsız değişkenleri",
     "freeform": "Serbest",
     "freeformPlaceholder": "Serbest komut (seçimi geçersiz kılar)",
+    "fields": {
+      "key": "Anahtar",
+      "field": "Alan",
+      "value": "Değer",
+      "channel": "Kanal",
+      "message": "Mesaj",
+      "start": "Başlangıç",
+      "stop": "Bitiş",
+      "id": "ID",
+      "fieldOrValue": "Alan/Değer",
+      "argument": "Argüman"
+    },
+    "addArgument": "Argüman ekle",
+    "removeArgument": "Argümanı kaldır",
     "tabs": {
       "channels": "Kanallar",
       "command": "Komut"

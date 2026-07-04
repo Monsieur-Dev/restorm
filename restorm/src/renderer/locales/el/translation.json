@@ -612,10 +612,22 @@
     "subscribeMode": "Εγγραφή",
     "commandMode": "Εντολή",
     "command": "Εντολή",
-    "args": "Ορίσματα",
-    "argsPlaceholder": "Ορίσματα εντολής",
     "freeform": "Ελεύθερη",
     "freeformPlaceholder": "Ελεύθερη εντολή (αντικαθιστά την επιλογή)",
+    "fields": {
+      "key": "Κλειδί",
+      "field": "Πεδίο",
+      "value": "Τιμή",
+      "channel": "Κανάλι",
+      "message": "Μήνυμα",
+      "start": "Αρχή",
+      "stop": "Τέλος",
+      "id": "ID",
+      "fieldOrValue": "Πεδίο/Τιμή",
+      "argument": "Όρισμα"
+    },
+    "addArgument": "Προσθήκη ορίσματος",
+    "removeArgument": "Αφαίρεση ορίσματος",
     "tabs": {
       "channels": "Κανάλια",
       "command": "Εντολή"

@@ -612,10 +612,22 @@
     "subscribeMode": "Tilaus",
     "commandMode": "Komento",
     "command": "Komento",
-    "args": "Argumentit",
-    "argsPlaceholder": "Komennon argumentit",
     "freeform": "Vapaa",
     "freeformPlaceholder": "Vapaamuotoinen komento (ohittaa valinnan)",
+    "fields": {
+      "key": "Avain",
+      "field": "Kenttä",
+      "value": "Arvo",
+      "channel": "Kanava",
+      "message": "Viesti",
+      "start": "Alku",
+      "stop": "Loppu",
+      "id": "ID",
+      "fieldOrValue": "Kenttä/Arvo",
+      "argument": "Argumentti"
+    },
+    "addArgument": "Lisää argumentti",
+    "removeArgument": "Poista argumentti",
     "tabs": {
       "channels": "Kanavat",
       "command": "Komento"

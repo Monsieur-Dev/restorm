@@ -612,10 +612,22 @@
     "subscribeMode": "Abonnement",
     "commandMode": "Kommando",
     "command": "Kommando",
-    "args": "Argumenter",
-    "argsPlaceholder": "Kommandoargumenter",
     "freeform": "Fritt",
     "freeformPlaceholder": "Fri kommando (overstyrer valget)",
+    "fields": {
+      "key": "Nøkkel",
+      "field": "Felt",
+      "value": "Verdi",
+      "channel": "Kanal",
+      "message": "Melding",
+      "start": "Start",
+      "stop": "Slutt",
+      "id": "ID",
+      "fieldOrValue": "Felt/Verdi",
+      "argument": "Argument"
+    },
+    "addArgument": "Legg til argument",
+    "removeArgument": "Fjern argument",
     "tabs": {
       "channels": "Kanaler",
       "command": "Kommando"

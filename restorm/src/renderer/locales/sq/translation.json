@@ -612,10 +612,22 @@
     "subscribeMode": "Abonim",
     "commandMode": "Komandë",
     "command": "Komandë",
-    "args": "Argumente",
-    "argsPlaceholder": "Argumentet e komandës",
     "freeform": "E lirë",
     "freeformPlaceholder": "Komandë e lirë (anulon zgjedhjen)",
+    "fields": {
+      "key": "Çelësi",
+      "field": "Fusha",
+      "value": "Vlera",
+      "channel": "Kanal",
+      "message": "Mesazhi",
+      "start": "Fillimi",
+      "stop": "Fundi",
+      "id": "ID",
+      "fieldOrValue": "Fusha/Vlera",
+      "argument": "Argumenti"
+    },
+    "addArgument": "Shto argument",
+    "removeArgument": "Hiq argumentin",
     "tabs": {
       "channels": "Kanale",
       "command": "Komandë"

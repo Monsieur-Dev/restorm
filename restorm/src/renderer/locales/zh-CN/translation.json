@@ -611,10 +611,22 @@
     "subscribeMode": "订阅",
     "commandMode": "命令",
     "command": "命令",
-    "args": "参数",
-    "argsPlaceholder": "命令参数",
     "freeform": "自由输入",
     "freeformPlaceholder": "自由输入命令（覆盖所选内容）",
+    "fields": {
+      "key": "键",
+      "field": "字段",
+      "value": "值",
+      "channel": "频道",
+      "message": "消息",
+      "start": "起始",
+      "stop": "结束",
+      "id": "ID",
+      "fieldOrValue": "字段/值",
+      "argument": "参数"
+    },
+    "addArgument": "添加参数",
+    "removeArgument": "移除参数",
     "tabs": {
       "channels": "频道",
       "command": "命令"

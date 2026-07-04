@@ -612,10 +612,22 @@
     "subscribeMode": "Prenumeration",
     "commandMode": "Kommando",
     "command": "Kommando",
-    "args": "Argument",
-    "argsPlaceholder": "Kommandoargument",
     "freeform": "Fritt",
     "freeformPlaceholder": "Fritt kommando (åsidosätter valet)",
+    "fields": {
+      "key": "Nyckel",
+      "field": "Fält",
+      "value": "Värde",
+      "channel": "Kanal",
+      "message": "Meddelande",
+      "start": "Start",
+      "stop": "Slut",
+      "id": "ID",
+      "fieldOrValue": "Fält/Värde",
+      "argument": "Argument"
+    },
+    "addArgument": "Lägg till argument",
+    "removeArgument": "Ta bort argument",
     "tabs": {
       "channels": "Kanaler",
       "command": "Kommando"

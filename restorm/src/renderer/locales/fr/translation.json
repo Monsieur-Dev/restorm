@@ -612,10 +612,22 @@
     "subscribeMode": "Abonnement",
     "commandMode": "Commande",
     "command": "Commande",
-    "args": "Arguments",
-    "argsPlaceholder": "Arguments de la commande",
     "freeform": "Libre",
     "freeformPlaceholder": "Commande libre (remplace la sélection)",
+    "fields": {
+      "key": "Clé",
+      "field": "Champ",
+      "value": "Valeur",
+      "channel": "Canal",
+      "message": "Message",
+      "start": "Début",
+      "stop": "Fin",
+      "id": "ID",
+      "fieldOrValue": "Champ/Valeur",
+      "argument": "Argument"
+    },
+    "addArgument": "Ajouter un argument",
+    "removeArgument": "Supprimer l'argument",
     "tabs": {
       "channels": "Canaux",
       "command": "Commande"

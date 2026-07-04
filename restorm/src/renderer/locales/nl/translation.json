@@ -612,10 +612,22 @@
     "subscribeMode": "Abonneren",
     "commandMode": "Opdracht",
     "command": "Opdracht",
-    "args": "Argumenten",
-    "argsPlaceholder": "Opdrachtargumenten",
     "freeform": "Vrij",
     "freeformPlaceholder": "Vrije opdracht (overschrijft de selectie)",
+    "fields": {
+      "key": "Sleutel",
+      "field": "Veld",
+      "value": "Waarde",
+      "channel": "Kanaal",
+      "message": "Bericht",
+      "start": "Begin",
+      "stop": "Einde",
+      "id": "ID",
+      "fieldOrValue": "Veld/Waarde",
+      "argument": "Argument"
+    },
+    "addArgument": "Argument toevoegen",
+    "removeArgument": "Argument verwijderen",
     "tabs": {
       "channels": "Kanalen",
       "command": "Opdracht"

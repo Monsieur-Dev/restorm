@@ -614,10 +614,22 @@
     "subscribeMode": "Підписка",
     "commandMode": "Команда",
     "command": "Команда",
-    "args": "Аргументи",
-    "argsPlaceholder": "Аргументи команди",
     "freeform": "Довільна",
     "freeformPlaceholder": "Довільна команда (замінює вибір)",
+    "fields": {
+      "key": "Ключ",
+      "field": "Поле",
+      "value": "Значення",
+      "channel": "Канал",
+      "message": "Повідомлення",
+      "start": "Початок",
+      "stop": "Кінець",
+      "id": "ID",
+      "fieldOrValue": "Поле/Значення",
+      "argument": "Аргумент"
+    },
+    "addArgument": "Додати аргумент",
+    "removeArgument": "Видалити аргумент",
     "tabs": {
       "channels": "Канали",
       "command": "Команда"

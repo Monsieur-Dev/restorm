@@ -611,10 +611,22 @@
     "subscribeMode": "Berlangganan",
     "commandMode": "Perintah",
     "command": "Perintah",
-    "args": "Argumen",
-    "argsPlaceholder": "Argumen perintah",
     "freeform": "Bebas",
     "freeformPlaceholder": "Perintah bebas (menggantikan pilihan)",
+    "fields": {
+      "key": "Kunci",
+      "field": "Bidang",
+      "value": "Nilai",
+      "channel": "Saluran",
+      "message": "Pesan",
+      "start": "Awal",
+      "stop": "Akhir",
+      "id": "ID",
+      "fieldOrValue": "Bidang/Nilai",
+      "argument": "Argumen"
+    },
+    "addArgument": "Tambah argumen",
+    "removeArgument": "Hapus argumen",
     "tabs": {
       "channels": "Saluran",
       "command": "Perintah"

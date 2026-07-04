@@ -613,10 +613,22 @@
     "subscribeMode": "Pretplata",
     "commandMode": "Komanda",
     "command": "Komanda",
-    "args": "Argumenti",
-    "argsPlaceholder": "Argumenti komande",
     "freeform": "Slobodno",
     "freeformPlaceholder": "Slobodna komanda (zamenjuje izbor)",
+    "fields": {
+      "key": "Ključ",
+      "field": "Polje",
+      "value": "Vrednost",
+      "channel": "Kanal",
+      "message": "Poruka",
+      "start": "Početak",
+      "stop": "Kraj",
+      "id": "ID",
+      "fieldOrValue": "Polje/Vrednost",
+      "argument": "Argument"
+    },
+    "addArgument": "Dodaj argument",
+    "removeArgument": "Ukloni argument",
     "tabs": {
       "channels": "Kanali",
       "command": "Komanda"
