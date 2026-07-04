@@ -25,6 +25,12 @@ import { stripIds } from '../utils/serialization'
 export interface EntityFieldDiff {
   fields: Record<string, boolean>
   preselectTabId?: string
+  /** Names of the saved project quick-configs that exist on BOTH sides under
+   * the same name but differ in content — the ones the conflict modal
+   * red-flags and offers an individual ours/theirs pick for. Empty/omitted
+   * when no quick-config conflicts (the common case). Only meaningful for
+   * request entities. */
+  conflictingQuickConfigNames?: string[]
 }
 
 /**
@@ -59,11 +65,17 @@ function isAuthRequest(request: Request): request is AuthenticationRequest {
   return request.type === 'auth'
 }
 
-/** `quickConfigs` is an ad-hoc field on the reactive request proxy (see
- * `requestQuickConfigStore.ts`), not part of the typed `Request` union. */
-function projectQuickConfigsOf(request: Request): QuickConfig[] {
-  const configs = (request as unknown as { quickConfigs?: QuickConfig[] }).quickConfigs
+/** Read the ad-hoc `quickConfigs` field off any request-shaped item — it's not
+ * part of the typed `Request`/`FolderItem` union (see `requestQuickConfigStore.
+ * ts`). Exported so the conflict modal + write-back read it the same way this
+ * module's diff does. */
+export function readQuickConfigs(item: unknown): QuickConfig[] {
+  const configs = (item as { quickConfigs?: QuickConfig[] } | null)?.quickConfigs
   return Array.isArray(configs) ? configs : []
+}
+
+function projectQuickConfigsOf(request: Request): QuickConfig[] {
+  return readQuickConfigs(request)
 }
 
 /**
@@ -80,6 +92,19 @@ function quickConfigsConflict(ours: QuickConfig[], theirs: QuickConfig[]): boole
     const theirsConfig = theirsByName.get(oursConfig.name)
     return theirsConfig !== undefined && snapshotDiffers(oursConfig.fields, theirsConfig.fields)
   })
+}
+
+/** The NAMES of the quick-configs that genuinely conflict (same name on both
+ * sides, different content) — the per-config granularity the conflict modal's
+ * picker needs, where `quickConfigsConflict` only answers yes/no. */
+function conflictingQuickConfigNames(ours: QuickConfig[], theirs: QuickConfig[]): string[] {
+  const theirsByName = new Map(theirs.map((c) => [c.name, c]))
+  return ours
+    .filter((oursConfig) => {
+      const theirsConfig = theirsByName.get(oursConfig.name)
+      return theirsConfig !== undefined && snapshotDiffers(oursConfig.fields, theirsConfig.fields)
+    })
+    .map((oursConfig) => oursConfig.name)
 }
 
 /**
@@ -184,12 +209,17 @@ export function computeEntityFieldDiff(
     return computeFolderFieldDiff(ours, theirs)
   }
   if (kind === 'request' && isRequest(ours) && isRequest(theirs)) {
+    let base: EntityFieldDiff | undefined
     if (isHTTPShaped(ours) && isHTTPShaped(theirs)) {
-      return computeRequestFieldDiff(ours, theirs)
+      base = computeRequestFieldDiff(ours, theirs)
+    } else if (ours.type === theirs.type) {
+      base = computeGenericRequestFieldDiff(ours, theirs)
     }
-    if (ours.type === theirs.type) {
-      return computeGenericRequestFieldDiff(ours, theirs)
-    }
+    if (!base) return undefined
+    // Every request kind carries the ad-hoc `quickConfigs` field, so the
+    // per-config conflict list applies to all of them, not just HTTP.
+    const quickConfigNames = conflictingQuickConfigNames(projectQuickConfigsOf(ours), projectQuickConfigsOf(theirs))
+    return quickConfigNames.length > 0 ? { ...base, conflictingQuickConfigNames: quickConfigNames } : base
   }
   return undefined
 }

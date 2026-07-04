@@ -159,6 +159,63 @@ describe('useGitPullConflict', () => {
     expect(yamlText).toContain('_projectUuid: ours-project-uuid')
   })
 
+  it('finishResolution bakes a per-config quick-config pick into the write-back, independent of the whole-entity pick', async () => {
+    const oursQc = [
+      '_projectUuid: ours-project-uuid',
+      'collections:',
+      '  - id: r1',
+      '    name: Find pet by ID',
+      '    type: http',
+      '    tags: []',
+      '    url: https://ours.example.com',
+      '    quickConfigs:',
+      '      - id: q1',
+      '        name: Staging',
+      '        requestId: r1',
+      '        storageTarget: project',
+      '        fields:',
+      '          url: https://ours-staging.example.com',
+      '        createdAt: \'\'',
+      '        updatedAt: \'\''
+    ].join('\n')
+    const theirsQc = [
+      'collections:',
+      '  - id: r1',
+      '    name: Find pet by ID',
+      '    type: http',
+      '    tags: []',
+      '    url: https://theirs.example.com',
+      '    quickConfigs:',
+      '      - id: q2',
+      '        name: Staging',
+      '        requestId: r1',
+      '        storageTarget: project',
+      '        fields:',
+      '          url: https://theirs-staging.example.com',
+      '        createdAt: \'\'',
+      '        updatedAt: \'\''
+    ].join('\n')
+    const api = stubGitApi({
+      getConflictVersions: vi.fn().mockResolvedValue({ path: 'api.restorm', base: null, ours: oursQc, theirs: theirsQc })
+    })
+    const { result } = renderHook(() => useGitPullConflict())
+    await act(async () => { await result.current.openFromPull('/proj', 'api.restorm') })
+
+    // No whole-entity pick → resolved defaults to "ours"; only the Staging
+    // quick-config is switched to "theirs".
+    act(() => { result.current.conflictResolution.pickQuickConfigVersion('r1', 'Staging', 'theirs') })
+
+    await act(async () => { await result.current.finishResolution() })
+    await flush()
+
+    const [, , yamlText] = api.writeResolvedConflict.mock.calls[0] as [string, string, string]
+    // The request's own URL stays "ours" (never picked), but the Staging
+    // quick-config carries "theirs" — independent per-config granularity.
+    expect(yamlText).toContain('url: https://ours.example.com')
+    expect(yamlText).toContain('https://theirs-staging.example.com')
+    expect(yamlText).not.toContain('https://ours-staging.example.com')
+  })
+
   it('finishResolution shows a failure toast and leaves the modal open when the commit fails', async () => {
     stubGitApi({ commit: vi.fn().mockResolvedValue({ success: false, error: 'nothing to commit' }) })
     const { result } = renderHook(() => useGitPullConflict())

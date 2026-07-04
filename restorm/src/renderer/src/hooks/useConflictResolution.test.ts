@@ -132,4 +132,24 @@ describe('useConflictResolution', () => {
     expect(result.current.selectedConflictId).toBe('r1')
     expect(result.current.getResolvedEntity('r1')).toMatchObject({ url: 'https://ours.example.com' })
   })
+
+  it('pickQuickConfigVersion records a per-config ours/theirs choice, keyed by conflict + config name', () => {
+    const { result } = renderHook(() => useConflictResolution(VERSIONS))
+    expect(result.current.quickConfigPicks).toEqual({})
+    act(() => { result.current.pickQuickConfigVersion('r1', 'Staging', 'theirs') })
+    expect(result.current.quickConfigPicks).toEqual({ r1: { Staging: 'theirs' } })
+    // A second config on the same conflict is additive; re-picking overrides.
+    act(() => { result.current.pickQuickConfigVersion('r1', 'Prod', 'ours') })
+    act(() => { result.current.pickQuickConfigVersion('r1', 'Staging', 'ours') })
+    expect(result.current.quickConfigPicks).toEqual({ r1: { Staging: 'ours', Prod: 'ours' } })
+  })
+
+  it('a new versions object clears the per-config quick-config picks', () => {
+    const { result, rerender } = renderHook(({ v }) => useConflictResolution(v), { initialProps: { v: VERSIONS } })
+    act(() => { result.current.pickQuickConfigVersion('r1', 'Staging', 'theirs') })
+    expect(result.current.quickConfigPicks).toEqual({ r1: { Staging: 'theirs' } })
+
+    rerender({ v: { path: 'api.restorm', base: null, ours: OURS_YAML, theirs: THEIRS_YAML } })
+    expect(result.current.quickConfigPicks).toEqual({})
+  })
 })

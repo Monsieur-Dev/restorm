@@ -71,6 +71,8 @@ function makeConflictResolution(overrides: Partial<UseConflictResolutionResult> 
     pickOursVersion: vi.fn(),
     pickTheirsVersion: vi.fn(),
     onScenarioChange: vi.fn(),
+    quickConfigPicks: {},
+    pickQuickConfigVersion: vi.fn(),
     ...overrides
   }
 }

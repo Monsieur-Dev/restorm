@@ -6,6 +6,9 @@ import { identifyConflictingEntities, type ConflictEntity } from '../../../share
 import { cloneEntityForResolution } from '../services/conflictEntityClone'
 import { processAfterDeserialization } from '../utils/serialization'
 
+/** Per-config ours/theirs overrides, keyed conflictId → configName → side. */
+export type QuickConfigPicks = Record<string, Record<string, 'ours' | 'theirs'>>
+
 export interface UseConflictResolutionResult {
   conflicts: ConflictEntity[]
   selectedConflictId: string | null
@@ -21,6 +24,16 @@ export interface UseConflictResolutionResult {
    * mutation (see `conflictEntityClone.ts`) — wire it to `ScenarioEditorView.
    * onScenarioChange` for the resolved panel. */
   onScenarioChange: (conflictId: string, patch: { nodes?: Scenario['nodes'], edges?: Scenario['edges'], notes?: string }) => void
+  /** Per-config ours/theirs overrides for conflicting saved quick-configs
+   * (same name on both sides, different content). Absent for a config =
+   * follow whatever the whole-entity pick resolved it to (the safe-floor).
+   * These are recorded as plain state and applied to the resolved entity's
+   * `quickConfigs` only at write-back — never by mutating the reactive
+   * resolved proxy, so the resolved panel's in-progress edits survive. */
+  quickConfigPicks: QuickConfigPicks
+  /** Record a finer-than-whole-entity ours/theirs choice for ONE conflicting
+   * saved quick-config, independent of the whole-entity pick. */
+  pickQuickConfigVersion: (conflictId: string, configName: string, side: 'ours' | 'theirs') => void
 }
 
 function isScenarioItem(item: FolderItem): item is Scenario {
@@ -54,11 +67,13 @@ export function useConflictResolution(versions: GitConflictVersions | null): Use
   const [priorConflicts, setPriorConflicts] = useState(conflicts)
   const [selectedConflictId, setSelectedConflictId] = useState<string | null>(conflicts[0]?.id ?? null)
   const [resolvedById, setResolvedById] = useState<Record<string, FolderItem>>(() => buildInitialResolved(conflicts))
+  const [quickConfigPicks, setQuickConfigPicks] = useState<QuickConfigPicks>({})
 
   if (conflicts !== priorConflicts) {
     setPriorConflicts(conflicts)
     setSelectedConflictId(conflicts[0]?.id ?? null)
     setResolvedById(buildInitialResolved(conflicts))
+    setQuickConfigPicks({})
   }
 
   const selectConflict = useCallback((id: string) => { setSelectedConflictId(id) }, [])
@@ -93,6 +108,13 @@ export function useConflictResolution(versions: GitConflictVersions | null): Use
     })
   }, [])
 
+  const pickQuickConfigVersion = useCallback((conflictId: string, configName: string, side: 'ours' | 'theirs') => {
+    setQuickConfigPicks((prev) => ({
+      ...prev,
+      [conflictId]: { ...(prev[conflictId] ?? {}), [configName]: side }
+    }))
+  }, [])
+
   return {
     conflicts,
     selectedConflictId,
@@ -100,6 +122,8 @@ export function useConflictResolution(versions: GitConflictVersions | null): Use
     getResolvedEntity,
     pickOursVersion,
     pickTheirsVersion,
-    onScenarioChange
+    onScenarioChange,
+    quickConfigPicks,
+    pickQuickConfigVersion
   }
 }

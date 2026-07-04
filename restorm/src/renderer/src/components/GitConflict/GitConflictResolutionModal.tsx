@@ -3,7 +3,36 @@ import { useTranslation } from 'react-i18next'
 import { Modal, Button, ConflictResolutionView } from 'electron-core-ui/renderer'
 import type { UseConflictResolutionResult } from '../../hooks/useConflictResolution'
 import { ConflictEntityPanel } from './ConflictEntityPanel'
-import { computeEntityFieldDiff } from '../../services/conflictFieldDiff'
+import { ConflictQuickConfigBand } from './ConflictQuickConfigBand'
+import { computeEntityFieldDiff, readQuickConfigs } from '../../services/conflictFieldDiff'
+import type { FolderItem } from '../../../../shared/types/folderTypes'
+
+/** Which side each conflicting quick-config currently resolves to: an explicit
+ * per-config pick wins; otherwise it's derived from the resolved entity's
+ * current config (which side its content matches), so a whole-entity pick is
+ * reflected until the user overrides an individual config. */
+function deriveCurrentSides(
+  names: string[],
+  resolved: FolderItem,
+  theirs: FolderItem,
+  picks: Record<string, 'ours' | 'theirs'> | undefined
+): Record<string, 'ours' | 'theirs'> {
+  const resolvedConfigs = readQuickConfigs(resolved)
+  const theirsConfigs = readQuickConfigs(theirs)
+  const sig = (configs: ReturnType<typeof readQuickConfigs>, name: string): string =>
+    JSON.stringify(configs.find((c) => c.name === name)?.fields)
+  const sides: Record<string, 'ours' | 'theirs'> = {}
+  for (const name of names) {
+    const explicit = picks?.[name]
+    sides[name] = explicit ?? (sig(resolvedConfigs, name) === sig(theirsConfigs, name) ? 'theirs' : 'ours')
+  }
+  return sides
+}
+
+/** Column wrapper so the quick-config band sits above the entity panel and the
+ * panel fills the remaining height. */
+const panelWithBandStyle: React.CSSProperties = { display: 'flex', flexDirection: 'column', height: '100%' }
+const panelBodyStyle: React.CSSProperties = { flex: 1, minHeight: 0 }
 
 export interface GitConflictResolutionModalProps {
   isOpen: boolean
@@ -26,7 +55,7 @@ export const GitConflictResolutionModal: React.FC<GitConflictResolutionModalProp
   onFinish
 }) => {
   const { t } = useTranslation()
-  const { conflicts, selectedConflictId, selectConflict, getResolvedEntity, pickOursVersion, pickTheirsVersion, onScenarioChange } = conflictResolution
+  const { conflicts, selectedConflictId, selectConflict, getResolvedEntity, pickOursVersion, pickTheirsVersion, onScenarioChange, quickConfigPicks, pickQuickConfigVersion } = conflictResolution
 
   // ECUI's `ConflictResolutionView` always renders all three panels for the
   // SAME (selected) conflict, so the field-diff is identical across them.
@@ -54,21 +83,53 @@ export const GitConflictResolutionModal: React.FC<GitConflictResolutionModalProp
             renderUserPanel={(id) => {
               const conflict = conflicts.find((c) => c.id === id)
               if (!conflict) return null
-              return <ConflictEntityPanel entity={conflict.ours} mode="readOnly" {...(activeFieldDiff ? { fieldDiff: activeFieldDiff } : {})} />
+              const names = activeFieldDiff?.conflictingQuickConfigNames ?? []
+              return (
+                <div style={panelWithBandStyle}>
+                  <ConflictQuickConfigBand mode="readOnly" conflictingNames={names} data-testid="conflict-quick-config-band-user" />
+                  <div style={panelBodyStyle}>
+                    <ConflictEntityPanel entity={conflict.ours} mode="readOnly" {...(activeFieldDiff ? { fieldDiff: activeFieldDiff } : {})} />
+                  </div>
+                </div>
+              )
             }}
             renderServerPanel={(id) => {
               const conflict = conflicts.find((c) => c.id === id)
               if (!conflict) return null
-              return <ConflictEntityPanel entity={conflict.theirs} mode="readOnly" {...(activeFieldDiff ? { fieldDiff: activeFieldDiff } : {})} />
+              const names = activeFieldDiff?.conflictingQuickConfigNames ?? []
+              return (
+                <div style={panelWithBandStyle}>
+                  <ConflictQuickConfigBand mode="readOnly" conflictingNames={names} data-testid="conflict-quick-config-band-server" />
+                  <div style={panelBodyStyle}>
+                    <ConflictEntityPanel entity={conflict.theirs} mode="readOnly" {...(activeFieldDiff ? { fieldDiff: activeFieldDiff } : {})} />
+                  </div>
+                </div>
+              )
             }}
             renderResolvedPanel={(id) => {
+              const conflict = conflicts.find((c) => c.id === id)
+              const names = activeFieldDiff?.conflictingQuickConfigNames ?? []
+              const resolved = getResolvedEntity(id)
               return (
-                <ConflictEntityPanel
-                  entity={getResolvedEntity(id)}
-                  mode="editable"
-                  {...(activeFieldDiff ? { fieldDiff: activeFieldDiff } : {})}
-                  onScenarioChange={(_scenarioId, patch) => { onScenarioChange(id, patch) }}
-                />
+                <div style={panelWithBandStyle}>
+                  {conflict && (
+                    <ConflictQuickConfigBand
+                      mode="editable"
+                      conflictingNames={names}
+                      currentSides={deriveCurrentSides(names, resolved, conflict.theirs, quickConfigPicks[id])}
+                      onPick={(name, side) => { pickQuickConfigVersion(id, name, side) }}
+                      data-testid="conflict-quick-config-band-resolved"
+                    />
+                  )}
+                  <div style={panelBodyStyle}>
+                    <ConflictEntityPanel
+                      entity={resolved}
+                      mode="editable"
+                      {...(activeFieldDiff ? { fieldDiff: activeFieldDiff } : {})}
+                      onScenarioChange={(_scenarioId, patch) => { onScenarioChange(id, patch) }}
+                    />
+                  </div>
+                </div>
               )
             }}
             {...(selectedConflictId ? { onUseUserVersion: () => { pickOursVersion(selectedConflictId) } } : {})}

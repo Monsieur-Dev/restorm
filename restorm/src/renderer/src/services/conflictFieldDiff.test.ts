@@ -233,27 +233,39 @@ describe('computeEntityFieldDiff', () => {
       quickConfigs: [{ id: 'q1', name: 'Staging', requestId: 'r1', storageTarget: 'project', fields: { url: 'a' }, createdAt: '', updatedAt: '' }]
     } as never)
     const theirs = makeHTTPRequest()
-    expect(computeEntityFieldDiff('request', ours, theirs)?.fields['quickConfigs']).toBe(false)
+    const diff = computeEntityFieldDiff('request', ours, theirs)
+    expect(diff?.fields['quickConfigs']).toBe(false)
+    expect(diff?.conflictingQuickConfigNames).toBeUndefined()
   })
 
   it('quick configs: does NOT flag a conflict when same-named configs have identical fields', () => {
     const config = { id: 'q1', name: 'Staging', requestId: 'r1', storageTarget: 'project' as const, fields: { url: 'a' }, createdAt: '', updatedAt: '' }
     const ours = makeHTTPRequest({ quickConfigs: [config] } as never)
     const theirs = makeHTTPRequest({ quickConfigs: [{ ...config, id: 'q2' }] } as never)
-    expect(computeEntityFieldDiff('request', ours, theirs)?.fields['quickConfigs']).toBe(false)
+    const diff = computeEntityFieldDiff('request', ours, theirs)
+    expect(diff?.fields['quickConfigs']).toBe(false)
+    expect(diff?.conflictingQuickConfigNames).toBeUndefined()
   })
 
-  it('quick configs: flags a whole-config conflict when the same name differs in fields on both sides', () => {
+  it('quick configs: flags a whole-config conflict + names it when the same name differs on both sides', () => {
     const ours = makeHTTPRequest({
-      quickConfigs: [{ id: 'q1', name: 'Staging', requestId: 'r1', storageTarget: 'project', fields: { url: 'a' }, createdAt: '', updatedAt: '' }]
+      quickConfigs: [
+        { id: 'q1', name: 'Staging', requestId: 'r1', storageTarget: 'project', fields: { url: 'a' }, createdAt: '', updatedAt: '' },
+        { id: 'q3', name: 'Prod', requestId: 'r1', storageTarget: 'project', fields: { url: 'p' }, createdAt: '', updatedAt: '' }
+      ]
     } as never)
     const theirs = makeHTTPRequest({
-      quickConfigs: [{ id: 'q2', name: 'Staging', requestId: 'r1', storageTarget: 'project', fields: { url: 'b' }, createdAt: '', updatedAt: '' }]
+      quickConfigs: [
+        { id: 'q2', name: 'Staging', requestId: 'r1', storageTarget: 'project', fields: { url: 'b' }, createdAt: '', updatedAt: '' },
+        { id: 'q3', name: 'Prod', requestId: 'r1', storageTarget: 'project', fields: { url: 'p' }, createdAt: '', updatedAt: '' }
+      ]
     } as never)
     const diff = computeEntityFieldDiff('request', ours, theirs)
     expect(diff?.fields['quickConfigs']).toBe(true)
-    // No tab hosts quick configs inside the conflict panel yet — a
-    // quickConfigs-only conflict never drives the tab preselect.
+    // Only the genuinely-divergent config is named; the identical "Prod" isn't.
+    expect(diff?.conflictingQuickConfigNames).toEqual(['Staging'])
+    // The picker for quick configs lives in a band above the tab strip, not in
+    // a tab — so a quickConfigs-only conflict still never drives the preselect.
     expect(diff?.preselectTabId).toBeUndefined()
   })
 })

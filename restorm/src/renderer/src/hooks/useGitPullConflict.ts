@@ -3,9 +3,46 @@ import { useTranslation } from 'react-i18next'
 import { parse as yamlParse, stringify as yamlStringify } from 'yaml'
 import { toasterService, type GitConflictVersions, type GitConflictCommitTimestamps } from 'electron-core-ui/renderer'
 import { useConflictResolution, type UseConflictResolutionResult } from './useConflictResolution'
+import type { FolderItem } from '../../../shared/types/folderTypes'
+import type { QuickConfig } from '../../../shared/types/requests/QuickConfig'
+import type { ConflictEntity } from '../../../shared/git/gitConflictModel'
 import { parseProjectYaml } from '../../../shared/git/gitCommitDiff'
 import { buildMergedProjectTree } from '../../../shared/git/gitConflictMerge'
+import { readQuickConfigs } from '../services/conflictFieldDiff'
 import { prepareForSerialization, processAfterDeserialization } from '../utils/serialization'
+
+/** `quickConfigs` is an ad-hoc field on the request proxy, not part of the
+ * typed `FolderItem` union — name the gap as an explicit optional intersection
+ * so the write-back copy stays checked against the rest of `FolderItem`. */
+type ItemWithQuickConfigs = FolderItem & { quickConfigs?: QuickConfig[] }
+
+/**
+ * Fold the user's per-config quick-config picks into the resolved entity at
+ * write-back — the finer-grained counterpart to the whole-entity resolved
+ * pick. Only EXPLICITLY-picked configs are overridden (to the chosen side's
+ * version); every other config keeps whatever the whole-entity pick already
+ * resolved it to, which preserves the safe-floor. Returns a plain copy — this
+ * object feeds `buildMergedProjectTree` + serialization, never a reactive
+ * panel, so it must NOT mutate the resolved proxy the user may still be
+ * editing.
+ */
+function applyQuickConfigPicks(
+  entity: FolderItem,
+  conflict: ConflictEntity,
+  picks: Record<string, 'ours' | 'theirs'> | undefined
+): FolderItem {
+  if (!picks || Object.keys(picks).length === 0) return entity
+  const oursByName = new Map(readQuickConfigs(conflict.ours).map((c) => [c.name, c]))
+  const theirsByName = new Map(readQuickConfigs(conflict.theirs).map((c) => [c.name, c]))
+  const next = readQuickConfigs(entity).map((config) => {
+    const side = picks[config.name]
+    if (!side) return config
+    const chosen = (side === 'theirs' ? theirsByName : oursByName).get(config.name)
+    return chosen ? structuredClone(chosen) : config
+  })
+  const copy: ItemWithQuickConfigs = { ...(entity as ItemWithQuickConfigs), quickConfigs: next }
+  return copy
+}
 
 export interface UseGitPullConflictResult {
   isOpen: boolean
@@ -71,7 +108,8 @@ export function useGitPullConflict(): UseGitPullConflictResult {
     const theirsItems = parseProjectYaml(versions.theirs, processAfterDeserialization)
     const resolvedById: Record<string, ReturnType<typeof conflictResolution.getResolvedEntity>> = {}
     for (const conflict of conflictResolution.conflicts) {
-      resolvedById[conflict.id] = conflictResolution.getResolvedEntity(conflict.id)
+      const resolved = conflictResolution.getResolvedEntity(conflict.id)
+      resolvedById[conflict.id] = applyQuickConfigPicks(resolved, conflict, conflictResolution.quickConfigPicks[conflict.id])
     }
 
     const merged = buildMergedProjectTree(oursItems, theirsItems, resolvedById, commitTimestamps)
