@@ -663,6 +663,7 @@
     "noMessages": "メッセージはまだありません",
     "connected": "接続済み",
     "disconnected": "切断されました",
+    "consumeError": "コンシューマーエラー",
     "producedTo": "送信先",
     "offset": "オフセット",
     "messages": "メッセージ"

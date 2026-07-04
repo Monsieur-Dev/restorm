@@ -665,6 +665,7 @@
     "noMessages": "Încă nu există mesaje",
     "connected": "Conectat",
     "disconnected": "Deconectat",
+    "consumeError": "Eroare consumator",
     "producedTo": "Produs către",
     "offset": "Offset",
     "messages": "Mesaje"

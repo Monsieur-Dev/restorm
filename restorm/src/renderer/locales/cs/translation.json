@@ -666,6 +666,7 @@
     "noMessages": "Zatím žádné zprávy",
     "connected": "Připojeno",
     "disconnected": "Odpojeno",
+    "consumeError": "Chyba konzumenta",
     "producedTo": "Odesláno do",
     "offset": "Offset",
     "messages": "Zprávy"

@@ -664,6 +664,7 @@
     "noMessages": "Ende nuk ka mesazhe",
     "connected": "I lidhur",
     "disconnected": "I shkëputur",
+    "consumeError": "Gabim i konsumatorit",
     "producedTo": "Prodhuar te",
     "offset": "Offset",
     "messages": "Mesazhet"

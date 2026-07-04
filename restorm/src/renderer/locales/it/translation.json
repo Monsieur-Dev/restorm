@@ -664,6 +664,7 @@
     "noMessages": "Nessun messaggio ancora",
     "connected": "Connesso",
     "disconnected": "Disconnesso",
+    "consumeError": "Errore del consumatore",
     "producedTo": "Prodotto su",
     "offset": "Offset",
     "messages": "Messaggi"

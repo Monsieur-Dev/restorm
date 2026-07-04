@@ -664,6 +664,7 @@
     "noMessages": "Még nincsenek üzenetek",
     "connected": "Csatlakoztatva",
     "disconnected": "Lecsatlakozva",
+    "consumeError": "Fogyasztói hiba",
     "producedTo": "Előállítva ide",
     "offset": "Offset",
     "messages": "Üzenetek"

@@ -666,6 +666,7 @@
     "noMessages": "Повідомлень ще немає",
     "connected": "З’єднано",
     "disconnected": "Роз’єднано",
+    "consumeError": "Помилка споживача",
     "producedTo": "Вироблено до",
     "offset": "Offset",
     "messages": "Повідомлення"

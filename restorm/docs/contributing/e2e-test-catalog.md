@@ -33,7 +33,7 @@ server; — = pure UI/in-process.
 | soap-execution | 9 | SOAP execution end-to-end | 🏠 |
 | trpc-execution | 9 | tRPC over HTTP execution | 🏠 |
 | odata-execution | 8 | OData query options, CRUD, batch, v2 envelope | 🏠 |
-| kafka-execution | 6 | Kafka produce/consume/offset | 🐳 kafka 🔌 |
+| kafka-execution | 7 | Kafka produce/consume/offset, live-consume stays alive + delivers | 🐳 kafka 🔌 |
 | sse-execution | 5 | Server-Sent Events execution | 🏠 |
 | redis-execution | 2 | Redis pub/sub + commands | 🐳 redis |
 | amqp-execution | 1 | AMQP / RabbitMQ publish/consume | 🐳 rabbitmq |

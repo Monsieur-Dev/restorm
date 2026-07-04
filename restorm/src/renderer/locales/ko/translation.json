@@ -663,6 +663,7 @@
     "noMessages": "아직 메시지가 없습니다",
     "connected": "연결됨",
     "disconnected": "연결 끊김",
+    "consumeError": "컨슈머 오류",
     "producedTo": "전송 위치",
     "offset": "오프셋",
     "messages": "메시지"

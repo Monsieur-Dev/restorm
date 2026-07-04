@@ -663,6 +663,7 @@
     "noMessages": "Chưa có tin nhắn nào",
     "connected": "Đã kết nối",
     "disconnected": "Đã ngắt kết nối",
+    "consumeError": "Lỗi trình tiêu thụ",
     "producedTo": "Đã tạo tới",
     "offset": "Offset",
     "messages": "Tin nhắn"

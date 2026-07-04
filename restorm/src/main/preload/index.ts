@@ -1734,8 +1734,8 @@ contextBridge.exposeInMainWorld('restorm', {
       return result as boolean
     },
     /** Listen for produce/browse/consume lifecycle updates. */
-    onProgress: (callback: (data: { requestId: string; status: 'started' | 'completed' | 'cancelled' | 'error' }) => void): (() => void) => {
-      const handler = (_event: Electron.IpcRendererEvent, data: { requestId: string; status: 'started' | 'completed' | 'cancelled' | 'error' }): void => {
+    onProgress: (callback: (data: { requestId: string; status: 'started' | 'completed' | 'cancelled' | 'error'; error?: string }) => void): (() => void) => {
+      const handler = (_event: Electron.IpcRendererEvent, data: { requestId: string; status: 'started' | 'completed' | 'cancelled' | 'error'; error?: string }): void => {
         callback(data)
       }
       ipcRenderer.on('kafka:request-progress', handler)

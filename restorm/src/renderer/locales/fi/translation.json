@@ -664,6 +664,7 @@
     "noMessages": "Ei vielä viestejä",
     "connected": "Yhdistetty",
     "disconnected": "Yhteys katkaistu",
+    "consumeError": "Kuluttajavirhe",
     "producedTo": "Tuotettu kohteeseen",
     "offset": "Offset",
     "messages": "Viestit"

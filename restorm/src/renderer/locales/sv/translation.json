@@ -664,6 +664,7 @@
     "noMessages": "Inga meddelanden än",
     "connected": "Ansluten",
     "disconnected": "Frånkopplad",
+    "consumeError": "Konsumentfel",
     "producedTo": "Producerad till",
     "offset": "Offset",
     "messages": "Meddelanden"

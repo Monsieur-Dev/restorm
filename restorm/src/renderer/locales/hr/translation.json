@@ -665,6 +665,7 @@
     "noMessages": "Još nema poruka",
     "connected": "Povezano",
     "disconnected": "Odspojeno",
+    "consumeError": "Pogreška potrošača",
     "producedTo": "Proizvedeno u",
     "offset": "Offset",
     "messages": "Poruke"

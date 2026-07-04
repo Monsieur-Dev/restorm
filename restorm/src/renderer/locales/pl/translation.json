@@ -666,6 +666,7 @@
     "noMessages": "Brak wiadomości",
     "connected": "Połączono",
     "disconnected": "Rozłączono",
+    "consumeError": "Błąd konsumenta",
     "producedTo": "Wyprodukowano do",
     "offset": "Offset",
     "messages": "Wiadomości"

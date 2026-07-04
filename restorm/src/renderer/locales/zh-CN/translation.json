@@ -663,6 +663,7 @@
     "noMessages": "暂无消息",
     "connected": "已连接",
     "disconnected": "已断开连接",
+    "consumeError": "消费者错误",
     "producedTo": "已生产至",
     "offset": "偏移量",
     "messages": "消息"
