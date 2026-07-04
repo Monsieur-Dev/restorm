@@ -17853,6 +17853,138 @@ collections:
                     position:
                       x: 0
                       y: 40
+                  - id: c0de0dep-0000-4000-8000-00000000000a
+                    kind: code
+                    config:
+                      language: javascript
+                      code: |-
+                        // code-deps chain — JS/TS link. Imports the pinned pure-JS
+                        // package (installed OFFLINE from the code-deps cache) to prove
+                        // install+mount worked, then adds its marker to the pass-through
+                        // dict for the next link.
+                        const restormjsdep = require('restormjsdep')
+                        const prev = (input && typeof input === 'object') ? input : {}
+                        console.log('javascript: restormjsdep', restormjsdep.version, 'loaded')
+                        return { ...prev, javascript: restormjsdep.version }
+                      packages:
+                        - name: restormjsdep
+                          version: 1.0.0
+                    inputs:
+                      - id: in
+                        name: ""
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: input
+                        dataType: any
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: any
+                        flow: both
+                    position:
+                      x: 360
+                      y: 40
+                  - id: c0de0dep-0000-4000-8000-00000000000b
+                    kind: code
+                    config:
+                      language: r
+                      code: |-
+                        # code-deps chain — R link. Loads the pinned pure-R package
+                        # (installed OFFLINE from the code-deps cache) to prove
+                        # install+mount worked, then adds its marker to the pass-through
+                        # named list for the next link. packageVersion (not the random
+                        # praise() message) keeps the run-log deterministic.
+                        library(praise)
+                        ver <- as.character(packageVersion("praise"))
+                        input[["r"]] <- ver
+                        cat(sprintf("r: praise %s loaded\n", ver))
+                        input
+                      packages:
+                        - name: praise
+                          version: 1.0.0
+                    inputs:
+                      - id: in
+                        name: ""
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: input
+                        dataType: any
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: any
+                        flow: both
+                    position:
+                      x: 720
+                      y: 40
+                  - id: c0de0dep-0000-4000-8000-00000000000c
+                    kind: code
+                    config:
+                      language: ruby
+                      code: |-
+                        # code-deps chain — Ruby link. Requires the pinned pure-Ruby gem
+                        # (installed OFFLINE from the code-deps cache) to prove
+                        # install+mount worked, then adds its marker to the pass-through
+                        # hash for the next link.
+                        require "restormrbdep"
+                        prev = $input.is_a?(Hash) ? $input : {}
+                        ver = Restormrbdep::VERSION
+                        puts "ruby: restormrbdep #{ver} loaded"
+                        prev.merge("ruby" => ver)
+                      packages:
+                        - name: restormrbdep
+                          version: 1.0.0
+                    inputs:
+                      - id: in
+                        name: ""
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: input
+                        dataType: any
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: any
+                        flow: both
+                    position:
+                      x: 1080
+                      y: 40
+                  - id: c0de0dep-0000-4000-8000-00000000000d
+                    kind: code
+                    config:
+                      language: lua
+                      code: |-
+                        -- code-deps chain — Lua link. Requires the pinned pure-Lua
+                        -- module (installed OFFLINE from the code-deps cache) to prove
+                        -- install+mount worked, then adds its marker to the pass-through
+                        -- table for the next link.
+                        local restormluadep = require("restormluadep")
+                        local prev = type(input) == "table" and input or {}
+                        prev.lua = restormluadep.version
+                        print(string.format("lua: restormluadep %s loaded", restormluadep.version))
+                        return prev
+                      packages:
+                        - name: restormluadep
+                          version: 1.0.0
+                    inputs:
+                      - id: in
+                        name: ""
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: input
+                        dataType: any
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: any
+                        flow: both
+                    position:
+                      x: 1440
+                      y: 40
                   - id: c0de0dep-0000-4000-8000-000000000003
                     kind: log
                     config:
@@ -17873,12 +18005,44 @@ collections:
                         dataType: any
                     outputs: []
                     position:
-                      x: 360
+                      x: 1800
                       y: 40
                 edges:
-                  - id: c0de0dep-0000-4000-8000-000000000004
+                  - id: c0de0dep-0000-4000-8000-00000000000e
                     from:
                       nodeId: c0de0dep-0000-4000-8000-000000000002
+                      portId: result
+                    to:
+                      nodeId: c0de0dep-0000-4000-8000-00000000000a
+                      portId: value
+                    selector: .
+                  - id: c0de0dep-0000-4000-8000-00000000000f
+                    from:
+                      nodeId: c0de0dep-0000-4000-8000-00000000000a
+                      portId: result
+                    to:
+                      nodeId: c0de0dep-0000-4000-8000-00000000000b
+                      portId: value
+                    selector: .
+                  - id: c0de0dep-0000-4000-8000-000000000010
+                    from:
+                      nodeId: c0de0dep-0000-4000-8000-00000000000b
+                      portId: result
+                    to:
+                      nodeId: c0de0dep-0000-4000-8000-00000000000c
+                      portId: value
+                    selector: .
+                  - id: c0de0dep-0000-4000-8000-000000000011
+                    from:
+                      nodeId: c0de0dep-0000-4000-8000-00000000000c
+                      portId: result
+                    to:
+                      nodeId: c0de0dep-0000-4000-8000-00000000000d
+                      portId: value
+                    selector: .
+                  - id: c0de0dep-0000-4000-8000-000000000004
+                    from:
+                      nodeId: c0de0dep-0000-4000-8000-00000000000d
                       portId: result
                     to:
                       nodeId: c0de0dep-0000-4000-8000-000000000003
@@ -17886,6 +18050,240 @@ collections:
                     selector: .
                 id: c0de0dep-0000-4000-8000-000000000001
                 name: code-deps-chain
+                items: []
+              - type: scenario
+                tags: []
+                params: []
+                nodes:
+                  - id: c0de0dep-1111-4000-8000-000000000002
+                    kind: code
+                    config:
+                      language: python
+                      code: |-
+                        # code-deps chain (REAL registry) — Python link. Installs +
+                        # imports a pinned pure-Python package from the LIVE PyPI on
+                        # first run (no offline mirror), then threads an import-success
+                        # marker. Asserts the true user download path; version-agnostic.
+                        import six
+                        assert hasattr(six, "PY3")
+                        prev = input if isinstance(input, dict) else {}
+                        print("python: six loaded")
+                        {**prev, "python": True}
+                      packages:
+                        - name: six
+                          version: 1.16.0
+                    inputs:
+                      - id: in
+                        name: ""
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: input
+                        dataType: any
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: any
+                        flow: both
+                    position:
+                      x: 0
+                      y: 40
+                  - id: c0de0dep-1111-4000-8000-00000000000a
+                    kind: code
+                    config:
+                      language: javascript
+                      code: |-
+                        // code-deps chain (REAL registry) — JS link. Fetches +
+                        // esbuild-bundles a pinned pure-JS package from the LIVE npm
+                        // registry on first run, then threads an import-success marker.
+                        const isNumber = require('is-number')
+                        if (isNumber(7) !== true) throw new Error('is-number did not load')
+                        const prev = (input && typeof input === 'object') ? input : {}
+                        console.log('javascript: is-number loaded')
+                        return { ...prev, javascript: true }
+                      packages:
+                        - name: is-number
+                          version: 7.0.0
+                    inputs:
+                      - id: in
+                        name: ""
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: input
+                        dataType: any
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: any
+                        flow: both
+                    position:
+                      x: 360
+                      y: 40
+                  - id: c0de0dep-1111-4000-8000-00000000000b
+                    kind: code
+                    config:
+                      language: r
+                      code: |-
+                        # code-deps chain (REAL registry) — R link. Installs a pinned
+                        # pure-R package from the LIVE WebR CRAN repository on first run,
+                        # then threads an import-success marker. praise is version-frozen
+                        # (single upstream release), so the pin never 404s on a repo
+                        # rebuild; a non-frozen package would need live-index resolution.
+                        library(praise)
+                        stopifnot(exists("praise"))
+                        cat("r: praise loaded\n")
+                        input[["r"]] <- TRUE
+                        input
+                      packages:
+                        - name: praise
+                          version: 1.0.0
+                    inputs:
+                      - id: in
+                        name: ""
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: input
+                        dataType: any
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: any
+                        flow: both
+                    position:
+                      x: 720
+                      y: 40
+                  - id: c0de0dep-1111-4000-8000-00000000000c
+                    kind: code
+                    config:
+                      language: ruby
+                      code: |-
+                        # code-deps chain (REAL registry) — Ruby link. Installs a pinned
+                        # pure-Ruby gem from the LIVE RubyGems on first run, then threads
+                        # an import-success marker.
+                        require "paint"
+                        raise "paint did not load" unless defined?(Paint)
+                        prev = $input.is_a?(Hash) ? $input : {}
+                        puts "ruby: paint loaded"
+                        prev.merge("ruby" => true)
+                      packages:
+                        - name: paint
+                          version: 2.3.0
+                    inputs:
+                      - id: in
+                        name: ""
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: input
+                        dataType: any
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: any
+                        flow: both
+                    position:
+                      x: 1080
+                      y: 40
+                  - id: c0de0dep-1111-4000-8000-00000000000d
+                    kind: code
+                    config:
+                      language: lua
+                      code: |-
+                        -- code-deps chain (REAL registry) — Lua link. Installs a pinned
+                        -- pure-Lua module from the LIVE LuaRocks on first run, then
+                        -- threads an import-success marker.
+                        local inspect = require("inspect")
+                        assert(type(inspect) == "function" or type(inspect) == "table")
+                        local prev = type(input) == "table" and input or {}
+                        prev.lua = true
+                        print("lua: inspect loaded")
+                        return prev
+                      packages:
+                        - name: inspect
+                          version: 3.1.3
+                    inputs:
+                      - id: in
+                        name: ""
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: input
+                        dataType: any
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: any
+                        flow: both
+                    position:
+                      x: 1440
+                      y: 40
+                  - id: c0de0dep-1111-4000-8000-000000000003
+                    kind: log
+                    config:
+                      level: info
+                      message:
+                        type: expression
+                        value: code-deps chain (real) result
+                    inputs:
+                      - id: in
+                        name: ""
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 1800
+                      y: 40
+                edges:
+                  - id: c0de0dep-1111-4000-8000-00000000000e
+                    from:
+                      nodeId: c0de0dep-1111-4000-8000-000000000002
+                      portId: result
+                    to:
+                      nodeId: c0de0dep-1111-4000-8000-00000000000a
+                      portId: value
+                    selector: .
+                  - id: c0de0dep-1111-4000-8000-00000000000f
+                    from:
+                      nodeId: c0de0dep-1111-4000-8000-00000000000a
+                      portId: result
+                    to:
+                      nodeId: c0de0dep-1111-4000-8000-00000000000b
+                      portId: value
+                    selector: .
+                  - id: c0de0dep-1111-4000-8000-000000000010
+                    from:
+                      nodeId: c0de0dep-1111-4000-8000-00000000000b
+                      portId: result
+                    to:
+                      nodeId: c0de0dep-1111-4000-8000-00000000000c
+                      portId: value
+                    selector: .
+                  - id: c0de0dep-1111-4000-8000-000000000011
+                    from:
+                      nodeId: c0de0dep-1111-4000-8000-00000000000c
+                      portId: result
+                    to:
+                      nodeId: c0de0dep-1111-4000-8000-00000000000d
+                      portId: value
+                    selector: .
+                  - id: c0de0dep-1111-4000-8000-000000000004
+                    from:
+                      nodeId: c0de0dep-1111-4000-8000-00000000000d
+                      portId: result
+                    to:
+                      nodeId: c0de0dep-1111-4000-8000-000000000003
+                      portId: data
+                    selector: .
+                id: c0de0dep-1111-4000-8000-000000000001
+                name: code-deps-chain-real
                 items: []
               - type: scenario
                 tags: []
