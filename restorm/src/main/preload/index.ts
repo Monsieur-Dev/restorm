@@ -398,6 +398,27 @@ contextBridge.exposeInMainWorld('restorm', {
       ipcRenderer.removeListener('app:save-and-close', handler)
     }
   },
+  git: {
+    /**
+     * Main asks the renderer to flush unsaved edits to disk before an
+     * MCP-driven git stage+commit and awaits the ack. The renderer runs
+     * its normal save-all and calls `notifySaveFlushComplete(token)` with
+     * the same token once that save resolves. Main's side is bounded, so a
+     * renderer that never replies only delays the confirm, never wedges it.
+     */
+    onSaveFlushRequest: (callback: (token: string) => void): (() => void) => {
+      const handler = (_event: Electron.IpcRendererEvent, token: string): void => {
+        callback(token)
+      }
+      ipcRenderer.on('file:save-flush-request', handler)
+      return () => {
+        ipcRenderer.removeListener('file:save-flush-request', handler)
+      }
+    },
+    notifySaveFlushComplete: (token: string): void => {
+      ipcRenderer.send('file:save-flush-complete', token)
+    }
+  },
   request: {
     /** Resolve HTTP request URL with variables and parameters */
     resolveURL: async (input: unknown): Promise<unknown> => {

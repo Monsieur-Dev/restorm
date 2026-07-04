@@ -1229,6 +1229,40 @@ const App: React.FC = () => {
     })
   }, [pendingAutoSave, handleMenuSaveAll])
 
+  // The MCP git commit+push route (`git_confirm_push`) asks main to flush
+  // unsaved edits to disk before it stages the on-disk file, and awaits an
+  // ack. Reuse the SAME deferred save-all the autosave trigger uses so a
+  // concurrent `mcp:tree-replace` (async `setRootItems`) can't make the save
+  // close over the pre-replace `rootItems` — then ack every queued token once
+  // that save resolves. Same counter-plus-ref latch as the autosave effect
+  // above (the tokens ride in a ref so the effect never calls setState), and
+  // main's wait is bounded, so a missing ack only delays, never wedges.
+  const flushTokenQueueRef = useRef<string[]>([])
+  const [flushRequestTick, setFlushRequestTick] = useState(0)
+  const lastFlushTickRef = useRef(0)
+  useEffect(() => {
+    const unsub = window.restorm?.git.onSaveFlushRequest((token) => {
+      flushTokenQueueRef.current.push(token)
+      setFlushRequestTick((c) => c + 1)
+    })
+    return () => { unsub?.() }
+  }, [])
+  useEffect(() => {
+    if (flushRequestTick === 0) return
+    if (lastFlushTickRef.current === flushRequestTick) return
+    lastFlushTickRef.current = flushRequestTick
+    const tokens = flushTokenQueueRef.current
+    flushTokenQueueRef.current = []
+    if (tokens.length === 0) return
+    void handleMenuSaveAll()
+      .catch((err: unknown) => {
+        logger.error('[App] git flush-save failed', { error: String(err) })
+      })
+      .finally(() => {
+        for (const token of tokens) window.restorm?.git.notifySaveFlushComplete(token)
+      })
+  }, [flushRequestTick, handleMenuSaveAll])
+
   // After an import, persist the fresh tree to disk so the registry's
   // initial hydration reference matches what's on disk. Without this,
   // the imported content stays dirty until the user explicitly saves,

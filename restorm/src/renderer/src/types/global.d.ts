@@ -150,6 +150,10 @@ declare global {
       }
       forceClose: () => Promise<void>
       onSaveAndClose: (callback: () => void) => (() => void)
+      git: {
+        onSaveFlushRequest: (callback: (token: string) => void) => (() => void)
+        notifySaveFlushComplete: (token: string) => void
+      }
       request: {
         resolveURL: (input: unknown) => Promise<unknown>
       }

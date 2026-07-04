@@ -39,8 +39,30 @@ const commitSpy = vi.fn(() => gitState.commitResult)
 const pushSpy = vi.fn(() => gitState.pushResult)
 const writeResolvedConflictSpy = vi.fn()
 
+// Configurable fake windows + an `ipcMain` stub so the save-flush round-trip
+// (`git_confirm_push` asks the renderer to persist unsaved edits and awaits an
+// ack before staging) is drivable from a test. Empty `windowsState` (the
+// default) makes the flush a no-op that resolves immediately, so every other
+// test behaves as if there is no renderer to wait on.
+interface FakeWindow { isDestroyed: () => boolean; webContents: { send: (channel: string, ...args: unknown[]) => void } }
+const windowsState: FakeWindow[] = []
+const ipcMainListeners = new Map<string, Set<(...args: unknown[]) => void>>()
+function emitIpcMain(channel: string, ...args: unknown[]): void {
+  for (const listener of [...(ipcMainListeners.get(channel) ?? [])]) listener({}, ...args)
+}
+
 vi.mock('electron', () => ({
-  BrowserWindow: { getAllWindows: () => [] }
+  BrowserWindow: { getAllWindows: () => windowsState },
+  ipcMain: {
+    on: (channel: string, listener: (...args: unknown[]) => void): void => {
+      const set = ipcMainListeners.get(channel) ?? new Set()
+      set.add(listener)
+      ipcMainListeners.set(channel, set)
+    },
+    removeListener: (channel: string, listener: (...args: unknown[]) => void): void => {
+      ipcMainListeners.get(channel)?.delete(listener)
+    }
+  }
 }))
 
 vi.mock('electron-core-ui', () => ({
@@ -110,6 +132,8 @@ describe('git MCP tools', () => {
     commitSpy.mockClear()
     pushSpy.mockClear()
     writeResolvedConflictSpy.mockClear()
+    windowsState.length = 0
+    ipcMainListeners.clear()
   })
 
   describe('git_commit_push', () => {
@@ -218,6 +242,49 @@ describe('git MCP tools', () => {
       expect(result.isError).toBe(true)
       expect(result.content[0]?.text).toContain('network down')
       expect(result.content[0]?.text).toContain('sha123')
+    })
+
+    it('flushes the renderer save to disk and awaits the ack BEFORE staging', async () => {
+      const order: string[] = []
+      // A window that, on the flush request, immediately acks with the same
+      // token — standing in for the renderer running its save-all then
+      // signalling completion.
+      windowsState.push({
+        isDestroyed: () => false,
+        webContents: {
+          send: (channel: string, token: string) => {
+            if (channel === 'file:save-flush-request') {
+              order.push('flush-request')
+              emitIpcMain('file:save-flush-complete', token)
+            }
+          }
+        }
+      })
+      stageSpy.mockImplementationOnce(() => { order.push('stage') })
+      const token = await review()
+      await mcp.invoke('git_confirm_push', { reviewToken: token })
+      expect(order).toEqual(['flush-request', 'stage'])
+      expect(stageSpy).toHaveBeenCalledWith('/proj', ['api.restorm'])
+    })
+
+    it('proceeds after a bounded wait when the renderer never acks the flush', async () => {
+      // A window that receives the flush request but never acks — the commit
+      // must still land once the bounded timeout elapses, never hang.
+      windowsState.push({
+        isDestroyed: () => false,
+        webContents: { send: () => { /* swallow: no ack */ } }
+      })
+      const token = await review()
+      vi.useFakeTimers()
+      try {
+        const confirmPromise = mcp.invoke('git_confirm_push', { reviewToken: token })
+        await vi.advanceTimersByTimeAsync(3000)
+        const result = await confirmPromise
+        expect(parse(result)).toEqual({ committed: true, commit: 'sha123', pushed: true })
+        expect(stageSpy).toHaveBeenCalledWith('/proj', ['api.restorm'])
+      } finally {
+        vi.useRealTimers()
+      }
     })
   })
 

@@ -17,15 +17,19 @@
  * `git_commit_push`'s diff "after" side is `collectionStore.getCollections()`
  * (main's in-memory mirror) — the SAME choice `usePushModal.ts` makes with
  * the renderer's live `rootItems` (not a disk read): both sides accept
- * that the diff previews the in-memory model, and rely on autosave having
- * flushed to disk by commit time (nudged, not awaited, via
- * `broadcastSaveTrigger` — save runs in the renderer; see `project.ts`'s
- * `save_project` for the same fire-and-forget characteristic).
+ * that the diff previews the in-memory model. Before staging,
+ * `git_confirm_push` asks the renderer to flush unsaved edits to disk and
+ * AWAITS a bounded completion ack (`flushRendererSaveAndAwait`) so a confirm
+ * landing microseconds after an edit can't stage a stale on-disk file that
+ * lags the reviewed diff. (`project.ts`'s `save_project` still nudges
+ * fire-and-forget; only the stage-then-commit path needs the disk to be
+ * current first.)
  */
 
 import { z } from 'zod'
+import { randomUUID } from 'node:crypto'
 import { parse as yamlParse, stringify as yamlStringify } from 'yaml'
-import { BrowserWindow } from 'electron'
+import { BrowserWindow, ipcMain, type IpcMainEvent } from 'electron'
 import {
   McpService,
   getGitService,
@@ -61,10 +65,36 @@ function errorReply(message: string): { content: { type: 'text'; text: string }[
   return { content: [{ type: 'text', text: message }], isError: true }
 }
 
-function broadcastSaveTrigger(): void {
-  for (const win of BrowserWindow.getAllWindows()) {
-    if (!win.isDestroyed()) win.webContents.send('file:autosave-trigger')
-  }
+/**
+ * Ask every open window to flush its unsaved in-memory edits to disk and
+ * await a real completion ack before returning. The git primitives stage
+ * whatever is on disk, so a confirm landing right after an edit must wait
+ * for that edit to reach disk first — otherwise it stages a stale file.
+ * Each window runs its normal save-all and replies with the token it was
+ * handed. Bounded: if no window acks within `timeoutMs` (nothing was
+ * dirty, or a renderer that can't reply), this resolves anyway so a commit
+ * can never hang on it.
+ */
+function flushRendererSaveAndAwait(timeoutMs = 3000): Promise<void> {
+  const windows = BrowserWindow.getAllWindows().filter((win) => !win.isDestroyed())
+  if (windows.length === 0) return Promise.resolve()
+  const token = randomUUID()
+  return new Promise<void>((resolve) => {
+    let settled = false
+    const finish = (): void => {
+      if (settled) return
+      settled = true
+      ipcMain.removeListener('file:save-flush-complete', onAck)
+      clearTimeout(timer)
+      resolve()
+    }
+    const onAck = (_event: IpcMainEvent, ackToken: unknown): void => {
+      if (ackToken === token) finish()
+    }
+    ipcMain.on('file:save-flush-complete', onAck)
+    const timer = setTimeout(finish, timeoutMs)
+    for (const win of windows) win.webContents.send('file:save-flush-request', token)
+  })
 }
 
 /** The `git` group's storage key for the commit-message language setting
@@ -210,7 +240,7 @@ export function registerGitTools(mcp: McpService): void {
       const body = typeof argRecord['body'] === 'string' ? argRecord['body'] : pending.body
       const message = body ? `${title}\n\n${body}` : title
 
-      broadcastSaveTrigger()
+      await flushRendererSaveAndAwait()
       await getGitService().stage(pending.gitFolder, [pending.relativePath])
       const commitResult = await getGitService().commit(pending.gitFolder, message)
       if (!commitResult.success) {
