@@ -375,7 +375,7 @@
       "switchTooltip": "切換環境"
     },
     "body": {
-      "fileLabel": "檔案或 URL：",
+      "fileLabel": "檔案：",
       "browse": "瀏覽..."
     },
     "tabs": {

@@ -376,7 +376,7 @@
       "switchTooltip": "Omgeving wisselen"
     },
     "body": {
-      "fileLabel": "Bestand of URL:",
+      "fileLabel": "Bestand:",
       "browse": "Bladeren..."
     },
     "tabs": {

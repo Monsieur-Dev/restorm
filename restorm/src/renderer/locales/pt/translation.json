@@ -376,7 +376,7 @@
       "switchTooltip": "Alternar ambiente"
     },
     "body": {
-      "fileLabel": "Ficheiro ou URL:",
+      "fileLabel": "Ficheiro:",
       "browse": "Procurar..."
     },
     "tabs": {

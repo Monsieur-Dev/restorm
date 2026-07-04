@@ -378,7 +378,7 @@
       "switchTooltip": "Змінити середовище"
     },
     "body": {
-      "fileLabel": "Файл або URL:",
+      "fileLabel": "Файл:",
       "browse": "Огляд..."
     },
     "tabs": {

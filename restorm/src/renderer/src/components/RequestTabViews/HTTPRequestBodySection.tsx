@@ -10,6 +10,7 @@ import {
 import { RestormKeyValueTable, type KeyValueTableHandle } from '../RestormKeyValueTable'
 import type { HTTPRequest, AuthenticationRequest, KeyValue } from '../../../../shared/types/collections'
 import type { TranslatedHelperDefinition } from '../../utils/handlebarsHelpersDefinitions'
+import { resolveFilePickerPath } from '../../utils/filePicker'
 
 export type BodyMode = 'text' | 'form-data' | 'x-www-form-urlencoded' | 'file'
 
@@ -19,6 +20,7 @@ const editorContainerStyle: CSSProperties = { height: '100%', border: '1px solid
 const fileRowStyle: CSSProperties = { display: 'flex', alignItems: 'center', gap: 8 }
 const fileLabelStyle: CSSProperties = { flexShrink: 0, fontSize: 12 }
 const fileInputWrapperStyle: CSSProperties = { flex: 1, minWidth: 0 }
+const hiddenFilePickerStyle: CSSProperties = { display: 'none' }
 const BODY_MODES: BodyMode[] = ['text', 'form-data', 'x-www-form-urlencoded', 'file']
 
 export interface HTTPRequestBodySectionProps {
@@ -99,10 +101,17 @@ export const HTTPRequestBodySection: React.FC<HTTPRequestBodySectionProps> = ({
   helpers
 }) => {
   const { t } = useTranslation()
+  const filePickerRef = useRef<HTMLInputElement | null>(null)
 
   const handleSelect = useCallback((index: number) => {
     onBodyModeChange(BODY_MODES[index] ?? 'text')
   }, [onBodyModeChange])
+
+  const handleFilePicked = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    event.target.value = ''
+    if (file) onBodyFilePathChange(resolveFilePickerPath(file))
+  }, [onBodyFilePathChange])
 
   const radioItems = useMemo(() => ({
     items: BODY_MODES.map((mode) => ({ text: mode, isActive: bodyMode === mode }))
@@ -143,9 +152,20 @@ export const HTTPRequestBodySection: React.FC<HTTPRequestBodySectionProps> = ({
             <div style={fileInputWrapperStyle}>
               <InputBox options={{ placeholder: '', type: 'text' }} value={bodyFilePath} onChange={(value: string) => { onBodyFilePathChange(value) }} data-testid="http-request-body-file-input" />
             </div>
-            <Button options={{ ariaLabel: t('requestTab.body.browse'), title: t('requestTab.body.browse') }} data-testid="http-request-body-browse-button">
+            <Button
+              options={{ ariaLabel: t('requestTab.body.browse'), title: t('requestTab.body.browse') }}
+              onClick={() => { filePickerRef.current?.click() }}
+              data-testid="http-request-body-browse-button"
+            >
               {t('requestTab.body.browse')}
             </Button>
+            <input
+              ref={filePickerRef}
+              type="file"
+              style={hiddenFilePickerStyle}
+              onChange={handleFilePicked}
+              data-testid="http-request-body-file-picker"
+            />
           </div>
         )}
       </div>

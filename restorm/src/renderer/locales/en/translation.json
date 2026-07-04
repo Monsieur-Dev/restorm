@@ -376,7 +376,7 @@
       "switchTooltip": "Switch environment"
     },
     "body": {
-      "fileLabel": "File or URL:",
+      "fileLabel": "File:",
       "browse": "Browse..."
     },
     "tabs": {

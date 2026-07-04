@@ -378,7 +378,7 @@
       "switchTooltip": "Przełącz środowisko"
     },
     "body": {
-      "fileLabel": "Plik lub URL:",
+      "fileLabel": "Plik:",
       "browse": "Przeglądaj..."
     },
     "tabs": {

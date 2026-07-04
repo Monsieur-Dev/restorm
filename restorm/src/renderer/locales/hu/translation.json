@@ -376,7 +376,7 @@
       "switchTooltip": "Környezet váltása"
     },
     "body": {
-      "fileLabel": "Fájl vagy URL:",
+      "fileLabel": "Fájl:",
       "browse": "Tallózás..."
     },
     "tabs": {

@@ -376,7 +376,7 @@
       "switchTooltip": "Εναλλαγή περιβάλλοντος"
     },
     "body": {
-      "fileLabel": "Αρχείο ή URL:",
+      "fileLabel": "Αρχείο:",
       "browse": "Περιήγηση..."
     },
     "tabs": {

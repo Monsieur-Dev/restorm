@@ -376,7 +376,7 @@
       "switchTooltip": "Vaihda ympäristöä"
     },
     "body": {
-      "fileLabel": "Tiedosto tai URL:",
+      "fileLabel": "Tiedosto:",
       "browse": "Selaa..."
     },
     "tabs": {

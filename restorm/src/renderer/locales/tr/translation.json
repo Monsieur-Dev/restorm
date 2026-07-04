@@ -376,7 +376,7 @@
       "switchTooltip": "Ortamı değiştir"
     },
     "body": {
-      "fileLabel": "Dosya veya URL:",
+      "fileLabel": "Dosya:",
       "browse": "Gözat..."
     },
     "tabs": {

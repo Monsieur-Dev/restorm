@@ -26,7 +26,7 @@ server; — = pure UI/in-process.
 
 | Suite | Scen | Covers | Deps |
 |---|--:|---|---|
-| http-execution | 26 | HTTP/REST execution end-to-end (methods, redirects, history, errors) | 🏠 |
+| http-execution | 27 | HTTP/REST execution end-to-end (methods, redirects, history, errors, file body) | 🏠 |
 | graphql-execution | 15 | GraphQL execution end-to-end | 🏠 |
 | graphql-operation-name | 3 | operationName / multi-operation selection | 🏠 |
 | grpc-execution | 11 | gRPC unary + streaming execution | 🐳 grpcbin |
