@@ -24,6 +24,7 @@ import {
 import { DocumentEvents, type RequestHistoryEventPayload } from '../../services/DocumentEvents'
 import { RestormVariableInputBox } from '../RestormVariableInputBox'
 import { RestormKeyValueTable, type KeyValueTableHandle } from '../RestormKeyValueTable'
+import { useEnvVariables } from '../../hooks/useEnvVariables'
 import type { TrpcRequest, KeyValue, ResponseHistoryDetail } from '../../../../shared/types/collections'
 import { useEnvironmentContext } from '../../contexts/useEnvironmentContext'
 import type { TrpcExecutionResult } from '../../types/global.d'
@@ -421,6 +422,10 @@ export const TrpcRequestTabView: React.FC<TrpcRequestTabViewProps> = ({
   // Stable empty array for components that get variables via their own variableId
   const emptyVariables = useMemo<VariableDefinition[]>(() => [], [])
 
+  // Environment variables for scalar {{...}} fields (URL, procedure, ...) so
+  // their autocomplete offers env vars alongside the helper functions.
+  const envVariables = useEnvVariables(request.id)
+
   // Request content: SplitView with Input (JSON, Monaco) + Headers
   const requestContent = (
     <SplitView
@@ -489,7 +494,7 @@ export const TrpcRequestTabView: React.FC<TrpcRequestTabViewProps> = ({
           <RestormVariableInputBox
             value={url}
             onChange={setUrl}
-            variables={emptyVariables}
+            variables={envVariables}
             helpers={handlebarsHelpers}
             placeholder={t('trpc.urlPlaceholder')}
             data-testid="trpc-url-input"
@@ -500,7 +505,7 @@ export const TrpcRequestTabView: React.FC<TrpcRequestTabViewProps> = ({
         <RestormVariableInputBox
           value={procedure}
           onChange={setProcedure}
-          variables={emptyVariables}
+          variables={envVariables}
           helpers={handlebarsHelpers}
           placeholder={t('trpc.procedurePlaceholder')}
           data-testid="trpc-request-procedure-input"

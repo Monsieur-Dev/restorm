@@ -22,6 +22,7 @@ import {
 } from 'electron-core-ui/renderer'
 import { DocumentEvents, type RequestHistoryEventPayload } from '../../services/DocumentEvents'
 import { RestormVariableInputBox } from '../RestormVariableInputBox'
+import { useEnvVariables } from '../../hooks/useEnvVariables'
 import { RestormKeyValueTable, type KeyValueTableHandle } from '../RestormKeyValueTable'
 import type { GraphQLRequest, GraphQLResponse, KeyValue, ResponseHistoryDetail } from '../../../../shared/types/collections'
 import { useEnvironmentContext } from '../../contexts/useEnvironmentContext'
@@ -454,6 +455,9 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
 
   // Stable empty array for components that get variables via their own variableId
   const emptyVariables = useMemo<VariableDefinition[]>(() => [], [])
+  // Environment variables for scalar {{...}} fields so their autocomplete
+  // offers env vars alongside the helper functions.
+  const envVariables = useEnvVariables(request.id)
 
   // Callback for headers changes - notify both reactive object and ContextService
   const handleHeadersChange = useCallback((rows: KeyValue[]): void => {
@@ -881,7 +885,7 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
               <RestormVariableInputBox
                 value={url}
                 onChange={setUrl}
-                variables={emptyVariables}
+                variables={envVariables}
                 helpers={handlebarsHelpers}
                 placeholder={t('graphql.urlPlaceholder')}
                 data-testid="graphql-url-input"

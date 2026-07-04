@@ -19,6 +19,7 @@ import { Button, InputBox } from 'electron-core-ui/renderer'
 import type { AuthenticationRequest, KeyValue } from '../../../../shared/types/collections'
 import { RestormKeyValueTable, type KeyValueTableHandle } from '../RestormKeyValueTable'
 import { RestormVariableInputBox } from '../RestormVariableInputBox'
+import { useEnvVariables } from '../../hooks/useEnvVariables'
 import { useHandlebarsHelpers } from '../../hooks/useHandlebarsHelpers'
 import { useTransportReplaced } from '../../hooks/useTransportReplaced'
 import { updateReactiveProperty } from './requestTabViewUtils'
@@ -67,6 +68,9 @@ function formatCodes(codes: readonly number[]): string {
 export const AuthenticationConfigurationTab: React.FC<AuthenticationConfigurationTabProps> = ({ request }) => {
   const { t } = useTranslation()
   const handlebarsHelpers = useHandlebarsHelpers()
+  // Environment variables for the scalar {{...}} expiration field so its
+  // autocomplete offers env vars alongside the helper functions.
+  const envVariables = useEnvVariables(request.id)
   const producedHeadersRef = useRef<KeyValueTableHandle | null>(null)
 
   // Remount the produced-headers table on a quick-config load (or MCP
@@ -143,7 +147,7 @@ export const AuthenticationConfigurationTab: React.FC<AuthenticationConfiguratio
           <RestormVariableInputBox
             value={request.expirationExpression ?? ''}
             onChange={handleExpirationChange}
-            variables={[]}
+            variables={envVariables}
             helpers={handlebarsHelpers}
             placeholder="{{expires_in}}"
             data-testid="auth-request-expiration"

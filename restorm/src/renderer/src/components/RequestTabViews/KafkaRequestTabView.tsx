@@ -23,6 +23,7 @@ import {
 } from 'electron-core-ui/renderer'
 import { DocumentEvents, type RequestHistoryEventPayload } from '../../services/DocumentEvents'
 import { RestormVariableInputBox } from '../RestormVariableInputBox'
+import { useEnvVariables } from '../../hooks/useEnvVariables'
 import { RestormKeyValueTable, type KeyValueTableHandle } from '../RestormKeyValueTable'
 import type {
   KafkaRequest,
@@ -199,6 +200,9 @@ export const KafkaRequestTabView: React.FC<KafkaRequestTabViewProps> = ({ reques
   const [transportEpoch, setTransportEpoch] = useState(0)
   const headersRef = useRef<KeyValueTableHandle | null>(null)
   const emptyVariables = useMemo<VariableDefinition[]>(() => [], [])
+  // Environment variables for scalar {{...}} fields so their autocomplete
+  // offers env vars alongside the helper functions.
+  const envVariables = useEnvVariables(request.id)
 
   const handleRequestReset = useCallback(() => {
     setUrlState(request.url)
@@ -426,10 +430,10 @@ export const KafkaRequestTabView: React.FC<KafkaRequestTabViewProps> = ({ reques
       {saslMechanism !== 'none' && (
         <>
           <Field label={t('kafka.auth.username')}>
-            <RestormVariableInputBox value={saslUsername} onChange={setSaslUsername} variables={emptyVariables} helpers={handlebarsHelpers} placeholder={t('kafka.auth.username')} data-testid="kafka-sasl-username-input" />
+            <RestormVariableInputBox value={saslUsername} onChange={setSaslUsername} variables={envVariables} helpers={handlebarsHelpers} placeholder={t('kafka.auth.username')} data-testid="kafka-sasl-username-input" />
           </Field>
           <Field label={t('kafka.auth.password')}>
-            <RestormVariableInputBox value={saslPassword} onChange={setSaslPassword} variables={emptyVariables} helpers={handlebarsHelpers} placeholder={t('kafka.auth.password')} data-testid="kafka-sasl-password-input" />
+            <RestormVariableInputBox value={saslPassword} onChange={setSaslPassword} variables={envVariables} helpers={handlebarsHelpers} placeholder={t('kafka.auth.password')} data-testid="kafka-sasl-password-input" />
           </Field>
         </>
       )}
@@ -444,7 +448,7 @@ export const KafkaRequestTabView: React.FC<KafkaRequestTabViewProps> = ({ reques
           <div style={{ display: 'flex', gap: 8 }}>
             <div style={{ flex: 1 }}>
               <Field label={t('kafka.key')}>
-                <RestormVariableInputBox value={key} onChange={setKey} variables={emptyVariables} helpers={handlebarsHelpers} placeholder={t('kafka.keyPlaceholder')} data-testid="kafka-key-input" />
+                <RestormVariableInputBox value={key} onChange={setKey} variables={envVariables} helpers={handlebarsHelpers} placeholder={t('kafka.keyPlaceholder')} data-testid="kafka-key-input" />
               </Field>
             </div>
             <div style={{ width: 120 }}>
@@ -499,7 +503,7 @@ export const KafkaRequestTabView: React.FC<KafkaRequestTabViewProps> = ({ reques
     <ScrollableElement options={{ vertical: 'auto', horizontal: 'hidden' }} style={{ width: '100%', height: '100%' }}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8, padding: 4 }} data-testid="kafka-consume-fields">
         <Field label={t('kafka.groupId')}>
-          <RestormVariableInputBox value={groupId} onChange={setGroupId} variables={emptyVariables} helpers={handlebarsHelpers} placeholder={t('kafka.groupIdPlaceholder')} data-testid="kafka-groupid-input" />
+          <RestormVariableInputBox value={groupId} onChange={setGroupId} variables={envVariables} helpers={handlebarsHelpers} placeholder={t('kafka.groupIdPlaceholder')} data-testid="kafka-groupid-input" />
         </Field>
         <Field label={t('kafka.fromOffsetLabel')} width={110}>
           <SelectBox
@@ -556,7 +560,7 @@ export const KafkaRequestTabView: React.FC<KafkaRequestTabViewProps> = ({ reques
       <div style={{ display: 'flex', gap: 8 }}>
         <div style={{ flex: 1 }}>
           <Field label={t('kafka.topic')}>
-            <RestormVariableInputBox value={topic} onChange={setTopic} variables={emptyVariables} helpers={handlebarsHelpers} placeholder={t('kafka.topicPlaceholder')} data-testid="kafka-topic-input" />
+            <RestormVariableInputBox value={topic} onChange={setTopic} variables={envVariables} helpers={handlebarsHelpers} placeholder={t('kafka.topicPlaceholder')} data-testid="kafka-topic-input" />
           </Field>
         </div>
       </div>
@@ -724,14 +728,14 @@ export const KafkaRequestTabView: React.FC<KafkaRequestTabViewProps> = ({ reques
       <HeaderHoverTooltip label={resolvedUrl || url} suppressed={!(resolvedUrl || url)} className="url-container-stretch">
         <div style={{ flex: 1, minWidth: 0 }} data-testid="url-container" data-url-resolved={resolvedUrl ? 'true' : 'false'} data-resolved-url={resolvedUrl || url}>
           <RestormVariableInputBox
-            value={url} onChange={setUrl} variables={emptyVariables} helpers={handlebarsHelpers}
+            value={url} onChange={setUrl} variables={envVariables} helpers={handlebarsHelpers}
             placeholder={t('kafka.brokersPlaceholder')} data-testid="kafka-url-input"
           />
         </div>
       </HeaderHoverTooltip>
       <div style={{ width: 140 }}>
         <RestormVariableInputBox
-          value={clientId} onChange={setClientId} variables={emptyVariables} helpers={handlebarsHelpers}
+          value={clientId} onChange={setClientId} variables={envVariables} helpers={handlebarsHelpers}
           placeholder={t('kafka.clientIdPlaceholder')} data-testid="kafka-clientid-input"
         />
       </div>

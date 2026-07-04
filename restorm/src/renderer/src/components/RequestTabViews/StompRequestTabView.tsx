@@ -21,6 +21,7 @@ import {
 } from 'electron-core-ui/renderer'
 import { DocumentEvents, type RequestHistoryEventPayload } from '../../services/DocumentEvents'
 import { RestormVariableInputBox } from '../RestormVariableInputBox'
+import { useEnvVariables } from '../../hooks/useEnvVariables'
 import { RestormKeyValueTable, type KeyValueTableHandle } from '../RestormKeyValueTable'
 import type { StompRequest, StompResponse, StompMessage, StompSubscription, StompAckMode, KeyValue, ResponseHistoryDetail } from '../../../../shared/types/collections'
 import { useEnvironmentContext } from '../../contexts/useEnvironmentContext'
@@ -237,6 +238,9 @@ export const StompRequestTabView: React.FC<StompRequestTabViewProps> = ({
   }, [request])
 
   const emptyVariables = useMemo<VariableDefinition[]>(() => [], [])
+  // Environment variables for scalar {{...}} fields so their autocomplete
+  // offers env vars alongside the helper functions.
+  const envVariables = useEnvVariables(request.id)
 
   const handleConnectHeadersChange = useCallback((rows: KeyValue[]): void => {
     updateReactiveProperty(request, 'connectHeaders', rows)
@@ -370,7 +374,7 @@ export const StompRequestTabView: React.FC<StompRequestTabViewProps> = ({
                   <RestormVariableInputBox
                     value={sub.destination}
                     onChange={(v) => { updateSubscription(i, { destination: v }) }}
-                    variables={emptyVariables}
+                    variables={envVariables}
                     helpers={handlebarsHelpers}
                     placeholder="/topic/example"
                     data-testid={`stomp-subscription-destination-${i}`}
@@ -413,7 +417,7 @@ export const StompRequestTabView: React.FC<StompRequestTabViewProps> = ({
               <RestormVariableInputBox
                 value={sendDestination}
                 onChange={setSendDestination}
-                variables={emptyVariables}
+                variables={envVariables}
                 helpers={handlebarsHelpers}
                 placeholder="/topic/example"
                 data-testid="stomp-send-destination-input"
@@ -585,7 +589,7 @@ export const StompRequestTabView: React.FC<StompRequestTabViewProps> = ({
           <RestormVariableInputBox
             value={url}
             onChange={setUrl}
-            variables={emptyVariables}
+            variables={envVariables}
             helpers={handlebarsHelpers}
             placeholder="ws://localhost:61614"
             data-testid="stomp-url-input"
