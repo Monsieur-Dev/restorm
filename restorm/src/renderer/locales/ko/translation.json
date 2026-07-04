@@ -2322,5 +2322,8 @@
     "sendDestination": "대상",
     "ack": "ACK",
     "nack": "NACK"
+  },
+  "server": {
+    "configLockedWhileRunning": "서버 실행 중에는 설정이 잠깁니다"
   }
 }

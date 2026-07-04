@@ -16,6 +16,7 @@ import {
 import type { GrpcMockMethod, GrpcRequest, GrpcCallType } from '../../../../shared/types/collections'
 import { BaseRequestTabView } from './BaseRequestTabView'
 import { BeamWrap } from '../common/BeamWrap'
+import { ServerConfigLockedHint } from '../common/ServerConfigLockedHint'
 import { updateReactiveProperty } from './requestTabViewUtils'
 import { useIsGrpcServerListening } from '../../services/grpcServerListeningStore'
 
@@ -144,127 +145,138 @@ export const GrpcServerTabView: React.FC<GrpcServerTabViewProps> = ({ request })
   const callTypeIndex = Math.max(0, CALL_TYPE_OPTIONS.findIndex((o) => o.value === selectedMethod?.callType))
 
   const requestContent = (
-    <SplitView
-      orientation="vertical"
-      style={{ width: '100%', height: '100%' }}
-      data-testid="grpc-server-content-splitview"
-    >
-      <Pane title={t('grpc.server.proto', 'Proto')} initialSize={0.45} minSize={120} data-testid="grpc-server-proto-pane">
-        <div style={{ height: '100%', border: '1px solid var(--panel-border)', borderRadius: 3 }}>
-          <CodeEditor
-            height="100%"
-            language="protobuf"
-            value={protoContent}
-            onChange={(v) => { setProtoContent(v ?? '') }}
-            options={{ minimap: { enabled: false }, wordWrap: 'on', automaticLayout: true }}
-            data-testid="grpc-server-proto-editor"
-          />
-        </div>
-      </Pane>
-      <Pane
-        title={t('grpc.server.methods', 'Mock methods')}
-        initialSize={0.55}
-        minSize={150}
-        data-testid="grpc-server-methods-pane"
-        headerActions={() => (
-          <Button
-            secondary
-            small
-            icon="add"
-            options={{ ariaLabel: t('grpc.server.addMethod', 'Add method') }}
-            onClick={addMethod}
-            data-testid="grpc-server-add-method-button"
-          />
-        )}
+    <div style={{ display: 'flex', flexDirection: 'column', width: '100%', height: '100%' }}>
+      {isListening && <ServerConfigLockedHint data-testid="grpc-server-locked-hint" />}
+      <SplitView
+        orientation="vertical"
+        style={{ width: '100%', flex: 1, minHeight: 0 }}
+        data-testid="grpc-server-content-splitview"
       >
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8, padding: 8 }} data-testid="grpc-server-method-editor">
-          <ControlGroup>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <SelectBox
-                id={`grpc-server-method-select-${request.id}`}
-                className=""
-                options={methodOptions.length > 0 ? methodOptions : [{ text: '0', label: t('grpc.server.noMethods', 'No methods yet') }]}
-                selected={selectedMethodIndex}
-                onDidSelect={(d: ISelectData) => { setSelectedMethodIndex(d.index) }}
-                data-testid="grpc-server-method-select"
-              />
-            </div>
-            {mockMethods.length > 0 && (
-              <Button
-                secondary
-                small
-                icon="trash"
-                options={{ ariaLabel: t('grpc.server.removeMethod', 'Remove method') }}
-                onClick={removeSelectedMethod}
-                data-testid="grpc-server-remove-method-button"
-              />
-            )}
-          </ControlGroup>
-          {selectedMethod && (
-            <>
-              <ControlGroup>
-                <InputBox
-                  value={selectedMethod.service}
-                  onChange={(v: string) => { updateSelectedMethod({ service: v }) }}
-                  options={{ placeholder: t('grpc.server.servicePlaceholder', 'package.Service') }}
-                  data-testid="grpc-server-method-service-input"
-                />
-                <InputBox
-                  value={selectedMethod.method}
-                  onChange={(v: string) => { updateSelectedMethod({ method: v }) }}
-                  options={{ placeholder: t('grpc.server.methodPlaceholder', 'Method') }}
-                  data-testid="grpc-server-method-name-input"
-                />
-                <div style={{ minWidth: 150 }}>
-                  <SelectBox
-                    id={`grpc-server-call-type-${request.id}`}
-                    className=""
-                    options={CALL_TYPE_OPTIONS.map((o) => ({ text: o.value, label: t(o.labelKey, o.fallback) }))}
-                    selected={callTypeIndex}
-                    onDidSelect={(d: ISelectData) => {
-                      const picked = CALL_TYPE_OPTIONS[d.index]
-                      if (picked) updateSelectedMethod({ callType: picked.value })
-                    }}
-                    data-testid="grpc-server-call-type-select"
-                  />
-                </div>
-              </ControlGroup>
-              <ControlGroup>
-                <span style={serverHostLabelStyle}>{t('grpc.server.statusCode', 'Status code')}</span>
-                <div style={{ width: 90 }}>
-                  <InputBox
-                    value={selectedMethod.statusCode === undefined ? '' : String(selectedMethod.statusCode)}
-                    onChange={(v: string) => {
-                      const n = v.trim() === '' ? undefined : Number.parseInt(v.replace(/[^0-9]/g, ''), 10)
-                      updateSelectedMethod({ statusCode: n })
-                    }}
-                    options={{ placeholder: '0', type: 'number' }}
-                    data-testid="grpc-server-status-code-input"
-                  />
-                </div>
-                <InputBox
-                  value={selectedMethod.statusMessage ?? ''}
-                  onChange={(v: string) => { updateSelectedMethod({ statusMessage: v }) }}
-                  options={{ placeholder: t('grpc.server.statusMessagePlaceholder', 'Status message (for a non-OK code)') }}
-                  data-testid="grpc-server-status-message-input"
-                />
-              </ControlGroup>
-              <div style={{ fontSize: 12, opacity: 0.8 }}>{t('grpc.server.responseLabel', 'Response message (JSON)')}</div>
-              <div style={{ height: 160, border: '1px solid var(--panel-border)', borderRadius: 3 }}>
-                <CodeEditor
-                  height="100%"
-                  language="json"
-                  value={selectedMethod.responseMessage}
-                  onChange={(v) => { updateSelectedMethod({ responseMessage: v ?? '{}' }) }}
-                  options={{ minimap: { enabled: false }, wordWrap: 'on', automaticLayout: true }}
-                  data-testid="grpc-server-response-editor"
+        <Pane title={t('grpc.server.proto', 'Proto')} initialSize={0.45} minSize={120} data-testid="grpc-server-proto-pane">
+          <div style={{ height: '100%', border: '1px solid var(--panel-border)', borderRadius: 3 }}>
+            <CodeEditor
+              height="100%"
+              language="protobuf"
+              value={protoContent}
+              onChange={(v) => { setProtoContent(v ?? '') }}
+              options={{ minimap: { enabled: false }, wordWrap: 'on', automaticLayout: true, readOnly: isListening }}
+              data-testid="grpc-server-proto-editor"
+            />
+          </div>
+        </Pane>
+        <Pane
+          title={t('grpc.server.methods', 'Mock methods')}
+          initialSize={0.55}
+          minSize={150}
+          data-testid="grpc-server-methods-pane"
+          headerActions={() => (
+            <Button
+              secondary
+              small
+              icon="add"
+              disabled={isListening}
+              options={{ ariaLabel: t('grpc.server.addMethod', 'Add method') }}
+              onClick={addMethod}
+              data-testid="grpc-server-add-method-button"
+            />
+          )}
+        >
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, padding: 8 }} data-testid="grpc-server-method-editor">
+            <ControlGroup>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <SelectBox
+                  id={`grpc-server-method-select-${request.id}`}
+                  className=""
+                  options={methodOptions.length > 0 ? methodOptions : [{ text: '0', label: t('grpc.server.noMethods', 'No methods yet') }]}
+                  selected={selectedMethodIndex}
+                  onDidSelect={(d: ISelectData) => { setSelectedMethodIndex(d.index) }}
+                  data-testid="grpc-server-method-select"
+                  disabled={isListening}
                 />
               </div>
-            </>
-          )}
-        </div>
-      </Pane>
-    </SplitView>
+              {mockMethods.length > 0 && (
+                <Button
+                  secondary
+                  small
+                  icon="trash"
+                  disabled={isListening}
+                  options={{ ariaLabel: t('grpc.server.removeMethod', 'Remove method') }}
+                  onClick={removeSelectedMethod}
+                  data-testid="grpc-server-remove-method-button"
+                />
+              )}
+            </ControlGroup>
+            {selectedMethod && (
+              <>
+                <ControlGroup>
+                  <InputBox
+                    value={selectedMethod.service}
+                    onChange={(v: string) => { updateSelectedMethod({ service: v }) }}
+                    options={{ placeholder: t('grpc.server.servicePlaceholder', 'package.Service') }}
+                    data-testid="grpc-server-method-service-input"
+                    disabled={isListening}
+                  />
+                  <InputBox
+                    value={selectedMethod.method}
+                    onChange={(v: string) => { updateSelectedMethod({ method: v }) }}
+                    options={{ placeholder: t('grpc.server.methodPlaceholder', 'Method') }}
+                    data-testid="grpc-server-method-name-input"
+                    disabled={isListening}
+                  />
+                  <div style={{ minWidth: 150 }}>
+                    <SelectBox
+                      id={`grpc-server-call-type-${request.id}`}
+                      className=""
+                      options={CALL_TYPE_OPTIONS.map((o) => ({ text: o.value, label: t(o.labelKey, o.fallback) }))}
+                      selected={callTypeIndex}
+                      onDidSelect={(d: ISelectData) => {
+                        const picked = CALL_TYPE_OPTIONS[d.index]
+                        if (picked) updateSelectedMethod({ callType: picked.value })
+                      }}
+                      data-testid="grpc-server-call-type-select"
+                      disabled={isListening}
+                    />
+                  </div>
+                </ControlGroup>
+                <ControlGroup>
+                  <span style={serverHostLabelStyle}>{t('grpc.server.statusCode', 'Status code')}</span>
+                  <div style={{ width: 90 }}>
+                    <InputBox
+                      value={selectedMethod.statusCode === undefined ? '' : String(selectedMethod.statusCode)}
+                      onChange={(v: string) => {
+                        const n = v.trim() === '' ? undefined : Number.parseInt(v.replace(/[^0-9]/g, ''), 10)
+                        updateSelectedMethod({ statusCode: n })
+                      }}
+                      options={{ placeholder: '0', type: 'number' }}
+                      data-testid="grpc-server-status-code-input"
+                      disabled={isListening}
+                    />
+                  </div>
+                  <InputBox
+                    value={selectedMethod.statusMessage ?? ''}
+                    onChange={(v: string) => { updateSelectedMethod({ statusMessage: v }) }}
+                    options={{ placeholder: t('grpc.server.statusMessagePlaceholder', 'Status message (for a non-OK code)') }}
+                    data-testid="grpc-server-status-message-input"
+                    disabled={isListening}
+                  />
+                </ControlGroup>
+                <div style={{ fontSize: 12, opacity: 0.8 }}>{t('grpc.server.responseLabel', 'Response message (JSON)')}</div>
+                <div style={{ height: 160, border: '1px solid var(--panel-border)', borderRadius: 3 }}>
+                  <CodeEditor
+                    height="100%"
+                    language="json"
+                    value={selectedMethod.responseMessage}
+                    onChange={(v) => { updateSelectedMethod({ responseMessage: v ?? '{}' }) }}
+                    options={{ minimap: { enabled: false }, wordWrap: 'on', automaticLayout: true, readOnly: isListening }}
+                    data-testid="grpc-server-response-editor"
+                  />
+                </div>
+              </>
+            )}
+          </div>
+        </Pane>
+      </SplitView>
+    </div>
   )
 
   const urlSection = (
@@ -276,6 +288,7 @@ export const GrpcServerTabView: React.FC<GrpcServerTabViewProps> = ({ request })
           onChange={setServerPort}
           options={{ placeholder: '50051' }}
           data-testid="grpc-server-port-input"
+          disabled={isListening}
         />
       </div>
       <div style={{ flex: 1 }} />
@@ -283,6 +296,7 @@ export const GrpcServerTabView: React.FC<GrpcServerTabViewProps> = ({ request })
         checked={reflection}
         onChange={setReflection}
         data-testid="grpc-server-reflection-toggle"
+        disabled={isListening}
       >
         {t('grpc.server.reflection', 'Reflection')}
       </Toggle>

@@ -38,6 +38,9 @@ export interface RestormKeyValueTableProps {
   persistenceId?: string | undefined
   /** Optional test id applied to the table root element. */
   'data-testid'?: string
+  /** Locks the whole table read-only — see the `KeyValueTable` doc for the
+   * exact scope (toggle/delete/reorder disabled, cells forwarded `disabled`). */
+  disabled?: boolean
 }
 
 const RestormKeyValueTableInner = React.forwardRef<KeyValueTableHandle, RestormKeyValueTableProps>((
@@ -47,7 +50,8 @@ const RestormKeyValueTableInner = React.forwardRef<KeyValueTableHandle, RestormK
     initialRows,
     onRowsChange,
     persistenceId,
-    'data-testid': dataTestId
+    'data-testid': dataTestId,
+    disabled = false
   },
   ref
 ) => {
@@ -182,12 +186,13 @@ const RestormKeyValueTableInner = React.forwardRef<KeyValueTableHandle, RestormK
 
   // Simple InputBox renderer for keys (no variable resolution needed for keys)
   const KeyCellRenderer = useCallback<React.FC<CellRendererProps>>(
-    ({ value, onChange }) => (
+    ({ value, onChange, disabled: cellDisabled }) => (
       <InputBox
         value={value}
         onChange={onChange}
         options={{ type: 'text' }}
         {...(dataTestId && { 'data-testid': `${dataTestId}-key-input` })}
+        disabled={cellDisabled ?? false}
       />
     ),
     [dataTestId]
@@ -201,7 +206,7 @@ const RestormKeyValueTableInner = React.forwardRef<KeyValueTableHandle, RestormK
   // forces a full `onRowsChange` rebuild so the new ValueType is persisted
   // even though the visible cell text is unchanged.
   const ValueCellRenderer = useCallback(
-    ({ value, onChange, rowId }: CellRendererProps) => {
+    ({ value, onChange, rowId, disabled: cellDisabled }: CellRendererProps) => {
       const id = rowId
       let existing = id ? valueTypeByRowIdRef.current.get(id) : undefined
 
@@ -236,32 +241,38 @@ const RestormKeyValueTableInner = React.forwardRef<KeyValueTableHandle, RestormK
       const resolved = id ? (valueTypeByRowIdRef.current.get(id) ?? new StringValue(value)) : new StringValue(value)
       const priorSerialized = serializeValueShape(resolved)
 
+      // TypedValueField has no `disabled` prop of its own (it fans out into
+      // per-type widgets — color swatch, secret modal, expression editor,
+      // …) — locking the cell from the outside avoids threading a new prop
+      // through every one of those variants for this one read-only use-case.
       return (
-        <TypedValueField
-          value={resolved}
-          onChange={(next) => {
-            if (id) valueTypeByRowIdRef.current.set(id, next)
-            onChange(next.toString())
-            // The table only emits `onRowsChange` when the cell's display
-            // STRING changes. An edit that keeps the same string but mutates
-            // the underlying ValueType — a type recast (string → secret) OR an
-            // in-place config change that doesn't surface in `toString()` (e.g.
-            // editing a secret's `params.name`, whose `toString()` stays the
-            // resolved/empty value) — would otherwise never persist. Compare
-            // the serialized shapes and force the rebuild on ANY structural
-            // change, not just a kind change.
-            const forceRebuild = onRowsChangeRef.current
-            if (serializeValueShape(next) !== priorSerialized && id && initialRowsRef.current && forceRebuild) {
-              const nextRows = initialRowsRef.current.map((r) => (r.id === id ? { ...r, value: next } : r))
-              forceRebuild(nextRows)
-            }
-          }}
-          variables={variablesRef.current}
-          helpers={helpersRef.current}
-          valueTypeGroups={valueTypeGroupsRef.current}
-          {...(id !== undefined && { expressionVariableId: id })}
-          {...(dataTestId && { dataTestId })}
-        />
+        <div style={cellDisabled ? { opacity: 0.6, pointerEvents: 'none' } : undefined}>
+          <TypedValueField
+            value={resolved}
+            onChange={(next) => {
+              if (id) valueTypeByRowIdRef.current.set(id, next)
+              onChange(next.toString())
+              // The table only emits `onRowsChange` when the cell's display
+              // STRING changes. An edit that keeps the same string but mutates
+              // the underlying ValueType — a type recast (string → secret) OR an
+              // in-place config change that doesn't surface in `toString()` (e.g.
+              // editing a secret's `params.name`, whose `toString()` stays the
+              // resolved/empty value) — would otherwise never persist. Compare
+              // the serialized shapes and force the rebuild on ANY structural
+              // change, not just a kind change.
+              const forceRebuild = onRowsChangeRef.current
+              if (serializeValueShape(next) !== priorSerialized && id && initialRowsRef.current && forceRebuild) {
+                const nextRows = initialRowsRef.current.map((r) => (r.id === id ? { ...r, value: next } : r))
+                forceRebuild(nextRows)
+              }
+            }}
+            variables={variablesRef.current}
+            helpers={helpersRef.current}
+            valueTypeGroups={valueTypeGroupsRef.current}
+            {...(id !== undefined && { expressionVariableId: id })}
+            {...(dataTestId && { dataTestId })}
+          />
+        </div>
       )
     },
     [dataTestId]
@@ -275,6 +286,7 @@ const RestormKeyValueTableInner = React.forwardRef<KeyValueTableHandle, RestormK
       renderKeyCell={KeyCellRenderer}
       renderValueCell={ValueCellRenderer}
       autoToggleEnabledOnEmpty
+      disabled={disabled}
       {...(persistenceId && { persistenceId })}
       {...(dataTestId && { 'data-testid': dataTestId })}
     />

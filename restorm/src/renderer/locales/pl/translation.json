@@ -2325,5 +2325,8 @@
     "sendDestination": "Cel",
     "ack": "ACK",
     "nack": "NACK"
+  },
+  "server": {
+    "configLockedWhileRunning": "Konfiguracja zablokowana podczas działania serwera"
   }
 }

@@ -2322,5 +2322,8 @@
     "sendDestination": "目的地",
     "ack": "ACK",
     "nack": "NACK"
+  },
+  "server": {
+    "configLockedWhileRunning": "伺服器執行時設定已鎖定"
   }
 }

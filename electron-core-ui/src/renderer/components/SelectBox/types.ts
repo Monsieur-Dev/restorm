@@ -119,6 +119,9 @@ export interface SelectBoxProps {
   filterPlaceholder?: string
   /** Optional test id forwarded to the filter row. */
   filterTestId?: string
+  /** When true, the control is locked: greyed out, closed, and inert to
+   * pointer + keyboard input (no dropdown open, no selection change). */
+  disabled?: boolean
 }
 
 // React props interface for SelectBoxList component
@@ -134,6 +137,7 @@ export interface SelectBoxListProps {
   filterThreshold?: number
   filterPlaceholder?: string
   filterTestId?: string
+  disabled?: boolean
 }
 
 // React props interface for SelectBoxNative component
@@ -146,4 +150,5 @@ export interface SelectBoxNativeProps {
   className: string
   id: string
   'data-testid'?: string
+  disabled?: boolean
 }

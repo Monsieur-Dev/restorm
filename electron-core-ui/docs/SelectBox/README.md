@@ -24,6 +24,9 @@ export interface SelectBoxProps {
   filterPlaceholder?: string
   /** Test id forwarded to the filter row (suffix `-input` for the field). */
   filterTestId?: string
+  /** When true, the whole control is locked: greyed out, closed, and inert
+   * to pointer + keyboard input. Default `false`. */
+  disabled?: boolean
 }
 
 // Select option item interface
@@ -96,6 +99,7 @@ export interface ISelectData {
 - **filterThreshold** (`number`) : Item count (inclusive) at or above which a sticky filter input appears at the top of the popup. Default `15`. See [Filtering long lists](#filtering-long-lists).
 - **filterPlaceholder** (`string`) : Localised placeholder for the filter input. Default `Filter…`.
 - **filterTestId** (`string`) : Test id forwarded to the filter row (suffixed with `-input` for the field).
+- **disabled** (`boolean`) : Locks the whole control (as opposed to `ISelectOptionItem.isDisabled`, which locks a single option). The trigger is greyed (matches the `InputBox`/`Toggle` disabled dimming), the dropdown can't be opened, and both pointer and keyboard input are inert — clicking, Enter/Space/arrow-keys all no-op. Default `false`. See [SelectBox with Disabled Control](#selectbox-with-disabled-control).
 
 ## Usage Examples
 
@@ -165,6 +169,19 @@ import { SelectBox } from 'electron-core-ui/renderer'
   ]}
   selected={0}
   onDidSelect={(data) => console.log('Selected:', data.selected)}
+/>
+```
+
+### SelectBox with Disabled Control
+
+Locks the whole control — distinct from `isDisabled` on a single option above. Typical use: a config field that must stay read-only while a resource it configures is active (e.g. a mock server that snapshotted its config on start).
+
+```tsx
+<SelectBox
+  options={[{ text: 'unary' }, { text: 'server-stream' }]}
+  selected={0}
+  onDidSelect={(data) => console.log('Call type:', data.selected)}
+  disabled={isServerListening}
 />
 ```
 
@@ -357,6 +374,7 @@ For reliable E2E tests, prefer forcing the custom dropdown:
 - **`.option-disabled`** : Disabled option styling
 - **`.visible`** : Applied when dropdown is visible
 - **`.synthetic-focus`** : Applied when element has synthetic focus
+- **`.disabled`** : Applied to `.select-box` (both the native `<select>` and the custom-drawn trigger) when the `disabled` prop is set — greyed + `pointer-events: none`
 
 ## Theme Variables
 

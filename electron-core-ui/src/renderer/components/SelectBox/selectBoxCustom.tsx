@@ -28,7 +28,8 @@ const SelectBoxList: React.FC<SelectBoxListProps> = ({
   'data-testid': dataTestId,
   filterThreshold,
   filterPlaceholder,
-  filterTestId
+  filterTestId,
+  disabled = false
 }) => {
   const testId = dataTestId ?? id
 
@@ -99,10 +100,17 @@ const SelectBoxList: React.FC<SelectBoxListProps> = ({
 
   // Show dropdown
   const showDropdown = useCallback((): void => {
-    if (isVisible) return
+    if (isVisible || disabled) return
     setIsVisible(true)
     setInternalFocus(currentSelection)
-  }, [isVisible, currentSelection, setInternalFocus])
+  }, [isVisible, disabled, currentSelection, setInternalFocus])
+
+  // A control disabled while its dropdown is open (e.g. the server it
+  // configures just started listening) must close immediately — it can't
+  // stay open and interactive underneath a greyed-out trigger.
+  useEffect(() => {
+    if (disabled && isVisible) setIsVisible(false)
+  }, [disabled, isVisible])
 
   // Reset the filter every time the popup closes — the user opens
   // a fresh dropdown, not a session-leftover view.
@@ -151,13 +159,14 @@ const SelectBoxList: React.FC<SelectBoxListProps> = ({
   const handleSelectClick = useCallback((event: React.MouseEvent): void => {
     event.preventDefault()
     event.stopPropagation()
-    
+    if (disabled) return
+
     if (isVisible) {
       hideDropdown(true)
     } else {
       showDropdown()
     }
-  }, [isVisible, showDropdown, hideDropdown])
+  }, [isVisible, disabled, showDropdown, hideDropdown])
 
   // Handle mouse down on select element
   const handleSelectMouseDown = useCallback((event: React.MouseEvent): void => {
@@ -167,6 +176,7 @@ const SelectBoxList: React.FC<SelectBoxListProps> = ({
 
   // Handle keyboard navigation
   const handleKeyDown = useCallback((event: React.KeyboardEvent): void => {
+    if (disabled) return
     let showDropDown = false
 
     if (isMacintosh) {
@@ -187,7 +197,7 @@ const SelectBoxList: React.FC<SelectBoxListProps> = ({
       event.preventDefault()
       event.stopPropagation()
     }
-  }, [showDropdown])
+  }, [disabled, showDropdown])
 
   // Handle option click
   const handleOptionClick = useCallback((index: number): void => {
@@ -331,6 +341,7 @@ const SelectBoxList: React.FC<SelectBoxListProps> = ({
     'select-box-dropdown-padding',
     'setting-control-focus-target',
     isVisible ? 'synthetic-focus' : '',
+    disabled ? 'disabled' : '',
     className
   ].filter(Boolean).join(' ')
 
@@ -368,7 +379,8 @@ const SelectBoxList: React.FC<SelectBoxListProps> = ({
         aria-label={selectBoxOptions.ariaLabel}
         aria-description={selectBoxOptions.ariaDescription}
         aria-expanded={isVisible}
-        tabIndex={0}
+        tabIndex={disabled ? -1 : 0}
+        disabled={disabled}
         data-testid={`${testId}-select`}
       >
         {options.map((option, index) => (
@@ -389,11 +401,12 @@ const SelectBoxList: React.FC<SelectBoxListProps> = ({
         onClick={handleSelectClick}
         onMouseDown={handleSelectMouseDown}
         onKeyDown={handleKeyDown}
-        tabIndex={0}
+        tabIndex={disabled ? -1 : 0}
         role="combobox"
         aria-expanded={isVisible}
         aria-haspopup="listbox"
         aria-controls={`${id}-listbox`}
+        aria-disabled={disabled}
         data-testid={`${testId}-trigger`}
       >
         <span className="select-text">

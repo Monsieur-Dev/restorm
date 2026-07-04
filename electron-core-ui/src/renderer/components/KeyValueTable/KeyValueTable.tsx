@@ -49,12 +49,15 @@ export interface CellRendererProps {
   'data-testid'?: string
   /** Runtime ID of the row (if provided in KeyValueTableRow) */
   rowId?: string | undefined
+  /** When true, the cell must render its editor read-only/inert. Forwarded
+   * from the table's own `disabled` prop. */
+  disabled?: boolean | undefined
 }
 
 /**
  * Default cell renderer using InputBox
  */
-const DefaultCellRenderer: React.FC<CellRendererProps> = ({ value, onChange, placeholder, 'data-testid': dataTestId }) => {
+const DefaultCellRenderer: React.FC<CellRendererProps> = ({ value, onChange, placeholder, 'data-testid': dataTestId, disabled }) => {
   const [localValue, setLocalValue] = useState<string>(value)
 
   React.useEffect(() => {
@@ -73,6 +76,7 @@ const DefaultCellRenderer: React.FC<CellRendererProps> = ({ value, onChange, pla
         setLocalValue(newValue)
         onChange(newValue)
       }}
+      disabled={disabled ?? false}
     />
   )
 }
@@ -141,6 +145,14 @@ export interface KeyValueTableProps {
    * send `?name=&drop=` to APIs that 422 on empty parameters.
    */
   autoToggleEnabledOnEmpty?: boolean | undefined
+  /**
+   * Locks the whole table read-only: the per-row enabled-toggle and delete
+   * button are disabled, and `disabled` is forwarded to every cell renderer
+   * (the default `InputBox` renderer honors it; a custom renderer opts in by
+   * reading `CellRendererProps.disabled`). Rows can't be reordered either.
+   * Default `false`.
+   */
+  disabled?: boolean | undefined
 }
 
 export interface KeyValueTableHandle {
@@ -160,6 +172,7 @@ export const KeyValueTable = React.memo(React.forwardRef<KeyValueTableHandle, Ke
     renderResolvedValueCell: ResolvedValueCellRenderer = DefaultCellRenderer,
     persistenceId,
     autoToggleEnabledOnEmpty = false,
+    disabled = false,
     'data-testid': dataTestId
   },
   ref
@@ -236,15 +249,17 @@ export const KeyValueTable = React.memo(React.forwardRef<KeyValueTableHandle, Ke
   }, [keyValues, onRowsChange])
 
   const handleAddRow = useCallback(() => {
+    if (disabled) return
     setRows((oldRows) => [
       ...oldRows,
       { id: generateRowId(), enabled: true, key: '', value: '', description: '' }
     ])
-  }, [])
+  }, [disabled])
 
   const handleRemoveRow = useCallback((rowId: string) => {
+    if (disabled) return
     setRows((oldRows) => oldRows.filter((r) => r.id !== rowId))
-  }, [])
+  }, [disabled])
 
   useImperativeHandle(ref, () => ({ addRow: handleAddRow }), [handleAddRow])
 
@@ -281,6 +296,7 @@ export const KeyValueTable = React.memo(React.forwardRef<KeyValueTableHandle, Ke
               <Toggle
                 checked={row.enabled}
                 notFocusable
+                disabled={disabled}
                 onChange={(newChecked) => { updateData(idx, 'enabled', newChecked) }}
               />
             </div>
@@ -303,6 +319,7 @@ export const KeyValueTable = React.memo(React.forwardRef<KeyValueTableHandle, Ke
               onChange={(v) => { updateData(idx, 'key', v) }}
               {...(dataTestId && { 'data-testid': `${dataTestId}-row-${row.id}-key` })}
               rowId={row.id}
+              disabled={disabled}
             />
           )
         }
@@ -324,6 +341,7 @@ export const KeyValueTable = React.memo(React.forwardRef<KeyValueTableHandle, Ke
               onChange={(v) => { updateData(idx, 'value', v) }}
               {...(dataTestId && { 'data-testid': `${dataTestId}-row-${row.id}-value` })}
               rowId={row.id}
+              disabled={disabled}
             />
           )
         }
@@ -368,11 +386,13 @@ export const KeyValueTable = React.memo(React.forwardRef<KeyValueTableHandle, Ke
                   placeholder={t('keyValueTable.description')}
                   {...(dataTestId && { 'data-testid': `${dataTestId}-row-${row.id}-description` })}
                   rowId={row.id}
+                  disabled={disabled}
                 />
               </div>
               <Button
                 line
                 secondary
+                disabled={disabled}
                 {...(dataTestId && { 'data-testid': `${dataTestId}-row-${row.id}-delete` })}
                 options={{ ariaLabel: 'Delete row', title: 'Delete row' }}
                 onClick={() => { handleRemoveRow(row.id) }}
@@ -394,6 +414,7 @@ export const KeyValueTable = React.memo(React.forwardRef<KeyValueTableHandle, Ke
           <Button
             line
             secondary
+            disabled={disabled}
             {...(dataTestId && { 'data-testid': `${dataTestId}-row-${row.id}-delete` })}
             options={{ ariaLabel: 'Delete row', title: 'Delete row' }}
             onClick={() => { handleRemoveRow(row.id) }}
@@ -404,7 +425,7 @@ export const KeyValueTable = React.memo(React.forwardRef<KeyValueTableHandle, Ke
     }
 
     return cols
-  }, [KeyCellRenderer, ValueCellRenderer, DescriptionCellRenderer, ResolvedValueCellRenderer, showDescription, showResolvedValue, showEnabledToggle, rows, updateData, dataTestId, handleRemoveRow, t])
+  }, [KeyCellRenderer, ValueCellRenderer, DescriptionCellRenderer, ResolvedValueCellRenderer, showDescription, showResolvedValue, showEnabledToggle, rows, updateData, dataTestId, handleRemoveRow, t, disabled])
 
   return (
     <div
@@ -422,7 +443,7 @@ export const KeyValueTable = React.memo(React.forwardRef<KeyValueTableHandle, Ke
               columns={columns}
               rows={rows}
               getRowId={(r) => r.id}
-              reorderable
+              reorderable={!disabled}
               onRowsReorder={handleRowsReorder}
               {...(dataTestId && { 'data-testid': `${dataTestId}-table` })}
             />

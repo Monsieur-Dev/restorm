@@ -41,6 +41,18 @@ export interface KeyValueTableRow {
   enabled?: boolean
 }
 
+export interface CellRendererProps {
+  value: string
+  onChange: (value: string) => void
+  placeholder?: string
+  'data-testid'?: string
+  /** Runtime ID of the row (if provided in KeyValueTableRow) */
+  rowId?: string
+  /** Forwarded from the table's own `disabled` prop — a custom renderer
+   * should render its editor read-only/inert when this is `true`. */
+  disabled?: boolean
+}
+
 export interface KeyValueTableProps {
   /** Optional test id applied to the table root element. */
   'data-testid'?: string
@@ -90,6 +102,17 @@ export interface KeyValueTableProps {
    * this off.
    */
   autoToggleEnabledOnEmpty?: boolean
+  /**
+   * Locks the whole table read-only: the per-row enabled-toggle and delete
+   * button are disabled, rows can't be reordered, and `disabled` is
+   * forwarded to every cell renderer via `CellRendererProps` (the default
+   * `InputBox` renderer honors it out of the box; a custom renderer opts in
+   * by reading the field). `addRow` (direct call or via the imperative
+   * handle) is a no-op while `disabled`. Use this when the table configures
+   * a resource that snapshotted its state and must not be edited live (e.g.
+   * a mock server's request headers while it's listening). Default `false`.
+   */
+  disabled?: boolean
 }
 
 export interface KeyValueTableHandle {
@@ -130,6 +153,20 @@ const Example: React.FC = () => {
   )
 }
 ```
+
+### Locked while a resource is active
+
+```tsx
+<KeyValueTable
+  data-testid="headers-table"
+  initialRows={initialRows}
+  disabled={isServerListening}
+/>
+```
+
+The caller still owns any add-row control it renders next to the table (the
+table itself has no built-in "+ Add" button) — disable that separately,
+e.g. `<Button disabled={isServerListening} onClick={() => tableRef.current?.addRow()} />`.
 
 ## Notes for AI Usage
 

@@ -2325,5 +2325,8 @@
     "sendDestination": "Cíl",
     "ack": "ACK",
     "nack": "NACK"
+  },
+  "server": {
+    "configLockedWhileRunning": "Konfigurace uzamčena během běhu serveru"
   }
 }

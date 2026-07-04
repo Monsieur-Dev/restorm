@@ -16,6 +16,7 @@ import { BaseRequestTabView } from './BaseRequestTabView'
 import { updateReactiveProperty } from './requestTabViewUtils'
 import { toKeyValueData as toKeyValueDataShared } from '../../utils/toKeyValueData'
 import { BeamWrap } from '../common/BeamWrap'
+import { ServerConfigLockedHint } from '../common/ServerConfigLockedHint'
 
 export interface SoapServerRequestTabViewProps {
   request: SoapRequest
@@ -151,6 +152,7 @@ export const SoapServerRequestTabView: React.FC<SoapServerRequestTabViewProps> =
           onChange={setServerPort}
           options={{ placeholder: '8080', ariaLabel: t('soap.server.portLabel', 'Port') }}
           data-testid="soap-server-port-input"
+          disabled={isListening}
         />
       </div>
       <span style={serverHostLabelStyle}>/</span>
@@ -160,6 +162,7 @@ export const SoapServerRequestTabView: React.FC<SoapServerRequestTabViewProps> =
           onChange={setServerRoute}
           options={{ placeholder: 'soap', ariaLabel: t('soap.server.routeLabel', 'Route') }}
           data-testid="soap-server-route-input"
+          disabled={isListening}
         />
       </div>
       <BeamWrap active={isListening} size={22} borderWidth={1.5}>
@@ -182,6 +185,7 @@ export const SoapServerRequestTabView: React.FC<SoapServerRequestTabViewProps> =
   const requestContent = (
     <ScrollableElement options={{ horizontal: 'hidden' }} className="soap-server-operations-scroll">
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12, padding: 8 }} data-testid="soap-server-operations">
+        {isListening && <ServerConfigLockedHint data-testid="soap-server-locked-hint" />}
         {operations.map((op, i) => (
           <div
             key={i}
@@ -195,6 +199,7 @@ export const SoapServerRequestTabView: React.FC<SoapServerRequestTabViewProps> =
                   onChange={(v) => { updateOperation(i, { name: v }) }}
                   options={{ placeholder: t('soap.server.operationNamePlaceholder', 'Operation name'), ariaLabel: t('soap.server.operationNameLabel', 'Operation name') }}
                   data-testid={`soap-server-operation-name-${i}`}
+                  disabled={isListening}
                 />
               </div>
               <div style={{ flex: 1, minWidth: 0 }}>
@@ -203,6 +208,7 @@ export const SoapServerRequestTabView: React.FC<SoapServerRequestTabViewProps> =
                   onChange={(v) => { updateOperation(i, { soapAction: v }) }}
                   options={{ placeholder: t('soap.server.soapActionPlaceholder', 'SOAPAction (optional)'), ariaLabel: t('soap.server.soapActionLabel', 'SOAPAction') }}
                   data-testid={`soap-server-operation-action-${i}`}
+                  disabled={isListening}
                 />
               </div>
               <Toggle
@@ -210,6 +216,7 @@ export const SoapServerRequestTabView: React.FC<SoapServerRequestTabViewProps> =
                 onChange={(checked) => { updateOperation(i, { isFault: checked }) }}
                 aria-label={t('soap.server.faultLabel', 'Fault')}
                 data-testid={`soap-server-operation-fault-${i}`}
+                disabled={isListening}
               >
                 {t('soap.server.faultLabel', 'Fault')}
               </Toggle>
@@ -220,6 +227,7 @@ export const SoapServerRequestTabView: React.FC<SoapServerRequestTabViewProps> =
                 onClick={() => { removeOperation(i) }}
                 options={{ ariaLabel: t('soap.server.removeOperation', 'Remove operation'), title: t('soap.server.removeOperation', 'Remove operation') }}
                 data-testid={`soap-server-operation-remove-${i}`}
+                disabled={isListening}
               />
             </div>
             <div style={{ height: 160, border: '1px solid var(--panel-border)', borderRadius: 3 }}>
@@ -228,7 +236,7 @@ export const SoapServerRequestTabView: React.FC<SoapServerRequestTabViewProps> =
                 language="xml"
                 value={op.responseBody}
                 onChange={(v) => { updateOperation(i, { responseBody: v ?? '' }) }}
-                options={{ minimap: { enabled: false }, wordWrap: 'on', automaticLayout: true }}
+                options={{ minimap: { enabled: false }, wordWrap: 'on', automaticLayout: true, readOnly: isListening }}
                 data-testid={`soap-server-operation-body-${i}`}
               />
             </div>
@@ -239,6 +247,7 @@ export const SoapServerRequestTabView: React.FC<SoapServerRequestTabViewProps> =
           icon="add"
           onClick={addOperation}
           data-testid="soap-server-add-operation"
+          disabled={isListening}
         >
           {t('soap.server.addOperation', 'Add operation')}
         </Button>
