@@ -9,7 +9,7 @@ Feature: gRPC reflection import — discover a live server's services without a 
     And I open a fresh project via MCP
 
   Scenario: Import via reflection against grpcbin, then run a discovered method
-    When I open the Import dialog and switch to the gRPC reflection card
+    When I open the Import dialog
     And I connect to "localhost:9000" via gRPC reflection
     # grpcbin's reflection surface spans several DIFFERENT proto packages
     # (addsvc, examplepb, grpcbin, hello) bundled into one demo binary, so

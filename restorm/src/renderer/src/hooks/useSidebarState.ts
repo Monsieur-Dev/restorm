@@ -12,7 +12,8 @@ import { folderAsRootListViewItem, folderItemToListViewItem } from '../services/
 import { attachContextMenus } from '../components/MainView/Sidebar/contextMenuBuilder'
 import type { AddChildKind } from '../components/MainView/Sidebar/contextMenuBuilder'
 import { Badge } from '../components/common/Badge'
-import { mapToBadgeType } from '../utils/badgeUtils'
+import { mapToBadgeType, requestBadgeType, requestBadgeMode, requestBadgeIcon } from '../utils/badgeUtils'
+import type { Request } from '../../../shared/types/collections'
 import { useDeprecatedRequestIds } from './useDeprecatedRequestIds'
 
 export interface UseSidebarStateOptions {
@@ -58,6 +59,7 @@ export function useSidebarState(options: UseSidebarStateOptions): UseSidebarStat
       expandedIds: expandedSet,
       renderMethodBadge: (method: string) => React.createElement(Badge, { type: mapToBadgeType(method) }),
       renderProtocolBadge: (protocol: string, label?: string, mode?: 'client' | 'server') => React.createElement(Badge, { type: mapToBadgeType(protocol), label, mode }),
+      renderRequestBadge: (request: Request) => React.createElement(Badge, { type: requestBadgeType(request), mode: requestBadgeMode(request), icon: requestBadgeIcon(request) }),
       // Removed (vanished from the spec) renders strikethrough.
       // Deprecated rows are dimmed via the per-id set passed alongside
       // — the wrapper applies opacity to the whole row visual rather

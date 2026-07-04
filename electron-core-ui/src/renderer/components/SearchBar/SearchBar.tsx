@@ -441,7 +441,12 @@ export const SearchBar: React.FC<SearchBarProps> = ({
               onBlur={handleBlur}
               options={{
                 placeholder: placeholderText,
-                ariaLabel: placeholderText
+                ariaLabel: placeholderText,
+                // Empty tooltip suppresses the InputBox's native `title` (it
+                // otherwise mirrors the placeholder) — the app uses styled
+                // tooltips, never the browser's native one. aria-label keeps
+                // the accessible name.
+                tooltip: ''
               }}
             />
           </div>

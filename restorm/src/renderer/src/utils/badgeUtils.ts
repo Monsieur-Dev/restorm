@@ -30,6 +30,36 @@ export function requestBadgeMode(request: Request): 'client' | 'server' {
 }
 
 /**
+ * Codicon glyph for a Kafka request mode. Kafka is the one protocol whose
+ * produce / consume / browse variants share a single fixed badge label
+ * (`KAFKA`), so a discriminating glyph rides on the badge to tell them apart.
+ * Shared by the Add menu, the sidebar tree and the workbench tab so all three
+ * render the SAME glyph for a given mode.
+ */
+export function kafkaModeIcon(mode: string | undefined): string {
+  switch (mode) {
+    case 'consume': return 'plug'
+    case 'browse': return 'eye'
+    case 'produce':
+    default: return 'arrow-up'
+  }
+}
+
+/**
+ * Optional sub-type glyph for a saved request's badge, or `undefined` when the
+ * protocol's badge label already distinguishes its sub-types (HTTP methods,
+ * gRPC call types, GraphQL op types are the label itself). Only Kafka needs one
+ * today — its modes collapse onto the fixed `KAFKA` label — so the badge picks
+ * up the same produce/consume/browse codicon the Add menu shows.
+ */
+export function requestBadgeIcon(request: Request): string | undefined {
+  if (request.type === 'kafka') {
+    return kafkaModeIcon((request as { mode?: string }).mode)
+  }
+  return undefined
+}
+
+/**
  * Map raw protocol/type values to BadgeType
  */
 export function mapToBadgeType(value: string): BadgeType {
