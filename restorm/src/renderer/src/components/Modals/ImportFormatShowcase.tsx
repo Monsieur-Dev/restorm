@@ -416,6 +416,17 @@ const IMPORT_FORMATS: readonly ImportFormat[] = [
   }
 ]
 
+// Warm the browser cache for the URL-served logos as soon as this module
+// loads. A bubble's <img> otherwise fetches its file on first mount, and
+// the first rotation can show an empty logo box for a beat before the
+// image pops in — the small SVGs are inlined as data: URIs by the bundler,
+// but the larger marks ship as files and are fetched on demand.
+for (const format of IMPORT_FORMATS) {
+  if (format.logoSrc !== null && typeof Image !== 'undefined') {
+    new Image().src = format.logoSrc
+  }
+}
+
 type Phase = 'in' | 'out' | 'gap'
 
 interface ShowcaseBubbleProps {

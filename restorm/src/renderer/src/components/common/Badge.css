@@ -155,9 +155,21 @@
   color: var(--badge-on-accent, #ffffff);
 }
 
+.badge-stomp .codicon {
+  color: var(--badge-on-accent, #ffffff) !important;
+}
+
 .badge-stomp {
   background-color: var(--badge-stomp-background);
   color: var(--badge-on-accent, #ffffff);
+}
+
+/* Same dark-on-dark guard as the GRPC badge: the produce/consume/browse
+ * mode codicon must stay white on the dark Kafka badge — a generic
+ * menu/list `.codicon { color }` rule otherwise wins over the inherited
+ * badge colour and renders the glyph illegible. */
+.badge-kafka .codicon {
+  color: var(--badge-on-accent, #ffffff) !important;
 }
 
 .badge-kafka {
@@ -217,6 +229,12 @@
 /* ============================================================================
  * Redis
  * ============================================================================ */
+
+/* Same dark-on-dark guard as the GRPC/Kafka badges: mode codicons must stay
+ * white on the dark Redis badge. */
+.badge-redis .codicon {
+  color: var(--badge-on-accent, #ffffff) !important;
+}
 
 .badge-redis {
   background-color: var(--badge-redis-background);

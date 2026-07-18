@@ -96,18 +96,15 @@
   border-radius: 0 0 0 8px;
 }
 
-/* When the "used in scenarios" button is present, the cluster shifts left
- * from right:44 to right:80 (~35px further left) — add that delta to the base
- * flush offset: -50 - 36 = -86px (reaches the same .editor-group-content-panel
- * border as the base case). */
-.restorm-workbench-tab:has(> .request-scenario-usage-button) .restorm-workbench-tab-action-zone {
-  right: -86px;
-}
-
-/* When the "used in scenarios" button is present, the whole cluster
- * shifts left so the button sits between it and the favourite star. */
-.restorm-workbench-tab:has(> .request-scenario-usage-button) > .restorm-workbench-tab-top-right {
-  right: 80px;
+/* The "used in scenarios" button flows INSIDE the top-right cluster (after
+ * the header actions, before the bookmark ribbon), so the cluster needs no
+ * conditional shifting — it sizes itself. */
+.restorm-workbench-tab-scenario-action {
+  display: flex;
+  align-items: center;
+  /* Measured live against the history / quick-settings buttons (y=73):
+   * 5px left the badge 2px higher than its neighbours. */
+  margin-top: 7px;
 }
 
 /* Auth-route key selector — the rightmost item of the top-right cluster,
@@ -301,27 +298,38 @@
 /* "Used in scenarios" reverse-nav button — between the bookmark ribbon and the
  * favourite star (star at right:4 is 32×32, so anchor at right:40).
  * top: -5px matches the favourite star offset. */
+/* In-flow wrapper — the visual chrome is the inner ECUI small Button
+ * (same as the neighbouring history button); the SCENARIO badge rides
+ * inside it as the icon. */
 .request-scenario-usage-button {
-  position: absolute;
-  top: -5px;
-  right: 40px;
-  z-index: 3;
-  width: 32px;
-  height: 32px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 0;
-  border: none;
-  border-radius: 6px;
-  background: transparent;
-  cursor: pointer;
-  color: var(--text-secondary, #cccccc);
 }
 
-.request-scenario-usage-button:hover,
-.request-scenario-usage-button.is-open {
-  background: var(--list-hover-background, rgba(255, 255, 255, 0.08));
+/* ECUI's `.small-button` pins a fixed 20x20 `overflow: hidden` box — the
+ * 25x18 SCENARIO badge gets clipped inside it. Let the box size itself to
+ * the badge (same visual weight as the neighbours, nothing cropped). */
+.request-scenario-usage-button .small-button {
+  width: auto;
+  height: auto;
+  min-width: 20px;
+  min-height: 20px;
+  padding: 1px 3px;
+  overflow: visible;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.request-scenario-usage-button .badge {
+  flex: none;
+}
+
+/* ECUI nudges a button's bare codicon by 1px (top/left) to optically centre
+ * it in the 20x20 icon box — inside the badge that nudge pushes the glyph
+ * off-centre instead (the badge already centres its icon itself). */
+.request-scenario-usage-button .badge .codicon {
+  padding: 0;
 }
 
 /* Popover body listing the scenarios that use the request. */
@@ -334,7 +342,7 @@
 .request-scenario-usage-title {
   padding: 4px 10px 8px 10px;
   font-size: 12px;
-  color: var(--text-secondary, #cccccc);
+  color: var(--foreground, #e0e0e0);
 }
 
 .request-scenario-usage-list {
@@ -357,6 +365,12 @@
   text-align: left;
   cursor: pointer;
   border-radius: 4px;
+}
+
+.request-scenario-usage-link .badge {
+  /* The ECUI link Button wraps its children, so the row's `gap` doesn't
+   * reach the badge/name pair — space them directly. */
+  margin-right: 8px;
 }
 
 .request-scenario-usage-link:hover {

@@ -19,6 +19,7 @@ import { McpService } from 'electron-core-ui'
 import { collectionStore } from '../../services/CollectionStore'
 import { contextService } from '../../services/ContextService'
 import { isAnyFolder, isEnvironmentFolder, isRequest, isScenario, KeyValue, Environment } from '../../../shared/models'
+import { REQUEST_TYPES } from '../../../shared/protocolRegistry'
 import { isSoapRequest } from '../../../shared/types/requests/index'
 import type { EnvironmentFolder, CustomValueList, CustomValueEntry } from '../../../shared/types/collections'
 import { broadcastTreeReplace } from './import'
@@ -124,7 +125,9 @@ function triggerSave(): void {
   }
 }
 
-const REQUEST_TYPES = ['http', 'graphql', 'grpc', 'soap', 'websocket', 'sse', 'odata', 'auth'] as const
+// Registry-driven: every protocol the app knows (incl. kafka / redis / stomp /
+// amqp / jsonrpc / trpc / …) is creatable through the API — a hardcoded list
+// here silently lagged each new protocol family.
 
 export function registerWriteTools(mcp: McpService): void {
   mcp.registerTool(
@@ -329,12 +332,14 @@ export function registerWriteTools(mcp: McpService): void {
       inputSchema: {
         id: z.string().min(1).describe('Request id to patch.'),
         patch: z.record(z.string(), z.unknown()).describe(
-          'Partial request shape. Whitelisted top-level keys: url, method, headers, params, ' +
-          'pathParams, body, name, description, query, variables, service, callType, ' +
-          'requestMessage, metadata, soapAction, operation, soapBody, protocol, event, message, server. ' +
-          '`id` and `type` are dropped silently — protected. `body.type` must be one of ' +
-          '`text` / `file` / `form-data` / `x-www-form-urlencoded` (the canonical HTTPRequestBody ' +
-          'discriminator values); to send a JSON payload use `{type: "text", content: "{…json…}"}`.'
+          'Partial request shape: ANY typed field of the request kind is patchable — url, method, ' +
+          'headers, body, plus every protocol-specific field (GraphQL query/variables/schema/' +
+          'resolverScript, gRPC service/callType, Kafka topic/mode/groupId, Redis command/args/' +
+          'channels, AMQP exchange/routingKey/queue, STOMP subscriptions, JSON-RPC method/children, ' +
+          'tRPC procedure/input/kind, …). Only `id` and `type` are protected (dropped silently). ' +
+          '`body.type` must be one of `text` / `file` / `form-data` / `x-www-form-urlencoded` ' +
+          '(the canonical HTTPRequestBody discriminator values); to send a JSON payload use ' +
+          '`{type: "text", content: "{…json…}"}`.'
         )
       } as Record<string, unknown>
     },

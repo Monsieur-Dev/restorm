@@ -19,6 +19,7 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useExclusiveHeaderPopover } from '../../hooks/useExclusiveHeaderPopover'
 import { useTranslation } from 'react-i18next'
 import { Button, eventBus, InputBox, Modal, Toggle, Tooltip } from 'electron-core-ui/renderer'
 import type { Request } from '../../../../shared/types/collections'
@@ -144,6 +145,8 @@ export const RequestQuickSettingsButton: React.FC<RequestQuickSettingsButtonProp
   // debounce which would make configName state stale at click time.
   const nameInputRef = useRef<HTMLInputElement>(null)
   const [open, setOpen] = useState(false)
+  // Opening this popover closes any sibling header popover (and vice versa).
+  useExclusiveHeaderPopover(open, () => { setOpen(false) })
 
   // Storage target: 'settings' (user-local) or 'project' (.restorm file)
   const [storageTarget, setStorageTarget] = useState<QuickConfigStorageTarget>('settings')
@@ -320,9 +323,7 @@ export const RequestQuickSettingsButton: React.FC<RequestQuickSettingsButtonProp
           data-testid="quick-settings-tooltip"
         >
           <Button
-            secondary
             small
-            line
             icon="list-ordered"
             data-testid="quick-settings-open-button"
             onClick={() => {

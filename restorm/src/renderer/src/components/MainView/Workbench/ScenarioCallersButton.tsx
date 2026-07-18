@@ -1,6 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react'
+import { useExclusiveHeaderPopover } from '../../../hooks/useExclusiveHeaderPopover'
 import { useTranslation } from 'react-i18next'
 import { Button, Tooltip } from 'electron-core-ui/renderer'
+import { HeaderHoverTooltip } from '../HeaderHoverTooltip'
 import { Badge } from '../../common/Badge'
 import type { ScenarioScenarioUsage } from '../../../services/scenarioRequestUsage'
 
@@ -24,7 +26,8 @@ export const ScenarioCallersButton: React.FC<ScenarioCallersButtonProps> = ({ us
   // Span wrapper provides a stable DOM ref for Tooltip anchoring and outside-click detection.
   const buttonRef = useRef<HTMLSpanElement>(null)
   const [open, setOpen] = useState(false)
-  const [hovered, setHovered] = useState(false)
+  // Opening this popover closes any sibling header popover (and vice versa).
+  useExclusiveHeaderPopover(open, () => { setOpen(false) })
 
   useEffect(() => {
     if (!open) return undefined
@@ -34,6 +37,22 @@ export const ScenarioCallersButton: React.FC<ScenarioCallersButtonProps> = ({ us
     document.addEventListener('mousedown', onDocMouseDown)
     return () => { document.removeEventListener('mousedown', onDocMouseDown) }
   }, [open])
+
+  // Every open tab keeps its toolbar mounted, hidden ones included — and a
+  // `display: none` anchor never fires mouseleave. Force both overlays shut
+  // the moment the anchor stops intersecting the viewport, so no tooltip or
+  // popover ever stays stranded on a collapsed 0,0 anchor rect.
+  useEffect(() => {
+    const el = buttonRef.current
+    if (!el) return undefined
+    const observer = new IntersectionObserver((entries) => {
+      if (entries.every((entry) => !entry.isIntersecting)) {
+        setOpen(false)
+      }
+    })
+    observer.observe(el)
+    return () => { observer.disconnect() }
+  }, [])
 
   if (usages.length === 0) return null
 
@@ -50,28 +69,24 @@ export const ScenarioCallersButton: React.FC<ScenarioCallersButtonProps> = ({ us
     <>
       <span
         ref={buttonRef}
-        style={{ display: 'inline-flex' }}
+        className={`request-scenario-usage-button${open ? ' is-open' : ''}`}
         onMouseDown={(e) => { e.stopPropagation() }}
       >
-        <Button
-          className={`request-scenario-usage-button${open ? ' is-open' : ''}`}
-          options={{ ariaLabel: label }}
-          aria-haspopup="dialog"
-          aria-expanded={open}
-          onClick={(e: React.MouseEvent) => { e.stopPropagation(); setOpen((v) => !v) }}
-          onMouseEnter={() => { setHovered(true) }}
-          onMouseLeave={() => { setHovered(false) }}
-          data-testid="scenario-callers-button"
-        >
-          <Badge type="SCENARIO" />
-        </Button>
+        {/* Same chrome as the request smartbar's scenario button: plain small
+            Button in a HeaderHoverTooltip, SCENARIO badge as the icon. */}
+        <HeaderHoverTooltip label={label} suppressed={open} placement="below">
+          <Button
+            small
+            options={{ ariaLabel: label }}
+            aria-haspopup="dialog"
+            aria-expanded={open}
+            onClick={(e: React.MouseEvent) => { e.stopPropagation(); setOpen((v) => !v) }}
+            data-testid="scenario-callers-button"
+          >
+            <Badge type="SCENARIO" />
+          </Button>
+        </HeaderHoverTooltip>
       </span>
-      <Tooltip
-        targetRef={buttonRef}
-        show={hovered && !open}
-        placement="below"
-        content={label}
-      />
       <Tooltip
         targetRef={buttonRef}
         show={open}

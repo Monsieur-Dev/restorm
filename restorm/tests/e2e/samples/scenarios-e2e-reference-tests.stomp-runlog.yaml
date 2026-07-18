@@ -1,0 +1,34 @@
+- message: 🔵 [<time>] ▶ STOMP
+- message: ⚪ [<time>] start stompConnect
+  data:
+    requestId: <uuid>
+    label: STOMP connect
+- message: ⚪ [<time>] done stompConnect
+- message: ⚪ [<time>] stomp "d22e2160-a1b9-4b45-ae57-247fd8e210cc" connecting
+- message: ⚪ [<time>] stomp "d22e2160-a1b9-4b45-ae57-247fd8e210cc" connected
+- message: ⚪ [<time>] start stompSend
+  data:
+    connectionNodeId: <uuid>
+    payload: '{"hello":"from the reference project"}'
+    in: true
+- message: ⚪ [<time>] done stompSend
+- message: ⚪ [<time>] start wait
+  data:
+    durationMs: <dynamic-time>
+    in: true
+- message: ⚪ [<time>] done wait
+- message: ⚪ [<time>] start stompClose
+  data:
+    connectionNodeId: <uuid>
+    in: true
+- message: ⚪ [<time>] done stompClose
+- message: ⚪ [<time>] start log
+  data:
+    level: info
+    message: stomp chain done
+    in: true
+- message: 🔵 [<time>] stomp chain done
+- message: ⚪ [<time>] done log
+  data: {}
+- message: ⚪ [<time>] stomp "d22e2160-a1b9-4b45-ae57-247fd8e210cc" closed
+- message: 🔵 [<time>] ■ STOMP

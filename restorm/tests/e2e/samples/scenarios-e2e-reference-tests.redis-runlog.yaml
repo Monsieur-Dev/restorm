@@ -1,0 +1,85 @@
+- message: 🔵 [<time>] ▶ Redis
+- message: ⚪ [<time>] start redisCommand
+  data:
+    requestId: <uuid>
+    label: SET
+- message: ⚪ [<time>] done redisCommand
+  data:
+    response:
+      request:
+        url: redis://localhost:6379
+        method: SET
+        headers: {}
+      response:
+        status: 0
+        statusText: ""
+        headers: {}
+        body: OK
+        durationMs: <dynamic-time>
+        success: true
+- message: ⚪ [<time>] start redisCommand
+  data:
+    requestId: <uuid>
+    label: GET
+    in: true
+- message: ⚪ [<time>] done redisCommand
+  data:
+    response:
+      request:
+        url: redis://localhost:6379
+        method: GET
+        headers: {}
+      response:
+        status: 0
+        statusText: ""
+        headers: {}
+        body: reference-value
+        durationMs: <dynamic-time>
+        success: true
+- message: ⚪ [<time>] start redisSubscribe
+  data:
+    requestId: <uuid>
+    label: Subscribe
+    in: true
+- message: ⚪ [<time>] done redisSubscribe
+- message: ⚪ [<time>] redis-subscribe "4b086895-f92f-4c1c-8dc2-53511861958a" connecting
+- message: ⚪ [<time>] redis-subscribe "4b086895-f92f-4c1c-8dc2-53511861958a" connected
+- message: ⚪ [<time>] start redisCommand
+  data:
+    requestId: <uuid>
+    label: PUBLISH
+    in: true
+- message: ⚪ [<time>] done redisCommand
+  data:
+    response:
+      request:
+        url: redis://localhost:6379
+        method: PUBLISH
+        headers: {}
+      response:
+        status: 0
+        statusText: ""
+        headers: {}
+        body: "1"
+        durationMs: <dynamic-time>
+        success: true
+- message: ⚪ [<time>] start wait
+  data:
+    durationMs: <dynamic-time>
+    in: true
+- message: ⚪ [<time>] done wait
+- message: ⚪ [<time>] start redisClose
+  data:
+    connectionNodeId: <uuid>
+    in: true
+- message: ⚪ [<time>] done redisClose
+- message: ⚪ [<time>] start log
+  data:
+    level: info
+    message: redis chain done
+    in: true
+- message: 🔵 [<time>] redis chain done
+- message: ⚪ [<time>] done log
+  data: {}
+- message: ⚪ [<time>] redis-subscribe "4b086895-f92f-4c1c-8dc2-53511861958a" closed
+- message: 🔵 [<time>] ■ Redis

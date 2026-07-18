@@ -66,7 +66,7 @@ export const GraphqlSubscribeNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> =
     { id: 'connected', label: t('scenario.socketio.connected', 'connected'), port: { id: 'connected', type: 'source', flow: 'signal' } },
     { id: 'message', label: t('scenario.grpc.message', 'message'), port: { id: 'message', type: 'source' } }
   ]
-  return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={right} headerIcon={<Badge type="QUERY" icon="broadcast" />} />
+  return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={right} headerIcon={<Badge type="GQL" icon="broadcast" />} />
 }
 
 /** C (graphqlUnsubscribe) — stops a declared GraphQL subscription; sequences via `done`. */
@@ -74,5 +74,5 @@ export const GraphqlUnsubscribeNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>>
   const left: ScenarioNodeSection[] = [
     { id: 'main', rows: [{ id: 'connection', content: <ConnectionPicker id={id} data={data} kind="graphqlSubscribe" /> }] }
   ]
-  return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={[]} headerIcon={<Badge type="QUERY" icon="debug-disconnect" />} />
+  return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={[]} headerIcon={<Badge type="GQL" icon="debug-disconnect" />} />
 }

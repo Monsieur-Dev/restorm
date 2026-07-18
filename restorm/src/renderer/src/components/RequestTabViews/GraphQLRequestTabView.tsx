@@ -113,6 +113,11 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
   const isServer = request.server === true
   const [schema, setSchemaState] = useState(request.schema ?? '')
   const [mockResolvers, setMockResolversState] = useState(request.mockResolvers ?? '')
+  // Scripted resolvers (persisted field, no in-tab editor yet): must reach the
+  // mock server's full data like `schema` / `mockResolvers`, otherwise a
+  // scripted Subscription resolver never mounts and a subscribe against the
+  // mock completes instantly with "must return Async Iterable".
+  const [resolverScript, setResolverScriptState] = useState(request.resolverScript ?? '')
   const [isListening, setIsListening] = useState(false)
   const [servedCount, setServedCount] = useState(0)
 
@@ -174,6 +179,7 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
     setVariablesState(request.variables ?? '{}')
     setSchemaState(request.schema ?? '')
     setMockResolversState(request.mockResolvers ?? '')
+    setResolverScriptState(request.resolverScript ?? '')
     setOperationNameState(request.operationName)
     setResponse(null)
   }, [request])
@@ -308,7 +314,7 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
       requestType: 'graphql' as const,
       headers: toKeyValueData(request.headers),
       body: { type: 'text' as const, content: buildGraphqlBody(query, variables, operationName) },
-      ...(isServer ? { server: true, schema, mockResolvers } : {})
+      ...(isServer ? { server: true, schema, mockResolvers, resolverScript } : {})
     }
     latestPayloadRef.current = payload
 
@@ -326,7 +332,7 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
         updateDebounceRef.current = null
       }
     }
-  }, [request.id, request.headers, url, query, variables, operationName, isServer, schema, mockResolvers])
+  }, [request.id, request.headers, url, query, variables, operationName, isServer, schema, mockResolvers, resolverScript])
 
   // Sync state changes to reactive request object
   const setUrl = useCallback((value: string): void => {

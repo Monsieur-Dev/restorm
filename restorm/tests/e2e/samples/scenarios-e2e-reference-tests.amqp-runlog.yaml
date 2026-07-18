@@ -1,0 +1,34 @@
+- message: 🔵 [<time>] ▶ AMQP
+- message: ⚪ [<time>] start amqpConnect
+  data:
+    requestId: <uuid>
+    label: AMQP subscribe
+- message: ⚪ [<time>] done amqpConnect
+- message: ⚪ [<time>] amqp "8c52935a-a3ac-4244-a512-9f2ec57f1898" connecting
+- message: ⚪ [<time>] amqp "8c52935a-a3ac-4244-a512-9f2ec57f1898" connected
+- message: ⚪ [<time>] start amqpPublish
+  data:
+    connectionNodeId: <uuid>
+    payload: '{"hello":"from the reference project"}'
+    in: true
+- message: ⚪ [<time>] done amqpPublish
+- message: ⚪ [<time>] start wait
+  data:
+    durationMs: <dynamic-time>
+    in: true
+- message: ⚪ [<time>] done wait
+- message: ⚪ [<time>] start amqpClose
+  data:
+    connectionNodeId: <uuid>
+    in: true
+- message: ⚪ [<time>] done amqpClose
+- message: ⚪ [<time>] start log
+  data:
+    level: info
+    message: amqp chain done
+    in: true
+- message: 🔵 [<time>] amqp chain done
+- message: ⚪ [<time>] done log
+  data: {}
+- message: ⚪ [<time>] amqp "8c52935a-a3ac-4244-a512-9f2ec57f1898" closed
+- message: 🔵 [<time>] ■ AMQP

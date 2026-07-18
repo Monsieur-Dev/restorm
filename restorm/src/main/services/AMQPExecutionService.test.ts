@@ -54,6 +54,7 @@ vi.mock('./secrets/SecretHydrationService', () => ({
 interface FakeChannel {
   publish: ReturnType<typeof vi.fn>
   consume: ReturnType<typeof vi.fn>
+  assertQueue: ReturnType<typeof vi.fn>
   get: ReturnType<typeof vi.fn>
   nack: ReturnType<typeof vi.fn>
   ack: ReturnType<typeof vi.fn>
@@ -74,6 +75,7 @@ function makeFakeChannel(): FakeChannel {
   return {
     publish: vi.fn().mockReturnValue(true),
     consume: vi.fn().mockResolvedValue(undefined),
+    assertQueue: vi.fn().mockResolvedValue(undefined),
     get: vi.fn().mockResolvedValue(false),
     nack: vi.fn(),
     ack: vi.fn(),

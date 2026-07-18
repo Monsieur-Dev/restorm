@@ -71,5 +71,11 @@ Feature: Scenario run-log end-to-end
       | GraphQL Subscription |
       | GraphQL unary  |
       | SSE            |
+      | Kafka          |
+      | Redis          |
+      | STOMP          |
+      | AMQP          |
+      | JSON-RPC      |
+      | tRPC          |
       | Quick config   |
       | Main           |
