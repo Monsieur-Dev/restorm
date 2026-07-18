@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest'
 import { Scheduler, type SocketioConnectRequest, type SocketioConnHandle } from './scheduler'
-import { socketioConnectExecutor, socketioSendExecutor, socketioCloseExecutor } from './executors/socketioExecutors'
+import { socketioConnectExecutor, socketioSendExecutor, socketioCloseExecutor, socketioServerCloseExecutor } from './executors/socketioExecutors'
 import type { Activation, ExecContext, ExecResult, NodeExecutor, ScenarioModel } from './types'
 
 /**
@@ -96,6 +96,19 @@ describe('socketio executors — reference validation', () => {
     const ctx = { node: { id: 'c', kind: 'socketioClose', config: {}, inputs: [], outputs: [], position: { x: 0, y: 0 } } } as unknown as ExecContext
     expect(() => socketioCloseExecutor({ nodeId: 'c', kind: 'socketioClose', scope: [], inputs: {} } as unknown as Activation, ctx)).toThrow(/no connection selected/)
   })
+
+  it('socketioServerClose with no server selected throws (hard error)', () => {
+    const ctx = { node: { id: 'sc', kind: 'socketioServerClose', config: {}, inputs: [], outputs: [], position: { x: 0, y: 0 } } } as unknown as ExecContext
+    expect(() => socketioServerCloseExecutor({ nodeId: 'sc', kind: 'socketioServerClose', scope: [], inputs: {} } as unknown as Activation, ctx)).toThrow(/no server selected/)
+  })
+
+  it('socketioServerClose errors when the referenced server does not exist in the run', () => {
+    const ctx = {
+      node: { id: 'sc', kind: 'socketioServerClose', config: { connectionNodeId: 'a' }, inputs: [], outputs: [], position: { x: 0, y: 0 } },
+      socketio: { has: () => false, isOpen: () => false, send: () => false, close: () => false }
+    } as unknown as ExecContext
+    expect(() => socketioServerCloseExecutor({ nodeId: 'sc', kind: 'socketioServerClose', scope: [], inputs: {} } as unknown as Activation, ctx)).toThrow(/does not exist/)
+  })
 })
 
 describe('socketio scheduler — connection lifecycle', () => {
@@ -153,6 +166,39 @@ describe('socketio scheduler — connection lifecycle', () => {
 
     // Closing the connection fires the universal `done` port + completes the run.
     fb.cb().onClose()
+    await done
+    expect(doneRuns).toBe(1)
+    expect(s.status().state).toBe('completed')
+  })
+
+  it('a socketioServerClose stops a server-hosting connect and fires its done', async () => {
+    // A `server: true`-bound socketioConnect HOSTS a Socket.IO mock server; the
+    // dedicated server-close node stops it exactly like a client close — the
+    // referenced connect node is closed, freeing its port, and its `done` fires.
+    const scenario = buildScenario(
+      [
+        { id: 'a', kind: 'socketioConnect', outputs: ['connected', 'others'], config: { requestId: 'srvReq', connectionName: 'Mock', events: [] } },
+        { id: 'c', kind: 'socketioServerClose', inputs: ['in'], outputs: [], config: { connectionNodeId: 'a' } },
+        { id: 'onDone', kind: 'now', inputs: ['in'], outputs: [] }
+      ],
+      [
+        { from: ['a', 'connected'], to: ['c', 'in'] },
+        { from: ['a', 'done'], to: ['onDone', 'in'] }
+      ]
+    )
+    let doneRuns = 0
+    const executors = new Map<string, NodeExecutor>([
+      ['a', socketioConnectExecutor],
+      ['c', socketioServerCloseExecutor],
+      ['onDone', () => { doneRuns += 1; return { outputs: [] } }]
+    ])
+    const fb = fakeBridge()
+    const s = new Scheduler({ scenario, executors, socketioConnect: fb.bridge })
+    const done = s.run()
+
+    await flush()
+    fb.open()
+    fb.cb().onConnect()
     await done
     expect(doneRuns).toBe(1)
     expect(s.status().state).toBe('completed')

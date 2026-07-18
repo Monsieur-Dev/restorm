@@ -171,7 +171,8 @@ export function ImportModal({
   // gRPC reflection doesn't fit the paste/file/URL auto-detect flow the
   // source input drives (its "source" is a live host:port connection, not
   // text to sniff) — it gets its own dedicated form, launched from the
-  // showcase bubble's action button (see `handleShowcaseAction` below).
+  // persistent connect button in the source-actions row (see
+  // `handleOpenGrpcReflection` below).
   const [showGrpcReflectionModal, setShowGrpcReflectionModal] = useState(false)
   /**
    * One-shot manual headers attached to the spec fetch. Used when
@@ -717,10 +718,13 @@ export function ImportModal({
     return () => { token.cancelled = true }
   }, [isOpen, refreshContext, t])
 
-  // Dispatches a showcase bubble's action button (see `ImportFormat.actionId`
-  // in `ImportFormatShowcase.tsx`). Only `grpc-reflection` sets one today.
-  const handleShowcaseAction = useCallback((actionId: string) => {
-    if (actionId === 'grpc-reflection') setShowGrpcReflectionModal(true)
+  // Opens the dedicated gRPC-reflection connect form. gRPC reflection doesn't
+  // fit the paste/file/URL auto-detect flow the source input drives (its
+  // "source" is a live host:port connection), so it gets a persistent button
+  // in the source-actions row rather than a control buried in the rotating
+  // format showcase (which would only be reachable when its card cycles in).
+  const handleOpenGrpcReflection = useCallback(() => {
+    setShowGrpcReflectionModal(true)
   }, [])
 
   // The reflection import already produces a fully-formed `EnvironmentFolder`
@@ -911,6 +915,18 @@ export function ImportModal({
                 </span>
               )}
             </Button>
+            {/* gRPC reflection import: a live host:port connection rather than a
+                paste/file/URL source, so it opens its own connect form. */}
+            <Button
+              icon="plug"
+              onClick={handleOpenGrpcReflection}
+              options={{
+                ariaLabel: t('import.formats.grpcReflection.action', 'Connect to a server…')
+              }}
+              data-testid="import-grpc-reflection-button"
+            >
+              {t('import.formats.grpcReflection.action', 'Connect to a server…')}
+            </Button>
           </div>
           {attachedAuth ? (
             <div
@@ -1004,7 +1020,7 @@ export function ImportModal({
                 from index 0 instead of resuming mid-cycle. */}
             {displayedSection === 'showcase' && !refreshContext && !isDraggingOver && (
               <div className={`import-section-fade${transitionPhase !== null ? ` import-section-fade--${transitionPhase}` : ''}`}>
-                <ImportFormatShowcase key={showcaseMountSeq} onAction={handleShowcaseAction} />
+                <ImportFormatShowcase key={showcaseMountSeq} />
               </div>
             )}
 

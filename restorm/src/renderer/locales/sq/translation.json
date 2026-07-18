@@ -258,7 +258,7 @@
         "httpPut": "HTTP – kërkesë PUT",
         "httpPatch": "HTTP – kërkesë PATCH",
         "httpDelete": "HTTP – kërkesë DELETE",
-        "httpServer": "Server HTTP mock",
+        "httpServer": "Server HTTP",
         "graphql": "Kërkesë GraphQL",
         "grpc": "Kërkesë gRPC",
         "grpcServerStream": "Kërkesë gRPC server-streaming",
@@ -273,18 +273,33 @@
         "websocketServer": "Server WebSocket",
         "socketio": "Kërkesë Socket.IO",
         "mqtt": "MQTT request",
-        "mqttServer": "Broker MQTT",
+        "mqttServer": "Server MQTT",
         "sse": "Kërkesë SSE",
-        "grpcServer": "Server gRPC mock",
-        "soapServer": "Server mock SOAP",
-        "graphqlServer": "Server GraphQL mock",
-        "odataServer": "Server OData mock",
+        "grpcServer": "Server gRPC",
+        "soapServer": "Server SOAP",
+        "graphqlServer": "Server GraphQL",
+        "odataServer": "Server OData",
         "trpc": "Kërkesë tRPC",
         "amqp": "Kërkesë AMQP",
         "redis": "Kërkesë Redis",
         "stomp": "Kërkesë STOMP",
         "kafkaProduce": "Kërkesë Kafka – Prodho",
-        "kafkaConsume": "Kërkesë Kafka – Konsumo"
+        "kafkaConsume": "Kërkesë Kafka – Konsumo",
+        "httpHead": "HTTP – kërkesë HEAD",
+        "httpOptions": "HTTP – kërkesë OPTIONS",
+        "httpQuery": "HTTP – kërkesë QUERY",
+        "groups": {
+          "grpc": "gRPC",
+          "websocket": "WebSocket",
+          "socketio": "Socket.IO",
+          "graphql": "GraphQL",
+          "redis": "Redis",
+          "messaging": "Messaging",
+          "soap": "SOAP",
+          "odata": "OData",
+          "sse": "SSE",
+          "trpc": "tRPC"
+        }
       }
     },
     "deleteConfirm": {
@@ -376,7 +391,7 @@
       "switchTooltip": "Ndrysho mjedisin"
     },
     "body": {
-      "fileLabel": "Skedar ose URL:",
+      "fileLabel": "Skedar:",
       "browse": "Shfleto..."
     },
     "tabs": {
@@ -397,6 +412,7 @@
         "graph": "Grafiku"
       },
       "loading": "Po dërgohet kërkesa...",
+      "noResponseBody": "Pa trup përgjigjeje — shih Infos për detaje",
       "noResponse": "Klikoni Dërgo për të ekzekutuar kërkesën",
       "history": {
         "list": "Lista e historikut të përgjigjeve",
@@ -612,10 +628,22 @@
     "subscribeMode": "Abonim",
     "commandMode": "Komandë",
     "command": "Komandë",
-    "args": "Argumente",
-    "argsPlaceholder": "Argumentet e komandës",
     "freeform": "E lirë",
     "freeformPlaceholder": "Komandë e lirë (anulon zgjedhjen)",
+    "fields": {
+      "key": "Çelësi",
+      "field": "Fusha",
+      "value": "Vlera",
+      "channel": "Kanal",
+      "message": "Mesazhi",
+      "start": "Fillimi",
+      "stop": "Fundi",
+      "id": "ID",
+      "fieldOrValue": "Fusha/Vlera",
+      "argument": "Argumenti"
+    },
+    "addArgument": "Shto argument",
+    "removeArgument": "Hiq argumentin",
     "tabs": {
       "channels": "Kanale",
       "command": "Komandë"
@@ -664,6 +692,7 @@
     "noMessages": "Ende nuk ka mesazhe",
     "connected": "I lidhur",
     "disconnected": "I shkëputur",
+    "consumeError": "Gabim i konsumatorit",
     "producedTo": "Prodhuar te",
     "offset": "Offset",
     "messages": "Mesazhet"
@@ -1252,43 +1281,46 @@
       "writeFile": "Write file",
       "timer": "Kohëmatës",
       "code": "Kodi",
-      "socketioConnect": "Socket.IO connect",
+      "socketioConnect": "Lidhje Socket.IO",
       "socketioSend": "Socket.IO send",
-      "socketioClose": "Socket.IO close",
-      "websocketConnect": "WebSocket connect",
-      "sseConnect": "SSE connect",
+      "socketioClose": "Mbyll lidhjen Socket.IO",
+      "socketioServerClose": "Mbyll serverin Socket.IO",
+      "websocketConnect": "Lidhje WebSocket",
+      "sseConnect": "Lidhje SSE",
       "websocketSend": "WebSocket send",
-      "websocketClose": "WebSocket close",
-      "sseClose": "SSE close",
+      "websocketClose": "Mbyll lidhjen WebSocket",
+      "websocketServerClose": "Mbyll serverin WebSocket",
+      "sseClose": "Mbyll lidhjen SSE",
       "grpcConnect": "gRPC connect",
       "grpcSend": "gRPC send",
-      "grpcClose": "gRPC close",
+      "grpcClose": "Mbyll lidhjen gRPC",
       "mqttConnect": "MQTT connect",
       "mqttSend": "MQTT publish",
-      "mqttClose": "MQTT close",
+      "mqttClose": "Mbyll lidhjen MQTT",
       "amqpConnect": "Lidhje AMQP",
       "amqpPublish": "Publikim AMQP",
-      "amqpClose": "Mbyllje AMQP",
+      "amqpClose": "Mbyll lidhjen AMQP",
       "redisSubscribe": "Redis subscribe",
-      "redisClose": "Redis close",
+      "redisClose": "Mbyll lidhjen Redis",
       "redisCommand": "Redis command",
-      "httpListen": "HTTP server",
-      "httpClose": "HTTP close",
+      "httpListen": "Server HTTP",
+      "httpClose": "Mbyll serverin HTTP",
       "grpcServerClose": "Mbyll serverin gRPC",
       "soapListen": "Server SOAP",
-      "soapClose": "Mbyll SOAP",
-      "graphqlListen": "GraphQL server",
-      "graphqlClose": "GraphQL close",
-      "odataListen": "OData server",
-      "odataClose": "OData close",
+      "soapClose": "Mbyll serverin SOAP",
+      "graphqlListen": "Server GraphQL",
+      "graphqlClose": "Mbyll serverin GraphQL",
+      "odataListen": "Server OData",
+      "odataClose": "Mbyll serverin OData",
       "graphqlSubscribe": "Abonim GraphQL",
       "graphqlUnsubscribe": "Çabonim GraphQL",
       "stompConnect": "Lidhje STOMP",
       "stompSend": "Dërgim STOMP",
-      "stompClose": "Mbyllje STOMP",
+      "stompClose": "Mbyll lidhjen STOMP",
       "kafkaProduce": "Kafka produce",
       "kafkaConsume": "Kafka consume",
-      "kafkaClose": "Kafka close"
+      "kafkaClose": "Mbyll lidhjen Kafka",
+      "grpcListen": "Server gRPC"
     },
     "comparator": {
       "result": "rezultati"
@@ -1401,6 +1433,9 @@
       },
       "file": {
         "missingPath": "Kërkohet një shteg skedari."
+      },
+      "connection": {
+        "missingName": "Emri i lidhjes është i detyrueshëm."
       }
     },
     "usage": {
@@ -1848,10 +1883,12 @@
       "socketioConnect": "Hap një lidhje Socket.IO dhe rilëshon çdo ngjarje të marrë në portin e tij.",
       "socketioSend": "Dërgon një mesazh në një lidhje Socket.IO tashmë të hapur.",
       "socketioClose": "Mbyll një lidhje Socket.IO tashmë të hapur.",
+      "socketioServerClose": "Ndalon një server fiktiv Socket.IO që tashmë po dëgjon (i deklaruar nga një nyje Socket.IO server) dhe çliron portin e tij.",
       "websocketConnect": "Hap një lidhje WebSocket të papërpunuar dhe rilëshon çdo mesazh të marrë në portin e tij.",
       "sseConnect": "Hap një lidhje SSE (Server-Sent Events) afatgjatë dhe ritransmeton çdo kuadër të marrë në portën e tij.",
       "websocketSend": "Dërgon një payload në një lidhje WebSocket tashmë të hapur.",
       "websocketClose": "Mbyll një lidhje WebSocket tashmë të hapur.",
+      "websocketServerClose": "Ndalon një server fiktiv WebSocket që tashmë po dëgjon (i deklaruar nga një nyje WebSocket server) dhe çliron portin e tij.",
       "sseClose": "Mbyll një lidhje SSE tashmë të hapur.",
       "grpcConnect": "Hap një thirrje streaming gRPC dhe rilëshon çdo kuadër të marrë në portin e tij message.",
       "grpcSend": "Shkruan një mesazh kërkese në një thirrje streaming gRPC tashmë të hapur.",
@@ -2322,5 +2359,8 @@
     "sendDestination": "Destinacioni",
     "ack": "ACK",
     "nack": "NACK"
+  },
+  "server": {
+    "configLockedWhileRunning": "Konfigurimi i kyçur ndërsa serveri po ekzekutohet"
   }
 }

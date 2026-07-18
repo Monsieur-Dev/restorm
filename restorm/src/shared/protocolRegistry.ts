@@ -115,8 +115,8 @@ export const PROTOCOL_REGISTRY = {
     serverCapable: true,
     searchIcon: 'websocket',
     scenarioKinds: [
-      'websocketConnect', 'websocketSend', 'websocketClose',
-      'socketioConnect', 'socketioSend', 'socketioClose',
+      'websocketConnect', 'websocketSend', 'websocketClose', 'websocketServerClose',
+      'socketioConnect', 'socketioSend', 'socketioClose', 'socketioServerClose',
       'mqttConnect', 'mqttSend', 'mqttClose'
     ]
   },

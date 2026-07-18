@@ -200,6 +200,18 @@ const ScrollableElementInner: React.FC<ScrollableElementProps> = ({
       const factor = 1 - Math.exp(-dt / TAU_MS);
       const liveTop = contentRef.current.scrollTop;
       const liveLeft = contentRef.current.scrollLeft;
+      // Clamp the target to the REAL scrollable range of the DOM node on
+      // every frame. The wheel handler clamps against measured
+      // contentHeight/containerHeight state, which can overshoot the true
+      // range (sticky spacing, stale measurements) — an out-of-range target
+      // can never be reached, so the settle check below would never pass
+      // and this loop would keep writing scrollTop forever, silently
+      // swallowing every external scroll (native smooth scrollTo,
+      // programmatic jumps, anchor navigation).
+      const domMaxTop = contentRef.current.scrollHeight - contentRef.current.clientHeight;
+      const domMaxLeft = contentRef.current.scrollWidth - contentRef.current.clientWidth;
+      targetScrollTopRef.current = Math.max(0, Math.min(targetScrollTopRef.current, domMaxTop));
+      targetScrollLeftRef.current = Math.max(0, Math.min(targetScrollLeftRef.current, domMaxLeft));
       const targetTop = targetScrollTopRef.current;
       const targetLeft = targetScrollLeftRef.current;
       const nextTop = liveTop + (targetTop - liveTop) * factor;
@@ -208,6 +220,20 @@ const ScrollableElementInner: React.FC<ScrollableElementProps> = ({
       // permanent sub-pixel jitter from the exponential approach.
       contentRef.current.scrollTop = Math.abs(targetTop - nextTop) < SETTLE_PX ? targetTop : nextTop;
       contentRef.current.scrollLeft = Math.abs(targetLeft - nextLeft) < SETTLE_PX ? targetLeft : nextLeft;
+      // The DOM may round scroll offsets to whole pixels: near the target
+      // the exponential step shrinks below 1px, rounds to zero, and the
+      // live value stops advancing while still > SETTLE_PX away — the loop
+      // would then spin forever, swallowing every external scroll. If the
+      // write produced no movement, jump straight to the target and adopt
+      // whatever the DOM actually accepts as the final position.
+      if (contentRef.current.scrollTop === liveTop && Math.abs(targetTop - liveTop) >= SETTLE_PX) {
+        contentRef.current.scrollTop = targetTop;
+        targetScrollTopRef.current = contentRef.current.scrollTop;
+      }
+      if (contentRef.current.scrollLeft === liveLeft && Math.abs(targetLeft - liveLeft) >= SETTLE_PX) {
+        contentRef.current.scrollLeft = targetLeft;
+        targetScrollLeftRef.current = contentRef.current.scrollLeft;
+      }
       if (
         Math.abs(targetTop - contentRef.current.scrollTop) < SETTLE_PX &&
         Math.abs(targetLeft - contentRef.current.scrollLeft) < SETTLE_PX

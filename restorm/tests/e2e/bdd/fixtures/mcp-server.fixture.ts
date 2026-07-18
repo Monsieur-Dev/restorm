@@ -14,20 +14,13 @@
 
 import { test as base } from 'playwright-bdd'
 import { _electron as electron, type ElectronApplication, type Page, expect } from '@playwright/test'
-import { mkdirSync, writeFileSync, readFileSync, existsSync, rmSync } from 'fs'
+import { mkdirSync, mkdtempSync, writeFileSync, readFileSync, existsSync, rmSync } from 'fs'
 import { join, resolve } from 'path'
 import { tmpdir } from 'os'
 import electronPath from 'electron'
 import { installSystemModalsMockingForE2E } from 'electron-core-ui/testing'
 import { withE2ECoverageEnv } from '../../helpers/coverage'
 import { createIsolatedUserDataDir } from '../../helpers/userdata-isolation'
-
-export const MCP_SERVER_TEMP_DIR = resolve(__dirname, '../../.tmp/mcp-server')
-
-function resetTempDir(): void {
-  rmSync(MCP_SERVER_TEMP_DIR, { recursive: true, force: true })
-  mkdirSync(MCP_SERVER_TEMP_DIR, { recursive: true })
-}
 
 export interface McpDiscovery {
   port: number
@@ -56,6 +49,18 @@ export interface LaunchedMcpApp {
 
 export interface McpServerFixtures {
   restormRoot: string
+  /**
+   * A fresh, uniquely-named scratch dir for THIS scenario's MCP-created
+   * projects (`mkdtempSync`, torn down after the scenario). Was previously
+   * ONE fixed path shared across the whole run, wiped-and-recreated at every
+   * scenario's launch — safe for a single scenario in isolation, but a
+   * cross-worker hazard once ≥2 projects sharing this fixture run together
+   * (the default `pnpm test:e2e`/CI/pre-push shape): one scenario's startup
+   * wipe would delete another concurrently-running scenario's in-flight
+   * files. Per-test isolation removes the shared mutable state entirely — no
+   * scenario can ever touch another's dir, regardless of scheduling.
+   */
+  mcpServerTempDir: string
   /**
    * Launch restorm (MCP on by default) with a launcher-extra discovery file
    * path, then read it back to recover `port + token`. Resolves once both are
@@ -128,9 +133,14 @@ async function readDiscoveryWithRetry(path: string, timeoutMs = 15_000): Promise
 export const test = base.extend<McpServerFixtures>({
   restormRoot: [resolve(__dirname, '../../../..'), { option: true }],
 
+  mcpServerTempDir: async ({}, use) => {
+    const dir = mkdtempSync(join(tmpdir(), 'restorm-mcp-server-'))
+    await use(dir)
+    rmSync(dir, { recursive: true, force: true })
+  },
+
   launchAppWithMcp: async ({ restormRoot }, use, testInfo) => {
     const launched: { app: ElectronApplication; logs: string[] }[] = []
-    resetTempDir()
 
     const electronExePath = electronPath as unknown as string
     const mainJsPath = join(restormRoot, 'dist/main/index.js')

@@ -258,7 +258,7 @@
         "httpPut": "HTTP – PUT isteği",
         "httpPatch": "HTTP – PATCH isteği",
         "httpDelete": "HTTP – DELETE isteği",
-        "httpServer": "HTTP mock sunucusu",
+        "httpServer": "HTTP sunucusu",
         "graphql": "GraphQL isteği",
         "grpc": "gRPC isteği",
         "grpcServerStream": "gRPC sunucu-akış isteği",
@@ -273,18 +273,33 @@
         "websocketServer": "WebSocket sunucusu",
         "socketio": "Socket.IO isteği",
         "mqtt": "MQTT request",
-        "mqttServer": "MQTT aracısı",
+        "mqttServer": "MQTT sunucusu",
         "sse": "SSE isteği",
-        "grpcServer": "gRPC mock sunucusu",
-        "soapServer": "SOAP sahte sunucusu",
-        "graphqlServer": "GraphQL mock sunucusu",
-        "odataServer": "OData mock sunucusu",
+        "grpcServer": "gRPC sunucusu",
+        "soapServer": "SOAP sunucusu",
+        "graphqlServer": "GraphQL sunucusu",
+        "odataServer": "OData sunucusu",
         "trpc": "tRPC isteği",
         "amqp": "AMQP isteği",
         "redis": "Redis isteği",
         "stomp": "STOMP isteği",
         "kafkaProduce": "Kafka isteği – Üret",
-        "kafkaConsume": "Kafka isteği – Tüket"
+        "kafkaConsume": "Kafka isteği – Tüket",
+        "httpHead": "HTTP – HEAD isteği",
+        "httpOptions": "HTTP – OPTIONS isteği",
+        "httpQuery": "HTTP – QUERY isteği",
+        "groups": {
+          "grpc": "gRPC",
+          "websocket": "WebSocket",
+          "socketio": "Socket.IO",
+          "graphql": "GraphQL",
+          "redis": "Redis",
+          "messaging": "Messaging",
+          "soap": "SOAP",
+          "odata": "OData",
+          "sse": "SSE",
+          "trpc": "tRPC"
+        }
       }
     },
     "deleteConfirm": {
@@ -376,7 +391,7 @@
       "switchTooltip": "Ortamı değiştir"
     },
     "body": {
-      "fileLabel": "Dosya veya URL:",
+      "fileLabel": "Dosya:",
       "browse": "Gözat..."
     },
     "tabs": {
@@ -397,6 +412,7 @@
         "graph": "Grafik"
       },
       "loading": "İstek gönderiliyor...",
+      "noResponseBody": "Yanıt gövdesi yok — ayrıntılar için Infos'a bakın",
       "noResponse": "İsteği yürütmek için Gönder'e tıklayın",
       "history": {
         "list": "Yanıt geçmişi listesi",
@@ -612,10 +628,22 @@
     "subscribeMode": "Abonelik",
     "commandMode": "Komut",
     "command": "Komut",
-    "args": "Bağımsız değişkenler",
-    "argsPlaceholder": "Komut bağımsız değişkenleri",
     "freeform": "Serbest",
     "freeformPlaceholder": "Serbest komut (seçimi geçersiz kılar)",
+    "fields": {
+      "key": "Anahtar",
+      "field": "Alan",
+      "value": "Değer",
+      "channel": "Kanal",
+      "message": "Mesaj",
+      "start": "Başlangıç",
+      "stop": "Bitiş",
+      "id": "ID",
+      "fieldOrValue": "Alan/Değer",
+      "argument": "Argüman"
+    },
+    "addArgument": "Argüman ekle",
+    "removeArgument": "Argümanı kaldır",
     "tabs": {
       "channels": "Kanallar",
       "command": "Komut"
@@ -664,6 +692,7 @@
     "noMessages": "Henüz mesaj yok",
     "connected": "Bağlandı",
     "disconnected": "Bağlantı kesildi",
+    "consumeError": "Tüketici hatası",
     "producedTo": "Şuraya üretildi",
     "offset": "Offset",
     "messages": "Mesajlar"
@@ -1252,43 +1281,46 @@
       "writeFile": "Write file",
       "timer": "Zamanlayıcı",
       "code": "Kod",
-      "socketioConnect": "Socket.IO connect",
+      "socketioConnect": "Socket.IO bağlantısı",
       "socketioSend": "Socket.IO send",
-      "socketioClose": "Socket.IO close",
-      "websocketConnect": "WebSocket connect",
-      "sseConnect": "SSE connect",
+      "socketioClose": "Socket.IO bağlantısını kapat",
+      "socketioServerClose": "Socket.IO sunucusunu kapat",
+      "websocketConnect": "WebSocket bağlantısı",
+      "sseConnect": "SSE bağlantısı",
       "websocketSend": "WebSocket send",
-      "websocketClose": "WebSocket close",
-      "sseClose": "SSE close",
+      "websocketClose": "WebSocket bağlantısını kapat",
+      "websocketServerClose": "WebSocket sunucusunu kapat",
+      "sseClose": "SSE bağlantısını kapat",
       "grpcConnect": "gRPC connect",
       "grpcSend": "gRPC send",
-      "grpcClose": "gRPC close",
+      "grpcClose": "gRPC bağlantısını kapat",
       "mqttConnect": "MQTT connect",
       "mqttSend": "MQTT publish",
-      "mqttClose": "MQTT close",
+      "mqttClose": "MQTT bağlantısını kapat",
       "amqpConnect": "AMQP bağlantısı",
       "amqpPublish": "AMQP yayını",
-      "amqpClose": "AMQP kapatma",
+      "amqpClose": "AMQP bağlantısını kapat",
       "redisSubscribe": "Redis subscribe",
-      "redisClose": "Redis close",
+      "redisClose": "Redis bağlantısını kapat",
       "redisCommand": "Redis command",
-      "httpListen": "HTTP server",
-      "httpClose": "HTTP close",
+      "httpListen": "HTTP sunucusu",
+      "httpClose": "HTTP sunucusunu kapat",
       "grpcServerClose": "gRPC sunucusunu kapat",
       "soapListen": "SOAP sunucusu",
-      "soapClose": "SOAP'ı kapat",
-      "graphqlListen": "GraphQL server",
-      "graphqlClose": "GraphQL close",
-      "odataListen": "OData server",
-      "odataClose": "OData close",
+      "soapClose": "SOAP sunucusunu kapat",
+      "graphqlListen": "GraphQL sunucusu",
+      "graphqlClose": "GraphQL sunucusunu kapat",
+      "odataListen": "OData sunucusu",
+      "odataClose": "OData sunucusunu kapat",
       "graphqlSubscribe": "GraphQL abone ol",
       "graphqlUnsubscribe": "GraphQL abonelikten çık",
       "stompConnect": "STOMP bağlantısı",
       "stompSend": "STOMP gönder",
-      "stompClose": "STOMP kapat",
+      "stompClose": "STOMP bağlantısını kapat",
       "kafkaProduce": "Kafka produce",
       "kafkaConsume": "Kafka consume",
-      "kafkaClose": "Kafka close"
+      "kafkaClose": "Kafka bağlantısını kapat",
+      "grpcListen": "gRPC sunucusu"
     },
     "comparator": {
       "result": "sonuç"
@@ -1401,6 +1433,9 @@
       },
       "file": {
         "missingPath": "Bir dosya yolu gereklidir."
+      },
+      "connection": {
+        "missingName": "Bağlantı adı zorunludur."
       }
     },
     "usage": {
@@ -1848,10 +1883,12 @@
       "socketioConnect": "Bir Socket.IO bağlantısı açar ve alınan her olayı portu üzerinde yeniden yayınlar.",
       "socketioSend": "Zaten açık olan bir Socket.IO bağlantısı üzerinde bir mesaj gönderir.",
       "socketioClose": "Zaten açık olan bir Socket.IO bağlantısını kapatır.",
+      "socketioServerClose": "Zaten dinleyen bir sahte Socket.IO sunucusunu (bir Socket.IO sunucu düğümü tarafından bildirilen) durdurur ve portunu serbest bırakır.",
       "websocketConnect": "Ham bir WebSocket bağlantısı açar ve alınan her mesajı portu üzerinde yeniden yayınlar.",
       "sseConnect": "Uzun süreli bir SSE (Server-Sent Events) bağlantısı açar ve alınan her çerçeveyi kendi portundan yeniden yayınlar.",
       "websocketSend": "Zaten açık olan bir WebSocket bağlantısı üzerinde bir yük gönderir.",
       "websocketClose": "Zaten açık olan bir WebSocket bağlantısını kapatır.",
+      "websocketServerClose": "Zaten dinleyen bir sahte WebSocket sunucusunu (bir WebSocket sunucu düğümü tarafından bildirilen) durdurur ve portunu serbest bırakır.",
       "sseClose": "Zaten açık olan bir SSE bağlantısını kapatır.",
       "grpcConnect": "Bir akış tabanlı gRPC çağrısı açar ve alınan her çerçeveyi message portu üzerinde yeniden yayınlar.",
       "grpcSend": "Zaten açık olan bir akış tabanlı gRPC çağrısına bir istek mesajı yazar.",
@@ -2322,5 +2359,8 @@
     "sendDestination": "Hedef",
     "ack": "ACK",
     "nack": "NACK"
+  },
+  "server": {
+    "configLockedWhileRunning": "Sunucu çalışırken yapılandırma kilitli"
   }
 }

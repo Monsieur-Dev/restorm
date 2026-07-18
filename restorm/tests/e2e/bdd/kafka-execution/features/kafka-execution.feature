@@ -35,6 +35,22 @@ Feature: Kafka execution end-to-end
     When I click the Kafka Consume button
     Then the Kafka Consume button reverts to the idle state
 
+  Scenario: Consume with no new records stays live, then delivers a live-produced record
+    # Yoann's exact manual flow: start consuming from the latest offset with no
+    # producer running, and the consumer must STAY live (not self-revert to idle
+    # a few seconds after the group join) — then a record produced afterwards
+    # must arrive live, and Stop must leave the group cleanly.
+    Given the restorm-test Kafka topic is freshly reseeded
+    When I open the "Kafka Consume Latest" request tab via MCP
+    And I click the Kafka Consume button
+    Then the Kafka Consume button stays in the consuming state
+    And the activity beam runs on the consume button, the tab badge and the sidebar badge
+    And the Kafka response panel shows 0 message frames
+    When a record is produced to the restorm-test topic
+    Then the Kafka response panel shows at least 1 message frame
+    When I click the Kafka Consume button
+    Then the Kafka Consume button reverts to the idle state
+
   Scenario: Switching mode swaps the request pane
     When I open the "Kafka Produce" request tab via MCP
     Then the Kafka mode selector reads "produce"

@@ -31,9 +31,10 @@ import type { KeyValueData } from '../../types/global.d'
 import { BaseRequestTabView } from './BaseRequestTabView'
 import { ResponseHistoryModal } from '../Modals/ResponseHistoryModal'
 import { AuthenticationConfigurationTab } from './AuthenticationConfigurationTab'
-import { Badge } from '../common/Badge'
 import { BeamWrap } from '../common/BeamWrap'
-import { mapToBadgeType } from '../../utils/badgeUtils'
+import { ServerConfigLockedHint } from '../common/ServerConfigLockedHint'
+import { RegistryBadge } from '../common/RegistryBadge'
+import { KNOWN_HTTP_METHODS, httpBadgeIdFor } from '../../../../shared/utils/httpMethod'
 import { useRestormStore } from '../../store/restormStore'
 import { buildRequestPath } from '../../utils/requestPath'
 import { DEFAULT_REQUEST_TIMEOUT_MS } from '../../../../shared/config/constants'
@@ -428,7 +429,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
   // Sync method changes to reactive object
   useEffect(() => {
     if (method !== request.method && requestIdRef.current === request.id) {
-      updateReactiveProperty(request, 'method', method as HTTPMethod)
+      updateReactiveProperty(request, 'method', method)
     }
   }, [method, request])
 
@@ -612,13 +613,20 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
     }
   }, [request])
 
-  const methodOptions = useMemo<ISelectOptionItem[]>(
-    () => ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS'].map((verb) => ({
+  // Combo entries: every well-known verb as its registry badge, plus the
+  // request's CURRENT method when it isn't one of them (a free-typed verb),
+  // so the closed trigger always has an option to render — the custom verb
+  // shows on the `http_other` color with its exact typed casing, and a
+  // known verb typed in non-standard casing ("Post") shows on its verb
+  // color with the typed casing.
+  const methodOptions = useMemo<ISelectOptionItem[]>(() => {
+    const verbs: string[] = [...KNOWN_HTTP_METHODS]
+    if (!verbs.includes(method)) verbs.push(method)
+    return verbs.map((verb) => ({
       text: verb,
-      label: <Badge type={mapToBadgeType(verb)} />
-    })),
-    []
-  )
+      label: <RegistryBadge badgeId={httpBadgeIdFor(verb)} text={verb} />
+    }))
+  }, [method])
 
   /**
    * Smart-paste: when the user pastes a `curl` command on the URL
@@ -825,6 +833,10 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
   // (Handlebars-resolved at serve time) to every matching inbound request.
   // ----------------------------------------------------------------------
   const isServer = mockServerFlag === true
+  // The served response (headers/pathParams/params/body) was snapshotted at
+  // Listen time — editing it live has no effect until the next start, so the
+  // whole config surface locks while the mock server is up.
+  const configLocked = isServer && isListening
   const { serverPort, serverPath } = useMemo(() => {
     const stripped = url.replace(/^[a-z]+:\/\//i, '')
     const slash = stripped.indexOf('/')
@@ -890,125 +902,135 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
   // updates HTTPRequestTabView's state, which survives the SplitView
   // remount that happens when the response panel toggles.
   const requestContent = (
-    <SplitView
-      orientation="vertical"
-      style={{ width: '100%', height: '100%' }}
-      data-testid="http-request-split-view"
-      onCollapsedChange={handlePanelCollapsedChange}
-    >
-      <Pane
-        title={t('requestTab.tabs.headers')}
-        initialSize={0.2}
-        collapsed={panelCollapsed.headers}
-        minSize={150}
-        data-testid="http-request-headers-pane"
-        headerActions={({ collapsed, toggle }: { collapsed: boolean; toggle: () => void }) => (
-          <Button
-            secondary
-            small
-            icon="add"
-            options={{ ariaLabel: t('requestTab.addHeader'), title: t('requestTab.addHeader') }}
-            data-testid="http-request-add-header-button"
-            onClick={() => {
-              if (collapsed) toggle()
-              headersParamsRef.current?.addRow()
-            }}
+    <div style={{ display: 'flex', flexDirection: 'column', width: '100%', height: '100%' }}>
+      {configLocked && <ServerConfigLockedHint data-testid="http-server-locked-hint" />}
+      <SplitView
+        orientation="vertical"
+        style={{ width: '100%', flex: 1, minHeight: 0 }}
+        data-testid="http-request-split-view"
+        onCollapsedChange={handlePanelCollapsedChange}
+      >
+        <Pane
+          title={t('requestTab.tabs.headers')}
+          initialSize={0.2}
+          collapsed={panelCollapsed.headers}
+          minSize={150}
+          data-testid="http-request-headers-pane"
+          headerActions={({ collapsed, toggle }: { collapsed: boolean; toggle: () => void }) => (
+            <Button
+              secondary
+              small
+              icon="add"
+              disabled={configLocked}
+              options={{ ariaLabel: t('requestTab.addHeader'), title: t('requestTab.addHeader') }}
+              data-testid="http-request-add-header-button"
+              onClick={() => {
+                if (collapsed) toggle()
+                headersParamsRef.current?.addRow()
+              }}
+            />
+          )}
+        >
+          <RestormKeyValueTable
+            key={`headers-${transportEpoch}`}
+            ref={headersParamsRef}
+            variables={emptyVariables}
+            helpers={handlebarsHelpers}
+            initialRows={request.headers}
+            onRowsChange={handleHeadersChange}
+            persistenceId={`http-headers:${request.id}`}
+            data-testid="http-request-headers-table"
+            disabled={configLocked}
           />
-        )}
-      >
-        <RestormKeyValueTable
-          key={`headers-${transportEpoch}`}
-          ref={headersParamsRef}
-          variables={emptyVariables}
-          helpers={handlebarsHelpers}
-          initialRows={request.headers}
-          onRowsChange={handleHeadersChange}
-          persistenceId={`http-headers:${request.id}`}
-          data-testid="http-request-headers-table"
-        />
-      </Pane>
-      <Pane
-        title={t('requestTab.tabs.pathParams')}
-        initialSize={0.2}
-        collapsed={panelCollapsed.pathParams}
-        minSize={150}
-        data-testid="http-request-path-params-pane"
-        headerActions={({ collapsed, toggle }: { collapsed: boolean; toggle: () => void }) => (
-          <Button
-            small
-            secondary
-            icon="add"
-            options={{ ariaLabel: t('requestTab.addParam'), title: t('requestTab.addParam') }}
-            data-testid="http-request-add-path-param-button"
-            onClick={() => {
-              if (collapsed) toggle()
-              pathParamsRef.current?.addRow()
-            }}
+        </Pane>
+        <Pane
+          title={t('requestTab.tabs.pathParams')}
+          initialSize={0.2}
+          collapsed={panelCollapsed.pathParams}
+          minSize={150}
+          data-testid="http-request-path-params-pane"
+          headerActions={({ collapsed, toggle }: { collapsed: boolean; toggle: () => void }) => (
+            <Button
+              small
+              secondary
+              icon="add"
+              disabled={configLocked}
+              options={{ ariaLabel: t('requestTab.addParam'), title: t('requestTab.addParam') }}
+              data-testid="http-request-add-path-param-button"
+              onClick={() => {
+                if (collapsed) toggle()
+                pathParamsRef.current?.addRow()
+              }}
+            />
+          )}
+        >
+          <RestormKeyValueTable
+            key={`pathParams-${transportEpoch}`}
+            ref={pathParamsRef}
+            variables={emptyVariables}
+            helpers={handlebarsHelpers}
+            initialRows={request.pathParams ?? []}
+            onRowsChange={handlePathParamsChange}
+            persistenceId={`http-path-params:${request.id}`}
+            data-testid="http-request-path-params-table"
+            disabled={configLocked}
           />
-        )}
-      >
-        <RestormKeyValueTable
-          key={`pathParams-${transportEpoch}`}
-          ref={pathParamsRef}
-          variables={emptyVariables}
-          helpers={handlebarsHelpers}
-          initialRows={request.pathParams ?? []}
-          onRowsChange={handlePathParamsChange}
-          persistenceId={`http-path-params:${request.id}`}
-          data-testid="http-request-path-params-table"
-        />
-      </Pane>
-      <Pane
-        title={t('requestTab.tabs.params')}
-        initialSize={0.2}
-        collapsed={panelCollapsed.params}
-        minSize={150}
-        data-testid="http-request-params-pane"
-        headerActions={({ collapsed, toggle }: { collapsed: boolean; toggle: () => void }) => (
-          <Button
-            small
-            secondary
-            icon="add"
-            options={{ ariaLabel: t('requestTab.addParam'), title: t('requestTab.addParam') }}
-            data-testid="http-request-add-param-button"
-            onClick={() => {
-              if (collapsed) toggle()
-              queryParamsRef.current?.addRow()
-            }}
+        </Pane>
+        <Pane
+          title={t('requestTab.tabs.params')}
+          initialSize={0.2}
+          collapsed={panelCollapsed.params}
+          minSize={150}
+          data-testid="http-request-params-pane"
+          headerActions={({ collapsed, toggle }: { collapsed: boolean; toggle: () => void }) => (
+            <Button
+              small
+              secondary
+              icon="add"
+              disabled={configLocked}
+              options={{ ariaLabel: t('requestTab.addParam'), title: t('requestTab.addParam') }}
+              data-testid="http-request-add-param-button"
+              onClick={() => {
+                if (collapsed) toggle()
+                queryParamsRef.current?.addRow()
+              }}
+            />
+          )}
+        >
+          <RestormKeyValueTable
+            key={`params-${transportEpoch}`}
+            ref={queryParamsRef}
+            variables={emptyVariables}
+            helpers={handlebarsHelpers}
+            initialRows={request.params}
+            onRowsChange={handleParamsChange}
+            persistenceId={`http-query-params:${request.id}`}
+            data-testid="http-request-query-params-table"
+            disabled={configLocked}
           />
-        )}
-      >
-        <RestormKeyValueTable
-          key={`params-${transportEpoch}`}
-          ref={queryParamsRef}
-          variables={emptyVariables}
-          helpers={handlebarsHelpers}
-          initialRows={request.params}
-          onRowsChange={handleParamsChange}
-          persistenceId={`http-query-params:${request.id}`}
-          data-testid="http-request-query-params-table"
-        />
-      </Pane>
-      <Pane
-        title={t('requestTab.tabs.body')}
-        initialSize={0.4}
-        collapsed={panelCollapsed.body}
-        data-testid="http-request-body-pane"
-      >
-        <HTTPRequestBodySection
-          bodyMode={bodyMode}
-          onBodyModeChange={setBodyMode}
-          body={body}
-          onBodyChange={setBody}
-          bodyFilePath={bodyFilePath}
-          onBodyFilePathChange={setBodyFilePath}
-          request={request}
-          onBodyFieldsChange={(rows): void => { updateReactiveProperty(request, 'body', { type: bodyMode as 'form-data' | 'x-www-form-urlencoded', fields: rows }) }}
-          variables={emptyVariables}
-          helpers={handlebarsHelpers}
-        />
-      </Pane>
-    </SplitView>
+        </Pane>
+        <Pane
+          title={t('requestTab.tabs.body')}
+          initialSize={0.4}
+          collapsed={panelCollapsed.body}
+          data-testid="http-request-body-pane"
+        >
+          <HTTPRequestBodySection
+            bodyMode={bodyMode}
+            onBodyModeChange={setBodyMode}
+            body={body}
+            onBodyChange={setBody}
+            bodyFilePath={bodyFilePath}
+            onBodyFilePathChange={setBodyFilePath}
+            request={request}
+            onBodyFieldsChange={(rows): void => { updateReactiveProperty(request, 'body', { type: bodyMode as 'form-data' | 'x-www-form-urlencoded', fields: rows }) }}
+            variables={emptyVariables}
+            helpers={handlebarsHelpers}
+            disabled={configLocked}
+          />
+        </Pane>
+      </SplitView>
+    </div>
   )
 
   // Use backend-provided code snippets
@@ -1063,8 +1085,10 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
           options={methodOptions}
           selected={methodOptions.findIndex((opt) => opt.text === method)}
           onDidSelect={(data: ISelectData) => { setMethod(data.selected) }}
-          selectBoxOptions={{ ariaLabel: t('requestTab.methodSelect'), useCustomDrawn: true }}
+          selectBoxOptions={{ ariaLabel: t('requestTab.methodSelect'), useCustomDrawn: true, editable: true }}
+          filterPlaceholder=""
           data-testid="http-request-method-select"
+          disabled={configLocked}
         />
       </div>
       {isServer ? (
@@ -1078,6 +1102,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
               onChange={setServerPort}
               options={{ placeholder: '8080' }}
               data-testid="http-server-port-input"
+              disabled={isListening}
             />
           </div>
           <span style={serverHostLabelStyle}>/</span>
@@ -1087,6 +1112,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
               onChange={setServerPath}
               options={{ placeholder: 'pets' }}
               data-testid="http-server-path-input"
+              disabled={isListening}
             />
           </div>
         </>

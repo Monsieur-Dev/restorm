@@ -1,114 +1,70 @@
 import React, { type ReactNode } from 'react'
-import { Badge, type BadgeType } from '../common/Badge'
-import type { AddChildKind } from '../MainView/Sidebar/contextMenuBuilder'
+import type { BadgeType } from '../common/Badge'
+import { RegistryBadge } from '../common/RegistryBadge'
+import { resolveBadgeId } from '../../utils/badgeUtils'
+import type { AddMenuRequestEntry } from '../MainView/Sidebar/contextMenuBuilder'
 
 /**
  * Catalogue for the scenario graph's "Add" submenu — shared by the right-click
- * full palette and the link-drag palette. It mirrors the sidebar's new-item
- * menu (create a child request of any protocol, or a sub-scenario, under the
- * open scenario) but, unlike the sidebar, the editor also drops the matching
- * node onto the graph. `folder` is intentionally absent: a folder has no node.
+ * full palette and the link-drag palette. The request / server ENTRIES and
+ * their per-protocol grouping now live in the sidebar's shared Add-menu model
+ * (`ADD_MENU_HTTP_ENTRIES` + `ADD_MENU_PROTOCOL_GROUPS` in `contextMenuBuilder`),
+ * so this palette and the sidebar menu read identically: same order, same
+ * labels, same registry badge ids. Unlike the sidebar the editor also drops the
+ * matching node onto the graph, and a folder is intentionally absent (no node).
  *
- * Only the *data* lives here; each palette builds its own `onClick` inline so
+ * What stays here is scenario-specific: the ACTION entries (send / close /
+ * listen / subscribe …) that fold into each protocol submenu, plus the badge
+ * helpers both palettes share. Each palette builds its own `onClick` inline so
  * the node-creation callbacks stay in event handlers (never invoked at render).
  */
-export interface ScenarioAddEntry {
-  kind: AddChildKind
-  badge: BadgeType
-  /** Server-mode badge (the two-part "hosts a server" pill) — set for the
-   * websocket-server / socketio-server / mqtt-server entries, matching the
-   * sidebar menu. */
-  mode?: 'server'
-  /** i18n key (shared with the sidebar menu) + English fallback. */
+
+/** Render the registry badge for a shared Add-menu request entry — the palette
+ * twin of the sidebar's request-entry icon, so both surfaces show the exact
+ * same badge (id + text + server capsule) for a given entry. */
+export function addMenuEntryBadge(entry: AddMenuRequestEntry): ReactNode {
+  return React.createElement(RegistryBadge, {
+    badgeId: entry.badgeId,
+    ...(entry.text !== undefined && { text: entry.text }),
+    ...(entry.server === true && { server: true })
+  })
+}
+
+/** A protocol NODE action badged straight from a registry id. Covers the four
+ * entries that historically rendered unbadged at the palette's top level and
+ * now fold into their protocol submenu: `graphqlSubscribe` / `graphqlUnsubscribe`
+ * (open / close a GraphQL subscription) and the `redisCommand` / `soapRequest`
+ * one-shot request nodes. */
+export interface ScenarioAddBadgedNodeEntry {
+  kind: 'graphqlSubscribe' | 'graphqlUnsubscribe' | 'redisCommand' | 'soapRequest'
+  badgeId: string
   labelKey: string
   defaultLabel: string
 }
 
-/** Request kinds, grouped exactly like the sidebar menu (HTTP methods, the
- * other protocols, then the auth request) — the separators between groups. */
-export const SCENARIO_ADD_REQUEST_GROUPS: ScenarioAddEntry[][] = [
-  [
-    { kind: 'http-get', badge: 'GET', labelKey: 'sidebar.contextMenu.add.httpGet', defaultLabel: 'HTTP request – GET' },
-    { kind: 'http-post', badge: 'POST', labelKey: 'sidebar.contextMenu.add.httpPost', defaultLabel: 'HTTP request – POST' },
-    { kind: 'http-put', badge: 'PUT', labelKey: 'sidebar.contextMenu.add.httpPut', defaultLabel: 'HTTP request – PUT' },
-    { kind: 'http-patch', badge: 'PATCH', labelKey: 'sidebar.contextMenu.add.httpPatch', defaultLabel: 'HTTP request – PATCH' },
-    { kind: 'http-delete', badge: 'DELETE', labelKey: 'sidebar.contextMenu.add.httpDelete', defaultLabel: 'HTTP request – DELETE' }
-  ],
-  // gRPC — its own group (the four call types) right after HTTP, mirroring the
-  // sidebar. Creating one from the palette makes a gRPC request of that call type
-  // + the matching node: unary → a one-shot request node; server / client / bidi
-  // → a grpcConnect (the box shows the call-type badge, so the stream direction
-  // stays visible). The connect / send / close action section below stays for
-  // driving an ALREADY-declared connection.
-  [
-    { kind: 'grpc', badge: 'UNARY', labelKey: 'sidebar.contextMenu.add.grpc', defaultLabel: 'gRPC request' },
-    { kind: 'grpc-server-stream', badge: 'S-STR', labelKey: 'sidebar.contextMenu.add.grpcServerStream', defaultLabel: 'gRPC server-streaming request' },
-    { kind: 'grpc-client-stream', badge: 'C-STR', labelKey: 'sidebar.contextMenu.add.grpcClientStream', defaultLabel: 'gRPC client-streaming request' },
-    { kind: 'grpc-bidi', badge: 'BIDI', labelKey: 'sidebar.contextMenu.add.grpcBidi', defaultLabel: 'gRPC bidirectional request' }
-  ],
-  // Streaming protocols — their CONNECT comes from creating a request (client or
-  // SERVER), mirroring both the sidebar menu and the gRPC entries above: the
-  // matching `*Connect` node is dropped bound to the new request (a connect node
-  // is useless unbound — its executor throws without a `requestId`). The
-  // send/close actions below drive an ALREADY-declared connection.
-  [
-    { kind: 'websocket', badge: 'WS', labelKey: 'sidebar.contextMenu.add.websocket', defaultLabel: 'WebSocket request' },
-    { kind: 'websocket-server', badge: 'WS', mode: 'server', labelKey: 'sidebar.contextMenu.add.websocketServer', defaultLabel: 'WebSocket server' },
-    { kind: 'socketio', badge: 'SIO', labelKey: 'sidebar.contextMenu.add.socketio', defaultLabel: 'Socket.IO request' },
-    { kind: 'socketio-server', badge: 'SIO', mode: 'server', labelKey: 'sidebar.contextMenu.add.socketioServer', defaultLabel: 'Socket.IO server' },
-    // STOMP is client-only — it connects to an external broker (e.g.
-    // ActiveMQ), no restorm-hosted server mode.
-    { kind: 'stomp', badge: 'STOMP', labelKey: 'sidebar.contextMenu.add.stomp', defaultLabel: 'STOMP request' },
-    { kind: 'mqtt', badge: 'MQTT', labelKey: 'sidebar.contextMenu.add.mqtt', defaultLabel: 'MQTT request' },
-    { kind: 'mqtt-server', badge: 'MQTT', mode: 'server', labelKey: 'sidebar.contextMenu.add.mqttServer', defaultLabel: 'MQTT broker' },
-    // SSE: receive-only streaming, no server mode — a single client entry
-    // (mirrors the sidebar's "Add" submenu).
-    { kind: 'sse', badge: 'SSE', labelKey: 'sidebar.contextMenu.add.sse', defaultLabel: 'SSE request' },
-    // AMQP is not server-capable (v1) — one entry, no `-server` twin. Only its
-    // `subscribe` mode drops a bound `amqpConnect`; `publish`/`browse` mode
-    // drops a one-shot request node (see ScenarioEditorView's onDrop / addNode).
-    { kind: 'amqp', badge: 'AMQP', labelKey: 'sidebar.contextMenu.add.amqp', defaultLabel: 'AMQP request' },
-    // Kafka has no server variant (restorm never hosts a broker) and no single
-    // request→response shape: produce (one-shot) and consume (long-lived
-    // consumer group) get their own entries, mirroring the gRPC call-type split.
-    { kind: 'kafka-produce', badge: 'KAFKA', labelKey: 'sidebar.contextMenu.add.kafkaProduce', defaultLabel: 'Kafka request – Produce' },
-    { kind: 'kafka-consume', badge: 'KAFKA', labelKey: 'sidebar.contextMenu.add.kafkaConsume', defaultLabel: 'Kafka request – Consume' },
-    // HTTP mock server is server-only (a one-shot HTTP request already has its own
-    // method entries above): dropping it creates a server: true request + a bound
-    // httpListen node.
-    { kind: 'http-server', badge: 'GET', mode: 'server', labelKey: 'sidebar.contextMenu.add.httpServer', defaultLabel: 'HTTP server' },
-    // gRPC mock server is server-only too: dropping it creates a server: true gRPC
-    // request + a bound grpcListen node.
-    { kind: 'grpc-server', badge: 'GRPC', mode: 'server', labelKey: 'sidebar.contextMenu.add.grpcServer', defaultLabel: 'gRPC server' }
-  ],
-  [
-    { kind: 'graphql', badge: 'QUERY', labelKey: 'sidebar.contextMenu.add.graphql', defaultLabel: 'GraphQL request' },
-    // GraphQL mock server is server-only: dropping it creates a server: true
-    // request + a bound graphqlListen node.
-    { kind: 'graphql-server', badge: 'QUERY', mode: 'server', labelKey: 'sidebar.contextMenu.add.graphqlServer', defaultLabel: 'GraphQL server' },
-    { kind: 'soap', badge: 'SOAP', labelKey: 'sidebar.contextMenu.add.soap', defaultLabel: 'SOAP request' },
-    // SOAP mock server is server-only (like the HTTP mock server): dropping it
-    // creates a server: true SOAP request + a bound soapListen node.
-    { kind: 'soap-server', badge: 'SOAP', mode: 'server', labelKey: 'sidebar.contextMenu.add.soapServer', defaultLabel: 'SOAP server' },
-    { kind: 'odata', badge: 'ODATA', labelKey: 'sidebar.contextMenu.add.odata', defaultLabel: 'OData request' },
-    // OData mock server is server-only: dropping it creates a server: true OData
-    // request + a bound odataListen node.
-    { kind: 'odata-server', badge: 'ODATA', mode: 'server', labelKey: 'sidebar.contextMenu.add.odataServer', defaultLabel: 'OData server' },
-    // A freshly-created Redis request always starts in command mode, so it
-    // drops the one-shot `redisCommand` node (like soap/odata above) — never
-    // a connect node. Dragging an EXISTING subscribe-mode request instead maps
-    // to `redisSubscribe` (see ScenarioEditorView's onDrop); the redisClose
-    // action below drives that already-open connection.
-    { kind: 'redis', badge: 'REDIS', labelKey: 'sidebar.contextMenu.add.redis', defaultLabel: 'Redis request' }
-  ],
-  [
-    { kind: 'auth', badge: 'AUTH', labelKey: 'sidebar.contextMenu.add.auth', defaultLabel: 'Authentication HTTP request' }
-  ]
+/** GraphQL subscription actions — subscribe (broadcast glyph) / unsubscribe
+ * (disconnect glyph), badged off the GraphQL query color. They drive an
+ * existing subscription request, so they live in the GraphQL submenu's action
+ * section (after its request entries). */
+export const SCENARIO_ADD_GRAPHQL_SUB_ACTIONS: ScenarioAddBadgedNodeEntry[] = [
+  { kind: 'graphqlSubscribe', badgeId: 'gql_subscribe', labelKey: 'scenario.nodes.graphqlSubscribe', defaultLabel: 'GraphQL subscribe' },
+  { kind: 'graphqlUnsubscribe', badgeId: 'gql_unsubscribe', labelKey: 'scenario.nodes.graphqlUnsubscribe', defaultLabel: 'GraphQL unsubscribe' }
 ]
 
-/** The sub-scenario entry (its own group, after the request groups). */
-export const SCENARIO_ADD_SCENARIO_ENTRY: ScenarioAddEntry = {
-  kind: 'scenario', badge: 'SCENARIO', labelKey: 'sidebar.contextMenu.add.scenario', defaultLabel: 'Scenario'
+/** The one-shot Redis command node — folds into the Redis submenu, badged
+ * REDIS. */
+export const SCENARIO_ADD_REDIS_COMMAND: ScenarioAddBadgedNodeEntry = {
+  kind: 'redisCommand', badgeId: 'redis', labelKey: 'scenario.nodes.redisCommand', defaultLabel: 'Redis command'
+}
+
+/** The one-shot SOAP request node — folds into the SOAP submenu, badged SOAP. */
+export const SCENARIO_ADD_SOAP_REQUEST: ScenarioAddBadgedNodeEntry = {
+  kind: 'soapRequest', badgeId: 'soap', labelKey: 'scenario.nodes.soapRequest', defaultLabel: 'SOAP Request'
+}
+
+/** Render the registry badge for a badged NODE action (no text override). */
+export function scenarioAddBadgedNodeIcon(badgeId: string): ReactNode {
+  return React.createElement(RegistryBadge, { badgeId })
 }
 
 /** Socket.IO scenario ACTION entries (a section of the "Add" submenu). Unlike
@@ -130,7 +86,22 @@ export interface ScenarioAddActionEntry {
 
 export const SCENARIO_ADD_SOCKETIO_ACTIONS: ScenarioAddActionEntry[] = [
   { kind: 'socketioSend', icon: 'arrow-up', labelKey: 'scenario.nodes.socketioSend', defaultLabel: 'Socket.IO send' },
-  { kind: 'socketioClose', icon: 'debug-disconnect', labelKey: 'scenario.nodes.socketioClose', defaultLabel: 'Socket.IO close' }
+  { kind: 'socketioClose', icon: 'debug-disconnect', labelKey: 'scenario.nodes.socketioClose', defaultLabel: 'Socket.IO connection close' }
+]
+
+/** Socket.IO mock-server action entries — CLOSE only (the listen comes from the
+ * "Socket.IO server" request entry, which drops a bound socketioConnect on a
+ * `server: true` request). Mirrors the gRPC/HTTP/SOAP server sections; badged
+ * with the SIO server pill + the close codicon. */
+export interface ScenarioAddSocketioServerActionEntry {
+  kind: 'socketioServerClose'
+  icon: string
+  labelKey: string
+  defaultLabel: string
+}
+
+export const SCENARIO_ADD_SOCKETIO_SERVER_ACTIONS: ScenarioAddSocketioServerActionEntry[] = [
+  { kind: 'socketioServerClose', icon: 'debug-disconnect', labelKey: 'scenario.nodes.socketioServerClose', defaultLabel: 'Socket.IO server close' }
 ]
 
 /** Raw-WebSocket action entries — same shape as the Socket.IO section, badged WS
@@ -144,7 +115,22 @@ export interface ScenarioAddWsActionEntry {
 
 export const SCENARIO_ADD_WEBSOCKET_ACTIONS: ScenarioAddWsActionEntry[] = [
   { kind: 'websocketSend', icon: 'arrow-up', labelKey: 'scenario.nodes.websocketSend', defaultLabel: 'WebSocket send' },
-  { kind: 'websocketClose', icon: 'debug-disconnect', labelKey: 'scenario.nodes.websocketClose', defaultLabel: 'WebSocket close' }
+  { kind: 'websocketClose', icon: 'debug-disconnect', labelKey: 'scenario.nodes.websocketClose', defaultLabel: 'WebSocket connection close' }
+]
+
+/** Raw-WebSocket mock-server action entries — CLOSE only (the listen comes from
+ * the "WebSocket server" request entry, which drops a bound websocketConnect on a
+ * `server: true` request). Mirrors the gRPC/HTTP/SOAP server sections; badged
+ * with the WS server pill + the close codicon. */
+export interface ScenarioAddWsServerActionEntry {
+  kind: 'websocketServerClose'
+  icon: string
+  labelKey: string
+  defaultLabel: string
+}
+
+export const SCENARIO_ADD_WEBSOCKET_SERVER_ACTIONS: ScenarioAddWsServerActionEntry[] = [
+  { kind: 'websocketServerClose', icon: 'debug-disconnect', labelKey: 'scenario.nodes.websocketServerClose', defaultLabel: 'WebSocket server close' }
 ]
 
 /** SSE action entries — CLOSE only (the connect comes from the request entry,
@@ -167,12 +153,12 @@ export interface ScenarioAddStompActionEntry {
 }
 
 export const SCENARIO_ADD_SSE_ACTIONS: ScenarioAddSseActionEntry[] = [
-  { kind: 'sseClose', icon: 'debug-disconnect', labelKey: 'scenario.nodes.sseClose', defaultLabel: 'SSE close' }
+  { kind: 'sseClose', icon: 'debug-disconnect', labelKey: 'scenario.nodes.sseClose', defaultLabel: 'SSE connection close' }
 ]
 
 export const SCENARIO_ADD_STOMP_ACTIONS: ScenarioAddStompActionEntry[] = [
   { kind: 'stompSend', icon: 'arrow-up', labelKey: 'scenario.nodes.stompSend', defaultLabel: 'STOMP send' },
-  { kind: 'stompClose', icon: 'debug-disconnect', labelKey: 'scenario.nodes.stompClose', defaultLabel: 'STOMP close' }
+  { kind: 'stompClose', icon: 'debug-disconnect', labelKey: 'scenario.nodes.stompClose', defaultLabel: 'STOMP connection close' }
 ]
 
 /** MQTT action entries — publish / close (connect comes from the request entry), badged MQTT. */
@@ -185,7 +171,7 @@ export interface ScenarioAddMqttActionEntry {
 
 export const SCENARIO_ADD_MQTT_ACTIONS: ScenarioAddMqttActionEntry[] = [
   { kind: 'mqttSend', icon: 'arrow-up', labelKey: 'scenario.nodes.mqttSend', defaultLabel: 'MQTT publish' },
-  { kind: 'mqttClose', icon: 'debug-disconnect', labelKey: 'scenario.nodes.mqttClose', defaultLabel: 'MQTT close' }
+  { kind: 'mqttClose', icon: 'debug-disconnect', labelKey: 'scenario.nodes.mqttClose', defaultLabel: 'MQTT connection close' }
 ]
 
 /** AMQP action entries — publish / close (connect comes from the request entry,
@@ -221,15 +207,15 @@ export interface ScenarioAddRedisActionEntry {
 
 export const SCENARIO_ADD_AMQP_ACTIONS: ScenarioAddAmqpActionEntry[] = [
   { kind: 'amqpPublish', icon: 'arrow-up', labelKey: 'scenario.nodes.amqpPublish', defaultLabel: 'AMQP publish' },
-  { kind: 'amqpClose', icon: 'debug-disconnect', labelKey: 'scenario.nodes.amqpClose', defaultLabel: 'AMQP close' }
+  { kind: 'amqpClose', icon: 'debug-disconnect', labelKey: 'scenario.nodes.amqpClose', defaultLabel: 'AMQP connection close' }
 ]
 
 export const SCENARIO_ADD_REDIS_ACTIONS: ScenarioAddRedisActionEntry[] = [
-  { kind: 'redisClose', icon: 'debug-disconnect', labelKey: 'scenario.nodes.redisClose', defaultLabel: 'Redis close' }
+  { kind: 'redisClose', icon: 'debug-disconnect', labelKey: 'scenario.nodes.redisClose', defaultLabel: 'Redis connection close' }
 ]
 
 export const SCENARIO_ADD_KAFKA_ACTIONS: ScenarioAddKafkaActionEntry[] = [
-  { kind: 'kafkaClose', icon: 'debug-disconnect', labelKey: 'scenario.nodes.kafkaClose', defaultLabel: 'Kafka close' }
+  { kind: 'kafkaClose', icon: 'debug-disconnect', labelKey: 'scenario.nodes.kafkaClose', defaultLabel: 'Kafka connection close' }
 ]
 
 /** gRPC streaming action entries — send / close only (badged GRPC). The CONNECT
@@ -246,7 +232,7 @@ export interface ScenarioAddGrpcActionEntry {
 
 export const SCENARIO_ADD_GRPC_ACTIONS: ScenarioAddGrpcActionEntry[] = [
   { kind: 'grpcSend', icon: 'arrow-up', labelKey: 'scenario.nodes.grpcSend', defaultLabel: 'gRPC send' },
-  { kind: 'grpcClose', icon: 'debug-disconnect', labelKey: 'scenario.nodes.grpcClose', defaultLabel: 'gRPC close' }
+  { kind: 'grpcClose', icon: 'debug-disconnect', labelKey: 'scenario.nodes.grpcClose', defaultLabel: 'gRPC connection close' }
 ]
 
 /** HTTP mock-server action entries — CLOSE only (the listen comes from the
@@ -261,7 +247,7 @@ export interface ScenarioAddHttpActionEntry {
 }
 
 export const SCENARIO_ADD_HTTP_ACTIONS: ScenarioAddHttpActionEntry[] = [
-  { kind: 'httpClose', icon: 'debug-disconnect', labelKey: 'scenario.nodes.httpClose', defaultLabel: 'HTTP close' }
+  { kind: 'httpClose', icon: 'debug-disconnect', labelKey: 'scenario.nodes.httpClose', defaultLabel: 'HTTP server close' }
 ]
 
 /** gRPC mock-server action entries — CLOSE only (the listen comes from the
@@ -289,7 +275,7 @@ export const SCENARIO_ADD_GRPC_SERVER_ACTIONS: ScenarioAddGrpcServerActionEntry[
 ]
 
 export const SCENARIO_ADD_SOAP_ACTIONS: ScenarioAddSoapActionEntry[] = [
-  { kind: 'soapClose', icon: 'debug-disconnect', labelKey: 'scenario.nodes.soapClose', defaultLabel: 'SOAP close' }
+  { kind: 'soapClose', icon: 'debug-disconnect', labelKey: 'scenario.nodes.soapClose', defaultLabel: 'SOAP server close' }
 ]
 
 /** GraphQL mock-server action entries — CLOSE only (the listen comes from the
@@ -302,72 +288,87 @@ export interface ScenarioAddGraphqlActionEntry {
   defaultLabel: string
 }
 
-export const SCENARIO_ADD_GRAPHQL_ACTIONS: ScenarioAddGraphqlActionEntry[] = [
-  { kind: 'graphqlClose', icon: 'debug-disconnect', labelKey: 'scenario.nodes.graphqlClose', defaultLabel: 'GraphQL close' }
+/** OData mock-server close action — the node exists (odataClose) but had no
+ * palette entry; the server section of the OData submenu surfaces it. */
+export interface ScenarioAddODataActionEntry {
+  kind: 'odataClose'
+  icon: string
+  labelKey: string
+  defaultLabel: string
+}
+export const SCENARIO_ADD_ODATA_ACTIONS: ScenarioAddODataActionEntry[] = [
+  { kind: 'odataClose', icon: 'debug-disconnect', labelKey: 'scenario.nodes.odataClose', defaultLabel: 'OData server close' }
 ]
 
-/** The protocol/scenario badge glyph for a palette entry — `mode: 'server'`
- * renders the two-part "hosts a server" pill (websocket-server / socketio-server). */
-export function scenarioAddIcon(badge: BadgeType, mode?: 'server'): ReactNode {
-  return React.createElement(Badge, { type: badge, ...(mode ? { mode } : {}) })
+export const SCENARIO_ADD_GRAPHQL_ACTIONS: ScenarioAddGraphqlActionEntry[] = [
+  { kind: 'graphqlClose', icon: 'debug-disconnect', labelKey: 'scenario.nodes.graphqlClose', defaultLabel: 'GraphQL server close' }
+]
+
+/** Render the `badgeRegistry.json` badge for a palette entry, resolving the
+ * `(type, mode, action-icon)` triple onto a registry id. Every palette badge —
+ * request entry or action entry — flows through this one helper so no palette
+ * surface rebuilds a badge by hand. */
+function paletteBadge(type: BadgeType, mode: 'server' | undefined, icon: string | undefined): ReactNode {
+  const { badgeId, server } = resolveBadgeId(type, mode, icon)
+  return React.createElement(RegistryBadge, { badgeId, ...(server === true && { server: true }) })
 }
 
-/** The green "SIO" badge with the action's codicon inside (Socket.IO section). */
+/** The "SIO" badge with the action's codicon inside (Socket.IO section). */
 export function scenarioAddSocketioIcon(icon: string): ReactNode {
-  return React.createElement(Badge, { type: 'SIO', icon })
+  return paletteBadge('SIO', undefined, icon)
 }
 
 /** The "WS" badge with the action's codicon inside (raw WebSocket section). */
 export function scenarioAddWebsocketIcon(icon: string): ReactNode {
-  return React.createElement(Badge, { type: 'WS', icon })
+  return paletteBadge('WS', undefined, icon)
 }
 
 /** The "SSE" badge with the action's codicon inside (SSE section). */
 export function scenarioAddSseIcon(icon: string): ReactNode {
-  return React.createElement(Badge, { type: 'SSE', icon })
+  return paletteBadge('SSE', undefined, icon)
 }
 
 /** The "GRPC" badge with the action's codicon inside (gRPC streaming section). */
 export function scenarioAddGrpcIcon(icon: string): ReactNode {
-  return React.createElement(Badge, { type: 'GRPC', icon })
+  return paletteBadge('GRPC', undefined, icon)
 }
 
 /** The "MQTT" badge with the action's codicon inside (MQTT section). */
 export function scenarioAddMqttIcon(icon: string): ReactNode {
-  return React.createElement(Badge, { type: 'MQTT', icon })
+  return paletteBadge('MQTT', undefined, icon)
 }
 
 /** The "AMQP" badge with the action's codicon inside (AMQP section). */
 export function scenarioAddAmqpIcon(icon: string): ReactNode {
-  return React.createElement(Badge, { type: 'AMQP', icon })
+  return paletteBadge('AMQP', undefined, icon)
 }
 
 /** The "REDIS" badge with the action's codicon inside (Redis section). */
 export function scenarioAddRedisIcon(icon: string): ReactNode {
-  return React.createElement(Badge, { type: 'REDIS', icon })
+  return paletteBadge('REDIS', undefined, icon)
 }
 
 /** The "STOMP" badge with the action's codicon inside (STOMP section). */
 export function scenarioAddStompIcon(icon: string): ReactNode {
-  return React.createElement(Badge, { type: 'STOMP', icon })
+  return paletteBadge('STOMP', undefined, icon)
 }
 
 /** The "KAFKA" badge with the action's codicon inside (Kafka section). */
 export function scenarioAddKafkaIcon(icon: string): ReactNode {
-  return React.createElement(Badge, { type: 'KAFKA', icon })
+  return paletteBadge('KAFKA', undefined, icon)
 }
 
-/** The server-pill HTTP badge with the action's codicon inside (HTTP section). */
-export function scenarioAddHttpIcon(icon: string): ReactNode {
-  return React.createElement(Badge, { type: 'GET', mode: 'server', icon })
+/** The HTTP mock-server close badge — SRV capsule + disconnect glyph. */
+export function scenarioAddHttpIcon(_icon: string): ReactNode {
+  return React.createElement(RegistryBadge, { badgeId: 'http_server_close' })
 }
 
-/** The server-pill SOAP badge with the action's codicon inside (SOAP section). */
-export function scenarioAddSoapIcon(icon: string): ReactNode {
-  return React.createElement(Badge, { type: 'SOAP', mode: 'server', icon })
+/** The SOAP mock-server close badge — SRV capsule + disconnect glyph. */
+export function scenarioAddSoapIcon(_icon: string): ReactNode {
+  return React.createElement(RegistryBadge, { badgeId: 'soap_server_close' })
 }
 
-/** The GraphQL mock-server close action's badge (QUERY server pill + codicon). */
-export function scenarioAddGraphqlIcon(icon: string): ReactNode {
-  return React.createElement(Badge, { type: 'QUERY', mode: 'server', icon })
+/** The GraphQL mock-server close badge — SRV capsule + disconnect glyph. */
+export function scenarioAddGraphqlIcon(_icon: string): ReactNode {
+  return React.createElement(RegistryBadge, { badgeId: 'gql_server_close' })
 }

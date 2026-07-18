@@ -1,7 +1,7 @@
 import React from 'react'
 import type { NodeProps } from '@xyflow/react'
 import { Button, InputBox, SelectBox, type ISelectData } from 'electron-core-ui/renderer'
-import { Badge } from '../../common/Badge'
+import { RegistryBadge } from '../../common/RegistryBadge'
 import { useTranslation } from 'react-i18next'
 import { ScenarioNodeBoxBase, type ScenarioNodeBoxType, type ScenarioNodeCell, type ScenarioNodeSection } from './ScenarioNodeBoxBase'
 import { ScenarioNameInput } from './ScenarioNameInput'
@@ -12,7 +12,8 @@ import { useAllEnvValueTypeGroups } from '../../../hooks/useAllEnvValueTypeGroup
 import { normalizeValueType } from '../../../utils/normalizeValueType'
 import { serializeValueForPersistence } from '../../../../../shared/utils/valuePersistence'
 import { readSocketioEvents } from '../../../../../shared/scenarioNodePorts'
-import { useScenarioConnections } from '../scenarioConnectionsContext'
+import { useScenarioConnections, type ConnectionPickerKind } from '../scenarioConnectionsContext'
+import { filterPickerConnections } from '../scenarioConnectionsFilter'
 import { useScenarioBoundResolver } from '../scenarioBoundResolver'
 import { isRequest } from '../../../../../shared/types/collections'
 import { readCodeString } from './scenarioCodeValue'
@@ -128,7 +129,7 @@ export const SocketioConnectNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = 
     { id: 'others', label: t('scenario.socketio.others', 'others'), port: { id: 'others', role: 'default', type: 'source' } }
   ]
 
-  const headerIcon = isServerBound ? <Badge type="SIO" mode="server" /> : <Badge type="SIO" icon="plug" />
+  const headerIcon = isServerBound ? <RegistryBadge badgeId="sio_server" /> : <RegistryBadge badgeId="sio_connect" />
   return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={right} headerIcon={headerIcon} />
 }
 
@@ -147,11 +148,14 @@ function isBlankValue(v: unknown): boolean {
  * context). When `prefill` is set, selecting a connection seeds the send node's
  * channel/payload from the connect node's linked request (only when blank, so a
  * user edit is never clobbered). */
-export const ConnectionPicker: React.FC<{ id: string; data: ScenarioNodeBoxType['data']; kind: 'socketioConnect' | 'websocketConnect' | 'stompConnect' | 'sseConnect' | 'grpcConnect' | 'mqttConnect' | 'amqpConnect' | 'redisSubscribe' | 'kafkaConsume' | 'httpListen' | 'grpcListen' | 'soapListen' | 'graphqlListen' | 'odataListen' | 'graphqlSubscribe'; prefill?: boolean }> = ({ id, data, kind, prefill }) => {
+export const ConnectionPicker: React.FC<{ id: string; data: ScenarioNodeBoxType['data']; kind: ConnectionPickerKind; prefill?: boolean; serverOnly?: boolean }> = ({ id, data, kind, prefill, serverOnly }) => {
   const { t } = useTranslation()
-  const connections = useScenarioConnections().filter((c) => c.kind === kind)
   const config = data.config ?? {}
   const selectedId = typeof config['connectionNodeId'] === 'string' ? config['connectionNodeId'] : ''
+  // The connections this picker offers: its transport `kind`, split by the
+  // optional server/client filter — but a persisted out-of-category selection is
+  // kept visible (retro-compat; see `filterPickerConnections`).
+  const connections = filterPickerConnections(useScenarioConnections(), kind, serverOnly, selectedId)
   // A leading placeholder row + one row per declared connection. The display
   // name comes from the connect node's config; a dangling reference (its connect
   // node was deleted) leaves the placeholder selected so the editor flags it.
@@ -161,7 +165,7 @@ export const ConnectionPicker: React.FC<{ id: string; data: ScenarioNodeBoxType[
   ]
   const selectedIndex = Math.max(0, connections.findIndex((c) => c.id === selectedId) + 1)
   return (
-    <div className="nodrag" onMouseDown={stop}>
+    <div className="nodrag scn-conn-picker" onMouseDown={stop}>
       <div className="scn-field-caption">{t('scenario.socketio.connection', 'connection')}</div>
       <SelectBox
         id={`scn-stream-connection-${id}`}
@@ -245,14 +249,27 @@ export const SocketioSendNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ 
     }
   ]
   // No explicit output — the action sequences via the universal `done` port.
-  return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={[]} headerIcon={<Badge type="SIO" icon="arrow-up" />} />
+  return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={[]} headerIcon={<RegistryBadge badgeId="sio_send" />} />
 }
 
-/** C (socketioClose) — closes a declared connection; sequences via `done`. */
+/** C (socketioClose) — closes a declared CLIENT connection; sequences via `done`.
+ * Its picker lists client connections only (a hosted server is closed by the
+ * dedicated socketioServerClose). */
 export const SocketioCloseNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, data, selected }) => {
   const left: ScenarioNodeSection[] = [
-    { id: 'main', rows: [{ id: 'connection', content: <ConnectionPicker id={id} data={data} kind="socketioConnect" /> }] }
+    { id: 'main', rows: [{ id: 'connection', content: <ConnectionPicker id={id} data={data} kind="socketioConnect" serverOnly={false} /> }] }
   ]
   // No explicit output — the action sequences via the universal `done` port.
-  return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={[]} headerIcon={<Badge type="SIO" icon="debug-disconnect" />} />
+  return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={[]} headerIcon={<RegistryBadge badgeId="sio_close" />} />
+}
+
+/** C (socketioServerClose) — stops a declared Socket.IO mock server (a
+ * socketioConnect node bound to a `server: true` request); sequences via `done`.
+ * Its picker lists hosted-server connections only. The header shows the SIO
+ * server-close (SRV) capsule. */
+export const SocketioServerCloseNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, data, selected }) => {
+  const left: ScenarioNodeSection[] = [
+    { id: 'main', rows: [{ id: 'connection', content: <ConnectionPicker id={id} data={data} kind="socketioConnect" serverOnly /> }] }
+  ]
+  return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={[]} headerIcon={<RegistryBadge badgeId="sio_server_close" />} />
 }

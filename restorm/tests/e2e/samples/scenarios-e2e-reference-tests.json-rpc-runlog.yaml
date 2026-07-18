@@ -1,0 +1,48 @@
+- message: 🔵 [<time>] ▶ JSON-RPC
+- message: ⚪ [<time>] start httpRequest
+  data:
+    requestId: <uuid>
+    label: JSON-RPC Echo
+- message: ⚪ [<time>] done httpRequest
+  data:
+    response:
+      request:
+        url: http://localhost:8095/rpc
+        method: POST
+        headers:
+          Content-Type: application/json
+      response:
+        status: 200
+        statusText: OK
+        headers: {}
+        body: '{"result":[null]}'
+        durationMs: <dynamic-time>
+        success: true
+- message: ⚪ [<time>] start httpRequest
+  data:
+    requestId: <uuid>
+    label: JSON-RPC Batch
+    in: true
+- message: ⚪ [<time>] done httpRequest
+  data:
+    response:
+      request:
+        url: http://localhost:8095/rpc
+        method: POST
+        headers: {}
+      response:
+        status: 200
+        statusText: ""
+        headers: {}
+        body: '{"children":[{"childId":"child-1","rpcId":"ref-1","result":[1]},{"childId":"child-2","rpcId":"ref-2","result":{"x":1}}]}'
+        durationMs: <dynamic-time>
+        success: true
+- message: ⚪ [<time>] start log
+  data:
+    level: info
+    message: jsonrpc chain done
+    in: true
+- message: 🔵 [<time>] jsonrpc chain done
+- message: ⚪ [<time>] done log
+  data: {}
+- message: 🔵 [<time>] ■ JSON-RPC

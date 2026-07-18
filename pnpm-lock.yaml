@@ -512,6 +512,9 @@ importers:
       tar:
         specifier: ^7.5.19
         version: 7.5.19
+      undici:
+        specifier: ^8.7.0
+        version: 8.7.0
       uuid:
         specifier: ^14.0.0
         version: 14.0.0
@@ -8007,6 +8010,10 @@ packages:
   undici@7.25.0:
     resolution: {integrity: sha512-xXnp4kTyor2Zq+J1FfPI6Eq3ew5h6Vl0F/8d9XU5zZQf1tX9s2Su1/3PiMmUANFULpmksxkClamIZcaUqryHsQ==}
     engines: {node: '>=20.18.1'}
+
+  undici@8.7.0:
+    resolution: {integrity: sha512-N7iQtfyLhIMOFgQubvmLV26svHpO0bqKnAiWotTQCVKCmWrcGbBotPuW1x+xwYZ2VHdSTVUfPQQnlEt1/LouTQ==}
+    engines: {node: '>=22.19.0'}
 
   unicorn-magic@0.4.0:
     resolution: {integrity: sha512-wH590V9VNgYH9g3lH9wWjTrUoKsjLF6sGLjhR4sH1LWpLmCOH0Zf7PukhDA8BiS7KHe4oPNkcTHqYkj7SOGUOw==}
@@ -17724,6 +17731,8 @@ snapshots:
   undici@6.25.0: {}
 
   undici@7.25.0: {}
+
+  undici@8.7.0: {}
 
   unicorn-magic@0.4.0: {}
 

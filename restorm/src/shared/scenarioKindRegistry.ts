@@ -201,11 +201,19 @@ export const SCENARIO_KIND_REGISTRY = {
     }
   },
   socketioClose: {
-    labelKey: 'scenario.nodes.socketioClose', defaultLabel: 'Socket.IO close', icon: 'debug-disconnect', category: 'composition',
+    labelKey: 'scenario.nodes.socketioClose', defaultLabel: 'Socket.IO connection close', icon: 'debug-disconnect', category: 'composition',
     ports: { inputs: [], outputs: [] },
     doc: {
       summary: 'Closes an already-open Socket.IO connection (declared by a socketioConnect node), firing that node\'s `done`. Pure-event action: triggered on `in`, sequences the next node via its own `done` port. Errors (to the `error` port) when no connection is selected.',
       config: { connectionNodeId: 'Id of the socketioConnect node whose connection to close.' }
+    }
+  },
+  socketioServerClose: {
+    labelKey: 'scenario.nodes.socketioServerClose', defaultLabel: 'Socket.IO server close', icon: 'debug-disconnect', category: 'composition',
+    ports: { inputs: [], outputs: [] },
+    doc: {
+      summary: 'Stops an already-listening Socket.IO mock server (declared by a socketioConnect node bound to a `server: true` request), freeing its port and firing that node\'s `done`. Pure-event action: triggered on `in`, sequences via its own `done`. Errors (to `error`) when no server is selected.',
+      config: { connectionNodeId: 'Id of the socketioConnect (server) node whose server to stop.' }
     }
   },
   websocketConnect: {
@@ -226,11 +234,19 @@ export const SCENARIO_KIND_REGISTRY = {
     }
   },
   websocketClose: {
-    labelKey: 'scenario.nodes.websocketClose', defaultLabel: 'WebSocket close', icon: 'debug-disconnect', category: 'composition',
+    labelKey: 'scenario.nodes.websocketClose', defaultLabel: 'WebSocket connection close', icon: 'debug-disconnect', category: 'composition',
     ports: { inputs: [], outputs: [] },
     doc: {
       summary: 'Closes an already-open raw WebSocket connection (declared by a websocketConnect node), firing that node\'s `done`. Pure-event action: triggered on `in`, sequences via its own `done`. Errors (to `error`) when no connection is selected.',
       config: { connectionNodeId: 'Id of the websocketConnect node whose connection to close.' }
+    }
+  },
+  websocketServerClose: {
+    labelKey: 'scenario.nodes.websocketServerClose', defaultLabel: 'WebSocket server close', icon: 'debug-disconnect', category: 'composition',
+    ports: { inputs: [], outputs: [] },
+    doc: {
+      summary: 'Stops an already-listening WebSocket mock server (declared by a websocketConnect node bound to a `server: true` request), freeing its port and firing that node\'s `done`. Pure-event action: triggered on `in`, sequences via its own `done`. Errors (to `error`) when no server is selected.',
+      config: { connectionNodeId: 'Id of the websocketConnect (server) node whose server to stop.' }
     }
   },
   sseConnect: {
@@ -243,7 +259,7 @@ export const SCENARIO_KIND_REGISTRY = {
     }
   },
   sseClose: {
-    labelKey: 'scenario.nodes.sseClose', defaultLabel: 'SSE close', icon: 'debug-disconnect', category: 'composition',
+    labelKey: 'scenario.nodes.sseClose', defaultLabel: 'SSE connection close', icon: 'debug-disconnect', category: 'composition',
     ports: { inputs: [], outputs: [] },
     doc: {
       summary: 'Closes an already-open SSE connection (declared by an sseConnect node), firing that node\'s `done`. Pure-event action: triggered on `in`, sequences via its own `done`. Errors (to `error`) when no connection is selected.',
@@ -268,7 +284,7 @@ export const SCENARIO_KIND_REGISTRY = {
     }
   },
   stompClose: {
-    labelKey: 'scenario.nodes.stompClose', defaultLabel: 'STOMP close', icon: 'debug-disconnect', category: 'composition',
+    labelKey: 'scenario.nodes.stompClose', defaultLabel: 'STOMP connection close', icon: 'debug-disconnect', category: 'composition',
     ports: { inputs: [], outputs: [] },
     doc: {
       summary: 'Sends DISCONNECT and closes an already-open STOMP connection (declared by a stompConnect node), firing that node\'s `done`. Pure-event action: triggered on `in`, sequences via its own `done`. Errors (to `error`) when no connection is selected.',
@@ -293,7 +309,7 @@ export const SCENARIO_KIND_REGISTRY = {
     }
   },
   mqttClose: {
-    labelKey: 'scenario.nodes.mqttClose', defaultLabel: 'MQTT close', icon: 'debug-disconnect', category: 'composition',
+    labelKey: 'scenario.nodes.mqttClose', defaultLabel: 'MQTT connection close', icon: 'debug-disconnect', category: 'composition',
     ports: { inputs: [], outputs: [] },
     doc: {
       summary: 'Closes an already-open MQTT connection (declared by an mqttConnect node), firing that node\'s `done`. Pure-event action: triggered on `in`, sequences via its own `done`. Errors (to `error`) when no connection is selected.',
@@ -318,7 +334,7 @@ export const SCENARIO_KIND_REGISTRY = {
     }
   },
   amqpClose: {
-    labelKey: 'scenario.nodes.amqpClose', defaultLabel: 'AMQP close', icon: 'debug-disconnect', category: 'composition',
+    labelKey: 'scenario.nodes.amqpClose', defaultLabel: 'AMQP connection close', icon: 'debug-disconnect', category: 'composition',
     ports: { inputs: [], outputs: [] },
     doc: {
       summary: 'Closes an already-open AMQP connection (declared by an amqpConnect node), firing that node\'s `done`. Pure-event action: triggered on `in`, sequences via its own `done`. Errors (to `error`) when no connection is selected.',
@@ -335,7 +351,7 @@ export const SCENARIO_KIND_REGISTRY = {
     }
   },
   redisClose: {
-    labelKey: 'scenario.nodes.redisClose', defaultLabel: 'Redis close', icon: 'debug-disconnect', category: 'composition',
+    labelKey: 'scenario.nodes.redisClose', defaultLabel: 'Redis connection close', icon: 'debug-disconnect', category: 'composition',
     ports: { inputs: [], outputs: [] },
     doc: {
       summary: 'Closes an already-open Redis subscribe connection (declared by a redisSubscribe node), firing that node\'s `done`. Pure-event action: triggered on `in`, sequences via its own `done`. Errors (to `error`) when no connection is selected.',
@@ -370,7 +386,7 @@ export const SCENARIO_KIND_REGISTRY = {
     }
   },
   kafkaClose: {
-    labelKey: 'scenario.nodes.kafkaClose', defaultLabel: 'Kafka close', icon: 'debug-disconnect', category: 'composition',
+    labelKey: 'scenario.nodes.kafkaClose', defaultLabel: 'Kafka connection close', icon: 'debug-disconnect', category: 'composition',
     ports: { inputs: [], outputs: [] },
     doc: {
       summary: 'Stops an already-open Kafka consumer (declared by a kafkaConsume node), firing that node\'s `done`. Pure-event action: triggered on `in`, sequences via its own `done`. Errors (to `error`) when no connection is selected.',
@@ -395,7 +411,7 @@ export const SCENARIO_KIND_REGISTRY = {
     }
   },
   grpcClose: {
-    labelKey: 'scenario.nodes.grpcClose', defaultLabel: 'gRPC close', icon: 'debug-disconnect', category: 'composition',
+    labelKey: 'scenario.nodes.grpcClose', defaultLabel: 'gRPC connection close', icon: 'debug-disconnect', category: 'composition',
     ports: { inputs: [], outputs: [] },
     doc: {
       summary: 'Half-closes an already-open streaming gRPC call (declared by a grpcConnect node), letting the server\'s final frames/response arrive and firing that node\'s `done`. Pure-event action: triggered on `in`, sequences via its own `done`. Errors (to `error`) when no connection is selected.',
@@ -412,7 +428,7 @@ export const SCENARIO_KIND_REGISTRY = {
     }
   },
   httpClose: {
-    labelKey: 'scenario.nodes.httpClose', defaultLabel: 'HTTP close', icon: 'debug-disconnect', category: 'composition',
+    labelKey: 'scenario.nodes.httpClose', defaultLabel: 'HTTP server close', icon: 'debug-disconnect', category: 'composition',
     ports: { inputs: [], outputs: [] },
     doc: {
       summary: 'Stops an already-listening HTTP mock server (declared by an httpListen node), freeing its port and firing that node\'s `done`. Pure-event action: triggered on `in`, sequences via its own `done`. Errors (to `error`) when no server is selected.',
@@ -446,7 +462,7 @@ export const SCENARIO_KIND_REGISTRY = {
     }
   },
   soapClose: {
-    labelKey: 'scenario.nodes.soapClose', defaultLabel: 'SOAP close', icon: 'debug-disconnect', category: 'composition',
+    labelKey: 'scenario.nodes.soapClose', defaultLabel: 'SOAP server close', icon: 'debug-disconnect', category: 'composition',
     ports: { inputs: [], outputs: [] },
     doc: {
       summary: 'Stops an already-listening SOAP mock server (declared by a soapListen node), freeing its port and firing that node\'s `done`. Pure-event action: triggered on `in`, sequences via its own `done`. Errors (to `error`) when no server is selected.',
@@ -463,7 +479,7 @@ export const SCENARIO_KIND_REGISTRY = {
     }
   },
   graphqlClose: {
-    labelKey: 'scenario.nodes.graphqlClose', defaultLabel: 'GraphQL close', icon: 'debug-disconnect', category: 'composition',
+    labelKey: 'scenario.nodes.graphqlClose', defaultLabel: 'GraphQL server close', icon: 'debug-disconnect', category: 'composition',
     ports: { inputs: [], outputs: [] },
     doc: {
       summary: 'Stops an already-listening GraphQL mock server (declared by a graphqlListen node), freeing its port and firing that node\'s `done`. Pure-event action: triggered on `in`, sequences via its own `done`. Errors (to `error`) when no server is selected.',
@@ -480,7 +496,7 @@ export const SCENARIO_KIND_REGISTRY = {
     }
   },
   odataClose: {
-    labelKey: 'scenario.nodes.odataClose', defaultLabel: 'OData close', icon: 'debug-disconnect', category: 'composition',
+    labelKey: 'scenario.nodes.odataClose', defaultLabel: 'OData server close', icon: 'debug-disconnect', category: 'composition',
     ports: { inputs: [], outputs: [] },
     doc: {
       summary: 'Stops an already-listening OData mock service (declared by an odataListen node), freeing its port and firing that node\'s `done`. Pure-event action: triggered on `in`, sequences via its own `done`. Errors (to `error`) when no server is selected.',

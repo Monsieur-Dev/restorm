@@ -155,6 +155,19 @@ export const RestormWorkbenchTab: React.FC<RestormWorkbenchTabProps> = ({
             {headerActions}
           </div>
         ) : null}
+        {/* "Used in scenarios" reverse-nav: flows in the cluster right after
+         * the header actions and BEFORE the bookmark ribbon, so it composes
+         * with the row instead of overlaying it. */}
+        {topRightAction ? (
+          <span
+            className="restorm-workbench-tab-scenario-action"
+            data-testid={`${testIdPrefix}-scenario-action`}
+            onClick={(e) => { e.stopPropagation() }}
+            onMouseDown={(e) => { e.stopPropagation() }}
+          >
+            {topRightAction}
+          </span>
+        ) : null}
         <BookmarkRibbonStack
           bookmarks={ribbonBookmarks}
           onRename={handleRibbonRename}
@@ -178,9 +191,6 @@ export const RestormWorkbenchTab: React.FC<RestormWorkbenchTabProps> = ({
           </span>
         ) : null}
       </div>
-      {/* Top-right action (e.g. "used in scenarios"), sitting between the
-       * bookmark ribbon and the favourite star. Self-positioned. */}
-      {topRightAction}
       {/* Row 1: ancestor breadcrumb — navigation only. The last segment
        * moved into the title row below, so edit / icon affordances are
        * disabled here (they live on the H1 + IconSelect). */}

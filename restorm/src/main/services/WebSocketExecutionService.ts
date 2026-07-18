@@ -1711,15 +1711,34 @@ class WebSocketExecutionService {
             fireClose(describeMqttConnectError(err, resolved.resolvedUrl))
           }
         })
+        // A broker that dies AFTER a successful connect must read as a clean
+        // disconnect, not a retry loop: mqtt.js would otherwise attempt a
+        // reconnect every second (each failing with a visible error) until the
+        // budget runs out. One 'close' after having been connected settles the
+        // stream immediately with a single clear error. (Pre-connect closes
+        // still flow through the connect timer / reconnect budget above.)
+        client.on('close', () => {
+          if (ctl.connected && !ctl.closedByCaller && !fired) {
+            clearTimeout(connectTimer)
+            this.activeConnections.delete(requestId)
+            this.broadcastProgress(requestId, 'error')
+            fireClose('MQTT broker connection lost')
+            try { client.end(true) } catch { /* already ended */ }
+          }
+        })
         // 'end' (explicit disconnect / timeout / error) is the terminal signal;
-        // 'close' is not (reconnect may follow). Clear the connect timer here too:
-        // if the client is ended (Stop) before it ever connected, a still-armed
-        // timer would later fire a stray 'error' progress event.
+        // a non-terminal 'close' (pre-connect) may still be followed by a
+        // reconnect. Clear the connect timer here too: if the client is ended
+        // (Stop) before it ever connected, a still-armed timer would later fire
+        // a stray 'error' progress event. When the close already settled the
+        // stream (broker loss above), only mop up — no second broadcast.
         client.on('end', () => {
           clearTimeout(connectTimer)
           this.activeConnections.delete(requestId)
-          this.broadcastProgress(requestId, 'completed')
-          fireClose()
+          if (!fired) {
+            this.broadcastProgress(requestId, 'completed')
+            fireClose()
+          }
         })
       } catch (err) {
         fireClose((err as Error).message || 'Connection failed')
@@ -2254,10 +2273,22 @@ class WebSocketExecutionService {
           if (!connected) { clearTimeout(connectTimer); finish(false, detail) }
         })
 
-        // 'close' fires on every dropped connection; with reconnect on it is NOT
-        // terminal (a 'reconnect' → 'connect' follows), so we don't finish here.
-        // 'end' fires only when the client is explicitly ended (disconnect / timeout
-        // / error) — that is the terminal signal.
+        // A broker that dies AFTER a successful connect must read as a clean
+        // disconnect: mqtt.js would otherwise retry every second forever,
+        // recording an endless 'reconnecting…' stream while the tab still
+        // shows Connected. One post-connect close (not caller-initiated —
+        // `disconnecting` covers manual Stop) settles it with a single
+        // record and ends the client. Pre-connect closes keep flowing into
+        // the connect timer / error path above.
+        c.on('close', () => {
+          if (connected && !c.disconnecting) {
+            record('MQTT broker connection lost — disconnected', 'error')
+            c.end(true)
+          }
+        })
+        // 'end' fires only when the client is explicitly ended (disconnect /
+        // timeout / error / the broker-loss close above) — that is the
+        // terminal signal.
         c.on('end', () => { finish(connected) })
       } catch (err) {
         finish(false, (err as Error).message || 'Connection failed')

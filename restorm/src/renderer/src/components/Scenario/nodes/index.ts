@@ -41,8 +41,8 @@ import { ToastNodeBox } from './ToastNodeBox'
 import { SchemaNodeBox, ReadFileNodeBox, WriteFileNodeBox } from './IoNodeBoxes'
 import { TimerNodeBox } from './TimerNodeBox'
 import { CodeNodeBox } from './CodeNodeBox'
-import { SocketioConnectNodeBox, SocketioSendNodeBox, SocketioCloseNodeBox } from './SocketioNodeBoxes'
-import { WebsocketConnectNodeBox, WebsocketSendNodeBox, WebsocketCloseNodeBox } from './WebsocketNodeBoxes'
+import { SocketioConnectNodeBox, SocketioSendNodeBox, SocketioCloseNodeBox, SocketioServerCloseNodeBox } from './SocketioNodeBoxes'
+import { WebsocketConnectNodeBox, WebsocketSendNodeBox, WebsocketCloseNodeBox, WebsocketServerCloseNodeBox } from './WebsocketNodeBoxes'
 import { SseConnectNodeBox, SseCloseNodeBox } from './SseNodeBoxes'
 import { StompConnectNodeBox, StompSendNodeBox, StompCloseNodeBox } from './StompNodeBoxes'
 import { MqttConnectNodeBox, MqttSendNodeBox, MqttCloseNodeBox } from './MqttNodeBoxes'
@@ -90,6 +90,7 @@ const SCENARIO_NODE_COMPONENTS: Record<ScenarioNodeKind, NodeBoxComponent> = {
   websocketConnect: WebsocketConnectNodeBox,
   websocketSend: WebsocketSendNodeBox,
   websocketClose: WebsocketCloseNodeBox,
+  websocketServerClose: WebsocketServerCloseNodeBox,
   sseConnect: SseConnectNodeBox,
   sseClose: SseCloseNodeBox,
   stompConnect: StompConnectNodeBox,
@@ -121,6 +122,7 @@ const SCENARIO_NODE_COMPONENTS: Record<ScenarioNodeKind, NodeBoxComponent> = {
   socketioConnect: SocketioConnectNodeBox,
   socketioSend: SocketioSendNodeBox,
   socketioClose: SocketioCloseNodeBox,
+  socketioServerClose: SocketioServerCloseNodeBox,
   forEach: ForEachNodeBox,
   for: ForNodeBox,
   while: WhileNodeBox,

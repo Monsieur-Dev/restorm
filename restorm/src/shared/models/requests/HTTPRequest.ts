@@ -10,7 +10,7 @@ import {
 } from 'electron-core-ui/decorators'
 import { BaseRequest } from './BaseRequest'
 import { KeyValue } from '../KeyValue'
-import type { HTTPMethod, RequestType, HTTPBodyType, RuntimeId, Icon } from '../types'
+import type { RequestType, HTTPBodyType, RuntimeId, Icon } from '../types'
 import type { QuickConfig } from '../../types/requests/QuickConfig'
 
 /** HTTP request body content */
@@ -29,10 +29,12 @@ export class HTTPRequest extends BaseRequest {
   /** Request type discriminator */
   readonly type: RequestType = 'http'
 
-  /** HTTP method (GET, POST, PUT, etc.) */
-  @graphqlField({ type: 'HTTPMethod' })
+  /** HTTP method. A well-known verb (GET/POST/…/QUERY) or an arbitrary custom
+   * token — method tokens are case-sensitive (RFC 9110 §5.1.1), so this is a
+   * free string, not the well-known-verb enum. */
+  @graphqlField({ type: 'String' })
   @searchable.property({ filterable: true })
-  method: HTTPMethod = 'GET'
+  method = 'GET'
 
   /** Request URL (may contain environment variable placeholders) */
   @graphqlField({ type: 'String' })
@@ -119,7 +121,7 @@ export class HTTPRequest extends BaseRequest {
     notes?: string
     tags?: string[]
     authenticationRequestId?: RuntimeId
-    method?: HTTPMethod
+    method?: string
     url?: string
     headers?: Parameters<typeof KeyValue.fromPlain>[0][]
     params?: Parameters<typeof KeyValue.fromPlain>[0][]

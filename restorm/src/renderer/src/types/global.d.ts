@@ -304,7 +304,7 @@ declare global {
         consumeStart: (requestId: string) => Promise<{ started: boolean }>
         cancel: (requestId: string) => Promise<boolean>
         isActive: (requestId: string) => Promise<boolean>
-        onProgress: (callback: (data: RequestProgressData) => void) => (() => void)
+        onProgress: (callback: (data: KafkaProgressData) => void) => (() => void)
         onMessage: (callback: (data: KafkaMessageData) => void) => (() => void)
       }
       odata: {
@@ -401,7 +401,7 @@ declare global {
           | { ok: true; checksum: string; payload: string; items: unknown[]; format: string | null }
           | { ok: false; error: string }
         >
-        syncCollections: (collections: unknown[]) => Promise<void>
+        syncCollections: (collections: unknown[], mcpVersion?: number) => Promise<void>
         updateFolderCustomValueLists: (folderId: string, lists: unknown[]) => Promise<void>
       }
       runtime: {
@@ -599,6 +599,14 @@ export interface HTTPProgressData {
 export interface RequestProgressData {
   requestId: string
   status: 'started' | 'completed' | 'cancelled' | 'error'
+}
+
+/** Kafka progress data — carries the consumer's error message on the `error`
+ * status so the panel can show WHY a consume ended instead of blanking to idle. */
+export interface KafkaProgressData {
+  requestId: string
+  status: 'started' | 'completed' | 'cancelled' | 'error'
+  error?: string
 }
 
 /** GraphQL execution input */

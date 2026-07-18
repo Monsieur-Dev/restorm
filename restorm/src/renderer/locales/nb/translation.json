@@ -258,7 +258,7 @@
         "httpPut": "HTTP – PUT-forespørsel",
         "httpPatch": "HTTP – PATCH-forespørsel",
         "httpDelete": "HTTP – DELETE-forespørsel",
-        "httpServer": "HTTP-mockserver",
+        "httpServer": "HTTP-server",
         "graphql": "GraphQL-forespørsel",
         "grpc": "gRPC-forespørsel",
         "grpcServerStream": "gRPC server-streaming-forespørsel",
@@ -273,18 +273,33 @@
         "websocketServer": "WebSocket-server",
         "socketio": "Socket.IO-forespørsel",
         "mqtt": "MQTT request",
-        "mqttServer": "MQTT-megler",
+        "mqttServer": "MQTT-server",
         "sse": "SSE-forespørsel",
-        "grpcServer": "gRPC-mockserver",
-        "soapServer": "SOAP-mockserver",
-        "graphqlServer": "GraphQL-mockserver",
-        "odataServer": "OData-mockserver",
+        "grpcServer": "gRPC-server",
+        "soapServer": "SOAP-server",
+        "graphqlServer": "GraphQL-server",
+        "odataServer": "OData-server",
         "trpc": "tRPC-forespørsel",
         "amqp": "AMQP-forespørsel",
         "redis": "Redis-forespørsel",
         "stomp": "STOMP-forespørsel",
         "kafkaProduce": "Kafka-forespørsel – Produser",
-        "kafkaConsume": "Kafka-forespørsel – Konsumer"
+        "kafkaConsume": "Kafka-forespørsel – Konsumer",
+        "httpHead": "HTTP – HEAD-forespørsel",
+        "httpOptions": "HTTP – OPTIONS-forespørsel",
+        "httpQuery": "HTTP – QUERY-forespørsel",
+        "groups": {
+          "grpc": "gRPC",
+          "websocket": "WebSocket",
+          "socketio": "Socket.IO",
+          "graphql": "GraphQL",
+          "redis": "Redis",
+          "messaging": "Messaging",
+          "soap": "SOAP",
+          "odata": "OData",
+          "sse": "SSE",
+          "trpc": "tRPC"
+        }
       }
     },
     "deleteConfirm": {
@@ -376,7 +391,7 @@
       "switchTooltip": "Bytt miljø"
     },
     "body": {
-      "fileLabel": "Fil eller URL:",
+      "fileLabel": "Fil:",
       "browse": "Bla gjennom..."
     },
     "tabs": {
@@ -397,6 +412,7 @@
         "graph": "Graf"
       },
       "loading": "Sender forespørsel...",
+      "noResponseBody": "Ingen svartekst — se Infos for detaljer",
       "noResponse": "Klikk Send for å utføre forespørselen",
       "history": {
         "list": "Liste over svarhistorikk",
@@ -612,10 +628,22 @@
     "subscribeMode": "Abonnement",
     "commandMode": "Kommando",
     "command": "Kommando",
-    "args": "Argumenter",
-    "argsPlaceholder": "Kommandoargumenter",
     "freeform": "Fritt",
     "freeformPlaceholder": "Fri kommando (overstyrer valget)",
+    "fields": {
+      "key": "Nøkkel",
+      "field": "Felt",
+      "value": "Verdi",
+      "channel": "Kanal",
+      "message": "Melding",
+      "start": "Start",
+      "stop": "Slutt",
+      "id": "ID",
+      "fieldOrValue": "Felt/Verdi",
+      "argument": "Argument"
+    },
+    "addArgument": "Legg til argument",
+    "removeArgument": "Fjern argument",
     "tabs": {
       "channels": "Kanaler",
       "command": "Kommando"
@@ -664,6 +692,7 @@
     "noMessages": "Ingen meldinger ennå",
     "connected": "Tilkoblet",
     "disconnected": "Frakoblet",
+    "consumeError": "Forbrukerfeil",
     "producedTo": "Produsert til",
     "offset": "Offset",
     "messages": "Meldinger"
@@ -1252,43 +1281,46 @@
       "writeFile": "Write file",
       "timer": "Tidsur",
       "code": "Kode",
-      "socketioConnect": "Socket.IO connect",
+      "socketioConnect": "Socket.IO-tilkobling",
       "socketioSend": "Socket.IO send",
-      "socketioClose": "Socket.IO close",
-      "websocketConnect": "WebSocket connect",
-      "sseConnect": "SSE connect",
+      "socketioClose": "Lukk Socket.IO-tilkobling",
+      "socketioServerClose": "Lukk Socket.IO-server",
+      "websocketConnect": "WebSocket-tilkobling",
+      "sseConnect": "SSE-tilkobling",
       "websocketSend": "WebSocket send",
-      "websocketClose": "WebSocket close",
-      "sseClose": "SSE close",
+      "websocketClose": "Lukk WebSocket-tilkobling",
+      "websocketServerClose": "Lukk WebSocket-server",
+      "sseClose": "Lukk SSE-tilkobling",
       "grpcConnect": "gRPC connect",
       "grpcSend": "gRPC send",
-      "grpcClose": "gRPC close",
+      "grpcClose": "Lukk gRPC-tilkobling",
       "mqttConnect": "MQTT connect",
       "mqttSend": "MQTT publish",
-      "mqttClose": "MQTT close",
+      "mqttClose": "Lukk MQTT-tilkobling",
       "amqpConnect": "AMQP-tilkobling",
       "amqpPublish": "AMQP-publisering",
-      "amqpClose": "AMQP-lukking",
+      "amqpClose": "Lukk AMQP-tilkobling",
       "redisSubscribe": "Redis subscribe",
-      "redisClose": "Redis close",
+      "redisClose": "Lukk Redis-tilkobling",
       "redisCommand": "Redis command",
-      "httpListen": "HTTP server",
-      "httpClose": "HTTP close",
+      "httpListen": "HTTP-server",
+      "httpClose": "Lukk HTTP-server",
       "grpcServerClose": "Lukk gRPC-server",
       "soapListen": "SOAP-server",
-      "soapClose": "Lukk SOAP",
-      "graphqlListen": "GraphQL server",
-      "graphqlClose": "GraphQL close",
-      "odataListen": "OData server",
-      "odataClose": "OData close",
+      "soapClose": "Lukk SOAP-server",
+      "graphqlListen": "GraphQL-server",
+      "graphqlClose": "Lukk GraphQL-server",
+      "odataListen": "OData-server",
+      "odataClose": "Lukk OData-server",
       "graphqlSubscribe": "GraphQL-abonnement",
       "graphqlUnsubscribe": "Si opp GraphQL-abonnement",
       "stompConnect": "STOMP-tilkobling",
       "stompSend": "STOMP-sending",
-      "stompClose": "Lukk STOMP",
+      "stompClose": "Lukk STOMP-tilkobling",
       "kafkaProduce": "Kafka produce",
       "kafkaConsume": "Kafka consume",
-      "kafkaClose": "Kafka close"
+      "kafkaClose": "Lukk Kafka-tilkobling",
+      "grpcListen": "gRPC-server"
     },
     "comparator": {
       "result": "resultat"
@@ -1401,6 +1433,9 @@
       },
       "file": {
         "missingPath": "En filsti er påkrevd."
+      },
+      "connection": {
+        "missingName": "Et tilkoblingsnavn er påkrevd."
       }
     },
     "usage": {
@@ -1848,10 +1883,12 @@
       "socketioConnect": "Åpner en Socket.IO-tilkobling og sender hver mottatt event på nytt på sin port.",
       "socketioSend": "Sender en melding på en allerede-åpen Socket.IO-tilkobling.",
       "socketioClose": "Lukker en allerede-åpen Socket.IO-tilkobling.",
+      "socketioServerClose": "Stopper en allerede-lyttende Socket.IO-mockserver (deklarert av en Socket.IO-servernode) og frigjør porten.",
       "websocketConnect": "Åpner en rå WebSocket-tilkobling og sender hver mottatt melding på nytt på sin port.",
       "sseConnect": "Åpner en langvarig SSE (Server-Sent Events)-tilkobling og videresender hver mottatte ramme på porten sin.",
       "websocketSend": "Sender en payload på en allerede-åpen WebSocket-tilkobling.",
       "websocketClose": "Lukker en allerede-åpen WebSocket-tilkobling.",
+      "websocketServerClose": "Stopper en allerede-lyttende WebSocket-mockserver (deklarert av en WebSocket-servernode) og frigjør porten.",
       "sseClose": "Lukker en allerede åpen SSE-tilkobling.",
       "grpcConnect": "Åpner et streaming-gRPC-kall og sender hver mottatt ramme på nytt på sin message-port.",
       "grpcSend": "Skriver en forespørselsmelding til et allerede-åpent streaming-gRPC-kall.",
@@ -2322,5 +2359,8 @@
     "sendDestination": "Destinasjon",
     "ack": "ACK",
     "nack": "NACK"
+  },
+  "server": {
+    "configLockedWhileRunning": "Konfigurasjon låst mens serveren kjører"
   }
 }

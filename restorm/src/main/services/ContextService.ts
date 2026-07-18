@@ -803,6 +803,13 @@ class ContextService {
       envVars.push({ name, value })
     }
 
+    // Env-only field: the environment / env-folder variables with no field-local
+    // additions. Scalar Handlebars inputs that are not the URL and carry no
+    // cumulative field context (procedure, topic, routing key, auth, ...) — for
+    // every protocol — subscribe to this so their {{...}} autocomplete offers the
+    // environment variables alongside the helper functions.
+    this.broadcastFieldVariables(`${requestId}:env`, envVars, sourceId)
+
     // Helper to add or replace a variable in cumulative array
     const addOrReplace = (
       arr: { name: string; value: string }[],

@@ -22,6 +22,7 @@ import {
 } from 'electron-core-ui/renderer'
 import { DocumentEvents, type RequestHistoryEventPayload } from '../../services/DocumentEvents'
 import { RestormVariableInputBox } from '../RestormVariableInputBox'
+import { useEnvVariables } from '../../hooks/useEnvVariables'
 import { RestormKeyValueTable, type KeyValueTableHandle } from '../RestormKeyValueTable'
 import type { GraphQLRequest, GraphQLResponse, KeyValue, ResponseHistoryDetail } from '../../../../shared/types/collections'
 import { useEnvironmentContext } from '../../contexts/useEnvironmentContext'
@@ -39,6 +40,7 @@ import { useCurlPaste, type ParsedCurl } from '../../hooks/useCurlPaste'
 import { CurlPasteCallout } from '../CurlPasteCallout'
 import { SendButtonEnvSwitcher } from './SendButtonEnvSwitcher'
 import { BeamWrap } from '../common/BeamWrap'
+import { ServerConfigLockedHint } from '../common/ServerConfigLockedHint'
 import { toasterService } from 'electron-core-ui/renderer'
 import { HeaderHoverTooltip } from '../MainView/HeaderHoverTooltip'
 import { useIsGraphqlSubscribing } from '../../services/graphqlSubscriptionListeningStore'
@@ -111,6 +113,11 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
   const isServer = request.server === true
   const [schema, setSchemaState] = useState(request.schema ?? '')
   const [mockResolvers, setMockResolversState] = useState(request.mockResolvers ?? '')
+  // Scripted resolvers (persisted field, no in-tab editor yet): must reach the
+  // mock server's full data like `schema` / `mockResolvers`, otherwise a
+  // scripted Subscription resolver never mounts and a subscribe against the
+  // mock completes instantly with "must return Async Iterable".
+  const [resolverScript, setResolverScriptState] = useState(request.resolverScript ?? '')
   const [isListening, setIsListening] = useState(false)
   const [servedCount, setServedCount] = useState(0)
 
@@ -172,6 +179,7 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
     setVariablesState(request.variables ?? '{}')
     setSchemaState(request.schema ?? '')
     setMockResolversState(request.mockResolvers ?? '')
+    setResolverScriptState(request.resolverScript ?? '')
     setOperationNameState(request.operationName)
     setResponse(null)
   }, [request])
@@ -306,7 +314,7 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
       requestType: 'graphql' as const,
       headers: toKeyValueData(request.headers),
       body: { type: 'text' as const, content: buildGraphqlBody(query, variables, operationName) },
-      ...(isServer ? { server: true, schema, mockResolvers } : {})
+      ...(isServer ? { server: true, schema, mockResolvers, resolverScript } : {})
     }
     latestPayloadRef.current = payload
 
@@ -324,7 +332,7 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
         updateDebounceRef.current = null
       }
     }
-  }, [request.id, request.headers, url, query, variables, operationName, isServer, schema, mockResolvers])
+  }, [request.id, request.headers, url, query, variables, operationName, isServer, schema, mockResolvers, resolverScript])
 
   // Sync state changes to reactive request object
   const setUrl = useCallback((value: string): void => {
@@ -454,6 +462,9 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
 
   // Stable empty array for components that get variables via their own variableId
   const emptyVariables = useMemo<VariableDefinition[]>(() => [], [])
+  // Environment variables for scalar {{...}} fields so their autocomplete
+  // offers env vars alongside the helper functions.
+  const envVariables = useEnvVariables(request.id)
 
   // Callback for headers changes - notify both reactive object and ContextService
   const handleHeadersChange = useCallback((rows: KeyValue[]): void => {
@@ -624,36 +635,39 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
   // Server-mode request content: SDL schema + canned resolvers the mock serves
   // (the "Send" panels — query / variables — have no meaning when hosting).
   const serverRequestContent = (
-    <SplitView
-      orientation="vertical"
-      style={{ width: '100%', height: '100%' }}
-      data-testid="graphql-server-splitview"
-    >
-      <Pane title={t('graphql.server.schema')} initialSize={0.6} minSize={150} data-testid="graphql-server-schema-pane">
-        <div style={{ height: '100%', border: '1px solid var(--panel-border)', borderRadius: 3 }}>
-          <CodeEditor
-            height="100%"
-            language="graphql"
-            value={schema}
-            onChange={(v) => { setSchema(v ?? '') }}
-            options={{ minimap: { enabled: false }, wordWrap: 'on', automaticLayout: true }}
-            data-testid="graphql-server-schema-editor"
-          />
-        </div>
-      </Pane>
-      <Pane title={t('graphql.server.resolvers')} initialSize={0.4} minSize={100} data-testid="graphql-server-resolvers-pane">
-        <div style={{ height: '100%', border: '1px solid var(--panel-border)', borderRadius: 3 }}>
-          <CodeEditor
-            height="100%"
-            language="json"
-            value={mockResolvers}
-            onChange={(v) => { setMockResolvers(v ?? '') }}
-            options={{ minimap: { enabled: false }, wordWrap: 'on', automaticLayout: true }}
-            data-testid="graphql-server-resolvers-editor"
-          />
-        </div>
-      </Pane>
-    </SplitView>
+    <div style={{ display: 'flex', flexDirection: 'column', width: '100%', height: '100%' }}>
+      {isListening && <ServerConfigLockedHint data-testid="graphql-server-locked-hint" />}
+      <SplitView
+        orientation="vertical"
+        style={{ width: '100%', flex: 1, minHeight: 0 }}
+        data-testid="graphql-server-splitview"
+      >
+        <Pane title={t('graphql.server.schema')} initialSize={0.6} minSize={150} data-testid="graphql-server-schema-pane">
+          <div style={{ height: '100%', border: '1px solid var(--panel-border)', borderRadius: 3 }}>
+            <CodeEditor
+              height="100%"
+              language="graphql"
+              value={schema}
+              onChange={(v) => { setSchema(v ?? '') }}
+              options={{ minimap: { enabled: false }, wordWrap: 'on', automaticLayout: true, readOnly: isListening }}
+              data-testid="graphql-server-schema-editor"
+            />
+          </div>
+        </Pane>
+        <Pane title={t('graphql.server.resolvers')} initialSize={0.4} minSize={100} data-testid="graphql-server-resolvers-pane">
+          <div style={{ height: '100%', border: '1px solid var(--panel-border)', borderRadius: 3 }}>
+            <CodeEditor
+              height="100%"
+              language="json"
+              value={mockResolvers}
+              onChange={(v) => { setMockResolvers(v ?? '') }}
+              options={{ minimap: { enabled: false }, wordWrap: 'on', automaticLayout: true, readOnly: isListening }}
+              data-testid="graphql-server-resolvers-editor"
+            />
+          </div>
+        </Pane>
+      </SplitView>
+    </div>
   )
 
   // Use backend-provided code snippets
@@ -850,6 +864,7 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
               onChange={setServerPort}
               options={{ placeholder: '4000' }}
               data-testid="graphql-server-port-input"
+              disabled={isListening}
             />
           </div>
           <span style={serverHostLabelStyle}>/</span>
@@ -859,6 +874,7 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
               onChange={setServerPath}
               options={{ placeholder: 'graphql' }}
               data-testid="graphql-server-path-input"
+              disabled={isListening}
             />
           </div>
           <BeamWrap active={isListening} size={22} borderWidth={1.5}>
@@ -881,7 +897,7 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
               <RestormVariableInputBox
                 value={url}
                 onChange={setUrl}
-                variables={emptyVariables}
+                variables={envVariables}
                 helpers={handlebarsHelpers}
                 placeholder={t('graphql.urlPlaceholder')}
                 data-testid="graphql-url-input"

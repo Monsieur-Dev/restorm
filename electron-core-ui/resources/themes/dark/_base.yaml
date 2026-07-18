@@ -567,6 +567,10 @@ colors:
     value: "#512da8"
     description: "HTTP OPTIONS badge (dark)"
 
+  - id: badge-other-background
+    value: "#616161"
+    description: "Custom/unknown HTTP verb badge (dark)"
+
   # ── Scenario UI semantic colors (dark themes) ───────────────────────────────
   # Action colors intentionally brighter on dark for icon-button contrast.
   - id: scenario-action-run-background

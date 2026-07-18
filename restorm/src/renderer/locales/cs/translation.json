@@ -260,7 +260,7 @@
         "httpPut": "HTTP – požadavek PUT",
         "httpPatch": "HTTP – požadavek PATCH",
         "httpDelete": "HTTP – požadavek DELETE",
-        "httpServer": "Server HTTP mock",
+        "httpServer": "Server HTTP",
         "graphql": "Požadavek GraphQL",
         "grpc": "Požadavek gRPC",
         "grpcServerStream": "Požadavek gRPC server-streaming",
@@ -275,18 +275,33 @@
         "websocketServer": "Server WebSocket",
         "socketio": "Požadavek Socket.IO",
         "mqtt": "MQTT request",
-        "mqttServer": "MQTT broker",
+        "mqttServer": "Server MQTT",
         "sse": "Požadavek SSE",
-        "grpcServer": "Mock server gRPC",
-        "soapServer": "Server SOAP mock",
-        "graphqlServer": "Server GraphQL mock",
-        "odataServer": "Fiktivní server OData",
+        "grpcServer": "Server gRPC",
+        "soapServer": "Server SOAP",
+        "graphqlServer": "Server GraphQL",
+        "odataServer": "Server OData",
         "trpc": "Požadavek tRPC",
         "amqp": "Požadavek AMQP",
         "redis": "Požadavek Redis",
         "stomp": "Požadavek STOMP",
         "kafkaProduce": "Požadavek Kafka – Produkovat",
-        "kafkaConsume": "Požadavek Kafka – Konzumovat"
+        "kafkaConsume": "Požadavek Kafka – Konzumovat",
+        "httpHead": "HTTP – požadavek HEAD",
+        "httpOptions": "HTTP – požadavek OPTIONS",
+        "httpQuery": "HTTP – požadavek QUERY",
+        "groups": {
+          "grpc": "gRPC",
+          "websocket": "WebSocket",
+          "socketio": "Socket.IO",
+          "graphql": "GraphQL",
+          "redis": "Redis",
+          "messaging": "Messaging",
+          "soap": "SOAP",
+          "odata": "OData",
+          "sse": "SSE",
+          "trpc": "tRPC"
+        }
       }
     },
     "deleteConfirm": {
@@ -378,7 +393,7 @@
       "switchTooltip": "Přepnout prostředí"
     },
     "body": {
-      "fileLabel": "Soubor nebo URL:",
+      "fileLabel": "Soubor:",
       "browse": "Procházet..."
     },
     "tabs": {
@@ -399,6 +414,7 @@
         "graph": "Graf"
       },
       "loading": "Odesílání požadavku...",
+      "noResponseBody": "Bez těla odpovědi — podrobnosti viz Infos",
       "noResponse": "Klikněte na Odeslat pro spuštění požadavku",
       "history": {
         "list": "Seznam historie odpovědí",
@@ -614,10 +630,22 @@
     "subscribeMode": "Odběr",
     "commandMode": "Příkaz",
     "command": "Příkaz",
-    "args": "Argumenty",
-    "argsPlaceholder": "Argumenty příkazu",
     "freeform": "Volný",
     "freeformPlaceholder": "Volný příkaz (nahrazuje výběr)",
+    "fields": {
+      "key": "Klíč",
+      "field": "Pole",
+      "value": "Hodnota",
+      "channel": "Kanál",
+      "message": "Zpráva",
+      "start": "Počátek",
+      "stop": "Konec",
+      "id": "ID",
+      "fieldOrValue": "Pole/Hodnota",
+      "argument": "Argument"
+    },
+    "addArgument": "Přidat argument",
+    "removeArgument": "Odebrat argument",
     "tabs": {
       "channels": "Kanály",
       "command": "Příkaz"
@@ -666,6 +694,7 @@
     "noMessages": "Zatím žádné zprávy",
     "connected": "Připojeno",
     "disconnected": "Odpojeno",
+    "consumeError": "Chyba konzumenta",
     "producedTo": "Odesláno do",
     "offset": "Offset",
     "messages": "Zprávy"
@@ -1254,43 +1283,46 @@
       "writeFile": "Write file",
       "timer": "Časovač",
       "code": "Kód",
-      "socketioConnect": "Socket.IO connect",
+      "socketioConnect": "Připojení Socket.IO",
       "socketioSend": "Socket.IO send",
-      "socketioClose": "Socket.IO close",
-      "websocketConnect": "WebSocket connect",
-      "sseConnect": "SSE connect",
+      "socketioClose": "Zavřít připojení Socket.IO",
+      "socketioServerClose": "Zavřít server Socket.IO",
+      "websocketConnect": "Připojení WebSocket",
+      "sseConnect": "Připojení SSE",
       "websocketSend": "WebSocket send",
-      "websocketClose": "WebSocket close",
-      "sseClose": "SSE close",
+      "websocketClose": "Zavřít připojení WebSocket",
+      "websocketServerClose": "Zavřít server WebSocket",
+      "sseClose": "Zavřít připojení SSE",
       "grpcConnect": "gRPC connect",
       "grpcSend": "gRPC send",
-      "grpcClose": "gRPC close",
+      "grpcClose": "Zavřít připojení gRPC",
       "mqttConnect": "MQTT connect",
       "mqttSend": "MQTT publish",
-      "mqttClose": "MQTT close",
+      "mqttClose": "Zavřít připojení MQTT",
       "amqpConnect": "Připojení AMQP",
       "amqpPublish": "Publikace AMQP",
-      "amqpClose": "Uzavření AMQP",
+      "amqpClose": "Zavřít připojení AMQP",
       "redisSubscribe": "Redis subscribe",
-      "redisClose": "Redis close",
+      "redisClose": "Zavřít připojení Redis",
       "redisCommand": "Redis command",
-      "httpListen": "HTTP server",
-      "httpClose": "HTTP close",
+      "httpListen": "Server HTTP",
+      "httpClose": "Zavřít server HTTP",
       "grpcServerClose": "Zavřít server gRPC",
       "soapListen": "Server SOAP",
-      "soapClose": "Zavřít SOAP",
-      "graphqlListen": "GraphQL server",
-      "graphqlClose": "GraphQL close",
-      "odataListen": "OData server",
-      "odataClose": "OData close",
+      "soapClose": "Zavřít server SOAP",
+      "graphqlListen": "Server GraphQL",
+      "graphqlClose": "Zavřít server GraphQL",
+      "odataListen": "Server OData",
+      "odataClose": "Zavřít server OData",
       "graphqlSubscribe": "Odběr GraphQL",
       "graphqlUnsubscribe": "Zrušení odběru GraphQL",
       "stompConnect": "Připojení STOMP",
       "stompSend": "Odeslání STOMP",
-      "stompClose": "Uzavření STOMP",
+      "stompClose": "Zavřít připojení STOMP",
       "kafkaProduce": "Kafka produce",
       "kafkaConsume": "Kafka consume",
-      "kafkaClose": "Kafka close"
+      "kafkaClose": "Zavřít připojení Kafka",
+      "grpcListen": "Server gRPC"
     },
     "comparator": {
       "result": "výsledek"
@@ -1403,6 +1435,9 @@
       },
       "file": {
         "missingPath": "Je vyžadována cesta k souboru."
+      },
+      "connection": {
+        "missingName": "Název připojení je povinný."
       }
     },
     "usage": {
@@ -1850,10 +1885,12 @@
       "socketioConnect": "Otevře připojení Socket.IO a znovu vysílá každou přijatou událost na svém portu.",
       "socketioSend": "Odešle zprávu do již otevřeného připojení Socket.IO.",
       "socketioClose": "Uzavře již otevřené připojení Socket.IO.",
+      "socketioServerClose": "Zastaví již naslouchající fiktivní server Socket.IO (deklarovaný uzlem Socket.IO server) a uvolní jeho port.",
       "websocketConnect": "Otevře surové připojení WebSocket a znovu vysílá každou přijatou zprávu na svém portu.",
       "sseConnect": "Otevře dlouhotrvající SSE (Server-Sent Events) připojení a znovu odešle každý přijatý rámec na svůj port.",
       "websocketSend": "Odešle payload do již otevřeného připojení WebSocket.",
       "websocketClose": "Uzavře již otevřené připojení WebSocket.",
+      "websocketServerClose": "Zastaví již naslouchající fiktivní server WebSocket (deklarovaný uzlem WebSocket server) a uvolní jeho port.",
       "sseClose": "Zavře již otevřené SSE připojení.",
       "grpcConnect": "Otevře streamovací volání gRPC a znovu vysílá každý přijatý rámec na svém portu message.",
       "grpcSend": "Zapíše zprávu požadavku do již otevřeného streamovacího volání gRPC.",
@@ -2324,5 +2361,8 @@
     "sendDestination": "Cíl",
     "ack": "ACK",
     "nack": "NACK"
+  },
+  "server": {
+    "configLockedWhileRunning": "Konfigurace uzamčena během běhu serveru"
   }
 }

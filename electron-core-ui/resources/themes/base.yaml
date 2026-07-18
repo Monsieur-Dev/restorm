@@ -210,6 +210,10 @@ variables:
     value: "#4527a0"
     description: "HTTP OPTIONS badge background (Material deep purple)"
 
+  - id: badge-other-background
+    value: "#616161"
+    description: "Custom/unknown HTTP verb badge background (Material grey 700)"
+
   # ── gRPC call-type badge colors ────────────────────────────────────────────
   - id: badge-grpc-unary-background
     value: "#0277bd"

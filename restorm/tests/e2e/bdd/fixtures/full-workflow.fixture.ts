@@ -1,25 +1,13 @@
 import { test as base } from 'playwright-bdd'
 import { _electron as electron, type ElectronApplication, type Page, expect } from '@playwright/test'
-import { mkdirSync, writeFileSync, readFileSync, existsSync, rmSync } from 'fs'
+import { mkdirSync, mkdtempSync, writeFileSync, readFileSync, existsSync, rmSync } from 'fs'
 import { join, resolve } from 'path'
+import { tmpdir } from 'os'
 import electronPath from 'electron'
 import { installSystemModalsMockingForE2E } from 'electron-core-ui/testing'
 import { withE2ECoverageEnv } from '../../helpers/coverage'
 import { createIsolatedUserDataDir } from '../../helpers/userdata-isolation'
 import { collectBlockingRendererMessages, summariseBlockingMessages } from '../../helpers/renderer-log-guard'
-
-/**
- * Project-local scratch directory for files the scenario creates
- * (collections saved via File → New, mocked save-dialog targets, …).
- * Lives under `restorm/tests/e2e/.tmp/` and is wiped at the start of
- * each scenario. Gitignored.
- */
-export const FULL_WORKFLOW_TEMP_DIR = resolve(__dirname, '../../.tmp/full-workflow')
-
-function resetTempDir(): void {
-  rmSync(FULL_WORKFLOW_TEMP_DIR, { recursive: true, force: true })
-  mkdirSync(FULL_WORKFLOW_TEMP_DIR, { recursive: true })
-}
 
 export interface SavedWindowBounds {
   x: number
@@ -49,6 +37,20 @@ export interface LaunchOptions {
 export interface FullWorkflowFixtures {
   restormRoot: string
   /**
+   * A fresh, uniquely-named scratch dir for THIS scenario's created files
+   * (collections saved via File → New, mocked save/open-dialog targets, …).
+   * Created with `mkdtempSync` at fixture setup, torn down after the
+   * scenario. Was previously ONE fixed path under `restorm/tests/e2e/.tmp/`
+   * shared across the whole run, wiped-and-recreated at every scenario's
+   * launch — safe for a single scenario in isolation, but a cross-worker
+   * hazard once ≥2 scenarios run together (the default `pnpm test:e2e`/CI/
+   * pre-push shape): one scenario's startup wipe would delete another
+   * concurrently-running scenario's in-flight files. Per-test isolation
+   * removes the shared mutable state entirely — no scenario can ever touch
+   * another's dir, regardless of scheduling.
+   */
+  fullWorkflowTempDir: string
+  /**
    * Launch an Electron app. On the first call (or when `relaunch` is
    * false) runs a bootstrap launch with `--clear-settings` to discover
    * the userData path, writes `seed` to `config.json`, then starts the
@@ -63,12 +65,15 @@ export interface FullWorkflowFixtures {
 export const test = base.extend<FullWorkflowFixtures>({
   restormRoot: [resolve(__dirname, '../../../..'), { option: true }],
 
+  fullWorkflowTempDir: async ({}, use) => {
+    const dir = mkdtempSync(join(tmpdir(), 'restorm-full-workflow-'))
+    await use(dir)
+    rmSync(dir, { recursive: true, force: true })
+  },
+
   launchApp: async ({ restormRoot }, use, testInfo) => {
     const launched: { app: ElectronApplication; logs: string[] }[] = []
     const state: { configPath: string | null } = { configPath: null }
-
-    // Each scenario starts with a clean scratch dir.
-    resetTempDir()
 
     const electronExePath = electronPath as unknown as string
     const mainJsPath = join(restormRoot, 'dist/main/index.js')

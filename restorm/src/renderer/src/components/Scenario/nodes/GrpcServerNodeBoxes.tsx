@@ -2,7 +2,7 @@ import React from 'react'
 import type { NodeProps } from '@xyflow/react'
 import { useTranslation } from 'react-i18next'
 import { Button } from 'electron-core-ui/renderer'
-import { Badge } from '../../common/Badge'
+import { RegistryBadge } from '../../common/RegistryBadge'
 import { ScenarioNodeBoxBase, type ScenarioNodeBoxType, type ScenarioNodeCell, type ScenarioNodeSection } from './ScenarioNodeBoxBase'
 import { ScenarioNameInput } from './ScenarioNameInput'
 import { ConnectionPicker } from './SocketioNodeBoxes'
@@ -74,7 +74,7 @@ export const GrpcListenNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id
     { id: 'served', label: t('scenario.http.served', 'served'), port: { id: 'served', type: 'source' } }
   ]
   // The header shows the gRPC server (SRV) capsule.
-  return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={right} headerIcon={<Badge type="GRPC" mode="server" />} />
+  return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={right} headerIcon={<RegistryBadge badgeId="grpc_server" />} />
 }
 
 /** C (grpcServerClose) — stops a declared gRPC mock server; sequences via `done`. */
@@ -82,5 +82,5 @@ export const GrpcServerCloseNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = 
   const left: ScenarioNodeSection[] = [
     { id: 'main', rows: [{ id: 'connection', content: <ConnectionPicker id={id} data={data} kind="grpcListen" /> }] }
   ]
-  return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={[]} headerIcon={<Badge type="GRPC" mode="server" icon="debug-disconnect" />} />
+  return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={[]} headerIcon={<RegistryBadge badgeId="grpc_server_close" />} />
 }

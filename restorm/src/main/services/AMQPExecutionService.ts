@@ -394,6 +394,12 @@ class AMQPExecutionService {
           logger.warn('[AMQPExecutionService] channel error, recreating channel', { requestId, error: err.message })
           void setupChannel(model).catch((e: unknown) => { settle(e instanceof Error ? e.message : String(e)) })
         })
+        // Declare the queue before consuming: BasicConsume on a queue nobody
+        // pre-declared hard-fails the channel, so a subscribe only worked
+        // against queues provisioned out-of-band (e.g. the mock broker's
+        // definitions file). assertQueue is idempotent for an existing queue
+        // with matching params — durable:true mirrors the provisioned ones.
+        await channel.assertQueue(resolved.queue, { durable: true })
         await channel.consume(resolved.queue, (msg: amqplib.ConsumeMessage | null) => {
           if (msg === null) return // the broker cancelled this consumer
           channelErrorBudget.onConnect() // a live delivery resets the error budget

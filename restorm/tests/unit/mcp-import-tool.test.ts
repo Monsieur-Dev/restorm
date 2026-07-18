@@ -50,7 +50,9 @@ vi.mock('../../src/main/services/CollectionStore', () => ({
   collectionStore: {
     findById: (id: string) => mockState.findById(id) as unknown,
     getCollections: () => [],
-    setCollections: () => undefined
+    setCollections: () => true,
+    getModelVersion: () => 0,
+    bumpModelVersion: () => 1
   },
   pubsub: {
     publish: () => undefined

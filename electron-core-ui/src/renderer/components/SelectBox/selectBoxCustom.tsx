@@ -28,7 +28,8 @@ const SelectBoxList: React.FC<SelectBoxListProps> = ({
   'data-testid': dataTestId,
   filterThreshold,
   filterPlaceholder,
-  filterTestId
+  filterTestId,
+  disabled = false
 }) => {
   const testId = dataTestId ?? id
 
@@ -41,9 +42,13 @@ const SelectBoxList: React.FC<SelectBoxListProps> = ({
     return option.text
   }, [])
 
-  const filterArgs = filterThreshold === undefined
+  // Editable (combobox) mode: the filter row IS the free-text entry, so it
+  // must render regardless of how few options there are.
+  const editable = selectBoxOptions.editable === true
+  const effectiveThreshold = editable ? 0 : filterThreshold
+  const filterArgs = effectiveThreshold === undefined
     ? { items: options, getLabel: getOptionLabel }
-    : { items: options, threshold: filterThreshold, getLabel: getOptionLabel }
+    : { items: options, threshold: effectiveThreshold, getLabel: getOptionLabel }
   const {
     shouldRenderFilter,
     filterValue,
@@ -78,6 +83,17 @@ const SelectBoxList: React.FC<SelectBoxListProps> = ({
   const setInternalFocus = useCallback((value: number | null) => {
     setInternalState(prev => ({ ...prev, forSelected: selected, focus: value }))
   }, [selected])
+
+  // Free-text commits bypass handleSelectChange, so a stale pick left in
+  // `internalState.selection` can resurrect: if the committed text lands at
+  // the SAME index as the current `selected` prop (a custom verb replacing
+  // another custom verb keeps the index), `forSelected === selected` makes
+  // the stale selection valid again and the trigger renders the OLD pick.
+  // Drop the internal override entirely — the controlled `selected` prop is
+  // the only truth after a free-text commit.
+  const clearInternalState = useCallback(() => {
+    setInternalState({ forSelected: -1, selection: null, focus: null })
+  }, [])
   
   const selectRef = useRef<HTMLSelectElement>(null)
   const dropdownRef = useRef<HTMLDivElement>(null)
@@ -99,10 +115,17 @@ const SelectBoxList: React.FC<SelectBoxListProps> = ({
 
   // Show dropdown
   const showDropdown = useCallback((): void => {
-    if (isVisible) return
+    if (isVisible || disabled) return
     setIsVisible(true)
     setInternalFocus(currentSelection)
-  }, [isVisible, currentSelection, setInternalFocus])
+  }, [isVisible, disabled, currentSelection, setInternalFocus])
+
+  // A control disabled while its dropdown is open (e.g. the server it
+  // configures just started listening) must close immediately — it can't
+  // stay open and interactive underneath a greyed-out trigger.
+  useEffect(() => {
+    if (disabled && isVisible) setIsVisible(false)
+  }, [disabled, isVisible])
 
   // Reset the filter every time the popup closes — the user opens
   // a fresh dropdown, not a session-leftover view.
@@ -151,13 +174,14 @@ const SelectBoxList: React.FC<SelectBoxListProps> = ({
   const handleSelectClick = useCallback((event: React.MouseEvent): void => {
     event.preventDefault()
     event.stopPropagation()
-    
+    if (disabled) return
+
     if (isVisible) {
       hideDropdown(true)
     } else {
       showDropdown()
     }
-  }, [isVisible, showDropdown, hideDropdown])
+  }, [isVisible, disabled, showDropdown, hideDropdown])
 
   // Handle mouse down on select element
   const handleSelectMouseDown = useCallback((event: React.MouseEvent): void => {
@@ -167,6 +191,7 @@ const SelectBoxList: React.FC<SelectBoxListProps> = ({
 
   // Handle keyboard navigation
   const handleKeyDown = useCallback((event: React.KeyboardEvent): void => {
+    if (disabled) return
     let showDropDown = false
 
     if (isMacintosh) {
@@ -187,7 +212,7 @@ const SelectBoxList: React.FC<SelectBoxListProps> = ({
       event.preventDefault()
       event.stopPropagation()
     }
-  }, [showDropdown])
+  }, [disabled, showDropdown])
 
   // Handle option click
   const handleOptionClick = useCallback((index: number): void => {
@@ -270,14 +295,42 @@ const SelectBoxList: React.FC<SelectBoxListProps> = ({
     }
   }, [isVisible, focusedIndex, options, filteredItems, filteredIndexFor, originalIndexFor, handleSelectChange, hideDropdown, setInternalFocus])
 
+  // Editable mode: whether the user arrow-navigated the list since the last
+  // text change. Enter must commit what the user TYPED, verbatim — even when
+  // it visually matches an option (typing "Post" must not silently become
+  // "POST") — unless they explicitly moved focus onto an option with the
+  // arrow keys, which switches Enter back to pick-the-focused-option.
+  const navigatedSinceTypingRef = useRef(false)
+
   // Filter input keyboard: Esc clear-then-close (delegated to hook),
   // ArrowDown/ArrowUp/Home/End/Enter mirror the listbox handler so
   // the user can navigate without leaving the input.
   const handleFilterInputKeyDown = useCallback((event: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>): void => {
     handleFilterKeyDown(event)
     if (event.defaultPrevented) return
+    if (editable) {
+      if (event.key === 'ArrowDown' || event.key === 'ArrowUp' || event.key === 'Home' || event.key === 'End') {
+        navigatedSinceTypingRef.current = true
+      } else if (event.key === 'Enter') {
+        const raw = filterValue.trim()
+        // With an empty filtered list there is nothing to pick — commit the
+        // text even after arrow presses (they had nothing to focus).
+        if (raw !== '' && (!navigatedSinceTypingRef.current || filteredItems.length === 0)) {
+          event.preventDefault()
+          clearInternalState()
+          onDidSelect({ selected: raw, index: -1 })
+          hideDropdown(true)
+          return
+        }
+      }
+    }
     handleDropdownKeyDown(event as unknown as React.KeyboardEvent)
-  }, [handleFilterKeyDown, handleDropdownKeyDown])
+  }, [handleFilterKeyDown, handleDropdownKeyDown, editable, filterValue, filteredItems, onDidSelect, hideDropdown, clearInternalState])
+
+  // Any text change re-arms type-commit mode (and a fresh popup starts there).
+  useEffect(() => {
+    navigatedSinceTypingRef.current = false
+  }, [filterValue, isVisible])
 
   // Handle click outside to close dropdown
   useEffect(() => {
@@ -286,6 +339,17 @@ const SelectBoxList: React.FC<SelectBoxListProps> = ({
       if (dropdownRef.current && !dropdownRef.current.contains(target) &&
           triggerRef.current && !triggerRef.current.contains(target) &&
           selectRef.current && !selectRef.current.contains(target)) {
+        // Editable mode commits on focus loss too: typed text left in the
+        // entry when the popup closes is applied, not discarded (Escape
+        // remains the explicit cancel path). Clicks INSIDE the dropdown
+        // don't land here, so option picks can't double-commit.
+        if (editable) {
+          const raw = filterValue.trim()
+          if (raw !== '') {
+            clearInternalState()
+            onDidSelect({ selected: raw, index: -1 })
+          }
+        }
         hideDropdown(false)
       }
     }
@@ -301,7 +365,7 @@ const SelectBoxList: React.FC<SelectBoxListProps> = ({
     return () => {
       document.removeEventListener('mousedown', handleClickOutside, true)
     }
-  }, [isVisible, hideDropdown])
+  }, [isVisible, hideDropdown, editable, filterValue, onDidSelect, clearInternalState])
 
   // Apply styles when component mounts or styles change
   useEffect(() => {
@@ -331,6 +395,7 @@ const SelectBoxList: React.FC<SelectBoxListProps> = ({
     'select-box-dropdown-padding',
     'setting-control-focus-target',
     isVisible ? 'synthetic-focus' : '',
+    disabled ? 'disabled' : '',
     className
   ].filter(Boolean).join(' ')
 
@@ -368,7 +433,8 @@ const SelectBoxList: React.FC<SelectBoxListProps> = ({
         aria-label={selectBoxOptions.ariaLabel}
         aria-description={selectBoxOptions.ariaDescription}
         aria-expanded={isVisible}
-        tabIndex={0}
+        tabIndex={disabled ? -1 : 0}
+        disabled={disabled}
         data-testid={`${testId}-select`}
       >
         {options.map((option, index) => (
@@ -389,11 +455,12 @@ const SelectBoxList: React.FC<SelectBoxListProps> = ({
         onClick={handleSelectClick}
         onMouseDown={handleSelectMouseDown}
         onKeyDown={handleKeyDown}
-        tabIndex={0}
+        tabIndex={disabled ? -1 : 0}
         role="combobox"
         aria-expanded={isVisible}
         aria-haspopup="listbox"
         aria-controls={`${id}-listbox`}
+        aria-disabled={disabled}
         data-testid={`${testId}-trigger`}
       >
         <span className="select-text">

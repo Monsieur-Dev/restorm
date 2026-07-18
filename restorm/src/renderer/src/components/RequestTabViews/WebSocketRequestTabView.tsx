@@ -22,6 +22,7 @@ import {
 } from 'electron-core-ui/renderer'
 import { DocumentEvents, type RequestHistoryEventPayload } from '../../services/DocumentEvents'
 import { RestormVariableInputBox } from '../RestormVariableInputBox'
+import { useEnvVariables } from '../../hooks/useEnvVariables'
 import { MqttOptionsPanel } from './MqttOptionsPanel'
 import { RestormKeyValueTable, type KeyValueTableHandle } from '../RestormKeyValueTable'
 import type { WebSocketRequest, WebSocketResponse, WebSocketMessage, KeyValue, ResponseHistoryDetail } from '../../../../shared/types/collections'
@@ -326,6 +327,9 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
 
   // Stable empty array for components that get variables via their own variableId
   const emptyVariables = useMemo<VariableDefinition[]>(() => [], [])
+  // Environment variables for scalar {{...}} fields so their autocomplete
+  // offers env vars alongside the helper functions.
+  const envVariables = useEnvVariables(request.id)
 
   // Callback for headers changes - notify both reactive object and ContextService
   const handleHeadersChange = useCallback((rows: KeyValue[]): void => {
@@ -407,7 +411,7 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
                   key={`event-${transportEpoch}`}
                   value={event}
                   onChange={setEvent}
-                  variables={emptyVariables}
+                  variables={envVariables}
                   helpers={handlebarsHelpers}
                   placeholder={request.protocol === 'mqtt' ? (isMqttServer ? 'restorm/demo/#' : 'topic/name') : 'event-name'}
                   data-testid="websocket-event-input"
@@ -416,7 +420,7 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
             </div>
           )}
           {request.protocol === 'mqtt' && (
-            <MqttOptionsPanel key={`mqtt-${transportEpoch}`} request={request} variables={emptyVariables} helpers={handlebarsHelpers} server={isServer} />
+            <MqttOptionsPanel key={`mqtt-${transportEpoch}`} request={request} variables={envVariables} helpers={handlebarsHelpers} server={isServer} />
           )}
           <div style={{ flex: 1, border: '1px solid var(--panel-border)', borderRadius: 3 }}>
             <CodeEditor
@@ -680,47 +684,59 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
     <ControlGroup data-testid="websocket-url-section">
       {isMqttServer ? (
         <>
-          <div style={{ width: 96, minWidth: 80 }} data-testid="mqtt-broker-scheme">
-            <SelectBox
-              id={`mqtt-broker-scheme-${request.id}`}
-              className=""
-              options={[{ text: 'mqtt://' }, { text: 'ws://' }]}
-              selected={mqttScheme === 'ws://' ? 1 : 0}
-              onDidSelect={(d: ISelectData): void => { setMqttScheme(d.index === 1 ? 'ws://' : 'mqtt://') }}
-              data-testid="mqtt-broker-scheme-select"
-            />
-          </div>
+          <HeaderHoverTooltip label={t('server.configLockedWhileRunning', 'Config locked while the server is running')} suppressed={!isListening}>
+            <div style={{ width: 96, minWidth: 80 }} data-testid="mqtt-broker-scheme">
+              <SelectBox
+                id={`mqtt-broker-scheme-${request.id}`}
+                className=""
+                options={[{ text: 'mqtt://' }, { text: 'ws://' }]}
+                selected={mqttScheme === 'ws://' ? 1 : 0}
+                onDidSelect={(d: ISelectData): void => { setMqttScheme(d.index === 1 ? 'ws://' : 'mqtt://') }}
+                data-testid="mqtt-broker-scheme-select"
+                disabled={isListening}
+              />
+            </div>
+          </HeaderHoverTooltip>
           <span style={{ display: 'flex', alignItems: 'center', padding: '0 8px', color: 'var(--foreground-muted)', whiteSpace: 'nowrap' }} data-testid="mqtt-broker-host">localhost:</span>
-          <div style={{ width: 90, minWidth: 60 }} data-testid="url-container" data-url-resolved={resolvedUrl ? 'true' : 'false'}>
-            <InputBox
-              value={serverPort}
-              onChange={setMqttServerPort}
-              options={{ placeholder: '1883' }}
-              data-testid="websocket-server-port-input"
-            />
-          </div>
+          <HeaderHoverTooltip label={t('server.configLockedWhileRunning', 'Config locked while the server is running')} suppressed={!isListening}>
+            <div style={{ width: 90, minWidth: 60 }} data-testid="url-container" data-url-resolved={resolvedUrl ? 'true' : 'false'}>
+              <InputBox
+                value={serverPort}
+                onChange={setMqttServerPort}
+                options={{ placeholder: '1883' }}
+                data-testid="websocket-server-port-input"
+                disabled={isListening}
+              />
+            </div>
+          </HeaderHoverTooltip>
           {connectButton}
         </>
       ) : isServer ? (
         <>
           <span style={{ display: 'flex', alignItems: 'center', padding: '0 8px', color: 'var(--foreground-muted)', whiteSpace: 'nowrap' }} data-testid="websocket-server-host">localhost:</span>
-          <div style={{ width: 90, minWidth: 60 }} data-testid="url-container" data-url-resolved={resolvedUrl ? 'true' : 'false'}>
-            <InputBox
-              value={serverPort}
-              onChange={setServerPort}
-              options={{ placeholder: '3001' }}
-              data-testid="websocket-server-port-input"
-            />
-          </div>
+          <HeaderHoverTooltip label={t('server.configLockedWhileRunning', 'Config locked while the server is running')} suppressed={!isListening} className="url-container-stretch">
+            <div style={{ width: 90, minWidth: 60 }} data-testid="url-container" data-url-resolved={resolvedUrl ? 'true' : 'false'}>
+              <InputBox
+                value={serverPort}
+                onChange={setServerPort}
+                options={{ placeholder: '3001' }}
+                data-testid="websocket-server-port-input"
+                disabled={isListening}
+              />
+            </div>
+          </HeaderHoverTooltip>
           <span style={{ display: 'flex', alignItems: 'center', padding: '0 2px', color: 'var(--foreground-muted)' }}>/</span>
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <InputBox
-              value={serverRoute}
-              onChange={setServerRoute}
-              options={{ placeholder: t('websocket.routePlaceholder') }}
-              data-testid="websocket-server-route-input"
-            />
-          </div>
+          <HeaderHoverTooltip label={t('server.configLockedWhileRunning', 'Config locked while the server is running')} suppressed={!isListening} className="url-container-stretch">
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <InputBox
+                value={serverRoute}
+                onChange={setServerRoute}
+                options={{ placeholder: t('websocket.routePlaceholder') }}
+                data-testid="websocket-server-route-input"
+                disabled={isListening}
+              />
+            </div>
+          </HeaderHoverTooltip>
           {connectButton}
         </>
       ) : (
@@ -730,7 +746,7 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
               <RestormVariableInputBox
                 value={url}
                 onChange={setUrl}
-                variables={emptyVariables}
+                variables={envVariables}
                 helpers={handlebarsHelpers}
                 placeholder={t('websocket.urlPlaceholder')}
                 data-testid="websocket-url-input"

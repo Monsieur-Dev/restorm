@@ -19,11 +19,21 @@ export interface ScenarioConnectionRef {
    * HTTP mock server, `grpcListen` for a gRPC one, `soapListen` for a SOAP one,
    * `graphqlListen` for a GraphQL one, `odataListen` for an OData one). */
   kind: 'socketioConnect' | 'websocketConnect' | 'stompConnect' | 'sseConnect' | 'grpcConnect' | 'mqttConnect' | 'amqpConnect' | 'redisSubscribe' | 'kafkaConsume' | 'httpListen' | 'grpcListen' | 'soapListen' | 'graphqlListen' | 'odataListen'
+  /** True when the connect node's bound request HOSTS a server (`server: true`) —
+   * i.e. this connection is a hosted WS/SIO mock server, not a client connection.
+   * Same source of truth as a box's `isServerBound`. Lets a picker split a
+   * server-close (server connections only) from a client close (clients only). */
+  isServer?: boolean
   /** The connect node's linked request event — pre-fills a send node's channel. */
   defaultChannel?: string
   /** The connect node's linked request message — pre-fills a send node's payload. */
   defaultPayload?: string
 }
+
+/** The `kind` a ConnectionPicker filters on — the ScenarioConnectionRef kinds
+ * plus `graphqlSubscribe` (the graphqlUnsubscribe node's target; a subscription
+ * isn't tracked as a ScenarioConnectionRef, so that value simply matches none). */
+export type ConnectionPickerKind = ScenarioConnectionRef['kind'] | 'graphqlSubscribe'
 
 export const ScenarioConnectionsContext = createContext<ScenarioConnectionRef[]>([])
 

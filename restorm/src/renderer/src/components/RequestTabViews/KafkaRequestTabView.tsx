@@ -23,6 +23,8 @@ import {
 } from 'electron-core-ui/renderer'
 import { DocumentEvents, type RequestHistoryEventPayload } from '../../services/DocumentEvents'
 import { RestormVariableInputBox } from '../RestormVariableInputBox'
+import { useEnvVariables } from '../../hooks/useEnvVariables'
+import { useEmitRequestExecution } from '../../services/requestExecutingStore'
 import { RestormKeyValueTable, type KeyValueTableHandle } from '../RestormKeyValueTable'
 import type {
   KafkaRequest,
@@ -38,8 +40,10 @@ import { BaseRequestTabView } from './BaseRequestTabView'
 import { ResponseHistoryModal } from '../Modals/ResponseHistoryModal'
 import { updateReactiveProperty } from './requestTabViewUtils'
 import { SendButtonEnvSwitcher } from './SendButtonEnvSwitcher'
+import { BeamWrap } from '../common/BeamWrap'
 import { HeaderHoverTooltip } from '../MainView/HeaderHoverTooltip'
 import { DEFAULT_REQUEST_TIMEOUT_MS } from '../../../../shared/config/constants'
+import './WebSocketChat.css'
 
 export interface KafkaRequestTabViewProps {
   request: KafkaRequest
@@ -171,6 +175,12 @@ export const KafkaRequestTabView: React.FC<KafkaRequestTabViewProps> = ({ reques
   const [produceResponse, setProduceResponse] = useState<KafkaLocalResponse | null>(null)
   const [browseResponse, setBrowseResponse] = useState<KafkaLocalResponse | null>(null)
   const [isConsuming, setIsConsuming] = useState(false)
+  // A consume is long-lived and doesn't flow through the base view's
+  // isLoading (that would fake the 'Sending…' placeholder) — feed the shared
+  // request-activity store directly so sidebar + tab badges beam while the
+  // consumer is live. A Kafka request has a single mode, so this never
+  // overlaps the produce/browse signal the base view emits.
+  useEmitRequestExecution(request.id, isConsuming)
   const [consumeMessages, setConsumeMessages] = useState<KafkaMessageItem[]>([])
   const [consumeError, setConsumeError] = useState<string | undefined>(undefined)
   const [isProducing, setIsProducing] = useState(false)
@@ -199,6 +209,9 @@ export const KafkaRequestTabView: React.FC<KafkaRequestTabViewProps> = ({ reques
   const [transportEpoch, setTransportEpoch] = useState(0)
   const headersRef = useRef<KeyValueTableHandle | null>(null)
   const emptyVariables = useMemo<VariableDefinition[]>(() => [], [])
+  // Environment variables for scalar {{...}} fields so their autocomplete
+  // offers env vars alongside the helper functions.
+  const envVariables = useEnvVariables(request.id)
 
   const handleRequestReset = useCallback(() => {
     setUrlState(request.url)
@@ -300,16 +313,17 @@ export const KafkaRequestTabView: React.FC<KafkaRequestTabViewProps> = ({ reques
       if (rid !== requestId) return
       setConsumeMessages((prev) => [...prev, m])
     })
-    const unsubProg = window.restorm?.kafka.onProgress(({ requestId: rid, status }) => {
+    const unsubProg = window.restorm?.kafka.onProgress(({ requestId: rid, status, error }) => {
       if (rid !== requestId) return
       if (status === 'started') { setConsumeMessages([]); setConsumeError(undefined) }
+      if (status === 'error') { setConsumeError(error ?? t('kafka.consumeError')) }
       if (status === 'completed' || status === 'cancelled' || status === 'error') {
         setIsConsuming(false)
         setHistoryRefreshKey((k) => k + 1)
       }
     })
     return () => { unsubMsg?.(); unsubProg?.() }
-  }, [request.id])
+  }, [request.id, t])
 
   // ---- Sync state changes to the reactive request object ------------------
   const setUrl = useCallback((v: string): void => { setUrlState(v); updateReactiveProperty(request, 'url', v) }, [request])
@@ -426,10 +440,10 @@ export const KafkaRequestTabView: React.FC<KafkaRequestTabViewProps> = ({ reques
       {saslMechanism !== 'none' && (
         <>
           <Field label={t('kafka.auth.username')}>
-            <RestormVariableInputBox value={saslUsername} onChange={setSaslUsername} variables={emptyVariables} helpers={handlebarsHelpers} placeholder={t('kafka.auth.username')} data-testid="kafka-sasl-username-input" />
+            <RestormVariableInputBox value={saslUsername} onChange={setSaslUsername} variables={envVariables} helpers={handlebarsHelpers} placeholder={t('kafka.auth.username')} data-testid="kafka-sasl-username-input" />
           </Field>
           <Field label={t('kafka.auth.password')}>
-            <RestormVariableInputBox value={saslPassword} onChange={setSaslPassword} variables={emptyVariables} helpers={handlebarsHelpers} placeholder={t('kafka.auth.password')} data-testid="kafka-sasl-password-input" />
+            <RestormVariableInputBox value={saslPassword} onChange={setSaslPassword} variables={envVariables} helpers={handlebarsHelpers} placeholder={t('kafka.auth.password')} data-testid="kafka-sasl-password-input" />
           </Field>
         </>
       )}
@@ -444,7 +458,7 @@ export const KafkaRequestTabView: React.FC<KafkaRequestTabViewProps> = ({ reques
           <div style={{ display: 'flex', gap: 8 }}>
             <div style={{ flex: 1 }}>
               <Field label={t('kafka.key')}>
-                <RestormVariableInputBox value={key} onChange={setKey} variables={emptyVariables} helpers={handlebarsHelpers} placeholder={t('kafka.keyPlaceholder')} data-testid="kafka-key-input" />
+                <RestormVariableInputBox value={key} onChange={setKey} variables={envVariables} helpers={handlebarsHelpers} placeholder={t('kafka.keyPlaceholder')} data-testid="kafka-key-input" />
               </Field>
             </div>
             <div style={{ width: 120 }}>
@@ -499,7 +513,7 @@ export const KafkaRequestTabView: React.FC<KafkaRequestTabViewProps> = ({ reques
     <ScrollableElement options={{ vertical: 'auto', horizontal: 'hidden' }} style={{ width: '100%', height: '100%' }}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8, padding: 4 }} data-testid="kafka-consume-fields">
         <Field label={t('kafka.groupId')}>
-          <RestormVariableInputBox value={groupId} onChange={setGroupId} variables={emptyVariables} helpers={handlebarsHelpers} placeholder={t('kafka.groupIdPlaceholder')} data-testid="kafka-groupid-input" />
+          <RestormVariableInputBox value={groupId} onChange={setGroupId} variables={envVariables} helpers={handlebarsHelpers} placeholder={t('kafka.groupIdPlaceholder')} data-testid="kafka-groupid-input" />
         </Field>
         <Field label={t('kafka.fromOffsetLabel')} width={110}>
           <SelectBox
@@ -556,7 +570,7 @@ export const KafkaRequestTabView: React.FC<KafkaRequestTabViewProps> = ({ reques
       <div style={{ display: 'flex', gap: 8 }}>
         <div style={{ flex: 1 }}>
           <Field label={t('kafka.topic')}>
-            <RestormVariableInputBox value={topic} onChange={setTopic} variables={emptyVariables} helpers={handlebarsHelpers} placeholder={t('kafka.topicPlaceholder')} data-testid="kafka-topic-input" />
+            <RestormVariableInputBox value={topic} onChange={setTopic} variables={envVariables} helpers={handlebarsHelpers} placeholder={t('kafka.topicPlaceholder')} data-testid="kafka-topic-input" />
           </Field>
         </div>
       </div>
@@ -571,23 +585,24 @@ export const KafkaRequestTabView: React.FC<KafkaRequestTabViewProps> = ({ reques
 
   const renderMessages = useCallback((messages: KafkaMessageItem[]): React.ReactNode => {
     if (messages.length === 0) {
-      return <div data-testid="kafka-no-messages">{t('kafka.noMessages')}</div>
+      return <div className="ws-chat-empty" data-testid="kafka-no-messages">{t('kafka.noMessages')}</div>
     }
     return (
       <ScrollableElement options={{ vertical: 'auto', horizontal: 'hidden', useShadows: true }} style={{ flex: 1, minHeight: 0 }}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 6, padding: 4 }}>
+        <div className="ws-chat">
           {messages.map((m, i) => (
             <div
               key={i}
+              className="ws-chat-bubble received"
               data-testid={`response-stream-frame-${i}`}
-              style={{ padding: 6, border: '1px solid var(--panel-border)', borderRadius: 3, fontSize: 12 }}
+              data-direction="received"
             >
-              <div style={{ display: 'flex', gap: 8, color: 'var(--foreground-muted)' }}>
-                <span>{t('kafka.partition')}: {m.partition}</span>
-                <span>{t('kafka.offset')}: {m.offset}</span>
+              <span className="ws-chat-event">
+                <span style={{ marginRight: 8 }}>{t('kafka.partition')}: {m.partition}</span>
+                <span style={{ marginRight: 8 }}>{t('kafka.offset')}: {m.offset}</span>
                 {m.key && <span>{t('kafka.key')}: {m.key}</span>}
-              </div>
-              <div style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{m.value}</div>
+              </span>
+              {m.value}
             </div>
           ))}
         </div>
@@ -680,33 +695,39 @@ export const KafkaRequestTabView: React.FC<KafkaRequestTabViewProps> = ({ reques
   // ---- Primary action button, one per mode --------------------------------
   const actionButton = mode === 'produce' ? (
     <SendButtonEnvSwitcher>
-      <Button
-        icon="send" onClick={handleProduce} disabled={isProducing}
-        {...(sendButtonStyle ? { style: sendButtonStyle } : { emphasis: 1 })}
-        options={{ title: t('kafka.produce'), ariaLabel: t('kafka.produce') }}
-        data-testid="kafka-produce-button"
-      />
+      <BeamWrap active={isProducing} size={22} borderWidth={1.5}>
+        <Button
+          icon="send" onClick={handleProduce} disabled={isProducing}
+          {...(sendButtonStyle ? { style: sendButtonStyle } : { emphasis: 1 })}
+          options={{ title: t('kafka.produce'), ariaLabel: t('kafka.produce') }}
+          data-testid="kafka-produce-button"
+        />
+      </BeamWrap>
     </SendButtonEnvSwitcher>
   ) : mode === 'browse' ? (
     <SendButtonEnvSwitcher>
-      <Button
-        icon="search" onClick={handleBrowse} disabled={isBrowsing}
-        {...(sendButtonStyle ? { style: sendButtonStyle } : { emphasis: 1 })}
-        options={{ title: t('kafka.peek'), ariaLabel: t('kafka.peek') }}
-        data-testid="kafka-browse-button"
-      />
+      <BeamWrap active={isBrowsing} size={22} borderWidth={1.5}>
+        <Button
+          icon="search" onClick={handleBrowse} disabled={isBrowsing}
+          {...(sendButtonStyle ? { style: sendButtonStyle } : { emphasis: 1 })}
+          options={{ title: t('kafka.peek'), ariaLabel: t('kafka.peek') }}
+          data-testid="kafka-browse-button"
+        />
+      </BeamWrap>
     </SendButtonEnvSwitcher>
   ) : (
-    <Button
-      icon={isConsuming ? 'debug-disconnect' : 'plug'}
-      onClick={isConsuming ? handleConsumeStop : handleConsumeStart}
-      {...(isConsuming ? { emphasis: 0 } : sendButtonStyle ? { style: sendButtonStyle } : { emphasis: 1 })}
-      options={{
-        title: isConsuming ? t('kafka.stopConsuming') : t('kafka.startConsuming'),
-        ariaLabel: isConsuming ? t('kafka.stopConsuming') : t('kafka.startConsuming')
-      }}
-      data-testid="kafka-consume-button"
-    />
+    <BeamWrap active={isConsuming} size={22} borderWidth={1.5}>
+      <Button
+        icon={isConsuming ? 'debug-disconnect' : 'plug'}
+        onClick={isConsuming ? handleConsumeStop : handleConsumeStart}
+        {...(isConsuming ? { emphasis: 0 } : sendButtonStyle ? { style: sendButtonStyle } : { emphasis: 1 })}
+        options={{
+          title: isConsuming ? t('kafka.stopConsuming') : t('kafka.startConsuming'),
+          ariaLabel: isConsuming ? t('kafka.stopConsuming') : t('kafka.startConsuming')
+        }}
+        data-testid="kafka-consume-button"
+      />
+    </BeamWrap>
   )
 
   const urlSection = (
@@ -724,14 +745,14 @@ export const KafkaRequestTabView: React.FC<KafkaRequestTabViewProps> = ({ reques
       <HeaderHoverTooltip label={resolvedUrl || url} suppressed={!(resolvedUrl || url)} className="url-container-stretch">
         <div style={{ flex: 1, minWidth: 0 }} data-testid="url-container" data-url-resolved={resolvedUrl ? 'true' : 'false'} data-resolved-url={resolvedUrl || url}>
           <RestormVariableInputBox
-            value={url} onChange={setUrl} variables={emptyVariables} helpers={handlebarsHelpers}
+            value={url} onChange={setUrl} variables={envVariables} helpers={handlebarsHelpers}
             placeholder={t('kafka.brokersPlaceholder')} data-testid="kafka-url-input"
           />
         </div>
       </HeaderHoverTooltip>
       <div style={{ width: 140 }}>
         <RestormVariableInputBox
-          value={clientId} onChange={setClientId} variables={emptyVariables} helpers={handlebarsHelpers}
+          value={clientId} onChange={setClientId} variables={envVariables} helpers={handlebarsHelpers}
           placeholder={t('kafka.clientIdPlaceholder')} data-testid="kafka-clientid-input"
         />
       </div>

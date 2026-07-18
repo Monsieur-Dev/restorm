@@ -15,11 +15,14 @@ const SelectBox: React.FC<SelectBoxProps> = ({
   'data-testid': dataTestId,
   filterThreshold,
   filterPlaceholder,
-  filterTestId
+  filterTestId,
+  disabled = false
 }) => {
   const testId = dataTestId ?? 'selectbox'
-  // Use native select on macOS unless explicitly overridden
-  const useCustomDrawn = selectBoxOptions?.useCustomDrawn ?? false
+  // Use native select on macOS unless explicitly overridden. Editable
+  // (combobox) mode needs the custom-drawn dropdown — a native <select>
+  // cannot take free text — so it forces the custom variant everywhere.
+  const useCustomDrawn = (selectBoxOptions?.useCustomDrawn ?? false) || (selectBoxOptions?.editable ?? false)
   const shouldUseNative = isMacintosh && !useCustomDrawn
 
   if (shouldUseNative) {
@@ -33,6 +36,7 @@ const SelectBox: React.FC<SelectBoxProps> = ({
         className={className}
         id={id}
         data-testid={testId}
+        disabled={disabled}
       />
     )
   }
@@ -47,6 +51,7 @@ const SelectBox: React.FC<SelectBoxProps> = ({
       className={className}
       id={id}
       data-testid={testId}
+      disabled={disabled}
       {...(filterThreshold !== undefined && { filterThreshold })}
       {...(filterPlaceholder !== undefined && { filterPlaceholder })}
       {...(filterTestId !== undefined && { filterTestId })}

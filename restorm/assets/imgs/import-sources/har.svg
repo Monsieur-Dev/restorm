@@ -1,0 +1,7 @@
+<!--
+  Custom glyph — HAR (HTTP Archive) never had an owning company or an
+  official mark, so there's nothing to source. The shape echoes the
+  browser DevTools "Network" waterfall a HAR file is a dump of: four
+  staggered bars of varying start/length, like request timing rows.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M1 1H10V4H1Z M6 7H23V10H6Z M3 13H13V16H3Z M9 19H22V22H9Z"/></svg>

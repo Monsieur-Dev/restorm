@@ -152,8 +152,8 @@ collections:
                     role: response
                     flow: both
                 position:
-                  x: 820
-                  'y': 260
+                  x: 362
+                  'y': 233
               - id: 1780418232553-8cfmhw
                 kind: setVariable
                 config:
@@ -171,8 +171,8 @@ collections:
                     dataType: any
                 outputs: []
                 position:
-                  x: 560
-                  'y': 280
+                  x: 12
+                  'y': 335
               - id: 1780420981592-6osi6r
                 kind: log
                 config:
@@ -193,8 +193,8 @@ collections:
                     dataType: any
                 outputs: []
                 position:
-                  x: 1280
-                  'y': 260
+                  x: 712
+                  'y': 218
               - id: 1780421882628-8oym4p
                 kind: log
                 config:
@@ -215,8 +215,8 @@ collections:
                     dataType: any
                 outputs: []
                 position:
-                  x: 1280
-                  'y': 460
+                  x: 712
+                  'y': 12
               - id: 1780482115336-0v2aq0
                 kind: runScenario
                 config:
@@ -234,8 +234,8 @@ collections:
                     role: response
                     flow: both
                 position:
-                  x: 580
-                  'y': 740
+                  x: 712
+                  'y': 424
               - id: 1780482218173-lsnebg
                 kind: runScenario
                 config:
@@ -253,8 +253,8 @@ collections:
                     role: response
                     flow: both
                 position:
-                  x: 800
-                  'y': 740
+                  x: 1062
+                  'y': 424
               - id: 1780482287906-hje41a
                 kind: runScenario
                 config:
@@ -272,8 +272,8 @@ collections:
                     role: response
                     flow: both
                 position:
-                  x: 1060
-                  'y': 740
+                  x: 1412
+                  'y': 424
               - id: 1780482293466-yfntnl
                 kind: runScenario
                 config:
@@ -291,8 +291,8 @@ collections:
                     role: response
                     flow: both
                 position:
-                  x: 1280
-                  'y': 740
+                  x: 1762
+                  'y': 424
               - id: 1780558249766-gq42u7
                 kind: runScenario
                 config:
@@ -310,8 +310,8 @@ collections:
                     role: response
                     flow: both
                 position:
-                  x: 580
-                  'y': 880
+                  x: 2112
+                  'y': 424
               - id: 1780566802666-s7yjvf
                 kind: runScenario
                 config:
@@ -329,8 +329,8 @@ collections:
                     role: response
                     flow: both
                 position:
-                  x: 880
-                  'y': 880
+                  x: 2462
+                  'y': 424
               - id: 1780566962422-32dd3c
                 kind: runScenario
                 config:
@@ -348,8 +348,8 @@ collections:
                     role: response
                     flow: both
                 position:
-                  x: 1120
-                  'y': 880
+                  x: 2812
+                  'y': 424
               - id: 1780638522135-nqxwn6
                 kind: runScenario
                 config:
@@ -367,8 +367,8 @@ collections:
                     role: response
                     flow: both
                 position:
-                  x: 1400
-                  'y': 880
+                  x: 3162
+                  'y': 424
               - id: a0a5db3a-449c-4fb3-970d-00983066ad53
                 kind: runScenario
                 config:
@@ -386,8 +386,8 @@ collections:
                     role: response
                     flow: both
                 position:
-                  x: 580
-                  'y': 1020
+                  x: 3512
+                  'y': 424
               - id: 98ba2f6d-ef0a-42b4-9c38-9dacfaef1582
                 kind: runScenario
                 config:
@@ -405,8 +405,8 @@ collections:
                     role: response
                     flow: both
                 position:
-                  x: 800
-                  'y': 1020
+                  x: 3862
+                  'y': 424
               - id: 35b1f372-380f-4274-8db2-5f4e9ad0d7bf
                 kind: runScenario
                 config:
@@ -424,8 +424,8 @@ collections:
                     role: response
                     flow: both
                 position:
-                  x: 1020
-                  'y': 1020
+                  x: 4212
+                  'y': 424
               - id: eecb3bb4-6cb7-4179-809e-52834891a835
                 kind: runScenario
                 config:
@@ -443,8 +443,8 @@ collections:
                     role: response
                     flow: both
                 position:
-                  x: 1240
-                  'y': 1020
+                  x: 4562
+                  'y': 424
               - id: 7e852f31-d7df-4e7b-9278-f88df6656850
                 kind: runScenario
                 config:
@@ -462,8 +462,8 @@ collections:
                     role: response
                     flow: both
                 position:
-                  x: 580
-                  'y': 1160
+                  x: 4912
+                  'y': 424
               - id: 7b8355af-9f3e-43cd-96e4-4b7685a84b93
                 kind: runScenario
                 config:
@@ -481,8 +481,8 @@ collections:
                     role: response
                     flow: both
                 position:
-                  x: 820
-                  'y': 1160
+                  x: 5262
+                  'y': 424
               - id: 56ca0175-a6fd-4653-88f9-7be393a23075
                 kind: runScenario
                 config:
@@ -500,8 +500,8 @@ collections:
                     role: response
                     flow: both
                 position:
-                  x: 1040
-                  'y': 1160
+                  x: 5612
+                  'y': 424
               - id: 83d62b4f-0a3e-46da-9e50-712459bbf736
                 kind: runScenario
                 config:
@@ -519,8 +519,8 @@ collections:
                     role: response
                     flow: both
                 position:
-                  x: 1260
-                  'y': 1160
+                  x: 5962
+                  'y': 424
               - id: 35b9fd90-6241-44a4-bc07-9f36bfb42685
                 kind: runScenario
                 config:
@@ -538,8 +538,8 @@ collections:
                     role: response
                     flow: both
                 position:
-                  x: 580
-                  'y': 1300
+                  x: 6312
+                  'y': 424
               - id: 3e2c6312-90b9-400f-a67d-77883c30629b
                 kind: runScenario
                 config:
@@ -557,8 +557,8 @@ collections:
                     role: response
                     flow: both
                 position:
-                  x: 820
-                  'y': 1300
+                  x: 6662
+                  'y': 424
               - id: ca5dbefc-13a8-4b25-9bcf-61863464b3fd
                 kind: runScenario
                 config:
@@ -576,8 +576,8 @@ collections:
                     role: response
                     flow: both
                 position:
-                  x: 1040
-                  'y': 1300
+                  x: 7012
+                  'y': 424
               - id: 13851015-dd4b-4fec-b21f-9daa6793f025
                 kind: runScenario
                 config:
@@ -595,8 +595,8 @@ collections:
                     role: response
                     flow: both
                 position:
-                  x: 1280
-                  'y': 1300
+                  x: 7362
+                  'y': 424
               - id: d36843a0-7257-471d-8a08-c468c09d2a5b
                 kind: runScenario
                 config:
@@ -614,8 +614,8 @@ collections:
                     role: response
                     flow: both
                 position:
-                  x: 580
-                  'y': 1440
+                  x: 7712
+                  'y': 424
               - id: 77d8790a-9a64-47a9-b8cc-4359e7d5bd41
                 kind: runScenario
                 config:
@@ -633,8 +633,8 @@ collections:
                     role: response
                     flow: both
                 position:
-                  x: 800
-                  'y': 1440
+                  x: 8062
+                  'y': 424
               - id: ba75fb9a-5c62-4304-a786-b65d7e03ee1f
                 kind: runScenario
                 config:
@@ -652,8 +652,8 @@ collections:
                     role: response
                     flow: both
                 position:
-                  x: 1020
-                  'y': 1440
+                  x: 8412
+                  'y': 424
               - id: 3294bbcf-cade-4f60-97c0-557784ae134a
                 kind: runScenario
                 config:
@@ -671,8 +671,8 @@ collections:
                     role: response
                     flow: both
                 position:
-                  x: 1240
-                  'y': 1440
+                  x: 8762
+                  'y': 424
               - id: e0610fff-f0f4-49aa-9818-975ddd7bc993
                 kind: runScenario
                 config:
@@ -690,8 +690,8 @@ collections:
                     role: response
                     flow: both
                 position:
-                  x: 580
-                  'y': 1580
+                  x: 9112
+                  'y': 424
               - id: d33f8e17-abe7-438c-8951-408ada8bfba7
                 kind: runScenario
                 config:
@@ -709,8 +709,8 @@ collections:
                     role: response
                     flow: both
                 position:
-                  x: 800
-                  'y': 1580
+                  x: 9462
+                  'y': 424
               - id: b11e6b54-266f-4b9c-88a7-3fbe63f1329b
                 kind: runScenario
                 config:
@@ -728,8 +728,8 @@ collections:
                     role: response
                     flow: both
                 position:
-                  x: 1020
-                  'y': 1580
+                  x: 10162
+                  'y': 424
               - id: c6f8b513-7004-47a3-baad-1637b540bfea
                 kind: runScenario
                 config:
@@ -747,8 +747,8 @@ collections:
                     role: response
                     flow: both
                 position:
-                  x: 1240
-                  'y': 1580
+                  x: 10512
+                  'y': 424
               - id: 86a4e805-1b06-4f4b-b699-2044c21ec805
                 kind: runScenario
                 config:
@@ -766,8 +766,8 @@ collections:
                     role: response
                     flow: both
                 position:
-                  x: 580
-                  'y': 1720
+                  x: 10862
+                  'y': 424
               - id: 84986541-c95a-4ebb-a059-865b2b92a11f
                 kind: runScenario
                 config:
@@ -785,8 +785,8 @@ collections:
                     role: response
                     flow: both
                 position:
-                  x: 800
-                  'y': 1720
+                  x: 11212
+                  'y': 424
               - id: 520d7913-c2ff-4a6c-b09b-f3c27b1831ee
                 kind: runScenario
                 config:
@@ -804,8 +804,8 @@ collections:
                     role: response
                     flow: both
                 position:
-                  x: 1020
-                  'y': 1720
+                  x: 11562
+                  'y': 424
               - id: ec3ea5d2-2043-48f0-b9b9-a268c4e4f72a
                 kind: runScenario
                 config:
@@ -823,8 +823,8 @@ collections:
                     role: response
                     flow: both
                 position:
-                  x: 580
-                  'y': 1860
+                  x: 9812
+                  'y': 424
               - id: 49ed9e8a-d1e0-423f-8652-1f12e6facee4
                 kind: runScenario
                 config:
@@ -842,8 +842,8 @@ collections:
                     role: response
                     flow: both
                 position:
-                  x: 800
-                  'y': 1860
+                  x: 11912
+                  'y': 424
               - id: 5b32be01-1d00-4a44-a2ba-14801cd8c10b
                 kind: runScenario
                 config:
@@ -861,8 +861,8 @@ collections:
                     role: response
                     flow: both
                 position:
-                  x: 1020
-                  'y': 1860
+                  x: 12262
+                  'y': 424
               - id: 0f8c224a-ca30-490b-86d3-f5ea48dd9da8
                 kind: runScenario
                 config:
@@ -880,8 +880,8 @@ collections:
                     role: response
                     flow: both
                 position:
-                  x: 1240
-                  'y': 1860
+                  x: 12612
+                  'y': 424
               - id: d2e34d0a-f49e-4bf5-bc10-33f91f6251c8
                 kind: runScenario
                 config:
@@ -899,8 +899,8 @@ collections:
                     role: response
                     flow: both
                 position:
-                  x: 1460
-                  'y': 1860
+                  x: 12962
+                  'y': 424
               - id: 976a855d-9d47-4f7c-b9e2-181e1c881bb7
                 kind: runScenario
                 config:
@@ -918,8 +918,8 @@ collections:
                     role: response
                     flow: both
                 position:
-                  x: 1680
-                  'y': 1860
+                  x: 13312
+                  'y': 424
               - id: adb271c8-6fba-47b8-a5b1-e36acdee72b4
                 kind: runScenario
                 config:
@@ -937,8 +937,8 @@ collections:
                     role: response
                     flow: both
                 position:
-                  x: 1900
-                  'y': 1860
+                  x: 13662
+                  'y': 424
               - id: c0e256d1-88c4-4263-93ba-49d91bf20858
                 kind: runScenario
                 config:
@@ -956,8 +956,8 @@ collections:
                     role: response
                     flow: both
                 position:
-                  x: 580
-                  'y': 2000
+                  x: 14012
+                  'y': 417
               - id: 99db48aa-9a1f-401e-b6ca-29da52b5587a
                 kind: runScenario
                 config:
@@ -975,8 +975,8 @@ collections:
                     role: response
                     flow: both
                 position:
-                  x: 800
-                  'y': 2000
+                  x: 14362
+                  'y': 424
               - id: 2cf953e3-de93-4e5e-9ca0-d16ceb2205e5
                 kind: runScenario
                 config:
@@ -994,8 +994,8 @@ collections:
                     role: response
                     flow: both
                 position:
-                  x: 580
-                  'y': 2140
+                  x: 14712
+                  'y': 424
               - id: 7cfce3bd-d527-48e4-a9d4-2ee6f31d8bd6
                 kind: runScenario
                 config:
@@ -1013,8 +1013,8 @@ collections:
                     role: response
                     flow: both
                 position:
-                  x: 800
-                  'y': 2140
+                  x: 15062
+                  'y': 424
               - id: 6b8f57f1-a9dc-42b4-9a13-e4c98bba0fd7
                 kind: runScenario
                 config:
@@ -1032,8 +1032,8 @@ collections:
                     role: response
                     flow: both
                 position:
-                  x: 1020
-                  'y': 2140
+                  x: 15412
+                  'y': 424
               - id: 8c586fc7-dd90-43cc-9032-5351916c47f7
                 kind: runScenario
                 config:
@@ -1051,8 +1051,8 @@ collections:
                     role: response
                     flow: both
                 position:
-                  x: 1240
-                  'y': 2140
+                  x: 15762
+                  'y': 424
               - id: 1f7168ac-0544-480b-b6b5-320ab66cff72
                 kind: runScenario
                 config:
@@ -1070,8 +1070,8 @@ collections:
                     role: response
                     flow: both
                 position:
-                  x: 1520
-                  'y': 2140
+                  x: 16112
+                  'y': 424
               - id: e418f9fe-0d7e-4b8b-8b54-ba3ce8239e5a
                 kind: runScenario
                 config:
@@ -1089,8 +1089,8 @@ collections:
                     role: response
                     flow: both
                 position:
-                  x: 1800
-                  'y': 2140
+                  x: 16462
+                  'y': 424
               - id: 667a33c2-174f-4675-88b1-3d1a9e8d01bc
                 kind: runScenario
                 config:
@@ -1108,8 +1108,122 @@ collections:
                     role: response
                     flow: both
                 position:
-                  x: 2080
-                  'y': 2140
+                  x: 16812
+                  'y': 424
+              - id: 1ea34167-c1b5-41ba-bba0-15ef7fe14548
+                kind: runScenario
+                config:
+                  scenarioId: c2e2b5e4-52b8-42ee-80b7-d184fb2f92b2
+                  label: Kafka
+                inputs:
+                  - id: in
+                    name: ''
+                    dataType: any
+                    flow: signal
+                outputs:
+                  - id: result
+                    name: result
+                    dataType: any
+                    role: response
+                    flow: both
+                position:
+                  x: 17162
+                  'y': 424
+              - id: 68177b24-a618-4ded-ab0c-3eb97e5184ef
+                kind: runScenario
+                config:
+                  scenarioId: f1c7b83e-5dc9-491e-8cb8-e0d707498e36
+                  label: Redis
+                inputs:
+                  - id: in
+                    name: ''
+                    dataType: any
+                    flow: signal
+                outputs:
+                  - id: result
+                    name: result
+                    dataType: any
+                    role: response
+                    flow: both
+                position:
+                  x: 17512
+                  'y': 424
+              - id: 601f2c64-fe2a-401a-aacf-530f3be090be
+                kind: runScenario
+                config:
+                  scenarioId: 50644158-d7eb-4a1e-bdd7-7656a02a47ed
+                  label: STOMP
+                inputs:
+                  - id: in
+                    name: ''
+                    dataType: any
+                    flow: signal
+                outputs:
+                  - id: result
+                    name: result
+                    dataType: any
+                    role: response
+                    flow: both
+                position:
+                  x: 17862
+                  'y': 424
+              - id: f43dc3df-550a-4624-8a3e-509e9958a6e9
+                kind: runScenario
+                config:
+                  scenarioId: f5bbdf5b-18a5-4ddb-8453-98fca7d154ce
+                  label: AMQP
+                inputs:
+                  - id: in
+                    name: ''
+                    dataType: any
+                    flow: signal
+                outputs:
+                  - id: result
+                    name: result
+                    dataType: any
+                    role: response
+                    flow: both
+                position:
+                  x: 18212
+                  'y': 424
+              - id: 322bbe34-97be-40ff-be64-6b8056e57a0e
+                kind: runScenario
+                config:
+                  scenarioId: 10dac49b-4659-4517-a492-06b1533ca640
+                  label: JSON-RPC
+                inputs:
+                  - id: in
+                    name: ''
+                    dataType: any
+                    flow: signal
+                outputs:
+                  - id: result
+                    name: result
+                    dataType: any
+                    role: response
+                    flow: both
+                position:
+                  x: 18562
+                  'y': 424
+              - id: bced5282-acb9-49c9-8d10-2700e2e3d78f
+                kind: runScenario
+                config:
+                  scenarioId: 08d2f516-c7bd-42b2-8e91-4f89d90e9c3a
+                  label: tRPC
+                inputs:
+                  - id: in
+                    name: ''
+                    dataType: any
+                    flow: signal
+                outputs:
+                  - id: result
+                    name: result
+                    dataType: any
+                    role: response
+                    flow: both
+                position:
+                  x: 18912
+                  'y': 424
             edges:
               - id: e-1780418276241-f2q3hz
                 from:
@@ -1462,6 +1576,48 @@ collections:
                   portId: done
                 to:
                   nodeId: 667a33c2-174f-4675-88b1-3d1a9e8d01bc
+                  portId: in
+              - id: 86684beb-0df0-4c60-ad9a-c2edc1fdce9b
+                from:
+                  nodeId: 667a33c2-174f-4675-88b1-3d1a9e8d01bc
+                  portId: done
+                to:
+                  nodeId: 1ea34167-c1b5-41ba-bba0-15ef7fe14548
+                  portId: in
+              - id: 8609c9cc-2027-4a9e-816e-006a804798ba
+                from:
+                  nodeId: 1ea34167-c1b5-41ba-bba0-15ef7fe14548
+                  portId: done
+                to:
+                  nodeId: 68177b24-a618-4ded-ab0c-3eb97e5184ef
+                  portId: in
+              - id: 5a7b5058-2f7d-4f2b-8ef0-17137b9184e8
+                from:
+                  nodeId: 68177b24-a618-4ded-ab0c-3eb97e5184ef
+                  portId: done
+                to:
+                  nodeId: 601f2c64-fe2a-401a-aacf-530f3be090be
+                  portId: in
+              - id: ea398ed6-1d77-40b5-93b9-124ea5df5a63
+                from:
+                  nodeId: 601f2c64-fe2a-401a-aacf-530f3be090be
+                  portId: done
+                to:
+                  nodeId: f43dc3df-550a-4624-8a3e-509e9958a6e9
+                  portId: in
+              - id: ff274db2-dc54-41ec-a704-6eeb2786896f
+                from:
+                  nodeId: f43dc3df-550a-4624-8a3e-509e9958a6e9
+                  portId: done
+                to:
+                  nodeId: 322bbe34-97be-40ff-be64-6b8056e57a0e
+                  portId: in
+              - id: 16e8f1a3-7ed4-40e0-bbfe-04cc65911742
+                from:
+                  nodeId: 322bbe34-97be-40ff-be64-6b8056e57a0e
+                  portId: done
+                to:
+                  nodeId: bced5282-acb9-49c9-8d10-2700e2e3d78f
                   portId: in
             id: c1573ce0-985c-44b5-b5d4-e081de2d4303
             name: Main
@@ -17839,7 +17995,7 @@ collections:
                           version: 1.0.0
                     inputs:
                       - id: in
-                        name: ""
+                        name: ''
                         dataType: any
                         flow: signal
                       - id: value
@@ -17852,7 +18008,139 @@ collections:
                         flow: both
                     position:
                       x: 0
-                      y: 40
+                      'y': 40
+                  - id: c0de0dep-0000-4000-8000-00000000000a
+                    kind: code
+                    config:
+                      language: javascript
+                      code: |-
+                        // code-deps chain — JS/TS link. Imports the pinned pure-JS
+                        // package (installed OFFLINE from the code-deps cache) to prove
+                        // install+mount worked, then adds its marker to the pass-through
+                        // dict for the next link.
+                        const restormjsdep = require('restormjsdep')
+                        const prev = (input && typeof input === 'object') ? input : {}
+                        console.log('javascript: restormjsdep', restormjsdep.version, 'loaded')
+                        return { ...prev, javascript: restormjsdep.version }
+                      packages:
+                        - name: restormjsdep
+                          version: 1.0.0
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: input
+                        dataType: any
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: any
+                        flow: both
+                    position:
+                      x: 360
+                      'y': 40
+                  - id: c0de0dep-0000-4000-8000-00000000000b
+                    kind: code
+                    config:
+                      language: r
+                      code: |-
+                        # code-deps chain — R link. Loads the pinned pure-R package
+                        # (installed OFFLINE from the code-deps cache) to prove
+                        # install+mount worked, then adds its marker to the pass-through
+                        # named list for the next link. packageVersion (not the random
+                        # praise() message) keeps the run-log deterministic.
+                        library(praise)
+                        ver <- as.character(packageVersion("praise"))
+                        input[["r"]] <- ver
+                        cat(sprintf("r: praise %s loaded\n", ver))
+                        input
+                      packages:
+                        - name: praise
+                          version: 1.0.0
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: input
+                        dataType: any
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: any
+                        flow: both
+                    position:
+                      x: 720
+                      'y': 40
+                  - id: c0de0dep-0000-4000-8000-00000000000c
+                    kind: code
+                    config:
+                      language: ruby
+                      code: |-
+                        # code-deps chain — Ruby link. Requires the pinned pure-Ruby gem
+                        # (installed OFFLINE from the code-deps cache) to prove
+                        # install+mount worked, then adds its marker to the pass-through
+                        # hash for the next link.
+                        require "restormrbdep"
+                        prev = $input.is_a?(Hash) ? $input : {}
+                        ver = Restormrbdep::VERSION
+                        puts "ruby: restormrbdep #{ver} loaded"
+                        prev.merge("ruby" => ver)
+                      packages:
+                        - name: restormrbdep
+                          version: 1.0.0
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: input
+                        dataType: any
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: any
+                        flow: both
+                    position:
+                      x: 1080
+                      'y': 40
+                  - id: c0de0dep-0000-4000-8000-00000000000d
+                    kind: code
+                    config:
+                      language: lua
+                      code: |-
+                        -- code-deps chain — Lua link. Requires the pinned pure-Lua
+                        -- module (installed OFFLINE from the code-deps cache) to prove
+                        -- install+mount worked, then adds its marker to the pass-through
+                        -- table for the next link.
+                        local restormluadep = require("restormluadep")
+                        local prev = type(input) == "table" and input or {}
+                        prev.lua = restormluadep.version
+                        print(string.format("lua: restormluadep %s loaded", restormluadep.version))
+                        return prev
+                      packages:
+                        - name: restormluadep
+                          version: 1.0.0
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: input
+                        dataType: any
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: any
+                        flow: both
+                    position:
+                      x: 1440
+                      'y': 40
                   - id: c0de0dep-0000-4000-8000-000000000003
                     kind: log
                     config:
@@ -17862,7 +18150,7 @@ collections:
                         value: code-deps chain result
                     inputs:
                       - id: in
-                        name: ""
+                        name: ''
                         dataType: any
                         flow: signal
                       - id: message
@@ -17873,12 +18161,44 @@ collections:
                         dataType: any
                     outputs: []
                     position:
-                      x: 360
-                      y: 40
+                      x: 1800
+                      'y': 40
                 edges:
-                  - id: c0de0dep-0000-4000-8000-000000000004
+                  - id: c0de0dep-0000-4000-8000-00000000000e
                     from:
                       nodeId: c0de0dep-0000-4000-8000-000000000002
+                      portId: result
+                    to:
+                      nodeId: c0de0dep-0000-4000-8000-00000000000a
+                      portId: value
+                    selector: .
+                  - id: c0de0dep-0000-4000-8000-00000000000f
+                    from:
+                      nodeId: c0de0dep-0000-4000-8000-00000000000a
+                      portId: result
+                    to:
+                      nodeId: c0de0dep-0000-4000-8000-00000000000b
+                      portId: value
+                    selector: .
+                  - id: c0de0dep-0000-4000-8000-000000000010
+                    from:
+                      nodeId: c0de0dep-0000-4000-8000-00000000000b
+                      portId: result
+                    to:
+                      nodeId: c0de0dep-0000-4000-8000-00000000000c
+                      portId: value
+                    selector: .
+                  - id: c0de0dep-0000-4000-8000-000000000011
+                    from:
+                      nodeId: c0de0dep-0000-4000-8000-00000000000c
+                      portId: result
+                    to:
+                      nodeId: c0de0dep-0000-4000-8000-00000000000d
+                      portId: value
+                    selector: .
+                  - id: c0de0dep-0000-4000-8000-000000000004
+                    from:
+                      nodeId: c0de0dep-0000-4000-8000-00000000000d
                       portId: result
                     to:
                       nodeId: c0de0dep-0000-4000-8000-000000000003
@@ -17886,6 +18206,240 @@ collections:
                     selector: .
                 id: c0de0dep-0000-4000-8000-000000000001
                 name: code-deps-chain
+                items: []
+              - type: scenario
+                tags: []
+                params: []
+                nodes:
+                  - id: c0de0dep-1111-4000-8000-000000000002
+                    kind: code
+                    config:
+                      language: python
+                      code: |-
+                        # code-deps chain (REAL registry) — Python link. Installs +
+                        # imports a pinned pure-Python package from the LIVE PyPI on
+                        # first run (no offline mirror), then threads an import-success
+                        # marker. Asserts the true user download path; version-agnostic.
+                        import six
+                        assert hasattr(six, "PY3")
+                        prev = input if isinstance(input, dict) else {}
+                        print("python: six loaded")
+                        {**prev, "python": True}
+                      packages:
+                        - name: six
+                          version: 1.16.0
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: input
+                        dataType: any
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: any
+                        flow: both
+                    position:
+                      x: 0
+                      'y': 40
+                  - id: c0de0dep-1111-4000-8000-00000000000a
+                    kind: code
+                    config:
+                      language: javascript
+                      code: |-
+                        // code-deps chain (REAL registry) — JS link. Fetches +
+                        // esbuild-bundles a pinned pure-JS package from the LIVE npm
+                        // registry on first run, then threads an import-success marker.
+                        const isNumber = require('is-number')
+                        if (isNumber(7) !== true) throw new Error('is-number did not load')
+                        const prev = (input && typeof input === 'object') ? input : {}
+                        console.log('javascript: is-number loaded')
+                        return { ...prev, javascript: true }
+                      packages:
+                        - name: is-number
+                          version: 7.0.0
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: input
+                        dataType: any
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: any
+                        flow: both
+                    position:
+                      x: 360
+                      'y': 40
+                  - id: c0de0dep-1111-4000-8000-00000000000b
+                    kind: code
+                    config:
+                      language: r
+                      code: |-
+                        # code-deps chain (REAL registry) — R link. Installs a pinned
+                        # pure-R package from the LIVE WebR CRAN repository on first run,
+                        # then threads an import-success marker. praise is version-frozen
+                        # (single upstream release), so the pin never 404s on a repo
+                        # rebuild; a non-frozen package would need live-index resolution.
+                        library(praise)
+                        stopifnot(exists("praise"))
+                        cat("r: praise loaded\n")
+                        input[["r"]] <- TRUE
+                        input
+                      packages:
+                        - name: praise
+                          version: 1.0.0
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: input
+                        dataType: any
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: any
+                        flow: both
+                    position:
+                      x: 720
+                      'y': 40
+                  - id: c0de0dep-1111-4000-8000-00000000000c
+                    kind: code
+                    config:
+                      language: ruby
+                      code: |-
+                        # code-deps chain (REAL registry) — Ruby link. Installs a pinned
+                        # pure-Ruby gem from the LIVE RubyGems on first run, then threads
+                        # an import-success marker.
+                        require "paint"
+                        raise "paint did not load" unless defined?(Paint)
+                        prev = $input.is_a?(Hash) ? $input : {}
+                        puts "ruby: paint loaded"
+                        prev.merge("ruby" => true)
+                      packages:
+                        - name: paint
+                          version: 2.3.0
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: input
+                        dataType: any
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: any
+                        flow: both
+                    position:
+                      x: 1080
+                      'y': 40
+                  - id: c0de0dep-1111-4000-8000-00000000000d
+                    kind: code
+                    config:
+                      language: lua
+                      code: |-
+                        -- code-deps chain (REAL registry) — Lua link. Installs a pinned
+                        -- pure-Lua module from the LIVE LuaRocks on first run, then
+                        -- threads an import-success marker.
+                        local inspect = require("inspect")
+                        assert(type(inspect) == "function" or type(inspect) == "table")
+                        local prev = type(input) == "table" and input or {}
+                        prev.lua = true
+                        print("lua: inspect loaded")
+                        return prev
+                      packages:
+                        - name: inspect
+                          version: 3.1.3
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: input
+                        dataType: any
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: any
+                        flow: both
+                    position:
+                      x: 1440
+                      'y': 40
+                  - id: c0de0dep-1111-4000-8000-000000000003
+                    kind: log
+                    config:
+                      level: info
+                      message:
+                        type: expression
+                        value: code-deps chain (real) result
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 1800
+                      'y': 40
+                edges:
+                  - id: c0de0dep-1111-4000-8000-00000000000e
+                    from:
+                      nodeId: c0de0dep-1111-4000-8000-000000000002
+                      portId: result
+                    to:
+                      nodeId: c0de0dep-1111-4000-8000-00000000000a
+                      portId: value
+                    selector: .
+                  - id: c0de0dep-1111-4000-8000-00000000000f
+                    from:
+                      nodeId: c0de0dep-1111-4000-8000-00000000000a
+                      portId: result
+                    to:
+                      nodeId: c0de0dep-1111-4000-8000-00000000000b
+                      portId: value
+                    selector: .
+                  - id: c0de0dep-1111-4000-8000-000000000010
+                    from:
+                      nodeId: c0de0dep-1111-4000-8000-00000000000b
+                      portId: result
+                    to:
+                      nodeId: c0de0dep-1111-4000-8000-00000000000c
+                      portId: value
+                    selector: .
+                  - id: c0de0dep-1111-4000-8000-000000000011
+                    from:
+                      nodeId: c0de0dep-1111-4000-8000-00000000000c
+                      portId: result
+                    to:
+                      nodeId: c0de0dep-1111-4000-8000-00000000000d
+                      portId: value
+                    selector: .
+                  - id: c0de0dep-1111-4000-8000-000000000004
+                    from:
+                      nodeId: c0de0dep-1111-4000-8000-00000000000d
+                      portId: result
+                    to:
+                      nodeId: c0de0dep-1111-4000-8000-000000000003
+                      portId: data
+                    selector: .
+                id: c0de0dep-1111-4000-8000-000000000001
+                name: code-deps-chain-real
                 items: []
               - type: scenario
                 tags: []
@@ -18755,7 +19309,7 @@ collections:
                       x: 840
                       'y': 220
                   - id: 2dbac6ce-478a-4075-a3e8-10f8c857ea46
-                    kind: socketioClose
+                    kind: socketioServerClose
                     config:
                       connectionNodeId: e69f6c7c-ba8d-4c2b-88d0-ed15db151753
                       label: close Server
@@ -19041,7 +19595,7 @@ collections:
                       x: 820
                       'y': 220
                   - id: 4b3b54f7-b56c-4dd9-82b4-f238ab3cef87
-                    kind: websocketClose
+                    kind: websocketServerClose
                     config:
                       connectionNodeId: df7080a6-c267-4faa-a62d-9a413ccd2875
                       label: close Server
@@ -19686,7 +20240,14 @@ collections:
                       portId: in
                 id: 0bc14494-21b9-4015-986d-ebdc990b93b0
                 name: SSE
-                items: []
+                items:
+                  - documentation: ''
+                    tags: []
+                    id: b7f32945-65fb-477b-bdba-d8d56303bd31
+                    name: SSE Frames
+                    url: http://localhost:8097/events?count=3&intervalMs=50
+                    headers: []
+                    type: sse
               - type: scenario
                 tags: []
                 params: []
@@ -20555,6 +21116,7 @@ collections:
                         "name": "world"
                       }
                     metadata: []
+                    transport: grpc
                     protoContent: |-
                       syntax = "proto3";
                       package mock;
@@ -20783,7 +21345,7 @@ collections:
                         flow: both
                     position:
                       x: 12
-                      'y': 231
+                      'y': 48
                     note: restorm hosts a GraphQL endpoint on localhost:4223/graphql whose `ticks` subscription emits one value then stays open
                   - id: 3b8d2e51-1c4f-4a72-9d13-2f6b84c15302
                     kind: graphqlSubscribe
@@ -20807,8 +21369,8 @@ collections:
                         dataType: any
                         flow: both
                     position:
-                      x: 500
-                      'y': 100
+                      x: 783
+                      'y': 245
                     note: consumes the hosted GraphQL subscription over SSE
                   - id: 3b8d2e51-1c4f-4a72-9d13-2f6b84c15303
                     kind: log
@@ -20829,8 +21391,8 @@ collections:
                         dataType: any
                     outputs: []
                     position:
-                      x: 860
-                      'y': 80
+                      x: 1194.3333333333333
+                      'y': 207
                   - id: 3b8d2e51-1c4f-4a72-9d13-2f6b84c15304
                     kind: graphqlUnsubscribe
                     config:
@@ -20843,8 +21405,8 @@ collections:
                         flow: signal
                     outputs: []
                     position:
-                      x: 500
-                      'y': 280
+                      x: 1563
+                      'y': 229
                     note: unsubscribes once the first event has been logged
                   - id: 3b8d2e51-1c4f-4a72-9d13-2f6b84c15305
                     kind: log
@@ -20864,8 +21426,8 @@ collections:
                         dataType: any
                     outputs: []
                     position:
-                      x: 500
-                      'y': 460
+                      x: 1193
+                      'y': 440
                   - id: 3b8d2e51-1c4f-4a72-9d13-2f6b84c15306
                     kind: graphqlClose
                     config:
@@ -20878,8 +21440,8 @@ collections:
                         flow: signal
                     outputs: []
                     position:
-                      x: 860
-                      'y': 460
+                      x: 1563
+                      'y': 462
                     note: stops the mock server so the run can finish
                   - id: 3b8d2e51-1c4f-4a72-9d13-2f6b84c15307
                     kind: log
@@ -20899,8 +21461,8 @@ collections:
                         dataType: any
                     outputs: []
                     position:
-                      x: 860
-                      'y': 620
+                      x: 783
+                      'y': 12
                 edges:
                   - id: 3b8d2e51-1c4f-4a72-9d13-2f6b84c15404
                     from:
@@ -21338,7 +21900,17 @@ collections:
                       portId: in
                 id: 86e3b22e-a36f-40b3-9612-c0895fdc5d5b
                 name: GraphQL unary
-                items: []
+                items:
+                  - documentation: ''
+                    tags: []
+                    id: 10f2163c-de61-4a3a-b7ff-c63a1914f067
+                    name: GraphQL Unary Client
+                    url: http://localhost:4222/graphql
+                    operationType: query
+                    query: '{ pets }'
+                    variables: '{}'
+                    headers: []
+                    type: graphql
               - type: scenario
                 tags: []
                 params: []
@@ -21349,6 +21921,7 @@ collections:
                       requestId: a1b07338-e892-41eb-9ea8-fe615933ae94
                       connectionName: QC Mock
                       label: start mock server
+                      id: 09a00e46-f572-4aea-9cc2-fa89a03c99c3
                     inputs:
                       - id: in
                         name: ''
@@ -21372,6 +21945,7 @@ collections:
                       requestId: a9cb1b58-b9d3-4dac-9341-62f7d3e9a370
                       quickConfigId: qc_f47542c5-83ca-4c6b-b39a-dda9bca8810a
                       label: call the mock (QC config redirects to /pets)
+                      id: 27f6912f-13c3-4a18-86d2-c0d940e1002e
                     inputs:
                       - id: in
                         name: ''
@@ -21485,9 +22059,996 @@ collections:
                     to:
                       nodeId: 74045a14-8665-45f4-af5c-fa171bf3a53f
                       portId: in
-                name: Quick config
                 id: 35c2c7e4-ff60-4150-b397-acf7c146ff8e
+                name: Quick config
                 items: []
+              - type: scenario
+                tags: []
+                params: []
+                nodes:
+                  - id: 24dd2844-1bf2-412a-8ecb-0e40a1ffce8e
+                    kind: kafkaConsume
+                    config:
+                      connectionName: Kafka consumer
+                      requestId: 69e80a38-6c58-4edb-9f1f-326935614c02
+                      label: Kafka consume (latest)
+                      id: 1f774ae4-f112-4b20-a026-56aca1afbcca
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                    outputs:
+                      - id: connected
+                        name: connected
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: any
+                        flow: both
+                    position:
+                      x: 362
+                      'y': 29
+                  - id: 2467b128-a183-4753-9e3c-9851a94f2549
+                    kind: kafkaProduce
+                    config:
+                      requestId: 44cce974-1672-4bd4-bbda-f57ff7b6138f
+                      label: Kafka produce
+                      id: a163e1f6-6c78-442c-b2fb-eeaf13032042
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: env
+                        name: env
+                        dataType: any
+                        flow: value
+                    outputs:
+                      - id: response
+                        name: response
+                        dataType: response
+                        role: response
+                        flow: both
+                    position:
+                      x: 712
+                      'y': 29
+                  - id: cd1e7134-e1a6-4724-b520-25e5ec6ea090
+                    kind: wait
+                    config:
+                      durationMs: 1500
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: duration
+                        name: duration
+                        dataType: duration
+                    outputs: []
+                    position:
+                      x: 1062
+                      'y': 29
+                  - id: 2fe3215a-206f-4b54-b6eb-801db98f7da9
+                    kind: kafkaClose
+                    config:
+                      connectionNodeId: 24dd2844-1bf2-412a-8ecb-0e40a1ffce8e
+                      label: Kafka close
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                    outputs: []
+                    position:
+                      x: 1412
+                      'y': 36
+                  - id: 558a9691-423c-4302-b27d-732bc64f22dc
+                    kind: log
+                    config:
+                      level: info
+                      message:
+                        type: string
+                        value: kafka chain done
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 1762
+                      'y': 12
+                  - id: 892d685b-b8c5-45a7-9625-f602c44d5e33
+                    kind: kafkaProduce
+                    config:
+                      requestId: 44cce974-1672-4bd4-bbda-f57ff7b6138f
+                      label: 'Kafka produce (warm-up: creates the topic)'
+                      id: dfe352bb-79fd-40f4-b00a-8608ac21434a
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: env
+                        name: env
+                        dataType: any
+                        flow: value
+                    outputs:
+                      - id: response
+                        name: response
+                        dataType: response
+                        role: response
+                        flow: both
+                    position:
+                      x: 12
+                      'y': 29
+                edges:
+                  - id: 87be75d4-18c3-4bee-b988-f97f278c4db1
+                    from:
+                      nodeId: 24dd2844-1bf2-412a-8ecb-0e40a1ffce8e
+                      portId: connected
+                    to:
+                      nodeId: 2467b128-a183-4753-9e3c-9851a94f2549
+                      portId: in
+                  - id: fb43f8aa-8b04-41ab-8029-8eca4083dbaa
+                    from:
+                      nodeId: 2467b128-a183-4753-9e3c-9851a94f2549
+                      portId: done
+                    to:
+                      nodeId: cd1e7134-e1a6-4724-b520-25e5ec6ea090
+                      portId: in
+                  - id: 11dfeca5-5ea7-4aa0-822c-c808d06dfe5a
+                    from:
+                      nodeId: cd1e7134-e1a6-4724-b520-25e5ec6ea090
+                      portId: done
+                    to:
+                      nodeId: 2fe3215a-206f-4b54-b6eb-801db98f7da9
+                      portId: in
+                  - id: ad129900-0dc1-4f30-9aa2-70a5765c82cb
+                    from:
+                      nodeId: 2fe3215a-206f-4b54-b6eb-801db98f7da9
+                      portId: done
+                    to:
+                      nodeId: 558a9691-423c-4302-b27d-732bc64f22dc
+                      portId: in
+                  - id: 0c18291b-a931-408b-948a-8d697bf3e6be
+                    from:
+                      nodeId: 892d685b-b8c5-45a7-9625-f602c44d5e33
+                      portId: done
+                    to:
+                      nodeId: 24dd2844-1bf2-412a-8ecb-0e40a1ffce8e
+                      portId: in
+                id: c2e2b5e4-52b8-42ee-80b7-d184fb2f92b2
+                name: Kafka
+                items:
+                  - documentation: ''
+                    tags: []
+                    id: 44cce974-1672-4bd4-bbda-f57ff7b6138f
+                    name: Kafka Produce
+                    url: localhost:9092
+                    clientId: ''
+                    mode: produce
+                    topic: restorm-ref
+                    value: |-
+                      {
+                        "hello": "from the reference project"
+                      }
+                    headers: []
+                    fromOffset: latest
+                    saslMechanism: none
+                    type: kafka
+                  - documentation: ''
+                    tags: []
+                    id: 69e80a38-6c58-4edb-9f1f-326935614c02
+                    name: Kafka Consume
+                    url: localhost:9092
+                    clientId: ''
+                    mode: consume
+                    topic: restorm-ref
+                    value: ''
+                    headers: []
+                    groupId: restorm-ref-consumer
+                    fromOffset: latest
+                    saslMechanism: none
+                    type: kafka
+              - type: scenario
+                tags: []
+                params: []
+                nodes:
+                  - id: 013de28b-317f-4d3b-b038-e7463b09a803
+                    kind: redisCommand
+                    config:
+                      requestId: f7787c70-4a50-4011-8d94-214e626b47ef
+                      label: SET
+                      id: b022ab90-ebf3-43b3-9987-c8c377ccbe8a
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: env
+                        name: env
+                        dataType: any
+                        flow: value
+                    outputs:
+                      - id: response
+                        name: response
+                        dataType: response
+                        role: response
+                        flow: both
+                    position:
+                      x: 12
+                      'y': 37
+                  - id: 502352b0-2860-406a-ad83-c71204209f57
+                    kind: redisCommand
+                    config:
+                      requestId: 3629ade0-8a19-4174-bad4-eecb281198cd
+                      label: GET
+                      id: 5b05745a-3c7b-473e-a9a2-a98366858a02
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: env
+                        name: env
+                        dataType: any
+                        flow: value
+                    outputs:
+                      - id: response
+                        name: response
+                        dataType: response
+                        role: response
+                        flow: both
+                    position:
+                      x: 348
+                      'y': 37
+                  - id: 759e9fc5-0f0c-48ff-a035-4aab4d4cab00
+                    kind: redisSubscribe
+                    config:
+                      connectionName: Redis subscriber
+                      requestId: 4b086895-f92f-4c1c-8dc2-53511861958a
+                      label: Subscribe
+                      id: d53bca25-69f0-4577-b60c-5956a2bdc2cc
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                    outputs:
+                      - id: connected
+                        name: connected
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: any
+                        flow: both
+                    position:
+                      x: 684
+                      'y': 37
+                  - id: 1a838778-17f2-46c8-a445-cd8590dc103b
+                    kind: redisCommand
+                    config:
+                      requestId: 2b871348-dcf0-4b02-bc62-dac751bc6bd3
+                      label: PUBLISH
+                      id: af2b1bc5-ee4f-42d6-8e3c-52ba8d320332
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: env
+                        name: env
+                        dataType: any
+                        flow: value
+                    outputs:
+                      - id: response
+                        name: response
+                        dataType: response
+                        role: response
+                        flow: both
+                    position:
+                      x: 1091
+                      'y': 37
+                  - id: c6f7f985-5db0-4a5e-9040-fba249ad9290
+                    kind: wait
+                    config:
+                      durationMs: 800
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: duration
+                        name: duration
+                        dataType: duration
+                    outputs: []
+                    position:
+                      x: 1427
+                      'y': 61
+                  - id: 207ac639-fb77-4780-ab80-9bba5d577b62
+                    kind: redisClose
+                    config:
+                      connectionNodeId: 759e9fc5-0f0c-48ff-a035-4aab4d4cab00
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                    outputs: []
+                    position:
+                      x: 1791
+                      'y': 51
+                  - id: 522ab254-ebec-4a7c-b9ac-a75448a9c2cb
+                    kind: log
+                    config:
+                      level: info
+                      message:
+                        type: string
+                        value: redis chain done
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 2223
+                      'y': 12
+                edges:
+                  - id: 32dd0a40-8e50-43d9-9a85-bf785d3b9652
+                    from:
+                      nodeId: 013de28b-317f-4d3b-b038-e7463b09a803
+                      portId: done
+                    to:
+                      nodeId: 502352b0-2860-406a-ad83-c71204209f57
+                      portId: in
+                  - id: 24334d32-cc6c-4fd7-9115-a0894b24eafc
+                    from:
+                      nodeId: 502352b0-2860-406a-ad83-c71204209f57
+                      portId: done
+                    to:
+                      nodeId: 759e9fc5-0f0c-48ff-a035-4aab4d4cab00
+                      portId: in
+                  - id: 85051438-17e6-4202-94c0-bf4c58efe0c7
+                    from:
+                      nodeId: 759e9fc5-0f0c-48ff-a035-4aab4d4cab00
+                      portId: connected
+                    to:
+                      nodeId: 1a838778-17f2-46c8-a445-cd8590dc103b
+                      portId: in
+                  - id: f58e50eb-b974-4c61-b2ec-c74ad47c8a79
+                    from:
+                      nodeId: 1a838778-17f2-46c8-a445-cd8590dc103b
+                      portId: done
+                    to:
+                      nodeId: c6f7f985-5db0-4a5e-9040-fba249ad9290
+                      portId: in
+                  - id: 9892a190-9d78-4523-b4b0-b1c302addf4a
+                    from:
+                      nodeId: c6f7f985-5db0-4a5e-9040-fba249ad9290
+                      portId: done
+                    to:
+                      nodeId: 207ac639-fb77-4780-ab80-9bba5d577b62
+                      portId: in
+                  - id: 6ff25f26-0c57-4102-a49c-ba62fe98d331
+                    from:
+                      nodeId: 207ac639-fb77-4780-ab80-9bba5d577b62
+                      portId: done
+                    to:
+                      nodeId: 522ab254-ebec-4a7c-b9ac-a75448a9c2cb
+                      portId: in
+                id: f1c7b83e-5dc9-491e-8cb8-e0d707498e36
+                name: Redis
+                items:
+                  - documentation: ''
+                    tags: []
+                    id: f7787c70-4a50-4011-8d94-214e626b47ef
+                    name: Redis Set
+                    url: redis://localhost:6379
+                    mode: command
+                    channels: []
+                    command: SET
+                    args:
+                      - restorm-ref-key
+                      - reference-value
+                    type: redis
+                  - documentation: ''
+                    tags: []
+                    id: 3629ade0-8a19-4174-bad4-eecb281198cd
+                    name: Redis Get
+                    url: redis://localhost:6379
+                    mode: command
+                    channels: []
+                    command: GET
+                    args:
+                      - restorm-ref-key
+                    type: redis
+                  - documentation: ''
+                    tags: []
+                    id: 4b086895-f92f-4c1c-8dc2-53511861958a
+                    name: Redis Subscribe
+                    url: redis://localhost:6379
+                    mode: subscribe
+                    channels:
+                      - restorm-ref-chat
+                    args: []
+                    type: redis
+                  - documentation: ''
+                    tags: []
+                    id: 2b871348-dcf0-4b02-bc62-dac751bc6bd3
+                    name: Redis Publish
+                    url: redis://localhost:6379
+                    mode: command
+                    channels: []
+                    command: PUBLISH
+                    args:
+                      - restorm-ref-chat
+                      - hello from the reference project
+                    type: redis
+              - type: scenario
+                tags: []
+                params: []
+                nodes:
+                  - id: 0b47db79-d129-4935-bc7e-b9edc12633eb
+                    kind: stompConnect
+                    config:
+                      connectionName: STOMP connection
+                      requestId: d22e2160-a1b9-4b45-ae57-247fd8e210cc
+                      label: STOMP connect
+                      id: 106b88fa-dd7a-4a5f-9280-5f42e26ab28c
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                    outputs:
+                      - id: connected
+                        name: connected
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: any
+                        flow: both
+                    position:
+                      x: 12
+                      'y': 29
+                  - id: d3108617-89a5-4f6b-ac4d-467f1c0e998b
+                    kind: stompSend
+                    config:
+                      connectionNodeId: 0b47db79-d129-4935-bc7e-b9edc12633eb
+                      payload:
+                        type: string
+                        value: '{"hello":"from the reference project"}'
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: payload
+                        name: payload
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 362
+                      'y': 29
+                  - id: 597a93f9-0c68-40ce-9529-23edcd46c61f
+                    kind: wait
+                    config:
+                      durationMs: 800
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: duration
+                        name: duration
+                        dataType: duration
+                    outputs: []
+                    position:
+                      x: 712
+                      'y': 29
+                  - id: 89fa31ce-3bf3-4f3e-8a26-b77e38aa20cd
+                    kind: stompClose
+                    config:
+                      connectionNodeId: 0b47db79-d129-4935-bc7e-b9edc12633eb
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                    outputs: []
+                    position:
+                      x: 1062
+                      'y': 36
+                  - id: b316bb9f-74d0-4152-a122-227e8d1f8368
+                    kind: log
+                    config:
+                      level: info
+                      message:
+                        type: string
+                        value: stomp chain done
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 1412
+                      'y': 12
+                edges:
+                  - id: 5b94a318-80d5-4a36-826a-88ed0eace875
+                    from:
+                      nodeId: 0b47db79-d129-4935-bc7e-b9edc12633eb
+                      portId: connected
+                    to:
+                      nodeId: d3108617-89a5-4f6b-ac4d-467f1c0e998b
+                      portId: in
+                  - id: fc87613b-ff09-4267-88d5-d0271788234f
+                    from:
+                      nodeId: d3108617-89a5-4f6b-ac4d-467f1c0e998b
+                      portId: done
+                    to:
+                      nodeId: 597a93f9-0c68-40ce-9529-23edcd46c61f
+                      portId: in
+                  - id: f30eebab-ab89-4868-b220-bb4c6a33c70d
+                    from:
+                      nodeId: 597a93f9-0c68-40ce-9529-23edcd46c61f
+                      portId: done
+                    to:
+                      nodeId: 89fa31ce-3bf3-4f3e-8a26-b77e38aa20cd
+                      portId: in
+                  - id: 259571f2-3851-478e-919c-f0d2b4d67b60
+                    from:
+                      nodeId: 89fa31ce-3bf3-4f3e-8a26-b77e38aa20cd
+                      portId: done
+                    to:
+                      nodeId: b316bb9f-74d0-4152-a122-227e8d1f8368
+                      portId: in
+                id: 50644158-d7eb-4a1e-bdd7-7656a02a47ed
+                name: STOMP
+                items:
+                  - documentation: ''
+                    tags: []
+                    id: d22e2160-a1b9-4b45-ae57-247fd8e210cc
+                    name: STOMP Chat
+                    url: ws://localhost:61614
+                    stompVersion: '1.2'
+                    connectHeaders: []
+                    subscriptions:
+                      - id: sub-0
+                        destination: /topic/restorm-ref-chat
+                        ackMode: auto
+                    sendDestination: /topic/restorm-ref-chat
+                    sendBody: |-
+                      {
+                        "hello": "from the reference project"
+                      }
+                    sendHeaders: []
+                    type: stomp
+              - type: scenario
+                tags: []
+                params: []
+                nodes:
+                  - id: 3915c544-5715-45e2-9f4e-fa152d524982
+                    kind: amqpConnect
+                    config:
+                      connectionName: AMQP subscriber
+                      requestId: 8c52935a-a3ac-4244-a512-9f2ec57f1898
+                      label: AMQP subscribe
+                      id: d0601737-9e85-489e-ba61-58f83aea4a89
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                    outputs:
+                      - id: connected
+                        name: connected
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: any
+                        flow: both
+                    position:
+                      x: 12
+                      'y': 29
+                  - id: c954c6e5-8671-45d5-b786-8f1873fa56c1
+                    kind: amqpPublish
+                    config:
+                      connectionNodeId: 3915c544-5715-45e2-9f4e-fa152d524982
+                      payload:
+                        type: string
+                        value: '{"hello":"from the reference project"}'
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: payload
+                        name: payload
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 362
+                      'y': 29
+                  - id: 6ff73ab3-61b1-4560-a30d-3104af0c576e
+                    kind: wait
+                    config:
+                      durationMs: 800
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: duration
+                        name: duration
+                        dataType: duration
+                    outputs: []
+                    position:
+                      x: 712
+                      'y': 29
+                  - id: eb8d2516-fb90-48dc-ae5b-659da8c1c0c4
+                    kind: amqpClose
+                    config:
+                      connectionNodeId: 3915c544-5715-45e2-9f4e-fa152d524982
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                    outputs: []
+                    position:
+                      x: 1062
+                      'y': 36
+                  - id: 4bd6c88b-b540-4d49-828d-004a9b2e11e7
+                    kind: log
+                    config:
+                      level: info
+                      message:
+                        type: string
+                        value: amqp chain done
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 1412
+                      'y': 12
+                edges:
+                  - id: a4e5de09-acd8-4e4b-ac22-e8d6dec24fd5
+                    from:
+                      nodeId: 3915c544-5715-45e2-9f4e-fa152d524982
+                      portId: connected
+                    to:
+                      nodeId: c954c6e5-8671-45d5-b786-8f1873fa56c1
+                      portId: in
+                  - id: 7b530208-7e65-48ab-a912-62b139af13a9
+                    from:
+                      nodeId: c954c6e5-8671-45d5-b786-8f1873fa56c1
+                      portId: done
+                    to:
+                      nodeId: 6ff73ab3-61b1-4560-a30d-3104af0c576e
+                      portId: in
+                  - id: bf26ecf9-3e3f-447e-bee2-c11c28c41891
+                    from:
+                      nodeId: 6ff73ab3-61b1-4560-a30d-3104af0c576e
+                      portId: done
+                    to:
+                      nodeId: eb8d2516-fb90-48dc-ae5b-659da8c1c0c4
+                      portId: in
+                  - id: fd447c15-0c99-4a66-9e11-3fc848de1bac
+                    from:
+                      nodeId: eb8d2516-fb90-48dc-ae5b-659da8c1c0c4
+                      portId: done
+                    to:
+                      nodeId: 4bd6c88b-b540-4d49-828d-004a9b2e11e7
+                      portId: in
+                id: f5bbdf5b-18a5-4ddb-8453-98fca7d154ce
+                name: AMQP
+                items:
+                  - documentation: ''
+                    tags: []
+                    id: 8c52935a-a3ac-4244-a512-9f2ec57f1898
+                    name: AMQP Subscribe
+                    url: amqp://guest:guest@localhost:5672
+                    mode: subscribe
+                    queue: restorm-ref-queue
+                    autoAck: true
+                    type: amqp
+                  - documentation: ''
+                    tags: []
+                    id: bb6d4aad-b86e-485a-a7e4-1780a406390d
+                    name: AMQP Publish
+                    url: amqp://guest:guest@localhost:5672
+                    mode: publish
+                    exchange: ''
+                    routingKey: restorm-ref-queue
+                    payload: |-
+                      {
+                        "hello": "from the reference project"
+                      }
+                    type: amqp
+              - type: scenario
+                tags: []
+                params: []
+                nodes:
+                  - id: 333458e5-9cdd-41e2-9e51-54c90ead458f
+                    kind: httpRequest
+                    config:
+                      requestId: ef12eae8-c26d-4fc6-8501-ad9a4b689509
+                      label: JSON-RPC Echo
+                      id: a7100de2-8c0c-4dcd-be70-e7b45564738e
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: env
+                        name: env
+                        dataType: any
+                        flow: value
+                      - id: requestOverride
+                        name: override
+                        dataType: object
+                        flow: value
+                    outputs:
+                      - id: response
+                        name: response
+                        dataType: response
+                        role: response
+                        flow: both
+                    position:
+                      x: 12
+                      'y': 12
+                  - id: 4776602f-997f-44f7-b687-2905c2df61fd
+                    kind: httpRequest
+                    config:
+                      requestId: 99089faf-fa76-4471-b220-5d18d3ea1934
+                      label: JSON-RPC Batch
+                      id: f7904199-02b9-4c63-8e65-fc0fa89e2bee
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: env
+                        name: env
+                        dataType: any
+                        flow: value
+                      - id: requestOverride
+                        name: override
+                        dataType: object
+                        flow: value
+                    outputs:
+                      - id: response
+                        name: response
+                        dataType: response
+                        role: response
+                        flow: both
+                    position:
+                      x: 362
+                      'y': 12
+                  - id: 79fd5973-0090-4a85-8d58-2865fca9f180
+                    kind: log
+                    config:
+                      level: info
+                      message:
+                        type: string
+                        value: jsonrpc chain done
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 712
+                      'y': 12
+                edges:
+                  - id: d52d6895-88be-409a-beb9-849c3496439a
+                    from:
+                      nodeId: 333458e5-9cdd-41e2-9e51-54c90ead458f
+                      portId: done
+                    to:
+                      nodeId: 4776602f-997f-44f7-b687-2905c2df61fd
+                      portId: in
+                  - id: 1a2a4619-5aff-44bc-952a-a5d41ed165a7
+                    from:
+                      nodeId: 4776602f-997f-44f7-b687-2905c2df61fd
+                      portId: done
+                    to:
+                      nodeId: 79fd5973-0090-4a85-8d58-2865fca9f180
+                      portId: in
+                id: 10dac49b-4659-4517-a492-06b1533ca640
+                name: JSON-RPC
+                items:
+                  - documentation: ''
+                    tags: []
+                    id: ef12eae8-c26d-4fc6-8501-ad9a4b689509
+                    name: JSON-RPC Echo
+                    url: http://localhost:8095/rpc
+                    headers: []
+                    method: echo
+                    params: ''
+                    rpcId: ref-echo
+                    deprecated: false
+                    type: jsonrpc
+                  - documentation: ''
+                    tags: []
+                    id: 99089faf-fa76-4471-b220-5d18d3ea1934
+                    name: JSON-RPC Batch
+                    url: http://localhost:8095/rpc
+                    headers: []
+                    children:
+                      - childId: child-1
+                        method: echo
+                        params: '[1]'
+                        rpcId: ref-1
+                      - childId: child-2
+                        method: namedEcho
+                        params: '{"x": 1}'
+                        rpcId: ref-2
+                    deprecated: false
+                    type: jsonrpcBatch
+              - type: scenario
+                tags: []
+                params: []
+                nodes:
+                  - id: b89ced34-9e11-4c94-b8e9-804fc724f0d7
+                    kind: httpRequest
+                    config:
+                      requestId: 6349ea9f-baf2-44cd-a984-249670c22cc7
+                      label: tRPC Get user
+                      id: 2bdbfc84-0973-476d-aa1d-f8caf2f517a2
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: env
+                        name: env
+                        dataType: any
+                        flow: value
+                      - id: requestOverride
+                        name: override
+                        dataType: object
+                        flow: value
+                    outputs:
+                      - id: response
+                        name: response
+                        dataType: response
+                        role: response
+                        flow: both
+                    position:
+                      x: 12
+                      'y': 12
+                  - id: fddeb5f5-59bf-4d27-aa89-9f5e63a3bd62
+                    kind: httpRequest
+                    config:
+                      requestId: 1a6ff2b2-3cfa-45bf-a61d-dc9a091b951a
+                      label: tRPC Create post
+                      id: a85c85a2-53ce-46ae-b558-16454eb137fe
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: env
+                        name: env
+                        dataType: any
+                        flow: value
+                      - id: requestOverride
+                        name: override
+                        dataType: object
+                        flow: value
+                    outputs:
+                      - id: response
+                        name: response
+                        dataType: response
+                        role: response
+                        flow: both
+                    position:
+                      x: 362
+                      'y': 12
+                  - id: 8313739a-f04f-4ee4-bc24-d09988d8a67c
+                    kind: log
+                    config:
+                      level: info
+                      message:
+                        type: string
+                        value: trpc chain done
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 712
+                      'y': 12
+                edges:
+                  - id: 8f2bb333-e47d-4e49-a8c6-5fdf8b3481f5
+                    from:
+                      nodeId: b89ced34-9e11-4c94-b8e9-804fc724f0d7
+                      portId: done
+                    to:
+                      nodeId: fddeb5f5-59bf-4d27-aa89-9f5e63a3bd62
+                      portId: in
+                  - id: 2447f26b-e7de-4d81-94fb-ca2525dca6d0
+                    from:
+                      nodeId: fddeb5f5-59bf-4d27-aa89-9f5e63a3bd62
+                      portId: done
+                    to:
+                      nodeId: 8313739a-f04f-4ee4-bc24-d09988d8a67c
+                      portId: in
+                id: 08d2f516-c7bd-42b2-8e91-4f89d90e9c3a
+                name: tRPC
+                items:
+                  - documentation: ''
+                    tags: []
+                    id: 6349ea9f-baf2-44cd-a984-249670c22cc7
+                    name: tRPC Get user
+                    url: http://localhost:8096
+                    procedure: user.get
+                    input: '{"id": 1}'
+                    kind: query
+                    headers: []
+                    type: trpc
+                  - documentation: ''
+                    tags: []
+                    id: 1a6ff2b2-3cfa-45bf-a61d-dc9a091b951a
+                    name: tRPC Echo header
+                    url: http://localhost:8096
+                    procedure: echo.header
+                    input: '{"name": "x-test-token"}'
+                    kind: query
+                    headers: []
+                    type: trpc
           - type: scenario
             tags: []
             params: []
@@ -22684,8 +24245,8 @@ collections:
                     flow: signal
                 outputs: []
                 position:
-                  x: 1000
-                  'y': 5600
+                  x: 1080
+                  'y': 5520
               - id: d480bb07-5505-4dc2-989e-c25acd9c7097
                 kind: grpcConnect
                 config:
@@ -22865,7 +24426,7 @@ collections:
                 outputs: []
                 position:
                   x: 1000
-                  'y': 5620
+                  'y': 5720
               - id: 13a9c033-0526-4d73-9c9d-800508787774
                 kind: toast
                 config:
@@ -22980,8 +24541,8 @@ collections:
                         dataType: any
                     outputs: []
                     position:
-                      x: 0
-                      'y': 0
+                      x: 12
+                      'y': 12
                   - id: bd86487d-1d41-4ce6-8544-475809a857bd
                     kind: wait
                     config:
@@ -23003,8 +24564,8 @@ collections:
                         role: then
                         flow: both
                     position:
-                      x: 280
-                      'y': 0
+                      x: 382
+                      'y': 61
                   - id: 87c25e72-45cc-4c10-baa7-8d051de277ea
                     kind: log
                     config:
@@ -23025,8 +24586,8 @@ collections:
                         dataType: any
                     outputs: []
                     position:
-                      x: 560
-                      'y': 0
+                      x: 745
+                      'y': 12
                 edges:
                   - id: 63b162b7-aace-4e55-9715-2af19f91dd04
                     from:
@@ -23069,8 +24630,8 @@ collections:
                         dataType: any
                     outputs: []
                     position:
-                      x: 0
-                      'y': 0
+                      x: 12
+                      'y': 12
                   - id: 2723e16a-6a5e-4435-8c6e-f75974f5d235
                     kind: wait
                     config:
@@ -23092,8 +24653,8 @@ collections:
                         role: then
                         flow: both
                     position:
-                      x: 280
-                      'y': 0
+                      x: 382
+                      'y': 61
                   - id: 50b55ea6-5f96-4f6d-887b-2899cf6df124
                     kind: log
                     config:
@@ -23114,8 +24675,8 @@ collections:
                         dataType: any
                     outputs: []
                     position:
-                      x: 560
-                      'y': 0
+                      x: 745
+                      'y': 12
                 edges:
                   - id: 8b241a8e-19fd-488f-8f61-b0e6301dd82e
                     from:
@@ -23158,8 +24719,8 @@ collections:
                         dataType: any
                     outputs: []
                     position:
-                      x: 0
-                      'y': 0
+                      x: 12
+                      'y': 12
                   - id: 97536098-b5dc-4475-af3b-1ca5684e2b96
                     kind: wait
                     config:
@@ -23181,8 +24742,8 @@ collections:
                         role: then
                         flow: both
                     position:
-                      x: 280
-                      'y': 0
+                      x: 382
+                      'y': 61
                   - id: e08ee11d-c161-42a2-b064-f2dfcbe9e834
                     kind: log
                     config:
@@ -23203,8 +24764,8 @@ collections:
                         dataType: any
                     outputs: []
                     position:
-                      x: 560
-                      'y': 0
+                      x: 745
+                      'y': 12
                 edges:
                   - id: 0ad05e85-37cb-4596-b38c-2b2d7d425357
                     from:
@@ -23269,6 +24830,19 @@ collections:
             callType: unary
             requestMessage: '{"f_string":"ping"}'
             metadata: []
+            transport: grpc
+            type: grpc
+          - documentation: Same DummyUnary call as "gRPC Unary" but dispatched over the gRPC-Web transport (binary framing over plain HTTP/1.1) against the dedicated grpcweb mock on port 9002 — grpcbin does not speak gRPC-Web on any port.
+            tags: []
+            id: a581324b-219d-4d1e-ba02-e9b5b96aecf8
+            name: gRPC-Web Unary
+            url: localhost:9002
+            service: grpcbin.GRPCBin
+            method: DummyUnary
+            callType: unary
+            requestMessage: '{"f_string":"web-ping"}'
+            metadata: []
+            transport: grpc-web
             type: grpc
           - documentation: ''
             tags: []
@@ -23283,23 +24857,7 @@ collections:
             type: grpc
           - documentation: ''
             tags: []
-            id: b7f32945-65fb-477b-bdba-d8d56303bd31
-            name: SSE Frames
-            url: http://localhost:8097/events?count=3&intervalMs=50
-            headers: []
-            type: sse
-          - documentation: ''
-            tags: []
-            id: 10f2163c-de61-4a3a-b7ff-c63a1914f067
-            name: GraphQL Unary Client
-            url: http://localhost:4222/graphql
-            operationType: query
-            query: '{ pets }'
-            variables: '{}'
-            headers: []
-            type: graphql
-          - documentation: ''
-            tags: []
+            id: a9cb1b58-b9d3-4dac-9341-62f7d3e9a370
             name: QC Config Consumer
             method: GET
             url: http://localhost:8077/wrong
@@ -23307,9 +24865,6 @@ collections:
             params: []
             pathParams: []
             deprecated: false
-            type: http
-            id: a9cb1b58-b9d3-4dac-9341-62f7d3e9a370
-            description: Base URL points at a wrong path (404). A project quick-config 'QC' redirects it to the served /pets — so a green run proves the scenario action applied the selected config.
             quickConfigs:
               - id: qc_f47542c5-83ca-4c6b-b39a-dda9bca8810a
                 name: QC
@@ -23319,74 +24874,80 @@ collections:
                   url: http://localhost:8077/pets
                 createdAt: '2026-06-28T07:35:19.862Z'
                 updatedAt: '2026-06-28T07:35:19.862Z'
+            type: http
         id: f1000000-0000-0000-0000-00000000auth
         name: Pet API
-      - documentation: ''
-        tags: []
-        id: 268e8d63-6d7c-431f-81fa-5ab6c984c784
-        name: Clear Tokens
-        method: POST
-        url: '{{baseUrl}}/cleartokens'
-        headers: []
-        params: []
-        pathParams: []
-        deprecated: false
-        type: http
-      - documentation: ''
-        tags: []
-        id: 638797b2-2101-4a85-8d17-713fb43c3334
-        name: Clear Logs
-        method: POST
-        url: '{{baseUrl}}/clear_logs'
-        headers: []
-        params: []
-        pathParams: []
-        deprecated: false
-        type: http
-      - documentation: ''
-        tags: []
-        id: e633f808-9fea-4235-9433-d92112ffa2e6
-        name: Login Probe
-        method: GET
-        url: '{{baseUrl}}/loginprobe'
-        headers: []
-        params: []
-        pathParams: []
-        deprecated: false
-        type: http
-      - documentation: ''
-        tags: []
-        id: 8edf5e58-e640-4f72-bca4-c9cec95a4dfe
-        name: Clear Flaky
-        method: POST
-        url: '{{baseUrl}}/clearflaky'
-        headers: []
-        params: []
-        pathParams: []
-        deprecated: false
-        type: http
-      - documentation: ''
-        tags: []
-        id: 70b7e14f-ed3f-47e1-b791-647deeb8db90
-        name: Flaky 503
-        method: GET
-        url: '{{baseUrl}}/flaky?fail=2&code=503'
-        headers: []
-        params: []
-        pathParams: []
-        deprecated: false
-        type: http
-      - documentation: ''
-        tags: []
-        id: 66d657c9-2ce1-4229-b98f-42e2e5fa96a4
-        name: Flaky 500
-        method: GET
-        url: '{{baseUrl}}/flaky?fail=5&code=500'
-        headers: []
-        params: []
-        pathParams: []
-        deprecated: false
-        type: http
+      - tags: []
+        configuration: {}
+        items:
+          - documentation: ''
+            tags: []
+            id: 268e8d63-6d7c-431f-81fa-5ab6c984c784
+            name: Clear Tokens
+            method: POST
+            url: '{{baseUrl}}/cleartokens'
+            headers: []
+            params: []
+            pathParams: []
+            deprecated: false
+            type: http
+          - documentation: ''
+            tags: []
+            id: 638797b2-2101-4a85-8d17-713fb43c3334
+            name: Clear Logs
+            method: POST
+            url: '{{baseUrl}}/clear_logs'
+            headers: []
+            params: []
+            pathParams: []
+            deprecated: false
+            type: http
+          - documentation: ''
+            tags: []
+            id: e633f808-9fea-4235-9433-d92112ffa2e6
+            name: Login Probe
+            method: GET
+            url: '{{baseUrl}}/loginprobe'
+            headers: []
+            params: []
+            pathParams: []
+            deprecated: false
+            type: http
+          - documentation: ''
+            tags: []
+            id: 8edf5e58-e640-4f72-bca4-c9cec95a4dfe
+            name: Clear Flaky
+            method: POST
+            url: '{{baseUrl}}/clearflaky'
+            headers: []
+            params: []
+            pathParams: []
+            deprecated: false
+            type: http
+          - documentation: ''
+            tags: []
+            id: 70b7e14f-ed3f-47e1-b791-647deeb8db90
+            name: Flaky 503
+            method: GET
+            url: '{{baseUrl}}/flaky?fail=2&code=503'
+            headers: []
+            params: []
+            pathParams: []
+            deprecated: false
+            type: http
+          - documentation: ''
+            tags: []
+            id: 66d657c9-2ce1-4229-b98f-42e2e5fa96a4
+            name: Flaky 500
+            method: GET
+            url: '{{baseUrl}}/flaky?fail=5&code=500'
+            headers: []
+            params: []
+            pathParams: []
+            deprecated: false
+            type: http
+        id: 25b2a74a-0c49-4b21-8326-e8e90214d5d5
+        name: e2e utilities
     id: a0000000-0000-0000-0000-00000000auth
     name: Auth Service
     customValueLists:

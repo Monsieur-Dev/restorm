@@ -42,7 +42,7 @@ The single scenario is long (~340 lines) and linear — every `When` /
 - **`When I favorite the welcome recent file {string}`** / **`When I unfavorite the welcome favorite {string}`**
 - **`Then the welcome favorites should contain {string}`** / **`Then … should not contain …`**
 - **`When I open the welcome recent file {string}`**
-- **`When I open the {string} file via Ctrl+O`** — mocks the next system open-file dialog for the given filename (resolved under `FULL_WORKFLOW_TEMP_DIR`) then presses Ctrl+O.
+- **`When I open the {string} file via Ctrl+O`** — mocks the next system open-file dialog for the given filename (resolved under the per-scenario `fullWorkflowTempDir` fixture) then presses Ctrl+O.
 
 ### Import modal
 

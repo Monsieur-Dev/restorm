@@ -14,7 +14,7 @@ import { createBdd } from 'playwright-bdd'
 import { createServer, type Server } from 'http'
 import { join } from 'path'
 import type { ElectronApplication, Page } from '@playwright/test'
-import { test, expect, type McpDiscovery, type McpToolReply, MCP_SERVER_TEMP_DIR } from '../../fixtures/mcp-server.fixture'
+import { test, expect, type McpDiscovery, type McpToolReply } from '../../fixtures/mcp-server.fixture'
 
 const { Given, When, Then } = createBdd(test)
 
@@ -149,9 +149,9 @@ Then(
 
 When(
   'I call MCP create_project with name {string}',
-  async ({ callMcpTool }, name: string) => {
+  async ({ callMcpTool, mcpServerTempDir }, name: string) => {
     if (!discovery) throw new Error('launch first')
-    const filePath = join(MCP_SERVER_TEMP_DIR, `${name}.restorm`)
+    const filePath = join(mcpServerTempDir, `${name}.restorm`)
     lastReply = await callMcpTool(discovery, 'create_project', { filePath })
     lastReplyPayload = parsedReply(lastReply)
     expect(lastReply.isError ?? false).toBe(false)

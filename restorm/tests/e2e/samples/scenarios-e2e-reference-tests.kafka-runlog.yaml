@@ -1,0 +1,68 @@
+- message: 🔵 [<time>] ▶ Kafka
+- message: ⚪ [<time>] start kafkaProduce
+  data:
+    requestId: <uuid>
+    label: "Kafka produce (warm-up: creates the topic)"
+- message: ⚪ [<time>] done kafkaProduce
+  data:
+    response:
+      request:
+        url: localhost:9092
+        method: PRODUCE
+        headers: {}
+      response:
+        status: 200
+        statusText: ""
+        headers: {}
+        body: '{"topic":"restorm-ref","partition":0}'
+        durationMs: <dynamic-time>
+        success: true
+- message: ⚪ [<time>] start kafkaConsume
+  data:
+    connectionName: Kafka consumer
+    requestId: <uuid>
+    label: Kafka consume (latest)
+    in: true
+- message: ⚪ [<time>] done kafkaConsume
+- message: ⚪ [<time>] kafka "Kafka consumer" connecting
+- message: ⚪ [<time>] kafka "Kafka consumer" connected
+- message: ⚪ [<time>] start kafkaProduce
+  data:
+    requestId: <uuid>
+    label: Kafka produce
+    in: true
+- message: ⚪ [<time>] done kafkaProduce
+  data:
+    response:
+      request:
+        url: localhost:9092
+        method: PRODUCE
+        headers: {}
+      response:
+        status: 200
+        statusText: ""
+        headers: {}
+        body: '{"topic":"restorm-ref","partition":0}'
+        durationMs: <dynamic-time>
+        success: true
+- message: ⚪ [<time>] start wait
+  data:
+    durationMs: <dynamic-time>
+    in: true
+- message: ⚪ [<time>] done wait
+- message: ⚪ [<time>] start kafkaClose
+  data:
+    connectionNodeId: <uuid>
+    label: Kafka close
+    in: true
+- message: ⚪ [<time>] done kafkaClose
+- message: ⚪ [<time>] start log
+  data:
+    level: info
+    message: kafka chain done
+    in: true
+- message: 🔵 [<time>] kafka chain done
+- message: ⚪ [<time>] done log
+  data: {}
+- message: ⚪ [<time>] kafka "Kafka consumer" closed
+- message: 🔵 [<time>] ■ Kafka

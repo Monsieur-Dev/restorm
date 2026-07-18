@@ -1,0 +1,57 @@
+- message: 🔵 [<time>] ▶ tRPC
+- message: ⚪ [<time>] start httpRequest
+  data:
+    requestId: <uuid>
+    label: tRPC Get user
+- message: ⚪ [<time>] done httpRequest
+  data:
+    response:
+      request:
+        url: http://localhost:8096/user.get?input=%7B%22id%22%3A%201%7D
+        method: ""
+        headers: {}
+      response:
+        status: 200
+        statusText: OK
+        headers:
+          content-type: application/json
+          content-length: "45"
+          date: <dynamic-time>
+          connection: keep-alive
+          keep-alive: timeout=5
+        body: '{"id":1,"name":"Alice"}'
+        durationMs: <dynamic-time>
+        success: true
+- message: ⚪ [<time>] start httpRequest
+  data:
+    requestId: <uuid>
+    label: tRPC Create post
+    in: true
+- message: ⚪ [<time>] done httpRequest
+  data:
+    response:
+      request:
+        url: http://localhost:8096/echo.header?input=%7B%22name%22%3A%20%22x-test-token%22%7D
+        method: ""
+        headers: {}
+      response:
+        status: 200
+        statusText: OK
+        headers:
+          content-type: application/json
+          content-length: "36"
+          date: <dynamic-time>
+          connection: keep-alive
+          keep-alive: timeout=5
+        body: '{"value":null}'
+        durationMs: <dynamic-time>
+        success: true
+- message: ⚪ [<time>] start log
+  data:
+    level: info
+    message: trpc chain done
+    in: true
+- message: 🔵 [<time>] trpc chain done
+- message: ⚪ [<time>] done log
+  data: {}
+- message: 🔵 [<time>] ■ tRPC

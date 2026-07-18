@@ -24,6 +24,9 @@ export interface SelectBoxProps {
   filterPlaceholder?: string
   /** Test id forwarded to the filter row (suffix `-input` for the field). */
   filterTestId?: string
+  /** When true, the whole control is locked: greyed out, closed, and inert
+   * to pointer + keyboard input. Default `false`. */
+  disabled?: boolean
 }
 
 // Select option item interface
@@ -44,6 +47,7 @@ export interface ISelectBoxOptions {
   ariaDescription?: string
   minBottomMargin?: number
   optionsAsChildren?: boolean
+  editable?: boolean
 }
 
 // SelectBox styles
@@ -89,6 +93,7 @@ export interface ISelectData {
   - `ariaDescription` : ARIA description
   - `minBottomMargin` : Minimum bottom margin for dropdown positioning
   - `optionsAsChildren` : Whether options are rendered as children
+  - `editable` : Combobox mode. The dropdown's filter row doubles as a free-text entry (always rendered, regardless of `filterThreshold`). Enter — or closing the popup by clicking outside — commits the typed text through `onDidSelect` with `index: -1`, VERBATIM (typing `Post` never silently becomes the `POST` option); arrow-navigating onto an option switches Enter back to picking it, and Escape cancels. The closed trigger keeps rendering the selected option's label. Forces the custom-drawn variant (a native `<select>` can't take free text). See [Editable SelectBox (combobox)](#editable-selectbox-combobox).
 
 - **styles** (`ISelectBoxStyles`) : Custom styling overrides
 - **className** (`string`) : Additional CSS classes
@@ -96,8 +101,29 @@ export interface ISelectData {
 - **filterThreshold** (`number`) : Item count (inclusive) at or above which a sticky filter input appears at the top of the popup. Default `15`. See [Filtering long lists](#filtering-long-lists).
 - **filterPlaceholder** (`string`) : Localised placeholder for the filter input. Default `Filter…`.
 - **filterTestId** (`string`) : Test id forwarded to the filter row (suffixed with `-input` for the field).
+- **disabled** (`boolean`) : Locks the whole control (as opposed to `ISelectOptionItem.isDisabled`, which locks a single option). The trigger is greyed (matches the `InputBox`/`Toggle` disabled dimming), the dropdown can't be opened, and both pointer and keyboard input are inert — clicking, Enter/Space/arrow-keys all no-op. Default `false`. See [SelectBox with Disabled Control](#selectbox-with-disabled-control).
 
 ## Usage Examples
+
+### Editable SelectBox (combobox)
+
+A picker whose values are SUGGESTIONS, not a closed set — e.g. an HTTP method
+selector that offers the well-known verbs but accepts any custom token:
+
+```tsx
+<SelectBox
+  id="http-method-select"
+  options={verbs.map((v) => ({ text: v, label: <MethodBadge verb={v} /> }))}
+  selected={verbs.indexOf(method)}
+  onDidSelect={({ selected }) => setMethod(selected)}  // index === -1 → free text
+  selectBoxOptions={{ ariaLabel: 'HTTP method', editable: true }}
+  filterPlaceholder=""
+/>
+```
+
+The host owns normalisation: a free-text commit arrives exactly as typed
+(`index: -1`); keep the current value in `options` (append it when it isn't a
+well-known entry) so the closed trigger always has something to render.
 
 ### Basic SelectBox
 
@@ -165,6 +191,19 @@ import { SelectBox } from 'electron-core-ui/renderer'
   ]}
   selected={0}
   onDidSelect={(data) => console.log('Selected:', data.selected)}
+/>
+```
+
+### SelectBox with Disabled Control
+
+Locks the whole control — distinct from `isDisabled` on a single option above. Typical use: a config field that must stay read-only while a resource it configures is active (e.g. a mock server that snapshotted its config on start).
+
+```tsx
+<SelectBox
+  options={[{ text: 'unary' }, { text: 'server-stream' }]}
+  selected={0}
+  onDidSelect={(data) => console.log('Call type:', data.selected)}
+  disabled={isServerListening}
 />
 ```
 
@@ -357,6 +396,7 @@ For reliable E2E tests, prefer forcing the custom dropdown:
 - **`.option-disabled`** : Disabled option styling
 - **`.visible`** : Applied when dropdown is visible
 - **`.synthetic-focus`** : Applied when element has synthetic focus
+- **`.disabled`** : Applied to `.select-box` (both the native `<select>` and the custom-drawn trigger) when the `disabled` prop is set — greyed + `pointer-events: none`
 
 ## Theme Variables
 

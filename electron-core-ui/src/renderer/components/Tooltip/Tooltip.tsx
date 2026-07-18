@@ -218,20 +218,30 @@ const Tooltip: React.FC<TooltipProps> = ({
     setResolvedPlacement(nextPlacement)
     setIsPositioned(true)
     
-    // Recalculate after positioning to ensure accurate beak position
+    // Recalculate after the tooltip box settles. The first pass can measure
+    // the content BEFORE its final layout (a transiently over-wide box), and
+    // the viewport clamp then anchors `left` on that phantom width — visibly
+    // stranding the tooltip far from a right-edge target. Re-derive the full
+    // horizontal position (centre + clamp), not just the beak, from the
+    // final rects.
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
         if (tooltipRef.current && targetRef.current) {
           const finalTooltipRect = tooltipRef.current.getBoundingClientRect()
           const finalTargetRect = targetRef.current.getBoundingClientRect()
           const finalTargetCenterX = finalTargetRect.left + finalTargetRect.width / 2
-          const finalTooltipLeft = finalTooltipRect.left
           const finalTooltipWidth = finalTooltipRect.width
-          
-          const finalBeakLeftPercent = ((finalTargetCenterX - finalTooltipLeft) / finalTooltipWidth) * 100
-          
+
+          let finalLeft = finalTargetCenterX - finalTooltipWidth / 2
+          const finalMaxLeft = window.innerWidth - finalTooltipWidth - gap
+          if (finalLeft < gap) finalLeft = gap
+          else if (finalLeft > finalMaxLeft) finalLeft = finalMaxLeft
+
+          const finalBeakLeftPercent = ((finalTargetCenterX - finalLeft) / finalTooltipWidth) * 100
+
           setPosition(prev => ({
             ...prev,
+            left: finalLeft,
             beakLeftPercent: finalBeakLeftPercent
           }))
         }

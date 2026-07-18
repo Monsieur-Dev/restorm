@@ -257,7 +257,7 @@
         "httpPut": "HTTP – PUT リクエスト",
         "httpPatch": "HTTP – PATCH リクエスト",
         "httpDelete": "HTTP – DELETE リクエスト",
-        "httpServer": "HTTP モックサーバー",
+        "httpServer": "HTTP サーバー",
         "graphql": "GraphQL リクエスト",
         "grpc": "gRPC リクエスト",
         "grpcServerStream": "gRPC サーバーストリーミングリクエスト",
@@ -272,18 +272,33 @@
         "websocketServer": "WebSocket サーバー",
         "socketio": "Socket.IO リクエスト",
         "mqtt": "MQTT request",
-        "mqttServer": "MQTT ブローカー",
+        "mqttServer": "MQTT サーバー",
         "sse": "SSE リクエスト",
-        "grpcServer": "gRPC モックサーバー",
-        "soapServer": "SOAP モックサーバー",
-        "graphqlServer": "GraphQL モックサーバー",
-        "odataServer": "OData モックサーバー",
+        "grpcServer": "gRPC サーバー",
+        "soapServer": "SOAP サーバー",
+        "graphqlServer": "GraphQL サーバー",
+        "odataServer": "OData サーバー",
         "trpc": "tRPC リクエスト",
         "amqp": "AMQP リクエスト",
         "redis": "Redis リクエスト",
         "stomp": "STOMPリクエスト",
         "kafkaProduce": "Kafka リクエスト – 生成",
-        "kafkaConsume": "Kafka リクエスト – 消費"
+        "kafkaConsume": "Kafka リクエスト – 消費",
+        "httpHead": "HTTP – HEAD リクエスト",
+        "httpOptions": "HTTP – OPTIONS リクエスト",
+        "httpQuery": "HTTP – QUERY リクエスト",
+        "groups": {
+          "grpc": "gRPC",
+          "websocket": "WebSocket",
+          "socketio": "Socket.IO",
+          "graphql": "GraphQL",
+          "redis": "Redis",
+          "messaging": "Messaging",
+          "soap": "SOAP",
+          "odata": "OData",
+          "sse": "SSE",
+          "trpc": "tRPC"
+        }
       }
     },
     "deleteConfirm": {
@@ -375,7 +390,7 @@
       "switchTooltip": "環境を切り替え"
     },
     "body": {
-      "fileLabel": "ファイルまたは URL：",
+      "fileLabel": "ファイル：",
       "browse": "参照..."
     },
     "tabs": {
@@ -396,6 +411,7 @@
         "graph": "グラフ"
       },
       "loading": "リクエストを送信しています...",
+      "noResponseBody": "レスポンス本文がありません — 詳細は Infos を参照してください",
       "noResponse": "「送信」をクリックしてリクエストを実行してください",
       "history": {
         "list": "レスポンス履歴の一覧",
@@ -611,10 +627,22 @@
     "subscribeMode": "購読",
     "commandMode": "コマンド",
     "command": "コマンド",
-    "args": "引数",
-    "argsPlaceholder": "コマンドの引数",
     "freeform": "自由入力",
     "freeformPlaceholder": "自由入力コマンド（選択を上書き）",
+    "fields": {
+      "key": "キー",
+      "field": "フィールド",
+      "value": "値",
+      "channel": "チャンネル",
+      "message": "メッセージ",
+      "start": "開始",
+      "stop": "終了",
+      "id": "ID",
+      "fieldOrValue": "フィールド/値",
+      "argument": "引数"
+    },
+    "addArgument": "引数を追加",
+    "removeArgument": "引数を削除",
     "tabs": {
       "channels": "チャンネル",
       "command": "コマンド"
@@ -663,6 +691,7 @@
     "noMessages": "メッセージはまだありません",
     "connected": "接続済み",
     "disconnected": "切断されました",
+    "consumeError": "コンシューマーエラー",
     "producedTo": "送信先",
     "offset": "オフセット",
     "messages": "メッセージ"
@@ -1251,43 +1280,46 @@
       "writeFile": "Write file",
       "timer": "タイマー",
       "code": "コード",
-      "socketioConnect": "Socket.IO connect",
+      "socketioConnect": "Socket.IO 接続",
       "socketioSend": "Socket.IO send",
-      "socketioClose": "Socket.IO close",
-      "websocketConnect": "WebSocket connect",
-      "sseConnect": "SSE connect",
+      "socketioClose": "Socket.IO 接続を閉じる",
+      "socketioServerClose": "Socket.IO サーバーを閉じる",
+      "websocketConnect": "WebSocket 接続",
+      "sseConnect": "SSE 接続",
       "websocketSend": "WebSocket send",
-      "websocketClose": "WebSocket close",
-      "sseClose": "SSE close",
+      "websocketClose": "WebSocket 接続を閉じる",
+      "websocketServerClose": "WebSocket サーバーを閉じる",
+      "sseClose": "SSE 接続を閉じる",
       "grpcConnect": "gRPC connect",
       "grpcSend": "gRPC send",
-      "grpcClose": "gRPC close",
+      "grpcClose": "gRPC 接続を閉じる",
       "mqttConnect": "MQTT connect",
       "mqttSend": "MQTT publish",
-      "mqttClose": "MQTT close",
+      "mqttClose": "MQTT 接続を閉じる",
       "amqpConnect": "AMQP 接続",
       "amqpPublish": "AMQP パブリッシュ",
-      "amqpClose": "AMQP クローズ",
+      "amqpClose": "AMQP 接続を閉じる",
       "redisSubscribe": "Redis subscribe",
-      "redisClose": "Redis close",
+      "redisClose": "Redis 接続を閉じる",
       "redisCommand": "Redis command",
-      "httpListen": "HTTP server",
-      "httpClose": "HTTP close",
+      "httpListen": "HTTP サーバー",
+      "httpClose": "HTTP サーバーを閉じる",
       "grpcServerClose": "gRPC サーバーを閉じる",
       "soapListen": "SOAP サーバー",
-      "soapClose": "SOAP を閉じる",
-      "graphqlListen": "GraphQL server",
-      "graphqlClose": "GraphQL close",
-      "odataListen": "OData server",
-      "odataClose": "OData close",
+      "soapClose": "SOAP サーバーを閉じる",
+      "graphqlListen": "GraphQL サーバー",
+      "graphqlClose": "GraphQL サーバーを閉じる",
+      "odataListen": "OData サーバー",
+      "odataClose": "OData サーバーを閉じる",
       "graphqlSubscribe": "GraphQL サブスクライブ",
       "graphqlUnsubscribe": "GraphQL サブスクライブ解除",
       "stompConnect": "STOMP接続",
       "stompSend": "STOMP送信",
-      "stompClose": "STOMPを閉じる",
+      "stompClose": "STOMP 接続を閉じる",
       "kafkaProduce": "Kafka produce",
       "kafkaConsume": "Kafka consume",
-      "kafkaClose": "Kafka close"
+      "kafkaClose": "Kafka 接続を閉じる",
+      "grpcListen": "gRPC サーバー"
     },
     "comparator": {
       "result": "結果"
@@ -1400,6 +1432,9 @@
       },
       "file": {
         "missingPath": "ファイルパスが必要です。"
+      },
+      "connection": {
+        "missingName": "接続名は必須です。"
       }
     },
     "usage": {
@@ -1847,10 +1882,12 @@
       "socketioConnect": "Socket.IO 接続を開き、受信した各イベントをそのポートに再送出します。",
       "socketioSend": "すでに開いている Socket.IO 接続でメッセージを送信します。",
       "socketioClose": "すでに開いている Socket.IO 接続を閉じます。",
+      "socketioServerClose": "すでに待ち受け中の Socket.IO モックサーバー (Socket.IO サーバーノードで宣言) を停止し、ポートを解放します。",
       "websocketConnect": "生の WebSocket 接続を開き、受信した各メッセージをそのポートに再送出します。",
       "sseConnect": "長時間持続する SSE (Server-Sent Events) 接続を開き、受信した各フレームをそのポートに再送出します。",
       "websocketSend": "すでに開いている WebSocket 接続でペイロードを送信します。",
       "websocketClose": "すでに開いている WebSocket 接続を閉じます。",
+      "websocketServerClose": "すでに待ち受け中の WebSocket モックサーバー (WebSocket サーバーノードで宣言) を停止し、ポートを解放します。",
       "sseClose": "すでに開いている SSE 接続を閉じます。",
       "grpcConnect": "ストリーミング gRPC 呼び出しを開き、受信した各フレームを message ポートに再送出します。",
       "grpcSend": "すでに開いているストリーミング gRPC 呼び出しにリクエストメッセージを書き込みます。",
@@ -2321,5 +2358,8 @@
     "sendDestination": "宛先",
     "ack": "ACK",
     "nack": "NACK"
+  },
+  "server": {
+    "configLockedWhileRunning": "サーバーの実行中は設定がロックされます"
   }
 }

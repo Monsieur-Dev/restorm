@@ -62,3 +62,8 @@ Feature: tRPC execution end-to-end
     When I import the tRPC schema URL via the sample
     Then the imported folder contains a request for "user.get"
     And the imported folder contains a request for "post.create"
+
+  Scenario: Environment variables are offered in the URL field suggestions
+    When I open the "Get user" request tab via MCP
+    And I trigger variable suggestions in the tRPC URL field
+    Then the tRPC URL suggestion list contains "serverUrl"

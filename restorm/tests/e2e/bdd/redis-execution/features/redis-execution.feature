@@ -35,3 +35,18 @@ Feature: Redis execution end-to-end (Docker mock)
     When I open the "Redis Get" request tab via MCP
     And I click the Redis run button
     Then the Redis command REPL shows a reply matching "e2e-value"
+
+  Scenario: Type a value containing a space into the structured SET fields (no manual quoting)
+    Given I launch restorm with the MCP server enabled
+    And I open the Redis sample via MCP
+
+    When I open the "Redis Set" request tab via MCP
+    And I type "e2e-space-key" into the Redis key field
+    And I type "hello world" into the Redis value field
+    And I click the Redis run button
+    Then the Redis command REPL shows a reply for "SET e2e-space-key hello world"
+
+    When I open the "Redis Get" request tab via MCP
+    And I type "e2e-space-key" into the Redis key field
+    And I click the Redis run button
+    Then the Redis command REPL shows a reply matching "hello world"

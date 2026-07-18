@@ -23,17 +23,122 @@
   data:
     result:
       python: 1.0.0
+- message: ⚪ [<time>] start code
+  data:
+    language: javascript
+    code: |-
+      // code-deps chain — JS/TS link. Imports the pinned pure-JS
+      // package (installed OFFLINE from the code-deps cache) to prove
+      // install+mount worked, then adds its marker to the pass-through
+      // dict for the next link.
+      const restormjsdep = require('restormjsdep')
+      const prev = (input && typeof input === 'object') ? input : {}
+      console.log('javascript: restormjsdep', restormjsdep.version, 'loaded')
+      return { ...prev, javascript: restormjsdep.version }
+    value:
+      python: 1.0.0
+- message: "🔵 [<time>] Downloading 1 package(s): restormjsdep@1.0.0"
+- message: "🔵 [<time>] javascript: restormjsdep 1.0.0 loaded"
+- message: ⚪ [<time>] done code
+  data:
+    result:
+      python: 1.0.0
+      javascript: 1.0.0
+- message: ⚪ [<time>] start code
+  data:
+    language: r
+    code: |-
+      # code-deps chain — R link. Loads the pinned pure-R package
+      # (installed OFFLINE from the code-deps cache) to prove
+      # install+mount worked, then adds its marker to the pass-through
+      # named list for the next link. packageVersion (not the random
+      # praise() message) keeps the run-log deterministic.
+      library(praise)
+      ver <- as.character(packageVersion("praise"))
+      input[["r"]] <- ver
+      cat(sprintf("r: praise %s loaded\n", ver))
+      input
+    value:
+      python: 1.0.0
+      javascript: 1.0.0
+- message: "🔵 [<time>] Downloading 1 package(s): praise@1.0.0"
+- message: "🔵 [<time>] r: praise 1.0.0 loaded"
+- message: ⚪ [<time>] done code
+  data:
+    result:
+      python: 1.0.0
+      javascript: 1.0.0
+      r: 1.0.0
+- message: ⚪ [<time>] start code
+  data:
+    language: ruby
+    code: |-
+      # code-deps chain — Ruby link. Requires the pinned pure-Ruby gem
+      # (installed OFFLINE from the code-deps cache) to prove
+      # install+mount worked, then adds its marker to the pass-through
+      # hash for the next link.
+      require "restormrbdep"
+      prev = $input.is_a?(Hash) ? $input : {}
+      ver = Restormrbdep::VERSION
+      puts "ruby: restormrbdep #{ver} loaded"
+      prev.merge("ruby" => ver)
+    value:
+      python: 1.0.0
+      javascript: 1.0.0
+      r: 1.0.0
+- message: "🔵 [<time>] Downloading 1 package(s): restormrbdep@1.0.0"
+- message: "🔵 [<time>] ruby: restormrbdep 1.0.0 loaded"
+- message: ⚪ [<time>] done code
+  data:
+    result:
+      python: 1.0.0
+      javascript: 1.0.0
+      r: 1.0.0
+      ruby: 1.0.0
+- message: ⚪ [<time>] start code
+  data:
+    language: lua
+    code: >-
+      -- code-deps chain — Lua link. Requires the pinned pure-Lua
+
+      -- module (installed OFFLINE from the code-deps cache) to prove
+
+      -- install+mount worked, then adds its marker to the pass-through
+
+      -- table for the next link.
+
+      local restormluadep = require("restormluadep")
+
+      local prev = type(input) == "table" and input or {}
+
+      prev.lua = restormluadep.version
+
+      print(string.format("lua: restormluadep %s loaded",
+      restormluadep.version))
+
+      return prev
+    value:
+      python: 1.0.0
+      javascript: 1.0.0
+      r: 1.0.0
+      ruby: 1.0.0
+- message: "🔵 [<time>] Downloading 1 package(s): restormluadep@1.0.0"
+- message: "🔵 [<time>] lua: restormluadep 1.0.0 loaded"
+- message: ⚪ [<time>] done code
+  data:
+    result:
+      lua: 1.0.0
 - message: ⚪ [<time>] start log
   data:
     level: info
     message: code-deps chain result
     data:
-      python: 1.0.0
+      lua: 1.0.0
 - message: 🔵 [<time>] code-deps chain result
   data:
-    python: 1.0.0
+    lua: 1.0.0
 - message: ⚪ [<time>] done log
   data:
     value:
-      python: 1.0.0
+      lua: 1.0.0
 - message: 🔵 [<time>] ■ code-deps-chain

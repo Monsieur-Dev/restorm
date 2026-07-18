@@ -24,6 +24,7 @@ import { MarkdownViewer, Tabs, type Tab, type SearchResult, BookmarkRibbonStack,
 import type { RestormSearchMetadata } from '../../../services/SearchIndexService'
 import requestDetailsTemplate from '../../../resources/templates/search/request-details.hbs?raw'
 import { Badge } from '../../common/Badge'
+import { RegistryBadge } from '../../common/RegistryBadge'
 import { mapToBadgeType } from '../../../utils/badgeUtils'
 import { DocumentationHost } from '../../documentation/DocumentationHost'
 import { mergeEnumDefinitionsIntoModels } from '../../documentation/mergeEnumDefinitions'
@@ -326,7 +327,7 @@ export const SearchTooltipContent: React.FC<SearchTooltipContentProps> = ({ resu
         {Header}
         <h1 className="search-tooltip-scenario-title">{resultTitle}</h1>
         <div className="search-tooltip-scenario-kind">
-          <Badge type="SCENARIO" />
+          <RegistryBadge badgeId="scenario" />
           <span>{t('search.tooltip.scenarioKind', 'scenario')}</span>
         </div>
         {notes && (

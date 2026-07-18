@@ -432,14 +432,55 @@ export class KafkaExecutionService {
         const kafka = new Kafka(this.buildKafkaConfig(resolved))
         const groupId = resolved.groupId && resolved.groupId.length > 0 ? resolved.groupId : `restorm-${requestId}`
         const consumer = kafka.consumer({ groupId })
-        this.activeOperations.set(requestId, { kind: 'consume', kill: () => { void consumer.disconnect() } })
+
+        // A single terminal signal, settled exactly once. `consumer.run()`
+        // resolves as soon as the consumer has JOINED the group — kafkajs keeps
+        // fetching in the background — so run() resolving is NOT the end of the
+        // consume. Only an explicit Stop (`kill` / `close`), or a consumer CRASH
+        // that kafkajs won't auto-restart, ends it. The async body awaits this
+        // before tearing the consumer down + reporting completion.
+        let settleTerminal: ((error?: string) => void) | undefined
+        const terminal = new Promise<string | undefined>((resolve) => { settleTerminal = resolve })
+        let terminalSettled = false
+        const signalTerminal = (error?: string): void => {
+          if (terminalSettled) return
+          terminalSettled = true
+          settleTerminal?.(error)
+        }
+
+        // Leave the group cleanly on teardown: stop the fetch loop, then
+        // disconnect so kafkajs sends the LeaveGroup request — otherwise a live
+        // member lingers in the group and, once more members than partitions
+        // accumulate, the broker hands new members an EMPTY assignment. Both
+        // calls are best-effort so a broker already gone can't mask the result.
+        let torndown = false
+        const teardown = async (): Promise<void> => {
+          if (torndown) return
+          torndown = true
+          try { await consumer.stop() } catch { /* best-effort */ }
+          try { await consumer.disconnect() } catch { /* best-effort */ }
+        }
+
+        // Cancel/Stop (request panel or scenario engine) just settles the
+        // terminal — the awaiting body performs the actual clean teardown.
+        this.activeOperations.set(requestId, { kind: 'consume', kill: () => { signalTerminal() } })
         this.broadcastProgress(requestId, 'started')
 
+        let terminalError: string | undefined
         await withFirewallBypass(async () => {
           await consumer.connect()
           await consumer.subscribe({ topic: resolved.topic, fromBeginning: resolved.fromOffset === 'earliest' })
           ctl.connected = true
           input.onConnect()
+
+          // A background crash (broker drop, unrecoverable rebalance) ends the
+          // consume with an error instead of hanging in a "connected" state that
+          // never delivers. A crash kafkajs WILL auto-restart (`restart: true`)
+          // is transient — let it recover rather than tearing down.
+          consumer.on(consumer.events.CRASH, (event) => {
+            if (event.payload.restart) return
+            signalTerminal(event.payload.error.message || 'Kafka consumer crashed')
+          })
 
           const partitionFilter = new Set(resolved.partitions ?? [])
           // Track which partitions still need a one-time seek when
@@ -475,17 +516,22 @@ export class KafkaExecutionService {
               return Promise.resolve()
             }
           })
+
+          // `run()` has resolved: the consumer JOINED and is now fetching in the
+          // background. Stay live until an explicit Stop/close/crash settles the
+          // terminal, then leave the group cleanly.
+          terminalError = await terminal
+          await teardown()
         })
 
-        // `run()` resolved — the consumer was stopped/disconnected (a Stop, a
-        // kafkaClose, or `close()` below), not a crash.
         this.activeOperations.delete(requestId)
-        this.broadcastProgress(requestId, 'completed')
-        fireClose()
+        this.broadcastProgress(requestId, terminalError !== undefined ? 'error' : 'completed', terminalError)
+        fireClose(terminalError)
       } catch (err) {
         this.activeOperations.delete(requestId)
-        this.broadcastProgress(requestId, 'error')
-        fireClose((err as Error).message || 'Kafka consumer failed')
+        const message = (err as Error).message || 'Kafka consumer failed'
+        this.broadcastProgress(requestId, 'error', message)
+        fireClose(message)
       }
     })()
 
@@ -528,9 +574,13 @@ export class KafkaExecutionService {
     return Promise.resolve()
   }
 
-  private broadcastProgress(requestId: string, status: 'started' | 'completed' | 'cancelled' | 'error'): void {
+  private broadcastProgress(
+    requestId: string,
+    status: 'started' | 'completed' | 'cancelled' | 'error',
+    error?: string
+  ): void {
     for (const win of BrowserWindow.getAllWindows()) {
-      win.webContents.send('kafka:request-progress', { requestId, status })
+      win.webContents.send('kafka:request-progress', { requestId, status, ...(error !== undefined ? { error } : {}) })
     }
   }
 

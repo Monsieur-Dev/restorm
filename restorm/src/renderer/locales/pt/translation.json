@@ -258,7 +258,7 @@
         "httpPut": "HTTP – pedido PUT",
         "httpPatch": "HTTP – pedido PATCH",
         "httpDelete": "HTTP – pedido DELETE",
-        "httpServer": "Servidor HTTP simulado",
+        "httpServer": "Servidor HTTP",
         "graphql": "Pedido GraphQL",
         "grpc": "Pedido gRPC",
         "grpcServerStream": "Pedido gRPC server-streaming",
@@ -273,18 +273,33 @@
         "websocketServer": "Servidor WebSocket",
         "socketio": "Requisição Socket.IO",
         "mqtt": "MQTT request",
-        "mqttServer": "Broker MQTT",
+        "mqttServer": "Servidor MQTT",
         "sse": "Pedido SSE",
-        "grpcServer": "Servidor gRPC simulado",
-        "soapServer": "Servidor SOAP de simulação",
-        "graphqlServer": "Servidor GraphQL simulado",
-        "odataServer": "Servidor OData simulado",
+        "grpcServer": "Servidor gRPC",
+        "soapServer": "Servidor SOAP",
+        "graphqlServer": "Servidor GraphQL",
+        "odataServer": "Servidor OData",
         "trpc": "Pedido tRPC",
         "amqp": "Pedido AMQP",
         "redis": "Pedido Redis",
         "stomp": "Pedido STOMP",
         "kafkaProduce": "Pedido Kafka – Produzir",
-        "kafkaConsume": "Pedido Kafka – Consumir"
+        "kafkaConsume": "Pedido Kafka – Consumir",
+        "httpHead": "HTTP – pedido HEAD",
+        "httpOptions": "HTTP – pedido OPTIONS",
+        "httpQuery": "HTTP – pedido QUERY",
+        "groups": {
+          "grpc": "gRPC",
+          "websocket": "WebSocket",
+          "socketio": "Socket.IO",
+          "graphql": "GraphQL",
+          "redis": "Redis",
+          "messaging": "Messaging",
+          "soap": "SOAP",
+          "odata": "OData",
+          "sse": "SSE",
+          "trpc": "tRPC"
+        }
       }
     },
     "deleteConfirm": {
@@ -376,7 +391,7 @@
       "switchTooltip": "Alternar ambiente"
     },
     "body": {
-      "fileLabel": "Ficheiro ou URL:",
+      "fileLabel": "Ficheiro:",
       "browse": "Procurar..."
     },
     "tabs": {
@@ -397,6 +412,7 @@
         "graph": "Grafo"
       },
       "loading": "A enviar pedido...",
+      "noResponseBody": "Sem corpo de resposta — consulte Infos para detalhes",
       "noResponse": "Clique em Enviar para executar o pedido",
       "history": {
         "list": "Lista do histórico de respostas",
@@ -612,10 +628,22 @@
     "subscribeMode": "Subscrição",
     "commandMode": "Comando",
     "command": "Comando",
-    "args": "Argumentos",
-    "argsPlaceholder": "Argumentos do comando",
     "freeform": "Livre",
     "freeformPlaceholder": "Comando livre (substitui a seleção)",
+    "fields": {
+      "key": "Chave",
+      "field": "Campo",
+      "value": "Valor",
+      "channel": "Canal",
+      "message": "Mensagem",
+      "start": "Início",
+      "stop": "Fim",
+      "id": "ID",
+      "fieldOrValue": "Campo/Valor",
+      "argument": "Argumento"
+    },
+    "addArgument": "Adicionar argumento",
+    "removeArgument": "Remover argumento",
     "tabs": {
       "channels": "Canais",
       "command": "Comando"
@@ -664,6 +692,7 @@
     "noMessages": "Ainda sem mensagens",
     "connected": "Ligado",
     "disconnected": "Desligado",
+    "consumeError": "Erro do consumidor",
     "producedTo": "Produzido para",
     "offset": "Offset",
     "messages": "Mensagens"
@@ -1252,43 +1281,46 @@
       "writeFile": "Write file",
       "timer": "Temporizador",
       "code": "Código",
-      "socketioConnect": "Socket.IO connect",
+      "socketioConnect": "Ligação Socket.IO",
       "socketioSend": "Socket.IO send",
-      "socketioClose": "Socket.IO close",
-      "websocketConnect": "WebSocket connect",
-      "sseConnect": "SSE connect",
+      "socketioClose": "Fechar ligação Socket.IO",
+      "socketioServerClose": "Fechar servidor Socket.IO",
+      "websocketConnect": "Ligação WebSocket",
+      "sseConnect": "Ligação SSE",
       "websocketSend": "WebSocket send",
-      "websocketClose": "WebSocket close",
-      "sseClose": "SSE close",
+      "websocketClose": "Fechar ligação WebSocket",
+      "websocketServerClose": "Fechar servidor WebSocket",
+      "sseClose": "Fechar ligação SSE",
       "grpcConnect": "gRPC connect",
       "grpcSend": "gRPC send",
-      "grpcClose": "gRPC close",
+      "grpcClose": "Fechar ligação gRPC",
       "mqttConnect": "MQTT connect",
       "mqttSend": "MQTT publish",
-      "mqttClose": "MQTT close",
+      "mqttClose": "Fechar ligação MQTT",
       "amqpConnect": "Ligação AMQP",
       "amqpPublish": "Publicação AMQP",
-      "amqpClose": "Fecho AMQP",
+      "amqpClose": "Fechar ligação AMQP",
       "redisSubscribe": "Redis subscribe",
-      "redisClose": "Redis close",
+      "redisClose": "Fechar ligação Redis",
       "redisCommand": "Redis command",
-      "httpListen": "HTTP server",
-      "httpClose": "HTTP close",
+      "httpListen": "Servidor HTTP",
+      "httpClose": "Fechar servidor HTTP",
       "grpcServerClose": "Fechar servidor gRPC",
       "soapListen": "Servidor SOAP",
-      "soapClose": "Fechar SOAP",
-      "graphqlListen": "GraphQL server",
-      "graphqlClose": "GraphQL close",
-      "odataListen": "OData server",
-      "odataClose": "OData close",
+      "soapClose": "Fechar servidor SOAP",
+      "graphqlListen": "Servidor GraphQL",
+      "graphqlClose": "Fechar servidor GraphQL",
+      "odataListen": "Servidor OData",
+      "odataClose": "Fechar servidor OData",
       "graphqlSubscribe": "Subscrição GraphQL",
       "graphqlUnsubscribe": "Cancelar subscrição GraphQL",
       "stompConnect": "Conexão STOMP",
       "stompSend": "Envio STOMP",
-      "stompClose": "Fechar STOMP",
+      "stompClose": "Fechar ligação STOMP",
       "kafkaProduce": "Kafka produce",
       "kafkaConsume": "Kafka consume",
-      "kafkaClose": "Kafka close"
+      "kafkaClose": "Fechar ligação Kafka",
+      "grpcListen": "Servidor gRPC"
     },
     "comparator": {
       "result": "resultado"
@@ -1401,6 +1433,9 @@
       },
       "file": {
         "missingPath": "É necessário um caminho de ficheiro."
+      },
+      "connection": {
+        "missingName": "O nome da ligação é obrigatório."
       }
     },
     "usage": {
@@ -1848,10 +1883,12 @@
       "socketioConnect": "Abre uma conexão Socket.IO e reemite cada evento recebido na sua porta.",
       "socketioSend": "Envia uma mensagem numa conexão Socket.IO já aberta.",
       "socketioClose": "Fecha uma conexão Socket.IO já aberta.",
+      "socketioServerClose": "Para um servidor simulado Socket.IO que já está a escutar (declarado por um nó servidor Socket.IO), libertando a sua porta.",
       "websocketConnect": "Abre uma conexão WebSocket em bruto e reemite cada mensagem recebida na sua porta.",
       "sseConnect": "Abre uma ligação SSE (Server-Sent Events) de longa duração e reemite cada trama recebida na sua porta.",
       "websocketSend": "Envia um payload numa conexão WebSocket já aberta.",
       "websocketClose": "Fecha uma conexão WebSocket já aberta.",
+      "websocketServerClose": "Para um servidor simulado WebSocket que já está a escutar (declarado por um nó servidor WebSocket), libertando a sua porta.",
       "sseClose": "Fecha uma ligação SSE já aberta.",
       "grpcConnect": "Abre uma chamada gRPC em streaming e reemite cada quadro recebido na sua porta de mensagens.",
       "grpcSend": "Escreve uma mensagem de pedido numa chamada gRPC em streaming já aberta.",
@@ -2322,5 +2359,8 @@
     "sendDestination": "Destino",
     "ack": "ACK",
     "nack": "NACK"
+  },
+  "server": {
+    "configLockedWhileRunning": "Configuração bloqueada enquanto o servidor está em execução"
   }
 }

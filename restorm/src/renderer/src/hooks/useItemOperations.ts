@@ -461,28 +461,31 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
       case 'http-put': return 'New PUT request'
       case 'http-patch': return 'New PATCH request'
       case 'http-delete': return 'New DELETE request'
-      case 'http-server': return 'New HTTP mock server'
+      case 'http-head': return 'New HEAD request'
+      case 'http-options': return 'New OPTIONS request'
+      case 'http-query': return 'New QUERY request'
+      case 'http-server': return 'New HTTP server'
       case 'graphql': return 'New GraphQL request'
-      case 'graphql-server': return 'New GraphQL mock server'
+      case 'graphql-server': return 'New GraphQL server'
       case 'grpc': return 'New gRPC request'
       case 'grpc-server-stream': return 'New gRPC server-streaming request'
       case 'grpc-client-stream': return 'New gRPC client-streaming request'
       case 'grpc-bidi': return 'New gRPC bidirectional request'
-      case 'grpc-server': return 'New gRPC mock server'
+      case 'grpc-server': return 'New gRPC server'
       case 'soap': return 'New SOAP request'
-      case 'soap-server': return 'New SOAP mock server'
+      case 'soap-server': return 'New SOAP server'
       case 'websocket': return 'New WebSocket request'
       case 'socketio': return 'New Socket.IO request'
       case 'socketio-server': return 'New Socket.IO server'
       case 'websocket-server': return 'New WebSocket server'
       case 'stomp': return 'New STOMP request'
       case 'mqtt': return 'New MQTT request'
-      case 'mqtt-server': return 'New MQTT broker'
+      case 'mqtt-server': return 'New MQTT server'
       case 'sse': return 'New SSE request'
       case 'kafka-produce': return 'New Kafka produce request'
       case 'kafka-consume': return 'New Kafka consume request'
       case 'odata': return 'New OData request'
-      case 'odata-server': return 'New OData mock server'
+      case 'odata-server': return 'New OData server'
       case 'amqp': return 'New AMQP request'
       case 'redis': return 'New Redis request'
       case 'auth': return 'New auth request'
@@ -593,7 +596,10 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
             kind === 'http-put' ? 'PUT' :
               kind === 'http-patch' ? 'PATCH' :
                 kind === 'http-delete' ? 'DELETE' :
-                  undefined
+                  kind === 'http-head' ? 'HEAD' :
+                    kind === 'http-options' ? 'OPTIONS' :
+                      kind === 'http-query' ? 'QUERY' :
+                        undefined
       let built: unknown
       if (httpMethod !== undefined) {
         built = new HTTPRequest({ id, name, method: httpMethod })

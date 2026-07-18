@@ -82,6 +82,32 @@ When('I click the Redis run button', async () => {
   await page.locator(RUN_BTN).click()
 })
 
+/** Clear a structured Redis arg field and retype it — the field is a
+ * Monaco-backed `VariableInputBox`, not a plain `<input>`, so a real
+ * `Ctrl+A` + keystrokes is needed (a `.fill()` doesn't reliably clear it).
+ * Matches the `clearAndType` convention used for other Monaco-backed inputs
+ * in `full-workflow.steps.ts`. */
+async function clearAndTypeRedisArg(currentPage: Page, testId: string, text: string): Promise<void> {
+  const input = currentPage.locator(`[data-testid="${testId}"]:visible`).first()
+  await input.click()
+  await currentPage.keyboard.press('Control+a')
+  await currentPage.keyboard.type(text, { delay: 20 })
+  // The arg fields are debounced Monaco-backed inputs: blur to commit, then
+  // wait out the debounce so a Run click can't fire with the previous args.
+  await currentPage.keyboard.press('Tab')
+  await currentPage.waitForTimeout(500)
+}
+
+When('I type {string} into the Redis key field', async ({}, text: string) => {
+  if (page === null) throw new Error('launch first')
+  await clearAndTypeRedisArg(page, 'redis-arg-key-input', text)
+})
+
+When('I type {string} into the Redis value field', async ({}, text: string) => {
+  if (page === null) throw new Error('launch first')
+  await clearAndTypeRedisArg(page, 'redis-arg-value-input', text)
+})
+
 Then('the Redis run button shows the subscribed state', async () => {
   if (page === null) throw new Error('launch first')
   // Subscribe mode toggles to the "unsubscribe" glyph once the connection is

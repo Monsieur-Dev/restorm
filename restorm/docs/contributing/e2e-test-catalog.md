@@ -26,14 +26,14 @@ server; — = pure UI/in-process.
 
 | Suite | Scen | Covers | Deps |
 |---|--:|---|---|
-| http-execution | 26 | HTTP/REST execution end-to-end (methods, redirects, history, errors) | 🏠 |
+| http-execution | 27 | HTTP/REST execution end-to-end (methods, redirects, history, errors, file body) | 🏠 |
 | graphql-execution | 15 | GraphQL execution end-to-end | 🏠 |
 | graphql-operation-name | 3 | operationName / multi-operation selection | 🏠 |
 | grpc-execution | 11 | gRPC unary + streaming execution | 🐳 grpcbin |
 | soap-execution | 9 | SOAP execution end-to-end | 🏠 |
-| trpc-execution | 9 | tRPC over HTTP execution | 🏠 |
+| trpc-execution | 10 | tRPC over HTTP execution (+ env-var suggestions) | 🏠 |
 | odata-execution | 8 | OData query options, CRUD, batch, v2 envelope | 🏠 |
-| kafka-execution | 6 | Kafka produce/consume/offset | 🐳 kafka 🔌 |
+| kafka-execution | 7 | Kafka produce/consume/offset, live-consume stays alive + delivers | 🐳 kafka 🔌 |
 | sse-execution | 5 | Server-Sent Events execution | 🏠 |
 | redis-execution | 2 | Redis pub/sub + commands | 🐳 redis |
 | amqp-execution | 1 | AMQP / RabbitMQ publish/consume | 🐳 rabbitmq |
@@ -79,7 +79,7 @@ server; — = pure UI/in-process.
 |---|--:|---|---|
 | odata-petstore | 4 | OData import + send + filter (petstore) | — |
 | scenario-code-deps | 2 | Code-node external deps (offline chained golden) | — |
-| scenario-runlog | 1 | Scenario run-log golden matrix (all node kinds) | 🏠 |
+| scenario-runlog | 56 | Scenario run-log golden matrix (all node kinds + every protocol sub-scenario + Main) | 🏠 |
 | scenario-quick-config-selector | 1 | Request-action config selector stays live | — |
 | scenario-setvariable-override | 1 | setVariable overrides an env-folder var downstream | — |
 | scenario-suggestions | 1 | Scenario inspector data suggestions | — |

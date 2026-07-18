@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { Button } from 'electron-core-ui/renderer'
 import { isRequest } from '../../../../../shared/types/collections'
 import { Badge } from '../../common/Badge'
+import { RegistryBadge } from '../../common/RegistryBadge'
 import { requestBadgeType } from '../../../utils/badgeUtils'
 import { useScenarioBoundResolver } from '../scenarioBoundResolver'
 import { ScenarioNodeBoxBase, type ScenarioNodeBoxType, type ScenarioNodeCell, type ScenarioNodeSection } from './ScenarioNodeBoxBase'
@@ -36,7 +37,7 @@ export const GrpcConnectNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ i
   const boundRequest = boundItem && isRequest(boundItem) ? boundItem : null
   const headerIcon = boundRequest
     ? <Badge type={requestBadgeType(boundRequest)} />
-    : <Badge type="GRPC" icon="plug" />
+    : <RegistryBadge badgeId="grpc_connect" />
   const overrideSections = useStreamingOverrideSections(boundRequest, config, (patch) => { data.onSetConfig?.(id, patch) })
 
   const left: ScenarioNodeSection[] = [
@@ -114,7 +115,7 @@ export const GrpcSendNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, 
       ]
     }
   ]
-  return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={[]} headerIcon={<Badge type="GRPC" icon="arrow-up" />} />
+  return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={[]} headerIcon={<RegistryBadge badgeId="grpc_send" />} />
 }
 
 /** C (grpcClose) — half-closes a declared streaming call; sequences via `done`. */
@@ -122,5 +123,5 @@ export const GrpcCloseNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id,
   const left: ScenarioNodeSection[] = [
     { id: 'main', rows: [{ id: 'connection', content: <ConnectionPicker id={id} data={data} kind="grpcConnect" /> }] }
   ]
-  return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={[]} headerIcon={<Badge type="GRPC" icon="debug-disconnect" />} />
+  return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={[]} headerIcon={<RegistryBadge badgeId="grpc_close" />} />
 }

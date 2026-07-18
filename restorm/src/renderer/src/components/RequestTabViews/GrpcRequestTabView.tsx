@@ -23,6 +23,7 @@ import {
 } from 'electron-core-ui/renderer'
 import { DocumentEvents, type RequestHistoryEventPayload } from '../../services/DocumentEvents'
 import { RestormVariableInputBox } from '../RestormVariableInputBox'
+import { useEnvVariables } from '../../hooks/useEnvVariables'
 import { RestormKeyValueTable, type KeyValueTableHandle } from '../RestormKeyValueTable'
 import type { GrpcRequest, GrpcResponse, GrpcCallType, GrpcTransport, KeyValue, ResponseHistoryDetail } from '../../../../shared/types/collections'
 import { useEnvironmentContext } from '../../contexts/useEnvironmentContext'
@@ -325,6 +326,9 @@ const GrpcClientTabView: React.FC<GrpcRequestTabViewProps> = ({
   
   // Stable empty array for components that get variables via their own variableId
   const emptyVariables = useMemo<VariableDefinition[]>(() => [], [])
+  // Environment variables for scalar {{...}} fields so their autocomplete
+  // offers env vars alongside the helper functions.
+  const envVariables = useEnvVariables(request.id)
 
   // Callback for metadata changes - notify both reactive object and ContextService
   const handleMetadataChange = useCallback((rows: KeyValue[]): void => {
@@ -637,7 +641,7 @@ const GrpcClientTabView: React.FC<GrpcRequestTabViewProps> = ({
             <RestormVariableInputBox
               value={url}
               onChange={setUrl}
-              variables={emptyVariables}
+              variables={envVariables}
               helpers={handlebarsHelpers}
               placeholder={t('grpc.urlPlaceholder')}
               data-testid="grpc-url-input"

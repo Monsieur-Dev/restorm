@@ -258,7 +258,7 @@
         "httpPut": "HTTP – PUT-pyyntö",
         "httpPatch": "HTTP – PATCH-pyyntö",
         "httpDelete": "HTTP – DELETE-pyyntö",
-        "httpServer": "HTTP-mock-palvelin",
+        "httpServer": "HTTP-palvelin",
         "graphql": "GraphQL-pyyntö",
         "grpc": "gRPC-pyyntö",
         "grpcServerStream": "gRPC server-streaming -pyyntö",
@@ -273,18 +273,33 @@
         "websocketServer": "WebSocket-palvelin",
         "socketio": "Socket.IO-pyyntö",
         "mqtt": "MQTT request",
-        "mqttServer": "MQTT-välittäjä",
+        "mqttServer": "MQTT-palvelin",
         "sse": "SSE-pyyntö",
-        "grpcServer": "gRPC-mock-palvelin",
-        "soapServer": "SOAP-mock-palvelin",
-        "graphqlServer": "GraphQL-mock-palvelin",
-        "odataServer": "OData-mock-palvelin",
+        "grpcServer": "gRPC-palvelin",
+        "soapServer": "SOAP-palvelin",
+        "graphqlServer": "GraphQL-palvelin",
+        "odataServer": "OData-palvelin",
         "trpc": "tRPC-pyyntö",
         "amqp": "AMQP-pyyntö",
         "redis": "Redis-pyyntö",
         "stomp": "STOMP-pyyntö",
         "kafkaProduce": "Kafka-pyyntö – Tuota",
-        "kafkaConsume": "Kafka-pyyntö – Kuluta"
+        "kafkaConsume": "Kafka-pyyntö – Kuluta",
+        "httpHead": "HTTP – HEAD-pyyntö",
+        "httpOptions": "HTTP – OPTIONS-pyyntö",
+        "httpQuery": "HTTP – QUERY-pyyntö",
+        "groups": {
+          "grpc": "gRPC",
+          "websocket": "WebSocket",
+          "socketio": "Socket.IO",
+          "graphql": "GraphQL",
+          "redis": "Redis",
+          "messaging": "Messaging",
+          "soap": "SOAP",
+          "odata": "OData",
+          "sse": "SSE",
+          "trpc": "tRPC"
+        }
       }
     },
     "deleteConfirm": {
@@ -376,7 +391,7 @@
       "switchTooltip": "Vaihda ympäristöä"
     },
     "body": {
-      "fileLabel": "Tiedosto tai URL:",
+      "fileLabel": "Tiedosto:",
       "browse": "Selaa..."
     },
     "tabs": {
@@ -397,6 +412,7 @@
         "graph": "Kaavio"
       },
       "loading": "Lähetetään pyyntöä...",
+      "noResponseBody": "Ei vastausrunkoa — katso tiedot Infos-välilehdeltä",
       "noResponse": "Suorita pyyntö napsauttamalla Lähetä",
       "history": {
         "list": "Vastaushistorian luettelo",
@@ -612,10 +628,22 @@
     "subscribeMode": "Tilaus",
     "commandMode": "Komento",
     "command": "Komento",
-    "args": "Argumentit",
-    "argsPlaceholder": "Komennon argumentit",
     "freeform": "Vapaa",
     "freeformPlaceholder": "Vapaamuotoinen komento (ohittaa valinnan)",
+    "fields": {
+      "key": "Avain",
+      "field": "Kenttä",
+      "value": "Arvo",
+      "channel": "Kanava",
+      "message": "Viesti",
+      "start": "Alku",
+      "stop": "Loppu",
+      "id": "ID",
+      "fieldOrValue": "Kenttä/Arvo",
+      "argument": "Argumentti"
+    },
+    "addArgument": "Lisää argumentti",
+    "removeArgument": "Poista argumentti",
     "tabs": {
       "channels": "Kanavat",
       "command": "Komento"
@@ -664,6 +692,7 @@
     "noMessages": "Ei vielä viestejä",
     "connected": "Yhdistetty",
     "disconnected": "Yhteys katkaistu",
+    "consumeError": "Kuluttajavirhe",
     "producedTo": "Tuotettu kohteeseen",
     "offset": "Offset",
     "messages": "Viestit"
@@ -1252,43 +1281,46 @@
       "writeFile": "Write file",
       "timer": "Ajastin",
       "code": "Koodi",
-      "socketioConnect": "Socket.IO connect",
+      "socketioConnect": "Socket.IO-yhteys",
       "socketioSend": "Socket.IO send",
-      "socketioClose": "Socket.IO close",
-      "websocketConnect": "WebSocket connect",
-      "sseConnect": "SSE connect",
+      "socketioClose": "Sulje Socket.IO-yhteys",
+      "socketioServerClose": "Sulje Socket.IO-palvelin",
+      "websocketConnect": "WebSocket-yhteys",
+      "sseConnect": "SSE-yhteys",
       "websocketSend": "WebSocket send",
-      "websocketClose": "WebSocket close",
-      "sseClose": "SSE close",
+      "websocketClose": "Sulje WebSocket-yhteys",
+      "websocketServerClose": "Sulje WebSocket-palvelin",
+      "sseClose": "Sulje SSE-yhteys",
       "grpcConnect": "gRPC connect",
       "grpcSend": "gRPC send",
-      "grpcClose": "gRPC close",
+      "grpcClose": "Sulje gRPC-yhteys",
       "mqttConnect": "MQTT connect",
       "mqttSend": "MQTT publish",
-      "mqttClose": "MQTT close",
+      "mqttClose": "Sulje MQTT-yhteys",
       "amqpConnect": "AMQP-yhteys",
       "amqpPublish": "AMQP-julkaisu",
-      "amqpClose": "AMQP-sulkeminen",
+      "amqpClose": "Sulje AMQP-yhteys",
       "redisSubscribe": "Redis subscribe",
-      "redisClose": "Redis close",
+      "redisClose": "Sulje Redis-yhteys",
       "redisCommand": "Redis command",
-      "httpListen": "HTTP server",
-      "httpClose": "HTTP close",
+      "httpListen": "HTTP-palvelin",
+      "httpClose": "Sulje HTTP-palvelin",
       "grpcServerClose": "Sulje gRPC-palvelin",
       "soapListen": "SOAP-palvelin",
-      "soapClose": "Sulje SOAP",
-      "graphqlListen": "GraphQL server",
-      "graphqlClose": "GraphQL close",
-      "odataListen": "OData server",
-      "odataClose": "OData close",
+      "soapClose": "Sulje SOAP-palvelin",
+      "graphqlListen": "GraphQL-palvelin",
+      "graphqlClose": "Sulje GraphQL-palvelin",
+      "odataListen": "OData-palvelin",
+      "odataClose": "Sulje OData-palvelin",
       "graphqlSubscribe": "GraphQL-tilaus",
       "graphqlUnsubscribe": "Peruuta GraphQL-tilaus",
       "stompConnect": "STOMP-yhteys",
       "stompSend": "STOMP-lähetys",
-      "stompClose": "Sulje STOMP",
+      "stompClose": "Sulje STOMP-yhteys",
       "kafkaProduce": "Kafka produce",
       "kafkaConsume": "Kafka consume",
-      "kafkaClose": "Kafka close"
+      "kafkaClose": "Sulje Kafka-yhteys",
+      "grpcListen": "gRPC-palvelin"
     },
     "comparator": {
       "result": "tulos"
@@ -1401,6 +1433,9 @@
       },
       "file": {
         "missingPath": "Tiedostopolku vaaditaan."
+      },
+      "connection": {
+        "missingName": "Yhteyden nimi vaaditaan."
       }
     },
     "usage": {
@@ -1848,10 +1883,12 @@
       "socketioConnect": "Avaa Socket.IO-yhteyden ja lähettää jokaisen vastaanotetun tapahtuman uudelleen portistaan.",
       "socketioSend": "Lähettää viestin jo avoimeen Socket.IO-yhteyteen.",
       "socketioClose": "Sulkee jo avoimen Socket.IO-yhteyden.",
+      "socketioServerClose": "Pysäyttää jo kuuntelevan Socket.IO-mock-palvelimen (jonka Socket.IO-palvelinsolmu on määritellyt) ja vapauttaa sen portin.",
       "websocketConnect": "Avaa raa'an WebSocket-yhteyden ja lähettää jokaisen vastaanotetun viestin uudelleen portistaan.",
       "sseConnect": "Avaa pitkäkestoisen SSE (Server-Sent Events) -yhteyden ja lähettää jokaisen vastaanotetun kehyksen uudelleen portistaan.",
       "websocketSend": "Lähettää hyötykuorman jo avoimeen WebSocket-yhteyteen.",
       "websocketClose": "Sulkee jo avoimen WebSocket-yhteyden.",
+      "websocketServerClose": "Pysäyttää jo kuuntelevan WebSocket-mock-palvelimen (jonka WebSocket-palvelinsolmu on määritellyt) ja vapauttaa sen portin.",
       "sseClose": "Sulkee jo avoinna olevan SSE-yhteyden.",
       "grpcConnect": "Avaa streaming-gRPC-kutsun ja lähettää jokaisen vastaanotetun kehyksen uudelleen message-portissaan.",
       "grpcSend": "Kirjoittaa pyyntöviestin jo avoimeen gRPC-streaming-kutsuun.",
@@ -2322,5 +2359,8 @@
     "sendDestination": "Kohde",
     "ack": "ACK",
     "nack": "NACK"
+  },
+  "server": {
+    "configLockedWhileRunning": "Asetukset lukittu palvelimen ollessa käynnissä"
   }
 }

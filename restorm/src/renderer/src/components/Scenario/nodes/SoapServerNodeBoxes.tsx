@@ -2,7 +2,7 @@ import React from 'react'
 import type { NodeProps } from '@xyflow/react'
 import { useTranslation } from 'react-i18next'
 import { Button } from 'electron-core-ui/renderer'
-import { Badge } from '../../common/Badge'
+import { RegistryBadge } from '../../common/RegistryBadge'
 import { ScenarioNodeBoxBase, type ScenarioNodeBoxType, type ScenarioNodeCell, type ScenarioNodeSection } from './ScenarioNodeBoxBase'
 import { ScenarioNameInput } from './ScenarioNameInput'
 import { ConnectionPicker } from './SocketioNodeBoxes'
@@ -65,7 +65,7 @@ export const SoapListenNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id
     { id: 'connected', label: t('scenario.socketio.started', 'started'), port: { id: 'connected', type: 'source', flow: 'signal' } },
     { id: 'served', label: t('scenario.http.served', 'served'), port: { id: 'served', type: 'source' } }
   ]
-  return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={right} headerIcon={<Badge type="SOAP" mode="server" />} />
+  return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={right} headerIcon={<RegistryBadge badgeId="soap_server" />} />
 }
 
 /** C (soapClose) — stops a declared SOAP mock server; sequences via `done`. */
@@ -73,5 +73,5 @@ export const SoapCloseNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id,
   const left: ScenarioNodeSection[] = [
     { id: 'main', rows: [{ id: 'connection', content: <ConnectionPicker id={id} data={data} kind="soapListen" /> }] }
   ]
-  return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={[]} headerIcon={<Badge type="SOAP" mode="server" icon="debug-disconnect" />} />
+  return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={[]} headerIcon={<RegistryBadge badgeId="soap_server_close" />} />
 }

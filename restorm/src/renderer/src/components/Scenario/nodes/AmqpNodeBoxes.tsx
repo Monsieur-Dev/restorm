@@ -2,7 +2,7 @@ import React from 'react'
 import type { NodeProps } from '@xyflow/react'
 import { useTranslation } from 'react-i18next'
 import { Button } from 'electron-core-ui/renderer'
-import { Badge } from '../../common/Badge'
+import { RegistryBadge } from '../../common/RegistryBadge'
 import { ScenarioNodeBoxBase, type ScenarioNodeBoxType, type ScenarioNodeCell, type ScenarioNodeSection } from './ScenarioNodeBoxBase'
 import { ScenarioNameInput } from './ScenarioNameInput'
 import { ScenarioCodeField } from './ScenarioCodeField'
@@ -77,7 +77,7 @@ export const AmqpConnectNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ i
     { id: 'connected', label: t('scenario.socketio.connected', 'connected'), port: { id: 'connected', type: 'source', flow: 'signal' } },
     { id: 'message', label: t('scenario.websocket.message', 'message'), port: { id: 'message', type: 'source' } }
   ]
-  return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={right} headerIcon={<Badge type="AMQP" icon="plug" />} />
+  return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={right} headerIcon={<RegistryBadge badgeId="amqp_connect" />} />
 }
 
 /** B (amqpPublish) — publishes a payload on a declared connection (to the bound
@@ -109,7 +109,7 @@ export const AmqpPublishNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ i
       ]
     }
   ]
-  return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={[]} headerIcon={<Badge type="AMQP" icon="arrow-up" />} />
+  return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={[]} headerIcon={<RegistryBadge badgeId="amqp_send" />} />
 }
 
 /** C (amqpClose) — closes a declared connection; sequences via `done`. */
@@ -117,5 +117,5 @@ export const AmqpCloseNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id,
   const left: ScenarioNodeSection[] = [
     { id: 'main', rows: [{ id: 'connection', content: <ConnectionPicker id={id} data={data} kind="amqpConnect" /> }] }
   ]
-  return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={[]} headerIcon={<Badge type="AMQP" icon="debug-disconnect" />} />
+  return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={[]} headerIcon={<RegistryBadge badgeId="amqp_close" />} />
 }

@@ -18,6 +18,7 @@ import {
 } from 'electron-core-ui/renderer'
 import { DocumentEvents, type RequestHistoryEventPayload } from '../../services/DocumentEvents'
 import { RestormVariableInputBox } from '../RestormVariableInputBox'
+import { useEnvVariables } from '../../hooks/useEnvVariables'
 import { RestormKeyValueTable, type KeyValueTableHandle } from '../RestormKeyValueTable'
 import type { JsonRpcBatchRequest, JsonRpcBatchCallSpec, KeyValue, ResponseHistoryDetail } from '../../../../shared/types/collections'
 import { useEnvironmentContext } from '../../contexts/useEnvironmentContext'
@@ -224,6 +225,9 @@ export const JsonRpcBatchRequestTabView: React.FC<JsonRpcBatchRequestTabViewProp
   }
 
   const emptyVariables = useMemo<VariableDefinition[]>(() => [], [])
+  // Environment variables for scalar {{...}} fields so their autocomplete
+  // offers env vars alongside the helper functions.
+  const envVariables = useEnvVariables(request.id)
 
   const requestContent = (
     <SplitView
@@ -350,7 +354,7 @@ export const JsonRpcBatchRequestTabView: React.FC<JsonRpcBatchRequestTabViewProp
           <RestormVariableInputBox
             value={url}
             onChange={setUrl}
-            variables={emptyVariables}
+            variables={envVariables}
             helpers={handlebarsHelpers}
             placeholder={t('jsonrpc.urlPlaceholder', 'JSON-RPC endpoint URL')}
             data-testid="jsonrpc-batch-request-url-input"

@@ -612,6 +612,10 @@ colors:
     value: "#4527a0"
     description: "HTTP OPTIONS badge (light)"
 
+  - id: badge-other-background
+    value: "#5f6368"
+    description: "Custom/unknown HTTP verb badge (light)"
+
   # ── Scenario UI semantic colors (light themes) ──────────────────────────────
   # Slightly deeper than universal defaults to stay legible on light backgrounds.
   - id: scenario-action-run-background

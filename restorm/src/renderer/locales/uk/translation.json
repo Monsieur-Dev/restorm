@@ -260,7 +260,7 @@
         "httpPut": "HTTP — запит PUT",
         "httpPatch": "HTTP — запит PATCH",
         "httpDelete": "HTTP — запит DELETE",
-        "httpServer": "HTTP mock-сервер",
+        "httpServer": "Сервер HTTP",
         "graphql": "Запит GraphQL",
         "grpc": "Запит gRPC",
         "grpcServerStream": "Запит gRPC server-streaming",
@@ -275,18 +275,33 @@
         "websocketServer": "Сервер WebSocket",
         "socketio": "Запит Socket.IO",
         "mqtt": "MQTT request",
-        "mqttServer": "MQTT-брокер",
+        "mqttServer": "Сервер MQTT",
         "sse": "Запит SSE",
-        "grpcServer": "gRPC mock-сервер",
-        "soapServer": "Макетний сервер SOAP",
-        "graphqlServer": "GraphQL mock-сервер",
-        "odataServer": "OData mock-сервер",
+        "grpcServer": "Сервер gRPC",
+        "soapServer": "Сервер SOAP",
+        "graphqlServer": "Сервер GraphQL",
+        "odataServer": "Сервер OData",
         "trpc": "Запит tRPC",
         "amqp": "Запит AMQP",
         "redis": "Запит Redis",
         "stomp": "Запит STOMP",
         "kafkaProduce": "Запит Kafka – Виробити",
-        "kafkaConsume": "Запит Kafka – Споживати"
+        "kafkaConsume": "Запит Kafka – Споживати",
+        "httpHead": "HTTP — запит HEAD",
+        "httpOptions": "HTTP — запит OPTIONS",
+        "httpQuery": "HTTP — запит QUERY",
+        "groups": {
+          "grpc": "gRPC",
+          "websocket": "WebSocket",
+          "socketio": "Socket.IO",
+          "graphql": "GraphQL",
+          "redis": "Redis",
+          "messaging": "Messaging",
+          "soap": "SOAP",
+          "odata": "OData",
+          "sse": "SSE",
+          "trpc": "tRPC"
+        }
       }
     },
     "deleteConfirm": {
@@ -378,7 +393,7 @@
       "switchTooltip": "Змінити середовище"
     },
     "body": {
-      "fileLabel": "Файл або URL:",
+      "fileLabel": "Файл:",
       "browse": "Огляд..."
     },
     "tabs": {
@@ -399,6 +414,7 @@
         "graph": "Граф"
       },
       "loading": "Надсилання запиту...",
+      "noResponseBody": "Немає тіла відповіді — деталі див. у Infos",
       "noResponse": "Натисніть «Надіслати», щоб виконати запит",
       "history": {
         "list": "Список історії відповідей",
@@ -614,10 +630,22 @@
     "subscribeMode": "Підписка",
     "commandMode": "Команда",
     "command": "Команда",
-    "args": "Аргументи",
-    "argsPlaceholder": "Аргументи команди",
     "freeform": "Довільна",
     "freeformPlaceholder": "Довільна команда (замінює вибір)",
+    "fields": {
+      "key": "Ключ",
+      "field": "Поле",
+      "value": "Значення",
+      "channel": "Канал",
+      "message": "Повідомлення",
+      "start": "Початок",
+      "stop": "Кінець",
+      "id": "ID",
+      "fieldOrValue": "Поле/Значення",
+      "argument": "Аргумент"
+    },
+    "addArgument": "Додати аргумент",
+    "removeArgument": "Видалити аргумент",
     "tabs": {
       "channels": "Канали",
       "command": "Команда"
@@ -666,6 +694,7 @@
     "noMessages": "Повідомлень ще немає",
     "connected": "З’єднано",
     "disconnected": "Роз’єднано",
+    "consumeError": "Помилка споживача",
     "producedTo": "Вироблено до",
     "offset": "Offset",
     "messages": "Повідомлення"
@@ -1254,43 +1283,46 @@
       "writeFile": "Write file",
       "timer": "Таймер",
       "code": "Код",
-      "socketioConnect": "Socket.IO connect",
+      "socketioConnect": "З’єднання Socket.IO",
       "socketioSend": "Socket.IO send",
-      "socketioClose": "Socket.IO close",
-      "websocketConnect": "WebSocket connect",
-      "sseConnect": "SSE connect",
+      "socketioClose": "Закрити з’єднання Socket.IO",
+      "socketioServerClose": "Закрити сервер Socket.IO",
+      "websocketConnect": "З’єднання WebSocket",
+      "sseConnect": "З’єднання SSE",
       "websocketSend": "WebSocket send",
-      "websocketClose": "WebSocket close",
-      "sseClose": "SSE close",
+      "websocketClose": "Закрити з’єднання WebSocket",
+      "websocketServerClose": "Закрити сервер WebSocket",
+      "sseClose": "Закрити з’єднання SSE",
       "grpcConnect": "gRPC connect",
       "grpcSend": "gRPC send",
-      "grpcClose": "gRPC close",
+      "grpcClose": "Закрити з’єднання gRPC",
       "mqttConnect": "MQTT connect",
       "mqttSend": "MQTT publish",
-      "mqttClose": "MQTT close",
+      "mqttClose": "Закрити з’єднання MQTT",
       "amqpConnect": "З’єднання AMQP",
       "amqpPublish": "Публікація AMQP",
-      "amqpClose": "Закриття AMQP",
+      "amqpClose": "Закрити з’єднання AMQP",
       "redisSubscribe": "Redis subscribe",
-      "redisClose": "Redis close",
+      "redisClose": "Закрити з’єднання Redis",
       "redisCommand": "Redis command",
-      "httpListen": "HTTP server",
-      "httpClose": "HTTP close",
+      "httpListen": "Сервер HTTP",
+      "httpClose": "Закрити сервер HTTP",
       "grpcServerClose": "Закрити сервер gRPC",
       "soapListen": "Сервер SOAP",
-      "soapClose": "Закрити SOAP",
-      "graphqlListen": "GraphQL server",
-      "graphqlClose": "GraphQL close",
-      "odataListen": "OData server",
-      "odataClose": "OData close",
+      "soapClose": "Закрити сервер SOAP",
+      "graphqlListen": "Сервер GraphQL",
+      "graphqlClose": "Закрити сервер GraphQL",
+      "odataListen": "Сервер OData",
+      "odataClose": "Закрити сервер OData",
       "graphqlSubscribe": "Підписка GraphQL",
       "graphqlUnsubscribe": "Скасувати підписку GraphQL",
       "stompConnect": "З'єднання STOMP",
       "stompSend": "Надсилання STOMP",
-      "stompClose": "Закриття STOMP",
+      "stompClose": "Закрити з’єднання STOMP",
       "kafkaProduce": "Kafka produce",
       "kafkaConsume": "Kafka consume",
-      "kafkaClose": "Kafka close"
+      "kafkaClose": "Закрити з’єднання Kafka",
+      "grpcListen": "Сервер gRPC"
     },
     "comparator": {
       "result": "результат"
@@ -1403,6 +1435,9 @@
       },
       "file": {
         "missingPath": "Потрібен шлях до файлу."
+      },
+      "connection": {
+        "missingName": "Назва з’єднання є обов’язковою."
       }
     },
     "usage": {
@@ -1850,10 +1885,12 @@
       "socketioConnect": "Відкриває з'єднання Socket.IO і повторно випромінює кожну отриману подію на своєму порту.",
       "socketioSend": "Надсилає повідомлення у вже відкритому з'єднанні Socket.IO.",
       "socketioClose": "Закриває вже відкрите з'єднання Socket.IO.",
+      "socketioServerClose": "Зупиняє вже активний фіктивний сервер Socket.IO (оголошений вузлом Socket.IO server) і звільняє його порт.",
       "websocketConnect": "Відкриває необроблене з'єднання WebSocket і повторно випромінює кожне отримане повідомлення на своєму порту.",
       "sseConnect": "Відкриває довготривале з'єднання SSE (Server-Sent Events) і повторно передає кожен отриманий кадр на свій порт.",
       "websocketSend": "Надсилає payload у вже відкритому з'єднанні WebSocket.",
       "websocketClose": "Закриває вже відкрите з'єднання WebSocket.",
+      "websocketServerClose": "Зупиняє вже активний фіктивний сервер WebSocket (оголошений вузлом WebSocket server) і звільняє його порт.",
       "sseClose": "Закриває вже відкрите з'єднання SSE.",
       "grpcConnect": "Відкриває потоковий виклик gRPC і повторно випромінює кожен отриманий кадр на своєму порту message.",
       "grpcSend": "Записує повідомлення запиту у вже відкритий потоковий виклик gRPC.",
@@ -2324,5 +2361,8 @@
     "sendDestination": "Призначення",
     "ack": "ACK",
     "nack": "NACK"
+  },
+  "server": {
+    "configLockedWhileRunning": "Конфігурацію заблоковано під час роботи сервера"
   }
 }

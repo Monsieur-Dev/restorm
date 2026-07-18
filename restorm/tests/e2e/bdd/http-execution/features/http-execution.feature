@@ -3,8 +3,9 @@ Feature: HTTP/REST execution end-to-end
   request panel against the Docker Petstore (:8080) and the local http-util mock
   (:8082). Each scenario opens a request tab by name, clicks Send, and asserts on
   the response panel — exercising methods, params, bodies (incl. multipart file
-  upload), response shapes (JSON / XML / binary), headers, auth, redirects,
-  cookies, errors, timeout, cancellation, handlebars on the wire, and history.
+  upload and standalone file body), response shapes (JSON / XML / binary),
+  headers, auth, redirects, cookies, errors, timeout, cancellation, handlebars
+  on the wire, and history.
 
   Background:
     Given I launch restorm with the MCP server enabled
@@ -44,6 +45,39 @@ Feature: HTTP/REST execution end-to-end
     And the response body contains "\"method\": \"POST\""
     And the response body contains "hello"
 
+  Scenario: A QUERY request carries a body to the wire
+    When I open the "QUERY echo" request tab via MCP
+    And I click Send
+    Then the response status is "200"
+    And the response body contains "\"method\": \"QUERY\""
+    And the response body contains "available"
+
+  Scenario: Registry badges track the method verb across every surface, verbatim casing included
+    When I open the "GET echo" request tab via MCP
+    And I favorite the "GET echo" request via MCP
+    And I open the "Badge scenario" scenario tab via MCP
+    And I activate the "GET echo" request tab
+    Then all method badge surfaces show "GET" as "http_get"
+    And the sidebar add menu shows the "GET" method badge as "http_get"
+    And the scenario add palette shows the "GET" method badge as "http_get"
+    When I pick "POST" from the method combo
+    Then all method badge surfaces show "POST" as "http_post"
+    When I type "Post" into the method combo
+    Then all method badge surfaces show "Post" as "http_post"
+    When I type "TeSt" into the method combo
+    Then all method badge surfaces show "TeSt" as "http_other"
+
+  Scenario: A typed custom verb reaches the wire verbatim, casing preserved
+    When I open the "GET echo" request tab via MCP
+    And I type "Machin" into the method combo
+    And I click Send
+    Then the response status is "200"
+    And the response body contains "\"method\": \"Machin\""
+    When I type "post" into the method combo
+    And I click Send
+    Then the response status is "200"
+    And the response body contains "\"method\": \"post\""
+
   Scenario: x-www-form-urlencoded body
     When I open the "Form urlencoded" request tab via MCP
     And I click Send
@@ -60,6 +94,13 @@ Feature: HTTP/REST execution end-to-end
     When I open the "Pet image upload" request tab via MCP
     And I click Send
     Then the response status is "200"
+
+  Scenario: A standalone file body sends the file's raw bytes with an inferred Content-Type
+    When I open the "File body upload" request tab via MCP
+    And I click Send
+    Then the response status is "200"
+    And the response body contains "restorm upload fixture"
+    And the response body contains "\"content-type\": \"text/plain\""
 
   Scenario: Custom header round-trips
     When I open the "Custom header roundtrip" request tab via MCP

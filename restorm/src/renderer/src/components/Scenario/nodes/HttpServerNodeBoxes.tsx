@@ -2,13 +2,13 @@ import React from 'react'
 import type { NodeProps } from '@xyflow/react'
 import { useTranslation } from 'react-i18next'
 import { Button } from 'electron-core-ui/renderer'
-import { Badge } from '../../common/Badge'
+import { RegistryBadge } from '../../common/RegistryBadge'
+import { httpBadgeIdFor } from '../../../../../shared/utils/httpMethod'
 import { ScenarioNodeBoxBase, type ScenarioNodeBoxType, type ScenarioNodeCell, type ScenarioNodeSection } from './ScenarioNodeBoxBase'
 import { ScenarioNameInput } from './ScenarioNameInput'
 import { ConnectionPicker } from './SocketioNodeBoxes'
 import { useScenarioBoundResolver } from '../scenarioBoundResolver'
 import { isRequest } from '../../../../../shared/types/collections'
-import { mapToBadgeType } from '../../../utils/badgeUtils'
 import { useStreamingOverrideSections } from './scenarioOverridePorts'
 
 const stop = (e: React.MouseEvent): void => { e.stopPropagation() }
@@ -79,7 +79,7 @@ export const HttpListenNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id
     { id: 'connected', label: t('scenario.socketio.started', 'started'), port: { id: 'connected', type: 'source', flow: 'signal' } },
     { id: 'served', label: t('scenario.http.served', 'served'), port: { id: 'served', type: 'source' } }
   ]
-  return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={right} headerIcon={<Badge type={mapToBadgeType(method)} mode="server" />} />
+  return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={right} headerIcon={<RegistryBadge badgeId={httpBadgeIdFor(method)} text={method} server />} />
 }
 
 /** C (httpClose) — stops a declared HTTP mock server; sequences via `done`. */
@@ -87,5 +87,5 @@ export const HttpCloseNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id,
   const left: ScenarioNodeSection[] = [
     { id: 'main', rows: [{ id: 'connection', content: <ConnectionPicker id={id} data={data} kind="httpListen" /> }] }
   ]
-  return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={[]} headerIcon={<Badge type="GET" mode="server" icon="debug-disconnect" />} />
+  return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={[]} headerIcon={<RegistryBadge badgeId="http_server_close" />} />
 }

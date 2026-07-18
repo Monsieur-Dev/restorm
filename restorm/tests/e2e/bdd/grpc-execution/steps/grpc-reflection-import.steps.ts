@@ -75,26 +75,21 @@ Given('I open a fresh project via MCP', async ({ callMcpTool }) => {
   }
 })
 
-When('I open the Import dialog and switch to the gRPC reflection card', async () => {
+When('I open the Import dialog', async () => {
   const p = requirePage()
   await p.keyboard.press('Control+I')
   const importModal = p.locator('[data-testid="import-modal"]')
   await expect(importModal).toBeVisible({ timeout: 15000 })
-  // The showcase rotates through ~17 formats every 15s — waiting out the
-  // cycle to reach `grpc-reflection` would be minutes-slow and flaky.
-  // Jump straight to it via the e2e-only hook (see `ImportFormatShowcase.tsx`).
-  const jumped = await p.evaluate(() => {
-    const w = window as unknown as { __e2eSetImportFormatShowcaseIndex?: (id: string) => boolean }
-    return w.__e2eSetImportFormatShowcaseIndex?.('grpc-reflection') ?? false
-  })
-  expect(jumped, 'e2e showcase-jump hook not found — did ImportFormatShowcase mount?').toBe(true)
-  await expect(p.locator('[data-testid="import-format-showcase-action-grpc-reflection"]').first())
+  // The gRPC-reflection connect button is a persistent control in the modal's
+  // source-actions row (not buried in the rotating format showcase), so it's
+  // always reachable — no carousel timing to wait out.
+  await expect(p.locator('[data-testid="import-grpc-reflection-button"]').first())
     .toBeVisible({ timeout: 5000 })
 })
 
 When('I connect to {string} via gRPC reflection', async ({}, address: string) => {
   const p = requirePage()
-  await p.locator('[data-testid="import-format-showcase-action-grpc-reflection"]').first().click()
+  await p.locator('[data-testid="import-grpc-reflection-button"]').first().click()
   const reflectionModal = p.locator('[data-testid="grpc-reflection-import-modal"]')
   await expect(reflectionModal).toBeVisible({ timeout: 5000 })
   // ECUI's `InputBox` puts `data-testid` on the outer wrapper and forwards

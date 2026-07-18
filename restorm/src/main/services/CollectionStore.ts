@@ -75,9 +75,41 @@ class CollectionStore {
    * them (no downward dependency). */
   private collectionsSetListeners: (() => void)[] = []
 
+  /**
+   * Monotonic version of the main-side tree, bumped once per main-driven
+   * mutation (every MCP write funnels through `broadcastTreeReplace`, which
+   * calls {@link bumpModelVersion}). It exists to break the write race between
+   * an MCP mutation and the renderer's autosave mirror: the renderer stamps
+   * each `collections:sync` with the last MCP version it has APPLIED, and
+   * {@link setCollections} refuses a `'user'` mirror whose stamp is older than
+   * this counter — that mirror is echoing a tree that predates a mutation the
+   * renderer hasn't rendered yet, so accepting it would silently drop the
+   * mutation. Never reset (session-global); the renderer's counter is equally
+   * monotonic so the comparison stays meaningful across project loads.
+   */
+  private modelVersion = 0
+
   /** Register a callback fired after every `setCollections` (load / replace). */
   onCollectionsSet(cb: () => void): void {
     this.collectionsSetListeners.push(cb)
+  }
+
+  /** Current main-side tree version (see {@link modelVersion}). */
+  getModelVersion(): number {
+    return this.modelVersion
+  }
+
+  /**
+   * Increment and return the tree version. Called by `broadcastTreeReplace`
+   * after a main-driven (MCP) mutation so a subsequent stale renderer mirror
+   * can be recognised and refused. Scenario node/edge edits mutate the live
+   * scenario object directly (never through a CollectionStore method), so the
+   * bump has to live on the broadcast — the one path EVERY MCP write shares —
+   * not on the folder/request mutators.
+   */
+  bumpModelVersion(): number {
+    this.modelVersion += 1
+    return this.modelVersion
   }
 
   // ==========================================================================
@@ -140,13 +172,32 @@ class CollectionStore {
   // ==========================================================================
 
   /**
-   * Set all collections (used when loading from file)
+   * Set all collections (used when loading from file, or mirrored from the
+   * renderer via `collections:sync`).
+   *
+   * `clientVersion` is the model version the caller is echoing (see
+   * {@link modelVersion}). For a `'user'` mirror it guards the MCP-write race:
+   * if the renderer's stamp is OLDER than the current version, the mirror is
+   * refused (returns `false`) and the authoritative tree is kept — the mirror
+   * was built from a tree that predates an MCP mutation the renderer hasn't
+   * applied yet, so writing it would drop that mutation. A `'file-load'` (or a
+   * trusted main-side call with no `clientVersion`) always applies. Returns
+   * whether the tree was actually replaced.
    */
-  setCollections(collections: Collection[], source: 'file-load' | 'user' = 'file-load'): void {
+  setCollections(collections: Collection[], source: 'file-load' | 'user' = 'file-load', clientVersion?: number): boolean {
+    if (source === 'user' && clientVersion !== undefined && clientVersion < this.modelVersion) {
+      logger.warn('[CollectionStore] Refused stale renderer mirror', {
+        clientVersion,
+        modelVersion: this.modelVersion,
+        count: collections.length
+      })
+      return false
+    }
     // Convert plain objects to class instances if needed
     this.collections = collections.map(c => this.ensureEnvironmentFolderInstance(c))
     logger.info('[CollectionStore] Collections set', { count: collections.length, source })
     for (const cb of this.collectionsSetListeners) cb()
+    return true
   }
 
   /**

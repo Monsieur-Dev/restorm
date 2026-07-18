@@ -198,10 +198,6 @@
   color: var(--descriptionForeground);
 }
 
-.import-format-showcase-action {
-  margin-top: 10px;
-}
-
 .import-format-showcase-trademark {
   /* Nominative-fair-use mention required when we display third-party
    * trademarks (Postman, Insomnia, etc.). Discreet on purpose. */

@@ -257,7 +257,7 @@
         "httpPut": "Permintaan HTTP – PUT",
         "httpPatch": "Permintaan HTTP – PATCH",
         "httpDelete": "Permintaan HTTP – DELETE",
-        "httpServer": "Server mock HTTP",
+        "httpServer": "Server HTTP",
         "graphql": "Permintaan GraphQL",
         "grpc": "Permintaan gRPC",
         "grpcServerStream": "Permintaan gRPC server-streaming",
@@ -272,18 +272,33 @@
         "websocketServer": "Server WebSocket",
         "socketio": "Permintaan Socket.IO",
         "mqtt": "MQTT request",
-        "mqttServer": "Broker MQTT",
+        "mqttServer": "Server MQTT",
         "sse": "Permintaan SSE",
-        "grpcServer": "Server mock gRPC",
-        "soapServer": "Server tiruan SOAP",
-        "graphqlServer": "Server mock GraphQL",
-        "odataServer": "Server mock OData",
+        "grpcServer": "Server gRPC",
+        "soapServer": "Server SOAP",
+        "graphqlServer": "Server GraphQL",
+        "odataServer": "Server OData",
         "trpc": "Permintaan tRPC",
         "amqp": "Permintaan AMQP",
         "redis": "Permintaan Redis",
         "stomp": "Permintaan STOMP",
         "kafkaProduce": "Permintaan Kafka – Hasilkan",
-        "kafkaConsume": "Permintaan Kafka – Konsumsi"
+        "kafkaConsume": "Permintaan Kafka – Konsumsi",
+        "httpHead": "Permintaan HTTP – HEAD",
+        "httpOptions": "Permintaan HTTP – OPTIONS",
+        "httpQuery": "Permintaan HTTP – QUERY",
+        "groups": {
+          "grpc": "gRPC",
+          "websocket": "WebSocket",
+          "socketio": "Socket.IO",
+          "graphql": "GraphQL",
+          "redis": "Redis",
+          "messaging": "Messaging",
+          "soap": "SOAP",
+          "odata": "OData",
+          "sse": "SSE",
+          "trpc": "tRPC"
+        }
       }
     },
     "deleteConfirm": {
@@ -375,7 +390,7 @@
       "switchTooltip": "Ganti lingkungan"
     },
     "body": {
-      "fileLabel": "File atau URL:",
+      "fileLabel": "File:",
       "browse": "Telusuri..."
     },
     "tabs": {
@@ -396,6 +411,7 @@
         "graph": "Grafik"
       },
       "loading": "Mengirim permintaan...",
+      "noResponseBody": "Tidak ada isi respons — lihat Infos untuk detail",
       "noResponse": "Klik Kirim untuk menjalankan permintaan",
       "history": {
         "list": "Daftar riwayat respons",
@@ -611,10 +627,22 @@
     "subscribeMode": "Berlangganan",
     "commandMode": "Perintah",
     "command": "Perintah",
-    "args": "Argumen",
-    "argsPlaceholder": "Argumen perintah",
     "freeform": "Bebas",
     "freeformPlaceholder": "Perintah bebas (menggantikan pilihan)",
+    "fields": {
+      "key": "Kunci",
+      "field": "Bidang",
+      "value": "Nilai",
+      "channel": "Saluran",
+      "message": "Pesan",
+      "start": "Awal",
+      "stop": "Akhir",
+      "id": "ID",
+      "fieldOrValue": "Bidang/Nilai",
+      "argument": "Argumen"
+    },
+    "addArgument": "Tambah argumen",
+    "removeArgument": "Hapus argumen",
     "tabs": {
       "channels": "Saluran",
       "command": "Perintah"
@@ -663,6 +691,7 @@
     "noMessages": "Belum ada pesan",
     "connected": "Terhubung",
     "disconnected": "Terputus",
+    "consumeError": "Kesalahan konsumen",
     "producedTo": "Dihasilkan ke",
     "offset": "Offset",
     "messages": "Pesan"
@@ -1251,43 +1280,46 @@
       "writeFile": "Write file",
       "timer": "Pengatur waktu",
       "code": "Kode",
-      "socketioConnect": "Socket.IO connect",
+      "socketioConnect": "Koneksi Socket.IO",
       "socketioSend": "Socket.IO send",
-      "socketioClose": "Socket.IO close",
-      "websocketConnect": "WebSocket connect",
-      "sseConnect": "SSE connect",
+      "socketioClose": "Tutup koneksi Socket.IO",
+      "socketioServerClose": "Tutup server Socket.IO",
+      "websocketConnect": "Koneksi WebSocket",
+      "sseConnect": "Koneksi SSE",
       "websocketSend": "WebSocket send",
-      "websocketClose": "WebSocket close",
-      "sseClose": "SSE close",
+      "websocketClose": "Tutup koneksi WebSocket",
+      "websocketServerClose": "Tutup server WebSocket",
+      "sseClose": "Tutup koneksi SSE",
       "grpcConnect": "gRPC connect",
       "grpcSend": "gRPC send",
-      "grpcClose": "gRPC close",
+      "grpcClose": "Tutup koneksi gRPC",
       "mqttConnect": "MQTT connect",
       "mqttSend": "MQTT publish",
-      "mqttClose": "MQTT close",
+      "mqttClose": "Tutup koneksi MQTT",
       "amqpConnect": "Koneksi AMQP",
       "amqpPublish": "Publikasi AMQP",
-      "amqpClose": "Penutupan AMQP",
+      "amqpClose": "Tutup koneksi AMQP",
       "redisSubscribe": "Redis subscribe",
-      "redisClose": "Redis close",
+      "redisClose": "Tutup koneksi Redis",
       "redisCommand": "Redis command",
-      "httpListen": "HTTP server",
-      "httpClose": "HTTP close",
+      "httpListen": "Server HTTP",
+      "httpClose": "Tutup server HTTP",
       "grpcServerClose": "Tutup server gRPC",
       "soapListen": "Server SOAP",
-      "soapClose": "Tutup SOAP",
-      "graphqlListen": "GraphQL server",
-      "graphqlClose": "GraphQL close",
-      "odataListen": "OData server",
-      "odataClose": "OData close",
+      "soapClose": "Tutup server SOAP",
+      "graphqlListen": "Server GraphQL",
+      "graphqlClose": "Tutup server GraphQL",
+      "odataListen": "Server OData",
+      "odataClose": "Tutup server OData",
       "graphqlSubscribe": "Langganan GraphQL",
       "graphqlUnsubscribe": "Batalkan langganan GraphQL",
       "stompConnect": "Koneksi STOMP",
       "stompSend": "Kirim STOMP",
-      "stompClose": "Tutup STOMP",
+      "stompClose": "Tutup koneksi STOMP",
       "kafkaProduce": "Kafka produce",
       "kafkaConsume": "Kafka consume",
-      "kafkaClose": "Kafka close"
+      "kafkaClose": "Tutup koneksi Kafka",
+      "grpcListen": "Server gRPC"
     },
     "comparator": {
       "result": "hasil"
@@ -1400,6 +1432,9 @@
       },
       "file": {
         "missingPath": "Path file wajib diisi."
+      },
+      "connection": {
+        "missingName": "Nama koneksi wajib diisi."
       }
     },
     "usage": {
@@ -1847,10 +1882,12 @@
       "socketioConnect": "Membuka koneksi Socket.IO dan memancarkan ulang setiap event yang diterima pada port-nya.",
       "socketioSend": "Mengirim sebuah pesan pada koneksi Socket.IO yang sudah terbuka.",
       "socketioClose": "Menutup koneksi Socket.IO yang sudah terbuka.",
+      "socketioServerClose": "Menghentikan server tiruan Socket.IO yang sudah mendengarkan (dideklarasikan oleh node server Socket.IO), membebaskan port-nya.",
       "websocketConnect": "Membuka koneksi WebSocket mentah dan memancarkan ulang setiap pesan yang diterima pada port-nya.",
       "sseConnect": "Membuka koneksi SSE (Server-Sent Events) yang berlangsung lama dan memancarkan ulang setiap frame yang diterima pada portnya.",
       "websocketSend": "Mengirim sebuah payload pada koneksi WebSocket yang sudah terbuka.",
       "websocketClose": "Menutup koneksi WebSocket yang sudah terbuka.",
+      "websocketServerClose": "Menghentikan server tiruan WebSocket yang sudah mendengarkan (dideklarasikan oleh node server WebSocket), membebaskan port-nya.",
       "sseClose": "Menutup koneksi SSE yang sudah terbuka.",
       "grpcConnect": "Membuka panggilan streaming gRPC dan memancarkan ulang setiap frame yang diterima pada port message-nya.",
       "grpcSend": "Menulis sebuah pesan permintaan pada panggilan streaming gRPC yang sudah terbuka.",
@@ -2321,5 +2358,8 @@
     "sendDestination": "Tujuan",
     "ack": "ACK",
     "nack": "NACK"
+  },
+  "server": {
+    "configLockedWhileRunning": "Konfigurasi terkunci saat server berjalan"
   }
 }

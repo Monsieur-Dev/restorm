@@ -14,11 +14,12 @@ import {
   eventBus,
   logger,
   getContrastColor,
-  type ISelectData,
-  type VariableDefinition
+  type ISelectData
 } from 'electron-core-ui/renderer'
 import { DocumentEvents, type RequestHistoryEventPayload } from '../../services/DocumentEvents'
 import { RestormVariableInputBox } from '../RestormVariableInputBox'
+import { useEmitRequestExecution } from '../../services/requestExecutingStore'
+import { useEnvVariables } from '../../hooks/useEnvVariables'
 import type { AmqpRequest, AmqpMode, ResponseHistoryDetail } from '../../../../shared/types/collections'
 import { useEnvironmentContext } from '../../contexts/useEnvironmentContext'
 import type { AmqpExecutionResult, AmqpMessageItem } from '../../types/global.d'
@@ -30,6 +31,7 @@ import { SendButtonEnvSwitcher } from './SendButtonEnvSwitcher'
 import { useIsAmqpListening } from '../../services/amqpListeningStore'
 import { BeamWrap } from '../common/BeamWrap'
 import { HeaderHoverTooltip } from '../MainView/HeaderHoverTooltip'
+import './WebSocketChat.css'
 
 export interface AmqpRequestTabViewProps {
   request: AmqpRequest
@@ -126,6 +128,11 @@ export const AmqpRequestTabView: React.FC<AmqpRequestTabViewProps> = ({ request 
   const [browsePeekCount, setBrowsePeekCountState] = useState(request.browsePeekCount !== undefined ? String(request.browsePeekCount) : '')
 
   const [response, setResponse] = useState<AmqpResponse | null>(null)
+  const [isExecuting, setIsExecuting] = useState(false)
+  // Publish/browse activity into the shared request-activity store so the
+  // sidebar + tab badges beam during a one-shot execute; the open subscribe
+  // connection is covered by the AMQP listening store.
+  useEmitRequestExecution(request.id, isExecuting)
   const [historyRefreshKey, setHistoryRefreshKey] = useState(0)
   // Live frames for the current connection/execution — appended as they
   // arrive so the list updates in real time.
@@ -312,14 +319,17 @@ export const AmqpRequestTabView: React.FC<AmqpRequestTabViewProps> = ({ request 
     updateReactiveProperty(request, 'browsePeekCount', value !== '' && Number.isFinite(n) ? n : undefined)
   }, [request])
 
-  // Stable empty array for components that get variables via their own variableId
-  const emptyVariables = useMemo<VariableDefinition[]>(() => [], [])
+  // Environment variables for scalar {{...}} fields so their autocomplete
+  // offers env vars alongside the helper functions.
+  const envVariables = useEnvVariables(request.id)
 
   // Publish / browse: one-shot `execute()`. Subscribe uses Connect below.
   const handleExecute = useCallback((): void => {
     setLiveMessages([])
     setResponse(null)
+    setIsExecuting(true)
     window.restorm?.amqp.execute({ requestId: request.id, timeout: DEFAULT_AMQP_TIMEOUT_MS })
+      .finally(() => { setIsExecuting(false) })
       .then((res: AmqpExecutionResult) => {
         setResponse({
           connected: res.connected,
@@ -357,39 +367,29 @@ export const AmqpRequestTabView: React.FC<AmqpRequestTabViewProps> = ({ request 
   // frame gets a distinct indicator since the queue is left untouched).
   const renderFrames = useCallback((messages: AmqpMessageItem[]): React.ReactNode => {
     if (messages.length === 0) {
-      return <div style={{ padding: 12, color: 'var(--foreground-muted)', fontSize: 12 }}>{t('amqp.noMessages')}</div>
+      return <div className="ws-chat-empty">{t('amqp.noMessages')}</div>
     }
     return (
       <ScrollableElement
         options={{ vertical: 'auto', horizontal: 'hidden', useShadows: true }}
         style={{ flex: 1, minHeight: 0 }}
       >
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 4, padding: 8 }} data-testid="amqp-frame-list">
+        <div className="ws-chat" data-testid="amqp-frame-list">
           {messages.map((msg, i) => (
             <div
               key={i}
+              className={`ws-chat-bubble ${msg.direction === 'sent' ? 'sent' : 'received'}`}
               data-testid={`response-stream-frame-${i}`}
               data-direction={msg.direction}
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                gap: 2,
-                padding: '6px 8px',
-                borderRadius: 3,
-                border: '1px solid var(--panel-border)',
-                alignSelf: msg.direction === 'sent' ? 'flex-end' : 'flex-start',
-                maxWidth: '85%',
-                background: msg.direction === 'sent' ? 'var(--list-hoverBackground)' : 'transparent'
-              }}
             >
-              <div style={{ display: 'flex', gap: 8, fontSize: 11, color: 'var(--foreground-muted)', flexWrap: 'wrap' }}>
-                <span className={`codicon codicon-arrow-${msg.direction === 'sent' ? 'up' : 'down'}`} aria-hidden="true" />
-                {msg.exchange !== undefined && <span>exchange: {msg.exchange || '(default)'}</span>}
-                {msg.routingKey !== undefined && <span>routingKey: {msg.routingKey}</span>}
-                {msg.deliveryTag !== undefined && <span>deliveryTag: {msg.deliveryTag}</span>}
+              <span className="ws-chat-event">
+                <span className={`codicon codicon-arrow-${msg.direction === 'sent' ? 'up' : 'down'}`} aria-hidden="true" style={{ marginRight: 4 }} />
+                {msg.exchange !== undefined && <span style={{ marginRight: 8 }}>exchange: {msg.exchange || '(default)'}</span>}
+                {msg.routingKey !== undefined && <span style={{ marginRight: 8 }}>routingKey: {msg.routingKey}</span>}
+                {msg.deliveryTag !== undefined && <span style={{ marginRight: 8 }}>deliveryTag: {msg.deliveryTag}</span>}
                 {msg.peek === true && <span data-testid="amqp-frame-peek">{t('amqp.peeked')}</span>}
-              </div>
-              <div style={{ fontSize: 12, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{msg.data}</div>
+              </span>
+              {msg.data}
             </div>
           ))}
         </div>
@@ -470,7 +470,7 @@ export const AmqpRequestTabView: React.FC<AmqpRequestTabViewProps> = ({ request 
       {(mode === 'subscribe' || mode === 'browse') && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6, padding: 4, border: '1px solid var(--panel-border)', borderRadius: 3 }} data-testid="amqp-subscribe-browse-options">
           <Field label={t('amqp.queue')}>
-            <RestormVariableInputBox key={`queue-${transportEpoch}`} value={queue} onChange={setQueue} variables={emptyVariables} helpers={handlebarsHelpers} placeholder={t('amqp.queuePlaceholder')} data-testid="amqp-queue-input" />
+            <RestormVariableInputBox key={`queue-${transportEpoch}`} value={queue} onChange={setQueue} variables={envVariables} helpers={handlebarsHelpers} placeholder={t('amqp.queuePlaceholder')} data-testid="amqp-queue-input" />
           </Field>
           {mode === 'subscribe' && (
             <>
@@ -495,12 +495,12 @@ export const AmqpRequestTabView: React.FC<AmqpRequestTabViewProps> = ({ request 
           <div style={{ display: 'flex', gap: 8 }}>
             <div style={{ flex: 1 }}>
               <Field label={t('amqp.exchange')}>
-                <RestormVariableInputBox key={`exchange-${transportEpoch}`} value={exchange} onChange={setExchange} variables={emptyVariables} helpers={handlebarsHelpers} placeholder={t('amqp.exchangePlaceholder')} data-testid="amqp-exchange-input" />
+                <RestormVariableInputBox key={`exchange-${transportEpoch}`} value={exchange} onChange={setExchange} variables={envVariables} helpers={handlebarsHelpers} placeholder={t('amqp.exchangePlaceholder')} data-testid="amqp-exchange-input" />
               </Field>
             </div>
             <div style={{ flex: 1 }}>
               <Field label={t('amqp.routingKey')}>
-                <RestormVariableInputBox key={`routingkey-${transportEpoch}`} value={routingKey} onChange={setRoutingKey} variables={emptyVariables} helpers={handlebarsHelpers} placeholder={t('amqp.routingKeyPlaceholder')} data-testid="amqp-routing-key-input" />
+                <RestormVariableInputBox key={`routingkey-${transportEpoch}`} value={routingKey} onChange={setRoutingKey} variables={envVariables} helpers={handlebarsHelpers} placeholder={t('amqp.routingKeyPlaceholder')} data-testid="amqp-routing-key-input" />
               </Field>
             </div>
           </div>
@@ -526,19 +526,19 @@ export const AmqpRequestTabView: React.FC<AmqpRequestTabViewProps> = ({ request 
         <div style={{ display: 'flex', gap: 8 }}>
           <div style={{ flex: 1 }}>
             <Field label={t('amqp.vhost')}>
-              <RestormVariableInputBox key={`vhost-${transportEpoch}`} value={vhost} onChange={setVhost} variables={emptyVariables} helpers={handlebarsHelpers} placeholder={t('amqp.vhostPlaceholder')} data-testid="amqp-vhost-input" />
+              <RestormVariableInputBox key={`vhost-${transportEpoch}`} value={vhost} onChange={setVhost} variables={envVariables} helpers={handlebarsHelpers} placeholder={t('amqp.vhostPlaceholder')} data-testid="amqp-vhost-input" />
             </Field>
           </div>
         </div>
         <div style={{ display: 'flex', gap: 8 }}>
           <div style={{ flex: 1 }}>
             <Field label={t('amqp.username')}>
-              <RestormVariableInputBox key={`username-${transportEpoch}`} value={username} onChange={setUsername} variables={emptyVariables} helpers={handlebarsHelpers} placeholder={t('amqp.username')} data-testid="amqp-username-input" />
+              <RestormVariableInputBox key={`username-${transportEpoch}`} value={username} onChange={setUsername} variables={envVariables} helpers={handlebarsHelpers} placeholder={t('amqp.username')} data-testid="amqp-username-input" />
             </Field>
           </div>
           <div style={{ flex: 1 }}>
             <Field label={t('amqp.password')}>
-              <RestormVariableInputBox key={`password-${transportEpoch}`} value={password} onChange={setPassword} variables={emptyVariables} helpers={handlebarsHelpers} placeholder={t('amqp.password')} data-testid="amqp-password-input" />
+              <RestormVariableInputBox key={`password-${transportEpoch}`} value={password} onChange={setPassword} variables={envVariables} helpers={handlebarsHelpers} placeholder={t('amqp.password')} data-testid="amqp-password-input" />
             </Field>
           </div>
         </div>
@@ -582,7 +582,7 @@ export const AmqpRequestTabView: React.FC<AmqpRequestTabViewProps> = ({ request 
           <RestormVariableInputBox
             value={url}
             onChange={setUrl}
-            variables={emptyVariables}
+            variables={envVariables}
             helpers={handlebarsHelpers}
             placeholder={t('amqp.urlPlaceholder')}
             data-testid="amqp-request-url-input"
@@ -591,26 +591,30 @@ export const AmqpRequestTabView: React.FC<AmqpRequestTabViewProps> = ({ request 
       </HeaderHoverTooltip>
       {mode === 'publish' && (
         <SendButtonEnvSwitcher>
-          <Button
-            icon="send"
-            onClick={handleExecute}
-            emphasis={1}
-            {...(sendButtonStyle ? { style: sendButtonStyle } : {})}
-            options={{ title: t('amqp.send'), ariaLabel: t('amqp.send') }}
-            data-testid="amqp-send-button"
-          />
+          <BeamWrap active={isExecuting} size={22} borderWidth={1.5}>
+            <Button
+              icon="send"
+              onClick={handleExecute}
+              emphasis={1}
+              {...(sendButtonStyle ? { style: sendButtonStyle } : {})}
+              options={{ title: t('amqp.send'), ariaLabel: t('amqp.send') }}
+              data-testid="amqp-send-button"
+            />
+          </BeamWrap>
         </SendButtonEnvSwitcher>
       )}
       {mode === 'browse' && (
         <SendButtonEnvSwitcher>
-          <Button
-            icon="search"
-            onClick={handleExecute}
-            emphasis={1}
-            {...(sendButtonStyle ? { style: sendButtonStyle } : {})}
-            options={{ title: t('amqp.browseButton'), ariaLabel: t('amqp.browseButton') }}
-            data-testid="amqp-browse-button"
-          />
+          <BeamWrap active={isExecuting} size={22} borderWidth={1.5}>
+            <Button
+              icon="search"
+              onClick={handleExecute}
+              emphasis={1}
+              {...(sendButtonStyle ? { style: sendButtonStyle } : {})}
+              options={{ title: t('amqp.browseButton'), ariaLabel: t('amqp.browseButton') }}
+              data-testid="amqp-browse-button"
+            />
+          </BeamWrap>
         </SendButtonEnvSwitcher>
       )}
       {mode === 'subscribe' && (

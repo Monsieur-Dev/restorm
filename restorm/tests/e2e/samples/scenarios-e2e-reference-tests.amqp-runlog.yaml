@@ -1,0 +1,35 @@
+- message: 🔵 [<time>] ▶ AMQP
+- message: ⚪ [<time>] start amqpConnect
+  data:
+    connectionName: AMQP subscriber
+    requestId: <uuid>
+    label: AMQP subscribe
+- message: ⚪ [<time>] done amqpConnect
+- message: ⚪ [<time>] amqp "AMQP subscriber" connecting
+- message: ⚪ [<time>] amqp "AMQP subscriber" connected
+- message: ⚪ [<time>] start amqpPublish
+  data:
+    connectionNodeId: <uuid>
+    payload: '{"hello":"from the reference project"}'
+    in: true
+- message: ⚪ [<time>] done amqpPublish
+- message: ⚪ [<time>] start wait
+  data:
+    durationMs: <dynamic-time>
+    in: true
+- message: ⚪ [<time>] done wait
+- message: ⚪ [<time>] start amqpClose
+  data:
+    connectionNodeId: <uuid>
+    in: true
+- message: ⚪ [<time>] done amqpClose
+- message: ⚪ [<time>] start log
+  data:
+    level: info
+    message: amqp chain done
+    in: true
+- message: 🔵 [<time>] amqp chain done
+- message: ⚪ [<time>] done log
+  data: {}
+- message: ⚪ [<time>] amqp "AMQP subscriber" closed
+- message: 🔵 [<time>] ■ AMQP

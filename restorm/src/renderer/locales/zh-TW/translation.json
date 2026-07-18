@@ -257,7 +257,7 @@
         "httpPut": "HTTP – PUT 請求",
         "httpPatch": "HTTP – PATCH 請求",
         "httpDelete": "HTTP – DELETE 請求",
-        "httpServer": "HTTP 模擬伺服器",
+        "httpServer": "HTTP 伺服器",
         "graphql": "GraphQL 請求",
         "grpc": "gRPC 請求",
         "grpcServerStream": "gRPC 伺服器串流請求",
@@ -272,18 +272,33 @@
         "websocketServer": "WebSocket 伺服器",
         "socketio": "Socket.IO 要求",
         "mqtt": "MQTT request",
-        "mqttServer": "MQTT 代理",
+        "mqttServer": "MQTT 伺服器",
         "sse": "SSE 請求",
-        "grpcServer": "gRPC 模擬伺服器",
-        "soapServer": "SOAP 模擬伺服器",
-        "graphqlServer": "GraphQL 模擬伺服器",
-        "odataServer": "OData 模擬伺服器",
+        "grpcServer": "gRPC 伺服器",
+        "soapServer": "SOAP 伺服器",
+        "graphqlServer": "GraphQL 伺服器",
+        "odataServer": "OData 伺服器",
         "trpc": "tRPC 請求",
         "amqp": "AMQP 請求",
         "redis": "Redis 請求",
         "stomp": "STOMP 請求",
         "kafkaProduce": "Kafka 請求 – 產生",
-        "kafkaConsume": "Kafka 請求 – 消費"
+        "kafkaConsume": "Kafka 請求 – 消費",
+        "httpHead": "HTTP – HEAD 請求",
+        "httpOptions": "HTTP – OPTIONS 請求",
+        "httpQuery": "HTTP – QUERY 請求",
+        "groups": {
+          "grpc": "gRPC",
+          "websocket": "WebSocket",
+          "socketio": "Socket.IO",
+          "graphql": "GraphQL",
+          "redis": "Redis",
+          "messaging": "Messaging",
+          "soap": "SOAP",
+          "odata": "OData",
+          "sse": "SSE",
+          "trpc": "tRPC"
+        }
       }
     },
     "deleteConfirm": {
@@ -375,7 +390,7 @@
       "switchTooltip": "切換環境"
     },
     "body": {
-      "fileLabel": "檔案或 URL：",
+      "fileLabel": "檔案：",
       "browse": "瀏覽..."
     },
     "tabs": {
@@ -396,6 +411,7 @@
         "graph": "圖表"
       },
       "loading": "正在傳送請求...",
+      "noResponseBody": "無回應內容 — 詳情請見 Infos",
       "noResponse": "點擊「傳送」以執行請求",
       "history": {
         "list": "回應歷史紀錄清單",
@@ -611,10 +627,22 @@
     "subscribeMode": "訂閱",
     "commandMode": "命令",
     "command": "命令",
-    "args": "參數",
-    "argsPlaceholder": "命令參數",
     "freeform": "自由輸入",
     "freeformPlaceholder": "自由輸入命令（覆蓋所選項目）",
+    "fields": {
+      "key": "鍵",
+      "field": "欄位",
+      "value": "值",
+      "channel": "頻道",
+      "message": "訊息",
+      "start": "起始",
+      "stop": "結束",
+      "id": "ID",
+      "fieldOrValue": "欄位/值",
+      "argument": "參數"
+    },
+    "addArgument": "新增參數",
+    "removeArgument": "移除參數",
     "tabs": {
       "channels": "頻道",
       "command": "命令"
@@ -663,6 +691,7 @@
     "noMessages": "尚無訊息",
     "connected": "已連線",
     "disconnected": "已中斷連線",
+    "consumeError": "消費者錯誤",
     "producedTo": "已產生至",
     "offset": "偏移量",
     "messages": "訊息"
@@ -1251,43 +1280,46 @@
       "writeFile": "Write file",
       "timer": "計時器",
       "code": "程式碼",
-      "socketioConnect": "Socket.IO connect",
+      "socketioConnect": "Socket.IO 連線",
       "socketioSend": "Socket.IO send",
-      "socketioClose": "Socket.IO close",
-      "websocketConnect": "WebSocket connect",
-      "sseConnect": "SSE connect",
+      "socketioClose": "關閉 Socket.IO 連線",
+      "socketioServerClose": "關閉 Socket.IO 伺服器",
+      "websocketConnect": "WebSocket 連線",
+      "sseConnect": "SSE 連線",
       "websocketSend": "WebSocket send",
-      "websocketClose": "WebSocket close",
-      "sseClose": "SSE close",
+      "websocketClose": "關閉 WebSocket 連線",
+      "websocketServerClose": "關閉 WebSocket 伺服器",
+      "sseClose": "關閉 SSE 連線",
       "grpcConnect": "gRPC connect",
       "grpcSend": "gRPC send",
-      "grpcClose": "gRPC close",
+      "grpcClose": "關閉 gRPC 連線",
       "mqttConnect": "MQTT connect",
       "mqttSend": "MQTT publish",
-      "mqttClose": "MQTT close",
+      "mqttClose": "關閉 MQTT 連線",
       "amqpConnect": "AMQP 連線",
       "amqpPublish": "AMQP 發布",
-      "amqpClose": "AMQP 關閉",
+      "amqpClose": "關閉 AMQP 連線",
       "redisSubscribe": "Redis subscribe",
-      "redisClose": "Redis close",
+      "redisClose": "關閉 Redis 連線",
       "redisCommand": "Redis command",
-      "httpListen": "HTTP server",
-      "httpClose": "HTTP close",
+      "httpListen": "HTTP 伺服器",
+      "httpClose": "關閉 HTTP 伺服器",
       "grpcServerClose": "關閉 gRPC 伺服器",
       "soapListen": "SOAP 伺服器",
-      "soapClose": "關閉 SOAP",
-      "graphqlListen": "GraphQL server",
-      "graphqlClose": "GraphQL close",
-      "odataListen": "OData server",
-      "odataClose": "OData close",
+      "soapClose": "關閉 SOAP 伺服器",
+      "graphqlListen": "GraphQL 伺服器",
+      "graphqlClose": "關閉 GraphQL 伺服器",
+      "odataListen": "OData 伺服器",
+      "odataClose": "關閉 OData 伺服器",
       "graphqlSubscribe": "GraphQL 訂閱",
       "graphqlUnsubscribe": "GraphQL 取消訂閱",
       "stompConnect": "STOMP 連線",
       "stompSend": "STOMP 傳送",
-      "stompClose": "STOMP 關閉",
+      "stompClose": "關閉 STOMP 連線",
       "kafkaProduce": "Kafka produce",
       "kafkaConsume": "Kafka consume",
-      "kafkaClose": "Kafka close"
+      "kafkaClose": "關閉 Kafka 連線",
+      "grpcListen": "gRPC 伺服器"
     },
     "comparator": {
       "result": "結果"
@@ -1400,6 +1432,9 @@
       },
       "file": {
         "missingPath": "需要檔案路徑。"
+      },
+      "connection": {
+        "missingName": "連線名稱為必填。"
       }
     },
     "usage": {
@@ -1847,10 +1882,12 @@
       "socketioConnect": "開啟一個 Socket.IO 連線，並在其連接埠上重新發出每個收到的事件。",
       "socketioSend": "在一個已開啟的 Socket.IO 連線上傳送一則訊息。",
       "socketioClose": "關閉一個已開啟的 Socket.IO 連線。",
+      "socketioServerClose": "停止一個已在監聽的 Socket.IO 模擬伺服器 (由 Socket.IO 伺服器節點宣告)，釋放其連接埠。",
       "websocketConnect": "開啟一個原始 WebSocket 連線，並在其連接埠上重新發出每個收到的訊息。",
       "sseConnect": "開啟一個長期存在的 SSE（Server-Sent Events）連線，並在其連接埠上重新發出每個收到的訊框。",
       "websocketSend": "在一個已開啟的 WebSocket 連線上傳送負載。",
       "websocketClose": "關閉一個已開啟的 WebSocket 連線。",
+      "websocketServerClose": "停止一個已在監聽的 WebSocket 模擬伺服器 (由 WebSocket 伺服器節點宣告)，釋放其連接埠。",
       "sseClose": "關閉一個已開啟的 SSE 連線。",
       "grpcConnect": "開啟一個串流 gRPC 呼叫，並在其 message 連接埠上重新發出每個收到的訊框。",
       "grpcSend": "在一個已開啟的串流 gRPC 呼叫上寫入請求訊息。",
@@ -2321,5 +2358,8 @@
     "sendDestination": "目的地",
     "ack": "ACK",
     "nack": "NACK"
+  },
+  "server": {
+    "configLockedWhileRunning": "伺服器執行時設定已鎖定"
   }
 }

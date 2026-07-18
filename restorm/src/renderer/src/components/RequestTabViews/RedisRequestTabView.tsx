@@ -20,6 +20,8 @@ import {
 } from 'electron-core-ui/renderer'
 import { DocumentEvents, type RequestHistoryEventPayload } from '../../services/DocumentEvents'
 import { RestormVariableInputBox } from '../RestormVariableInputBox'
+import { useEnvVariables } from '../../hooks/useEnvVariables'
+import { useEmitRequestExecution } from '../../services/requestExecutingStore'
 import type { RedisRequest, ResponseHistoryDetail } from '../../../../shared/types/collections'
 import { REDIS_COMMANDS } from '../../../../shared/models/types'
 import { useEnvironmentContext } from '../../contexts/useEnvironmentContext'
@@ -30,10 +32,11 @@ import { useRestormStore } from '../../store/restormStore'
 import { buildRequestPath } from '../../utils/requestPath'
 import { updateReactiveProperty } from './requestTabViewUtils'
 import { DEFAULT_REDIS_TIMEOUT_MS } from '../../../../shared/config/constants'
-import { parseFreeformCommand } from '../../../../shared/utils/redisCommand'
+import { getRedisCommandFields } from '../../../../shared/utils/redisCommandFields'
 import { SendButtonEnvSwitcher } from './SendButtonEnvSwitcher'
 import { BeamWrap } from '../common/BeamWrap'
 import { HeaderHoverTooltip } from '../MainView/HeaderHoverTooltip'
+import './WebSocketChat.css'
 
 export interface RedisRequestTabViewProps {
   request: RedisRequest
@@ -48,20 +51,6 @@ interface CommandHistoryEntry {
   reply?: string
   error?: string
   timestamp: string
-}
-
-/** Parse the single-line args input into `string[]` — same tokenizer the main
- * process uses for the freeform override, so quoting behaves identically in
- * both fields. */
-function parseArgsInput(value: string): string[] {
-  return value.trim() === '' ? [] : parseFreeformCommand(value)
-}
-
-/** Join `args` back into the single-line display string. Re-quotes a token
- * that contains whitespace so a round-trip through {@link parseArgsInput}
- * reproduces it. */
-function formatArgsInput(args: string[]): string {
-  return args.map((a) => (/\s/.test(a) ? `"${a.replace(/"/g, '\\"')}"` : a)).join(' ')
 }
 
 export const RedisRequestTabView: React.FC<RedisRequestTabViewProps> = ({
@@ -85,7 +74,7 @@ export const RedisRequestTabView: React.FC<RedisRequestTabViewProps> = ({
   const [mode, setModeState] = useState(request.mode)
   const [channelsText, setChannelsText] = useState(request.channels.join('\n'))
   const [command, setCommandState] = useState<string>(request.command ?? REDIS_COMMANDS[0])
-  const [argsText, setArgsText] = useState(formatArgsInput(request.args))
+  const [args, setArgsState] = useState<string[]>(request.args)
   const [freeformCommand, setFreeformCommandState] = useState(request.freeformCommand ?? '')
 
   // Subscribe mode: live frames for the current connection.
@@ -132,7 +121,7 @@ export const RedisRequestTabView: React.FC<RedisRequestTabViewProps> = ({
     setModeState(request.mode)
     setChannelsText(request.channels.join('\n'))
     setCommandState(request.command ?? REDIS_COMMANDS[0])
-    setArgsText(formatArgsInput(request.args))
+    setArgsState(request.args)
     setFreeformCommandState(request.freeformCommand ?? '')
     setLiveMessages([])
     setSubscribeResult(null)
@@ -156,7 +145,7 @@ export const RedisRequestTabView: React.FC<RedisRequestTabViewProps> = ({
     setModeState(current.mode)
     setChannelsText(current.channels.join('\n'))
     setCommandState(current.command ?? REDIS_COMMANDS[0])
-    setArgsText(formatArgsInput(current.args))
+    setArgsState(current.args)
     setFreeformCommandState(current.freeformCommand ?? '')
     setTransportEpoch((n) => n + 1)
   }, [])
@@ -243,7 +232,6 @@ export const RedisRequestTabView: React.FC<RedisRequestTabViewProps> = ({
     () => channelsText.split('\n').map((c) => c.trim()).filter((c) => c.length > 0),
     [channelsText]
   )
-  const args = useMemo(() => parseArgsInput(argsText), [argsText])
 
   useEffect(() => {
     void window.restorm?.context.updateFullRequestData(request.id, buildFullData({
@@ -289,10 +277,26 @@ export const RedisRequestTabView: React.FC<RedisRequestTabViewProps> = ({
     setCommandState(value)
     updateReactiveProperty(request, 'command', value as RedisRequest['command'])
   }, [request])
-  const setArgs = useCallback((value: string): void => {
-    setArgsText(value)
-    updateReactiveProperty(request, 'args', parseArgsInput(value))
-  }, [request])
+  // Structured per-argument editing: each field writes its own `args` slot
+  // directly (no space-join/split round trip), so a value carrying a space
+  // is preserved verbatim.
+  const setArgAt = useCallback((index: number, value: string): void => {
+    const next = [...args]
+    while (next.length <= index) next.push('')
+    next[index] = value
+    setArgsState(next)
+    updateReactiveProperty(request, 'args', next)
+  }, [args, request])
+  const addArg = useCallback((): void => {
+    const next = [...args, '']
+    setArgsState(next)
+    updateReactiveProperty(request, 'args', next)
+  }, [args, request])
+  const removeArgAt = useCallback((index: number): void => {
+    const next = args.filter((_, i) => i !== index)
+    setArgsState(next)
+    updateReactiveProperty(request, 'args', next)
+  }, [args, request])
   const setFreeformCommand = useCallback((value: string): void => {
     setFreeformCommandState(value)
     updateReactiveProperty(request, 'freeformCommand', value ? value : undefined)
@@ -300,6 +304,9 @@ export const RedisRequestTabView: React.FC<RedisRequestTabViewProps> = ({
 
   // Stable empty array for components that get variables via their own variableId
   const emptyVariables = useMemo<VariableDefinition[]>(() => [], [])
+  // Environment variables for scalar {{...}} connection fields so their
+  // autocomplete offers env vars alongside the helper functions.
+  const envVariables = useEnvVariables(request.id)
 
   // SUBSCRIBE mode: open the connection and listen. Resolves once the
   // session ends (user unsubscribe, or the server drops it).
@@ -360,6 +367,15 @@ export const RedisRequestTabView: React.FC<RedisRequestTabViewProps> = ({
 
   const handleRun = mode === 'subscribe' ? handleSubscribe : handleRunCommand
   const isRunning = mode === 'subscribe' ? isSubscribing : isRunningCommand
+  // Publish the activity into the shared request-activity store so the
+  // sidebar and tab badges beam in sync with the run button.
+  useEmitRequestExecution(request.id, isRunning)
+
+  // Command-aware field layout for the selected command — fixed positional
+  // fields (e.g. SET -> key + value) plus an optional repeatable tail for
+  // variable-arity commands. Falls back to a generic one-field-per-argument
+  // list for commands with no dedicated layout (see `redisCommandFields.ts`).
+  const fieldsSpec = useMemo(() => getRedisCommandFields(command), [command])
 
   // Request content: mode-specific pane (channels for subscribe, command
   // palette + args + freeform override for command).
@@ -399,19 +415,57 @@ export const RedisRequestTabView: React.FC<RedisRequestTabViewProps> = ({
                   />
                 </div>
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '0 4px' }}>
-                <span style={{ fontSize: 12, minWidth: 70 }}>{t('redis.args')}:</span>
-                <div style={{ flex: 1 }}>
-                  <RestormVariableInputBox
-                    value={argsText}
-                    onChange={setArgs}
-                    variables={emptyVariables}
-                    helpers={handlebarsHelpers}
-                    placeholder={t('redis.argsPlaceholder')}
-                    data-testid="redis-args-input"
-                  />
+              {fieldsSpec.fixed.map((field, i) => (
+                <div key={field.key} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '0 4px' }}>
+                  <span style={{ fontSize: 12, minWidth: 70 }}>{t(field.labelKey)}:</span>
+                  <div style={{ flex: 1 }}>
+                    <RestormVariableInputBox
+                      value={args[i] ?? ''}
+                      onChange={(v) => { setArgAt(i, v) }}
+                      variables={emptyVariables}
+                      helpers={handlebarsHelpers}
+                      data-testid={`redis-arg-${field.key}-input`}
+                    />
+                  </div>
                 </div>
-              </div>
+              ))}
+              {fieldsSpec.repeatable && (
+                <>
+                  {args.slice(fieldsSpec.fixed.length).map((value, idx) => {
+                    const i = fieldsSpec.fixed.length + idx
+                    const repeatableLabelKey = fieldsSpec.repeatable?.labelKey ?? 'redis.fields.argument'
+                    return (
+                      <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '0 4px' }}>
+                        <span style={{ fontSize: 12, minWidth: 70 }}>{t(repeatableLabelKey)} {idx + 1}:</span>
+                        <div style={{ flex: 1 }}>
+                          <RestormVariableInputBox
+                            value={value}
+                            onChange={(v) => { setArgAt(i, v) }}
+                            variables={emptyVariables}
+                            helpers={handlebarsHelpers}
+                            data-testid={`redis-arg-repeatable-${idx}-input`}
+                          />
+                        </div>
+                        <HeaderHoverTooltip label={t('redis.removeArgument')}>
+                          <Button
+                            secondary
+                            small
+                            icon="trash"
+                            onClick={() => { removeArgAt(i) }}
+                            options={{ ariaLabel: t('redis.removeArgument') }}
+                            data-testid={`redis-arg-remove-${idx}`}
+                          />
+                        </HeaderHoverTooltip>
+                      </div>
+                    )
+                  })}
+                  <div style={{ padding: '0 4px' }}>
+                    <Button secondary icon="add" onClick={addArg} data-testid="redis-arg-add-button">
+                      {t('redis.addArgument')}
+                    </Button>
+                  </div>
+                </>
+              )}
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '0 4px' }}>
                 <span style={{ fontSize: 12, minWidth: 70 }}>{t('redis.freeform')}:</span>
                 <div style={{ flex: 1 }}>
@@ -441,11 +495,16 @@ export const RedisRequestTabView: React.FC<RedisRequestTabViewProps> = ({
     }
     return (
       <ScrollableElement options={{ vertical: 'auto', horizontal: 'hidden', useShadows: true }} style={{ flex: 1, minHeight: 0 }}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 4, padding: 4 }}>
+        <div className="ws-chat">
           {messages.map((m, i) => (
-            <div key={i} data-testid={`response-stream-frame-${i}`} style={{ padding: 6, border: '1px solid var(--panel-border)', borderRadius: 3, fontSize: 12 }}>
-              <span style={{ fontWeight: 600, marginRight: 8 }}>{m.channel}</span>
-              <span>{m.data}</span>
+            <div
+              key={i}
+              className={`ws-chat-bubble ${m.direction === 'sent' ? 'sent' : 'received'}`}
+              data-testid={`response-stream-frame-${i}`}
+              data-direction={m.direction}
+            >
+              {m.channel && <span className="ws-chat-event">{m.channel}</span>}
+              {m.data}
             </div>
           ))}
         </div>
@@ -460,16 +519,26 @@ export const RedisRequestTabView: React.FC<RedisRequestTabViewProps> = ({
     }
     return (
       <ScrollableElement options={{ vertical: 'auto', horizontal: 'hidden', useShadows: true }} style={{ flex: 1, minHeight: 0 }}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 4, padding: 4 }}>
+        <div className="ws-chat">
           {entries.map((entry, i) => (
-            <div key={i} data-testid={`response-stream-frame-${i}`} style={{ padding: 6, border: '1px solid var(--panel-border)', borderRadius: 3, fontSize: 12 }}>
-              <div style={{ fontFamily: 'var(--monospace-font-family, monospace)', opacity: 0.8 }}>
-                {'> '}{entry.command} {entry.args.join(' ')}
+            <React.Fragment key={i}>
+              <div
+                className="ws-chat-bubble sent"
+                data-testid={`response-stream-frame-${i}`}
+                data-direction="sent"
+                style={{ fontFamily: 'var(--monospace-font-family, monospace)' }}
+              >
+                {entry.command} {entry.args.join(' ')}
               </div>
-              {entry.error
-                ? <div style={{ color: 'var(--testing-iconFailed)' }}>{entry.error}</div>
-                : <div>{entry.reply ?? '(nil)'}</div>}
-            </div>
+              <div
+                className="ws-chat-bubble received"
+                data-testid={`response-stream-frame-${i}-reply`}
+                data-direction="received"
+                style={entry.error ? { color: 'var(--testing-iconFailed)' } : undefined}
+              >
+                {entry.error ?? entry.reply ?? '(nil)'}
+              </div>
+            </React.Fragment>
           ))}
         </div>
       </ScrollableElement>
@@ -608,7 +677,7 @@ export const RedisRequestTabView: React.FC<RedisRequestTabViewProps> = ({
           <RestormVariableInputBox
             value={url}
             onChange={setUrl}
-            variables={emptyVariables}
+            variables={envVariables}
             helpers={handlebarsHelpers}
             placeholder={t('redis.urlPlaceholder')}
             data-testid="redis-url-input"
@@ -619,7 +688,7 @@ export const RedisRequestTabView: React.FC<RedisRequestTabViewProps> = ({
         <RestormVariableInputBox
           value={password}
           onChange={setPassword}
-          variables={emptyVariables}
+          variables={envVariables}
           helpers={handlebarsHelpers}
           placeholder={t('redis.passwordPlaceholder')}
           data-testid="redis-password-input"

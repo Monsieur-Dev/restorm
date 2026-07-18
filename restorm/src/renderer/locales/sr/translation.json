@@ -259,7 +259,7 @@
         "httpPut": "HTTP – PUT zahtev",
         "httpPatch": "HTTP – PATCH zahtev",
         "httpDelete": "HTTP – DELETE zahtev",
-        "httpServer": "HTTP mock сервер",
+        "httpServer": "HTTP сервер",
         "graphql": "GraphQL zahtev",
         "grpc": "gRPC zahtev",
         "grpcServerStream": "gRPC server-streaming захтев",
@@ -274,18 +274,33 @@
         "websocketServer": "WebSocket сервер",
         "socketio": "Socket.IO захтев",
         "mqtt": "MQTT request",
-        "mqttServer": "MQTT broker",
+        "mqttServer": "MQTT сервер",
         "sse": "SSE zahtev",
-        "grpcServer": "gRPC mock сервер",
-        "soapServer": "SOAP mock сервер",
-        "graphqlServer": "GraphQL mock сервер",
-        "odataServer": "OData mock сервер",
+        "grpcServer": "gRPC сервер",
+        "soapServer": "SOAP сервер",
+        "graphqlServer": "GraphQL сервер",
+        "odataServer": "OData сервер",
         "trpc": "tRPC zahtev",
         "amqp": "AMQP zahtev",
         "redis": "Redis zahtev",
         "stomp": "STOMP захтев",
         "kafkaProduce": "Kafka zahtev – Proizvedi",
-        "kafkaConsume": "Kafka zahtev – Potroši"
+        "kafkaConsume": "Kafka zahtev – Potroši",
+        "httpHead": "HTTP – HEAD zahtev",
+        "httpOptions": "HTTP – OPTIONS zahtev",
+        "httpQuery": "HTTP – QUERY zahtev",
+        "groups": {
+          "grpc": "gRPC",
+          "websocket": "WebSocket",
+          "socketio": "Socket.IO",
+          "graphql": "GraphQL",
+          "redis": "Redis",
+          "messaging": "Messaging",
+          "soap": "SOAP",
+          "odata": "OData",
+          "sse": "SSE",
+          "trpc": "tRPC"
+        }
       }
     },
     "deleteConfirm": {
@@ -377,7 +392,7 @@
       "switchTooltip": "Промени окружење"
     },
     "body": {
-      "fileLabel": "Datoteka ili URL:",
+      "fileLabel": "Datoteka:",
       "browse": "Pregledaj..."
     },
     "tabs": {
@@ -398,6 +413,7 @@
         "graph": "Graf"
       },
       "loading": "Slanje zahteva...",
+      "noResponseBody": "Нема тела одговора — погледајте Infos за детаље",
       "noResponse": "Kliknite Pošalji da biste izvršili zahtev",
       "history": {
         "list": "Lista istorije odgovora",
@@ -613,10 +629,22 @@
     "subscribeMode": "Pretplata",
     "commandMode": "Komanda",
     "command": "Komanda",
-    "args": "Argumenti",
-    "argsPlaceholder": "Argumenti komande",
     "freeform": "Slobodno",
     "freeformPlaceholder": "Slobodna komanda (zamenjuje izbor)",
+    "fields": {
+      "key": "Ključ",
+      "field": "Polje",
+      "value": "Vrednost",
+      "channel": "Kanal",
+      "message": "Poruka",
+      "start": "Početak",
+      "stop": "Kraj",
+      "id": "ID",
+      "fieldOrValue": "Polje/Vrednost",
+      "argument": "Argument"
+    },
+    "addArgument": "Dodaj argument",
+    "removeArgument": "Ukloni argument",
     "tabs": {
       "channels": "Kanali",
       "command": "Komanda"
@@ -665,6 +693,7 @@
     "noMessages": "Još nema poruka",
     "connected": "Povezano",
     "disconnected": "Prekinuto",
+    "consumeError": "Грешка потрошача",
     "producedTo": "Proizvedeno u",
     "offset": "Offset",
     "messages": "Poruke"
@@ -1253,43 +1282,46 @@
       "writeFile": "Write file",
       "timer": "Тајмер",
       "code": "Кôд",
-      "socketioConnect": "Socket.IO connect",
+      "socketioConnect": "Socket.IO veza",
       "socketioSend": "Socket.IO send",
-      "socketioClose": "Socket.IO close",
-      "websocketConnect": "WebSocket connect",
-      "sseConnect": "SSE connect",
+      "socketioClose": "Затвори Socket.IO везу",
+      "socketioServerClose": "Затвори Socket.IO сервер",
+      "websocketConnect": "WebSocket veza",
+      "sseConnect": "SSE veza",
       "websocketSend": "WebSocket send",
-      "websocketClose": "WebSocket close",
-      "sseClose": "SSE close",
+      "websocketClose": "Затвори WebSocket везу",
+      "websocketServerClose": "Затвори WebSocket сервер",
+      "sseClose": "Затвори SSE везу",
       "grpcConnect": "gRPC connect",
       "grpcSend": "gRPC send",
-      "grpcClose": "gRPC close",
+      "grpcClose": "Затвори gRPC везу",
       "mqttConnect": "MQTT connect",
       "mqttSend": "MQTT publish",
-      "mqttClose": "MQTT close",
+      "mqttClose": "Затвори MQTT везу",
       "amqpConnect": "AMQP veza",
       "amqpPublish": "AMQP objava",
-      "amqpClose": "AMQP zatvaranje",
+      "amqpClose": "Затвори AMQP везу",
       "redisSubscribe": "Redis subscribe",
-      "redisClose": "Redis close",
+      "redisClose": "Затвори Redis везу",
       "redisCommand": "Redis command",
-      "httpListen": "HTTP server",
-      "httpClose": "HTTP close",
+      "httpListen": "HTTP сервер",
+      "httpClose": "Затвори HTTP сервер",
       "grpcServerClose": "Затвори gRPC сервер",
       "soapListen": "SOAP сервер",
-      "soapClose": "Затвори SOAP",
-      "graphqlListen": "GraphQL server",
-      "graphqlClose": "GraphQL close",
-      "odataListen": "OData server",
-      "odataClose": "OData close",
+      "soapClose": "Затвори SOAP сервер",
+      "graphqlListen": "GraphQL сервер",
+      "graphqlClose": "Затвори GraphQL сервер",
+      "odataListen": "OData сервер",
+      "odataClose": "Затвори OData сервер",
       "graphqlSubscribe": "GraphQL претплата",
       "graphqlUnsubscribe": "Откажи GraphQL претплату",
       "stompConnect": "STOMP веза",
       "stompSend": "STOMP слање",
-      "stompClose": "Затварање STOMP",
+      "stompClose": "Затвори STOMP везу",
       "kafkaProduce": "Kafka produce",
       "kafkaConsume": "Kafka consume",
-      "kafkaClose": "Kafka close"
+      "kafkaClose": "Затвори Kafka везу",
+      "grpcListen": "gRPC сервер"
     },
     "comparator": {
       "result": "резултат"
@@ -1402,6 +1434,9 @@
       },
       "file": {
         "missingPath": "Потребна је путања датотеке."
+      },
+      "connection": {
+        "missingName": "Назив везе је обавезан."
       }
     },
     "usage": {
@@ -1849,10 +1884,12 @@
       "socketioConnect": "Отвара Socket.IO везу и поново емитује сваки примљени догађај на свом порту.",
       "socketioSend": "Шаље поруку на већ отвореној Socket.IO вези.",
       "socketioClose": "Затвара већ отворену Socket.IO везу.",
+      "socketioServerClose": "Зауставља већ активни лажни Socket.IO сервер (декларисан чвором Socket.IO server) и ослобађа његов порт.",
       "websocketConnect": "Отвара сирову WebSocket везу и поново емитује сваку примљену поруку на свом порту.",
       "sseConnect": "Otvara dugotrajnu SSE (Server-Sent Events) vezu i ponovo emituje svaki primljeni okvir na svom portu.",
       "websocketSend": "Шаље payload на већ отвореној WebSocket вези.",
       "websocketClose": "Затвара већ отворену WebSocket везу.",
+      "websocketServerClose": "Зауставља већ активни лажни WebSocket сервер (декларисан чвором WebSocket server) и ослобађа његов порт.",
       "sseClose": "Zatvara već otvorenu SSE vezu.",
       "grpcConnect": "Отвара streaming gRPC позив и поново емитује сваки примљени оквир на свом message порту.",
       "grpcSend": "Уписује поруку захтева у већ отворен streaming gRPC позив.",
@@ -2323,5 +2360,8 @@
     "sendDestination": "Одредиште",
     "ack": "ACK",
     "nack": "NACK"
+  },
+  "server": {
+    "configLockedWhileRunning": "Конфигурација закључана док се сервер извршава"
   }
 }

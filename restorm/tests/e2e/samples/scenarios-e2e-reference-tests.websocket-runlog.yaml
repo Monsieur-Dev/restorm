@@ -61,13 +61,13 @@
     label: close Echo
     in: true
 - message: ⚪ [<time>] done websocketClose
-- message: ⚪ [<time>] start websocketClose
+- message: ⚪ [<time>] start websocketServerClose
   data:
     connectionNodeId: <uuid>
     label: close Server
     in: true
 - message: ⚪ [<time>] websocket "Server" closed
-- message: ⚪ [<time>] done websocketClose
+- message: ⚪ [<time>] done websocketServerClose
 - message: ⚪ [<time>] websocket "Echo" closed
 - message: ⚪ [<time>] start log
   data:

@@ -5,8 +5,9 @@
 import type { ListViewItemData } from 'electron-core-ui/renderer'
 import { IconView } from 'electron-core-ui/renderer'
 import type { Icon } from 'electron-core-ui/types'
-import type { Folder, FolderItem, HTTPRequest, EnvironmentFolder, GraphQLRequest, GrpcRequest, SoapRequest, WebSocketRequest, ODataRequest, AuthenticationRequest, AmqpRequest, Scenario, Environment } from '../../../shared/types/collections'
-import { isFolder, isRequest, isHTTPRequest, isEnvironmentFolder, isAnyFolder, isGraphQLRequest, isGrpcRequest, isSoapRequest, isWebSocketRequest, isODataRequest, isAuthenticationRequest, isAmqpRequest, isScenario } from '../../../shared/types/collections'
+import type { Folder, FolderItem, HTTPRequest, EnvironmentFolder, GraphQLRequest, GrpcRequest, SoapRequest, WebSocketRequest, SseRequest, ODataRequest, AuthenticationRequest, AmqpRequest, Scenario, Environment, Request } from '../../../shared/types/collections'
+import { isFolder, isRequest, isHTTPRequest, isEnvironmentFolder, isAnyFolder, isGraphQLRequest, isGrpcRequest, isSoapRequest, isWebSocketRequest, isSseRequest, isODataRequest, isAuthenticationRequest, isAmqpRequest, isScenario } from '../../../shared/types/collections'
+import { requestBadgeMode } from '../utils/badgeUtils'
 import React, { type ReactNode } from 'react'
 import { ScenarioRunningBadge } from '../components/common/ScenarioRunningBadge'
 import { ServerListeningBadge } from '../components/common/ServerListeningBadge'
@@ -53,6 +54,13 @@ export interface FolderToListViewOptions {
    * that restorm HOSTS (server) render the uniform server variant of its
    * protocol badge. */
   renderProtocolBadge?: (protocol: string, label?: string, mode?: 'client' | 'server') => ReactNode
+  /** Function to render a request's badge straight from the protocol registry
+   * (badge label, server-capsule mode, and sub-type glyph) — the same badge the
+   * workbench tab shows. Used by the generic fallback so every protocol without
+   * a dedicated handler still gets its tab-accurate badge instead of a blank
+   * icon (the string-keyed {@link renderProtocolBadge} can't reproduce the fixed
+   * `RPC` / `RPC[]` / `tRPC` labels or the Kafka mode glyph). */
+  renderRequestBadge?: (request: Request) => ReactNode
   /** Function to render removed-from-spec request title — strikethrough. */
   renderRemovedTitle?: (name: string) => ReactNode
   /** Set of request ids whose URL resolves to a deprecated operation
@@ -139,17 +147,18 @@ function graphqlRequestToListViewItem(
 ): ListViewItemData {
   // A GraphQL mock SERVER (server === true) renders the SRV capsule over its
   // badge + the listening beam while it hosts (like the HTTP / gRPC / WS / SIO /
-  // MQTT servers); a client GraphQL request keeps its op-type badge + the
+  // MQTT servers); a client GraphQL request shows the fixed GQL badge (the
+  // protocol registry's badge, same as the workbench tab and scenario nodes) + the
   // executing beam.
   if (request.server === true) {
-    const badge = options.renderProtocolBadge?.(request.operationType, undefined, 'server')
+    const badge = options.renderProtocolBadge?.('gql', undefined, 'server')
     return {
       id: request.id,
       title: request.name,
       icon: withListeningBeam(request.id, badge)
     }
   }
-  const badge = options.renderProtocolBadge?.(request.operationType)
+  const badge = options.renderProtocolBadge?.('gql')
   return {
     id: request.id,
     title: request.name,
@@ -278,6 +287,49 @@ function amqpRequestToListViewItem(
 }
 
 /**
+ * Convert an SseRequest to a ListViewItemData. SSE keeps an open client
+ * connection, so it wears the listening beam (driven by the same SSE listening
+ * state the workbench tab reads) rather than the one-shot executing beam — the
+ * only client protocol here that does, which is why it has its own handler
+ * instead of riding the generic fallback below.
+ */
+function sseRequestToListViewItem(
+  request: SseRequest,
+  options: FolderToListViewOptions
+): ListViewItemData {
+  const badge = options.renderRequestBadge?.(request)
+  return {
+    id: request.id,
+    title: request.name,
+    icon: withListeningBeam(request.id, badge)
+  }
+}
+
+/**
+ * Registry-driven fallback for any request whose protocol has no dedicated
+ * handler above (STOMP, Redis, JSON-RPC, JSON-RPC batch, tRPC, Kafka — and any
+ * protocol added later). It renders the exact badge the workbench tab shows —
+ * label + server capsule + sub-type glyph — from the protocol registry, so a
+ * new protocol picks up a correct sidebar badge automatically instead of
+ * falling through to a blank icon. A server-hosted request beams while
+ * listening; every other request beams while it executes.
+ */
+function genericRequestToListViewItem(
+  request: Request,
+  options: FolderToListViewOptions
+): ListViewItemData {
+  const badge = options.renderRequestBadge?.(request)
+  const isServer = requestBadgeMode(request) === 'server'
+  return {
+    id: request.id,
+    title: request.name,
+    icon: isServer
+      ? withListeningBeam(request.id, badge)
+      : withExecutingBeam(request.id, badge)
+  }
+}
+
+/**
  * Convert a Scenario to a ListViewItemData. Renders the circuit-board
  * scenario badge so dataflow graphs are visually distinct from requests.
  * A scenario doubles as a folder-like container: its `items` (requests +
@@ -319,16 +371,21 @@ export function folderItemToListViewItem(
   const secretBadges = (id: string): ReactNode => React.createElement(ItemSecretBadges, { itemId: id })
 
   if (isRequest(item)) {
-    let base: ListViewItemData | null = null
+    let base: ListViewItemData
     if (isHTTPRequest(item)) base = httpRequestToListViewItem(item, options)
     else if (isGraphQLRequest(item)) base = graphqlRequestToListViewItem(item, options)
     else if (isGrpcRequest(item)) base = grpcRequestToListViewItem(item, options)
     else if (isSoapRequest(item)) base = soapRequestToListViewItem(item, options)
     else if (isWebSocketRequest(item)) base = websocketRequestToListViewItem(item, options)
+    else if (isSseRequest(item)) base = sseRequestToListViewItem(item, options)
     else if (isODataRequest(item)) base = odataRequestToListViewItem(item, options)
     else if (isAuthenticationRequest(item)) base = authenticationRequestToListViewItem(item, options)
     else if (isAmqpRequest(item)) base = amqpRequestToListViewItem(item, options)
-    if (base) return { ...base, rightActions: secretBadges(item.id) }
+    // STOMP / Redis / JSON-RPC / JSON-RPC batch / tRPC / Kafka (and any new
+    // protocol) get their tab-accurate badge from the registry-driven fallback
+    // instead of a blank icon.
+    else base = genericRequestToListViewItem(item, options)
+    return { ...base, rightActions: secretBadges(item.id) }
   }
 
   if (isScenario(item)) {

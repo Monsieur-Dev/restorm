@@ -111,6 +111,25 @@ export const websocketCloseExecutor: NodeExecutor = (_act, ctx) => {
   return { outputs: [] }
 }
 
+/** C (websocketServerClose): stop the WebSocket mock server named by
+ * `config.connectionNodeId` (a websocketConnect node bound to a `server: true`
+ * request), freeing its port and firing that connect node's `done`. DERIVES from
+ * grpcServerClose — a raw WS server is hosted by the same connect-node machinery,
+ * so stopping it is the same `close` on the referenced node. Pure-event action;
+ * sequences via its own `done`. Errors when no server is selected or it is not
+ * listening. */
+export const websocketServerCloseExecutor: NodeExecutor = (_act, ctx) => {
+  const cfg = ctx.node.config as { connectionNodeId?: unknown }
+  const connectionNodeId = typeof cfg.connectionNodeId === 'string' ? cfg.connectionNodeId : ''
+  if (connectionNodeId === '') throw new Error('websocketServerClose: no server selected')
+  if (!ctx.socketio) throw new Error('websocketServerClose: socket bridge unavailable')
+  if (!ctx.socketio.has(connectionNodeId)) {
+    throw new Error('websocketServerClose: the referenced server does not exist in this run')
+  }
+  ctx.socketio.close(connectionNodeId)
+  return { outputs: [] }
+}
+
 /** A (sseConnect): SSE — same handoff as websocketConnect, but there is no send
  * direction at all (no B executor): every received frame routes to the single
  * `message` port. */
@@ -616,5 +635,24 @@ export const socketioCloseExecutor: NodeExecutor = (_act, ctx) => {
   }
   ctx.socketio.close(connectionNodeId)
   // No value output — sequencing is the universal `done` port.
+  return { outputs: [] }
+}
+
+/** C (socketioServerClose): stop the Socket.IO mock server named by
+ * `config.connectionNodeId` (a socketioConnect node bound to a `server: true`
+ * request), freeing its port and firing that connect node's `done`. DERIVES from
+ * grpcServerClose — a Socket.IO server is hosted by the same connect-node
+ * machinery, so stopping it is the same `close` on the referenced node.
+ * Pure-event action; sequences via its own `done`. Errors when no server is
+ * selected or it is not listening. */
+export const socketioServerCloseExecutor: NodeExecutor = (_act, ctx) => {
+  const cfg = ctx.node.config as { connectionNodeId?: unknown }
+  const connectionNodeId = typeof cfg.connectionNodeId === 'string' ? cfg.connectionNodeId : ''
+  if (connectionNodeId === '') throw new Error('socketioServerClose: no server selected')
+  if (!ctx.socketio) throw new Error('socketioServerClose: socket bridge unavailable')
+  if (!ctx.socketio.has(connectionNodeId)) {
+    throw new Error('socketioServerClose: the referenced server does not exist in this run')
+  }
+  ctx.socketio.close(connectionNodeId)
   return { outputs: [] }
 }

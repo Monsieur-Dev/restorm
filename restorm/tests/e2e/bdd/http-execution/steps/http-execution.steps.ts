@@ -17,6 +17,7 @@
 
 import { createBdd } from 'playwright-bdd'
 import { join } from 'path'
+import { copyFileSync, mkdirSync } from 'node:fs'
 import type { Page } from '@playwright/test'
 import { test, expect, type McpDiscovery, type McpToolReply } from '../../fixtures/mcp-server.fixture'
 
@@ -68,8 +69,16 @@ Given(
   'I open the HTTP sample via MCP',
   async ({ callMcpTool, restormRoot }) => {
     if (discovery === null) throw new Error('launch first')
+    // Open a COPY of the sample: several scenarios mutate the project (the
+    // method combo matrix rewrites the request's method) and the renderer
+    // autosaves — pointing the app at the repo file would dirty the checkout
+    // on every run.
     const samplePath = join(restormRoot, 'tests/e2e/samples/http-sample.restorm')
-    const opened = await callMcpTool(discovery, 'open_project', { filePath: samplePath })
+    const tmpDir = join(restormRoot, 'tests/e2e/.tmp')
+    mkdirSync(tmpDir, { recursive: true })
+    const workingCopy = join(tmpDir, 'http-sample.working.restorm')
+    copyFileSync(samplePath, workingCopy)
+    const opened = await callMcpTool(discovery, 'open_project', { filePath: workingCopy })
     expect(opened.isError ?? false).toBe(false)
 
     const deadline = Date.now() + 20_000
@@ -85,21 +94,26 @@ Given(
 
     // Resolve the sample's environment id so steps that need a runtime
     // env value (e.g. the upload file path) can set it via MCP.
-    const envReply = await callMcpTool(discovery, 'list_environments', {})
-    const envs = parsedReply(envReply) as { id: string; name: string }[]
-    environmentId = envs[0]?.id ?? null
+    // `list_environments` is scoped to an env folder, so resolve the
+    // sample's top-level env folder first.
+    const foldersReply = await callMcpTool(discovery, 'list_folders', {})
+    const folders = parsedReply(foldersReply) as { id: string; kind: string }[]
+    const envFolderId = folders.find((f) => f.kind === 'env-folder')?.id
+    expect(envFolderId, 'sample env folder not found').toBeTruthy()
+    const envReply = await callMcpTool(discovery, 'list_environments', { envFolderId })
+    const envs = parsedReply(envReply) as { environments: { id: string; name: string }[] }
+    environmentId = envs.environments[0]?.id ?? null
+    expect(environmentId, 'sample environment not found').toBeTruthy()
 
-    // The multipart upload field points at `{{uploadPath}}`; bind it to
-    // the committed fixture's absolute path so the executor streams a
-    // real file part.
-    if (environmentId) {
-      const uploadPath = join(restormRoot, 'tests/e2e/samples/fixtures/upload.txt')
-      await callMcpTool(discovery, 'set_env_variable', {
-        envId: environmentId,
-        key: 'uploadPath',
-        value: { type: 'string', value: uploadPath }
-      })
-    }
+    // The multipart upload field and the standalone file body both point
+    // at `{{uploadPath}}`; bind it to the committed fixture's absolute
+    // path so the executor streams a real file.
+    const uploadPath = join(restormRoot, 'tests/e2e/samples/fixtures/upload.txt')
+    await callMcpTool(discovery, 'set_env_variable', {
+      envId: environmentId,
+      key: 'uploadPath',
+      value: { type: 'string', value: uploadPath }
+    })
   }
 )
 
@@ -127,6 +141,200 @@ When('I click Cancel', async () => {
   // The cancel button replaces the send button while a request is in flight.
   await page.locator(CANCEL_BTN).waitFor({ state: 'visible', timeout: 10_000 })
   await page.locator(CANCEL_BTN).click()
+})
+
+const METHOD_TRIGGER = '[data-testid="http-request-method-select-trigger"]'
+const METHOD_DROPDOWN = '[data-testid="http-request-method-select-dropdown"]'
+
+/** Resolved background color of a badge-registry entry, computed by probing
+ * the entry's CSS token inside the live page (theme-proof: whatever theme the
+ * app runs, the badge must resolve to the SAME color as its declared token). */
+async function registryColor(p: Page, badgeId: string): Promise<string> {
+  return await p.evaluate((id) => {
+    const probe = document.createElement('div')
+    const tokens: Record<string, string> = {
+      http_get: 'var(--badge-get-background)',
+      http_post: 'var(--badge-post-background)',
+      http_put: 'var(--badge-put-background)',
+      http_patch: 'var(--badge-patch-background)',
+      http_delete: 'var(--badge-delete-background)',
+      http_head: 'var(--badge-head-background)',
+      http_options: 'var(--badge-options-background)',
+      http_query: 'var(--badge-gql-background)',
+      http_other: 'var(--badge-other-background)'
+    }
+    probe.style.backgroundColor = tokens[id] ?? ''
+    document.body.appendChild(probe)
+    const color = getComputedStyle(probe).backgroundColor
+    probe.remove()
+    return color
+  }, badgeId)
+}
+
+async function expectRegistryBadge(badge: ReturnType<Page['locator']>, text: string, badgeId: string, expectedColor: string): Promise<void> {
+  await expect(badge).toBeVisible({ timeout: 10_000 })
+  await expect(badge).toHaveText(text, { timeout: 10_000 })
+  await expect(badge).toHaveAttribute('data-badge-id', badgeId)
+  const bg = await badge.evaluate((el) => getComputedStyle(el).backgroundColor)
+  expect(bg, `badge background for ${badgeId}`).toBe(expectedColor)
+}
+
+/** Snapshot-assert a registry badge inside the OPEN context menu: the menu can
+ * close under async re-renders while a polling locator waits, so the whole
+ * check runs in ONE page.evaluate the instant the submenu is open. */
+async function expectMenuRegistryBadge(p: Page, text: string, badgeId: string, expectedColor: string, where = ''): Promise<void> {
+  const result = await p.evaluate(([wantText, wantId]) => {
+    const badge = document.querySelector(`[role="menuitem"] .registry-badge[data-badge-id="${wantId}"]`)
+    if (!badge) {
+      const open = document.querySelectorAll('[role="menuitem"]').length
+      return { ok: false, why: `no badge ${wantId} in the open menu (${String(open)} menuitems visible)` }
+    }
+    const bg = getComputedStyle(badge).backgroundColor
+    const txt = badge.textContent.trim()
+    if (txt !== wantText) return { ok: false, why: `text ${txt} != ${wantText}` }
+    return { ok: true, bg }
+  }, [text, badgeId])
+  expect(result.ok, result.ok ? undefined : `${where}: ${result.why ?? ''}`).toBe(true)
+  expect(result.bg, `menu badge background for ${badgeId}`).toBe(expectedColor)
+}
+
+When('I favorite the {string} request via MCP', async ({ callMcpTool }, name: string) => {
+  if (discovery === null) throw new Error('launch first')
+  const id = requestsByName.get(name)
+  expect(id, `request ${name} not found`).toBeTruthy()
+  const reply = await callMcpTool(discovery, 'set_favorite', { itemId: id, favorite: true })
+  expect(reply.isError ?? false).toBe(false)
+})
+
+When('I open the {string} scenario tab via MCP', async ({ callMcpTool }, name: string) => {
+  if (discovery === null) throw new Error('launch first')
+  const reply = await callMcpTool(discovery, 'list_scenarios', {})
+  const scenarios = parsedReply(reply) as { id: string; name: string }[]
+  const scn = scenarios.find((sc) => sc.name === name)
+  expect(scn, `scenario ${name} not found`).toBeTruthy()
+  const opened = await callMcpTool(discovery, 'open_tab', { itemId: scn?.id })
+  expect(opened.isError ?? false).toBe(false)
+  if (page === null) throw new Error('launch first')
+  await page.waitForTimeout(1_000)
+})
+
+When('I activate the {string} request tab', async ({}, name: string) => {
+  if (page === null) throw new Error('launch first')
+  const tab = page.locator('[role="tab"]', { hasText: name }).first()
+  await tab.click({ timeout: 10_000 })
+  await expect(page.locator(METHOD_TRIGGER).first()).toBeVisible({ timeout: 10_000 })
+})
+
+When('I pick {string} from the method combo', async ({}, verb: string) => {
+  if (page === null) throw new Error('launch first')
+  await page.locator(METHOD_TRIGGER).first().click()
+  const option = page
+    .locator(`${METHOD_DROPDOWN} .select-option`)
+    .filter({ has: page.locator('.registry-badge', { hasText: new RegExp(`^${verb}$`) }) })
+    .first()
+  await option.click({ timeout: 10_000 })
+})
+
+When('I type {string} into the method combo', async ({}, text: string) => {
+  if (page === null) throw new Error('launch first')
+  await page.locator(METHOD_TRIGGER).first().click()
+  const entry = page.locator(`${METHOD_DROPDOWN} .dropdown-filter-row input`).first()
+  await entry.waitFor({ state: 'visible', timeout: 10_000 })
+  await entry.fill(text)
+  // Commit is Enter (or focus loss); Enter keeps the typed text VERBATIM even
+  // when it visually matches a known verb ("Post" must not become "POST").
+  await entry.press('Enter')
+})
+
+Then('all method badge surfaces show {string} as {string}', async ({}, text: string, badgeId: string) => {
+  if (page === null) throw new Error('launch first')
+  const color = await registryColor(page, badgeId)
+
+  // 1. Method combo trigger (request tab must be active).
+  await expectRegistryBadge(page.locator(`${METHOD_TRIGGER} .registry-badge`).first(), text, badgeId, color)
+  // The other surfaces follow through the reactive REQUEST_UPDATED emission
+  // (50ms trailing debounce) — give the propagation a beat under load before
+  // polling them.
+  await page.waitForTimeout(500)
+  // 2. Workbench tab-strip badge of the request tab.
+  const tab = page.locator('[role="tab"]', { hasText: 'GET echo' }).first()
+  await expectRegistryBadge(tab.locator('.registry-badge').first(), text, badgeId, color)
+  // 3. Sidebar workspace tree row (rows are ARIA treeitems).
+  const treeRow = page.locator('[data-testid="sidebar-listview"]').getByRole('treeitem', { name: /GET echo/ }).first()
+  await expectRegistryBadge(treeRow.locator('.registry-badge').first(), text, badgeId, color)
+  // 4. Favorites pane row (ARIA listitems).
+  const favRow = page.locator('[data-testid="sidebar-favorites-listview"]').getByRole('listitem').filter({ hasText: 'GET echo' }).first()
+  await expectRegistryBadge(favRow.locator('.registry-badge').first(), text, badgeId, color)
+  // 5. Open-documents pane row.
+  const openRow = page.locator('[data-testid="sidebar-open-documents-listview"]').getByRole('listitem').filter({ hasText: 'GET echo' }).first()
+  await expectRegistryBadge(openRow.locator('.registry-badge').first(), text, badgeId, color)
+  // 6. Scenario request-node header — switch to the scenario tab, assert, and
+  // come back so the combo stays reachable for the next mutation.
+  await page.locator('[role="tab"]', { hasText: 'Badge scenario' }).first().click()
+  const node = page.locator('.react-flow__node', { hasText: 'GET echo' }).first()
+  await expectRegistryBadge(node.locator('.registry-badge').first(), text, badgeId, color)
+  await page.locator('[role="tab"]', { hasText: 'GET echo' }).first().click()
+  await expect(page.locator(METHOD_TRIGGER).first()).toBeVisible({ timeout: 10_000 })
+})
+
+Then('the sidebar add menu shows the {string} method badge as {string}', async ({}, text: string, badgeId: string) => {
+  if (page === null) throw new Error('launch first')
+  const color = await registryColor(page, badgeId)
+  // The add entries live in the sidebar context menu's "Add" submenu —
+  // right-click the workspace root folder and hover the submenu parent.
+  const folderRow = page.locator('[data-testid="sidebar-listview"]').getByRole('treeitem', { name: /HTTP Execution Playground/ }).first()
+  // Let the debounced sidebar rebuild triggered by the previous tab
+  // activations land BEFORE opening the menu — a rebuild remounts the rows
+  // and takes the context menu's anchor (and the menu) down with it.
+  await page.waitForTimeout(1_000)
+  await folderRow.click({ button: 'right' })
+  const addParent = page.getByRole('menuitem', { name: /^(Add|Ajouter)/ }).first()
+  await addParent.waitFor({ state: 'visible', timeout: 10_000 })
+  // Pointer-based submenu opening is unreliable here (the context menu
+  // anchors under the pointer, so hover can produce no mouseenter). Use the
+  // keyboard path instead: focus the parent and ArrowRight opens the submenu
+  // synchronously.
+  await addParent.focus()
+  await addParent.press('ArrowRight')
+  await page.waitForTimeout(500)
+  await expectMenuRegistryBadge(page, text, badgeId, color, 'sidebar-add-menu')
+  await page.keyboard.press('Escape')
+  await page.keyboard.press('Escape')
+})
+
+Then('the scenario add palette shows the {string} method badge as {string}', async ({}, text: string, badgeId: string) => {
+  if (page === null) throw new Error('launch first')
+  const color = await registryColor(page, badgeId)
+  // The palette is the scenario editor's add-child context menu — open the
+  // scenario tab and right-click the canvas.
+  await page.locator('[role="tab"]', { hasText: 'Badge scenario' }).first().click()
+  const canvas = page.locator('.react-flow__pane').first()
+  await canvas.waitFor({ state: 'visible', timeout: 10_000 })
+  // Dispatch the contextmenu at an EMPTY spot (top-right of the pane):
+  // bottom-left hosts the React Flow controls (they intercept pointer
+  // events) and the request node sits in the left half.
+  const paneBox = await canvas.boundingBox()
+  if (paneBox === null) throw new Error('scenario pane has no bounding box')
+  await canvas.dispatchEvent('contextmenu', {
+    bubbles: true,
+    cancelable: true,
+    button: 2,
+    clientX: Math.round(paneBox.x + paneBox.width - 80),
+    clientY: Math.round(paneBox.y + 80)
+  })
+  await page.waitForTimeout(600)
+  // The request entries (and their badges) sit under the palette's "Add"
+  // submenu — open it with the keyboard, like the sidebar menu.
+  const paletteAdd = page.getByRole('menuitem', { name: /^(Add|Ajouter)/ }).first()
+  await paletteAdd.waitFor({ state: 'visible', timeout: 10_000 })
+  await paletteAdd.focus()
+  await paletteAdd.press('ArrowRight')
+  await page.waitForTimeout(400)
+  await expectMenuRegistryBadge(page, text, badgeId, color, 'scenario-palette')
+  await page.keyboard.press('Escape')
+  // Back to the request tab for the rest of the scenario.
+  await page.locator('[role="tab"]', { hasText: 'GET echo' }).first().click()
+  await expect(page.locator(METHOD_TRIGGER).first()).toBeVisible({ timeout: 10_000 })
 })
 
 Then('the response status is {string}', async ({}, status: string) => {

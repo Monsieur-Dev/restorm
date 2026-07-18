@@ -1,6 +1,6 @@
 import type { KeyValue } from './baseTypes'
 
-export type HTTPMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE' | 'HEAD' | 'OPTIONS'
+export type HTTPMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE' | 'HEAD' | 'OPTIONS' | 'QUERY'
 
 export interface HTTPRequestBodyText {
   type: 'text'

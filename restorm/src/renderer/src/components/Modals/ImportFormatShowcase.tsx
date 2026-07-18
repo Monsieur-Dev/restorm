@@ -13,9 +13,8 @@
 
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Badge } from '../common/Badge'
+import { RegistryBadge } from '../common/RegistryBadge'
 import {
-  Button,
   ElectricBorder,
   MagicCard,
   pickRandomBorderBeamProps,
@@ -47,6 +46,10 @@ import websocketSvgRaw from '../../../../../assets/imgs/import-sources/websocket
 import kafkaSvgRaw from '../../../../../assets/imgs/import-sources/kafka.svg?raw'
 import socketioSvgRaw from '../../../../../assets/imgs/import-sources/socketio.svg?raw'
 import soapSvgRaw from '../../../../../assets/imgs/import-sources/soap.svg?raw'
+import harSvgRaw from '../../../../../assets/imgs/import-sources/har.svg?raw'
+import httpieSvgRaw from '../../../../../assets/imgs/import-sources/httpie.svg?raw'
+import wadlSvgRaw from '../../../../../assets/imgs/import-sources/wadl.svg?raw'
+import thriftSvgRaw from '../../../../../assets/imgs/import-sources/thrift.svg?raw'
 import './ImportFormatShowcase.css'
 
 /** Time spent on each format before rotating to the next one. */
@@ -184,18 +187,6 @@ interface ImportFormat {
   trademarkKey?: string
   /** Whether the marketing tier requires a paid plan. */
   isPro: boolean
-  /**
-   * When set, the bubble renders a small action button under the
-   * description. Unlike every other format here — which is a pure
-   * pitch for the paste/file/URL auto-detect flow the modal's source
-   * input already drives — this format's import needs its own form
-   * (e.g. gRPC reflection's host:port + TLS + metadata), so the
-   * button hands off to `onAction(actionId)` on the showcase's parent
-   * instead of describing what to paste.
-   */
-  actionId?: string
-  /** Translation key for the action button's label. */
-  actionLabelKey?: string
 }
 
 const IMPORT_FORMATS: readonly ImportFormat[] = [
@@ -261,8 +252,7 @@ const IMPORT_FORMATS: readonly ImportFormat[] = [
   {
     id: 'thunderclient',
     title: 'Thunder Client',
-    logoSrc: null,
-    iconCodicon: 'zap',
+    logoSrc: new URL('../../../../../assets/imgs/import-sources/thunderclient.png', import.meta.url).href,
     descriptionKey: 'import.formats.thunderclient.description',
     trademarkKey: 'import.formats.thunderclient.trademark',
     isPro: false
@@ -289,8 +279,6 @@ const IMPORT_FORMATS: readonly ImportFormat[] = [
     logoSrc: new URL('../../../../../assets/imgs/import-sources/grpc.svg', import.meta.url).href,
     descriptionKey: 'import.formats.grpcReflection.description',
     trademarkKey: 'import.formats.grpc.trademark',
-    actionId: 'grpc-reflection',
-    actionLabelKey: 'import.formats.grpcReflection.action',
     isPro: false
   },
   {
@@ -344,34 +332,25 @@ const IMPORT_FORMATS: readonly ImportFormat[] = [
     isPro: false
   },
   {
-    // No first-party Paw logo asset is shipped yet — a generic codicon
-    // stands in until one is added, same fallback the `logoSrc: null` +
-    // `iconCodicon` combination was built for.
     id: 'paw',
     title: 'Paw',
-    logoSrc: null,
-    iconCodicon: 'package',
+    logoSrc: new URL('../../../../../assets/imgs/import-sources/paw.png', import.meta.url).href,
     descriptionKey: 'import.formats.paw.description',
     trademarkKey: 'import.formats.paw.trademark',
     isPro: false
   },
-  // The next nine formats (HAR through API Blueprint) all lack a
-  // first-party logo asset — same situation as Paw above — so they use
-  // a codicon glyph picked for a loose visual match to what the format
-  // represents until a real SVG pass replaces them.
   {
     id: 'har',
     title: 'HAR',
     logoSrc: null,
-    iconCodicon: 'browser',
+    inlineSvg: harSvgRaw,
     descriptionKey: 'import.formats.har.description',
     isPro: false
   },
   {
     id: 'rest-client',
     title: 'REST Client',
-    logoSrc: null,
-    iconCodicon: 'extensions',
+    logoSrc: new URL('../../../../../assets/imgs/import-sources/rest-client.png', import.meta.url).href,
     descriptionKey: 'import.formats.restClient.description',
     trademarkKey: 'import.formats.restClient.trademark',
     isPro: false
@@ -380,7 +359,7 @@ const IMPORT_FORMATS: readonly ImportFormat[] = [
     id: 'httpie',
     title: 'HTTPie',
     logoSrc: null,
-    iconCodicon: 'send',
+    inlineSvg: httpieSvgRaw,
     descriptionKey: 'import.formats.httpie.description',
     trademarkKey: 'import.formats.httpie.trademark',
     isPro: false
@@ -388,8 +367,7 @@ const IMPORT_FORMATS: readonly ImportFormat[] = [
   {
     id: 'smithy',
     title: 'Smithy',
-    logoSrc: null,
-    iconCodicon: 'symbol-namespace',
+    logoSrc: new URL('../../../../../assets/imgs/import-sources/smithy.svg', import.meta.url).href,
     descriptionKey: 'import.formats.smithy.description',
     trademarkKey: 'import.formats.smithy.trademark',
     isPro: false
@@ -397,8 +375,7 @@ const IMPORT_FORMATS: readonly ImportFormat[] = [
   {
     id: 'typespec',
     title: 'TypeSpec',
-    logoSrc: null,
-    iconCodicon: 'symbol-interface',
+    logoSrc: new URL('../../../../../assets/imgs/import-sources/typespec.svg', import.meta.url).href,
     descriptionKey: 'import.formats.typespec.description',
     trademarkKey: 'import.formats.typespec.trademark',
     isPro: false
@@ -406,8 +383,7 @@ const IMPORT_FORMATS: readonly ImportFormat[] = [
   {
     id: 'raml',
     title: 'RAML',
-    logoSrc: null,
-    iconCodicon: 'list-tree',
+    logoSrc: new URL('../../../../../assets/imgs/import-sources/raml.svg', import.meta.url).href,
     descriptionKey: 'import.formats.raml.description',
     trademarkKey: 'import.formats.raml.trademark',
     isPro: false
@@ -416,7 +392,7 @@ const IMPORT_FORMATS: readonly ImportFormat[] = [
     id: 'wadl',
     title: 'WADL',
     logoSrc: null,
-    iconCodicon: 'file-code',
+    inlineSvg: wadlSvgRaw,
     descriptionKey: 'import.formats.wadl.description',
     trademarkKey: 'import.formats.wadl.trademark',
     isPro: false
@@ -425,7 +401,7 @@ const IMPORT_FORMATS: readonly ImportFormat[] = [
     id: 'thrift',
     title: 'Thrift',
     logoSrc: null,
-    iconCodicon: 'type-hierarchy',
+    inlineSvg: thriftSvgRaw,
     descriptionKey: 'import.formats.thrift.description',
     trademarkKey: 'import.formats.thrift.trademark',
     isPro: false
@@ -433,20 +409,29 @@ const IMPORT_FORMATS: readonly ImportFormat[] = [
   {
     id: 'api-blueprint',
     title: 'API Blueprint',
-    logoSrc: null,
-    iconCodicon: 'markdown',
+    logoSrc: new URL('../../../../../assets/imgs/import-sources/api-blueprint.svg', import.meta.url).href,
     descriptionKey: 'import.formats.apiBlueprint.description',
     trademarkKey: 'import.formats.apiBlueprint.trademark',
     isPro: false
   }
 ]
 
+// Warm the browser cache for the URL-served logos as soon as this module
+// loads. A bubble's <img> otherwise fetches its file on first mount, and
+// the first rotation can show an empty logo box for a beat before the
+// image pops in — the small SVGs are inlined as data: URIs by the bundler,
+// but the larger marks ship as files and are fetched on demand.
+for (const format of IMPORT_FORMATS) {
+  if (format.logoSrc !== null && typeof Image !== 'undefined') {
+    new Image().src = format.logoSrc
+  }
+}
+
 type Phase = 'in' | 'out' | 'gap'
 
 interface ShowcaseBubbleProps {
   format: ImportFormat
   phase: 'in' | 'out'
-  onAction?: ((actionId: string) => void) | undefined
 }
 
 /**
@@ -459,14 +444,8 @@ interface ShowcaseBubbleProps {
  * silhouette-with-tail variant; MagicCard runs as the stock component
  * since its radial gradient fades naturally past the silhouette.
  */
-const ShowcaseBubble: React.FC<ShowcaseBubbleProps> = ({ format, phase, onAction }) => {
+const ShowcaseBubble: React.FC<ShowcaseBubbleProps> = ({ format, phase }) => {
   const { t } = useTranslation()
-  // Narrowed once to a local `const` so the `onClick` closure below keeps
-  // the "defined" narrowing from the `actionId !== undefined` check — a
-  // repeated `format.actionId` property read inside a nested closure loses
-  // that narrowing (TS treats object properties as re-widenable across
-  // function boundaries, plain `const` bindings aren't).
-  const { actionId } = format
   const bubbleRef = useRef<HTMLDivElement | null>(null)
   const [silhouette, setSilhouette] = useState<{ offsetPath: string; mask: string } | null>(null)
   // Pick one of the four ECUI border effects (and a coherent set of
@@ -522,7 +501,7 @@ const ShowcaseBubble: React.FC<ShowcaseBubbleProps> = ({ format, phase, onAction
     >
       <header className="import-format-showcase-header">
         <h1 className="import-format-showcase-title">{format.title}</h1>
-        {format.isPro && <Badge type="PRO" />}
+        {format.isPro && <RegistryBadge badgeId="pro" />}
       </header>
       <div className="import-format-showcase-body">
         {format.inlineSvg !== undefined ? (
@@ -550,23 +529,16 @@ const ShowcaseBubble: React.FC<ShowcaseBubbleProps> = ({ format, phase, onAction
           />
         ) : null}
         {/* Text column, separate from the row-level flex the logo sits
-            in — the description and (when present) the action button
-            below it need to stack vertically, which a bare sibling
-            `<p>` of the logo couldn't do inside a row-direction flex
-            container. */}
+            in — the description needs to sit below the logo, which a
+            bare sibling `<p>` of the logo couldn't do inside a
+            row-direction flex container. The bubbles are purely
+            informative: no action buttons live here (a format whose
+            import needs its own form is reached from a persistent
+            control in the import modal, not from the rotating bubble). */}
         <div className="import-format-showcase-text">
           <p className="import-format-showcase-description">
             {t(format.descriptionKey)}
           </p>
-          {actionId !== undefined && (
-            <Button
-              className="import-format-showcase-action"
-              onClick={() => { onAction?.(actionId) }}
-              data-testid={`import-format-showcase-action-${actionId}`}
-            >
-              {t(format.actionLabelKey ?? '', format.title)}
-            </Button>
-          )}
         </div>
       </div>
       {format.trademarkKey !== undefined && (
@@ -709,17 +681,7 @@ function renderProBorderEffect(
   return <ElectricBorder {...proEffect.electric} borderRadius="12px" />
 }
 
-export interface ImportFormatShowcaseProps {
-  /**
-   * Fired when the visible bubble's action button is clicked (see
-   * `ImportFormat.actionId`). Only the `grpc-reflection` entry sets one
-   * today — the parent `ImportModal` uses it to open the dedicated
-   * `GrpcReflectionImportModal` form.
-   */
-  onAction?: ((actionId: string) => void) | undefined
-}
-
-export const ImportFormatShowcase: React.FC<ImportFormatShowcaseProps> = ({ onAction }) => {
+export const ImportFormatShowcase: React.FC = () => {
   const [index, setIndex] = useState(0)
   // `phase` drives the bubble's lifecycle:
   //   'in'  → bubble mounted, fade-in animation, stays full-opacity for STEADY_MS
@@ -757,23 +719,6 @@ export const ImportFormatShowcase: React.FC<ImportFormatShowcaseProps> = ({ onAc
     }
   }, [])
 
-  // e2e-only escape hatch: the 15s-per-card rotation makes waiting for a
-  // specific format (e.g. `grpc-reflection`, whose action button an e2e
-  // scenario needs to click) impractically slow and flaky. Jump straight to
-  // a format by id instead of waiting out the cycle. Inert in production —
-  // nothing calls it outside a test. Mirrors `useE2eDocumentUpdateBridge`.
-  useEffect(() => {
-    const w = window as unknown as { __e2eSetImportFormatShowcaseIndex?: (id: string) => boolean }
-    w.__e2eSetImportFormatShowcaseIndex = (id: string): boolean => {
-      const idx = IMPORT_FORMATS.findIndex((f) => f.id === id)
-      if (idx === -1) return false
-      setIndex(idx)
-      setPhase('in')
-      return true
-    }
-    return () => { delete w.__e2eSetImportFormatShowcaseIndex }
-  }, [])
-
   const format = IMPORT_FORMATS[index]
   if (format === undefined) return null
 
@@ -788,7 +733,7 @@ export const ImportFormatShowcase: React.FC<ImportFormatShowcaseProps> = ({ onAc
           `key={format.id}` is redundant with the unmount but keeps
           things safe if we ever shorten the gap to zero. */}
       {phase !== 'gap' && (
-        <ShowcaseBubble key={format.id} format={format} phase={phase} onAction={onAction} />
+        <ShowcaseBubble key={format.id} format={format} phase={phase} />
       )}
     </div>
   )

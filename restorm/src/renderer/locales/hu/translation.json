@@ -258,7 +258,7 @@
         "httpPut": "HTTP – PUT kérés",
         "httpPatch": "HTTP – PATCH kérés",
         "httpDelete": "HTTP – DELETE kérés",
-        "httpServer": "HTTP mock-kiszolgáló",
+        "httpServer": "HTTP-kiszolgáló",
         "graphql": "GraphQL-kérés",
         "grpc": "gRPC-kérés",
         "grpcServerStream": "gRPC server-streaming kérés",
@@ -269,22 +269,37 @@
         "odata": "OData-kérés",
         "auth": "HTTP-hitelesítési kérés",
         "scenario": "Forgatókönyv",
-        "socketioServer": "Socket.IO kiszolgáló",
+        "socketioServer": "Socket.IO-kiszolgáló",
         "websocketServer": "WebSocket-kiszolgáló",
         "socketio": "Socket.IO-kérés",
         "mqtt": "MQTT request",
-        "mqttServer": "MQTT broker",
+        "mqttServer": "MQTT-kiszolgáló",
         "sse": "SSE-kérés",
-        "grpcServer": "gRPC mock-kiszolgáló",
-        "soapServer": "SOAP mock-kiszolgáló",
-        "graphqlServer": "GraphQL mock-kiszolgáló",
-        "odataServer": "OData mock-kiszolgáló",
+        "grpcServer": "gRPC-kiszolgáló",
+        "soapServer": "SOAP-kiszolgáló",
+        "graphqlServer": "GraphQL-kiszolgáló",
+        "odataServer": "OData-kiszolgáló",
         "trpc": "tRPC-kérés",
         "amqp": "AMQP-kérés",
         "redis": "Redis-kérés",
         "stomp": "STOMP kérés",
         "kafkaProduce": "Kafka-kérés – Előállítás",
-        "kafkaConsume": "Kafka-kérés – Fogyasztás"
+        "kafkaConsume": "Kafka-kérés – Fogyasztás",
+        "httpHead": "HTTP – HEAD kérés",
+        "httpOptions": "HTTP – OPTIONS kérés",
+        "httpQuery": "HTTP – QUERY kérés",
+        "groups": {
+          "grpc": "gRPC",
+          "websocket": "WebSocket",
+          "socketio": "Socket.IO",
+          "graphql": "GraphQL",
+          "redis": "Redis",
+          "messaging": "Messaging",
+          "soap": "SOAP",
+          "odata": "OData",
+          "sse": "SSE",
+          "trpc": "tRPC"
+        }
       }
     },
     "deleteConfirm": {
@@ -376,7 +391,7 @@
       "switchTooltip": "Környezet váltása"
     },
     "body": {
-      "fileLabel": "Fájl vagy URL:",
+      "fileLabel": "Fájl:",
       "browse": "Tallózás..."
     },
     "tabs": {
@@ -397,6 +412,7 @@
         "graph": "Grafikon"
       },
       "loading": "Kérés küldése...",
+      "noResponseBody": "Nincs válasz-törzs — a részletekért lásd az Infos fület",
       "noResponse": "Kattintson a Küldés gombra a kérés végrehajtásához",
       "history": {
         "list": "Válaszok előzménylistája",
@@ -612,10 +628,22 @@
     "subscribeMode": "Feliratkozás",
     "commandMode": "Parancs",
     "command": "Parancs",
-    "args": "Argumentumok",
-    "argsPlaceholder": "Parancs argumentumai",
     "freeform": "Szabad",
     "freeformPlaceholder": "Szabad parancs (felülírja a kiválasztást)",
+    "fields": {
+      "key": "Kulcs",
+      "field": "Mező",
+      "value": "Érték",
+      "channel": "Csatorna",
+      "message": "Üzenet",
+      "start": "Kezdet",
+      "stop": "Vég",
+      "id": "ID",
+      "fieldOrValue": "Mező/Érték",
+      "argument": "Argumentum"
+    },
+    "addArgument": "Argumentum hozzáadása",
+    "removeArgument": "Argumentum eltávolítása",
     "tabs": {
       "channels": "Csatornák",
       "command": "Parancs"
@@ -664,6 +692,7 @@
     "noMessages": "Még nincsenek üzenetek",
     "connected": "Csatlakoztatva",
     "disconnected": "Lecsatlakozva",
+    "consumeError": "Fogyasztói hiba",
     "producedTo": "Előállítva ide",
     "offset": "Offset",
     "messages": "Üzenetek"
@@ -1252,43 +1281,46 @@
       "writeFile": "Write file",
       "timer": "Időzítő",
       "code": "Kód",
-      "socketioConnect": "Socket.IO connect",
+      "socketioConnect": "Socket.IO-kapcsolat",
       "socketioSend": "Socket.IO send",
-      "socketioClose": "Socket.IO close",
-      "websocketConnect": "WebSocket connect",
-      "sseConnect": "SSE connect",
+      "socketioClose": "Socket.IO-kapcsolat bezárása",
+      "socketioServerClose": "Socket.IO-kiszolgáló bezárása",
+      "websocketConnect": "WebSocket-kapcsolat",
+      "sseConnect": "SSE-kapcsolat",
       "websocketSend": "WebSocket send",
-      "websocketClose": "WebSocket close",
-      "sseClose": "SSE close",
+      "websocketClose": "WebSocket-kapcsolat bezárása",
+      "websocketServerClose": "WebSocket-kiszolgáló bezárása",
+      "sseClose": "SSE-kapcsolat bezárása",
       "grpcConnect": "gRPC connect",
       "grpcSend": "gRPC send",
-      "grpcClose": "gRPC close",
+      "grpcClose": "gRPC-kapcsolat bezárása",
       "mqttConnect": "MQTT connect",
       "mqttSend": "MQTT publish",
-      "mqttClose": "MQTT close",
+      "mqttClose": "MQTT-kapcsolat bezárása",
       "amqpConnect": "AMQP-kapcsolat",
       "amqpPublish": "AMQP-közzététel",
-      "amqpClose": "AMQP-lezárás",
+      "amqpClose": "AMQP-kapcsolat bezárása",
       "redisSubscribe": "Redis subscribe",
-      "redisClose": "Redis close",
+      "redisClose": "Redis-kapcsolat bezárása",
       "redisCommand": "Redis command",
-      "httpListen": "HTTP server",
-      "httpClose": "HTTP close",
+      "httpListen": "HTTP-kiszolgáló",
+      "httpClose": "HTTP-kiszolgáló bezárása",
       "grpcServerClose": "gRPC-kiszolgáló bezárása",
       "soapListen": "SOAP-kiszolgáló",
-      "soapClose": "SOAP lezárása",
-      "graphqlListen": "GraphQL server",
-      "graphqlClose": "GraphQL close",
-      "odataListen": "OData server",
-      "odataClose": "OData close",
+      "soapClose": "SOAP-kiszolgáló bezárása",
+      "graphqlListen": "GraphQL-kiszolgáló",
+      "graphqlClose": "GraphQL-kiszolgáló bezárása",
+      "odataListen": "OData-kiszolgáló",
+      "odataClose": "OData-kiszolgáló bezárása",
       "graphqlSubscribe": "GraphQL feliratkozás",
       "graphqlUnsubscribe": "GraphQL leiratkozás",
       "stompConnect": "STOMP kapcsolódás",
       "stompSend": "STOMP küldés",
-      "stompClose": "STOMP bezárása",
+      "stompClose": "STOMP-kapcsolat bezárása",
       "kafkaProduce": "Kafka produce",
       "kafkaConsume": "Kafka consume",
-      "kafkaClose": "Kafka close"
+      "kafkaClose": "Kafka-kapcsolat bezárása",
+      "grpcListen": "gRPC-kiszolgáló"
     },
     "comparator": {
       "result": "eredmény"
@@ -1401,6 +1433,9 @@
       },
       "file": {
         "missingPath": "Fájlútvonal megadása kötelező."
+      },
+      "connection": {
+        "missingName": "A kapcsolat neve kötelező."
       }
     },
     "usage": {
@@ -1848,10 +1883,12 @@
       "socketioConnect": "Megnyit egy Socket.IO-kapcsolatot, és minden fogadott eseményt újraküld a portján.",
       "socketioSend": "Üzenetet küld egy már nyitott Socket.IO-kapcsolaton.",
       "socketioClose": "Lezár egy már nyitott Socket.IO-kapcsolatot.",
+      "socketioServerClose": "Leállít egy már figyelő Socket.IO-mockkiszolgálót (amelyet egy Socket.IO-kiszolgálócsomópont deklarál), és felszabadítja a portját.",
       "websocketConnect": "Megnyit egy nyers WebSocket-kapcsolatot, és minden fogadott üzenetet újraküld a portján.",
       "sseConnect": "Megnyit egy hosszú élettartamú SSE (Server-Sent Events) kapcsolatot, és minden fogadott keretet újra kibocsát a portján.",
       "websocketSend": "Adatot küld egy már nyitott WebSocket-kapcsolaton.",
       "websocketClose": "Lezár egy már nyitott WebSocket-kapcsolatot.",
+      "websocketServerClose": "Leállít egy már figyelő WebSocket-mockkiszolgálót (amelyet egy WebSocket-kiszolgálócsomópont deklarál), és felszabadítja a portját.",
       "sseClose": "Bezár egy már nyitott SSE-kapcsolatot.",
       "grpcConnect": "Megnyit egy streaming gRPC-hívást, és minden fogadott keretet újraküld a message portján.",
       "grpcSend": "Kérésüzenetet ír egy már nyitott streaming gRPC-hívásra.",
@@ -2322,5 +2359,8 @@
     "sendDestination": "Cél",
     "ack": "ACK",
     "nack": "NACK"
+  },
+  "server": {
+    "configLockedWhileRunning": "A konfiguráció zárolva, amíg a szerver fut"
   }
 }

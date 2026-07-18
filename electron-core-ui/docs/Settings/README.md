@@ -85,10 +85,11 @@ Renders a single setting:
 - **Title**: translated via `titleKey`
 - **Description**: translated via `descriptionKey` (hidden for `toggle` type)
 - **Renderer**: selected by `type` field from built-in or custom renderers
-- **Gear menu**: visible when the item is focused; opens a `ContextMenu` with:
+- **Gear menu**: revealed when the row is hovered or holds focus (`:hover` / `:focus-within`); it stays mounted so it remains a keyboard tab stop. Opens a `ContextMenu` with:
   - "Reset Setting" -- resets to default value
   - "Copy Setting ID" -- copies `storageKey` to clipboard
 - **Modified indicator**: CSS class `setting-item--modified` applied when `currentValue !== default`
+- **Focus**: the row container is not focusable and never draws a focus ring — only the real controls (the gear button and the setting's input) are tab stops.
 
 Props:
 

@@ -1,6 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react'
+import { useExclusiveHeaderPopover } from '../../../hooks/useExclusiveHeaderPopover'
 import { useTranslation } from 'react-i18next'
 import { Button, Tooltip } from 'electron-core-ui/renderer'
+import { HeaderHoverTooltip } from '../HeaderHoverTooltip'
 import { Badge } from '../../common/Badge'
 import type { ScenarioRequestUsage } from '../../../services/scenarioRequestUsage'
 
@@ -25,7 +27,8 @@ export const RequestScenarioUsageButton: React.FC<RequestScenarioUsageButtonProp
   // Span wrapper provides a stable DOM ref for Tooltip anchoring and outside-click detection.
   const buttonRef = useRef<HTMLSpanElement>(null)
   const [open, setOpen] = useState(false)
-  const [hovered, setHovered] = useState(false)
+  // Opening this popover closes any sibling header popover (and vice versa).
+  useExclusiveHeaderPopover(open, () => { setOpen(false) })
 
   // Close on any outside click while the popover is open.
   useEffect(() => {
@@ -36,6 +39,24 @@ export const RequestScenarioUsageButton: React.FC<RequestScenarioUsageButtonProp
     document.addEventListener('mousedown', onDocMouseDown)
     return () => { document.removeEventListener('mousedown', onDocMouseDown) }
   }, [open])
+
+  // Every open tab keeps its toolbar mounted, hidden ones included — and a
+  // `display: none` anchor never fires mouseleave. Without this guard, the
+  // hover tooltip (stale `hovered`) or the click popover of a now-hidden
+  // tab stays portaled on screen, anchored to a collapsed 0,0 rect (it
+  // renders stranded at the top-left of the window). Force both overlays
+  // shut the moment the anchor stops intersecting the viewport.
+  useEffect(() => {
+    const el = buttonRef.current
+    if (!el) return undefined
+    const observer = new IntersectionObserver((entries) => {
+      if (entries.every((entry) => !entry.isIntersecting)) {
+        setOpen(false)
+      }
+    })
+    observer.observe(el)
+    return () => { observer.disconnect() }
+  }, [])
 
   if (usages.length === 0) return null
 
@@ -52,28 +73,25 @@ export const RequestScenarioUsageButton: React.FC<RequestScenarioUsageButtonProp
     <>
       <span
         ref={buttonRef}
-        style={{ display: 'inline-flex' }}
+        className={`request-scenario-usage-button${open ? ' is-open' : ''}`}
         onMouseDown={(e) => { e.stopPropagation() }}
       >
-        <Button
-          className={`request-scenario-usage-button${open ? ' is-open' : ''}`}
-          options={{ ariaLabel: label }}
-          aria-haspopup="dialog"
-          aria-expanded={open}
-          onClick={(e: React.MouseEvent) => { e.stopPropagation(); setOpen((v) => !v) }}
-          onMouseEnter={() => { setHovered(true) }}
-          onMouseLeave={() => { setHovered(false) }}
-          data-testid="request-scenario-usage-button"
-        >
-          <Badge type="SCENARIO" />
-        </Button>
+        {/* Same chrome as the neighbouring history button (plain small
+            icon Button in a HeaderHoverTooltip) — the four header actions
+            (history, quick settings, scenarios, favourite) share one look. */}
+        <HeaderHoverTooltip label={label} suppressed={open} placement="below">
+          <Button
+            small
+            options={{ ariaLabel: label }}
+            aria-haspopup="dialog"
+            aria-expanded={open}
+            onClick={(e: React.MouseEvent) => { e.stopPropagation(); setOpen((v) => !v) }}
+            data-testid="request-scenario-usage-button"
+          >
+            <Badge type="SCENARIO" />
+          </Button>
+        </HeaderHoverTooltip>
       </span>
-      <Tooltip
-        targetRef={buttonRef}
-        show={hovered && !open}
-        placement="below"
-        content={label}
-      />
       <Tooltip
         targetRef={buttonRef}
         show={open}

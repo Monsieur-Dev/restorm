@@ -1,0 +1,7 @@
+<!--
+  Custom glyph — WADL is an old Sun/Oracle-era W3C member submission
+  that no organization ever branded, so there is no mark to source.
+  This draws a plain dog-eared document silhouette, the generic
+  pictogram for "a description document".
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M5 2H15L20 7V22H5Z"/></svg>

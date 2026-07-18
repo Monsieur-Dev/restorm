@@ -43,7 +43,7 @@ export interface RestormState {
   currentEventSource: EventSource
   
   // Actions
-  setCollections: (collections: EnvironmentFolder[], source?: EventSource) => void
+  setCollections: (collections: EnvironmentFolder[], source?: EventSource, mcpVersion?: number) => void
   updateCollection: (id: string, updates: Partial<EnvironmentFolder>, source?: EventSource) => void
   
   // Item operations
@@ -247,7 +247,7 @@ export const useRestormStore = create<RestormState>()(
     currentEventSource: 'user',
     
     // Set collections
-    setCollections: (collections, source = 'user') => {
+    setCollections: (collections, source = 'user', mcpVersion) => {
       set({ collections, currentEventSource: source })
       // Skip the main-side mirror when MCP drove the change — main IS
       // the source in that case (the MCP write tool already mutated
@@ -268,7 +268,11 @@ export const useRestormStore = create<RestormState>()(
         // `cloneForEventBus` (not JSON round-trip) so SecretValue.toJSON()
         // isn't called — main needs the plaintext to resolve handlebars +
         // to write the `.restorm.env` sidecar correctly on the next save.
-        void api.syncCollections(cloneForEventBus(collections) as unknown[])
+        // `mcpVersion` = the last main-side tree version this renderer has
+        // applied; main refuses the mirror if it predates a newer MCP mutation
+        // (stale-write guard) — preventing a lagging autosave from clobbering
+        // freshly-created scenario nodes / requests in the main store.
+        void api.syncCollections(cloneForEventBus(collections) as unknown[], mcpVersion)
       }
     },
     

@@ -10,7 +10,7 @@
  * State is purely in-memory.
  */
 
-import { useSyncExternalStore } from 'react'
+import { useEffect, useSyncExternalStore } from 'react'
 import { eventBus } from 'electron-core-ui/renderer'
 import { DocumentEvents } from './DocumentEvents'
 
@@ -55,4 +55,21 @@ export function useIsRequestExecuting(requestId: string): boolean {
     () => active.has(requestId),
     () => false
   )
+}
+
+/**
+ * Publish a request's activity into this store from a tab view whose
+ * in-flight state does NOT flow through `BaseRequestTabView`'s `isLoading`
+ * (long-lived sessions like a Redis subscribe or a Kafka consume, and
+ * transient sends on connection-style views). Emits the same
+ * `REQUEST_EXECUTION_STARTED` / `REQUEST_EXECUTION_ENDED` pair the base view
+ * emits, so every surface (send button, sidebar badge, tab badge) reads one
+ * truth. A request id has a single owner view state, so feeders never fight.
+ */
+export function useEmitRequestExecution(requestId: string, isActive: boolean): void {
+  useEffect(() => {
+    if (!isActive) return undefined
+    eventBus.emitLocalSync(DocumentEvents.REQUEST_EXECUTION_STARTED, { requestId })
+    return () => { eventBus.emitLocalSync(DocumentEvents.REQUEST_EXECUTION_ENDED, { requestId }) }
+  }, [requestId, isActive])
 }

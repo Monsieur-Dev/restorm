@@ -258,7 +258,7 @@
         "httpPut": "HTTP – αίτημα PUT",
         "httpPatch": "HTTP – αίτημα PATCH",
         "httpDelete": "HTTP – αίτημα DELETE",
-        "httpServer": "Διακομιστής HTTP mock",
+        "httpServer": "Διακομιστής HTTP",
         "graphql": "Αίτημα GraphQL",
         "grpc": "Αίτημα gRPC",
         "grpcServerStream": "Αίτημα gRPC server-streaming",
@@ -273,18 +273,33 @@
         "websocketServer": "Διακομιστής WebSocket",
         "socketio": "Αίτημα Socket.IO",
         "mqtt": "MQTT request",
-        "mqttServer": "MQTT broker",
+        "mqttServer": "Διακομιστής MQTT",
         "sse": "Αίτημα SSE",
-        "grpcServer": "Διακομιστής gRPC mock",
-        "soapServer": "Διακομιστής εικονικού SOAP",
-        "graphqlServer": "Διακομιστής GraphQL mock",
-        "odataServer": "Διακομιστής OData mock",
+        "grpcServer": "Διακομιστής gRPC",
+        "soapServer": "Διακομιστής SOAP",
+        "graphqlServer": "Διακομιστής GraphQL",
+        "odataServer": "Διακομιστής OData",
         "trpc": "Αίτημα tRPC",
         "amqp": "Αίτημα AMQP",
         "redis": "Αίτημα Redis",
         "stomp": "Αίτημα STOMP",
         "kafkaProduce": "Αίτημα Kafka – Παραγωγή",
-        "kafkaConsume": "Αίτημα Kafka – Κατανάλωση"
+        "kafkaConsume": "Αίτημα Kafka – Κατανάλωση",
+        "httpHead": "HTTP – αίτημα HEAD",
+        "httpOptions": "HTTP – αίτημα OPTIONS",
+        "httpQuery": "HTTP – αίτημα QUERY",
+        "groups": {
+          "grpc": "gRPC",
+          "websocket": "WebSocket",
+          "socketio": "Socket.IO",
+          "graphql": "GraphQL",
+          "redis": "Redis",
+          "messaging": "Messaging",
+          "soap": "SOAP",
+          "odata": "OData",
+          "sse": "SSE",
+          "trpc": "tRPC"
+        }
       }
     },
     "deleteConfirm": {
@@ -376,7 +391,7 @@
       "switchTooltip": "Εναλλαγή περιβάλλοντος"
     },
     "body": {
-      "fileLabel": "Αρχείο ή URL:",
+      "fileLabel": "Αρχείο:",
       "browse": "Περιήγηση..."
     },
     "tabs": {
@@ -397,6 +412,7 @@
         "graph": "Γράφημα"
       },
       "loading": "Αποστολή αιτήματος...",
+      "noResponseBody": "Χωρίς σώμα απάντησης — δείτε το Infos για λεπτομέρειες",
       "noResponse": "Κάντε κλικ στο Αποστολή για να εκτελέσετε το αίτημα",
       "history": {
         "list": "Λίστα ιστορικού απαντήσεων",
@@ -612,10 +628,22 @@
     "subscribeMode": "Εγγραφή",
     "commandMode": "Εντολή",
     "command": "Εντολή",
-    "args": "Ορίσματα",
-    "argsPlaceholder": "Ορίσματα εντολής",
     "freeform": "Ελεύθερη",
     "freeformPlaceholder": "Ελεύθερη εντολή (αντικαθιστά την επιλογή)",
+    "fields": {
+      "key": "Κλειδί",
+      "field": "Πεδίο",
+      "value": "Τιμή",
+      "channel": "Κανάλι",
+      "message": "Μήνυμα",
+      "start": "Αρχή",
+      "stop": "Τέλος",
+      "id": "ID",
+      "fieldOrValue": "Πεδίο/Τιμή",
+      "argument": "Όρισμα"
+    },
+    "addArgument": "Προσθήκη ορίσματος",
+    "removeArgument": "Αφαίρεση ορίσματος",
     "tabs": {
       "channels": "Κανάλια",
       "command": "Εντολή"
@@ -664,6 +692,7 @@
     "noMessages": "Δεν υπάρχουν ακόμα μηνύματα",
     "connected": "Συνδεδεμένο",
     "disconnected": "Αποσυνδεδεμένο",
+    "consumeError": "Σφάλμα καταναλωτή",
     "producedTo": "Παρήχθη σε",
     "offset": "Offset",
     "messages": "Μηνύματα"
@@ -1252,43 +1281,46 @@
       "writeFile": "Write file",
       "timer": "Χρονοδιακόπτης",
       "code": "Κώδικας",
-      "socketioConnect": "Socket.IO connect",
+      "socketioConnect": "Σύνδεση Socket.IO",
       "socketioSend": "Socket.IO send",
-      "socketioClose": "Socket.IO close",
-      "websocketConnect": "WebSocket connect",
-      "sseConnect": "SSE connect",
+      "socketioClose": "Κλείσιμο σύνδεσης Socket.IO",
+      "socketioServerClose": "Κλείσιμο διακομιστή Socket.IO",
+      "websocketConnect": "Σύνδεση WebSocket",
+      "sseConnect": "Σύνδεση SSE",
       "websocketSend": "WebSocket send",
-      "websocketClose": "WebSocket close",
-      "sseClose": "SSE close",
+      "websocketClose": "Κλείσιμο σύνδεσης WebSocket",
+      "websocketServerClose": "Κλείσιμο διακομιστή WebSocket",
+      "sseClose": "Κλείσιμο σύνδεσης SSE",
       "grpcConnect": "gRPC connect",
       "grpcSend": "gRPC send",
-      "grpcClose": "gRPC close",
+      "grpcClose": "Κλείσιμο σύνδεσης gRPC",
       "mqttConnect": "MQTT connect",
       "mqttSend": "MQTT publish",
-      "mqttClose": "MQTT close",
+      "mqttClose": "Κλείσιμο σύνδεσης MQTT",
       "amqpConnect": "Σύνδεση AMQP",
       "amqpPublish": "Δημοσίευση AMQP",
-      "amqpClose": "Κλείσιμο AMQP",
+      "amqpClose": "Κλείσιμο σύνδεσης AMQP",
       "redisSubscribe": "Redis subscribe",
-      "redisClose": "Redis close",
+      "redisClose": "Κλείσιμο σύνδεσης Redis",
       "redisCommand": "Redis command",
-      "httpListen": "HTTP server",
-      "httpClose": "HTTP close",
+      "httpListen": "Διακομιστής HTTP",
+      "httpClose": "Κλείσιμο διακομιστή HTTP",
       "grpcServerClose": "Κλείσιμο διακομιστή gRPC",
       "soapListen": "Διακομιστής SOAP",
-      "soapClose": "Κλείσιμο SOAP",
-      "graphqlListen": "GraphQL server",
-      "graphqlClose": "GraphQL close",
-      "odataListen": "OData server",
-      "odataClose": "OData close",
+      "soapClose": "Κλείσιμο διακομιστή SOAP",
+      "graphqlListen": "Διακομιστής GraphQL",
+      "graphqlClose": "Κλείσιμο διακομιστή GraphQL",
+      "odataListen": "Διακομιστής OData",
+      "odataClose": "Κλείσιμο διακομιστή OData",
       "graphqlSubscribe": "Συνδρομή GraphQL",
       "graphqlUnsubscribe": "Κατάργηση συνδρομής GraphQL",
       "stompConnect": "Σύνδεση STOMP",
       "stompSend": "Αποστολή STOMP",
-      "stompClose": "Κλείσιμο STOMP",
+      "stompClose": "Κλείσιμο σύνδεσης STOMP",
       "kafkaProduce": "Kafka produce",
       "kafkaConsume": "Kafka consume",
-      "kafkaClose": "Kafka close"
+      "kafkaClose": "Κλείσιμο σύνδεσης Kafka",
+      "grpcListen": "Διακομιστής gRPC"
     },
     "comparator": {
       "result": "αποτέλεσμα"
@@ -1401,6 +1433,9 @@
       },
       "file": {
         "missingPath": "Απαιτείται μια διαδρομή αρχείου."
+      },
+      "connection": {
+        "missingName": "Απαιτείται όνομα σύνδεσης."
       }
     },
     "usage": {
@@ -1848,10 +1883,12 @@
       "socketioConnect": "Ανοίγει μια σύνδεση Socket.IO και επανεκπέμπει κάθε ληφθέν συμβάν στη θύρα του.",
       "socketioSend": "Στέλνει ένα μήνυμα σε μια ήδη ανοιχτή σύνδεση Socket.IO.",
       "socketioClose": "Κλείνει μια ήδη ανοιχτή σύνδεση Socket.IO.",
+      "socketioServerClose": "Σταματά έναν ήδη ακροαζόμενο εικονικό διακομιστή Socket.IO (που δηλώνεται από έναν κόμβο διακομιστή Socket.IO) και απελευθερώνει τη θύρα του.",
       "websocketConnect": "Ανοίγει μια ακατέργαστη σύνδεση WebSocket και επανεκπέμπει κάθε ληφθέν μήνυμα στη θύρα του.",
       "sseConnect": "Ανοίγει μια μακροχρόνια σύνδεση SSE (Server-Sent Events) και επανεκπέμπει κάθε ληφθέν πλαίσιο στη θύρα της.",
       "websocketSend": "Στέλνει ένα ωφέλιμο φορτίο σε μια ήδη ανοιχτή σύνδεση WebSocket.",
       "websocketClose": "Κλείνει μια ήδη ανοιχτή σύνδεση WebSocket.",
+      "websocketServerClose": "Σταματά έναν ήδη ακροαζόμενο εικονικό διακομιστή WebSocket (που δηλώνεται από έναν κόμβο διακομιστή WebSocket) και απελευθερώνει τη θύρα του.",
       "sseClose": "Κλείνει μια ήδη ανοιχτή σύνδεση SSE.",
       "grpcConnect": "Ανοίγει μια κλήση streaming gRPC και επανεκπέμπει κάθε ληφθέν πλαίσιο στη θύρα message του.",
       "grpcSend": "Γράφει ένα μήνυμα αιτήματος σε μια ήδη ανοιχτή κλήση streaming gRPC.",
@@ -2322,5 +2359,8 @@
     "sendDestination": "Προορισμός",
     "ack": "ACK",
     "nack": "NACK"
+  },
+  "server": {
+    "configLockedWhileRunning": "Η διαμόρφωση είναι κλειδωμένη ενώ εκτελείται ο διακομιστής"
   }
 }

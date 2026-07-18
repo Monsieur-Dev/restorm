@@ -19,6 +19,7 @@ import {
 } from 'electron-core-ui/renderer'
 import { DocumentEvents, type RequestHistoryEventPayload } from '../../services/DocumentEvents'
 import { RestormVariableInputBox } from '../RestormVariableInputBox'
+import { useEnvVariables } from '../../hooks/useEnvVariables'
 import { RestormKeyValueTable, type KeyValueTableHandle } from '../RestormKeyValueTable'
 import type { JsonRpcRequest, KeyValue, ResponseHistoryDetail } from '../../../../shared/types/collections'
 import { useEnvironmentContext } from '../../contexts/useEnvironmentContext'
@@ -275,6 +276,9 @@ export const JsonRpcRequestTabView: React.FC<JsonRpcRequestTabViewProps> = ({ re
   }
 
   const emptyVariables = useMemo<VariableDefinition[]>(() => [], [])
+  // Environment variables for scalar {{...}} fields so their autocomplete
+  // offers env vars alongside the helper functions.
+  const envVariables = useEnvVariables(request.id)
 
   const requestContent = (
     <SplitView
@@ -430,7 +434,7 @@ export const JsonRpcRequestTabView: React.FC<JsonRpcRequestTabViewProps> = ({ re
           <RestormVariableInputBox
             value={url}
             onChange={setUrl}
-            variables={emptyVariables}
+            variables={envVariables}
             helpers={handlebarsHelpers}
             placeholder={t('jsonrpc.urlPlaceholder', 'JSON-RPC endpoint URL')}
             data-testid="jsonrpc-request-url-input"
@@ -441,7 +445,7 @@ export const JsonRpcRequestTabView: React.FC<JsonRpcRequestTabViewProps> = ({ re
         <RestormVariableInputBox
           value={method}
           onChange={setMethod}
-          variables={emptyVariables}
+          variables={envVariables}
           helpers={handlebarsHelpers}
           placeholder={t('jsonrpc.methodPlaceholder', 'method')}
           data-testid="jsonrpc-request-method-input"
@@ -452,7 +456,7 @@ export const JsonRpcRequestTabView: React.FC<JsonRpcRequestTabViewProps> = ({ re
           <RestormVariableInputBox
             value={rpcId}
             onChange={setRpcId}
-            variables={emptyVariables}
+            variables={envVariables}
             helpers={handlebarsHelpers}
             placeholder={t('jsonrpc.idPlaceholder', 'id (auto)')}
             data-testid="jsonrpc-request-id-input"

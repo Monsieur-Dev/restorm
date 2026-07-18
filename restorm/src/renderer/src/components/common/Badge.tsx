@@ -1,5 +1,6 @@
 import React from 'react'
-import './Badge.css'
+import { RegistryBadge } from './RegistryBadge'
+import { resolveBadgeId, isKnownBadgeType } from '../../utils/badgeUtils'
 
 /**
  * Badge types supported by the application
@@ -25,6 +26,8 @@ export type BadgeType =
   | 'ODATA'
   // tRPC
   | 'tRPC'
+  // JSON-RPC (single + batch)
+  | 'RPC' | 'RPC[]'
   // Redis
   | 'REDIS'
   // Authentication
@@ -45,61 +48,38 @@ export interface BadgeProps {
   label?: string | undefined
   /** Optional additional CSS class */
   className?: string | undefined
-  /** Optional codicon glyph name (without the `codicon-` prefix) rendered before
-   * the text — e.g. a Socket.IO action badge shows the action's glyph + "SIO". */
+  /** Optional codicon glyph name (without the `codicon-` prefix) — resolves to
+   * the badge-registry action id for the protocol (e.g. WS + `arrow-up` →
+   * `ws_send`). */
   icon?: string | undefined
-  /** Client (default) vs server. In `server` mode the badge becomes a two-part
-   * "capsule": a dark "SRV" segment (left) glued to the protocol's normal
-   * coloured badge (right) — a reusable norm for ANY hosted protocol
-   * (SIO / WS / MQTT / gRPC / HTTP methods…), no per-protocol entry. */
+  /** Client (default) vs server. `server` resolves to the protocol's SRV
+   * capsule registry id (e.g. `ws_server`), or the method-colored capsule for
+   * HTTP mock servers. */
   mode?: 'client' | 'server' | undefined
 }
 
 /**
- * A unified badge component for displaying protocol/method indicators
+ * Thin adapter over {@link RegistryBadge}: maps the legacy `type` / `mode` /
+ * `icon` props onto a `badgeRegistry.json` id (via {@link resolveBadgeId}) and
+ * renders the registry badge. It owns NO styling — the registry is the single
+ * source. Prefer calling `RegistryBadge` with an explicit `badgeId` directly;
+ * this adapter stays for the dynamic call sites that only know a runtime
+ * protocol/method string.
  */
 export const Badge: React.FC<BadgeProps> = ({ type, label, className, icon, mode }) => {
-  const typeClass = `badge-${type.toLowerCase().replace('-', '')}`
-
-  // Server mode: a two-part capsule. The dark "SRV" segment (rounded on its
-  // LEFT only) is glued to the protocol's normal coloured badge (rounded on its
-  // RIGHT only) with no radius where they meet — like a two-tone pill. The
-  // right segment keeps the protocol's own colour class, so POST stays blue,
-  // SIO teal, etc. This is the shared norm for every hosted protocol.
-  if (mode === 'server') {
-    return (
-      <span className={`badge-capsule ${className ?? ''}`} aria-label={label ?? `${type} server`}>
-        <span className="badge-capsule-glyph">SRV</span>
-        <span className={`badge ${typeClass} badge-capsule-body`}>{label ?? type}</span>
-      </span>
-    )
-  }
-
-  // Auth badges display an icon instead of text: the codicon-key
-  // glyph is more recognisable than a three-letter acronym.
-  if (type === 'AUTH') {
-    return (
-      <span className={`badge ${typeClass} ${className ?? ''}`} aria-label={label ?? 'Authentication request'}>
-        <i className="codicon codicon-key" aria-hidden="true" />
-      </span>
-    )
-  }
-
-  // Scenarios show a circuit-board glyph (a dataflow graph), not text.
-  if (type === 'SCENARIO') {
-    return (
-      <span className={`badge ${typeClass} ${className ?? ''}`} aria-label={label ?? 'Scenario'}>
-        <i className="codicon codicon-circuit-board" aria-hidden="true" />
-      </span>
-    )
-  }
-
-  const displayText = label ?? type
+  const { badgeId, server } = resolveBadgeId(type, mode, icon)
+  // Icon-only badges (auth, scenario) never show text. Otherwise a known type
+  // takes its label from the registry; an unknown type (custom HTTP verb →
+  // `http_other`) shows the raw verb verbatim.
+  const iconOnly = type === 'AUTH' || type === 'SCENARIO'
+  const text = iconOnly ? undefined : label ?? (isKnownBadgeType(type) ? undefined : type)
   return (
-    <span className={`badge ${typeClass} ${className ?? ''}`}>
-      {icon !== undefined && <i className={`codicon codicon-${icon}`} aria-hidden="true" style={{ marginRight: 3 }} />}
-      {displayText}
-    </span>
+    <RegistryBadge
+      badgeId={badgeId}
+      {...(text !== undefined && { text })}
+      {...(server === true && { server: true })}
+      {...(className !== undefined && { className })}
+    />
   )
 }
 
