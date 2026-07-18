@@ -1,7 +1,7 @@
 import React from 'react'
 import type { NodeProps } from '@xyflow/react'
 import { Button, InputBox, SelectBox, type ISelectData } from 'electron-core-ui/renderer'
-import { Badge } from '../../common/Badge'
+import { RegistryBadge } from '../../common/RegistryBadge'
 import { useTranslation } from 'react-i18next'
 import { ScenarioNodeBoxBase, type ScenarioNodeBoxType, type ScenarioNodeCell, type ScenarioNodeSection } from './ScenarioNodeBoxBase'
 import { ScenarioNameInput } from './ScenarioNameInput'
@@ -128,7 +128,7 @@ export const SocketioConnectNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = 
     { id: 'others', label: t('scenario.socketio.others', 'others'), port: { id: 'others', role: 'default', type: 'source' } }
   ]
 
-  const headerIcon = isServerBound ? <Badge type="SIO" mode="server" /> : <Badge type="SIO" icon="plug" />
+  const headerIcon = isServerBound ? <RegistryBadge badgeId="sio_server" /> : <RegistryBadge badgeId="sio_connect" />
   return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={right} headerIcon={headerIcon} />
 }
 
@@ -245,7 +245,7 @@ export const SocketioSendNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ 
     }
   ]
   // No explicit output — the action sequences via the universal `done` port.
-  return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={[]} headerIcon={<Badge type="SIO" icon="arrow-up" />} />
+  return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={[]} headerIcon={<RegistryBadge badgeId="sio_send" />} />
 }
 
 /** C (socketioClose) — closes a declared connection; sequences via `done`. */
@@ -254,5 +254,5 @@ export const SocketioCloseNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({
     { id: 'main', rows: [{ id: 'connection', content: <ConnectionPicker id={id} data={data} kind="socketioConnect" /> }] }
   ]
   // No explicit output — the action sequences via the universal `done` port.
-  return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={[]} headerIcon={<Badge type="SIO" icon="debug-disconnect" />} />
+  return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={[]} headerIcon={<RegistryBadge badgeId="sio_close" />} />
 }

@@ -2,8 +2,8 @@
  * Hook for managing workbench updates (tags, folders, environment folders)
  */
 
-import React, { useCallback, useState } from 'react'
-import { isContainerNode, isTabGroupNode } from 'electron-core-ui/renderer'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
+import { isContainerNode, isTabGroupNode, eventBus } from 'electron-core-ui/renderer'
 import type { EditorTab, GroupNode, WorkbenchTree } from 'electron-core-ui/renderer'
 
 /**
@@ -34,6 +34,7 @@ import { isEnvironmentFolder } from '../../../shared/types/collections'
 import { findItemById, findEnvironmentFolderById, getNearestEnvironmentsForBreadcrumbs, getFolderIcon } from '../utils/treeSearch'
 import { isAnyFolder, isScenario } from '../../../shared/types/collections'
 import { searchIndexService } from '../services/SearchIndexService'
+import { DocumentEvents } from '../services/DocumentEvents'
 import type { FolderTab, EnvironmentFolderTab, HTTPRequestTab, BreadcrumbItem } from '../../../shared/types/editor'
 
 export interface UseWorkbenchUpdatesOptions {
@@ -59,6 +60,27 @@ export function useWorkbenchUpdates(options: UseWorkbenchUpdatesOptions): UseWor
   const [_updateCount, setUpdateCount] = useState(0)
   const forceUpdate = useCallback(() => {
     setUpdateCount(n => n + 1)
+  }, [])
+
+  // Reactive request mutations from an open tab (method, server flag, …)
+  // never flowed into this counter, so the sidebar / favorites / open-items
+  // lists kept rendering a stale badge until an unrelated UI action bumped
+  // it. Follow REQUEST_UPDATED — trailing-debounced, because URL/body typing
+  // emits one event per (already-debounced) keystroke and a full tree
+  // rebuild per event would be wasteful.
+  const requestUpdateTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  useEffect(() => {
+    const subscription = eventBus.subscribe(DocumentEvents.REQUEST_UPDATED, () => {
+      if (requestUpdateTimerRef.current !== null) clearTimeout(requestUpdateTimerRef.current)
+      requestUpdateTimerRef.current = setTimeout(() => {
+        requestUpdateTimerRef.current = null
+        setUpdateCount(n => n + 1)
+      }, 250)
+    })
+    return () => {
+      subscription.unsubscribe()
+      if (requestUpdateTimerRef.current !== null) clearTimeout(requestUpdateTimerRef.current)
+    }
   }, [])
 
   // Handle tags changes from Workbench (folders or HTTP requests)

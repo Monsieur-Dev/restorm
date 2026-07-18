@@ -31,10 +31,10 @@ import type { KeyValueData } from '../../types/global.d'
 import { BaseRequestTabView } from './BaseRequestTabView'
 import { ResponseHistoryModal } from '../Modals/ResponseHistoryModal'
 import { AuthenticationConfigurationTab } from './AuthenticationConfigurationTab'
-import { Badge } from '../common/Badge'
 import { BeamWrap } from '../common/BeamWrap'
 import { ServerConfigLockedHint } from '../common/ServerConfigLockedHint'
-import { mapToBadgeType } from '../../utils/badgeUtils'
+import { RegistryBadge } from '../common/RegistryBadge'
+import { KNOWN_HTTP_METHODS, httpBadgeIdFor } from '../../../../shared/utils/httpMethod'
 import { useRestormStore } from '../../store/restormStore'
 import { buildRequestPath } from '../../utils/requestPath'
 import { DEFAULT_REQUEST_TIMEOUT_MS } from '../../../../shared/config/constants'
@@ -429,7 +429,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
   // Sync method changes to reactive object
   useEffect(() => {
     if (method !== request.method && requestIdRef.current === request.id) {
-      updateReactiveProperty(request, 'method', method as HTTPMethod)
+      updateReactiveProperty(request, 'method', method)
     }
   }, [method, request])
 
@@ -613,13 +613,20 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
     }
   }, [request])
 
-  const methodOptions = useMemo<ISelectOptionItem[]>(
-    () => ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS'].map((verb) => ({
+  // Combo entries: every well-known verb as its registry badge, plus the
+  // request's CURRENT method when it isn't one of them (a free-typed verb),
+  // so the closed trigger always has an option to render — the custom verb
+  // shows on the `http_other` color with its exact typed casing, and a
+  // known verb typed in non-standard casing ("Post") shows on its verb
+  // color with the typed casing.
+  const methodOptions = useMemo<ISelectOptionItem[]>(() => {
+    const verbs: string[] = [...KNOWN_HTTP_METHODS]
+    if (!verbs.includes(method)) verbs.push(method)
+    return verbs.map((verb) => ({
       text: verb,
-      label: <Badge type={mapToBadgeType(verb)} />
-    })),
-    []
-  )
+      label: <RegistryBadge badgeId={httpBadgeIdFor(verb)} text={verb} />
+    }))
+  }, [method])
 
   /**
    * Smart-paste: when the user pastes a `curl` command on the URL
@@ -1078,7 +1085,8 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
           options={methodOptions}
           selected={methodOptions.findIndex((opt) => opt.text === method)}
           onDidSelect={(data: ISelectData) => { setMethod(data.selected) }}
-          selectBoxOptions={{ ariaLabel: t('requestTab.methodSelect'), useCustomDrawn: true }}
+          selectBoxOptions={{ ariaLabel: t('requestTab.methodSelect'), useCustomDrawn: true, editable: true }}
+          filterPlaceholder=""
           data-testid="http-request-method-select"
           disabled={configLocked}
         />

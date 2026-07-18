@@ -31,7 +31,7 @@ collections:
             enabled: true
             value:
               type: string
-              value: /home/yoann/git/restorm-master/restorm-wt/task-249/restorm/tests/e2e/samples/fixtures/upload.txt
+              value: /home/yoann/git/restorm-master/restorm-wt/task-238/restorm/tests/e2e/samples/fixtures/upload.txt
         id: 8c25de44-9643-47e1-b557-af39e245e119
         name: Default
     items:
@@ -119,6 +119,25 @@ collections:
         headers: []
         params: []
         pathParams: []
+        deprecated: false
+        type: http
+      - documentation: ''
+        tags: []
+        id: 7c63ec7c-34a6-4d23-850f-713239459a6f
+        name: QUERY echo
+        method: QUERY
+        url: '{{util}}/echo'
+        headers:
+          - key: Content-Type
+            enabled: true
+            value:
+              type: string
+              value: application/json
+        params: []
+        pathParams: []
+        body:
+          type: text
+          content: '{"filter":{"status":"available"}}'
         deprecated: false
         type: http
       - documentation: ''
@@ -500,6 +519,36 @@ collections:
         pathParams: []
         deprecated: false
         type: http
+      - type: scenario
+        tags: []
+        params: []
+        nodes:
+          - id: badge-node-get-echo-000000000001
+            kind: httpRequest
+            config:
+              requestId: 330f3c58-6460-4229-b14f-05592a578697
+              label: GET echo
+            inputs:
+              - id: in
+                name: ''
+                dataType: any
+                flow: signal
+              - id: env
+                name: env
+                dataType: any
+                flow: value
+            outputs:
+              - id: response
+                name: response
+                dataType: response
+                role: response
+                flow: both
+            position:
+              x: 220
+              'y': 120
+        edges: []
+        id: badge-scenario-000000000000e2e1
+        name: Badge scenario
     id: 6b1c8f4a-0d2e-4f3b-9a1c-7e5d4c3b2a10
     name: HTTP Execution Playground
 _projectUuid: 9f8e7d6c-5b4a-3210-fedc-ba9876543210

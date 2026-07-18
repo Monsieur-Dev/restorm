@@ -4,7 +4,9 @@ import { useTranslation } from 'react-i18next'
 import { Button } from 'electron-core-ui/renderer'
 import { isRequest } from '../../../../../shared/types/collections'
 import { Badge } from '../../common/Badge'
+import { RegistryBadge } from '../../common/RegistryBadge'
 import { requestBadgeType, requestBadgeMode } from '../../../utils/badgeUtils'
+import { httpBadgeIdFor } from '../../../../../shared/utils/httpMethod'
 import { useScenarioBoundResolver, useScenarioRequestEnv } from '../scenarioBoundResolver'
 import { TypedValueField } from '../../TypedValueField'
 import type { ValueTypeKind } from '../../TypedValueField/castValue'
@@ -42,7 +44,15 @@ export const RequestNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, d
 
   const fallbackLabel = typeof data.config?.['label'] === 'string' ? data.config['label'] : undefined
   const title = request?.name ?? fallbackLabel
-  const headerIcon = request ? <Badge type={requestBadgeType(request)} mode={requestBadgeMode(request)} /> : undefined
+  // Plain HTTP requests render the registry-driven method badge (verbatim
+  // casing, http_other fallback color for custom verbs); every other protocol
+  // — and the HTTP mock-server SRV capsule — stays on the legacy Badge until
+  // the registry covers them.
+  const headerIcon = request
+    ? (request.type === 'http' && (request as { server?: boolean }).server !== true
+        ? <RegistryBadge badgeId={httpBadgeIdFor((request as { method?: string }).method ?? 'GET')} text={(request as { method?: string }).method ?? 'GET'} />
+        : <Badge type={requestBadgeType(request)} mode={requestBadgeMode(request)} />)
+    : undefined
 
   // Nameless section with the env field — only when the request sits under an
   // environment folder. A value selector pinned to the `environment` type: the

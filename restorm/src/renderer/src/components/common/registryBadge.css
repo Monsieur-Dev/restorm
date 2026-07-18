@@ -1,0 +1,85 @@
+/* Registry-driven badge pill — the single styling source for every protocol /
+ * method / scenario badge in the app. The HEIGHT is pinned to the scenario
+ * badge's rendered height (18px) so rows mixing protocol and scenario badges
+ * align; the radius matches every other badge pill. Colors come from the
+ * registry entry (theme-token references), never from per-badge CSS rules.
+ *
+ * Casing is NOT forced: a custom HTTP verb renders verbatim (e.g. "Post" stays
+ * "Post"), so there is deliberately no `text-transform` here. */
+.registry-badge {
+  height: 18px;
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1.2;
+  white-space: nowrap;
+  color: var(--badge-on-accent, #ffffff);
+  font-family: var(--font-family);
+}
+
+/* The codicon inherits the badge's text color. This replaces the former
+ * per-protocol `.badge-grpc/.badge-kafka/.badge-redis/.badge-stomp .codicon`
+ * white patches: a generic menu/list `.codicon { color }` rule otherwise wins
+ * over the inherited color and renders the glyph dark-on-dark (illegible). One
+ * rule keeps every action glyph legible on its badge, and lets the light SOAP /
+ * MQTT badges keep their dark glyph via the entry's foreground. */
+.registry-badge .codicon {
+  color: inherit !important;
+  font-size: 12px;
+}
+
+/* Server variant: two-tone capsule — a fixed-color "SRV" segment (rounded LEFT
+ * only) glued to the protocol body (rounded RIGHT only). Class names are shared
+ * with the rest of the app's capsule markup so the "SRV" glyph is one selector. */
+.badge-capsule {
+  display: inline-flex;
+  align-items: stretch;
+  height: 18px;
+}
+
+.badge-capsule-glyph {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--badge-capsule-glyph-background, #6b21a8);
+  color: var(--badge-on-accent, #ffffff);
+  padding: 2px 5px;
+  border-radius: 3px 0 0 3px;
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1.2;
+  text-transform: uppercase;
+  font-family: var(--font-family);
+}
+
+.registry-badge.registry-badge--capsule-body {
+  border-radius: 0 3px 3px 0;
+}
+
+/* Icon-only badges (auth, scenario): no text, a slightly tighter horizontal
+ * padding, and a larger glyph so the single codicon carries the pill. */
+.registry-badge[data-badge-id='auth'],
+.registry-badge[data-badge-id='scenario'] {
+  padding: 2px 4px;
+}
+
+.registry-badge[data-badge-id='auth'] .codicon,
+.registry-badge[data-badge-id='scenario'] .codicon {
+  font-size: 14px;
+}
+
+/* Marketing tier badge. Gold gradient + dark text reads "premium" without
+ * looking like a protocol acronym; a subtle inner shadow gives the pill a
+ * sticker feel. The gradient is a deliberate brand color, identical on every
+ * theme (marketing intent) — it is intentionally NOT a theme token. */
+.registry-badge[data-badge-id='pro'] {
+  background: linear-gradient(135deg, #f6c560 0%, #c98a1a 100%);
+  color: #1a1306;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.18);
+  letter-spacing: 0.5px;
+}

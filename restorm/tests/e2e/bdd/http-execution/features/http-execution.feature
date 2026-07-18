@@ -45,6 +45,39 @@ Feature: HTTP/REST execution end-to-end
     And the response body contains "\"method\": \"POST\""
     And the response body contains "hello"
 
+  Scenario: A QUERY request carries a body to the wire
+    When I open the "QUERY echo" request tab via MCP
+    And I click Send
+    Then the response status is "200"
+    And the response body contains "\"method\": \"QUERY\""
+    And the response body contains "available"
+
+  Scenario: Registry badges track the method verb across every surface, verbatim casing included
+    When I open the "GET echo" request tab via MCP
+    And I favorite the "GET echo" request via MCP
+    And I open the "Badge scenario" scenario tab via MCP
+    And I activate the "GET echo" request tab
+    Then all method badge surfaces show "GET" as "http_get"
+    And the sidebar add menu shows the "GET" method badge as "http_get"
+    And the scenario add palette shows the "GET" method badge as "http_get"
+    When I pick "POST" from the method combo
+    Then all method badge surfaces show "POST" as "http_post"
+    When I type "Post" into the method combo
+    Then all method badge surfaces show "Post" as "http_post"
+    When I type "TeSt" into the method combo
+    Then all method badge surfaces show "TeSt" as "http_other"
+
+  Scenario: A typed custom verb reaches the wire verbatim, casing preserved
+    When I open the "GET echo" request tab via MCP
+    And I type "Machin" into the method combo
+    And I click Send
+    Then the response status is "200"
+    And the response body contains "\"method\": \"Machin\""
+    When I type "post" into the method combo
+    And I click Send
+    Then the response status is "200"
+    And the response body contains "\"method\": \"post\""
+
   Scenario: x-www-form-urlencoded body
     When I open the "Form urlencoded" request tab via MCP
     And I click Send

@@ -22,8 +22,11 @@ export interface Icon {
   value: string
 }
 
-/** HTTP methods */
-export const HTTP_METHODS = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS'] as const
+/** Well-known HTTP method tokens the UI offers as ready-made choices and
+ * canonicalizes to upper-case. QUERY is RFC 10008 (safe + idempotent, carries
+ * a request body). Arbitrary custom verbs are still accepted on the wire — they
+ * are simply not part of this canonical list. */
+export const HTTP_METHODS = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS', 'QUERY'] as const
 export type HTTPMethod = (typeof HTTP_METHODS)[number]
 
 /** GraphQL operation type */

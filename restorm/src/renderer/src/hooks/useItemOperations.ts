@@ -461,6 +461,9 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
       case 'http-put': return 'New PUT request'
       case 'http-patch': return 'New PATCH request'
       case 'http-delete': return 'New DELETE request'
+      case 'http-head': return 'New HEAD request'
+      case 'http-options': return 'New OPTIONS request'
+      case 'http-query': return 'New QUERY request'
       case 'http-server': return 'New HTTP mock server'
       case 'graphql': return 'New GraphQL request'
       case 'graphql-server': return 'New GraphQL mock server'
@@ -593,7 +596,10 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
             kind === 'http-put' ? 'PUT' :
               kind === 'http-patch' ? 'PATCH' :
                 kind === 'http-delete' ? 'DELETE' :
-                  undefined
+                  kind === 'http-head' ? 'HEAD' :
+                    kind === 'http-options' ? 'OPTIONS' :
+                      kind === 'http-query' ? 'QUERY' :
+                        undefined
       let built: unknown
       if (httpMethod !== undefined) {
         built = new HTTPRequest({ id, name, method: httpMethod })

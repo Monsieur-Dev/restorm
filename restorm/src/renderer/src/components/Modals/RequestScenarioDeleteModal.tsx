@@ -1,7 +1,7 @@
 import React from 'react'
 import { Modal, Button } from 'electron-core-ui/renderer'
 import { useTranslation } from 'react-i18next'
-import { Badge } from '../common/Badge'
+import { RegistryBadge } from '../common/RegistryBadge'
 
 /** A scenario that references the request being deleted. */
 export interface RequestScenarioDeleteUsage {
@@ -57,7 +57,7 @@ export const RequestScenarioDeleteModal: React.FC<RequestScenarioDeleteModalProp
         <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: '6px' }}>
           {usages.map((u) => (
             <li key={u.scenarioId} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <Badge type="SCENARIO" />
+              <RegistryBadge badgeId="scenario" />
               <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                 {u.scenarioName}
                 {u.inSubtree ? <span style={{ opacity: 0.6 }}> — {t('sidebar.scenarioDelete.belongsTag', 'belongs to this scenario')}</span> : null}

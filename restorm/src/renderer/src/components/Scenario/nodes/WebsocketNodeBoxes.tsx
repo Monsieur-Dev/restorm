@@ -2,7 +2,7 @@ import React from 'react'
 import type { NodeProps } from '@xyflow/react'
 import { useTranslation } from 'react-i18next'
 import { Button } from 'electron-core-ui/renderer'
-import { Badge } from '../../common/Badge'
+import { RegistryBadge } from '../../common/RegistryBadge'
 import { ScenarioNodeBoxBase, type ScenarioNodeBoxType, type ScenarioNodeCell, type ScenarioNodeSection } from './ScenarioNodeBoxBase'
 import { ScenarioNameInput } from './ScenarioNameInput'
 import { ScenarioCodeField } from './ScenarioCodeField'
@@ -78,7 +78,7 @@ export const WebsocketConnectNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> =
     { id: 'connected', label: isServerBound ? t('scenario.socketio.started', 'started') : t('scenario.socketio.connected', 'connected'), port: { id: 'connected', type: 'source', flow: 'signal' } },
     { id: 'message', label: t('scenario.websocket.message', 'message'), port: { id: 'message', type: 'source' } }
   ]
-  const headerIcon = isServerBound ? <Badge type="WS" mode="server" /> : <Badge type="WS" icon="plug" />
+  const headerIcon = isServerBound ? <RegistryBadge badgeId="ws_server" /> : <RegistryBadge badgeId="ws_connect" />
   return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={right} headerIcon={headerIcon} />
 }
 
@@ -110,7 +110,7 @@ export const WebsocketSendNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({
       ]
     }
   ]
-  return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={[]} headerIcon={<Badge type="WS" icon="arrow-up" />} />
+  return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={[]} headerIcon={<RegistryBadge badgeId="ws_send" />} />
 }
 
 /** C (websocketClose) — closes a declared connection; sequences via `done`. */
@@ -118,5 +118,5 @@ export const WebsocketCloseNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = (
   const left: ScenarioNodeSection[] = [
     { id: 'main', rows: [{ id: 'connection', content: <ConnectionPicker id={id} data={data} kind="websocketConnect" /> }] }
   ]
-  return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={[]} headerIcon={<Badge type="WS" icon="debug-disconnect" />} />
+  return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={[]} headerIcon={<RegistryBadge badgeId="ws_close" />} />
 }

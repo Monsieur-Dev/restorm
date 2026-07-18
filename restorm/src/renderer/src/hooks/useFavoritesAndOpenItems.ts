@@ -12,7 +12,9 @@ import {
 import type { FolderItem } from '../../../shared/types/collections'
 import { folderItemToListViewItem } from '../services/FolderToListView'
 import { Badge } from '../components/common/Badge'
-import { mapToBadgeType, requestBadgeType, requestBadgeMode, requestBadgeIcon } from '../utils/badgeUtils'
+import { RegistryBadge } from '../components/common/RegistryBadge'
+import { httpBadgeIdFor, isKnownHttpMethod } from '../../../shared/utils/httpMethod'
+import { mapToBadgeType, requestBadgeId } from '../utils/badgeUtils'
 import type { Request } from '../../../shared/types/collections'
 import { findItemById } from '../utils/treeSearch'
 import { getFavorites } from '../services/favoritesStore'
@@ -115,11 +117,17 @@ export function useFavoritesAndOpenItems(
 
   const renderOptions = useMemo(() => ({
     expandedIds: new Set<string>(),
-    renderMethodBadge: (method: string) => React.createElement(Badge, { type: mapToBadgeType(method) }),
+    renderMethodBadge: (method: string) => React.createElement(RegistryBadge, { badgeId: httpBadgeIdFor(method), text: method }),
     renderProtocolBadge: (protocol: string, label?: string, mode?: 'client' | 'server') =>
+      // The HTTP mock server's badge is method-colored: route it to the
+      // registry capsule (GraphQL's QUERY badge renamed GQL upstream, so a
+      // known-verb token here is genuinely HTTP).
+      (mode === 'server' && isKnownHttpMethod(protocol))
+        ? React.createElement(RegistryBadge, { badgeId: httpBadgeIdFor(protocol), text: label ?? protocol, server: true })
+        :
       React.createElement(Badge, { type: mapToBadgeType(protocol), label, mode }),
     renderRequestBadge: (request: Request) =>
-      React.createElement(Badge, { type: requestBadgeType(request), mode: requestBadgeMode(request), icon: requestBadgeIcon(request) }),
+      React.createElement(RegistryBadge, { badgeId: requestBadgeId(request) }),
     renderRemovedTitle: (name: string) =>
       React.createElement('span', { style: { textDecoration: 'line-through', opacity: 0.6 } }, name)
   }), [])

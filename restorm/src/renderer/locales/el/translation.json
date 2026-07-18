@@ -284,7 +284,22 @@
         "redis": "Αίτημα Redis",
         "stomp": "Αίτημα STOMP",
         "kafkaProduce": "Αίτημα Kafka – Παραγωγή",
-        "kafkaConsume": "Αίτημα Kafka – Κατανάλωση"
+        "kafkaConsume": "Αίτημα Kafka – Κατανάλωση",
+        "httpHead": "HTTP – αίτημα HEAD",
+        "httpOptions": "HTTP – αίτημα OPTIONS",
+        "httpQuery": "HTTP – αίτημα QUERY",
+        "groups": {
+          "grpc": "gRPC",
+          "websocket": "WebSocket",
+          "socketio": "Socket.IO",
+          "graphql": "GraphQL",
+          "redis": "Redis",
+          "messaging": "Μηνύματα",
+          "soap": "SOAP",
+          "odata": "OData",
+          "sse": "SSE",
+          "trpc": "tRPC"
+        }
       }
     },
     "deleteConfirm": {

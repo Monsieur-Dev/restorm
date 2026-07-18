@@ -283,7 +283,22 @@
         "redis": "Redis 請求",
         "stomp": "STOMP 請求",
         "kafkaProduce": "Kafka 請求 – 產生",
-        "kafkaConsume": "Kafka 請求 – 消費"
+        "kafkaConsume": "Kafka 請求 – 消費",
+        "httpHead": "HTTP – HEAD 請求",
+        "httpOptions": "HTTP – OPTIONS 請求",
+        "httpQuery": "HTTP – QUERY 請求",
+        "groups": {
+          "grpc": "gRPC",
+          "websocket": "WebSocket",
+          "socketio": "Socket.IO",
+          "graphql": "GraphQL",
+          "redis": "Redis",
+          "messaging": "訊息傳遞",
+          "soap": "SOAP",
+          "odata": "OData",
+          "sse": "SSE",
+          "trpc": "tRPC"
+        }
       }
     },
     "deleteConfirm": {

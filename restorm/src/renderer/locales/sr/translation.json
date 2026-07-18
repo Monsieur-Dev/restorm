@@ -285,7 +285,22 @@
         "redis": "Redis zahtev",
         "stomp": "STOMP захтев",
         "kafkaProduce": "Kafka zahtev – Proizvedi",
-        "kafkaConsume": "Kafka zahtev – Potroši"
+        "kafkaConsume": "Kafka zahtev – Potroši",
+        "httpHead": "HTTP – HEAD zahtev",
+        "httpOptions": "HTTP – OPTIONS zahtev",
+        "httpQuery": "HTTP – QUERY zahtev",
+        "groups": {
+          "grpc": "gRPC",
+          "websocket": "WebSocket",
+          "socketio": "Socket.IO",
+          "graphql": "GraphQL",
+          "redis": "Redis",
+          "messaging": "Размена порука",
+          "soap": "SOAP",
+          "odata": "OData",
+          "sse": "SSE",
+          "trpc": "tRPC"
+        }
       }
     },
     "deleteConfirm": {

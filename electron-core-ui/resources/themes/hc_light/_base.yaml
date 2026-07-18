@@ -389,6 +389,10 @@ colors:
     value: "#311b92"
     description: "HTTP OPTIONS badge (HC light)"
 
+  - id: badge-other-background
+    value: "#424242"
+    description: "Custom/unknown HTTP verb badge (HC light)"
+
   - id: badge-grpc-unary-background
     value: "#01579b"
     description: "gRPC Unary badge (HC light)"
