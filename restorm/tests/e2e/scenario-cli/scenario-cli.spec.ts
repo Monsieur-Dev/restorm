@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test'
 import { spawn } from 'child_process'
-import { mkdtempSync, readFileSync } from 'fs'
+import { mkdtempSync, readFileSync, writeFileSync } from 'fs'
 import { tmpdir } from 'os'
 import { join } from 'path'
 import electronPath from 'electron'
@@ -56,7 +56,15 @@ test.describe('headless CLI scenario runner', () => {
       '--param', 'SecondInput=2030-01-15T08:30:00.000Z'
     ])
     expect(res.code, res.stderr).toBe(0)
-    expect(normalizeRunLogYaml(res.stdout)).toBe(readFileSync(goldenPathFor('Main'), 'utf-8'))
+    // `--all-logs` inlines every child scenario's log lines, which the UI
+    // run-log (and its golden) never contains — so the CLI orchestrator run
+    // keeps its OWN golden next to the shared one. Regenerate explicitly
+    // with UPDATE_RUNLOG_GOLDEN=1 on an intentional change.
+    const cliGolden = goldenPathFor('Main').replace(/\.yaml$/, '.all-logs.yaml')
+    if (process.env.UPDATE_RUNLOG_GOLDEN === '1') {
+      writeFileSync(cliGolden, normalizeRunLogYaml(res.stdout))
+    }
+    expect(normalizeRunLogYaml(res.stdout)).toBe(readFileSync(cliGolden, 'utf-8'))
   })
 
   test('--out writes the run-log to a file, byte-identical to stdout', async () => {

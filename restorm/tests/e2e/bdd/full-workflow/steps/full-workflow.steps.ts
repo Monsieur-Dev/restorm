@@ -2102,12 +2102,25 @@ const ADD_CHILD_LABEL_REGEX: Record<string, RegExp> = {
   'http-put': /HTTP\s*[–-]\s*PUT/,
   'http-patch': /HTTP\s*[–-]\s*PATCH/,
   'http-delete': /HTTP\s*[–-]\s*DELETE/,
+  // Protocol requests live in a NESTED per-protocol submenu (Add ▸ GraphQL ▸
+  // Requête GraphQL). Accessible names carry the badge text prefix, so the
+  // leaf regexes anchor on the label END.
+  graphql: /Requête GraphQL$|GraphQL request$/,
+  grpc: /Requête gRPC$|gRPC request$/,
+  soap: /Requête SOAP$|SOAP request$/,
+  websocket: /Requête WebSocket$|WebSocket request$/,
+  odata: /Requête OData$|OData request$/,
+  auth: /authentication|authentification/i
+}
+
+/** Kinds folded under a per-protocol group submenu since the Add-menu
+ * reorganization — the step hovers the group first to reveal the leaf. */
+const ADD_CHILD_GROUP_REGEX: Record<string, RegExp> = {
   graphql: /GraphQL/,
   grpc: /gRPC/,
   soap: /SOAP/,
   websocket: /WebSocket/,
-  odata: /OData/,
-  auth: /authentication|authentification/i
+  odata: /OData/
 }
 
 When(
@@ -2142,7 +2155,16 @@ When(
     // under the "Add" item once `showSubmenu` flips, so scope by the
     // visible submenu holder — otherwise a plain `/Folder/` match can
     // walk into the sidebar row behind the menu.
-    const submenu = page.locator('.menubar-menu-items-holder:visible').last()
+    let submenu = page.locator('.menubar-menu-items-holder:visible').last()
+    const groupLabel = ADD_CHILD_GROUP_REGEX[kind]
+    if (groupLabel) {
+      // Second hop: open the protocol group's own submenu.
+      const groupEntry = submenu.getByRole('menuitem', { name: groupLabel }).first()
+      await expect(groupEntry).toBeVisible({ timeout: 5000 })
+      await groupEntry.hover()
+      await page.waitForTimeout(350)
+      submenu = page.locator('.menubar-menu-items-holder:visible').last()
+    }
     const target = submenu
       .getByRole('menuitem', { name: childLabel })
       .first()
@@ -2209,7 +2231,16 @@ When(
     await addEntry.hover()
     await page.waitForTimeout(350)
 
-    const submenu = page.locator('.menubar-menu-items-holder:visible').last()
+    let submenu = page.locator('.menubar-menu-items-holder:visible').last()
+    const groupLabel = ADD_CHILD_GROUP_REGEX[kind]
+    if (groupLabel) {
+      // Second hop: open the protocol group's own submenu.
+      const groupEntry = submenu.getByRole('menuitem', { name: groupLabel }).first()
+      await expect(groupEntry).toBeVisible({ timeout: 5000 })
+      await groupEntry.hover()
+      await page.waitForTimeout(350)
+      submenu = page.locator('.menubar-menu-items-holder:visible').last()
+    }
     const target = submenu
       .getByRole('menuitem', { name: childLabel })
       .first()
