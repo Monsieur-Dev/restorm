@@ -88,6 +88,7 @@ export const test = base.extend<McpServerFixtures>({
 
   launchAppWithMcp: async ({ restormRoot }, use, testInfo) => {
     const launched: { app: ElectronApplication; logs: string[] }[] = []
+    resetTempDir()
 
     const electronExePath = electronPath as unknown as string
     const mainJsPath = join(restormRoot, 'dist/main/index.js')

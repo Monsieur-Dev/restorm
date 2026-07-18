@@ -20,7 +20,8 @@ vi.mock('electron-core-ui/renderer', () => ({
   MarkdownViewer: (): ReactNode => null,
   MarkdownEditor: (): ReactNode => null,
   JsonViewer: (): ReactNode => createElement('div', { 'data-testid': 'json-viewer' }),
-  eventBus: { emitLocalSync: vi.fn() }
+  eventBus: { emitLocalSync: vi.fn() },
+  fieldDiffStyle: (differs: boolean): Record<string, string> | undefined => (differs ? { borderColor: 'red' } : undefined)
 }))
 
 vi.mock('react-i18next', () => ({
