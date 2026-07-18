@@ -2373,6 +2373,8 @@
   "git": {
     "pullFailedTitle": "Pull failed",
     "pullFailedBody": "Could not pull the latest changes.",
+    "pullSaveFailedBody": "Could not save your changes before pulling.",
+    "pullUnpushedChangesBody": "You have local changes that aren't pushed yet — Push them first, then Pull.",
     "pushFailedTitle": "Push failed",
     "pushFailedBody": "Could not push the changes.",
     "pushSucceededTitle": "Pushed",

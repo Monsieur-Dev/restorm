@@ -2373,6 +2373,8 @@
   "git": {
     "pullFailedTitle": "Η λήψη απέτυχε",
     "pullFailedBody": "Δεν ήταν δυνατή η λήψη των πιο πρόσφατων αλλαγών.",
+    "pullSaveFailedBody": "Δεν ήταν δυνατή η αποθήκευση των αλλαγών σας πριν από το τράβηγμα.",
+    "pullUnpushedChangesBody": "Έχετε τοπικές αλλαγές που δεν έχουν ακόμη προωθηθεί — κάντε πρώτα Push και μετά Pull.",
     "pushFailedTitle": "Η αποστολή απέτυχε",
     "pushFailedBody": "Δεν ήταν δυνατή η αποστολή των αλλαγών.",
     "pushSucceededTitle": "Στάλθηκε",

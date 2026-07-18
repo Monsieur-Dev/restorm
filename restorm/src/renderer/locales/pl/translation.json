@@ -2375,6 +2375,8 @@
   "git": {
     "pullFailedTitle": "Nie udało się pobrać zmian",
     "pullFailedBody": "Nie można pobrać najnowszych zmian.",
+    "pullSaveFailedBody": "Nie udało się zapisać zmian przed pobraniem.",
+    "pullUnpushedChangesBody": "Masz lokalne zmiany, które nie zostały jeszcze wypchnięte — najpierw zrób Push, potem Pull.",
     "pushFailedTitle": "Wypchnięcie nie powiodło się",
     "pushFailedBody": "Nie można wypchnąć zmian.",
     "pushSucceededTitle": "Wypchnięto",

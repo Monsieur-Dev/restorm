@@ -2373,6 +2373,8 @@
   "git": {
     "pullFailedTitle": "A lehívás sikertelen",
     "pullFailedBody": "A legújabb módosítások lehívása nem sikerült.",
+    "pullSaveFailedBody": "A módosításokat nem sikerült menteni a lekérés előtt.",
+    "pullUnpushedChangesBody": "Vannak még el nem küldött helyi módosításaid — előbb Push, aztán Pull.",
     "pushFailedTitle": "A push sikertelen",
     "pushFailedBody": "A módosításokat nem sikerült push-olni.",
     "pushSucceededTitle": "Push-olva",

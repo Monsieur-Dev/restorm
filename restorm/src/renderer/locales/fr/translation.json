@@ -2373,6 +2373,8 @@
   "git": {
     "pullFailedTitle": "Échec de la récupération",
     "pullFailedBody": "Impossible de récupérer les dernières modifications.",
+    "pullSaveFailedBody": "Impossible d'enregistrer vos modifications avant de tirer les changements.",
+    "pullUnpushedChangesBody": "Tu as des changements locaux non poussés — fais Push d'abord, puis Pull.",
     "pushFailedTitle": "Échec de la publication",
     "pushFailedBody": "Impossible de publier les modifications.",
     "pushSucceededTitle": "Publié",

@@ -2372,6 +2372,8 @@
   "git": {
     "pullFailedTitle": "Kéo thất bại",
     "pullFailedBody": "Không thể kéo các thay đổi mới nhất.",
+    "pullSaveFailedBody": "Không thể lưu thay đổi của bạn trước khi kéo về.",
+    "pullUnpushedChangesBody": "Bạn có các thay đổi cục bộ chưa được đẩy lên — hãy Push trước, rồi Pull.",
     "pushFailedTitle": "Đẩy thất bại",
     "pushFailedBody": "Không thể đẩy các thay đổi.",
     "pushSucceededTitle": "Đã đẩy",

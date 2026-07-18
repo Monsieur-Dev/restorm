@@ -81,10 +81,17 @@ The modal has:
 
 ## Pulling and the 4-panel conflict resolution
 
-**Pull** fetches and merges the remote version. When it merges cleanly, you're
-done. When the remote and your local copy changed the *same* entities, Restorm
-opens the **conflict-resolution view** instead of leaving conflict markers in
-your file.
+**Pull** first saves your project to disk (just like Push — the merge operates
+on the file on disk, so any pending edits are persisted before it runs), then
+fetches and merges the remote version. When it merges cleanly, the open sidebar
+tree and any open editor tab **refresh in place** to the pulled content — no
+manual reopen — with your tabs, so you immediately see what you pulled. When the
+remote and your local copy changed the *same* entities, Restorm opens the
+**conflict-resolution view** instead of leaving conflict markers in your file.
+
+If you have local edits that haven't been pushed yet, git won't merge remote
+changes on top of them: the pull reports the git error as a toast and your
+unsaved work is left untouched — push your changes first, then pull.
 
 ![The 4-panel conflict-resolution view: the conflict list down the left, then your version, the server's version, and the editable resolved copy. The differing field (here the folder's notes) is outlined in red on the two read-only panels.](images/git-integration/conflict-4-panel.png)
 

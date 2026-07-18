@@ -2373,6 +2373,8 @@
   "git": {
     "pullFailedTitle": "Error al obtener los cambios",
     "pullFailedBody": "No se pudieron obtener los últimos cambios.",
+    "pullSaveFailedBody": "No se pudieron guardar tus cambios antes de bajar los cambios.",
+    "pullUnpushedChangesBody": "Tienes cambios locales sin enviar — haz Push primero y luego Pull.",
     "pushFailedTitle": "Error al subir cambios",
     "pushFailedBody": "No se pudieron subir los cambios.",
     "pushSucceededTitle": "Cambios subidos",

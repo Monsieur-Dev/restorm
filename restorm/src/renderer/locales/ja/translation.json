@@ -2372,6 +2372,8 @@
   "git": {
     "pullFailedTitle": "プルに失敗しました",
     "pullFailedBody": "最新の変更を取得できませんでした。",
+    "pullSaveFailedBody": "プルする前に変更を保存できませんでした。",
+    "pullUnpushedChangesBody": "まだプッシュしていないローカルの変更があります。先にPushしてからPullしてください。",
     "pushFailedTitle": "プッシュに失敗しました",
     "pushFailedBody": "変更をプッシュできませんでした。",
     "pushSucceededTitle": "プッシュしました",

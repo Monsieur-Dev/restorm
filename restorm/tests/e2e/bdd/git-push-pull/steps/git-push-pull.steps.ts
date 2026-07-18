@@ -22,6 +22,11 @@ let page: Page | null = null
 // tests in the same file) — see the two distinctly-worded "Given" steps
 // below, one per scenario, rather than a single shared/branching step.
 let activeRepoName: string | null = null
+// The on-disk working copy restorm opened, so the unsaved-edits scenario can
+// read the file back and prove the edit was persisted (never clobbered).
+let openedWorkingCopy: string | null = null
+// A distinctive fragment typed into the request URL as an unsaved local edit.
+const UNSAVED_EDIT_MARKER = 'unsaved-local-edit'
 
 function requirePage(): Page {
   if (!page) throw new Error('app must be launched before driving UI steps')
@@ -148,4 +153,91 @@ When('I pull', async () => {
 Then('the collaborator\'s change is visible', async () => {
   const p = requirePage()
   await expect(p.getByText('Find pet by ID (updated by collaborator)', { exact: true })).toBeVisible({ timeout: 10000 })
+})
+
+Given('I have opened a clone of a freshly seeded git remote', async ({ launchApp, seedFreshRepo, cloneNamedRepo }) => {
+  const launched = await launchApp()
+  page = launched.page
+
+  activeRepoName = `git-pull-refresh-${Date.now()}`
+  await seedFreshRepo(activeRepoName)
+
+  const workingCopy = await cloneNamedRepo(activeRepoName, 'git-pull-refresh-open')
+  openedWorkingCopy = workingCopy
+  const filePath = join(workingCopy, 'api.restorm')
+
+  await configureNextOpenDialogForE2E(requireApp(), { kind: 'openFile', path: filePath })
+  await page.locator('[data-testid="titlebar-menubar-item-file"]').click()
+  await page.locator('[data-testid="titlebar-menu-item-open"]').first().click()
+  // The clone is opened BEFORE any collaborator push, so at this point the
+  // sidebar shows the ORIGINAL request name — the pull under test is what must
+  // bring in the collaborator's rename.
+  await expect(sidebarRowByName(page, 'Find pet by ID')).toBeVisible({ timeout: 10000 })
+})
+
+When('a collaborator pushes a change to that same remote', async ({ cloneNamedRepo }) => {
+  if (!activeRepoName) throw new Error('no active repo — a "...opened a clone..." step must run first')
+  const collaboratorDir = await cloneNamedRepo(activeRepoName, 'git-pull-refresh-collaborator')
+  const projectFile = join(collaboratorDir, 'api.restorm')
+  const content = readFileSync(projectFile, 'utf-8')
+  writeFileSync(projectFile, content.replace('Find pet by ID', 'Find pet by ID (updated by collaborator)'), 'utf-8')
+  execSync('git add api.restorm', { cwd: collaboratorDir, stdio: 'ignore', env: gitEnv() })
+  execSync('git -c user.email=collaborator@restorm.test -c user.name="Other Collaborator" commit -m "Collaborator update"', { cwd: collaboratorDir, stdio: 'ignore', env: gitEnv() })
+  execSync('git push origin main', { cwd: collaboratorDir, stdio: 'ignore', env: gitEnv() })
+})
+
+Then('the collaborator\'s change is visible without reopening the project', async () => {
+  const p = requirePage()
+  // The pulled rename must appear with NO manual reload — this is the whole
+  // point of the fix. `getByText(exact)` fails if the sidebar is still stale
+  // (old code left the pre-pull tree untouched).
+  await expect(p.getByText('Find pet by ID (updated by collaborator)', { exact: true })).toBeVisible({ timeout: 10000 })
+  // Exactly one matching row — the tree re-hydrated in place rather than
+  // appending a duplicate row/tab (the row selector is a substring match, so
+  // the renamed row still matches the pre-rename fragment).
+  await expect(sidebarRowByName(p, 'Find pet by ID')).toHaveCount(1)
+})
+
+Given('I have an unsaved local edit to the open request', async () => {
+  const p = requirePage()
+  const row = sidebarRowByName(p, 'Find pet by ID')
+  await expect(row).toBeVisible({ timeout: 10000 })
+  await row.click()
+  await p.waitForTimeout(300)
+  await activateRequestSubTab(p)
+
+  const urlInput = p.locator('[data-testid="http-request-url-input"]:visible').first()
+  await expect(urlInput).toBeVisible({ timeout: 5000 })
+  const viewport = urlInput.locator('.monaco-editor').first()
+  await viewport.click({ force: true })
+  await p.keyboard.press('Control+A')
+  await p.keyboard.press('Delete')
+  await p.keyboard.type(`https://petstore.example.com/pets/${UNSAVED_EDIT_MARKER}`)
+  await p.keyboard.press('Tab')
+  await p.waitForTimeout(300)
+  // Deliberately NOT saved and NOT pushed — the point is that the pull is what
+  // has to persist this edit (save-first) and must not lose it.
+})
+
+Then('my unsaved edit is preserved on disk', async () => {
+  if (!openedWorkingCopy) throw new Error('no opened working copy — an "...opened a clone..." step must run first')
+  // Pull saves first, so the edit must have been written to the .restorm file;
+  // git then refuses to merge over it, so it survives on disk untouched.
+  const onDisk = readFileSync(join(openedWorkingCopy, 'api.restorm'), 'utf-8')
+  expect(onDisk).toContain(UNSAVED_EDIT_MARKER)
+})
+
+Then('I am told to push my changes before pulling', async () => {
+  const p = requirePage()
+  // The dedicated "you have unpushed changes — push first" toast, not the
+  // generic pull-failed body.
+  await expect(p.getByText('Push them first', { exact: false })).toBeVisible({ timeout: 10000 })
+})
+
+Then('the collaborator\'s change is not applied', async () => {
+  const p = requirePage()
+  // The refused pull merged nothing, so the sidebar still shows the original
+  // name and never the collaborator's rename.
+  await expect(p.getByText('Find pet by ID (updated by collaborator)', { exact: true })).toHaveCount(0)
+  await expect(sidebarRowByName(p, 'Find pet by ID')).toHaveCount(1)
 })

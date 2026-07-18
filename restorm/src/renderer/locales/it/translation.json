@@ -2373,6 +2373,8 @@
   "git": {
     "pullFailedTitle": "Pull non riuscito",
     "pullFailedBody": "Impossibile recuperare le ultime modifiche.",
+    "pullSaveFailedBody": "Impossibile salvare le modifiche prima di eseguire il pull.",
+    "pullUnpushedChangesBody": "Hai modifiche locali non ancora inviate — esegui prima Push, poi Pull.",
     "pushFailedTitle": "Push non riuscito",
     "pushFailedBody": "Non è stato possibile eseguire il push delle modifiche.",
     "pushSucceededTitle": "Push eseguito",

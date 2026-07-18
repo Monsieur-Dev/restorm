@@ -68,13 +68,21 @@ import { Environment as EnvironmentClass } from '../../shared/models/Environment
 let scenarioSaveTimer: ReturnType<typeof setTimeout> | null = null
 let latestSaveAll: (() => Promise<boolean>) | null = null
 
-/** Adapter: `usePushModal`'s `saveBeforePush` wants `Promise<void>`;
- * `handleMenuSaveAll` (via `latestSaveAll`) returns `Promise<boolean>`. A
- * `null` ref (save-all not mounted yet) resolves immediately — `push()`
- * only ever runs from a user click well after mount, so this is a
- * defensive fallback, not an expected path. */
+/** Flush the live in-memory tree to disk via the current save-all callback,
+ * reporting whether the save succeeded. A `null` ref (save-all not mounted
+ * yet) resolves `true` — the git actions only ever run from a user click well
+ * after mount, so this is a defensive fallback, not an expected path. Shared
+ * by the Push flow (`saveBeforePush`) and the Pull flow (`useGitActions`):
+ * both must persist pending edits before touching git, since git reads/merges
+ * whatever is on disk. `handleMenuSaveAll` writes only when the tree actually
+ * changed, so a clean git op leaves the file untouched. */
+function saveAllForGit(): Promise<boolean> {
+  return latestSaveAll ? latestSaveAll() : Promise.resolve(true)
+}
+
+/** Adapter: `usePushModal`'s `saveBeforePush` wants `Promise<void>`. */
 function saveBeforePush(): Promise<void> {
-  return latestSaveAll ? latestSaveAll().then(() => undefined) : Promise.resolve()
+  return saveAllForGit().then(() => undefined)
 }
 
 /**
@@ -427,10 +435,27 @@ const App: React.FC = () => {
   // The pull-conflict 4-panel resolution flow — opened by `useGitActions`
   // below when a pull comes back conflicted, instead of a plain toast.
   const pullConflict = useGitPullConflict()
+  // After a clean pull fast-forwards new content onto disk, re-open the same
+  // project through the normal file-open path so the sidebar tree + open
+  // editor tabs re-hydrate from the pulled content — no manual reopen, and no
+  // parallel tree-loading logic (`open` re-reads disk, resets dirty, and
+  // broadcasts `file:opened` → `handleFileOpened`, exactly like the initial
+  // open). Tabs rebind by their stable persisted ids.
+  const refreshOpenFileAfterPull = useCallback(() => {
+    if (filePath) void _openFile(filePath)
+  }, [filePath, _openFile])
   // Repo-push / repo-pull click actions, shared verbatim by the statusbar
   // `GIT` entry and the title-bar `Git` menu (see `useGitActions`).
   // repo-push opens the modal above; the actual push happens from there.
-  const { onPush: handleGitPush, onPull: handleGitPull } = useGitActions(filePath, pushModal.openPushModal, pullConflict.openFromPull)
+  // Both actions save the live tree to disk first (`saveAllForGit`) — git
+  // reads/merges on-disk content — and a clean pull refreshes the open file.
+  const { onPush: handleGitPush, onPull: handleGitPull } = useGitActions(
+    filePath,
+    pushModal.openPushModal,
+    pullConflict.openFromPull,
+    saveAllForGit,
+    refreshOpenFileAfterPull
+  )
   // Semi-pull detection → "Pull now" toast. Reuses the SAME click
   // handler as the statusbar/title-bar pull actions above, so accepting
   // the toast goes through the identical conflict-aware pull flow — no

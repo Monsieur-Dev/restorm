@@ -2373,6 +2373,8 @@
   "git": {
     "pullFailedTitle": "Pullen mislukt",
     "pullFailedBody": "Kon de nieuwste wijzigingen niet ophalen.",
+    "pullSaveFailedBody": "Kan je wijzigingen niet opslaan vóór het pullen.",
+    "pullUnpushedChangesBody": "Je hebt lokale wijzigingen die nog niet zijn gepusht — push ze eerst en pull daarna.",
     "pushFailedTitle": "Push mislukt",
     "pushFailedBody": "Kon de wijzigingen niet pushen.",
     "pushSucceededTitle": "Gepusht",

@@ -2372,6 +2372,8 @@
   "git": {
     "pullFailedTitle": "Pull gagal",
     "pullFailedBody": "Tidak dapat menarik perubahan terbaru.",
+    "pullSaveFailedBody": "Tidak dapat menyimpan perubahan Anda sebelum menarik.",
+    "pullUnpushedChangesBody": "Anda memiliki perubahan lokal yang belum di-push — lakukan Push dulu, lalu Pull.",
     "pushFailedTitle": "Push gagal",
     "pushFailedBody": "Tidak dapat mendorong perubahan.",
     "pushSucceededTitle": "Terkirim",

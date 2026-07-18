@@ -2372,6 +2372,8 @@
   "git": {
     "pullFailedTitle": "풀 실패",
     "pullFailedBody": "최신 변경 사항을 가져올 수 없습니다.",
+    "pullSaveFailedBody": "풀 하기 전에 변경 사항을 저장할 수 없습니다.",
+    "pullUnpushedChangesBody": "아직 푸시하지 않은 로컬 변경 사항이 있습니다. 먼저 Push한 다음 Pull하세요.",
     "pushFailedTitle": "푸시 실패",
     "pushFailedBody": "변경 사항을 푸시할 수 없습니다.",
     "pushSucceededTitle": "푸시됨",

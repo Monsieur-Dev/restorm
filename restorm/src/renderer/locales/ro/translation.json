@@ -2374,6 +2374,8 @@
   "git": {
     "pullFailedTitle": "Preluarea a eșuat",
     "pullFailedBody": "Nu s-au putut prelua cele mai recente modificări.",
+    "pullSaveFailedBody": "Nu s-au putut salva modificările înainte de pull.",
+    "pullUnpushedChangesBody": "Ai modificări locale care nu au fost încă trimise — fă mai întâi Push, apoi Pull.",
     "pushFailedTitle": "Trimiterea a eșuat",
     "pushFailedBody": "Modificările nu au putut fi trimise.",
     "pushSucceededTitle": "Trimis",

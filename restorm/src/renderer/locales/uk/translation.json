@@ -2375,6 +2375,8 @@
   "git": {
     "pullFailedTitle": "Не вдалося виконати pull",
     "pullFailedBody": "Не вдалося отримати останні зміни.",
+    "pullSaveFailedBody": "Не вдалося зберегти зміни перед отриманням.",
+    "pullUnpushedChangesBody": "У вас є локальні зміни, які ще не відправлені — спершу зробіть Push, потім Pull.",
     "pushFailedTitle": "Не вдалося виконати push",
     "pushFailedBody": "Не вдалося надіслати зміни.",
     "pushSucceededTitle": "Надіслано",

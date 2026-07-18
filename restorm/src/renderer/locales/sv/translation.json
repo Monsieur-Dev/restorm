@@ -2373,6 +2373,8 @@
   "git": {
     "pullFailedTitle": "Pull misslyckades",
     "pullFailedBody": "Det gick inte att hämta de senaste ändringarna.",
+    "pullSaveFailedBody": "Det gick inte att spara dina ändringar före pull.",
+    "pullUnpushedChangesBody": "Du har lokala ändringar som inte har pushats än — pusha dem först och pulla sedan.",
     "pushFailedTitle": "Push misslyckades",
     "pushFailedBody": "Det gick inte att pusha ändringarna.",
     "pushSucceededTitle": "Push klar",
