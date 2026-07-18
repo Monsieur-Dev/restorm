@@ -2918,6 +2918,10 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
       // event/channel concept for any of the three — a stompSend node has no
       // channel input, only `payload`).
       const req = typeof cfg.requestId === 'string' && resolveBoundItem ? resolveBoundItem(cfg.requestId) : null
+      // Whether this connection HOSTS a server — same check the boxes use for their
+      // SRV header badge (`isServerBound`). Lets a server-close vs client-close
+      // picker filter its own side.
+      const isServer = !!req && isRequest(req) && (req as { server?: boolean }).server === true
       const event = req && isRequest(req) && node.kind !== 'stompConnect' ? (req as { event?: unknown }).event : undefined
       const message = req && isRequest(req)
         ? (node.kind === 'grpcConnect'
@@ -2932,6 +2936,7 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
         id: node.id,
         name,
         kind: node.kind,
+        ...(isServer ? { isServer: true } : {}),
         ...(typeof event === 'string' && event.trim() !== '' ? { defaultChannel: event } : {}),
         ...(typeof message === 'string' && message.trim() !== '' ? { defaultPayload: message } : {})
       })

@@ -113,20 +113,23 @@ export const WebsocketSendNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({
   return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={[]} headerIcon={<RegistryBadge badgeId="ws_send" />} />
 }
 
-/** C (websocketClose) — closes a declared connection; sequences via `done`. */
+/** C (websocketClose) — closes a declared CLIENT connection; sequences via
+ * `done`. Its picker lists client connections only (a hosted server is closed by
+ * the dedicated websocketServerClose). */
 export const WebsocketCloseNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, data, selected }) => {
   const left: ScenarioNodeSection[] = [
-    { id: 'main', rows: [{ id: 'connection', content: <ConnectionPicker id={id} data={data} kind="websocketConnect" /> }] }
+    { id: 'main', rows: [{ id: 'connection', content: <ConnectionPicker id={id} data={data} kind="websocketConnect" serverOnly={false} /> }] }
   ]
   return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={[]} headerIcon={<RegistryBadge badgeId="ws_close" />} />
 }
 
 /** C (websocketServerClose) — stops a declared WebSocket mock server (a
  * websocketConnect node bound to a `server: true` request); sequences via `done`.
- * The header shows the WS server-close (SRV) capsule. */
+ * Its picker lists hosted-server connections only. The header shows the WS
+ * server-close (SRV) capsule. */
 export const WebsocketServerCloseNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, data, selected }) => {
   const left: ScenarioNodeSection[] = [
-    { id: 'main', rows: [{ id: 'connection', content: <ConnectionPicker id={id} data={data} kind="websocketConnect" /> }] }
+    { id: 'main', rows: [{ id: 'connection', content: <ConnectionPicker id={id} data={data} kind="websocketConnect" serverOnly /> }] }
   ]
   return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={[]} headerIcon={<RegistryBadge badgeId="ws_server_close" />} />
 }
