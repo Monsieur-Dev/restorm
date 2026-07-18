@@ -464,6 +464,10 @@ const EnvironmentConfigPanel: React.FC<EnvironmentConfigPanelProps> = ({ folder,
             width: 14,
             height: 14,
             minWidth: 14,
+            // ECUI Button carries `.text-button { min-height: 22px; line-height: 20px }`;
+            // pin both so the swatch stays a 14×14 square instead of stretching tall.
+            minHeight: 14,
+            lineHeight: '14px',
             padding: 0,
             border: '1px solid var(--panel-border)',
             borderRadius: 3,
