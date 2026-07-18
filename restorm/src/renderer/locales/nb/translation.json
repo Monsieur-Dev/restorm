@@ -369,6 +369,7 @@
     "cancel": "Avbryt",
     "urlPlaceholder": "Forespørsels-URL",
     "methodSelect": "Velg HTTP-metode",
+    "methodPicker": "Velg metode",
     "addHeader": "Legg til header",
     "addParam": "Legg til parameter",
     "environmentSelector": {

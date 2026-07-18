@@ -6,7 +6,6 @@ import { useTranslation } from 'react-i18next'
 import { useHandlebarsHelpers } from '../../hooks/useHandlebarsHelpers'
 import {
   Button,
-  SelectBox,
   SplitView,
   Pane,
   ControlGroup,
@@ -15,9 +14,7 @@ import {
   eventBus,
   logger,
   getContrastColor,
-  type VariableDefinition,
-  type ISelectOptionItem,
-  type ISelectData
+  type VariableDefinition
 } from 'electron-core-ui/renderer'
 import { DocumentEvents, type RequestHistoryEventPayload } from '../../services/DocumentEvents'
 import { RestormVariableInputBox } from '../RestormVariableInputBox'
@@ -31,10 +28,9 @@ import type { KeyValueData } from '../../types/global.d'
 import { BaseRequestTabView } from './BaseRequestTabView'
 import { ResponseHistoryModal } from '../Modals/ResponseHistoryModal'
 import { AuthenticationConfigurationTab } from './AuthenticationConfigurationTab'
-import { Badge } from '../common/Badge'
 import { BeamWrap } from '../common/BeamWrap'
 import { ServerConfigLockedHint } from '../common/ServerConfigLockedHint'
-import { mapToBadgeType } from '../../utils/badgeUtils'
+import { HttpMethodCombo } from './HttpMethodCombo'
 import { useRestormStore } from '../../store/restormStore'
 import { buildRequestPath } from '../../utils/requestPath'
 import { DEFAULT_REQUEST_TIMEOUT_MS } from '../../../../shared/config/constants'
@@ -52,7 +48,7 @@ import { SendButtonEnvSwitcher } from './SendButtonEnvSwitcher'
 import { toasterService } from 'electron-core-ui/renderer'
 import { HeaderHoverTooltip } from '../MainView/HeaderHoverTooltip'
 
-const methodSelectWrapperStyle: CSSProperties = { width: 90, flexShrink: 0 }
+const methodSelectWrapperStyle: CSSProperties = { width: 112, flexShrink: 0 }
 const urlInputWrapperStyle: CSSProperties = { flex: 1, minWidth: 0 }
 // SERVER MODE (HTTP mock) URL-section pieces: a fixed "localhost:" / "/" label
 // and the narrow numeric port field, mirroring the WebSocket server layout.
@@ -429,7 +425,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
   // Sync method changes to reactive object
   useEffect(() => {
     if (method !== request.method && requestIdRef.current === request.id) {
-      updateReactiveProperty(request, 'method', method as HTTPMethod)
+      updateReactiveProperty(request, 'method', method)
     }
   }, [method, request])
 
@@ -612,14 +608,6 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
       )
     }
   }, [request])
-
-  const methodOptions = useMemo<ISelectOptionItem[]>(
-    () => ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS'].map((verb) => ({
-      text: verb,
-      label: <Badge type={mapToBadgeType(verb)} />
-    })),
-    []
-  )
 
   /**
    * Smart-paste: when the user pastes a `curl` command on the URL
@@ -1072,15 +1060,13 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
       )}
     <ControlGroup data-testid="http-request-url-section">
       <div style={methodSelectWrapperStyle}>
-        <SelectBox
-          id="http-method-select"
-          className=""
-          options={methodOptions}
-          selected={methodOptions.findIndex((opt) => opt.text === method)}
-          onDidSelect={(data: ISelectData) => { setMethod(data.selected) }}
-          selectBoxOptions={{ ariaLabel: t('requestTab.methodSelect'), useCustomDrawn: true }}
-          data-testid="http-request-method-select"
+        <HttpMethodCombo
+          value={method}
+          onChange={setMethod}
           disabled={configLocked}
+          ariaLabel={t('requestTab.methodSelect')}
+          pickerLabel={t('requestTab.methodPicker')}
+          data-testid="http-request-method-select"
         />
       </div>
       {isServer ? (

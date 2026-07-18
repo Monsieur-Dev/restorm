@@ -368,6 +368,7 @@
     "cancel": "取消",
     "urlPlaceholder": "请求 URL",
     "methodSelect": "选择 HTTP 方法",
+    "methodPicker": "选择方法",
     "addHeader": "添加请求头",
     "addParam": "添加参数",
     "environmentSelector": {

@@ -369,6 +369,7 @@
     "cancel": "Avbryt",
     "urlPlaceholder": "Förfrågnings-URL",
     "methodSelect": "Välj HTTP-metod",
+    "methodPicker": "Välj metod",
     "addHeader": "Lägg till header",
     "addParam": "Lägg till parameter",
     "environmentSelector": {

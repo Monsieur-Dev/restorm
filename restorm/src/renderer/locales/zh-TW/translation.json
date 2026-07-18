@@ -368,6 +368,7 @@
     "cancel": "取消",
     "urlPlaceholder": "請求 URL",
     "methodSelect": "選取 HTTP 方法",
+    "methodPicker": "選取方法",
     "addHeader": "新增標頭",
     "addParam": "新增參數",
     "environmentSelector": {

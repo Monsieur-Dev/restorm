@@ -20,6 +20,7 @@ import { secretHydrationService } from './secrets/SecretHydrationService'
 import { collectRequestSecrets } from './secrets/collectRequestSecrets'
 import { withFirewallBypass } from 'electron-core-ui/main'
 import { DEFAULT_REQUEST_TIMEOUT_MS, MAX_RESPONSE_BYTES } from '../../shared/config/constants'
+import { canonicalizeHttpMethod } from '../../shared/utils/httpMethod'
 import type { AuthenticationRequest } from '../../shared/models/requests/AuthenticationRequest'
 
 /** One served HTTP-mock request, surfaced on a scenario `httpListen` node's
@@ -356,10 +357,13 @@ class HTTPExecutionService {
         }
       }
 
-      // Execute request
+      // Execute request. Known verbs are upper-cased (post -> POST); a custom
+      // verb goes out verbatim — method tokens are case-sensitive (RFC 9110
+      // §5.1.1), so a server-defined 'Machin' must not be forced to 'MACHIN'.
+      const wireMethod = canonicalizeHttpMethod(method)
       let result = await this.makeRequest({
         url: parsedUrl,
-        method: method.toUpperCase(),
+        method: wireMethod,
         headers,
         body,
         timeout,
@@ -383,7 +387,7 @@ class HTTPExecutionService {
           }
           result = await this.makeRequest({
             url: parsedUrl,
-            method: method.toUpperCase(),
+            method: wireMethod,
             headers,
             body,
             timeout,

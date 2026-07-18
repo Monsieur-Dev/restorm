@@ -369,6 +369,7 @@
     "cancel": "Ακύρωση",
     "urlPlaceholder": "URL αιτήματος",
     "methodSelect": "Επιλογή μεθόδου HTTP",
+    "methodPicker": "Επιλογή μεθόδου",
     "addHeader": "Προσθήκη κεφαλίδας",
     "addParam": "Προσθήκη παραμέτρου",
     "environmentSelector": {

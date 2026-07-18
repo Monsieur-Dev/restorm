@@ -368,6 +368,7 @@
     "cancel": "Hủy",
     "urlPlaceholder": "URL yêu cầu",
     "methodSelect": "Chọn phương thức HTTP",
+    "methodPicker": "Chọn phương thức",
     "addHeader": "Thêm header",
     "addParam": "Thêm tham số",
     "environmentSelector": {

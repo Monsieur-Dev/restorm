@@ -134,6 +134,39 @@ When('I click Cancel', async () => {
   await page.locator(CANCEL_BTN).click()
 })
 
+const METHOD_INPUT = '[data-testid="http-request-method-select-input"]'
+const METHOD_PICKER = '[data-testid="http-request-method-select-picker"]'
+
+When('I open the method picker', async () => {
+  if (page === null) throw new Error('launch first')
+  await page.locator(METHOD_PICKER).click()
+})
+
+Then('the method picker offers {string}', async ({}, verb: string) => {
+  if (page === null) throw new Error('launch first')
+  const option = page.locator(`[data-testid="http-request-method-select-option-${verb}"]`).first()
+  await expect(option).toBeVisible({ timeout: 10_000 })
+})
+
+When('I pick {string} from the method picker', async ({}, verb: string) => {
+  if (page === null) throw new Error('launch first')
+  await page.locator(`[data-testid="http-request-method-select-option-${verb}"]`).first().click()
+})
+
+When('I type {string} into the method combo', async ({}, text: string) => {
+  if (page === null) throw new Error('launch first')
+  const input = page.locator(METHOD_INPUT).first()
+  await input.fill(text)
+  // Commit happens on blur: the combo canonicalizes a known verb to upper-case
+  // and passes a custom verb through verbatim.
+  await input.blur()
+})
+
+Then('the method combo shows {string}', async ({}, expected: string) => {
+  if (page === null) throw new Error('launch first')
+  await expect(page.locator(METHOD_INPUT).first()).toHaveValue(expected, { timeout: 10_000 })
+})
+
 Then('the response status is {string}', async ({}, status: string) => {
   if (page === null) throw new Error('launch first')
   await openInfosTab(page)

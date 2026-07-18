@@ -369,6 +369,7 @@
     "cancel": "Annuleren",
     "urlPlaceholder": "URL van het verzoek",
     "methodSelect": "HTTP-methode selecteren",
+    "methodPicker": "Methode kiezen",
     "addHeader": "Header toevoegen",
     "addParam": "Parameter toevoegen",
     "environmentSelector": {

@@ -369,6 +369,7 @@
     "cancel": "Peruuta",
     "urlPlaceholder": "Pyynnön URL",
     "methodSelect": "Valitse HTTP-menetelmä",
+    "methodPicker": "Valitse menetelmä",
     "addHeader": "Lisää otsake",
     "addParam": "Lisää parametri",
     "environmentSelector": {

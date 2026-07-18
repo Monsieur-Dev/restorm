@@ -368,6 +368,7 @@
     "cancel": "취소",
     "urlPlaceholder": "요청 URL",
     "methodSelect": "HTTP 메서드 선택",
+    "methodPicker": "메서드 선택",
     "addHeader": "헤더 추가",
     "addParam": "매개변수 추가",
     "environmentSelector": {

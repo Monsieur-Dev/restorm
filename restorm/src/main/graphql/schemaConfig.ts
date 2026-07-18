@@ -190,7 +190,7 @@ function registerInputTypes(): void {
   id: String
   name: String!
   type: RequestType!
-  method: HTTPMethod!
+  method: String!
   url: String!
   headers: [KeyValueInput!]
   params: [KeyValueInput!]

@@ -45,6 +45,24 @@ Feature: HTTP/REST execution end-to-end
     And the response body contains "\"method\": \"POST\""
     And the response body contains "hello"
 
+  Scenario: A QUERY request carries a body to the wire
+    When I open the "QUERY echo" request tab via MCP
+    And I click Send
+    Then the response status is "200"
+    And the response body contains "\"method\": \"QUERY\""
+    And the response body contains "available"
+
+  Scenario: The method combo picks a known verb and canonicalizes case, custom verbs pass through
+    When I open the "GET echo" request tab via MCP
+    And I open the method picker
+    Then the method picker offers "QUERY"
+    When I pick "QUERY" from the method picker
+    Then the method combo shows "QUERY"
+    When I type "post" into the method combo
+    Then the method combo shows "POST"
+    When I type "Machin" into the method combo
+    Then the method combo shows "Machin"
+
   Scenario: x-www-form-urlencoded body
     When I open the "Form urlencoded" request tab via MCP
     And I click Send

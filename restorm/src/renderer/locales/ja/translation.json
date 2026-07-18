@@ -368,6 +368,7 @@
     "cancel": "キャンセル",
     "urlPlaceholder": "リクエスト URL",
     "methodSelect": "HTTP メソッドを選択",
+    "methodPicker": "メソッドを選択",
     "addHeader": "ヘッダーを追加",
     "addParam": "パラメータを追加",
     "environmentSelector": {

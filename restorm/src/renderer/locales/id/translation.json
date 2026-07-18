@@ -368,6 +368,7 @@
     "cancel": "Batal",
     "urlPlaceholder": "URL permintaan",
     "methodSelect": "Pilih metode HTTP",
+    "methodPicker": "Pilih metode",
     "addHeader": "Tambah header",
     "addParam": "Tambah parameter",
     "environmentSelector": {

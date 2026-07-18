@@ -31,7 +31,7 @@ collections:
             enabled: true
             value:
               type: string
-              value: /home/yoann/git/restorm-master/restorm-wt/task-249/restorm/tests/e2e/samples/fixtures/upload.txt
+              value: /home/yoann/git/restorm-master/restorm-wt/task-238/restorm/tests/e2e/samples/fixtures/upload.txt
         id: 8c25de44-9643-47e1-b557-af39e245e119
         name: Default
     items:
@@ -119,6 +119,25 @@ collections:
         headers: []
         params: []
         pathParams: []
+        deprecated: false
+        type: http
+      - documentation: ''
+        tags: []
+        id: 7c63ec7c-34a6-4d23-850f-713239459a6f
+        name: QUERY echo
+        method: QUERY
+        url: '{{util}}/echo'
+        headers:
+          - key: Content-Type
+            enabled: true
+            value:
+              type: string
+              value: application/json
+        params: []
+        pathParams: []
+        body:
+          type: text
+          content: '{"filter":{"status":"available"}}'
         deprecated: false
         type: http
       - documentation: ''

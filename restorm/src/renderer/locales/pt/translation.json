@@ -369,6 +369,7 @@
     "cancel": "Cancelar",
     "urlPlaceholder": "URL do pedido",
     "methodSelect": "Selecionar método HTTP",
+    "methodPicker": "Escolher método",
     "addHeader": "Adicionar cabeçalho",
     "addParam": "Adicionar parâmetro",
     "environmentSelector": {

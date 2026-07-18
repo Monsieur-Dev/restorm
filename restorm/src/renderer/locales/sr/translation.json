@@ -370,6 +370,7 @@
     "cancel": "Otkaži",
     "urlPlaceholder": "URL zahteva",
     "methodSelect": "Izaberi HTTP metodu",
+    "methodPicker": "Izaberi metodu",
     "addHeader": "Dodaj zaglavlje",
     "addParam": "Dodaj parametar",
     "environmentSelector": {
