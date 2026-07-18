@@ -1,5 +1,5 @@
-import React, { useMemo, useState, useCallback, useEffect, useRef, forwardRef, useImperativeHandle } from 'react'
-import { EditorWorkbench, findGroup, isTabGroupNode, isContainerNode, logger, IconView, TabSwitcherOverlay, navigationService, useFeature, MiniBrowserPanel, ConsolePanel, SettingsPage, McpLogsPanel, Tabs, MarkdownEditor, FirewallPanel, type Tab, type ContextMenuItem, type McpLogsLabels } from 'electron-core-ui/renderer'
+import React, { useMemo, useState, useCallback, useEffect, useReducer, useRef, forwardRef, useImperativeHandle } from 'react'
+import { EditorWorkbench, findGroup, isTabGroupNode, isContainerNode, logger, IconView, TabSwitcherOverlay, navigationService, useFeature, MiniBrowserPanel, ConsolePanel, SettingsPage, McpLogsPanel, Tabs, MarkdownEditor, FirewallPanel, type Tab, type ContextMenuItem, type McpLogsLabels , eventBus } from 'electron-core-ui/renderer'
 import { miniBrowserDriver } from '../../../services/miniBrowserDriver'
 import type { EditorWorkbenchCallbacks, WorkbenchTree, EditorTab, EditorWorkbenchHandle, RebuildTabCallback, TabSwitcherItem } from 'electron-core-ui/renderer'
 import type { Icon } from 'electron-core-ui/types'
@@ -42,7 +42,10 @@ import { FolderView } from '../../Folders/FolderView'
 import { EnvironmentFolderView } from '../../Folders/EnvironmentFolderView'
 import type { EnvironmentFolder, Folder, Request, Scenario, ScenarioNode, ScenarioEdge } from '../../../../../shared/types/collections'
 import { getFolderIcon } from '../../../utils/treeSearch'
+import { DocumentEvents } from '../../../services/DocumentEvents'
 import { Badge } from '../../common/Badge'
+import { RegistryBadge } from '../../common/RegistryBadge'
+import { httpBadgeIdFor } from '../../../../../shared/utils/httpMethod'
 import { ScenarioRunningBadge } from '../../common/ScenarioRunningBadge'
 import { ServerListeningBadge } from '../../common/ServerListeningBadge'
 import { RequestExecutingBadge } from '../../common/RequestExecutingBadge'
@@ -289,6 +292,17 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
   // tab actually is now.
   const treeRef = useRef<WorkbenchTree>(tree)
   useEffect(() => { treeRef.current = tree }, [tree])
+
+  // Reactive request mutations (method, Kafka mode, server flag, …) don't
+  // flow through any workbench state, so a tab badge minted in
+  // renderTabLabel would go stale until an unrelated re-render (e.g. a
+  // server tab kept showing its old method after the user changed it).
+  // Re-render on the debounced REQUEST_UPDATED the reactive proxies emit.
+  const [, bumpRequestTick] = useReducer((count: number) => count + 1, 0)
+  useEffect(() => {
+    const subscription = eventBus.subscribe(DocumentEvents.REQUEST_UPDATED, () => { bumpRequestTick() })
+    return () => { subscription.unsubscribe() }
+  }, [])
   const lastTabCountRef = useRef<number>(0)
   // Per-group active-tab tracker so we can detect activations in any
   // split pane (not just `groups[0]`) when the tree mutates
@@ -462,7 +476,12 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
     // the sidebar tree paints, driven by the same listening state.
     if (isHTTPRequestTab(restormTab)) {
       const isServer = restormTab.request.server === true
-      const badge = <Badge type={mapToBadgeType(restormTab.request.method)} mode={isServer ? 'server' : undefined} />
+      // Plain HTTP requests use the registry-driven badge (custom verbs render
+      // verbatim on the http_other color); the SRV capsule variant stays on the
+      // legacy Badge until the registry grows its server property.
+      const badge = isServer
+        ? <Badge type={mapToBadgeType(restormTab.request.method)} mode="server" />
+        : <RegistryBadge badgeId={httpBadgeIdFor(restormTab.request.method)} text={restormTab.request.method} />
       return (
         <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
           <RequestExecutingBadge requestId={restormTab.request.id}>{badge}</RequestExecutingBadge>

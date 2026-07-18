@@ -369,7 +369,6 @@
     "cancel": "Cancel",
     "urlPlaceholder": "Request URL",
     "methodSelect": "Select HTTP method",
-    "methodPicker": "Choose a method",
     "addHeader": "Add header",
     "addParam": "Add param",
     "environmentSelector": {

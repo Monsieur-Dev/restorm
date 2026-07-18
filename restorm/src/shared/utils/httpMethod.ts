@@ -15,17 +15,14 @@ export function isKnownHttpMethod(value: string): value is HTTPMethod {
 }
 
 /**
- * Canonicalize an HTTP method token for the wire.
- *
- * HTTP method tokens are case-sensitive (RFC 9110 §5.1.1), but the standard
- * verbs are upper-case by convention, so `post` / `PoSt` must go out as `POST`.
- * A CUSTOM/unknown verb, however, must be sent VERBATIM — a server may define a
- * case-sensitive token like `Machin`, and force-upper-casing it would send the
- * wrong method. So: known verb → upper-case; anything else → passed through
- * untouched (only surrounding whitespace trimmed).
+ * Badge-registry id for an HTTP method token. The method itself is NEVER
+ * normalized — it is saved and sent verbatim (method tokens are
+ * case-sensitive per RFC 9110 §5.1.1, and real servers exist that accept
+ * `post` but not `POST`). Only the BADGE lookup is case-insensitive: a
+ * well-known verb in any casing maps to its `http_<verb>` registry entry
+ * (so "Post" renders on the POST color, labeled "Post"), anything else
+ * falls back to `http_other`.
  */
-export function canonicalizeHttpMethod(method: string): string {
-  const trimmed = method.trim()
-  const upper = trimmed.toUpperCase()
-  return KNOWN_METHODS.has(upper) ? upper : trimmed
+export function httpBadgeIdFor(method: string): string {
+  return isKnownHttpMethod(method) ? `http_${method.toLowerCase()}` : 'http_other'
 }

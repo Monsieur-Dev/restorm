@@ -519,6 +519,36 @@ collections:
         pathParams: []
         deprecated: false
         type: http
+      - type: scenario
+        tags: []
+        params: []
+        nodes:
+          - id: badge-node-get-echo-000000000001
+            kind: httpRequest
+            config:
+              requestId: 330f3c58-6460-4229-b14f-05592a578697
+              label: GET echo
+            inputs:
+              - id: in
+                name: ''
+                dataType: any
+                flow: signal
+              - id: env
+                name: env
+                dataType: any
+                flow: value
+            outputs:
+              - id: response
+                name: response
+                dataType: response
+                role: response
+                flow: both
+            position:
+              x: 220
+              'y': 120
+        edges: []
+        id: badge-scenario-000000000000e2e1
+        name: Badge scenario
     id: 6b1c8f4a-0d2e-4f3b-9a1c-7e5d4c3b2a10
     name: HTTP Execution Playground
 _projectUuid: 9f8e7d6c-5b4a-3210-fedc-ba9876543210

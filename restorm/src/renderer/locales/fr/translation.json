@@ -369,7 +369,6 @@
     "cancel": "Annuler",
     "urlPlaceholder": "URL de la requête",
     "methodSelect": "Sélectionner la méthode HTTP",
-    "methodPicker": "Choisir une méthode",
     "addHeader": "Ajouter un header",
     "addParam": "Ajouter un paramètre",
     "environmentSelector": {

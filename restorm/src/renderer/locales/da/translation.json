@@ -369,7 +369,6 @@
     "cancel": "Annullér",
     "urlPlaceholder": "Anmodnings-URL",
     "methodSelect": "Vælg HTTP-metode",
-    "methodPicker": "Vælg metode",
     "addHeader": "Tilføj header",
     "addParam": "Tilføj parameter",
     "environmentSelector": {

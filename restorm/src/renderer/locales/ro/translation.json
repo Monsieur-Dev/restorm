@@ -370,7 +370,6 @@
     "cancel": "Anulează",
     "urlPlaceholder": "URL-ul cererii",
     "methodSelect": "Selectați metoda HTTP",
-    "methodPicker": "Alegeți metoda",
     "addHeader": "Adaugă antet",
     "addParam": "Adaugă parametru",
     "environmentSelector": {

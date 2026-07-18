@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next'
 import { useHandlebarsHelpers } from '../../hooks/useHandlebarsHelpers'
 import {
   Button,
+  SelectBox,
   SplitView,
   Pane,
   ControlGroup,
@@ -14,7 +15,9 @@ import {
   eventBus,
   logger,
   getContrastColor,
-  type VariableDefinition
+  type VariableDefinition,
+  type ISelectOptionItem,
+  type ISelectData
 } from 'electron-core-ui/renderer'
 import { DocumentEvents, type RequestHistoryEventPayload } from '../../services/DocumentEvents'
 import { RestormVariableInputBox } from '../RestormVariableInputBox'
@@ -30,7 +33,8 @@ import { ResponseHistoryModal } from '../Modals/ResponseHistoryModal'
 import { AuthenticationConfigurationTab } from './AuthenticationConfigurationTab'
 import { BeamWrap } from '../common/BeamWrap'
 import { ServerConfigLockedHint } from '../common/ServerConfigLockedHint'
-import { HttpMethodCombo } from './HttpMethodCombo'
+import { RegistryBadge } from '../common/RegistryBadge'
+import { KNOWN_HTTP_METHODS, httpBadgeIdFor } from '../../../../shared/utils/httpMethod'
 import { useRestormStore } from '../../store/restormStore'
 import { buildRequestPath } from '../../utils/requestPath'
 import { DEFAULT_REQUEST_TIMEOUT_MS } from '../../../../shared/config/constants'
@@ -48,7 +52,7 @@ import { SendButtonEnvSwitcher } from './SendButtonEnvSwitcher'
 import { toasterService } from 'electron-core-ui/renderer'
 import { HeaderHoverTooltip } from '../MainView/HeaderHoverTooltip'
 
-const methodSelectWrapperStyle: CSSProperties = { width: 112, flexShrink: 0 }
+const methodSelectWrapperStyle: CSSProperties = { width: 90, flexShrink: 0 }
 const urlInputWrapperStyle: CSSProperties = { flex: 1, minWidth: 0 }
 // SERVER MODE (HTTP mock) URL-section pieces: a fixed "localhost:" / "/" label
 // and the narrow numeric port field, mirroring the WebSocket server layout.
@@ -609,6 +613,21 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
     }
   }, [request])
 
+  // Combo entries: every well-known verb as its registry badge, plus the
+  // request's CURRENT method when it isn't one of them (a free-typed verb),
+  // so the closed trigger always has an option to render — the custom verb
+  // shows on the `http_other` color with its exact typed casing, and a
+  // known verb typed in non-standard casing ("Post") shows on its verb
+  // color with the typed casing.
+  const methodOptions = useMemo<ISelectOptionItem[]>(() => {
+    const verbs: string[] = [...KNOWN_HTTP_METHODS]
+    if (!verbs.includes(method)) verbs.push(method)
+    return verbs.map((verb) => ({
+      text: verb,
+      label: <RegistryBadge badgeId={httpBadgeIdFor(verb)} text={verb} />
+    }))
+  }, [method])
+
   /**
    * Smart-paste: when the user pastes a `curl` command on the URL
    * section, replace the request's transport fields with the parsed
@@ -1060,13 +1079,16 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
       )}
     <ControlGroup data-testid="http-request-url-section">
       <div style={methodSelectWrapperStyle}>
-        <HttpMethodCombo
-          value={method}
-          onChange={setMethod}
-          disabled={configLocked}
-          ariaLabel={t('requestTab.methodSelect')}
-          pickerLabel={t('requestTab.methodPicker')}
+        <SelectBox
+          id="http-method-select"
+          className=""
+          options={methodOptions}
+          selected={methodOptions.findIndex((opt) => opt.text === method)}
+          onDidSelect={(data: ISelectData) => { setMethod(data.selected) }}
+          selectBoxOptions={{ ariaLabel: t('requestTab.methodSelect'), useCustomDrawn: true, editable: true }}
+          filterPlaceholder=""
           data-testid="http-request-method-select"
+          disabled={configLocked}
         />
       </div>
       {isServer ? (

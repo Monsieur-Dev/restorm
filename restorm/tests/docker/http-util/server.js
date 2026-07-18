@@ -163,6 +163,25 @@ const server = http.createServer(async (req, res) => {
   sendJson(res, 404, { error: 'Not found', path })
 })
 
+// llhttp (Node's HTTP parser) rejects any method token outside its canonical
+// UPPERCASE list before the request handler runs — a custom-cased `post` or a
+// server-defined `Machin` would 400 at the parser. The raw bytes are still
+// visible in the clientError hook: echo the method token back manually so
+// clients can prove their wire sends the token verbatim.
+server.on('clientError', (err, socket) => {
+  const raw = err && err.rawPacket ? err.rawPacket.toString('utf-8') : ''
+  const m = /^([!#$%&'*+\-.^_`|~0-9A-Za-z]+) \S+ HTTP\/1\.[01]\r\n/.exec(raw)
+  if (m && err.code === 'HPE_INVALID_METHOD' && socket.writable) {
+    const body = JSON.stringify({ method: m[1], rawMethodEcho: true })
+    socket.end(
+      'HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: ' +
+      Buffer.byteLength(body) + '\r\nConnection: close\r\n\r\n' + body
+    )
+    return
+  }
+  socket.destroy(err)
+})
+
 server.listen(PORT, () => {
   console.log(`http-util mock listening on :${PORT}`)
 })

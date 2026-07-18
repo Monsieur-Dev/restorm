@@ -12,6 +12,8 @@ import {
 import type { FolderItem } from '../../../shared/types/collections'
 import { folderItemToListViewItem } from '../services/FolderToListView'
 import { Badge } from '../components/common/Badge'
+import { RegistryBadge } from '../components/common/RegistryBadge'
+import { httpBadgeIdFor } from '../../../shared/utils/httpMethod'
 import { mapToBadgeType, requestBadgeType, requestBadgeMode, requestBadgeIcon } from '../utils/badgeUtils'
 import type { Request } from '../../../shared/types/collections'
 import { findItemById } from '../utils/treeSearch'
@@ -115,7 +117,7 @@ export function useFavoritesAndOpenItems(
 
   const renderOptions = useMemo(() => ({
     expandedIds: new Set<string>(),
-    renderMethodBadge: (method: string) => React.createElement(Badge, { type: mapToBadgeType(method) }),
+    renderMethodBadge: (method: string) => React.createElement(RegistryBadge, { badgeId: httpBadgeIdFor(method), text: method }),
     renderProtocolBadge: (protocol: string, label?: string, mode?: 'client' | 'server') =>
       React.createElement(Badge, { type: mapToBadgeType(protocol), label, mode }),
     renderRequestBadge: (request: Request) =>

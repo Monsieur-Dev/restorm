@@ -1,0 +1,19 @@
+/* Registry-driven badge pill. The HEIGHT is pinned to the scenario badge's
+ * rendered height (18px) so rows mixing protocol badges and scenario badges
+ * align; the radius matches every other badge pill. Colors come from the
+ * registry entry (theme-token references), never from per-badge CSS rules. */
+.registry-badge {
+  height: 18px;
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1.2;
+  white-space: nowrap;
+  color: var(--badge-on-accent, #ffffff);
+  font-family: var(--font-family);
+}

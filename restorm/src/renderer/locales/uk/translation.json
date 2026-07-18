@@ -371,7 +371,6 @@
     "cancel": "Скасувати",
     "urlPlaceholder": "URL запиту",
     "methodSelect": "Виберіть метод HTTP",
-    "methodPicker": "Виберіть метод",
     "addHeader": "Додати заголовок",
     "addParam": "Додати параметр",
     "environmentSelector": {

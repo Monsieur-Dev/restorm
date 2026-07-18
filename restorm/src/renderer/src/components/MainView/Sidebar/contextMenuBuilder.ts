@@ -5,6 +5,7 @@
 import React from 'react'
 import type { ListViewItemData } from 'electron-core-ui/renderer'
 import { Badge } from '../../common/Badge'
+import { RegistryBadge } from '../../common/RegistryBadge'
 import { kafkaModeIcon } from '../../../utils/badgeUtils'
 
 export interface SidebarContextMenuItem {
@@ -105,31 +106,31 @@ export const buildAddSubmenu = (
   {
     id: `add-http-get-${parentId}`,
     label: t('sidebar.contextMenu.add.httpGet'),
-    icon: React.createElement(Badge, { type: 'GET' }),
+    icon: React.createElement(RegistryBadge, { badgeId: 'http_get', text: 'GET' }),
     onClick: () => { onAddChildItem(parentId, 'http-get') }
   },
   {
     id: `add-http-post-${parentId}`,
     label: t('sidebar.contextMenu.add.httpPost'),
-    icon: React.createElement(Badge, { type: 'POST' }),
+    icon: React.createElement(RegistryBadge, { badgeId: 'http_post', text: 'POST' }),
     onClick: () => { onAddChildItem(parentId, 'http-post') }
   },
   {
     id: `add-http-put-${parentId}`,
     label: t('sidebar.contextMenu.add.httpPut'),
-    icon: React.createElement(Badge, { type: 'PUT' }),
+    icon: React.createElement(RegistryBadge, { badgeId: 'http_put', text: 'PUT' }),
     onClick: () => { onAddChildItem(parentId, 'http-put') }
   },
   {
     id: `add-http-patch-${parentId}`,
     label: t('sidebar.contextMenu.add.httpPatch'),
-    icon: React.createElement(Badge, { type: 'PATCH' }),
+    icon: React.createElement(RegistryBadge, { badgeId: 'http_patch', text: 'PATCH' }),
     onClick: () => { onAddChildItem(parentId, 'http-patch') }
   },
   {
     id: `add-http-delete-${parentId}`,
     label: t('sidebar.contextMenu.add.httpDelete'),
-    icon: React.createElement(Badge, { type: 'DELETE' }),
+    icon: React.createElement(RegistryBadge, { badgeId: 'http_delete', text: 'DELETE' }),
     onClick: () => { onAddChildItem(parentId, 'http-delete') }
   },
   // HTTP mock server: restorm hosts a local HTTP endpoint (METHOD + PATH) that

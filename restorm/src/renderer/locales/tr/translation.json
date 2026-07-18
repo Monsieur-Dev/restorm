@@ -369,7 +369,6 @@
     "cancel": "İptal",
     "urlPlaceholder": "İstek URL'si",
     "methodSelect": "HTTP yöntemini seçin",
-    "methodPicker": "Yöntem seç",
     "addHeader": "Başlık ekle",
     "addParam": "Parametre ekle",
     "environmentSelector": {

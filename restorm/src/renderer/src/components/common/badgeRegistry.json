@@ -1,0 +1,37 @@
+{
+  "http_get": {
+    "color": "var(--badge-get-background)",
+    "text": "GET"
+  },
+  "http_post": {
+    "color": "var(--badge-post-background)",
+    "text": "POST"
+  },
+  "http_put": {
+    "color": "var(--badge-put-background)",
+    "text": "PUT"
+  },
+  "http_patch": {
+    "color": "var(--badge-patch-background)",
+    "text": "PATCH"
+  },
+  "http_delete": {
+    "color": "var(--badge-delete-background)",
+    "text": "DELETE"
+  },
+  "http_head": {
+    "color": "var(--badge-head-background)",
+    "text": "HEAD"
+  },
+  "http_options": {
+    "color": "var(--badge-options-background)",
+    "text": "OPTIONS"
+  },
+  "http_query": {
+    "color": "var(--badge-gql-background)",
+    "text": "QUERY"
+  },
+  "http_other": {
+    "color": "var(--badge-other-background)"
+  }
+}

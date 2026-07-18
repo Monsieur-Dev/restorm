@@ -47,6 +47,8 @@ import './scenarioEnvPreview'
 import { useSecretPreviewVersion } from './scenarioSecretPreview'
 import { layoutScenarioGraph, scenarioGraphNeedsPlacement, SCENARIO_NODE_FALLBACK_WIDTH, SCENARIO_NODE_FALLBACK_HEIGHT } from '../../../../shared/scenarioGraphLayout'
 import { SCENARIO_ADD_REQUEST_GROUPS, SCENARIO_ADD_SCENARIO_ENTRY, SCENARIO_ADD_SOCKETIO_ACTIONS, SCENARIO_ADD_WEBSOCKET_ACTIONS, SCENARIO_ADD_STOMP_ACTIONS, SCENARIO_ADD_SSE_ACTIONS, SCENARIO_ADD_MQTT_ACTIONS, SCENARIO_ADD_AMQP_ACTIONS, SCENARIO_ADD_REDIS_ACTIONS, SCENARIO_ADD_KAFKA_ACTIONS, SCENARIO_ADD_GRPC_ACTIONS, SCENARIO_ADD_HTTP_ACTIONS, SCENARIO_ADD_GRPC_SERVER_ACTIONS, SCENARIO_ADD_SOAP_ACTIONS, SCENARIO_ADD_GRAPHQL_ACTIONS, scenarioAddIcon, scenarioAddSocketioIcon, scenarioAddWebsocketIcon, scenarioAddStompIcon, scenarioAddSseIcon, scenarioAddMqttIcon, scenarioAddAmqpIcon, scenarioAddRedisIcon, scenarioAddKafkaIcon, scenarioAddGrpcIcon, scenarioAddHttpIcon, scenarioAddSoapIcon, scenarioAddGraphqlIcon } from './scenarioChildPalette'
+import { RegistryBadge } from '../common/RegistryBadge'
+import { httpBadgeIdFor } from '../../../../shared/utils/httpMethod'
 import type { AddChildKind } from '../MainView/Sidebar/contextMenuBuilder'
 import type { TFunction } from 'i18next'
 import { ScenarioGraphPreview } from '../MainView/Titlebar/ScenarioGraphPreview'
@@ -318,7 +320,15 @@ function buildScenarioPaletteItems(p: PaletteBuildParams): ContextMenuItem[] {
       const groupItems = (group: typeof SCENARIO_ADD_REQUEST_GROUPS[number]): ContextMenuItem[] =>
         group.flatMap((c): ContextMenuItem[] => {
           const cb = p.pickChild(c.kind)
-          return cb ? [{ id: `add-${c.kind}`, label: p.t(c.labelKey, c.defaultLabel), icon: scenarioAddIcon(c.badge, c.mode), onClick: cb }] : []
+          if (!cb) return []
+          // Plain HTTP verb entries use the registry-driven badge (routed by
+          // KIND — the 'QUERY' badge type is shared with GraphQL, so the badge
+          // type alone can't discriminate). The http-server capsule and every
+          // other protocol stay on the legacy Badge.
+          const icon = c.kind.startsWith('http-') && c.mode === undefined
+            ? <RegistryBadge badgeId={httpBadgeIdFor(c.badge)} text={c.badge} />
+            : scenarioAddIcon(c.badge, c.mode)
+          return [{ id: `add-${c.kind}`, label: p.t(c.labelKey, c.defaultLabel), icon, onClick: cb }]
         })
       // The auth request sits in its own (last) group; the Socket.IO action
       // section is inserted JUST BEFORE it.

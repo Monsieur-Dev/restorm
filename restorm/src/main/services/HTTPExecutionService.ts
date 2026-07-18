@@ -4,13 +4,13 @@
  */
 
 import http from 'http'
-import https from 'https'
 import type { IncomingMessage, ServerResponse } from 'http'
 import fs from 'fs'
 import { basename } from 'path'
-import { randomBytes } from 'crypto'
+import { randomBytes, randomUUID } from 'crypto'
 import { URL } from 'url'
 import { BrowserWindow } from 'electron'
+import { request as undiciRequest, type Dispatcher } from 'undici'
 import { logger } from 'electron-core-ui/main'
 import { contextService } from './ContextService'
 import { websocketExecutionService } from './WebSocketExecutionService'
@@ -18,9 +18,9 @@ import { authenticationCacheService, type ResolvedAuthShape } from './Authentica
 import { responseHistoryService } from './ResponseHistoryService'
 import { secretHydrationService } from './secrets/SecretHydrationService'
 import { collectRequestSecrets } from './secrets/collectRequestSecrets'
-import { withFirewallBypass } from 'electron-core-ui/main'
+import { withFirewallBypass, isFirewallBypassed, firewallService, permissionService } from 'electron-core-ui/main'
+import type { RequestRecord } from 'electron-core-ui/main'
 import { DEFAULT_REQUEST_TIMEOUT_MS, MAX_RESPONSE_BYTES } from '../../shared/config/constants'
-import { canonicalizeHttpMethod } from '../../shared/utils/httpMethod'
 import type { AuthenticationRequest } from '../../shared/models/requests/AuthenticationRequest'
 
 /** One served HTTP-mock request, surfaced on a scenario `httpListen` node's
@@ -357,10 +357,12 @@ class HTTPExecutionService {
         }
       }
 
-      // Execute request. Known verbs are upper-cased (post -> POST); a custom
-      // verb goes out verbatim — method tokens are case-sensitive (RFC 9110
-      // §5.1.1), so a server-defined 'Machin' must not be forced to 'MACHIN'.
-      const wireMethod = canonicalizeHttpMethod(method)
+      // Execute request. The method token goes out EXACTLY as stored — no
+      // case normalization of any kind. Method tokens are case-sensitive
+      // (RFC 9110 §5.1.1) and real-world servers exist that accept 'post'
+      // but not 'POST'; whatever the user committed in the combo is the
+      // wire truth.
+      const wireMethod = method.trim()
       let result = await this.makeRequest({
         url: parsedUrl,
         method: wireMethod,
@@ -844,105 +846,130 @@ class HTTPExecutionService {
     // server-controlled and could point at cloud-metadata (169.254.169.254),
     // localhost, or an RFC1918 address (SSRF), so it is vetted by the
     // firewall normally; the user can still allow it via the prompt.
-    const dispatch = (): Promise<{ statusCode: number; statusText: string; headers: Record<string, string | string[]>; body: string; bodyIsBase64?: boolean }> => new Promise((resolve, reject) => {
+    // Transport = undici, NOT node:http: Node's ClientRequest upper-cases
+    // EVERY method token (`this.method = method.toUpperCase()` in
+    // _http_client), which breaks verbatim custom-cased verbs — the app
+    // guarantees that the stored method ('post', 'Machin') hits the wire
+    // exactly as saved. undici sends the token untouched.
+    //
+    // Consequence: these calls no longer pass through the firewall's patched
+    // `http.request` chokepoint, so Layer B's HTTP-level flow (audit record →
+    // classify → prompt await) is reproduced explicitly below. The socket-level
+    // HardenInterceptor still vets the underlying connect as defence-in-depth.
+    const dispatch = async (): Promise<{ statusCode: number; statusText: string; headers: Record<string, string | string[]>; body: string; bodyIsBase64?: boolean }> => {
       const { url, method, headers, body, timeout, signal } = options
-
       const isHttps = url.protocol === 'https:'
-      const httpModule = isHttps ? https : http
+      const port = url.port !== '' ? Number(url.port) : (isHttps ? 443 : 80)
 
-      const requestOptions: http.RequestOptions = {
-        hostname: url.hostname,
-        port: url.port || (isHttps ? 443 : 80),
-        path: url.pathname + url.search,
+      const record: RequestRecord = {
+        id: randomUUID(),
+        timestamp: new Date().toISOString(),
+        source: isHttps ? 'main-https' : 'main-http',
+        protocol: isHttps ? 'https' : 'http',
         method,
-        headers,
-        timeout
+        url: url.toString(),
+        host: url.hostname,
+        port,
+        headers: { ...headers },
+        ...(typeof body === 'string' ? { body } : {}),
+        verdict: 'pending'
+      }
+      if (options.bypassFirewall || isFirewallBypassed()) {
+        // User-initiated hop: pre-authorised, but still audited (the patched
+        // http.request used to emit this allow record — keep the console
+        // showing every Send).
+        firewallService.emit({ ...record, verdict: 'allow' })
+      } else {
+        const checkInput = { scheme: record.protocol, host: record.host, port, source: record.source }
+        const cls = permissionService.classify(checkInput)
+        if (cls === 'deny') {
+          firewallService.emit({ ...record, verdict: 'deny', errorMessage: 'firewall: denied (blacklist)' })
+          throw new Error(`Firewall blocked outbound request to ${record.host}:${String(port)}`)
+        }
+        if (cls === 'prompt') {
+          firewallService.emit(record)
+          const verdict = await permissionService.check(checkInput)
+          firewallService.emit({ ...record, verdict, ...(verdict === 'deny' ? { errorMessage: 'firewall: denied' } : {}) })
+          if (verdict === 'deny') {
+            throw new Error(`Firewall blocked outbound request to ${record.host}:${String(port)}`)
+          }
+        } else {
+          firewallService.emit({ ...record, verdict: 'allow' })
+        }
       }
 
-      // Handle abort signal
-      const abortHandler = (): void => {
-        request.destroy()
-        reject(new Error('AbortError'))
+      const mapTransportError = (err: unknown): Error => {
+        const code = (err as { code?: string }).code
+        if ((err as Error).name === 'AbortError' || code === 'UND_ERR_ABORTED') return new Error('AbortError')
+        if (code === 'UND_ERR_HEADERS_TIMEOUT' || code === 'UND_ERR_BODY_TIMEOUT' || code === 'UND_ERR_CONNECT_TIMEOUT') return new Error('Request timeout')
+        return err instanceof Error ? err : new Error(String(err))
       }
-      signal.addEventListener('abort', abortHandler, { once: true })
 
-      const request = httpModule.request(requestOptions, (response) => {
-        const chunks: Buffer[] = []
-        let received = 0
+      let response: Dispatcher.ResponseData
+      try {
+        response = await undiciRequest(url, {
+          method: method as Dispatcher.HttpMethod,
+          headers,
+          ...(body !== undefined ? { body } : {}),
+          signal,
+          headersTimeout: timeout,
+          bodyTimeout: timeout
+        })
+      } catch (err) {
+        throw mapTransportError(err)
+      }
 
-        response.on('data', (chunk: Buffer) => {
-          received += chunk.length
+      const chunks: Buffer[] = []
+      let received = 0
+      try {
+        for await (const chunk of response.body) {
+          const buf = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk as Uint8Array)
+          received += buf.length
           if (received > MAX_RESPONSE_BYTES) {
-            // Bound main-process memory: destroy the socket and reject
+            // Bound main-process memory: destroy the stream and reject
             // rather than keep buffering an unbounded body.
-            signal.removeEventListener('abort', abortHandler)
-            request.destroy()
-            reject(new Error(`Response exceeded the ${MAX_RESPONSE_BYTES}-byte limit`))
-            return
+            response.body.destroy()
+            throw new Error(`Response exceeded the ${String(MAX_RESPONSE_BYTES)}-byte limit`)
           }
-          chunks.push(chunk)
-        })
+          chunks.push(buf)
+        }
+      } catch (err) {
+        if (err instanceof Error && err.message.includes('byte limit')) throw err
+        throw mapTransportError(err)
+      }
+      const bodyBuffer = Buffer.concat(chunks)
 
-        response.on('end', () => {
-          signal.removeEventListener('abort', abortHandler)
-          const bodyBuffer = Buffer.concat(chunks)
+      const responseHeaders: Record<string, string | string[]> = {}
+      for (const [key, value] of Object.entries(response.headers)) {
+        if (value !== undefined) responseHeaders[key] = value
+      }
+      // undici does not surface the HTTP/1.1 reason phrase — map the code to
+      // its canonical text (what virtually every server sends anyway).
+      const statusText = http.STATUS_CODES[response.statusCode] ?? ''
 
-          // Convert headers to plain object
-          const responseHeaders: Record<string, string | string[]> = {}
-          for (const [key, value] of Object.entries(response.headers)) {
-            if (value !== undefined) {
-              responseHeaders[key] = value
-            }
-          }
-
-          // Preserve binary bodies: a text response decodes to UTF-8 as
-          // before; a binary one (by Content-Type or non-text bytes) is
-          // base64-encoded so it round-trips intact to the renderer,
-          // which offers a download rather than a corrupting text render.
-          const contentTypeRaw = responseHeaders['content-type']
-          const contentType = Array.isArray(contentTypeRaw) ? contentTypeRaw[0] : contentTypeRaw
-          if (this.isBinaryResponse(contentType, bodyBuffer)) {
-            resolve({
-              statusCode: response.statusCode ?? 0,
-              statusText: response.statusMessage ?? '',
-              headers: responseHeaders,
-              body: bodyBuffer.toString('base64'),
-              bodyIsBase64: true
-            })
-            return
-          }
-
-          resolve({
-            statusCode: response.statusCode ?? 0,
-            statusText: response.statusMessage ?? '',
-            headers: responseHeaders,
-            body: bodyBuffer.toString('utf-8')
-          })
-        })
-
-        response.on('error', (err) => {
-          signal.removeEventListener('abort', abortHandler)
-          reject(err)
-        })
-      })
-
-      request.on('error', (err) => {
-        signal.removeEventListener('abort', abortHandler)
-        reject(err)
-      })
-
-      request.on('timeout', () => {
-        signal.removeEventListener('abort', abortHandler)
-        request.destroy()
-        reject(new Error('Request timeout'))
-      })
-
-      if (body !== undefined) {
-        request.write(body)
+      // Preserve binary bodies: a text response decodes to UTF-8 as
+      // before; a binary one (by Content-Type or non-text bytes) is
+      // base64-encoded so it round-trips intact to the renderer,
+      // which offers a download rather than a corrupting text render.
+      const contentTypeRaw = responseHeaders['content-type']
+      const contentType = Array.isArray(contentTypeRaw) ? contentTypeRaw[0] : contentTypeRaw
+      if (this.isBinaryResponse(contentType, bodyBuffer)) {
+        return {
+          statusCode: response.statusCode,
+          statusText,
+          headers: responseHeaders,
+          body: bodyBuffer.toString('base64'),
+          bodyIsBase64: true
+        }
       }
 
-      request.end()
-    })
+      return {
+        statusCode: response.statusCode,
+        statusText,
+        headers: responseHeaders,
+        body: bodyBuffer.toString('utf-8')
+      }
+    }
 
     return options.bypassFirewall ? withFirewallBypass(dispatch) : dispatch()
   }

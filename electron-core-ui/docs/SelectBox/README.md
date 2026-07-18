@@ -47,6 +47,7 @@ export interface ISelectBoxOptions {
   ariaDescription?: string
   minBottomMargin?: number
   optionsAsChildren?: boolean
+  editable?: boolean
 }
 
 // SelectBox styles
@@ -92,6 +93,7 @@ export interface ISelectData {
   - `ariaDescription` : ARIA description
   - `minBottomMargin` : Minimum bottom margin for dropdown positioning
   - `optionsAsChildren` : Whether options are rendered as children
+  - `editable` : Combobox mode. The dropdown's filter row doubles as a free-text entry (always rendered, regardless of `filterThreshold`). Enter — or closing the popup by clicking outside — commits the typed text through `onDidSelect` with `index: -1`, VERBATIM (typing `Post` never silently becomes the `POST` option); arrow-navigating onto an option switches Enter back to picking it, and Escape cancels. The closed trigger keeps rendering the selected option's label. Forces the custom-drawn variant (a native `<select>` can't take free text). See [Editable SelectBox (combobox)](#editable-selectbox-combobox).
 
 - **styles** (`ISelectBoxStyles`) : Custom styling overrides
 - **className** (`string`) : Additional CSS classes
@@ -102,6 +104,26 @@ export interface ISelectData {
 - **disabled** (`boolean`) : Locks the whole control (as opposed to `ISelectOptionItem.isDisabled`, which locks a single option). The trigger is greyed (matches the `InputBox`/`Toggle` disabled dimming), the dropdown can't be opened, and both pointer and keyboard input are inert — clicking, Enter/Space/arrow-keys all no-op. Default `false`. See [SelectBox with Disabled Control](#selectbox-with-disabled-control).
 
 ## Usage Examples
+
+### Editable SelectBox (combobox)
+
+A picker whose values are SUGGESTIONS, not a closed set — e.g. an HTTP method
+selector that offers the well-known verbs but accepts any custom token:
+
+```tsx
+<SelectBox
+  id="http-method-select"
+  options={verbs.map((v) => ({ text: v, label: <MethodBadge verb={v} /> }))}
+  selected={verbs.indexOf(method)}
+  onDidSelect={({ selected }) => setMethod(selected)}  // index === -1 → free text
+  selectBoxOptions={{ ariaLabel: 'HTTP method', editable: true }}
+  filterPlaceholder=""
+/>
+```
+
+The host owns normalisation: a free-text commit arrives exactly as typed
+(`index: -1`); keep the current value in `options` (append it when it isn't a
+well-known entry) so the closed trigger always has something to render.
 
 ### Basic SelectBox
 

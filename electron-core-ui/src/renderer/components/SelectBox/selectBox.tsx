@@ -19,8 +19,10 @@ const SelectBox: React.FC<SelectBoxProps> = ({
   disabled = false
 }) => {
   const testId = dataTestId ?? 'selectbox'
-  // Use native select on macOS unless explicitly overridden
-  const useCustomDrawn = selectBoxOptions?.useCustomDrawn ?? false
+  // Use native select on macOS unless explicitly overridden. Editable
+  // (combobox) mode needs the custom-drawn dropdown — a native <select>
+  // cannot take free text — so it forces the custom variant everywhere.
+  const useCustomDrawn = (selectBoxOptions?.useCustomDrawn ?? false) || (selectBoxOptions?.editable ?? false)
   const shouldUseNative = isMacintosh && !useCustomDrawn
 
   if (shouldUseNative) {

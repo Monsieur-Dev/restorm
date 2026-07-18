@@ -371,7 +371,6 @@
     "cancel": "Zrušit",
     "urlPlaceholder": "URL požadavku",
     "methodSelect": "Vybrat metodu HTTP",
-    "methodPicker": "Zvolit metodu",
     "addHeader": "Přidat hlavičku",
     "addParam": "Přidat parametr",
     "environmentSelector": {

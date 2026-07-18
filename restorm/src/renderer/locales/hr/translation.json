@@ -370,7 +370,6 @@
     "cancel": "Odustani",
     "urlPlaceholder": "URL zahtjeva",
     "methodSelect": "Odaberi HTTP metodu",
-    "methodPicker": "Odaberi metodu",
     "addHeader": "Dodaj zaglavlje",
     "addParam": "Dodaj parametar",
     "environmentSelector": {

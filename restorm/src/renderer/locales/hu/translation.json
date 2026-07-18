@@ -369,7 +369,6 @@
     "cancel": "Megszakítás",
     "urlPlaceholder": "Kérés URL-je",
     "methodSelect": "HTTP-metódus kiválasztása",
-    "methodPicker": "Metódus választása",
     "addHeader": "Fejléc hozzáadása",
     "addParam": "Paraméter hozzáadása",
     "environmentSelector": {

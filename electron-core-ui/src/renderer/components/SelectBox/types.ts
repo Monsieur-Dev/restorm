@@ -27,6 +27,16 @@ export interface ISelectBoxOptions {
   ariaDescription?: string
   minBottomMargin?: number
   optionsAsChildren?: boolean
+  /**
+   * Combobox mode: the dropdown's filter row doubles as a free-text entry.
+   * The row is always rendered (the filter threshold is ignored) and pressing
+   * Enter while the typed text matches no visible option commits the raw text
+   * through `onDidSelect` with `index: -1`; when the text narrows the list to
+   * visible options, Enter picks the focused one as usual. The closed trigger
+   * is unchanged — it keeps rendering the selected option's label. Free text
+   * needs the custom-drawn variant, so `editable` forces it on.
+   */
+  editable?: boolean
 }
 
 // Select option item interface
