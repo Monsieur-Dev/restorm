@@ -1434,6 +1434,9 @@
       },
       "file": {
         "missingPath": "Este necesară o cale de fișier."
+      },
+      "connection": {
+        "missingName": "Numele conexiunii este obligatoriu."
       }
     },
     "usage": {

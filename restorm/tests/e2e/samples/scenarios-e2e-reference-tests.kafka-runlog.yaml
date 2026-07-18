@@ -19,12 +19,13 @@
         success: true
 - message: ⚪ [<time>] start kafkaConsume
   data:
+    connectionName: Kafka consumer
     requestId: <uuid>
     label: Kafka consume (latest)
     in: true
 - message: ⚪ [<time>] done kafkaConsume
-- message: ⚪ [<time>] kafka "69e80a38-6c58-4edb-9f1f-326935614c02" connecting
-- message: ⚪ [<time>] kafka "69e80a38-6c58-4edb-9f1f-326935614c02" connected
+- message: ⚪ [<time>] kafka "Kafka consumer" connecting
+- message: ⚪ [<time>] kafka "Kafka consumer" connected
 - message: ⚪ [<time>] start kafkaProduce
   data:
     requestId: <uuid>
@@ -63,5 +64,5 @@
 - message: 🔵 [<time>] kafka chain done
 - message: ⚪ [<time>] done log
   data: {}
-- message: ⚪ [<time>] kafka "69e80a38-6c58-4edb-9f1f-326935614c02" closed
+- message: ⚪ [<time>] kafka "Kafka consumer" closed
 - message: 🔵 [<time>] ■ Kafka

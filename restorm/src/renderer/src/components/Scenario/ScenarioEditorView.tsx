@@ -2911,13 +2911,17 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
     for (const node of scenario.nodes) {
       if (node.kind !== 'socketioConnect' && node.kind !== 'websocketConnect' && node.kind !== 'stompConnect' && node.kind !== 'sseConnect' && node.kind !== 'mqttConnect' && node.kind !== 'amqpConnect' && node.kind !== 'redisSubscribe' && node.kind !== 'kafkaConsume' && node.kind !== 'grpcConnect' && node.kind !== 'httpListen' && node.kind !== 'grpcListen' && node.kind !== 'soapListen' && node.kind !== 'graphqlListen' && node.kind !== 'odataListen') continue
       const cfg = node.config as { connectionName?: unknown; requestId?: unknown }
-      const name = typeof cfg.connectionName === 'string' && cfg.connectionName.trim() !== '' ? cfg.connectionName.trim() : node.id
       // Pull the linked request's event + message so a send node can pre-fill its
       // channel + payload when this connection is selected. gRPC carries its
       // payload on `requestMessage`, AMQP on `payload`, STOMP on `sendBody` (no
       // event/channel concept for any of the three — a stompSend node has no
       // channel input, only `payload`).
       const req = typeof cfg.requestId === 'string' && resolveBoundItem ? resolveBoundItem(cfg.requestId) : null
+      // A picker never displays a raw node id: an unnamed connection falls back
+      // to its bound request's name (the id remains a last resort for a dangling
+      // reference, which the editor flags elsewhere anyway).
+      const reqName = req && isRequest(req) && typeof (req as { name?: unknown }).name === 'string' ? ((req as { name: string }).name).trim() : ''
+      const name = typeof cfg.connectionName === 'string' && cfg.connectionName.trim() !== '' ? cfg.connectionName.trim() : (reqName !== '' ? reqName : node.id)
       // Whether this connection HOSTS a server — same check the boxes use for their
       // SRV header badge (`isServerBound`). Lets a server-close vs client-close
       // picker filter its own side.

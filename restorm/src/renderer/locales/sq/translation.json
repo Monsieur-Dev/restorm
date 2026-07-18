@@ -1433,6 +1433,9 @@
       },
       "file": {
         "missingPath": "Kërkohet një shteg skedari."
+      },
+      "connection": {
+        "missingName": "Emri i lidhjes është i detyrueshëm."
       }
     },
     "usage": {

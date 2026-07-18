@@ -1433,6 +1433,9 @@
       },
       "file": {
         "missingPath": "En filsökväg krävs."
+      },
+      "connection": {
+        "missingName": "Ett anslutningsnamn krävs."
       }
     },
     "usage": {

@@ -1434,6 +1434,9 @@
       },
       "file": {
         "missingPath": "Potrebna je putanja datoteke."
+      },
+      "connection": {
+        "missingName": "Naziv veze je obavezan."
       }
     },
     "usage": {

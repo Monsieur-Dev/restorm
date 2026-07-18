@@ -1433,6 +1433,9 @@
       },
       "file": {
         "missingPath": "En filsti er påkrævet."
+      },
+      "connection": {
+        "missingName": "Et forbindelsesnavn er påkrævet."
       }
     },
     "usage": {

@@ -1432,6 +1432,9 @@
       },
       "file": {
         "missingPath": "需要檔案路徑。"
+      },
+      "connection": {
+        "missingName": "連線名稱為必填。"
       }
     },
     "usage": {

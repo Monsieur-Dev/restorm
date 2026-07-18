@@ -1433,6 +1433,9 @@
       },
       "file": {
         "missingPath": "È richiesto un percorso di file."
+      },
+      "connection": {
+        "missingName": "Il nome della connessione è obbligatorio."
       }
     },
     "usage": {

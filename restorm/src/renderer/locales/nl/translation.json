@@ -1433,6 +1433,9 @@
       },
       "file": {
         "missingPath": "Een bestandspad is vereist."
+      },
+      "connection": {
+        "missingName": "Een verbindingsnaam is verplicht."
       }
     },
     "usage": {

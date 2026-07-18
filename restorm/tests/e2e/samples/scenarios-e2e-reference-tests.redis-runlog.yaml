@@ -38,12 +38,13 @@
         success: true
 - message: ⚪ [<time>] start redisSubscribe
   data:
+    connectionName: Redis subscriber
     requestId: <uuid>
     label: Subscribe
     in: true
 - message: ⚪ [<time>] done redisSubscribe
-- message: ⚪ [<time>] redis-subscribe "4b086895-f92f-4c1c-8dc2-53511861958a" connecting
-- message: ⚪ [<time>] redis-subscribe "4b086895-f92f-4c1c-8dc2-53511861958a" connected
+- message: ⚪ [<time>] redis-subscribe "Redis subscriber" connecting
+- message: ⚪ [<time>] redis-subscribe "Redis subscriber" connected
 - message: ⚪ [<time>] start redisCommand
   data:
     requestId: <uuid>
@@ -81,5 +82,5 @@
 - message: 🔵 [<time>] redis chain done
 - message: ⚪ [<time>] done log
   data: {}
-- message: ⚪ [<time>] redis-subscribe "4b086895-f92f-4c1c-8dc2-53511861958a" closed
+- message: ⚪ [<time>] redis-subscribe "Redis subscriber" closed
 - message: 🔵 [<time>] ■ Redis

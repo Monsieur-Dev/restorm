@@ -165,7 +165,7 @@ export const ConnectionPicker: React.FC<{ id: string; data: ScenarioNodeBoxType[
   ]
   const selectedIndex = Math.max(0, connections.findIndex((c) => c.id === selectedId) + 1)
   return (
-    <div className="nodrag" onMouseDown={stop}>
+    <div className="nodrag scn-conn-picker" onMouseDown={stop}>
       <div className="scn-field-caption">{t('scenario.socketio.connection', 'connection')}</div>
       <SelectBox
         id={`scn-stream-connection-${id}`}

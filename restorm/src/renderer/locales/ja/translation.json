@@ -1432,6 +1432,9 @@
       },
       "file": {
         "missingPath": "ファイルパスが必要です。"
+      },
+      "connection": {
+        "missingName": "接続名は必須です。"
       }
     },
     "usage": {

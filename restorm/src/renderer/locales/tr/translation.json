@@ -1433,6 +1433,9 @@
       },
       "file": {
         "missingPath": "Bir dosya yolu gereklidir."
+      },
+      "connection": {
+        "missingName": "Bağlantı adı zorunludur."
       }
     },
     "usage": {

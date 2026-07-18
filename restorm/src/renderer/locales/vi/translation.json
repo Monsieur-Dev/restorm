@@ -1432,6 +1432,9 @@
       },
       "file": {
         "missingPath": "Cần có một đường dẫn tệp."
+      },
+      "connection": {
+        "missingName": "Tên kết nối là bắt buộc."
       }
     },
     "usage": {

@@ -1435,6 +1435,9 @@
       },
       "file": {
         "missingPath": "Je vyžadována cesta k souboru."
+      },
+      "connection": {
+        "missingName": "Název připojení je povinný."
       }
     },
     "usage": {

@@ -1433,6 +1433,9 @@
       },
       "file": {
         "missingPath": "Fájlútvonal megadása kötelező."
+      },
+      "connection": {
+        "missingName": "A kapcsolat neve kötelező."
       }
     },
     "usage": {

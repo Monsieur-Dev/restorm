@@ -330,6 +330,18 @@ function validateFilePath(node: ValidationNode, ctx: ScenarioValidationContext):
   return []
 }
 
+/** Connection-declaring messaging nodes (Kafka consume, Redis subscribe,
+ * STOMP / AMQP connect) — the connection name is what every close/send picker
+ * displays, so it is required: an unnamed connection would surface as a raw id
+ * in the dropdowns. */
+function validateConnectionName(node: ValidationNode, ctx: ScenarioValidationContext): ScenarioNodeError[] {
+  const name = typeof node.config['connectionName'] === 'string' ? node.config['connectionName'].trim() : ''
+  if (!name) {
+    return [{ code: 'missing-connection-name', field: 'connectionName', message: ctx.t('scenario.validation.connection.missingName', 'A connection name is required.') }]
+  }
+  return []
+}
+
 /** Validate a single box. Kinds without a rule yet return no errors. */
 export function validateScenarioNode(node: ValidationNode, ctx: ScenarioValidationContext): ScenarioNodeError[] {
   switch (node.kind) {
@@ -352,6 +364,11 @@ export function validateScenarioNode(node: ValidationNode, ctx: ScenarioValidati
     case 'readFile':
     case 'writeFile':
       return validateFilePath(node, ctx)
+    case 'kafkaConsume':
+    case 'redisSubscribe':
+    case 'stompConnect':
+    case 'amqpConnect':
+      return validateConnectionName(node, ctx)
     default:
       return []
   }

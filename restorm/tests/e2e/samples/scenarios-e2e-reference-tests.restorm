@@ -22069,6 +22069,7 @@ collections:
                   - id: 24dd2844-1bf2-412a-8ecb-0e40a1ffce8e
                     kind: kafkaConsume
                     config:
+                      connectionName: Kafka consumer
                       requestId: 69e80a38-6c58-4edb-9f1f-326935614c02
                       label: Kafka consume (latest)
                       id: 1f774ae4-f112-4b20-a026-56aca1afbcca
@@ -22313,6 +22314,7 @@ collections:
                   - id: 759e9fc5-0f0c-48ff-a035-4aab4d4cab00
                     kind: redisSubscribe
                     config:
+                      connectionName: Redis subscriber
                       requestId: 4b086895-f92f-4c1c-8dc2-53511861958a
                       label: Subscribe
                       id: d53bca25-69f0-4577-b60c-5956a2bdc2cc
@@ -22506,6 +22508,7 @@ collections:
                   - id: 0b47db79-d129-4935-bc7e-b9edc12633eb
                     kind: stompConnect
                     config:
+                      connectionName: STOMP connection
                       requestId: d22e2160-a1b9-4b45-ae57-247fd8e210cc
                       label: STOMP connect
                       id: 106b88fa-dd7a-4a5f-9280-5f42e26ab28c
@@ -22653,6 +22656,7 @@ collections:
                   - id: 3915c544-5715-45e2-9f4e-fa152d524982
                     kind: amqpConnect
                     config:
+                      connectionName: AMQP subscriber
                       requestId: 8c52935a-a3ac-4244-a512-9f2ec57f1898
                       label: AMQP subscribe
                       id: d0601737-9e85-489e-ba61-58f83aea4a89

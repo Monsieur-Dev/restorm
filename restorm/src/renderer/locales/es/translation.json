@@ -1433,6 +1433,9 @@
       },
       "file": {
         "missingPath": "Se requiere una ruta de archivo."
+      },
+      "connection": {
+        "missingName": "El nombre de la conexión es obligatorio."
       }
     },
     "usage": {

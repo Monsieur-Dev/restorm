@@ -900,6 +900,13 @@
 .scn-node-col-out {
   align-items: flex-end;
 }
+/* The input column grows into the node's width (the header often IS the widest
+ * part), so full-width fields really span the box — the output column keeps
+ * hugging the right edge through the body's space-between. */
+.scn-node-col-in {
+  flex: 1 1 auto;
+  min-width: 0;
+}
 
 /* A body row: an anchor + a cell. Min-height keeps rows aligned even when
  * one column has fewer rows than the other. */
@@ -1214,6 +1221,23 @@
 :where(.scn-node-col-in .scn-row-left .inputbox),
 :where(.scn-node-col-in .scn-row-left .select-container) {
   width: 100%;
+}
+
+/* The connection picker (send / close / server-close boxes) fills the row
+ * width: ECUI's .select-container is inline-block/auto-width by default and,
+ * at (0,1,0) specificity, beats the zero-specificity :where() stretch rule
+ * above — so the picker needs its own heavier rule. */
+.scn-conn-picker .select-container {
+  display: block;
+  width: 100%;
+}
+
+/* A right-column row holding ONLY a field caption (e.g. the channel name over
+ * its input): hug the field below instead of centering in the 22px row
+ * footprint, so the caption-to-field gap matches the left column's. */
+.scn-node-col-out .scn-row-right:has(.scn-field-caption):not(:has(input, .select-container)) {
+  min-height: 0;
+  align-items: flex-end;
 }
 
 /* A "number + unit toggle" row (e.g. the retry delay): the numeric field keeps

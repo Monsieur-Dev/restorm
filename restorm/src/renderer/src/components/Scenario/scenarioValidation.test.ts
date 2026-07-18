@@ -231,6 +231,22 @@ describe('scenarioValidation — names', () => {
   })
 })
 
+describe('scenarioValidation — messaging connection name', () => {
+  it.each(['kafkaConsume', 'redisSubscribe', 'stompConnect', 'amqpConnect'] as const)('flags an unnamed %s connection', (kind) => {
+    const errs = run([node('a', kind)]).get('a') ?? []
+    expect(errs).toHaveLength(1)
+    expect(errs[0]).toMatchObject({ code: 'missing-connection-name', field: 'connectionName' })
+  })
+
+  it('accepts a named connection', () => {
+    expect(run([node('a', 'kafkaConsume', { connectionName: 'orders' })]).has('a')).toBe(false)
+  })
+
+  it('rejects a whitespace-only name', () => {
+    expect(codes(run([node('a', 'stompConnect', { connectionName: '   ' })]), 'a')).toContain('missing-connection-name')
+  })
+})
+
 describe('scenarioValidation — data-link selector', () => {
   it('flags an empty and a malformed selector on the consuming box', () => {
     const map = run([node('n', 'log')], { dataLinks: [

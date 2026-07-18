@@ -1,11 +1,12 @@
 - message: 🔵 [<time>] ▶ STOMP
 - message: ⚪ [<time>] start stompConnect
   data:
+    connectionName: STOMP connection
     requestId: <uuid>
     label: STOMP connect
 - message: ⚪ [<time>] done stompConnect
-- message: ⚪ [<time>] stomp "d22e2160-a1b9-4b45-ae57-247fd8e210cc" connecting
-- message: ⚪ [<time>] stomp "d22e2160-a1b9-4b45-ae57-247fd8e210cc" connected
+- message: ⚪ [<time>] stomp "STOMP connection" connecting
+- message: ⚪ [<time>] stomp "STOMP connection" connected
 - message: ⚪ [<time>] start stompSend
   data:
     connectionNodeId: <uuid>
@@ -30,5 +31,5 @@
 - message: 🔵 [<time>] stomp chain done
 - message: ⚪ [<time>] done log
   data: {}
-- message: ⚪ [<time>] stomp "d22e2160-a1b9-4b45-ae57-247fd8e210cc" closed
+- message: ⚪ [<time>] stomp "STOMP connection" closed
 - message: 🔵 [<time>] ■ STOMP

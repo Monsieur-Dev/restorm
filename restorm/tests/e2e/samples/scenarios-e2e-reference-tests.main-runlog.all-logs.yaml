@@ -8536,12 +8536,13 @@
         success: true
 - message: ⚪ [<time>] start kafkaConsume
   data:
+    connectionName: Kafka consumer
     requestId: <uuid>
     label: Kafka consume (latest)
     in: true
 - message: ⚪ [<time>] done kafkaConsume
-- message: ⚪ [<time>] kafka "69e80a38-6c58-4edb-9f1f-326935614c02" connecting
-- message: ⚪ [<time>] kafka "69e80a38-6c58-4edb-9f1f-326935614c02" connected
+- message: ⚪ [<time>] kafka "Kafka consumer" connecting
+- message: ⚪ [<time>] kafka "Kafka consumer" connected
 - message: ⚪ [<time>] start kafkaProduce
   data:
     requestId: <uuid>
@@ -8580,7 +8581,7 @@
 - message: 🔵 [<time>] kafka chain done
 - message: ⚪ [<time>] done log
   data: {}
-- message: ⚪ [<time>] kafka "69e80a38-6c58-4edb-9f1f-326935614c02" closed
+- message: ⚪ [<time>] kafka "Kafka consumer" closed
 - message: 🔵 [<time>] ■ Kafka
 - message: ⚪ [<time>] done runScenario
   data:
@@ -8630,12 +8631,13 @@
         success: true
 - message: ⚪ [<time>] start redisSubscribe
   data:
+    connectionName: Redis subscriber
     requestId: <uuid>
     label: Subscribe
     in: true
 - message: ⚪ [<time>] done redisSubscribe
-- message: ⚪ [<time>] redis-subscribe "4b086895-f92f-4c1c-8dc2-53511861958a" connecting
-- message: ⚪ [<time>] redis-subscribe "4b086895-f92f-4c1c-8dc2-53511861958a" connected
+- message: ⚪ [<time>] redis-subscribe "Redis subscriber" connecting
+- message: ⚪ [<time>] redis-subscribe "Redis subscriber" connected
 - message: ⚪ [<time>] start redisCommand
   data:
     requestId: <uuid>
@@ -8673,7 +8675,7 @@
 - message: 🔵 [<time>] redis chain done
 - message: ⚪ [<time>] done log
   data: {}
-- message: ⚪ [<time>] redis-subscribe "4b086895-f92f-4c1c-8dc2-53511861958a" closed
+- message: ⚪ [<time>] redis-subscribe "Redis subscriber" closed
 - message: 🔵 [<time>] ■ Redis
 - message: ⚪ [<time>] done runScenario
   data:
@@ -8686,11 +8688,12 @@
 - message: 🔵 [<time>] ▶ STOMP
 - message: ⚪ [<time>] start stompConnect
   data:
+    connectionName: STOMP connection
     requestId: <uuid>
     label: STOMP connect
 - message: ⚪ [<time>] done stompConnect
-- message: ⚪ [<time>] stomp "d22e2160-a1b9-4b45-ae57-247fd8e210cc" connecting
-- message: ⚪ [<time>] stomp "d22e2160-a1b9-4b45-ae57-247fd8e210cc" connected
+- message: ⚪ [<time>] stomp "STOMP connection" connecting
+- message: ⚪ [<time>] stomp "STOMP connection" connected
 - message: ⚪ [<time>] start stompSend
   data:
     connectionNodeId: <uuid>
@@ -8715,7 +8718,7 @@
 - message: 🔵 [<time>] stomp chain done
 - message: ⚪ [<time>] done log
   data: {}
-- message: ⚪ [<time>] stomp "d22e2160-a1b9-4b45-ae57-247fd8e210cc" closed
+- message: ⚪ [<time>] stomp "STOMP connection" closed
 - message: 🔵 [<time>] ■ STOMP
 - message: ⚪ [<time>] done runScenario
   data:
@@ -8728,11 +8731,12 @@
 - message: 🔵 [<time>] ▶ AMQP
 - message: ⚪ [<time>] start amqpConnect
   data:
+    connectionName: AMQP subscriber
     requestId: <uuid>
     label: AMQP subscribe
 - message: ⚪ [<time>] done amqpConnect
-- message: ⚪ [<time>] amqp "8c52935a-a3ac-4244-a512-9f2ec57f1898" connecting
-- message: ⚪ [<time>] amqp "8c52935a-a3ac-4244-a512-9f2ec57f1898" connected
+- message: ⚪ [<time>] amqp "AMQP subscriber" connecting
+- message: ⚪ [<time>] amqp "AMQP subscriber" connected
 - message: ⚪ [<time>] start amqpPublish
   data:
     connectionNodeId: <uuid>
@@ -8757,7 +8761,7 @@
 - message: 🔵 [<time>] amqp chain done
 - message: ⚪ [<time>] done log
   data: {}
-- message: ⚪ [<time>] amqp "8c52935a-a3ac-4244-a512-9f2ec57f1898" closed
+- message: ⚪ [<time>] amqp "AMQP subscriber" closed
 - message: 🔵 [<time>] ■ AMQP
 - message: ⚪ [<time>] done runScenario
   data:

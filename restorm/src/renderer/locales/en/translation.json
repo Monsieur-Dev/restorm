@@ -1433,6 +1433,9 @@
       },
       "file": {
         "missingPath": "A file path is required."
+      },
+      "connection": {
+        "missingName": "A connection name is required."
       }
     },
     "usage": {

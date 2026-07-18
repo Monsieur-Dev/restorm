@@ -1433,6 +1433,9 @@
       },
       "file": {
         "missingPath": "Tiedostopolku vaaditaan."
+      },
+      "connection": {
+        "missingName": "Yhteyden nimi vaaditaan."
       }
     },
     "usage": {

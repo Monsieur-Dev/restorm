@@ -1432,6 +1432,9 @@
       },
       "file": {
         "missingPath": "Path file wajib diisi."
+      },
+      "connection": {
+        "missingName": "Nama koneksi wajib diisi."
       }
     },
     "usage": {

@@ -1432,6 +1432,9 @@
       },
       "file": {
         "missingPath": "파일 경로가 필요합니다."
+      },
+      "connection": {
+        "missingName": "연결 이름은 필수입니다."
       }
     },
     "usage": {

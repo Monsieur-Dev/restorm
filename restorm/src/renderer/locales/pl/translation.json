@@ -1435,6 +1435,9 @@
       },
       "file": {
         "missingPath": "Wymagana jest ścieżka do pliku."
+      },
+      "connection": {
+        "missingName": "Nazwa połączenia jest wymagana."
       }
     },
     "usage": {
