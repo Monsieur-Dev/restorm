@@ -13,8 +13,8 @@ import { attachContextMenus } from '../components/MainView/Sidebar/contextMenuBu
 import type { AddChildKind } from '../components/MainView/Sidebar/contextMenuBuilder'
 import { Badge } from '../components/common/Badge'
 import { RegistryBadge } from '../components/common/RegistryBadge'
-import { httpBadgeIdFor } from '../../../shared/utils/httpMethod'
-import { mapToBadgeType, requestBadgeType, requestBadgeMode, requestBadgeIcon } from '../utils/badgeUtils'
+import { httpBadgeIdFor, isKnownHttpMethod } from '../../../shared/utils/httpMethod'
+import { mapToBadgeType, requestBadgeId } from '../utils/badgeUtils'
 import type { Request } from '../../../shared/types/collections'
 import { useDeprecatedRequestIds } from './useDeprecatedRequestIds'
 
@@ -60,8 +60,14 @@ export function useSidebarState(options: UseSidebarStateOptions): UseSidebarStat
     const renderOptions = {
       expandedIds: expandedSet,
       renderMethodBadge: (method: string) => React.createElement(RegistryBadge, { badgeId: httpBadgeIdFor(method), text: method }),
-      renderProtocolBadge: (protocol: string, label?: string, mode?: 'client' | 'server') => React.createElement(Badge, { type: mapToBadgeType(protocol), label, mode }),
-      renderRequestBadge: (request: Request) => React.createElement(Badge, { type: requestBadgeType(request), mode: requestBadgeMode(request), icon: requestBadgeIcon(request) }),
+      renderProtocolBadge: (protocol: string, label?: string, mode?: 'client' | 'server') =>
+      // The HTTP mock server's badge is method-colored: route it to the
+      // registry capsule (GraphQL's QUERY badge renamed GQL upstream, so a
+      // known-verb token here is genuinely HTTP).
+      (mode === 'server' && isKnownHttpMethod(protocol))
+        ? React.createElement(RegistryBadge, { badgeId: httpBadgeIdFor(protocol), text: label ?? protocol, server: true })
+        : React.createElement(Badge, { type: mapToBadgeType(protocol), label, mode }),
+      renderRequestBadge: (request: Request) => React.createElement(RegistryBadge, { badgeId: requestBadgeId(request) }),
       // Removed (vanished from the spec) renders strikethrough.
       // Deprecated rows are dimmed via the per-id set passed alongside
       // — the wrapper applies opacity to the whole row visual rather

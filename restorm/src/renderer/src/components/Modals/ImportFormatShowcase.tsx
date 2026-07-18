@@ -13,7 +13,7 @@
 
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Badge } from '../common/Badge'
+import { RegistryBadge } from '../common/RegistryBadge'
 import {
   ElectricBorder,
   MagicCard,
@@ -490,7 +490,7 @@ const ShowcaseBubble: React.FC<ShowcaseBubbleProps> = ({ format, phase }) => {
     >
       <header className="import-format-showcase-header">
         <h1 className="import-format-showcase-title">{format.title}</h1>
-        {format.isPro && <Badge type="PRO" />}
+        {format.isPro && <RegistryBadge badgeId="pro" />}
       </header>
       <div className="import-format-showcase-body">
         {format.inlineSvg !== undefined ? (

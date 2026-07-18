@@ -2623,7 +2623,7 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
       const boundItem = boundId ? (resolveBoundItem?.(boundId) ?? null) : null
       if (boundItem && isScenario(boundItem)) {
         title = boundItem.name
-        titleBadge = <Badge type="SCENARIO" />
+        titleBadge = <RegistryBadge badgeId="scenario" />
       }
     } else if (n.data.kind === 'httpRequest' || n.data.kind === 'soapRequest' || n.data.kind === 'redisCommand' || n.data.kind === 'kafkaProduce' || n.data.kind === 'kafkaConsume' || n.data.kind === 'socketioConnect' || n.data.kind === 'websocketConnect' || n.data.kind === 'stompConnect' || n.data.kind === 'sseConnect' || n.data.kind === 'mqttConnect' || n.data.kind === 'amqpConnect' || n.data.kind === 'redisSubscribe' || n.data.kind === 'grpcConnect' || n.data.kind === 'httpListen' || n.data.kind === 'grpcListen' || n.data.kind === 'soapListen' || n.data.kind === 'graphqlListen' || n.data.kind === 'odataListen') {
       const boundId = typeof cfg['requestId'] === 'string' ? cfg['requestId'] : null
@@ -3343,7 +3343,7 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
           <div data-scn-sublog-popover className="scn-sublog-popover" onMouseDown={(e) => { e.stopPropagation() }}>
             <Button
               externalLink
-              icon={<Badge type="SCENARIO" />}
+              icon={<RegistryBadge badgeId="scenario" />}
               onClick={() => { onOpenItem?.(subLogPopover.scenario.id); setSubLogPopover(null) }}
               data-testid="scenario-sublog-popover-title"
             >

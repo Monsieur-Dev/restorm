@@ -1,37 +1,87 @@
 {
-  "http_get": {
-    "color": "var(--badge-get-background)",
-    "text": "GET"
-  },
-  "http_post": {
-    "color": "var(--badge-post-background)",
-    "text": "POST"
-  },
-  "http_put": {
-    "color": "var(--badge-put-background)",
-    "text": "PUT"
-  },
-  "http_patch": {
-    "color": "var(--badge-patch-background)",
-    "text": "PATCH"
-  },
-  "http_delete": {
-    "color": "var(--badge-delete-background)",
-    "text": "DELETE"
-  },
-  "http_head": {
-    "color": "var(--badge-head-background)",
-    "text": "HEAD"
-  },
-  "http_options": {
-    "color": "var(--badge-options-background)",
-    "text": "OPTIONS"
-  },
-  "http_query": {
-    "color": "var(--badge-gql-background)",
-    "text": "QUERY"
-  },
-  "http_other": {
-    "color": "var(--badge-other-background)"
-  }
+  "http_get": { "color": "var(--badge-get-background)", "text": "GET" },
+  "http_post": { "color": "var(--badge-post-background)", "text": "POST" },
+  "http_put": { "color": "var(--badge-put-background)", "text": "PUT" },
+  "http_patch": { "color": "var(--badge-patch-background)", "text": "PATCH" },
+  "http_delete": { "color": "var(--badge-delete-background)", "text": "DELETE" },
+  "http_head": { "color": "var(--badge-head-background)", "text": "HEAD" },
+  "http_options": { "color": "var(--badge-options-background)", "text": "OPTIONS" },
+  "http_query": { "color": "var(--badge-gql-background)", "text": "QUERY" },
+  "http_other": { "color": "var(--badge-other-background)" },
+
+  "grpc_unary": { "color": "var(--badge-grpc-unary-background)", "text": "UNARY" },
+  "grpc_sstr": { "color": "var(--badge-grpc-sstr-background)", "text": "S-STR" },
+  "grpc_cstr": { "color": "var(--badge-grpc-cstr-background)", "text": "C-STR" },
+  "grpc_bidi": { "color": "var(--badge-grpc-bidi-background)", "text": "BIDI" },
+  "grpc": { "color": "var(--badge-grpc-background)", "text": "GRPC" },
+  "grpc_server": { "color": "var(--badge-grpc-background)", "text": "GRPC", "isServer": true },
+  "grpc_send": { "color": "var(--badge-grpc-background)", "text": "GRPC", "icon": "arrow-up" },
+  "grpc_connect": { "color": "var(--badge-grpc-background)", "text": "GRPC", "icon": "plug" },
+  "grpc_close": { "color": "var(--badge-grpc-background)", "text": "GRPC", "icon": "debug-disconnect" },
+
+  "gql": { "color": "var(--badge-gql-background)", "text": "GQL" },
+  "gql_query": { "color": "var(--badge-gql-background)", "text": "QUERY" },
+  "gql_mutation": { "color": "var(--badge-mutation-background)", "text": "MUTATION" },
+  "gql_subscription": { "color": "var(--badge-subscription-background)", "text": "SUBSCRIPTION" },
+  "gql_server": { "color": "var(--badge-gql-background)", "text": "GQL", "isServer": true },
+  "gql_query_server": { "color": "var(--badge-gql-background)", "text": "QUERY", "isServer": true },
+  "gql_subscribe": { "color": "var(--badge-gql-background)", "text": "QUERY", "icon": "broadcast" },
+  "gql_unsubscribe": { "color": "var(--badge-gql-background)", "text": "QUERY", "icon": "debug-disconnect" },
+
+  "soap": { "color": "var(--badge-soap-background)", "foreground": "var(--badge-soap-foreground, #000000)", "text": "SOAP" },
+  "soap_server": { "color": "var(--badge-soap-background)", "foreground": "var(--badge-soap-foreground, #000000)", "text": "SOAP", "isServer": true },
+
+  "ws": { "color": "var(--badge-ws-background)", "text": "WS" },
+  "ws_server": { "color": "var(--badge-ws-background)", "text": "WS", "isServer": true },
+  "ws_send": { "color": "var(--badge-ws-background)", "text": "WS", "icon": "arrow-up" },
+  "ws_connect": { "color": "var(--badge-ws-background)", "text": "WS", "icon": "plug" },
+  "ws_close": { "color": "var(--badge-ws-background)", "text": "WS", "icon": "debug-disconnect" },
+
+  "sio": { "color": "var(--badge-sio-background)", "text": "SIO" },
+  "sio_server": { "color": "var(--badge-sio-background)", "text": "SIO", "isServer": true },
+  "sio_send": { "color": "var(--badge-sio-background)", "text": "SIO", "icon": "arrow-up" },
+  "sio_connect": { "color": "var(--badge-sio-background)", "text": "SIO", "icon": "plug" },
+  "sio_close": { "color": "var(--badge-sio-background)", "text": "SIO", "icon": "debug-disconnect" },
+
+  "mqtt": { "color": "var(--badge-mqtt-background)", "foreground": "var(--badge-mqtt-foreground, #000000)", "text": "MQTT" },
+  "mqtt_server": { "color": "var(--badge-mqtt-background)", "foreground": "var(--badge-mqtt-foreground, #000000)", "text": "MQTT", "isServer": true },
+  "mqtt_send": { "color": "var(--badge-mqtt-background)", "foreground": "var(--badge-mqtt-foreground, #000000)", "text": "MQTT", "icon": "arrow-up" },
+  "mqtt_connect": { "color": "var(--badge-mqtt-background)", "foreground": "var(--badge-mqtt-foreground, #000000)", "text": "MQTT", "icon": "plug" },
+  "mqtt_close": { "color": "var(--badge-mqtt-background)", "foreground": "var(--badge-mqtt-foreground, #000000)", "text": "MQTT", "icon": "debug-disconnect" },
+
+  "stomp": { "color": "var(--badge-stomp-background)", "text": "STOMP" },
+  "stomp_send": { "color": "var(--badge-stomp-background)", "text": "STOMP", "icon": "arrow-up" },
+  "stomp_connect": { "color": "var(--badge-stomp-background)", "text": "STOMP", "icon": "plug" },
+  "stomp_close": { "color": "var(--badge-stomp-background)", "text": "STOMP", "icon": "debug-disconnect" },
+
+  "sse": { "color": "var(--badge-sse-background)", "text": "SSE" },
+  "sse_connect": { "color": "var(--badge-sse-background)", "text": "SSE", "icon": "plug" },
+  "sse_close": { "color": "var(--badge-sse-background)", "text": "SSE", "icon": "debug-disconnect" },
+
+  "kafka": { "color": "var(--badge-kafka-background)", "text": "KAFKA" },
+  "kafka_produce": { "color": "var(--badge-kafka-background)", "text": "KAFKA", "icon": "arrow-up" },
+  "kafka_consume": { "color": "var(--badge-kafka-background)", "text": "KAFKA", "icon": "plug" },
+  "kafka_browse": { "color": "var(--badge-kafka-background)", "text": "KAFKA", "icon": "eye" },
+  "kafka_close": { "color": "var(--badge-kafka-background)", "text": "KAFKA", "icon": "debug-disconnect" },
+
+  "odata": { "color": "var(--badge-odata-background)", "text": "ODATA" },
+  "odata_server": { "color": "var(--badge-odata-background)", "text": "ODATA", "isServer": true },
+
+  "redis": { "color": "var(--badge-redis-background)", "text": "REDIS" },
+  "redis_connect": { "color": "var(--badge-redis-background)", "text": "REDIS", "icon": "plug" },
+  "redis_close": { "color": "var(--badge-redis-background)", "text": "REDIS", "icon": "debug-disconnect" },
+
+  "amqp": { "color": "var(--badge-amqp-background)", "text": "AMQP" },
+  "amqp_send": { "color": "var(--badge-amqp-background)", "text": "AMQP", "icon": "arrow-up" },
+  "amqp_connect": { "color": "var(--badge-amqp-background)", "text": "AMQP", "icon": "plug" },
+  "amqp_close": { "color": "var(--badge-amqp-background)", "text": "AMQP", "icon": "debug-disconnect" },
+
+  "trpc": { "color": "var(--badge-trpc-background)", "text": "tRPC" },
+
+  "rpc": { "color": "var(--badge-other-background)", "text": "RPC" },
+  "rpc_batch": { "color": "var(--badge-other-background)", "text": "RPC[]" },
+
+  "auth": { "color": "var(--badge-auth-background)", "icon": "key" },
+  "scenario": { "color": "var(--badge-scenario-background)", "icon": "circuit-board" },
+  "pro": { "text": "PRO" }
 }

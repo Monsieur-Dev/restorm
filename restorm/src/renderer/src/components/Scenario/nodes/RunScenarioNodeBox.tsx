@@ -3,7 +3,7 @@ import { useNodeConnections, type NodeProps } from '@xyflow/react'
 import { useTranslation } from 'react-i18next'
 import { Button, Tooltip } from 'electron-core-ui/renderer'
 import { isScenario } from '../../../../../shared/types/collections'
-import { Badge } from '../../common/Badge'
+import { RegistryBadge } from '../../common/RegistryBadge'
 import { useScenarioBoundResolver } from '../scenarioBoundResolver'
 import { ScenarioNodeBoxBase, type ScenarioNodeBoxType, type ScenarioNodeCell, type ScenarioNodeSection } from './ScenarioNodeBoxBase'
 import { deriveRunScenarioPorts } from '../../../../../shared/scenarioNodePorts'
@@ -106,7 +106,7 @@ export const RunScenarioNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ i
 
   const fallbackLabel = typeof data.config?.['label'] === 'string' ? data.config['label'] : undefined
   const title = scenario?.name ?? fallbackLabel
-  const headerIcon = scenario ? <Badge type="SCENARIO" /> : undefined
+  const headerIcon = scenario ? <RegistryBadge badgeId="scenario" /> : undefined
 
   // Ports derived from the sub-scenario's input / output nodes (shared with the
   // MCP authoring path, so both agree on the exact port ids). Memoised so an

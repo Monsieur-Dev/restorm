@@ -1,5 +1,7 @@
 import React, { type ReactNode } from 'react'
-import { Badge, type BadgeType } from '../common/Badge'
+import type { BadgeType } from '../common/Badge'
+import { RegistryBadge } from '../common/RegistryBadge'
+import { resolveBadgeId } from '../../utils/badgeUtils'
 import type { AddChildKind } from '../MainView/Sidebar/contextMenuBuilder'
 
 /**
@@ -306,68 +308,78 @@ export const SCENARIO_ADD_GRAPHQL_ACTIONS: ScenarioAddGraphqlActionEntry[] = [
   { kind: 'graphqlClose', icon: 'debug-disconnect', labelKey: 'scenario.nodes.graphqlClose', defaultLabel: 'GraphQL close' }
 ]
 
-/** The protocol/scenario badge glyph for a palette entry — `mode: 'server'`
- * renders the two-part "hosts a server" pill (websocket-server / socketio-server). */
-export function scenarioAddIcon(badge: BadgeType, mode?: 'server'): ReactNode {
-  return React.createElement(Badge, { type: badge, ...(mode ? { mode } : {}) })
+/** Render the `badgeRegistry.json` badge for a palette entry, resolving the
+ * `(type, mode, action-icon)` triple onto a registry id. Every palette badge —
+ * request entry or action entry — flows through this one helper so no palette
+ * surface rebuilds a badge by hand. */
+function paletteBadge(type: BadgeType, mode: 'server' | undefined, icon: string | undefined): ReactNode {
+  const { badgeId, server } = resolveBadgeId(type, mode, icon)
+  return React.createElement(RegistryBadge, { badgeId, ...(server === true && { server: true }) })
 }
 
-/** The green "SIO" badge with the action's codicon inside (Socket.IO section). */
+/** The protocol/scenario badge for a palette entry — `mode: 'server'` renders
+ * the two-part "hosts a server" pill (websocket-server / socketio-server). */
+export function scenarioAddIcon(badge: BadgeType, mode?: 'server'): ReactNode {
+  return paletteBadge(badge, mode, undefined)
+}
+
+/** The "SIO" badge with the action's codicon inside (Socket.IO section). */
 export function scenarioAddSocketioIcon(icon: string): ReactNode {
-  return React.createElement(Badge, { type: 'SIO', icon })
+  return paletteBadge('SIO', undefined, icon)
 }
 
 /** The "WS" badge with the action's codicon inside (raw WebSocket section). */
 export function scenarioAddWebsocketIcon(icon: string): ReactNode {
-  return React.createElement(Badge, { type: 'WS', icon })
+  return paletteBadge('WS', undefined, icon)
 }
 
 /** The "SSE" badge with the action's codicon inside (SSE section). */
 export function scenarioAddSseIcon(icon: string): ReactNode {
-  return React.createElement(Badge, { type: 'SSE', icon })
+  return paletteBadge('SSE', undefined, icon)
 }
 
 /** The "GRPC" badge with the action's codicon inside (gRPC streaming section). */
 export function scenarioAddGrpcIcon(icon: string): ReactNode {
-  return React.createElement(Badge, { type: 'GRPC', icon })
+  return paletteBadge('GRPC', undefined, icon)
 }
 
 /** The "MQTT" badge with the action's codicon inside (MQTT section). */
 export function scenarioAddMqttIcon(icon: string): ReactNode {
-  return React.createElement(Badge, { type: 'MQTT', icon })
+  return paletteBadge('MQTT', undefined, icon)
 }
 
 /** The "AMQP" badge with the action's codicon inside (AMQP section). */
 export function scenarioAddAmqpIcon(icon: string): ReactNode {
-  return React.createElement(Badge, { type: 'AMQP', icon })
+  return paletteBadge('AMQP', undefined, icon)
 }
 
 /** The "REDIS" badge with the action's codicon inside (Redis section). */
 export function scenarioAddRedisIcon(icon: string): ReactNode {
-  return React.createElement(Badge, { type: 'REDIS', icon })
+  return paletteBadge('REDIS', undefined, icon)
 }
 
 /** The "STOMP" badge with the action's codicon inside (STOMP section). */
 export function scenarioAddStompIcon(icon: string): ReactNode {
-  return React.createElement(Badge, { type: 'STOMP', icon })
+  return paletteBadge('STOMP', undefined, icon)
 }
 
 /** The "KAFKA" badge with the action's codicon inside (Kafka section). */
 export function scenarioAddKafkaIcon(icon: string): ReactNode {
-  return React.createElement(Badge, { type: 'KAFKA', icon })
+  return paletteBadge('KAFKA', undefined, icon)
 }
 
-/** The server-pill HTTP badge with the action's codicon inside (HTTP section). */
-export function scenarioAddHttpIcon(icon: string): ReactNode {
-  return React.createElement(Badge, { type: 'GET', mode: 'server', icon })
+/** The server-pill HTTP badge (HTTP mock-server close section). The close
+ * action's codicon is not shown — the server capsule carries no glyph. */
+export function scenarioAddHttpIcon(_icon: string): ReactNode {
+  return paletteBadge('GET', 'server', undefined)
 }
 
-/** The server-pill SOAP badge with the action's codicon inside (SOAP section). */
-export function scenarioAddSoapIcon(icon: string): ReactNode {
-  return React.createElement(Badge, { type: 'SOAP', mode: 'server', icon })
+/** The server-pill SOAP badge (SOAP mock-server close section). */
+export function scenarioAddSoapIcon(_icon: string): ReactNode {
+  return paletteBadge('SOAP', 'server', undefined)
 }
 
-/** The GraphQL mock-server close action's badge (QUERY server pill + codicon). */
-export function scenarioAddGraphqlIcon(icon: string): ReactNode {
-  return React.createElement(Badge, { type: 'QUERY', mode: 'server', icon })
+/** The GraphQL mock-server close action's badge (QUERY server pill). */
+export function scenarioAddGraphqlIcon(_icon: string): ReactNode {
+  return paletteBadge('QUERY', 'server', undefined)
 }

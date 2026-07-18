@@ -4,9 +4,7 @@
 
 import React from 'react'
 import type { ListViewItemData } from 'electron-core-ui/renderer'
-import { Badge } from '../../common/Badge'
 import { RegistryBadge } from '../../common/RegistryBadge'
-import { kafkaModeIcon } from '../../../utils/badgeUtils'
 
 export interface SidebarContextMenuItem {
   id: string
@@ -138,7 +136,7 @@ export const buildAddSubmenu = (
   {
     id: `add-http-server-${parentId}`,
     label: t('sidebar.contextMenu.add.httpServer'),
-    icon: React.createElement(Badge, { type: 'GET', mode: 'server' }),
+    icon: React.createElement(RegistryBadge, { badgeId: 'http_get', server: true }),
     onClick: () => { onAddChildItem(parentId, 'http-server') }
   },
   { id: `sep-add-http-${parentId}`, isSeparator: true, label: '' },
@@ -146,25 +144,25 @@ export const buildAddSubmenu = (
   {
     id: `add-grpc-${parentId}`,
     label: t('sidebar.contextMenu.add.grpc'),
-    icon: React.createElement(Badge, { type: 'UNARY' }),
+    icon: React.createElement(RegistryBadge, { badgeId: 'grpc_unary' }),
     onClick: () => { onAddChildItem(parentId, 'grpc') }
   },
   {
     id: `add-grpc-server-stream-${parentId}`,
     label: t('sidebar.contextMenu.add.grpcServerStream'),
-    icon: React.createElement(Badge, { type: 'S-STR' }),
+    icon: React.createElement(RegistryBadge, { badgeId: 'grpc_sstr' }),
     onClick: () => { onAddChildItem(parentId, 'grpc-server-stream') }
   },
   {
     id: `add-grpc-client-stream-${parentId}`,
     label: t('sidebar.contextMenu.add.grpcClientStream'),
-    icon: React.createElement(Badge, { type: 'C-STR' }),
+    icon: React.createElement(RegistryBadge, { badgeId: 'grpc_cstr' }),
     onClick: () => { onAddChildItem(parentId, 'grpc-client-stream') }
   },
   {
     id: `add-grpc-bidi-${parentId}`,
     label: t('sidebar.contextMenu.add.grpcBidi'),
-    icon: React.createElement(Badge, { type: 'BIDI' }),
+    icon: React.createElement(RegistryBadge, { badgeId: 'grpc_bidi' }),
     onClick: () => { onAddChildItem(parentId, 'grpc-bidi') }
   },
   // gRPC mock server: restorm HOSTS a local gRPC endpoint (its proto + per-method
@@ -172,14 +170,14 @@ export const buildAddSubmenu = (
   {
     id: `add-grpc-server-${parentId}`,
     label: t('sidebar.contextMenu.add.grpcServer'),
-    icon: React.createElement(Badge, { type: 'GRPC', mode: 'server' }),
+    icon: React.createElement(RegistryBadge, { badgeId: 'grpc_server' }),
     onClick: () => { onAddChildItem(parentId, 'grpc-server') }
   },
   { id: `sep-add-grpc-${parentId}`, isSeparator: true, label: '' },
   {
     id: `add-graphql-${parentId}`,
     label: t('sidebar.contextMenu.add.graphql'),
-    icon: React.createElement(Badge, { type: 'QUERY' }),
+    icon: React.createElement(RegistryBadge, { badgeId: 'gql_query' }),
     onClick: () => { onAddChildItem(parentId, 'graphql') }
   },
   // GraphQL mock server: restorm hosts a local GraphQL endpoint that resolves
@@ -187,13 +185,13 @@ export const buildAddSubmenu = (
   {
     id: `add-graphql-server-${parentId}`,
     label: t('sidebar.contextMenu.add.graphqlServer'),
-    icon: React.createElement(Badge, { type: 'QUERY', mode: 'server' }),
+    icon: React.createElement(RegistryBadge, { badgeId: 'gql_query_server' }),
     onClick: () => { onAddChildItem(parentId, 'graphql-server') }
   },
   {
     id: `add-soap-${parentId}`,
     label: t('sidebar.contextMenu.add.soap'),
-    icon: React.createElement(Badge, { type: 'SOAP' }),
+    icon: React.createElement(RegistryBadge, { badgeId: 'soap' }),
     onClick: () => { onAddChildItem(parentId, 'soap') }
   },
   // SOAP mock server: restorm hosts a local SOAP endpoint that answers configured
@@ -201,7 +199,7 @@ export const buildAddSubmenu = (
   {
     id: `add-soap-server-${parentId}`,
     label: t('sidebar.contextMenu.add.soapServer'),
-    icon: React.createElement(Badge, { type: 'SOAP', mode: 'server' }),
+    icon: React.createElement(RegistryBadge, { badgeId: 'soap_server' }),
     onClick: () => { onAddChildItem(parentId, 'soap-server') }
   },
   { id: `sep-add-ws-${parentId}`, isSeparator: true, label: '' },
@@ -209,13 +207,13 @@ export const buildAddSubmenu = (
   {
     id: `add-websocket-${parentId}`,
     label: t('sidebar.contextMenu.add.websocket'),
-    icon: React.createElement(Badge, { type: 'WS' }),
+    icon: React.createElement(RegistryBadge, { badgeId: 'ws' }),
     onClick: () => { onAddChildItem(parentId, 'websocket') }
   },
   {
     id: `add-websocket-server-${parentId}`,
     label: t('sidebar.contextMenu.add.websocketServer'),
-    icon: React.createElement(Badge, { type: 'WS', mode: 'server' }),
+    icon: React.createElement(RegistryBadge, { badgeId: 'ws_server' }),
     onClick: () => { onAddChildItem(parentId, 'websocket-server') }
   },
   { id: `sep-add-sio-${parentId}`, isSeparator: true, label: '' },
@@ -223,13 +221,13 @@ export const buildAddSubmenu = (
   {
     id: `add-socketio-${parentId}`,
     label: t('sidebar.contextMenu.add.socketio'),
-    icon: React.createElement(Badge, { type: 'SIO' }),
+    icon: React.createElement(RegistryBadge, { badgeId: 'sio' }),
     onClick: () => { onAddChildItem(parentId, 'socketio') }
   },
   {
     id: `add-socketio-server-${parentId}`,
     label: t('sidebar.contextMenu.add.socketioServer'),
-    icon: React.createElement(Badge, { type: 'SIO', mode: 'server' }),
+    icon: React.createElement(RegistryBadge, { badgeId: 'sio_server' }),
     onClick: () => { onAddChildItem(parentId, 'socketio-server') }
   },
   { id: `sep-add-stomp-${parentId}`, isSeparator: true, label: '' },
@@ -238,7 +236,7 @@ export const buildAddSubmenu = (
   {
     id: `add-stomp-${parentId}`,
     label: t('sidebar.contextMenu.add.stomp'),
-    icon: React.createElement(Badge, { type: 'STOMP' }),
+    icon: React.createElement(RegistryBadge, { badgeId: 'stomp' }),
     onClick: () => { onAddChildItem(parentId, 'stomp') }
   },
   { id: `sep-add-mqtt-${parentId}`, isSeparator: true, label: '' },
@@ -246,13 +244,13 @@ export const buildAddSubmenu = (
   {
     id: `add-mqtt-${parentId}`,
     label: t('sidebar.contextMenu.add.mqtt'),
-    icon: React.createElement(Badge, { type: 'MQTT' }),
+    icon: React.createElement(RegistryBadge, { badgeId: 'mqtt' }),
     onClick: () => { onAddChildItem(parentId, 'mqtt') }
   },
   {
     id: `add-mqtt-server-${parentId}`,
     label: t('sidebar.contextMenu.add.mqttServer'),
-    icon: React.createElement(Badge, { type: 'MQTT', mode: 'server' }),
+    icon: React.createElement(RegistryBadge, { badgeId: 'mqtt_server' }),
     onClick: () => { onAddChildItem(parentId, 'mqtt-server') }
   },
   { id: `sep-add-sse-${parentId}`, isSeparator: true, label: '' },
@@ -260,7 +258,7 @@ export const buildAddSubmenu = (
   {
     id: `add-sse-${parentId}`,
     label: t('sidebar.contextMenu.add.sse'),
-    icon: React.createElement(Badge, { type: 'SSE' }),
+    icon: React.createElement(RegistryBadge, { badgeId: 'sse' }),
     onClick: () => { onAddChildItem(parentId, 'sse') }
   },
   { id: `sep-add-kafka-${parentId}`, isSeparator: true, label: '' },
@@ -269,33 +267,33 @@ export const buildAddSubmenu = (
   {
     id: `add-kafka-produce-${parentId}`,
     label: t('sidebar.contextMenu.add.kafkaProduce'),
-    icon: React.createElement(Badge, { type: 'KAFKA', icon: kafkaModeIcon('produce') }),
+    icon: React.createElement(RegistryBadge, { badgeId: 'kafka_produce' }),
     onClick: () => { onAddChildItem(parentId, 'kafka-produce') }
   },
   {
     id: `add-kafka-consume-${parentId}`,
     label: t('sidebar.contextMenu.add.kafkaConsume'),
-    icon: React.createElement(Badge, { type: 'KAFKA', icon: kafkaModeIcon('consume') }),
+    icon: React.createElement(RegistryBadge, { badgeId: 'kafka_consume' }),
     onClick: () => { onAddChildItem(parentId, 'kafka-consume') }
   },
   { id: `sep-add-odata-${parentId}`, isSeparator: true, label: '' },
   {
     id: `add-odata-${parentId}`,
     label: t('sidebar.contextMenu.add.odata'),
-    icon: React.createElement(Badge, { type: 'ODATA' }),
+    icon: React.createElement(RegistryBadge, { badgeId: 'odata' }),
     onClick: () => { onAddChildItem(parentId, 'odata') }
   },
   {
     id: `add-odata-server-${parentId}`,
     label: t('sidebar.contextMenu.add.odataServer'),
-    icon: React.createElement(Badge, { type: 'ODATA', mode: 'server' }),
+    icon: React.createElement(RegistryBadge, { badgeId: 'odata_server' }),
     onClick: () => { onAddChildItem(parentId, 'odata-server') }
   },
   { id: `sep-add-trpc-${parentId}`, isSeparator: true, label: '' },
   {
     id: `add-trpc-${parentId}`,
     label: t('sidebar.contextMenu.add.trpc'),
-    icon: React.createElement(Badge, { type: 'tRPC' }),
+    icon: React.createElement(RegistryBadge, { badgeId: 'trpc' }),
     onClick: () => { onAddChildItem(parentId, 'trpc') }
   },
   { id: `sep-add-amqp-${parentId}`, isSeparator: true, label: '' },
@@ -305,28 +303,28 @@ export const buildAddSubmenu = (
   {
     id: `add-amqp-${parentId}`,
     label: t('sidebar.contextMenu.add.amqp'),
-    icon: React.createElement(Badge, { type: 'AMQP' }),
+    icon: React.createElement(RegistryBadge, { badgeId: 'amqp' }),
     onClick: () => { onAddChildItem(parentId, 'amqp') }
   },
   { id: `sep-add-redis-${parentId}`, isSeparator: true, label: '' },
   {
     id: `add-redis-${parentId}`,
     label: t('sidebar.contextMenu.add.redis'),
-    icon: React.createElement(Badge, { type: 'REDIS' }),
+    icon: React.createElement(RegistryBadge, { badgeId: 'redis' }),
     onClick: () => { onAddChildItem(parentId, 'redis') }
   },
   { id: `sep-add-proto-${parentId}`, isSeparator: true, label: '' },
   {
     id: `add-auth-${parentId}`,
     label: t('sidebar.contextMenu.add.auth'),
-    icon: React.createElement(Badge, { type: 'AUTH' }),
+    icon: React.createElement(RegistryBadge, { badgeId: 'auth' }),
     onClick: () => { onAddChildItem(parentId, 'auth') }
   },
   { id: `sep-add-scenario-${parentId}`, isSeparator: true, label: '' },
   {
     id: `add-scenario-${parentId}`,
     label: t('sidebar.contextMenu.add.scenario'),
-    icon: React.createElement(Badge, { type: 'SCENARIO' }),
+    icon: React.createElement(RegistryBadge, { badgeId: 'scenario' }),
     onClick: () => { onAddChildItem(parentId, 'scenario') }
   }
 ]

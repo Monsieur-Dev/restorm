@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Button, Tooltip } from 'electron-core-ui/renderer'
-import { Badge } from '../../common/Badge'
+import { RegistryBadge } from '../../common/RegistryBadge'
 import type { ScenarioRequestUsage } from '../../../services/scenarioRequestUsage'
 
 export interface RequestScenarioUsageButtonProps {
@@ -65,7 +65,7 @@ export const RequestScenarioUsageButton: React.FC<RequestScenarioUsageButtonProp
           onMouseLeave={() => { setHovered(false) }}
           data-testid="request-scenario-usage-button"
         >
-          <Badge type="SCENARIO" />
+          <RegistryBadge badgeId="scenario" />
         </Button>
       </span>
       <Tooltip
@@ -91,7 +91,7 @@ export const RequestScenarioUsageButton: React.FC<RequestScenarioUsageButtonProp
                     onClick={() => { openScenario(usage) }}
                     data-testid={`request-scenario-usage-link-${usage.scenario.id}`}
                   >
-                    <Badge type="SCENARIO" />
+                    <RegistryBadge badgeId="scenario" />
                     <span className="request-scenario-usage-name">{usage.scenario.name}</span>
                   </Button>
                 </li>

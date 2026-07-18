@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { requestBadgeType, requestBadgeMode, requestBadgeIcon, kafkaModeIcon } from '../../../src/renderer/src/utils/badgeUtils'
+import { requestBadgeType, requestBadgeMode, requestBadgeIcon, kafkaModeIcon, resolveBadgeId, requestBadgeId } from '../../../src/renderer/src/utils/badgeUtils'
 import type { Request } from '../../../src/renderer/src/../../shared/types/requests'
 
 /**
@@ -64,5 +64,55 @@ describe('badgeUtils — Kafka mode sub-type glyph', () => {
     expect(requestBadgeIcon({ type: 'sse' } as unknown as Request)).toBeUndefined()
     expect(requestBadgeIcon({ type: 'grpc', callType: 'unary' } as unknown as Request)).toBeUndefined()
     expect(requestBadgeIcon({ type: 'http', method: 'GET' } as unknown as Request)).toBeUndefined()
+  })
+})
+
+/**
+ * `resolveBadgeId` maps the legacy `(type, mode, icon)` triple onto a
+ * `badgeRegistry.json` id — the one mapping the Badge adapter and every
+ * direct-id surface share. `requestBadgeId` is its saved-request shortcut.
+ */
+describe('badgeUtils — registry id resolution', () => {
+  it('a plain type resolves to its base id', () => {
+    expect(resolveBadgeId('GET', undefined, undefined)).toEqual({ badgeId: 'http_get' })
+    expect(resolveBadgeId('WS', undefined, undefined)).toEqual({ badgeId: 'ws' })
+    expect(resolveBadgeId('S-STR', undefined, undefined)).toEqual({ badgeId: 'grpc_sstr' })
+    expect(resolveBadgeId('tRPC', undefined, undefined)).toEqual({ badgeId: 'trpc' })
+  })
+
+  it('an action codicon resolves to the per-protocol action id', () => {
+    expect(resolveBadgeId('WS', undefined, 'arrow-up')).toEqual({ badgeId: 'ws_send' })
+    expect(resolveBadgeId('WS', undefined, 'plug')).toEqual({ badgeId: 'ws_connect' })
+    expect(resolveBadgeId('SIO', undefined, 'debug-disconnect')).toEqual({ badgeId: 'sio_close' })
+  })
+
+  it('Kafka and GraphQL glyphs use their overriding ids', () => {
+    expect(resolveBadgeId('KAFKA', undefined, 'plug')).toEqual({ badgeId: 'kafka_consume' })
+    expect(resolveBadgeId('KAFKA', undefined, 'arrow-up')).toEqual({ badgeId: 'kafka_produce' })
+    expect(resolveBadgeId('KAFKA', undefined, 'eye')).toEqual({ badgeId: 'kafka_browse' })
+    expect(resolveBadgeId('QUERY', undefined, 'broadcast')).toEqual({ badgeId: 'gql_subscribe' })
+    expect(resolveBadgeId('QUERY', undefined, 'debug-disconnect')).toEqual({ badgeId: 'gql_unsubscribe' })
+  })
+
+  it('server mode resolves to the capsule id — fixed protocols vs the method-colored HTTP server', () => {
+    expect(resolveBadgeId('WS', 'server', undefined)).toEqual({ badgeId: 'ws_server' })
+    expect(resolveBadgeId('SOAP', 'server', undefined)).toEqual({ badgeId: 'soap_server' })
+    // GraphQL keeps two labels today: workbench GQL vs scenario QUERY.
+    expect(resolveBadgeId('GQL', 'server', undefined)).toEqual({ badgeId: 'gql_server' })
+    expect(resolveBadgeId('QUERY', 'server', undefined)).toEqual({ badgeId: 'gql_query_server' })
+    // HTTP mock server has no fixed entry — the method id + the server prop.
+    expect(resolveBadgeId('GET', 'server', undefined)).toEqual({ badgeId: 'http_get', server: true })
+  })
+
+  it('an unknown type falls back to http_other', () => {
+    expect(resolveBadgeId('FROB' as never, undefined, undefined)).toEqual({ badgeId: 'http_other' })
+  })
+
+  it('requestBadgeId composes type + mode + icon for a saved request', () => {
+    expect(requestBadgeId({ type: 'websocket', protocol: 'socketio', server: true } as unknown as Request)).toBe('sio_server')
+    expect(requestBadgeId({ type: 'kafka', mode: 'consume' } as unknown as Request)).toBe('kafka_consume')
+    expect(requestBadgeId({ type: 'sse' } as unknown as Request)).toBe('sse')
+    expect(requestBadgeId({ type: 'trpc' } as unknown as Request)).toBe('trpc')
+    expect(requestBadgeId({ type: 'jsonrpc' } as unknown as Request)).toBe('rpc')
   })
 })
