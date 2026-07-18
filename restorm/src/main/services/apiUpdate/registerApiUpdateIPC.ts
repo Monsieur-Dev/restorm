@@ -1,5 +1,7 @@
 import { createHash } from 'node:crypto'
+import { BrowserWindow } from 'electron'
 import { logger, validatedHandle } from 'electron-core-ui'
+import { broadcastTreeReplace } from '../../mcp/tools/import'
 import {
   apiUpdateSetSettingsArgs,
   apiUpdateApplyArgs,
@@ -165,11 +167,29 @@ export function registerApiUpdateIPC(deps: ApiUpdateIPCDeps): void {
     }
   )
 
-  validatedHandle('collections:sync', collectionsSyncArgs, (_event, [collections]) => {
-    collectionStore.setCollections(
+  validatedHandle('collections:sync', collectionsSyncArgs, (_event, [collections, mcpVersion]) => {
+    const applied = collectionStore.setCollections(
       collections as Parameters<typeof collectionStore.setCollections>[0],
-      'user'
+      'user',
+      mcpVersion
     )
+    if (!applied) {
+      // The mirror predated an MCP mutation the renderer hasn't applied yet, so
+      // the authoritative tree was kept. Re-broadcast it (no version bump) so
+      // the renderer swaps its stale rootItems back to authoritative, then
+      // re-trigger the autosave so the corrected tree — not the stale one —
+      // reaches disk. This is what makes an MCP write tool's return guarantee
+      // its mutation survives the next autosave.
+      broadcastTreeReplace({ bumpVersion: false })
+      for (const win of BrowserWindow.getAllWindows()) {
+        if (!win.isDestroyed()) win.webContents.send('file:autosave-trigger')
+      }
+      logger.warn('[apiUpdate.collections:sync] refused stale renderer mirror; re-broadcast authoritative tree', {
+        mcpVersion,
+        modelVersion: collectionStore.getModelVersion()
+      })
+      return
+    }
     logger.info('[apiUpdate.collections:sync] mirrored collections from renderer', { count: collections.length })
   })
 
