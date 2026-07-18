@@ -182,36 +182,37 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
     const scrollContainer = scrollContentRef.current
     if (!scrollContainer) return
 
-    const scrollTop = scrollContainer.scrollTop
     let newActivePath: string | null = null
-    let newActiveDepth = 0
 
-    // Use layout position (offsetTop) combined with the sticky offset that
-    // ScrollableElement computes and applies to each title via style.top.
-    // A group is "active" when scrollTop reaches where its title becomes stuck.
-    for (const [groupPath, el] of groupElementsRef.current.entries()) {
-      // Walk up offsetParent chain to compute offset from scroll container
-      let offsetFromContainer = 0
-      let current: HTMLElement | null = el
-      while (current && current !== scrollContainer) {
-        offsetFromContainer += current.offsetTop
-        current = current.offsetParent as HTMLElement | null
-      }
-
-      // Read the sticky top value computed by ScrollableElement for this title
+    // A group is "active" once its title sits AT (or above) its sticky stick
+    // line — measured with live rects, not scrollTop math. The previous
+    // scrollTop-threshold model could never activate the TRAILING sections:
+    // the container's scrollTop clamps at scrollHeight - clientHeight, which
+    // is smaller than the layout offset of the last groups, so their
+    // thresholds were unreachable and the highlight stayed stuck on an
+    // earlier section while a later title was visibly pinned.
+    const containerTop = scrollContainer.getBoundingClientRect().top
+    // Ref callbacks fire child-first, so Map insertion order is NOT document
+    // order (a subgroup registers before its parent and could never win a
+    // last-one-past-the-line scan). Sort by real document position instead.
+    const orderedGroups = [...groupElementsRef.current.entries()].sort((a, b) =>
+      (a[1].compareDocumentPosition(b[1]) & Node.DOCUMENT_POSITION_FOLLOWING) !== 0 ? -1 : 1
+    )
+    for (const [groupPath, el] of orderedGroups) {
       const titleEl = el.querySelector(':scope > .settings-group-title')
-      const titleStyle = titleEl instanceof HTMLElement ? titleEl.style.top : ''
-      const stickyTopRaw = parseFloat(titleStyle || '0')
-      const stickyTop = Number.isFinite(stickyTopRaw) ? stickyTopRaw : 0
-
-      if (scrollTop >= offsetFromContainer - stickyTop - 10) {
-        const depth = groupPath.split('.').length
-        if (depth > newActiveDepth) {
-          newActivePath = groupPath
-          newActiveDepth = depth
-        } else if (depth === newActiveDepth) {
-          newActivePath = groupPath
-        }
+      if (!(titleEl instanceof HTMLElement)) continue
+      // The stick line ScrollableElement computed for this title (its
+      // style.top); negative values mean it slides under the previous one.
+      const stickyTopRaw = parseFloat(titleEl.style.top || '0')
+      const stickyTop = Number.isFinite(stickyTopRaw) ? Math.max(stickyTopRaw, 0) : 0
+      const titleTop = titleEl.getBoundingClientRect().top - containerTop
+      if (titleTop <= stickyTop + 12) {
+        // Registration order is document order, so the LAST title past its
+        // stick line wins outright. (The old depth-priority rule locked a
+        // passed SUBGROUP — e.g. Appearance.Editor — as active forever: every
+        // later top-level section had a smaller depth and could never take
+        // over, which froze the summary highlight for the rest of the page.)
+        newActivePath = groupPath
       }
     }
 
@@ -219,14 +220,18 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
       activeGroupPathRef.current = newActivePath
       setActiveGroupPath(newActivePath)
 
-      // Auto-expand the active group path, collapse others
+      // Reveal the active path in the summary by expanding its ancestor
+      // chain — ADDITIVELY. Scrolling must never collapse a branch the user
+      // opened (or one that was just auto-opened a moment ago).
       if (newActivePath) {
         const parts = newActivePath.split('.')
-        const newExpanded = new Set<string>()
-        for (let i = 1; i <= parts.length; i++) {
-          newExpanded.add(parts.slice(0, i).join('.'))
-        }
-        setExpandedPaths(newExpanded)
+        setExpandedPaths(prev => {
+          const next = new Set(prev)
+          for (let i = 1; i <= parts.length; i++) {
+            next.add(parts.slice(0, i).join('.'))
+          }
+          return next
+        })
       }
     }
   }, [])
