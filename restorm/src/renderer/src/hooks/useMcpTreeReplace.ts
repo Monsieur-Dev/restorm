@@ -36,6 +36,14 @@ export interface UseMcpTreeReplaceInput {
    */
   mcpDrivenRef: { current: boolean }
   /**
+   * Mutable ref the hook writes with the `mcpVersion` carried by each
+   * `mcp:tree-replace` payload — the last main-side tree version this renderer
+   * has APPLIED. The renderer's autosave-mirror path (`setCollections` →
+   * `syncCollections`) stamps its call with this value so the main store can
+   * refuse a mirror that predates a newer MCP mutation (stale-write guard).
+   */
+  lastMcpVersionRef: { current: number }
+  /**
    * Invalidate every workbench tab's content cache after `setRootItems`.
    * `EditorWorkbench` caches each tab's rendered React element keyed
    * by `tab.contentVersion`; without bumping it, the cached element
@@ -61,8 +69,24 @@ export function reifyItem(raw: unknown): FolderItem | null {
   return makeReactiveFolderItem(item)
 }
 
+/**
+ * Normalise the `mcp:tree-replace` payload into `{ items, mcpVersion }`.
+ * Current main sends `{ items: FolderItem[], mcpVersion: number }`; a bare
+ * array is tolerated (defensive — an older/other sender) with version 0.
+ */
+export function readTreeReplacePayload(payload: unknown): { items: unknown[]; mcpVersion: number } | null {
+  if (Array.isArray(payload)) return { items: payload, mcpVersion: 0 }
+  if (payload && typeof payload === 'object') {
+    const p = payload as { items?: unknown; mcpVersion?: unknown }
+    if (Array.isArray(p.items)) {
+      return { items: p.items, mcpVersion: typeof p.mcpVersion === 'number' ? p.mcpVersion : 0 }
+    }
+  }
+  return null
+}
+
 export function useMcpTreeReplace(input: UseMcpTreeReplaceInput): void {
-  const { enabled, setRootItems, mcpDrivenRef, bumpAllTabContentVersions } = input
+  const { enabled, setRootItems, mcpDrivenRef, lastMcpVersionRef, bumpAllTabContentVersions } = input
 
   useEffect(() => {
     if (!enabled) return
@@ -70,12 +94,16 @@ export function useMcpTreeReplace(input: UseMcpTreeReplaceInput): void {
     const api = root.restorm?.runtime
     if (!api) return
     const off = api.onMcpTreeReplace((payload) => {
-      if (!Array.isArray(payload)) return
+      const parsed = readTreeReplacePayload(payload)
+      if (parsed === null) return
       const next: FolderItem[] = []
-      for (const raw of payload) {
+      for (const raw of parsed.items) {
         const r = reifyItem(raw)
         if (r !== null) next.push(r)
       }
+      // Record the applied main-side version so the downstream autosave
+      // mirror stamps `syncCollections` with it (stale-write guard).
+      lastMcpVersionRef.current = parsed.mcpVersion
       // Flip the flag BEFORE setRootItems. The downstream zustand
       // `setCollections` effect reads it on the next render to pick
       // `source: 'mcp'` (skipping the main-side mirror). Resetting
@@ -88,5 +116,5 @@ export function useMcpTreeReplace(input: UseMcpTreeReplaceInput): void {
       bumpAllTabContentVersions()
     })
     return off
-  }, [enabled, setRootItems, mcpDrivenRef, bumpAllTabContentVersions])
+  }, [enabled, setRootItems, mcpDrivenRef, lastMcpVersionRef, bumpAllTabContentVersions])
 }

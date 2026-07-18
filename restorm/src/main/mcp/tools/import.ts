@@ -49,7 +49,7 @@ function triggerSave(): void {
  * cover newly-introduced ids that aren't in the renderer's apollo
  * cache yet.
  */
-export function broadcastTreeReplace(): void {
+export function broadcastTreeReplace(options?: { bumpVersion?: boolean }): void {
   // `cloneForEventBus` over `JSON.parse(JSON.stringify(...))`: the
   // latter calls `SecretValue.toJSON()` which strips the plaintext,
   // so the renderer would receive a password-less tree and
@@ -60,9 +60,19 @@ export function broadcastTreeReplace(): void {
   // on the renderer side as POJOs (constructors lost over IPC
   // anyway), but with `{ type, value }` intact — `normalizeValueType`
   // re-instantiates them on reify.
-  const tree = cloneForEventBus(collectionStore.getCollections()) as unknown
+  //
+  // The payload carries `mcpVersion` — bumped here on a real mutation so the
+  // renderer can stamp its autosave mirror and let the main store refuse a
+  // stale one (see CollectionStore.setCollections). A heal re-broadcast
+  // (`bumpVersion: false`) re-sends the current tree at the current version to
+  // re-sync a renderer whose mirror was just refused, without inflating the
+  // counter or triggering a further refuse loop.
+  const mcpVersion = options?.bumpVersion === false
+    ? collectionStore.getModelVersion()
+    : collectionStore.bumpModelVersion()
+  const items = cloneForEventBus(collectionStore.getCollections()) as unknown
   for (const win of BrowserWindow.getAllWindows()) {
-    if (!win.isDestroyed()) win.webContents.send('mcp:tree-replace', tree)
+    if (!win.isDestroyed()) win.webContents.send('mcp:tree-replace', { items, mcpVersion })
   }
 }
 

@@ -1547,9 +1547,13 @@ const App: React.FC = () => {
   // mutations — roundtripping would clobber its class instances).
   // The hook flips the ref true; the effect reads + resets it.
   const mcpDrivenRef = useRef(false)
+  // Last main-side tree version applied via `mcp:tree-replace`. Stamped onto
+  // the autosave mirror (`setCollections` → `syncCollections`) so main can
+  // refuse a mirror that predates a newer MCP mutation (stale-write guard).
+  const lastMcpVersionRef = useRef(0)
   const bumpAllTabContentVersionsRef = useRef<() => void>(() => { /* not yet wired */ })
   const bumpAllTabContentVersionsStable = useCallback((): void => { bumpAllTabContentVersionsRef.current() }, [])
-  useMcpTreeReplace({ enabled: mcpEnabled, setRootItems, mcpDrivenRef, bumpAllTabContentVersions: bumpAllTabContentVersionsStable })
+  useMcpTreeReplace({ enabled: mcpEnabled, setRootItems, mcpDrivenRef, lastMcpVersionRef, bumpAllTabContentVersions: bumpAllTabContentVersionsStable })
   useMcpRunRequest({ enabled: mcpEnabled })
   // Read-only e2e automation hook: exposes window.__restormSuggestions to pull
   // each action's inspector data suggestion for a scenario from the running app.
@@ -2137,7 +2141,9 @@ const App: React.FC = () => {
   useEffect(() => {
     const source = mcpDrivenRef.current ? 'mcp' : 'user'
     if (mcpDrivenRef.current) mcpDrivenRef.current = false
-    setCollections(environmentFolderCollections, source)
+    // Stamp the mirror with the last applied main-side version so a stale
+    // `'user'` mirror (rootItems lagging an MCP mutation) is refused main-side.
+    setCollections(environmentFolderCollections, source, lastMcpVersionRef.current)
   }, [environmentFolderCollections, setCollections])
 
   // Listen to test events for E2E tests (only in dev/test mode)

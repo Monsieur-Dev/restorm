@@ -604,7 +604,11 @@ export const apiUpdateRefreshFetchArgs = z.tuple([folderIdArg])
  * (folder / env-folder / request / scenario, plus reactive clones) and the
  * store's reify path owns the rich validation. `.loose()` keeps every field. */
 const syncedCollectionNode = z.object({}).loose()
-export const collectionsSyncArgs = z.tuple([z.array(syncedCollectionNode)])
+/** `[collections, mcpVersion?]` — the optional `mcpVersion` is the last
+ * main-side tree version the renderer has APPLIED; the store uses it to refuse
+ * a mirror that predates an unapplied MCP mutation (stale-write guard). Legacy
+ * callers that omit it are treated as trusted (always applied). */
+export const collectionsSyncArgs = z.tuple([z.array(syncedCollectionNode), z.number().optional()])
 
 /** `[folderId, customValueLists]` — targeted update of one env-folder's
  * custom value lists. Lists pass through as `unknown` (no strip) so the

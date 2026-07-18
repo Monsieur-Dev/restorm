@@ -2219,8 +2219,8 @@ contextBridge.exposeInMainWorld('restorm', {
      * orchestrators look up folders by id; without this sync they
      * would always fail with "folder not found". Fire-and-forget;
      * the handler doesn't return anything. */
-    syncCollections: async (collections: unknown[]): Promise<void> => {
-      await ipcRenderer.invoke('collections:sync', collections)
+    syncCollections: async (collections: unknown[], mcpVersion?: number): Promise<void> => {
+      await ipcRenderer.invoke('collections:sync', collections, mcpVersion)
     },
     /** Persist an env-folder's custom value lists onto the main-side
      * CollectionStore. Unlike `syncCollections` (full-tree replace),

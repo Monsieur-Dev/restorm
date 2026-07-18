@@ -8,7 +8,29 @@ import { describe, it, expect, vi } from 'vitest'
 const makeReactiveFolderItem = vi.hoisted(() => vi.fn((item: unknown) => item))
 vi.mock('../types/reactive', () => ({ makeReactiveFolderItem }))
 
-import { reifyItem } from './useMcpTreeReplace'
+import { reifyItem, readTreeReplacePayload } from './useMcpTreeReplace'
+
+describe('readTreeReplacePayload', () => {
+  it('reads the versioned `{ items, mcpVersion }` payload', () => {
+    expect(readTreeReplacePayload({ items: [{ id: 'a' }], mcpVersion: 7 }))
+      .toEqual({ items: [{ id: 'a' }], mcpVersion: 7 })
+  })
+
+  it('tolerates a bare array (version 0)', () => {
+    expect(readTreeReplacePayload([{ id: 'a' }])).toEqual({ items: [{ id: 'a' }], mcpVersion: 0 })
+  })
+
+  it('defaults a missing / non-numeric version to 0', () => {
+    expect(readTreeReplacePayload({ items: [] })).toEqual({ items: [], mcpVersion: 0 })
+    expect(readTreeReplacePayload({ items: [], mcpVersion: 'nope' })).toEqual({ items: [], mcpVersion: 0 })
+  })
+
+  it('rejects a malformed payload', () => {
+    expect(readTreeReplacePayload(null)).toBeNull()
+    expect(readTreeReplacePayload({ nope: true })).toBeNull()
+    expect(readTreeReplacePayload('x')).toBeNull()
+  })
+})
 
 describe('reifyItem', () => {
   it('delegates a top-level scenario to makeReactiveFolderItem (not mangled into a folder)', () => {

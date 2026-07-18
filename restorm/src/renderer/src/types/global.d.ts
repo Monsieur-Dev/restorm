@@ -401,7 +401,7 @@ declare global {
           | { ok: true; checksum: string; payload: string; items: unknown[]; format: string | null }
           | { ok: false; error: string }
         >
-        syncCollections: (collections: unknown[]) => Promise<void>
+        syncCollections: (collections: unknown[], mcpVersion?: number) => Promise<void>
         updateFolderCustomValueLists: (folderId: string, lists: unknown[]) => Promise<void>
       }
       runtime: {
