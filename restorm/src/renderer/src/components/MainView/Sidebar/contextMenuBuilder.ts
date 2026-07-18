@@ -103,6 +103,9 @@ export interface AddMenuRequestEntry {
   /** i18n key (+ English fallback for the palette's `t(key, default)` form). */
   labelKey: string
   defaultLabel: string
+  /** Techno tag inside a multi-technology group (Messaging) — renderers
+   * insert a separator whenever it changes between consecutive entries. */
+  techno?: string
 }
 
 /** A protocol submenu of the Add menu — its header (label + representative
@@ -180,14 +183,16 @@ export const ADD_MENU_PROTOCOL_GROUPS: AddMenuGroup[] = [
     ]
   },
   {
-    id: 'messaging', labelKey: 'sidebar.contextMenu.add.groups.messaging', defaultLabel: 'Messaging', icon: 'mail',
+    id: 'messaging', labelKey: 'sidebar.contextMenu.add.groups.messaging', defaultLabel: 'Messaging',
+    // Messaging bundles several technologies: entries are grouped per techno
+    // (the renderers insert a separator whenever `techno` changes).
     entries: [
-      { kind: 'mqtt', badgeId: 'mqtt', labelKey: 'sidebar.contextMenu.add.mqtt', defaultLabel: 'MQTT request' },
-      { kind: 'amqp', badgeId: 'amqp', labelKey: 'sidebar.contextMenu.add.amqp', defaultLabel: 'AMQP request' },
-      { kind: 'mqtt-server', badgeId: 'mqtt_server', labelKey: 'sidebar.contextMenu.add.mqttServer', defaultLabel: 'MQTT broker' },
-      { kind: 'kafka-produce', badgeId: 'kafka_produce', labelKey: 'sidebar.contextMenu.add.kafkaProduce', defaultLabel: 'Kafka request – Produce' },
-      { kind: 'kafka-consume', badgeId: 'kafka_consume', labelKey: 'sidebar.contextMenu.add.kafkaConsume', defaultLabel: 'Kafka request – Consume' },
-      { kind: 'stomp', badgeId: 'stomp', labelKey: 'sidebar.contextMenu.add.stomp', defaultLabel: 'STOMP request' }
+      { kind: 'mqtt', badgeId: 'mqtt', labelKey: 'sidebar.contextMenu.add.mqtt', defaultLabel: 'MQTT request', techno: 'mqtt' },
+      { kind: 'mqtt-server', badgeId: 'mqtt_server', labelKey: 'sidebar.contextMenu.add.mqttServer', defaultLabel: 'MQTT broker', techno: 'mqtt' },
+      { kind: 'amqp', badgeId: 'amqp', labelKey: 'sidebar.contextMenu.add.amqp', defaultLabel: 'AMQP request', techno: 'amqp' },
+      { kind: 'kafka-produce', badgeId: 'kafka_produce', labelKey: 'sidebar.contextMenu.add.kafkaProduce', defaultLabel: 'Kafka request – Produce', techno: 'kafka' },
+      { kind: 'kafka-consume', badgeId: 'kafka_consume', labelKey: 'sidebar.contextMenu.add.kafkaConsume', defaultLabel: 'Kafka request – Consume', techno: 'kafka' },
+      { kind: 'stomp', badgeId: 'stomp', labelKey: 'sidebar.contextMenu.add.stomp', defaultLabel: 'STOMP request', techno: 'stomp' }
     ]
   },
   {
@@ -272,10 +277,27 @@ export const buildAddSubmenu = (
   ...ADD_MENU_PROTOCOL_GROUPS.map((group): SidebarContextMenuItem => ({
     id: `add-group-${group.id}-${parentId}`,
     label: t(group.labelKey),
-    icon: group.badgeId !== undefined
-      ? React.createElement(RegistryBadge, { badgeId: group.badgeId })
-      : (group.icon ?? 'circle-outline'),
-    items: group.entries.map((entry) => addEntryToMenuItem(entry, parentId, t, onAddChildItem))
+    // Group (submenu) entries carry NO badge — a plain codicon at most.
+    icon: group.icon ?? '',
+    items: (() => {
+      const isServerEntry = (e: AddMenuRequestEntry): boolean => e.server === true || e.badgeId.endsWith('_server')
+      // Within each techno block (Messaging) — or the whole group when
+      // untagged — client entries first, server entries last. Stable sort
+      // keyed on (first-seen techno, server flag) keeps techno blocks intact.
+      const technoRank = new Map<string | undefined, number>()
+      for (const e of group.entries) if (!technoRank.has(e.techno)) technoRank.set(e.techno, technoRank.size)
+      const ordered = [...group.entries].sort((a, b) =>
+        ((technoRank.get(a.techno) ?? 0) - (technoRank.get(b.techno) ?? 0)) || (Number(isServerEntry(a)) - Number(isServerEntry(b))))
+      return ordered.flatMap((entry, i) => {
+        const prev = ordered[i - 1]
+        const technoBoundary = prev !== undefined && prev.techno !== entry.techno && (prev.techno !== undefined || entry.techno !== undefined)
+        const serverBoundary = prev !== undefined && !isServerEntry(prev) && isServerEntry(entry)
+        return [
+          ...(technoBoundary || serverBoundary ? [{ id: `sep-${group.id}-${String(i)}-${parentId}`, isSeparator: true as const, label: '' }] : []),
+          addEntryToMenuItem(entry, parentId, t, onAddChildItem)
+        ]
+      })
+    })()
   }))
 ]
 

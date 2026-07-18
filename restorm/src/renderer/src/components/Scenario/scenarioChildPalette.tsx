@@ -258,6 +258,18 @@ export interface ScenarioAddGraphqlActionEntry {
   defaultLabel: string
 }
 
+/** OData mock-server close action — the node exists (odataClose) but had no
+ * palette entry; the server section of the OData submenu surfaces it. */
+export interface ScenarioAddODataActionEntry {
+  kind: 'odataClose'
+  icon: string
+  labelKey: string
+  defaultLabel: string
+}
+export const SCENARIO_ADD_ODATA_ACTIONS: ScenarioAddODataActionEntry[] = [
+  { kind: 'odataClose', icon: 'debug-disconnect', labelKey: 'scenario.nodes.odataClose', defaultLabel: 'OData server close' }
+]
+
 export const SCENARIO_ADD_GRAPHQL_ACTIONS: ScenarioAddGraphqlActionEntry[] = [
   { kind: 'graphqlClose', icon: 'debug-disconnect', labelKey: 'scenario.nodes.graphqlClose', defaultLabel: 'GraphQL close' }
 ]
@@ -316,18 +328,17 @@ export function scenarioAddKafkaIcon(icon: string): ReactNode {
   return paletteBadge('KAFKA', undefined, icon)
 }
 
-/** The server-pill HTTP badge (HTTP mock-server close section). The close
- * action's codicon is not shown — the server capsule carries no glyph. */
+/** The HTTP mock-server close badge — SRV capsule + disconnect glyph. */
 export function scenarioAddHttpIcon(_icon: string): ReactNode {
-  return paletteBadge('GET', 'server', undefined)
+  return React.createElement(RegistryBadge, { badgeId: 'http_server_close' })
 }
 
-/** The server-pill SOAP badge (SOAP mock-server close section). */
+/** The SOAP mock-server close badge — SRV capsule + disconnect glyph. */
 export function scenarioAddSoapIcon(_icon: string): ReactNode {
-  return paletteBadge('SOAP', 'server', undefined)
+  return React.createElement(RegistryBadge, { badgeId: 'soap_server_close' })
 }
 
-/** The GraphQL mock-server close action's badge (QUERY server pill). */
+/** The GraphQL mock-server close badge — SRV capsule + disconnect glyph. */
 export function scenarioAddGraphqlIcon(_icon: string): ReactNode {
-  return paletteBadge('QUERY', 'server', undefined)
+  return React.createElement(RegistryBadge, { badgeId: 'gql_server_close' })
 }

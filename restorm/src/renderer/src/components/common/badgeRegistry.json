@@ -3,6 +3,12 @@
     "color": "var(--badge-get-background)",
     "text": "GET"
   },
+  "http_server_close": {
+    "color": "var(--badge-get-background)",
+    "text": "GET",
+    "isServer": true,
+    "icon": "debug-disconnect"
+  },
   "http_post": {
     "color": "var(--badge-post-background)",
     "text": "POST"
@@ -59,6 +65,12 @@
     "text": "GRPC",
     "isServer": true
   },
+  "grpc_server_close": {
+    "color": "var(--badge-grpc-background)",
+    "text": "GRPC",
+    "isServer": true,
+    "icon": "debug-disconnect"
+  },
   "grpc_send": {
     "color": "var(--badge-grpc-background)",
     "text": "GRPC",
@@ -100,6 +112,12 @@
     "text": "QUERY",
     "isServer": true
   },
+  "gql_server_close": {
+    "color": "var(--badge-gql-background)",
+    "text": "QUERY",
+    "isServer": true,
+    "icon": "debug-disconnect"
+  },
   "gql_subscribe": {
     "color": "var(--badge-gql-background)",
     "text": "GQL",
@@ -120,6 +138,13 @@
     "foreground": "var(--badge-soap-foreground, #000000)",
     "text": "SOAP",
     "isServer": true
+  },
+  "soap_server_close": {
+    "color": "var(--badge-soap-background)",
+    "foreground": "var(--badge-soap-foreground, #000000)",
+    "text": "SOAP",
+    "isServer": true,
+    "icon": "debug-disconnect"
   },
   "ws": {
     "color": "var(--badge-ws-background)",
@@ -263,6 +288,12 @@
     "color": "var(--badge-odata-background)",
     "text": "ODATA",
     "isServer": true
+  },
+  "odata_server_close": {
+    "color": "var(--badge-odata-background)",
+    "text": "ODATA",
+    "isServer": true,
+    "icon": "debug-disconnect"
   },
   "redis": {
     "color": "var(--badge-redis-background)",

@@ -46,7 +46,7 @@ import './scenarioEnvPreview'
 // inspector's static preview resolves a SecretValue operand to its live value.
 import { useSecretPreviewVersion } from './scenarioSecretPreview'
 import { layoutScenarioGraph, scenarioGraphNeedsPlacement, SCENARIO_NODE_FALLBACK_WIDTH, SCENARIO_NODE_FALLBACK_HEIGHT } from '../../../../shared/scenarioGraphLayout'
-import { addMenuEntryBadge, scenarioAddBadgedNodeIcon, SCENARIO_ADD_GRAPHQL_SUB_ACTIONS, SCENARIO_ADD_REDIS_COMMAND, SCENARIO_ADD_SOAP_REQUEST, SCENARIO_ADD_SOCKETIO_ACTIONS, SCENARIO_ADD_WEBSOCKET_ACTIONS, SCENARIO_ADD_STOMP_ACTIONS, SCENARIO_ADD_SSE_ACTIONS, SCENARIO_ADD_MQTT_ACTIONS, SCENARIO_ADD_AMQP_ACTIONS, SCENARIO_ADD_REDIS_ACTIONS, SCENARIO_ADD_KAFKA_ACTIONS, SCENARIO_ADD_GRPC_ACTIONS, SCENARIO_ADD_HTTP_ACTIONS, SCENARIO_ADD_GRPC_SERVER_ACTIONS, SCENARIO_ADD_SOAP_ACTIONS, SCENARIO_ADD_GRAPHQL_ACTIONS, scenarioAddSocketioIcon, scenarioAddWebsocketIcon, scenarioAddStompIcon, scenarioAddSseIcon, scenarioAddMqttIcon, scenarioAddAmqpIcon, scenarioAddRedisIcon, scenarioAddKafkaIcon, scenarioAddGrpcIcon, scenarioAddHttpIcon, scenarioAddSoapIcon, scenarioAddGraphqlIcon } from './scenarioChildPalette'
+import { addMenuEntryBadge, scenarioAddBadgedNodeIcon, SCENARIO_ADD_GRAPHQL_SUB_ACTIONS, SCENARIO_ADD_REDIS_COMMAND, SCENARIO_ADD_SOAP_REQUEST, SCENARIO_ADD_SOCKETIO_ACTIONS, SCENARIO_ADD_WEBSOCKET_ACTIONS, SCENARIO_ADD_STOMP_ACTIONS, SCENARIO_ADD_SSE_ACTIONS, SCENARIO_ADD_MQTT_ACTIONS, SCENARIO_ADD_AMQP_ACTIONS, SCENARIO_ADD_REDIS_ACTIONS, SCENARIO_ADD_KAFKA_ACTIONS, SCENARIO_ADD_GRPC_ACTIONS, SCENARIO_ADD_HTTP_ACTIONS, SCENARIO_ADD_GRPC_SERVER_ACTIONS, SCENARIO_ADD_SOAP_ACTIONS, SCENARIO_ADD_ODATA_ACTIONS, SCENARIO_ADD_GRAPHQL_ACTIONS, scenarioAddSocketioIcon, scenarioAddWebsocketIcon, scenarioAddStompIcon, scenarioAddSseIcon, scenarioAddMqttIcon, scenarioAddAmqpIcon, scenarioAddRedisIcon, scenarioAddKafkaIcon, scenarioAddGrpcIcon, scenarioAddHttpIcon, scenarioAddSoapIcon, scenarioAddGraphqlIcon } from './scenarioChildPalette'
 import { RegistryBadge } from '../common/RegistryBadge'
 import type { AddChildKind, AddMenuRequestEntry } from '../MainView/Sidebar/contextMenuBuilder'
 import { ADD_MENU_HTTP_ENTRIES, ADD_MENU_PROTOCOL_GROUPS } from '../MainView/Sidebar/contextMenuBuilder'
@@ -338,43 +338,47 @@ function buildScenarioPaletteItems(p: PaletteBuildParams): ContextMenuItem[] {
       // stay in lockstep. Connect actions are intentionally absent: a connection
       // is created by the protocol's request entry (which drops the bound
       // `*Connect`), so a standalone connect would only add an unbound node.
-      const groupActions = (id: string): ContextMenuItem[] => {
+      // Per-group action entries, split CLIENT vs SERVER: every submenu lists
+      // its client items first, then a separator, then the server block
+      // (server request entry + server-close action) — same order everywhere.
+      const groupActions = (id: string): { client: ContextMenuItem[]; server: ContextMenuItem[] } => {
         switch (id) {
           case 'grpc':
-            return [
-              ...SCENARIO_ADD_GRPC_ACTIONS.flatMap((a) => nodeItem(a.kind, scenarioAddGrpcIcon(a.icon), a.labelKey, a.defaultLabel)),
-              ...SCENARIO_ADD_GRPC_SERVER_ACTIONS.flatMap((a) => nodeItem(a.kind, scenarioAddGrpcIcon(a.icon), a.labelKey, a.defaultLabel))
-            ]
+            return {
+              client: SCENARIO_ADD_GRPC_ACTIONS.flatMap((a) => nodeItem(a.kind, scenarioAddGrpcIcon(a.icon), a.labelKey, a.defaultLabel)),
+              server: SCENARIO_ADD_GRPC_SERVER_ACTIONS.flatMap((a) => nodeItem(a.kind, scenarioAddBadgedNodeIcon('grpc_server_close'), a.labelKey, a.defaultLabel))
+            }
           case 'websocket':
-            return SCENARIO_ADD_WEBSOCKET_ACTIONS.flatMap((a) => nodeItem(a.kind, scenarioAddWebsocketIcon(a.icon), a.labelKey, a.defaultLabel))
+            return { client: SCENARIO_ADD_WEBSOCKET_ACTIONS.flatMap((a) => nodeItem(a.kind, scenarioAddWebsocketIcon(a.icon), a.labelKey, a.defaultLabel)), server: [] }
           case 'socketio':
-            return SCENARIO_ADD_SOCKETIO_ACTIONS.flatMap((a) => nodeItem(a.kind, scenarioAddSocketioIcon(a.icon), a.labelKey, a.defaultLabel))
+            return { client: SCENARIO_ADD_SOCKETIO_ACTIONS.flatMap((a) => nodeItem(a.kind, scenarioAddSocketioIcon(a.icon), a.labelKey, a.defaultLabel)), server: [] }
           case 'graphql':
-            return [
-              ...SCENARIO_ADD_GRAPHQL_SUB_ACTIONS.flatMap((a) => nodeItem(a.kind, scenarioAddBadgedNodeIcon(a.badgeId), a.labelKey, a.defaultLabel)),
-              ...SCENARIO_ADD_GRAPHQL_ACTIONS.flatMap((a) => nodeItem(a.kind, scenarioAddGraphqlIcon(a.icon), a.labelKey, a.defaultLabel))
-            ]
+            return {
+              client: SCENARIO_ADD_GRAPHQL_SUB_ACTIONS.flatMap((a) => nodeItem(a.kind, scenarioAddBadgedNodeIcon(a.badgeId), a.labelKey, a.defaultLabel)),
+              server: SCENARIO_ADD_GRAPHQL_ACTIONS.flatMap((a) => nodeItem(a.kind, scenarioAddGraphqlIcon(a.icon), a.labelKey, a.defaultLabel))
+            }
           case 'redis':
-            return [
-              ...nodeItem(SCENARIO_ADD_REDIS_COMMAND.kind, scenarioAddBadgedNodeIcon(SCENARIO_ADD_REDIS_COMMAND.badgeId), SCENARIO_ADD_REDIS_COMMAND.labelKey, SCENARIO_ADD_REDIS_COMMAND.defaultLabel),
-              ...SCENARIO_ADD_REDIS_ACTIONS.flatMap((a) => nodeItem(a.kind, scenarioAddRedisIcon(a.icon), a.labelKey, a.defaultLabel))
-            ]
+            return {
+              client: [
+                ...nodeItem(SCENARIO_ADD_REDIS_COMMAND.kind, scenarioAddBadgedNodeIcon(SCENARIO_ADD_REDIS_COMMAND.badgeId), SCENARIO_ADD_REDIS_COMMAND.labelKey, SCENARIO_ADD_REDIS_COMMAND.defaultLabel),
+                ...SCENARIO_ADD_REDIS_ACTIONS.flatMap((a) => nodeItem(a.kind, scenarioAddRedisIcon(a.icon), a.labelKey, a.defaultLabel))
+              ],
+              server: []
+            }
           case 'messaging':
-            return [
-              ...SCENARIO_ADD_MQTT_ACTIONS.flatMap((a) => nodeItem(a.kind, scenarioAddMqttIcon(a.icon), a.labelKey, a.defaultLabel)),
-              ...SCENARIO_ADD_AMQP_ACTIONS.flatMap((a) => nodeItem(a.kind, scenarioAddAmqpIcon(a.icon), a.labelKey, a.defaultLabel)),
-              ...SCENARIO_ADD_KAFKA_ACTIONS.flatMap((a) => nodeItem(a.kind, scenarioAddKafkaIcon(a.icon), a.labelKey, a.defaultLabel)),
-              ...SCENARIO_ADD_STOMP_ACTIONS.flatMap((a) => nodeItem(a.kind, scenarioAddStompIcon(a.icon), a.labelKey, a.defaultLabel))
-            ]
+            // Handled per techno by the messaging assembly below.
+            return { client: [], server: [] }
           case 'soap':
-            return [
-              ...nodeItem(SCENARIO_ADD_SOAP_REQUEST.kind, scenarioAddBadgedNodeIcon(SCENARIO_ADD_SOAP_REQUEST.badgeId), SCENARIO_ADD_SOAP_REQUEST.labelKey, SCENARIO_ADD_SOAP_REQUEST.defaultLabel),
-              ...SCENARIO_ADD_SOAP_ACTIONS.flatMap((a) => nodeItem(a.kind, scenarioAddSoapIcon(a.icon), a.labelKey, a.defaultLabel))
-            ]
+            return {
+              client: nodeItem(SCENARIO_ADD_SOAP_REQUEST.kind, scenarioAddBadgedNodeIcon(SCENARIO_ADD_SOAP_REQUEST.badgeId), SCENARIO_ADD_SOAP_REQUEST.labelKey, SCENARIO_ADD_SOAP_REQUEST.defaultLabel),
+              server: SCENARIO_ADD_SOAP_ACTIONS.flatMap((a) => nodeItem(a.kind, scenarioAddSoapIcon(a.icon), a.labelKey, a.defaultLabel))
+            }
+          case 'odata':
+            return { client: [], server: SCENARIO_ADD_ODATA_ACTIONS.flatMap((a) => nodeItem(a.kind, scenarioAddBadgedNodeIcon('odata_server_close'), a.labelKey, a.defaultLabel)) }
           case 'sse':
-            return SCENARIO_ADD_SSE_ACTIONS.flatMap((a) => nodeItem(a.kind, scenarioAddSseIcon(a.icon), a.labelKey, a.defaultLabel))
+            return { client: SCENARIO_ADD_SSE_ACTIONS.flatMap((a) => nodeItem(a.kind, scenarioAddSseIcon(a.icon), a.labelKey, a.defaultLabel)), server: [] }
           default:
-            return []
+            return { client: [], server: [] }
         }
       }
       // Sub-scenario + auth sit at the top (mirroring the sidebar's folder /
@@ -389,16 +393,50 @@ function buildScenarioPaletteItems(p: PaletteBuildParams): ContextMenuItem[] {
         : []
       // The HTTP block: the eight method entries + mock server (inline, no
       // submenu), then the HTTP mock-server close action.
-      const httpSection = [
-        ...ADD_MENU_HTTP_ENTRIES.flatMap(reqItem),
+      const httpVerbItems = ADD_MENU_HTTP_ENTRIES.filter((e2) => e2.server !== true).flatMap(reqItem)
+      const httpServerItems = [
+        ...ADD_MENU_HTTP_ENTRIES.filter((e2) => e2.server === true).flatMap(reqItem),
         ...SCENARIO_ADD_HTTP_ACTIONS.flatMap((a) => nodeItem(a.kind, scenarioAddHttpIcon(a.icon), a.labelKey, a.defaultLabel))
       ]
+      const httpSection = httpServerItems.length > 0 && httpVerbItems.length > 0
+        ? [...httpVerbItems, sep('add-http-srv'), ...httpServerItems]
+        : [...httpVerbItems, ...httpServerItems]
       // One nested submenu per protocol group — its request/server entries then
       // its action entries. Empty groups (every pick unavailable) are dropped.
+      const messagingActions: Record<string, ContextMenuItem[]> = {
+        mqtt: SCENARIO_ADD_MQTT_ACTIONS.flatMap((a) => nodeItem(a.kind, scenarioAddMqttIcon(a.icon), a.labelKey, a.defaultLabel)),
+        amqp: SCENARIO_ADD_AMQP_ACTIONS.flatMap((a) => nodeItem(a.kind, scenarioAddAmqpIcon(a.icon), a.labelKey, a.defaultLabel)),
+        kafka: SCENARIO_ADD_KAFKA_ACTIONS.flatMap((a) => nodeItem(a.kind, scenarioAddKafkaIcon(a.icon), a.labelKey, a.defaultLabel)),
+        stomp: SCENARIO_ADD_STOMP_ACTIONS.flatMap((a) => nodeItem(a.kind, scenarioAddStompIcon(a.icon), a.labelKey, a.defaultLabel))
+      }
+      const isServerEntry = (e2: typeof ADD_MENU_PROTOCOL_GROUPS[number]['entries'][number]): boolean =>
+        e2.server === true || e2.badgeId.endsWith('_server')
       const groupSubmenus = ADD_MENU_PROTOCOL_GROUPS.flatMap((g): ContextMenuItem[] => {
-        const inner = [...g.entries.flatMap(reqItem), ...groupActions(g.id)]
+        // Messaging: one block per techno (requests then actions, server last),
+        // technos separated — mirroring the sidebar's techno separators.
+        let inner: ContextMenuItem[]
+        if (g.id === 'messaging') {
+          inner = ['mqtt', 'amqp', 'kafka', 'stomp'].flatMap((techno, ti) => {
+            const technoEntries = g.entries.filter((e2) => e2.techno === techno)
+            const block = [
+              ...technoEntries.filter((e2) => !isServerEntry(e2)).flatMap(reqItem),
+              ...(messagingActions[techno] ?? []),
+              ...technoEntries.filter(isServerEntry).flatMap(reqItem)
+            ]
+            if (block.length === 0) return []
+            return ti > 0 ? [sep(`add-msg-${techno}`), ...block] : block
+          })
+        } else {
+          const acts = groupActions(g.id)
+          const clientPart = [...g.entries.filter((e2) => !isServerEntry(e2)).flatMap(reqItem), ...acts.client]
+          const serverPart = [...g.entries.filter(isServerEntry).flatMap(reqItem), ...acts.server]
+          inner = serverPart.length > 0 && clientPart.length > 0
+            ? [...clientPart, sep(`add-srv-${g.id}`), ...serverPart]
+            : [...clientPart, ...serverPart]
+        }
         if (inner.length === 0) return []
-        const icon: ReactNode | string = g.badgeId !== undefined ? scenarioAddBadgedNodeIcon(g.badgeId) : (g.icon ?? 'circle-outline')
+        // Group (submenu) entries carry NO badge — a plain codicon at most.
+        const icon: ReactNode | string = g.icon ?? ''
         return [{ id: `add-group-${g.id}`, label: p.t(g.labelKey, g.defaultLabel), icon, items: inner }]
       })
       // Assembled sections, divider-separated (orphan separators tidied by the

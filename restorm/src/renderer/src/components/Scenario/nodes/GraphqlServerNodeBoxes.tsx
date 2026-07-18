@@ -73,5 +73,5 @@ export const GraphqlCloseNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ 
   const left: ScenarioNodeSection[] = [
     { id: 'main', rows: [{ id: 'connection', content: <ConnectionPicker id={id} data={data} kind="graphqlListen" /> }] }
   ]
-  return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={[]} headerIcon={<RegistryBadge badgeId="gql_query_server" />} />
+  return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={[]} headerIcon={<RegistryBadge badgeId="gql_server_close" />} />
 }
