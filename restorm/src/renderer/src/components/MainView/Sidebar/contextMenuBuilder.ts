@@ -136,7 +136,7 @@ export const ADD_MENU_HTTP_ENTRIES: AddMenuRequestEntry[] = [
   { kind: 'http-query', badgeId: 'http_query', text: 'QUERY', labelKey: 'sidebar.contextMenu.add.httpQuery', defaultLabel: 'HTTP – QUERY request' },
   // restorm hosts a local HTTP endpoint (METHOD + PATH) serving a configured
   // response — its body keeps the GET color, so the SRV capsule is forced on.
-  { kind: 'http-server', badgeId: 'http_get', server: true, labelKey: 'sidebar.contextMenu.add.httpServer', defaultLabel: 'HTTP mock server' }
+  { kind: 'http-server', badgeId: 'http_get', server: true, labelKey: 'sidebar.contextMenu.add.httpServer', defaultLabel: 'HTTP server' }
 ]
 
 /** The protocol submenus, in the canonical Add-menu order. Only kinds that
@@ -152,7 +152,7 @@ export const ADD_MENU_PROTOCOL_GROUPS: AddMenuGroup[] = [
       { kind: 'grpc-server-stream', badgeId: 'grpc_sstr', labelKey: 'sidebar.contextMenu.add.grpcServerStream', defaultLabel: 'gRPC server-streaming request' },
       { kind: 'grpc-client-stream', badgeId: 'grpc_cstr', labelKey: 'sidebar.contextMenu.add.grpcClientStream', defaultLabel: 'gRPC client-streaming request' },
       { kind: 'grpc-bidi', badgeId: 'grpc_bidi', labelKey: 'sidebar.contextMenu.add.grpcBidi', defaultLabel: 'gRPC bidirectional request' },
-      { kind: 'grpc-server', badgeId: 'grpc_server', labelKey: 'sidebar.contextMenu.add.grpcServer', defaultLabel: 'gRPC mock server' }
+      { kind: 'grpc-server', badgeId: 'grpc_server', labelKey: 'sidebar.contextMenu.add.grpcServer', defaultLabel: 'gRPC server' }
     ]
   },
   {
@@ -173,7 +173,7 @@ export const ADD_MENU_PROTOCOL_GROUPS: AddMenuGroup[] = [
     id: 'graphql', labelKey: 'sidebar.contextMenu.add.groups.graphql', defaultLabel: 'GraphQL', badgeId: 'gql',
     entries: [
       { kind: 'graphql', badgeId: 'gql_query', labelKey: 'sidebar.contextMenu.add.graphql', defaultLabel: 'GraphQL request' },
-      { kind: 'graphql-server', badgeId: 'gql_query_server', labelKey: 'sidebar.contextMenu.add.graphqlServer', defaultLabel: 'GraphQL mock server' }
+      { kind: 'graphql-server', badgeId: 'gql_query_server', labelKey: 'sidebar.contextMenu.add.graphqlServer', defaultLabel: 'GraphQL server' }
     ]
   },
   {
@@ -188,7 +188,7 @@ export const ADD_MENU_PROTOCOL_GROUPS: AddMenuGroup[] = [
     // (the renderers insert a separator whenever `techno` changes).
     entries: [
       { kind: 'mqtt', badgeId: 'mqtt', labelKey: 'sidebar.contextMenu.add.mqtt', defaultLabel: 'MQTT request', techno: 'mqtt' },
-      { kind: 'mqtt-server', badgeId: 'mqtt_server', labelKey: 'sidebar.contextMenu.add.mqttServer', defaultLabel: 'MQTT broker', techno: 'mqtt' },
+      { kind: 'mqtt-server', badgeId: 'mqtt_server', labelKey: 'sidebar.contextMenu.add.mqttServer', defaultLabel: 'MQTT server', techno: 'mqtt' },
       { kind: 'amqp', badgeId: 'amqp', labelKey: 'sidebar.contextMenu.add.amqp', defaultLabel: 'AMQP request', techno: 'amqp' },
       { kind: 'kafka-produce', badgeId: 'kafka_produce', labelKey: 'sidebar.contextMenu.add.kafkaProduce', defaultLabel: 'Kafka request – Produce', techno: 'kafka' },
       { kind: 'kafka-consume', badgeId: 'kafka_consume', labelKey: 'sidebar.contextMenu.add.kafkaConsume', defaultLabel: 'Kafka request – Consume', techno: 'kafka' },
@@ -199,14 +199,14 @@ export const ADD_MENU_PROTOCOL_GROUPS: AddMenuGroup[] = [
     id: 'soap', labelKey: 'sidebar.contextMenu.add.groups.soap', defaultLabel: 'SOAP', badgeId: 'soap',
     entries: [
       { kind: 'soap', badgeId: 'soap', labelKey: 'sidebar.contextMenu.add.soap', defaultLabel: 'SOAP request' },
-      { kind: 'soap-server', badgeId: 'soap_server', labelKey: 'sidebar.contextMenu.add.soapServer', defaultLabel: 'SOAP mock server' }
+      { kind: 'soap-server', badgeId: 'soap_server', labelKey: 'sidebar.contextMenu.add.soapServer', defaultLabel: 'SOAP server' }
     ]
   },
   {
     id: 'odata', labelKey: 'sidebar.contextMenu.add.groups.odata', defaultLabel: 'OData', badgeId: 'odata',
     entries: [
       { kind: 'odata', badgeId: 'odata', labelKey: 'sidebar.contextMenu.add.odata', defaultLabel: 'OData request' },
-      { kind: 'odata-server', badgeId: 'odata_server', labelKey: 'sidebar.contextMenu.add.odataServer', defaultLabel: 'OData mock server' }
+      { kind: 'odata-server', badgeId: 'odata_server', labelKey: 'sidebar.contextMenu.add.odataServer', defaultLabel: 'OData server' }
     ]
   },
   {

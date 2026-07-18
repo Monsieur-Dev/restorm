@@ -86,7 +86,7 @@ export interface ScenarioAddActionEntry {
 
 export const SCENARIO_ADD_SOCKETIO_ACTIONS: ScenarioAddActionEntry[] = [
   { kind: 'socketioSend', icon: 'arrow-up', labelKey: 'scenario.nodes.socketioSend', defaultLabel: 'Socket.IO send' },
-  { kind: 'socketioClose', icon: 'debug-disconnect', labelKey: 'scenario.nodes.socketioClose', defaultLabel: 'Socket.IO close' }
+  { kind: 'socketioClose', icon: 'debug-disconnect', labelKey: 'scenario.nodes.socketioClose', defaultLabel: 'Socket.IO connection close' }
 ]
 
 /** Socket.IO mock-server action entries — CLOSE only (the listen comes from the
@@ -115,7 +115,7 @@ export interface ScenarioAddWsActionEntry {
 
 export const SCENARIO_ADD_WEBSOCKET_ACTIONS: ScenarioAddWsActionEntry[] = [
   { kind: 'websocketSend', icon: 'arrow-up', labelKey: 'scenario.nodes.websocketSend', defaultLabel: 'WebSocket send' },
-  { kind: 'websocketClose', icon: 'debug-disconnect', labelKey: 'scenario.nodes.websocketClose', defaultLabel: 'WebSocket close' }
+  { kind: 'websocketClose', icon: 'debug-disconnect', labelKey: 'scenario.nodes.websocketClose', defaultLabel: 'WebSocket connection close' }
 ]
 
 /** Raw-WebSocket mock-server action entries — CLOSE only (the listen comes from
@@ -153,12 +153,12 @@ export interface ScenarioAddStompActionEntry {
 }
 
 export const SCENARIO_ADD_SSE_ACTIONS: ScenarioAddSseActionEntry[] = [
-  { kind: 'sseClose', icon: 'debug-disconnect', labelKey: 'scenario.nodes.sseClose', defaultLabel: 'SSE close' }
+  { kind: 'sseClose', icon: 'debug-disconnect', labelKey: 'scenario.nodes.sseClose', defaultLabel: 'SSE connection close' }
 ]
 
 export const SCENARIO_ADD_STOMP_ACTIONS: ScenarioAddStompActionEntry[] = [
   { kind: 'stompSend', icon: 'arrow-up', labelKey: 'scenario.nodes.stompSend', defaultLabel: 'STOMP send' },
-  { kind: 'stompClose', icon: 'debug-disconnect', labelKey: 'scenario.nodes.stompClose', defaultLabel: 'STOMP close' }
+  { kind: 'stompClose', icon: 'debug-disconnect', labelKey: 'scenario.nodes.stompClose', defaultLabel: 'STOMP connection close' }
 ]
 
 /** MQTT action entries — publish / close (connect comes from the request entry), badged MQTT. */
@@ -171,7 +171,7 @@ export interface ScenarioAddMqttActionEntry {
 
 export const SCENARIO_ADD_MQTT_ACTIONS: ScenarioAddMqttActionEntry[] = [
   { kind: 'mqttSend', icon: 'arrow-up', labelKey: 'scenario.nodes.mqttSend', defaultLabel: 'MQTT publish' },
-  { kind: 'mqttClose', icon: 'debug-disconnect', labelKey: 'scenario.nodes.mqttClose', defaultLabel: 'MQTT close' }
+  { kind: 'mqttClose', icon: 'debug-disconnect', labelKey: 'scenario.nodes.mqttClose', defaultLabel: 'MQTT connection close' }
 ]
 
 /** AMQP action entries — publish / close (connect comes from the request entry,
@@ -207,15 +207,15 @@ export interface ScenarioAddRedisActionEntry {
 
 export const SCENARIO_ADD_AMQP_ACTIONS: ScenarioAddAmqpActionEntry[] = [
   { kind: 'amqpPublish', icon: 'arrow-up', labelKey: 'scenario.nodes.amqpPublish', defaultLabel: 'AMQP publish' },
-  { kind: 'amqpClose', icon: 'debug-disconnect', labelKey: 'scenario.nodes.amqpClose', defaultLabel: 'AMQP close' }
+  { kind: 'amqpClose', icon: 'debug-disconnect', labelKey: 'scenario.nodes.amqpClose', defaultLabel: 'AMQP connection close' }
 ]
 
 export const SCENARIO_ADD_REDIS_ACTIONS: ScenarioAddRedisActionEntry[] = [
-  { kind: 'redisClose', icon: 'debug-disconnect', labelKey: 'scenario.nodes.redisClose', defaultLabel: 'Redis close' }
+  { kind: 'redisClose', icon: 'debug-disconnect', labelKey: 'scenario.nodes.redisClose', defaultLabel: 'Redis connection close' }
 ]
 
 export const SCENARIO_ADD_KAFKA_ACTIONS: ScenarioAddKafkaActionEntry[] = [
-  { kind: 'kafkaClose', icon: 'debug-disconnect', labelKey: 'scenario.nodes.kafkaClose', defaultLabel: 'Kafka close' }
+  { kind: 'kafkaClose', icon: 'debug-disconnect', labelKey: 'scenario.nodes.kafkaClose', defaultLabel: 'Kafka connection close' }
 ]
 
 /** gRPC streaming action entries — send / close only (badged GRPC). The CONNECT
@@ -232,7 +232,7 @@ export interface ScenarioAddGrpcActionEntry {
 
 export const SCENARIO_ADD_GRPC_ACTIONS: ScenarioAddGrpcActionEntry[] = [
   { kind: 'grpcSend', icon: 'arrow-up', labelKey: 'scenario.nodes.grpcSend', defaultLabel: 'gRPC send' },
-  { kind: 'grpcClose', icon: 'debug-disconnect', labelKey: 'scenario.nodes.grpcClose', defaultLabel: 'gRPC close' }
+  { kind: 'grpcClose', icon: 'debug-disconnect', labelKey: 'scenario.nodes.grpcClose', defaultLabel: 'gRPC connection close' }
 ]
 
 /** HTTP mock-server action entries — CLOSE only (the listen comes from the
@@ -247,7 +247,7 @@ export interface ScenarioAddHttpActionEntry {
 }
 
 export const SCENARIO_ADD_HTTP_ACTIONS: ScenarioAddHttpActionEntry[] = [
-  { kind: 'httpClose', icon: 'debug-disconnect', labelKey: 'scenario.nodes.httpClose', defaultLabel: 'HTTP close' }
+  { kind: 'httpClose', icon: 'debug-disconnect', labelKey: 'scenario.nodes.httpClose', defaultLabel: 'HTTP server close' }
 ]
 
 /** gRPC mock-server action entries — CLOSE only (the listen comes from the
@@ -275,7 +275,7 @@ export const SCENARIO_ADD_GRPC_SERVER_ACTIONS: ScenarioAddGrpcServerActionEntry[
 ]
 
 export const SCENARIO_ADD_SOAP_ACTIONS: ScenarioAddSoapActionEntry[] = [
-  { kind: 'soapClose', icon: 'debug-disconnect', labelKey: 'scenario.nodes.soapClose', defaultLabel: 'SOAP close' }
+  { kind: 'soapClose', icon: 'debug-disconnect', labelKey: 'scenario.nodes.soapClose', defaultLabel: 'SOAP server close' }
 ]
 
 /** GraphQL mock-server action entries — CLOSE only (the listen comes from the
@@ -301,7 +301,7 @@ export const SCENARIO_ADD_ODATA_ACTIONS: ScenarioAddODataActionEntry[] = [
 ]
 
 export const SCENARIO_ADD_GRAPHQL_ACTIONS: ScenarioAddGraphqlActionEntry[] = [
-  { kind: 'graphqlClose', icon: 'debug-disconnect', labelKey: 'scenario.nodes.graphqlClose', defaultLabel: 'GraphQL close' }
+  { kind: 'graphqlClose', icon: 'debug-disconnect', labelKey: 'scenario.nodes.graphqlClose', defaultLabel: 'GraphQL server close' }
 ]
 
 /** Render the `badgeRegistry.json` badge for a palette entry, resolving the

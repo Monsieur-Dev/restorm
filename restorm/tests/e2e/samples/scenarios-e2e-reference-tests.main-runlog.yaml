@@ -4543,13 +4543,13 @@
 - message: ⚪ [<time>] done log
   data: {}
 - message: ⚪ [<time>] done socketioClose
-- message: ⚪ [<time>] start socketioClose
+- message: ⚪ [<time>] start socketioServerClose
   data:
     connectionNodeId: <uuid>
     label: close Server
     in: true
 - message: ⚪ [<time>] socketio "Server" closed
-- message: ⚪ [<time>] done socketioClose
+- message: ⚪ [<time>] done socketioServerClose
 - message: 🔵 [<time>] ■ Socket.IO
 - message: ⚪ [<time>] done runScenario
   data:
@@ -4622,13 +4622,13 @@
     label: close Echo
     in: true
 - message: ⚪ [<time>] done websocketClose
-- message: ⚪ [<time>] start websocketClose
+- message: ⚪ [<time>] start websocketServerClose
   data:
     connectionNodeId: <uuid>
     label: close Server
     in: true
 - message: ⚪ [<time>] websocket "Server" closed
-- message: ⚪ [<time>] done websocketClose
+- message: ⚪ [<time>] done websocketServerClose
 - message: ⚪ [<time>] websocket "Echo" closed
 - message: ⚪ [<time>] start log
   data:

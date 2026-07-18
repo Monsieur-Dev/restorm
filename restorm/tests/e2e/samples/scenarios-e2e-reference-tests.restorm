@@ -19309,7 +19309,7 @@ collections:
                       x: 840
                       'y': 220
                   - id: 2dbac6ce-478a-4075-a3e8-10f8c857ea46
-                    kind: socketioClose
+                    kind: socketioServerClose
                     config:
                       connectionNodeId: e69f6c7c-ba8d-4c2b-88d0-ed15db151753
                       label: close Server
@@ -19595,7 +19595,7 @@ collections:
                       x: 820
                       'y': 220
                   - id: 4b3b54f7-b56c-4dd9-82b4-f238ab3cef87
-                    kind: websocketClose
+                    kind: websocketServerClose
                     config:
                       connectionNodeId: df7080a6-c267-4faa-a62d-9a413ccd2875
                       label: close Server

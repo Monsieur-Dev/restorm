@@ -14,7 +14,7 @@ This doc covers:
 
 ## Creating a mock
 
-Right-click a folder → **Add → HTTP mock server**. You get an HTTP request pre-set to `server: true`, method `GET`, address `localhost:8080/`, and status `200`. In the request panel:
+Right-click a folder → **Add → HTTP server**. You get an HTTP request pre-set to `server: true`, method `GET`, address `localhost:8080/`, and status `200`. In the request panel:
 
 - the **host is fixed to `localhost`** — only the **port** and **path** are editable (next to the existing method selector);
 - the **Send** button becomes a **Listen ↔ Stop** toggle;

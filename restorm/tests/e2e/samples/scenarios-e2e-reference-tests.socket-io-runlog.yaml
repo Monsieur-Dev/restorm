@@ -72,11 +72,11 @@
 - message: ⚪ [<time>] done log
   data: {}
 - message: ⚪ [<time>] done socketioClose
-- message: ⚪ [<time>] start socketioClose
+- message: ⚪ [<time>] start socketioServerClose
   data:
     connectionNodeId: <uuid>
     label: close Server
     in: true
 - message: ⚪ [<time>] socketio "Server" closed
-- message: ⚪ [<time>] done socketioClose
+- message: ⚪ [<time>] done socketioServerClose
 - message: 🔵 [<time>] ■ Socket.IO
