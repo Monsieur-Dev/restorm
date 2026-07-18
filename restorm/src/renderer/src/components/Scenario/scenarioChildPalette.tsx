@@ -89,6 +89,21 @@ export const SCENARIO_ADD_SOCKETIO_ACTIONS: ScenarioAddActionEntry[] = [
   { kind: 'socketioClose', icon: 'debug-disconnect', labelKey: 'scenario.nodes.socketioClose', defaultLabel: 'Socket.IO close' }
 ]
 
+/** Socket.IO mock-server action entries — CLOSE only (the listen comes from the
+ * "Socket.IO server" request entry, which drops a bound socketioConnect on a
+ * `server: true` request). Mirrors the gRPC/HTTP/SOAP server sections; badged
+ * with the SIO server pill + the close codicon. */
+export interface ScenarioAddSocketioServerActionEntry {
+  kind: 'socketioServerClose'
+  icon: string
+  labelKey: string
+  defaultLabel: string
+}
+
+export const SCENARIO_ADD_SOCKETIO_SERVER_ACTIONS: ScenarioAddSocketioServerActionEntry[] = [
+  { kind: 'socketioServerClose', icon: 'debug-disconnect', labelKey: 'scenario.nodes.socketioServerClose', defaultLabel: 'Socket.IO server close' }
+]
+
 /** Raw-WebSocket action entries — same shape as the Socket.IO section, badged WS
  * (send / close only; connect comes from the request entries). */
 export interface ScenarioAddWsActionEntry {
@@ -101,6 +116,21 @@ export interface ScenarioAddWsActionEntry {
 export const SCENARIO_ADD_WEBSOCKET_ACTIONS: ScenarioAddWsActionEntry[] = [
   { kind: 'websocketSend', icon: 'arrow-up', labelKey: 'scenario.nodes.websocketSend', defaultLabel: 'WebSocket send' },
   { kind: 'websocketClose', icon: 'debug-disconnect', labelKey: 'scenario.nodes.websocketClose', defaultLabel: 'WebSocket close' }
+]
+
+/** Raw-WebSocket mock-server action entries — CLOSE only (the listen comes from
+ * the "WebSocket server" request entry, which drops a bound websocketConnect on a
+ * `server: true` request). Mirrors the gRPC/HTTP/SOAP server sections; badged
+ * with the WS server pill + the close codicon. */
+export interface ScenarioAddWsServerActionEntry {
+  kind: 'websocketServerClose'
+  icon: string
+  labelKey: string
+  defaultLabel: string
+}
+
+export const SCENARIO_ADD_WEBSOCKET_SERVER_ACTIONS: ScenarioAddWsServerActionEntry[] = [
+  { kind: 'websocketServerClose', icon: 'debug-disconnect', labelKey: 'scenario.nodes.websocketServerClose', defaultLabel: 'WebSocket server close' }
 ]
 
 /** SSE action entries — CLOSE only (the connect comes from the request entry,

@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest'
 import { Scheduler, type SocketioConnectRequest, type SocketioConnHandle } from './scheduler'
-import { websocketConnectExecutor, websocketSendExecutor, websocketCloseExecutor } from './executors/socketioExecutors'
+import { websocketConnectExecutor, websocketSendExecutor, websocketCloseExecutor, websocketServerCloseExecutor } from './executors/socketioExecutors'
 import type { Activation, ExecContext, ExecResult, NodeExecutor, ScenarioModel } from './types'
 
 /**
@@ -91,6 +91,19 @@ describe('websocket executors — reference validation', () => {
     const ctx = { node: { id: 'c', kind: 'websocketClose', config: {}, inputs: [], outputs: [], position: { x: 0, y: 0 } } } as unknown as ExecContext
     expect(() => websocketCloseExecutor({ nodeId: 'c', kind: 'websocketClose', scope: [], inputs: {} } as unknown as Activation, ctx)).toThrow(/no connection selected/)
   })
+
+  it('websocketServerClose with no server selected throws (hard error)', () => {
+    const ctx = { node: { id: 'sc', kind: 'websocketServerClose', config: {}, inputs: [], outputs: [], position: { x: 0, y: 0 } } } as unknown as ExecContext
+    expect(() => websocketServerCloseExecutor({ nodeId: 'sc', kind: 'websocketServerClose', scope: [], inputs: {} } as unknown as Activation, ctx)).toThrow(/no server selected/)
+  })
+
+  it('websocketServerClose errors when the referenced server does not exist in the run', () => {
+    const ctx = {
+      node: { id: 'sc', kind: 'websocketServerClose', config: { connectionNodeId: 'a' }, inputs: [], outputs: [], position: { x: 0, y: 0 } },
+      socketio: { has: () => false, isOpen: () => false, send: () => false, close: () => false }
+    } as unknown as ExecContext
+    expect(() => websocketServerCloseExecutor({ nodeId: 'sc', kind: 'websocketServerClose', scope: [], inputs: {} } as unknown as Activation, ctx)).toThrow(/does not exist/)
+  })
 })
 
 describe('websocket scheduler — connection lifecycle', () => {
@@ -171,6 +184,39 @@ describe('websocket scheduler — connection lifecycle', () => {
     expect(s.status().state).toBe('completed')
     // Empty channel → a plain ws.send(payload).
     expect(fb.sends).toEqual([{ channel: '', payload: '{"hi":1}' }])
+  })
+
+  it('a websocketServerClose stops a server-hosting connect and fires its done', async () => {
+    // A `server: true`-bound websocketConnect HOSTS a raw-WS mock server; the
+    // dedicated server-close node stops it exactly like a client close — the
+    // referenced connect node is closed, freeing its port, and its `done` fires.
+    const scenario = buildScenario(
+      [
+        { id: 'a', kind: 'websocketConnect', outputs: ['connected', 'message'], config: { requestId: 'srvReq', connectionName: 'Mock' } },
+        { id: 'c', kind: 'websocketServerClose', inputs: ['in'], outputs: [], config: { connectionNodeId: 'a' } },
+        { id: 'onDone', kind: 'now', inputs: ['in'], outputs: [] }
+      ],
+      [
+        { from: ['a', 'connected'], to: ['c', 'in'] },
+        { from: ['a', 'done'], to: ['onDone', 'in'] }
+      ]
+    )
+    let doneRuns = 0
+    const executors = new Map<string, NodeExecutor>([
+      ['a', websocketConnectExecutor],
+      ['c', websocketServerCloseExecutor],
+      ['onDone', () => { doneRuns += 1; return { outputs: [] } }]
+    ])
+    const fb = fakeBridge()
+    const s = new Scheduler({ scenario, executors, socketioConnect: fb.bridge })
+    const done = s.run()
+
+    await flush()
+    fb.open()
+    fb.cb().onConnect()
+    await done
+    expect(doneRuns).toBe(1)
+    expect(s.status().state).toBe('completed')
   })
 
   it('a Stop closes the connection (no done fired; run cancelled)', async () => {

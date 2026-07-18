@@ -256,3 +256,13 @@ export const SocketioCloseNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({
   // No explicit output — the action sequences via the universal `done` port.
   return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={[]} headerIcon={<RegistryBadge badgeId="sio_close" />} />
 }
+
+/** C (socketioServerClose) — stops a declared Socket.IO mock server (a
+ * socketioConnect node bound to a `server: true` request); sequences via `done`.
+ * The header shows the SIO server-close (SRV) capsule. */
+export const SocketioServerCloseNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, data, selected }) => {
+  const left: ScenarioNodeSection[] = [
+    { id: 'main', rows: [{ id: 'connection', content: <ConnectionPicker id={id} data={data} kind="socketioConnect" /> }] }
+  ]
+  return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={[]} headerIcon={<RegistryBadge badgeId="sio_server_close" />} />
+}

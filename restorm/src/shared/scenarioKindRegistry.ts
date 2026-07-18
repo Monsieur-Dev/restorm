@@ -208,6 +208,14 @@ export const SCENARIO_KIND_REGISTRY = {
       config: { connectionNodeId: 'Id of the socketioConnect node whose connection to close.' }
     }
   },
+  socketioServerClose: {
+    labelKey: 'scenario.nodes.socketioServerClose', defaultLabel: 'Socket.IO server close', icon: 'debug-disconnect', category: 'composition',
+    ports: { inputs: [], outputs: [] },
+    doc: {
+      summary: 'Stops an already-listening Socket.IO mock server (declared by a socketioConnect node bound to a `server: true` request), freeing its port and firing that node\'s `done`. Pure-event action: triggered on `in`, sequences via its own `done`. Errors (to `error`) when no server is selected.',
+      config: { connectionNodeId: 'Id of the socketioConnect (server) node whose server to stop.' }
+    }
+  },
   websocketConnect: {
     labelKey: 'scenario.nodes.websocketConnect', defaultLabel: 'WebSocket connect', icon: 'plug', category: 'composition',
     requestBinding: true,
@@ -231,6 +239,14 @@ export const SCENARIO_KIND_REGISTRY = {
     doc: {
       summary: 'Closes an already-open raw WebSocket connection (declared by a websocketConnect node), firing that node\'s `done`. Pure-event action: triggered on `in`, sequences via its own `done`. Errors (to `error`) when no connection is selected.',
       config: { connectionNodeId: 'Id of the websocketConnect node whose connection to close.' }
+    }
+  },
+  websocketServerClose: {
+    labelKey: 'scenario.nodes.websocketServerClose', defaultLabel: 'WebSocket server close', icon: 'debug-disconnect', category: 'composition',
+    ports: { inputs: [], outputs: [] },
+    doc: {
+      summary: 'Stops an already-listening WebSocket mock server (declared by a websocketConnect node bound to a `server: true` request), freeing its port and firing that node\'s `done`. Pure-event action: triggered on `in`, sequences via its own `done`. Errors (to `error`) when no server is selected.',
+      config: { connectionNodeId: 'Id of the websocketConnect (server) node whose server to stop.' }
     }
   },
   sseConnect: {

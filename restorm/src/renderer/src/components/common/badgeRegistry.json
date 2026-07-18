@@ -170,6 +170,12 @@
     "text": "WS",
     "icon": "debug-disconnect"
   },
+  "ws_server_close": {
+    "color": "var(--badge-ws-background)",
+    "text": "WS",
+    "isServer": true,
+    "icon": "debug-disconnect"
+  },
   "sio": {
     "color": "var(--badge-sio-background)",
     "text": "SIO"
@@ -192,6 +198,12 @@
   "sio_close": {
     "color": "var(--badge-sio-background)",
     "text": "SIO",
+    "icon": "debug-disconnect"
+  },
+  "sio_server_close": {
+    "color": "var(--badge-sio-background)",
+    "text": "SIO",
+    "isServer": true,
     "icon": "debug-disconnect"
   },
   "mqtt": {

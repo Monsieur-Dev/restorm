@@ -46,7 +46,7 @@ import './scenarioEnvPreview'
 // inspector's static preview resolves a SecretValue operand to its live value.
 import { useSecretPreviewVersion } from './scenarioSecretPreview'
 import { layoutScenarioGraph, scenarioGraphNeedsPlacement, SCENARIO_NODE_FALLBACK_WIDTH, SCENARIO_NODE_FALLBACK_HEIGHT } from '../../../../shared/scenarioGraphLayout'
-import { addMenuEntryBadge, scenarioAddBadgedNodeIcon, SCENARIO_ADD_GRAPHQL_SUB_ACTIONS, SCENARIO_ADD_REDIS_COMMAND, SCENARIO_ADD_SOAP_REQUEST, SCENARIO_ADD_SOCKETIO_ACTIONS, SCENARIO_ADD_WEBSOCKET_ACTIONS, SCENARIO_ADD_STOMP_ACTIONS, SCENARIO_ADD_SSE_ACTIONS, SCENARIO_ADD_MQTT_ACTIONS, SCENARIO_ADD_AMQP_ACTIONS, SCENARIO_ADD_REDIS_ACTIONS, SCENARIO_ADD_KAFKA_ACTIONS, SCENARIO_ADD_GRPC_ACTIONS, SCENARIO_ADD_HTTP_ACTIONS, SCENARIO_ADD_GRPC_SERVER_ACTIONS, SCENARIO_ADD_SOAP_ACTIONS, SCENARIO_ADD_ODATA_ACTIONS, SCENARIO_ADD_GRAPHQL_ACTIONS, scenarioAddSocketioIcon, scenarioAddWebsocketIcon, scenarioAddStompIcon, scenarioAddSseIcon, scenarioAddMqttIcon, scenarioAddAmqpIcon, scenarioAddRedisIcon, scenarioAddKafkaIcon, scenarioAddGrpcIcon, scenarioAddHttpIcon, scenarioAddSoapIcon, scenarioAddGraphqlIcon } from './scenarioChildPalette'
+import { addMenuEntryBadge, scenarioAddBadgedNodeIcon, SCENARIO_ADD_GRAPHQL_SUB_ACTIONS, SCENARIO_ADD_REDIS_COMMAND, SCENARIO_ADD_SOAP_REQUEST, SCENARIO_ADD_SOCKETIO_ACTIONS, SCENARIO_ADD_SOCKETIO_SERVER_ACTIONS, SCENARIO_ADD_WEBSOCKET_ACTIONS, SCENARIO_ADD_WEBSOCKET_SERVER_ACTIONS, SCENARIO_ADD_STOMP_ACTIONS, SCENARIO_ADD_SSE_ACTIONS, SCENARIO_ADD_MQTT_ACTIONS, SCENARIO_ADD_AMQP_ACTIONS, SCENARIO_ADD_REDIS_ACTIONS, SCENARIO_ADD_KAFKA_ACTIONS, SCENARIO_ADD_GRPC_ACTIONS, SCENARIO_ADD_HTTP_ACTIONS, SCENARIO_ADD_GRPC_SERVER_ACTIONS, SCENARIO_ADD_SOAP_ACTIONS, SCENARIO_ADD_ODATA_ACTIONS, SCENARIO_ADD_GRAPHQL_ACTIONS, scenarioAddSocketioIcon, scenarioAddWebsocketIcon, scenarioAddStompIcon, scenarioAddSseIcon, scenarioAddMqttIcon, scenarioAddAmqpIcon, scenarioAddRedisIcon, scenarioAddKafkaIcon, scenarioAddGrpcIcon, scenarioAddHttpIcon, scenarioAddSoapIcon, scenarioAddGraphqlIcon } from './scenarioChildPalette'
 import { RegistryBadge } from '../common/RegistryBadge'
 import type { AddChildKind, AddMenuRequestEntry } from '../MainView/Sidebar/contextMenuBuilder'
 import { ADD_MENU_HTTP_ENTRIES, ADD_MENU_PROTOCOL_GROUPS } from '../MainView/Sidebar/contextMenuBuilder'
@@ -319,7 +319,7 @@ function buildScenarioPaletteItems(p: PaletteBuildParams): ContextMenuItem[] {
     // top level. The four request-shaped nodes (graphqlSubscribe / graphql
     // Unsubscribe / redisCommand / soapRequest) that historically leaked out
     // unbadged join that list — they now live in their protocol submenu, badged.
-    if (p.withAddSubmenu && (e.kind === 'socketioConnect' || e.kind === 'socketioSend' || e.kind === 'socketioClose' || e.kind === 'websocketConnect' || e.kind === 'websocketSend' || e.kind === 'websocketClose' || e.kind === 'stompConnect' || e.kind === 'stompSend' || e.kind === 'stompClose' || e.kind === 'sseConnect' || e.kind === 'sseClose' || e.kind === 'mqttConnect' || e.kind === 'mqttSend' || e.kind === 'mqttClose' || e.kind === 'amqpConnect' || e.kind === 'amqpPublish' || e.kind === 'amqpClose' || e.kind === 'redisSubscribe' || e.kind === 'redisClose' || e.kind === 'redisCommand' || e.kind === 'kafkaProduce' || e.kind === 'kafkaConsume' || e.kind === 'kafkaClose' || e.kind === 'grpcConnect' || e.kind === 'grpcSend' || e.kind === 'grpcClose' || e.kind === 'httpListen' || e.kind === 'httpClose' || e.kind === 'grpcListen' || e.kind === 'grpcServerClose' || e.kind === 'soapListen' || e.kind === 'soapClose' || e.kind === 'soapRequest' || e.kind === 'graphqlListen' || e.kind === 'graphqlClose' || e.kind === 'graphqlSubscribe' || e.kind === 'graphqlUnsubscribe' || e.kind === 'odataListen' || e.kind === 'odataClose')) return []
+    if (p.withAddSubmenu && (e.kind === 'socketioConnect' || e.kind === 'socketioSend' || e.kind === 'socketioClose' || e.kind === 'socketioServerClose' || e.kind === 'websocketConnect' || e.kind === 'websocketSend' || e.kind === 'websocketClose' || e.kind === 'websocketServerClose' || e.kind === 'stompConnect' || e.kind === 'stompSend' || e.kind === 'stompClose' || e.kind === 'sseConnect' || e.kind === 'sseClose' || e.kind === 'mqttConnect' || e.kind === 'mqttSend' || e.kind === 'mqttClose' || e.kind === 'amqpConnect' || e.kind === 'amqpPublish' || e.kind === 'amqpClose' || e.kind === 'redisSubscribe' || e.kind === 'redisClose' || e.kind === 'redisCommand' || e.kind === 'kafkaProduce' || e.kind === 'kafkaConsume' || e.kind === 'kafkaClose' || e.kind === 'grpcConnect' || e.kind === 'grpcSend' || e.kind === 'grpcClose' || e.kind === 'httpListen' || e.kind === 'httpClose' || e.kind === 'grpcListen' || e.kind === 'grpcServerClose' || e.kind === 'soapListen' || e.kind === 'soapClose' || e.kind === 'soapRequest' || e.kind === 'graphqlListen' || e.kind === 'graphqlClose' || e.kind === 'graphqlSubscribe' || e.kind === 'graphqlUnsubscribe' || e.kind === 'odataListen' || e.kind === 'odataClose')) return []
     if (p.withAddSubmenu && e.kind === 'httpRequest') {
       // A shared Add-menu request/server entry (pickChild → create a child +
       // drop its bound node). Same badge the sidebar shows for the same kind.
@@ -349,9 +349,15 @@ function buildScenarioPaletteItems(p: PaletteBuildParams): ContextMenuItem[] {
               server: SCENARIO_ADD_GRPC_SERVER_ACTIONS.flatMap((a) => nodeItem(a.kind, scenarioAddBadgedNodeIcon('grpc_server_close'), a.labelKey, a.defaultLabel))
             }
           case 'websocket':
-            return { client: SCENARIO_ADD_WEBSOCKET_ACTIONS.flatMap((a) => nodeItem(a.kind, scenarioAddWebsocketIcon(a.icon), a.labelKey, a.defaultLabel)), server: [] }
+            return {
+              client: SCENARIO_ADD_WEBSOCKET_ACTIONS.flatMap((a) => nodeItem(a.kind, scenarioAddWebsocketIcon(a.icon), a.labelKey, a.defaultLabel)),
+              server: SCENARIO_ADD_WEBSOCKET_SERVER_ACTIONS.flatMap((a) => nodeItem(a.kind, scenarioAddBadgedNodeIcon('ws_server_close'), a.labelKey, a.defaultLabel))
+            }
           case 'socketio':
-            return { client: SCENARIO_ADD_SOCKETIO_ACTIONS.flatMap((a) => nodeItem(a.kind, scenarioAddSocketioIcon(a.icon), a.labelKey, a.defaultLabel)), server: [] }
+            return {
+              client: SCENARIO_ADD_SOCKETIO_ACTIONS.flatMap((a) => nodeItem(a.kind, scenarioAddSocketioIcon(a.icon), a.labelKey, a.defaultLabel)),
+              server: SCENARIO_ADD_SOCKETIO_SERVER_ACTIONS.flatMap((a) => nodeItem(a.kind, scenarioAddBadgedNodeIcon('sio_server_close'), a.labelKey, a.defaultLabel))
+            }
           case 'graphql':
             return {
               client: SCENARIO_ADD_GRAPHQL_SUB_ACTIONS.flatMap((a) => nodeItem(a.kind, scenarioAddBadgedNodeIcon(a.badgeId), a.labelKey, a.defaultLabel)),
@@ -2662,19 +2668,20 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
           helpKey = `${n.data.kind}Server`
         }
       }
-    } else if (n.data.kind === 'socketioSend' || n.data.kind === 'socketioClose' || n.data.kind === 'websocketSend' || n.data.kind === 'websocketClose' || n.data.kind === 'sseClose' || n.data.kind === 'mqttSend' || n.data.kind === 'mqttClose' || n.data.kind === 'kafkaClose' || n.data.kind === 'httpClose' || n.data.kind === 'grpcServerClose' || n.data.kind === 'soapClose' || n.data.kind === 'graphqlClose' || n.data.kind === 'odataClose') {
+    } else if (n.data.kind === 'socketioSend' || n.data.kind === 'socketioClose' || n.data.kind === 'socketioServerClose' || n.data.kind === 'websocketSend' || n.data.kind === 'websocketClose' || n.data.kind === 'websocketServerClose' || n.data.kind === 'sseClose' || n.data.kind === 'mqttSend' || n.data.kind === 'mqttClose' || n.data.kind === 'kafkaClose' || n.data.kind === 'httpClose' || n.data.kind === 'grpcServerClose' || n.data.kind === 'soapClose' || n.data.kind === 'graphqlClose' || n.data.kind === 'odataClose') {
       // Send/close reference a connection NODE — if that node hosts a server,
       // the blurb should read "broadcast to clients" / "stop the server".
       const connId = typeof cfg['connectionNodeId'] === 'string' ? cfg['connectionNodeId'] : null
       const connNode = connId ? nodes.find((x) => x.id === connId) : null
       const connReqId = typeof connNode?.data.config?.['requestId'] === 'string' ? connNode.data.config['requestId'] : null
       const connReq = connReqId ? (resolveBoundItem?.(connReqId) ?? null) : null
-      // httpClose / grpcServerClose / soapClose / graphqlClose / odataClose /
-      // sseClose / kafkaClose have a single meaning (an httpListen / grpcListen
-      // / soapListen / graphqlListen / odataListen ALWAYS hosts; SSE and Kafka
-      // never do), so they use their plain help key — only the WS/SIO/MQTT
-      // send/close kinds have a distinct server-variant blurb.
-      if (n.data.kind !== 'httpClose' && n.data.kind !== 'grpcServerClose' && n.data.kind !== 'soapClose' && n.data.kind !== 'graphqlClose' && n.data.kind !== 'odataClose' && n.data.kind !== 'sseClose' && n.data.kind !== 'kafkaClose' && connReq && isRequest(connReq) && requestBadgeMode(connReq) === 'server') {
+      // httpClose / grpcServerClose / websocketServerClose / socketioServerClose
+      // / soapClose / graphqlClose / odataClose / sseClose / kafkaClose have a
+      // single meaning (a *Listen node — or a `server: true`-bound WS/SIO connect
+      // — ALWAYS hosts; SSE and Kafka never do), so they use their plain help key
+      // — only the WS/SIO/MQTT (client) send/close kinds have a distinct
+      // server-variant blurb.
+      if (n.data.kind !== 'httpClose' && n.data.kind !== 'grpcServerClose' && n.data.kind !== 'websocketServerClose' && n.data.kind !== 'socketioServerClose' && n.data.kind !== 'soapClose' && n.data.kind !== 'graphqlClose' && n.data.kind !== 'odataClose' && n.data.kind !== 'sseClose' && n.data.kind !== 'kafkaClose' && connReq && isRequest(connReq) && requestBadgeMode(connReq) === 'server') {
         helpKey = `${n.data.kind}Server`
       }
     }
