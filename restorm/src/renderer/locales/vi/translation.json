@@ -283,7 +283,22 @@
         "redis": "Yêu cầu Redis",
         "stomp": "Yêu cầu STOMP",
         "kafkaProduce": "Yêu cầu Kafka – Tạo",
-        "kafkaConsume": "Yêu cầu Kafka – Tiêu thụ"
+        "kafkaConsume": "Yêu cầu Kafka – Tiêu thụ",
+        "httpHead": "Yêu cầu HTTP – HEAD",
+        "httpOptions": "Yêu cầu HTTP – OPTIONS",
+        "httpQuery": "Yêu cầu HTTP – QUERY",
+        "groups": {
+          "grpc": "gRPC",
+          "websocket": "WebSocket",
+          "socketio": "Socket.IO",
+          "graphql": "GraphQL",
+          "redis": "Redis",
+          "messaging": "Nhắn tin",
+          "soap": "SOAP",
+          "odata": "OData",
+          "sse": "SSE",
+          "trpc": "tRPC"
+        }
       }
     },
     "deleteConfirm": {

@@ -284,7 +284,22 @@
         "redis": "Redis-anmodning",
         "stomp": "STOMP-anmodning",
         "kafkaProduce": "Kafka-anmodning – Producer",
-        "kafkaConsume": "Kafka-anmodning – Forbrug"
+        "kafkaConsume": "Kafka-anmodning – Forbrug",
+        "httpHead": "HTTP – HEAD-anmodning",
+        "httpOptions": "HTTP – OPTIONS-anmodning",
+        "httpQuery": "HTTP – QUERY-anmodning",
+        "groups": {
+          "grpc": "gRPC",
+          "websocket": "WebSocket",
+          "socketio": "Socket.IO",
+          "graphql": "GraphQL",
+          "redis": "Redis",
+          "messaging": "Beskeder",
+          "soap": "SOAP",
+          "odata": "OData",
+          "sse": "SSE",
+          "trpc": "tRPC"
+        }
       }
     },
     "deleteConfirm": {

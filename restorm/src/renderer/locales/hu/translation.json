@@ -284,7 +284,22 @@
         "redis": "Redis-kérés",
         "stomp": "STOMP kérés",
         "kafkaProduce": "Kafka-kérés – Előállítás",
-        "kafkaConsume": "Kafka-kérés – Fogyasztás"
+        "kafkaConsume": "Kafka-kérés – Fogyasztás",
+        "httpHead": "HTTP – HEAD kérés",
+        "httpOptions": "HTTP – OPTIONS kérés",
+        "httpQuery": "HTTP – QUERY kérés",
+        "groups": {
+          "grpc": "gRPC",
+          "websocket": "WebSocket",
+          "socketio": "Socket.IO",
+          "graphql": "GraphQL",
+          "redis": "Redis",
+          "messaging": "Üzenetküldés",
+          "soap": "SOAP",
+          "odata": "OData",
+          "sse": "SSE",
+          "trpc": "tRPC"
+        }
       }
     },
     "deleteConfirm": {

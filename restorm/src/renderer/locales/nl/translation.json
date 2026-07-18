@@ -284,7 +284,22 @@
         "redis": "Redis-verzoek",
         "stomp": "STOMP-verzoek",
         "kafkaProduce": "Kafka-verzoek – Produceren",
-        "kafkaConsume": "Kafka-verzoek – Consumeren"
+        "kafkaConsume": "Kafka-verzoek – Consumeren",
+        "httpHead": "HTTP – HEAD-verzoek",
+        "httpOptions": "HTTP – OPTIONS-verzoek",
+        "httpQuery": "HTTP – QUERY-verzoek",
+        "groups": {
+          "grpc": "gRPC",
+          "websocket": "WebSocket",
+          "socketio": "Socket.IO",
+          "graphql": "GraphQL",
+          "redis": "Redis",
+          "messaging": "Berichten",
+          "soap": "SOAP",
+          "odata": "OData",
+          "sse": "SSE",
+          "trpc": "tRPC"
+        }
       }
     },
     "deleteConfirm": {

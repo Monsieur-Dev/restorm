@@ -1,4 +1,4 @@
-import React, { useCallback, useContext, useEffect, useMemo, useReducer, useRef, useState, type CSSProperties } from 'react'
+import React, { useCallback, useContext, useEffect, useMemo, useReducer, useRef, useState, type CSSProperties, type ReactNode } from 'react'
 import {
   ReactFlowProvider,
   useNodesState,
@@ -46,10 +46,10 @@ import './scenarioEnvPreview'
 // inspector's static preview resolves a SecretValue operand to its live value.
 import { useSecretPreviewVersion } from './scenarioSecretPreview'
 import { layoutScenarioGraph, scenarioGraphNeedsPlacement, SCENARIO_NODE_FALLBACK_WIDTH, SCENARIO_NODE_FALLBACK_HEIGHT } from '../../../../shared/scenarioGraphLayout'
-import { SCENARIO_ADD_REQUEST_GROUPS, SCENARIO_ADD_SCENARIO_ENTRY, SCENARIO_ADD_SOCKETIO_ACTIONS, SCENARIO_ADD_WEBSOCKET_ACTIONS, SCENARIO_ADD_STOMP_ACTIONS, SCENARIO_ADD_SSE_ACTIONS, SCENARIO_ADD_MQTT_ACTIONS, SCENARIO_ADD_AMQP_ACTIONS, SCENARIO_ADD_REDIS_ACTIONS, SCENARIO_ADD_KAFKA_ACTIONS, SCENARIO_ADD_GRPC_ACTIONS, SCENARIO_ADD_HTTP_ACTIONS, SCENARIO_ADD_GRPC_SERVER_ACTIONS, SCENARIO_ADD_SOAP_ACTIONS, SCENARIO_ADD_GRAPHQL_ACTIONS, scenarioAddIcon, scenarioAddSocketioIcon, scenarioAddWebsocketIcon, scenarioAddStompIcon, scenarioAddSseIcon, scenarioAddMqttIcon, scenarioAddAmqpIcon, scenarioAddRedisIcon, scenarioAddKafkaIcon, scenarioAddGrpcIcon, scenarioAddHttpIcon, scenarioAddSoapIcon, scenarioAddGraphqlIcon } from './scenarioChildPalette'
+import { addMenuEntryBadge, scenarioAddBadgedNodeIcon, SCENARIO_ADD_GRAPHQL_SUB_ACTIONS, SCENARIO_ADD_REDIS_COMMAND, SCENARIO_ADD_SOAP_REQUEST, SCENARIO_ADD_SOCKETIO_ACTIONS, SCENARIO_ADD_WEBSOCKET_ACTIONS, SCENARIO_ADD_STOMP_ACTIONS, SCENARIO_ADD_SSE_ACTIONS, SCENARIO_ADD_MQTT_ACTIONS, SCENARIO_ADD_AMQP_ACTIONS, SCENARIO_ADD_REDIS_ACTIONS, SCENARIO_ADD_KAFKA_ACTIONS, SCENARIO_ADD_GRPC_ACTIONS, SCENARIO_ADD_HTTP_ACTIONS, SCENARIO_ADD_GRPC_SERVER_ACTIONS, SCENARIO_ADD_SOAP_ACTIONS, SCENARIO_ADD_GRAPHQL_ACTIONS, scenarioAddSocketioIcon, scenarioAddWebsocketIcon, scenarioAddStompIcon, scenarioAddSseIcon, scenarioAddMqttIcon, scenarioAddAmqpIcon, scenarioAddRedisIcon, scenarioAddKafkaIcon, scenarioAddGrpcIcon, scenarioAddHttpIcon, scenarioAddSoapIcon, scenarioAddGraphqlIcon } from './scenarioChildPalette'
 import { RegistryBadge } from '../common/RegistryBadge'
-import { httpBadgeIdFor } from '../../../../shared/utils/httpMethod'
-import type { AddChildKind } from '../MainView/Sidebar/contextMenuBuilder'
+import type { AddChildKind, AddMenuRequestEntry } from '../MainView/Sidebar/contextMenuBuilder'
+import { ADD_MENU_HTTP_ENTRIES, ADD_MENU_PROTOCOL_GROUPS } from '../MainView/Sidebar/contextMenuBuilder'
 import type { TFunction } from 'i18next'
 import { ScenarioGraphPreview } from '../MainView/Titlebar/ScenarioGraphPreview'
 import { validateScenarioGraph, targetKey, type ScenarioNodeError, type ScenarioDataLink, type ValidationNode } from '../../../../shared/scenarioValidation'
@@ -314,113 +314,96 @@ function buildScenarioPaletteItems(p: PaletteBuildParams): ContextMenuItem[] {
   const items = PALETTE_ENTRIES.flatMap((e, i): ContextMenuItem[] => {
     if ('separator' in e) return [sep(`sep-${i}`)]
     if (p.withAddSubmenu && e.kind === 'runScenario') return [] // folds into "Add"
-    // The Socket.IO actions fold into the "Add" submenu (their own section) too.
-    if (p.withAddSubmenu && (e.kind === 'socketioConnect' || e.kind === 'socketioSend' || e.kind === 'socketioClose' || e.kind === 'websocketConnect' || e.kind === 'websocketSend' || e.kind === 'websocketClose' || e.kind === 'stompConnect' || e.kind === 'stompSend' || e.kind === 'stompClose' || e.kind === 'sseConnect' || e.kind === 'sseClose' || e.kind === 'mqttConnect' || e.kind === 'mqttSend' || e.kind === 'mqttClose' || e.kind === 'amqpConnect' || e.kind === 'amqpPublish' || e.kind === 'amqpClose' || e.kind === 'redisSubscribe' || e.kind === 'redisClose' || e.kind === 'kafkaProduce' || e.kind === 'kafkaConsume' || e.kind === 'kafkaClose' || e.kind === 'grpcConnect' || e.kind === 'grpcSend' || e.kind === 'grpcClose' || e.kind === 'httpListen' || e.kind === 'httpClose' || e.kind === 'grpcListen' || e.kind === 'grpcServerClose' || e.kind === 'soapListen' || e.kind === 'soapClose' || e.kind === 'graphqlListen' || e.kind === 'graphqlClose' || e.kind === 'odataListen' || e.kind === 'odataClose')) return []
+    // Every protocol ACTION node (send / close / listen / subscribe …) folds into
+    // its protocol submenu inside the "Add" menu, so none render at the palette's
+    // top level. The four request-shaped nodes (graphqlSubscribe / graphql
+    // Unsubscribe / redisCommand / soapRequest) that historically leaked out
+    // unbadged join that list — they now live in their protocol submenu, badged.
+    if (p.withAddSubmenu && (e.kind === 'socketioConnect' || e.kind === 'socketioSend' || e.kind === 'socketioClose' || e.kind === 'websocketConnect' || e.kind === 'websocketSend' || e.kind === 'websocketClose' || e.kind === 'stompConnect' || e.kind === 'stompSend' || e.kind === 'stompClose' || e.kind === 'sseConnect' || e.kind === 'sseClose' || e.kind === 'mqttConnect' || e.kind === 'mqttSend' || e.kind === 'mqttClose' || e.kind === 'amqpConnect' || e.kind === 'amqpPublish' || e.kind === 'amqpClose' || e.kind === 'redisSubscribe' || e.kind === 'redisClose' || e.kind === 'redisCommand' || e.kind === 'kafkaProduce' || e.kind === 'kafkaConsume' || e.kind === 'kafkaClose' || e.kind === 'grpcConnect' || e.kind === 'grpcSend' || e.kind === 'grpcClose' || e.kind === 'httpListen' || e.kind === 'httpClose' || e.kind === 'grpcListen' || e.kind === 'grpcServerClose' || e.kind === 'soapListen' || e.kind === 'soapClose' || e.kind === 'soapRequest' || e.kind === 'graphqlListen' || e.kind === 'graphqlClose' || e.kind === 'graphqlSubscribe' || e.kind === 'graphqlUnsubscribe' || e.kind === 'odataListen' || e.kind === 'odataClose')) return []
     if (p.withAddSubmenu && e.kind === 'httpRequest') {
-      const groupItems = (group: typeof SCENARIO_ADD_REQUEST_GROUPS[number]): ContextMenuItem[] =>
-        group.flatMap((c): ContextMenuItem[] => {
-          const cb = p.pickChild(c.kind)
-          if (!cb) return []
-          // Plain HTTP verb entries use the registry-driven badge (routed by
-          // KIND — the 'QUERY' badge type is shared with GraphQL, so the badge
-          // type alone can't discriminate). The http-server capsule and every
-          // other protocol stay on the legacy Badge.
-          const icon = c.kind.startsWith('http-') && c.mode === undefined
-            ? <RegistryBadge badgeId={httpBadgeIdFor(c.badge)} text={c.badge} />
-            : scenarioAddIcon(c.badge, c.mode)
-          return [{ id: `add-${c.kind}`, label: p.t(c.labelKey, c.defaultLabel), icon, onClick: cb }]
-        })
-      // The auth request sits in its own (last) group; the Socket.IO action
-      // section is inserted JUST BEFORE it.
-      // gRPC send/close ACTION items (pickNode). There's no "connect" action: a
-      // gRPC connection is created by the gRPC request entries (streaming → a
-      // bound grpcConnect) or by dragging a request — a standalone connect action
-      // would only add an unbound, redundant node.
-      const grpcActionItems = SCENARIO_ADD_GRPC_ACTIONS.flatMap((a): ContextMenuItem[] => {
-        const cb = p.pickNode(a.kind)
-        return cb ? [{ id: `add-${a.kind}`, label: p.t(a.labelKey, a.defaultLabel), icon: scenarioAddGrpcIcon(a.icon), onClick: cb }] : []
-      })
-      // Request-protocol groups. The gRPC group also carries the gRPC send/close
-      // action items so ALL gRPC entries sit together as one contiguous block.
-      const requestGroups = SCENARIO_ADD_REQUEST_GROUPS.slice(0, -1)
-        .map((group) => (group[0]?.kind === 'grpc' ? [...groupItems(group), ...grpcActionItems] : groupItems(group)))
-        .filter((g) => g.length > 0)
-      const authItems = groupItems(SCENARIO_ADD_REQUEST_GROUPS[SCENARIO_ADD_REQUEST_GROUPS.length - 1] ?? [])
-      // Socket.IO + raw WebSocket actions — their own sections (pickNode drops the
-      // node directly, unlike the request entries which create a request).
-      const sioItems = SCENARIO_ADD_SOCKETIO_ACTIONS.flatMap((a): ContextMenuItem[] => {
-        const cb = p.pickNode(a.kind)
-        return cb ? [{ id: `add-${a.kind}`, label: p.t(a.labelKey, a.defaultLabel), icon: scenarioAddSocketioIcon(a.icon), onClick: cb }] : []
-      })
-      const wsItems = SCENARIO_ADD_WEBSOCKET_ACTIONS.flatMap((a): ContextMenuItem[] => {
-        const cb = p.pickNode(a.kind)
-        return cb ? [{ id: `add-${a.kind}`, label: p.t(a.labelKey, a.defaultLabel), icon: scenarioAddWebsocketIcon(a.icon), onClick: cb }] : []
-      })
-      const stompItems = SCENARIO_ADD_STOMP_ACTIONS.flatMap((a): ContextMenuItem[] => {
-        const cb = p.pickNode(a.kind)
-        return cb ? [{ id: `add-${a.kind}`, label: p.t(a.labelKey, a.defaultLabel), icon: scenarioAddStompIcon(a.icon), onClick: cb }] : []
-      })
-      const mqttItems = SCENARIO_ADD_MQTT_ACTIONS.flatMap((a): ContextMenuItem[] => {
-        const cb = p.pickNode(a.kind)
-        return cb ? [{ id: `add-${a.kind}`, label: p.t(a.labelKey, a.defaultLabel), icon: scenarioAddMqttIcon(a.icon), onClick: cb }] : []
-      })
-      // SSE close action (the connect comes from the "SSE request" entry above,
-      // which drops a bound sseConnect node). Receive-only — no send action.
-      const sseItems = SCENARIO_ADD_SSE_ACTIONS.flatMap((a): ContextMenuItem[] => {
-        const cb = p.pickNode(a.kind)
-        return cb ? [{ id: `add-${a.kind}`, label: p.t(a.labelKey, a.defaultLabel), icon: scenarioAddSseIcon(a.icon), onClick: cb }] : []
-      })
-      const amqpItems = SCENARIO_ADD_AMQP_ACTIONS.flatMap((a): ContextMenuItem[] => {
-        const cb = p.pickNode(a.kind)
-        return cb ? [{ id: `add-${a.kind}`, label: p.t(a.labelKey, a.defaultLabel), icon: scenarioAddAmqpIcon(a.icon), onClick: cb }] : []
-      })
-      // Redis close action (the subscribe connection comes from dragging an
-      // existing subscribe-mode Redis request onto the canvas — see onDrop;
-      // no publish/send action, PUBLISH is a command-mode run).
-      const redisItems = SCENARIO_ADD_REDIS_ACTIONS.flatMap((a): ContextMenuItem[] => {
-        const cb = p.pickNode(a.kind)
-        return cb ? [{ id: `add-${a.kind}`, label: p.t(a.labelKey, a.defaultLabel), icon: scenarioAddRedisIcon(a.icon), onClick: cb }] : []
-      })
-      // Kafka close action — closes an already-declared kafkaConsume connection
-      // (produce is one-shot and never needs closing; the consume connect comes
-      // from the Kafka request entries above).
-      const kafkaItems = SCENARIO_ADD_KAFKA_ACTIONS.flatMap((a): ContextMenuItem[] => {
-        const cb = p.pickNode(a.kind)
-        return cb ? [{ id: `add-${a.kind}`, label: p.t(a.labelKey, a.defaultLabel), icon: scenarioAddKafkaIcon(a.icon), onClick: cb }] : []
-      })
-      // HTTP mock-server close action (the listen comes from the "HTTP server"
-      // request entry above, which drops a bound httpListen node).
-      const httpItems = SCENARIO_ADD_HTTP_ACTIONS.flatMap((a): ContextMenuItem[] => {
-        const cb = p.pickNode(a.kind)
-        return cb ? [{ id: `add-${a.kind}`, label: p.t(a.labelKey, a.defaultLabel), icon: scenarioAddHttpIcon(a.icon), onClick: cb }] : []
-      })
-      // gRPC mock-server close action (the listen comes from the "gRPC server"
-      // request entry above, which drops a bound grpcListen node).
-      const grpcServerItems = SCENARIO_ADD_GRPC_SERVER_ACTIONS.flatMap((a): ContextMenuItem[] => {
-        const cb = p.pickNode(a.kind)
-        return cb ? [{ id: `add-${a.kind}`, label: p.t(a.labelKey, a.defaultLabel), icon: scenarioAddGrpcIcon(a.icon), onClick: cb }] : []
-      })
-      // SOAP mock-server close action (the listen comes from the "SOAP server"
-      // request entry above, which drops a bound soapListen node).
-      const soapItems = SCENARIO_ADD_SOAP_ACTIONS.flatMap((a): ContextMenuItem[] => {
-        const cb = p.pickNode(a.kind)
-        return cb ? [{ id: `add-${a.kind}`, label: p.t(a.labelKey, a.defaultLabel), icon: scenarioAddSoapIcon(a.icon), onClick: cb }] : []
-      })
-      // GraphQL mock-server close action (the listen comes from the "GraphQL
-      // server" request entry above, which drops a bound graphqlListen node).
-      const graphqlItems = SCENARIO_ADD_GRAPHQL_ACTIONS.flatMap((a): ContextMenuItem[] => {
-        const cb = p.pickNode(a.kind)
-        return cb ? [{ id: `add-${a.kind}`, label: p.t(a.labelKey, a.defaultLabel), icon: scenarioAddGraphqlIcon(a.icon), onClick: cb }] : []
-      })
-      const scnCb = p.pickChild(SCENARIO_ADD_SCENARIO_ENTRY.kind)
+      // A shared Add-menu request/server entry (pickChild → create a child +
+      // drop its bound node). Same badge the sidebar shows for the same kind.
+      const reqItem = (entry: AddMenuRequestEntry): ContextMenuItem[] => {
+        const cb = p.pickChild(entry.kind)
+        return cb ? [{ id: `add-${entry.kind}`, label: p.t(entry.labelKey, entry.defaultLabel), icon: addMenuEntryBadge(entry), onClick: cb }] : []
+      }
+      // A scenario ACTION node (pickNode → drop the node directly, driving an
+      // already-declared connection / an existing request).
+      const nodeItem = (kind: ScenarioNodeKind, icon: ReactNode, labelKey: string, defaultLabel: string): ContextMenuItem[] => {
+        const cb = p.pickNode(kind)
+        return cb ? [{ id: `add-${kind}`, label: p.t(labelKey, defaultLabel), icon, onClick: cb }] : []
+      }
+      // The extra ACTION entries each protocol submenu carries, after its
+      // request/server entries. Keyed off the shared model's group id so the two
+      // stay in lockstep. Connect actions are intentionally absent: a connection
+      // is created by the protocol's request entry (which drops the bound
+      // `*Connect`), so a standalone connect would only add an unbound node.
+      const groupActions = (id: string): ContextMenuItem[] => {
+        switch (id) {
+          case 'grpc':
+            return [
+              ...SCENARIO_ADD_GRPC_ACTIONS.flatMap((a) => nodeItem(a.kind, scenarioAddGrpcIcon(a.icon), a.labelKey, a.defaultLabel)),
+              ...SCENARIO_ADD_GRPC_SERVER_ACTIONS.flatMap((a) => nodeItem(a.kind, scenarioAddGrpcIcon(a.icon), a.labelKey, a.defaultLabel))
+            ]
+          case 'websocket':
+            return SCENARIO_ADD_WEBSOCKET_ACTIONS.flatMap((a) => nodeItem(a.kind, scenarioAddWebsocketIcon(a.icon), a.labelKey, a.defaultLabel))
+          case 'socketio':
+            return SCENARIO_ADD_SOCKETIO_ACTIONS.flatMap((a) => nodeItem(a.kind, scenarioAddSocketioIcon(a.icon), a.labelKey, a.defaultLabel))
+          case 'graphql':
+            return [
+              ...SCENARIO_ADD_GRAPHQL_SUB_ACTIONS.flatMap((a) => nodeItem(a.kind, scenarioAddBadgedNodeIcon(a.badgeId), a.labelKey, a.defaultLabel)),
+              ...SCENARIO_ADD_GRAPHQL_ACTIONS.flatMap((a) => nodeItem(a.kind, scenarioAddGraphqlIcon(a.icon), a.labelKey, a.defaultLabel))
+            ]
+          case 'redis':
+            return [
+              ...nodeItem(SCENARIO_ADD_REDIS_COMMAND.kind, scenarioAddBadgedNodeIcon(SCENARIO_ADD_REDIS_COMMAND.badgeId), SCENARIO_ADD_REDIS_COMMAND.labelKey, SCENARIO_ADD_REDIS_COMMAND.defaultLabel),
+              ...SCENARIO_ADD_REDIS_ACTIONS.flatMap((a) => nodeItem(a.kind, scenarioAddRedisIcon(a.icon), a.labelKey, a.defaultLabel))
+            ]
+          case 'messaging':
+            return [
+              ...SCENARIO_ADD_MQTT_ACTIONS.flatMap((a) => nodeItem(a.kind, scenarioAddMqttIcon(a.icon), a.labelKey, a.defaultLabel)),
+              ...SCENARIO_ADD_AMQP_ACTIONS.flatMap((a) => nodeItem(a.kind, scenarioAddAmqpIcon(a.icon), a.labelKey, a.defaultLabel)),
+              ...SCENARIO_ADD_KAFKA_ACTIONS.flatMap((a) => nodeItem(a.kind, scenarioAddKafkaIcon(a.icon), a.labelKey, a.defaultLabel)),
+              ...SCENARIO_ADD_STOMP_ACTIONS.flatMap((a) => nodeItem(a.kind, scenarioAddStompIcon(a.icon), a.labelKey, a.defaultLabel))
+            ]
+          case 'soap':
+            return [
+              ...nodeItem(SCENARIO_ADD_SOAP_REQUEST.kind, scenarioAddBadgedNodeIcon(SCENARIO_ADD_SOAP_REQUEST.badgeId), SCENARIO_ADD_SOAP_REQUEST.labelKey, SCENARIO_ADD_SOAP_REQUEST.defaultLabel),
+              ...SCENARIO_ADD_SOAP_ACTIONS.flatMap((a) => nodeItem(a.kind, scenarioAddSoapIcon(a.icon), a.labelKey, a.defaultLabel))
+            ]
+          case 'sse':
+            return SCENARIO_ADD_SSE_ACTIONS.flatMap((a) => nodeItem(a.kind, scenarioAddSseIcon(a.icon), a.labelKey, a.defaultLabel))
+          default:
+            return []
+        }
+      }
+      // Sub-scenario + auth sit at the top (mirroring the sidebar's folder /
+      // scenario / auth head — the palette has no folder).
+      const scnCb = p.pickChild('scenario')
       const scnItems: ContextMenuItem[] = scnCb
-        ? [{ id: `add-${SCENARIO_ADD_SCENARIO_ENTRY.kind}`, label: p.t(SCENARIO_ADD_SCENARIO_ENTRY.labelKey, SCENARIO_ADD_SCENARIO_ENTRY.defaultLabel), icon: scenarioAddIcon(SCENARIO_ADD_SCENARIO_ENTRY.badge), onClick: scnCb }]
+        ? [{ id: 'add-scenario', label: p.t('sidebar.contextMenu.add.scenario', 'Scenario'), icon: scenarioAddBadgedNodeIcon('scenario'), onClick: scnCb }]
         : []
-      // Sections in order: request protocols (the gRPC group already includes its
-      // send/close actions), Socket.IO actions, raw WebSocket actions, STOMP
-      // actions, SSE actions, AMQP actions, Redis actions, Kafka actions, auth,
-      // scenario — each separated by a divider (orphans tidied).
-      const sections = [...requestGroups, sioItems, wsItems, stompItems, sseItems, mqttItems, amqpItems, redisItems, kafkaItems, httpItems, grpcServerItems, soapItems, graphqlItems, authItems, scnItems].filter((s) => s.length > 0)
+      const authCb = p.pickChild('auth')
+      const authItems: ContextMenuItem[] = authCb
+        ? [{ id: 'add-auth', label: p.t('sidebar.contextMenu.add.auth', 'HTTP authentication request'), icon: scenarioAddBadgedNodeIcon('auth'), onClick: authCb }]
+        : []
+      // The HTTP block: the eight method entries + mock server (inline, no
+      // submenu), then the HTTP mock-server close action.
+      const httpSection = [
+        ...ADD_MENU_HTTP_ENTRIES.flatMap(reqItem),
+        ...SCENARIO_ADD_HTTP_ACTIONS.flatMap((a) => nodeItem(a.kind, scenarioAddHttpIcon(a.icon), a.labelKey, a.defaultLabel))
+      ]
+      // One nested submenu per protocol group — its request/server entries then
+      // its action entries. Empty groups (every pick unavailable) are dropped.
+      const groupSubmenus = ADD_MENU_PROTOCOL_GROUPS.flatMap((g): ContextMenuItem[] => {
+        const inner = [...g.entries.flatMap(reqItem), ...groupActions(g.id)]
+        if (inner.length === 0) return []
+        const icon: ReactNode | string = g.badgeId !== undefined ? scenarioAddBadgedNodeIcon(g.badgeId) : (g.icon ?? 'circle-outline')
+        return [{ id: `add-group-${g.id}`, label: p.t(g.labelKey, g.defaultLabel), icon, items: inner }]
+      })
+      // Assembled sections, divider-separated (orphan separators tidied by the
+      // outer builder): [scenario + auth] | [HTTP block] | [protocol submenus].
+      const sections = [[...scnItems, ...authItems], httpSection, groupSubmenus].filter((s) => s.length > 0)
       const sub = sections.flatMap((section, si) => (si > 0 ? [sep(`add-sec-${si}`), ...section] : section))
       return sub.length > 0 ? [{ id: 'scenario-add', label: p.t('sidebar.contextMenu.add.title', 'Add'), icon: 'add', items: sub }] : []
     }
@@ -3162,7 +3145,7 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
             },
             // Child request kinds wire through the request port the filter found;
             // the sub-scenario through its own. Either may be unavailable.
-            pickChild: (kind) => kind === SCENARIO_ADD_SCENARIO_ENTRY.kind
+            pickChild: (kind) => kind === 'scenario'
               ? (linkScnWire !== undefined ? () => { addChildLinkedNode('scenario', linkScnWire) } : null)
               : (linkReqWire !== undefined ? () => { addChildLinkedNode(kind as AddChildKind, linkReqWire) } : null)
           })}

@@ -283,7 +283,22 @@
         "redis": "Permintaan Redis",
         "stomp": "Permintaan STOMP",
         "kafkaProduce": "Permintaan Kafka – Hasilkan",
-        "kafkaConsume": "Permintaan Kafka – Konsumsi"
+        "kafkaConsume": "Permintaan Kafka – Konsumsi",
+        "httpHead": "Permintaan HTTP – HEAD",
+        "httpOptions": "Permintaan HTTP – OPTIONS",
+        "httpQuery": "Permintaan HTTP – QUERY",
+        "groups": {
+          "grpc": "gRPC",
+          "websocket": "WebSocket",
+          "socketio": "Socket.IO",
+          "graphql": "GraphQL",
+          "redis": "Redis",
+          "messaging": "Perpesanan",
+          "soap": "SOAP",
+          "odata": "OData",
+          "sse": "SSE",
+          "trpc": "tRPC"
+        }
       }
     },
     "deleteConfirm": {

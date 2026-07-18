@@ -284,7 +284,22 @@
         "redis": "Redis isteği",
         "stomp": "STOMP isteği",
         "kafkaProduce": "Kafka isteği – Üret",
-        "kafkaConsume": "Kafka isteği – Tüket"
+        "kafkaConsume": "Kafka isteği – Tüket",
+        "httpHead": "HTTP – HEAD isteği",
+        "httpOptions": "HTTP – OPTIONS isteği",
+        "httpQuery": "HTTP – QUERY isteği",
+        "groups": {
+          "grpc": "gRPC",
+          "websocket": "WebSocket",
+          "socketio": "Socket.IO",
+          "graphql": "GraphQL",
+          "redis": "Redis",
+          "messaging": "Mesajlaşma",
+          "soap": "SOAP",
+          "odata": "OData",
+          "sse": "SSE",
+          "trpc": "tRPC"
+        }
       }
     },
     "deleteConfirm": {

@@ -286,7 +286,22 @@
         "redis": "Запит Redis",
         "stomp": "Запит STOMP",
         "kafkaProduce": "Запит Kafka – Виробити",
-        "kafkaConsume": "Запит Kafka – Споживати"
+        "kafkaConsume": "Запит Kafka – Споживати",
+        "httpHead": "HTTP — запит HEAD",
+        "httpOptions": "HTTP — запит OPTIONS",
+        "httpQuery": "HTTP — запит QUERY",
+        "groups": {
+          "grpc": "gRPC",
+          "websocket": "WebSocket",
+          "socketio": "Socket.IO",
+          "graphql": "GraphQL",
+          "redis": "Redis",
+          "messaging": "Обмін повідомленнями",
+          "soap": "SOAP",
+          "odata": "OData",
+          "sse": "SSE",
+          "trpc": "tRPC"
+        }
       }
     },
     "deleteConfirm": {
