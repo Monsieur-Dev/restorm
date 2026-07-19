@@ -298,10 +298,25 @@ jobs:
           cd restorm/tests/docker
           mkdir -p git-server/repos
           git init --bare -b main git-server/repos/healthcheck.git
+          # `apk add` runs at container start and is the one network-flaky
+          # step — retry it in a loop instead of dying on the first miss.
           docker run -d --name restorm-git-server -p 9418:9418 \
             -v "$(pwd)/git-server/repos:/srv/git" \
             alpine:3.19 \
-            sh -c "apk add --no-cache git-daemon && git daemon --base-path=/srv/git --export-all --enable=receive-pack --reuseaddr --verbose"
+            sh -c "until apk add --no-cache git-daemon; do echo 'apk retry…'; sleep 2; done && exec git daemon --base-path=/srv/git --export-all --enable=receive-pack --reuseaddr --informative-errors --verbose"
+          # Bounded readiness wait + UNCONDITIONAL container log dump: if the
+          # daemon still isn't up, the next run's logs say exactly why
+          # (apk failure, daemon exit, …) instead of a silent probe timeout.
+          for i in $(seq 1 45); do
+            if git ls-remote git://localhost:9418/healthcheck.git >/dev/null 2>&1; then
+              echo "git daemon ready after $((i*2))s"; break
+            fi
+            sleep 2
+          done
+          echo "--- restorm-git-server container logs ---"
+          docker logs restorm-git-server 2>&1 | tail -40 || true
+          echo "--- container state ---"
+          docker inspect -f '{{.State.Status}} {{.State.ExitCode}}' restorm-git-server || true
 
       - name: Wait for services
         run: |
