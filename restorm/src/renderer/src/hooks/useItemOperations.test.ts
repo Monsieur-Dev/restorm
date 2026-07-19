@@ -7,12 +7,12 @@ import { renderHook, act, cleanup } from '@testing-library/react'
 // `../types/reactive` touch at module load. A single shared `emitSync` spy
 // captures BOTH the clone's CREATED events and any UPDATED events the reactive
 // proxy fires, so the wrap can be asserted behaviourally.
-const { emitSyncMock } = vi.hoisted(() => ({ emitSyncMock: vi.fn() }))
+const { emitSyncMock, emitLocalSyncMock } = vi.hoisted(() => ({ emitSyncMock: vi.fn(), emitLocalSyncMock: vi.fn() }))
 
 vi.mock('electron-core-ui/renderer', () => ({
   eventBus: {
     emitSync: emitSyncMock,
-    emitLocalSync: vi.fn(),
+    emitLocalSync: emitLocalSyncMock,
     emit: vi.fn(),
     emitLocal: vi.fn(),
     subscribe: vi.fn(() => ({ unsubscribe: vi.fn() }))
@@ -39,7 +39,12 @@ const calls = (): EmittedCall[] =>
   (emitSyncMock.mock.calls as [string, EmittedCall['payload']][]).map(([event, payload]) => ({ event, payload }))
 const callsFor = (event: string): EmittedCall[] => calls().filter((c) => c.event === event)
 
-beforeEach(() => { emitSyncMock.mockClear() })
+const localCallsFor = (event: string): EmittedCall[] =>
+  (emitLocalSyncMock.mock.calls as [string, EmittedCall['payload']][])
+    .map(([e, payload]) => ({ event: e, payload }))
+    .filter((c) => c.event === event)
+
+beforeEach(() => { emitSyncMock.mockClear(); emitLocalSyncMock.mockClear() })
 afterEach(() => { cleanup() })
 
 const httpRequest = (id: string, name: string): FolderItem =>
@@ -53,6 +58,20 @@ describe('emitClonedSubtreeCreated', () => {
     expect(created).toHaveLength(1)
     expect(created[0]?.payload.id).toBe('r1')
     expect(created[0]?.payload.parentFolderId).toBeUndefined()
+  })
+
+  it('delivers the CREATED event on BOTH buses so the clone is indexed AND marked dirty', () => {
+    // emitSync feeds the main-process search index; emitLocalSync feeds the
+    // renderer save-unit bridge that marks the new unit dirty (autosave / git
+    // push badge). A main-only delivery would index the clone but never dirty
+    // it — the exact bug this guards against.
+    emitClonedSubtreeCreated(httpRequest('r1', 'Solo'), 'parent-1')
+
+    expect(callsFor(DocumentEvents.REQUEST_CREATED)).toHaveLength(1)
+    const localCreated = localCallsFor(DocumentEvents.REQUEST_CREATED)
+    expect(localCreated).toHaveLength(1)
+    expect(localCreated[0]?.payload.id).toBe('r1')
+    expect(localCreated[0]?.payload.parentFolderId).toBe('parent-1')
   })
 
   it('carries the parent folder id on a nested request', () => {

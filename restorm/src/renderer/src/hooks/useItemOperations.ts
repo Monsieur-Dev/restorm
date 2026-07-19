@@ -148,10 +148,22 @@ export interface UseItemOperationsReturn {
  * mirroring `handleAddChildItem`); their nested requests still get theirs.
  * `cloneForEventBus` (not a JSON round-trip) preserves `SecretValue` plaintext
  * on the way to main.
+ *
+ * Each event is delivered on BOTH buses (like reactive.ts's `emitBoth` for
+ * updates): `emitSync` reaches the main-process subscribers (search index,
+ * ContextService), and `emitLocalSync` reaches the renderer-local save-unit
+ * bridge that marks the new unit dirty — which is what drives autosave (file
+ * rewrite + git push badge) and the unsaved-window indicator. A main-only
+ * delivery indexes the clone for search but never marks it dirty, so the copy
+ * silently vanishes on close in autosave-off mode and never round-trips to disk.
  */
 export function emitClonedSubtreeCreated(item: FolderItem, parentFolderId?: string): void {
+  const emitBothBuses = (event: string, payload: DocumentChangedPayload): void => {
+    eventBus.emitSync(event, payload)
+    eventBus.emitLocalSync(event, payload)
+  }
   const emitEnvironmentTree = (env: Environment, envFolderId: string, parentEnvironmentId: string | null): void => {
-    eventBus.emitSync(DocumentEvents.ENVIRONMENT_CREATED, {
+    emitBothBuses(DocumentEvents.ENVIRONMENT_CREATED, {
       id: env.id,
       type: 'environment',
       document: cloneForEventBus(env),
@@ -168,7 +180,7 @@ export function emitClonedSubtreeCreated(item: FolderItem, parentFolderId?: stri
     return
   }
   if (isAnyFolder(item)) {
-    eventBus.emitSync(DocumentEvents.FOLDER_CREATED, {
+    emitBothBuses(DocumentEvents.FOLDER_CREATED, {
       id: item.id,
       type: 'folder',
       document: cloneForEventBus(item)
@@ -179,7 +191,7 @@ export function emitClonedSubtreeCreated(item: FolderItem, parentFolderId?: stri
     for (const child of item.items) emitClonedSubtreeCreated(child, item.id)
     return
   }
-  eventBus.emitSync(DocumentEvents.REQUEST_CREATED, {
+  emitBothBuses(DocumentEvents.REQUEST_CREATED, {
     id: item.id,
     type: 'request',
     document: cloneForEventBus(item),
