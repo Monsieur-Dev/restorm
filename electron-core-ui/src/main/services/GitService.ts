@@ -141,7 +141,16 @@ export class GitService {
     if (!isAbsolute(folder)) {
       throw new Error(`[GitService] refusing non-absolute git folder "${folder}" — a git operation must never fall back to process.cwd()`)
     }
-    return simpleGit({ baseDir: folder })
+    // Strip inherited GIT_* environment overrides (GIT_DIR, GIT_WORK_TREE,
+    // GIT_INDEX_FILE, …): a host app launched FROM a git hook (or any
+    // git-spawned context) inherits them, and git then targets THAT
+    // repository regardless of `baseDir` — the e2e suite running under the
+    // repo's pre-push hook actually committed into the app's own source
+    // branch through this. `baseDir` must be the single source of truth.
+    const cleanedEnv = Object.fromEntries(
+      Object.entries(process.env).filter(([key]) => !key.startsWith('GIT_'))
+    ) as Record<string, string>
+    return simpleGit({ baseDir: folder }).env(cleanedEnv)
   }
 
   /**

@@ -1,6 +1,9 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 
 const mockGit = {
+  // `git()` chains `.env(cleanedEnv)` on every instance (GIT_* stripping);
+  // the mock must return itself to keep the chain alive.
+  env: vi.fn(function (this: unknown) { return mockGit }),
   checkIsRepo: vi.fn(),
   status: vi.fn(),
   add: vi.fn(),
