@@ -146,8 +146,16 @@ Given('another collaborator has pushed a change to a freshly seeded git remote',
 
 When('I pull', async () => {
   const p = requirePage()
-  await p.locator('[data-testid="statusbar-git-indicator-pull"]').click()
-  await p.waitForTimeout(1000)
+  // A lone click can land on a Pull button DOM node React is mid-replacing
+  // (a git status/toast re-render) and get silently dropped — the same race
+  // the git-conflict suite documents (verified there via a console probe).
+  // Pulls are idempotent (an already-pulled repo just fast-forwards to
+  // "up to date"), so click a few times spaced out; the scenario-specific
+  // outcome is asserted by the step that follows.
+  for (let attempt = 0; attempt < 3; attempt++) {
+    await p.locator('[data-testid="statusbar-git-indicator-pull"]').click()
+    await p.waitForTimeout(2000)
+  }
 })
 
 Then('the collaborator\'s change is visible', async () => {
@@ -271,8 +279,9 @@ Then('my unsaved edit is preserved on disk', async () => {
 Then('I am told to push my changes before pulling', async () => {
   const p = requirePage()
   // The dedicated "you have unpushed changes — push first" toast, not the
-  // generic pull-failed body.
-  await expect(p.getByText('Push them first', { exact: false })).toBeVisible({ timeout: 10000 })
+  // generic pull-failed body. `.first()`: the retried pull click can stack
+  // several copies of the same toast.
+  await expect(p.getByText('push first, then pull', { exact: false }).first()).toBeVisible({ timeout: 10000 })
 })
 
 Then('the collaborator\'s change is not applied', async () => {

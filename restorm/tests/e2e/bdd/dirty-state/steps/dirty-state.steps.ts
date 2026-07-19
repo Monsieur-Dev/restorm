@@ -625,7 +625,7 @@ When('I clone the sidebar request {string}', async ({}, requestName: string) => 
   await expect(row).toBeVisible({ timeout: 5000 })
   await row.click({ button: 'right' })
   await p.waitForTimeout(200)
-  await clickContextMenuItem(p, /^(Clone|Cloner)$/)
+  await clickContextMenuItem(p, /Clone|Cloner/)
 })
 
 When('I open the search bar', async () => {

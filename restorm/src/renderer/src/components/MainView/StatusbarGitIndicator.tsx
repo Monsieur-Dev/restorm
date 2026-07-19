@@ -8,6 +8,11 @@ export interface StatusbarGitIndicatorProps {
    * gates whether the entry renders AT ALL (independent of the Pro/git-repo
    * gating below, which only decides its enabled/locked APPEARANCE). */
   filePath: string | null
+  /** IN-MEMORY dirty state (unsaved edits). The push flow saves before
+   * staging, so unsaved edits ARE pushable — without this the button greys
+   * out on a clean working tree even though the editor holds real changes
+   * (bitten by the e2e push scenario: edit → push, autosave off). */
+  hasUnsavedChanges?: boolean
   /** Repo-push click. Shared with the title-bar `Git → Push` menu item via
    * `useGitActions` — see `App.tsx`. */
   onPush: () => void
@@ -34,7 +39,7 @@ export interface StatusbarGitIndicatorProps {
  * rather than each button individually, per this component's own design
  * note.
  */
-export const StatusbarGitIndicator: React.FC<StatusbarGitIndicatorProps> = ({ filePath, onPush, onPull }) => {
+export const StatusbarGitIndicator: React.FC<StatusbarGitIndicatorProps> = ({ filePath, hasUnsavedChanges = false, onPush, onPull }) => {
   const gitState = useGitState()
   const gate = useGitGateState()
 
@@ -48,7 +53,7 @@ export const StatusbarGitIndicator: React.FC<StatusbarGitIndicatorProps> = ({ fi
   const relevantFiles = (gitState.status?.files ?? []).filter(
     (f) => !f.path.endsWith('.restorm.env') && !f.path.endsWith('.responses.zip')
   )
-  const pushPending = relevantFiles.length > 0 || (gitState.status?.ahead ?? 0) > 0
+  const pushPending = relevantFiles.length > 0 || (gitState.status?.ahead ?? 0) > 0 || hasUnsavedChanges
 
   if (filePath === null) return null
 

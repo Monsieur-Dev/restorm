@@ -3080,7 +3080,7 @@ const App: React.FC = () => {
         {/* Renders nothing unless a project is open; visible-but-locked (the
          * 3-state gate) rather than hidden once one is, regardless of
          * whether the folder happens to be a git repo. */}
-        <StatusbarGitIndicator filePath={filePath} onPush={handleGitPush} onPull={handleGitPull} />
+        <StatusbarGitIndicator filePath={filePath} hasUnsavedChanges={isDirty} onPush={handleGitPush} onPull={handleGitPull} />
         <StatusBarBellButton toasterId="app" />
       </Statusbar>
 

@@ -126,17 +126,22 @@ When('I change the request\'s URL to a different value and push', async () => {
 
 Then('the push is rejected', async () => {
   const p = requirePage()
-  // `usePushModal.push()` only calls `setIsOpen(false)` on the SUCCESS
-  // path — a rejected (non-fast-forward) push shows a failure toast (no
-  // stable id, so match by its title text) and leaves the modal open (the
-  // commit itself succeeded LOCALLY; only the `git push` failed).
+  // A rejected (non-fast-forward) push shows a failure toast AND closes the
+  // modal — the toaster renders under the modal overlay, so the modal now
+  // closes on failure too or the user would never see the error. (The
+  // commit itself succeeded LOCALLY; only the `git push` failed.)
   await expect(p.getByText('Push failed', { exact: true })).toBeVisible({ timeout: 10000 })
-  await expect(p.locator('[data-testid="push-modal"]')).toBeVisible()
+  await expect(p.locator('[data-testid="push-modal"]')).not.toBeVisible()
 })
 
 When('I close the push dialog', async () => {
   const p = requirePage()
-  await p.locator('[data-testid="push-modal-cancel-button"]').click()
+  // The modal already closes itself on a rejected push — only click Cancel
+  // when it is still up (e.g. a flow that reaches here without an error).
+  const cancel = p.locator('[data-testid="push-modal-cancel-button"]')
+  if (await cancel.isVisible()) {
+    await cancel.click()
+  }
   await expect(p.locator('[data-testid="push-modal"]')).not.toBeVisible({ timeout: 10000 })
 })
 
@@ -299,23 +304,27 @@ Given('a remote has diverged on the request\'s headers', async ({ seedFreshRepo,
 
 Then('the headers section is expanded in the your-version panel', async () => {
   const p = requirePage()
-  // A collapsed pane renders no body, so a visible header key-input proves the
-  // conflicting section auto-expanded (it is otherwise unclickable — the panel
-  // is inert).
-  const keyInput = conflictPaneBySide(p, 'user').locator('[data-testid="http-request-headers-table-key-input"]').first()
+  // A collapsed pane renders no body, so a visible header key-input proves
+  // the conflicting section auto-expanded. Double `-input` suffix: InputBox
+  // renders a hidden state-probe div at the bare testid and the real
+  // <input> one level deeper (same convention as the push-modal fields).
+  const keyInput = conflictPaneBySide(p, 'user').locator('[data-testid="http-request-headers-table-key-input-input"]').first()
   await expect(keyInput).toBeVisible({ timeout: 10000 })
 })
 
 Then('the changed header row is highlighted but the unchanged one is not', async () => {
   const p = requirePage()
   const cells = await conflictPaneBySide(p, 'user')
-    .locator('[data-testid="http-request-headers-table-key-input"]')
+    .locator('[data-testid="http-request-headers-table-key-input-container"]')
     .evaluateAll((els) =>
       els.map((el) => {
         const field = el.querySelector('input, textarea')
         const value = field instanceof HTMLInputElement || field instanceof HTMLTextAreaElement ? field.value : ''
-        // The key-input's wrapper div carries the per-row diff border.
-        const borderColor = el.parentElement ? getComputedStyle(el.parentElement).borderColor : ''
+        // container → InputBox root → the per-row diff wrapper div that
+        // carries the border (the bare-testid element is a hidden probe with
+        // no input inside and the wrong parent chain).
+        const wrapper = el.parentElement?.parentElement
+        const borderColor = wrapper ? getComputedStyle(wrapper).borderColor : ''
         return { value, borderColor }
       })
     )
