@@ -344,7 +344,9 @@
     },
     "git": {
       "pushTooltip": "Enviar para o repositório",
-      "pullTooltip": "Obter do repositório"
+      "pullTooltip": "Obter do repositório",
+      "nothingToPushTooltip": "Sem alterações para enviar",
+      "refreshTooltip": "Verificar alterações para enviar ou receber"
     }
   },
   "mcpToolTitles": {
@@ -429,7 +431,7 @@
   "pushModal": {
     "title": "Enviar",
     "languageLabel": "Idioma da mensagem de commit",
-    "applyLanguageByDefault": "Aplicar este idioma por padrão nos próximos envios",
+    "applyLanguageByDefault": "Idioma predefinido dos commits",
     "titleFieldLabel": "Título do commit",
     "bodyFieldLabel": "Descrição",
     "cancel": "Cancelar",

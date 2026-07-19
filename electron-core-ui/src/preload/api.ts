@@ -586,6 +586,9 @@ export const createCoreUIAPI = (): CoreUiApi => ({
       const result: unknown = await ipcRenderer.invoke('git:pull', folder)
       return result as GitPullResult
     },
+    refreshState: async (): Promise<void> => {
+      await ipcRenderer.invoke('git:refresh-state')
+    },
     fetchAndCompare: async (folder: string): Promise<GitFetchCompareResult> => {
       const result: unknown = await ipcRenderer.invoke('git:fetch-and-compare', folder)
       return result as GitFetchCompareResult

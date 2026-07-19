@@ -42,6 +42,10 @@ export interface ModalProps {
   children: React.ReactNode
   /** Modal size: 'full' for fullscreen-like, 'dialog' for compact dialog box */
   size?: 'full' | 'dialog'
+  /** Dialog-size only: widens the compact dialog beyond its default 320-480px
+   * envelope (any CSS width — applied as width + max-width, capped at 92vw).
+   * Ignored for size='full'. */
+  dialogWidth?: number | string
   /** Optional test id applied to the modal container. Defaults to `modal`. */
   'data-testid'?: string
   /**

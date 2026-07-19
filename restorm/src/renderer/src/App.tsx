@@ -3070,6 +3070,7 @@ const App: React.FC = () => {
         body={pushModal.body}
         onBodyChange={pushModal.setBody}
         onPush={pushModal.push}
+        pushDisabled={!pushModal.hasChanges}
       />
 
       {/* Pull-conflict 4-panel resolution — opened when a repo-pull comes

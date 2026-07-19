@@ -48,6 +48,11 @@ Conditional rendering based on `SettingsContext`:
 - **When `SettingsProvider` is active** and has loaded groups: renders `SettingsView` (the full YAML-driven settings UI)
 - **Otherwise**: falls back to a hardcoded UI with `ThemeCarousel` + language `SelectBox`
 
+The language `SelectBox` lists `AVAILABLE_LANGUAGES` (`Settings/languages.ts`) as
+`"{flag} {endonym}"` (e.g. `🇫🇷 Français`) — each entry carries an emoji `flag`
+alongside its `code` + `name`. On platforms without emoji flags (Windows' Segoe
+UI Emoji) the flag degrades to regional-indicator letters; no image assets.
+
 Props:
 
 | Prop | Default | Description |

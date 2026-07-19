@@ -344,7 +344,9 @@
     },
     "git": {
       "pushTooltip": "Pošalji u repozitorijum",
-      "pullTooltip": "Preuzmi iz repozitorijuma"
+      "pullTooltip": "Preuzmi iz repozitorijuma",
+      "nothingToPushTooltip": "Нема промена за слање",
+      "refreshTooltip": "Провери промене за слање или преузимање"
     }
   },
   "mcpToolTitles": {
@@ -429,7 +431,7 @@
   "pushModal": {
     "title": "Pošalji",
     "languageLabel": "Jezik poruke commita",
-    "applyLanguageByDefault": "Podesi ovaj jezik kao podrazumevani za buduća slanja",
+    "applyLanguageByDefault": "Подразумевани језик комитова",
     "titleFieldLabel": "Naslov commita",
     "bodyFieldLabel": "Opis",
     "cancel": "Otkaži",

@@ -344,7 +344,9 @@
     },
     "git": {
       "pushTooltip": "Pousser sur le dépôt",
-      "pullTooltip": "Récupérer depuis le dépôt"
+      "pullTooltip": "Récupérer depuis le dépôt",
+      "nothingToPushTooltip": "Aucune modification à pousser",
+      "refreshTooltip": "Vérifier les modifications à pousser ou rapatrier"
     }
   },
   "mcpToolTitles": {
@@ -429,7 +431,7 @@
   "pushModal": {
     "title": "Publier",
     "languageLabel": "Langue du message de commit",
-    "applyLanguageByDefault": "Appliquer cette langue par défaut pour les prochaines publications",
+    "applyLanguageByDefault": "Langue par défaut des commits",
     "titleFieldLabel": "Titre du commit",
     "bodyFieldLabel": "Description",
     "cancel": "Annuler",

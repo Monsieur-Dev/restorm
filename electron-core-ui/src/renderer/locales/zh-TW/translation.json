@@ -344,7 +344,9 @@
     },
     "git": {
       "pushTooltip": "推送到儲存庫",
-      "pullTooltip": "從儲存庫提取"
+      "pullTooltip": "從儲存庫提取",
+      "nothingToPushTooltip": "沒有要推送的變更",
+      "refreshTooltip": "檢查要推送或拉取的變更"
     }
   },
   "mcpToolTitles": {
@@ -429,7 +431,7 @@
   "pushModal": {
     "title": "推送",
     "languageLabel": "提交訊息語言",
-    "applyLanguageByDefault": "將此語言設為日後推送的預設語言",
+    "applyLanguageByDefault": "提交預設語言",
     "titleFieldLabel": "提交標題",
     "bodyFieldLabel": "描述",
     "cancel": "取消",

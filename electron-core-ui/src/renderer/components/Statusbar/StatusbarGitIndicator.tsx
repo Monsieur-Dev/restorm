@@ -12,10 +12,20 @@ export interface StatusbarGitIndicatorProps {
   /** Show the pull pastille. The host sets this when its semi-pull
    * (fetch + compare, no merge) detected a newer remote version. */
   pullPending: boolean
+  /** Invoked on the manual refresh click (the codicon-refresh button just
+   * before push): the host re-checks BOTH sides — the local working tree
+   * (anything to push?) and the remote (anything to pull?). */
+  onRefresh: () => void
   /** Invoked on a repo-push click. The host opens its commit/push flow
    * (title + body + language picker) — this primitive only renders the
    * entry point. */
   onPush: () => void
+  /** Greys out the push icon and swaps its hover tooltip for the
+   * "nothing to push" explanation. The host sets it when the working tree
+   * is clean AND nothing is ahead of the remote. Only relevant unlocked —
+   * when the surrounding gate is locked its own upsell tooltip is the one
+   * showing. */
+  pushDisabled?: boolean
   /** Invoked on a repo-pull click. Pull has no intermediate UI of its own
    * here: a plain pull either succeeds, or the host's conflict-resolution
    * surface takes over. */
@@ -49,7 +59,9 @@ export interface StatusbarGitIndicatorProps {
 export const StatusbarGitIndicator: React.FC<StatusbarGitIndicatorProps> = ({
   pushPending,
   pullPending,
+  onRefresh,
   onPush,
+  pushDisabled = false,
   onPull,
   'data-testid': dataTestId = 'statusbar-git-indicator'
 }) => {
@@ -62,10 +74,18 @@ export const StatusbarGitIndicator: React.FC<StatusbarGitIndicatorProps> = ({
        * than going through `t()`. */}
       <span className="statusbar-item-label" data-testid={`${dataTestId}-label`}>GIT</span>
       <GitActionIcon
+        icon="refresh"
+        pending={false}
+        tooltip={t('statusbar.git.refreshTooltip')}
+        onClick={onRefresh}
+        dataTestId={`${dataTestId}-refresh`}
+      />
+      <GitActionIcon
         icon="repo-push"
         pending={pushPending}
-        tooltip={t('statusbar.git.pushTooltip')}
+        tooltip={pushDisabled ? t('statusbar.git.nothingToPushTooltip') : t('statusbar.git.pushTooltip')}
         onClick={onPush}
+        disabled={pushDisabled}
         dataTestId={`${dataTestId}-push`}
       />
       <GitActionIcon
@@ -80,10 +100,13 @@ export const StatusbarGitIndicator: React.FC<StatusbarGitIndicatorProps> = ({
 }
 
 interface GitActionIconProps {
-  icon: 'repo-push' | 'repo-pull'
+  icon: 'repo-push' | 'repo-pull' | 'refresh'
   pending: boolean
   tooltip: string
   onClick: () => void
+  /** Inert-but-explaining state: the icon greys out, clicks/Enter do
+   * nothing, and the hover tooltip (passed above) tells the user WHY. */
+  disabled?: boolean
   dataTestId: string
 }
 
@@ -93,20 +116,31 @@ interface GitActionIconProps {
  * like `GatedControl` needs) since the tooltip content here is plain text,
  * never something the pointer has to travel onto.
  */
-const GitActionIcon: React.FC<GitActionIconProps> = ({ icon, pending, tooltip, onClick, dataTestId }) => {
+const GitActionIcon: React.FC<GitActionIconProps> = ({ icon, pending, tooltip, onClick, disabled = false, dataTestId }) => {
   const anchorRef = useRef<HTMLSpanElement>(null)
   const [hover, setHover] = useState(false)
 
   return (
     <span
       ref={anchorRef}
-      className="statusbar-git-action"
+      className={disabled ? 'statusbar-git-action disabled' : 'statusbar-git-action'}
       role="button"
-      tabIndex={0}
-      onClick={onClick}
+      tabIndex={disabled ? -1 : 0}
+      aria-disabled={disabled || undefined}
+      // Prevent the mousedown from focusing the span at all — a mouse click
+      // must never leave a focus ring on the icon (Chromium focuses any
+      // element carrying a tabindex, even -1, and can then surface
+      // :focus-visible). Keyboard users still Tab in (tabindex 0 when
+      // enabled) and keep their ring.
+      onMouseDown={(event) => { event.preventDefault() }}
+      onClick={() => {
+        if (disabled) return
+        onClick()
+      }}
       onMouseEnter={() => { setHover(true) }}
       onMouseLeave={() => { setHover(false) }}
       onKeyDown={(event) => {
+        if (disabled) return
         if (event.key === 'Enter' || event.key === ' ') {
           event.preventDefault()
           onClick()

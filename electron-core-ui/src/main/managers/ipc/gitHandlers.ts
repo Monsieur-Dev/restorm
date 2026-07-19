@@ -67,6 +67,10 @@ export function registerGitHandlers(): void {
     await service.setActiveFolder(folder)
   })
 
+  ipcMain.handle('git:refresh-state', async () => {
+    await service.refreshNow()
+  })
+
   ipcMain.handle('git:get-state', () => {
     return service.getState()
   })

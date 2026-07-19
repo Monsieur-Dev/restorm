@@ -1,6 +1,10 @@
 export interface AvailableLanguage {
   code: string
   name: string
+  /** Emoji flag shown next to the endonym in language dropdowns. Rendered as
+   * regional-indicator letters on platforms without emoji flags (e.g. Windows'
+   * Segoe UI Emoji) — acceptable degradation, no image assets needed. */
+  flag: string
 }
 
 /**
@@ -14,31 +18,31 @@ export interface AvailableLanguage {
  * for the ride.
  */
 export const AVAILABLE_LANGUAGES: AvailableLanguage[] = [
-  { code: 'en', name: 'English' },
-  { code: 'fr', name: 'Français' },
-  { code: 'es', name: 'Español' },
-  { code: 'de', name: 'Deutsch' },
-  { code: 'it', name: 'Italiano' },
-  { code: 'pt', name: 'Português' },
-  { code: 'nl', name: 'Nederlands' },
-  { code: 'sv', name: 'Svenska' },
-  { code: 'da', name: 'Dansk' },
-  { code: 'nb', name: 'Norsk bokmål' },
-  { code: 'fi', name: 'Suomi' },
-  { code: 'pl', name: 'Polski' },
-  { code: 'cs', name: 'Čeština' },
-  { code: 'hu', name: 'Magyar' },
-  { code: 'ro', name: 'Română' },
-  { code: 'el', name: 'Ελληνικά' },
-  { code: 'uk', name: 'Українська' },
-  { code: 'hr', name: 'Hrvatski' },
-  { code: 'sr', name: 'Srpski' },
-  { code: 'sq', name: 'Shqip' },
-  { code: 'tr', name: 'Türkçe' },
-  { code: 'id', name: 'Bahasa Indonesia' },
-  { code: 'vi', name: 'Tiếng Việt' },
-  { code: 'ja', name: '日本語' },
-  { code: 'ko', name: '한국어' },
-  { code: 'zh-CN', name: '简体中文' },
-  { code: 'zh-TW', name: '繁體中文' }
+  { code: 'en', name: 'English', flag: '🇬🇧' },
+  { code: 'fr', name: 'Français', flag: '🇫🇷' },
+  { code: 'es', name: 'Español', flag: '🇪🇸' },
+  { code: 'de', name: 'Deutsch', flag: '🇩🇪' },
+  { code: 'it', name: 'Italiano', flag: '🇮🇹' },
+  { code: 'pt', name: 'Português', flag: '🇵🇹' },
+  { code: 'nl', name: 'Nederlands', flag: '🇳🇱' },
+  { code: 'sv', name: 'Svenska', flag: '🇸🇪' },
+  { code: 'da', name: 'Dansk', flag: '🇩🇰' },
+  { code: 'nb', name: 'Norsk bokmål', flag: '🇳🇴' },
+  { code: 'fi', name: 'Suomi', flag: '🇫🇮' },
+  { code: 'pl', name: 'Polski', flag: '🇵🇱' },
+  { code: 'cs', name: 'Čeština', flag: '🇨🇿' },
+  { code: 'hu', name: 'Magyar', flag: '🇭🇺' },
+  { code: 'ro', name: 'Română', flag: '🇷🇴' },
+  { code: 'el', name: 'Ελληνικά', flag: '🇬🇷' },
+  { code: 'uk', name: 'Українська', flag: '🇺🇦' },
+  { code: 'hr', name: 'Hrvatski', flag: '🇭🇷' },
+  { code: 'sr', name: 'Srpski', flag: '🇷🇸' },
+  { code: 'sq', name: 'Shqip', flag: '🇦🇱' },
+  { code: 'tr', name: 'Türkçe', flag: '🇹🇷' },
+  { code: 'id', name: 'Bahasa Indonesia', flag: '🇮🇩' },
+  { code: 'vi', name: 'Tiếng Việt', flag: '🇻🇳' },
+  { code: 'ja', name: '日本語', flag: '🇯🇵' },
+  { code: 'ko', name: '한국어', flag: '🇰🇷' },
+  { code: 'zh-CN', name: '简体中文', flag: '🇨🇳' },
+  { code: 'zh-TW', name: '繁體中文', flag: '🇹🇼' }
 ]

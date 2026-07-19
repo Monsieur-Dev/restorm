@@ -344,7 +344,9 @@
     },
     "git": {
       "pushTooltip": "Αποστολή στο αποθετήριο",
-      "pullTooltip": "Λήψη από το αποθετήριο"
+      "pullTooltip": "Λήψη από το αποθετήριο",
+      "nothingToPushTooltip": "Δεν υπάρχουν αλλαγές για αποστολή",
+      "refreshTooltip": "Έλεγχος αλλαγών για αποστολή ή λήψη"
     }
   },
   "mcpToolTitles": {
@@ -429,7 +431,7 @@
   "pushModal": {
     "title": "Αποστολή",
     "languageLabel": "Γλώσσα μηνύματος commit",
-    "applyLanguageByDefault": "Εφαρμογή αυτής της γλώσσας ως προεπιλογή για μελλοντικές αποστολές",
+    "applyLanguageByDefault": "Προεπιλεγμένη γλώσσα commit",
     "titleFieldLabel": "Τίτλος commit",
     "bodyFieldLabel": "Περιγραφή",
     "cancel": "Ακύρωση",

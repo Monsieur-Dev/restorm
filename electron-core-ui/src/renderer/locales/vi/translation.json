@@ -344,7 +344,9 @@
     },
     "git": {
       "pushTooltip": "Đẩy lên kho lưu trữ",
-      "pullTooltip": "Kéo từ kho lưu trữ"
+      "pullTooltip": "Kéo từ kho lưu trữ",
+      "nothingToPushTooltip": "Không có thay đổi để đẩy",
+      "refreshTooltip": "Kiểm tra thay đổi để đẩy hoặc kéo"
     }
   },
   "mcpToolTitles": {
@@ -429,7 +431,7 @@
   "pushModal": {
     "title": "Đẩy",
     "languageLabel": "Ngôn ngữ thông điệp commit",
-    "applyLanguageByDefault": "Áp dụng ngôn ngữ này làm mặc định cho các lần đẩy sau",
+    "applyLanguageByDefault": "Ngôn ngữ commit mặc định",
     "titleFieldLabel": "Tiêu đề commit",
     "bodyFieldLabel": "Mô tả",
     "cancel": "Hủy",

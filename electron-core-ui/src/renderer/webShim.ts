@@ -730,6 +730,7 @@ export function ensureCoreUiWebApiShim(): void {
     commit: (): Promise<GitCommitResult> => Promise.resolve({ success: false, error: 'Git is not available in the web build' }),
     push: (): Promise<GitPushResult> => Promise.resolve({ success: false, error: 'Git is not available in the web build' }),
     pull: (): Promise<GitPullResult> => Promise.resolve({ success: false, conflicted: false, conflictFiles: [], error: 'Git is not available in the web build' }),
+    refreshState: (): Promise<void> => Promise.resolve(),
     fetchAndCompare: (): Promise<GitFetchCompareResult> => Promise.resolve({ remoteHasNewerVersion: false, behind: 0 }),
     getConflictVersions: (_folder: string, filePath: string): Promise<GitConflictVersions> => Promise.resolve({ path: filePath, base: null, ours: null, theirs: null }),
     getFileAtHead: (): Promise<string | null> => Promise.resolve(null),

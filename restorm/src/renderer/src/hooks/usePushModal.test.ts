@@ -204,7 +204,7 @@ describe('usePushModal', () => {
     expect(api.stage).toHaveBeenCalledWith('/proj', ['api.restorm'])
     expect(api.commit).toHaveBeenCalledWith('/proj', 'My title\n\nmodified:request:Find pet by ID')
     expect(api.push).toHaveBeenCalledWith('/proj')
-    expect(toasterPushMock).toHaveBeenCalledWith('app', { title: 'git.pushSucceededTitle', body: 'git.pushSucceededBody' })
+    expect(toasterPushMock).toHaveBeenCalledWith('app', { title: 'git.pushSucceededTitle', body: 'git.pushSucceededBody', durationMs: 5000 })
     expect(result.current.isOpen).toBe(false)
   })
 

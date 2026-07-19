@@ -15,6 +15,13 @@ export interface ModalProps {
   /** Modal size: 'full' for fullscreen-like, 'dialog' for compact dialog box */
   size?: ModalSize
   /**
+   * Dialog-size only: widens the compact dialog box beyond its default
+   * 320-480px envelope (any CSS width value — `640`, `'52rem'`, `'70%'`).
+   * Applied as both the dialog's width and its max-width, capped at 92vw so
+   * a large value never overflows a small window. Ignored for `size='full'`.
+   */
+  dialogWidth?: number | string
+  /**
    * Fired once the close animation has finished and the modal has
    * fully unmounted its content — i.e. the "really closed" signal, as
    * opposed to `onClose` which fires the instant the user requests a
@@ -59,6 +66,7 @@ const ModalInner: React.FC<ModalProps> = ({
   onClose,
   children,
   size = 'full',
+  dialogWidth,
   onClosed,
   'data-testid': dataTestId,
   scopeToSelector,
@@ -306,6 +314,9 @@ const ModalInner: React.FC<ModalProps> = ({
           data-size={size}
           data-is-open={isOpen ? 'true' : 'false'}
           tabIndex={-1}
+          style={size === 'dialog' && dialogWidth !== undefined
+            ? { width: dialogWidth, maxWidth: '92vw' }
+            : undefined}
         >
           <div
             className="ecu-modal-header"

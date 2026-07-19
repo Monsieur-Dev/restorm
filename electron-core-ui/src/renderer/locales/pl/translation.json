@@ -344,7 +344,9 @@
     },
     "git": {
       "pushTooltip": "Wypchnij do repozytorium",
-      "pullTooltip": "Pobierz z repozytorium"
+      "pullTooltip": "Pobierz z repozytorium",
+      "nothingToPushTooltip": "Brak zmian do wypchnięcia",
+      "refreshTooltip": "Sprawdź zmiany do wypchnięcia lub pobrania"
     }
   },
   "mcpToolTitles": {
@@ -429,7 +431,7 @@
   "pushModal": {
     "title": "Wypchnij",
     "languageLabel": "Język wiadomości commit",
-    "applyLanguageByDefault": "Ustaw ten język jako domyślny dla przyszłych wypchnięć",
+    "applyLanguageByDefault": "Domyślny język commitów",
     "titleFieldLabel": "Tytuł commita",
     "bodyFieldLabel": "Opis",
     "cancel": "Anuluj",

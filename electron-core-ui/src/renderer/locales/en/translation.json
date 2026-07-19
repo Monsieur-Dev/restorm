@@ -344,7 +344,9 @@
     },
     "git": {
       "pushTooltip": "Push to the repository",
-      "pullTooltip": "Pull from the repository"
+      "pullTooltip": "Pull from the repository",
+      "nothingToPushTooltip": "No changes to push",
+      "refreshTooltip": "Check for changes to push or pull"
     }
   },
   "mcpToolTitles": {
@@ -429,7 +431,7 @@
   "pushModal": {
     "title": "Push",
     "languageLabel": "Commit message language",
-    "applyLanguageByDefault": "Apply this language by default for future pushes",
+    "applyLanguageByDefault": "Default commit language",
     "titleFieldLabel": "Commit title",
     "bodyFieldLabel": "Description",
     "cancel": "Cancel",

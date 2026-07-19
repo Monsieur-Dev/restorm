@@ -344,7 +344,9 @@
     },
     "git": {
       "pushTooltip": "Push til depotet",
-      "pullTooltip": "Hent fra depotet"
+      "pullTooltip": "Hent fra depotet",
+      "nothingToPushTooltip": "Ingen endringer å pushe",
+      "refreshTooltip": "Se etter endringer å pushe eller pulle"
     }
   },
   "mcpToolTitles": {
@@ -429,7 +431,7 @@
   "pushModal": {
     "title": "Push",
     "languageLabel": "Språk for commit-meldingen",
-    "applyLanguageByDefault": "Bruk dette språket som standard for fremtidige pushar",
+    "applyLanguageByDefault": "Standardspråk for commits",
     "titleFieldLabel": "Commit-tittel",
     "bodyFieldLabel": "Beskrivelse",
     "cancel": "Avbryt",

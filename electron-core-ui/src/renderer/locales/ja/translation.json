@@ -344,7 +344,9 @@
     },
     "git": {
       "pushTooltip": "リポジトリにプッシュ",
-      "pullTooltip": "リポジトリからプル"
+      "pullTooltip": "リポジトリからプル",
+      "nothingToPushTooltip": "プッシュする変更はありません",
+      "refreshTooltip": "プッシュ/プル対象の変更を確認"
     }
   },
   "mcpToolTitles": {
@@ -429,7 +431,7 @@
   "pushModal": {
     "title": "プッシュ",
     "languageLabel": "コミットメッセージの言語",
-    "applyLanguageByDefault": "今後のプッシュでもこの言語を既定にする",
+    "applyLanguageByDefault": "コミットの既定の言語",
     "titleFieldLabel": "コミットタイトル",
     "bodyFieldLabel": "説明",
     "cancel": "キャンセル",

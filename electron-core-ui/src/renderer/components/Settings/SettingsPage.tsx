@@ -175,8 +175,7 @@ const SettingsPageFallback: React.FC<SettingsPageFallbackProps> = ({
 
   const languageOptions = useMemo(() => {
     return AVAILABLE_LANGUAGES.map(lang => ({
-      text: lang.name,
-      detail: lang.code.toUpperCase()
+      text: `${lang.flag} ${lang.name}`
     }))
   }, [])
 

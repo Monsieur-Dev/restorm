@@ -10,6 +10,8 @@ import { Toggle } from '../Toggle'
 export interface PushModalLanguageOption {
   code: string
   name: string
+  /** Emoji flag prefixed to the name in the picker (omitted → name alone). */
+  flag?: string
 }
 
 export interface PushModalProps {
@@ -31,6 +33,9 @@ export interface PushModalProps {
   body: string
   onBodyChange: (value: string) => void
   onPush: () => void
+  /** Disables the Push button — the host sets it when there is nothing to
+   * publish (an empty structural diff), so an empty commit can't be sent. */
+  pushDisabled?: boolean
   /** Soft character-count warning threshold for the title field — visual
    * only, never blocks the push. Defaults to 72 (the git subject-line
    * convention). */
@@ -64,13 +69,14 @@ export const PushModal: React.FC<PushModalProps> = ({
   body,
   onBodyChange,
   onPush,
+  pushDisabled = false,
   titleSoftLimit = 72,
   'data-testid': dataTestId = 'push-modal'
 }) => {
   const { t } = useTranslation()
 
   const languageOptions = useMemo(
-    () => languages.map((lang) => ({ text: lang.name, detail: lang.code.toUpperCase() })),
+    () => languages.map((lang) => ({ text: lang.flag ? `${lang.flag} ${lang.name}` : lang.name })),
     [languages]
   )
   const selectedLanguageIndex = languages.findIndex((lang) => lang.code === language)
@@ -82,31 +88,37 @@ export const PushModal: React.FC<PushModalProps> = ({
       isOpen={isOpen}
       onClose={onClose}
       size="dialog"
+      dialogWidth={640}
       data-testid={dataTestId}
     >
       <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span>{t('pushModal.languageLabel')}</span>
-            <SelectBox
-              id={`${dataTestId}-language-select`}
-              className={`${dataTestId}-language-select`}
-              options={languageOptions}
-              selected={selectedLanguageIndex}
-              onDidSelect={(data: ISelectData) => {
-                const selectedLanguage = languages[data.index]
-                if (selectedLanguage) onLanguageChange(selectedLanguage.code)
-              }}
-              data-testid={`${dataTestId}-language-select`}
-            />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+          <span>{t('pushModal.languageLabel')}</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
+            {/* The wrapper div sets the picker's width (the custom trigger
+              * fills its wrapper) — without it the select stretches to the
+              * modal's full width and pushes the toggle onto its own line. */}
+            <div style={{ width: 240, flex: '0 0 auto' }}>
+              <SelectBox
+                id={`${dataTestId}-language-select`}
+                className={`${dataTestId}-language-select`}
+                options={languageOptions}
+                selected={selectedLanguageIndex}
+                onDidSelect={(data: ISelectData) => {
+                  const selectedLanguage = languages[data.index]
+                  if (selectedLanguage) onLanguageChange(selectedLanguage.code)
+                }}
+                data-testid={`${dataTestId}-language-select`}
+              />
+            </div>
+            <Toggle
+              checked={applyLanguageByDefault}
+              onChange={(checked) => { onApplyLanguageByDefaultChange(checked) }}
+              data-testid={`${dataTestId}-apply-default-toggle`}
+            >
+              {t('pushModal.applyLanguageByDefault')}
+            </Toggle>
           </div>
-          <Toggle
-            checked={applyLanguageByDefault}
-            onChange={(checked) => { onApplyLanguageByDefaultChange(checked) }}
-            data-testid={`${dataTestId}-apply-default-toggle`}
-          >
-            {t('pushModal.applyLanguageByDefault')}
-          </Toggle>
         </div>
 
         <div>
@@ -140,7 +152,11 @@ export const PushModal: React.FC<PushModalProps> = ({
           <InputBox
             value={body}
             onChange={onBodyChange}
-            options={{ flexibleHeight: true, flexibleMaxHeight: 200, ariaLabel: t('pushModal.bodyFieldLabel') }}
+            // An inline min/max height turns the flexible textarea into a
+            // multi-line field with the thin editor-style scrollbar (the
+            // inputbox CSS keys its scrollbar rules on [style*="min-height"]).
+            style={{ minHeight: 160, maxHeight: 320 }}
+            options={{ flexibleHeight: true, ariaLabel: t('pushModal.bodyFieldLabel') }}
             data-testid={`${dataTestId}-body-input`}
           />
         </div>
@@ -149,7 +165,7 @@ export const PushModal: React.FC<PushModalProps> = ({
           <Button secondary onClick={onClose} data-testid={`${dataTestId}-cancel-button`}>
             {t('pushModal.cancel')}
           </Button>
-          <Button onClick={onPush} data-testid={`${dataTestId}-push-button`}>
+          <Button onClick={onPush} disabled={pushDisabled} data-testid={`${dataTestId}-push-button`}>
             {t('pushModal.push')}
           </Button>
         </div>

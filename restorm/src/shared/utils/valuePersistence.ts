@@ -28,6 +28,19 @@ function isValueTypeName(value: unknown): value is ValueTypeName {
   return value === 'string' || value === 'color' || value === 'numeric' || value === 'datetime' || value === 'secret' || value === 'expression' || value === 'boolean' || value === 'enum' || value === 'enumList' || value === 'customList' || value === 'customListMulti' || value === 'variable' || value === 'environment' || value === 'null' || value === 'list'
 }
 
+/** The env-file secret's `params.key`/`params.folderPath` are POSITIONAL
+ * runtime identity, stamped at load/collect time from the entity's current
+ * folder/environment/variable names (`envFileSecrets.ts` `stampParams`) and
+ * re-derived on every open — the persisted form always writes them empty.
+ * Keeping them here would make a freshly-parsed file and a lived-in
+ * in-memory model ALWAYS differ (a phantom "environment folder modified" in the
+ * git commit diff) even when nothing was edited. */
+function persistedSecretParams(source: string, params: Record<string, unknown>): Record<string, unknown> {
+  if (source !== 'envFileSecret') return params
+  const { key: _key, folderPath: _folderPath, ...rest } = params
+  return rest
+}
+
 /**
  * Convert any ValueType (or legacy raw value) into a persisted object structure.
  * - SecretValue is persisted without its resolved plaintext.
@@ -42,7 +55,7 @@ export function serializeValueForPersistence(value: unknown): PersistedValue {
     return { type: 'list', items: value.items.map(serializeValueForPersistence) }
   }
   if (value instanceof SecretValue) {
-    return { type: 'secret', source: value.source, params: value.params }
+    return { type: 'secret', source: value.source, params: persistedSecretParams(value.source, value.params) }
   }
   if (value instanceof NumericValue) {
     return { type: 'numeric', value: value.value, format: value.format }
@@ -96,7 +109,8 @@ export function serializeValueForPersistence(value: unknown): PersistedValue {
     if (type === 'secret') {
       const source = (value as { source?: unknown }).source
       const params = (value as { params?: unknown }).params
-      return { type: 'secret', source: typeof source === 'string' ? source : '', params: isRecord(params) ? params : {} }
+      const src = typeof source === 'string' ? source : ''
+      return { type: 'secret', source: src, params: persistedSecretParams(src, isRecord(params) ? params : {}) }
     }
     if (type === 'numeric') {
       const raw = (value as { value?: unknown }).value

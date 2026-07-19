@@ -176,6 +176,18 @@
 	outline: none;
 }
 
+/* Inert push/pull action (e.g. nothing to push): greyed, no hover feedback,
+ * but STILL hoverable — its tooltip explains why it is disabled. */
+.statusbar-git-action.disabled {
+	opacity: 0.4;
+	cursor: default;
+}
+
+.statusbar-git-action.disabled:hover {
+	background-color: transparent;
+	color: inherit;
+}
+
 /* A dot, never a count (v1 commit+push is atomic, so there is no
    meaningful "ahead N" to show) — reuses the same prominent accent token
    as the activity-pulse wave above so it reads as "something to act on"

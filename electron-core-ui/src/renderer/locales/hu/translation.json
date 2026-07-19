@@ -344,7 +344,9 @@
     },
     "git": {
       "pushTooltip": "Küldés a tárolóba",
-      "pullTooltip": "Letöltés a tárolóból"
+      "pullTooltip": "Letöltés a tárolóból",
+      "nothingToPushTooltip": "Nincs pusholandó módosítás",
+      "refreshTooltip": "Pusholandó vagy pullolandó módosítások keresése"
     }
   },
   "mcpToolTitles": {
@@ -429,7 +431,7 @@
   "pushModal": {
     "title": "Push",
     "languageLabel": "A commit üzenet nyelve",
-    "applyLanguageByDefault": "Ez legyen az alapértelmezett nyelv a jövőbeli push-oknál",
+    "applyLanguageByDefault": "Commitok alapértelmezett nyelve",
     "titleFieldLabel": "Commit címe",
     "bodyFieldLabel": "Leírás",
     "cancel": "Mégse",

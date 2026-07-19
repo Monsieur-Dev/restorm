@@ -344,7 +344,9 @@
     },
     "git": {
       "pushTooltip": "Push ke repositori",
-      "pullTooltip": "Tarik dari repositori"
+      "pullTooltip": "Tarik dari repositori",
+      "nothingToPushTooltip": "Tidak ada perubahan untuk didorong",
+      "refreshTooltip": "Periksa perubahan untuk didorong atau ditarik"
     }
   },
   "mcpToolTitles": {
@@ -429,7 +431,7 @@
   "pushModal": {
     "title": "Push",
     "languageLabel": "Bahasa pesan commit",
-    "applyLanguageByDefault": "Jadikan bahasa ini default untuk push berikutnya",
+    "applyLanguageByDefault": "Bahasa commit bawaan",
     "titleFieldLabel": "Judul commit",
     "bodyFieldLabel": "Deskripsi",
     "cancel": "Batal",

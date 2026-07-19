@@ -344,7 +344,9 @@
     },
     "git": {
       "pushTooltip": "Dërgo te depozitari",
-      "pullTooltip": "Merr nga depozitari"
+      "pullTooltip": "Merr nga depozitari",
+      "nothingToPushTooltip": "Nuk ka ndryshime për t'u dërguar",
+      "refreshTooltip": "Kontrollo ndryshimet për dërgim ose tërheqje"
     }
   },
   "mcpToolTitles": {
@@ -429,7 +431,7 @@
   "pushModal": {
     "title": "Dërgo",
     "languageLabel": "Gjuha e mesazhit të commit-it",
-    "applyLanguageByDefault": "Përdor këtë gjuhë si parazgjedhje për dërgimet e ardhshme",
+    "applyLanguageByDefault": "Gjuha e parazgjedhur e commit-eve",
     "titleFieldLabel": "Titulli i commit-it",
     "bodyFieldLabel": "Përshkrimi",
     "cancel": "Anulo",

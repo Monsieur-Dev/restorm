@@ -154,6 +154,7 @@ const pushModal = usePushModal(filePath, rootItems)
   isOpen={pushModal.isOpen}
   onClose={pushModal.closePushModal}
   languages={AVAILABLE_LANGUAGES}
+  pushDisabled={!hasChanges} // nothing to publish → the Push button is disabled
   language={pushModal.language}
   onLanguageChange={pushModal.setLanguage}
   applyLanguageByDefault={pushModal.applyLanguageByDefault}
@@ -376,7 +377,7 @@ src/main/services/GitSemiPullController.ts        — CRON schedule reading `git
 src/renderer/hooks/useGitPullAvailableToast.tsx   — "a newer version exists" toast with a Pull-now action button
 src/shared/CommitMessageEngine.ts                 — renderCommitMessage (generic Handlebars render, cached per template; exported from BOTH main + renderer)
 src/renderer/components/PushModal/PushModal.tsx   — the non-scoped commit + push UI (fully controlled)
-src/renderer/components/Settings/languages.ts     — AVAILABLE_LANGUAGES (shared by the UI-language switcher + PushModal)
+src/renderer/components/Settings/languages.ts     — AVAILABLE_LANGUAGES with per-language emoji flag (shared by the UI-language switcher + PushModal; pickers render "{flag} {endonym}")
 src/renderer/components/ConflictResolutionView/ConflictResolutionView.tsx — the 4-panel shell (list + user/server/resolved)
 src/renderer/components/ConflictResolutionView/fieldDiffStyle.ts          — the diff-highlight style helper
 src/renderer/locales/*/translation.json          — `git.cliMissing.*` + `git.pullAvailable.*` + `pushModal.*` + `conflictResolution.*` (all 27 locales)

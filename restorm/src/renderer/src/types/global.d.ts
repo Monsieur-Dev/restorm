@@ -105,6 +105,7 @@ declare global {
         commit: (folder: string, message: string) => Promise<GitCommitResult>
         push: (folder: string) => Promise<GitPushResult>
         pull: (folder: string) => Promise<GitPullResult>
+        refreshState: () => Promise<void>
         fetchAndCompare: (folder: string) => Promise<GitFetchCompareResult>
         getConflictVersions: (folder: string, filePath: string) => Promise<GitConflictVersions>
         getFileAtHead: (folder: string, filePath: string) => Promise<string | null>

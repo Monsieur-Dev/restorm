@@ -98,6 +98,13 @@ export class GitService {
   private activeFolder: string | null = null
   private state: GitState = { ...NO_GIT_STATE }
   private watcher: FSWatcher | null = null
+  /** Shallow watcher on the folder ROOT (depth 0, `.git` excluded) — a
+   * working-tree write (an autosave of the project file, or an external
+   * editor touching it) changes `git status` without touching any of the
+   * `.git` signal paths the main watcher targets, and would otherwise
+   * leave the app's git state (push pastille / disabled push button)
+   * stale until the next open or manual action. */
+  private rootWatcher: FSWatcher | null = null
   private watchTimer: ReturnType<typeof setTimeout> | null = null
   private gitInstalledChecked = false
   private cliMissingToastFired = false
@@ -462,6 +469,18 @@ export class GitService {
     return this.activeFolder
   }
 
+  /**
+   * Manual "check now" — the status-bar refresh button's backend. Runs the
+   * same two passes the folder watch chains (local status refresh, then the
+   * semi-pull remote check), so both the push side (working-tree changes)
+   * and the pull side (remote ahead) light up without waiting for the CRON
+   * tick or a watch event. Safe no-op without an active folder.
+   */
+  public async refreshNow(): Promise<void> {
+    await this.refresh()
+    await this.checkForRemoteUpdate()
+  }
+
   private async refresh(): Promise<void> {
     const folder = this.activeFolder
     if (!folder) return
@@ -504,6 +523,11 @@ export class GitService {
     if (!existsSync(gitDir)) return
     const targets = [join(gitDir, 'HEAD'), join(gitDir, 'index'), join(gitDir, 'refs')]
     this.watcher = watchPaths(targets, { ignoreInitial: true })
+    this.rootWatcher = watchPaths(folder, {
+      ignoreInitial: true,
+      depth: 0,
+      ignored: (path) => path.includes('/.git')
+    })
     const trigger = (): void => {
       if (this.watchTimer) clearTimeout(this.watchTimer)
       this.watchTimer = setTimeout(() => {
@@ -521,6 +545,7 @@ export class GitService {
       }, this.config.watchDebounceMs)
     }
     this.watcher.on('all', trigger)
+    this.rootWatcher.on('all', trigger)
   }
 
   private stopWatching(): void {
@@ -531,6 +556,10 @@ export class GitService {
     if (this.watcher) {
       void this.watcher.close()
       this.watcher = null
+    }
+    if (this.rootWatcher) {
+      void this.rootWatcher.close()
+      this.rootWatcher = null
     }
   }
 

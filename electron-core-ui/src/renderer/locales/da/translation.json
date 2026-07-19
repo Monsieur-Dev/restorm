@@ -344,7 +344,9 @@
     },
     "git": {
       "pushTooltip": "Push til repositoriet",
-      "pullTooltip": "Hent fra repositoriet"
+      "pullTooltip": "Hent fra repositoriet",
+      "nothingToPushTooltip": "Ingen ændringer at pushe",
+      "refreshTooltip": "Tjek for ændringer at pushe eller pulle"
     }
   },
   "mcpToolTitles": {
@@ -429,7 +431,7 @@
   "pushModal": {
     "title": "Push",
     "languageLabel": "Sprog for commit-beskeden",
-    "applyLanguageByDefault": "Anvend dette sprog som standard for fremtidige pushes",
+    "applyLanguageByDefault": "Standardsprog for commits",
     "titleFieldLabel": "Commit-titel",
     "bodyFieldLabel": "Beskrivelse",
     "cancel": "Annuller",

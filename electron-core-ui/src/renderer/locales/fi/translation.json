@@ -344,7 +344,9 @@
     },
     "git": {
       "pushTooltip": "Työnnä repositorioon",
-      "pullTooltip": "Nouda repositoriosta"
+      "pullTooltip": "Nouda repositoriosta",
+      "nothingToPushTooltip": "Ei muutoksia työnnettäväksi",
+      "refreshTooltip": "Tarkista työnnettävät tai vedettävät muutokset"
     }
   },
   "mcpToolTitles": {
@@ -429,7 +431,7 @@
   "pushModal": {
     "title": "Push",
     "languageLabel": "Commit-viestin kieli",
-    "applyLanguageByDefault": "Käytä tätä kieltä oletuksena tulevissa pusheissa",
+    "applyLanguageByDefault": "Committien oletuskieli",
     "titleFieldLabel": "Commitin otsikko",
     "bodyFieldLabel": "Kuvaus",
     "cancel": "Peruuta",

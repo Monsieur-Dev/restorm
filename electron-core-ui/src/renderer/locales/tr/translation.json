@@ -344,7 +344,9 @@
     },
     "git": {
       "pushTooltip": "Depoya gönder",
-      "pullTooltip": "Depodan çek"
+      "pullTooltip": "Depodan çek",
+      "nothingToPushTooltip": "Gönderilecek değişiklik yok",
+      "refreshTooltip": "Gönderilecek veya çekilecek değişiklikleri denetle"
     }
   },
   "mcpToolTitles": {
@@ -429,7 +431,7 @@
   "pushModal": {
     "title": "Gönder",
     "languageLabel": "Commit mesajı dili",
-    "applyLanguageByDefault": "Bu dili gelecekteki göndermeler için varsayılan yap",
+    "applyLanguageByDefault": "Varsayılan commit dili",
     "titleFieldLabel": "Commit başlığı",
     "bodyFieldLabel": "Açıklama",
     "cancel": "İptal",

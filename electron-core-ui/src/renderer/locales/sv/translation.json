@@ -344,7 +344,9 @@
     },
     "git": {
       "pushTooltip": "Push:a till förvaret",
-      "pullTooltip": "Hämta från förvaret"
+      "pullTooltip": "Hämta från förvaret",
+      "nothingToPushTooltip": "Inga ändringar att pusha",
+      "refreshTooltip": "Sök efter ändringar att pusha eller pulla"
     }
   },
   "mcpToolTitles": {
@@ -429,7 +431,7 @@
   "pushModal": {
     "title": "Push",
     "languageLabel": "Språk för commit-meddelandet",
-    "applyLanguageByDefault": "Använd detta språk som standard för framtida pushar",
+    "applyLanguageByDefault": "Standardspråk för commits",
     "titleFieldLabel": "Commit-titel",
     "bodyFieldLabel": "Beskrivning",
     "cancel": "Avbryt",

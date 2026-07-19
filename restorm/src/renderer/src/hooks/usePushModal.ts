@@ -22,6 +22,9 @@ const DEFAULT_LANGUAGE = 'en'
 
 export interface PushModalState {
   isOpen: boolean
+  /** False when the structural diff against HEAD is empty — the host
+   * disables the modal's Push button (nothing to publish). */
+  hasChanges: boolean
   language: string
   applyLanguageByDefault: boolean
   title: string
@@ -141,7 +144,7 @@ export function usePushModal(filePath: string | null, rootItems: FolderItem[], s
             })
             return
           }
-          toasterService.push('app', { title: t('git.pushSucceededTitle'), body: t('git.pushSucceededBody') })
+          toasterService.push('app', { title: t('git.pushSucceededTitle'), body: t('git.pushSucceededBody'), durationMs: 5000 })
           setIsOpen(false)
         })
       })
@@ -149,6 +152,7 @@ export function usePushModal(filePath: string | null, rootItems: FolderItem[], s
 
   return {
     isOpen,
+    hasChanges: changes.length > 0,
     language,
     applyLanguageByDefault,
     title,

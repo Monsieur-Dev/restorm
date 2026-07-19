@@ -41,7 +41,14 @@ export const StatusbarGitIndicator: React.FC<StatusbarGitIndicatorProps> = ({ fi
   // Push pastille: uncommitted working-tree changes OR local commits still
   // to sweep in. Pull pastille: the folder-watch-triggered semi-pull found a
   // newer remote version. Neither ever renders a count — see GitState's doc.
-  const pushPending = (gitState.status?.files.length ?? 0) > 0 || (gitState.status?.ahead ?? 0) > 0
+  // The env-values sidecar (`*.restorm.env` — secrets, deliberately never
+  // committed by the push flow) and the response-history archive
+  // (`*.responses.zip`) sit untracked next to every project; counting them
+  // would keep the pastille lit forever right after a successful push.
+  const relevantFiles = (gitState.status?.files ?? []).filter(
+    (f) => !f.path.endsWith('.restorm.env') && !f.path.endsWith('.responses.zip')
+  )
+  const pushPending = relevantFiles.length > 0 || (gitState.status?.ahead ?? 0) > 0
 
   if (filePath === null) return null
 
@@ -54,7 +61,9 @@ export const StatusbarGitIndicator: React.FC<StatusbarGitIndicatorProps> = ({ fi
       data-testid="statusbar-git-indicator-gate"
     >
       <EcuiStatusbarGitIndicator
+        onRefresh={() => { void window.api.git.refreshState() }}
         pushPending={pushPending}
+        pushDisabled={!pushPending}
         pullPending={gitState.remoteHasNewerVersion}
         onPush={onPush}
         onPull={onPull}

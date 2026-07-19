@@ -344,7 +344,9 @@
     },
     "git": {
       "pushTooltip": "Надіслати в репозиторій",
-      "pullTooltip": "Отримати з репозиторію"
+      "pullTooltip": "Отримати з репозиторію",
+      "nothingToPushTooltip": "Немає змін для надсилання",
+      "refreshTooltip": "Перевірити зміни для надсилання чи отримання"
     }
   },
   "mcpToolTitles": {
@@ -429,7 +431,7 @@
   "pushModal": {
     "title": "Надіслати",
     "languageLabel": "Мова повідомлення commit",
-    "applyLanguageByDefault": "Використовувати цю мову за замовчуванням для майбутніх надсилань",
+    "applyLanguageByDefault": "Мова комітів за замовчуванням",
     "titleFieldLabel": "Заголовок commit",
     "bodyFieldLabel": "Опис",
     "cancel": "Скасувати",

@@ -344,7 +344,9 @@
     },
     "git": {
       "pushTooltip": "Odeslat do repozitáře",
-      "pullTooltip": "Stáhnout z repozitáře"
+      "pullTooltip": "Stáhnout z repozitáře",
+      "nothingToPushTooltip": "Žádné změny k odeslání",
+      "refreshTooltip": "Zkontrolovat změny k odeslání nebo stažení"
     }
   },
   "mcpToolTitles": {
@@ -429,7 +431,7 @@
   "pushModal": {
     "title": "Odeslat",
     "languageLabel": "Jazyk zprávy commitu",
-    "applyLanguageByDefault": "Použít tento jazyk jako výchozí pro budoucí odeslání",
+    "applyLanguageByDefault": "Výchozí jazyk commitů",
     "titleFieldLabel": "Název commitu",
     "bodyFieldLabel": "Popis",
     "cancel": "Zrušit",
