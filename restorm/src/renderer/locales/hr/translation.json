@@ -2384,6 +2384,7 @@
     "conflictResolvedTitle": "Sukob riješen",
     "conflictResolvedBody": "Vaš sukob spajanja riješen je i commit je izvršen.",
     "conflictResolutionTitle": "Riješi sukobe",
+    "conflictEntityPath": "Lokacija stavke u sukobu",
     "conflictCancel": "Odustani",
     "conflictFinish": "Završi",
     "conflictReadOnlyEntityNotice": "Ova se vrsta entiteta ovdje ne može uređivati. Gore odaberite svoju ili njihovu verziju.",

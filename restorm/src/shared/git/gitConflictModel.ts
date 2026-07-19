@@ -16,6 +16,10 @@ export interface ConflictEntity {
    * future 3-way resolution refinement; the v1 4-panel view only shows
    * ours/theirs/resolved. */
   base: FolderItem | null
+  /** Ancestor folder names, root-first, self excluded (from OUR tree —
+   * both sides share the id, and a same-entity move is not a conflict this
+   * model surfaces). Feeds the modal's read-only breadcrumb band. */
+  pathSegments: string[]
 }
 
 /**
@@ -69,7 +73,8 @@ export function identifyConflictingEntities(
       name: oursEntity.name,
       ours: oursEntity.item,
       theirs: theirsEntity.item,
-      base: base.get(id)?.item ?? null
+      base: base.get(id)?.item ?? null,
+      pathSegments: oursEntity.path
     })
   }
 

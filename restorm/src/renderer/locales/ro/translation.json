@@ -2384,6 +2384,7 @@
     "conflictResolvedTitle": "Conflict rezolvat",
     "conflictResolvedBody": "Conflictul de îmbinare a fost rezolvat și confirmat.",
     "conflictResolutionTitle": "Rezolvă conflictele",
+    "conflictEntityPath": "Locația elementului în conflict",
     "conflictCancel": "Anulează",
     "conflictFinish": "Finalizează",
     "conflictReadOnlyEntityNotice": "Acest tip de entitate nu poate fi editat aici. Alegeți mai sus versiunea dvs. sau a lor.",

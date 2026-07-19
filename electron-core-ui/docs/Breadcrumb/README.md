@@ -24,6 +24,9 @@ import { Breadcrumb } from 'electron-core-ui/renderer'
 export interface BreadcrumbItem {
   id: string
   label: string
+  /** Arbitrary node rendered before the label — e.g. a host badge capsule
+   * next to the entity name. Currently honoured in `plain` mode only. */
+  prefix?: React.ReactNode
 }
 
 export interface BreadcrumbProps {
@@ -38,6 +41,13 @@ export interface BreadcrumbProps {
    * Receives the item, the new value, and the index.
    */
   onLastItemChange?: (item: BreadcrumbItem, newValue: string, index: number) => void
+  /**
+   * Static, display-only mode: every item renders as a plain label — no link
+   * buttons (no underline), no hover affordance, no editable last item, no
+   * callbacks. For read-only contexts that only SITUATE something (e.g. a
+   * conflict-resolution header band). Default `false`.
+   */
+  plain?: boolean
   className?: string
   style?: React.CSSProperties
   ariaLabel?: string
@@ -150,3 +160,19 @@ The component uses standard theme CSS variables for theming:
 - Treat `items` as a **pure, ordered path** in your domain model (e.g. workspace → folder → resource) and rebuild it from state rather than mutating labels in-place, except when handling `onLastItemChange`.
 - Use stable `id` values that map directly to domain entities; this makes it easier for AI agents to translate breadcrumb clicks into navigation actions.
 - Keep rename logic confined to a small handler (e.g. `onLastItemChange`) so that agents can safely update the last segment’s label without touching the rest of the path.
+
+#### Display-only (plain) breadcrumb
+
+```tsx
+// Read-only context: shows WHERE an entity lives, navigates nowhere.
+<Breadcrumb
+  plain
+  items={[
+    { id: 'a', label: 'Petstore' },
+    { id: 'b', label: 'Pets' },
+    // The situated entity itself as the last item, its badge as `prefix`.
+    { id: 'self', label: 'Find pet by ID', prefix: <MethodBadge method="GET" /> }
+  ]}
+  ariaLabel="Location of the conflicting item"
+/>
+```

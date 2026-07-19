@@ -140,7 +140,20 @@ export function useGitPullConflict(): UseGitPullConflictResult {
       return
     }
 
-    toasterService.push('app', { title: t('git.conflictResolvedTitle'), body: t('git.conflictResolvedBody') })
+    // Commit+push is atomic everywhere else in the app (the Push flow) —
+    // the merge commit above must not silently strand the repo "ahead",
+    // leaving a push pastille the user never asked for after resolving.
+    const pushResult = await window.api.git.push(target.folder)
+    if (!pushResult.success) {
+      toasterService.push('app', {
+        title: t('git.pushFailedTitle'),
+        body: pushResult.error ?? t('git.pushFailedBody'),
+        durationMs: 10000
+      })
+      return
+    }
+
+    toasterService.push('app', { title: t('git.conflictResolvedTitle'), body: t('git.conflictResolvedBody'), durationMs: 5000 })
     setIsOpen(false)
   }, [versions, target, conflictResolution, commitTimestamps, t])
 

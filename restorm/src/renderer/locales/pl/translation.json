@@ -2385,6 +2385,7 @@
     "conflictResolvedTitle": "Konflikt rozwiązany",
     "conflictResolvedBody": "Twój konflikt scalania został rozwiązany i zatwierdzony.",
     "conflictResolutionTitle": "Rozwiąż konflikty",
+    "conflictEntityPath": "Lokalizacja elementu w konflikcie",
     "conflictCancel": "Anuluj",
     "conflictFinish": "Zakończ",
     "conflictReadOnlyEntityNotice": "Tego typu encji nie można tutaj edytować. Wybierz powyżej swoją wersję lub ich.",

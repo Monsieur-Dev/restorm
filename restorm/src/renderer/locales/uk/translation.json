@@ -2385,6 +2385,7 @@
     "conflictResolvedTitle": "Конфлікт вирішено",
     "conflictResolvedBody": "Ваш конфлікт злиття вирішено та закомічено.",
     "conflictResolutionTitle": "Вирішити конфлікти",
+    "conflictEntityPath": "Розташування елемента в конфлікті",
     "conflictCancel": "Скасувати",
     "conflictFinish": "Завершити",
     "conflictReadOnlyEntityNotice": "Цей тип сутності не можна редагувати тут. Виберіть вище свою або їхню версію.",

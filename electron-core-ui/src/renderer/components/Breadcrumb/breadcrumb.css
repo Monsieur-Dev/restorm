@@ -101,3 +101,20 @@
   width: 14px;
   height: 14px;
 }
+
+/* Plain (display-only) mode: static labels, same metrics as the link
+ * items but no underline / hover affordance. */
+.ecui-breadcrumb-plain-item {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	color: var(--descriptionForeground);
+	white-space: nowrap;
+}
+
+/* The last plain item is the entity being situated — read it as the row's
+ * subject, not one more ancestor. */
+.ecui-breadcrumb-plain-item--current {
+	color: var(--foreground);
+	font-weight: 600;
+}

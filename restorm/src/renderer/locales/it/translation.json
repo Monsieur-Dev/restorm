@@ -2383,6 +2383,7 @@
     "conflictResolvedTitle": "Conflitto risolto",
     "conflictResolvedBody": "Il conflitto di merge è stato risolto e confermato.",
     "conflictResolutionTitle": "Risolvi i conflitti",
+    "conflictEntityPath": "Posizione dell'elemento in conflitto",
     "conflictCancel": "Annulla",
     "conflictFinish": "Fine",
     "conflictReadOnlyEntityNotice": "Questo tipo di entità non può essere modificato qui. Scegli sopra la tua versione o la loro.",

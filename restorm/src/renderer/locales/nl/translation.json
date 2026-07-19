@@ -2383,6 +2383,7 @@
     "conflictResolvedTitle": "Conflict opgelost",
     "conflictResolvedBody": "Uw mergeconflict is opgelost en gecommit.",
     "conflictResolutionTitle": "Conflicten oplossen",
+    "conflictEntityPath": "Locatie van het conflicterende item",
     "conflictCancel": "Annuleren",
     "conflictFinish": "Voltooien",
     "conflictReadOnlyEntityNotice": "Dit entiteitstype kan hier niet worden bewerkt. Kies hierboven jouw versie of die van hen.",

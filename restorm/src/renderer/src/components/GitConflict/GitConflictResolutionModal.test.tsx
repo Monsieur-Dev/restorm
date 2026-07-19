@@ -16,6 +16,8 @@ vi.mock('react-i18next', () => ({
 vi.mock('electron-core-ui/renderer', () => ({
   Modal: ({ isOpen, title, children }: { isOpen: boolean, title: React.ReactNode, children: React.ReactNode }) =>
     isOpen ? <div data-testid="mock-modal"><span>{title}</span>{children}</div> : null,
+  Breadcrumb: ({ items, 'data-testid': testId }: { items: { id: string, label: string }[], 'data-testid'?: string }) =>
+    <nav data-testid={testId}>{items.map((item) => item.label).join(' / ')}</nav>,
   Button: ({ children, onClick, disabled, 'data-testid': testId }: {
     children: React.ReactNode, onClick?: () => void, disabled?: boolean, 'data-testid'?: string
   }) => <button data-testid={testId} onClick={onClick} disabled={disabled}>{children}</button>,
@@ -61,7 +63,7 @@ afterEach(() => { cleanup() })
 
 function makeConflictResolution(overrides: Partial<UseConflictResolutionResult> = {}): UseConflictResolutionResult {
   const conflicts: ConflictEntity[] = [
-    { id: 'r1', kind: 'request', name: 'Find pet', ours: { id: 'r1', name: 'Ours name' } as never, theirs: { id: 'r1', name: 'Theirs name' } as never, base: null }
+    { id: 'r1', kind: 'request', name: 'Find pet', ours: { id: 'r1', name: 'Ours name' } as never, theirs: { id: 'r1', name: 'Theirs name' } as never, base: null, pathSegments: ['Petstore', 'Pets'] }
   ]
   return {
     conflicts,
@@ -88,6 +90,13 @@ describe('GitConflictResolutionModal', () => {
     expect(readOnlyPanels).toHaveLength(2)
     expect(readOnlyPanels.map((el) => el.textContent)).toEqual(['r1:Ours name', 'r1:Theirs name'])
     expect(screen.getByTestId('mock-panel-editable').textContent).toBe('r1:Resolved name')
+  })
+
+  it('shows the identity band: ONE plain breadcrumb ending with the conflicting entity itself', () => {
+    render(
+      <GitConflictResolutionModal isOpen conflictResolution={makeConflictResolution()} onClose={vi.fn()} onFinish={vi.fn()} />
+    )
+    expect(screen.getByTestId('git-conflict-entity-breadcrumb').textContent).toBe('Petstore / Pets / Find pet')
   })
 
   it('calls onClose from the Cancel button', () => {
@@ -130,6 +139,7 @@ describe('GitConflictResolutionModal', () => {
         id: 'f1',
         kind: 'folder',
         name: 'My Folder',
+        pathSegments: [],
         ours: { id: 'f1', name: 'My Folder', notes: 'ours', tags: [], configuration: {}, items: [] } as never,
         theirs: { id: 'f1', name: 'My Folder', notes: 'theirs', tags: [], configuration: {}, items: [] } as never,
         base: null

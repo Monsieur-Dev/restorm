@@ -2383,6 +2383,7 @@
     "conflictResolvedTitle": "Conflito resolvido",
     "conflictResolvedBody": "O seu conflito de merge foi resolvido e submetido.",
     "conflictResolutionTitle": "Resolver conflitos",
+    "conflictEntityPath": "Localização do item em conflito",
     "conflictCancel": "Cancelar",
     "conflictFinish": "Concluir",
     "conflictReadOnlyEntityNotice": "Este tipo de entidade não pode ser editado aqui. Escolha acima a sua versão ou a deles.",

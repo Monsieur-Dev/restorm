@@ -2383,6 +2383,7 @@
     "conflictResolvedTitle": "Ristiriita ratkaistu",
     "conflictResolvedBody": "Yhdistämisristiriitasi on ratkaistu ja committoitu.",
     "conflictResolutionTitle": "Ratkaise ristiriidat",
+    "conflictEntityPath": "Ristiriidassa olevan kohteen sijainti",
     "conflictCancel": "Peruuta",
     "conflictFinish": "Valmis",
     "conflictReadOnlyEntityNotice": "Tätä entiteettityyppiä ei voi muokata tässä. Valitse yllä oma tai heidän versionsa.",

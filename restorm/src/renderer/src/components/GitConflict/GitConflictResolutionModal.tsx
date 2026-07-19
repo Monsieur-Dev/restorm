@@ -1,11 +1,13 @@
 import React, { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Modal, Button, ConflictResolutionView } from 'electron-core-ui/renderer'
+import { Modal, Button, Breadcrumb, ConflictResolutionView } from 'electron-core-ui/renderer'
 import type { UseConflictResolutionResult } from '../../hooks/useConflictResolution'
 import { ConflictEntityPanel } from './ConflictEntityPanel'
 import { ConflictQuickConfigBand } from './ConflictQuickConfigBand'
 import { computeEntityFieldDiff, readQuickConfigs } from '../../services/conflictFieldDiff'
-import type { FolderItem } from '../../../../shared/types/folderTypes'
+import { isRequest, type FolderItem } from '../../../../shared/types/folderTypes'
+import { RegistryBadge } from '../common/RegistryBadge'
+import { requestBadgeId } from '../../utils/badgeUtils'
 
 /** Which side each conflicting quick-config currently resolves to: an explicit
  * per-config pick wins; otherwise it's derived from the resolved entity's
@@ -33,6 +35,10 @@ function deriveCurrentSides(
  * panel fills the remaining height. */
 const panelWithBandStyle: React.CSSProperties = { display: 'flex', flexDirection: 'column', height: '100%' }
 const panelBodyStyle: React.CSSProperties = { flex: 1, minHeight: 0 }
+/** The identity band above the columns: WHICH entity is being resolved —
+ * ONE plain (read-only) breadcrumb whose last item is the entity itself,
+ * badge as its prefix, so path and name sit flush on a single line. */
+const entityBandStyle: React.CSSProperties = { display: 'flex', alignItems: 'center', padding: '4px 12px 8px', overflow: 'hidden', whiteSpace: 'nowrap' }
 
 export interface GitConflictResolutionModalProps {
   isOpen: boolean
@@ -80,6 +86,9 @@ export const GitConflictResolutionModal: React.FC<GitConflictResolutionModalProp
   const sharedTabId = sharedTab !== null && sharedTab.conflictId === selectedConflictId ? sharedTab.tabId : null
   const effectiveTabId = sharedTabId ?? activeFieldDiff?.preselectTabId ?? 'request'
 
+  const selectedConflict = conflicts.find((c) => c.id === selectedConflictId)
+  const ancestorSegments = selectedConflict?.pathSegments ?? []
+
   return (
     <Modal
       isOpen={isOpen}
@@ -91,6 +100,26 @@ export const GitConflictResolutionModal: React.FC<GitConflictResolutionModalProp
         * Annuler/Terminer row must sit at the BOTTOM edge of the modal, not
         * float mid-air under the columns. */}
       <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
+        {selectedConflict && (
+          <div style={entityBandStyle} data-testid="git-conflict-entity-band">
+            <Breadcrumb
+              items={[
+                ...ancestorSegments.map((label, index) => ({ id: `ancestor-${index}`, label })),
+                {
+                  id: 'conflict-entity',
+                  label: selectedConflict.name,
+                  ...(isRequest(selectedConflict.ours)
+                    ? { prefix: <RegistryBadge badgeId={requestBadgeId(selectedConflict.ours)} /> }
+                    : {})
+                }
+              ]}
+              plain
+              showRoot
+              ariaLabel={t('git.conflictEntityPath')}
+              data-testid="git-conflict-entity-breadcrumb"
+            />
+          </div>
+        )}
         <div style={{ flex: 1, minHeight: 0 }}>
           <ConflictResolutionView
             conflicts={conflicts.map((conflict) => ({ id: conflict.id, label: conflict.name }))}

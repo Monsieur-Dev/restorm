@@ -2383,6 +2383,7 @@
     "conflictResolvedTitle": "Ütközés feloldva",
     "conflictResolvedBody": "Az összefésülési ütközés fel lett oldva és commitolva.",
     "conflictResolutionTitle": "Ütközések feloldása",
+    "conflictEntityPath": "Az ütköző elem helye",
     "conflictCancel": "Mégse",
     "conflictFinish": "Befejezés",
     "conflictReadOnlyEntityNotice": "Ez az entitástípus itt nem szerkeszthető. Fent válassza a saját vagy az ő verziójukat.",

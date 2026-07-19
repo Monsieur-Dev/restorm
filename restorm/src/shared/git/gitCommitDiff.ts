@@ -27,18 +27,20 @@ export function kindOf(item: FolderItem): GitEntityKind {
  * model (`gitConflictModel.ts`, which needs the actual `FolderItem` to
  * hand to an entity panel).
  */
-export function flattenEntities(items: FolderItem[]): Map<string, { kind: GitEntityKind, name: string, item: FolderItem }> {
-  const out = new Map<string, { kind: GitEntityKind, name: string, item: FolderItem }>()
-  const walk = (nodes: FolderItem[]): void => {
+export function flattenEntities(items: FolderItem[]): Map<string, { kind: GitEntityKind, name: string, item: FolderItem, path: string[] }> {
+  const out = new Map<string, { kind: GitEntityKind, name: string, item: FolderItem, path: string[] }>()
+  const walk = (nodes: FolderItem[], ancestors: string[]): void => {
     for (const item of nodes) {
-      out.set(item.id, { kind: kindOf(item), name: item.name, item })
+      // `path` = the ANCESTOR names, root-first, self excluded — the
+      // conflict modal's breadcrumb band is the consumer.
+      out.set(item.id, { kind: kindOf(item), name: item.name, item, path: ancestors })
       const children = (item as FolderItem & { items?: FolderItem[] }).items
       if (children && children.length > 0) {
-        walk(children)
+        walk(children, [...ancestors, item.name])
       }
     }
   }
-  walk(items)
+  walk(items, [])
   return out
 }
 

@@ -43,12 +43,14 @@ function stubGitApi(overrides: Partial<{
   getConflictCommitTimestamps: ReturnType<typeof vi.fn>
   writeResolvedConflict: ReturnType<typeof vi.fn>
   commit: ReturnType<typeof vi.fn>
+  push: ReturnType<typeof vi.fn>
   abortMerge: ReturnType<typeof vi.fn>
 }> = {}): {
   getConflictVersions: ReturnType<typeof vi.fn>
   getConflictCommitTimestamps: ReturnType<typeof vi.fn>
   writeResolvedConflict: ReturnType<typeof vi.fn>
   commit: ReturnType<typeof vi.fn>
+  push: ReturnType<typeof vi.fn>
   abortMerge: ReturnType<typeof vi.fn>
 } {
   const api = {
@@ -58,6 +60,7 @@ function stubGitApi(overrides: Partial<{
     getConflictCommitTimestamps: overrides.getConflictCommitTimestamps ?? vi.fn().mockResolvedValue({ ours: null, theirs: null }),
     writeResolvedConflict: overrides.writeResolvedConflict ?? vi.fn().mockResolvedValue(undefined),
     commit: overrides.commit ?? vi.fn().mockResolvedValue({ success: true, commit: 'abc123' }),
+    push: overrides.push ?? vi.fn().mockResolvedValue({ success: true }),
     abortMerge: overrides.abortMerge ?? vi.fn().mockResolvedValue(undefined)
   }
   ;(window as unknown as { api: unknown }).api = { git: api }
@@ -135,7 +138,10 @@ describe('useGitPullConflict', () => {
     expect(yamlText).toContain('https://theirs.example.com')
 
     expect(api.commit).toHaveBeenCalledWith('/proj', 'git.conflictResolvedCommitMessage')
-    expect(toasterPushMock).toHaveBeenCalledWith('app', { title: 'git.conflictResolvedTitle', body: 'git.conflictResolvedBody' })
+    // Commit+push is atomic: the merge commit must not strand the repo
+    // "ahead" with a push pastille the user never asked for.
+    expect(api.push).toHaveBeenCalledWith('/proj')
+    expect(toasterPushMock).toHaveBeenCalledWith('app', { title: 'git.conflictResolvedTitle', body: 'git.conflictResolvedBody', durationMs: 5000 })
     expect(result.current.isOpen).toBe(false)
   })
 

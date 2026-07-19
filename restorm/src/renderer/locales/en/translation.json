@@ -2383,6 +2383,7 @@
     "conflictResolvedTitle": "Conflict resolved",
     "conflictResolvedBody": "Your merge conflict was resolved and committed.",
     "conflictResolutionTitle": "Resolve conflicts",
+    "conflictEntityPath": "Location of the conflicting item",
     "conflictCancel": "Cancel",
     "conflictFinish": "Finish",
     "conflictReadOnlyEntityNotice": "This entity type can't be edited here. Pick your version or theirs above.",

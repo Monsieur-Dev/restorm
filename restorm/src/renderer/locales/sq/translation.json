@@ -2383,6 +2383,7 @@
     "conflictResolvedTitle": "Konflikti u zgjidh",
     "conflictResolvedBody": "Konflikti juaj i bashkimit u zgjidh dhe u bë commit.",
     "conflictResolutionTitle": "Zgjidh konfliktet",
+    "conflictEntityPath": "Vendndodhja e artikullit në konflikt",
     "conflictCancel": "Anulo",
     "conflictFinish": "Përfundo",
     "conflictReadOnlyEntityNotice": "Ky lloj entiteti nuk mund të modifikohet këtu. Zgjidhni më lart versionin tuaj ose të tyre.",

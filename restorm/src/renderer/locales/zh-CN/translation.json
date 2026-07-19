@@ -2382,6 +2382,7 @@
     "conflictResolvedTitle": "冲突已解决",
     "conflictResolvedBody": "您的合并冲突已解决并提交。",
     "conflictResolutionTitle": "解决冲突",
+    "conflictEntityPath": "冲突项的位置",
     "conflictCancel": "取消",
     "conflictFinish": "完成",
     "conflictReadOnlyEntityNotice": "此实体类型无法在此处编辑。请在上方选择你的版本或他们的版本。",
