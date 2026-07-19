@@ -1,0 +1,114 @@
+/* Side-by-side column layout for the conflict-resolution shell. The panels
+ * (conflict list, your version, server version, resolved) sit in a single
+ * horizontal row so the three versions can be compared at a glance, instead
+ * of being stacked vertically. Each column owns its header and a body that
+ * fills the remaining height.
+ *
+ * INVARIANT — the column body is a plain flex container, NOT an ECUI
+ * `ScrollableElement`. The injected panels already fill height and scroll
+ * internally via their OWN ECUI scrollables (the request/folder tab-views'
+ * section split-views + KV tables), so per-column independent scrolling is
+ * already delivered and no NATIVE scrollbar is introduced here — which is the
+ * actual intent of the "use ScrollableElement, not native overflow" rule.
+ * Wrapping a height:100% self-filling panel in an outer ScrollableElement
+ * would break its flex chain (dead space / double scrollbar), so we
+ * deliberately don't. */
+
+.conflict-resolution-view {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+}
+
+.conflict-resolution-view-columns {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+}
+
+.conflict-resolution-column {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+  box-sizing: border-box;
+  border-left: 1px solid var(--panel-border);
+}
+
+.conflict-resolution-column:first-child {
+  border-left: none;
+}
+
+/* The three version columns share the width equally; the optional conflict
+ * list is a narrower master-detail sidebar (only present with >1 conflict). */
+.conflict-resolution-column--version {
+  flex: 1 1 0;
+}
+
+.conflict-resolution-column--list {
+  flex: 0 0 220px;
+  min-width: 180px;
+}
+
+.conflict-resolution-column-header {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 2px 8px;
+  min-height: 26px;
+  box-sizing: border-box;
+  color: var(--foreground);
+  background-color: var(--sideBarSectionHeader-background);
+  font-size: 11px;
+  text-transform: uppercase;
+  font-weight: bold;
+  letter-spacing: 0.05em;
+  user-select: none;
+}
+
+.conflict-resolution-column-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.conflict-resolution-column-actions {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.conflict-resolution-column-body {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  position: relative;
+}
+
+/* Whatever the render prop returns fills the body so its own flex chain and
+ * internal scrolling resolve against a real height (no dead space). */
+.conflict-resolution-column-body > * {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+}
+
+.conflict-resolution-view-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  padding: 8px;
+  text-align: center;
+  color: var(--descriptionForeground);
+}

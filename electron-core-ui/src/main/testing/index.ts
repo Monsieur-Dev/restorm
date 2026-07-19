@@ -227,6 +227,9 @@ export {
   splitViewSashSelector
 } from './splitViewSelectors'
 
+export { conflictResolutionPanelSelector } from './conflictResolutionSelectors'
+export type { ConflictResolutionSide } from './conflictResolutionSelectors'
+
 export {
   markdownViewerRootSelector,
   markdownViewerCodeBlockSelector,

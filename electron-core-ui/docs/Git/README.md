@@ -196,11 +196,18 @@ merge is correct/lossless today, just not interactively resolvable — the
 live quick-config UI isn't mounted inside this view at all — deferred to
 a follow-up ticket by design).
 
-`ConflictResolutionView` lays out, left to right: an optional conflict
-LIST (master-detail, shown only when there's more than one conflicting
-entity — built on `SplitView`/`Pane` + `ListView`), then three fixed
-panels — user/ours, server/theirs, resolved — each populated entirely by a
-host-supplied render prop:
+`ConflictResolutionView` lays out, left to right, a row of side-by-side
+COLUMNS so the versions can be compared at a glance: an optional conflict
+LIST (master-detail, a narrower sidebar column shown only when there's more
+than one conflicting entity — a `ListView`), then three equal-width content
+columns — user/ours, server/theirs, resolved — each populated entirely by a
+host-supplied render prop. Each column carries its own header (title +, on
+the user/server columns, the "use this version" action) and a body that
+fills the remaining height; a column that overflows scrolls independently of
+its neighbours (the injected panels fill height and scroll via their own
+ECUI scrollables). Each column exposes a stable side-based test id —
+`<root>-panel-{user|server|resolved|list}` — for tests to scope into (the
+`conflictResolutionPanelSelector` testing helper builds it):
 
 ```tsx
 import { ConflictResolutionView } from 'electron-core-ui/renderer'
@@ -245,7 +252,12 @@ pointer events — so the panel can't be mutated by mouse OR keyboard.
 Wheel/trackpad scrolling still works (`inert` doesn't gate scrolling), so a
 tall panel stays browsable; text selection and interaction are intentionally
 off. A scoped `pointer-events: none` CSS rule is retained as a fallback for
-any environment that doesn't honour `inert`. restorm's actual dispatcher
+any environment that doesn't honour `inert`. Because `inert` also blocks the
+click that toggles a collapsible section, a KV section (headers/params/path
+params) that DIFFERS between the two sides starts EXPANDED in every panel —
+the host reads the field-diff and seeds those sections open, so the user sees
+the line-by-line differences on the read-only panels without needing a click
+they can't make. restorm's actual dispatcher
 (`restorm/src/renderer/src/components/GitConflict/ConflictEntityPanel.tsx`)
 picks the right panel per entity kind — folder / environment-folder /
 scenario / every request protocol (HTTP, auth, GraphQL, gRPC, SOAP,
@@ -378,8 +390,10 @@ src/renderer/hooks/useGitPullAvailableToast.tsx   — "a newer version exists" t
 src/shared/CommitMessageEngine.ts                 — renderCommitMessage (generic Handlebars render, cached per template; exported from BOTH main + renderer)
 src/renderer/components/PushModal/PushModal.tsx   — the non-scoped commit + push UI (fully controlled)
 src/renderer/components/Settings/languages.ts     — AVAILABLE_LANGUAGES with per-language emoji flag (shared by the UI-language switcher + PushModal; pickers render "{flag} {endonym}")
-src/renderer/components/ConflictResolutionView/ConflictResolutionView.tsx — the 4-panel shell (list + user/server/resolved)
+src/renderer/components/ConflictResolutionView/ConflictResolutionView.tsx — the side-by-side columns shell (optional list + user/server/resolved)
+src/renderer/components/ConflictResolutionView/conflictResolutionView.css — the columns layout styles
 src/renderer/components/ConflictResolutionView/fieldDiffStyle.ts          — the diff-highlight style helper
+src/main/testing/conflictResolutionSelectors.ts                          — conflictResolutionPanelSelector (scope a test into a column by side)
 src/renderer/locales/*/translation.json          — `git.cliMissing.*` + `git.pullAvailable.*` + `pushModal.*` + `conflictResolution.*` (all 27 locales)
 ```
 

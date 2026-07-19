@@ -49,6 +49,38 @@ describe('ConflictResolutionView', () => {
     expect(screen.getByTestId('resolved-content')).toBeTruthy()
   })
 
+  it('lays the panels out as side-by-side columns (a single columns row, list absent for one conflict)', () => {
+    const { container } = render(
+      <ConflictResolutionView
+        conflicts={SINGLE_CONFLICT}
+        selectedConflictId="r1"
+        onSelectConflict={vi.fn()}
+        renderUserPanel={() => <div data-testid="user-content" />}
+        renderServerPanel={() => <div data-testid="server-content" />}
+        renderResolvedPanel={() => <div data-testid="resolved-content" />}
+      />
+    )
+    expect(screen.getByTestId('conflict-resolution-view-columns')).toBeTruthy()
+    // 3 version columns, no list column, for a single conflict.
+    expect(container.querySelectorAll('.conflict-resolution-column--version')).toHaveLength(3)
+    expect(container.querySelectorAll('.conflict-resolution-column--list')).toHaveLength(0)
+  })
+
+  it('adds a fourth (list) column when there is more than one conflict', () => {
+    const { container } = render(
+      <ConflictResolutionView
+        conflicts={CONFLICTS}
+        selectedConflictId="r1"
+        onSelectConflict={vi.fn()}
+        renderUserPanel={() => <div />}
+        renderServerPanel={() => <div />}
+        renderResolvedPanel={() => <div />}
+      />
+    )
+    expect(container.querySelectorAll('.conflict-resolution-column--list')).toHaveLength(1)
+    expect(container.querySelectorAll('.conflict-resolution-column--version')).toHaveLength(3)
+  })
+
   it('shows the conflict list master-detail panel ONLY when there is more than one conflict', () => {
     render(
       <ConflictResolutionView

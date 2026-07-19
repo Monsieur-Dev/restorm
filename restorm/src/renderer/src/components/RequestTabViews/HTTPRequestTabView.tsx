@@ -2,6 +2,7 @@ import React, { type CSSProperties, useEffect, useMemo, useRef, useState, useCal
 import { useRequestReset } from '../../hooks/useRequestReset'
 import { useTransportReplaced } from '../../hooks/useTransportReplaced'
 import { getRequestPanelState, setRequestPanelCollapsed } from '../../services/requestPanelStateStore'
+import { computeInitialPanelCollapsed } from './conflictPanelExpansion'
 import { useTranslation } from 'react-i18next'
 import { useHandlebarsHelpers } from '../../hooks/useHandlebarsHelpers'
 import {
@@ -240,12 +241,16 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
     body: boolean
   }>(() => {
     const seed = (projectUuid ? getRequestPanelState(projectUuid, request.id) : undefined) ?? {}
-    return {
-      headers: typeof seed['headers'] === 'boolean' ? seed['headers'] : request.headers.length === 0,
-      pathParams: typeof seed['pathParams'] === 'boolean' ? seed['pathParams'] : (request.pathParams?.length ?? 0) === 0,
-      params: typeof seed['params'] === 'boolean' ? seed['params'] : request.params.length === 0,
-      body: typeof seed['body'] === 'boolean' ? seed['body'] : false
-    }
+    return computeInitialPanelCollapsed(
+      seed,
+      {
+        headers: request.headers.length === 0,
+        pathParams: (request.pathParams?.length ?? 0) === 0,
+        params: request.params.length === 0,
+        body: false
+      },
+      conflictFieldDiff?.fields
+    )
   })
   const handlePanelCollapsedChange = useCallback((arr: boolean[]) => {
     // SplitView fires this with the array in pane render order:

@@ -3,7 +3,7 @@ import { execSync } from 'child_process'
 import { existsSync } from 'fs'
 import { dirname, join } from 'path'
 import type { ElectronApplication, Locator, Page } from '@playwright/test'
-import { configureNextOpenDialogForE2E, listViewRowSelectorByTitle, splitViewPaneSelectorByHeaderTitle } from 'electron-core-ui/testing'
+import { configureNextOpenDialogForE2E, listViewRowSelectorByTitle, conflictResolutionPanelSelector, type ConflictResolutionSide } from 'electron-core-ui/testing'
 import { test, expect, currentElectronApp } from '../../fixtures/git-integration.fixture'
 import { readSeedDocument, findEntity, setEntityField, gitCommit, gitPush, type SeedEntity } from '../../../helpers/gitSeedHelpers'
 import { gitEnv } from '../../../../integration/gitServerSeed'
@@ -46,15 +46,13 @@ function conflictRowByName(p: Page, name: string): Locator {
   return p.locator(listViewRowSelectorByTitle('conflict-resolution-view-list', name))
 }
 
-/** Scopes into one of the 3 conflict-resolution panes by its header title
- * ("Your version" / "Server version" / "Resolved") — `GitConflictResolutionModal`
- * renders the SAME entity view 3 times with IDENTICAL inner testids (the
- * panel content has no idea which side it's on), and the pane's OWN
- * generated testid embeds a positional index that shifts depending on
- * whether the conflict list is shown, so header text is the only stable
- * way to disambiguate. */
-function conflictPaneByTitle(p: Page, title: string): Locator {
-  return p.locator(splitViewPaneSelectorByHeaderTitle('conflict-resolution-view-split', title))
+/** Scopes into one of the conflict-resolution version columns by side —
+ * `GitConflictResolutionModal` renders the SAME entity view in all three
+ * columns with IDENTICAL inner testids (the panel content has no idea which
+ * side it's on), so the column's stable side-based testid is the only way to
+ * disambiguate. */
+function conflictPaneBySide(p: Page, side: ConflictResolutionSide): Locator {
+  return p.locator(conflictResolutionPanelSelector('conflict-resolution-view', side))
 }
 
 async function activateRequestSubTab(p: Page): Promise<void> {
@@ -215,7 +213,7 @@ Then('the conflicting folder\'s notes field is highlighted', async () => {
   // → request → scenario) — auto-selected on open, no row click needed.
   // `notesDiffers` also drives `BaseFolderView`'s default-tab logic, so the
   // Notes tab (holding the highlighted field) is already active.
-  const yourVersionPane = conflictPaneByTitle(p, 'Your version')
+  const yourVersionPane = conflictPaneBySide(p, 'user')
   const notesEditor = yourVersionPane.locator('[data-testid="folder-view-e2e-seed-folder-markdown-editor-notes"]')
   await expect(notesEditor).toBeVisible({ timeout: 10000 })
   const wrapper = notesEditor.locator('..')
@@ -232,7 +230,7 @@ When('I use the server\'s version of the request and tweak its URL', async () =>
   await conflictRowByName(p, 'Find pet by ID').click()
   await p.locator('[data-testid="conflict-resolution-view-use-server-version"]').click()
 
-  const resolvedPane = conflictPaneByTitle(p, 'Resolved')
+  const resolvedPane = conflictPaneBySide(p, 'resolved')
   const urlInput = resolvedPane.locator('[data-testid="http-request-url-input"]:visible').first()
   await expect(urlInput).toBeVisible({ timeout: 10000 })
   const viewport = urlInput.locator('.monaco-editor').first()
@@ -301,7 +299,7 @@ Then('the mock server\'s start button in the resolved panel is disabled', async 
   // could open a real mock server keyed by request.id while viewing a static
   // conflict snapshot). ECUI's Button renders an <a role="button"> with
   // `aria-disabled` (not a native `disabled`), so assert that attribute.
-  const resolvedPane = conflictPaneByTitle(p, 'Resolved')
+  const resolvedPane = conflictPaneBySide(p, 'resolved')
   const listenButton = resolvedPane.locator('[data-testid="http-server-listen-button"]')
   await expect(listenButton).toBeVisible({ timeout: 10000 })
   await expect(listenButton).toHaveAttribute('aria-disabled', 'true')

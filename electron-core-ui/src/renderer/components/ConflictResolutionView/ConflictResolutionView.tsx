@@ -1,9 +1,9 @@
 import React from 'react'
 import { useTranslation } from 'react-i18next'
-import { SplitView, Pane } from '../Panes/SplitView'
 import { ListView } from '../ListView'
 import type { ListViewItemData, ListViewItemEventPayload } from '../ListView'
 import { Button } from '../Button'
+import './conflictResolutionView.css'
 
 export interface ConflictListEntry {
   id: string
@@ -11,12 +11,12 @@ export interface ConflictListEntry {
 }
 
 export interface ConflictResolutionViewProps {
-  /** Every conflicting entity in the pull. The list panel (leftmost) is
+  /** Every conflicting entity in the pull. The list column (leftmost) is
    * shown ONLY when there is more than one — a single conflict skips
-   * straight to the 3 content panels. */
+   * straight to the 3 content columns. */
   conflicts: ConflictListEntry[]
   /** `null` before the user has picked one (only possible while the list
-   * panel is showing, i.e. `conflicts.length > 1`). */
+   * column is showing, i.e. `conflicts.length > 1`). */
   selectedConflictId: string | null
   onSelectConflict: (id: string) => void
   /** Renders the user/ours panel content for the given conflict — the
@@ -38,18 +38,20 @@ export interface ConflictResolutionViewProps {
 }
 
 /**
- * The generic 4-panel conflict-resolution shell: a master-detail conflict
- * LIST (only rendered when there's more than one conflict) driving three
- * side-by-side content panels — user/ours (read-only), server/theirs
- * (read-only), resolved (editable). This component owns none of the
- * entity-specific rendering: `renderUserPanel`/`renderServerPanel`/
- * `renderResolvedPanel` are host-injected (restorm plugs in its
- * entity→tab-view mapping — request/scenario/folder/environment-folder/…
- * — per `docs/Git/README.md`'s ECUI/restorm split). Selecting a
- * conflict-list row and the two "use this version" buttons are the only
- * interactions this component itself handles; everything else (field-
- * level diff highlighting, what "use this version" actually copies) is
- * the host's responsibility.
+ * The generic conflict-resolution shell: an optional master-detail conflict
+ * LIST (only rendered when there's more than one conflict) followed by three
+ * side-by-side content columns — user/ours (read-only), server/theirs
+ * (read-only), resolved (editable). Laying the versions out as COLUMNS lets
+ * the user compare them at a glance; each column scrolls independently of its
+ * neighbours (the injected panels fill height and scroll via their own ECUI
+ * scrollables). This component owns none of the entity-specific rendering:
+ * `renderUserPanel`/`renderServerPanel`/`renderResolvedPanel` are host-injected
+ * (restorm plugs in its entity→tab-view mapping — request/scenario/folder/
+ * environment-folder/… — per `docs/Git/README.md`'s ECUI/restorm split).
+ * Selecting a conflict-list row and the two "use this version" buttons are the
+ * only interactions this component itself handles; everything else (field-
+ * level diff highlighting, what "use this version" actually copies) is the
+ * host's responsibility.
  */
 export const ConflictResolutionView: React.FC<ConflictResolutionViewProps> = ({
   conflicts,
@@ -84,51 +86,65 @@ export const ConflictResolutionView: React.FC<ConflictResolutionViewProps> = ({
     )
   }
 
+  const renderVersionColumn = (
+    side: 'user' | 'server' | 'resolved',
+    title: string,
+    renderPanel: (conflictId: string) => React.ReactNode,
+    action?: React.ReactNode
+  ): React.ReactNode => (
+    <div
+      className="conflict-resolution-column conflict-resolution-column--version"
+      data-testid={`${dataTestId}-panel-${side}`}
+    >
+      <div className="conflict-resolution-column-header">
+        <span className="conflict-resolution-column-title">{title}</span>
+        {action ? <div className="conflict-resolution-column-actions">{action}</div> : null}
+      </div>
+      <div className="conflict-resolution-column-body">
+        {selectedConflictId ? renderPanel(selectedConflictId) : (
+          <EmptySelectionState dataTestId={`${dataTestId}-${side}-empty`} />
+        )}
+      </div>
+    </div>
+  )
+
   return (
     <div className="conflict-resolution-view" data-testid={dataTestId} style={{ width: '100%', height: '100%' }}>
-      {/* `Pane` is a declarative marker only (renders null; `SplitView`
-       * reads its children's props) — it has no `data-testid` of its own,
-       * so per-panel testids live on the CONTENT below instead. */}
-      <SplitView orientation="vertical" data-testid={`${dataTestId}-split`} style={{ width: '100%', height: '100%' }}>
+      <div className="conflict-resolution-view-columns" data-testid={`${dataTestId}-columns`}>
         {showList && (
-          <Pane title={t('conflictResolution.listTitle')} collapsible={false} minSize={180}>
-            <ListView
-              items={listItems}
-              ariaLabel={t('conflictResolution.listTitle')}
-              selectedIds={selectedConflictId ? [selectedConflictId] : []}
-              onItemClick={handleItemClick}
-              data-testid={`${dataTestId}-list`}
-            />
-          </Pane>
+          <div className="conflict-resolution-column conflict-resolution-column--list" data-testid={`${dataTestId}-panel-list`}>
+            <div className="conflict-resolution-column-header">
+              <span className="conflict-resolution-column-title">{t('conflictResolution.listTitle')}</span>
+            </div>
+            <div className="conflict-resolution-column-body">
+              <ListView
+                items={listItems}
+                ariaLabel={t('conflictResolution.listTitle')}
+                selectedIds={selectedConflictId ? [selectedConflictId] : []}
+                onItemClick={handleItemClick}
+                data-testid={`${dataTestId}-list`}
+              />
+            </div>
+          </div>
         )}
-        <Pane
-          title={t('conflictResolution.userTitle')}
-          collapsible={false}
-          minSize={240}
-          alwaysShowHeaderActions
-          headerActions={useVersionAction(onUseUserVersion, 'use-user-version')}
-        >
-          {selectedConflictId ? renderUserPanel(selectedConflictId) : (
-            <EmptySelectionState dataTestId={`${dataTestId}-user-empty`} />
-          )}
-        </Pane>
-        <Pane
-          title={t('conflictResolution.serverTitle')}
-          collapsible={false}
-          minSize={240}
-          alwaysShowHeaderActions
-          headerActions={useVersionAction(onUseServerVersion, 'use-server-version')}
-        >
-          {selectedConflictId ? renderServerPanel(selectedConflictId) : (
-            <EmptySelectionState dataTestId={`${dataTestId}-server-empty`} />
-          )}
-        </Pane>
-        <Pane title={t('conflictResolution.resolvedTitle')} collapsible={false} minSize={240}>
-          {selectedConflictId ? renderResolvedPanel(selectedConflictId) : (
-            <EmptySelectionState dataTestId={`${dataTestId}-resolved-empty`} />
-          )}
-        </Pane>
-      </SplitView>
+        {renderVersionColumn(
+          'user',
+          t('conflictResolution.userTitle'),
+          renderUserPanel,
+          useVersionAction(onUseUserVersion, 'use-user-version')
+        )}
+        {renderVersionColumn(
+          'server',
+          t('conflictResolution.serverTitle'),
+          renderServerPanel,
+          useVersionAction(onUseServerVersion, 'use-server-version')
+        )}
+        {renderVersionColumn(
+          'resolved',
+          t('conflictResolution.resolvedTitle'),
+          renderResolvedPanel
+        )}
+      </div>
     </div>
   )
 }
@@ -136,10 +152,7 @@ export const ConflictResolutionView: React.FC<ConflictResolutionViewProps> = ({
 const EmptySelectionState: React.FC<{ dataTestId: string }> = ({ dataTestId }) => {
   const { t } = useTranslation()
   return (
-    <div
-      data-testid={dataTestId}
-      style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'var(--descriptionForeground)' }}
-    >
+    <div className="conflict-resolution-view-empty" data-testid={dataTestId}>
       {t('conflictResolution.selectAConflict')}
     </div>
   )
