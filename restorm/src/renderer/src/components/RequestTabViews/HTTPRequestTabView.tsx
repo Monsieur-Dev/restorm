@@ -1002,6 +1002,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
             persistenceId={`http-headers:${request.id}`}
             data-testid="http-request-headers-table"
             disabled={configLocked}
+            {...(conflictFieldDiff?.rowDiffs?.['headers'] ? { highlightRowKeys: conflictFieldDiff.rowDiffs['headers'] } : {})}
           />
           </div>
         </Pane>
@@ -1037,6 +1038,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
             persistenceId={`http-path-params:${request.id}`}
             data-testid="http-request-path-params-table"
             disabled={configLocked}
+            {...(conflictFieldDiff?.rowDiffs?.['pathParams'] ? { highlightRowKeys: conflictFieldDiff.rowDiffs['pathParams'] } : {})}
           />
           </div>
         </Pane>
@@ -1072,6 +1074,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
             persistenceId={`http-query-params:${request.id}`}
             data-testid="http-request-query-params-table"
             disabled={configLocked}
+            {...(conflictFieldDiff?.rowDiffs?.['params'] ? { highlightRowKeys: conflictFieldDiff.rowDiffs['params'] } : {})}
           />
           </div>
         </Pane>

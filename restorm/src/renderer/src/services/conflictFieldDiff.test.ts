@@ -184,6 +184,7 @@ describe('computeEntityFieldDiff', () => {
     const theirs = makeHTTPRequest({ url: 'https://theirs.example.com/pets' })
     expect(computeEntityFieldDiff('request', ours, theirs)).toEqual({
       fields: { url: true, method: false, headers: false, params: false, pathParams: false, body: false, notes: false, quickConfigs: false },
+      rowDiffs: { headers: [], params: [], pathParams: [] },
       preselectTabId: 'request'
     })
   })
@@ -202,6 +203,32 @@ describe('computeEntityFieldDiff', () => {
     const ours = makeHTTPRequest({ notes: 'a' })
     const theirs = makeHTTPRequest({ notes: 'b' })
     expect(computeEntityFieldDiff('request', ours, theirs)?.preselectTabId).toBe('notes')
+  })
+
+  it('reports the exact KV row keys that differ (value change, one-sided, ignoring id churn + reorder)', () => {
+    const ours = makeHTTPRequest({
+      headers: [
+        { id: 'id-a', key: 'Accept', value: 'application/json' } as never,
+        { id: 'id-b', key: 'X-Only-Ours', value: 'keep' } as never,
+        { id: 'id-c', key: 'Stable', value: 'same' } as never
+      ]
+    })
+    const theirs = makeHTTPRequest({
+      headers: [
+        // reordered + fresh ids, Stable unchanged → not flagged
+        { id: 'id-z', key: 'Stable', value: 'same' } as never,
+        { id: 'id-d', key: 'Accept', value: 'text/plain' } as never, // value changed → flagged
+        { id: 'id-e', key: 'X-Only-Theirs', value: 'new' } as never  // one-sided → flagged
+      ]
+    })
+    const rows = computeEntityFieldDiff('request', ours, theirs)?.rowDiffs?.['headers'] ?? []
+    expect([...rows].sort()).toEqual(['Accept', 'X-Only-Ours', 'X-Only-Theirs'])
+  })
+
+  it('reports no differing rows when the KV lists match (even reordered / re-id-ed)', () => {
+    const ours = makeHTTPRequest({ params: [{ id: 'p1', key: 'a', value: '1' } as never, { id: 'p2', key: 'b', value: '2' } as never] })
+    const theirs = makeHTTPRequest({ params: [{ id: 'p9', key: 'b', value: '2' } as never, { id: 'p8', key: 'a', value: '1' } as never] })
+    expect(computeEntityFieldDiff('request', ours, theirs)?.rowDiffs?.['params']).toEqual([])
   })
 
   it('adds auth-only fields and preselects the configuration tab when they differ (request tab identical)', () => {

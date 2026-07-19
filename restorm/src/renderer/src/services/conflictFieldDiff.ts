@@ -1,3 +1,4 @@
+import type { KeyValue } from '../../../shared/types/baseTypes'
 import type { Folder, FolderItem } from '../../../shared/types/folderTypes'
 import { isAnyFolder, isRequest } from '../../../shared/types/folderTypes'
 import type { AuthenticationRequest, HTTPRequest, Request } from '../../../shared/types/requests'
@@ -25,6 +26,12 @@ import { stripIds } from '../utils/serialization'
 export interface EntityFieldDiff {
   fields: Record<string, boolean>
   preselectTabId?: string
+  /** Per-row diff for the KV sections (headers/params/pathParams): the row
+   * KEYS whose value/enabled/description differ between the two sides, or that
+   * exist on only one side. Lets the conflict panel highlight the exact rows
+   * that differ (not just border the whole section). Compared by key, so a
+   * pure reorder flags nothing here. Only populated for request entities. */
+  rowDiffs?: Record<string, string[]>
   /** Names of the saved project quick-configs that exist on BOTH sides under
    * the same name but differ in content — the ones the conflict modal
    * red-flags and offers an individual ours/theirs pick for. Empty/omitted
@@ -55,6 +62,31 @@ function computeFolderFieldDiff(ours: Folder, theirs: Folder): EntityFieldDiff {
  */
 function snapshotDiffers(a: unknown, b: unknown): boolean {
   return JSON.stringify(stripIds(a)) !== JSON.stringify(stripIds(b))
+}
+
+/**
+ * The row keys that differ between two KV lists: same id-agnostic value
+ * compare as `snapshotDiffers`, but per-row (keyed by the row's `key`) so the
+ * conflict panel can highlight the exact rows that changed. A key present on
+ * only one side counts as differing; a pure reorder (same keys, same values)
+ * does not. Duplicate keys within a list collapse to the last occurrence —
+ * acceptable for a highlight hint.
+ */
+function keyValueRowDiffKeys(ours: KeyValue[] | undefined, theirs: KeyValue[] | undefined): string[] {
+  const normalize = (rows: KeyValue[] | undefined): Map<string, string> => {
+    const map = new Map<string, string>()
+    for (const row of rows ?? []) {
+      map.set(row.key, JSON.stringify(stripIds({ value: row.value, enabled: row.enabled, description: row.description })))
+    }
+    return map
+  }
+  const oursByKey = normalize(ours)
+  const theirsByKey = normalize(theirs)
+  const diff: string[] = []
+  for (const key of new Set([...oursByKey.keys(), ...theirsByKey.keys()])) {
+    if (oursByKey.get(key) !== theirsByKey.get(key)) diff.push(key)
+  }
+  return diff
 }
 
 function isHTTPShaped(request: Request): request is HTTPRequest | AuthenticationRequest {
@@ -158,7 +190,12 @@ function computeRequestFieldDiff(ours: HTTPRequest | AuthenticationRequest, thei
     fields['expirationExpression'] = expirationExpression
     fields['authErrorCodes'] = authErrorCodes
   }
-  return { fields, ...(preselectTabId ? { preselectTabId } : {}) }
+  const rowDiffs: Record<string, string[]> = {
+    headers: keyValueRowDiffKeys(ours.headers, theirs.headers),
+    params: keyValueRowDiffKeys(ours.params, theirs.params),
+    pathParams: keyValueRowDiffKeys(ours.pathParams, theirs.pathParams)
+  }
+  return { fields, rowDiffs, ...(preselectTabId ? { preselectTabId } : {}) }
 }
 
 /** Identity/metadata fields that are never part of "the request config" —

@@ -287,13 +287,21 @@ collections store with no user click — the clone must never silently
 diverge from the ours/theirs/resolved snapshot the user is looking at.
 
 `conflictFieldDiff.ts` is restorm's field-diff computation half of AC#9:
-`computeEntityFieldDiff(kind, ours, theirs)` returns `{ fields, preselectTabId }`
-for kinds it knows how to diff, or `undefined` for scenarios (never, by
-design). `GitConflictResolutionModal` computes it ONCE per conflict (ours
-vs theirs) and passes the same result to all 3 panels via
+`computeEntityFieldDiff(kind, ours, theirs)` returns `{ fields, rowDiffs?,
+preselectTabId }` for kinds it knows how to diff, or `undefined` for scenarios
+(never, by design). `GitConflictResolutionModal` computes it ONCE per conflict
+(ours vs theirs) and passes the same result to all 3 panels via
 `ConflictEntityPanel`'s `fieldDiff` prop: the `fields` red-border map only
 applies in `readOnly` mode (user/server, per AC#4), while `preselectTabId`
-applies to every panel regardless of mode (AC#5).
+applies to every panel regardless of mode (AC#5). For HTTP/auth requests
+`rowDiffs` additionally names, per KV section (headers/params/pathParams),
+the exact row KEYS that differ (compared id-agnostically and order-agnostically)
+— `HTTPRequestTabView` forwards each section's keys to its `RestormKeyValueTable`
+as `highlightRowKeys`, which borders just those rows with `fieldDiffStyle`, so a
+one-row-in-twenty change is pinpointed instead of only bordering the whole
+section. A conflicting KV section also starts EXPANDED (via
+`computeInitialPanelCollapsed`) so those highlighted rows are visible without a
+click the inert read-only panel can't take.
 For folders/environment-folders this surfaces as `notesDiffers` +
 `defaultActiveTabId` passthrough props on `FolderView`/
 `EnvironmentFolderView` → `BaseFolderView`, which borders the notes editor

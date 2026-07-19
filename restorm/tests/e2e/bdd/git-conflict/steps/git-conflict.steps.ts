@@ -271,6 +271,65 @@ Then('my folder notes were kept, the request URL reflects my tweak, and the unto
 })
 
 // ---------------------------------------------------------------------------
+// Scenario — a KV-section conflict auto-expands + highlights the differing rows
+// ---------------------------------------------------------------------------
+
+Given('a remote has diverged on the request\'s headers', async ({ seedFreshRepo, cloneNamedRepo }) => {
+  activeRepoName = `git-conflict-headers-${Date.now()}`
+  localFilePath = await seedFreshRepo(activeRepoName)
+  localCloneDir = dirname(localFilePath)
+
+  // Same key changes value on both sides (a real conflict on `X-Trace`); a
+  // second header is identical on both sides (`X-Common`) — so exactly one of
+  // the two rows should light up.
+  setEntityField(localCloneDir, 'e2e-seed-request', 'headers', [
+    { key: 'X-Trace', value: 'ours' },
+    { key: 'X-Common', value: 'same' }
+  ])
+  gitCommit(localCloneDir, LOCAL_AUTHOR, 'My local edit to the request headers')
+
+  const collaboratorDir = await cloneNamedRepo(activeRepoName, 'git-conflict-headers-collaborator')
+  setEntityField(collaboratorDir, 'e2e-seed-request', 'headers', [
+    { key: 'X-Trace', value: 'theirs' },
+    { key: 'X-Common', value: 'same' }
+  ])
+  gitCommit(collaboratorDir, COLLABORATOR_AUTHOR, 'Collaborator edit to the request headers')
+  gitPush(collaboratorDir)
+})
+
+Then('the headers section is expanded in the your-version panel', async () => {
+  const p = requirePage()
+  // A collapsed pane renders no body, so a visible header key-input proves the
+  // conflicting section auto-expanded (it is otherwise unclickable — the panel
+  // is inert).
+  const keyInput = conflictPaneBySide(p, 'user').locator('[data-testid="http-request-headers-table-key-input"]').first()
+  await expect(keyInput).toBeVisible({ timeout: 10000 })
+})
+
+Then('the changed header row is highlighted but the unchanged one is not', async () => {
+  const p = requirePage()
+  const cells = await conflictPaneBySide(p, 'user')
+    .locator('[data-testid="http-request-headers-table-key-input"]')
+    .evaluateAll((els) =>
+      els.map((el) => {
+        const field = el.querySelector('input, textarea')
+        const value = field instanceof HTMLInputElement || field instanceof HTMLTextAreaElement ? field.value : ''
+        // The key-input's wrapper div carries the per-row diff border.
+        const borderColor = el.parentElement ? getComputedStyle(el.parentElement).borderColor : ''
+        return { value, borderColor }
+      })
+    )
+  const changed = cells.find((c) => c.value === 'X-Trace')
+  const unchanged = cells.find((c) => c.value === 'X-Common')
+  expect(changed, 'changed header row present').toBeTruthy()
+  expect(unchanged, 'unchanged header row present').toBeTruthy()
+  // A transparent border computes to rgba(0, 0, 0, 0); the diff border is a
+  // solid (non-transparent) colour.
+  expect(changed?.borderColor).not.toBe('rgba(0, 0, 0, 0)')
+  expect(unchanged?.borderColor).toBe('rgba(0, 0, 0, 0)')
+})
+
+// ---------------------------------------------------------------------------
 // Scenario — live-action controls disabled inside the conflict panel
 // ---------------------------------------------------------------------------
 

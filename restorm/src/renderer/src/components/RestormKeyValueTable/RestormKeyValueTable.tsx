@@ -2,6 +2,7 @@ import React, { useCallback, useRef, useEffect } from 'react'
 import {
   KeyValueTable,
   InputBox,
+  fieldDiffStyle,
   type KeyValueTableHandle,
   type KeyValueTableRow,
   type CellRendererProps,
@@ -41,6 +42,18 @@ export interface RestormKeyValueTableProps {
   /** Locks the whole table read-only — see the `KeyValueTable` doc for the
    * exact scope (toggle/delete/reorder disabled, cells forwarded `disabled`). */
   disabled?: boolean
+  /** Conflict-resolution row highlight: the KEYS of rows that differ from the
+   * other side. When provided, each matching row's key + value cells get the
+   * field-diff border (`fieldDiffStyle`). Left `undefined` outside the conflict
+   * view, in which case no per-cell wrapper is rendered at all. */
+  highlightRowKeys?: readonly string[]
+}
+
+/** Reserve a transparent 1px border on the cell so toggling the diff border on
+ * doesn't shift the row — same reserve-border trick the whole-section conflict
+ * wrapper uses. */
+function cellDiffStyle(differs: boolean): React.CSSProperties {
+  return { border: '1px solid transparent', borderRadius: 2, boxSizing: 'border-box', ...fieldDiffStyle(differs) }
 }
 
 const RestormKeyValueTableInner = React.forwardRef<KeyValueTableHandle, RestormKeyValueTableProps>((
@@ -51,10 +64,15 @@ const RestormKeyValueTableInner = React.forwardRef<KeyValueTableHandle, RestormK
     onRowsChange,
     persistenceId,
     'data-testid': dataTestId,
-    disabled = false
+    disabled = false,
+    highlightRowKeys
   },
   ref
 ) => {
+  // Conflict-view row highlight. `highlightActive` gates the extra per-cell
+  // wrapper so tables outside the conflict view render exactly as before.
+  const highlightActive = highlightRowKeys !== undefined
+  const highlightKeySet = React.useMemo(() => new Set(highlightRowKeys ?? []), [highlightRowKeys])
   // The type-pick menu offers enum / custom types from every API (env folder)
   // in the project, grouped per API — not just the request's nearest folder.
   const valueTypeGroups = useAllEnvValueTypeGroups()
@@ -186,16 +204,22 @@ const RestormKeyValueTableInner = React.forwardRef<KeyValueTableHandle, RestormK
 
   // Simple InputBox renderer for keys (no variable resolution needed for keys)
   const KeyCellRenderer = useCallback<React.FC<CellRendererProps>>(
-    ({ value, onChange, disabled: cellDisabled }) => (
-      <InputBox
-        value={value}
-        onChange={onChange}
-        options={{ type: 'text' }}
-        {...(dataTestId && { 'data-testid': `${dataTestId}-key-input` })}
-        disabled={cellDisabled ?? false}
-      />
-    ),
-    [dataTestId]
+    ({ value, onChange, disabled: cellDisabled }) => {
+      const cell = (
+        <InputBox
+          value={value}
+          onChange={onChange}
+          options={{ type: 'text' }}
+          {...(dataTestId && { 'data-testid': `${dataTestId}-key-input` })}
+          disabled={cellDisabled ?? false}
+        />
+      )
+      // The key cell's `value` IS the row key — highlight the whole row's key
+      // cell when that key differs from the other side.
+      if (!highlightActive) return cell
+      return <div style={cellDiffStyle(highlightKeySet.has(value))}>{cell}</div>
+    },
+    [dataTestId, highlightActive, highlightKeySet]
   )
 
   // Value cell: resolve the row's authoritative ValueType (id ref →
@@ -245,8 +269,10 @@ const RestormKeyValueTableInner = React.forwardRef<KeyValueTableHandle, RestormK
       // per-type widgets — color swatch, secret modal, expression editor,
       // …) — locking the cell from the outside avoids threading a new prop
       // through every one of those variants for this one read-only use-case.
+      const rowKey = id ? tableInitialRowsRef.current?.find((tr) => tr.id === id)?.key : undefined
+      const diffStyle = highlightActive ? cellDiffStyle(rowKey ? highlightKeySet.has(rowKey) : false) : undefined
       return (
-        <div style={cellDisabled ? { opacity: 0.6, pointerEvents: 'none' } : undefined}>
+        <div style={{ ...diffStyle, ...(cellDisabled ? { opacity: 0.6, pointerEvents: 'none' } : {}) }}>
           <TypedValueField
             value={resolved}
             onChange={(next) => {
@@ -275,7 +301,7 @@ const RestormKeyValueTableInner = React.forwardRef<KeyValueTableHandle, RestormK
         </div>
       )
     },
-    [dataTestId]
+    [dataTestId, highlightActive, highlightKeySet]
   )
 
   return (
