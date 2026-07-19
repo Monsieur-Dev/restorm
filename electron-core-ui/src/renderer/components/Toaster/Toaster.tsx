@@ -82,9 +82,49 @@ export const Toaster: React.FC<ToasterProps> = ({
   )
 
   // ── Pause on hover / focus ──────────────────────────────────────
+  // `focused` is re-derived from the live active element rather than
+  // latched on blur. A bubbling `focusout` never fires when the focused
+  // control is *removed* from the DOM (a toast dismissed while its close
+  // button held focus, the framed panel collapsing) — a latch cleared only
+  // by blur would then stay `true` forever and strand every remaining
+  // toast on screen past its duration. Deriving from `document.activeElement`
+  // instead keeps the pause honest: it lifts as soon as focus is no longer
+  // inside the region, however it left.
+  const toasterRootRef = useRef<HTMLDivElement>(null)
   const [hovered, setHovered] = useState(false)
   const [focused, setFocused] = useState(false)
   const interaction = useMemo(() => ({ paused: hovered || focused }), [hovered, focused])
+
+  const syncFocused = useCallback(() => {
+    const root = toasterRootRef.current
+    setFocused(
+      typeof document !== 'undefined' &&
+      !!root &&
+      root.contains(document.activeElement)
+    )
+  }, [])
+
+  // A single document-level `focusin` listener re-derives containment on
+  // every focus change anywhere in the app: focus entering the region
+  // pauses, focus landing on any element outside it resumes. `focusin`
+  // bubbles, so one listener covers the whole subtree.
+  useEffect(() => {
+    if (typeof document === 'undefined') return
+    document.addEventListener('focusin', syncFocused)
+    return () => { document.removeEventListener('focusin', syncFocused) }
+  }, [syncFocused])
+
+  // Removing the focused node drops focus to `<body>` with no `focusin`, so
+  // the listener above can't catch it. Re-derive after any change to what
+  // the region renders (toast list, framed panel) to release a pause left
+  // dangling by a dismissed/unmounted focused control. Deferred to a
+  // microtask so the state update doesn't run synchronously inside the
+  // effect (cascading-render lint) and reads focus after the commit settles.
+  useEffect(() => {
+    let cancelled = false
+    queueMicrotask(() => { if (!cancelled) syncFocused() })
+    return () => { cancelled = true }
+  }, [toasts, showFrame, syncFocused])
 
   // ── Dismiss with exit-animation grace period ────────────────────
   const handleDismiss = useCallback((toastId: string) => {
@@ -215,7 +255,6 @@ export const Toaster: React.FC<ToasterProps> = ({
   // so the MiniBrowser (or any other compositor-level surface) can step
   // out of its way. Only when there's at least one toast on screen —
   // when the toaster is empty, there's nothing for us to occlude.
-  const toasterRootRef = useRef<HTMLDivElement>(null)
   useOverlayPresence(toasterRootRef, visibleToasts.length > 0)
 
   // Mount/unmount fade: keep the component in the DOM for `exitMs`
@@ -302,12 +341,6 @@ export const Toaster: React.FC<ToasterProps> = ({
         style={cssVars}
         onMouseEnter={() => { setHovered(true) }}
         onMouseLeave={() => { setHovered(false) }}
-        onFocus={() => { setFocused(true) }}
-        onBlur={(e) => {
-          // Only clear focused when focus truly leaves the toaster.
-          if (e.currentTarget.contains(e.relatedTarget as Node | null)) return
-          setFocused(false)
-        }}
         {...(dataTestId && { 'data-testid': dataTestId })}
       >
         {showFrame && (
