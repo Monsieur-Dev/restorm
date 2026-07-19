@@ -22,6 +22,7 @@ import { formatIndex, sanitizeName } from '../shared/folderModeNaming'
 import type { FolderItem } from '../shared/types/collections'
 import { saveFolderSecretsEnvFile, applyFolderSecretsEnvFile } from './services/SecretsEnvFileService'
 import { normalizeDocumentValuesForPersistence } from '../shared/utils/valuePersistence'
+import { canonicalizeSerializedKeys } from '../shared/utils/serialization'
 import { assertPathWithinParent } from './utils/pathSecurity'
 
 // ==========================================================================
@@ -286,7 +287,10 @@ async function saveFile(
   format: PersistenceFormat
 ): Promise<void> {
   const persistenceService = getPersistenceService()
-  const cleanData = stripIds(data)
+  // Strip runtime-only KeyValue ids, then impose the canonical key order so a
+  // folder-mode file is byte-stable across saves and builds — the same
+  // deterministic shape the single-file path gets via `prepareForSerialization`.
+  const cleanData = canonicalizeSerializedKeys(stripIds(data))
   await persistenceService.saveSingleFile(filePath, cleanData, { format })
 }
 

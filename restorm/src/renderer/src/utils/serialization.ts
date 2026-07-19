@@ -15,7 +15,7 @@
 import { generateId } from '../../../shared/utils/serialization'
 import { normalizeValueType } from './normalizeValueType'
 
-export { generateId, stripIds, prepareForSerialization } from '../../../shared/utils/serialization'
+export { generateId, stripIds, prepareForSerialization, canonicalizeSerializedKeys, CANONICAL_KEY_PRIORITY } from '../../../shared/utils/serialization'
 
 /**
  * Recursively generate 'id' properties for all objects that should have them.

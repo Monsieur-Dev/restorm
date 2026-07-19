@@ -79,6 +79,35 @@ The modal has:
   commits with your message, and pushes to the remote, reporting success or the
   exact git error as a toast.
 
+## Deterministic serialization (why an unchanged save changes nothing)
+
+For git collaboration to be usable the persisted file must be an **invariant**:
+saving a project you did not edit must produce byte-for-byte the same file, and
+the commit-message diff must only mention entities whose content actually
+changed. Both used to break because the on-disk key order was inherited from the
+in-memory property **insertion order**, which varies by construction path — a
+file parsed by one build, versus the class-field/default order a newer build
+rebuilds it in. The first save after a build upgrade then re-emitted every
+object in a different order and the whole file showed as changed, with the
+commit message listing every entity as *Modified*.
+
+The fix imposes a **canonical key order** at serialization time, independent of
+insertion order. `prepareForSerialization` (and the folder-mode writer) run
+every object through `canonicalizeSerializedKeys`, which emits keys in a fixed,
+documented order:
+
+1. a small **priority list** first, in this exact sequence when present —
+   `id`, `name`, `key`, `type`, `folderType`, `method`, `url` (the identity /
+   label fields a reader scans first, kept up top so diffs stay readable);
+2. then every remaining key in ascending Unicode order.
+
+Array element order is **never** touched — item ordering inside a folder, header
+list, or scenario is meaningful and preserved. The priority list is a **stable
+contract**: reordering or removing an entry reformats every existing project
+file once on its next save (a one-time migration), so it changes only under a
+deliberate migration. The semantic commit diff compares canonicalized snapshots,
+so a pure shape/order change is never reported as a modification.
+
 ## Pulling and the 4-panel conflict resolution
 
 **Pull** first saves your project to disk (just like Push — the merge operates
