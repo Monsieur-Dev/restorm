@@ -234,7 +234,7 @@ describe('usePushModal', () => {
     expect(callOrder).toEqual(['saveBeforePush:start', 'saveBeforePush:done', 'stage'])
   })
 
-  it('push shows a failure toast and leaves the modal open when commit fails', async () => {
+  it('push shows a failure toast and CLOSES the modal when commit fails (the toast renders under the modal overlay)', async () => {
     const api = stubGitApi({ commit: vi.fn().mockResolvedValue({ success: false, error: 'nothing to commit' }) })
     const { result } = renderHook(() => usePushModal('/proj/api.restorm', ROOT_ITEMS, saveBeforePushMock))
     act(() => { result.current.openPushModal() })
@@ -249,10 +249,10 @@ describe('usePushModal', () => {
       body: 'nothing to commit',
       durationMs: 10000
     })
-    expect(result.current.isOpen).toBe(true)
+    expect(result.current.isOpen).toBe(false)
   })
 
-  it('push shows a failure toast and leaves the modal open when the push itself fails', async () => {
+  it('push shows a failure toast and CLOSES the modal when the push itself fails', async () => {
     const api = stubGitApi({ push: vi.fn().mockResolvedValue({ success: false, error: 'rejected non-fast-forward' }) })
     const { result } = renderHook(() => usePushModal('/proj/api.restorm', ROOT_ITEMS, saveBeforePushMock))
     act(() => { result.current.openPushModal() })
@@ -267,7 +267,7 @@ describe('usePushModal', () => {
       body: 'rejected non-fast-forward',
       durationMs: 10000
     })
-    expect(result.current.isOpen).toBe(true)
+    expect(result.current.isOpen).toBe(false)
   })
 
   it('closePushModal closes without touching git', () => {

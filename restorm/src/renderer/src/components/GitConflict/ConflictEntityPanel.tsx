@@ -103,6 +103,7 @@ function renderEntity(
     return (
       <ScenarioEditorView
         scenario={entity}
+        hideInspector
         {...(mode === 'editable' && onScenarioChange ? { onScenarioChange } : {})}
       />
     )

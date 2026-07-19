@@ -80,6 +80,11 @@ export interface ScenarioEditorViewProps {
   projectUuid?: string | null | undefined
   /** Persist node/edge edits back to the tree (debounced by the host). */
   onScenarioChange?: (scenarioId: string, patch: { nodes?: ScenarioNode[]; edges?: Scenario['edges']; notes?: string }) => void
+  /** Hide the inspector panel entirely. The conflict-resolution columns set
+   * it: they show the scenario GRAPH for comparison, and the inspector (run
+   * log, errors, play controls) is live-session chrome that has no meaning
+   * on a static snapshot and only eats column width. */
+  hideInspector?: boolean
   /**
    * Resolve a tree item by id → live object. Drives both sidebar-drop
    * creation (Request → `request`, Scenario → `runScenario`, else ignored)
@@ -620,7 +625,7 @@ function chooseColorTooltipPlacement(rect: DOMRect): { placement: 'above' | 'bel
   return { placement: 'below', side: 'auto' }
 }
 
-const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tabId, projectUuid, onScenarioChange, resolveBoundItem, resolveRequestEnv, resolveSyntheticPreview, onOpenItem, onCreateRequest, onCreateChild }) => {
+const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tabId, projectUuid, onScenarioChange, resolveBoundItem, resolveRequestEnv, resolveSyntheticPreview, onOpenItem, onCreateRequest, onCreateChild, hideInspector = false }) => {
   const { t } = useTranslation()
   const { screenToFlowPosition, fitView, getNode, getViewport } = useReactFlow()
   const wrapperRef = useRef<HTMLDivElement>(null)
@@ -3025,7 +3030,7 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
           {t('scenario.locked', 'Editing locked while the scenario is running')}
         </div>
       )}
-      <ScenarioInspectorPanel
+      {!hideInspector && <ScenarioInspectorPanel
         scenarioId={scenario.id}
         scenarioName={scenario.name}
         errors={workflowErrors}
@@ -3076,7 +3081,7 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
         canRedo={canRedo}
         onUndo={undo}
         onRedo={redo}
-      />
+      />}
       <GraphCanvas
         withoutProvider
         data-testid="scenario-graph-canvas"

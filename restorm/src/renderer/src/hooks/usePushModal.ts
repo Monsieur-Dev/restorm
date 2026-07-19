@@ -128,6 +128,9 @@ export function usePushModal(filePath: string | null, rootItems: FolderItem[], s
       .then(() => window.api.git.commit(gitFolder, message))
       .then((commitResult) => {
         if (!commitResult.success) {
+          // Close FIRST: the toaster renders under the modal overlay, so an
+          // error toast raised while the modal stays open is invisible.
+          setIsOpen(false)
           toasterService.push('app', {
             title: t('git.pushFailedTitle'),
             body: commitResult.error ?? t('git.pushFailedBody'),
@@ -137,6 +140,7 @@ export function usePushModal(filePath: string | null, rootItems: FolderItem[], s
         }
         return window.api.git.push(gitFolder).then((pushResult) => {
           if (!pushResult.success) {
+            setIsOpen(false)
             toasterService.push('app', {
               title: t('git.pushFailedTitle'),
               body: pushResult.error ?? t('git.pushFailedBody'),

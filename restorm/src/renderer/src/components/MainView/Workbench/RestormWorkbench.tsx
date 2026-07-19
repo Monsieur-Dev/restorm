@@ -1001,7 +1001,12 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
           useScrollableElement: false,
           content: (
             <div style={{ height: '100%', minHeight: 0 }}>
+              {/* Same post-pull remount contract as the request views
+                * (`renderProtocolTabView`): the editor seeds nodes/edges into
+                * local state once, so a pull that rewrites the scenario needs
+                * the epoch in the key or the graph keeps the pre-pull layout. */}
               <ScenarioEditorView
+                key={`${scenario.id}:${tabReloadEpoch ?? 0}`}
                 scenario={scenario}
                 tabId={effectiveTab.id}
                 {...(projectUuid ? { projectUuid } : {})}
