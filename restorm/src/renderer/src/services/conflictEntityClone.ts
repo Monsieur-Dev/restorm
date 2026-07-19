@@ -1,6 +1,7 @@
 import type { FolderItem } from '../../../shared/types/folderTypes'
 import { isScenario } from '../../../shared/types/folderTypes'
 import { makeReactiveFolderItem } from '../types/reactive'
+import { processAfterDeserialization } from '../utils/serialization'
 
 /**
  * Produce an independent, editable copy of a conflict entity for the
@@ -17,6 +18,10 @@ import { makeReactiveFolderItem } from '../types/reactive'
  * clone is enough; the caller applies patches with a normal state update.
  */
 export function cloneEntityForResolution(item: FolderItem): FolderItem {
-  const clone = structuredClone(item)
+  // `structuredClone` strips class prototypes: a SecretValue/ExpressionValue
+  // cell degrades to a plain object and the KV renderers' `instanceof` checks
+  // then display it as a different value type. Re-run the deserialization
+  // normalization on the clone to rehydrate every ValueType before use.
+  const [clone] = processAfterDeserialization([structuredClone(item)])
   return isScenario(clone) ? clone : makeReactiveFolderItem(clone)
 }

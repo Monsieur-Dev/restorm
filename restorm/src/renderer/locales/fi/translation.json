@@ -2374,7 +2374,7 @@
     "pullFailedTitle": "Nouto epäonnistui",
     "pullFailedBody": "Uusimpia muutoksia ei voitu noutaa.",
     "pullSaveFailedBody": "Muutoksiasi ei voitu tallentaa ennen vetämistä.",
-    "pullUnpushedChangesBody": "Sinulla on paikallisia muutoksia, joita ei ole vielä työnnetty — tee ensin Push ja sitten Pull.",
+    "pullUnpushedChangesBody": "Paikallisia muutoksia ei ole vielä työnnetty — tee ensin push ja sitten pull.",
     "pushFailedTitle": "Työntäminen epäonnistui",
     "pushFailedBody": "Muutoksia ei voitu työntää.",
     "pushSucceededTitle": "Työnnetty",

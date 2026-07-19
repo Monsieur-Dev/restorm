@@ -2374,7 +2374,7 @@
     "pullFailedTitle": "Abruf fehlgeschlagen",
     "pullFailedBody": "Die neuesten Änderungen konnten nicht abgerufen werden.",
     "pullSaveFailedBody": "Ihre Änderungen konnten vor dem Abrufen nicht gespeichert werden.",
-    "pullUnpushedChangesBody": "Du hast lokale Änderungen, die noch nicht gepusht wurden – erst pushen, dann pullen.",
+    "pullUnpushedChangesBody": "Es gibt lokale, noch nicht gepushte Änderungen – bitte zuerst pushen, dann pullen.",
     "pushFailedTitle": "Push fehlgeschlagen",
     "pushFailedBody": "Die Änderungen konnten nicht gepusht werden.",
     "pushSucceededTitle": "Gepusht",

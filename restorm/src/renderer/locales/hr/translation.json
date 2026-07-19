@@ -2375,7 +2375,7 @@
     "pullFailedTitle": "Povlačenje nije uspjelo",
     "pullFailedBody": "Nije moguće povući najnovije promjene.",
     "pullSaveFailedBody": "Vaše promjene nije moguće spremiti prije povlačenja.",
-    "pullUnpushedChangesBody": "Imate lokalne promjene koje još nisu poslane — prvo napravite Push, zatim Pull.",
+    "pullUnpushedChangesBody": "Postoje lokalne promjene koje nisu poslane — najprije izvršite Push, zatim Pull.",
     "pushFailedTitle": "Slanje nije uspjelo",
     "pushFailedBody": "Nije moguće poslati promjene.",
     "pushSucceededTitle": "Poslano",

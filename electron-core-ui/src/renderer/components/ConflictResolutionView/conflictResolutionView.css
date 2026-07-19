@@ -112,3 +112,12 @@
   text-align: center;
   color: var(--descriptionForeground);
 }
+
+/* The picked side's "use this version" check turns green — mirrors which
+ * version the resolved copy currently equals; the host clears it on any
+ * hand edit of the resolved panel. `!important` is required to out-rank the
+ * Button primitive's own `.text-button .codicon { color: inherit !important }`
+ * (an important rule can only be beaten by another important rule). */
+.conflict-resolution-use-action.picked .button .codicon-check {
+	color: var(--charts-green, #2ea043) !important;
+}

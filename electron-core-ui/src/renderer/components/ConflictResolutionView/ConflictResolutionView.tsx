@@ -33,6 +33,10 @@ export interface ConflictResolutionViewProps {
   onUseUserVersion?: () => void
   /** Same as `onUseUserVersion`, for the server panel. */
   onUseServerVersion?: () => void
+  /** Which side the resolved copy currently mirrors — paints that column's
+   * "use this version" check green. Cleared (null/undefined) once the
+   * resolved copy is hand-edited. */
+  pickedSide?: 'user' | 'server' | null
   /** Test id root. Defaults to `conflict-resolution-view`. */
   'data-testid'?: string
 }
@@ -62,6 +66,7 @@ export const ConflictResolutionView: React.FC<ConflictResolutionViewProps> = ({
   renderResolvedPanel,
   onUseUserVersion,
   onUseServerVersion,
+  pickedSide = null,
   'data-testid': dataTestId = 'conflict-resolution-view'
 }) => {
   const { t } = useTranslation()
@@ -73,16 +78,18 @@ export const ConflictResolutionView: React.FC<ConflictResolutionViewProps> = ({
     onSelectConflict(payload.item.id)
   }
 
-  const useVersionAction = (onUse: (() => void) | undefined, testIdSuffix: string): React.ReactNode | undefined => {
+  const useVersionAction = (onUse: (() => void) | undefined, testIdSuffix: string, picked: boolean): React.ReactNode | undefined => {
     if (!onUse || !selectedConflictId) return undefined
     return (
-      <Button
-        small
-        icon="check"
-        options={{ ariaLabel: t('conflictResolution.useThisVersion') }}
-        onClick={onUse}
-        data-testid={`${dataTestId}-${testIdSuffix}`}
-      />
+      <span className={picked ? 'conflict-resolution-use-action picked' : 'conflict-resolution-use-action'} data-picked={picked || undefined}>
+        <Button
+          small
+          icon="check"
+          options={{ ariaLabel: t('conflictResolution.useThisVersion') }}
+          onClick={onUse}
+          data-testid={`${dataTestId}-${testIdSuffix}`}
+        />
+      </span>
     )
   }
 
@@ -131,13 +138,13 @@ export const ConflictResolutionView: React.FC<ConflictResolutionViewProps> = ({
           'user',
           t('conflictResolution.userTitle'),
           renderUserPanel,
-          useVersionAction(onUseUserVersion, 'use-user-version')
+          useVersionAction(onUseUserVersion, 'use-user-version', pickedSide === 'user')
         )}
         {renderVersionColumn(
           'server',
           t('conflictResolution.serverTitle'),
           renderServerPanel,
-          useVersionAction(onUseServerVersion, 'use-server-version')
+          useVersionAction(onUseServerVersion, 'use-server-version', pickedSide === 'server')
         )}
         {renderVersionColumn(
           'resolved',

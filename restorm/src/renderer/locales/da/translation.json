@@ -2374,7 +2374,7 @@
     "pullFailedTitle": "Pull mislykkedes",
     "pullFailedBody": "Kunne ikke hente de seneste ændringer.",
     "pullSaveFailedBody": "Dine ændringer kunne ikke gemmes før pull.",
-    "pullUnpushedChangesBody": "Du har lokale ændringer, der endnu ikke er pushet — push dem først, og pull derefter.",
+    "pullUnpushedChangesBody": "Der er lokale ændringer, som ikke er pushet — push først, og pull derefter.",
     "pushFailedTitle": "Push mislykkedes",
     "pushFailedBody": "Kunne ikke pushe ændringerne.",
     "pushSucceededTitle": "Pushet",

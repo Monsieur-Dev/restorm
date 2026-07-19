@@ -69,6 +69,12 @@ export interface GrpcRequestTabViewProps {
   conflictFieldDiff?: EntityFieldDiff
   /** Preselects the tab holding the conflicting field (AC#5). */
   defaultActiveTabId?: string
+  /** Fully-controlled request-side tab pair, forwarded verbatim to
+   * `BaseRequestTabView`. The conflict panels use it to mirror the tab
+   * selection across the three columns (the read-only columns sit under an
+   * `inert` overlay, so their own tab strips can't be clicked). */
+  activeRequestTabId?: string
+  onRequestTabChange?: (tabId: string) => void
   /** Hides the (non-editable, generated) Code Snippets tab (AC#5). */
   showCodeSnippets?: boolean
   /** Blanket conflict-mode safety rule (AC#2/#5, see
@@ -92,6 +98,8 @@ const GrpcClientTabView: React.FC<GrpcRequestTabViewProps> = ({
   request,
   conflictFieldDiff,
   defaultActiveTabId,
+  activeRequestTabId,
+  onRequestTabChange,
   showCodeSnippets = true,
   conflictMode
 }) => {
@@ -806,6 +814,8 @@ const GrpcClientTabView: React.FC<GrpcRequestTabViewProps> = ({
         showCodeSnippets={showCodeSnippets}
         notesDiffers={!!conflictFields?.['notes']}
         {...(defaultActiveTabId !== undefined ? { defaultActiveTabId } : {})}
+        {...(activeRequestTabId !== undefined ? { activeRequestTabId } : {})}
+        {...(onRequestTabChange !== undefined ? { onRequestTabChange } : {})}
       />
       <ResponseHistoryModal
         isOpen={historyModalOpen}

@@ -71,7 +71,7 @@ const timeoutLabelStyle: CSSProperties = { color: 'var(--descriptionForeground)'
  * own "URL differs → border URL input" granularity example (discrete
  * inputs only; list sections are all-or-nothing). */
 function sectionDiffWrapperStyle(differs: boolean): CSSProperties {
-  return { height: '100%', boxSizing: 'border-box', border: '1px solid transparent', ...fieldDiffStyle(differs) }
+  return { height: '100%', boxSizing: 'border-box', border: '2px solid transparent', ...fieldDiffStyle(differs) }
 }
 
 export interface HTTPRequestTabViewProps {
@@ -90,6 +90,12 @@ export interface HTTPRequestTabViewProps {
   /** Preselects the tab holding the conflicting field (AC#5) — forwarded
    * to `BaseRequestTabView`'s `defaultActiveTabId`. */
   defaultActiveTabId?: string
+  /** Fully-controlled request-side tab pair, forwarded verbatim to
+   * `BaseRequestTabView`. The conflict panels use it to mirror the tab
+   * selection across the three columns (the read-only columns sit under an
+   * `inert` overlay, so their own tab strips can't be clicked). */
+  activeRequestTabId?: string
+  onRequestTabChange?: (tabId: string) => void
   /** Hides the (non-editable, generated) Code Snippets tab — AC#5's "HIDE
    * non-editable tabs". Defaults to `true` (visible) for the live editor;
    * the conflict panel passes `false`. */
@@ -153,6 +159,8 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
   request,
   conflictFieldDiff,
   defaultActiveTabId,
+  activeRequestTabId,
+  onRequestTabChange,
   showCodeSnippets = true,
   conflictMode
 }) => {
@@ -1314,6 +1322,8 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
         showCodeSnippets={showCodeSnippets}
         notesDiffers={!!conflictFields?.['notes']}
         {...(defaultActiveTabId !== undefined ? { defaultActiveTabId } : {})}
+        {...(activeRequestTabId !== undefined ? { activeRequestTabId } : {})}
+        {...(onRequestTabChange !== undefined ? { onRequestTabChange } : {})}
       />
       <ResponseHistoryModal
         isOpen={historyModalOpen}

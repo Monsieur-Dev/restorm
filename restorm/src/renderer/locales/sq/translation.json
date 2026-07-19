@@ -2374,7 +2374,7 @@
     "pullFailedTitle": "Marrja dështoi",
     "pullFailedBody": "Nuk u arrit të merren ndryshimet më të fundit.",
     "pullSaveFailedBody": "Ndryshimet tuaja nuk u ruajtën para tërheqjes.",
-    "pullUnpushedChangesBody": "Ke ndryshime lokale që nuk janë dërguar ende — bëj fillimisht Push, pastaj Pull.",
+    "pullUnpushedChangesBody": "Ka ndryshime lokale të padërguara — bëni fillimisht Push, pastaj Pull.",
     "pushFailedTitle": "Dërgimi dështoi",
     "pushFailedBody": "Nuk u arrit të dërgohen ndryshimet.",
     "pushSucceededTitle": "U dërgua",

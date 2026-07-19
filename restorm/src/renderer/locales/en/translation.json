@@ -2374,7 +2374,7 @@
     "pullFailedTitle": "Pull failed",
     "pullFailedBody": "Could not pull the latest changes.",
     "pullSaveFailedBody": "Could not save your changes before pulling.",
-    "pullUnpushedChangesBody": "You have local changes that aren't pushed yet — Push them first, then Pull.",
+    "pullUnpushedChangesBody": "You have unpushed local changes — push first, then pull.",
     "pushFailedTitle": "Push failed",
     "pushFailedBody": "Could not push the changes.",
     "pushSucceededTitle": "Pushed",

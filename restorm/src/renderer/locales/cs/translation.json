@@ -2376,7 +2376,7 @@
     "pullFailedTitle": "Stažení se nezdařilo",
     "pullFailedBody": "Nejnovější změny se nepodařilo stáhnout.",
     "pullSaveFailedBody": "Před stažením se nepodařilo uložit vaše změny.",
-    "pullUnpushedChangesBody": "Máte lokální změny, které ještě nebyly odeslány — nejdřív proveďte Push a potom Pull.",
+    "pullUnpushedChangesBody": "Existují lokální změny, které nebyly odeslány — nejprve proveďte push, poté pull.",
     "pushFailedTitle": "Odeslání se nezdařilo",
     "pushFailedBody": "Změny se nepodařilo odeslat.",
     "pushSucceededTitle": "Odesláno",

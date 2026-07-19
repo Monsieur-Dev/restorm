@@ -73,6 +73,9 @@ function makeConflictResolution(overrides: Partial<UseConflictResolutionResult> 
     onScenarioChange: vi.fn(),
     quickConfigPicks: {},
     pickQuickConfigVersion: vi.fn(),
+    resolvedEpochById: {},
+    pickedSideById: {},
+    onResolvedEdited: vi.fn(),
     ...overrides
   }
 }

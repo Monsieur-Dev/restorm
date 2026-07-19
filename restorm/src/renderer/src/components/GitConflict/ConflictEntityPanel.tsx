@@ -36,6 +36,14 @@ export interface ConflictEntityPanelProps {
    * preselects the conflict-bearing tab everywhere. `undefined` for kinds
    * that aren't field-diffed (scenarios, by design). */
   fieldDiff?: EntityFieldDiff
+  /** Controlled request-side tab selection, shared by the modal across its
+   * 3 columns. The read-only columns sit under an `inert` overlay, so their
+   * own tab strips can't be clicked — instead the EDITABLE (resolved)
+   * column's tab strip drives the selection (`onActiveTabChange`) and every
+   * column mirrors it (`activeTabId`), keeping the side-by-side comparison
+   * on the same tab. Request kinds only — folder/scenario panels ignore it. */
+  activeTabId?: string
+  onActiveTabChange?: (tabId: string) => void
   'data-testid'?: string
 }
 
@@ -63,9 +71,11 @@ export const ConflictEntityPanel: React.FC<ConflictEntityPanelProps> = ({
   mode,
   onScenarioChange,
   fieldDiff,
+  activeTabId,
+  onActiveTabChange,
   'data-testid': dataTestId
 }) => {
-  const content = renderEntity(entity, mode, onScenarioChange, fieldDiff)
+  const content = renderEntity(entity, mode, onScenarioChange, fieldDiff, activeTabId, onActiveTabChange)
   if (mode === 'readOnly') {
     return <ReadOnlyOverlay {...(dataTestId ? { 'data-testid': dataTestId } : {})}>{content}</ReadOnlyOverlay>
   }
@@ -76,7 +86,9 @@ function renderEntity(
   entity: FolderItem,
   mode: ConflictPanelMode,
   onScenarioChange?: ConflictEntityPanelProps['onScenarioChange'],
-  fieldDiff?: EntityFieldDiff
+  fieldDiff?: EntityFieldDiff,
+  activeTabId?: string,
+  onActiveTabChange?: (tabId: string) => void
 ): React.ReactNode {
   if (isEnvironmentFolder(entity)) {
     return renderEnvironmentFolder(entity, mode, fieldDiff)
@@ -97,7 +109,7 @@ function renderEntity(
     )
   }
   if (isRequest(entity)) {
-    return renderRequest(entity, mode, fieldDiff)
+    return renderRequest(entity, mode, fieldDiff, activeTabId, onActiveTabChange)
   }
   return <MonacoFallback entity={entity} mode={mode} />
 }
@@ -126,13 +138,24 @@ function renderEnvironmentFolder(folder: EnvironmentFolder, mode: ConflictPanelM
   )
 }
 
-function renderRequest(request: Request, mode: ConflictPanelMode, fieldDiff?: EntityFieldDiff): React.ReactNode {
+function renderRequest(
+  request: Request,
+  mode: ConflictPanelMode,
+  fieldDiff?: EntityFieldDiff,
+  activeTabId?: string,
+  onActiveTabChange?: (tabId: string) => void
+): React.ReactNode {
   // Every field-diff-aware panel shares 3 conflict props: the red-border
   // map (readOnly only, AC#4), the tab preselect (every mode, AC#5), and
-  // hiding the generated Code Snippets tab (every mode, AC#5).
+  // hiding the generated Code Snippets tab (every mode, AC#5). The
+  // controlled tab pair (modal-shared, see `activeTabId`'s prop doc) rides
+  // along; the `inert` read-only panels can never fire the callback, so
+  // passing it to all 3 modes is harmless and keeps this spread uniform.
   const fieldDiffProps = {
     ...(mode === 'readOnly' && fieldDiff ? { conflictFieldDiff: fieldDiff } : {}),
-    ...(fieldDiff?.preselectTabId ? { defaultActiveTabId: fieldDiff.preselectTabId } : {})
+    ...(fieldDiff?.preselectTabId ? { defaultActiveTabId: fieldDiff.preselectTabId } : {}),
+    ...(activeTabId !== undefined ? { activeRequestTabId: activeTabId } : {}),
+    ...(onActiveTabChange !== undefined ? { onRequestTabChange: onActiveTabChange } : {})
   }
   // AC#2/#5 blanket safety rule (`conflictSafeLiveState.ts`): every panel
   // rendered here is a STATIC historical snapshot, never a live session —

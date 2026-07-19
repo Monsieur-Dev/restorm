@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react'
+import React, { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Modal, Button, ConflictResolutionView } from 'electron-core-ui/renderer'
 import type { UseConflictResolutionResult } from '../../hooks/useConflictResolution'
@@ -44,9 +44,10 @@ export interface GitConflictResolutionModalProps {
 /**
  * Mounts the generic `ConflictResolutionView` shell with restorm's
  * `ConflictEntityPanel` dispatcher wired into every render prop — the
- * concrete "4-panel conflict resolution UI" a pull conflict opens. Owns
- * no state of its own; everything comes from `useGitPullConflict` (via
- * its `conflictResolution` sub-result) through the parent.
+ * concrete "4-panel conflict resolution UI" a pull conflict opens. All
+ * entity state comes from `useGitPullConflict` (via its
+ * `conflictResolution` sub-result) through the parent; the only state
+ * owned here is the shared request-tab selection below.
  */
 export const GitConflictResolutionModal: React.FC<GitConflictResolutionModalProps> = ({
   isOpen,
@@ -55,7 +56,7 @@ export const GitConflictResolutionModal: React.FC<GitConflictResolutionModalProp
   onFinish
 }) => {
   const { t } = useTranslation()
-  const { conflicts, selectedConflictId, selectConflict, getResolvedEntity, pickOursVersion, pickTheirsVersion, onScenarioChange, quickConfigPicks, pickQuickConfigVersion } = conflictResolution
+  const { conflicts, selectedConflictId, selectConflict, getResolvedEntity, pickOursVersion, pickTheirsVersion, onScenarioChange, quickConfigPicks, pickQuickConfigVersion, resolvedEpochById, pickedSideById, onResolvedEdited } = conflictResolution
 
   // ECUI's `ConflictResolutionView` always renders all three panels for the
   // SAME (selected) conflict, so the field-diff is identical across them.
@@ -66,6 +67,18 @@ export const GitConflictResolutionModal: React.FC<GitConflictResolutionModalProp
     const conflict = conflicts.find((c) => c.id === selectedConflictId)
     return conflict ? computeEntityFieldDiff(conflict.kind, conflict.ours, conflict.theirs) : undefined
   }, [conflicts, selectedConflictId])
+
+  // ONE request-tab selection shared by the 3 columns: the read-only panels
+  // sit under an `inert` overlay (their own tab strips can't be clicked), so
+  // the EDITABLE panel's strip drives the tab and both read-only panels
+  // mirror it — the side-by-side comparison always shows the same tab.
+  // The pick is stored WITH the conflict id it belongs to (instead of an
+  // effect-based reset, which would cascade a render): selecting another
+  // conflict makes the stored pick stale and the fallback (the diff's
+  // preselected tab) takes over.
+  const [sharedTab, setSharedTab] = useState<{ conflictId: string | null, tabId: string } | null>(null)
+  const sharedTabId = sharedTab !== null && sharedTab.conflictId === selectedConflictId ? sharedTab.tabId : null
+  const effectiveTabId = sharedTabId ?? activeFieldDiff?.preselectTabId ?? 'request'
 
   return (
     <Modal
@@ -88,7 +101,7 @@ export const GitConflictResolutionModal: React.FC<GitConflictResolutionModalProp
                 <div style={panelWithBandStyle}>
                   <ConflictQuickConfigBand mode="readOnly" conflictingNames={names} data-testid="conflict-quick-config-band-user" />
                   <div style={panelBodyStyle}>
-                    <ConflictEntityPanel entity={conflict.ours} mode="readOnly" {...(activeFieldDiff ? { fieldDiff: activeFieldDiff } : {})} />
+                    <ConflictEntityPanel entity={conflict.ours} mode="readOnly" activeTabId={effectiveTabId} {...(activeFieldDiff ? { fieldDiff: activeFieldDiff } : {})} />
                   </div>
                 </div>
               )
@@ -101,7 +114,7 @@ export const GitConflictResolutionModal: React.FC<GitConflictResolutionModalProp
                 <div style={panelWithBandStyle}>
                   <ConflictQuickConfigBand mode="readOnly" conflictingNames={names} data-testid="conflict-quick-config-band-server" />
                   <div style={panelBodyStyle}>
-                    <ConflictEntityPanel entity={conflict.theirs} mode="readOnly" {...(activeFieldDiff ? { fieldDiff: activeFieldDiff } : {})} />
+                    <ConflictEntityPanel entity={conflict.theirs} mode="readOnly" activeTabId={effectiveTabId} {...(activeFieldDiff ? { fieldDiff: activeFieldDiff } : {})} />
                   </div>
                 </div>
               )
@@ -121,10 +134,24 @@ export const GitConflictResolutionModal: React.FC<GitConflictResolutionModalProp
                       data-testid="conflict-quick-config-band-resolved"
                     />
                   )}
-                  <div style={panelBodyStyle}>
+                  {/* The key remounts the editable panel on every ours/theirs
+                    * pick — its tab view seeds fields into local state once, so
+                    * without a remount the picked values would never display.
+                    * Hand edits (input/change bubbling from the fields) clear
+                    * the green side checks; Monaco-hosted editors don't bubble
+                    * these, so scenario/body edits clear via their own change
+                    * callbacks instead. */}
+                  <div
+                    style={panelBodyStyle}
+                    onInputCapture={() => { onResolvedEdited(id) }}
+                    onChangeCapture={() => { onResolvedEdited(id) }}
+                  >
                     <ConflictEntityPanel
+                      key={`${id}:${resolvedEpochById[id] ?? 0}`}
                       entity={resolved}
                       mode="editable"
+                      activeTabId={effectiveTabId}
+                      onActiveTabChange={(tabId) => { setSharedTab({ conflictId: selectedConflictId, tabId }) }}
                       {...(activeFieldDiff ? { fieldDiff: activeFieldDiff } : {})}
                       onScenarioChange={(_scenarioId, patch) => { onScenarioChange(id, patch) }}
                     />
@@ -133,6 +160,7 @@ export const GitConflictResolutionModal: React.FC<GitConflictResolutionModalProp
               )
             }}
             {...(selectedConflictId ? { onUseUserVersion: () => { pickOursVersion(selectedConflictId) } } : {})}
+            pickedSide={selectedConflictId ? (pickedSideById[selectedConflictId] ?? null) : null}
             {...(selectedConflictId ? { onUseServerVersion: () => { pickTheirsVersion(selectedConflictId) } } : {})}
           />
         </div>

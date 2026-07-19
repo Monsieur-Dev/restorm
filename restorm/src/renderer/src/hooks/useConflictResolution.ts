@@ -34,6 +34,12 @@ export interface UseConflictResolutionResult {
   /** Record a finer-than-whole-entity ours/theirs choice for ONE conflicting
    * saved quick-config, independent of the whole-entity pick. */
   pickQuickConfigVersion: (conflictId: string, configName: string, side: 'ours' | 'theirs') => void
+  /** Per-conflict pick counter — remount key for the resolved panel. */
+  resolvedEpochById: Record<string, number>
+  /** Which side the resolved copy mirrors ('user'/'server'), null once hand-edited. */
+  pickedSideById: Record<string, 'user' | 'server' | null>
+  /** Report a hand edit of the resolved panel (clears the green checks). */
+  onResolvedEdited: (conflictId: string) => void
 }
 
 function isScenarioItem(item: FolderItem): item is Scenario {
@@ -68,12 +74,23 @@ export function useConflictResolution(versions: GitConflictVersions | null): Use
   const [selectedConflictId, setSelectedConflictId] = useState<string | null>(conflicts[0]?.id ?? null)
   const [resolvedById, setResolvedById] = useState<Record<string, FolderItem>>(() => buildInitialResolved(conflicts))
   const [quickConfigPicks, setQuickConfigPicks] = useState<QuickConfigPicks>({})
+  // Bumped on every ours/theirs PICK (never on a manual edit): the resolved
+  // panel's tab view seeds its editable fields into local state once, so a
+  // pick that swaps the resolved entity must REMOUNT the panel (key) for the
+  // picked values to show — a plain re-render keeps the pre-pick fields.
+  const [resolvedEpochById, setResolvedEpochById] = useState<Record<string, number>>({})
+  // Which side the resolved copy currently mirrors — drives the green check
+  // on the matching version column. Cleared as soon as the user hand-edits
+  // the resolved panel (the copy no longer equals either side verbatim).
+  const [pickedSideById, setPickedSideById] = useState<Record<string, 'user' | 'server' | null>>({})
 
   if (conflicts !== priorConflicts) {
     setPriorConflicts(conflicts)
     setSelectedConflictId(conflicts[0]?.id ?? null)
     setResolvedById(buildInitialResolved(conflicts))
     setQuickConfigPicks({})
+    setResolvedEpochById({})
+    setPickedSideById({})
   }
 
   const selectConflict = useCallback((id: string) => { setSelectedConflictId(id) }, [])
@@ -89,13 +106,23 @@ export function useConflictResolution(versions: GitConflictVersions | null): Use
     const conflict = conflicts.find((c) => c.id === conflictId)
     if (!conflict) return
     setResolvedById((prev) => ({ ...prev, [conflictId]: cloneEntityForResolution(conflict.ours) }))
+    setResolvedEpochById((prev) => ({ ...prev, [conflictId]: (prev[conflictId] ?? 0) + 1 }))
+    setPickedSideById((prev) => ({ ...prev, [conflictId]: 'user' }))
   }, [conflicts])
 
   const pickTheirsVersion = useCallback((conflictId: string) => {
     const conflict = conflicts.find((c) => c.id === conflictId)
     if (!conflict) return
     setResolvedById((prev) => ({ ...prev, [conflictId]: cloneEntityForResolution(conflict.theirs) }))
+    setResolvedEpochById((prev) => ({ ...prev, [conflictId]: (prev[conflictId] ?? 0) + 1 }))
+    setPickedSideById((prev) => ({ ...prev, [conflictId]: 'server' }))
   }, [conflicts])
+
+  /** The resolved panel reports any hand edit here — the copy then matches
+   * neither side verbatim, so both green checks go out. */
+  const onResolvedEdited = useCallback((conflictId: string) => {
+    setPickedSideById((prev) => (prev[conflictId] ? { ...prev, [conflictId]: null } : prev))
+  }, [])
 
   const onScenarioChange = useCallback((
     conflictId: string,
@@ -106,6 +133,7 @@ export function useConflictResolution(versions: GitConflictVersions | null): Use
       if (!current || !isScenarioItem(current)) return prev
       return { ...prev, [conflictId]: { ...current, ...patch } }
     })
+    setPickedSideById((prev) => (prev[conflictId] ? { ...prev, [conflictId]: null } : prev))
   }, [])
 
   const pickQuickConfigVersion = useCallback((conflictId: string, configName: string, side: 'ours' | 'theirs') => {
@@ -124,6 +152,9 @@ export function useConflictResolution(versions: GitConflictVersions | null): Use
     pickTheirsVersion,
     onScenarioChange,
     quickConfigPicks,
-    pickQuickConfigVersion
+    pickQuickConfigVersion,
+    resolvedEpochById,
+    pickedSideById,
+    onResolvedEdited
   }
 }

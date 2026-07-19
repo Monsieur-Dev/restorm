@@ -2374,7 +2374,7 @@
     "pullFailedTitle": "Çekme başarısız oldu",
     "pullFailedBody": "En son değişiklikler alınamadı.",
     "pullSaveFailedBody": "Değişiklikleriniz çekmeden önce kaydedilemedi.",
-    "pullUnpushedChangesBody": "Henüz gönderilmemiş yerel değişiklikleriniz var — önce Push, sonra Pull yapın.",
+    "pullUnpushedChangesBody": "Gönderilmemiş yerel değişiklikler var — önce Push, ardından Pull yapın.",
     "pushFailedTitle": "Gönderme başarısız oldu",
     "pushFailedBody": "Değişiklikler gönderilemedi.",
     "pushSucceededTitle": "Gönderildi",

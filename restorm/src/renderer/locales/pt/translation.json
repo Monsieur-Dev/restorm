@@ -2374,7 +2374,7 @@
     "pullFailedTitle": "Falha ao obter alterações",
     "pullFailedBody": "Não foi possível obter as alterações mais recentes.",
     "pullSaveFailedBody": "Não foi possível salvar suas alterações antes de fazer o pull.",
-    "pullUnpushedChangesBody": "Você tem alterações locais que ainda não foram enviadas — faça Push primeiro e depois Pull.",
+    "pullUnpushedChangesBody": "Existem alterações locais por enviar — faça primeiro Push e depois Pull.",
     "pushFailedTitle": "Falha ao enviar",
     "pushFailedBody": "Não foi possível enviar as alterações.",
     "pushSucceededTitle": "Enviado",

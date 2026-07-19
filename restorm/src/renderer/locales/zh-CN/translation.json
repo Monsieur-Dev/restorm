@@ -2373,7 +2373,7 @@
     "pullFailedTitle": "拉取失败",
     "pullFailedBody": "无法拉取最新更改。",
     "pullSaveFailedBody": "拉取前无法保存您的更改。",
-    "pullUnpushedChangesBody": "您有尚未推送的本地更改——请先 Push，然后再 Pull。",
+    "pullUnpushedChangesBody": "存在尚未推送的本地更改——请先推送，再拉取。",
     "pushFailedTitle": "推送失败",
     "pushFailedBody": "无法推送更改。",
     "pushSucceededTitle": "已推送",
