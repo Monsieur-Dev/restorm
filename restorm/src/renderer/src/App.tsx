@@ -426,27 +426,26 @@ const App: React.FC = () => {
   // stay plain re-renders — folding them into the remount key would tear down
   // and rebuild Monaco editors on every keystroke.
   const [tabReloadEpoch, setTabReloadEpoch] = useState(0)
-  // Set true by `refreshOpenFileAfterPull` before it re-opens the file, read
-  // by the `rootItems`-keyed effect below so the epoch bump lands on the exact
-  // commit that installed the re-hydrated tree (not one render early, which
-  // would remount tabs against the still-stale proxies). The re-open runs
-  // through an IPC round-trip, so keying on `rootItems` — rather than on the
-  // `_openFile` promise — is what pins the bump to the actual re-hydration.
+  // Armed by `refreshOpenFileAfterPull` right before the pull re-opens the
+  // project, consumed by `setRootItemsWithPullReload` below on the very
+  // `setRootItems` call that installs the re-hydrated tree.
   const pullRefreshPendingRef = useRef(false)
-  useEffect(() => {
-    if (!pullRefreshPendingRef.current) return
-    // Deferred a frame (past this commit) so the remount reads the just-
-    // installed proxies, and to keep the bump out of the effect body. The flag
-    // is cleared INSIDE the callback, not here: if `rootItems` commits again
-    // before the frame fires, the cleanup cancels this rAF, and clearing the
-    // flag early would swallow the bump entirely — so it stays armed and the
-    // next run re-schedules.
-    const rafId = requestAnimationFrame(() => {
+  // The setter handed to `useFileManagement`. When the pull flag is armed, the
+  // epoch bump is issued in the SAME synchronous call as the re-hydration's
+  // `setRootItems`, so React batches both into one commit: the workbench
+  // re-renders once with the fresh proxies AND the new remount key. Doing it
+  // here — rather than in a `[rootItems]` effect + rAF — removes the timing
+  // window entirely (a deferred bump could fire against an intermediate commit,
+  // or a throttled rAF could never fire), which is what left the reopened tab
+  // stale. The flag is cleared on consume so only the pull re-hydration bumps,
+  // not later opens.
+  const setRootItemsWithPullReload = useCallback<React.Dispatch<React.SetStateAction<FolderItem[]>>>((action) => {
+    setRootItems(action)
+    if (pullRefreshPendingRef.current) {
       pullRefreshPendingRef.current = false
       setTabReloadEpoch((n) => n + 1)
-    })
-    return () => { cancelAnimationFrame(rafId) }
-  }, [rootItems])
+    }
+  }, [])
 
   // The scenario inspector's CLI-command help asks for the shortest unambiguous
   // `--run` value for a scenario; computed from the live project tree.
@@ -478,9 +477,9 @@ const App: React.FC = () => {
     if (!filePath) return
     // Arm the tab-remount flag BEFORE re-opening: the re-open replaces the
     // reactive proxies wholesale, so open request tabs (which cache their
-    // fields in local state) must remount to re-read the pulled values. The
-    // `rootItems`-keyed effect consumes the flag on the commit that installs
-    // the re-hydrated tree.
+    // fields in local state) must remount to re-read the pulled values.
+    // `setRootItemsWithPullReload` consumes the flag on the re-hydration's
+    // `setRootItems`, bumping the remount epoch in the same commit.
     pullRefreshPendingRef.current = true
     void _openFile(filePath)
   }, [filePath, _openFile])
@@ -1030,7 +1029,7 @@ const App: React.FC = () => {
     setCurrentFolderPath: _setCurrentFolderPath
   } = useFileManagement({
     rootItems,
-    setRootItems,
+    setRootItems: setRootItemsWithPullReload,
     setWorkbenchTree,
     clearTabDirtyState,
     registerTabDirtyState,
