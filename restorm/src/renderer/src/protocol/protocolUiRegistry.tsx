@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react'
+import { cloneElement, isValidElement, type ReactNode } from 'react'
 import type { RequestType } from '../../../shared/protocolRegistry'
 import type {
   Request,
@@ -72,7 +72,22 @@ export const PROTOCOL_TAB_VIEWS: Record<RequestType, (request: Request) => React
   kafka: (request) => <KafkaRequestTabView request={request as KafkaRequest} />
 }
 
-/** Render the tab-view editor element for a request, chosen by its protocol. */
-export function renderProtocolTabView(request: Request): ReactNode {
-  return PROTOCOL_TAB_VIEWS[request.type](request)
+/**
+ * Render the tab-view editor element for a request, chosen by its protocol.
+ *
+ * `reloadEpoch` is a monotonic counter the host bumps when the whole
+ * collection tree is re-hydrated from disk out from under an open tab (a
+ * clean git pull fast-forwards new content, replacing the reactive request
+ * proxies). Each protocol view seeds its editable fields into local React
+ * state ONCE from the `request` prop, so a same-id re-hydration alone leaves
+ * the tab showing pre-pull values until it's closed and reopened. Folding the
+ * epoch into the view's `key` remounts it on a bump, re-running those
+ * initializers against the freshly-hydrated proxy — an automatic reopen. The
+ * key is stable while `reloadEpoch` doesn't change, so ordinary re-renders
+ * never remount (which would tear down Monaco editors mid-edit).
+ */
+export function renderProtocolTabView(request: Request, reloadEpoch = 0): ReactNode {
+  const view = PROTOCOL_TAB_VIEWS[request.type](request)
+  if (!isValidElement(view)) return view
+  return cloneElement(view, { key: `${request.id}:${reloadEpoch}` })
 }

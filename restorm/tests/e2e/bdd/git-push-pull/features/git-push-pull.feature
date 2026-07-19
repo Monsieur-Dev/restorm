@@ -24,6 +24,17 @@ Feature: Git push and pull
     And I pull
     Then the collaborator's change is visible without reopening the project
 
+  # The open-tab path: the tree/sidebar refresh above read the live tree, but an
+  # already-open request tab caches its editable fields (URL, params, ...) in
+  # local state seeded once at open. So a clean pull must also remount the open
+  # tab, otherwise it keeps showing the pre-pull value until close/reopen.
+  Scenario: A clean pull refreshes an already-open request tab without reopening it
+    Given I have opened a clone of a freshly seeded git remote
+    And I have the request open in a tab showing its original URL
+    When a collaborator pushes a URL change to that same remote
+    And I pull
+    Then the open request tab shows the pulled URL without reopening it
+
   # The unsaved-edits path: pull saves first, so the edit reaches disk, but git
   # refuses to merge remote changes on top of unpushed local changes — the edit
   # is kept, the remote change is NOT silently applied, and the user is told to

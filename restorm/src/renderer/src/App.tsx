@@ -415,6 +415,39 @@ const App: React.FC = () => {
   const rootItemsRef = useRef(rootItems)
   useEffect(() => { rootItemsRef.current = rootItems }, [rootItems])
 
+  // Monotonic counter forwarded to the workbench so open request tabs remount
+  // after a clean pull re-hydrates the tree from disk. A request tab seeds its
+  // editable fields into local React state ONCE from the request prop; the
+  // tree/sidebar refresh on their own (they read the live tree) but a same-id
+  // re-hydration leaves the open tab showing pre-pull values until close +
+  // reopen. Bumping this remounts those tabs (see `tabReloadEpoch` in
+  // RestormWorkbench). A DEDICATED counter, deliberately NOT the tab
+  // `contentVersion` bump used by favorite-toggle / MCP patches: those must
+  // stay plain re-renders — folding them into the remount key would tear down
+  // and rebuild Monaco editors on every keystroke.
+  const [tabReloadEpoch, setTabReloadEpoch] = useState(0)
+  // Set true by `refreshOpenFileAfterPull` before it re-opens the file, read
+  // by the `rootItems`-keyed effect below so the epoch bump lands on the exact
+  // commit that installed the re-hydrated tree (not one render early, which
+  // would remount tabs against the still-stale proxies). The re-open runs
+  // through an IPC round-trip, so keying on `rootItems` — rather than on the
+  // `_openFile` promise — is what pins the bump to the actual re-hydration.
+  const pullRefreshPendingRef = useRef(false)
+  useEffect(() => {
+    if (!pullRefreshPendingRef.current) return
+    // Deferred a frame (past this commit) so the remount reads the just-
+    // installed proxies, and to keep the bump out of the effect body. The flag
+    // is cleared INSIDE the callback, not here: if `rootItems` commits again
+    // before the frame fires, the cleanup cancels this rAF, and clearing the
+    // flag early would swallow the bump entirely — so it stays armed and the
+    // next run re-schedules.
+    const rafId = requestAnimationFrame(() => {
+      pullRefreshPendingRef.current = false
+      setTabReloadEpoch((n) => n + 1)
+    })
+    return () => { cancelAnimationFrame(rafId) }
+  }, [rootItems])
+
   // The scenario inspector's CLI-command help asks for the shortest unambiguous
   // `--run` value for a scenario; computed from the live project tree.
   const suggestScenarioRunTarget = useCallback(
@@ -442,7 +475,14 @@ const App: React.FC = () => {
   // broadcasts `file:opened` → `handleFileOpened`, exactly like the initial
   // open). Tabs rebind by their stable persisted ids.
   const refreshOpenFileAfterPull = useCallback(() => {
-    if (filePath) void _openFile(filePath)
+    if (!filePath) return
+    // Arm the tab-remount flag BEFORE re-opening: the re-open replaces the
+    // reactive proxies wholesale, so open request tabs (which cache their
+    // fields in local state) must remount to re-read the pulled values. The
+    // `rootItems`-keyed effect consumes the flag on the commit that installs
+    // the re-hydrated tree.
+    pullRefreshPendingRef.current = true
+    void _openFile(filePath)
   }, [filePath, _openFile])
   // Repo-push / repo-pull click actions, shared verbatim by the statusbar
   // `GIT` entry and the title-bar `Git` menu (see `useGitActions`).
@@ -2938,6 +2978,7 @@ const App: React.FC = () => {
               navigationEnabled={navigationEnabled}
               tabSwitcherAnchorSelector='[data-testid="main-titlebar-searchbar-closed"]'
               projectUuid={projectUuid}
+              tabReloadEpoch={tabReloadEpoch}
               isItemFavorite={isItemFavorite}
               onToggleFavorite={handleToggleFavorite}
             />
@@ -3011,6 +3052,7 @@ const App: React.FC = () => {
             navigationEnabled={navigationEnabled}
             tabSwitcherAnchorSelector='[data-testid="main-titlebar-searchbar-closed"]'
             projectUuid={projectUuid}
+            tabReloadEpoch={tabReloadEpoch}
             isItemFavorite={isItemFavorite}
             onToggleFavorite={handleToggleFavorite}
           />

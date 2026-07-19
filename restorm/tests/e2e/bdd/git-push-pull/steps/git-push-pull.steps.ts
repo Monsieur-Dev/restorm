@@ -198,6 +198,47 @@ Then('the collaborator\'s change is visible without reopening the project', asyn
   await expect(sidebarRowByName(p, 'Find pet by ID')).toHaveCount(1)
 })
 
+Given('I have the request open in a tab showing its original URL', async () => {
+  const p = requirePage()
+  const row = sidebarRowByName(p, 'Find pet by ID')
+  await expect(row).toBeVisible({ timeout: 10000 })
+  await row.click()
+  await p.waitForTimeout(300)
+  await activateRequestSubTab(p)
+
+  const urlInput = p.locator('[data-testid="http-request-url-input"]:visible').first()
+  await expect(urlInput).toBeVisible({ timeout: 5000 })
+  // The seed URL ends in /pets/1. Asserting it here pins the pre-pull state so
+  // the post-pull assertion genuinely proves the OPEN tab re-read the model
+  // (rather than the tab having shown /pets/3 all along).
+  await expect(urlInput).toContainText('petstore.example.com/pets/1', { timeout: 5000 })
+})
+
+When('a collaborator pushes a URL change to that same remote', async ({ cloneNamedRepo }) => {
+  if (!activeRepoName) throw new Error('no active repo — a "...opened a clone..." step must run first')
+  const collaboratorDir = await cloneNamedRepo(activeRepoName, 'git-pull-tab-refresh-collaborator')
+  const projectFile = join(collaboratorDir, 'api.restorm')
+  const content = readFileSync(projectFile, 'utf-8')
+  // Change the request's URL (petId 1 → 3) — the value shown in the OPEN tab's
+  // URL editor, so the pull has to reach the editor, not just the sidebar.
+  writeFileSync(projectFile, content.replace('pets/1', 'pets/3'), 'utf-8')
+  execSync('git add api.restorm', { cwd: collaboratorDir, stdio: 'ignore', env: gitEnv() })
+  execSync('git -c user.email=collaborator@restorm.test -c user.name="Other Collaborator" commit -m "Collaborator URL update"', { cwd: collaboratorDir, stdio: 'ignore', env: gitEnv() })
+  execSync('git push origin main', { cwd: collaboratorDir, stdio: 'ignore', env: gitEnv() })
+})
+
+Then('the open request tab shows the pulled URL without reopening it', async () => {
+  const p = requirePage()
+  const urlInput = p.locator('[data-testid="http-request-url-input"]:visible').first()
+  // The tab was opened BEFORE the pull and never closed/reopened; its URL
+  // editor must now show the pulled value. The pre-fix behaviour kept /pets/1.
+  await expect(urlInput).toContainText('petstore.example.com/pets/3', { timeout: 10000 })
+  await expect(urlInput).not.toContainText('petstore.example.com/pets/1', { timeout: 5000 })
+  // Exactly one URL editor visible — the refresh re-rendered the tab in place,
+  // it did not spawn a duplicate tab.
+  await expect(p.locator('[data-testid="http-request-url-input"]:visible')).toHaveCount(1)
+})
+
 Given('I have an unsaved local edit to the open request', async () => {
   const p = requirePage()
   const row = sidebarRowByName(p, 'Find pet by ID')
