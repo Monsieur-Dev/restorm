@@ -120,4 +120,8 @@
  * (an important rule can only be beaten by another important rule). */
 .conflict-resolution-use-action.picked .button .codicon-check {
 	color: var(--charts-green, #2ea043) !important;
+
+	/* Codicons ship a single font weight — stroke the glyph to bold it, so
+	 * the green state is readable at a glance next to the grey unpicked one. */
+	-webkit-text-stroke: 1px currentcolor;
 }

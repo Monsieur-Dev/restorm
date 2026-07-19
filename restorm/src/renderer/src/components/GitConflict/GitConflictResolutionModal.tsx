@@ -68,10 +68,10 @@ export const GitConflictResolutionModal: React.FC<GitConflictResolutionModalProp
     return conflict ? computeEntityFieldDiff(conflict.kind, conflict.ours, conflict.theirs) : undefined
   }, [conflicts, selectedConflictId])
 
-  // ONE request-tab selection shared by the 3 columns: the read-only panels
-  // sit under an `inert` overlay (their own tab strips can't be clicked), so
-  // the EDITABLE panel's strip drives the tab and both read-only panels
-  // mirror it — the side-by-side comparison always shows the same tab.
+  // ONE request-tab selection shared by the 3 columns: clicking a tab in
+  // ANY column (tab strips are navigation, so `ReadOnlyOverlay` lets the
+  // read-only columns' strips through) moves all three together — the
+  // side-by-side comparison always shows the same tab.
   // The pick is stored WITH the conflict id it belongs to (instead of an
   // effect-based reset, which would cascade a render): selecting another
   // conflict makes the stored pick stale and the fallback (the diff's
@@ -87,7 +87,10 @@ export const GitConflictResolutionModal: React.FC<GitConflictResolutionModalProp
       title={t('git.conflictResolutionTitle')}
       data-testid="git-conflict-resolution-modal"
     >
-      <div style={{ display: 'flex', flexDirection: 'column', height: '80vh' }}>
+      {/* Fill the modal body entirely (it's a flex column): the footer's
+        * Annuler/Terminer row must sit at the BOTTOM edge of the modal, not
+        * float mid-air under the columns. */}
+      <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
         <div style={{ flex: 1, minHeight: 0 }}>
           <ConflictResolutionView
             conflicts={conflicts.map((conflict) => ({ id: conflict.id, label: conflict.name }))}
@@ -101,7 +104,7 @@ export const GitConflictResolutionModal: React.FC<GitConflictResolutionModalProp
                 <div style={panelWithBandStyle}>
                   <ConflictQuickConfigBand mode="readOnly" conflictingNames={names} data-testid="conflict-quick-config-band-user" />
                   <div style={panelBodyStyle}>
-                    <ConflictEntityPanel entity={conflict.ours} mode="readOnly" activeTabId={effectiveTabId} {...(activeFieldDiff ? { fieldDiff: activeFieldDiff } : {})} />
+                    <ConflictEntityPanel entity={conflict.ours} mode="readOnly" activeTabId={effectiveTabId} onActiveTabChange={(tabId) => { setSharedTab({ conflictId: selectedConflictId, tabId }) }} {...(activeFieldDiff ? { fieldDiff: activeFieldDiff } : {})} />
                   </div>
                 </div>
               )
@@ -114,7 +117,7 @@ export const GitConflictResolutionModal: React.FC<GitConflictResolutionModalProp
                 <div style={panelWithBandStyle}>
                   <ConflictQuickConfigBand mode="readOnly" conflictingNames={names} data-testid="conflict-quick-config-band-server" />
                   <div style={panelBodyStyle}>
-                    <ConflictEntityPanel entity={conflict.theirs} mode="readOnly" activeTabId={effectiveTabId} {...(activeFieldDiff ? { fieldDiff: activeFieldDiff } : {})} />
+                    <ConflictEntityPanel entity={conflict.theirs} mode="readOnly" activeTabId={effectiveTabId} onActiveTabChange={(tabId) => { setSharedTab({ conflictId: selectedConflictId, tabId }) }} {...(activeFieldDiff ? { fieldDiff: activeFieldDiff } : {})} />
                   </div>
                 </div>
               )

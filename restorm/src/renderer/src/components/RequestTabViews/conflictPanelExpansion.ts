@@ -10,12 +10,13 @@ const SECTIONS: readonly RequestPanelSection[] = ['headers', 'pathParams', 'para
  * Normal precedence: a per-request persisted value wins; otherwise the
  * empty-section heuristic (an empty section starts collapsed).
  *
- * Conflict override: in the conflict-resolution view a section that DIFFERS
- * between the two sides (`conflictFields[name] === true`) starts EXPANDED,
- * overriding both the persisted value and the heuristic. The read-only
- * ours/server panels are `inert`, so the user can't click a collapsed section
- * open — a differing section left collapsed would hide exactly the
- * line-by-line differences the conflict screen exists to show.
+ * Conflict override: in the conflict-resolution view (`conflictFields`
+ * defined) the sections mirror the diff EXACTLY — a section that differs
+ * between the two sides starts expanded, every other section starts
+ * COLLAPSED, ignoring both the persisted value and the heuristic. The
+ * screen exists to show differences: an identical expanded section (e.g.
+ * a non-empty headers list) is pure noise pushing the real diff below the
+ * fold, and a differing section left collapsed would hide it.
  */
 export function computeInitialPanelCollapsed(
   seed: Record<string, unknown>,
@@ -24,8 +25,8 @@ export function computeInitialPanelCollapsed(
 ): Record<RequestPanelSection, boolean> {
   const result = {} as Record<RequestPanelSection, boolean>
   for (const name of SECTIONS) {
-    if (conflictFields?.[name] === true) {
-      result[name] = false
+    if (conflictFields !== undefined) {
+      result[name] = conflictFields[name] !== true
       continue
     }
     const seeded = seed[name]

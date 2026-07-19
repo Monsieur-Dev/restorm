@@ -37,8 +37,10 @@ describe('computeInitialPanelCollapsed', () => {
       EMPTY_DEFAULTS,
       { headers: true, pathParams: false, params: false, body: false }
     )
-    // headers conflicts → forced open; the rest keep their heuristic default.
-    expect(collapsed).toEqual({ headers: false, pathParams: true, params: true, body: false })
+    // headers conflicts → forced open; every OTHER section is forced closed
+    // (identical content is noise pushing the real diff below the fold),
+    // overriding the heuristic — body's heuristic said open, it closes.
+    expect(collapsed).toEqual({ headers: false, pathParams: true, params: true, body: true })
   })
 
   it('ignores unrelated fields present in the conflict map (url, method, notes, …)', () => {
@@ -47,6 +49,7 @@ describe('computeInitialPanelCollapsed', () => {
       EMPTY_DEFAULTS,
       { url: true, method: true, notes: true, headers: false, pathParams: false, params: false, body: false }
     )
-    expect(collapsed).toEqual({ headers: true, pathParams: true, params: true, body: false })
+    // No section conflicts → in conflict mode they ALL start collapsed.
+    expect(collapsed).toEqual({ headers: true, pathParams: true, params: true, body: true })
   })
 })

@@ -3,6 +3,10 @@
 	height: 100%;
 }
 
+/* Hard-block the value-editing surfaces one level below the event guards
+ * (see ReadOnlyOverlay.tsx): even a stray un-guarded event path can't reach
+ * a form control. Deliberately NOT applied to navigation surfaces (tab
+ * strips, pane headers) — those must stay clickable in a read-only panel. */
 .ecui-read-only-overlay input,
 .ecui-read-only-overlay textarea,
 .ecui-read-only-overlay select,

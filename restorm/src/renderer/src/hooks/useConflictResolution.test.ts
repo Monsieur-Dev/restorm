@@ -152,4 +152,31 @@ describe('useConflictResolution', () => {
     rerender({ v: { path: 'api.restorm', base: null, ours: OURS_YAML, theirs: THEIRS_YAML } })
     expect(result.current.quickConfigPicks).toEqual({})
   })
+
+  it('pickedSideById derives from equality: the fresh resolved copy (= ours) greens "user", a theirs pick flips to "server"', () => {
+    const { result } = renderHook(() => useConflictResolution(VERSIONS))
+    expect(result.current.pickedSideById['r1']).toBe('user')
+    act(() => { result.current.pickTheirsVersion('r1') })
+    expect(result.current.pickedSideById['r1']).toBe('server')
+  })
+
+  it('a hand edit re-derives the checks: a divergent edit clears both, editing back into equality with a side re-greens it', () => {
+    const { result } = renderHook(() => useConflictResolution(VERSIONS))
+    const resolved = result.current.getResolvedEntity('r1') as { url: string }
+    resolved.url = 'https://neither.example.com'
+    act(() => { result.current.onResolvedEdited('r1') })
+    expect(result.current.pickedSideById['r1']).toBeNull()
+    resolved.url = 'https://theirs.example.com'
+    act(() => { result.current.onResolvedEdited('r1') })
+    expect(result.current.pickedSideById['r1']).toBe('server')
+  })
+
+  it('scenario conflicts derive equality from the graph + notes (no field diff exists for them)', () => {
+    const { result } = renderHook(() => useConflictResolution(VERSIONS))
+    expect(result.current.pickedSideById['s1']).toBe('user')
+    act(() => { result.current.pickTheirsVersion('s1') })
+    expect(result.current.pickedSideById['s1']).toBe('server')
+    act(() => { result.current.onScenarioChange('s1', { notes: 'diverged' }) })
+    expect(result.current.pickedSideById['s1']).toBeNull()
+  })
 })

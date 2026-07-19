@@ -4,6 +4,7 @@ import type { FolderItem } from '../../../shared/types/folderTypes'
 import type { Scenario } from '../../../shared/types/scenario'
 import { identifyConflictingEntities, type ConflictEntity } from '../../../shared/git/gitConflictModel'
 import { cloneEntityForResolution } from '../services/conflictEntityClone'
+import { computeEntityFieldDiff } from '../services/conflictFieldDiff'
 import { processAfterDeserialization } from '../utils/serialization'
 
 /** Per-config ours/theirs overrides, keyed conflictId → configName → side. */
@@ -36,14 +37,36 @@ export interface UseConflictResolutionResult {
   pickQuickConfigVersion: (conflictId: string, configName: string, side: 'ours' | 'theirs') => void
   /** Per-conflict pick counter — remount key for the resolved panel. */
   resolvedEpochById: Record<string, number>
-  /** Which side the resolved copy mirrors ('user'/'server'), null once hand-edited. */
+  /** DERIVED, not event-tracked: which side the resolved copy currently
+   * EQUALS (per the same field comparison the diff highlighting uses) —
+   * 'user' when it matches ours, 'server' when it matches theirs, null
+   * otherwise. Hand-editing the resolved copy back into equality with a
+   * side re-greens that side's check with no pick needed. */
   pickedSideById: Record<string, 'user' | 'server' | null>
-  /** Report a hand edit of the resolved panel (clears the green checks). */
+  /** Report a hand edit of the resolved panel. The resolved entities are
+   * reactive proxies mutated in place (no React state change), so this
+   * bump is what triggers re-deriving `pickedSideById`. */
   onResolvedEdited: (conflictId: string) => void
 }
 
 function isScenarioItem(item: FolderItem): item is Scenario {
   return (item as { type?: string }).type === 'scenario'
+}
+
+/** Whether the resolved copy equals one side, using the SAME comparison the
+ * diff highlighting is built on (`computeEntityFieldDiff`) so "the check is
+ * green" and "nothing is red-bordered against that side" can never disagree.
+ * Scenario kinds aren't field-diffed — compare their graph + notes instead. */
+function resolvedEqualsSide(conflict: ConflictEntity, resolved: FolderItem, side: FolderItem): boolean {
+  const diff = computeEntityFieldDiff(conflict.kind, resolved, side)
+  if (diff) {
+    return Object.values(diff.fields).every((differs) => !differs) && !diff.conflictingQuickConfigNames?.length
+  }
+  if (isScenarioItem(resolved) && isScenarioItem(side)) {
+    return JSON.stringify([resolved.nodes, resolved.edges, resolved.notes ?? '']) ===
+      JSON.stringify([side.nodes, side.edges, side.notes ?? ''])
+  }
+  return false
 }
 
 function buildInitialResolved(conflicts: ConflictEntity[]): Record<string, FolderItem> {
@@ -79,10 +102,11 @@ export function useConflictResolution(versions: GitConflictVersions | null): Use
   // pick that swaps the resolved entity must REMOUNT the panel (key) for the
   // picked values to show — a plain re-render keeps the pre-pick fields.
   const [resolvedEpochById, setResolvedEpochById] = useState<Record<string, number>>({})
-  // Which side the resolved copy currently mirrors — drives the green check
-  // on the matching version column. Cleared as soon as the user hand-edits
-  // the resolved panel (the copy no longer equals either side verbatim).
-  const [pickedSideById, setPickedSideById] = useState<Record<string, 'user' | 'server' | null>>({})
+  // The resolved entities are reactive proxies mutated in place — hand edits
+  // change no React state, so `pickedSideById` below could never re-derive
+  // without this revision counter, bumped by `onResolvedEdited`. Only the
+  // setter is needed: the value's sole job is forcing the re-render.
+  const [, setResolvedRevision] = useState(0)
 
   if (conflicts !== priorConflicts) {
     setPriorConflicts(conflicts)
@@ -90,7 +114,20 @@ export function useConflictResolution(versions: GitConflictVersions | null): Use
     setResolvedById(buildInitialResolved(conflicts))
     setQuickConfigPicks({})
     setResolvedEpochById({})
-    setPickedSideById({})
+    setResolvedRevision(0)
+  }
+
+  // Derived every render (kept fresh by `resolvedRevision` bumps and
+  // `resolvedById` swaps): which column's check paints green. Deliberately
+  // NOT tracking picks as events — Yoann's rule is pure equality: resolved
+  // == ours → user check green; == theirs → server check green; else none.
+  const pickedSideById: Record<string, 'user' | 'server' | null> = {}
+  for (const conflict of conflicts) {
+    const resolved = resolvedById[conflict.id]
+    pickedSideById[conflict.id] = !resolved ? null
+      : resolvedEqualsSide(conflict, resolved, conflict.ours) ? 'user'
+        : resolvedEqualsSide(conflict, resolved, conflict.theirs) ? 'server'
+          : null
   }
 
   const selectConflict = useCallback((id: string) => { setSelectedConflictId(id) }, [])
@@ -107,7 +144,6 @@ export function useConflictResolution(versions: GitConflictVersions | null): Use
     if (!conflict) return
     setResolvedById((prev) => ({ ...prev, [conflictId]: cloneEntityForResolution(conflict.ours) }))
     setResolvedEpochById((prev) => ({ ...prev, [conflictId]: (prev[conflictId] ?? 0) + 1 }))
-    setPickedSideById((prev) => ({ ...prev, [conflictId]: 'user' }))
   }, [conflicts])
 
   const pickTheirsVersion = useCallback((conflictId: string) => {
@@ -115,13 +151,12 @@ export function useConflictResolution(versions: GitConflictVersions | null): Use
     if (!conflict) return
     setResolvedById((prev) => ({ ...prev, [conflictId]: cloneEntityForResolution(conflict.theirs) }))
     setResolvedEpochById((prev) => ({ ...prev, [conflictId]: (prev[conflictId] ?? 0) + 1 }))
-    setPickedSideById((prev) => ({ ...prev, [conflictId]: 'server' }))
   }, [conflicts])
 
-  /** The resolved panel reports any hand edit here — the copy then matches
-   * neither side verbatim, so both green checks go out. */
-  const onResolvedEdited = useCallback((conflictId: string) => {
-    setPickedSideById((prev) => (prev[conflictId] ? { ...prev, [conflictId]: null } : prev))
+  /** The resolved panel reports any hand edit here — re-derive the checks
+   * (the edit may have broken equality with a side, or restored it). */
+  const onResolvedEdited = useCallback((_conflictId: string) => {
+    setResolvedRevision((revision) => revision + 1)
   }, [])
 
   const onScenarioChange = useCallback((
@@ -133,7 +168,6 @@ export function useConflictResolution(versions: GitConflictVersions | null): Use
       if (!current || !isScenarioItem(current)) return prev
       return { ...prev, [conflictId]: { ...current, ...patch } }
     })
-    setPickedSideById((prev) => (prev[conflictId] ? { ...prev, [conflictId]: null } : prev))
   }, [])
 
   const pickQuickConfigVersion = useCallback((conflictId: string, configName: string, side: 'ours' | 'theirs') => {

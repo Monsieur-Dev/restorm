@@ -87,6 +87,13 @@ export interface HTTPRequestTabViewProps {
    * params/pathParams/body) as a whole. Only ever set by
    * `ConflictEntityPanel`; `undefined` in the live (non-conflict) editor. */
   conflictFieldDiff?: EntityFieldDiff
+  /** The diff's per-section booleans, used ONLY for the initial
+   * expand/collapse of the KV sections (differing sections open, identical
+   * ones closed). Passed to ALL THREE conflict columns — unlike
+   * `conflictFieldDiff`, which also paints red borders and is therefore
+   * kept off the editable resolved panel — so the columns stay visually
+   * aligned section-for-section. */
+  conflictPanelFields?: Record<string, boolean>
   /** Preselects the tab holding the conflicting field (AC#5) — forwarded
    * to `BaseRequestTabView`'s `defaultActiveTabId`. */
   defaultActiveTabId?: string
@@ -158,6 +165,7 @@ function getBodyFilePath(request: HTTPRequest | AuthenticationRequest): string {
 export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
   request,
   conflictFieldDiff,
+  conflictPanelFields,
   defaultActiveTabId,
   activeRequestTabId,
   onRequestTabChange,
@@ -257,7 +265,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
         params: request.params.length === 0,
         body: false
       },
-      conflictFieldDiff?.fields
+      conflictPanelFields ?? conflictFieldDiff?.fields
     )
   })
   const handlePanelCollapsedChange = useCallback((arr: boolean[]) => {

@@ -246,18 +246,20 @@ server versions.
 `ReadOnlyOverlay` is how restorm's `MyEntityPanel` above achieves "EXACTLY
 the normal entity panel, read-only" without a bespoke `readOnly` prop
 threaded through every protocol view: it renders the host's UNMODIFIED
-panel wrapped in a div carrying the DOM `inert` attribute, which takes the
-whole subtree out of the tab order and blocks focus, typing, clicks and
-pointer events — so the panel can't be mutated by mouse OR keyboard.
-Wheel/trackpad scrolling still works (`inert` doesn't gate scrolling), so a
-tall panel stays browsable; text selection and interaction are intentionally
-off. A scoped `pointer-events: none` CSS rule is retained as a fallback for
-any environment that doesn't honour `inert`. Because `inert` also blocks the
-click that toggles a collapsible section, a KV section (headers/params/path
-params) that DIFFERS between the two sides starts EXPANDED in every panel —
-the host reads the field-diff and seeds those sections open, so the user sees
-the line-by-line differences on the read-only panels without needing a click
-they can't make. restorm's actual dispatcher
+panel and blocks every MUTATING interaction at the wrapper (capture-phase
+handlers stop `click`/`dblclick`/`contextmenu`, all text input —
+`beforeinput`/`paste`/`cut`/`drop` — and mutating keys before any child,
+React or native, sees them) while keeping NAVIGATION alive: tab strips
+(`[role="tab"]`) and collapsible `SplitView` pane headers (minus their
+header-actions cluster, which holds mutating buttons) stay clickable, and
+read-only keys (arrows, Tab, PageUp/Down, Home/End, Escape, Ctrl/Cmd+A/C)
+still work. So a read-only snapshot can be INSPECTED — open its tabs, fold
+and unfold its sections, scroll, select and copy — but never edited. A
+scoped `pointer-events: none` CSS rule on form controls hard-blocks the
+value-editing surfaces one level deeper as a defensive fallback. The KV
+sections' initial expansion mirrors the field-diff exactly (differing
+sections open, identical ones closed — `conflictPanelExpansion.ts` host-
+side), which keeps the differences above the fold in all three columns. restorm's actual dispatcher
 (`restorm/src/renderer/src/components/GitConflict/ConflictEntityPanel.tsx`)
 picks the right panel per entity kind — folder / environment-folder /
 scenario / every request protocol (HTTP, auth, GraphQL, gRPC, SOAP,

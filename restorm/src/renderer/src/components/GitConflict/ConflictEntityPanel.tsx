@@ -37,11 +37,10 @@ export interface ConflictEntityPanelProps {
    * that aren't field-diffed (scenarios, by design). */
   fieldDiff?: EntityFieldDiff
   /** Controlled request-side tab selection, shared by the modal across its
-   * 3 columns. The read-only columns sit under an `inert` overlay, so their
-   * own tab strips can't be clicked — instead the EDITABLE (resolved)
-   * column's tab strip drives the selection (`onActiveTabChange`) and every
-   * column mirrors it (`activeTabId`), keeping the side-by-side comparison
-   * on the same tab. Request kinds only — folder/scenario panels ignore it. */
+   * 3 columns: any column's tab strip drives it (`ReadOnlyOverlay` lets
+   * tab clicks through as navigation) and every column mirrors it, keeping
+   * the side-by-side comparison on the same tab. Request kinds only —
+   * folder/scenario panels ignore it. */
   activeTabId?: string
   onActiveTabChange?: (tabId: string) => void
   'data-testid'?: string
@@ -157,6 +156,14 @@ function renderRequest(
     ...(activeTabId !== undefined ? { activeRequestTabId: activeTabId } : {}),
     ...(onActiveTabChange !== undefined ? { onRequestTabChange: onActiveTabChange } : {})
   }
+  // Expansion-only diff map for ALL 3 columns (the resolved panel gets it
+  // too, unlike the red-border `conflictFieldDiff`) so the columns open the
+  // same sections and stay visually aligned. HTTP-only: it's the one panel
+  // with per-section collapse driven by the diff's section booleans.
+  const httpPanelProps = {
+    ...fieldDiffProps,
+    ...(fieldDiff ? { conflictPanelFields: fieldDiff.fields } : {})
+  }
   // AC#2/#5 blanket safety rule (`conflictSafeLiveState.ts`): every panel
   // rendered here is a STATIC historical snapshot, never a live session —
   // `conflictMode` forces isListening/isSubscribing false and skips every
@@ -166,7 +173,7 @@ function renderRequest(
   if (isHTTPPanelRequest(request)) {
     return (
       <EnvironmentProvider environments={undefined}>
-        <HTTPRequestTabView request={request} showCodeSnippets={false} conflictMode={conflictMode} {...fieldDiffProps} />
+        <HTTPRequestTabView request={request} showCodeSnippets={false} conflictMode={conflictMode} {...httpPanelProps} />
       </EnvironmentProvider>
     )
   }
