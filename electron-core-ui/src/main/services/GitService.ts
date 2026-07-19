@@ -147,8 +147,12 @@ export class GitService {
     // repository regardless of `baseDir` — the e2e suite running under the
     // repo's pre-push hook actually committed into the app's own source
     // branch through this. `baseDir` must be the single source of truth.
+    // SSH_ASKPASS is stripped too: simple-git REFUSES an explicit env that
+    // carries it (allowUnsafeAskPass safety) — and a git-hook context
+    // exports it alongside GIT_DIR, which broke isGitRepo → the whole GIT
+    // UI read as "not a repo".
     const cleanedEnv = Object.fromEntries(
-      Object.entries(process.env).filter(([key]) => !key.startsWith('GIT_'))
+      Object.entries(process.env).filter(([key]) => !key.startsWith('GIT_') && key !== 'SSH_ASKPASS')
     ) as Record<string, string>
     return simpleGit({ baseDir: folder }).env(cleanedEnv)
   }

@@ -32,7 +32,7 @@ export function getE2ECoverageOutputDirs(restormRoot: string): { nycOutputDir: s
  * under the full pre-push run (standalone shells carry no GIT_DIR).
  * Mirrors `gitServerSeed.gitEnv()`'s stripping for the seed commands. */
 export function withE2ECoverageEnv(restormRoot: string, env: NodeJS.ProcessEnv): NodeJS.ProcessEnv {
-  const sanitized = Object.fromEntries(Object.entries(env).filter(([key]) => !key.startsWith('GIT_')))
+  const sanitized = Object.fromEntries(Object.entries(env).filter(([key]) => !key.startsWith('GIT_') && key !== 'SSH_ASKPASS'))
   if (!isE2ECoverageEnabled()) return sanitized
 
   const { v8OutputDir } = getE2ECoverageOutputDirs(restormRoot)
