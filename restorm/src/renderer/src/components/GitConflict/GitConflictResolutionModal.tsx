@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Modal, Button, Breadcrumb, ConflictResolutionView } from 'electron-core-ui/renderer'
 import type { UseConflictResolutionResult } from '../../hooks/useConflictResolution'
@@ -89,6 +89,21 @@ export const GitConflictResolutionModal: React.FC<GitConflictResolutionModalProp
   const selectedConflict = conflicts.find((c) => c.id === selectedConflictId)
   const ancestorSegments = selectedConflict?.pathSegments ?? []
 
+  // Monaco-backed fields (URL, body) commit their edit through a ~200ms
+  // debounce: the input event that reaches our capture handler fires BEFORE
+  // the reactive proxy holds the new value. Re-derive once more after the
+  // debounce flushed, or the LAST keystroke's equality (green checks) would
+  // be computed against the pre-edit value and stick.
+  const resolvedEditTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  useEffect(() => () => {
+    if (resolvedEditTimerRef.current !== null) clearTimeout(resolvedEditTimerRef.current)
+  }, [])
+  const reportResolvedEdited = (conflictId: string): void => {
+    onResolvedEdited(conflictId)
+    if (resolvedEditTimerRef.current !== null) clearTimeout(resolvedEditTimerRef.current)
+    resolvedEditTimerRef.current = setTimeout(() => { onResolvedEdited(conflictId) }, 350)
+  }
+
   return (
     <Modal
       isOpen={isOpen}
@@ -175,8 +190,8 @@ export const GitConflictResolutionModal: React.FC<GitConflictResolutionModalProp
                     * callbacks instead. */}
                   <div
                     style={panelBodyStyle}
-                    onInputCapture={() => { onResolvedEdited(id) }}
-                    onChangeCapture={() => { onResolvedEdited(id) }}
+                    onInputCapture={() => { reportResolvedEdited(id) }}
+                    onChangeCapture={() => { reportResolvedEdited(id) }}
                   >
                     <ConflictEntityPanel
                       key={`${id}:${resolvedEpochById[id] ?? 0}`}

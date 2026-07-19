@@ -485,3 +485,59 @@ Then('the generated commit title lists both changed entity kinds', async () => {
   const titleValue = await modal.locator('[data-testid="push-modal-title-input-input"]').inputValue()
   expect(titleValue).toBe('Update to 1 folder, 1 request')
 })
+
+// ---------------------------------------------------------------------------
+// Equality-derived side checks + identity band
+
+/** The span wrapping one side's "use this version" check — `.picked` on it
+ * is what paints the check green (equality-derived, see
+ * `useConflictResolution.pickedSideById`). */
+function useActionWrapper(p: Page, side: 'user' | 'server'): Locator {
+  return p.locator(`span.conflict-resolution-use-action:has([data-testid="conflict-resolution-view-use-${side}-version"])`)
+}
+
+Then('the identity band shows the conflicting request', async () => {
+  const p = requirePage()
+  const band = p.locator('[data-testid="git-conflict-entity-band"]')
+  await expect(band).toBeVisible({ timeout: 10000 })
+  await expect(band.locator('[data-testid="git-conflict-entity-breadcrumb"]')).toContainText('Find pet by ID')
+})
+
+Then('the your-version check is green and the server-version check is not', async () => {
+  const p = requirePage()
+  // The resolved copy seeds from OURS, so equality greens the user side
+  // from the very first render — no pick needed.
+  await expect(useActionWrapper(p, 'user')).toHaveClass(/picked/, { timeout: 10000 })
+  await expect(useActionWrapper(p, 'server')).not.toHaveClass(/picked/)
+})
+
+When("I use the server's version", async () => {
+  const p = requirePage()
+  await p.locator('[data-testid="conflict-resolution-view-use-server-version"]').click()
+})
+
+Then('the server-version check is green and the your-version check is not', async () => {
+  const p = requirePage()
+  await expect(useActionWrapper(p, 'server')).toHaveClass(/picked/, { timeout: 10000 })
+  await expect(useActionWrapper(p, 'user')).not.toHaveClass(/picked/)
+})
+
+When("I tweak the resolved request's URL", async () => {
+  const p = requirePage()
+  const resolvedPane = conflictPaneBySide(p, 'resolved')
+  const urlInput = resolvedPane.locator('[data-testid="http-request-url-input"]:visible').first()
+  await expect(urlInput).toBeVisible({ timeout: 10000 })
+  const viewport = urlInput.locator('.monaco-editor').first()
+  await viewport.click({ force: true })
+  await p.keyboard.press('Control+A')
+  await p.keyboard.press('Delete')
+  await p.keyboard.type('https://neither.example.com/pets/1')
+  await p.keyboard.press('Tab')
+  await p.waitForTimeout(300)
+})
+
+Then('neither side check is green', async () => {
+  const p = requirePage()
+  await expect(useActionWrapper(p, 'user')).not.toHaveClass(/picked/, { timeout: 10000 })
+  await expect(useActionWrapper(p, 'server')).not.toHaveClass(/picked/)
+})

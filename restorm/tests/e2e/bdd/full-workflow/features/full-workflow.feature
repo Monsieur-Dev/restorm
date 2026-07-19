@@ -339,7 +339,17 @@ Feature: Full workflow end-to-end scenario
     # CodeEditor's 200ms debounce.
     When I expand the sidebar folder "Swagger Petstore"
     And I expand the sidebar folder "pet"
-    And I click the sidebar request "Find pet by ID"
+
+    # Cloning a request must land in the search index immediately — the
+    # clone emits the same document-created events as any create, so the
+    # copy is searchable without a file reload.
+    When I clone the sidebar request "Find pet by ID"
+    And I open the search bar
+    And I search for "Find pet by ID (copy)"
+    Then the title-bar search results should contain a hit mentioning "(copy)"
+    When I close the search bar
+
+    When I click the sidebar request "Find pet by ID"
     Then a request tab for "Find pet by ID" should be open
     When I focus the URL field at the start
     And I type "debounce" character by character with delay 0 ms

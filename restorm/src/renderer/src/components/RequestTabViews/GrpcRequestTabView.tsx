@@ -71,8 +71,8 @@ export interface GrpcRequestTabViewProps {
   defaultActiveTabId?: string
   /** Fully-controlled request-side tab pair, forwarded verbatim to
    * `BaseRequestTabView`. The conflict panels use it to mirror the tab
-   * selection across the three columns (the read-only columns sit under an
-   * `inert` overlay, so their own tab strips can't be clicked). */
+   * selection across the three columns — any column's strip drives it
+   * (`ReadOnlyOverlay` lets tab clicks through as navigation). */
   activeRequestTabId?: string
   onRequestTabChange?: (tabId: string) => void
   /** Hides the (non-editable, generated) Code Snippets tab (AC#5). */

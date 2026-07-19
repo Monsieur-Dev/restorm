@@ -55,3 +55,15 @@ Feature: Git conflict resolution
     Given I open a project with unsaved local edits to a folder and a request
     When I open the push dialog
     Then the generated commit title lists both changed entity kinds
+
+  Scenario: The side checks mirror equality with each version and the identity band situates the entity
+    Given a remote has diverged on the request
+    And I open my own conflicting clone of that remote
+    When I pull
+    Then the conflict-resolution screen appears
+    And the identity band shows the conflicting request
+    And the your-version check is green and the server-version check is not
+    When I use the server's version
+    Then the server-version check is green and the your-version check is not
+    When I tweak the resolved request's URL
+    Then neither side check is green
