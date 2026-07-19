@@ -25,13 +25,13 @@ import {
   KafkaRequest
 } from '../../../shared/models/requests'
 import type { HTTPMethod } from '../../../shared/models/types'
-import { findItemById, findItemWithBreadcrumbs, getFolderIcon, getNearestEnvironmentsForBreadcrumbs } from '../utils/treeSearch'
+import { findItemById, findItemWithParent, findItemWithBreadcrumbs, getFolderIcon, getNearestEnvironmentsForBreadcrumbs } from '../utils/treeSearch'
 import { cloneForEventBus } from '../utils/cloneForEventBus'
 import { generateUniqueId, cloneItemInTree, removeItemFromTree, insertItemIntoTree } from '../utils/treeManipulation'
 import { mapAllWorkbenchTabs, tabReferencesItem } from '../utils/workbenchTabs'
 import type { WorkbenchTree, EditorTab } from 'electron-core-ui/renderer'
 import type { BreadcrumbItem, FolderTab, EnvironmentFolderTab, HTTPRequestTab, ScenarioEditorTab } from '../../../shared/types/editor'
-import { makeReactiveFolder, makeReactiveRequest } from '../types/reactive'
+import { makeReactiveFolder, makeReactiveRequest, makeReactiveFolderItem } from '../types/reactive'
 import { DocumentEvents, type DocumentChangedPayload } from '../services/DocumentEvents'
 import { eventBus } from 'electron-core-ui/renderer'
 import type { AddChildKind } from '../components/MainView/Sidebar/contextMenuBuilder'
@@ -130,6 +130,61 @@ export interface UseItemOperationsReturn {
   confirmDelete: (itemId: string) => void
   cancelDelete: () => void
   handleSidebarItemRename: (payload: ListViewItemEventPayload, newName: string) => void
+}
+
+/**
+ * Emit the document-created events for a freshly cloned subtree so the new
+ * items reach the save-unit registry (dirty → autosave rewrites the file, the
+ * git push badge lights) and the main-process search index — the same signals
+ * a normal create fires. `cloneItemInTree` only splices the deep copy into the
+ * tree; without these events the clone is invisible to both autosave and search
+ * until the next full file load.
+ *
+ * Mirrors the import path: one CREATED event per item — FOLDER_CREATED for
+ * folders / environment folders, ENVIRONMENT_CREATED for every env / sub-env on
+ * an environment folder (so ContextService can resolve handlebars variables),
+ * REQUEST_CREATED for requests (carrying `parentFolderId` when nested).
+ * Scenarios carry no per-item document event (they sync via `collections:sync`,
+ * mirroring `handleAddChildItem`); their nested requests still get theirs.
+ * `cloneForEventBus` (not a JSON round-trip) preserves `SecretValue` plaintext
+ * on the way to main.
+ */
+export function emitClonedSubtreeCreated(item: FolderItem, parentFolderId?: string): void {
+  const emitEnvironmentTree = (env: Environment, envFolderId: string, parentEnvironmentId: string | null): void => {
+    eventBus.emitSync(DocumentEvents.ENVIRONMENT_CREATED, {
+      id: env.id,
+      type: 'environment',
+      document: cloneForEventBus(env),
+      parentFolderId: envFolderId,
+      parentEnvironmentId: parentEnvironmentId ?? undefined
+    } as DocumentChangedPayload)
+    for (const child of env.subEnvironments ?? []) emitEnvironmentTree(child, envFolderId, env.id)
+  }
+
+  if (isScenario(item)) {
+    for (const child of (item as { items?: FolderItem[] }).items ?? []) {
+      emitClonedSubtreeCreated(child, item.id)
+    }
+    return
+  }
+  if (isAnyFolder(item)) {
+    eventBus.emitSync(DocumentEvents.FOLDER_CREATED, {
+      id: item.id,
+      type: 'folder',
+      document: cloneForEventBus(item)
+    } as DocumentChangedPayload)
+    if (isEnvironmentFolder(item)) {
+      for (const env of item.environments) emitEnvironmentTree(env, item.id, null)
+    }
+    for (const child of item.items) emitClonedSubtreeCreated(child, item.id)
+    return
+  }
+  eventBus.emitSync(DocumentEvents.REQUEST_CREATED, {
+    id: item.id,
+    type: 'request',
+    document: cloneForEventBus(item),
+    ...(parentFolderId !== undefined ? { parentFolderId } : {})
+  } as DocumentChangedPayload)
 }
 
 export function useItemOperations(options: UseItemOperationsOptions): UseItemOperationsReturn {
@@ -249,21 +304,37 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
     const clonedItem = cloneItemInTree(rootItems, itemId, t('sidebar.contextMenu.copySuffix', 'copy'))
     if (!clonedItem) return
 
+    // `deepCloneItem` returns a plain, non-reactive POJO. Wrap the clone (and
+    // its subtree) reactive and swap it into the tree in place so later edits
+    // emit REQUEST_UPDATED / FOLDER_UPDATED like any other item.
+    const { parent, index } = findItemWithParent(rootItems, clonedItem.id)
+    const parentFolderId = parent && (isAnyFolder(parent) || isScenario(parent)) ? parent.id : undefined
+    const reactiveClone = makeReactiveFolderItem(clonedItem, parentFolderId)
+    if (index >= 0) {
+      const siblings = parent ? (parent as { items: FolderItem[] }).items : rootItems
+      if (siblings[index]?.id === reactiveClone.id) siblings[index] = reactiveClone
+    }
+
+    // Announce the creation. `cloneItemInTree` alone marks nothing dirty and
+    // indexes nothing — this is what lights the git push badge (autosave) and
+    // makes the clone findable in search immediately, like a normal create.
+    emitClonedSubtreeCreated(reactiveClone, parentFolderId)
+
     // Force React re-render by creating new reference
     setRootItems((prevItems) => [...prevItems])
 
     // Open the clone in the workbench, as a click on it would.
-    const { breadcrumbs } = findItemWithBreadcrumbs(rootItems, clonedItem.id)
+    const { breadcrumbs } = findItemWithBreadcrumbs(rootItems, reactiveClone.id)
     if (breadcrumbs.length > 0) {
-      if (isScenario(clonedItem)) {
-        openScenarioEditorTab(clonedItem, breadcrumbs)
-      } else if (isEnvironmentFolder(clonedItem)) {
-        openEnvironmentFolderTab(clonedItem, breadcrumbs)
-      } else if (isFolder(clonedItem)) {
-        openFolderTab(clonedItem, breadcrumbs)
-      } else if (isRequest(clonedItem)) {
+      if (isScenario(reactiveClone)) {
+        openScenarioEditorTab(reactiveClone, breadcrumbs)
+      } else if (isEnvironmentFolder(reactiveClone)) {
+        openEnvironmentFolderTab(reactiveClone, breadcrumbs)
+      } else if (isFolder(reactiveClone)) {
+        openFolderTab(reactiveClone, breadcrumbs)
+      } else if (isRequest(reactiveClone)) {
         const envs = getNearestEnvironmentsForBreadcrumbs(rootItems, breadcrumbs)
-        openAnyRequestTab(clonedItem, breadcrumbs, envs)
+        openAnyRequestTab(reactiveClone, breadcrumbs, envs)
       }
     }
   }, [rootItems, setRootItems, t, openFolderTab, openScenarioEditorTab, openEnvironmentFolderTab, openAnyRequestTab])

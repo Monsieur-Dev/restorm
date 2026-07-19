@@ -226,3 +226,20 @@ Feature: Dirty-state propagation across nested units
     Then the window should be dirty
     When I press backspace in the first env folder variable value
     Then the window should be clean
+
+  # Cloning a request must behave like any create: it emits the document-
+  # created events that mark the new save-unit dirty (autosave rewrites the
+  # file, the git push badge lights) AND index it for search. A clone that
+  # skipped those events stayed invisible to both autosave and search until
+  # the next full file reload.
+  Scenario: Cloning a request marks it dirty and indexes it for search
+    Given a new single-file YAML collection named "clone-index-probe"
+    When I import the Petstore sample
+    Then the window should be clean
+
+    When I clone the sidebar request "Find pet by ID"
+    Then the window should be dirty
+
+    When I open the search bar
+    And I search for "Find pet by ID (copy)"
+    Then the title-bar search results should contain a hit mentioning "(copy)"
