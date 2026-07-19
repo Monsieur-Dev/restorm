@@ -641,3 +641,15 @@ describe('GitService', () => {
     })
   })
 })
+
+describe('GitService absolute-folder guard', () => {
+  it('refuses an empty or relative folder instead of falling back to process.cwd()', async () => {
+    const service = new GitService()
+    // Both the read path (status → this.git) and the write path
+    // (writeResolvedConflict) must fail LOUDLY: simple-git would otherwise
+    // operate on process.cwd() — the source repository in dev/e2e.
+    await expect(service.getStatus('')).rejects.toThrow(/non-absolute/)
+    await expect(service.getStatus('relative/dir')).rejects.toThrow(/non-absolute/)
+    await expect(service.writeResolvedConflict('', 'api.restorm', 'x')).rejects.toThrow(/non-absolute/)
+  })
+})

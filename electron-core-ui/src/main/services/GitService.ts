@@ -133,6 +133,14 @@ export class GitService {
   }
 
   private git(folder: string): SimpleGit {
+    // HARD guard: an empty or relative folder would make simple-git fall
+    // back to `process.cwd()` — in dev/e2e that is the SOURCE REPOSITORY,
+    // and a stray commit/push then lands on the development branch (this
+    // actually happened: an e2e run committed seed-file churn into the
+    // app's own branch). No caller legitimately passes a relative folder.
+    if (!isAbsolute(folder)) {
+      throw new Error(`[GitService] refusing non-absolute git folder "${folder}" — a git operation must never fall back to process.cwd()`)
+    }
     return simpleGit({ baseDir: folder })
   }
 
@@ -398,6 +406,11 @@ export class GitService {
    * (committing) is a separate `commit()` call once every conflict in the
    * pull's `conflictFiles` has been written. */
   public async writeResolvedConflict(folder: string, filePath: string, content: string): Promise<void> {
+    // Same cwd-fallback guard as `git()` — this method WRITES a file, so a
+    // relative folder would drop the resolved YAML into process.cwd().
+    if (!isAbsolute(folder)) {
+      throw new Error(`writeResolvedConflict: refusing non-absolute folder "${folder}"`)
+    }
     if (!this.isPathWithinFolder(folder, filePath)) {
       throw new Error(`writeResolvedConflict: filePath escapes the repo folder: ${filePath}`)
     }
