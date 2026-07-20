@@ -726,6 +726,7 @@ export function ensureCoreUiWebApiShim(): void {
   const gitApi: CoreUiGitApi = {
     isRepo: (): Promise<boolean> => Promise.resolve(false),
     getStatus: (): Promise<GitStatus> => Promise.resolve({ branch: null, ahead: 0, behind: 0, files: [] }),
+    log: () => Promise.resolve([]),
     stage: (): Promise<void> => Promise.resolve(),
     commit: (): Promise<GitCommitResult> => Promise.resolve({ success: false, error: 'Git is not available in the web build' }),
     push: (): Promise<GitPushResult> => Promise.resolve({ success: false, error: 'Git is not available in the web build' }),

@@ -346,7 +346,8 @@
       "pushTooltip": "Depoya gönder",
       "pullTooltip": "Depodan çek",
       "nothingToPushTooltip": "Gönderilecek değişiklik yok",
-      "refreshTooltip": "Gönderilecek veya çekilecek değişiklikleri denetle"
+      "refreshTooltip": "Gönderilecek veya çekilecek değişiklikleri denetle",
+      "historyTooltip": "Git geçmişi"
     }
   },
   "mcpToolTitles": {
@@ -444,5 +445,13 @@
     "resolvedTitle": "Çözüldü",
     "selectAConflict": "Çözmek için bir çakışma seçin",
     "useThisVersion": "Bu sürümü kullan"
+  },
+  "gitHistory": {
+    "commits": "Commitler",
+    "noCommitSelected": "Ayrıntıları görmek için bir commit seçin",
+    "author": "Yazar",
+    "date": "Tarih",
+    "hash": "Hash",
+    "parents": "Üst commitler"
   }
 }

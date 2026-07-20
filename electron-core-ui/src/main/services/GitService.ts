@@ -16,7 +16,7 @@ import type {
   GitFetchCompareResult,
   GitConflictVersions,
   GitConflictCommitTimestamps
-} from '../../types/git'
+, GitLogEntry} from '../../types/git'
 import { NO_GIT_STATE } from '../../types/git'
 
 /** Debounce window for folder-watch-triggered refreshes, tunable per host. */
@@ -271,6 +271,38 @@ export class GitService {
         logger.error('[GitService] commit failed', { folder, error: String(error) })
         return { success: false, error: String(error) }
       }
+    })
+  }
+
+  /** Full history for the history view: every ref, topologically ordered
+   * (newest first). Field/record separators are control chars so no commit
+   * message can break the parse. */
+  public async log(folder: string): Promise<GitLogEntry[]> {
+    return this.withFolderLock(folder, async () => {
+      const FIELD = String.fromCharCode(31)
+      const RECORD = String.fromCharCode(30)
+      const format = ['%H', '%P', '%an', '%ae', '%aI', '%D', '%s', '%b'].join(`%x1f`)
+      const raw = await this.git(folder).raw([
+        'log', '--all', '--topo-order', '--date=iso-strict', `--pretty=format:${format}%x1e`
+      ])
+      const entries: GitLogEntry[] = []
+      for (const record of raw.split(RECORD)) {
+        const trimmed = record.replace(/^\n/, '')
+        if (trimmed.trim() === '') continue
+        const [hash, parents, authorName, authorEmail, date, refs, subject, body = ''] = trimmed.split(FIELD)
+        if (!hash) continue
+        entries.push({
+          hash,
+          parents: (parents ?? '').split(' ').filter((p) => p !== ''),
+          authorName: authorName ?? '',
+          authorEmail: authorEmail ?? '',
+          date: date ?? '',
+          refs: (refs ?? '').split(',').map((r) => r.trim()).filter((r) => r !== ''),
+          subject: subject ?? '',
+          body: body
+        })
+      }
+      return entries
     })
   }
 

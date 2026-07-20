@@ -2383,6 +2383,7 @@
     "conflictResolvedBody": "マージの競合が解決され、コミットされました。",
     "conflictResolutionTitle": "競合を解決",
     "conflictEntityPath": "競合しているアイテムの場所",
+    "historyTitle": "Git 履歴",
     "conflictCancel": "キャンセル",
     "conflictFinish": "完了",
     "conflictReadOnlyEntityNotice": "この種類のエンティティはここでは編集できません。上で自分のバージョンか相手のバージョンを選択してください。",

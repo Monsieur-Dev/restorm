@@ -2384,6 +2384,7 @@
     "conflictResolvedBody": "Din merge-konflikt er blevet løst og committet.",
     "conflictResolutionTitle": "Løs konflikter",
     "conflictEntityPath": "Placering af elementet i konflikt",
+    "historyTitle": "Git-historik",
     "conflictCancel": "Annuller",
     "conflictFinish": "Afslut",
     "conflictReadOnlyEntityNotice": "Denne entitetstype kan ikke redigeres her. Vælg din version eller deres ovenfor.",

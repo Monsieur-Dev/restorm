@@ -2384,6 +2384,7 @@
     "conflictResolvedBody": "Su conflicto de fusión se resolvió y confirmó.",
     "conflictResolutionTitle": "Resolver conflictos",
     "conflictEntityPath": "Ubicación del elemento en conflicto",
+    "historyTitle": "Historial de Git",
     "conflictCancel": "Cancelar",
     "conflictFinish": "Finalizar",
     "conflictReadOnlyEntityNotice": "Este tipo de entidad no se puede editar aquí. Elija arriba su versión o la de ellos.",

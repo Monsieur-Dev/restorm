@@ -2384,6 +2384,7 @@
     "conflictResolvedBody": "Votre conflit de fusion a été résolu et validé.",
     "conflictResolutionTitle": "Résoudre les conflits",
     "conflictEntityPath": "Emplacement de l'élément en conflit",
+    "historyTitle": "Historique Git",
     "conflictCancel": "Annuler",
     "conflictFinish": "Terminer",
     "conflictReadOnlyEntityNotice": "Ce type d'entité ne peut pas être modifié ici. Choisissez votre version ou la leur ci-dessus.",

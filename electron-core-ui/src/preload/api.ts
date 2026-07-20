@@ -12,7 +12,7 @@ import type {
   GitConflictVersions,
   GitConflictCommitTimestamps,
   GitState
-} from '../types/git'
+, GitLogEntry} from '../types/git'
 import type { CoreUiApi } from '../types/api'
 
 /**
@@ -570,6 +570,10 @@ export const createCoreUIAPI = (): CoreUiApi => ({
     getStatus: async (folder: string): Promise<GitStatus> => {
       const result: unknown = await ipcRenderer.invoke('git:get-status', folder)
       return result as GitStatus
+    },
+    log: async (folder: string): Promise<GitLogEntry[]> => {
+      const result: unknown = await ipcRenderer.invoke('git:log', folder)
+      return result as GitLogEntry[]
     },
     stage: async (folder: string, paths: string[]): Promise<void> => {
       await ipcRenderer.invoke('git:stage', folder, paths)

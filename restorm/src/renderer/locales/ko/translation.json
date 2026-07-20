@@ -2383,6 +2383,7 @@
     "conflictResolvedBody": "병합 충돌이 해결되고 커밋되었습니다.",
     "conflictResolutionTitle": "충돌 해결",
     "conflictEntityPath": "충돌 항목의 위치",
+    "historyTitle": "Git 기록",
     "conflictCancel": "취소",
     "conflictFinish": "완료",
     "conflictReadOnlyEntityNotice": "이 엔터티 유형은 여기서 편집할 수 없습니다. 위에서 내 버전 또는 상대 버전을 선택하세요.",

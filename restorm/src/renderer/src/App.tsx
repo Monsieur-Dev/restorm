@@ -32,7 +32,9 @@ import {
   type MiniBrowserBridgeApi,
   type ConsoleFeedSource,
   type McpLogsSource,
-  type McpLogsLabels
+  type McpLogsLabels,
+  GitHistoryView,
+  type GitHistoryCommit
 } from 'electron-core-ui/renderer'
 import { PROJECT_UUID_KEY } from '../../shared/config/projectUuid'
 import { preloadRequestPanelStates, removeRequestPanelState } from './services/requestPanelStateStore'
@@ -483,6 +485,33 @@ const App: React.FC = () => {
     pullRefreshPendingRef.current = true
     void _openFile(filePath)
   }, [filePath, _openFile])
+  // Git-history modal: opened from the statusbar `source-control` icon.
+  // Loads the full log lazily on open (the modal is rare; no polling).
+  const [gitHistory, setGitHistory] = useState<{ open: boolean, commits: GitHistoryCommit[], mainTipHash?: string }>({ open: false, commits: [] })
+  const handleOpenGitHistory = useCallback(() => {
+    const folder = filePath?.endsWith('.restorm') === true
+      ? filePath.slice(0, Math.max(filePath.lastIndexOf('/'), filePath.lastIndexOf('\\')))
+      : filePath
+    if (folder === null || folder === '') return
+    void window.api.git.log(folder).then((entries) => {
+      const commits: GitHistoryCommit[] = entries.map((e) => ({
+        hash: e.hash,
+        parents: e.parents,
+        subject: e.subject,
+        body: e.body,
+        authorName: e.authorName,
+        authorEmail: e.authorEmail,
+        date: e.date,
+        refs: e.refs
+      }))
+      // Seed lane 0 with the main/master tip so that chain renders as one
+      // straight vertical (prefer the remote ref — it is the shared truth).
+      const isMainRef = (r: string): boolean => /(?:^|\/|\s)(main|master)$/.test(r)
+      const mainTip = commits.find((c) => c.refs.some(isMainRef))
+      setGitHistory({ open: true, commits, ...(mainTip ? { mainTipHash: mainTip.hash } : {}) })
+    })
+  }, [filePath])
+
   // Repo-push / repo-pull click actions, shared verbatim by the statusbar
   // `GIT` entry and the title-bar `Git` menu (see `useGitActions`).
   // repo-push opens the modal above; the actual push happens from there.
@@ -3079,12 +3108,25 @@ const App: React.FC = () => {
         {/* Renders nothing unless a project is open; visible-but-locked (the
          * 3-state gate) rather than hidden once one is, regardless of
          * whether the folder happens to be a git repo. */}
-        <StatusbarGitIndicator filePath={filePath} hasUnsavedChanges={isDirty} onPush={handleGitPush} onPull={handleGitPull} />
+        <StatusbarGitIndicator filePath={filePath} hasUnsavedChanges={isDirty} onPush={handleGitPush} onPull={handleGitPull} onHistory={handleOpenGitHistory} />
         <StatusBarBellButton toasterId="app" />
       </Statusbar>
 
       {/* Global toaster anchored to the bottom-right, toggled by the statusbar bell. */}
       <Toaster id="app" position="bottom-right" data-testid="app-toaster" />
+
+      {/* Fullscreen git-history modal (statusbar source-control icon). */}
+      <Modal
+        isOpen={gitHistory.open}
+        onClose={() => { setGitHistory((prev) => ({ ...prev, open: false })) }}
+        title={t('git.historyTitle')}
+        data-testid="git-history-modal"
+      >
+        <GitHistoryView
+          commits={gitHistory.commits}
+          {...(gitHistory.mainTipHash !== undefined ? { mainTipHash: gitHistory.mainTipHash } : {})}
+        />
+      </Modal>
 
       {/* Delete confirmation modal */}
       <DeleteConfirmationModal

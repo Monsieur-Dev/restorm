@@ -2383,6 +2383,7 @@
     "conflictResolvedBody": "Konflik penggabungan Anda telah diselesaikan dan di-commit.",
     "conflictResolutionTitle": "Selesaikan konflik",
     "conflictEntityPath": "Lokasi item yang berkonflik",
+    "historyTitle": "Riwayat Git",
     "conflictCancel": "Batal",
     "conflictFinish": "Selesai",
     "conflictReadOnlyEntityNotice": "Tipe entitas ini tidak dapat diedit di sini. Pilih versi Anda atau versi mereka di atas.",

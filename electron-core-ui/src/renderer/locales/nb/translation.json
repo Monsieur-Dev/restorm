@@ -346,7 +346,8 @@
       "pushTooltip": "Push til depotet",
       "pullTooltip": "Hent fra depotet",
       "nothingToPushTooltip": "Ingen endringer å pushe",
-      "refreshTooltip": "Se etter endringer å pushe eller pulle"
+      "refreshTooltip": "Se etter endringer å pushe eller pulle",
+      "historyTooltip": "Git-historikk"
     }
   },
   "mcpToolTitles": {
@@ -444,5 +445,13 @@
     "resolvedTitle": "Løst",
     "selectAConflict": "Velg en konflikt for å løse den",
     "useThisVersion": "Bruk denne versjonen"
+  },
+  "gitHistory": {
+    "commits": "Commits",
+    "noCommitSelected": "Velg en commit for å se detaljene",
+    "author": "Forfatter",
+    "date": "Dato",
+    "hash": "Hash",
+    "parents": "Foreldre"
   }
 }

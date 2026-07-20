@@ -2385,6 +2385,7 @@
     "conflictResolvedBody": "Vaš sukob spajanja je rešen i commit je izvršen.",
     "conflictResolutionTitle": "Reši sukobe",
     "conflictEntityPath": "Lokacija stavke u sukobu",
+    "historyTitle": "Git istorija",
     "conflictCancel": "Otkaži",
     "conflictFinish": "Završi",
     "conflictReadOnlyEntityNotice": "Овај тип ентитета не може се уређивати овде. Изнад изаберите своју или њихову верзију.",

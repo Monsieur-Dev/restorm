@@ -346,7 +346,8 @@
       "pushTooltip": "Pošalji u repozitorijum",
       "pullTooltip": "Preuzmi iz repozitorijuma",
       "nothingToPushTooltip": "Нема промена за слање",
-      "refreshTooltip": "Провери промене за слање или преузимање"
+      "refreshTooltip": "Провери промене за слање или преузимање",
+      "historyTooltip": "Git istorija"
     }
   },
   "mcpToolTitles": {
@@ -444,5 +445,13 @@
     "resolvedTitle": "Rešeno",
     "selectAConflict": "Izaberite sukob da biste ga rešili",
     "useThisVersion": "Koristi ovu verziju"
+  },
+  "gitHistory": {
+    "commits": "Commitovi",
+    "noCommitSelected": "Izaberite commit da vidite detalje",
+    "author": "Autor",
+    "date": "Datum",
+    "hash": "Heš",
+    "parents": "Roditelji"
   }
 }

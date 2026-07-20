@@ -346,7 +346,8 @@
       "pushTooltip": "Pousser sur le dépôt",
       "pullTooltip": "Récupérer depuis le dépôt",
       "nothingToPushTooltip": "Aucune modification à pousser",
-      "refreshTooltip": "Vérifier les modifications à pousser ou rapatrier"
+      "refreshTooltip": "Vérifier les modifications à pousser ou rapatrier",
+      "historyTooltip": "Historique Git"
     }
   },
   "mcpToolTitles": {
@@ -444,5 +445,13 @@
     "resolvedTitle": "Résolu",
     "selectAConflict": "Sélectionnez un conflit pour le résoudre",
     "useThisVersion": "Utiliser cette version"
+  },
+  "gitHistory": {
+    "commits": "Commits",
+    "noCommitSelected": "Sélectionnez un commit pour voir ses détails",
+    "author": "Auteur",
+    "date": "Date",
+    "hash": "Hash",
+    "parents": "Parents"
   }
 }

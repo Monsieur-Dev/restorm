@@ -2384,6 +2384,7 @@
     "conflictResolvedBody": "Η σύγκρουση συγχώνευσης επιλύθηκε και έγινε commit.",
     "conflictResolutionTitle": "Επίλυση συγκρούσεων",
     "conflictEntityPath": "Θέση του στοιχείου σε διένεξη",
+    "historyTitle": "Ιστορικό Git",
     "conflictCancel": "Ακύρωση",
     "conflictFinish": "Ολοκλήρωση",
     "conflictReadOnlyEntityNotice": "Αυτός ο τύπος οντότητας δεν μπορεί να επεξεργαστεί εδώ. Επιλέξτε παραπάνω τη δική σας έκδοση ή τη δική τους.",

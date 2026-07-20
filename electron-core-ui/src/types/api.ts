@@ -18,7 +18,7 @@ import type {
   GitConflictVersions,
   GitConflictCommitTimestamps,
   GitState
-} from './git'
+, GitLogEntry} from './git'
 
 export interface CoreUiThemeApi {
   list: () => Promise<ThemeInfo[]>
@@ -205,6 +205,8 @@ export interface CoreUiSettingsApi {
 export interface CoreUiGitApi {
   isRepo: (folder: string) => Promise<boolean>
   getStatus: (folder: string) => Promise<GitStatus>
+  /** Full multi-ref history, newest first (`git log --all --topo-order`). */
+  log: (folder: string) => Promise<GitLogEntry[]>
   stage: (folder: string, paths: string[]) => Promise<void>
   commit: (folder: string, message: string) => Promise<GitCommitResult>
   push: (folder: string) => Promise<GitPushResult>

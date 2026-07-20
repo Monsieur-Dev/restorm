@@ -346,7 +346,8 @@
       "pushTooltip": "リポジトリにプッシュ",
       "pullTooltip": "リポジトリからプル",
       "nothingToPushTooltip": "プッシュする変更はありません",
-      "refreshTooltip": "プッシュ/プル対象の変更を確認"
+      "refreshTooltip": "プッシュ/プル対象の変更を確認",
+      "historyTooltip": "Git 履歴"
     }
   },
   "mcpToolTitles": {
@@ -444,5 +445,13 @@
     "resolvedTitle": "解決済み",
     "selectAConflict": "解決する競合を選択してください",
     "useThisVersion": "このバージョンを使用"
+  },
+  "gitHistory": {
+    "commits": "コミット",
+    "noCommitSelected": "コミットを選択すると詳細が表示されます",
+    "author": "作成者",
+    "date": "日付",
+    "hash": "ハッシュ",
+    "parents": "親"
   }
 }

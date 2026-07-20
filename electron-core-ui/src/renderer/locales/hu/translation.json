@@ -346,7 +346,8 @@
       "pushTooltip": "Küldés a tárolóba",
       "pullTooltip": "Letöltés a tárolóból",
       "nothingToPushTooltip": "Nincs pusholandó módosítás",
-      "refreshTooltip": "Pusholandó vagy pullolandó módosítások keresése"
+      "refreshTooltip": "Pusholandó vagy pullolandó módosítások keresése",
+      "historyTooltip": "Git-előzmények"
     }
   },
   "mcpToolTitles": {
@@ -444,5 +445,13 @@
     "resolvedTitle": "Megoldva",
     "selectAConflict": "Válasszon egy ütközést a feloldásához",
     "useThisVersion": "Ennek a verziónak a használata"
+  },
+  "gitHistory": {
+    "commits": "Commitok",
+    "noCommitSelected": "Válasszon ki egy commitot a részletek megtekintéséhez",
+    "author": "Szerző",
+    "date": "Dátum",
+    "hash": "Hash",
+    "parents": "Szülők"
   }
 }

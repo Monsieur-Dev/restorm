@@ -346,7 +346,8 @@
       "pushTooltip": "Push to the repository",
       "pullTooltip": "Pull from the repository",
       "nothingToPushTooltip": "No changes to push",
-      "refreshTooltip": "Check for changes to push or pull"
+      "refreshTooltip": "Check for changes to push or pull",
+      "historyTooltip": "Git history"
     }
   },
   "mcpToolTitles": {
@@ -444,5 +445,13 @@
     "resolvedTitle": "Resolved",
     "selectAConflict": "Select a conflict to resolve it",
     "useThisVersion": "Use this version"
+  },
+  "gitHistory": {
+    "commits": "Commits",
+    "noCommitSelected": "Select a commit to see its details",
+    "author": "Author",
+    "date": "Date",
+    "hash": "Hash",
+    "parents": "Parents"
   }
 }

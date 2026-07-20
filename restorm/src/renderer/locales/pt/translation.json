@@ -2384,6 +2384,7 @@
     "conflictResolvedBody": "O seu conflito de merge foi resolvido e submetido.",
     "conflictResolutionTitle": "Resolver conflitos",
     "conflictEntityPath": "Localização do item em conflito",
+    "historyTitle": "Histórico do Git",
     "conflictCancel": "Cancelar",
     "conflictFinish": "Concluir",
     "conflictReadOnlyEntityNotice": "Este tipo de entidade não pode ser editado aqui. Escolha acima a sua versão ou a deles.",

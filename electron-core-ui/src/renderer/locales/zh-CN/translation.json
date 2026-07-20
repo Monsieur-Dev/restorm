@@ -346,7 +346,8 @@
       "pushTooltip": "推送到仓库",
       "pullTooltip": "从仓库拉取",
       "nothingToPushTooltip": "没有要推送的更改",
-      "refreshTooltip": "检查要推送或拉取的更改"
+      "refreshTooltip": "检查要推送或拉取的更改",
+      "historyTooltip": "Git 历史记录"
     }
   },
   "mcpToolTitles": {
@@ -444,5 +445,13 @@
     "resolvedTitle": "已解决",
     "selectAConflict": "选择一个冲突以解决它",
     "useThisVersion": "使用此版本"
+  },
+  "gitHistory": {
+    "commits": "提交",
+    "noCommitSelected": "选择一个提交以查看详细信息",
+    "author": "作者",
+    "date": "日期",
+    "hash": "哈希",
+    "parents": "父提交"
   }
 }

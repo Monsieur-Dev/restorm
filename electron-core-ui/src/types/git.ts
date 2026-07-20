@@ -129,3 +129,19 @@ export const NO_GIT_STATE: Readonly<GitState> = Object.freeze({
   remoteHasNewerVersion: false,
   hasConflicts: false
 })
+
+/** One commit of the history log (`GitService.log`) — raw display data;
+ * the renderer maps it onto `GitHistoryCommit` for the history view. */
+export interface GitLogEntry {
+  hash: string
+  /** Parent hashes, first parent first. */
+  parents: string[]
+  authorName: string
+  authorEmail: string
+  /** ISO-8601 author date. */
+  date: string
+  /** Decoration refs ("HEAD -> main", "origin/main", "tag: v1", …). */
+  refs: string[]
+  subject: string
+  body: string
+}

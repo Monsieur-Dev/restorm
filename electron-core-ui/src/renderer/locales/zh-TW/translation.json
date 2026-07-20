@@ -346,7 +346,8 @@
       "pushTooltip": "推送到儲存庫",
       "pullTooltip": "從儲存庫提取",
       "nothingToPushTooltip": "沒有要推送的變更",
-      "refreshTooltip": "檢查要推送或拉取的變更"
+      "refreshTooltip": "檢查要推送或拉取的變更",
+      "historyTooltip": "Git 歷史記錄"
     }
   },
   "mcpToolTitles": {
@@ -444,5 +445,13 @@
     "resolvedTitle": "已解決",
     "selectAConflict": "選擇一個衝突以解決它",
     "useThisVersion": "使用此版本"
+  },
+  "gitHistory": {
+    "commits": "提交",
+    "noCommitSelected": "選取一個提交以檢視詳細資訊",
+    "author": "作者",
+    "date": "日期",
+    "hash": "雜湊",
+    "parents": "父提交"
   }
 }

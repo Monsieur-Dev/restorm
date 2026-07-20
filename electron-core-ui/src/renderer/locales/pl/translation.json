@@ -346,7 +346,8 @@
       "pushTooltip": "Wypchnij do repozytorium",
       "pullTooltip": "Pobierz z repozytorium",
       "nothingToPushTooltip": "Brak zmian do wypchnięcia",
-      "refreshTooltip": "Sprawdź zmiany do wypchnięcia lub pobrania"
+      "refreshTooltip": "Sprawdź zmiany do wypchnięcia lub pobrania",
+      "historyTooltip": "Historia Gita"
     }
   },
   "mcpToolTitles": {
@@ -444,5 +445,13 @@
     "resolvedTitle": "Rozwiązano",
     "selectAConflict": "Wybierz konflikt, aby go rozwiązać",
     "useThisVersion": "Użyj tej wersji"
+  },
+  "gitHistory": {
+    "commits": "Commity",
+    "noCommitSelected": "Wybierz commit, aby zobaczyć szczegóły",
+    "author": "Autor",
+    "date": "Data",
+    "hash": "Hash",
+    "parents": "Rodzice"
   }
 }

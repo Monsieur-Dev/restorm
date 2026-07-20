@@ -346,7 +346,8 @@
       "pushTooltip": "Надіслати в репозиторій",
       "pullTooltip": "Отримати з репозиторію",
       "nothingToPushTooltip": "Немає змін для надсилання",
-      "refreshTooltip": "Перевірити зміни для надсилання чи отримання"
+      "refreshTooltip": "Перевірити зміни для надсилання чи отримання",
+      "historyTooltip": "Історія Git"
     }
   },
   "mcpToolTitles": {
@@ -444,5 +445,13 @@
     "resolvedTitle": "Вирішено",
     "selectAConflict": "Виберіть конфлікт, щоб вирішити його",
     "useThisVersion": "Використати цю версію"
+  },
+  "gitHistory": {
+    "commits": "Коміти",
+    "noCommitSelected": "Виберіть коміт, щоб переглянути деталі",
+    "author": "Автор",
+    "date": "Дата",
+    "hash": "Хеш",
+    "parents": "Батьки"
   }
 }

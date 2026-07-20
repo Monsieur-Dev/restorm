@@ -346,7 +346,8 @@
       "pushTooltip": "Αποστολή στο αποθετήριο",
       "pullTooltip": "Λήψη από το αποθετήριο",
       "nothingToPushTooltip": "Δεν υπάρχουν αλλαγές για αποστολή",
-      "refreshTooltip": "Έλεγχος αλλαγών για αποστολή ή λήψη"
+      "refreshTooltip": "Έλεγχος αλλαγών για αποστολή ή λήψη",
+      "historyTooltip": "Ιστορικό Git"
     }
   },
   "mcpToolTitles": {
@@ -444,5 +445,13 @@
     "resolvedTitle": "Επιλύθηκε",
     "selectAConflict": "Επιλέξτε μια σύγκρουση για να την επιλύσετε",
     "useThisVersion": "Χρήση αυτής της έκδοσης"
+  },
+  "gitHistory": {
+    "commits": "Commits",
+    "noCommitSelected": "Επιλέξτε ένα commit για να δείτε τις λεπτομέρειες",
+    "author": "Συντάκτης",
+    "date": "Ημερομηνία",
+    "hash": "Hash",
+    "parents": "Γονείς"
   }
 }

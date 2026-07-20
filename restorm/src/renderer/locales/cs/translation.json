@@ -2386,6 +2386,7 @@
     "conflictResolvedBody": "Váš konflikt sloučení byl vyřešen a commitnut.",
     "conflictResolutionTitle": "Vyřešit konflikty",
     "conflictEntityPath": "Umístění položky v konfliktu",
+    "historyTitle": "Historie Gitu",
     "conflictCancel": "Zrušit",
     "conflictFinish": "Dokončit",
     "conflictReadOnlyEntityNotice": "Tento typ entity zde nelze upravovat. Vyberte výše svou verzi nebo jejich.",

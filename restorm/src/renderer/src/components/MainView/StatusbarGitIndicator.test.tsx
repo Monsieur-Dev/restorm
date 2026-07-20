@@ -77,14 +77,14 @@ describe('StatusbarGitIndicator (restorm container)', () => {
   it('renders nothing when no project is open at all', () => {
     useGitStateMock.mockReturnValue(NO_REPO)
     useGitGateStateMock.mockReturnValue(COMMUNITY)
-    const { container } = render(<StatusbarGitIndicator filePath={null} onPush={vi.fn()} onPull={vi.fn()} />)
+    const { container } = render(<StatusbarGitIndicator filePath={null} onPush={vi.fn()} onHistory={vi.fn()} onPull={vi.fn()} />)
     expect(container.firstChild).toBeNull()
   })
 
   it('a project is open but not a git repo, Pro entitled: renders VISIBLE-BUT-LOCKED with the init-git message, no subscribe link', () => {
     useGitStateMock.mockReturnValue(NO_REPO)
     useGitGateStateMock.mockReturnValue(NO_GIT_FOLDER)
-    render(<StatusbarGitIndicator filePath="/proj/api.restorm" onPush={vi.fn()} onPull={vi.fn()} />)
+    render(<StatusbarGitIndicator filePath="/proj/api.restorm" onPush={vi.fn()} onHistory={vi.fn()} onPull={vi.fn()} />)
     const gate = screen.getByTestId('statusbar-git-indicator-gate')
     expect(gate.dataset['locked']).toBe('true')
     expect(gate.dataset['showSubscribe']).toBe('false')
@@ -96,7 +96,7 @@ describe('StatusbarGitIndicator (restorm container)', () => {
   it('a project is open but not a git repo, Community: renders VISIBLE-BUT-LOCKED with the standard Pro upsell', () => {
     useGitStateMock.mockReturnValue(NO_REPO)
     useGitGateStateMock.mockReturnValue(COMMUNITY)
-    render(<StatusbarGitIndicator filePath="/proj/api.restorm" onPush={vi.fn()} onPull={vi.fn()} />)
+    render(<StatusbarGitIndicator filePath="/proj/api.restorm" onPush={vi.fn()} onHistory={vi.fn()} onPull={vi.fn()} />)
     const gate = screen.getByTestId('statusbar-git-indicator-gate')
     expect(gate.dataset['locked']).toBe('true')
     expect(gate.dataset['showSubscribe']).toBe('true')
@@ -107,14 +107,14 @@ describe('StatusbarGitIndicator (restorm container)', () => {
   it('Pro + git repo: renders unlocked', () => {
     useGitStateMock.mockReturnValue(HAS_REPO)
     useGitGateStateMock.mockReturnValue(ENABLED)
-    render(<StatusbarGitIndicator filePath="/proj/api.restorm" onPush={vi.fn()} onPull={vi.fn()} />)
+    render(<StatusbarGitIndicator filePath="/proj/api.restorm" onPush={vi.fn()} onHistory={vi.fn()} onPull={vi.fn()} />)
     expect(screen.getByTestId('statusbar-git-indicator-gate').dataset['locked']).toBe('false')
   })
 
   it('wires the gate\'s onSubscribe to subscribeToPro()', () => {
     useGitStateMock.mockReturnValue(NO_REPO)
     useGitGateStateMock.mockReturnValue(COMMUNITY)
-    render(<StatusbarGitIndicator filePath="/proj/api.restorm" onPush={vi.fn()} onPull={vi.fn()} />)
+    render(<StatusbarGitIndicator filePath="/proj/api.restorm" onPush={vi.fn()} onHistory={vi.fn()} onPull={vi.fn()} />)
     fireEvent.click(screen.getByTestId('gate-subscribe-trigger'))
     expect(subscribeToProMock).toHaveBeenCalledTimes(1)
   })
@@ -128,7 +128,7 @@ describe('StatusbarGitIndicator (restorm container)', () => {
       hasConflicts: false
     })
     useGitGateStateMock.mockReturnValue(ENABLED)
-    render(<StatusbarGitIndicator filePath="/proj/api.restorm" onPush={vi.fn()} onPull={vi.fn()} />)
+    render(<StatusbarGitIndicator filePath="/proj/api.restorm" onPush={vi.fn()} onHistory={vi.fn()} onPull={vi.fn()} />)
     expect(screen.getByTestId('ecui-git-push').dataset['pending']).toBe('true')
   })
 
@@ -141,7 +141,7 @@ describe('StatusbarGitIndicator (restorm container)', () => {
       hasConflicts: false
     })
     useGitGateStateMock.mockReturnValue(ENABLED)
-    render(<StatusbarGitIndicator filePath="/proj/api.restorm" onPush={vi.fn()} onPull={vi.fn()} />)
+    render(<StatusbarGitIndicator filePath="/proj/api.restorm" onPush={vi.fn()} onHistory={vi.fn()} onPull={vi.fn()} />)
     expect(screen.getByTestId('ecui-git-push').dataset['pending']).toBe('true')
   })
 
@@ -154,7 +154,7 @@ describe('StatusbarGitIndicator (restorm container)', () => {
       hasConflicts: false
     })
     useGitGateStateMock.mockReturnValue(ENABLED)
-    render(<StatusbarGitIndicator filePath="/proj/api.restorm" onPush={vi.fn()} onPull={vi.fn()} />)
+    render(<StatusbarGitIndicator filePath="/proj/api.restorm" onPush={vi.fn()} onHistory={vi.fn()} onPull={vi.fn()} />)
     expect(screen.getByTestId('ecui-git-pull').dataset['pending']).toBe('true')
   })
 
@@ -163,7 +163,7 @@ describe('StatusbarGitIndicator (restorm container)', () => {
     const onPull = vi.fn()
     useGitStateMock.mockReturnValue(HAS_REPO)
     useGitGateStateMock.mockReturnValue(ENABLED)
-    render(<StatusbarGitIndicator filePath="/proj/api.restorm" onPush={onPush} onPull={onPull} />)
+    render(<StatusbarGitIndicator filePath="/proj/api.restorm" onPush={onPush} onHistory={vi.fn()} onPull={onPull} />)
     fireEvent.click(screen.getByTestId('ecui-git-push'))
     fireEvent.click(screen.getByTestId('ecui-git-pull'))
     expect(onPush).toHaveBeenCalledTimes(1)

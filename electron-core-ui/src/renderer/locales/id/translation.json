@@ -346,7 +346,8 @@
       "pushTooltip": "Push ke repositori",
       "pullTooltip": "Tarik dari repositori",
       "nothingToPushTooltip": "Tidak ada perubahan untuk didorong",
-      "refreshTooltip": "Periksa perubahan untuk didorong atau ditarik"
+      "refreshTooltip": "Periksa perubahan untuk didorong atau ditarik",
+      "historyTooltip": "Riwayat Git"
     }
   },
   "mcpToolTitles": {
@@ -444,5 +445,13 @@
     "resolvedTitle": "Terselesaikan",
     "selectAConflict": "Pilih konflik untuk menyelesaikannya",
     "useThisVersion": "Gunakan versi ini"
+  },
+  "gitHistory": {
+    "commits": "Commit",
+    "noCommitSelected": "Pilih commit untuk melihat detailnya",
+    "author": "Penulis",
+    "date": "Tanggal",
+    "hash": "Hash",
+    "parents": "Induk"
   }
 }

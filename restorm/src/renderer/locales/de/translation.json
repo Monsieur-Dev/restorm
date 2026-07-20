@@ -2384,6 +2384,7 @@
     "conflictResolvedBody": "Ihr Merge-Konflikt wurde gelöst und committet.",
     "conflictResolutionTitle": "Konflikte auflösen",
     "conflictEntityPath": "Speicherort des Konfliktelements",
+    "historyTitle": "Git-Verlauf",
     "conflictCancel": "Abbrechen",
     "conflictFinish": "Fertig",
     "conflictReadOnlyEntityNotice": "Dieser Entitätstyp kann hier nicht bearbeitet werden. Wählen Sie oben Ihre oder deren Version.",

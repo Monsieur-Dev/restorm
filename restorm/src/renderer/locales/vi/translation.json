@@ -2383,6 +2383,7 @@
     "conflictResolvedBody": "Xung đột hợp nhất của bạn đã được giải quyết và commit.",
     "conflictResolutionTitle": "Giải quyết xung đột",
     "conflictEntityPath": "Vị trí của mục xung đột",
+    "historyTitle": "Lịch sử Git",
     "conflictCancel": "Hủy",
     "conflictFinish": "Hoàn tất",
     "conflictReadOnlyEntityNotice": "Không thể chỉnh sửa loại thực thể này ở đây. Hãy chọn phiên bản của bạn hoặc của họ ở trên.",

@@ -2384,6 +2384,7 @@
     "conflictResolvedBody": "Sammenslåingskonflikten din er løst og committet.",
     "conflictResolutionTitle": "Løs konflikter",
     "conflictEntityPath": "Plassering av elementet i konflikt",
+    "historyTitle": "Git-historikk",
     "conflictCancel": "Avbryt",
     "conflictFinish": "Fullfør",
     "conflictReadOnlyEntityNotice": "Denne entitetstypen kan ikke redigeres her. Velg din eller deres versjon ovenfor.",

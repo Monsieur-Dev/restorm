@@ -346,7 +346,8 @@
       "pushTooltip": "Đẩy lên kho lưu trữ",
       "pullTooltip": "Kéo từ kho lưu trữ",
       "nothingToPushTooltip": "Không có thay đổi để đẩy",
-      "refreshTooltip": "Kiểm tra thay đổi để đẩy hoặc kéo"
+      "refreshTooltip": "Kiểm tra thay đổi để đẩy hoặc kéo",
+      "historyTooltip": "Lịch sử Git"
     }
   },
   "mcpToolTitles": {
@@ -444,5 +445,13 @@
     "resolvedTitle": "Đã giải quyết",
     "selectAConflict": "Chọn một xung đột để giải quyết",
     "useThisVersion": "Dùng phiên bản này"
+  },
+  "gitHistory": {
+    "commits": "Commit",
+    "noCommitSelected": "Chọn một commit để xem chi tiết",
+    "author": "Tác giả",
+    "date": "Ngày",
+    "hash": "Hash",
+    "parents": "Cha"
   }
 }

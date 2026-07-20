@@ -19,6 +19,8 @@ export interface StatusbarGitIndicatorProps {
   /** Repo-pull click. Shared with the title-bar `Git → Pull` menu item via
    * `useGitActions` — see `App.tsx`. */
   onPull: () => void
+  /** Opens the git-history modal (the `source-control` icon). */
+  onHistory: () => void
 }
 
 /**
@@ -39,7 +41,7 @@ export interface StatusbarGitIndicatorProps {
  * rather than each button individually, per this component's own design
  * note.
  */
-export const StatusbarGitIndicator: React.FC<StatusbarGitIndicatorProps> = ({ filePath, hasUnsavedChanges = false, onPush, onPull }) => {
+export const StatusbarGitIndicator: React.FC<StatusbarGitIndicatorProps> = ({ filePath, hasUnsavedChanges = false, onPush, onPull, onHistory }) => {
   const gitState = useGitState()
   const gate = useGitGateState()
 
@@ -72,6 +74,7 @@ export const StatusbarGitIndicator: React.FC<StatusbarGitIndicatorProps> = ({ fi
         pullPending={gitState.remoteHasNewerVersion}
         onPush={onPush}
         onPull={onPull}
+        onHistory={onHistory}
       />
     </GatedControl>
   )

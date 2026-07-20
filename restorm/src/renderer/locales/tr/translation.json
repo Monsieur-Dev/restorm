@@ -2384,6 +2384,7 @@
     "conflictResolvedBody": "Birleştirme çakışmanız çözüldü ve commit edildi.",
     "conflictResolutionTitle": "Çakışmaları çöz",
     "conflictEntityPath": "Çakışan öğenin konumu",
+    "historyTitle": "Git geçmişi",
     "conflictCancel": "İptal",
     "conflictFinish": "Bitir",
     "conflictReadOnlyEntityNotice": "Bu varlık türü burada düzenlenemez. Yukarıdan kendi sürümünüzü veya onlarınkini seçin.",

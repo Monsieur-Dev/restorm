@@ -30,6 +30,9 @@ export interface StatusbarGitIndicatorProps {
    * here: a plain pull either succeeds, or the host's conflict-resolution
    * surface takes over. */
   onPull: () => void
+  /** Optional history click (the `source-control` icon after pull) — the
+   * host opens its git-history surface. Omit to hide the icon. */
+  onHistory?: () => void
   /** Test id root. Defaults to `statusbar-git-indicator`; the two action
    * icons and their pastilles/tooltips suffix `-push` / `-pull`. */
   'data-testid'?: string
@@ -63,6 +66,7 @@ export const StatusbarGitIndicator: React.FC<StatusbarGitIndicatorProps> = ({
   onPush,
   pushDisabled = false,
   onPull,
+  onHistory,
   'data-testid': dataTestId = 'statusbar-git-indicator'
 }) => {
   const { t } = useTranslation()
@@ -95,12 +99,21 @@ export const StatusbarGitIndicator: React.FC<StatusbarGitIndicatorProps> = ({
         onClick={onPull}
         dataTestId={`${dataTestId}-pull`}
       />
+      {onHistory && (
+        <GitActionIcon
+          icon="source-control"
+          pending={false}
+          tooltip={t('statusbar.git.historyTooltip')}
+          onClick={onHistory}
+          dataTestId={`${dataTestId}-history`}
+        />
+      )}
     </div>
   )
 }
 
 interface GitActionIconProps {
-  icon: 'repo-push' | 'repo-pull' | 'refresh'
+  icon: 'repo-push' | 'repo-pull' | 'refresh' | 'source-control'
   pending: boolean
   tooltip: string
   onClick: () => void

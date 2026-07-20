@@ -7,6 +7,7 @@ import type {
   GitPushResult,
   GitPullResult,
   GitFetchCompareResult,
+  GitLogEntry,
   GitConflictVersions,
   GitConflictCommitTimestamps,
   GitState
@@ -101,6 +102,7 @@ declare global {
       git: {
         isRepo: (folder: string) => Promise<boolean>
         getStatus: (folder: string) => Promise<GitStatus>
+        log: (folder: string) => Promise<GitLogEntry[]>
         stage: (folder: string, paths: string[]) => Promise<void>
         commit: (folder: string, message: string) => Promise<GitCommitResult>
         push: (folder: string) => Promise<GitPushResult>

@@ -346,7 +346,8 @@
       "pushTooltip": "Työnnä repositorioon",
       "pullTooltip": "Nouda repositoriosta",
       "nothingToPushTooltip": "Ei muutoksia työnnettäväksi",
-      "refreshTooltip": "Tarkista työnnettävät tai vedettävät muutokset"
+      "refreshTooltip": "Tarkista työnnettävät tai vedettävät muutokset",
+      "historyTooltip": "Git-historia"
     }
   },
   "mcpToolTitles": {
@@ -444,5 +445,13 @@
     "resolvedTitle": "Ratkaistu",
     "selectAConflict": "Valitse ristiriita ratkaistaksesi sen",
     "useThisVersion": "Käytä tätä versiota"
+  },
+  "gitHistory": {
+    "commits": "Commitit",
+    "noCommitSelected": "Valitse commit nähdäksesi sen tiedot",
+    "author": "Tekijä",
+    "date": "Päivämäärä",
+    "hash": "Hash",
+    "parents": "Vanhemmat"
   }
 }

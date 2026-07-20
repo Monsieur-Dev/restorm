@@ -346,7 +346,8 @@
       "pushTooltip": "Pushen naar de repository",
       "pullTooltip": "Pullen vanuit de repository",
       "nothingToPushTooltip": "Geen wijzigingen om te pushen",
-      "refreshTooltip": "Controleren op wijzigingen om te pushen of pullen"
+      "refreshTooltip": "Controleren op wijzigingen om te pushen of pullen",
+      "historyTooltip": "Git-geschiedenis"
     }
   },
   "mcpToolTitles": {
@@ -444,5 +445,13 @@
     "resolvedTitle": "Opgelost",
     "selectAConflict": "Selecteer een conflict om het op te lossen",
     "useThisVersion": "Deze versie gebruiken"
+  },
+  "gitHistory": {
+    "commits": "Commits",
+    "noCommitSelected": "Selecteer een commit om de details te bekijken",
+    "author": "Auteur",
+    "date": "Datum",
+    "hash": "Hash",
+    "parents": "Ouders"
   }
 }

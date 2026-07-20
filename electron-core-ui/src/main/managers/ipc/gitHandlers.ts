@@ -29,6 +29,10 @@ export function registerGitHandlers(): void {
     return service.commit(folder, message)
   })
 
+  validatedHandle('git:log', gitFolderArgs, async (_event, [folder]) => {
+    return service.log(folder)
+  })
+
   validatedHandle('git:push', gitFolderArgs, async (_event, [folder]) => {
     return service.push(folder)
   })

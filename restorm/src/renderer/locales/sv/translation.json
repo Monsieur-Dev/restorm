@@ -2384,6 +2384,7 @@
     "conflictResolvedBody": "Din sammanslagningskonflikt har lösts och committats.",
     "conflictResolutionTitle": "Lös konflikter",
     "conflictEntityPath": "Plats för objektet i konflikt",
+    "historyTitle": "Git-historik",
     "conflictCancel": "Avbryt",
     "conflictFinish": "Slutför",
     "conflictReadOnlyEntityNotice": "Den här entitetstypen kan inte redigeras här. Välj din eller deras version ovan.",

@@ -346,7 +346,8 @@
       "pushTooltip": "저장소에 푸시",
       "pullTooltip": "저장소에서 풀",
       "nothingToPushTooltip": "푸시할 변경 사항이 없습니다",
-      "refreshTooltip": "푸시/풀할 변경 사항 확인"
+      "refreshTooltip": "푸시/풀할 변경 사항 확인",
+      "historyTooltip": "Git 기록"
     }
   },
   "mcpToolTitles": {
@@ -444,5 +445,13 @@
     "resolvedTitle": "해결됨",
     "selectAConflict": "해결할 충돌을 선택하세요",
     "useThisVersion": "이 버전 사용"
+  },
+  "gitHistory": {
+    "commits": "커밋",
+    "noCommitSelected": "커밋을 선택하면 세부 정보가 표시됩니다",
+    "author": "작성자",
+    "date": "날짜",
+    "hash": "해시",
+    "parents": "부모"
   }
 }

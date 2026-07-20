@@ -346,7 +346,8 @@
       "pushTooltip": "Push:a till förvaret",
       "pullTooltip": "Hämta från förvaret",
       "nothingToPushTooltip": "Inga ändringar att pusha",
-      "refreshTooltip": "Sök efter ändringar att pusha eller pulla"
+      "refreshTooltip": "Sök efter ändringar att pusha eller pulla",
+      "historyTooltip": "Git-historik"
     }
   },
   "mcpToolTitles": {
@@ -444,5 +445,13 @@
     "resolvedTitle": "Löst",
     "selectAConflict": "Välj en konflikt för att lösa den",
     "useThisVersion": "Använd den här versionen"
+  },
+  "gitHistory": {
+    "commits": "Commits",
+    "noCommitSelected": "Välj en commit för att se detaljerna",
+    "author": "Författare",
+    "date": "Datum",
+    "hash": "Hash",
+    "parents": "Föräldrar"
   }
 }

@@ -84,6 +84,7 @@ export type {
   GitPushResult,
   GitPullResult,
   GitFetchCompareResult,
+  GitLogEntry,
   GitConflictVersions,
   GitConflictCommitTimestamps,
   GitState

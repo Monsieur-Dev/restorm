@@ -346,7 +346,8 @@
       "pushTooltip": "Odeslat do repozitáře",
       "pullTooltip": "Stáhnout z repozitáře",
       "nothingToPushTooltip": "Žádné změny k odeslání",
-      "refreshTooltip": "Zkontrolovat změny k odeslání nebo stažení"
+      "refreshTooltip": "Zkontrolovat změny k odeslání nebo stažení",
+      "historyTooltip": "Historie Gitu"
     }
   },
   "mcpToolTitles": {
@@ -444,5 +445,13 @@
     "resolvedTitle": "Vyřešeno",
     "selectAConflict": "Vyberte konflikt, který chcete vyřešit",
     "useThisVersion": "Použít tuto verzi"
+  },
+  "gitHistory": {
+    "commits": "Commity",
+    "noCommitSelected": "Vyberte commit pro zobrazení podrobností",
+    "author": "Autor",
+    "date": "Datum",
+    "hash": "Hash",
+    "parents": "Rodiče"
   }
 }

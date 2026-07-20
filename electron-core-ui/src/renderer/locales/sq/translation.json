@@ -346,7 +346,8 @@
       "pushTooltip": "Dërgo te depozitari",
       "pullTooltip": "Merr nga depozitari",
       "nothingToPushTooltip": "Nuk ka ndryshime për t'u dërguar",
-      "refreshTooltip": "Kontrollo ndryshimet për dërgim ose tërheqje"
+      "refreshTooltip": "Kontrollo ndryshimet për dërgim ose tërheqje",
+      "historyTooltip": "Historiku i Git"
     }
   },
   "mcpToolTitles": {
@@ -444,5 +445,13 @@
     "resolvedTitle": "Zgjidhur",
     "selectAConflict": "Zgjidhni një konflikt për ta zgjidhur",
     "useThisVersion": "Përdor këtë version"
+  },
+  "gitHistory": {
+    "commits": "Commit-e",
+    "noCommitSelected": "Zgjidhni një commit për të parë detajet",
+    "author": "Autori",
+    "date": "Data",
+    "hash": "Hash",
+    "parents": "Prindërit"
   }
 }
