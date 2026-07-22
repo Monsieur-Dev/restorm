@@ -39,6 +39,14 @@ export function cloneForEventBus<T>(value: T): T {
 function walk(value: unknown, seen: WeakMap<object, unknown>): unknown {
   if (value === null || value === undefined) return value
   const typeOf = typeof value
+  // Functions and symbols are exactly what `structuredClone` refuses, and
+  // the whole point of this helper is to hand IPC something it can ferry.
+  // Passing them through unchanged defeats it: the caller gets a
+  // "DataCloneError: An object could not be cloned" from deep inside
+  // `ipcRenderer.invoke`, with no clue which field carried the function.
+  // Reactive-proxy-wrapped documents can expose them (a getter returning a
+  // bound helper, a class method surfaced as an own property).
+  if (typeOf === 'function' || typeOf === 'symbol') return undefined
   if (typeOf !== 'object') return value
   if (value instanceof Date) return new Date(value.getTime())
 

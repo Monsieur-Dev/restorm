@@ -50,6 +50,11 @@ const quickConfigBannerStyle: React.CSSProperties = {
  * axes so it reads as a prompt, not as content. */
 const unresolvedPlaceholderStyle: React.CSSProperties = {
   height: '100%',
+  // Without border-box the 24px padding is ADDED to the full height, so
+  // the placeholder overflows its column and covers the footer — the
+  // Cancel button underneath stops being clickable.
+  boxSizing: 'border-box',
+  minHeight: 0,
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',

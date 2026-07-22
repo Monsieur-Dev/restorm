@@ -30,6 +30,7 @@ import { updateReactiveProperty } from './requestTabViewUtils'
 import { SendButtonEnvSwitcher } from './SendButtonEnvSwitcher'
 import { BeamWrap } from '../common/BeamWrap'
 import { HeaderHoverTooltip } from '../MainView/HeaderHoverTooltip'
+import { cloneForEventBus } from '../../utils/cloneForEventBus'
 
 const urlInputWrapperStyle: React.CSSProperties = { flex: 2, minWidth: 0 }
 const methodInputWrapperStyle: React.CSSProperties = { flex: 1, minWidth: 120 }
@@ -132,7 +133,7 @@ export const JsonRpcRequestTabView: React.FC<JsonRpcRequestTabViewProps> = ({ re
     void restormContext.registerRequest(requestId, currentEnvId, {
       headers: toKeyValueDataShared(currentRequest.headers)
     })
-    void restormContext.updateFullRequestData(requestId, {
+    void restormContext.updateFullRequestData(requestId, cloneForEventBus({
       url: currentRequest.url,
       method: 'POST',
       requestType: 'jsonrpc',
@@ -141,7 +142,7 @@ export const JsonRpcRequestTabView: React.FC<JsonRpcRequestTabViewProps> = ({ re
       jsonRpcParams: currentRequest.params,
       jsonRpcId: currentRequest.rpcId || '',
       jsonRpcNotificationMode: currentRequest.notificationMode === true
-    }, sourceIdRef.current)
+    }), sourceIdRef.current)
 
     const unsubUrl = restormContext.onUrlResolved((result) => {
       if (result.requestId === requestId) setResolvedUrl(result.resolvedUrl)
@@ -181,7 +182,7 @@ export const JsonRpcRequestTabView: React.FC<JsonRpcRequestTabViewProps> = ({ re
       updateDebounceRef.current = null
     }
     const payload = latestPayloadRef.current
-    if (payload) void window.restorm?.context.updateFullRequestData(request.id, payload, sourceIdRef.current)
+    if (payload) void window.restorm?.context.updateFullRequestData(request.id, cloneForEventBus(payload), sourceIdRef.current)
   }, [request.id])
 
   useEffect(() => {
@@ -201,7 +202,7 @@ export const JsonRpcRequestTabView: React.FC<JsonRpcRequestTabViewProps> = ({ re
     if (updateDebounceRef.current !== null) clearTimeout(updateDebounceRef.current)
     updateDebounceRef.current = setTimeout(() => {
       updateDebounceRef.current = null
-      void window.restorm?.context.updateFullRequestData(reqId, payload, source)
+      void window.restorm?.context.updateFullRequestData(reqId, cloneForEventBus(payload), source)
     }, 250)
     return () => {
       if (updateDebounceRef.current !== null) {

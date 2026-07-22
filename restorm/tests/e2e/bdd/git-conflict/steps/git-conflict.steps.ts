@@ -111,6 +111,10 @@ When('I change the request\'s URL to a different value and push', async () => {
   const urlInput = p.locator('[data-testid="http-request-url-input"]:visible').first()
   await expect(urlInput).toBeVisible({ timeout: 5000 })
   const viewport = urlInput.locator('.monaco-editor').first()
+  // The resolved column mounts when a version is picked, so Monaco is in
+  // the DOM a beat before it has been laid out — clicking a zero-size
+  // editor fails even with `force`. Wait for real geometry.
+  await expect.poll(async () => (await viewport.boundingBox())?.width ?? 0, { timeout: 10000 }).toBeGreaterThan(0)
   await viewport.click({ force: true })
   await p.keyboard.press('Control+A')
   await p.keyboard.press('Delete')
@@ -122,6 +126,16 @@ When('I change the request\'s URL to a different value and push', async () => {
   const modal = p.locator('[data-testid="push-modal"]')
   await expect(modal).toBeVisible({ timeout: 10000 })
   await modal.locator('[data-testid="push-modal-push-button"]').click()
+})
+
+Then('I am told an update is required', async () => {
+  const p = requirePage()
+  await expect(p.locator('[data-testid="git-update-required-modal-overlay"]')).toBeVisible({ timeout: 15000 })
+})
+
+When('I open the conflict resolution from the update prompt', async () => {
+  const p = requirePage()
+  await p.locator('[data-testid="git-update-required-modal-resolve-button"]').click()
 })
 
 Then('the push is rejected', async () => {
@@ -148,6 +162,7 @@ When('I close the push dialog', async () => {
 When('I pull', async () => {
   const p = requirePage()
   const modal = p.locator('[data-testid="git-conflict-resolution-modal"]')
+  const updatePrompt = p.locator('[data-testid="git-update-required-modal-resolve-button"]')
   // A click immediately following a push-rejected toast/status refresh can
   // land on a Pull button DOM node React is mid-replacing (a re-render
   // triggered by the just-updated git status/toast state) and gets
@@ -159,7 +174,18 @@ When('I pull', async () => {
   // fixed number of clicks covers it — real UI race, not a test artifact,
   // but not worth a deeper product fix for a single dropped click a user
   // can always just repeat.
+  //
+  // A CONTESTED pull no longer opens the resolution screen directly: it
+  // raises the same update prompt the push flow uses, and resolving is
+  // one click further in. Retrying the statusbar click while that prompt
+  // is up would hit its overlay forever, so take the prompt when it is
+  // there.
   for (let attempt = 0; attempt < 5; attempt++) {
+    if (await updatePrompt.isVisible().catch(() => false)) {
+      await updatePrompt.click()
+      await expect(modal).toBeVisible({ timeout: 20000 })
+      return
+    }
     await p.locator('[data-testid="statusbar-git-indicator-pull"]').click()
     await p.waitForTimeout(1000)
     if (await modal.isVisible()) return
@@ -230,6 +256,31 @@ When('I keep my own version of the folder', async () => {
   await p.locator('[data-testid="conflict-resolution-view-use-user-version"]').click()
 })
 
+When('I keep my own version of every conflict still undecided', async () => {
+  const p = requirePage()
+  // Finishing is gated on EVERY conflict being decided — an untouched one
+  // no longer silently defaults to our side, because that let a user
+  // publish our version of conflicts they never opened. Walk the list and
+  // pick for whatever is left.
+  const rows = p.locator('[data-testid="conflict-resolution-view-list"] .list-view-row')
+  const count = await rows.count()
+  for (let index = 0; index < count; index++) {
+    await rows.nth(index).click()
+    await p.waitForTimeout(200)
+    const finish = p.locator('[data-testid="git-conflict-resolution-finish"]')
+    if (await finish.getAttribute('aria-disabled') !== 'true') break
+    // "Undecided" is the placeholder being up — NOT the absence of a green
+    // check. A conflict resolved by hand-editing matches neither side, so
+    // it has no green check while being very much decided; picking for it
+    // here would silently throw the user's edit away.
+    const undecided = await p.locator('[data-testid="conflict-resolved-placeholder"]').isVisible().catch(() => false)
+    if (undecided) {
+      await p.locator('[data-testid="conflict-resolution-view-use-user-version"]').click()
+      await p.waitForTimeout(200)
+    }
+  }
+})
+
 When('I use the server\'s version of the request and tweak its URL', async () => {
   const p = requirePage()
   await conflictRowByName(p, 'Find pet by ID').click()
@@ -239,6 +290,10 @@ When('I use the server\'s version of the request and tweak its URL', async () =>
   const urlInput = resolvedPane.locator('[data-testid="http-request-url-input"]:visible').first()
   await expect(urlInput).toBeVisible({ timeout: 10000 })
   const viewport = urlInput.locator('.monaco-editor').first()
+  // The resolved column mounts when a version is picked, so Monaco is in
+  // the DOM a beat before it has been laid out — clicking a zero-size
+  // editor fails even with `force`. Wait for real geometry.
+  await expect.poll(async () => (await viewport.boundingBox())?.width ?? 0, { timeout: 10000 }).toBeGreaterThan(0)
   await viewport.click({ force: true })
   await p.keyboard.press('Control+A')
   await p.keyboard.press('Delete')
@@ -512,10 +567,15 @@ Then('the identity band shows the conflicting request', async () => {
   await expect(band.locator('[data-testid="git-conflict-entity-breadcrumb"]')).toContainText('Find pet by ID')
 })
 
+When('I use my version', async () => {
+  const p = requirePage()
+  await p.locator('[data-testid="conflict-resolution-view-use-user-version"]').click()
+})
+
 Then('the your-version check is green and the server-version check is not', async () => {
   const p = requirePage()
-  // The resolved copy seeds from OURS, so equality greens the user side
-  // from the very first render — no pick needed.
+  // A session starts with NOTHING resolved, so the user side greens only
+  // after the pick — the check reports equality, it does not assume it.
   await expect(useActionWrapper(p, 'user')).toHaveClass(/picked/, { timeout: 10000 })
   await expect(useActionWrapper(p, 'server')).not.toHaveClass(/picked/)
 })
@@ -537,6 +597,10 @@ When("I tweak the resolved request's URL", async () => {
   const urlInput = resolvedPane.locator('[data-testid="http-request-url-input"]:visible').first()
   await expect(urlInput).toBeVisible({ timeout: 10000 })
   const viewport = urlInput.locator('.monaco-editor').first()
+  // The resolved column mounts when a version is picked, so Monaco is in
+  // the DOM a beat before it has been laid out — clicking a zero-size
+  // editor fails even with `force`. Wait for real geometry.
+  await expect.poll(async () => (await viewport.boundingBox())?.width ?? 0, { timeout: 10000 }).toBeGreaterThan(0)
   await viewport.click({ force: true })
   await p.keyboard.press('Control+A')
   await p.keyboard.press('Delete')

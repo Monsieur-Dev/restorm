@@ -18,6 +18,7 @@ import { updateReactiveProperty } from './requestTabViewUtils'
 import { toKeyValueData as toKeyValueDataShared } from '../../utils/toKeyValueData'
 import { BeamWrap } from '../common/BeamWrap'
 import { ServerConfigLockedHint } from '../common/ServerConfigLockedHint'
+import { cloneForEventBus } from '../../utils/cloneForEventBus'
 
 export interface SoapServerRequestTabViewProps {
   request: SoapRequest
@@ -99,14 +100,14 @@ export const SoapServerRequestTabView: React.FC<SoapServerRequestTabViewProps> =
 
   // Keep the main-process context in sync with the edited URL + operations.
   useEffect(() => {
-    void window.restorm?.context.updateFullRequestData(request.id, {
+    void window.restorm?.context.updateFullRequestData(request.id, cloneForEventBus({
       url,
       method: 'POST',
       requestType: 'soap',
       headers: toKeyValueDataShared(request.headers),
       server: true,
       soapMockOperations: operations
-    }, sourceIdRef.current)
+    }), sourceIdRef.current)
   }, [request.id, request.headers, url, operations])
 
   // Track listening state + served count for the hosted mock route.

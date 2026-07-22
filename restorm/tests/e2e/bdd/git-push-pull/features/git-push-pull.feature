@@ -39,11 +39,14 @@ Feature: Git push and pull
   # refuses to merge remote changes on top of unpushed local changes — the edit
   # is kept, the remote change is NOT silently applied, and the user is told to
   # push first.
-  Scenario: Pulling with unsaved local edits keeps the edits and asks to push first
+  Scenario: Pulling with unsaved local edits saves them first and offers the update
     Given I have opened a clone of a freshly seeded git remote
     And I have an unsaved local edit to the open request
     When a collaborator pushes a change to that same remote
     And I pull
+    # The pull persists the working copy itself, so the edit is safe on
+    # disk before anything merges; a remote that moved then raises the
+    # update prompt instead of asking the user to sort it out first.
     Then my unsaved edit is preserved on disk
-    And I am told to push my changes before pulling
+    And I am told an update is required
     And the collaborator's change is not applied

@@ -152,7 +152,14 @@ When('I pull', async () => {
   // Pulls are idempotent (an already-pulled repo just fast-forwards to
   // "up to date"), so click a few times spaced out; the scenario-specific
   // outcome is asserted by the step that follows.
+  //
+  // Stop as soon as a modal is up: a pull that needs a decision now raises
+  // the update prompt, and further clicks would land on its overlay
+  // instead of the button. What the prompt means for this scenario is the
+  // following steps' business, not this one's.
+  const anyPrompt = p.locator('[data-testid="git-update-required-modal-overlay"], [data-testid="git-conflict-resolution-modal"]')
   for (let attempt = 0; attempt < 3; attempt++) {
+    if (await anyPrompt.first().isVisible().catch(() => false)) return
     await p.locator('[data-testid="statusbar-git-indicator-pull"]').click()
     await p.waitForTimeout(2000)
   }
@@ -276,12 +283,12 @@ Then('my unsaved edit is preserved on disk', async () => {
   expect(onDisk).toContain(UNSAVED_EDIT_MARKER)
 })
 
-Then('I am told to push my changes before pulling', async () => {
+Then('I am told an update is required', async () => {
   const p = requirePage()
-  // The dedicated "you have unpushed changes — push first" toast, not the
-  // generic pull-failed body. `.first()`: the retried pull click can stack
-  // several copies of the same toast.
-  await expect(p.getByText('push first, then pull', { exact: false }).first()).toBeVisible({ timeout: 10000 })
+  // The dedicated "push first, then pull" toast is gone: the pull now
+  // saves the working copy itself, and a remote that moved raises the
+  // update prompt rather than telling the user to sort it out first.
+  await expect(p.locator('[data-testid="git-update-required-modal-overlay"]')).toBeVisible({ timeout: 15000 })
 })
 
 Then('the collaborator\'s change is not applied', async () => {

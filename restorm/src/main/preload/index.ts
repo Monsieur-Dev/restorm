@@ -1,4 +1,5 @@
 import { contextBridge, ipcRenderer, webUtils } from 'electron'
+import { cloneForEventBus } from '../../shared/utils/cloneForEventBus'
 // Import from core-ui preload modules using relative paths
 // This works in both dev and prod because:
 // - In dev: Vite resolves these imports via aliases in electron.vite.config.ts
@@ -537,11 +538,16 @@ contextBridge.exposeInMainWorld('restorm', {
       keyValues: { id?: string; key: string; value: string; enabled?: boolean }[],
       sourceId?: string
     ): Promise<void> => {
-      await ipcRenderer.invoke('context:update-request-keyvalues', requestId, groupName, keyValues, sourceId)
+      await ipcRenderer.invoke('context:update-request-keyvalues', requestId, groupName, cloneForEventBus(keyValues), sourceId)
     },
     /** Update full request data for URL resolution and code snippet generation */
     updateFullRequestData: async (requestId: string, data: FullRequestData, sourceId?: string): Promise<void> => {
-      await ipcRenderer.invoke('context:update-full-request-data', requestId, data, sourceId)
+      // The renderer hands us the request's LIVE fields, and every request
+      // type is now wrapped in a reactive Proxy — which `ipcRenderer.invoke`
+      // cannot structured-clone ("An object could not be cloned"). The throw
+      // is uncaught inside the tab view's effect, so the editor never
+      // finishes rendering: the protocol never reaches its own UI.
+      await ipcRenderer.invoke('context:update-full-request-data', requestId, cloneForEventBus(data), sourceId)
     },
     /** Get resolved URL for a request */
     getResolvedUrl: async (requestId: string): Promise<ResolvedUrlResult | undefined> => {
