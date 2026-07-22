@@ -13,6 +13,13 @@
       "save": "Simpan",
       "dontSave": "Jangan simpan",
       "cancel": "Batal"
+    },
+    "externalChange": {
+      "title": "Berkas berubah di disk",
+      "message": "\"{{fileName}}\" diubah di luar aplikasi.",
+      "detail": "Muat ulang untuk menggunakan versi di disk, atau pertahankan versi Anda dan timpa versi tersebut.",
+      "reload": "Muat ulang",
+      "keepMine": "Pertahankan versi saya"
     }
   },
   "recentFilesVignette": {
@@ -427,6 +434,11 @@
       "title": "Pembaruan tersedia",
       "body": "Versi file ini yang lebih baru tersedia di repositori.",
       "pullNow": "Tarik sekarang"
+    },
+    "mergeInProgress": {
+      "title": "Penggabungan belum selesai",
+      "body": "Penggabungan Git dimulai dan tidak pernah diselesaikan. Berkas proyek mungkin masih berisi penanda konflik.",
+      "abort": "Batalkan penggabungan"
     }
   },
   "pushModal": {

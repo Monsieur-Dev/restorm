@@ -40,6 +40,13 @@ export function stripIds<T>(obj: T): T {
     return obj.map((item: unknown) => stripIds(item)) as T
   }
 
+  // A Date has no own enumerable keys, so walking it like a plain object
+  // returns `{}` — silently destroying the value. Anything that arrives
+  // here already deserialized (the git merge write-back rehydrates
+  // timestamps) must survive; both YAML and JSON render a Date correctly
+  // on their own.
+  if (obj instanceof Date) return obj
+
   if (typeof obj === 'object') {
     const record = obj as Record<string, unknown>
     const isKeyValueLike = 'key' in record && 'value' in record && typeof record['key'] === 'string'
@@ -111,6 +118,9 @@ export function canonicalizeSerializedKeys<T>(data: T): T {
   if (Array.isArray(data)) {
     return data.map((item: unknown) => canonicalizeSerializedKeys(item)) as T
   }
+  // Same reason as in `stripIds`: reordering a Date's (empty) key set
+  // would replace the value with `{}`.
+  if (data instanceof Date) return data
   const record = data as Record<string, unknown>
   const result: Record<string, unknown> = {}
   for (const key of Object.keys(record).sort(canonicalKeyCompare)) {

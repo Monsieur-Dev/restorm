@@ -13,6 +13,13 @@
       "save": "Tallenna",
       "dontSave": "Älä tallenna",
       "cancel": "Peruuta"
+    },
+    "externalChange": {
+      "title": "Tiedosto muuttui levyllä",
+      "message": "”{{fileName}}” muutettiin sovelluksen ulkopuolella.",
+      "detail": "Lataa uudelleen käyttääksesi levyllä olevaa versiota tai säilytä oma versiosi ja korvaa se.",
+      "reload": "Lataa uudelleen",
+      "keepMine": "Säilytä oma versioni"
     }
   },
   "recentFilesVignette": {
@@ -427,6 +434,11 @@
       "title": "Päivitys saatavilla",
       "body": "Tästä tiedostosta on saatavilla uudempi versio tietovarastossa.",
       "pullNow": "Noudata nyt"
+    },
+    "mergeInProgress": {
+      "title": "Keskeneräinen yhdistäminen",
+      "body": "Git-yhdistäminen aloitettiin, mutta sitä ei koskaan saatettu loppuun. Projektitiedostossa voi olla vielä ristiriitamerkintöjä.",
+      "abort": "Keskeytä yhdistäminen"
     }
   },
   "pushModal": {

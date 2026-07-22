@@ -8,7 +8,7 @@ import type { FeaturePlatform } from '../types/feature'
 import type { FileServiceState, FileMetadata } from '../types/file'
 import type { CoreUiApi, CoreUiThemeApi, CoreUiStorageApi, CoreUiFeatureApi, CoreUiFileApi, CoreUiEventBusApi, CoreUiI18nApi, CoreUiSearchApi, CoreUiSettingsApi, CoreUiGitApi, CoreUiSearchDocument, CoreUiSearchResult, CoreUiSearchResultGroup } from '../types/api'
 import type { SettingValue, ResolvedSetting, SettingsGroup } from '../types/settings'
-import type { GitStatus, GitCommitResult, GitPushResult, GitPullResult, GitFetchCompareResult, GitConflictVersions, GitConflictCommitTimestamps, GitState } from '../types/git'
+import type { GitStatus, GitCommitResult, GitPushResult, GitResetResult, GitPullResult, GitFetchCompareResult, GitConflictVersions, GitConflictCommitTimestamps, GitState } from '../types/git'
 import { NO_GIT_STATE } from '../types/git'
 import yaml from 'js-yaml'
 import themeIndexJson from '../../resources/themes/index.json'
@@ -382,6 +382,11 @@ export function ensureCoreUiWebApiShim(): void {
   }
 
   const fileApi: CoreUiFileApi = {
+    // The browser has no file the user can rewrite behind the app's
+    // back, so the external-change guard is inert on the web.
+    showExternalChangeDialog: (): Promise<'reload' | 'keepMine'> => Promise.resolve('reload'),
+    acceptExternalChange: (): Promise<void> => Promise.resolve(),
+    onFileExternallyChanged: (): (() => void) => () => undefined,
     newFile: (): Promise<boolean> => {
       // Web behavior: For web, we'll ask for a name via prompt
       const name = window.prompt('Enter file name:')
@@ -735,6 +740,11 @@ export function ensureCoreUiWebApiShim(): void {
     fetchAndCompare: (): Promise<GitFetchCompareResult> => Promise.resolve({ remoteHasNewerVersion: false, behind: 0 }),
     getConflictVersions: (_folder: string, filePath: string): Promise<GitConflictVersions> => Promise.resolve({ path: filePath, base: null, ours: null, theirs: null }),
     getFileAtHead: (): Promise<string | null> => Promise.resolve(null),
+    getFileAtRemote: (): Promise<string | null> => Promise.resolve(null),
+    getFileAtMergeBase: (): Promise<string | null> => Promise.resolve(null),
+    getWorkingTreeFile: (): Promise<string | null> => Promise.resolve(null),
+    resetToRemoteKeepingWorkingTree: (): Promise<GitResetResult> => Promise.resolve({ success: false, error: 'not supported in the web shim' }),
+    resetHardToRemote: (): Promise<GitResetResult> => Promise.resolve({ success: false, error: 'not supported in the web shim' }),
     writeResolvedConflict: (): Promise<void> => Promise.resolve(),
     abortMerge: (): Promise<void> => Promise.resolve(),
     getConflictCommitTimestamps: (): Promise<GitConflictCommitTimestamps> => Promise.resolve({ ours: null, theirs: null }),

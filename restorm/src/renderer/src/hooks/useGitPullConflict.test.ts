@@ -137,7 +137,9 @@ describe('useGitPullConflict', () => {
     expect(relativePath).toBe('api.restorm')
     expect(yamlText).toContain('https://theirs.example.com')
 
-    expect(api.commit).toHaveBeenCalledWith('/proj', 'git.conflictResolvedCommitMessage')
+    // Scoped to the project file: a commit must never sweep up whatever
+    // else the user happens to have dirty in the same repository.
+    expect(api.commit).toHaveBeenCalledWith('/proj', 'git.conflictResolvedCommitMessage', ['api.restorm'])
     // Commit+push is atomic: the merge commit must not strand the repo
     // "ahead" with a push pastille the user never asked for.
     expect(api.push).toHaveBeenCalledWith('/proj')
@@ -165,7 +167,7 @@ describe('useGitPullConflict', () => {
     expect(yamlText).toContain('_projectUuid: ours-project-uuid')
   })
 
-  it('finishResolution bakes a per-config quick-config pick into the write-back, independent of the whole-entity pick', async () => {
+  it('finishResolution settles a saved configuration independently of the request itself', async () => {
     const oursQc = [
       '_projectUuid: ours-project-uuid',
       'collections:',
@@ -207,16 +209,20 @@ describe('useGitPullConflict', () => {
     const { result } = renderHook(() => useGitPullConflict())
     await act(async () => { await result.current.openFromPull('/proj', 'api.restorm') })
 
-    // No whole-entity pick → resolved defaults to "ours"; only the Staging
-    // quick-config is switched to "theirs".
-    act(() => { result.current.conflictResolution.pickQuickConfigVersion('r1', 'Staging', 'theirs') })
+    // Two entries now: the request itself (its own url differs) and the
+    // contested saved configuration, each arbitrated on its own.
+    expect(result.current.conflictResolution.conflicts.map((c) => c.quickConfigName)).toEqual([undefined, 'Staging'])
+    act(() => { result.current.conflictResolution.pickOursVersion('r1') })
+    act(() => { result.current.conflictResolution.pickTheirsVersion('r1::quick-config::Staging') })
 
     await act(async () => { await result.current.finishResolution() })
     await flush()
 
     const [, , yamlText] = api.writeResolvedConflict.mock.calls[0] as [string, string, string]
-    // The request's own URL stays "ours" (never picked), but the Staging
-    // quick-config carries "theirs" — independent per-config granularity.
+    // The request's own URL follows its own decision (ours), while the
+    // Staging configuration follows its own (theirs) — the two are
+    // arbitrated independently, which is the whole point of splitting a
+    // saved configuration out into its own conflict.
     expect(yamlText).toContain('url: https://ours.example.com')
     expect(yamlText).toContain('https://theirs-staging.example.com')
     expect(yamlText).not.toContain('https://ours-staging.example.com')
@@ -226,6 +232,9 @@ describe('useGitPullConflict', () => {
     stubGitApi({ commit: vi.fn().mockResolvedValue({ success: false, error: 'nothing to commit' }) })
     const { result } = renderHook(() => useGitPullConflict())
     await act(async () => { await result.current.openFromPull('/proj', 'api.restorm') })
+    // Finishing requires every conflict to be decided — otherwise the
+    // write-back refuses before it ever reaches the commit under test.
+    act(() => { result.current.conflictResolution.pickOursVersion('r1') })
 
     await act(async () => { await result.current.finishResolution() })
     await flush()
@@ -236,6 +245,22 @@ describe('useGitPullConflict', () => {
       durationMs: 10000
     })
     expect(result.current.isOpen).toBe(true)
+  })
+
+  it('finishResolution re-opens the project once the merged content is on disk', async () => {
+    // The repository has moved on; leaving the app on its pre-merge tree
+    // means the sidebar, the open tabs and the search index all describe a
+    // file that no longer exists on disk.
+    const onProjectReplaced = vi.fn()
+    stubGitApi()
+    const { result } = renderHook(() => useGitPullConflict({ onProjectReplaced }))
+    await act(async () => { await result.current.openFromPull('/proj', 'api.restorm') })
+    act(() => { result.current.conflictResolution.pickTheirsVersion('r1') })
+
+    await act(async () => { await result.current.finishResolution() })
+    await flush()
+
+    expect(onProjectReplaced).toHaveBeenCalledTimes(1)
   })
 
   it('finishResolution is a no-op before openFromPull has run', async () => {

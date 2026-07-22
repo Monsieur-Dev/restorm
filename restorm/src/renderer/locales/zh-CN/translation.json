@@ -230,7 +230,10 @@
     "mcpLogs": "MCP 日志",
     "git": "Git",
     "gitPush": "推送",
-    "gitPull": "拉取"
+    "gitPull": "拉取",
+    "gitRefresh": "刷新",
+    "gitHistory": "历史记录",
+    "gitResetToServer": "重置为服务器版本"
   },
   "sidebar": {
     "addRequest": "添加请求",
@@ -2373,7 +2376,6 @@
     "pullFailedTitle": "拉取失败",
     "pullFailedBody": "无法拉取最新更改。",
     "pullSaveFailedBody": "拉取前无法保存您的更改。",
-    "pullUnpushedChangesBody": "存在尚未推送的本地更改——请先推送，再拉取。",
     "pushFailedTitle": "推送失败",
     "pushFailedBody": "无法推送更改。",
     "pushSucceededTitle": "已推送",
@@ -2405,7 +2407,11 @@
       "deletedFolder": "已删除文件夹 \"{{name}}\"",
       "addedEnvironmentFolder": "已添加环境文件夹 \"{{name}}\"",
       "modifiedEnvironmentFolder": "已修改环境文件夹 \"{{name}}\"",
-      "deletedEnvironmentFolder": "已删除环境文件夹 \"{{name}}\""
+      "deletedEnvironmentFolder": "已删除环境文件夹 \"{{name}}\"",
+      "movedRequest": "移动了请求“{{name}}”",
+      "movedScenario": "移动了场景“{{name}}”",
+      "movedFolder": "移动了文件夹“{{name}}”",
+      "movedEnvironmentFolder": "移动了环境文件夹“{{name}}”"
     },
     "commitTitle": {
       "singleRequest": "更新请求 \"{{name}}\"",
@@ -2435,6 +2441,37 @@
     },
     "gate": {
       "initGitFolder": "请初始化您的 git 文件夹以使用此功能。"
-    }
+    },
+    "conflictChooseVersion": "请选择一个版本",
+    "conflictChooseVersionHint": "点击您的版本或服务器版本顶部的 <0></0>，随后可在保存前编辑任意字段。",
+    "conflictFinishBlocked": "仍有冲突尚未解决。",
+    "conflictOnQuickConfig": "冲突出现在请求的快速设置：{{name}}",
+    "conflictNameField": "名称",
+    "conflictTagsEmpty": "此侧没有标签。",
+    "conflictTagName": "标签名称",
+    "conflictTagRemove": "移除此标签",
+    "conflictTagAdd": "添加标签",
+    "conflictTagNew": "新标签",
+    "conflictTagsTab": "标签",
+    "conflictTreeStructure": "树结构"
+  },
+  "gitUpdate": {
+    "title": "需要更新",
+    "message": "远程服务器上存在该文件的更新版本。继续之前，您必须更新自己的版本。如果您的版本与服务器版本之间存在冲突，我们会帮助您解决。",
+    "conflictCount_one": "您的版本与服务器版本之间有 {{count}} 项不同。",
+    "conflictCount_other": "您的版本与服务器版本之间有 {{count}} 项不同。",
+    "cancel": "取消",
+    "discardMine": "删除我的修改",
+    "keepMineOverwriting": "保留我的版本（覆盖服务器的修改）",
+    "updateFailedTitle": "更新失败",
+    "updateFailedBody": "无法从远程服务器获取版本。",
+    "discardedTitle": "修改已删除",
+    "discardedBody": "您现在处于服务器上的最新版本。",
+    "updatedTitle": "项目已更新",
+    "updatedBody": "您现在处于服务器上的最新版本，您的修改已保留。",
+    "keepServerVersion": "保留服务器版本",
+    "resolveConflicts": "解决冲突",
+    "resetConfirmTitle": "要重置为服务器版本吗？",
+    "resetConfirmBody": "您所有的本地修改都将被永久删除，并替换为服务器版本。"
   }
 }

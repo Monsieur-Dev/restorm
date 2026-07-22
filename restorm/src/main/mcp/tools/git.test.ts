@@ -30,6 +30,7 @@ const gitState = {
   },
   commitResult: { success: true, commit: 'sha123' } as { success: boolean, commit?: string, error?: string },
   pushResult: { success: true } as { success: boolean, error?: string },
+  fetchCompare: { remoteHasNewerVersion: false, behind: 0 } as { remoteHasNewerVersion: boolean, behind: number },
   collections: [] as unknown[],
   settingValue: undefined as unknown
 }
@@ -73,6 +74,7 @@ vi.mock('electron-core-ui', () => ({
     commit: (...args: unknown[]) => Promise.resolve(commitSpy(...args)),
     push: (...args: unknown[]) => Promise.resolve(pushSpy(...args)),
     pull: () => Promise.resolve(gitState.pullResult),
+    fetchAndCompare: () => Promise.resolve(gitState.fetchCompare),
     getConflictVersions: () => Promise.resolve(gitState.conflictVersions),
     getConflictCommitTimestamps: () => Promise.resolve({ ours: null, theirs: null }),
     writeResolvedConflict: (...args: unknown[]) => { writeResolvedConflictSpy(...args); return Promise.resolve() }
@@ -125,6 +127,7 @@ describe('git MCP tools', () => {
     gitState.pullResult = { success: true, conflicted: false, conflictFiles: [] }
     gitState.conflictVersions = { path: 'api.restorm', base: null, ours: null, theirs: null }
     gitState.commitResult = { success: true, commit: 'sha123' }
+    gitState.fetchCompare = { remoteHasNewerVersion: false, behind: 0 }
     gitState.pushResult = { success: true }
     gitState.collections = []
     gitState.settingValue = undefined
@@ -208,6 +211,21 @@ describe('git MCP tools', () => {
       expect(second.content[0]?.text).toContain('git_commit_push first')
     })
 
+    it('refuses without committing anything while the remote is ahead', async () => {
+      // The UI runs this pre-flight before its own publish. Skipping it here
+      // let the commit land and only the push fail, stranding a local commit
+      // the caller never asked for — the very thing this flow avoids.
+      const token = await review()
+      gitState.fetchCompare = { remoteHasNewerVersion: true, behind: 2 }
+
+      const result = await mcp.invoke('git_confirm_push', { reviewToken: token })
+
+      expect(result.isError).toBe(true)
+      expect(result.content[0]?.text).toContain('git_pull first')
+      expect(commitSpy).not.toHaveBeenCalled()
+      expect(pushSpy).not.toHaveBeenCalled()
+    })
+
     it('stages, commits, and pushes on a matching token; clears the pending review', async () => {
       const token = await review()
       const result = await mcp.invoke('git_confirm_push', { reviewToken: token })
@@ -223,7 +241,8 @@ describe('git MCP tools', () => {
     it('lets the caller override the generated title/body', async () => {
       const token = await review()
       await mcp.invoke('git_confirm_push', { reviewToken: token, title: 'Custom title', body: 'Custom body' })
-      expect(commitSpy).toHaveBeenCalledWith('/proj', 'Custom title\n\nCustom body')
+      // Scoped to the project file, like every other commit path.
+      expect(commitSpy).toHaveBeenCalledWith('/proj', 'Custom title\n\nCustom body', ['api.restorm'])
     })
 
     it('reports a commit failure and clears the pending review', async () => {

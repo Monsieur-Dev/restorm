@@ -13,6 +13,13 @@
       "save": "Salvează",
       "dontSave": "Nu salva",
       "cancel": "Anulează"
+    },
+    "externalChange": {
+      "title": "Fișierul a fost modificat pe disc",
+      "message": "„{{fileName}}” a fost modificat în afara aplicației.",
+      "detail": "Reîncărcați pentru a folosi versiunea de pe disc sau păstrați-vă versiunea și suprascrieți-o.",
+      "reload": "Reîncarcă",
+      "keepMine": "Păstrează versiunea mea"
     }
   },
   "recentFilesVignette": {
@@ -427,6 +434,11 @@
       "title": "Actualizare disponibilă",
       "body": "O versiune mai nouă a acestui fișier este disponibilă în depozit.",
       "pullNow": "Extrage acum"
+    },
+    "mergeInProgress": {
+      "title": "Îmbinare neterminată",
+      "body": "A fost începută o îmbinare Git care nu a fost niciodată finalizată. Fișierul proiectului poate conține încă marcaje de conflict.",
+      "abort": "Anulează îmbinarea"
     }
   },
   "pushModal": {

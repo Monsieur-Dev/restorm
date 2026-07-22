@@ -25,11 +25,21 @@ const TOAST_ID = 'git-pull-available'
  * `TOAST_ID` means a re-detection while the previous toast is still
  * showing updates it in place rather than stacking a duplicate.
  *
+ * `isBehind` (optional) keeps the toast honest: it is a call to action
+ * that becomes a lie the moment the repository catches up — by a pull, by
+ * a conflict resolution, or by the update the push flow performs on its
+ * own. Pass the host's live behind-flag and the toast retracts itself as
+ * soon as there is nothing left to fetch, instead of sitting there
+ * offering to pull nothing.
+ *
  * Requires the host preload to expose `window.api.git` and an `app`
  * toaster mounted somewhere in the tree.
  */
-export function useGitPullAvailableToast(onPull: () => void): void {
+export function useGitPullAvailableToast(onPull: () => void, isBehind?: boolean): void {
   const { t } = useTranslation()
+  useEffect(() => {
+    if (isBehind === false) toasterService.dismiss('app', TOAST_ID)
+  }, [isBehind])
   useEffect(() => {
     const unsubscribe = window.api.git.onPullAvailable(() => {
       const pullNow = (): void => {

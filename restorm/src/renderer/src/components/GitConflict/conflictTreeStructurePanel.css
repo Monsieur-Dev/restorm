@@ -1,0 +1,15 @@
+/* The hierarchy panel of the tree-structure conflict entry. The rows come
+ * from the SAME `ListView` the sidebar uses, so nothing here restyles a
+ * row's content — only the container, plus a transparent border on every
+ * row so the contested ones can take a colour without shifting the layout
+ * by a pixel. */
+.conflict-tree-structure {
+  height: 100%;
+  overflow: auto;
+  padding: 4px 0;
+}
+
+.conflict-tree-structure .list-view-row {
+  border: 1px solid transparent;
+  border-radius: 3px;
+}

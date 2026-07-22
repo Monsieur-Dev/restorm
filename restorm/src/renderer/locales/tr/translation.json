@@ -231,7 +231,10 @@
     "mcpLogs": "MCP günlükleri",
     "git": "Git",
     "gitPush": "Gönder",
-    "gitPull": "Çek"
+    "gitPull": "Çek",
+    "gitRefresh": "Yenile",
+    "gitHistory": "Geçmiş",
+    "gitResetToServer": "Sunucu sürümüne sıfırla"
   },
   "sidebar": {
     "addRequest": "İstek ekle",
@@ -2374,7 +2377,6 @@
     "pullFailedTitle": "Çekme başarısız oldu",
     "pullFailedBody": "En son değişiklikler alınamadı.",
     "pullSaveFailedBody": "Değişiklikleriniz çekmeden önce kaydedilemedi.",
-    "pullUnpushedChangesBody": "Gönderilmemiş yerel değişiklikler var — önce Push, ardından Pull yapın.",
     "pushFailedTitle": "Gönderme başarısız oldu",
     "pushFailedBody": "Değişiklikler gönderilemedi.",
     "pushSucceededTitle": "Gönderildi",
@@ -2406,7 +2408,11 @@
       "deletedFolder": "\"{{name}}\" klasörü silindi",
       "addedEnvironmentFolder": "\"{{name}}\" ortam klasörü eklendi",
       "modifiedEnvironmentFolder": "\"{{name}}\" ortam klasörü değiştirildi",
-      "deletedEnvironmentFolder": "\"{{name}}\" ortam klasörü silindi"
+      "deletedEnvironmentFolder": "\"{{name}}\" ortam klasörü silindi",
+      "movedRequest": "\"{{name}}\" isteği taşındı",
+      "movedScenario": "\"{{name}}\" senaryosu taşındı",
+      "movedFolder": "\"{{name}}\" klasörü taşındı",
+      "movedEnvironmentFolder": "\"{{name}}\" ortam klasörü taşındı"
     },
     "commitTitle": {
       "singleRequest": "\"{{name}}\" isteğinde güncelleme",
@@ -2436,6 +2442,37 @@
     },
     "gate": {
       "initGitFolder": "Bu özelliği kullanmak için git klasörünüzü başlatın."
-    }
+    },
+    "conflictChooseVersion": "Bir sürüm seçin",
+    "conflictChooseVersionHint": "Kendi sürümünüzün veya sunucununkinin üstündeki <0></0> işaretine tıklayın — ardından kaydetmeden önce her alanı düzenleyebilirsiniz.",
+    "conflictFinishBlocked": "Bazı çakışmalar hâlâ çözülmedi.",
+    "conflictOnQuickConfig": "Çakışma, isteğin hızlı ayarıyla ilgili: {{name}}",
+    "conflictNameField": "Ad",
+    "conflictTagsEmpty": "Bu tarafta etiket yok.",
+    "conflictTagName": "Etiket adı",
+    "conflictTagRemove": "Bu etiketi kaldır",
+    "conflictTagAdd": "Etiket ekle",
+    "conflictTagNew": "yeni-etiket",
+    "conflictTagsTab": "Etiketler",
+    "conflictTreeStructure": "Ağaç yapısı"
+  },
+  "gitUpdate": {
+    "title": "Güncelleme gerekli",
+    "message": "Uzak sunucuda dosyanın daha yeni bir sürümü var. Devam etmeden önce sürümünüzü güncellemelisiniz. Sizin sürümünüzle sunucununki arasında çakışmalar varsa, bunları çözmenize yardımcı olacağız.",
+    "conflictCount_one": "Sizin sürümünüzle sunucununki arasında {{count}} öge farklı.",
+    "conflictCount_other": "Sizin sürümünüzle sunucununki arasında {{count}} öge farklı.",
+    "cancel": "İptal",
+    "discardMine": "Değişikliklerimi sil",
+    "keepMineOverwriting": "Kendi sürümümü koru (sunucunun değişikliklerinin üzerine yazar)",
+    "updateFailedTitle": "Güncelleme başarısız",
+    "updateFailedBody": "Uzak sunucudan sürüm alınamadı.",
+    "discardedTitle": "Değişiklikler silindi",
+    "discardedBody": "Artık sunucudaki en son sürümdesiniz.",
+    "updatedTitle": "Proje güncellendi",
+    "updatedBody": "Artık sunucudaki en son sürümdesiniz, değişiklikleriniz korundu.",
+    "keepServerVersion": "Sunucu sürümünü koru",
+    "resolveConflicts": "Çakışmaları çöz",
+    "resetConfirmTitle": "Sunucu sürümüne sıfırlansın mı?",
+    "resetConfirmBody": "Tüm yerel değişiklikleriniz kalıcı olarak silinecek ve sunucu sürümüyle değiştirilecek."
   }
 }

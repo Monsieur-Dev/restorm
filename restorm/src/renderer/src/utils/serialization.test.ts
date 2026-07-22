@@ -72,3 +72,59 @@ describe('parseProjectYaml wired to processAfterDeserialization', () => {
     expect((items[0]?.id ?? '').length).toBeGreaterThan(0)
   })
 })
+
+describe('quick-config timestamps are dropped on load', () => {
+  it('removes createdAt/updatedAt from a saved quick-config, including corrupted ones', () => {
+    // The two fields were written since quick-configs existed but read by
+    // nothing, and files in the wild carry `{}` where a Date was destroyed
+    // by the serializer. Dropping them on load lets the next save heal the
+    // file, with no separate migration.
+    const loaded = processAfterDeserialization({
+      collections: [{
+        id: 'r1',
+        name: 'Fiche',
+        quickConfigs: [{
+          id: 'qc1', name: 'Recette', requestId: 'r1', storageTarget: 'project',
+          fields: { url: 'https://example.com' }, createdAt: {}, updatedAt: '2026-07-22T05:07:12.471Z'
+        }]
+      }]
+    })
+    const config = (loaded.collections[0] as { quickConfigs: Record<string, unknown>[] }).quickConfigs[0]
+
+    expect(config).toBeDefined()
+    expect('createdAt' in (config ?? {})).toBe(false)
+    expect('updatedAt' in (config ?? {})).toBe(false)
+    expect(config?.['fields']).toEqual({ url: 'https://example.com' })
+  })
+
+  it('leaves createdAt alone outside a quick-config', () => {
+    // Only a quick-config's own timestamps are this function's business.
+    const loaded = processAfterDeserialization({ report: { createdAt: '2026-07-22T05:00:00.000Z' } })
+    expect(loaded.report.createdAt).toBe('2026-07-22T05:00:00.000Z')
+  })
+})
+
+describe("a scenario node's config bag", () => {
+  it('never receives a generated id, even when it carries a requestId', () => {
+    // An httpRequest node's config holds `requestId`, which the
+    // "looks like a response" heuristic matches. Minting an id there made
+    // every open produce a different value, which the next save persisted
+    // — so a node nobody edited showed up as conflicting between two
+    // people working on the same project.
+    const loaded = processAfterDeserialization({
+      nodes: [{ id: 'n1', kind: 'httpRequest', config: { label: 'Consulter', requestId: 'r1' } }]
+    })
+    const config = loaded.nodes[0]?.config as Record<string, unknown>
+
+    expect('id' in config).toBe(false)
+    expect(config).toEqual({ label: 'Consulter', requestId: 'r1' })
+  })
+
+  it('drops an id a previous version already persisted into the bag', () => {
+    const loaded = processAfterDeserialization({
+      nodes: [{ id: 'n1', kind: 'log', config: { id: 'da9340fc-stale', label: 'Trace' } }]
+    })
+
+    expect(loaded.nodes[0]?.config).toEqual({ label: 'Trace' })
+  })
+})

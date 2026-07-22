@@ -231,7 +231,10 @@
     "mcpLogs": "MCP-Protokolle",
     "git": "Git",
     "gitPush": "Push",
-    "gitPull": "Pull"
+    "gitPull": "Pull",
+    "gitRefresh": "Aktualisieren",
+    "gitHistory": "Verlauf",
+    "gitResetToServer": "Auf Serverversion zurücksetzen"
   },
   "sidebar": {
     "addRequest": "Anfrage hinzufügen",
@@ -2374,7 +2377,6 @@
     "pullFailedTitle": "Abruf fehlgeschlagen",
     "pullFailedBody": "Die neuesten Änderungen konnten nicht abgerufen werden.",
     "pullSaveFailedBody": "Ihre Änderungen konnten vor dem Abrufen nicht gespeichert werden.",
-    "pullUnpushedChangesBody": "Es gibt lokale, noch nicht gepushte Änderungen – bitte zuerst pushen, dann pullen.",
     "pushFailedTitle": "Push fehlgeschlagen",
     "pushFailedBody": "Die Änderungen konnten nicht gepusht werden.",
     "pushSucceededTitle": "Gepusht",
@@ -2406,7 +2408,11 @@
       "deletedFolder": "Ordner „{{name}}“ gelöscht",
       "addedEnvironmentFolder": "Umgebungsordner „{{name}}“ hinzugefügt",
       "modifiedEnvironmentFolder": "Umgebungsordner „{{name}}“ geändert",
-      "deletedEnvironmentFolder": "Umgebungsordner „{{name}}“ gelöscht"
+      "deletedEnvironmentFolder": "Umgebungsordner „{{name}}“ gelöscht",
+      "movedRequest": "Anfrage \"{{name}}\" verschoben",
+      "movedScenario": "Szenario \"{{name}}\" verschoben",
+      "movedFolder": "Ordner \"{{name}}\" verschoben",
+      "movedEnvironmentFolder": "Umgebungsordner \"{{name}}\" verschoben"
     },
     "commitTitle": {
       "singleRequest": "Aktualisierung der Anfrage „{{name}}“",
@@ -2436,6 +2442,37 @@
     },
     "gate": {
       "initGitFolder": "Initialisieren Sie Ihren Git-Ordner, um diese Funktion zu nutzen."
-    }
+    },
+    "conflictChooseVersion": "Version auswählen",
+    "conflictChooseVersionHint": "Klicken Sie oben auf das <0></0> Ihrer Version oder der des Servers — anschließend können Sie vor dem Speichern jedes Feld bearbeiten.",
+    "conflictFinishBlocked": "Einige Konflikte müssen noch entschieden werden.",
+    "conflictOnQuickConfig": "Der Konflikt betrifft die Schnelleinstellung der Anfrage: {{name}}",
+    "conflictNameField": "Name",
+    "conflictTagsEmpty": "Keine Tags auf dieser Seite.",
+    "conflictTagName": "Tag-Name",
+    "conflictTagRemove": "Dieses Tag entfernen",
+    "conflictTagAdd": "Tag hinzufügen",
+    "conflictTagNew": "neues-tag",
+    "conflictTagsTab": "Tags",
+    "conflictTreeStructure": "Baumstruktur"
+  },
+  "gitUpdate": {
+    "title": "Aktualisierung erforderlich",
+    "message": "Auf dem Remote-Server existiert eine neuere Version der Datei. Sie müssen Ihre Version aktualisieren, bevor Sie fortfahren. Falls es Konflikte zwischen Ihrer Version und der des Servers gibt, helfen wir Ihnen bei der Lösung.",
+    "conflictCount_one": "{{count}} Element unterscheidet sich zwischen Ihrer Version und der des Servers.",
+    "conflictCount_other": "{{count}} Elemente unterscheiden sich zwischen Ihrer Version und der des Servers.",
+    "cancel": "Abbrechen",
+    "discardMine": "Meine Änderungen verwerfen",
+    "keepMineOverwriting": "Meine Version behalten (überschreibt die Änderungen des Servers)",
+    "updateFailedTitle": "Aktualisierung fehlgeschlagen",
+    "updateFailedBody": "Die Version vom Remote-Server konnte nicht abgerufen werden.",
+    "discardedTitle": "Änderungen verworfen",
+    "discardedBody": "Sie sind jetzt auf der neuesten Version des Servers.",
+    "updatedTitle": "Projekt aktualisiert",
+    "updatedBody": "Sie sind jetzt auf der neuesten Version des Servers, Ihre Änderungen wurden beibehalten.",
+    "keepServerVersion": "Serverversion übernehmen",
+    "resolveConflicts": "Konflikte lösen",
+    "resetConfirmTitle": "Auf Serverversion zurücksetzen?",
+    "resetConfirmBody": "Alle Ihre lokalen Änderungen werden endgültig gelöscht und durch die Serverversion ersetzt."
   }
 }

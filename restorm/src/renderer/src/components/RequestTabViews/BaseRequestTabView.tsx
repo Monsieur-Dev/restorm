@@ -90,6 +90,16 @@ export interface BaseRequestTabViewProps {
    * ever set by `ConflictEntityPanel`; `undefined`/`false` in the live
    * (non-conflict) editor. */
   notesDiffers?: boolean
+  /** Conflict resolution: restrict the request-side strip to these tab ids.
+   * A conflict view shows what is contested and nothing else — a tab with
+   * no divergence is noise the user has to rule out by hand. `undefined`
+   * (the live editor) keeps every tab. An empty array hides the strip
+   * entirely, which is the "only the name changed" case. */
+  visibleRequestTabIds?: string[]
+  /** Conflict resolution: tabs appended to the request-side strip that the
+   * live editor has no equivalent for (today: the contested tag list).
+   * Filtered by `visibleRequestTabIds` like every other tab. */
+  extraRequestTabs?: Tab[]
 }
 
 const COMPACT_BREAKPOINT = 750
@@ -118,7 +128,9 @@ export const BaseRequestTabView: React.FC<BaseRequestTabViewProps> = ({
   onRequestTabChange,
   initialLeftRatio,
   defaultActiveTabId,
-  notesDiffers
+  notesDiffers,
+  visibleRequestTabIds,
+  extraRequestTabs
 }) => {
   const { t } = useTranslation()
   const [internalActiveTabId, setInternalActiveTabId] = useState(defaultActiveTabId ?? 'request')
@@ -294,8 +306,10 @@ export const BaseRequestTabView: React.FC<BaseRequestTabViewProps> = ({
       })
     }
 
-    return tabs
-  }, [requestId, notes, requestContent, urlSection, docsContent, hasDocs, handleNotesChange, codeSnippetsContent, additionalRequestTabs, showNotes, showCodeSnippets, notesDiffers, t])
+    if (extraRequestTabs) tabs.push(...extraRequestTabs)
+    if (!visibleRequestTabIds) return tabs
+    return tabs.filter((tab) => visibleRequestTabIds.includes(tab.id))
+  }, [requestId, notes, requestContent, urlSection, docsContent, hasDocs, handleNotesChange, codeSnippetsContent, additionalRequestTabs, showNotes, showCodeSnippets, notesDiffers, visibleRequestTabIds, extraRequestTabs, t])
 
   // If the active tab vanishes (e.g., user was on Docs and the request's URL
   // changed so no operation matches anymore), fall back to the Request tab

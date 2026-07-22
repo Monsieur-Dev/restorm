@@ -13,6 +13,13 @@
       "save": "Spara",
       "dontSave": "Spara inte",
       "cancel": "Avbryt"
+    },
+    "externalChange": {
+      "title": "Filen har ändrats på disken",
+      "message": "”{{fileName}}” ändrades utanför programmet.",
+      "detail": "Läs in på nytt för att använda versionen på disken, eller behåll din version och skriv över den.",
+      "reload": "Läs in på nytt",
+      "keepMine": "Behåll min version"
     }
   },
   "recentFilesVignette": {
@@ -427,6 +434,11 @@
       "title": "Uppdatering tillgänglig",
       "body": "En nyare version av den här filen finns tillgänglig i repot.",
       "pullNow": "Hämta nu"
+    },
+    "mergeInProgress": {
+      "title": "Oavslutad sammanslagning",
+      "body": "En Git-sammanslagning påbörjades men slutfördes aldrig. Projektfilen kan fortfarande innehålla konfliktmarkeringar.",
+      "abort": "Avbryt sammanslagningen"
     }
   },
   "pushModal": {

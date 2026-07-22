@@ -47,7 +47,7 @@ export const featureIsEnabledArgs = z.tuple([z.string()])
 // File
 // ==========================================================================
 export const fileOpenArgs = z.tuple([z.string().optional()])
-export const fileSaveArgs = z.tuple([z.unknown()])
+export const fileSaveArgs = z.tuple([z.unknown(), z.object({ force: z.boolean().optional() }).optional()])
 export const fileSaveAsArgs = z.tuple([
   z.unknown(),
   z.string().optional(),
@@ -168,6 +168,6 @@ export const settingsResetArgs = z.tuple([z.string()])
 export const gitFolderArgs = z.tuple([z.string()])
 export const gitSetActiveFolderArgs = z.tuple([z.string().nullable()])
 export const gitStageArgs = z.tuple([z.string(), z.array(z.string())])
-export const gitCommitArgs = z.tuple([z.string(), z.string()])
+export const gitCommitArgs = z.tuple([z.string(), z.string(), z.array(z.string()).optional()])
 export const gitConflictVersionsArgs = z.tuple([z.string(), z.string()])
 export const gitWriteResolvedConflictArgs = z.tuple([z.string(), z.string(), z.string()])

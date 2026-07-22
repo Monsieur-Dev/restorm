@@ -13,6 +13,13 @@
       "save": "Save",
       "dontSave": "Don't Save",
       "cancel": "Cancel"
+    },
+    "externalChange": {
+      "title": "File changed on disk",
+      "message": "\"{{fileName}}\" was modified outside the application.",
+      "detail": "Reload to use the version on disk, or keep your version and overwrite it.",
+      "reload": "Reload",
+      "keepMine": "Keep my version"
     }
   },
   "recentFilesVignette": {
@@ -427,6 +434,11 @@
       "title": "Update available",
       "body": "A newer version of this file is available on the repository.",
       "pullNow": "Pull now"
+    },
+    "mergeInProgress": {
+      "title": "Unfinished merge",
+      "body": "A Git merge was started and never finished. The project file may still contain conflict markers.",
+      "abort": "Abort the merge"
     }
   },
   "pushModal": {

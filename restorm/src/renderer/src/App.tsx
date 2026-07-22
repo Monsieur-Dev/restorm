@@ -129,6 +129,7 @@ import type { SplitDirection } from 'electron-core-ui/renderer'
 import { REOPEN_LAST_FILE_STORAGE_KEY, REOPEN_LAST_FILE_SETTING_KEY } from '../../shared/config/reopenLastFile'
 import { CONSOLE_TAB_ID, FIREWALL_TAB_ID, MINI_BROWSER_TAB_ID, SETTINGS_TAB_ID, MCP_LOGS_TAB_ID, type ConsoleTab, type FirewallTab, type MiniBrowserTab, type SettingsTab, type McpLogsTab } from '../../shared/types/editor'
 import { findGroupIdForTab, hasGroupWithId, updateGroupById } from './utils/workbenchHelpers'
+import { pruneOrphanTabs } from './utils/workbenchTabs'
 import { findTopLevelEnvironment } from './utils/envSaveUnit'
 
 /**
@@ -151,13 +152,20 @@ import { Onboarding } from './components/MainView/Workbench/Onboarding'
 import { RestormTitlebar } from './components/MainView/Titlebar/RestormTitlebar'
 import { StatusbarMcpIndicator } from './components/MainView/StatusbarMcpIndicator'
 import { StatusbarGitIndicator } from './components/MainView/StatusbarGitIndicator'
+import { useGitPendingFlags } from './hooks/useGitPendingFlags'
 import { ScenarioToastBody, ScenarioToastTitle } from './components/ScenarioToastBody'
 import { useMcpEnabled } from './hooks/useMcpEnabled'
 import { useMcpActiveStateBridge } from './hooks/useMcpActiveStateBridge'
 import { useMcpNavigation } from './hooks/useMcpNavigation'
+import { useExternalFileChange } from './hooks/useExternalFileChange'
+import { useGitMergeInProgressToast } from 'electron-core-ui/renderer'
+import { useGitFolder } from './hooks/useGitFolder'
 import { useGitActions } from './hooks/useGitActions'
 import { usePushModal } from './hooks/usePushModal'
 import { useGitPullConflict } from './hooks/useGitPullConflict'
+import { GitUpdateRequiredModal } from './components/GitConflict/GitUpdateRequiredModal'
+import { GitResetToServerConfirmModal } from './components/GitConflict/GitResetToServerConfirmModal'
+import { useGitUpdateActions } from './hooks/useGitUpdateActions'
 import { GitConflictResolutionModal } from './components/GitConflict/GitConflictResolutionModal'
 import { useMcpTreeReplace } from './hooks/useMcpTreeReplace'
 import { useMcpRunRequest } from './hooks/useMcpRunRequest'
@@ -465,10 +473,26 @@ const App: React.FC = () => {
   // The Push modal's whole lifecycle (diff-on-open, language-driven
   // regeneration, the setting sync, the actual stage+commit+push) —
   // `rootItems` is the "after" side of its structural diff.
-  const pushModal = usePushModal(filePath, rootItems, saveBeforePush)
+  const pushModal = usePushModal(filePath, rootItems, saveBeforePush, {
+    onResolveConflicts: (pending) => {
+      pullConflict.openFromVersions(
+        pending.gitFolder,
+        pending.relativePath,
+        pending.versions,
+        // Only a Push publishes once the conflicts are settled.
+        pending.mode === 'push'
+      )
+    },
+    // The project file on disk was replaced (updated from the server, or
+    // reset onto it) — re-hydrate the tree, tabs and search index through
+    // the normal open path, exactly as a clean pull does.
+    onProjectReplaced: () => { refreshOpenFileAfterPull() }
+  })
   // The pull-conflict 4-panel resolution flow — opened by `useGitActions`
   // below when a pull comes back conflicted, instead of a plain toast.
-  const pullConflict = useGitPullConflict()
+  const pullConflict = useGitPullConflict({
+    onProjectReplaced: () => { refreshOpenFileAfterPull() }
+  })
   // After a clean pull fast-forwards new content onto disk, re-open the same
   // project through the normal file-open path so the sidebar tree + open
   // editor tabs re-hydrate from the pulled content — no manual reopen, and no
@@ -488,6 +512,37 @@ const App: React.FC = () => {
   // Git-history modal: opened from the statusbar `source-control` icon.
   // Loads the full log lazily on open (the modal is rare; no polling).
   const [gitHistory, setGitHistory] = useState<{ open: boolean, commits: GitHistoryCommit[], mainTipHash?: string }>({ open: false, commits: [] })
+  // Same both-sides re-check as the statusbar refresh icon; the pastille
+  // flags are shared with the title-bar Git menu via useGitPendingFlags.
+  const handleGitRefresh = useCallback(() => { void window.api.git.refreshState() }, [])
+  // "Reset to the server version" — the same destructive operation the
+  // update prompt offers, reachable at any time and not only when the
+  // remote happens to be ahead. Confirmed first: it throws away work.
+  const [resetToServerConfirm, setResetToServerConfirm] = useState(false)
+  const { takeServerVersion } = useGitUpdateActions()
+  const handleGitResetToServer = useCallback(() => { setResetToServerConfirm(true) }, [])
+  const confirmGitResetToServer = useCallback(() => {
+    setResetToServerConfirm(false)
+    const folder = filePath?.endsWith('.restorm') === true
+      ? filePath.slice(0, Math.max(filePath.lastIndexOf('/'), filePath.lastIndexOf('\\')))
+      : null
+    if (!folder) return
+    void takeServerVersion(folder).then((result) => {
+      if (!result.success) {
+        toasterService.push('app', {
+          title: t('gitUpdate.updateFailedTitle'),
+          body: result.error ?? t('gitUpdate.updateFailedBody'),
+          durationMs: 10000
+        })
+        return
+      }
+      toasterService.push('app', { title: t('gitUpdate.discardedTitle'), body: t('gitUpdate.discardedBody'), durationMs: 5000 })
+      refreshOpenFileAfterPull()
+    })
+  }, [filePath, takeServerVersion, t, refreshOpenFileAfterPull])
+  const gitPendingFlags = useGitPendingFlags(isDirty)
+  const gitFolderForConflicts = useGitFolder(filePath)
+
   const handleOpenGitHistory = useCallback(() => {
     const folder = filePath?.endsWith('.restorm') === true
       ? filePath.slice(0, Math.max(filePath.lastIndexOf('/'), filePath.lastIndexOf('\\')))
@@ -520,15 +575,26 @@ const App: React.FC = () => {
   const { onPush: handleGitPush, onPull: handleGitPull } = useGitActions(
     filePath,
     pushModal.openPushModal,
-    pullConflict.openFromPull,
     saveAllForGit,
-    refreshOpenFileAfterPull
+    refreshOpenFileAfterPull,
+    // A contested pull raises the SAME prompt the push flow uses; the
+    // prompt itself knows not to publish afterwards.
+    pushModal.beginUpdatePrompt
   )
   // Semi-pull detection → "Pull now" toast. Reuses the SAME click
   // handler as the statusbar/title-bar pull actions above, so accepting
   // the toast goes through the identical conflict-aware pull flow — no
   // separate pull path to keep in sync.
-  useGitPullAvailableToast(handleGitPull)
+  // The live behind-flag retracts the toast the moment the repository
+  // catches up — otherwise it keeps offering to fetch nothing.
+  useGitPullAvailableToast(handleGitPull, gitPendingFlags.pullPending)
+  // A resolution screen that was closed rather than cancelled leaves the
+  // repository mid-merge, with no way back into that screen — surface it
+  // and offer the one escape hatch.
+  useGitMergeInProgressToast(gitFolderForConflicts, gitPendingFlags.hasConflicts)
+  // A `git checkout` / `git pull` run from a terminal rewrites the open
+  // file under us; without this the next autosave tick silently undoes it.
+  useExternalFileChange(refreshOpenFileAfterPull, saveAllForGit)
 
   // Sidebar expansion is persisted per-project under
   // `restorm-main-sidebar:<projectUuid>`. The UUID is stamped into the
@@ -1431,7 +1497,11 @@ const App: React.FC = () => {
     openScenarioEditorTab,
     openEnvironmentFolderTab,
     openAnyRequestTab,
-    projectUuid
+    projectUuid,
+    // A moved SCENARIO has no save-unit document of its own, so nothing
+    // marks it unsaved. Route it through the same debounced whole-file
+    // save that scenario edits already use.
+    onStructureChanged: () => { void saveAllForGit() }
   })
 
   const requestCreationApi = useRequestCreationApi({
@@ -1722,7 +1792,13 @@ const App: React.FC = () => {
   const lastMcpVersionRef = useRef(0)
   const bumpAllTabContentVersionsRef = useRef<() => void>(() => { /* not yet wired */ })
   const bumpAllTabContentVersionsStable = useCallback((): void => { bumpAllTabContentVersionsRef.current() }, [])
-  useMcpTreeReplace({ setRootItems, mcpDrivenRef, lastMcpVersionRef, bumpAllTabContentVersions: bumpAllTabContentVersionsStable })
+  // Prune workbench tabs orphaned by a main-driven tree replacement (MCP
+  // delete_item, folder move, …). `setWorkbenchTree` is stable, so this
+  // callback never changes identity — safe as a hook dep.
+  const pruneOrphanTabsStable = useCallback((existingIds: Set<string>): void => {
+    setWorkbenchTree((prevTree) => ({ ...prevTree, groups: pruneOrphanTabs(prevTree.groups, existingIds) }))
+  }, [setWorkbenchTree])
+  useMcpTreeReplace({ setRootItems, mcpDrivenRef, lastMcpVersionRef, bumpAllTabContentVersions: bumpAllTabContentVersionsStable, pruneOrphanTabs: pruneOrphanTabsStable })
   useMcpRunRequest({ enabled: mcpEnabled })
   // Read-only e2e automation hook: exposes window.__restormSuggestions to pull
   // each action's inspector data suggestion for a scenario from the running app.
@@ -2875,6 +2951,11 @@ const App: React.FC = () => {
         onOpenMcpLogs={handleOpenMcpLogs}
         onGitPush={handleGitPush}
         onGitPull={handleGitPull}
+        onGitRefresh={handleGitRefresh}
+        onGitHistory={handleOpenGitHistory}
+        onGitResetToServer={handleGitResetToServer}
+        gitPushPending={gitPendingFlags.pushPending}
+        gitPullPending={gitPendingFlags.pullPending}
         workbenchActive={fileName !== null}
         onOpenSettingsTab={handleOpenSettingsTab}
       />
@@ -3156,9 +3237,31 @@ const App: React.FC = () => {
         pushDisabled={!pushModal.hasChanges}
       />
 
-      {/* Pull-conflict 4-panel resolution — opened when a repo-pull comes
-          back conflicted instead of a plain failure toast (see
-          `useGitPullConflict`). */}
+      {/* Explicit "throw my work away and take the server's version".
+          Same operation as the update prompt's server choice — one
+          implementation, two entry points — but always confirmed, since
+          nothing about the click itself says how much is at stake. */}
+      <GitResetToServerConfirmModal
+        isOpen={resetToServerConfirm}
+        onConfirm={confirmGitResetToServer}
+        onCancel={() => { setResetToServerConfirm(false) }}
+      />
+
+      {/* Raised before anything is written when the server holds a newer
+          version AND the two sides genuinely disagree. Shared by Push and
+          Pull; with nothing contested it never opens at all. */}
+      {pushModal.pendingUpdate && (
+        <GitUpdateRequiredModal
+          isOpen
+          conflictCount={pushModal.pendingUpdate.conflicts.length}
+          conflictNames={pushModal.pendingUpdate.conflicts.map((c) => `${c.kind}:${c.name}`).join(', ')}
+          onClose={pushModal.cancelPendingUpdate}
+          onChoice={pushModal.resolvePendingUpdate}
+        />
+      )}
+
+      {/* 4-panel resolution — reached from the prompt above (or, for a
+          caller that started a real git merge, from that merge state). */}
       <GitConflictResolutionModal
         isOpen={pullConflict.isOpen}
         conflictResolution={pullConflict.conflictResolution}

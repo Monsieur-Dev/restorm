@@ -29,6 +29,4 @@ export interface QuickConfig {
    * {{}} references and literal values alike.
    */
   fields: Record<string, unknown>
-  createdAt: string
-  updatedAt: string
 }

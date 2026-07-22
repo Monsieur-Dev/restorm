@@ -132,3 +132,10 @@
 	height: 100%;
 	color: var(--descriptionForeground);
 }
+
+/* The user's current location (HEAD): the row reads bold so "where am I"
+ * jumps out of the list at a glance. */
+.ecui-git-history-row.head .ecui-git-history-subject,
+.ecui-git-history-row.head .ecui-git-history-date {
+	font-weight: 700;
+}

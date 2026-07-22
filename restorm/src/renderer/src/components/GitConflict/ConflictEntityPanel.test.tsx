@@ -7,6 +7,10 @@ import { render, cleanup, screen } from '@testing-library/react'
 // logic (right component for the right entity kind, readOnly wrapping),
 // so every leaf is mocked to a simple marker.
 vi.mock('electron-core-ui/renderer', () => ({
+  // The name row renders one; a text input is enough for these assertions.
+  InputBox: ({ value, onChange, 'data-testid': testId, options }: { value?: string, onChange?: (v: string) => void, 'data-testid'?: string, options?: { readOnly?: boolean } }) =>
+    <input data-testid={testId} value={value ?? ''} readOnly={options?.readOnly ?? false} onChange={(e) => { onChange?.(e.target.value) }} />,
+
   CodeEditor: ({ value, options }: { value: string, options?: { readOnly?: boolean } }) => (
     <div data-testid="mock-code-editor" data-readonly={String(options?.readOnly)}>{value}</div>
   ),
@@ -24,8 +28,12 @@ vi.mock('../Folders/EnvironmentFolderView', () => ({
   EnvironmentFolderView: ({ folder }: { folder: { name: string } }) => <div data-testid="mock-env-folder-view">{folder.name}</div>
 }))
 vi.mock('../Scenario/ScenarioEditorView', () => ({
-  ScenarioEditorView: ({ scenario, onScenarioChange }: { scenario: { name: string }, onScenarioChange?: unknown }) => (
-    <div data-testid="mock-scenario-view" data-has-onchange={onScenarioChange ? 'true' : 'false'}>{scenario.name}</div>
+  ScenarioEditorView: ({ scenario, onScenarioChange, resolveBoundItem }: { scenario: { name: string }, onScenarioChange?: unknown, resolveBoundItem?: unknown }) => (
+    <div
+      data-testid="mock-scenario-view"
+      data-has-onchange={onScenarioChange ? 'true' : 'false'}
+      data-has-resolver={resolveBoundItem ? 'true' : 'false'}
+    >{scenario.name}</div>
   )
 }))
 /** Every protocol's conflict-mode mock is shaped identically — a marker
@@ -191,10 +199,116 @@ describe('ConflictEntityPanel', () => {
   })
 
   it('wraps the panel in ReadOnlyOverlay when mode is readOnly, and does not when editable', () => {
-    const { rerender } = render(<ConflictEntityPanel entity={makeFolder()} mode="readOnly" data-testid="panel" />)
-    expect(screen.getByTestId('panel').getAttribute('data-role')).toBe('read-only-overlay')
+    // The overlay wraps the entity view inside the panel, not the panel
+    // itself — the name row above it stays outside its reach.
+    const { rerender, container } = render(<ConflictEntityPanel entity={makeFolder()} mode="readOnly" data-testid="panel" />)
+    expect(screen.getByTestId('panel').querySelector('[data-role="read-only-overlay"]')).toBeTruthy()
 
     rerender(<ConflictEntityPanel entity={makeFolder()} mode="editable" data-testid="panel" />)
-    expect(screen.getByTestId('panel').getAttribute('data-role')).toBeNull()
+    expect(container.querySelector('[data-role="read-only-overlay"]')).toBeNull()
+  })
+})
+
+describe('the name row', () => {
+  it('appears only when the name is what differs', () => {
+    const entity = { id: 'r1', name: 'Mine', type: 'http', tags: [] } as unknown as FolderItem
+
+    const { queryByTestId, rerender } = render(
+      <ConflictEntityPanel entity={entity} mode="readOnly" fieldDiff={{ fields: { notes: true } }} />
+    )
+    // Nothing renamed → no row, so the panel is not padded with fields the
+    // user never touched.
+    expect(queryByTestId('conflict-entity-name-row')).toBeNull()
+
+    rerender(
+      <ConflictEntityPanel entity={entity} mode="readOnly" fieldDiff={{ fields: { name: true } }} />
+    )
+    expect(queryByTestId('conflict-entity-name-row')).toBeTruthy()
+  })
+
+  it('is read-only on a comparison column and editable on the resolved one', () => {
+    const entity = { id: 'r1', name: 'Mine', type: 'http', tags: [] } as unknown as FolderItem
+    const onNameChange = vi.fn()
+
+    const { getByTestId, rerender } = render(
+      <ConflictEntityPanel entity={entity} mode="readOnly" fieldDiff={{ fields: { name: true } }} />
+    )
+    expect(getByTestId('conflict-entity-name-input')).toBeTruthy()
+
+    rerender(
+      <ConflictEntityPanel
+        entity={entity}
+        mode="editable"
+        fieldDiff={{ fields: { name: true } }}
+        onNameChange={onNameChange}
+      />
+    )
+    // The resolved column lets the user settle on a third name, not only
+    // pick one of the two sides.
+    expect(getByTestId('conflict-entity-name-input')).toBeTruthy()
+  })
+})
+
+describe('showing only what conflicts', () => {
+  it('drops the entity view entirely when the rename is the whole conflict', () => {
+    const entity = { id: 'r1', name: 'Mine', type: 'http', tags: [] } as unknown as FolderItem
+    const { queryByTestId, rerender } = render(
+      <ConflictEntityPanel entity={entity} mode="readOnly" fieldDiff={{ fields: { name: true } }} />
+    )
+    // Only the name row survives: a full request editor under a one-line
+    // difference is noise the user has to rule out tab by tab.
+    expect(queryByTestId('conflict-entity-name-row')).toBeTruthy()
+    expect(queryByTestId('mock-http-view')).toBeNull()
+
+    rerender(
+      <ConflictEntityPanel entity={entity} mode="readOnly" fieldDiff={{ fields: { name: true, url: true } }} />
+    )
+    expect(queryByTestId('mock-http-view')).toBeTruthy()
+  })
+
+  it('still renders a scenario, which has no field diff by design', () => {
+    const scenario = { id: 's1', name: 'Flow', type: 'scenario', tags: [], params: [], nodes: [], edges: [] } as unknown as FolderItem
+    const { queryByTestId } = render(<ConflictEntityPanel entity={scenario} mode="readOnly" />)
+    expect(queryByTestId('mock-scenario-view')).toBeTruthy()
+  })
+})
+
+describe('a scenario node bound to a request', () => {
+  it('receives the resolver as a prop, so the node can resolve its target', () => {
+    // The editor publishes this context itself from its own prop. Wrapping
+    // it in an outer provider therefore has no effect — the inner one wins
+    // with `null`, the node reports its request as missing, and renders an
+    // error box with none of the content the conflict view exists to show.
+    const resolveBoundItem = vi.fn().mockReturnValue(null)
+    const scenario = { id: 's1', name: 'Flow', type: 'scenario', tags: [], params: [], nodes: [], edges: [] } as unknown as FolderItem
+
+    render(<ConflictEntityPanel entity={scenario} mode="readOnly" resolveBoundItem={resolveBoundItem} />)
+
+    expect(screen.getByTestId('mock-scenario-view').getAttribute('data-has-resolver')).toBe('true')
+  })
+})
+
+describe('a folder conflict is never blanked by the tab filter', () => {
+  it('still renders an environment folder whose diff reports no request tab', () => {
+    // The folder diff only reports `notes`, so a conflict on environment
+    // variables produces an empty tab list. Applying the request-only
+    // "nothing to show" rule here blanked all three columns and left the
+    // user unable to arbitrate what they were asked to arbitrate.
+    const envFolder = {
+      id: 'e1', name: 'Lab', tags: [], configuration: {}, folderType: 'environment',
+      environments: [{ id: 'env1', name: 'dev', variables: [] }], items: []
+    } as unknown as FolderItem
+
+    render(<ConflictEntityPanel entity={envFolder} mode="readOnly" fieldDiff={{ fields: { notes: false } }} />)
+
+    expect(screen.getByTestId('mock-env-folder-view')).toBeTruthy()
+  })
+
+  it('still renders a plain folder in the same situation', () => {
+    const folder = { id: 'f1', name: 'Folder', tags: [], configuration: {}, items: [] } as unknown as FolderItem
+
+    render(<ConflictEntityPanel entity={folder} mode="readOnly" fieldDiff={{ fields: { notes: false } }} />)
+
+    expect(screen.getByTestId('mock-folder-view')).toBeTruthy()
   })
 })

@@ -9,6 +9,7 @@ import type {
   GitPushResult,
   GitPullResult,
   GitFetchCompareResult,
+  GitResetResult,
   GitConflictVersions,
   GitConflictCommitTimestamps,
   GitState
@@ -185,8 +186,15 @@ export const createCoreUIAPI = (): CoreUiApi => ({
       const result: unknown = await ipcRenderer.invoke('file:open', path)
       return result as { success: boolean; content?: unknown }
     },
-    save: async (content: unknown): Promise<boolean> => {
-      const result: unknown = await ipcRenderer.invoke('file:save', content)
+    acceptExternalChange: async (): Promise<void> => {
+      await ipcRenderer.invoke('file:accept-external-change')
+    },
+    showExternalChangeDialog: async (): Promise<'reload' | 'keepMine'> => {
+      const result: unknown = await ipcRenderer.invoke('file:show-external-change-dialog')
+      return result as 'reload' | 'keepMine'
+    },
+    save: async (content: unknown, options?: { force?: boolean }): Promise<boolean> => {
+      const result: unknown = await ipcRenderer.invoke('file:save', content, options)
       return result as boolean
     },
     saveAs: async (content: unknown, filename?: string, format?: SerializationFormat): Promise<boolean> => {
@@ -312,6 +320,17 @@ export const createCoreUIAPI = (): CoreUiApi => ({
       ipcRenderer.on('file:drafts-restored', handler)
       return () => {
         ipcRenderer.removeListener('file:drafts-restored', handler)
+      }
+    },
+    onFileExternallyChanged: (
+      callback: (payload: { path: string | null }) => void
+    ): (() => void) => {
+      const handler = (_event: Electron.IpcRendererEvent, payload: { path: string | null }): void => {
+        callback(payload)
+      }
+      ipcRenderer.on('file:externally-changed', handler)
+      return () => {
+        ipcRenderer.removeListener('file:externally-changed', handler)
       }
     },
     onAutoSaveTrigger: (callback: () => void): (() => void) => {
@@ -578,8 +597,8 @@ export const createCoreUIAPI = (): CoreUiApi => ({
     stage: async (folder: string, paths: string[]): Promise<void> => {
       await ipcRenderer.invoke('git:stage', folder, paths)
     },
-    commit: async (folder: string, message: string): Promise<GitCommitResult> => {
-      const result: unknown = await ipcRenderer.invoke('git:commit', folder, message)
+    commit: async (folder: string, message: string, paths?: string[]): Promise<GitCommitResult> => {
+      const result: unknown = await ipcRenderer.invoke('git:commit', folder, message, paths)
       return result as GitCommitResult
     },
     push: async (folder: string): Promise<GitPushResult> => {
@@ -604,6 +623,26 @@ export const createCoreUIAPI = (): CoreUiApi => ({
     getFileAtHead: async (folder: string, filePath: string): Promise<string | null> => {
       const result: unknown = await ipcRenderer.invoke('git:get-file-at-head', folder, filePath)
       return result as string | null
+    },
+    getFileAtRemote: async (folder: string, filePath: string): Promise<string | null> => {
+      const result: unknown = await ipcRenderer.invoke('git:get-file-at-remote', folder, filePath)
+      return result as string | null
+    },
+    getFileAtMergeBase: async (folder: string, filePath: string): Promise<string | null> => {
+      const result: unknown = await ipcRenderer.invoke('git:get-file-at-merge-base', folder, filePath)
+      return result as string | null
+    },
+    getWorkingTreeFile: async (folder: string, filePath: string): Promise<string | null> => {
+      const result: unknown = await ipcRenderer.invoke('git:get-working-tree-file', folder, filePath)
+      return result as string | null
+    },
+    resetToRemoteKeepingWorkingTree: async (folder: string): Promise<GitResetResult> => {
+      const result: unknown = await ipcRenderer.invoke('git:reset-to-remote-keeping-working-tree', folder)
+      return result as GitResetResult
+    },
+    resetHardToRemote: async (folder: string): Promise<GitResetResult> => {
+      const result: unknown = await ipcRenderer.invoke('git:reset-hard-to-remote', folder)
+      return result as GitResetResult
     },
     writeResolvedConflict: async (folder: string, filePath: string, content: string): Promise<void> => {
       await ipcRenderer.invoke('git:write-resolved-conflict', folder, filePath, content)

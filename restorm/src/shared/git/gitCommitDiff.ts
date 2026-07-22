@@ -4,7 +4,7 @@ import { isEnvironmentFolder, isFolder, isScenario } from '../types/folderTypes'
 import { prepareForSerialization, stripIds } from '../utils/serialization'
 
 export type GitEntityKind = 'folder' | 'environmentFolder' | 'request' | 'scenario'
-export type GitChangeAction = 'added' | 'modified' | 'deleted'
+export type GitChangeAction = 'added' | 'modified' | 'moved' | 'deleted'
 
 export interface GitEntityChange {
   kind: GitEntityKind
@@ -71,7 +71,38 @@ export function flattenEntities(items: FolderItem[]): Map<string, { kind: GitEnt
  */
 export function ownFieldsSnapshot(item: FolderItem): string {
   const { items: _children, ...own } = item as FolderItem & { items?: FolderItem[] }
-  return JSON.stringify(stripIds(own))
+  return canonicalStringify(stripIds(own))
+}
+
+/**
+ * `JSON.stringify` with object keys sorted at every depth, so the result
+ * depends on an entity's CONTENT and never on the order its fields happen
+ * to sit in.
+ *
+ * That distinction is not academic: the project file is rewritten on
+ * every save, and the key order it comes back with is not stable. A plain
+ * stringify therefore reports two identical entities as different the
+ * moment one of them has been through a save — which, in the conflict
+ * flow, means the user is asked to arbitrate entities NOBODY touched.
+ * Reordering fields is not an edit, and this snapshot must not pretend
+ * otherwise.
+ *
+ * Array order is deliberately preserved: for headers, params and
+ * path-params it IS meaningful content, not incidental layout.
+ */
+function canonicalStringify(value: unknown): string {
+  return JSON.stringify(canonicalize(value))
+}
+
+function canonicalize(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map(canonicalize)
+  if (value === null || typeof value !== 'object') return value
+  const source = value as Record<string, unknown>
+  const out: Record<string, unknown> = {}
+  for (const key of Object.keys(source).sort()) {
+    out[key] = canonicalize(source[key])
+  }
+  return out
 }
 
 interface CollectedEntity {
@@ -81,14 +112,19 @@ interface CollectedEntity {
    * child add/remove/change is reported as its own separate entity
    * change, never bubbled up as "the parent folder was modified"). */
   ownSnapshot: string
+  /** Which container the entity sits in. Moving an item changes nothing
+   * about the item itself, so without this a reorganisation looks like an
+   * unchanged project — and the publish flow refuses to commit work that
+   * is genuinely on disk. */
+  parentId: string | null
 }
 
-function collectEntities(items: FolderItem[], out: Map<string, CollectedEntity>): void {
+function collectEntities(items: FolderItem[], out: Map<string, CollectedEntity>, parentId: string | null = null): void {
   for (const item of items) {
     const children = (item as FolderItem & { items?: FolderItem[] }).items
-    out.set(item.id, { kind: kindOf(item), name: item.name, ownSnapshot: ownFieldsSnapshot(item) })
+    out.set(item.id, { kind: kindOf(item), name: item.name, ownSnapshot: ownFieldsSnapshot(item), parentId })
     if (children && children.length > 0) {
-      collectEntities(children, out)
+      collectEntities(children, out, item.id)
     }
   }
 }
@@ -122,6 +158,11 @@ export function diffProjectEntities(beforeItems: FolderItem[], afterItems: Folde
       changes.push({ kind: entity.kind, name: entity.name, action: 'added' })
     } else if (prior.ownSnapshot !== entity.ownSnapshot) {
       changes.push({ kind: entity.kind, name: entity.name, action: 'modified' })
+    } else if (prior.parentId !== entity.parentId) {
+      // Same content, different container: a reorganisation. Reported on
+      // its own rather than as "modified", because nothing about the
+      // entity itself changed and the commit message should say so.
+      changes.push({ kind: entity.kind, name: entity.name, action: 'moved' })
     }
   }
   for (const [id, entity] of before) {
@@ -133,7 +174,7 @@ export function diffProjectEntities(beforeItems: FolderItem[], afterItems: Folde
   // Deterministic order — the same diff always renders the same commit
   // body, independent of the two Maps' insertion order.
   const kindOrder: Record<GitEntityKind, number> = { folder: 0, environmentFolder: 1, request: 2, scenario: 3 }
-  const actionOrder: Record<GitChangeAction, number> = { added: 0, modified: 1, deleted: 2 }
+  const actionOrder: Record<GitChangeAction, number> = { added: 0, modified: 1, moved: 2, deleted: 3 }
   changes.sort((a, b) =>
     kindOrder[a.kind] - kindOrder[b.kind] ||
     actionOrder[a.action] - actionOrder[b.action] ||

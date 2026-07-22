@@ -228,6 +228,29 @@ The cleanup pass is shared in two paths:
 
 GC removes any lockfile whose recorded pid is dead, or whose endpoint no longer answers an authenticated `initialize` probe within ~800 ms. A previous restorm killed with `-9` or interrupted by a reboot won't poison discovery.
 
+## Building test fixtures: drive the app, never hand-edit the file
+
+When you need a `.restorm` project in a particular state — a seed for an
+E2E scenario, a repro for a bug, the "before" side of a merge — **launch an
+instance and drive it over MCP** (`create_request`, `update_request`,
+`rename_item`, `save_project`, …). Do not hand-write or `sed` the YAML.
+
+Two reasons, both learned the hard way:
+
+- **A hand-edited file is not what the app produces.** The running app holds
+  the project in memory and rewrites the file on its next save, so an
+  external edit is silently discarded — a test built that way proves
+  nothing, and the failure looks like a product bug.
+- **Driving the app exercises the product.** Every fixture you build this
+  way is another pass over the real write path, and it surfaces genuine
+  bugs for free. Take that as a feature: if the fixture is awkward to
+  build through the UI/MCP, that awkwardness is itself a finding worth
+  reporting.
+
+Hand-authored YAML is acceptable only for a state the app genuinely cannot
+produce (a legacy file format, a corrupted document you are testing the
+recovery of). Say so explicitly when you do it.
+
 ## Sending screencasts over Telegram
 
 The restorm MCP `screencast-start` / `screencast-stop` tools return a `.webm` (vp9). Telegram retranscodes raw vp9 webm server-side, which adds visible compression artefacts (banding on smooth gradients, blocking on motion). Always pipe the webm through ffmpeg into a standards-compliant mp4 before attaching:

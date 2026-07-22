@@ -13,6 +13,13 @@
       "save": "Enregistrer",
       "dontSave": "Ne pas enregistrer",
       "cancel": "Annuler"
+    },
+    "externalChange": {
+      "title": "Fichier modifié sur le disque",
+      "message": "« {{fileName}} » a été modifié en dehors de l'application.",
+      "detail": "Rechargez pour utiliser la version du disque, ou conservez votre version et écrasez-la.",
+      "reload": "Recharger",
+      "keepMine": "Conserver ma version"
     }
   },
   "recentFilesVignette": {
@@ -427,6 +434,11 @@
       "title": "Mise à jour disponible",
       "body": "Une version plus récente de ce fichier est disponible sur le dépôt.",
       "pullNow": "Récupérer maintenant"
+    },
+    "mergeInProgress": {
+      "title": "Fusion inachevée",
+      "body": "Une fusion Git a été démarrée sans jamais être terminée. Le fichier du projet peut encore contenir des marqueurs de conflit.",
+      "abort": "Annuler la fusion"
     }
   },
   "pushModal": {

@@ -48,3 +48,27 @@ describe('prepareForSerialization', () => {
     expect((result[0] as { headers: { id?: string }[] }).headers[0]?.id).toBeUndefined()
   })
 })
+
+describe('timestamps survive serialization', () => {
+  it('keeps a Date intact instead of flattening it to an empty object', () => {
+    // A Date exposes no own enumerable keys, so walking it like a plain
+    // object yields `{}` — the value is destroyed, and it lands in the
+    // saved project file as `createdAt: {}`. Reached whenever the document
+    // arrives already deserialized, as the git merge write-back does.
+    const created = new Date('2026-07-22T04:32:01.569Z')
+    const stripped = stripIds({ name: 'Recette', createdAt: created })
+
+    expect(stripped.createdAt).toBeInstanceOf(Date)
+    expect(stripped.createdAt.toISOString()).toBe('2026-07-22T04:32:01.569Z')
+  })
+
+  it('keeps a nested Date intact through the full save preparation', () => {
+    const prepared = prepareForSerialization({
+      collections: [{ id: 'r1', name: 'Fiche', quickConfigs: [{ name: 'Recette', createdAt: new Date('2026-07-22T04:32:01.569Z') }] }]
+    })
+    const config = prepared.collections[0]?.quickConfigs[0]
+
+    expect(config?.createdAt).toBeInstanceOf(Date)
+    expect(JSON.stringify(config?.createdAt)).toBe('"2026-07-22T04:32:01.569Z"')
+  })
+})

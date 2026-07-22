@@ -13,6 +13,13 @@
       "save": "Speichern",
       "dontSave": "Nicht speichern",
       "cancel": "Abbrechen"
+    },
+    "externalChange": {
+      "title": "Datei auf der Festplatte geändert",
+      "message": "„{{fileName}}“ wurde außerhalb der Anwendung geändert.",
+      "detail": "Neu laden, um die Version auf der Festplatte zu verwenden, oder Ihre Version behalten und sie überschreiben.",
+      "reload": "Neu laden",
+      "keepMine": "Meine Version behalten"
     }
   },
   "recentFilesVignette": {
@@ -427,6 +434,11 @@
       "title": "Aktualisierung verfügbar",
       "body": "Eine neuere Version dieser Datei ist im Repository verfügbar.",
       "pullNow": "Jetzt abrufen"
+    },
+    "mergeInProgress": {
+      "title": "Unvollendete Zusammenführung",
+      "body": "Eine Git-Zusammenführung wurde begonnen und nie abgeschlossen. Die Projektdatei enthält möglicherweise noch Konfliktmarkierungen.",
+      "abort": "Zusammenführung abbrechen"
     }
   },
   "pushModal": {

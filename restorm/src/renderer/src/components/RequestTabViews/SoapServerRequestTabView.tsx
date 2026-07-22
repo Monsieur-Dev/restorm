@@ -8,7 +8,8 @@ import {
   ControlGroup,
   ScrollableElement,
   logger,
-  toasterService
+  toasterService,
+  type Tab
 } from 'electron-core-ui/renderer'
 import type { SoapRequest, SoapMockOperation } from '../../../../shared/types/requests/SoapRequest'
 import { useEnvironmentContext } from '../../contexts/useEnvironmentContext'
@@ -25,6 +26,12 @@ export interface SoapServerRequestTabViewProps {
    * subscription — a conflict panel is a static historical snapshot,
    * never a live mock server. Only ever set by `ConflictEntityPanel`. */
   conflictMode?: boolean
+  /** Conflict resolution: restrict the request-side tab strip to these
+   * ids (forwarded verbatim to `BaseRequestTabView`). */
+  conflictVisibleTabIds?: string[]
+  /** Conflict resolution: extra tabs appended to the strip (the contested
+   * tag list), forwarded verbatim to `BaseRequestTabView`. */
+  conflictExtraTabs?: Tab[]
 }
 
 // SERVER MODE URL-section pieces — mirror the HTTP mock server layout.
@@ -50,7 +57,7 @@ function parseServerUrl(raw: string): { port: string; route: string } {
  * SOAP-specific operations editor (the canned responses dispatched by SOAPAction
  * / body operation name).
  */
-export const SoapServerRequestTabView: React.FC<SoapServerRequestTabViewProps> = ({ request, conflictMode }) => {
+export const SoapServerRequestTabView: React.FC<SoapServerRequestTabViewProps> = ({ request, conflictMode, conflictVisibleTabIds, conflictExtraTabs }) => {
   const { t } = useTranslation()
   const { selectedEnvId, environments } = useEnvironmentContext()
 
@@ -280,6 +287,8 @@ export const SoapServerRequestTabView: React.FC<SoapServerRequestTabViewProps> =
 
   return (
     <BaseRequestTabView
+      {...(conflictVisibleTabIds ? { visibleRequestTabIds: conflictVisibleTabIds } : {})}
+        {...(conflictExtraTabs ? { extraRequestTabs: conflictExtraTabs } : {})}
       requestId={request.id}
       urlSection={urlSection}
       requestContent={requestContent}

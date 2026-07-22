@@ -231,7 +231,10 @@
     "mcpLogs": "MCP-lokit",
     "git": "Git",
     "gitPush": "Työnnä",
-    "gitPull": "Nouda"
+    "gitPull": "Nouda",
+    "gitRefresh": "Päivitä",
+    "gitHistory": "Historia",
+    "gitResetToServer": "Palauta palvelimen versioon"
   },
   "sidebar": {
     "addRequest": "Lisää pyyntö",
@@ -2374,7 +2377,6 @@
     "pullFailedTitle": "Nouto epäonnistui",
     "pullFailedBody": "Uusimpia muutoksia ei voitu noutaa.",
     "pullSaveFailedBody": "Muutoksiasi ei voitu tallentaa ennen vetämistä.",
-    "pullUnpushedChangesBody": "Paikallisia muutoksia ei ole vielä työnnetty — tee ensin push ja sitten pull.",
     "pushFailedTitle": "Työntäminen epäonnistui",
     "pushFailedBody": "Muutoksia ei voitu työntää.",
     "pushSucceededTitle": "Työnnetty",
@@ -2406,7 +2408,11 @@
       "deletedFolder": "Poistettiin kansio \"{{name}}\"",
       "addedEnvironmentFolder": "Lisättiin ympäristökansio \"{{name}}\"",
       "modifiedEnvironmentFolder": "Muutettiin ympäristökansiota \"{{name}}\"",
-      "deletedEnvironmentFolder": "Poistettiin ympäristökansio \"{{name}}\""
+      "deletedEnvironmentFolder": "Poistettiin ympäristökansio \"{{name}}\"",
+      "movedRequest": "Siirrettiin pyyntö \"{{name}}\"",
+      "movedScenario": "Siirrettiin skenaario \"{{name}}\"",
+      "movedFolder": "Siirrettiin kansio \"{{name}}\"",
+      "movedEnvironmentFolder": "Siirrettiin ympäristökansio \"{{name}}\""
     },
     "commitTitle": {
       "singleRequest": "Päivitys pyyntöön \"{{name}}\"",
@@ -2436,6 +2442,37 @@
     },
     "gate": {
       "initGitFolder": "Alusta git-kansiosi käyttääksesi tätä ominaisuutta."
-    }
+    },
+    "conflictChooseVersion": "Valitse versio",
+    "conflictChooseVersionHint": "Napsauta <0></0>-merkkiä oman tai palvelimen version yläreunassa — sen jälkeen voit muokata kaikkia kenttiä ennen tallennusta.",
+    "conflictFinishBlocked": "Osa ristiriidoista on yhä ratkaisematta.",
+    "conflictOnQuickConfig": "Ristiriita koskee pyynnön pika-asetusta: {{name}}",
+    "conflictNameField": "Nimi",
+    "conflictTagsEmpty": "Ei tunnisteita tällä puolella.",
+    "conflictTagName": "Tunnisteen nimi",
+    "conflictTagRemove": "Poista tämä tunniste",
+    "conflictTagAdd": "Lisää tunniste",
+    "conflictTagNew": "uusi-tunniste",
+    "conflictTagsTab": "Tunnisteet",
+    "conflictTreeStructure": "Puurakenne"
+  },
+  "gitUpdate": {
+    "title": "Päivitys vaaditaan",
+    "message": "Etäpalvelimella on tiedostosta uudempi versio. Sinun on päivitettävä versiosi ennen jatkamista. Jos versiosi ja palvelimen version välillä on ristiriitoja, autamme sinua ratkaisemaan ne.",
+    "conflictCount_one": "{{count}} kohde eroaa versiosi ja palvelimen version välillä.",
+    "conflictCount_other": "{{count}} kohdetta eroaa versiosi ja palvelimen version välillä.",
+    "cancel": "Peruuta",
+    "discardMine": "Poista muutokseni",
+    "keepMineOverwriting": "Säilytä versioni (korvaa palvelimen muutokset)",
+    "updateFailedTitle": "Päivitys epäonnistui",
+    "updateFailedBody": "Version hakeminen etäpalvelimelta epäonnistui.",
+    "discardedTitle": "Muutokset poistettu",
+    "discardedBody": "Olet nyt palvelimen uusimmassa versiossa.",
+    "updatedTitle": "Projekti päivitetty",
+    "updatedBody": "Olet nyt palvelimen uusimmassa versiossa, ja muutoksesi on säilytetty.",
+    "keepServerVersion": "Säilytä palvelimen versio",
+    "resolveConflicts": "Ratkaise ristiriidat",
+    "resetConfirmTitle": "Palautetaanko palvelimen versioon?",
+    "resetConfirmBody": "Kaikki paikalliset muutoksesi poistetaan pysyvästi ja korvataan palvelimen versiolla."
   }
 }

@@ -233,7 +233,10 @@
     "mcpLogs": "Protokoly MCP",
     "git": "Git",
     "gitPush": "Odeslat",
-    "gitPull": "Stáhnout"
+    "gitPull": "Stáhnout",
+    "gitRefresh": "Obnovit",
+    "gitHistory": "Historie",
+    "gitResetToServer": "Obnovit na verzi serveru"
   },
   "sidebar": {
     "addRequest": "Přidat požadavek",
@@ -2376,7 +2379,6 @@
     "pullFailedTitle": "Stažení se nezdařilo",
     "pullFailedBody": "Nejnovější změny se nepodařilo stáhnout.",
     "pullSaveFailedBody": "Před stažením se nepodařilo uložit vaše změny.",
-    "pullUnpushedChangesBody": "Existují lokální změny, které nebyly odeslány — nejprve proveďte push, poté pull.",
     "pushFailedTitle": "Odeslání se nezdařilo",
     "pushFailedBody": "Změny se nepodařilo odeslat.",
     "pushSucceededTitle": "Odesláno",
@@ -2408,7 +2410,11 @@
       "deletedFolder": "Odstraněna složka „{{name}}“",
       "addedEnvironmentFolder": "Přidána složka prostředí „{{name}}“",
       "modifiedEnvironmentFolder": "Upravena složka prostředí „{{name}}“",
-      "deletedEnvironmentFolder": "Odstraněna složka prostředí „{{name}}“"
+      "deletedEnvironmentFolder": "Odstraněna složka prostředí „{{name}}“",
+      "movedRequest": "Přesunut požadavek \"{{name}}\"",
+      "movedScenario": "Přesunut scénář \"{{name}}\"",
+      "movedFolder": "Přesunuta složka \"{{name}}\"",
+      "movedEnvironmentFolder": "Přesunuta složka prostředí \"{{name}}\""
     },
     "commitTitle": {
       "singleRequest": "Aktualizace požadavku „{{name}}“",
@@ -2438,6 +2444,37 @@
     },
     "gate": {
       "initGitFolder": "Inicializujte svou složku git, abyste mohli tuto funkci používat."
-    }
+    },
+    "conflictChooseVersion": "Zvolte verzi",
+    "conflictChooseVersionHint": "Klikněte na <0></0> v horní části své verze nebo verze serveru — poté můžete před uložením upravit kterékoli pole.",
+    "conflictFinishBlocked": "Některé konflikty je stále potřeba vyřešit.",
+    "conflictOnQuickConfig": "Konflikt se týká rychlého nastavení požadavku: {{name}}",
+    "conflictNameField": "Název",
+    "conflictTagsEmpty": "Na této straně nejsou žádné štítky.",
+    "conflictTagName": "Název štítku",
+    "conflictTagRemove": "Odebrat tento štítek",
+    "conflictTagAdd": "Přidat štítek",
+    "conflictTagNew": "novy-stitek",
+    "conflictTagsTab": "Štítky",
+    "conflictTreeStructure": "Struktura stromu"
+  },
+  "gitUpdate": {
+    "title": "Je nutná aktualizace",
+    "message": "Na vzdáleném serveru existuje novější verze souboru. Před pokračováním musíte svou verzi aktualizovat. Pokud mezi vaší verzí a verzí serveru vzniknou konflikty, pomůžeme vám je vyřešit.",
+    "conflictCount_one": "{{count}} položka se liší mezi vaší verzí a verzí serveru.",
+    "conflictCount_other": "Počet položek lišících se mezi vaší verzí a verzí serveru: {{count}}.",
+    "cancel": "Zrušit",
+    "discardMine": "Zahodit mé změny",
+    "keepMineOverwriting": "Ponechat mou verzi (přepíše změny serveru)",
+    "updateFailedTitle": "Aktualizace se nezdařila",
+    "updateFailedBody": "Nepodařilo se načíst verzi ze vzdáleného serveru.",
+    "discardedTitle": "Změny zahozeny",
+    "discardedBody": "Nyní jste na nejnovější verzi ze serveru.",
+    "updatedTitle": "Projekt aktualizován",
+    "updatedBody": "Nyní jste na nejnovější verzi ze serveru, vaše změny byly zachovány.",
+    "keepServerVersion": "Ponechat verzi serveru",
+    "resolveConflicts": "Vyřešit konflikty",
+    "resetConfirmTitle": "Obnovit na verzi serveru?",
+    "resetConfirmBody": "Všechny vaše místní změny budou trvale smazány a nahrazeny verzí serveru."
   }
 }

@@ -60,6 +60,17 @@ export interface GitPullResult {
   error?: string
 }
 
+/**
+ * Outcome of a branch-repositioning reset onto the upstream ref, in
+ * either flavour: keeping the working tree (`--mixed`) or discarding it
+ * (`--hard`). `success: false` with `error: 'no upstream branch'` is the
+ * expected, non-exceptional answer for a repo that was never pushed.
+ */
+export interface GitResetResult {
+  success: boolean
+  error?: string
+}
+
 /** Result of a semi-pull (`fetch` + compare, no merge). */
 export interface GitFetchCompareResult {
   /** True when the fetch found commits on the remote tracking branch that

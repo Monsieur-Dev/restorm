@@ -13,6 +13,13 @@
       "save": "Guardar",
       "dontSave": "No guardar",
       "cancel": "Cancelar"
+    },
+    "externalChange": {
+      "title": "Archivo modificado en el disco",
+      "message": "«{{fileName}}» se modificó fuera de la aplicación.",
+      "detail": "Vuelve a cargar para usar la versión del disco, o conserva tu versión y sobrescríbela.",
+      "reload": "Volver a cargar",
+      "keepMine": "Conservar mi versión"
     }
   },
   "recentFilesVignette": {
@@ -427,6 +434,11 @@
       "title": "Actualización disponible",
       "body": "Hay una versión más reciente de este archivo disponible en el repositorio.",
       "pullNow": "Extraer ahora"
+    },
+    "mergeInProgress": {
+      "title": "Fusión sin terminar",
+      "body": "Se inició una fusión de Git que nunca se completó. El archivo del proyecto puede seguir conteniendo marcadores de conflicto.",
+      "abort": "Cancelar la fusión"
     }
   },
   "pushModal": {

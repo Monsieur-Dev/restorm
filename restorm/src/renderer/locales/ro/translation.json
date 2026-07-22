@@ -232,7 +232,10 @@
     "mcpLogs": "Jurnale MCP",
     "git": "Git",
     "gitPush": "Trimite",
-    "gitPull": "Extrage"
+    "gitPull": "Extrage",
+    "gitRefresh": "Reîmprospătare",
+    "gitHistory": "Istoric",
+    "gitResetToServer": "Resetează la versiunea serverului"
   },
   "sidebar": {
     "addRequest": "Adaugă cerere",
@@ -2375,7 +2378,6 @@
     "pullFailedTitle": "Preluarea a eșuat",
     "pullFailedBody": "Nu s-au putut prelua cele mai recente modificări.",
     "pullSaveFailedBody": "Nu s-au putut salva modificările înainte de pull.",
-    "pullUnpushedChangesBody": "Există modificări locale netrimise — efectuați mai întâi Push, apoi Pull.",
     "pushFailedTitle": "Trimiterea a eșuat",
     "pushFailedBody": "Modificările nu au putut fi trimise.",
     "pushSucceededTitle": "Trimis",
@@ -2407,7 +2409,11 @@
       "deletedFolder": "Șters folderul „{{name}}”",
       "addedEnvironmentFolder": "Adăugat folderul de mediu „{{name}}”",
       "modifiedEnvironmentFolder": "Modificat folderul de mediu „{{name}}”",
-      "deletedEnvironmentFolder": "Șters folderul de mediu „{{name}}”"
+      "deletedEnvironmentFolder": "Șters folderul de mediu „{{name}}”",
+      "movedRequest": "Cererea \"{{name}}\" a fost mutată",
+      "movedScenario": "Scenariul \"{{name}}\" a fost mutat",
+      "movedFolder": "Dosarul \"{{name}}\" a fost mutat",
+      "movedEnvironmentFolder": "Dosarul de mediu \"{{name}}\" a fost mutat"
     },
     "commitTitle": {
       "singleRequest": "Actualizare a cererii „{{name}}”",
@@ -2437,6 +2443,37 @@
     },
     "gate": {
       "initGitFolder": "Inițializați folderul git pentru a utiliza această funcție."
-    }
+    },
+    "conflictChooseVersion": "Alegeți o versiune",
+    "conflictChooseVersionHint": "Faceți clic pe <0></0> din partea de sus a versiunii dvs. sau a serverului — apoi puteți edita orice câmp înainte de salvare.",
+    "conflictFinishBlocked": "Mai există conflicte de rezolvat.",
+    "conflictOnQuickConfig": "Conflictul vizează setarea rapidă a cererii: {{name}}",
+    "conflictNameField": "Nume",
+    "conflictTagsEmpty": "Nicio etichetă pe această parte.",
+    "conflictTagName": "Numele etichetei",
+    "conflictTagRemove": "Elimină această etichetă",
+    "conflictTagAdd": "Adaugă o etichetă",
+    "conflictTagNew": "eticheta-noua",
+    "conflictTagsTab": "Etichete",
+    "conflictTreeStructure": "Structura arborelui"
+  },
+  "gitUpdate": {
+    "title": "Actualizare necesară",
+    "message": "Pe serverul la distanță există o versiune mai recentă a fișierului. Trebuie să vă actualizați versiunea înainte de a continua. Dacă există conflicte între versiunea dvs. și cea a serverului, vă vom ajuta să le rezolvați.",
+    "conflictCount_one": "{{count}} element diferă între versiunea dvs. și cea a serverului.",
+    "conflictCount_other": "{{count}} elemente diferă între versiunea dvs. și cea a serverului.",
+    "cancel": "Anulează",
+    "discardMine": "Șterge modificările mele",
+    "keepMineOverwriting": "Păstrează versiunea mea (suprascrie modificările serverului)",
+    "updateFailedTitle": "Actualizarea a eșuat",
+    "updateFailedBody": "Nu s-a putut prelua versiunea de pe serverul la distanță.",
+    "discardedTitle": "Modificări șterse",
+    "discardedBody": "Sunteți acum pe cea mai recentă versiune de pe server.",
+    "updatedTitle": "Proiect actualizat",
+    "updatedBody": "Sunteți acum pe cea mai recentă versiune de pe server, modificările dvs. au fost păstrate.",
+    "keepServerVersion": "Păstrează versiunea serverului",
+    "resolveConflicts": "Rezolvă conflictele",
+    "resetConfirmTitle": "Resetați la versiunea serverului?",
+    "resetConfirmBody": "Toate modificările dvs. locale vor fi șterse definitiv și înlocuite cu versiunea serverului."
   }
 }

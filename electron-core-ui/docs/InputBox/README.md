@@ -39,12 +39,25 @@ export interface InputBoxProps {
   onFocus?: () => void
   onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) => void
   disabled?: boolean
+  /** Non-editable but readable, focusable and selectable. Default false. */
+  readOnly?: boolean
   className?: string
   id?: string
   style?: React.CSSProperties
   inputRef?: React.RefObject<HTMLInputElement | HTMLTextAreaElement | null>
   password?: boolean
 }
+```
+
+### Read-only value
+
+`readOnly` shows a value the user may read, focus and copy but not change.
+Prefer it over `disabled` for that case: `disabled` also greys the field out
+and drops it from the tab order, which reads as "unavailable" rather than
+"not yours to edit".
+
+```tsx
+<InputBox value={name} readOnly options={{ ariaLabel: 'Name' }} />
 ```
 
 Validation-related types (`IInputBoxStyles`, `IMessage`, `MessageType`, `IInputValidator`) are exported from `electron-core-ui/renderer` and documented in the source.

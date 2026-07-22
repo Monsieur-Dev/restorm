@@ -1,15 +1,12 @@
 import { useCallback, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { parse as yamlParse, stringify as yamlStringify } from 'yaml'
 import { toasterService, type GitConflictVersions, type GitConflictCommitTimestamps } from 'electron-core-ui/renderer'
 import { useConflictResolution, type UseConflictResolutionResult } from './useConflictResolution'
 import type { FolderItem } from '../../../shared/types/folderTypes'
 import type { QuickConfig } from '../../../shared/types/requests/QuickConfig'
 import type { ConflictEntity } from '../../../shared/git/gitConflictModel'
-import { parseProjectYaml } from '../../../shared/git/gitCommitDiff'
-import { buildMergedProjectTree } from '../../../shared/git/gitConflictMerge'
 import { readQuickConfigs } from '../services/conflictFieldDiff'
-import { prepareForSerialization, processAfterDeserialization } from '../utils/serialization'
+import { buildMergedProjectYaml, type QuickConfigResolution } from '../services/mergedProjectYaml'
 
 /** `quickConfigs` is an ad-hoc field on the request proxy, not part of the
  * typed `FolderItem` union — name the gap as an explicit optional intersection
@@ -51,6 +48,18 @@ export interface UseGitPullConflictResult {
    * resolution UI. Call this when `window.api.git.pull()` resolves with
    * `conflicted: true`. */
   openFromPull: (folder: string, relativePath: string) => Promise<void>
+  /** Open on versions the caller already computed, WITHOUT a git merge in
+   * progress. The pre-flight gate reads the three sides read-only, so the
+   * resolution view can be reached without ever committing first — the
+   * merge-state entry point above is kept for callers that do start a
+   * real merge. `publishAfterResolve` tells "finish" whether to publish
+   * (Push) or stop at the updated working tree (Pull). */
+  openFromVersions: (
+    folder: string,
+    relativePath: string,
+    versions: GitConflictVersions,
+    publishAfterResolve: boolean
+  ) => void
   close: () => void
   /** Reconstruct the merged project tree from every conflict's resolved
    * pick, write it back (`writeResolvedConflict` — also stages the file),
@@ -65,7 +74,17 @@ export interface UseGitPullConflictResult {
  * the write-back half of the conflict-resolution feature (the UI half is
  * `ConflictResolutionView` + `ConflictEntityPanel`).
  */
-export function useGitPullConflict(): UseGitPullConflictResult {
+export interface UseGitPullConflictCallbacks {
+  /** Called once the resolved content is on disk, so the app can re-open
+   * the project through the normal file-open path: the sidebar tree, the
+   * open editor tabs and the search index all have to re-hydrate from the
+   * merged file, exactly as a clean pull does. Without it the user keeps
+   * looking at their pre-merge tree while the repository has moved on. */
+  onProjectReplaced?: () => void
+}
+
+export function useGitPullConflict(callbacks: UseGitPullConflictCallbacks = {}): UseGitPullConflictResult {
+  const { onProjectReplaced } = callbacks
   const { t } = useTranslation()
   const [isOpen, setIsOpen] = useState(false)
   const [versions, setVersions] = useState<GitConflictVersions | null>(null)
@@ -76,6 +95,11 @@ export function useGitPullConflict(): UseGitPullConflictResult {
   // harmless default: `resolveApiDocumentationConflict` treats a missing
   // timestamp signal exactly like a tied version, falling back to `ours`.
   const [commitTimestamps, setCommitTimestamps] = useState<GitConflictCommitTimestamps>({ ours: null, theirs: null })
+  /** True only when a real `git merge` is underway — the merge-state entry
+   * point. Governs whether Cancel must abort anything. */
+  const [mergeInProgress, setMergeInProgress] = useState(true)
+  /** Push resolves-then-publishes; Pull resolves and stops. */
+  const [publishAfterResolve, setPublishAfterResolve] = useState(true)
   const conflictResolution = useConflictResolution(versions)
 
   const openFromPull = useCallback(async (folder: string, relativePath: string) => {
@@ -86,6 +110,8 @@ export function useGitPullConflict(): UseGitPullConflictResult {
     setVersions(conflictVersions)
     setCommitTimestamps(timestamps)
     setTarget({ folder, relativePath })
+    setMergeInProgress(true)
+    setPublishAfterResolve(true)
     setIsOpen(true)
   }, [])
 
@@ -96,41 +122,90 @@ export function useGitPullConflict(): UseGitPullConflictResult {
   // raw git CLI, so Cancel aborts the merge (`git merge --abort`, which
   // returns to the pre-merge branch tip — the user's own committed work is
   // untouched, only the in-progress merge is undone) before closing.
+  const openFromVersions = useCallback((
+    folder: string,
+    relativePath: string,
+    conflictVersions: GitConflictVersions,
+    publishAfterResolve: boolean
+  ) => {
+    setVersions(conflictVersions)
+    // No merge is in progress on this path, so there are no merge-commit
+    // timestamps to read; the api-documentation tie-breaker falls back to
+    // ours exactly as it does for a tie.
+    setCommitTimestamps({ ours: null, theirs: null })
+    setTarget({ folder, relativePath })
+    setMergeInProgress(false)
+    setPublishAfterResolve(publishAfterResolve)
+    setIsOpen(true)
+  }, [])
+
+  // Cancelling out of conflict resolution has no "resume later" path.
+  // When we got here through a real git merge, the working tree is left
+  // mid-merge and only `git merge --abort` recovers it. When we got here
+  // from the pre-flight gate there IS no merge to abort — nothing was
+  // written, so closing is genuinely inert.
   const close = useCallback(() => {
-    if (target) void window.api.git.abortMerge(target.folder)
+    if (target && mergeInProgress) void window.api.git.abortMerge(target.folder)
     setIsOpen(false)
-  }, [target])
+  }, [target, mergeInProgress])
 
   const finishResolution = useCallback(async () => {
     if (!versions || !target) return
 
-    const oursItems = parseProjectYaml(versions.ours, processAfterDeserialization)
-    const theirsItems = parseProjectYaml(versions.theirs, processAfterDeserialization)
-    const resolvedById: Record<string, ReturnType<typeof conflictResolution.getResolvedEntity>> = {}
+    const resolvedById: Record<string, FolderItem> = {}
+    const quickConfigResolutions: QuickConfigResolution[] = []
     for (const conflict of conflictResolution.conflicts) {
       const resolved = conflictResolution.getResolvedEntity(conflict.id)
+      // Unreachable through the UI (finishing is gated on every conflict
+      // being decided) — but writing back a merge with an undecided entity
+      // would silently publish our side of it, so refuse rather than guess.
+      if (!resolved) return
+      if (conflict.quickConfigName !== undefined) {
+        // A saved-configuration entry resolves to a request, but belongs
+        // in that request's `quickConfigs` — keyed by the entity id, which
+        // this conflict's own id is NOT (it carries the config name too).
+        quickConfigResolutions.push({
+          requestId: conflict.ours.id,
+          configName: conflict.quickConfigName,
+          resolved
+        })
+        continue
+      }
       resolvedById[conflict.id] = applyQuickConfigPicks(resolved, conflict, conflictResolution.quickConfigPicks[conflict.id])
     }
 
-    const merged = buildMergedProjectTree(oursItems, theirsItems, resolvedById, commitTimestamps)
-    // Splice the merged tree into the FULL `ours` document rather than
-    // rebuilding `{ collections: merged }` from scratch — `ours` carries
-    // top-level project fields beyond `collections` (notably
-    // `_projectUuid`, see `shared/config/projectUuid.ts`), and this
-    // write-back bypasses `FileService`'s normal save path (which would
-    // otherwise re-stamp it via `uuidKey`) entirely — `writeResolvedConflict`
-    // is a raw git write. Dropping the uuid here would make the next open
-    // regenerate a fresh one, orphaning the DraftStore and changing the
-    // project's identity.
-    // `versions.ours` is `null` only when the file didn't exist yet at
-    // `HEAD` (see `parseProjectYaml`'s own doc) — no document to preserve
-    // fields from in that case.
-    const oursDocument = versions.ours !== null ? (yamlParse(versions.ours) as Record<string, unknown> | null) : null
-    const mergedDocument = { ...(oursDocument ?? {}), collections: merged }
-    const yamlText = yamlStringify(prepareForSerialization(mergedDocument))
+    const yamlText = buildMergedProjectYaml(versions, resolvedById, commitTimestamps, quickConfigResolutions)
+
+    // Reached from the pre-flight gate, no merge is underway: move onto
+    // the server's tip FIRST so the resolved content lands as an ordinary
+    // modification against it (same ordering the silent-update path uses —
+    // writing first would let the reset's index update race the write).
+    if (!mergeInProgress) {
+      const moved = await window.api.git.resetToRemoteKeepingWorkingTree(target.folder)
+      if (!moved.success) {
+        toasterService.push('app', {
+          title: t('gitUpdate.updateFailedTitle'),
+          body: moved.error ?? t('gitUpdate.updateFailedBody'),
+          durationMs: 10000
+        })
+        return
+      }
+    }
 
     await window.api.git.writeResolvedConflict(target.folder, target.relativePath, yamlText)
-    const commitResult = await window.api.git.commit(target.folder, t('git.conflictResolvedCommitMessage'))
+    onProjectReplaced?.()
+
+    // Pull resolves and stops: the file is up to date and the user's
+    // decisions are on disk, but publishing was never what they asked
+    // for — and committing here would reintroduce exactly the stray
+    // commit this flow exists to avoid.
+    if (!publishAfterResolve) {
+      toasterService.push('app', { title: t('git.conflictResolvedTitle'), body: t('git.conflictResolvedBody'), durationMs: 5000 })
+      setIsOpen(false)
+      return
+    }
+
+    const commitResult = await window.api.git.commit(target.folder, t('git.conflictResolvedCommitMessage'), [target.relativePath])
     if (!commitResult.success) {
       toasterService.push('app', {
         title: t('git.pushFailedTitle'),
@@ -155,7 +230,7 @@ export function useGitPullConflict(): UseGitPullConflictResult {
 
     toasterService.push('app', { title: t('git.conflictResolvedTitle'), body: t('git.conflictResolvedBody'), durationMs: 5000 })
     setIsOpen(false)
-  }, [versions, target, conflictResolution, commitTimestamps, t])
+  }, [versions, target, conflictResolution, commitTimestamps, t, mergeInProgress, publishAfterResolve, onProjectReplaced])
 
-  return { isOpen, conflictResolution, openFromPull, close, finishResolution }
+  return { isOpen, conflictResolution, openFromPull, openFromVersions, close, finishResolution }
 }

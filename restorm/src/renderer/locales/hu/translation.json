@@ -231,7 +231,10 @@
     "mcpLogs": "MCP-naplók",
     "git": "Git",
     "gitPush": "Küldés",
-    "gitPull": "Letöltés"
+    "gitPull": "Letöltés",
+    "gitRefresh": "Frissítés",
+    "gitHistory": "Előzmények",
+    "gitResetToServer": "Visszaállítás a kiszolgáló változatára"
   },
   "sidebar": {
     "addRequest": "Kérés hozzáadása",
@@ -2374,7 +2377,6 @@
     "pullFailedTitle": "A lehívás sikertelen",
     "pullFailedBody": "A legújabb módosítások lehívása nem sikerült.",
     "pullSaveFailedBody": "A módosításokat nem sikerült menteni a lekérés előtt.",
-    "pullUnpushedChangesBody": "Vannak még nem pusholt helyi módosítások — először pusholjon, majd pulloljon.",
     "pushFailedTitle": "A push sikertelen",
     "pushFailedBody": "A módosításokat nem sikerült push-olni.",
     "pushSucceededTitle": "Push-olva",
@@ -2406,7 +2408,11 @@
       "deletedFolder": "Törölve a(z) „{{name}}” mappa",
       "addedEnvironmentFolder": "Hozzáadva a(z) „{{name}}” környezeti mappa",
       "modifiedEnvironmentFolder": "Módosítva a(z) „{{name}}” környezeti mappa",
-      "deletedEnvironmentFolder": "Törölve a(z) „{{name}}” környezeti mappa"
+      "deletedEnvironmentFolder": "Törölve a(z) „{{name}}” környezeti mappa",
+      "movedRequest": "A(z) \"{{name}}\" kérés áthelyezve",
+      "movedScenario": "A(z) \"{{name}}\" forgatókönyv áthelyezve",
+      "movedFolder": "A(z) \"{{name}}\" mappa áthelyezve",
+      "movedEnvironmentFolder": "A(z) \"{{name}}\" környezeti mappa áthelyezve"
     },
     "commitTitle": {
       "singleRequest": "A(z) „{{name}}” kérés frissítése",
@@ -2436,6 +2442,37 @@
     },
     "gate": {
       "initGitFolder": "Inicializálja a git mappáját a funkció használatához."
-    }
+    },
+    "conflictChooseVersion": "Válasszon változatot",
+    "conflictChooseVersionHint": "Kattintson a <0></0> jelre a saját vagy a kiszolgáló verziójának tetején — ezután mentés előtt bármelyik mezőt szerkesztheti.",
+    "conflictFinishBlocked": "Néhány ütközés még feloldásra vár.",
+    "conflictOnQuickConfig": "Az ütközés a kérés gyorsbeállítását érinti: {{name}}",
+    "conflictNameField": "Név",
+    "conflictTagsEmpty": "Ezen az oldalon nincsenek címkék.",
+    "conflictTagName": "Címke neve",
+    "conflictTagRemove": "Címke eltávolítása",
+    "conflictTagAdd": "Címke hozzáadása",
+    "conflictTagNew": "uj-cimke",
+    "conflictTagsTab": "Címkék",
+    "conflictTreeStructure": "Fastruktúra"
+  },
+  "gitUpdate": {
+    "title": "Frissítés szükséges",
+    "message": "A távoli kiszolgálón a fájl újabb változata található. A folytatás előtt frissítenie kell a saját változatát. Ha ütközések vannak az Ön és a kiszolgáló változata között, segítünk azok feloldásában.",
+    "conflictCount_one": "{{count}} elem tér el az Ön változata és a kiszolgálóé között.",
+    "conflictCount_other": "{{count}} elem tér el az Ön változata és a kiszolgálóé között.",
+    "cancel": "Mégse",
+    "discardMine": "Módosításaim elvetése",
+    "keepMineOverwriting": "Saját változat megtartása (felülírja a kiszolgáló módosításait)",
+    "updateFailedTitle": "A frissítés sikertelen",
+    "updateFailedBody": "Nem sikerült lekérni a változatot a távoli kiszolgálóról.",
+    "discardedTitle": "Módosítások elvetve",
+    "discardedBody": "Most a kiszolgáló legfrissebb változatán van.",
+    "updatedTitle": "A projekt frissítve",
+    "updatedBody": "Most a kiszolgáló legfrissebb változatán van, a módosításai megmaradtak.",
+    "keepServerVersion": "A kiszolgáló változatának megtartása",
+    "resolveConflicts": "Ütközések feloldása",
+    "resetConfirmTitle": "Visszaállítja a kiszolgáló változatára?",
+    "resetConfirmBody": "Minden helyi módosítása véglegesen törlődik, és a kiszolgáló változata lép a helyükre."
   }
 }

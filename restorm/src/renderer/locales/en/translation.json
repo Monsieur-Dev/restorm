@@ -231,7 +231,10 @@
     "mcpLogs": "MCP logs",
     "git": "Git",
     "gitPush": "Push",
-    "gitPull": "Pull"
+    "gitPull": "Pull",
+    "gitRefresh": "Refresh",
+    "gitHistory": "History",
+    "gitResetToServer": "Reset to the server version"
   },
   "sidebar": {
     "addRequest": "Add request",
@@ -2374,7 +2377,6 @@
     "pullFailedTitle": "Pull failed",
     "pullFailedBody": "Could not pull the latest changes.",
     "pullSaveFailedBody": "Could not save your changes before pulling.",
-    "pullUnpushedChangesBody": "You have unpushed local changes — push first, then pull.",
     "pushFailedTitle": "Push failed",
     "pushFailedBody": "Could not push the changes.",
     "pushSucceededTitle": "Pushed",
@@ -2406,7 +2408,11 @@
       "deletedFolder": "Deleted the folder \"{{name}}\"",
       "addedEnvironmentFolder": "Added the environment folder \"{{name}}\"",
       "modifiedEnvironmentFolder": "Modified the environment folder \"{{name}}\"",
-      "deletedEnvironmentFolder": "Deleted the environment folder \"{{name}}\""
+      "deletedEnvironmentFolder": "Deleted the environment folder \"{{name}}\"",
+      "movedRequest": "Moved the request \"{{name}}\"",
+      "movedScenario": "Moved the scenario \"{{name}}\"",
+      "movedFolder": "Moved the folder \"{{name}}\"",
+      "movedEnvironmentFolder": "Moved the environment folder \"{{name}}\""
     },
     "commitTitle": {
       "singleRequest": "Update to the request \"{{name}}\"",
@@ -2436,6 +2442,37 @@
     },
     "gate": {
       "initGitFolder": "Initialize your git folder to use this feature."
-    }
+    },
+    "conflictChooseVersion": "Choose a version",
+    "conflictChooseVersionHint": "Click the <0></0> at the top of your version or the server’s — you can then edit any field before saving.",
+    "conflictFinishBlocked": "Some conflicts still need a decision.",
+    "conflictOnQuickConfig": "The conflict is on the request’s quick setting: {{name}}",
+    "conflictNameField": "Name",
+    "conflictTagsEmpty": "No tags on this side.",
+    "conflictTagName": "Tag name",
+    "conflictTagRemove": "Remove this tag",
+    "conflictTagAdd": "Add a tag",
+    "conflictTagNew": "new-tag",
+    "conflictTagsTab": "Tags",
+    "conflictTreeStructure": "Tree structure"
+  },
+  "gitUpdate": {
+    "title": "Update required",
+    "message": "A newer version of the file exists on the remote server. You must update your version before continuing. If there are conflicts between your version and the server’s, we will help you resolve them.",
+    "conflictCount_one": "{{count}} item differs between your version and the server’s.",
+    "conflictCount_other": "{{count}} items differ between your version and the server’s.",
+    "cancel": "Cancel",
+    "discardMine": "Discard my changes",
+    "keepMineOverwriting": "Keep my version (overwrites the server’s changes)",
+    "updateFailedTitle": "Update failed",
+    "updateFailedBody": "Could not update from the remote server.",
+    "discardedTitle": "Changes discarded",
+    "discardedBody": "You are now on the latest version from the server.",
+    "updatedTitle": "Project updated",
+    "updatedBody": "You are now on the latest version from the server, with your changes kept.",
+    "keepServerVersion": "Keep the server version",
+    "resolveConflicts": "Resolve conflicts",
+    "resetConfirmTitle": "Reset to the server version?",
+    "resetConfirmBody": "All your local changes will be permanently deleted and replaced by the server version."
   }
 }

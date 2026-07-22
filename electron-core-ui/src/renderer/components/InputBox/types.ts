@@ -74,6 +74,13 @@ export interface InputBoxProps {
   onFocus?: () => void
   onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) => void
   disabled?: boolean
+  /**
+   * Renders the field non-editable while keeping it fully readable,
+   * focusable and selectable — unlike `disabled`, which also greys it out
+   * and takes it out of the tab order. Use this to display a value the
+   * user may copy but not change. Default: false
+   */
+  readOnly?: boolean
   className?: string
   id?: string
   style?: React.CSSProperties

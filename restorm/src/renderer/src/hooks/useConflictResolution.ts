@@ -1,8 +1,10 @@
 import { useCallback, useMemo, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import type { GitConflictVersions } from 'electron-core-ui/renderer'
 import type { FolderItem } from '../../../shared/types/folderTypes'
 import type { Scenario } from '../../../shared/types/scenario'
 import { identifyConflictingEntities, type ConflictEntity } from '../../../shared/git/gitConflictModel'
+import { flattenEntities, parseProjectYaml } from '../../../shared/git/gitCommitDiff'
 import { cloneEntityForResolution } from '../services/conflictEntityClone'
 import { computeEntityFieldDiff } from '../services/conflictFieldDiff'
 import { processAfterDeserialization } from '../utils/serialization'
@@ -14,9 +16,26 @@ export interface UseConflictResolutionResult {
   conflicts: ConflictEntity[]
   selectedConflictId: string | null
   selectConflict: (id: string) => void
-  /** The current editable "resolved" copy for a conflict — defaults to a
-   * clone of `ours` the first time a conflict is seen. */
-  getResolvedEntity: (conflictId: string) => FolderItem
+  /** The current editable "resolved" copy for a conflict, or `null` while
+   * the user has not chosen a side yet. */
+  getResolvedEntity: (conflictId: string) => FolderItem | null
+  /** True once the user has picked a side for this conflict. */
+  isResolved: (conflictId: string) => boolean
+  /** True when every conflict has been decided — the gate on finishing. */
+  allResolved: boolean
+  /** Rename the resolved copy. The name is arbitrated like any other
+   * field, and the resolved column's box is editable so the user can
+   * settle on a third name rather than only picking a side. */
+  setResolvedName: (conflictId: string, name: string) => void
+  /** Replace the resolved copy's tag list. Tags are arbitrated in their own
+   * tab, so they need their own setter — the reactive proxy forbids raw
+   * field assignment from outside. */
+  setResolvedTags: (conflictId: string, tags: string[]) => void
+  /** Look up any item of one side's project tree by id. A scenario node
+   * bound to a request needs its target to render its summary, and in the
+   * conflict view each column must resolve against ITS OWN side — showing
+   * our request under the server's column would misrepresent the diff. */
+  resolveItemOnSide: (side: 'ours' | 'theirs', itemId: string) => FolderItem | null
   /** AC#3: "use this version" — replaces the resolved copy with a fresh
    * clone of `ours`/`theirs`, discarding any edits made so far. */
   pickOursVersion: (conflictId: string) => void
@@ -69,12 +88,17 @@ function resolvedEqualsSide(conflict: ConflictEntity, resolved: FolderItem, side
   return false
 }
 
-function buildInitialResolved(conflicts: ConflictEntity[]): Record<string, FolderItem> {
-  const resolved: Record<string, FolderItem> = {}
-  for (const conflict of conflicts) {
-    resolved[conflict.id] = cloneEntityForResolution(conflict.ours)
-  }
-  return resolved
+/**
+ * A resolution session starts with NOTHING resolved.
+ *
+ * Pre-seeding each conflict with a clone of `ours` used to make the
+ * resolved column look already decided: the user could reach the finish
+ * button without ever opening the list, and silently publish our side of
+ * every conflict they never looked at. An untouched conflict must read as
+ * untouched — the choice is the user's to make, not ours to assume.
+ */
+function buildInitialResolved(): Record<string, FolderItem> {
+  return {}
 }
 
 /**
@@ -88,14 +112,18 @@ function buildInitialResolved(conflicts: ConflictEntity[]): Record<string, Folde
  * (https://react.dev/learn/you-might-not-need-an-effect).
  */
 export function useConflictResolution(versions: GitConflictVersions | null): UseConflictResolutionResult {
+  const { t } = useTranslation()
+  // The model is shared with the main process (no i18n there), so the
+  // tree-structure entry's display name is supplied by this side.
+  const treeConflictName = t('git.conflictTreeStructure')
   const conflicts = useMemo(
-    () => (versions ? identifyConflictingEntities(versions, processAfterDeserialization) : []),
-    [versions]
+    () => (versions ? identifyConflictingEntities(versions, processAfterDeserialization, treeConflictName) : []),
+    [versions, treeConflictName]
   )
 
   const [priorConflicts, setPriorConflicts] = useState(conflicts)
   const [selectedConflictId, setSelectedConflictId] = useState<string | null>(conflicts[0]?.id ?? null)
-  const [resolvedById, setResolvedById] = useState<Record<string, FolderItem>>(() => buildInitialResolved(conflicts))
+  const [resolvedById, setResolvedById] = useState<Record<string, FolderItem>>(buildInitialResolved)
   const [quickConfigPicks, setQuickConfigPicks] = useState<QuickConfigPicks>({})
   // Bumped on every ours/theirs PICK (never on a manual edit): the resolved
   // panel's tab view seeds its editable fields into local state once, so a
@@ -111,7 +139,7 @@ export function useConflictResolution(versions: GitConflictVersions | null): Use
   if (conflicts !== priorConflicts) {
     setPriorConflicts(conflicts)
     setSelectedConflictId(conflicts[0]?.id ?? null)
-    setResolvedById(buildInitialResolved(conflicts))
+    setResolvedById(buildInitialResolved())
     setQuickConfigPicks({})
     setResolvedEpochById({})
     setResolvedRevision(0)
@@ -132,12 +160,45 @@ export function useConflictResolution(versions: GitConflictVersions | null): Use
 
   const selectConflict = useCallback((id: string) => { setSelectedConflictId(id) }, [])
 
-  const getResolvedEntity = useCallback((conflictId: string): FolderItem => {
-    const resolved = resolvedById[conflictId]
-    if (resolved) return resolved
-    const conflict = conflicts.find((c) => c.id === conflictId)
-    return conflict ? conflict.ours : ({} as FolderItem)
-  }, [resolvedById, conflicts])
+  const getResolvedEntity = useCallback((conflictId: string): FolderItem | null => {
+    return resolvedById[conflictId] ?? null
+  }, [resolvedById])
+
+  const isResolved = useCallback((conflictId: string): boolean => {
+    return resolvedById[conflictId] !== undefined
+  }, [resolvedById])
+
+  const allResolved = conflicts.every((c) => resolvedById[c.id] !== undefined)
+
+  // Each side's full tree, flattened once per versions object: the node
+  // boxes call this per render, so re-walking the YAML every time would be
+  // wasteful.
+  const sideIndexes = useMemo(() => ({
+    ours: flattenEntities(parseProjectYaml(versions?.ours ?? null, processAfterDeserialization)),
+    theirs: flattenEntities(parseProjectYaml(versions?.theirs ?? null, processAfterDeserialization))
+  }), [versions])
+
+  const setResolvedName = useCallback((conflictId: string, name: string) => {
+    setResolvedById((prev) => {
+      const current = prev[conflictId]
+      // Renaming presupposes a decision: with nothing picked there is no
+      // resolved copy to rename yet.
+      if (!current) return prev
+      return { ...prev, [conflictId]: { ...(current as unknown as Record<string, unknown>), name } as unknown as FolderItem }
+    })
+  }, [])
+
+  const setResolvedTags = useCallback((conflictId: string, tags: string[]) => {
+    setResolvedById((prev) => {
+      const current = prev[conflictId]
+      if (!current) return prev
+      return { ...prev, [conflictId]: { ...(current as unknown as Record<string, unknown>), tags } as unknown as FolderItem }
+    })
+  }, [])
+
+  const resolveItemOnSide = useCallback((side: 'ours' | 'theirs', itemId: string): FolderItem | null => {
+    return sideIndexes[side].get(itemId)?.item ?? null
+  }, [sideIndexes])
 
   const pickOursVersion = useCallback((conflictId: string) => {
     const conflict = conflicts.find((c) => c.id === conflictId)
@@ -182,6 +243,10 @@ export function useConflictResolution(versions: GitConflictVersions | null): Use
     selectedConflictId,
     selectConflict,
     getResolvedEntity,
+    isResolved,
+    allResolved,
+    resolveItemOnSide,
+    setResolvedName,
     pickOursVersion,
     pickTheirsVersion,
     onScenarioChange,
@@ -189,6 +254,7 @@ export function useConflictResolution(versions: GitConflictVersions | null): Use
     pickQuickConfigVersion,
     resolvedEpochById,
     pickedSideById,
-    onResolvedEdited
+    onResolvedEdited,
+    setResolvedTags
   }
 }

@@ -4,6 +4,8 @@ import { render, cleanup, fireEvent, screen } from '@testing-library/react'
 import type React from 'react'
 
 vi.mock('react-i18next', () => ({
+  // The placeholder hint draws a codicon inline via <Trans>.
+  Trans: ({ i18nKey }: { i18nKey: string }) => i18nKey,
   useTranslation: () => ({ t: (key: string) => key })
 }))
 // `electron-core-ui/renderer` is the full merged barrel — importing ANY
@@ -14,6 +16,9 @@ vi.mock('react-i18next', () => ({
 // thin stand-in that still exercises this component's render props +
 // "use this version" wiring, not a Monaco-safe re-render of the real one.
 vi.mock('electron-core-ui/renderer', () => ({
+  // `HeaderHoverTooltip` (wrapping the Finish button) renders this.
+  Tooltip: ({ show, content }: { show?: boolean, content?: React.ReactNode }) =>
+    show === true ? <div data-testid="mock-tooltip">{content}</div> : null,
   Modal: ({ isOpen, title, children }: { isOpen: boolean, title: React.ReactNode, children: React.ReactNode }) =>
     isOpen ? <div data-testid="mock-modal"><span>{title}</span>{children}</div> : null,
   Breadcrumb: ({ items, 'data-testid': testId }: { items: { id: string, label: string }[], 'data-testid'?: string }) =>
@@ -70,6 +75,11 @@ function makeConflictResolution(overrides: Partial<UseConflictResolutionResult> 
     selectedConflictId: 'r1',
     selectConflict: vi.fn(),
     getResolvedEntity: vi.fn(() => ({ id: 'r1', name: 'Resolved name' }) as never),
+    isResolved: vi.fn(() => true),
+    allResolved: true,
+    resolveItemOnSide: vi.fn(() => null),
+    setResolvedName: vi.fn(),
+    setResolvedTags: vi.fn(),
     pickOursVersion: vi.fn(),
     pickTheirsVersion: vi.fn(),
     onScenarioChange: vi.fn(),
@@ -125,12 +135,16 @@ describe('GitConflictResolutionModal', () => {
     expect(screen.getByTestId('git-conflict-resolution-finish')).toHaveProperty('disabled', true)
   })
 
-  it('computes + passes the same fieldDiff to the user and server panels, none to the request-kind default fixture', () => {
+  it('computes + passes the same fieldDiff to the user and server panels', () => {
+    // The default fixture's two sides carry different names, so the diff
+    // is no longer empty: a rename is now something the panels can show.
     const cr = makeConflictResolution()
     render(<GitConflictResolutionModal isOpen conflictResolution={cr} onClose={vi.fn()} onFinish={vi.fn()} />)
-    for (const panel of screen.getAllByTestId('mock-panel-readOnly')) {
-      expect(panel.getAttribute('data-field-diff')).toBe('')
-    }
+    const panels = screen.getAllByTestId('mock-panel-readOnly')
+    expect(panels.length).toBeGreaterThan(0)
+    const diffs = panels.map((panel) => panel.getAttribute('data-field-diff'))
+    expect(new Set(diffs).size).toBe(1)
+    expect(diffs[0]).toContain('name')
   })
 
   it('computes + passes an identical folder notes fieldDiff to user/server (not resolved, since #4 only borders readOnly panels)', () => {
@@ -148,9 +162,12 @@ describe('GitConflictResolutionModal', () => {
     })
     render(<GitConflictResolutionModal isOpen conflictResolution={cr} onClose={vi.fn()} onFinish={vi.fn()} />)
     const [userPanel, serverPanel] = screen.getAllByTestId('mock-panel-readOnly')
-    const expectedDiff = JSON.stringify({ fields: { notes: true }, preselectTabId: 'notes' })
-    expect(userPanel?.getAttribute('data-field-diff')).toBe(expectedDiff)
-    expect(serverPanel?.getAttribute('data-field-diff')).toBe(expectedDiff)
+    const parse = (p: HTMLElement | undefined): { fields: Record<string, boolean>; preselectTabId?: string } =>
+      JSON.parse(p?.getAttribute('data-field-diff') ?? '{}') as { fields: Record<string, boolean>; preselectTabId?: string }
+    for (const panel of [userPanel, serverPanel]) {
+      expect(parse(panel).fields['notes']).toBe(true)
+      expect(parse(panel).preselectTabId).toBe('notes')
+    }
   })
 
   it('wires "use this version" to pickOursVersion/pickTheirsVersion for the selected conflict', () => {
@@ -160,5 +177,56 @@ describe('GitConflictResolutionModal', () => {
     expect(cr.pickOursVersion).toHaveBeenCalledWith('r1')
     fireEvent.click(screen.getByTestId('conflict-resolution-view-use-server-version'))
     expect(cr.pickTheirsVersion).toHaveBeenCalledWith('r1')
+  })
+})
+
+describe('an undecided conflict cannot be published', () => {
+  it('shows a prompt instead of a pre-filled resolution when no side is picked', () => {
+    render(
+      <GitConflictResolutionModal
+        isOpen
+        conflictResolution={makeConflictResolution({
+          getResolvedEntity: vi.fn(() => null),
+          isResolved: vi.fn(() => false),
+          allResolved: false
+        })}
+        onClose={vi.fn()}
+        onFinish={vi.fn()}
+      />
+    )
+    // The resolved column must read as "your move", not as an answer we
+    // picked on the user's behalf.
+    expect(screen.getByTestId('conflict-resolved-placeholder')).toBeTruthy()
+  })
+
+  it('disables Finish while at least one conflict is undecided', () => {
+    const onFinish = vi.fn()
+    render(
+      <GitConflictResolutionModal
+        isOpen
+        conflictResolution={makeConflictResolution({
+          getResolvedEntity: vi.fn(() => null),
+          isResolved: vi.fn(() => false),
+          allResolved: false
+        })}
+        onClose={vi.fn()}
+        onFinish={onFinish}
+      />
+    )
+    const finish = screen.getByTestId('git-conflict-resolution-finish')
+    expect(finish.hasAttribute('disabled')).toBe(true)
+  })
+
+  it('enables Finish once every conflict has been decided', () => {
+    render(
+      <GitConflictResolutionModal
+        isOpen
+        conflictResolution={makeConflictResolution({ allResolved: true })}
+        onClose={vi.fn()}
+        onFinish={vi.fn()}
+      />
+    )
+    const finish = screen.getByTestId('git-conflict-resolution-finish')
+    expect(finish.hasAttribute('disabled')).toBe(false)
   })
 })

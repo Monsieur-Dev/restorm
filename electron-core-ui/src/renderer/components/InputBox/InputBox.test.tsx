@@ -115,3 +115,20 @@ describe('InputBox debounce', () => {
     expect(onChange).not.toHaveBeenCalled()
   })
 })
+
+describe('InputBox readOnly', () => {
+  it('renders a non-editable but enabled field, unlike disabled', () => {
+    const { getByTestId, rerender } = render(
+      <InputBox data-testid="ib" value="Find pet by ID" options={{ ariaLabel: 'Name' }} readOnly />
+    )
+    const input = getByTestId('ib-input') as HTMLInputElement
+    // Readable and still reachable — the user may focus it and copy the
+    // value; only editing is off.
+    expect(input.readOnly).toBe(true)
+    expect(input.disabled).toBe(false)
+    expect(input.value).toBe('Find pet by ID')
+
+    rerender(<InputBox data-testid="ib" value="Find pet by ID" options={{ ariaLabel: 'Name' }} />)
+    expect((getByTestId('ib-input') as HTMLInputElement).readOnly).toBe(false)
+  })
+})

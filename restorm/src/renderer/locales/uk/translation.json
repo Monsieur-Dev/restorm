@@ -233,7 +233,10 @@
     "mcpLogs": "Журнали MCP",
     "git": "Git",
     "gitPush": "Надіслати",
-    "gitPull": "Отримати"
+    "gitPull": "Отримати",
+    "gitRefresh": "Оновити",
+    "gitHistory": "Історія",
+    "gitResetToServer": "Скинути до версії сервера"
   },
   "sidebar": {
     "addRequest": "Додати запит",
@@ -2376,7 +2379,6 @@
     "pullFailedTitle": "Не вдалося виконати pull",
     "pullFailedBody": "Не вдалося отримати останні зміни.",
     "pullSaveFailedBody": "Не вдалося зберегти зміни перед отриманням.",
-    "pullUnpushedChangesBody": "Є локальні зміни, які ще не надіслано — спочатку виконайте Push, потім Pull.",
     "pushFailedTitle": "Не вдалося виконати push",
     "pushFailedBody": "Не вдалося надіслати зміни.",
     "pushSucceededTitle": "Надіслано",
@@ -2408,7 +2410,11 @@
       "deletedFolder": "Видалено теку «{{name}}»",
       "addedEnvironmentFolder": "Додано теку середовища «{{name}}»",
       "modifiedEnvironmentFolder": "Змінено теку середовища «{{name}}»",
-      "deletedEnvironmentFolder": "Видалено теку середовища «{{name}}»"
+      "deletedEnvironmentFolder": "Видалено теку середовища «{{name}}»",
+      "movedRequest": "Переміщено запит \"{{name}}\"",
+      "movedScenario": "Переміщено сценарій \"{{name}}\"",
+      "movedFolder": "Переміщено теку \"{{name}}\"",
+      "movedEnvironmentFolder": "Переміщено теку середовища \"{{name}}\""
     },
     "commitTitle": {
       "singleRequest": "Оновлення запиту «{{name}}»",
@@ -2438,6 +2444,37 @@
     },
     "gate": {
       "initGitFolder": "Ініціалізуйте свою git-теку, щоб користуватися цією функцією."
-    }
+    },
+    "conflictChooseVersion": "Виберіть версію",
+    "conflictChooseVersionHint": "Натисніть <0></0> угорі своєї версії або версії сервера — після цього можна редагувати будь-яке поле перед збереженням.",
+    "conflictFinishBlocked": "Деякі конфлікти ще потрібно розв’язати.",
+    "conflictOnQuickConfig": "Конфлікт стосується швидкого налаштування запиту: {{name}}",
+    "conflictNameField": "Назва",
+    "conflictTagsEmpty": "Немає міток з цього боку.",
+    "conflictTagName": "Назва мітки",
+    "conflictTagRemove": "Видалити цю мітку",
+    "conflictTagAdd": "Додати мітку",
+    "conflictTagNew": "nova-mitka",
+    "conflictTagsTab": "Мітки",
+    "conflictTreeStructure": "Структура дерева"
+  },
+  "gitUpdate": {
+    "title": "Потрібне оновлення",
+    "message": "На віддаленому сервері є новіша версія файлу. Перш ніж продовжити, потрібно оновити свою версію. Якщо між вашою версією та версією сервера виникнуть конфлікти, ми допоможемо вам їх розв’язати.",
+    "conflictCount_one": "{{count}} елемент відрізняється між вашою версією та версією сервера.",
+    "conflictCount_other": "Кількість елементів, що відрізняються між вашою версією та версією сервера: {{count}}.",
+    "cancel": "Скасувати",
+    "discardMine": "Видалити мої зміни",
+    "keepMineOverwriting": "Зберегти мою версію (перезапише зміни сервера)",
+    "updateFailedTitle": "Не вдалося оновити",
+    "updateFailedBody": "Не вдалося отримати версію з віддаленого сервера.",
+    "discardedTitle": "Зміни видалено",
+    "discardedBody": "Тепер ви на найновішій версії з сервера.",
+    "updatedTitle": "Проєкт оновлено",
+    "updatedBody": "Тепер ви на найновішій версії з сервера, ваші зміни збережено.",
+    "keepServerVersion": "Зберегти версію сервера",
+    "resolveConflicts": "Розв’язати конфлікти",
+    "resetConfirmTitle": "Скинути до версії сервера?",
+    "resetConfirmBody": "Усі ваші локальні зміни буде остаточно видалено та замінено версією сервера."
   }
 }

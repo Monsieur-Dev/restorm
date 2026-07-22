@@ -64,6 +64,15 @@ export interface RestormTitlebarProps {
   /** Repo-push, same effect + codicon as the statusbar `GIT` entry's push
    * button. Wired to `Git → Push`. */
   onGitPush: () => void
+  /** Manual both-sides git refresh (mirrors the statusbar refresh icon). */
+  onGitRefresh: () => void
+  /** Opens the git-history modal (mirrors the statusbar source-control icon). */
+  onGitHistory: () => void
+  /** Discard every local change and take the server's version. */
+  onGitResetToServer: () => void
+  /** Pastille flags, same derivation as the statusbar (useGitPendingFlags). */
+  gitPushPending: boolean
+  gitPullPending: boolean
   /** Repo-pull, same effect + codicon as the statusbar `GIT` entry's pull
    * button. Wired to `Git → Pull`. */
   onGitPull: () => void
@@ -102,6 +111,11 @@ export const RestormTitlebar: React.FC<RestormTitlebarProps> = ({
   onOpenMcpLogs,
   onGitPush,
   onGitPull,
+  onGitRefresh,
+  onGitHistory,
+  onGitResetToServer,
+  gitPushPending,
+  gitPullPending,
   workbenchActive,
   onOpenSettingsTab
 }) => {
@@ -335,17 +349,40 @@ export const RestormTitlebar: React.FC<RestormTitlebarProps> = ({
             data-testid="titlebar-menubar-item-git"
           >
             <MenuItem
+              data-testid="titlebar-menu-item-git-refresh"
+              title={t('menuBar.gitRefresh')}
+              icon={<span className="codicon codicon-refresh" aria-hidden="true" />}
+              onClick={onGitRefresh}
+              disabled={gitGate.locked}
+            />
+            <MenuItem
               data-testid="titlebar-menu-item-git-push"
               title={t('menuBar.gitPush')}
-              icon={<span className="codicon codicon-repo-push" aria-hidden="true" />}
+              icon={<GitMenuIcon codicon="repo-push" pending={gitPushPending} data-testid="titlebar-menu-item-git-push-pastille" />}
               onClick={onGitPush}
               disabled={gitGate.locked}
             />
             <MenuItem
               data-testid="titlebar-menu-item-git-pull"
               title={t('menuBar.gitPull')}
-              icon={<span className="codicon codicon-repo-pull" aria-hidden="true" />}
+              icon={<GitMenuIcon codicon="repo-pull" pending={gitPullPending} data-testid="titlebar-menu-item-git-pull-pastille" />}
               onClick={onGitPull}
+              disabled={gitGate.locked}
+            />
+            <MenuItemSeparator data-testid="titlebar-menu-separator-git-1" />
+            <MenuItem
+              data-testid="titlebar-menu-item-git-reset-to-server"
+              title={t('menuBar.gitResetToServer')}
+              icon={<span className="codicon codicon-discard" aria-hidden="true" />}
+              onClick={onGitResetToServer}
+              disabled={gitGate.locked}
+            />
+            <MenuItemSeparator data-testid="titlebar-menu-separator-git-2" />
+            <MenuItem
+              data-testid="titlebar-menu-item-git-history"
+              title={t('menuBar.gitHistory')}
+              icon={<span className="codicon codicon-source-control" aria-hidden="true" />}
+              onClick={onGitHistory}
               disabled={gitGate.locked}
             />
           </MenuBarItem>
@@ -380,3 +417,28 @@ export const RestormTitlebar: React.FC<RestormTitlebarProps> = ({
 }
 
 export default RestormTitlebar
+
+/** Menu-item icon with the same pastille dot as the statusbar GIT cell —
+ * the top-level "Git" MenuBarItem title stays a plain string (overflow/
+ * hamburger conversion is string-only, see its own comment above), so the
+ * pending indicators live on the dropdown items instead. */
+const GitMenuIcon: React.FC<{ codicon: string; pending: boolean; 'data-testid'?: string }> = ({ codicon, pending, 'data-testid': dataTestId }) => (
+  <span style={{ position: 'relative', display: 'inline-flex' }}>
+    <span className={`codicon codicon-${codicon}`} aria-hidden="true" />
+    {pending && (
+      <span
+        aria-hidden="true"
+        {...(dataTestId ? { 'data-testid': dataTestId } : {})}
+        style={{
+          position: 'absolute',
+          top: -1,
+          right: -2,
+          width: 6,
+          height: 6,
+          borderRadius: '50%',
+          backgroundColor: 'var(--statusBar-prominentBackground, var(--focusBorder))'
+        }}
+      />
+    )}
+  </span>
+)

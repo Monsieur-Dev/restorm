@@ -13,6 +13,13 @@
       "save": "Opslaan",
       "dontSave": "Niet opslaan",
       "cancel": "Annuleren"
+    },
+    "externalChange": {
+      "title": "Bestand op schijf gewijzigd",
+      "message": "'{{fileName}}' is buiten de applicatie gewijzigd.",
+      "detail": "Herlaad om de versie op schijf te gebruiken, of behoud je versie en overschrijf die.",
+      "reload": "Herladen",
+      "keepMine": "Mijn versie behouden"
     }
   },
   "recentFilesVignette": {
@@ -427,6 +434,11 @@
       "title": "Update beschikbaar",
       "body": "Er is een nieuwere versie van dit bestand beschikbaar in de repository.",
       "pullNow": "Nu pullen"
+    },
+    "mergeInProgress": {
+      "title": "Onvoltooide samenvoeging",
+      "body": "Er is een Git-samenvoeging gestart die nooit is voltooid. Het projectbestand kan nog conflictmarkeringen bevatten.",
+      "abort": "Samenvoeging afbreken"
     }
   },
   "pushModal": {

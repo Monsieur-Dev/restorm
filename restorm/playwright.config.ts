@@ -413,6 +413,12 @@ const gitConflictTestDir = defineBddConfig({
   outputDir: '.features-gen/git-conflict'
 })
 
+const gitCollabTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/git-collab/features/**/*.feature',
+  steps: ['tests/e2e/bdd/git-collab/steps/**/*.ts', 'tests/e2e/bdd/fixtures/git-collab.fixture.ts'],
+  outputDir: '.features-gen/git-collab'
+})
+
 const gitMcpTestDir = defineBddConfig({
   features: 'tests/e2e/bdd/git-mcp/features/**/*.feature',
   steps: ['tests/e2e/bdd/git-mcp/steps/**/*.ts', 'tests/e2e/bdd/fixtures/git-mcp.fixture.ts'],
@@ -774,6 +780,12 @@ export default defineConfig({
             name: 'git-mcp',
             testDir: gitMcpTestDir,
             timeout: 120 * 1000
+          },
+          {
+            name: 'git-collab',
+            testDir: gitCollabTestDir,
+            // ONE long multi-chapter scenario driving TWO live instances.
+            timeout: 600 * 1000
           }
         ]),
     {

@@ -230,7 +230,10 @@
     "mcpLogs": "MCP 記錄",
     "git": "Git",
     "gitPush": "推送",
-    "gitPull": "提取"
+    "gitPull": "提取",
+    "gitRefresh": "重新整理",
+    "gitHistory": "歷史記錄",
+    "gitResetToServer": "重設為伺服器版本"
   },
   "sidebar": {
     "addRequest": "新增請求",
@@ -2373,7 +2376,6 @@
     "pullFailedTitle": "拉取失敗",
     "pullFailedBody": "無法拉取最新變更。",
     "pullSaveFailedBody": "拉取前無法儲存您的變更。",
-    "pullUnpushedChangesBody": "存在尚未推送的本機變更——請先推送，再拉取。",
     "pushFailedTitle": "推送失敗",
     "pushFailedBody": "無法推送變更。",
     "pushSucceededTitle": "已推送",
@@ -2405,7 +2407,11 @@
       "deletedFolder": "已刪除資料夾 \"{{name}}\"",
       "addedEnvironmentFolder": "已新增環境資料夾 \"{{name}}\"",
       "modifiedEnvironmentFolder": "已修改環境資料夾 \"{{name}}\"",
-      "deletedEnvironmentFolder": "已刪除環境資料夾 \"{{name}}\""
+      "deletedEnvironmentFolder": "已刪除環境資料夾 \"{{name}}\"",
+      "movedRequest": "已移動請求「{{name}}」",
+      "movedScenario": "已移動場景「{{name}}」",
+      "movedFolder": "已移動資料夾「{{name}}」",
+      "movedEnvironmentFolder": "已移動環境資料夾「{{name}}」"
     },
     "commitTitle": {
       "singleRequest": "更新請求 \"{{name}}\"",
@@ -2435,6 +2441,37 @@
     },
     "gate": {
       "initGitFolder": "請初始化您的 git 資料夾以使用此功能。"
-    }
+    },
+    "conflictChooseVersion": "請選擇一個版本",
+    "conflictChooseVersionHint": "點擊您的版本或伺服器版本頂端的 <0></0>，之後可在儲存前編輯任何欄位。",
+    "conflictFinishBlocked": "仍有衝突尚未解決。",
+    "conflictOnQuickConfig": "衝突出現在請求的快速設定：{{name}}",
+    "conflictNameField": "名稱",
+    "conflictTagsEmpty": "此側沒有標籤。",
+    "conflictTagName": "標籤名稱",
+    "conflictTagRemove": "移除此標籤",
+    "conflictTagAdd": "新增標籤",
+    "conflictTagNew": "新標籤",
+    "conflictTagsTab": "標籤",
+    "conflictTreeStructure": "樹狀結構"
+  },
+  "gitUpdate": {
+    "title": "需要更新",
+    "message": "遠端伺服器上有該檔案的較新版本。繼續之前，您必須更新自己的版本。如果您的版本與伺服器版本之間存在衝突，我們會協助您解決。",
+    "conflictCount_one": "您的版本與伺服器版本之間有 {{count}} 個項目不同。",
+    "conflictCount_other": "您的版本與伺服器版本之間有 {{count}} 個項目不同。",
+    "cancel": "取消",
+    "discardMine": "刪除我的修改",
+    "keepMineOverwriting": "保留我的版本（覆寫伺服器的修改）",
+    "updateFailedTitle": "更新失敗",
+    "updateFailedBody": "無法從遠端伺服器取得版本。",
+    "discardedTitle": "修改已刪除",
+    "discardedBody": "您現在處於伺服器上的最新版本。",
+    "updatedTitle": "專案已更新",
+    "updatedBody": "您現在處於伺服器上的最新版本，您的修改已保留。",
+    "keepServerVersion": "保留伺服器版本",
+    "resolveConflicts": "解決衝突",
+    "resetConfirmTitle": "要重設為伺服器版本嗎？",
+    "resetConfirmBody": "您所有的本機修改都將被永久刪除，並以伺服器版本取代。"
   }
 }

@@ -13,6 +13,13 @@
       "save": "Uložit",
       "dontSave": "Neukládat",
       "cancel": "Zrušit"
+    },
+    "externalChange": {
+      "title": "Soubor změněn na disku",
+      "message": "„{{fileName}}“ byl změněn mimo aplikaci.",
+      "detail": "Znovu načtěte, chcete-li použít verzi z disku, nebo ponechte svou verzi a přepište ji.",
+      "reload": "Znovu načíst",
+      "keepMine": "Ponechat mou verzi"
     }
   },
   "recentFilesVignette": {
@@ -427,6 +434,11 @@
       "title": "Dostupná aktualizace",
       "body": "V repozitáři je k dispozici novější verze tohoto souboru.",
       "pullNow": "Stáhnout nyní"
+    },
+    "mergeInProgress": {
+      "title": "Nedokončené sloučení",
+      "body": "Bylo zahájeno slučování Git, které nikdy neskončilo. Soubor projektu může stále obsahovat značky konfliktu.",
+      "abort": "Zrušit sloučení"
     }
   },
   "pushModal": {

@@ -174,6 +174,29 @@ your local work exactly as it was — nothing is half-applied.
 > aren't yet individually pickable inside this view — an interactive
 > per-quick-config picker is a planned follow-up.
 
+### If a resolution is interrupted
+
+Cancelling the conflict-resolution view aborts the merge for you, so the
+repository is left exactly as it was before the pull. Closing the window
+mid-resolution (or a crash) cannot do that — the repository stays
+**mid-merge**, with conflict markers in the project file. Restorm notices on
+the next launch and offers a toast with a single action, **abort the merge**,
+which returns to the state before the pull. Your own committed work is
+untouched; only the unfinished merge is undone.
+
+### If the file changes outside Restorm
+
+Restorm holds your project in memory and autosaves shortly after any edit, so
+a `git checkout` or `git pull` run from a terminal while the project is open
+would otherwise be undone on disk within a second. Instead, the save is
+refused and Restorm asks what you want:
+
+- **Reload** — take the version now on disk, dropping the in-memory copy;
+- **Keep my version** — overwrite what's on disk with what you have open.
+
+A later external change asks again, so this can't be answered once and
+forgotten.
+
 ## Background pull checks (semi-pull) and settings
 
 Restorm periodically checks whether the remote has a newer version of your open
@@ -201,6 +224,14 @@ which uses whatever credential helper, SSH key, or token you've already set up.
 There's no separate login, token field, or credential prompt inside Restorm —
 set the remote up once in your terminal (HTTPS token, SSH key, credential
 manager, …) and Restorm rides on it.
+
+If your credentials stop working (an expired token, a revoked key), the push
+or pull **fails immediately** with git's own error message in a toast, rather
+than hanging. Restorm runs git with prompting disabled on purpose: a git
+process stopped on a credential prompt no window shows would sit there
+forever, and every later git action queues behind it — one silent hang would
+take the whole GIT panel down for the session. Fix the credentials in your
+terminal and retry.
 
 ## Driving git from an AI agent (MCP)
 

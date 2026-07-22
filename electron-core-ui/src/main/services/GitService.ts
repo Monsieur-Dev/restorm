@@ -1,6 +1,6 @@
 import { BrowserWindow } from 'electron'
 import { existsSync } from 'fs'
-import { writeFile } from 'fs/promises'
+import { readFile, writeFile } from 'fs/promises'
 import { isAbsolute, join, relative, resolve } from 'path'
 import { simpleGit, type SimpleGit, type StatusResult } from 'simple-git'
 import { watch as watchPaths, type FSWatcher } from 'chokidar'
@@ -12,6 +12,7 @@ import type {
   GitFileState,
   GitCommitResult,
   GitPushResult,
+  GitResetResult,
   GitPullResult,
   GitFetchCompareResult,
   GitConflictVersions,
@@ -154,6 +155,15 @@ export class GitService {
     const cleanedEnv = Object.fromEntries(
       Object.entries(process.env).filter(([key]) => !key.startsWith('GIT_') && key !== 'SSH_ASKPASS')
     ) as Record<string, string>
+    // Never let git stop to ask for credentials. A push to a remote whose
+    // token expired would otherwise sit forever on a prompt no window
+    // shows — and since every operation on a folder queues behind the
+    // previous one, that single hung process takes the whole Git UI down
+    // for the rest of the session. Failing fast turns it into an error
+    // message the push flow already knows how to surface.
+    // Set AFTER the filter above on purpose: this is OUR value, not an
+    // inherited one, and it is the only GIT_* var we want git to see.
+    cleanedEnv['GIT_TERMINAL_PROMPT'] = '0'
     return simpleGit({ baseDir: folder }).env(cleanedEnv)
   }
 
@@ -259,10 +269,20 @@ export class GitService {
    * a false positive there is a silent no-op passed off as a real
    * write.
    */
-  public async commit(folder: string, message: string): Promise<GitCommitResult> {
+  /**
+   * Commit, optionally restricted to explicit paths.
+   *
+   * Without `paths` this commits whatever the index holds — including
+   * files the user staged themselves in a terminal, which the app has no
+   * business publishing. Passing the project file scopes the commit to it
+   * and leaves everything else in the working tree untouched.
+   */
+  public async commit(folder: string, message: string, paths?: string[]): Promise<GitCommitResult> {
     return this.withFolderLock(folder, async () => {
       try {
-        const result = await this.git(folder).commit(message)
+        const result = paths && paths.length > 0
+          ? await this.git(folder).commit(message, paths)
+          : await this.git(folder).commit(message)
         if (!result.commit) {
           return { success: false, error: 'Nothing to commit — no changes are staged.' }
         }
@@ -309,7 +329,17 @@ export class GitService {
   public async push(folder: string): Promise<GitPushResult> {
     return this.withFolderLock(folder, async () => {
       try {
-        await this.git(folder).push()
+        const status = await this.git(folder).status()
+        if (status.tracking) {
+          await this.git(folder).push()
+        } else {
+          // First publish of a freshly-initialised branch: no upstream is
+          // configured yet, so a bare `git push` refuses outright ("The
+          // current branch <b> has no upstream branch"). Do what git's own
+          // hint says — push once with --set-upstream so this and every
+          // later push just work.
+          await this.git(folder).push(['--set-upstream', 'origin', status.current ?? 'main'])
+        }
         return { success: true }
       } catch (error) {
         logger.error('[GitService] push failed', { folder, error: String(error) })
@@ -425,6 +455,120 @@ export class GitService {
   }
 
   /**
+   * Read a file as it currently stands in the WORKING TREE, guarded to
+   * the repo folder. This is the "ours" side of a pre-merge comparison:
+   * what the user has right now, after their save — as opposed to
+   * `getFileAtHead` (last commit) and `getFileAtRemote` (upstream).
+   *
+   * A dedicated primitive rather than a generic file read: the three
+   * sides of the comparison must all come from the same guarded surface,
+   * and a generic reader scoped to the application's own directory
+   * silently returns an empty string for a user project living anywhere
+   * else — which reads as "I have no content", the single most dangerous
+   * possible answer here (it makes every merge adopt the other side
+   * wholesale).
+   *
+   * Resolves to `null` when the file doesn't exist, never an empty
+   * string, so callers can tell "absent" from "genuinely empty".
+   */
+  public async getWorkingTreeFile(folder: string, filePath: string): Promise<string | null> {
+    if (!this.isPathWithinFolder(folder, filePath)) {
+      throw new Error(`getWorkingTreeFile: filePath escapes the repo folder: ${filePath}`)
+    }
+    const absolute = join(folder, filePath)
+    if (!existsSync(absolute)) return null
+    try {
+      return await readFile(absolute, 'utf-8')
+    } catch (error) {
+      logger.warn('[GitService] getWorkingTreeFile failed', { folder, filePath, error: String(error) })
+      return null
+    }
+  }
+
+  /**
+   * Read `filePath`'s content on the branch's UPSTREAM ref (e.g.
+   * `origin/main`) — the "theirs" side when comparing a working tree
+   * against the remote WITHOUT starting a merge.
+   *
+   * This is what lets the app answer "does my in-progress version
+   * conflict with the server's?" before committing anything. The
+   * merge-based path (`getConflictVersions`) can only read its three
+   * sides from the git index's conflict stages, which exist solely
+   * during an in-progress merge — and reaching that state requires
+   * committing first. Sourcing `theirs` from the upstream ref instead
+   * keeps the whole comparison read-only: no commit, no merge, no
+   * mutation of the working tree.
+   *
+   * Resolves to `null` when there is no upstream, or the path doesn't
+   * exist there (deleted / never pushed), rather than rejecting.
+   */
+  public async getFileAtRemote(folder: string, filePath: string): Promise<string | null> {
+    if (!this.isPathWithinFolder(folder, filePath)) {
+      throw new Error(`getFileAtRemote: filePath escapes the repo folder: ${filePath}`)
+    }
+    return this.withFolderLock(folder, async () => {
+      try {
+        const status = await this.git(folder).status()
+        if (!status.tracking) return null
+        return await this.git(folder).show([`${status.tracking}:${filePath}`])
+      } catch {
+        return null
+      }
+    })
+  }
+
+  /**
+   * Move the local branch onto its upstream WITHOUT touching the working
+   * tree (`git reset --mixed <upstream>`): HEAD and the index end up at
+   * the remote's tip while every file on disk keeps the user's
+   * in-progress content, which then reads as ordinary unstaged
+   * modifications against the new base.
+   *
+   * This is the "update to the latest version but keep my changes" move.
+   * A plain `git merge`/`git pull` can't do it: git refuses to merge over
+   * uncommitted changes to the same path, which is precisely why the old
+   * flow had to commit before it could update — the behaviour this
+   * replaces.
+   */
+  public async resetToRemoteKeepingWorkingTree(folder: string): Promise<GitResetResult> {
+    return this.withFolderLock(folder, async () => {
+      try {
+        const status = await this.git(folder).status()
+        if (!status.tracking) return { success: false, error: 'no upstream branch' }
+        await this.git(folder).reset(['--mixed', status.tracking])
+        return { success: true }
+      } catch (error) {
+        logger.error('[GitService] resetToRemoteKeepingWorkingTree failed', { folder, error: String(error) })
+        return { success: false, error: String(error) }
+      }
+    })
+  }
+
+  /**
+   * Hard-reset the branch AND the working tree onto the upstream
+   * (`git reset --hard <upstream>`): every local modification to tracked
+   * files is discarded and the checkout matches the remote exactly.
+   *
+   * Destructive by design — the "throw my changes away and start clean
+   * from the server's version" move, for the user who experimented
+   * locally and simply wants the latest shared state back. Callers MUST
+   * confirm with the user first; nothing here asks.
+   */
+  public async resetHardToRemote(folder: string): Promise<GitResetResult> {
+    return this.withFolderLock(folder, async () => {
+      try {
+        const status = await this.git(folder).status()
+        if (!status.tracking) return { success: false, error: 'no upstream branch' }
+        await this.git(folder).reset(['--hard', status.tracking])
+        return { success: true }
+      } catch (error) {
+        logger.error('[GitService] resetHardToRemote failed', { folder, error: String(error) })
+        return { success: false, error: String(error) }
+      }
+    })
+  }
+
+  /**
    * Read `filePath`'s content at the last commit (`HEAD`), for a normal
    * (non-conflicted) repo — the "before" side of a before/after diff
    * (e.g. a commit-message generator comparing the working tree against
@@ -433,6 +577,37 @@ export class GitService {
    * exist at `HEAD` yet (a brand-new, never-committed file) rather than
    * rejecting.
    */
+  /**
+   * The file as it stood at the MERGE BASE — the last commit the local
+   * branch and its upstream have in common.
+   *
+   * This, not `HEAD`, is the common ancestor a three-way merge needs.
+   * They coincide only while every local change is uncommitted; the
+   * moment the branch holds a commit of its own, `HEAD` already contains
+   * our work, so our side reads as "unchanged since the base" and the
+   * merge adopts the other side over it — silently reverting exactly the
+   * work the user committed.
+   *
+   * Resolves to `null` when there is no upstream, no common ancestor, or
+   * the file didn't exist there.
+   */
+  public async getFileAtMergeBase(folder: string, filePath: string): Promise<string | null> {
+    if (!this.isPathWithinFolder(folder, filePath)) {
+      throw new Error(`getFileAtMergeBase: filePath escapes the repo folder: ${filePath}`)
+    }
+    return this.withFolderLock(folder, async () => {
+      try {
+        const status = await this.git(folder).status()
+        if (!status.tracking) return null
+        const base = (await this.git(folder).raw(['merge-base', 'HEAD', status.tracking])).trim()
+        if (!base) return null
+        return await this.git(folder).show([`${base}:${filePath}`])
+      } catch {
+        return null
+      }
+    })
+  }
+
   public async getFileAtHead(folder: string, filePath: string): Promise<string | null> {
     if (!this.isPathWithinFolder(folder, filePath)) {
       throw new Error(`getFileAtHead: filePath escapes the repo folder: ${filePath}`)

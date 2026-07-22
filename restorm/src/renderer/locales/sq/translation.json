@@ -231,7 +231,10 @@
     "mcpLogs": "Regjistrat MCP",
     "git": "Git",
     "gitPush": "Dërgo",
-    "gitPull": "Merr"
+    "gitPull": "Merr",
+    "gitRefresh": "Rifresko",
+    "gitHistory": "Historiku",
+    "gitResetToServer": "Rikthe te versioni i serverit"
   },
   "sidebar": {
     "addRequest": "Shto kërkesë",
@@ -2374,7 +2377,6 @@
     "pullFailedTitle": "Marrja dështoi",
     "pullFailedBody": "Nuk u arrit të merren ndryshimet më të fundit.",
     "pullSaveFailedBody": "Ndryshimet tuaja nuk u ruajtën para tërheqjes.",
-    "pullUnpushedChangesBody": "Ka ndryshime lokale të padërguara — bëni fillimisht Push, pastaj Pull.",
     "pushFailedTitle": "Dërgimi dështoi",
     "pushFailedBody": "Nuk u arrit të dërgohen ndryshimet.",
     "pushSucceededTitle": "U dërgua",
@@ -2406,7 +2408,11 @@
       "deletedFolder": "U fshi dosja \"{{name}}\"",
       "addedEnvironmentFolder": "U shtua dosja e mjedisit \"{{name}}\"",
       "modifiedEnvironmentFolder": "U modifikua dosja e mjedisit \"{{name}}\"",
-      "deletedEnvironmentFolder": "U fshi dosja e mjedisit \"{{name}}\""
+      "deletedEnvironmentFolder": "U fshi dosja e mjedisit \"{{name}}\"",
+      "movedRequest": "U zhvendos kërkesa \"{{name}}\"",
+      "movedScenario": "U zhvendos skenari \"{{name}}\"",
+      "movedFolder": "U zhvendos dosja \"{{name}}\"",
+      "movedEnvironmentFolder": "U zhvendos dosja e mjedisit \"{{name}}\""
     },
     "commitTitle": {
       "singleRequest": "Përditësim i kërkesës \"{{name}}\"",
@@ -2436,6 +2442,37 @@
     },
     "gate": {
       "initGitFolder": "Inicializoni dosjen tuaj git për të përdorur këtë veçori."
-    }
+    },
+    "conflictChooseVersion": "Zgjidhni një version",
+    "conflictChooseVersionHint": "Klikoni <0></0> në krye të versionit tuaj ose të serverit — më pas mund të redaktoni çdo fushë përpara ruajtjes.",
+    "conflictFinishBlocked": "Disa konflikte mbeten për t’u zgjidhur.",
+    "conflictOnQuickConfig": "Konflikti ka të bëjë me cilësimin e shpejtë të kërkesës: {{name}}",
+    "conflictNameField": "Emri",
+    "conflictTagsEmpty": "Asnjë etiketë në këtë anë.",
+    "conflictTagName": "Emri i etiketës",
+    "conflictTagRemove": "Hiqe këtë etiketë",
+    "conflictTagAdd": "Shto një etiketë",
+    "conflictTagNew": "etikete-e-re",
+    "conflictTagsTab": "Etiketa",
+    "conflictTreeStructure": "Struktura e pemës"
+  },
+  "gitUpdate": {
+    "title": "Nevojitet përditësim",
+    "message": "Në serverin e largët ekziston një version më i ri i skedarit. Duhet të përditësoni versionin tuaj përpara se të vazhdoni. Nëse ka konflikte mes versionit tuaj dhe atij të serverit, do t’ju ndihmojmë t’i zgjidhni.",
+    "conflictCount_one": "{{count}} element ndryshon mes versionit tuaj dhe atij të serverit.",
+    "conflictCount_other": "{{count}} elemente ndryshojnë mes versionit tuaj dhe atij të serverit.",
+    "cancel": "Anulo",
+    "discardMine": "Fshi ndryshimet e mia",
+    "keepMineOverwriting": "Ruaj versionin tim (mbishkruan ndryshimet e serverit)",
+    "updateFailedTitle": "Përditësimi dështoi",
+    "updateFailedBody": "Nuk u arrit të merrej versioni nga serveri i largët.",
+    "discardedTitle": "Ndryshimet u fshinë",
+    "discardedBody": "Tani jeni në versionin më të fundit nga serveri.",
+    "updatedTitle": "Projekti u përditësua",
+    "updatedBody": "Tani jeni në versionin më të fundit nga serveri, ndryshimet tuaja u ruajtën.",
+    "keepServerVersion": "Ruaj versionin e serverit",
+    "resolveConflicts": "Zgjidh konfliktet",
+    "resetConfirmTitle": "Të rikthehet te versioni i serverit?",
+    "resetConfirmBody": "Të gjitha ndryshimet tuaja lokale do të fshihen përfundimisht dhe do të zëvendësohen nga versioni i serverit."
   }
 }

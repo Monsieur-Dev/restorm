@@ -233,7 +233,10 @@
     "mcpLogs": "Dzienniki MCP",
     "git": "Git",
     "gitPush": "Wypchnij",
-    "gitPull": "Pobierz"
+    "gitPull": "Pobierz",
+    "gitRefresh": "Odśwież",
+    "gitHistory": "Historia",
+    "gitResetToServer": "Przywróć wersję serwera"
   },
   "sidebar": {
     "addRequest": "Dodaj żądanie",
@@ -2376,7 +2379,6 @@
     "pullFailedTitle": "Nie udało się pobrać zmian",
     "pullFailedBody": "Nie można pobrać najnowszych zmian.",
     "pullSaveFailedBody": "Nie udało się zapisać zmian przed pobraniem.",
-    "pullUnpushedChangesBody": "Istnieją lokalne zmiany, które nie zostały wypchnięte — najpierw wykonaj push, potem pull.",
     "pushFailedTitle": "Wypchnięcie nie powiodło się",
     "pushFailedBody": "Nie można wypchnąć zmian.",
     "pushSucceededTitle": "Wypchnięto",
@@ -2408,7 +2410,11 @@
       "deletedFolder": "Usunięto folder „{{name}}”",
       "addedEnvironmentFolder": "Dodano folder środowiska „{{name}}”",
       "modifiedEnvironmentFolder": "Zmodyfikowano folder środowiska „{{name}}”",
-      "deletedEnvironmentFolder": "Usunięto folder środowiska „{{name}}”"
+      "deletedEnvironmentFolder": "Usunięto folder środowiska „{{name}}”",
+      "movedRequest": "Przeniesiono żądanie \"{{name}}\"",
+      "movedScenario": "Przeniesiono scenariusz \"{{name}}\"",
+      "movedFolder": "Przeniesiono folder \"{{name}}\"",
+      "movedEnvironmentFolder": "Przeniesiono folder środowiska \"{{name}}\""
     },
     "commitTitle": {
       "singleRequest": "Aktualizacja żądania „{{name}}”",
@@ -2438,6 +2444,37 @@
     },
     "gate": {
       "initGitFolder": "Zainicjuj folder Git, aby korzystać z tej funkcji."
-    }
+    },
+    "conflictChooseVersion": "Wybierz wersję",
+    "conflictChooseVersionHint": "Kliknij <0></0> u góry swojej wersji lub wersji serwera — następnie możesz edytować każde pole przed zapisaniem.",
+    "conflictFinishBlocked": "Niektóre konflikty wciąż wymagają decyzji.",
+    "conflictOnQuickConfig": "Konflikt dotyczy szybkiego ustawienia żądania: {{name}}",
+    "conflictNameField": "Nazwa",
+    "conflictTagsEmpty": "Brak tagów po tej stronie.",
+    "conflictTagName": "Nazwa tagu",
+    "conflictTagRemove": "Usuń ten tag",
+    "conflictTagAdd": "Dodaj tag",
+    "conflictTagNew": "nowy-tag",
+    "conflictTagsTab": "Tagi",
+    "conflictTreeStructure": "Struktura drzewa"
+  },
+  "gitUpdate": {
+    "title": "Wymagana aktualizacja",
+    "message": "Na serwerze zdalnym istnieje nowsza wersja pliku. Musisz zaktualizować swoją wersję, zanim przejdziesz dalej. Jeśli między Twoją wersją a wersją serwera wystąpią konflikty, pomożemy Ci je rozwiązać.",
+    "conflictCount_one": "{{count}} element różni się między Twoją wersją a wersją serwera.",
+    "conflictCount_other": "Liczba różniących się elementów między Twoją wersją a wersją serwera: {{count}}.",
+    "cancel": "Anuluj",
+    "discardMine": "Usuń moje zmiany",
+    "keepMineOverwriting": "Zachowaj moją wersję (nadpisuje zmiany serwera)",
+    "updateFailedTitle": "Aktualizacja nie powiodła się",
+    "updateFailedBody": "Nie udało się pobrać wersji z serwera zdalnego.",
+    "discardedTitle": "Zmiany usunięte",
+    "discardedBody": "Jesteś teraz na najnowszej wersji z serwera.",
+    "updatedTitle": "Projekt zaktualizowany",
+    "updatedBody": "Jesteś teraz na najnowszej wersji z serwera, Twoje zmiany zostały zachowane.",
+    "keepServerVersion": "Zachowaj wersję serwera",
+    "resolveConflicts": "Rozwiąż konflikty",
+    "resetConfirmTitle": "Przywrócić wersję serwera?",
+    "resetConfirmBody": "Wszystkie zmiany lokalne zostaną trwale usunięte i zastąpione wersją serwera."
   }
 }

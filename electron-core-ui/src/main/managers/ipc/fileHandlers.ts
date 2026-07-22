@@ -26,12 +26,26 @@ export function registerFileHandlers(): void {
     return getFileService().open(path)
   })
 
-  validatedHandle('file:save', fileSaveArgs, async (_event, [content]) => {
+  ipcMain.handle('file:show-external-change-dialog', async () => {
+    if (!isFileServiceInitialized()) {
+      logger.warn('File service not initialized')
+      return 'reload'
+    }
+    return getFileService().showExternalChangeDialog()
+  })
+
+  ipcMain.handle('file:accept-external-change', () => {
+    if (!isFileServiceInitialized()) return false
+    getFileService().acceptExternalChange()
+    return true
+  })
+
+  validatedHandle('file:save', fileSaveArgs, async (_event, [content, options]) => {
     if (!isFileServiceInitialized()) {
       logger.warn('File service not initialized')
       return false
     }
-    return getFileService().save(content)
+    return getFileService().save(content, options?.force === true ? { force: true } : undefined)
   })
 
   validatedHandle('file:save-as', fileSaveAsArgs, async (_event, [content, filename, format]) => {
@@ -144,6 +158,15 @@ export function registerFileHandlers(): void {
       return
     }
     registry.mutate(params.runtimeId, params.draft, params.reason ?? 'modify')
+    // A tree move changes WHERE the unit lives, not what it contains — so
+    // `mutate` above sees an unchanged document and drops the draft as a
+    // revert, leaving the project "saved" while the item sits somewhere
+    // else. `move` is what records a relocation (and re-drafts from the
+    // reference so it is committable); it no-ops when the parent is
+    // unchanged, so passing through it on every upsert is free.
+    if (params.parentId !== undefined) {
+      registry.move(params.runtimeId, params.parentId)
+    }
   })
 
   validatedHandle('file:mark-save-unit-deleted', fileSaveUnitIdArgs, (_event, [runtimeId]) => {

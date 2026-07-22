@@ -240,9 +240,23 @@ export function registerGitTools(mcp: McpService): void {
       const body = typeof argRecord['body'] === 'string' ? argRecord['body'] : pending.body
       const message = body ? `${title}\n\n${body}` : title
 
+      // Same pre-flight the UI runs before its own publish: refuse while
+      // the remote is ahead, BEFORE committing anything. Without it the
+      // commit lands and only the push fails, leaving exactly the stray
+      // local commit this flow exists to avoid — and the caller then has
+      // to be updated from a state the app never puts a user in.
+      const compare = await getGitService().fetchAndCompare(pending.gitFolder)
+      if (compare.remoteHasNewerVersion) {
+        clearPendingCommitReview()
+        return errorReply(
+          `The remote is ${String(compare.behind)} commit(s) ahead — nothing was committed. ` +
+          'Call git_pull first (resolving any conflicts it reports), then git_commit_push again.'
+        )
+      }
+
       await flushRendererSaveAndAwait()
       await getGitService().stage(pending.gitFolder, [pending.relativePath])
-      const commitResult = await getGitService().commit(pending.gitFolder, message)
+      const commitResult = await getGitService().commit(pending.gitFolder, message, [pending.relativePath])
       if (!commitResult.success) {
         clearPendingCommitReview()
         return errorReply(`Commit failed: ${commitResult.error ?? 'unknown error'}`)
@@ -349,7 +363,10 @@ export function registerGitTools(mcp: McpService): void {
 
       const oursItems = parseProjectYaml(pending.versions.ours)
       const theirsItems = parseProjectYaml(pending.versions.theirs)
-      const merged = buildMergedProjectTree(oursItems, theirsItems, resolvedById, pending.commitTimestamps)
+      // Same ancestor-aware merge the UI path uses: an entity only THEY
+      // changed carries no resolution pick and would otherwise be lost.
+      const baseItems = parseProjectYaml(pending.versions.base)
+      const merged = buildMergedProjectTree(oursItems, theirsItems, resolvedById, pending.commitTimestamps, baseItems)
 
       // Splice the merged tree into the FULL `ours` document rather than
       // rebuilding `{ collections: merged }` from scratch — `ours` carries

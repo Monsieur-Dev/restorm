@@ -25,8 +25,8 @@ export function registerGitHandlers(): void {
     await service.stage(folder, paths)
   })
 
-  validatedHandle('git:commit', gitCommitArgs, async (_event, [folder, message]) => {
-    return service.commit(folder, message)
+  validatedHandle('git:commit', gitCommitArgs, async (_event, [folder, message, paths]) => {
+    return service.commit(folder, message, paths)
   })
 
   validatedHandle('git:log', gitFolderArgs, async (_event, [folder]) => {
@@ -53,6 +53,30 @@ export function registerGitHandlers(): void {
   // than declaring a duplicate schema.
   validatedHandle('git:get-file-at-head', gitConflictVersionsArgs, async (_event, [folder, filePath]) => {
     return service.getFileAtHead(folder, filePath)
+  })
+
+  // Same `[folder, filePath]` shape again — the upstream-ref read that
+  // supplies the "theirs" side without starting a merge.
+  validatedHandle('git:get-file-at-remote', gitConflictVersionsArgs, async (_event, [folder, filePath]) => {
+    return service.getFileAtRemote(folder, filePath)
+  })
+
+  // The three-way merge's true common ancestor — HEAD is only the same
+  // thing while nothing is committed locally.
+  validatedHandle('git:get-file-at-merge-base', gitConflictVersionsArgs, async (_event, [folder, filePath]) => {
+    return service.getFileAtMergeBase(folder, filePath)
+  })
+
+  validatedHandle('git:get-working-tree-file', gitConflictVersionsArgs, async (_event, [folder, filePath]) => {
+    return service.getWorkingTreeFile(folder, filePath)
+  })
+
+  validatedHandle('git:reset-to-remote-keeping-working-tree', gitFolderArgs, async (_event, [folder]) => {
+    return service.resetToRemoteKeepingWorkingTree(folder)
+  })
+
+  validatedHandle('git:reset-hard-to-remote', gitFolderArgs, async (_event, [folder]) => {
+    return service.resetHardToRemote(folder)
   })
 
   validatedHandle('git:write-resolved-conflict', gitWriteResolvedConflictArgs, async (_event, [folder, filePath, content]) => {

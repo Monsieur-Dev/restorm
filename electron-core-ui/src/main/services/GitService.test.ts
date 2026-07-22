@@ -150,6 +150,25 @@ describe('GitService', () => {
       expect(await service.commit('/proj', 'Update request X')).toEqual({ success: true, commit: 'abc123' })
     })
 
+    it('scopes the commit to the given paths, leaving the rest of the index alone', async () => {
+      // Without a pathspec, `git commit` publishes whatever the index
+      // holds — including files the user staged in a terminal. The app has
+      // no business committing those.
+      mockGit.commit.mockResolvedValue({ commit: 'abc123' })
+
+      await service.commit('/proj', 'Update request X', ['api.restorm'])
+
+      expect(mockGit.commit).toHaveBeenCalledWith('Update request X', ['api.restorm'])
+    })
+
+    it('commits the whole index when no path is given', async () => {
+      mockGit.commit.mockResolvedValue({ commit: 'abc123' })
+
+      await service.commit('/proj', 'Update request X')
+
+      expect(mockGit.commit).toHaveBeenCalledWith('Update request X')
+    })
+
     it('commit reports failure without throwing', async () => {
       mockGit.commit.mockRejectedValue(new Error('nothing to commit'))
       const result = await service.commit('/proj', 'msg')
@@ -654,5 +673,38 @@ describe('GitService absolute-folder guard', () => {
     await expect(service.getStatus('')).rejects.toThrow(/non-absolute/)
     await expect(service.getStatus('relative/dir')).rejects.toThrow(/non-absolute/)
     await expect(service.writeResolvedConflict('', 'api.restorm', 'x')).rejects.toThrow(/non-absolute/)
+  })
+})
+
+describe('GitService — credential prompts', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mockGit.checkIsRepo.mockResolvedValue(true)
+  })
+
+  it('never lets git stop to ask for credentials', async () => {
+    // A push to a remote whose token expired would otherwise sit forever
+    // on a prompt no window shows — and every operation on that folder
+    // queues behind it, so the whole Git UI dies for the session.
+    const service = new GitService()
+
+    await service.isGitRepo('/repo')
+
+    const [env] = mockGit.env.mock.calls[0] as unknown as [Record<string, string>]
+    expect(env['GIT_TERMINAL_PROMPT']).toBe('0')
+  })
+
+  it('still strips the inherited GIT_* overrides around it', async () => {
+    process.env['GIT_DIR'] = '/somewhere/else/.git'
+    try {
+      const service = new GitService()
+
+      await service.isGitRepo('/repo')
+
+      const [env] = mockGit.env.mock.calls[0] as unknown as [Record<string, string>]
+      expect(env['GIT_DIR']).toBeUndefined()
+    } finally {
+      delete process.env['GIT_DIR']
+    }
   })
 })

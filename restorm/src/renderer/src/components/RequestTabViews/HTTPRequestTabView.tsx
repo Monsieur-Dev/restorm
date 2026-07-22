@@ -19,7 +19,8 @@ import {
   fieldDiffStyle,
   type VariableDefinition,
   type ISelectOptionItem,
-  type ISelectData
+  type ISelectData,
+  type Tab
 } from 'electron-core-ui/renderer'
 import { DocumentEvents, type RequestHistoryEventPayload } from '../../services/DocumentEvents'
 import { RestormVariableInputBox } from '../RestormVariableInputBox'
@@ -87,6 +88,12 @@ export interface HTTPRequestTabViewProps {
    * params/pathParams/body) as a whole. Only ever set by
    * `ConflictEntityPanel`; `undefined` in the live (non-conflict) editor. */
   conflictFieldDiff?: EntityFieldDiff
+  /** Conflict resolution: restrict the request-side tab strip to these
+   * ids (forwarded verbatim to `BaseRequestTabView`). */
+  conflictVisibleTabIds?: string[]
+  /** Conflict resolution: extra tabs appended to the strip (the contested
+   * tag list), forwarded verbatim to `BaseRequestTabView`. */
+  conflictExtraTabs?: Tab[]
   /** The diff's per-section booleans, used ONLY for the initial
    * expand/collapse of the KV sections (differing sections open, identical
    * ones closed). Passed to ALL THREE conflict columns — unlike
@@ -165,6 +172,8 @@ function getBodyFilePath(request: HTTPRequest | AuthenticationRequest): string {
 export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
   request,
   conflictFieldDiff,
+  conflictVisibleTabIds,
+  conflictExtraTabs,
   conflictPanelFields,
   defaultActiveTabId,
   activeRequestTabId,
@@ -1317,6 +1326,8 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
   return (
     <>
       <BaseRequestTabView
+        {...(conflictVisibleTabIds ? { visibleRequestTabIds: conflictVisibleTabIds } : {})}
+        {...(conflictExtraTabs ? { extraRequestTabs: conflictExtraTabs } : {})}
         requestId={request.id}
         urlSection={urlSection}
         requestContent={requestContent}

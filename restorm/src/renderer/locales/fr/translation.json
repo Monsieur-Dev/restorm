@@ -231,7 +231,10 @@
     "mcpLogs": "Journaux MCP",
     "git": "Git",
     "gitPush": "Pousser",
-    "gitPull": "Récupérer"
+    "gitPull": "Récupérer",
+    "gitRefresh": "Rafraîchir",
+    "gitHistory": "Historique",
+    "gitResetToServer": "Réinitialiser sur la version du serveur"
   },
   "sidebar": {
     "addRequest": "Ajouter une requête",
@@ -2374,7 +2377,6 @@
     "pullFailedTitle": "Échec de la récupération",
     "pullFailedBody": "Impossible de récupérer les dernières modifications.",
     "pullSaveFailedBody": "Impossible d'enregistrer vos modifications avant de tirer les changements.",
-    "pullUnpushedChangesBody": "Des modifications locales n'ont pas été poussées — faites d'abord un Push, puis un Pull.",
     "pushFailedTitle": "Échec de la publication",
     "pushFailedBody": "Impossible de publier les modifications.",
     "pushSucceededTitle": "Publié",
@@ -2406,7 +2408,11 @@
       "deletedFolder": "Suppression du dossier « {{name}} »",
       "addedEnvironmentFolder": "Ajout du dossier d'environnement « {{name}} »",
       "modifiedEnvironmentFolder": "Modification du dossier d'environnement « {{name}} »",
-      "deletedEnvironmentFolder": "Suppression du dossier d'environnement « {{name}} »"
+      "deletedEnvironmentFolder": "Suppression du dossier d'environnement « {{name}} »",
+      "movedRequest": "Déplacement de la requête « {{name}} »",
+      "movedScenario": "Déplacement du scénario « {{name}} »",
+      "movedFolder": "Déplacement du dossier « {{name}} »",
+      "movedEnvironmentFolder": "Déplacement du dossier d'environnement « {{name}} »"
     },
     "commitTitle": {
       "singleRequest": "Mise à jour de la requête « {{name}} »",
@@ -2436,6 +2442,37 @@
     },
     "gate": {
       "initGitFolder": "Initialisez votre dossier Git pour profiter de la fonctionnalité."
-    }
+    },
+    "conflictChooseVersion": "Choisissez une version",
+    "conflictChooseVersionHint": "Cliquez sur la <0></0> en haut de votre version ou de celle du serveur — vous pourrez ensuite modifier chaque champ avant d’enregistrer.",
+    "conflictFinishBlocked": "Des conflits restent à résoudre.",
+    "conflictOnQuickConfig": "Le conflit porte sur le paramétrage rapide de la requête : {{name}}",
+    "conflictNameField": "Nom",
+    "conflictTagsEmpty": "Aucune étiquette de ce côté.",
+    "conflictTagName": "Nom de l'étiquette",
+    "conflictTagRemove": "Supprimer cette étiquette",
+    "conflictTagAdd": "Ajouter une étiquette",
+    "conflictTagNew": "nouvelle-etiquette",
+    "conflictTagsTab": "Étiquettes",
+    "conflictTreeStructure": "Arborescence"
+  },
+  "gitUpdate": {
+    "title": "Mise à jour nécessaire",
+    "message": "Une version plus récente du fichier existe sur le serveur distant. Vous devez mettre à jour votre version avant de continuer. Si des conflits existent entre votre version et celle du serveur, nous vous aiderons à les résoudre.",
+    "conflictCount_one": "{{count}} élément diffère entre votre version et celle du serveur.",
+    "conflictCount_other": "{{count}} éléments diffèrent entre votre version et celle du serveur.",
+    "cancel": "Annuler",
+    "discardMine": "Supprimer mes modifications",
+    "keepMineOverwriting": "Garder ma version (écrase les changements du serveur)",
+    "updateFailedTitle": "Échec de la mise à jour",
+    "updateFailedBody": "Impossible de récupérer la version du serveur distant.",
+    "discardedTitle": "Modifications supprimées",
+    "discardedBody": "Vous êtes maintenant sur la dernière version du serveur.",
+    "updatedTitle": "Projet mis à jour",
+    "updatedBody": "Vous êtes maintenant sur la dernière version du serveur, vos modifications ont été conservées.",
+    "keepServerVersion": "Garder la version du serveur",
+    "resolveConflicts": "Résoudre les conflits",
+    "resetConfirmTitle": "Réinitialiser sur la version du serveur ?",
+    "resetConfirmBody": "Toutes vos modifications locales seront définitivement supprimées et remplacées par la version du serveur."
   }
 }

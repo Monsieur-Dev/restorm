@@ -8,8 +8,8 @@
 import { eventBus, logger } from 'electron-core-ui/renderer'
 import { DocumentEvents, type DocumentChangedPayload } from '../services/DocumentEvents'
 import { cloneForEventBus } from '../utils/cloneForEventBus'
-import type { Folder, HTTPRequest, FolderItem, Request, GraphQLRequest, GrpcRequest, SoapRequest, WebSocketRequest, ODataRequest, AuthenticationRequest, Environment } from '../../../shared/types/collections'
-import { isAnyFolder, isHTTPRequest, isRequest, isGraphQLRequest, isGrpcRequest, isSoapRequest, isWebSocketRequest, isODataRequest, isAuthenticationRequest, isEnvironmentFolder, isScenario } from '../../../shared/types/collections'
+import type { Folder, FolderItem, Request, Environment } from '../../../shared/types/collections'
+import { isAnyFolder, isRequest, isEnvironmentFolder, isScenario } from '../../../shared/types/collections'
 
 // ============================================================================
 // Indexable Properties Configuration
@@ -57,6 +57,12 @@ const HTTP_REQUEST_INDEXABLE_KEYS = new Set([
   'params',
   'pathParams',
   'body',
+  // Execution options edited inline on the request tab. Absent from this
+  // set, their proxy assignment is stored but SILENT — no REQUEST_UPDATED,
+  // so the document never turns dirty: no autosave, no push pastille, and
+  // the change is lost on close unless the user happens to Ctrl+S.
+  'followRedirects',
+  'timeout',
   'quickConfigs'
 ])
 
@@ -72,6 +78,8 @@ const GRAPHQL_REQUEST_INDEXABLE_KEYS = new Set([
   'query',
   'variables',
   'operationName',
+  'schema',
+  'mockResolvers',
   'quickConfigs'
 ])
 
@@ -87,6 +95,11 @@ const GRPC_REQUEST_INDEXABLE_KEYS = new Set([
   'method',
   'callType',
   'requestMessage',
+  'transport',
+  'protoDescriptorSet',
+  'protoContent',
+  'reflection',
+  'mockMethods',
   'quickConfigs'
 ])
 
@@ -102,6 +115,7 @@ const SOAP_REQUEST_INDEXABLE_KEYS = new Set([
   'operation',
   'soapAction',
   'body',
+  'mockOperations',
   'quickConfigs'
 ])
 
@@ -116,6 +130,19 @@ const WEBSOCKET_REQUEST_INDEXABLE_KEYS = new Set([
   'protocol',
   'event',
   'message',
+  // MQTT rides on the WebSocket request type — its options panel mutates
+  // these keys on the same document.
+  'clientId',
+  'keepalive',
+  'username',
+  'password',
+  'qos',
+  'retain',
+  'mqttSubscribe',
+  'lwtTopic',
+  'lwtPayload',
+  'lwtQos',
+  'lwtRetain',
   'quickConfigs'
 ])
 
@@ -140,6 +167,8 @@ const ODATA_REQUEST_INDEXABLE_KEYS = new Set([
   'navigationProperties',
   'operationParameters',
   'deprecated',
+  'mockData',
+  'mockMetadata',
   'quickConfigs'
 ])
 
@@ -162,6 +191,47 @@ const AUTH_REQUEST_INDEXABLE_KEYS = new Set([
   'deprecated',
   'quickConfigs'
 ])
+
+/** Keys shared by EVERY request type's indexable set. */
+const REQUEST_COMMON_INDEXABLE_KEYS = [
+  'name',
+  'notes',
+  'tags',
+  'authenticationRequestId',
+  'url',
+  'quickConfigs'
+] as const
+
+/** Build a request indexable-key set: common keys + type-specific extras. */
+function requestIndexableKeys(...extras: string[]): Set<string> {
+  return new Set([...REQUEST_COMMON_INDEXABLE_KEYS, ...extras])
+}
+
+// Indexable sets for the remaining request types. Every key a tab view
+// mutates through the reactive proxy MUST be listed — an absent key is
+// stored silently (no REQUEST_UPDATED, no dirty, no autosave; the edit
+// looks applied on screen and is lost on close).
+const SSE_REQUEST_INDEXABLE_KEYS = requestIndexableKeys('headers')
+const STOMP_REQUEST_INDEXABLE_KEYS = requestIndexableKeys(
+  'connectHeaders', 'sendDestination', 'sendHeaders', 'sendBody', 'subscriptions', 'stompVersion'
+)
+const JSONRPC_REQUEST_INDEXABLE_KEYS = requestIndexableKeys(
+  'headers', 'method', 'params', 'rpcId', 'notificationMode'
+)
+const JSONRPC_BATCH_REQUEST_INDEXABLE_KEYS = requestIndexableKeys('headers', 'children')
+const TRPC_REQUEST_INDEXABLE_KEYS = requestIndexableKeys('headers', 'procedure', 'kind', 'input')
+const AMQP_REQUEST_INDEXABLE_KEYS = requestIndexableKeys(
+  'mode', 'exchange', 'queue', 'routingKey', 'payload', 'username', 'password', 'vhost',
+  'autoAck', 'prefetch', 'browsePeekCount'
+)
+const REDIS_REQUEST_INDEXABLE_KEYS = requestIndexableKeys(
+  'mode', 'command', 'args', 'freeformCommand', 'channels', 'password'
+)
+const KAFKA_REQUEST_INDEXABLE_KEYS = requestIndexableKeys(
+  'mode', 'topic', 'key', 'value', 'headers', 'partition', 'partitions', 'groupId', 'clientId',
+  'fromOffset', 'specificOffset', 'browsePeekCount', 'tlsEnabled',
+  'saslMechanism', 'saslUsername', 'saslPassword'
+)
 
 /** Properties that trigger re-indexing when modified (Environments) */
 const ENVIRONMENT_INDEXABLE_KEYS = new Set([
@@ -527,109 +597,49 @@ export function makeReactiveFolder(folder: Folder): Folder {
 }
 
 /**
- * Make an HTTPRequest reactive - it will emit events when indexable properties change.
- * `parentFolderId` is optional: root-level requests (no enclosing folder) pass nothing,
- * and the `REQUEST_UPDATED` payload then carries no `parentFolderId`.
- */
-export function makeReactiveHTTPRequest(request: HTTPRequest, parentFolderId?: string): HTTPRequest {
-  if (isReactive(request)) {
-    return request
-  }
-  return new Proxy(request, createDocumentProxyHandler('request', HTTP_REQUEST_INDEXABLE_KEYS, parentFolderId) as ProxyHandler<HTTPRequest>)
-}
-
-/**
- * Make a GraphQLRequest reactive - it will emit events when indexable properties change
- */
-export function makeReactiveGraphQLRequest(request: GraphQLRequest, parentFolderId?: string): GraphQLRequest {
-  if (isReactive(request)) {
-    return request
-  }
-  return new Proxy(request, createDocumentProxyHandler('request', GRAPHQL_REQUEST_INDEXABLE_KEYS, parentFolderId) as ProxyHandler<GraphQLRequest>)
-}
-
-/**
- * Make a GrpcRequest reactive - it will emit events when indexable properties change
- */
-export function makeReactiveGrpcRequest(request: GrpcRequest, parentFolderId?: string): GrpcRequest {
-  if (isReactive(request)) {
-    return request
-  }
-  return new Proxy(request, createDocumentProxyHandler('request', GRPC_REQUEST_INDEXABLE_KEYS, parentFolderId) as ProxyHandler<GrpcRequest>)
-}
-
-/**
- * Make a SoapRequest reactive - it will emit events when indexable properties change
- */
-export function makeReactiveSoapRequest(request: SoapRequest, parentFolderId?: string): SoapRequest {
-  if (isReactive(request)) {
-    return request
-  }
-  return new Proxy(request, createDocumentProxyHandler('request', SOAP_REQUEST_INDEXABLE_KEYS, parentFolderId) as ProxyHandler<SoapRequest>)
-}
-
-/**
- * Make a WebSocketRequest reactive - it will emit events when indexable properties change
- */
-export function makeReactiveWebSocketRequest(request: WebSocketRequest, parentFolderId?: string): WebSocketRequest {
-  if (isReactive(request)) {
-    return request
-  }
-  return new Proxy(request, createDocumentProxyHandler('request', WEBSOCKET_REQUEST_INDEXABLE_KEYS, parentFolderId) as ProxyHandler<WebSocketRequest>)
-}
-
-/**
- * Make an ODataRequest reactive - it will emit events when indexable properties change
- */
-export function makeReactiveODataRequest(request: ODataRequest, parentFolderId?: string): ODataRequest {
-  if (isReactive(request)) {
-    return request
-  }
-  return new Proxy(request, createDocumentProxyHandler('request', ODATA_REQUEST_INDEXABLE_KEYS, parentFolderId) as ProxyHandler<ODataRequest>)
-}
-
-/**
- * Make an AuthenticationRequest reactive - it will emit events when indexable properties change
- */
-export function makeReactiveAuthenticationRequest(request: AuthenticationRequest, parentFolderId?: string): AuthenticationRequest {
-  if (isReactive(request)) {
-    return request
-  }
-  return new Proxy(request, createDocumentProxyHandler('request', AUTH_REQUEST_INDEXABLE_KEYS, parentFolderId) as ProxyHandler<AuthenticationRequest>)
-}
-
-/**
  * Make any Request type reactive - it will emit events when indexable properties change.
  * `parentFolderId` may be omitted for root-level requests (e.g. an attached auth route
  * sitting at the top of a collection) — the resulting `REQUEST_UPDATED` payload simply
  * carries no `parentFolderId`.
  */
+const REQUEST_INDEXABLE_KEYS_BY_TYPE: Record<string, Set<string>> = {
+  http: HTTP_REQUEST_INDEXABLE_KEYS,
+  graphql: GRAPHQL_REQUEST_INDEXABLE_KEYS,
+  grpc: GRPC_REQUEST_INDEXABLE_KEYS,
+  soap: SOAP_REQUEST_INDEXABLE_KEYS,
+  websocket: WEBSOCKET_REQUEST_INDEXABLE_KEYS,
+  odata: ODATA_REQUEST_INDEXABLE_KEYS,
+  auth: AUTH_REQUEST_INDEXABLE_KEYS,
+  sse: SSE_REQUEST_INDEXABLE_KEYS,
+  stomp: STOMP_REQUEST_INDEXABLE_KEYS,
+  jsonrpc: JSONRPC_REQUEST_INDEXABLE_KEYS,
+  jsonrpcBatch: JSONRPC_BATCH_REQUEST_INDEXABLE_KEYS,
+  trpc: TRPC_REQUEST_INDEXABLE_KEYS,
+  amqp: AMQP_REQUEST_INDEXABLE_KEYS,
+  redis: REDIS_REQUEST_INDEXABLE_KEYS,
+  kafka: KAFKA_REQUEST_INDEXABLE_KEYS
+}
+
 export function makeReactiveRequest(request: Request, parentFolderId?: string): Request {
   if (isReactive(request)) {
     return request
   }
-  if (isHTTPRequest(request)) {
-    return makeReactiveHTTPRequest(request, parentFolderId)
+  const keys = REQUEST_INDEXABLE_KEYS_BY_TYPE[request.type]
+  if (!keys) {
+    // A request type without an entry above would edit SILENTLY (no
+    // REQUEST_UPDATED → never dirty → autosave never fires). Fall back to
+    // the common keys rather than returning the object unwrapped, so at
+    // worst the type-specific fields are missed — never the whole doc.
+    logger.warn(`[Reactive] No indexable-key set for request type "${request.type}" — using common keys only`)
+    return new Proxy(
+      request,
+      createDocumentProxyHandler('request', requestIndexableKeys(), parentFolderId) as ProxyHandler<Request>
+    )
   }
-  if (isGraphQLRequest(request)) {
-    return makeReactiveGraphQLRequest(request, parentFolderId)
-  }
-  if (isGrpcRequest(request)) {
-    return makeReactiveGrpcRequest(request, parentFolderId)
-  }
-  if (isSoapRequest(request)) {
-    return makeReactiveSoapRequest(request, parentFolderId)
-  }
-  if (isWebSocketRequest(request)) {
-    return makeReactiveWebSocketRequest(request, parentFolderId)
-  }
-  if (isODataRequest(request)) {
-    return makeReactiveODataRequest(request, parentFolderId)
-  }
-  if (isAuthenticationRequest(request)) {
-    return makeReactiveAuthenticationRequest(request, parentFolderId)
-  }
-  return request
+  return new Proxy(
+    request,
+    createDocumentProxyHandler('request', keys, parentFolderId) as ProxyHandler<Request>
+  )
 }
 
 /**

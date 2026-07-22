@@ -230,7 +230,10 @@
     "mcpLogs": "MCP ログ",
     "git": "Git",
     "gitPush": "プッシュ",
-    "gitPull": "プル"
+    "gitPull": "プル",
+    "gitRefresh": "更新",
+    "gitHistory": "履歴",
+    "gitResetToServer": "サーバーのバージョンに戻す"
   },
   "sidebar": {
     "addRequest": "リクエストを追加",
@@ -2373,7 +2376,6 @@
     "pullFailedTitle": "プルに失敗しました",
     "pullFailedBody": "最新の変更を取得できませんでした。",
     "pullSaveFailedBody": "プルする前に変更を保存できませんでした。",
-    "pullUnpushedChangesBody": "プッシュされていないローカル変更があります。先にプッシュしてからプルしてください。",
     "pushFailedTitle": "プッシュに失敗しました",
     "pushFailedBody": "変更をプッシュできませんでした。",
     "pushSucceededTitle": "プッシュしました",
@@ -2405,7 +2407,11 @@
       "deletedFolder": "フォルダー「{{name}}」を削除",
       "addedEnvironmentFolder": "環境フォルダー「{{name}}」を追加",
       "modifiedEnvironmentFolder": "環境フォルダー「{{name}}」を変更",
-      "deletedEnvironmentFolder": "環境フォルダー「{{name}}」を削除"
+      "deletedEnvironmentFolder": "環境フォルダー「{{name}}」を削除",
+      "movedRequest": "リクエスト「{{name}}」を移動",
+      "movedScenario": "シナリオ「{{name}}」を移動",
+      "movedFolder": "フォルダー「{{name}}」を移動",
+      "movedEnvironmentFolder": "環境フォルダー「{{name}}」を移動"
     },
     "commitTitle": {
       "singleRequest": "リクエスト「{{name}}」の更新",
@@ -2435,6 +2441,37 @@
     },
     "gate": {
       "initGitFolder": "この機能を使用するには、Git フォルダーを初期化してください。"
-    }
+    },
+    "conflictChooseVersion": "バージョンを選択してください",
+    "conflictChooseVersionHint": "自分のバージョンまたはサーバーのバージョンの上部にある <0></0> をクリックしてください。その後、保存前に各フィールドを編集できます。",
+    "conflictFinishBlocked": "未解決の競合が残っています。",
+    "conflictOnQuickConfig": "競合はリクエストのクイック設定にあります: {{name}}",
+    "conflictNameField": "名前",
+    "conflictTagsEmpty": "この側にはタグがありません。",
+    "conflictTagName": "タグ名",
+    "conflictTagRemove": "このタグを削除",
+    "conflictTagAdd": "タグを追加",
+    "conflictTagNew": "新しいタグ",
+    "conflictTagsTab": "タグ",
+    "conflictTreeStructure": "ツリー構造"
+  },
+  "gitUpdate": {
+    "title": "更新が必要です",
+    "message": "リモートサーバーにファイルの新しいバージョンがあります。続行する前にご自分のバージョンを更新する必要があります。ご自分のバージョンとサーバーのバージョンの間に競合がある場合は、解決をお手伝いします。",
+    "conflictCount_one": "ご自分のバージョンとサーバーのバージョンで {{count}} 件の項目が異なります。",
+    "conflictCount_other": "ご自分のバージョンとサーバーのバージョンで {{count}} 件の項目が異なります。",
+    "cancel": "キャンセル",
+    "discardMine": "自分の変更を破棄",
+    "keepMineOverwriting": "自分のバージョンを保持（サーバーの変更を上書きします）",
+    "updateFailedTitle": "更新に失敗しました",
+    "updateFailedBody": "リモートサーバーからバージョンを取得できませんでした。",
+    "discardedTitle": "変更を破棄しました",
+    "discardedBody": "サーバーの最新バージョンになりました。",
+    "updatedTitle": "プロジェクトを更新しました",
+    "updatedBody": "サーバーの最新バージョンになり、変更は保持されました。",
+    "keepServerVersion": "サーバーのバージョンを使用",
+    "resolveConflicts": "競合を解決",
+    "resetConfirmTitle": "サーバーのバージョンに戻しますか？",
+    "resetConfirmBody": "ローカルの変更はすべて完全に削除され、サーバーのバージョンに置き換えられます。"
   }
 }

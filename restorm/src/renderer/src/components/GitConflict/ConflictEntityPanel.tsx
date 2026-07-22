@@ -1,7 +1,7 @@
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { stringify as yamlStringify } from 'yaml'
-import { CodeEditor, ReadOnlyOverlay } from 'electron-core-ui/renderer'
+import { CodeEditor, InputBox, ReadOnlyOverlay } from 'electron-core-ui/renderer'
 import { isEnvironmentFolder, isFolder, isScenario, isRequest, type FolderItem, type EnvironmentFolder, type Folder } from '../../../../shared/types/folderTypes'
 import type { Scenario } from '../../../../shared/types/scenario'
 import type { Request, GraphQLRequest, GrpcRequest, SoapRequest, WebSocketRequest, ODataRequest } from '../../../../shared/types/requests'
@@ -9,6 +9,7 @@ import { EnvironmentProvider } from '../../contexts/EnvironmentContext'
 import { FolderView } from '../Folders/FolderView'
 import { EnvironmentFolderView } from '../Folders/EnvironmentFolderView'
 import { ScenarioEditorView } from '../Scenario/ScenarioEditorView'
+import type { ResolveBoundItem } from '../Scenario/scenarioBoundResolver'
 import { HTTPRequestTabView } from '../RequestTabViews/HTTPRequestTabView'
 import { GraphQLRequestTabView } from '../RequestTabViews/GraphQLRequestTabView'
 import { GrpcRequestTabView } from '../RequestTabViews/GrpcRequestTabView'
@@ -16,7 +17,9 @@ import { SoapRequestTabView } from '../RequestTabViews/SoapRequestTabView'
 import { SoapServerRequestTabView } from '../RequestTabViews/SoapServerRequestTabView'
 import { WebSocketRequestTabView } from '../RequestTabViews/WebSocketRequestTabView'
 import { ODataRequestTabView } from '../RequestTabViews/ODataRequestTabView'
-import type { EntityFieldDiff } from '../../services/conflictFieldDiff'
+import { conflictVisibleTabIds, contestedFolderTabIds, type EntityFieldDiff } from '../../services/conflictFieldDiff'
+import { ConflictTagsTab } from './ConflictTagsTab'
+import { ConflictTreeStructurePanel } from './ConflictTreeStructurePanel'
 
 export type ConflictPanelMode = 'readOnly' | 'editable'
 
@@ -43,6 +46,20 @@ export interface ConflictEntityPanelProps {
    * folder/scenario panels ignore it. */
   activeTabId?: string
   onActiveTabChange?: (tabId: string) => void
+  /** Rename callback for the resolved column. Absent = the name row is
+   * read-only, which is what the two comparison columns want. */
+  onNameChange?: (name: string) => void
+  /** Tag-list callback for the resolved column, same contract as
+   * `onNameChange`. Absent = the tag tab is read-only. */
+  onTagsChange?: (tags: string[]) => void
+  /** Set on the tree-structure entry: the ids that moved differently on
+   * each side. Its presence is what selects the hierarchy panel over the
+   * normal entity panel. */
+  movedItemIds?: string[]
+  /** Resolve a bound item against THIS column's side of the project, so a
+   * scenario node bound to a request can render its summary. Omitted =
+   * nodes fall back to showing only what the node itself carries. */
+  resolveBoundItem?: ResolveBoundItem
   'data-testid'?: string
 }
 
@@ -72,13 +89,69 @@ export const ConflictEntityPanel: React.FC<ConflictEntityPanelProps> = ({
   fieldDiff,
   activeTabId,
   onActiveTabChange,
+  resolveBoundItem,
+  onNameChange,
+  onTagsChange,
+  movedItemIds,
   'data-testid': dataTestId
 }) => {
-  const content = renderEntity(entity, mode, onScenarioChange, fieldDiff, activeTabId, onActiveTabChange)
-  if (mode === 'readOnly') {
-    return <ReadOnlyOverlay {...(dataTestId ? { 'data-testid': dataTestId } : {})}>{content}</ReadOnlyOverlay>
-  }
-  return <div {...(dataTestId ? { 'data-testid': dataTestId } : {})} style={{ width: '100%', height: '100%' }}>{content}</div>
+  const { t } = useTranslation()
+  const nameLabel = t('git.conflictNameField')
+  // Nothing left once the tabs are filtered down to the contested ones —
+  // i.e. the rename IS the conflict. Showing the entity view anyway would
+  // put an empty tab strip and a full editor under a one-line difference.
+  //
+  // REQUESTS ONLY. The tab filter is wired into the request panels alone,
+  // and the folder/env-folder diff reports `notes` and nothing else — so a
+  // conflict on, say, environment variables would read as "nothing to
+  // show" and blank all three columns, leaving the user unable to
+  // arbitrate what they were asked to arbitrate. Scenarios are excluded
+  // for the same reason (no field diff at all, by design).
+  const entityViewIsEmpty = isRequest(entity) && fieldDiff !== undefined && conflictVisibleTabIds(fieldDiff).length === 0
+  // The tree entry is not an entity: it arbitrates where things LIVE, so
+  // it shows the hierarchy rather than any one item's fields.
+  const content = movedItemIds
+    ? (
+        <ConflictTreeStructurePanel
+          items={(entity as FolderItem & { items?: FolderItem[] }).items ?? []}
+          movedItemIds={movedItemIds}
+          {...(dataTestId ? { 'data-testid': `${dataTestId}-tree` } : {})}
+        />
+      )
+    : entityViewIsEmpty
+    ? null
+    : renderEntity(entity, mode, onScenarioChange, fieldDiff, activeTabId, onActiveTabChange, resolveBoundItem, onTagsChange, t('git.conflictTagsTab'))
+  // The name sits ABOVE the entity's own view, in every column, and only
+  // when it is what diverges — an unchanged name would be noise.
+  const nameRow = fieldDiff?.fields['name'] === true
+    ? (
+        <div style={{ padding: '8px 12px 0' }} data-testid={dataTestId ? `${dataTestId}-name-row` : 'conflict-entity-name-row'}>
+          <InputBox
+            value={entity.name}
+            {...(mode === 'editable' && onNameChange ? { onChange: onNameChange } : { onChange: () => undefined })}
+            changeDebounceMs={0}
+            readOnly={mode === 'readOnly'}
+            options={{ ariaLabel: nameLabel, placeholder: nameLabel }}
+            data-testid={dataTestId ? `${dataTestId}-name-input` : 'conflict-entity-name-input'}
+          />
+        </div>
+      )
+    : null
+  // The overlay wraps the entity view only: the name row carries its own
+  // read-only state, and putting it under the overlay would also swallow
+  // the tab clicks the row sits above.
+  const body = mode === 'readOnly'
+    ? <ReadOnlyOverlay>{content}</ReadOnlyOverlay>
+    : content
+  return (
+    <div
+      {...(dataTestId ? { 'data-testid': dataTestId } : {})}
+      style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column' }}
+    >
+      {nameRow}
+      <div style={{ flex: 1, minHeight: 0 }}>{body}</div>
+    </div>
+  )
 }
 
 function renderEntity(
@@ -87,7 +160,10 @@ function renderEntity(
   onScenarioChange?: ConflictEntityPanelProps['onScenarioChange'],
   fieldDiff?: EntityFieldDiff,
   activeTabId?: string,
-  onActiveTabChange?: (tabId: string) => void
+  onActiveTabChange?: (tabId: string) => void,
+  resolveBoundItem?: ResolveBoundItem,
+  onTagsChange?: (tags: string[]) => void,
+  tagsTabLabel = 'Tags'
 ): React.ReactNode {
   if (isEnvironmentFolder(entity)) {
     return renderEnvironmentFolder(entity, mode, fieldDiff)
@@ -100,16 +176,31 @@ function renderEntity(
     // conflict highlighting — `fieldDiff` is never passed in for this kind
     // (`computeEntityFieldDiff` returns `undefined`), so there's nothing
     // to forward here.
+    // The bound-item resolver is what lets a node bound to a request show
+    // that request's summary. Without it the request-derived sections
+    // render empty, so a scenario conflict displays half its content.
+    // Deliberately no `onOpenItem`: the diff view is a comparison, and a
+    // link that navigates away from it (into a tab showing the CURRENT
+    // tree, not this side's) would be actively misleading — the node
+    // boxes only render the link when a handler exists, so omitting it
+    // removes the link rather than leaving a dead one.
+    // Passed as a PROP, not through a wrapping provider: the editor
+    // publishes this same context itself, from its own prop, so an outer
+    // provider is overwritten with `null` before any node box reads it —
+    // and a request node whose target "cannot be found" renders as an
+    // error box with none of its content, in a view whose whole job is to
+    // show that content.
     return (
       <ScenarioEditorView
         scenario={entity}
         hideInspector
+        {...(resolveBoundItem ? { resolveBoundItem } : {})}
         {...(mode === 'editable' && onScenarioChange ? { onScenarioChange } : {})}
       />
     )
   }
   if (isRequest(entity)) {
-    return renderRequest(entity, mode, fieldDiff, activeTabId, onActiveTabChange)
+    return renderRequest(entity, mode, fieldDiff, activeTabId, onActiveTabChange, onTagsChange, tagsTabLabel)
   }
   return <MonacoFallback entity={entity} mode={mode} />
 }
@@ -119,7 +210,7 @@ function renderFolder(folder: Folder, mode: ConflictPanelMode, fieldDiff?: Entit
     <EnvironmentProvider environments={undefined}>
       <FolderView
         folder={folder}
-        {...(mode === 'readOnly' && fieldDiff ? { notesDiffers: fieldDiff.fields['notes'] } : {})}
+        {...(mode === 'readOnly' && fieldDiff ? { notesDiffers: fieldDiff.fields['notes'], contestedTabIds: contestedFolderTabIds(fieldDiff) } : {})}
         {...(fieldDiff?.preselectTabId ? { defaultActiveTabId: fieldDiff.preselectTabId } : {})}
       />
     </EnvironmentProvider>
@@ -131,7 +222,7 @@ function renderEnvironmentFolder(folder: EnvironmentFolder, mode: ConflictPanelM
     <EnvironmentProvider environments={folder.environments}>
       <EnvironmentFolderView
         folder={folder}
-        {...(mode === 'readOnly' && fieldDiff ? { notesDiffers: fieldDiff.fields['notes'] } : {})}
+        {...(mode === 'readOnly' && fieldDiff ? { notesDiffers: fieldDiff.fields['notes'], contestedTabIds: contestedFolderTabIds(fieldDiff) } : {})}
         {...(fieldDiff?.preselectTabId ? { defaultActiveTabId: fieldDiff.preselectTabId } : {})}
       />
     </EnvironmentProvider>
@@ -143,7 +234,9 @@ function renderRequest(
   mode: ConflictPanelMode,
   fieldDiff?: EntityFieldDiff,
   activeTabId?: string,
-  onActiveTabChange?: (tabId: string) => void
+  onActiveTabChange?: (tabId: string) => void,
+  onTagsChange?: (tags: string[]) => void,
+  tagsTabLabel = 'Tags'
 ): React.ReactNode {
   // Every field-diff-aware panel shares 3 conflict props: the red-border
   // map (readOnly only, AC#4), the tab preselect (every mode, AC#5), and
@@ -153,6 +246,27 @@ function renderRequest(
   // passing it to all 3 modes is harmless and keeps this spread uniform.
   const fieldDiffProps = {
     ...(mode === 'readOnly' && fieldDiff ? { conflictFieldDiff: fieldDiff } : {}),
+    // Same restricted strip in all 3 columns, or they would not line up.
+    conflictVisibleTabIds: conflictVisibleTabIds(fieldDiff),
+    // The tag list has no equivalent tab in the live editor, so the
+    // conflict view brings its own — and only when the tags are what
+    // diverge (the id below is what `conflictVisibleTabIds` lets through).
+    ...(fieldDiff?.fields['tags'] === true
+      ? {
+          conflictExtraTabs: [{
+            id: 'conflict-tags',
+            label: tagsTabLabel,
+            useScrollableElement: false,
+            content: (
+              <ConflictTagsTab
+                tags={request.tags}
+                {...(mode === 'editable' && onTagsChange ? { onChange: onTagsChange } : {})}
+                data-testid={`conflict-tags-${mode}`}
+              />
+            )
+          }]
+        }
+      : {}),
     ...(fieldDiff?.preselectTabId ? { defaultActiveTabId: fieldDiff.preselectTabId } : {}),
     ...(activeTabId !== undefined ? { activeRequestTabId: activeTabId } : {}),
     ...(onActiveTabChange !== undefined ? { onRequestTabChange: onActiveTabChange } : {})

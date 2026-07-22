@@ -3,6 +3,8 @@ import { describe, it, expect, vi, afterEach } from 'vitest'
 import { render, screen, cleanup, fireEvent } from '@testing-library/react'
 
 vi.mock('react-i18next', () => ({
+  // The placeholder hint draws a codicon inline via <Trans>.
+  Trans: ({ i18nKey }: { i18nKey: string }) => i18nKey,
   useTranslation: () => ({ t: (key: string) => key })
 }))
 // Stand in for the ECUI SelectBox with a native <select> so the value +

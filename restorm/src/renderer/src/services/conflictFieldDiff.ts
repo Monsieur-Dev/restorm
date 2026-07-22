@@ -49,9 +49,35 @@ export interface EntityFieldDiff {
  * up in the conflict list (via `identifyConflictingEntities`) but has no
  * tab to preselect in this panel.
  */
+/**
+ * A folder's contested fields. `notes` used to be the only one computed,
+ * which left the most valuable case silent: two people editing the same
+ * environment's variables produced a conflict the panel highlighted
+ * nowhere and opened on the wrong tab, so the user had to compare two
+ * environment trees by eye.
+ *
+ * The preselected tab follows what actually diverged, most specific
+ * first — environments carry real user data, the folder's own
+ * configuration next, notes last.
+ */
 function computeFolderFieldDiff(ours: Folder, theirs: Folder): EntityFieldDiff {
   const notes = (ours.notes ?? '') !== (theirs.notes ?? '')
-  return { fields: { notes }, ...(notes ? { preselectTabId: 'notes' } : {}) }
+  const environments = snapshotDiffers(
+    (ours as Folder & { environments?: unknown }).environments,
+    (theirs as Folder & { environments?: unknown }).environments
+  )
+  const configuration = snapshotDiffers(ours.configuration, theirs.configuration)
+  const customValueLists = snapshotDiffers(
+    (ours as Folder & { customValueLists?: unknown }).customValueLists,
+    (theirs as Folder & { customValueLists?: unknown }).customValueLists
+  )
+  const preselectTabId = environments
+    ? 'environments'
+    : (customValueLists ? 'custom-values' : (configuration ? 'home' : (notes ? 'notes' : undefined)))
+  return {
+    fields: { notes, environments, configuration, customValueLists },
+    ...(preselectTabId !== undefined ? { preselectTabId } : {})
+  }
 }
 
 /**
@@ -242,8 +268,35 @@ export function computeEntityFieldDiff(
   ours: FolderItem,
   theirs: FolderItem
 ): EntityFieldDiff | undefined {
+  // The name is diffed for EVERY kind, folders and scenarios included. It
+  // used to be excluded from the displayed diff entirely, so a conflict
+  // that was only a rename listed the entity and then showed nothing to
+  // arbitrate — the user chose a side blind.
+  const nameDiffers = ours.name !== theirs.name
+  // Tags are excluded from the request-config comparison (they are not a
+  // transport setting), but they ARE contested content: they get their
+  // own tab, so they need their own flag.
+  // `tags` is typed as required, but hand-written and legacy project files
+  // reach here without it — read defensively rather than throwing while
+  // computing a diff.
+  const tagList = (item: FolderItem): string[] => {
+    const raw = (item as FolderItem & { tags?: unknown }).tags
+    return Array.isArray(raw) ? [...raw].sort() : []
+  }
+  const tagsDiffer = JSON.stringify(tagList(ours)) !== JSON.stringify(tagList(theirs))
+  const withName = (diff: EntityFieldDiff | undefined): EntityFieldDiff | undefined => {
+    if (!nameDiffers && !tagsDiffer) return diff
+    return {
+      ...(diff ?? { fields: {} }),
+      fields: {
+        ...(diff?.fields ?? {}),
+        ...(nameDiffers ? { name: true } : {}),
+        ...(tagsDiffer ? { tags: true } : {})
+      }
+    }
+  }
   if ((kind === 'folder' || kind === 'environmentFolder') && isAnyFolder(ours) && isAnyFolder(theirs)) {
-    return computeFolderFieldDiff(ours, theirs)
+    return withName(computeFolderFieldDiff(ours, theirs))
   }
   if (kind === 'request' && isRequest(ours) && isRequest(theirs)) {
     let base: EntityFieldDiff | undefined
@@ -252,11 +305,62 @@ export function computeEntityFieldDiff(
     } else if (ours.type === theirs.type) {
       base = computeGenericRequestFieldDiff(ours, theirs)
     }
-    if (!base) return undefined
+    if (!base) return withName(undefined)
     // Every request kind carries the ad-hoc `quickConfigs` field, so the
     // per-config conflict list applies to all of them, not just HTTP.
     const quickConfigNames = conflictingQuickConfigNames(projectQuickConfigsOf(ours), projectQuickConfigsOf(theirs))
-    return quickConfigNames.length > 0 ? { ...base, conflictingQuickConfigNames: quickConfigNames } : base
+    return withName(quickConfigNames.length > 0 ? { ...base, conflictingQuickConfigNames: quickConfigNames } : base)
   }
-  return undefined
+  // Scenarios (and anything else) still get a name diff, which is the only
+  // field they can conflict on that this panel can render.
+  return withName(undefined)
+}
+
+/**
+ * Which request-side tabs a conflict view should show: only those that
+ * actually carry a divergence.
+ *
+ * A conflict view exists to show what is contested. Rendering the full
+ * tab strip makes the user open each tab to rule it out by hand, and on a
+ * pure rename it showed a whole request editor with nothing to arbitrate
+ * in it. The documentation tab is never listed: it is imported content
+ * the user does not author, resolved automatically, so it is never
+ * theirs to arbitrate.
+ *
+ * `name` is deliberately not mapped to a tab — it is rendered above the
+ * strip, and is exactly what makes the empty result meaningful: no tabs
+ * at all means "the rename is the whole conflict".
+ */
+const NOTES_ONLY_FIELDS = new Set(['name', 'notes', 'tags'])
+
+export function conflictVisibleTabIds(diff: EntityFieldDiff | undefined): string[] {
+  if (!diff) return []
+  const differing = Object.entries(diff.fields).filter(([, differs]) => differs).map(([field]) => field)
+  const tabs: string[] = []
+  // Anything that isn't the name or the notes lives in the Request tab —
+  // url, method, body, headers, params, and every protocol-specific field.
+  if (differing.some((field) => !NOTES_ONLY_FIELDS.has(field))) tabs.push('request')
+  if (differing.includes('notes')) tabs.push('notes')
+  // Own tab, shown only when the tags are what diverge.
+  if (differing.includes('tags')) tabs.push('conflict-tags')
+  return tabs
+}
+
+/**
+ * The folder tabs a conflict actually contests, so the panel can border
+ * them. Mirrors the field names `computeFolderFieldDiff` produces; `notes`
+ * is deliberately absent — `BaseFolderView` borders its notes editor
+ * through the older `notesDiffers` prop.
+ */
+const FOLDER_FIELD_TO_TAB: Record<string, string> = {
+  environments: 'environments',
+  customValueLists: 'custom-values',
+  configuration: 'home'
+}
+
+export function contestedFolderTabIds(diff: EntityFieldDiff | undefined): string[] {
+  if (!diff) return []
+  return Object.entries(FOLDER_FIELD_TO_TAB)
+    .filter(([field]) => diff.fields[field])
+    .map(([, tab]) => tab)
 }

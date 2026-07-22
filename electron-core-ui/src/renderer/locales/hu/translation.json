@@ -13,6 +13,13 @@
       "save": "Mentés",
       "dontSave": "Ne mentse",
       "cancel": "Mégse"
+    },
+    "externalChange": {
+      "title": "A fájl megváltozott a lemezen",
+      "message": "A(z) „{{fileName}}” fájlt az alkalmazáson kívül módosították.",
+      "detail": "Töltse be újra a lemezen lévő verzió használatához, vagy tartsa meg a sajátját és írja felül.",
+      "reload": "Újratöltés",
+      "keepMine": "Saját verzió megtartása"
     }
   },
   "recentFilesVignette": {
@@ -427,6 +434,11 @@
       "title": "Elérhető frissítés",
       "body": "A fájl újabb verziója érhető el a tárolóban.",
       "pullNow": "Lehívás most"
+    },
+    "mergeInProgress": {
+      "title": "Befejezetlen egyesítés",
+      "body": "Elindult egy Git-egyesítés, amely soha nem fejeződött be. A projektfájl még tartalmazhat ütközésjelölőket.",
+      "abort": "Egyesítés megszakítása"
     }
   },
   "pushModal": {

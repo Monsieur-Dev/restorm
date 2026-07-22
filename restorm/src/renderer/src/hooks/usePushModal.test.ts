@@ -38,12 +38,18 @@ vi.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key: string) => key })
 }))
 
-vi.mock('../../../shared/git/gitCommitDiff', () => ({
-  parseProjectYaml: vi.fn(() => []),
+// PARTIAL mock: the commit-message half is stubbed (this suite asserts
+// the generated message, not the diff engine), but the real
+// `flattenEntities` / `ownFieldsSnapshot` must stay — the pre-flight gate
+// computes actual conflicts through them, and a fully-stubbed module
+// silently turns every "behind" case into "no conflicts".
+vi.mock('../../../shared/git/gitCommitDiff', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('../../../shared/git/gitCommitDiff')>()),
   diffProjectEntities: vi.fn(() => [{ kind: 'request', name: 'Find pet by ID', action: 'modified' }])
 }))
 
-vi.mock('../utils/serialization', () => ({
+vi.mock('../utils/serialization', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('../utils/serialization')>()),
   processAfterDeserialization: (data: unknown) => data
 }))
 
@@ -65,20 +71,31 @@ const saveBeforePushMock = vi.fn().mockResolvedValue(undefined)
 
 function stubGitApi(overrides: Partial<{
   getFileAtHead: ReturnType<typeof vi.fn>
+  getFileAtMergeBase: ReturnType<typeof vi.fn>
+  getConflictCommitTimestamps: ReturnType<typeof vi.fn>
   stage: ReturnType<typeof vi.fn>
   commit: ReturnType<typeof vi.fn>
   push: ReturnType<typeof vi.fn>
-}> = {}): {
-  getFileAtHead: ReturnType<typeof vi.fn>
-  stage: ReturnType<typeof vi.fn>
-  commit: ReturnType<typeof vi.fn>
-  push: ReturnType<typeof vi.fn>
-} {
+}> & Partial<GitApiStub> = {}): GitApiStub {
   const api = {
     getFileAtHead: overrides.getFileAtHead ?? vi.fn().mockResolvedValue(null),
+    // The commit diff reads HEAD; the behind-check's three-way base reads
+    // the merge base. Two different questions, two different primitives.
+    getFileAtMergeBase: overrides.getFileAtMergeBase ?? vi.fn().mockResolvedValue(null),
+    getConflictCommitTimestamps: overrides.getConflictCommitTimestamps ?? vi.fn().mockResolvedValue({ ours: null, theirs: null }),
     stage: overrides.stage ?? vi.fn().mockResolvedValue(undefined),
     commit: overrides.commit ?? vi.fn().mockResolvedValue({ success: true, commit: 'abc123' }),
-    push: overrides.push ?? vi.fn().mockResolvedValue({ success: true })
+    push: overrides.push ?? vi.fn().mockResolvedValue({ success: true }),
+    // Pre-flight primitives. The default answer is "already up to date",
+    // so every pre-existing expectation still describes the plain publish
+    // path; the behind cases opt in explicitly below.
+    fetchAndCompare: overrides.fetchAndCompare ?? vi.fn().mockResolvedValue({ remoteHasNewerVersion: false, behind: 0 }),
+    getFileAtRemote: overrides.getFileAtRemote ?? vi.fn().mockResolvedValue(null),
+    resetToRemoteKeepingWorkingTree: overrides.resetToRemoteKeepingWorkingTree ?? vi.fn().mockResolvedValue({ success: true }),
+    resetHardToRemote: overrides.resetHardToRemote ?? vi.fn().mockResolvedValue({ success: true }),
+    writeResolvedConflict: overrides.writeResolvedConflict ?? vi.fn().mockResolvedValue(undefined),
+    getWorkingTreeFile: overrides.getWorkingTreeFile ?? vi.fn().mockResolvedValue(null),
+    getStatus: overrides.getStatus ?? vi.fn().mockResolvedValue({ branch: 'main', ahead: 0, behind: 0, files: [{ path: 'api.restorm', state: 'modified' }] })
   }
   ;(window as unknown as { api: unknown }).api = { git: api }
   return api
@@ -94,8 +111,30 @@ afterEach(() => {
 
 // Flush the microtask queue so the `.then()` chains inside the hook settle
 // before assertions.
+interface GitApiStub {
+  getFileAtHead: ReturnType<typeof vi.fn>
+  getFileAtMergeBase: ReturnType<typeof vi.fn>
+  getConflictCommitTimestamps: ReturnType<typeof vi.fn>
+  stage: ReturnType<typeof vi.fn>
+  commit: ReturnType<typeof vi.fn>
+  push: ReturnType<typeof vi.fn>
+  fetchAndCompare: ReturnType<typeof vi.fn>
+  getFileAtRemote: ReturnType<typeof vi.fn>
+  resetToRemoteKeepingWorkingTree: ReturnType<typeof vi.fn>
+  resetHardToRemote: ReturnType<typeof vi.fn>
+  writeResolvedConflict: ReturnType<typeof vi.fn>
+  getWorkingTreeFile: ReturnType<typeof vi.fn>
+  getStatus: ReturnType<typeof vi.fn>
+}
+
 async function flush(): Promise<void> {
-  await act(async () => { await Promise.resolve(); await Promise.resolve() })
+  // The push chain awaits a fetch, then three reads in parallel, then a
+  // merge/write — several microtask turns deep. Drain generously rather
+  // than counting them: an under-drained flush reads as "the hook did
+  // nothing" and fails in a way that looks like a logic bug.
+  await act(async () => {
+    for (let i = 0; i < 20; i++) await Promise.resolve()
+  })
 }
 
 describe('usePushModal', () => {
@@ -202,7 +241,8 @@ describe('usePushModal', () => {
     await flush()
 
     expect(api.stage).toHaveBeenCalledWith('/proj', ['api.restorm'])
-    expect(api.commit).toHaveBeenCalledWith('/proj', 'My title\n\nmodified:request:Find pet by ID')
+    // Scoped to the project file — see useGitPullConflict.test.ts.
+    expect(api.commit).toHaveBeenCalledWith('/proj', 'My title\n\nmodified:request:Find pet by ID', ['api.restorm'])
     expect(api.push).toHaveBeenCalledWith('/proj')
     expect(toasterPushMock).toHaveBeenCalledWith('app', { title: 'git.pushSucceededTitle', body: 'git.pushSucceededBody', durationMs: 5000 })
     expect(result.current.isOpen).toBe(false)
@@ -274,5 +314,121 @@ describe('usePushModal', () => {
     const { result } = renderHook(() => usePushModal('/proj/api.restorm', ROOT_ITEMS, saveBeforePushMock))
     act(() => { result.current.closePushModal() })
     expect(result.current.isOpen).toBe(false)
+  })
+})
+
+describe('usePushModal — behind the server', () => {
+  const BASE = `_projectUuid: p
+collections:
+  - id: env
+    name: Project
+    tags: []
+    configuration: {}
+    folderType: environment
+    environments: []
+    items:
+      - id: r1
+        name: Base name
+        type: http
+        tags: []
+        method: GET
+        url: https://base
+        headers: []
+        params: []
+        pathParams: []
+`
+  const mine = BASE.replace('https://base', 'https://mine')
+  const theirsSameEntity = BASE.replace('https://base', 'https://theirs')
+  const theirsOtherName = BASE.replace('Base name', 'Their name')
+
+  function behindStub(theirsYaml: string): GitApiStub {
+    return stubGitApi({
+      fetchAndCompare: vi.fn().mockResolvedValue({ remoteHasNewerVersion: true, behind: 1 }),
+      getFileAtHead: vi.fn().mockResolvedValue(BASE),
+      getFileAtMergeBase: vi.fn().mockResolvedValue(BASE),
+      getFileAtRemote: vi.fn().mockResolvedValue(theirsYaml)
+    })
+  }
+
+  it('publishes without prompting when nothing is contested', async () => {
+    // They renamed the request, we changed its url — different fields of
+    // the same entity would clash, so use a genuinely untouched-by-us doc.
+    const api = behindStub(theirsOtherName)
+    api.getWorkingTreeFile.mockResolvedValue(BASE)
+
+    const { result } = renderHook(() => usePushModal('/proj/api.restorm', ROOT_ITEMS, saveBeforePushMock))
+    act(() => { result.current.push() })
+    await flush()
+
+    // No prompt, and the publish went through after the silent update.
+    expect(result.current.pendingUpdate).toBeNull()
+    expect(api.resetToRemoteKeepingWorkingTree).toHaveBeenCalledWith('/proj')
+    expect(api.commit).toHaveBeenCalled()
+    expect(api.push).toHaveBeenCalledWith('/proj')
+  })
+
+  it('prompts WITHOUT committing when the same entity is contested', async () => {
+    const api = behindStub(theirsSameEntity)
+    api.getWorkingTreeFile.mockResolvedValue(mine)
+
+    const { result } = renderHook(() => usePushModal('/proj/api.restorm', ROOT_ITEMS, saveBeforePushMock))
+    act(() => { result.current.push() })
+    await flush()
+
+    expect(result.current.pendingUpdate?.conflicts).toHaveLength(1)
+    // THE guarantee: reaching the prompt must not have committed anything.
+    expect(api.commit).not.toHaveBeenCalled()
+    expect(api.push).not.toHaveBeenCalled()
+    expect(api.resetToRemoteKeepingWorkingTree).not.toHaveBeenCalled()
+    expect(api.resetHardToRemote).not.toHaveBeenCalled()
+  })
+
+  it('cancelling the prompt leaves the repository completely untouched', async () => {
+    const api = behindStub(theirsSameEntity)
+    api.getWorkingTreeFile.mockResolvedValue(mine)
+
+    const { result } = renderHook(() => usePushModal('/proj/api.restorm', ROOT_ITEMS, saveBeforePushMock))
+    act(() => { result.current.push() })
+    await flush()
+    act(() => { result.current.cancelPendingUpdate() })
+    await flush()
+
+    expect(result.current.pendingUpdate).toBeNull()
+    expect(api.commit).not.toHaveBeenCalled()
+    expect(api.push).not.toHaveBeenCalled()
+    expect(api.resetToRemoteKeepingWorkingTree).not.toHaveBeenCalled()
+    expect(api.resetHardToRemote).not.toHaveBeenCalled()
+  })
+
+  it('"keep the server version" resets hard and publishes nothing', async () => {
+    const api = behindStub(theirsSameEntity)
+    api.getWorkingTreeFile.mockResolvedValue(mine)
+
+    const { result } = renderHook(() => usePushModal('/proj/api.restorm', ROOT_ITEMS, saveBeforePushMock))
+    act(() => { result.current.push() })
+    await flush()
+    act(() => { result.current.resolvePendingUpdate('keepServer') })
+    await flush()
+
+    expect(api.resetHardToRemote).toHaveBeenCalledWith('/proj')
+    // Taking the server's version leaves nothing of ours to publish.
+    expect(api.commit).not.toHaveBeenCalled()
+    expect(api.push).not.toHaveBeenCalled()
+  })
+
+  it('"keep my version" merges, then commits and publishes', async () => {
+    const api = behindStub(theirsSameEntity)
+    api.getWorkingTreeFile.mockResolvedValue(mine)
+
+    const { result } = renderHook(() => usePushModal('/proj/api.restorm', ROOT_ITEMS, saveBeforePushMock))
+    act(() => { result.current.push() })
+    await flush()
+    act(() => { result.current.resolvePendingUpdate('keepMine') })
+    await flush()
+
+    expect(api.resetToRemoteKeepingWorkingTree).toHaveBeenCalledWith('/proj')
+    expect(api.writeResolvedConflict).toHaveBeenCalled()
+    expect(api.commit).toHaveBeenCalled()
+    expect(api.push).toHaveBeenCalledWith('/proj')
   })
 })

@@ -166,3 +166,18 @@ export function seedFreshRepo(repoName: string, reposDir: string = REPOS_DIR): s
   seedRepoAt(reposDir, bareRepoPath)
   return gitServerUrlFor(repoName)
 }
+
+/**
+ * Create a FRESH, completely EMPTY bare repo (no seed commit, unborn
+ * `main`) — the "brand-new shared remote" starting point of collaborative
+ * scenarios where the FIRST push comes from the app itself, not from the
+ * harness. Always re-created, same contamination rationale as
+ * `seedFreshRepo`.
+ */
+export function createEmptyRemote(repoName: string, reposDir: string = REPOS_DIR): string {
+  const bareRepoPath = bareRepoPathFor(reposDir, `${repoName}.git`)
+  rmSync(bareRepoPath, { recursive: true, force: true })
+  mkdirSync(reposDir, { recursive: true })
+  run(`git init --bare -b ${DEFAULT_BRANCH} "${bareRepoPath}"`)
+  return gitServerUrlFor(repoName)
+}

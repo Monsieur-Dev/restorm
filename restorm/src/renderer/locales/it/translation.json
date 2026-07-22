@@ -231,7 +231,10 @@
     "mcpLogs": "Log MCP",
     "git": "Git",
     "gitPush": "Push",
-    "gitPull": "Pull"
+    "gitPull": "Pull",
+    "gitRefresh": "Aggiorna",
+    "gitHistory": "Cronologia",
+    "gitResetToServer": "Ripristina alla versione del server"
   },
   "sidebar": {
     "addRequest": "Aggiungi richiesta",
@@ -2374,7 +2377,6 @@
     "pullFailedTitle": "Pull non riuscito",
     "pullFailedBody": "Impossibile recuperare le ultime modifiche.",
     "pullSaveFailedBody": "Impossibile salvare le modifiche prima di eseguire il pull.",
-    "pullUnpushedChangesBody": "Ci sono modifiche locali non inviate: eseguire prima il Push, poi il Pull.",
     "pushFailedTitle": "Push non riuscito",
     "pushFailedBody": "Non è stato possibile eseguire il push delle modifiche.",
     "pushSucceededTitle": "Push eseguito",
@@ -2406,7 +2408,11 @@
       "deletedFolder": "Eliminata la cartella \"{{name}}\"",
       "addedEnvironmentFolder": "Aggiunta la cartella di ambiente \"{{name}}\"",
       "modifiedEnvironmentFolder": "Modificata la cartella di ambiente \"{{name}}\"",
-      "deletedEnvironmentFolder": "Eliminata la cartella di ambiente \"{{name}}\""
+      "deletedEnvironmentFolder": "Eliminata la cartella di ambiente \"{{name}}\"",
+      "movedRequest": "Spostata la richiesta \"{{name}}\"",
+      "movedScenario": "Spostato lo scenario \"{{name}}\"",
+      "movedFolder": "Spostata la cartella \"{{name}}\"",
+      "movedEnvironmentFolder": "Spostata la cartella di ambiente \"{{name}}\""
     },
     "commitTitle": {
       "singleRequest": "Aggiornamento della richiesta \"{{name}}\"",
@@ -2436,6 +2442,37 @@
     },
     "gate": {
       "initGitFolder": "Inizializza la tua cartella Git per usare questa funzione."
-    }
+    },
+    "conflictChooseVersion": "Scegli una versione",
+    "conflictChooseVersionHint": "Fai clic sulla <0></0> in alto nella tua versione o in quella del server: potrai poi modificare ogni campo prima di salvare.",
+    "conflictFinishBlocked": "Alcuni conflitti devono ancora essere risolti.",
+    "conflictOnQuickConfig": "Il conflitto riguarda la configurazione rapida della richiesta: {{name}}",
+    "conflictNameField": "Nome",
+    "conflictTagsEmpty": "Nessun tag su questo lato.",
+    "conflictTagName": "Nome del tag",
+    "conflictTagRemove": "Rimuovi questo tag",
+    "conflictTagAdd": "Aggiungi un tag",
+    "conflictTagNew": "nuovo-tag",
+    "conflictTagsTab": "Tag",
+    "conflictTreeStructure": "Struttura ad albero"
+  },
+  "gitUpdate": {
+    "title": "Aggiornamento necessario",
+    "message": "Sul server remoto esiste una versione più recente del file. Devi aggiornare la tua versione prima di continuare. Se ci sono conflitti tra la tua versione e quella del server, ti aiuteremo a risolverli.",
+    "conflictCount_one": "{{count}} elemento differisce tra la tua versione e quella del server.",
+    "conflictCount_other": "{{count}} elementi differiscono tra la tua versione e quella del server.",
+    "cancel": "Annulla",
+    "discardMine": "Elimina le mie modifiche",
+    "keepMineOverwriting": "Mantieni la mia versione (sovrascrive le modifiche del server)",
+    "updateFailedTitle": "Aggiornamento non riuscito",
+    "updateFailedBody": "Impossibile recuperare la versione dal server remoto.",
+    "discardedTitle": "Modifiche eliminate",
+    "discardedBody": "Ora sei sull’ultima versione del server.",
+    "updatedTitle": "Progetto aggiornato",
+    "updatedBody": "Ora sei sull’ultima versione del server, le tue modifiche sono state mantenute.",
+    "keepServerVersion": "Mantieni la versione del server",
+    "resolveConflicts": "Risolvi i conflitti",
+    "resetConfirmTitle": "Ripristinare alla versione del server?",
+    "resetConfirmBody": "Tutte le tue modifiche locali saranno eliminate definitivamente e sostituite dalla versione del server."
   }
 }

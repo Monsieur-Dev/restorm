@@ -232,7 +232,10 @@
     "mcpLogs": "MCP zapisi",
     "git": "Git",
     "gitPush": "Pošalji",
-    "gitPull": "Preuzmi"
+    "gitPull": "Preuzmi",
+    "gitRefresh": "Osvježi",
+    "gitHistory": "Povijest",
+    "gitResetToServer": "Vrati na verziju poslužitelja"
   },
   "sidebar": {
     "addRequest": "Dodaj zahtjev",
@@ -2375,7 +2378,6 @@
     "pullFailedTitle": "Povlačenje nije uspjelo",
     "pullFailedBody": "Nije moguće povući najnovije promjene.",
     "pullSaveFailedBody": "Vaše promjene nije moguće spremiti prije povlačenja.",
-    "pullUnpushedChangesBody": "Postoje lokalne promjene koje nisu poslane — najprije izvršite Push, zatim Pull.",
     "pushFailedTitle": "Slanje nije uspjelo",
     "pushFailedBody": "Nije moguće poslati promjene.",
     "pushSucceededTitle": "Poslano",
@@ -2407,7 +2409,11 @@
       "deletedFolder": "Uklonjena mapa „{{name}}”",
       "addedEnvironmentFolder": "Dodana mapa okruženja „{{name}}”",
       "modifiedEnvironmentFolder": "Izmijenjena mapa okruženja „{{name}}”",
-      "deletedEnvironmentFolder": "Uklonjena mapa okruženja „{{name}}”"
+      "deletedEnvironmentFolder": "Uklonjena mapa okruženja „{{name}}”",
+      "movedRequest": "Premješten zahtjev \"{{name}}\"",
+      "movedScenario": "Premješten scenarij \"{{name}}\"",
+      "movedFolder": "Premještena mapa \"{{name}}\"",
+      "movedEnvironmentFolder": "Premještena mapa okruženja \"{{name}}\""
     },
     "commitTitle": {
       "singleRequest": "Ažuriranje zahtjeva „{{name}}”",
@@ -2437,6 +2443,37 @@
     },
     "gate": {
       "initGitFolder": "Inicijalizirajte svoju git mapu da biste koristili ovu značajku."
-    }
+    },
+    "conflictChooseVersion": "Odaberite verziju",
+    "conflictChooseVersionHint": "Kliknite <0></0> na vrhu svoje verzije ili verzije poslužitelja — zatim možete urediti svako polje prije spremanja.",
+    "conflictFinishBlocked": "Neki sukobi još čekaju rješavanje.",
+    "conflictOnQuickConfig": "Sukob se odnosi na brzu postavku zahtjeva: {{name}}",
+    "conflictNameField": "Naziv",
+    "conflictTagsEmpty": "Nema oznaka na ovoj strani.",
+    "conflictTagName": "Naziv oznake",
+    "conflictTagRemove": "Ukloni ovu oznaku",
+    "conflictTagAdd": "Dodaj oznaku",
+    "conflictTagNew": "nova-oznaka",
+    "conflictTagsTab": "Oznake",
+    "conflictTreeStructure": "Struktura stabla"
+  },
+  "gitUpdate": {
+    "title": "Potrebno je ažuriranje",
+    "message": "Na udaljenom poslužitelju postoji novija verzija datoteke. Morate ažurirati svoju verziju prije nastavka. Ako postoje sukobi između vaše verzije i verzije poslužitelja, pomoći ćemo vam da ih riješite.",
+    "conflictCount_one": "{{count}} stavka razlikuje se između vaše verzije i verzije poslužitelja.",
+    "conflictCount_other": "Broj stavki koje se razlikuju između vaše verzije i verzije poslužitelja: {{count}}.",
+    "cancel": "Odustani",
+    "discardMine": "Odbaci moje promjene",
+    "keepMineOverwriting": "Zadrži moju verziju (prepisuje promjene poslužitelja)",
+    "updateFailedTitle": "Ažuriranje nije uspjelo",
+    "updateFailedBody": "Nije bilo moguće dohvatiti verziju s udaljenog poslužitelja.",
+    "discardedTitle": "Promjene odbačene",
+    "discardedBody": "Sada ste na najnovijoj verziji s poslužitelja.",
+    "updatedTitle": "Projekt ažuriran",
+    "updatedBody": "Sada ste na najnovijoj verziji s poslužitelja, a vaše su promjene zadržane.",
+    "keepServerVersion": "Zadrži verziju poslužitelja",
+    "resolveConflicts": "Riješi sukobe",
+    "resetConfirmTitle": "Vratiti na verziju poslužitelja?",
+    "resetConfirmBody": "Sve vaše lokalne promjene bit će trajno izbrisane i zamijenjene verzijom poslužitelja."
   }
 }

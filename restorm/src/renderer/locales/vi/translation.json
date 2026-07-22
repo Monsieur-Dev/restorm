@@ -230,7 +230,10 @@
     "mcpLogs": "Nhật ký MCP",
     "git": "Git",
     "gitPush": "Đẩy",
-    "gitPull": "Kéo"
+    "gitPull": "Kéo",
+    "gitRefresh": "Làm mới",
+    "gitHistory": "Lịch sử",
+    "gitResetToServer": "Đặt lại về phiên bản máy chủ"
   },
   "sidebar": {
     "addRequest": "Thêm yêu cầu",
@@ -2373,7 +2376,6 @@
     "pullFailedTitle": "Kéo thất bại",
     "pullFailedBody": "Không thể kéo các thay đổi mới nhất.",
     "pullSaveFailedBody": "Không thể lưu thay đổi của bạn trước khi kéo về.",
-    "pullUnpushedChangesBody": "Có các thay đổi cục bộ chưa được đẩy — hãy Push trước, sau đó Pull.",
     "pushFailedTitle": "Đẩy thất bại",
     "pushFailedBody": "Không thể đẩy các thay đổi.",
     "pushSucceededTitle": "Đã đẩy",
@@ -2405,7 +2407,11 @@
       "deletedFolder": "Đã xóa thư mục \"{{name}}\"",
       "addedEnvironmentFolder": "Đã thêm thư mục môi trường \"{{name}}\"",
       "modifiedEnvironmentFolder": "Đã sửa thư mục môi trường \"{{name}}\"",
-      "deletedEnvironmentFolder": "Đã xóa thư mục môi trường \"{{name}}\""
+      "deletedEnvironmentFolder": "Đã xóa thư mục môi trường \"{{name}}\"",
+      "movedRequest": "Đã di chuyển yêu cầu \"{{name}}\"",
+      "movedScenario": "Đã di chuyển kịch bản \"{{name}}\"",
+      "movedFolder": "Đã di chuyển thư mục \"{{name}}\"",
+      "movedEnvironmentFolder": "Đã di chuyển thư mục môi trường \"{{name}}\""
     },
     "commitTitle": {
       "singleRequest": "Cập nhật yêu cầu \"{{name}}\"",
@@ -2435,6 +2441,37 @@
     },
     "gate": {
       "initGitFolder": "Khởi tạo thư mục git của bạn để sử dụng tính năng này."
-    }
+    },
+    "conflictChooseVersion": "Chọn một phiên bản",
+    "conflictChooseVersionHint": "Nhấp vào <0></0> ở đầu phiên bản của bạn hoặc của máy chủ — sau đó bạn có thể chỉnh sửa mọi trường trước khi lưu.",
+    "conflictFinishBlocked": "Vẫn còn xung đột cần được giải quyết.",
+    "conflictOnQuickConfig": "Xung đột nằm ở thiết lập nhanh của yêu cầu: {{name}}",
+    "conflictNameField": "Tên",
+    "conflictTagsEmpty": "Không có thẻ nào ở phía này.",
+    "conflictTagName": "Tên thẻ",
+    "conflictTagRemove": "Xóa thẻ này",
+    "conflictTagAdd": "Thêm thẻ",
+    "conflictTagNew": "the-moi",
+    "conflictTagsTab": "Thẻ",
+    "conflictTreeStructure": "Cấu trúc cây"
+  },
+  "gitUpdate": {
+    "title": "Cần cập nhật",
+    "message": "Trên máy chủ từ xa có phiên bản tệp mới hơn. Bạn phải cập nhật phiên bản của mình trước khi tiếp tục. Nếu có xung đột giữa phiên bản của bạn và của máy chủ, chúng tôi sẽ giúp bạn giải quyết.",
+    "conflictCount_one": "{{count}} mục khác nhau giữa phiên bản của bạn và của máy chủ.",
+    "conflictCount_other": "{{count}} mục khác nhau giữa phiên bản của bạn và của máy chủ.",
+    "cancel": "Hủy",
+    "discardMine": "Xóa thay đổi của tôi",
+    "keepMineOverwriting": "Giữ phiên bản của tôi (ghi đè các thay đổi của máy chủ)",
+    "updateFailedTitle": "Cập nhật thất bại",
+    "updateFailedBody": "Không thể lấy phiên bản từ máy chủ từ xa.",
+    "discardedTitle": "Đã xóa thay đổi",
+    "discardedBody": "Bạn hiện đang ở phiên bản mới nhất từ máy chủ.",
+    "updatedTitle": "Đã cập nhật dự án",
+    "updatedBody": "Bạn hiện đang ở phiên bản mới nhất từ máy chủ, các thay đổi của bạn được giữ lại.",
+    "keepServerVersion": "Giữ phiên bản máy chủ",
+    "resolveConflicts": "Giải quyết xung đột",
+    "resetConfirmTitle": "Đặt lại về phiên bản máy chủ?",
+    "resetConfirmBody": "Toàn bộ thay đổi cục bộ của bạn sẽ bị xóa vĩnh viễn và thay bằng phiên bản máy chủ."
   }
 }

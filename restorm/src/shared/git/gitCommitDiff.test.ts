@@ -149,3 +149,58 @@ describe('parseProjectYaml', () => {
     expect(items[0]?.name).toBe('rehydrated:Find pet by ID')
   })
 })
+
+describe('reorganising the tree', () => {
+  it('reports a moved entity, so a reorganisation can be published', () => {
+    // Nothing about the request itself changes when it is dragged into
+    // another folder. Without this the publish flow saw an unchanged
+    // project, opened with an empty message and a disabled button — the
+    // user could not commit work that was already on disk.
+    const before = [
+      { id: 'f1', name: 'Folder A', tags: [], configuration: {}, items: [{ id: 'r1', name: 'Find pet', type: 'http', tags: [] }] },
+      { id: 'f2', name: 'Folder B', tags: [], configuration: {}, items: [] }
+    ] as unknown as FolderItem[]
+    const after = [
+      { id: 'f1', name: 'Folder A', tags: [], configuration: {}, items: [] },
+      { id: 'f2', name: 'Folder B', tags: [], configuration: {}, items: [{ id: 'r1', name: 'Find pet', type: 'http', tags: [] }] }
+    ] as unknown as FolderItem[]
+
+    const changes = diffProjectEntities(before, after)
+
+    expect(changes).toEqual([{ kind: 'request', name: 'Find pet', action: 'moved' }])
+  })
+
+  it('still reports a plain reorder as no change at all', () => {
+    // Same parent, different position: the file's byte order changes, the
+    // project does not.
+    const before = [
+      { id: 'f1', name: 'Folder A', tags: [], configuration: {}, items: [
+        { id: 'r1', name: 'Find pet', type: 'http', tags: [] },
+        { id: 'r2', name: 'Add pet', type: 'http', tags: [] }
+      ] }
+    ] as unknown as FolderItem[]
+    const after = [
+      { id: 'f1', name: 'Folder A', tags: [], configuration: {}, items: [
+        { id: 'r2', name: 'Add pet', type: 'http', tags: [] },
+        { id: 'r1', name: 'Find pet', type: 'http', tags: [] }
+      ] }
+    ] as unknown as FolderItem[]
+
+    expect(diffProjectEntities(before, after)).toEqual([])
+  })
+
+  it('reports a move as moved, not as modified, when the content is untouched', () => {
+    const before = [
+      { id: 'f1', name: 'A', tags: [], configuration: {}, items: [{ id: 'r1', name: 'Find pet', type: 'http', tags: [], url: 'https://a' }] },
+      { id: 'f2', name: 'B', tags: [], configuration: {}, items: [] }
+    ] as unknown as FolderItem[]
+    const after = [
+      { id: 'f1', name: 'A', tags: [], configuration: {}, items: [] },
+      { id: 'f2', name: 'B', tags: [], configuration: {}, items: [{ id: 'r1', name: 'Find pet', type: 'http', tags: [], url: 'https://CHANGED' }] }
+    ] as unknown as FolderItem[]
+
+    // Content changed too: "modified" wins — it is the more informative of
+    // the two, and the move is implied by the new location.
+    expect(diffProjectEntities(before, after)).toEqual([{ kind: 'request', name: 'Find pet', action: 'modified' }])
+  })
+})

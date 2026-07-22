@@ -125,3 +125,14 @@
 	 * the green state is readable at a glance next to the grey unpicked one. */
 	-webkit-text-stroke: 1px currentcolor;
 }
+
+/* Resolution markers in the conflict list: green tick once the user has
+   settled a conflict, red cross while it still needs a decision. Colour
+   carries the meaning here — the glyph alone is too small to scan. */
+.conflict-resolution-view .list-view-row .codicon-check {
+  color: var(--testing-iconPassed, var(--charts-green, #388a34));
+}
+
+.conflict-resolution-view .list-view-row .codicon-close {
+  color: var(--testing-iconFailed, var(--charts-red, #e51400));
+}

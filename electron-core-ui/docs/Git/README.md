@@ -48,11 +48,24 @@ newer-remote-version detection, conflict-blob retrieval, and a debounced
   `AutoSaveController`'s shape (`start()`/`stop()`, a settings
   subscription, a singleton `initGitSemiPullController()`/
   `getGitSemiPullController()` pair).
-- **`useGitPullAvailableToast(onPull)`** — surfaces every
+- **`useGitMergeInProgressToast(folder, hasConflicts)`** — surfaces a
+  repository left mid-merge, with an "abort the merge" action. Cancelling
+  the resolution screen aborts the merge itself, so this state is only
+  reachable by NOT cancelling — the window is closed, the app is killed.
+  There is no "resume later" path back into the resolution screen and the
+  working tree holds conflict markers, so without this the user is
+  stranded in a state nothing in the app mentions. Pass the host's live
+  `GitState.hasConflicts`; the toast retracts itself as soon as the
+  repository is clean again, however that happened.
+- **`useGitPullAvailableToast(onPull, isBehind?)`** — surfaces every
   `git:pull-available` detection as an `app`-toaster toast with a "Pull
   now" action button. Unlike `useGitCliMissingToast`, this can fire more
   than once per session; a fixed toast id means a re-detection updates the
-  existing toast rather than stacking a duplicate. `onPull` is the host's
+  existing toast rather than stacking a duplicate. Pass the host's live
+  behind-flag as `isBehind` and the toast retracts itself as soon as the
+  repository catches up (a pull, a conflict resolution, or the push
+  flow's own update) — without it the toast keeps offering to fetch
+  nothing. `onPull` is the host's
   injection point — this hook only knows a newer version was detected,
   never how to actually pull (conflict handling belongs to the host's own
   pull flow, e.g. restorm's `useGitActions`/`useGitPullConflict`).
@@ -94,7 +107,7 @@ at a **higher layer**, not on the service itself:
 | Semantic diff / commit-message generation | host app + a generic ECUI templating engine | `renderCommitMessage` (generic) + restorm's differ/context builder (host) |
 | Per-entity conflict rendering (request / scenario / folder tab-views) | host app | the conflict-resolution UI |
 | Toast wording | ECUI, self-contained | `git.cliMissing.*` / `git.pullAvailable.*` i18n keys in ECUI's own `locales/` |
-| Reacting to "Pull now" (plain pull vs. opening conflict resolution) | host app | `useGitPullAvailableToast(onPull)`'s `onPull` callback |
+| Reacting to "Pull now" (plain pull vs. opening conflict resolution) | host app | `useGitPullAvailableToast(onPull, isBehind?)`'s `onPull` callback |
 | The CRON frequency setting's visible YAML registration | host app | restorm's `resources/settings.yaml` `git` group (`GitSemiPullController` just reads the `git:semiPullFrequency` key, wherever it's registered) |
 
 `GitServiceConfig.watchDebounceMs` is the one generic tuning knob (default
@@ -397,6 +410,7 @@ src/renderer/hooks/useGitState.ts                — React hook: live GitState
 src/renderer/hooks/useGitCliMissingToast.ts       — one-time "git not installed" toast
 src/main/services/GitSemiPullController.ts        — CRON schedule reading `git:semiPullFrequency`, calls checkForRemoteUpdate()
 src/renderer/hooks/useGitPullAvailableToast.tsx   — "a newer version exists" toast with a Pull-now action button
+src/renderer/hooks/useGitMergeInProgressToast.tsx — "a merge was never finished" toast with an abort action
 src/shared/CommitMessageEngine.ts                 — renderCommitMessage (generic Handlebars render, cached per template; exported from BOTH main + renderer)
 src/renderer/components/PushModal/PushModal.tsx   — the non-scoped commit + push UI (fully controlled)
 src/renderer/components/Settings/languages.ts     — AVAILABLE_LANGUAGES with per-language emoji flag (shared by the UI-language switcher + PushModal; pickers render "{flag} {endonym}")

@@ -13,6 +13,13 @@
       "save": "Kaydet",
       "dontSave": "Kaydetme",
       "cancel": "İptal"
+    },
+    "externalChange": {
+      "title": "Dosya diskte değişti",
+      "message": "\"{{fileName}}\" uygulama dışında değiştirildi.",
+      "detail": "Diskteki sürümü kullanmak için yeniden yükleyin ya da kendi sürümünüzü koruyup üzerine yazın.",
+      "reload": "Yeniden yükle",
+      "keepMine": "Sürümümü koru"
     }
   },
   "recentFilesVignette": {
@@ -427,6 +434,11 @@
       "title": "Güncelleme mevcut",
       "body": "Bu dosyanın daha yeni bir sürümü depoda mevcut.",
       "pullNow": "Şimdi çek"
+    },
+    "mergeInProgress": {
+      "title": "Tamamlanmamış birleştirme",
+      "body": "Başlatılan bir Git birleştirmesi hiç tamamlanmadı. Proje dosyası hâlâ çakışma işaretleri içeriyor olabilir.",
+      "abort": "Birleştirmeyi iptal et"
     }
   },
   "pushModal": {

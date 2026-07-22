@@ -37,6 +37,12 @@ export interface BaseFolderViewProps {
    * Only ever passed from `ConflictEntityPanel`; `undefined`/`false` in
    * the live (non-conflict) editor. */
   notesDiffers?: boolean
+  /** Ids of the tabs a folder-level conflict actually contests (e.g.
+   * `environments`, `custom-values`, `home`). Their content gets the same
+   * red border as a contested notes editor, so the user can see WHICH tab
+   * to arbitrate instead of comparing two environment trees by eye.
+   * Only ever passed from `ConflictEntityPanel`. */
+  contestedTabIds?: string[]
 }
 
 /**
@@ -49,7 +55,8 @@ export const BaseFolderView: React.FC<BaseFolderViewProps> = ({
   defaultActiveTabId,
   docsContent,
   onSwitchTabReady,
-  notesDiffers
+  notesDiffers,
+  contestedTabIds
 }) => {
   const { t } = useTranslation()
   const testIdBase = `folder-view-${folder.id}`
@@ -102,7 +109,21 @@ export const BaseFolderView: React.FC<BaseFolderViewProps> = ({
     )
   })
 
-  const allTabs = [...additionalTabs, ...docsTabs]
+  const contested = new Set(contestedTabIds ?? [])
+  const highlightedAdditionalTabs = contested.size === 0
+    ? additionalTabs
+    : additionalTabs.map((tab) => (contested.has(tab.id)
+      ? {
+        ...tab,
+        content: (
+          <div style={{ height: '100%', boxSizing: 'border-box', border: '1px solid transparent', ...fieldDiffStyle(true) }}>
+            {tab.content}
+          </div>
+        )
+      }
+      : tab))
+
+  const allTabs = [...highlightedAdditionalTabs, ...docsTabs]
 
   return (
     <div

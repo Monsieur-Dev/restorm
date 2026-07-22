@@ -160,3 +160,179 @@ describe('identifyConflictingEntities', () => {
     expect(conflicts.find((c) => c.id === 'e1')).toBeTruthy()
   })
 })
+
+describe('saved quick-configs conflict on their own', () => {
+  const withConfig = (url: string, configFields: string): string => `collections:
+  - id: r1
+    name: Find pet
+    type: http
+    tags: []
+    url: ${url}
+    quickConfigs:
+      - id: qc1
+        name: Staging
+        requestId: r1
+        storageTarget: project
+        fields:
+          url: ${configFields}
+`
+
+  it('reports the contested config as its own entry, naming it', () => {
+    // A quick-config is a whole-request snapshot: folding it into the
+    // request's own comparison would say "this request conflicts" without
+    // ever saying WHICH configuration disagrees.
+    const conflicts = identifyConflictingEntities({
+      path: 'p',
+      base: withConfig('https://same', 'https://base-cfg'),
+      ours: withConfig('https://same', 'https://ours-cfg'),
+      theirs: withConfig('https://same', 'https://theirs-cfg')
+    })
+
+    expect(conflicts).toHaveLength(1)
+    expect(conflicts[0]?.quickConfigName).toBe('Staging')
+    // The two sides are the request AS THAT CONFIG LEAVES IT, so the
+    // normal request diff can render them unchanged.
+    expect(conflicts[0]?.ours).toMatchObject({ url: 'https://ours-cfg' })
+    expect(conflicts[0]?.theirs).toMatchObject({ url: 'https://theirs-cfg' })
+  })
+
+  it('does not report a config only one side changed', () => {
+    const conflicts = identifyConflictingEntities({
+      path: 'p',
+      base: withConfig('https://same', 'https://base-cfg'),
+      ours: withConfig('https://same', 'https://base-cfg'),
+      theirs: withConfig('https://same', 'https://theirs-cfg')
+    })
+    expect(conflicts).toEqual([])
+  })
+
+  it('a config difference no longer makes the REQUEST itself conflict', () => {
+    const conflicts = identifyConflictingEntities({
+      path: 'p',
+      base: withConfig('https://same', 'https://base-cfg'),
+      ours: withConfig('https://same', 'https://ours-cfg'),
+      theirs: withConfig('https://same', 'https://theirs-cfg')
+    })
+    // Exactly one entry, and it is the config one — not a second, opaque
+    // "the request conflicts" row alongside it.
+    expect(conflicts.filter((c) => c.quickConfigName === undefined)).toEqual([])
+  })
+})
+
+describe('imported documentation is never a manual conflict', () => {
+  it('does not report a request whose documentation is all that differs', () => {
+    // The user does not author it, so there is nothing for them to
+    // arbitrate — it auto-resolves at write-back instead.
+    const ours = [
+      'collections:',
+      '  - id: r1',
+      '    name: Find pet',
+      '    type: http',
+      '    tags: []',
+      '    url: https://example.com',
+      '    documentation: ours doc'
+    ].join('\n')
+    const theirs = ours.replace('ours doc', 'theirs doc')
+
+    const conflicts = identifyConflictingEntities({ path: 'p.restorm', base: null, ours, theirs })
+
+    expect(conflicts).toEqual([])
+  })
+})
+
+describe('the tree-structure conflict', () => {
+  const project = (layout: string): string => layout
+
+  const BASE = [
+    'collections:',
+    '  - id: f1',
+    '    name: Folder A',
+    '    tags: []',
+    '    configuration: {}',
+    '    items:',
+    '      - id: r1',
+    '        name: Find pet',
+    '        type: http',
+    '        tags: []',
+    '        url: https://example.com',
+    '  - id: f2',
+    '    name: Folder B',
+    '    tags: []',
+    '    configuration: {}',
+    '    items: []'
+  ].join('\n')
+
+  /** Same project with `r1` living under `f2` instead of `f1`. */
+  const MOVED_TO_B = [
+    'collections:',
+    '  - id: f1',
+    '    name: Folder A',
+    '    tags: []',
+    '    configuration: {}',
+    '    items: []',
+    '  - id: f2',
+    '    name: Folder B',
+    '    tags: []',
+    '    configuration: {}',
+    '    items:',
+    '      - id: r1',
+    '        name: Find pet',
+    '        type: http',
+    '        tags: []',
+    '        url: https://example.com'
+  ].join('\n')
+
+  /** Same project with `r1` promoted to the root. */
+  const MOVED_TO_ROOT = [
+    'collections:',
+    '  - id: f1',
+    '    name: Folder A',
+    '    tags: []',
+    '    configuration: {}',
+    '    items: []',
+    '  - id: f2',
+    '    name: Folder B',
+    '    tags: []',
+    '    configuration: {}',
+    '    items: []',
+    '  - id: r1',
+    '    name: Find pet',
+    '    type: http',
+    '    tags: []',
+    '    url: https://example.com'
+  ].join('\n')
+
+  it('reports ONE entry naming the items both sides moved differently', () => {
+    const conflicts = identifyConflictingEntities({
+      path: 'p.restorm', base: project(BASE), ours: project(MOVED_TO_B), theirs: project(MOVED_TO_ROOT)
+    }, undefined, 'Arborescence')
+
+    expect(conflicts).toHaveLength(1)
+    expect(conflicts[0]?.name).toBe('Arborescence')
+    expect(conflicts[0]?.movedItemIds).toEqual(['r1'])
+  })
+
+  it('says nothing when only one side moved the item — that move is adopted silently', () => {
+    const conflicts = identifyConflictingEntities({
+      path: 'p.restorm', base: project(BASE), ours: project(BASE), theirs: project(MOVED_TO_B)
+    })
+
+    expect(conflicts).toEqual([])
+  })
+
+  it('says nothing when both sides made the SAME move', () => {
+    const conflicts = identifyConflictingEntities({
+      path: 'p.restorm', base: project(BASE), ours: project(MOVED_TO_B), theirs: project(MOVED_TO_B)
+    })
+
+    expect(conflicts).toEqual([])
+  })
+
+  it('cannot judge a move without a common ancestor, and says nothing', () => {
+    const conflicts = identifyConflictingEntities({
+      path: 'p.restorm', base: null, ours: project(MOVED_TO_B), theirs: project(MOVED_TO_ROOT)
+    })
+
+    expect(conflicts.filter((c) => c.movedItemIds)).toEqual([])
+  })
+})

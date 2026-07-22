@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
-import { computeEntityFieldDiff } from './conflictFieldDiff'
-import type { Folder, EnvironmentFolder } from '../../../shared/types/folderTypes'
+import { computeEntityFieldDiff, conflictVisibleTabIds } from './conflictFieldDiff'
+import type { Folder, EnvironmentFolder, FolderItem } from '../../../shared/types/folderTypes'
 import type { HTTPRequest, AuthenticationRequest, GraphQLRequest, WebSocketRequest } from '../../../shared/types/requests'
 
 function makeFolder(overrides: Partial<Folder> = {}): Folder {
@@ -90,10 +90,9 @@ describe('computeEntityFieldDiff', () => {
   it('flags notes as differing and preselects the notes tab for a folder conflict', () => {
     const ours = makeFolder({ notes: 'ours notes' })
     const theirs = makeFolder({ notes: 'theirs notes' })
-    expect(computeEntityFieldDiff('folder', ours, theirs)).toEqual({
-      fields: { notes: true },
-      preselectTabId: 'notes'
-    })
+    const diff = computeEntityFieldDiff('folder', ours, theirs)
+    expect(diff?.fields['notes']).toBe(true)
+    expect(diff?.preselectTabId).toBe('notes')
   })
 
   it('treats undefined and empty-string notes as equal', () => {
@@ -107,10 +106,14 @@ describe('computeEntityFieldDiff', () => {
     expect(diff?.preselectTabId).toBeUndefined()
   })
 
-  it('reports no diff and no preselect when a folder conflict is on a non-panel field only', () => {
+  it('reports the NAME as the differing field when only the name diverges', () => {
+    // A rename used to produce an empty diff: the entity was listed as
+    // conflicting and the panel then showed nothing to arbitrate.
     const ours = makeFolder({ name: 'Ours name' })
     const theirs = makeFolder({ name: 'Theirs name' })
-    expect(computeEntityFieldDiff('folder', ours, theirs)).toEqual({ fields: { notes: false } })
+    const diff = computeEntityFieldDiff('folder', ours, theirs)
+    expect(diff?.fields['name']).toBe(true)
+    expect(diff?.fields['notes']).toBe(false)
   })
 
   it('works the same for a REAL environment-folder object (folderType: "environment", not just the "folder" shape)', () => {
@@ -122,18 +125,21 @@ describe('computeEntityFieldDiff', () => {
     // here before. Dispatch must use `isAnyFolder` instead.
     const ours = makeEnvironmentFolder({ notes: 'a' })
     const theirs = makeEnvironmentFolder({ notes: 'b' })
-    expect(computeEntityFieldDiff('environmentFolder', ours, theirs)).toEqual({
-      fields: { notes: true },
-      preselectTabId: 'notes'
-    })
+    const diff = computeEntityFieldDiff('environmentFolder', ours, theirs)
+    expect(diff?.fields['notes']).toBe(true)
+    expect(diff?.preselectTabId).toBe('notes')
   })
 
   it('returns undefined for scenario — no field-diff / highlighting by design', () => {
     expect(computeEntityFieldDiff('scenario', makeFolder(), makeFolder())).toBeUndefined()
   })
 
-  it('returns undefined when the two sides have different request.type (pathological, no sensible diff)', () => {
-    expect(computeEntityFieldDiff('request', makeGraphQLRequest(), makeWebSocketRequest() as never)).toBeUndefined()
+  it('two sides of different request.type still surface a name difference', () => {
+    // No sensible per-field comparison exists across kinds — but the name
+    // is comparable whatever the shapes are, and it is the one thing the
+    // user can still arbitrate here.
+    const diff = computeEntityFieldDiff('request', makeGraphQLRequest(), makeWebSocketRequest() as never)
+    expect(diff?.fields['name']).toBe(true)
   })
 
   it('generic protocol diff (GraphQL): identical requests report no diff and no preselect', () => {
@@ -293,6 +299,83 @@ describe('computeEntityFieldDiff', () => {
     expect(diff?.conflictingQuickConfigNames).toEqual(['Staging'])
     // The picker for quick configs lives in a band above the tab strip, not in
     // a tab — so a quickConfigs-only conflict still never drives the preselect.
+    expect(diff?.preselectTabId).toBeUndefined()
+  })
+})
+
+describe('conflictVisibleTabIds', () => {
+  it('keeps only the tabs that carry a divergence', () => {
+    expect(conflictVisibleTabIds({ fields: { url: true, notes: false } })).toEqual(['request'])
+    expect(conflictVisibleTabIds({ fields: { url: false, notes: true } })).toEqual(['notes'])
+    expect(conflictVisibleTabIds({ fields: { url: true, notes: true } })).toEqual(['request', 'notes'])
+  })
+
+  it('returns nothing when the name is all that changed', () => {
+    // The rename is rendered above the strip, so there is genuinely no tab
+    // to show — the caller drops the entity view entirely.
+    expect(conflictVisibleTabIds({ fields: { name: true } })).toEqual([])
+    expect(conflictVisibleTabIds({ fields: { name: true, url: false } })).toEqual([])
+  })
+
+  it('never lists the documentation tab, even for a request that has one', () => {
+    // Documentation is imported, never authored, and auto-resolved — it is
+    // not the user's to arbitrate.
+    expect(conflictVisibleTabIds({ fields: { documentation: true } })).not.toContain('docs')
+  })
+})
+
+describe('contested tags', () => {
+  it('flags a tag difference and gives it its own tab', () => {
+    const ours = { ...makeHTTPRequest(), tags: ['smoke', 'v1'] }
+    const theirs = { ...makeHTTPRequest(), tags: ['smoke', 'v2'] }
+
+    const diff = computeEntityFieldDiff('request', ours, theirs)
+
+    expect(diff?.fields['tags']).toBe(true)
+    expect(conflictVisibleTabIds(diff)).toEqual(['conflict-tags'])
+  })
+
+  it('ignores a pure reorder — a tag list is a set, not a sequence', () => {
+    const ours = { ...makeHTTPRequest(), tags: ['smoke', 'v1'] }
+    const theirs = { ...makeHTTPRequest(), tags: ['v1', 'smoke'] }
+
+    const diff = computeEntityFieldDiff('request', ours, theirs)
+
+    expect(diff?.fields['tags']).toBeUndefined()
+  })
+})
+
+describe('a folder conflict beyond notes', () => {
+  const envFolder = (variableValue: string): FolderItem => ({
+    id: 'e1', name: 'Lab', tags: [], configuration: {}, folderType: 'environment',
+    environments: [{ id: 'env1', name: 'dev', variables: [{ key: 'url', value: variableValue }] }],
+    items: []
+  } as unknown as FolderItem)
+
+  it('flags contested environment variables and opens on that tab', () => {
+    // Previously only `notes` was computed, so this conflict highlighted
+    // nothing and opened on the wrong tab — the user had to compare two
+    // environment trees by eye.
+    const diff = computeEntityFieldDiff('environmentFolder', envFolder('https://ours'), envFolder('https://theirs'))
+
+    expect(diff?.fields['environments']).toBe(true)
+    expect(diff?.preselectTabId).toBe('environments')
+  })
+
+  it('flags a contested folder configuration', () => {
+    const ours = { id: 'f1', name: 'F', tags: [], configuration: { timeout: 1000 }, items: [] } as unknown as FolderItem
+    const theirs = { id: 'f1', name: 'F', tags: [], configuration: { timeout: 9000 }, items: [] } as unknown as FolderItem
+
+    const diff = computeEntityFieldDiff('folder', ours, theirs)
+
+    expect(diff?.fields['configuration']).toBe(true)
+    expect(diff?.preselectTabId).toBe('home')
+  })
+
+  it('leaves everything false when the two sides match', () => {
+    const diff = computeEntityFieldDiff('environmentFolder', envFolder('https://same'), envFolder('https://same'))
+
+    expect(diff?.fields['environments']).toBe(false)
     expect(diff?.preselectTabId).toBeUndefined()
   })
 })

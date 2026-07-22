@@ -13,6 +13,13 @@
       "save": "儲存",
       "dontSave": "不儲存",
       "cancel": "取消"
+    },
+    "externalChange": {
+      "title": "磁碟上的檔案已變更",
+      "message": "「{{fileName}}」已在應用程式外部被修改。",
+      "detail": "重新載入以使用磁碟上的版本，或保留您的版本並覆寫它。",
+      "reload": "重新載入",
+      "keepMine": "保留我的版本"
     }
   },
   "recentFilesVignette": {
@@ -427,6 +434,11 @@
       "title": "有可用更新",
       "body": "儲存庫中有此檔案的更新版本。",
       "pullNow": "立即拉取"
+    },
+    "mergeInProgress": {
+      "title": "未完成的合併",
+      "body": "已開始的 Git 合併從未完成。專案檔案中可能仍殘留衝突標記。",
+      "abort": "中止合併"
     }
   },
   "pushModal": {

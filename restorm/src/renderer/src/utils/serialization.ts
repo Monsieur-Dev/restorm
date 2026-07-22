@@ -60,8 +60,23 @@ export function generateIds<T>(obj: T): T {
       seen.add(result['id'] as string)
     }
 
+    // A scenario node's `config` is an opaque per-kind bag, not a document:
+    // stamping runtime ids inside it is meaningless AND harmful. An
+    // `httpRequest` node's config carries `requestId`, which the
+    // "is this a response?" heuristic below matches — so every open
+    // minted a fresh id there and the next save persisted it. Two people
+    // opening the same project got different ids on a node neither had
+    // touched, and the node then showed up as conflicting. Leave the bag
+    // alone, and drop any id a previous version already wrote into it.
+    const isScenarioNode = 'kind' in record && 'config' in record
+    if (isScenarioNode && typeof result['config'] === 'object' && result['config'] !== null) {
+      const { id: _staleRuntimeId, ...config } = result['config'] as Record<string, unknown>
+      result['config'] = config
+    }
+
     for (const [key, v] of Object.entries(result)) {
       if (key === 'id') continue
+      if (isScenarioNode && key === 'config') continue
       if (isKeyValueLike && key === 'value') {
         // Rehydrate persisted ValueType POJOs (`{ type, value, … }`)
         // into real class instances. The runtime UI (cell renderers,
@@ -128,11 +143,39 @@ function shouldHaveId(obj: Record<string, unknown>): boolean {
 }
 
 /**
+ * Drop `createdAt` / `updatedAt` from every saved quick-config found in the
+ * graph.
+ *
+ * The two fields were written since quick-configs existed but never read
+ * by anything, and files in the wild carry corrupted values (a `Date` that
+ * went through the serializer's key walk came back out as `{}`). Removing
+ * them on load means the next save rewrites the file without them, so a
+ * project heals itself simply by being opened — no separate migration step
+ * and no dead field left in the diffs.
+ */
+function dropQuickConfigTimestamps<T>(data: T): T {
+  if (data === null || typeof data !== 'object') return data
+  if (data instanceof Date) return data
+  if (Array.isArray(data)) return data.map((item: unknown) => dropQuickConfigTimestamps(item)) as T
+  const record = data as Record<string, unknown>
+  const result: Record<string, unknown> = {}
+  for (const [key, value] of Object.entries(record)) {
+    // Only inside a quick-config: `createdAt` elsewhere in the document is
+    // none of this function's business.
+    const isQuickConfigTimestamp = (key === 'createdAt' || key === 'updatedAt') &&
+      'storageTarget' in record && 'fields' in record
+    if (isQuickConfigTimestamp) continue
+    result[key] = dropQuickConfigTimestamps(value)
+  }
+  return result as T
+}
+
+/**
  * Process deserialized data by generating runtime ids.
  *
  * @param data - The raw deserialized data
  * @returns Data with generated runtime ids
  */
 export function processAfterDeserialization<T>(data: T): T {
-  return generateIds(data)
+  return generateIds(dropQuickConfigTimestamps(data))
 }

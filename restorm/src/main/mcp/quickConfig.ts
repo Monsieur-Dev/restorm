@@ -151,13 +151,11 @@ export function addConfig(
   if (fieldError) return { ok: false, error: fieldError }
   const trimmed = name.trim()
   if (!trimmed) return { ok: false, error: 'name is required' }
-  const now = new Date().toISOString()
-
   const existing = readProjectConfigs(request)
   const idx = existing.findIndex((c) => c.name === trimmed)
   const saved: QuickConfig = idx >= 0
-    ? { ...existing[idx], fields, updatedAt: now }
-    : { id: `qc_${randomUUID()}`, name: trimmed, requestId: request.id, storageTarget: 'project', fields, createdAt: now, updatedAt: now }
+    ? { ...existing[idx], fields }
+    : { id: `qc_${randomUUID()}`, name: trimmed, requestId: request.id, storageTarget: 'project', fields }
   if (idx >= 0) existing[idx] = saved; else existing.push(saved)
   writeProjectConfigs(request, [...existing])
   return { ok: true, config: saved }
@@ -182,8 +180,7 @@ export function updateConfig(
   const next: QuickConfig = {
     ...project[idx],
     ...(patch.fields !== undefined ? { fields: patch.fields } : {}),
-    ...(trimmedName ? { name: trimmedName } : {}),
-    updatedAt: new Date().toISOString()
+    ...(trimmedName ? { name: trimmedName } : {})
   }
   project[idx] = next
   writeProjectConfigs(request, [...project])

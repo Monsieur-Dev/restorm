@@ -121,3 +121,25 @@ function findButton(node: unknown): { props: unknown } | null {
   }
   return null
 }
+
+describe('retracting the toast once the repository has caught up', () => {
+  it('dismisses as soon as the host reports it is no longer behind', () => {
+    // The toast is a call to action; leaving it up after a pull (or a
+    // resolution, or the push flow's own update) offers to fetch nothing.
+    const { rerender } = renderHook(
+      ({ behind }: { behind: boolean }) => { useGitPullAvailableToast(vi.fn(), behind) },
+      { initialProps: { behind: true } }
+    )
+    expect(dismissMock).not.toHaveBeenCalledWith('app', 'git-pull-available')
+
+    rerender({ behind: false })
+    expect(dismissMock).toHaveBeenCalledWith('app', 'git-pull-available')
+  })
+
+  it('leaves the toast alone when the host passes no flag at all', () => {
+    // Consumers that never wired the flag keep the previous behaviour.
+    dismissMock.mockClear()
+    renderHook(() => { useGitPullAvailableToast(vi.fn()) })
+    expect(dismissMock).not.toHaveBeenCalledWith('app', 'git-pull-available')
+  })
+})

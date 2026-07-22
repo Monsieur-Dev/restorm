@@ -5,6 +5,7 @@ import type {
   GitStatus,
   GitCommitResult,
   GitPushResult,
+  GitResetResult,
   GitPullResult,
   GitFetchCompareResult,
   GitLogEntry,
@@ -104,13 +105,18 @@ declare global {
         getStatus: (folder: string) => Promise<GitStatus>
         log: (folder: string) => Promise<GitLogEntry[]>
         stage: (folder: string, paths: string[]) => Promise<void>
-        commit: (folder: string, message: string) => Promise<GitCommitResult>
+        commit: (folder: string, message: string, paths?: string[]) => Promise<GitCommitResult>
         push: (folder: string) => Promise<GitPushResult>
         pull: (folder: string) => Promise<GitPullResult>
         refreshState: () => Promise<void>
         fetchAndCompare: (folder: string) => Promise<GitFetchCompareResult>
         getConflictVersions: (folder: string, filePath: string) => Promise<GitConflictVersions>
         getFileAtHead: (folder: string, filePath: string) => Promise<string | null>
+        getFileAtRemote: (folder: string, filePath: string) => Promise<string | null>
+        getFileAtMergeBase: (folder: string, filePath: string) => Promise<string | null>
+        getWorkingTreeFile: (folder: string, filePath: string) => Promise<string | null>
+        resetToRemoteKeepingWorkingTree: (folder: string) => Promise<GitResetResult>
+        resetHardToRemote: (folder: string) => Promise<GitResetResult>
         writeResolvedConflict: (folder: string, filePath: string, content: string) => Promise<void>
         abortMerge: (folder: string) => Promise<void>
         getConflictCommitTimestamps: (folder: string) => Promise<GitConflictCommitTimestamps>

@@ -231,7 +231,10 @@
     "mcpLogs": "MCP-logboeken",
     "git": "Git",
     "gitPush": "Pushen",
-    "gitPull": "Pullen"
+    "gitPull": "Pullen",
+    "gitRefresh": "Vernieuwen",
+    "gitHistory": "Geschiedenis",
+    "gitResetToServer": "Terugzetten naar serverversie"
   },
   "sidebar": {
     "addRequest": "Verzoek toevoegen",
@@ -2374,7 +2377,6 @@
     "pullFailedTitle": "Pullen mislukt",
     "pullFailedBody": "Kon de nieuwste wijzigingen niet ophalen.",
     "pullSaveFailedBody": "Kan je wijzigingen niet opslaan vóór het pullen.",
-    "pullUnpushedChangesBody": "Er zijn lokale wijzigingen die nog niet gepusht zijn — push eerst en pull daarna.",
     "pushFailedTitle": "Push mislukt",
     "pushFailedBody": "Kon de wijzigingen niet pushen.",
     "pushSucceededTitle": "Gepusht",
@@ -2406,7 +2408,11 @@
       "deletedFolder": "Map \"{{name}}\" verwijderd",
       "addedEnvironmentFolder": "Omgevingsmap \"{{name}}\" toegevoegd",
       "modifiedEnvironmentFolder": "Omgevingsmap \"{{name}}\" gewijzigd",
-      "deletedEnvironmentFolder": "Omgevingsmap \"{{name}}\" verwijderd"
+      "deletedEnvironmentFolder": "Omgevingsmap \"{{name}}\" verwijderd",
+      "movedRequest": "Verzoek \"{{name}}\" verplaatst",
+      "movedScenario": "Scenario \"{{name}}\" verplaatst",
+      "movedFolder": "Map \"{{name}}\" verplaatst",
+      "movedEnvironmentFolder": "Omgevingsmap \"{{name}}\" verplaatst"
     },
     "commitTitle": {
       "singleRequest": "Update van verzoek \"{{name}}\"",
@@ -2436,6 +2442,37 @@
     },
     "gate": {
       "initGitFolder": "Initialiseer uw git-map om deze functie te gebruiken."
-    }
+    },
+    "conflictChooseVersion": "Kies een versie",
+    "conflictChooseVersionHint": "Klik op het <0></0> bovenaan uw versie of die van de server — daarna kunt u elk veld bewerken voordat u opslaat.",
+    "conflictFinishBlocked": "Er moeten nog conflicten worden opgelost.",
+    "conflictOnQuickConfig": "Het conflict betreft de snelinstelling van de aanvraag: {{name}}",
+    "conflictNameField": "Naam",
+    "conflictTagsEmpty": "Geen labels aan deze kant.",
+    "conflictTagName": "Labelnaam",
+    "conflictTagRemove": "Dit label verwijderen",
+    "conflictTagAdd": "Label toevoegen",
+    "conflictTagNew": "nieuw-label",
+    "conflictTagsTab": "Labels",
+    "conflictTreeStructure": "Boomstructuur"
+  },
+  "gitUpdate": {
+    "title": "Update vereist",
+    "message": "Er bestaat een nieuwere versie van het bestand op de externe server. U moet uw versie bijwerken voordat u verdergaat. Als er conflicten zijn tussen uw versie en die van de server, helpen wij u die op te lossen.",
+    "conflictCount_one": "{{count}} item verschilt tussen uw versie en die van de server.",
+    "conflictCount_other": "{{count}} items verschillen tussen uw versie en die van de server.",
+    "cancel": "Annuleren",
+    "discardMine": "Mijn wijzigingen verwijderen",
+    "keepMineOverwriting": "Mijn versie behouden (overschrijft de wijzigingen van de server)",
+    "updateFailedTitle": "Bijwerken mislukt",
+    "updateFailedBody": "Kon de versie van de externe server niet ophalen.",
+    "discardedTitle": "Wijzigingen verwijderd",
+    "discardedBody": "U bevindt zich nu op de nieuwste versie van de server.",
+    "updatedTitle": "Project bijgewerkt",
+    "updatedBody": "U bevindt zich nu op de nieuwste versie van de server, uw wijzigingen zijn behouden.",
+    "keepServerVersion": "Serverversie behouden",
+    "resolveConflicts": "Conflicten oplossen",
+    "resetConfirmTitle": "Terugzetten naar serverversie?",
+    "resetConfirmBody": "Al uw lokale wijzigingen worden definitief verwijderd en vervangen door de serverversie."
   }
 }

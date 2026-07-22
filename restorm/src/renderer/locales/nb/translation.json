@@ -231,7 +231,10 @@
     "mcpLogs": "MCP-logger",
     "git": "Git",
     "gitPush": "Push",
-    "gitPull": "Hent"
+    "gitPull": "Hent",
+    "gitRefresh": "Oppdater",
+    "gitHistory": "Historikk",
+    "gitResetToServer": "Tilbakestill til serverens versjon"
   },
   "sidebar": {
     "addRequest": "Legg til forespørsel",
@@ -2374,7 +2377,6 @@
     "pullFailedTitle": "Pull mislyktes",
     "pullFailedBody": "Kunne ikke hente de nyeste endringene.",
     "pullSaveFailedBody": "Kunne ikke lagre endringene dine før pull.",
-    "pullUnpushedChangesBody": "Det finnes lokale endringer som ikke er pushet — push først, og pull deretter.",
     "pushFailedTitle": "Push mislyktes",
     "pushFailedBody": "Kunne ikke pushe endringene.",
     "pushSucceededTitle": "Pushet",
@@ -2406,7 +2408,11 @@
       "deletedFolder": "Slettet mappen \"{{name}}\"",
       "addedEnvironmentFolder": "La til miljømappen \"{{name}}\"",
       "modifiedEnvironmentFolder": "Endret miljømappen \"{{name}}\"",
-      "deletedEnvironmentFolder": "Slettet miljømappen \"{{name}}\""
+      "deletedEnvironmentFolder": "Slettet miljømappen \"{{name}}\"",
+      "movedRequest": "Flyttet forespørselen \"{{name}}\"",
+      "movedScenario": "Flyttet scenariet \"{{name}}\"",
+      "movedFolder": "Flyttet mappen \"{{name}}\"",
+      "movedEnvironmentFolder": "Flyttet miljømappen \"{{name}}\""
     },
     "commitTitle": {
       "singleRequest": "Oppdatering av forespørselen \"{{name}}\"",
@@ -2436,6 +2442,37 @@
     },
     "gate": {
       "initGitFolder": "Initialiser git-mappen din for å bruke denne funksjonen."
-    }
+    },
+    "conflictChooseVersion": "Velg en versjon",
+    "conflictChooseVersionHint": "Klikk på <0></0> øverst i din versjon eller serverens — deretter kan du redigere alle felt før du lagrer.",
+    "conflictFinishBlocked": "Noen konflikter må fortsatt løses.",
+    "conflictOnQuickConfig": "Konflikten gjelder forespørselens hurtiginnstilling: {{name}}",
+    "conflictNameField": "Navn",
+    "conflictTagsEmpty": "Ingen etiketter på denne siden.",
+    "conflictTagName": "Etikettnavn",
+    "conflictTagRemove": "Fjern denne etiketten",
+    "conflictTagAdd": "Legg til en etikett",
+    "conflictTagNew": "ny-etikett",
+    "conflictTagsTab": "Etiketter",
+    "conflictTreeStructure": "Trestruktur"
+  },
+  "gitUpdate": {
+    "title": "Oppdatering kreves",
+    "message": "Det finnes en nyere versjon av filen på ekstern server. Du må oppdatere din versjon før du fortsetter. Hvis det er konflikter mellom din versjon og serverens, hjelper vi deg med å løse dem.",
+    "conflictCount_one": "{{count}} element er forskjellig mellom din versjon og serverens.",
+    "conflictCount_other": "{{count}} elementer er forskjellige mellom din versjon og serverens.",
+    "cancel": "Avbryt",
+    "discardMine": "Slett endringene mine",
+    "keepMineOverwriting": "Behold min versjon (overskriver serverens endringer)",
+    "updateFailedTitle": "Oppdateringen mislyktes",
+    "updateFailedBody": "Kunne ikke hente versjonen fra ekstern server.",
+    "discardedTitle": "Endringer slettet",
+    "discardedBody": "Du er nå på den nyeste versjonen fra serveren.",
+    "updatedTitle": "Prosjektet oppdatert",
+    "updatedBody": "Du er nå på den nyeste versjonen fra serveren, endringene dine er beholdt.",
+    "keepServerVersion": "Behold serverens versjon",
+    "resolveConflicts": "Løs konflikter",
+    "resetConfirmTitle": "Tilbakestille til serverens versjon?",
+    "resetConfirmBody": "Alle dine lokale endringer slettes permanent og erstattes av serverens versjon."
   }
 }

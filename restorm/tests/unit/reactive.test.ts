@@ -89,7 +89,7 @@ import {
   emitRequestCreated,
   emitRequestDeleted
 } from '../../src/renderer/src/types/reactive'
-import type { Folder, HTTPRequest, EnvironmentFolder, Environment } from '../../src/shared/types/collections'
+import type { Folder, HTTPRequest, EnvironmentFolder, Environment, Request } from '../../src/shared/types/collections'
 import { StringValue } from '../../src/shared/types/valueTypes'
 
 describe('Reactive Document System', () => {
@@ -172,6 +172,57 @@ describe('Reactive Document System', () => {
     })
   })
 
+  describe('makeReactiveRequest — every request type emits on a type-specific edit', () => {
+    // One representative UI-edited key per request type. A type missing
+    // from the reactive dispatch (or a key missing from its indexable
+    // set) stores the value SILENTLY: no REQUEST_UPDATED, document never
+    // dirty, autosave never fires, edit lost on close.
+    const CASES: { type: string; key: string; value: unknown }[] = [
+      { type: 'http', key: 'followRedirects', value: false },
+      { type: 'http', key: 'timeout', value: 5000 },
+      { type: 'graphql', key: 'query', value: '{ hero { name } }' },
+      { type: 'grpc', key: 'transport', value: 'grpc-web' },
+      { type: 'soap', key: 'mockOperations', value: [{ name: 'op' }] },
+      { type: 'websocket', key: 'mqttSubscribe', value: true },
+      { type: 'websocket', key: 'qos', value: 1 },
+      { type: 'odata', key: 'mockData', value: '{}' },
+      { type: 'auth', key: 'expirationExpression', value: 'exp' },
+      { type: 'sse', key: 'headers', value: [{ key: 'Accept', value: 'text/event-stream' }] },
+      { type: 'stomp', key: 'sendDestination', value: '/queue/foo' },
+      { type: 'jsonrpc', key: 'rpcId', value: '42' },
+      { type: 'jsonrpcBatch', key: 'children', value: [] },
+      { type: 'trpc', key: 'procedure', value: 'post.byId' },
+      { type: 'amqp', key: 'routingKey', value: 'orders.created' },
+      { type: 'redis', key: 'command', value: 'GET' },
+      { type: 'kafka', key: 'topic', value: 'events' }
+    ]
+
+    for (const { type, key, value } of CASES) {
+      it(`${type}: setting "${key}" emits REQUEST_UPDATED`, () => {
+        const request = {
+          type,
+          id: `request-${type}`,
+          name: `${type} request`,
+          tags: [],
+          url: 'proto://example'
+        } as Request
+        const reactiveRequest = makeReactiveRequest(request, 'parent-folder-1') as Record<string, unknown>
+
+        reactiveRequest[key] = value
+
+        vi.advanceTimersByTime(100)
+
+        expect(mockedEventBus.emitSync).toHaveBeenCalledWith(
+          mockedDocumentEvents.REQUEST_UPDATED,
+          expect.objectContaining({
+            id: `request-${type}`,
+            type: 'request'
+          })
+        )
+      })
+    }
+  })
+
   describe('makeReactiveRequest', () => {
     it('should emit REQUEST_UPDATED when name is changed', () => {
       const request = createTestRequest()
@@ -187,6 +238,45 @@ describe('Reactive Document System', () => {
           id: 'request-1',
           type: 'request',
           parentFolderId: 'parent-folder-1'
+        })
+      )
+    })
+
+    it('should emit REQUEST_UPDATED when followRedirects is toggled off', () => {
+      // Optional execution options (`followRedirects?`, `timeout?`) never
+      // exist on a fresh request object — the proxy must still treat their
+      // first assignment as a real, indexable change. Left out of the
+      // indexable set, the value is stored SILENTLY: no event, document
+      // never dirty, autosave never fires, and the edit is lost on close.
+      const request = createTestRequest()
+      const reactiveRequest = makeReactiveRequest(request, 'parent-folder-1') as HTTPRequest
+
+      reactiveRequest.followRedirects = false
+
+      vi.advanceTimersByTime(100)
+
+      expect(mockedEventBus.emitSync).toHaveBeenCalledWith(
+        mockedDocumentEvents.REQUEST_UPDATED,
+        expect.objectContaining({
+          id: 'request-1',
+          type: 'request'
+        })
+      )
+    })
+
+    it('should emit REQUEST_UPDATED when timeout is set', () => {
+      const request = createTestRequest()
+      const reactiveRequest = makeReactiveRequest(request, 'parent-folder-1') as HTTPRequest
+
+      reactiveRequest.timeout = 5000
+
+      vi.advanceTimersByTime(100)
+
+      expect(mockedEventBus.emitSync).toHaveBeenCalledWith(
+        mockedDocumentEvents.REQUEST_UPDATED,
+        expect.objectContaining({
+          id: 'request-1',
+          type: 'request'
         })
       )
     })

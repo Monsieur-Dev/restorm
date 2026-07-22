@@ -13,6 +13,13 @@
       "save": "Gem",
       "dontSave": "Gem ikke",
       "cancel": "Annullér"
+    },
+    "externalChange": {
+      "title": "Filen er ændret på disken",
+      "message": "\"{{fileName}}\" blev ændret uden for programmet.",
+      "detail": "Genindlæs for at bruge versionen på disken, eller behold din version og overskriv den.",
+      "reload": "Genindlæs",
+      "keepMine": "Behold min version"
     }
   },
   "recentFilesVignette": {
@@ -427,6 +434,11 @@
       "title": "Opdatering tilgængelig",
       "body": "En nyere version af denne fil er tilgængelig i repositoriet.",
       "pullNow": "Hent nu"
+    },
+    "mergeInProgress": {
+      "title": "Uafsluttet fletning",
+      "body": "En Git-fletning blev startet og aldrig afsluttet. Projektfilen kan stadig indeholde konfliktmarkeringer.",
+      "abort": "Afbryd fletningen"
     }
   },
   "pushModal": {

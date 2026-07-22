@@ -1,13 +1,40 @@
-import React from 'react'
+import React, { useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ListView } from '../ListView'
 import type { ListViewItemData, ListViewItemEventPayload } from '../ListView'
 import { Button } from '../Button'
+import { Tooltip } from '../Tooltip'
 import './conflictResolutionView.css'
 
 export interface ConflictListEntry {
   id: string
   label: string
+  /** Whether the user has settled this conflict. Drives the marker in the
+   * list so an unvisited conflict is visible at a glance — without it the
+   * list gives no clue which rows still need a decision. */
+  resolved?: boolean
+}
+
+/**
+ * A conflict's row label with a hover tooltip carrying the full text. The
+ * column is narrow and a label can pair an entity name with a saved
+ * configuration name, so truncation is the norm rather than the exception —
+ * without the tooltip the user cannot read what they are choosing between.
+ */
+const ConflictListLabel: React.FC<{ label: string }> = ({ label }) => {
+  const anchorRef = useRef<HTMLSpanElement>(null)
+  const [hover, setHover] = useState(false)
+  return (
+    <span
+      ref={anchorRef}
+      style={{ display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+      onMouseEnter={() => { setHover(true) }}
+      onMouseLeave={() => { setHover(false) }}
+    >
+      {label}
+      <Tooltip targetRef={anchorRef} show={hover} placement="below" content={<div>{label}</div>} />
+    </span>
+  )
 }
 
 export interface ConflictResolutionViewProps {
@@ -72,7 +99,13 @@ export const ConflictResolutionView: React.FC<ConflictResolutionViewProps> = ({
   const { t } = useTranslation()
   const showList = conflicts.length > 1
 
-  const listItems: ListViewItemData[] = conflicts.map((conflict) => ({ id: conflict.id, title: conflict.label }))
+  // The marker sits BEFORE the name so the eye scans a single column of
+  // states rather than hunting at the end of ragged-length labels.
+  const listItems: ListViewItemData[] = conflicts.map((conflict) => ({
+    id: conflict.id,
+    title: <ConflictListLabel label={conflict.label} />,
+    ...(conflict.resolved === undefined ? {} : { icon: conflict.resolved ? 'check' : 'close' })
+  }))
 
   const handleItemClick = (payload: ListViewItemEventPayload): void => {
     onSelectConflict(payload.item.id)

@@ -97,10 +97,12 @@ const {
   favorites,      // FileMetadata[]
   newFile,        // () => Promise<boolean>
   open,           // (path?: string) => Promise<{ success, content? }>
-  save,           // (content: unknown) => Promise<boolean>
+  save,           // (content: unknown, options?: { force?: boolean }) => Promise<boolean>
   saveAs,         // (content, filename?, format?) => Promise<boolean>
   close,          // () => Promise<boolean>
   showUnsavedChangesDialog, // (labels?) => Promise<'save'|'discard'|'cancel'>
+  showExternalChangeDialog, // () => Promise<'reload'|'keepMine'>
+  acceptExternalChange,     // () => Promise<void>  — keep mine, re-baseline
   toggleFavorite, // (path: string) => Promise<boolean>
   removeFromRecent, // (path: string) => Promise<void>
   refresh         // () => Promise<void>
@@ -114,6 +116,12 @@ const { isDirty, reason } = useUnitDirtyState(runtimeId)
 
 // Aggregate view of every dirty unit — ReadonlySet<runtimeId>
 const dirtyIds = useDirtyUnitsSet()
+
+// The open file was rewritten outside the app (terminal `git checkout`
+// / `git pull`, another editor). The save that triggered this was
+// REFUSED, so the callback must resolve it — reload from disk, or
+// acceptExternalChange() then save. See Architecture/Persistence.md.
+useFileExternallyChanged(({ path }) => { /* ask, then resolve */ })
 
 // File events hook
 useFileEvents(
@@ -139,7 +147,8 @@ import {
   saveUnitToDisk,
   saveUnitsToDiskBatch,
   getSaveUnitsSnapshot,
-  useDraftsRestored
+  useDraftsRestored,
+  useFileExternallyChanged
 } from 'electron-core-ui/renderer'
 ```
 

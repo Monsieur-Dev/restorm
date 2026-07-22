@@ -239,8 +239,17 @@ function main() {
   // ── Check 1: missing from en ────────────────────────────────────────────────
   const missingFromEn = []
 
+  // A pluralised key never appears under its bare name: i18next stores it
+  // as `<key>_one` / `<key>_other` (plus `_zero`/`_two`/`_few`/`_many` for
+  // the locales that need them) and resolves the suffix at call time from
+  // `count`. Treating the bare name as absent would report a key that is
+  // perfectly translated.
+  const CLDR_PLURAL_SUFFIXES = ['zero', 'one', 'two', 'few', 'many', 'other']
+  const hasKey = (key) =>
+    key in enCombined || CLDR_PLURAL_SUFFIXES.some((suffix) => `${key}_${suffix}` in enCombined)
+
   for (const { key, file, line } of uniqueStatic) {
-    if (!(key in enCombined) && !missingFromEnExceptions.has(key)) {
+    if (!hasKey(key) && !missingFromEnExceptions.has(key)) {
       missingFromEn.push({ key, file, line })
     }
   }

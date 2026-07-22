@@ -13,6 +13,13 @@
       "save": "Spremi",
       "dontSave": "Ne spremaj",
       "cancel": "Odustani"
+    },
+    "externalChange": {
+      "title": "Datoteka promijenjena na disku",
+      "message": "„{{fileName}}“ izmijenjena je izvan aplikacije.",
+      "detail": "Ponovno učitajte kako biste koristili verziju s diska ili zadržite svoju verziju i prepišite je.",
+      "reload": "Ponovno učitaj",
+      "keepMine": "Zadrži moju verziju"
     }
   },
   "recentFilesVignette": {
@@ -427,6 +434,11 @@
       "title": "Dostupno ažuriranje",
       "body": "Novija verzija ove datoteke dostupna je u repozitoriju.",
       "pullNow": "Povuci sada"
+    },
+    "mergeInProgress": {
+      "title": "Nedovršeno spajanje",
+      "body": "Pokrenuto je Git spajanje koje nikada nije dovršeno. Datoteka projekta možda još sadrži oznake sukoba.",
+      "abort": "Prekini spajanje"
     }
   },
   "pushModal": {

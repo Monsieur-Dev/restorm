@@ -13,6 +13,13 @@
       "save": "Zapisz",
       "dontSave": "Nie zapisuj",
       "cancel": "Anuluj"
+    },
+    "externalChange": {
+      "title": "Plik zmieniony na dysku",
+      "message": "„{{fileName}}” został zmodyfikowany poza aplikacją.",
+      "detail": "Wczytaj ponownie, aby użyć wersji z dysku, albo zachowaj swoją wersję i nadpisz ją.",
+      "reload": "Wczytaj ponownie",
+      "keepMine": "Zachowaj moją wersję"
     }
   },
   "recentFilesVignette": {
@@ -427,6 +434,11 @@
       "title": "Dostępna aktualizacja",
       "body": "W repozytorium dostępna jest nowsza wersja tego pliku.",
       "pullNow": "Pobierz teraz"
+    },
+    "mergeInProgress": {
+      "title": "Niedokończone scalanie",
+      "body": "Rozpoczęto scalanie Git, którego nigdy nie ukończono. Plik projektu może nadal zawierać znaczniki konfliktu.",
+      "abort": "Przerwij scalanie"
     }
   },
   "pushModal": {

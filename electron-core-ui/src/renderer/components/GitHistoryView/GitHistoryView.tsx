@@ -100,13 +100,20 @@ export const GitHistoryView: React.FC<GitHistoryViewProps> = ({
           const row = rows[index]
           if (!row) return null
           const isSelected = commit.hash === selectedHash
+          // The user's CURRENT location: any ref anchored on HEAD
+          // ("HEAD -> main", detached "HEAD") marks the checked-out commit.
+          const isHead = commit.refs.some((ref) => ref === 'HEAD' || ref.startsWith('HEAD ->'))
           return (
             <div
               key={commit.hash}
               role="option"
               aria-selected={isSelected}
               tabIndex={0}
-              className={isSelected ? 'ecui-git-history-row selected' : 'ecui-git-history-row'}
+              className={[
+                'ecui-git-history-row',
+                isSelected ? 'selected' : '',
+                isHead ? 'head' : ''
+              ].filter(Boolean).join(' ')}
               style={{ height: ROW_HEIGHT }}
               onClick={() => { setSelectedHash(commit.hash) }}
               onKeyDown={(event) => {

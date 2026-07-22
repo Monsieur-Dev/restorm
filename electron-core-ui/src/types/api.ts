@@ -13,6 +13,7 @@ import type {
   GitStatus,
   GitCommitResult,
   GitPushResult,
+  GitResetResult,
   GitPullResult,
   GitFetchCompareResult,
   GitConflictVersions,
@@ -57,7 +58,9 @@ export interface CoreUiFeatureApi {
 export interface CoreUiFileApi {
   newFile: () => Promise<boolean>
   open: (path?: string) => Promise<{ success: boolean; content?: unknown }>
-  save: (content: unknown) => Promise<boolean>
+  save: (content: unknown, options?: { force?: boolean }) => Promise<boolean>
+  showExternalChangeDialog: () => Promise<'reload' | 'keepMine'>
+  acceptExternalChange: () => Promise<void>
   saveAs: (content: unknown, filename?: string, format?: SerializationFormat) => Promise<boolean>
   close: () => Promise<boolean>
   getState: () => Promise<FileServiceState | null>
@@ -111,6 +114,9 @@ export interface CoreUiFileApi {
   ) => () => void
   onDraftsRestored: (
     callback: (payload: { count: number }) => void
+  ) => () => void
+  onFileExternallyChanged: (
+    callback: (payload: { path: string | null }) => void
   ) => () => void
   onAutoSaveTrigger: (callback: () => void) => () => void
   saveUnit: (entry: {
@@ -208,13 +214,28 @@ export interface CoreUiGitApi {
   /** Full multi-ref history, newest first (`git log --all --topo-order`). */
   log: (folder: string) => Promise<GitLogEntry[]>
   stage: (folder: string, paths: string[]) => Promise<void>
-  commit: (folder: string, message: string) => Promise<GitCommitResult>
+  /** `paths` scopes the commit to those files — without it, anything the
+   * user staged themselves would be published too. */
+  commit: (folder: string, message: string, paths?: string[]) => Promise<GitCommitResult>
   push: (folder: string) => Promise<GitPushResult>
   pull: (folder: string) => Promise<GitPullResult>
   refreshState: () => Promise<void>
   fetchAndCompare: (folder: string) => Promise<GitFetchCompareResult>
   getConflictVersions: (folder: string, filePath: string) => Promise<GitConflictVersions>
   getFileAtHead: (folder: string, filePath: string) => Promise<string | null>
+  /** Read the file on the branch's upstream ref — the "theirs" side of a
+   * pre-merge comparison (no commit, no merge, no working-tree change). */
+  getFileAtRemote: (folder: string, filePath: string) => Promise<string | null>
+  /** The file at the merge base (common ancestor of HEAD and its
+   * upstream) — the "base" side of a three-way merge. */
+  getFileAtMergeBase: (folder: string, filePath: string) => Promise<string | null>
+  /** Read the file as it stands in the working tree — the "ours" side. */
+  getWorkingTreeFile: (folder: string, filePath: string) => Promise<string | null>
+  /** Move the branch onto its upstream, leaving every file on disk as-is. */
+  resetToRemoteKeepingWorkingTree: (folder: string) => Promise<GitResetResult>
+  /** Move the branch AND the working tree onto the upstream, discarding
+   * local modifications to tracked files. Destructive — confirm first. */
+  resetHardToRemote: (folder: string) => Promise<GitResetResult>
   writeResolvedConflict: (folder: string, filePath: string, content: string) => Promise<void>
   abortMerge: (folder: string) => Promise<void>
   getConflictCommitTimestamps: (folder: string) => Promise<GitConflictCommitTimestamps>

@@ -194,3 +194,69 @@ describe('useItemOperations.handleCloneItem', () => {
     }
   })
 })
+
+describe('useItemOperations.handleItemDrop', () => {
+  const buildOptions = (rootItems: FolderItem[]): UseItemOperationsOptions => ({
+    rootItems,
+    setRootItems: vi.fn(),
+    setExpandedIds: vi.fn(),
+    setSelectedItemId: vi.fn(),
+    setSidebarEditingItemId: vi.fn(),
+    setWorkbenchTree: vi.fn(),
+    setDeleteConfirmation: vi.fn(),
+    openFolderTab: vi.fn(),
+    openScenarioEditorTab: vi.fn(),
+    openEnvironmentFolderTab: vi.fn(),
+    openAnyRequestTab: vi.fn(),
+    projectUuid: 'project-1'
+  })
+
+  function makeTree(): FolderItem[] {
+    const request = new HTTPRequest({ id: 'req-1', name: 'Find pet', method: 'GET' }) as unknown as FolderItem
+    return [
+      { id: 'root', name: 'Root', tags: [], configuration: {}, items: [
+        { id: 'folder-a', name: 'A', tags: [], configuration: {}, items: [request] },
+        { id: 'folder-b', name: 'B', tags: [], configuration: {}, items: [] }
+      ] } as unknown as FolderItem
+    ]
+  }
+
+  function dropPayload(rootItems: FolderItem[]): Parameters<ReturnType<typeof useItemOperations>['handleItemDrop']>[0] {
+    const root = rootItems[0] as FolderItem & { items: (FolderItem & { items: FolderItem[] })[] }
+    const source = root.items[0]?.items[0]
+    const target = root.items[1]
+    if (!source || !target) throw new Error('fixture tree is malformed')
+    return {
+      item: target, path: [], source, sourcePath: [], position: 'into',
+      originalEvent: {} as never
+    } as never
+  }
+
+  it('announces the MOVED item with its new parent, so the move is marked unsaved', () => {
+    // A folder's own draft excludes its children, so announcing the
+    // container changes nothing and leaves the project "saved". The save
+    // unit that genuinely moved is the item, and `parentFolderId` is what
+    // carries the move.
+    const rootItems = makeTree()
+    const { result } = renderHook(() => useItemOperations(buildOptions(rootItems)))
+
+    act(() => { result.current.handleItemDrop(dropPayload(rootItems)) })
+
+    const updated = callsFor(DocumentEvents.REQUEST_UPDATED)
+    expect(updated).toHaveLength(1)
+    expect(updated[0]?.payload.id).toBe('req-1')
+    expect((updated[0]?.payload as { parentFolderId?: string }).parentFolderId).toBe('folder-b')
+    // Both buses: only the local one carries the dirty-marking bridge.
+    expect(localCallsFor(DocumentEvents.REQUEST_UPDATED)).toHaveLength(1)
+  })
+
+  it('stays silent when the drop is refused (an item onto itself)', () => {
+    const rootItems = makeTree()
+    const { result } = renderHook(() => useItemOperations(buildOptions(rootItems)))
+    const payload = dropPayload(rootItems)
+
+    act(() => { result.current.handleItemDrop({ ...payload, item: payload.source } as never) })
+
+    expect(callsFor(DocumentEvents.REQUEST_UPDATED)).toHaveLength(0)
+  })
+})

@@ -13,6 +13,13 @@
       "save": "Lưu",
       "dontSave": "Không lưu",
       "cancel": "Hủy"
+    },
+    "externalChange": {
+      "title": "Tệp đã thay đổi trên đĩa",
+      "message": "\"{{fileName}}\" đã bị sửa đổi bên ngoài ứng dụng.",
+      "detail": "Tải lại để dùng phiên bản trên đĩa, hoặc giữ phiên bản của bạn và ghi đè lên.",
+      "reload": "Tải lại",
+      "keepMine": "Giữ phiên bản của tôi"
     }
   },
   "recentFilesVignette": {
@@ -427,6 +434,11 @@
       "title": "Có bản cập nhật",
       "body": "Phiên bản mới hơn của tệp này có sẵn trên kho lưu trữ.",
       "pullNow": "Kéo về ngay"
+    },
+    "mergeInProgress": {
+      "title": "Hợp nhất chưa hoàn tất",
+      "body": "Một lần hợp nhất Git đã được bắt đầu nhưng chưa bao giờ hoàn tất. Tệp dự án có thể vẫn chứa dấu xung đột.",
+      "abort": "Hủy hợp nhất"
     }
   },
   "pushModal": {

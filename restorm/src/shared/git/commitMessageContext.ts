@@ -1,13 +1,14 @@
 import type { TFunction } from 'i18next'
 import type { GitEntityChange, GitEntityKind } from './gitCommitDiff'
 
-const DIFF_KEYS: Record<GitEntityKind, Record<'added' | 'modified' | 'deleted', string>> = {
-  request: { added: 'git.diff.addedRequest', modified: 'git.diff.modifiedRequest', deleted: 'git.diff.deletedRequest' },
-  scenario: { added: 'git.diff.addedScenario', modified: 'git.diff.modifiedScenario', deleted: 'git.diff.deletedScenario' },
-  folder: { added: 'git.diff.addedFolder', modified: 'git.diff.modifiedFolder', deleted: 'git.diff.deletedFolder' },
+const DIFF_KEYS: Record<GitEntityKind, Record<'added' | 'modified' | 'moved' | 'deleted', string>> = {
+  request: { added: 'git.diff.addedRequest', modified: 'git.diff.modifiedRequest', moved: 'git.diff.movedRequest', deleted: 'git.diff.deletedRequest' },
+  scenario: { added: 'git.diff.addedScenario', modified: 'git.diff.modifiedScenario', moved: 'git.diff.movedScenario', deleted: 'git.diff.deletedScenario' },
+  folder: { added: 'git.diff.addedFolder', modified: 'git.diff.modifiedFolder', moved: 'git.diff.movedFolder', deleted: 'git.diff.deletedFolder' },
   environmentFolder: {
     added: 'git.diff.addedEnvironmentFolder',
     modified: 'git.diff.modifiedEnvironmentFolder',
+    moved: 'git.diff.movedEnvironmentFolder',
     deleted: 'git.diff.deletedEnvironmentFolder'
   }
 }

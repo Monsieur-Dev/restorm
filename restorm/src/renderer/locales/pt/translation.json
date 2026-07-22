@@ -231,7 +231,10 @@
     "mcpLogs": "Registos MCP",
     "git": "Git",
     "gitPush": "Enviar",
-    "gitPull": "Obter"
+    "gitPull": "Obter",
+    "gitRefresh": "Atualizar",
+    "gitHistory": "Histórico",
+    "gitResetToServer": "Repor para a versão do servidor"
   },
   "sidebar": {
     "addRequest": "Adicionar pedido",
@@ -2374,7 +2377,6 @@
     "pullFailedTitle": "Falha ao obter alterações",
     "pullFailedBody": "Não foi possível obter as alterações mais recentes.",
     "pullSaveFailedBody": "Não foi possível salvar suas alterações antes de fazer o pull.",
-    "pullUnpushedChangesBody": "Existem alterações locais por enviar — faça primeiro Push e depois Pull.",
     "pushFailedTitle": "Falha ao enviar",
     "pushFailedBody": "Não foi possível enviar as alterações.",
     "pushSucceededTitle": "Enviado",
@@ -2406,7 +2408,11 @@
       "deletedFolder": "Removida a pasta \"{{name}}\"",
       "addedEnvironmentFolder": "Adicionada a pasta de ambiente \"{{name}}\"",
       "modifiedEnvironmentFolder": "Modificada a pasta de ambiente \"{{name}}\"",
-      "deletedEnvironmentFolder": "Removida a pasta de ambiente \"{{name}}\""
+      "deletedEnvironmentFolder": "Removida a pasta de ambiente \"{{name}}\"",
+      "movedRequest": "Movido o pedido \"{{name}}\"",
+      "movedScenario": "Movido o cenário \"{{name}}\"",
+      "movedFolder": "Movida a pasta \"{{name}}\"",
+      "movedEnvironmentFolder": "Movida a pasta de ambiente \"{{name}}\""
     },
     "commitTitle": {
       "singleRequest": "Atualização da requisição \"{{name}}\"",
@@ -2436,6 +2442,37 @@
     },
     "gate": {
       "initGitFolder": "Inicialize sua pasta Git para usar este recurso."
-    }
+    },
+    "conflictChooseVersion": "Escolha uma versão",
+    "conflictChooseVersionHint": "Clique no <0></0> no topo da sua versão ou na do servidor — depois poderá editar qualquer campo antes de guardar.",
+    "conflictFinishBlocked": "Ainda há conflitos por resolver.",
+    "conflictOnQuickConfig": "O conflito incide na configuração rápida do pedido: {{name}}",
+    "conflictNameField": "Nome",
+    "conflictTagsEmpty": "Sem etiquetas deste lado.",
+    "conflictTagName": "Nome da etiqueta",
+    "conflictTagRemove": "Remover esta etiqueta",
+    "conflictTagAdd": "Adicionar uma etiqueta",
+    "conflictTagNew": "nova-etiqueta",
+    "conflictTagsTab": "Etiquetas",
+    "conflictTreeStructure": "Estrutura da árvore"
+  },
+  "gitUpdate": {
+    "title": "Atualização necessária",
+    "message": "Existe uma versão mais recente do ficheiro no servidor remoto. Deve atualizar a sua versão antes de continuar. Se existirem conflitos entre a sua versão e a do servidor, iremos ajudá-lo a resolvê-los.",
+    "conflictCount_one": "{{count}} elemento difere entre a sua versão e a do servidor.",
+    "conflictCount_other": "{{count}} elementos diferem entre a sua versão e a do servidor.",
+    "cancel": "Cancelar",
+    "discardMine": "Eliminar as minhas alterações",
+    "keepMineOverwriting": "Manter a minha versão (substitui as alterações do servidor)",
+    "updateFailedTitle": "Falha na atualização",
+    "updateFailedBody": "Não foi possível obter a versão do servidor remoto.",
+    "discardedTitle": "Alterações eliminadas",
+    "discardedBody": "Está agora na versão mais recente do servidor.",
+    "updatedTitle": "Projeto atualizado",
+    "updatedBody": "Está agora na versão mais recente do servidor, as suas alterações foram mantidas.",
+    "keepServerVersion": "Manter a versão do servidor",
+    "resolveConflicts": "Resolver conflitos",
+    "resetConfirmTitle": "Repor para a versão do servidor?",
+    "resetConfirmBody": "Todas as suas alterações locais serão eliminadas definitivamente e substituídas pela versão do servidor."
   }
 }

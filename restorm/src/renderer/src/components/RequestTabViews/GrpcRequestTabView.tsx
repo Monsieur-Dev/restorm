@@ -20,7 +20,8 @@ import {
   useDebouncedValue,
   fieldDiffStyle,
   type ISelectData,
-  type VariableDefinition
+  type VariableDefinition,
+  type Tab
 } from 'electron-core-ui/renderer'
 import { DocumentEvents, type RequestHistoryEventPayload } from '../../services/DocumentEvents'
 import { RestormVariableInputBox } from '../RestormVariableInputBox'
@@ -67,6 +68,12 @@ export interface GrpcRequestTabViewProps {
    * field-diff wiring there, matching the HTTP/OData server-mode
    * precedent). */
   conflictFieldDiff?: EntityFieldDiff
+  /** Conflict resolution: restrict the request-side tab strip to these
+   * ids (forwarded verbatim to `BaseRequestTabView`). */
+  conflictVisibleTabIds?: string[]
+  /** Conflict resolution: extra tabs appended to the strip (the contested
+   * tag list), forwarded verbatim to `BaseRequestTabView`. */
+  conflictExtraTabs?: Tab[]
   /** Preselects the tab holding the conflicting field (AC#5). */
   defaultActiveTabId?: string
   /** Fully-controlled request-side tab pair, forwarded verbatim to
@@ -97,6 +104,8 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = (props) => 
 const GrpcClientTabView: React.FC<GrpcRequestTabViewProps> = ({
   request,
   conflictFieldDiff,
+  conflictVisibleTabIds,
+  conflictExtraTabs,
   defaultActiveTabId,
   activeRequestTabId,
   onRequestTabChange,
@@ -799,6 +808,8 @@ const GrpcClientTabView: React.FC<GrpcRequestTabViewProps> = ({
   return (
     <>
       <BaseRequestTabView
+        {...(conflictVisibleTabIds ? { visibleRequestTabIds: conflictVisibleTabIds } : {})}
+        {...(conflictExtraTabs ? { extraRequestTabs: conflictExtraTabs } : {})}
         requestId={request.id}
         urlSection={urlSection}
         requestContent={requestContent}

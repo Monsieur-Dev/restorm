@@ -13,6 +13,13 @@
       "save": "Ruaj",
       "dontSave": "Mos ruaj",
       "cancel": "Anulo"
+    },
+    "externalChange": {
+      "title": "Skedari ndryshoi në disk",
+      "message": "«{{fileName}}» u ndryshua jashtë aplikacionit.",
+      "detail": "Ringarkoni për të përdorur versionin në disk, ose ruani versionin tuaj dhe mbishkruajeni.",
+      "reload": "Ringarko",
+      "keepMine": "Ruaj versionin tim"
     }
   },
   "recentFilesVignette": {
@@ -427,6 +434,11 @@
       "title": "Përditësim i disponueshëm",
       "body": "Një version më i ri i këtij skedari është i disponueshëm në depo.",
       "pullNow": "Tërhiq tani"
+    },
+    "mergeInProgress": {
+      "title": "Bashkim i papërfunduar",
+      "body": "Një bashkim Git u nis dhe nuk përfundoi kurrë. Skedari i projektit mund të përmbajë ende shënues konflikti.",
+      "abort": "Anulo bashkimin"
     }
   },
   "pushModal": {

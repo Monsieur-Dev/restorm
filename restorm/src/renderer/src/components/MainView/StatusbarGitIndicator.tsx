@@ -1,5 +1,6 @@
 import React from 'react'
-import { StatusbarGitIndicator as EcuiStatusbarGitIndicator, useGitState, GatedControl } from 'electron-core-ui/renderer'
+import { StatusbarGitIndicator as EcuiStatusbarGitIndicator, GatedControl } from 'electron-core-ui/renderer'
+import { useGitPendingFlags } from '../../hooks/useGitPendingFlags'
 import { useGitGateState } from '../../hooks/useGitGateState'
 import { subscribeToPro } from '../../services/subscribeToPro'
 
@@ -42,20 +43,10 @@ export interface StatusbarGitIndicatorProps {
  * note.
  */
 export const StatusbarGitIndicator: React.FC<StatusbarGitIndicatorProps> = ({ filePath, hasUnsavedChanges = false, onPush, onPull, onHistory }) => {
-  const gitState = useGitState()
   const gate = useGitGateState()
-
-  // Push pastille: uncommitted working-tree changes OR local commits still
-  // to sweep in. Pull pastille: the folder-watch-triggered semi-pull found a
-  // newer remote version. Neither ever renders a count — see GitState's doc.
-  // The env-values sidecar (`*.restorm.env` — secrets, deliberately never
-  // committed by the push flow) and the response-history archive
-  // (`*.responses.zip`) sit untracked next to every project; counting them
-  // would keep the pastille lit forever right after a successful push.
-  const relevantFiles = (gitState.status?.files ?? []).filter(
-    (f) => !f.path.endsWith('.restorm.env') && !f.path.endsWith('.responses.zip')
-  )
-  const pushPending = relevantFiles.length > 0 || (gitState.status?.ahead ?? 0) > 0 || hasUnsavedChanges
+  // Pastille derivation shared with the title-bar Git menu — one formula,
+  // two surfaces (see useGitPendingFlags).
+  const { pushPending, pullPending } = useGitPendingFlags(hasUnsavedChanges)
 
   if (filePath === null) return null
 
@@ -71,7 +62,7 @@ export const StatusbarGitIndicator: React.FC<StatusbarGitIndicatorProps> = ({ fi
         onRefresh={() => { void window.api.git.refreshState() }}
         pushPending={pushPending}
         pushDisabled={!pushPending}
-        pullPending={gitState.remoteHasNewerVersion}
+        pullPending={pullPending}
         onPush={onPush}
         onPull={onPull}
         onHistory={onHistory}

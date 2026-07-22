@@ -230,7 +230,10 @@
     "mcpLogs": "Log MCP",
     "git": "Git",
     "gitPush": "Push",
-    "gitPull": "Tarik"
+    "gitPull": "Tarik",
+    "gitRefresh": "Segarkan",
+    "gitHistory": "Riwayat",
+    "gitResetToServer": "Setel ulang ke versi server"
   },
   "sidebar": {
     "addRequest": "Tambah permintaan",
@@ -2373,7 +2376,6 @@
     "pullFailedTitle": "Pull gagal",
     "pullFailedBody": "Tidak dapat menarik perubahan terbaru.",
     "pullSaveFailedBody": "Tidak dapat menyimpan perubahan Anda sebelum menarik.",
-    "pullUnpushedChangesBody": "Ada perubahan lokal yang belum didorong — lakukan Push terlebih dahulu, lalu Pull.",
     "pushFailedTitle": "Push gagal",
     "pushFailedBody": "Tidak dapat mendorong perubahan.",
     "pushSucceededTitle": "Terkirim",
@@ -2405,7 +2407,11 @@
       "deletedFolder": "Menghapus folder \"{{name}}\"",
       "addedEnvironmentFolder": "Menambahkan folder lingkungan \"{{name}}\"",
       "modifiedEnvironmentFolder": "Mengubah folder lingkungan \"{{name}}\"",
-      "deletedEnvironmentFolder": "Menghapus folder lingkungan \"{{name}}\""
+      "deletedEnvironmentFolder": "Menghapus folder lingkungan \"{{name}}\"",
+      "movedRequest": "Memindahkan permintaan \"{{name}}\"",
+      "movedScenario": "Memindahkan skenario \"{{name}}\"",
+      "movedFolder": "Memindahkan folder \"{{name}}\"",
+      "movedEnvironmentFolder": "Memindahkan folder lingkungan \"{{name}}\""
     },
     "commitTitle": {
       "singleRequest": "Pembaruan permintaan \"{{name}}\"",
@@ -2435,6 +2441,37 @@
     },
     "gate": {
       "initGitFolder": "Inisialisasi folder git Anda untuk menggunakan fitur ini."
-    }
+    },
+    "conflictChooseVersion": "Pilih versi",
+    "conflictChooseVersionHint": "Klik <0></0> di bagian atas versi Anda atau versi server — setelah itu Anda dapat mengedit setiap bidang sebelum menyimpan.",
+    "conflictFinishBlocked": "Masih ada konflik yang perlu diselesaikan.",
+    "conflictOnQuickConfig": "Konflik terjadi pada pengaturan cepat permintaan: {{name}}",
+    "conflictNameField": "Nama",
+    "conflictTagsEmpty": "Tidak ada tag di sisi ini.",
+    "conflictTagName": "Nama tag",
+    "conflictTagRemove": "Hapus tag ini",
+    "conflictTagAdd": "Tambah tag",
+    "conflictTagNew": "tag-baru",
+    "conflictTagsTab": "Tag",
+    "conflictTreeStructure": "Struktur pohon"
+  },
+  "gitUpdate": {
+    "title": "Pembaruan diperlukan",
+    "message": "Versi berkas yang lebih baru tersedia di server jarak jauh. Anda harus memperbarui versi Anda sebelum melanjutkan. Jika ada konflik antara versi Anda dan versi server, kami akan membantu Anda menyelesaikannya.",
+    "conflictCount_one": "{{count}} item berbeda antara versi Anda dan versi server.",
+    "conflictCount_other": "{{count}} item berbeda antara versi Anda dan versi server.",
+    "cancel": "Batal",
+    "discardMine": "Hapus perubahan saya",
+    "keepMineOverwriting": "Pertahankan versi saya (menimpa perubahan server)",
+    "updateFailedTitle": "Pembaruan gagal",
+    "updateFailedBody": "Tidak dapat mengambil versi dari server jarak jauh.",
+    "discardedTitle": "Perubahan dihapus",
+    "discardedBody": "Anda kini berada pada versi terbaru dari server.",
+    "updatedTitle": "Proyek diperbarui",
+    "updatedBody": "Anda kini berada pada versi terbaru dari server, dan perubahan Anda dipertahankan.",
+    "keepServerVersion": "Pertahankan versi server",
+    "resolveConflicts": "Selesaikan konflik",
+    "resetConfirmTitle": "Setel ulang ke versi server?",
+    "resetConfirmBody": "Semua perubahan lokal Anda akan dihapus permanen dan diganti dengan versi server."
   }
 }

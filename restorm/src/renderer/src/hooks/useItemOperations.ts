@@ -113,6 +113,10 @@ export interface UseItemOperationsOptions {
   /** Project UUID. When the deleted subtree contains favorited items,
    * each id is removed from the favorites store under this key. */
   projectUuid: string | null
+  /** Called when a moved item has no save-unit document type of its own
+   * (a scenario). The host persists those through its own debounced
+   * whole-file save — the same path it already uses for scenario edits. */
+  onStructureChanged?: () => void
 }
 
 export interface UseItemOperationsReturn {
@@ -157,11 +161,15 @@ export interface UseItemOperationsReturn {
  * delivery indexes the clone for search but never marks it dirty, so the copy
  * silently vanishes on close in autosave-off mode and never round-trips to disk.
  */
+/** Both buses, always: the local one carries the renderer-side bridge that
+ * marks the unit dirty (autosave, push badge, unsaved-window indicator),
+ * while a main-only delivery would index for search and nothing more. */
+function emitBothBuses(event: string, payload: DocumentChangedPayload): void {
+  eventBus.emitSync(event, payload)
+  eventBus.emitLocalSync(event, payload)
+}
+
 export function emitClonedSubtreeCreated(item: FolderItem, parentFolderId?: string): void {
-  const emitBothBuses = (event: string, payload: DocumentChangedPayload): void => {
-    eventBus.emitSync(event, payload)
-    eventBus.emitLocalSync(event, payload)
-  }
   const emitEnvironmentTree = (env: Environment, envFolderId: string, parentEnvironmentId: string | null): void => {
     emitBothBuses(DocumentEvents.ENVIRONMENT_CREATED, {
       id: env.id,
@@ -208,7 +216,8 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
     setSidebarEditingItemId,
     setWorkbenchTree,
     setDeleteConfirmation,
-    projectUuid
+    projectUuid,
+    onStructureChanged
   } = options
   const { openFolderTab, openScenarioEditorTab, openEnvironmentFolderTab, openAnyRequestTab } = options
   const { t } = useTranslation()
@@ -241,6 +250,18 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
       return false
     }
     if (isDescendant(sourceId, targetId)) return
+
+    // Resolves an item's containing folder — used AFTER the move to report
+    // where the item landed.
+    const findParentFolder = (nodes: FolderItem[], childId: string): FolderItem | null => {
+      for (const node of nodes) {
+        if (!isAnyFolder(node)) continue
+        if (node.items.some((child) => child.id === childId)) return node
+        const deeper = findParentFolder(node.items, childId)
+        if (deeper) return deeper
+      }
+      return null
+    }
 
     // Remove the item from its current position
     const removedItem = removeItemFromTree(rootItems, sourceId)
@@ -307,7 +328,37 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
       ...prevTree,
       groups: mapAllWorkbenchTabs(prevTree.groups, refreshTabBreadcrumbs)
     }))
-  }, [rootItems, setRootItems, setWorkbenchTree])
+
+    // Moving an item edits the TREE, not any document, so none of the
+    // per-document events fire — nothing marks a dirty unit, the autosave
+    // is never armed, and the reorganisation stays in memory until some
+    // unrelated edit happens to carry it to disk. Announce the moved item
+    // as updated: that is the same signal every other mutation sends, so
+    // it marks the project dirty and lets the autosave (or Ctrl+S) do the
+    // writing, rather than forcing a write from here.
+    // Announce the MOVED item with its new parent. A folder's own draft
+    // excludes its children (each child is its own save unit), so
+    // announcing the container changes nothing and leaves the project
+    // "saved" — the save unit that genuinely moved is the item itself, and
+    // `parentFolderId` is what carries the move.
+    //
+    // Scenarios are left to the host: they have no save-unit document
+    // type of their own (announcing one under 'folder' would cleanse its
+    // draft against the wrong shape and drop its nodes), and the app
+    // already persists scenario edits through a debounced whole-file save
+    // for exactly that reason.
+    const movedParentId = findParentFolder(rootItems, sourceId)?.id
+    if (isScenario(removedItem)) {
+      onStructureChanged?.()
+    } else {
+      emitBothBuses(isAnyFolder(removedItem) ? DocumentEvents.FOLDER_UPDATED : DocumentEvents.REQUEST_UPDATED, {
+        id: removedItem.id,
+        type: isAnyFolder(removedItem) ? 'folder' : 'request',
+        document: cloneForEventBus(removedItem),
+        ...(movedParentId !== undefined ? { parentFolderId: movedParentId } : {})
+      } as DocumentChangedPayload)
+    }
+  }, [rootItems, setRootItems, setWorkbenchTree, onStructureChanged])
 
   // Handle "Clone" context menu action. Works for any item — including a
   // ROOT-level folder / environment folder (cloneItemInTree inserts the deep

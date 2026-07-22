@@ -232,7 +232,10 @@
     "mcpLogs": "MCP записи",
     "git": "Git",
     "gitPush": "Pošalji",
-    "gitPull": "Preuzmi"
+    "gitPull": "Preuzmi",
+    "gitRefresh": "Osveži",
+    "gitHistory": "Istorija",
+    "gitResetToServer": "Врати на верзију сервера"
   },
   "sidebar": {
     "addRequest": "Dodaj zahtev",
@@ -2375,7 +2378,6 @@
     "pullFailedTitle": "Preuzimanje nije uspelo",
     "pullFailedBody": "Nije moguće preuzeti najnovije izmene.",
     "pullSaveFailedBody": "Ваше измене није могуће сачувати пре повлачења.",
-    "pullUnpushedChangesBody": "Постоје локалне промене које нису послате — прво извршите Push, затим Pull.",
     "pushFailedTitle": "Slanje nije uspelo",
     "pushFailedBody": "Nije moguće poslati izmene.",
     "pushSucceededTitle": "Poslato",
@@ -2407,7 +2409,11 @@
       "deletedFolder": "Uklonjena fascikla „{{name}}”",
       "addedEnvironmentFolder": "Dodata fascikla okruženja „{{name}}”",
       "modifiedEnvironmentFolder": "Izmenjena fascikla okruženja „{{name}}”",
-      "deletedEnvironmentFolder": "Uklonjena fascikla okruženja „{{name}}”"
+      "deletedEnvironmentFolder": "Uklonjena fascikla okruženja „{{name}}”",
+      "movedRequest": "Премештен захтев \"{{name}}\"",
+      "movedScenario": "Премештен сценарио \"{{name}}\"",
+      "movedFolder": "Премештена фасцикла \"{{name}}\"",
+      "movedEnvironmentFolder": "Премештена фасцикла окружења \"{{name}}\""
     },
     "commitTitle": {
       "singleRequest": "Ažuriranje zahteva „{{name}}”",
@@ -2437,6 +2443,37 @@
     },
     "gate": {
       "initGitFolder": "Иницијализујте свој git фолдер да бисте користили ову функцију."
-    }
+    },
+    "conflictChooseVersion": "Изаберите верзију",
+    "conflictChooseVersionHint": "Кликните на <0></0> на врху своје верзије или верзије сервера — затим можете уредити свако поље пре чувања.",
+    "conflictFinishBlocked": "Неки сукоби још увек чекају решавање.",
+    "conflictOnQuickConfig": "Сукоб се односи на брзо подешавање захтева: {{name}}",
+    "conflictNameField": "Назив",
+    "conflictTagsEmpty": "Нема ознака на овој страни.",
+    "conflictTagName": "Назив ознаке",
+    "conflictTagRemove": "Уклони ову ознаку",
+    "conflictTagAdd": "Додај ознаку",
+    "conflictTagNew": "nova-oznaka",
+    "conflictTagsTab": "Ознаке",
+    "conflictTreeStructure": "Структура стабла"
+  },
+  "gitUpdate": {
+    "title": "Потребно је ажурирање",
+    "message": "На удаљеном серверу постоји новија верзија датотеке. Морате ажурирати своју верзију пре него што наставите. Ако постоје сукоби између ваше верзије и верзије сервера, помоћи ћемо вам да их решите.",
+    "conflictCount_one": "{{count}} ставка се разликује између ваше верзије и верзије сервера.",
+    "conflictCount_other": "Број ставки које се разликују између ваше верзије и верзије сервера: {{count}}.",
+    "cancel": "Откажи",
+    "discardMine": "Одбаци моје измене",
+    "keepMineOverwriting": "Задржи моју верзију (преписује измене сервера)",
+    "updateFailedTitle": "Ажурирање није успело",
+    "updateFailedBody": "Није било могуће преузети верзију са удаљеног сервера.",
+    "discardedTitle": "Измене одбачене",
+    "discardedBody": "Сада сте на најновијој верзији са сервера.",
+    "updatedTitle": "Пројекат ажуриран",
+    "updatedBody": "Сада сте на најновијој верзији са сервера, а ваше измене су задржане.",
+    "keepServerVersion": "Задржи верзију сервера",
+    "resolveConflicts": "Реши сукобе",
+    "resetConfirmTitle": "Вратити на верзију сервера?",
+    "resetConfirmBody": "Све ваше локалне измене биће трајно обрисане и замењене верзијом сервера."
   }
 }
