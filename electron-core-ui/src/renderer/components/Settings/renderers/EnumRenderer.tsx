@@ -4,6 +4,7 @@ import { SelectBox } from '../../SelectBox'
 import type { ISelectData } from '../../SelectBox/types'
 import type { SettingRendererProps } from './types'
 import type { EnumParams } from '../../../../types/settings'
+import { formatLanguageOptionLabel } from '../languages'
 
 export const EnumRenderer: React.FC<SettingRendererProps> = ({ setting, value, onChange }) => {
   const { t } = useTranslation()
@@ -13,7 +14,7 @@ export const EnumRenderer: React.FC<SettingRendererProps> = ({ setting, value, o
 
   const options = useMemo(() =>
     enumValues.map(ev => ({
-      text: t(ev.labelKey, ev.value)
+      text: formatLanguageOptionLabel(t(ev.labelKey, ev.value), ev.flag)
     })),
     [enumValues, t]
   )

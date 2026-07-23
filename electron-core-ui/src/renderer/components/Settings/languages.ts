@@ -13,9 +13,9 @@ export interface AvailableLanguage {
  * from this list always reads natively for the user picking from it.
  * Shared by the app-wide language switcher ({@link SettingsPage}) and any
  * other generic component needing the same language set (e.g.
- * `PushModal`'s commit-message-language picker) — kept in its own
- * data-only file so importing it doesn't drag a component module along
- * for the ride.
+ * `PushModal`'s commit-message-language picker) — kept in its own file,
+ * separate from any component module, so importing the list doesn't drag
+ * one along for the ride.
  */
 export const AVAILABLE_LANGUAGES: AvailableLanguage[] = [
   { code: 'en', name: 'English', flag: '🇬🇧' },
@@ -46,3 +46,14 @@ export const AVAILABLE_LANGUAGES: AvailableLanguage[] = [
   { code: 'zh-CN', name: '简体中文', flag: '🇨🇳' },
   { code: 'zh-TW', name: '繁體中文', flag: '🇹🇼' }
 ]
+
+/**
+ * Renders an option label with its optional flag prefixed — the single
+ * shared "{flag} {name}" template for any language picker (the commit
+ * language picker in `PushModal` and the `enum`-typed Settings row driven
+ * by `EnumRenderer`). Returns `name` alone when `flag` is absent, so
+ * callers can pass it through unconditionally for non-language enums.
+ */
+export function formatLanguageOptionLabel(name: string, flag?: string): string {
+  return flag ? `${flag} ${name}` : name
+}

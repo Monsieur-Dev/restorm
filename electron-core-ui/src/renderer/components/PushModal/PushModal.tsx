@@ -6,6 +6,7 @@ import { InputBox } from '../InputBox'
 import { SelectBox } from '../SelectBox'
 import type { ISelectData } from '../SelectBox/types'
 import { Toggle } from '../Toggle'
+import { formatLanguageOptionLabel } from '../Settings/languages'
 
 export interface PushModalLanguageOption {
   code: string
@@ -76,7 +77,7 @@ export const PushModal: React.FC<PushModalProps> = ({
   const { t } = useTranslation()
 
   const languageOptions = useMemo(
-    () => languages.map((lang) => ({ text: lang.flag ? `${lang.flag} ${lang.name}` : lang.name })),
+    () => languages.map((lang) => ({ text: formatLanguageOptionLabel(lang.name, lang.flag) })),
     [languages]
   )
   const selectedLanguageIndex = languages.findIndex((lang) => lang.code === language)

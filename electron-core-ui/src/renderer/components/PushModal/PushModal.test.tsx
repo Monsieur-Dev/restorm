@@ -15,6 +15,11 @@ const LANGUAGES = [
   { code: 'fr', name: 'Français' }
 ]
 
+const LANGUAGES_WITH_FLAGS = [
+  { code: 'en', name: 'English', flag: '🇬🇧' },
+  { code: 'fr', name: 'Français', flag: '🇫🇷' }
+]
+
 function renderPushModal(overrides: Partial<React.ComponentProps<typeof PushModal>> = {}): {
   onClose: ReturnType<typeof vi.fn>
   onLanguageChange: ReturnType<typeof vi.fn>
@@ -124,5 +129,17 @@ describe('PushModal', () => {
     renderPushModal({ 'data-testid': 'custom-push' })
     expect(screen.getByTestId('custom-push')).toBeTruthy()
     expect(screen.getByTestId('custom-push-push-button')).toBeTruthy()
+  })
+
+  it('renders each language option as "{flag} {name}" via the shared formatter, when flags are provided', () => {
+    renderPushModal({ languages: LANGUAGES_WITH_FLAGS })
+    const trigger = screen.getByTestId('push-modal-language-select-trigger')
+    expect(trigger.textContent).toContain('🇬🇧 English')
+  })
+
+  it('renders the language name alone when a language entry has no flag', () => {
+    renderPushModal({ languages: LANGUAGES })
+    const trigger = screen.getByTestId('push-modal-language-select-trigger')
+    expect(trigger.textContent).toBe('English')
   })
 })
