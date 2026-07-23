@@ -36,8 +36,9 @@ export interface GitHistoryViewProps {
    * Restore the open file to a past commit's content. Wired to the row's
    * right-click "recover this version" entry; the host owns the actual
    * checkout-file-at-revision + re-hydrate. Omitting it hides the entry.
-   * The entry is disabled on the commit the working copy is currently at
-   * (recovering the current version is a no-op).
+   * Active on every row, including the commit the working copy is
+   * currently at — that's the row a user needs to undo a prior recover
+   * and return to the checked-out version.
    */
   onRecoverVersion?: (hash: string) => void
   /**
