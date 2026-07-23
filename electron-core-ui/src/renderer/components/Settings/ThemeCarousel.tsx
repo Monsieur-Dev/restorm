@@ -1,14 +1,9 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import type { CSSProperties } from 'react'
-import { useTranslation } from 'react-i18next'
 import { useThemeContext } from '../../contexts/useThemeContext'
 import type { ThemeInfo, ThemeVariables } from '../../../types/theme'
 import { setPendingThemeRevealOrigin } from '../../utils/themeReveal'
-import { Button } from '../Button'
-import { Toggle } from '../Toggle'
-import { InputBox } from '../InputBox'
 import { ScrollableElement } from '../ScrollableElement'
-import CustomDropdown from '../CustomDropdown'
 import './settings.css'
 
 interface ThemeCarouselProps {
@@ -40,27 +35,18 @@ const THEME_TYPE_ORDER: Record<ThemeTypeOrder, number> = {
 
 type ThemePreviewVariables = Record<string, ThemeVariables>
 
-const BEATLES_OPTIONS = [
-  { value: 'john', label: 'John Lennon' },
-  { value: 'paul', label: 'Paul McCartney' },
-  { value: 'george', label: 'George Harrison' },
-  { value: 'ringo', label: 'Ringo Starr' }
-] as const
-
 export const ThemeCarousel: React.FC<ThemeCarouselProps> = ({
   className,
   'data-testid': dataTestId,
   scrollableTestId,
   onSelect
 }) => {
-  const { t } = useTranslation()
   const { themes, currentThemeId, setTheme, isLoading } = useThemeContext()
   const rootTestId = dataTestId ?? 'theme-carousel'
   const scrollableId = scrollableTestId ?? `${rootTestId}-scrollable`
   const scrollContentRef = useRef<HTMLDivElement | null>(null)
   const selectedTileRef = useRef<HTMLButtonElement | null>(null)
   const [previewVariables, setPreviewVariables] = useState<ThemePreviewVariables>({})
-  const [selectedBeatle, setSelectedBeatle] = useState<string>('john')
 
   const sortedThemes: ThemeInfo[] = useMemo(() => {
     return [...themes].sort((a, b) => {
@@ -207,59 +193,44 @@ export const ThemeCarousel: React.FC<ThemeCarouselProps> = ({
                 ref={isSelected ? selectedTileRef : null}
                 className={`theme-carousel-item${isSelected ? ' theme-carousel-item--selected' : ''}`}
                 style={style}
+                aria-pressed={isSelected}
                 onClick={(event) => { handleSelectTheme(theme.id, event) }}
               >
-                <div className="theme-carousel-item-header">
-                  <div className="theme-carousel-item-title">
-                    <span className="theme-carousel-item-name">{theme.name}</span>
-                    <span className={`theme-carousel-item-type theme-carousel-item-type--${theme.type}`}>
-                      {theme.type}
-                    </span>
+                {/* Abstract "mini-screenshot" of the app, not a functional
+                    mockup: every element below is a plain, non-interactive
+                    <div>/<span> styled with the theme's real colour tokens —
+                    no ECUI control, no tabIndex, no click handler. The card
+                    <button> above stays the only focusable/clickable element
+                    per tile; the theme name is the only real text. */}
+                <div className="theme-carousel-item-preview">
+                  <div className="theme-carousel-item-preview-sidebar">
+                    <span className="theme-carousel-item-preview-sidebar-item" />
+                    <span className="theme-carousel-item-preview-sidebar-item" />
+                    <span className="theme-carousel-item-preview-sidebar-item" />
                   </div>
-                  {isSelected && (
-                    <span className="theme-carousel-item-selected-indicator" aria-label={t('themeCarousel.selectedTheme')} />
-                  )}
-                </div>
+                  <div className="theme-carousel-item-preview-main">
+                    <div className="theme-carousel-item-preview-title">{theme.name}</div>
 
-                <div className="theme-carousel-item-body">
-                  <div className="theme-carousel-row">
-                    <span className="theme-carousel-label">Actions</span>
-                    <div className="theme-carousel-row-buttons">
-                      <Button>
-                        Primary
-                      </Button>
-                      <Button secondary>
-                        Secondary
-                      </Button>
+                    <div className="theme-carousel-item-preview-paragraph">
+                      <div className="theme-carousel-item-preview-lead">
+                        <span className="theme-carousel-item-preview-accent" />
+                        <span className="theme-carousel-item-preview-line" />
+                      </div>
+                      <span className="theme-carousel-item-preview-line" />
+                      <span className="theme-carousel-item-preview-line" />
                     </div>
-                  </div>
 
-                  <div className="theme-carousel-row">
-                    <span className="theme-carousel-label">Toggle</span>
-                    <Toggle checked>
-                      Enabled
-                    </Toggle>
-                  </div>
+                    <div className="theme-carousel-item-preview-paragraph theme-carousel-item-preview-paragraph--plain">
+                      <span className="theme-carousel-item-preview-line" />
+                      <span className="theme-carousel-item-preview-line" />
+                      <span className="theme-carousel-item-preview-line" />
+                    </div>
 
-                  <div className="theme-carousel-row">
-                    <span className="theme-carousel-label">Input</span>
-                    <InputBox
-                      value="Sample"
-                      options={{
-                        placeholder: 'Search...',
-                        ariaLabel: 'Theme preview input'
-                      }}
-                    />
-                  </div>
-
-                  <div className="theme-carousel-row">
-                    <span className="theme-carousel-label">Band</span>
-                    <CustomDropdown
-                      id={`theme-beatles-${theme.id}`}
-                      value={selectedBeatle}
-                      options={BEATLES_OPTIONS as unknown as { value: string; label: React.ReactNode }[]}
-                      onChange={setSelectedBeatle}
-                    />
+                    <div className="theme-carousel-item-preview-spacer" />
+                    <div className="theme-carousel-item-preview-actions">
+                      <span className="theme-carousel-item-preview-button theme-carousel-item-preview-button--primary" />
+                      <span className="theme-carousel-item-preview-button theme-carousel-item-preview-button--secondary" />
+                    </div>
                   </div>
                 </div>
               </button>

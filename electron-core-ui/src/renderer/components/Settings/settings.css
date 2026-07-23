@@ -84,87 +84,144 @@
   box-shadow: 0 0 0 2px var(--button-background);
 }
 
-.theme-carousel-item-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 6px;
-}
-
-.theme-carousel-item-title {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.theme-carousel-item-name {
-  font-size: 14px;
-  font-weight: 600;
-}
-
-.theme-carousel-item-type {
-  display: inline-flex;
-  align-items: center;
-  padding: 2px 8px;
-  border-radius: 999px;
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  border: 1px solid var(--editorWidget-border);
-}
-
-.theme-carousel-item-type--dark,
-.theme-carousel-item-type--hcDark {
-  background-color: rgb(0, 0, 0, 0.3);
-}
-
-.theme-carousel-item-type--light,
-.theme-carousel-item-type--hcLight {
-  background-color: rgb(255, 255, 255, 0.06);
-}
-
-.theme-carousel-item-selected-indicator {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background-color: var(--button-background);
-  box-shadow: 0 0 0 4px rgb(14, 99, 156, 0.4);
-}
-
-.theme-carousel-item-body {
+/* Abstract "mini-screenshot" preview — a square panel (fake sidebar +
+   fake content area) built entirely from non-interactive <div>/<span>
+   elements styled with the theme's real colour tokens. No ECUI control
+   lives in here, so the card <button> stays the tile's only focusable
+   element by construction (no `inert`/`tabIndex` juggling needed). */
+.theme-carousel-item-preview {
   flex: 1;
-  border-radius: 6px;
-  padding: 6px;
-  background-color: var(--editorWidget-background);
+  min-height: 0;
   display: flex;
-  flex-direction: column;
   gap: 8px;
-
-  /* Preview controls are decorative — let clicks pass through to the
-     parent <button> so the user can pick the theme by clicking
-     anywhere on the tile, not just the title strip. */
-  pointer-events: none;
+  padding: 8px;
+  border-radius: 8px;
+  background-color: var(--editorWidget-background);
 }
 
-.theme-carousel-row {
+.theme-carousel-item-preview-sidebar {
+  flex-shrink: 0;
+  width: 28px;
   display: flex;
-  align-items: center;
-  justify-content: flex-start;
+  flex-direction: column;
+  gap: 5px;
+  padding: 8px 5px;
+  border-radius: 4px;
+  background-color: var(--sideBar-background, var(--editorWidget-background));
+}
+
+.theme-carousel-item-preview-sidebar-item {
+  height: 4px;
+  border-radius: 2px;
+  background-color: var(--foreground);
+  opacity: 0.3;
+}
+
+.theme-carousel-item-preview-main {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+
+  /* A very long translated theme name must clip inside the fixed-size
+     square panel rather than push the primary/secondary pills below
+     the card's visible bounds. */
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 10px;
+  border-radius: 6px;
+  background-color: var(--editor-background);
+}
+
+.theme-carousel-item-preview-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--foreground);
+}
+
+.theme-carousel-item-preview-paragraph {
+  display: flex;
+  flex-direction: column;
   gap: 6px;
 }
 
-.theme-carousel-label {
-  font-size: 12px;
-  color: var(--descriptionForeground);
-  min-width: 60px;
-  text-align: left;
-  flex-shrink: 0;
+.theme-carousel-item-preview-lead {
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
-.theme-carousel-row-buttons {
+.theme-carousel-item-preview-accent {
+  flex-shrink: 0;
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  background-color: var(--button-background);
+}
+
+.theme-carousel-item-preview-line {
+  height: 6px;
+  border-radius: 3px;
+  background-color: var(--foreground);
+}
+
+.theme-carousel-item-preview-lead .theme-carousel-item-preview-line {
+  width: 60%;
+  opacity: 0.6;
+}
+
+.theme-carousel-item-preview-paragraph > .theme-carousel-item-preview-line:nth-child(2) {
+  width: 80%;
+  opacity: 0.35;
+}
+
+.theme-carousel-item-preview-paragraph > .theme-carousel-item-preview-line:nth-child(3) {
+  width: 45%;
+  opacity: 0.25;
+}
+
+.theme-carousel-item-preview-paragraph--plain > .theme-carousel-item-preview-line:nth-child(1) {
+  width: 70%;
+  opacity: 0.35;
+}
+
+.theme-carousel-item-preview-paragraph--plain > .theme-carousel-item-preview-line:nth-child(2) {
+  width: 85%;
+  opacity: 0.25;
+}
+
+.theme-carousel-item-preview-paragraph--plain > .theme-carousel-item-preview-line:nth-child(3) {
+  width: 50%;
+  opacity: 0.3;
+}
+
+.theme-carousel-item-preview-spacer {
+  flex: 1;
+}
+
+.theme-carousel-item-preview-actions {
   display: flex;
-  flex-direction: row;
-  gap: 4px;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.theme-carousel-item-preview-button {
+  width: 28px;
+  height: 10px;
+  border-radius: 5px;
+}
+
+.theme-carousel-item-preview-button--primary {
+  background-color: var(--button-background);
+}
+
+.theme-carousel-item-preview-button--secondary {
+  background-color: var(--button-secondaryBackground);
 }
 
 /* SettingsView */
