@@ -29,6 +29,15 @@ Feature: DateTimePicker
     When I set date time picker "datetimepicker-basic" hours to 9
     When I set date time picker "datetimepicker-basic" minutes to 5
     When I set date time picker "datetimepicker-basic" include time to "false"
+    # Toggling in "iso" mode never rewrites the pattern (the rewrite only fires
+    # for output mode "pattern"), so it can't exercise that path. Switch to
+    # "pattern" and assert the DISPLAYED value after each toggle direction —
+    # this is what used to render the broken 'YYYY-MM-DD…' literal.
+    When I set date time picker "datetimepicker-basic" output mode to "pattern"
+    When I set date time picker "datetimepicker-basic" include time to "true"
+    Then date time picker "datetimepicker-basic" value should match "^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$"
+    When I set date time picker "datetimepicker-basic" include time to "false"
+    Then date time picker "datetimepicker-basic" value should match "^\d{4}-\d{2}-\d{2}$"
     When I close date time picker "datetimepicker-basic"
 
   Scenario: Output mode and pattern editing updates preview (VariableInputBox)
