@@ -15,6 +15,7 @@ import {
 import { logger } from 'electron-core-ui/renderer'
 import type { ResponseHistoryDetail, ResponseHistoryEntry } from '../../../../shared/types/collections'
 import { getResponseHistoryDetail, getResponseHistoryList } from '../../services/GraphQLIntegration'
+import { useUserDateFormat } from '../../hooks/useUserDateFormat'
 
 /**
  * Resolve the dot color for a history entry. New entries carry a 3-way
@@ -188,7 +189,8 @@ export const ResponseHistoryTab: React.FC<ResponseHistoryTabProps> = ({
   refreshKey,
   buildResponseView
 }) => {
-  const { t, i18n } = useTranslation()
+  const { t } = useTranslation()
+  const { formatUserDate: formatDate } = useUserDateFormat()
   const store = useMemo(() => new ResponseHistoryStore(), [])
   const { entries, selectedGuid, selectedDetail } = useSyncExternalStore(store.subscribe, store.getSnapshot)
   const [activeTabId, setActiveTabId] = useState('response')
@@ -197,34 +199,6 @@ export const ResponseHistoryTab: React.FC<ResponseHistoryTabProps> = ({
     const themeAttr = document.documentElement.getAttribute('data-theme') ?? 'dark'
     return themeAttr === 'dark' || themeAttr === 'hcDark'
   })
-
-  // Read date format setting
-  const [dateFormat, setDateFormat] = useState<'us' | 'iso'>('us')
-  useEffect(() => {
-    void window.api.settings.get('behavior:dateTimeFormat').then((value) => {
-      if (value === 'iso' || value === 'us') setDateFormat(value)
-    })
-  }, [])
-
-  const formatDate = useCallback((date: Date): string => {
-    if (dateFormat === 'iso') {
-      const y = date.getFullYear()
-      const m = String(date.getMonth() + 1).padStart(2, '0')
-      const d = String(date.getDate()).padStart(2, '0')
-      const h = String(date.getHours()).padStart(2, '0')
-      const min = String(date.getMinutes()).padStart(2, '0')
-      const s = String(date.getSeconds()).padStart(2, '0')
-      return `${String(y)}-${m}-${d} ${h}:${min}:${s}`
-    }
-    return new Intl.DateTimeFormat(i18n.language, {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit'
-    }).format(date)
-  }, [dateFormat, i18n.language])
 
   useEffect(() => {
     void store.loadEntries(requestId)

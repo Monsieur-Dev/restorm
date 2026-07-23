@@ -160,6 +160,7 @@ import { useMcpNavigation } from './hooks/useMcpNavigation'
 import { useExternalFileChange } from './hooks/useExternalFileChange'
 import { useGitMergeInProgressToast } from 'electron-core-ui/renderer'
 import { useGitFolder } from './hooks/useGitFolder'
+import { useUserDateFormat } from './hooks/useUserDateFormat'
 import { useGitActions } from './hooks/useGitActions'
 import { usePushModal } from './hooks/usePushModal'
 import { useGitPullConflict } from './hooks/useGitPullConflict'
@@ -566,6 +567,8 @@ const App: React.FC = () => {
   }, [filePath, takeServerVersion, t, refreshOpenFileAfterPull])
   const gitPendingFlags = useGitPendingFlags(isDirty)
   const gitFolderForConflicts = useGitFolder(filePath)
+  const { formatUserDate } = useUserDateFormat()
+  const formatGitHistoryDate = useCallback((iso: string) => formatUserDate(new Date(iso)), [formatUserDate])
 
   const handleOpenGitHistory = useCallback(() => {
     const folder = filePath?.endsWith('.restorm') === true
@@ -3231,6 +3234,7 @@ const App: React.FC = () => {
           commits={gitHistory.commits}
           {...(gitHistory.mainTipHash !== undefined ? { mainTipHash: gitHistory.mainTipHash } : {})}
           onRecoverVersion={handleRecoverVersion}
+          formatDate={formatGitHistoryDate}
         />
       </Modal>
 

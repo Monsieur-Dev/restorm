@@ -5,6 +5,7 @@ import { DocumentEvents, type DocumentChangedPayload } from '../../services/Docu
 import { ApiSpecRefreshFlow } from './ApiSpecRefreshFlow'
 import type { ApiUpdateConfig } from '../../../../shared/types/baseTypes'
 import type { EnvironmentFolder } from '../../../../shared/types/folderTypes'
+import { useUserDateFormat } from '../../hooks/useUserDateFormat'
 
 /**
  * Read-only summary of the env folder's API spec import state plus a
@@ -19,6 +20,7 @@ interface Props {
 
 export const ApiUpdateSettingsSection: React.FC<Props> = ({ folder }) => {
   const { t } = useTranslation()
+  const { formatUserDate } = useUserDateFormat()
   const [refreshing, setRefreshing] = useState(false)
   // Bumped on every FOLDER_UPDATED for this folder so we re-read the
   // proxy's `apiUpdate` field after `persistPatch` / refresh-from-source
@@ -63,14 +65,14 @@ export const ApiUpdateSettingsSection: React.FC<Props> = ({ folder }) => {
   }
 
   const lastImportedText = config.lastImportedAt !== undefined
-    ? new Date(config.lastImportedAt).toLocaleString()
+    ? formatUserDate(new Date(config.lastImportedAt))
     : t('folderView.home.apiUpdate.neverImported')
   // Fallback to the import timestamp when the user hasn't pinged the
   // source yet — importing IS the first successful check, so showing
   // "Never checked" right after an import is confusing.
   const effectiveLastChecked = config.lastCheckedAt ?? config.lastImportedAt
   const lastCheckedText = effectiveLastChecked !== undefined
-    ? new Date(effectiveLastChecked).toLocaleString()
+    ? formatUserDate(new Date(effectiveLastChecked))
     : t('folderView.home.apiUpdate.neverChecked')
 
   return (

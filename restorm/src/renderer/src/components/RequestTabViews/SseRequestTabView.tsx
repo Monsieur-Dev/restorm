@@ -29,6 +29,7 @@ import { SendButtonEnvSwitcher } from './SendButtonEnvSwitcher'
 import { useIsSseListening } from '../../services/sseListeningStore'
 import { BeamWrap } from '../common/BeamWrap'
 import { HeaderHoverTooltip } from '../MainView/HeaderHoverTooltip'
+import { useUserDateFormat } from '../../hooks/useUserDateFormat'
 import './WebSocketChat.css'
 
 /** Cap on how many frames render by default — a chatty stream (thousands of
@@ -45,6 +46,7 @@ export interface SseRequestTabViewProps {
 export const SseRequestTabView: React.FC<SseRequestTabViewProps> = ({ request }) => {
   const [historyModalOpen, setHistoryModalOpen] = useState(false)
   const { t } = useTranslation()
+  const { formatUserDate } = useUserDateFormat()
   const { selectedEnvId, environments, envColor } = useEnvironmentContext()
   const handlebarsHelpers = useHandlebarsHelpers()
   const { apiDocumentation, route } = useApiDocumentationFromRequest(request)
@@ -336,7 +338,7 @@ export const SseRequestTabView: React.FC<SseRequestTabViewProps> = ({ request })
                 style={{ cursor: 'pointer' }}
               >
                 <span style={{ color: 'var(--foreground-muted)', fontSize: 11, marginRight: 8 }}>
-                  {new Date(frame.timestamp).toLocaleTimeString()}
+                  {formatUserDate(new Date(frame.timestamp), { timeOnly: true })}
                 </span>
                 <span className="ws-chat-event">{frame.event}</span>
                 <span data-testid={`response-stream-frame-data-${i}`}>
@@ -348,7 +350,7 @@ export const SseRequestTabView: React.FC<SseRequestTabViewProps> = ({ request })
         </div>
       </ScrollableElement>
     )
-  }, [t, expandedFrames, toggleFrameExpanded, showAllFrames])
+  }, [t, expandedFrames, toggleFrameExpanded, showAllFrames, formatUserDate])
 
   const buildSseResponseView = useCallback((resp: SseResponse | null) => {
     if (!resp) return { infosContent: null, responseContent: null, jsonData: undefined }

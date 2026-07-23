@@ -23,6 +23,15 @@ export interface GitHistoryViewProps {
    * (recovering the current version is a no-op).
    */
   onRecoverVersion?: (hash: string) => void
+  /**
+   * Formats an ISO commit date for display. Defaults to a raw
+   * `toLocaleString` when omitted, so consumers that don't need a custom
+   * format (or don't have one, e.g. `demo/`) keep working unchanged. A host
+   * app with a user-configurable date/time format setting should inject a
+   * formatter here rather than the library reading that setting itself —
+   * the setting is host-specific, this component isn't.
+   */
+  formatDate?: (iso: string) => string
   'data-testid'?: string
 }
 
@@ -76,7 +85,8 @@ const LaneCell: React.FC<{ row: LaneRow, gutterLanes: number }> = ({ row, gutter
   )
 }
 
-function formatDate(iso: string, locale: string): string {
+/** Fallback used when the host doesn't supply a `formatDate` prop. */
+function defaultFormatDate(iso: string, locale: string): string {
   const date = new Date(iso)
   if (Number.isNaN(date.getTime())) return iso
   return date.toLocaleString(locale, { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })
@@ -94,9 +104,11 @@ export const GitHistoryView: React.FC<GitHistoryViewProps> = ({
   mainTipHash,
   initialSelectedHash,
   onRecoverVersion,
+  formatDate,
   'data-testid': dataTestId = 'git-history-view'
 }) => {
   const { t, i18n } = useTranslation()
+  const formatCommitDate = formatDate ?? ((iso: string) => defaultFormatDate(iso, i18n.language))
   const [selectedHash, setSelectedHash] = useState<string | null>(initialSelectedHash ?? commits[0]?.hash ?? null)
   // Right-click "recover this version" menu. `null` = closed.
   const [menu, setMenu] = useState<{ x: number; y: number; hash: string; isHead: boolean } | null>(null)
@@ -152,7 +164,7 @@ export const GitHistoryView: React.FC<GitHistoryViewProps> = ({
                   ))}
                 </span>
               )}
-              <span className="ecui-git-history-date">{formatDate(commit.date, i18n.language)}</span>
+              <span className="ecui-git-history-date">{formatCommitDate(commit.date)}</span>
             </div>
           )
         })}
@@ -178,7 +190,7 @@ export const GitHistoryView: React.FC<GitHistoryViewProps> = ({
             <dt>{t('gitHistory.author')}</dt>
             <dd>{selected.authorName} &lt;{selected.authorEmail}&gt;</dd>
             <dt>{t('gitHistory.date')}</dt>
-            <dd>{formatDate(selected.date, i18n.language)}</dd>
+            <dd>{formatCommitDate(selected.date)}</dd>
             <dt>{t('gitHistory.hash')}</dt>
             <dd className="ecui-git-history-hash">{selected.hash}</dd>
             {selected.parents.length > 0 && (

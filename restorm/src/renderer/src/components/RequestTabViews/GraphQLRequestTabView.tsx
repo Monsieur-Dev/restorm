@@ -49,6 +49,7 @@ import { useIsGraphqlSubscribing } from '../../services/graphqlSubscriptionListe
 import { conflictSafeBoolean } from '../../services/conflictSafeLiveState'
 import type { EntityFieldDiff } from '../../services/conflictFieldDiff'
 import { detectGraphqlOperationType } from '../../../../shared/utils/detectGraphqlOperationType'
+import { useUserDateFormat } from '../../hooks/useUserDateFormat'
 import './GraphQLSubscriptionEvents.css'
 
 /** One payload pushed by a subscription, kept in the live append-only list. */
@@ -120,6 +121,7 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
   const conflictFields = conflictFieldDiff?.fields
   const [historyModalOpen, setHistoryModalOpen] = useState(false)
   const { t } = useTranslation()
+  const { formatUserDate } = useUserDateFormat()
   // `projectUuid` comes from the EnvironmentContext (mirrored from the
   // workbench's `persistenceKey`) — not `useFileService`. See
   // HTTPRequestTabView for the rationale: useState's lazy initializer
@@ -827,7 +829,7 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
                   <span className="gql-sub-event-index">
                     {t('graphql.subscription.eventLabel', { index: i + 1, defaultValue: 'Event {{index}}' })}
                   </span>
-                  <span className="gql-sub-event-time">{new Date(event.timestamp).toLocaleTimeString()}</span>
+                  <span className="gql-sub-event-time">{formatUserDate(new Date(event.timestamp), { timeOnly: true })}</span>
                 </Button>
                 {expanded && (
                   <pre className="gql-sub-event-body" data-testid="graphql-subscription-event-body">{pretty}</pre>
@@ -838,7 +840,7 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
         </div>
       </ScrollableElement>
     )
-  }, [subscriptionEvents, expandedEvents, isSubscribing, toggleEventExpanded, t])
+  }, [subscriptionEvents, expandedEvents, isSubscribing, toggleEventExpanded, t, formatUserDate])
 
   // Subscription-mode connection-state banner (mirrors the server "served N").
   const subscriptionInfosContent = isSubscription ? (

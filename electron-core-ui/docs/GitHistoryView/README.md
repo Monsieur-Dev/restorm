@@ -40,6 +40,14 @@ export interface GitHistoryViewProps {
    * (recovering the current version is a no-op).
    */
   onRecoverVersion?: (hash: string) => void
+  /**
+   * Formats an ISO commit date for display. Defaults to a raw
+   * `toLocaleString` when omitted, so consumers without a custom format
+   * (e.g. `demo/`) keep working unchanged. A host app with a
+   * user-configurable date/time format setting should inject a formatter
+   * here — the library never reads a host-specific setting itself.
+   */
+  formatDate?: (iso: string) => string
   'data-testid'?: string
 }
 
@@ -74,6 +82,9 @@ const mainTip = commits.find((c) => c.refs.some((r) => /(^|\/|\s)(main|master)$/
     // re-hydrates its editor — `window.api.git.recoverFileAtRevision` does
     // the checkout; a normal commit + push is left to the user.
     onRecoverVersion={(hash) => host.recoverOpenFileAt(hash)}
+    // Optional: render dates per a host setting instead of the raw
+    // toLocaleString fallback (e.g. an app-level "date format" preference).
+    formatDate={(iso) => formatUserDate(new Date(iso))}
   />
 </Modal>
 ```
