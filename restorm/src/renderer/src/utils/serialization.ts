@@ -12,14 +12,16 @@
  * live UI's `instanceof` checks, which only the renderer needs.
  */
 
-import { generateId } from '../../../shared/utils/serialization'
+import { deriveStableId, idPathSegment } from '../../../shared/utils/stableId'
 import { normalizeValueType } from './normalizeValueType'
 
 export { generateId, stripIds, prepareForSerialization, canonicalizeSerializedKeys, CANONICAL_KEY_PRIORITY } from '../../../shared/utils/serialization'
 
 /**
  * Recursively generate 'id' properties for all objects that should have them.
- * This function adds ids to objects matching known collection types.
+ * This function adds ids to objects matching known collection types (see
+ * `idPathSegment` in `shared/utils/stableId.ts`, which is both the
+ * classifier and the derivation grammar).
  *
  * Documents (folders, environments, requests) persist their ids now, so
  * the usual path is to keep whatever id the file carries. Two edge cases
@@ -31,6 +33,19 @@ export { generateId, stripIds, prepareForSerialization, canonicalizeSerializedKe
  *      duplicate ids would make per-request persistence (env selection,
  *      workbench tab layout, …) collide between the original and the copy.
  *
+ * In both cases the replacement is DERIVED from the entity's position in
+ * the document (`deriveStableId`), never random: the same bytes must yield
+ * the same ids in every process, because the git diff and the 3-way
+ * conflict model pair entities by id across independent parses. A random
+ * backfill made those pairings fail wholesale on any file whose ids are
+ * not yet persisted — see `shared/utils/stableId.ts` for the full story.
+ *
+ * The derivation path is SEMANTIC, not positional: a container contributes
+ * its key name, an array contributes nothing, and an entity contributes an
+ * identity segment built from its name/key/type. So inserting an item at
+ * the head of a folder leaves its siblings' ids alone, which is what lets
+ * `ours` and `theirs` still pair up after one side added something.
+ *
  * Tracking ids in a `seen` Set scoped to the top-level call is enough —
  * every traversal gets a fresh set so reloading the same file keeps its
  * persisted ids intact.
@@ -40,22 +55,34 @@ export { generateId, stripIds, prepareForSerialization, canonicalizeSerializedKe
  */
 export function generateIds<T>(obj: T): T {
   const seen = new Set<string>()
+  // How many entities already claimed a given path. Two siblings can spell
+  // the same identity segment (two folders with the same name); the second
+  // one takes an occurrence suffix so the two subtrees stay distinct. The
+  // count is per PATH, and entities sharing a path always share a container,
+  // so the suffix follows array order — never the object key order, which
+  // varies between builds.
+  const occupiedPaths = new Map<string, number>()
 
-  const walk = <U>(value: U): U => {
+  const walk = <U>(value: U, path: readonly string[]): U => {
     if (value === null || value === undefined) return value
     if (Array.isArray(value)) {
-      return value.map((item: unknown) => walk(item)) as U
+      // An array contributes no segment of its own: an index would make
+      // every sibling's id shift when an item is inserted above it.
+      return value.map((item: unknown) => walk(item, path)) as U
     }
     if (typeof value !== 'object') return value
 
     const record = value as Record<string, unknown>
     const result: Record<string, unknown> = { ...record }
-    const isKeyValueLike = shouldHaveId(record) && 'key' in record && 'value' in record && typeof record['key'] === 'string'
+    const segment = idPathSegment(record)
+    const isKeyValueLike = segment !== null && 'key' in record && 'value' in record && typeof record['key'] === 'string'
 
-    if (shouldHaveId(record)) {
+    let childPath = path
+    if (segment !== null) {
+      childPath = claimPath(path, segment, occupiedPaths)
       const existing = typeof record['id'] === 'string' ? record['id'] : undefined
       if (!existing || seen.has(existing)) {
-        result['id'] = generateId()
+        result['id'] = deriveUnusedId(childPath, seen)
       }
       seen.add(result['id'] as string)
     }
@@ -87,59 +114,45 @@ export function generateIds<T>(obj: T): T {
         continue
       }
       if (typeof v === 'object' && v !== null) {
-        result[key] = walk(v)
+        // A plain container contributes its own key name, so the path
+        // reads `… folder:Pet / items / req:http:Find pet by ID`.
+        result[key] = walk(v, [...childPath, key])
       }
     }
     return result as U
   }
 
-  return walk(obj)
+  return walk(obj, [])
 }
 
 /**
- * Determine if an object should have an id based on its structure.
- * This matches known collection types:
- * - KeyValue: has 'key' and 'value' properties
- * - Environment: has 'name' and 'variables' properties
- * - Request types: has 'name' and 'type' properties (http, graphql, grpc, soap, websocket, sse, odata, auth)
- * - Folder: has 'name', 'items', and 'configuration' properties
- * - Response types: has 'requestId' property
+ * Reserve an entity's derivation path, disambiguating a segment two
+ * siblings spell identically (two same-named folders in one parent) with a
+ * `#<occurrence>` element. The suffix is its own path element rather than
+ * glued onto the segment, so an entity literally named `#1` can never
+ * masquerade as the second occurrence of an unnamed one.
  */
-function shouldHaveId(obj: Record<string, unknown>): boolean {
-  // KeyValue: has key and value
-  if ('key' in obj && 'value' in obj && typeof obj['key'] === 'string') {
-    return true
-  }
+function claimPath(parentPath: readonly string[], segment: string, occupied: Map<string, number>): string[] {
+  const basePath = [...parentPath, segment]
+  const key = JSON.stringify(basePath)
+  const occurrence = occupied.get(key) ?? 0
+  occupied.set(key, occurrence + 1)
+  return occurrence === 0 ? basePath : [...basePath, `#${occurrence}`]
+}
 
-  // Environment: has name and variables array
-  if ('name' in obj && 'variables' in obj && Array.isArray(obj['variables'])) {
-    return true
+/**
+ * The derived id for a path, walked forward until it lands on one no other
+ * entity in this load already holds. Two entities only reach the same
+ * derived id when a THIRD one already carries that exact value as a
+ * persisted id — vanishingly rare, and resolved deterministically here
+ * rather than by falling back to randomness.
+ */
+function deriveUnusedId(path: readonly string[], seen: ReadonlySet<string>): string {
+  let candidate = deriveStableId(path)
+  for (let attempt = 0; seen.has(candidate); attempt++) {
+    candidate = deriveStableId([...path, `#collision${attempt}`])
   }
-
-  // Request types — must stay in lockstep with the class resolver's
-  // `type` discriminants (HTTPRequest…'http', ODataRequest…'odata',
-  // AuthenticationRequest…'auth', …). Omitting one means that request
-  // kind gets no runtime id on legacy load and duplicate ids aren't
-  // regenerated on copy-paste, colliding in every UUID-keyed
-  // per-request store.
-  if ('name' in obj && 'type' in obj) {
-    const requestTypes = ['http', 'graphql', 'grpc', 'soap', 'websocket', 'sse', 'odata', 'auth', 'amqp']
-    if (requestTypes.includes(obj['type'] as string)) {
-      return true
-    }
-  }
-
-  // Folder: has name, items array, and configuration
-  if ('name' in obj && 'items' in obj && 'configuration' in obj && Array.isArray(obj['items'])) {
-    return true
-  }
-
-  // Response types: has requestId
-  if ('requestId' in obj && typeof obj['requestId'] === 'string') {
-    return true
-  }
-
-  return false
+  return candidate
 }
 
 /**

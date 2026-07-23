@@ -142,6 +142,19 @@ describe('project serialization — round-trip stability on reference samples', 
     const s2 = saveDocument(loadCollections(s1))
     expect(s2).toBe(s1)
   })
+
+  it.each(SAMPLES)('the FIRST save is already a fixed point across processes: %s', (fileName) => {
+    const raw = readFileSync(join(SAMPLES_DIR, fileName), 'utf-8')
+
+    // Stronger than the fixed point above, which starts from a document
+    // already backfilled once: two INDEPENDENT load→save pipelines over the
+    // raw bytes must agree. This is what two colleagues opening the same
+    // legacy file on two machines do, and what the git engines rely on —
+    // they parse the same bytes twice and pair the entities BY ID. A random
+    // backfill made these two byte streams differ on every entity that has
+    // no persisted id yet.
+    expect(saveDocument(loadCollections(raw))).toBe(saveDocument(loadCollections(raw)))
+  })
 })
 
 const clone = <T>(v: T): T => JSON.parse(JSON.stringify(v)) as T
@@ -149,11 +162,13 @@ const clone = <T>(v: T): T => JSON.parse(JSON.stringify(v)) as T
 describe('project serialization — insertion-order independence (cross-build churn)', () => {
   it.each(SAMPLES)('same data in a different key order serializes identically: %s', (fileName) => {
     const raw = readFileSync(join(SAMPLES_DIR, fileName), 'utf-8')
-    // Establish an id-stable plain baseline (ids assigned + de-duplicated
-    // once), so this test isolates KEY ORDER — the invariant under test —
-    // from the orthogonal runtime-id backfill.
+    // Both sides go through their OWN load: the id backfill is derived from
+    // the document, not random, so it no longer has to be neutralised by
+    // sharing one pre-backfilled baseline. Shuffling the keys BEFORE the
+    // load also proves the derivation itself ignores key order — a
+    // key-order-sensitive path would give the two builds different ids.
     const stable = clone({ collections: processAfterDeserialization(loadCollections(raw)) })
-    const shuffled = reverseKeys(clone(stable))
+    const shuffled = clone({ collections: processAfterDeserialization(reverseKeys(loadCollections(raw))) })
 
     // Sanity: the shuffle really did change the in-memory key order, so this
     // test would be RED without the canonical ordering (it models build A's
@@ -162,7 +177,7 @@ describe('project serialization — insertion-order independence (cross-build ch
 
     // …yet after canonicalization both serialize to the same bytes.
     // (Clone per call — `prepareForSerialization` normalizes values in place.)
-    expect(dumpYaml(prepareForSerialization(reverseKeys(clone(stable))))).toBe(
+    expect(dumpYaml(prepareForSerialization(clone(shuffled)))).toBe(
       dumpYaml(prepareForSerialization(clone(stable)))
     )
   })
