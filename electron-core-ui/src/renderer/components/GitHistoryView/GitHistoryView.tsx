@@ -19,8 +19,9 @@ export interface GitHistoryViewProps {
    * Restore the open file to a past commit's content. Wired to the row's
    * right-click "recover this version" entry; the host owns the actual
    * checkout-file-at-revision + re-hydrate. Omitting it hides the entry.
-   * The entry is disabled on the commit the working copy is currently at
-   * (recovering the current version is a no-op).
+   * Active on every row, including the commit the working copy is
+   * currently at — that's the row a user needs to undo a prior recover
+   * and return to the checked-out version.
    */
   onRecoverVersion?: (hash: string) => void
   /**
@@ -119,7 +120,7 @@ export const GitHistoryView: React.FC<GitHistoryViewProps> = ({
   const formatCommitDate = formatDate ?? ((iso: string) => defaultFormatDate(iso, i18n.language))
   const [selectedHash, setSelectedHash] = useState<string | null>(initialSelectedHash ?? commits[0]?.hash ?? null)
   // Right-click "recover this version" menu. `null` = closed.
-  const [menu, setMenu] = useState<{ x: number; y: number; hash: string; isHead: boolean } | null>(null)
+  const [menu, setMenu] = useState<{ x: number; y: number; hash: string } | null>(null)
 
   const rows = useMemo(() => computeLaneLayout(commits, mainTipHash), [commits, mainTipHash])
   const gutterLanes = useMemo(() => Math.max(1, ...rows.map((r) => r.laneCount)), [rows])
@@ -152,7 +153,7 @@ export const GitHistoryView: React.FC<GitHistoryViewProps> = ({
                 ? (event) => {
                     event.preventDefault()
                     setSelectedHash(commit.hash)
-                    setMenu({ x: event.clientX, y: event.clientY, hash: commit.hash, isHead })
+                    setMenu({ x: event.clientX, y: event.clientY, hash: commit.hash })
                   }
                 : undefined}
               onKeyDown={(event) => {
@@ -237,8 +238,6 @@ export const GitHistoryView: React.FC<GitHistoryViewProps> = ({
             id: 'recover-version',
             label: t('gitHistory.recoverVersion'),
             icon: 'history',
-            // Recovering the commit the working copy is already at is a no-op.
-            disabled: menu.isHead,
             onClick: () => {
               onRecoverVersion(menu.hash)
               setMenu(null)
