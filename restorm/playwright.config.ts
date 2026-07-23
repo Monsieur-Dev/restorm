@@ -339,6 +339,18 @@ const settingsTabTestDir = defineBddConfig({
   outputDir: '.features-gen/settings-tab'
 })
 
+const themeCarouselA11yTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/theme-carousel-a11y/features/**/*.feature',
+  steps: [
+    'tests/e2e/bdd/theme-carousel-a11y/steps/**/*.ts',
+    // Reuses the "no file is open" / "open Settings from the gear button"
+    // steps already registered for the settings-tab suite.
+    'tests/e2e/bdd/settings-tab/steps/**/*.ts',
+    'tests/e2e/bdd/fixtures/settings-tab.fixture.ts'
+  ],
+  outputDir: '.features-gen/theme-carousel-a11y'
+})
+
 const mcpLogsTestDir = defineBddConfig({
   features: 'tests/e2e/bdd/mcp-logs/features/mcp-logs.feature',
   steps: [
@@ -732,6 +744,11 @@ export default defineConfig({
     {
       name: 'settings-tab',
       testDir: settingsTabTestDir,
+      timeout: 120 * 1000
+    },
+    {
+      name: 'theme-carousel-a11y',
+      testDir: themeCarouselA11yTestDir,
       timeout: 120 * 1000
     },
     {

@@ -405,9 +405,6 @@
   "bookmarkRibbon": {
     "addBookmark": "Lesezeichen hinzufügen"
   },
-  "themeCarousel": {
-    "selectedTheme": "Ausgewähltes Design"
-  },
   "toaster": {
     "notificationsRegion": "Benachrichtigungen"
   },
