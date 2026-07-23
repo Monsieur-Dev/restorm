@@ -282,6 +282,14 @@
   gap: 8px;
   padding: 4px 16px 4px 16px;
   min-width: 0;
+  /* Room for the absolutely-positioned request action bar that sits at this
+   * height on the right: without it a long title would run underneath the
+   * discs instead of truncating. The bar publishes its exact measured width
+   * (+ inset + clearance) as this custom property, so a one-disc bar reserves
+   * less than a two-disc bar and the title truncates right at the bar's left
+   * edge. The fallback covers the brief first paint before the measurement
+   * lands, and non-request tabs that carry no bar. */
+  padding-right: var(--restorm-action-toolbar-reserve, 180px);
 }
 
 /* Star toggle anchored top-right of the workbench tab, immediately to
@@ -387,6 +395,45 @@
   /* EditableLabel renders as <h1>; override its native margin so the
    * row stays visually tight and aligned with the icon + tags. */
   min-width: 0;
+  /* A long title truncates with an ellipsis on a single line instead of
+   * wrapping — the reserved padding-right keeps it clear of the fixed
+   * action bar, and the ellipsis keeps it to one line. Scoped to THIS
+   * title's H1 only; the shared `ecui-editable-label` primitive is left
+   * untouched so other editable labels can still wrap. */
+  overflow: hidden;
+}
+
+.restorm-workbench-tab-title .ecui-editable-label-trigger {
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  /* The trigger is a native <button>, which the UA stylesheet centres
+   * (`text-align: center`). That only shows once a long title occupies
+   * more than one line's worth of box; force it flush-left, and pack the
+   * inline-flex item to the start, so the title always begins at the left
+   * edge in every layout. */
+  text-align: left;
+  justify-content: flex-start;
+  /* Trim the pencil slot (default 24px) to just fit the 10px hint at
+   * right:4px, so a truncated title stops a hair from the bar instead of
+   * leaving a wide dead band before it. */
+  padding-right: 16px;
+}
+
+.restorm-workbench-tab-title .ecui-editable-label-text {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: left;
+  /* `overflow: hidden` (needed for the ellipsis) also clips the vertical box,
+   * so the line box must be tall enough to hold descenders (g, p, y, …) —
+   * a box the height of the font alone shears their bottoms off. A line-height
+   * with headroom plus a couple of px of bottom padding keeps the clip purely
+   * horizontal. */
+  line-height: 1.35;
+  padding-bottom: 2px;
 }
 
 .restorm-workbench-tab-title h1 {

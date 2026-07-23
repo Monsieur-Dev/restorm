@@ -36,6 +36,10 @@ import { BaseRequestTabView } from './BaseRequestTabView'
 import { ResponseHistoryModal } from '../Modals/ResponseHistoryModal'
 import { AuthenticationConfigurationTab } from './AuthenticationConfigurationTab'
 import { BeamWrap } from '../common/BeamWrap'
+import { RoundActionButton } from '../common/RoundActionButton'
+import { RequestActionToolbar } from './RequestActionToolbar'
+import { useIsInWorkbenchTab } from '../../contexts/workbenchTabHost'
+import { SendButtonEnvSwitcher } from './SendButtonEnvSwitcher'
 import { ServerConfigLockedHint } from '../common/ServerConfigLockedHint'
 import { RegistryBadge } from '../common/RegistryBadge'
 import { KNOWN_HTTP_METHODS, httpBadgeIdFor } from '../../../../shared/utils/httpMethod'
@@ -52,7 +56,6 @@ import { DocumentationHost } from '../documentation/DocumentationHost'
 import { findOperationForRoute } from '../../../../shared/utils/findOperationForRoute'
 import { useCurlPaste, type ParsedCurl } from '../../hooks/useCurlPaste'
 import { CurlPasteCallout } from '../CurlPasteCallout'
-import { SendButtonEnvSwitcher } from './SendButtonEnvSwitcher'
 import { toasterService } from 'electron-core-ui/renderer'
 import { HeaderHoverTooltip } from '../MainView/HeaderHoverTooltip'
 
@@ -192,7 +195,10 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
   // `requestPanelStateStore` lookup in `useState`'s lazy initializer
   // below and silently fall through to the empty-section heuristic
   // on a tab reopen.
-  const { selectedEnvId, environments, envColor, projectUuid } = useEnvironmentContext()
+  const { selectedEnvId, environments, envColor, envIcon, envPaintColor, projectUuid } = useEnvironmentContext()
+  // The fixed bar anchors on the workbench tab, so it only exists there; the
+  // conflict / auth modals keep the button inline in the URL row.
+  const inWorkbenchTab = useIsInWorkbenchTab()
   const resolveAuthRequest = useAuthRequestResolver()
   const collections = useRestormStore((state) => state.collections)
   const handlebarsHelpers = useHandlebarsHelpers()
@@ -1215,8 +1221,9 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
           </div>
         </HeaderHoverTooltip>
       )}
-      {isServer ? (
-        // Listen↔Stop toggle (Send has no meaning when hosting a mock).
+      {/* Outside a workbench tab (conflict panel, auth modal) there is nothing
+        * for the fixed bar to anchor to, so the button stays inline here. */}
+      {!inWorkbenchTab && (isServer ? (
         <BeamWrap active={isListening} size={22} borderWidth={1.5}>
           <Button
             icon={isListening ? 'debug-disconnect' : 'plug'}
@@ -1231,9 +1238,6 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
           />
         </BeamWrap>
       ) : (
-        // One persistent BeamWrap around both states so the beam finishes its
-        // lap when the request ends (the cancel↔send toggle inside doesn't
-        // remount the wrapper, which would otherwise cut the beam mid-orbit).
         <BeamWrap active={isSending} size={22} borderWidth={1.5}>
           {isSending ? (
             <Button
@@ -1254,7 +1258,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
             </SendButtonEnvSwitcher>
           )}
         </BeamWrap>
-      )}
+      ))}
     </ControlGroup>
     {httpReq && (
       <div style={requestOptionsRowStyle} data-testid="http-request-options-row">
@@ -1323,6 +1327,42 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
     </div>
   ) : undefined
 
+  // Action bar, anchored top-right of the workbench tab. It lives outside the
+  // tab + split subtree so the response panel opening cannot displace it —
+  // which is exactly the frustration it exists to remove.
+  const actionToolbar = !inWorkbenchTab ? undefined : (
+    <RequestActionToolbar data-testid="http-request-action-toolbar">
+      {isServer ? (
+        // Listen↔Stop toggle (Send has no meaning when hosting a mock). Server
+        // mode ignores environments, so no env colour and no right-click picker.
+        <RoundActionButton
+          icon={isListening ? 'debug-disconnect' : 'plug'}
+          onClick={isListening ? handleStop : handleListen}
+          disabled={!!conflictMode}
+          tone={isListening ? 'stop' : 'run'}
+          beamActive={isListening}
+          ariaLabel={isListening ? t('http.server.stopListening') : t('http.server.startListening')}
+          data-testid="http-server-listen-button"
+        />
+      ) : (
+        // ONE instance across both states: flipping props (rather than swapping
+        // two components) keeps the beam host mounted, so the beam finishes its
+        // lap instead of being cut mid-orbit when the request ends.
+        <RoundActionButton
+          icon={isSending ? 'close' : 'send'}
+          onClick={isSending ? handleCancel : handleSend}
+          tone={isSending ? 'stop' : 'run'}
+          {...(isSending || !envPaintColor ? {} : { color: envPaintColor })}
+          {...(isSending || !envIcon ? {} : { envIcon })}
+          envSwitch={!isSending}
+          beamActive={isSending}
+          ariaLabel={isSending ? t('requestTab.cancel') : t('requestTab.send')}
+          data-testid={isSending ? 'http-request-cancel-button' : 'http-request-send-button'}
+        />
+      )}
+    </RequestActionToolbar>
+  )
+
   return (
     <>
       <BaseRequestTabView
@@ -1330,6 +1370,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
         {...(conflictExtraTabs ? { extraRequestTabs: conflictExtraTabs } : {})}
         requestId={request.id}
         urlSection={urlSection}
+        {...(actionToolbar ? { actionToolbar } : {})}
         requestContent={requestContent}
         codeSnippetsContent={codeSnippetsContent}
         {...(docsContent !== undefined ? { docsContent } : {})}

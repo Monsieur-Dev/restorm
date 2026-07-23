@@ -16,6 +16,9 @@ import {
 import type { GrpcMockMethod, GrpcRequest, GrpcCallType } from '../../../../shared/types/collections'
 import { BaseRequestTabView } from './BaseRequestTabView'
 import { BeamWrap } from '../common/BeamWrap'
+import { RoundActionButton } from '../common/RoundActionButton'
+import { RequestActionToolbar } from './RequestActionToolbar'
+import { useIsInWorkbenchTab } from '../../contexts/workbenchTabHost'
 import { ServerConfigLockedHint } from '../common/ServerConfigLockedHint'
 import { updateReactiveProperty } from './requestTabViewUtils'
 import { useIsGrpcServerListening } from '../../services/grpcServerListeningStore'
@@ -49,6 +52,8 @@ export interface GrpcServerTabViewProps {
  */
 export const GrpcServerTabView: React.FC<GrpcServerTabViewProps> = ({ request, conflictMode }) => {
   const { t } = useTranslation()
+  // The fixed bar anchors on the workbench tab, so it only exists there.
+  const inWorkbenchTab = useIsInWorkbenchTab()
 
   const [url, setUrlState] = useState(request.url)
   const [protoContent, setProtoContentState] = useState(request.protoContent ?? '')
@@ -310,6 +315,7 @@ export const GrpcServerTabView: React.FC<GrpcServerTabViewProps> = ({ request, c
       >
         {t('grpc.server.reflection', 'Reflection')}
       </Toggle>
+      {!inWorkbenchTab && (
       <BeamWrap active={isListening} size={22} borderWidth={1.5}>
         <Button
           icon={isListening ? 'debug-disconnect' : 'plug'}
@@ -323,6 +329,7 @@ export const GrpcServerTabView: React.FC<GrpcServerTabViewProps> = ({ request, c
           data-testid="grpc-server-listen-button"
         />
       </BeamWrap>
+      )}
     </ControlGroup>
   )
 
@@ -342,10 +349,27 @@ export const GrpcServerTabView: React.FC<GrpcServerTabViewProps> = ({ request, c
     </div>
   )
 
+  // Fixed action bar, anchored top-right of the workbench tab. Server mode
+  // ignores environments, so the disc keeps its tone and has no env picker.
+  const actionToolbar = !inWorkbenchTab ? undefined : (
+    <RequestActionToolbar>
+      <RoundActionButton
+        icon={isListening ? 'debug-disconnect' : 'plug'}
+        onClick={isListening ? handleStop : handleListen}
+        disabled={!!conflictMode}
+        tone={isListening ? 'stop' : 'run'}
+        beamActive={isListening}
+        ariaLabel={isListening ? t('grpc.server.stopListening', 'Stop server') : t('grpc.server.startListening', 'Start server')}
+        data-testid="grpc-server-listen-button"
+      />
+    </RequestActionToolbar>
+  )
+
   return (
     <BaseRequestTabView
       requestId={request.id}
       urlSection={urlSection}
+      {...(actionToolbar ? { actionToolbar } : {})}
       requestContent={requestContent}
       codeSnippetsContent={t('grpc.server.snippetsUnavailable', 'Code snippets are not available for a mock server.')}
       notes={request.notes}

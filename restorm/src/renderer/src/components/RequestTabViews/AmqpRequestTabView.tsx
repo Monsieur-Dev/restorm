@@ -30,6 +30,9 @@ import { DEFAULT_AMQP_TIMEOUT_MS } from '../../../../shared/config/constants'
 import { SendButtonEnvSwitcher } from './SendButtonEnvSwitcher'
 import { useIsAmqpListening } from '../../services/amqpListeningStore'
 import { BeamWrap } from '../common/BeamWrap'
+import { RoundActionButton } from '../common/RoundActionButton'
+import { RequestActionToolbar } from './RequestActionToolbar'
+import { useIsInWorkbenchTab } from '../../contexts/workbenchTabHost'
 import { HeaderHoverTooltip } from '../MainView/HeaderHoverTooltip'
 import './WebSocketChat.css'
 
@@ -107,7 +110,9 @@ const Field: React.FC<{ label: string; children: React.ReactNode }> = ({ label, 
 export const AmqpRequestTabView: React.FC<AmqpRequestTabViewProps> = ({ request }) => {
   const [historyModalOpen, setHistoryModalOpen] = useState(false)
   const { t } = useTranslation()
-  const { selectedEnvId, environments, envColor, projectUuid: _projectUuid } = useEnvironmentContext()
+  const { selectedEnvId, environments, envColor, projectUuid: _projectUuid, envIcon, envPaintColor } = useEnvironmentContext()
+  // The fixed bar anchors on the workbench tab, so it only exists there.
+  const inWorkbenchTab = useIsInWorkbenchTab()
   const handlebarsHelpers = useHandlebarsHelpers()
   const previousEnvIdRef = useRef<string | null>(null)
   const sendButtonStyle: React.CSSProperties | undefined = envColor
@@ -472,7 +477,7 @@ export const AmqpRequestTabView: React.FC<AmqpRequestTabViewProps> = ({ request 
           <Field label={t('amqp.queue')}>
             <RestormVariableInputBox key={`queue-${transportEpoch}`} value={queue} onChange={setQueue} variables={envVariables} helpers={handlebarsHelpers} placeholder={t('amqp.queuePlaceholder')} data-testid="amqp-queue-input" />
           </Field>
-          {mode === 'subscribe' && (
+          {!inWorkbenchTab && mode === 'subscribe' && (
             <>
               <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12 }}>
                 <Toggle checked={autoAck} onChange={setAutoAck} aria-label={t('amqp.autoAck')} data-testid="amqp-autoack-toggle" />
@@ -483,7 +488,7 @@ export const AmqpRequestTabView: React.FC<AmqpRequestTabViewProps> = ({ request 
               </Field>
             </>
           )}
-          {mode === 'browse' && (
+          {!inWorkbenchTab && mode === 'browse' && (
             <Field label={t('amqp.browsePeekCount')}>
               <InputBox value={browsePeekCount} onChange={setBrowsePeekCount} options={{ placeholder: '50' }} data-testid="amqp-browse-peek-count-input" />
             </Field>
@@ -589,7 +594,7 @@ export const AmqpRequestTabView: React.FC<AmqpRequestTabViewProps> = ({ request 
           />
         </div>
       </HeaderHoverTooltip>
-      {mode === 'publish' && (
+      {!inWorkbenchTab && mode === 'publish' && (
         <SendButtonEnvSwitcher>
           <BeamWrap active={isExecuting} size={22} borderWidth={1.5}>
             <Button
@@ -603,7 +608,7 @@ export const AmqpRequestTabView: React.FC<AmqpRequestTabViewProps> = ({ request 
           </BeamWrap>
         </SendButtonEnvSwitcher>
       )}
-      {mode === 'browse' && (
+      {!inWorkbenchTab && mode === 'browse' && (
         <SendButtonEnvSwitcher>
           <BeamWrap active={isExecuting} size={22} borderWidth={1.5}>
             <Button
@@ -617,7 +622,7 @@ export const AmqpRequestTabView: React.FC<AmqpRequestTabViewProps> = ({ request 
           </BeamWrap>
         </SendButtonEnvSwitcher>
       )}
-      {mode === 'subscribe' && (
+      {!inWorkbenchTab && mode === 'subscribe' && (
         <>
           <SendButtonEnvSwitcher>{connectButton}</SendButtonEnvSwitcher>
           <Button
@@ -646,11 +651,66 @@ export const AmqpRequestTabView: React.FC<AmqpRequestTabViewProps> = ({ request 
     return () => { subscription.unsubscribe() }
   }, [request.id])
 
+  // Fixed action bar, one shape per mode. `subscribe` is the connection family:
+  // a smaller connect/disconnect disc beside the primary send, which stays
+  // disabled until the connection is up.
+  const actionToolbar = !inWorkbenchTab ? undefined : (
+    <RequestActionToolbar>
+      {mode === 'publish' ? (
+        <RoundActionButton
+          icon="send"
+          onClick={handleExecute}
+          {...(envPaintColor ? { color: envPaintColor } : {})}
+          {...(envIcon ? { envIcon } : {})}
+          envSwitch
+          beamActive={isExecuting}
+          ariaLabel={t('amqp.send')}
+          data-testid="amqp-send-button"
+        />
+      ) : mode === 'browse' ? (
+        <RoundActionButton
+          icon="search"
+          onClick={handleExecute}
+          {...(envPaintColor ? { color: envPaintColor } : {})}
+          {...(envIcon ? { envIcon } : {})}
+          envSwitch
+          beamActive={isExecuting}
+          ariaLabel={t('amqp.browseButton')}
+          data-testid="amqp-browse-button"
+        />
+      ) : (
+        <>
+          <RoundActionButton
+            icon={isListening ? 'debug-disconnect' : 'plug'}
+            onClick={isListening ? handleDisconnect : handleConnect}
+            tone={isListening ? 'stop' : 'run'}
+            {...(isListening || !envPaintColor ? {} : { color: envPaintColor })}
+            {...(isListening || !envIcon ? {} : { envIcon })}
+            envSwitch={!isListening}
+            beamActive={isListening}
+            ariaLabel={isListening ? t('amqp.disconnect') : t('amqp.connect')}
+            data-testid="amqp-connect-button"
+          />
+          <RoundActionButton
+            size="secondary"
+            icon="send"
+            onClick={handleSendOnConnection}
+            disabled={!isListening}
+            {...(envPaintColor ? { color: envPaintColor } : {})}
+            ariaLabel={t('amqp.send')}
+            data-testid="amqp-send-button"
+          />
+        </>
+      )}
+    </RequestActionToolbar>
+  )
+
   return (
     <>
       <BaseRequestTabView
         requestId={request.id}
         urlSection={urlSection}
+        {...(actionToolbar ? { actionToolbar } : {})}
         requestContent={requestContent}
         codeSnippetsContent={codeSnippetsContent}
         notes={request.notes}

@@ -89,7 +89,9 @@ When('I open the request {string} and send it', async ({}, name: string) => {
   // which starts collapsed — its child rows aren't in the DOM until expanded.
   await expandFolder(p, 'Petstore')
   await sidebarRow(p, name).dblclick()
-  const sendButton = p.locator('[data-testid="http-request-send-button"]').first()
+  // Scope to the visible (active) tab's send button: each open workbench tab
+  // owns its own fixed action bar, so inactive tabs' hidden buttons also match.
+  const sendButton = p.locator('[data-testid="http-request-send-button"]:visible').first()
   await expect(sendButton).toBeVisible({ timeout: 15000 })
   await sendButton.click()
   // Status code lives in the response panel's "Infos" tab, not the

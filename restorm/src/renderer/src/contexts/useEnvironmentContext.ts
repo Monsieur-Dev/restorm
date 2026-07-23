@@ -1,4 +1,5 @@
 import { useContext, createContext } from 'react'
+import type { Icon } from 'electron-core-ui/types'
 import type { Environment } from '../../../shared/types/collections'
 
 export interface EnvironmentContextValue {
@@ -6,6 +7,17 @@ export interface EnvironmentContextValue {
   selectedEnvId: string | null
   tagColors?: Record<string, string> | undefined
   envColor?: string | undefined
+  /** Icon of the active environment, when it defines one. Derived here rather
+   * than re-resolved per consumer so every surface that paints the active env
+   * (send disc, statusbar, …) reads the same value. */
+  envIcon?: Icon | undefined
+  /** Colour to PAINT the active environment with — `envColor` when the
+   * environment defines one, the shared default when it does not, and
+   * `undefined` when the project has no environments at all. This is what a
+   * surface showing "the environment" should use; `envColor` alone renders
+   * nothing for an environment that simply never picked a colour, which is why
+   * the statusbar pill and the send disc would otherwise disagree. */
+  envPaintColor?: string | undefined
   /** Project UUID that owns the env-folder selected by
    * `persistenceKey.projectUuid` (mirrored here so callers like
    * `SendButtonEnvSwitcher` can run sibling-override cleanup without

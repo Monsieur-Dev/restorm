@@ -29,3 +29,15 @@
 	height: 100%;
 	max-width: none;
 }
+
+/* Inert: the wrapper stays in the tree (unmounting it would restart a running
+ * border-beam below) but must never become an event target. `pointer-events`
+ * is re-enabled on the child so the wrapped control keeps working — the
+ * wrapper disappears from hit-testing, the button does not. */
+.restorm-send-button-env-switcher-inert {
+	pointer-events: none;
+}
+
+.restorm-send-button-env-switcher-inert > * {
+	pointer-events: auto;
+}

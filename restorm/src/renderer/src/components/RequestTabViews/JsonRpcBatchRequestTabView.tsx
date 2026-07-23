@@ -28,6 +28,9 @@ import { ResponseHistoryModal } from '../Modals/ResponseHistoryModal'
 import { updateReactiveProperty } from './requestTabViewUtils'
 import { SendButtonEnvSwitcher } from './SendButtonEnvSwitcher'
 import { BeamWrap } from '../common/BeamWrap'
+import { RoundActionButton } from '../common/RoundActionButton'
+import { RequestActionToolbar } from './RequestActionToolbar'
+import { useIsInWorkbenchTab } from '../../contexts/workbenchTabHost'
 import { HeaderHoverTooltip } from '../MainView/HeaderHoverTooltip'
 import { JsonRpcBatchEditor } from './JsonRpcBatchEditor'
 import { cloneForEventBus } from '../../utils/cloneForEventBus'
@@ -41,7 +44,9 @@ export interface JsonRpcBatchRequestTabViewProps {
 export const JsonRpcBatchRequestTabView: React.FC<JsonRpcBatchRequestTabViewProps> = ({ request }) => {
   const [historyModalOpen, setHistoryModalOpen] = useState(false)
   const { t } = useTranslation()
-  const { selectedEnvId, environments, envColor, projectUuid } = useEnvironmentContext()
+  const { selectedEnvId, environments, envColor, projectUuid, envIcon, envPaintColor } = useEnvironmentContext()
+  // The fixed bar anchors on the workbench tab, so it only exists there.
+  const inWorkbenchTab = useIsInWorkbenchTab()
   const handlebarsHelpers = useHandlebarsHelpers()
   const previousEnvIdRef = useRef<string | null>(null)
   const sendButtonStyle: React.CSSProperties | undefined = envColor
@@ -362,6 +367,7 @@ export const JsonRpcBatchRequestTabView: React.FC<JsonRpcBatchRequestTabViewProp
           />
         </div>
       </HeaderHoverTooltip>
+  {!inWorkbenchTab && (
       <SendButtonEnvSwitcher>
         <BeamWrap active={isSending} size={22} borderWidth={1.5}>
           <Button
@@ -376,6 +382,7 @@ export const JsonRpcBatchRequestTabView: React.FC<JsonRpcBatchRequestTabViewProp
           />
         </BeamWrap>
       </SendButtonEnvSwitcher>
+  )}
     </ControlGroup>
   )
 
@@ -390,11 +397,30 @@ export const JsonRpcBatchRequestTabView: React.FC<JsonRpcBatchRequestTabViewProp
     return () => { subscription.unsubscribe() }
   }, [request.id])
 
+  // Fixed action bar, anchored top-right of the workbench tab: opening the
+  // response panel must never move the button out from under the pointer.
+  const actionToolbar = !inWorkbenchTab ? undefined : (
+    <RequestActionToolbar>
+      <RoundActionButton
+        icon={isSending ? 'close' : 'send'}
+        onClick={isSending ? handleCancel : handleSend}
+        tone={isSending ? 'stop' : 'run'}
+        {...(isSending || !envPaintColor ? {} : { color: envPaintColor })}
+        {...(isSending || !envIcon ? {} : { envIcon })}
+        envSwitch={!isSending}
+        beamActive={isSending}
+        ariaLabel={isSending ? t('cancel') : t('jsonrpcBatch.send', 'Send batch')}
+        data-testid="jsonrpc-batch-action-button"
+      />
+    </RequestActionToolbar>
+  )
+
   return (
     <>
       <BaseRequestTabView
         requestId={request.id}
         urlSection={urlSection}
+        {...(actionToolbar ? { actionToolbar } : {})}
         requestContent={requestContent}
         codeSnippetsContent={codeSnippetsContent}
         notes={request.notes}

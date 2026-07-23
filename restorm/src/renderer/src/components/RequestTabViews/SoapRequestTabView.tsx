@@ -38,6 +38,9 @@ import { useCurlPaste, type ParsedCurl } from '../../hooks/useCurlPaste'
 import { CurlPasteCallout } from '../CurlPasteCallout'
 import { SendButtonEnvSwitcher } from './SendButtonEnvSwitcher'
 import { BeamWrap } from '../common/BeamWrap'
+import { RoundActionButton } from '../common/RoundActionButton'
+import { RequestActionToolbar } from './RequestActionToolbar'
+import { useIsInWorkbenchTab } from '../../contexts/workbenchTabHost'
 import { toasterService } from 'electron-core-ui/renderer'
 import { HeaderHoverTooltip } from '../MainView/HeaderHoverTooltip'
 import type { EntityFieldDiff } from '../../services/conflictFieldDiff'
@@ -83,7 +86,9 @@ export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({
   // See HTTPRequestTabView — `projectUuid` from the env context is
   // synchronously available, unlike `useFileService` which races the
   // `useState` lazy initializer.
-  const { selectedEnvId, environments, envColor, projectUuid } = useEnvironmentContext()
+  const { selectedEnvId, environments, envColor, projectUuid, envIcon, envPaintColor } = useEnvironmentContext()
+  // The fixed bar anchors on the workbench tab, so it only exists there.
+  const inWorkbenchTab = useIsInWorkbenchTab()
   const collections = useRestormStore((state) => state.collections)
   const handlebarsHelpers = useHandlebarsHelpers()
   const { apiDocumentation, route } = useApiDocumentationFromRequest(request)
@@ -537,6 +542,7 @@ export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({
             />
           </div>
         </HeaderHoverTooltip>
+  {!inWorkbenchTab && (
         <SendButtonEnvSwitcher>
           <BeamWrap active={isSending} size={22} borderWidth={1.5}>
             <Button
@@ -551,6 +557,7 @@ export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({
             />
           </BeamWrap>
         </SendButtonEnvSwitcher>
+  )}
       </ControlGroup>
       <div style={{ fontSize: 12, color: 'var(--descriptionForeground)' }}>
         {request.service}/{request.operation} • SOAPAction: {request.soapAction}
@@ -573,6 +580,24 @@ export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({
     return () => { subscription.unsubscribe() }
   }, [request.id])
 
+  // Fixed action bar, anchored top-right of the workbench tab: opening the
+  // response panel must never move the button out from under the pointer.
+  const actionToolbar = !inWorkbenchTab ? undefined : (
+    <RequestActionToolbar>
+      <RoundActionButton
+        icon={isSending ? 'close' : 'send'}
+        onClick={isSending ? handleCancel : handleSend}
+        tone={isSending ? 'stop' : 'run'}
+        {...(isSending || !envPaintColor ? {} : { color: envPaintColor })}
+        {...(isSending || !envIcon ? {} : { envIcon })}
+        envSwitch={!isSending}
+        beamActive={isSending}
+        ariaLabel={isSending ? t('cancel') : t('soap.send')}
+        data-testid="soap-request-action-button"
+      />
+    </RequestActionToolbar>
+  )
+
   return (
     <>
       <BaseRequestTabView
@@ -580,6 +605,7 @@ export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({
         {...(conflictExtraTabs ? { extraRequestTabs: conflictExtraTabs } : {})}
         requestId={request.id}
         urlSection={urlSection}
+        {...(actionToolbar ? { actionToolbar } : {})}
         requestContent={requestContent}
         codeSnippetsContent={codeSnippetsContent}
         {...(apiDocumentation && route && findOperationForRoute(apiDocumentation, route) ? { docsContent: <DocumentationHost apiDocumentation={apiDocumentation} filters={[route]} /> } : {})}
