@@ -309,10 +309,10 @@ const DateTimePickerInner: React.FC<DateTimePickerProps> = ({
     if (effectiveOutputMode === 'pattern') {
       const hasTimeTokens = /HH|mm|ss/.test(effectivePattern)
       if (nextIncludeTime && !hasTimeTokens) {
-        handleSetPattern('YYYY-MM-DD HH:mm:ss')
+        handleSetPattern('yyyy-MM-dd HH:mm:ss')
       }
       if (!nextIncludeTime && hasTimeTokens) {
-        handleSetPattern('YYYY-MM-DD')
+        handleSetPattern('yyyy-MM-dd')
       }
     }
   }, [
