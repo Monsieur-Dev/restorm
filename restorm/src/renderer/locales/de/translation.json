@@ -2171,6 +2171,7 @@
     "setFavorite": "Favorit festlegen",
     "stopScenarioRun": "Szenario-Lauf stoppen",
     "updateCustomValueList": "Werteliste aktualisieren",
+    "updateEnvironment": "Umgebung aktualisieren",
     "updateFolder": "Ordner aktualisieren",
     "updateRequest": "Anfrage aktualisieren",
     "updateScenario": "Szenario aktualisieren",

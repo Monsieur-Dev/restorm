@@ -10,7 +10,8 @@ export type { RuntimeId }
 /**
  * Type of icon (emoji character, codicon name, library icons, or no icon).
  */
-export type IconType = 'emoji' | 'codicon' | 'iconoir' | 'phosphor' | 'material' | 'simpleicons' | 'feather' | 'fontawesome' | 'none'
+export const ICON_TYPES = ['emoji', 'codicon', 'iconoir', 'phosphor', 'material', 'simpleicons', 'feather', 'fontawesome', 'none'] as const
+export type IconType = (typeof ICON_TYPES)[number]
 
 /**
  * Represents an icon that can be an emoji, codicon, or an icon from supported libraries.

@@ -2171,6 +2171,7 @@
     "setFavorite": "Aseta suosikki",
     "stopScenarioRun": "Pysäytä skenaarion suoritus",
     "updateCustomValueList": "Päivitä arvoluettelo",
+    "updateEnvironment": "Päivitä ympäristö",
     "updateFolder": "Päivitä kansio",
     "updateRequest": "Päivitä pyyntö",
     "updateScenario": "Päivitä skenaario",

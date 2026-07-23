@@ -2171,6 +2171,7 @@
     "setFavorite": "Definir um favorito",
     "stopScenarioRun": "Parar uma execução de cenário",
     "updateCustomValueList": "Atualizar uma lista de valores",
+    "updateEnvironment": "Atualizar um ambiente",
     "updateFolder": "Atualizar uma pasta",
     "updateRequest": "Atualizar um pedido",
     "updateScenario": "Atualizar um cenário",

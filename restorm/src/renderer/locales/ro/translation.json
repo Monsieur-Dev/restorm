@@ -2172,6 +2172,7 @@
     "setFavorite": "Setează un favorit",
     "stopScenarioRun": "Oprește o execuție de scenariu",
     "updateCustomValueList": "Actualizează o listă de valori",
+    "updateEnvironment": "Actualizează un mediu",
     "updateFolder": "Actualizează un folder",
     "updateRequest": "Actualizează o cerere",
     "updateScenario": "Actualizează un scenariu",
