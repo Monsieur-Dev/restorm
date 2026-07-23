@@ -56,18 +56,20 @@ export function flattenEntities(items: FolderItem[]): Map<string, { kind: GitEnt
  *
  * `stripIds` clears the runtime-only ids `processAfterDeserialization`
  * assigns to key-value rows (headers / params / pathParams /
- * producedHeaders) on EVERY independent parse — without it, two byte-
- * identical requests parsed from `ours`/`theirs` YAML each get their own
- * `crypto.randomUUID()` per header row, so the raw JSON.stringify would
- * report a spurious diff on any request that merely HAS headers, whether
- * or not their content actually changed. `diffProjectEntities` below
- * dodges this by running its two in-memory sides through the full
- * `prepareForSerialization` upstream; `identifyConflictingEntities`
- * (`gitConflictModel.ts`) hands `flattenEntities` the freshly-parsed
- * items (ids intact, so `RestormKeyValueTable` rows keep stable React
- * keys when rendered) and relies on THIS function to normalize away the
- * id churn for comparison only — the returned `FolderItem` itself is
- * never mutated.
+ * producedHeaders) on EVERY independent parse. Those ids are DERIVED from
+ * the row's position in the document (`shared/utils/stableId.ts`), so two
+ * parses of the same bytes agree — but the derivation path includes the
+ * owning folder chain, so the SAME request compared across a move carries
+ * different key-value ids on the two sides. Without `stripIds` the raw
+ * JSON.stringify would then report a spurious diff on any request that
+ * merely HAS headers, whether or not their content actually changed.
+ * `diffProjectEntities` below dodges this by running its two in-memory
+ * sides through the full `prepareForSerialization` upstream;
+ * `identifyConflictingEntities` (`gitConflictModel.ts`) hands
+ * `flattenEntities` the freshly-parsed items (ids intact, so
+ * `RestormKeyValueTable` rows keep stable React keys when rendered) and
+ * relies on THIS function to normalize away the id churn for comparison
+ * only — the returned `FolderItem` itself is never mutated.
  */
 export function ownFieldsSnapshot(item: FolderItem): string {
   const { items: _children, ...own } = item as FolderItem & { items?: FolderItem[] }
@@ -135,9 +137,12 @@ function collectEntities(items: FolderItem[], out: Map<string, CollectedEntity>,
  * `docs/Git/README.md`). Grouped ONE line per changed entity (never per
  * field, never per scenario-node reposition): a request / scenario /
  * folder / environment-folder is either added, modified (any of its own
- * fields changed), or deleted. Diffed by the entity's persisted `id` —
- * never by array position or index — so reordering items alone is never
- * reported as a change.
+ * fields changed), or deleted. Diffed by the entity's `id` — never by
+ * array position or index — so reordering items alone is never reported as
+ * a change. On a project whose ids are not persisted yet, the two sides are
+ * paired by the id the loader DERIVES from the document
+ * (`shared/utils/stableId.ts`), which two independent parses of the same
+ * bytes agree on.
  *
  * Both sides are run through `prepareForSerialization` first so the
  * comparison ignores exactly the fields a real save would already strip

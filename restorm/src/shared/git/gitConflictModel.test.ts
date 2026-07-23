@@ -1,5 +1,8 @@
 import { describe, it, expect } from 'vitest'
 import { identifyConflictingEntities } from './gitConflictModel'
+// The renderer's rehydrate callback — the one the conflict UI really
+// passes (`useConflictResolution.ts`), and the only one that backfills ids.
+import { processAfterDeserialization } from '../../renderer/src/utils/serialization'
 
 const OURS_YAML = [
   'collections:',
@@ -334,5 +337,80 @@ describe('the tree-structure conflict', () => {
     })
 
     expect(conflicts.filter((c) => c.movedItemIds)).toEqual([])
+  })
+})
+
+/**
+ * A project written before document ids were persisted carries no `id` at
+ * all. This model parses `ours`, `theirs` and `base` in three INDEPENDENT
+ * passes and pairs entities by id — so while the loader minted those ids
+ * randomly, the three id sets were disjoint, `theirs.get(id)` never matched,
+ * and NO conflict was EVER reported on such a file. The user was told the
+ * merge was clean and quietly lost one side's work. A backfill derived from
+ * the document makes the three passes agree.
+ */
+const LEGACY_UNTOUCHED = [
+  '      - name: Untouched',
+  '        type: http',
+  '        tags: []',
+  '        url: https://example.com/other'
+].join('\n')
+
+const legacyProject = (petUrl: string): string => [
+  'collections:',
+  '  - name: Petstore',
+  '    tags: []',
+  '    configuration: {}',
+  '    items:',
+  '      - name: Find pet by ID',
+  '        type: http',
+  '        tags: []',
+  `        url: ${petUrl}`,
+  LEGACY_UNTOUCHED
+].join('\n')
+
+describe('identifyConflictingEntities on a project whose ids are not persisted yet', () => {
+  const versions = {
+    path: 'p.restorm',
+    base: legacyProject('https://base.example.com/pets'),
+    ours: legacyProject('https://ours.example.com/pets'),
+    theirs: legacyProject('https://theirs.example.com/pets')
+  }
+
+  it('pairs the three sides and reports the entity both of them changed', () => {
+    const conflicts = identifyConflictingEntities(versions, processAfterDeserialization)
+
+    expect(conflicts).toHaveLength(1)
+    expect(conflicts[0]).toMatchObject({ kind: 'request', name: 'Find pet by ID' })
+    expect(conflicts[0]?.ours).toMatchObject({ url: 'https://ours.example.com/pets' })
+    expect(conflicts[0]?.theirs).toMatchObject({ url: 'https://theirs.example.com/pets' })
+    expect(conflicts[0]?.base).toMatchObject({ url: 'https://base.example.com/pets' })
+  })
+
+  it('gives the paired entity the same derived id on all three sides', () => {
+    const [conflict] = identifyConflictingEntities(versions, processAfterDeserialization)
+
+    expect(conflict?.id).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/)
+    expect((conflict?.ours as unknown as { id: string }).id).toBe(conflict?.id)
+    expect((conflict?.theirs as unknown as { id: string }).id).toBe(conflict?.id)
+    expect((conflict?.base as unknown as { id: string }).id).toBe(conflict?.id)
+  })
+
+  it('leaves the entity neither side touched alone', () => {
+    const conflicts = identifyConflictingEntities(versions, processAfterDeserialization)
+
+    expect(conflicts.find((c) => c.name === 'Untouched')).toBeUndefined()
+    expect(conflicts.find((c) => c.name === 'Petstore')).toBeUndefined()
+  })
+
+  it('does not put an entity only ONE side changed to the user', () => {
+    const conflicts = identifyConflictingEntities({
+      path: 'p.restorm',
+      base: legacyProject('https://base.example.com/pets'),
+      ours: legacyProject('https://ours.example.com/pets'),
+      theirs: legacyProject('https://base.example.com/pets')
+    }, processAfterDeserialization)
+
+    expect(conflicts).toEqual([])
   })
 })

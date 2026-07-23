@@ -108,6 +108,84 @@ file once on its next save (a one-time migration), so it changes only under a
 deliberate migration. The semantic commit diff compares canonicalized snapshots,
 so a pure shape/order change is never reported as a modification.
 
+### Stable document ids
+
+Key order is only half of the invariant. Both git engines pair entities **by
+id**: the commit diff compares the live tree against a *separate* parse of the
+HEAD blob, and the conflict model parses `ours`, `theirs` and `base` in three
+*independent* passes. Ids are persisted for folders, environments, requests and
+scenarios — but a file written before that was the case, and every import,
+arrives with none, and the loader backfills one so the rest of the app has
+something to key on.
+
+While that backfill used `crypto.randomUUID()`, it was a per-process coin toss,
+and the consequences were far worse than the id churn visible in a first-save
+diff:
+
+- the commit diff shared no id between its two sides, so an untouched legacy
+  project reported **every entity as deleted *and* added**;
+- the conflict model's three passes produced three disjoint id sets, so nothing
+  ever paired up and **no conflict was ever detected** — the merge was reported
+  clean and one side's work was silently lost.
+
+The backfill is therefore a **pure function of the document**: the same bytes
+yield the same ids, in any process, on any machine, on any build. An id is
+derived as a UUID v5 — `SHA-1` of the JSON-serialized `[namespace, …path]`,
+stamped with RFC-4122's version and variant bits — over a **semantic path**
+built from:
+
+- the **key name** of each container traversed (`items`, `environments`,
+  `headers`, …);
+- an **identity segment** per entity: `kv:<key>`, `env:<name>`,
+  `req:<type>:<name>` (the type list comes from `protocolRegistry.ts`, so a new
+  protocol is never missed), `folder:<name>`, `ref:<requestId>`;
+- **no array index** — inserting an item at the head of a folder must not shift
+  its siblings' ids, otherwise `ours` and `theirs` re-derive different ids for
+  entities nobody touched and the three-way pairing breaks again. Two siblings
+  that spell the same segment (same-named folders) are told apart by an
+  occurrence suffix, which follows array order and never key order.
+
+The path is serialized as JSON rather than joined on a separator: quoting makes
+the segment boundaries independent of what the segments contain, and it keeps
+the digest input encodable even when a name holds an unpaired surrogate — a
+legal JS string that the digest's UTF-8 encoder rejects. A name must never be a
+reason a project fails to open.
+
+The namespace and that path grammar are a **stable contract**, the same status
+as the canonical key order above: changing either re-derives *different* ids for
+every project whose ids are not yet persisted, so two builds straddling the
+change stop pairing up their entities. Both live in
+`src/shared/utils/stableId.ts`, with a frozen test vector.
+
+Only the backfill is derived. A brand-new object created in the app, and an
+import grafted onto an existing tree, still get a random `generateId()` — they
+must *not* collide with what is already there.
+
+#### Migration
+
+There is none, by design:
+
+- **no `fileFormatVersion` bump, no rewrite pass.** A legacy project heals
+  itself by being opened and saved once, which is when the derived ids first
+  reach the file.
+- **an id already present in the file is never re-derived.** A project saved by
+  an earlier build keeps its random uuids forever; cross-references
+  (`authenticationRequestId`, a scenario node's `config.requestId` /
+  `config.scenarioId`, per-request settings, the response history) stay valid.
+- **residual divergence window.** If one machine already saved the file with an
+  older build, the random ids it wrote are now committed, and the other machine
+  gets them at the next pull — the derivation cannot help that file any more,
+  because it never re-derives an id that exists. The window closes as soon as
+  both sides share a committed file.
+- **a move — or a RENAME of an ancestor — on a not-yet-saved project still
+  reads as delete + add.** The derivation path includes the folder chain, so an
+  entity with no persisted id whose parent changed, or whose parent was simply
+  renamed, derives a different id on the two sides. Saving once (which persists
+  the ids) removes the ambiguity for good.
+- **two saved quick-configs of one request sharing the same name** fall back to
+  the occurrence suffix, i.e. to array position, because the name is what
+  distinguishes them. Same self-healing on the first save.
+
 ## Pulling and the 4-panel conflict resolution
 
 **Pull** first saves your project to disk (just like Push — the merge operates
