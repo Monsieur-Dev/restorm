@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, afterEach, beforeAll } from 'vitest'
-import { render, cleanup } from '@testing-library/react'
+import { render, cleanup, waitFor } from '@testing-library/react'
 import { ThemeCarousel } from './ThemeCarousel'
 import type { ThemeInfo } from '../../../types/theme'
 import type { ThemeContextValue } from '../../contexts/ThemeContext'
@@ -100,6 +100,49 @@ describe('ThemeCarousel — the preview is a non-interactive abstract "mini-scre
     expect(preview?.querySelector('.theme-carousel-item-preview-accent')).not.toBeNull()
     expect(preview?.querySelector('.theme-carousel-item-preview-button--primary')).not.toBeNull()
     expect(preview?.querySelector('.theme-carousel-item-preview-button--secondary')).not.toBeNull()
+  })
+
+  it('pins every vignette token onto the tile from the theme\'s OWN colours — a theme that omits sideBar.background must not inherit the active theme', async () => {
+    useThemeContextMock.mockReturnValue({
+      themes: [{ id: 'light-plus', name: 'Light+', type: 'light', path: '/light-plus.json' }],
+      currentThemeId: 'light-plus',
+      setTheme: vi.fn(),
+      isLoading: false
+    })
+    // A light theme whose resolved variables legitimately OMIT
+    // `sideBar.background` (exactly the Light+ case). Without the fill, the
+    // tile would leave `--sideBar-background` unset and the vignette's fake
+    // sidebar would inherit the ACTIVE theme's value from `:root`.
+    const variables = {
+      '--editor-background': '#ffffff',
+      '--editorWidget-background': '#f3f3f3',
+      '--foreground': '#1e1e1e',
+      '--button-background': '#0e639c',
+      '--focusBorder': '#0090f1'
+    }
+    const loadMock = vi.fn().mockResolvedValue({ theme: {}, variables })
+    Object.defineProperty(window, 'api', {
+      value: { theme: { load: loadMock } },
+      configurable: true,
+      writable: true
+    })
+
+    const { container } = render(<ThemeCarousel />)
+
+    await waitFor(() => {
+      const tile = container.querySelector<HTMLElement>('.theme-carousel-item')
+      // The missing token is pinned to the theme's OWN editorWidget background,
+      // never left blank (which would inherit :root / the active theme).
+      expect(tile?.style.getPropertyValue('--sideBar-background')).toBe('#f3f3f3')
+    })
+
+    const tile = container.querySelector<HTMLElement>('.theme-carousel-item')
+    // Tokens the theme DOES define pass through unchanged...
+    expect(tile?.style.getPropertyValue('--editor-background')).toBe('#ffffff')
+    expect(tile?.style.getPropertyValue('--button-background')).toBe('#0e639c')
+    // ...and a token missing with no editorWidget sibling would fall back to
+    // another same-theme token, never to nothing: secondary → editorWidget.
+    expect(tile?.style.getPropertyValue('--button-secondaryBackground')).toBe('#f3f3f3')
   })
 
   it('the selected card carries aria-pressed="true", every other card aria-pressed="false"', () => {

@@ -35,6 +35,48 @@ const THEME_TYPE_ORDER: Record<ThemeTypeOrder, number> = {
 
 type ThemePreviewVariables = Record<string, ThemeVariables>
 
+// The preview vignette must render each theme's OWN colours and must NEVER
+// inherit the currently-applied theme. A theme's resolved variables can
+// legitimately omit a token (e.g. a light theme that doesn't redefine
+// `sideBar.background`). Left unset on the tile, `var(--sideBar-background)`
+// falls through to the document `:root` — i.e. the ACTIVE theme — so the fake
+// sidebar would change colour when you switch the app theme. To prevent any
+// such leak, we pin every token the vignette reads onto the tile itself,
+// deriving any the theme omits from a sibling token OF THE SAME THEME. Each
+// entry is `[target, ...fallbacks]`, resolved top-down so earlier fills feed
+// later ones.
+const PREVIEW_TOKEN_FALLBACKS: readonly (readonly [string, ...string[]])[] = [
+  ['--editor-background', '--editorWidget-background'],
+  ['--editorWidget-background', '--editor-background'],
+  ['--sideBar-background', '--editorWidget-background', '--editor-background'],
+  ['--foreground', '--editor-foreground'],
+  ['--editor-foreground', '--foreground'],
+  ['--button-background', '--focusBorder', '--foreground'],
+  ['--button-secondaryBackground', '--editorWidget-background', '--button-background'],
+  ['--editorWidget-border', '--focusBorder'],
+  ['--focusBorder', '--button-background', '--foreground']
+]
+
+/**
+ * Build the tile's inline CSS-variable style from a theme's resolved variables,
+ * pinning every vignette token to a same-theme value so none inherits `:root`.
+ */
+const buildPreviewStyle = (variables: ThemeVariables | undefined): CSSProperties => {
+  if (!variables) return {}
+  const style: Record<string, string> = { ...(variables as Record<string, string>) }
+  for (const entry of PREVIEW_TOKEN_FALLBACKS) {
+    const [target, ...fallbacks] = entry
+    if (style[target]) continue
+    for (const key of fallbacks) {
+      if (style[key]) {
+        style[target] = style[key]
+        break
+      }
+    }
+  }
+  return style as CSSProperties
+}
+
 export const ThemeCarousel: React.FC<ThemeCarouselProps> = ({
   className,
   'data-testid': dataTestId,
@@ -183,8 +225,7 @@ export const ThemeCarousel: React.FC<ThemeCarouselProps> = ({
         <div className="theme-carousel-list">
           {sortedThemes.map((theme) => {
             const isSelected = theme.id === currentThemeId
-            const variables = previewVariables[theme.id]
-            const style: CSSProperties = variables ? (variables as CSSProperties) : {}
+            const style = buildPreviewStyle(previewVariables[theme.id])
 
             return (
               <button
