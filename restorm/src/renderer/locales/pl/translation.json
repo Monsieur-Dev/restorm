@@ -2173,6 +2173,7 @@
     "setFavorite": "Ustaw ulubione",
     "stopScenarioRun": "Zatrzymaj uruchomienie scenariusza",
     "updateCustomValueList": "Zaktualizuj listę wartości",
+    "updateEnvironment": "Zaktualizuj środowisko",
     "updateFolder": "Zaktualizuj folder",
     "updateRequest": "Zaktualizuj żądanie",
     "updateScenario": "Zaktualizuj scenariusz",

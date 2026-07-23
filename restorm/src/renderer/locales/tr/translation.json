@@ -2171,6 +2171,7 @@
     "setFavorite": "Sık kullanılan ayarla",
     "stopScenarioRun": "Senaryo çalıştırmasını durdur",
     "updateCustomValueList": "Değer listesini güncelle",
+    "updateEnvironment": "Ortamı güncelle",
     "updateFolder": "Klasörü güncelle",
     "updateRequest": "İsteği güncelle",
     "updateScenario": "Senaryoyu güncelle",

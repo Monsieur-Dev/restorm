@@ -112,6 +112,7 @@ export const FREE_MCP_TOOLS: ReadonlySet<string> = new Set([
   'move_item',
   'rename_item',
   'create_environment',
+  'update_environment',
   'delete_environment',
   'rename_environment',
   'refresh_environment',

@@ -390,6 +390,85 @@ describe('environment structure tools (create / rename / delete / list)', () => 
     expect(broadcastSpy).toHaveBeenCalled()
   })
 
+  it('update_environment patches name + icon + color together + autosaves', () => {
+    makeFolder()
+    const res = mcp.invoke('update_environment', {
+      envId: 'env-B',
+      name: 'renamed',
+      icon: { type: 'emoji', value: '🚀' },
+      color: '#ff6600'
+    })
+    expect(res.isError).toBeUndefined()
+    expect(updateEnvironmentSpy).toHaveBeenCalledWith('env-B', {
+      name: 'renamed',
+      icon: { type: 'emoji', value: '🚀' },
+      color: '#ff6600'
+    })
+    expect(parse(res)).toEqual({ envId: 'env-B', name: 'renamed', icon: { type: 'emoji', value: '🚀' }, color: '#ff6600' })
+    expect(broadcastSpy).toHaveBeenCalled()
+  })
+
+  it('update_environment patches only the icon, leaving name/color untouched', () => {
+    makeFolder()
+    const res = mcp.invoke('update_environment', { envId: 'env-A', icon: { type: 'codicon', value: 'globe' } })
+    expect(res.isError).toBeUndefined()
+    expect(updateEnvironmentSpy).toHaveBeenCalledWith('env-A', { icon: { type: 'codicon', value: 'globe' } })
+    expect(parse(res)).toEqual({ envId: 'env-A', icon: { type: 'codicon', value: 'globe' } })
+  })
+
+  it('update_environment allows an empty value for icon.type "none"', () => {
+    makeFolder()
+    const res = mcp.invoke('update_environment', { envId: 'env-A', icon: { type: 'none', value: '' } })
+    expect(res.isError).toBeUndefined()
+    expect(updateEnvironmentSpy).toHaveBeenCalledWith('env-A', { icon: { type: 'none', value: '' } })
+  })
+
+  it('update_environment rejects when no field is provided', () => {
+    makeFolder()
+    const res = mcp.invoke('update_environment', { envId: 'env-A' })
+    expect(res.isError).toBe(true)
+    expect(res.content[0]?.text).toContain('At least one of')
+    expect(updateEnvironmentSpy).not.toHaveBeenCalled()
+  })
+
+  it('update_environment rejects an unknown envId', () => {
+    makeFolder()
+    const res = mcp.invoke('update_environment', { envId: 'env-ghost', name: 'x' })
+    expect(res.isError).toBe(true)
+    expect(res.content[0]?.text).toContain('No environment with id')
+    expect(updateEnvironmentSpy).not.toHaveBeenCalled()
+  })
+
+  it('update_environment rejects a malformed hex color', () => {
+    makeFolder()
+    const res = mcp.invoke('update_environment', { envId: 'env-A', color: 'not-a-color' })
+    expect(res.isError).toBe(true)
+    expect(res.content[0]?.text).toContain('color must be a hex string')
+    expect(updateEnvironmentSpy).not.toHaveBeenCalled()
+  })
+
+  it('update_environment rejects an empty name', () => {
+    makeFolder()
+    const res = mcp.invoke('update_environment', { envId: 'env-A', name: '' })
+    expect(res.isError).toBe(true)
+    expect(updateEnvironmentSpy).not.toHaveBeenCalled()
+  })
+
+  it('update_environment rejects an unknown icon.type', () => {
+    makeFolder()
+    const res = mcp.invoke('update_environment', { envId: 'env-A', icon: { type: 'svg', value: 'x' } })
+    expect(res.isError).toBe(true)
+    expect(res.content[0]?.text).toContain('icon.type must be one of')
+    expect(updateEnvironmentSpy).not.toHaveBeenCalled()
+  })
+
+  it('update_environment rejects a malformed icon (not an object)', () => {
+    makeFolder()
+    const res = mcp.invoke('update_environment', { envId: 'env-A', icon: 'rocket' })
+    expect(res.isError).toBe(true)
+    expect(updateEnvironmentSpy).not.toHaveBeenCalled()
+  })
+
   it('deletes a sub-environment + autosaves (owner folder resolved before delete)', () => {
     makeFolder()
     deleteEnvironmentSpy.mockReturnValue(true)

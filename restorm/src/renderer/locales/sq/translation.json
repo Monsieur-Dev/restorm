@@ -2171,6 +2171,7 @@
     "setFavorite": "Cakto një të preferuar",
     "stopScenarioRun": "Ndalo një ekzekutim skenari",
     "updateCustomValueList": "Përditëso një listë vlerash",
+    "updateEnvironment": "Përditëso një mjedis",
     "updateFolder": "Përditëso një dosje",
     "updateRequest": "Përditëso një kërkesë",
     "updateScenario": "Përditëso një skenar",

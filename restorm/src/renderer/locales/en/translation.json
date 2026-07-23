@@ -2171,6 +2171,7 @@
     "setFavorite": "Set a favorite",
     "stopScenarioRun": "Stop a scenario run",
     "updateCustomValueList": "Update a value list",
+    "updateEnvironment": "Update an environment",
     "updateFolder": "Update a folder",
     "updateRequest": "Update a request",
     "updateScenario": "Update a scenario",

@@ -26,7 +26,9 @@ export interface StringCast {
 
 export type ValueCastResult = DateTimeCast | NumericCast | ColorCast | StringCast
 
-const HEX_COLOR_REGEX = /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/
+/** Matches `#rgb`/`#rgba`/`#rrggbb`/`#rrggbbaa` hex colour strings — the format
+ * documented on every persisted `color` field (e.g. `Environment.color`). */
+export const HEX_COLOR_REGEX = /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/
 const NUMBER_REGEX = /^[-+]?(?:\d+\.?\d*|\d*\.?\d+)(?:[eE][-+]?\d+)?$/
 
 function looksLikeIsoDate(value: string): boolean {
