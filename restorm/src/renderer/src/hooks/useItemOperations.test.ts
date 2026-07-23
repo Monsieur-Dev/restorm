@@ -22,6 +22,10 @@ vi.mock('electron-core-ui/renderer', () => ({
   isContainerNode: () => false
 }))
 
+vi.mock('../services/favoritesStore', () => ({
+  removeFavorite: vi.fn()
+}))
+
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (_key: string, fallback?: string) => fallback ?? _key })
 }))
@@ -258,5 +262,71 @@ describe('useItemOperations.handleItemDrop', () => {
     act(() => { result.current.handleItemDrop({ ...payload, item: payload.source } as never) })
 
     expect(callsFor(DocumentEvents.REQUEST_UPDATED)).toHaveLength(0)
+  })
+})
+
+describe('useItemOperations.confirmDelete', () => {
+  const buildOptions = (rootItems: FolderItem[]): UseItemOperationsOptions => ({
+    rootItems,
+    setRootItems: vi.fn(),
+    setExpandedIds: vi.fn(),
+    setSelectedItemId: vi.fn(),
+    setSidebarEditingItemId: vi.fn(),
+    setWorkbenchTree: vi.fn(),
+    setDeleteConfirmation: vi.fn(),
+    openFolderTab: vi.fn(),
+    openScenarioEditorTab: vi.fn(),
+    openEnvironmentFolderTab: vi.fn(),
+    openAnyRequestTab: vi.fn(),
+    projectUuid: 'project-1'
+  })
+
+  const folderWith = (id: string, children: FolderItem[]): FolderItem =>
+    ({ id, name: id, tags: [], configuration: {}, items: children }) as unknown as FolderItem
+
+  it('announces REQUEST_DELETED on BOTH buses so search drops it AND the project goes dirty', () => {
+    // A sidebar delete used to emit nothing at all: the main-process search
+    // index kept the entry (deleted requests still showed in results) and the
+    // renderer save-unit bridge never marked the project dirty (no autosave).
+    const rootItems: FolderItem[] = [folderWith('f1', [httpRequest('r1', 'Doomed')])]
+    const { result } = renderHook(() => useItemOperations(buildOptions(rootItems)))
+
+    act(() => { result.current.confirmDelete('r1') })
+
+    const deleted = callsFor(DocumentEvents.REQUEST_DELETED)
+    expect(deleted).toHaveLength(1)
+    expect(deleted[0]?.payload.id).toBe('r1')
+    expect(deleted[0]?.payload.parentFolderId).toBe('f1')
+    expect(localCallsFor(DocumentEvents.REQUEST_DELETED)).toHaveLength(1)
+  })
+
+  it('announces the whole subtree when a folder is deleted, one event per descendant', () => {
+    // The search index FOLDER_DELETED handler removes only the named id, not
+    // descendants, so every request and sub-folder must announce its own
+    // deletion or the children linger in the index after the parent is gone.
+    const rootItems: FolderItem[] = [
+      folderWith('f1', [httpRequest('r1', 'A'), folderWith('f2', [httpRequest('r2', 'B')])])
+    ]
+    const { result } = renderHook(() => useItemOperations(buildOptions(rootItems)))
+
+    act(() => { result.current.confirmDelete('f1') })
+
+    expect(callsFor(DocumentEvents.FOLDER_DELETED).map((c) => c.payload.id).sort()).toEqual(['f1', 'f2'])
+    expect(callsFor(DocumentEvents.REQUEST_DELETED).map((c) => c.payload.id).sort()).toEqual(['r1', 'r2'])
+  })
+
+  it('announces a deleted scenario\'s nested requests even though the scenario itself is not indexed', () => {
+    const scenario = {
+      id: 's1', name: 'Flow', type: 'scenario', tags: [], params: [], nodes: [], edges: [],
+      items: [httpRequest('r1', 'Step')]
+    } as unknown as FolderItem
+    const rootItems: FolderItem[] = [folderWith('f1', [scenario])]
+    const { result } = renderHook(() => useItemOperations(buildOptions(rootItems)))
+
+    act(() => { result.current.confirmDelete('s1') })
+
+    // No FOLDER_DELETED for the scenario id; its nested request still drops.
+    expect(callsFor(DocumentEvents.FOLDER_DELETED)).toHaveLength(0)
+    expect(callsFor(DocumentEvents.REQUEST_DELETED).map((c) => c.payload.id)).toEqual(['r1'])
   })
 })

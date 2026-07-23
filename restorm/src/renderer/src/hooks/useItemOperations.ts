@@ -32,7 +32,7 @@ import { mapAllWorkbenchTabs, tabReferencesItem } from '../utils/workbenchTabs'
 import type { WorkbenchTree, EditorTab } from 'electron-core-ui/renderer'
 import type { BreadcrumbItem, FolderTab, EnvironmentFolderTab, HTTPRequestTab, ScenarioEditorTab } from '../../../shared/types/editor'
 import { makeReactiveFolder, makeReactiveRequest, makeReactiveFolderItem } from '../types/reactive'
-import { DocumentEvents, type DocumentChangedPayload } from '../services/DocumentEvents'
+import { DocumentEvents, type DocumentChangedPayload, type DocumentDeletedPayload } from '../services/DocumentEvents'
 import { eventBus } from 'electron-core-ui/renderer'
 import type { AddChildKind } from '../components/MainView/Sidebar/contextMenuBuilder'
 import { removeFavorite as favoritesStoreRemove } from '../services/favoritesStore'
@@ -164,7 +164,7 @@ export interface UseItemOperationsReturn {
 /** Both buses, always: the local one carries the renderer-side bridge that
  * marks the unit dirty (autosave, push badge, unsaved-window indicator),
  * while a main-only delivery would index for search and nothing more. */
-function emitBothBuses(event: string, payload: DocumentChangedPayload): void {
+function emitBothBuses(event: string, payload: DocumentChangedPayload | DocumentDeletedPayload): void {
   eventBus.emitSync(event, payload)
   eventBus.emitLocalSync(event, payload)
 }
@@ -433,6 +433,53 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
       }
     }
     collect(itemId)
+
+    // Announce the deletion of every entity in the subtree, on BOTH buses,
+    // BEFORE the tree mutation drops the nodes. Without this a sidebar
+    // delete emitted nothing at all: the main-process search index never
+    // dropped the entries (deleted items kept showing in search results)
+    // and the renderer save-unit bridge never marked the project dirty (no
+    // autosave after a delete). Each request/folder emits its own DELETED
+    // so the search index — whose FOLDER_DELETED handler removes only the
+    // named id, not descendants — clears the whole subtree. A scenario is
+    // not itself indexed, but its descendant requests are, so we recurse
+    // into scenarios and announce those.
+    const announceDeleted = (node: FolderItem, parentId: string | undefined): void => {
+      if (isRequest(node)) {
+        emitBothBuses(DocumentEvents.REQUEST_DELETED, {
+          id: node.id,
+          type: 'request',
+          ...(parentId !== undefined ? { parentFolderId: parentId } : {})
+        } as DocumentDeletedPayload)
+        return
+      }
+      if (isAnyFolder(node) || isScenario(node)) {
+        if (isAnyFolder(node)) {
+          emitBothBuses(DocumentEvents.FOLDER_DELETED, {
+            id: node.id,
+            type: 'folder',
+            ...(parentId !== undefined ? { parentFolderId: parentId } : {})
+          } as DocumentDeletedPayload)
+        }
+        for (const child of (node as FolderItem & { items?: FolderItem[] }).items ?? []) {
+          announceDeleted(child, node.id)
+        }
+      }
+    }
+    const parentOf = (nodes: FolderItem[], childId: string): FolderItem | null => {
+      for (const node of nodes) {
+        if (!isAnyFolder(node) && !isScenario(node)) continue
+        const kids = (node as FolderItem & { items?: FolderItem[] }).items ?? []
+        if (kids.some((child) => child.id === childId)) return node
+        const deeper = parentOf(kids, childId)
+        if (deeper) return deeper
+      }
+      return null
+    }
+    const nodeToDelete = findItemById(rootItems, itemId)
+    if (nodeToDelete) {
+      announceDeleted(nodeToDelete, parentOf(rootItems, itemId)?.id)
+    }
 
     // Remove the item from the tree (handles nested items)
     const removed = removeItemFromTree(rootItems, itemId)
@@ -716,7 +763,11 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
         type: 'folder',
         document: cloneForEventBus(reactive)
       }
-      eventBus.emitSync(DocumentEvents.FOLDER_CREATED, folderPayload)
+      // BOTH buses: emitSync reaches the main-process search index +
+      // ContextService; emitLocalSync reaches the renderer save-unit bridge
+      // that marks the project dirty so autosave fires. emitSync alone
+      // updated search but never triggered a save.
+      emitBothBuses(DocumentEvents.FOLDER_CREATED, folderPayload)
     } else {
       // The class instances structurally satisfy the structural
       // `Request` union in `shared/types/requests`, but TS's
@@ -884,7 +935,7 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
         document: cloneForEventBus(reactive),
         ...(resolvedParentId !== undefined ? { parentFolderId: resolvedParentId } : {})
       }
-      eventBus.emitSync(DocumentEvents.REQUEST_CREATED, createdPayload)
+      emitBothBuses(DocumentEvents.REQUEST_CREATED, createdPayload)
     }
 
     // `silent` (a request created inline in a scenario graph) skips ALL
@@ -930,7 +981,7 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
     setSelectedItemId(newFolder.id)
     // Announce the creation so the save-unit registry learns about the new root
     // folder (crash-recovery draft) — child folders emit this; root ones didn't.
-    eventBus.emitSync(DocumentEvents.FOLDER_CREATED, {
+    emitBothBuses(DocumentEvents.FOLDER_CREATED, {
       id: newFolder.id,
       type: 'folder',
       document: cloneForEventBus(newFolder)
@@ -958,7 +1009,7 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
     // Announce the creation (FOLDER_CREATED — the main-side handler keys on
     // type:'folder'; an EnvironmentFolder is a folder with folderType:'environment')
     // so the save-unit registry learns about the new root env-folder.
-    eventBus.emitSync(DocumentEvents.FOLDER_CREATED, {
+    emitBothBuses(DocumentEvents.FOLDER_CREATED, {
       id: newFolder.id,
       type: 'folder',
       document: cloneForEventBus(newFolder)
