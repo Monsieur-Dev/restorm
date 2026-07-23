@@ -13,6 +13,13 @@
       "save": "Lagre",
       "dontSave": "Ikke lagre",
       "cancel": "Avbryt"
+    },
+    "externalChange": {
+      "title": "Filen er endret på disken",
+      "message": "«{{fileName}}» ble endret utenfor programmet.",
+      "detail": "Last inn på nytt for å bruke versjonen på disken, eller behold din versjon og overskriv den.",
+      "reload": "Last inn på nytt",
+      "keepMine": "Behold min versjon"
     }
   },
   "recentFilesVignette": {
@@ -341,6 +348,13 @@
       "stopServer": "Stopp MCP-server",
       "resumeServer": "Gjenoppta MCP-server",
       "serverStopped": "stoppet"
+    },
+    "git": {
+      "pushTooltip": "Push til depotet",
+      "pullTooltip": "Hent fra depotet",
+      "nothingToPushTooltip": "Ingen endringer å pushe",
+      "refreshTooltip": "Se etter endringer å pushe eller pulle",
+      "historyTooltip": "Git-historikk"
     }
   },
   "mcpToolTitles": {
@@ -410,5 +424,47 @@
   "gatedControl": {
     "proLabel": "Pro-versjon",
     "subscribe": "Abonner"
+  },
+  "git": {
+    "cliMissing": {
+      "title": "Git er ikke installert",
+      "body": "Installer Git og legg det til i PATH-en din for å bruke Git-integrasjonen."
+    },
+    "pullAvailable": {
+      "title": "Oppdatering tilgjengelig",
+      "body": "En nyere versjon av denne filen er tilgjengelig i repositoriet.",
+      "pullNow": "Hent nå"
+    },
+    "mergeInProgress": {
+      "title": "Uferdig fletting",
+      "body": "En Git-fletting ble startet og aldri fullført. Prosjektfilen kan fortsatt inneholde konfliktmarkører.",
+      "abort": "Avbryt flettingen"
+    }
+  },
+  "pushModal": {
+    "title": "Push",
+    "languageLabel": "Språk for commit-meldingen",
+    "applyLanguageByDefault": "Standardspråk for commits",
+    "titleFieldLabel": "Commit-tittel",
+    "bodyFieldLabel": "Beskrivelse",
+    "cancel": "Avbryt",
+    "push": "Push"
+  },
+  "conflictResolution": {
+    "listTitle": "Konflikter",
+    "userTitle": "Din versjon",
+    "serverTitle": "Serverversjon",
+    "resolvedTitle": "Løst",
+    "selectAConflict": "Velg en konflikt for å løse den",
+    "useThisVersion": "Bruk denne versjonen"
+  },
+  "gitHistory": {
+    "commits": "Commits",
+    "noCommitSelected": "Velg en commit for å se detaljene",
+    "author": "Forfatter",
+    "date": "Dato",
+    "hash": "Hash",
+    "parents": "Foreldre",
+    "recoverVersion": "Gjenopprett denne versjonen"
   }
 }

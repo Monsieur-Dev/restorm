@@ -22,12 +22,22 @@ export function getE2ECoverageOutputDirs(restormRoot: string): { nycOutputDir: s
   }
 }
 
+/** Every fixture builds its Electron env through here, making it the ONE
+ * place to sanitize the inherited environment. `GIT_*` vars are stripped
+ * UNCONDITIONALLY (coverage on or off): when the suite runs under the
+ * PRE-PUSH HOOK, git exports GIT_DIR (and friends) pointing at the SOURCE
+ * repository — an app inheriting them aims every git command at the dev
+ * branch regardless of its simple-git baseDir. This actually committed e2e
+ * seed churn into the app's own branch, and made the git suites fail ONLY
+ * under the full pre-push run (standalone shells carry no GIT_DIR).
+ * Mirrors `gitServerSeed.gitEnv()`'s stripping for the seed commands. */
 export function withE2ECoverageEnv(restormRoot: string, env: NodeJS.ProcessEnv): NodeJS.ProcessEnv {
-  if (!isE2ECoverageEnabled()) return env
+  const sanitized = Object.fromEntries(Object.entries(env).filter(([key]) => !key.startsWith('GIT_') && key !== 'SSH_ASKPASS'))
+  if (!isE2ECoverageEnabled()) return sanitized
 
   const { v8OutputDir } = getE2ECoverageOutputDirs(restormRoot)
   return {
-    ...env,
+    ...sanitized,
     NODE_V8_COVERAGE: v8OutputDir
   }
 }

@@ -81,6 +81,9 @@ export interface RestormWorkbenchContainerProps {
   navigationEnabled?: boolean | undefined
   tabSwitcherAnchorSelector?: string | undefined
   projectUuid?: string | null | undefined
+  /** Bumped after a clean git pull re-hydrates the tree; forwarded to
+   * RestormWorkbench so open request tabs remount and re-read pulled values. */
+  tabReloadEpoch?: number | undefined
   isItemFavorite?: (itemId: string) => boolean
   onToggleFavorite?: (itemId: string) => void
 }
@@ -131,6 +134,7 @@ export const RestormWorkbenchContainer: React.FC<RestormWorkbenchContainerProps>
   navigationEnabled,
   tabSwitcherAnchorSelector,
   projectUuid,
+  tabReloadEpoch,
   isItemFavorite,
   onToggleFavorite
 }) => {
@@ -189,6 +193,7 @@ export const RestormWorkbenchContainer: React.FC<RestormWorkbenchContainerProps>
           navigationEnabled={navigationEnabled}
           tabSwitcherAnchorSelector={tabSwitcherAnchorSelector}
           projectUuid={projectUuid}
+          tabReloadEpoch={tabReloadEpoch}
           isItemFavorite={isItemFavorite}
           onToggleFavorite={onToggleFavorite}
         />

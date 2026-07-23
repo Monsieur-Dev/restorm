@@ -13,6 +13,13 @@
       "save": "Guardar",
       "dontSave": "No guardar",
       "cancel": "Cancelar"
+    },
+    "externalChange": {
+      "title": "Archivo modificado en el disco",
+      "message": "«{{fileName}}» se modificó fuera de la aplicación.",
+      "detail": "Vuelve a cargar para usar la versión del disco, o conserva tu versión y sobrescríbela.",
+      "reload": "Volver a cargar",
+      "keepMine": "Conservar mi versión"
     }
   },
   "recentFilesVignette": {
@@ -341,6 +348,13 @@
       "stopServer": "Detener servidor MCP",
       "resumeServer": "Reanudar servidor MCP",
       "serverStopped": "detenido"
+    },
+    "git": {
+      "pushTooltip": "Subir al repositorio",
+      "pullTooltip": "Descargar del repositorio",
+      "nothingToPushTooltip": "No hay cambios que enviar",
+      "refreshTooltip": "Comprobar cambios para enviar o recibir",
+      "historyTooltip": "Historial de Git"
     }
   },
   "mcpToolTitles": {
@@ -410,5 +424,47 @@
   "gatedControl": {
     "proLabel": "Versión Pro",
     "subscribe": "Suscribirse"
+  },
+  "git": {
+    "cliMissing": {
+      "title": "Git no está instalado",
+      "body": "Instale Git y añádalo a su PATH para usar la integración con Git."
+    },
+    "pullAvailable": {
+      "title": "Actualización disponible",
+      "body": "Hay una versión más reciente de este archivo disponible en el repositorio.",
+      "pullNow": "Extraer ahora"
+    },
+    "mergeInProgress": {
+      "title": "Fusión sin terminar",
+      "body": "Se inició una fusión de Git que nunca se completó. El archivo del proyecto puede seguir conteniendo marcadores de conflicto.",
+      "abort": "Cancelar la fusión"
+    }
+  },
+  "pushModal": {
+    "title": "Subir cambios",
+    "languageLabel": "Idioma del mensaje de confirmación",
+    "applyLanguageByDefault": "Idioma predeterminado de los commits",
+    "titleFieldLabel": "Título del commit",
+    "bodyFieldLabel": "Descripción",
+    "cancel": "Cancelar",
+    "push": "Subir cambios"
+  },
+  "conflictResolution": {
+    "listTitle": "Conflictos",
+    "userTitle": "Su versión",
+    "serverTitle": "Versión del servidor",
+    "resolvedTitle": "Resuelto",
+    "selectAConflict": "Seleccione un conflicto para resolverlo",
+    "useThisVersion": "Usar esta versión"
+  },
+  "gitHistory": {
+    "commits": "Commits",
+    "noCommitSelected": "Seleccione un commit para ver sus detalles",
+    "author": "Autor",
+    "date": "Fecha",
+    "hash": "Hash",
+    "parents": "Padres",
+    "recoverVersion": "Recuperar esta versión"
   }
 }

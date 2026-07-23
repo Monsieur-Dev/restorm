@@ -41,3 +41,8 @@ export {
   JITTER_FACTOR,
   FAILED_AFTER_RECONNECTING_MS
 } from './graphqlLinkStatus'
+
+// Process-neutral (pure Handlebars, no DOM) — lives in `src/shared` so
+// main-process code can use it too; see `main/index.ts`'s matching export.
+export { renderCommitMessage } from '../../shared/CommitMessageEngine'
+export type { CommitMessageTemplates, RenderedCommitMessage } from '../../shared/CommitMessageEngine'

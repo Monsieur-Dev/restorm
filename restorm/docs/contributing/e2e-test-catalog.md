@@ -108,6 +108,15 @@ server; — = pure UI/in-process.
 | mcp-server | 1 | MCP server end-to-end (JSON-RPC tools) | 🔌 |
 | mcp-logs | 1 | MCP logs menu entry gated on the MCP server | 🔌 |
 
+## Git (version control)
+
+| Suite | Scen | Covers | Deps |
+|---|--:|---|---|
+| git-status | 1 | Detect repo → GIT status-bar push button enabled | 🐳 git-server |
+| git-push-pull | 2 | Push lands on remote; collaborator pull with no conflict appears | 🐳 git-server |
+| git-conflict | 6 | Provoked conflict → 4-panel resolve (all entity kinds + field-diffs), abort-merge keeps local work, pull-available toast, commit-message generation, live-action controls disabled in the conflict panel | 🐳 git-server |
+| git-mcp | 3 | git_commit_push→confirm, git_pull→resolve_conflicts (agent-driven), and an MCP write right after open_project still reaches disk | 🐳 git-server 🔌 |
+
 ## Non-BDD e2e specs
 
 | Spec | Covers |
@@ -115,14 +124,3 @@ server; — = pure UI/in-process.
 | scenario-cli/scenario-cli.spec.ts | Headless CLI scenario runner (run-log goldens, exit codes, --param/--out) |
 | stage-gating/headless-gating.spec.ts | Capability gating in headless mode |
 | stage-gating/gating-lifecycle.spec.ts | Capability gating lifecycle |
-
-## Not yet on `main` (Git epic — m-5, branch task-91)
-
-Added by TASK-91.9; folds in when task-91 merges. Add rows here at merge time.
-
-| Suite | Scen | Covers | Deps |
-|---|--:|---|---|
-| git-status | 1 | Detect repo → GIT status-bar push button enabled | 🐳 git-server |
-| git-push-pull | 2 | Push lands on remote; collaborator pull appears | 🐳 git-server |
-| git-conflict | 5 | Provoked conflict → 4-panel resolve (all entity kinds), abort-merge, semi-pull toast, msg-gen | 🐳 git-server |
-| git-mcp | 2 | git_commit_push→confirm, git_pull→resolve_conflicts (agent-driven) | 🐳 git-server 🔌 |

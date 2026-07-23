@@ -25,14 +25,14 @@ import {
   KafkaRequest
 } from '../../../shared/models/requests'
 import type { HTTPMethod } from '../../../shared/models/types'
-import { findItemById, findItemWithBreadcrumbs, getFolderIcon, getNearestEnvironmentsForBreadcrumbs } from '../utils/treeSearch'
+import { findItemById, findItemWithParent, findItemWithBreadcrumbs, getFolderIcon, getNearestEnvironmentsForBreadcrumbs } from '../utils/treeSearch'
 import { cloneForEventBus } from '../utils/cloneForEventBus'
 import { generateUniqueId, cloneItemInTree, removeItemFromTree, insertItemIntoTree } from '../utils/treeManipulation'
 import { mapAllWorkbenchTabs, tabReferencesItem } from '../utils/workbenchTabs'
 import type { WorkbenchTree, EditorTab } from 'electron-core-ui/renderer'
 import type { BreadcrumbItem, FolderTab, EnvironmentFolderTab, HTTPRequestTab, ScenarioEditorTab } from '../../../shared/types/editor'
-import { makeReactiveFolder, makeReactiveRequest } from '../types/reactive'
-import { DocumentEvents, type DocumentChangedPayload } from '../services/DocumentEvents'
+import { makeReactiveFolder, makeReactiveRequest, makeReactiveFolderItem } from '../types/reactive'
+import { DocumentEvents, type DocumentChangedPayload, type DocumentDeletedPayload } from '../services/DocumentEvents'
 import { eventBus } from 'electron-core-ui/renderer'
 import type { AddChildKind } from '../components/MainView/Sidebar/contextMenuBuilder'
 import { removeFavorite as favoritesStoreRemove } from '../services/favoritesStore'
@@ -113,6 +113,10 @@ export interface UseItemOperationsOptions {
   /** Project UUID. When the deleted subtree contains favorited items,
    * each id is removed from the favorites store under this key. */
   projectUuid: string | null
+  /** Called when a moved item has no save-unit document type of its own
+   * (a scenario). The host persists those through its own debounced
+   * whole-file save — the same path it already uses for scenario edits. */
+  onStructureChanged?: () => void
 }
 
 export interface UseItemOperationsReturn {
@@ -132,6 +136,77 @@ export interface UseItemOperationsReturn {
   handleSidebarItemRename: (payload: ListViewItemEventPayload, newName: string) => void
 }
 
+/**
+ * Emit the document-created events for a freshly cloned subtree so the new
+ * items reach the save-unit registry (dirty → autosave rewrites the file, the
+ * git push badge lights) and the main-process search index — the same signals
+ * a normal create fires. `cloneItemInTree` only splices the deep copy into the
+ * tree; without these events the clone is invisible to both autosave and search
+ * until the next full file load.
+ *
+ * Mirrors the import path: one CREATED event per item — FOLDER_CREATED for
+ * folders / environment folders, ENVIRONMENT_CREATED for every env / sub-env on
+ * an environment folder (so ContextService can resolve handlebars variables),
+ * REQUEST_CREATED for requests (carrying `parentFolderId` when nested).
+ * Scenarios carry no per-item document event (they sync via `collections:sync`,
+ * mirroring `handleAddChildItem`); their nested requests still get theirs.
+ * `cloneForEventBus` (not a JSON round-trip) preserves `SecretValue` plaintext
+ * on the way to main.
+ *
+ * Each event is delivered on BOTH buses (like reactive.ts's `emitBoth` for
+ * updates): `emitSync` reaches the main-process subscribers (search index,
+ * ContextService), and `emitLocalSync` reaches the renderer-local save-unit
+ * bridge that marks the new unit dirty — which is what drives autosave (file
+ * rewrite + git push badge) and the unsaved-window indicator. A main-only
+ * delivery indexes the clone for search but never marks it dirty, so the copy
+ * silently vanishes on close in autosave-off mode and never round-trips to disk.
+ */
+/** Both buses, always: the local one carries the renderer-side bridge that
+ * marks the unit dirty (autosave, push badge, unsaved-window indicator),
+ * while a main-only delivery would index for search and nothing more. */
+function emitBothBuses(event: string, payload: DocumentChangedPayload | DocumentDeletedPayload): void {
+  eventBus.emitSync(event, payload)
+  eventBus.emitLocalSync(event, payload)
+}
+
+export function emitClonedSubtreeCreated(item: FolderItem, parentFolderId?: string): void {
+  const emitEnvironmentTree = (env: Environment, envFolderId: string, parentEnvironmentId: string | null): void => {
+    emitBothBuses(DocumentEvents.ENVIRONMENT_CREATED, {
+      id: env.id,
+      type: 'environment',
+      document: cloneForEventBus(env),
+      parentFolderId: envFolderId,
+      parentEnvironmentId: parentEnvironmentId ?? undefined
+    } as DocumentChangedPayload)
+    for (const child of env.subEnvironments ?? []) emitEnvironmentTree(child, envFolderId, env.id)
+  }
+
+  if (isScenario(item)) {
+    for (const child of (item as { items?: FolderItem[] }).items ?? []) {
+      emitClonedSubtreeCreated(child, item.id)
+    }
+    return
+  }
+  if (isAnyFolder(item)) {
+    emitBothBuses(DocumentEvents.FOLDER_CREATED, {
+      id: item.id,
+      type: 'folder',
+      document: cloneForEventBus(item)
+    } as DocumentChangedPayload)
+    if (isEnvironmentFolder(item)) {
+      for (const env of item.environments) emitEnvironmentTree(env, item.id, null)
+    }
+    for (const child of item.items) emitClonedSubtreeCreated(child, item.id)
+    return
+  }
+  emitBothBuses(DocumentEvents.REQUEST_CREATED, {
+    id: item.id,
+    type: 'request',
+    document: cloneForEventBus(item),
+    ...(parentFolderId !== undefined ? { parentFolderId } : {})
+  } as DocumentChangedPayload)
+}
+
 export function useItemOperations(options: UseItemOperationsOptions): UseItemOperationsReturn {
   const {
     rootItems,
@@ -141,7 +216,8 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
     setSidebarEditingItemId,
     setWorkbenchTree,
     setDeleteConfirmation,
-    projectUuid
+    projectUuid,
+    onStructureChanged
   } = options
   const { openFolderTab, openScenarioEditorTab, openEnvironmentFolderTab, openAnyRequestTab } = options
   const { t } = useTranslation()
@@ -174,6 +250,18 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
       return false
     }
     if (isDescendant(sourceId, targetId)) return
+
+    // Resolves an item's containing folder — used AFTER the move to report
+    // where the item landed.
+    const findParentFolder = (nodes: FolderItem[], childId: string): FolderItem | null => {
+      for (const node of nodes) {
+        if (!isAnyFolder(node)) continue
+        if (node.items.some((child) => child.id === childId)) return node
+        const deeper = findParentFolder(node.items, childId)
+        if (deeper) return deeper
+      }
+      return null
+    }
 
     // Remove the item from its current position
     const removedItem = removeItemFromTree(rootItems, sourceId)
@@ -240,7 +328,37 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
       ...prevTree,
       groups: mapAllWorkbenchTabs(prevTree.groups, refreshTabBreadcrumbs)
     }))
-  }, [rootItems, setRootItems, setWorkbenchTree])
+
+    // Moving an item edits the TREE, not any document, so none of the
+    // per-document events fire — nothing marks a dirty unit, the autosave
+    // is never armed, and the reorganisation stays in memory until some
+    // unrelated edit happens to carry it to disk. Announce the moved item
+    // as updated: that is the same signal every other mutation sends, so
+    // it marks the project dirty and lets the autosave (or Ctrl+S) do the
+    // writing, rather than forcing a write from here.
+    // Announce the MOVED item with its new parent. A folder's own draft
+    // excludes its children (each child is its own save unit), so
+    // announcing the container changes nothing and leaves the project
+    // "saved" — the save unit that genuinely moved is the item itself, and
+    // `parentFolderId` is what carries the move.
+    //
+    // Scenarios are left to the host: they have no save-unit document
+    // type of their own (announcing one under 'folder' would cleanse its
+    // draft against the wrong shape and drop its nodes), and the app
+    // already persists scenario edits through a debounced whole-file save
+    // for exactly that reason.
+    const movedParentId = findParentFolder(rootItems, sourceId)?.id
+    if (isScenario(removedItem)) {
+      onStructureChanged?.()
+    } else {
+      emitBothBuses(isAnyFolder(removedItem) ? DocumentEvents.FOLDER_UPDATED : DocumentEvents.REQUEST_UPDATED, {
+        id: removedItem.id,
+        type: isAnyFolder(removedItem) ? 'folder' : 'request',
+        document: cloneForEventBus(removedItem),
+        ...(movedParentId !== undefined ? { parentFolderId: movedParentId } : {})
+      } as DocumentChangedPayload)
+    }
+  }, [rootItems, setRootItems, setWorkbenchTree, onStructureChanged])
 
   // Handle "Clone" context menu action. Works for any item — including a
   // ROOT-level folder / environment folder (cloneItemInTree inserts the deep
@@ -249,21 +367,37 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
     const clonedItem = cloneItemInTree(rootItems, itemId, t('sidebar.contextMenu.copySuffix', 'copy'))
     if (!clonedItem) return
 
+    // `deepCloneItem` returns a plain, non-reactive POJO. Wrap the clone (and
+    // its subtree) reactive and swap it into the tree in place so later edits
+    // emit REQUEST_UPDATED / FOLDER_UPDATED like any other item.
+    const { parent, index } = findItemWithParent(rootItems, clonedItem.id)
+    const parentFolderId = parent && (isAnyFolder(parent) || isScenario(parent)) ? parent.id : undefined
+    const reactiveClone = makeReactiveFolderItem(clonedItem, parentFolderId)
+    if (index >= 0) {
+      const siblings = parent ? (parent as { items: FolderItem[] }).items : rootItems
+      if (siblings[index]?.id === reactiveClone.id) siblings[index] = reactiveClone
+    }
+
+    // Announce the creation. `cloneItemInTree` alone marks nothing dirty and
+    // indexes nothing — this is what lights the git push badge (autosave) and
+    // makes the clone findable in search immediately, like a normal create.
+    emitClonedSubtreeCreated(reactiveClone, parentFolderId)
+
     // Force React re-render by creating new reference
     setRootItems((prevItems) => [...prevItems])
 
     // Open the clone in the workbench, as a click on it would.
-    const { breadcrumbs } = findItemWithBreadcrumbs(rootItems, clonedItem.id)
+    const { breadcrumbs } = findItemWithBreadcrumbs(rootItems, reactiveClone.id)
     if (breadcrumbs.length > 0) {
-      if (isScenario(clonedItem)) {
-        openScenarioEditorTab(clonedItem, breadcrumbs)
-      } else if (isEnvironmentFolder(clonedItem)) {
-        openEnvironmentFolderTab(clonedItem, breadcrumbs)
-      } else if (isFolder(clonedItem)) {
-        openFolderTab(clonedItem, breadcrumbs)
-      } else if (isRequest(clonedItem)) {
+      if (isScenario(reactiveClone)) {
+        openScenarioEditorTab(reactiveClone, breadcrumbs)
+      } else if (isEnvironmentFolder(reactiveClone)) {
+        openEnvironmentFolderTab(reactiveClone, breadcrumbs)
+      } else if (isFolder(reactiveClone)) {
+        openFolderTab(reactiveClone, breadcrumbs)
+      } else if (isRequest(reactiveClone)) {
         const envs = getNearestEnvironmentsForBreadcrumbs(rootItems, breadcrumbs)
-        openAnyRequestTab(clonedItem, breadcrumbs, envs)
+        openAnyRequestTab(reactiveClone, breadcrumbs, envs)
       }
     }
   }, [rootItems, setRootItems, t, openFolderTab, openScenarioEditorTab, openEnvironmentFolderTab, openAnyRequestTab])
@@ -299,6 +433,53 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
       }
     }
     collect(itemId)
+
+    // Announce the deletion of every entity in the subtree, on BOTH buses,
+    // BEFORE the tree mutation drops the nodes. Without this a sidebar
+    // delete emitted nothing at all: the main-process search index never
+    // dropped the entries (deleted items kept showing in search results)
+    // and the renderer save-unit bridge never marked the project dirty (no
+    // autosave after a delete). Each request/folder emits its own DELETED
+    // so the search index — whose FOLDER_DELETED handler removes only the
+    // named id, not descendants — clears the whole subtree. A scenario is
+    // not itself indexed, but its descendant requests are, so we recurse
+    // into scenarios and announce those.
+    const announceDeleted = (node: FolderItem, parentId: string | undefined): void => {
+      if (isRequest(node)) {
+        emitBothBuses(DocumentEvents.REQUEST_DELETED, {
+          id: node.id,
+          type: 'request',
+          ...(parentId !== undefined ? { parentFolderId: parentId } : {})
+        } as DocumentDeletedPayload)
+        return
+      }
+      if (isAnyFolder(node) || isScenario(node)) {
+        if (isAnyFolder(node)) {
+          emitBothBuses(DocumentEvents.FOLDER_DELETED, {
+            id: node.id,
+            type: 'folder',
+            ...(parentId !== undefined ? { parentFolderId: parentId } : {})
+          } as DocumentDeletedPayload)
+        }
+        for (const child of (node as FolderItem & { items?: FolderItem[] }).items ?? []) {
+          announceDeleted(child, node.id)
+        }
+      }
+    }
+    const parentOf = (nodes: FolderItem[], childId: string): FolderItem | null => {
+      for (const node of nodes) {
+        if (!isAnyFolder(node) && !isScenario(node)) continue
+        const kids = (node as FolderItem & { items?: FolderItem[] }).items ?? []
+        if (kids.some((child) => child.id === childId)) return node
+        const deeper = parentOf(kids, childId)
+        if (deeper) return deeper
+      }
+      return null
+    }
+    const nodeToDelete = findItemById(rootItems, itemId)
+    if (nodeToDelete) {
+      announceDeleted(nodeToDelete, parentOf(rootItems, itemId)?.id)
+    }
 
     // Remove the item from the tree (handles nested items)
     const removed = removeItemFromTree(rootItems, itemId)
@@ -582,7 +763,11 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
         type: 'folder',
         document: cloneForEventBus(reactive)
       }
-      eventBus.emitSync(DocumentEvents.FOLDER_CREATED, folderPayload)
+      // BOTH buses: emitSync reaches the main-process search index +
+      // ContextService; emitLocalSync reaches the renderer save-unit bridge
+      // that marks the project dirty so autosave fires. emitSync alone
+      // updated search but never triggered a save.
+      emitBothBuses(DocumentEvents.FOLDER_CREATED, folderPayload)
     } else {
       // The class instances structurally satisfy the structural
       // `Request` union in `shared/types/requests`, but TS's
@@ -750,7 +935,7 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
         document: cloneForEventBus(reactive),
         ...(resolvedParentId !== undefined ? { parentFolderId: resolvedParentId } : {})
       }
-      eventBus.emitSync(DocumentEvents.REQUEST_CREATED, createdPayload)
+      emitBothBuses(DocumentEvents.REQUEST_CREATED, createdPayload)
     }
 
     // `silent` (a request created inline in a scenario graph) skips ALL
@@ -796,7 +981,7 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
     setSelectedItemId(newFolder.id)
     // Announce the creation so the save-unit registry learns about the new root
     // folder (crash-recovery draft) — child folders emit this; root ones didn't.
-    eventBus.emitSync(DocumentEvents.FOLDER_CREATED, {
+    emitBothBuses(DocumentEvents.FOLDER_CREATED, {
       id: newFolder.id,
       type: 'folder',
       document: cloneForEventBus(newFolder)
@@ -824,7 +1009,7 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
     // Announce the creation (FOLDER_CREATED — the main-side handler keys on
     // type:'folder'; an EnvironmentFolder is a folder with folderType:'environment')
     // so the save-unit registry learns about the new root env-folder.
-    eventBus.emitSync(DocumentEvents.FOLDER_CREATED, {
+    emitBothBuses(DocumentEvents.FOLDER_CREATED, {
       id: newFolder.id,
       type: 'folder',
       document: cloneForEventBus(newFolder)

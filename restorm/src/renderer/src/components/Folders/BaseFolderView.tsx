@@ -3,7 +3,8 @@ import { useTranslation } from 'react-i18next'
 import {
   Tabs,
   type Tab,
-  MarkdownEditor
+  MarkdownEditor,
+  fieldDiffStyle
 } from 'electron-core-ui/renderer'
 import type { Folder, EnvironmentFolder } from '../../../../shared/types/collections'
 
@@ -28,6 +29,20 @@ export interface BaseFolderViewProps {
    * `<DocumentationHost />`. The Docs tab is omitted when this is
    * undefined — there's no fallback markdown source. */
   docsContent?: React.ReactNode
+  /** Conflict-resolution field-diff (AC#4): when true, red-borders the
+   * notes editor (`fieldDiffStyle`) — the ONLY field this panel exposes
+   * that a folder-level conflict can highlight. Also nudges the default
+   * active tab to `notes` (unless `defaultActiveTabId` already picks one
+   * explicitly), satisfying AC#5's "preselect the conflict-bearing tab".
+   * Only ever passed from `ConflictEntityPanel`; `undefined`/`false` in
+   * the live (non-conflict) editor. */
+  notesDiffers?: boolean
+  /** Ids of the tabs a folder-level conflict actually contests (e.g.
+   * `environments`, `custom-values`, `home`). Their content gets the same
+   * red border as a contested notes editor, so the user can see WHICH tab
+   * to arbitrate instead of comparing two environment trees by eye.
+   * Only ever passed from `ConflictEntityPanel`. */
+  contestedTabIds?: string[]
 }
 
 /**
@@ -39,7 +54,9 @@ export const BaseFolderView: React.FC<BaseFolderViewProps> = ({
   additionalTabs = [],
   defaultActiveTabId,
   docsContent,
-  onSwitchTabReady
+  onSwitchTabReady,
+  notesDiffers,
+  contestedTabIds
 }) => {
   const { t } = useTranslation()
   const testIdBase = `folder-view-${folder.id}`
@@ -47,6 +64,7 @@ export const BaseFolderView: React.FC<BaseFolderViewProps> = ({
   const hasDocs = docsContent !== undefined && docsContent !== null
 
   const defaultTabId = defaultActiveTabId
+    ?? (notesDiffers ? 'notes' : undefined)
     ?? additionalTabs[0]?.id
     ?? (hasDocs ? 'docs' : 'notes')
   const [activeTabId, setActiveTabId] = useState<string>(defaultTabId)
@@ -81,15 +99,31 @@ export const BaseFolderView: React.FC<BaseFolderViewProps> = ({
     label: t('folderView.tabs.notes'),
     useScrollableElement: false,
     content: (
-      <MarkdownEditor
-        initialValue={folder.notes ?? ''}
-        onChange={handleNotesChange}
-        data-testid={`${testIdBase}-markdown-editor-notes`}
-      />
+      <div style={{ height: '100%', boxSizing: 'border-box', border: '1px solid transparent', ...fieldDiffStyle(!!notesDiffers) }}>
+        <MarkdownEditor
+          initialValue={folder.notes ?? ''}
+          onChange={handleNotesChange}
+          data-testid={`${testIdBase}-markdown-editor-notes`}
+        />
+      </div>
     )
   })
 
-  const allTabs = [...additionalTabs, ...docsTabs]
+  const contested = new Set(contestedTabIds ?? [])
+  const highlightedAdditionalTabs = contested.size === 0
+    ? additionalTabs
+    : additionalTabs.map((tab) => (contested.has(tab.id)
+      ? {
+        ...tab,
+        content: (
+          <div style={{ height: '100%', boxSizing: 'border-box', border: '1px solid transparent', ...fieldDiffStyle(true) }}>
+            {tab.content}
+          </div>
+        )
+      }
+      : tab))
+
+  const allTabs = [...highlightedAdditionalTabs, ...docsTabs]
 
   return (
     <div

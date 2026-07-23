@@ -7,6 +7,12 @@ import './modal.css'
 
 export type ModalSize = 'full' | 'dialog'
 
+/** Upper bound on the close fade (CSS: 120ms) before the overlay is torn
+ * down regardless of whether `transitionend` ever arrived. Generous
+ * enough never to cut a real animation short, short enough that a stuck
+ * overlay is not perceptible. */
+const CLOSE_FALLBACK_MS = 400
+
 export interface ModalProps {
   title: React.ReactNode
   isOpen: boolean
@@ -14,6 +20,13 @@ export interface ModalProps {
   children: React.ReactNode
   /** Modal size: 'full' for fullscreen-like, 'dialog' for compact dialog box */
   size?: ModalSize
+  /**
+   * Dialog-size only: widens the compact dialog box beyond its default
+   * 320-480px envelope (any CSS width value — `640`, `'52rem'`, `'70%'`).
+   * Applied as both the dialog's width and its max-width, capped at 92vw so
+   * a large value never overflows a small window. Ignored for `size='full'`.
+   */
+  dialogWidth?: number | string
   /**
    * Fired once the close animation has finished and the modal has
    * fully unmounted its content — i.e. the "really closed" signal, as
@@ -59,6 +72,7 @@ const ModalInner: React.FC<ModalProps> = ({
   onClose,
   children,
   size = 'full',
+  dialogWidth,
   onClosed,
   'data-testid': dataTestId,
   scopeToSelector,
@@ -81,6 +95,11 @@ const ModalInner: React.FC<ModalProps> = ({
   const [overlayState, setOverlayState] = useState<'open' | 'closing' | 'closed'>('closed')
   const wasOpenRef = useRef(isOpen)
   const rafIdsRef = useRef<number[]>([])
+  // Read through a ref so the open/close orchestration effect stays keyed
+  // on `isOpen` alone: re-running it whenever the consumer happens to pass
+  // a fresh `onClosed` identity would restart the fade mid-flight.
+  const onClosedRef = useRef(onClosed)
+  useEffect(() => { onClosedRef.current = onClosed }, [onClosed])
   // Announce the modal's overlay footprint to listeners
   // (`MiniBrowserPanel` collapses its content view while a modal sits
   // over it). Active while the modal is rendered — including the
@@ -130,7 +149,23 @@ const ModalInner: React.FC<ModalProps> = ({
         setOverlayState('closing')
       })
       rafIdsRef.current = [raf]
+      // Safety net. Tearing the overlay down ONLY on `transitionend` means
+      // any missed transition strands a full-screen overlay on top of the
+      // app forever: it is invisible (opacity 0) but still swallows every
+      // click, including on the title bar and menu bar, so the window
+      // looks alive and answers nothing. A transition can legitimately
+      // fail to fire — the element already at the target opacity, a
+      // parent hidden mid-close, the tab backgrounded, a user agent
+      // honouring reduced motion by dropping it. This timer completes the
+      // teardown when that happens; when the transition does fire, the
+      // handler wins and this is a no-op.
+      const fallback = setTimeout(() => {
+        setIsRendered(false)
+        setOverlayState('closed')
+        onClosedRef.current?.()
+      }, CLOSE_FALLBACK_MS)
       return () => {
+        clearTimeout(fallback)
         for (const id of rafIdsRef.current) cancelAnimationFrame(id)
         rafIdsRef.current = []
       }
@@ -306,6 +341,9 @@ const ModalInner: React.FC<ModalProps> = ({
           data-size={size}
           data-is-open={isOpen ? 'true' : 'false'}
           tabIndex={-1}
+          style={size === 'dialog' && dialogWidth !== undefined
+            ? { width: dialogWidth, maxWidth: '92vw' }
+            : undefined}
         >
           <div
             className="ecu-modal-header"

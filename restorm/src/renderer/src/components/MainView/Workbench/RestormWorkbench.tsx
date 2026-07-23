@@ -197,6 +197,15 @@ export interface RestormWorkbenchProps {
    * renames the user does outside the app.
    */
   projectUuid?: string | null | undefined
+  /**
+   * Monotonic counter the host bumps after a clean git pull re-hydrates the
+   * whole collection tree from disk. Folded into each request tab's content
+   * `key` so an open tab remounts and re-reads the freshly-pulled values
+   * instead of keeping its pre-pull local state (the tree/sidebar refresh on
+   * their own because they read the live tree; a request tab seeds editable
+   * fields into local React state once at mount, so it needs the remount).
+   */
+  tabReloadEpoch?: number | undefined
 }
 
 /** Imperative handle for Workbench component */
@@ -253,6 +262,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
   navigationEnabled,
   tabSwitcherAnchorSelector,
   projectUuid,
+  tabReloadEpoch,
   isItemFavorite,
   onToggleFavorite,
   getScenariosUsingRequest,
@@ -991,7 +1001,12 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
           useScrollableElement: false,
           content: (
             <div style={{ height: '100%', minHeight: 0 }}>
+              {/* Same post-pull remount contract as the request views
+                * (`renderProtocolTabView`): the editor seeds nodes/edges into
+                * local state once, so a pull that rewrites the scenario needs
+                * the epoch in the key or the graph keeps the pre-pull layout. */}
               <ScenarioEditorView
+                key={`${scenario.id}:${tabReloadEpoch ?? 0}`}
                 scenario={scenario}
                 tabId={effectiveTab.id}
                 {...(projectUuid ? { projectUuid } : {})}
@@ -1236,7 +1251,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
             starLeftAction={starLeftActionFor(request)}
           >
             <div style={{ flex: 1, minHeight: 0, minWidth: 0, padding: '0 16px 8px 16px' }}>
-              {renderProtocolTabView(request)}
+              {renderProtocolTabView(request, tabReloadEpoch)}
             </div>
           </DeprecationAwareRequestTab>
         </EnvironmentProvider>
@@ -1273,7 +1288,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
             starLeftAction={starLeftActionFor(request)}
           >
             <div style={{ flex: 1, minHeight: 0, minWidth: 0, padding: '0 16px 8px 16px' }}>
-              {renderProtocolTabView(request)}
+              {renderProtocolTabView(request, tabReloadEpoch)}
             </div>
           </RestormWorkbenchTab>
         </EnvironmentProvider>
@@ -1310,7 +1325,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
             starLeftAction={starLeftActionFor(request)}
           >
             <div style={{ flex: 1, minHeight: 0, minWidth: 0, padding: '0 16px 8px 16px' }}>
-              {renderProtocolTabView(request)}
+              {renderProtocolTabView(request, tabReloadEpoch)}
             </div>
           </RestormWorkbenchTab>
         </EnvironmentProvider>
@@ -1347,7 +1362,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
             starLeftAction={starLeftActionFor(request)}
           >
             <div style={{ flex: 1, minHeight: 0, minWidth: 0, padding: '0 16px 8px 16px' }}>
-              {renderProtocolTabView(request)}
+              {renderProtocolTabView(request, tabReloadEpoch)}
             </div>
           </RestormWorkbenchTab>
         </EnvironmentProvider>
@@ -1384,7 +1399,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
             starLeftAction={starLeftActionFor(request)}
           >
             <div style={{ flex: 1, minHeight: 0, minWidth: 0, padding: '0 16px 8px 16px' }}>
-              {renderProtocolTabView(request)}
+              {renderProtocolTabView(request, tabReloadEpoch)}
             </div>
           </RestormWorkbenchTab>
         </EnvironmentProvider>
@@ -1421,7 +1436,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
             starLeftAction={starLeftActionFor(request)}
           >
             <div style={{ flex: 1, minHeight: 0, minWidth: 0, padding: '0 16px 8px 16px' }}>
-              {renderProtocolTabView(request)}
+              {renderProtocolTabView(request, tabReloadEpoch)}
             </div>
           </RestormWorkbenchTab>
         </EnvironmentProvider>
@@ -1458,7 +1473,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
             starLeftAction={starLeftActionFor(request)}
           >
             <div style={{ flex: 1, minHeight: 0, minWidth: 0, padding: '0 16px 8px 16px' }}>
-              {renderProtocolTabView(request)}
+              {renderProtocolTabView(request, tabReloadEpoch)}
             </div>
           </RestormWorkbenchTab>
         </EnvironmentProvider>
@@ -1495,7 +1510,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
             starLeftAction={starLeftActionFor(request)}
           >
             <div style={{ flex: 1, minHeight: 0, minWidth: 0, padding: '0 16px 8px 16px' }}>
-              {renderProtocolTabView(request)}
+              {renderProtocolTabView(request, tabReloadEpoch)}
             </div>
           </RestormWorkbenchTab>
         </EnvironmentProvider>
@@ -1532,7 +1547,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
             starLeftAction={starLeftActionFor(request)}
           >
             <div style={{ flex: 1, minHeight: 0, minWidth: 0, padding: '0 16px 8px 16px' }}>
-              {renderProtocolTabView(request)}
+              {renderProtocolTabView(request, tabReloadEpoch)}
             </div>
           </RestormWorkbenchTab>
         </EnvironmentProvider>
@@ -1570,7 +1585,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
             starLeftAction={starLeftActionFor(request)}
           >
             <div style={{ flex: 1, minHeight: 0, minWidth: 0, padding: '0 16px 8px 16px' }}>
-              {renderProtocolTabView(request)}
+              {renderProtocolTabView(request, tabReloadEpoch)}
             </div>
           </RestormWorkbenchTab>
         </EnvironmentProvider>
@@ -1607,7 +1622,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
             starLeftAction={starLeftActionFor(request)}
           >
             <div style={{ flex: 1, minHeight: 0, minWidth: 0, padding: '0 16px 8px 16px' }}>
-              {renderProtocolTabView(request)}
+              {renderProtocolTabView(request, tabReloadEpoch)}
             </div>
           </RestormWorkbenchTab>
         </EnvironmentProvider>
@@ -1644,7 +1659,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
             starLeftAction={starLeftActionFor(request)}
           >
             <div style={{ flex: 1, minHeight: 0, minWidth: 0, padding: '0 16px 8px 16px' }}>
-              {renderProtocolTabView(request)}
+              {renderProtocolTabView(request, tabReloadEpoch)}
             </div>
           </RestormWorkbenchTab>
         </EnvironmentProvider>
@@ -1681,7 +1696,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
             starLeftAction={starLeftActionFor(request)}
           >
             <div style={{ flex: 1, minHeight: 0, minWidth: 0, padding: '0 16px 8px 16px' }}>
-              {renderProtocolTabView(request)}
+              {renderProtocolTabView(request, tabReloadEpoch)}
             </div>
           </RestormWorkbenchTab>
         </EnvironmentProvider>
@@ -1718,7 +1733,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
             starLeftAction={starLeftActionFor(request)}
           >
             <div style={{ flex: 1, minHeight: 0, minWidth: 0, padding: '0 16px 8px 16px' }}>
-              {renderProtocolTabView(request)}
+              {renderProtocolTabView(request, tabReloadEpoch)}
             </div>
           </RestormWorkbenchTab>
         </EnvironmentProvider>
@@ -1755,7 +1770,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
             starLeftAction={starLeftActionFor(request)}
           >
             <div style={{ flex: 1, minHeight: 0, minWidth: 0, padding: '0 16px 8px 16px' }}>
-              {renderProtocolTabView(request)}
+              {renderProtocolTabView(request, tabReloadEpoch)}
             </div>
           </RestormWorkbenchTab>
         </EnvironmentProvider>
@@ -1819,7 +1834,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
 
     // Legacy/empty tab fallback (should not happen with typed tabs)
     return null
-  }, [t, mcpLogsLabels, onBreadcrumbClick, onBreadcrumbAuxClick, onItemRename, onItemIconChange, onTagsChange, onTagColorChange, onFolderChange, onScenarioChange, onCreateScenarioRequest, onCreateScenarioChild, resolveBoundItem, resolveRequestEnv, resolveSyntheticPreview, onEnvironmentFolderChange, onRequestClick, onRequestAuxClick, getRequestById, getFolderById, getScenarioById, getEnvironmentFolderById, getTagColorsFromBreadcrumbs, getEnvFolderIdFromBreadcrumbs, projectUuid, isItemFavorite, onToggleFavorite, getScenariosUsingRequest, getScenariosUsingQuickConfig, onOpenScenarioFromRequest, getScenariosUsingScenario, updateMiniBrowserUrl])
+  }, [t, mcpLogsLabels, onBreadcrumbClick, onBreadcrumbAuxClick, onItemRename, onItemIconChange, onTagsChange, onTagColorChange, onFolderChange, onScenarioChange, onCreateScenarioRequest, onCreateScenarioChild, resolveBoundItem, resolveRequestEnv, resolveSyntheticPreview, onEnvironmentFolderChange, onRequestClick, onRequestAuxClick, getRequestById, getFolderById, getScenarioById, getEnvironmentFolderById, getTagColorsFromBreadcrumbs, getEnvFolderIdFromBreadcrumbs, projectUuid, isItemFavorite, onToggleFavorite, getScenariosUsingRequest, getScenariosUsingQuickConfig, onOpenScenarioFromRequest, getScenariosUsingScenario, updateMiniBrowserUrl, tabReloadEpoch])
 
   // Handle tab detach to new window
   const handleDetachToNewWindow = useCallback(

@@ -23,3 +23,10 @@ restorm/tests/e2e/samples/scenarios-e2e-reference-tests.writefile-out.json
 # Entitlement signing keys — NEVER commit the private key
 entitlement_*.pem
 *.pem
+
+# E2E fallout guard: a test-harness bug once resolved a RELATIVE project path
+# against the app cwd (this repo root) and git-committed seed files here.
+# The seeds live in /tmp clones — any api.restorm at the repo root is residue.
+/api.restorm
+/api.restorm.env
+/api.restorm.responses.zip

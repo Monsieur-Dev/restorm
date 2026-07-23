@@ -7,6 +7,7 @@ import {
   VerticalSashContainer,
   JsonViewer,
   eventBus,
+  fieldDiffStyle,
   type Tab
 } from 'electron-core-ui/renderer'
 import { DocumentEvents } from '../../services/DocumentEvents'
@@ -75,6 +76,30 @@ export interface BaseRequestTabViewProps {
    * `initialWidth={500}` that suits the main tab view; the auth
    * modal (narrower container) overrides to `0.5` for a 50/50 split. */
   initialLeftRatio?: number
+  /** Seeds the INITIAL request-side tab, then lets the user freely switch
+   * tabs afterward — unlike `activeRequestTabId` (which is fully
+   * controlled: once passed, the caller owns every subsequent selection),
+   * this only affects `useState`'s initial value. Mirrors
+   * `BaseFolderView`'s `defaultActiveTabId`. Used by the conflict-
+   * resolution panel to preselect the tab holding the conflicting field
+   * (AC#5) without locking the user out of exploring other tabs. Defaults
+   * to `'request'`. */
+  defaultActiveTabId?: string
+  /** Conflict-resolution field-diff (AC#4): red-borders the Notes editor
+   * (`fieldDiffStyle`) — mirrors `BaseFolderView`'s matching prop. Only
+   * ever set by `ConflictEntityPanel`; `undefined`/`false` in the live
+   * (non-conflict) editor. */
+  notesDiffers?: boolean
+  /** Conflict resolution: restrict the request-side strip to these tab ids.
+   * A conflict view shows what is contested and nothing else — a tab with
+   * no divergence is noise the user has to rule out by hand. `undefined`
+   * (the live editor) keeps every tab. An empty array hides the strip
+   * entirely, which is the "only the name changed" case. */
+  visibleRequestTabIds?: string[]
+  /** Conflict resolution: tabs appended to the request-side strip that the
+   * live editor has no equivalent for (today: the contested tag list).
+   * Filtered by `visibleRequestTabIds` like every other tab. */
+  extraRequestTabs?: Tab[]
 }
 
 const COMPACT_BREAKPOINT = 750
@@ -101,10 +126,14 @@ export const BaseRequestTabView: React.FC<BaseRequestTabViewProps> = ({
   showCodeSnippets = true,
   activeRequestTabId,
   onRequestTabChange,
-  initialLeftRatio
+  initialLeftRatio,
+  defaultActiveTabId,
+  notesDiffers,
+  visibleRequestTabIds,
+  extraRequestTabs
 }) => {
   const { t } = useTranslation()
-  const [internalActiveTabId, setInternalActiveTabId] = useState('request')
+  const [internalActiveTabId, setInternalActiveTabId] = useState(defaultActiveTabId ?? 'request')
   const activeTabId = activeRequestTabId ?? internalActiveTabId
   const setActiveTabId = useCallback((tabId: string) => {
     if (onRequestTabChange) onRequestTabChange(tabId)
@@ -256,12 +285,14 @@ export const BaseRequestTabView: React.FC<BaseRequestTabViewProps> = ({
         label: t('requestTab.tabs.notes'),
         useScrollableElement: false,
         content: (
-          <MarkdownEditor
-            key={requestId}
-            initialValue={notes ?? ''}
-            onChange={handleNotesChange}
-            data-testid="base-request-markdown-editor-notes"
-          />
+          <div style={{ height: '100%', boxSizing: 'border-box', border: '1px solid transparent', ...fieldDiffStyle(!!notesDiffers) }}>
+            <MarkdownEditor
+              key={requestId}
+              initialValue={notes ?? ''}
+              onChange={handleNotesChange}
+              data-testid="base-request-markdown-editor-notes"
+            />
+          </div>
         )
       })
     }
@@ -275,8 +306,10 @@ export const BaseRequestTabView: React.FC<BaseRequestTabViewProps> = ({
       })
     }
 
-    return tabs
-  }, [requestId, notes, requestContent, urlSection, docsContent, hasDocs, handleNotesChange, codeSnippetsContent, additionalRequestTabs, showNotes, showCodeSnippets, t])
+    if (extraRequestTabs) tabs.push(...extraRequestTabs)
+    if (!visibleRequestTabIds) return tabs
+    return tabs.filter((tab) => visibleRequestTabIds.includes(tab.id))
+  }, [requestId, notes, requestContent, urlSection, docsContent, hasDocs, handleNotesChange, codeSnippetsContent, additionalRequestTabs, showNotes, showCodeSnippets, notesDiffers, visibleRequestTabIds, extraRequestTabs, t])
 
   // If the active tab vanishes (e.g., user was on Docs and the request's URL
   // changed so no operation matches anymore), fall back to the Request tab

@@ -13,6 +13,13 @@
       "save": "Ruaj",
       "dontSave": "Mos ruaj",
       "cancel": "Anulo"
+    },
+    "externalChange": {
+      "title": "Skedari ndryshoi në disk",
+      "message": "«{{fileName}}» u ndryshua jashtë aplikacionit.",
+      "detail": "Ringarkoni për të përdorur versionin në disk, ose ruani versionin tuaj dhe mbishkruajeni.",
+      "reload": "Ringarko",
+      "keepMine": "Ruaj versionin tim"
     }
   },
   "recentFilesVignette": {
@@ -341,6 +348,13 @@
       "stopServer": "Ndalo serverin MCP",
       "resumeServer": "Rifillo serverin MCP",
       "serverStopped": "ndaluar"
+    },
+    "git": {
+      "pushTooltip": "Dërgo te depozitari",
+      "pullTooltip": "Merr nga depozitari",
+      "nothingToPushTooltip": "Nuk ka ndryshime për t'u dërguar",
+      "refreshTooltip": "Kontrollo ndryshimet për dërgim ose tërheqje",
+      "historyTooltip": "Historiku i Git"
     }
   },
   "mcpToolTitles": {
@@ -410,5 +424,47 @@
   "gatedControl": {
     "proLabel": "Versioni Pro",
     "subscribe": "Abonohu"
+  },
+  "git": {
+    "cliMissing": {
+      "title": "Git nuk është i instaluar",
+      "body": "Instaloni Git-in dhe shtojeni në PATH për të përdorur integrimin e Git-ut."
+    },
+    "pullAvailable": {
+      "title": "Përditësim i disponueshëm",
+      "body": "Një version më i ri i këtij skedari është i disponueshëm në depo.",
+      "pullNow": "Tërhiq tani"
+    },
+    "mergeInProgress": {
+      "title": "Bashkim i papërfunduar",
+      "body": "Një bashkim Git u nis dhe nuk përfundoi kurrë. Skedari i projektit mund të përmbajë ende shënues konflikti.",
+      "abort": "Anulo bashkimin"
+    }
+  },
+  "pushModal": {
+    "title": "Dërgo",
+    "languageLabel": "Gjuha e mesazhit të commit-it",
+    "applyLanguageByDefault": "Gjuha e parazgjedhur e commit-eve",
+    "titleFieldLabel": "Titulli i commit-it",
+    "bodyFieldLabel": "Përshkrimi",
+    "cancel": "Anulo",
+    "push": "Dërgo"
+  },
+  "conflictResolution": {
+    "listTitle": "Konfliktet",
+    "userTitle": "Versioni juaj",
+    "serverTitle": "Versioni i serverit",
+    "resolvedTitle": "Zgjidhur",
+    "selectAConflict": "Zgjidhni një konflikt për ta zgjidhur",
+    "useThisVersion": "Përdor këtë version"
+  },
+  "gitHistory": {
+    "commits": "Commit-e",
+    "noCommitSelected": "Zgjidhni një commit për të parë detajet",
+    "author": "Autori",
+    "date": "Data",
+    "hash": "Hash",
+    "parents": "Prindërit",
+    "recoverVersion": "Rikthe këtë version"
   }
 }

@@ -181,15 +181,14 @@ export function saveSettingsConfig(
   const existing = projectMap.get(requestId) ?? []
   const trimmedName = name.trim()
   const existingIdx = existing.findIndex((c) => c.name === trimmedName)
-  const now = new Date().toISOString()
 
   let saved: QuickConfig
   const existingEntry = existingIdx >= 0 ? existing[existingIdx] : undefined
   if (existingIdx >= 0 && existingEntry !== undefined) {
-    saved = { ...existingEntry, fields, updatedAt: now }
+    saved = { ...existingEntry, fields }
     existing[existingIdx] = saved
   } else {
-    saved = { id: generateId(), name: trimmedName, requestId, storageTarget: 'settings', fields, createdAt: now, updatedAt: now }
+    saved = { id: generateId(), name: trimmedName, requestId, storageTarget: 'settings', fields }
     existing.push(saved)
   }
   projectMap.set(requestId, existing)
@@ -253,15 +252,14 @@ export function saveProjectConfig(
   const existing = getProjectConfigs(request)
   const trimmedName = name.trim()
   const existingIdx = existing.findIndex((c) => c.name === trimmedName)
-  const now = new Date().toISOString()
 
   let saved: QuickConfig
   const existingEntry = existingIdx >= 0 ? existing[existingIdx] : undefined
   if (existingIdx >= 0 && existingEntry !== undefined) {
-    saved = { ...existingEntry, fields, updatedAt: now }
+    saved = { ...existingEntry, fields }
     existing[existingIdx] = saved
   } else {
-    saved = { id: generateId(), name: trimmedName, requestId: request.id, storageTarget: 'project', fields, createdAt: now, updatedAt: now }
+    saved = { id: generateId(), name: trimmedName, requestId: request.id, storageTarget: 'project', fields }
     existing.push(saved)
   }
   // Assigning to the reactive proxy fires the set-trap → REQUEST_UPDATED.

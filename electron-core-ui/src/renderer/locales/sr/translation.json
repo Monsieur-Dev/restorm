@@ -13,6 +13,13 @@
       "save": "Sačuvaj",
       "dontSave": "Nemoj sačuvati",
       "cancel": "Otkaži"
+    },
+    "externalChange": {
+      "title": "Датотека је промењена на диску",
+      "message": "„{{fileName}}“ је измењена изван апликације.",
+      "detail": "Поново учитајте да бисте користили верзију са диска или задржите своју верзију и препишите је.",
+      "reload": "Поново учитај",
+      "keepMine": "Задржи моју верзију"
     }
   },
   "recentFilesVignette": {
@@ -341,6 +348,13 @@
       "stopServer": "Zaustavi MCP server",
       "resumeServer": "Nastavi MCP server",
       "serverStopped": "zaustavljeno"
+    },
+    "git": {
+      "pushTooltip": "Pošalji u repozitorijum",
+      "pullTooltip": "Preuzmi iz repozitorijuma",
+      "nothingToPushTooltip": "Нема промена за слање",
+      "refreshTooltip": "Провери промене за слање или преузимање",
+      "historyTooltip": "Git istorija"
     }
   },
   "mcpToolTitles": {
@@ -410,5 +424,47 @@
   "gatedControl": {
     "proLabel": "Pro verzija",
     "subscribe": "Pretplati se"
+  },
+  "git": {
+    "cliMissing": {
+      "title": "Git nije instaliran",
+      "body": "Instalirajte Git i dodajte ga u PATH da biste koristili Git integraciju."
+    },
+    "pullAvailable": {
+      "title": "Доступно ажурирање",
+      "body": "Новија верзија ове датотеке је доступна у репозиторијуму.",
+      "pullNow": "Повуци сада"
+    },
+    "mergeInProgress": {
+      "title": "Недовршено спајање",
+      "body": "Започето је Git спајање које никада није довршено. Датотека пројекта можда још садржи ознаке сукоба.",
+      "abort": "Прекини спајање"
+    }
+  },
+  "pushModal": {
+    "title": "Pošalji",
+    "languageLabel": "Jezik poruke commita",
+    "applyLanguageByDefault": "Подразумевани језик комитова",
+    "titleFieldLabel": "Naslov commita",
+    "bodyFieldLabel": "Opis",
+    "cancel": "Otkaži",
+    "push": "Pošalji"
+  },
+  "conflictResolution": {
+    "listTitle": "Sukobi",
+    "userTitle": "Vaša verzija",
+    "serverTitle": "Verzija servera",
+    "resolvedTitle": "Rešeno",
+    "selectAConflict": "Izaberite sukob da biste ga rešili",
+    "useThisVersion": "Koristi ovu verziju"
+  },
+  "gitHistory": {
+    "commits": "Commitovi",
+    "noCommitSelected": "Izaberite commit da vidite detalje",
+    "author": "Autor",
+    "date": "Datum",
+    "hash": "Heš",
+    "parents": "Roditelji",
+    "recoverVersion": "Врати ову верзију"
   }
 }

@@ -13,6 +13,13 @@
       "save": "Opslaan",
       "dontSave": "Niet opslaan",
       "cancel": "Annuleren"
+    },
+    "externalChange": {
+      "title": "Bestand op schijf gewijzigd",
+      "message": "'{{fileName}}' is buiten de applicatie gewijzigd.",
+      "detail": "Herlaad om de versie op schijf te gebruiken, of behoud je versie en overschrijf die.",
+      "reload": "Herladen",
+      "keepMine": "Mijn versie behouden"
     }
   },
   "recentFilesVignette": {
@@ -341,6 +348,13 @@
       "stopServer": "MCP-server stoppen",
       "resumeServer": "MCP-server hervatten",
       "serverStopped": "gestopt"
+    },
+    "git": {
+      "pushTooltip": "Pushen naar de repository",
+      "pullTooltip": "Pullen vanuit de repository",
+      "nothingToPushTooltip": "Geen wijzigingen om te pushen",
+      "refreshTooltip": "Controleren op wijzigingen om te pushen of pullen",
+      "historyTooltip": "Git-geschiedenis"
     }
   },
   "mcpToolTitles": {
@@ -410,5 +424,47 @@
   "gatedControl": {
     "proLabel": "Pro-versie",
     "subscribe": "Abonneren"
+  },
+  "git": {
+    "cliMissing": {
+      "title": "Git is niet geïnstalleerd",
+      "body": "Installeer Git en voeg het toe aan uw PATH om de Git-integratie te gebruiken."
+    },
+    "pullAvailable": {
+      "title": "Update beschikbaar",
+      "body": "Er is een nieuwere versie van dit bestand beschikbaar in de repository.",
+      "pullNow": "Nu pullen"
+    },
+    "mergeInProgress": {
+      "title": "Onvoltooide samenvoeging",
+      "body": "Er is een Git-samenvoeging gestart die nooit is voltooid. Het projectbestand kan nog conflictmarkeringen bevatten.",
+      "abort": "Samenvoeging afbreken"
+    }
+  },
+  "pushModal": {
+    "title": "Push",
+    "languageLabel": "Taal van het commitbericht",
+    "applyLanguageByDefault": "Standaardtaal voor commits",
+    "titleFieldLabel": "Commit-titel",
+    "bodyFieldLabel": "Beschrijving",
+    "cancel": "Annuleren",
+    "push": "Push"
+  },
+  "conflictResolution": {
+    "listTitle": "Conflicten",
+    "userTitle": "Uw versie",
+    "serverTitle": "Serverversie",
+    "resolvedTitle": "Opgelost",
+    "selectAConflict": "Selecteer een conflict om het op te lossen",
+    "useThisVersion": "Deze versie gebruiken"
+  },
+  "gitHistory": {
+    "commits": "Commits",
+    "noCommitSelected": "Selecteer een commit om de details te bekijken",
+    "author": "Auteur",
+    "date": "Datum",
+    "hash": "Hash",
+    "parents": "Ouders",
+    "recoverVersion": "Deze versie herstellen"
   }
 }

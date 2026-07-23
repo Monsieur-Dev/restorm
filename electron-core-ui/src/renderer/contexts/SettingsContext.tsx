@@ -1,13 +1,17 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { SettingValue, ResolvedSetting } from '../../types/settings'
-import { SettingsContext } from './settingsContextDef'
+import { SettingsContext, type CapabilityGate } from './settingsContextDef'
 
 interface SettingsProviderProps {
   children: React.ReactNode
+  /** See {@link CapabilityGate}. Threaded straight through to context — the
+   * provider itself has no opinion on capabilities, just relays whatever
+   * the host (via `ElectronCoreUiProvider`) supplies. */
+  capabilityGate?: CapabilityGate | undefined
 }
 
-export function SettingsProvider({ children }: SettingsProviderProps): React.ReactElement {
+export function SettingsProvider({ children, capabilityGate }: SettingsProviderProps): React.ReactElement {
   const { i18n } = useTranslation()
   const [groups, setGroups] = useState<import('../../types/settings').SettingsGroup[]>([])
   const [settingsList, setSettingsList] = useState<ResolvedSetting[]>([])
@@ -195,8 +199,9 @@ export function SettingsProvider({ children }: SettingsProviderProps): React.Rea
     workspacePath,
     workspaceValues,
     setWorkspaceSetting,
-    resetWorkspaceSetting
-  }), [groups, settingsMap, isLoading, getSetting, setSetting, resetSetting, searchQuery, filteredSettings, workspacePath, workspaceValues, setWorkspaceSetting, resetWorkspaceSetting])
+    resetWorkspaceSetting,
+    capabilityGate
+  }), [groups, settingsMap, isLoading, getSetting, setSetting, resetSetting, searchQuery, filteredSettings, workspacePath, workspaceValues, setWorkspaceSetting, resetWorkspaceSetting, capabilityGate])
 
   return (
     <SettingsContext.Provider value={value}>

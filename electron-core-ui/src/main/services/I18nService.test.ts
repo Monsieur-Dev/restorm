@@ -65,3 +65,32 @@ describe('I18nService.t interpolation', () => {
     expect(i18nService.t('meta.plain')).toBe('no {{token}} replaced')
   })
 })
+
+describe('I18nService.getFixedT', () => {
+  it('resolves against the GIVEN language, independent of currentLanguage', () => {
+    i18nService.addTranslations('en', { fixed: { greeting: 'Hello {{name}}' } })
+    i18nService.addTranslations('fr', { fixed: { greeting: 'Bonjour {{name}}' } })
+    // getLanguage()/setLanguage() are untouched — no side effect on the
+    // app's active UI language just from asking for a fixed translator.
+    const currentBefore = i18nService.getLanguage()
+
+    const fixedFr = i18nService.getFixedT('fr')
+    expect(fixedFr('fixed.greeting', { name: 'Yoann' })).toBe('Bonjour Yoann')
+    expect(i18nService.getLanguage()).toBe(currentBefore)
+  })
+
+  it('falls back to the service fallback language for a key missing in the fixed language', () => {
+    i18nService.addTranslations('en', { fixed: { onlyInEnglish: 'English only' } })
+    const fixedFr = i18nService.getFixedT('fr')
+    expect(fixedFr('fixed.onlyInEnglish')).toBe('English only')
+  })
+
+  it('resolves an i18next-style plural-suffixed key from a `count` param (matches the renderer i18next convention)', () => {
+    i18nService.addTranslations('en', {
+      fixed: { countRequest_one: '{{count}} request', countRequest_other: '{{count}} requests' }
+    })
+    const fixedEn = i18nService.getFixedT('en')
+    expect(fixedEn('fixed.countRequest', { count: 1 })).toBe('1 request')
+    expect(fixedEn('fixed.countRequest', { count: 3 })).toBe('3 requests')
+  })
+})

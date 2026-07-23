@@ -48,3 +48,22 @@ describe('cloneForEventBus', () => {
     expect(out.left).not.toBe(shared)
   })
 })
+
+describe('values structuredClone refuses', () => {
+  it('drops a function so the payload can actually cross IPC', () => {
+    const cloned = cloneForEventBus({ name: 'req', onRun: () => 'nope', nested: { fn: () => 1, keep: 2 } })
+
+    expect(cloned.onRun).toBeUndefined()
+    expect(cloned.nested.fn).toBeUndefined()
+    expect(cloned.nested.keep).toBe(2)
+    // The point of the helper: the result survives a real structured clone.
+    expect(() => structuredClone(cloned)).not.toThrow()
+  })
+
+  it('drops a symbol value too', () => {
+    const cloned = cloneForEventBus({ tag: Symbol('x'), keep: 'yes' })
+
+    expect(cloned.tag).toBeUndefined()
+    expect(cloned.keep).toBe('yes')
+  })
+})

@@ -46,4 +46,23 @@ describe('GatedControl', () => {
     fireEvent.click(link)
     expect(onSubscribe).toHaveBeenCalledTimes(1)
   })
+
+  it('showSubscribeLink=false: hovering reveals the message with NO subscribe link (nothing to buy)', () => {
+    const onSubscribe = vi.fn()
+    render(
+      <GatedControl
+        locked
+        onSubscribe={onSubscribe}
+        data-testid="gate"
+        proLabel="Initialize your git folder"
+        showSubscribeLink={false}
+      >
+        <button type="button">Push</button>
+      </GatedControl>
+    )
+    fireEvent.mouseEnter(screen.getByTestId('gate'))
+    expect(screen.getByText('Initialize your git folder')).not.toBeNull()
+    expect(screen.queryByTestId('gate-subscribe')).toBeNull()
+    expect(onSubscribe).not.toHaveBeenCalled()
+  })
 })

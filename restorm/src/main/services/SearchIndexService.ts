@@ -175,7 +175,15 @@ function requestToSearchDocument(
   if (request.type === 'http') {
     icon = request.method?.toLowerCase() ?? 'get'
   } else {
-    icon = protocolSpec(request.type).searchIcon ?? 'file'
+    const spec = protocolSpec(request.type)
+    // Fall back to the protocol's fixed badge before the generic `file`
+    // icon: a protocol can declare a badge (`REDIS`, `STOMP`, …) without a
+    // `searchIcon`, and `file` gives a search result a grey FILE badge
+    // instead of the protocol's own. The badge value round-trips through
+    // `mapToBadgeType` (which uppercases any unknown token), so `redis`
+    // lands back as the `REDIS` badge.
+    icon = spec.searchIcon
+      ?? (spec.badge.kind === 'fixed' ? spec.badge.value.toLowerCase() : 'file')
   }
 
   return {

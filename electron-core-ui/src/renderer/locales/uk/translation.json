@@ -13,6 +13,13 @@
       "save": "Зберегти",
       "dontSave": "Не зберігати",
       "cancel": "Скасувати"
+    },
+    "externalChange": {
+      "title": "Файл змінено на диску",
+      "message": "«{{fileName}}» було змінено поза програмою.",
+      "detail": "Перезавантажте, щоб використати версію з диска, або збережіть свою версію та перезапишіть її.",
+      "reload": "Перезавантажити",
+      "keepMine": "Зберегти мою версію"
     }
   },
   "recentFilesVignette": {
@@ -341,6 +348,13 @@
       "stopServer": "Зупинити MCP-сервер",
       "resumeServer": "Відновити MCP-сервер",
       "serverStopped": "зупинено"
+    },
+    "git": {
+      "pushTooltip": "Надіслати в репозиторій",
+      "pullTooltip": "Отримати з репозиторію",
+      "nothingToPushTooltip": "Немає змін для надсилання",
+      "refreshTooltip": "Перевірити зміни для надсилання чи отримання",
+      "historyTooltip": "Історія Git"
     }
   },
   "mcpToolTitles": {
@@ -410,5 +424,47 @@
   "gatedControl": {
     "proLabel": "Версія Pro",
     "subscribe": "Підписатися"
+  },
+  "git": {
+    "cliMissing": {
+      "title": "Git не встановлено",
+      "body": "Встановіть Git і додайте його до PATH, щоб використовувати інтеграцію з Git."
+    },
+    "pullAvailable": {
+      "title": "Доступне оновлення",
+      "body": "У репозиторії доступна новіша версія цього файлу.",
+      "pullNow": "Отримати зараз"
+    },
+    "mergeInProgress": {
+      "title": "Незавершене злиття",
+      "body": "Було розпочато злиття Git, яке так і не завершилося. Файл проєкту може досі містити маркери конфлікту.",
+      "abort": "Скасувати злиття"
+    }
+  },
+  "pushModal": {
+    "title": "Надіслати",
+    "languageLabel": "Мова повідомлення commit",
+    "applyLanguageByDefault": "Мова комітів за замовчуванням",
+    "titleFieldLabel": "Заголовок commit",
+    "bodyFieldLabel": "Опис",
+    "cancel": "Скасувати",
+    "push": "Надіслати"
+  },
+  "conflictResolution": {
+    "listTitle": "Конфлікти",
+    "userTitle": "Ваша версія",
+    "serverTitle": "Версія сервера",
+    "resolvedTitle": "Вирішено",
+    "selectAConflict": "Виберіть конфлікт, щоб вирішити його",
+    "useThisVersion": "Використати цю версію"
+  },
+  "gitHistory": {
+    "commits": "Коміти",
+    "noCommitSelected": "Виберіть коміт, щоб переглянути деталі",
+    "author": "Автор",
+    "date": "Дата",
+    "hash": "Хеш",
+    "parents": "Батьки",
+    "recoverVersion": "Відновити цю версію"
   }
 }

@@ -28,6 +28,13 @@ export {
 export type { ElectronAppLike } from './systemModalsMockClient'
 
 export {
+  postMcpJsonRpc,
+  callMcpToolOverJsonRpc,
+  readMcpDiscoveryWithRetry
+} from './mcpJsonRpc'
+export type { McpDiscovery, McpJsonRpcResponse, McpToolReply } from './mcpJsonRpc'
+
+export {
   breadcrumbRootSelector,
   breadcrumbLastLabelSelector,
   breadcrumbEditInputSelector,
@@ -215,9 +222,13 @@ export {
   splitViewPaneSelector,
   splitViewPaneHeaderSelector,
   splitViewPaneBodySelector,
+  splitViewPaneSelectorByHeaderTitle,
   splitViewSashTestId,
   splitViewSashSelector
 } from './splitViewSelectors'
+
+export { conflictResolutionPanelSelector } from './conflictResolutionSelectors'
+export type { ConflictResolutionSide } from './conflictResolutionSelectors'
 
 export {
   markdownViewerRootSelector,

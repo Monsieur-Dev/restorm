@@ -2,11 +2,23 @@
  * Listen for `mcp:tree-replace` IPC pushes and replace the renderer's
  * `rootItems` state with the fresh tree. Used by the main-side MCP
  * mutation tools (`import_from_url`, `create_folder`, `create_request`,
- * `rename_item`, `delete_item`) so the user sees changes in the
- * sidebar immediately, without waiting for the autosave round-trip.
+ * `rename_item`, `delete_item`, `update_request`, ...) so the user sees
+ * changes in the sidebar immediately, without waiting for the autosave
+ * round-trip.
  *
- * Disabled outside MCP mode — when `mcpEnabled` is false the listener
- * is never registered.
+ * Registered unconditionally from mount — NOT gated on `mcpEnabled`.
+ * `mcpEnabled` only resolves after an async main round-trip
+ * (`useMcpEnabled`'s `getConfig()` IPC `invoke`), so gating this
+ * listener on it left a real startup window where a fast MCP client
+ * (open_project immediately followed by a write tool, well within an
+ * automated agent's reach) could fire `mcp:tree-replace` before the
+ * listener existed. Electron doesn't replay a dropped IPC message once
+ * a listener registers late, so that edit would never reach `rootItems`
+ * — and every downstream save check (which reads `rootItems`) would see
+ * "nothing changed" for the rest of the session. Registering the
+ * listener on mount instead removes that window entirely: it's a no-op
+ * subscription (no messages arrive) until an MCP tool actually runs,
+ * which itself can't happen before MCP is enabled main-side.
  *
  * Items arrive as plain JSON (lost their class prototype across the
  * IPC boundary). We walk the tree and reify each leaf via
@@ -17,6 +29,7 @@
 import type React from 'react'
 import { useEffect } from 'react'
 import { makeReactiveFolderItem } from '../types/reactive'
+import { collectTreeItemIds } from '../utils/treeItemIds'
 import { isAnyFolder, isRequest, isScenario } from '../../../shared/types/collections'
 import type { FolderItem } from '../../../shared/types/collections'
 
@@ -25,7 +38,6 @@ interface RestormTreeBridge {
 }
 
 export interface UseMcpTreeReplaceInput {
-  enabled: boolean
   setRootItems: React.Dispatch<React.SetStateAction<FolderItem[]>>
   /**
    * Mutable ref the renderer flips to `true` immediately before applying
@@ -55,6 +67,16 @@ export interface UseMcpTreeReplaceInput {
    * empty `.env`.
    */
   bumpAllTabContentVersions: () => void
+  /**
+   * Close every workbench tab whose backing tree item is absent from the
+   * freshly-applied tree. A main-driven mutation (e.g. MCP `delete_item`,
+   * or a folder move that drops an item) replaces `rootItems` WITHOUT
+   * going through the UI delete path that prunes tabs — so without this,
+   * a deleted item's editor tab stays open in the workbench with no
+   * matching sidebar row, breaking the "every open tab maps to a live
+   * item" invariant. Receives the id set of everything still in the tree.
+   */
+  pruneOrphanTabs: (existingIds: Set<string>) => void
 }
 
 export function reifyItem(raw: unknown): FolderItem | null {
@@ -86,10 +108,9 @@ export function readTreeReplacePayload(payload: unknown): { items: unknown[]; mc
 }
 
 export function useMcpTreeReplace(input: UseMcpTreeReplaceInput): void {
-  const { enabled, setRootItems, mcpDrivenRef, lastMcpVersionRef, bumpAllTabContentVersions } = input
+  const { setRootItems, mcpDrivenRef, lastMcpVersionRef, bumpAllTabContentVersions, pruneOrphanTabs } = input
 
   useEffect(() => {
-    if (!enabled) return
     const root = window as { restorm?: { runtime?: RestormTreeBridge } }
     const api = root.restorm?.runtime
     if (!api) return
@@ -110,11 +131,16 @@ export function useMcpTreeReplace(input: UseMcpTreeReplaceInput): void {
       // happens on the same effect after the call lands.
       mcpDrivenRef.current = true
       setRootItems(next)
+      // Close any tab whose backing item vanished in this replacement
+      // (e.g. an MCP `delete_item`) — the main-driven path doesn't go
+      // through the UI delete's tab pruning, so without this a deleted
+      // item's editor tab lingers with no sidebar row.
+      pruneOrphanTabs(collectTreeItemIds(next))
       // Invalidate every workbench tab's cached content so the next
       // render re-runs `renderTabContent` against the fresh
       // `rootItems`. See the prop doc for the full rationale.
       bumpAllTabContentVersions()
     })
     return off
-  }, [enabled, setRootItems, mcpDrivenRef, lastMcpVersionRef, bumpAllTabContentVersions])
+  }, [setRootItems, mcpDrivenRef, lastMcpVersionRef, bumpAllTabContentVersions, pruneOrphanTabs])
 }

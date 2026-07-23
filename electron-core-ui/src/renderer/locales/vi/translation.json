@@ -13,6 +13,13 @@
       "save": "Lưu",
       "dontSave": "Không lưu",
       "cancel": "Hủy"
+    },
+    "externalChange": {
+      "title": "Tệp đã thay đổi trên đĩa",
+      "message": "\"{{fileName}}\" đã bị sửa đổi bên ngoài ứng dụng.",
+      "detail": "Tải lại để dùng phiên bản trên đĩa, hoặc giữ phiên bản của bạn và ghi đè lên.",
+      "reload": "Tải lại",
+      "keepMine": "Giữ phiên bản của tôi"
     }
   },
   "recentFilesVignette": {
@@ -341,6 +348,13 @@
       "stopServer": "Dừng máy chủ MCP",
       "resumeServer": "Tiếp tục máy chủ MCP",
       "serverStopped": "đã dừng"
+    },
+    "git": {
+      "pushTooltip": "Đẩy lên kho lưu trữ",
+      "pullTooltip": "Kéo từ kho lưu trữ",
+      "nothingToPushTooltip": "Không có thay đổi để đẩy",
+      "refreshTooltip": "Kiểm tra thay đổi để đẩy hoặc kéo",
+      "historyTooltip": "Lịch sử Git"
     }
   },
   "mcpToolTitles": {
@@ -410,5 +424,47 @@
   "gatedControl": {
     "proLabel": "Phiên bản Pro",
     "subscribe": "Đăng ký"
+  },
+  "git": {
+    "cliMissing": {
+      "title": "Git chưa được cài đặt",
+      "body": "Cài đặt Git và thêm vào PATH của bạn để sử dụng tính năng tích hợp Git."
+    },
+    "pullAvailable": {
+      "title": "Có bản cập nhật",
+      "body": "Phiên bản mới hơn của tệp này có sẵn trên kho lưu trữ.",
+      "pullNow": "Kéo về ngay"
+    },
+    "mergeInProgress": {
+      "title": "Hợp nhất chưa hoàn tất",
+      "body": "Một lần hợp nhất Git đã được bắt đầu nhưng chưa bao giờ hoàn tất. Tệp dự án có thể vẫn chứa dấu xung đột.",
+      "abort": "Hủy hợp nhất"
+    }
+  },
+  "pushModal": {
+    "title": "Đẩy",
+    "languageLabel": "Ngôn ngữ thông điệp commit",
+    "applyLanguageByDefault": "Ngôn ngữ commit mặc định",
+    "titleFieldLabel": "Tiêu đề commit",
+    "bodyFieldLabel": "Mô tả",
+    "cancel": "Hủy",
+    "push": "Đẩy"
+  },
+  "conflictResolution": {
+    "listTitle": "Xung đột",
+    "userTitle": "Phiên bản của bạn",
+    "serverTitle": "Phiên bản máy chủ",
+    "resolvedTitle": "Đã giải quyết",
+    "selectAConflict": "Chọn một xung đột để giải quyết",
+    "useThisVersion": "Dùng phiên bản này"
+  },
+  "gitHistory": {
+    "commits": "Commit",
+    "noCommitSelected": "Chọn một commit để xem chi tiết",
+    "author": "Tác giả",
+    "date": "Ngày",
+    "hash": "Hash",
+    "parents": "Cha",
+    "recoverVersion": "Khôi phục phiên bản này"
   }
 }

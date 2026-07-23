@@ -13,6 +13,13 @@
       "save": "Gem",
       "dontSave": "Gem ikke",
       "cancel": "Annullér"
+    },
+    "externalChange": {
+      "title": "Filen er ændret på disken",
+      "message": "\"{{fileName}}\" blev ændret uden for programmet.",
+      "detail": "Genindlæs for at bruge versionen på disken, eller behold din version og overskriv den.",
+      "reload": "Genindlæs",
+      "keepMine": "Behold min version"
     }
   },
   "recentFilesVignette": {
@@ -341,6 +348,13 @@
       "stopServer": "Stop MCP-server",
       "resumeServer": "Genoptag MCP-server",
       "serverStopped": "stoppet"
+    },
+    "git": {
+      "pushTooltip": "Push til repositoriet",
+      "pullTooltip": "Hent fra repositoriet",
+      "nothingToPushTooltip": "Ingen ændringer at pushe",
+      "refreshTooltip": "Tjek for ændringer at pushe eller pulle",
+      "historyTooltip": "Git-historik"
     }
   },
   "mcpToolTitles": {
@@ -410,5 +424,47 @@
   "gatedControl": {
     "proLabel": "Pro-version",
     "subscribe": "Abonnér"
+  },
+  "git": {
+    "cliMissing": {
+      "title": "Git er ikke installeret",
+      "body": "Installer Git, og tilføj det til din PATH for at bruge Git-integrationen."
+    },
+    "pullAvailable": {
+      "title": "Opdatering tilgængelig",
+      "body": "En nyere version af denne fil er tilgængelig i repositoriet.",
+      "pullNow": "Hent nu"
+    },
+    "mergeInProgress": {
+      "title": "Uafsluttet fletning",
+      "body": "En Git-fletning blev startet og aldrig afsluttet. Projektfilen kan stadig indeholde konfliktmarkeringer.",
+      "abort": "Afbryd fletningen"
+    }
+  },
+  "pushModal": {
+    "title": "Push",
+    "languageLabel": "Sprog for commit-beskeden",
+    "applyLanguageByDefault": "Standardsprog for commits",
+    "titleFieldLabel": "Commit-titel",
+    "bodyFieldLabel": "Beskrivelse",
+    "cancel": "Annuller",
+    "push": "Push"
+  },
+  "conflictResolution": {
+    "listTitle": "Konflikter",
+    "userTitle": "Din version",
+    "serverTitle": "Serverversion",
+    "resolvedTitle": "Løst",
+    "selectAConflict": "Vælg en konflikt for at løse den",
+    "useThisVersion": "Brug denne version"
+  },
+  "gitHistory": {
+    "commits": "Commits",
+    "noCommitSelected": "Vælg en commit for at se detaljerne",
+    "author": "Forfatter",
+    "date": "Dato",
+    "hash": "Hash",
+    "parents": "Forældre",
+    "recoverVersion": "Gendan denne version"
   }
 }

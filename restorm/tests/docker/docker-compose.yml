@@ -298,6 +298,49 @@ services:
       retries: 10
       start_period: 5s
 
+  # Git server — a minimal, unauthenticated `git daemon` over a bind-mounted
+  # bare-repo directory. Zero-dependency, same house style as http-util /
+  # soap-server (no gitea/heavy web app). Alpine splits git into sub-packages
+  # — the base `git` apk does NOT include `git daemon` (it's a separate
+  # `git-daemon` package, pulled in here) — so this needs a plain `alpine`
+  # base + an `apk add`, not a git-only image. Auth-free is intentional — the
+  # git client delegates authentication entirely to the system credential
+  # helper (see docs/Git/README.md); this mock only needs to BE a real
+  # remote git can push/pull/fetch against, not exercise credential UX.
+  # Repos live under ./git-server/repos (bind-mounted), seeded host-side by
+  # tests/integration/gitServerSeed.ts (git CLI on the host against the SAME
+  # mounted path — no docker exec needed). Listens on :9418 (git://).
+  git-server:
+    image: alpine:3.19
+    container_name: restorm-git-server
+    # `safe.directory *`: the bind-mounted bares are created by the HOST
+    # user; on native-Linux docker the container's root git refuses to serve
+    # them ("dubious ownership" — Docker Desktop masks this by remapping
+    # ownership through its VM, which is why local runs never hit it but CI
+    # did). A throwaway localhost mock, so the blanket exception is fine.
+    command: sh -c "until apk add --no-cache git-daemon; do sleep 2; done && git config --global --add safe.directory '*' && exec git daemon --base-path=/srv/git --export-all --enable=receive-pack --reuseaddr --informative-errors --verbose"
+    ports:
+      - "9418:9418"
+    volumes:
+      - ./git-server/repos:/srv/git
+    healthcheck:
+      # TCP-open, not a real `git ls-remote` — deliberately narrower than
+      # the CI check in wait-for-services.js. Baking a bare repo INTO the
+      # image so this healthcheck could `ls-remote` it in-container would be
+      # nontrivial image plumbing for a race this repo's dev/CI hosts don't
+      # actually hit locally: `docker compose up -d --wait` runs against a
+      # warm Docker cache here, and the `apk add git-daemon` step (the
+      # actual race window) has consistently finished well inside the 5s
+      # start_period in practice — see gitServerSeed.ts's real clone/push
+      # validation, which never raced this. CI's cold image pull on a fresh
+      # runner is the scenario where TCP-open really can lie, which is why
+      # that check is the stricter protocol-level one.
+      test: ["CMD", "sh", "-c", "nc -z localhost 9418"]
+      interval: 3s
+      timeout: 3s
+      retries: 10
+      start_period: 5s
+
   # OData v4 - Custom Pet Store (AspNetCoreOData)
   # Multi-stage Dockerfile builds the .NET 9 service and serves it on :5100.
   # Provides Pets/Categories/Tags/Owners entity sets, a bound `AdoptPet`

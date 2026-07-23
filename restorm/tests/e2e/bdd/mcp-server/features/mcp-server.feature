@@ -92,3 +92,12 @@ Feature: MCP server end-to-end
     And I send the active workbench tab to the next group
     Then the request tab's host node is the same relocated instance
     And the request tab content is still rendered
+
+    # ── Deleting an item via MCP closes its orphaned workbench tab ──
+    # Every open workbench tab must map to a live sidebar item. A
+    # main-driven delete (MCP delete_item) replaces the tree without
+    # going through the UI delete's tab pruning, so the deleted request's
+    # editor tab must be closed by the tree-replace reconciliation.
+    When I open the first imported request as a workbench tab via MCP
+    And I delete the open request via MCP
+    Then no workbench tab references the deleted request

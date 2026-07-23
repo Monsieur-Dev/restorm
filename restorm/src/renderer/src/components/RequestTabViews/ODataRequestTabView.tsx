@@ -41,13 +41,16 @@ import {
   Toggle,
   eventBus,
   logger,
+  fieldDiffStyle,
   type ISelectOptionItem,
   type ISelectData,
   type ListViewItemData,
-  type VariableDefinition
+  type VariableDefinition,
+  type Tab
 } from 'electron-core-ui/renderer'
 import { RestormVariableInputBox } from '../RestormVariableInputBox'
 import type { ODataRequest, ODataQueryOptions, ODataVersion, ODataOperationKind, ODataBatchFormat, ODataBatchSubRequestSpec, ODataOperationParameterSpec, KeyValue, ResponseHistoryDetail } from '../../../../shared/types/collections'
+import type { EntityFieldDiff } from '../../services/conflictFieldDiff'
 import { ODataBatchEditor } from './ODataBatchEditor'
 import { ODataFilterEditor } from './ODataFilterEditor'
 import { ODataOrderbyEditor } from './ODataOrderbyEditor'
@@ -197,9 +200,51 @@ interface ODataResponseViewData {
 
 export interface ODataRequestTabViewProps {
   request: ODataRequest
+  /** Conflict-resolution field-diff (AC#4) — `computeEntityFieldDiff`'s
+   * result for this request. Red-borders the URL input when `url` differs;
+   * coarse-borders the whole request-config form when `requestConfig`
+   * differs. Only ever set by `ConflictEntityPanel`; `undefined` in the
+   * live (non-conflict) editor. */
+  conflictFieldDiff?: EntityFieldDiff
+  /** Conflict resolution: restrict the request-side tab strip to these
+   * ids (forwarded verbatim to `BaseRequestTabView`). */
+  conflictVisibleTabIds?: string[]
+  /** Conflict resolution: extra tabs appended to the strip (the contested
+   * tag list), forwarded verbatim to `BaseRequestTabView`. */
+  conflictExtraTabs?: Tab[]
+  /** Preselects the tab holding the conflicting field (AC#5) — forwarded
+   * to `BaseRequestTabView`'s `defaultActiveTabId`. */
+  defaultActiveTabId?: string
+  /** Fully-controlled request-side tab pair, forwarded verbatim to
+   * `BaseRequestTabView`. The conflict panels use it to mirror the tab
+   * selection across the three columns — any column's strip drives it
+   * (`ReadOnlyOverlay` lets tab clicks through as navigation). */
+  activeRequestTabId?: string
+  onRequestTabChange?: (tabId: string) => void
+  /** Hides the (non-editable, generated) Code Snippets tab — AC#5's "HIDE
+   * non-editable tabs". Defaults to `true` (visible) for the live editor;
+   * the conflict panel passes `false`. */
+  showCodeSnippets?: boolean
+  /** Blanket conflict-mode safety rule (AC#2/#5, see
+   * `conflictSafeLiveState.ts`): skips the server-mode listening/served-
+   * count subscription — a conflict panel is a static historical
+   * snapshot, never a live mock service. Only meaningful when
+   * `request.server === true`. */
+  conflictMode?: boolean
 }
 
-export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ request }) => {
+export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({
+  request,
+  conflictFieldDiff,
+  conflictVisibleTabIds,
+  conflictExtraTabs,
+  defaultActiveTabId,
+  activeRequestTabId,
+  onRequestTabChange,
+  showCodeSnippets = true,
+  conflictMode
+}) => {
+  const conflictFields = conflictFieldDiff?.fields
   const { t } = useTranslation()
   const { selectedEnvId, environments, projectUuid } = useEnvironmentContext()
   const collections = useRestormStore((state) => state.collections)
@@ -926,7 +971,7 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
   // file close / quit; the promise resolves when the routes stop.
   const handleListen = useCallback((): void => {
     const requestId = request.id
-    if (!requestId || isListening) return
+    if (!requestId || isListening || conflictMode) return
     setServedCount(0)
     void window.restorm?.odata.listen(requestId)
       .then((res) => {
@@ -936,15 +981,17 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
         }
       })
       .catch((err: unknown) => { logger.error('OData mock server listen error', { error: String(err) }) })
-  }, [request.id, isListening, t])
+  }, [request.id, isListening, conflictMode, t])
 
   const handleStop = useCallback((): void => {
     void window.restorm?.odata.stop(request.id)
   }, [request.id])
 
   // Track listening state + served count for the hosted mock service.
+  // Skipped entirely in conflict mode (see `conflictSafeLiveState.ts`) — a
+  // static historical snapshot must never pick up another tab's live state.
   useEffect(() => {
-    if (!isServer) return undefined
+    if (!isServer || conflictMode) return undefined
     const requestId = request.id
     let cancelled = false
     void window.restorm?.odata.isListening(requestId).then((listening) => {
@@ -960,7 +1007,7 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
       setServedCount(count)
     })
     return () => { cancelled = true; unsubProgress?.(); unsubServed?.() }
-  }, [isServer, request.id])
+  }, [isServer, request.id, conflictMode])
 
   const serverUrlSection = (
     <div data-testid="odata-request-url-section-host">
@@ -990,6 +1037,7 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
             <Button
               icon={isListening ? 'debug-disconnect' : 'plug'}
               onClick={isListening ? handleStop : handleListen}
+              disabled={!!conflictMode}
               {...(isListening ? {} : { emphasis: 1 })}
               options={{
                 title: isListening ? t('odata.server.stopListening', 'Stop listening') : t('odata.server.startListening', 'Start listening'),
@@ -1072,7 +1120,7 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
         />
       )}
     <div style={urlRowStyle} data-testid="odata-request-url-section">
-      <div style={urlInputWrapperStyle}>
+      <div style={{ ...urlInputWrapperStyle, boxSizing: 'border-box', border: '1px solid transparent', ...fieldDiffStyle(!!conflictFields?.['url']) }}>
         <RestormVariableInputBox
           key={`odata-url-${transportEpoch}`}
           value={request.url}
@@ -1109,7 +1157,10 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
       style={formOuterStyle}
       options={{ vertical: 'auto', horizontal: 'hidden', useShadows: true }}
     >
-    <div style={formStyle} data-testid="odata-request-form">
+    <div
+      style={{ ...formStyle, boxSizing: 'border-box', border: '1px solid transparent', ...fieldDiffStyle(!!conflictFields?.['requestConfig']) }}
+      data-testid="odata-request-form"
+    >
       <div style={numericRowStyle}>
         <div style={{ ...rowStyle, ...numericItemStyle }}>
           <label style={labelStyle} htmlFor="odata-request-version">
@@ -2174,6 +2225,8 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
   return (
     <>
       <BaseRequestTabView
+        {...(conflictVisibleTabIds ? { visibleRequestTabIds: conflictVisibleTabIds } : {})}
+        {...(conflictExtraTabs ? { extraRequestTabs: conflictExtraTabs } : {})}
         requestId={request.id}
         urlSection={isServer ? serverUrlSection : urlSection}
         requestContent={isServer ? serverRequestContent : requestContent}
@@ -2188,6 +2241,11 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
         {...(isServer ? { responseContent: serverResponseContent } : responseContent !== undefined ? { responseContent } : {})}
         {...(isServer ? {} : infosContent !== undefined ? { infosContent } : {})}
         {...(isServer ? {} : jsonData !== undefined ? { jsonData } : {})}
+        showCodeSnippets={showCodeSnippets}
+        notesDiffers={!!conflictFields?.['notes']}
+        {...(defaultActiveTabId !== undefined ? { defaultActiveTabId } : {})}
+        {...(activeRequestTabId !== undefined ? { activeRequestTabId } : {})}
+        {...(onRequestTabChange !== undefined ? { onRequestTabChange } : {})}
       />
       <ResponseHistoryModal
         isOpen={historyModalOpen}

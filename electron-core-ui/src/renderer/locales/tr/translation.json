@@ -13,6 +13,13 @@
       "save": "Kaydet",
       "dontSave": "Kaydetme",
       "cancel": "İptal"
+    },
+    "externalChange": {
+      "title": "Dosya diskte değişti",
+      "message": "\"{{fileName}}\" uygulama dışında değiştirildi.",
+      "detail": "Diskteki sürümü kullanmak için yeniden yükleyin ya da kendi sürümünüzü koruyup üzerine yazın.",
+      "reload": "Yeniden yükle",
+      "keepMine": "Sürümümü koru"
     }
   },
   "recentFilesVignette": {
@@ -341,6 +348,13 @@
       "stopServer": "MCP sunucusunu durdur",
       "resumeServer": "MCP sunucusunu devam ettir",
       "serverStopped": "durduruldu"
+    },
+    "git": {
+      "pushTooltip": "Depoya gönder",
+      "pullTooltip": "Depodan çek",
+      "nothingToPushTooltip": "Gönderilecek değişiklik yok",
+      "refreshTooltip": "Gönderilecek veya çekilecek değişiklikleri denetle",
+      "historyTooltip": "Git geçmişi"
     }
   },
   "mcpToolTitles": {
@@ -410,5 +424,47 @@
   "gatedControl": {
     "proLabel": "Pro sürüm",
     "subscribe": "Abone ol"
+  },
+  "git": {
+    "cliMissing": {
+      "title": "Git yüklü değil",
+      "body": "Git entegrasyonunu kullanmak için Git'i yükleyin ve PATH değişkeninize ekleyin."
+    },
+    "pullAvailable": {
+      "title": "Güncelleme mevcut",
+      "body": "Bu dosyanın daha yeni bir sürümü depoda mevcut.",
+      "pullNow": "Şimdi çek"
+    },
+    "mergeInProgress": {
+      "title": "Tamamlanmamış birleştirme",
+      "body": "Başlatılan bir Git birleştirmesi hiç tamamlanmadı. Proje dosyası hâlâ çakışma işaretleri içeriyor olabilir.",
+      "abort": "Birleştirmeyi iptal et"
+    }
+  },
+  "pushModal": {
+    "title": "Gönder",
+    "languageLabel": "Commit mesajı dili",
+    "applyLanguageByDefault": "Varsayılan commit dili",
+    "titleFieldLabel": "Commit başlığı",
+    "bodyFieldLabel": "Açıklama",
+    "cancel": "İptal",
+    "push": "Gönder"
+  },
+  "conflictResolution": {
+    "listTitle": "Çakışmalar",
+    "userTitle": "Sizin sürümünüz",
+    "serverTitle": "Sunucu sürümü",
+    "resolvedTitle": "Çözüldü",
+    "selectAConflict": "Çözmek için bir çakışma seçin",
+    "useThisVersion": "Bu sürümü kullan"
+  },
+  "gitHistory": {
+    "commits": "Commitler",
+    "noCommitSelected": "Ayrıntıları görmek için bir commit seçin",
+    "author": "Yazar",
+    "date": "Tarih",
+    "hash": "Hash",
+    "parents": "Üst commitler",
+    "recoverVersion": "Bu sürümü geri yükle"
   }
 }

@@ -1,53 +1,21 @@
 /**
  * Serialization utilities for collections
  * Handles stripping and generating runtime-only properties (id fields)
+ *
+ * `generateId` / `stripIds` / `prepareForSerialization` have no dependency
+ * on `normalizeValueType` below (a renderer-only concern) and now live in
+ * `shared/utils/serialization.ts` so main-process code (the git MCP tools'
+ * diff engine) can use them too — re-exported here unchanged so every
+ * existing renderer import of this file keeps working. `generateIds` /
+ * `processAfterDeserialization` stay here: they rehydrate persisted
+ * `{ type, value, … }` POJOs into real `ValueType` class instances for the
+ * live UI's `instanceof` checks, which only the renderer needs.
  */
 
-import type { RuntimeId } from '../../../shared/types/collections'
-import { normalizeDocumentValuesForPersistence } from '../../../shared/utils/valuePersistence'
+import { generateId } from '../../../shared/utils/serialization'
 import { normalizeValueType } from './normalizeValueType'
 
-/**
- * Generate a unique identifier (UUID v4)
- */
-export function generateId(): RuntimeId {
-  return crypto.randomUUID()
-}
-
-/**
- * Recursively strip 'id' properties from key-value objects only.
- * Document ids (folders, environments, requests) are now persisted so the
- * per-request settings store (workbench layout, env selection) can key by
- * a stable id instead of a fragile name path. Key-value ids remain runtime-
- * only — they're not user-facing and regenerating them on load is cheap.
- *
- * @param obj - The object to strip ids from
- * @returns A new object with key-value ids removed
- */
-export function stripIds<T>(obj: T): T {
-  if (obj === null || obj === undefined) {
-    return obj
-  }
-
-  if (Array.isArray(obj)) {
-    return obj.map((item: unknown) => stripIds(item)) as T
-  }
-
-  if (typeof obj === 'object') {
-    const record = obj as Record<string, unknown>
-    const isKeyValueLike = 'key' in record && 'value' in record && typeof record['key'] === 'string'
-    const result: Record<string, unknown> = {}
-    for (const [key, value] of Object.entries(record)) {
-      if (key === 'id' && isKeyValueLike) {
-        continue
-      }
-      result[key] = stripIds(value)
-    }
-    return result as T
-  }
-
-  return obj
-}
+export { generateId, stripIds, prepareForSerialization, canonicalizeSerializedKeys, CANONICAL_KEY_PRIORITY } from '../../../shared/utils/serialization'
 
 /**
  * Recursively generate 'id' properties for all objects that should have them.
@@ -92,8 +60,23 @@ export function generateIds<T>(obj: T): T {
       seen.add(result['id'] as string)
     }
 
+    // A scenario node's `config` is an opaque per-kind bag, not a document:
+    // stamping runtime ids inside it is meaningless AND harmful. An
+    // `httpRequest` node's config carries `requestId`, which the
+    // "is this a response?" heuristic below matches — so every open
+    // minted a fresh id there and the next save persisted it. Two people
+    // opening the same project got different ids on a node neither had
+    // touched, and the node then showed up as conflicting. Leave the bag
+    // alone, and drop any id a previous version already wrote into it.
+    const isScenarioNode = 'kind' in record && 'config' in record
+    if (isScenarioNode && typeof result['config'] === 'object' && result['config'] !== null) {
+      const { id: _staleRuntimeId, ...config } = result['config'] as Record<string, unknown>
+      result['config'] = config
+    }
+
     for (const [key, v] of Object.entries(result)) {
       if (key === 'id') continue
+      if (isScenarioNode && key === 'config') continue
       if (isKeyValueLike && key === 'value') {
         // Rehydrate persisted ValueType POJOs (`{ type, value, … }`)
         // into real class instances. The runtime UI (cell renderers,
@@ -160,18 +143,31 @@ function shouldHaveId(obj: Record<string, unknown>): boolean {
 }
 
 /**
- * Prepare collections data for serialization (save to file).
- * Strips all runtime-only id properties.
+ * Drop `createdAt` / `updatedAt` from every saved quick-config found in the
+ * graph.
  *
- * @param data - The collections data with { collections: Folder[] }
- * @returns Data ready for JSON/YAML serialization
+ * The two fields were written since quick-configs existed but never read
+ * by anything, and files in the wild carry corrupted values (a `Date` that
+ * went through the serializer's key walk came back out as `{}`). Removing
+ * them on load means the next save rewrites the file without them, so a
+ * project heals itself simply by being opened — no separate migration step
+ * and no dead field left in the diffs.
  */
-export function prepareForSerialization<T>(data: T): T {
-  const stripped = stripIds(data)
-  // Ensure ValueType objects are persisted as { type, ... } and never as plain strings.
-  // Also ensures SecretValue never persists its resolved plaintext in the main file.
-  normalizeDocumentValuesForPersistence(stripped)
-  return stripped
+function dropQuickConfigTimestamps<T>(data: T): T {
+  if (data === null || typeof data !== 'object') return data
+  if (data instanceof Date) return data
+  if (Array.isArray(data)) return data.map((item: unknown) => dropQuickConfigTimestamps(item)) as T
+  const record = data as Record<string, unknown>
+  const result: Record<string, unknown> = {}
+  for (const [key, value] of Object.entries(record)) {
+    // Only inside a quick-config: `createdAt` elsewhere in the document is
+    // none of this function's business.
+    const isQuickConfigTimestamp = (key === 'createdAt' || key === 'updatedAt') &&
+      'storageTarget' in record && 'fields' in record
+    if (isQuickConfigTimestamp) continue
+    result[key] = dropQuickConfigTimestamps(value)
+  }
+  return result as T
 }
 
 /**
@@ -181,5 +177,5 @@ export function prepareForSerialization<T>(data: T): T {
  * @returns Data with generated runtime ids
  */
 export function processAfterDeserialization<T>(data: T): T {
-  return generateIds(data)
+  return generateIds(dropQuickConfigTimestamps(data))
 }

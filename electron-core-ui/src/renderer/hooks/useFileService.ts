@@ -10,7 +10,9 @@ interface WindowFileApi {
   file: {
     newFile: () => Promise<boolean>
     open: (path?: string) => Promise<{ success: boolean; content?: unknown }>
-    save: (content: unknown) => Promise<boolean>
+    save: (content: unknown, options?: { force?: boolean }) => Promise<boolean>
+  showExternalChangeDialog: () => Promise<'reload' | 'keepMine'>
+  acceptExternalChange: () => Promise<void>
     saveAs: (content: unknown, filename?: string, format?: SerializationFormat) => Promise<boolean>
     close: () => Promise<boolean>
     getState: () => Promise<FileServiceState | null>
@@ -58,6 +60,9 @@ interface WindowFileApi {
     onDraftsRestored: (
       callback: (payload: { count: number }) => void
     ) => () => void
+    onFileExternallyChanged: (
+      callback: (payload: { path: string | null }) => void
+    ) => () => void
     saveUnit: (entry: {
       runtimeId: string
       content: unknown
@@ -98,7 +103,9 @@ export const useFileService = (): {
   // Actions
   newFile: () => Promise<boolean>
   open: (path?: string) => Promise<{ success: boolean; content?: unknown }>
-  save: (content: unknown) => Promise<boolean>
+  save: (content: unknown, options?: { force?: boolean }) => Promise<boolean>
+  showExternalChangeDialog: () => Promise<'reload' | 'keepMine'>
+  acceptExternalChange: () => Promise<void>
   saveAs: (content: unknown, filename?: string, format?: SerializationFormat) => Promise<boolean>
   close: () => Promise<boolean>
   showUnsavedChangesDialog: (labels?: UnsavedChangesDialogLabels) => Promise<'save' | 'discard' | 'cancel'>
@@ -205,6 +212,18 @@ export const useFileService = (): {
     return api.showUnsavedChangesDialog(labels)
   }, [])
 
+  const showExternalChangeDialog = useCallback(async (): Promise<'reload' | 'keepMine'> => {
+    const api = getApi()
+    if (!api) return 'reload'
+    return api.showExternalChangeDialog()
+  }, [])
+
+  const acceptExternalChange = useCallback(async (): Promise<void> => {
+    const api = getApi()
+    if (!api) return
+    await api.acceptExternalChange()
+  }, [])
+
   const toggleFavorite = useCallback(async (path: string): Promise<boolean> => {
     const api = getApi()
     if (!api) return false
@@ -223,6 +242,8 @@ export const useFileService = (): {
   return {
     state,
     isLoading,
+    showExternalChangeDialog,
+    acceptExternalChange,
     fileName: state?.currentFile.name ?? null,
     filePath: state?.currentFile.path ?? null,
     isDirty: state?.currentFile.isDirty ?? false,
@@ -551,6 +572,28 @@ export const saveUnitsToDiskBatch = async (
   const api = getApi()
   if (!api) return []
   return api.saveUnitsBatch(entries)
+}
+
+/**
+ * Subscribe to the `file:externally-changed` broadcast — fired when a
+ * save was refused because a third party (a terminal `git checkout` /
+ * `git pull`, another editor) rewrote the open file under us. The app is
+ * expected to ask the user whether to reload from disk or keep the
+ * in-memory version; until one of the two happens, every save is
+ * refused, so the prompt must not be swallowed.
+ */
+export const useFileExternallyChanged = (
+  callback: (payload: { path: string | null }) => void
+): void => {
+  const callbackRef = useRef(callback)
+  useEffect(() => { callbackRef.current = callback }, [callback])
+  useEffect(() => {
+    const api = getApi()
+    if (!api) return
+    return api.onFileExternallyChanged((payload) => {
+      callbackRef.current(payload)
+    })
+  }, [])
 }
 
 /**

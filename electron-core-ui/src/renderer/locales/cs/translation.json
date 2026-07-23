@@ -13,6 +13,13 @@
       "save": "Uložit",
       "dontSave": "Neukládat",
       "cancel": "Zrušit"
+    },
+    "externalChange": {
+      "title": "Soubor změněn na disku",
+      "message": "„{{fileName}}“ byl změněn mimo aplikaci.",
+      "detail": "Znovu načtěte, chcete-li použít verzi z disku, nebo ponechte svou verzi a přepište ji.",
+      "reload": "Znovu načíst",
+      "keepMine": "Ponechat mou verzi"
     }
   },
   "recentFilesVignette": {
@@ -341,6 +348,13 @@
       "stopServer": "Zastavit MCP server",
       "resumeServer": "Obnovit MCP server",
       "serverStopped": "zastaveno"
+    },
+    "git": {
+      "pushTooltip": "Odeslat do repozitáře",
+      "pullTooltip": "Stáhnout z repozitáře",
+      "nothingToPushTooltip": "Žádné změny k odeslání",
+      "refreshTooltip": "Zkontrolovat změny k odeslání nebo stažení",
+      "historyTooltip": "Historie Gitu"
     }
   },
   "mcpToolTitles": {
@@ -410,5 +424,47 @@
   "gatedControl": {
     "proLabel": "Verze Pro",
     "subscribe": "Předplatit"
+  },
+  "git": {
+    "cliMissing": {
+      "title": "Git není nainstalován",
+      "body": "Nainstalujte Git a přidejte jej do proměnné PATH, abyste mohli používat integraci Git."
+    },
+    "pullAvailable": {
+      "title": "Dostupná aktualizace",
+      "body": "V repozitáři je k dispozici novější verze tohoto souboru.",
+      "pullNow": "Stáhnout nyní"
+    },
+    "mergeInProgress": {
+      "title": "Nedokončené sloučení",
+      "body": "Bylo zahájeno slučování Git, které nikdy neskončilo. Soubor projektu může stále obsahovat značky konfliktu.",
+      "abort": "Zrušit sloučení"
+    }
+  },
+  "pushModal": {
+    "title": "Odeslat",
+    "languageLabel": "Jazyk zprávy commitu",
+    "applyLanguageByDefault": "Výchozí jazyk commitů",
+    "titleFieldLabel": "Název commitu",
+    "bodyFieldLabel": "Popis",
+    "cancel": "Zrušit",
+    "push": "Odeslat"
+  },
+  "conflictResolution": {
+    "listTitle": "Konflikty",
+    "userTitle": "Vaše verze",
+    "serverTitle": "Verze serveru",
+    "resolvedTitle": "Vyřešeno",
+    "selectAConflict": "Vyberte konflikt, který chcete vyřešit",
+    "useThisVersion": "Použít tuto verzi"
+  },
+  "gitHistory": {
+    "commits": "Commity",
+    "noCommitSelected": "Vyberte commit pro zobrazení podrobností",
+    "author": "Autor",
+    "date": "Datum",
+    "hash": "Hash",
+    "parents": "Rodiče",
+    "recoverVersion": "Obnovit tuto verzi"
   }
 }

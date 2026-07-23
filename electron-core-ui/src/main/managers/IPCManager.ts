@@ -12,7 +12,8 @@ import {
   registerSearchHandlers,
   registerWindowHandlers,
   registerMiscHandlers,
-  registerSettingsHandlers
+  registerSettingsHandlers,
+  registerGitHandlers
 } from './ipc'
 
 // Register custom protocol schemes BEFORE app.whenReady()
@@ -137,6 +138,7 @@ export function setupIPC(resourcesPath?: string, appSettingsConfigPath?: string,
   registerFileHandlers()
   registerSearchHandlers()
   registerSettingsHandlers()
+  registerGitHandlers()
 
   logger.info('IPC handlers setup complete')
 }

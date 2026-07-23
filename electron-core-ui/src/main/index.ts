@@ -28,6 +28,25 @@ export {
   FileService
 } from './services'
 
+// Git service
+export { getGitService, resetGitService, GitService } from './services'
+export type { GitServiceConfig } from './services'
+
+// Git semi-pull CRON controller
+export {
+  GitSemiPullController,
+  initGitSemiPullController,
+  getGitSemiPullController
+} from './services'
+export type { GitSemiPullFrequency, GitSemiPullControllerOptions } from './services'
+
+// Commit-message engine — process-neutral (pure Handlebars, no DOM), lives
+// in `src/shared` and is exported from BOTH processes: the renderer's Push
+// modal renders live previews, a main-process MCP tool renders the same
+// commit message for an AI agent to review before it lands.
+export { renderCommitMessage } from '../shared/CommitMessageEngine'
+export type { CommitMessageTemplates, RenderedCommitMessage } from '../shared/CommitMessageEngine'
+
 // GraphQL runtime
 export {
   graphQLService,
@@ -258,6 +277,21 @@ export type {
   FileServiceState,
   FileServiceApi
 } from '../types/file'
+
+// Re-export git types
+export type {
+  GitFileState,
+  GitFileEntry,
+  GitStatus,
+  GitCommitResult,
+  GitPushResult,
+  GitPullResult,
+  GitFetchCompareResult,
+  GitConflictVersions,
+  GitConflictCommitTimestamps,
+  GitState
+} from '../types/git'
+export { NO_GIT_STATE } from '../types/git'
 
 // ── Auth / entitlement ─────────────────────────────────────────────────────
 // Shared auth types (AuthState, AUTH_IPC, CheckoutResult, PlanTier …)

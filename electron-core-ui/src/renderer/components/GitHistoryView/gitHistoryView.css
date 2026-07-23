@@ -1,0 +1,145 @@
+.ecui-git-history-view {
+	width: 100%;
+	height: 100%;
+	min-height: 0;
+}
+
+.ecui-git-history-list {
+	width: 100%;
+	height: 100%;
+}
+
+.ecui-git-history-row {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 0 10px 0 6px;
+	cursor: pointer;
+	white-space: nowrap;
+	overflow: hidden;
+	box-sizing: border-box;
+}
+
+.ecui-git-history-row:hover {
+	background-color: var(--list-hoverBackground);
+}
+
+.ecui-git-history-row.selected {
+	background-color: var(--list-activeSelectionBackground);
+	color: var(--list-activeSelectionForeground);
+}
+
+.ecui-git-history-lanes {
+	flex-shrink: 0;
+	display: block;
+}
+
+.ecui-git-history-subject {
+	flex: 1;
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	font-size: 13px;
+}
+
+.ecui-git-history-refs {
+	display: inline-flex;
+	gap: 4px;
+	flex-shrink: 0;
+}
+
+.ecui-git-history-ref-badge {
+	font-size: 10px;
+	line-height: 16px;
+	padding: 0 6px;
+	border-radius: 8px;
+	background-color: var(--badge-background);
+	color: var(--badge-foreground);
+	white-space: nowrap;
+}
+
+.ecui-git-history-date {
+	flex-shrink: 0;
+	font-size: 11px;
+	color: var(--descriptionForeground);
+
+	/* Keep the date clear of the overlay scrollbar, which is drawn on top of
+	   the list's right edge and would otherwise sit over the last digits. */
+	margin-right: 8px;
+}
+
+.ecui-git-history-row.selected .ecui-git-history-date {
+	color: inherit;
+	opacity: 0.85;
+}
+
+.ecui-git-history-details {
+	width: 100%;
+	height: 100%;
+}
+
+.ecui-git-history-details-body {
+	padding: 14px 16px;
+}
+
+.ecui-git-history-details-subject {
+	margin: 0 0 8px;
+	font-size: 15px;
+	font-weight: 600;
+}
+
+.ecui-git-history-details-refs {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 4px;
+	margin-bottom: 10px;
+}
+
+.ecui-git-history-details-grid {
+	display: grid;
+	grid-template-columns: max-content 1fr;
+	column-gap: 14px;
+	row-gap: 6px;
+	margin: 0 0 12px;
+	font-size: 12px;
+}
+
+.ecui-git-history-details-grid dt {
+	color: var(--descriptionForeground);
+}
+
+.ecui-git-history-details-grid dd {
+	margin: 0;
+	overflow-wrap: anywhere;
+}
+
+.ecui-git-history-hash {
+	font-family: var(--monaco-monospace-font, monospace);
+	font-size: 11px;
+}
+
+.ecui-git-history-details-message {
+	margin: 0;
+	padding: 10px 12px;
+	border-radius: 4px;
+	background-color: var(--textCodeBlock-background, rgb(0, 0, 0, 0.08));
+	font-size: 12px;
+	white-space: pre-wrap;
+	overflow-wrap: anywhere;
+	font-family: inherit;
+}
+
+.ecui-git-history-empty {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	height: 100%;
+	color: var(--descriptionForeground);
+}
+
+/* The user's current location (HEAD): the row reads bold so "where am I"
+ * jumps out of the list at a glance. */
+.ecui-git-history-row.head .ecui-git-history-subject,
+.ecui-git-history-row.head .ecui-git-history-date {
+	font-weight: 700;
+}

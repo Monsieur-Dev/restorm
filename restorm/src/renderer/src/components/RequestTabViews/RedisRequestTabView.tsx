@@ -37,6 +37,7 @@ import { SendButtonEnvSwitcher } from './SendButtonEnvSwitcher'
 import { BeamWrap } from '../common/BeamWrap'
 import { HeaderHoverTooltip } from '../MainView/HeaderHoverTooltip'
 import './WebSocketChat.css'
+import { cloneForEventBus } from '../../utils/cloneForEventBus'
 
 export interface RedisRequestTabViewProps {
   request: RedisRequest
@@ -159,7 +160,14 @@ export const RedisRequestTabView: React.FC<RedisRequestTabViewProps> = ({
     command: string
     args: string[]
     freeformCommand: string
-  }): Record<string, unknown> => ({
+    // `values` carries fields read straight off the reactive request
+    // (`args`, `channels`), which are Proxy-wrapped. The contextBridge
+    // serializes into the preload's isolated world and REFUSES exotic
+    // objects: it throws `An object could not be cloned.` BEFORE the
+    // preload function runs, the exception escapes this effect, and React
+    // tears the whole tree down — a blank window with no error shown.
+    // Only plain data may cross.
+  }): Record<string, unknown> => cloneForEventBus({
     url: values.url,
     requestType: 'redis',
     // Redis has no HTTP-style headers concept in its UI, but `headers` is a

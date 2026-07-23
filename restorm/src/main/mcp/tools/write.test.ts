@@ -304,7 +304,9 @@ describe('secret value MCP round-trip (write -> read serialization)', () => {
     ;(kv.value as unknown as { resolved?: string }).resolved = 'plaintext-secret-DO-NOT-LEAK'
 
     const persisted = serializeValueForPersistence(kv.value)
-    expect(persisted).toEqual({ type: 'secret', source: 'envFileSecret', params: { key: 'a/b', folderPath: '/p' } })
+    // The persisted form also drops the env-file secret's runtime positional
+    // params (key/folderPath are re-stamped at load) — see persistedSecretParams.
+    expect(persisted).toEqual({ type: 'secret', source: 'envFileSecret', params: {} })
     expect(JSON.stringify(persisted)).not.toContain('plaintext-secret')
 
     // The JSON.stringify channel (what jsonReply uses) also masks via toJSON.

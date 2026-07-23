@@ -13,6 +13,13 @@
       "save": "儲存",
       "dontSave": "不儲存",
       "cancel": "取消"
+    },
+    "externalChange": {
+      "title": "磁碟上的檔案已變更",
+      "message": "「{{fileName}}」已在應用程式外部被修改。",
+      "detail": "重新載入以使用磁碟上的版本，或保留您的版本並覆寫它。",
+      "reload": "重新載入",
+      "keepMine": "保留我的版本"
     }
   },
   "recentFilesVignette": {
@@ -341,6 +348,13 @@
       "stopServer": "停止 MCP 伺服器",
       "resumeServer": "恢復 MCP 伺服器",
       "serverStopped": "已停止"
+    },
+    "git": {
+      "pushTooltip": "推送到儲存庫",
+      "pullTooltip": "從儲存庫提取",
+      "nothingToPushTooltip": "沒有要推送的變更",
+      "refreshTooltip": "檢查要推送或拉取的變更",
+      "historyTooltip": "Git 歷史記錄"
     }
   },
   "mcpToolTitles": {
@@ -410,5 +424,47 @@
   "gatedControl": {
     "proLabel": "專業版",
     "subscribe": "訂閱"
+  },
+  "git": {
+    "cliMissing": {
+      "title": "尚未安裝 Git",
+      "body": "請安裝 Git 並將其加入 PATH，以使用 Git 整合功能。"
+    },
+    "pullAvailable": {
+      "title": "有可用更新",
+      "body": "儲存庫中有此檔案的更新版本。",
+      "pullNow": "立即拉取"
+    },
+    "mergeInProgress": {
+      "title": "未完成的合併",
+      "body": "已開始的 Git 合併從未完成。專案檔案中可能仍殘留衝突標記。",
+      "abort": "中止合併"
+    }
+  },
+  "pushModal": {
+    "title": "推送",
+    "languageLabel": "提交訊息語言",
+    "applyLanguageByDefault": "提交預設語言",
+    "titleFieldLabel": "提交標題",
+    "bodyFieldLabel": "描述",
+    "cancel": "取消",
+    "push": "推送"
+  },
+  "conflictResolution": {
+    "listTitle": "衝突",
+    "userTitle": "您的版本",
+    "serverTitle": "伺服器版本",
+    "resolvedTitle": "已解決",
+    "selectAConflict": "選擇一個衝突以解決它",
+    "useThisVersion": "使用此版本"
+  },
+  "gitHistory": {
+    "commits": "提交",
+    "noCommitSelected": "選取一個提交以檢視詳細資訊",
+    "author": "作者",
+    "date": "日期",
+    "hash": "雜湊",
+    "parents": "父提交",
+    "recoverVersion": "復原此版本"
   }
 }

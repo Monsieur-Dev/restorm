@@ -17,8 +17,10 @@ import {
   eventBus,
   logger,
   getContrastColor,
+  fieldDiffStyle,
   type ISelectData,
-  type VariableDefinition
+  type VariableDefinition,
+  type Tab
 } from 'electron-core-ui/renderer'
 import { DocumentEvents, type RequestHistoryEventPayload } from '../../services/DocumentEvents'
 import { RestormVariableInputBox } from '../RestormVariableInputBox'
@@ -44,6 +46,8 @@ import { ServerConfigLockedHint } from '../common/ServerConfigLockedHint'
 import { toasterService } from 'electron-core-ui/renderer'
 import { HeaderHoverTooltip } from '../MainView/HeaderHoverTooltip'
 import { useIsGraphqlSubscribing } from '../../services/graphqlSubscriptionListeningStore'
+import { conflictSafeBoolean } from '../../services/conflictSafeLiveState'
+import type { EntityFieldDiff } from '../../services/conflictFieldDiff'
 import { detectGraphqlOperationType } from '../../../../shared/utils/detectGraphqlOperationType'
 import './GraphQLSubscriptionEvents.css'
 
@@ -59,6 +63,34 @@ const serverPortWrapperStyle: React.CSSProperties = { width: 80, flexShrink: 0 }
 
 export interface GraphQLRequestTabViewProps {
   request: GraphQLRequest
+  /** Conflict-resolution field-diff (AC#4) — `computeEntityFieldDiff`'s
+   * result. Red-borders the URL input when `url` differs; coarse-borders
+   * the query/variables/headers area when `requestConfig` differs. Only
+   * ever set by `ConflictEntityPanel`. */
+  conflictFieldDiff?: EntityFieldDiff
+  /** Conflict resolution: restrict the request-side tab strip to these
+   * ids (forwarded verbatim to `BaseRequestTabView`). */
+  conflictVisibleTabIds?: string[]
+  /** Conflict resolution: extra tabs appended to the strip (the contested
+   * tag list), forwarded verbatim to `BaseRequestTabView`. */
+  conflictExtraTabs?: Tab[]
+  /** Preselects the tab holding the conflicting field (AC#5). */
+  defaultActiveTabId?: string
+  /** Fully-controlled request-side tab pair, forwarded verbatim to
+   * `BaseRequestTabView`. The conflict panels use it to mirror the tab
+   * selection across the three columns — any column's strip drives it
+   * (`ReadOnlyOverlay` lets tab clicks through as navigation). */
+  activeRequestTabId?: string
+  onRequestTabChange?: (tabId: string) => void
+  /** Hides the (non-editable, generated) Code Snippets tab (AC#5). */
+  showCodeSnippets?: boolean
+  /** Blanket conflict-mode safety rule (AC#2/#5, see
+   * `conflictSafeLiveState.ts`): forces `isListening`/`isSubscribing` to
+   * `false` and skips every live subscription/progress/event stream — a
+   * conflict panel is a static historical snapshot, never a live call.
+   * ALSO disables the auto `setOperationName` effect below: the clone must
+   * never silently diverge from what the user is actually looking at. */
+  conflictMode?: boolean
 }
 
 /**
@@ -75,8 +107,17 @@ function buildGraphqlBody(query: string, variables: string | undefined, operatio
 }
 
 export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
-  request
+  request,
+  conflictFieldDiff,
+  conflictVisibleTabIds,
+  conflictExtraTabs,
+  defaultActiveTabId,
+  activeRequestTabId,
+  onRequestTabChange,
+  showCodeSnippets = true,
+  conflictMode
 }) => {
+  const conflictFields = conflictFieldDiff?.fields
   const [historyModalOpen, setHistoryModalOpen] = useState(false)
   const { t } = useTranslation()
   // `projectUuid` comes from the EnvironmentContext (mirrored from the
@@ -127,7 +168,7 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
   // query SDL (the user edits it freely, so this is more reliable than the stored
   // `operationType` field).
   const isSubscription = !isServer && detectGraphqlOperationType(query) === 'subscription'
-  const isSubscribing = useIsGraphqlSubscribing(request.id)
+  const isSubscribing = conflictSafeBoolean(useIsGraphqlSubscribing(request.id), conflictMode)
   const [subscriptionEvents, setSubscriptionEvents] = useState<SubscriptionEventItem[]>([])
   const [expandedEvents, setExpandedEvents] = useState<Set<number>>(() => new Set())
 
@@ -379,7 +420,7 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
 
   const handleListen = useCallback((): void => {
     const requestId = request.id
-    if (!requestId || isListening) return
+    if (!requestId || isListening || conflictMode) return
     // Flush the debounced schema / resolver push so the main-process mock
     // hosts the current SDL — not the pre-debounce (possibly empty) one.
     flushUpdate()
@@ -392,15 +433,17 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
         }
       })
       .catch((err: unknown) => { logger.error('GraphQL mock server listen error', { error: String(err) }) })
-  }, [request.id, isListening, t, flushUpdate])
+  }, [request.id, isListening, conflictMode, t, flushUpdate])
 
   const handleStop = useCallback((): void => {
     void window.restorm?.graphql.stop(request.id)
   }, [request.id])
 
-  // Track listening state + served count in server mode.
+  // Track listening state + served count in server mode. Skipped entirely
+  // in conflict mode (see `conflictSafeLiveState.ts`) — a static historical
+  // snapshot must never pick up another tab's live mock state.
   useEffect(() => {
-    if (!isServer) return undefined
+    if (!isServer || conflictMode) return undefined
     const requestId = request.id
     let cancelled = false
     void window.restorm?.graphql.isListening(requestId).then((listening) => {
@@ -416,7 +459,7 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
       setServedCount(count)
     })
     return () => { cancelled = true; unsubProgress?.(); unsubServed?.() }
-  }, [isServer, request.id])
+  }, [isServer, request.id, conflictMode])
 
   const setOperationName = useCallback((value: string | undefined): void => {
     setOperationNameState(value)
@@ -440,7 +483,12 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
   // (or the previously-chosen one no longer exists). The setState calls
   // are deferred behind an awaited microtask so they don't fire
   // synchronously in the effect body (react-hooks/set-state-in-effect).
+  // Disabled entirely in conflict mode: this effect mutates the request
+  // (+ re-mirrors the global collections store) with NO user click — the
+  // clone must never silently diverge from the ours/theirs/resolved
+  // snapshot the user is actually looking at.
   useEffect(() => {
+    if (conflictMode) return undefined
     const cancelRef = { current: false }
     // The function wrapper hides the read behind a type boundary so
     // ESLint's control-flow narrowing doesn't treat the guard as a
@@ -458,7 +506,7 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
       }
     })()
     return () => { cancelRef.current = true }
-  }, [operationNames, operationName, setOperationName])
+  }, [operationNames, operationName, setOperationName, conflictMode])
 
   // Stable empty array for components that get variables via their own variableId
   const emptyVariables = useMemo<VariableDefinition[]>(() => [], [])
@@ -529,11 +577,12 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
   // Subscription client: open the SSE subscription (clears the prior event list)
   // / stop it. Pushed payloads + lifecycle arrive via the streaming effect below.
   const handleSubscribe = useCallback((): void => {
+    if (conflictMode) return
     setSubscriptionEvents([])
     setExpandedEvents(new Set())
     void window.restorm?.graphql.subscribe({ requestId: request.id })
       .catch((err: unknown) => { logger.error('GraphQL subscribe failed', { error: String(err) }) })
-  }, [request.id])
+  }, [request.id, conflictMode])
 
   const handleUnsubscribe = useCallback((): void => {
     void window.restorm?.graphql.unsubscribe(request.id)
@@ -549,9 +598,12 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
   }, [])
 
   // Stream pushed payloads + lifecycle into the live event list. A `started`
-  // resets the list (a fresh subscription); each event appends in arrival order.
+  // resets the list (a fresh subscription); each event appends in arrival
+  // order. Skipped entirely in conflict mode (see `conflictSafeLiveState.
+  // ts`) — a static historical snapshot must never pick up another tab's
+  // live subscription events.
   useEffect(() => {
-    if (isServer) return undefined
+    if (isServer || conflictMode) return undefined
     const requestId = request.id
     const unsubEvent = window.restorm?.graphql.onEvent(({ requestId: rid, event }) => {
       if (rid !== requestId) return
@@ -562,7 +614,7 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
       if (status === 'started') { setSubscriptionEvents([]); setExpandedEvents(new Set()) }
     })
     return () => { unsubEvent?.(); unsubProgress?.() }
-  }, [isServer, request.id])
+  }, [isServer, request.id, conflictMode])
 
   // Request content (SplitView with Query, Variables, Headers)
   const requestContent = (
@@ -573,7 +625,7 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
       onCollapsedChange={handlePanelCollapsedChange}
     >
       <Pane title={t('graphql.tabs.query')} initialSize={0.5} minSize={150} collapsed={panelCollapsed.query} data-testid="graphql-query-pane">
-        <div style={{ height: '100%', border: '1px solid var(--panel-border)', borderRadius: 3 }}>
+        <div style={{ height: '100%', border: '1px solid var(--panel-border)', borderRadius: 3, ...fieldDiffStyle(!!conflictFields?.['requestConfig']) }}>
           <CodeEditor
             key={`query-${transportEpoch}`}
             height="100%"
@@ -586,7 +638,7 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
         </div>
       </Pane>
       <Pane title={t('graphql.tabs.variables')} initialSize={0.25} minSize={100} collapsed={panelCollapsed.variables} data-testid="graphql-variables-pane">
-        <div style={{ height: '100%', border: '1px solid var(--panel-border)', borderRadius: 3 }}>
+        <div style={{ height: '100%', border: '1px solid var(--panel-border)', borderRadius: 3, ...fieldDiffStyle(!!conflictFields?.['requestConfig']) }}>
           <CodeEditor
             key={`variables-${transportEpoch}`}
             height="100%"
@@ -618,16 +670,18 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
           />
         )}
       >
-        <RestormKeyValueTable
-          key={`headers-${transportEpoch}`}
-          ref={headersRef}
-          variables={emptyVariables}
-          helpers={handlebarsHelpers}
-          initialRows={request.headers}
-          onRowsChange={handleHeadersChange}
-          persistenceId={`graphql-headers:${request.id}`}
-          data-testid="graphql-headers-table"
-        />
+        <div style={{ height: '100%', boxSizing: 'border-box', border: '1px solid transparent', ...fieldDiffStyle(!!conflictFields?.['requestConfig']) }}>
+          <RestormKeyValueTable
+            key={`headers-${transportEpoch}`}
+            ref={headersRef}
+            variables={emptyVariables}
+            helpers={handlebarsHelpers}
+            initialRows={request.headers}
+            onRowsChange={handleHeadersChange}
+            persistenceId={`graphql-headers:${request.id}`}
+            data-testid="graphql-headers-table"
+          />
+        </div>
       </Pane>
     </SplitView>
   )
@@ -881,6 +935,7 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
             <Button
               icon={isListening ? 'debug-disconnect' : 'plug'}
               onClick={isListening ? handleStop : handleListen}
+              disabled={!!conflictMode}
               {...(isListening ? {} : { emphasis: 1 })}
               options={{
                 title: isListening ? t('graphql.server.stopListening') : t('graphql.server.startListening'),
@@ -893,7 +948,12 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
       ) : (
         <>
           <HeaderHoverTooltip label={resolvedUrl || url} suppressed={!(resolvedUrl || url)} className="url-container-stretch">
-            <div style={{ flex: 1, minWidth: 0 }} data-testid="url-container" data-url-resolved={resolvedUrl ? 'true' : 'false'} data-resolved-url={resolvedUrl || url}>
+            <div
+              style={{ flex: 1, minWidth: 0, boxSizing: 'border-box', border: '1px solid transparent', ...fieldDiffStyle(!!conflictFields?.['url']) }}
+              data-testid="url-container"
+              data-url-resolved={resolvedUrl ? 'true' : 'false'}
+              data-resolved-url={resolvedUrl || url}
+            >
               <RestormVariableInputBox
                 value={url}
                 onChange={setUrl}
@@ -927,6 +987,7 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
                 <Button
                   icon={isSubscribing ? 'debug-disconnect' : 'broadcast'}
                   onClick={isSubscribing ? handleUnsubscribe : handleSubscribe}
+                  disabled={!!conflictMode}
                   {...(isSubscribing ? { emphasis: 0 } : sendButtonStyle ? { style: sendButtonStyle } : { emphasis: 1 })}
                   options={{
                     title: isSubscribing ? t('graphql.subscription.stop') : t('graphql.subscription.subscribe'),
@@ -989,6 +1050,8 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
   return (
     <>
       <BaseRequestTabView
+        {...(conflictVisibleTabIds ? { visibleRequestTabIds: conflictVisibleTabIds } : {})}
+        {...(conflictExtraTabs ? { extraRequestTabs: conflictExtraTabs } : {})}
         requestId={request.id}
         urlSection={urlSection}
         requestContent={isServer ? serverRequestContent : requestContent}
@@ -1001,6 +1064,11 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
         infosContent={isServer ? undefined : (isSubscription ? subscriptionInfosContent : infosContent)}
         responseContent={isServer ? serverResponseContent : (isSubscription ? subscriptionContent : responseContent)}
         jsonData={isServer || isSubscription ? undefined : (response ? { data: response.data, errors: response.errors } : undefined)}
+        showCodeSnippets={showCodeSnippets}
+        notesDiffers={!!conflictFields?.['notes']}
+        {...(defaultActiveTabId !== undefined ? { defaultActiveTabId } : {})}
+        {...(activeRequestTabId !== undefined ? { activeRequestTabId } : {})}
+        {...(onRequestTabChange !== undefined ? { onRequestTabChange } : {})}
       />
       <ResponseHistoryModal
         isOpen={historyModalOpen}

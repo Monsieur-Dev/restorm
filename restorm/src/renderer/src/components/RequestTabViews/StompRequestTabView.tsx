@@ -37,6 +37,7 @@ import { useIsStompListening } from '../../services/stompListeningStore'
 import { BeamWrap } from '../common/BeamWrap'
 import { HeaderHoverTooltip } from '../MainView/HeaderHoverTooltip'
 import './WebSocketChat.css'
+import { cloneForEventBus } from '../../utils/cloneForEventBus'
 
 export interface StompRequestTabViewProps {
   request: StompRequest
@@ -138,7 +139,7 @@ export const StompRequestTabView: React.FC<StompRequestTabViewProps> = ({
       headers: toKeyValueData(combinedHeaders(currentRequest.connectHeaders, currentRequest.sendHeaders))
     })
 
-    void window.restorm?.context.updateFullRequestData(requestId, {
+    void window.restorm?.context.updateFullRequestData(requestId, cloneForEventBus({
       url: currentRequest.url,
       requestType: 'stomp',
       stompVersion: currentRequest.stompVersion,
@@ -149,7 +150,7 @@ export const StompRequestTabView: React.FC<StompRequestTabViewProps> = ({
       sendHeaders: toKeyValueData(currentRequest.sendHeaders),
       headers: toKeyValueData(combinedHeaders(currentRequest.connectHeaders, currentRequest.sendHeaders)),
       body: { type: 'text', content: currentRequest.sendBody }
-    }, sourceIdRef.current)
+    }), sourceIdRef.current)
 
     const unsubUrl = window.restorm?.context.onUrlResolved((result) => {
       if (result.requestId === requestId) setResolvedUrl(result.resolvedUrl)
@@ -186,7 +187,7 @@ export const StompRequestTabView: React.FC<StompRequestTabViewProps> = ({
   // Notify ContextService when URL / version / subscriptions / send fields change
   useEffect(() => {
     const toKeyValueData = toKeyValueDataShared
-    void window.restorm?.context.updateFullRequestData(request.id, {
+    void window.restorm?.context.updateFullRequestData(request.id, cloneForEventBus({
       url,
       requestType: 'stomp',
       stompVersion,
@@ -197,7 +198,7 @@ export const StompRequestTabView: React.FC<StompRequestTabViewProps> = ({
       sendHeaders: toKeyValueData(request.sendHeaders),
       headers: toKeyValueData(combinedHeaders(request.connectHeaders, request.sendHeaders)),
       body: { type: 'text', content: sendBody }
-    }, sourceIdRef.current)
+    }), sourceIdRef.current)
     // `request` carries the KV-table-owned connectHeaders/sendHeaders (their
     // own onRowsChange handlers push straight to ContextService); the other
     // fields are this view's own locally-tracked state.

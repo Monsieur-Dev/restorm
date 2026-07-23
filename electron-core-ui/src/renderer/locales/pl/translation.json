@@ -13,6 +13,13 @@
       "save": "Zapisz",
       "dontSave": "Nie zapisuj",
       "cancel": "Anuluj"
+    },
+    "externalChange": {
+      "title": "Plik zmieniony na dysku",
+      "message": "„{{fileName}}” został zmodyfikowany poza aplikacją.",
+      "detail": "Wczytaj ponownie, aby użyć wersji z dysku, albo zachowaj swoją wersję i nadpisz ją.",
+      "reload": "Wczytaj ponownie",
+      "keepMine": "Zachowaj moją wersję"
     }
   },
   "recentFilesVignette": {
@@ -341,6 +348,13 @@
       "stopServer": "Zatrzymaj serwer MCP",
       "resumeServer": "Wznów serwer MCP",
       "serverStopped": "zatrzymany"
+    },
+    "git": {
+      "pushTooltip": "Wypchnij do repozytorium",
+      "pullTooltip": "Pobierz z repozytorium",
+      "nothingToPushTooltip": "Brak zmian do wypchnięcia",
+      "refreshTooltip": "Sprawdź zmiany do wypchnięcia lub pobrania",
+      "historyTooltip": "Historia Gita"
     }
   },
   "mcpToolTitles": {
@@ -410,5 +424,47 @@
   "gatedControl": {
     "proLabel": "Wersja Pro",
     "subscribe": "Subskrybuj"
+  },
+  "git": {
+    "cliMissing": {
+      "title": "Git nie jest zainstalowany",
+      "body": "Zainstaluj Git i dodaj go do zmiennej PATH, aby korzystać z integracji Git."
+    },
+    "pullAvailable": {
+      "title": "Dostępna aktualizacja",
+      "body": "W repozytorium dostępna jest nowsza wersja tego pliku.",
+      "pullNow": "Pobierz teraz"
+    },
+    "mergeInProgress": {
+      "title": "Niedokończone scalanie",
+      "body": "Rozpoczęto scalanie Git, którego nigdy nie ukończono. Plik projektu może nadal zawierać znaczniki konfliktu.",
+      "abort": "Przerwij scalanie"
+    }
+  },
+  "pushModal": {
+    "title": "Wypchnij",
+    "languageLabel": "Język wiadomości commit",
+    "applyLanguageByDefault": "Domyślny język commitów",
+    "titleFieldLabel": "Tytuł commita",
+    "bodyFieldLabel": "Opis",
+    "cancel": "Anuluj",
+    "push": "Wypchnij"
+  },
+  "conflictResolution": {
+    "listTitle": "Konflikty",
+    "userTitle": "Twoja wersja",
+    "serverTitle": "Wersja serwera",
+    "resolvedTitle": "Rozwiązano",
+    "selectAConflict": "Wybierz konflikt, aby go rozwiązać",
+    "useThisVersion": "Użyj tej wersji"
+  },
+  "gitHistory": {
+    "commits": "Commity",
+    "noCommitSelected": "Wybierz commit, aby zobaczyć szczegóły",
+    "author": "Autor",
+    "date": "Data",
+    "hash": "Hash",
+    "parents": "Rodzice",
+    "recoverVersion": "Przywróć tę wersję"
   }
 }

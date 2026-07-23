@@ -1,5 +1,6 @@
 import { dialog, BrowserWindow } from 'electron'
 import { readFileSync, existsSync, statSync } from 'fs'
+import { createHash } from 'crypto'
 import { basename, extname } from 'path'
 import { atomicWriteFile, serialize as serializePersisted, type PersistenceFormat } from './PersistenceService'
 import {
@@ -666,6 +667,8 @@ export class FileService {
       const data = readFileSync(filePath, 'utf-8')
       const content = this.deserialize(data, format)
       const name = this.getDisplayName(filePath)
+      this.diskDigest = FileService.digestOf(data)
+      this.externalChangePending = false
 
       this.currentFile = {
         path: filePath,
@@ -703,6 +706,10 @@ export class FileService {
    */
   public setOpenedFolder(folderPath: string, content: unknown, format?: SerializationFormat): void {
     const name = this.getDisplayName(folderPath)
+    // Folder mode has no single file whose bytes we can digest, so the
+    // external-change guard stays inert here.
+    this.diskDigest = null
+    this.externalChangePending = false
     
     this.currentFile = {
       path: folderPath,
@@ -753,9 +760,81 @@ export class FileService {
   }
 
   /**
-   * Save current file
+   * Digest of the bytes we last read from — or wrote to — disk. Anything
+   * else on disk means a third party (a terminal `git checkout`, a `git
+   * pull`, another editor) rewrote the file under us.
    */
-  public async save(content: unknown): Promise<boolean> {
+  private diskDigest: string | null = null
+
+  /** Set once an external rewrite is detected, so a per-second autosave
+   * can't re-broadcast the same prompt every tick. Cleared when the user
+   * resolves it — by reloading, or by force-saving over it. */
+  private externalChangePending = false
+
+  private static digestOf(data: string): string {
+    return createHash('sha1').update(data).digest('hex')
+  }
+
+  /**
+   * Whether the open file's bytes on disk differ from what we last read
+   * or wrote. False when there is no open file, when the path is gone
+   * (deletion is a different problem), or when we can't read it.
+   */
+  public hasExternalChange(): boolean {
+    const path = this.currentFile.path
+    if (path === null || this.diskDigest === null) return false
+    try {
+      if (!existsSync(path)) return false
+      return FileService.digestOf(readFileSync(path, 'utf-8')) !== this.diskDigest
+    } catch (error: unknown) {
+      logger.warn('FileService: Failed to probe the file for external changes', { path, error: String(error) })
+      return false
+    }
+  }
+
+  /**
+   * The user chose to keep their in-memory version over the one a third
+   * party wrote. Re-baselines on the current disk bytes, so the next
+   * ordinary save goes through (overwriting them, as asked) and a LATER
+   * external rewrite still prompts.
+   */
+  public acceptExternalChange(): void {
+    const path = this.currentFile.path
+    this.externalChangePending = false
+    if (path === null) return
+    try {
+      if (existsSync(path)) {
+        this.diskDigest = FileService.digestOf(readFileSync(path, 'utf-8'))
+      }
+    } catch (error: unknown) {
+      logger.warn('FileService: Failed to re-baseline after an external change', { path, error: String(error) })
+    }
+  }
+
+  /**
+   * Save current file.
+   *
+   * Refuses to overwrite a file a third party rewrote under us — the
+   * common case being a `git checkout` / `git pull` run from a terminal
+   * while the project is open. The in-memory tree still holds the OLD
+   * branch's content, and autosave fires a second later, so without this
+   * guard the checkout is silently undone on disk. `force` is the user
+   * answering "keep my version" to that prompt — see also
+   * `acceptExternalChange()`, which the renderer uses to re-baseline
+   * before running its ordinary save-all.
+   */
+  public async save(content: unknown, options?: { force?: boolean }): Promise<boolean> {
+    if (options?.force === true) {
+      this.externalChangePending = false
+    } else if (this.hasExternalChange()) {
+      if (!this.externalChangePending) {
+        this.externalChangePending = true
+        this.broadcastEvent('file:externally-changed', { path: this.currentFile.path })
+        logger.warn('FileService: Refusing to overwrite a file changed outside the app', { path: this.currentFile.path })
+      }
+      return false
+    }
+
     // If no current file, use SaveAs
     if (!this.currentFile.path) {
       return this.saveAs(content)
@@ -765,6 +844,7 @@ export class FileService {
       const preserved = this.preserveUuidMetadata(content)
       const data = this.serialize(preserved, this.currentFile.format)
       await atomicWriteFile(this.currentFile.path, data)
+      this.diskDigest = FileService.digestOf(data)
 
       this.currentFile.content = preserved
       this.currentFile.contentChecksum = JSON.stringify(preserved)
@@ -829,6 +909,8 @@ export class FileService {
       const preserved = this.preserveUuidMetadata(content)
       const data = this.serialize(preserved, fileFormat)
       await atomicWriteFile(filePath, data)
+      this.diskDigest = FileService.digestOf(data)
+      this.externalChangePending = false
 
       const name = this.getDisplayName(filePath)
       this.currentFile = {
@@ -872,6 +954,8 @@ export class FileService {
     // events (by design), so we reset the cached dirty flag manually.
     this.saveUnitRegistry.clear()
     this.detachDraftStore()
+    this.diskDigest = null
+    this.externalChangePending = false
 
     this.currentFile = {
       path: null,
@@ -939,6 +1023,36 @@ export class FileService {
    * Returns: 'save' | 'discard' | 'cancel'
    * @param labels Optional labels for i18n support
    */
+  /**
+   * Ask what to do about a file a third party rewrote under us. Native
+   * message box rather than an in-app modal, deliberately: the app may be
+   * mid-autosave and this decides whether someone's work survives, so it
+   * must be impossible to miss or click past.
+   */
+  public async showExternalChangeDialog(): Promise<'reload' | 'keepMine'> {
+    const focusedWindow = BrowserWindow.getFocusedWindow()
+    const fileName = this.currentFile.name ?? i18nService.t('file.untitled')
+
+    const options = {
+      type: 'warning' as const,
+      buttons: [
+        i18nService.t('file.externalChange.reload'),
+        i18nService.t('file.externalChange.keepMine')
+      ],
+      defaultId: 0,
+      cancelId: 0,
+      title: i18nService.t('file.externalChange.title'),
+      message: i18nService.t('file.externalChange.message', { fileName }),
+      detail: i18nService.t('file.externalChange.detail')
+    }
+
+    const result = focusedWindow
+      ? await dialog.showMessageBox(focusedWindow, options)
+      : await dialog.showMessageBox(options)
+
+    return result.response === 1 ? 'keepMine' : 'reload'
+  }
+
   public async showUnsavedChangesDialog(labels?: {
     title?: string
     message?: string

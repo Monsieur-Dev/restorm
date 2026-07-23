@@ -13,6 +13,13 @@
       "save": "保存",
       "dontSave": "保存しない",
       "cancel": "キャンセル"
+    },
+    "externalChange": {
+      "title": "ファイルがディスク上で変更されました",
+      "message": "「{{fileName}}」がアプリケーションの外部で変更されました。",
+      "detail": "再読み込みしてディスク上のバージョンを使用するか、自分のバージョンを保持して上書きします。",
+      "reload": "再読み込み",
+      "keepMine": "自分のバージョンを保持"
     }
   },
   "recentFilesVignette": {
@@ -341,6 +348,13 @@
       "stopServer": "MCPサーバーを停止",
       "resumeServer": "MCPサーバーを再開",
       "serverStopped": "停止中"
+    },
+    "git": {
+      "pushTooltip": "リポジトリにプッシュ",
+      "pullTooltip": "リポジトリからプル",
+      "nothingToPushTooltip": "プッシュする変更はありません",
+      "refreshTooltip": "プッシュ/プル対象の変更を確認",
+      "historyTooltip": "Git 履歴"
     }
   },
   "mcpToolTitles": {
@@ -410,5 +424,47 @@
   "gatedControl": {
     "proLabel": "Pro版",
     "subscribe": "申し込む"
+  },
+  "git": {
+    "cliMissing": {
+      "title": "Gitがインストールされていません",
+      "body": "Git統合機能を使用するには、GitをインストールしてPATHに追加してください。"
+    },
+    "pullAvailable": {
+      "title": "更新があります",
+      "body": "このファイルの新しいバージョンがリポジトリで利用可能です。",
+      "pullNow": "今すぐプル"
+    },
+    "mergeInProgress": {
+      "title": "未完了のマージ",
+      "body": "開始された Git のマージが完了していません。プロジェクトファイルにコンフリクトマーカーが残っている可能性があります。",
+      "abort": "マージを中止"
+    }
+  },
+  "pushModal": {
+    "title": "プッシュ",
+    "languageLabel": "コミットメッセージの言語",
+    "applyLanguageByDefault": "コミットの既定の言語",
+    "titleFieldLabel": "コミットタイトル",
+    "bodyFieldLabel": "説明",
+    "cancel": "キャンセル",
+    "push": "プッシュ"
+  },
+  "conflictResolution": {
+    "listTitle": "競合",
+    "userTitle": "あなたのバージョン",
+    "serverTitle": "サーバーのバージョン",
+    "resolvedTitle": "解決済み",
+    "selectAConflict": "解決する競合を選択してください",
+    "useThisVersion": "このバージョンを使用"
+  },
+  "gitHistory": {
+    "commits": "コミット",
+    "noCommitSelected": "コミットを選択すると詳細が表示されます",
+    "author": "作成者",
+    "date": "日付",
+    "hash": "ハッシュ",
+    "parents": "親",
+    "recoverVersion": "このバージョンを復元"
   }
 }

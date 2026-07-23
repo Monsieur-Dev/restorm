@@ -14,7 +14,9 @@ import {
   eventBus,
   logger,
   getContrastColor,
-  type VariableDefinition
+  fieldDiffStyle,
+  type VariableDefinition,
+  type Tab
 } from 'electron-core-ui/renderer'
 import { DocumentEvents, type RequestHistoryEventPayload } from '../../services/DocumentEvents'
 import { RestormVariableInputBox } from '../RestormVariableInputBox'
@@ -38,14 +40,44 @@ import { SendButtonEnvSwitcher } from './SendButtonEnvSwitcher'
 import { BeamWrap } from '../common/BeamWrap'
 import { toasterService } from 'electron-core-ui/renderer'
 import { HeaderHoverTooltip } from '../MainView/HeaderHoverTooltip'
+import type { EntityFieldDiff } from '../../services/conflictFieldDiff'
 
 export interface SoapRequestTabViewProps {
   request: SoapRequest
+  /** Conflict-resolution field-diff (AC#4) — `computeEntityFieldDiff`'s
+   * result. Red-borders the URL input when `url` differs; coarse-borders
+   * the body/headers area when `requestConfig` differs. Only ever set by
+   * `ConflictEntityPanel`. */
+  conflictFieldDiff?: EntityFieldDiff
+  /** Conflict resolution: restrict the request-side tab strip to these
+   * ids (forwarded verbatim to `BaseRequestTabView`). */
+  conflictVisibleTabIds?: string[]
+  /** Conflict resolution: extra tabs appended to the strip (the contested
+   * tag list), forwarded verbatim to `BaseRequestTabView`. */
+  conflictExtraTabs?: Tab[]
+  /** Preselects the tab holding the conflicting field (AC#5). */
+  defaultActiveTabId?: string
+  /** Fully-controlled request-side tab pair, forwarded verbatim to
+   * `BaseRequestTabView`. The conflict panels use it to mirror the tab
+   * selection across the three columns — any column's strip drives it
+   * (`ReadOnlyOverlay` lets tab clicks through as navigation). */
+  activeRequestTabId?: string
+  onRequestTabChange?: (tabId: string) => void
+  /** Hides the (non-editable, generated) Code Snippets tab (AC#5). */
+  showCodeSnippets?: boolean
 }
 
 export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({
-  request
+  request,
+  conflictFieldDiff,
+  conflictVisibleTabIds,
+  conflictExtraTabs,
+  defaultActiveTabId,
+  activeRequestTabId,
+  onRequestTabChange,
+  showCodeSnippets = true
 }) => {
+  const conflictFields = conflictFieldDiff?.fields
   const [historyModalOpen, setHistoryModalOpen] = useState(false)
   const { t } = useTranslation()
   // See HTTPRequestTabView — `projectUuid` from the env context is
@@ -280,7 +312,7 @@ export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({
       onCollapsedChange={handlePanelCollapsedChange}
     >
       <Pane title={t('soap.tabs.body')} initialSize={0.7} minSize={150} collapsed={panelCollapsed.body} data-testid="soap-request-body-pane">
-        <div style={{ height: '100%', border: '1px solid var(--panel-border)', borderRadius: 3 }}>
+        <div style={{ height: '100%', border: '1px solid var(--panel-border)', borderRadius: 3, ...fieldDiffStyle(!!conflictFields?.['requestConfig']) }}>
           <CodeEditor
             key={`body-${transportEpoch}`}
             height="100%"
@@ -312,16 +344,18 @@ export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({
           />
         )}
       >
-        <RestormKeyValueTable
-          key={`headers-${transportEpoch}`}
-          ref={headersRef}
-          variables={emptyVariables}
-          helpers={handlebarsHelpers}
-          initialRows={request.headers}
-          onRowsChange={handleHeadersChange}
-          persistenceId={`soap-headers:${request.id}`}
-          data-testid="soap-request-headers-table"
-        />
+        <div style={{ height: '100%', boxSizing: 'border-box', border: '1px solid transparent', ...fieldDiffStyle(!!conflictFields?.['requestConfig']) }}>
+          <RestormKeyValueTable
+            key={`headers-${transportEpoch}`}
+            ref={headersRef}
+            variables={emptyVariables}
+            helpers={handlebarsHelpers}
+            initialRows={request.headers}
+            onRowsChange={handleHeadersChange}
+            persistenceId={`soap-headers:${request.id}`}
+            data-testid="soap-request-headers-table"
+          />
+        </div>
       </Pane>
     </SplitView>
   )
@@ -487,7 +521,12 @@ export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({
       )}
       <ControlGroup data-testid="soap-url-section">
         <HeaderHoverTooltip label={resolvedUrl || url} suppressed={!(resolvedUrl || url)} className="url-container-stretch">
-          <div style={{ flex: 1, minWidth: 0 }} data-testid="url-container" data-url-resolved={resolvedUrl ? 'true' : 'false'} data-resolved-url={resolvedUrl || url}>
+          <div
+            style={{ flex: 1, minWidth: 0, boxSizing: 'border-box', border: '1px solid transparent', ...fieldDiffStyle(!!conflictFields?.['url']) }}
+            data-testid="url-container"
+            data-url-resolved={resolvedUrl ? 'true' : 'false'}
+            data-resolved-url={resolvedUrl || url}
+          >
             <RestormVariableInputBox
               value={url}
               onChange={setUrl}
@@ -537,6 +576,8 @@ export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({
   return (
     <>
       <BaseRequestTabView
+        {...(conflictVisibleTabIds ? { visibleRequestTabIds: conflictVisibleTabIds } : {})}
+        {...(conflictExtraTabs ? { extraRequestTabs: conflictExtraTabs } : {})}
         requestId={request.id}
         urlSection={urlSection}
         requestContent={requestContent}
@@ -548,6 +589,11 @@ export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({
         showResponse={response !== null}
         infosContent={infosContent}
         responseContent={responseContent}
+        showCodeSnippets={showCodeSnippets}
+        notesDiffers={!!conflictFields?.['notes']}
+        {...(defaultActiveTabId !== undefined ? { defaultActiveTabId } : {})}
+        {...(activeRequestTabId !== undefined ? { activeRequestTabId } : {})}
+        {...(onRequestTabChange !== undefined ? { onRequestTabChange } : {})}
       />
       <ResponseHistoryModal
         isOpen={historyModalOpen}

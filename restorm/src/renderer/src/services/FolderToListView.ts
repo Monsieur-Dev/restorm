@@ -417,7 +417,7 @@ function environmentFolderToListViewItem(
 ): ListViewItemData {
   const isExpanded = options.expandedIds.has(folder.id)
 
-  const children = folder.items.map((item) => folderItemToListViewItem(item, options))
+  const children = childItemsOf(folder).map((item) => folderItemToListViewItem(item, options))
   return {
     id: folder.id,
     title: folder.name,
@@ -445,7 +445,7 @@ function folderToListViewItem(
 ): ListViewItemData {
   const isExpanded = options.expandedIds.has(folder.id)
 
-  const children = folder.items.map((item) => folderItemToListViewItem(item, options))
+  const children = childItemsOf(folder).map((item) => folderItemToListViewItem(item, options))
   return {
     id: folder.id,
     title: folder.name,
@@ -464,7 +464,7 @@ export function folderToListViewItems(
   folder: Folder | EnvironmentFolder,
   options: FolderToListViewOptions
 ): ListViewItemData[] {
-  return folder.items.map((item) => folderItemToListViewItem(item, options))
+  return childItemsOf(folder).map((item) => folderItemToListViewItem(item, options))
 }
 
 /**
@@ -502,17 +502,26 @@ export function collectAllFolderIds(folder: Folder | EnvironmentFolder): string[
  * survives a reload exactly like a folder's (a scenario excluded from the
  * known set would have its persisted id filtered out on restore).
  */
+/** A folder's children, tolerating the shapes a hand-written or older
+ * project file can carry: `items:` with nothing after it parses to `null`,
+ * which every `.map`/`.flatMap` below would throw on — and a throw here
+ * takes the whole renderer down with it. */
+function childItemsOf(item: { items?: FolderItem[] | null }): FolderItem[] {
+  return Array.isArray(item.items) ? item.items : []
+}
+
 export function collectExpandableIds(item: FolderItem): string[] {
   // A scenario is a container too, but it carries `type:'scenario'` and an
   // optional `items` — branch it first (an empty scenario isn't expandable).
   if (isScenario(item)) {
-    return item.items && item.items.length > 0 ? [item.id, ...item.items.flatMap(collectExpandableIds)] : []
+    const children = childItemsOf(item)
+    return children.length > 0 ? [item.id, ...children.flatMap(collectExpandableIds)] : []
   }
   // Folders AND env-folders. Test `'items' in item` rather than `isAnyFolder`:
   // the latter requires `configuration`, which env-folders lack, so it would
   // drop a root env-folder and leave it collapsed on load.
   if ('items' in item) {
-    return [item.id, ...item.items.flatMap(collectExpandableIds)]
+    return [item.id, ...childItemsOf(item).flatMap(collectExpandableIds)]
   }
   return []
 }

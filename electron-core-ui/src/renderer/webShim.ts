@@ -6,8 +6,10 @@
 import type { ThemeInfo, ThemeDefinition, ThemeVariables } from '../types/theme'
 import type { FeaturePlatform } from '../types/feature'
 import type { FileServiceState, FileMetadata } from '../types/file'
-import type { CoreUiApi, CoreUiThemeApi, CoreUiStorageApi, CoreUiFeatureApi, CoreUiFileApi, CoreUiEventBusApi, CoreUiI18nApi, CoreUiSearchApi, CoreUiSettingsApi, CoreUiSearchDocument, CoreUiSearchResult, CoreUiSearchResultGroup } from '../types/api'
+import type { CoreUiApi, CoreUiThemeApi, CoreUiStorageApi, CoreUiFeatureApi, CoreUiFileApi, CoreUiEventBusApi, CoreUiI18nApi, CoreUiSearchApi, CoreUiSettingsApi, CoreUiGitApi, CoreUiSearchDocument, CoreUiSearchResult, CoreUiSearchResultGroup } from '../types/api'
 import type { SettingValue, ResolvedSetting, SettingsGroup } from '../types/settings'
+import type { GitStatus, GitCommitResult, GitPushResult, GitResetResult, GitPullResult, GitFetchCompareResult, GitConflictVersions, GitConflictCommitTimestamps, GitState } from '../types/git'
+import { NO_GIT_STATE } from '../types/git'
 import yaml from 'js-yaml'
 import themeIndexJson from '../../resources/themes/index.json'
 
@@ -380,6 +382,11 @@ export function ensureCoreUiWebApiShim(): void {
   }
 
   const fileApi: CoreUiFileApi = {
+    // The browser has no file the user can rewrite behind the app's
+    // back, so the external-change guard is inert on the web.
+    showExternalChangeDialog: (): Promise<'reload' | 'keepMine'> => Promise.resolve('reload'),
+    acceptExternalChange: (): Promise<void> => Promise.resolve(),
+    onFileExternallyChanged: (): (() => void) => () => undefined,
     newFile: (): Promise<boolean> => {
       // Web behavior: For web, we'll ask for a name via prompt
       const name = window.prompt('Enter file name:')
@@ -716,6 +723,45 @@ export function ensureCoreUiWebApiShim(): void {
     }
   }
 
+  // Git isn't meaningful in a stateless web build — there is no local
+  // filesystem or git CLI to shell out to. Surface a flat "never a repo"
+  // shim so shared UI code (status bar pastilles, `useGitState`, …)
+  // doesn't crash; every mutating call resolves to a failure result
+  // instead of throwing.
+  const gitApi: CoreUiGitApi = {
+    isRepo: (): Promise<boolean> => Promise.resolve(false),
+    getStatus: (): Promise<GitStatus> => Promise.resolve({ branch: null, ahead: 0, behind: 0, files: [] }),
+    log: () => Promise.resolve([]),
+    stage: (): Promise<void> => Promise.resolve(),
+    commit: (): Promise<GitCommitResult> => Promise.resolve({ success: false, error: 'Git is not available in the web build' }),
+    push: (): Promise<GitPushResult> => Promise.resolve({ success: false, error: 'Git is not available in the web build' }),
+    pull: (): Promise<GitPullResult> => Promise.resolve({ success: false, conflicted: false, conflictFiles: [], error: 'Git is not available in the web build' }),
+    refreshState: (): Promise<void> => Promise.resolve(),
+    fetchAndCompare: (): Promise<GitFetchCompareResult> => Promise.resolve({ remoteHasNewerVersion: false, behind: 0 }),
+    getConflictVersions: (_folder: string, filePath: string): Promise<GitConflictVersions> => Promise.resolve({ path: filePath, base: null, ours: null, theirs: null }),
+    getFileAtHead: (): Promise<string | null> => Promise.resolve(null),
+    getFileAtRemote: (): Promise<string | null> => Promise.resolve(null),
+    getFileAtMergeBase: (): Promise<string | null> => Promise.resolve(null),
+    getWorkingTreeFile: (): Promise<string | null> => Promise.resolve(null),
+    resetToRemoteKeepingWorkingTree: (): Promise<GitResetResult> => Promise.resolve({ success: false, error: 'not supported in the web shim' }),
+    resetHardToRemote: (): Promise<GitResetResult> => Promise.resolve({ success: false, error: 'not supported in the web shim' }),
+    writeResolvedConflict: (): Promise<void> => Promise.resolve(),
+    recoverFileAtRevision: (): Promise<string> => Promise.resolve(''),
+    abortMerge: (): Promise<void> => Promise.resolve(),
+    getConflictCommitTimestamps: (): Promise<GitConflictCommitTimestamps> => Promise.resolve({ ours: null, theirs: null }),
+    setActiveFolder: (): Promise<void> => Promise.resolve(),
+    getState: (): Promise<GitState> => Promise.resolve(NO_GIT_STATE),
+    onStateChanged: (): (() => void) => {
+      return () => { /* noop in web shim: git state never changes */ }
+    },
+    onCliMissing: (): (() => void) => {
+      return () => { /* noop in web shim: git is never "installed" to probe */ }
+    },
+    onPullAvailable: (): (() => void) => {
+      return () => { /* noop in web shim: a stateless build never detects a newer remote version */ }
+    }
+  }
+
   const api: CoreUiApi = {
     platform: (navigator as { userAgentData?: { platform?: string } }).userAgentData?.platform ?? 'web',
     theme: themeApi,
@@ -731,6 +777,7 @@ export function ensureCoreUiWebApiShim(): void {
     eventBus: eventBusApi,
     search: searchApi,
     settings: settingsApi,
+    git: gitApi,
     minimizeWindow: () => Promise.resolve(),
     maximizeWindow: () => Promise.resolve(),
     closeWindow: () => Promise.resolve(),

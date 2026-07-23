@@ -19,6 +19,7 @@ import { BeamWrap } from '../common/BeamWrap'
 import { ServerConfigLockedHint } from '../common/ServerConfigLockedHint'
 import { updateReactiveProperty } from './requestTabViewUtils'
 import { useIsGrpcServerListening } from '../../services/grpcServerListeningStore'
+import { conflictSafeBoolean } from '../../services/conflictSafeLiveState'
 
 const serverHostLabelStyle: CSSProperties = { display: 'flex', alignItems: 'center', padding: '0 4px', whiteSpace: 'nowrap', opacity: 0.8 }
 const serverPortWrapperStyle: CSSProperties = { width: 90, flexShrink: 0 }
@@ -33,6 +34,11 @@ const CALL_TYPE_OPTIONS: { value: GrpcCallType; labelKey: string; fallback: stri
 
 export interface GrpcServerTabViewProps {
   request: GrpcRequest
+  /** Blanket conflict-mode safety rule (AC#2/#5, see
+   * `conflictSafeLiveState.ts`): forces the listening beam to `false` — a
+   * conflict panel is a static historical snapshot, never a live mock
+   * server. Only ever set by `ConflictEntityPanel`. */
+  conflictMode?: boolean
 }
 
 /**
@@ -41,7 +47,7 @@ export interface GrpcServerTabViewProps {
  * becomes a Listen↔Stop toggle. The proto + per-method mock responses/status are
  * edited in the panes below; each configured method is answered on the wire.
  */
-export const GrpcServerTabView: React.FC<GrpcServerTabViewProps> = ({ request }) => {
+export const GrpcServerTabView: React.FC<GrpcServerTabViewProps> = ({ request, conflictMode }) => {
   const { t } = useTranslation()
 
   const [url, setUrlState] = useState(request.url)
@@ -50,8 +56,9 @@ export const GrpcServerTabView: React.FC<GrpcServerTabViewProps> = ({ request })
   const [reflection, setReflectionState] = useState(request.reflection !== false)
   const [selectedMethodIndex, setSelectedMethodIndex] = useState(0)
 
-  // The listening beam + served count for the hosted server.
-  const isListening = useIsGrpcServerListening(request.id)
+  // The listening beam + served count for the hosted server. Conflict-mode
+  // guard: see `conflictSafeLiveState.ts`.
+  const isListening = conflictSafeBoolean(useIsGrpcServerListening(request.id), conflictMode)
   const [servedCount, setServedCount] = useState(0)
 
   // localhost-fixed: only the port is editable.
@@ -111,7 +118,7 @@ export const GrpcServerTabView: React.FC<GrpcServerTabViewProps> = ({ request })
   // Listen = start hosting the gRPC mock server. It stays up until Stop / file
   // close / quit. The lifecycle beam is fed by grpc:server-progress.
   const handleListen = useCallback((): void => {
-    if (!request.id || isListening) return
+    if (!request.id || isListening || conflictMode) return
     setServedCount(0)
     void window.restorm?.grpc.listen(request.id)
       .then((res) => {
@@ -121,20 +128,23 @@ export const GrpcServerTabView: React.FC<GrpcServerTabViewProps> = ({ request })
         }
       })
       .catch((err: unknown) => { logger.error('gRPC mock server listen error', { error: String(err) }) })
-  }, [request.id, isListening, t])
+  }, [request.id, isListening, conflictMode, t])
 
   const handleStop = useCallback((): void => {
     void window.restorm?.grpc.stopServer(request.id)
   }, [request.id])
 
-  // Track served-count updates for the banner.
+  // Track served-count updates for the banner. Skipped entirely in
+  // conflict mode (see `conflictSafeLiveState.ts`) — no live subscription
+  // means no live count can ever leak into a static conflict snapshot.
   React.useEffect(() => {
+    if (conflictMode) return undefined
     const requestId = request.id
     const unsub = window.restorm?.grpc.onServerServed(({ requestId: rid, count }) => {
       if (rid === requestId) setServedCount(count)
     })
     return () => { unsub?.() }
-  }, [request.id])
+  }, [request.id, conflictMode])
 
   const selectedMethod = mockMethods[selectedMethodIndex]
 
@@ -304,6 +314,7 @@ export const GrpcServerTabView: React.FC<GrpcServerTabViewProps> = ({ request })
         <Button
           icon={isListening ? 'debug-disconnect' : 'plug'}
           onClick={isListening ? handleStop : handleListen}
+          disabled={!!conflictMode}
           {...(isListening ? {} : { emphasis: 1 })}
           options={{
             title: isListening ? t('grpc.server.stopListening', 'Stop server') : t('grpc.server.startListening', 'Start server'),

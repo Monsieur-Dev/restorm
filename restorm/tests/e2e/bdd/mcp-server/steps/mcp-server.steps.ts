@@ -665,3 +665,39 @@ Then(
 // so the mock HTTP server frees its port even if the worker is killed
 // early. close() is idempotent on the wrapper.
 process.once('exit', () => { void stopMockServer() })
+
+// ── Orphan-tab invariant: an item deleted via MCP must close its tab ──
+
+When(
+  'I delete the open request via MCP',
+  async ({ callMcpTool }) => {
+    if (!discovery || !firstRequestId) throw new Error('open the request tab first')
+    lastReply = await callMcpTool(discovery, 'delete_item', { id: firstRequestId })
+    lastReplyPayload = parsedReply(lastReply)
+    expect(lastReply.isError ?? false).toBe(false)
+    expect(lastReplyPayload).toMatchObject({ id: firstRequestId, deleted: true })
+  }
+)
+
+Then(
+  'no workbench tab references the deleted request',
+  async ({ callMcpTool }) => {
+    if (!page || !discovery || !firstRequestId) throw new Error('launch + delete first')
+    const activePage = page
+    const activeDiscovery = discovery
+    const deletedId = firstRequestId
+    // A main-driven delete (MCP) must prune the orphaned editor tab, or
+    // the workbench keeps a tab with no matching sidebar row. Poll: the
+    // tree-replace → prune → re-render lands a beat after the tool reply.
+    await expect(async () => {
+      const openTabs = await activePage.locator(`[data-testid*="tab-request-id:${deletedId}"]`).count()
+      expect(openTabs).toBe(0)
+      // And the current-tab snapshot must not point at the dead item.
+      const cur = await callMcpTool(activeDiscovery, 'get_current_tab', {})
+      const payload = parsedReply(cur) as { itemId?: string | null }
+      expect(payload.itemId ?? null).not.toBe(deletedId)
+    }).toPass({ timeout: 10_000 })
+    // The sidebar row is gone too (the invariant's other half).
+    await expect(page.locator(`[data-testid="sidebar-listview"] [data-item-id="${deletedId}"]`)).toHaveCount(0)
+  }
+)

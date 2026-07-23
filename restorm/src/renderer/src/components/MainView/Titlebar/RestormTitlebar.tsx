@@ -18,6 +18,7 @@ import { HeaderHoverTooltip } from '../HeaderHoverTooltip'
 import { Badge } from '../../common/Badge'
 import { mapToBadgeType } from '../../../utils/badgeUtils'
 import { useMcpEnabled } from '../../../hooks/useMcpEnabled'
+import { useGitGateState } from '../../../hooks/useGitGateState'
 
 /** Categories whose search results render with the single-line badge
  * layout (method/protocol pill + title + breadcrumb on one row). The
@@ -60,6 +61,21 @@ export interface RestormTitlebarProps {
    * otherwise). Wired to `View → MCP logs`; the entry is disabled when
    * the embedded MCP server isn't running. */
   onOpenMcpLogs: () => void
+  /** Repo-push, same effect + codicon as the statusbar `GIT` entry's push
+   * button. Wired to `Git → Push`. */
+  onGitPush: () => void
+  /** Manual both-sides git refresh (mirrors the statusbar refresh icon). */
+  onGitRefresh: () => void
+  /** Opens the git-history modal (mirrors the statusbar source-control icon). */
+  onGitHistory: () => void
+  /** Discard every local change and take the server's version. */
+  onGitResetToServer: () => void
+  /** Pastille flags, same derivation as the statusbar (useGitPendingFlags). */
+  gitPushPending: boolean
+  gitPullPending: boolean
+  /** Repo-pull, same effect + codicon as the statusbar `GIT` entry's pull
+   * button. Wired to `Git → Pull`. */
+  onGitPull: () => void
   /** Whether a workbench (an open file) is currently active. When
    * true, the gear button and `View → Settings` open Settings as a
    * singleton workbench tab; when false they fall back to the
@@ -93,6 +109,13 @@ export const RestormTitlebar: React.FC<RestormTitlebarProps> = ({
   onOpenFirewall,
   onOpenMiniBrowser,
   onOpenMcpLogs,
+  onGitPush,
+  onGitPull,
+  onGitRefresh,
+  onGitHistory,
+  onGitResetToServer,
+  gitPushPending,
+  gitPullPending,
   workbenchActive,
   onOpenSettingsTab
 }) => {
@@ -102,6 +125,11 @@ export const RestormTitlebar: React.FC<RestormTitlebarProps> = ({
   // The MCP-logs menu entry is disabled when the embedded MCP server isn't
   // running — there'd be nothing to view.
   const mcpEnabled = useMcpEnabled()
+  // The Git menu's root + both sub-items are disabled whenever the
+  // 3-state gate says locked (Community OR Pro-without-a-git-folder); the
+  // "Pro" badge next to the root label is Community-specific — a Pro user
+  // without a git folder has nothing to buy, so no badge for them.
+  const gitGate = useGitGateState()
 
   // Settings opens as a workbench tab when a file is open, or as the
   // full-screen modal on the welcome screen (no workbench).
@@ -305,6 +333,59 @@ export const RestormTitlebar: React.FC<RestormTitlebarProps> = ({
             <MenuItemSeparator data-testid="titlebar-menu-separator-tools-1" />
             <MenuItem data-testid="titlebar-menu-item-open-logs" title={t('menuBar.openLogsFolder')} disabled />
           </MenuBarItem>
+          <MenuBarItem
+            // A plain string, not a rich `<Badge>` node: `MenuBar`'s
+            // overflow/hamburger conversion (`menuBarItemToMenuItem`)
+            // renders a top-level item's title through ECUI's `MenuItem`,
+            // whose own `title` prop is `string`-only (used in a
+            // `${title}…` template literal for the opensDialog ellipsis)
+            // — a JSX title silently renders as an EMPTY row there once
+            // the bar collapses to overflow (confirmed live). "(Pro)"
+            // keeps the untranslated "Pro" wording AC#5 asks for without
+            // that regression; the styled `Badge` pill stays reserved for
+            // surfaces that don't feed through this conversion (the
+            // status bar already uses it via `GatedControl`).
+            title={gitGate.kind === 'community' ? `${t('menuBar.git')} (Pro)` : t('menuBar.git')}
+            data-testid="titlebar-menubar-item-git"
+          >
+            <MenuItem
+              data-testid="titlebar-menu-item-git-refresh"
+              title={t('menuBar.gitRefresh')}
+              icon={<span className="codicon codicon-refresh" aria-hidden="true" />}
+              onClick={onGitRefresh}
+              disabled={gitGate.locked}
+            />
+            <MenuItem
+              data-testid="titlebar-menu-item-git-push"
+              title={t('menuBar.gitPush')}
+              icon={<GitMenuIcon codicon="repo-push" pending={gitPushPending} data-testid="titlebar-menu-item-git-push-pastille" />}
+              onClick={onGitPush}
+              disabled={gitGate.locked}
+            />
+            <MenuItem
+              data-testid="titlebar-menu-item-git-pull"
+              title={t('menuBar.gitPull')}
+              icon={<GitMenuIcon codicon="repo-pull" pending={gitPullPending} data-testid="titlebar-menu-item-git-pull-pastille" />}
+              onClick={onGitPull}
+              disabled={gitGate.locked}
+            />
+            <MenuItemSeparator data-testid="titlebar-menu-separator-git-1" />
+            <MenuItem
+              data-testid="titlebar-menu-item-git-reset-to-server"
+              title={t('menuBar.gitResetToServer')}
+              icon={<span className="codicon codicon-discard" aria-hidden="true" />}
+              onClick={onGitResetToServer}
+              disabled={gitGate.locked}
+            />
+            <MenuItemSeparator data-testid="titlebar-menu-separator-git-2" />
+            <MenuItem
+              data-testid="titlebar-menu-item-git-history"
+              title={t('menuBar.gitHistory')}
+              icon={<span className="codicon codicon-source-control" aria-hidden="true" />}
+              onClick={onGitHistory}
+              disabled={gitGate.locked}
+            />
+          </MenuBarItem>
           <MenuBarItem title={t('menuBar.help')} data-testid="titlebar-menubar-item-help">
             <MenuItem data-testid="titlebar-menu-item-about" title={t('menuBar.about')} disabled />
             <MenuItem data-testid="titlebar-menu-item-documentation" title={t('menuBar.documentation')} disabled />
@@ -336,3 +417,28 @@ export const RestormTitlebar: React.FC<RestormTitlebarProps> = ({
 }
 
 export default RestormTitlebar
+
+/** Menu-item icon with the same pastille dot as the statusbar GIT cell —
+ * the top-level "Git" MenuBarItem title stays a plain string (overflow/
+ * hamburger conversion is string-only, see its own comment above), so the
+ * pending indicators live on the dropdown items instead. */
+const GitMenuIcon: React.FC<{ codicon: string; pending: boolean; 'data-testid'?: string }> = ({ codicon, pending, 'data-testid': dataTestId }) => (
+  <span style={{ position: 'relative', display: 'inline-flex' }}>
+    <span className={`codicon codicon-${codicon}`} aria-hidden="true" />
+    {pending && (
+      <span
+        aria-hidden="true"
+        {...(dataTestId ? { 'data-testid': dataTestId } : {})}
+        style={{
+          position: 'absolute',
+          top: -1,
+          right: -2,
+          width: 6,
+          height: 6,
+          borderRadius: '50%',
+          backgroundColor: 'var(--statusBar-prominentBackground, var(--focusBorder))'
+        }}
+      />
+    )}
+  </span>
+)

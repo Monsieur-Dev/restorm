@@ -1,6 +1,18 @@
 import type { ThemeInfo, ThemeDefinition, ThemeVariables } from 'electron-core-ui/types'
 import type { SettingValue, ResolvedSetting, SettingsGroup } from 'electron-core-ui/types'
 import type { PersistenceFormat } from 'electron-core-ui/main'
+import type {
+  GitStatus,
+  GitCommitResult,
+  GitPushResult,
+  GitResetResult,
+  GitPullResult,
+  GitFetchCompareResult,
+  GitLogEntry,
+  GitConflictVersions,
+  GitConflictCommitTimestamps,
+  GitState
+} from 'electron-core-ui/types'
 import type { ResponseHistoryDetail, ResponseHistoryEntry } from '../../../shared/types/collections'
 import type { AuthState, CheckoutResult, PortalResult } from '../../../shared/auth/authState'
 
@@ -84,6 +96,37 @@ declare global {
         /** The running app version (e.g. `0.1.12-preview`). */
         getVersion: () => Promise<string>
       }
+      /** electron-core-ui's Git plumbing — see `electron-core-ui/docs/Git/README.md`.
+       * Mirrors `WindowApiGit` in electron-core-ui's own `global.d.ts`; restorm
+       * re-declares it here (rather than importing `WindowApi` wholesale) to stay
+       * consistent with the rest of this file's per-namespace declarations. */
+      git: {
+        isRepo: (folder: string) => Promise<boolean>
+        getStatus: (folder: string) => Promise<GitStatus>
+        log: (folder: string) => Promise<GitLogEntry[]>
+        stage: (folder: string, paths: string[]) => Promise<void>
+        commit: (folder: string, message: string, paths?: string[]) => Promise<GitCommitResult>
+        push: (folder: string) => Promise<GitPushResult>
+        pull: (folder: string) => Promise<GitPullResult>
+        refreshState: () => Promise<void>
+        fetchAndCompare: (folder: string) => Promise<GitFetchCompareResult>
+        getConflictVersions: (folder: string, filePath: string) => Promise<GitConflictVersions>
+        getFileAtHead: (folder: string, filePath: string) => Promise<string | null>
+        getFileAtRemote: (folder: string, filePath: string) => Promise<string | null>
+        getFileAtMergeBase: (folder: string, filePath: string) => Promise<string | null>
+        getWorkingTreeFile: (folder: string, filePath: string) => Promise<string | null>
+        resetToRemoteKeepingWorkingTree: (folder: string) => Promise<GitResetResult>
+        resetHardToRemote: (folder: string) => Promise<GitResetResult>
+        writeResolvedConflict: (folder: string, filePath: string, content: string) => Promise<void>
+        recoverFileAtRevision: (folder: string, filePath: string, revision: string) => Promise<string>
+        abortMerge: (folder: string) => Promise<void>
+        getConflictCommitTimestamps: (folder: string) => Promise<GitConflictCommitTimestamps>
+        setActiveFolder: (folder: string | null) => Promise<void>
+        getState: () => Promise<GitState>
+        onStateChanged: (callback: (state: GitState) => void) => () => void
+        onCliMissing: (callback: () => void) => () => void
+        onPullAvailable: (callback: () => void) => () => void
+      }
     }
     // Mirrors the preload's createElectronAPI() surface. Keep in sync with
     // electron-core-ui/src/preload/electronAPI.ts.
@@ -117,6 +160,10 @@ declare global {
       }
       forceClose: () => Promise<void>
       onSaveAndClose: (callback: () => void) => (() => void)
+      git: {
+        onSaveFlushRequest: (callback: (token: string) => void) => (() => void)
+        notifySaveFlushComplete: (token: string) => void
+      }
       request: {
         resolveURL: (input: unknown) => Promise<unknown>
       }

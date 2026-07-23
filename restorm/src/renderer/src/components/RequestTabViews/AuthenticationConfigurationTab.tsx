@@ -15,7 +15,7 @@
 
 import React, { useCallback, useRef, useState, type CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Button, InputBox } from 'electron-core-ui/renderer'
+import { Button, InputBox, fieldDiffStyle } from 'electron-core-ui/renderer'
 import type { AuthenticationRequest, KeyValue } from '../../../../shared/types/collections'
 import { RestormKeyValueTable, type KeyValueTableHandle } from '../RestormKeyValueTable'
 import { RestormVariableInputBox } from '../RestormVariableInputBox'
@@ -52,6 +52,12 @@ const inputWrapperStyle: CSSProperties = {
 
 export interface AuthenticationConfigurationTabProps {
   request: AuthenticationRequest
+  /** Conflict-resolution field-diff (AC#4) for this tab's 3 fields —
+   * `computeEntityFieldDiff`'s `fields` map. Red-borders `expiration`/
+   * `authErrorCodes` (discrete inputs) and coarse-borders the whole
+   * produced-headers table when it differs. Only ever set by
+   * `ConflictEntityPanel`; `undefined` in the live (non-conflict) editor. */
+  fieldDiff?: { producedHeaders?: boolean, expirationExpression?: boolean, authErrorCodes?: boolean }
 }
 
 function parseCodes(raw: string): number[] {
@@ -65,7 +71,7 @@ function formatCodes(codes: readonly number[]): string {
   return codes.join(', ')
 }
 
-export const AuthenticationConfigurationTab: React.FC<AuthenticationConfigurationTabProps> = ({ request }) => {
+export const AuthenticationConfigurationTab: React.FC<AuthenticationConfigurationTabProps> = ({ request, fieldDiff }) => {
   const { t } = useTranslation()
   const handlebarsHelpers = useHandlebarsHelpers()
   // Environment variables for the scalar {{...}} expiration field so its
@@ -122,15 +128,17 @@ export const AuthenticationConfigurationTab: React.FC<AuthenticationConfiguratio
             {t('authRequestTab.addProducedHeader', 'Add produced header')}
           </Button>
         </div>
-        <RestormKeyValueTable
-          key={`produced-headers-${transportEpoch}`}
-          ref={producedHeadersRef}
-          variables={[]}
-          helpers={handlebarsHelpers}
-          initialRows={request.producedHeaders}
-          onRowsChange={handleProducedHeadersChange}
-          data-testid="auth-request-produced-headers"
-        />
+        <div style={{ boxSizing: 'border-box', border: '1px solid transparent', ...fieldDiffStyle(!!fieldDiff?.producedHeaders) }}>
+          <RestormKeyValueTable
+            key={`produced-headers-${transportEpoch}`}
+            ref={producedHeadersRef}
+            variables={[]}
+            helpers={handlebarsHelpers}
+            initialRows={request.producedHeaders}
+            onRowsChange={handleProducedHeadersChange}
+            data-testid="auth-request-produced-headers"
+          />
+        </div>
       </section>
 
       <section style={sectionStyle}>
@@ -143,7 +151,7 @@ export const AuthenticationConfigurationTab: React.FC<AuthenticationConfiguratio
             'Handlebars expression yielding the seconds after which the cached headers are stale (e.g. {{expires_in}}). Empty ⇒ never auto-expire.'
           )}
         </span>
-        <div style={inputWrapperStyle}>
+        <div style={{ ...inputWrapperStyle, boxSizing: 'border-box', border: '1px solid transparent', ...fieldDiffStyle(!!fieldDiff?.expirationExpression) }}>
           <RestormVariableInputBox
             value={request.expirationExpression ?? ''}
             onChange={handleExpirationChange}
@@ -165,7 +173,7 @@ export const AuthenticationConfigurationTab: React.FC<AuthenticationConfiguratio
             'Comma-separated HTTP status codes. When a downstream request returns one of these, the auth cache is invalidated and the call is retried exactly once. Defaults to 401, 403.'
           )}
         </span>
-        <div style={inputWrapperStyle}>
+        <div style={{ ...inputWrapperStyle, boxSizing: 'border-box', border: '1px solid transparent', ...fieldDiffStyle(!!fieldDiff?.authErrorCodes) }}>
           <InputBox
             value={formatCodes(request.authErrorCodes)}
             onChange={handleCodesChange}

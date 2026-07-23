@@ -13,6 +13,13 @@
       "save": "Spara",
       "dontSave": "Spara inte",
       "cancel": "Avbryt"
+    },
+    "externalChange": {
+      "title": "Filen har ändrats på disken",
+      "message": "”{{fileName}}” ändrades utanför programmet.",
+      "detail": "Läs in på nytt för att använda versionen på disken, eller behåll din version och skriv över den.",
+      "reload": "Läs in på nytt",
+      "keepMine": "Behåll min version"
     }
   },
   "recentFilesVignette": {
@@ -341,6 +348,13 @@
       "stopServer": "Stoppa MCP-server",
       "resumeServer": "Återuppta MCP-server",
       "serverStopped": "stoppad"
+    },
+    "git": {
+      "pushTooltip": "Push:a till förvaret",
+      "pullTooltip": "Hämta från förvaret",
+      "nothingToPushTooltip": "Inga ändringar att pusha",
+      "refreshTooltip": "Sök efter ändringar att pusha eller pulla",
+      "historyTooltip": "Git-historik"
     }
   },
   "mcpToolTitles": {
@@ -410,5 +424,47 @@
   "gatedControl": {
     "proLabel": "Pro-version",
     "subscribe": "Prenumerera"
+  },
+  "git": {
+    "cliMissing": {
+      "title": "Git är inte installerat",
+      "body": "Installera Git och lägg till det i din PATH för att använda Git-integrationen."
+    },
+    "pullAvailable": {
+      "title": "Uppdatering tillgänglig",
+      "body": "En nyare version av den här filen finns tillgänglig i repot.",
+      "pullNow": "Hämta nu"
+    },
+    "mergeInProgress": {
+      "title": "Oavslutad sammanslagning",
+      "body": "En Git-sammanslagning påbörjades men slutfördes aldrig. Projektfilen kan fortfarande innehålla konfliktmarkeringar.",
+      "abort": "Avbryt sammanslagningen"
+    }
+  },
+  "pushModal": {
+    "title": "Push",
+    "languageLabel": "Språk för commit-meddelandet",
+    "applyLanguageByDefault": "Standardspråk för commits",
+    "titleFieldLabel": "Commit-titel",
+    "bodyFieldLabel": "Beskrivning",
+    "cancel": "Avbryt",
+    "push": "Push"
+  },
+  "conflictResolution": {
+    "listTitle": "Konflikter",
+    "userTitle": "Din version",
+    "serverTitle": "Serverversion",
+    "resolvedTitle": "Löst",
+    "selectAConflict": "Välj en konflikt för att lösa den",
+    "useThisVersion": "Använd den här versionen"
+  },
+  "gitHistory": {
+    "commits": "Commits",
+    "noCommitSelected": "Välj en commit för att se detaljerna",
+    "author": "Författare",
+    "date": "Datum",
+    "hash": "Hash",
+    "parents": "Föräldrar",
+    "recoverVersion": "Återställ denna version"
   }
 }

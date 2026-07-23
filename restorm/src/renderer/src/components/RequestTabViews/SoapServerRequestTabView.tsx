@@ -8,7 +8,8 @@ import {
   ControlGroup,
   ScrollableElement,
   logger,
-  toasterService
+  toasterService,
+  type Tab
 } from 'electron-core-ui/renderer'
 import type { SoapRequest, SoapMockOperation } from '../../../../shared/types/requests/SoapRequest'
 import { useEnvironmentContext } from '../../contexts/useEnvironmentContext'
@@ -17,9 +18,21 @@ import { updateReactiveProperty } from './requestTabViewUtils'
 import { toKeyValueData as toKeyValueDataShared } from '../../utils/toKeyValueData'
 import { BeamWrap } from '../common/BeamWrap'
 import { ServerConfigLockedHint } from '../common/ServerConfigLockedHint'
+import { cloneForEventBus } from '../../utils/cloneForEventBus'
 
 export interface SoapServerRequestTabViewProps {
   request: SoapRequest
+  /** Blanket conflict-mode safety rule (AC#2/#5, see
+   * `conflictSafeLiveState.ts`): skips the listening/served-count
+   * subscription — a conflict panel is a static historical snapshot,
+   * never a live mock server. Only ever set by `ConflictEntityPanel`. */
+  conflictMode?: boolean
+  /** Conflict resolution: restrict the request-side tab strip to these
+   * ids (forwarded verbatim to `BaseRequestTabView`). */
+  conflictVisibleTabIds?: string[]
+  /** Conflict resolution: extra tabs appended to the strip (the contested
+   * tag list), forwarded verbatim to `BaseRequestTabView`. */
+  conflictExtraTabs?: Tab[]
 }
 
 // SERVER MODE URL-section pieces — mirror the HTTP mock server layout.
@@ -45,7 +58,7 @@ function parseServerUrl(raw: string): { port: string; route: string } {
  * SOAP-specific operations editor (the canned responses dispatched by SOAPAction
  * / body operation name).
  */
-export const SoapServerRequestTabView: React.FC<SoapServerRequestTabViewProps> = ({ request }) => {
+export const SoapServerRequestTabView: React.FC<SoapServerRequestTabViewProps> = ({ request, conflictMode, conflictVisibleTabIds, conflictExtraTabs }) => {
   const { t } = useTranslation()
   const { selectedEnvId, environments } = useEnvironmentContext()
 
@@ -87,18 +100,21 @@ export const SoapServerRequestTabView: React.FC<SoapServerRequestTabViewProps> =
 
   // Keep the main-process context in sync with the edited URL + operations.
   useEffect(() => {
-    void window.restorm?.context.updateFullRequestData(request.id, {
+    void window.restorm?.context.updateFullRequestData(request.id, cloneForEventBus({
       url,
       method: 'POST',
       requestType: 'soap',
       headers: toKeyValueDataShared(request.headers),
       server: true,
       soapMockOperations: operations
-    }, sourceIdRef.current)
+    }), sourceIdRef.current)
   }, [request.id, request.headers, url, operations])
 
   // Track listening state + served count for the hosted mock route.
+  // Skipped entirely in conflict mode (see `conflictSafeLiveState.ts`) — a
+  // static historical snapshot must never pick up another tab's live state.
   useEffect(() => {
+    if (conflictMode) return undefined
     const requestId = request.id
     let cancelled = false
     void window.restorm?.soap.isListening(requestId).then((listening) => {
@@ -114,11 +130,11 @@ export const SoapServerRequestTabView: React.FC<SoapServerRequestTabViewProps> =
       setServedCount(count)
     })
     return () => { cancelled = true; unsubProgress?.(); unsubServed?.() }
-  }, [request.id])
+  }, [request.id, conflictMode])
 
   const handleListen = useCallback((): void => {
     const requestId = request.id
-    if (!requestId || isListening) return
+    if (!requestId || isListening || conflictMode) return
     setServedCount(0)
     void window.restorm?.soap.listen(requestId)
       .then((res) => {
@@ -128,7 +144,7 @@ export const SoapServerRequestTabView: React.FC<SoapServerRequestTabViewProps> =
         }
       })
       .catch((err: unknown) => { logger.error('SOAP mock server listen error', { error: String(err) }) })
-  }, [request.id, isListening, t])
+  }, [request.id, isListening, conflictMode, t])
 
   const handleStop = useCallback((): void => { void window.restorm?.soap.stop(request.id) }, [request.id])
 
@@ -169,6 +185,7 @@ export const SoapServerRequestTabView: React.FC<SoapServerRequestTabViewProps> =
         <Button
           icon={isListening ? 'debug-disconnect' : 'plug'}
           onClick={isListening ? handleStop : handleListen}
+          disabled={!!conflictMode}
           {...(isListening ? {} : { emphasis: 1 })}
           options={{
             title: isListening ? t('soap.server.stopListening', 'Stop the SOAP mock server') : t('soap.server.startListening', 'Start the SOAP mock server'),
@@ -271,6 +288,8 @@ export const SoapServerRequestTabView: React.FC<SoapServerRequestTabViewProps> =
 
   return (
     <BaseRequestTabView
+      {...(conflictVisibleTabIds ? { visibleRequestTabIds: conflictVisibleTabIds } : {})}
+        {...(conflictExtraTabs ? { extraRequestTabs: conflictExtraTabs } : {})}
       requestId={request.id}
       urlSection={urlSection}
       requestContent={requestContent}

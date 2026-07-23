@@ -1,5 +1,6 @@
 import { isContainerNode, isTabGroupNode } from 'electron-core-ui/renderer'
 import type { GroupNode, EditorTab } from 'electron-core-ui/renderer'
+export { collectTreeItemIds } from './treeItemIds'
 
 /**
  * Map every tab in a workbench `groups` array, recursing into the container
@@ -48,4 +49,52 @@ export function tabReferencesItem(tab: EditorTab, itemId: string): boolean {
   if (t.scenario?.id === itemId) return true
   if (t.breadcrumbs?.some((bc) => bc.id === itemId)) return true
   return false
+}
+
+/**
+ * The id of the tree item a tab is primarily backed by (request / folder /
+ * scenario), or `undefined` for tabs not backed by a tree item at all (a
+ * project-file / settings / scratch tab, which must NEVER be pruned by the
+ * orphan sweep). Breadcrumb ancestors are deliberately ignored here: when a
+ * folder is deleted its descendants leave the tree too, so their own backing
+ * id already disappears from the "existing ids" set.
+ */
+export function tabBackingItemId(tab: EditorTab): string | undefined {
+  const t = tab as ItemBackedTab
+  return t.request?.id ?? t.folder?.id ?? t.scenario?.id
+}
+
+/**
+ * Drop every tab whose backing tree item is no longer present in
+ * `existingIds`, in EVERY pane (recursing into split containers), pruning
+ * emptied tab-groups + emptied containers and re-picking each surviving
+ * group's active tab. Tabs not backed by a tree item (project/settings)
+ * are always kept. Mirrors the delete-path pruning so the invariant
+ * "every open tab maps to a live sidebar item" also holds after a
+ * main-driven (MCP) tree replacement, not only after a UI delete.
+ */
+export function pruneOrphanTabs(groups: readonly GroupNode[], existingIds: Set<string>): GroupNode[] {
+  const result: GroupNode[] = []
+  for (const node of groups) {
+    if (isContainerNode(node)) {
+      const prunedChildren = pruneOrphanTabs(node.groups, existingIds)
+      if (prunedChildren.length > 0) result.push({ ...node, groups: prunedChildren })
+      continue
+    }
+    if (!isTabGroupNode(node)) {
+      result.push(node)
+      continue
+    }
+    const filteredTabs = node.tabs.filter((tab) => {
+      const backingId = tabBackingItemId(tab)
+      return backingId === undefined || existingIds.has(backingId)
+    })
+    if (filteredTabs.length === 0) continue
+    let newActiveTabId: string = node.activeTabId ?? ''
+    if (!filteredTabs.some((t) => t.id === node.activeTabId)) {
+      newActiveTabId = filteredTabs[0]?.id ?? ''
+    }
+    result.push({ ...node, tabs: filteredTabs, activeTabId: newActiveTabId })
+  }
+  return result
 }

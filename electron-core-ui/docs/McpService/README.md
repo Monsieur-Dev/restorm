@@ -799,3 +799,23 @@ Claude Code auto-loads project-scoped MCP servers at session start (after a one-
 ## Why off-by-default
 
 A packaged production binary opening a TCP port — even on loopback — surprises users and security scanners. The CLI flag pattern keeps the surface zero-cost for normal users and explicit for developers / AI integrations.
+
+## Testing
+
+`electron-core-ui/testing` exports generic JSON-RPC-over-the-discovery-file helpers for driving an embedded `McpService` end-to-end the same way a real MCP client would — read the discovery file a launched host writes on boot, then call tools over Streamable HTTP:
+
+```ts
+import { readMcpDiscoveryWithRetry, callMcpToolOverJsonRpc, postMcpJsonRpc, type McpDiscovery } from 'electron-core-ui/testing'
+
+// After launching the host with `--mcp-discovery-file=<path>` (or reading
+// the default `os.tmpdir()/restorm-mcp/<pid>.json` location):
+const discovery: McpDiscovery = await readMcpDiscoveryWithRetry(discoveryPath)
+
+// `tools/call` convenience wrapper — throws on an MCP-level error reply:
+const reply = await callMcpToolOverJsonRpc(discovery, 'screenshot', {})
+
+// Raw JSON-RPC for anything that doesn't fit `tools/call` (e.g. `tools/list`):
+const listReply = await postMcpJsonRpc(discovery, { method: 'tools/list' })
+```
+
+`postMcpJsonRpc` handles both the plain-JSON and SSE-framed (`event: message\ndata: …`) reply shapes the Streamable-HTTP transport can return, transparently. Consuming apps build their own Playwright fixture around these primitives (launch the host, resolve the discovery file, expose `callMcpTool`/`rawJsonRpc` as fixtures) — see restorm's `tests/e2e/bdd/fixtures/mcp-server.fixture.ts` for a worked example.

@@ -9,6 +9,17 @@ import type { ThemeInfo, ThemeDefinition, ThemeVariables } from './theme'
 import type { FeatureEnvironment, FeaturePlatform } from './feature'
 import type { FileServiceState, FileMetadata, SerializationFormat } from './file'
 import type { SettingValue, ResolvedSetting, SettingsGroup } from './settings'
+import type {
+  GitStatus,
+  GitCommitResult,
+  GitPushResult,
+  GitResetResult,
+  GitPullResult,
+  GitFetchCompareResult,
+  GitConflictVersions,
+  GitConflictCommitTimestamps,
+  GitState
+, GitLogEntry} from './git'
 
 export interface CoreUiThemeApi {
   list: () => Promise<ThemeInfo[]>
@@ -47,7 +58,9 @@ export interface CoreUiFeatureApi {
 export interface CoreUiFileApi {
   newFile: () => Promise<boolean>
   open: (path?: string) => Promise<{ success: boolean; content?: unknown }>
-  save: (content: unknown) => Promise<boolean>
+  save: (content: unknown, options?: { force?: boolean }) => Promise<boolean>
+  showExternalChangeDialog: () => Promise<'reload' | 'keepMine'>
+  acceptExternalChange: () => Promise<void>
   saveAs: (content: unknown, filename?: string, format?: SerializationFormat) => Promise<boolean>
   close: () => Promise<boolean>
   getState: () => Promise<FileServiceState | null>
@@ -101,6 +114,9 @@ export interface CoreUiFileApi {
   ) => () => void
   onDraftsRestored: (
     callback: (payload: { count: number }) => void
+  ) => () => void
+  onFileExternallyChanged: (
+    callback: (payload: { path: string | null }) => void
   ) => () => void
   onAutoSaveTrigger: (callback: () => void) => () => void
   saveUnit: (entry: {
@@ -192,6 +208,45 @@ export interface CoreUiSettingsApi {
   onWorkspaceChanged: (callback: (path: string | null) => void) => () => void
 }
 
+export interface CoreUiGitApi {
+  isRepo: (folder: string) => Promise<boolean>
+  getStatus: (folder: string) => Promise<GitStatus>
+  /** Full multi-ref history, newest first (`git log --all --topo-order`). */
+  log: (folder: string) => Promise<GitLogEntry[]>
+  stage: (folder: string, paths: string[]) => Promise<void>
+  /** `paths` scopes the commit to those files — without it, anything the
+   * user staged themselves would be published too. */
+  commit: (folder: string, message: string, paths?: string[]) => Promise<GitCommitResult>
+  push: (folder: string) => Promise<GitPushResult>
+  pull: (folder: string) => Promise<GitPullResult>
+  refreshState: () => Promise<void>
+  fetchAndCompare: (folder: string) => Promise<GitFetchCompareResult>
+  getConflictVersions: (folder: string, filePath: string) => Promise<GitConflictVersions>
+  getFileAtHead: (folder: string, filePath: string) => Promise<string | null>
+  /** Read the file on the branch's upstream ref — the "theirs" side of a
+   * pre-merge comparison (no commit, no merge, no working-tree change). */
+  getFileAtRemote: (folder: string, filePath: string) => Promise<string | null>
+  /** The file at the merge base (common ancestor of HEAD and its
+   * upstream) — the "base" side of a three-way merge. */
+  getFileAtMergeBase: (folder: string, filePath: string) => Promise<string | null>
+  /** Read the file as it stands in the working tree — the "ours" side. */
+  getWorkingTreeFile: (folder: string, filePath: string) => Promise<string | null>
+  /** Move the branch onto its upstream, leaving every file on disk as-is. */
+  resetToRemoteKeepingWorkingTree: (folder: string) => Promise<GitResetResult>
+  /** Move the branch AND the working tree onto the upstream, discarding
+   * local modifications to tracked files. Destructive — confirm first. */
+  resetHardToRemote: (folder: string) => Promise<GitResetResult>
+  writeResolvedConflict: (folder: string, filePath: string, content: string) => Promise<void>
+  recoverFileAtRevision: (folder: string, filePath: string, revision: string) => Promise<string>
+  abortMerge: (folder: string) => Promise<void>
+  getConflictCommitTimestamps: (folder: string) => Promise<GitConflictCommitTimestamps>
+  setActiveFolder: (folder: string | null) => Promise<void>
+  getState: () => Promise<GitState>
+  onStateChanged: (callback: (state: GitState) => void) => () => void
+  onCliMissing: (callback: () => void) => () => void
+  onPullAvailable: (callback: () => void) => () => void
+}
+
 export interface CoreUiApi {
   platform: string
   theme: CoreUiThemeApi
@@ -203,6 +258,7 @@ export interface CoreUiApi {
   eventBus: CoreUiEventBusApi
   search: CoreUiSearchApi
   settings: CoreUiSettingsApi
+  git: CoreUiGitApi
   minimizeWindow: () => Promise<void>
   maximizeWindow: () => Promise<void>
   closeWindow: () => Promise<void>

@@ -13,6 +13,13 @@
       "save": "Tallenna",
       "dontSave": "Älä tallenna",
       "cancel": "Peruuta"
+    },
+    "externalChange": {
+      "title": "Tiedosto muuttui levyllä",
+      "message": "”{{fileName}}” muutettiin sovelluksen ulkopuolella.",
+      "detail": "Lataa uudelleen käyttääksesi levyllä olevaa versiota tai säilytä oma versiosi ja korvaa se.",
+      "reload": "Lataa uudelleen",
+      "keepMine": "Säilytä oma versioni"
     }
   },
   "recentFilesVignette": {
@@ -341,6 +348,13 @@
       "stopServer": "Pysäytä MCP-palvelin",
       "resumeServer": "Jatka MCP-palvelinta",
       "serverStopped": "pysäytetty"
+    },
+    "git": {
+      "pushTooltip": "Työnnä repositorioon",
+      "pullTooltip": "Nouda repositoriosta",
+      "nothingToPushTooltip": "Ei muutoksia työnnettäväksi",
+      "refreshTooltip": "Tarkista työnnettävät tai vedettävät muutokset",
+      "historyTooltip": "Git-historia"
     }
   },
   "mcpToolTitles": {
@@ -410,5 +424,47 @@
   "gatedControl": {
     "proLabel": "Pro-versio",
     "subscribe": "Tilaa"
+  },
+  "git": {
+    "cliMissing": {
+      "title": "Git ei ole asennettu",
+      "body": "Asenna Git ja lisää se PATH-muuttujaan käyttääksesi Git-integraatiota."
+    },
+    "pullAvailable": {
+      "title": "Päivitys saatavilla",
+      "body": "Tästä tiedostosta on saatavilla uudempi versio tietovarastossa.",
+      "pullNow": "Noudata nyt"
+    },
+    "mergeInProgress": {
+      "title": "Keskeneräinen yhdistäminen",
+      "body": "Git-yhdistäminen aloitettiin, mutta sitä ei koskaan saatettu loppuun. Projektitiedostossa voi olla vielä ristiriitamerkintöjä.",
+      "abort": "Keskeytä yhdistäminen"
+    }
+  },
+  "pushModal": {
+    "title": "Push",
+    "languageLabel": "Commit-viestin kieli",
+    "applyLanguageByDefault": "Committien oletuskieli",
+    "titleFieldLabel": "Commitin otsikko",
+    "bodyFieldLabel": "Kuvaus",
+    "cancel": "Peruuta",
+    "push": "Push"
+  },
+  "conflictResolution": {
+    "listTitle": "Ristiriidat",
+    "userTitle": "Oma versiosi",
+    "serverTitle": "Palvelimen versio",
+    "resolvedTitle": "Ratkaistu",
+    "selectAConflict": "Valitse ristiriita ratkaistaksesi sen",
+    "useThisVersion": "Käytä tätä versiota"
+  },
+  "gitHistory": {
+    "commits": "Commitit",
+    "noCommitSelected": "Valitse commit nähdäksesi sen tiedot",
+    "author": "Tekijä",
+    "date": "Päivämäärä",
+    "hash": "Hash",
+    "parents": "Vanhemmat",
+    "recoverVersion": "Palauta tämä versio"
   }
 }

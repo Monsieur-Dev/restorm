@@ -17,7 +17,7 @@
  * "enters", so its existing focus must survive untouched.
  */
 import { useState } from 'react'
-import { describe, it, expect, afterEach, beforeAll } from 'vitest'
+import { describe, it, expect, afterEach, beforeAll, vi } from 'vitest'
 import { render, cleanup, fireEvent, waitFor } from '@testing-library/react'
 import Modal from './Modal'
 
@@ -133,5 +133,23 @@ describe('Modal — focus management', () => {
       expect(getByTestId('trigger')).toBeTruthy()
     })
     expect(document.activeElement).toBe(childB)
+  })
+})
+
+describe('closing without a transition', () => {
+  it('tears the overlay down even when transitionend never fires', async () => {
+    // jsdom runs no CSS transitions, so this is exactly the stranded case:
+    // an overlay left mounted at opacity 0 still swallows every click in
+    // the window — the app looks alive and answers nothing.
+    const onClosed = vi.fn()
+    const { rerender, queryByTestId } = render(
+      <Modal isOpen title="t" onClose={vi.fn()} onClosed={onClosed} data-testid="m">body</Modal>
+    )
+    expect(queryByTestId('m')).toBeTruthy()
+
+    rerender(<Modal isOpen={false} title="t" onClose={vi.fn()} onClosed={onClosed} data-testid="m">body</Modal>)
+
+    await waitFor(() => { expect(onClosed).toHaveBeenCalled() }, { timeout: 2000 })
+    expect(queryByTestId('m')).toBeNull()
   })
 })

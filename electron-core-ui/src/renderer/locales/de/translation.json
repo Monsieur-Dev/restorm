@@ -13,6 +13,13 @@
       "save": "Speichern",
       "dontSave": "Nicht speichern",
       "cancel": "Abbrechen"
+    },
+    "externalChange": {
+      "title": "Datei auf der Festplatte geändert",
+      "message": "„{{fileName}}“ wurde außerhalb der Anwendung geändert.",
+      "detail": "Neu laden, um die Version auf der Festplatte zu verwenden, oder Ihre Version behalten und sie überschreiben.",
+      "reload": "Neu laden",
+      "keepMine": "Meine Version behalten"
     }
   },
   "recentFilesVignette": {
@@ -341,6 +348,13 @@
       "stopServer": "MCP-Server stoppen",
       "resumeServer": "MCP-Server fortsetzen",
       "serverStopped": "gestoppt"
+    },
+    "git": {
+      "pushTooltip": "Auf das Repository pushen",
+      "pullTooltip": "Vom Repository pullen",
+      "nothingToPushTooltip": "Keine Änderungen zum Pushen",
+      "refreshTooltip": "Auf Änderungen zum Pushen oder Pullen prüfen",
+      "historyTooltip": "Git-Verlauf"
     }
   },
   "mcpToolTitles": {
@@ -410,5 +424,47 @@
   "gatedControl": {
     "proLabel": "Pro-Version",
     "subscribe": "Abonnieren"
+  },
+  "git": {
+    "cliMissing": {
+      "title": "Git ist nicht installiert",
+      "body": "Installieren Sie Git und fügen Sie es Ihrem PATH hinzu, um die Git-Integration zu nutzen."
+    },
+    "pullAvailable": {
+      "title": "Aktualisierung verfügbar",
+      "body": "Eine neuere Version dieser Datei ist im Repository verfügbar.",
+      "pullNow": "Jetzt abrufen"
+    },
+    "mergeInProgress": {
+      "title": "Unvollendete Zusammenführung",
+      "body": "Eine Git-Zusammenführung wurde begonnen und nie abgeschlossen. Die Projektdatei enthält möglicherweise noch Konfliktmarkierungen.",
+      "abort": "Zusammenführung abbrechen"
+    }
+  },
+  "pushModal": {
+    "title": "Push",
+    "languageLabel": "Sprache der Commit-Nachricht",
+    "applyLanguageByDefault": "Standardsprache für Commits",
+    "titleFieldLabel": "Commit-Titel",
+    "bodyFieldLabel": "Beschreibung",
+    "cancel": "Abbrechen",
+    "push": "Push"
+  },
+  "conflictResolution": {
+    "listTitle": "Konflikte",
+    "userTitle": "Ihre Version",
+    "serverTitle": "Serverversion",
+    "resolvedTitle": "Gelöst",
+    "selectAConflict": "Wählen Sie einen Konflikt aus, um ihn zu lösen",
+    "useThisVersion": "Diese Version verwenden"
+  },
+  "gitHistory": {
+    "commits": "Commits",
+    "noCommitSelected": "Wählen Sie einen Commit aus, um Details anzuzeigen",
+    "author": "Autor",
+    "date": "Datum",
+    "hash": "Hash",
+    "parents": "Eltern-Commits",
+    "recoverVersion": "Diese Version wiederherstellen"
   }
 }

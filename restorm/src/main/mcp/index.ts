@@ -27,7 +27,8 @@ import { registerScenarioRunTools } from './tools/scenarioRun'
 import { registerScenarioEngineTools } from './tools/scenarioEngineTools'
 import { installScenarioEngineIPC } from '../scenarioEngine/ipcBridge'
 import { registerResources } from './resources'
-import { createMcpProGate, MCP_PRO_CAPABILITY } from './mcpProGate'
+import { registerGitTools } from './tools/git'
+import { createMcpProGate } from './mcpProGate'
 import { getEntitlementService } from '../services/auth/authComposition'
 import { hasCapability } from '../../shared/auth/authState'
 import { resolveChannel } from '../../shared/config/backend'
@@ -35,21 +36,24 @@ import { pricingUrl } from '../../shared/config/site'
 
 export function registerRestormMcp(mcp: McpService, instanceHost: InstanceLifecycleHost): void {
   registerActiveStateBridge()
-  // Per-tool Pro gate: the request-driving tools stay free, the advanced tools
-  // (scenarios, capture, UI automation, multi-instance) refuse at call time
-  // without the live `mcp.pro` capability. The capability is read lazily on each
-  // call (the EntitlementService is initialized before any tool can run, and the
-  // entitlement flips live on login/logout/refresh). The refusal's upgrade URL is
-  // channel-resolved (dev site on preview builds, restorm.app on release) from
-  // the same `pricingUrl` source the renderer's upsell link uses.
+  // Per-tool capability gate: the request-driving tools stay free, the
+  // advanced tools (scenarios, capture, UI automation, multi-instance)
+  // require `mcp.pro`, and the git routes require `git.client` — see
+  // `mcpProGate.ts`'s `TOOL_CAPABILITY` map for which tool needs which. Each
+  // tool's specific capability is read lazily on every call (the
+  // EntitlementService is initialized before any tool can run, and the
+  // entitlement flips live on login/logout/refresh). The refusal's upgrade
+  // URL is channel-resolved (dev site on preview builds, restorm.app on
+  // release) from the same `pricingUrl` source the renderer's upsell link
+  // uses.
   mcp.setToolGate(
     createMcpProGate({
-      hasProCapability: () => {
+      hasCapability: (capability) => {
         // Fail closed to community if the entitlement service isn't ready (never
         // let a gate read crash a tool call); in production it's initialized at
         // boot before any tool can run.
         try {
-          return hasCapability(getEntitlementService().getState(), MCP_PRO_CAPABILITY)
+          return hasCapability(getEntitlementService().getState(), capability)
         } catch {
           return false
         }
@@ -71,6 +75,7 @@ export function registerRestormMcp(mcp: McpService, instanceHost: InstanceLifecy
   registerScenarioTools(mcp)
   registerScenarioRunTools(mcp)
   registerScenarioEngineTools(mcp)
+  registerGitTools(mcp)
   installScenarioEngineIPC()
   registerResources(mcp)
 }

@@ -12,6 +12,10 @@ export interface BreadcrumbItem {
   label: string
   /** Optional icon to display before the label */
   icon?: Icon | null
+  /** Arbitrary node rendered before the label (after `icon`) — e.g. a
+   * host-supplied badge capsule next to the entity name. Currently honoured
+   * in `plain` mode only. */
+  prefix?: React.ReactNode
 }
 
 export interface BreadcrumbProps {
@@ -65,6 +69,16 @@ export interface BreadcrumbProps {
    */
   allNavigable?: boolean
   /**
+   * Static, display-only mode: every item renders as a plain label —
+   * no link buttons (so no underline), no hover affordance, no editable
+   * last item, no click/aux-click callbacks. For read-only contexts where
+   * the breadcrumb only SITUATES something (e.g. a conflict-resolution
+   * header band) rather than navigating. Mutually exclusive with the
+   * interactive props (`onItemClick`, `canEditName`, `canEditIcon`, …).
+   * @default false
+   */
+  plain?: boolean
+  /**
    * Show the root item even when it's the only item (normally hidden).
    * @default false
    */
@@ -90,6 +104,7 @@ const BreadcrumbInner: React.FC<BreadcrumbProps> = ({
   canEditIcon = false,
   canEditName = false,
   allNavigable = false,
+  plain = false,
   showRoot: _showRoot = false,
   className,
   style,
@@ -118,6 +133,26 @@ const BreadcrumbInner: React.FC<BreadcrumbProps> = ({
     <nav className={rootClasses} style={style} aria-label={ariaLabel ?? 'Breadcrumb'} data-testid={dataTestId}>
       <ol className="ecui-breadcrumb-list">
         {items.map((item, index) => {
+          // Plain mode: static labels only, separators included — no
+          // Buttons (no underline), no EditableLabel, no callbacks.
+          if (plain) {
+            const isLastPlain = index === items.length - 1
+            return (
+              <li key={item.id} className="ecui-breadcrumb-item">
+                <span className={isLastPlain ? 'ecui-breadcrumb-plain-item ecui-breadcrumb-plain-item--current' : 'ecui-breadcrumb-plain-item'}>
+                  {item.prefix}
+                  {renderIcon(item.icon)}
+                  {item.label}
+                </span>
+                {index < items.length - 1 ? (
+                  <span className="ecui-breadcrumb-separator" aria-hidden="true">
+                    <i className="codicon codicon-chevron-right" />
+                  </span>
+                ) : null}
+              </li>
+            )
+          }
+
           // In `allNavigable` mode every item — even the last — is
           // treated as an ancestor-style clickable link. Use this when
           // the current page is rendered separately (e.g. as an H1

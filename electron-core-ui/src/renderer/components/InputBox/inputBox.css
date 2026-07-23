@@ -18,6 +18,12 @@
 .inputbox > .ibwrapper {
 	position: relative;
 	width: 100%;
+
+	/* A scrolling textarea child is composited on its own layer; at fractional
+	 * display scales its painted background can round up to 1px outside its
+	 * box and cover the container's top border while scrolled. Clipping the
+	 * wrapper keeps the border visible in every scroll position. */
+	overflow: hidden;
 }
 
 .inputbox > .ibwrapper > .input {
@@ -69,6 +75,13 @@
 	scrollbar-color: var(--scrollbarSlider-background) transparent;
 	overflow-y: auto;
 	overflow-x: hidden;
+
+	/* Fractional-scale layouts can land the textarea's border-box half a
+	 * device pixel over the container's 1px top border; once the content
+	 * scrolls, its paint hides that border. A 1px inset keeps the scrolling
+	 * box strictly inside the border in every scroll position. */
+	margin-top: 1px;
+	margin-bottom: 1px;
 }
 
 .inputbox > .ibwrapper > textarea.input[style*="min-height"]::-webkit-scrollbar,

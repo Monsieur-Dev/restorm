@@ -282,6 +282,42 @@ jobs:
           docker cp kafka-seed.sh restorm-kafka:/kafka-seed.sh
           docker exec restorm-kafka /bin/sh /kafka-seed.sh
 
+      - name: Start git server (git daemon)
+        # Unauthenticated `git daemon` on :9418, mirroring
+        # tests/docker/docker-compose.yml. Alpine splits `git daemon` into its
+        # own `git-daemon` apk package — the base `git` package does not
+        # include it. Bind-mounts the SAME repos dir gitServerSeed.ts seeds
+        # host-side for local runs; not seeded with a full project here (this
+        # job only runs the vitest integration suite, not Playwright e2e —
+        # the local pre-push / ship.sh gate) — but DOES `git init --bare` an
+        # empty `healthcheck.git` so the wait-for-services check below can do
+        # a real `git ls-remote` (protocol-level, not just TCP-open — a cold
+        # `apk add` start has the port bound before git-daemon is actually
+        # ready to speak the protocol).
+        run: |
+          cd restorm/tests/docker
+          mkdir -p git-server/repos
+          git init --bare -b main git-server/repos/healthcheck.git
+          # `apk add` runs at container start and is the one network-flaky
+          # step — retry it in a loop instead of dying on the first miss.
+          docker run -d --name restorm-git-server -p 9418:9418 \
+            -v "$(pwd)/git-server/repos:/srv/git" \
+            alpine:3.19 \
+            sh -c "until apk add --no-cache git-daemon; do echo 'apk retry…'; sleep 2; done && git config --global --add safe.directory '*' && exec git daemon --base-path=/srv/git --export-all --enable=receive-pack --reuseaddr --informative-errors --verbose"
+          # Bounded readiness wait + UNCONDITIONAL container log dump: if the
+          # daemon still isn't up, the next run's logs say exactly why
+          # (apk failure, daemon exit, …) instead of a silent probe timeout.
+          for i in $(seq 1 45); do
+            if git ls-remote git://localhost:9418/healthcheck.git >/dev/null 2>&1; then
+              echo "git daemon ready after $((i*2))s"; break
+            fi
+            sleep 2
+          done
+          echo "--- restorm-git-server container logs ---"
+          docker logs restorm-git-server 2>&1 | tail -40 || true
+          echo "--- container state ---"
+          docker inspect -f '{{.State.Status}} {{.State.ExitCode}}' restorm-git-server || true
+
       - name: Wait for services
         run: |
           cd restorm

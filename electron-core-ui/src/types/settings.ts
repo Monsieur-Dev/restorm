@@ -54,6 +54,17 @@ export interface SettingDefinition {
    * `false`: every setting is workspace-overridable unless flagged.
    */
   userOnly?: boolean | undefined
+  /**
+   * Capability id that gates this setting via the host's entitlement
+   * system — distinct from `feature` above (an environment-driven
+   * feature flag that HIDES the setting when off). When set, and the
+   * host's `SettingsProvider`/`ElectronCoreUiProvider` `capabilityGate`
+   * prop reports it locked, the setting's control renders greyed through
+   * `GatedControl` with an upsell instead of being hidden — a locked
+   * setting stays VISIBLE, matching the rest of the app's "visible but
+   * disabled" gating convention (`GatedControl`'s own contract).
+   */
+  capability?: string | undefined
 }
 
 // ==========================================================================
@@ -118,4 +129,24 @@ export function isSettingItem(item: SettingsGroupItem): item is { setting: Setti
 
 export function isGroupItem(item: SettingsGroupItem): item is { group: SettingsGroup } {
   return 'group' in item
+}
+
+// ==========================================================================
+// Storage keys
+// ==========================================================================
+
+/**
+ * The canonical storage-key format: `<group1>.<group2>.<groupN>:<settingId>`
+ * — a flat (single-level) group produces just `<groupId>:<settingId>`.
+ * `SettingsService.buildStorageKey` (main process) delegates to this
+ * exact function; any renderer code that needs to read/write a setting
+ * outside the `useSetting()`/YAML-driven path (e.g. a host hook that
+ * hardcodes a settings key, like `usePushModal.ts`'s Push-modal
+ * settings) MUST use this too rather than re-deriving the format by
+ * hand — a hand-rolled key that doesn't match what the registered YAML
+ * setting resolves to silently reads/writes a DIFFERENT storage entry
+ * than the one the visible Settings UI row uses.
+ */
+export function buildSettingsStorageKey(groupPath: string[], settingId: string): string {
+  return groupPath.length > 0 ? `${groupPath.join('.')}:${settingId}` : settingId
 }

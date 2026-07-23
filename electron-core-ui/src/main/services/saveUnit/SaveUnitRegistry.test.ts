@@ -419,3 +419,31 @@ describe('SaveUnitRegistry', () => {
     })
   })
 })
+
+describe('a relocation whose document is unchanged', () => {
+  it('stays dirty after a mutate that sees no content change', () => {
+    // Dragging an item into another folder changes WHERE it lives, not
+    // what it contains. The upsert that follows therefore passes an
+    // identical document, and `mutate` reads that as an undo and drops
+    // the draft — leaving the project "saved" while the item sits
+    // somewhere else, so the move is lost on close. `move` is what
+    // records the relocation.
+    const reg = new SaveUnitRegistry()
+    reg.hydrate({ runtimeId: 'req', kind: 'file', reference: { name: 'Find pet' }, parentId: 'folder-a' })
+
+    reg.mutate('req', { name: 'Find pet' })
+    expect(reg.isDirty('req')).toBe(false)
+
+    reg.move('req', 'folder-b')
+    expect(reg.isDirty('req')).toBe(true)
+  })
+
+  it('no-ops when the parent did not actually change', () => {
+    const reg = new SaveUnitRegistry()
+    reg.hydrate({ runtimeId: 'req', kind: 'file', reference: { name: 'Find pet' }, parentId: 'folder-a' })
+
+    reg.move('req', 'folder-a')
+
+    expect(reg.isDirty('req')).toBe(false)
+  })
+})

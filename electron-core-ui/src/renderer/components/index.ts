@@ -88,7 +88,8 @@ export { FirewallPanel, useFirewallControl, refreshFirewallControl, useFirewallP
 export type { FirewallPanelProps } from './Firewall'
 
 // Settings exports
-export { SettingsPage, SettingsModalProvider, useSettingsModal } from './Settings'
+export { SettingsPage, SettingsModalProvider, useSettingsModal, AVAILABLE_LANGUAGES } from './Settings'
+export type { AvailableLanguage } from './Settings'
 
 // Toggle exports
 export { Toggle, defaultToggleStyles, starLottieAnimationData } from './Toggle/index'
@@ -220,8 +221,8 @@ export { SearchBar } from './SearchBar/index'
 export type { SearchBarProps } from './SearchBar/index'
 
 // Statusbar exports
-export { Statusbar, StatusbarElement, StatusbarMcpIndicator, useStatusbarTooltip } from './Statusbar/index'
-export type { StatusbarProps, StatusbarElementProps, StatusbarMcpIndicatorProps, StatusbarTooltipContextValue } from './Statusbar/index'
+export { Statusbar, StatusbarElement, StatusbarMcpIndicator, StatusbarGitIndicator, useStatusbarTooltip } from './Statusbar/index'
+export type { StatusbarProps, StatusbarElementProps, StatusbarMcpIndicatorProps, StatusbarGitIndicatorProps, StatusbarTooltipContextValue } from './Statusbar/index'
 
 // Tooltip exports
 export { Tooltip } from './Tooltip/index'
@@ -277,6 +278,12 @@ export {
 export type { Tab, TabsProps } from './Tabs'
 export { Modal } from './Modal'
 export type { ModalProps } from './Modal'
+export { PushModal } from './PushModal'
+export type { PushModalProps, PushModalLanguageOption } from './PushModal'
+export { ConflictResolutionView, fieldDiffStyle, ReadOnlyOverlay } from './ConflictResolutionView'
+export { GitHistoryView, computeLaneLayout } from './GitHistoryView'
+export type { GitHistoryViewProps, GitHistoryCommit, LaneRow } from './GitHistoryView'
+export type { ConflictResolutionViewProps, ConflictListEntry, ReadOnlyOverlayProps } from './ConflictResolutionView'
 export type { MarkdownEditorProps } from './MarkdownEditor/MarkdownEditor'
 export type { MarkdownViewerProps } from './MarkdownViewer/MarkdownViewer'
 export type { WorkbenchProps } from './Workbench/Workbench'

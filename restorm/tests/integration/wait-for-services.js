@@ -7,6 +7,7 @@
 
 const http = require('http')
 const net = require('net')
+const { execSync } = require('child_process')
 
 const SERVICES = [
   { name: 'Petstore', url: 'http://localhost:8080/api/pet/findByStatus?status=available' },
@@ -56,13 +57,30 @@ const SERVICES = [
   // Kafka speaks its own wire protocol on 9092 — not HTTP, so probe the raw
   // TCP port. The `kafka-seed` one-shot job (topic + 3 messages) runs after
   // the broker's own compose healthcheck, independent of this poll.
-  { name: 'Kafka', tcp: { host: 'localhost', port: 9092 } }
+  { name: 'Kafka', tcp: { host: 'localhost', port: 9092 } },
+  // Git server (git daemon): a raw TCP-open check would be a FALSE positive
+  // here — the container's `apk add git-daemon` step runs on every start, so
+  // the port can be bound by a launching (not-yet-serving) process before
+  // git-daemon itself is actually speaking the protocol (the exact "TCP-open
+  // != protocol-ready on a cold broker" trap). `git ls-remote` against the
+  // empty `healthcheck.git` the CI step `git init --bare`'d is a real
+  // protocol-level round-trip: it only succeeds once git-daemon is actually
+  // parsing requests and serving that repo.
+  { name: 'Git server (git daemon)', cmd: 'git ls-remote git://localhost:9418/healthcheck.git' }
 ]
 
 const MAX_RETRIES = 60
 const RETRY_DELAY = 2000
 
 async function checkService(service) {
+  if (service.cmd) {
+    try {
+      execSync(service.cmd, { stdio: 'ignore', timeout: 5000 })
+      return true
+    } catch {
+      return false
+    }
+  }
   if (service.tcp) {
     return new Promise((resolve) => {
       const socket = net.connect(service.tcp.port, service.tcp.host)

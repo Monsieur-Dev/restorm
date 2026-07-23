@@ -2,6 +2,7 @@ import React, { type CSSProperties, useEffect, useMemo, useRef, useState, useCal
 import { useRequestReset } from '../../hooks/useRequestReset'
 import { useTransportReplaced } from '../../hooks/useTransportReplaced'
 import { getRequestPanelState, setRequestPanelCollapsed } from '../../services/requestPanelStateStore'
+import { computeInitialPanelCollapsed } from './conflictPanelExpansion'
 import { useTranslation } from 'react-i18next'
 import { useHandlebarsHelpers } from '../../hooks/useHandlebarsHelpers'
 import {
@@ -15,13 +16,16 @@ import {
   eventBus,
   logger,
   getContrastColor,
+  fieldDiffStyle,
   type VariableDefinition,
   type ISelectOptionItem,
-  type ISelectData
+  type ISelectData,
+  type Tab
 } from 'electron-core-ui/renderer'
 import { DocumentEvents, type RequestHistoryEventPayload } from '../../services/DocumentEvents'
 import { RestormVariableInputBox } from '../RestormVariableInputBox'
 import { RestormKeyValueTable, type KeyValueTableHandle } from '../RestormKeyValueTable'
+import type { EntityFieldDiff } from '../../services/conflictFieldDiff'
 import type { HTTPRequest, HTTPResponse, HTTPMethod, KeyValue, ResponseHistoryDetail, AuthenticationRequest } from '../../../../shared/types/collections'
 import { isAuthenticationRequest } from '../../../../shared/types/collections'
 import { StringValue } from '../../../../shared/types/collections'
@@ -62,11 +66,60 @@ const requestOptionsRowStyle: CSSProperties = { display: 'flex', alignItems: 'ce
 const timeoutFieldStyle: CSSProperties = { display: 'flex', alignItems: 'center', gap: 6 }
 const timeoutLabelStyle: CSSProperties = { color: 'var(--descriptionForeground)', whiteSpace: 'nowrap' }
 
+/** Coarse, whole-section conflict border (AC#4) for a list-shaped Pane
+ * (headers / params / pathParams / body / producedHeaders) — bordering the
+ * Pane's content wrapper rather than diffing per-row, per the ticket's
+ * own "URL differs → border URL input" granularity example (discrete
+ * inputs only; list sections are all-or-nothing). */
+function sectionDiffWrapperStyle(differs: boolean): CSSProperties {
+  return { height: '100%', boxSizing: 'border-box', border: '2px solid transparent', ...fieldDiffStyle(differs) }
+}
+
 export interface HTTPRequestTabViewProps {
   /** An HTTPRequest or an AuthenticationRequest. The latter inherits
    * every HTTP field but adds a Configuration tab surfaced via
    * `additionalRequestTabs`. */
   request: HTTPRequest | AuthenticationRequest
+  /** Conflict-resolution field-diff (AC#4/#5) — `computeEntityFieldDiff`'s
+   * result for this request, computed once per conflict by
+   * `GitConflictResolutionModal` and passed to every panel identically.
+   * Red-borders the differing discrete inputs (url/method/notes/auth
+   * config) and coarse-borders the differing list sections (headers/
+   * params/pathParams/body) as a whole. Only ever set by
+   * `ConflictEntityPanel`; `undefined` in the live (non-conflict) editor. */
+  conflictFieldDiff?: EntityFieldDiff
+  /** Conflict resolution: restrict the request-side tab strip to these
+   * ids (forwarded verbatim to `BaseRequestTabView`). */
+  conflictVisibleTabIds?: string[]
+  /** Conflict resolution: extra tabs appended to the strip (the contested
+   * tag list), forwarded verbatim to `BaseRequestTabView`. */
+  conflictExtraTabs?: Tab[]
+  /** The diff's per-section booleans, used ONLY for the initial
+   * expand/collapse of the KV sections (differing sections open, identical
+   * ones closed). Passed to ALL THREE conflict columns — unlike
+   * `conflictFieldDiff`, which also paints red borders and is therefore
+   * kept off the editable resolved panel — so the columns stay visually
+   * aligned section-for-section. */
+  conflictPanelFields?: Record<string, boolean>
+  /** Preselects the tab holding the conflicting field (AC#5) — forwarded
+   * to `BaseRequestTabView`'s `defaultActiveTabId`. */
+  defaultActiveTabId?: string
+  /** Fully-controlled request-side tab pair, forwarded verbatim to
+   * `BaseRequestTabView`. The conflict panels use it to mirror the tab
+   * selection across the three columns — any column's strip drives it
+   * (`ReadOnlyOverlay` lets tab clicks through as navigation). */
+  activeRequestTabId?: string
+  onRequestTabChange?: (tabId: string) => void
+  /** Hides the (non-editable, generated) Code Snippets tab — AC#5's "HIDE
+   * non-editable tabs". Defaults to `true` (visible) for the live editor;
+   * the conflict panel passes `false`. */
+  showCodeSnippets?: boolean
+  /** Blanket conflict-mode safety rule (AC#2/#5, see
+   * `conflictSafeLiveState.ts`): forces the server-mode `isListening` beam
+   * to `false` and skips the live progress/served-count subscription — a
+   * conflict panel is a static historical snapshot, never a live mock
+   * server. Only meaningful when `request.server === true`. */
+  conflictMode?: boolean
 }
 
 function buildRequestBodyFromHistory(body: { type: string; content?: string; path?: string; fields?: { key: string; value: string; enabled?: boolean }[] } | undefined): HTTPResponse['requestBody'] {
@@ -117,8 +170,18 @@ function getBodyFilePath(request: HTTPRequest | AuthenticationRequest): string {
 }
 
 export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
-  request
+  request,
+  conflictFieldDiff,
+  conflictVisibleTabIds,
+  conflictExtraTabs,
+  conflictPanelFields,
+  defaultActiveTabId,
+  activeRequestTabId,
+  onRequestTabChange,
+  showCodeSnippets = true,
+  conflictMode
 }) => {
+  const conflictFields = conflictFieldDiff?.fields
   const [historyModalOpen, setHistoryModalOpen] = useState(false)
   const { t } = useTranslation()
   // `projectUuid` lives on the EnvironmentContext (mirrored from the
@@ -203,12 +266,16 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
     body: boolean
   }>(() => {
     const seed = (projectUuid ? getRequestPanelState(projectUuid, request.id) : undefined) ?? {}
-    return {
-      headers: typeof seed['headers'] === 'boolean' ? seed['headers'] : request.headers.length === 0,
-      pathParams: typeof seed['pathParams'] === 'boolean' ? seed['pathParams'] : (request.pathParams?.length ?? 0) === 0,
-      params: typeof seed['params'] === 'boolean' ? seed['params'] : request.params.length === 0,
-      body: typeof seed['body'] === 'boolean' ? seed['body'] : false
-    }
+    return computeInitialPanelCollapsed(
+      seed,
+      {
+        headers: request.headers.length === 0,
+        pathParams: (request.pathParams?.length ?? 0) === 0,
+        params: request.params.length === 0,
+        body: false
+      },
+      conflictPanelFields ?? conflictFieldDiff?.fields
+    )
   })
   const handlePanelCollapsedChange = useCallback((arr: boolean[]) => {
     // SplitView fires this with the array in pane render order:
@@ -860,7 +927,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
   // file close / quit; the promise resolves when the route stops.
   const handleListen = useCallback((): void => {
     const requestId = request.id
-    if (!requestId || isListening) return
+    if (!requestId || isListening || conflictMode) return
     setServedCount(0)
     void window.restorm?.http.listen(requestId)
       .then((res) => {
@@ -870,15 +937,17 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
         }
       })
       .catch((err: unknown) => { logger.error('HTTP mock server listen error', { error: String(err) }) })
-  }, [request.id, isListening, t])
+  }, [request.id, isListening, conflictMode, t])
 
   const handleStop = useCallback((): void => {
     void window.restorm?.http.stop(request.id)
   }, [request.id])
 
-  // Track listening state + served count for the hosted mock route.
+  // Track listening state + served count for the hosted mock route. Skipped
+  // entirely in conflict mode (see `conflictSafeLiveState.ts`) — a static
+  // historical snapshot must never pick up another tab's live mock state.
   useEffect(() => {
-    if (!isServer) return undefined
+    if (!isServer || conflictMode) return undefined
     const requestId = request.id
     let cancelled = false
     void window.restorm?.http.isListening(requestId).then((listening) => {
@@ -894,7 +963,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
       setServedCount(count)
     })
     return () => { cancelled = true; unsubProgress?.(); unsubServed?.() }
-  }, [isServer, request.id])
+  }, [isServer, request.id, conflictMode])
 
   // Request content (SplitView with Panes). Every Pane provides an
   // explicit `collapsed` from `panelCollapsed` → SplitView runs in
@@ -931,6 +1000,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
             />
           )}
         >
+          <div style={sectionDiffWrapperStyle(!!conflictFields?.['headers'])}>
           <RestormKeyValueTable
             key={`headers-${transportEpoch}`}
             ref={headersParamsRef}
@@ -941,7 +1011,9 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
             persistenceId={`http-headers:${request.id}`}
             data-testid="http-request-headers-table"
             disabled={configLocked}
+            {...(conflictFieldDiff?.rowDiffs?.['headers'] ? { highlightRowKeys: conflictFieldDiff.rowDiffs['headers'] } : {})}
           />
+          </div>
         </Pane>
         <Pane
           title={t('requestTab.tabs.pathParams')}
@@ -964,6 +1036,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
             />
           )}
         >
+          <div style={sectionDiffWrapperStyle(!!conflictFields?.['pathParams'])}>
           <RestormKeyValueTable
             key={`pathParams-${transportEpoch}`}
             ref={pathParamsRef}
@@ -974,7 +1047,9 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
             persistenceId={`http-path-params:${request.id}`}
             data-testid="http-request-path-params-table"
             disabled={configLocked}
+            {...(conflictFieldDiff?.rowDiffs?.['pathParams'] ? { highlightRowKeys: conflictFieldDiff.rowDiffs['pathParams'] } : {})}
           />
+          </div>
         </Pane>
         <Pane
           title={t('requestTab.tabs.params')}
@@ -997,6 +1072,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
             />
           )}
         >
+          <div style={sectionDiffWrapperStyle(!!conflictFields?.['params'])}>
           <RestormKeyValueTable
             key={`params-${transportEpoch}`}
             ref={queryParamsRef}
@@ -1007,7 +1083,9 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
             persistenceId={`http-query-params:${request.id}`}
             data-testid="http-request-query-params-table"
             disabled={configLocked}
+            {...(conflictFieldDiff?.rowDiffs?.['params'] ? { highlightRowKeys: conflictFieldDiff.rowDiffs['params'] } : {})}
           />
+          </div>
         </Pane>
         <Pane
           title={t('requestTab.tabs.body')}
@@ -1015,6 +1093,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
           collapsed={panelCollapsed.body}
           data-testid="http-request-body-pane"
         >
+          <div style={sectionDiffWrapperStyle(!!conflictFields?.['body'])}>
           <HTTPRequestBodySection
             bodyMode={bodyMode}
             onBodyModeChange={setBodyMode}
@@ -1028,6 +1107,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
             helpers={handlebarsHelpers}
             disabled={configLocked}
           />
+          </div>
         </Pane>
       </SplitView>
     </div>
@@ -1078,7 +1158,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
         />
       )}
     <ControlGroup data-testid="http-request-url-section">
-      <div style={methodSelectWrapperStyle}>
+      <div style={{ ...methodSelectWrapperStyle, boxSizing: 'border-box', border: '1px solid transparent', ...fieldDiffStyle(!!conflictFields?.['method']) }}>
         <SelectBox
           id="http-method-select"
           className=""
@@ -1118,7 +1198,12 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
         </>
       ) : (
         <HeaderHoverTooltip label={resolvedUrl || url} suppressed={!(resolvedUrl || url)} className="url-container-stretch">
-          <div style={urlInputWrapperStyle} data-testid="url-container" data-url-resolved={resolvedUrl ? 'true' : 'false'} data-resolved-url={resolvedUrl || url}>
+          <div
+            style={{ ...urlInputWrapperStyle, boxSizing: 'border-box', border: '1px solid transparent', ...fieldDiffStyle(!!conflictFields?.['url']) }}
+            data-testid="url-container"
+            data-url-resolved={resolvedUrl ? 'true' : 'false'}
+            data-resolved-url={resolvedUrl || url}
+          >
             <RestormVariableInputBox
               value={url}
               onChange={(value: string) => { setUrl(value) }}
@@ -1136,6 +1221,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
           <Button
             icon={isListening ? 'debug-disconnect' : 'plug'}
             onClick={isListening ? handleStop : handleListen}
+            disabled={!!conflictMode}
             {...(isListening ? {} : { emphasis: 1 })}
             options={{
               title: isListening ? t('http.server.stopListening') : t('http.server.startListening'),
@@ -1217,7 +1303,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
         id: 'configuration',
         label: t('authRequestTab.tabs.configuration', 'Configuration'),
         useScrollableElement: false,
-        content: <AuthenticationConfigurationTab request={request} />
+        content: <AuthenticationConfigurationTab request={request} {...(conflictFields ? { fieldDiff: conflictFields } : {})} />
       }]
     : undefined
 
@@ -1240,6 +1326,8 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
   return (
     <>
       <BaseRequestTabView
+        {...(conflictVisibleTabIds ? { visibleRequestTabIds: conflictVisibleTabIds } : {})}
+        {...(conflictExtraTabs ? { extraRequestTabs: conflictExtraTabs } : {})}
         requestId={request.id}
         urlSection={urlSection}
         requestContent={requestContent}
@@ -1253,6 +1341,11 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
         responseContent={isServer ? serverResponseContent : responseContent}
         jsonData={isServer ? undefined : jsonData}
         {...(additionalRequestTabs ? { additionalRequestTabs } : {})}
+        showCodeSnippets={showCodeSnippets}
+        notesDiffers={!!conflictFields?.['notes']}
+        {...(defaultActiveTabId !== undefined ? { defaultActiveTabId } : {})}
+        {...(activeRequestTabId !== undefined ? { activeRequestTabId } : {})}
+        {...(onRequestTabChange !== undefined ? { onRequestTabChange } : {})}
       />
       <ResponseHistoryModal
         isOpen={historyModalOpen}

@@ -13,6 +13,13 @@
       "save": "Save",
       "dontSave": "Don't Save",
       "cancel": "Cancel"
+    },
+    "externalChange": {
+      "title": "File changed on disk",
+      "message": "\"{{fileName}}\" was modified outside the application.",
+      "detail": "Reload to use the version on disk, or keep your version and overwrite it.",
+      "reload": "Reload",
+      "keepMine": "Keep my version"
     }
   },
   "recentFilesVignette": {
@@ -341,6 +348,13 @@
       "stopServer": "Stop MCP server",
       "resumeServer": "Resume MCP server",
       "serverStopped": "stopped"
+    },
+    "git": {
+      "pushTooltip": "Push to the repository",
+      "pullTooltip": "Pull from the repository",
+      "nothingToPushTooltip": "No changes to push",
+      "refreshTooltip": "Check for changes to push or pull",
+      "historyTooltip": "Git history"
     }
   },
   "mcpToolTitles": {
@@ -410,5 +424,47 @@
   "gatedControl": {
     "proLabel": "Pro version",
     "subscribe": "Subscribe"
+  },
+  "git": {
+    "cliMissing": {
+      "title": "Git isn't installed",
+      "body": "Install git and add it to your PATH to use the Git integration."
+    },
+    "pullAvailable": {
+      "title": "Update available",
+      "body": "A newer version of this file is available on the repository.",
+      "pullNow": "Pull now"
+    },
+    "mergeInProgress": {
+      "title": "Unfinished merge",
+      "body": "A Git merge was started and never finished. The project file may still contain conflict markers.",
+      "abort": "Abort the merge"
+    }
+  },
+  "pushModal": {
+    "title": "Push",
+    "languageLabel": "Commit message language",
+    "applyLanguageByDefault": "Default commit language",
+    "titleFieldLabel": "Commit title",
+    "bodyFieldLabel": "Description",
+    "cancel": "Cancel",
+    "push": "Push"
+  },
+  "conflictResolution": {
+    "listTitle": "Conflicts",
+    "userTitle": "Your version",
+    "serverTitle": "Server version",
+    "resolvedTitle": "Resolved",
+    "selectAConflict": "Select a conflict to resolve it",
+    "useThisVersion": "Use this version"
+  },
+  "gitHistory": {
+    "commits": "Commits",
+    "noCommitSelected": "Select a commit to see its details",
+    "author": "Author",
+    "date": "Date",
+    "hash": "Hash",
+    "parents": "Parents",
+    "recoverVersion": "Recover this version"
   }
 }

@@ -82,6 +82,38 @@ each re-indexed sibling — goes through `atomicWriteFile()`: serialize
 to `<target>.<uuid>.tmp` adjacent to the target, then `fs.rename` into
 place. A crash mid-write leaves the previous target intact.
 
+### Files rewritten outside the app
+
+`FileService` keeps a SHA-1 digest of the bytes it last read from — or
+wrote to — the open file (`diskDigest`, refreshed by `open()`,
+`save()` and `saveAs()`). `hasExternalChange()` re-reads the file and
+compares; anything else on disk means a third party rewrote it.
+
+The case that matters is a `git checkout` / `git pull` run from a
+terminal while the project is open. The in-memory tree still holds the
+pre-checkout content and autosave fires about a second later, so
+without a guard the checkout is silently undone on disk.
+
+`save()` therefore refuses to write when `hasExternalChange()` is true,
+returns `false`, and broadcasts **`file:externally-changed`** exactly
+once per divergence (a per-second autosave must not re-prompt every
+tick). The app resolves it either way:
+
+| Resolution | Call | Effect |
+| --- | --- | --- |
+| Use the version on disk | re-open the path | the normal file-open path re-hydrates and re-baselines the digest |
+| Keep the in-memory version | `acceptExternalChange()` then save | re-baselines on the new bytes so the ordinary save overwrites them |
+| — | `save(content, { force: true })` | same overwrite in one call, for callers that own the save themselves |
+
+Both paths re-arm the guard, so a *second* external rewrite prompts
+again. Folder mode leaves `diskDigest` null (no single file to digest),
+which makes the guard inert there.
+
+Renderer surface: `useFileExternallyChanged(cb)` subscribes to the
+broadcast; `useFileService()` exposes `showExternalChangeDialog()` (a
+native message box — the decision is about whose work survives, so it
+must be impossible to click past) and `acceptExternalChange()`.
+
 ### Reorder cascade
 
 When siblings are reordered, every affected unit's counter flips — so

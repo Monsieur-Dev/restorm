@@ -395,6 +395,36 @@ const typespecImportTestDir = defineBddConfig({
   outputDir: '.features-gen/typespec-import'
 })
 
+const gitStatusTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/git-status/features/**/*.feature',
+  steps: ['tests/e2e/bdd/git-status/steps/**/*.ts', 'tests/e2e/bdd/fixtures/git-integration.fixture.ts'],
+  outputDir: '.features-gen/git-status'
+})
+
+const gitPushPullTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/git-push-pull/features/**/*.feature',
+  steps: ['tests/e2e/bdd/git-push-pull/steps/**/*.ts', 'tests/e2e/bdd/fixtures/git-integration.fixture.ts'],
+  outputDir: '.features-gen/git-push-pull'
+})
+
+const gitConflictTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/git-conflict/features/**/*.feature',
+  steps: ['tests/e2e/bdd/git-conflict/steps/**/*.ts', 'tests/e2e/bdd/fixtures/git-integration.fixture.ts'],
+  outputDir: '.features-gen/git-conflict'
+})
+
+const gitCollabTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/git-collab/features/**/*.feature',
+  steps: ['tests/e2e/bdd/git-collab/steps/**/*.ts', 'tests/e2e/bdd/fixtures/git-collab.fixture.ts'],
+  outputDir: '.features-gen/git-collab'
+})
+
+const gitMcpTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/git-mcp/features/**/*.feature',
+  steps: ['tests/e2e/bdd/git-mcp/steps/**/*.ts', 'tests/e2e/bdd/fixtures/git-mcp.fixture.ts'],
+  outputDir: '.features-gen/git-mcp'
+})
+
 /**
  * Playwright configuration for Electron E2E tests using playwright-bdd.
  * Each test group has its own project with a dedicated fixture.
@@ -724,6 +754,40 @@ export default defineConfig({
       testDir: sidebarSplitDropTestDir,
       timeout: 120 * 1000 // opens the reference project; drags sidebar items onto tabs / a scenario
     },
+    // The git suites depend on the docker `git-server` mock (a real git://
+    // remote) — unlike every self-hosted protocol above, there is no
+    // restorm-hosted alternative. Opt out with SKIP_GIT_E2E=1 on a host that
+    // can't run docker, mirroring the `stomp-execution` / activemq pattern.
+    ...(process.env.SKIP_GIT_E2E === '1'
+      ? []
+      : [
+          {
+            name: 'git-status',
+            testDir: gitStatusTestDir,
+            timeout: 120 * 1000
+          },
+          {
+            name: 'git-push-pull',
+            testDir: gitPushPullTestDir,
+            timeout: 120 * 1000
+          },
+          {
+            name: 'git-conflict',
+            testDir: gitConflictTestDir,
+            timeout: 180 * 1000 // multiple diverging clones per scenario + the 4-panel resolution UI
+          },
+          {
+            name: 'git-mcp',
+            testDir: gitMcpTestDir,
+            timeout: 120 * 1000
+          },
+          {
+            name: 'git-collab',
+            testDir: gitCollabTestDir,
+            // ONE long multi-chapter scenario driving TWO live instances.
+            timeout: 600 * 1000
+          }
+        ]),
     {
       name: 'paw-import',
       testDir: pawImportTestDir,

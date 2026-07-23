@@ -39,4 +39,18 @@ describe('renderer protocol UI registry', () => {
       expect(element).toBeTruthy()
     }
   })
+
+  it('folds the reload epoch into the element key so a bump forces a remount', async () => {
+    const { renderProtocolTabView } = await import('./protocolUiRegistry')
+    const request = { type: 'http', id: 'req-1' } as never
+    // Same request + same epoch → stable key (ordinary re-renders never remount).
+    expect((renderProtocolTabView(request, 0) as { key: string }).key)
+      .toBe((renderProtocolTabView(request, 0) as { key: string }).key)
+    // A bump changes the key → React remounts the view, re-reading the request.
+    expect((renderProtocolTabView(request, 0) as { key: string }).key)
+      .not.toBe((renderProtocolTabView(request, 1) as { key: string }).key)
+    // Distinct requests keep distinct keys at the same epoch.
+    expect((renderProtocolTabView(request, 1) as { key: string }).key)
+      .not.toBe((renderProtocolTabView({ type: 'http', id: 'req-2' } as never, 1) as { key: string }).key)
+  })
 })

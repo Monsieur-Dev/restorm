@@ -99,6 +99,10 @@ groups:
 | `type` | Yes | Renderer type (`toggle`, `number`, `text`, `enum`, `theme`, or custom) |
 | `default` | Yes | Default value (`string`, `number`, or `boolean`) |
 | `params` | No | Type-specific params (e.g. `min`/`max` for number, `values` for enum) |
+| `feature` | No | Feature-flag name (`FeatureFlippingService`) that gates this setting — HIDES it entirely when the flag is disabled |
+| `featureDisabledDefault` | No | Value substituted when `feature` is disabled. Required when `feature` is set |
+| `userOnly` | No | When `true`, only the user layer may set this — a workspace overlay can never override it |
+| `capability` | No | Entitlement capability id (the host's Pro/plan system, distinct from `feature`) that gates this setting — see "Capability-gated settings" below |
 
 ### Groups / Settings Hierarchy
 
@@ -183,6 +187,38 @@ interface SettingRendererProps {
   value: SettingValue  // string | number | boolean
   onChange: (v: SettingValue) => void
 }
+```
+
+## Capability-gated settings
+
+A setting tagged with `capability: "some.capability.id"` in its YAML definition renders greyed + non-interactive (via `GatedControl`, the same "visible but locked with an upsell" primitive used elsewhere in the app) when the host reports that capability as locked — as opposed to `feature`, which HIDES the setting entirely. ECUI has no notion of the host's entitlement/auth system, so the host supplies the check + the upsell action via a `CapabilityGate`, threaded down through `ElectronCoreUiProvider`:
+
+```tsx
+import { ElectronCoreUiProvider, type CapabilityGate } from 'electron-core-ui/renderer'
+
+const capabilityGate: CapabilityGate = {
+  isLocked: (capability) => !hasCapability(myAuthState, capability),
+  onSubscribe: () => { void myCheckoutFlow() }
+}
+
+<ElectronCoreUiProvider capabilityGate={capabilityGate}>
+  {children}
+</ElectronCoreUiProvider>
+```
+
+`capabilityGate` must be recomputed (a fresh object identity) whenever the underlying entitlement changes — e.g. build it inside a component that itself calls a reactive `useAuthState()`-style hook, memoized on that state, rather than a static object built once at bootstrap. Otherwise every capability-gated setting stays frozen at whatever entitlement existed when the app first rendered.
+
+Omitting `capabilityGate` entirely (a host with no capability/entitlement concept) makes every `capability`-tagged setting render UNLOCKED — the gate fails open, never silently hiding a setting a host never wired a check for.
+
+```yaml
+- setting:
+    id: "semiPullFrequency"
+    titleKey: "git.semiPullFrequencyTitle"
+    type: "enum"
+    default: "1h"
+    capability: "git.client"
+    params:
+      values: [...]
 ```
 
 ## SettingsService API (Main Process)

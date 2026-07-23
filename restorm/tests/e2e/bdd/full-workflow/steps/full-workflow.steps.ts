@@ -662,6 +662,16 @@ When('I rename the sidebar request {string} to {string}', async ({}, oldName: st
   await page.waitForTimeout(500)
 })
 
+When('I clone the sidebar request {string}', async ({}, requestName: string) => {
+  if (!page) throw new Error('app must be launched')
+  const row = page.locator('[data-testid="sidebar-listview"] .list-view-row')
+    .filter({ has: page.getByText(requestName, { exact: true }) }).first()
+  await expect(row).toBeVisible({ timeout: 2000 })
+  await row.click({ button: 'right' })
+  await page.waitForTimeout(200)
+  await clickContextMenuItem(page, /Clone|Cloner/)
+})
+
 When('I delete the sidebar request {string}', async ({}, requestName: string) => {
   if (!page) throw new Error('app must be launched')
   const row = page.locator('[data-testid="sidebar-listview"] .list-view-row')
@@ -669,7 +679,14 @@ When('I delete the sidebar request {string}', async ({}, requestName: string) =>
   await expect(row).toBeVisible({ timeout: 2000 })
   await row.click({ button: 'right' })
   await page.waitForTimeout(200)
-  await clickContextMenuItem(page, /^Delete$|^Supprimer$/)
+  await clickContextMenuItem(page, /Delete|Supprimer/)
+  // A request delete raises a confirmation modal; confirm it so the delete
+  // actually lands (the sidebar path that emits REQUEST_DELETED).
+  const confirm = page.locator('[data-testid="delete-confirmation-confirm-button"]')
+  if (await confirm.isVisible().catch(() => false)) {
+    await confirm.click()
+    await expect(page.locator('[data-testid="delete-confirmation-modal"]')).toBeHidden({ timeout: 5000 })
+  }
 })
 
 // ---------------------------------------------------------------------------

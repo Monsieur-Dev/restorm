@@ -602,6 +602,59 @@ Then('the tab {string} should be clean', async ({}, tabName: string) => {
   await expect(tab.locator('.dirty-indicator').first()).toHaveCount(0, { timeout: 10000 })
 })
 
+// ── Clone → dirty + search-indexing ───────────────────────────────────
+
+/** Click a context-menu entry by visible label (menu items render as
+ * `.action-menu-item` / `[role="menuitem"]`). */
+async function clickContextMenuItem(currentPage: Page, pattern: RegExp): Promise<void> {
+  const item = currentPage
+    .locator('.action-menu-item, [role="menuitem"]')
+    .filter({ hasText: pattern })
+    .first()
+  await expect(item).toBeVisible({ timeout: 5000 })
+  await item.click()
+  await currentPage.waitForTimeout(300)
+}
+
+When('I clone the sidebar request {string}', async ({}, requestName: string) => {
+  const p = requirePage()
+  const row = p
+    .locator('[data-testid="sidebar-listview"] .list-view-row')
+    .filter({ has: p.getByText(requestName, { exact: true }) })
+    .first()
+  await expect(row).toBeVisible({ timeout: 5000 })
+  await row.click({ button: 'right' })
+  await p.waitForTimeout(200)
+  await clickContextMenuItem(p, /Clone|Cloner/)
+})
+
+When('I open the search bar', async () => {
+  const p = requirePage()
+  const closed = p.locator('[data-testid="main-titlebar-searchbar-closed"]').first()
+  await expect(closed).toBeVisible({ timeout: 5000 })
+  await closed.click({ force: true })
+  await expect(p.locator('[data-testid="main-titlebar-searchbar-open"]').first()).toBeVisible({ timeout: 5000 })
+})
+
+When('I search for {string}', async ({}, query: string) => {
+  const p = requirePage()
+  const input = p.locator('[data-testid="main-titlebar-searchbar-inputbox-input"]').first()
+  await expect(input).toBeVisible({ timeout: 5000 })
+  await input.focus()
+  await p.keyboard.press('Control+A')
+  await p.keyboard.press('Backspace')
+  await p.keyboard.type(query)
+  await p.waitForSelector('[data-testid="main-titlebar-searchbar"][data-results-count]', { timeout: 5000 })
+})
+
+Then('the title-bar search results should contain a hit mentioning {string}', async ({}, needle: string) => {
+  const p = requirePage()
+  const results = p
+    .locator('[data-testid="main-titlebar-searchbar-results"] [data-testid^="main-titlebar-searchbar-result-"]')
+    .filter({ hasText: needle })
+  await expect(results.first()).toBeVisible({ timeout: 10000 })
+})
+
 // Keep TS happy about unused helpers — `currentElectronApp` + `requireApp`
 // are there for steps that need to drive dialog mocks from `when` clauses.
 void currentElectronApp

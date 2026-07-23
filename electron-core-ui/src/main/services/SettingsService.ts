@@ -11,7 +11,7 @@ import type {
   ResolvedSetting,
   ResolvedSettingValue
 } from '../../types/settings'
-import { isSettingItem, isGroupItem } from '../../types/settings'
+import { isSettingItem, isGroupItem, buildSettingsStorageKey } from '../../types/settings'
 import { settingsYamlConfigSchema } from '../schemas/configSchemas'
 import { logger } from './LoggerService'
 import { getStorageService } from './StorageService'
@@ -621,9 +621,13 @@ export class SettingsService {
   // Private Helpers
   // ==========================================================================
 
-  /** Build storage key from group path and setting ID */
+  /** Build storage key from group path and setting ID — delegates to the
+   * shared `buildSettingsStorageKey` (`types/settings.ts`) so any renderer
+   * code that needs to hardcode a settings key (rather than going through
+   * `useSetting()`'s YAML-driven lookup) computes the IDENTICAL format,
+   * instead of silently drifting onto a different storage entry. */
   private buildStorageKey(groupPath: string[], settingId: string): string {
-    return groupPath.length > 0 ? `${groupPath.join('.')}:${settingId}` : settingId
+    return buildSettingsStorageKey(groupPath, settingId)
   }
 
   /** Flatten all settings with their group paths and current values */

@@ -8,6 +8,7 @@ import { ThemeCarousel } from './ThemeCarousel'
 import { SettingsView } from './SettingsView'
 import { SettingsContext } from '../../contexts/settingsContextDef'
 import type { SettingsScope } from '../../contexts/settingsContextDef'
+import { AVAILABLE_LANGUAGES } from './languages'
 import './settings.css'
 
 export interface SettingsPageProps {
@@ -20,41 +21,6 @@ export interface SettingsPageProps {
   /** Additional settings content rendered below the built-in settings */
   children?: React.ReactNode
 }
-
-/**
- * Available languages for the application. Each entry's `name` is the
- * endonym (the language's name in its own tongue) so the dropdown
- * always reads natively for the user picking from it.
- */
-const AVAILABLE_LANGUAGES = [
-  { code: 'en', name: 'English' },
-  { code: 'fr', name: 'Français' },
-  { code: 'es', name: 'Español' },
-  { code: 'de', name: 'Deutsch' },
-  { code: 'it', name: 'Italiano' },
-  { code: 'pt', name: 'Português' },
-  { code: 'nl', name: 'Nederlands' },
-  { code: 'sv', name: 'Svenska' },
-  { code: 'da', name: 'Dansk' },
-  { code: 'nb', name: 'Norsk bokmål' },
-  { code: 'fi', name: 'Suomi' },
-  { code: 'pl', name: 'Polski' },
-  { code: 'cs', name: 'Čeština' },
-  { code: 'hu', name: 'Magyar' },
-  { code: 'ro', name: 'Română' },
-  { code: 'el', name: 'Ελληνικά' },
-  { code: 'uk', name: 'Українська' },
-  { code: 'hr', name: 'Hrvatski' },
-  { code: 'sr', name: 'Srpski' },
-  { code: 'sq', name: 'Shqip' },
-  { code: 'tr', name: 'Türkçe' },
-  { code: 'id', name: 'Bahasa Indonesia' },
-  { code: 'vi', name: 'Tiếng Việt' },
-  { code: 'ja', name: '日本語' },
-  { code: 'ko', name: '한국어' },
-  { code: 'zh-CN', name: '简体中文' },
-  { code: 'zh-TW', name: '繁體中文' }
-]
 
 /**
  * Settings page component
@@ -209,8 +175,7 @@ const SettingsPageFallback: React.FC<SettingsPageFallbackProps> = ({
 
   const languageOptions = useMemo(() => {
     return AVAILABLE_LANGUAGES.map(lang => ({
-      text: lang.name,
-      detail: lang.code.toUpperCase()
+      text: `${lang.flag} ${lang.name}`
     }))
   }, [])
 

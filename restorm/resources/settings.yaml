@@ -64,3 +64,36 @@ groups:
             min: 0
             max: 10000
             integer: true
+  - id: "git"
+    titleKey: "git.settingsTitle"
+    items:
+      - setting:
+          id: "applyCommitMessageLanguageByDefault"
+          titleKey: "git.applyCommitMessageLanguageByDefaultTitle"
+          descriptionKey: "git.applyCommitMessageLanguageByDefaultDescription"
+          type: "toggle"
+          default: true
+          capability: "git.client"
+      - setting:
+          id: "semiPullFrequency"
+          titleKey: "git.semiPullFrequencyTitle"
+          descriptionKey: "git.semiPullFrequencyDescription"
+          type: "enum"
+          default: "1h"
+          capability: "git.client"
+          params:
+            values:
+              - value: "off"
+                labelKey: "git.semiPullFrequency.off"
+              - value: "15m"
+                labelKey: "git.semiPullFrequency.15m"
+              - value: "30m"
+                labelKey: "git.semiPullFrequency.30m"
+              - value: "1h"
+                labelKey: "git.semiPullFrequency.1h"
+              - value: "4h"
+                labelKey: "git.semiPullFrequency.4h"
+              - value: "12h"
+                labelKey: "git.semiPullFrequency.12h"
+              - value: "24h"
+                labelKey: "git.semiPullFrequency.24h"
