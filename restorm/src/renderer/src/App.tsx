@@ -203,7 +203,6 @@ import {
   findItemWithBreadcrumbs,
   getNearestEnvironmentsForBreadcrumbs
 } from './utils/treeSearch'
-import { DesktopIndicator } from './components/MainView/DesktopIndicator'
 import { StatusbarVersionPlan } from './components/MainView/StatusbarVersionPlan'
 import { findItemById, findItemWithParent } from './utils/treeSearch'
 import { getSessionRequestOverride, getSessionFolderEnv, findEnvironmentById } from './services/environmentSelectionStore'
@@ -3207,7 +3206,6 @@ const App: React.FC = () => {
       <Statusbar data-testid="app-statusbar">
         <StatusbarVersionPlan />
         {filePath && <StatusbarElement data-testid="app-statusbar-element" title={filePath} />}
-        <DesktopIndicator />
         {/* The environment selector, request-history button and auth-route
          * selector now all live in the request tab header, not here. The
          * MCP indicator carries the `right-aligned` auto margin in every

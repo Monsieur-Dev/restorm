@@ -11,12 +11,6 @@ Features:
       - Type: Basic
         Enabled: true
 
-  # Desktop indicator feature - only visible on desktop platform
-  - Name: "desktop-indicator"
-    Strategies:
-      - Type: Platform
-        AvailableOn: [desktop]
-
   # Handlebars helpers - extended helpers for variable transformation
   - Name: "handlebars-helpers"
     Strategies:
