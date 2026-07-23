@@ -38,8 +38,13 @@ export interface GitHistoryViewProps {
 const ROW_HEIGHT = 28
 const LANE_WIDTH = 14
 const DOT_RADIUS = 3.5
-/** Lane color palette — theme-ish, cycles by lane index. */
-const LANE_COLORS = ['#3794ff', '#2ea043', '#d29922', '#f85149', '#a371f7', '#39c5cf', '#db61a2']
+const LANE_COLOR_COUNT = 7
+
+/** Theme-driven lane color class — see `.ecui-git-history-lane-N` in
+ * `gitHistoryView.css`, backed by the `--git-lane-N` theme variables. */
+function laneClass(lane: number): string {
+  return `ecui-git-history-lane-${(lane % LANE_COLOR_COUNT) + 1}`
+}
 
 function laneX(lane: number): number {
   return lane * LANE_WIDTH + LANE_WIDTH / 2
@@ -52,31 +57,34 @@ const LaneCell: React.FC<{ row: LaneRow, gutterLanes: number }> = ({ row, gutter
   const width = gutterLanes * LANE_WIDTH
   const midY = ROW_HEIGHT / 2
   const cx = laneX(row.commitLane)
-  const color = (lane: number): string => LANE_COLORS[lane % LANE_COLORS.length] ?? LANE_COLORS[0] ?? '#3794ff'
 
   const paths: React.ReactNode[] = []
   for (const lane of row.passLanes) {
-    paths.push(<line key={`p${lane}`} x1={laneX(lane)} y1={0} x2={laneX(lane)} y2={ROW_HEIGHT} stroke={color(lane)} strokeWidth={2} />)
+    paths.push(<line key={`p${lane}`} x1={laneX(lane)} y1={0} x2={laneX(lane)} y2={ROW_HEIGHT} className={laneClass(lane)} strokeWidth={2} />)
   }
   if (row.continuesUp) {
-    paths.push(<line key="up" x1={cx} y1={0} x2={cx} y2={midY} stroke={color(row.commitLane)} strokeWidth={2} />)
+    paths.push(<line key="up" x1={cx} y1={0} x2={cx} y2={midY} className={laneClass(row.commitLane)} strokeWidth={2} />)
   }
   if (row.continuesDown) {
-    paths.push(<line key="down" x1={cx} y1={midY} x2={cx} y2={ROW_HEIGHT} stroke={color(row.commitLane)} strokeWidth={2} />)
+    paths.push(<line key="down" x1={cx} y1={midY} x2={cx} y2={ROW_HEIGHT} className={laneClass(row.commitLane)} strokeWidth={2} />)
   }
   for (const lane of row.joinLanes) {
     const x = laneX(lane)
     paths.push(
-      <path key={`j${lane}`} d={`M ${x} 0 C ${x} ${midY}, ${cx} ${midY * 0.6}, ${cx} ${midY}`} fill="none" stroke={color(lane)} strokeWidth={2} />
+      // The lane class also sets `fill`, but a join curve is an open stroke,
+      // not a shape — force fill:none via inline style, which outranks the
+      // class in the CSS cascade (a bare `fill="none"` attribute would not:
+      // author stylesheet rules always beat SVG presentation attributes).
+      <path key={`j${lane}`} d={`M ${x} 0 C ${x} ${midY}, ${cx} ${midY * 0.6}, ${cx} ${midY}`} style={{ fill: 'none' }} className={laneClass(lane)} strokeWidth={2} />
     )
   }
   for (const lane of row.forkLanes) {
     const x = laneX(lane)
     paths.push(
-      <path key={`f${lane}`} d={`M ${cx} ${midY} C ${cx} ${midY * 1.4}, ${x} ${midY}, ${x} ${ROW_HEIGHT}`} fill="none" stroke={color(lane)} strokeWidth={2} />
+      <path key={`f${lane}`} d={`M ${cx} ${midY} C ${cx} ${midY * 1.4}, ${x} ${midY}, ${x} ${ROW_HEIGHT}`} style={{ fill: 'none' }} className={laneClass(lane)} strokeWidth={2} />
     )
   }
-  paths.push(<circle key="dot" cx={cx} cy={midY} r={DOT_RADIUS} fill={color(row.commitLane)} />)
+  paths.push(<circle key="dot" cx={cx} cy={midY} r={DOT_RADIUS} className={laneClass(row.commitLane)} />)
 
   return (
     <svg className="ecui-git-history-lanes" width={width} height={ROW_HEIGHT} aria-hidden="true">

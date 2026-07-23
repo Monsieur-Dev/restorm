@@ -104,6 +104,17 @@ themselves. Rules:
 - parents outside the loaded window (shallow edges) terminate their lane;
 - freed lanes are reused, keeping the gutter narrow.
 
+## Lane colors
+
+The gutter cycles through 7 theme variables — `--git-lane-1` … `--git-lane-7`,
+defined in `resources/themes/base.yaml` — applied via CSS classes
+(`.ecui-git-history-lane-1` … `-7` in `gitHistoryView.css`, each setting
+`stroke`/`fill`) rather than literal colors in the component. A lane's class
+is `ecui-git-history-lane-{(lane % 7) + 1}`. Theme families override only the
+lanes that would otherwise be unreadable on their background (see the
+`_base.yaml` of the affected family) — most families inherit the base palette
+unchanged.
+
 ## i18n keys
 
 `gitHistory.commits`, `gitHistory.noCommitSelected`, `gitHistory.author`,
