@@ -405,9 +405,6 @@
   "bookmarkRibbon": {
     "addBookmark": "북마크 추가"
   },
-  "themeCarousel": {
-    "selectedTheme": "선택된 테마"
-  },
   "toaster": {
     "notificationsRegion": "알림"
   },

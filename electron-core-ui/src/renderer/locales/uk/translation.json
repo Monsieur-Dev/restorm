@@ -405,9 +405,6 @@
   "bookmarkRibbon": {
     "addBookmark": "Додати закладку"
   },
-  "themeCarousel": {
-    "selectedTheme": "Вибрана тема"
-  },
   "toaster": {
     "notificationsRegion": "Сповіщення"
   },

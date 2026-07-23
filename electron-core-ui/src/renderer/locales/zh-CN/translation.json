@@ -405,9 +405,6 @@
   "bookmarkRibbon": {
     "addBookmark": "添加书签"
   },
-  "themeCarousel": {
-    "selectedTheme": "已选主题"
-  },
   "toaster": {
     "notificationsRegion": "通知"
   },
