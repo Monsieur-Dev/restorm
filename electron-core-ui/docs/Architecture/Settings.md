@@ -132,8 +132,15 @@ items:
 | `toggle` | `ToggleRenderer` | `boolean` | -- |
 | `number` | `NumberInput` | `number` | `min`, `max`, `integer` |
 | `text` | `TextInput` | `string` | `maxLength` |
-| `enum` | `EnumRenderer` | `string` | `values: [{value, labelKey}]` |
+| `enum` | `EnumRenderer` | `string` | `values: [{value, labelKey, flag?}]` |
 | `theme` | `ThemeRenderer` (wraps `ThemeCarousel`) | `string` | -- |
+
+Each `EnumValue`'s `flag` is optional and, when present, is prefixed to the
+translated label as `"{flag} {label}"` via the shared
+`formatLanguageOptionLabel` helper (`Settings/languages.ts`) -- the same
+function the `PushModal` commit-language picker uses, so both pickers render
+identically. An entry without `flag` renders its label alone; `EnumRenderer`
+itself stays generic and applies no language-specific logic.
 
 ## Custom Renderers
 
