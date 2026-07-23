@@ -17,6 +17,9 @@ import { BaseRequestTabView } from './BaseRequestTabView'
 import { updateReactiveProperty } from './requestTabViewUtils'
 import { toKeyValueData as toKeyValueDataShared } from '../../utils/toKeyValueData'
 import { BeamWrap } from '../common/BeamWrap'
+import { RoundActionButton } from '../common/RoundActionButton'
+import { RequestActionToolbar } from './RequestActionToolbar'
+import { useIsInWorkbenchTab } from '../../contexts/workbenchTabHost'
 import { ServerConfigLockedHint } from '../common/ServerConfigLockedHint'
 import { cloneForEventBus } from '../../utils/cloneForEventBus'
 
@@ -60,6 +63,8 @@ function parseServerUrl(raw: string): { port: string; route: string } {
  */
 export const SoapServerRequestTabView: React.FC<SoapServerRequestTabViewProps> = ({ request, conflictMode, conflictVisibleTabIds, conflictExtraTabs }) => {
   const { t } = useTranslation()
+  // The fixed bar anchors on the workbench tab, so it only exists there.
+  const inWorkbenchTab = useIsInWorkbenchTab()
   const { selectedEnvId, environments } = useEnvironmentContext()
 
   const [url, setUrlState] = useState(request.url)
@@ -181,6 +186,7 @@ export const SoapServerRequestTabView: React.FC<SoapServerRequestTabViewProps> =
           disabled={isListening}
         />
       </div>
+      {!inWorkbenchTab && (
       <BeamWrap active={isListening} size={22} borderWidth={1.5}>
         <Button
           icon={isListening ? 'debug-disconnect' : 'plug'}
@@ -194,6 +200,7 @@ export const SoapServerRequestTabView: React.FC<SoapServerRequestTabViewProps> =
           data-testid="soap-server-listen-button"
         />
       </BeamWrap>
+      )}
     </ControlGroup>
   )
 
@@ -286,12 +293,29 @@ export const SoapServerRequestTabView: React.FC<SoapServerRequestTabViewProps> =
     </div>
   )
 
+  // Fixed action bar, anchored top-right of the workbench tab. Server mode
+  // ignores environments, so the disc keeps its tone and has no env picker.
+  const actionToolbar = !inWorkbenchTab ? undefined : (
+    <RequestActionToolbar>
+      <RoundActionButton
+        icon={isListening ? 'debug-disconnect' : 'plug'}
+        onClick={isListening ? handleStop : handleListen}
+        disabled={!!conflictMode}
+        tone={isListening ? 'stop' : 'run'}
+        beamActive={isListening}
+        ariaLabel={isListening ? t('soap.server.stopListening', 'Stop the SOAP mock server') : t('soap.server.startListening', 'Start the SOAP mock server')}
+        data-testid="soap-server-listen-button"
+      />
+    </RequestActionToolbar>
+  )
+
   return (
     <BaseRequestTabView
       {...(conflictVisibleTabIds ? { visibleRequestTabIds: conflictVisibleTabIds } : {})}
         {...(conflictExtraTabs ? { extraRequestTabs: conflictExtraTabs } : {})}
       requestId={request.id}
       urlSection={urlSection}
+      {...(actionToolbar ? { actionToolbar } : {})}
       requestContent={requestContent}
       codeSnippetsContent={t('soap.server.noCodeSnippets', 'A SOAP mock server has no client code snippet.')}
       notes={request.notes}

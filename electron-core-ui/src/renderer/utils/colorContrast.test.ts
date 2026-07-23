@@ -50,3 +50,27 @@ describe('getContrastColor', () => {
     expect(getContrastColor('hsl(0, 0%, 100%)')).toBe('#000000')
   })
 })
+
+describe('getContrastColor with computed colours', () => {
+  it('parses the rgb() form getComputedStyle returns', () => {
+    // Read off a rendered element, a colour arrives as `rgb(r, g, b)` — not as
+    // the hex the caller originally wrote. Treating that as hex silently
+    // produced the WRONG contrast rather than an error.
+    expect(getContrastColor('rgb(199, 80, 0)')).toBe(getContrastColor('#c75000'))
+    expect(getContrastColor('rgb(255, 255, 255)')).toBe('#000000')
+    expect(getContrastColor('rgb(0, 0, 0)')).toBe('#ffffff')
+  })
+
+  it('parses rgba() and ignores the alpha channel', () => {
+    expect(getContrastColor('rgba(255, 255, 255, 0.5)')).toBe('#000000')
+    expect(getContrastColor('rgba(0, 0, 0, 1)')).toBe('#ffffff')
+  })
+
+  it('still resolves a colour sitting right on the luminance threshold', () => {
+    // #c75000 lands at 0.1788 — just under the 0.179 cut, so it takes white.
+    // A parser that mangles the input flips this to black, which is the exact
+    // failure this guards.
+    expect(getContrastColor('#c75000')).toBe('#ffffff')
+    expect(getContrastColor('rgb(199, 80, 0)')).toBe('#ffffff')
+  })
+})

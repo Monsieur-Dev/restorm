@@ -469,23 +469,23 @@ export const ScenarioInspectorPanel: React.FC<ScenarioInspectorPanelProps> = ({ 
           </>
         )}
         <HeaderHoverTooltip label={runTooltip}>
-          <Button small icon={runIcon} onClick={onRun} disabled={runDisabled} className={`scn-inspector-run-round${runIsPause ? ' scn-inspector-run-round-active' : ''}`} options={{ ariaLabel: runLabel }} data-testid="scenario-inspector-run" />
+          <Button appearance="round" icon={runIcon} onClick={onRun} disabled={runDisabled} className={`scn-inspector-run-round${runIsPause ? ' scn-inspector-run-round-active' : ''}`} options={{ ariaLabel: runLabel }} data-testid="scenario-inspector-run" />
         </HeaderHoverTooltip>
         <GatedControl locked={stepDebugLocked} onSubscribe={handleSubscribe} data-testid="scenario-inspector-step-gate">
           <HeaderHoverTooltip label={stepTooltip}>
-            <Button small icon="debug-step-over" onClick={onStep} disabled={stepDisabled} className="scn-inspector-step-round" options={{ ariaLabel: stepLabel }} data-testid="scenario-inspector-step" />
+            <Button appearance="round" icon="debug-step-over" onClick={onStep} disabled={stepDisabled} className="scn-inspector-step-round" options={{ ariaLabel: stepLabel }} data-testid="scenario-inspector-step" />
           </HeaderHoverTooltip>
         </GatedControl>
         {engineWired && (
           <GatedControl locked={stepDebugLocked} onSubscribe={handleSubscribe} data-testid="scenario-inspector-debug-gate">
             <HeaderHoverTooltip label={debugTooltip}>
-              <Button small icon="debug-alt" onClick={onDebug} disabled={debugDisabled} className="scn-inspector-debug-round" options={{ ariaLabel: debugLabel }} data-testid="scenario-inspector-debug" />
+              <Button appearance="round" icon="debug-alt" onClick={onDebug} disabled={debugDisabled} className="scn-inspector-debug-round" options={{ ariaLabel: debugLabel }} data-testid="scenario-inspector-debug" />
             </HeaderHoverTooltip>
           </GatedControl>
         )}
         {engineWired && (
           <HeaderHoverTooltip label={stopTooltip}>
-            <Button small icon="debug-stop" onClick={onStop} disabled={stopDisabled} className="scn-inspector-stop-round" options={{ ariaLabel: stopLabel }} data-testid="scenario-inspector-stop" />
+            <Button appearance="round" icon="debug-stop" onClick={onStop} disabled={stopDisabled} className="scn-inspector-stop-round" options={{ ariaLabel: stopLabel }} data-testid="scenario-inspector-stop" />
           </HeaderHoverTooltip>
         )}
       </div>

@@ -136,6 +136,36 @@ When('I click Send', async () => {
   await page.locator(SEND_BTN).click()
 })
 
+// Fixed-position guarantee: the action bar is anchored to the workbench tab
+// OUTSIDE the tab/split subtree, so opening the response panel on the first
+// send must not move or resize the send button. We snapshot its viewport box
+// before the send and compare after the response has landed.
+let recordedSendButtonBox: { x: number; y: number; width: number; height: number } | null = null
+
+When('I record the send button position', async () => {
+  if (page === null) throw new Error('launch first')
+  const btn = page.locator(SEND_BTN)
+  await btn.waitFor({ state: 'visible', timeout: 20_000 })
+  const box = await btn.boundingBox()
+  if (box === null) throw new Error('send button has no bounding box')
+  recordedSendButtonBox = box
+})
+
+Then('the send button position is unchanged', async () => {
+  if (page === null) throw new Error('launch first')
+  if (recordedSendButtonBox === null) throw new Error('record the send button position first')
+  const before = recordedSendButtonBox
+  const btn = page.locator(SEND_BTN)
+  await expect(btn).toBeVisible({ timeout: 20_000 })
+  const after = await btn.boundingBox()
+  if (after === null) throw new Error('send button has no bounding box')
+  // Allow only sub-pixel rounding — the bar must not shift or resize.
+  expect(Math.abs(after.x - before.x)).toBeLessThanOrEqual(1)
+  expect(Math.abs(after.y - before.y)).toBeLessThanOrEqual(1)
+  expect(Math.abs(after.width - before.width)).toBeLessThanOrEqual(1)
+  expect(Math.abs(after.height - before.height)).toBeLessThanOrEqual(1)
+})
+
 When('I click Cancel', async () => {
   if (page === null) throw new Error('launch first')
   // The cancel button replaces the send button while a request is in flight.

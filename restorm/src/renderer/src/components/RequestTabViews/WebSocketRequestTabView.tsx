@@ -44,6 +44,9 @@ import { useIsWebsocketListening } from '../../services/websocketListeningStore'
 import { conflictSafeBoolean } from '../../services/conflictSafeLiveState'
 import type { EntityFieldDiff } from '../../services/conflictFieldDiff'
 import { BeamWrap } from '../common/BeamWrap'
+import { RoundActionButton } from '../common/RoundActionButton'
+import { RequestActionToolbar } from './RequestActionToolbar'
+import { useIsInWorkbenchTab } from '../../contexts/workbenchTabHost'
 import { HeaderHoverTooltip } from '../MainView/HeaderHoverTooltip'
 import './WebSocketChat.css'
 
@@ -114,7 +117,9 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
   // See HTTPRequestTabView — `projectUuid` from the env context is
   // synchronously available, unlike `useFileService` which races the
   // `useState` lazy initializer.
-  const { selectedEnvId, environments, envColor, projectUuid } = useEnvironmentContext()
+  const { selectedEnvId, environments, envColor, projectUuid, envIcon, envPaintColor } = useEnvironmentContext()
+  // The fixed bar anchors on the workbench tab, so it only exists there.
+  const inWorkbenchTab = useIsInWorkbenchTab()
   const collections = useRestormStore((state) => state.collections)
   const handlebarsHelpers = useHandlebarsHelpers()
   const { apiDocumentation, route } = useApiDocumentationFromRequest(request)
@@ -755,7 +760,7 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
               />
             </div>
           </HeaderHoverTooltip>
-          {connectButton}
+          {!inWorkbenchTab && connectButton}
         </>
       ) : isServer ? (
         <>
@@ -783,7 +788,7 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
               />
             </div>
           </HeaderHoverTooltip>
-          {connectButton}
+          {!inWorkbenchTab && connectButton}
         </>
       ) : (
         <>
@@ -804,19 +809,21 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
               />
             </div>
           </HeaderHoverTooltip>
-          <SendButtonEnvSwitcher>{connectButton}</SendButtonEnvSwitcher>
+          {!inWorkbenchTab && <SendButtonEnvSwitcher>{connectButton}</SendButtonEnvSwitcher>}
         </>
       )}
       {/* Every WebSocket-family protocol (websocket / socketio / mqtt) has a Send
           button: it sends a frame, emits an event, or publishes to a topic. */}
-      <Button
-        icon="send"
-        onClick={handleSend}
-        disabled={!isListening}
-        emphasis={1}
-        options={{ title: t('requestTab.send'), ariaLabel: t('requestTab.send') }}
-        data-testid="websocket-send-button"
-      />
+      {!inWorkbenchTab && (
+        <Button
+          icon="send"
+          onClick={handleSend}
+          disabled={!isListening}
+          emphasis={1}
+          options={{ title: t('requestTab.send'), ariaLabel: t('requestTab.send') }}
+          data-testid="websocket-send-button"
+        />
+      )}
     </ControlGroup>
   )
   
@@ -835,6 +842,38 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
     return () => { subscription.unsubscribe() }
   }, [request.id])
 
+  // Fixed action bar, shared by every WebSocket-family protocol (websocket,
+  // socket.io, mqtt): connect/listen as the smaller companion, and a send that
+  // stays disabled until the connection is up. Server mode ignores
+  // environments, so its disc keeps its tone and has no env picker.
+  const actionToolbar = !inWorkbenchTab ? undefined : (
+    <RequestActionToolbar>
+      <RoundActionButton
+        icon={isListening ? 'debug-disconnect' : 'plug'}
+        onClick={isListening ? handleDisconnect : handleConnect}
+        disabled={!!conflictMode}
+        tone={isListening ? 'stop' : 'run'}
+        {...(isServer || isListening || !envPaintColor ? {} : { color: envPaintColor })}
+        {...(isServer || isListening || !envIcon ? {} : { envIcon })}
+        envSwitch={!isServer && !isListening}
+        beamActive={isListening}
+        ariaLabel={isServer
+          ? (isListening ? t('websocket.stopListening') : t('websocket.startListening'))
+          : (isListening ? t('websocket.disconnect') : t('websocket.connect'))}
+        data-testid="websocket-connect-button"
+      />
+      <RoundActionButton
+            size="secondary"
+        icon="send"
+        onClick={handleSend}
+        disabled={!isListening}
+        {...(isServer || !envPaintColor ? {} : { color: envPaintColor })}
+        ariaLabel={t('requestTab.send')}
+        data-testid="websocket-send-button"
+      />
+    </RequestActionToolbar>
+  )
+
   return (
     <>
       <BaseRequestTabView
@@ -842,6 +881,7 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
         {...(conflictExtraTabs ? { extraRequestTabs: conflictExtraTabs } : {})}
         requestId={request.id}
         urlSection={urlSection}
+        {...(actionToolbar ? { actionToolbar } : {})}
         requestContent={requestContent}
         codeSnippetsContent={codeSnippetsContent}
         {...(!isServer && apiDocumentation && route && findOperationForRoute(apiDocumentation, route) ? { docsContent: <DocumentationHost apiDocumentation={apiDocumentation} filters={[route]} /> } : {})}

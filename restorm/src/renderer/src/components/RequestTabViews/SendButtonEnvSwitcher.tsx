@@ -10,6 +10,14 @@ import { flattenEnvironments } from '../MainView/envSelectorHelpers'
 import './sendButtonEnvSwitcher.css'
 
 export interface SendButtonEnvSwitcherProps {
+  /** When false the wrapper stays MOUNTED but claims nothing: no context
+   * menu, and it can never become an event target itself.
+   *
+   * Callers that show the picker on one state of a toggle (send) and not the
+   * other (cancel) must flip this rather than mounting the wrapper
+   * conditionally: swapping the element at this position remounts everything
+   * below it, which restarts a running border-beam mid-lap. */
+  enabled?: boolean
   /** The Send button itself. Rendered as a child rather than via a
    * factory prop so the call site keeps full control over the Button
    * variant (`emphasis`, `style`, custom icons, etc.) that varies
@@ -28,7 +36,7 @@ export interface SendButtonEnvSwitcherProps {
  * sibling cleanup) is pulled from `useEnvironmentContext` so the
  * popover stays in sync with whatever is showing in the statusbar.
  */
-export const SendButtonEnvSwitcher: React.FC<SendButtonEnvSwitcherProps> = ({ children }) => {
+export const SendButtonEnvSwitcher: React.FC<SendButtonEnvSwitcherProps> = ({ enabled = true, children }) => {
   const wrapperRef = useRef<HTMLSpanElement | null>(null)
   const [open, setOpen] = useState(false)
   const [applyToAll, setApplyToAll] = useState(true)
@@ -38,6 +46,14 @@ export const SendButtonEnvSwitcher: React.FC<SendButtonEnvSwitcherProps> = ({ ch
   // self-contained ephemeral form). The non-throwing variant lets
   // the wrapper render in both places — when there's no provider
   // we just leave the right-click handler inert.
+  // Going inert must close an open picker. Adjusting during render rather than
+  // in an effect avoids painting the popover for one frame after the switch.
+  const [wasEnabled, setWasEnabled] = useState(enabled)
+  if (wasEnabled !== enabled) {
+    setWasEnabled(enabled)
+    if (!enabled) setOpen(false)
+  }
+
   const ctx = useOptionalEnvironmentContext()
   const environments = ctx?.environments
   const selectedEnvId = ctx?.selectedEnvId ?? null
@@ -51,12 +67,12 @@ export const SendButtonEnvSwitcher: React.FC<SendButtonEnvSwitcherProps> = ({ ch
   ), [environments])
 
   const handleContextMenu = useCallback((event: React.MouseEvent): void => {
-    // No envs configured → don't claim the right-click; let the
+    // Inert, or no envs configured → don't claim the right-click; let the
     // browser's default menu through.
-    if (rows.length === 0) return
+    if (!enabled || rows.length === 0) return
     event.preventDefault()
     setOpen((prev) => !prev)
-  }, [rows.length])
+  }, [enabled, rows.length])
 
   const handleSelect = useCallback((envId: string): void => {
     if (!setFolderEnv || !setRequestOverride) return
@@ -119,7 +135,7 @@ export const SendButtonEnvSwitcher: React.FC<SendButtonEnvSwitcherProps> = ({ ch
       <span
         ref={wrapperRef}
         onContextMenu={handleContextMenu}
-        className="restorm-send-button-env-switcher"
+        className={`restorm-send-button-env-switcher${enabled ? '' : ' restorm-send-button-env-switcher-inert'}`}
         data-testid="send-button-env-switcher-anchor"
       >
         {children}

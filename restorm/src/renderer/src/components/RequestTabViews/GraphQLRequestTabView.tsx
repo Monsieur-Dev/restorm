@@ -42,6 +42,9 @@ import { useCurlPaste, type ParsedCurl } from '../../hooks/useCurlPaste'
 import { CurlPasteCallout } from '../CurlPasteCallout'
 import { SendButtonEnvSwitcher } from './SendButtonEnvSwitcher'
 import { BeamWrap } from '../common/BeamWrap'
+import { RoundActionButton } from '../common/RoundActionButton'
+import { RequestActionToolbar } from './RequestActionToolbar'
+import { useIsInWorkbenchTab } from '../../contexts/workbenchTabHost'
 import { ServerConfigLockedHint } from '../common/ServerConfigLockedHint'
 import { toasterService } from 'electron-core-ui/renderer'
 import { HeaderHoverTooltip } from '../MainView/HeaderHoverTooltip'
@@ -127,7 +130,9 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
   // HTTPRequestTabView for the rationale: useState's lazy initializer
   // below needs a synchronous, already-hydrated value to read the
   // per-request panel-state store from.
-  const { selectedEnvId, environments, envColor, projectUuid } = useEnvironmentContext()
+  const { selectedEnvId, environments, envColor, projectUuid, envIcon, envPaintColor } = useEnvironmentContext()
+  // The fixed bar anchors on the workbench tab, so it only exists there.
+  const inWorkbenchTab = useIsInWorkbenchTab()
   const collections = useRestormStore((state) => state.collections)
   const setCollections = useRestormStore((state) => state.setCollections)
   // Live tree ref so `setOperationName` can re-mirror the collections onto the
@@ -933,6 +938,7 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
               disabled={isListening}
             />
           </div>
+          {!inWorkbenchTab && (
           <BeamWrap active={isListening} size={22} borderWidth={1.5}>
             <Button
               icon={isListening ? 'debug-disconnect' : 'plug'}
@@ -946,6 +952,7 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
               data-testid="graphql-server-listen-button"
             />
           </BeamWrap>
+          )}
         </>
       ) : (
         <>
@@ -982,6 +989,7 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
               />
             </div>
           )}
+          {!inWorkbenchTab && (
           <SendButtonEnvSwitcher>
             {isSubscription ? (
               // Subscription operation: Subscribe opens the SSE stream, Stop ends it.
@@ -1013,6 +1021,7 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
               </BeamWrap>
             )}
           </SendButtonEnvSwitcher>
+          )}
         </>
       )}
     </ControlGroup>
@@ -1049,6 +1058,49 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
     return () => { subscription.unsubscribe() }
   }, [request.id])
 
+  // Fixed action bar, anchored top-right of the workbench tab. Three states:
+  // hosting a mock (server), streaming a subscription, or a plain send.
+  const actionToolbar = !inWorkbenchTab ? undefined : (
+    <RequestActionToolbar>
+      {isServer ? (
+        <RoundActionButton
+          icon={isListening ? 'debug-disconnect' : 'plug'}
+          onClick={isListening ? handleStop : handleListen}
+          disabled={!!conflictMode}
+          tone={isListening ? 'stop' : 'run'}
+          beamActive={isListening}
+          ariaLabel={isListening ? t('graphql.server.stopListening') : t('graphql.server.startListening')}
+          data-testid="graphql-server-listen-button"
+        />
+      ) : isSubscription ? (
+        <RoundActionButton
+          icon={isSubscribing ? 'debug-disconnect' : 'broadcast'}
+          onClick={isSubscribing ? handleUnsubscribe : handleSubscribe}
+          disabled={!!conflictMode}
+          tone={isSubscribing ? 'stop' : 'run'}
+          {...(isSubscribing || !envPaintColor ? {} : { color: envPaintColor })}
+          {...(isSubscribing || !envIcon ? {} : { envIcon })}
+          envSwitch={!isSubscribing}
+          beamActive={isSubscribing}
+          ariaLabel={isSubscribing ? t('graphql.subscription.stop') : t('graphql.subscription.subscribe')}
+          data-testid="graphql-subscribe-button"
+        />
+      ) : (
+        <RoundActionButton
+          icon={isSending ? 'close' : 'send'}
+          onClick={isSending ? handleCancel : handleSend}
+          tone={isSending ? 'stop' : 'run'}
+          {...(isSending || !envPaintColor ? {} : { color: envPaintColor })}
+          {...(isSending || !envIcon ? {} : { envIcon })}
+          envSwitch={!isSending}
+          beamActive={isSending}
+          ariaLabel={isSending ? t('cancel') : t('graphql.send')}
+          data-testid="graphql-action-button"
+        />
+      )}
+    </RequestActionToolbar>
+  )
+
   return (
     <>
       <BaseRequestTabView
@@ -1056,6 +1108,7 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
         {...(conflictExtraTabs ? { extraRequestTabs: conflictExtraTabs } : {})}
         requestId={request.id}
         urlSection={urlSection}
+        {...(actionToolbar ? { actionToolbar } : {})}
         requestContent={isServer ? serverRequestContent : requestContent}
         codeSnippetsContent={codeSnippetsContent}
         {...(apiDocumentation && route && findOperationForRoute(apiDocumentation, route) ? { docsContent: <DocumentationHost apiDocumentation={apiDocumentation} filters={[route]} /> } : {})}

@@ -597,3 +597,84 @@
 	min-width: 0;
 	max-width: none;
 }
+
+/* ==========================================================================
+   appearance="round" — a coloured disc with a white ring and a single centred
+   glyph. Sized by `size`: default = 54px, `sm` = 40.5px.
+
+   `--ecui-round-diameter` and `--ecui-round-ring` are PUBLIC: a host that
+   decorates the disc (an orbiting beam, a focus halo) derives its own geometry
+   from them rather than restating the numbers. Changing them here moves the
+   decoration too. See docs/Button/README.md.
+   ========================================================================== */
+.text-button.appearance-round {
+	--ecui-round-diameter: 54px;
+	--ecui-round-ring: 3px;
+
+	box-sizing: border-box;
+	width: var(--ecui-round-diameter);
+	min-width: var(--ecui-round-diameter);
+	height: var(--ecui-round-diameter);
+	min-height: var(--ecui-round-diameter);
+	padding: 0;
+	border-radius: 50%;
+	border: var(--ecui-round-ring) solid rgb(255, 255, 255, 0.92);
+	box-shadow: 0 2px 6px rgb(0, 0, 0, 0.5);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex: 0 0 auto;
+	overflow: visible;
+}
+
+.text-button.appearance-round.small-button {
+	--ecui-round-diameter: 40.5px;
+}
+
+.text-button.appearance-round:hover {
+	filter: brightness(1.12);
+}
+
+.text-button.appearance-round.disabled {
+	opacity: 0.55;
+}
+
+/* The glyph is half the disc, and both its colour and its optical offset are
+ * measured from what is actually painted (see Button.tsx) — a disc tinted by
+ * the host can be any colour, including one that makes white unreadable. */
+.text-button.appearance-round .codicon {
+	margin: 0;
+	padding: 0;
+	width: 1em !important;
+	height: 1em !important;
+	overflow: visible !important;
+	line-height: 1;
+	font-size: var(--ecui-round-glyph-size, calc(var(--ecui-round-diameter) / 2)) !important;
+	color: var(--ecui-round-glyph-color, var(--badge-on-accent, #fff)) !important;
+	transform: translate(var(--ecui-round-glyph-dx, 0), var(--ecui-round-glyph-dy, 0));
+}
+
+/* Corner badge — pinned to the bottom-right, overlapping the disc edge. The
+ * button places it; what it means is the caller's business. */
+.button-container:has(> .appearance-round) {
+	position: relative;
+	display: inline-flex;
+}
+
+.ecui-round-corner-badge {
+	position: absolute;
+	right: -1.5px;
+	bottom: -1.5px;
+	width: calc(var(--ecui-round-diameter, 54px) * 0.389);
+	height: calc(var(--ecui-round-diameter, 54px) * 0.389);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 50%;
+	background: var(--editorWidget-background, #252526);
+	color: var(--foreground, #ccc);
+	border: 1.5px solid rgb(255, 255, 255, 0.92);
+	box-shadow: 0 1px 3px rgb(0, 0, 0, 0.5);
+	pointer-events: none;
+	z-index: 2;
+}

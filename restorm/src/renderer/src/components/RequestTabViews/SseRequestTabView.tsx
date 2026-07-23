@@ -28,6 +28,9 @@ import { findOperationForRoute } from '../../../../shared/utils/findOperationFor
 import { SendButtonEnvSwitcher } from './SendButtonEnvSwitcher'
 import { useIsSseListening } from '../../services/sseListeningStore'
 import { BeamWrap } from '../common/BeamWrap'
+import { RoundActionButton } from '../common/RoundActionButton'
+import { RequestActionToolbar } from './RequestActionToolbar'
+import { useIsInWorkbenchTab } from '../../contexts/workbenchTabHost'
 import { HeaderHoverTooltip } from '../MainView/HeaderHoverTooltip'
 import { useUserDateFormat } from '../../hooks/useUserDateFormat'
 import './WebSocketChat.css'
@@ -47,7 +50,9 @@ export const SseRequestTabView: React.FC<SseRequestTabViewProps> = ({ request })
   const [historyModalOpen, setHistoryModalOpen] = useState(false)
   const { t } = useTranslation()
   const { formatUserDate } = useUserDateFormat()
-  const { selectedEnvId, environments, envColor } = useEnvironmentContext()
+  const { selectedEnvId, environments, envColor, envIcon, envPaintColor } = useEnvironmentContext()
+  // The fixed bar anchors on the workbench tab, so it only exists there.
+  const inWorkbenchTab = useIsInWorkbenchTab()
   const handlebarsHelpers = useHandlebarsHelpers()
   const { apiDocumentation, route } = useApiDocumentationFromRequest(request)
   const previousEnvIdRef = useRef<string | null>(null)
@@ -457,7 +462,7 @@ export const SseRequestTabView: React.FC<SseRequestTabViewProps> = ({ request })
           />
         </div>
       </HeaderHoverTooltip>
-      <SendButtonEnvSwitcher>{connectButton}</SendButtonEnvSwitcher>
+      {!inWorkbenchTab && <SendButtonEnvSwitcher>{connectButton}</SendButtonEnvSwitcher>}
     </ControlGroup>
   )
 
@@ -476,11 +481,30 @@ export const SseRequestTabView: React.FC<SseRequestTabViewProps> = ({ request })
     return () => { subscription.unsubscribe() }
   }, [request.id])
 
+  // Fixed action bar, anchored top-right of the workbench tab: opening the
+  // response panel must never move the button out from under the pointer.
+  const actionToolbar = !inWorkbenchTab ? undefined : (
+    <RequestActionToolbar>
+      <RoundActionButton
+        icon={isListening ? 'debug-disconnect' : 'plug'}
+        onClick={isListening ? handleDisconnect : handleConnect}
+        tone={isListening ? 'stop' : 'run'}
+        {...(isListening || !envPaintColor ? {} : { color: envPaintColor })}
+        {...(isListening || !envIcon ? {} : { envIcon })}
+        envSwitch={!isListening}
+        beamActive={isListening}
+        ariaLabel={isListening ? t('websocket.disconnect') : t('websocket.connect')}
+        data-testid="sse-connect-button"
+      />
+    </RequestActionToolbar>
+  )
+
   return (
     <>
       <BaseRequestTabView
         requestId={request.id}
         urlSection={urlSection}
+        {...(actionToolbar ? { actionToolbar } : {})}
         requestContent={requestContent}
         codeSnippetsContent={codeSnippetsContent}
         {...(apiDocumentation && route && findOperationForRoute(apiDocumentation, route) ? { docsContent: <DocumentationHost apiDocumentation={apiDocumentation} filters={[route]} /> } : {})}

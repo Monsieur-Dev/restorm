@@ -5,6 +5,7 @@ import { Callout, EditableLabel, IconSelect, BookmarkRibbonStack, Toggle, type B
 import type { Icon } from 'electron-core-ui/types'
 import type { BreadcrumbItem } from '../../../../../shared/types/editor'
 import './restormWorkbenchTab.css'
+import { WorkbenchTabHostContext } from '../../../contexts/workbenchTabHost'
 
 const { Breadcrumb } = CoreUIRenderer as unknown as {
   Breadcrumb: React.ComponentType<{
@@ -137,6 +138,7 @@ export const RestormWorkbenchTab: React.FC<RestormWorkbenchTabProps> = ({
   }, [tags, onTagsChange])
 
   return (
+    <WorkbenchTabHostContext.Provider value={true}>
     <div className="restorm-workbench-tab">
       {/* Top-right cluster: optional header actions (e.g. a request's env
        * selector + history button) flow in a flex row to the LEFT of the
@@ -262,6 +264,7 @@ export const RestormWorkbenchTab: React.FC<RestormWorkbenchTabProps> = ({
       </div>
       {children}
     </div>
+    </WorkbenchTabHostContext.Provider>
   )
 }
 

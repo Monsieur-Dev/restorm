@@ -1,3 +1,4 @@
+import type React from 'react';
 import type { Icon } from '../../../types/icon';
 
 export interface IButtonOptions extends Partial<IButtonStyles> {
@@ -39,7 +40,7 @@ export interface IButtonWithDropdownOptions extends IButtonOptions {
  *   of theme. The codicon / `secondary` / `emphasis` modifiers have
  *   no effect on this appearance.
  */
-export type ButtonAppearance = 'default' | 'rainbow';
+export type ButtonAppearance = 'default' | 'rainbow' | 'round';
 
 /**
  * Size variant.
@@ -122,8 +123,21 @@ export interface ButtonProps {
    * over the variant's CSS background. Use for swatches / tinted
    * list rows where the row's color is part of the data (env color,
    * tag color, status pill, …) rather than a theme variant.
+   *
+   * For `appearance="round"` this is THE way to colour the disc, and the
+   * glyph's own colour is derived from it for contrast — pass the colour,
+   * never a foreground to go with it.
    */
   backgroundColor?: string;
+  /**
+   * Content pinned to the bottom-right corner of the button, overlapping its
+   * edge — a small badge that qualifies the action (a status dot, a scope
+   * icon, …). Only rendered by `appearance="round"`.
+   *
+   * Deliberately untyped beyond `ReactNode`: the button places it and knows
+   * nothing about what it means.
+   */
+  cornerBadge?: React.ReactNode;
   /**
    * Horizontal alignment of the button label.
    * Defaults to `'center'` (the historical CTA-style behavior).

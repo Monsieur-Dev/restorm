@@ -35,6 +35,9 @@ import { DEFAULT_WS_TIMEOUT_MS } from '../../../../shared/config/constants'
 import { SendButtonEnvSwitcher } from './SendButtonEnvSwitcher'
 import { useIsStompListening } from '../../services/stompListeningStore'
 import { BeamWrap } from '../common/BeamWrap'
+import { RoundActionButton } from '../common/RoundActionButton'
+import { RequestActionToolbar } from './RequestActionToolbar'
+import { useIsInWorkbenchTab } from '../../contexts/workbenchTabHost'
 import { HeaderHoverTooltip } from '../MainView/HeaderHoverTooltip'
 import './WebSocketChat.css'
 import { cloneForEventBus } from '../../utils/cloneForEventBus'
@@ -63,7 +66,9 @@ export const StompRequestTabView: React.FC<StompRequestTabViewProps> = ({
 }) => {
   const [historyModalOpen, setHistoryModalOpen] = useState(false)
   const { t } = useTranslation()
-  const { selectedEnvId, environments, envColor } = useEnvironmentContext()
+  const { selectedEnvId, environments, envColor, envIcon, envPaintColor } = useEnvironmentContext()
+  // The fixed bar anchors on the workbench tab, so it only exists there.
+  const inWorkbenchTab = useIsInWorkbenchTab()
   const collections = useRestormStore((state) => state.collections)
   const handlebarsHelpers = useHandlebarsHelpers()
   const previousEnvIdRef = useRef<string | null>(null)
@@ -597,15 +602,19 @@ export const StompRequestTabView: React.FC<StompRequestTabViewProps> = ({
           />
         </div>
       </HeaderHoverTooltip>
-      <SendButtonEnvSwitcher>{connectButton}</SendButtonEnvSwitcher>
-      <Button
-        icon="send"
-        onClick={handleSend}
-        disabled={!isListening}
-        emphasis={1}
-        options={{ title: t('requestTab.send'), ariaLabel: t('requestTab.send') }}
-        data-testid="stomp-send-button"
-      />
+      {!inWorkbenchTab && (
+        <>
+          <SendButtonEnvSwitcher>{connectButton}</SendButtonEnvSwitcher>
+          <Button
+            icon="send"
+            onClick={handleSend}
+            disabled={!isListening}
+            emphasis={1}
+            options={{ title: t('requestTab.send'), ariaLabel: t('requestTab.send') }}
+            data-testid="stomp-send-button"
+          />
+        </>
+      )}
     </ControlGroup>
   )
 
@@ -620,11 +629,39 @@ export const StompRequestTabView: React.FC<StompRequestTabViewProps> = ({
     return () => { subscription.unsubscribe() }
   }, [request.id])
 
+  // Fixed action bar: connect/disconnect as the smaller companion, sending a
+  // frame as the primary action — which stays disabled until connected.
+  const actionToolbar = !inWorkbenchTab ? undefined : (
+    <RequestActionToolbar>
+      <RoundActionButton
+        icon={isListening ? 'debug-disconnect' : 'plug'}
+        onClick={isListening ? handleDisconnect : handleConnect}
+        tone={isListening ? 'stop' : 'run'}
+        {...(isListening || !envPaintColor ? {} : { color: envPaintColor })}
+        {...(isListening || !envIcon ? {} : { envIcon })}
+        envSwitch={!isListening}
+        beamActive={isListening}
+        ariaLabel={isListening ? t('stomp.disconnect', 'Disconnect') : t('stomp.connect', 'Connect')}
+        data-testid="stomp-connect-button"
+      />
+      <RoundActionButton
+            size="secondary"
+        icon="send"
+        onClick={handleSend}
+        disabled={!isListening}
+        {...(envPaintColor ? { color: envPaintColor } : {})}
+        ariaLabel={t('requestTab.send')}
+        data-testid="stomp-send-button"
+      />
+    </RequestActionToolbar>
+  )
+
   return (
     <>
       <BaseRequestTabView
         requestId={request.id}
         urlSection={urlSection}
+        {...(actionToolbar ? { actionToolbar } : {})}
         requestContent={requestContent}
         codeSnippetsContent={codeSnippetsContent}
         notes={request.notes}

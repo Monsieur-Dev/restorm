@@ -26,6 +26,13 @@ Feature: HTTP/REST execution end-to-end
       | HEAD echo    |
       | OPTIONS echo |
 
+  Scenario: The send button holds its on-screen position when the response panel opens
+    When I open the "GET echo" request tab via MCP
+    And I record the send button position
+    And I click Send
+    Then the response status is "200"
+    And the send button position is unchanged
+
   Scenario: Query params reach the wire
     When I open the "Query params" request tab via MCP
     And I click Send

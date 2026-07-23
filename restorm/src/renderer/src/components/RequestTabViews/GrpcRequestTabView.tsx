@@ -40,6 +40,9 @@ import { DocumentationHost } from '../documentation/DocumentationHost'
 import { findOperationForRoute } from '../../../../shared/utils/findOperationForRoute'
 import { SendButtonEnvSwitcher } from './SendButtonEnvSwitcher'
 import { BeamWrap } from '../common/BeamWrap'
+import { RoundActionButton } from '../common/RoundActionButton'
+import { RequestActionToolbar } from './RequestActionToolbar'
+import { useIsInWorkbenchTab } from '../../contexts/workbenchTabHost'
 import { useIsGrpcListening } from '../../services/grpcListeningStore'
 import { conflictSafeBoolean } from '../../services/conflictSafeLiveState'
 import type { EntityFieldDiff } from '../../services/conflictFieldDiff'
@@ -118,7 +121,9 @@ const GrpcClientTabView: React.FC<GrpcRequestTabViewProps> = ({
   // See HTTPRequestTabView — `projectUuid` from the env context is
   // synchronously available, unlike `useFileService` which races the
   // `useState` lazy initializer.
-  const { selectedEnvId, environments, envColor, projectUuid } = useEnvironmentContext()
+  const { selectedEnvId, environments, envColor, projectUuid, envIcon, envPaintColor } = useEnvironmentContext()
+  // The fixed bar anchors on the workbench tab, so it only exists there.
+  const inWorkbenchTab = useIsInWorkbenchTab()
   const collections = useRestormStore((state) => state.collections)
   const handlebarsHelpers = useHandlebarsHelpers()
   const { apiDocumentation, route } = useApiDocumentationFromRequest(request)
@@ -724,6 +729,7 @@ const GrpcClientTabView: React.FC<GrpcRequestTabViewProps> = ({
             data-testid="grpc-call-type-select"
           />
         </div>
+        {!inWorkbenchTab && (
         <SendButtonEnvSwitcher>
           {isStreaming ? (
             <div style={{ display: 'flex', gap: 4 }}>
@@ -773,6 +779,7 @@ const GrpcClientTabView: React.FC<GrpcRequestTabViewProps> = ({
             </BeamWrap>
           )}
         </SendButtonEnvSwitcher>
+        )}
       </ControlGroup>
       <div style={{ fontSize: 12, color: 'var(--descriptionForeground)', display: 'flex', alignItems: 'center', gap: 6 }}>
         <span>{request.service}/{request.method}</span>
@@ -805,6 +812,53 @@ const GrpcClientTabView: React.FC<GrpcRequestTabViewProps> = ({
     return () => { subscription.unsubscribe() }
   }, [request.id])
 
+  // Fixed action bar. Streaming calls are the connection family: connect /
+  // disconnect, plus a stream-send that only client- and bidi-streaming expose
+  // and that stays disabled until the call is open. Unary calls get one disc.
+  const actionToolbar = !inWorkbenchTab ? undefined : (
+    <RequestActionToolbar>
+      {isStreaming ? (
+        <>
+          <RoundActionButton
+            icon={isListening ? 'debug-disconnect' : 'plug'}
+            onClick={isListening ? handleDisconnect : handleConnect}
+            disabled={duplexBlockedByTransport || !!conflictMode}
+            tone={isListening ? 'stop' : 'run'}
+            {...(isListening || !envPaintColor ? {} : { color: envPaintColor })}
+            {...(isListening || !envIcon ? {} : { envIcon })}
+            envSwitch={!isListening}
+            beamActive={isListening}
+            ariaLabel={isListening ? t('grpc.disconnect', 'Disconnect') : t('grpc.connect', 'Connect')}
+            data-testid="grpc-connect-button"
+          />
+          {showSendButton && (
+            <RoundActionButton
+            size="secondary"
+              icon="arrow-up"
+              onClick={handleStreamSend}
+              disabled={!isListening}
+              {...(envPaintColor ? { color: envPaintColor } : {})}
+              ariaLabel={t('grpc.send')}
+              data-testid="grpc-stream-send-button"
+            />
+          )}
+        </>
+      ) : (
+        <RoundActionButton
+          icon={isSending ? 'close' : 'send'}
+          onClick={isSending ? handleCancel : handleSend}
+          tone={isSending ? 'stop' : 'run'}
+          {...(isSending || !envPaintColor ? {} : { color: envPaintColor })}
+          {...(isSending || !envIcon ? {} : { envIcon })}
+          envSwitch={!isSending}
+          beamActive={isSending}
+          ariaLabel={isSending ? t('cancel') : t('grpc.send')}
+          data-testid="grpc-send-button"
+        />
+      )}
+    </RequestActionToolbar>
+  )
+
   return (
     <>
       <BaseRequestTabView
@@ -812,6 +866,7 @@ const GrpcClientTabView: React.FC<GrpcRequestTabViewProps> = ({
         {...(conflictExtraTabs ? { extraRequestTabs: conflictExtraTabs } : {})}
         requestId={request.id}
         urlSection={urlSection}
+        {...(actionToolbar ? { actionToolbar } : {})}
         requestContent={requestContent}
         codeSnippetsContent={codeSnippetsContent}
         {...(apiDocumentation && route && findOperationForRoute(apiDocumentation, route) ? { docsContent: <DocumentationHost apiDocumentation={apiDocumentation} filters={[route]} /> } : {})}
