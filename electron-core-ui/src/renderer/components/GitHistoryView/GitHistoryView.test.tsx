@@ -53,6 +53,15 @@ describe('GitHistoryView', () => {
     const { container } = render(<GitHistoryView commits={COMMITS} mainTipHash="bbbbbbbbbb" />)
     expect(container.querySelectorAll('.ecui-git-history-lanes')).toHaveLength(2)
   })
+
+  it('colors the lane gutter via a theme-driven class, not a literal stroke/fill attribute', () => {
+    const { container } = render(<GitHistoryView commits={COMMITS} mainTipHash="bbbbbbbbbb" />)
+    // mainTipHash seeds lane 0 for the HEAD commit's chain, i.e. class "…-lane-1".
+    const dot = container.querySelector('.ecui-git-history-lane-1')
+    expect(dot).not.toBeNull()
+    expect(dot?.getAttribute('stroke')).toBeNull()
+    expect(dot?.getAttribute('fill')).toBeNull()
+  })
 })
 
 describe('GitHistoryView — recover version context menu', () => {
