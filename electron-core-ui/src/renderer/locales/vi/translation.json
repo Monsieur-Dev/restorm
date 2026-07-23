@@ -464,6 +464,7 @@
     "author": "Tác giả",
     "date": "Ngày",
     "hash": "Hash",
-    "parents": "Cha"
+    "parents": "Cha",
+    "recoverVersion": "Khôi phục phiên bản này"
   }
 }

@@ -54,3 +54,34 @@ describe('GitHistoryView', () => {
     expect(container.querySelectorAll('.ecui-git-history-lanes')).toHaveLength(2)
   })
 })
+
+describe('GitHistoryView — recover version context menu', () => {
+  it('does not open a context menu when no onRecoverVersion is provided', () => {
+    render(<GitHistoryView commits={COMMITS} mainTipHash="bbbbbbbbbb" />)
+    fireEvent.contextMenu(screen.getByTestId('git-history-view-row-aaaaaaaa'))
+    expect(screen.queryByTestId('git-history-view-recover-version')).toBeNull()
+  })
+
+  it('offers "recover this version" on right-click of a non-HEAD commit and calls back with its hash', () => {
+    const onRecover = vi.fn()
+    render(<GitHistoryView commits={COMMITS} mainTipHash="bbbbbbbbbb" onRecoverVersion={onRecover} />)
+
+    // aaaaaaaaaa is the FIRST commit — not HEAD (HEAD is on bbbbbbbbbb).
+    fireEvent.contextMenu(screen.getByTestId('git-history-view-row-aaaaaaaa'))
+    const item = screen.getByTestId('git-history-view-recover-version')
+    expect(item).toBeTruthy()
+    fireEvent.click(item)
+    expect(onRecover).toHaveBeenCalledWith('aaaaaaaaaa')
+  })
+
+  it('disables the entry on the HEAD commit (recovering the current version is a no-op)', () => {
+    const onRecover = vi.fn()
+    render(<GitHistoryView commits={COMMITS} mainTipHash="bbbbbbbbbb" onRecoverVersion={onRecover} />)
+
+    // bbbbbbbbbb carries "HEAD -> main".
+    fireEvent.contextMenu(screen.getByTestId('git-history-view-row-bbbbbbbb'))
+    const item = screen.getByTestId('git-history-view-recover-version')
+    fireEvent.click(item)
+    expect(onRecover).not.toHaveBeenCalled()
+  })
+})

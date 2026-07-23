@@ -32,6 +32,14 @@ export interface GitHistoryViewProps {
   mainTipHash?: string
   /** Initial selection; defaults to the first (newest) commit. */
   initialSelectedHash?: string
+  /**
+   * Restore the open file to a past commit's content. Wired to the row's
+   * right-click "recover this version" entry; the host owns the actual
+   * checkout-file-at-revision + re-hydrate. Omitting it hides the entry.
+   * The entry is disabled on the commit the working copy is currently at
+   * (recovering the current version is a no-op).
+   */
+  onRecoverVersion?: (hash: string) => void
   'data-testid'?: string
 }
 
@@ -58,7 +66,15 @@ const commits = entries.map(toGitHistoryCommit)
 const mainTip = commits.find((c) => c.refs.some((r) => /(^|\/|\s)(main|master)$/.test(r)))
 
 <Modal isOpen={open} onClose={close} title={t('git.historyTitle')}>
-  <GitHistoryView commits={commits} mainTipHash={mainTip?.hash} />
+  <GitHistoryView
+    commits={commits}
+    mainTipHash={mainTip?.hash}
+    // Right-click a commit → "recover this version". The host restores the
+    // open file to that revision in the WORKING TREE (uncommitted) and
+    // re-hydrates its editor — `window.api.git.recoverFileAtRevision` does
+    // the checkout; a normal commit + push is left to the user.
+    onRecoverVersion={(hash) => host.recoverOpenFileAt(hash)}
+  />
 </Modal>
 ```
 

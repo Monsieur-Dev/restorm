@@ -2411,7 +2411,9 @@
       "movedRequest": "移动了请求“{{name}}”",
       "movedScenario": "移动了场景“{{name}}”",
       "movedFolder": "移动了文件夹“{{name}}”",
-      "movedEnvironmentFolder": "移动了环境文件夹“{{name}}”"
+      "movedEnvironmentFolder": "移动了环境文件夹“{{name}}”",
+      "reorderedFolder": "已重新排序文件夹“{{name}}”中的项目",
+      "reorderedEnvironmentFolder": "已重新排序环境文件夹“{{name}}”中的项目"
     },
     "commitTitle": {
       "singleRequest": "更新请求 \"{{name}}\"",
@@ -2473,5 +2475,13 @@
     "resolveConflicts": "解决冲突",
     "resetConfirmTitle": "要重置为服务器版本吗？",
     "resetConfirmBody": "您所有的本地修改都将被永久删除，并替换为服务器版本。"
+  },
+  "gitHistory": {
+    "recoverConfirmTitle": "恢复此版本？",
+    "recoverConfirmBody": "打开文件的当前内容将被替换为此提交的版本。更改不会被提交——如果想保留，你可以自己提交并推送。",
+    "recoverConfirmAction": "恢复",
+    "recoveredTitle": "版本已恢复",
+    "recoveredBody": "文件现在包含所选提交的内容，未提交。",
+    "recoverFailedTitle": "恢复失败"
   }
 }

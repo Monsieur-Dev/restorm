@@ -2413,7 +2413,9 @@
       "movedRequest": "Premješten zahtjev \"{{name}}\"",
       "movedScenario": "Premješten scenarij \"{{name}}\"",
       "movedFolder": "Premještena mapa \"{{name}}\"",
-      "movedEnvironmentFolder": "Premještena mapa okruženja \"{{name}}\""
+      "movedEnvironmentFolder": "Premještena mapa okruženja \"{{name}}\"",
+      "reorderedFolder": "Promijenjen redoslijed stavki u mapi „{{name}}“",
+      "reorderedEnvironmentFolder": "Promijenjen redoslijed stavki u mapi okruženja „{{name}}“"
     },
     "commitTitle": {
       "singleRequest": "Ažuriranje zahtjeva „{{name}}”",
@@ -2475,5 +2477,13 @@
     "resolveConflicts": "Riješi sukobe",
     "resetConfirmTitle": "Vratiti na verziju poslužitelja?",
     "resetConfirmBody": "Sve vaše lokalne promjene bit će trajno izbrisane i zamijenjene verzijom poslužitelja."
+  },
+  "gitHistory": {
+    "recoverConfirmTitle": "Vratiti ovu verziju?",
+    "recoverConfirmBody": "Trenutačni sadržaj otvorene datoteke bit će zamijenjen verzijom ovog commita. Promjena se ne commita — možete je sami commitati i push-ati ako je želite zadržati.",
+    "recoverConfirmAction": "Vrati",
+    "recoveredTitle": "Verzija vraćena",
+    "recoveredBody": "Datoteka sada sadrži sadržaj odabranog commita, bez commita.",
+    "recoverFailedTitle": "Vraćanje nije uspjelo"
   }
 }

@@ -2412,7 +2412,9 @@
       "movedRequest": "Flyttede anmodningen \"{{name}}\"",
       "movedScenario": "Flyttede scenariet \"{{name}}\"",
       "movedFolder": "Flyttede mappen \"{{name}}\"",
-      "movedEnvironmentFolder": "Flyttede miljømappen \"{{name}}\""
+      "movedEnvironmentFolder": "Flyttede miljømappen \"{{name}}\"",
+      "reorderedFolder": "Elementer omarrangeret i mappen \"{{name}}\"",
+      "reorderedEnvironmentFolder": "Elementer omarrangeret i miljømappen \"{{name}}\""
     },
     "commitTitle": {
       "singleRequest": "Opdatering af forespørgslen \"{{name}}\"",
@@ -2474,5 +2476,13 @@
     "resolveConflicts": "Løs konflikter",
     "resetConfirmTitle": "Nulstil til serverens version?",
     "resetConfirmBody": "Alle dine lokale ændringer slettes permanent og erstattes af serverens version."
+  },
+  "gitHistory": {
+    "recoverConfirmTitle": "Gendan denne version?",
+    "recoverConfirmBody": "Det aktuelle indhold i den åbne fil erstattes med denne commits version. Ændringen commites ikke — du kan selv committe og pushe den, hvis du vil beholde den.",
+    "recoverConfirmAction": "Gendan",
+    "recoveredTitle": "Version gendannet",
+    "recoveredBody": "Filen indeholder nu den valgte commits indhold, ikke commitet.",
+    "recoverFailedTitle": "Gendannelse mislykkedes"
   }
 }

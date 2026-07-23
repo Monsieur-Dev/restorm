@@ -2414,7 +2414,9 @@
       "movedRequest": "Переміщено запит \"{{name}}\"",
       "movedScenario": "Переміщено сценарій \"{{name}}\"",
       "movedFolder": "Переміщено теку \"{{name}}\"",
-      "movedEnvironmentFolder": "Переміщено теку середовища \"{{name}}\""
+      "movedEnvironmentFolder": "Переміщено теку середовища \"{{name}}\"",
+      "reorderedFolder": "Змінено порядок елементів у теці «{{name}}»",
+      "reorderedEnvironmentFolder": "Змінено порядок елементів у теці середовища «{{name}}»"
     },
     "commitTitle": {
       "singleRequest": "Оновлення запиту «{{name}}»",
@@ -2476,5 +2478,13 @@
     "resolveConflicts": "Розв’язати конфлікти",
     "resetConfirmTitle": "Скинути до версії сервера?",
     "resetConfirmBody": "Усі ваші локальні зміни буде остаточно видалено та замінено версією сервера."
+  },
+  "gitHistory": {
+    "recoverConfirmTitle": "Відновити цю версію?",
+    "recoverConfirmBody": "Поточний вміст відкритого файлу буде замінено версією цього коміту. Зміну не закомічено — ви можете закомітити та відправити її самостійно, якщо хочете зберегти.",
+    "recoverConfirmAction": "Відновити",
+    "recoveredTitle": "Версію відновлено",
+    "recoveredBody": "Файл тепер містить вміст вибраного коміту, незакомічений.",
+    "recoverFailedTitle": "Не вдалося відновити"
   }
 }

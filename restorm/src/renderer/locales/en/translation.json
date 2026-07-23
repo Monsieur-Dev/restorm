@@ -2412,7 +2412,9 @@
       "movedRequest": "Moved the request \"{{name}}\"",
       "movedScenario": "Moved the scenario \"{{name}}\"",
       "movedFolder": "Moved the folder \"{{name}}\"",
-      "movedEnvironmentFolder": "Moved the environment folder \"{{name}}\""
+      "movedEnvironmentFolder": "Moved the environment folder \"{{name}}\"",
+      "reorderedFolder": "Reordered items in the folder \"{{name}}\"",
+      "reorderedEnvironmentFolder": "Reordered items in the environment folder \"{{name}}\""
     },
     "commitTitle": {
       "singleRequest": "Update to the request \"{{name}}\"",
@@ -2474,5 +2476,13 @@
     "resolveConflicts": "Resolve conflicts",
     "resetConfirmTitle": "Reset to the server version?",
     "resetConfirmBody": "All your local changes will be permanently deleted and replaced by the server version."
+  },
+  "gitHistory": {
+    "recoverConfirmTitle": "Recover this version?",
+    "recoverConfirmBody": "The open file's current content will be replaced with this commit's version. The change is not committed — you can commit and push it yourself if you want to keep it.",
+    "recoverConfirmAction": "Recover",
+    "recoveredTitle": "Version recovered",
+    "recoveredBody": "The file now holds the selected commit's content, uncommitted.",
+    "recoverFailedTitle": "Recovery failed"
   }
 }

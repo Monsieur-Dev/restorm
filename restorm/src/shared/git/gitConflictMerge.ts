@@ -211,16 +211,212 @@ export function buildMergedProjectTree(
     return subtreeSnapshot(theirsItem) === subtreeSnapshot(baseEntry.item)
   }
 
+  // A theirs-only folder is folded WHOLE, but any descendant already
+  // represented on our side (walked into `merged` from ours) must be
+  // dropped from the folded copy — otherwise the same id appears twice.
+  // The relocation pass dedups relocated ids after the fact, but this keeps
+  // the intermediate tree well-formed for every id, relocated or not.
+  function pruneKnownDescendants(item: FolderItem): FolderItem {
+    const children = (item as FolderItem & { items?: FolderItem[] }).items
+    if (!children || children.length === 0) return item
+    const kept = children.filter((child) => !oursById.has(child.id)).map(pruneKnownDescendants)
+    return { ...item, items: kept } as FolderItem
+  }
+
   function mergeList(oursList: FolderItem[], theirsList: FolderItem[]): FolderItem[] {
     const merged = oursList.filter((item) => !theyDeletedAndWeLeftItAlone(item)).map(mergeItem)
     const oursIds = new Set(oursList.map((item) => item.id))
     for (const theirsItem of theirsList) {
       if (oursIds.has(theirsItem.id) || oursById.has(theirsItem.id)) continue
       if (weDeletedAndTheyLeftItAlone(theirsItem)) continue
-      merged.push(theirsItem)
+      merged.push(pruneKnownDescendants(theirsItem))
     }
     return merged
   }
 
-  return mergeList(oursItems, theirsItems)
+  const contentMerged = mergeList(oursItems, theirsItems)
+
+  // Structural reconciliation (three-way, one-sided adoption). The content
+  // merge above walks OUR hierarchy, so an item the other side RELOCATED
+  // (moved to a different folder) but we left where it was keeps our old
+  // placement — their move is silently lost. Symmetric to the field-level
+  // `takeTheirsIfOnlyTheyChanged`: when only THEY changed an item's parent,
+  // adopt their parent; when we changed it (or neither did), keep ours. A
+  // both-sides-moved-differently case is a real conflict, arbitrated whole
+  // by the tree-structure entry — not here.
+  if (!baseById) return contentMerged
+  const relocated = applyRemoteRelocations(contentMerged, baseItems ?? [], oursItems, theirsItems)
+  return applyRemoteReorders(relocated, baseItems ?? [], oursItems, theirsItems)
+}
+
+/** Ordered child-id list for every folder (keyed by folder id; `null` = root). */
+function childOrderByParent(items: FolderItem[]): Map<string | null, string[]> {
+  const out = new Map<string | null, string[]>()
+  const walk = (nodes: FolderItem[], parent: string | null): void => {
+    out.set(parent, nodes.map((n) => n.id))
+    for (const node of nodes) {
+      const children = (node as FolderItem & { items?: FolderItem[] }).items
+      if (children && children.length > 0) walk(children, node.id)
+    }
+  }
+  walk(items, null)
+  return out
+}
+
+/**
+ * Adopt the OTHER side's sibling ordering wherever only they reordered a
+ * folder's children and we kept the ancestor's order. A reorder is invisible
+ * to the content merge (which walks our order), so a remote reorder we did
+ * not touch is otherwise lost. Symmetric to the move adoption above.
+ */
+function applyRemoteReorders(
+  merged: FolderItem[],
+  baseItems: FolderItem[],
+  oursItems: FolderItem[],
+  theirsItems: FolderItem[]
+): FolderItem[] {
+  const base = childOrderByParent(baseItems)
+  const ours = childOrderByParent(oursItems)
+  const theirs = childOrderByParent(theirsItems)
+
+  const orderFor = (parentId: string | null, currentIds: string[]): string[] => {
+    const only = (list: string[] | undefined): string[] => (list ?? []).filter((id) => currentIds.includes(id))
+    const b = only(base.get(parentId))
+    const o = only(ours.get(parentId))
+    const t = only(theirs.get(parentId))
+    const same = (a: string[], c: string[]): boolean => a.length === c.length && a.every((x, i) => x === c[i])
+    // Adopt theirs only when WE match the ancestor, THEY diverged, and both
+    // sides describe the same sibling set (no add/remove/move skew).
+    if (b.length === t.length && same(o, b) && !same(t, b)) {
+      const rank = new Map(t.map((id, i) => [id, i]))
+      return [...currentIds].sort((x, y) => (rank.get(x) ?? 0) - (rank.get(y) ?? 0))
+    }
+    return currentIds
+  }
+
+  const walk = (nodes: FolderItem[], parentId: string | null): FolderItem[] => {
+    const reindexed = nodes.map((node) => {
+      const children = (node as FolderItem & { items?: FolderItem[] }).items
+      return children && children.length > 0
+        ? { ...node, items: walk(children, node.id) } as FolderItem
+        : node
+    })
+    const order = orderFor(parentId, reindexed.map((n) => n.id))
+    const byId = new Map(reindexed.map((n) => [n.id, n]))
+    return order.map((id) => byId.get(id)).filter((n): n is FolderItem => n !== undefined)
+  }
+  return walk(merged, null)
+}
+
+/** Map every entity id to the id of its containing folder (null at root). */
+function parentByChild(items: FolderItem[]): Map<string, string | null> {
+  const out = new Map<string, string | null>()
+  const walk = (nodes: FolderItem[], parent: string | null): void => {
+    for (const node of nodes) {
+      out.set(node.id, parent)
+      const children = (node as FolderItem & { items?: FolderItem[] }).items
+      if (children && children.length > 0) walk(children, node.id)
+    }
+  }
+  walk(items, null)
+  return out
+}
+
+/**
+ * Relocate, in the already-content-merged tree, every entity the OTHER side
+ * moved to a different folder while WE left it where the ancestor had it.
+ * The item keeps its merged content (field decisions already applied) — only
+ * its position in the hierarchy is adopted from theirs.
+ */
+function applyRemoteRelocations(
+  merged: FolderItem[],
+  baseItems: FolderItem[],
+  oursItems: FolderItem[],
+  theirsItems: FolderItem[]
+): FolderItem[] {
+  const base = parentByChild(baseItems)
+  const ours = parentByChild(oursItems)
+  const theirs = parentByChild(theirsItems)
+
+  // Which ids must move, and to which parent. Only when THEY moved it and we
+  // did not — every other case keeps the placement already in `merged`.
+  const relocations = new Map<string, string | null>()
+  for (const [id, theirsParent] of theirs) {
+    if (!base.has(id) || !ours.has(id)) continue
+    const baseParent = base.get(id) ?? null
+    const oursParent = ours.get(id) ?? null
+    const weMoved = oursParent !== baseParent
+    const theyMoved = theirsParent !== baseParent
+    if (theyMoved && !weMoved && theirsParent !== oursParent) {
+      relocations.set(id, theirsParent)
+    }
+  }
+  if (relocations.size === 0) return merged
+
+  // Pull every relocated node out of the merged tree, remembering the node.
+  const pulled = new Map<string, FolderItem>()
+  const strip = (nodes: FolderItem[]): FolderItem[] => {
+    const kept: FolderItem[] = []
+    for (const node of nodes) {
+      const children = (node as FolderItem & { items?: FolderItem[] }).items
+      const nextNode = children && children.length > 0
+        ? { ...node, items: strip(children) } as FolderItem
+        : node
+      if (relocations.has(node.id)) { pulled.set(node.id, nextNode); continue }
+      kept.push(nextNode)
+    }
+    return kept
+  }
+  let tree = strip(merged)
+
+  // A relocated node can be MISSING from the merged tree: theirs moved it
+  // out of a folder and then deleted that now-empty folder, so the content
+  // merge honoured the deletion and removed the node along with its old
+  // parent before we could rescue it. Recover it from theirs — it was
+  // relocated, not deleted, and theirs holds it at its new home. (theirs is
+  // also its content source here: this branch only fires for a node WE left
+  // alone, so theirs == the intended content.)
+  const theirsNodeById = new Map<string, FolderItem>()
+  const indexTheirs = (nodes: FolderItem[]): void => {
+    for (const node of nodes) {
+      theirsNodeById.set(node.id, node)
+      const children = (node as FolderItem & { items?: FolderItem[] }).items
+      if (children && children.length > 0) indexTheirs(children)
+    }
+  }
+  indexTheirs(theirsItems)
+
+  // Insert each pulled node under its target parent. A target that no longer
+  // exists in our merged tree (we deleted it, or it is a brand-new folder of
+  // theirs not yet recovered) falls back to the root so the item is never
+  // dropped — full recreate/repatriate of the target folder is a later step.
+  // Non-mutating insert: returns a new node array with `child` appended to
+  // the target folder's items. `found` reports whether the target existed,
+  // so a missing target falls back to root instead of silently vanishing.
+  const insertUnder = (nodes: FolderItem[], parentId: string, child: FolderItem): { nodes: FolderItem[]; found: boolean } => {
+    let found = false
+    const next = nodes.map((node) => {
+      if (found) return node
+      if (node.id === parentId) {
+        found = true
+        const kids = (node as FolderItem & { items?: FolderItem[] }).items ?? []
+        return { ...node, items: [...kids, child] } as FolderItem
+      }
+      const children = (node as FolderItem & { items?: FolderItem[] }).items
+      if (children && children.length > 0) {
+        const res = insertUnder(children, parentId, child)
+        if (res.found) { found = true; return { ...node, items: res.nodes } as FolderItem }
+      }
+      return node
+    })
+    return { nodes: next, found }
+  }
+  for (const [id, target] of relocations) {
+    const node = pulled.get(id) ?? theirsNodeById.get(id)
+    if (!node) continue
+    if (target === null) { tree = [...tree, node]; continue }
+    const res = insertUnder(tree, target, node)
+    tree = res.found ? res.nodes : [...tree, node]
+  }
+  return tree
 }

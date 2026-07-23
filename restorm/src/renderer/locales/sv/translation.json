@@ -2412,7 +2412,9 @@
       "movedRequest": "Flyttade begäran \"{{name}}\"",
       "movedScenario": "Flyttade scenariot \"{{name}}\"",
       "movedFolder": "Flyttade mappen \"{{name}}\"",
-      "movedEnvironmentFolder": "Flyttade miljömappen \"{{name}}\""
+      "movedEnvironmentFolder": "Flyttade miljömappen \"{{name}}\"",
+      "reorderedFolder": "Objekt omordnade i mappen ”{{name}}”",
+      "reorderedEnvironmentFolder": "Objekt omordnade i miljömappen ”{{name}}”"
     },
     "commitTitle": {
       "singleRequest": "Uppdatering av förfrågan \"{{name}}\"",
@@ -2474,5 +2476,13 @@
     "resolveConflicts": "Lös konflikter",
     "resetConfirmTitle": "Återställ till serverns version?",
     "resetConfirmBody": "Alla dina lokala ändringar tas bort permanent och ersätts med serverns version."
+  },
+  "gitHistory": {
+    "recoverConfirmTitle": "Återställ denna version?",
+    "recoverConfirmBody": "Det aktuella innehållet i den öppna filen ersätts med denna commits version. Ändringen committas inte — du kan själv committa och pusha den om du vill behålla den.",
+    "recoverConfirmAction": "Återställ",
+    "recoveredTitle": "Version återställd",
+    "recoveredBody": "Filen innehåller nu den valda commitens innehåll, ej committat.",
+    "recoverFailedTitle": "Återställningen misslyckades"
   }
 }

@@ -621,6 +621,29 @@ export class GitService {
     })
   }
 
+  /**
+   * Restore one file to its content at a past commit, writing it into the
+   * working tree WITHOUT staging or committing. Deliberately not a branch
+   * rewind: HEAD stays put, so the repo doesn't go "behind" — the recovered
+   * content is a plain uncommitted edit the user commits (and pushes)
+   * themselves if they want to keep it. Returns the recovered content so the
+   * caller can re-hydrate the open editor (otherwise the app's next autosave,
+   * still holding the pre-recovery tree in memory, would overwrite it).
+   */
+  public async recoverFileAtRevision(folder: string, filePath: string, revision: string): Promise<string> {
+    if (!isAbsolute(folder)) {
+      throw new Error(`recoverFileAtRevision: refusing non-absolute folder "${folder}"`)
+    }
+    if (!this.isPathWithinFolder(folder, filePath)) {
+      throw new Error(`recoverFileAtRevision: filePath escapes the repo folder: ${filePath}`)
+    }
+    return this.withFolderLock(folder, async () => {
+      const content = await this.git(folder).show([`${revision}:${filePath}`])
+      await writeFile(join(folder, filePath), content, 'utf-8')
+      return content
+    })
+  }
+
   /** Write the user's resolved content to disk and stage it (marks the
    * conflict resolved from git's point of view). Finalising the merge
    * (committing) is a separate `commit()` call once every conflict in the

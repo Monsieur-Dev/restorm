@@ -464,6 +464,7 @@
     "author": "Tekijä",
     "date": "Päivämäärä",
     "hash": "Hash",
-    "parents": "Vanhemmat"
+    "parents": "Vanhemmat",
+    "recoverVersion": "Palauta tämä versio"
   }
 }

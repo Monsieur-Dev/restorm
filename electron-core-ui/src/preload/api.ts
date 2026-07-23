@@ -647,6 +647,10 @@ export const createCoreUIAPI = (): CoreUiApi => ({
     writeResolvedConflict: async (folder: string, filePath: string, content: string): Promise<void> => {
       await ipcRenderer.invoke('git:write-resolved-conflict', folder, filePath, content)
     },
+    recoverFileAtRevision: async (folder: string, filePath: string, revision: string): Promise<string> => {
+      const result: unknown = await ipcRenderer.invoke('git:recover-file-at-revision', folder, filePath, revision)
+      return result as string
+    },
     abortMerge: async (folder: string): Promise<void> => {
       await ipcRenderer.invoke('git:abort-merge', folder)
     },

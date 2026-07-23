@@ -464,6 +464,7 @@
     "author": "作成者",
     "date": "日付",
     "hash": "ハッシュ",
-    "parents": "親"
+    "parents": "親",
+    "recoverVersion": "このバージョンを復元"
   }
 }

@@ -464,6 +464,7 @@
     "author": "작성자",
     "date": "날짜",
     "hash": "해시",
-    "parents": "부모"
+    "parents": "부모",
+    "recoverVersion": "이 버전 복구"
   }
 }

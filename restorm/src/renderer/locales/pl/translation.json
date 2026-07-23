@@ -2414,7 +2414,9 @@
       "movedRequest": "Przeniesiono żądanie \"{{name}}\"",
       "movedScenario": "Przeniesiono scenariusz \"{{name}}\"",
       "movedFolder": "Przeniesiono folder \"{{name}}\"",
-      "movedEnvironmentFolder": "Przeniesiono folder środowiska \"{{name}}\""
+      "movedEnvironmentFolder": "Przeniesiono folder środowiska \"{{name}}\"",
+      "reorderedFolder": "Zmieniono kolejność elementów w folderze „{{name}}”",
+      "reorderedEnvironmentFolder": "Zmieniono kolejność elementów w folderze środowiska „{{name}}”"
     },
     "commitTitle": {
       "singleRequest": "Aktualizacja żądania „{{name}}”",
@@ -2476,5 +2478,13 @@
     "resolveConflicts": "Rozwiąż konflikty",
     "resetConfirmTitle": "Przywrócić wersję serwera?",
     "resetConfirmBody": "Wszystkie zmiany lokalne zostaną trwale usunięte i zastąpione wersją serwera."
+  },
+  "gitHistory": {
+    "recoverConfirmTitle": "Przywrócić tę wersję?",
+    "recoverConfirmBody": "Bieżąca zawartość otwartego pliku zostanie zastąpiona wersją z tego zatwierdzenia. Zmiana nie jest zatwierdzana — możesz ją samodzielnie zatwierdzić i wypchnąć, jeśli chcesz ją zachować.",
+    "recoverConfirmAction": "Przywróć",
+    "recoveredTitle": "Wersja przywrócona",
+    "recoveredBody": "Plik zawiera teraz zawartość wybranego zatwierdzenia, niezatwierdzoną.",
+    "recoverFailedTitle": "Przywracanie nie powiodło się"
   }
 }

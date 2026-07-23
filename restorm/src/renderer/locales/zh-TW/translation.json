@@ -2411,7 +2411,9 @@
       "movedRequest": "已移動請求「{{name}}」",
       "movedScenario": "已移動場景「{{name}}」",
       "movedFolder": "已移動資料夾「{{name}}」",
-      "movedEnvironmentFolder": "已移動環境資料夾「{{name}}」"
+      "movedEnvironmentFolder": "已移動環境資料夾「{{name}}」",
+      "reorderedFolder": "已重新排序資料夾「{{name}}」中的項目",
+      "reorderedEnvironmentFolder": "已重新排序環境資料夾「{{name}}」中的項目"
     },
     "commitTitle": {
       "singleRequest": "更新請求 \"{{name}}\"",
@@ -2473,5 +2475,13 @@
     "resolveConflicts": "解決衝突",
     "resetConfirmTitle": "要重設為伺服器版本嗎？",
     "resetConfirmBody": "您所有的本機修改都將被永久刪除，並以伺服器版本取代。"
+  },
+  "gitHistory": {
+    "recoverConfirmTitle": "復原此版本？",
+    "recoverConfirmBody": "開啟檔案的目前內容將被替換為此提交的版本。變更不會被提交——如果想保留，你可以自行提交並推送。",
+    "recoverConfirmAction": "復原",
+    "recoveredTitle": "版本已復原",
+    "recoveredBody": "檔案現在包含所選提交的內容，未提交。",
+    "recoverFailedTitle": "復原失敗"
   }
 }

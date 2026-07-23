@@ -464,6 +464,7 @@
     "author": "Autori",
     "date": "Data",
     "hash": "Hash",
-    "parents": "Prindërit"
+    "parents": "Prindërit",
+    "recoverVersion": "Rikthe këtë version"
   }
 }

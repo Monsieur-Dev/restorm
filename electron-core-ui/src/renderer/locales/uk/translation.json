@@ -464,6 +464,7 @@
     "author": "Автор",
     "date": "Дата",
     "hash": "Хеш",
-    "parents": "Батьки"
+    "parents": "Батьки",
+    "recoverVersion": "Відновити цю версію"
   }
 }

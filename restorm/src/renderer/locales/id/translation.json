@@ -2411,7 +2411,9 @@
       "movedRequest": "Memindahkan permintaan \"{{name}}\"",
       "movedScenario": "Memindahkan skenario \"{{name}}\"",
       "movedFolder": "Memindahkan folder \"{{name}}\"",
-      "movedEnvironmentFolder": "Memindahkan folder lingkungan \"{{name}}\""
+      "movedEnvironmentFolder": "Memindahkan folder lingkungan \"{{name}}\"",
+      "reorderedFolder": "Urutan item diubah di folder \"{{name}}\"",
+      "reorderedEnvironmentFolder": "Urutan item diubah di folder lingkungan \"{{name}}\""
     },
     "commitTitle": {
       "singleRequest": "Pembaruan permintaan \"{{name}}\"",
@@ -2473,5 +2475,13 @@
     "resolveConflicts": "Selesaikan konflik",
     "resetConfirmTitle": "Setel ulang ke versi server?",
     "resetConfirmBody": "Semua perubahan lokal Anda akan dihapus permanen dan diganti dengan versi server."
+  },
+  "gitHistory": {
+    "recoverConfirmTitle": "Pulihkan versi ini?",
+    "recoverConfirmBody": "Konten file yang terbuka saat ini akan diganti dengan versi commit ini. Perubahan tidak di-commit — Anda dapat meng-commit dan mendorongnya sendiri jika ingin menyimpannya.",
+    "recoverConfirmAction": "Pulihkan",
+    "recoveredTitle": "Versi dipulihkan",
+    "recoveredBody": "File kini berisi konten commit yang dipilih, belum di-commit.",
+    "recoverFailedTitle": "Pemulihan gagal"
   }
 }

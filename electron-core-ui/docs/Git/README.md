@@ -13,7 +13,12 @@ newer-remote-version detection, conflict-blob retrieval, and a debounced
   semi-pull), `getConflictVersions` (`:1`/`:2`/`:3` index stages),
   `getFileAtHead` (the last-committed content of a path, `null` if it didn't
   exist at `HEAD` — for diffing the working copy against the last commit
-  without touching the index), `writeResolvedConflict`, `abortMerge`,
+  without touching the index), `recoverFileAtRevision` (restore one file to
+  its content at a given commit, written into the WORKING TREE only — not
+  staged, not committed, HEAD stays put so the repo never goes "behind";
+  returns the recovered content so the host can re-hydrate the open editor
+  before its next autosave overwrites it), `writeResolvedConflict`,
+  `abortMerge`,
   `getConflictCommitTimestamps` (`HEAD`/`MERGE_HEAD` commit times, Unix
   seconds, `null` when a ref can't be read — a generic tie-breaker a host's
   conflict UI can use when two conflicting versions carry no other

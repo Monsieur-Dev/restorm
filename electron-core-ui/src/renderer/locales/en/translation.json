@@ -464,6 +464,7 @@
     "author": "Author",
     "date": "Date",
     "hash": "Hash",
-    "parents": "Parents"
+    "parents": "Parents",
+    "recoverVersion": "Recover this version"
   }
 }

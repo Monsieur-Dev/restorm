@@ -2411,7 +2411,9 @@
       "movedRequest": "Đã di chuyển yêu cầu \"{{name}}\"",
       "movedScenario": "Đã di chuyển kịch bản \"{{name}}\"",
       "movedFolder": "Đã di chuyển thư mục \"{{name}}\"",
-      "movedEnvironmentFolder": "Đã di chuyển thư mục môi trường \"{{name}}\""
+      "movedEnvironmentFolder": "Đã di chuyển thư mục môi trường \"{{name}}\"",
+      "reorderedFolder": "Đã sắp xếp lại các mục trong thư mục \"{{name}}\"",
+      "reorderedEnvironmentFolder": "Đã sắp xếp lại các mục trong thư mục môi trường \"{{name}}\""
     },
     "commitTitle": {
       "singleRequest": "Cập nhật yêu cầu \"{{name}}\"",
@@ -2473,5 +2475,13 @@
     "resolveConflicts": "Giải quyết xung đột",
     "resetConfirmTitle": "Đặt lại về phiên bản máy chủ?",
     "resetConfirmBody": "Toàn bộ thay đổi cục bộ của bạn sẽ bị xóa vĩnh viễn và thay bằng phiên bản máy chủ."
+  },
+  "gitHistory": {
+    "recoverConfirmTitle": "Khôi phục phiên bản này?",
+    "recoverConfirmBody": "Nội dung hiện tại của tệp đang mở sẽ được thay bằng phiên bản của commit này. Thay đổi không được commit — bạn có thể tự commit và đẩy nếu muốn giữ lại.",
+    "recoverConfirmAction": "Khôi phục",
+    "recoveredTitle": "Đã khôi phục phiên bản",
+    "recoveredBody": "Tệp hiện chứa nội dung của commit đã chọn, chưa commit.",
+    "recoverFailedTitle": "Khôi phục thất bại"
   }
 }

@@ -170,9 +170,10 @@ describe('reorganising the tree', () => {
     expect(changes).toEqual([{ kind: 'request', name: 'Find pet', action: 'moved' }])
   })
 
-  it('still reports a plain reorder as no change at all', () => {
-    // Same parent, different position: the file's byte order changes, the
-    // project does not.
+  it('reports a plain reorder at the container folder level', () => {
+    // Same parent, different position: nothing about the requests changed,
+    // but the folder was reorganised — the commit message should say so
+    // (named once, on the container, not per shuffled item).
     const before = [
       { id: 'f1', name: 'Folder A', tags: [], configuration: {}, items: [
         { id: 'r1', name: 'Find pet', type: 'http', tags: [] },
@@ -186,7 +187,22 @@ describe('reorganising the tree', () => {
       ] }
     ] as unknown as FolderItem[]
 
-    expect(diffProjectEntities(before, after)).toEqual([])
+    expect(diffProjectEntities(before, after)).toEqual([{ kind: 'folder', name: 'Folder A', action: 'reordered' }])
+  })
+
+  it('does not report a reorder when membership changed (that churn is on the per-entity lines)', () => {
+    const before = [
+      { id: 'f1', name: 'A', tags: [], configuration: {}, items: [{ id: 'r1', name: 'One', type: 'http', tags: [] }] }
+    ] as unknown as FolderItem[]
+    const after = [
+      { id: 'f1', name: 'A', tags: [], configuration: {}, items: [
+        { id: 'r2', name: 'Two', type: 'http', tags: [] },
+        { id: 'r1', name: 'One', type: 'http', tags: [] }
+      ] }
+    ] as unknown as FolderItem[]
+
+    // r2 added; NO 'reordered' line (the set changed, not just the order).
+    expect(diffProjectEntities(before, after)).toEqual([{ kind: 'request', name: 'Two', action: 'added' }])
   })
 
   it('reports a move as moved, not as modified, when the content is untouched', () => {

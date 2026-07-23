@@ -2412,7 +2412,9 @@
       "movedRequest": "U zhvendos kërkesa \"{{name}}\"",
       "movedScenario": "U zhvendos skenari \"{{name}}\"",
       "movedFolder": "U zhvendos dosja \"{{name}}\"",
-      "movedEnvironmentFolder": "U zhvendos dosja e mjedisit \"{{name}}\""
+      "movedEnvironmentFolder": "U zhvendos dosja e mjedisit \"{{name}}\"",
+      "reorderedFolder": "Elementet u rirenditën në dosjen «{{name}}»",
+      "reorderedEnvironmentFolder": "Elementet u rirenditën në dosjen e mjedisit «{{name}}»"
     },
     "commitTitle": {
       "singleRequest": "Përditësim i kërkesës \"{{name}}\"",
@@ -2474,5 +2476,13 @@
     "resolveConflicts": "Zgjidh konfliktet",
     "resetConfirmTitle": "Të rikthehet te versioni i serverit?",
     "resetConfirmBody": "Të gjitha ndryshimet tuaja lokale do të fshihen përfundimisht dhe do të zëvendësohen nga versioni i serverit."
+  },
+  "gitHistory": {
+    "recoverConfirmTitle": "Ta rikthesh këtë version?",
+    "recoverConfirmBody": "Përmbajtja aktuale e skedarit të hapur do të zëvendësohet me versionin e këtij commit-i. Ndryshimi nuk kryhet — mund ta kryesh dhe ta shtysh vetë nëse dëshiron ta mbash.",
+    "recoverConfirmAction": "Rikthe",
+    "recoveredTitle": "Versioni u rikthye",
+    "recoveredBody": "Skedari tani përmban përmbajtjen e commit-it të zgjedhur, të pakryer.",
+    "recoverFailedTitle": "Rikthimi dështoi"
   }
 }

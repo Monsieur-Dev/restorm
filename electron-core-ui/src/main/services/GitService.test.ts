@@ -371,6 +371,27 @@ describe('GitService', () => {
     })
   })
 
+  describe('recoverFileAtRevision', () => {
+    it('reads the file at the revision, writes it to the working tree, and does NOT stage or commit', async () => {
+      mockGit.show.mockResolvedValueOnce('old: content')
+
+      const content = await service.recoverFileAtRevision('/proj', 'requests/foo.yaml', 'abc123')
+
+      expect(mockGit.show).toHaveBeenCalledWith(['abc123:requests/foo.yaml'])
+      expect(vi.mocked(writeFile)).toHaveBeenCalledWith('/proj/requests/foo.yaml', 'old: content', 'utf-8')
+      // The whole point: no staging, no commit — HEAD stays put, the repo
+      // never goes "behind", and the user commits it themselves if they wish.
+      expect(mockGit.add).not.toHaveBeenCalled()
+      expect(mockGit.commit).not.toHaveBeenCalled()
+      expect(content).toBe('old: content')
+    })
+
+    it('rejects a filePath that escapes the repo folder, writing nothing', async () => {
+      await expect(service.recoverFileAtRevision('/proj', '../../etc/passwd', 'abc123')).rejects.toThrow('escapes the repo folder')
+      expect(vi.mocked(writeFile)).not.toHaveBeenCalled()
+    })
+  })
+
   describe('abortMerge', () => {
     it('runs merge --abort', async () => {
       await service.abortMerge('/proj')

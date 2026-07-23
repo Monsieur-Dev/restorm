@@ -2413,7 +2413,9 @@
       "movedRequest": "Премештен захтев \"{{name}}\"",
       "movedScenario": "Премештен сценарио \"{{name}}\"",
       "movedFolder": "Премештена фасцикла \"{{name}}\"",
-      "movedEnvironmentFolder": "Премештена фасцикла окружења \"{{name}}\""
+      "movedEnvironmentFolder": "Премештена фасцикла окружења \"{{name}}\"",
+      "reorderedFolder": "Промењен редослед ставки у фасцикли „{{name}}“",
+      "reorderedEnvironmentFolder": "Промењен редослед ставки у фасцикли окружења „{{name}}“"
     },
     "commitTitle": {
       "singleRequest": "Ažuriranje zahteva „{{name}}”",
@@ -2475,5 +2477,13 @@
     "resolveConflicts": "Реши сукобе",
     "resetConfirmTitle": "Вратити на верзију сервера?",
     "resetConfirmBody": "Све ваше локалне измене биће трајно обрисане и замењене верзијом сервера."
+  },
+  "gitHistory": {
+    "recoverConfirmTitle": "Вратити ову верзију?",
+    "recoverConfirmBody": "Тренутни садржај отворене датотеке биће замењен верзијом овог комита. Промена се не комитује — можете је сами комитовати и погурати ако желите да је задржите.",
+    "recoverConfirmAction": "Врати",
+    "recoveredTitle": "Верзија враћена",
+    "recoveredBody": "Датотека сада садржи садржај изабраног комита, некомитован.",
+    "recoverFailedTitle": "Враћање није успело"
   }
 }

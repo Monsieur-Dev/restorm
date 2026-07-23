@@ -464,6 +464,7 @@
     "author": "Forfatter",
     "date": "Dato",
     "hash": "Hash",
-    "parents": "Foreldre"
+    "parents": "Foreldre",
+    "recoverVersion": "Gjenopprett denne versjonen"
   }
 }

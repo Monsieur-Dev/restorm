@@ -2412,7 +2412,9 @@
       "movedRequest": "Déplacement de la requête « {{name}} »",
       "movedScenario": "Déplacement du scénario « {{name}} »",
       "movedFolder": "Déplacement du dossier « {{name}} »",
-      "movedEnvironmentFolder": "Déplacement du dossier d'environnement « {{name}} »"
+      "movedEnvironmentFolder": "Déplacement du dossier d'environnement « {{name}} »",
+      "reorderedFolder": "Réorganisation des éléments du dossier « {{name}} »",
+      "reorderedEnvironmentFolder": "Réorganisation des éléments du dossier d'environnement « {{name}} »"
     },
     "commitTitle": {
       "singleRequest": "Mise à jour de la requête « {{name}} »",
@@ -2474,5 +2476,13 @@
     "resolveConflicts": "Résoudre les conflits",
     "resetConfirmTitle": "Réinitialiser sur la version du serveur ?",
     "resetConfirmBody": "Toutes vos modifications locales seront définitivement supprimées et remplacées par la version du serveur."
+  },
+  "gitHistory": {
+    "recoverConfirmTitle": "Récupérer cette version ?",
+    "recoverConfirmBody": "Le contenu actuel du fichier ouvert sera remplacé par la version de ce commit. Le changement n'est pas commité — tu pourras le commiter et le pousser toi-même si tu veux le conserver.",
+    "recoverConfirmAction": "Récupérer",
+    "recoveredTitle": "Version récupérée",
+    "recoveredBody": "Le fichier contient maintenant le contenu du commit sélectionné, non commité.",
+    "recoverFailedTitle": "Échec de la récupération"
   }
 }

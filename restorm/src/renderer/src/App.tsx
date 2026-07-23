@@ -165,6 +165,7 @@ import { usePushModal } from './hooks/usePushModal'
 import { useGitPullConflict } from './hooks/useGitPullConflict'
 import { GitUpdateRequiredModal } from './components/GitConflict/GitUpdateRequiredModal'
 import { GitResetToServerConfirmModal } from './components/GitConflict/GitResetToServerConfirmModal'
+import { GitRecoverVersionConfirmModal } from './components/GitConflict/GitRecoverVersionConfirmModal'
 import { useGitUpdateActions } from './hooks/useGitUpdateActions'
 import { GitConflictResolutionModal } from './components/GitConflict/GitConflictResolutionModal'
 import { useMcpTreeReplace } from './hooks/useMcpTreeReplace'
@@ -519,6 +520,29 @@ const App: React.FC = () => {
   // update prompt offers, reachable at any time and not only when the
   // remote happens to be ahead. Confirmed first: it throws away work.
   const [resetToServerConfirm, setResetToServerConfirm] = useState(false)
+  // "Recover this version" from the git-history view: the commit the user
+  // right-clicked, held until they confirm (it overwrites the open file).
+  const [recoverVersionHash, setRecoverVersionHash] = useState<string | null>(null)
+  const handleRecoverVersion = useCallback((hash: string) => { setRecoverVersionHash(hash) }, [])
+  const confirmRecoverVersion = useCallback(() => {
+    const hash = recoverVersionHash
+    setRecoverVersionHash(null)
+    if (hash === null || filePath?.endsWith('.restorm') !== true) return
+    const sep = Math.max(filePath.lastIndexOf('/'), filePath.lastIndexOf('\\'))
+    const folder = filePath.slice(0, sep)
+    const relativePath = filePath.slice(sep + 1)
+    void window.api.git.recoverFileAtRevision(folder, relativePath, hash).then(() => {
+      // The old content is on disk now, uncommitted. Re-open through the same
+      // path a clean pull uses so the tree + open editor tabs re-read it —
+      // otherwise the app's next autosave, still holding the pre-recovery
+      // tree in memory, would write the current version back over it.
+      refreshOpenFileAfterPull()
+      setGitHistory((prev) => ({ ...prev, open: false }))
+      toasterService.push('app', { title: t('gitHistory.recoveredTitle'), body: t('gitHistory.recoveredBody'), durationMs: 5000 })
+    }).catch((error: unknown) => {
+      toasterService.push('app', { title: t('gitHistory.recoverFailedTitle'), body: String(error), durationMs: 10000 })
+    })
+  }, [recoverVersionHash, filePath, refreshOpenFileAfterPull, t])
   const { takeServerVersion } = useGitUpdateActions()
   const handleGitResetToServer = useCallback(() => { setResetToServerConfirm(true) }, [])
   const confirmGitResetToServer = useCallback(() => {
@@ -3206,8 +3230,15 @@ const App: React.FC = () => {
         <GitHistoryView
           commits={gitHistory.commits}
           {...(gitHistory.mainTipHash !== undefined ? { mainTipHash: gitHistory.mainTipHash } : {})}
+          onRecoverVersion={handleRecoverVersion}
         />
       </Modal>
+
+      <GitRecoverVersionConfirmModal
+        isOpen={recoverVersionHash !== null}
+        onConfirm={confirmRecoverVersion}
+        onCancel={() => { setRecoverVersionHash(null) }}
+      />
 
       {/* Delete confirmation modal */}
       <DeleteConfirmationModal

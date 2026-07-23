@@ -464,6 +464,7 @@
     "author": "Yazar",
     "date": "Tarih",
     "hash": "Hash",
-    "parents": "Üst commitler"
+    "parents": "Üst commitler",
+    "recoverVersion": "Bu sürümü geri yükle"
   }
 }

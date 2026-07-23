@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { VerticalSashContainer } from '../Sash'
 import { ScrollableElement } from '../ScrollableElement'
+import { ContextMenu } from '../ContextMenu/ContextMenu'
 import { computeLaneLayout } from './laneLayout'
 import type { GitHistoryCommit, LaneRow } from './types'
 import './gitHistoryView.css'
@@ -14,6 +15,14 @@ export interface GitHistoryViewProps {
   mainTipHash?: string
   /** Initial selection; defaults to the first (newest) commit. */
   initialSelectedHash?: string
+  /**
+   * Restore the open file to a past commit's content. Wired to the row's
+   * right-click "recover this version" entry; the host owns the actual
+   * checkout-file-at-revision + re-hydrate. Omitting it hides the entry.
+   * The entry is disabled on the commit the working copy is currently at
+   * (recovering the current version is a no-op).
+   */
+  onRecoverVersion?: (hash: string) => void
   'data-testid'?: string
 }
 
@@ -84,10 +93,13 @@ export const GitHistoryView: React.FC<GitHistoryViewProps> = ({
   commits,
   mainTipHash,
   initialSelectedHash,
+  onRecoverVersion,
   'data-testid': dataTestId = 'git-history-view'
 }) => {
   const { t, i18n } = useTranslation()
   const [selectedHash, setSelectedHash] = useState<string | null>(initialSelectedHash ?? commits[0]?.hash ?? null)
+  // Right-click "recover this version" menu. `null` = closed.
+  const [menu, setMenu] = useState<{ x: number; y: number; hash: string; isHead: boolean } | null>(null)
 
   const rows = useMemo(() => computeLaneLayout(commits, mainTipHash), [commits, mainTipHash])
   const gutterLanes = useMemo(() => Math.max(1, ...rows.map((r) => r.laneCount)), [rows])
@@ -116,6 +128,13 @@ export const GitHistoryView: React.FC<GitHistoryViewProps> = ({
               ].filter(Boolean).join(' ')}
               style={{ height: ROW_HEIGHT }}
               onClick={() => { setSelectedHash(commit.hash) }}
+              onContextMenu={onRecoverVersion
+                ? (event) => {
+                    event.preventDefault()
+                    setSelectedHash(commit.hash)
+                    setMenu({ x: event.clientX, y: event.clientY, hash: commit.hash, isHead })
+                  }
+                : undefined}
               onKeyDown={(event) => {
                 if (event.key === 'Enter' || event.key === ' ') {
                   event.preventDefault()
@@ -187,6 +206,27 @@ export const GitHistoryView: React.FC<GitHistoryViewProps> = ({
         minRightWidth={260}
         data-testid={`${dataTestId}-sash`}
       />
+      {menu && onRecoverVersion && (
+        <ContextMenu
+          visible
+          x={menu.x}
+          y={menu.y}
+          onRequestClose={() => { setMenu(null) }}
+          data-testid={`${dataTestId}-context-menu`}
+          items={[{
+            id: 'recover-version',
+            label: t('gitHistory.recoverVersion'),
+            icon: 'history',
+            // Recovering the commit the working copy is already at is a no-op.
+            disabled: menu.isHead,
+            onClick: () => {
+              onRecoverVersion(menu.hash)
+              setMenu(null)
+            },
+            'data-testid': `${dataTestId}-recover-version`
+          }]}
+        />
+      )}
     </div>
   )
 }

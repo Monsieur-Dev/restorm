@@ -6,7 +6,8 @@ import {
   gitStageArgs,
   gitCommitArgs,
   gitConflictVersionsArgs,
-  gitWriteResolvedConflictArgs
+  gitWriteResolvedConflictArgs,
+  gitRecoverFileArgs
 } from '../../ipc/schemas'
 import { getGitService } from '../../services'
 
@@ -77,6 +78,10 @@ export function registerGitHandlers(): void {
 
   validatedHandle('git:reset-hard-to-remote', gitFolderArgs, async (_event, [folder]) => {
     return service.resetHardToRemote(folder)
+  })
+
+  validatedHandle('git:recover-file-at-revision', gitRecoverFileArgs, async (_event, [folder, filePath, revision]) => {
+    return service.recoverFileAtRevision(folder, filePath, revision)
   })
 
   validatedHandle('git:write-resolved-conflict', gitWriteResolvedConflictArgs, async (_event, [folder, filePath, content]) => {

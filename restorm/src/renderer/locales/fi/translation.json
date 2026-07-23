@@ -2412,7 +2412,9 @@
       "movedRequest": "Siirrettiin pyyntö \"{{name}}\"",
       "movedScenario": "Siirrettiin skenaario \"{{name}}\"",
       "movedFolder": "Siirrettiin kansio \"{{name}}\"",
-      "movedEnvironmentFolder": "Siirrettiin ympäristökansio \"{{name}}\""
+      "movedEnvironmentFolder": "Siirrettiin ympäristökansio \"{{name}}\"",
+      "reorderedFolder": "Kohteiden järjestys muutettu kansiossa ”{{name}}”",
+      "reorderedEnvironmentFolder": "Kohteiden järjestys muutettu ympäristökansiossa ”{{name}}”"
     },
     "commitTitle": {
       "singleRequest": "Päivitys pyyntöön \"{{name}}\"",
@@ -2474,5 +2476,13 @@
     "resolveConflicts": "Ratkaise ristiriidat",
     "resetConfirmTitle": "Palautetaanko palvelimen versioon?",
     "resetConfirmBody": "Kaikki paikalliset muutoksesi poistetaan pysyvästi ja korvataan palvelimen versiolla."
+  },
+  "gitHistory": {
+    "recoverConfirmTitle": "Palautetaanko tämä versio?",
+    "recoverConfirmBody": "Avoimen tiedoston nykyinen sisältö korvataan tämän committauksen versiolla. Muutosta ei committata — voit committata ja työntää sen itse, jos haluat säilyttää sen.",
+    "recoverConfirmAction": "Palauta",
+    "recoveredTitle": "Versio palautettu",
+    "recoveredBody": "Tiedosto sisältää nyt valitun committauksen sisällön, committamatta.",
+    "recoverFailedTitle": "Palautus epäonnistui"
   }
 }

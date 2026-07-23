@@ -4,7 +4,7 @@ import { isEnvironmentFolder, isFolder, isScenario } from '../types/folderTypes'
 import { prepareForSerialization, stripIds } from '../utils/serialization'
 
 export type GitEntityKind = 'folder' | 'environmentFolder' | 'request' | 'scenario'
-export type GitChangeAction = 'added' | 'modified' | 'moved' | 'deleted'
+export type GitChangeAction = 'added' | 'modified' | 'moved' | 'deleted' | 'reordered'
 
 export interface GitEntityChange {
   kind: GitEntityKind
@@ -171,10 +171,46 @@ export function diffProjectEntities(beforeItems: FolderItem[], afterItems: Folde
     }
   }
 
+  // Reorder — reported at the CONTAINER level, one line per folder whose
+  // children changed order (same set, different sequence). Reordering used
+  // to be invisible (the diff keys on id, not position), so publishing a
+  // pure reorganisation produced no message line; now the folder that was
+  // reorganised is named. A container whose membership changed (add / move /
+  // delete) is NOT reported here — that churn is already covered by the
+  // per-entity lines above.
+  const orderedChildIds = (items: FolderItem[]): Map<string, string[]> => {
+    const out = new Map<string, string[]>()
+    const walk = (nodes: FolderItem[]): void => {
+      for (const node of nodes) {
+        const children = (node as FolderItem & { items?: FolderItem[] }).items
+        if (children && children.length > 0) {
+          out.set(node.id, children.map((c) => c.id))
+          walk(children)
+        }
+      }
+    }
+    walk(items)
+    return out
+  }
+  const beforeOrder = orderedChildIds(prepareForSerialization(beforeItems))
+  const afterOrder = orderedChildIds(prepareForSerialization(afterItems))
+  const sameSet = (a: string[], b: string[]): boolean => a.length === b.length && [...a].sort().every((x, i) => x === [...b].sort()[i])
+  const sameSeq = (a: string[], b: string[]): boolean => a.length === b.length && a.every((x, i) => x === b[i])
+  for (const [folderId, afterKids] of afterOrder) {
+    const beforeKids = beforeOrder.get(folderId)
+    if (!beforeKids) continue
+    if (sameSet(beforeKids, afterKids) && !sameSeq(beforeKids, afterKids)) {
+      const entity = after.get(folderId)
+      if (entity && (entity.kind === 'folder' || entity.kind === 'environmentFolder')) {
+        changes.push({ kind: entity.kind, name: entity.name, action: 'reordered' })
+      }
+    }
+  }
+
   // Deterministic order — the same diff always renders the same commit
   // body, independent of the two Maps' insertion order.
   const kindOrder: Record<GitEntityKind, number> = { folder: 0, environmentFolder: 1, request: 2, scenario: 3 }
-  const actionOrder: Record<GitChangeAction, number> = { added: 0, modified: 1, moved: 2, deleted: 3 }
+  const actionOrder: Record<GitChangeAction, number> = { added: 0, modified: 1, moved: 2, reordered: 3, deleted: 4 }
   changes.sort((a, b) =>
     kindOrder[a.kind] - kindOrder[b.kind] ||
     actionOrder[a.action] - actionOrder[b.action] ||

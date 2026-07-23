@@ -2414,7 +2414,9 @@
       "movedRequest": "Přesunut požadavek \"{{name}}\"",
       "movedScenario": "Přesunut scénář \"{{name}}\"",
       "movedFolder": "Přesunuta složka \"{{name}}\"",
-      "movedEnvironmentFolder": "Přesunuta složka prostředí \"{{name}}\""
+      "movedEnvironmentFolder": "Přesunuta složka prostředí \"{{name}}\"",
+      "reorderedFolder": "Změněno pořadí položek ve složce „{{name}}“",
+      "reorderedEnvironmentFolder": "Změněno pořadí položek ve složce prostředí „{{name}}“"
     },
     "commitTitle": {
       "singleRequest": "Aktualizace požadavku „{{name}}“",
@@ -2476,5 +2478,13 @@
     "resolveConflicts": "Vyřešit konflikty",
     "resetConfirmTitle": "Obnovit na verzi serveru?",
     "resetConfirmBody": "Všechny vaše místní změny budou trvale smazány a nahrazeny verzí serveru."
+  },
+  "gitHistory": {
+    "recoverConfirmTitle": "Obnovit tuto verzi?",
+    "recoverConfirmBody": "Aktuální obsah otevřeného souboru bude nahrazen verzí tohoto commitu. Změna se necommituje — můžete ji sami commitnout a odeslat, pokud si ji chcete ponechat.",
+    "recoverConfirmAction": "Obnovit",
+    "recoveredTitle": "Verze obnovena",
+    "recoveredBody": "Soubor nyní obsahuje obsah vybraného commitu, necommitovaný.",
+    "recoverFailedTitle": "Obnovení se nezdařilo"
   }
 }

@@ -746,6 +746,7 @@ export function ensureCoreUiWebApiShim(): void {
     resetToRemoteKeepingWorkingTree: (): Promise<GitResetResult> => Promise.resolve({ success: false, error: 'not supported in the web shim' }),
     resetHardToRemote: (): Promise<GitResetResult> => Promise.resolve({ success: false, error: 'not supported in the web shim' }),
     writeResolvedConflict: (): Promise<void> => Promise.resolve(),
+    recoverFileAtRevision: (): Promise<string> => Promise.resolve(''),
     abortMerge: (): Promise<void> => Promise.resolve(),
     getConflictCommitTimestamps: (): Promise<GitConflictCommitTimestamps> => Promise.resolve({ ours: null, theirs: null }),
     setActiveFolder: (): Promise<void> => Promise.resolve(),

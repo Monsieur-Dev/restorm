@@ -464,6 +464,7 @@
     "author": "作者",
     "date": "日期",
     "hash": "雜湊",
-    "parents": "父提交"
+    "parents": "父提交",
+    "recoverVersion": "復原此版本"
   }
 }

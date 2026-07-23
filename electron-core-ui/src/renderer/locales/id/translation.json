@@ -464,6 +464,7 @@
     "author": "Penulis",
     "date": "Tanggal",
     "hash": "Hash",
-    "parents": "Induk"
+    "parents": "Induk",
+    "recoverVersion": "Pulihkan versi ini"
   }
 }

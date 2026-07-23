@@ -464,6 +464,7 @@
     "author": "Szerző",
     "date": "Dátum",
     "hash": "Hash",
-    "parents": "Szülők"
+    "parents": "Szülők",
+    "recoverVersion": "Ezen verzió visszaállítása"
   }
 }

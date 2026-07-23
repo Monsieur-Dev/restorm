@@ -2412,7 +2412,9 @@
       "movedRequest": "\"{{name}}\" isteği taşındı",
       "movedScenario": "\"{{name}}\" senaryosu taşındı",
       "movedFolder": "\"{{name}}\" klasörü taşındı",
-      "movedEnvironmentFolder": "\"{{name}}\" ortam klasörü taşındı"
+      "movedEnvironmentFolder": "\"{{name}}\" ortam klasörü taşındı",
+      "reorderedFolder": "\"{{name}}\" klasöründeki öğeler yeniden sıralandı",
+      "reorderedEnvironmentFolder": "\"{{name}}\" ortam klasöründeki öğeler yeniden sıralandı"
     },
     "commitTitle": {
       "singleRequest": "\"{{name}}\" isteğinde güncelleme",
@@ -2474,5 +2476,13 @@
     "resolveConflicts": "Çakışmaları çöz",
     "resetConfirmTitle": "Sunucu sürümüne sıfırlansın mı?",
     "resetConfirmBody": "Tüm yerel değişiklikleriniz kalıcı olarak silinecek ve sunucu sürümüyle değiştirilecek."
+  },
+  "gitHistory": {
+    "recoverConfirmTitle": "Bu sürüm geri yüklensin mi?",
+    "recoverConfirmBody": "Açık dosyanın mevcut içeriği bu işlemenin sürümüyle değiştirilecek. Değişiklik işlenmez — saklamak isterseniz kendiniz işleyip gönderebilirsiniz.",
+    "recoverConfirmAction": "Geri yükle",
+    "recoveredTitle": "Sürüm geri yüklendi",
+    "recoveredBody": "Dosya artık seçili işlemenin içeriğini işlenmemiş olarak içeriyor.",
+    "recoverFailedTitle": "Geri yükleme başarısız"
   }
 }

@@ -464,6 +464,7 @@
     "author": "Auteur",
     "date": "Datum",
     "hash": "Hash",
-    "parents": "Ouders"
+    "parents": "Ouders",
+    "recoverVersion": "Deze versie herstellen"
   }
 }

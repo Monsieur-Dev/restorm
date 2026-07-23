@@ -2411,7 +2411,9 @@
       "movedRequest": "リクエスト「{{name}}」を移動",
       "movedScenario": "シナリオ「{{name}}」を移動",
       "movedFolder": "フォルダー「{{name}}」を移動",
-      "movedEnvironmentFolder": "環境フォルダー「{{name}}」を移動"
+      "movedEnvironmentFolder": "環境フォルダー「{{name}}」を移動",
+      "reorderedFolder": "フォルダー「{{name}}」内の項目を並べ替えました",
+      "reorderedEnvironmentFolder": "環境フォルダー「{{name}}」内の項目を並べ替えました"
     },
     "commitTitle": {
       "singleRequest": "リクエスト「{{name}}」の更新",
@@ -2473,5 +2475,13 @@
     "resolveConflicts": "競合を解決",
     "resetConfirmTitle": "サーバーのバージョンに戻しますか？",
     "resetConfirmBody": "ローカルの変更はすべて完全に削除され、サーバーのバージョンに置き換えられます。"
+  },
+  "gitHistory": {
+    "recoverConfirmTitle": "このバージョンを復元しますか？",
+    "recoverConfirmBody": "開いているファイルの現在の内容は、このコミットのバージョンに置き換えられます。変更はコミットされません。残したい場合は自分でコミットしてプッシュできます。",
+    "recoverConfirmAction": "復元",
+    "recoveredTitle": "バージョンを復元しました",
+    "recoveredBody": "ファイルには選択したコミットの内容が未コミットで含まれています。",
+    "recoverFailedTitle": "復元に失敗しました"
   }
 }

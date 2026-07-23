@@ -118,6 +118,7 @@ declare global {
         resetToRemoteKeepingWorkingTree: (folder: string) => Promise<GitResetResult>
         resetHardToRemote: (folder: string) => Promise<GitResetResult>
         writeResolvedConflict: (folder: string, filePath: string, content: string) => Promise<void>
+        recoverFileAtRevision: (folder: string, filePath: string, revision: string) => Promise<string>
         abortMerge: (folder: string) => Promise<void>
         getConflictCommitTimestamps: (folder: string) => Promise<GitConflictCommitTimestamps>
         setActiveFolder: (folder: string | null) => Promise<void>

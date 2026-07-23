@@ -442,3 +442,184 @@ describe('successive round-trips with more than one other person', () => {
     expect((merged[1] as Request).name).toBe('Ajout du troisième')
   })
 })
+
+describe('one-sided structural adoption (their move / reorder, we did not touch it)', () => {
+  it('adopts a remote MOVE: they moved a request to another folder, we left it alone', () => {
+    // Base: r1 lives in f1. They moved it to f2; we changed nothing structural.
+    // Their move must be adopted — before, r1 stayed in f1 (their move lost).
+    const base: FolderItem[] = [
+      makeFolder('f1', 'F1', [makeRequest('r1', 'Req')]),
+      makeFolder('f2', 'F2', [])
+    ]
+    const ours: FolderItem[] = [
+      makeFolder('f1', 'F1', [makeRequest('r1', 'Req')]),
+      makeFolder('f2', 'F2', [])
+    ]
+    const theirs: FolderItem[] = [
+      makeFolder('f1', 'F1', []),
+      makeFolder('f2', 'F2', [makeRequest('r1', 'Req')])
+    ]
+
+    const merged = buildMergedProjectTree(ours, theirs, {}, undefined, base)
+
+    const f1 = merged.find((i) => i.id === 'f1') as Folder
+    const f2 = merged.find((i) => i.id === 'f2') as Folder
+    expect(f1.items.map((i) => i.id)).toEqual([])
+    expect(f2.items.map((i) => i.id)).toEqual(['r1'])
+  })
+
+  it('keeps OUR move when only we moved it', () => {
+    const base: FolderItem[] = [
+      makeFolder('f1', 'F1', [makeRequest('r1', 'Req')]),
+      makeFolder('f2', 'F2', [])
+    ]
+    const ours: FolderItem[] = [
+      makeFolder('f1', 'F1', []),
+      makeFolder('f2', 'F2', [makeRequest('r1', 'Req')])
+    ]
+    const theirs: FolderItem[] = [
+      makeFolder('f1', 'F1', [makeRequest('r1', 'Req')]),
+      makeFolder('f2', 'F2', [])
+    ]
+
+    const merged = buildMergedProjectTree(ours, theirs, {}, undefined, base)
+
+    const f2 = merged.find((i) => i.id === 'f2') as Folder
+    expect(f2.items.map((i) => i.id)).toEqual(['r1'])
+  })
+
+  it('merges their MOVE with our FIELD edit on the same item', () => {
+    // They moved r1 to f2; we renamed r1. Result: r1 in f2, with our name.
+    const base: FolderItem[] = [
+      makeFolder('f1', 'F1', [makeRequest('r1', 'Base')]),
+      makeFolder('f2', 'F2', [])
+    ]
+    const ours: FolderItem[] = [
+      makeFolder('f1', 'F1', [makeRequest('r1', 'Our name')]),
+      makeFolder('f2', 'F2', [])
+    ]
+    const theirs: FolderItem[] = [
+      makeFolder('f1', 'F1', []),
+      makeFolder('f2', 'F2', [makeRequest('r1', 'Base')])
+    ]
+
+    const merged = buildMergedProjectTree(ours, theirs, {}, undefined, base)
+
+    const f2 = merged.find((i) => i.id === 'f2') as Folder
+    expect(f2.items).toHaveLength(1)
+    expect((f2.items[0] as Request).name).toBe('Our name')
+  })
+})
+
+describe('one-sided reorder adoption (same parent, order changed by them only)', () => {
+  it('adopts their sibling reorder when we kept the base order', () => {
+    const base: FolderItem[] = [makeFolder('f', 'F', [
+      makeRequest('a', 'A'), makeRequest('b', 'B'), makeRequest('c', 'C')
+    ])]
+    const ours: FolderItem[] = [makeFolder('f', 'F', [
+      makeRequest('a', 'A'), makeRequest('b', 'B'), makeRequest('c', 'C')
+    ])]
+    // They reordered to C, A, B.
+    const theirs: FolderItem[] = [makeFolder('f', 'F', [
+      makeRequest('c', 'C'), makeRequest('a', 'A'), makeRequest('b', 'B')
+    ])]
+
+    const merged = buildMergedProjectTree(ours, theirs, {}, undefined, base)
+
+    const f = merged.find((i) => i.id === 'f') as Folder
+    expect(f.items.map((i) => i.id)).toEqual(['c', 'a', 'b'])
+  })
+
+  it('keeps OUR reorder when only we reordered', () => {
+    const base: FolderItem[] = [makeFolder('f', 'F', [
+      makeRequest('a', 'A'), makeRequest('b', 'B'), makeRequest('c', 'C')
+    ])]
+    const ours: FolderItem[] = [makeFolder('f', 'F', [
+      makeRequest('b', 'B'), makeRequest('a', 'A'), makeRequest('c', 'C')
+    ])]
+    const theirs: FolderItem[] = [makeFolder('f', 'F', [
+      makeRequest('a', 'A'), makeRequest('b', 'B'), makeRequest('c', 'C')
+    ])]
+
+    const merged = buildMergedProjectTree(ours, theirs, {}, undefined, base)
+
+    const f = merged.find((i) => i.id === 'f') as Folder
+    expect(f.items.map((i) => i.id)).toEqual(['b', 'a', 'c'])
+  })
+})
+
+describe('relocation into a folder that is not in our tree', () => {
+  it('repatriates a NEW folder of theirs when they moved an item into it', () => {
+    // Base: r1 in f1. They created f2 (new) and moved r1 into it. We did nothing.
+    const base: FolderItem[] = [makeFolder('f1', 'F1', [makeRequest('r1', 'Req')])]
+    const ours: FolderItem[] = [makeFolder('f1', 'F1', [makeRequest('r1', 'Req')])]
+    const theirs: FolderItem[] = [
+      makeFolder('f1', 'F1', []),
+      makeFolder('f2', 'New folder', [makeRequest('r1', 'Req')])
+    ]
+
+    const merged = buildMergedProjectTree(ours, theirs, {}, undefined, base)
+
+    const f2 = merged.find((i) => i.id === 'f2') as Folder | undefined
+    expect(f2, 'their new target folder must be repatriated').toBeTruthy()
+    expect(f2?.items.map((i) => i.id)).toEqual(['r1'])
+  })
+
+  it('recreates a target folder WE deleted when they moved an item into it', () => {
+    // Base: f1 (empty), f2 with r1. We deleted f1. They moved r1 into f1.
+    const base: FolderItem[] = [makeFolder('f1', 'F1', []), makeFolder('f2', 'F2', [makeRequest('r1', 'Req')])]
+    const ours: FolderItem[] = [makeFolder('f2', 'F2', [makeRequest('r1', 'Req')])]
+    const theirs: FolderItem[] = [makeFolder('f1', 'F1', [makeRequest('r1', 'Req')]), makeFolder('f2', 'F2', [])]
+
+    const merged = buildMergedProjectTree(ours, theirs, {}, undefined, base)
+
+    const f1 = merged.find((i) => i.id === 'f1') as Folder | undefined
+    expect(f1, 'the deleted target folder must be recreated to hold the moved item').toBeTruthy()
+    expect(f1?.items.map((i) => i.id)).toEqual(['r1'])
+  })
+})
+
+describe('a remote deletion of a folder whose child they relocated OUT of it', () => {
+  it('keeps the relocated child (it was moved, not deleted with the folder)', () => {
+    // base: X in A, B empty. They moved X out of A to B, then deleted the
+    // now-empty A. We changed nothing. X must survive in B — it was
+    // relocated, not deleted. (Regression: A's deletion was honoured and
+    // took X down with it before the relocation could rescue it.)
+    const base: FolderItem[] = [makeFolder('A', 'A', [makeRequest('X', 'Req')]), makeFolder('B', 'B', [])]
+    const ours: FolderItem[] = [makeFolder('A', 'A', [makeRequest('X', 'Req')]), makeFolder('B', 'B', [])]
+    const theirs: FolderItem[] = [makeFolder('B', 'B', [makeRequest('X', 'Req')])]
+
+    const merged = buildMergedProjectTree(ours, theirs, {}, undefined, base)
+
+    expect(merged.find((i) => i.id === 'A'), 'the emptied folder is gone').toBeFalsy()
+    const b = merged.find((i) => i.id === 'B') as Folder
+    expect(b, 'B survives').toBeTruthy()
+    expect(b.items.map((i) => i.id)).toEqual(['X'])
+  })
+})
+
+describe('a theirs-only folder must not re-fold a descendant we already have', () => {
+  it('drops a folded descendant already present on our side (no duplication)', () => {
+    // theirs adds a brand-new folder N; it happens to carry a nested copy of
+    // an id (r1) our side already holds at root. Folding N wholesale would
+    // duplicate r1. The fold must prune the already-known descendant.
+    const ours: FolderItem[] = [makeRequest('r1', 'Mine')]
+    const theirs: FolderItem[] = [
+      makeRequest('r1', 'Mine'),
+      makeFolder('N', 'New', [makeRequest('r1', 'Dup')])
+    ]
+
+    const merged = buildMergedProjectTree(ours, theirs, {})
+
+    const allIds: string[] = []
+    const walk = (nodes: FolderItem[]): void => {
+      for (const n of nodes) {
+        allIds.push(n.id)
+        walk((n as FolderItem & { items?: FolderItem[] }).items ?? [])
+      }
+    }
+    walk(merged)
+    expect(allIds.filter((id) => id === 'r1')).toHaveLength(1)
+    expect(merged.find((i) => i.id === 'N')).toBeTruthy()
+  })
+})

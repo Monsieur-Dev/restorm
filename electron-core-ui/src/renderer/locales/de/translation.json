@@ -464,6 +464,7 @@
     "author": "Autor",
     "date": "Datum",
     "hash": "Hash",
-    "parents": "Eltern-Commits"
+    "parents": "Eltern-Commits",
+    "recoverVersion": "Diese Version wiederherstellen"
   }
 }

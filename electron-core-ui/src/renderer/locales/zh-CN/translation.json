@@ -464,6 +464,7 @@
     "author": "作者",
     "date": "日期",
     "hash": "哈希",
-    "parents": "父提交"
+    "parents": "父提交",
+    "recoverVersion": "恢复此版本"
   }
 }

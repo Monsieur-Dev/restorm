@@ -464,6 +464,7 @@
     "author": "Autor",
     "date": "Data",
     "hash": "Hash",
-    "parents": "Rodzice"
+    "parents": "Rodzice",
+    "recoverVersion": "Przywróć tę wersję"
   }
 }

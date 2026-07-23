@@ -62,6 +62,10 @@
 	flex-shrink: 0;
 	font-size: 11px;
 	color: var(--descriptionForeground);
+
+	/* Keep the date clear of the overlay scrollbar, which is drawn on top of
+	   the list's right edge and would otherwise sit over the last digits. */
+	margin-right: 8px;
 }
 
 .ecui-git-history-row.selected .ecui-git-history-date {

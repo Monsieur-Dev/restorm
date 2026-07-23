@@ -2413,7 +2413,9 @@
       "movedRequest": "Cererea \"{{name}}\" a fost mutată",
       "movedScenario": "Scenariul \"{{name}}\" a fost mutat",
       "movedFolder": "Dosarul \"{{name}}\" a fost mutat",
-      "movedEnvironmentFolder": "Dosarul de mediu \"{{name}}\" a fost mutat"
+      "movedEnvironmentFolder": "Dosarul de mediu \"{{name}}\" a fost mutat",
+      "reorderedFolder": "Elemente reordonate în folderul „{{name}}”",
+      "reorderedEnvironmentFolder": "Elemente reordonate în folderul de mediu „{{name}}”"
     },
     "commitTitle": {
       "singleRequest": "Actualizare a cererii „{{name}}”",
@@ -2475,5 +2477,13 @@
     "resolveConflicts": "Rezolvă conflictele",
     "resetConfirmTitle": "Resetați la versiunea serverului?",
     "resetConfirmBody": "Toate modificările dvs. locale vor fi șterse definitiv și înlocuite cu versiunea serverului."
+  },
+  "gitHistory": {
+    "recoverConfirmTitle": "Recuperați această versiune?",
+    "recoverConfirmBody": "Conținutul actual al fișierului deschis va fi înlocuit cu versiunea acestui commit. Modificarea nu este comisă — o puteți comite și împinge singur dacă doriți să o păstrați.",
+    "recoverConfirmAction": "Recuperează",
+    "recoveredTitle": "Versiune recuperată",
+    "recoveredBody": "Fișierul conține acum conținutul commit-ului selectat, necomis.",
+    "recoverFailedTitle": "Recuperarea a eșuat"
   }
 }

@@ -2412,7 +2412,9 @@
       "movedRequest": "Spostata la richiesta \"{{name}}\"",
       "movedScenario": "Spostato lo scenario \"{{name}}\"",
       "movedFolder": "Spostata la cartella \"{{name}}\"",
-      "movedEnvironmentFolder": "Spostata la cartella di ambiente \"{{name}}\""
+      "movedEnvironmentFolder": "Spostata la cartella di ambiente \"{{name}}\"",
+      "reorderedFolder": "Elementi riordinati nella cartella «{{name}}»",
+      "reorderedEnvironmentFolder": "Elementi riordinati nella cartella dell'ambiente «{{name}}»"
     },
     "commitTitle": {
       "singleRequest": "Aggiornamento della richiesta \"{{name}}\"",
@@ -2474,5 +2476,13 @@
     "resolveConflicts": "Risolvi i conflitti",
     "resetConfirmTitle": "Ripristinare alla versione del server?",
     "resetConfirmBody": "Tutte le tue modifiche locali saranno eliminate definitivamente e sostituite dalla versione del server."
+  },
+  "gitHistory": {
+    "recoverConfirmTitle": "Ripristinare questa versione?",
+    "recoverConfirmBody": "Il contenuto attuale del file aperto verrà sostituito con la versione di questo commit. La modifica non viene committata: puoi committarla e inviarla tu stesso se vuoi conservarla.",
+    "recoverConfirmAction": "Ripristina",
+    "recoveredTitle": "Versione ripristinata",
+    "recoveredBody": "Il file contiene ora il contenuto del commit selezionato, non committato.",
+    "recoverFailedTitle": "Ripristino non riuscito"
   }
 }
