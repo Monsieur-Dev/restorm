@@ -1,12 +1,15 @@
 import { createBdd } from 'playwright-bdd'
 import { test, expect } from '../../fixtures/settings-tab.fixture'
-import { defineSystemModalsBddSteps } from 'electron-core-ui/testing/playwright-bdd'
+import { defineSystemModalsBddSteps, defineToggleBddSteps } from 'electron-core-ui/testing/playwright-bdd'
 import { listViewRowSelectorByTitle, configureNextOpenDialogForE2E } from 'electron-core-ui/testing'
 
 const bdd = createBdd(test)
 const { Given, When, Then } = bdd
 
 defineSystemModalsBddSteps(bdd)
+// Generic Toggle steps (focus / keyboard / focus-ring assertions) so a Settings
+// toggle can be driven the same way as any other ECUI Toggle.
+defineToggleBddSteps(bdd)
 
 // The Settings workbench tab is a singleton with this stable id; the
 // EditorWorkbench composes every tab header's data-testid as

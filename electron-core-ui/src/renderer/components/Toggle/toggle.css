@@ -74,6 +74,30 @@
 	cursor: pointer;
 }
 
+/* Keyboard-only focus ring for the default `switch` appearance (covers the
+ * additive `.checkbox` variant too, since that class only adds to
+ * `.custom-toggle`). This div already inherits the global inset ring from
+ * `.workbench [tabindex="0"]:focus` in workbench.css, but that 1px inset ring
+ * is visually swallowed by this element's own 1px border + 3px radius on a
+ * 20x20 box — effectively invisible. Draw a dedicated, detached ring instead:
+ * `:focus-visible` keeps it keyboard-only (no ring on a mouse click), and the
+ * positive offset paints it OUTSIDE the box so it isn't clipped by this
+ * element's own `overflow:hidden`.
+ *
+ * The `[tabindex]` qualifier is load-bearing, not decoration: without it this
+ * selector ties the global rule's specificity exactly (0,3,0), so which
+ * `outline-offset` wins would depend on stylesheet order — i.e. on bundling.
+ * Matching the attribute the action element always carries takes it to
+ * (0,4,0) and makes the detached ring deterministic. The bare attribute (not
+ * `[tabindex="0"]`) mirrors the global rule, which covers `[tabindex="-1"]`
+ * too. That also future-proofs this ring for `notFocusable` toggles: those
+ * are not keyboard-reachable at all today — nothing in the app moves focus
+ * to them — but if that ever changes they light up with no edit here. */
+.workbench .custom-toggle[tabindex]:focus-visible {
+	outline: 1px solid var(--focusBorder);
+	outline-offset: 2px;
+}
+
 /*
  * `appearance="star"` — Lottie-driven favorite star renderer.
  * Replaces the codicon checkbox visual with a 32×32 button hosting
@@ -98,11 +122,24 @@
 
 /* No focus ring on the star — the row that hosts it already takes
  * focus and announces the file; a separate ring on the toggle just
- * adds visual noise without aiding keyboard navigation. The
- * `.workbench` prefix is required to outweigh the global
- * `.workbench [tabindex="0"]:focus` outline rule in `workbench.css`. */
-.workbench .custom-toggle-star:focus,
-.workbench .custom-toggle-star:focus-visible,
+ * adds visual noise without aiding keyboard navigation.
+ *
+ * The star renders a `<div tabindex>`, so inside a `.workbench` host the
+ * global `.workbench [tabindex="0"]:focus` rule in `workbench.css` also
+ * matches it and paints a ring. Suppressing that takes MORE specificity than
+ * the global rule, not equal specificity: `.workbench .custom-toggle-star:focus`
+ * would be (0,3,0) — the same as the global — and a tie is resolved by
+ * stylesheet order, so the star's ring would come back the day bundling
+ * reordered these two files. Qualifying with `[tabindex]` makes it (0,4,0)
+ * and settles it by specificity, the same remedy the switch variant's ring
+ * uses above.
+ *
+ * The two UNPREFIXED selectors below are (0,2,0) and lose to the global rule
+ * outright — they are NOT what protects the star inside a workbench. They
+ * cover hosts that render this component without a `.workbench` ancestor,
+ * where no global rule competes. */
+.workbench .custom-toggle-star[tabindex]:focus,
+.workbench .custom-toggle-star[tabindex]:focus-visible,
 .custom-toggle-star:focus,
 .custom-toggle-star:focus-visible {
 	outline: none;

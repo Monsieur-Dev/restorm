@@ -10,6 +10,7 @@ export const ToggleRenderer: React.FC<SettingRendererProps> = ({ setting, value,
     <Toggle
       checked={Boolean(value)}
       onChange={(checked) => { onChange(checked) }}
+      data-testid={`setting-toggle-${setting.storageKey}`}
     >
       {setting.descriptionKey ? t(setting.descriptionKey) : undefined}
     </Toggle>

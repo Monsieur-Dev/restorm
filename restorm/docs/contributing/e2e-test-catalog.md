@@ -91,7 +91,7 @@ server; — = pure UI/in-process.
 |---|--:|---|---|
 | full-workflow | 7 | Full workflow (bounds, new-file, imports, MRU tabs) | — |
 | exhaustive-doc-viewer | 6 | Exhaustive documentation-viewer behaviour | — |
-| settings-tab | 6 | Settings surface follows the workbench | — |
+| settings-tab | 7 | Settings surface follows the workbench (+ Toggle keyboard focus ring) | — |
 | dirty-state | 5 | Dirty-state propagation across nested units | — |
 | documentation-viewer | 4 | Documentation viewer interactions | — |
 | quick-settings | 8 | Quick-config save/load round-trip every protocol field | — |
