@@ -83,6 +83,7 @@ Manage the environment tree of an env-folder and the variables each environment 
 | `list_environments` | Return the environment tree of an env-folder: every top-level environment with its nested `subEnvironments`, each as `{ id, name, subEnvironments? }`. |
 | `create_environment` | Add a new environment to an env-folder. Omit `parentEnvironmentId` for a top-level environment, or pass an existing environment id to nest the new one under it. |
 | `rename_environment` | Rename an environment (or sub-environment) by id. |
+| `update_environment` | Patch one or more of `name` / `icon` / `color` on an environment (or sub-environment) by id. Every field is optional; only the fields passed are changed. `icon` is `{ type, value }` (`type` one of `emoji`/`codicon`/`iconoir`/`phosphor`/`material`/`simpleicons`/`feather`/`fontawesome`/`none`); `color` is a hex string (e.g. `"#ff6600"`). Invalid values are rejected, not silently persisted. |
 | `delete_environment` | Remove an environment and, recursively, its sub-environments by id. Returns `removed: false` when the id isn't found. |
 | `refresh_environment` | Force a re-resolution of every secret variable the environment **owns**: drops the resolution cache, blanks the resolved plaintext, and re-fetches from each provider. The renderer's spinner / error badges update from the broadcast status. |
 | `list_env_variables` | Return every key + serialised value for the given environment. Secret values come back as `{ type: "secret", source, params }` — never the plaintext. |

@@ -1,6 +1,8 @@
-import React, { useCallback, useRef } from 'react'
+import React, { useCallback, useLayoutEffect, useRef, useState } from 'react'
 import './button.css'
 import { IButtonOptions, IButtonStyles, ButtonProps, defaultButtonStyles } from './types'
+import { getContrastColor } from '../../utils/colorContrast'
+import { getCodiconOpticalOffset } from '../../utils/codiconOpticalCentre'
 import { IconView } from '../IconView'
 
 const Button: React.FC<ButtonProps> = ({
@@ -19,6 +21,7 @@ const Button: React.FC<ButtonProps> = ({
   fullWidth = false,
   backgroundColor,
   align,
+  cornerBadge,
   onClick,
   onContextMenu,
   onMouseEnter,
@@ -34,6 +37,42 @@ const Button: React.FC<ButtonProps> = ({
   'data-testid': dataTestId,
   children
 }) => {
+  // The round appearance paints a coloured disc whose glyph must stay legible
+  // on ANY background — including a theme token this component cannot see from
+  // JavaScript. Both the contrast colour and the glyph's optical offset are
+  // therefore measured from what the element actually renders, once mounted.
+  const surfaceRef = useRef<HTMLAnchorElement | null>(null)
+  const [discGlyph, setDiscGlyph] = useState<{ color: string, dx: number, dy: number } | null>(null)
+
+  const isRound = appearance === 'round'
+  const roundGlyph = typeof icon === 'string' ? icon : null
+  useLayoutEffect(() => {
+    if (!isRound) return
+    let cancelled = false
+    const measure = (): void => {
+      if (cancelled) return
+      const el = surfaceRef.current
+      if (!el) return
+      // The disc's colour may come from `backgroundColor` OR from a theme
+      // token this component cannot read in JS — so take what is painted.
+      const painted = window.getComputedStyle(el).backgroundColor
+      const glyphEl = el.querySelector('.codicon')
+      const offset = roundGlyph !== null && glyphEl
+        ? getCodiconOpticalOffset(roundGlyph, Number.parseFloat(window.getComputedStyle(glyphEl).fontSize))
+        : null
+      setDiscGlyph({
+        color: getContrastColor(painted),
+        dx: offset?.dx ?? 0,
+        dy: offset?.dy ?? 0
+      })
+    }
+    measure()
+    // The glyph font arrives after first paint; re-measure once it has.
+    const { fonts } = document as Omit<Document, 'fonts'> & { fonts?: FontFaceSet }
+    if (fonts) void fonts.ready.then(measure)
+    return () => { cancelled = true }
+  }, [isRound, roundGlyph, backgroundColor, size, small])
+
   // Resolve size — `size` prop wins; `small` / `medium` are shorthand aliases
   // for `size: 'sm'` / `size: 'md'` kept for ergonomic call sites.
   const effectiveSize = size ?? (small ? 'sm' : medium ? 'md' : 'default')
@@ -155,7 +194,14 @@ const Button: React.FC<ButtonProps> = ({
   const inlineStyles: React.CSSProperties = {
     ...style,
     ...(backgroundColor !== undefined ? { background: backgroundColor } : {}),
-    ...(align !== undefined ? { textAlign: align, justifyContent: alignToJustify[align] } : {})
+    ...(align !== undefined ? { textAlign: align, justifyContent: alignToJustify[align] } : {}),
+    ...(isRound && discGlyph
+      ? {
+          ['--ecui-round-glyph-color' as string]: discGlyph.color,
+          ['--ecui-round-glyph-dx' as string]: `${discGlyph.dx}px`,
+          ['--ecui-round-glyph-dy' as string]: `${discGlyph.dy}px`
+        }
+      : {})
   }
 
   const containerClassName = fullWidth ? 'button-container full-width' : 'button-container'
@@ -163,7 +209,7 @@ const Button: React.FC<ButtonProps> = ({
   return (
     <div className={containerClassName}>
       <a
-        ref={buttonRef}
+        ref={(node) => { buttonRef.current = node; surfaceRef.current = node }}
         id={id}
         data-testid={dataTestId}
         className={buttonClasses}
@@ -185,6 +231,9 @@ const Button: React.FC<ButtonProps> = ({
         {link || externalLink ? <span className="button-link-label">{renderChildren()}</span> : renderChildren()}
         {externalLink && <span className="codicon codicon-link-external button-link-trailing-icon" aria-hidden="true" />}
       </a>
+      {isRound && cornerBadge !== undefined && (
+        <span className="ecui-round-corner-badge" aria-hidden="true">{cornerBadge}</span>
+      )}
     </div>
   )
 }

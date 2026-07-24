@@ -1,0 +1,18 @@
+/* Fixed action bar for a request tab.
+ *
+ * Anchored on `.restorm-workbench-tab` (the nearest positioned ancestor), NOT
+ * on the request pane — that is the whole point: when the response panel opens
+ * and the request pane shrinks to a split, this bar does not move, so the
+ * button never slides out from under the pointer that just clicked it.
+ *
+ * `top` clears the 44px header action band; `right` lines the primary disc up
+ * with the tab's right inset. */
+.restorm-request-action-toolbar {
+  position: absolute;
+  top: 50px;
+  right: 16px;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}

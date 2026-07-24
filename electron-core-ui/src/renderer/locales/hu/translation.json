@@ -405,9 +405,6 @@
   "bookmarkRibbon": {
     "addBookmark": "Könyvjelző hozzáadása"
   },
-  "themeCarousel": {
-    "selectedTheme": "Kiválasztott téma"
-  },
   "toaster": {
     "notificationsRegion": "Értesítések"
   },

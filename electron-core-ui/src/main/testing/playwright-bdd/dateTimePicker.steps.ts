@@ -2,6 +2,7 @@ import {
   dateTimePickerDaySelector,
   dateTimePickerIncludeTimeSelector,
   dateTimePickerHoursSelector,
+  dateTimePickerInputSelector,
   dateTimePickerMinutesSelector,
   dateTimePickerNextMonthSelector,
   dateTimePickerOpenSelector,
@@ -23,6 +24,7 @@ interface LocatorLike {
   waitFor: (options: { state: 'attached' | 'detached' | 'visible' | 'hidden'; timeout?: number }) => Promise<void>
   getAttribute: (name: string) => Promise<string | null>
   count: () => Promise<number>
+  inputValue: () => Promise<string>
 }
 
 interface KeyboardLike {
@@ -187,5 +189,23 @@ export function defineDateTimePickerBddSteps({ When, Then }: BddFnsWithPage): vo
   Then('date time picker {string} output mode should be {string}', async ({ page }, testId: unknown, mode: unknown) => {
     if (typeof testId !== 'string' || typeof mode !== 'string') throw new Error('Invalid date time picker parameters')
     await waitForAttribute(asPage(page).locator(dateTimePickerRootSelector(testId)), 'data-output-mode', mode, 5000)
+  })
+
+  // Asserts the text actually DISPLAYED in the input, not just that a toggle
+  // fired mechanically. `pattern` is a regex source, e.g. "^\\d{4}-\\d{2}-\\d{2}$"
+  // to lock the shape of a date-only render.
+  //
+  // `dateTimePickerInputSelector` targets the InputBox's hidden state marker
+  // (`data-focused`/`data-has-message`, `display:none`), not the live <input> —
+  // the real editable element carries an extra InputBox-internal `-input`
+  // suffix. Passing the already-suffixed id back through the same helper reuses
+  // its escaping and lands on the actual input.
+  Then('date time picker {string} value should match {string}', async ({ page }, testId: unknown, pattern: unknown) => {
+    if (typeof testId !== 'string' || typeof pattern !== 'string') throw new Error('Invalid date time picker parameters')
+    const inputSelector = dateTimePickerInputSelector(`${testId}-input`)
+    const value = await asPage(page).locator(inputSelector).inputValue()
+    if (!new RegExp(pattern).test(value)) {
+      throw new Error(`Expected date time picker "${testId}" value to match /${pattern}/, got "${value}"`)
+    }
   })
 }

@@ -1,0 +1,46 @@
+/* What restorm adds around the ECUI round button: the orbiting beam, and the
+ * tone colours for a disc with no caller-supplied colour.
+ *
+ * The disc geometry itself — diameter, ring, glyph size, glyph contrast,
+ * corner badge — belongs to `appearance="round"` in the library and is
+ * deliberately NOT restated here. */
+
+.restorm-round-action {
+  position: relative;
+  display: inline-flex;
+  flex: 0 0 auto;
+}
+
+/* Tones for a disc the caller did not colour. A caller-supplied colour arrives
+ * as the button's `backgroundColor` and wins on its own. */
+.restorm-round-action-tone-run.button.text-button {
+  background: var(--scenario-action-run-background);
+}
+.restorm-round-action-tone-stop.button.text-button {
+  background: var(--scenario-action-stop-background);
+}
+.restorm-round-action-tone-neutral.button.text-button {
+  background: var(--scenario-action-neutral-background);
+}
+.restorm-round-action-button.button.text-button.disabled {
+  background: var(--scenario-action-neutral-background);
+}
+
+/* The beam host hugs the disc, and its orbit follows the shape's own geometry:
+ * the radius arrives as a custom property computed from the diameter and ring
+ * the library exposes, so retuning the shape moves the beam with it. */
+.restorm-round-action-beam {
+  border-radius: 50%;
+}
+
+.restorm-round-action-beam .ecu-border-beam-trail {
+  offset-path: circle(var(--restorm-round-action-orbit, 25.5px) at 50% 50%) !important;
+}
+
+/* The beam passes UNDER the corner badge, and starts its lap at 12 o'clock
+ * rather than 3. Rotating the ring is exact: it is a circle, so only the
+ * trail's entry point moves. */
+.restorm-round-action-beam > .ecu-border-effect {
+  z-index: 1;
+  transform: rotate(-90deg);
+}

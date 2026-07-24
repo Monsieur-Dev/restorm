@@ -18,13 +18,15 @@ import { BrowserWindow } from 'electron'
 import { McpService } from 'electron-core-ui'
 import { collectionStore } from '../../services/CollectionStore'
 import { contextService } from '../../services/ContextService'
-import { isAnyFolder, isEnvironmentFolder, isRequest, isScenario, KeyValue, Environment } from '../../../shared/models'
+import { isAnyFolder, isEnvironmentFolder, isRequest, isScenario, KeyValue, Environment, ICON_TYPES } from '../../../shared/models'
+import type { Icon } from '../../../shared/models'
 import { REQUEST_TYPES } from '../../../shared/protocolRegistry'
 import { isSoapRequest } from '../../../shared/types/requests/index'
 import type { EnvironmentFolder, CustomValueList, CustomValueEntry } from '../../../shared/types/collections'
 import { broadcastTreeReplace } from './import'
 import { broadcastScenario } from './scenario'
 import { valueSourceRegistry } from '../../../shared/secrets/valueSourceRegistry'
+import { HEX_COLOR_REGEX } from '../../../shared/utils/valueCasting'
 
 /**
  * If `value` is a secret reference (`{ type: 'secret', … }`), validate its
@@ -854,6 +856,74 @@ export function registerWriteTools(mcp: McpService): void {
       const folderId = ownerEnvFolderId(envId)
       if (folderId !== undefined) refreshEnvFolderAndSave(folderId)
       return jsonReply({ envId, name })
+    }
+  )
+
+  mcp.registerTool(
+    'update_environment',
+    {
+      titleKey: 'mcpToolTitles.updateEnvironment',
+      title: 'Update the name, icon or color of an environment',
+      description:
+        'Patch one or more of `name` / `icon` / `color` on an existing environment or sub-' +
+        'environment by id — the generic counterpart to `rename_environment` for the icon/color ' +
+        'shown as the environment\'s badge (e.g. on the statusbar env selector). Every field is ' +
+        'optional; only the fields you pass are changed. Triggers an autosave.',
+      inputSchema: {
+        envId: z.string().min(1).describe('Environment id (from `list_environments`).'),
+        name: z.string().min(1).optional().describe('New name.'),
+        icon: z.object({
+          type: z.enum(ICON_TYPES).describe('Icon kind.'),
+          value: z.string().describe('Emoji character for `emoji`, icon name for a library icon, empty string for `none`.')
+        }).optional().describe(`Icon shown on the environment's badge. Type must be one of: ${ICON_TYPES.join(', ')}.`),
+        color: z.string().optional().describe('Custom color as a hex string, e.g. "#ff6600".')
+      } as Record<string, unknown>
+    },
+    (args) => {
+      const envId = typeof args['envId'] === 'string' ? args['envId'] : ''
+      if (!envId) return errorReply('envId is required')
+      if (!findEnvById(envId)) return errorReply(`No environment with id ${envId}`)
+
+      const hasName = 'name' in args && args['name'] !== undefined
+      const hasIcon = 'icon' in args && args['icon'] !== undefined
+      const hasColor = 'color' in args && args['color'] !== undefined
+      if (!hasName && !hasIcon && !hasColor) {
+        return errorReply('At least one of name, icon, color is required')
+      }
+
+      const patch: Partial<Environment> = {}
+
+      if (hasName) {
+        const name = args['name']
+        if (typeof name !== 'string' || name.length === 0) return errorReply('name must be a non-empty string')
+        patch.name = name
+      }
+
+      if (hasIcon) {
+        const icon = args['icon']
+        if (icon === null || typeof icon !== 'object' || Array.isArray(icon)) {
+          return errorReply('icon must be an object with `type` and `value`')
+        }
+        const { type, value } = icon as { type?: unknown; value?: unknown }
+        if (typeof type !== 'string' || !(ICON_TYPES as readonly string[]).includes(type)) {
+          return errorReply(`icon.type must be one of: ${ICON_TYPES.join(', ')} (got: ${JSON.stringify(type)})`)
+        }
+        if (typeof value !== 'string') return errorReply('icon.value must be a string')
+        patch.icon = { type, value } as Icon
+      }
+
+      if (hasColor) {
+        const color = args['color']
+        if (typeof color !== 'string' || !HEX_COLOR_REGEX.test(color)) {
+          return errorReply(`color must be a hex string (e.g. "#ff6600"), got: ${JSON.stringify(color)}`)
+        }
+        patch.color = color
+      }
+
+      collectionStore.updateEnvironment(envId, patch)
+      const folderId = ownerEnvFolderId(envId)
+      if (folderId !== undefined) refreshEnvFolderAndSave(folderId)
+      return jsonReply({ envId, ...patch })
     }
   )
 

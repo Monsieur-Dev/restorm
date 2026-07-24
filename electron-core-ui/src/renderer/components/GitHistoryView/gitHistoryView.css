@@ -143,3 +143,39 @@
 .ecui-git-history-row.head .ecui-git-history-date {
 	font-weight: 700;
 }
+
+/* Lane gutter colors — theme-driven (see resources/themes/base.yaml). */
+.ecui-git-history-lane-1 {
+	stroke: var(--git-lane-1);
+	fill: var(--git-lane-1);
+}
+
+.ecui-git-history-lane-2 {
+	stroke: var(--git-lane-2);
+	fill: var(--git-lane-2);
+}
+
+.ecui-git-history-lane-3 {
+	stroke: var(--git-lane-3);
+	fill: var(--git-lane-3);
+}
+
+.ecui-git-history-lane-4 {
+	stroke: var(--git-lane-4);
+	fill: var(--git-lane-4);
+}
+
+.ecui-git-history-lane-5 {
+	stroke: var(--git-lane-5);
+	fill: var(--git-lane-5);
+}
+
+.ecui-git-history-lane-6 {
+	stroke: var(--git-lane-6);
+	fill: var(--git-lane-6);
+}
+
+.ecui-git-history-lane-7 {
+	stroke: var(--git-lane-7);
+	fill: var(--git-lane-7);
+}

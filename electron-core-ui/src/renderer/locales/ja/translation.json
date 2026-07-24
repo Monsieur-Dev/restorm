@@ -405,9 +405,6 @@
   "bookmarkRibbon": {
     "addBookmark": "ブックマークを追加"
   },
-  "themeCarousel": {
-    "selectedTheme": "選択中のテーマ"
-  },
   "toaster": {
     "notificationsRegion": "通知"
   },

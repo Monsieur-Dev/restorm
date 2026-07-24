@@ -41,6 +41,9 @@ import { ResponseHistoryModal } from '../Modals/ResponseHistoryModal'
 import { updateReactiveProperty } from './requestTabViewUtils'
 import { SendButtonEnvSwitcher } from './SendButtonEnvSwitcher'
 import { BeamWrap } from '../common/BeamWrap'
+import { RoundActionButton } from '../common/RoundActionButton'
+import { RequestActionToolbar } from './RequestActionToolbar'
+import { useIsInWorkbenchTab } from '../../contexts/workbenchTabHost'
 import { HeaderHoverTooltip } from '../MainView/HeaderHoverTooltip'
 import { DEFAULT_REQUEST_TIMEOUT_MS } from '../../../../shared/config/constants'
 import './WebSocketChat.css'
@@ -146,7 +149,9 @@ const OFFSET_OPTIONS: { text: KafkaFromOffset }[] = [{ text: 'earliest' }, { tex
 export const KafkaRequestTabView: React.FC<KafkaRequestTabViewProps> = ({ request }) => {
   const [historyModalOpen, setHistoryModalOpen] = useState(false)
   const { t } = useTranslation()
-  const { selectedEnvId, environments, envColor, projectUuid } = useEnvironmentContext()
+  const { selectedEnvId, environments, envColor, projectUuid, envIcon, envPaintColor } = useEnvironmentContext()
+  // The fixed bar anchors on the workbench tab, so it only exists there.
+  const inWorkbenchTab = useIsInWorkbenchTab()
   const handlebarsHelpers = useHandlebarsHelpers()
   const previousEnvIdRef = useRef<string | null>(null)
   const sendButtonStyle: React.CSSProperties | undefined = envColor
@@ -756,8 +761,51 @@ export const KafkaRequestTabView: React.FC<KafkaRequestTabViewProps> = ({ reques
           placeholder={t('kafka.clientIdPlaceholder')} data-testid="kafka-clientid-input"
         />
       </div>
-      {actionButton}
+      {!inWorkbenchTab && actionButton}
     </ControlGroup>
+  )
+
+  // Fixed action bar, anchored top-right of the workbench tab. One disc per
+  // mode: produce a record, browse a topic, or run a consumer.
+  const actionToolbar = !inWorkbenchTab ? undefined : (
+    <RequestActionToolbar>
+      {mode === 'produce' ? (
+        <RoundActionButton
+          icon="send"
+          onClick={handleProduce}
+          disabled={isProducing}
+          {...(envPaintColor ? { color: envPaintColor } : {})}
+          {...(envIcon ? { envIcon } : {})}
+          envSwitch
+          beamActive={isProducing}
+          ariaLabel={t('kafka.produce')}
+          data-testid="kafka-produce-button"
+        />
+      ) : mode === 'browse' ? (
+        <RoundActionButton
+          icon="search"
+          onClick={handleBrowse}
+          disabled={isBrowsing}
+          {...(envPaintColor ? { color: envPaintColor } : {})}
+          {...(envIcon ? { envIcon } : {})}
+          envSwitch
+          beamActive={isBrowsing}
+          ariaLabel={t('kafka.peek')}
+          data-testid="kafka-browse-button"
+        />
+      ) : (
+        <RoundActionButton
+          icon={isConsuming ? 'debug-disconnect' : 'plug'}
+          onClick={isConsuming ? handleConsumeStop : handleConsumeStart}
+          tone={isConsuming ? 'stop' : 'run'}
+          {...(isConsuming || !envPaintColor ? {} : { color: envPaintColor })}
+          {...(isConsuming || !envIcon ? {} : { envIcon })}
+          beamActive={isConsuming}
+          ariaLabel={isConsuming ? t('kafka.stopConsuming') : t('kafka.startConsuming')}
+          data-testid="kafka-consume-button"
+        />
+      )}
+    </RequestActionToolbar>
   )
 
   return (
@@ -765,6 +813,7 @@ export const KafkaRequestTabView: React.FC<KafkaRequestTabViewProps> = ({ reques
       <BaseRequestTabView
         requestId={request.id}
         urlSection={urlSection}
+        {...(actionToolbar ? { actionToolbar } : {})}
         requestContent={requestContent}
         codeSnippetsContent={codeSnippetsContent}
         notes={request.notes}

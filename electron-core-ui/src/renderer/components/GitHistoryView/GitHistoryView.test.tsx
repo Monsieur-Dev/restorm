@@ -53,6 +53,15 @@ describe('GitHistoryView', () => {
     const { container } = render(<GitHistoryView commits={COMMITS} mainTipHash="bbbbbbbbbb" />)
     expect(container.querySelectorAll('.ecui-git-history-lanes')).toHaveLength(2)
   })
+
+  it('colors the lane gutter via a theme-driven class, not a literal stroke/fill attribute', () => {
+    const { container } = render(<GitHistoryView commits={COMMITS} mainTipHash="bbbbbbbbbb" />)
+    // mainTipHash seeds lane 0 for the HEAD commit's chain, i.e. class "…-lane-1".
+    const dot = container.querySelector('.ecui-git-history-lane-1')
+    expect(dot).not.toBeNull()
+    expect(dot?.getAttribute('stroke')).toBeNull()
+    expect(dot?.getAttribute('fill')).toBeNull()
+  })
 })
 
 describe('GitHistoryView — recover version context menu', () => {
@@ -74,14 +83,16 @@ describe('GitHistoryView — recover version context menu', () => {
     expect(onRecover).toHaveBeenCalledWith('aaaaaaaaaa')
   })
 
-  it('disables the entry on the HEAD commit (recovering the current version is a no-op)', () => {
+  it('offers "recover this version" on right-click of the HEAD commit and calls back with its hash', () => {
     const onRecover = vi.fn()
     render(<GitHistoryView commits={COMMITS} mainTipHash="bbbbbbbbbb" onRecoverVersion={onRecover} />)
 
-    // bbbbbbbbbb carries "HEAD -> main".
+    // bbbbbbbbbb carries "HEAD -> main" — recovering it restores the working
+    // copy to the checked-out version, so the entry must stay active there.
     fireEvent.contextMenu(screen.getByTestId('git-history-view-row-bbbbbbbb'))
     const item = screen.getByTestId('git-history-view-recover-version')
+    expect(item).toBeTruthy()
     fireEvent.click(item)
-    expect(onRecover).not.toHaveBeenCalled()
+    expect(onRecover).toHaveBeenCalledWith('bbbbbbbbbb')
   })
 })

@@ -36,7 +36,7 @@ interface ButtonProps {
   icon?: string | Icon  // string = codicon shorthand; Icon object = any IconView-supported library
   disabled?: boolean
   secondary?: boolean
-  appearance?: 'default' | 'rainbow'
+  appearance?: 'default' | 'rainbow' | 'round'
   size?: 'sm' | 'md' | 'default' | 'lg' | 'xl'  // 'md' = 28×28 square icon button
   /** Shorthand for `size="sm"` — convenient for compact toolbar / icon buttons. */
   small?: boolean
@@ -158,6 +158,7 @@ Render the button as an inline link: no background, left-aligned, pointer cursor
 | ----------- | ------------------ |
 | `'default'` | Standard codicon-friendly button (theme tokens, `secondary`/`emphasis`/`backgroundColor` apply). |
 | `'rainbow'` | Hero CTA — solid dark surface (`#121213`) with an animated rainbow gradient border pinned to the bottom edge and a soft glow underneath, revealed on hover/focus-visible. `secondary`/`emphasis`/codicon modifiers do **not** apply (rainbow paints its own surface). |
+| `'round'`   | A coloured disc with a white ring and a single centred codicon — a primary action that stands apart from a form (send / run / connect). Icon-only: a label would overflow the circle. `size` selects the diameter (`default` 54px, `'sm'` 40.5px). See [`round`](#round) below. |
 
 | Size        | Typography / padding | Use for |
 | ----------- | -------------------- | ------- |
@@ -184,6 +185,74 @@ Render the button as an inline link: no background, left-aligned, pointer cursor
 ```
 
 The animated rainbow gradient + glow are paused at rest and run only on hover / focus-visible, so the button is calm in idle and lights up when interacted with. The full animation honors `prefers-reduced-motion: reduce`.
+
+##### `round`
+
+A coloured disc for a primary action that sits on its own rather than inside a
+form row. Icon-only, and the glyph's colour is **derived**, not passed:
+
+```typescript
+<Button
+  appearance="round"
+  icon="send"
+  backgroundColor={activeColor}          // optional — data-driven tint
+  cornerBadge={<IconView icon={scopeIcon} size={15} />}   // optional
+  onClick={onSend}
+  options={{ ariaLabel: 'Send' }}
+/>
+```
+
+| Prop | Effect on `round` |
+| ---- | ----------------- |
+| `backgroundColor` | Paints the disc. Omit it and the disc falls back to whatever the host's CSS gives it. |
+| `size` | `'default'` → 54px, `'sm'` (or `small`) → 40.5px. Other sizes are not distinguished. |
+| `cornerBadge` | Any node, pinned to the bottom-right and overlapping the disc edge. The button places it and knows nothing about what it means. |
+| `icon` | Required in practice — the disc has no label. |
+| `options.ariaLabel` | **Required.** With no label and no tooltip, it is the button's only accessible name. |
+
+**The glyph colour is computed, not configured.** The disc can be tinted by the
+caller *or* by a theme token the component cannot read from JavaScript, so the
+contrast colour is derived from the background the element actually paints —
+white on a dark disc, black on a pale one. Passing a foreground colour is
+neither needed nor honoured.
+
+The glyph is also **optically centred**: a codicon's ink is not always centred
+in its em box (a paper plane's tail, a play triangle's slanted edge), so the
+rendered glyph is measured once and nudged onto its centre of mass.
+
+###### Geometry: three public custom properties
+
+These are **public**, and **settable as well as readable**:
+
+| Property | Meaning | Default |
+| -------- | ------- | ------- |
+| `--ecui-round-diameter` | The disc's outer diameter. | `54px` (`40.5px` at `sm`) |
+| `--ecui-round-ring` | The white ring's thickness. | `3px` |
+| `--ecui-round-glyph-size` | The codicon's font-size. | half the diameter |
+
+**Read them** when you decorate the disc from outside (an orbiting beam, a
+focus halo) instead of restating the numbers — retuning the shape then moves
+the decoration with it.
+
+**Set them** when a surface needs the same disc at its own scale. That is the
+supported way to rescale: the two `size` steps cover the common cases, and a
+host with its own scale overrides the properties rather than asking for another
+named size.
+
+```css
+/* A denser toolbar reusing the shape at two-thirds scale. */
+.my-toolbar-primary.appearance-round   { --ecui-round-diameter: 36px; --ecui-round-ring: 2px; }
+.my-toolbar-secondary.appearance-round { --ecui-round-diameter: 27px; --ecui-round-ring: 2px; }
+```
+
+Reading them back:
+
+```typescript
+const cs = getComputedStyle(discEl)
+const orbit =
+  parseFloat(cs.getPropertyValue('--ecui-round-diameter')) / 2 -
+  parseFloat(cs.getPropertyValue('--ecui-round-ring')) / 2
+```
 
 ### ButtonWithDescription
 

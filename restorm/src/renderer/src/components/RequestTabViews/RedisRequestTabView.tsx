@@ -35,6 +35,9 @@ import { DEFAULT_REDIS_TIMEOUT_MS } from '../../../../shared/config/constants'
 import { getRedisCommandFields } from '../../../../shared/utils/redisCommandFields'
 import { SendButtonEnvSwitcher } from './SendButtonEnvSwitcher'
 import { BeamWrap } from '../common/BeamWrap'
+import { RoundActionButton } from '../common/RoundActionButton'
+import { RequestActionToolbar } from './RequestActionToolbar'
+import { useIsInWorkbenchTab } from '../../contexts/workbenchTabHost'
 import { HeaderHoverTooltip } from '../MainView/HeaderHoverTooltip'
 import './WebSocketChat.css'
 import { cloneForEventBus } from '../../utils/cloneForEventBus'
@@ -62,7 +65,9 @@ export const RedisRequestTabView: React.FC<RedisRequestTabViewProps> = ({
   // See HTTPRequestTabView — `projectUuid` from the env context is
   // synchronously available, unlike `useFileService` which races the
   // `useState` lazy initializer.
-  const { selectedEnvId, environments, envColor, projectUuid } = useEnvironmentContext()
+  const { selectedEnvId, environments, envColor, projectUuid, envIcon, envPaintColor } = useEnvironmentContext()
+  // The fixed bar anchors on the workbench tab, so it only exists there.
+  const inWorkbenchTab = useIsInWorkbenchTab()
   const collections = useRestormStore((state) => state.collections)
   const handlebarsHelpers = useHandlebarsHelpers()
   const previousEnvIdRef = useRef<string | null>(null)
@@ -702,7 +707,7 @@ export const RedisRequestTabView: React.FC<RedisRequestTabViewProps> = ({
           data-testid="redis-password-input"
         />
       </div>
-      <SendButtonEnvSwitcher>{runButton}</SendButtonEnvSwitcher>
+      {!inWorkbenchTab && <SendButtonEnvSwitcher>{runButton}</SendButtonEnvSwitcher>}
     </ControlGroup>
   )
 
@@ -725,11 +730,31 @@ export const RedisRequestTabView: React.FC<RedisRequestTabViewProps> = ({
     ? (isSubscribing || liveMessages.length > 0 || subscribeResult !== null)
     : commandHistory.length > 0
 
+  // Fixed action bar, anchored top-right of the workbench tab: opening the
+  // response panel must never move the button out from under the pointer.
+  const actionToolbar = !inWorkbenchTab ? undefined : (
+    <RequestActionToolbar>
+      <RoundActionButton
+        icon={mode === 'subscribe' ? (isSubscribing ? 'debug-disconnect' : 'plug') : 'run'}
+        onClick={mode === 'subscribe' ? (isSubscribing ? handleUnsubscribe : handleSubscribe) : handleRun}
+        disabled={mode === 'command' && isRunningCommand}
+        tone={mode === 'subscribe' && isSubscribing ? 'stop' : 'run'}
+        {...((mode === 'subscribe' && isSubscribing) || !envPaintColor ? {} : { color: envPaintColor })}
+        {...((mode === 'subscribe' && isSubscribing) || !envIcon ? {} : { envIcon })}
+        envSwitch={!(mode === 'subscribe' && isSubscribing)}
+        beamActive={isRunning}
+        ariaLabel={mode === 'subscribe' ? (isSubscribing ? t('redis.unsubscribe') : t('redis.subscribe')) : t('redis.run')}
+        data-testid="redis-run-button"
+      />
+    </RequestActionToolbar>
+  )
+
   return (
     <>
       <BaseRequestTabView
         requestId={request.id}
         urlSection={urlSection}
+        {...(actionToolbar ? { actionToolbar } : {})}
         requestContent={requestContent}
         codeSnippetsContent={codeSnippetsContent}
         notes={request.notes}

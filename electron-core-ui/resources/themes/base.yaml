@@ -442,3 +442,32 @@ variables:
   - id: search-result-badge-background
     value: "#6b7280"
     description: "Search bar: result count badge fallback background (gray)"
+
+  # ── Git history graph: lane colors (cycled by lane index) ─────────────────
+  - id: git-lane-1
+    value: "#3794ff"
+    description: "Git history graph: lane color 1 (blue)"
+
+  - id: git-lane-2
+    value: "#2ea043"
+    description: "Git history graph: lane color 2 (green)"
+
+  - id: git-lane-3
+    value: "#d29922"
+    description: "Git history graph: lane color 3 (amber)"
+
+  - id: git-lane-4
+    value: "#f85149"
+    description: "Git history graph: lane color 4 (red)"
+
+  - id: git-lane-5
+    value: "#a371f7"
+    description: "Git history graph: lane color 5 (purple)"
+
+  - id: git-lane-6
+    value: "#39c5cf"
+    description: "Git history graph: lane color 6 (cyan)"
+
+  - id: git-lane-7
+    value: "#db61a2"
+    description: "Git history graph: lane color 7 (pink)"

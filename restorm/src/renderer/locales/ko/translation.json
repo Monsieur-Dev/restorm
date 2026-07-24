@@ -2170,6 +2170,7 @@
     "setFavorite": "즐겨찾기 설정",
     "stopScenarioRun": "시나리오 실행 중지",
     "updateCustomValueList": "값 목록 업데이트",
+    "updateEnvironment": "환경 업데이트",
     "updateFolder": "폴더 업데이트",
     "updateRequest": "요청 업데이트",
     "updateScenario": "시나리오 업데이트",

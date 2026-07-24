@@ -2170,6 +2170,7 @@
     "setFavorite": "お気に入りを設定",
     "stopScenarioRun": "シナリオ実行を停止",
     "updateCustomValueList": "値リストを更新",
+    "updateEnvironment": "環境を更新",
     "updateFolder": "フォルダーを更新",
     "updateRequest": "リクエストを更新",
     "updateScenario": "シナリオを更新",

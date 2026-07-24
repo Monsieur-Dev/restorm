@@ -160,6 +160,7 @@ import { useMcpNavigation } from './hooks/useMcpNavigation'
 import { useExternalFileChange } from './hooks/useExternalFileChange'
 import { useGitMergeInProgressToast } from 'electron-core-ui/renderer'
 import { useGitFolder } from './hooks/useGitFolder'
+import { useUserDateFormat } from './hooks/useUserDateFormat'
 import { useGitActions } from './hooks/useGitActions'
 import { usePushModal } from './hooks/usePushModal'
 import { useGitPullConflict } from './hooks/useGitPullConflict'
@@ -202,7 +203,6 @@ import {
   findItemWithBreadcrumbs,
   getNearestEnvironmentsForBreadcrumbs
 } from './utils/treeSearch'
-import { DesktopIndicator } from './components/MainView/DesktopIndicator'
 import { StatusbarVersionPlan } from './components/MainView/StatusbarVersionPlan'
 import { findItemById, findItemWithParent } from './utils/treeSearch'
 import { getSessionRequestOverride, getSessionFolderEnv, findEnvironmentById } from './services/environmentSelectionStore'
@@ -566,6 +566,8 @@ const App: React.FC = () => {
   }, [filePath, takeServerVersion, t, refreshOpenFileAfterPull])
   const gitPendingFlags = useGitPendingFlags(isDirty)
   const gitFolderForConflicts = useGitFolder(filePath)
+  const { formatUserDate } = useUserDateFormat()
+  const formatGitHistoryDate = useCallback((iso: string) => formatUserDate(new Date(iso)), [formatUserDate])
 
   const handleOpenGitHistory = useCallback(() => {
     const folder = filePath?.endsWith('.restorm') === true
@@ -3204,7 +3206,6 @@ const App: React.FC = () => {
       <Statusbar data-testid="app-statusbar">
         <StatusbarVersionPlan />
         {filePath && <StatusbarElement data-testid="app-statusbar-element" title={filePath} />}
-        <DesktopIndicator />
         {/* The environment selector, request-history button and auth-route
          * selector now all live in the request tab header, not here. The
          * MCP indicator carries the `right-aligned` auto margin in every
@@ -3231,6 +3232,7 @@ const App: React.FC = () => {
           commits={gitHistory.commits}
           {...(gitHistory.mainTipHash !== undefined ? { mainTipHash: gitHistory.mainTipHash } : {})}
           onRecoverVersion={handleRecoverVersion}
+          formatDate={formatGitHistoryDate}
         />
       </Modal>
 

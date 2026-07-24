@@ -128,3 +128,28 @@ describe('BaseRequestTabView response panel state', () => {
     expect(getByTestId('tab-infos').textContent).not.toContain(LOADING)
   })
 })
+
+describe('BaseRequestTabView action toolbar slot', () => {
+  it('renders the toolbar OUTSIDE the tab subtree, in both layouts', () => {
+    const toolbar = <div data-testid="action-toolbar" />
+    const { getByTestId, rerender } = render(
+      <BaseRequestTabView {...baseProps} actionToolbar={toolbar} />
+    )
+
+    // The whole point of the slot: the toolbar must not live inside any tab
+    // panel, because that is the subtree the response panel splits.
+    const placed = getByTestId('action-toolbar')
+    expect(placed.closest('[data-testid^="tab-"]')).toBeNull()
+
+    // Opening the response panel switches the layout; the toolbar survives it
+    // and is still outside the split.
+    rerender(<BaseRequestTabView {...baseProps} actionToolbar={toolbar} showResponse />)
+    const afterResponse = getByTestId('action-toolbar')
+    expect(afterResponse.closest('[data-testid^="tab-"]')).toBeNull()
+  })
+
+  it('renders nothing extra when no toolbar is supplied', () => {
+    const { queryByTestId } = render(<BaseRequestTabView {...baseProps} />)
+    expect(queryByTestId('action-toolbar')).toBeNull()
+  })
+})

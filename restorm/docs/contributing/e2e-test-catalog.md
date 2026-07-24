@@ -100,6 +100,7 @@ server; — = pure UI/in-process.
 | open-folder | 2 | Open Folder | — |
 | body-type-migration | 1 | Legacy body-type canonicalisation on load | — |
 | fully-documented-petstore | 1 | Fully-documented Petstore fixture builder | — |
+| theme-carousel-a11y | 1 | Theme preview cards keep Tab on the card only, never the abstract preview | — |
 
 ## MCP surface
 

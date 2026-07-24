@@ -1,7 +1,9 @@
 import React, { useCallback, useEffect, useRef, useState, useMemo } from 'react'
 import { eventBus } from 'electron-core-ui/renderer'
+import type { Icon } from 'electron-core-ui/types'
 import type { Environment } from '../../../shared/types/collections'
 import { EnvironmentContext, type EnvironmentContextValue } from './useEnvironmentContext'
+import { DEFAULT_ENV_COLOR } from '../components/MainView/envSelectorHelpers'
 import {
   DocumentEvents,
   type RequestEnvEventPayload,
@@ -258,18 +260,33 @@ export const EnvironmentProvider: React.FC<EnvironmentProviderProps> = ({
     return findEnvironmentById(environments, selectedEnvId)?.color
   }, [environments, selectedEnvId])
 
+  const envIcon = useMemo<Icon | undefined>(() => {
+    if (!selectedEnvId || !environments) return undefined
+    return findEnvironmentById(environments, selectedEnvId)?.icon
+  }, [environments, selectedEnvId])
+
+  // Mirrors what the statusbar pill paints: any project WITH environments gets
+  // a colour, falling back to the shared default when the active one defines
+  // none. A project with no environments gets nothing to paint.
+  const envPaintColor = useMemo<string | undefined>(() => {
+    if (!environments || environments.length === 0) return undefined
+    return envColor ?? DEFAULT_ENV_COLOR
+  }, [environments, envColor])
+
   const value = useMemo<EnvironmentContextValue>(
     () => ({
       environments,
       selectedEnvId,
       tagColors,
       envColor,
+      envIcon,
+      envPaintColor,
       projectUuid: persistenceKey?.projectUuid,
       folderRequestIds,
       setFolderEnv,
       setRequestOverride
     }),
-    [environments, selectedEnvId, tagColors, envColor, persistenceKey?.projectUuid, folderRequestIds, setFolderEnv, setRequestOverride]
+    [environments, selectedEnvId, tagColors, envColor, envIcon, envPaintColor, persistenceKey?.projectUuid, folderRequestIds, setFolderEnv, setRequestOverride]
   )
 
   return <EnvironmentContext.Provider value={value}>{children}</EnvironmentContext.Provider>

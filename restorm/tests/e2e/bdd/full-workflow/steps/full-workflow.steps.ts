@@ -2737,7 +2737,11 @@ Then('the fullscreen workbench modal should be hidden', async () => {
 
 When('I click the send button in the active request tab', async () => {
   if (!page) throw new Error('app must be launched')
-  const button = page.locator('[data-testid="http-request-send-button"]').first()
+  // Each open workbench tab now owns its own fixed action bar, so several
+  // `http-request-send-button`s coexist in the DOM (inactive tabs' bars are
+  // display:none). Scope to the visible one — the active tab's — rather than
+  // the first in document order, which is id-sorted and may be a hidden tab.
+  const button = page.locator('[data-testid="http-request-send-button"]:visible').first()
   await expect(button).toBeVisible({ timeout: 5000 })
   await button.click()
   // Wait for the response panel to land before we treat the send as

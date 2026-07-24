@@ -7,6 +7,7 @@ import type {
 } from '../../../../shared/types/scenarioRunHistory'
 import { ScenarioRunLogView } from './ScenarioRunLogView'
 import { ScenarioRunGraphTab } from './ScenarioRunGraphTab'
+import { useUserDateFormat } from '../../hooks/useUserDateFormat'
 import './scenarioRunHistoryModal.css'
 
 export interface ScenarioRunHistoryModalProps {
@@ -25,13 +26,6 @@ function bridge(): HistoryBridge | undefined {
   return (window as { restorm?: { runtime?: HistoryBridge } }).restorm?.runtime
 }
 
-function formatTimestamp(iso: string): string {
-  // Locale date+time; fall back to the raw string if unparseable.
-  const d = new Date(iso)
-  if (Number.isNaN(d.getTime())) return iso
-  return d.toLocaleString()
-}
-
 /**
  * Persisted scenario run history, rendered as an overlay scoped to the
  * scenario tab (mirrors the response-history overlay). Master/detail:
@@ -40,6 +34,13 @@ function formatTimestamp(iso: string): string {
  */
 export const ScenarioRunHistoryModal: React.FC<ScenarioRunHistoryModalProps> = ({ isOpen, onClose, scenarioId }) => {
   const { t } = useTranslation()
+  const { formatUserDate } = useUserDateFormat()
+  const formatTimestamp = useCallback((iso: string): string => {
+    // Locale date+time; fall back to the raw string if unparseable.
+    const d = new Date(iso)
+    if (Number.isNaN(d.getTime())) return iso
+    return formatUserDate(d)
+  }, [formatUserDate])
   const [runs, setRuns] = useState<ScenarioRunHistoryEntry[]>([])
   const [selectedGuid, setSelectedGuid] = useState<string | null>(null)
   const [detail, setDetail] = useState<ScenarioRunHistoryDetail | null>(null)

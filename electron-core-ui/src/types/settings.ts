@@ -12,6 +12,10 @@ export type SettingValue = string | number | boolean
 export interface EnumValue {
   value: string
   labelKey: string
+  /** Optional emoji/icon prefixed to the option label — currently used by
+   * the language enum's flags. When absent, the option renders as label
+   * text alone. */
+  flag?: string | undefined
 }
 
 export interface EnumParams {

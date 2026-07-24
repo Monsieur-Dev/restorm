@@ -93,6 +93,9 @@ import { useApiDocumentationFromRequest } from '../../hooks/useApiDocumentationF
 import { buildRequestPath } from '../../utils/requestPath'
 import { SendButtonEnvSwitcher } from './SendButtonEnvSwitcher'
 import { BeamWrap } from '../common/BeamWrap'
+import { RoundActionButton } from '../common/RoundActionButton'
+import { RequestActionToolbar } from './RequestActionToolbar'
+import { useIsInWorkbenchTab } from '../../contexts/workbenchTabHost'
 import { ServerConfigLockedHint } from '../common/ServerConfigLockedHint'
 
 const urlRowStyle: CSSProperties = { display: 'flex', gap: 8, alignItems: 'center' }
@@ -246,7 +249,9 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({
 }) => {
   const conflictFields = conflictFieldDiff?.fields
   const { t } = useTranslation()
-  const { selectedEnvId, environments, projectUuid } = useEnvironmentContext()
+  const { selectedEnvId, environments, projectUuid, envIcon, envPaintColor } = useEnvironmentContext()
+  // The fixed bar anchors on the workbench tab, so it only exists there.
+  const inWorkbenchTab = useIsInWorkbenchTab()
   const collections = useRestormStore((state) => state.collections)
   const resolveAuthRequest = useAuthRequestResolver()
 
@@ -1033,6 +1038,7 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({
           />
         </div>
         <div style={sendButtonWrapperStyle}>
+          {!inWorkbenchTab && (
           <BeamWrap active={isListening} size={22} borderWidth={1.5}>
             <Button
               icon={isListening ? 'debug-disconnect' : 'plug'}
@@ -1046,6 +1052,7 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({
               data-testid="odata-server-listen"
             />
           </BeamWrap>
+          )}
         </div>
       </div>
     </div>
@@ -1132,11 +1139,12 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({
         />
       </div>
       <div style={sendButtonWrapperStyle}>
+        {!inWorkbenchTab && (
         <SendButtonEnvSwitcher>
           <BeamWrap active={isSending} size={22} borderWidth={1.5}>
             <Button
               disabled={isSending}
-              icon="play"
+              icon="send"
               onClick={handleSend}
               options={{
                 ariaLabel: t('odataRequestTab.send', 'Send')
@@ -1147,6 +1155,7 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({
             </Button>
           </BeamWrap>
         </SendButtonEnvSwitcher>
+        )}
       </div>
     </div>
     </div>
@@ -2222,6 +2231,39 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({
     return () => { subscription.unsubscribe() }
   }, [request.id])
 
+  // Fixed action bar, anchored top-right of the workbench tab. Server mode
+  // ignores environments, so that disc keeps its tone and has no env picker.
+  // The send disc drops the "Send" caption the square button carried: a round
+  // button of this size is icon-only, and the word moves into the accessible
+  // name. Its icon aligns on `send` like every other protocol.
+  const actionToolbar = !inWorkbenchTab ? undefined : (
+    <RequestActionToolbar>
+      {isServer ? (
+        <RoundActionButton
+          icon={isListening ? 'debug-disconnect' : 'plug'}
+          onClick={isListening ? handleStop : handleListen}
+          disabled={!!conflictMode}
+          tone={isListening ? 'stop' : 'run'}
+          beamActive={isListening}
+          ariaLabel={isListening ? t('odata.server.stopListening', 'Stop listening') : t('odata.server.startListening', 'Start listening')}
+          data-testid="odata-server-listen"
+        />
+      ) : (
+        <RoundActionButton
+          icon="send"
+          onClick={handleSend}
+          disabled={isSending}
+          {...(envPaintColor ? { color: envPaintColor } : {})}
+          {...(envIcon ? { envIcon } : {})}
+          envSwitch
+          beamActive={isSending}
+          ariaLabel={t('odataRequestTab.send', 'Send')}
+          data-testid="odata-request-send"
+        />
+      )}
+    </RequestActionToolbar>
+  )
+
   return (
     <>
       <BaseRequestTabView
@@ -2229,6 +2271,7 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({
         {...(conflictExtraTabs ? { extraRequestTabs: conflictExtraTabs } : {})}
         requestId={request.id}
         urlSection={isServer ? serverUrlSection : urlSection}
+        {...(actionToolbar ? { actionToolbar } : {})}
         requestContent={isServer ? serverRequestContent : requestContent}
         codeSnippetsContent={t(
           'odataRequestTab.codeSnippetsPlaceholder',

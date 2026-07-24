@@ -1,5 +1,10 @@
+import { readFileSync } from 'fs'
+import { join } from 'path'
 import { describe, it, expect } from 'vitest'
 import { diffProjectEntities, parseProjectYaml } from './gitCommitDiff'
+// The renderer's rehydrate callback — the one the publish flow really
+// passes (`usePushModal.ts`), and the only one that backfills ids.
+import { processAfterDeserialization } from '../../renderer/src/utils/serialization'
 import type { FolderItem, Folder, EnvironmentFolder } from '../types/folderTypes'
 import type { Scenario } from '../types/scenario'
 import type { Request } from '../types/requests'
@@ -218,5 +223,40 @@ describe('reorganising the tree', () => {
     // Content changed too: "modified" wins — it is the more informative of
     // the two, and the move is implied by the new location.
     expect(diffProjectEntities(before, after)).toEqual([{ kind: 'request', name: 'Find pet', action: 'modified' }])
+  })
+})
+
+/**
+ * A project written before document ids were persisted carries no `id` at
+ * all — the committed `Petstore.restorm` sample is exactly that file. The
+ * publish flow parses the HEAD blob on one side and holds the live tree on
+ * the other, then pairs entities BY id. When the loader minted those ids
+ * randomly the two sides shared none, so an untouched project reported
+ * every single entity as deleted AND added, and the generated commit
+ * message was nonsense.
+ */
+describe('diffProjectEntities on a project whose ids are not persisted yet', () => {
+  const legacySample = readFileSync(join(__dirname, '../../../tests/e2e/samples/Petstore.restorm'), 'utf-8')
+
+  it('reports nothing at all when neither side changed', () => {
+    // Two INDEPENDENT parses, as the publish flow really does it.
+    const head = parseProjectYaml(legacySample, processAfterDeserialization)
+    const live = parseProjectYaml(legacySample, processAfterDeserialization)
+
+    expect(head.length).toBeGreaterThan(0)
+    expect(diffProjectEntities(head, live)).toEqual([])
+  })
+
+  it('still reports the one entity that DID change', () => {
+    // Guard against a vacuous pass: the diff must stay sensitive.
+    const head = parseProjectYaml(legacySample, processAfterDeserialization)
+    const live = parseProjectYaml(
+      legacySample.replace('Returns a single pet', 'Returns exactly one pet'),
+      processAfterDeserialization
+    )
+
+    expect(diffProjectEntities(head, live)).toEqual([
+      { kind: 'request', name: 'Find pet by ID', action: 'modified' }
+    ])
   })
 })

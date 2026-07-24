@@ -405,9 +405,6 @@
   "bookmarkRibbon": {
     "addBookmark": "Ajouter un signet"
   },
-  "themeCarousel": {
-    "selectedTheme": "Thème sélectionné"
-  },
   "toaster": {
     "notificationsRegion": "Notifications"
   },

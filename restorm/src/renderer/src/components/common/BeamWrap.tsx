@@ -12,6 +12,10 @@ export interface BeamWrapProps {
   borderWidth?: number
   /** Extra class on the wrapper span (it is `position: relative; inline-flex`). */
   className?: string
+  /** Leading colour of the trail gradient. */
+  colorFrom?: string
+  /** Trailing colour of the trail gradient. */
+  colorTo?: string
   children?: React.ReactNode
 }
 
@@ -22,7 +26,7 @@ export interface BeamWrapProps {
  * before unmounting (no mid-lap jump) — the same graceful stop as
  * {@link ScenarioRunningBadge}.
  */
-export const BeamWrap: React.FC<BeamWrapProps> = ({ active, size = 16, borderWidth = 1.5, className, children }) => {
+export const BeamWrap: React.FC<BeamWrapProps> = ({ active, size = 16, borderWidth = 1.5, className, colorFrom = '#facc15', colorTo = '#22c55e', children }) => {
   const [beamOn, dispatchBeam] = useReducer((_state: boolean, on: boolean) => on, false)
   const wantsStopRef = useRef(false)
   useEffect(() => {
@@ -43,7 +47,7 @@ export const BeamWrap: React.FC<BeamWrapProps> = ({ active, size = 16, borderWid
     <span className={`scn-running-badge${className ? ` ${className}` : ''}`} onAnimationIteration={onAnimationIteration}>
       {children}
       {beamOn && (
-        <BorderBeam size={size} duration={BEAM_LAP_S} borderWidth={borderWidth} colorFrom="#facc15" colorTo="#22c55e" />
+        <BorderBeam size={size} duration={BEAM_LAP_S} borderWidth={borderWidth} colorFrom={colorFrom} colorTo={colorTo} />
       )}
     </span>
   )

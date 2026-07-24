@@ -2170,6 +2170,7 @@
     "setFavorite": "设置收藏",
     "stopScenarioRun": "停止场景运行",
     "updateCustomValueList": "更新值列表",
+    "updateEnvironment": "更新环境",
     "updateFolder": "更新文件夹",
     "updateRequest": "更新请求",
     "updateScenario": "更新场景",

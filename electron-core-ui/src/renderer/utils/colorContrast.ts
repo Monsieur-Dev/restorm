@@ -2,7 +2,9 @@
  * Returns '#000000' (black) or '#ffffff' (white) depending on which
  * provides better contrast against the given background color.
  *
- * Accepts hex (`#rgb`, `#rrggbb`, or no leading `#`) and `hsl(h, s%, l%)`.
+ * Accepts hex (`#rgb`, `#rrggbb`, or no leading `#`), `hsl(h, s%, l%)`, and
+ * `rgb()` / `rgba()` — the last being what `getComputedStyle` returns, so a
+ * caller can pass a colour read off a rendered element directly.
  * Uses the W3C relative luminance formula (WCAG 2.0).
  */
 export function getContrastColor(color: string): '#000000' | '#ffffff' {
@@ -17,11 +19,21 @@ export function getContrastColor(color: string): '#000000' | '#ffffff' {
 }
 
 const HSL_RE = /^hsl\(\s*(-?\d+(?:\.\d+)?)\s*,\s*(\d+(?:\.\d+)?)%\s*,\s*(\d+(?:\.\d+)?)%\s*\)$/i
+/** `rgb()` / `rgba()`, in the exact shape `getComputedStyle` hands back — the
+ * natural input when the colour is read off a rendered element rather than
+ * supplied as a literal. */
+const RGB_RE = /^rgba?\(\s*(\d+(?:\.\d+)?)\s*[, ]\s*(\d+(?:\.\d+)?)\s*[, ]\s*(\d+(?:\.\d+)?)\s*(?:[,/].*)?\)$/i
 
 function parseColorToRgb(color: string): [number, number, number] {
-  const hsl = HSL_RE.exec(color.trim())
+  const trimmed = color.trim()
+  const hsl = HSL_RE.exec(trimmed)
   if (hsl) {
     return hslToRgb(Number(hsl[1]), Number(hsl[2]), Number(hsl[3]))
+  }
+
+  const rgb = RGB_RE.exec(trimmed)
+  if (rgb) {
+    return [Number(rgb[1]) / 255, Number(rgb[2]) / 255, Number(rgb[3]) / 255]
   }
 
   let h = color.replace(/^#/, '')

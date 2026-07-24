@@ -159,113 +159,53 @@
 }
 /* Step — same disc as Stop (27px, white ring, shadow) but blue. */
 .scn-inspector-step-round.button.text-button {
-  width: 27px;
-  height: 27px;
-  min-width: 27px;
-  padding: 0;
-  border-radius: 50%;
-  border: 2px solid rgba(255, 255, 255, 0.92);
+  /* Same disc as the workbench bar, at this strip's own scale: the shape
+   * owns the geometry, these three public properties place it. */
+  --ecui-round-diameter: 27px;
+  --ecui-round-ring: 2px;
+  --ecui-round-glyph-size: 14px;
   background: var(--scenario-action-step-background);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex: 0 0 auto;
 }
 .scn-inspector-step-round.button.text-button:hover { background: var(--scenario-action-step-hover-background); }
 .scn-inspector-step-round.button.text-button.disabled {
   background: var(--scenario-action-neutral-background);
   opacity: 0.55;
 }
-.scn-inspector-step-round .codicon {
-  color: var(--badge-on-accent, #fff) !important;
-  font-size: 14px !important;
-  line-height: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  height: 100%;
-  /* Nudge the step glyph 1px up-left to sit visually centred in the disc. */
-  transform: translate(-1px, -1px);
-}
 /* Debug — same disc as Stop/Step (27px, white ring, shadow) but violet. Runs
  * the scenario honoring breakpoints; greyed when the scenario has none. */
 .scn-inspector-debug-round.button.text-button {
-  width: 27px;
-  height: 27px;
-  min-width: 27px;
-  padding: 0;
-  border-radius: 50%;
-  border: 2px solid rgba(255, 255, 255, 0.92);
+  /* Same disc as the workbench bar, at this strip's own scale: the shape
+   * owns the geometry, these three public properties place it. */
+  --ecui-round-diameter: 27px;
+  --ecui-round-ring: 2px;
+  --ecui-round-glyph-size: 14px;
   background: var(--scenario-action-debug-background);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex: 0 0 auto;
 }
 .scn-inspector-debug-round.button.text-button:hover { background: var(--scenario-action-debug-hover-background); }
 .scn-inspector-debug-round.button.text-button.disabled {
   background: var(--scenario-action-neutral-background);
   opacity: 0.55;
 }
-.scn-inspector-debug-round .codicon {
-  color: var(--badge-on-accent, #fff) !important;
-  font-size: 14px !important;
-  line-height: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  height: 100%;
-  transform: translate(0.5px, -1.5px);
-}
 .scn-inspector-stop-round.button.text-button {
-  width: 27px;
-  height: 27px;
-  min-width: 27px;
-  padding: 0;
-  border-radius: 50%;
-  border: 2px solid rgba(255, 255, 255, 0.92);
+  /* Same disc as the workbench bar, at this strip's own scale: the shape
+   * owns the geometry, these three public properties place it. */
+  --ecui-round-diameter: 27px;
+  --ecui-round-ring: 2px;
+  --ecui-round-glyph-size: 14px;
   background: var(--scenario-action-stop-background);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex: 0 0 auto;
 }
 .scn-inspector-stop-round.button.text-button:hover { background: var(--scenario-action-stop-hover-background); }
 .scn-inspector-stop-round.button.text-button.disabled {
   background: var(--scenario-action-neutral-background);
   opacity: 0.55;
 }
-.scn-inspector-stop-round .codicon {
-  color: var(--badge-on-accent, #fff) !important;
-  font-size: 14px !important;
-  line-height: 1;
-  /* Center the glyph box, then nudge the `debug-stop` square up-left 1px — its
-   * codicon glyph sits a touch low-and-right inside its em box. */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  height: 100%;
-  transform: translate(-0.5px, -0.75px);
-}
 .scn-inspector-run-round.button.text-button {
-  width: 36px;
-  height: 36px;
-  min-width: 36px;
-  padding: 0;
-  border-radius: 50%;
-  border: 2px solid rgba(255, 255, 255, 0.92);
+  /* Same disc as the workbench bar, at this strip's own scale: the shape
+   * owns the geometry, these three public properties place it. */
+  --ecui-round-diameter: 36px;
+  --ecui-round-ring: 2px;
+  --ecui-round-glyph-size: 20px;
   background: var(--scenario-action-run-background);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex: 0 0 auto;
 }
 .scn-inspector-run-round.button.text-button:hover { background: var(--scenario-action-run-hover-background); }
 .scn-inspector-run-round.button.text-button.disabled {
@@ -274,10 +214,6 @@
 }
 .scn-inspector-run-round.scn-inspector-run-round-active.button.text-button { background: var(--scenario-action-run-active-background); }
 .scn-inspector-run-round.scn-inspector-run-round-active.button.text-button:hover { background: var(--scenario-action-run-active-hover-background); }
-.scn-inspector-run-round .codicon {
-  color: var(--badge-on-accent, #fff) !important;
-  font-size: 20px !important;
-}
 /* Undo / redo — flat, theme-coloured icon buttons sitting at the LEFT of the
  * toolbar (no `order` → before the run/step/debug/stop discs). Secondary
  * utility controls, so they're understated next to the coloured run discs. */

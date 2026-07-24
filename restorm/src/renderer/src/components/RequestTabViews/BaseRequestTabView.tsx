@@ -26,6 +26,11 @@ export interface BaseRequestTabViewProps {
    * know about HTTP / GraphQL / gRPC / SOAP / OData / WebSocket
    * specifics. */
   urlSection: ReactNode
+  /** Fixed action bar (send / cancel / connect / listen …) for this request.
+   * Rendered OUTSIDE the tab + split subtree so opening the response panel
+   * cannot move it — see `RequestActionToolbar`. Omitted by hosts that render
+   * outside a workbench tab (the auth modal), which keep an inline button. */
+  actionToolbar?: ReactNode | undefined
   /** Content for the "Request" tab */
   requestContent: ReactNode
   /** Code snippets markdown content */
@@ -111,6 +116,7 @@ const COMPACT_BREAKPOINT = 750
 export const BaseRequestTabView: React.FC<BaseRequestTabViewProps> = ({
   requestId,
   urlSection,
+  actionToolbar,
   requestContent,
   codeSnippetsContent,
   docsContent,
@@ -531,6 +537,7 @@ export const BaseRequestTabView: React.FC<BaseRequestTabViewProps> = ({
         boxSizing: 'border-box'
       }}
     >
+      {actionToolbar}
       {/* The URL section (verb select + URL input + send/run) is rendered
        * inside the Request tab itself — see `requestTabs` above. The in-flight
        * indicator is no longer a progress bar here: it's the border-beam on the

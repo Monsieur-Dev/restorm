@@ -405,9 +405,6 @@
   "bookmarkRibbon": {
     "addBookmark": "Lägg till bokmärke"
   },
-  "themeCarousel": {
-    "selectedTheme": "Valt tema"
-  },
   "toaster": {
     "notificationsRegion": "Aviseringar"
   },

@@ -157,3 +157,38 @@ describe('DateTimePicker typed input', () => {
     }
   })
 })
+
+describe('DateTimePicker include-time toggle', () => {
+  // Regression coverage: toggling "include time" used to rewrite the pattern
+  // with 'YYYY-MM-DD HH:mm:ss' / 'YYYY-MM-DD' — invalid luxon tokens (`YYYY`
+  // leaks verbatim, `DD` is a localized date, not "day"). This pattern is what
+  // gets SENT as the value's wire format, so the displayed value must never
+  // carry either artifact.
+  const brokenTokenPattern = /YYYY|(?<![a-zA-Z])DD(?![a-zA-Z])/
+
+  it('toggling ON then OFF then ON again keeps a valid lowercase pattern in both directions', () => {
+    const { getByTestId } = render(
+      <DateTimePicker value={new Date(2026, 6, 23, 16, 11, 51)} onChange={vi.fn()} />
+    )
+    fireEvent.click(getByTestId('datetimepicker-open'))
+    const input = getByTestId('datetimepicker-input-input') as HTMLInputElement
+
+    // Default pattern already carries time tokens, so this first toggle ON is
+    // a no-op on the pattern — it doesn't exercise line 312 (the ON-direction
+    // rewrite) at all.
+    fireEvent.click(getByTestId('datetimepicker-include-time'))
+    expect(input.value).not.toMatch(brokenTokenPattern)
+
+    // Toggling OFF is what used to trip the broken 'YYYY-MM-DD' literal.
+    fireEvent.click(getByTestId('datetimepicker-include-time'))
+    expect(input.value).not.toMatch(brokenTokenPattern)
+    expect(input.value).toMatch(/^\d{4}-\d{2}-\d{2}$/)
+
+    // The pattern is now time-less, so toggling ON again exercises the OTHER
+    // rewrite — line 312's 'YYYY-MM-DD HH:mm:ss' literal — which the two
+    // assertions above never reach.
+    fireEvent.click(getByTestId('datetimepicker-include-time'))
+    expect(input.value).not.toMatch(brokenTokenPattern)
+    expect(input.value).toMatch(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/)
+  })
+})

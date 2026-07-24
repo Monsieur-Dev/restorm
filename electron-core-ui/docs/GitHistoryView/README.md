@@ -36,10 +36,19 @@ export interface GitHistoryViewProps {
    * Restore the open file to a past commit's content. Wired to the row's
    * right-click "recover this version" entry; the host owns the actual
    * checkout-file-at-revision + re-hydrate. Omitting it hides the entry.
-   * The entry is disabled on the commit the working copy is currently at
-   * (recovering the current version is a no-op).
+   * Active on every row, including the commit the working copy is
+   * currently at — that's the row a user needs to undo a prior recover
+   * and return to the checked-out version.
    */
   onRecoverVersion?: (hash: string) => void
+  /**
+   * Formats an ISO commit date for display. Defaults to a raw
+   * `toLocaleString` when omitted, so consumers without a custom format
+   * (e.g. `demo/`) keep working unchanged. A host app with a
+   * user-configurable date/time format setting should inject a formatter
+   * here — the library never reads a host-specific setting itself.
+   */
+  formatDate?: (iso: string) => string
   'data-testid'?: string
 }
 
@@ -74,6 +83,9 @@ const mainTip = commits.find((c) => c.refs.some((r) => /(^|\/|\s)(main|master)$/
     // re-hydrates its editor — `window.api.git.recoverFileAtRevision` does
     // the checkout; a normal commit + push is left to the user.
     onRecoverVersion={(hash) => host.recoverOpenFileAt(hash)}
+    // Optional: render dates per a host setting instead of the raw
+    // toLocaleString fallback (e.g. an app-level "date format" preference).
+    formatDate={(iso) => formatUserDate(new Date(iso))}
   />
 </Modal>
 ```
@@ -92,6 +104,17 @@ themselves. Rules:
 - extra parents (merges) open or join lanes to the right;
 - parents outside the loaded window (shallow edges) terminate their lane;
 - freed lanes are reused, keeping the gutter narrow.
+
+## Lane colors
+
+The gutter cycles through 7 theme variables — `--git-lane-1` … `--git-lane-7`,
+defined in `resources/themes/base.yaml` — applied via CSS classes
+(`.ecui-git-history-lane-1` … `-7` in `gitHistoryView.css`, each setting
+`stroke`/`fill`) rather than literal colors in the component. A lane's class
+is `ecui-git-history-lane-{(lane % 7) + 1}`. Theme families override only the
+lanes that would otherwise be unreadable on their background (see the
+`_base.yaml` of the affected family) — most families inherit the base palette
+unchanged.
 
 ## i18n keys
 
