@@ -58,6 +58,13 @@
       "noAuth": "Ei todennusta",
       "popoverLabel": "Todennusreitti",
       "unnamed": "Nimetön"
+    },
+    "contextMenu": {
+      "revealInFolder": "Avaa sisältävä kansio",
+      "copyFileName": "Kopioi tiedostonimi",
+      "copyFullPath": "Kopioi koko polku",
+      "revealFailedTitle": "Kansiota ei voitu avata",
+      "revealFailedBody": "Tiedosto on ehkä siirretty, nimetty uudelleen tai poistettu."
     }
   },
   "tips": {

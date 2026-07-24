@@ -58,6 +58,13 @@
       "noAuth": "Aucune authentification",
       "popoverLabel": "Route d'authentification",
       "unnamed": "Sans nom"
+    },
+    "contextMenu": {
+      "revealInFolder": "Ouvrir le dossier contenant",
+      "copyFileName": "Copier le nom du fichier",
+      "copyFullPath": "Copier le chemin complet",
+      "revealFailedTitle": "Impossible d'ouvrir le dossier",
+      "revealFailedBody": "Le fichier a peut-être été déplacé, renommé ou supprimé."
     }
   },
   "tips": {

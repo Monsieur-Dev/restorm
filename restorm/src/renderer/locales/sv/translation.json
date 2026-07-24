@@ -58,6 +58,13 @@
       "noAuth": "Ingen autentisering",
       "popoverLabel": "Autentiseringsväg",
       "unnamed": "Namnlös"
+    },
+    "contextMenu": {
+      "revealInFolder": "Öppna mappen som innehåller filen",
+      "copyFileName": "Kopiera filnamn",
+      "copyFullPath": "Kopiera fullständig sökväg",
+      "revealFailedTitle": "Det gick inte att öppna mappen",
+      "revealFailedBody": "Filen kan ha flyttats, bytt namn eller tagits bort."
     }
   },
   "tips": {

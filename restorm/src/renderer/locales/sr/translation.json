@@ -59,6 +59,13 @@
       "noAuth": "Без аутентификације",
       "popoverLabel": "Рута аутентификације",
       "unnamed": "Без назива"
+    },
+    "contextMenu": {
+      "revealInFolder": "Otvori fasciklu koja sadrži datoteku",
+      "copyFileName": "Kopiraj naziv datoteke",
+      "copyFullPath": "Kopiraj celu putanju",
+      "revealFailedTitle": "Nije moguće otvoriti fasciklu",
+      "revealFailedBody": "Datoteka je možda premeštena, preimenovana ili obrisana."
     }
   },
   "tips": {

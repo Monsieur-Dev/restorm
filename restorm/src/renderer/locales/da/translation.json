@@ -58,6 +58,13 @@
       "noAuth": "Ingen godkendelse",
       "popoverLabel": "Godkendelsesrute",
       "unnamed": "Uden navn"
+    },
+    "contextMenu": {
+      "revealInFolder": "Åbn indeholdende mappe",
+      "copyFileName": "Kopiér filnavn",
+      "copyFullPath": "Kopiér fuld sti",
+      "revealFailedTitle": "Mappen kunne ikke åbnes",
+      "revealFailedBody": "Filen er muligvis blevet flyttet, omdøbt eller slettet."
     }
   },
   "tips": {

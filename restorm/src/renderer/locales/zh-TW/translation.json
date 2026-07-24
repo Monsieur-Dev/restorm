@@ -57,6 +57,13 @@
       "noAuth": "無驗證",
       "popoverLabel": "驗證路由",
       "unnamed": "未命名"
+    },
+    "contextMenu": {
+      "revealInFolder": "開啟所在資料夾",
+      "copyFileName": "複製檔案名稱",
+      "copyFullPath": "複製完整路徑",
+      "revealFailedTitle": "無法開啟資料夾",
+      "revealFailedBody": "檔案可能已被移動、重新命名或刪除。"
     }
   },
   "tips": {

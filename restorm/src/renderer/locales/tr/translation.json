@@ -58,6 +58,13 @@
       "noAuth": "Kimlik doğrulama yok",
       "popoverLabel": "Kimlik doğrulama rotası",
       "unnamed": "Adsız"
+    },
+    "contextMenu": {
+      "revealInFolder": "İçeren klasörü aç",
+      "copyFileName": "Dosya adını kopyala",
+      "copyFullPath": "Tam yolu kopyala",
+      "revealFailedTitle": "Klasör açılamadı",
+      "revealFailedBody": "Dosya taşınmış, yeniden adlandırılmış veya silinmiş olabilir."
     }
   },
   "tips": {

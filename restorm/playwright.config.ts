@@ -53,6 +53,12 @@ const dirtyStateTestDir = defineBddConfig({
   outputDir: '.features-gen/dirty-state'
 })
 
+const statusBarContextMenuTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/status-bar-context-menu/features/**/*.feature',
+  steps: ['tests/e2e/bdd/status-bar-context-menu/steps/**/*.ts', 'tests/e2e/bdd/fixtures/dirty-state.fixture.ts'],
+  outputDir: '.features-gen/status-bar-context-menu'
+})
+
 const odataPetstoreTestDir = defineBddConfig({
   features: 'tests/e2e/bdd/odata-petstore/features/**/*.feature',
   steps: ['tests/e2e/bdd/odata-petstore/steps/**/*.ts', 'tests/e2e/bdd/fixtures/odata-petstore.fixture.ts'],
@@ -537,6 +543,10 @@ export default defineConfig({
     {
       name: 'dirty-state',
       testDir: dirtyStateTestDir
+    },
+    {
+      name: 'status-bar-context-menu',
+      testDir: statusBarContextMenuTestDir
     },
     {
       name: 'odata-petstore',

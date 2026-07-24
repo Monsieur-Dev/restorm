@@ -58,6 +58,13 @@
       "noAuth": "Geen authenticatie",
       "popoverLabel": "Authenticatieroute",
       "unnamed": "Naamloos"
+    },
+    "contextMenu": {
+      "revealInFolder": "Bevattende map openen",
+      "copyFileName": "Bestandsnaam kopiëren",
+      "copyFullPath": "Volledig pad kopiëren",
+      "revealFailedTitle": "Kan de map niet openen",
+      "revealFailedBody": "Het bestand is mogelijk verplaatst, hernoemd of verwijderd."
     }
   },
   "tips": {

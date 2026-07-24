@@ -59,6 +59,13 @@
       "noAuth": "Bez autentifikacije",
       "popoverLabel": "Ruta autentifikacije",
       "unnamed": "Bez naziva"
+    },
+    "contextMenu": {
+      "revealInFolder": "Otvori mapu koja sadrži datoteku",
+      "copyFileName": "Kopiraj naziv datoteke",
+      "copyFullPath": "Kopiraj cijelu putanju",
+      "revealFailedTitle": "Nije moguće otvoriti mapu",
+      "revealFailedBody": "Datoteka je možda premještena, preimenovana ili izbrisana."
     }
   },
   "tips": {

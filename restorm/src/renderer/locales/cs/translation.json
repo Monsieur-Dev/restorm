@@ -60,6 +60,13 @@
       "noAuth": "Bez ověření",
       "popoverLabel": "Ověřovací trasa",
       "unnamed": "Bez názvu"
+    },
+    "contextMenu": {
+      "revealInFolder": "Otevřít obsahující složku",
+      "copyFileName": "Kopírovat název souboru",
+      "copyFullPath": "Kopírovat celou cestu",
+      "revealFailedTitle": "Složku se nepodařilo otevřít",
+      "revealFailedBody": "Soubor byl možná přesunut, přejmenován nebo smazán."
     }
   },
   "tips": {

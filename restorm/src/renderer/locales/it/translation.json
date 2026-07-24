@@ -58,6 +58,13 @@
       "noAuth": "Nessuna autenticazione",
       "popoverLabel": "Percorso di autenticazione",
       "unnamed": "Senza nome"
+    },
+    "contextMenu": {
+      "revealInFolder": "Apri cartella contenitore",
+      "copyFileName": "Copia nome file",
+      "copyFullPath": "Copia percorso completo",
+      "revealFailedTitle": "Impossibile aprire la cartella",
+      "revealFailedBody": "Il file potrebbe essere stato spostato, rinominato o eliminato."
     }
   },
   "tips": {
