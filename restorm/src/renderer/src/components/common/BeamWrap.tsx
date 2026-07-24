@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useReducer, useRef } from 'react'
 import { BorderBeam } from 'electron-core-ui/renderer'
+import { prefersReducedMotion } from '../../utils/prefersReducedMotion'
 import './ScenarioRunningBadge.css'
 
 const BEAM_LAP_S = 1.5
@@ -24,7 +25,8 @@ export interface BeamWrapProps {
  * scenario graph paints on a running node, around whatever it wraps, while
  * `active` is true. When `active` flips false the beam finishes its current lap
  * before unmounting (no mid-lap jump) — the same graceful stop as
- * {@link ScenarioRunningBadge}.
+ * {@link ScenarioRunningBadge}. Under reduced motion there is no lap to
+ * finish, so it unmounts immediately instead.
  */
 export const BeamWrap: React.FC<BeamWrapProps> = ({ active, size = 16, borderWidth = 1.5, className, colorFrom = '#facc15', colorTo = '#22c55e', children }) => {
   const [beamOn, dispatchBeam] = useReducer((_state: boolean, on: boolean) => on, false)
@@ -33,10 +35,20 @@ export const BeamWrap: React.FC<BeamWrapProps> = ({ active, size = 16, borderWid
     if (active) {
       dispatchBeam(true)
       wantsStopRef.current = false
-    } else {
-      wantsStopRef.current = true
+      return
     }
-  }, [active])
+    wantsStopRef.current = true
+    // Under reduced motion the trail carries `animation: none`, so no
+    // `animationiteration` will ever fire and the "finish the current lap"
+    // handoff below can never run — the overlay would stay on the badge for
+    // good. There is no lap to finish in that mode, so drop it right away.
+    // Gated on `beamOn` so an idle wrapper (the overwhelming majority: every
+    // sidebar row and tab that is not executing) never dispatches at all.
+    if (beamOn && prefersReducedMotion()) {
+      dispatchBeam(false)
+      wantsStopRef.current = false
+    }
+  }, [active, beamOn])
   const onAnimationIteration = useCallback((e: React.AnimationEvent<HTMLSpanElement>): void => {
     if (e.animationName === 'ecu-border-beam-travel' && wantsStopRef.current) {
       dispatchBeam(false)

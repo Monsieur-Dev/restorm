@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useReducer, useRef } from 'react'
 import { BorderBeam } from 'electron-core-ui/renderer'
 import { useIsScenarioRunning } from '../../services/scenarioRunningStore'
+import { prefersReducedMotion } from '../../utils/prefersReducedMotion'
 import './ScenarioRunningBadge.css'
 
 const BEAM_LAP_S = 1.5
@@ -32,11 +33,19 @@ export const ScenarioRunningBadge: React.FC<ScenarioRunningBadgeProps> = ({ scen
     if (running) {
       dispatchBeam(true)
       wantsStopRef.current = false
-    } else {
-      // Don't drop the beam now — mark it for removal on the next lap boundary.
-      wantsStopRef.current = true
+      return
     }
-  }, [running])
+    // Don't drop the beam now — mark it for removal on the next lap boundary.
+    wantsStopRef.current = true
+    // …unless there is no lap to wait for: under reduced motion the trail
+    // carries `animation: none`, so `animationiteration` never fires and the
+    // overlay would stay on the badge for good. Gated on `beamOn` so an idle
+    // badge never dispatches.
+    if (beamOn && prefersReducedMotion()) {
+      dispatchBeam(false)
+      wantsStopRef.current = false
+    }
+  }, [running, beamOn])
   const onAnimationIteration = useCallback((e: React.AnimationEvent<HTMLSpanElement>): void => {
     if (e.animationName === 'ecu-border-beam-travel' && wantsStopRef.current) {
       dispatchBeam(false)

@@ -222,3 +222,16 @@ Feature: HTTP/REST execution end-to-end
     And I click Send
     Then the response status is "200"
     And the request has at least 1 history entry
+
+  Scenario: A send with an emptied URL leaves no activity beam behind
+    When I open the "GET echo" request tab via MCP
+    And I clear the request URL
+    And I click Send
+    Then the response shows an error
+    And the activity beam has stopped on the tab badge and the sidebar badge
+
+  Scenario: A successful send leaves no activity beam behind
+    When I open the "GET echo" request tab via MCP
+    And I click Send
+    Then the response status is "200"
+    And the activity beam has stopped on the tab badge and the sidebar badge

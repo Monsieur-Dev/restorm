@@ -444,6 +444,33 @@ Then('the response body matches a handlebars uuid for header {string}', async ({
   }).toPass({ timeout: 20_000 })
 })
 
+When('I clear the request URL', async () => {
+  if (page === null) throw new Error('launch first')
+  const p = page
+  const urlInput = p.locator('[data-testid="http-request-url-input"]:visible').first()
+  await expect(urlInput).toBeVisible({ timeout: 20_000 })
+  await urlInput.click()
+  await p.keyboard.press('ControlOrMeta+a')
+  await p.keyboard.press('Delete')
+  // Blur so the field commits, then let the debounced upstream update land
+  // before the send reads the resolved URL.
+  await p.keyboard.press('Tab')
+  await p.waitForTimeout(1_000)
+})
+
+Then('the activity beam has stopped on the tab badge and the sidebar badge', async () => {
+  if (page === null) throw new Error('launch first')
+  const p = page
+  // The beam always finishes its current lap before it disappears (1.5s),
+  // so allow a few laps' grace — but it MUST eventually go, on the error
+  // path exactly as on the success path. A request whose execution never
+  // announces its outcome leaves both badges orbiting forever.
+  const tabBeam = p.locator('.tab[role="tab"][aria-selected="true"] .ecu-border-beam')
+  const sidebarBeam = p.locator('[data-testid="sidebar-listview"] .ecu-border-beam')
+  await expect(tabBeam).toHaveCount(0, { timeout: 20_000 })
+  await expect(sidebarBeam).toHaveCount(0, { timeout: 20_000 })
+})
+
 Then('the request has at least {int} history entry', async ({ callMcpTool }, n: number) => {
   if (discovery === null) throw new Error('launch first')
   if (currentRequestId === null) throw new Error('open a request first')
