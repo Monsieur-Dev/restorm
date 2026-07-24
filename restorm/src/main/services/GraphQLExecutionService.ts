@@ -113,6 +113,18 @@ class GraphQLExecutionService {
     // Broadcast that request started
     this.broadcastProgress(requestId, 'started')
 
+    // Guarantee EXACTLY ONE terminal progress event per execution, on every
+    // exit path — otherwise an early `return` inside the try (an unparseable
+    // URL, …) leaves the request stuck "running" and the activity beam
+    // (sidebar row + workbench tab) spinning forever after a failed send. The
+    // `finally` fallback settles any path that didn't announce its own outcome.
+    let settled = false
+    const settleProgress = (status: 'completed' | 'cancelled' | 'error'): void => {
+      if (settled) return
+      settled = true
+      this.broadcastProgress(requestId, status)
+    }
+
     try {
       // Resolve any SecretValues reachable from this request's KeyValue
       // groups AND from the active env-folder variable chain BEFORE the
@@ -217,7 +229,7 @@ class GraphQLExecutionService {
       const durationMs = Date.now() - startTime
       
       // Broadcast completion
-      this.broadcastProgress(requestId, 'completed')
+      settleProgress('completed')
 
       // Parse GraphQL response
       let data: unknown
@@ -251,7 +263,7 @@ class GraphQLExecutionService {
       
       // Check if cancelled
       if (error.name === 'AbortError' || abortController.signal.aborted) {
-        this.broadcastProgress(requestId, 'cancelled')
+        settleProgress('cancelled')
         return {
           requestId,
           success: false,
@@ -261,8 +273,8 @@ class GraphQLExecutionService {
         }
       }
 
-      this.broadcastProgress(requestId, 'error')
-      
+      settleProgress('error')
+
       return {
         requestId,
         success: false,
@@ -271,6 +283,10 @@ class GraphQLExecutionService {
         timings: { startedAt, durationMs }
       }
     } finally {
+      // Settle any early-return path (e.g. an unparseable URL) that never
+      // announced a terminal, so the request leaves the activity-beam's
+      // "running" set instead of spinning forever.
+      settleProgress('error')
       this.activeRequests.delete(requestId)
     }
   }

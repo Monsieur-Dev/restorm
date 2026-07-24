@@ -140,6 +140,22 @@ class HTTPExecutionService {
     // Broadcast that request started
     this.broadcastProgress(requestId, 'started')
 
+    // Guarantee EXACTLY ONE terminal progress event per execution, on every
+    // exit path. The activity beam (sidebar row + workbench tab) treats a
+    // request as running between `started` and its terminal; an early `return`
+    // inside the try that skips the terminal (no resolved URL, unparseable
+    // URL, missing upload file, unknown body type…) would leave the request
+    // stuck "running" and the beam spinning forever after a finished-but-failed
+    // send. The `finally` fallback settles any path that didn't announce its
+    // own outcome; `settled` keeps the normal completed/cancelled/error path
+    // from being double-reported.
+    let settled = false
+    const settleProgress = (status: 'completed' | 'cancelled' | 'error'): void => {
+      if (settled) return
+      settled = true
+      this.broadcastProgress(requestId, status)
+    }
+
     // Declared before the try so the catch's error responses can report
     // the URL even if resolution itself threw.
     let resolvedUrl = ''
@@ -325,7 +341,7 @@ class HTTPExecutionService {
         const resolved = this.resolveAuthShape(authRequest, requestId)
         if (!resolved.ok) {
           const durationMs = Date.now() - startTime
-          this.broadcastProgress(requestId, 'error')
+          settleProgress('error')
           return {
             requestId,
             success: false,
@@ -346,7 +362,7 @@ class HTTPExecutionService {
           }
         } catch (authErr) {
           const durationMs = Date.now() - startTime
-          this.broadcastProgress(requestId, 'error')
+          settleProgress('error')
           return {
             requestId,
             success: false,
@@ -406,7 +422,7 @@ class HTTPExecutionService {
       const durationMs = Date.now() - startTime
 
       // Broadcast completion
-      this.broadcastProgress(requestId, 'completed')
+      settleProgress('completed')
 
       return {
         requestId,
@@ -435,7 +451,7 @@ class HTTPExecutionService {
       
       // Check if cancelled
       if (error.name === 'AbortError' || abortController.signal.aborted) {
-        this.broadcastProgress(requestId, 'cancelled')
+        settleProgress('cancelled')
         return {
           requestId,
           success: false,
@@ -445,8 +461,8 @@ class HTTPExecutionService {
         }
       }
 
-      this.broadcastProgress(requestId, 'error')
-      
+      settleProgress('error')
+
       return {
         requestId,
         success: false,
@@ -455,6 +471,10 @@ class HTTPExecutionService {
         timings: { startedAt, durationMs }
       }
     } finally {
+      // Any exit path that didn't announce its own outcome (an early return
+      // for an empty / unparseable URL, a missing file, …) settles here so the
+      // request never stays stuck in the activity-beam's "running" set.
+      settleProgress('error')
       this.activeRequests.delete(requestId)
     }
   }
