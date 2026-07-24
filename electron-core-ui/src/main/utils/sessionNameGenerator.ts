@@ -36,7 +36,13 @@ export function generateUniqueSessionName(
   _generateName: () => string = generateSessionName
 ): string {
   const existing = new Set(existingNames)
-  const compose = (base: string): string => (worktreeSuffix !== undefined ? `${base}@${worktreeSuffix}` : base)
+  // Treat an empty/blank suffix as absent. The DEV suffix is resolved from
+  // `git rev-parse --show-toplevel` with a `basename(process.cwd())` fallback,
+  // and that fallback yields '' when the process was started with cwd `/`
+  // (e.g. launched via macOS `open`) — which previously produced a dangling
+  // `name@` with nothing after the separator.
+  const suffix = worktreeSuffix?.trim()
+  const compose = (base: string): string => (suffix ? `${base}@${suffix}` : base)
 
   let lastBase = _generateName()
   for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {

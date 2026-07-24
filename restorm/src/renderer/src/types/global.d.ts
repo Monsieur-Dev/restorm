@@ -38,6 +38,8 @@ declare global {
       }
       minimizeWindow: () => Promise<void>
       maximizeWindow: () => Promise<void>
+      /** Toggle the window's fullscreen state; resolves to the new state. */
+      toggleFullscreen: () => Promise<boolean>
       closeWindow: () => Promise<void>
       toggleDeveloperTools: () => Promise<void>
       setWindowTitle: (title: string) => Promise<void>

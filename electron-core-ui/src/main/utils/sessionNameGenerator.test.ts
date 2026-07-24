@@ -50,6 +50,14 @@ describe('generateUniqueSessionName', () => {
     expect(generateUniqueSessionName(existing, undefined, gen)).toBe('brave-panda-4')
   })
 
+  it('omits the @ separator when the worktree suffix is empty or blank', () => {
+    // The DEV suffix falls back to `basename(process.cwd())`, which is '' when
+    // the process was started with cwd `/` (e.g. via macOS `open`). A dangling
+    // `name@` was showing in the status bar.
+    expect(generateUniqueSessionName([], '', make('lucky-unicorn'))).toBe('lucky-unicorn')
+    expect(generateUniqueSessionName([], '   ', make('lucky-unicorn'))).toBe('lucky-unicorn')
+  })
+
   it('numeric suffix also respects worktree suffix', () => {
     const gen = make('brave-panda')
     const existing = ['brave-panda@wt', 'brave-panda-2@wt']

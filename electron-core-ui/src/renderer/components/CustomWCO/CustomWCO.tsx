@@ -114,7 +114,11 @@ const CustomWCO: React.FC<CustomWCOProps> = ({
     if (typeof document === 'undefined') return
     let width = 0
     if (currentPlatform === 'linux') width = LINUX_WCO_WIDTH_PX
-    else if (currentPlatform === 'win32' || currentPlatform === 'darwin') width = wcoWidth
+    // macOS draws its window controls on the LEFT, so nothing is reserved on
+    // the right here — the title bar reserves a left inset instead. Reserving
+    // the Windows width on darwin left a dead gap after the right-hand actions
+    // and pushed the centre zone off-centre.
+    else if (currentPlatform === 'win32') width = wcoWidth
     document.body.style.setProperty('--wco-width', `${width}px`)
     return () => {
       document.body.style.removeProperty('--wco-width')
@@ -139,8 +143,14 @@ const CustomWCO: React.FC<CustomWCOProps> = ({
     }
   }
 
-  // On Windows/macOS, return a spacer div to reserve space for native WCO
-  if (currentPlatform === 'win32' || currentPlatform === 'darwin') {
+  // macOS: the native traffic lights sit top-LEFT, so there is nothing to
+  // reserve on the right. The title bar insets its left zone instead.
+  if (currentPlatform === 'darwin') {
+    return null
+  }
+
+  // On Windows, return a spacer div to reserve space for the native WCO
+  if (currentPlatform === 'win32') {
     return (
       <div 
         className={`custom-wco-spacer ${className}`}

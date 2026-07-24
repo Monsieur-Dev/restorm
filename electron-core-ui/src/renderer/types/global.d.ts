@@ -172,8 +172,17 @@ interface WindowApiGit {
   onPullAvailable: (callback: () => void) => () => void
 }
 
+/** Native application menu (macOS renders menus in the system bar). */
+interface WindowApiNativeMenu {
+  set: (template: unknown) => Promise<boolean>
+  clear: () => Promise<boolean>
+  onInvoke: (callback: (id: string) => void) => () => void
+}
+
 interface WindowApi {
   platform: string
+  toggleFullscreen: () => Promise<boolean>
+  nativeMenu: WindowApiNativeMenu
   theme: WindowApiTheme
   i18n: WindowApiI18n
   logger: {

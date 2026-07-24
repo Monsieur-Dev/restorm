@@ -76,6 +76,7 @@ export interface MenuItemSeparatorProps {
 - **onClick** (`() => void`) : Click handler
 - **checked** (`boolean`) : Whether the item is checked
 - **disabled** (`boolean`) : Whether the item is disabled
+- **role** (`string`) : Native platform role (`'undo' | 'copy' | 'paste' | …`), used only where the host renders menus natively (macOS system bar). The platform then performs the action on the focused element — the only thing that makes ⌘C/⌘V/⌘Z work in text fields — and **owns the item's enabled state**, so a role item ignores `disabled` in the native menu. Validated against an allow-list; `togglefullscreen` is excluded. See [Native roles](#native-roles--declared-by-the-host-not-inferred).
 - **children** (`React.ReactNode`) : MenuItem components for submenu
 - **className** (`string`) : Additional CSS classes
 - **id** (`string`) : HTML ID of the menu item
@@ -513,6 +514,92 @@ The component uses:
 - `useRef` for DOM element references
 - Efficient event handling
 - Minimal re-renders with proper state management
+
+## Native application menu (macOS)
+
+On Windows/Linux the `MenuBar` renders **inside** the window title bar. On macOS,
+applications render their menus in the **system menu bar**, outside the window.
+Rather than maintaining a second menu definition, the same `MenuBar` JSX is walked
+into a native menu template — so the two renderings cannot drift apart.
+
+### Pieces
+
+| Piece | Location | Role |
+|-------|----------|------|
+| `buildNativeMenuTemplate(jsx)` | `renderer/utils/menuTemplate.ts` | Walks the MenuBar JSX into a serializable `NativeMenuNode[]` template + an `id → onClick` handler map. |
+| `toAccelerator(shortcut)` | `renderer/utils/menuTemplate.ts` | Maps an ECUI `shortcut` (`"Ctrl+N"`) to an Electron accelerator (`"CmdOrCtrl+N"`), so macOS renders and binds **⌘** while Windows/Linux keep **Ctrl** — no per-platform strings. |
+| `useNativeAppMenu(jsx, enabled)` | `renderer/hooks/useNativeAppMenu.ts` | Publishes the template over IPC when `enabled` (macOS), and runs the matching `onClick` when the main process echoes an activation back. |
+| `native-menu:set` / `native-menu:clear` / `native-menu:invoke` | main `ipc/nativeMenuHandlers.ts` | Build/clear the `Menu` in the main process; echo an item id back to the renderer on click. |
+
+`Titlebar` calls `useNativeAppMenu(leftContent, isMac)` for you — a consumer that
+uses `Titlebar` gets the native menu automatically and does not call these
+utilities directly.
+
+### How the walk works
+
+`buildNativeMenuTemplate` reads React elements as plain objects (no rendering).
+It matches nodes by **`displayName`** — `MenuBar`, `MenuBarItem`, `MenuItem`,
+`MenuItemSeparator` — rather than by importing the components, which avoids a
+renderer import cycle and, crucially, **survives production minification** (a
+minified function `name` would not). Each of those components sets an explicit
+`displayName`.
+
+- `React.Children.toArray` flattens fragments and drops `false`/`null`/`undefined`,
+  so conditional entries — e.g. `{fileName && <><MenuItemSeparator/><MenuItem …/></>}` —
+  work unchanged.
+- A top-level `MenuBarItem` whose children all vanished (everything conditionally
+  hidden) is dropped, so no dead menu title is left behind.
+- Unknown element types are traversed **through**, so a wrapper component around
+  some items does not silently swallow them.
+- `data-testid` becomes the item **id**; the item's `onClick` is stored under that
+  id. `shortcut` → accelerator, `disabled` → `enabled: false`, `checked` →
+  checkbox, `opensDialog` appends the `…` ellipsis.
+
+### Clicks round-trip
+
+The main process cannot hold a renderer callback, so activating a native item
+sends `native-menu:invoke` with the item id; `useNativeAppMenu` looks the id up
+in its handler map and runs the original `onClick`. The handler map is refreshed
+on every publish (its closures capture the latest props), but the IPC `set` is
+skipped when the serialized template is unchanged — so a title-bar re-render does
+not needlessly rebuild the whole native menu.
+
+### Native roles — declared by the host, not inferred
+
+Some items should be performed by the **platform** rather than by an app
+handler. Declare that with the `role` prop on `MenuItem`:
+
+```tsx
+<MenuItem title={t('menuBar.copy')} shortcut="Ctrl+C" role="copy" disabled />
+```
+
+This matters most on macOS: routing edit operations through an IPC round-trip to
+a renderer handler does **not** reliably act on the focused element (native
+fields, Monaco, webviews), and an app whose menu carries no Edit roles has no
+working ⌘C/⌘V/⌘Z **at all** — the well-known Electron trap.
+
+Two consequences worth knowing:
+
+- **The role owns enablement.** An item carrying a role ignores `disabled` in the
+  native menu — the platform enables it exactly when it applies (there is a
+  selection to copy, something to undo…). So a host can mark an item `disabled`
+  for its own in-window bar, as restorm does for its not-yet-wired Edit menu,
+  without killing the native shortcut.
+- **The library never infers a role from an item's identity.** The role travels
+  in the template because the alternative — mapping well-known `data-testid`s to
+  roles inside the library — would make this package depend on one host app's
+  test identifiers, and a rename there would silently drop the role with no
+  failing test.
+
+`role` is validated against an allow-list before reaching
+`Menu.buildFromTemplate`; unknown values are ignored and the item stays a plain
+action. **`togglefullscreen` is deliberately excluded**: AppKit appends its own
+"Enter Full Screen" next to any menu carrying that selector, so a host asking for
+it would get two fullscreen entries. Toggle the window over the
+`toggle-fullscreen` IPC channel instead.
+
+The application menu is prepended with `{ role: 'appMenu' }` so macOS gets its
+standard About/Services/Hide/**⌘Q** items.
 
 ## Testing
 

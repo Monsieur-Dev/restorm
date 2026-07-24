@@ -24,6 +24,22 @@ export function registerWindowHandlers(): void {
   // ========================================================================
   // Window control IPC handlers (no args, use event.sender)
   // ========================================================================
+  // Toggle the active window's fullscreen state. Drives the Windows/Linux
+  // in-window menu item and the macOS native menu item alike — on macOS the
+  // item routes native-menu:invoke → renderer → here rather than using
+  // Electron's `togglefullscreen` role, which would make AppKit inject a
+  // second "Enter Full Screen" entry.
+  ipcMain.handle('toggle-fullscreen', (event) => {
+    const wnd = BrowserWindow.fromWebContents(event.sender)
+    if (wnd && !wnd.isDestroyed()) {
+      const next = !wnd.isFullScreen()
+      wnd.setFullScreen(next)
+      logger.info(`Window fullscreen set to ${String(next)}`)
+      return next
+    }
+    return false
+  })
+
   ipcMain.handle('minimize-window', (event) => {
     const wnd = BrowserWindow.fromWebContents(event.sender)
     if (wnd && !wnd.isDestroyed()) {

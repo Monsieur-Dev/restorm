@@ -4,6 +4,8 @@ import { TitlebarProps } from './types'
 import { CustomWCO } from '../CustomWCO'
 import { SearchBar } from '../SearchBar'
 import { NavigationButtons } from './NavigationButtons'
+import { useElectronPlatform } from '../../hooks/useElectronPlatform'
+import { useNativeAppMenu } from '../../hooks/useNativeAppMenu'
 import { logger } from '../../services/logger'
 
 const Titlebar: React.FC<TitlebarProps> = ({
@@ -38,8 +40,15 @@ const Titlebar: React.FC<TitlebarProps> = ({
   const derivedSearchBarTestId = searchBarTestId ?? `${rootTestId}-searchbar`
   const derivedCustomWcoTestId = customWcoTestId ?? `${rootTestId}-customwco`
 
+  // Platform from the main process (`process.platform`), the same source the
+  // window controls use. On macOS the native traffic lights are drawn over the
+  // top-left of the window, so the left zone must reserve room for them.
+  const hostPlatform = useElectronPlatform(customWcoPlatform)
+  const isMac = hostPlatform === 'darwin'
+
   const titlebarClasses = [
     'titlebar',
+    isMac && 'titlebar--mac',
     className
   ].filter(Boolean).join(' ')
 
@@ -102,6 +111,10 @@ const Titlebar: React.FC<TitlebarProps> = ({
   // Use leftContent if provided, otherwise fall back to children for backward compatibility
   const actualLeftContent = leftContent ?? children
 
+  // macOS shows application menus in the system bar, not inside the window.
+  // The same JSX drives both, so the two renderings cannot drift apart.
+  useNativeAppMenu(actualLeftContent, isMac)
+
   return (
     <div
       id={id}
@@ -115,8 +128,13 @@ const Titlebar: React.FC<TitlebarProps> = ({
     >
       {/* Left zone */}
       <div className="titlebar-left" data-testid={leftZoneTestId}>
-        {renderIcon()}
-        {actualLeftContent}
+        {/* macOS puts the app identity in the system menu bar, not the window
+            chrome — and the native traffic lights occupy exactly this spot,
+            so rendering an icon here would sit underneath them. */}
+        {!isMac && renderIcon()}
+        {/* On macOS the menu is published to the system menu bar by
+            useNativeAppMenu above, so it is not rendered in the window. */}
+        {!isMac && actualLeftContent}
       </div>
 
       {/* Center zone */}

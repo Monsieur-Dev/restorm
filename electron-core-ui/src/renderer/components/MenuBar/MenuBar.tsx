@@ -559,4 +559,9 @@ const MenuBar: React.FC<MenuBarProps> = ({
   )
 }
 
+// Stable identity for the native-menu template walker, which matches
+// nodes by displayName rather than importing the components (avoids a
+// renderer import cycle). Also improves React DevTools output.
+MenuBar.displayName = 'MenuBar'
+
 export default MenuBar
