@@ -34,3 +34,8 @@ Feature: Toggle
     When I press "Space" on toggle "toggle-disabled"
     Then toggle change count should be 0
 
+  Scenario: The switch appearance draws a keyboard focus ring, the star does not
+    Given I open the toggle tab
+    Then toggle "toggle-basic-unchecked" should show a keyboard focus ring
+    And toggle "toggle-star" should be visible
+    And toggle "toggle-star" should NOT show a keyboard focus ring

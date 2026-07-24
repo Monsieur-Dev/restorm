@@ -18,6 +18,12 @@ Feature: Settings surface follows the workbench
     Then the Settings modal should be visible
     And no Settings tab should be open
 
+  Scenario: A Settings toggle shows a keyboard focus ring
+    Given a project folder is open
+    When I open Settings from the gear button
+    Then a Settings tab should be open
+    And toggle "setting-toggle-appearance:advancedVisualEffects" should show a keyboard focus ring
+
   Scenario: The gear button opens a tab once a file is open
     Given a project folder is open
     When I open Settings from the gear button
