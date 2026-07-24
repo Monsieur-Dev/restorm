@@ -762,8 +762,18 @@ export function ensureCoreUiWebApiShim(): void {
     }
   }
 
+  // A browser has no OS menu bar; the in-window MenuBar is the only menu.
+  const nativeMenuApi = {
+    set: (): Promise<boolean> => Promise.resolve(false),
+    clear: (): Promise<boolean> => Promise.resolve(false),
+    onInvoke: (): (() => void) => () => { /* noop in web shim: no native menu */ }
+  }
+
   const api: CoreUiApi = {
     platform: (navigator as { userAgentData?: { platform?: string } }).userAgentData?.platform ?? 'web',
+    nativeMenu: nativeMenuApi,
+    // A browser tab has no OS window to put fullscreen.
+    toggleFullscreen: (): Promise<boolean> => Promise.resolve(false),
     theme: themeApi,
     i18n: i18nApi,
     logger: {

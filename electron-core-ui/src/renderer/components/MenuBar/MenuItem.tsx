@@ -368,4 +368,9 @@ const MenuItem: React.FC<MenuItemProps> = ({
   )
 }
 
+// Stable identity for the native-menu template walker, which matches
+// nodes by displayName rather than importing the components (avoids a
+// renderer import cycle). Also improves React DevTools output.
+MenuItem.displayName = 'MenuItem'
+
 export default MenuItem

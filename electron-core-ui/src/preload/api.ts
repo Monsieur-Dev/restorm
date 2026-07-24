@@ -84,6 +84,11 @@ export const createCoreUIAPI = (): CoreUiApi => ({
   maximizeWindow: async (): Promise<void> => {
     await ipcRenderer.invoke('maximize-window')
   },
+  /** Toggle the window's fullscreen state. Returns the new state. */
+  toggleFullscreen: async (): Promise<boolean> => {
+    const result: unknown = await ipcRenderer.invoke('toggle-fullscreen')
+    return result === true
+  },
   
   closeWindow: async (): Promise<void> => {
     await ipcRenderer.invoke('close-window')
@@ -690,6 +695,32 @@ export const createCoreUIAPI = (): CoreUiApi => ({
       ipcRenderer.on('git:pull-available', handler)
       return () => {
         ipcRenderer.removeListener('git:pull-available', handler)
+      }
+    }
+  },
+  nativeMenu: {
+    /** Publish a serializable menu template (derived from the MenuBar JSX). */
+    set: async (template: unknown): Promise<boolean> => {
+      const result: unknown = await ipcRenderer.invoke('native-menu:set', template)
+      return result === true
+    },
+    /** Remove the application menu (non-macOS hosts render it in-window). */
+    clear: async (): Promise<boolean> => {
+      const result: unknown = await ipcRenderer.invoke('native-menu:clear')
+      return result === true
+    },
+    /**
+     * Subscribe to activations of a native menu item. The main process cannot
+     * hold a renderer callback, so it echoes back the item id and the renderer
+     * runs the original `onClick`.
+     */
+    onInvoke: (callback: (id: string) => void): (() => void) => {
+      const handler = (_event: unknown, id: string): void => {
+        callback(id)
+      }
+      ipcRenderer.on('native-menu:invoke', handler)
+      return () => {
+        ipcRenderer.removeListener('native-menu:invoke', handler)
       }
     }
   }

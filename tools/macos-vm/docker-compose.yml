@@ -1,0 +1,45 @@
+# macOS QA sandbox (KVM-accelerated, via dockur/macos).
+#
+# Purpose: eyeball + fix macOS-only rendering (titlebar, native traffic lights,
+# menus) without renting a Mac. NOT a build/release path — releases go through
+# the macOS runners in .github/workflows/release.yml (real Apple hardware).
+#
+# LEGAL: Apple's EULA permits macOS only on Apple-branded hardware. Treat this
+# as a local, experimental tool. Never put it in a release/distribution
+# pipeline, and don't ship anything built here.
+#
+# Start:  docker --context default compose up -d      <-- see README (context!)
+# View:   http://localhost:8006          (web viewer)
+# SSH:    ssh -p 2222 <user>@localhost   (after enabling Remote Login, see README)
+services:
+  macos:
+    image: dockurr/macos
+    container_name: macos
+    environment:
+      # 11=Big Sur 12=Monterey 13=Ventura 14=Sonoma 15=Sequoia
+      VERSION: "13"
+      DISK_SIZE: "48G"
+      # 4G/2 cores is NOT enough: restorm's renderer bundle OOMs the JS heap
+      # (>2 GB) during `electron-vite build`. 6G/6 cores builds comfortably.
+      RAM_SIZE: "6G"
+      CPU_CORES: "6"
+    devices:
+      - /dev/kvm
+      - /dev/net/tun
+    cap_add:
+      - NET_ADMIN
+    ports:
+      - "8006:8006"        # web viewer (noVNC)
+      - "5900:5900/tcp"    # raw VNC — used by vncdotool for screenshots/clicks
+      - "5900:5900/udp"
+      - "2222:22"          # SSH into the guest (needs Remote Login ON, see README)
+    volumes:
+      - macos_storage:/storage
+      # NOTE: a 9p bind-mount (`- ./src:/shared`) is deliberately NOT used.
+      # QEMU exposes it (mount_tag=shared) but macOS has no 9p client —
+      # `mount_9p` does not exist on macOS. Use scp over port 2222 instead.
+    restart: "no"
+    stop_grace_period: 2m
+
+volumes:
+  macos_storage:

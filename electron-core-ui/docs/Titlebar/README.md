@@ -245,6 +245,40 @@ const win = new BrowserWindow({
 })
 ```
 
+## macOS (`darwin`)
+
+On macOS the title bar adapts to the platform's own conventions. The platform is
+read from the main process (`process.platform`) via
+[`useElectronPlatform`](../Renderer/Hooks-Services-Contexts.md#useelectronplatform) —
+the same source the window controls use — not from `navigator.userAgent`.
+
+When the host is `darwin`:
+
+- The root element gains the **`titlebar--mac`** class, which reserves a **left
+  inset** (`padding-left: 78px`) so the native traffic lights (top-left) do not
+  overlap the title-bar content.
+- The **app icon is not rendered** — it would sit underneath the traffic lights;
+  macOS shows the app identity in the system menu bar instead.
+- The **in-window `leftContent` (the MenuBar) is not rendered**. macOS renders
+  application menus in the system menu bar, outside the window, so the same menu
+  JSX is published there instead — see below.
+- `CustomWCO` renders nothing and reserves no right-hand width (see the
+  [CustomWCO doc](../CustomWCO/README.md)); the search / account / settings zone
+  therefore extends to the right edge with no dead gap.
+
+### Native application menu
+
+`Titlebar` mirrors its `leftContent` (a `MenuBar` JSX tree) into the macOS system
+menu bar via the [`useNativeAppMenu`](../Renderer/Hooks-Services-Contexts.md#usenativeappmenu)
+hook. The **same JSX** drives both the in-window bar (Windows/Linux) and the
+native menu (macOS), so labels, accelerators, ordering and conditional entries
+can never drift apart. See the
+[MenuBar doc → Native application menu (macOS)](../MenuBar/README.md#native-application-menu-macos)
+for how the template is derived and how clicks round-trip back to the renderer.
+
+Nothing changes on Windows/Linux: the class, the inset, the icon/menu skipping
+and the native-menu publish are all gated on `platform === 'darwin'`.
+
 ## Theme Variables
 
 The component uses the following CSS variables:
