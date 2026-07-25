@@ -75,6 +75,10 @@ export interface VariableInputBoxProps {
   - Uses `data-theme` (`dark`, `light`, `hc`, `hcLight`) to select `vs-dark` or `vs`.
   - A `MutationObserver` re-applies the Monaco theme whenever `data-theme` changes.
   - The Monaco editor background is transparent so the `InputBox` background (`--input-background`) remains visible.
+- **Suggest/hover widget cleanup on visibility loss**:
+  - The editor sets `fixedOverflowWidgets: true` + `overflowWidgetsDomNode: document.body` so the suggest/hover popups aren't clipped by an `overflow: hidden` ancestor — this reparents them onto `document.body`, outside the component's own DOM subtree.
+  - Because of that reparenting, hiding this input (e.g. a host that toggles `display: none` on an inactive tab, without unmounting) does not hide an already-open popup on its own. An `IntersectionObserver` on the input's container detects the loss of visibility and explicitly hides both widgets (`editor.trigger(..., 'hideSuggestWidget', {})` and the `editor.contrib.contentHover` contribution's `hideContentHover()`).
+  - `editor.onDidBlurEditorWidget` triggers the same cleanup as a fallback for a direct click away from the field that doesn't change the container's intersection (no host visibility change).
 
 ## Usage Examples
 
@@ -140,6 +144,7 @@ It also exposes stable attributes on the root:
 - `variableInputBoxCodeEditorSelector(testId)`
 - `variableInputBoxTextareaSelector(testId)` (delegates to `CodeEditor` textarea selector)
 - `variableInputBoxContextMenuSelector(testId)`
+- `variableInputBoxSuggestWidgetSelector` — a constant, not a factory: the open `{{...}}` suggest popup is reparented onto `document.body` (see *Suggest/hover widget cleanup* above), so it is not a descendant of `variableInputBoxRootSelector(testId)` and carries no per-instance test id. Match it page-wide, and assert on its **count** when several inputs could have opened it.
 
 ### Playwright-BDD steps (`electron-core-ui/testing/playwright-bdd`)
 
