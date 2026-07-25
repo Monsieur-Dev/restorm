@@ -251,8 +251,6 @@
     "newFolder": "New Folder",
     "newEnvironmentFolder": "New Environment Folder",
     "contextMenu": {
-      "createFolder": "Create folder",
-      "createEnvironmentFolder": "Create environment folder",
       "delete": "Delete",
       "clone": "Clone",
       "copySuffix": "copy",
@@ -266,6 +264,7 @@
       "add": {
         "title": "Add",
         "folder": "Folder",
+        "environmentFolder": "Environment folder",
         "httpGet": "HTTP – GET request",
         "httpPost": "HTTP – POST request",
         "httpPut": "HTTP – PUT request",

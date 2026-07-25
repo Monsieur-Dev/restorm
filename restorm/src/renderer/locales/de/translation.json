@@ -251,8 +251,6 @@
     "newFolder": "Neuer Ordner",
     "newEnvironmentFolder": "Neuer Umgebungsordner",
     "contextMenu": {
-      "createFolder": "Ordner erstellen",
-      "createEnvironmentFolder": "Umgebungsordner erstellen",
       "delete": "Löschen",
       "clone": "Klonen",
       "copySuffix": "Kopie",
@@ -266,6 +264,7 @@
       "add": {
         "title": "Hinzufügen",
         "folder": "Ordner",
+        "environmentFolder": "Umgebungsordner",
         "httpGet": "HTTP-Anfrage – GET",
         "httpPost": "HTTP-Anfrage – POST",
         "httpPut": "HTTP-Anfrage – PUT",

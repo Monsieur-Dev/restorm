@@ -251,8 +251,6 @@
     "newFolder": "Ny mappe",
     "newEnvironmentFolder": "Ny miljømappe",
     "contextMenu": {
-      "createFolder": "Opret mappe",
-      "createEnvironmentFolder": "Opret miljømappe",
       "delete": "Slet",
       "clone": "Klon",
       "copySuffix": "kopi",
@@ -266,6 +264,7 @@
       "add": {
         "title": "Tilføj",
         "folder": "Mappe",
+        "environmentFolder": "Miljømappe",
         "httpGet": "HTTP – GET-anmodning",
         "httpPost": "HTTP – POST-anmodning",
         "httpPut": "HTTP – PUT-anmodning",

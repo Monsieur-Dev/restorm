@@ -250,8 +250,6 @@
     "newFolder": "Folder baru",
     "newEnvironmentFolder": "Folder lingkungan baru",
     "contextMenu": {
-      "createFolder": "Buat folder",
-      "createEnvironmentFolder": "Buat folder lingkungan",
       "delete": "Hapus",
       "clone": "Klon",
       "copySuffix": "salinan",
@@ -265,6 +263,7 @@
       "add": {
         "title": "Tambah",
         "folder": "Folder",
+        "environmentFolder": "Folder lingkungan",
         "httpGet": "Permintaan HTTP – GET",
         "httpPost": "Permintaan HTTP – POST",
         "httpPut": "Permintaan HTTP – PUT",

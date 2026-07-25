@@ -2197,6 +2197,7 @@ When(
     // Short settle window — the reactive proxy / React commit loop
     // needs a beat before the Then assertion polls the sidebar.
     await page.waitForTimeout(150)
+    await dismissInlineRenameAfterCreation()
   }
 )
 
@@ -2211,58 +2212,149 @@ Then(
   }
 )
 
+/** Every creation launched from the sidebar's "Ajouter" submenu drops the new
+ * row straight into inline rename, so the user can name it without reaching
+ * for F2. Assert that edit field appeared — it is the shared behaviour of
+ * every entry, whatever the kind — then dismiss it with Escape, which keeps
+ * the default name. The steps that follow expect the row to render its title
+ * again, which it only does once the edit field is gone. */
+const sidebarRenameInput = (): Locator => {
+  const p = page
+  if (!p) throw new Error('app must be launched')
+  return p.locator('[data-testid="sidebar-listview-rename-input"]')
+}
+
+const dismissInlineRenameAfterCreation = async (): Promise<void> => {
+  const p = page
+  if (!p) throw new Error('app must be launched')
+  const input = sidebarRenameInput()
+  await expect(input.first()).toBeVisible({ timeout: 5000 })
+  await p.keyboard.press('Escape')
+  await expect(input).toHaveCount(0, { timeout: 5000 })
+}
+
+/** Open the sidebar's empty-area context menu.
+ *
+ * `RestormSidebar` wraps the workspace tree in a flex-column div tagged
+ * with `sidebar-empty-area`; its `onContextMenu` handler bypasses the
+ * event when `event.target.closest('.list-view-row')` — so we dispatch
+ * the contextmenu event programmatically with the wrapper element itself
+ * as the target, guaranteeing the bypass check fails regardless of where
+ * the visible row stack happens to end. Plain
+ * `.click({ button: 'right', position })` can land inside a row when the
+ * workspace tree fills the pane. */
+const openEmptyAreaContextMenu = async (): Promise<void> => {
+  const p = page
+  if (!p) throw new Error('app must be launched')
+  const emptyArea = p.locator('[data-testid="sidebar-empty-area"]')
+  await expect(emptyArea).toBeVisible({ timeout: 5000 })
+  await emptyArea.evaluate((el) => {
+    const rect = el.getBoundingClientRect()
+    el.dispatchEvent(new MouseEvent('contextmenu', {
+      bubbles: true,
+      cancelable: true,
+      button: 2,
+      clientX: rect.left + Math.round(rect.width / 2),
+      clientY: rect.top + Math.max(0, rect.height - 8)
+    }))
+  })
+  await p.waitForTimeout(200)
+}
+
+/** Open the empty-area context menu and reveal its "Ajouter" submenu —
+ * the single entry the menu offers, holding every root-level creation.
+ * Returns the visible submenu holder. */
+const openEmptyAreaAddSubmenu = async (): Promise<Locator> => {
+  const p = page
+  if (!p) throw new Error('app must be launched')
+  await openEmptyAreaContextMenu()
+  const addEntry = p.getByRole('menuitem', { name: /^(Add|Ajouter)$/ }).first()
+  await expect(addEntry).toBeVisible({ timeout: 5000 })
+  await addEntry.hover()
+  await p.waitForTimeout(350)
+  return p.locator('.menubar-menu-items-holder:visible').last()
+}
+
+/** Click one creation entry of the empty-area "Ajouter" submenu. Leaves the
+ * new row in inline rename — callers decide whether to dismiss it. */
+const clickEmptyAreaAddEntry = async (label: RegExp, groupLabel?: RegExp): Promise<void> => {
+  const p = page
+  if (!p) throw new Error('app must be launched')
+  let submenu = await openEmptyAreaAddSubmenu()
+  if (groupLabel) {
+    // Second hop: open the protocol group's own submenu.
+    const groupEntry = submenu.getByRole('menuitem', { name: groupLabel }).first()
+    await expect(groupEntry).toBeVisible({ timeout: 5000 })
+    await groupEntry.hover()
+    await p.waitForTimeout(350)
+    submenu = p.locator('.menubar-menu-items-holder:visible').last()
+  }
+  const target = submenu.getByRole('menuitem', { name: label }).first()
+  await expect(target).toBeVisible({ timeout: 5000 })
+  await target.evaluate((el) => { (el as HTMLElement).click() })
+  await p.waitForTimeout(150)
+}
+
+const ENV_FOLDER_ENTRY_REGEX = /^(Environment folder|Dossier de variables)$/
+
+const addChildLabelFor = (kind: string): RegExp => {
+  const childLabel = ADD_CHILD_LABEL_REGEX[kind]
+  if (!childLabel) throw new Error(`unknown AddChildKind: ${kind}`)
+  return childLabel
+}
+
 When(
   'I add a root-level {string} via the sidebar empty-area Ajouter submenu',
   async ({}, kind: string) => {
+    await clickEmptyAreaAddEntry(addChildLabelFor(kind), ADD_CHILD_GROUP_REGEX[kind])
+    await dismissInlineRenameAfterCreation()
+  }
+)
+
+When(
+  'I add a root-level {string} via the sidebar empty-area Ajouter submenu, keeping the rename field open',
+  async ({}, kind: string) => {
+    await clickEmptyAreaAddEntry(addChildLabelFor(kind), ADD_CHILD_GROUP_REGEX[kind])
+  }
+)
+
+When(
+  'I add a root-level environment folder via the sidebar empty-area Ajouter submenu, keeping the rename field open',
+  async () => {
+    await clickEmptyAreaAddEntry(ENV_FOLDER_ENTRY_REGEX)
+  }
+)
+
+Then('the created row should be in inline rename', async () => {
+  await expect(sidebarRenameInput().first()).toBeVisible({ timeout: 5000 })
+})
+
+When('I confirm the inline rename as {string}', async ({}, newName: string) => {
+  if (!page) throw new Error('app must be launched')
+  const input = sidebarRenameInput().first()
+  await expect(input).toBeVisible({ timeout: 5000 })
+  await input.fill(newName)
+  await page.keyboard.press('Enter')
+  await expect(sidebarRenameInput()).toHaveCount(0, { timeout: 5000 })
+})
+
+When('I cancel the inline rename', async () => {
+  if (!page) throw new Error('app must be launched')
+  const input = sidebarRenameInput().first()
+  await expect(input).toBeVisible({ timeout: 5000 })
+  await page.keyboard.press('Escape')
+  await expect(sidebarRenameInput()).toHaveCount(0, { timeout: 5000 })
+})
+
+Then(
+  'the sidebar empty-area context menu should only offer the Ajouter entry',
+  async () => {
     if (!page) throw new Error('app must be launched')
-    const childLabel = ADD_CHILD_LABEL_REGEX[kind]
-    if (!childLabel) throw new Error(`unknown AddChildKind: ${kind}`)
-
-    // Right-click the empty area of the sidebar. `RestormSidebar`
-    // wraps the workspace tree in a flex-column div tagged with
-    // `sidebar-empty-area`; its `onContextMenu` handler bypasses
-    // the event when `event.target.closest('.list-view-row')` —
-    // so we dispatch the contextmenu event programmatically with
-    // the wrapper element itself as the target, guaranteeing the
-    // bypass check fails regardless of where the visible row stack
-    // happens to end. Plain `.click({ button: 'right', position })`
-    // can land inside a row when the workspace tree fills the pane.
-    const emptyArea = page.locator('[data-testid="sidebar-empty-area"]')
-    await expect(emptyArea).toBeVisible({ timeout: 5000 })
-    await emptyArea.evaluate((el) => {
-      const rect = el.getBoundingClientRect()
-      el.dispatchEvent(new MouseEvent('contextmenu', {
-        bubbles: true,
-        cancelable: true,
-        button: 2,
-        clientX: rect.left + Math.round(rect.width / 2),
-        clientY: rect.top + Math.max(0, rect.height - 8)
-      }))
-    })
-    await page.waitForTimeout(200)
-
-    const addEntry = page
-      .getByRole('menuitem', { name: /^(Add|Ajouter)$/ })
-      .first()
-    await expect(addEntry).toBeVisible({ timeout: 5000 })
-    await addEntry.hover()
-    await page.waitForTimeout(350)
-
-    let submenu = page.locator('.menubar-menu-items-holder:visible').last()
-    const groupLabel = ADD_CHILD_GROUP_REGEX[kind]
-    if (groupLabel) {
-      // Second hop: open the protocol group's own submenu.
-      const groupEntry = submenu.getByRole('menuitem', { name: groupLabel }).first()
-      await expect(groupEntry).toBeVisible({ timeout: 5000 })
-      await groupEntry.hover()
-      await page.waitForTimeout(350)
-      submenu = page.locator('.menubar-menu-items-holder:visible').last()
-    }
-    const target = submenu
-      .getByRole('menuitem', { name: childLabel })
-      .first()
-    await expect(target).toBeVisible({ timeout: 5000 })
-    await target.evaluate((el) => { (el as HTMLElement).click() })
+    await openEmptyAreaContextMenu()
+    const entries = page.locator('.menubar-menu-items-holder:visible').last().getByRole('menuitem')
+    await expect(entries).toHaveCount(1, { timeout: 5000 })
+    await expect(entries.first()).toHaveAccessibleName(/^(Add|Ajouter)$/)
+    await page.keyboard.press('Escape')
     await page.waitForTimeout(150)
   }
 )

@@ -250,8 +250,6 @@
     "newFolder": "새 폴더",
     "newEnvironmentFolder": "새 환경 폴더",
     "contextMenu": {
-      "createFolder": "폴더 만들기",
-      "createEnvironmentFolder": "환경 폴더 만들기",
       "delete": "삭제",
       "clone": "복제",
       "copySuffix": "복사본",
@@ -265,6 +263,7 @@
       "add": {
         "title": "추가",
         "folder": "폴더",
+        "environmentFolder": "환경 폴더",
         "httpGet": "HTTP – GET 요청",
         "httpPost": "HTTP – POST 요청",
         "httpPut": "HTTP – PUT 요청",

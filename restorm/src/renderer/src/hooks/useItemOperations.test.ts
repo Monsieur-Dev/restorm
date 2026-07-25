@@ -330,3 +330,78 @@ describe('useItemOperations.confirmDelete', () => {
     expect(callsFor(DocumentEvents.REQUEST_DELETED).map((c) => c.payload.id)).toEqual(['r1'])
   })
 })
+
+describe('inline rename on creation', () => {
+  const buildOptions = (
+    rootItems: FolderItem[],
+    setSidebarEditingItemId: UseItemOperationsOptions['setSidebarEditingItemId']
+  ): UseItemOperationsOptions => ({
+    rootItems,
+    setRootItems: vi.fn(),
+    setExpandedIds: vi.fn(),
+    setSelectedItemId: vi.fn(),
+    setSidebarEditingItemId,
+    setWorkbenchTree: vi.fn(),
+    setDeleteConfirmation: vi.fn(),
+    openFolderTab: vi.fn(),
+    openScenarioEditorTab: vi.fn(),
+    openEnvironmentFolderTab: vi.fn(),
+    openAnyRequestTab: vi.fn(),
+    projectUuid: 'project-1'
+  })
+
+  const folderWith = (id: string, children: FolderItem[]): FolderItem =>
+    ({ id, name: id, tags: [], configuration: {}, items: children }) as unknown as FolderItem
+
+  /** Run `body`, then flush the tick the rename is deferred by, and report
+   * which item (if any) was handed to the sidebar's inline editor. */
+  const editedItemAfter = (
+    rootItems: FolderItem[],
+    body: (ops: ReturnType<typeof useItemOperations>) => void
+  ): string | null => {
+    vi.useFakeTimers()
+    try {
+      const setSidebarEditingItemId = vi.fn()
+      const { result } = renderHook(() => useItemOperations(buildOptions(rootItems, setSidebarEditingItemId)))
+      act(() => { body(result.current) })
+      act(() => { vi.advanceTimersByTime(1) })
+      const editorCalls = setSidebarEditingItemId.mock.calls
+      const call = editorCalls[editorCalls.length - 1]
+      return call ? (call[0] as string) : null
+    } finally {
+      vi.useRealTimers()
+    }
+  }
+
+  it('opens a folder created from the Add submenu in inline rename', () => {
+    let newId: string | null = null
+    const edited = editedItemAfter([], (ops) => { newId = ops.handleAddChildItem('', 'folder') })
+    expect(newId).toBeTruthy()
+    expect(edited).toBe(newId)
+  })
+
+  it('does the same for a request — the behaviour is not folder-specific', () => {
+    // Requests go down the same dispatcher, so every protocol entry of the
+    // submenu inherits the rename without its own wiring.
+    const rootItems: FolderItem[] = [folderWith('f1', [])]
+    let newId: string | null = null
+    const edited = editedItemAfter(rootItems, (ops) => { newId = ops.handleAddChildItem('f1', 'http-get') })
+    expect(newId).toBeTruthy()
+    expect(edited).toBe(newId)
+  })
+
+  it('opens a root environment folder in inline rename too', () => {
+    const edited = editedItemAfter([], (ops) => { ops.handleCreateRootEnvironmentFolder() })
+    expect(edited).toBeTruthy()
+  })
+
+  it('leaves a silent creation alone — the scenario graph must not be interrupted', () => {
+    // `silent` creations come from the scenario editor's add palette: no
+    // selection, no tab, and therefore no edit field stealing the graph focus.
+    const rootItems: FolderItem[] = [
+      { id: 's1', name: 'Flow', type: 'scenario', tags: [], params: [], nodes: [], edges: [], items: [] } as unknown as FolderItem
+    ]
+    const edited = editedItemAfter(rootItems, (ops) => { ops.handleAddChildItem('s1', 'http-get', { silent: true }) })
+    expect(edited).toBeNull()
+  })
+})

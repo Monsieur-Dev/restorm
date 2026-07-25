@@ -251,8 +251,6 @@
     "newFolder": "Nuova cartella",
     "newEnvironmentFolder": "Nuova cartella di ambiente",
     "contextMenu": {
-      "createFolder": "Crea cartella",
-      "createEnvironmentFolder": "Crea cartella di ambiente",
       "delete": "Elimina",
       "clone": "Clona",
       "copySuffix": "copia",
@@ -266,6 +264,7 @@
       "add": {
         "title": "Aggiungi",
         "folder": "Cartella",
+        "environmentFolder": "Cartella di ambiente",
         "httpGet": "Richiesta HTTP – GET",
         "httpPost": "Richiesta HTTP – POST",
         "httpPut": "Richiesta HTTP – PUT",

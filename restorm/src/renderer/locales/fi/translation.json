@@ -251,8 +251,6 @@
     "newFolder": "Uusi kansio",
     "newEnvironmentFolder": "Uusi ympäristökansio",
     "contextMenu": {
-      "createFolder": "Luo kansio",
-      "createEnvironmentFolder": "Luo ympäristökansio",
       "delete": "Poista",
       "clone": "Kloonaa",
       "copySuffix": "kopio",
@@ -266,6 +264,7 @@
       "add": {
         "title": "Lisää",
         "folder": "Kansio",
+        "environmentFolder": "Ympäristökansio",
         "httpGet": "HTTP – GET-pyyntö",
         "httpPost": "HTTP – POST-pyyntö",
         "httpPut": "HTTP – PUT-pyyntö",

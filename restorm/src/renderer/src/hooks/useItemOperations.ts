@@ -122,7 +122,6 @@ export interface UseItemOperationsOptions {
 export interface UseItemOperationsReturn {
   handleItemDrop: (payload: ListViewDropEventPayload) => void
   handleCloneItem: (itemId: string) => void
-  handleCreateRootFolder: () => void
   handleCreateRootEnvironmentFolder: () => void
   /** Kind-agnostic add-child dispatcher bound to the sidebar's
    * "Ajouter" submenu. Creates a well-typed empty request (or a
@@ -675,6 +674,20 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
     }
   }, [t])
 
+  /** Open a just-created sidebar item in inline rename, so the user can name
+   * it straight away instead of hunting for F2 — every creation entry behaves
+   * this way, whatever the kind. Deferred by a tick because the row only
+   * mounts on the render that follows the tree update, and the ListView can't
+   * put an edit field on a row it hasn't drawn yet.
+   *
+   * The item is fully created *before* this runs, so cancelling the rename
+   * (Escape) leaves it in place under its default name — nothing half-built. */
+  const startInlineRename = useCallback((itemId: string) => {
+    setTimeout(() => {
+      setSidebarEditingItemId(itemId)
+    }, 0)
+  }, [setSidebarEditingItemId])
+
   const handleAddChildItem = useCallback((parentId: string, kind: AddChildKind, options?: { silent?: boolean }): string | null => {
     // `parentId === ''` is the ROOT sentinel — used by the empty-area
     // sidebar context menu so users can add a top-level folder /
@@ -965,33 +978,13 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
       } else if (!isAnyFolder(pushedItem)) {
         openAnyRequestTab(pushedItem, breadcrumbs, envs)
       }
+      // Every kind this dispatcher can build lands in inline rename — folders,
+      // scenarios and requests alike. Keeping it here rather than per-kind is
+      // what makes a future request type inherit the behaviour for free.
+      startInlineRename(id)
     }
     return id
-  }, [rootItems, setRootItems, setExpandedIds, setSelectedItemId, openFolderTab, openScenarioEditorTab, openAnyRequestTab, defaultNameFor])
-
-  const handleCreateRootFolder = useCallback(() => {
-    const newFolder: Folder = {
-      id: generateUniqueId(),
-      name: t('sidebar.newFolder'),
-      tags: [],
-      configuration: {},
-      items: []
-    }
-    setRootItems((prev) => [...prev, newFolder])
-    setSelectedItemId(newFolder.id)
-    // Announce the creation so the save-unit registry learns about the new root
-    // folder (crash-recovery draft) — child folders emit this; root ones didn't.
-    emitBothBuses(DocumentEvents.FOLDER_CREATED, {
-      id: newFolder.id,
-      type: 'folder',
-      document: cloneForEventBus(newFolder)
-    } as DocumentChangedPayload)
-    const breadcrumbs = [{ id: newFolder.id, label: newFolder.name, icon: getFolderIcon(newFolder) }]
-    openFolderTab(newFolder, breadcrumbs)
-    setTimeout(() => {
-      setSidebarEditingItemId(newFolder.id)
-    }, 0)
-  }, [setRootItems, setSelectedItemId, setSidebarEditingItemId, openFolderTab, t])
+  }, [rootItems, setRootItems, setExpandedIds, setSelectedItemId, openFolderTab, openScenarioEditorTab, openAnyRequestTab, defaultNameFor, startInlineRename])
 
   const handleCreateRootEnvironmentFolder = useCallback(() => {
     const newFolder: EnvironmentFolder = {
@@ -1016,15 +1009,12 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
     } as DocumentChangedPayload)
     const breadcrumbs = [{ id: newFolder.id, label: newFolder.name, icon: getFolderIcon(newFolder) }]
     openEnvironmentFolderTab(newFolder, breadcrumbs)
-    setTimeout(() => {
-      setSidebarEditingItemId(newFolder.id)
-    }, 0)
-  }, [setRootItems, setSelectedItemId, setSidebarEditingItemId, openEnvironmentFolderTab, t])
+    startInlineRename(newFolder.id)
+  }, [setRootItems, setSelectedItemId, startInlineRename, openEnvironmentFolderTab, t])
 
   return {
     handleItemDrop,
     handleCloneItem,
-    handleCreateRootFolder,
     handleCreateRootEnvironmentFolder,
     handleAddChildItem,
     handleDeleteItem,

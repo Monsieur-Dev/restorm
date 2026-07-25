@@ -89,7 +89,7 @@ server; — = pure UI/in-process.
 
 | Suite | Scen | Covers | Deps |
 |---|--:|---|---|
-| full-workflow | 8 | Full workflow (bounds, new-file, imports, MRU tabs) | — |
+| full-workflow | 9 | Full workflow (bounds, new-file, imports, MRU tabs, sidebar Add submenu) | — |
 | exhaustive-doc-viewer | 6 | Exhaustive documentation-viewer behaviour | — |
 | settings-tab | 7 | Settings surface follows the workbench (+ Toggle keyboard focus ring) | — |
 | dirty-state | 6 | Dirty-state propagation across nested units | — |

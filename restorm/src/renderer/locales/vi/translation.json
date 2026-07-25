@@ -250,8 +250,6 @@
     "newFolder": "Thư mục mới",
     "newEnvironmentFolder": "Thư mục môi trường mới",
     "contextMenu": {
-      "createFolder": "Tạo thư mục",
-      "createEnvironmentFolder": "Tạo thư mục môi trường",
       "delete": "Xóa",
       "clone": "Nhân bản",
       "copySuffix": "bản sao",
@@ -265,6 +263,7 @@
       "add": {
         "title": "Thêm",
         "folder": "Thư mục",
+        "environmentFolder": "Thư mục môi trường",
         "httpGet": "Yêu cầu HTTP – GET",
         "httpPost": "Yêu cầu HTTP – POST",
         "httpPut": "Yêu cầu HTTP – PUT",

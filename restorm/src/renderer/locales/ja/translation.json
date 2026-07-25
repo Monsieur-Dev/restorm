@@ -250,8 +250,6 @@
     "newFolder": "新規フォルダ",
     "newEnvironmentFolder": "新規環境フォルダ",
     "contextMenu": {
-      "createFolder": "フォルダを作成",
-      "createEnvironmentFolder": "環境フォルダを作成",
       "delete": "削除",
       "clone": "複製",
       "copySuffix": "コピー",
@@ -265,6 +263,7 @@
       "add": {
         "title": "追加",
         "folder": "フォルダ",
+        "environmentFolder": "環境フォルダ",
         "httpGet": "HTTP – GET リクエスト",
         "httpPost": "HTTP – POST リクエスト",
         "httpPut": "HTTP – PUT リクエスト",

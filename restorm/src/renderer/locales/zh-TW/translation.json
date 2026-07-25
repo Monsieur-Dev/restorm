@@ -250,8 +250,6 @@
     "newFolder": "新增資料夾",
     "newEnvironmentFolder": "新增環境資料夾",
     "contextMenu": {
-      "createFolder": "建立資料夾",
-      "createEnvironmentFolder": "建立環境資料夾",
       "delete": "刪除",
       "clone": "複製",
       "copySuffix": "複本",
@@ -265,6 +263,7 @@
       "add": {
         "title": "新增",
         "folder": "資料夾",
+        "environmentFolder": "環境資料夾",
         "httpGet": "HTTP – GET 請求",
         "httpPost": "HTTP – POST 請求",
         "httpPut": "HTTP – PUT 請求",

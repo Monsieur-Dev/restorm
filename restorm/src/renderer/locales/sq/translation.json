@@ -251,8 +251,6 @@
     "newFolder": "Dosje e re",
     "newEnvironmentFolder": "Dosje e re mjedisi",
     "contextMenu": {
-      "createFolder": "Krijo dosje",
-      "createEnvironmentFolder": "Krijo dosje mjedisi",
       "delete": "Fshi",
       "clone": "Klono",
       "copySuffix": "kopje",
@@ -266,6 +264,7 @@
       "add": {
         "title": "Shto",
         "folder": "Dosje",
+        "environmentFolder": "Dosje mjedisi",
         "httpGet": "HTTP – kërkesë GET",
         "httpPost": "HTTP – kërkesë POST",
         "httpPut": "HTTP – kërkesë PUT",

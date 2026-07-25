@@ -253,8 +253,6 @@
     "newFolder": "Нова тека",
     "newEnvironmentFolder": "Нова тека середовищ",
     "contextMenu": {
-      "createFolder": "Створити теку",
-      "createEnvironmentFolder": "Створити теку середовищ",
       "delete": "Видалити",
       "clone": "Клонувати",
       "copySuffix": "копія",
@@ -268,6 +266,7 @@
       "add": {
         "title": "Додати",
         "folder": "Тека",
+        "environmentFolder": "Тека середовищ",
         "httpGet": "HTTP — запит GET",
         "httpPost": "HTTP — запит POST",
         "httpPut": "HTTP — запит PUT",

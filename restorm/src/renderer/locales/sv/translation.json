@@ -251,8 +251,6 @@
     "newFolder": "Ny mapp",
     "newEnvironmentFolder": "Ny miljömapp",
     "contextMenu": {
-      "createFolder": "Skapa mapp",
-      "createEnvironmentFolder": "Skapa miljömapp",
       "delete": "Ta bort",
       "clone": "Klona",
       "copySuffix": "kopia",
@@ -266,6 +264,7 @@
       "add": {
         "title": "Lägg till",
         "folder": "Mapp",
+        "environmentFolder": "Miljömapp",
         "httpGet": "HTTP – GET-förfrågan",
         "httpPost": "HTTP – POST-förfrågan",
         "httpPut": "HTTP – PUT-förfrågan",

@@ -251,8 +251,6 @@
     "newFolder": "Νέος φάκελος",
     "newEnvironmentFolder": "Νέος φάκελος περιβάλλοντος",
     "contextMenu": {
-      "createFolder": "Δημιουργία φακέλου",
-      "createEnvironmentFolder": "Δημιουργία φακέλου περιβάλλοντος",
       "delete": "Διαγραφή",
       "clone": "Κλωνοποίηση",
       "copySuffix": "αντίγραφο",
@@ -266,6 +264,7 @@
       "add": {
         "title": "Προσθήκη",
         "folder": "Φάκελος",
+        "environmentFolder": "Φάκελος περιβάλλοντος",
         "httpGet": "HTTP – αίτημα GET",
         "httpPost": "HTTP – αίτημα POST",
         "httpPut": "HTTP – αίτημα PUT",

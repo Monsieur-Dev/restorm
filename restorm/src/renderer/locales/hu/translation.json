@@ -251,8 +251,6 @@
     "newFolder": "Új mappa",
     "newEnvironmentFolder": "Új környezeti mappa",
     "contextMenu": {
-      "createFolder": "Mappa létrehozása",
-      "createEnvironmentFolder": "Környezeti mappa létrehozása",
       "delete": "Törlés",
       "clone": "Klónozás",
       "copySuffix": "másolat",
@@ -266,6 +264,7 @@
       "add": {
         "title": "Hozzáadás",
         "folder": "Mappa",
+        "environmentFolder": "Környezeti mappa",
         "httpGet": "HTTP – GET kérés",
         "httpPost": "HTTP – POST kérés",
         "httpPut": "HTTP – PUT kérés",
