@@ -101,6 +101,7 @@ server; — = pure UI/in-process.
 | body-type-migration | 1 | Legacy body-type canonicalisation on load | — |
 | fully-documented-petstore | 1 | Fully-documented Petstore fixture builder | — |
 | theme-carousel-a11y | 1 | Theme preview cards keep Tab on the card only, never the abstract preview | — |
+| monaco-suggest-dismiss | 1 | A `{{...}}` suggest popup opened in one request is gone after switching tabs, and still opens in the now-active field | 🔌 |
 
 ## MCP surface
 

@@ -128,6 +128,29 @@ const VariableInputBox: React.FC<VariableInputBoxProps> = (props) => {
     setContextMenu(prev => ({ ...prev, visible: false }))
   }, [])
 
+  // Hide the suggest + hover widgets that `fixedOverflowWidgets` (see
+  // `editorOptions` below) reparents onto `document.body`. Both widgets live
+  // OUTSIDE this component's own DOM subtree once reparented, so they don't
+  // naturally disappear when a workbench tab is switched away from — the tab
+  // slot only toggles `display:none` on its container, it never unmounts the
+  // editor (see `TabSlot` in electron-core-ui's Workbench). Without this,
+  // a suggestion/hover popup opened in one request keeps floating over
+  // whichever request is now active.
+  const hideOverflowWidgets = useCallback(() => {
+    const editor = editorRef.current
+    if (!editor) return
+    // Public editor command (registered by Monaco's suggest contribution) —
+    // safe to call even when no suggestion is showing.
+    editor.trigger('electron-core-ui', 'hideSuggestWidget', {})
+    // No public command exists for the hover widget; reach its contribution
+    // directly. `hideContentHover` is a no-op when nothing is showing.
+    editor
+      .getContribution<monacoEditor.editor.IEditorContribution & { hideContentHover?: () => void }>(
+        'editor.contrib.contentHover'
+      )
+      ?.hideContentHover?.()
+  }, [])
+
   // Keep refs in sync
   variablesRef.current = variables
 
@@ -167,6 +190,24 @@ const VariableInputBox: React.FC<VariableInputBoxProps> = (props) => {
       }
     }
   }, [])
+
+  // A hidden workbench tab slot never fires `mouseleave`/blur on this
+  // editor — the container just stops intersecting the viewport. Watch for
+  // that (also covers scrolling the field itself out of view) and hide any
+  // body-attached suggest/hover widget the moment it happens.
+  useEffect(() => {
+    const el = containerRef.current
+    // jsdom (unit tests) doesn't implement IntersectionObserver; every real
+    // runtime target (Electron/browser) does.
+    if (!el || typeof IntersectionObserver === 'undefined') return undefined
+    const observer = new IntersectionObserver((entries) => {
+      if (entries.every((entry) => !entry.isIntersecting)) {
+        hideOverflowWidgets()
+      }
+    })
+    observer.observe(el)
+    return () => { observer.disconnect() }
+  }, [hideOverflowWidgets])
 
   const editorOptions = useMemo(
     () => ({
@@ -402,6 +443,13 @@ const VariableInputBox: React.FC<VariableInputBoxProps> = (props) => {
         variables: variablesRef.current
       })
     }
+
+    // Belt-and-suspenders for `hideOverflowWidgets` above: covers a click
+    // straight to another control WITHOUT a tab switch (the container never
+    // loses intersection, so the IntersectionObserver never fires). Widget-
+    // level blur (not text-input blur) so keyboard navigation inside an open
+    // suggestion list doesn't get treated as leaving the field.
+    editor.onDidBlurEditorWidget(() => { hideOverflowWidgets() })
 
     // Signal that editor is mounted so useEffect can update variables
     setEditorMounted(true)

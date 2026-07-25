@@ -225,6 +225,12 @@ const graphqlExecutionTestDir = defineBddConfig({
   outputDir: '.features-gen/graphql-execution'
 })
 
+const monacoSuggestDismissTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/monaco-suggest-dismiss/features/**/*.feature',
+  steps: ['tests/e2e/bdd/monaco-suggest-dismiss/steps/**/*.ts', 'tests/e2e/bdd/fixtures/mcp-server.fixture.ts'],
+  outputDir: '.features-gen/monaco-suggest-dismiss'
+})
+
 const trpcExecutionTestDir = defineBddConfig({
   features: 'tests/e2e/bdd/trpc-execution/features/**/*.feature',
   steps: ['tests/e2e/bdd/trpc-execution/steps/**/*.ts', 'tests/e2e/bdd/fixtures/mcp-server.fixture.ts'],
@@ -688,6 +694,11 @@ export default defineConfig({
       name: 'graphql-execution',
       testDir: graphqlExecutionTestDir,
       timeout: 180 * 1000
+    },
+    {
+      name: 'monaco-suggest-dismiss',
+      testDir: monacoSuggestDismissTestDir,
+      timeout: 120 * 1000
     },
     {
       name: 'trpc-execution',
