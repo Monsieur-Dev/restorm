@@ -11,6 +11,7 @@ import { Button } from '../Button'
 import { InputBox } from '../InputBox'
 import { Tooltip } from '../Tooltip'
 import { useOverlayPresence } from '../../hooks/useOverlayPresence'
+import { useExclusivePopover } from '../../hooks/useExclusivePopover'
 import {
   getIconoirNames,
   getPhosphorNames,
@@ -238,6 +239,14 @@ const IconSelectInner: React.FC<IconSelectProps> = ({
     setSimpleIconsSearch('')
     setFeatherSearch('')
   }, [])
+
+  // Opening any other anchored popover closes this picker, and vice versa.
+  // The picker's own outside-click handling cannot cover that: popovers
+  // guard themselves with `onMouseDown` + `stopPropagation`, so a mousedown
+  // landing inside a sibling popover never reaches it. Reuses the close
+  // path that also clears the per-tab search state, so reopening starts
+  // clean exactly as a manual close does.
+  useExclusivePopover(isOpen, closeAndReset)
 
   // Memoized icon lists
   const iconoirNames = useMemo(() => getIconoirNames(), [])

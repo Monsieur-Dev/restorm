@@ -5,6 +5,7 @@ import { Tooltip } from '../Tooltip'
 import { ColorPicker } from '../ColorPicker'
 import { Button } from '../Button'
 import { InputBox } from '../InputBox'
+import { useExclusivePopover } from '../../hooks/useExclusivePopover'
 
 import './bookmarkRibbon.css'
 
@@ -180,6 +181,13 @@ export const BookmarkRibbon: React.FC<BookmarkRibbonProps> = ({
       dispatch({ type: 'LEAVE' })
     }
   }, [wantsOpen, animState.phase])
+
+  // Opening any other anchored popover closes this editor, and vice versa
+  // — including a sibling ribbon's editor in the same stack. The
+  // outside-click listener below cannot cover that: popovers guard
+  // themselves with `onMouseDown` + `stopPropagation`, so a mousedown
+  // landing inside another popover never reaches this handler.
+  useExclusivePopover(editorOpen, useCallback(() => { setEditorOpen(false) }, []))
 
   // Close the editor tooltip when the user clicks outside of the
   // ribbon button + the tooltip content. `mousedown` runs before

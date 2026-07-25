@@ -647,7 +647,7 @@ export default defineConfig({
     {
       name: 'quick-settings',
       testDir: quickSettingsTestDir,
-      timeout: 300 * 1000 // 5 min — 8 scenarios, each launches a fresh app
+      timeout: 300 * 1000 // 5 min — 13 scenarios, each launches a fresh app
     },
     {
       name: 'scenario-quick-config-selector',

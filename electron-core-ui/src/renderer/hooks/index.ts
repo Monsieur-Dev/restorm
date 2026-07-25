@@ -23,6 +23,7 @@ export type { UseMcpMiniBrowserBridgeInput, MiniBrowserBridgeApi } from './useMc
 export { useMcpWorkbenchLayoutBridge } from './useMcpWorkbenchLayoutBridge'
 export type { UseMcpWorkbenchLayoutBridgeInput, WorkbenchLayoutBridgeApi } from './useMcpWorkbenchLayoutBridge'
 export { useOverlayPresence } from './useOverlayPresence'
+export { useExclusivePopover } from './useExclusivePopover'
 export { useAuthState } from './useAuthState'
 export { useGitState } from './useGitState'
 export { useGitCliMissingToast } from './useGitCliMissingToast'

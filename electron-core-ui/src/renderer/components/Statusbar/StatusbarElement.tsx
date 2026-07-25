@@ -4,6 +4,7 @@ import { StatusbarElementProps } from './types'
 import { Tooltip } from '../Tooltip'
 import { IconView } from '../IconView'
 import { getContrastColor } from '../../utils/colorContrast'
+import { useExclusivePopover } from '../../hooks/useExclusivePopover'
 import { StatusbarTooltipContext } from './StatusbarTooltipContext'
 
 interface PulseEntry {
@@ -188,6 +189,19 @@ const StatusbarElement: React.FC<StatusbarElementProps> = ({
   // env-select but stays open while the user toggles "Apply to all".
   const closeTooltip = useCallback((): void => { setShowTooltip(false) }, [])
   const tooltipContextValue = useMemo(() => ({ closeTooltip }), [closeTooltip])
+
+  // Click-mode popovers join the app-wide "one popover at a time" set:
+  // opening any other anchored popover closes this one, and vice versa.
+  // Enrolling here rather than at each call site makes every
+  // `tooltipTrigger="click"` element exclusive by construction — an
+  // opt-in would leave it to each author to remember, which is how
+  // popovers end up stacking. Hover tooltips are excluded: they are not
+  // popovers and are already dismissed by pointer movement.
+  //
+  // This is also why a host must NOT wire its own exclusivity on top: two
+  // announcements under different ids for the same popover would make the
+  // outer one close the inner one's host.
+  useExclusivePopover(clickMode && showTooltip, closeTooltip)
 
   // Click-mode: report open/close so a host can coordinate sibling
   // overlays (e.g. suppress its hover tooltip while this popover is open).

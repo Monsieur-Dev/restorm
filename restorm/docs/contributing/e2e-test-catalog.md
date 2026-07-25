@@ -94,7 +94,7 @@ server; — = pure UI/in-process.
 | settings-tab | 6 | Settings surface follows the workbench | — |
 | dirty-state | 5 | Dirty-state propagation across nested units | — |
 | documentation-viewer | 4 | Documentation viewer interactions | — |
-| quick-settings | 8 | Quick-config save/load round-trip every protocol field | — |
+| quick-settings | 13 | Quick-config save/load round-trip every protocol field + app-wide popover exclusivity | — |
 | sidebar-split-drop | 3 | Sidebar → workbench drag opens a split view | — |
 | auth-login | 2 | Authentication routes end-to-end | 🏠 |
 | open-folder | 2 | Open Folder | — |
