@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { Button, Tooltip } from 'electron-core-ui/renderer'
 import type { Environment } from '../../../../shared/types/collections'
 import { useEnvironmentContext } from '../../contexts/useEnvironmentContext'
+import { useExclusiveHeaderPopover } from '../../hooks/useExclusiveHeaderPopover'
 import {
   clearSessionRequestOverridesForRequests,
   clearStoredRequestOverridesForRequests,
@@ -43,6 +44,9 @@ export const RequestHeaderEnvSelector: React.FC<RequestHeaderEnvSelectorProps> =
   const [open, setOpen] = useState(false)
   const [hover, setHover] = useState(false)
   const anchorRef = useRef<HTMLSpanElement>(null)
+
+  // Opening this popover closes any sibling header popover (and vice versa).
+  useExclusiveHeaderPopover(open, useCallback(() => { setOpen(false) }, []))
 
   const selectedEnvironment = useMemo<Environment | null>(() => {
     if (!environments || !selectedEnvId) return null

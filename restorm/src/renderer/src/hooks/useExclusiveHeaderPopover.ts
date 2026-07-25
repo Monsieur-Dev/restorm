@@ -1,29 +1,21 @@
-import { useCallback, useEffect, useId, useRef } from 'react'
-
-const OPEN_EVENT = 'restorm:header-popover-open'
+import { useExclusivePopover } from 'electron-core-ui/renderer'
 
 /**
  * Mutual exclusion for the request-header click popovers (quick settings,
- * scenarios-using-request, scenario callers, …): opening one must close the
- * others, otherwise two anchored tooltips stack on top of each other.
- * Each caller announces its opening on a shared DOM event; every other
- * subscriber with an open popover closes itself.
+ * environment, auth route, scenarios-using-request, scenario callers, …):
+ * opening one must close the others, otherwise two anchored tooltips stack
+ * on top of each other.
+ *
+ * Delegates to the shared library primitive rather than owning a second
+ * channel. That matters because several popovers in the same header row —
+ * the bookmark/tag ribbon editors, the icon picker — are library
+ * components that own their open state and their content internally, so
+ * they cannot reach an application-level hook. One channel is what makes
+ * the whole row a single set; two would silently split it in half, which
+ * is precisely the failure this exists to prevent.
  */
 export function useExclusiveHeaderPopover(open: boolean, close: () => void): void {
-  const id = useId()
-  const closeRef = useRef(close)
-  useEffect(() => { closeRef.current = close }, [close])
-
-  const onSiblingOpen = useCallback((e: Event): void => {
-    if ((e as CustomEvent<string>).detail !== id) closeRef.current()
-  }, [id])
-
-  useEffect(() => {
-    if (!open) return undefined
-    document.dispatchEvent(new CustomEvent<string>(OPEN_EVENT, { detail: id }))
-    document.addEventListener(OPEN_EVENT, onSiblingOpen)
-    return () => { document.removeEventListener(OPEN_EVENT, onSiblingOpen) }
-  }, [open, id, onSiblingOpen])
+  useExclusivePopover(open, close)
 }
 
 export default useExclusiveHeaderPopover

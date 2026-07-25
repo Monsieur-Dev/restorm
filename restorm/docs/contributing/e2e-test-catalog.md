@@ -95,7 +95,7 @@ server; — = pure UI/in-process.
 | dirty-state | 6 | Dirty-state propagation across nested units | — |
 | status-bar-context-menu | 6 | Status bar file-path popover actions: reveal in OS file explorer, copy file name, copy full path, popover closes after each action, no-file-open state, reveal-channel path containment | — |
 | documentation-viewer | 4 | Documentation viewer interactions | — |
-| quick-settings | 8 | Quick-config save/load round-trip every protocol field | — |
+| quick-settings | 13 | Quick-config save/load round-trip every protocol field + app-wide popover exclusivity | — |
 | sidebar-split-drop | 3 | Sidebar → workbench drag opens a split view | — |
 | auth-login | 2 | Authentication routes end-to-end | 🏠 |
 | open-folder | 2 | Open Folder | — |
