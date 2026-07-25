@@ -59,6 +59,13 @@
       "noAuth": "Fără autentificare",
       "popoverLabel": "Rută de autentificare",
       "unnamed": "Fără nume"
+    },
+    "contextMenu": {
+      "revealInFolder": "Deschide folderul care conține fișierul",
+      "copyFileName": "Copiază numele fișierului",
+      "copyFullPath": "Copiază calea completă",
+      "revealFailedTitle": "Dosarul nu a putut fi deschis",
+      "revealFailedBody": "Fișierul ar fi putut fi mutat, redenumit sau șters."
     }
   },
   "tips": {
@@ -245,8 +252,6 @@
     "newFolder": "Folder nou",
     "newEnvironmentFolder": "Folder nou de mediu",
     "contextMenu": {
-      "createFolder": "Creează folder",
-      "createEnvironmentFolder": "Creează folder de mediu",
       "delete": "Șterge",
       "clone": "Clonează",
       "copySuffix": "copie",
@@ -260,6 +265,7 @@
       "add": {
         "title": "Adaugă",
         "folder": "Folder",
+        "environmentFolder": "Folder de mediu",
         "httpGet": "Cerere HTTP – GET",
         "httpPost": "Cerere HTTP – POST",
         "httpPut": "Cerere HTTP – PUT",

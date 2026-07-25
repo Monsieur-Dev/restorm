@@ -22,12 +22,13 @@ export interface CustomWCOProps {
 - **className** (`string`, optional): Extra CSS classes applied to the root container.
 - **platform** (`string`, optional): Platform override (`'linux'`, `'darwin'`, `'win32'`, etc.).  
   When omitted, the component uses `window.electronAPI.onPlatform` to detect the platform.
-- **data-testid** (`string`, optional): Stable E2E hook applied to the root element (Linux root or win32/darwin spacer).
+- **data-testid** (`string`, optional): Stable E2E hook applied to the root element (Linux root or win32 spacer; nothing is rendered on darwin).
 
 ## Behavior
 
 - When the **current platform is `linux`**, renders custom window buttons (minimize / maximize-or-restore / close).
-- When the **current platform is `win32` or `darwin`**, renders a spacer (`custom-wco-spacer`) to reserve space for native window controls.
+- When the **current platform is `win32`**, renders a spacer (`custom-wco-spacer`) to reserve space on the **right** for the native window controls.
+- When the **current platform is `darwin`**, renders **nothing** (`null`) and reserves **no** width. macOS draws its traffic lights top-**left**, so a right-hand spacer would only leave dead space and push the centre zone off-centre; the `Titlebar` reserves a left inset instead (see `titlebar--mac`).
 - On other platforms, returns `null`.
 - Subscribes to:
   - `window.electronAPI.onPlatform((platform: string) => …)` to discover platform.
@@ -48,7 +49,7 @@ The root `.custom-wco` element stays mounted in the host title-bar layout and on
 |------------|---------------------------------|
 | `linux`    | `92px` (3 × 30px buttons + 2px) |
 | `win32`    | OS-reserved width (default `138px`, refined by `navigator.windowControlsOverlay`) |
-| `darwin`   | same as `win32`                 |
+| `darwin`   | `0px` (controls are top-left; the title bar reserves a left inset instead) |
 | other      | `0px`                           |
 
 Downstream consumers (e.g. `Modal`'s `.ecu-modal-drag-strip` `right` offset) read this var so they can leave a matching gap and never swallow WCO clicks. The body-level location guarantees the value is reachable from anywhere in the renderer, including portals. The var is removed on unmount.
@@ -73,7 +74,7 @@ const AppShell: React.FC = ({ children }) => {
 
 ## Notes for AI Usage
 
-- Do not use `CustomWCO` on macOS or Windows unless you explicitly want to manage reserved space; on `win32/darwin` it renders a spacer.
+- On `win32` the component renders a right-hand spacer to reserve room for the native controls; on `darwin` it renders nothing (native controls are top-left, handled by the title bar's left inset).
 - When integrating with a custom preload, ensure that `window.electronAPI.onPlatform`, `onWindowState` and `sendAction` are exposed with the same signatures as in the demo project.
 - Keep all user-facing strings (tooltips like `"Minimize"`, `"Restore"`, `"Close"`) consistent and, if needed, route them through the host app’s i18n system instead of inlining translations in this component.
 
@@ -84,7 +85,8 @@ const AppShell: React.FC = ({ children }) => {
 If you pass a `data-testid` to the component:
 
 - Linux root: `[data-testid="..."]` (element has `.custom-wco`)
-- Spacer (win32/darwin): `[data-testid="..."]` (element has `.custom-wco-spacer`)
+- Spacer (win32 only): `[data-testid="..."]` (element has `.custom-wco-spacer`)
+- darwin: no element is rendered (nothing to select)
 
 On Linux, button sub-elements are tagged when `data-testid` is provided:
 

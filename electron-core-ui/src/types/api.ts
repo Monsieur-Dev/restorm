@@ -247,8 +247,20 @@ export interface CoreUiGitApi {
   onPullAvailable: (callback: () => void) => () => void
 }
 
+/**
+ * Native application menu (macOS puts menus in the system bar, outside the
+ * window). The template is derived by walking the MenuBar JSX, so the menu
+ * definition stays in one place.
+ */
+export interface CoreUiNativeMenuApi {
+  set: (template: unknown) => Promise<boolean>
+  clear: () => Promise<boolean>
+  onInvoke: (callback: (id: string) => void) => () => void
+}
+
 export interface CoreUiApi {
   platform: string
+  nativeMenu: CoreUiNativeMenuApi
   theme: CoreUiThemeApi
   i18n: CoreUiI18nApi
   logger: CoreUiLoggerApi
@@ -259,6 +271,7 @@ export interface CoreUiApi {
   search: CoreUiSearchApi
   settings: CoreUiSettingsApi
   git: CoreUiGitApi
+  toggleFullscreen: () => Promise<boolean>
   minimizeWindow: () => Promise<void>
   maximizeWindow: () => Promise<void>
   closeWindow: () => Promise<void>

@@ -2,6 +2,7 @@ import React, { useState, useCallback, useRef, useEffect, useLayoutEffect } from
 import { MenuItemProps } from './types'
 import { ScrollableElement } from '../ScrollableElement'
 import { useOverlayPresence } from '../../hooks/useOverlayPresence'
+import { computeSubmenuPlacement } from './computeSubmenuPlacement'
 
 const SUBMENU_WIDTH = 300
 const VIEWPORT_PADDING = 8
@@ -29,44 +30,52 @@ const MenuItem: React.FC<MenuItemProps> = ({
   const submenuRef = useRef<HTMLDivElement>(null)
   useOverlayPresence(submenuRef, showSubmenu)
   const submenuTimeoutRef = useRef<NodeJS.Timeout | null>(null)
-  // Store the calculated height only when submenu is shown (null means use 'auto')
-  const [activeHeight, setActiveHeight] = useState<string | null>(null)
 
-  // Derive effective height: 'auto' when not shown, calculated value when shown
-  const calculatedHeight = showSubmenu && activeHeight !== null ? activeHeight : 'auto'
-
-  // Position the submenu via direct DOM mutation on the ref. This runs before paint,
-  // flipping or overlapping when the submenu would overflow the viewport horizontally.
-  // Vertical overflow is handled separately via clipping + scroll.
+  // Position and size the submenu via direct DOM mutation on the refs. This runs
+  // before paint and fits the submenu inside the viewport on BOTH axes: it flips
+  // or overlaps on horizontal overflow, and slides the submenu up on vertical
+  // overflow so it stays fully readable instead of being clipped into a strip.
+  // Clipping + scroll is the fallback for a submenu taller than the viewport.
+  //
+  // Position AND clipping are owned together, on purpose: computed by two
+  // separate effects their viewport margins disagree, which reintroduces a
+  // parasitic scrollbar a couple of pixels tall. Writing the clip straight to
+  // the DOM rather than through state also guarantees each opening is measured
+  // at its natural height — a clip held in state would outlive the closed
+  // submenu, under-estimate the height on the next opening and defeat the clamp.
   useLayoutEffect(() => {
     if (!showSubmenu || !itemRef.current || !submenuRef.current) return
 
+    const holder = submenuRef.current
     const itemRect = itemRef.current.getBoundingClientRect()
-    const winWidth = window.innerWidth
+    const parentRect = itemRef.current.closest('.menu-container')?.getBoundingClientRect() ?? null
+    const holderHeight = holder.getBoundingClientRect().height
+    // The computed clip is an outer holder height, but it is applied to the
+    // scroll viewport nested inside it — subtract the holder's padding + border.
+    const scroller = holder.querySelector<HTMLElement>(':scope > .scrollable-element')
+    const chrome = scroller ? holderHeight - scroller.getBoundingClientRect().height : 0
 
-    let left = itemRect.right
-    let top = itemRect.top
+    const { left, top, maxHeight } = computeSubmenuPlacement({
+      itemTop: itemRect.top,
+      itemLeft: itemRect.left,
+      itemRight: itemRect.right,
+      parentMenuTop: parentRect?.top ?? null,
+      parentMenuLeft: parentRect?.left ?? null,
+      submenuWidth: SUBMENU_WIDTH,
+      submenuHeight: holderHeight,
+      viewportWidth: window.innerWidth,
+      viewportHeight: window.innerHeight,
+      padding: VIEWPORT_PADDING,
+      overlapOffset: OVERLAP_OFFSET
+    })
 
-    const overflowsRight = left + SUBMENU_WIDTH + VIEWPORT_PADDING > winWidth
-
-    if (overflowsRight) {
-      const flippedLeft = itemRect.left - SUBMENU_WIDTH
-      if (flippedLeft >= VIEWPORT_PADDING) {
-        left = flippedLeft
-      } else {
-        const parentMenu = itemRef.current.closest('.menu-container')
-        if (parentMenu) {
-          const parentRect = parentMenu.getBoundingClientRect()
-          left = parentRect.left + OVERLAP_OFFSET
-          top = parentRect.top + OVERLAP_OFFSET
-        } else {
-          left = Math.max(VIEWPORT_PADDING, winWidth - SUBMENU_WIDTH - VIEWPORT_PADDING)
-        }
-      }
+    holder.style.left = `${left}px`
+    holder.style.top = `${top}px`
+    if (scroller) {
+      const clip = maxHeight === null ? '' : `${Math.max(0, maxHeight - chrome)}px`
+      scroller.style.height = clip
+      scroller.style.maxHeight = clip
     }
-
-    submenuRef.current.style.left = `${left}px`
-    submenuRef.current.style.top = `${top}px`
   }, [showSubmenu])
 
   const hasSubmenu = React.Children.count(children) > 0
@@ -199,28 +208,6 @@ const MenuItem: React.FC<MenuItemProps> = ({
     return undefined
   }, [showSubmenu])
 
-  // Calculate dynamic height for scroll fix when submenu is shown
-  useEffect(() => {
-    if (!showSubmenu || !submenuRef.current) {
-      return
-    }
-    const timeoutId = setTimeout(() => {
-      if (submenuRef.current) {
-        const rect = submenuRef.current.getBoundingClientRect()
-        const windowHeight = window.innerHeight
-        const availableHeight = windowHeight - rect.top - 10
-        const currentHeight = submenuRef.current.scrollHeight
-        
-        if (availableHeight < currentHeight) {
-          setActiveHeight(`${availableHeight}px`)
-        } else {
-          setActiveHeight(null)
-        }
-      }
-    }, 0)
-    return () => { clearTimeout(timeoutId) }
-  }, [showSubmenu])
-
   // Cleanup timeouts on unmount
   useEffect(() => {
     return () => {
@@ -340,8 +327,8 @@ const MenuItem: React.FC<MenuItemProps> = ({
                 handleMouseWheel: true
               }}
               style={{
-                height: calculatedHeight,
-                maxHeight: calculatedHeight,
+                // Height is left to the content and clipped by the layout
+                // effect above when the submenu is taller than the viewport.
                 width: '300px',
                 minWidth: '300px',
                 maxWidth: '300px',
@@ -367,5 +354,10 @@ const MenuItem: React.FC<MenuItemProps> = ({
     </li>
   )
 }
+
+// Stable identity for the native-menu template walker, which matches
+// nodes by displayName rather than importing the components (avoids a
+// renderer import cycle). Also improves React DevTools output.
+MenuItem.displayName = 'MenuItem'
 
 export default MenuItem

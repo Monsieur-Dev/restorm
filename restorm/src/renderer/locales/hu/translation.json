@@ -58,6 +58,13 @@
       "noAuth": "Nincs hitelesítés",
       "popoverLabel": "Hitelesítési útvonal",
       "unnamed": "Névtelen"
+    },
+    "contextMenu": {
+      "revealInFolder": "Tartalmazó mappa megnyitása",
+      "copyFileName": "Fájlnév másolása",
+      "copyFullPath": "Teljes elérési út másolása",
+      "revealFailedTitle": "A mappa nem nyitható meg",
+      "revealFailedBody": "A fájlt áthelyezhették, átnevezhették vagy törölhették."
     }
   },
   "tips": {
@@ -244,8 +251,6 @@
     "newFolder": "Új mappa",
     "newEnvironmentFolder": "Új környezeti mappa",
     "contextMenu": {
-      "createFolder": "Mappa létrehozása",
-      "createEnvironmentFolder": "Környezeti mappa létrehozása",
       "delete": "Törlés",
       "clone": "Klónozás",
       "copySuffix": "másolat",
@@ -259,6 +264,7 @@
       "add": {
         "title": "Hozzáadás",
         "folder": "Mappa",
+        "environmentFolder": "Környezeti mappa",
         "httpGet": "HTTP – GET kérés",
         "httpPost": "HTTP – POST kérés",
         "httpPut": "HTTP – PUT kérés",

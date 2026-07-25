@@ -60,6 +60,13 @@
       "noAuth": "Без автентифікації",
       "popoverLabel": "Маршрут автентифікації",
       "unnamed": "Без назви"
+    },
+    "contextMenu": {
+      "revealInFolder": "Відкрити папку, що містить файл",
+      "copyFileName": "Копіювати ім'я файлу",
+      "copyFullPath": "Копіювати повний шлях",
+      "revealFailedTitle": "Не вдалося відкрити папку",
+      "revealFailedBody": "Файл, можливо, переміщено, перейменовано або видалено."
     }
   },
   "tips": {
@@ -246,8 +253,6 @@
     "newFolder": "Нова тека",
     "newEnvironmentFolder": "Нова тека середовищ",
     "contextMenu": {
-      "createFolder": "Створити теку",
-      "createEnvironmentFolder": "Створити теку середовищ",
       "delete": "Видалити",
       "clone": "Клонувати",
       "copySuffix": "копія",
@@ -261,6 +266,7 @@
       "add": {
         "title": "Додати",
         "folder": "Тека",
+        "environmentFolder": "Тека середовищ",
         "httpGet": "HTTP — запит GET",
         "httpPost": "HTTP — запит POST",
         "httpPut": "HTTP — запит PUT",

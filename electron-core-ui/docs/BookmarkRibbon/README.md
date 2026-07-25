@@ -76,6 +76,7 @@ interface Bookmark {
 - **Shape** is a rectangle with a 7 px V-notch cut upward from the bottom centre, producing two pointed tails — the classic signet silhouette. The notch depth is constant regardless of total height, so the tails stay the same size as the body extends.
 - **Colour** is applied via a CSS custom property (`--bookmark-color`) read by the `::before` pseudo that renders the silhouette. The label colour is the result of `getContrastColor(effectiveColor)` so it stays readable on any bookmark colour.
 - **`[+]` add slot** keeps its `30px` footprint on hover (no label to drive height) and renders a small `codicon-add` glyph centred in the rectangle.
+- **Mutually exclusive with every other anchored popover.** Both the per-ribbon editor and the `[+]` add popover call [`useExclusivePopover`](../useExclusivePopover/README.md), so opening either one closes any other open popover — another ribbon's editor in the same stack, or an unrelated popover elsewhere in the app — and vice versa. This is automatic; there is no prop to opt in or out. It matters because a popover's own outside-click listener cannot see a mousedown that lands inside a sibling popover (siblings stop propagation to protect themselves), so without it two popovers can sit open at once.
 
 ## Accessibility
 

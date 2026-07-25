@@ -58,6 +58,13 @@
       "noAuth": "Ei todennusta",
       "popoverLabel": "Todennusreitti",
       "unnamed": "Nimetön"
+    },
+    "contextMenu": {
+      "revealInFolder": "Avaa sisältävä kansio",
+      "copyFileName": "Kopioi tiedostonimi",
+      "copyFullPath": "Kopioi koko polku",
+      "revealFailedTitle": "Kansiota ei voitu avata",
+      "revealFailedBody": "Tiedosto on ehkä siirretty, nimetty uudelleen tai poistettu."
     }
   },
   "tips": {
@@ -244,8 +251,6 @@
     "newFolder": "Uusi kansio",
     "newEnvironmentFolder": "Uusi ympäristökansio",
     "contextMenu": {
-      "createFolder": "Luo kansio",
-      "createEnvironmentFolder": "Luo ympäristökansio",
       "delete": "Poista",
       "clone": "Kloonaa",
       "copySuffix": "kopio",
@@ -259,6 +264,7 @@
       "add": {
         "title": "Lisää",
         "folder": "Kansio",
+        "environmentFolder": "Ympäristökansio",
         "httpGet": "HTTP – GET-pyyntö",
         "httpPost": "HTTP – POST-pyyntö",
         "httpPut": "HTTP – PUT-pyyntö",

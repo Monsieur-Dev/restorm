@@ -157,6 +157,13 @@ import { Statusbar, StatusbarElement } from 'electron-core-ui/renderer'
 </StatusbarElement>
 ```
 
+A `tooltipTrigger="click"` element is an anchored popover, so it automatically joins the application-wide **one-popover-at-a-time** set via [`useExclusivePopover`](../useExclusivePopover/README.md): opening it closes any other open popover (statusbar or not), and opening another closes it. This needs no prop and no wiring — it is on by default.
+
+Two consequences worth knowing:
+
+- **Do not add your own exclusivity around a `StatusbarElement`.** A host helper rendered inside the popover to reach `closeTooltip` would announce under a second id and close its own host, so the popover would shut the instant it opened. The element already participates; the host adds nothing.
+- **`tooltipTrigger="hover"` does not participate.** Hover tooltips are not popovers and are dismissed by pointer movement.
+
 ### Disabled (non-actionable) cell
 
 ```tsx

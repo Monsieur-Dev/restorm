@@ -57,6 +57,13 @@
       "noAuth": "인증 없음",
       "popoverLabel": "인증 경로",
       "unnamed": "이름 없음"
+    },
+    "contextMenu": {
+      "revealInFolder": "포함된 폴더 열기",
+      "copyFileName": "파일 이름 복사",
+      "copyFullPath": "전체 경로 복사",
+      "revealFailedTitle": "폴더를 열 수 없습니다",
+      "revealFailedBody": "파일이 이동되었거나 이름이 변경되었거나 삭제되었을 수 있습니다."
     }
   },
   "tips": {
@@ -243,8 +250,6 @@
     "newFolder": "새 폴더",
     "newEnvironmentFolder": "새 환경 폴더",
     "contextMenu": {
-      "createFolder": "폴더 만들기",
-      "createEnvironmentFolder": "환경 폴더 만들기",
       "delete": "삭제",
       "clone": "복제",
       "copySuffix": "복사본",
@@ -258,6 +263,7 @@
       "add": {
         "title": "추가",
         "folder": "폴더",
+        "environmentFolder": "환경 폴더",
         "httpGet": "HTTP – GET 요청",
         "httpPost": "HTTP – POST 요청",
         "httpPut": "HTTP – PUT 요청",

@@ -164,6 +164,17 @@ The component renders icons via the codicon font. Defaults: `'check'` for the ch
 - **Space** / **Enter** : Toggle the value. From indeterminate this promotes to checked.
 - **Tab** : Move focus to the next focusable element.
 
+### Focus ring
+
+The `'switch'` appearance draws a `1px solid var(--focusBorder)` ring at
+`outline-offset: 2px` under `:focus-visible` — keyboard-only, so a mouse click
+leaves no ring. The offset is positive on purpose: the workbench-wide focus rule
+paints its ring *inset*, where the toggle's own 1px border and 3px radius on a
+20×20 box swallow it entirely. Detaching the ring is what makes it perceptible.
+
+`'star'` keeps its documented focus opt-out and `'button'` inherits the ECUI
+`Button` focus treatment; neither is affected.
+
 ## Accessibility
 
 - `role="checkbox"` on the action element.
@@ -210,6 +221,38 @@ Reusable steps from `electron-core-ui/testing/playwright-bdd`:
 - `When I click toggle {string}`
 - `When I click toggle {string} label`
 - `When I press {string} on toggle {string}`
+- `Then toggle {string} should show a keyboard focus ring`
+- `Then toggle {string} should NOT show a keyboard focus ring`
+
+The focus-ring step arms the keyboard modality (a `Tab` press) before focusing
+the action, then asserts via `getComputedStyle` that the element matches
+`:focus-visible`, that an outline is actually drawn, that its colour resolves to
+the theme's `--focusBorder`, and that its offset is positive (an inset ring is
+the invisible state this assertion guards against).
+
+It also carries a negative control: the probe reads back a deliberately
+undefined custom property on the same element, and fails if `--focusBorder`
+resolves to that same value. Without it, a theme missing the token would let
+the colour comparison succeed vacuously — both sides falling back identically.
+
+The negative step is for appearances that opt OUT of a ring (`star`). It arms
+keyboard modality the same way and **fails if the element is not
+`:focus-visible`** — asserting "no ring" on something that was never
+keyboard-focused would pass for the wrong reason. Use it inside a `.workbench`
+host: that is where the host's global focus rule competes for the element, so
+it is what makes the assertion meaningful rather than vacuous.
+
+### Focus-ring suppression: raise specificity, don't rely on order
+
+A rule that suppresses or replaces the host's global focus ring must **beat it
+on specificity**, not merely equal it. `.workbench [tabindex="0"]:focus` in
+`workbench.css` computes to (0,3,0); a suppression written as
+`.workbench .my-thing:focus` is *also* (0,3,0), and a tie is resolved by
+stylesheet order — so it holds only until bundling reorders the two files, and
+it fails with no source change to blame. Qualify with the attribute the element
+already carries (e.g. `[tabindex]`) to reach (0,4,0) and settle it by
+specificity. Prefer that over `!important`, which a consuming host cannot
+override.
 
 ## Appearance variants
 

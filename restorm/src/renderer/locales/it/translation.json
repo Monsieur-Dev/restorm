@@ -58,6 +58,13 @@
       "noAuth": "Nessuna autenticazione",
       "popoverLabel": "Percorso di autenticazione",
       "unnamed": "Senza nome"
+    },
+    "contextMenu": {
+      "revealInFolder": "Apri cartella contenitore",
+      "copyFileName": "Copia nome file",
+      "copyFullPath": "Copia percorso completo",
+      "revealFailedTitle": "Impossibile aprire la cartella",
+      "revealFailedBody": "Il file potrebbe essere stato spostato, rinominato o eliminato."
     }
   },
   "tips": {
@@ -244,8 +251,6 @@
     "newFolder": "Nuova cartella",
     "newEnvironmentFolder": "Nuova cartella di ambiente",
     "contextMenu": {
-      "createFolder": "Crea cartella",
-      "createEnvironmentFolder": "Crea cartella di ambiente",
       "delete": "Elimina",
       "clone": "Clona",
       "copySuffix": "copia",
@@ -259,6 +264,7 @@
       "add": {
         "title": "Aggiungi",
         "folder": "Cartella",
+        "environmentFolder": "Cartella di ambiente",
         "httpGet": "Richiesta HTTP – GET",
         "httpPost": "Richiesta HTTP – POST",
         "httpPut": "Richiesta HTTP – PUT",

@@ -58,6 +58,13 @@
       "noAuth": "Kimlik doğrulama yok",
       "popoverLabel": "Kimlik doğrulama rotası",
       "unnamed": "Adsız"
+    },
+    "contextMenu": {
+      "revealInFolder": "İçeren klasörü aç",
+      "copyFileName": "Dosya adını kopyala",
+      "copyFullPath": "Tam yolu kopyala",
+      "revealFailedTitle": "Klasör açılamadı",
+      "revealFailedBody": "Dosya taşınmış, yeniden adlandırılmış veya silinmiş olabilir."
     }
   },
   "tips": {
@@ -244,8 +251,6 @@
     "newFolder": "Yeni klasör",
     "newEnvironmentFolder": "Yeni ortam klasörü",
     "contextMenu": {
-      "createFolder": "Klasör oluştur",
-      "createEnvironmentFolder": "Ortam klasörü oluştur",
       "delete": "Sil",
       "clone": "Çoğalt",
       "copySuffix": "kopya",
@@ -259,6 +264,7 @@
       "add": {
         "title": "Ekle",
         "folder": "Klasör",
+        "environmentFolder": "Ortam klasörü",
         "httpGet": "HTTP – GET isteği",
         "httpPost": "HTTP – POST isteği",
         "httpPut": "HTTP – PUT isteği",

@@ -26,7 +26,7 @@ server; — = pure UI/in-process.
 
 | Suite | Scen | Covers | Deps |
 |---|--:|---|---|
-| http-execution | 27 | HTTP/REST execution end-to-end (methods, redirects, history, errors, file body) | 🏠 |
+| http-execution | 33 | HTTP/REST execution end-to-end (methods, redirects, history, errors, file body, activity beam stops) | 🏠 |
 | graphql-execution | 15 | GraphQL execution end-to-end | 🏠 |
 | graphql-operation-name | 3 | operationName / multi-operation selection | 🏠 |
 | grpc-execution | 11 | gRPC unary + streaming execution | 🐳 grpcbin |
@@ -89,18 +89,20 @@ server; — = pure UI/in-process.
 
 | Suite | Scen | Covers | Deps |
 |---|--:|---|---|
-| full-workflow | 7 | Full workflow (bounds, new-file, imports, MRU tabs) | — |
+| full-workflow | 9 | Full workflow (bounds, new-file, imports, MRU tabs, sidebar Add submenu) | — |
 | exhaustive-doc-viewer | 6 | Exhaustive documentation-viewer behaviour | — |
-| settings-tab | 6 | Settings surface follows the workbench | — |
-| dirty-state | 5 | Dirty-state propagation across nested units | — |
+| settings-tab | 7 | Settings surface follows the workbench (+ Toggle keyboard focus ring) | — |
+| dirty-state | 6 | Dirty-state propagation across nested units | — |
+| status-bar-context-menu | 6 | Status bar file-path popover actions: reveal in OS file explorer, copy file name, copy full path, popover closes after each action, no-file-open state, reveal-channel path containment | — |
 | documentation-viewer | 4 | Documentation viewer interactions | — |
-| quick-settings | 8 | Quick-config save/load round-trip every protocol field | — |
+| quick-settings | 13 | Quick-config save/load round-trip every protocol field + app-wide popover exclusivity | — |
 | sidebar-split-drop | 3 | Sidebar → workbench drag opens a split view | — |
 | auth-login | 2 | Authentication routes end-to-end | 🏠 |
 | open-folder | 2 | Open Folder | — |
 | body-type-migration | 1 | Legacy body-type canonicalisation on load | — |
 | fully-documented-petstore | 1 | Fully-documented Petstore fixture builder | — |
 | theme-carousel-a11y | 1 | Theme preview cards keep Tab on the card only, never the abstract preview | — |
+| monaco-suggest-dismiss | 1 | A `{{...}}` suggest popup opened in one request is gone after switching tabs, and still opens in the now-active field | 🔌 |
 
 ## MCP surface
 

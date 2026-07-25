@@ -1,4 +1,4 @@
-import { ipcMain, BrowserWindow, dialog } from 'electron'
+import { ipcMain, BrowserWindow, dialog, shell } from 'electron'
 import { logger, getFileService, isFileServiceInitialized, isPersistenceServiceInitialized, getPersistenceService, getFeatureService, isFeatureServiceInitialized, validatedHandle } from 'electron-core-ui'
 import { isTabDetachEnabled } from './featureFlags'
 import { join, relative, dirname } from 'path'
@@ -6,7 +6,7 @@ import { promises as fs, existsSync, statSync, rmSync } from 'fs'
 import { EditorWindow } from './windows/EditorWindow'
 import { contextService, responseHistoryService, requestUsageService, scenarioUsageService } from './services'
 import { miniBrowserService } from './services/MiniBrowserService'
-import { assertPathWithinParent, isPathContained } from './utils/pathSecurity'
+import { assertPathWithinParent, isPathContained, resolveOpenedFolderBoundary } from './utils/pathSecurity'
 import { secretHydrationService } from './services/secrets/SecretHydrationService'
 import { saveFolderStructure, loadFolderStructure, attachDraftStoreForFolder, attachDraftStoreForFile } from './FileOperations'
 import type { PersistenceFormat } from 'electron-core-ui'
@@ -41,6 +41,7 @@ import {
   saveAsFileArgs, saveAsFolderArgs,
   secretsReadArgs, secretsWriteArgs, secretsInvalidateArgs, secretsResolveArgs, secretsRefreshArgs,
   openPathArgs,
+  revealInFolderArgs,
   projectReadFileArgs,
   contextRegisterRequestArgs, contextUnregisterRequestArgs, contextGetEnvironmentContextArgs,
   contextSetRequestEnvironmentArgs, contextSetAvailableEnvironmentsArgs,
@@ -101,8 +102,8 @@ function getE2EMockedFolderPath(): string | null {
  * Containment root for renderer-supplied secrets / save paths. Secrets
  * live either inside the opened project FOLDER (folder mode) or next to
  * the opened `.restorm` FILE as `<file>.env` (single-file mode — the
- * renderer writes `${filePath}.env`). So the legitimate root is the
- * opened folder when present, otherwise the opened file's directory.
+ * renderer writes `${filePath}.env`). The root is the containing
+ * directory of whatever is open, in both modes.
  * Returns `null` when nothing is open at all — e.g. a brand-new
  * unsaved single-file document whose path isn't registered yet. In
  * that window the renderer still legitimately writes `<file>.env`
@@ -114,14 +115,13 @@ function getE2EMockedFolderPath(): string | null {
  */
 function getSecretsContainmentRoot(): string | null {
   if (!isFileServiceInitialized()) return null
-  const fileService = getFileService() as {
-    getOpenedFolderPath?: () => string | null
-    getFilePath?: () => string | null
-  }
-  const folder = fileService.getOpenedFolderPath?.() ?? null
-  if (folder) return folder
-  const file = fileService.getFilePath?.() ?? null
-  return file ? dirname(file) : null
+  // The boundary is deliberately the CONTAINING DIRECTORY of whatever is
+  // open, in both modes. Widening or narrowing it is a secrets-subsystem
+  // decision, not a local cleanup — see the note above about a brand-new
+  // unsaved document, which legitimately writes its sidecar before its
+  // path is registered.
+  const openProject = getFileService().getFilePath()
+  return openProject ? dirname(openProject) : null
 }
 
 interface KeyValueRowFromIpc {
@@ -368,9 +368,12 @@ export function registerRestormIPC(deps: {
         // INITIAL save-as (which establishes the folder) runs before any
         // folder is open, so a null `openedFolder` has no boundary to
         // enforce and the user-chosen target is allowed.
-        const openedFolder = isFileServiceInitialized()
-          ? (getFileService() as { getOpenedFolderPath?: () => string | null }).getOpenedFolderPath?.() ?? null
-          : null
+        // Resolved through a method the service actually defines — that is
+        // the point of routing it via `getFilePath()`: an optional-chained
+        // call to a method the service does NOT define returns undefined,
+        // which silently reduces this whole guard to a no-op.
+        const openProject = isFileServiceInitialized() ? getFileService().getFilePath() : null
+        const openedFolder = resolveOpenedFolderBoundary(openProject)
         // `targetPath` may legitimately equal `openedFolder` itself
         // (a plain re-save); containment is satisfied in that case.
         if (openedFolder && !isPathContained(openedFolder, targetPath)) {
@@ -654,6 +657,41 @@ export function registerRestormIPC(deps: {
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : String(error)
       logger.error('Failed to open path', { path, error: errorMsg })
+      return { success: false, error: errorMsg }
+    }
+  })
+
+  // ==========================================================================
+  // Reveal In Folder IPC Handler
+  // ==========================================================================
+
+  validatedHandle('restorm:reveal-in-folder', revealInFolderArgs, (_event, [path]) => {
+    logger.debug('Reveal in folder requested', { path })
+
+    // The renderer names the path, but the main process is the authority on
+    // what may be handed to the OS shell. The only thing this channel is
+    // allowed to reveal is the project the app currently has open, so a
+    // caller cannot repurpose it into "reveal any path on disk". Resolved
+    // from the service rather than trusted from the argument, and DENIED
+    // when nothing is open — an unresolvable root is a refusal, not a
+    // skipped check. `getFilePath()` is the same field the statusbar cell
+    // renders, and folder-mode sets it to the folder, so both modes work.
+    const openProjectPath = isFileServiceInitialized() ? getFileService().getFilePath() : null
+    if (!openProjectPath) {
+      logger.warn('Blocked reveal - no project open')
+      return { success: false, error: 'no project open' }
+    }
+    if (path !== openProjectPath) {
+      logger.warn('Blocked reveal - path is not the open project', { path })
+      return { success: false, error: 'path outside project' }
+    }
+
+    try {
+      shell.showItemInFolder(path)
+      return { success: true }
+    } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error)
+      logger.error('Failed to reveal path in folder', { path, error: errorMsg })
       return { success: false, error: errorMsg }
     }
   })

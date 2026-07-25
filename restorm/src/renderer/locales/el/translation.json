@@ -58,6 +58,13 @@
       "noAuth": "Χωρίς έλεγχο ταυτότητας",
       "popoverLabel": "Διαδρομή ελέγχου ταυτότητας",
       "unnamed": "Χωρίς όνομα"
+    },
+    "contextMenu": {
+      "revealInFolder": "Άνοιγμα φακέλου που περιέχει το αρχείο",
+      "copyFileName": "Αντιγραφή ονόματος αρχείου",
+      "copyFullPath": "Αντιγραφή πλήρους διαδρομής",
+      "revealFailedTitle": "Δεν ήταν δυνατό το άνοιγμα του φακέλου",
+      "revealFailedBody": "Το αρχείο ίσως μετακινήθηκε, μετονομάστηκε ή διαγράφηκε."
     }
   },
   "tips": {
@@ -244,8 +251,6 @@
     "newFolder": "Νέος φάκελος",
     "newEnvironmentFolder": "Νέος φάκελος περιβάλλοντος",
     "contextMenu": {
-      "createFolder": "Δημιουργία φακέλου",
-      "createEnvironmentFolder": "Δημιουργία φακέλου περιβάλλοντος",
       "delete": "Διαγραφή",
       "clone": "Κλωνοποίηση",
       "copySuffix": "αντίγραφο",
@@ -259,6 +264,7 @@
       "add": {
         "title": "Προσθήκη",
         "folder": "Φάκελος",
+        "environmentFolder": "Φάκελος περιβάλλοντος",
         "httpGet": "HTTP – αίτημα GET",
         "httpPost": "HTTP – αίτημα POST",
         "httpPut": "HTTP – αίτημα PUT",

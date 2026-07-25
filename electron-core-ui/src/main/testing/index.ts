@@ -127,7 +127,8 @@ export {
   variableInputBoxEditorSelector,
   variableInputBoxCodeEditorSelector,
   variableInputBoxTextareaSelector,
-  variableInputBoxContextMenuSelector
+  variableInputBoxContextMenuSelector,
+  variableInputBoxSuggestWidgetSelector
 } from './variableInputBoxSelectors'
 
 export {

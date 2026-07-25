@@ -4,6 +4,7 @@ import { BookmarkRibbon } from './BookmarkRibbon'
 import { Tooltip } from '../Tooltip'
 import { Button } from '../Button'
 import { InputBox } from '../InputBox'
+import { useExclusivePopover } from '../../hooks/useExclusivePopover'
 
 import './bookmarkRibbon.css'
 
@@ -48,6 +49,12 @@ export const BookmarkRibbonStack: React.FC<BookmarkRibbonStackProps> = ({
   const [addDraft, setAddDraft] = useState('')
   const addBtnRef = useRef<HTMLButtonElement | null>(null)
   const addEditorRef = useRef<HTMLDivElement | null>(null)
+
+  // Opening any other anchored popover closes this one, and vice versa.
+  // The outside-click listener below cannot cover that case on its own:
+  // popovers guard themselves with `onMouseDown` + `stopPropagation`, so a
+  // mousedown landing inside a sibling popover never reaches this handler.
+  useExclusivePopover(isAddOpen, useCallback(() => { setIsAddOpen(false) }, []))
 
   // Close the add-tag tooltip on any click outside of the `[+]`
   // button or the tooltip content. Individual ribbon tooltips handle

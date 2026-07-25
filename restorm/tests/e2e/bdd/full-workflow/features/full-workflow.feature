@@ -859,3 +859,32 @@ Feature: Full workflow end-to-end scenario
     When I close the current file and discard changes
     And I close the app
     Then no errors should have been logged
+
+  # Every root-level creation lives in the empty-area "Ajouter" submenu —
+  # the menu offers nothing else at its top level (no duplicate of
+  # "Ajouter > Dossier"), and the environment folder is created from that
+  # same submenu rather than from a first-level entry of its own.
+  #
+  # Creating from that submenu also opens the new row in inline rename,
+  # whatever the kind, so the user can name it without reaching for F2.
+  # Both exits are covered: Enter keeps the typed name, Escape keeps the
+  # default one — neither leaves a half-created item behind.
+  Scenario: The sidebar empty-area menu creates root folders from the Ajouter submenu alone
+    Given a fresh app seeded with the main window at x=10 y=10
+    When I create a new single-file YAML collection named "empty-area-add"
+    Then the file "empty-area-add.restorm" should exist in the temp dir
+    And the sidebar empty-area context menu should only offer the Ajouter entry
+
+    When I add a root-level "folder" via the sidebar empty-area Ajouter submenu, keeping the rename field open
+    Then the created row should be in inline rename
+    When I confirm the inline rename as "NamedOnCreate"
+    Then the sidebar should contain the folder "NamedOnCreate"
+
+    When I add a root-level environment folder via the sidebar empty-area Ajouter submenu, keeping the rename field open
+    Then the created row should be in inline rename
+    When I cancel the inline rename
+    Then the sidebar should contain the folder "New Environment Folder"
+
+    When I close the current file and discard changes
+    And I close the app
+    Then no errors should have been logged

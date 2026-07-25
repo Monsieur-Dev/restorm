@@ -44,3 +44,26 @@ describe('CustomWCO — window-control hover tooltip', () => {
     expect(document.querySelector('.tooltip-content')).toBeNull()
   })
 })
+
+describe('CustomWCO — per-platform rendering', () => {
+  afterEach(() => { document.body.style.removeProperty('--wco-width') })
+
+  it('win32: renders a right-hand spacer and reserves width', () => {
+    const { container } = render(<CustomWCO platform="win32" data-testid="wco" />)
+    expect(container.querySelector('.custom-wco-spacer')).not.toBeNull()
+    // No custom buttons on Windows (native controls draw the min/max/close).
+    expect(document.querySelector('[data-testid="wco-minimize"]')).toBeNull()
+    // A non-zero reserved width is written for the layout.
+    expect(document.body.style.getPropertyValue('--wco-width')).not.toBe('0px')
+    expect(document.body.style.getPropertyValue('--wco-width')).not.toBe('')
+  })
+
+  it('darwin: renders nothing and reserves no width (controls are top-left)', () => {
+    const { container } = render(<CustomWCO platform="darwin" data-testid="wco" />)
+    // No spacer and no custom buttons — the title bar insets its left zone instead.
+    expect(container.querySelector('.custom-wco-spacer')).toBeNull()
+    expect(document.querySelector('[data-testid="wco-minimize"]')).toBeNull()
+    expect(container.firstChild).toBeNull()
+    expect(document.body.style.getPropertyValue('--wco-width')).toBe('0px')
+  })
+})

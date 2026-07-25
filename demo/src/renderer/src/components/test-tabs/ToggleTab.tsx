@@ -18,6 +18,7 @@ const ToggleTab: React.FC = () => {
   const [checkedB, setCheckedB] = useState(false)
   const [disabledChecked, setDisabledChecked] = useState(false)
   const [noFocusChecked, setNoFocusChecked] = useState(false)
+  const [starChecked, setStarChecked] = useState(false)
 
   const lastChangeText = useMemo(() => {
     if (!lastChange) return ''
@@ -80,6 +81,26 @@ const ToggleTab: React.FC = () => {
         >
           {t('toggle.harness.noFocusLabel')}
         </Toggle>
+
+        {/* The `star` appearance deliberately draws NO focus ring. It is here so
+            the shared negative BDD step can assert that opt-out actually holds
+            under keyboard focus. The assertion is only meaningful because this
+            harness renders inside the provider's `.workbench`, which is where
+            the host's global focus rule competes for the same element — outside
+            one, "no ring" would be true no matter what the opt-out did.
+            Deliberately unlabelled: the accessible name falls back to the
+            component default, which keeps a test-only control out of every
+            locale file. */}
+        <Toggle
+          appearance="star"
+          data-testid="toggle-star"
+          checked={starChecked}
+          onChange={(checked, viaKeyboard) => {
+            setStarChecked(checked)
+            setLastChange({ id: 'toggle-star', checked, viaKeyboard })
+            setChangeCount((c) => c + 1)
+          }}
+        />
       </div>
 
       <div style={{ display: 'grid', gap: 6 }}>

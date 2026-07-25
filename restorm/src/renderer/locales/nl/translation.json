@@ -58,6 +58,13 @@
       "noAuth": "Geen authenticatie",
       "popoverLabel": "Authenticatieroute",
       "unnamed": "Naamloos"
+    },
+    "contextMenu": {
+      "revealInFolder": "Bevattende map openen",
+      "copyFileName": "Bestandsnaam kopiëren",
+      "copyFullPath": "Volledig pad kopiëren",
+      "revealFailedTitle": "Kan de map niet openen",
+      "revealFailedBody": "Het bestand is mogelijk verplaatst, hernoemd of verwijderd."
     }
   },
   "tips": {
@@ -244,8 +251,6 @@
     "newFolder": "Nieuwe map",
     "newEnvironmentFolder": "Nieuwe omgevingsmap",
     "contextMenu": {
-      "createFolder": "Map maken",
-      "createEnvironmentFolder": "Omgevingsmap maken",
       "delete": "Verwijderen",
       "clone": "Klonen",
       "copySuffix": "kopie",
@@ -259,6 +264,7 @@
       "add": {
         "title": "Toevoegen",
         "folder": "Map",
+        "environmentFolder": "Omgevingsmap",
         "httpGet": "HTTP – GET-verzoek",
         "httpPost": "HTTP – POST-verzoek",
         "httpPut": "HTTP – PUT-verzoek",

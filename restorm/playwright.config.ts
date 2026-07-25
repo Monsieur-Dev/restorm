@@ -53,6 +53,12 @@ const dirtyStateTestDir = defineBddConfig({
   outputDir: '.features-gen/dirty-state'
 })
 
+const statusBarContextMenuTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/status-bar-context-menu/features/**/*.feature',
+  steps: ['tests/e2e/bdd/status-bar-context-menu/steps/**/*.ts', 'tests/e2e/bdd/fixtures/dirty-state.fixture.ts'],
+  outputDir: '.features-gen/status-bar-context-menu'
+})
+
 const odataPetstoreTestDir = defineBddConfig({
   features: 'tests/e2e/bdd/odata-petstore/features/**/*.feature',
   steps: ['tests/e2e/bdd/odata-petstore/steps/**/*.ts', 'tests/e2e/bdd/fixtures/odata-petstore.fixture.ts'],
@@ -223,6 +229,12 @@ const graphqlExecutionTestDir = defineBddConfig({
   features: 'tests/e2e/bdd/graphql-execution/features/**/*.feature',
   steps: ['tests/e2e/bdd/graphql-execution/steps/**/*.ts', 'tests/e2e/bdd/fixtures/mcp-server.fixture.ts'],
   outputDir: '.features-gen/graphql-execution'
+})
+
+const monacoSuggestDismissTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/monaco-suggest-dismiss/features/**/*.feature',
+  steps: ['tests/e2e/bdd/monaco-suggest-dismiss/steps/**/*.ts', 'tests/e2e/bdd/fixtures/mcp-server.fixture.ts'],
+  outputDir: '.features-gen/monaco-suggest-dismiss'
 })
 
 const trpcExecutionTestDir = defineBddConfig({
@@ -539,6 +551,10 @@ export default defineConfig({
       testDir: dirtyStateTestDir
     },
     {
+      name: 'status-bar-context-menu',
+      testDir: statusBarContextMenuTestDir
+    },
+    {
       name: 'odata-petstore',
       testDir: odataPetstoreTestDir
     },
@@ -647,7 +663,7 @@ export default defineConfig({
     {
       name: 'quick-settings',
       testDir: quickSettingsTestDir,
-      timeout: 300 * 1000 // 5 min — 8 scenarios, each launches a fresh app
+      timeout: 300 * 1000 // 5 min — 13 scenarios, each launches a fresh app
     },
     {
       name: 'scenario-quick-config-selector',
@@ -688,6 +704,11 @@ export default defineConfig({
       name: 'graphql-execution',
       testDir: graphqlExecutionTestDir,
       timeout: 180 * 1000
+    },
+    {
+      name: 'monaco-suggest-dismiss',
+      testDir: monacoSuggestDismissTestDir,
+      timeout: 120 * 1000
     },
     {
       name: 'trpc-execution',

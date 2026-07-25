@@ -13,6 +13,8 @@ This document describes the React hooks, services, and contexts available in `el
   - [useDebouncedValue](#usedebouncedvalue)
   - [useDebouncedCallback](#usedebouncedcallback)
   - [usePlatform](#useplatform)
+  - [useElectronPlatform](#useelectronplatform)
+  - [useNativeAppMenu](#usenativeappmenu)
   - [useKeyboardShortcut](#usekeyboardshortcut)
   - [isUndoKeyEvent / isRedoKeyEvent](#isundokeyevent--isredokeyevent)
   - [useDirtyState](#usedirtystate)
@@ -277,7 +279,7 @@ Default delay across the codebase is **250 ms**.
 
 ### usePlatform
 
-Detects the OS platform (Mac, Windows, Linux).
+Detects the OS platform (Mac, Windows, Linux) **from `navigator.userAgent`**.
 
 ```typescript
 import { usePlatform, isMacintosh } from 'electron-core-ui/renderer'
@@ -290,6 +292,54 @@ if (isMacintosh) {
   // Mac-specific logic
 }
 ```
+
+> For UI that must agree with the **main process** (window controls, title-bar
+> insets), prefer [`useElectronPlatform`](#useelectronplatform) — it reads
+> `process.platform` (`'darwin'`) over IPC, which can disagree with the
+> userAgent-derived `isMacintosh` (`'MAC'`).
+
+---
+
+### useElectronPlatform
+
+Reads the host platform from the **main process** (`process.platform`:
+`'darwin' | 'win32' | 'linux' | …`) over the `platform` IPC. This is the single
+source of truth for platform-branched chrome that must match what the main
+process does with the window — deriving the platform from `navigator.userAgent`
+instead yields a different vocabulary (`'MAC'` vs `'darwin'`) and can disagree.
+
+```typescript
+import { useElectronPlatform } from 'electron-core-ui/renderer'
+
+const platform = useElectronPlatform()      // undefined until the IPC answers
+const isMac = platform === 'darwin'
+
+// Tests / storybook can skip detection with an override:
+const forced = useElectronPlatform('win32')
+```
+
+Returns `undefined` until the IPC responds (or the passed `override`).
+
+---
+
+### useNativeAppMenu
+
+Publishes a `MenuBar` JSX tree as the host's **native application menu** (macOS
+renders menus in the system bar, outside the window). The same JSX drives both
+the in-window bar and the native menu, so they cannot drift. Only serializable
+data crosses to the main process; `onClick` handlers stay in the renderer, keyed
+by item id, and run when main echoes an activation back.
+
+```typescript
+import { useNativeAppMenu } from 'electron-core-ui/renderer'
+
+// Typically you don't call this directly — <Titlebar> does it for you.
+useNativeAppMenu(menuBarJsx, isMac)  // publish only when enabled (macOS)
+```
+
+See [MenuBar → Native application menu (macOS)](../MenuBar/README.md#native-application-menu-macos)
+for the full pipeline (`buildNativeMenuTemplate`, `toAccelerator`, edit roles,
+the fullscreen caveat, and the click round-trip).
 
 ---
 

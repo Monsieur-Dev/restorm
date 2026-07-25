@@ -58,6 +58,13 @@
       "noAuth": "Sem autenticação",
       "popoverLabel": "Rota de autenticação",
       "unnamed": "Sem nome"
+    },
+    "contextMenu": {
+      "revealInFolder": "Abrir pasta que contém o ficheiro",
+      "copyFileName": "Copiar nome do ficheiro",
+      "copyFullPath": "Copiar caminho completo",
+      "revealFailedTitle": "Não foi possível abrir a pasta",
+      "revealFailedBody": "O ficheiro pode ter sido movido, renomeado ou eliminado."
     }
   },
   "tips": {
@@ -244,8 +251,6 @@
     "newFolder": "Nova pasta",
     "newEnvironmentFolder": "Nova pasta de ambiente",
     "contextMenu": {
-      "createFolder": "Criar pasta",
-      "createEnvironmentFolder": "Criar pasta de ambiente",
       "delete": "Eliminar",
       "clone": "Clonar",
       "copySuffix": "cópia",
@@ -259,6 +264,7 @@
       "add": {
         "title": "Adicionar",
         "folder": "Pasta",
+        "environmentFolder": "Pasta de ambiente",
         "httpGet": "HTTP – pedido GET",
         "httpPost": "HTTP – pedido POST",
         "httpPut": "HTTP – pedido PUT",

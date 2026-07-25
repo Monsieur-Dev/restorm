@@ -6,6 +6,7 @@ import { Tooltip } from '../Tooltip'
 import { Modal } from '../Modal'
 import { toasterService } from '../Toaster'
 import { useAuthState } from '../../hooks/useAuthState'
+import { useExclusivePopover } from '../../hooks/useExclusivePopover'
 import { logger } from '../../services/logger'
 import type { PlanTier } from '../../../shared/auth/authState'
 import './accountButton.css'
@@ -59,6 +60,13 @@ export const AccountButton: React.FC<AccountButtonProps> = ({ dashboardUrl }) =>
 
   const close = useCallback(() => { setOpen(false) }, [])
   const toggleOpen = useCallback(() => { setOpen((prev) => !prev) }, [])
+
+  // Opening any other anchored popover closes this account card, and vice
+  // versa — one popover at a time, application-wide. The outside-click
+  // listener below cannot cover that: popovers guard themselves with
+  // `onMouseDown` + `stopPropagation`, so a mousedown inside a sibling popover
+  // never reaches this handler.
+  useExclusivePopover(open, close)
 
   // Dismiss the card on an outside click / Escape — clicks inside the card (its
   // buttons) or on the trigger stay open. Mirrors the ECUI click-popover pattern.

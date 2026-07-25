@@ -100,6 +100,15 @@
 	-webkit-app-region: drag !important;
 }
 
+/* macOS: the OS draws the native traffic lights over the top-left of the
+ * window (they are NOT suppressed by `frame: false` — `titleBarStyle`
+ * governs). Nothing in the left zone may sit under them, so reserve their
+ * width. 78px covers the three 12px buttons plus Apple's spacing at the
+ * default (non-inset) position. Windows/Linux are untouched. */
+.titlebar--mac .titlebar-left {
+	padding-left: 78px;
+}
+
 .titlebar-center {
 	/* Grid item in column 2. The track width is set on the parent
 	 * via `grid-template-columns`, so the SearchBar's `width: 100%;

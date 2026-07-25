@@ -57,6 +57,13 @@
       "noAuth": "无认证",
       "popoverLabel": "认证路由",
       "unnamed": "未命名"
+    },
+    "contextMenu": {
+      "revealInFolder": "打开所在文件夹",
+      "copyFileName": "复制文件名",
+      "copyFullPath": "复制完整路径",
+      "revealFailedTitle": "无法打开文件夹",
+      "revealFailedBody": "文件可能已被移动、重命名或删除。"
     }
   },
   "tips": {
@@ -243,8 +250,6 @@
     "newFolder": "新建文件夹",
     "newEnvironmentFolder": "新建环境文件夹",
     "contextMenu": {
-      "createFolder": "创建文件夹",
-      "createEnvironmentFolder": "创建环境文件夹",
       "delete": "删除",
       "clone": "克隆",
       "copySuffix": "副本",
@@ -258,6 +263,7 @@
       "add": {
         "title": "添加",
         "folder": "文件夹",
+        "environmentFolder": "环境文件夹",
         "httpGet": "HTTP – GET 请求",
         "httpPost": "HTTP – POST 请求",
         "httpPut": "HTTP – PUT 请求",

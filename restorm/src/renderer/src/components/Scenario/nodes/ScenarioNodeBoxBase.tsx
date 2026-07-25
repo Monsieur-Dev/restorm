@@ -11,6 +11,7 @@ import { useScenarioInternalsRequester } from '../scenarioInternalsContext'
 import { HeaderHoverTooltip } from '../../MainView/HeaderHoverTooltip'
 import { anchorColor, cellBody, portAnchorColor, inputFlowRingClass, outputFlowRingClass, cellInputRingClass, cellOutputRingClass } from './scenarioCellRender'
 import { hasDonePort, hasErrorPort } from '../../../../../shared/scenarioNodeCapabilities'
+import { prefersReducedMotion } from '../../../utils/prefersReducedMotion'
 import '../ScenarioNodeBox.css'
 
 /** React Flow node data shared by every scenario node box. */
@@ -389,8 +390,16 @@ export const ScenarioNodeBoxBase: React.FC<ScenarioNodeBoxBaseProps> = ({ id, da
     // unmounts. Don't touch `running` synchronously; the trail finishes
     // its lap first.
     wantsStopRef.current = true
+    // …except when there is no lap coming: under reduced motion the trail
+    // carries `animation: none`, so `animationiteration` never fires and the
+    // beam would orbit the box for good. Gated on `running` so an idle box
+    // never dispatches.
+    if (running && prefersReducedMotion()) {
+      dispatchRunning(false)
+      wantsStopRef.current = false
+    }
     return undefined
-  }, [engineRunning])
+  }, [engineRunning, running])
   const onAnimationIteration = useCallback((e: React.AnimationEvent<HTMLDivElement>) => {
     // Only react to the BorderBeam's own keyframe, not other animations the
     // box might host (the collapse/expand transitions, the spinning status

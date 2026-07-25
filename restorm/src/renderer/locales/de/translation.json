@@ -58,6 +58,13 @@
       "noAuth": "Keine Authentifizierung",
       "popoverLabel": "Authentifizierungsroute",
       "unnamed": "Unbenannt"
+    },
+    "contextMenu": {
+      "revealInFolder": "Enthaltenden Ordner öffnen",
+      "copyFileName": "Dateinamen kopieren",
+      "copyFullPath": "Vollständigen Pfad kopieren",
+      "revealFailedTitle": "Ordner konnte nicht geöffnet werden",
+      "revealFailedBody": "Die Datei wurde möglicherweise verschoben, umbenannt oder gelöscht."
     }
   },
   "tips": {
@@ -244,8 +251,6 @@
     "newFolder": "Neuer Ordner",
     "newEnvironmentFolder": "Neuer Umgebungsordner",
     "contextMenu": {
-      "createFolder": "Ordner erstellen",
-      "createEnvironmentFolder": "Umgebungsordner erstellen",
       "delete": "Löschen",
       "clone": "Klonen",
       "copySuffix": "Kopie",
@@ -259,6 +264,7 @@
       "add": {
         "title": "Hinzufügen",
         "folder": "Ordner",
+        "environmentFolder": "Umgebungsordner",
         "httpGet": "HTTP-Anfrage – GET",
         "httpPost": "HTTP-Anfrage – POST",
         "httpPut": "HTTP-Anfrage – PUT",

@@ -71,6 +71,10 @@ const folder = codiconIcon('folder')
 const empty = noIcon()
 ```
 
+## Behaviour
+
+- **Mutually exclusive with every other anchored popover.** The picker calls [`useExclusivePopover`](../useExclusivePopover/README.md), so opening it closes any other open popover, and opening another one closes the picker. This is automatic; there is no prop to opt in or out. Closing this way runs the same path as a manual close, so the per-tab search fields are cleared and the picker reopens clean.
+
 ## Notes for AI Usage
 
 - Store the selected icon as an **explicit, typed value** (`Icon`) in your domain model rather than as a raw string; this makes it easier for agents to transform or migrate icon data.

@@ -58,6 +58,13 @@
       "noAuth": "No auth",
       "popoverLabel": "Authentication route",
       "unnamed": "Unnamed"
+    },
+    "contextMenu": {
+      "revealInFolder": "Open containing folder",
+      "copyFileName": "Copy file name",
+      "copyFullPath": "Copy full path",
+      "revealFailedTitle": "Couldn't open the folder",
+      "revealFailedBody": "The file may have been moved, renamed or deleted."
     }
   },
   "tips": {
@@ -244,8 +251,6 @@
     "newFolder": "New Folder",
     "newEnvironmentFolder": "New Environment Folder",
     "contextMenu": {
-      "createFolder": "Create folder",
-      "createEnvironmentFolder": "Create environment folder",
       "delete": "Delete",
       "clone": "Clone",
       "copySuffix": "copy",
@@ -259,6 +264,7 @@
       "add": {
         "title": "Add",
         "folder": "Folder",
+        "environmentFolder": "Environment folder",
         "httpGet": "HTTP – GET request",
         "httpPost": "HTTP – POST request",
         "httpPut": "HTTP – PUT request",

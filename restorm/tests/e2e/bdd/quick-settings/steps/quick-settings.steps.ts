@@ -29,6 +29,7 @@ let discovery: McpDiscovery | null = null
 let page: Page | null = null
 let folderId = ''
 let requestId = ''
+let envFolderId = ''
 
 function parsedReply(reply: McpToolReply): unknown {
   const text = reply.content?.[0]?.text ?? ''
@@ -467,14 +468,20 @@ When(
     // node existing in the renderer and silently no-op (the workbench stays on
     // the empty bench). Re-issue `open_tab` until `get_current_tab` reflects
     // our request id, mirroring the mcp-server suite's open-then-poll recipe.
+    // That same lag can also make `open_tab` itself report a transient error
+    // (the item is not projected yet), so a single failed attempt must not be
+    // fatal — the loop is the retry, and only the final `opened` assertion
+    // decides the step.
     const deadline = Date.now() + 15_000
     let opened = false
     while (Date.now() < deadline) {
-      expect((await callMcpTool(discovery, 'open_tab', { itemId: requestId })).isError ?? false).toBe(false)
-      const cur = parsedReply(await callMcpTool(discovery, 'get_current_tab', {})) as { itemId?: string | null; tabId?: string | null }
-      if (cur.itemId === requestId && typeof cur.tabId === 'string' && cur.tabId.length > 0) {
-        opened = true
-        break
+      const openReply = await callMcpTool(discovery, 'open_tab', { itemId: requestId })
+      if (!(openReply.isError ?? false)) {
+        const cur = parsedReply(await callMcpTool(discovery, 'get_current_tab', {})) as { itemId?: string | null; tabId?: string | null }
+        if (cur.itemId === requestId && typeof cur.tabId === 'string' && cur.tabId.length > 0) {
+          opened = true
+          break
+        }
       }
       await page.waitForTimeout(250)
     }
@@ -533,3 +540,249 @@ Then(
     await matrix.assert(page)
   }
 )
+
+// ---------------------------------------------------------------------------
+// Anchored-popover exclusivity: opening ANY participating click-popover must
+// dismiss whichever other one is open — application-wide, not just the request
+// header — and an outside click must still close the open one (no regression).
+// The set spans four different owners, deliberately, because a single missing
+// one is exactly the gap that let two popovers stack in the first place:
+//   - request-header application popovers  → quick-config, auth-key, environment
+//   - the request tab's scenario-usage badge popover
+//   - the bookmark/tag add popover (a library popover that owns its open state)
+//   - the title icon picker (`IconSelect`) — a library popover that renders on a
+//     CONTAINER tab (folder / env-folder / scenario). A request leaf carries no
+//     icon (`findItemWithBreadcrumbs` sets the request crumb's icon to null), so
+//     `RestormWorkbenchTab` mounts the title `IconSelect` only for containers;
+//     it is exercised here on the env-folder tab, not the request header.
+//   - statusbar click popovers (`StatusbarElement` `tooltipTrigger="click"`) →
+//     the MCP-status indicator, a full window's-length away from the header yet
+//     in the same set. (The statusbar env selector is not mounted anywhere in
+//     the app, so the MCP indicator is the statusbar member that actually
+//     renders; the auth-key selector is itself a click `StatusbarElement`, so
+//     that primitive's enrolment is also covered on the request tab.)
+// They only form one set because every side announces on the one shared
+// exclusivity channel (`useExclusivePopover`). Because they do not all render on
+// one surface, the "all present" precondition is asserted per-surface (the
+// request-tab subset vs the env-folder subset); the "only X open / none open"
+// assertions stay global — a member absent from the current surface has no
+// visible popover, so it reads as closed, which is exactly the invariant.
+// ---------------------------------------------------------------------------
+
+type ExclusivePopoverKey =
+  | 'quick-config'
+  | 'auth-key'
+  | 'environment'
+  | 'tags'
+  | 'icon'
+  | 'scenarios'
+  | 'statusbar-mcp'
+
+/** Selector (not bare testid) because the workbench-tab popovers are keyed by
+ * the runtime tab id (`tab-<tabId>-…`); matching on the stable suffix avoids
+ * having to thread that id through every step. */
+const EXCLUSIVE_POPOVER_BUTTON: Record<ExclusivePopoverKey, string> = {
+  'quick-config': vis('quick-settings-open-button'),
+  'auth-key': vis('request-header-auth-selector'),
+  environment: vis('request-header-env-selector'),
+  tags: '[data-testid$="-bookmarks-add"]:visible',
+  icon: '[data-testid$="-title-icon-button"]:visible',
+  scenarios: vis('request-scenario-usage-button'),
+  'statusbar-mcp': vis('statusbar-mcp-indicator')
+}
+
+const EXCLUSIVE_POPOVER_CONTENT: Record<ExclusivePopoverKey, string> = {
+  'quick-config': vis('quick-settings-popover'),
+  'auth-key': vis('request-header-auth-popover'),
+  environment: vis('request-header-env-popover'),
+  tags: '[data-testid$="-bookmarks-add-tooltip"]:visible',
+  icon: '[data-testid$="-title-icon-picker"]:visible',
+  scenarios: vis('request-scenario-usage-popover'),
+  'statusbar-mcp': vis('statusbar-mcp-popover')
+}
+
+const ALL_EXCLUSIVE_POPOVER_KEYS = Object.keys(EXCLUSIVE_POPOVER_CONTENT) as ExclusivePopoverKey[]
+
+// Which triggers actually render on which tab surface — the "all present"
+// precondition waits only for the subset its scenario drives. The statusbar MCP
+// indicator is global chrome (present on every surface), so it needs no subset
+// entry of its own; a scenario that drives it opens a request tab first for a
+// second member to be mutually exclusive against.
+const REQUEST_TAB_POPOVER_KEYS: ExclusivePopoverKey[] = [
+  'quick-config', 'auth-key', 'environment', 'tags', 'scenarios'
+]
+const ENV_FOLDER_TAB_POPOVER_KEYS: ExclusivePopoverKey[] = ['icon', 'tags']
+
+function asExclusivePopoverKey(value: string): ExclusivePopoverKey {
+  if ((ALL_EXCLUSIVE_POPOVER_KEYS as string[]).includes(value)) return value as ExclusivePopoverKey
+  throw new Error(`unknown exclusive popover "${value}"`)
+}
+
+Given(
+  'I have a request with an environment, an in-scope auth route, and a scenario using it',
+  async ({ callMcpTool }) => {
+    if (discovery === null || page === null) throw new Error('launch first')
+    const disco = discovery
+    const pg = page
+
+    // Fresh project so the request id starts clean (same late-empty-project-load
+    // race as the field-matrix fixture above — see its comment for the full
+    // explanation of why the created items must be re-verified stable).
+    const projectPath = `/tmp/header-popover-exclusivity-e2e-${String(Date.now())}.restorm`
+    expect((await callMcpTool(disco, 'create_project', { filePath: projectPath })).isError ?? false).toBe(false)
+
+    const listHasRequest = async (id: string): Promise<boolean> => {
+      const lr = parsedReply(await callMcpTool(disco, 'list_requests', {})) as { id: string }[] | { requests?: { id: string }[] }
+      const arr = Array.isArray(lr) ? lr : (lr.requests ?? [])
+      return arr.some((r) => r.id === id)
+    }
+
+    const deadline = Date.now() + 20_000
+    let stable = false
+    envFolderId = ''
+    while (Date.now() < deadline && !stable) {
+      // Env-folder + an environment in it (so the header env selector renders)
+      // and an auth request in it (so the header auth-key selector renders,
+      // in scope for every request in the same folder) — all recreated
+      // together on every retry so a wipe never leaves them out of sync with
+      // the http request below.
+      const envFolder = parsedReply(await callMcpTool(disco, 'create_folder', { name: 'env' })) as { id: string }
+      expect(envFolder.id, 'env-folder id missing').toBeTruthy()
+      envFolderId = envFolder.id
+      expect((await callMcpTool(disco, 'create_environment', { envFolderId: envFolder.id, name: 'local' })).isError ?? false).toBe(false)
+      const authRequest = parsedReply(await callMcpTool(disco, 'create_request', {
+        parentFolderId: envFolder.id,
+        name: 'login',
+        protocol: 'auth'
+      })) as { id: string }
+      expect(authRequest.id, 'auth request id missing').toBeTruthy()
+
+      const created = parsedReply(await callMcpTool(disco, 'create_request', {
+        parentFolderId: envFolder.id,
+        name: 'exclusivity-target',
+        protocol: 'http'
+      })) as { id: string }
+      requestId = created.id
+      expect(requestId, 'request id missing').toBeTruthy()
+
+      // Confirm it survives the late empty-project load: 4 consecutive present reads.
+      let consecutive = 0
+      while (Date.now() < deadline && consecutive < 4) {
+        if (await listHasRequest(requestId)) {
+          consecutive++
+        } else {
+          consecutive = 0
+          break // wiped — recreate everything from the top
+        }
+        await pg.waitForTimeout(250)
+      }
+      stable = consecutive >= 4
+    }
+    expect(stable, 'request never stabilised after create_project').toBe(true)
+
+    // Seed a scenario that binds the request via an `httpRequest` node, so the
+    // scenario-usage badge popover mounts in the tab header (it renders only
+    // when the request is used by at least one scenario). The badge is one of
+    // the popovers Yoann's rejection named, so it must be in the set — and its
+    // presence is a setup precondition, not something the exclusivity code can
+    // conjure on its own.
+    const scenario = parsedReply(await callMcpTool(disco, 'create_scenario', {
+      parentId: envFolderId,
+      name: 'uses-the-request'
+    })) as { id: string }
+    expect(scenario.id, 'scenario id missing').toBeTruthy()
+    expect((await callMcpTool(disco, 'create_scenario_node', {
+      scenarioId: scenario.id,
+      kind: 'httpRequest',
+      config: { requestId, label: 'call it' }
+    })).isError ?? false).toBe(false)
+  }
+)
+
+/** Open `itemId` in a workbench tab (retrying past the empty-project settle
+ * race) and then wait for every exclusivity trigger that renders on that
+ * surface to be mounted. A trigger that never mounts would otherwise surface as
+ * a confusing click timeout mid-scenario rather than a clear setup failure. */
+async function openTabAndAwaitTriggers(
+  callMcpTool: (d: McpDiscovery, n: string, a?: Record<string, unknown>) => Promise<McpToolReply>,
+  itemId: string,
+  keys: ExclusivePopoverKey[]
+): Promise<void> {
+  if (discovery === null || page === null) throw new Error('launch first')
+  const disco = discovery
+  const pg = page
+  const deadline = Date.now() + 15_000
+  let opened = false
+  while (Date.now() < deadline) {
+    // `open_tab` can transiently report an error while the project is still
+    // settling (the empty-project bootstrap can land after the create), so a
+    // single failed attempt is not fatal — this loop IS the retry. Only the
+    // final `opened` assertion decides the step, otherwise one transient
+    // error defeats the very polling it sits inside.
+    const openReply = await callMcpTool(disco, 'open_tab', { itemId })
+    if (!(openReply.isError ?? false)) {
+      const cur = parsedReply(await callMcpTool(disco, 'get_current_tab', {})) as { itemId?: string | null; tabId?: string | null }
+      // Container tabs (env-folder in particular) report `itemId: null` from
+      // get_current_tab — only `tabId` carries the id, as `<kind>-id:<itemId>`.
+      // Match on the tabId suffix, which holds for every tab kind (requests
+      // included) rather than on `itemId`, which is null for env-folder tabs.
+      if (typeof cur.tabId === 'string' && cur.tabId.endsWith(itemId)) {
+        opened = true
+        break
+      }
+    }
+    await pg.waitForTimeout(250)
+  }
+  expect(opened, 'open_tab never surfaced the item as the current tab').toBe(true)
+  for (const key of keys) {
+    await pg.locator(EXCLUSIVE_POPOVER_BUTTON[key])
+      .waitFor({ state: 'visible', timeout: 15_000 })
+  }
+}
+
+When('I open its tab', async ({ callMcpTool }) => {
+  await openTabAndAwaitTriggers(callMcpTool, requestId, REQUEST_TAB_POPOVER_KEYS)
+})
+
+When('I open the env-folder tab', async ({ callMcpTool }) => {
+  // The title icon picker renders on a CONTAINER tab, not the request header, so
+  // the icon-picker exclusivity is driven here — against the tag ribbon, which
+  // renders on this surface too.
+  await openTabAndAwaitTriggers(callMcpTool, envFolderId, ENV_FOLDER_TAB_POPOVER_KEYS)
+})
+
+When('I open the {string} popover', async ({}, key: string) => {
+  if (page === null) throw new Error('launch first')
+  const popoverKey = asExclusivePopoverKey(key)
+  await page.locator(EXCLUSIVE_POPOVER_BUTTON[popoverKey]).click()
+})
+
+When('I click outside every popover', async ({}) => {
+  if (page === null) throw new Error('launch first')
+  // The popovers close on an outside `mousedown` (not Escape), so click a
+  // stable element well clear of every trigger — the top-left page corner is
+  // always outside every popover in the set.
+  await page.mouse.click(8, 8)
+})
+
+Then('only the {string} popover is open', async ({}, key: string) => {
+  if (page === null) throw new Error('launch first')
+  const openKey = asExclusivePopoverKey(key)
+  const pg = page
+  await expect(pg.locator(EXCLUSIVE_POPOVER_CONTENT[openKey]), `${openKey} popover should be open`)
+    .toBeVisible({ timeout: 10_000 })
+  for (const otherKey of ALL_EXCLUSIVE_POPOVER_KEYS) {
+    if (otherKey === openKey) continue
+    await expect(pg.locator(EXCLUSIVE_POPOVER_CONTENT[otherKey]), `${otherKey} popover should be closed`)
+      .toHaveCount(0, { timeout: 10_000 })
+  }
+})
+
+Then('no popover is open', async ({}) => {
+  if (page === null) throw new Error('launch first')
+  const pg = page
+  for (const key of ALL_EXCLUSIVE_POPOVER_KEYS) {
+    await expect(pg.locator(EXCLUSIVE_POPOVER_CONTENT[key]), `${key} popover should be closed`)
+      .toHaveCount(0, { timeout: 10_000 })
+  }
+})

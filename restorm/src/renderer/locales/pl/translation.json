@@ -60,6 +60,13 @@
       "noAuth": "Brak uwierzytelniania",
       "popoverLabel": "Trasa uwierzytelniania",
       "unnamed": "Bez nazwy"
+    },
+    "contextMenu": {
+      "revealInFolder": "Otwórz folder zawierający plik",
+      "copyFileName": "Kopiuj nazwę pliku",
+      "copyFullPath": "Kopiuj pełną ścieżkę",
+      "revealFailedTitle": "Nie można otworzyć folderu",
+      "revealFailedBody": "Plik mógł zostać przeniesiony, przemianowany lub usunięty."
     }
   },
   "tips": {
@@ -246,8 +253,6 @@
     "newFolder": "Nowy folder",
     "newEnvironmentFolder": "Nowy folder środowisk",
     "contextMenu": {
-      "createFolder": "Utwórz folder",
-      "createEnvironmentFolder": "Utwórz folder środowisk",
       "delete": "Usuń",
       "clone": "Klonuj",
       "copySuffix": "kopia",
@@ -261,6 +266,7 @@
       "add": {
         "title": "Dodaj",
         "folder": "Folder",
+        "environmentFolder": "Folder środowisk",
         "httpGet": "Żądanie HTTP – GET",
         "httpPost": "Żądanie HTTP – POST",
         "httpPut": "Żądanie HTTP – PUT",

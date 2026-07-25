@@ -10,7 +10,7 @@ import {
   Pane,
   Button
 } from 'electron-core-ui/renderer'
-import { buildAddSubmenu, type AddChildHandler } from './contextMenuBuilder'
+import { buildEmptyAreaContextMenu, type AddChildHandler, type SidebarContextMenuItem } from './contextMenuBuilder'
 
 export interface RestormSidebarProps {
   items: ListViewItemData[]
@@ -35,7 +35,6 @@ export interface RestormSidebarProps {
   onEditingEnd: () => void
   onAddRequest: () => void
   onCollapseAll: () => void
-  onCreateRootFolder: () => void
   onCreateRootEnvironmentFolder: () => void
   /**
    * Same handler the per-item Ajouter submenu uses — invoked with
@@ -81,7 +80,6 @@ export const RestormSidebar: React.FC<RestormSidebarProps> = ({
   onEditingEnd,
   onAddRequest,
   onCollapseAll,
-  onCreateRootFolder,
   onCreateRootEnvironmentFolder,
   onAddChildItem,
   onDeselectAll,
@@ -171,40 +169,20 @@ export const RestormSidebar: React.FC<RestormSidebarProps> = ({
 
   // Build the empty-area context menu lazily so the "Ajouter" submenu
   // (which closes over `onAddChildItem` + `t`) always reflects the
-  // current handler reference. The `'' /* root sentinel */` parentId
-  // tells `handleAddChildItem` to push the new node into `rootItems`
-  // rather than into a parent folder's `items` array.
+  // current handler reference. `buildEmptyAreaContextMenu` uses the
+  // `'' /* root sentinel */` parentId so `handleAddChildItem` pushes the
+  // new node into `rootItems` rather than a parent folder's `items` array.
+  // Every leaf `onClick` is decorated to also dismiss the menu.
   const emptyAreaMenuItems = useMemo(() => {
     const closeAfter = (action: () => void) => () => { action(); closeEmptyAreaMenu() }
-    const addItems = buildAddSubmenu('', t, onAddChildItem).map((entry) => {
-      if (entry.isSeparator) return entry
-      const original = entry.onClick
-      return original
-        ? { ...entry, onClick: closeAfter(original) }
-        : entry
-    })
-    return [
-      {
-        id: 'add-root-child',
-        label: t('sidebar.contextMenu.add.title'),
-        icon: 'add',
-        items: addItems
-      },
-      { id: 'sep-empty-area-add', isSeparator: true, label: '' },
-      {
-        id: 'create-folder',
-        label: t('sidebar.contextMenu.createFolder'),
-        icon: 'folder',
-        onClick: closeAfter(onCreateRootFolder)
-      },
-      {
-        id: 'create-env-folder',
-        label: t('sidebar.contextMenu.createEnvironmentFolder'),
-        icon: 'globe',
-        onClick: closeAfter(onCreateRootEnvironmentFolder)
-      }
-    ]
-  }, [t, onAddChildItem, onCreateRootFolder, onCreateRootEnvironmentFolder, closeEmptyAreaMenu])
+    const decorate = (entry: SidebarContextMenuItem): SidebarContextMenuItem => {
+      const withItems = entry.items ? { ...entry, items: entry.items.map(decorate) } : entry
+      return withItems.onClick
+        ? { ...withItems, onClick: closeAfter(withItems.onClick) }
+        : withItems
+    }
+    return buildEmptyAreaContextMenu(t, onAddChildItem, onCreateRootEnvironmentFolder).map(decorate)
+  }, [t, onAddChildItem, onCreateRootEnvironmentFolder, closeEmptyAreaMenu])
 
   return (
     <div

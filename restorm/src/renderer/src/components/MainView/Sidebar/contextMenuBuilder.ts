@@ -301,6 +301,39 @@ export const buildAddSubmenu = (
   }))
 ]
 
+/** Build the sidebar's empty-area (collection root) context menu: a single
+ * "Add" submenu — the shared {@link buildAddSubmenu} with the root-only
+ * "Environment folder" creation slotted in right after "Folder". Every
+ * creation entry lives under "Add" (no redundant top-level "Create folder";
+ * that action is `Add > Folder`). Environment folders can only be created at
+ * the collection root, so their entry is injected here rather than in the
+ * shared submenu that per-folder and scenario menus also render. */
+export const buildEmptyAreaContextMenu = (
+  t: TranslateFunction,
+  onAddChildItem: AddChildHandler,
+  onCreateEnvironmentFolder: () => void
+): SidebarContextMenuItem[] => {
+  const addItems = buildAddSubmenu('', t, onAddChildItem)
+  const folderIndex = addItems.findIndex((entry) => entry.id.startsWith('add-folder-'))
+  // The shared submenu opens with "Folder"; should that ever stop being true,
+  // put the environment folder first rather than stranding it at the bottom.
+  const insertAt = folderIndex >= 0 ? folderIndex + 1 : 0
+  addItems.splice(insertAt, 0, {
+    id: 'add-env-folder',
+    label: t('sidebar.contextMenu.add.environmentFolder'),
+    icon: 'folder-library',
+    onClick: () => { onCreateEnvironmentFolder() }
+  })
+  return [
+    {
+      id: 'add-root-child',
+      label: t('sidebar.contextMenu.add.title'),
+      icon: 'add',
+      items: addItems
+    }
+  ]
+}
+
 export const buildContextMenuForItem = (
   options: BuildContextMenuOptions
 ): SidebarContextMenuItem[] => {

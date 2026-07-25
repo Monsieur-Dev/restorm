@@ -177,6 +177,14 @@ export const RestormTitlebar: React.FC<RestormTitlebarProps> = ({
     onImport()
   }, [onImport])
 
+  // Toggle fullscreen over IPC on every platform. On macOS the native menu
+  // deliberately does NOT map this onto Electron's `togglefullscreen` role:
+  // AppKit would then inject its own "Enter Full Screen" item and the menu
+  // would show two. Driving the window over IPC keeps a single entry.
+  const handleToggleFullscreen = useCallback(() => {
+    void window.api.toggleFullscreen()
+  }, [])
+
   return (
     <Titlebar
       data-testid="main-titlebar"
@@ -251,12 +259,18 @@ export const RestormTitlebar: React.FC<RestormTitlebarProps> = ({
               skeleton lands here so the responsive overflow logic in
               ECUI's MenuBar has the full menu surface to test against. */}
           <MenuBarItem title={t('menuBar.edit')} data-testid="titlebar-menubar-item-edit">
-            <MenuItem data-testid="titlebar-menu-item-undo" title={t('menuBar.undo')} shortcut="Ctrl+Z" disabled />
-            <MenuItem data-testid="titlebar-menu-item-redo" title={t('menuBar.redo')} shortcut="Ctrl+Shift+Z" disabled />
+            {/* `role` drives the NATIVE menu only (macOS renders menus in the
+                system bar). Declaring it lets the platform perform the edit on
+                whatever has focus — the only thing that makes ⌘C/⌘V/⌘Z work in
+                text fields — and the role owns its own enabled state, so the
+                `disabled` below applies solely to the not-yet-wired in-window
+                bar on Windows/Linux. */}
+            <MenuItem data-testid="titlebar-menu-item-undo" title={t('menuBar.undo')} shortcut="Ctrl+Z" role="undo" disabled />
+            <MenuItem data-testid="titlebar-menu-item-redo" title={t('menuBar.redo')} shortcut="Ctrl+Shift+Z" role="redo" disabled />
             <MenuItemSeparator data-testid="titlebar-menu-separator-edit-1" />
-            <MenuItem data-testid="titlebar-menu-item-cut" title={t('menuBar.cut')} shortcut="Ctrl+X" disabled />
-            <MenuItem data-testid="titlebar-menu-item-copy" title={t('menuBar.copy')} shortcut="Ctrl+C" disabled />
-            <MenuItem data-testid="titlebar-menu-item-paste" title={t('menuBar.paste')} shortcut="Ctrl+V" disabled />
+            <MenuItem data-testid="titlebar-menu-item-cut" title={t('menuBar.cut')} shortcut="Ctrl+X" role="cut" disabled />
+            <MenuItem data-testid="titlebar-menu-item-copy" title={t('menuBar.copy')} shortcut="Ctrl+C" role="copy" disabled />
+            <MenuItem data-testid="titlebar-menu-item-paste" title={t('menuBar.paste')} shortcut="Ctrl+V" role="paste" disabled />
             <MenuItemSeparator data-testid="titlebar-menu-separator-edit-2" />
             <MenuItem data-testid="titlebar-menu-item-find" title={t('menuBar.find')} shortcut="Ctrl+F" disabled />
             <MenuItem data-testid="titlebar-menu-item-replace" title={t('menuBar.replace')} shortcut="Ctrl+H" disabled />
@@ -323,7 +337,7 @@ export const RestormTitlebar: React.FC<RestormTitlebarProps> = ({
             />
             <MenuItemSeparator data-testid="titlebar-menu-separator-view-3" />
             <MenuItem data-testid="titlebar-menu-item-toggle-devtools" title={t('menuBar.toggleDevTools')} disabled />
-            <MenuItem data-testid="titlebar-menu-item-toggle-fullscreen" title={t('menuBar.toggleFullscreen')} disabled />
+            <MenuItem data-testid="titlebar-menu-item-toggle-fullscreen" title={t('menuBar.toggleFullscreen')} onClick={handleToggleFullscreen} />
           </MenuBarItem>
           <MenuBarItem title={t('menuBar.tools')} data-testid="titlebar-menubar-item-tools">
             <MenuItem data-testid="titlebar-menu-item-generate-snippet" title={t('menuBar.generateCodeSnippet')} disabled />
