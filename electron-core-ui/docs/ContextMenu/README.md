@@ -6,6 +6,7 @@ Context (right-click) menu component for React applications, sharing the same lo
 
 `ContextMenu` is a lightweight wrapper that reuses existing `MenuItem` / `MenuItemSeparator` styling, but positions the menu at arbitrary screen coordinates (typically the mouse cursor).
 It is designed to be used by higher-level components (such as `ListView`) that decide *when* and *where* to show the menu.
+The root menu is clamped (via `clampMenuAxis`) so it never falls outside the window, keeping a small uniform gap from the edge that matches its submenus — a menu opened at the bottom sits just above the edge rather than flush against it. Its submenus — rendered by `MenuItem` — are reframed inside the viewport on both axes with the same gap, so a menu opened near the bottom of the screen slides up rather than being clipped (see [MenuBar › Floating Menu Positioning](../MenuBar/README.md#floating-menu-positioning)).
 
 ## Component Location
 

@@ -2,6 +2,11 @@ import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { MenuItem, MenuItemSeparator } from '../MenuBar'
 import { useOverlayPresence } from '../../hooks/useOverlayPresence'
 import { registerOpenContextMenu } from './openContextMenuRegistry'
+import { clampMenuAxis } from './clampMenuAxis'
+
+/** Gap kept from the viewport edge when a menu is clamped, matching the
+ * submenu's edge padding so first-level and nested menus align. */
+const EDGE_GAP = 8
 
 export interface ContextMenuItem {
   id: string
@@ -74,9 +79,13 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
     const el = containerRef.current
     if (!el) return
     const { width, height } = el.getBoundingClientRect()
-    const maxLeft = Math.max(0, window.innerWidth - width)
-    const maxTop = Math.max(0, window.innerHeight - height)
-    setPos({ left: Math.min(x, maxLeft), top: Math.min(y, maxTop) })
+    // Clamp both axes so the menu stays in the viewport with the same edge gap
+    // a repositioned submenu keeps — a first-level menu at the bottom shouldn't
+    // be flush against the edge while its own submenu floats above it.
+    setPos({
+      left: clampMenuAxis(x, width, window.innerWidth, EDGE_GAP),
+      top: clampMenuAxis(y, height, window.innerHeight, EDGE_GAP)
+    })
   }, [visible, x, y, items])
 
   const renderItems = (menuItems: ContextMenuItem[]): React.ReactNode =>
