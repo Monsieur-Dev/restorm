@@ -163,32 +163,14 @@ When('I pull', async () => {
   const p = requirePage()
   const modal = p.locator('[data-testid="git-conflict-resolution-modal"]')
   const updatePrompt = p.locator('[data-testid="git-update-required-modal-resolve-button"]')
-  // A click immediately following a push-rejected toast/status refresh can
-  // land on a Pull button DOM node React is mid-replacing (a re-render
-  // triggered by the just-updated git status/toast state) and gets
-  // dropped — confirmed by direct diagnosis (a lone click never fired
-  // `onPull`, verified via a temporary console probe). Under concurrent
-  // worker load (another git-suite scenario's electron instance running
-  // at the same time) one retry isn't always enough, so this retries the
-  // click until the conflict screen actually opens rather than assume a
-  // fixed number of clicks covers it — real UI race, not a test artifact,
-  // but not worth a deeper product fix for a single dropped click a user
-  // can always just repeat.
-  //
-  // A CONTESTED pull no longer opens the resolution screen directly: it
-  // raises the same update prompt the push flow uses, and resolving is
-  // one click further in. Retrying the statusbar click while that prompt
-  // is up would hit its overlay forever, so take the prompt when it is
-  // there.
-  for (let attempt = 0; attempt < 5; attempt++) {
-    if (await updatePrompt.isVisible().catch(() => false)) {
-      await updatePrompt.click()
-      await expect(modal).toBeVisible({ timeout: 20000 })
-      return
-    }
-    await p.locator('[data-testid="statusbar-git-indicator-pull"]').click()
-    await p.waitForTimeout(1000)
-    if (await modal.isVisible()) return
+  // A CONTESTED pull doesn't open the resolution screen directly: it
+  // raises the same update-required prompt the push flow uses, and
+  // resolving from there is one click further in.
+  await p.locator('[data-testid="statusbar-git-indicator-pull"]').click()
+  await expect(modal.or(updatePrompt)).toBeVisible({ timeout: 20000 })
+  if (await updatePrompt.isVisible().catch(() => false)) {
+    await updatePrompt.click()
+    await expect(modal).toBeVisible({ timeout: 20000 })
   }
 })
 
@@ -493,10 +475,9 @@ Then('a pull-available toast appears', async () => {
 When('I click pull now in the toast', async () => {
   const p = requirePage()
   await p.locator('[data-testid="git-pull-available-pull-now"]').click()
-  await p.waitForTimeout(1000)
 })
 
-Then('the pull lands the collaborator\'s change on disk', () => {
+Then('the pull lands the collaborator\'s change on disk', async () => {
   // Deliberately scoped to the git/disk ground truth, NOT the open
   // editor's on-screen content: this proves the toast→pull mechanism
   // itself works (AC's actual scope) — a clean, non-conflicting pull
@@ -506,8 +487,15 @@ Then('the pull lands the collaborator\'s change on disk', () => {
   // semantics make a hasty fix risky) — asserting UI text here would
   // quietly paper over that gap instead of surfacing it.
   const dir = requireLocalCloneDir()
-  const log = execSync('git log -1 --format=%s', { cwd: dir, encoding: 'utf-8', env: gitEnv() }).trim()
-  expect(log).toBe('Collaborator renames the request')
+  // The pull itself (fetch + merge over IPC) is async — poll for the
+  // commit to land rather than assume it already has the instant the
+  // click resolves.
+  await expect
+    .poll(
+      () => execSync('git log -1 --format=%s', { cwd: dir, encoding: 'utf-8', env: gitEnv() }).trim(),
+      { timeout: 25000 },
+    )
+    .toBe('Collaborator renames the request')
 
   const doc = readSeedDocument(dir)
   const entity = findEntity(doc.collections, 'e2e-seed-request')
