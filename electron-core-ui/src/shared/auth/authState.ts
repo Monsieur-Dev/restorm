@@ -18,6 +18,11 @@
  * baseline (NOT 'Free'). */
 export type PlanTier = 'community' | 'pro' | 'enterprise'
 
+/** The signed-in user's role within their organization. `admin` (master account)
+ * manages billing, seats and members; `member` (a seat-holder) only uses their
+ * seat. Generic org-membership concept — the host decides what each role gates. */
+export type MemberRole = 'admin' | 'member'
+
 /** The signed-in user's display profile. `email` is always present (it rides the
  * session JWT); `name` / `photoUrl` are best-effort and may be absent when the
  * backend or provider did not surface them. */
@@ -39,6 +44,9 @@ export interface AuthState {
   user: AuthUser | null
   /** Current plan; defaults to `community` when signed out or without a live subscription. */
   plan: PlanTier
+  /** The user's org role. Defaults to `member` (least privilege) when signed out
+   * or when the session carried no role — never assume admin. */
+  role: MemberRole
   /** Granted capabilities (absence = denied). Empty for community / signed-out.
    * The specific capability strings are host-defined; ECUI treats them as opaque. */
   capabilities: string[]
@@ -50,6 +58,7 @@ export const SIGNED_OUT_STATE: Readonly<AuthState> = Object.freeze({
   signedIn: false,
   user: null,
   plan: 'community' as PlanTier,
+  role: 'member' as MemberRole,
   capabilities: [] as string[]
 })
 

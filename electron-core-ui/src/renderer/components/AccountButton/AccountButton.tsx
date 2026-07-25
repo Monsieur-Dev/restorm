@@ -56,7 +56,11 @@ export const AccountButton: React.FC<AccountButtonProps> = ({ dashboardUrl }) =>
   const anchorRef = useRef<HTMLSpanElement>(null)
   const cardRef = useRef<HTMLDivElement>(null)
 
-  const { signedIn, user, plan } = authState
+  const { signedIn, user, plan, role } = authState
+  // Account management (dashboard, subscribe/upgrade, manage subscription) is an
+  // admin-only surface. A seat-holder (member) sees only their identity, plan and
+  // sign-out — the backend also enforces this, this just hides what they can't do.
+  const isAdmin = signedIn && role === 'admin'
 
   const close = useCallback(() => { setOpen(false) }, [])
   const toggleOpen = useCallback(() => { setOpen((prev) => !prev) }, [])
@@ -195,7 +199,7 @@ export const AccountButton: React.FC<AccountButtonProps> = ({ dashboardUrl }) =>
         </div>
 
         <div className="account-card-actions">
-          {dashboardUrl !== undefined && (
+          {isAdmin && dashboardUrl !== undefined && (
             <Button
               link
               icon="dashboard"
@@ -206,7 +210,7 @@ export const AccountButton: React.FC<AccountButtonProps> = ({ dashboardUrl }) =>
             </Button>
           )}
 
-          {plan === 'community'
+          {isAdmin && (plan === 'community'
             ? (
               <Button
                 link
@@ -226,7 +230,7 @@ export const AccountButton: React.FC<AccountButtonProps> = ({ dashboardUrl }) =>
               >
                 {t('account.manageSubscription')}
               </Button>
-            )}
+            ))}
 
           <Button
             link

@@ -79,7 +79,12 @@ registerAuthIpc(ipcMain, entitlementService)
 import { AccountButton } from 'electron-core-ui/renderer'
 // or read auth state in any component:
 import { useAuthState } from 'electron-core-ui/renderer'
-const { signedIn, user, plan, capabilities } = useAuthState()
+const { signedIn, user, plan, role, capabilities } = useAuthState()
+// `role` is the user's org role: 'admin' (master account — manages billing,
+// seats, members) or 'member' (a seat-holder). Defaults to 'member' (least
+// privilege) when signed out or when the session carried no role. Use it to
+// hide account-management surface from members; the backend still enforces the
+// real gate on the LIVE role, so a stale role here only affects what's shown.
 ```
 
 ## Test helpers

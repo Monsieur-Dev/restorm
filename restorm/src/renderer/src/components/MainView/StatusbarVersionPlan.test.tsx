@@ -23,6 +23,7 @@ const makeState = (plan: PlanTier): AuthState => ({
   signedIn: plan !== 'community',
   user: plan === 'community' ? null : { email: 'u@example.com' },
   plan,
+  role: plan === 'community' ? 'member' : 'admin',
   capabilities: []
 })
 

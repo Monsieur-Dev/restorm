@@ -26,6 +26,8 @@ export interface SessionInfo {
   photoUrl?: string
   /** organizations.id. */
   org?: string
+  /** membership role ('admin' | 'member'), when the backend minted it. */
+  role?: string
   /** expiry (epoch seconds), if present. */
   exp?: number
   /** audience, used to sanity-check we were handed the right token kind. */
@@ -56,6 +58,7 @@ export function decodeSessionInfo(token: string): SessionInfo | null {
     if (typeof payload['name'] === 'string') info.name = payload['name']
     if (typeof payload['photoUrl'] === 'string') info.photoUrl = payload['photoUrl']
     if (typeof payload['org'] === 'string') info.org = payload['org']
+    if (typeof payload['role'] === 'string') info.role = payload['role']
     if (typeof payload['exp'] === 'number') info.exp = payload['exp']
     if (typeof payload['aud'] === 'string') info.aud = payload['aud']
     return info
