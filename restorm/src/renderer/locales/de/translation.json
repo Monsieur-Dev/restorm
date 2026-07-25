@@ -58,6 +58,13 @@
       "noAuth": "Keine Authentifizierung",
       "popoverLabel": "Authentifizierungsroute",
       "unnamed": "Unbenannt"
+    },
+    "contextMenu": {
+      "revealInFolder": "Enthaltenden Ordner öffnen",
+      "copyFileName": "Dateinamen kopieren",
+      "copyFullPath": "Vollständigen Pfad kopieren",
+      "revealFailedTitle": "Ordner konnte nicht geöffnet werden",
+      "revealFailedBody": "Die Datei wurde möglicherweise verschoben, umbenannt oder gelöscht."
     }
   },
   "tips": {

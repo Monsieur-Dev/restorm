@@ -58,6 +58,13 @@
       "noAuth": "Pa vërtetim",
       "popoverLabel": "Rruga e vërtetimit",
       "unnamed": "Pa emër"
+    },
+    "contextMenu": {
+      "revealInFolder": "Hap dosjen që përmban skedarin",
+      "copyFileName": "Kopjo emrin e skedarit",
+      "copyFullPath": "Kopjo shtegun e plotë",
+      "revealFailedTitle": "Dosja nuk mund të hapej",
+      "revealFailedBody": "Skedari mund të jetë zhvendosur, riemërtuar ose fshirë."
     }
   },
   "tips": {

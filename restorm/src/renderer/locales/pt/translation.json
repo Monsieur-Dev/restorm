@@ -58,6 +58,13 @@
       "noAuth": "Sem autenticação",
       "popoverLabel": "Rota de autenticação",
       "unnamed": "Sem nome"
+    },
+    "contextMenu": {
+      "revealInFolder": "Abrir pasta que contém o ficheiro",
+      "copyFileName": "Copiar nome do ficheiro",
+      "copyFullPath": "Copiar caminho completo",
+      "revealFailedTitle": "Não foi possível abrir a pasta",
+      "revealFailedBody": "O ficheiro pode ter sido movido, renomeado ou eliminado."
     }
   },
   "tips": {

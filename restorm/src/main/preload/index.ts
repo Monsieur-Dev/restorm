@@ -324,6 +324,11 @@ contextBridge.exposeInMainWorld('restorm', {
       const result: unknown = await ipcRenderer.invoke('restorm:open-path', path)
       return result as { success: boolean; isDirectory?: boolean; content?: unknown; path?: string; format?: PersistenceFormat }
     },
+    /** Reveal a path in the OS's native file explorer (Finder/Explorer/file manager) */
+    revealInFolder: async (path: string): Promise<{ success: boolean; error?: string }> => {
+      const result: unknown = await ipcRenderer.invoke('restorm:reveal-in-folder', path)
+      return result as { success: boolean; error?: string }
+    },
     /**
      * Bulk-clear `.draft.*` files in the project's drafts
      * directory. Call this after a save-all path that may have

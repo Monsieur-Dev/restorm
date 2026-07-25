@@ -89,10 +89,11 @@ server; — = pure UI/in-process.
 
 | Suite | Scen | Covers | Deps |
 |---|--:|---|---|
-| full-workflow | 7 | Full workflow (bounds, new-file, imports, MRU tabs) | — |
+| full-workflow | 8 | Full workflow (bounds, new-file, imports, MRU tabs) | — |
 | exhaustive-doc-viewer | 6 | Exhaustive documentation-viewer behaviour | — |
 | settings-tab | 7 | Settings surface follows the workbench (+ Toggle keyboard focus ring) | — |
-| dirty-state | 5 | Dirty-state propagation across nested units | — |
+| dirty-state | 6 | Dirty-state propagation across nested units | — |
+| status-bar-context-menu | 6 | Status bar file-path popover actions: reveal in OS file explorer, copy file name, copy full path, popover closes after each action, no-file-open state, reveal-channel path containment | — |
 | documentation-viewer | 4 | Documentation viewer interactions | — |
 | quick-settings | 8 | Quick-config save/load round-trip every protocol field | — |
 | sidebar-split-drop | 3 | Sidebar → workbench drag opens a split view | — |

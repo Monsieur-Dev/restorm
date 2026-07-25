@@ -58,6 +58,13 @@
       "noAuth": "Nincs hitelesítés",
       "popoverLabel": "Hitelesítési útvonal",
       "unnamed": "Névtelen"
+    },
+    "contextMenu": {
+      "revealInFolder": "Tartalmazó mappa megnyitása",
+      "copyFileName": "Fájlnév másolása",
+      "copyFullPath": "Teljes elérési út másolása",
+      "revealFailedTitle": "A mappa nem nyitható meg",
+      "revealFailedBody": "A fájlt áthelyezhették, átnevezhették vagy törölhették."
     }
   },
   "tips": {

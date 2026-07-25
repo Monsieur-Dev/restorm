@@ -58,6 +58,13 @@
       "noAuth": "No auth",
       "popoverLabel": "Authentication route",
       "unnamed": "Unnamed"
+    },
+    "contextMenu": {
+      "revealInFolder": "Open containing folder",
+      "copyFileName": "Copy file name",
+      "copyFullPath": "Copy full path",
+      "revealFailedTitle": "Couldn't open the folder",
+      "revealFailedBody": "The file may have been moved, renamed or deleted."
     }
   },
   "tips": {

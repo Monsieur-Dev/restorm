@@ -58,6 +58,13 @@
       "noAuth": "Ingen autentisering",
       "popoverLabel": "Autentiseringsrute",
       "unnamed": "Uten navn"
+    },
+    "contextMenu": {
+      "revealInFolder": "Åpne mappen som inneholder filen",
+      "copyFileName": "Kopier filnavn",
+      "copyFullPath": "Kopier full sti",
+      "revealFailedTitle": "Kunne ikke åpne mappen",
+      "revealFailedBody": "Filen kan ha blitt flyttet, omdøpt eller slettet."
     }
   },
   "tips": {

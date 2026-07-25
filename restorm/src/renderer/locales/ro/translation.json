@@ -59,6 +59,13 @@
       "noAuth": "Fără autentificare",
       "popoverLabel": "Rută de autentificare",
       "unnamed": "Fără nume"
+    },
+    "contextMenu": {
+      "revealInFolder": "Deschide folderul care conține fișierul",
+      "copyFileName": "Copiază numele fișierului",
+      "copyFullPath": "Copiază calea completă",
+      "revealFailedTitle": "Dosarul nu a putut fi deschis",
+      "revealFailedBody": "Fișierul ar fi putut fi mutat, redenumit sau șters."
     }
   },
   "tips": {

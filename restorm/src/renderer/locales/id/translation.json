@@ -57,6 +57,13 @@
       "noAuth": "Tanpa autentikasi",
       "popoverLabel": "Rute autentikasi",
       "unnamed": "Tanpa nama"
+    },
+    "contextMenu": {
+      "revealInFolder": "Buka folder yang berisi file ini",
+      "copyFileName": "Salin nama file",
+      "copyFullPath": "Salin jalur lengkap",
+      "revealFailedTitle": "Tidak dapat membuka folder",
+      "revealFailedBody": "File mungkin telah dipindahkan, diganti nama, atau dihapus."
     }
   },
   "tips": {

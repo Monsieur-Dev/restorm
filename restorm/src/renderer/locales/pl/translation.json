@@ -60,6 +60,13 @@
       "noAuth": "Brak uwierzytelniania",
       "popoverLabel": "Trasa uwierzytelniania",
       "unnamed": "Bez nazwy"
+    },
+    "contextMenu": {
+      "revealInFolder": "Otwórz folder zawierający plik",
+      "copyFileName": "Kopiuj nazwę pliku",
+      "copyFullPath": "Kopiuj pełną ścieżkę",
+      "revealFailedTitle": "Nie można otworzyć folderu",
+      "revealFailedBody": "Plik mógł zostać przeniesiony, przemianowany lub usunięty."
     }
   },
   "tips": {

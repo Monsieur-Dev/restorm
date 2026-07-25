@@ -152,6 +152,7 @@ import { Onboarding } from './components/MainView/Workbench/Onboarding'
 import { RestormTitlebar } from './components/MainView/Titlebar/RestormTitlebar'
 import { StatusbarMcpIndicator } from './components/MainView/StatusbarMcpIndicator'
 import { StatusbarGitIndicator } from './components/MainView/StatusbarGitIndicator'
+import { StatusbarPathActionsHost } from './components/MainView/StatusbarPathActions'
 import { useGitPendingFlags } from './hooks/useGitPendingFlags'
 import { ScenarioToastBody, ScenarioToastTitle } from './components/ScenarioToastBody'
 import { useMcpEnabled } from './hooks/useMcpEnabled'
@@ -3205,7 +3206,16 @@ const App: React.FC = () => {
           `right-aligned`. */}
       <Statusbar data-testid="app-statusbar">
         <StatusbarVersionPlan />
-        {filePath && <StatusbarElement data-testid="app-statusbar-element" title={filePath} />}
+        {filePath && (
+          <StatusbarElement
+            data-testid="app-statusbar-element"
+            title={filePath}
+            tooltipTrigger="click"
+            tooltipPlacement="above"
+          >
+            <StatusbarPathActionsHost filePath={filePath} />
+          </StatusbarElement>
+        )}
         {/* The environment selector, request-history button and auth-route
          * selector now all live in the request tab header, not here. The
          * MCP indicator carries the `right-aligned` auto margin in every

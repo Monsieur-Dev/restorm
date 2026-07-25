@@ -58,6 +58,13 @@
       "noAuth": "Sin autenticación",
       "popoverLabel": "Ruta de autenticación",
       "unnamed": "Sin nombre"
+    },
+    "contextMenu": {
+      "revealInFolder": "Abrir carpeta contenedora",
+      "copyFileName": "Copiar nombre de archivo",
+      "copyFullPath": "Copiar ruta completa",
+      "revealFailedTitle": "No se pudo abrir la carpeta",
+      "revealFailedBody": "Puede que el archivo se haya movido, renombrado o eliminado."
     }
   },
   "tips": {
