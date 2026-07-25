@@ -244,8 +244,6 @@
     "newFolder": "Nieuwe map",
     "newEnvironmentFolder": "Nieuwe omgevingsmap",
     "contextMenu": {
-      "createFolder": "Map maken",
-      "createEnvironmentFolder": "Omgevingsmap maken",
       "delete": "Verwijderen",
       "clone": "Klonen",
       "copySuffix": "kopie",
@@ -259,6 +257,7 @@
       "add": {
         "title": "Toevoegen",
         "folder": "Map",
+        "environmentFolder": "Omgevingsmap",
         "httpGet": "HTTP – GET-verzoek",
         "httpPost": "HTTP – POST-verzoek",
         "httpPut": "HTTP – PUT-verzoek",

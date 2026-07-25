@@ -245,8 +245,6 @@
     "newFolder": "Nova fascikla",
     "newEnvironmentFolder": "Nova fascikla okruženja",
     "contextMenu": {
-      "createFolder": "Napravi fasciklu",
-      "createEnvironmentFolder": "Napravi fasciklu okruženja",
       "delete": "Obriši",
       "clone": "Kloniraj",
       "copySuffix": "копија",
@@ -260,6 +258,7 @@
       "add": {
         "title": "Dodaj",
         "folder": "Fascikla",
+        "environmentFolder": "Fascikla okruženja",
         "httpGet": "HTTP – GET zahtev",
         "httpPost": "HTTP – POST zahtev",
         "httpPut": "HTTP – PUT zahtev",

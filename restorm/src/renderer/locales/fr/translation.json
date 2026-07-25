@@ -244,8 +244,6 @@
     "newFolder": "Nouveau dossier",
     "newEnvironmentFolder": "Nouveau dossier de variables",
     "contextMenu": {
-      "createFolder": "Créer un dossier",
-      "createEnvironmentFolder": "Créer un dossier de variables",
       "delete": "Supprimer",
       "clone": "Cloner",
       "copySuffix": "copie",
@@ -259,6 +257,7 @@
       "add": {
         "title": "Ajouter",
         "folder": "Dossier",
+        "environmentFolder": "Dossier de variables",
         "httpGet": "Requête HTTP – GET",
         "httpPost": "Requête HTTP – POST",
         "httpPut": "Requête HTTP – PUT",

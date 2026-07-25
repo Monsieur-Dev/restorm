@@ -246,8 +246,6 @@
     "newFolder": "Nowy folder",
     "newEnvironmentFolder": "Nowy folder środowisk",
     "contextMenu": {
-      "createFolder": "Utwórz folder",
-      "createEnvironmentFolder": "Utwórz folder środowisk",
       "delete": "Usuń",
       "clone": "Klonuj",
       "copySuffix": "kopia",
@@ -261,6 +259,7 @@
       "add": {
         "title": "Dodaj",
         "folder": "Folder",
+        "environmentFolder": "Folder środowisk",
         "httpGet": "Żądanie HTTP – GET",
         "httpPost": "Żądanie HTTP – POST",
         "httpPut": "Żądanie HTTP – PUT",

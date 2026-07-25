@@ -246,8 +246,6 @@
     "newFolder": "Nová složka",
     "newEnvironmentFolder": "Nová složka prostředí",
     "contextMenu": {
-      "createFolder": "Vytvořit složku",
-      "createEnvironmentFolder": "Vytvořit složku prostředí",
       "delete": "Smazat",
       "clone": "Duplikovat",
       "copySuffix": "kopie",
@@ -261,6 +259,7 @@
       "add": {
         "title": "Přidat",
         "folder": "Složka",
+        "environmentFolder": "Složka prostředí",
         "httpGet": "HTTP – požadavek GET",
         "httpPost": "HTTP – požadavek POST",
         "httpPut": "HTTP – požadavek PUT",

@@ -245,8 +245,6 @@
     "newFolder": "Nova mapa",
     "newEnvironmentFolder": "Nova mapa okruženja",
     "contextMenu": {
-      "createFolder": "Stvori mapu",
-      "createEnvironmentFolder": "Stvori mapu okruženja",
       "delete": "Izbriši",
       "clone": "Kloniraj",
       "copySuffix": "kopija",
@@ -260,6 +258,7 @@
       "add": {
         "title": "Dodaj",
         "folder": "Mapa",
+        "environmentFolder": "Mapa okruženja",
         "httpGet": "HTTP – GET zahtjev",
         "httpPost": "HTTP – POST zahtjev",
         "httpPut": "HTTP – PUT zahtjev",

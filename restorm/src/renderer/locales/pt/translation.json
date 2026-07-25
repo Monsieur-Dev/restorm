@@ -244,8 +244,6 @@
     "newFolder": "Nova pasta",
     "newEnvironmentFolder": "Nova pasta de ambiente",
     "contextMenu": {
-      "createFolder": "Criar pasta",
-      "createEnvironmentFolder": "Criar pasta de ambiente",
       "delete": "Eliminar",
       "clone": "Clonar",
       "copySuffix": "cópia",
@@ -259,6 +257,7 @@
       "add": {
         "title": "Adicionar",
         "folder": "Pasta",
+        "environmentFolder": "Pasta de ambiente",
         "httpGet": "HTTP – pedido GET",
         "httpPost": "HTTP – pedido POST",
         "httpPut": "HTTP – pedido PUT",

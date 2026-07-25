@@ -245,8 +245,6 @@
     "newFolder": "Folder nou",
     "newEnvironmentFolder": "Folder nou de mediu",
     "contextMenu": {
-      "createFolder": "Creează folder",
-      "createEnvironmentFolder": "Creează folder de mediu",
       "delete": "Șterge",
       "clone": "Clonează",
       "copySuffix": "copie",
@@ -260,6 +258,7 @@
       "add": {
         "title": "Adaugă",
         "folder": "Folder",
+        "environmentFolder": "Folder de mediu",
         "httpGet": "Cerere HTTP – GET",
         "httpPost": "Cerere HTTP – POST",
         "httpPut": "Cerere HTTP – PUT",

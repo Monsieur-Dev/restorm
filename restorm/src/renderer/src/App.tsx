@@ -1504,7 +1504,6 @@ const App: React.FC = () => {
   const {
     handleItemDrop,
     handleCloneItem,
-    handleCreateRootFolder,
     handleCreateRootEnvironmentFolder,
     handleAddChildItem,
     handleDeleteItem,
@@ -3039,7 +3038,6 @@ const App: React.FC = () => {
                   onEditingEnd={() => { setSidebarEditingItemId(null) }}
                   onAddRequest={() => { setShowImportModal(true) }}
                   onCollapseAll={() => { setExpandedIds([]) }}
-                  onCreateRootFolder={handleCreateRootFolder}
                   onCreateRootEnvironmentFolder={handleCreateRootEnvironmentFolder}
                   onAddChildItem={handleAddChildItem}
                   onDeselectAll={() => { setSelectedItemId(null) }}

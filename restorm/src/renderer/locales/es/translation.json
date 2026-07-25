@@ -244,8 +244,6 @@
     "newFolder": "Nueva carpeta",
     "newEnvironmentFolder": "Nueva carpeta de entorno",
     "contextMenu": {
-      "createFolder": "Crear carpeta",
-      "createEnvironmentFolder": "Crear carpeta de entorno",
       "delete": "Eliminar",
       "clone": "Clonar",
       "copySuffix": "copia",
@@ -259,6 +257,7 @@
       "add": {
         "title": "Añadir",
         "folder": "Carpeta",
+        "environmentFolder": "Carpeta de entorno",
         "httpGet": "Petición HTTP – GET",
         "httpPost": "Petición HTTP – POST",
         "httpPut": "Petición HTTP – PUT",

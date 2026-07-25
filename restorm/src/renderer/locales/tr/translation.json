@@ -244,8 +244,6 @@
     "newFolder": "Yeni klasör",
     "newEnvironmentFolder": "Yeni ortam klasörü",
     "contextMenu": {
-      "createFolder": "Klasör oluştur",
-      "createEnvironmentFolder": "Ortam klasörü oluştur",
       "delete": "Sil",
       "clone": "Çoğalt",
       "copySuffix": "kopya",
@@ -259,6 +257,7 @@
       "add": {
         "title": "Ekle",
         "folder": "Klasör",
+        "environmentFolder": "Ortam klasörü",
         "httpGet": "HTTP – GET isteği",
         "httpPost": "HTTP – POST isteği",
         "httpPut": "HTTP – PUT isteği",
