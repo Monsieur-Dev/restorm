@@ -443,14 +443,25 @@ The component automatically handles:
 All dropdown menus and submenus are positioned using `position: fixed` with high z-index (2000) to ensure they float above other content without affecting the layout of parent elements:
 
 - **Main menus**: Positioned below the menu bar button
-- **Submenus**: Positioned to the right of the parent menu item
+- **Submenus**: Positioned flush to the right of the parent menu item, then reframed inside the viewport (see below)
 - **Z-index**: 2000 to ensure menus appear above other UI elements
 - **No layout impact**: Menus don't affect the size or position of parent elements
-- **Height control**: Maximum height of 600px with custom scrolling
+- **Height control**: Menus render at their natural height; they are only clipped (with custom scrolling) when taller than the viewport itself
 - **ScrollableElement integration**: Uses the project's custom scrollable component
 - **Proper sizing**: Menus adapt to content height, not screen height
 - **Menu bar height**: Fixed at 30px height for consistent appearance
 - **Menu button height**: 30px with proper padding and font sizing
+
+### Submenu Reframing
+
+Submenus (at every depth, in the menu bar and in a `ContextMenu` alike) are placed by `computeSubmenuPlacement`, an internal pure function measured against the live rects in `MenuItem`'s layout effect. It keeps a submenu inside the viewport on both axes, with an 8px margin from every edge:
+
+- **Horizontal** — the preferred position is flush to the right of the parent item. If that overflows the right edge, the submenu flips to the item's left; if the flipped position would fall off the left edge, it stacks over its parent menu, inset by 8px on both axes. With no parent menu to stack onto, it pins against the right edge.
+- **Vertical** — a submenu that would overflow the bottom edge slides **up** until it fits, instead of being clipped into a scrolling strip. The clamp is purely upward, so a submenu that already fits never moves — a menu opened from the top of the screen keeps its historical position.
+- **Attachment** — because the submenu only moves up to the point where its bottom sits 8px above the viewport bottom, the parent item's top edge always stays inside the submenu's vertical band. The submenu therefore keeps overlapping its (highlighted) parent item, so the parent-child relationship stays readable.
+- **Fallback** — a submenu taller than the viewport cannot be made to fit. It is pinned 8px from the top and clipped to the padded viewport height, falling back to scrolling. `top` is never negative and the submenu never escapes through the top edge.
+
+The same layout effect owns both the position and the clip: computing them separately lets their viewport margins disagree and reintroduces a parasitic scrollbar a couple of pixels tall.
 
 ### ScrollableElement Integration
 - **Custom scrollbars**: Consistent with the rest of the application
