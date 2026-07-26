@@ -27,8 +27,8 @@ vi.mock('react-i18next', () => ({
 
 import { StatusbarMcpIndicator } from './StatusbarMcpIndicator'
 
-const PRO: AuthState = { signedIn: true, user: { email: 'a@b.com' }, plan: 'pro', capabilities: ['mcp.pro'] }
-const COMMUNITY: AuthState = { signedIn: false, user: null, plan: 'community', capabilities: [] }
+const PRO: AuthState = { signedIn: true, user: { email: 'a@b.com' }, plan: 'pro', role: 'admin', capabilities: ['mcp.pro'] }
+const COMMUNITY: AuthState = { signedIn: false, user: null, plan: 'community', role: 'member', capabilities: [] }
 
 function stubEnv(state: AuthState): void {
   ;(window as unknown as { api: unknown }).api = {

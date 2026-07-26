@@ -35,6 +35,18 @@ describe('sessionToken', () => {
     expect(info?.photoUrl).toBe('https://lh3.googleusercontent.com/a/ada')
   })
 
+  it('decodes the membership role from the payload', async () => {
+    const asAdmin = decodeSessionInfo(token) // signSession defaults role=admin
+    expect(asAdmin?.role).toBe('admin')
+    const asMember = await signSession({
+      secret: 'a-secret-at-least-32-bytes-long-xxxxxx',
+      email: 'seat@e.com',
+      role: 'member',
+      iatSeconds: IAT
+    })
+    expect(decodeSessionInfo(asMember)?.role).toBe('member')
+  })
+
   it('leaves name + photoUrl undefined when the JWT omits them (provider gave none)', () => {
     const info = decodeSessionInfo(token)
     expect(info?.name).toBeUndefined()

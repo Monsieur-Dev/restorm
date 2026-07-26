@@ -14,8 +14,8 @@ vi.mock('electron-core-ui/renderer', () => ({
 import { subscribeToPro } from './subscribeToPro'
 import type { AuthState, CheckoutResult } from '../../../shared/auth/authState'
 
-const PRO_IN: AuthState = { signedIn: true, user: { email: 'a@b.com' }, plan: 'pro', capabilities: [] }
-const SIGNED_OUT: AuthState = { signedIn: false, user: null, plan: 'community', capabilities: [] }
+const PRO_IN: AuthState = { signedIn: true, user: { email: 'a@b.com' }, plan: 'pro', role: 'admin', capabilities: [] }
+const SIGNED_OUT: AuthState = { signedIn: false, user: null, plan: 'community', role: 'member', capabilities: [] }
 
 beforeEach(() => { push.mockClear() })
 afterEach(() => { delete (window as { api?: unknown }).api })

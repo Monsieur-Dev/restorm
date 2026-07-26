@@ -21,6 +21,7 @@ const signedIn = (photoUrl?: string): AuthState => ({
   signedIn: true,
   user: { email: 'a@b.com', ...(photoUrl !== undefined ? { photoUrl } : {}) },
   plan: 'community',
+  role: 'member',
   capabilities: []
 })
 

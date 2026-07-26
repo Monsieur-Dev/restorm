@@ -16,8 +16,8 @@ vi.mock('../services/subscribeToPro', () => ({ subscribeToPro: subscribeToProMoc
 
 import { GitCapabilityGateHost } from './GitCapabilityGateHost'
 
-const PRO: AuthState = { signedIn: true, user: { email: 'a@b.com' }, plan: 'pro', capabilities: ['git.client'] }
-const COMMUNITY: AuthState = { signedIn: false, user: null, plan: 'community', capabilities: [] }
+const PRO: AuthState = { signedIn: true, user: { email: 'a@b.com' }, plan: 'pro', role: 'admin', capabilities: ['git.client'] }
+const COMMUNITY: AuthState = { signedIn: false, user: null, plan: 'community', role: 'member', capabilities: [] }
 
 function stubAccount(initial: AuthState): { emit: (s: AuthState) => void } {
   let listener: ((s: AuthState) => void) | null = null

@@ -4,9 +4,14 @@ import { render, cleanup, fireEvent, screen, waitFor } from '@testing-library/re
 import { AccountButton } from './AccountButton'
 import type { AuthState } from '../../../shared/auth/authState'
 
-const SIGNED_OUT: AuthState = { signedIn: false, user: null, plan: 'community', capabilities: [] }
-const COMMUNITY: AuthState = { signedIn: true, user: { email: 'a@b.com' }, plan: 'community', capabilities: [] }
-const PRO: AuthState = { signedIn: true, user: { email: 'a@b.com' }, plan: 'pro', capabilities: [] }
+const SIGNED_OUT: AuthState = { signedIn: false, user: null, plan: 'community', role: 'member', capabilities: [] }
+// Signed-in admins see the full management surface; the community/pro fixtures
+// are admins so the pre-existing management-visible assertions still hold.
+const COMMUNITY: AuthState = { signedIn: true, user: { email: 'a@b.com' }, plan: 'community', role: 'admin', capabilities: [] }
+const PRO: AuthState = { signedIn: true, user: { email: 'a@b.com' }, plan: 'pro', role: 'admin', capabilities: [] }
+// A seat-holder (member): signed in but no account-management surface.
+const MEMBER_PRO: AuthState = { signedIn: true, user: { email: 'seat@b.com' }, plan: 'pro', role: 'member', capabilities: [] }
+const MEMBER_COMMUNITY: AuthState = { signedIn: true, user: { email: 'seat@b.com' }, plan: 'community', role: 'member', capabilities: [] }
 
 const DASHBOARD = 'https://my.restorm.app'
 
@@ -70,6 +75,22 @@ describe('AccountButton — popover card', () => {
     expect(screen.getByTestId('account-card-plan-badge').textContent).toBe('Pro')
     expect(screen.getByTestId('account-card-manage-subscription')).not.toBeNull()
     expect(screen.queryByTestId('account-card-upgrade')).toBeNull()
+  })
+
+  it('signed in (member, pro): plan badge + sign-out, but NO dashboard / manage / upgrade', async () => {
+    await openCard(MEMBER_PRO)
+    expect(screen.getByTestId('account-card-plan-badge').textContent).toBe('Pro')
+    expect(screen.getByTestId('account-card-sign-out')).not.toBeNull()
+    expect(screen.queryByTestId('account-card-dashboard')).toBeNull()
+    expect(screen.queryByTestId('account-card-manage-subscription')).toBeNull()
+    expect(screen.queryByTestId('account-card-upgrade')).toBeNull()
+  })
+
+  it('signed in (member, community): no upgrade CTA either — management is admin-only', async () => {
+    await openCard(MEMBER_COMMUNITY)
+    expect(screen.queryByTestId('account-card-upgrade')).toBeNull()
+    expect(screen.queryByTestId('account-card-dashboard')).toBeNull()
+    expect(screen.getByTestId('account-card-sign-out')).not.toBeNull()
   })
 
   it('dashboard link opens the injected URL in the system browser', async () => {

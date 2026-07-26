@@ -24,6 +24,7 @@ import {
   SIGNED_OUT_STATE,
   type AuthState,
   type AuthUser,
+  type MemberRole,
   type PlanTier
 } from '../../../shared/auth/authState'
 
@@ -56,6 +57,7 @@ export function seedEntitlementForE2E(
     signedIn: true,
     user: { email: 'e2e@test.local' },
     plan: 'pro',
+    role: 'admin',
     capabilities: [...E2E_PRO_CAPABILITIES]
   })
   return true
@@ -338,13 +340,19 @@ export class EntitlementService {
     if (session?.name) user.name = session.name
     if (session?.photoUrl) user.photoUrl = session.photoUrl
 
+    // Role gates the account-management UI (billing/seats/members). It rides the
+    // session claim; the backend re-checks the LIVE role on every privileged
+    // call, so a stale claim here only affects which controls are shown, never
+    // what a member can actually do. Default to `member` (least privilege).
+    const role: MemberRole = session?.role === 'admin' ? 'admin' : 'member'
+
     let plan: PlanTier = 'community'
     let capabilities: string[] = []
     if (this.entitlement && isWithinGrace(this.entitlement.claims, nowSeconds(this.deps.now))) {
       plan = this.entitlement.claims.plan
       capabilities = [...this.entitlement.claims.capabilities]
     }
-    return { signedIn: true, user, plan, capabilities }
+    return { signedIn: true, user, plan, role, capabilities }
   }
 
   /** Derive + broadcast, but only when the snapshot actually changed. */

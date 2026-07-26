@@ -78,6 +78,7 @@ export function signSession(opts: {
   name?: string
   photoUrl?: string
   org?: string
+  role?: string
   iatSeconds: number
   ttlSeconds?: number
   audience?: string
@@ -87,7 +88,7 @@ export function signSession(opts: {
   return new jose.SignJWT({
     wuid: 'wuid-1',
     org: opts.org ?? 'org-1',
-    role: 'admin',
+    role: opts.role ?? 'admin',
     email: opts.email ?? 'user@example.com',
     ...(opts.name !== undefined ? { name: opts.name } : {}),
     ...(opts.photoUrl !== undefined ? { photoUrl: opts.photoUrl } : {})
