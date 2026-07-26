@@ -13,12 +13,17 @@ import LoadingScreen from './components/Welcome/LoadingScreen'
 import { GitCapabilityGateHost } from './components/GitCapabilityGateHost'
 import { initializeGraphQL } from './services/GraphQLIntegration'
 import { registerRendererSources } from './secrets/registerRendererSources'
+import { UpdateActionsRenderer } from './components/Settings/UpdateActionsRenderer'
 import { DEFAULT_UI_DELAY_MS } from '../../shared/config/constants'
 
 // Populate the renderer's copy of the value-source registry (descriptors only;
 // resolvers stay main-side). Synchronous + idempotent — done once at module
 // load so the type-pick menu can enumerate secret sources before first render.
 registerRendererSources()
+
+// Custom settings renderer for the "Updates" group (version + live status +
+// "Check now"), bound to the `update-actions` setting type in settings.yaml.
+ElectronCoreUi.registerSettingRenderer('update-actions', UpdateActionsRenderer)
 
 const App = lazy(() => import('./App'))
 

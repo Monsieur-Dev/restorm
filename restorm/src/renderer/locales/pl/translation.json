@@ -2493,5 +2493,29 @@
     "recoveredTitle": "Wersja przywrócona",
     "recoveredBody": "Plik zawiera teraz zawartość wybranego zatwierdzenia, niezatwierdzoną.",
     "recoverFailedTitle": "Przywracanie nie powiodło się"
+  },
+  "updates": {
+    "settingsTitle": "Aktualizacje",
+    "autoCheckTitle": "Automatycznie sprawdzaj aktualizacje",
+    "autoCheckDescription": "Sprawdza aktualizacje w tle przy uruchomieniu i okresowo.",
+    "statusTitle": "Stan aktualizacji",
+    "statusDescription": "Bieżąca wersja i stan aktualizacji, z ręcznym sprawdzaniem.",
+    "currentVersion": "Wersja {{version}}",
+    "checkNow": "Sprawdź teraz",
+    "readyTitle": "Aktualizacja gotowa",
+    "readyBody": "Wersja {{version}} zostanie zainstalowana przy następnym uruchomieniu.",
+    "restartNow": "Uruchom ponownie teraz",
+    "checkFailedTitle": "Sprawdzanie aktualizacji nie powiodło się",
+    "checkFailedBody": "Nie można sprawdzić aktualizacji. Spróbuj ponownie później.",
+    "upToDateTitle": "Masz najnowszą wersję",
+    "upToDateBody": "Używasz najnowszej wersji ({{version}}).",
+    "whatsNewTitle": "Co nowego w {{version}}",
+    "status": {
+      "idle": "Aktualne",
+      "checking": "Sprawdzanie…",
+      "downloading": "Pobieranie… {{percent}} %",
+      "downloaded": "Aktualizacja gotowa do instalacji ({{version}})",
+      "error": "Sprawdzanie nie powiodło się"
+    }
   }
 }

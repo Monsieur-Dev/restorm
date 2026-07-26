@@ -7,6 +7,9 @@ export type { RequestUsageEntry, RequestUsageMap } from './RequestUsageService'
 export { scenarioUsageService } from './ScenarioUsageService'
 export type { ScenarioUsageEntry, ScenarioUsageMap } from './ScenarioUsageService'
 export { authenticationCacheService } from './AuthenticationCacheService'
+export { updateService, UpdateService } from './UpdateService'
+export type { UpdaterEngine } from './UpdateService'
+export { parseChangelogSince } from './changelog'
 export { DocumentEvents } from './DocumentEvents'
 export {
   getFolderSecretsEnvPath,

@@ -2491,5 +2491,29 @@
     "recoveredTitle": "Version wiederhergestellt",
     "recoveredBody": "Die Datei enthält jetzt den Inhalt des ausgewählten Commits, nicht committet.",
     "recoverFailedTitle": "Wiederherstellung fehlgeschlagen"
+  },
+  "updates": {
+    "settingsTitle": "Updates",
+    "autoCheckTitle": "Automatisch nach Updates suchen",
+    "autoCheckDescription": "Sucht beim Start und regelmäßig im Hintergrund nach Updates.",
+    "statusTitle": "Update-Status",
+    "statusDescription": "Die aktuelle Version und der Update-Status, mit manueller Prüfung.",
+    "currentVersion": "Version {{version}}",
+    "checkNow": "Jetzt suchen",
+    "readyTitle": "Update bereit",
+    "readyBody": "Version {{version}} wird beim nächsten Neustart installiert.",
+    "restartNow": "Jetzt neu starten",
+    "checkFailedTitle": "Update-Suche fehlgeschlagen",
+    "checkFailedBody": "Nach Updates konnte nicht gesucht werden. Bitte später erneut versuchen.",
+    "upToDateTitle": "Sie sind auf dem neuesten Stand",
+    "upToDateBody": "Sie verwenden die neueste Version ({{version}}).",
+    "whatsNewTitle": "Neuheiten in {{version}}",
+    "status": {
+      "idle": "Aktuell",
+      "checking": "Suche…",
+      "downloading": "Wird heruntergeladen… {{percent}} %",
+      "downloaded": "Update installationsbereit ({{version}})",
+      "error": "Update-Suche fehlgeschlagen"
+    }
   }
 }

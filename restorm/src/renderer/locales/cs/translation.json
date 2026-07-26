@@ -2493,5 +2493,29 @@
     "recoveredTitle": "Verze obnovena",
     "recoveredBody": "Soubor nyní obsahuje obsah vybraného commitu, necommitovaný.",
     "recoverFailedTitle": "Obnovení se nezdařilo"
+  },
+  "updates": {
+    "settingsTitle": "Aktualizace",
+    "autoCheckTitle": "Automaticky kontrolovat aktualizace",
+    "autoCheckDescription": "Kontroluje aktualizace na pozadí při spuštění a pravidelně.",
+    "statusTitle": "Stav aktualizace",
+    "statusDescription": "Aktuální verze a stav aktualizace, s ruční kontrolou.",
+    "currentVersion": "Verze {{version}}",
+    "checkNow": "Zkontrolovat nyní",
+    "readyTitle": "Aktualizace připravena",
+    "readyBody": "Verze {{version}} se nainstaluje při příštím restartu.",
+    "restartNow": "Restartovat nyní",
+    "checkFailedTitle": "Kontrola aktualizací selhala",
+    "checkFailedBody": "Aktualizace se nepodařilo zkontrolovat. Zkuste to prosím později.",
+    "upToDateTitle": "Máte aktuální verzi",
+    "upToDateBody": "Používáte nejnovější verzi ({{version}}).",
+    "whatsNewTitle": "Novinky ve verzi {{version}}",
+    "status": {
+      "idle": "Aktuální",
+      "checking": "Kontrola…",
+      "downloading": "Stahování… {{percent}} %",
+      "downloaded": "Aktualizace připravena k instalaci ({{version}})",
+      "error": "Kontrola selhala"
+    }
   }
 }

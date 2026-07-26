@@ -2490,5 +2490,29 @@
     "recoveredTitle": "バージョンを復元しました",
     "recoveredBody": "ファイルには選択したコミットの内容が未コミットで含まれています。",
     "recoverFailedTitle": "復元に失敗しました"
+  },
+  "updates": {
+    "settingsTitle": "アップデート",
+    "autoCheckTitle": "自動的にアップデートを確認",
+    "autoCheckDescription": "起動時および定期的にバックグラウンドでアップデートを確認します。",
+    "statusTitle": "アップデートの状態",
+    "statusDescription": "現在のバージョンとアップデートの状態、手動確認付き。",
+    "currentVersion": "バージョン {{version}}",
+    "checkNow": "今すぐ確認",
+    "readyTitle": "アップデートの準備ができました",
+    "readyBody": "バージョン {{version}} は次回の再起動時にインストールされます。",
+    "restartNow": "今すぐ再起動",
+    "checkFailedTitle": "アップデートの確認に失敗しました",
+    "checkFailedBody": "アップデートを確認できませんでした。しばらくしてからもう一度お試しください。",
+    "upToDateTitle": "最新の状態です",
+    "upToDateBody": "最新バージョン（{{version}}）を使用しています。",
+    "whatsNewTitle": "{{version}} の新機能",
+    "status": {
+      "idle": "最新",
+      "checking": "確認中…",
+      "downloading": "ダウンロード中… {{percent}}%",
+      "downloaded": "インストールの準備ができました（{{version}}）",
+      "error": "確認に失敗しました"
+    }
   }
 }

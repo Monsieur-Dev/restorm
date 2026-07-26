@@ -2491,5 +2491,29 @@
     "recoveredTitle": "Versio palautettu",
     "recoveredBody": "Tiedosto sisältää nyt valitun committauksen sisällön, committamatta.",
     "recoverFailedTitle": "Palautus epäonnistui"
+  },
+  "updates": {
+    "settingsTitle": "Päivitykset",
+    "autoCheckTitle": "Tarkista päivitykset automaattisesti",
+    "autoCheckDescription": "Tarkistaa päivitykset taustalla käynnistyksen yhteydessä ja säännöllisesti.",
+    "statusTitle": "Päivityksen tila",
+    "statusDescription": "Nykyinen versio ja päivityksen tila, sisältää manuaalisen tarkistuksen.",
+    "currentVersion": "Versio {{version}}",
+    "checkNow": "Tarkista nyt",
+    "readyTitle": "Päivitys valmis",
+    "readyBody": "Versio {{version}} asennetaan, kun käynnistät sovelluksen uudelleen.",
+    "restartNow": "Käynnistä uudelleen nyt",
+    "checkFailedTitle": "Päivitysten tarkistus epäonnistui",
+    "checkFailedBody": "Päivityksiä ei voitu tarkistaa. Yritä myöhemmin uudelleen.",
+    "upToDateTitle": "Sovellus on ajan tasalla",
+    "upToDateBody": "Käytössäsi on uusin versio ({{version}}).",
+    "whatsNewTitle": "Mitä uutta versiossa {{version}}",
+    "status": {
+      "idle": "Ajan tasalla",
+      "checking": "Tarkistetaan…",
+      "downloading": "Ladataan… {{percent}} %",
+      "downloaded": "Päivitys valmis asennettavaksi ({{version}})",
+      "error": "Tarkistus epäonnistui"
+    }
   }
 }

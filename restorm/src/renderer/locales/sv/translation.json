@@ -2491,5 +2491,29 @@
     "recoveredTitle": "Version återställd",
     "recoveredBody": "Filen innehåller nu den valda commitens innehåll, ej committat.",
     "recoverFailedTitle": "Återställningen misslyckades"
+  },
+  "updates": {
+    "settingsTitle": "Uppdateringar",
+    "autoCheckTitle": "Sök efter uppdateringar automatiskt",
+    "autoCheckDescription": "Söker efter uppdateringar i bakgrunden vid start och regelbundet.",
+    "statusTitle": "Uppdateringsstatus",
+    "statusDescription": "Aktuell version och uppdateringsstatus, med manuell sökning.",
+    "currentVersion": "Version {{version}}",
+    "checkNow": "Sök nu",
+    "readyTitle": "Uppdatering klar",
+    "readyBody": "Version {{version}} installeras nästa gång du startar om.",
+    "restartNow": "Starta om nu",
+    "checkFailedTitle": "Sökning efter uppdateringar misslyckades",
+    "checkFailedBody": "Kunde inte söka efter uppdateringar. Försök igen senare.",
+    "upToDateTitle": "Du är uppdaterad",
+    "upToDateBody": "Du använder den senaste versionen ({{version}}).",
+    "whatsNewTitle": "Nyheter i {{version}}",
+    "status": {
+      "idle": "Uppdaterad",
+      "checking": "Söker…",
+      "downloading": "Laddar ner… {{percent}} %",
+      "downloaded": "Uppdatering redo att installeras ({{version}})",
+      "error": "Sökningen misslyckades"
+    }
   }
 }

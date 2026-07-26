@@ -2492,5 +2492,29 @@
     "recoveredTitle": "Verzija vraćena",
     "recoveredBody": "Datoteka sada sadrži sadržaj odabranog commita, bez commita.",
     "recoverFailedTitle": "Vraćanje nije uspjelo"
+  },
+  "updates": {
+    "settingsTitle": "Ažuriranja",
+    "autoCheckTitle": "Automatski provjeravaj ažuriranja",
+    "autoCheckDescription": "Provjerava ažuriranja u pozadini pri pokretanju i povremeno.",
+    "statusTitle": "Stanje ažuriranja",
+    "statusDescription": "Trenutna verzija i stanje ažuriranja, uz ručnu provjeru.",
+    "currentVersion": "Verzija {{version}}",
+    "checkNow": "Provjeri sada",
+    "readyTitle": "Ažuriranje spremno",
+    "readyBody": "Verzija {{version}} instalirat će se pri sljedećem ponovnom pokretanju.",
+    "restartNow": "Ponovno pokreni sada",
+    "checkFailedTitle": "Provjera ažuriranja nije uspjela",
+    "checkFailedBody": "Ažuriranja nije moguće provjeriti. Pokušajte ponovno kasnije.",
+    "upToDateTitle": "Imate najnoviju verziju",
+    "upToDateBody": "Koristite najnoviju verziju ({{version}}).",
+    "whatsNewTitle": "Novosti u verziji {{version}}",
+    "status": {
+      "idle": "Ažurirano",
+      "checking": "Provjera…",
+      "downloading": "Preuzimanje… {{percent}} %",
+      "downloaded": "Ažuriranje spremno za instalaciju ({{version}})",
+      "error": "Provjera nije uspjela"
+    }
   }
 }

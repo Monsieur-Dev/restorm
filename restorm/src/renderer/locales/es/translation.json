@@ -2491,5 +2491,29 @@
     "recoveredTitle": "Versión recuperada",
     "recoveredBody": "El archivo ahora contiene el contenido del commit seleccionado, sin confirmar.",
     "recoverFailedTitle": "Error al recuperar"
+  },
+  "updates": {
+    "settingsTitle": "Actualizaciones",
+    "autoCheckTitle": "Buscar actualizaciones automáticamente",
+    "autoCheckDescription": "Busca actualizaciones en segundo plano al iniciar y periódicamente.",
+    "statusTitle": "Estado de la actualización",
+    "statusDescription": "La versión actual y el estado de actualización, con comprobación manual.",
+    "currentVersion": "Versión {{version}}",
+    "checkNow": "Buscar ahora",
+    "readyTitle": "Actualización lista",
+    "readyBody": "La versión {{version}} se instalará la próxima vez que reinicies.",
+    "restartNow": "Reiniciar ahora",
+    "checkFailedTitle": "Error al buscar actualizaciones",
+    "checkFailedBody": "No se pudo buscar actualizaciones. Inténtalo de nuevo más tarde.",
+    "upToDateTitle": "Estás al día",
+    "upToDateBody": "Estás usando la última versión ({{version}}).",
+    "whatsNewTitle": "Novedades de {{version}}",
+    "status": {
+      "idle": "Actualizado",
+      "checking": "Buscando…",
+      "downloading": "Descargando… {{percent}} %",
+      "downloaded": "Actualización lista para instalar ({{version}})",
+      "error": "Error al buscar actualizaciones"
+    }
   }
 }

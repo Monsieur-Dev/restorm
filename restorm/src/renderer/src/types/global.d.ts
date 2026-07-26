@@ -15,6 +15,7 @@ import type {
 } from 'electron-core-ui/types'
 import type { ResponseHistoryDetail, ResponseHistoryEntry } from '../../../shared/types/collections'
 import type { AuthState, CheckoutResult, PortalResult } from '../../../shared/auth/authState'
+import type { UpdateState, UpdateSettings } from '../../../shared/update/updateTypes'
 
 declare global {
   interface Window {
@@ -97,6 +98,18 @@ declare global {
       app: {
         /** The running app version (e.g. `0.1.12-preview`). */
         getVersion: () => Promise<string>
+      }
+      /** Silent auto-update surface (see `src/main/services/UpdateService.ts`). */
+      update: {
+        getState: () => Promise<UpdateState>
+        getSettings: () => Promise<UpdateSettings>
+        checkNow: () => Promise<UpdateState>
+        quitAndInstall: () => Promise<void>
+        setAutoCheckEnabled: (enabled: boolean) => Promise<UpdateSettings>
+        getChangelogSince: (fromVersion: string) => Promise<string>
+        getLastSeenVersion: () => Promise<string | null>
+        markVersionSeen: (version: string) => Promise<void>
+        onStateChanged: (callback: (state: UpdateState) => void) => (() => void)
       }
       /** electron-core-ui's Git plumbing — see `electron-core-ui/docs/Git/README.md`.
        * Mirrors `WindowApiGit` in electron-core-ui's own `global.d.ts`; restorm

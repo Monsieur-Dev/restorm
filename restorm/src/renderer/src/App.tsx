@@ -151,6 +151,7 @@ const tabMatchesItem = (tab: EditorTab, itemId: string): boolean => {
 import { Onboarding } from './components/MainView/Workbench/Onboarding'
 import { RestormTitlebar } from './components/MainView/Titlebar/RestormTitlebar'
 import { StatusbarMcpIndicator } from './components/MainView/StatusbarMcpIndicator'
+import { UpdateNotifications } from './components/UpdateNotifications'
 import { StatusbarGitIndicator } from './components/MainView/StatusbarGitIndicator'
 import { StatusbarPathActionsHost } from './components/MainView/StatusbarPathActions'
 import { useGitPendingFlags } from './hooks/useGitPendingFlags'
@@ -3228,6 +3229,10 @@ const App: React.FC = () => {
 
       {/* Global toaster anchored to the bottom-right, toggled by the statusbar bell. */}
       <Toaster id="app" position="bottom-right" data-testid="app-toaster" />
+
+      {/* Headless: turns auto-update transitions into app-toaster notifications
+       * + shows "What's new" on the first run after an update. */}
+      <UpdateNotifications />
 
       {/* Fullscreen git-history modal (statusbar source-control icon). */}
       <Modal

@@ -1,0 +1,84 @@
+import { describe, it, expect } from 'vitest'
+import { parseChangelogSince } from './changelog'
+
+const CHANGELOG = `# Changelog
+
+Some preamble that must never appear in output.
+
+## v1.2.0
+
+- Big new feature
+- Another line
+
+### Details
+
+Nested subtitle body — must stay inside v1.2.0, not split it.
+
+## v1.1.0
+
+- Fix A
+- Fix B
+
+## v1.0.0
+
+- Initial release
+`
+
+describe('parseChangelogSince', () => {
+  it('returns sections strictly after fromVersion up to and including current', () => {
+    const out = parseChangelogSince(CHANGELOG, '1.0.0', '1.2.0')
+    expect(out).toContain('## v1.2.0')
+    expect(out).toContain('## v1.1.0')
+    expect(out).not.toContain('## v1.0.0') // fromVersion is exclusive
+    expect(out).not.toContain('preamble') // preamble before first heading dropped
+  })
+
+  it('keeps ### subtitles inside their section (does not treat them as boundaries)', () => {
+    const out = parseChangelogSince(CHANGELOG, '1.1.0', '1.2.0')
+    expect(out).toContain('### Details')
+    expect(out).toContain('Nested subtitle body')
+    expect(out).not.toContain('## v1.1.0')
+  })
+
+  it('excludes versions newer than current (a not-yet-run future entry)', () => {
+    const out = parseChangelogSince(CHANGELOG, '1.0.0', '1.1.0')
+    expect(out).toContain('## v1.1.0')
+    expect(out).not.toContain('## v1.2.0')
+  })
+
+  it('tolerates a prerelease suffix on the current/from versions', () => {
+    const out = parseChangelogSince(CHANGELOG, '1.0.0', '1.2.0-preview')
+    expect(out).toContain('## v1.2.0')
+    expect(out).toContain('## v1.1.0')
+  })
+
+  it('returns empty when nothing is newer than fromVersion', () => {
+    expect(parseChangelogSince(CHANGELOG, '1.2.0', '1.2.0')).toBe('')
+  })
+
+  it('ignores ## v… lines inside fenced code blocks', () => {
+    const md = `## v2.0.0
+
+Example of a heading in a snippet:
+
+\`\`\`md
+## v9.9.9
+this is documentation, not a real release
+\`\`\`
+
+- Real change
+`
+    const out = parseChangelogSince(md, '1.0.0', '2.0.0')
+    expect(out).toContain('## v2.0.0')
+    expect(out).toContain('## v9.9.9') // preserved as body text
+    expect(out).toContain('Real change')
+    // v9.9.9 must NOT be picked as its own (future) section
+    const sectionsPickedTwice = out.split('## v2.0.0').length - 1
+    expect(sectionsPickedTwice).toBe(1)
+  })
+
+  it('returns empty on unparseable version inputs', () => {
+    expect(parseChangelogSince(CHANGELOG, 'not-a-version', '1.2.0')).toBe('')
+    expect(parseChangelogSince(CHANGELOG, '1.0.0', 'garbage')).toBe('')
+  })
+})

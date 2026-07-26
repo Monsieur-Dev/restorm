@@ -47,6 +47,7 @@ import {
 } from '../ipc/schemas'
 import type { z } from 'zod/v4'
 import { AUTH_IPC, type AuthState, type CheckoutResult, type PortalResult } from '../../shared/auth/authState'
+import { UPDATE_IPC, type UpdateSettings, type UpdateState } from '../../shared/update/updateTypes'
 
 // Expose core-ui APIs (imported from core-ui preload modules) and extend with restorm project API
 const coreUIAPI = createCoreUIAPI()
@@ -156,6 +157,48 @@ contextBridge.exposeInMainWorld('api', {
     /** The running app version, e.g. `0.1.12-preview` (suffix on preview). */
     getVersion: async (): Promise<string> => {
       return (await ipcRenderer.invoke('app:get-version')) as string
+    }
+  },
+  // Silent auto-update surface. The renderer drives the Settings section + the
+  // "update ready" / "what's new" toasts; the feed + install stay main-side.
+  update: {
+    /** Read the current update state. */
+    getState: async (): Promise<UpdateState> => {
+      return (await ipcRenderer.invoke(UPDATE_IPC.GET_STATE)) as UpdateState
+    },
+    /** Read the update settings (auto-check flag + current version). */
+    getSettings: async (): Promise<UpdateSettings> => {
+      return (await ipcRenderer.invoke(UPDATE_IPC.GET_SETTINGS)) as UpdateSettings
+    },
+    /** Trigger a manual check; resolves with the post-check state. */
+    checkNow: async (): Promise<UpdateState> => {
+      return (await ipcRenderer.invoke(UPDATE_IPC.CHECK_NOW)) as UpdateState
+    },
+    /** Quit and install a downloaded update now. */
+    quitAndInstall: async (): Promise<void> => {
+      await ipcRenderer.invoke(UPDATE_IPC.QUIT_AND_INSTALL)
+    },
+    /** Toggle the periodic auto-check; resolves with the new settings. */
+    setAutoCheckEnabled: async (enabled: boolean): Promise<UpdateSettings> => {
+      return (await ipcRenderer.invoke(UPDATE_IPC.SET_AUTO_CHECK, enabled)) as UpdateSettings
+    },
+    /** Markdown of CHANGELOG entries since `fromVersion` (for "What's new"). */
+    getChangelogSince: async (fromVersion: string): Promise<string> => {
+      return (await ipcRenderer.invoke(UPDATE_IPC.GET_CHANGELOG_SINCE, fromVersion)) as string
+    },
+    /** The version the "What's new" note was last shown for (or install seed). */
+    getLastSeenVersion: async (): Promise<string | null> => {
+      return (await ipcRenderer.invoke(UPDATE_IPC.GET_LAST_SEEN_VERSION)) as string | null
+    },
+    /** Record that the current version's "What's new" has been shown. */
+    markVersionSeen: async (version: string): Promise<void> => {
+      await ipcRenderer.invoke(UPDATE_IPC.MARK_VERSION_SEEN, version)
+    },
+    /** Subscribe to live state transitions. Returns an unsubscribe fn. */
+    onStateChanged: (callback: (state: UpdateState) => void): (() => void) => {
+      const handler = (_event: unknown, state: UpdateState): void => { callback(state) }
+      ipcRenderer.on(UPDATE_IPC.STATE_CHANGED, handler)
+      return (): void => { ipcRenderer.off(UPDATE_IPC.STATE_CHANGED, handler) }
     }
   }
 })

@@ -2491,5 +2491,29 @@
     "recoveredTitle": "Version recovered",
     "recoveredBody": "The file now holds the selected commit's content, uncommitted.",
     "recoverFailedTitle": "Recovery failed"
+  },
+  "updates": {
+    "settingsTitle": "Updates",
+    "autoCheckTitle": "Check for updates automatically",
+    "autoCheckDescription": "Check for updates in the background on launch and periodically.",
+    "statusTitle": "Update status",
+    "statusDescription": "The current version and update state, with a manual check.",
+    "currentVersion": "Version {{version}}",
+    "checkNow": "Check now",
+    "readyTitle": "Update ready",
+    "readyBody": "Version {{version}} will be installed the next time you restart.",
+    "restartNow": "Restart now",
+    "checkFailedTitle": "Update check failed",
+    "checkFailedBody": "Couldn't check for updates. Please try again later.",
+    "upToDateTitle": "You're up to date",
+    "upToDateBody": "You're running the latest version ({{version}}).",
+    "whatsNewTitle": "What's new in {{version}}",
+    "status": {
+      "idle": "Up to date",
+      "checking": "Checking…",
+      "downloading": "Downloading… {{percent}}%",
+      "downloaded": "Update ready to install ({{version}})",
+      "error": "Update check failed"
+    }
   }
 }
