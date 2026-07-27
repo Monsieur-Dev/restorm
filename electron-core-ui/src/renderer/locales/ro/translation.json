@@ -60,7 +60,8 @@
     "keyboardShortcuts": "Scurtături de tastatură",
     "releaseNotes": "Note de lansare",
     "reportIssue": "Raportează o problemă",
-    "mcpLogs": "Jurnale MCP"
+    "mcpLogs": "Jurnale MCP",
+    "checkForUpdates": "Caută actualizări"
   },
   "settings": {
     "title": "Setări",

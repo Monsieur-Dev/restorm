@@ -47,7 +47,7 @@ function installApi(
     update: {
       getState: vi.fn(() => Promise.resolve(baseState())),
       getSettings: vi.fn(() =>
-        Promise.resolve({ autoCheckEnabled: true, currentVersion: '1.2.0' })
+        Promise.resolve({ autoCheckEnabled: true, currentVersion: '1.2.0', autoUpdateSupported: true })
       ),
       getLastSeenVersion: vi.fn(() => Promise.resolve(opts.lastSeen ?? '1.2.0')),
       getChangelogSince: vi.fn(() => Promise.resolve(opts.changelog ?? '')),

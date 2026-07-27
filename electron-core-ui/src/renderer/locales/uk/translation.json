@@ -60,7 +60,8 @@
     "keyboardShortcuts": "Сполучення клавіш",
     "releaseNotes": "Примітки до випуску",
     "reportIssue": "Повідомити про проблему",
-    "mcpLogs": "Журнали MCP"
+    "mcpLogs": "Журнали MCP",
+    "checkForUpdates": "Перевірити оновлення"
   },
   "settings": {
     "title": "Параметри",

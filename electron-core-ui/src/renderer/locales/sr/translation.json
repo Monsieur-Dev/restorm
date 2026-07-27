@@ -60,7 +60,8 @@
     "keyboardShortcuts": "Prečice na tastaturi",
     "releaseNotes": "Napomene o izdanju",
     "reportIssue": "Prijavi problem",
-    "mcpLogs": "MCP евиденције"
+    "mcpLogs": "MCP евиденције",
+    "checkForUpdates": "Провери ажурирања"
   },
   "settings": {
     "title": "Podešavanja",

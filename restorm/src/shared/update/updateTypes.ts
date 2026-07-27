@@ -47,4 +47,12 @@ export interface UpdateState {
 export interface UpdateSettings {
   autoCheckEnabled: boolean
   currentVersion: string
+  /**
+   * Whether THIS build manages its own updates (a direct-download build:
+   * AppImage / NSIS / dmg from the release feed). False for store / package-
+   * manager builds (Mac App Store, Snap, Windows Store, apt, …) where the store
+   * owns updates and the in-app updater is disabled — the "Check for updates"
+   * menu entry is hidden in that case.
+   */
+  autoUpdateSupported: boolean
 }

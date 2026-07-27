@@ -60,7 +60,8 @@
     "keyboardShortcuts": "Billentyűparancsok",
     "releaseNotes": "Kiadási megjegyzések",
     "reportIssue": "Hiba bejelentése",
-    "mcpLogs": "MCP naplók"
+    "mcpLogs": "MCP naplók",
+    "checkForUpdates": "Frissítések keresése"
   },
   "settings": {
     "title": "Beállítások",

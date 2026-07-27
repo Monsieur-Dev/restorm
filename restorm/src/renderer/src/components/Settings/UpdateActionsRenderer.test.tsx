@@ -48,7 +48,7 @@ function installApi(initial: UpdateState): void {
     update: {
       getState: vi.fn(() => Promise.resolve(initial)),
       getSettings: vi.fn(() =>
-        Promise.resolve({ autoCheckEnabled: true, currentVersion: '1.2.0' })
+        Promise.resolve({ autoCheckEnabled: true, currentVersion: '1.2.0', autoUpdateSupported: true })
       ),
       checkNow: checkNowMock,
       onStateChanged: vi.fn(() => vi.fn())

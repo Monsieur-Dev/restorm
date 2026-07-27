@@ -26,6 +26,18 @@ update can install (Gatekeeper rejects an unsigned/unnotarized `.app`); until th
 signing pipeline is in place, macOS auto-update stays disabled while Linux and
 Windows work.
 
+**Firewall.** Restorm's outbound firewall denies background traffic by default.
+The updater's requests to the feed are a background system operation, so
+`UpdateService` wraps the updater's network calls (`checkForUpdates` +
+`downloadUpdate`) in `withFirewallBypass` — the same AsyncLocalStorage-scoped
+exemption the cloud backend fetch uses for its own external host. This exempts
+every socket connect made within the scope, including the auto-download
+electron-updater kicks off synchronously inside `checkForUpdates`. A static
+host-allow in the firewall's `internalRequestPredicate` would NOT suffice: that
+predicate only exempts the http layer, while the socket-layer `HardenInterceptor`
+still classifies the raw connect to an external host — so the scoped bypass is
+the correct mechanism.
+
 ## Cutting a release
 
 1. **Update `CHANGELOG.md`** at the repo root: add a `## vX.Y.Z` section (newest

@@ -25,7 +25,12 @@ import { app, BrowserWindow } from 'electron'
 import { autoUpdater } from 'electron-updater'
 import { existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { logger, getSettingsService, getStorageService } from 'electron-core-ui/main'
+import {
+  logger,
+  getSettingsService,
+  getStorageService,
+  withFirewallBypass
+} from 'electron-core-ui/main'
 import { parseChangelogSince } from './changelog'
 import { createMockUpdaterEngine } from './mockUpdaterEngine'
 import {
@@ -113,10 +118,12 @@ export class UpdateService {
       this.#writeLastSeenVersion(this.#state.currentVersion)
     }
 
-    // In dev without a mock engine, electron-updater has no feed and throws —
-    // stay inert (the manual button + settings still work, checks are no-ops).
-    if (!app.isPackaged && !process.env.RESTORM_UPDATE_MOCK) {
-      logger.info('UpdateService: dev build without mock — auto-update inert')
+    // Stay inert when this build doesn't self-manage updates: a store /
+    // package-manager build (the store owns updates), or a dev build without the
+    // mock (no feed → electron-updater would throw). The manual "Check for
+    // updates" entry is hidden in those builds (autoUpdateSupported=false).
+    if (!this.#isAutoUpdateSupported()) {
+      logger.info('UpdateService: auto-update not managed by this build — inert')
       return
     }
 
@@ -160,8 +167,21 @@ export class UpdateService {
   getSettings(): UpdateSettings {
     return {
       autoCheckEnabled: this.#readAutoCheckEnabled(),
-      currentVersion: app.getVersion()
+      currentVersion: app.getVersion(),
+      autoUpdateSupported: this.#isAutoUpdateSupported()
     }
+  }
+
+  /**
+   * True when THIS build self-manages updates via electron-updater — a
+   * direct-download build (packaged, not from a store). A store /
+   * package-manager build sets `RESTORM_STORE_BUILD` so the in-app updater goes
+   * inert and the "Check for updates" menu entry hides (the store owns updates).
+   * A dev build with the mock engine counts as supported (for QA of the flow).
+   */
+  #isAutoUpdateSupported(): boolean {
+    if (process.env.RESTORM_STORE_BUILD) return false
+    return app.isPackaged || Boolean(process.env.RESTORM_UPDATE_MOCK)
   }
 
   /** Run a check. `manual` errors surface to the user; `auto` errors stay silent. */
@@ -178,7 +198,14 @@ export class UpdateService {
     this.#downloadRetries = 0
     this.#setState({ phase: 'checking', trigger, error: null })
     try {
-      await engine.checkForUpdates()
+      // The updater's requests to the feed are a background system operation the
+      // user's firewall would otherwise block/prompt on. `withFirewallBypass`
+      // (AsyncLocalStorage) exempts every socket connect made within this scope
+      // — including the auto-download electron-updater kicks off SYNCHRONOUSLY
+      // inside checkForUpdates when `autoDownload` is on, so it inherits the
+      // bypass too. Same mechanism the cloud backend fetch uses for its own
+      // external host.
+      await withFirewallBypass(() => engine.checkForUpdates())
     } catch (err) {
       this.#onError(err, trigger)
     }
@@ -285,11 +312,12 @@ export class UpdateService {
         message: err instanceof Error ? err.message : String(err)
       })
       setTimeout(() => {
-        void this.#getEngine()
-          .downloadUpdate()
-          .catch((e: unknown) => {
+        // Retry download under the same firewall bypass as the initial fetch.
+        void withFirewallBypass(() => this.#getEngine().downloadUpdate()).catch(
+          (e: unknown) => {
             this.#onDownloadOrEngineError(e)
-          })
+          }
+        )
       }, delay)
       return
     }

@@ -60,7 +60,8 @@
     "keyboardShortcuts": "Tastaturgenveje",
     "releaseNotes": "Udgivelsesnoter",
     "reportIssue": "Rapportér problem",
-    "mcpLogs": "MCP-logge"
+    "mcpLogs": "MCP-logge",
+    "checkForUpdates": "Søg efter opdateringer"
   },
   "settings": {
     "title": "Indstillinger",

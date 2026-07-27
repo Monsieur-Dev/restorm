@@ -60,7 +60,8 @@
     "keyboardShortcuts": "Pikanäppäimet",
     "releaseNotes": "Julkaisutiedot",
     "reportIssue": "Ilmoita ongelmasta",
-    "mcpLogs": "MCP-lokit"
+    "mcpLogs": "MCP-lokit",
+    "checkForUpdates": "Tarkista päivitykset"
   },
   "settings": {
     "title": "Asetukset",

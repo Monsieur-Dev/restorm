@@ -60,7 +60,8 @@
     "keyboardShortcuts": "Phím tắt",
     "releaseNotes": "Ghi chú phát hành",
     "reportIssue": "Báo cáo sự cố",
-    "mcpLogs": "Nhật ký MCP"
+    "mcpLogs": "Nhật ký MCP",
+    "checkForUpdates": "Kiểm tra cập nhật"
   },
   "settings": {
     "title": "Cài đặt",

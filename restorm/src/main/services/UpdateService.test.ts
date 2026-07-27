@@ -21,6 +21,7 @@ vi.mock('electron-updater', () => ({ autoUpdater: {} }))
 
 vi.mock('electron-core-ui/main', () => ({
   logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn() },
+  withFirewallBypass: <T,>(fn: () => Promise<T>) => fn(),
   getSettingsService: () => ({
     get: (k: string) => settingsStore.get(k),
     set: (k: string, v: unknown) => {
@@ -168,7 +169,12 @@ describe('UpdateService', () => {
 
   it('getSettings reflects the persisted auto-check flag + current version', () => {
     const svc = newService(makeEngine())
-    expect(svc.getSettings()).toEqual({ autoCheckEnabled: true, currentVersion: '1.2.0' })
+    expect(svc.getSettings()).toEqual({
+      autoCheckEnabled: true,
+      currentVersion: '1.2.0',
+      // isPackaged:true in the electron mock, no RESTORM_STORE_BUILD → supported.
+      autoUpdateSupported: true
+    })
     svc.setAutoCheckEnabled(false)
     expect(svc.getSettings().autoCheckEnabled).toBe(false)
   })

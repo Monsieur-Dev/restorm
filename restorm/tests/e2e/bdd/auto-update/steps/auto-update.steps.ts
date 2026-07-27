@@ -35,6 +35,31 @@ When('I trigger a manual update check', async ({ page }) => {
   })
 })
 
+When('I check for updates from the Help menu', async ({ page }) => {
+  const menubarTestId = 'titlebar-menubar'
+  const item = page.locator('[data-testid="titlebar-menu-item-check-updates"]')
+  const MENU_TIMEOUT = 15000
+  // Layout-agnostic (full / overflow / hamburger), mirroring the settings-tab
+  // View-menu step.
+  const mode = await page.locator(`[data-testid="${menubarTestId}"]`).getAttribute('data-mode')
+  if (mode === 'full') {
+    await page.locator('[data-testid="titlebar-menubar-item-help"]').click({ force: true })
+  } else {
+    const overflowBtn = page
+      .locator(
+        `[data-testid="${menubarTestId}-overflow-button"], [data-testid="${menubarTestId}-hamburger-button"]`
+      )
+      .first()
+    await overflowBtn.click({ force: true })
+    const helpEntry = page.locator('[data-testid="titlebar-menubar-item-help-overflow"]')
+    await helpEntry.waitFor({ state: 'visible', timeout: MENU_TIMEOUT })
+    await helpEntry.hover()
+    await helpEntry.click({ force: true })
+  }
+  await item.waitFor({ state: 'visible', timeout: MENU_TIMEOUT })
+  await item.click({ force: true })
+})
+
 Then('the "up to date" update notification appears', async ({ page }) => {
   // The mock reports no update on a manual check → the "you're up to date" toast
   // (matched by its stable data-toast-title substring).

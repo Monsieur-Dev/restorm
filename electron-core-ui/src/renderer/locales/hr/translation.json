@@ -60,7 +60,8 @@
     "keyboardShortcuts": "Tipkovni prečaci",
     "releaseNotes": "Bilješke o izdanju",
     "reportIssue": "Prijavi problem",
-    "mcpLogs": "MCP zapisi"
+    "mcpLogs": "MCP zapisi",
+    "checkForUpdates": "Provjeri ažuriranja"
   },
   "settings": {
     "title": "Postavke",

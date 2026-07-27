@@ -60,7 +60,8 @@
     "keyboardShortcuts": "Keyboard Shortcuts",
     "releaseNotes": "Release Notes",
     "reportIssue": "Report Issue",
-    "mcpLogs": "MCP logs"
+    "mcpLogs": "MCP logs",
+    "checkForUpdates": "Check for Updates"
   },
   "settings": {
     "title": "Settings",

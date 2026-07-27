@@ -60,7 +60,8 @@
     "keyboardShortcuts": "Pintasan keyboard",
     "releaseNotes": "Catatan rilis",
     "reportIssue": "Laporkan masalah",
-    "mcpLogs": "Log MCP"
+    "mcpLogs": "Log MCP",
+    "checkForUpdates": "Periksa pembaruan"
   },
   "settings": {
     "title": "Pengaturan",

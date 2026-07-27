@@ -9,3 +9,8 @@ Feature: Silent auto-update — manual check surfaces the result
     Given the app is running with the update mock
     When I trigger a manual update check
     Then the "up to date" update notification appears
+
+  Scenario: The Help menu "Check for updates" entry runs a check
+    Given the app is running with the update mock
+    When I check for updates from the Help menu
+    Then the "up to date" update notification appears

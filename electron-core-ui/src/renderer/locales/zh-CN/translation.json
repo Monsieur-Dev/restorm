@@ -60,7 +60,8 @@
     "keyboardShortcuts": "键盘快捷键",
     "releaseNotes": "发行说明",
     "reportIssue": "报告问题",
-    "mcpLogs": "MCP 日志"
+    "mcpLogs": "MCP 日志",
+    "checkForUpdates": "检查更新"
   },
   "settings": {
     "title": "设置",
