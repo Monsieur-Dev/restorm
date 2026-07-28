@@ -22,6 +22,12 @@ jobs:
   release:
     name: Release (${{ matrix.platform }})
     runs-on: ${{ matrix.os }}
+    # Use bash on every runner (Git Bash on Windows) so the shared shell steps
+    # below — inline `NODE_OPTIONS=… cmd`, unix-style paths — behave identically
+    # across linux/windows/macos.
+    defaults:
+      run:
+        shell: bash
     strategy:
       fail-fast: false
       matrix:
