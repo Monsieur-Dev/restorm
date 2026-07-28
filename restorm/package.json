@@ -175,7 +175,8 @@
     "files": [
       "dist/**/*",
       "node_modules/**/*",
-      "package.json"
+      "package.json",
+      "assets/**/*"
     ],
     "asarUnpack": [
       "**/*.node"
@@ -184,6 +185,18 @@
       {
         "from": "resources/dotnet-wasm",
         "to": "restorm-resources/dotnet-wasm"
+      },
+      {
+        "from": "resources/settings.yaml",
+        "to": "restorm-resources/settings.yaml"
+      },
+      {
+        "from": "resources/features.yaml",
+        "to": "restorm-resources/features.yaml"
+      },
+      {
+        "from": "../electron-core-ui/resources",
+        "to": "resources"
       },
       {
         "from": "CHANGELOG.md",

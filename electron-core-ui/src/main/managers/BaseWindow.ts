@@ -13,6 +13,13 @@ export abstract class BaseWindow {
     private window: BrowserWindow | null = null
     private storageService = getStorageService()
     protected iconPath: string | undefined = undefined
+    /**
+     * When this window was constructed — the reference point for
+     * {@link WindowConfiguration.minReadyDelayMs}. The splash appears a moment
+     * before this (it is created ahead of the main window), so measuring from
+     * here slightly under-counts the splash's on-screen time, which is safe.
+     */
+    private readonly createdAt = Date.now()
 
     /**
      * Callbacks fired once the window is ready to be shown. When the window
@@ -619,9 +626,26 @@ export abstract class BaseWindow {
           if (window.isDestroyed()) {
             return
           }
-          logger.info('BaseWindow: renderer signalled ready, revealing window')
-          this.fireReadyToShow()
-          this.revealWindow(window)
+          // Hand off: run the ready-to-show callbacks (e.g. close the splash),
+          // then reveal the window. Deferred by `minReadyDelayMs` (measured from
+          // construction) when the renderer became ready sooner — so a splash
+          // stays on screen a minimum time instead of flashing, since its close
+          // is one of the callbacks fired here.
+          const handoff = (): void => {
+            if (window.isDestroyed()) {
+              return
+            }
+            logger.info('BaseWindow: renderer signalled ready, revealing window')
+            this.fireReadyToShow()
+            this.revealWindow(window)
+          }
+          const minDelay = this.configuration.minReadyDelayMs ?? 0
+          const remaining = minDelay - (Date.now() - this.createdAt)
+          if (remaining > 0) {
+            setTimeout(handoff, remaining)
+          } else {
+            handoff()
+          }
         }
         ipcMain.on('app:renderer-ready', onRendererReady)
         // Stop listening if the window goes away before the renderer signals.

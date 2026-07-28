@@ -39,6 +39,17 @@ export interface WindowConfiguration {
    * when left unset, so a launch can opt in via argv alone.
    */
   revealInactive?: boolean
+  /**
+   * Minimum time, in milliseconds, to keep the window hidden after it is
+   * created — even when its renderer signals ready sooner. The ready-to-show
+   * handoff (which runs {@link BaseWindow.onReadyToShow} callbacks and reveals
+   * the window) is deferred for the remainder. Paired with a splash, this keeps
+   * the splash on screen for at least this long instead of flashing on a fast
+   * boot: the splash is dismissed by a ready-to-show callback, so delaying the
+   * handoff delays the splash close AND the reveal together. Only meaningful
+   * with `showWhenReady`. Defaults to 0 (reveal as soon as the renderer is ready).
+   */
+  minReadyDelayMs?: number
 }
 
 /**

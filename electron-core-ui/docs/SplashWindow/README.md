@@ -158,6 +158,26 @@ readiness). When `showWhenReady` is off, `onReadyToShow` fires once on the
 renderer's `did-finish-load`, so consumers get a single readiness signal either
 way.
 
+### `BaseWindow` — `minReadyDelayMs` (minimum splash time)
+
+Set `minReadyDelayMs` (milliseconds) in a window's `WindowConfiguration` to keep
+the window hidden for at least that long after it is created, even when the
+renderer signals ready sooner. The ready-to-show handoff — the `onReadyToShow`
+callbacks (which close the splash) **and** the reveal — is deferred for the
+remainder, measured from window construction. Because the splash is dismissed by
+one of those callbacks, delaying the handoff holds the splash on screen: on a
+fast boot the logo stays readable instead of flashing for a few frames. Only
+meaningful with `showWhenReady`. Defaults to `0` (reveal as soon as ready).
+
+```ts
+const configuration = {
+  name: 'main',
+  // …
+  showWhenReady: true,
+  minReadyDelayMs: 1500 // keep the splash up ≥ 1.5s
+}
+```
+
 ### `BaseWindow` — `revealInactive` (reveal without focus)
 
 By default the `showWhenReady` reveal calls `window.show()`, which makes the

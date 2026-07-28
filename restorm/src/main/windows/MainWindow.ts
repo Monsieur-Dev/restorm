@@ -2,6 +2,17 @@ import { join } from 'path'
 import type { BrowserWindowConstructorOptions } from 'electron'
 import { RestormWindow } from './RestormWindow'
 
+/**
+ * True under the Playwright e2e harness — it sets `RESTORM_USER_DATA_OVERRIDE`
+ * per launch (the same signal the splash suppression + firewall bypass read).
+ * Used to skip the splash min-display delay so tests aren't slowed on every
+ * window reveal.
+ */
+function isE2EHarness(): boolean {
+  const v = process.env['RESTORM_USER_DATA_OVERRIDE']
+  return typeof v === 'string' && v.length > 0
+}
+
 /** Options for the main application window. */
 export interface MainWindowOptions {
   /**
@@ -30,6 +41,12 @@ export class MainWindow extends RestormWindow {
       // Stay hidden until the renderer is ready to paint so the splash can
       // hand off to a fully-ready window with no flash of an unstyled view.
       showWhenReady: true,
+      // Keep the splash on screen long enough to read the logo on a fast boot
+      // instead of flashing a coloured square (the splash closes as part of this
+      // window's ready-to-show handoff, so delaying the handoff holds the splash).
+      // Skipped under the e2e harness (splash suppressed there) so tests aren't
+      // delayed on every window reveal.
+      ...(isE2EHarness() ? {} : { minReadyDelayMs: 3000 }),
       // Reveal without focus when launched for automation/agents (--inactive-window).
       revealInactive: options.revealInactive
     })
