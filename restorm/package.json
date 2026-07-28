@@ -188,6 +188,10 @@
       {
         "from": "CHANGELOG.md",
         "to": "restorm-resources/CHANGELOG.md"
+      },
+      {
+        "from": "build/com.oyo-fr.restorm.metainfo.xml",
+        "to": "restorm-resources/com.oyo-fr.restorm.metainfo.xml"
       }
     ],
     "linux": {
@@ -196,9 +200,23 @@
         "deb",
         "rpm"
       ],
+      "icon": "assets/icons/icon.png",
       "category": "Development",
-      "maintainer": "Yoann Diguet <contact@oyo-fr.com>",
-      "executableName": "restorm-bin"
+      "maintainer": "MonsieurDev <contact@oyo-fr.com>",
+      "vendor": "MonsieurDev",
+      "synopsis": "Local-first REST and API client",
+      "description": "Restorm is a local-first API client for REST, GraphQL, gRPC, WebSocket, Redis, AMQP and more. Your requests, environments and scenarios stay on your disk.",
+      "executableName": "restorm-bin",
+      "desktop": {
+        "entry": {
+          "Name": "Restorm",
+          "GenericName": "API Client",
+          "Comment": "Local-first REST and API client",
+          "Categories": "Development;Network;WebDevelopment;",
+          "Keywords": "REST;API;HTTP;GraphQL;gRPC;WebSocket;",
+          "StartupWMClass": "restorm"
+        }
+      }
     },
     "deb": {
       "afterInstall": "build/postinstall.sh"
@@ -209,13 +227,15 @@
     "win": {
       "target": [
         "nsis"
-      ]
+      ],
+      "icon": "assets/icons/icon.ico"
     },
     "mac": {
       "target": [
         "dmg",
         "zip"
       ],
+      "icon": "assets/icons/icon.icns",
       "category": "public.app-category.developer-tools"
     },
     "publish": [
