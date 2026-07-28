@@ -1,12 +1,12 @@
 {
   "name": "restorm",
   "version": "0.1.14",
-  "description": "restorm - A REST API client",
+  "description": "Local-first API testing environment — client and server",
   "main": "dist/main/index.js",
-  "homepage": "https://github.com/oYo-fr/restorm",
+  "homepage": "https://restorm.app",
   "author": {
-    "name": "Yoann Diguet",
-    "email": "contact@oyo-fr.com"
+    "name": "MonsieurDev",
+    "email": "contact@restorm.app"
   },
   "license": "MIT",
   "engines": {
@@ -167,7 +167,7 @@
     "vitest": "^4.1.6"
   },
   "build": {
-    "appId": "com.oyo-fr.restorm",
+    "appId": "com.monsieurdev.restorm",
     "productName": "restorm",
     "directories": {
       "output": "dist-electron"
@@ -190,8 +190,8 @@
         "to": "restorm-resources/CHANGELOG.md"
       },
       {
-        "from": "build/com.oyo-fr.restorm.metainfo.xml",
-        "to": "restorm-resources/com.oyo-fr.restorm.metainfo.xml"
+        "from": "build/com.monsieurdev.restorm.metainfo.xml",
+        "to": "restorm-resources/com.monsieurdev.restorm.metainfo.xml"
       }
     ],
     "linux": {
@@ -200,18 +200,18 @@
         "deb",
         "rpm"
       ],
-      "icon": "assets/icons/icon.png",
+      "icon": "assets/icons/linux",
       "category": "Development",
-      "maintainer": "MonsieurDev <contact@oyo-fr.com>",
+      "maintainer": "MonsieurDev <contact@restorm.app>",
       "vendor": "MonsieurDev",
-      "synopsis": "Local-first REST and API client",
-      "description": "Restorm is a local-first API client for REST, GraphQL, gRPC, WebSocket, Redis, AMQP and more. Your requests, environments and scenarios stay on your disk.",
+      "synopsis": "Local-first API testing environment — client and server",
+      "description": "Restorm is a local-first environment to test APIs end to end: it is both an API client and a server. Send and inspect requests, mock and simulate endpoints, and chain reproducible scenarios across REST, GraphQL, gRPC, WebSocket, Redis, AMQP, MQTT and more — everything kept on your own disk, Git-friendly for teams, with no forced cloud account.",
       "executableName": "restorm-bin",
       "desktop": {
         "entry": {
           "Name": "Restorm",
-          "GenericName": "API Client",
-          "Comment": "Local-first REST and API client",
+          "GenericName": "API Testing Environment",
+          "Comment": "Local-first API testing environment — client and server",
           "Categories": "Development;Network;WebDevelopment;",
           "Keywords": "REST;API;HTTP;GraphQL;gRPC;WebSocket;",
           "StartupWMClass": "restorm"
@@ -219,10 +219,12 @@
       }
     },
     "deb": {
-      "afterInstall": "build/postinstall.sh"
+      "afterInstall": "build/postinstall.sh",
+      "afterRemove": "build/postremove.sh"
     },
     "rpm": {
-      "afterInstall": "build/postinstall.sh"
+      "afterInstall": "build/postinstall.sh",
+      "afterRemove": "build/postremove.sh"
     },
     "win": {
       "target": [

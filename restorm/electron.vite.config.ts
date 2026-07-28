@@ -94,6 +94,12 @@ export default defineConfig({
     // runs → `window.restorm` is undefined → the renderer never signals ready.
     plugins: [externalizeDepsPlugin({ exclude: ['zod'] })],
     build: {
+      // Output next to main/renderer under dist/ (electron-vite's default is
+      // out/preload). electron-builder only packages dist/**, and in prod the
+      // main resolves the preload at dist/preload/index.js — building it to
+      // out/preload leaves it out of the package, so window.restorm is never
+      // exposed and the (showWhenReady) window never appears. Keep it in dist/.
+      outDir: 'dist/preload',
       sourcemap: process.env.VITE_COVERAGE === 'true',
       rollupOptions: {
         input: {
