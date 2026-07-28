@@ -2,6 +2,7 @@
   "name": "restorm-monorepo",
   "version": "1.0.0",
   "private": true,
+  "packageManager": "pnpm@10.26.1",
   "description": "Restorm monorepo with electron-core-ui",
   "homepage": "https://github.com/oYo-fr/restorm",
   "author": {
