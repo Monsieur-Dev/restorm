@@ -40,11 +40,14 @@ the correct mechanism.
 
 ## Cutting a release
 
-1. **Update `CHANGELOG.md`** at the repo root: add a `## vX.Y.Z` section (newest
-   on top) describing user-visible changes. The "What's new" note renders exactly
-   this section, so write it for users. The heading MUST match `## vX.Y.Z`.
+1. **Write the release notes** — add a `## vX.Y.Z` section (newest on top) to
+   `CHANGELOG.md` (English) **and** each `changelogs/<locale>.md`. The heading MUST
+   match `## vX.Y.Z`. These are hand-written, user-facing communication copy;
+   follow [`release-notes.md`](./release-notes.md) for the tag-diff → pick →
+   translate process.
 2. Bump the version (the release tooling / `manual-release.yml` creates the
-   version bump + tag).
+   version bump + tag). `scripts/ship.sh --release <patch|minor|major>` does this
+   automatically right after the merge.
 3. The release CI (`release.yml`) builds on each platform, signs where configured,
    and uploads the artifacts + `latest-*.yml` + `.blockmap` to the generic feed.
    `AppImage` is a required Linux target (the only auto-updatable Linux format).
