@@ -4,9 +4,10 @@ name: Release (production)
 # R2 bucket (restorm-releases, served at https://dl.restorm.app) + a GitHub
 # Release. Triggered on a version tag (vX.Y.Z) or manually.
 #
-# MVP scope: Linux only (deb/rpm), unsigned. Windows + macOS (with code signing
-# / notarisation) are added in TASK-63. The matrix is structured so adding them
-# is a one-line uncomment.
+# All three desktop platforms, unsigned. Windows (nsis) + macOS (dmg/zip) build
+# without code signing / notarisation for now — installable for testing, with the
+# usual SmartScreen / Gatekeeper prompt. Signing + notarisation land in TASK-63
+# (macOS auto-update in particular needs a signed build to self-apply).
 
 on:
   push:
@@ -27,11 +28,10 @@ jobs:
         include:
           - os: ubuntu-latest
             platform: linux
-          # TASK-63 (signing): enable Windows + macOS once certs are set up.
-          # - os: windows-latest
-          #   platform: windows
-          # - os: macos-latest
-          #   platform: macos
+          - os: windows-latest
+            platform: windows
+          - os: macos-latest
+            platform: macos
 
     steps:
       - name: Checkout code
@@ -72,6 +72,9 @@ jobs:
           # generic publish provider → electron-builder generates latest*.yml
           # (the auto-update feed) without uploading; we upload to R2 below.
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Unsigned builds: stop electron-builder from hunting for a macOS
+          # signing identity (would fail the mac job with no cert installed).
+          CSC_IDENTITY_AUTO_DISCOVERY: false
 
       - name: Publish to R2 (public — restorm-releases)
         run: |
@@ -99,5 +102,8 @@ jobs:
           files: |
             restorm/dist-electron/*.deb
             restorm/dist-electron/*.rpm
+            restorm/dist-electron/*.AppImage
+            restorm/dist-electron/*.exe
+            restorm/dist-electron/*.dmg
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
