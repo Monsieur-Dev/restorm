@@ -35,7 +35,7 @@
  * Apple ICNS binary format — no external tools needed.
  */
 
-import { existsSync, writeFileSync } from 'fs'
+import { existsSync, mkdirSync, writeFileSync } from 'fs'
 import { createRequire } from 'module'
 import { dirname, resolve } from 'path'
 import { fileURLToPath } from 'url'
@@ -184,6 +184,18 @@ async function main() {
   // ── assets/imgs/logo_400.png (400 px) ──────────────────────────────────────
   console.log('=== Writing assets/imgs/logo_400.png (400 px) ===')
   writeFileSync(resolve(IMGS_DIR, 'logo_400.png'), pngMap[400])
+
+  // ── assets/icons/linux/<size>x<size>.png (hicolor icon set) ────────────────
+  // electron-builder installs each file into /usr/share/icons/hicolor/<size>/apps.
+  // A single 1024 px png is NOT enough — KDE/GNOME icon lookup needs the common
+  // sizes (48/64/128/256…) or the app shows a generic icon in the menu/store.
+  console.log('=== Writing assets/icons/linux/<size>.png set ===')
+  const LINUX_ICON_DIR = resolve(ICONS_DIR, 'linux')
+  mkdirSync(LINUX_ICON_DIR, { recursive: true })
+  const LINUX_ICON_SIZES = [16, 32, 48, 64, 128, 256, 512, 1024]
+  for (const size of LINUX_ICON_SIZES) {
+    writeFileSync(resolve(LINUX_ICON_DIR, `${size}x${size}.png`), pngMap[size])
+  }
 
   // ── assets/icons/icon.ico (multi-size ICO) ─────────────────────────────────
   console.log('=== Writing assets/icons/icon.ico (multi-size ICO) ===')

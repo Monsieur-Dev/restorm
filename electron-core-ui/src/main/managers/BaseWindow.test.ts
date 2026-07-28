@@ -301,6 +301,44 @@ describe('BaseWindow', () => {
       expect(cbOrder).toBeLessThan(showOrder)
     })
 
+    it('defers the reveal by minReadyDelayMs when the renderer is ready sooner', () => {
+      vi.useFakeTimers()
+      try {
+        mockStorageGet.mockReturnValue(undefined)
+        const win = new TestWindow({ ...defaultConfig, showWhenReady: true, minReadyDelayMs: 1500 })
+        const cb = vi.fn()
+        win.onReadyToShow(cb)
+        const bw = win.getWindow() as unknown as InstanceType<typeof MockBrowserWindow>
+
+        // Renderer ready immediately (< 1500ms since construction) → held back.
+        fireRendererReady()
+        expect(cb).not.toHaveBeenCalled()
+        expect(bw.show).not.toHaveBeenCalled()
+
+        // After the remainder elapses, the handoff runs (callbacks then reveal).
+        vi.advanceTimersByTime(1500)
+        expect(cb).toHaveBeenCalledTimes(1)
+        expect(bw.show).toHaveBeenCalledTimes(1)
+      } finally {
+        vi.useRealTimers()
+      }
+    })
+
+    it('reveals immediately when minReadyDelayMs has already elapsed', () => {
+      vi.useFakeTimers()
+      try {
+        mockStorageGet.mockReturnValue(undefined)
+        const win = new TestWindow({ ...defaultConfig, showWhenReady: true, minReadyDelayMs: 1500 })
+        const bw = win.getWindow() as unknown as InstanceType<typeof MockBrowserWindow>
+
+        vi.advanceTimersByTime(2000)
+        fireRendererReady()
+        expect(bw.show).toHaveBeenCalledTimes(1)
+      } finally {
+        vi.useRealTimers()
+      }
+    })
+
     it('ignores a renderer-ready IPC from a different window', () => {
       mockStorageGet.mockReturnValue(undefined)
       const win = new TestWindow({ ...defaultConfig, showWhenReady: true })

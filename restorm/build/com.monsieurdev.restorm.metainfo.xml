@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>com.monsieurdev.restorm</id>
+
+  <name>Restorm</name>
+  <summary>Local-first API testing environment — client and server</summary>
+
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>MIT</project_license>
+
+  <developer id="com.monsieurdev">
+    <name>MonsieurDev</name>
+  </developer>
+
+  <description>
+    <p>
+      Restorm is a local-first environment to test APIs end to end: it is both
+      an API client and a server. Send and inspect requests, mock and simulate
+      endpoints, and chain reproducible scenarios across REST, GraphQL, gRPC,
+      WebSocket, Redis, AMQP, MQTT and more.
+    </p>
+    <p>
+      Everything stays on your own disk — no forced cloud account, no telemetry
+      on your traffic — and is Git-friendly for teams.
+    </p>
+  </description>
+
+  <categories>
+    <category>Development</category>
+    <category>Network</category>
+    <category>WebDevelopment</category>
+  </categories>
+
+  <launchable type="desktop-id">restorm-bin.desktop</launchable>
+
+  <!-- Binds the component to its dpkg/rpm package so software centres mark it
+       "installed" once the package is present (Discover's Installed list). -->
+  <pkgname>restorm</pkgname>
+
+  <url type="homepage">https://restorm.app</url>
+  <url type="help">https://restorm.app</url>
+
+  <content_rating type="oars-1.1" />
+</component>
