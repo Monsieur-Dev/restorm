@@ -27,3 +27,11 @@ fi
 # Refresh the desktop + icon caches so the new entry/icon appear immediately.
 command -v update-desktop-database >/dev/null 2>&1 && update-desktop-database -q /usr/share/applications || true
 command -v gtk-update-icon-cache >/dev/null 2>&1 && gtk-update-icon-cache -q -t -f /usr/share/icons/hicolor || true
+
+# Rebuild the AppStream cache so software centres pick up the metainfo we just
+# copied. dpkg's own appstream trigger only fires for files it tracks — ours is
+# dropped by this script, so refresh explicitly. (--force covers "already
+# refreshed recently".)
+if command -v appstreamcli >/dev/null 2>&1; then
+  appstreamcli refresh-cache --force >/dev/null 2>&1 || appstreamcli refresh --force >/dev/null 2>&1 || true
+fi

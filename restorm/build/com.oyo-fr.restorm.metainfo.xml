@@ -30,7 +30,7 @@
     <category>WebDevelopment</category>
   </categories>
 
-  <launchable type="desktop-id">restorm.desktop</launchable>
+  <launchable type="desktop-id">restorm-bin.desktop</launchable>
 
   <url type="homepage">https://restorm.app</url>
   <url type="help">https://restorm.app</url>
