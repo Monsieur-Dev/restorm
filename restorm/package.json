@@ -1,6 +1,6 @@
 {
   "name": "restorm",
-  "version": "0.1.12-preview",
+  "version": "0.1.13",
   "description": "restorm - A REST API client",
   "main": "dist/main/index.js",
   "homepage": "https://github.com/oYo-fr/restorm",
