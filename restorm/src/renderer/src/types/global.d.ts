@@ -106,7 +106,7 @@ declare global {
         checkNow: () => Promise<UpdateState>
         quitAndInstall: () => Promise<void>
         setAutoCheckEnabled: (enabled: boolean) => Promise<UpdateSettings>
-        getChangelogSince: (fromVersion: string) => Promise<string>
+        getChangelogSince: (fromVersion: string, locale?: string) => Promise<string>
         getLastSeenVersion: () => Promise<string | null>
         markVersionSeen: (version: string) => Promise<void>
         onStateChanged: (callback: (state: UpdateState) => void) => (() => void)

@@ -43,6 +43,10 @@
 #                                   # PR if missing → watch CI → merge on green.
 #                                   # Default (no --auto) stops at the no-PR
 #                                   # step so the lead can open the PR manually.
+#   scripts/ship.sh --release <patch|minor|major>
+#                                   # after a successful merge, cut a release:
+#                                   # bump+tag (manual-release.yml) then build
+#                                   # (release.yml). Rejected with --no-merge.
 #
 # --auto safety contract:
 #   • PR is created with `gh pr create --base <BASE> --fill` (title+body from
@@ -71,15 +75,27 @@ START_TS=$(date +%s)
 BASE="main"
 DO_MERGE=1
 AUTO=0
+RELEASE_TYPE=""
 while [ $# -gt 0 ]; do
   case "$1" in
     --base) BASE="${2:?--base needs a branch}"; shift 2 ;;
     --no-merge) DO_MERGE=0; shift ;;
     --auto) AUTO=1; shift ;;
+    --release)
+      RELEASE_TYPE="${2:?--release needs patch|minor|major}"
+      case "${RELEASE_TYPE}" in patch|minor|major) ;; *) echo "ship.sh: --release must be patch|minor|major (got '${RELEASE_TYPE}')" >&2; exit 2 ;; esac
+      shift 2 ;;
     -h|--help) sed -n '2,56p' "$0"; exit 0 ;;
     *) echo "ship.sh: unknown argument: $1" >&2; exit 2 ;;
   esac
 done
+
+# --release only makes sense when we actually merge — it cuts the release right
+# after. Refuse the contradictory combination up front.
+if [ -n "${RELEASE_TYPE}" ] && [ "${DO_MERGE}" -eq 0 ]; then
+  echo "ship.sh: --release requires a merge; drop --no-merge." >&2
+  exit 2
+fi
 
 # ── Repo / worktree resolution (mirrors git-commit-timeout.sh) ─────────
 REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
@@ -359,4 +375,44 @@ fi
 trap - EXIT
 journal "PASS at $(date -Is) — SHIP merged — agent ${AGENT} — branch ${BRANCH} → ${BASE} — worktree ${WORKTREE} — took $(elapsed)"
 echo "🎉 Shipped: ${BRANCH} merged into ${BASE} (took $(elapsed)). Remote branch auto-deleted; tear down the worktree."
+
+# ── Optional release (--release) ───────────────────────────────────────
+# Only reached after a real merge (the --no-merge guard above rejects the
+# combination). Bumps + tags via manual-release.yml, then kicks the platform
+# build (release.yml) — its tag, pushed with GITHUB_TOKEN, doesn't self-trigger
+# the `on: push: tags` build, so we launch it explicitly. Never fails the ship:
+# the merge already landed; a release hiccup just prints the manual commands.
+if [ -n "${RELEASE_TYPE}" ]; then
+  echo "🚀 Launching ${RELEASE_TYPE} release…"
+  git fetch origin --tags --quiet 2>/dev/null || true
+  CUR="$(git show "origin/${BASE}:restorm/package.json" 2>/dev/null | grep -m1 '"version"' | sed -E 's/.*"version"[[:space:]]*:[[:space:]]*"([^"]+)".*/\1/')"
+  if [ -z "${CUR}" ]; then
+    echo "⚠️  Couldn't read the version from origin/${BASE}; run it manually: gh workflow run manual-release.yml -f version_type=${RELEASE_TYPE}" >&2
+  else
+    IFS='.' read -r MAJ MIN PAT <<< "${CUR%%-*}"
+    case "${RELEASE_TYPE}" in
+      major) MAJ=$((MAJ + 1)); MIN=0; PAT=0 ;;
+      minor) MIN=$((MIN + 1)); PAT=0 ;;
+      patch) PAT=$((PAT + 1)) ;;
+    esac
+    NEW_TAG="v${MAJ}.${MIN}.${PAT}"
+    echo "   ${CUR} → ${NEW_TAG#v}"
+    if ! gh workflow run manual-release.yml -f version_type="${RELEASE_TYPE}"; then
+      echo "⚠️  Failed to trigger manual-release.yml; run it manually." >&2
+    else
+      echo "⏳ Waiting for ${NEW_TAG} to be tagged…"
+      TAGGED=0
+      for _ in $(seq 1 40); do
+        git fetch origin --tags --quiet 2>/dev/null || true
+        if git rev-parse -q --verify "refs/tags/${NEW_TAG}" >/dev/null 2>&1; then TAGGED=1; break; fi
+        sleep 15
+      done
+      if [ "${TAGGED}" -eq 1 ] && gh workflow run release.yml --ref "${NEW_TAG}"; then
+        echo "🚀 Release build launched for ${NEW_TAG}. Watch: gh run watch \$(gh run list --workflow=release.yml --limit 1 --json databaseId -q '.[0].databaseId')"
+      else
+        echo "⚠️  ${NEW_TAG} not built automatically; run: gh workflow run release.yml --ref ${NEW_TAG}" >&2
+      fi
+    fi
+  fi
+fi
 exit 0

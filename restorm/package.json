@@ -203,6 +203,10 @@
         "to": "restorm-resources/CHANGELOG.md"
       },
       {
+        "from": "changelogs",
+        "to": "restorm-resources/changelogs"
+      },
+      {
         "from": "build/com.monsieurdev.restorm.metainfo.xml",
         "to": "restorm-resources/com.monsieurdev.restorm.metainfo.xml"
       }

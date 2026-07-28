@@ -13,7 +13,7 @@ const WHATS_NEW_TOAST_ID = 'restorm:whats-new'
  * first time the app runs after an update. Mount once, near the app root.
  */
 export function UpdateNotifications(): null {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const { state, quitAndInstall } = useUpdateState()
   const prevPhaseRef = useRef<UpdatePhase | null>(null)
   const whatsNewShownRef = useRef(false)
@@ -72,7 +72,7 @@ export function UpdateNotifications(): null {
       ])
       const current = settings.currentVersion
       if (!lastSeen || lastSeen === current) return
-      const md = await api.getChangelogSince(lastSeen)
+      const md = await api.getChangelogSince(lastSeen, i18n.language)
       if (md.trim().length > 0) {
         toasterService.push('app', {
           id: WHATS_NEW_TOAST_ID,
@@ -83,7 +83,7 @@ export function UpdateNotifications(): null {
       }
       await api.markVersionSeen(current)
     })()
-  }, [t])
+  }, [t, i18n])
 
   return null
 }

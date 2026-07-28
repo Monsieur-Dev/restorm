@@ -8,6 +8,7 @@ import { UPDATE_IPC } from '../../shared/update/updateTypes'
 import {
   noArgs,
   updateChangelogSinceArgs,
+  updateChangelogSinceLocaleArgs,
   updateSetAutoCheckArgs
 } from './schemas'
 
@@ -30,8 +31,10 @@ export function registerUpdateIpc(): void {
     return updateService.getSettings()
   })
 
-  validatedHandle(UPDATE_IPC.GET_CHANGELOG_SINCE, updateChangelogSinceArgs, (_event, [fromVersion]) =>
-    updateService.getChangelogSince(fromVersion)
+  validatedHandle(
+    UPDATE_IPC.GET_CHANGELOG_SINCE,
+    updateChangelogSinceLocaleArgs,
+    (_event, [fromVersion, locale]) => updateService.getChangelogSince(fromVersion, locale)
   )
 
   validatedHandle(UPDATE_IPC.GET_LAST_SEEN_VERSION, noArgs, () =>

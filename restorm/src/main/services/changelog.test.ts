@@ -1,4 +1,6 @@
 import { describe, it, expect } from 'vitest'
+import { existsSync, readdirSync, readFileSync } from 'fs'
+import { join } from 'path'
 import { parseChangelogSince } from './changelog'
 
 const CHANGELOG = `# Changelog
@@ -80,5 +82,24 @@ this is documentation, not a real release
   it('returns empty on unparseable version inputs', () => {
     expect(parseChangelogSince(CHANGELOG, 'not-a-version', '1.2.0')).toBe('')
     expect(parseChangelogSince(CHANGELOG, '1.0.0', 'garbage')).toBe('')
+  })
+})
+
+describe('localized changelogs', () => {
+  // vitest runs from the restorm package root, where changelogs/ lives.
+  const dir = join(process.cwd(), 'changelogs')
+
+  it('every locale changelog parses to the latest version section', () => {
+    if (!existsSync(dir)) return // hand-written per-locale release notes
+    const files = readdirSync(dir).filter((f) => f.endsWith('.md'))
+    expect(files.length).toBeGreaterThan(0)
+    for (const f of files) {
+      const md = readFileSync(join(dir, f), 'utf8')
+      // The updater renders the span since the previously-run version; every
+      // locale must expose the newest release as a parseable `## vX.Y.Z` section.
+      const out = parseChangelogSince(md, '0.1.16', '0.1.17')
+      expect(out, `${f}: v0.1.17 section`).toContain('## v0.1.17')
+      expect(out.trim().length, `${f}: non-empty notes`).toBeGreaterThan(0)
+    }
   })
 })
