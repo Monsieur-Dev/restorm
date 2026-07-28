@@ -136,6 +136,21 @@ applyUserDataOverride(app)
 // keep their accelerated path.
 app.commandLine.appendSwitch('enable-unsafe-swiftshader')
 
+// Linux launch flags applied by the app itself so they hold however it is
+// started — double-click, the auto-updater's relaunch (which passes NO args),
+// or a terminal:
+//   --no-sandbox: distros that restrict unprivileged user namespaces
+//     (Ubuntu 24.04+/Kubuntu, AppArmor) SIGTRAP Chromium's sandbox at startup.
+//     The .deb wrapper already passes this; setting it here also covers the
+//     AppImage relaunch/double-click, where no wrapper intervenes.
+//   --ozone-platform-hint=auto: run natively on the session's display server
+//     (Wayland on Wayland, X11 otherwise) instead of forcing XWayland.
+// Linux-only so the Windows/macOS sandbox stays on.
+if (process.platform === 'linux') {
+  app.commandLine.appendSwitch('no-sandbox')
+  app.commandLine.appendSwitch('ozone-platform-hint', 'auto')
+}
+
 // Set the app name for proper taskbar icon on Linux
 // Without this, Electron 38+ may use the default "Electron" identity
 app.name = 'restorm'
