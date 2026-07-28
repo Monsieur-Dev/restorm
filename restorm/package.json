@@ -14,9 +14,10 @@
   },
   "scripts": {
     "generate-icons": "node scripts/generate-icons.mjs",
-    "prebuild": "node scripts/generate-icons.mjs",
-    "predist": "node scripts/generate-icons.mjs",
-    "prepackage": "node scripts/generate-icons.mjs",
+    "generate-changelogs": "node scripts/generate-changelogs.mjs",
+    "prebuild": "node scripts/generate-icons.mjs && node scripts/generate-changelogs.mjs",
+    "predist": "node scripts/generate-icons.mjs && node scripts/generate-changelogs.mjs",
+    "prepackage": "node scripts/generate-icons.mjs && node scripts/generate-changelogs.mjs",
     "generate:brand-font": "node scripts/generate-brand-font.mjs",
     "generate:wordmark-font": "node scripts/generate-wordmark-font.mjs",
     "dev": "cross-env ELECTRON_DISABLE_SANDBOX=1 electron-vite dev",
@@ -201,6 +202,10 @@
       {
         "from": "CHANGELOG.md",
         "to": "restorm-resources/CHANGELOG.md"
+      },
+      {
+        "from": "changelogs",
+        "to": "restorm-resources/changelogs"
       },
       {
         "from": "build/com.monsieurdev.restorm.metainfo.xml",

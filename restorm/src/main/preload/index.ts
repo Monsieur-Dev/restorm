@@ -182,9 +182,10 @@ contextBridge.exposeInMainWorld('api', {
     setAutoCheckEnabled: async (enabled: boolean): Promise<UpdateSettings> => {
       return (await ipcRenderer.invoke(UPDATE_IPC.SET_AUTO_CHECK, enabled)) as UpdateSettings
     },
-    /** Markdown of CHANGELOG entries since `fromVersion` (for "What's new"). */
-    getChangelogSince: async (fromVersion: string): Promise<string> => {
-      return (await ipcRenderer.invoke(UPDATE_IPC.GET_CHANGELOG_SINCE, fromVersion)) as string
+    /** Markdown of CHANGELOG entries since `fromVersion` (for "What's new"),
+     * localized to `locale` when a translated changelog exists (else English). */
+    getChangelogSince: async (fromVersion: string, locale?: string): Promise<string> => {
+      return (await ipcRenderer.invoke(UPDATE_IPC.GET_CHANGELOG_SINCE, fromVersion, locale)) as string
     },
     /** The version the "What's new" note was last shown for (or install seed). */
     getLastSeenVersion: async (): Promise<string | null> => {

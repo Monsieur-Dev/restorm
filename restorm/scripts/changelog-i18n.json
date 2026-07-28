@@ -1,0 +1,232 @@
+{
+  "_comment": "Per-locale 'What's new' release notes. English lives in ../CHANGELOG.md (canonical); this file feeds scripts/generate-changelogs.mjs which writes ../changelogs/<locale>.md for every non-English locale. Add each new release's translated bullets under a new version entry, then run: node scripts/generate-changelogs.mjs",
+  "header": "# Changelog",
+  "versions": [
+    {
+      "version": "0.1.17",
+      "notes": {
+        "en": [
+          "Release notes are now shown in your language.",
+          "Linux, Windows and macOS desktop apps: the installer now shows Restorm's icon, name and details, and the app opens with your theme applied."
+        ],
+        "fr": [
+          "Les notes de version s'affichent désormais dans votre langue.",
+          "Applications de bureau Linux, Windows et macOS : l'installeur affiche maintenant l'icône, le nom et les détails de Restorm, et l'application s'ouvre avec votre thème."
+        ],
+        "de": [
+          "Versionshinweise werden jetzt in Ihrer Sprache angezeigt.",
+          "Desktop-Apps für Linux, Windows und macOS: Der Installer zeigt nun Symbol, Name und Details von Restorm an, und die App öffnet sich mit Ihrem Design."
+        ],
+        "es": [
+          "Las notas de la versión ahora se muestran en tu idioma.",
+          "Aplicaciones de escritorio para Linux, Windows y macOS: el instalador ahora muestra el icono, el nombre y los detalles de Restorm, y la aplicación se abre con tu tema."
+        ],
+        "it": [
+          "Le note di rilascio ora vengono mostrate nella tua lingua.",
+          "App desktop per Linux, Windows e macOS: l'installer ora mostra icona, nome e dettagli di Restorm e l'app si apre con il tuo tema."
+        ],
+        "pt": [
+          "As notas de versão agora são exibidas no seu idioma.",
+          "Aplicações de desktop para Linux, Windows e macOS: o instalador agora mostra o ícone, o nome e os detalhes do Restorm, e a aplicação abre com o seu tema."
+        ],
+        "nl": [
+          "Release-opmerkingen worden nu in uw taal weergegeven.",
+          "Desktop-apps voor Linux, Windows en macOS: het installatieprogramma toont nu het pictogram, de naam en de details van Restorm, en de app opent met uw thema."
+        ],
+        "cs": [
+          "Poznámky k verzi se nyní zobrazují ve vašem jazyce.",
+          "Desktopové aplikace pro Linux, Windows a macOS: instalátor nyní zobrazuje ikonu, název a podrobnosti Restormu a aplikace se otevře s vaším motivem."
+        ],
+        "da": [
+          "Udgivelsesnoter vises nu på dit sprog.",
+          "Skrivebordsapps til Linux, Windows og macOS: installationsprogrammet viser nu Restorms ikon, navn og detaljer, og appen åbner med dit tema."
+        ],
+        "el": [
+          "Οι σημειώσεις έκδοσης εμφανίζονται πλέον στη γλώσσα σας.",
+          "Εφαρμογές για Linux, Windows και macOS: το πρόγραμμα εγκατάστασης εμφανίζει πλέον το εικονίδιο, το όνομα και τις λεπτομέρειες του Restorm, και η εφαρμογή ανοίγει με το θέμα σας."
+        ],
+        "fi": [
+          "Julkaisutiedot näytetään nyt omalla kielelläsi.",
+          "Työpöytäsovellukset Linuxille, Windowsille ja macOS:lle: asennusohjelma näyttää nyt Restormin kuvakkeen, nimen ja tiedot, ja sovellus avautuu teemasi mukaisesti."
+        ],
+        "hr": [
+          "Bilješke o izdanju sada se prikazuju na vašem jeziku.",
+          "Desktop aplikacije za Linux, Windows i macOS: instalacijski program sada prikazuje ikonu, naziv i pojedinosti Restorma, a aplikacija se otvara s vašom temom."
+        ],
+        "hu": [
+          "A kiadási megjegyzések mostantól az Ön nyelvén jelennek meg.",
+          "Asztali alkalmazások Linuxra, Windowsra és macOS-re: a telepítő mostantól megjeleníti a Restorm ikonját, nevét és részleteit, és az alkalmazás az Ön témájával nyílik meg."
+        ],
+        "id": [
+          "Catatan rilis kini ditampilkan dalam bahasa Anda.",
+          "Aplikasi desktop untuk Linux, Windows, dan macOS: pemasang kini menampilkan ikon, nama, dan detail Restorm, dan aplikasi terbuka dengan tema Anda."
+        ],
+        "ja": [
+          "リリースノートがお使いの言語で表示されるようになりました。",
+          "Linux・Windows・macOS のデスクトップアプリ：インストーラーに Restorm のアイコン・名前・詳細が表示されるようになり、アプリはお使いのテーマで起動します。"
+        ],
+        "ko": [
+          "릴리스 노트가 이제 사용자의 언어로 표시됩니다.",
+          "Linux, Windows, macOS 데스크톱 앱: 설치 프로그램에 Restorm의 아이콘, 이름, 세부 정보가 표시되며 앱이 사용자의 테마로 열립니다."
+        ],
+        "nb": [
+          "Versjonsmerknader vises nå på ditt språk.",
+          "Skrivebordsapper for Linux, Windows og macOS: installasjonsprogrammet viser nå Restorms ikon, navn og detaljer, og appen åpnes med ditt tema."
+        ],
+        "pl": [
+          "Informacje o wydaniu są teraz wyświetlane w Twoim języku.",
+          "Aplikacje desktopowe dla Linuksa, Windowsa i macOS: instalator pokazuje teraz ikonę, nazwę i szczegóły Restorma, a aplikacja otwiera się z Twoim motywem."
+        ],
+        "ro": [
+          "Notele de lansare sunt acum afișate în limba dvs.",
+          "Aplicații desktop pentru Linux, Windows și macOS: programul de instalare afișează acum pictograma, numele și detaliile Restorm, iar aplicația se deschide cu tema dvs."
+        ],
+        "sq": [
+          "Shënimet e versionit tani shfaqen në gjuhën tuaj.",
+          "Aplikacione desktop për Linux, Windows dhe macOS: instaluesi tani shfaq ikonën, emrin dhe detajet e Restorm, dhe aplikacioni hapet me temën tuaj."
+        ],
+        "sr": [
+          "Белешке о издању се сада приказују на вашем језику.",
+          "Десктоп апликације за Linux, Windows и macOS: инсталатер сада приказује икону, назив и детаље Restorm-а, а апликација се отвара са вашом темом."
+        ],
+        "sv": [
+          "Versionsinformation visas nu på ditt språk.",
+          "Skrivbordsappar för Linux, Windows och macOS: installationsprogrammet visar nu Restorms ikon, namn och detaljer, och appen öppnas med ditt tema."
+        ],
+        "tr": [
+          "Sürüm notları artık kendi dilinizde gösteriliyor.",
+          "Linux, Windows ve macOS masaüstü uygulamaları: yükleyici artık Restorm'un simgesini, adını ve ayrıntılarını gösteriyor ve uygulama temanızla açılıyor."
+        ],
+        "uk": [
+          "Примітки до випуску тепер відображаються вашою мовою.",
+          "Настільні застосунки для Linux, Windows і macOS: інсталятор тепер показує піктограму, назву та відомості Restorm, а застосунок відкривається з вашою темою."
+        ],
+        "vi": [
+          "Ghi chú phát hành giờ đây được hiển thị bằng ngôn ngữ của bạn.",
+          "Ứng dụng máy tính cho Linux, Windows và macOS: trình cài đặt giờ đây hiển thị biểu tượng, tên và chi tiết của Restorm, và ứng dụng mở ra với giao diện của bạn."
+        ],
+        "zh-CN": [
+          "发行说明现在会以您的语言显示。",
+          "Linux、Windows 和 macOS 桌面应用：安装程序现在会显示 Restorm 的图标、名称和详细信息，应用会以您的主题打开。"
+        ],
+        "zh-TW": [
+          "發行說明現在會以您的語言顯示。",
+          "Linux、Windows 和 macOS 桌面應用程式：安裝程式現在會顯示 Restorm 的圖示、名稱與詳細資訊，應用程式會以您的佈景主題開啟。"
+        ]
+      }
+    },
+    {
+      "version": "0.1.12",
+      "notes": {
+        "en": [
+          "Silent background auto-update: Restorm checks for updates on launch and periodically, downloads them in the background, and installs on the next restart. A \"What's new\" note is shown after each update.",
+          "Manual \"Check for updates\" control and an auto-update toggle in Settings."
+        ],
+        "fr": [
+          "Mise à jour automatique silencieuse en arrière-plan : Restorm vérifie les mises à jour au démarrage et régulièrement, les télécharge en arrière-plan et les installe au prochain redémarrage. Une note « Nouveautés » s'affiche après chaque mise à jour.",
+          "Commande manuelle « Rechercher des mises à jour » et bascule d'auto-mise à jour dans les Paramètres."
+        ],
+        "de": [
+          "Stille Hintergrund-Updates: Restorm sucht beim Start und regelmäßig nach Updates, lädt sie im Hintergrund herunter und installiert sie beim nächsten Neustart. Nach jedem Update wird ein „Neuigkeiten“-Hinweis angezeigt.",
+          "Manuelle Schaltfläche „Nach Updates suchen“ und ein Auto-Update-Schalter in den Einstellungen."
+        ],
+        "es": [
+          "Actualización automática silenciosa en segundo plano: Restorm busca actualizaciones al iniciar y periódicamente, las descarga en segundo plano y las instala en el próximo reinicio. Se muestra una nota de «Novedades» tras cada actualización.",
+          "Control manual «Buscar actualizaciones» y un interruptor de actualización automática en Ajustes."
+        ],
+        "it": [
+          "Aggiornamento automatico silenzioso in background: Restorm controlla gli aggiornamenti all'avvio e periodicamente, li scarica in background e li installa al successivo riavvio. Dopo ogni aggiornamento viene mostrata una nota «Novità».",
+          "Comando manuale «Controlla aggiornamenti» e un interruttore di aggiornamento automatico nelle Impostazioni."
+        ],
+        "pt": [
+          "Atualização automática silenciosa em segundo plano: o Restorm verifica atualizações ao iniciar e periodicamente, transfere-as em segundo plano e instala-as no próximo reinício. Uma nota de «Novidades» é mostrada após cada atualização.",
+          "Controlo manual «Procurar atualizações» e um interruptor de atualização automática nas Definições."
+        ],
+        "nl": [
+          "Stille automatische update op de achtergrond: Restorm controleert bij het opstarten en periodiek op updates, downloadt ze op de achtergrond en installeert ze bij de volgende herstart. Na elke update wordt een 'Nieuw'-melding getoond.",
+          "Handmatige knop 'Controleren op updates' en een schakelaar voor automatische updates in Instellingen."
+        ],
+        "cs": [
+          "Tichá automatická aktualizace na pozadí: Restorm kontroluje aktualizace při spuštění a pravidelně, stahuje je na pozadí a instaluje při příštím restartu. Po každé aktualizaci se zobrazí poznámka „Novinky“.",
+          "Ruční tlačítko „Zkontrolovat aktualizace“ a přepínač automatických aktualizací v Nastavení."
+        ],
+        "da": [
+          "Lydløs baggrundsopdatering: Restorm søger efter opdateringer ved opstart og med jævne mellemrum, henter dem i baggrunden og installerer dem ved næste genstart. En „Nyheder“-note vises efter hver opdatering.",
+          "Manuel „Søg efter opdateringer“-knap og en kontakt til automatisk opdatering i Indstillinger."
+        ],
+        "el": [
+          "Σιωπηλή αυτόματη ενημέρωση στο παρασκήνιο: το Restorm ελέγχει για ενημερώσεις κατά την εκκίνηση και περιοδικά, τις κατεβάζει στο παρασκήνιο και τις εγκαθιστά στην επόμενη επανεκκίνηση. Μετά από κάθε ενημέρωση εμφανίζεται μια σημείωση «Τι νέο υπάρχει».",
+          "Χειροκίνητο κουμπί «Έλεγχος για ενημερώσεις» και διακόπτης αυτόματης ενημέρωσης στις Ρυθμίσεις."
+        ],
+        "fi": [
+          "Hiljainen taustapäivitys: Restorm tarkistaa päivitykset käynnistyksessä ja säännöllisesti, lataa ne taustalla ja asentaa ne seuraavalla uudelleenkäynnistyksellä. Jokaisen päivityksen jälkeen näytetään „Mitä uutta“ -huomautus.",
+          "Manuaalinen „Tarkista päivitykset“ -painike ja automaattisen päivityksen kytkin Asetuksissa."
+        ],
+        "hr": [
+          "Tiho automatsko ažuriranje u pozadini: Restorm provjerava ažuriranja pri pokretanju i povremeno, preuzima ih u pozadini i instalira pri sljedećem ponovnom pokretanju. Nakon svakog ažuriranja prikazuje se bilješka „Novosti“.",
+          "Ručni gumb „Provjeri ažuriranja“ i prekidač za automatsko ažuriranje u Postavkama."
+        ],
+        "hu": [
+          "Csendes háttérfrissítés: a Restorm indításkor és rendszeresen ellenőrzi a frissítéseket, a háttérben letölti, és a következő újraindításkor telepíti őket. Minden frissítés után „Újdonságok“ megjegyzés jelenik meg.",
+          "Kézi „Frissítések keresése“ gomb és automatikus frissítés kapcsoló a Beállításokban."
+        ],
+        "id": [
+          "Pembaruan otomatis diam-diam di latar belakang: Restorm memeriksa pembaruan saat diluncurkan dan secara berkala, mengunduhnya di latar belakang, dan memasangnya saat berikutnya dijalankan ulang. Catatan „Yang baru“ ditampilkan setelah setiap pembaruan.",
+          "Kontrol manual „Periksa pembaruan“ dan sakelar pembaruan otomatis di Pengaturan."
+        ],
+        "ja": [
+          "バックグラウンドでのサイレント自動更新：Restorm は起動時および定期的に更新を確認し、バックグラウンドでダウンロードして次回の再起動時にインストールします。更新のたびに「新機能」の通知が表示されます。",
+          "手動の「更新を確認」ボタンと、設定内の自動更新の切り替え。"
+        ],
+        "ko": [
+          "백그라운드 무음 자동 업데이트: Restorm이 시작 시와 주기적으로 업데이트를 확인하고, 백그라운드에서 다운로드하며, 다음 재시작 시 설치합니다. 업데이트마다 '새로운 기능' 알림이 표시됩니다.",
+          "수동 '업데이트 확인' 버튼과 설정의 자동 업데이트 전환."
+        ],
+        "nb": [
+          "Stille bakgrunnsoppdatering: Restorm ser etter oppdateringer ved oppstart og jevnlig, laster dem ned i bakgrunnen og installerer dem ved neste omstart. En «Nyheter»-merknad vises etter hver oppdatering.",
+          "Manuell «Se etter oppdateringer»-knapp og en bryter for automatisk oppdatering i Innstillinger."
+        ],
+        "pl": [
+          "Cicha aktualizacja w tle: Restorm sprawdza aktualizacje przy uruchomieniu i okresowo, pobiera je w tle i instaluje przy następnym ponownym uruchomieniu. Po każdej aktualizacji wyświetlana jest notka „Nowości“.",
+          "Ręczny przycisk „Sprawdź aktualizacje“ i przełącznik automatycznych aktualizacji w Ustawieniach."
+        ],
+        "ro": [
+          "Actualizare automată silențioasă în fundal: Restorm caută actualizări la pornire și periodic, le descarcă în fundal și le instalează la următoarea repornire. După fiecare actualizare se afișează o notă „Noutăți“.",
+          "Buton manual „Caută actualizări“ și un comutator de actualizare automată în Setări."
+        ],
+        "sq": [
+          "Përditësim automatik i heshtur në sfond: Restorm kontrollon për përditësime në nisje dhe periodikisht, i shkarkon në sfond dhe i instalon në rinisjen e ardhshme. Pas çdo përditësimi shfaqet një shënim „Të rejat“.",
+          "Butoni manual „Kontrollo për përditësime“ dhe një çelës për përditësim automatik te Cilësimet."
+        ],
+        "sr": [
+          "Тихо аутоматско ажурирање у позадини: Restorm проверава ажурирања при покретању и повремено, преузима их у позадини и инсталира при следећем поновном покретању. После сваког ажурирања приказује се белешка „Новости“.",
+          "Ручно дугме „Провери ажурирања“ и прекидач за аутоматско ажурирање у Подешавањима."
+        ],
+        "sv": [
+          "Tyst bakgrundsuppdatering: Restorm söker efter uppdateringar vid start och regelbundet, laddar ner dem i bakgrunden och installerar dem vid nästa omstart. En „Nyheter“-notis visas efter varje uppdatering.",
+          "Manuell „Sök efter uppdateringar“-knapp och en växel för automatisk uppdatering i Inställningar."
+        ],
+        "tr": [
+          "Arka planda sessiz otomatik güncelleme: Restorm başlangıçta ve düzenli olarak güncellemeleri denetler, arka planda indirir ve bir sonraki yeniden başlatmada yükler. Her güncellemeden sonra bir „Yenilikler“ notu gösterilir.",
+          "Manuel „Güncellemeleri denetle“ düğmesi ve Ayarlar'da otomatik güncelleme anahtarı."
+        ],
+        "uk": [
+          "Тихе автоматичне оновлення у фоні: Restorm перевіряє оновлення під час запуску та періодично, завантажує їх у фоні та встановлює під час наступного перезапуску. Після кожного оновлення показується примітка «Що нового».",
+          "Ручна кнопка «Перевірити оновлення» та перемикач автоматичного оновлення в Налаштуваннях."
+        ],
+        "vi": [
+          "Tự động cập nhật im lặng ở nền: Restorm kiểm tra cập nhật khi khởi động và định kỳ, tải xuống ở nền và cài đặt vào lần khởi động lại tiếp theo. Một ghi chú „Có gì mới“ được hiển thị sau mỗi lần cập nhật.",
+          "Nút „Kiểm tra cập nhật“ thủ công và công tắc tự động cập nhật trong Cài đặt."
+        ],
+        "zh-CN": [
+          "后台静默自动更新：Restorm 会在启动时并定期检查更新，在后台下载，并在下次重启时安装。每次更新后都会显示“新增内容”提示。",
+          "手动“检查更新”按钮，以及设置中的自动更新开关。"
+        ],
+        "zh-TW": [
+          "背景靜默自動更新：Restorm 會在啟動時並定期檢查更新，在背景下載，並在下次重新啟動時安裝。每次更新後都會顯示「新增功能」提示。",
+          "手動「檢查更新」按鈕，以及設定中的自動更新開關。"
+        ]
+      }
+    }
+  ]
+}

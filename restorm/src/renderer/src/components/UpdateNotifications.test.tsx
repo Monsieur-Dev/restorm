@@ -18,9 +18,13 @@ vi.mock('electron-core-ui/renderer', () => ({
     createElement('div', { 'data-testid': 'md' }, props.value)
 }))
 
-// t returns the key so assertions can match on it directly.
+// t returns the key so assertions can match on it directly. `i18n.language`
+// feeds the localized "What's new" lookup.
 vi.mock('react-i18next', () => ({
-  useTranslation: (): { t: (key: string) => string } => ({ t: (key: string) => key })
+  useTranslation: (): { t: (key: string) => string; i18n: { language: string } } => ({
+    t: (key: string) => key,
+    i18n: { language: 'en' }
+  })
 }))
 
 import { UpdateNotifications } from './UpdateNotifications'

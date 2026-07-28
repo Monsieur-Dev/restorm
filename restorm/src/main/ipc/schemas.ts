@@ -114,6 +114,9 @@ export const revealInFolderArgs = z.tuple([z.string()])
 export const noArgs = z.tuple([])
 export const updateSetAutoCheckArgs = z.tuple([z.boolean()])
 export const updateChangelogSinceArgs = z.tuple([z.string()])
+// GET_CHANGELOG_SINCE takes an optional UI locale so the "What's new" note is
+// rendered from the matching per-locale changelog (falls back to English).
+export const updateChangelogSinceLocaleArgs = z.tuple([z.string(), z.string().optional()])
 
 // ==========================================================================
 // Project Files

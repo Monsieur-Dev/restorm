@@ -231,9 +231,10 @@ export class UpdateService {
   }
 
   /** Markdown span of CHANGELOG entries strictly after `fromVersion` up to and
-   * including the current version — the body of the post-update "What's new". */
-  getChangelogSince(fromVersion: string): string {
-    const md = this.#readChangelog()
+   * including the current version — the body of the post-update "What's new".
+   * `locale` selects the localized changelog (falls back to English). */
+  getChangelogSince(fromVersion: string, locale?: string): string {
+    const md = this.#readChangelog(locale)
     if (!md) return ''
     return parseChangelogSince(md, fromVersion, app.getVersion())
   }
@@ -377,21 +378,36 @@ export class UpdateService {
     getStorageService().set(LAST_SEEN_VERSION_KEY, version)
   }
 
-  #readChangelog(): string | null {
-    // Packaged: bundled under resources; dev: repo-root CHANGELOG.md.
-    const candidates = [
+  #readChangelog(locale?: string): string | null {
+    // Localized "What's new": prefer changelogs/<locale>.md (exact, then the base
+    // language), and fall back to the English CHANGELOG.md. English (or an unknown
+    // locale) reads CHANGELOG.md directly — no changelogs/en.md duplication.
+    const localeCandidates: string[] = []
+    const norm = (locale ?? '').trim()
+    if (norm && norm.toLowerCase() !== 'en') {
+      const base = norm.split('-')[0]
+      const names = base && base !== norm ? [norm, base] : [norm]
+      for (const name of names) {
+        localeCandidates.push(
+          join(process.resourcesPath, 'restorm-resources', 'changelogs', `${name}.md`),
+          join(app.getAppPath(), 'changelogs', `${name}.md`),
+          join(process.cwd(), 'changelogs', `${name}.md`)
+        )
+      }
+    }
+    const englishCandidates = [
       join(process.resourcesPath, 'restorm-resources', 'CHANGELOG.md'),
       join(app.getAppPath(), 'CHANGELOG.md'),
       join(process.cwd(), 'CHANGELOG.md')
     ]
-    for (const p of candidates) {
+    for (const p of [...localeCandidates, ...englishCandidates]) {
       try {
         if (existsSync(p)) return readFileSync(p, 'utf8')
       } catch {
         // try next
       }
     }
-    logger.warn('UpdateService: CHANGELOG.md not found', { candidates })
+    logger.warn('UpdateService: CHANGELOG.md not found', { locale, englishCandidates })
     return null
   }
 }
