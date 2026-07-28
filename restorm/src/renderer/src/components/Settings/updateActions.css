@@ -1,0 +1,23 @@
+.update-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.update-actions-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.update-actions-version {
+  font-weight: 600;
+}
+
+.update-actions-status {
+  color: var(--vscode-descriptionForeground);
+  font-size: 0.9em;
+}

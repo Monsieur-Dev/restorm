@@ -60,7 +60,8 @@
     "keyboardShortcuts": "Sneltoetsen",
     "releaseNotes": "Release-opmerkingen",
     "reportIssue": "Probleem melden",
-    "mcpLogs": "MCP-logboeken"
+    "mcpLogs": "MCP-logboeken",
+    "checkForUpdates": "Op updates controleren"
   },
   "settings": {
     "title": "Instellingen",

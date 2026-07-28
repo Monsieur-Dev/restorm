@@ -60,7 +60,8 @@
     "keyboardShortcuts": "Συντομεύσεις πληκτρολογίου",
     "releaseNotes": "Σημειώσεις έκδοσης",
     "reportIssue": "Αναφορά προβλήματος",
-    "mcpLogs": "Αρχεία καταγραφής MCP"
+    "mcpLogs": "Αρχεία καταγραφής MCP",
+    "checkForUpdates": "Έλεγχος για ενημερώσεις"
   },
   "settings": {
     "title": "Ρυθμίσεις",

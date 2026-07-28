@@ -60,7 +60,8 @@
     "keyboardShortcuts": "Tastenkürzel",
     "releaseNotes": "Versionshinweise",
     "reportIssue": "Problem melden",
-    "mcpLogs": "MCP-Protokolle"
+    "mcpLogs": "MCP-Protokolle",
+    "checkForUpdates": "Nach Updates suchen"
   },
   "settings": {
     "title": "Einstellungen",

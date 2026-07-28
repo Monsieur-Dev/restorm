@@ -2490,5 +2490,29 @@
     "recoveredTitle": "版本已復原",
     "recoveredBody": "檔案現在包含所選提交的內容，未提交。",
     "recoverFailedTitle": "復原失敗"
+  },
+  "updates": {
+    "settingsTitle": "更新",
+    "autoCheckTitle": "自動檢查更新",
+    "autoCheckDescription": "在啟動時及定期於背景檢查更新。",
+    "statusTitle": "更新狀態",
+    "statusDescription": "目前版本與更新狀態，並可手動檢查。",
+    "currentVersion": "版本 {{version}}",
+    "checkNow": "立即檢查",
+    "readyTitle": "更新已就緒",
+    "readyBody": "版本 {{version}} 將在下次重新啟動時安裝。",
+    "restartNow": "立即重新啟動",
+    "checkFailedTitle": "檢查更新失敗",
+    "checkFailedBody": "無法檢查更新，請稍後再試。",
+    "upToDateTitle": "已是最新版本",
+    "upToDateBody": "您正在使用最新版本（{{version}}）。",
+    "whatsNewTitle": "{{version}} 的新功能",
+    "status": {
+      "idle": "最新",
+      "checking": "正在檢查…",
+      "downloading": "正在下載… {{percent}}%",
+      "downloaded": "更新已準備好安裝（{{version}}）",
+      "error": "檢查失敗"
+    }
   }
 }

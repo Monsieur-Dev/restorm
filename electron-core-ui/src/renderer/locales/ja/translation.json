@@ -60,7 +60,8 @@
     "keyboardShortcuts": "キーボードショートカット",
     "releaseNotes": "リリースノート",
     "reportIssue": "問題を報告",
-    "mcpLogs": "MCP ログ"
+    "mcpLogs": "MCP ログ",
+    "checkForUpdates": "アップデートを確認"
   },
   "settings": {
     "title": "設定",

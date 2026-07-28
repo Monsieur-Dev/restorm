@@ -60,7 +60,8 @@
     "keyboardShortcuts": "Scorciatoie da tastiera",
     "releaseNotes": "Note di rilascio",
     "reportIssue": "Segnala un problema",
-    "mcpLogs": "Log MCP"
+    "mcpLogs": "Log MCP",
+    "checkForUpdates": "Controlla aggiornamenti"
   },
   "settings": {
     "title": "Impostazioni",

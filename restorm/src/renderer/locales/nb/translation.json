@@ -2491,5 +2491,29 @@
     "recoveredTitle": "Versjon gjenopprettet",
     "recoveredBody": "Filen inneholder nå den valgte commitens innhold, ikke committet.",
     "recoverFailedTitle": "Gjenoppretting mislyktes"
+  },
+  "updates": {
+    "settingsTitle": "Oppdateringer",
+    "autoCheckTitle": "Se etter oppdateringer automatisk",
+    "autoCheckDescription": "Ser etter oppdateringer i bakgrunnen ved oppstart og jevnlig.",
+    "statusTitle": "Oppdateringsstatus",
+    "statusDescription": "Gjeldende versjon og oppdateringsstatus, med manuell sjekk.",
+    "currentVersion": "Versjon {{version}}",
+    "checkNow": "Se etter nå",
+    "readyTitle": "Oppdatering klar",
+    "readyBody": "Versjon {{version}} installeres neste gang du starter på nytt.",
+    "restartNow": "Start på nytt nå",
+    "checkFailedTitle": "Kunne ikke se etter oppdateringer",
+    "checkFailedBody": "Kunne ikke se etter oppdateringer. Prøv igjen senere.",
+    "upToDateTitle": "Du er oppdatert",
+    "upToDateBody": "Du bruker den nyeste versjonen ({{version}}).",
+    "whatsNewTitle": "Nyheter i {{version}}",
+    "status": {
+      "idle": "Oppdatert",
+      "checking": "Ser etter…",
+      "downloading": "Laster ned… {{percent}} %",
+      "downloaded": "Oppdatering klar til installering ({{version}})",
+      "error": "Sjekken mislyktes"
+    }
   }
 }

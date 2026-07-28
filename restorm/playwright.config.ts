@@ -351,6 +351,15 @@ const settingsTabTestDir = defineBddConfig({
   outputDir: '.features-gen/settings-tab'
 })
 
+const autoUpdateTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/auto-update/features/**/*.feature',
+  steps: [
+    'tests/e2e/bdd/auto-update/steps/**/*.ts',
+    'tests/e2e/bdd/fixtures/auto-update.fixture.ts'
+  ],
+  outputDir: '.features-gen/auto-update'
+})
+
 const themeCarouselA11yTestDir = defineBddConfig({
   features: 'tests/e2e/bdd/theme-carousel-a11y/features/**/*.feature',
   steps: [
@@ -765,6 +774,11 @@ export default defineConfig({
     {
       name: 'settings-tab',
       testDir: settingsTabTestDir,
+      timeout: 120 * 1000
+    },
+    {
+      name: 'auto-update',
+      testDir: autoUpdateTestDir,
       timeout: 120 * 1000
     },
     {

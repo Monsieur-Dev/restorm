@@ -60,7 +60,8 @@
     "keyboardShortcuts": "키보드 단축키",
     "releaseNotes": "릴리스 노트",
     "reportIssue": "문제 신고",
-    "mcpLogs": "MCP 로그"
+    "mcpLogs": "MCP 로그",
+    "checkForUpdates": "업데이트 확인"
   },
   "settings": {
     "title": "설정",

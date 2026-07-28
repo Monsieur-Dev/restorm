@@ -2492,5 +2492,29 @@
     "recoveredTitle": "Versiune recuperată",
     "recoveredBody": "Fișierul conține acum conținutul commit-ului selectat, necomis.",
     "recoverFailedTitle": "Recuperarea a eșuat"
+  },
+  "updates": {
+    "settingsTitle": "Actualizări",
+    "autoCheckTitle": "Caută actualizări automat",
+    "autoCheckDescription": "Caută actualizări în fundal la pornire și periodic.",
+    "statusTitle": "Starea actualizării",
+    "statusDescription": "Versiunea curentă și starea actualizării, cu verificare manuală.",
+    "currentVersion": "Versiunea {{version}}",
+    "checkNow": "Caută acum",
+    "readyTitle": "Actualizare pregătită",
+    "readyBody": "Versiunea {{version}} va fi instalată la următoarea repornire.",
+    "restartNow": "Repornește acum",
+    "checkFailedTitle": "Verificarea actualizărilor a eșuat",
+    "checkFailedBody": "Nu s-au putut căuta actualizări. Încearcă din nou mai târziu.",
+    "upToDateTitle": "Ești la zi",
+    "upToDateBody": "Folosești cea mai recentă versiune ({{version}}).",
+    "whatsNewTitle": "Noutăți în {{version}}",
+    "status": {
+      "idle": "La zi",
+      "checking": "Se verifică…",
+      "downloading": "Se descarcă… {{percent}} %",
+      "downloaded": "Actualizare pregătită de instalare ({{version}})",
+      "error": "Verificarea a eșuat"
+    }
   }
 }

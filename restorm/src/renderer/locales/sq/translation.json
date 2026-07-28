@@ -2491,5 +2491,29 @@
     "recoveredTitle": "Versioni u rikthye",
     "recoveredBody": "Skedari tani përmban përmbajtjen e commit-it të zgjedhur, të pakryer.",
     "recoverFailedTitle": "Rikthimi dështoi"
+  },
+  "updates": {
+    "settingsTitle": "Përditësimet",
+    "autoCheckTitle": "Kontrollo automatikisht për përditësime",
+    "autoCheckDescription": "Kontrollon për përditësime në sfond gjatë nisjes dhe periodikisht.",
+    "statusTitle": "Statusi i përditësimit",
+    "statusDescription": "Versioni aktual dhe statusi i përditësimit, me kontroll manual.",
+    "currentVersion": "Versioni {{version}}",
+    "checkNow": "Kontrollo tani",
+    "readyTitle": "Përditësimi është gati",
+    "readyBody": "Versioni {{version}} do të instalohet herën tjetër që rinisni.",
+    "restartNow": "Rinis tani",
+    "checkFailedTitle": "Kontrolli i përditësimeve dështoi",
+    "checkFailedBody": "Nuk u kontrolluan dot përditësimet. Ju lutemi provoni sërish më vonë.",
+    "upToDateTitle": "Jeni të përditësuar",
+    "upToDateBody": "Po përdorni versionin më të fundit ({{version}}).",
+    "whatsNewTitle": "Çfarë ka të re në {{version}}",
+    "status": {
+      "idle": "I përditësuar",
+      "checking": "Duke kontrolluar…",
+      "downloading": "Duke shkarkuar… {{percent}} %",
+      "downloaded": "Përditësimi gati për instalim ({{version}})",
+      "error": "Kontrolli dështoi"
+    }
   }
 }

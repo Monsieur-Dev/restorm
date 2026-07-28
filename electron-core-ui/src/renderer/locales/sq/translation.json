@@ -60,7 +60,8 @@
     "keyboardShortcuts": "Shkurtoret e tastierës",
     "releaseNotes": "Shënimet e versionit",
     "reportIssue": "Raporto një problem",
-    "mcpLogs": "Regjistrat MCP"
+    "mcpLogs": "Regjistrat MCP",
+    "checkForUpdates": "Kontrollo për përditësime"
   },
   "settings": {
     "title": "Parametrat",

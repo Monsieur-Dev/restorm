@@ -60,7 +60,8 @@
     "keyboardShortcuts": "Kortkommandon",
     "releaseNotes": "Versionsinformation",
     "reportIssue": "Rapportera ett problem",
-    "mcpLogs": "MCP-loggar"
+    "mcpLogs": "MCP-loggar",
+    "checkForUpdates": "Sök efter uppdateringar"
   },
   "settings": {
     "title": "Inställningar",

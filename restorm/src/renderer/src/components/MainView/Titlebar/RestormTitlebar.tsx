@@ -19,6 +19,7 @@ import { Badge } from '../../common/Badge'
 import { mapToBadgeType } from '../../../utils/badgeUtils'
 import { useMcpEnabled } from '../../../hooks/useMcpEnabled'
 import { useGitGateState } from '../../../hooks/useGitGateState'
+import { useUpdateState } from '../../../hooks/useUpdateState'
 
 /** Categories whose search results render with the single-line badge
  * layout (method/protocol pill + title + breadcrumb on one row). The
@@ -130,6 +131,11 @@ export const RestormTitlebar: React.FC<RestormTitlebarProps> = ({
   // "Pro" badge next to the root label is Community-specific — a Pro user
   // without a git folder has nothing to buy, so no badge for them.
   const gitGate = useGitGateState()
+  // "Check for updates" (Help menu) is shown only for a direct-download build
+  // that self-manages updates — hidden for store / package-manager builds where
+  // the store owns updates. `checkNow` reuses the same flow as the Settings
+  // button; feedback is the shared update toasts.
+  const { settings: updateSettings, checkNow: checkForUpdates } = useUpdateState()
 
   // Settings opens as a workbench tab when a file is open, or as the
   // full-screen modal on the welcome screen (no workbench).
@@ -405,6 +411,13 @@ export const RestormTitlebar: React.FC<RestormTitlebarProps> = ({
             <MenuItem data-testid="titlebar-menu-item-documentation" title={t('menuBar.documentation')} disabled />
             <MenuItem data-testid="titlebar-menu-item-keyboard-shortcuts" title={t('menuBar.keyboardShortcuts')} disabled />
             <MenuItem data-testid="titlebar-menu-item-release-notes" title={t('menuBar.releaseNotes')} disabled />
+            {updateSettings?.autoUpdateSupported === true && (
+              <MenuItem
+                data-testid="titlebar-menu-item-check-updates"
+                title={t('menuBar.checkForUpdates')}
+                onClick={() => { void checkForUpdates() }}
+              />
+            )}
             <MenuItem data-testid="titlebar-menu-item-report-issue" title={t('menuBar.reportIssue')} disabled />
           </MenuBarItem>
         </MenuBar>

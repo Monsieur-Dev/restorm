@@ -2491,5 +2491,29 @@
     "recoveredTitle": "Version gendannet",
     "recoveredBody": "Filen indeholder nu den valgte commits indhold, ikke commitet.",
     "recoverFailedTitle": "Gendannelse mislykkedes"
+  },
+  "updates": {
+    "settingsTitle": "Opdateringer",
+    "autoCheckTitle": "Søg automatisk efter opdateringer",
+    "autoCheckDescription": "Søger efter opdateringer i baggrunden ved opstart og jævnligt.",
+    "statusTitle": "Opdateringsstatus",
+    "statusDescription": "Den aktuelle version og opdateringsstatus, med manuel søgning.",
+    "currentVersion": "Version {{version}}",
+    "checkNow": "Søg nu",
+    "readyTitle": "Opdatering klar",
+    "readyBody": "Version {{version}} installeres, næste gang du genstarter.",
+    "restartNow": "Genstart nu",
+    "checkFailedTitle": "Søgning efter opdateringer mislykkedes",
+    "checkFailedBody": "Kunne ikke søge efter opdateringer. Prøv igen senere.",
+    "upToDateTitle": "Du er opdateret",
+    "upToDateBody": "Du bruger den nyeste version ({{version}}).",
+    "whatsNewTitle": "Nyheder i {{version}}",
+    "status": {
+      "idle": "Opdateret",
+      "checking": "Søger…",
+      "downloading": "Downloader… {{percent}} %",
+      "downloaded": "Opdatering klar til installation ({{version}})",
+      "error": "Søgningen mislykkedes"
+    }
   }
 }

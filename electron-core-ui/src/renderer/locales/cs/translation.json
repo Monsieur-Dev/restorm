@@ -60,7 +60,8 @@
     "keyboardShortcuts": "Klávesové zkratky",
     "releaseNotes": "Poznámky k vydání",
     "reportIssue": "Nahlásit problém",
-    "mcpLogs": "Protokoly MCP"
+    "mcpLogs": "Protokoly MCP",
+    "checkForUpdates": "Zkontrolovat aktualizace"
   },
   "settings": {
     "title": "Nastavení",

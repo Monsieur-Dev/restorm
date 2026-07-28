@@ -60,7 +60,8 @@
     "keyboardShortcuts": "Raccourcis clavier",
     "releaseNotes": "Notes de version",
     "reportIssue": "Signaler un bug",
-    "mcpLogs": "Journaux MCP"
+    "mcpLogs": "Journaux MCP",
+    "checkForUpdates": "Rechercher des mises à jour"
   },
   "settings": {
     "title": "Paramètres",

@@ -60,7 +60,8 @@
     "keyboardShortcuts": "Klavye Kısayolları",
     "releaseNotes": "Sürüm Notları",
     "reportIssue": "Sorun Bildir",
-    "mcpLogs": "MCP günlükleri"
+    "mcpLogs": "MCP günlükleri",
+    "checkForUpdates": "Güncellemeleri denetle"
   },
   "settings": {
     "title": "Ayarlar",

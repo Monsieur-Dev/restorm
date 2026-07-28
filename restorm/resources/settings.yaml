@@ -97,3 +97,18 @@ groups:
                 labelKey: "git.semiPullFrequency.12h"
               - value: "24h"
                 labelKey: "git.semiPullFrequency.24h"
+  - id: "updates"
+    titleKey: "updates.settingsTitle"
+    items:
+      - setting:
+          id: "autoCheckEnabled"
+          titleKey: "updates.autoCheckTitle"
+          descriptionKey: "updates.autoCheckDescription"
+          type: "toggle"
+          default: true
+      - setting:
+          id: "status"
+          titleKey: "updates.statusTitle"
+          descriptionKey: "updates.statusDescription"
+          type: "update-actions"
+          default: ""

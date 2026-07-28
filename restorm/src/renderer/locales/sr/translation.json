@@ -2492,5 +2492,29 @@
     "recoveredTitle": "Верзија враћена",
     "recoveredBody": "Датотека сада садржи садржај изабраног комита, некомитован.",
     "recoverFailedTitle": "Враћање није успело"
+  },
+  "updates": {
+    "settingsTitle": "Ажурирања",
+    "autoCheckTitle": "Аутоматски проверавај ажурирања",
+    "autoCheckDescription": "Проверава ажурирања у позадини при покретању и повремено.",
+    "statusTitle": "Статус ажурирања",
+    "statusDescription": "Тренутна верзија и статус ажурирања, уз ручну проверу.",
+    "currentVersion": "Верзија {{version}}",
+    "checkNow": "Провери сада",
+    "readyTitle": "Ажурирање је спремно",
+    "readyBody": "Верзија {{version}} биће инсталирана при следећем поновном покретању.",
+    "restartNow": "Поново покрени сада",
+    "checkFailedTitle": "Провера ажурирања није успела",
+    "checkFailedBody": "Није могуће проверити ажурирања. Покушајте поново касније.",
+    "upToDateTitle": "Имате најновију верзију",
+    "upToDateBody": "Користите најновију верзију ({{version}}).",
+    "whatsNewTitle": "Шта је ново у верзији {{version}}",
+    "status": {
+      "idle": "Ажурирано",
+      "checking": "Провера…",
+      "downloading": "Преузимање… {{percent}} %",
+      "downloaded": "Ажурирање спремно за инсталацију ({{version}})",
+      "error": "Провера није успела"
+    }
   }
 }

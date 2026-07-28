@@ -108,6 +108,14 @@ export const openPathArgs = z.tuple([z.string()])
 export const revealInFolderArgs = z.tuple([z.string()])
 
 // ==========================================================================
+// Auto-update
+// ==========================================================================
+
+export const noArgs = z.tuple([])
+export const updateSetAutoCheckArgs = z.tuple([z.boolean()])
+export const updateChangelogSinceArgs = z.tuple([z.string()])
+
+// ==========================================================================
 // Project Files
 // ==========================================================================
 

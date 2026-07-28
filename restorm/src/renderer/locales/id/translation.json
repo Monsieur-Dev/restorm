@@ -2490,5 +2490,29 @@
     "recoveredTitle": "Versi dipulihkan",
     "recoveredBody": "File kini berisi konten commit yang dipilih, belum di-commit.",
     "recoverFailedTitle": "Pemulihan gagal"
+  },
+  "updates": {
+    "settingsTitle": "Pembaruan",
+    "autoCheckTitle": "Periksa pembaruan secara otomatis",
+    "autoCheckDescription": "Memeriksa pembaruan di latar belakang saat memulai dan secara berkala.",
+    "statusTitle": "Status pembaruan",
+    "statusDescription": "Versi saat ini dan status pembaruan, dengan pemeriksaan manual.",
+    "currentVersion": "Versi {{version}}",
+    "checkNow": "Periksa sekarang",
+    "readyTitle": "Pembaruan siap",
+    "readyBody": "Versi {{version}} akan dipasang saat Anda memulai ulang berikutnya.",
+    "restartNow": "Mulai ulang sekarang",
+    "checkFailedTitle": "Gagal memeriksa pembaruan",
+    "checkFailedBody": "Tidak dapat memeriksa pembaruan. Silakan coba lagi nanti.",
+    "upToDateTitle": "Anda sudah versi terbaru",
+    "upToDateBody": "Anda menggunakan versi terbaru ({{version}}).",
+    "whatsNewTitle": "Yang baru di {{version}}",
+    "status": {
+      "idle": "Terbaru",
+      "checking": "Memeriksa…",
+      "downloading": "Mengunduh… {{percent}} %",
+      "downloaded": "Pembaruan siap dipasang ({{version}})",
+      "error": "Pemeriksaan gagal"
+    }
   }
 }

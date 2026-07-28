@@ -2491,5 +2491,29 @@
     "recoveredTitle": "Versie hersteld",
     "recoveredBody": "Het bestand bevat nu de inhoud van de geselecteerde commit, niet vastgelegd.",
     "recoverFailedTitle": "Herstellen mislukt"
+  },
+  "updates": {
+    "settingsTitle": "Updates",
+    "autoCheckTitle": "Automatisch op updates controleren",
+    "autoCheckDescription": "Controleert bij het starten en periodiek op de achtergrond op updates.",
+    "statusTitle": "Updatestatus",
+    "statusDescription": "De huidige versie en updatestatus, met handmatige controle.",
+    "currentVersion": "Versie {{version}}",
+    "checkNow": "Nu controleren",
+    "readyTitle": "Update gereed",
+    "readyBody": "Versie {{version}} wordt bij de volgende herstart geïnstalleerd.",
+    "restartNow": "Nu herstarten",
+    "checkFailedTitle": "Controle op updates mislukt",
+    "checkFailedBody": "Kan niet op updates controleren. Probeer het later opnieuw.",
+    "upToDateTitle": "Je bent up-to-date",
+    "upToDateBody": "Je gebruikt de nieuwste versie ({{version}}).",
+    "whatsNewTitle": "Nieuw in {{version}}",
+    "status": {
+      "idle": "Up-to-date",
+      "checking": "Controleren…",
+      "downloading": "Downloaden… {{percent}} %",
+      "downloaded": "Update klaar om te installeren ({{version}})",
+      "error": "Controle mislukt"
+    }
   }
 }

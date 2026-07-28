@@ -2491,5 +2491,29 @@
     "recoveredTitle": "Versão recuperada",
     "recoveredBody": "O ficheiro contém agora o conteúdo do commit selecionado, sem submeter.",
     "recoverFailedTitle": "Falha na recuperação"
+  },
+  "updates": {
+    "settingsTitle": "Atualizações",
+    "autoCheckTitle": "Procurar atualizações automaticamente",
+    "autoCheckDescription": "Procura atualizações em segundo plano ao iniciar e periodicamente.",
+    "statusTitle": "Estado da atualização",
+    "statusDescription": "A versão atual e o estado da atualização, com verificação manual.",
+    "currentVersion": "Versão {{version}}",
+    "checkNow": "Procurar agora",
+    "readyTitle": "Atualização pronta",
+    "readyBody": "A versão {{version}} será instalada no próximo reinício.",
+    "restartNow": "Reiniciar agora",
+    "checkFailedTitle": "Falha ao procurar atualizações",
+    "checkFailedBody": "Não foi possível procurar atualizações. Tente novamente mais tarde.",
+    "upToDateTitle": "Está atualizado",
+    "upToDateBody": "Está a usar a versão mais recente ({{version}}).",
+    "whatsNewTitle": "Novidades da versão {{version}}",
+    "status": {
+      "idle": "Atualizado",
+      "checking": "A procurar…",
+      "downloading": "A transferir… {{percent}} %",
+      "downloaded": "Atualização pronta para instalar ({{version}})",
+      "error": "Falha na verificação"
+    }
   }
 }

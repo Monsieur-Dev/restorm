@@ -60,7 +60,8 @@
     "keyboardShortcuts": "Hurtigtaster",
     "releaseNotes": "Versjonsmerknader",
     "reportIssue": "Rapporter problem",
-    "mcpLogs": "MCP-logger"
+    "mcpLogs": "MCP-logger",
+    "checkForUpdates": "Se etter oppdateringer"
   },
   "settings": {
     "title": "Innstillinger",

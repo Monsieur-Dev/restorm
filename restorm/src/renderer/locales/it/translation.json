@@ -2491,5 +2491,29 @@
     "recoveredTitle": "Versione ripristinata",
     "recoveredBody": "Il file contiene ora il contenuto del commit selezionato, non committato.",
     "recoverFailedTitle": "Ripristino non riuscito"
+  },
+  "updates": {
+    "settingsTitle": "Aggiornamenti",
+    "autoCheckTitle": "Controlla automaticamente gli aggiornamenti",
+    "autoCheckDescription": "Controlla gli aggiornamenti in background all'avvio e periodicamente.",
+    "statusTitle": "Stato dell'aggiornamento",
+    "statusDescription": "La versione attuale e lo stato dell'aggiornamento, con controllo manuale.",
+    "currentVersion": "Versione {{version}}",
+    "checkNow": "Controlla ora",
+    "readyTitle": "Aggiornamento pronto",
+    "readyBody": "La versione {{version}} verrà installata al prossimo riavvio.",
+    "restartNow": "Riavvia ora",
+    "checkFailedTitle": "Controllo aggiornamenti non riuscito",
+    "checkFailedBody": "Impossibile controllare gli aggiornamenti. Riprova più tardi.",
+    "upToDateTitle": "Sei aggiornato",
+    "upToDateBody": "Stai usando l'ultima versione ({{version}}).",
+    "whatsNewTitle": "Novità della versione {{version}}",
+    "status": {
+      "idle": "Aggiornato",
+      "checking": "Controllo…",
+      "downloading": "Download… {{percent}} %",
+      "downloaded": "Aggiornamento pronto per l'installazione ({{version}})",
+      "error": "Controllo non riuscito"
+    }
   }
 }

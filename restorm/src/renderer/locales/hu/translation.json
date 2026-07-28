@@ -2491,5 +2491,29 @@
     "recoveredTitle": "Verzió visszaállítva",
     "recoveredBody": "A fájl most a kiválasztott commit tartalmát tartalmazza, commit nélkül.",
     "recoverFailedTitle": "A visszaállítás sikertelen"
+  },
+  "updates": {
+    "settingsTitle": "Frissítések",
+    "autoCheckTitle": "Frissítések automatikus keresése",
+    "autoCheckDescription": "Frissítéseket keres a háttérben indításkor és rendszeresen.",
+    "statusTitle": "Frissítés állapota",
+    "statusDescription": "Az aktuális verzió és a frissítés állapota, kézi kereséssel.",
+    "currentVersion": "{{version}} verzió",
+    "checkNow": "Keresés most",
+    "readyTitle": "A frissítés kész",
+    "readyBody": "A(z) {{version}} verzió a következő újraindításkor települ.",
+    "restartNow": "Újraindítás most",
+    "checkFailedTitle": "A frissítéskeresés sikertelen",
+    "checkFailedBody": "Nem sikerült frissítéseket keresni. Kérjük, próbálja újra később.",
+    "upToDateTitle": "Naprakész",
+    "upToDateBody": "A legújabb verziót használja ({{version}}).",
+    "whatsNewTitle": "Újdonságok a(z) {{version}} verzióban",
+    "status": {
+      "idle": "Naprakész",
+      "checking": "Keresés…",
+      "downloading": "Letöltés… {{percent}} %",
+      "downloaded": "A frissítés telepítésre kész ({{version}})",
+      "error": "A keresés sikertelen"
+    }
   }
 }

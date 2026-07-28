@@ -86,7 +86,8 @@ import type { PersistenceFormat } from 'electron-core-ui'
 import { dirname, join } from 'path'
 import { existsSync, statSync } from 'fs'
 import { spawn } from 'node:child_process'
-import { searchIndexService, contextService, responseHistoryService, requestUsageService, scenarioUsageService, authenticationCacheService } from './services'
+import { searchIndexService, contextService, responseHistoryService, requestUsageService, scenarioUsageService, authenticationCacheService, updateService } from './services'
+import { registerUpdateIpc } from './ipc/updateHandlers'
 import { registerRestormMcp } from './mcp'
 import { isHeadlessHost as isHeadlessHostPure, isMcpEnabledForLaunch, shouldLaunchInactive } from './mcp/mcpEnablement'
 import { readAutoSaveOn, type InstanceLifecycleHost } from './mcp/tools/instances'
@@ -679,6 +680,15 @@ void app.whenReady().then(() => {
   logger.info('Git semi-pull CRON controller initialized')
 })
 
+// Silent auto-update: check on launch + every 4 h + a manual button, download
+// in the background, install on next quit. Inert in dev (no feed) unless the
+// dev mock is enabled. Built after `whenReady` (queued after `initializeApp`'s
+// own `setupIPC` callback) so the Settings + Storage services it reads are ready.
+void app.whenReady().then(() => {
+  updateService.initialize()
+  logger.info('Update Service initialized')
+})
+
 // Auth + entitlement: the reactive capability source of truth
 // (login loopback, offline entitlement cache, IPC). Built after `whenReady` so
 // `app.getPath('userData')` (the encrypted token cache) and `safeStorage` are
@@ -1046,6 +1056,7 @@ app.on('before-quit', () => {
   // (mcpActive:false marker present), and toggled-on-from-a-disabled-launch.
   void cleanupMcpDiscoveryFile(MCP_DISCOVERY_DIR, process.pid, cliArgs.mcpDiscoveryFile)
   void mcpService.stop()
+  updateService.dispose()
 })
 
 // Renderer-facing read of runtime config — MCP state + GraphQL
@@ -1086,6 +1097,9 @@ ipcMain.handle('mcp:clear-logs', () => { mcpService.clearServedCalls() })
 
 // Register all restorm-specific IPC handlers
 registerRestormIPC({ editorWindows, closeAllWindows })
+
+// Auto-update IPC (window.api.update.*)
+registerUpdateIpc()
 
 // Wire the scenario execution engine's IPC bridge unconditionally — the Run /
 // Debug / Step controls in the scenario editor drive it, so it must exist in

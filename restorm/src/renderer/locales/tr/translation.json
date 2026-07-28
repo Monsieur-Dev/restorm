@@ -2491,5 +2491,29 @@
     "recoveredTitle": "Sürüm geri yüklendi",
     "recoveredBody": "Dosya artık seçili işlemenin içeriğini işlenmemiş olarak içeriyor.",
     "recoverFailedTitle": "Geri yükleme başarısız"
+  },
+  "updates": {
+    "settingsTitle": "Güncellemeler",
+    "autoCheckTitle": "Güncellemeleri otomatik denetle",
+    "autoCheckDescription": "Başlangıçta ve düzenli olarak arka planda güncellemeleri denetler.",
+    "statusTitle": "Güncelleme durumu",
+    "statusDescription": "Geçerli sürüm ve güncelleme durumu, elle denetleme ile.",
+    "currentVersion": "Sürüm {{version}}",
+    "checkNow": "Şimdi denetle",
+    "readyTitle": "Güncelleme hazır",
+    "readyBody": "{{version}} sürümü bir sonraki yeniden başlatmada yüklenecek.",
+    "restartNow": "Şimdi yeniden başlat",
+    "checkFailedTitle": "Güncelleme denetimi başarısız",
+    "checkFailedBody": "Güncellemeler denetlenemedi. Lütfen daha sonra tekrar deneyin.",
+    "upToDateTitle": "Günceldesiniz",
+    "upToDateBody": "En son sürümü kullanıyorsunuz ({{version}}).",
+    "whatsNewTitle": "{{version}} sürümündeki yenilikler",
+    "status": {
+      "idle": "Güncel",
+      "checking": "Denetleniyor…",
+      "downloading": "İndiriliyor… %{{percent}}",
+      "downloaded": "Güncelleme yüklemeye hazır ({{version}})",
+      "error": "Denetim başarısız"
+    }
   }
 }

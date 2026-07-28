@@ -2490,5 +2490,29 @@
     "recoveredTitle": "Đã khôi phục phiên bản",
     "recoveredBody": "Tệp hiện chứa nội dung của commit đã chọn, chưa commit.",
     "recoverFailedTitle": "Khôi phục thất bại"
+  },
+  "updates": {
+    "settingsTitle": "Cập nhật",
+    "autoCheckTitle": "Tự động kiểm tra cập nhật",
+    "autoCheckDescription": "Kiểm tra cập nhật ở chế độ nền khi khởi động và theo định kỳ.",
+    "statusTitle": "Trạng thái cập nhật",
+    "statusDescription": "Phiên bản hiện tại và trạng thái cập nhật, có kiểm tra thủ công.",
+    "currentVersion": "Phiên bản {{version}}",
+    "checkNow": "Kiểm tra ngay",
+    "readyTitle": "Bản cập nhật đã sẵn sàng",
+    "readyBody": "Phiên bản {{version}} sẽ được cài đặt trong lần khởi động lại tiếp theo.",
+    "restartNow": "Khởi động lại ngay",
+    "checkFailedTitle": "Kiểm tra cập nhật thất bại",
+    "checkFailedBody": "Không thể kiểm tra cập nhật. Vui lòng thử lại sau.",
+    "upToDateTitle": "Bạn đang dùng bản mới nhất",
+    "upToDateBody": "Bạn đang chạy phiên bản mới nhất ({{version}}).",
+    "whatsNewTitle": "Có gì mới trong {{version}}",
+    "status": {
+      "idle": "Đã cập nhật",
+      "checking": "Đang kiểm tra…",
+      "downloading": "Đang tải xuống… {{percent}} %",
+      "downloaded": "Bản cập nhật sẵn sàng để cài đặt ({{version}})",
+      "error": "Kiểm tra thất bại"
+    }
   }
 }
