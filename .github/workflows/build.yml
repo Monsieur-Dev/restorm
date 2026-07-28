@@ -46,7 +46,7 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: 10
+          version: 10.26.1
 
       - name: Install electron-core-ui dependencies
         run: |
@@ -172,7 +172,7 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: 10
+          version: 10.26.1
 
       - name: Install electron-core-ui dependencies
         run: |
