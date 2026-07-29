@@ -390,7 +390,10 @@
     "listInstances": "Daftar instans MCP",
     "listThemes": "Daftar tema yang tersedia",
     "getCurrentTheme": "Dapatkan tema saat ini",
-    "switchTheme": "Ganti tema aktif"
+    "getSettings": "Tampilkan pengaturan aplikasi",
+    "setSetting": "Ubah sebuah pengaturan",
+    "patchSettings": "Ubah beberapa pengaturan sekaligus",
+    "resetSetting": "Setel ulang pengaturan"
   },
   "customWco": {
     "minimize": "Perkecil",

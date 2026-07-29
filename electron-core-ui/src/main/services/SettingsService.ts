@@ -522,6 +522,17 @@ export class SettingsService {
     return this.flattenSettings(this.groups, [])
   }
 
+  /**
+   * Flattened resolved list of the settings the GUI actually shows —
+   * `getAll()` minus the entries whose feature flag is disabled. Use
+   * this (not `getAll()`) whenever a consumer must mirror the visible
+   * settings page, e.g. an external automation surface enumerating what
+   * a user could change by hand.
+   */
+  public getFiltered(): ResolvedSetting[] {
+    return this.flattenSettings(this.getFilteredGroups(), [])
+  }
+
   /** Get the raw group hierarchy */
   public getGroups(): SettingsGroup[] {
     return this.groups

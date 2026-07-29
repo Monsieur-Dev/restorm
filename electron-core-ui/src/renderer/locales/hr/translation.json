@@ -390,7 +390,10 @@
     "listInstances": "Popis MCP instanci",
     "listThemes": "Popis dostupnih tema",
     "getCurrentTheme": "Dohvati trenutnu temu",
-    "switchTheme": "Promijeni aktivnu temu"
+    "getSettings": "Prikaži postavke aplikacije",
+    "setSetting": "Promijeni postavku",
+    "patchSettings": "Promijeni više postavki odjednom",
+    "resetSetting": "Vrati postavku na zadano"
   },
   "customWco": {
     "minimize": "Minimiziraj",

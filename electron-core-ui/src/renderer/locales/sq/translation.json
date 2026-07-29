@@ -390,7 +390,10 @@
     "listInstances": "Listo instancat MCP",
     "listThemes": "Lista e temave të disponueshme",
     "getCurrentTheme": "Merr temën aktuale",
-    "switchTheme": "Ndrysho temën aktive"
+    "getSettings": "Listo cilësimet e aplikacionit",
+    "setSetting": "Ndrysho një cilësim",
+    "patchSettings": "Ndrysho disa cilësime njëherësh",
+    "resetSetting": "Rivendos një cilësim"
   },
   "customWco": {
     "minimize": "Minimizo",

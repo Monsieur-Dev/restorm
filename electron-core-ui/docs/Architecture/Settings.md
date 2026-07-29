@@ -245,7 +245,8 @@ isSettingsServiceInitialized(): boolean
 | `get(storageKey)` | Get current value (persisted or default) |
 | `set(storageKey, value)` | Persist value, broadcast `settings:changed` to all windows |
 | `resetSetting(storageKey)` | Delete persisted value, broadcast default value |
-| `getAll()` | Flattened list of `ResolvedSetting` with current values |
+| `getAll()` | Flattened list of `ResolvedSetting` with current values, **including** feature-gated settings whose flag is off |
+| `getFiltered()` | Same, minus the feature-gated settings the UI hides — use this whenever a consumer must mirror what the settings page actually shows |
 | `getGroups()` | Raw group hierarchy |
 
 ### Runtime Mutations
@@ -467,6 +468,26 @@ The `SettingsProvider` applies side effects when certain settings change:
 | `appearance:language` | Calls `i18n.changeLanguage(value)` and `window.api.i18n.setLanguage(value)` |
 | `appearance:theme` | Calls `window.api.theme.set(value)` |
 | `files:autoSave` / `files:autoSaveDelay` | Drive the in-process `AutoSaveController` (see below) |
+
+Because these hang off the `settings:changed` broadcast — not off the settings
+page's click handler — they fire for **any** writer that goes through
+`SettingsService.set()` / `setWorkspaceValue()`, at either scope. That is what
+lets the MCP settings routes (below) change the theme or the UI language without
+a line of per-setting code. It also means the side effect needs a live renderer:
+with no window open the value is persisted but only takes effect on the next
+launch.
+
+## MCP settings routes
+
+`McpService` exposes the whole registry to external tooling through four generic
+routes — `get_settings`, `set_setting`, `patch_settings`, `reset_setting` —
+covering both scopes. They flatten `getFiltered()` and derive each setting's
+accepted values from its declared `type` + `params`, so a setting added to any
+YAML config (this library's defaults or the app's own) becomes readable and
+writable with no code change. The derivation, validation and per-scope write
+helpers live in `main/services/settingsCatalog.ts`; the route definitions live in
+`McpService`. See the [McpService doc](../McpService/README.md#settings-routes)
+for the wire shapes.
 
 ## Subscribing from the main process
 

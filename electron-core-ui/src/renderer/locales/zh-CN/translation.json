@@ -390,7 +390,10 @@
     "listInstances": "列出 MCP 实例",
     "listThemes": "列出可用主题",
     "getCurrentTheme": "获取当前主题",
-    "switchTheme": "切换活跃主题"
+    "getSettings": "列出应用设置",
+    "setSetting": "修改设置",
+    "patchSettings": "一次修改多个设置",
+    "resetSetting": "重置设置"
   },
   "customWco": {
     "minimize": "最小化",

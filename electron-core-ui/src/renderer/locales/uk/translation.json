@@ -390,7 +390,10 @@
     "listInstances": "Список екземплярів MCP",
     "listThemes": "Список доступних тем",
     "getCurrentTheme": "Отримати поточну тему",
-    "switchTheme": "Змінити активну тему"
+    "getSettings": "Показати налаштування застосунку",
+    "setSetting": "Змінити налаштування",
+    "patchSettings": "Змінити кілька налаштувань одночасно",
+    "resetSetting": "Скинути налаштування"
   },
   "customWco": {
     "minimize": "Мінімізувати",

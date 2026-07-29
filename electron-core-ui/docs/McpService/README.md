@@ -606,17 +606,7 @@ Returns the `id`, `name`, and `family` of the currently active color theme. Read
 { "id": "dark/Default Dark+", "name": "Default Dark+", "family": "dark" }
 ```
 
-### `switch_theme`
-
-Changes the app color theme to the one identified by `themeId`. Validates the id against `ThemeService.listThemes()`, persists the selection to `StorageService`, and broadcasts `theme:changed` to all renderer windows so the new palette is applied live — the same path the UI uses. Returns an error when `themeId` is unknown or `ThemeService` is uninitialised.
-
-```jsonc
-{ "themeId": "light/Default Light+" }
-// Reply:
-{ "id": "light/Default Light+", "name": "Default Light+", "family": "light", "changed": true }
-```
-
-`changed: false` is returned (without broadcasting) when the requested theme is already active.
+There is no dedicated route to CHANGE the theme: the theme is an ordinary setting, so `set_setting` with the theme's key does it (and reports the installed ids as that setting's allowed values). See [Settings routes](#settings-routes).
 
 ### `set_tab_maximized`
 
@@ -749,6 +739,121 @@ Returns `getComputedStyle` values for an element. Pass a `properties` array to f
 ```
 
 Reply: `{ selector, pseudoElement, properties: { name: value, ... } }`. Omitting `properties` returns the FULL computed style (long but exhaustive).
+
+## Settings routes
+
+Four generic routes read and write **every** setting the app declares, at either scope. They know no setting id: the catalogue is flattened from the same registry that builds the GUI settings page — this library's `resources/settings/defaults.yaml` plus whatever YAML the consuming app registers — so a newly-added setting appears on these routes, with its constraints, on the next call.
+
+Writes go through `SettingsService.set()` / `setWorkspaceValue()`, i.e. the exact path a click in the settings page takes. That is what makes a change *apply* and not merely persist: the renderer's `SettingsProvider` listens to the resulting `settings:changed` broadcast and runs whatever side effect the key carries — swapping the palette for the theme key, calling `i18n.changeLanguage` + the `i18n:set-language` IPC for the language key (see [Settings architecture › Side Effects](../Architecture/Settings.md#side-effects)). Those side effects live in the renderer, so a change lands live only while a window is open; with no window the value is still persisted and applies on the next launch.
+
+All four require the host to have initialised `SettingsService`, and return `SettingsService is not initialised` otherwise.
+
+### Scopes
+
+| `scope` | Layer |
+|---------|-------|
+| `user` (default) | The global, app-wide layer, persisted by `StorageService`. |
+| `workspace` | The per-project overlay (`<workspace>/.restorm/settings.json`), available only while a project is open. |
+
+Reading or writing the `workspace` scope with no project open is an error naming the reason. A setting declared `userOnly` (locale, for instance) reports `editableScopes: ["user"]` and refuses a workspace write.
+
+Deliberate divergence from the UI: the settings page's Workspace tab *hides* `userOnly` settings, whereas `get_settings` at the `workspace` scope still lists them, with `editableScopes: ["user"]`. A caller enumerating the API is better served by seeing the setting and why it can't be written there than by a key that silently doesn't exist at one scope.
+
+### `get_settings`
+
+Returns every setting at the requested scope. `query` filters case-insensitively over key, title and description.
+
+```jsonc
+{ "scope": "user", "query": "font" }   // both optional
+// Reply:
+{
+  "scope": "user",
+  "workspacePath": "/home/me/projects/demo",   // null when no project is open
+  "count": 1,
+  "settings": [
+    {
+      "key": "appearance.editor:fontSize",     // pass this verbatim to set_setting
+      "groupPath": ["appearance", "editor"],
+      "title": "Font size",                    // translated
+      "description": "Font size of the code editor, in pixels.",
+      "type": "number",
+      "default": 14,
+      "allowed": { "kind": "number", "min": 8, "max": 72, "integer": true },
+      "value": 18,                             // value AT THIS SCOPE, null when the layer doesn't override it
+      "effective": 18,                         // value actually in force, across all layers
+      "effectiveSource": "user",               // "workspace" | "user" | "default"
+      "editableScopes": ["user", "workspace"],
+      "capability": "pro.editor"               // present only when the setting declares one
+    }
+  ]
+}
+```
+
+`allowed` is derived from the setting's declared `type` + `params`:
+
+| `kind` | Setting type | Fields |
+|--------|--------------|--------|
+| `boolean` | `toggle` | -- |
+| `enum` | `enum` | `values: [{ value, label }]` (labels translated) |
+| `number` | `number` | `min?`, `max?`, `integer` |
+| `text` | `text` | `maxLength?` |
+| `theme` | `theme` | `values: [{ value, label, family }]` — the installed themes; empty when no `ThemeService` is running, in which case any id is accepted |
+| `any` | a host-registered custom type | `valueType`: `string` \| `number` \| `boolean` |
+
+Feature-gated settings whose flag is off are absent, exactly as they are absent from the settings page.
+
+`capability` is reported for information only — these routes do NOT refuse a write to a capability-gated setting. `capability` names an entitlement in the HOST's plan system, which ECUI's main process knows nothing about (in the UI it is the renderer's `CapabilityGate` that greys the control). A host that gates paid features over MCP does it where it already owns that policy: the per-tool `McpToolGate`, installed with `setToolGate()`.
+
+### `set_setting`
+
+Sets one setting, validated against the `allowed` domain above. A refusal names the constraint and the accepted values; nothing is written.
+
+```jsonc
+{ "key": "appearance:theme", "value": "light/Default Light+" }   // scope optional
+// Reply:
+{
+  "scope": "user",
+  "key": "appearance:theme",
+  "previous": null,
+  "value": "light/Default Light+",
+  "effective": "light/Default Light+",
+  "effectiveSource": "user"
+}
+```
+
+### `patch_settings`
+
+Sets several settings together. Validation is **all-or-nothing**: every pair is checked first and, if any is refused, nothing is written and the reply lists every rejection — a partly-wrong patch never leaves the app half-updated.
+
+```jsonc
+{ "values": { "appearance:language": "fr", "appearance.editor:fontSize": 18 }, "scope": "user" }
+// Reply:
+{
+  "scope": "user",
+  "applied": 2,
+  "settings": [
+    { "key": "appearance:language", "value": "fr", "effective": "fr", "effectiveSource": "user" },
+    { "key": "appearance.editor:fontSize", "value": 18, "effective": 18, "effectiveSource": "user" }
+  ]
+}
+// On refusal (isError, nothing written):
+{
+  "scope": "user",
+  "applied": 0,
+  "rejected": [{ "key": "appearance:language", "error": "\"kl\" is not a valid value for \"appearance:language\". Allowed values: en, fr, …" }],
+  "message": "Nothing was written — fix every rejected value and retry."
+}
+```
+
+### `reset_setting`
+
+Drops the value held at the requested scope so the setting falls back to the layer beneath — the user value for a workspace reset, the declared default for a user reset. Same effect as "Reset Setting" in the settings page gear menu.
+
+```jsonc
+{ "key": "appearance.editor:fontSize", "scope": "workspace" }
+// Reply:
+{ "scope": "workspace", "key": "appearance.editor:fontSize", "previous": 30, "value": null, "effective": 16, "effectiveSource": "user" }
+```
 
 ## System dialog bypass
 

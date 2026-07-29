@@ -194,7 +194,11 @@ export const PRO_MCP_TOOLS: ReadonlySet<string> = new Set([
   'exit',
   'get_current_theme',
   'list_themes',
-  'switch_theme',
+  // application settings — the generic read/write routes over every setting
+  'get_settings',
+  'set_setting',
+  'patch_settings',
+  'reset_setting',
   'get_workbench_layout',
   'set_workbench_layout'
 ])

@@ -390,7 +390,10 @@
     "listInstances": "Liệt kê các phiên bản MCP",
     "listThemes": "Liệt kê các chủ đề có sẵn",
     "getCurrentTheme": "Lấy chủ đề hiện tại",
-    "switchTheme": "Chuyển chủ đề đang hoạt động"
+    "getSettings": "Liệt kê cài đặt ứng dụng",
+    "setSetting": "Thay đổi một cài đặt",
+    "patchSettings": "Thay đổi nhiều cài đặt cùng lúc",
+    "resetSetting": "Đặt lại một cài đặt"
   },
   "customWco": {
     "minimize": "Thu nhỏ",

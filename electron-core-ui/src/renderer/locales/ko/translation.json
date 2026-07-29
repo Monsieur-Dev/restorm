@@ -390,7 +390,10 @@
     "listInstances": "MCP 인스턴스 목록",
     "listThemes": "사용 가능한 테마 목록",
     "getCurrentTheme": "현재 테마 가져오기",
-    "switchTheme": "활성 테마 전환"
+    "getSettings": "앱 설정 목록 표시",
+    "setSetting": "설정 변경",
+    "patchSettings": "여러 설정을 한 번에 변경",
+    "resetSetting": "설정 초기화"
   },
   "customWco": {
     "minimize": "최소화",

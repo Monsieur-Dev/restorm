@@ -390,7 +390,10 @@
     "listInstances": "MCPインスタンスを一覧表示",
     "listThemes": "利用可能なテーマを一覧表示",
     "getCurrentTheme": "現在のテーマを取得",
-    "switchTheme": "アクティブなテーマを切り替え"
+    "getSettings": "アプリの設定を一覧表示",
+    "setSetting": "設定を変更",
+    "patchSettings": "複数の設定をまとめて変更",
+    "resetSetting": "設定をリセット"
   },
   "customWco": {
     "minimize": "最小化",

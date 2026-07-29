@@ -390,7 +390,10 @@
     "listInstances": "Vypsat instance MCP",
     "listThemes": "Vypsat dostupná témata",
     "getCurrentTheme": "Zobrazit aktuální téma",
-    "switchTheme": "Přepnout aktivní téma"
+    "getSettings": "Zobrazit nastavení aplikace",
+    "setSetting": "Změnit nastavení",
+    "patchSettings": "Změnit několik nastavení najednou",
+    "resetSetting": "Obnovit nastavení"
   },
   "customWco": {
     "minimize": "Minimalizovat",

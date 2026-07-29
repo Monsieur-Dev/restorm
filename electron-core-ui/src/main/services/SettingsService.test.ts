@@ -1221,5 +1221,43 @@ describe('SettingsService', () => {
         expect(filtered).toEqual([])
       })
     })
+
+    describe('getFiltered()', () => {
+      it('drops feature-gated settings that getAll() still returns', () => {
+        mockIsEnabled.mockReturnValue(false)
+
+        const service = createService(makeFeatureGatedConfig())
+
+        expect(service.getAll().map(s => s.id)).toEqual(['theme', 'effects'])
+        expect(service.getFiltered().map(s => s.id)).toEqual(['theme'])
+      })
+
+      it('keeps them when the feature is enabled', () => {
+        mockIsEnabled.mockReturnValue(true)
+
+        const service = createService(makeFeatureGatedConfig())
+
+        expect(service.getFiltered().map(s => s.id)).toEqual(['theme', 'effects'])
+      })
+
+      it('resolves storage keys through the nested group path', () => {
+        mockIsEnabled.mockReturnValue(true)
+
+        const service = createService(makeNestedFeatureGatedConfig())
+
+        expect(service.getFiltered().map(s => s.storageKey)).toEqual([
+          'root.experimental:beta',
+          'root:stable'
+        ])
+      })
+
+      it('omits a nested group whose only settings are gated off', () => {
+        mockIsEnabled.mockReturnValue(false)
+
+        const service = createService(makeNestedFeatureGatedConfig())
+
+        expect(service.getFiltered().map(s => s.storageKey)).toEqual(['root:stable'])
+      })
+    })
   })
 })

@@ -390,7 +390,10 @@
     "listInstances": "MCP-példányok listázása",
     "listThemes": "Elérhető témák listázása",
     "getCurrentTheme": "Jelenlegi téma lekérése",
-    "switchTheme": "Aktív téma váltása"
+    "getSettings": "Alkalmazásbeállítások listázása",
+    "setSetting": "Beállítás módosítása",
+    "patchSettings": "Több beállítás módosítása egyszerre",
+    "resetSetting": "Beállítás visszaállítása"
   },
   "customWco": {
     "minimize": "Kis méret",

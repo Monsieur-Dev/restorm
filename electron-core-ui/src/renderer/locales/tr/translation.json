@@ -390,7 +390,10 @@
     "listInstances": "MCP örneklerini listele",
     "listThemes": "Mevcut temaları listele",
     "getCurrentTheme": "Geçerli temayı al",
-    "switchTheme": "Etkin temayı değiştir"
+    "getSettings": "Uygulama ayarlarını listele",
+    "setSetting": "Bir ayarı değiştir",
+    "patchSettings": "Birden fazla ayarı aynı anda değiştir",
+    "resetSetting": "Bir ayarı sıfırla"
   },
   "customWco": {
     "minimize": "Küçült",

@@ -390,7 +390,10 @@
     "listInstances": "List MCP instances",
     "listThemes": "List available themes",
     "getCurrentTheme": "Get the current theme",
-    "switchTheme": "Switch the active theme"
+    "getSettings": "List the application settings",
+    "setSetting": "Set an application setting",
+    "patchSettings": "Set several settings at once",
+    "resetSetting": "Reset an application setting"
   },
   "customWco": {
     "minimize": "Minimize",

@@ -390,7 +390,10 @@
     "listInstances": "Lista instancji MCP",
     "listThemes": "Lista dostępnych motywów",
     "getCurrentTheme": "Pobierz bieżący motyw",
-    "switchTheme": "Przełącz aktywny motyw"
+    "getSettings": "Wyświetl ustawienia aplikacji",
+    "setSetting": "Zmień ustawienie",
+    "patchSettings": "Zmień kilka ustawień naraz",
+    "resetSetting": "Przywróć ustawienie"
   },
   "customWco": {
     "minimize": "Minimalizuj",

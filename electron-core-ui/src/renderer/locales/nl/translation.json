@@ -390,7 +390,10 @@
     "listInstances": "MCP-instanties weergeven",
     "listThemes": "Beschikbare thema's weergeven",
     "getCurrentTheme": "Huidig thema ophalen",
-    "switchTheme": "Actief thema wisselen"
+    "getSettings": "Applicatie-instellingen weergeven",
+    "setSetting": "Een instelling wijzigen",
+    "patchSettings": "Meerdere instellingen tegelijk wijzigen",
+    "resetSetting": "Een instelling herstellen"
   },
   "customWco": {
     "minimize": "Minimaliseren",

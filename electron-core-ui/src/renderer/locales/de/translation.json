@@ -390,7 +390,10 @@
     "listInstances": "MCP-Instanzen auflisten",
     "listThemes": "Verfügbare Themes auflisten",
     "getCurrentTheme": "Aktuelles Theme anzeigen",
-    "switchTheme": "Aktives Theme wechseln"
+    "getSettings": "Anwendungseinstellungen auflisten",
+    "setSetting": "Eine Einstellung ändern",
+    "patchSettings": "Mehrere Einstellungen auf einmal ändern",
+    "resetSetting": "Eine Einstellung zurücksetzen"
   },
   "customWco": {
     "minimize": "Minimieren",

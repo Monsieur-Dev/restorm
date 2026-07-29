@@ -390,7 +390,10 @@
     "listInstances": "Listaa MCP-instanssit",
     "listThemes": "Luettele käytettävissä olevat teemat",
     "getCurrentTheme": "Hae nykyinen teema",
-    "switchTheme": "Vaihda aktiivinen teema"
+    "getSettings": "Näytä sovelluksen asetukset",
+    "setSetting": "Muuta asetusta",
+    "patchSettings": "Muuta useita asetuksia kerralla",
+    "resetSetting": "Palauta asetus"
   },
   "customWco": {
     "minimize": "Pienennä",

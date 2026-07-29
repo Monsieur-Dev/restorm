@@ -390,7 +390,10 @@
     "listInstances": "Listare instanțe MCP",
     "listThemes": "Lista teme disponibile",
     "getCurrentTheme": "Obține tema curentă",
-    "switchTheme": "Schimbă tema activă"
+    "getSettings": "Listează setările aplicației",
+    "setSetting": "Modifică o setare",
+    "patchSettings": "Modifică mai multe setări deodată",
+    "resetSetting": "Resetează o setare"
   },
   "customWco": {
     "minimize": "Minimizare",

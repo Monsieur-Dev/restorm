@@ -14,6 +14,21 @@ import { z } from 'zod'
 import { logger } from './LoggerService'
 import { getThemeService } from './ThemeService'
 import { getStorageService } from './StorageService'
+import { getSettingsService, isSettingsServiceInitialized } from './SettingsService'
+import { i18nService } from './I18nService'
+import {
+  SETTINGS_SCOPES,
+  applySettingValue,
+  buildSettingsCatalog,
+  checkScopeReadable,
+  checkScopeWritable,
+  resetSettingValue,
+  validateSettingValue,
+  validateSettingWrites,
+  type CatalogThemeInfo,
+  type SettingsCatalogDeps,
+  type SettingsScope
+} from './settingsCatalog'
 import { MCP_SESSION_ROUTING_KEY, MCP_FORWARDED_HEADER, forwardToNamedSession, readAllLiveEntries, probeMcpEndpoint } from './mcpDiscovery'
 import {
   MINI_BROWSER_OPEN_CHANNEL,
@@ -2810,7 +2825,8 @@ export class McpService {
         description:
           'Return the list of color themes available in the app, each with its `id`, ' +
           '`name` (display label), and `family` (`dark` | `light` | `hcDark` | `hcLight`). ' +
-          'Useful before calling `switch_theme` to discover valid theme ids. ' +
+          'Useful to discover valid theme ids before setting the theme setting through ' +
+          '`set_setting` (which also reports them as that setting\'s allowed values). ' +
           'Requires the host app to have initialised `ThemeService`.',
         inputSchema: {} as Record<string, unknown>
       },
@@ -2869,67 +2885,294 @@ export class McpService {
       }
     )
 
+    this.registerSettingsTools()
+  }
+
+  // ==========================================================================
+  // Settings tools
+  // ==========================================================================
+
+  /**
+   * The dependencies the settings catalogue reads through, or `null` when the
+   * host hasn't initialised `SettingsService`. The theme list is resolved
+   * lazily per call so a theme service that starts later is picked up without
+   * restarting the MCP server.
+   */
+  private settingsCatalogDeps(): SettingsCatalogDeps | null {
+    if (!isSettingsServiceInitialized()) return null
+    return {
+      store: getSettingsService(),
+      translate: (key: string) => i18nService.t(key) || key,
+      listThemes: (): CatalogThemeInfo[] | null => {
+        try {
+          return getThemeService().listThemes()
+        } catch {
+          return null
+        }
+      }
+    }
+  }
+
+  /** Parse the optional `scope` argument, defaulting to the user (global) layer. */
+  private static parseSettingsScope(raw: unknown): SettingsScope | null {
+    if (raw === undefined || raw === null || raw === '') return 'user'
+    return SETTINGS_SCOPES.find((s) => s === raw) ?? null
+  }
+
+  private static settingsError(text: string): McpToolResult {
+    return { content: [{ type: 'text', text }], isError: true }
+  }
+
+  private static settingsJson(payload: unknown): McpToolResult {
+    return { content: [{ type: 'text', text: JSON.stringify(payload, null, 2) }] }
+  }
+
+  /**
+   * Register the generic settings routes: one read + three writes over EVERY
+   * setting the app declares, at either scope.
+   *
+   * Nothing here knows a single setting id. The catalogue is assembled from the
+   * same registry that builds the GUI settings page (library defaults + the
+   * consuming app's own YAML), so a setting added anywhere shows up on these
+   * routes automatically — and because the writes go through `SettingsService`,
+   * whatever side effect a key carries in the UI (swapping the theme, changing
+   * the locale through the i18n IPC) applies identically here.
+   */
+  private registerSettingsTools(): void {
+    const scopeArg = z
+      .enum(['user', 'workspace'])
+      .optional()
+      .describe(
+        'Which layer to read/write: `user` (the global, app-wide layer — the default) or ' +
+        '`workspace` (the per-project overlay, only available while a project is open).'
+      )
+
     this.registerTool(
-      'switch_theme',
+      'get_settings',
       {
-        titleKey: 'mcpToolTitles.switchTheme',
-        title: 'Switch the active theme',
+        titleKey: 'mcpToolTitles.getSettings',
+        title: 'List the application settings',
         description:
-          'Change the app color theme to the one identified by `themeId`. The id must ' +
-          'match one of the values returned by `list_themes`. Persists the selection to ' +
-          '`StorageService` and broadcasts `theme:changed` to all renderer windows so the ' +
-          'new palette is applied live without a restart — the same path the UI uses. ' +
-          'Returns an error when `themeId` is unknown.',
+          'Return EVERY setting the app exposes at the given scope — the same list the GUI ' +
+          'settings page shows, assembled from the library defaults plus the settings the host ' +
+          'app registers, so newly-added settings appear here with no code change. Per setting: ' +
+          'its `key` (use it verbatim with `set_setting`), translated `title` + `description` of ' +
+          'what it does, its `allowed` domain (`boolean` | `enum` with the accepted values | ' +
+          '`number` with min/max/integer | `text` with maxLength | `theme` with the installed ' +
+          'theme ids | `any` for a host-specific type), the `value` stored at the requested scope ' +
+          '(`null` when that layer does not override it), the `effective` value actually in force ' +
+          'with its `effectiveSource`, and the scopes it may be written at. `query` filters on key, ' +
+          'title and description. Theme and language are ordinary settings here — set them through ' +
+          '`set_setting` rather than a dedicated route.',
         inputSchema: {
-          themeId: z.string().min(1).describe('Id of the theme to activate — must match a value from `list_themes`.')
+          scope: scopeArg,
+          query: z
+            .string()
+            .optional()
+            .describe('Case-insensitive filter over the setting key, title and description. Omit to list everything.')
         } as Record<string, unknown>
       },
       (args) => {
-        const themeId = typeof args['themeId'] === 'string' ? args['themeId'].trim() : ''
-        if (!themeId) {
-          return { content: [{ type: 'text', text: 'themeId is required' }], isError: true }
+        const deps = this.settingsCatalogDeps()
+        if (!deps) return McpService.settingsError('SettingsService is not initialised')
+
+        const scope = McpService.parseSettingsScope(args['scope'])
+        if (scope === null) {
+          return McpService.settingsError(`Unknown scope "${String(args['scope'])}". Valid scopes: ${SETTINGS_SCOPES.join(', ')}`)
         }
 
-        let themeService: ReturnType<typeof getThemeService>
-        try {
-          themeService = getThemeService()
-        } catch {
-          return { content: [{ type: 'text', text: 'ThemeService is not initialised' }], isError: true }
+        const unreadable = checkScopeReadable(deps, scope)
+        if (unreadable !== null) return McpService.settingsError(unreadable)
+
+        const query = typeof args['query'] === 'string' ? args['query'] : undefined
+        const settings = buildSettingsCatalog(deps, scope, query)
+        return McpService.settingsJson({
+          scope,
+          workspacePath: deps.store.getWorkspacePath(),
+          count: settings.length,
+          settings
+        })
+      }
+    )
+
+    this.registerTool(
+      'set_setting',
+      {
+        titleKey: 'mcpToolTitles.setSetting',
+        title: 'Set an application setting',
+        description:
+          'Set ONE setting to `value` at the given scope. The value is validated against the ' +
+          'domain `get_settings` reports for that key — an out-of-range number, an unknown enum ' +
+          'member or a wrong type is refused with the accepted values named. The write goes ' +
+          'through the same path the settings page uses, so it persists and applies live: ' +
+          'setting the theme key repaints the app, setting the language key switches the UI ' +
+          'locale. Call `get_settings` first when you do not already know the key.',
+        inputSchema: {
+          key: z
+            .string()
+            .min(1)
+            .describe('Storage key of the setting, exactly as returned by `get_settings` (e.g. `appearance:theme`).'),
+          value: z
+            .union([z.string(), z.number(), z.boolean()])
+            .describe('The new value. Must satisfy the `allowed` domain `get_settings` reports for this key.'),
+          scope: scopeArg
+        } as Record<string, unknown>
+      },
+      (args) => {
+        const deps = this.settingsCatalogDeps()
+        if (!deps) return McpService.settingsError('SettingsService is not initialised')
+
+        const scope = McpService.parseSettingsScope(args['scope'])
+        if (scope === null) {
+          return McpService.settingsError(`Unknown scope "${String(args['scope'])}". Valid scopes: ${SETTINGS_SCOPES.join(', ')}`)
         }
 
-        const themes = themeService.listThemes()
-        const target = themes.find(t => t.id === themeId)
-        if (!target) {
-          const available = themes.map(t => t.id).join(', ')
+        const key = typeof args['key'] === 'string' ? args['key'].trim() : ''
+        if (!key) return McpService.settingsError('key is required')
+
+        const catalog = buildSettingsCatalog(deps, scope)
+        const entry = catalog.find((e) => e.key === key)
+        const scopeError = checkScopeWritable(deps, entry, key, scope)
+        if (scopeError !== null || !entry) {
+          return McpService.settingsError(scopeError ?? `Unknown setting "${key}".`)
+        }
+
+        const validation = validateSettingValue(entry, args['value'])
+        if (!validation.ok) return McpService.settingsError(validation.error)
+
+        applySettingValue(deps, scope, key, validation.value)
+        logger.info('McpService set_setting', { key, scope })
+
+        const updated = buildSettingsCatalog(deps, scope).find((e) => e.key === key)
+        return McpService.settingsJson({
+          scope,
+          key,
+          previous: entry.value,
+          value: updated?.value ?? validation.value,
+          effective: updated?.effective ?? validation.value,
+          effectiveSource: updated?.effectiveSource ?? scope
+        })
+      }
+    )
+
+    this.registerTool(
+      'patch_settings',
+      {
+        titleKey: 'mcpToolTitles.patchSettings',
+        title: 'Set several application settings at once',
+        description:
+          'Set SEVERAL settings in one call, as a `values` object of `key: value` pairs, at the ' +
+          'given scope. Validation is all-or-nothing: every pair is checked against its domain ' +
+          'first and, if ANY of them is refused, nothing is written and the reply lists every ' +
+          'rejection with its reason — so a partly-wrong patch never leaves the app half-updated. ' +
+          'Use `get_settings` for the keys and their accepted values.',
+        inputSchema: {
+          values: z
+            .record(z.string(), z.union([z.string(), z.number(), z.boolean()]))
+            .describe('Object of `settingKey: value` pairs to apply together.'),
+          scope: scopeArg
+        } as Record<string, unknown>
+      },
+      (args) => {
+        const deps = this.settingsCatalogDeps()
+        if (!deps) return McpService.settingsError('SettingsService is not initialised')
+
+        const scope = McpService.parseSettingsScope(args['scope'])
+        if (scope === null) {
+          return McpService.settingsError(`Unknown scope "${String(args['scope'])}". Valid scopes: ${SETTINGS_SCOPES.join(', ')}`)
+        }
+
+        const rawValues = args['values']
+        if (typeof rawValues !== 'object' || rawValues === null || Array.isArray(rawValues)) {
+          return McpService.settingsError('values must be an object of `settingKey: value` pairs')
+        }
+        const writes = Object.entries(rawValues as Record<string, unknown>).map(([key, value]) => ({ key, value }))
+        if (writes.length === 0) return McpService.settingsError('values must carry at least one setting')
+
+        const catalog = buildSettingsCatalog(deps, scope)
+        const { accepted, rejected } = validateSettingWrites(deps, catalog, scope, writes)
+        if (rejected.length > 0) {
           return {
-            content: [{ type: 'text', text: `Unknown theme id "${themeId}". Available ids: ${available}` }],
+            content: [{
+              type: 'text',
+              text: JSON.stringify(
+                { scope, applied: 0, rejected, message: 'Nothing was written — fix every rejected value and retry.' },
+                null,
+                2
+              )
+            }],
             isError: true
           }
         }
 
-        const storageService = getStorageService()
-        const previous = storageService.get('currentTheme') as string | undefined
-        if (previous === themeId) {
-          logger.info('McpService switch_theme: already active, skipping broadcast', { themeId })
-          return {
-            content: [{
-              type: 'text',
-              text: JSON.stringify({ id: target.id, name: target.name, family: target.type, changed: false }, null, 2)
-            }]
-          }
+        for (const write of accepted) {
+          applySettingValue(deps, scope, write.key, write.value)
+        }
+        logger.info('McpService patch_settings', { scope, count: accepted.length })
+
+        const updated = buildSettingsCatalog(deps, scope)
+        return McpService.settingsJson({
+          scope,
+          applied: accepted.length,
+          settings: accepted.map((write) => {
+            const entry = updated.find((e) => e.key === write.key)
+            return {
+              key: write.key,
+              value: entry?.value ?? write.value,
+              effective: entry?.effective ?? write.value,
+              effectiveSource: entry?.effectiveSource ?? scope
+            }
+          })
+        })
+      }
+    )
+
+    this.registerTool(
+      'reset_setting',
+      {
+        titleKey: 'mcpToolTitles.resetSetting',
+        title: 'Reset an application setting',
+        description:
+          'Drop the value a setting holds at the given scope, so it falls back to the layer ' +
+          'beneath it — the user value for a workspace reset, the declared default for a user ' +
+          'reset. Same effect as "Reset Setting" in the settings page gear menu. The reply ' +
+          'reports the value now in force and where it comes from.',
+        inputSchema: {
+          key: z.string().min(1).describe('Storage key of the setting to reset, as returned by `get_settings`.'),
+          scope: scopeArg
+        } as Record<string, unknown>
+      },
+      (args) => {
+        const deps = this.settingsCatalogDeps()
+        if (!deps) return McpService.settingsError('SettingsService is not initialised')
+
+        const scope = McpService.parseSettingsScope(args['scope'])
+        if (scope === null) {
+          return McpService.settingsError(`Unknown scope "${String(args['scope'])}". Valid scopes: ${SETTINGS_SCOPES.join(', ')}`)
         }
 
-        storageService.set('currentTheme', themeId)
-        for (const win of BrowserWindow.getAllWindows()) {
-          if (!win.isDestroyed()) win.webContents.send('theme:changed', themeId)
+        const key = typeof args['key'] === 'string' ? args['key'].trim() : ''
+        if (!key) return McpService.settingsError('key is required')
+
+        const catalog = buildSettingsCatalog(deps, scope)
+        const entry = catalog.find((e) => e.key === key)
+        const scopeError = checkScopeWritable(deps, entry, key, scope)
+        if (scopeError !== null || !entry) {
+          return McpService.settingsError(scopeError ?? `Unknown setting "${key}".`)
         }
-        logger.info('McpService switch_theme: theme changed and broadcasted', { themeId })
-        return {
-          content: [{
-            type: 'text',
-            text: JSON.stringify({ id: target.id, name: target.name, family: target.type, changed: true }, null, 2)
-          }]
-        }
+
+        resetSettingValue(deps, scope, key)
+        logger.info('McpService reset_setting', { key, scope })
+
+        const updated = buildSettingsCatalog(deps, scope).find((e) => e.key === key)
+        return McpService.settingsJson({
+          scope,
+          key,
+          previous: entry.value,
+          value: updated?.value ?? null,
+          effective: updated?.effective ?? entry.default,
+          effectiveSource: updated?.effectiveSource ?? 'default'
+        })
       }
     )
   }

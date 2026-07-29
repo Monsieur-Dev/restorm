@@ -390,7 +390,10 @@
     "listInstances": "Lista MCP-instanser",
     "listThemes": "Lista tillgängliga teman",
     "getCurrentTheme": "Hämta aktuellt tema",
-    "switchTheme": "Byt aktivt tema"
+    "getSettings": "Visa programmets inställningar",
+    "setSetting": "Ändra en inställning",
+    "patchSettings": "Ändra flera inställningar samtidigt",
+    "resetSetting": "Återställ en inställning"
   },
   "customWco": {
     "minimize": "Minimera",
