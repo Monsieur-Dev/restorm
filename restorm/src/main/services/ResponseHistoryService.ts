@@ -477,7 +477,7 @@ class ResponseHistoryService {
     const requestPathParams = this.getResolvedKeyValues(requestId, 'pathParams')
 
     const requestBodyData = this.getRequestBodyData(requestId)
-    const requestBody = requestBodyData ? this.buildHttpBody(requestId, requestBodyData) : undefined
+    const requestBody = requestBodyData ? this.buildHttpBody(requestId, requestBodyData, requestHeaders) : undefined
 
     let responseHeaders = this.headersRecordToKeyValues(result.headers)
     const contentTypeHeader = result.headers?.['content-type']
@@ -912,13 +912,18 @@ class ResponseHistoryService {
 
   private buildHttpBody(
     requestId: string,
-    body: { type?: string; content?: string; path?: string; fields?: unknown[] } | undefined
+    body: { type?: string; content?: string; path?: string; fields?: unknown[] } | undefined,
+    requestHeaders: ResponseHistoryKeyValue[] = []
   ): ResponseHistoryHttpBody | undefined {
     const bodyType = typeof body?.type === 'string' ? body.type : ''
     if (bodyType === 'text') {
+      // Resolve exactly like the executor does — Content-Type-aware — so the
+      // archived "what we sent" matches the bytes that went on the wire
+      // instead of a differently-escaped (or unresolved) rendering of it.
+      const contentType = requestHeaders.find((h) => h.key.toLowerCase() === 'content-type')?.value
       return {
         type: 'text',
-        content: body?.content ? contextService.resolveValue(body.content, requestId) : ''
+        content: body?.content ? contextService.resolveBodyValue(body.content, requestId, contentType) : ''
       }
     }
     if (bodyType === 'file') {

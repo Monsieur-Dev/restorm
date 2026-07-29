@@ -31,6 +31,16 @@ interface ServedSummary {
   response: { status: number; headers: Record<string, string>; body: string }
 }
 
+/** Case-insensitive lookup in an outgoing header map — header names are
+ * case-insensitive on the wire, and the user types them however they like. */
+function findHeaderValue(headers: Record<string, string>, name: string): string | undefined {
+  const wanted = name.toLowerCase()
+  for (const [key, value] of Object.entries(headers)) {
+    if (key.toLowerCase() === wanted) return value
+  }
+  return undefined
+}
+
 /** Flatten Node's `IncomingHttpHeaders` (string | string[] | undefined) to a
  * plain string map for the served summary. */
 function flattenIncomingHeaders(headers: IncomingMessage['headers']): Record<string, string> {
@@ -249,9 +259,15 @@ class HTTPExecutionService {
       // body fields. `form-data` / `file` produce a `Buffer` (a
       // multipart payload with a generated boundary); everything else
       // is a `string`.
+      //
+      // A text body is resolved Content-Type-aware: a JSON payload gets the
+      // JSON-safe substitution (braces of the document kept out of the
+      // Handlebars parse, injected values escaped when they land inside a
+      // string), anything else the raw whole-template substitution.
       let body: string | Buffer | undefined
+      const declaredContentType = findHeaderValue(headers, 'content-type')
       if (rawBody !== undefined) {
-        body = contextService.resolveValue(rawBody, requestId)
+        body = contextService.resolveBodyValue(rawBody, requestId, rawBodyContentType ?? declaredContentType)
         if (rawBodyContentType) {
           headers['Content-Type'] ??= rawBodyContentType
         }
@@ -259,7 +275,7 @@ class HTTPExecutionService {
         const bodyData = requestContext.fullData.body
         switch (bodyData.type) {
           case 'text':
-            body = contextService.resolveValue(bodyData.content, requestId)
+            body = contextService.resolveBodyValue(bodyData.content, requestId, declaredContentType)
             break
           case 'x-www-form-urlencoded': {
             const params = new URLSearchParams()

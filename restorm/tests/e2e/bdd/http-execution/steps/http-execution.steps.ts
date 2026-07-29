@@ -471,6 +471,38 @@ Then('the activity beam has stopped on the tab badge and the sidebar badge', asy
   await expect(sidebarBeam).toHaveCount(0, { timeout: 20_000 })
 })
 
+/** The values the sample's `hb*` environment variables carry — the `name` one
+ * is deliberately hostile to JSON string syntax (a quote, a backslash and a
+ * newline), so an unescaped substitution would produce an invalid document. */
+const HANDLEBARS_BODY_EXPECTED = {
+  name: 'Rex "the\\dog"\nline2',
+  nested: { tag: 'good boy' },
+  id: 42
+}
+
+Then('the server received the body as valid resolved JSON', async ({ callMcpTool }) => {
+  if (discovery === null) throw new Error('launch first')
+  if (currentRequestId === null) throw new Error('open a request first')
+  const disco = discovery
+  const reqId = currentRequestId
+  // Read what the echo mock reflected back: the raw bytes it received. Parsing
+  // them is the assertion — an unresolved `{{hbId}}` or an unescaped quote
+  // makes `JSON.parse` throw right here.
+  await expect(async () => {
+    const historyReply = await callMcpTool(disco, 'get_response_history', { requestId: reqId, limit: 1 })
+    const history = parsedReply(historyReply) as { entries?: { guid: string }[] }
+    const guid = history.entries?.[0]?.guid
+    expect(guid, 'no history entry for the dispatched request').toBeTruthy()
+    const detail = parsedReply(await callMcpTool(disco, 'get_response', { historyEntryId: guid })) as {
+      response?: { responseBody?: string; requestBody?: { content?: string } }
+    }
+    const echoed = JSON.parse(detail.response?.responseBody ?? '') as { body?: string }
+    expect(JSON.parse(echoed.body ?? '')).toEqual(HANDLEBARS_BODY_EXPECTED)
+    // The archived "what we sent" must be the same bytes the server got.
+    expect(detail.response?.requestBody?.content).toBe(echoed.body)
+  }).toPass({ timeout: 15_000 })
+})
+
 Then('the request has at least {int} history entry', async ({ callMcpTool }, n: number) => {
   if (discovery === null) throw new Error('launch first')
   if (currentRequestId === null) throw new Error('open a request first')

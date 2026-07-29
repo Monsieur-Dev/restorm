@@ -15,6 +15,7 @@
 
 import { BrowserWindow } from 'electron'
 import { resolveWithContextPriority } from '../../shared/utils/handlebars/resolveWithContextPriority'
+import { resolveJsonBodyTemplate, isJsonContentType } from '../../shared/utils/handlebars/resolveJsonBodyTemplate'
 import {
   eventBusService,
   type Subscription,
@@ -1481,6 +1482,35 @@ class ContextService {
     const context = this.effectiveEnvContext(ctx)
     if (!context) return value
     return this.transformValue(value, context)
+  }
+
+  /**
+   * Resolve a request BODY. A body the Content-Type declares as JSON goes
+   * through the JSON-aware resolver, which substitutes `{{ … }}` spans without
+   * feeding the document's own braces to the Handlebars parser (so an unquoted
+   * `{"id":{{petId}}}` resolves instead of failing to parse) and JSON-escapes
+   * every value it injects inside a string. Any other Content-Type — XML, plain
+   * text, none at all — keeps the raw whole-template substitution.
+   *
+   * Like `transformValue`, a resolution failure logs and returns the body
+   * verbatim rather than shipping a half-substituted payload.
+   */
+  resolveBodyValue(value: string, requestId: string, contentType?: string): string {
+    if (!isJsonContentType(contentType)) return this.resolveValue(value, requestId)
+    const ctx = this.requestContexts.get(requestId)
+    if (!ctx) return value
+    const context = this.effectiveEnvContext(ctx)
+    if (!context) return value
+    if (!value.includes('{{')) return value
+    try {
+      return resolveJsonBodyTemplate(value, context)
+    } catch (error) {
+      logger.warn('[ContextService] JSON body transform error', {
+        value,
+        error: String(error)
+      })
+      return value
+    }
   }
 
   /**
