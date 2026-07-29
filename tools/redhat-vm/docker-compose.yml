@@ -1,0 +1,40 @@
+# RedHat-family QA sandbox (KVM-accelerated, via qemux/qemu — full VM, own
+# kernel). For installing + launching the .rpm and exercising in-app auto-update
+# against a LOCAL feed (see tools/local-feed/). NOT a build/release path.
+#
+# Default ISO: Fedora Workstation (GNOME Software renders .rpm metadata; dnf/rpm
+# install path). Fedora is the closest freely-installable stand-in for the
+# RHEL/CentOS/Rocky .rpm target. Point BOOT at a Rocky/Alma ISO to test those.
+#
+# Start:  docker --context default compose up -d     <-- context matters (KVM!)
+# View:   http://localhost:8006         (web viewer — do the OS install here)
+# SSH:    ssh -p 2222 restorm@localhost (Fedora ships sshd; enable it)
+services:
+  redhat:
+    image: qemux/qemu
+    container_name: restorm-redhat-vm
+    environment:
+      # Fedora Workstation Live. Bump the version as needed, or swap for
+      # Rocky/AlmaLinux to validate the enterprise .rpm path.
+      BOOT: "https://download.fedoraproject.org/pub/fedora/linux/releases/41/Workstation/x86_64/iso/Fedora-Workstation-Live-x86_64-41-1.4.iso"
+      RAM_SIZE: "6G"
+      CPU_CORES: "4"
+      DISK_SIZE: "32G"
+    devices:
+      - /dev/kvm
+      - /dev/net/tun
+    cap_add:
+      - NET_ADMIN
+    ports:
+      - "8007:8006"        # web viewer (noVNC) — 8007 on host to coexist w/ linux-vm
+      - "5901:5900/tcp"    # raw VNC
+      - "5901:5900/udp"
+      - "2223:22"          # SSH
+    volumes:
+      - redhat_storage:/storage
+      - ./shared:/data     # Samba share //host.lan/Data in the guest
+    stop_grace_period: 2m
+    restart: "no"
+
+volumes:
+  redhat_storage:
