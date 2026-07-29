@@ -29,7 +29,8 @@
     "removeFromFavorites": "Quitar de favoritos",
     "confirmRemoveFavorite": "¿Seguro que quieres quitar \"{{fileName}}\" de favoritos?",
     "favoritesLandmarkLabel": "Lista de favoritos",
-    "recentsLandmarkLabel": "Lista de archivos recientes"
+    "recentsLandmarkLabel": "Lista de archivos recientes",
+    "openContainingFolder": "Abrir carpeta contenedora"
   },
   "welcomeScreen": {
     "landmarkLabel": "Bienvenida"

@@ -29,7 +29,8 @@
     "removeFromFavorites": "Fjern fra favoritter",
     "confirmRemoveFavorite": "Er du sikker på, at du vil fjerne \"{{fileName}}\" fra favoritter?",
     "favoritesLandmarkLabel": "Favoritliste",
-    "recentsLandmarkLabel": "Liste over seneste filer"
+    "recentsLandmarkLabel": "Liste over seneste filer",
+    "openContainingFolder": "Åbn indeholdende mappe"
   },
   "welcomeScreen": {
     "landmarkLabel": "Velkomst"

@@ -29,7 +29,8 @@
     "removeFromFavorites": "Видалити з обраного",
     "confirmRemoveFavorite": "Ви дійсно хочете видалити «{{fileName}}» з обраного?",
     "favoritesLandmarkLabel": "Список обраних",
-    "recentsLandmarkLabel": "Список останніх файлів"
+    "recentsLandmarkLabel": "Список останніх файлів",
+    "openContainingFolder": "Відкрити папку, що містить файл"
   },
   "welcomeScreen": {
     "landmarkLabel": "Ласкаво просимо"

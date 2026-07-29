@@ -29,7 +29,8 @@
     "removeFromFavorites": "从收藏中移除",
     "confirmRemoveFavorite": "确定要将 \"{{fileName}}\" 从收藏中移除吗？",
     "favoritesLandmarkLabel": "收藏列表",
-    "recentsLandmarkLabel": "最近文件列表"
+    "recentsLandmarkLabel": "最近文件列表",
+    "openContainingFolder": "打开所在文件夹"
   },
   "welcomeScreen": {
     "landmarkLabel": "欢迎"

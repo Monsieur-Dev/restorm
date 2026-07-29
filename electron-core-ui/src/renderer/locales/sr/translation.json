@@ -29,7 +29,8 @@
     "removeFromFavorites": "Ukloni iz omiljenog",
     "confirmRemoveFavorite": "Da li ste sigurni da želite da uklonite \"{{fileName}}\" iz omiljenog?",
     "favoritesLandmarkLabel": "Lista omiljenog",
-    "recentsLandmarkLabel": "Lista nedavnih datoteka"
+    "recentsLandmarkLabel": "Lista nedavnih datoteka",
+    "openContainingFolder": "Otvori fasciklu koja sadrži datoteku"
   },
   "welcomeScreen": {
     "landmarkLabel": "Dobrodošli"

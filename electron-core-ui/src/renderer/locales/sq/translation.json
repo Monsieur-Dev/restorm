@@ -29,7 +29,8 @@
     "removeFromFavorites": "Hiq nga të preferuarat",
     "confirmRemoveFavorite": "Jeni i sigurt se doni të hiqni \"{{fileName}}\" nga të preferuarat?",
     "favoritesLandmarkLabel": "Lista e të preferuarave",
-    "recentsLandmarkLabel": "Lista e skedarëve të fundit"
+    "recentsLandmarkLabel": "Lista e skedarëve të fundit",
+    "openContainingFolder": "Hap dosjen që përmban skedarin"
   },
   "welcomeScreen": {
     "landmarkLabel": "Mirësevini"

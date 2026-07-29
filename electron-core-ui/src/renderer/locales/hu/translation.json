@@ -29,7 +29,8 @@
     "removeFromFavorites": "Eltávolítás a kedvencekből",
     "confirmRemoveFavorite": "Biztosan eltávolítja a(z) \"{{fileName}}\" elemet a kedvencek közül?",
     "favoritesLandmarkLabel": "Kedvencek listája",
-    "recentsLandmarkLabel": "Legutóbbi fájlok listája"
+    "recentsLandmarkLabel": "Legutóbbi fájlok listája",
+    "openContainingFolder": "Tartalmazó mappa megnyitása"
   },
   "welcomeScreen": {
     "landmarkLabel": "Üdvözöljük"

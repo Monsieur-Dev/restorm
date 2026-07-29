@@ -29,7 +29,8 @@
     "removeFromFavorites": "Favorilerden çıkar",
     "confirmRemoveFavorite": "\"{{fileName}}\" dosyasını favorilerden çıkarmak istediğinize emin misiniz?",
     "favoritesLandmarkLabel": "Favoriler listesi",
-    "recentsLandmarkLabel": "Son kullanılan dosyalar listesi"
+    "recentsLandmarkLabel": "Son kullanılan dosyalar listesi",
+    "openContainingFolder": "İçeren klasörü aç"
   },
   "welcomeScreen": {
     "landmarkLabel": "Hoş geldiniz"

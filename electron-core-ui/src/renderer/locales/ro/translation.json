@@ -29,7 +29,8 @@
     "removeFromFavorites": "Elimină din favorite",
     "confirmRemoveFavorite": "Sigur doriți să eliminați \"{{fileName}}\" din favorite?",
     "favoritesLandmarkLabel": "Listă de favorite",
-    "recentsLandmarkLabel": "Listă de fișiere recente"
+    "recentsLandmarkLabel": "Listă de fișiere recente",
+    "openContainingFolder": "Deschide folderul care conține fișierul"
   },
   "welcomeScreen": {
     "landmarkLabel": "Bine ați venit"

@@ -79,6 +79,7 @@ import {
   miniBrowserGoBackArgs, miniBrowserGoForwardArgs, miniBrowserGetStateArgs,
   miniBrowserCaptureArgs
 } from './ipc/schemas'
+import { isRevealablePath } from './ipc/revealAuthority'
 
 /**
  * Get mocked folder path for E2E tests, if E2E_MOCK_SAVE_FOLDER env var is set.
@@ -669,20 +670,24 @@ export function registerRestormIPC(deps: {
     logger.debug('Reveal in folder requested', { path })
 
     // The renderer names the path, but the main process is the authority on
-    // what may be handed to the OS shell. The only thing this channel is
-    // allowed to reveal is the project the app currently has open, so a
-    // caller cannot repurpose it into "reveal any path on disk". Resolved
-    // from the service rather than trusted from the argument, and DENIED
-    // when nothing is open — an unresolvable root is a refusal, not a
-    // skipped check. `getFilePath()` is the same field the statusbar cell
-    // renders, and folder-mode sets it to the folder, so both modes work.
-    const openProjectPath = isFileServiceInitialized() ? getFileService().getFilePath() : null
-    if (!openProjectPath) {
-      logger.warn('Blocked reveal - no project open')
+    // what may be handed to the OS shell — see `isRevealablePath`, which owns
+    // the rule. Both inputs are read from the service rather than trusted
+    // from the argument: `getFilePath()` is the same field the statusbar cell
+    // renders (folder-mode sets it to the folder, so both modes work), and
+    // `getRecentFiles()` is already filtered to paths that still exist, with
+    // favorites a subset of it. An uninitialised service resolves to no
+    // authority at all — a refusal, not a skipped check.
+    const fileService = isFileServiceInitialized() ? getFileService() : null
+    if (!fileService) {
+      logger.warn('Blocked reveal - file service unavailable')
       return { success: false, error: 'no project open' }
     }
-    if (path !== openProjectPath) {
-      logger.warn('Blocked reveal - path is not the open project', { path })
+    const allowed = isRevealablePath(path, {
+      openProjectPath: fileService.getFilePath(),
+      recentPaths: fileService.getRecentFiles().map((file) => file.path)
+    })
+    if (!allowed) {
+      logger.warn('Blocked reveal - path is neither the open project nor a tracked recent file', { path })
       return { success: false, error: 'path outside project' }
     }
 

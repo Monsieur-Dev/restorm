@@ -29,7 +29,8 @@
     "removeFromFavorites": "Hapus dari favorit",
     "confirmRemoveFavorite": "Apakah Anda yakin ingin menghapus \"{{fileName}}\" dari favorit?",
     "favoritesLandmarkLabel": "Daftar favorit",
-    "recentsLandmarkLabel": "Daftar file terbaru"
+    "recentsLandmarkLabel": "Daftar file terbaru",
+    "openContainingFolder": "Buka folder yang berisi file ini"
   },
   "welcomeScreen": {
     "landmarkLabel": "Selamat datang"

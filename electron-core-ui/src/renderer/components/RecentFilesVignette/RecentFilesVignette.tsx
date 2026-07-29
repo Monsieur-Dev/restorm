@@ -1,6 +1,9 @@
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
 import { Toggle } from '../Toggle'
+import { Tooltip } from '../Tooltip'
+import { ContextMenu, type ContextMenuItem } from '../ContextMenu/ContextMenu'
 import { Vignette, type VignetteDecoration } from '../Vignette'
 import { ScrollableElement } from '../ScrollableElement'
 import { useFileService } from '../../hooks/useFileService'
@@ -23,6 +26,74 @@ const splitPath = (fullPath: string): { directory: string; basename: string } =>
     directory: fullPath.slice(0, lastSep),
     basename: fullPath.slice(lastSep + 1)
   }
+}
+
+/**
+ * Cuts a directory into the part that may be elided (`head`, everything up
+ * to and including the last separator) and the part that must stay visible
+ * (`tail`, the immediate parent folder). `head + tail` re-forms the input
+ * exactly. Rendering them as two flex children — head shrinkable with an
+ * end-ellipsis, tail unshrinkable — is what produces the middle-ellipsis
+ * CSS alone cannot express.
+ */
+const splitDirectory = (directory: string): { head: string; tail: string } => {
+  const lastSep = Math.max(directory.lastIndexOf('/'), directory.lastIndexOf('\\'))
+  if (lastSep < 0) return { head: '', tail: directory }
+  return {
+    head: directory.slice(0, lastSep + 1),
+    tail: directory.slice(lastSep + 1)
+  }
+}
+
+/**
+ * The two text lines of a file row: the basename on top, the containing
+ * directory muted underneath. Shared by the favorites and the recents
+ * list so both stay in lockstep.
+ *
+ * Hovering a directory that had to be elided reveals the whole absolute
+ * path in a tooltip. Truncation is measured on hover rather than on mount
+ * so the answer stays right after a window resize without listening for
+ * one — the only moment it matters is the moment the pointer arrives.
+ */
+const FileRowText: React.FC<{ path: string }> = ({ path }) => {
+  const { directory, basename } = splitPath(path)
+  const { head, tail } = splitDirectory(directory)
+  const pathRef = useRef<HTMLSpanElement>(null)
+  const headRef = useRef<HTMLSpanElement>(null)
+  const [showFullPath, setShowFullPath] = useState(false)
+
+  const handleMouseEnter = useCallback((): void => {
+    // The head is the only shrinkable part, so it is where the ellipsis
+    // lands: overflowing content there means the line is not showing the
+    // whole path.
+    const headEl = headRef.current
+    setShowFullPath(headEl !== null && headEl.scrollWidth > headEl.clientWidth)
+  }, [])
+  const handleMouseLeave = useCallback((): void => { setShowFullPath(false) }, [])
+
+  return (
+    <div className="ecu-recent-files-vignette-item-text">
+      <span className="ecu-recent-files-vignette-item-name">{basename}</span>
+      {directory !== '' && (
+        <span
+          ref={pathRef}
+          className="ecu-recent-files-vignette-item-path"
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}
+        >
+          <span ref={headRef} className="ecu-recent-files-vignette-item-path-head">{head}</span>
+          <span className="ecu-recent-files-vignette-item-path-tail">{tail}</span>
+        </span>
+      )}
+      <Tooltip
+        targetRef={pathRef}
+        content={path}
+        show={showFullPath}
+        placement="below"
+        data-testid="recent-files-vignette-path-tooltip"
+      />
+    </div>
+  )
 }
 
 interface FileLike { path: string; name: string }
@@ -111,6 +182,14 @@ export interface RecentFilesVignetteProps {
    */
   confirmRemoveFavorite?: (fileName: string) => boolean | Promise<boolean>
   /**
+   * Optional handler for "open containing folder". When provided, every
+   * row gains a right-click context menu offering it; when omitted, no
+   * context menu is shown at all. Revealing a path in the OS file manager
+   * is a main-process concern, so the panel only reports which file the
+   * user asked for and leaves the shell call to the consumer.
+   */
+  onRevealInFolder?: (path: string) => void
+  /**
    * Vignette decoration applied to the frame. Defaults to `'random'`.
    * See the `Vignette` component for the list of built-in decorations.
    */
@@ -137,6 +216,7 @@ export interface RecentFilesVignetteProps {
 export const RecentFilesVignette: React.FC<RecentFilesVignetteProps> = ({
   onOpenFile,
   confirmRemoveFavorite,
+  onRevealInFolder,
   decoration = 'random',
   className,
   style,
@@ -144,6 +224,33 @@ export const RecentFilesVignette: React.FC<RecentFilesVignetteProps> = ({
 }) => {
   const { t } = useTranslation()
   const { recentFiles, favorites, toggleFavorite } = useFileService()
+
+  // One menu for the whole panel, re-anchored to whichever row was
+  // right-clicked — rows are transient (they animate in and out), so
+  // hanging a menu off each of them would tie it to a disappearing owner.
+  const [contextMenu, setContextMenu] = useState<{ x: number; y: number; path: string } | null>(null)
+  const closeContextMenu = useCallback((): void => { setContextMenu(null) }, [])
+
+  const handleRowContextMenu = useCallback(
+    (event: React.MouseEvent, path: string): void => {
+      if (!onRevealInFolder) return
+      event.preventDefault()
+      setContextMenu({ x: event.clientX, y: event.clientY, path })
+    },
+    [onRevealInFolder]
+  )
+
+  const contextMenuItems = useMemo<ContextMenuItem[]>(() => {
+    if (!onRevealInFolder || !contextMenu) return []
+    const { path } = contextMenu
+    return [{
+      id: 'reveal-in-folder',
+      label: t('recentFilesVignette.openContainingFolder'),
+      icon: 'folder-opened',
+      'data-testid': 'recent-files-vignette-reveal-in-folder',
+      onClick: () => { onRevealInFolder(path) }
+    }]
+  }, [onRevealInFolder, contextMenu, t])
 
   const askConfirm = useCallback(async (fileName: string): Promise<boolean> => {
     if (confirmRemoveFavorite) return confirmRemoveFavorite(fileName)
@@ -231,6 +338,7 @@ export const RecentFilesVignette: React.FC<RecentFilesVignetteProps> = ({
                     role="button"
                     tabIndex={0}
                     onClick={() => { onOpenFile(file.path) }}
+                    onContextMenu={(e) => { handleRowContextMenu(e, file.path) }}
                     onKeyDown={(e) => {
                       if (e.key === 'Enter' || e.key === ' ') {
                         e.preventDefault()
@@ -238,8 +346,7 @@ export const RecentFilesVignette: React.FC<RecentFilesVignetteProps> = ({
                       }
                     }}
                   >
-                    <span className="ecu-recent-files-vignette-item-name">{splitPath(file.path).basename}</span>
-                    <span className="ecu-recent-files-vignette-item-path">{splitPath(file.path).directory}</span>
+                    <FileRowText path={file.path} />
                     <div
                       className="ecu-recent-files-vignette-toggle-wrap"
                       onClick={(e) => { e.stopPropagation() }}
@@ -285,6 +392,7 @@ export const RecentFilesVignette: React.FC<RecentFilesVignetteProps> = ({
                     role="button"
                     tabIndex={0}
                     onClick={() => { onOpenFile(file.path) }}
+                    onContextMenu={(e) => { handleRowContextMenu(e, file.path) }}
                     onKeyDown={(e) => {
                       if (e.key === 'Enter' || e.key === ' ') {
                         e.preventDefault()
@@ -292,8 +400,7 @@ export const RecentFilesVignette: React.FC<RecentFilesVignetteProps> = ({
                       }
                     }}
                   >
-                    <span className="ecu-recent-files-vignette-item-name">{splitPath(file.path).basename}</span>
-                    <span className="ecu-recent-files-vignette-item-path">{splitPath(file.path).directory}</span>
+                    <FileRowText path={file.path} />
                     <div
                       className="ecu-recent-files-vignette-toggle-wrap"
                       onClick={(e) => { e.stopPropagation() }}
@@ -316,6 +423,24 @@ export const RecentFilesVignette: React.FC<RecentFilesVignetteProps> = ({
         </section>
       )}
       </ScrollableElement>
+      {contextMenu !== null && createPortal(
+        // Portalled to the body on purpose. The menu positions itself with
+        // `position: fixed` against viewport coordinates, but the frosted
+        // frame above it sets `backdrop-filter`, which makes that frame the
+        // containing block for fixed descendants — rendered in place, the
+        // menu resolves the pointer's coordinates against the panel instead
+        // of the window and lands off-screen. The portal takes it out of the
+        // filtered subtree, the same way `Tooltip` escapes it.
+        <ContextMenu
+          visible
+          x={contextMenu.x}
+          y={contextMenu.y}
+          items={contextMenuItems}
+          onRequestClose={closeContextMenu}
+          data-testid="recent-files-vignette-context-menu"
+        />,
+        document.body
+      )}
     </Vignette>
   )
 }

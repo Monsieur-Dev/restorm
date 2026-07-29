@@ -381,6 +381,28 @@ const App: React.FC = () => {
     })
   })
 
+  // "Open containing folder" on a welcome-screen recent/favorite row.
+  // The panel is a generic library component, so it only reports which
+  // file the user picked; handing a path to the OS shell is this app's
+  // job. Main refuses anything it doesn't already track (the open project
+  // or one of its own recent files), and the OS call can fail on its own
+  // when the file moved since it was listed — either way the user is
+  // told, because a menu entry that silently does nothing reads as broken.
+  // The failure strings are shared with the statusbar's identical action:
+  // they name no surface, so they are reused rather than duplicated.
+  const revealPathInFolder = useCallback((path: string): void => {
+    void window.restorm?.file.revealInFolder(path)
+      .then((result) => {
+        if (result.success) return
+        toasterService.push('app', {
+          title: t('statusbar.contextMenu.revealFailedTitle'),
+          body: t('statusbar.contextMenu.revealFailedBody'),
+          durationMs: 5000
+        })
+      })
+      .catch(() => { /* channel unavailable — no-op */ })
+  }, [t])
+
   // Surface every firewall pending-permission prompt as a toast in
   // the global app toaster. The four action buttons (Allow once /
   // Allow always / Deny once / Deny always) dispatch the user's
@@ -3152,6 +3174,7 @@ const App: React.FC = () => {
                 ariaLabel={t('welcome.landmarkLabel')}
                 onOpenFile={(path) => { void window.restorm?.file.openPath(path) }}
                 confirmRemoveFavorite={(fileName) => window.confirm(t('welcome.confirmRemoveFavorite', { fileName }))}
+                onRevealInFolder={(path) => { revealPathInFolder(path) }}
               >
                 <Button
                   appearance="rainbow"

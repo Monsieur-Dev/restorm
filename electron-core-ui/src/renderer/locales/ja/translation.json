@@ -29,7 +29,8 @@
     "removeFromFavorites": "お気に入りから削除",
     "confirmRemoveFavorite": "\"{{fileName}}\" をお気に入りから削除してもよろしいですか？",
     "favoritesLandmarkLabel": "お気に入り一覧",
-    "recentsLandmarkLabel": "最近使ったファイル一覧"
+    "recentsLandmarkLabel": "最近使ったファイル一覧",
+    "openContainingFolder": "ファイルの場所を開く"
   },
   "welcomeScreen": {
     "landmarkLabel": "ようこそ"

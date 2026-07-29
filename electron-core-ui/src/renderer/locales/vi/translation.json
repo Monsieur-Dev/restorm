@@ -29,7 +29,8 @@
     "removeFromFavorites": "Xóa khỏi mục yêu thích",
     "confirmRemoveFavorite": "Bạn có chắc chắn muốn xóa \"{{fileName}}\" khỏi mục yêu thích không?",
     "favoritesLandmarkLabel": "Danh sách yêu thích",
-    "recentsLandmarkLabel": "Danh sách tệp gần đây"
+    "recentsLandmarkLabel": "Danh sách tệp gần đây",
+    "openContainingFolder": "Mở thư mục chứa tệp"
   },
   "welcomeScreen": {
     "landmarkLabel": "Chào mừng"

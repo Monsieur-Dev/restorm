@@ -29,7 +29,8 @@
     "removeFromFavorites": "Remove from favorites",
     "confirmRemoveFavorite": "Are you sure you want to remove \"{{fileName}}\" from favorites?",
     "favoritesLandmarkLabel": "Favorites list",
-    "recentsLandmarkLabel": "Recent files list"
+    "recentsLandmarkLabel": "Recent files list",
+    "openContainingFolder": "Open containing folder"
   },
   "welcomeScreen": {
     "landmarkLabel": "Welcome"

@@ -29,7 +29,8 @@
     "removeFromFavorites": "Poista suosikeista",
     "confirmRemoveFavorite": "Haluatko varmasti poistaa kohteen \"{{fileName}}\" suosikeista?",
     "favoritesLandmarkLabel": "Suosikkilista",
-    "recentsLandmarkLabel": "Viimeisimpien tiedostojen lista"
+    "recentsLandmarkLabel": "Viimeisimpien tiedostojen lista",
+    "openContainingFolder": "Avaa sisältävä kansio"
   },
   "welcomeScreen": {
     "landmarkLabel": "Tervetuloa"

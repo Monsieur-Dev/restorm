@@ -29,7 +29,8 @@
     "removeFromFavorites": "즐겨찾기에서 제거",
     "confirmRemoveFavorite": "\"{{fileName}}\"을(를) 즐겨찾기에서 제거하시겠습니까?",
     "favoritesLandmarkLabel": "즐겨찾기 목록",
-    "recentsLandmarkLabel": "최근 파일 목록"
+    "recentsLandmarkLabel": "최근 파일 목록",
+    "openContainingFolder": "포함된 폴더 열기"
   },
   "welcomeScreen": {
     "landmarkLabel": "시작 화면"

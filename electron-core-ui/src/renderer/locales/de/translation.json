@@ -29,7 +29,8 @@
     "removeFromFavorites": "Aus Favoriten entfernen",
     "confirmRemoveFavorite": "Möchten Sie „{{fileName}}“ wirklich aus den Favoriten entfernen?",
     "favoritesLandmarkLabel": "Favoritenliste",
-    "recentsLandmarkLabel": "Liste der zuletzt verwendeten Dateien"
+    "recentsLandmarkLabel": "Liste der zuletzt verwendeten Dateien",
+    "openContainingFolder": "Enthaltenden Ordner öffnen"
   },
   "welcomeScreen": {
     "landmarkLabel": "Willkommen"

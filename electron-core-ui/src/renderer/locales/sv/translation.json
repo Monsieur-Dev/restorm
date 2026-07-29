@@ -29,7 +29,8 @@
     "removeFromFavorites": "Ta bort från favoriter",
     "confirmRemoveFavorite": "Vill du verkligen ta bort \"{{fileName}}\" från favoriter?",
     "favoritesLandmarkLabel": "Favoritlista",
-    "recentsLandmarkLabel": "Lista över senaste filer"
+    "recentsLandmarkLabel": "Lista över senaste filer",
+    "openContainingFolder": "Öppna mappen som innehåller filen"
   },
   "welcomeScreen": {
     "landmarkLabel": "Välkommen"

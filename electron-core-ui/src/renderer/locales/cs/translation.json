@@ -29,7 +29,8 @@
     "removeFromFavorites": "Odebrat z oblíbených",
     "confirmRemoveFavorite": "Opravdu chcete odebrat „{{fileName}}“ z oblíbených?",
     "favoritesLandmarkLabel": "Seznam oblíbených",
-    "recentsLandmarkLabel": "Seznam naposledy otevřených souborů"
+    "recentsLandmarkLabel": "Seznam naposledy otevřených souborů",
+    "openContainingFolder": "Otevřít obsahující složku"
   },
   "welcomeScreen": {
     "landmarkLabel": "Úvodní obrazovka"

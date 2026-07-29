@@ -29,7 +29,8 @@
     "removeFromFavorites": "Verwijderen uit favorieten",
     "confirmRemoveFavorite": "Weet je zeker dat je \"{{fileName}}\" uit favorieten wilt verwijderen?",
     "favoritesLandmarkLabel": "Lijst met favorieten",
-    "recentsLandmarkLabel": "Lijst met recente bestanden"
+    "recentsLandmarkLabel": "Lijst met recente bestanden",
+    "openContainingFolder": "Bevattende map openen"
   },
   "welcomeScreen": {
     "landmarkLabel": "Welkom"

@@ -29,7 +29,8 @@
     "removeFromFavorites": "Αφαίρεση από τα αγαπημένα",
     "confirmRemoveFavorite": "Είστε σίγουροι ότι θέλετε να αφαιρέσετε το \"{{fileName}}\" από τα αγαπημένα;",
     "favoritesLandmarkLabel": "Λίστα αγαπημένων",
-    "recentsLandmarkLabel": "Λίστα πρόσφατων αρχείων"
+    "recentsLandmarkLabel": "Λίστα πρόσφατων αρχείων",
+    "openContainingFolder": "Άνοιγμα φακέλου που περιέχει το αρχείο"
   },
   "welcomeScreen": {
     "landmarkLabel": "Καλώς ήρθατε"
