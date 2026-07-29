@@ -2550,6 +2550,13 @@
         "telemetry": "Anonim kullanım istatistikleri (yalnızca onayınızla)",
         "backend": "Hesap, lisans ve abonelik"
       }
+    },
+    "crashReportsLockedLabel": "Pro planından itibaren değiştirilebilir. Ücretsiz planda, kaliteyi korumak için çökme raporları gereklidir.",
+    "consentToast": {
+      "title": "Restorm'u geliştirmemize yardımcı olun",
+      "body": "Restorm çöktüğünde, arızanın giderilebilmesi için anonim bir rapor gönderilebilir. Rapor, teknik hata izini ve tanılama bağlamını (uygulama sürümü, son etkinlikler) içerir. URL'ler, belirteçler, istek ve yanıt gövdeleri ve kişisel veriler, rapor cihazınızdan ayrılmadan önce kaldırılır. Her rapordan önce tam olarak ne gönderildiğini göreceksiniz.",
+      "save": "Tercihlerimi kaydet",
+      "learnMore": "Daha fazla bilgi"
     }
   }
 }

@@ -2552,6 +2552,13 @@
         "telemetry": "Anonymní statistiky používání (pouze s vaším souhlasem)",
         "backend": "Účet, licence a předplatné"
       }
+    },
+    "crashReportsLockedLabel": "Lze změnit od tarifu Pro. V bezplatném tarifu jsou zprávy o pádech nutné pro udržení kvality.",
+    "consentToast": {
+      "title": "Pomozte nám vylepšit Restorm",
+      "body": "Když Restorm spadne, může být odeslána anonymní zpráva, aby bylo možné chybu opravit. Obsahuje technický výpis chyby a diagnostický kontext (verzi aplikace, nedávnou činnost). Adresy URL, tokeny, těla požadavků a odpovědí a osobní údaje jsou odstraněny dříve, než zpráva opustí vaše zařízení. Před každou zprávou uvidíte přesně, co se odesílá.",
+      "save": "Uložit mé předvolby",
+      "learnMore": "Zjistit více"
     }
   }
 }

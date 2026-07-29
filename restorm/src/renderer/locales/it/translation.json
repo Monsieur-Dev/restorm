@@ -2550,6 +2550,13 @@
         "telemetry": "Statistiche di utilizzo anonime (solo con il suo consenso)",
         "backend": "Account, licenza e abbonamento"
       }
+    },
+    "crashReportsLockedLabel": "Modificabile a partire dal piano Pro. Nel piano gratuito i rapporti di arresto anomalo sono necessari per mantenere la qualità.",
+    "consentToast": {
+      "title": "Aiutaci a migliorare Restorm",
+      "body": "Quando Restorm si arresta in modo anomalo, è possibile inviare un rapporto anonimo affinché il problema venga corretto. Contiene la traccia tecnica dell'errore e il contesto diagnostico (versione dell'app, attività recenti). URL, token, corpi di richiesta e risposta e dati personali vengono rimossi prima che lasci il tuo computer. Vedrai esattamente cosa viene inviato prima di ogni rapporto.",
+      "save": "Salva le mie preferenze",
+      "learnMore": "Scopri di più"
     }
   }
 }

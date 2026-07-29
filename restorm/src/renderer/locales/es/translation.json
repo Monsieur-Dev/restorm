@@ -2550,6 +2550,13 @@
         "telemetry": "Estadísticas de uso anónimas (solo con su consentimiento)",
         "backend": "Cuenta, licencia y suscripción"
       }
+    },
+    "crashReportsLockedLabel": "Modificable a partir del plan Pro. En el plan gratuito, los informes de fallos son necesarios para mantener la calidad.",
+    "consentToast": {
+      "title": "Ayúdenos a mejorar Restorm",
+      "body": "Cuando Restorm falla, se puede enviar un informe anónimo para que el fallo pueda corregirse. Contiene la traza técnica del error y el contexto de diagnóstico (versión de la aplicación, actividad reciente). Las URL, los tokens, los cuerpos de solicitud y respuesta y los datos personales se eliminan antes de que salga de su equipo. Verá exactamente lo que se envía antes de cada informe.",
+      "save": "Guardar mis preferencias",
+      "learnMore": "Más información"
     }
   }
 }

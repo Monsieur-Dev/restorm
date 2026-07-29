@@ -2549,6 +2549,13 @@
         "telemetry": "Thống kê sử dụng ẩn danh (chỉ khi bạn đồng ý)",
         "backend": "Tài khoản, giấy phép và gói đăng ký"
       }
+    },
+    "crashReportsLockedLabel": "Có thể thay đổi từ gói Pro. Ở gói miễn phí, báo cáo sự cố là cần thiết để duy trì chất lượng.",
+    "consentToast": {
+      "title": "Hãy giúp chúng tôi cải thiện Restorm",
+      "body": "Khi Restorm gặp sự cố, một báo cáo ẩn danh có thể được gửi đi để lỗi được khắc phục. Báo cáo chứa dấu vết lỗi kỹ thuật và bối cảnh chẩn đoán (phiên bản ứng dụng, hoạt động gần đây). Các URL, mã thông báo, nội dung yêu cầu và phản hồi cùng dữ liệu cá nhân đều được loại bỏ trước khi rời khỏi máy của bạn. Bạn sẽ thấy chính xác những gì được gửi trước mỗi báo cáo.",
+      "save": "Lưu tùy chọn của tôi",
+      "learnMore": "Tìm hiểu thêm"
     }
   }
 }

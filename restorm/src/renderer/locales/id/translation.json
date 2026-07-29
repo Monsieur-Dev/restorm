@@ -2549,6 +2549,13 @@
         "telemetry": "Statistik penggunaan anonim (hanya dengan persetujuan Anda)",
         "backend": "Akun, lisensi, dan langganan"
       }
+    },
+    "crashReportsLockedLabel": "Dapat diubah mulai paket Pro. Pada paket gratis, laporan crash diperlukan untuk menjaga kualitas.",
+    "consentToast": {
+      "title": "Bantu kami meningkatkan Restorm",
+      "body": "Saat Restorm mengalami crash, laporan anonim dapat dikirim agar kegagalan tersebut dapat diperbaiki. Laporan berisi jejak galat teknis dan konteks diagnostik (versi aplikasi, aktivitas terakhir). URL, token, isi permintaan dan respons, serta data pribadi dihapus sebelum meninggalkan perangkat Anda. Anda akan melihat persis apa yang dikirim sebelum setiap laporan.",
+      "save": "Simpan preferensi saya",
+      "learnMore": "Pelajari lebih lanjut"
     }
   }
 }

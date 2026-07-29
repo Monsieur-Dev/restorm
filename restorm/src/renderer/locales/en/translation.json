@@ -2550,6 +2550,13 @@
         "telemetry": "Anonymous usage analytics (only with your consent)",
         "backend": "Account, licence and subscription"
       }
+    },
+    "crashReportsLockedLabel": "Changeable from the Pro plan. On the free plan, crash reports are what keep quality up.",
+    "consentToast": {
+      "title": "Help us improve Restorm",
+      "body": "When Restorm crashes, an anonymous report can be sent so the failure can be fixed. It carries the technical error trace and diagnostic context (app version, recent activity). URLs, tokens, request and response bodies and personal data are removed before it leaves your machine. You will see exactly what is sent before each report.",
+      "save": "Save my preferences",
+      "learnMore": "Learn more"
     }
   }
 }

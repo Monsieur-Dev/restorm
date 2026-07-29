@@ -37,7 +37,7 @@ import {
   type ReleaseChannel
 } from '../../../shared/config/backend'
 import { entitlementPublicKeyPem, isEntitlementPublicKeyConfigured } from '../entitlement/keys'
-import { syncConsentFirewall } from '../privacy/consentComposition'
+import { syncConsentAfterPlanChange } from '../privacy/consentComposition'
 
 /** Restorm audience strings — injected into ECUI's generic service. */
 const RESTORM_ENTITLEMENT_AUDIENCE = 'restorm-entitlement'
@@ -135,10 +135,12 @@ const avatarExemption = new AvatarFirewallExemption(permissionService)
  * allowed by the time the renderer mounts the avatar; it is dropped on logout /
  * a photo-less profile.
  *
- * Also re-syncs the consent-gated firewall exemptions: crash reporting is
- * plan-modulated, so a login, logout, upgrade or expiry changes the answer to
- * `canSend('crash')` without any setting being touched. Without this the
- * exemption would lag a plan transition until the next toggle.
+ * Also re-evaluates consent: crash reporting is plan-modulated, so a login,
+ * logout, upgrade or expiry changes the answer to `canSend('crash')` without any
+ * setting being touched. That both reconciles the firewall exemption AND
+ * announces the new answer, so a Community account promoted to Pro disarms the
+ * reporter — its gate reverts to unanswered — instead of continuing to send
+ * under the mandate the previous plan imposed.
  *
  * Also invalidates the FeatureFlippingService so any `Type: Entitlement`
  * strategy re-evaluates against the new capabilities. The service may not
@@ -147,7 +149,7 @@ const avatarExemption = new AvatarFirewallExemption(permissionService)
  */
 function broadcastAuthStateWithAvatarExemption(channel: string, state: AuthState): void {
   avatarExemption.sync(state)
-  syncConsentFirewall()
+  syncConsentAfterPlanChange()
   broadcastAuthState(channel, state)
   // Invalidate so `useFeature` subscribers re-evaluate Entitlement strategies.
   if (isFeatureServiceInitialized()) {

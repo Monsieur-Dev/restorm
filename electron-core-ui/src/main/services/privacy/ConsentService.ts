@@ -139,6 +139,27 @@ export class ConsentService {
     this.setGranted(gateId, false)
   }
 
+  /**
+   * Re-announce every decision because an input the service CANNOT observe has
+   * changed — in practice `resolveOverride`, which is a caller-supplied function
+   * over state this service knows nothing about (an account plan, a policy
+   * fetched at runtime).
+   *
+   * Without this, such a change is invisible: `getDecision` recomputes the
+   * override on every call, so a reader sees the new answer, but nothing tells
+   * the SUBSCRIBERS to go and read it. Anything that armed itself on the old
+   * answer stays armed on it. For a gate that forces sending ON for one class of
+   * account and leaves it to the user for another, that gap is the difference
+   * between "we stopped when they gained the right to refuse" and "we kept
+   * sending until they happened to touch a toggle".
+   *
+   * Not automatic, because it cannot be: the service is given a function, not an
+   * observable. The owner of that state calls this when it moves.
+   */
+  revalidate(): void {
+    this.notify()
+  }
+
   /** Observe consent transitions (e.g. to reconcile a firewall exemption).
    * Fires after the audit trail is written. Returns an unsubscribe function. */
   onChange(listener: (decisions: ConsentDecision[]) => void): () => void {

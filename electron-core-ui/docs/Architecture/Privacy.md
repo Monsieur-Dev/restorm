@@ -64,11 +64,32 @@ if (consent.canSend('telemetry')) { /* … */ }
 | `listDecisions(): ConsentDecision[]` | every gate, in declaration order |
 | `setGranted(gateId, granted)` / `revoke(gateId)` | drive a gate from a consent dialog |
 | `onChange(listener)` | fires after the audit trail is written; returns an unsubscribe |
+| `revalidate()` | re-announce every decision because an input the service cannot observe moved — see below |
 | `dispose()` | drop every settings subscription |
 
 `ConsentDecision.source` reports how the value was arrived at — `default`
 (nobody has decided), `user`, `forced-on`, `forced-off` — so a UI can explain a
 value the user did not pick instead of silently contradicting their toggle.
+
+### `revalidate()` — when the override moves
+
+`resolveOverride` is a function over state the service knows nothing about (an
+account plan, a policy fetched at runtime). When that state changes, every
+`getDecision` call returns the new answer immediately — but nothing tells
+existing SUBSCRIBERS to go and re-read it, so anything that armed itself on the
+old answer stays armed on it.
+
+For a gate that forces sending ON for one class of account and leaves it to the
+user for another, that gap is the difference between stopping the moment someone
+gains the right to refuse and carrying on until they happen to touch a toggle.
+Call `revalidate()` from whatever owns the overridden state:
+
+```typescript
+// on login / logout / plan change
+consent.revalidate()
+```
+
+It cannot be automatic: the service is handed a function, not an observable.
 
 ### Deliberate non-behaviours
 

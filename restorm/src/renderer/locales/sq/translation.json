@@ -2550,6 +2550,13 @@
         "telemetry": "Statistika anonime përdorimi (vetëm me pëlqimin tuaj)",
         "backend": "Llogaria, licenca dhe abonimi"
       }
+    },
+    "crashReportsLockedLabel": "I ndryshueshëm nga plani Pro. Në planin falas, raportet e rrëzimeve janë të nevojshme për ruajtjen e cilësisë.",
+    "consentToast": {
+      "title": "Na ndihmoni ta përmirësojmë Restorm",
+      "body": "Kur Restorm rrëzohet, mund të dërgohet një raport anonim që defekti të riparohet. Ai përmban gjurmën teknike të gabimit dhe kontekstin diagnostikues (versionin e aplikacionit, veprimtarinë e fundit). URL-të, token-ët, trupat e kërkesave dhe përgjigjeve dhe të dhënat personale hiqen përpara se raporti të largohet nga pajisja juaj. Do të shihni saktësisht çfarë dërgohet përpara çdo raporti.",
+      "save": "Ruaj preferencat e mia",
+      "learnMore": "Mësoni më shumë"
     }
   }
 }

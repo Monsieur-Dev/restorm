@@ -2550,6 +2550,13 @@
         "telemetry": "Névtelen használati statisztikák (kizárólag az Ön hozzájárulásával)",
         "backend": "Fiók, licenc és előfizetés"
       }
+    },
+    "crashReportsLockedLabel": "A Pro csomagtól módosítható. Az ingyenes csomagban az összeomlási jelentések a minőség fenntartásához szükségesek.",
+    "consentToast": {
+      "title": "Segítsen nekünk a Restorm fejlesztésében",
+      "body": "Ha a Restorm összeomlik, névtelen jelentés küldhető, hogy a hiba javítható legyen. Tartalmazza a hiba technikai nyomkövetését és a diagnosztikai környezetet (alkalmazásverzió, legutóbbi tevékenység). Az URL-ek, tokenek, kérés- és válasz-tartalmak, valamint a személyes adatok eltávolításra kerülnek, mielőtt elhagyná a gépét. Minden jelentés előtt pontosan látni fogja, mi kerül elküldésre.",
+      "save": "Beállításaim mentése",
+      "learnMore": "További információ"
     }
   }
 }

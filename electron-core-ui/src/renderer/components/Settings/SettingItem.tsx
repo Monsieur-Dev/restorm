@@ -145,6 +145,9 @@ export const SettingItem: React.FC<SettingItemProps> = ({
           <GatedControl
             locked={capabilityLocked}
             {...(capabilityGate ? { onSubscribe: capabilityGate.onSubscribe } : {})}
+            {...(setting.capabilityLockedLabelKey
+              ? { proLabel: t(setting.capabilityLockedLabelKey) }
+              : {})}
             data-testid={`setting-gate-${setting.storageKey}`}
           >
             {control}

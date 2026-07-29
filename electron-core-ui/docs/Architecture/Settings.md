@@ -104,6 +104,7 @@ groups:
 | `userOnly` | No | When `true`, only the user layer may set this — a workspace overlay can never override it |
 | `capability` | No | Entitlement capability id (the host's Pro/plan system, distinct from `feature`) that gates this setting — see "Capability-gated settings" below |
 | `capabilityLockedValue` | No | Value to DISPLAY while `capability` reports the setting locked, instead of the stored one — see "Capability-gated settings" below |
+| `capabilityLockedLabelKey` | No | i18n key for the lock tooltip's text, replacing the generic "Pro version" upsell — see "Capability-gated settings" below |
 
 ### Groups / Settings Hierarchy
 
@@ -253,6 +254,30 @@ It changes only what is RENDERED. The stored value is untouched, so the user's
 own choice survives and takes effect again the moment the lock lifts. The host
 must make its runtime honour the same override the lock implies — this field
 keeps the UI honest about it, it does not enforce it.
+
+#### `capabilityLockedLabelKey` — when the lock is not an upsell
+
+The lock tooltip says "Pro version" and offers a Subscribe link. That is right
+when the lock exists because a feature is sold separately, and wrong when it
+exists because the host imposes the value for a reason of its own — a setting a
+plan *mandates* rather than withholds. Telling someone to subscribe in order to
+keep sending crash reports they cannot turn off explains nothing.
+
+`capabilityLockedLabelKey` replaces that label with wording the host chooses:
+
+```yaml
+- setting:
+    id: "crashReports"
+    titleKey: "privacy.crashReportsTitle"
+    type: "toggle"
+    default: true
+    capability: "crash.optOut"
+    capabilityLockedValue: true
+    capabilityLockedLabelKey: "privacy.crashReportsLockedLabel"
+```
+
+The key is resolved with the app's `t()`, so it lives in the host's locale files
+like any other string. Left unset, the generic upsell label is used unchanged.
 
 ## SettingsService API (Main Process)
 

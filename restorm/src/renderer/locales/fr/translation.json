@@ -2550,6 +2550,13 @@
         "telemetry": "Statistiques d'utilisation anonymes (uniquement avec votre consentement)",
         "backend": "Compte, licence et abonnement"
       }
+    },
+    "crashReportsLockedLabel": "Modifiable à partir de l'offre Pro. Sur l'offre gratuite, les rapports de plantage sont nécessaires au maintien de la qualité.",
+    "consentToast": {
+      "title": "Aidez-nous à améliorer Restorm",
+      "body": "Lorsque Restorm plante, un rapport anonyme peut nous être envoyé afin que la panne soit corrigée. Il contient la trace technique de l'erreur et le contexte de diagnostic (version de l'application, dernières actions). Les URL, jetons, corps de requête et de réponse et données personnelles en sont retirés avant qu'il ne quitte votre machine. Vous verrez exactement ce qui est envoyé avant chaque rapport.",
+      "save": "Enregistrer mes préférences",
+      "learnMore": "En savoir plus"
     }
   }
 }

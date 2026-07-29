@@ -2552,6 +2552,13 @@
         "telemetry": "Anonimowe statystyki użycia (tylko za Twoją zgodą)",
         "backend": "Konto, licencja i subskrypcja"
       }
+    },
+    "crashReportsLockedLabel": "Możliwe do zmiany od planu Pro. W planie bezpłatnym raporty o awariach są niezbędne do utrzymania jakości.",
+    "consentToast": {
+      "title": "Pomóż nam ulepszyć Restorm",
+      "body": "Gdy Restorm ulegnie awarii, może zostać wysłany anonimowy raport, aby można było naprawić usterkę. Zawiera techniczny ślad błędu i kontekst diagnostyczny (wersja aplikacji, ostatnie działania). Adresy URL, tokeny, treści żądań i odpowiedzi oraz dane osobowe są usuwane, zanim raport opuści Twoje urządzenie. Przed każdym raportem zobaczysz dokładnie, co zostanie wysłane.",
+      "save": "Zapisz moje preferencje",
+      "learnMore": "Dowiedz się więcej"
     }
   }
 }

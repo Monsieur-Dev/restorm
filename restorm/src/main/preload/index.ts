@@ -54,7 +54,7 @@ import {
   type UpdateSettings,
   type UpdateState
 } from '../../shared/update/updateTypes'
-import { CRASH_IPC, type CrashArmedState } from '../../shared/crash/crashTypes'
+import { CRASH_IPC, type CrashArmedState, type CrashConsentState } from '../../shared/crash/crashTypes'
 import { hookupIpc as hookupSentryIpc } from '@sentry/electron/preload-namespaced'
 
 // Expose the crash SDK's renderer↔main IPC conduit (`window.__SENTRY_IPC__`).
@@ -261,6 +261,20 @@ contextBridge.exposeInMainWorld('api', {
       const handler = (_event: unknown, state: CrashArmedState): void => { callback(state) }
       ipcRenderer.on(CRASH_IPC.ARMED_STATE_CHANGED, handler)
       return (): void => { ipcRenderer.off(CRASH_IPC.ARMED_STATE_CHANGED, handler) }
+    },
+    /** Whether the user still owes an answer, and the answer in force. */
+    getConsentState: async (): Promise<CrashConsentState> => {
+      return (await ipcRenderer.invoke(CRASH_IPC.GET_CONSENT_STATE)) as CrashConsentState
+    },
+    /** Subscribe to consent transitions. Returns an unsubscribe fn. */
+    onConsentStateChanged: (callback: (state: CrashConsentState) => void): (() => void) => {
+      const handler = (_event: unknown, state: CrashConsentState): void => { callback(state) }
+      ipcRenderer.on(CRASH_IPC.CONSENT_STATE_CHANGED, handler)
+      return (): void => { ipcRenderer.off(CRASH_IPC.CONSENT_STATE_CHANGED, handler) }
+    },
+    /** Record the user's own answer. Cannot override what their plan mandates. */
+    setConsent: async (granted: boolean): Promise<CrashConsentState> => {
+      return (await ipcRenderer.invoke(CRASH_IPC.SET_CONSENT, granted)) as CrashConsentState
     }
   }
 })

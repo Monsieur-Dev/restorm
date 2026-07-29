@@ -2550,6 +2550,13 @@
         "telemetry": "Anonym användningsstatistik (endast med ditt samtycke)",
         "backend": "Konto, licens och prenumeration"
       }
+    },
+    "crashReportsLockedLabel": "Kan ändras från Pro-abonnemanget. I gratisabonnemanget behövs kraschrapporter för att upprätthålla kvaliteten.",
+    "consentToast": {
+      "title": "Hjälp oss att förbättra Restorm",
+      "body": "När Restorm kraschar kan en anonym rapport skickas så att felet kan åtgärdas. Den innehåller det tekniska felspåret och diagnostisk kontext (appversion, senaste aktivitet). URL:er, tokens, begärans- och svarsinnehåll samt personuppgifter tas bort innan den lämnar din dator. Du ser exakt vad som skickas före varje rapport.",
+      "save": "Spara mina inställningar",
+      "learnMore": "Läs mer"
     }
   }
 }

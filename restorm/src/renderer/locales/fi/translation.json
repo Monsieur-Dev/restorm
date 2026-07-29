@@ -2550,6 +2550,13 @@
         "telemetry": "Anonyymit käyttötilastot (vain suostumuksellasi)",
         "backend": "Tili, lisenssi ja tilaus"
       }
+    },
+    "crashReportsLockedLabel": "Muutettavissa Pro-tilauksesta alkaen. Maksuttomassa tilauksessa kaatumisraportit ovat tarpeen laadun ylläpitämiseksi.",
+    "consentToast": {
+      "title": "Auta meitä parantamaan Restormia",
+      "body": "Kun Restorm kaatuu, voidaan lähettää nimetön raportti, jotta vika saadaan korjattua. Se sisältää teknisen virhejäljen ja diagnostiikkatiedot (sovelluksen version, viimeaikaisen toiminnan). URL-osoitteet, tunnisteet, pyyntöjen ja vastausten sisällöt sekä henkilötiedot poistetaan ennen kuin raportti lähtee laitteeltasi. Näet tarkalleen, mitä lähetetään ennen jokaista raporttia.",
+      "save": "Tallenna asetukseni",
+      "learnMore": "Lue lisää"
     }
   }
 }

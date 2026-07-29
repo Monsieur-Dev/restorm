@@ -162,13 +162,24 @@ export function initConsentService(getPlan: () => ResolvedPlan): ConsentService 
 }
 
 /**
- * Re-evaluate the exemptions after something OTHER than the toggles changed the
- * answer — in practice a plan transition (login, logout, subscription upgrade or
+ * Re-evaluate consent after something OTHER than the toggles changed the answer
+ * — in practice a plan transition (login, logout, subscription upgrade or
  * expiry), which flips `canSend('crash')` without touching a setting. Safe to
  * call before init (no-op) and as often as needed (idempotent).
+ *
+ * Announcing the change matters as much as reconciling the firewall. A
+ * Community account has crash reporting forced ON; the moment it becomes Pro the
+ * override lifts and the gate reverts to UNANSWERED, which must disarm the
+ * reporter until the user is asked. Syncing only the exemption would leave every
+ * subscriber — the crash reporter among them — still acting on the answer the
+ * previous plan imposed, so an upgrade would keep sending reports the user has
+ * not yet consented to. That is the exact inversion of the promotion prompt.
  */
-export function syncConsentFirewall(): void {
+export function syncConsentAfterPlanChange(): void {
   exemption?.sync()
+  // Notifies subscribers; the listener registered at init reconciles the
+  // exemption again, which is idempotent.
+  instance?.revalidate()
 }
 
 /**

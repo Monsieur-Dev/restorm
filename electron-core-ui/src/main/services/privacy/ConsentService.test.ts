@@ -224,3 +224,67 @@ describe('ConsentService — host overrides', () => {
     expect(persisted(store).gates['telemetry']?.granted).toBe(false)
   })
 })
+
+describe('ConsentService — answering without changing the value', () => {
+  it('records an answer that matches the value already stored', () => {
+    // The case a consent prompt actually hits: the checkbox is pre-checked from
+    // the default, so the commonest answer changes no value at all. If that did
+    // not stamp the trail the gate would stay "nobody decided" and the prompt
+    // would return on every launch, however many times it was answered.
+    const settings = makeSettings()
+    const store = makeStore()
+    const service = new ConsentService({
+      gates: GATES,
+      settings,
+      store,
+      policyVersion: '2026-07-29',
+      now: () => new Date('2026-07-29T10:00:00.000Z')
+    })
+
+    expect(service.getDecision('crash')?.source).toBe('default')
+    expect(service.getDecision('crash')?.consentedAt).toBeNull()
+
+    service.setGranted('crash', true) // same as the default — no value moves
+
+    const decision = service.getDecision('crash')
+    expect(decision?.source).toBe('user')
+    expect(decision?.granted).toBe(true)
+    expect(decision?.consentedAt).toBe('2026-07-29T10:00:00.000Z')
+    expect(persisted(store).gates['crash']?.granted).toBe(true)
+  })
+
+  it('lets a plan-mandated account express a preference without escaping the mandate', () => {
+    // A Community client may call the consent write; it must record the choice
+    // and still resolve to granted, because the override is applied after the
+    // stored value. The stored `false` is preserved for when the plan lifts.
+    const settings = makeSettings()
+    const service = build({
+      settings,
+      resolveOverride: (gateId) => (gateId === 'crash' ? 'forced-on' : null)
+    })
+
+    service.setGranted('crash', false)
+
+    expect(service.canSend('crash')).toBe(true)
+    expect(service.getDecision('crash')?.source).toBe('forced-on')
+    expect(settings.values['privacy:crashReports']).toBe(false)
+  })
+})
+
+describe('ConsentService — revalidate', () => {
+  it('announces a new answer when only the override moved', () => {
+    // A plan transition changes `resolveOverride`'s answer without touching a
+    // setting, so nothing else would ever tell subscribers to re-read it.
+    let plan: ConsentOverride = 'forced-on'
+    const service = build({ resolveOverride: (gateId) => (gateId === 'crash' ? plan : null) })
+    const listener = vi.fn()
+    service.onChange(listener)
+
+    plan = null
+    service.revalidate()
+
+    expect(listener).toHaveBeenCalledTimes(1)
+    const decisions = listener.mock.calls[0]?.[0] as { gate: string; source: string }[]
+    expect(decisions.find((d) => d.gate === 'crash')?.source).toBe('default')
+  })
+})

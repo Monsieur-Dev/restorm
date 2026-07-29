@@ -136,6 +136,11 @@ groups:
           # sent. Their stored `false` is preserved and takes effect again the
           # moment they resubscribe.
           capabilityLockedValue: true
+          # The generic lock tooltip is an upsell ("Pro version / Subscribe"),
+          # which reads wrong here: this is not a feature held back for sale, it
+          # is an explanation of why the free tier cannot switch it off. Name the
+          # reason instead.
+          capabilityLockedLabelKey: "privacy.crashReportsLockedLabel"
       - setting:
           id: "telemetry"
           titleKey: "privacy.telemetryTitle"

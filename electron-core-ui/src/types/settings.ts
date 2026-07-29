@@ -84,6 +84,18 @@ export interface SettingDefinition {
    * this field keeps the UI honest about it, it does not enforce it.
    */
   capabilityLockedValue?: SettingValue | undefined
+  /**
+   * i18n key for the text shown in the lock tooltip, replacing the generic
+   * "Pro version" label.
+   *
+   * The default wording is an upsell, which is right when the lock exists
+   * because a feature is sold separately. It is wrong when the lock exists
+   * because the host imposes the value for a reason of its own — a setting a
+   * plan mandates rather than withholds. Naming the reason is the difference
+   * between "you are missing something you could buy" and "here is why this is
+   * decided for you", and only the host knows which it is.
+   */
+  capabilityLockedLabelKey?: string | undefined
 }
 
 // ==========================================================================

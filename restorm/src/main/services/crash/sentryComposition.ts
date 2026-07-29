@@ -17,6 +17,7 @@ import { app, BrowserWindow } from 'electron'
 import { logger } from 'electron-core-ui/main'
 import { crashDsn } from '../../../shared/config/observability'
 import { CRASH_IPC, type CrashArmedState } from '../../../shared/crash/crashTypes'
+import { readCrashConsentState } from './crashConsentState'
 import { getConsentService } from '../privacy/consentComposition'
 import { CrashReportingService, type CrashSdkPort } from './CrashReportingService'
 import { makeBeforeSend, makeBeforeBreadcrumb } from './sentryScrub'
@@ -35,10 +36,19 @@ let instance: CrashReportingService | null = null
  * cannot be the thing that breaks the app.
  */
 function broadcastArmedState(state: CrashArmedState): void {
+  broadcast(CRASH_IPC.ARMED_STATE_CHANGED, state)
+}
+
+/** Push the current consent state — whether the user still owes an answer. */
+function broadcastConsentState(): void {
+  broadcast(CRASH_IPC.CONSENT_STATE_CHANGED, readCrashConsentState())
+}
+
+function broadcast(channel: string, payload: unknown): void {
   for (const window of BrowserWindow.getAllWindows()) {
     if (window.isDestroyed()) continue
     try {
-      window.webContents.send(CRASH_IPC.ARMED_STATE_CHANGED, state)
+      window.webContents.send(channel, payload)
     } catch {
       // A window can be torn down between the check and the send.
     }
@@ -177,6 +187,11 @@ export function initCrashReporting(): CrashReportingService | null {
   // restart. Plan changes reach here too — `consentComposition` re-syncs the
   // gate on every auth broadcast.
   consentService?.onChange(() => {
+    // The consent ANSWER moved, so the renderer's prompt state moved with it.
+    // This is also how the prompt re-appears on promotion: a Community account
+    // becoming Pro loses the plan override, its gate reverts to unanswered, and
+    // that arrives here as an ordinary consent change — no plan diffing anywhere.
+    broadcastConsentState()
     void service.sync().catch((error: unknown) => {
       logger.error('Crash reporting failed to re-sync after a consent change', {
         message: error instanceof Error ? error.message : String(error)

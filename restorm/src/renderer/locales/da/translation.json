@@ -2550,6 +2550,13 @@
         "telemetry": "Anonym brugsstatistik (kun med dit samtykke)",
         "backend": "Konto, licens og abonnement"
       }
+    },
+    "crashReportsLockedLabel": "Kan ændres fra Pro-abonnementet. På det gratis abonnement er nedbrudsrapporter nødvendige for at opretholde kvaliteten.",
+    "consentToast": {
+      "title": "Hjælp os med at forbedre Restorm",
+      "body": "Når Restorm går ned, kan der sendes en anonym rapport, så fejlen kan rettes. Den indeholder det tekniske fejlspor og diagnostisk kontekst (appversion, seneste aktivitet). URL'er, tokens, anmodnings- og svarindhold samt personoplysninger fjernes, før den forlader din maskine. Du kan se præcis, hvad der sendes, før hver rapport.",
+      "save": "Gem mine præferencer",
+      "learnMore": "Læs mere"
     }
   }
 }

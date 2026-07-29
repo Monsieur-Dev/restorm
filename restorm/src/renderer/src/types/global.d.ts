@@ -16,7 +16,7 @@ import type {
 import type { ResponseHistoryDetail, ResponseHistoryEntry } from '../../../shared/types/collections'
 import type { AuthState, CheckoutResult, PortalResult } from '../../../shared/auth/authState'
 import type { UpdateState, UpdateSettings, ReleaseNoteSection } from '../../../shared/update/updateTypes'
-import type { CrashArmedState } from '../../../shared/crash/crashTypes'
+import type { CrashArmedState, CrashConsentState } from '../../../shared/crash/crashTypes'
 
 declare global {
   interface Window {
@@ -118,6 +118,9 @@ declare global {
       crash: {
         getArmedState: () => Promise<CrashArmedState>
         onArmedStateChanged: (callback: (state: CrashArmedState) => void) => (() => void)
+        getConsentState: () => Promise<CrashConsentState>
+        onConsentStateChanged: (callback: (state: CrashConsentState) => void) => (() => void)
+        setConsent: (granted: boolean) => Promise<CrashConsentState>
       }
       /** electron-core-ui's Git plumbing — see `electron-core-ui/docs/Git/README.md`.
        * Mirrors `WindowApiGit` in electron-core-ui's own `global.d.ts`; restorm
