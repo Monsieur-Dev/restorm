@@ -38,6 +38,18 @@ predicate only exempts the http layer, while the socket-layer `HardenInterceptor
 still classifies the raw connect to an external host — so the scoped bypass is
 the correct mechanism.
 
+**Differential downloads.** electron-updater fetches only the changed blockmap
+regions on an update rather than the full installer, but by default it tries to
+combine every changed region into a single multi-range `Range:` request
+(`bytes=a-b, c-d, ...`) and expects a `multipart/byteranges` response. The feed's
+storage backend (Cloudflare R2, behind `dl.restorm.app`) rejects that combined
+form with `HTTP 400` while honouring a single-range request (`Range: bytes=a-b`)
+fine — a known R2 limitation, not an electron-updater bug. `build.publish` sets
+`useMultipleRangeRequest: false` so the updater instead issues one sequential
+single-range request per changed block; the download is still differential
+(only changed bytes are fetched), just via many small requests instead of one
+combined one.
+
 ## Cutting a release
 
 1. **Write the release notes** — add a `## vX.Y.Z` section (newest on top) to
@@ -78,3 +90,8 @@ Against a real packaged `.AppImage` and a feed serving a newer version:
    entries added since the previous version.
 4. In Settings → Updates, confirm the auto-check toggle persists and the manual
    "Check now" reflects the live status.
+5. Watch the update log for `Cannot download differentially, fallback to full
+   download` — it should NOT appear, and the downloaded byte count should be a
+   small fraction of the full installer size, confirming the differential path
+   actually succeeded against the production feed rather than silently falling
+   back.
