@@ -411,7 +411,20 @@
   "firewall": {
     "addOrigin": "Tambahkan origin",
     "removeOrigin": "Hapus {{origin}}",
-    "noEntries": "Belum ada entri."
+    "noEntries": "Belum ada entri.",
+    "outbound": {
+      "title": "Layanan keluar",
+      "intro": "Tujuan yang mungkin dihubungi aplikasi ini atas inisiatifnya sendiri. Semuanya dideklarasikan dalam kode dan tidak dapat diubah di sini — yang memerlukan persetujuan Anda tetap nonaktif sampai Anda memberikannya di Preferensi.",
+      "empty": "Aplikasi ini tidak mendeklarasikan tujuan keluar miliknya sendiri.",
+      "hostUnset": "belum dikonfigurasi",
+      "stateConsented": "Diizinkan — Anda telah memberi persetujuan",
+      "stateNoConsent": "Diblokir — tidak ada persetujuan",
+      "stateRequired": "Diizinkan — diperlukan oleh aplikasi",
+      "stateInactive": "Tidak aktif — sedang tidak digunakan",
+      "purpose": {
+        "avatar": "Foto profil akun yang masuk"
+      }
+    }
   },
   "bookmarkRibbon": {
     "addBookmark": "Tambah penanda"

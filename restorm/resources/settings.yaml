@@ -112,3 +112,33 @@ groups:
           descriptionKey: "updates.statusDescription"
           type: "update-actions"
           default: ""
+  - id: "privacy"
+    titleKey: "privacy.settingsTitle"
+    items:
+      # Crash reports are plan-modulated, which is why this toggle defaults ON
+      # while telemetry defaults OFF. Community accounts fund the product with
+      # the diagnostics that make it possible to fix what breaks for them, so
+      # the capability below locks the control (visible, greyed, with the
+      # upsell); Pro and Enterprise unlock it and can opt out. The main-process
+      # ConsentService applies the same rule to `canSend('crash')`, so a locked
+      # control can never disagree with what is actually sent.
+      - setting:
+          id: "crashReports"
+          titleKey: "privacy.crashReportsTitle"
+          descriptionKey: "privacy.crashReportsDescription"
+          type: "toggle"
+          default: true
+          capability: "crash.optOut"
+          # Community sees the control locked ON because that is what the main
+          # process actually enforces. Without this the row would render the
+          # stored boolean — so an ex-Pro user who had opted out and then
+          # downgraded would see a greyed OFF toggle while reports were being
+          # sent. Their stored `false` is preserved and takes effect again the
+          # moment they resubscribe.
+          capabilityLockedValue: true
+      - setting:
+          id: "telemetry"
+          titleKey: "privacy.telemetryTitle"
+          descriptionKey: "privacy.telemetryDescription"
+          type: "toggle"
+          default: false

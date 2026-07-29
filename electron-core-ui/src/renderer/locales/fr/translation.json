@@ -411,7 +411,20 @@
   "firewall": {
     "addOrigin": "Ajouter un origin",
     "removeOrigin": "Retirer {{origin}}",
-    "noEntries": "Aucune entrée pour l'instant."
+    "noEntries": "Aucune entrée pour l'instant.",
+    "outbound": {
+      "title": "Services sortants",
+      "intro": "Destinations que cette application peut contacter de sa propre initiative. Elles sont déclarées dans le code et ne sont pas modifiables ici — celles qui exigent votre consentement restent désactivées tant que vous ne l'avez pas accordé dans les Préférences.",
+      "empty": "Cette application ne déclare aucune destination sortante qui lui soit propre.",
+      "hostUnset": "non configuré",
+      "stateConsented": "Autorisé — vous avez donné votre consentement",
+      "stateNoConsent": "Bloqué — aucun consentement donné",
+      "stateRequired": "Autorisé — nécessaire au fonctionnement de l'application",
+      "stateInactive": "Inactif — non utilisé actuellement",
+      "purpose": {
+        "avatar": "Photo de profil du compte connecté"
+      }
+    }
   },
   "bookmarkRibbon": {
     "addBookmark": "Ajouter un signet"

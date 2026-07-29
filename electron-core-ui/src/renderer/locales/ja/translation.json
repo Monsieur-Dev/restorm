@@ -411,7 +411,20 @@
   "firewall": {
     "addOrigin": "オリジンを追加",
     "removeOrigin": "{{origin}} を削除",
-    "noEntries": "エントリがありません。"
+    "noEntries": "エントリがありません。",
+    "outbound": {
+      "title": "外部送信サービス",
+      "intro": "このアプリケーションが自らの判断で接続する可能性がある宛先です。コード内で宣言されており、ここでは編集できません。同意が必要な宛先は、環境設定で同意するまで無効のままです。",
+      "empty": "このアプリケーションは独自の送信先を宣言していません。",
+      "hostUnset": "未設定",
+      "stateConsented": "許可 — 同意済みです",
+      "stateNoConsent": "ブロック — 同意がありません",
+      "stateRequired": "許可 — アプリケーションの動作に必要です",
+      "stateInactive": "無効 — 現在使用されていません",
+      "purpose": {
+        "avatar": "サインイン中のアカウントのプロフィール画像"
+      }
+    }
   },
   "bookmarkRibbon": {
     "addBookmark": "ブックマークを追加"

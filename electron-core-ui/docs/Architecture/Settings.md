@@ -103,6 +103,7 @@ groups:
 | `featureDisabledDefault` | No | Value substituted when `feature` is disabled. Required when `feature` is set |
 | `userOnly` | No | When `true`, only the user layer may set this — a workspace overlay can never override it |
 | `capability` | No | Entitlement capability id (the host's Pro/plan system, distinct from `feature`) that gates this setting — see "Capability-gated settings" below |
+| `capabilityLockedValue` | No | Value to DISPLAY while `capability` reports the setting locked, instead of the stored one — see "Capability-gated settings" below |
 
 ### Groups / Settings Hierarchy
 
@@ -227,6 +228,31 @@ Omitting `capabilityGate` entirely (a host with no capability/entitlement concep
     params:
       values: [...]
 ```
+
+#### `capabilityLockedValue` — when the lock exists because a value is forced
+
+A locked control is greyed but still renders its STORED value. That is fine when
+the lock merely means "you can't change this", and a lie when the lock exists
+because the host is forcing a different value than the one on disk — a plan that
+mandates a setting the user had previously turned off, say. The user then reads a
+greyed OFF while the app behaves as ON.
+
+`capabilityLockedValue` gives the definition a value to display while locked:
+
+```yaml
+- setting:
+    id: "crashReports"
+    titleKey: "privacy.crashReportsTitle"
+    type: "toggle"
+    default: true
+    capability: "crash.optOut"
+    capabilityLockedValue: true   # what the runtime actually enforces while locked
+```
+
+It changes only what is RENDERED. The stored value is untouched, so the user's
+own choice survives and takes effect again the moment the lock lifts. The host
+must make its runtime honour the same override the lock implies — this field
+keeps the UI honest about it, it does not enforce it.
 
 ## SettingsService API (Main Process)
 

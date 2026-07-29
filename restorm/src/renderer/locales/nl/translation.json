@@ -2537,5 +2537,19 @@
       "downloaded": "Update klaar om te installeren ({{version}})",
       "error": "Controle mislukt"
     }
+  },
+  "privacy": {
+    "settingsTitle": "Privacy",
+    "crashReportsTitle": "Crashrapporten verzenden",
+    "crashReportsDescription": "Verzendt een geanonimiseerd rapport wanneer Restorm crasht, zodat de storing verholpen kan worden. Rapporten worden ontdaan van URL's, tokens, aanvraaginhoud en persoonsgegevens voordat ze uw machine verlaten. Inbegrepen bij het gratis abonnement; met een betaald abonnement kunt u dit uitschakelen. Alle details: https://restorm.app/privacy",
+    "telemetryTitle": "Gebruiksstatistieken verzenden",
+    "telemetryDescription": "Verzendt anonieme statistieken over welke functies gebruikt worden, om te sturen wat er hierna gebouwd wordt. Standaard uit en nooit ingeschakeld zonder uw uitdrukkelijke toestemming. Bevat geen aanvraaggegevens, geen URL's en geen persoonsgegevens. Alle details: https://restorm.app/privacy",
+    "outbound": {
+      "purpose": {
+        "crash": "Crashrapporten (alleen met uw toestemming)",
+        "telemetry": "Anonieme gebruiksstatistieken (alleen met uw toestemming)",
+        "backend": "Account, licentie en abonnement"
+      }
+    }
   }
 }

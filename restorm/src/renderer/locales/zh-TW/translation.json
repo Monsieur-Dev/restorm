@@ -2536,5 +2536,19 @@
       "downloaded": "更新已準備好安裝（{{version}}）",
       "error": "檢查失敗"
     }
+  },
+  "privacy": {
+    "settingsTitle": "隱私",
+    "crashReportsTitle": "傳送當機報告",
+    "crashReportsDescription": "在 Restorm 當機時傳送匿名化報告，以便修復故障。報告在離開您的裝置前會清除 URL、權杖、請求內容與個人資料。免費方案包含此功能；付費方案可將其關閉。 完整說明：https://restorm.app/privacy",
+    "telemetryTitle": "傳送使用統計",
+    "telemetryDescription": "傳送關於使用了哪些功能的匿名統計，用於引導後續開發。預設關閉，未經您明確同意絕不啟用。不含任何請求資料、URL 或個人資料。 完整說明：https://restorm.app/privacy",
+    "outbound": {
+      "purpose": {
+        "crash": "當機報告（僅在您同意時）",
+        "telemetry": "匿名使用統計（僅在您同意時）",
+        "backend": "帳戶、授權與訂閱"
+      }
+    }
   }
 }

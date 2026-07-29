@@ -98,7 +98,8 @@ import { clearUserSettings, parseCliArgs } from './cli/args'
 import { checkHeadlessEntitlement } from './cli/headlessEntitlementFetch'
 import { setupGraphQL } from './GraphQLSetup'
 import { registerRestormIPC } from './IPCHandlers'
-import { initEntitlementService, stopEntitlementAutoRefresh, makeBackendFetch, resolveBackendVersion } from './services/auth/authComposition'
+import { initEntitlementService, getEntitlementService, stopEntitlementAutoRefresh, makeBackendFetch, resolveBackendVersion } from './services/auth/authComposition'
+import { initConsentService } from './services/privacy/consentComposition'
 import { createEntitlementEvaluator } from './services/entitlement/entitlementStrategy'
 import { installScenarioEngineIPC } from './scenarioEngine/ipcBridge'
 import { registerBuiltinSources } from './services/secrets/mainSourceRegistry'
@@ -744,6 +745,28 @@ void app.whenReady().then(() => {
 // `app.getPath('userData')` (the encrypted token cache) and `safeStorage` are
 // resolvable. Registers its own IPC and restores a cached session internally.
 void app.whenReady().then(() => {
+  // Consent first: it declares the phone-home endpoints and reconciles the
+  // firewall exemptions, so nothing optional can reach the network in the window
+  // before it exists (`canSend` answers `false` until then). The plan is read
+  // lazily — the entitlement service is built on the next line and restores its
+  // cached session asynchronously, so before that lands the plan is genuinely
+  // UNKNOWN, which suppresses the plan override rather than guessing at it.
+  //
+  // Wrapped: consent is not a prerequisite of signing in, so a failure here must
+  // not stop `initEntitlementService` on the next line from running.
+  try {
+    initConsentService(() => {
+      try {
+        return getEntitlementService().getState().plan
+      } catch {
+        return 'unknown'
+      }
+    })
+  } catch (error) {
+    logger.error('ConsentService failed to initialize; optional sending stays disabled', {
+      message: error instanceof Error ? error.message : String(error)
+    })
+  }
   const entitlementService = initEntitlementService()
   // Register the 'Entitlement' custom strategy so features.yaml entries that
   // declare `Type: Entitlement` / `RequiredCapabilities: [...]` are evaluated

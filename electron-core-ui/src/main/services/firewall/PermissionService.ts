@@ -3,7 +3,13 @@ import { randomUUID } from 'node:crypto'
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs'
 import { join, dirname } from 'node:path'
 import { logger } from '../LoggerService'
-import { FIREWALL_IPC, type FirewallOrigin, type FirewallPromptPayload } from '../../../types/firewall'
+import {
+	FIREWALL_IPC,
+	type FirewallOrigin,
+	type FirewallPromptPayload,
+	type SystemEndpointDeclaration,
+	type SystemEndpointStatus
+} from '../../../types/firewall'
 import { isFirewallE2EBypass } from './firewallConfig'
 
 /**
@@ -198,14 +204,33 @@ class PermissionService {
 	 * host (`lh3.googleusercontent.com`), which the renderer loads via
 	 * an `<img>` and which would otherwise be blocked by the user
 	 * firewall. Distinct from the user-managed whitelist: in-memory,
-	 * never persisted, not surfaced in the firewall rules UI, and not
+	 * never persisted, not editable from the firewall rules UI, and not
 	 * user-deletable. The app registers / clears entries programmatically
 	 * as the relevant state changes (login / logout). Matched by EXACT
 	 * host over HTTPS only (these are always-https display assets) — a
 	 * deliberately narrow exemption that never auto-allows plaintext http
 	 * to the host.
+	 *
+	 * Not user-deletable is not the same as invisible: pair every entry
+	 * with a `declareSystemEndpoint` declaration so it shows up in the
+	 * panel's read-only outbound-services list. An exemption nobody can
+	 * see is the thing this firewall exists to prevent.
 	 */
 	private readonly systemAllowedHosts = new Set<string>()
+
+	/**
+	 * The app's OWN outbound destinations, declared in code and rendered
+	 * read-only in the firewall panel. Keyed by declaration id so a
+	 * re-declaration (an avatar host swapping on login, a telemetry host
+	 * resolving after config load) upserts rather than duplicates.
+	 *
+	 * Purely descriptive — nothing here grants access. A declaration
+	 * documents an exemption that some other mechanism (the system
+	 * allowlist above, or a call-scoped `withFirewallBypass`) actually
+	 * performs, which is why `listSystemEndpoints` computes liveness from
+	 * that mechanism instead of trusting the declaration.
+	 */
+	private readonly systemEndpoints = new Map<string, SystemEndpointDeclaration>()
 
 	/**
 	 * Pending toast prompts keyed by promptId. The renderer
@@ -425,17 +450,82 @@ class PermissionService {
 	addSystemAllowedHost(host: string): void {
 		const normalised = host.trim().toLowerCase()
 		if (normalised === '') return
+		if (this.systemAllowedHosts.has(normalised)) return
 		this.systemAllowedHosts.add(normalised)
+		this.broadcastSystemEndpoints()
 	}
 
 	/** Drop a previously system-exempted host. No-op if it wasn't set. */
 	removeSystemAllowedHost(host: string): void {
-		this.systemAllowedHosts.delete(host.trim().toLowerCase())
+		if (!this.systemAllowedHosts.delete(host.trim().toLowerCase())) return
+		this.broadcastSystemEndpoints()
 	}
 
 	/** Snapshot of the system-exempted hosts (sorted). Introspection / tests. */
 	listSystemAllowedHosts(): string[] {
 		return Array.from(this.systemAllowedHosts).sort()
+	}
+
+	/**
+	 * Declare (or re-declare) one of the app's own outbound destinations so
+	 * the firewall panel can list it. Upserts by `id` — call it again with a
+	 * new `host` when the destination resolves or changes (login swapping the
+	 * avatar CDN, a config load filling in a telemetry host).
+	 *
+	 * Declaring does NOT grant access; pair it with `addSystemAllowedHost` (or
+	 * a call-scoped bypass) for that. Keeping the two separate is what lets a
+	 * consent-gated endpoint stay VISIBLE while switched off — the row renders
+	 * with `active: false` instead of vanishing, so "we are not sending this"
+	 * is something the user can read rather than infer.
+	 */
+	declareSystemEndpoint(declaration: SystemEndpointDeclaration): void {
+		const host = declaration.host === null ? null : declaration.host.trim().toLowerCase()
+		this.systemEndpoints.set(declaration.id, {
+			...declaration,
+			host: host === '' ? null : host
+		})
+		this.broadcastSystemEndpoints()
+	}
+
+	/** Drop a declaration entirely (the feature it described is gone, not
+	 * merely inactive). No-op for an unknown id. */
+	undeclareSystemEndpoint(id: string): void {
+		if (!this.systemEndpoints.delete(id)) return
+		this.broadcastSystemEndpoints()
+	}
+
+	/**
+	 * Tell every renderer the outbound inventory moved, so an open firewall
+	 * panel reflects a consent change (or a login resolving the avatar host)
+	 * without being re-mounted. Payload-free: the renderer re-reads the list,
+	 * which collapses a burst of declare/allow calls into one consistent read
+	 * and keeps the panel's source of truth main-side.
+	 */
+	private broadcastSystemEndpoints(): void {
+		// Declarations legitimately happen at module scope, before `whenReady` —
+		// there is no renderer to tell yet, and the first `listSystemEndpoints`
+		// on mount picks the state up anyway.
+		if (!app.isReady()) return
+		for (const win of BrowserWindow.getAllWindows()) {
+			if (!win.isDestroyed()) win.webContents.send(FIREWALL_IPC.SYSTEM_ENDPOINTS_CHANGED)
+		}
+	}
+
+	/**
+	 * Every declared outbound destination with its live state, sorted by id for
+	 * a stable UI order. `active` is computed, never stored: an allowlist-backed
+	 * endpoint is live only while its host is actually registered, so a revoked
+	 * consent flips the row the moment the exemption is dropped.
+	 */
+	listSystemEndpoints(): SystemEndpointStatus[] {
+		return Array.from(this.systemEndpoints.values())
+			.map((d) => ({
+				...d,
+				active: d.host !== null && (
+					d.exemption === 'call-scoped-bypass' || this.systemAllowedHosts.has(d.host)
+				)
+			}))
+			.sort((a, b) => a.id.localeCompare(b.id))
 	}
 
 	/** True when `host` is a host-app-registered system / display asset. */

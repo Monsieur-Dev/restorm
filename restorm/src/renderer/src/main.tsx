@@ -10,7 +10,7 @@ import './httpMethods.css'
 import './app.css'
 import './components/common/registryBadge.css'
 import LoadingScreen from './components/Welcome/LoadingScreen'
-import { GitCapabilityGateHost } from './components/GitCapabilityGateHost'
+import { CapabilityGateHost } from './components/CapabilityGateHost'
 import { initializeGraphQL } from './services/GraphQLIntegration'
 import { registerRendererSources } from './secrets/registerRendererSources'
 import { UpdateActionsRenderer } from './components/Settings/UpdateActionsRenderer'
@@ -391,7 +391,7 @@ void Promise.all([initI18n(), graphqlReady])
 
     ReactDOM.createRoot(rootElement).render(
       <React.StrictMode>
-        <GitCapabilityGateHost>
+        <CapabilityGateHost>
           {(capabilityGate) => (
             <ElectronCoreUiProvider fontAliasing="auto" data-testid="electron-core-ui-provider" capabilityGate={capabilityGate}>
               <Suspense fallback={<LoadingScreen />}>
@@ -399,7 +399,7 @@ void Promise.all([initI18n(), graphqlReady])
               </Suspense>
             </ElectronCoreUiProvider>
           )}
-        </GitCapabilityGateHost>
+        </CapabilityGateHost>
       </React.StrictMode>
     )
   })

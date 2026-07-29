@@ -411,7 +411,20 @@
   "firewall": {
     "addOrigin": "Shto origjinën",
     "removeOrigin": "Hiq {{origin}}",
-    "noEntries": "Ende nuk ka hyrje."
+    "noEntries": "Ende nuk ka hyrje.",
+    "outbound": {
+      "title": "Shërbime dalëse",
+      "intro": "Destinacione që ky aplikacion mund të kontaktojë me nismën e vet. Janë të deklaruara në kod dhe nuk mund të ndryshohen këtu — ato që kërkojnë pëlqimin tuaj mbeten të çaktivizuara derisa ta jepni te Preferencat.",
+      "empty": "Ky aplikacion nuk deklaron asnjë destinacion dalës të vetin.",
+      "hostUnset": "i pakonfiguruar",
+      "stateConsented": "I lejuar — keni dhënë pëlqimin",
+      "stateNoConsent": "I bllokuar — nuk është dhënë pëlqim",
+      "stateRequired": "I lejuar — i domosdoshëm për aplikacionin",
+      "stateInactive": "Joaktiv — nuk përdoret për momentin",
+      "purpose": {
+        "avatar": "Fotoja e profilit të llogarisë së kyçur"
+      }
+    }
   },
   "bookmarkRibbon": {
     "addBookmark": "Shto faqeshënues"

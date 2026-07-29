@@ -7,7 +7,8 @@ vi.mock('electron', () => {
 	const path = mkdtempSync(join(tmpdir(), 'ecui-fw-test-'))
 	return {
 		app: {
-			getPath: (): string => path
+			getPath: (): string => path,
+			isReady: (): boolean => true
 		},
 		BrowserWindow: {
 			getAllWindows: (): never[] => []
@@ -25,6 +26,7 @@ beforeEach(() => {
 	for (const o of permissionService.listWhitelist()) permissionService.removeFromWhitelist(o)
 	for (const o of permissionService.listBlacklist()) permissionService.removeFromBlacklist(o)
 	for (const h of permissionService.listSystemAllowedHosts()) permissionService.removeSystemAllowedHost(h)
+	for (const e of permissionService.listSystemEndpoints()) permissionService.undeclareSystemEndpoint(e.id)
 	permissionService.setProjectOrigins([])
 	permissionService.setInfraPorts({ graphqlPort: null, mcpPort: null, viteDevPort: null })
 })
@@ -240,6 +242,127 @@ describe('PermissionService — system-allowed hosts (display / system assets, e
 		permissionService.addSystemAllowedHost('cdn.example')
 		permissionService.addSystemAllowedHost('cdn.example')
 		expect(permissionService.listSystemAllowedHosts()).toEqual(['cdn.example'])
+	})
+})
+
+describe('PermissionService — declared outbound endpoints (the app\'s own traffic)', () => {
+	it('reports an allowlist-backed endpoint as active only while its host is registered', () => {
+		permissionService.declareSystemEndpoint({
+			id: 'telemetry',
+			host: 'eu.i.example.com',
+			purposeKey: 'purpose.telemetry',
+			consentGate: 'telemetry',
+			exemption: 'system-allowlist'
+		})
+		expect(permissionService.listSystemEndpoints()[0]).toMatchObject({ id: 'telemetry', active: false })
+
+		permissionService.addSystemAllowedHost('eu.i.example.com')
+		expect(permissionService.listSystemEndpoints()[0]).toMatchObject({ active: true })
+
+		permissionService.removeSystemAllowedHost('eu.i.example.com')
+		expect(permissionService.listSystemEndpoints()[0]).toMatchObject({ active: false })
+	})
+
+	it('keeps a refused endpoint VISIBLE rather than hiding it', () => {
+		permissionService.declareSystemEndpoint({
+			id: 'crash',
+			host: 'errors.example.com',
+			purposeKey: 'purpose.crash',
+			consentGate: 'crash',
+			exemption: 'system-allowlist'
+		})
+		const rows = permissionService.listSystemEndpoints()
+		expect(rows).toHaveLength(1)
+		expect(rows[0]).toMatchObject({ host: 'errors.example.com', consentGate: 'crash', active: false })
+	})
+
+	it('reports a call-scoped bypass as active once its host is known — it never joins the allowlist', () => {
+		permissionService.declareSystemEndpoint({
+			id: 'backend',
+			host: 'project.supabase.co',
+			purposeKey: 'purpose.backend',
+			consentGate: null,
+			exemption: 'call-scoped-bypass'
+		})
+		expect(permissionService.listSystemEndpoints()[0]).toMatchObject({ active: true })
+		expect(permissionService.listSystemAllowedHosts()).toEqual([])
+	})
+
+	it('treats an unresolved host as inactive whatever the mechanism', () => {
+		permissionService.declareSystemEndpoint({
+			id: 'avatar',
+			host: null,
+			purposeKey: 'purpose.avatar',
+			consentGate: null,
+			exemption: 'system-allowlist'
+		})
+		expect(permissionService.listSystemEndpoints()[0]).toMatchObject({ active: false })
+	})
+
+	it('upserts by id and normalises the host, so a re-declaration never duplicates a row', () => {
+		const declare = (host: string): void => {
+			permissionService.declareSystemEndpoint({
+				id: 'avatar', host, purposeKey: 'purpose.avatar', consentGate: null, exemption: 'system-allowlist'
+			})
+		}
+		declare('LH3.googleusercontent.com')
+		declare('avatars.githubusercontent.com')
+		const rows = permissionService.listSystemEndpoints()
+		expect(rows).toHaveLength(1)
+		expect(rows[0]?.host).toBe('avatars.githubusercontent.com')
+	})
+
+	it('lowercases a declared host so it matches the allowlist', () => {
+		permissionService.declareSystemEndpoint({
+			id: 'avatar', host: 'LH3.googleusercontent.com', purposeKey: 'p', consentGate: null, exemption: 'system-allowlist'
+		})
+		permissionService.addSystemAllowedHost('lh3.googleusercontent.com')
+		expect(permissionService.listSystemEndpoints()[0]).toMatchObject({
+			host: 'lh3.googleusercontent.com',
+			active: true
+		})
+	})
+
+	it('sorts rows by id for a stable panel order', () => {
+		for (const id of ['telemetry', 'avatar', 'backend']) {
+			permissionService.declareSystemEndpoint({
+				id, host: `${id}.example.com`, purposeKey: 'p', consentGate: null, exemption: 'system-allowlist'
+			})
+		}
+		expect(permissionService.listSystemEndpoints().map((e) => e.id)).toEqual(['avatar', 'backend', 'telemetry'])
+	})
+
+	it('gates a consent-declared host at the VERDICT, not just in the panel', () => {
+		// The point of tying the exemption to consent: with consent off the host
+		// is classified exactly like any unknown destination, so an SDK that kept
+		// a queued event around and retried it is stopped by the firewall rather
+		// than by the sender's good manners.
+		const host = 'eu.i.example.com'
+		permissionService.declareSystemEndpoint({
+			id: 'telemetry', host, purposeKey: 'p', consentGate: 'telemetry', exemption: 'system-allowlist'
+		})
+		const origin = { scheme: 'https', host, port: 443, source: 'main-fetch' } as const
+
+		expect(permissionService.classify(origin)).toBe('prompt')
+		permissionService.addSystemAllowedHost(host)
+		expect(permissionService.classify(origin)).toBe('allow')
+		permissionService.removeSystemAllowedHost(host)
+		expect(permissionService.classify(origin)).toBe('prompt')
+	})
+
+	it('never exempts a consent-declared host over plaintext http', () => {
+		const host = 'eu.i.example.com'
+		permissionService.addSystemAllowedHost(host)
+		expect(permissionService.classify({ scheme: 'http', host, port: 80, source: 'main-http' })).toBe('prompt')
+	})
+
+	it('undeclares a row entirely', () => {
+		permissionService.declareSystemEndpoint({
+			id: 'gone', host: 'x.example.com', purposeKey: 'p', consentGate: null, exemption: 'system-allowlist'
+		})
+		permissionService.undeclareSystemEndpoint('gone')
+		permissionService.undeclareSystemEndpoint('never-existed')
+		expect(permissionService.listSystemEndpoints()).toEqual([])
 	})
 })
 

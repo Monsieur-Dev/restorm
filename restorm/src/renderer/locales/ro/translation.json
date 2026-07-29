@@ -2538,5 +2538,19 @@
       "downloaded": "Actualizare pregătită de instalare ({{version}})",
       "error": "Verificarea a eșuat"
     }
+  },
+  "privacy": {
+    "settingsTitle": "Confidențialitate",
+    "crashReportsTitle": "Trimite rapoarte de blocare",
+    "crashReportsDescription": "Trimite un raport anonimizat atunci când Restorm se blochează, pentru ca defecțiunea să poată fi remediată. Rapoartele sunt curățate de URL-uri, jetoane, corpuri de cerere și date personale înainte de a părăsi computerul dumneavoastră. Inclus în planul gratuit; un plan cu plată permite dezactivarea. Toate detaliile: https://restorm.app/privacy",
+    "telemetryTitle": "Trimite statistici de utilizare",
+    "telemetryDescription": "Trimite statistici anonime despre funcțiile utilizate, pentru a orienta dezvoltările viitoare. Dezactivat implicit și niciodată activat fără consimțământul dumneavoastră explicit. Nu conține date ale cererilor, URL-uri sau date personale. Toate detaliile: https://restorm.app/privacy",
+    "outbound": {
+      "purpose": {
+        "crash": "Rapoarte de blocare (numai cu consimțământul dumneavoastră)",
+        "telemetry": "Statistici de utilizare anonime (numai cu consimțământul dumneavoastră)",
+        "backend": "Cont, licență și abonament"
+      }
+    }
   }
 }

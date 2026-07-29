@@ -92,6 +92,7 @@ server; — = pure UI/in-process.
 | full-workflow | 9 | Full workflow (bounds, new-file, imports, MRU tabs, sidebar Add submenu) | — |
 | exhaustive-doc-viewer | 6 | Exhaustive documentation-viewer behaviour | — |
 | settings-tab | 7 | Settings surface follows the workbench (+ Toggle keyboard focus ring) | — |
+| firewall-outbound | 5 | Firewall panel's read-only outbound-services list: declared phone-home rows, and consent OFF ⇒ endpoint not exempted / ON ⇒ exempted + shown allowed | — |
 | dirty-state | 6 | Dirty-state propagation across nested units | — |
 | status-bar-context-menu | 6 | Status bar file-path popover actions: reveal in OS file explorer, copy file name, copy full path, popover closes after each action, no-file-open state, reveal-channel path containment | — |
 | documentation-viewer | 4 | Documentation viewer interactions | — |

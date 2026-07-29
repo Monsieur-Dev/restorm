@@ -411,7 +411,20 @@
   "firewall": {
     "addOrigin": "新增來源",
     "removeOrigin": "移除 {{origin}}",
-    "noEntries": "目前沒有條目。"
+    "noEntries": "目前沒有條目。",
+    "outbound": {
+      "title": "對外服務",
+      "intro": "本應用程式可能主動連線的目標位址。它們在程式碼中宣告，無法在此編輯——需要您同意的目標在您於「偏好設定」中授權之前將維持關閉。",
+      "empty": "本應用程式未宣告任何自身的對外目標位址。",
+      "hostUnset": "未設定",
+      "stateConsented": "已允許——您已授予同意",
+      "stateNoConsent": "已封鎖——未取得同意",
+      "stateRequired": "已允許——應用程式運作所必需",
+      "stateInactive": "未啟用——目前未使用",
+      "purpose": {
+        "avatar": "已登入帳戶的大頭貼"
+      }
+    }
   },
   "bookmarkRibbon": {
     "addBookmark": "新增書籤"

@@ -16,13 +16,23 @@
  */
 
 import type { AuthState } from '../../../shared/auth/authState'
+import type { SystemEndpointDeclaration } from '../../../types/firewall'
 
 /** The slice of the firewall PermissionService this needs — register / drop a
- * system-exempted host. Mirrors `permissionService`'s methods. */
+ * system-exempted host, and (optionally) declare it so the firewall panel can
+ * show it. Mirrors `permissionService`'s methods; the declaration half is
+ * optional so a test fake can implement the allowlist alone. */
 export interface SystemHostAllowlist {
   addSystemAllowedHost(host: string): void
   removeSystemAllowedHost(host: string): void
+  declareSystemEndpoint?(declaration: SystemEndpointDeclaration): void
 }
+
+/** Declaration id + purpose key under which the avatar CDN exemption is listed
+ * in the firewall panel. Stable across logins — the host changes, the row
+ * doesn't. */
+const AVATAR_ENDPOINT_ID = 'avatar'
+const AVATAR_PURPOSE_KEY = 'firewall.outbound.purpose.avatar'
 
 /** The host of the signed-in user's avatar photo, or `null` when absent /
  * unparsable (signed out, no photo, or a malformed URL → initials fallback). */
@@ -44,7 +54,13 @@ export class AvatarFirewallExemption {
   /** The host currently exempted, or `null` when none is. */
   private current: string | null = null
 
-  constructor(private readonly allowlist: SystemHostAllowlist) {}
+  constructor(private readonly allowlist: SystemHostAllowlist) {
+    // Declare up-front, host-less: signed out is the common boot state and
+    // `sync(SIGNED_OUT_STATE)` is a no-op transition, so waiting for the first
+    // change would leave the row missing exactly when the user is most likely
+    // to go looking for it.
+    this.declare(null)
+  }
 
   /**
    * Reconcile the firewall exemption to `state`: register the new avatar host
@@ -58,6 +74,7 @@ export class AvatarFirewallExemption {
       if (this.current !== null) this.allowlist.removeSystemAllowedHost(this.current)
       if (host !== null) this.allowlist.addSystemAllowedHost(host)
       this.current = host
+      this.declare(host)
     }
     return host
   }
@@ -67,6 +84,23 @@ export class AvatarFirewallExemption {
     if (this.current !== null) {
       this.allowlist.removeSystemAllowedHost(this.current)
       this.current = null
+      this.declare(null)
     }
+  }
+
+  /**
+   * Mirror the exemption into the firewall panel's read-only outbound-services
+   * list. The row is declared even when signed out (`host: null`, rendered
+   * inactive) so the user can see that the app WOULD reach an avatar CDN once
+   * they log in, rather than discovering it after the fact.
+   */
+  private declare(host: string | null): void {
+    this.allowlist.declareSystemEndpoint?.({
+      id: AVATAR_ENDPOINT_ID,
+      host,
+      purposeKey: AVATAR_PURPOSE_KEY,
+      consentGate: null,
+      exemption: 'system-allowlist'
+    })
   }
 }

@@ -2,18 +2,27 @@
 import { describe, it, expect } from 'vitest'
 import { AvatarFirewallExemption, avatarHostOf, type SystemHostAllowlist } from './avatarFirewallExemption'
 import { SIGNED_OUT_STATE, type AuthState } from '../../../shared/auth/authState'
+import type { SystemEndpointDeclaration } from '../../../types/firewall'
 
 /** A fake firewall allowlist that records every add/remove + holds the live set. */
-function makeFakeAllowlist(): SystemHostAllowlist & { hosts: Set<string>; added: string[]; removed: string[] } {
+function makeFakeAllowlist(): SystemHostAllowlist & {
+  hosts: Set<string>
+  added: string[]
+  removed: string[]
+  declared: SystemEndpointDeclaration[]
+} {
   const hosts = new Set<string>()
   const added: string[] = []
   const removed: string[] = []
+  const declared: SystemEndpointDeclaration[] = []
   return {
     hosts,
     added,
     removed,
+    declared,
     addSystemAllowedHost: (h) => { added.push(h); hosts.add(h) },
-    removeSystemAllowedHost: (h) => { removed.push(h); hosts.delete(h) }
+    removeSystemAllowedHost: (h) => { removed.push(h); hosts.delete(h) },
+    declareSystemEndpoint: (d) => { declared.push(d) }
   }
 }
 
@@ -97,5 +106,32 @@ describe('AvatarFirewallExemption', () => {
     expect(fw.removed).toEqual(['lh3.googleusercontent.com'])
     ex.clear() // no-op the second time
     expect(fw.removed).toEqual(['lh3.googleusercontent.com'])
+  })
+})
+
+describe('AvatarFirewallExemption — firewall panel visibility', () => {
+  it('declares the row up-front, host-less, so a signed-out user still sees it', () => {
+    const fw = makeFakeAllowlist()
+    new AvatarFirewallExemption(fw)
+    expect(fw.declared).toEqual([
+      { id: 'avatar', host: null, purposeKey: 'firewall.outbound.purpose.avatar', consentGate: null, exemption: 'system-allowlist' }
+    ])
+  })
+
+  it('re-declares the row with the new host on login and drops it back to null on logout', () => {
+    const fw = makeFakeAllowlist()
+    const ex = new AvatarFirewallExemption(fw)
+    ex.sync(signedIn('https://lh3.googleusercontent.com/a/ada'))
+    expect(fw.declared.at(-1)?.host).toBe('lh3.googleusercontent.com')
+    ex.sync(SIGNED_OUT_STATE)
+    expect(fw.declared.at(-1)?.host).toBeNull()
+    // Always the same id — the host changes, the panel row does not.
+    expect(new Set(fw.declared.map((d) => d.id))).toEqual(new Set(['avatar']))
+  })
+
+  it('works against an allowlist that never wired the declaration half', () => {
+    const bare: SystemHostAllowlist = { addSystemAllowedHost: () => undefined, removeSystemAllowedHost: () => undefined }
+    const ex = new AvatarFirewallExemption(bare)
+    expect(() => ex.sync(signedIn('https://lh3.googleusercontent.com/a/ada'))).not.toThrow()
   })
 })

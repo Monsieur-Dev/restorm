@@ -2539,5 +2539,19 @@
       "downloaded": "Aktualizace připravena k instalaci ({{version}})",
       "error": "Kontrola selhala"
     }
+  },
+  "privacy": {
+    "settingsTitle": "Soukromí",
+    "crashReportsTitle": "Odesílat hlášení o pádech",
+    "crashReportsDescription": "Odešle anonymizované hlášení, když Restorm spadne, aby bylo možné závadu opravit. Hlášení jsou před odesláním z vašeho počítače zbavena URL, tokenů, těl požadavků a osobních údajů. Součást bezplatného tarifu; placený tarif umožňuje odesílání vypnout. Úplné informace: https://restorm.app/privacy",
+    "telemetryTitle": "Odesílat statistiky používání",
+    "telemetryDescription": "Odesílá anonymní statistiky o tom, které funkce se používají, aby bylo možné nasměrovat další vývoj. Ve výchozím stavu vypnuto a nikdy zapnuto bez vašeho výslovného souhlasu. Neobsahuje data požadavků, URL ani osobní údaje. Úplné informace: https://restorm.app/privacy",
+    "outbound": {
+      "purpose": {
+        "crash": "Hlášení o pádech (pouze s vaším souhlasem)",
+        "telemetry": "Anonymní statistiky používání (pouze s vaším souhlasem)",
+        "backend": "Účet, licence a předplatné"
+      }
+    }
   }
 }

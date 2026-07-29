@@ -2537,5 +2537,19 @@
       "downloaded": "Uppdatering redo att installeras ({{version}})",
       "error": "Sökningen misslyckades"
     }
+  },
+  "privacy": {
+    "settingsTitle": "Integritet",
+    "crashReportsTitle": "Skicka kraschrapporter",
+    "crashReportsDescription": "Skickar en anonymiserad rapport när Restorm kraschar, så att felet kan åtgärdas. Rapporter rensas från URL:er, tokens, förfrågningsinnehåll och personuppgifter innan de lämnar din dator. Ingår i gratisplanen; en betald plan låter dig stänga av det. Fullständiga uppgifter: https://restorm.app/privacy",
+    "telemetryTitle": "Skicka användningsstatistik",
+    "telemetryDescription": "Skickar anonym statistik om vilka funktioner som används, för att styra vad som byggs härnäst. Av som standard och aldrig påslaget utan ditt uttryckliga samtycke. Innehåller inga förfrågningsdata, inga URL:er och inga personuppgifter. Fullständiga uppgifter: https://restorm.app/privacy",
+    "outbound": {
+      "purpose": {
+        "crash": "Kraschrapporter (endast med ditt samtycke)",
+        "telemetry": "Anonym användningsstatistik (endast med ditt samtycke)",
+        "backend": "Konto, licens och prenumeration"
+      }
+    }
   }
 }

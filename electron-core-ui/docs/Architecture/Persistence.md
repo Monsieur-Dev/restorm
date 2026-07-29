@@ -301,6 +301,17 @@ useDraftsRestored(({ count }) => {
 await FileService.cleanupOrphanedDrafts(join(app.getPath('userData'), 'drafts'))
 ```
 
+## Other files under `userData`
+
+Beyond documents and drafts, a few services keep small state files of their own
+directly under `app.getPath('userData')`. They are listed here so the on-disk
+footprint is answerable from one page:
+
+| Path | Owner | Contents |
+|------|-------|----------|
+| `firewall/state.json` | `permissionService` | the user's whitelist + blacklist, as two arrays of `FirewallOrigin`. The project-derived origins, the infra ports and the system allowlist are **not** persisted — they are re-supplied on every boot |
+| `privacy/consent.json` | `ConsentService` | the consent audit trail: `{ version: 1, gates: { <id>: { granted, consentedAt, policyVersion } } }`. The user-editable boolean itself lives in the settings store — deleting this file loses the trail, never the choice. Both read and write are non-throwing: an unreadable file starts a fresh trail, a failed write is logged and swallowed. See [Privacy](./Privacy.md) |
+
 ## `@TreatEmptyAsUndefined`
 
 Decorator that normalizes `null`, `undefined`, and `""` to `undefined`

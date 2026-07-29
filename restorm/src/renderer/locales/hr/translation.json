@@ -2538,5 +2538,19 @@
       "downloaded": "Ažuriranje spremno za instalaciju ({{version}})",
       "error": "Provjera nije uspjela"
     }
+  },
+  "privacy": {
+    "settingsTitle": "Privatnost",
+    "crashReportsTitle": "Slanje izvješća o rušenju",
+    "crashReportsDescription": "Šalje anonimizirano izvješće kada se Restorm sruši, kako bi se kvar mogao ispraviti. Izvješća se čiste od URL-ova, tokena, tijela zahtjeva i osobnih podataka prije nego napuste vaše računalo. Uključeno u besplatni plan; plaćeni plan omogućuje isključivanje. Svi detalji: https://restorm.app/privacy",
+    "telemetryTitle": "Slanje statistike korištenja",
+    "telemetryDescription": "Šalje anonimnu statistiku o tome koje se značajke koriste, radi usmjeravanja budućeg razvoja. Isključeno prema zadanome i nikada uključeno bez vašeg izričitog pristanka. Ne sadrži podatke zahtjeva, URL-ove ni osobne podatke. Svi detalji: https://restorm.app/privacy",
+    "outbound": {
+      "purpose": {
+        "crash": "Izvješća o rušenju (samo uz vaš pristanak)",
+        "telemetry": "Anonimna statistika korištenja (samo uz vaš pristanak)",
+        "backend": "Račun, licenca i pretplata"
+      }
+    }
   }
 }

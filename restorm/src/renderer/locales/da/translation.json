@@ -2537,5 +2537,19 @@
       "downloaded": "Opdatering klar til installation ({{version}})",
       "error": "Søgningen mislykkedes"
     }
+  },
+  "privacy": {
+    "settingsTitle": "Privatliv",
+    "crashReportsTitle": "Send nedbrudsrapporter",
+    "crashReportsDescription": "Sender en anonymiseret rapport, når Restorm går ned, så fejlen kan rettes. Rapporter renses for URL'er, tokens, forespørgselsindhold og personoplysninger, før de forlader din maskine. Indgår i den gratis plan; en betalt plan lader dig slå det fra. Alle detaljer: https://restorm.app/privacy",
+    "telemetryTitle": "Send brugsstatistik",
+    "telemetryDescription": "Sender anonym statistik om, hvilke funktioner der bruges, så udviklingen kan prioriteres. Slået fra som standard og aldrig aktiveret uden dit udtrykkelige samtykke. Indeholder ingen forespørgselsdata, ingen URL'er og ingen personoplysninger. Alle detaljer: https://restorm.app/privacy",
+    "outbound": {
+      "purpose": {
+        "crash": "Nedbrudsrapporter (kun med dit samtykke)",
+        "telemetry": "Anonym brugsstatistik (kun med dit samtykke)",
+        "backend": "Konto, licens og abonnement"
+      }
+    }
   }
 }

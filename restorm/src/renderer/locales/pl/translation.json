@@ -2539,5 +2539,19 @@
       "downloaded": "Aktualizacja gotowa do instalacji ({{version}})",
       "error": "Sprawdzanie nie powiodło się"
     }
+  },
+  "privacy": {
+    "settingsTitle": "Prywatność",
+    "crashReportsTitle": "Wysyłaj raporty o awariach",
+    "crashReportsDescription": "Wysyła zanonimizowany raport, gdy Restorm ulegnie awarii, aby usterkę można było naprawić. Raporty są oczyszczane z adresów URL, tokenów, treści żądań i danych osobowych, zanim opuszczą Twój komputer. Wliczone w plan bezpłatny; plan płatny pozwala to wyłączyć. Pełne informacje: https://restorm.app/privacy",
+    "telemetryTitle": "Wysyłaj statystyki użycia",
+    "telemetryDescription": "Wysyła anonimowe statystyki dotyczące używanych funkcji, aby ukierunkować dalszy rozwój. Domyślnie wyłączone i nigdy nie włączane bez Twojej wyraźnej zgody. Nie zawiera danych żądań, adresów URL ani danych osobowych. Pełne informacje: https://restorm.app/privacy",
+    "outbound": {
+      "purpose": {
+        "crash": "Raporty o awariach (tylko za Twoją zgodą)",
+        "telemetry": "Anonimowe statystyki użycia (tylko za Twoją zgodą)",
+        "backend": "Konto, licencja i subskrypcja"
+      }
+    }
   }
 }

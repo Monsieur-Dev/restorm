@@ -2537,5 +2537,19 @@
       "downloaded": "Update installationsbereit ({{version}})",
       "error": "Update-Suche fehlgeschlagen"
     }
+  },
+  "privacy": {
+    "settingsTitle": "Datenschutz",
+    "crashReportsTitle": "Absturzberichte senden",
+    "crashReportsDescription": "Sendet einen anonymisierten Bericht, wenn Restorm abstürzt, damit der Fehler behoben werden kann. Berichte werden vor dem Verlassen Ihres Rechners von URLs, Tokens, Anfrage-Inhalten und personenbezogenen Daten bereinigt. Im kostenlosen Tarif enthalten; ein kostenpflichtiger Tarif erlaubt das Abschalten. Alle Einzelheiten: https://restorm.app/privacy",
+    "telemetryTitle": "Nutzungsstatistiken senden",
+    "telemetryDescription": "Sendet anonyme Statistiken darüber, welche Funktionen genutzt werden, um die Weiterentwicklung zu steuern. Standardmäßig aus und niemals ohne Ihre ausdrückliche Einwilligung aktiv. Enthält keine Anfragedaten, keine URLs und keine personenbezogenen Daten. Alle Einzelheiten: https://restorm.app/privacy",
+    "outbound": {
+      "purpose": {
+        "crash": "Absturzberichte (nur mit Ihrer Einwilligung)",
+        "telemetry": "Anonyme Nutzungsstatistiken (nur mit Ihrer Einwilligung)",
+        "backend": "Konto, Lizenz und Abonnement"
+      }
+    }
   }
 }

@@ -411,7 +411,20 @@
   "firewall": {
     "addOrigin": "Add origin",
     "removeOrigin": "Remove {{origin}}",
-    "noEntries": "No entries yet."
+    "noEntries": "No entries yet.",
+    "outbound": {
+      "title": "Outbound services",
+      "intro": "Destinations this application may contact on its own initiative. They are declared in code and cannot be edited here — the ones that require your consent stay switched off until you grant it in Preferences.",
+      "empty": "This application declares no outbound destination of its own.",
+      "hostUnset": "not configured",
+      "stateConsented": "Allowed — you granted consent",
+      "stateNoConsent": "Blocked — no consent given",
+      "stateRequired": "Allowed — required by the application",
+      "stateInactive": "Inactive — not in use right now",
+      "purpose": {
+        "avatar": "Profile picture of the signed-in account"
+      }
+    }
   },
   "bookmarkRibbon": {
     "addBookmark": "Add bookmark"

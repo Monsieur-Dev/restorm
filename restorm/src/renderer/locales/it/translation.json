@@ -2537,5 +2537,19 @@
       "downloaded": "Aggiornamento pronto per l'installazione ({{version}})",
       "error": "Controllo non riuscito"
     }
+  },
+  "privacy": {
+    "settingsTitle": "Privacy",
+    "crashReportsTitle": "Inviare i rapporti di arresto anomalo",
+    "crashReportsDescription": "Invia un rapporto anonimizzato quando Restorm si arresta, così il problema può essere corretto. I rapporti vengono ripuliti da URL, token, corpi delle richieste e dati personali prima di lasciare il suo computer. Incluso nel piano gratuito; un piano a pagamento consente di disattivarlo. Tutti i dettagli: https://restorm.app/privacy",
+    "telemetryTitle": "Inviare le statistiche di utilizzo",
+    "telemetryDescription": "Invia statistiche anonime sulle funzionalità utilizzate, per orientare gli sviluppi futuri. Disattivato per impostazione predefinita e mai attivato senza il suo consenso esplicito. Non contiene dati delle richieste, né URL, né dati personali. Tutti i dettagli: https://restorm.app/privacy",
+    "outbound": {
+      "purpose": {
+        "crash": "Rapporti di arresto anomalo (solo con il suo consenso)",
+        "telemetry": "Statistiche di utilizzo anonime (solo con il suo consenso)",
+        "backend": "Account, licenza e abbonamento"
+      }
+    }
   }
 }

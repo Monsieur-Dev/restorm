@@ -2537,5 +2537,19 @@
       "downloaded": "Atualização pronta para instalar ({{version}})",
       "error": "Falha na verificação"
     }
+  },
+  "privacy": {
+    "settingsTitle": "Privacidade",
+    "crashReportsTitle": "Enviar relatórios de falha",
+    "crashReportsDescription": "Envia um relatório anonimizado quando o Restorm falha, para que o problema possa ser corrigido. Os relatórios são limpos de URL, tokens, corpos de pedido e dados pessoais antes de saírem do seu computador. Incluído no plano gratuito; um plano pago permite desativá-lo. Todos os detalhes: https://restorm.app/privacy",
+    "telemetryTitle": "Enviar estatísticas de utilização",
+    "telemetryDescription": "Envia estatísticas anónimas sobre as funcionalidades utilizadas, para orientar o que será desenvolvido a seguir. Desativado por predefinição e nunca ativado sem o seu consentimento explícito. Não contém dados de pedidos, nem URL, nem dados pessoais. Todos os detalhes: https://restorm.app/privacy",
+    "outbound": {
+      "purpose": {
+        "crash": "Relatórios de falha (apenas com o seu consentimento)",
+        "telemetry": "Estatísticas de utilização anónimas (apenas com o seu consentimento)",
+        "backend": "Conta, licença e subscrição"
+      }
+    }
   }
 }

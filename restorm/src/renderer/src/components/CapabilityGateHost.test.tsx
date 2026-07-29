@@ -14,7 +14,8 @@ vi.mock('electron-core-ui/renderer', async () => {
 const { subscribeToProMock } = vi.hoisted(() => ({ subscribeToProMock: vi.fn() }))
 vi.mock('../services/subscribeToPro', () => ({ subscribeToPro: subscribeToProMock }))
 
-import { GitCapabilityGateHost } from './GitCapabilityGateHost'
+import { CapabilityGateHost } from './CapabilityGateHost'
+import { CRASH_OPT_OUT_CAPABILITY } from '../../../shared/auth/planCapabilities'
 
 const PRO: AuthState = { signedIn: true, user: { email: 'a@b.com' }, plan: 'pro', role: 'admin', capabilities: ['git.client'] }
 const COMMUNITY: AuthState = { signedIn: false, user: null, plan: 'community', role: 'member', capabilities: [] }
@@ -41,14 +42,14 @@ interface CapturedGate {
   onSubscribe: () => void
 }
 
-describe('GitCapabilityGateHost', () => {
+describe('CapabilityGateHost', () => {
   it('isLocked reports false for a capability present in the entitlement', async () => {
     stubAccount(PRO)
     const captures: CapturedGate[] = []
     render(
-      <GitCapabilityGateHost>
+      <CapabilityGateHost>
         {(gate) => { captures.push(gate); return null }}
-      </GitCapabilityGateHost>
+      </CapabilityGateHost>
     )
     await act(async () => { await Promise.resolve() })
     expect(captures[captures.length - 1]?.isLocked('git.client')).toBe(false)
@@ -58,9 +59,9 @@ describe('GitCapabilityGateHost', () => {
     stubAccount(COMMUNITY)
     const captures: CapturedGate[] = []
     render(
-      <GitCapabilityGateHost>
+      <CapabilityGateHost>
         {(gate) => { captures.push(gate); return null }}
-      </GitCapabilityGateHost>
+      </CapabilityGateHost>
     )
     await act(async () => { await Promise.resolve() })
     expect(captures[captures.length - 1]?.isLocked('git.client')).toBe(true)
@@ -70,9 +71,9 @@ describe('GitCapabilityGateHost', () => {
     const account = stubAccount(COMMUNITY)
     const captures: CapturedGate[] = []
     render(
-      <GitCapabilityGateHost>
+      <CapabilityGateHost>
         {(gate) => { captures.push(gate); return null }}
-      </GitCapabilityGateHost>
+      </CapabilityGateHost>
     )
     await act(async () => { await Promise.resolve() })
     expect(captures[captures.length - 1]?.isLocked('git.client')).toBe(true)
@@ -81,13 +82,57 @@ describe('GitCapabilityGateHost', () => {
     expect(captures[captures.length - 1]?.isLocked('git.client')).toBe(false)
   })
 
+  it('locks the crash opt-out on Community even though no capability is minted for it', async () => {
+    // Community accounts cannot turn crash reporting off; the control renders
+    // greyed with an upsell rather than disappearing.
+    stubAccount(COMMUNITY)
+    const captures: CapturedGate[] = []
+    render(
+      <CapabilityGateHost>
+        {(gate) => { captures.push(gate); return null }}
+      </CapabilityGateHost>
+    )
+    await act(async () => { await Promise.resolve() })
+    expect(captures[captures.length - 1]?.isLocked(CRASH_OPT_OUT_CAPABILITY)).toBe(true)
+  })
+
+  it('unlocks the crash opt-out on a paid plan, which the capability list alone would not', async () => {
+    // `crash.optOut` is absent from PRO.capabilities on purpose: the backend
+    // never mints it, so resolving it through `hasCapability` would lock a
+    // paying user out of an opt-out they are entitled to.
+    stubAccount(PRO)
+    const captures: CapturedGate[] = []
+    render(
+      <CapabilityGateHost>
+        {(gate) => { captures.push(gate); return null }}
+      </CapabilityGateHost>
+    )
+    await act(async () => { await Promise.resolve() })
+    expect(PRO.capabilities).not.toContain(CRASH_OPT_OUT_CAPABILITY)
+    expect(captures[captures.length - 1]?.isLocked(CRASH_OPT_OUT_CAPABILITY)).toBe(false)
+  })
+
+  it('re-evaluates the crash opt-out lock on a plan transition', async () => {
+    const account = stubAccount(COMMUNITY)
+    const captures: CapturedGate[] = []
+    render(
+      <CapabilityGateHost>
+        {(gate) => { captures.push(gate); return null }}
+      </CapabilityGateHost>
+    )
+    await act(async () => { await Promise.resolve() })
+    expect(captures[captures.length - 1]?.isLocked(CRASH_OPT_OUT_CAPABILITY)).toBe(true)
+    account.emit(PRO)
+    expect(captures[captures.length - 1]?.isLocked(CRASH_OPT_OUT_CAPABILITY)).toBe(false)
+  })
+
   it('onSubscribe calls subscribeToPro()', async () => {
     stubAccount(COMMUNITY)
     const captures: CapturedGate[] = []
     render(
-      <GitCapabilityGateHost>
+      <CapabilityGateHost>
         {(gate) => { captures.push(gate); return null }}
-      </GitCapabilityGateHost>
+      </CapabilityGateHost>
     )
     await act(async () => { await Promise.resolve() })
     captures[captures.length - 1]?.onSubscribe()

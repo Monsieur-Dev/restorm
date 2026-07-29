@@ -2537,5 +2537,19 @@
       "downloaded": "Päivitys valmis asennettavaksi ({{version}})",
       "error": "Tarkistus epäonnistui"
     }
+  },
+  "privacy": {
+    "settingsTitle": "Yksityisyys",
+    "crashReportsTitle": "Lähetä kaatumisraportit",
+    "crashReportsDescription": "Lähettää anonymisoidun raportin, kun Restorm kaatuu, jotta vika voidaan korjata. Raporteista poistetaan URL-osoitteet, tunnisteet, pyyntöjen sisällöt ja henkilötiedot ennen kuin ne lähtevät koneeltasi. Sisältyy ilmaiseen tilaukseen; maksullisessa tilauksessa sen voi kytkeä pois. Kaikki tiedot: https://restorm.app/privacy",
+    "telemetryTitle": "Lähetä käyttötilastot",
+    "telemetryDescription": "Lähettää anonyymejä tilastoja siitä, mitä ominaisuuksia käytetään, kehityksen suuntaamiseksi. Oletuksena pois päältä eikä koskaan käytössä ilman nimenomaista suostumustasi. Ei sisällä pyyntödataa, URL-osoitteita eikä henkilötietoja. Kaikki tiedot: https://restorm.app/privacy",
+    "outbound": {
+      "purpose": {
+        "crash": "Kaatumisraportit (vain suostumuksellasi)",
+        "telemetry": "Anonyymit käyttötilastot (vain suostumuksellasi)",
+        "backend": "Tili, lisenssi ja tilaus"
+      }
+    }
   }
 }

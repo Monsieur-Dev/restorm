@@ -51,8 +51,28 @@ export type {
   RequestRecord,
   RequestRecordSource,
   RequestRecordVerdict,
-  RequestRecordProtocol
+  RequestRecordProtocol,
+  SystemEndpointDeclaration,
+  SystemEndpointStatus,
+  SystemEndpointExemption
 } from '../types/firewall'
+
+// Privacy / consent shared model + the fail-closed payload scrubber (usable
+// from the renderer for anything it builds before handing to main).
+export type {
+  ConsentDecision,
+  ConsentGateDefinition,
+  ConsentOverride,
+  ConsentSource
+} from '../shared/privacy/consent'
+export {
+  scrubPayload,
+  scrubString,
+  assertScrubbed,
+  findScrubViolations,
+  PayloadNotScrubbedError
+} from '../shared/privacy/scrub'
+export type { ScrubOptions, ScrubViolation, UrlPolicy } from '../shared/privacy/scrub'
 
 export type { ThemeInfo, ThemeDefinition, ThemeVariables } from '../types/theme'
 export type {

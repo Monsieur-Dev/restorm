@@ -2536,5 +2536,19 @@
       "downloaded": "Pembaruan siap dipasang ({{version}})",
       "error": "Pemeriksaan gagal"
     }
+  },
+  "privacy": {
+    "settingsTitle": "Privasi",
+    "crashReportsTitle": "Kirim laporan kerusakan",
+    "crashReportsDescription": "Mengirim laporan yang dianonimkan saat Restorm mengalami kerusakan, agar masalahnya dapat diperbaiki. Laporan dibersihkan dari URL, token, isi permintaan, dan data pribadi sebelum meninggalkan komputer Anda. Termasuk dalam paket gratis; paket berbayar dapat mematikannya. Detail lengkap: https://restorm.app/privacy",
+    "telemetryTitle": "Kirim statistik penggunaan",
+    "telemetryDescription": "Mengirim statistik anonim tentang fitur mana yang digunakan, untuk mengarahkan pengembangan berikutnya. Mati secara bawaan dan tidak pernah aktif tanpa persetujuan tegas Anda. Tidak berisi data permintaan, URL, maupun data pribadi. Detail lengkap: https://restorm.app/privacy",
+    "outbound": {
+      "purpose": {
+        "crash": "Laporan kerusakan (hanya dengan persetujuan Anda)",
+        "telemetry": "Statistik penggunaan anonim (hanya dengan persetujuan Anda)",
+        "backend": "Akun, lisensi, dan langganan"
+      }
+    }
   }
 }

@@ -37,6 +37,7 @@ import {
   type ReleaseChannel
 } from '../../../shared/config/backend'
 import { entitlementPublicKeyPem, isEntitlementPublicKeyConfigured } from '../entitlement/keys'
+import { syncConsentFirewall } from '../privacy/consentComposition'
 
 /** Restorm audience strings — injected into ECUI's generic service. */
 const RESTORM_ENTITLEMENT_AUDIENCE = 'restorm-entitlement'
@@ -134,6 +135,11 @@ const avatarExemption = new AvatarFirewallExemption(permissionService)
  * allowed by the time the renderer mounts the avatar; it is dropped on logout /
  * a photo-less profile.
  *
+ * Also re-syncs the consent-gated firewall exemptions: crash reporting is
+ * plan-modulated, so a login, logout, upgrade or expiry changes the answer to
+ * `canSend('crash')` without any setting being touched. Without this the
+ * exemption would lag a plan transition until the next toggle.
+ *
  * Also invalidates the FeatureFlippingService so any `Type: Entitlement`
  * strategy re-evaluates against the new capabilities. The service may not
  * be initialized yet on the very first boot broadcast (the entitlement service
@@ -141,6 +147,7 @@ const avatarExemption = new AvatarFirewallExemption(permissionService)
  */
 function broadcastAuthStateWithAvatarExemption(channel: string, state: AuthState): void {
   avatarExemption.sync(state)
+  syncConsentFirewall()
   broadcastAuthState(channel, state)
   // Invalidate so `useFeature` subscribers re-evaluate Entitlement strategies.
   if (isFeatureServiceInitialized()) {
@@ -180,6 +187,16 @@ export function initEntitlementService(version: string = resolveBackendVersion()
   const backendFetch = makeGuardedFetch({
     isEligibleUrl: (url) => isBackendFunctionsUrl(url, host),
     bypass: withFirewallBypass
+  })
+  // Surface the bypass in the firewall panel's read-only outbound list. A
+  // call-scoped bypass never appears in the allowlist, so without a declaration
+  // this is traffic the firewall UI could not account for at all.
+  permissionService.declareSystemEndpoint({
+    id: 'backend',
+    host,
+    purposeKey: 'privacy.outbound.purpose.backend',
+    consentGate: null,
+    exemption: 'call-scoped-bypass'
   })
   const store = new AuthStore(
     join(app.getPath('userData'), AUTH_CACHE_FILE),

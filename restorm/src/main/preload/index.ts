@@ -20,7 +20,8 @@ import {
   FIREWALL_REQUEST_RECORD_CHANNEL,
   type FirewallOrigin,
   type FirewallPromptPayload,
-  type RequestRecord
+  type RequestRecord,
+  type SystemEndpointStatus
 } from '../../../../electron-core-ui/src/types/firewall'
 import {
   httpExecuteResultSchema,
@@ -111,6 +112,29 @@ contextBridge.exposeInMainWorld('api', {
      * permission check. */
     setProjectOrigins: async (origins: FirewallOrigin[]): Promise<void> => {
       await ipcRenderer.invoke(FIREWALL_IPC.SET_PROJECT_ORIGINS, origins)
+    },
+    /** Read-only inventory of the destinations the APP itself may contact
+     * (licensing backend, avatar CDN, consent-gated crash / telemetry ingest).
+     * No mutating counterpart by design — these are declared in code and
+     * governed by the Privacy settings, not editable from the panel. */
+    listSystemEndpoints: async (): Promise<SystemEndpointStatus[]> => {
+      const result: unknown = await ipcRenderer.invoke(FIREWALL_IPC.LIST_SYSTEM_ENDPOINTS)
+      return Array.isArray(result) ? (result as SystemEndpointStatus[]) : []
+    },
+    /** The hosts the firewall currently exempts as system / display assets —
+     * the actual input to the permission check, as opposed to the descriptive
+     * rows above. Read-only introspection; the panel does not use it, but it is
+     * what lets a test assert on enforcement rather than on presentation. */
+    listSystemAllowedHosts: async (): Promise<string[]> => {
+      const result: unknown = await ipcRenderer.invoke(FIREWALL_IPC.LIST_SYSTEM_ALLOWED_HOSTS)
+      return Array.isArray(result) ? (result as string[]) : []
+    },
+    /** Push notification that the outbound inventory moved (consent granted or
+     * revoked, a host resolved on login) so an open panel re-reads it live. */
+    onSystemEndpointsChanged: (cb: () => void): (() => void) => {
+      const handler = (): void => { cb() }
+      ipcRenderer.on(FIREWALL_IPC.SYSTEM_ENDPOINTS_CHANGED, handler)
+      return (): void => { ipcRenderer.off(FIREWALL_IPC.SYSTEM_ENDPOINTS_CHANGED, handler) }
     },
     onPromptShow: (cb: (payload: FirewallPromptPayload) => void): (() => void) => {
       const handler = (_event: unknown, payload: FirewallPromptPayload): void => { cb(payload) }

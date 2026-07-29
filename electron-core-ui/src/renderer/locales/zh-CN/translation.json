@@ -411,7 +411,20 @@
   "firewall": {
     "addOrigin": "添加来源",
     "removeOrigin": "移除 {{origin}}",
-    "noEntries": "暂无条目。"
+    "noEntries": "暂无条目。",
+    "outbound": {
+      "title": "对外服务",
+      "intro": "本应用可能主动联系的目标地址。它们在代码中声明，无法在此编辑——需要您同意的目标在您于「偏好设置」中授权之前将保持关闭。",
+      "empty": "本应用未声明任何自身的对外目标地址。",
+      "hostUnset": "未配置",
+      "stateConsented": "已允许——您已授予同意",
+      "stateNoConsent": "已阻止——未获得同意",
+      "stateRequired": "已允许——应用运行所必需",
+      "stateInactive": "未启用——当前未使用",
+      "purpose": {
+        "avatar": "已登录账户的头像"
+      }
+    }
   },
   "bookmarkRibbon": {
     "addBookmark": "添加书签"

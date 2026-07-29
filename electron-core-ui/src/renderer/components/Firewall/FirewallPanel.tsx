@@ -10,7 +10,7 @@ import { useFeature } from '../../hooks/useFeature'
 import { useFirewallControl } from './useFirewallControl'
 import { Tooltip } from '../Tooltip'
 import './firewallPanel.css'
-import type { FirewallOrigin } from '../../../types/firewall'
+import type { FirewallOrigin, SystemEndpointStatus } from '../../../types/firewall'
 
 export interface FirewallPanelProps {
 	'data-testid'?: string
@@ -53,12 +53,14 @@ export const FirewallPanel: React.FC<FirewallPanelProps> = ({
 	const {
 		whitelist,
 		blacklist,
+		systemEndpoints,
 		ready,
 		addToWhitelist,
 		removeFromWhitelist,
 		addToBlacklist,
 		removeFromBlacklist
 	} = useFirewallControl()
+	const { t } = useTranslation()
 
 	const [whitelistDraft, setWhitelistDraft] = useState('')
 	const [blacklistDraft, setBlacklistDraft] = useState('')
@@ -183,6 +185,7 @@ export const FirewallPanel: React.FC<FirewallPanelProps> = ({
 						)}
 					</div>
 				</header>
+				<OutboundServicesSection endpoints={systemEndpoints} t={t} />
 				<div className="firewall-panel__tabs">
 					<Tabs
 						data-testid="firewall-tabs"
@@ -195,6 +198,94 @@ export const FirewallPanel: React.FC<FirewallPanelProps> = ({
 			</div>
 		</ScrollableElement>
 	)
+}
+
+/** Minimal shape of i18next's `t`, so the section can take it as a prop
+ * instead of calling the hook a second time. */
+type Translate = (key: string, defaultValue: string) => string
+
+interface OutboundServicesSectionProps {
+	endpoints: SystemEndpointStatus[]
+	t: Translate
+}
+
+/**
+ * Read-only inventory of the destinations the APPLICATION ITSELF may contact —
+ * its licensing backend, the avatar CDN of the signed-in account, and any
+ * consent-gated crash / telemetry ingest.
+ *
+ * These hosts bypass the whitelist / blacklist below by design (they are the
+ * app's own plumbing, not the user's API traffic), which historically made them
+ * the one class of outbound call the firewall panel could not account for. A
+ * firewall whose headline promise is "nothing leaves without you knowing" has to
+ * show them, including — especially — the ones currently switched OFF: a row
+ * that reads "no consent, not exempted" is a verifiable statement, whereas an
+ * absent row is indistinguishable from a hidden one.
+ *
+ * Read-only on purpose. These entries are declared in code and governed by the
+ * consent settings; letting the panel delete one would create a state where the
+ * app believes it may phone home and the firewall disagrees.
+ */
+const OutboundServicesSection: React.FC<OutboundServicesSectionProps> = ({ endpoints, t }) => (
+	<section className="firewall-panel__outbound" data-testid="firewall-outbound">
+		<h2 className="firewall-panel__outbound-title">
+			{t('firewall.outbound.title', 'Outbound services')}
+		</h2>
+		<p className="firewall-panel__hint">
+			{t('firewall.outbound.intro', 'Destinations this application may contact on its own initiative. They are declared in code and cannot be edited here — the ones that require your consent stay switched off until you grant it in Preferences.')}
+		</p>
+		{endpoints.length === 0 ? (
+			<div className="firewall-panel__empty" data-testid="firewall-outbound-empty">
+				{t('firewall.outbound.empty', 'This application declares no outbound destination of its own.')}
+			</div>
+		) : (
+			<ul className="firewall-panel__outbound-list">
+				{endpoints.map((endpoint) => (
+					<OutboundServiceRow key={endpoint.id} endpoint={endpoint} t={t} />
+				))}
+			</ul>
+		)}
+	</section>
+)
+
+const OutboundServiceRow: React.FC<{ endpoint: SystemEndpointStatus; t: Translate }> = ({ endpoint, t }) => {
+	const state = outboundState(endpoint, t)
+	return (
+		<li className="firewall-panel__outbound-row" data-testid={`firewall-outbound-row-${endpoint.id}`}>
+			<div className="firewall-panel__outbound-identity">
+				<code className="firewall-panel__outbound-host" data-testid={`firewall-outbound-host-${endpoint.id}`}>
+					{endpoint.host ?? t('firewall.outbound.hostUnset', 'not configured')}
+				</code>
+				<span className="firewall-panel__outbound-purpose">
+					{t(endpoint.purposeKey, endpoint.purposeKey)}
+				</span>
+			</div>
+			<span
+				className="firewall-panel__outbound-state"
+				data-active={endpoint.active ? 'true' : 'false'}
+				data-testid={`firewall-outbound-state-${endpoint.id}`}
+			>
+				<IconView icon={{ type: 'codicon', value: endpoint.active ? 'pass-filled' : 'circle-slash' }} size={13} />
+				{state}
+			</span>
+		</li>
+	)
+}
+
+/**
+ * The one sentence that tells the user where this destination stands. Four
+ * cases, because "allowed" means something different for a host the app cannot
+ * work without than for one the user opted into.
+ */
+function outboundState(endpoint: SystemEndpointStatus, t: Translate): string {
+	if (endpoint.consentGate !== null) {
+		return endpoint.active
+			? t('firewall.outbound.stateConsented', 'Allowed — you granted consent')
+			: t('firewall.outbound.stateNoConsent', 'Blocked — no consent given')
+	}
+	return endpoint.active
+		? t('firewall.outbound.stateRequired', 'Allowed — required by the application')
+		: t('firewall.outbound.stateInactive', 'Inactive — not in use right now')
 }
 
 interface OriginListSectionProps {

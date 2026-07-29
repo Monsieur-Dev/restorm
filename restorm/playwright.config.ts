@@ -351,6 +351,15 @@ const settingsTabTestDir = defineBddConfig({
   outputDir: '.features-gen/settings-tab'
 })
 
+const firewallOutboundTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/firewall-outbound/features/**/*.feature',
+  steps: [
+    'tests/e2e/bdd/firewall-outbound/steps/**/*.ts',
+    'tests/e2e/bdd/fixtures/firewall-outbound.fixture.ts'
+  ],
+  outputDir: '.features-gen/firewall-outbound'
+})
+
 const autoUpdateTestDir = defineBddConfig({
   features: 'tests/e2e/bdd/auto-update/features/**/*.feature',
   steps: [
@@ -775,6 +784,11 @@ export default defineConfig({
       name: 'settings-tab',
       testDir: settingsTabTestDir,
       timeout: 120 * 1000
+    },
+    {
+      name: 'firewall-outbound',
+      testDir: firewallOutboundTestDir,
+      timeout: 120 * 1000 // opens the Firewall tab, flips consent, re-reads the exemptions
     },
     {
       name: 'auto-update',

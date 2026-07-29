@@ -31,6 +31,55 @@ afterEach(() => {
   vi.clearAllMocks()
 })
 
+describe('SettingItem — capabilityLockedValue', () => {
+  /** The toggle's own checked state, as `ToggleRenderer` renders it. */
+  function renderedToggleState(): string | null {
+    return document.querySelector('[role="checkbox"]')?.getAttribute('aria-checked') ?? null
+  }
+
+  it('displays the forced value, not the stored one, while the setting is locked', () => {
+    // The failure this prevents: a plan that mandates a setting the user had
+    // previously turned off would render a greyed OFF toggle while the app
+    // behaved as ON — telling the user the opposite of what is happening.
+    useSettingsMock.mockReturnValue({ capabilityGate: { isLocked: () => true, onSubscribe: vi.fn() } })
+    render(
+      <SettingItem
+        setting={makeSetting({ capability: 'crash.optOut', capabilityLockedValue: true })}
+        value={false}
+        onChange={vi.fn()}
+        onReset={vi.fn()}
+      />
+    )
+    expect(renderedToggleState()).toBe('true')
+  })
+
+  it('shows the stored value again as soon as the lock lifts — the choice was never overwritten', () => {
+    useSettingsMock.mockReturnValue({ capabilityGate: { isLocked: () => false, onSubscribe: vi.fn() } })
+    render(
+      <SettingItem
+        setting={makeSetting({ capability: 'crash.optOut', capabilityLockedValue: true })}
+        value={false}
+        onChange={vi.fn()}
+        onReset={vi.fn()}
+      />
+    )
+    expect(renderedToggleState()).toBe('false')
+  })
+
+  it('leaves the stored value showing when a locked setting declares no forced value', () => {
+    useSettingsMock.mockReturnValue({ capabilityGate: { isLocked: () => true, onSubscribe: vi.fn() } })
+    render(
+      <SettingItem
+        setting={makeSetting({ capability: 'git.client' })}
+        value={false}
+        onChange={vi.fn()}
+        onReset={vi.fn()}
+      />
+    )
+    expect(renderedToggleState()).toBe('false')
+  })
+})
+
 describe('SettingItem — capability gating', () => {
   it('a setting with no `capability` tag is never gated, regardless of capabilityGate', () => {
     useSettingsMock.mockReturnValue({ capabilityGate: { isLocked: () => true, onSubscribe: vi.fn() } })
