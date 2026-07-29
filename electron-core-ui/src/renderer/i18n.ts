@@ -2,6 +2,7 @@ import i18n from 'i18next'
 import type { Resource, i18n as I18nInstance } from 'i18next'
 import { initReactI18next } from 'react-i18next'
 import { logger } from './services/logger'
+import { matchSupportedLocale } from '../shared/localeMatch'
 import coreEnTranslation from './locales/en/translation.json'
 import coreFrTranslation from './locales/fr/translation.json'
 import coreEsTranslation from './locales/es/translation.json'
@@ -117,22 +118,36 @@ export function initializeI18n(resources: Resource, defaultLanguage = 'en'): Pro
 
   const availableLanguages = new Set(Object.keys(mergedResources))
 
+  // OS/browser-locale fallback used whenever the user hasn't explicitly
+  // chosen a language yet. `navigator.languages` (ordered, most-preferred
+  // first) is tried before the single `navigator.language`, each matched
+  // against whatever this app actually ships (`availableLanguages`) —
+  // resolving all the way down to the caller's `defaultLanguage` ('en' by
+  // convention) only when nothing in the OS preference list is shipped.
+  const resolveOsLocale = (): string => {
+    const nav = typeof navigator === 'undefined' ? undefined : navigator
+    const candidates = [...(nav?.languages ?? []), nav?.language].filter(
+      (candidate): candidate is string => Boolean(candidate)
+    )
+    return matchSupportedLocale(candidates, [...availableLanguages], defaultLanguage)
+  }
+
   const resolveInitialLanguage = async (): Promise<string> => {
     try {
       const api = (window as unknown as { api?: { i18n?: { getLanguage?: () => Promise<string> } } }).api
       const getLanguage = api?.i18n?.getLanguage
-      if (!getLanguage) {
-        return defaultLanguage
-      }
-      const stored = await getLanguage()
+      // An empty/missing result means "nothing explicitly chosen yet" — NOT
+      // "use English" — so it falls through to the OS-locale guess below
+      // rather than short-circuiting to defaultLanguage here.
+      const stored = getLanguage ? await getLanguage() : ''
       if (stored && availableLanguages.has(stored)) {
         return stored
       }
-      return defaultLanguage
     } catch (error) {
-      logger.warn('Failed to resolve persisted language, falling back to default', { error: String(error) })
-      return defaultLanguage
+      logger.warn('Failed to resolve persisted language, falling back to OS locale', { error: String(error) })
     }
+
+    return resolveOsLocale()
   }
 
   return resolveInitialLanguage()

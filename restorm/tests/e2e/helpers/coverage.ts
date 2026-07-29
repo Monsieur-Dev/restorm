@@ -1,7 +1,7 @@
 import type { ElectronApplication, Page, TestInfo } from '@playwright/test'
 import { mkdir, writeFile } from 'fs/promises'
 import { basename, join } from 'path'
-import { configureNextConfirmationDialogForE2E, installSystemModalsMockingForE2E } from 'electron-core-ui/testing'
+import { configureNextConfirmationDialogForE2E, installSystemModalsMockingForE2E, withE2ELocaleEnv } from 'electron-core-ui/testing'
 
 function sanitizeFileName(value: string): string {
   return value
@@ -30,14 +30,21 @@ export function getE2ECoverageOutputDirs(restormRoot: string): { nycOutputDir: s
  * branch regardless of its simple-git baseDir. This actually committed e2e
  * seed churn into the app's own branch, and made the git suites fail ONLY
  * under the full pre-push run (standalone shells carry no GIT_DIR).
- * Mirrors `gitServerSeed.gitEnv()`'s stripping for the seed commands. */
+ * Mirrors `gitServerSeed.gitEnv()`'s stripping for the seed commands.
+ *
+ * It is also where the suite's locale gets pinned (`withE2ELocaleEnv`) —
+ * the app defaults its UI language to the OS locale when the user has never
+ * picked one, which is the state of every launch here, so without the pin
+ * the suite would run in the developer's language and assert against
+ * strings CI never renders. */
 export function withE2ECoverageEnv(restormRoot: string, env: NodeJS.ProcessEnv): NodeJS.ProcessEnv {
   const sanitized = Object.fromEntries(Object.entries(env).filter(([key]) => !key.startsWith('GIT_') && key !== 'SSH_ASKPASS'))
-  if (!isE2ECoverageEnabled()) return sanitized
+  const base = withE2ELocaleEnv(sanitized)
+  if (!isE2ECoverageEnabled()) return base
 
   const { v8OutputDir } = getE2ECoverageOutputDirs(restormRoot)
   return {
-    ...sanitized,
+    ...base,
     NODE_V8_COVERAGE: v8OutputDir
   }
 }

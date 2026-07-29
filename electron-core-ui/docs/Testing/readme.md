@@ -21,8 +21,38 @@ In E2E tests, native OS dialogs block the flow. These utilities let tests:
 
 - `electron-core-ui/testing`
   - E2E helpers to install/configure mocks through Playwright `electronApp.evaluate(...)`
+  - `withE2ELocaleEnv(env, overrides?)` to pin the launch locale (see below)
 - `electron-core-ui/testing/playwright-bdd`
   - `defineSystemModalsBddSteps(...)` to register ready-to-use BDD steps
+
+## Pinning the launch locale (`withE2ELocaleEnv`)
+
+The renderer's i18n bootstrap defaults the UI language to the OS locale whenever
+the user has never explicitly chosen one (see
+[Architecture/I18n](../Architecture/I18n.md)) — which is the state of every test
+run, since each launch gets a throwaway `userData` dir. An inherited host locale
+therefore runs the suite in whatever language the developer's machine uses while
+CI runs it in another, silently changing every user-visible string the specs
+assert on.
+
+Build the launch environment through this helper so the language is a property
+of the suite rather than of the machine:
+
+```ts
+import { withE2ELocaleEnv } from 'electron-core-ui/testing'
+
+const app = await electron.launch({
+  args: [mainJsPath],
+  env: withE2ELocaleEnv(process.env, { NODE_ENV: 'development' })
+})
+```
+
+It drops every locale variable it finds (`LANG`, `LANGUAGE`, and all `LC_*` —
+a host setting only `LC_MESSAGES` would otherwise keep steering Chromium's
+locale resolution) and substitutes `en_US.UTF-8`. `overrides` are applied last,
+so they win over the pin. The return type is `Record<string, string>`, which is
+what Playwright's `launch({ env })` accepts; variables with no value are dropped
+rather than forwarded.
 
 ## How to use (Playwright Electron fixture)
 

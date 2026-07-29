@@ -114,3 +114,4 @@ export type { SaveUnitKind, DirtyReason } from '../main/services/saveUnit/types'
 // crossing into the main-process module tree.
 export type { AuthState, CheckoutResult, PlanTier } from '../shared/auth/authState'
 export { AUTH_IPC, SIGNED_OUT_STATE, hasCapability } from '../shared/auth/authState'
+export { matchSupportedLocale } from '../shared/localeMatch'

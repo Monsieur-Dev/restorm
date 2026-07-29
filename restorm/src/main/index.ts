@@ -427,12 +427,17 @@ function getSettingsConfigPath(): string {
   return join(process.resourcesPath, 'restorm-resources/settings.yaml')
 }
 
-// Initialize I18n Service for main process translations
-// Default to system locale or 'en', will be synchronized with renderer via IPC
-const systemLocale = app.getLocale().split('-')[0] ?? 'en'
-const supportedLocales = ['en', 'fr']
-const defaultLocale = supportedLocales.includes(systemLocale) ? systemLocale : 'en'
-i18nService.initialize('', defaultLocale)
+// Initialize I18n Service for main process translations. The UI's default
+// language — including OS/system-locale detection — is resolved by the
+// renderer's i18n bootstrap (electron-core-ui's `initializeI18n`, which can
+// read the full shipped language list + `navigator.language`, unlike this
+// early main-process call) and synchronized back here over IPC moments
+// after boot. This only seeds the main-process translator (native dialogs)
+// for the brief window before that first sync, so a plain 'en' default is
+// fine; calling `app.getLocale()` here would also be unreliable, since
+// Electron only guarantees a correct result once `app.whenReady()` fires,
+// well after this module-level code runs.
+i18nService.initialize('')
 // Layer Restorm's renderer translations onto ECUI's built-ins so
 // settings-yaml `titleKey` / `descriptionKey` lookups (e.g.
 // `behavior.dateTimeFormat`, `behavior.syncSidebarWithTabs`) resolve
@@ -440,7 +445,7 @@ i18nService.initialize('', defaultLocale)
 // immediately after.
 i18nService.addTranslations('en', restormEnTranslation as Record<string, unknown>)
 i18nService.addTranslations('fr', restormFrTranslation as Record<string, unknown>)
-logger.info('I18n Service initialized', { locale: defaultLocale })
+logger.info('I18n Service initialized', { language: i18nService.getLanguage() })
 
 // Initialize File Service for .restorm files with YAML serialization.
 // `uuidKey` tells FileService which top-level field to preserve across

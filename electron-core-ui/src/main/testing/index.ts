@@ -27,6 +27,8 @@ export {
 } from './systemModalsMockClient'
 export type { ElectronAppLike } from './systemModalsMockClient'
 
+export { withE2ELocaleEnv } from './e2eLaunchEnv'
+
 export {
   postMcpJsonRpc,
   callMcpToolOverJsonRpc,

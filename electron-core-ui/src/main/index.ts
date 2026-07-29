@@ -47,6 +47,12 @@ export type { GitSemiPullFrequency, GitSemiPullControllerOptions } from './servi
 export { renderCommitMessage } from '../shared/CommitMessageEngine'
 export type { CommitMessageTemplates, RenderedCommitMessage } from '../shared/CommitMessageEngine'
 
+// OS-locale matching — also process-neutral, and also exported from both:
+// the renderer resolves its initial UI language with it, and a host that
+// wants the main-process translator to follow the OS locale needs the same
+// matching rules rather than a second, divergent implementation.
+export { matchSupportedLocale } from '../shared/localeMatch'
+
 // GraphQL runtime
 export {
   graphQLService,

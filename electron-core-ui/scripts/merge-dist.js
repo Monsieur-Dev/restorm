@@ -69,9 +69,20 @@ copyIfExists(
   path.join(distSrcDir, 'errors')
 )
 
-// Copy shared (generic cross-layer types consumed by both main and renderer)
+// Copy shared (generic cross-layer code consumed by main and/or renderer).
+// A shared file only gets compiled by whichever tsconfig(s) actually import
+// it — tsconfig.main.json/tsconfig.renderer.json only glob src/main/** and
+// src/renderer/** respectively, so a file under src/shared/ that only the
+// renderer (or only main) imports lands in just ONE of dist-main/
+// dist-renderer, never both. Copy from both build outputs into the same
+// merged dest so either case resolves correctly regardless of which side(s)
+// actually reference it.
 copyIfExists(
   path.join(__dirname, '..', 'dist-main', 'src', 'shared'),
+  path.join(distSrcDir, 'shared')
+)
+copyIfExists(
+  path.join(__dirname, '..', 'dist-renderer', 'src', 'shared'),
   path.join(distSrcDir, 'shared')
 )
 
