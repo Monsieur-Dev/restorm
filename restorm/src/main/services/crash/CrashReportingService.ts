@@ -18,6 +18,7 @@ import {
   shouldInitCrashReporting,
   type CrashReportingDecision
 } from './crashReportingDecision'
+import type { WindowCrashReport } from './windowCrashObserver'
 
 /** Options handed to the SDK at init. Structural, so the port stays testable. */
 export interface CrashSdkInitOptions {
@@ -38,6 +39,10 @@ export interface CrashSdkPort {
   /** Tear the client down. Resolves when the transport has finished flushing —
    * or, on revocation, when it has been discarded. */
   close(): Promise<void>
+  /** Record a renderer-process death. Separate from the SDK's own global
+   * handlers because nothing in the dead renderer can report it — the main
+   * process synthesises the event instead. */
+  captureWindowCrash(report: WindowCrashReport): void
 }
 
 export interface CrashReportingServiceOptions {
@@ -64,6 +69,20 @@ export class CrashReportingService {
   /** True when the SDK is currently initialised. */
   isArmed(): boolean {
     return this.armed
+  }
+
+  /**
+   * Report a renderer-process death, if we are permitted to report anything.
+   *
+   * The consent check is here rather than at the call site so the observer can
+   * stay a dumb witness: it reports every death it sees, and this decides
+   * whether any of it may leave the machine. A crash observed while disarmed is
+   * simply dropped — no queue, no "send it later if they consent", because
+   * consent granted tomorrow is not consent for what happened today.
+   */
+  reportWindowCrash(report: WindowCrashReport): void {
+    if (!this.armed) return
+    this.options.sdk.captureWindowCrash(report)
   }
 
   /**

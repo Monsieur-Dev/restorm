@@ -1,15 +1,22 @@
 import { describe, it, expect, vi } from 'vitest'
 import { CrashReportingService, type CrashSdkPort, type CrashSdkInitOptions } from './CrashReportingService'
 import type { ConsentDecision } from 'electron-core-ui/main'
+import type { WindowCrashReport } from './windowCrashObserver'
 
 const DSN = 'https://k@o4507.ingest.de.sentry.io/1'
 
-function makeSdk(): CrashSdkPort & { inits: CrashSdkInitOptions[]; closes: number } {
+function makeSdk(): CrashSdkPort & {
+  inits: CrashSdkInitOptions[]
+  closes: number
+  captured: WindowCrashReport[]
+} {
   const state = {
     inits: [] as CrashSdkInitOptions[],
     closes: 0,
+    captured: [] as WindowCrashReport[],
     init(options: CrashSdkInitOptions): Promise<void> { state.inits.push(options); return Promise.resolve() },
-    close(): Promise<void> { state.closes += 1; return Promise.resolve() }
+    close(): Promise<void> { state.closes += 1; return Promise.resolve() },
+    captureWindowCrash(report: WindowCrashReport): void { state.captured.push(report) }
   }
   return state
 }
@@ -114,6 +121,37 @@ describe('CrashReportingService — withdrawal is immediate', () => {
     decision = consent({ source: 'forced-off', granted: false })
     expect((await service.sync()).reason).toBe('plan-forbidden')
     expect(sdk.closes).toBe(1)
+  })
+})
+
+describe('CrashReportingService — reporting a renderer death', () => {
+  const crash: WindowCrashReport = {
+    window: 'Restorm', reason: 'oom', exitCode: 9, duringStartup: true
+  }
+
+  it('forwards the crash once armed', async () => {
+    const { service, sdk } = build()
+    await service.sync()
+    service.reportWindowCrash(crash)
+    expect(sdk.captured).toEqual([crash])
+  })
+
+  it('DROPS a crash observed while disarmed — no queue, no send-later', async () => {
+    // Consent granted tomorrow is not consent for what happened today.
+    const { service, sdk } = build({ readConsent: () => consent({ source: 'user', granted: false }) })
+    await service.sync()
+    service.reportWindowCrash(crash)
+    expect(sdk.captured).toEqual([])
+  })
+
+  it('does not retroactively send a crash that happened before consent', async () => {
+    let decision = consent({ source: 'default' })
+    const { service, sdk } = build({ readConsent: () => decision })
+    await service.sync()
+    service.reportWindowCrash(crash)
+    decision = consent({ source: 'user', granted: true })
+    await service.sync()
+    expect(sdk.captured).toEqual([])
   })
 })
 

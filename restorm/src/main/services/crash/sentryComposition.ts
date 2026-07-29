@@ -19,6 +19,7 @@ import { crashDsn } from '../../../shared/config/observability'
 import { getConsentService } from '../privacy/consentComposition'
 import { CrashReportingService, type CrashSdkPort } from './CrashReportingService'
 import { makeBeforeSend, makeBeforeBreadcrumb } from './sentryScrub'
+import { observeWindowCrashes } from './windowCrashObserver'
 
 let instance: CrashReportingService | null = null
 
@@ -49,6 +50,22 @@ function makeSentryPort(): CrashSdkPort {
         // `sendDefaultPii` OFF is the SDK's own switch for attaching the user's
         // IP and similar. Belt AND braces with the scrubber.
         sendDefaultPii: false
+      })
+    },
+    captureWindowCrash(report): void {
+      // Synthesised main-side: the renderer that died cannot report itself.
+      // The payload is a fixed set of process facts — no user content — so it
+      // carries nothing the scrubber would have to strip.
+      void import('@sentry/electron/main').then((Sentry) => {
+        Sentry.captureMessage(`Renderer process gone: ${report.reason}`, {
+          level: 'fatal',
+          tags: {
+            window: report.window,
+            reason: report.reason,
+            during_startup: String(report.duringStartup)
+          },
+          extra: { exitCode: report.exitCode }
+        })
       })
     },
     async close(): Promise<void> {
@@ -98,6 +115,18 @@ export function initCrashReporting(): CrashReportingService | null {
   // restart. Plan changes reach here too — `consentComposition` re-syncs the
   // gate on every auth broadcast.
   consentService?.onChange(() => { void service.sync() })
+
+  // Witness renderer deaths for EVERY window, including the splash — a
+  // `data:text/html` document with no script context, so nothing inside it
+  // could ever report its own death. The observer is installed unconditionally
+  // and the service decides whether anything may be sent, so consent granted
+  // later never retroactively ships an earlier crash.
+  observeWindowCrashes({
+    app,
+    onCrash: (report) => { service.reportWindowCrash(report) },
+    isStartingUp: () => !app.isReady(),
+    log: (message, fields) => { logger.warn(message, fields) }
+  })
 
   instance = service
   return service
