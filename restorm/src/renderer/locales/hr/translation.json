@@ -2494,6 +2494,7 @@
     "recoverFailedTitle": "Vraćanje nije uspjelo"
   },
   "updates": {
+    "seeReleaseNotes": "Pogledaj bilješke o izdanju",
     "settingsTitle": "Ažuriranja",
     "autoCheckTitle": "Automatski provjeravaj ažuriranja",
     "autoCheckDescription": "Provjerava ažuriranja u pozadini pri pokretanju i povremeno.",

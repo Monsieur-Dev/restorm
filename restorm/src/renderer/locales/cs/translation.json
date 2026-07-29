@@ -2495,6 +2495,7 @@
     "recoverFailedTitle": "Obnovení se nezdařilo"
   },
   "updates": {
+    "seeReleaseNotes": "Zobrazit poznámky k vydání",
     "settingsTitle": "Aktualizace",
     "autoCheckTitle": "Automaticky kontrolovat aktualizace",
     "autoCheckDescription": "Kontroluje aktualizace na pozadí při spuštění a pravidelně.",

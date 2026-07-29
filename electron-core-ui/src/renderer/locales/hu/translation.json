@@ -1,4 +1,10 @@
 {
+  "releaseNotesModal": {
+    "title": "Újdonságok",
+    "showMore": "Több megjelenítése",
+    "loading": "Kiadási megjegyzések betöltése…",
+    "empty": "Nincsenek megjeleníthető kiadási megjegyzések."
+  },
   "common": {
     "opened": "Megnyitva",
     "refresh": "Frissítés",

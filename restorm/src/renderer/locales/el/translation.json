@@ -2493,6 +2493,7 @@
     "recoverFailedTitle": "Η ανάκτηση απέτυχε"
   },
   "updates": {
+    "seeReleaseNotes": "Δείτε τις σημειώσεις έκδοσης",
     "settingsTitle": "Ενημερώσεις",
     "autoCheckTitle": "Αυτόματος έλεγχος για ενημερώσεις",
     "autoCheckDescription": "Ελέγχει για ενημερώσεις στο παρασκήνιο κατά την εκκίνηση και περιοδικά.",

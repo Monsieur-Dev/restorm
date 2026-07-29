@@ -1,4 +1,10 @@
 {
+  "releaseNotesModal": {
+    "title": "Nyheder",
+    "showMore": "Vis mere",
+    "loading": "Indlæser udgivelsesnoter…",
+    "empty": "Ingen udgivelsesnoter at vise."
+  },
   "common": {
     "opened": "Åbnet",
     "refresh": "Opdatér",

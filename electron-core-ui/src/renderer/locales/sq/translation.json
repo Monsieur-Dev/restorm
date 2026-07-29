@@ -1,4 +1,10 @@
 {
+  "releaseNotesModal": {
+    "title": "Të rejat",
+    "showMore": "Shfaq më shumë",
+    "loading": "Po ngarkohen shënimet e versionit…",
+    "empty": "Nuk ka shënime versioni për të shfaqur."
+  },
   "common": {
     "opened": "U hap",
     "refresh": "Rifresko",

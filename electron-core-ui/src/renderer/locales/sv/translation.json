@@ -1,4 +1,10 @@
 {
+  "releaseNotesModal": {
+    "title": "Nyheter",
+    "showMore": "Visa mer",
+    "loading": "Läser in versionsinformation…",
+    "empty": "Inga versionsanteckningar att visa."
+  },
   "common": {
     "opened": "Öppnade",
     "refresh": "Uppdatera",

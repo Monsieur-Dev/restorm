@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs'
+import { join } from 'node:path'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { UpdateService, type UpdaterEngine } from './UpdateService'
 
@@ -233,5 +235,152 @@ describe('UpdateService', () => {
     svc.initialize()
     svc.quitAndInstall()
     expect(engine.quitAndInstall).toHaveBeenCalledTimes(1)
+  })
+
+  describe('getReleaseNotes', () => {
+    const REMOTE = `# Changelog
+
+## v2.0.0
+
+- Second release
+![logo](data:image/png;base64,AAAA)
+![shot](https://dl.restorm.app/x.png)
+
+## v1.0.0
+
+- First release
+`
+
+    const ENGLISH = `# Changelog
+
+## v2.0.0
+
+- Second release, in English
+
+## v1.0.0
+
+- First release
+`
+
+    /** Serve `body` for the URLs in `available`, 404 everything else. */
+    function serve(available: Record<string, string>): ReturnType<typeof vi.fn> {
+      return vi.fn((url: string) =>
+        Promise.resolve(
+          url in available
+            ? { ok: true, text: () => Promise.resolve(available[url] ?? '') }
+            : { ok: false, text: () => Promise.resolve('') }
+        )
+      )
+    }
+
+    const urlsOf = (m: ReturnType<typeof vi.fn>): string[] =>
+      m.mock.calls.map((c) => String(c[0]))
+
+    it('fetches the localized changelog first and returns sections newest-first', async () => {
+      const fetchMock = serve({ 'https://dl.restorm.app/changelogs/fr.md': REMOTE })
+      vi.stubGlobal('fetch', fetchMock)
+      try {
+        const sections = await newService(makeEngine()).getReleaseNotes('fr')
+
+        expect(urlsOf(fetchMock)).toEqual(['https://dl.restorm.app/changelogs/fr.md'])
+        expect(sections.map((s) => s.version)).toEqual(['2.0.0', '1.0.0'])
+        // The markdown crosses over verbatim — restricting images to inline
+        // `data:` URIs is the viewer's job, not this service's, so a remote one
+        // is left in the payload rather than scrubbed out of the text.
+        const newest = sections[0]?.markdown ?? ''
+        expect(newest).toContain('data:image/png;base64,AAAA')
+        expect(newest).toContain('dl.restorm.app/x.png')
+      } finally {
+        vi.unstubAllGlobals()
+      }
+    })
+
+    it('falls back to the English feed changelog when the locale is missing', async () => {
+      // Only the English file exists on the feed — `changelogs/de.md` 404s.
+      const fetchMock = serve({ 'https://dl.restorm.app/CHANGELOG.md': ENGLISH })
+      vi.stubGlobal('fetch', fetchMock)
+      try {
+        const sections = await newService(makeEngine()).getReleaseNotes('de')
+
+        expect(urlsOf(fetchMock)).toEqual([
+          'https://dl.restorm.app/changelogs/de.md',
+          'https://dl.restorm.app/CHANGELOG.md'
+        ])
+        expect(sections.map((s) => s.version)).toEqual(['2.0.0', '1.0.0'])
+        expect(sections[0]?.markdown ?? '').toContain('Second release, in English')
+      } finally {
+        vi.unstubAllGlobals()
+      }
+    })
+
+    it('tries the region tag then the base language before English', async () => {
+      const fetchMock = serve({ 'https://dl.restorm.app/changelogs/zh.md': ENGLISH })
+      vi.stubGlobal('fetch', fetchMock)
+      try {
+        await newService(makeEngine()).getReleaseNotes('zh-TW')
+        expect(urlsOf(fetchMock)).toEqual([
+          'https://dl.restorm.app/changelogs/zh-TW.md',
+          'https://dl.restorm.app/changelogs/zh.md'
+        ])
+      } finally {
+        vi.unstubAllGlobals()
+      }
+    })
+
+    it('goes straight to English for an English locale (no guaranteed 404s)', async () => {
+      const fetchMock = serve({ 'https://dl.restorm.app/CHANGELOG.md': ENGLISH })
+      vi.stubGlobal('fetch', fetchMock)
+      try {
+        await newService(makeEngine()).getReleaseNotes('en-US')
+        expect(urlsOf(fetchMock)).toEqual(['https://dl.restorm.app/CHANGELOG.md'])
+      } finally {
+        vi.unstubAllGlobals()
+      }
+    })
+
+    it('never interpolates an implausible locale into the feed URL', async () => {
+      const fetchMock = serve({ 'https://dl.restorm.app/CHANGELOG.md': ENGLISH })
+      vi.stubGlobal('fetch', fetchMock)
+      try {
+        await newService(makeEngine()).getReleaseNotes('../../etc/passwd')
+        expect(urlsOf(fetchMock)).toEqual(['https://dl.restorm.app/CHANGELOG.md'])
+      } finally {
+        vi.unstubAllGlobals()
+      }
+    })
+
+    it('falls back to the bundled changelog when the feed is unreachable', async () => {
+      const fetchMock = vi.fn().mockRejectedValue(new Error('offline'))
+      vi.stubGlobal('fetch', fetchMock)
+      try {
+        const sections = await newService(makeEngine()).getReleaseNotes('fr')
+
+        // Both candidates were attempted, and the shipped file answered instead.
+        expect(urlsOf(fetchMock)).toEqual([
+          'https://dl.restorm.app/changelogs/fr.md',
+          'https://dl.restorm.app/CHANGELOG.md'
+        ])
+        // Compare against the real bundled French changelog rather than a fixed
+        // version string, so cutting a release doesn't break this test.
+        const bundled = readFileSync(join(process.cwd(), 'changelogs', 'fr.md'), 'utf-8')
+        const expected = [...bundled.matchAll(/^##\s+v(\d+\.\d+\.\d+)/gm)].map((m) => m[1])
+        expect(expected.length).toBeGreaterThan(0)
+        expect(sections.map((s) => s.version)).toEqual(expected)
+        expect((sections[0]?.markdown ?? '').trim().length).toBeGreaterThan(0)
+      } finally {
+        vi.unstubAllGlobals()
+      }
+    })
+
+    it('returns an empty list rather than throwing when nothing can be resolved', async () => {
+      vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('offline')))
+      const cwd = vi.spyOn(process, 'cwd').mockReturnValue('/nonexistent')
+      try {
+        await expect(newService(makeEngine()).getReleaseNotes('fr')).resolves.toEqual([])
+      } finally {
+        cwd.mockRestore()
+        vi.unstubAllGlobals()
+      }
+    })
   })
 })

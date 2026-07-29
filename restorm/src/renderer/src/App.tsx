@@ -3253,8 +3253,9 @@ const App: React.FC = () => {
       {/* Global toaster anchored to the bottom-right, toggled by the statusbar bell. */}
       <Toaster id="app" position="bottom-right" data-testid="app-toaster" />
 
-      {/* Headless: turns auto-update transitions into app-toaster notifications
-       * + shows "What's new" on the first run after an update. */}
+      {/* Turns auto-update transitions into app-toaster notifications, shows
+       * "What's new" on the first run after an update, and owns the release-notes
+       * modal those toasts (and the Help menu) open. */}
       <UpdateNotifications />
 
       {/* Fullscreen git-history modal (statusbar source-control icon). */}

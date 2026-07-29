@@ -2495,6 +2495,7 @@
     "recoverFailedTitle": "Не вдалося відновити"
   },
   "updates": {
+    "seeReleaseNotes": "Переглянути примітки до випуску",
     "settingsTitle": "Оновлення",
     "autoCheckTitle": "Автоматично перевіряти оновлення",
     "autoCheckDescription": "Перевіряє оновлення у фоні під час запуску та періодично.",

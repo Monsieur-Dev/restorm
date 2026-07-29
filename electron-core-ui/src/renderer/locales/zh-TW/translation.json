@@ -1,4 +1,10 @@
 {
+  "releaseNotesModal": {
+    "title": "新功能",
+    "showMore": "顯示更多",
+    "loading": "正在載入版本資訊…",
+    "empty": "沒有可顯示的發行說明。"
+  },
   "common": {
     "opened": "已開啟",
     "refresh": "重新整理",

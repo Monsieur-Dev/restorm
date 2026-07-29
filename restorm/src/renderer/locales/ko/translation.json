@@ -2492,6 +2492,7 @@
     "recoverFailedTitle": "복구 실패"
   },
   "updates": {
+    "seeReleaseNotes": "릴리스 노트 보기",
     "settingsTitle": "업데이트",
     "autoCheckTitle": "자동으로 업데이트 확인",
     "autoCheckDescription": "시작 시 및 주기적으로 백그라운드에서 업데이트를 확인합니다.",

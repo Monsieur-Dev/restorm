@@ -2494,6 +2494,7 @@
     "recoverFailedTitle": "Recuperarea a eșuat"
   },
   "updates": {
+    "seeReleaseNotes": "Vezi notele de lansare",
     "settingsTitle": "Actualizări",
     "autoCheckTitle": "Caută actualizări automat",
     "autoCheckDescription": "Caută actualizări în fundal la pornire și periodic.",

@@ -1,4 +1,10 @@
 {
+  "releaseNotesModal": {
+    "title": "Novinky",
+    "showMore": "Zobrazit více",
+    "loading": "Načítání poznámek k vydání…",
+    "empty": "Žádné poznámky k vydání k zobrazení."
+  },
   "common": {
     "opened": "Otevřeno",
     "refresh": "Obnovit",

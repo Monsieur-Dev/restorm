@@ -1,4 +1,10 @@
 {
+  "releaseNotesModal": {
+    "title": "What's new",
+    "showMore": "Show more",
+    "loading": "Loading release notes…",
+    "empty": "No release notes to show."
+  },
   "common": {
     "opened": "Opened",
     "refresh": "Refresh",

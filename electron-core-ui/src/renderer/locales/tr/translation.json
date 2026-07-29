@@ -1,4 +1,10 @@
 {
+  "releaseNotesModal": {
+    "title": "Yenilikler",
+    "showMore": "Daha fazla göster",
+    "loading": "Sürüm notları yükleniyor…",
+    "empty": "Gösterilecek sürüm notu yok."
+  },
   "common": {
     "opened": "Açıldı",
     "refresh": "Yenile",

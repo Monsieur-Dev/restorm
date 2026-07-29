@@ -1,4 +1,10 @@
 {
+  "releaseNotesModal": {
+    "title": "Novedades",
+    "showMore": "Ver más",
+    "loading": "Cargando notas de la versión…",
+    "empty": "No hay notas de versión para mostrar."
+  },
   "common": {
     "opened": "Abiertos",
     "refresh": "Actualizar",

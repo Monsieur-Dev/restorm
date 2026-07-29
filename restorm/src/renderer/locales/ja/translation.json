@@ -2492,6 +2492,7 @@
     "recoverFailedTitle": "復元に失敗しました"
   },
   "updates": {
+    "seeReleaseNotes": "リリースノートを表示",
     "settingsTitle": "アップデート",
     "autoCheckTitle": "自動的にアップデートを確認",
     "autoCheckDescription": "起動時および定期的にバックグラウンドでアップデートを確認します。",

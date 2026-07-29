@@ -1,4 +1,10 @@
 {
+  "releaseNotesModal": {
+    "title": "새로운 기능",
+    "showMore": "더 보기",
+    "loading": "릴리스 노트를 불러오는 중…",
+    "empty": "표시할 릴리스 노트가 없습니다."
+  },
   "common": {
     "opened": "열림",
     "refresh": "새로 고침",

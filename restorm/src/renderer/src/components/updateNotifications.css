@@ -1,0 +1,38 @@
+/* Update toast bodies. Both stack their content vertically and end with the
+ * "see release notes" link that opens the release-notes modal — the gap keeps
+ * that link off the block above it (the restart CTA on the update-ready toast,
+ * the inline "What's new" note on the post-update one). Items stay stretched so
+ * the full-width rainbow CTA keeps its width. */
+
+.update-ready-toast,
+.whats-new-toast {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+/* The link button only LOOKS label-sized — it is left-aligned inside a box the
+ * column stretches to full width, so without this the entire toast-width row is
+ * a click target. Shrink the wrapper to the label so the hit area matches what
+ * the user sees. */
+.update-ready-toast > .button-container:last-child,
+.whats-new-toast > .button-container:last-child {
+	align-self: flex-start;
+}
+
+/* The toast already provides the outer padding. */
+.update-ready-toast > p {
+	margin: 0;
+}
+
+/* The post-update note is a TEASER, and the toaster CLIPS at its max-height
+ * (`.toast` is `overflow: hidden`, it does not scroll). Left uncapped, a long
+ * changelog — or one carrying a screenshot — pushes the "see release notes"
+ * link past the clip and the user can never reach it. Cap the note and fade its
+ * last few pixels so the truncation reads as intentional; the full history is
+ * one click away in the modal the link opens. */
+.whats-new-toast > .markdown-viewer {
+	max-height: min(40vh, 220px);
+	overflow: hidden;
+	mask-image: linear-gradient(to bottom, rgb(0, 0, 0) calc(100% - 24px), transparent 100%);
+}

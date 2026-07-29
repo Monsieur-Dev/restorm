@@ -1,4 +1,10 @@
 {
+  "releaseNotesModal": {
+    "title": "Noutăți",
+    "showMore": "Afișează mai multe",
+    "loading": "Se încarcă notele de versiune…",
+    "empty": "Nu există note de lansare de afișat."
+  },
   "common": {
     "opened": "Deschise",
     "refresh": "Reîmprospătează",

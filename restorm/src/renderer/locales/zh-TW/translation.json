@@ -2492,6 +2492,7 @@
     "recoverFailedTitle": "復原失敗"
   },
   "updates": {
+    "seeReleaseNotes": "查看發行說明",
     "settingsTitle": "更新",
     "autoCheckTitle": "自動檢查更新",
     "autoCheckDescription": "在啟動時及定期於背景檢查更新。",

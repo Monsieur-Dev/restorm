@@ -2492,6 +2492,7 @@
     "recoverFailedTitle": "Khôi phục thất bại"
   },
   "updates": {
+    "seeReleaseNotes": "Xem ghi chú phát hành",
     "settingsTitle": "Cập nhật",
     "autoCheckTitle": "Tự động kiểm tra cập nhật",
     "autoCheckDescription": "Kiểm tra cập nhật ở chế độ nền khi khởi động và theo định kỳ.",

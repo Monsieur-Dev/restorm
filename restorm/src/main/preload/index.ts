@@ -47,7 +47,12 @@ import {
 } from '../ipc/schemas'
 import type { z } from 'zod/v4'
 import { AUTH_IPC, type AuthState, type CheckoutResult, type PortalResult } from '../../shared/auth/authState'
-import { UPDATE_IPC, type UpdateSettings, type UpdateState } from '../../shared/update/updateTypes'
+import {
+  UPDATE_IPC,
+  type ReleaseNoteSection,
+  type UpdateSettings,
+  type UpdateState
+} from '../../shared/update/updateTypes'
 
 // Expose core-ui APIs (imported from core-ui preload modules) and extend with restorm project API
 const coreUIAPI = createCoreUIAPI()
@@ -186,6 +191,11 @@ contextBridge.exposeInMainWorld('api', {
      * localized to `locale` when a translated changelog exists (else English). */
     getChangelogSince: async (fromVersion: string, locale?: string): Promise<string> => {
       return (await ipcRenderer.invoke(UPDATE_IPC.GET_CHANGELOG_SINCE, fromVersion, locale)) as string
+    },
+    /** All release-note sections (newest first) for the release-notes modal,
+     * fetched from the feed with a bundled fallback, localized to `locale`. */
+    getReleaseNotes: async (locale?: string): Promise<ReleaseNoteSection[]> => {
+      return (await ipcRenderer.invoke(UPDATE_IPC.GET_RELEASE_NOTES, locale)) as ReleaseNoteSection[]
     },
     /** The version the "What's new" note was last shown for (or install seed). */
     getLastSeenVersion: async (): Promise<string | null> => {

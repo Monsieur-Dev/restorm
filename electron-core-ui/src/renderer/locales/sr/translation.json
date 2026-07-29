@@ -1,4 +1,10 @@
 {
+  "releaseNotesModal": {
+    "title": "Новости",
+    "showMore": "Прикажи више",
+    "loading": "Учитавање напомена о издању…",
+    "empty": "Нема белешки о издању за приказ."
+  },
   "common": {
     "opened": "Otvoreno",
     "refresh": "Osveži",

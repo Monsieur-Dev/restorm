@@ -1,4 +1,10 @@
 {
+  "releaseNotesModal": {
+    "title": "Có gì mới",
+    "showMore": "Xem thêm",
+    "loading": "Đang tải ghi chú phát hành…",
+    "empty": "Không có ghi chú phát hành để hiển thị."
+  },
   "common": {
     "opened": "Đã mở",
     "refresh": "Làm mới",

@@ -1,4 +1,10 @@
 {
+  "releaseNotesModal": {
+    "title": "Nyheter",
+    "showMore": "Vis mer",
+    "loading": "Laster inn versjonsmerknader…",
+    "empty": "Ingen versjonsmerknader å vise."
+  },
   "common": {
     "opened": "Åpnet",
     "refresh": "Oppdater",

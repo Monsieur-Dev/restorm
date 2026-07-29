@@ -2492,6 +2492,7 @@
     "recoverFailedTitle": "Pemulihan gagal"
   },
   "updates": {
+    "seeReleaseNotes": "Lihat catatan rilis",
     "settingsTitle": "Pembaruan",
     "autoCheckTitle": "Periksa pembaruan secara otomatis",
     "autoCheckDescription": "Memeriksa pembaruan di latar belakang saat memulai dan secara berkala.",

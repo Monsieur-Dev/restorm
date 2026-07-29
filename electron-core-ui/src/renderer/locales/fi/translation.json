@@ -1,4 +1,10 @@
 {
+  "releaseNotesModal": {
+    "title": "Uutta",
+    "showMore": "Näytä lisää",
+    "loading": "Ladataan julkaisutietoja…",
+    "empty": "Ei näytettäviä julkaisutietoja."
+  },
   "common": {
     "opened": "Avatut",
     "refresh": "Päivitä",

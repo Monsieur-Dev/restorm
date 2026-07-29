@@ -8,11 +8,13 @@ import {
   MenuItemSeparator,
   Button,
   AccountButton,
+  eventBus,
   useSettingsModal,
   useFeature,
   type SearchResult
 } from 'electron-core-ui/renderer'
 import { renderSearchTooltipContent } from './renderSearchTooltipContent'
+import { RELEASE_NOTES_OPEN, type ReleaseNotesOpenPayload } from '../../releaseNotesEvents'
 import { DASHBOARD_URL } from '../../../../../shared/config/site'
 import { HeaderHoverTooltip } from '../HeaderHoverTooltip'
 import { Badge } from '../../common/Badge'
@@ -410,7 +412,13 @@ export const RestormTitlebar: React.FC<RestormTitlebarProps> = ({
             <MenuItem data-testid="titlebar-menu-item-about" title={t('menuBar.about')} disabled />
             <MenuItem data-testid="titlebar-menu-item-documentation" title={t('menuBar.documentation')} disabled />
             <MenuItem data-testid="titlebar-menu-item-keyboard-shortcuts" title={t('menuBar.keyboardShortcuts')} disabled />
-            <MenuItem data-testid="titlebar-menu-item-release-notes" title={t('menuBar.releaseNotes')} disabled />
+            <MenuItem
+              data-testid="titlebar-menu-item-release-notes"
+              title={t('menuBar.releaseNotes')}
+              onClick={() => {
+                eventBus.emitLocalSync(RELEASE_NOTES_OPEN, { mode: 'recent' } as ReleaseNotesOpenPayload)
+              }}
+            />
             {updateSettings?.autoUpdateSupported === true && (
               <MenuItem
                 data-testid="titlebar-menu-item-check-updates"

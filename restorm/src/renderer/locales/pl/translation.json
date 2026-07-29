@@ -2495,6 +2495,7 @@
     "recoverFailedTitle": "Przywracanie nie powiodło się"
   },
   "updates": {
+    "seeReleaseNotes": "Zobacz informacje o wydaniu",
     "settingsTitle": "Aktualizacje",
     "autoCheckTitle": "Automatycznie sprawdzaj aktualizacje",
     "autoCheckDescription": "Sprawdza aktualizacje w tle przy uruchomieniu i okresowo.",

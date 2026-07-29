@@ -9,6 +9,7 @@ import {
   noArgs,
   updateChangelogSinceArgs,
   updateChangelogSinceLocaleArgs,
+  updateReleaseNotesArgs,
   updateSetAutoCheckArgs
 } from './schemas'
 
@@ -40,6 +41,10 @@ export function registerUpdateIpc(): void {
     UPDATE_IPC.GET_CHANGELOG_SINCE,
     updateChangelogSinceLocaleArgs,
     (_event, [fromVersion, locale]) => updateService.getChangelogSince(fromVersion, locale)
+  )
+
+  validatedHandle(UPDATE_IPC.GET_RELEASE_NOTES, updateReleaseNotesArgs, (_event, [locale]) =>
+    updateService.getReleaseNotes(locale)
   )
 
   validatedHandle(UPDATE_IPC.GET_LAST_SEEN_VERSION, noArgs, () =>

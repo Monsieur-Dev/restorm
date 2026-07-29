@@ -15,7 +15,7 @@ import type {
 } from 'electron-core-ui/types'
 import type { ResponseHistoryDetail, ResponseHistoryEntry } from '../../../shared/types/collections'
 import type { AuthState, CheckoutResult, PortalResult } from '../../../shared/auth/authState'
-import type { UpdateState, UpdateSettings } from '../../../shared/update/updateTypes'
+import type { UpdateState, UpdateSettings, ReleaseNoteSection } from '../../../shared/update/updateTypes'
 
 declare global {
   interface Window {
@@ -107,6 +107,7 @@ declare global {
         quitAndInstall: () => Promise<void>
         setAutoCheckEnabled: (enabled: boolean) => Promise<UpdateSettings>
         getChangelogSince: (fromVersion: string, locale?: string) => Promise<string>
+        getReleaseNotes: (locale?: string) => Promise<ReleaseNoteSection[]>
         getLastSeenVersion: () => Promise<string | null>
         markVersionSeen: (version: string) => Promise<void>
         onStateChanged: (callback: (state: UpdateState) => void) => (() => void)

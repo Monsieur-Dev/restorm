@@ -2492,6 +2492,7 @@
     "recoverFailedTitle": "恢复失败"
   },
   "updates": {
+    "seeReleaseNotes": "查看发行说明",
     "settingsTitle": "更新",
     "autoCheckTitle": "自动检查更新",
     "autoCheckDescription": "在启动时及定期在后台检查更新。",

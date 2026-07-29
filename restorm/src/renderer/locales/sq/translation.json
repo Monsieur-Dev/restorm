@@ -2493,6 +2493,7 @@
     "recoverFailedTitle": "Rikthimi dështoi"
   },
   "updates": {
+    "seeReleaseNotes": "Shiko shënimet e versionit",
     "settingsTitle": "Përditësimet",
     "autoCheckTitle": "Kontrollo automatikisht për përditësime",
     "autoCheckDescription": "Kontrollon për përditësime në sfond gjatë nisjes dhe periodikisht.",

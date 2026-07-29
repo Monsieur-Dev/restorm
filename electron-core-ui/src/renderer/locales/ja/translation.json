@@ -1,4 +1,10 @@
 {
+  "releaseNotesModal": {
+    "title": "新機能",
+    "showMore": "もっと見る",
+    "loading": "リリースノートを読み込んでいます…",
+    "empty": "表示するリリースノートはありません。"
+  },
   "common": {
     "opened": "開いた状態",
     "refresh": "更新",

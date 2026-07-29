@@ -1,4 +1,10 @@
 {
+  "releaseNotesModal": {
+    "title": "Nieuw",
+    "showMore": "Meer tonen",
+    "loading": "Release-opmerkingen laden…",
+    "empty": "Geen release-opmerkingen om te tonen."
+  },
   "common": {
     "opened": "Geopend",
     "refresh": "Vernieuwen",

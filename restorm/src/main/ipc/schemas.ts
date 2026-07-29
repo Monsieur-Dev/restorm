@@ -1,4 +1,5 @@
 import { z } from 'zod/v4'
+import { LOCALE_TAG_PATTERN } from '../../shared/update/updateTypes'
 
 // ==========================================================================
 // Shared primitives
@@ -114,9 +115,27 @@ export const revealInFolderArgs = z.tuple([z.string()])
 export const noArgs = z.tuple([])
 export const updateSetAutoCheckArgs = z.tuple([z.boolean()])
 export const updateChangelogSinceArgs = z.tuple([z.string()])
+/**
+ * A UI locale tag. Constrained at the boundary because both changelog readers
+ * interpolate it into a path — a filesystem one (`changelogs/<locale>.md`) and a
+ * release-feed URL — so an unconstrained renderer-supplied string would be a
+ * traversal primitive. Applying it here covers both call sites at once.
+ *
+ * Drops an implausible tag to `undefined` rather than REJECTING the call: the
+ * handlers already treat a missing locale as "use English", so normalising keeps
+ * the pre-existing fail-soft contract. A hard reject would turn a merely odd
+ * locale into a failed IPC — and for the "What's new" path that would also skip
+ * `markVersionSeen`, re-arming the toast on every launch. The security property
+ * is identical: an implausible tag is still never interpolated into a path.
+ */
+const localeArg = z
+  .string()
+  .optional()
+  .transform((v) => (v !== undefined && LOCALE_TAG_PATTERN.test(v) ? v : undefined))
 // GET_CHANGELOG_SINCE takes an optional UI locale so the "What's new" note is
 // rendered from the matching per-locale changelog (falls back to English).
-export const updateChangelogSinceLocaleArgs = z.tuple([z.string(), z.string().optional()])
+export const updateChangelogSinceLocaleArgs = z.tuple([z.string(), localeArg])
+export const updateReleaseNotesArgs = z.tuple([localeArg])
 
 // ==========================================================================
 // Project Files

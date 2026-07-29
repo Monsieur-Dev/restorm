@@ -1,4 +1,10 @@
 {
+  "releaseNotesModal": {
+    "title": "Yang baru",
+    "showMore": "Tampilkan lebih banyak",
+    "loading": "Memuat catatan rilis…",
+    "empty": "Tidak ada catatan rilis untuk ditampilkan."
+  },
   "common": {
     "opened": "Dibuka",
     "refresh": "Segarkan",
