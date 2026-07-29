@@ -85,6 +85,17 @@ function newService(engine: FakeEngine): UpdateService {
   return new UpdateService({ engineFactory: () => engine, now: () => 1_700_000_000_000 })
 }
 
+/** Run `body` with `process.platform` forced, then restore it. */
+function withPlatform(platform: NodeJS.Platform, body: () => void): void {
+  const original = Object.getOwnPropertyDescriptor(process, 'platform')
+  Object.defineProperty(process, 'platform', { value: platform, configurable: true })
+  try {
+    body()
+  } finally {
+    if (original) Object.defineProperty(process, 'platform', original)
+  }
+}
+
 describe('UpdateService', () => {
   it('seeds lastSeenVersion on a fresh install (no toast later for a version never run)', () => {
     const svc = newService(makeEngine())
@@ -96,8 +107,22 @@ describe('UpdateService', () => {
     const engine = makeEngine()
     newService(engine).initialize()
     expect(engine.autoDownload).toBe(true)
-    expect(engine.autoInstallOnAppQuit).toBe(true)
     expect(engine.checkForUpdates).toHaveBeenCalledTimes(1)
+  })
+
+  it('never lets an update install itself on quit, on any platform', () => {
+    // The quit-time installer runs after the last window is gone, and where it
+    // needs elevation it blocks the main thread behind a windowless prompt —
+    // that is how the app ends up alive with nothing on screen. An update is
+    // applied only from the user's explicit "restart now".
+    for (const platform of ['linux', 'win32', 'darwin'] as NodeJS.Platform[]) {
+      withPlatform(platform, () => {
+        const engine = makeEngine()
+        engine.autoInstallOnAppQuit = true
+        newService(engine).initialize()
+        expect(engine.autoInstallOnAppQuit).toBe(false)
+      })
+    }
   })
 
   it('does NOT auto-check when auto-check is disabled, but manual still works', async () => {
@@ -108,6 +133,29 @@ describe('UpdateService', () => {
     expect(engine.checkForUpdates).not.toHaveBeenCalled()
     await svc.checkForUpdates('manual')
     expect(engine.checkForUpdates).toHaveBeenCalledTimes(1)
+  })
+
+  it('applies the install-on-quit policy to an engine acquired outside initialize()', () => {
+    // A build where `initialize` bailed out early still hands an engine to a
+    // manual check; it must not carry electron-updater's install-on-quit
+    // default, which registers the quit-time installer behind our back.
+    const engine = makeEngine()
+    engine.autoInstallOnAppQuit = true
+    const svc = newService(engine)
+    void svc.checkForUpdates('manual')
+    expect(engine.autoInstallOnAppQuit).toBe(false)
+  })
+
+  it('asks the installer to relaunch — "restart now" has to actually restart', () => {
+    // Locks the CALL SHAPE only: the fake engine cannot tell us what the real
+    // backend does with the arguments (with `isSilent: false` it resolves the
+    // force-run flag from `autoRunAppAfterInstall` and ignores this one). The
+    // point is that the silent path is never the one we take.
+    const engine = makeEngine()
+    const svc = newService(engine)
+    svc.initialize()
+    svc.quitAndInstall()
+    expect(engine.quitAndInstall).toHaveBeenCalledWith(false, true)
   })
 
   it('walks available → downloading → downloaded', () => {

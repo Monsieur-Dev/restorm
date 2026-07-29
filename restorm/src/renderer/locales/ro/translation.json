@@ -2502,7 +2502,7 @@
     "currentVersion": "Versiunea {{version}}",
     "checkNow": "Caută acum",
     "readyTitle": "Actualizare pregătită",
-    "readyBody": "Versiunea {{version}} va fi instalată la următoarea repornire.",
+    "readyBody": "Versiunea {{version}} este gata de instalare.",
     "restartNow": "Repornește acum",
     "checkFailedTitle": "Verificarea actualizărilor a eșuat",
     "checkFailedBody": "Nu s-au putut căuta actualizări. Încearcă din nou mai târziu.",

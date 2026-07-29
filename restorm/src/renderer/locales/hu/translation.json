@@ -2501,7 +2501,7 @@
     "currentVersion": "{{version}} verzió",
     "checkNow": "Keresés most",
     "readyTitle": "A frissítés kész",
-    "readyBody": "A(z) {{version}} verzió a következő újraindításkor települ.",
+    "readyBody": "A(z) {{version}} verzió telepítésre kész.",
     "restartNow": "Újraindítás most",
     "checkFailedTitle": "A frissítéskeresés sikertelen",
     "checkFailedBody": "Nem sikerült frissítéseket keresni. Kérjük, próbálja újra később.",

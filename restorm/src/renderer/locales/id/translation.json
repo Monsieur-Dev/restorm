@@ -2500,7 +2500,7 @@
     "currentVersion": "Versi {{version}}",
     "checkNow": "Periksa sekarang",
     "readyTitle": "Pembaruan siap",
-    "readyBody": "Versi {{version}} akan dipasang saat Anda memulai ulang berikutnya.",
+    "readyBody": "Versi {{version}} siap dipasang.",
     "restartNow": "Mulai ulang sekarang",
     "checkFailedTitle": "Gagal memeriksa pembaruan",
     "checkFailedBody": "Tidak dapat memeriksa pembaruan. Silakan coba lagi nanti.",

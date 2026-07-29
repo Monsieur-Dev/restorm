@@ -146,15 +146,113 @@ export function setupIPC(resourcesPath?: string, appSettingsConfigPath?: string,
 }
 
 /**
+ * How long the process may still be running after a quit started before that
+ * quit is assumed wedged. Not a teardown budget — `app.quit()` awaits none of
+ * the app's teardown — just a threshold well past any plausible shutdown.
+ */
+const DEFAULT_QUIT_WATCHDOG_MS = 10_000
+
+/** Pending force-exit timer, or `null` when no quit is in flight. */
+let quitWatchdogTimer: ReturnType<typeof setTimeout> | null = null
+
+/** Options for {@link setupAppLifecycle}. */
+export interface AppLifecycleOptions {
+  /**
+   * Grace period before a quit that never completed is turned into a hard
+   * exit, in ms. Pass `false` to disable the watchdog entirely — do that only
+   * in an app that deliberately keeps running without windows (close-to-tray),
+   * since without it a wedged quit leaves an invisible process behind.
+   * Defaults to 10 s.
+   *
+   * A quit that a `before-quit` listener legitimately CANCELS is not affected:
+   * the watchdog only exits when no live window is left by the time it fires.
+   */
+  quitWatchdogMs?: number | false
+}
+
+/**
+ * Last-resort guarantee that a quit really ends the process.
+ *
+ * `app.quit()` is a *request*, not an exit: it runs the `before-quit` /
+ * `will-quit` chain first, and a listener there can throw (which aborts the
+ * listeners after it) or cancel the shutdown outright. The failure mode is
+ * invisible to the user: a windowless main process that keeps its user-data
+ * lock, its single-instance lock and its memory, and that accumulates one entry
+ * per session until the machine reboots.
+ *
+ * So: arm a timer alongside the graceful quit and hard-exit when it expires. If
+ * the quit worked, the process is gone long before the timer fires.
+ *
+ * Limit worth knowing: this is a JavaScript timer, so it cannot rescue a quit
+ * handler that BLOCKS the main thread (a synchronous child process, a modal
+ * native prompt). Teardown on the quit path has to stay non-blocking.
+ */
+function armQuitWatchdog(delayMs: number): void {
+  if (quitWatchdogTimer !== null) {
+    return
+  }
+  quitWatchdogTimer = setTimeout(() => {
+    quitWatchdogTimer = null
+    // A window came back in the meantime (deep link, dock re-activation, a
+    // newly opened project): the app is legitimately alive again, leave it be.
+    if (BrowserWindow.getAllWindows().some((window) => !window.isDestroyed())) {
+      return
+    }
+    // Write the diagnosis to stderr as well as through the logger: a packaged
+    // app launched from the desktop configures neither a console nor a file
+    // transport, and the exit on the next line would truncate a buffered one
+    // anyway. A desktop launch's stderr lands in the session journal, which is
+    // the only place a force-exit can still be accounted for after the fact.
+    process.stderr.write(`Quit watchdog: still running ${delayMs}ms after the quit started, forcing exit\n`)
+    logger.warn('Quit watchdog: process still alive after the quit started, forcing exit', {
+      afterMs: delayMs
+    })
+    // Honour a host that already decided on a failure code; 0 otherwise.
+    app.exit(typeof process.exitCode === 'number' ? process.exitCode : 0)
+  }, delayMs)
+  // Un-ref'd so the watchdog itself can never be the last handle keeping a
+  // would-be-exiting loop open. In an Electron main process the loop is pumped
+  // by the browser regardless, so the timer still fires.
+  quitWatchdogTimer.unref()
+}
+
+/**
  * Setup application lifecycle handlers
  * Quit when all windows are closed, except on macOS
  */
-export function setupAppLifecycle(): void {
+export function setupAppLifecycle(options: AppLifecycleOptions = {}): void {
+  const watchdogMs = options.quitWatchdogMs ?? DEFAULT_QUIT_WATCHDOG_MS
+  const arm = (): void => {
+    // macOS: running with no window is normal there, and a Cmd+Q that a
+    // `before-quit` listener cancels legitimately leaves the process up.
+    if (process.platform === 'darwin' || watchdogMs === false) {
+      return
+    }
+    armQuitWatchdog(watchdogMs)
+  }
+
   app.on('window-all-closed', () => {
     if (process.platform !== 'darwin') {
+      // Arm BEFORE asking: `app.quit()` runs the whole `before-quit` chain
+      // synchronously, and a listener in it that throws would unwind straight
+      // past the arming line.
+      arm()
       app.quit()
     }
   })
+
+  // Every OTHER route into a quit — the app menu's Quit role, an in-app
+  // `app.quit()`, the updater's quit-and-install — closes the windows itself and
+  // goes straight to `will-quit`, WITHOUT emitting `window-all-closed`. Arming
+  // here as well covers them. Idempotent, and harmless when the quit is
+  // cancelled: the watchdog exits only if no live window is left when it fires.
+  //
+  // PREPENDED on purpose: listeners run in registration order and the chain
+  // stops at the first one that throws. The host app registers its teardown at
+  // module scope, long before this runs inside `whenReady`, so a plain
+  // `app.on` would put the watchdog last — disarmed by exactly the failure it
+  // exists to catch.
+  app.prependListener('before-quit', arm)
 
   logger.info('App lifecycle handlers setup complete')
 }
@@ -212,6 +310,12 @@ export interface InitializeAppOptions {
    * window to be created with `showWhenReady: true` in its configuration.
    */
   splash?: SplashWindowOptions
+  /**
+   * Grace period, in ms, before a quit that never completed is turned into a
+   * hard exit — see {@link AppLifecycleOptions.quitWatchdogMs}. `false`
+   * disables the watchdog. Defaults to 10 s.
+   */
+  quitWatchdogMs?: number | false
 }
 
 /**
@@ -271,7 +375,7 @@ export function initializeApp(
     logger.info('setupIPC completed')
 
     logger.info('Starting setupAppLifecycle...')
-    setupAppLifecycle()
+    setupAppLifecycle({ ...(options.quitWatchdogMs !== undefined && { quitWatchdogMs: options.quitWatchdogMs }) })
     logger.info('setupAppLifecycle completed')
 
     // Close the splash exactly once, however the handoff resolves. Idempotent

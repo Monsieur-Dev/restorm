@@ -6,6 +6,16 @@ import { setWindowTitleArgs, registerInterceptedShortcutsArgs } from "../ipc/sch
 import { WindowConfiguration, WindowState, isDevToolsEnabled, isInactiveRevealRequested } from "./WindowManager"
 
 /**
+ * How long a `showWhenReady` window waits for the renderer's readiness signal
+ * before it is revealed regardless, so a renderer that never mounts cannot
+ * leave a windowless process behind. Sized to match the splash's own safety
+ * timeout — long enough that a slow cold start on a loaded machine never trips
+ * it. Only the WAIT is bounded: once the renderer has signalled, the configured
+ * {@link WindowConfiguration.minReadyDelayMs} still applies.
+ */
+const READY_REVEAL_SAFETY_TIMEOUT_MS = 30_000
+
+/**
  * BaseWindow handles window state persistence and restoration
  * with safety checks to ensure windows remain visible and accessible
  */
@@ -617,39 +627,73 @@ export abstract class BaseWindow {
       // signal either way.
       if (this.configuration.showWhenReady) {
         const webContentsId = window.webContents.id
+        // Hand off: run the ready-to-show callbacks (e.g. close the splash),
+        // then reveal the window. Guarded so the safety net below and the
+        // renderer's own signal can't both reveal.
+        let revealed = false
+        const handoff = (): void => {
+          if (revealed || window.isDestroyed()) {
+            return
+          }
+          revealed = true
+          this.fireReadyToShow()
+          this.revealWindow(window)
+        }
+        // Safety net: the reveal is driven ENTIRELY by the renderer's
+        // `app:renderer-ready`, so a renderer that never mounts (load failure,
+        // crash before mount, a broken asset path in a packaged build) would
+        // leave the window hidden forever — a running process with nothing on
+        // screen, which the user can neither use nor close, and which never
+        // reaches `window-all-closed`. Reveal it anyway once the deadline
+        // passes: a visibly broken window can be closed, an invisible one
+        // cannot.
+        const revealSafetyTimer = setTimeout(() => {
+          if (window.isDestroyed() || revealed) {
+            return
+          }
+          logger.warn('BaseWindow: renderer never signalled ready, revealing the window anyway', {
+            afterMs: READY_REVEAL_SAFETY_TIMEOUT_MS
+          })
+          handoff()
+        }, READY_REVEAL_SAFETY_TIMEOUT_MS)
+        let minDelayTimer: ReturnType<typeof setTimeout> | null = null
         const onRendererReady = (event: Electron.IpcMainEvent): void => {
           // Scope to THIS window — the channel is shared across all windows.
           if (event.sender.id !== webContentsId) {
             return
           }
           ipcMain.removeListener('app:renderer-ready', onRendererReady)
+          clearTimeout(revealSafetyTimer)
           if (window.isDestroyed()) {
             return
           }
-          // Hand off: run the ready-to-show callbacks (e.g. close the splash),
-          // then reveal the window. Deferred by `minReadyDelayMs` (measured from
-          // construction) when the renderer became ready sooner — so a splash
-          // stays on screen a minimum time instead of flashing, since its close
-          // is one of the callbacks fired here.
-          const handoff = (): void => {
-            if (window.isDestroyed()) {
+          // Deferred by `minReadyDelayMs` (measured from construction) when the
+          // renderer became ready sooner — so a splash stays on screen a
+          // minimum time instead of flashing, since its close is one of the
+          // callbacks fired by the handoff.
+          const revealOnSignal = (): void => {
+            if (revealed || window.isDestroyed()) {
               return
             }
             logger.info('BaseWindow: renderer signalled ready, revealing window')
-            this.fireReadyToShow()
-            this.revealWindow(window)
+            handoff()
           }
           const minDelay = this.configuration.minReadyDelayMs ?? 0
           const remaining = minDelay - (Date.now() - this.createdAt)
           if (remaining > 0) {
-            setTimeout(handoff, remaining)
+            minDelayTimer = setTimeout(revealOnSignal, remaining)
           } else {
-            handoff()
+            revealOnSignal()
           }
         }
         ipcMain.on('app:renderer-ready', onRendererReady)
         // Stop listening if the window goes away before the renderer signals.
         window.once('closed', () => {
+          clearTimeout(revealSafetyTimer)
+          if (minDelayTimer !== null) {
+            clearTimeout(minDelayTimer)
+            minDelayTimer = null
+          }
           ipcMain.removeListener('app:renderer-ready', onRendererReady)
         })
       } else {

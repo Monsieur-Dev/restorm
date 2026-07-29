@@ -2502,7 +2502,7 @@
     "currentVersion": "Verzija {{version}}",
     "checkNow": "Provjeri sada",
     "readyTitle": "Ažuriranje spremno",
-    "readyBody": "Verzija {{version}} instalirat će se pri sljedećem ponovnom pokretanju.",
+    "readyBody": "Verzija {{version}} spremna je za instalaciju.",
     "restartNow": "Ponovno pokreni sada",
     "checkFailedTitle": "Provjera ažuriranja nije uspjela",
     "checkFailedBody": "Ažuriranja nije moguće provjeriti. Pokušajte ponovno kasnije.",

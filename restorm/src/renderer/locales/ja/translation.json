@@ -2500,7 +2500,7 @@
     "currentVersion": "バージョン {{version}}",
     "checkNow": "今すぐ確認",
     "readyTitle": "アップデートの準備ができました",
-    "readyBody": "バージョン {{version}} は次回の再起動時にインストールされます。",
+    "readyBody": "バージョン {{version}} をインストールする準備ができました。",
     "restartNow": "今すぐ再起動",
     "checkFailedTitle": "アップデートの確認に失敗しました",
     "checkFailedBody": "アップデートを確認できませんでした。しばらくしてからもう一度お試しください。",

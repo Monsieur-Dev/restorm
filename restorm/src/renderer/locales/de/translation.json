@@ -2501,7 +2501,7 @@
     "currentVersion": "Version {{version}}",
     "checkNow": "Jetzt suchen",
     "readyTitle": "Update bereit",
-    "readyBody": "Version {{version}} wird beim nächsten Neustart installiert.",
+    "readyBody": "Version {{version}} ist bereit zur Installation.",
     "restartNow": "Jetzt neu starten",
     "checkFailedTitle": "Update-Suche fehlgeschlagen",
     "checkFailedBody": "Nach Updates konnte nicht gesucht werden. Bitte später erneut versuchen.",

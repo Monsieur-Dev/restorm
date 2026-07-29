@@ -2501,7 +2501,7 @@
     "currentVersion": "Versioni {{version}}",
     "checkNow": "Kontrollo tani",
     "readyTitle": "Përditësimi është gati",
-    "readyBody": "Versioni {{version}} do të instalohet herën tjetër që rinisni.",
+    "readyBody": "Versioni {{version}} është gati për instalim.",
     "restartNow": "Rinis tani",
     "checkFailedTitle": "Kontrolli i përditësimeve dështoi",
     "checkFailedBody": "Nuk u kontrolluan dot përditësimet. Ju lutemi provoni sërish më vonë.",

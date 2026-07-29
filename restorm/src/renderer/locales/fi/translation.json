@@ -2501,7 +2501,7 @@
     "currentVersion": "Versio {{version}}",
     "checkNow": "Tarkista nyt",
     "readyTitle": "Päivitys valmis",
-    "readyBody": "Versio {{version}} asennetaan, kun käynnistät sovelluksen uudelleen.",
+    "readyBody": "Versio {{version}} on valmis asennettavaksi.",
     "restartNow": "Käynnistä uudelleen nyt",
     "checkFailedTitle": "Päivitysten tarkistus epäonnistui",
     "checkFailedBody": "Päivityksiä ei voitu tarkistaa. Yritä myöhemmin uudelleen.",

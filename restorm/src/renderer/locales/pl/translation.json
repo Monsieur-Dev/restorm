@@ -2503,7 +2503,7 @@
     "currentVersion": "Wersja {{version}}",
     "checkNow": "Sprawdź teraz",
     "readyTitle": "Aktualizacja gotowa",
-    "readyBody": "Wersja {{version}} zostanie zainstalowana przy następnym uruchomieniu.",
+    "readyBody": "Wersja {{version}} jest gotowa do zainstalowania.",
     "restartNow": "Uruchom ponownie teraz",
     "checkFailedTitle": "Sprawdzanie aktualizacji nie powiodło się",
     "checkFailedBody": "Nie można sprawdzić aktualizacji. Spróbuj ponownie później.",

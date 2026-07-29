@@ -2501,7 +2501,7 @@
     "currentVersion": "Version {{version}}",
     "checkNow": "Søg nu",
     "readyTitle": "Opdatering klar",
-    "readyBody": "Version {{version}} installeres, næste gang du genstarter.",
+    "readyBody": "Version {{version}} er klar til installation.",
     "restartNow": "Genstart nu",
     "checkFailedTitle": "Søgning efter opdateringer mislykkedes",
     "checkFailedBody": "Kunne ikke søge efter opdateringer. Prøv igen senere.",

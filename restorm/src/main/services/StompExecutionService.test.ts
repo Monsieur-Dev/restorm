@@ -329,4 +329,38 @@ describe('StompExecutionService', () => {
     await new Promise((r) => setTimeout(r, 50))
     contextService.unregisterRequest(requestId)
   })
+
+  it('disconnect() clears the outgoing heart-beat timer synchronously', async () => {
+    // The timer's other teardown site is the socket's `close` callback, which
+    // needs another turn of the event loop. On the app-quit path that turn
+    // never comes, so a still-armed interval outlives the disconnect that was
+    // supposed to end the connection.
+    broker.connectedHeartBeat = '30000,20000'
+    const requestId = 'stomp-heartbeat-cleared-on-disconnect'
+    registerStompRequest(requestId, { url: `ws://127.0.0.1:${broker.port}` })
+
+    const setIntervalSpy = vi.spyOn(global, 'setInterval')
+    await new Promise<void>((resolve) => {
+      stompExecutionService.connectStreamingStomp({
+        requestId,
+        onConnect: () => { resolve() },
+        onMessage: () => { /* no-op */ },
+        onClose: () => { /* no-op */ }
+      })
+    })
+
+    const heartbeatIndex = setIntervalSpy.mock.calls.findIndex((args) => args[1] === 20000)
+    expect(heartbeatIndex).toBeGreaterThanOrEqual(0)
+    const heartbeatTimer: unknown = setIntervalSpy.mock.results[heartbeatIndex]?.value
+    expect(heartbeatTimer).toBeDefined()
+    setIntervalSpy.mockRestore()
+
+    const clearIntervalSpy = vi.spyOn(global, 'clearInterval')
+    stompExecutionService.disconnect(requestId)
+    expect(clearIntervalSpy).toHaveBeenCalledWith(heartbeatTimer)
+    clearIntervalSpy.mockRestore()
+
+    await new Promise((r) => setTimeout(r, 50))
+    contextService.unregisterRequest(requestId)
+  })
 })

@@ -569,9 +569,26 @@ app.whenReady().then(async () => {
 **configureCommandLineSwitches():**
 - Disables sandbox and GPU for restricted environments (WSL, containers)
 
-**setupAppLifecycle():**
+**setupAppLifecycle(options?):**
 - Handles `window-all-closed` (quit on non-macOS)
-- Handles `activate` (recreate window on macOS dock click)
+- Arms a **quit watchdog** on `window-all-closed` *and* on `before-quit`:
+  `app.quit()` only *requests* a shutdown — a `before-quit` / `will-quit`
+  listener can cancel it or throw (which aborts the listeners after it), leaving
+  a windowless process running: invisible to the user, still holding the
+  user-data + single-instance locks, and accumulating one per session. If the
+  process is still alive `quitWatchdogMs` (default 10 s) after a quit started
+  **and** no live window is left, it is force-exited with `app.exit(0)`. Both
+  arming points are needed: a quit triggered by the app itself (menu Quit,
+  `app.quit()`, quit-and-install) closes the windows internally and never emits
+  `window-all-closed`. Never armed on macOS, where running windowless is normal.
+- **What it cannot do:** it is a JavaScript timer, so a quit handler that BLOCKS
+  the main thread (a synchronous child process, a modal native prompt) starves
+  it. Teardown on the quit path must stay non-blocking and non-throwing.
+- Pass `{ quitWatchdogMs: false }` only in an app that deliberately runs without
+  windows (close-to-tray).
+
+`activate` (recreate the window on a macOS dock click) is registered by
+`initializeApp`, not here.
 
 **setupAppProtocol(scheme):**
 - Registers custom protocol for loading local resources

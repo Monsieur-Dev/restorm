@@ -2501,7 +2501,7 @@
     "currentVersion": "Sürüm {{version}}",
     "checkNow": "Şimdi denetle",
     "readyTitle": "Güncelleme hazır",
-    "readyBody": "{{version}} sürümü bir sonraki yeniden başlatmada yüklenecek.",
+    "readyBody": "{{version}} sürümü yüklenmeye hazır.",
     "restartNow": "Şimdi yeniden başlat",
     "checkFailedTitle": "Güncelleme denetimi başarısız",
     "checkFailedBody": "Güncellemeler denetlenemedi. Lütfen daha sonra tekrar deneyin.",

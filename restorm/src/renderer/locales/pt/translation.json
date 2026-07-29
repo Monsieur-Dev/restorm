@@ -2501,7 +2501,7 @@
     "currentVersion": "Versão {{version}}",
     "checkNow": "Procurar agora",
     "readyTitle": "Atualização pronta",
-    "readyBody": "A versão {{version}} será instalada no próximo reinício.",
+    "readyBody": "A versão {{version}} está pronta para ser instalada.",
     "restartNow": "Reiniciar agora",
     "checkFailedTitle": "Falha ao procurar atualizações",
     "checkFailedBody": "Não foi possível procurar atualizações. Tente novamente mais tarde.",

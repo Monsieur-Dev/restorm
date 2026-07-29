@@ -2500,7 +2500,7 @@
     "currentVersion": "Phiên bản {{version}}",
     "checkNow": "Kiểm tra ngay",
     "readyTitle": "Bản cập nhật đã sẵn sàng",
-    "readyBody": "Phiên bản {{version}} sẽ được cài đặt trong lần khởi động lại tiếp theo.",
+    "readyBody": "Phiên bản {{version}} đã sẵn sàng để cài đặt.",
     "restartNow": "Khởi động lại ngay",
     "checkFailedTitle": "Kiểm tra cập nhật thất bại",
     "checkFailedBody": "Không thể kiểm tra cập nhật. Vui lòng thử lại sau.",

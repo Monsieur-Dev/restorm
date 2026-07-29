@@ -89,7 +89,7 @@ initializeApp()
 | `BaseWindow` | Abstract base class for Electron windows with DevTools, state persistence, and controls |
 | `setupIPC()` | Registers all IPC handlers (theme, storage, file, search, feature, logger, window) |
 | `initializeApp()` | Configures app lifecycle (single instance, protocol, ready event) |
-| `setupAppLifecycle()` | Sets up window-all-closed and activate handlers |
+| `setupAppLifecycle()` | Quits when the last window closes; a watchdog armed on `window-all-closed` **and** `before-quit` force-exits a quit that never completed (see [App Lifecycle](./docs/Main/Services-Managers.md#app-lifecycle)) |
 
 ### Decorators
 

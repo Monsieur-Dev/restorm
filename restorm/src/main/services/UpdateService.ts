@@ -6,9 +6,9 @@
  * engine wired via an env flag, for e2e) without a real release feed.
  *
  * State machine: idle → checking → (idle | available) → downloading → downloaded,
- * plus a terminal-ish `error`. Downloads are automatic (`autoDownload`) and the
- * install is applied on the next app quit (`autoInstallOnAppQuit`); the renderer
- * offers a "Restart now" shortcut. Checks fire at launch, every 4 h, and on a
+ * plus a terminal-ish `error`. Downloads are automatic (`autoDownload`) but the
+ * install is NEVER applied on quit (`autoInstallOnAppQuit` stays off): the
+ * renderer's "Restart now" button is the only way in. Checks fire at launch, every 4 h, and on a
  * manual button — all sharing this one machine. Auto-check errors are silent;
  * manual-check errors surface. Download errors retry 3× with exponential backoff
  * then go quiet until the next check.
@@ -59,7 +59,7 @@ export interface UpdaterEngine {
   autoInstallOnAppQuit: boolean
   checkForUpdates(): Promise<unknown>
   downloadUpdate(): Promise<unknown>
-  quitAndInstall(): void
+  quitAndInstall(isSilent?: boolean, isForceRunAfter?: boolean): void
   on(event: string, listener: (...args: unknown[]) => void): void
 }
 
@@ -130,7 +130,6 @@ export class UpdateService {
     try {
       const engine = this.#getEngine()
       engine.autoDownload = true
-      engine.autoInstallOnAppQuit = true
       this.#attachListeners(engine)
     } catch (err) {
       logger.warn('UpdateService: engine init failed', {
@@ -213,7 +212,14 @@ export class UpdateService {
 
   quitAndInstall(): void {
     try {
-      this.#getEngine().quitAndInstall()
+      // The button this comes from says "restart now", so the app has to come
+      // BACK. With `isSilent: false` electron-updater resolves the force-run
+      // flag from its own `autoRunAppAfterInstall` (default `true`) and
+      // discards the one passed here — so the relaunch already holds. The
+      // explicit `isForceRunAfter` is belt-and-braces: it is the operative
+      // argument only on the silent path (the install-on-quit route, which we
+      // never take).
+      this.#getEngine().quitAndInstall(false, true)
     } catch (err) {
       logger.warn('UpdateService: quitAndInstall failed', {
         message: err instanceof Error ? err.message : String(err)
@@ -259,7 +265,27 @@ export class UpdateService {
   // ---- internals ----------------------------------------------------------
 
   #getEngine(): UpdaterEngine {
-    if (!this.#engine) this.#engine = this.#engineFactory()
+    if (!this.#engine) {
+      this.#engine = this.#engineFactory()
+      // An update NEVER installs itself on quit. electron-updater's quit-time
+      // installer runs from the `quit` handler — after every window is already
+      // gone — and on some platforms it is a BLOCKING child process behind a
+      // graphical privilege prompt. A prompt with no window to belong to, on a
+      // main thread that can no longer process anything, is how the app ends up
+      // as a process the user can neither see nor stop. An update is applied
+      // only when the user asks for it, with the app still on screen.
+      //
+      // macOS caveat for whoever enables signing/notarization: there this flag
+      // ALSO gates whether Squirrel ever stages the payload (`MacUpdater` only
+      // calls the native `checkForUpdates()` when it is on), so with it off the
+      // staging happens at button-press time and the user waits through it.
+      //
+      // Set HERE, not at the call site: an engine acquired outside `initialize`
+      // (a manual check on a build where init bailed out early) would otherwise
+      // carry electron-updater's default and register that handler behind our
+      // back.
+      this.#engine.autoInstallOnAppQuit = false
+    }
     return this.#engine
   }
 

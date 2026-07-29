@@ -2501,7 +2501,7 @@
     "currentVersion": "Version {{version}}",
     "checkNow": "Check now",
     "readyTitle": "Update ready",
-    "readyBody": "Version {{version}} will be installed the next time you restart.",
+    "readyBody": "Version {{version}} is ready to install.",
     "restartNow": "Restart now",
     "checkFailedTitle": "Update check failed",
     "checkFailedBody": "Couldn't check for updates. Please try again later.",

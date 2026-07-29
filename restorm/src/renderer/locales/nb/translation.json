@@ -2501,7 +2501,7 @@
     "currentVersion": "Versjon {{version}}",
     "checkNow": "Se etter nå",
     "readyTitle": "Oppdatering klar",
-    "readyBody": "Versjon {{version}} installeres neste gang du starter på nytt.",
+    "readyBody": "Versjon {{version}} er klar til å installeres.",
     "restartNow": "Start på nytt nå",
     "checkFailedTitle": "Kunne ikke se etter oppdateringer",
     "checkFailedBody": "Kunne ikke se etter oppdateringer. Prøv igjen senere.",

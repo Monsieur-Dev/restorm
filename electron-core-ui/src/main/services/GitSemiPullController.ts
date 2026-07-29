@@ -101,6 +101,10 @@ export class GitSemiPullController {
     this.timer = setInterval(() => {
       void this.gitService.checkForRemoteUpdate()
     }, intervalMs)
+    // `stop()` is what actually ends this poll; un-ref'ing is belt-and-braces
+    // for the case where it is never called, so a background refresh can never
+    // be the handle that keeps a would-be-exiting loop open.
+    this.timer.unref()
   }
 
   private clearTimer(): void {

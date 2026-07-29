@@ -68,6 +68,12 @@ The boot sequence then becomes:
 > The explicit `notifyReady()` signal fires only once the real UI is painted, so
 > the user never sees an intermediate loading state.
 
+Two safety nets keep a renderer that never signals from stranding the app: the
+splash closes on its own after 30 s, and a `showWhenReady` window that has not
+been revealed by then is **revealed anyway** (with a warning in the log). A
+visibly broken window can be closed by the user — a window left hidden forever
+cannot, and its process would keep running with nothing on screen.
+
 ## How `createWindow` should return its window
 
 `initializeApp`'s `createWindow` may return the `BaseWindow` instance it

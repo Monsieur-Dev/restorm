@@ -68,7 +68,7 @@ installHardenInterceptor()
 import { app, BrowserWindow, ipcMain, shell } from 'electron'
 import { randomBytes } from 'node:crypto'
 import { MainWindow } from './windows/MainWindow'
-import { initializeApp, logger, initFileService, getFileService, isFileServiceInitialized, i18nService, initPersistenceService, isPersistenceServiceInitialized, FileService, getSettingsService, isSettingsServiceInitialized, getStorageService, initAutoSaveController, McpService, resolveMcpDiscoveryDir, writeMcpDiscoveryFile, cleanupMcpDiscoveryFile, firewallService, permissionService, registerFirewallIpc, installWorkerPatcher, getGitService, initGitSemiPullController } from 'electron-core-ui'
+import { initializeApp, logger, initFileService, getFileService, isFileServiceInitialized, i18nService, initPersistenceService, isPersistenceServiceInitialized, FileService, getSettingsService, isSettingsServiceInitialized, getStorageService, initAutoSaveController, McpService, resolveMcpDiscoveryDir, writeMcpDiscoveryFile, cleanupMcpDiscoveryFile, firewallService, permissionService, registerFirewallIpc, installWorkerPatcher, getGitService, initGitSemiPullController, getGitSemiPullController } from 'electron-core-ui'
 import { REOPEN_LAST_FILE_SETTING_KEY, REOPEN_LAST_FILE_STORAGE_KEY } from '../shared/config/reopenLastFile'
 import { resolveChannel, endpointUrl } from '../shared/config/backend'
 import { entitlementPublicKeyPem, isEntitlementPublicKeyConfigured } from './services/entitlement/keys'
@@ -109,6 +109,8 @@ import { amqpExecutionService } from './services/AMQPExecutionService'
 import { redisExecutionService } from './services/RedisExecutionService'
 import { grpcMockServerService } from './services/GRPCMockServerService'
 import { odataMockServerService } from './services/ODataMockServerService'
+import { stompExecutionService } from './services/StompExecutionService'
+import { kafkaExecutionService } from './services/KafkaExecutionService'
 import { registerApiUpdateIPC } from './services/apiUpdate/registerApiUpdateIPC'
 import { runApiUpdateApply } from './services/apiUpdate/orchestrateApply'
 import { loadFolderStructure, loadProjectIntoStore, attachDraftStoreForFolder, attachDraftStoreForFile, getDraftsRootDir } from './FileOperations'
@@ -588,6 +590,18 @@ app.on('before-quit', () => {
   grpcMockServerService.closeAll()
   // Same for any hosted OData mock service (its routes on the shared HTTP host).
   odataMockServerService.closeAll()
+  // Same for any live STOMP connection (no port to release, just DISCONNECT +
+  // close the socket, and drop its outgoing heart-beat interval) — was only
+  // wired on file-close, so it survived a quit that skipped that path (closing
+  // the window directly rather than closing the file first).
+  stompExecutionService.closeAll()
+  // Same for any live Kafka browse peek / long-lived consumer — same gap as
+  // STOMP above (file-close only, not app-quit).
+  void kafkaExecutionService.closeAll()
+  // Stop the git semi-pull CRON poll: clears its interval AND detaches its
+  // settings-change subscription (see `GitSemiPullController` in
+  // electron-core-ui), neither of which should outlive the process.
+  getGitSemiPullController()?.stop()
 })
 
 // Initialize Search Index Service (listens to document events from renderer)

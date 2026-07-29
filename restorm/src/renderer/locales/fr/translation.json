@@ -2501,7 +2501,7 @@
     "currentVersion": "Version {{version}}",
     "checkNow": "Vérifier maintenant",
     "readyTitle": "Mise à jour prête",
-    "readyBody": "La version {{version}} sera installée au prochain redémarrage.",
+    "readyBody": "La version {{version}} est prête à être installée.",
     "restartNow": "Redémarrer maintenant",
     "checkFailedTitle": "Échec de la vérification des mises à jour",
     "checkFailedBody": "Impossible de vérifier les mises à jour. Veuillez réessayer plus tard.",

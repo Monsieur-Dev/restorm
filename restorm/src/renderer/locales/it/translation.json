@@ -2501,7 +2501,7 @@
     "currentVersion": "Versione {{version}}",
     "checkNow": "Controlla ora",
     "readyTitle": "Aggiornamento pronto",
-    "readyBody": "La versione {{version}} verrà installata al prossimo riavvio.",
+    "readyBody": "La versione {{version}} è pronta per l'installazione.",
     "restartNow": "Riavvia ora",
     "checkFailedTitle": "Controllo aggiornamenti non riuscito",
     "checkFailedBody": "Impossibile controllare gli aggiornamenti. Riprova più tardi.",

@@ -2503,7 +2503,7 @@
     "currentVersion": "Verze {{version}}",
     "checkNow": "Zkontrolovat nyní",
     "readyTitle": "Aktualizace připravena",
-    "readyBody": "Verze {{version}} se nainstaluje při příštím restartu.",
+    "readyBody": "Verze {{version}} je připravena k instalaci.",
     "restartNow": "Restartovat nyní",
     "checkFailedTitle": "Kontrola aktualizací selhala",
     "checkFailedBody": "Aktualizace se nepodařilo zkontrolovat. Zkuste to prosím později.",

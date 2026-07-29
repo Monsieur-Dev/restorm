@@ -495,6 +495,14 @@ class StompExecutionService {
     } catch {
       // best-effort
     }
+    // Drop the outgoing heart-beat SYNCHRONOUSLY. Its usual home is the
+    // socket's `close` handler, which only runs once the event loop delivers
+    // that event — on the quit path it never does, and a live `setInterval`
+    // then outlives the caller that asked for the connection to end.
+    if (conn.heartbeatTimer) {
+      clearInterval(conn.heartbeatTimer)
+      delete conn.heartbeatTimer
+    }
     try { conn.ws.close() } catch { /* already closed */ }
     return true
   }

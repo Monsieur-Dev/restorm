@@ -2500,7 +2500,7 @@
     "currentVersion": "版本 {{version}}",
     "checkNow": "立即檢查",
     "readyTitle": "更新已就緒",
-    "readyBody": "版本 {{version}} 將在下次重新啟動時安裝。",
+    "readyBody": "版本 {{version}} 已準備好安裝。",
     "restartNow": "立即重新啟動",
     "checkFailedTitle": "檢查更新失敗",
     "checkFailedBody": "無法檢查更新，請稍後再試。",

@@ -23,6 +23,11 @@ export function registerUpdateIpc(): void {
   })
 
   validatedHandle(UPDATE_IPC.QUIT_AND_INSTALL, noArgs, () => {
+    // Blocking on purpose where the installer needs elevation: the handler
+    // doesn't return until the privilege prompt is answered, so the window is
+    // briefly unresponsive. That is the trade for having the prompt appear
+    // while the app is still on screen and attributable to a button the user
+    // just pressed, rather than after the last window is gone.
     updateService.quitAndInstall()
   })
 

@@ -10,13 +10,20 @@ Restorm uses **electron-updater** against the generic feed configured in
 (`src/main/services/UpdateService.ts`) drives the state machine:
 
 - Checks on launch, every 4 h, and on the manual "Check now" button.
-- Downloads in the background (`autoDownload`) and installs on the next quit
-  (`autoInstallOnAppQuit`); the "Update ready" toast offers "Restart now".
+- Downloads in the background (`autoDownload`) but never installs on quit
+  (`autoInstallOnAppQuit` is kept **off**): the "Update ready" toast's "Restart
+  now" button is the only install path. Installing from the quit handler runs
+  after the last window is gone, and on the platforms whose installer needs
+  elevation it blocks the main thread behind a prompt with no window to belong
+  to — which leaves the app running, invisible, with no way for the user to
+  stop it.
 - After an update, the first launch shows a "What's new" note built from the
   bundled `CHANGELOG.md` (entries since the previously-run version).
 
-**Self-update only applies to direct-download builds** (the `.AppImage` on Linux,
-NSIS `.exe` on Windows, `.dmg`/`.zip` on macOS). Store / package-manager channels
+**Self-update only applies to direct-download builds** (the `.AppImage`, `.deb`
+and `.rpm` on Linux, NSIS `.exe` on Windows, `.dmg`/`.zip` on macOS — every
+artifact published to the generic feed self-updates, each through its own
+electron-updater backend). Store / package-manager channels
 manage updates themselves and must ship with the updater inert — a build knows it
 is store-distributed and skips electron-updater. In a non-packaged dev build the
 updater is inert unless the dev mock is enabled (below).
@@ -24,7 +31,10 @@ updater is inert unless the dev mock is enabled (below).
 **macOS** additionally requires the build to be signed + notarized before an
 update can install (Gatekeeper rejects an unsigned/unnotarized `.app`); until the
 signing pipeline is in place, macOS auto-update stays disabled while Linux and
-Windows work.
+Windows work. When that lands, re-check the download UX: with install-on-quit
+off, `MacUpdater` does not hand the payload to Squirrel during the background
+download — it stages it when the user presses "Restart now", so that press can
+sit for a while. Worth a progress indication before it ships.
 
 **Firewall.** Restorm's outbound firewall denies background traffic by default.
 The updater's requests to the feed are a background system operation, so
@@ -94,13 +104,19 @@ Example: `RESTORM_UPDATE_MOCK=downloaded pnpm dev:restorm`. The e2e suite
 
 ## Manual QA checklist (packaged build)
 
-Against a real packaged `.AppImage` and a feed serving a newer version:
+Against a real packaged build and a feed serving a newer version — run it at
+least once on a `.deb`/`.rpm` as well as the `.AppImage`, since those install
+through a different backend that needs a privilege prompt:
 
 1. Launch the older version; confirm the background check downloads the newer one.
-2. Confirm the "Update ready" toast appears and "Restart now" installs it.
-3. After relaunch, confirm the "What's new in vX.Y.Z" note shows the CHANGELOG
+2. Confirm the "Update ready" toast appears and "Restart now" installs it AND
+   brings the app back up on the new version.
+3. Quit and relaunch WITHOUT pressing the button; confirm the old version is
+   still running (nothing installs on quit) and that no windowless process is
+   left behind.
+4. After relaunch, confirm the "What's new in vX.Y.Z" note shows the CHANGELOG
    entries added since the previous version.
-4. In Settings → Updates, confirm the auto-check toggle persists and the manual
+5. In Settings → Updates, confirm the auto-check toggle persists and the manual
    "Check now" reflects the live status.
 5. Watch the update log for `Cannot download differentially, fallback to full
    download` — it should NOT appear, and the downloaded byte count should be a

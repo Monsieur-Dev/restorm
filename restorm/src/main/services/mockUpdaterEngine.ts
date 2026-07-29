@@ -63,7 +63,7 @@ export function createMockUpdaterEngine(rawMode: string | undefined): UpdaterEng
       }, 0)
       return Promise.resolve(null)
     },
-    quitAndInstall() {
+    quitAndInstall(_isSilent?: boolean, _isForceRunAfter?: boolean) {
       // No-op in the mock — we never actually relaunch during e2e/QA.
     }
   }

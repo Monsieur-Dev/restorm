@@ -2501,7 +2501,7 @@
     "currentVersion": "Version {{version}}",
     "checkNow": "Sök nu",
     "readyTitle": "Uppdatering klar",
-    "readyBody": "Version {{version}} installeras nästa gång du startar om.",
+    "readyBody": "Version {{version}} är redo att installeras.",
     "restartNow": "Starta om nu",
     "checkFailedTitle": "Sökning efter uppdateringar misslyckades",
     "checkFailedBody": "Kunde inte söka efter uppdateringar. Försök igen senare.",
