@@ -68,6 +68,7 @@
     "@phosphor-icons/react": "^2.1.10",
     "@ruby/3.4-wasm-wasi": "2.9.3-2.9.4",
     "@ruby/wasm-wasi": "2.9.3-2.9.4",
+    "@sentry/electron": "^7.16.0",
     "@typespec/compiler": "^1.13.0",
     "@typespec/http": "^1.13.0",
     "@typespec/openapi": "^1.13.0",

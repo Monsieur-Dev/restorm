@@ -38,7 +38,7 @@ import {
 import type { PlanTier } from '../../../shared/auth/authState'
 import {
   CONSENT_SETTING_KEYS,
-  OBSERVABILITY_ENDPOINTS,
+  resolveObservabilityEndpoints,
   PRIVACY_POLICY_VERSION,
   type ConsentGateId
 } from '../../../shared/config/observability'
@@ -121,11 +121,15 @@ export function initConsentService(getPlan: () => ResolvedPlan): ConsentService 
     log: (message, fields) => { logger.warn(message, fields) }
   })
 
+  // Resolved once at init: the crash host is derived from the configured DSN, so
+  // the firewall exemption always names the host the SDK will actually reach.
+  const endpoints = resolveObservabilityEndpoints()
+
   // Declare the endpoints BEFORE the first sync so the panel can render a row
   // for each one whatever the consent answer — including the rows that will
   // read "blocked, no consent". A destination the user cannot see is one they
   // cannot refuse.
-  for (const endpoint of OBSERVABILITY_ENDPOINTS) {
+  for (const endpoint of endpoints) {
     permissionService.declareSystemEndpoint({
       id: endpoint.id,
       host: endpoint.host,
@@ -137,7 +141,7 @@ export function initConsentService(getPlan: () => ResolvedPlan): ConsentService 
 
   exemption = new ConsentFirewallExemption(
     permissionService,
-    OBSERVABILITY_ENDPOINTS.map((e) => ({ host: e.host, consentGate: e.consentGate })),
+    endpoints.map((e) => ({ host: e.host, consentGate: e.consentGate })),
     (gate) => service.canSend(gate)
   )
   service.onChange((decisions: ConsentDecision[]) => {

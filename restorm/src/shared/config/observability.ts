@@ -61,16 +61,52 @@ export interface ObservabilityEndpoint {
 }
 
 /**
- * Crash ingest — Sentry's EU region. The `oXXXXXXX` segment is the Sentry
- * ORGANISATION id and comes out of the DSN, which is not provisioned yet, so the
- * value below is a deliberate placeholder: `o0` is not a valid organisation, so
- * the exemption currently points at a host that resolves to nothing.
- *
- * PROVISIONAL — replace the org id once the Sentry account exists. Because the
- * exemption is host-EXACT, a stale value fails CLOSED (the real ingest would be
- * prompted like any unknown destination), never open.
+ * Environment variable carrying the Sentry DSN. Never committed: the DSN embeds
+ * the project's public key, and hard-coding it would also pin the org id into
+ * the repo. Absent ⇒ crash reporting is inert (no SDK, no host to exempt).
  */
-const CRASH_INGEST_HOST = 'o0.ingest.de.sentry.io'
+export const CRASH_DSN_ENV = 'RESTORM_SENTRY_DSN'
+
+/**
+ * Fallback crash-ingest host, used only when no DSN is configured.
+ *
+ * `o0` is not a valid Sentry organisation, so this resolves to nothing — the row
+ * still renders in the firewall panel (so the user can see crash reporting
+ * exists as a destination) while pointing at a host that cannot receive
+ * anything. Once a DSN is set, the REAL host is derived from it and this value
+ * is never used.
+ */
+const CRASH_INGEST_HOST_FALLBACK = 'o0.ingest.de.sentry.io'
+
+/**
+ * The ingest host a Sentry DSN points at.
+ *
+ * A DSN is `https://<publicKey>@<ingest-host>/<projectId>`, so the host the SDK
+ * will actually send to is carried IN the DSN. Deriving the firewall exemption
+ * from it — rather than maintaining a parallel constant — means the allowlist
+ * cannot drift from the destination: change the DSN and the exempted host
+ * follows, with no code change and no window where the SDK sends somewhere the
+ * firewall has not been told about.
+ *
+ * Returns `null` for an absent or unparsable DSN, which leaves crash reporting
+ * inert rather than guessing at a host.
+ */
+export function ingestHostFromDsn(dsn: string | undefined): string | null {
+  if (dsn === undefined || dsn.trim() === '') return null
+  try {
+    const url = new URL(dsn)
+    if (url.protocol !== 'https:') return null
+    return url.host.toLowerCase()
+  } catch {
+    return null
+  }
+}
+
+/** The configured DSN, or `undefined` when crash reporting is not provisioned. */
+export function crashDsn(env: NodeJS.ProcessEnv = process.env): string | undefined {
+  const raw = env[CRASH_DSN_ENV]
+  return raw === undefined || raw.trim() === '' ? undefined : raw.trim()
+}
 
 /**
  * Telemetry ingest — PostHog's EU cloud. Unlike Sentry's, this host carries no
@@ -91,24 +127,31 @@ const TELEMETRY_INGEST_HOST = 'eu.i.posthog.com'
  * exemption and the panel row are all connected and testable end to end before
  * anything can actually send.
  */
-export const OBSERVABILITY_ENDPOINTS: readonly ObservabilityEndpoint[] = [
-  {
-    id: 'crash',
-    host: CRASH_INGEST_HOST,
-    purposeKey: 'privacy.outbound.purpose.crash',
-    consentGate: 'crash'
-  },
-  {
-    id: 'telemetry',
-    host: TELEMETRY_INGEST_HOST,
-    purposeKey: 'privacy.outbound.purpose.telemetry',
-    consentGate: 'telemetry'
-  }
-]
+export function resolveObservabilityEndpoints(
+  env: NodeJS.ProcessEnv = process.env
+): readonly ObservabilityEndpoint[] {
+  return [
+    {
+      id: 'crash',
+      host: ingestHostFromDsn(crashDsn(env)) ?? CRASH_INGEST_HOST_FALLBACK,
+      purposeKey: 'privacy.outbound.purpose.crash',
+      consentGate: 'crash'
+    },
+    {
+      id: 'telemetry',
+      host: TELEMETRY_INGEST_HOST,
+      purposeKey: 'privacy.outbound.purpose.telemetry',
+      consentGate: 'telemetry'
+    }
+  ]
+}
 
 /** The declared endpoint for a gate, or `undefined` when none is declared. */
-export function endpointForGate(gate: ConsentGateId): ObservabilityEndpoint | undefined {
-  return OBSERVABILITY_ENDPOINTS.find((e) => e.consentGate === gate)
+export function endpointForGate(
+  gate: ConsentGateId,
+  env: NodeJS.ProcessEnv = process.env
+): ObservabilityEndpoint | undefined {
+  return resolveObservabilityEndpoints(env).find((e) => e.consentGate === gate)
 }
 
 /**
@@ -128,8 +171,12 @@ export function endpointForGate(gate: ConsentGateId): ObservabilityEndpoint | un
  * matches on `{scheme, host}` alone and is therefore port-agnostic. The port
  * refusal is a property of THIS predicate, not of that allowlist.
  */
-export function isObservabilityUrl(rawUrl: string, gate: ConsentGateId): boolean {
-  const endpoint = endpointForGate(gate)
+export function isObservabilityUrl(
+  rawUrl: string,
+  gate: ConsentGateId,
+  env: NodeJS.ProcessEnv = process.env
+): boolean {
+  const endpoint = endpointForGate(gate, env)
   if (endpoint === undefined) return false
   let url: URL
   try {
@@ -142,11 +189,11 @@ export function isObservabilityUrl(rawUrl: string, gate: ConsentGateId): boolean
 }
 
 /** Sugar for the crash-ingest gate. */
-export function isCrashUrl(rawUrl: string): boolean {
-  return isObservabilityUrl(rawUrl, 'crash')
+export function isCrashUrl(rawUrl: string, env: NodeJS.ProcessEnv = process.env): boolean {
+  return isObservabilityUrl(rawUrl, 'crash', env)
 }
 
 /** Sugar for the telemetry gate. */
-export function isTelemetryUrl(rawUrl: string): boolean {
-  return isObservabilityUrl(rawUrl, 'telemetry')
+export function isTelemetryUrl(rawUrl: string, env: NodeJS.ProcessEnv = process.env): boolean {
+  return isObservabilityUrl(rawUrl, 'telemetry', env)
 }

@@ -100,6 +100,7 @@ import { setupGraphQL } from './GraphQLSetup'
 import { registerRestormIPC } from './IPCHandlers'
 import { initEntitlementService, getEntitlementService, stopEntitlementAutoRefresh, makeBackendFetch, resolveBackendVersion } from './services/auth/authComposition'
 import { initConsentService } from './services/privacy/consentComposition'
+import { initCrashReporting } from './services/crash/sentryComposition'
 import { createEntitlementEvaluator } from './services/entitlement/entitlementStrategy'
 import { installScenarioEngineIPC } from './scenarioEngine/ipcBridge'
 import { registerBuiltinSources } from './services/secrets/mainSourceRegistry'
@@ -768,6 +769,17 @@ void app.whenReady().then(() => {
     })
   }
   const entitlementService = initEntitlementService()
+  // Crash reporting, AFTER consent: the service reads the gate on construction,
+  // so an unconsented launch never arms the SDK even briefly. It also subscribes
+  // to consent changes, so a later grant arms it and a revocation tears it down
+  // without a restart. Inert while no DSN is configured.
+  try {
+    initCrashReporting()
+  } catch (error) {
+    logger.error('Crash reporting failed to initialize; it stays disarmed', {
+      message: error instanceof Error ? error.message : String(error)
+    })
+  }
   // Register the 'Entitlement' custom strategy so features.yaml entries that
   // declare `Type: Entitlement` / `RequiredCapabilities: [...]` are evaluated
   // against the live auth state. `setupIPC` (called inside `initializeApp`'s
