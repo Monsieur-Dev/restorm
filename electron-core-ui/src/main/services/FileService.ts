@@ -64,6 +64,20 @@ export class FileService {
    */
   private draftStore: DraftStore | null = null
 
+  /**
+   * The active attach: which project (`rootDir` + `uuid`) the current
+   * `draftStore` belongs to, and the promise of its restored-draft
+   * count. Lets `attachDraftStore` recognize a redundant re-attach for
+   * the SAME project — see its doc comment for why that happens
+   * routinely — and hand back the first call's result instead of
+   * re-reading drafts from disk / re-broadcasting `file:drafts-restored`.
+   * Holding the PROMISE rather than a settled count matters: the
+   * redundant call typically arrives while the first one is still
+   * awaiting the disk read, so a plain cached number would hand it a
+   * count that isn't this project's yet.
+   */
+  private draftStoreAttach: { identity: string; restored: Promise<number> } | null = null
+
   constructor(config: Partial<FileServiceConfig> = {}) {
     this.config = {
       extension: config.extension ?? '.json',
@@ -154,6 +168,21 @@ export class FileService {
    * and re-applied to the registry — each restored unit transitions
    * to `dirty` and emits the usual per-unit event. Returns the number
    * of drafts restored so callers can surface a toast.
+   *
+   * Idempotent per project (`rootDir` + `uuid`): a host app's `open()`
+   * routinely triggers TWO independent callers of this method for the
+   * same file-mode open — a reactive `onStateChanged` listener (fired
+   * synchronously as soon as the new path is visible) and the explicit
+   * caller that awaits the open's result — both racing to attach the
+   * same draft store. Re-reading drafts from disk and re-broadcasting
+   * `file:drafts-restored` on the second call would restore the same
+   * units twice and show the recovery toast twice. Whichever call
+   * reaches here first does the real work; a second call for the SAME
+   * identity joins it and resolves to the same count, whether the first
+   * has already settled or is still reading from disk. A call for a
+   * genuinely different project (switching files without an explicit
+   * `close()`/`detachDraftStore()` in between) still drops the old store
+   * and attaches the new one as before.
    */
   public async attachDraftStore(params: {
     rootDir: string
@@ -164,15 +193,64 @@ export class FileService {
     deserialize: (raw: string) => unknown
     debounceMs?: number
   }): Promise<number> {
-    this.draftStore = new DraftStore(params)
+    // The project — `rootDir` + `uuid` — is the identity; the
+    // serialization params are how the SAME project's drafts are read
+    // and written, so callers must agree on them and they deliberately
+    // don't turn a repeat call into a different attach. NUL-separated
+    // so no pair can collide with another by straddling the separator
+    // the way a path join would allow.
+    const identity = `${params.rootDir}\u0000${params.uuid}`
+    if (this.draftStore && this.draftStoreAttach?.identity === identity) {
+      return this.draftStoreAttach.restored
+    }
+    const restored = this.openDraftStore(params)
+    this.draftStoreAttach = { identity, restored }
+    // A failed attach must not pin the identity to a rejected promise —
+    // every later call for the same project would inherit the failure
+    // instead of retrying the restore.
+    restored.catch(() => {
+      if (this.draftStoreAttach?.restored === restored) {
+        this.draftStoreAttach = null
+      }
+    })
+    return restored
+  }
+
+  /**
+   * The real attach: swap in a fresh `DraftStore`, replay whatever it
+   * finds on disk into the registry, and announce the result once.
+   * Always go through {@link attachDraftStore}, which owns the
+   * per-project de-duplication.
+   *
+   * Every step works off the local `store`, never the `draftStore`
+   * field, and abandons the attach as soon as the field no longer
+   * points at it. An attach can be superseded mid-flight — a project
+   * switch or a `close()` while this one is awaiting the disk — and
+   * reading the field back after an await would make the stale call
+   * finish someone else's attach: restoring the new project's drafts a
+   * second time and re-broadcasting `file:drafts-restored` behind the
+   * de-duplication's back, or dereferencing a null store after a close.
+   */
+  private async openDraftStore(params: {
+    rootDir: string
+    uuid: string
+    extension: string
+    serialize: (value: unknown) => string
+    deserialize: (raw: string) => unknown
+    debounceMs?: number
+  }): Promise<number> {
+    const store = new DraftStore(params)
+    this.draftStore = store
     // Refresh the per-project `.last-opened` timestamp so the
     // age-based orphan sweep at next boot doesn't reap this project's
     // drafts. `markOpened` creates the directory if it doesn't exist
     // yet, so opening a project without mutating anything still keeps
     // the UUID alive (important for the "I opened it, crashed, reopen
     // next week" recovery story).
-    await this.draftStore.markOpened()
-    const drafts = await this.draftStore.loadAllDrafts()
+    await store.markOpened()
+    if (this.draftStore !== store) return 0
+    const drafts = await store.loadAllDrafts()
+    if (this.draftStore !== store) return 0
     let restored = 0
     for (const draft of drafts) {
       const unit = this.saveUnitRegistry.get(draft.runtimeId)
@@ -204,9 +282,15 @@ export class FileService {
     return restored
   }
 
-  /** Detach the active draft store. Called when closing a project. */
+  /**
+   * Detach the active draft store. Called when closing a project.
+   * Clearing the recorded attach is what lets the SAME project be
+   * opened again later in the session and restore its drafts afresh —
+   * only a repeat attach with no `close()` in between is de-duplicated.
+   */
   public detachDraftStore(): void {
     this.draftStore = null
+    this.draftStoreAttach = null
   }
 
   /**

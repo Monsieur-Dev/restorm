@@ -210,8 +210,9 @@ work survives a hard crash.
 - One draft file per dirty unit.
 - Tombstones serialize as `{ __tombstone: true, snapshot: … }`.
 - `.last-opened` holds a numeric epoch-ms; `DraftStore.markOpened()` is
-  called from `FileService.attachDraftStore()` every time a project is
-  opened, so the marker stays fresh as long as the user keeps returning
+  called from `FileService.attachDraftStore()` on the first attach for a
+  project (a de-duplicated repeat attach for the same one skips it, see
+  below), so the marker stays fresh as long as the user keeps returning
   to the project. There is no on-disk `filePath` sidecar anywhere in
   the draft tree — the store is fully path-agnostic, which means the
   user can rename or move the project file outside the app and the
@@ -232,10 +233,46 @@ work survives a hard crash.
 | Unit saved | Draft file deleted after the reference commit. |
 | Unit un-dirtied via undo | Draft file deleted. |
 | App crash | Draft files survive. |
-| Project reopened | Drafts auto-restored — each unit is marked dirty via `registry.mutate` (or `markDeleted` for tombstones); `file:drafts-restored { count }` broadcasts so the host app can push a toast via `<Toaster>`. |
+| Project reopened | Drafts auto-restored — each unit is marked dirty via `registry.mutate` (or `markDeleted` for tombstones); `file:drafts-restored { count }` broadcasts once so the host app can push a toast via `<Toaster>`. |
 | Project abandoned for >30 days | At next app boot, `sweepOrphanedDrafts` reaps any draft directory whose `.last-opened` stamp is older than `DEFAULT_DRAFT_MAX_AGE_DAYS` (30). Age-based reaping is path-agnostic — it won't nuke drafts for a project the user simply renamed or moved outside the app. |
 | Tab closed without saving | Drafts kept silently; next open re-restores them. |
 | Explicit "Discard all changes" | Drafts deleted. |
+
+### `attachDraftStore` is idempotent per project
+
+`FileService.attachDraftStore({ rootDir, uuid, ... })` is safe to call
+more than once for the SAME `(rootDir, uuid)` pair without re-emitting
+`file:drafts-restored` or re-reading drafts from disk — a repeat call
+joins the first one and resolves to the same restored-count, whether
+that first call has already settled or is still reading from disk.
+
+This matters because host apps commonly reach it from more than one
+code path for a single "open": e.g. a reactive `onStateChanged`
+listener that fires as soon as the file's path is visible, AND the
+explicit caller that awaited the open. Un-de-duplicated, both callers
+read the on-disk drafts and broadcast `file:drafts-restored`
+independently — restoring correctly (both agree on the count) but
+firing the recovery toast twice for one open.
+
+Two boundaries the de-duplication deliberately does NOT cross:
+
+- a call for a genuinely different project (a different
+  `(rootDir, uuid)`) still drops the old store and attaches the new
+  one — callers must NOT `detachDraftStore()` first, since that would
+  reset the identity and re-arm the duplicate broadcast;
+- `detachDraftStore()` (which `close()` calls) clears the recorded
+  identity, so closing a project and reopening the SAME one later in
+  the session restores its drafts afresh.
+
+The identity is the PROJECT only. `extension` / `serialize` /
+`deserialize` describe how that one project's drafts are read and
+written, so callers that reach `attachDraftStore` for the same project
+must pass matching ones; disagreeing about them would not produce a
+second attach, it would just mean whichever call arrived first decided
+the on-disk draft format. An attach that is superseded mid-flight — a
+project switch or a `close()` landing while it is still reading the
+disk — abandons itself: it restores nothing and stays silent, leaving
+the newer attach in charge.
 
 ### Wire-up
 

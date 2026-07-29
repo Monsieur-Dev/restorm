@@ -818,8 +818,12 @@ export async function loadProjectIntoStore(targetPath: string): Promise<void> {
  * Ensure the currently-loaded folder has a project UUID, attach a
  * `DraftStore` to FileService so per-unit writes land in
  * `userData/drafts/<uuid>`, and restore any drafts that survived a
- * crash. Safe to call on every folder open — previous draft store (if
- * any) is detached first.
+ * crash. Safe to call on every folder open: `attachDraftStore` replaces
+ * the store by itself when the project changed, and joins the existing
+ * attach — no re-read, no second `file:drafts-restored` — when it
+ * didn't. Deliberately does NOT detach first: that would reset the
+ * project identity and re-arm the duplicate recovery toast the way the
+ * file-mode path used to (see `attachDraftStoreForFile`).
  */
 export async function attachDraftStoreForFolder(
   folderPath: string,
@@ -843,7 +847,6 @@ export async function attachDraftStoreForFolder(
     }
 
     const fileService = getFileService()
-    fileService.detachDraftStore()
     const restored = await fileService.attachDraftStore({
       rootDir: getDraftsRootDir(),
       uuid,
@@ -865,6 +868,13 @@ export async function attachDraftStoreForFolder(
  * so per-unit drafts survive a crash in file mode too — the recovery
  * UX must match folder mode; only the on-disk layout of the user's
  * saved content differs.
+ *
+ * File-mode opens reach this function TWICE for the same open: the
+ * reactive `onStateChanged` listener in `index.ts` fires as soon as
+ * `FileService.open()` updates `currentFile.path`, and the caller that
+ * awaited that same `open()` calls it too. Relies on `attachDraftStore`
+ * de-duplicating a repeat call for the same project so the "drafts
+ * restored" toast still fires exactly once.
  */
 export async function attachDraftStoreForFile(
   filePath: string,
@@ -884,7 +894,6 @@ export async function attachDraftStoreForFile(
     }
 
     const fileService = getFileService()
-    fileService.detachDraftStore()
     const restored = await fileService.attachDraftStore({
       rootDir: getDraftsRootDir(),
       uuid,
