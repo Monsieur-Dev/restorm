@@ -1,6 +1,6 @@
 {
   "name": "restorm",
-  "version": "0.1.18",
+  "version": "0.1.19",
   "description": "Local-first API testing environment — client and server",
   "main": "dist/main/index.js",
   "homepage": "https://restorm.app",
