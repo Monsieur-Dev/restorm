@@ -1008,10 +1008,22 @@
     "requestFormat.powershell": "PowerShell (Invoke-RestMethod)"
   },
   "import": {
-    "title": "Importér anmodninger",
-    "source": {
-      "label": "Indsæt noget her!",
-      "placeholder": "Indtast filsti, URL eller indsæt curl/PowerShell-kommando..."
+    "addAuth": "Tilføj en godkendelsesrute",
+    "applyFailedTitle": "Opdatering fra kilde mislykkedes",
+    "applyUpdate": "Anvend opdatering",
+    "authenticatedVia": "Godkendt via {{name}}",
+    "cancel": "Annullér",
+    "customHeadersAdd": "Tilføj header",
+    "customHeadersBtn": "Tilføj brugerdefinerede headers",
+    "customHeadersBtnTitle": "Vedhæft engangs-headers til hentningen af specifikationen (gemmes på den importerede mappe til gentagne importer)",
+    "customHeadersDone": "Færdig",
+    "customHeadersHint": "Headers gemmes på den importerede mappe, så en fremtidig opdatering fra kilden gentager dem. Brug i stedet godkendelsesruten ovenfor til loginflows med tokenrotation.",
+    "customHeadersTitle": "Brugerdefinerede headers",
+    "detachAuth": "Fjern godkendelsesrute",
+    "dropZone": "Slip-zone",
+    "editAuth": "Rediger godkendelsesrute",
+    "error": {
+      "unknown": "Der opstod en ukendt fejl"
     },
     "formats": {
       "swagger": {
@@ -1137,15 +1149,24 @@
     },
     "loading": "Analyserer...",
     "noResults": "Ingen anmodninger fundet",
-    "error": {
-      "unknown": "Der opstod en ukendt fejl"
-    },
     "ok": "Importér",
-    "cancel": "Annullér",
-    "dropZone": "Slip-zone",
-    "addAuth": "Tilføj en godkendelsesrute",
-    "detachAuth": "Fjern godkendelsesrute",
-    "editAuth": "Rediger godkendelsesrute"
+    "okN": "{{action}} ({{count}})",
+    "preview": {
+      "noDocumentation": "Ingen parset dokumentation for denne kilde."
+    },
+    "refreshTitle": "Opdater fra kilde",
+    "searchPlaceholder": "Filtrér ruter / mapper…",
+    "selectAll": "Vælg alle",
+    "selectNone": "Fravælg alle",
+    "source": {
+      "label": "Indsæt noget her!",
+      "placeholder": "Indtast filsti, URL eller indsæt curl/PowerShell-kommando..."
+    },
+    "tabs": {
+      "routes": "Ruter",
+      "documentation": "Dokumentation"
+    },
+    "title": "Importér anmodninger"
   },
   "emptyBench": {
     "importCard": {

@@ -1009,10 +1009,22 @@
     "requestFormat.powershell": "PowerShell (Invoke-RestMethod)"
   },
   "import": {
-    "title": "Uvezi zahteve",
-    "source": {
-      "label": "Nalepite nešto ovde!",
-      "placeholder": "Unesite putanju datoteke, URL ili nalepite curl/PowerShell komandu..."
+    "addAuth": "Додај руту за аутентификацију",
+    "applyFailedTitle": "Osvežavanje iz izvora nije uspelo",
+    "applyUpdate": "Primeni ažuriranje",
+    "authenticatedVia": "Autentifikovano preko {{name}}",
+    "cancel": "Otkaži",
+    "customHeadersAdd": "Dodaj zaglavlje",
+    "customHeadersBtn": "Dodaj prilagođena zaglavlja",
+    "customHeadersBtnTitle": "Priloži jednokratna zaglavlja preuzimanju specifikacije (čuvaju se u uvezenoj fascikli za ponovne uvoze)",
+    "customHeadersDone": "Gotovo",
+    "customHeadersHint": "Zaglavlja se čuvaju u uvezenoj fascikli, pa ih buduće osvežavanje iz izvora ponavlja. Za prijave sa rotacijom tokena radije koristite rutu za autentifikaciju iznad.",
+    "customHeadersTitle": "Prilagođena zaglavlja",
+    "detachAuth": "Одвоји руту за аутентификацију",
+    "dropZone": "Zona za ispuštanje",
+    "editAuth": "Уреди руту за аутентификацију",
+    "error": {
+      "unknown": "Došlo je do nepoznate greške"
     },
     "formats": {
       "swagger": {
@@ -1138,15 +1150,24 @@
     },
     "loading": "Analiziranje...",
     "noResults": "Nije pronađen nijedan zahtev",
-    "error": {
-      "unknown": "Došlo je do nepoznate greške"
-    },
     "ok": "Uvezi",
-    "cancel": "Otkaži",
-    "dropZone": "Zona za ispuštanje",
-    "addAuth": "Додај руту за аутентификацију",
-    "detachAuth": "Одвоји руту за аутентификацију",
-    "editAuth": "Уреди руту за аутентификацију"
+    "okN": "{{action}} ({{count}})",
+    "preview": {
+      "noDocumentation": "Za ovaj izvor nije analizirana nikakva dokumentacija."
+    },
+    "refreshTitle": "Osveži iz izvora",
+    "searchPlaceholder": "Filtriraj rute / fascikle…",
+    "selectAll": "Izaberi sve",
+    "selectNone": "Poništi izbor",
+    "source": {
+      "label": "Nalepite nešto ovde!",
+      "placeholder": "Unesite putanju datoteke, URL ili nalepite curl/PowerShell komandu..."
+    },
+    "tabs": {
+      "routes": "Rute",
+      "documentation": "Документација"
+    },
+    "title": "Uvezi zahteve"
   },
   "emptyBench": {
     "importCard": {

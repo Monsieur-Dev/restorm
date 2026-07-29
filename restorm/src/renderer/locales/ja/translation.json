@@ -1007,10 +1007,22 @@
     "requestFormat.powershell": "PowerShell（Invoke-RestMethod）"
   },
   "import": {
-    "title": "リクエストをインポート",
-    "source": {
-      "label": "ここに貼り付けてください！",
-      "placeholder": "ファイルパス、URL を入力するか、curl／PowerShell コマンドを貼り付けてください..."
+    "addAuth": "認証ルートを追加",
+    "applyFailedTitle": "ソースからの更新に失敗しました",
+    "applyUpdate": "更新を適用",
+    "authenticatedVia": "{{name}} で認証済み",
+    "cancel": "キャンセル",
+    "customHeadersAdd": "ヘッダーを追加",
+    "customHeadersBtn": "カスタムヘッダーを追加",
+    "customHeadersBtnTitle": "仕様の取得に一度限りのヘッダーを付加します（再インポート用にインポート済みフォルダへ保存されます）",
+    "customHeadersDone": "完了",
+    "customHeadersHint": "ヘッダーはインポート済みフォルダに保存され、今後ソースから更新するときに再送されます。トークンが更新されるログインフローでは、上の認証ルートの添付を使用してください。",
+    "customHeadersTitle": "カスタムヘッダー",
+    "detachAuth": "認証ルートを切り離す",
+    "dropZone": "ドロップ領域",
+    "editAuth": "認証ルートを編集",
+    "error": {
+      "unknown": "不明なエラーが発生しました"
     },
     "formats": {
       "swagger": {
@@ -1136,15 +1148,24 @@
     },
     "loading": "解析中...",
     "noResults": "リクエストが見つかりません",
-    "error": {
-      "unknown": "不明なエラーが発生しました"
-    },
     "ok": "インポート",
-    "cancel": "キャンセル",
-    "dropZone": "ドロップ領域",
-    "addAuth": "認証ルートを追加",
-    "detachAuth": "認証ルートを切り離す",
-    "editAuth": "認証ルートを編集"
+    "okN": "{{action}} ({{count}})",
+    "preview": {
+      "noDocumentation": "このソースには解析済みのドキュメントがありません。"
+    },
+    "refreshTitle": "ソースから更新",
+    "searchPlaceholder": "ルート / フォルダを絞り込み…",
+    "selectAll": "すべて選択",
+    "selectNone": "すべて選択解除",
+    "source": {
+      "label": "ここに貼り付けてください！",
+      "placeholder": "ファイルパス、URL を入力するか、curl／PowerShell コマンドを貼り付けてください..."
+    },
+    "tabs": {
+      "routes": "ルート",
+      "documentation": "ドキュメント"
+    },
+    "title": "リクエストをインポート"
   },
   "emptyBench": {
     "importCard": {

@@ -1010,10 +1010,22 @@
     "requestFormat.powershell": "PowerShell (Invoke-RestMethod)"
   },
   "import": {
-    "title": "Importovat požadavky",
-    "source": {
-      "label": "Sem něco vložte!",
-      "placeholder": "Zadejte cestu k souboru, URL nebo vložte příkaz curl/PowerShell..."
+    "addAuth": "Přidat ověřovací trasu",
+    "applyFailedTitle": "Aktualizace ze zdroje selhala",
+    "applyUpdate": "Použít aktualizaci",
+    "authenticatedVia": "Ověřeno přes {{name}}",
+    "cancel": "Zrušit",
+    "customHeadersAdd": "Přidat hlavičku",
+    "customHeadersBtn": "Přidat vlastní hlavičky",
+    "customHeadersBtnTitle": "Připojit jednorázové hlavičky k načtení specifikace (uloží se do importované složky pro další importy)",
+    "customHeadersDone": "Hotovo",
+    "customHeadersHint": "Hlavičky se ukládají do importované složky, takže je budoucí aktualizace ze zdroje zopakuje. Pro přihlašovací postupy s rotací tokenů použijte raději připojení ověřovací trasy výše.",
+    "customHeadersTitle": "Vlastní hlavičky",
+    "detachAuth": "Odebrat ověřovací trasu",
+    "dropZone": "Zóna pro vložení",
+    "editAuth": "Upravit ověřovací trasu",
+    "error": {
+      "unknown": "Došlo k neznámé chybě"
     },
     "formats": {
       "swagger": {
@@ -1139,15 +1151,24 @@
     },
     "loading": "Probíhá analýza...",
     "noResults": "Nebyly nalezeny žádné požadavky",
-    "error": {
-      "unknown": "Došlo k neznámé chybě"
-    },
     "ok": "Importovat",
-    "cancel": "Zrušit",
-    "dropZone": "Zóna pro vložení",
-    "addAuth": "Přidat ověřovací trasu",
-    "detachAuth": "Odebrat ověřovací trasu",
-    "editAuth": "Upravit ověřovací trasu"
+    "okN": "{{action}} ({{count}})",
+    "preview": {
+      "noDocumentation": "Pro tento zdroj nebyla analyzována žádná dokumentace."
+    },
+    "refreshTitle": "Aktualizovat ze zdroje",
+    "searchPlaceholder": "Filtrovat trasy / složky…",
+    "selectAll": "Vybrat vše",
+    "selectNone": "Zrušit výběr",
+    "source": {
+      "label": "Sem něco vložte!",
+      "placeholder": "Zadejte cestu k souboru, URL nebo vložte příkaz curl/PowerShell..."
+    },
+    "tabs": {
+      "routes": "Trasy",
+      "documentation": "Dokumentace"
+    },
+    "title": "Importovat požadavky"
   },
   "emptyBench": {
     "importCard": {

@@ -1007,10 +1007,22 @@
     "requestFormat.powershell": "PowerShell (Invoke-RestMethod)"
   },
   "import": {
-    "title": "Impor permintaan",
-    "source": {
-      "label": "Tempel sesuatu di sini!",
-      "placeholder": "Masukkan jalur file, URL, atau tempel perintah curl/PowerShell..."
+    "addAuth": "Tambahkan rute autentikasi",
+    "applyFailedTitle": "Gagal menyegarkan dari sumber",
+    "applyUpdate": "Terapkan pembaruan",
+    "authenticatedVia": "Diautentikasi melalui {{name}}",
+    "cancel": "Batal",
+    "customHeadersAdd": "Tambah header",
+    "customHeadersBtn": "Tambah header kustom",
+    "customHeadersBtnTitle": "Lampirkan header sekali pakai ke pengambilan spesifikasi (disimpan di folder yang diimpor untuk impor ulang)",
+    "customHeadersDone": "Selesai",
+    "customHeadersHint": "Header disimpan di folder yang diimpor sehingga penyegaran dari sumber berikutnya mengulanginya. Untuk alur login dengan rotasi token, gunakan rute autentikasi di atas.",
+    "customHeadersTitle": "Header kustom",
+    "detachAuth": "Lepaskan rute autentikasi",
+    "dropZone": "Zona lepas",
+    "editAuth": "Edit rute autentikasi",
+    "error": {
+      "unknown": "Terjadi kesalahan yang tidak diketahui"
     },
     "formats": {
       "swagger": {
@@ -1136,15 +1148,24 @@
     },
     "loading": "Menganalisis...",
     "noResults": "Tidak ada permintaan ditemukan",
-    "error": {
-      "unknown": "Terjadi kesalahan yang tidak diketahui"
-    },
     "ok": "Impor",
-    "cancel": "Batal",
-    "dropZone": "Zona lepas",
-    "addAuth": "Tambahkan rute autentikasi",
-    "detachAuth": "Lepaskan rute autentikasi",
-    "editAuth": "Edit rute autentikasi"
+    "okN": "{{action}} ({{count}})",
+    "preview": {
+      "noDocumentation": "Tidak ada dokumentasi yang diuraikan untuk sumber ini."
+    },
+    "refreshTitle": "Segarkan dari sumber",
+    "searchPlaceholder": "Filter rute / folder…",
+    "selectAll": "Pilih semua",
+    "selectNone": "Kosongkan pilihan",
+    "source": {
+      "label": "Tempel sesuatu di sini!",
+      "placeholder": "Masukkan jalur file, URL, atau tempel perintah curl/PowerShell..."
+    },
+    "tabs": {
+      "routes": "Rute",
+      "documentation": "Dokumentasi"
+    },
+    "title": "Impor permintaan"
   },
   "emptyBench": {
     "importCard": {

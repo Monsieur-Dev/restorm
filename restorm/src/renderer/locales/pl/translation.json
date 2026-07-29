@@ -1010,10 +1010,22 @@
     "requestFormat.powershell": "PowerShell (Invoke-RestMethod)"
   },
   "import": {
-    "title": "Importuj żądania",
-    "source": {
-      "label": "Wklej tutaj coś!",
-      "placeholder": "Wprowadź ścieżkę pliku, URL lub wklej polecenie curl/PowerShell..."
+    "addAuth": "Dodaj trasę uwierzytelniania",
+    "applyFailedTitle": "Odświeżanie ze źródła nie powiodło się",
+    "applyUpdate": "Zastosuj aktualizację",
+    "authenticatedVia": "Uwierzytelniono przez {{name}}",
+    "cancel": "Anuluj",
+    "customHeadersAdd": "Dodaj nagłówek",
+    "customHeadersBtn": "Dodaj własne nagłówki",
+    "customHeadersBtnTitle": "Dołącz jednorazowe nagłówki do pobrania specyfikacji (zapisywane w zaimportowanym folderze na potrzeby ponownych importów)",
+    "customHeadersDone": "Gotowe",
+    "customHeadersHint": "Nagłówki są zapisywane w zaimportowanym folderze, więc przyszłe odświeżenie ze źródła je powtórzy. W przypadku logowania z rotacją tokenów użyj raczej trasy uwierzytelniania powyżej.",
+    "customHeadersTitle": "Własne nagłówki",
+    "detachAuth": "Odłącz trasę uwierzytelniania",
+    "dropZone": "Strefa upuszczania",
+    "editAuth": "Edytuj trasę uwierzytelniania",
+    "error": {
+      "unknown": "Wystąpił nieznany błąd"
     },
     "formats": {
       "swagger": {
@@ -1139,15 +1151,24 @@
     },
     "loading": "Analizowanie...",
     "noResults": "Nie znaleziono żądań",
-    "error": {
-      "unknown": "Wystąpił nieznany błąd"
-    },
     "ok": "Importuj",
-    "cancel": "Anuluj",
-    "dropZone": "Strefa upuszczania",
-    "addAuth": "Dodaj trasę uwierzytelniania",
-    "detachAuth": "Odłącz trasę uwierzytelniania",
-    "editAuth": "Edytuj trasę uwierzytelniania"
+    "okN": "{{action}} ({{count}})",
+    "preview": {
+      "noDocumentation": "Brak przeanalizowanej dokumentacji dla tego źródła."
+    },
+    "refreshTitle": "Odśwież ze źródła",
+    "searchPlaceholder": "Filtruj trasy / foldery…",
+    "selectAll": "Zaznacz wszystko",
+    "selectNone": "Odznacz wszystko",
+    "source": {
+      "label": "Wklej tutaj coś!",
+      "placeholder": "Wprowadź ścieżkę pliku, URL lub wklej polecenie curl/PowerShell..."
+    },
+    "tabs": {
+      "routes": "Trasy",
+      "documentation": "Dokumentacja"
+    },
+    "title": "Importuj żądania"
   },
   "emptyBench": {
     "importCard": {

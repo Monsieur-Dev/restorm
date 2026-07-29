@@ -1008,10 +1008,22 @@
     "requestFormat.powershell": "PowerShell (Invoke-RestMethod)"
   },
   "import": {
-    "title": "Verzoeken importeren",
-    "source": {
-      "label": "Plak hier iets!",
-      "placeholder": "Voer bestandspad of URL in, of plak een curl/PowerShell-commando..."
+    "addAuth": "Een authenticatieroute toevoegen",
+    "applyFailedTitle": "Vernieuwen vanaf bron mislukt",
+    "applyUpdate": "Update toepassen",
+    "authenticatedVia": "Geauthenticeerd via {{name}}",
+    "cancel": "Annuleren",
+    "customHeadersAdd": "Header toevoegen",
+    "customHeadersBtn": "Aangepaste headers toevoegen",
+    "customHeadersBtnTitle": "Eenmalige headers meesturen bij het ophalen van de specificatie (opgeslagen op de geïmporteerde map voor herimports)",
+    "customHeadersDone": "Klaar",
+    "customHeadersHint": "Headers worden opgeslagen op de geïmporteerde map, zodat een latere vernieuwing vanaf de bron ze opnieuw verstuurt. Gebruik voor loginflows met tokenrotatie liever de authenticatieroute hierboven.",
+    "customHeadersTitle": "Aangepaste headers",
+    "detachAuth": "Authenticatieroute loskoppelen",
+    "dropZone": "Sleepzone",
+    "editAuth": "Authenticatieroute bewerken",
+    "error": {
+      "unknown": "Er is een onbekende fout opgetreden"
     },
     "formats": {
       "swagger": {
@@ -1137,15 +1149,24 @@
     },
     "loading": "Analyseren...",
     "noResults": "Geen verzoeken gevonden",
-    "error": {
-      "unknown": "Er is een onbekende fout opgetreden"
-    },
     "ok": "Importeren",
-    "cancel": "Annuleren",
-    "dropZone": "Sleepzone",
-    "addAuth": "Een authenticatieroute toevoegen",
-    "detachAuth": "Authenticatieroute loskoppelen",
-    "editAuth": "Authenticatieroute bewerken"
+    "okN": "{{action}} ({{count}})",
+    "preview": {
+      "noDocumentation": "Geen geparseerde documentatie voor deze bron."
+    },
+    "refreshTitle": "Vernieuwen vanaf bron",
+    "searchPlaceholder": "Routes / mappen filteren…",
+    "selectAll": "Alles selecteren",
+    "selectNone": "Niets selecteren",
+    "source": {
+      "label": "Plak hier iets!",
+      "placeholder": "Voer bestandspad of URL in, of plak een curl/PowerShell-commando..."
+    },
+    "tabs": {
+      "routes": "Routes",
+      "documentation": "Documentatie"
+    },
+    "title": "Verzoeken importeren"
   },
   "emptyBench": {
     "importCard": {

@@ -1007,10 +1007,22 @@
     "requestFormat.powershell": "PowerShell (Invoke-RestMethod)"
   },
   "import": {
-    "title": "Nhập yêu cầu",
-    "source": {
-      "label": "Dán gì đó vào đây!",
-      "placeholder": "Nhập đường dẫn tệp, URL, hoặc dán lệnh curl/PowerShell..."
+    "addAuth": "Thêm tuyến xác thực",
+    "applyFailedTitle": "Làm mới từ nguồn thất bại",
+    "applyUpdate": "Áp dụng cập nhật",
+    "authenticatedVia": "Đã xác thực qua {{name}}",
+    "cancel": "Hủy",
+    "customHeadersAdd": "Thêm header",
+    "customHeadersBtn": "Thêm header tùy chỉnh",
+    "customHeadersBtnTitle": "Đính kèm header dùng một lần vào lượt tải đặc tả (được lưu trên thư mục đã nhập để nhập lại)",
+    "customHeadersDone": "Xong",
+    "customHeadersHint": "Header được lưu trên thư mục đã nhập nên lần làm mới từ nguồn sau sẽ gửi lại chúng. Với luồng đăng nhập có xoay vòng token, hãy dùng tuyến xác thực ở trên.",
+    "customHeadersTitle": "Header tùy chỉnh",
+    "detachAuth": "Tách tuyến xác thực",
+    "dropZone": "Vùng thả",
+    "editAuth": "Chỉnh sửa tuyến xác thực",
+    "error": {
+      "unknown": "Đã xảy ra lỗi không xác định"
     },
     "formats": {
       "swagger": {
@@ -1136,15 +1148,24 @@
     },
     "loading": "Đang phân tích...",
     "noResults": "Không tìm thấy yêu cầu",
-    "error": {
-      "unknown": "Đã xảy ra lỗi không xác định"
-    },
     "ok": "Nhập",
-    "cancel": "Hủy",
-    "dropZone": "Vùng thả",
-    "addAuth": "Thêm tuyến xác thực",
-    "detachAuth": "Tách tuyến xác thực",
-    "editAuth": "Chỉnh sửa tuyến xác thực"
+    "okN": "{{action}} ({{count}})",
+    "preview": {
+      "noDocumentation": "Không có tài liệu được phân tích cho nguồn này."
+    },
+    "refreshTitle": "Làm mới từ nguồn",
+    "searchPlaceholder": "Lọc tuyến / thư mục…",
+    "selectAll": "Chọn tất cả",
+    "selectNone": "Bỏ chọn tất cả",
+    "source": {
+      "label": "Dán gì đó vào đây!",
+      "placeholder": "Nhập đường dẫn tệp, URL, hoặc dán lệnh curl/PowerShell..."
+    },
+    "tabs": {
+      "routes": "Tuyến",
+      "documentation": "Tài liệu"
+    },
+    "title": "Nhập yêu cầu"
   },
   "emptyBench": {
     "importCard": {

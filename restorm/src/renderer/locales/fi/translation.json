@@ -1008,10 +1008,22 @@
     "requestFormat.powershell": "PowerShell (Invoke-RestMethod)"
   },
   "import": {
-    "title": "Tuo pyyntöjä",
-    "source": {
-      "label": "Liitä jotain tähän!",
-      "placeholder": "Anna tiedostopolku, URL tai liitä curl/PowerShell-komento..."
+    "addAuth": "Lisää todennusreitti",
+    "applyFailedTitle": "Päivitys lähteestä epäonnistui",
+    "applyUpdate": "Käytä päivitystä",
+    "authenticatedVia": "Todennettu kohteella {{name}}",
+    "cancel": "Peruuta",
+    "customHeadersAdd": "Lisää otsake",
+    "customHeadersBtn": "Lisää mukautetut otsakkeet",
+    "customHeadersBtnTitle": "Liitä kertaluonteiset otsakkeet määrityksen noutoon (tallennetaan tuotuun kansioon uudelleentuonteja varten)",
+    "customHeadersDone": "Valmis",
+    "customHeadersHint": "Otsakkeet tallennetaan tuotuun kansioon, joten tuleva päivitys lähteestä toistaa ne. Käytä kirjautumisvirtoihin, joissa token vaihtuu, mieluummin yllä olevaa todennusreittiä.",
+    "customHeadersTitle": "Mukautetut otsakkeet",
+    "detachAuth": "Irrota todennusreitti",
+    "dropZone": "Pudotusalue",
+    "editAuth": "Muokkaa todennusreittiä",
+    "error": {
+      "unknown": "Tapahtui tuntematon virhe"
     },
     "formats": {
       "swagger": {
@@ -1137,15 +1149,24 @@
     },
     "loading": "Analysoidaan...",
     "noResults": "Pyyntöjä ei löytynyt",
-    "error": {
-      "unknown": "Tapahtui tuntematon virhe"
-    },
     "ok": "Tuo",
-    "cancel": "Peruuta",
-    "dropZone": "Pudotusalue",
-    "addAuth": "Lisää todennusreitti",
-    "detachAuth": "Irrota todennusreitti",
-    "editAuth": "Muokkaa todennusreittiä"
+    "okN": "{{action}} ({{count}})",
+    "preview": {
+      "noDocumentation": "Tälle lähteelle ei ole jäsennettyä dokumentaatiota."
+    },
+    "refreshTitle": "Päivitä lähteestä",
+    "searchPlaceholder": "Suodata reitit / kansiot…",
+    "selectAll": "Valitse kaikki",
+    "selectNone": "Tyhjennä valinnat",
+    "source": {
+      "label": "Liitä jotain tähän!",
+      "placeholder": "Anna tiedostopolku, URL tai liitä curl/PowerShell-komento..."
+    },
+    "tabs": {
+      "routes": "Reitit",
+      "documentation": "Dokumentaatio"
+    },
+    "title": "Tuo pyyntöjä"
   },
   "emptyBench": {
     "importCard": {

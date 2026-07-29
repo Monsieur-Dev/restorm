@@ -1007,10 +1007,22 @@
     "requestFormat.powershell": "PowerShell（Invoke-RestMethod）"
   },
   "import": {
-    "title": "导入请求",
-    "source": {
-      "label": "在此粘贴内容！",
-      "placeholder": "输入文件路径、URL，或粘贴 curl/PowerShell 命令..."
+    "addAuth": "添加认证路由",
+    "applyFailedTitle": "从源刷新失败",
+    "applyUpdate": "应用更新",
+    "authenticatedVia": "通过 {{name}} 认证",
+    "cancel": "取消",
+    "customHeadersAdd": "添加请求头",
+    "customHeadersBtn": "添加自定义请求头",
+    "customHeadersBtnTitle": "为规范抓取附加一次性请求头（保存在已导入的文件夹中，供重新导入时使用）",
+    "customHeadersDone": "完成",
+    "customHeadersHint": "请求头会保存在已导入的文件夹中，以便日后从源刷新时重放。对于会轮换令牌的登录流程，请改用上方的认证路由附加。",
+    "customHeadersTitle": "自定义请求头",
+    "detachAuth": "分离认证路由",
+    "dropZone": "拖放区",
+    "editAuth": "编辑认证路由",
+    "error": {
+      "unknown": "发生未知错误"
     },
     "formats": {
       "swagger": {
@@ -1136,15 +1148,24 @@
     },
     "loading": "正在分析...",
     "noResults": "未找到请求",
-    "error": {
-      "unknown": "发生未知错误"
-    },
     "ok": "导入",
-    "cancel": "取消",
-    "dropZone": "拖放区",
-    "addAuth": "添加认证路由",
-    "detachAuth": "分离认证路由",
-    "editAuth": "编辑认证路由"
+    "okN": "{{action}} ({{count}})",
+    "preview": {
+      "noDocumentation": "此来源没有可解析的文档。"
+    },
+    "refreshTitle": "从源刷新",
+    "searchPlaceholder": "筛选路由 / 文件夹…",
+    "selectAll": "全选",
+    "selectNone": "全不选",
+    "source": {
+      "label": "在此粘贴内容！",
+      "placeholder": "输入文件路径、URL，或粘贴 curl/PowerShell 命令..."
+    },
+    "tabs": {
+      "routes": "路由",
+      "documentation": "文档"
+    },
+    "title": "导入请求"
   },
   "emptyBench": {
     "importCard": {

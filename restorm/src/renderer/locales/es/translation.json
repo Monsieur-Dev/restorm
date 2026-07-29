@@ -1008,10 +1008,22 @@
     "requestFormat.powershell": "PowerShell (Invoke-RestMethod)"
   },
   "import": {
-    "title": "Importar peticiones",
-    "source": {
-      "label": "¡Pega algo aquí!",
-      "placeholder": "Introduce la ruta del archivo, la URL o pega un comando curl/PowerShell..."
+    "addAuth": "Agregar una ruta de autenticación",
+    "applyFailedTitle": "Error al actualizar desde el origen",
+    "applyUpdate": "Aplicar actualización",
+    "authenticatedVia": "Autenticado mediante {{name}}",
+    "cancel": "Cancelar",
+    "customHeadersAdd": "Añadir cabecera",
+    "customHeadersBtn": "Añadir cabeceras personalizadas",
+    "customHeadersBtnTitle": "Adjuntar cabeceras puntuales a la descarga de la especificación (se guardan en la carpeta importada para reimportaciones)",
+    "customHeadersDone": "Listo",
+    "customHeadersHint": "Las cabeceras se guardan en la carpeta importada para que una futura actualización desde el origen las repita. Para flujos de inicio de sesión con rotación de tokens, use la ruta de autenticación de arriba.",
+    "customHeadersTitle": "Cabeceras personalizadas",
+    "detachAuth": "Desconectar ruta de autenticación",
+    "dropZone": "Zona de arrastre",
+    "editAuth": "Editar ruta de autenticación",
+    "error": {
+      "unknown": "Se ha producido un error desconocido"
     },
     "formats": {
       "swagger": {
@@ -1137,15 +1149,24 @@
     },
     "loading": "Analizando...",
     "noResults": "No se han encontrado peticiones",
-    "error": {
-      "unknown": "Se ha producido un error desconocido"
-    },
     "ok": "Importar",
-    "cancel": "Cancelar",
-    "dropZone": "Zona de arrastre",
-    "addAuth": "Agregar una ruta de autenticación",
-    "detachAuth": "Desconectar ruta de autenticación",
-    "editAuth": "Editar ruta de autenticación"
+    "okN": "{{action}} ({{count}})",
+    "preview": {
+      "noDocumentation": "No hay documentación analizada para esta fuente."
+    },
+    "refreshTitle": "Actualizar desde el origen",
+    "searchPlaceholder": "Filtrar rutas / carpetas…",
+    "selectAll": "Seleccionar todo",
+    "selectNone": "No seleccionar nada",
+    "source": {
+      "label": "¡Pega algo aquí!",
+      "placeholder": "Introduce la ruta del archivo, la URL o pega un comando curl/PowerShell..."
+    },
+    "tabs": {
+      "routes": "Rutas",
+      "documentation": "Documentación"
+    },
+    "title": "Importar peticiones"
   },
   "emptyBench": {
     "importCard": {

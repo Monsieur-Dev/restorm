@@ -1008,10 +1008,22 @@
     "requestFormat.powershell": "PowerShell (Invoke-RestMethod)"
   },
   "import": {
-    "title": "Importer des requêtes",
-    "source": {
-      "label": "Collez quelque chose ici !",
-      "placeholder": "Saisir le chemin du fichier, l'URL, ou coller une commande curl/PowerShell..."
+    "addAuth": "Ajouter une route d'authentification",
+    "applyFailedTitle": "Échec de l'actualisation depuis la source",
+    "applyUpdate": "Appliquer la mise à jour",
+    "authenticatedVia": "Authentifié via {{name}}",
+    "cancel": "Annuler",
+    "customHeadersAdd": "Ajouter un header",
+    "customHeadersBtn": "Ajouter des headers personnalisés",
+    "customHeadersBtnTitle": "Joindre des headers ponctuels à la récupération de la spécification (enregistrés sur le dossier importé pour les réimports)",
+    "customHeadersDone": "Terminé",
+    "customHeadersHint": "Les headers sont enregistrés sur le dossier importé afin qu'une future actualisation depuis la source les rejoue. Pour les flux de connexion avec rotation de jeton, utilisez plutôt la route d'authentification ci-dessus.",
+    "customHeadersTitle": "Headers personnalisés",
+    "detachAuth": "Détacher la route d'authentification",
+    "dropZone": "Drop zone",
+    "editAuth": "Modifier la route d'authentification",
+    "error": {
+      "unknown": "Une erreur inconnue s'est produite"
     },
     "formats": {
       "swagger": {
@@ -1137,15 +1149,24 @@
     },
     "loading": "Analyse en cours...",
     "noResults": "Aucune requête trouvée",
-    "error": {
-      "unknown": "Une erreur inconnue s'est produite"
-    },
     "ok": "Importer",
-    "cancel": "Annuler",
-    "dropZone": "Drop zone",
-    "addAuth": "Ajouter une route d'authentification",
-    "detachAuth": "Détacher la route d'authentification",
-    "editAuth": "Modifier la route d'authentification"
+    "okN": "{{action}} ({{count}})",
+    "preview": {
+      "noDocumentation": "Aucune documentation analysée pour cette source."
+    },
+    "refreshTitle": "Actualiser depuis la source",
+    "searchPlaceholder": "Filtrer les routes / dossiers…",
+    "selectAll": "Tout sélectionner",
+    "selectNone": "Tout désélectionner",
+    "source": {
+      "label": "Collez quelque chose ici !",
+      "placeholder": "Saisir le chemin du fichier, l'URL, ou coller une commande curl/PowerShell..."
+    },
+    "tabs": {
+      "routes": "Routes",
+      "documentation": "Documentation"
+    },
+    "title": "Importer des requêtes"
   },
   "emptyBench": {
     "importCard": {

@@ -1008,10 +1008,22 @@
     "requestFormat.powershell": "PowerShell (Invoke-RestMethod)"
   },
   "import": {
-    "title": "Kérések importálása",
-    "source": {
-      "label": "Illesszen be valamit ide!",
-      "placeholder": "Adja meg a fájl elérési útját, URL-t, vagy illesszen be egy curl/PowerShell parancsot..."
+    "addAuth": "Hitelesítési útvonal hozzáadása",
+    "applyFailedTitle": "A forrásból való frissítés sikertelen",
+    "applyUpdate": "Frissítés alkalmazása",
+    "authenticatedVia": "Hitelesítve ezzel: {{name}}",
+    "cancel": "Mégse",
+    "customHeadersAdd": "Fejléc hozzáadása",
+    "customHeadersBtn": "Egyéni fejlécek hozzáadása",
+    "customHeadersBtnTitle": "Egyszeri fejlécek csatolása a specifikáció letöltéséhez (az importált mappára mentve az újraimportáláshoz)",
+    "customHeadersDone": "Kész",
+    "customHeadersHint": "A fejlécek az importált mappára mentődnek, így egy későbbi, forrásból történő frissítés újra elküldi őket. Tokenrotációval működő bejelentkezéshez inkább a fenti hitelesítési útvonalat használja.",
+    "customHeadersTitle": "Egyéni fejlécek",
+    "detachAuth": "Hitelesítési útvonal leválasztása",
+    "dropZone": "Bedobási terület",
+    "editAuth": "Hitelesítési útvonal szerkesztése",
+    "error": {
+      "unknown": "Ismeretlen hiba történt"
     },
     "formats": {
       "swagger": {
@@ -1137,15 +1149,24 @@
     },
     "loading": "Elemzés...",
     "noResults": "Nem található kérés",
-    "error": {
-      "unknown": "Ismeretlen hiba történt"
-    },
     "ok": "Importálás",
-    "cancel": "Mégse",
-    "dropZone": "Bedobási terület",
-    "addAuth": "Hitelesítési útvonal hozzáadása",
-    "detachAuth": "Hitelesítési útvonal leválasztása",
-    "editAuth": "Hitelesítési útvonal szerkesztése"
+    "okN": "{{action}} ({{count}})",
+    "preview": {
+      "noDocumentation": "Ehhez a forráshoz nincs elemzett dokumentáció."
+    },
+    "refreshTitle": "Frissítés a forrásból",
+    "searchPlaceholder": "Útvonalak / mappák szűrése…",
+    "selectAll": "Összes kijelölése",
+    "selectNone": "Kijelölés törlése",
+    "source": {
+      "label": "Illesszen be valamit ide!",
+      "placeholder": "Adja meg a fájl elérési útját, URL-t, vagy illesszen be egy curl/PowerShell parancsot..."
+    },
+    "tabs": {
+      "routes": "Útvonalak",
+      "documentation": "Dokumentáció"
+    },
+    "title": "Kérések importálása"
   },
   "emptyBench": {
     "importCard": {

@@ -1008,10 +1008,22 @@
     "requestFormat.powershell": "PowerShell (Invoke-RestMethod)"
   },
   "import": {
-    "title": "Importera förfrågningar",
-    "source": {
-      "label": "Klistra in något här!",
-      "placeholder": "Ange filsökväg, URL, eller klistra in ett curl/PowerShell-kommando..."
+    "addAuth": "Lägg till en autentiseringsrutt",
+    "applyFailedTitle": "Uppdatering från källa misslyckades",
+    "applyUpdate": "Tillämpa uppdatering",
+    "authenticatedVia": "Autentiserad via {{name}}",
+    "cancel": "Avbryt",
+    "customHeadersAdd": "Lägg till header",
+    "customHeadersBtn": "Lägg till anpassade headers",
+    "customHeadersBtnTitle": "Bifoga engångsheaders till hämtningen av specifikationen (sparas på den importerade mappen för omimporter)",
+    "customHeadersDone": "Klar",
+    "customHeadersHint": "Headers sparas på den importerade mappen så att en framtida uppdatering från källan skickar dem igen. För inloggningsflöden med tokenrotation använder du hellre autentiseringsrutten ovan.",
+    "customHeadersTitle": "Anpassade headers",
+    "detachAuth": "Koppla bort autentiseringsrutt",
+    "dropZone": "Släppzon",
+    "editAuth": "Redigera autentiseringsrutt",
+    "error": {
+      "unknown": "Ett okänt fel inträffade"
     },
     "formats": {
       "swagger": {
@@ -1137,15 +1149,24 @@
     },
     "loading": "Analyserar...",
     "noResults": "Inga förfrågningar hittades",
-    "error": {
-      "unknown": "Ett okänt fel inträffade"
-    },
     "ok": "Importera",
-    "cancel": "Avbryt",
-    "dropZone": "Släppzon",
-    "addAuth": "Lägg till en autentiseringsrutt",
-    "detachAuth": "Koppla bort autentiseringsrutt",
-    "editAuth": "Redigera autentiseringsrutt"
+    "okN": "{{action}} ({{count}})",
+    "preview": {
+      "noDocumentation": "Ingen analyserad dokumentation för denna källa."
+    },
+    "refreshTitle": "Uppdatera från källa",
+    "searchPlaceholder": "Filtrera rutter / mappar…",
+    "selectAll": "Välj alla",
+    "selectNone": "Välj inga",
+    "source": {
+      "label": "Klistra in något här!",
+      "placeholder": "Ange filsökväg, URL, eller klistra in ett curl/PowerShell-kommando..."
+    },
+    "tabs": {
+      "routes": "Rutter",
+      "documentation": "Dokumentation"
+    },
+    "title": "Importera förfrågningar"
   },
   "emptyBench": {
     "importCard": {

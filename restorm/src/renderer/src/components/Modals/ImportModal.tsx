@@ -11,6 +11,7 @@ import {
   Tabs,
   Wordmark,
   getContrastColor,
+  toasterService,
   type Tab,
   type KeyValueTableHandle,
   type KeyValueTableRow
@@ -22,6 +23,7 @@ import type { ApiDocumentation } from '../../../../shared/types/apiDocumentation
 import type { AuthenticationRequest } from '../../../../shared/models'
 import { logger } from 'electron-core-ui/renderer'
 import { AuthenticationSetupModal } from './AuthenticationSetupModal'
+import { HeaderHoverTooltip } from '../MainView/HeaderHoverTooltip'
 import { DocumentationHost } from '../documentation/DocumentationHost'
 import { ImportFormatShowcase } from './ImportFormatShowcase'
 import { GrpcReflectionImportModal } from './GrpcReflectionImportModal'
@@ -488,10 +490,24 @@ export function ImportModal({
           await api?.setSettings(refreshContext.targetFolderId, { sourceHeaders: refreshHeadersRecord })
           const result = await api?.apply(refreshContext.targetFolderId, { include, skip })
           refreshContext.onApplied(result?.updatedFolder)
-        } catch (err) {
-          logger.error('[ImportModal] apiUpdate.apply failed', { error: err instanceof Error ? err.message : String(err) })
-        } finally {
           onClose()
+        } catch (err) {
+          // A rejected apply must stay visible. Closing the modal on a
+          // bare `logger.error` made every failure look like a no-op:
+          // the dialog vanished, nothing was refreshed, and the user
+          // got no reason. Report on both surfaces — the in-modal
+          // error row, which keeps the message attached to the action
+          // that produced it, and a toast that outlives the dialog if
+          // the user dismisses it.
+          const message = err instanceof Error ? err.message : String(err)
+          logger.error('[ImportModal] apiUpdate.apply failed', { error: message })
+          setError(message)
+          toasterService.push('app', {
+            title: t('import.applyFailedTitle', 'Refresh from source failed'),
+            body: message,
+            durationMs: 10000,
+            ariaLive: 'assertive'
+          })
         }
       })()
       return
@@ -627,7 +643,7 @@ export function ImportModal({
 
     // Close modal (useEffect will clear state when modal closes)
     onClose()
-  }, [previewItems, previewChecksum, previewFormat, previewExtraHeaders, selection, input, onImport, onClose, attachedAuth, manualHeaders, refreshContext])
+  }, [previewItems, previewChecksum, previewFormat, previewExtraHeaders, selection, input, onImport, onClose, attachedAuth, manualHeaders, refreshContext, t])
 
   // Refresh-from-source bootstrap. When `refreshContext` is provided
   // we pre-fill the URL display + the auth pill from the env folder's
@@ -900,21 +916,28 @@ export function ImportModal({
                 {t('import.addAuth', 'Add an authentication route')}
               </Button>
             )}
-            <Button
-              onClick={() => { setCustomHeadersOpen(true) }}
-              options={{
-                ariaLabel: t('import.customHeadersBtn', 'Add custom headers'),
-                title: t('import.customHeadersBtnTitle', 'Attach one-shot headers to the spec fetch (saved on the imported folder for re-imports)')
-              }}
-              data-testid="import-custom-headers-button"
+            {/* Hover label goes through the ECUI Tooltip, not the
+                native `title` attribute — `ariaLabel` stays for the
+                accessible name. */}
+            <HeaderHoverTooltip
+              label={t('import.customHeadersBtnTitle', 'Attach one-shot headers to the spec fetch (saved on the imported folder for re-imports)')}
+              data-testid="import-custom-headers-tooltip"
             >
-              {t('import.customHeadersBtn', 'Add custom headers')}
-              {manualHeaders.filter((row) => row.enabled && row.key.trim().length > 0).length > 0 && (
-                <span className="import-custom-headers__count" style={{ marginLeft: 6 }} aria-hidden="true">
-                  {manualHeaders.filter((row) => row.enabled && row.key.trim().length > 0).length}
-                </span>
-              )}
-            </Button>
+              <Button
+                onClick={() => { setCustomHeadersOpen(true) }}
+                options={{
+                  ariaLabel: t('import.customHeadersBtn', 'Add custom headers')
+                }}
+                data-testid="import-custom-headers-button"
+              >
+                {t('import.customHeadersBtn', 'Add custom headers')}
+                {manualHeaders.filter((row) => row.enabled && row.key.trim().length > 0).length > 0 && (
+                  <span className="import-custom-headers__count" style={{ marginLeft: 6 }} aria-hidden="true">
+                    {manualHeaders.filter((row) => row.enabled && row.key.trim().length > 0).length}
+                  </span>
+                )}
+              </Button>
+            </HeaderHoverTooltip>
             {/* gRPC reflection import: a live host:port connection rather than a
                 paste/file/URL source, so it opens its own connect form. */}
             <Button
@@ -1098,7 +1121,7 @@ export function ImportModal({
       <Modal
         isOpen={customHeadersOpen}
         onClose={() => { setCustomHeadersOpen(false) }}
-        title={t('import.customHeadersBtn', 'Custom headers')}
+        title={t('import.customHeadersTitle', 'Custom headers')}
         data-testid="import-custom-headers-modal"
         size="dialog"
       >

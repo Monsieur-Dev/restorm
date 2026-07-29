@@ -1007,10 +1007,22 @@
     "requestFormat.powershell": "PowerShell（Invoke-RestMethod）"
   },
   "import": {
-    "title": "匯入請求",
-    "source": {
-      "label": "把內容貼到這裡！",
-      "placeholder": "輸入檔案路徑、URL，或貼上 curl / PowerShell 命令..."
+    "addAuth": "新增驗證路由",
+    "applyFailedTitle": "從來源重新整理失敗",
+    "applyUpdate": "套用更新",
+    "authenticatedVia": "透過 {{name}} 驗證",
+    "cancel": "取消",
+    "customHeadersAdd": "新增標頭",
+    "customHeadersBtn": "新增自訂標頭",
+    "customHeadersBtnTitle": "為規格擷取附加一次性標頭（儲存在已匯入的資料夾中，供重新匯入時使用）",
+    "customHeadersDone": "完成",
+    "customHeadersHint": "標頭會儲存在已匯入的資料夾中，以便日後從來源重新整理時重送。若登入流程會輪替權杖，請改用上方的驗證路由附加。",
+    "customHeadersTitle": "自訂標頭",
+    "detachAuth": "分離驗證路由",
+    "dropZone": "拖放區",
+    "editAuth": "編輯驗證路由",
+    "error": {
+      "unknown": "發生未知的錯誤"
     },
     "formats": {
       "swagger": {
@@ -1136,15 +1148,24 @@
     },
     "loading": "正在分析...",
     "noResults": "找不到請求",
-    "error": {
-      "unknown": "發生未知的錯誤"
-    },
     "ok": "匯入",
-    "cancel": "取消",
-    "dropZone": "拖放區",
-    "addAuth": "新增驗證路由",
-    "detachAuth": "分離驗證路由",
-    "editAuth": "編輯驗證路由"
+    "okN": "{{action}} ({{count}})",
+    "preview": {
+      "noDocumentation": "此來源沒有可解析的文件。"
+    },
+    "refreshTitle": "從來源重新整理",
+    "searchPlaceholder": "篩選路由 / 資料夾…",
+    "selectAll": "全選",
+    "selectNone": "全不選",
+    "source": {
+      "label": "把內容貼到這裡！",
+      "placeholder": "輸入檔案路徑、URL，或貼上 curl / PowerShell 命令..."
+    },
+    "tabs": {
+      "routes": "路由",
+      "documentation": "文件"
+    },
+    "title": "匯入請求"
   },
   "emptyBench": {
     "importCard": {

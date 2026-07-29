@@ -1008,10 +1008,22 @@
     "requestFormat.powershell": "PowerShell (Invoke-RestMethod)"
   },
   "import": {
-    "title": "Importa richieste",
-    "source": {
-      "label": "Incolla qualcosa qui!",
-      "placeholder": "Inserisci il percorso del file, l'URL, o incolla un comando curl/PowerShell..."
+    "addAuth": "Aggiungi una route di autenticazione",
+    "applyFailedTitle": "Aggiornamento dalla sorgente non riuscito",
+    "applyUpdate": "Applica aggiornamento",
+    "authenticatedVia": "Autenticato tramite {{name}}",
+    "cancel": "Annulla",
+    "customHeadersAdd": "Aggiungi header",
+    "customHeadersBtn": "Aggiungi header personalizzati",
+    "customHeadersBtnTitle": "Allega header una tantum al recupero della specifica (salvati sulla cartella importata per le reimportazioni)",
+    "customHeadersDone": "Fatto",
+    "customHeadersHint": "Gli header vengono salvati sulla cartella importata, così un futuro aggiornamento dalla sorgente li ripete. Per i flussi di login con rotazione dei token, usa invece la route di autenticazione sopra.",
+    "customHeadersTitle": "Header personalizzati",
+    "detachAuth": "Scollega route di autenticazione",
+    "dropZone": "Area di rilascio",
+    "editAuth": "Modifica route di autenticazione",
+    "error": {
+      "unknown": "Si è verificato un errore sconosciuto"
     },
     "formats": {
       "swagger": {
@@ -1137,15 +1149,24 @@
     },
     "loading": "Analisi in corso...",
     "noResults": "Nessuna richiesta trovata",
-    "error": {
-      "unknown": "Si è verificato un errore sconosciuto"
-    },
     "ok": "Importa",
-    "cancel": "Annulla",
-    "dropZone": "Area di rilascio",
-    "addAuth": "Aggiungi una route di autenticazione",
-    "detachAuth": "Scollega route di autenticazione",
-    "editAuth": "Modifica route di autenticazione"
+    "okN": "{{action}} ({{count}})",
+    "preview": {
+      "noDocumentation": "Nessuna documentazione analizzata per questa sorgente."
+    },
+    "refreshTitle": "Aggiorna dalla sorgente",
+    "searchPlaceholder": "Filtra route / cartelle…",
+    "selectAll": "Seleziona tutto",
+    "selectNone": "Deseleziona tutto",
+    "source": {
+      "label": "Incolla qualcosa qui!",
+      "placeholder": "Inserisci il percorso del file, l'URL, o incolla un comando curl/PowerShell..."
+    },
+    "tabs": {
+      "routes": "Route",
+      "documentation": "Documentazione"
+    },
+    "title": "Importa richieste"
   },
   "emptyBench": {
     "importCard": {

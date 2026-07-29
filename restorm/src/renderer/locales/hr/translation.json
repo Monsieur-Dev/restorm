@@ -1009,10 +1009,22 @@
     "requestFormat.powershell": "PowerShell (Invoke-RestMethod)"
   },
   "import": {
-    "title": "Uvezi zahtjeve",
-    "source": {
-      "label": "Zalijepite nešto ovdje!",
-      "placeholder": "Unesite putanju datoteke, URL ili zalijepite curl/PowerShell naredbu..."
+    "addAuth": "Dodaj rutu provjere autentičnosti",
+    "applyFailedTitle": "Osvježavanje iz izvora nije uspjelo",
+    "applyUpdate": "Primijeni ažuriranje",
+    "authenticatedVia": "Autentificirano putem {{name}}",
+    "cancel": "Odustani",
+    "customHeadersAdd": "Dodaj zaglavlje",
+    "customHeadersBtn": "Dodaj prilagođena zaglavlja",
+    "customHeadersBtnTitle": "Priloži jednokratna zaglavlja dohvatu specifikacije (spremaju se u uvezenu mapu za ponovne uvoze)",
+    "customHeadersDone": "Gotovo",
+    "customHeadersHint": "Zaglavlja se spremaju u uvezenu mapu pa ih buduće osvježavanje iz izvora ponavlja. Za prijave s rotacijom tokena radije upotrijebite rutu provjere autentičnosti iznad.",
+    "customHeadersTitle": "Prilagođena zaglavlja",
+    "detachAuth": "Odvoji rutu provjere autentičnosti",
+    "dropZone": "Područje za ispuštanje",
+    "editAuth": "Uredi rutu provjere autentičnosti",
+    "error": {
+      "unknown": "Dogodila se nepoznata pogreška"
     },
     "formats": {
       "swagger": {
@@ -1138,15 +1150,24 @@
     },
     "loading": "Analiziranje...",
     "noResults": "Nije pronađen nijedan zahtjev",
-    "error": {
-      "unknown": "Dogodila se nepoznata pogreška"
-    },
     "ok": "Uvezi",
-    "cancel": "Odustani",
-    "dropZone": "Područje za ispuštanje",
-    "addAuth": "Dodaj rutu provjere autentičnosti",
-    "detachAuth": "Odvoji rutu provjere autentičnosti",
-    "editAuth": "Uredi rutu provjere autentičnosti"
+    "okN": "{{action}} ({{count}})",
+    "preview": {
+      "noDocumentation": "Za ovaj izvor nije analizirana nikakva dokumentacija."
+    },
+    "refreshTitle": "Osvježi iz izvora",
+    "searchPlaceholder": "Filtriraj rute / mape…",
+    "selectAll": "Odaberi sve",
+    "selectNone": "Poništi odabir",
+    "source": {
+      "label": "Zalijepite nešto ovdje!",
+      "placeholder": "Unesite putanju datoteke, URL ili zalijepite curl/PowerShell naredbu..."
+    },
+    "tabs": {
+      "routes": "Rute",
+      "documentation": "Dokumentacija"
+    },
+    "title": "Uvezi zahtjeve"
   },
   "emptyBench": {
     "importCard": {

@@ -1008,10 +1008,22 @@
     "requestFormat.powershell": "PowerShell (Invoke-RestMethod)"
   },
   "import": {
-    "title": "İstekleri içe aktar",
-    "source": {
-      "label": "Buraya bir şey yapıştırın!",
-      "placeholder": "Dosya yolu, URL girin veya curl/PowerShell komutu yapıştırın..."
+    "addAuth": "Kimlik doğrulama rotası ekle",
+    "applyFailedTitle": "Kaynaktan yenileme başarısız",
+    "applyUpdate": "Güncellemeyi uygula",
+    "authenticatedVia": "{{name}} ile kimlik doğrulandı",
+    "cancel": "İptal",
+    "customHeadersAdd": "Başlık ekle",
+    "customHeadersBtn": "Özel başlıklar ekle",
+    "customHeadersBtnTitle": "Spesifikasyon indirmesine tek seferlik başlıklar ekleyin (yeniden içe aktarmalar için içe aktarılan klasöre kaydedilir)",
+    "customHeadersDone": "Bitti",
+    "customHeadersHint": "Başlıklar içe aktarılan klasöre kaydedilir, böylece ileride kaynaktan yenileme bunları yeniden gönderir. Token döndürmeli oturum açma akışları için bunun yerine yukarıdaki kimlik doğrulama rotasını kullanın.",
+    "customHeadersTitle": "Özel başlıklar",
+    "detachAuth": "Kimlik doğrulama rotasını ayır",
+    "dropZone": "Bırakma alanı",
+    "editAuth": "Kimlik doğrulama rotasını düzenle",
+    "error": {
+      "unknown": "Bilinmeyen bir hata oluştu"
     },
     "formats": {
       "swagger": {
@@ -1137,15 +1149,24 @@
     },
     "loading": "Analiz ediliyor...",
     "noResults": "İstek bulunamadı",
-    "error": {
-      "unknown": "Bilinmeyen bir hata oluştu"
-    },
     "ok": "İçe aktar",
-    "cancel": "İptal",
-    "dropZone": "Bırakma alanı",
-    "addAuth": "Kimlik doğrulama rotası ekle",
-    "detachAuth": "Kimlik doğrulama rotasını ayır",
-    "editAuth": "Kimlik doğrulama rotasını düzenle"
+    "okN": "{{action}} ({{count}})",
+    "preview": {
+      "noDocumentation": "Bu kaynak için ayrıştırılmış belge yok."
+    },
+    "refreshTitle": "Kaynaktan yenile",
+    "searchPlaceholder": "Rotaları / klasörleri filtrele…",
+    "selectAll": "Tümünü seç",
+    "selectNone": "Hiçbirini seçme",
+    "source": {
+      "label": "Buraya bir şey yapıştırın!",
+      "placeholder": "Dosya yolu, URL girin veya curl/PowerShell komutu yapıştırın..."
+    },
+    "tabs": {
+      "routes": "Rotalar",
+      "documentation": "Belgeler"
+    },
+    "title": "İstekleri içe aktar"
   },
   "emptyBench": {
     "importCard": {

@@ -1008,10 +1008,22 @@
     "requestFormat.powershell": "PowerShell (Invoke-RestMethod)"
   },
   "import": {
-    "title": "Import Requests",
-    "source": {
-      "label": "Paste something in there!",
-      "placeholder": "Enter file path, URL, or paste curl/PowerShell command..."
+    "addAuth": "Add an authentication route",
+    "applyFailedTitle": "Refresh from source failed",
+    "applyUpdate": "Apply update",
+    "authenticatedVia": "Authenticated via {{name}}",
+    "cancel": "Cancel",
+    "customHeadersAdd": "Add header",
+    "customHeadersBtn": "Add custom headers",
+    "customHeadersBtnTitle": "Attach one-shot headers to the spec fetch (saved on the imported folder for re-imports)",
+    "customHeadersDone": "Done",
+    "customHeadersHint": "Headers are stored on the imported folder so a future Refresh-from-source replays them. For login flows with token rotation, use the Auth-route attach above instead.",
+    "customHeadersTitle": "Custom headers",
+    "detachAuth": "Detach authentication route",
+    "dropZone": "Drop zone",
+    "editAuth": "Edit authentication route",
+    "error": {
+      "unknown": "An unknown error occurred"
     },
     "formats": {
       "swagger": {
@@ -1137,15 +1149,24 @@
     },
     "loading": "Analyzing...",
     "noResults": "No requests found",
-    "error": {
-      "unknown": "An unknown error occurred"
-    },
     "ok": "Import",
-    "cancel": "Cancel",
-    "dropZone": "Drop zone",
-    "addAuth": "Add an authentication route",
-    "detachAuth": "Detach authentication route",
-    "editAuth": "Edit authentication route"
+    "okN": "{{action}} ({{count}})",
+    "preview": {
+      "noDocumentation": "No parsed documentation for this source."
+    },
+    "refreshTitle": "Refresh from source",
+    "searchPlaceholder": "Filter routes / folders…",
+    "selectAll": "Select all",
+    "selectNone": "Select none",
+    "source": {
+      "label": "Paste something in there!",
+      "placeholder": "Enter file path, URL, or paste curl/PowerShell command..."
+    },
+    "tabs": {
+      "routes": "Routes",
+      "documentation": "Documentation"
+    },
+    "title": "Import Requests"
   },
   "emptyBench": {
     "importCard": {

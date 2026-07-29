@@ -1009,10 +1009,22 @@
     "requestFormat.powershell": "PowerShell (Invoke-RestMethod)"
   },
   "import": {
-    "title": "Importă cereri",
-    "source": {
-      "label": "Lipiți ceva aici!",
-      "placeholder": "Introduceți calea fișierului, URL-ul sau lipiți o comandă curl/PowerShell..."
+    "addAuth": "Adaugă o rută de autentificare",
+    "applyFailedTitle": "Reîmprospătarea din sursă a eșuat",
+    "applyUpdate": "Aplică actualizarea",
+    "authenticatedVia": "Autentificat prin {{name}}",
+    "cancel": "Anulează",
+    "customHeadersAdd": "Adaugă antet",
+    "customHeadersBtn": "Adaugă anteturi personalizate",
+    "customHeadersBtnTitle": "Atașează anteturi punctuale la descărcarea specificației (salvate pe folderul importat pentru reimporturi)",
+    "customHeadersDone": "Gata",
+    "customHeadersHint": "Anteturile sunt salvate pe folderul importat, astfel încât o reîmprospătare viitoare din sursă să le retrimită. Pentru fluxuri de autentificare cu rotația tokenurilor, folosiți mai degrabă ruta de autentificare de mai sus.",
+    "customHeadersTitle": "Anteturi personalizate",
+    "detachAuth": "Dezatașează ruta de autentificare",
+    "dropZone": "Zonă de plasare",
+    "editAuth": "Editează ruta de autentificare",
+    "error": {
+      "unknown": "A apărut o eroare necunoscută"
     },
     "formats": {
       "swagger": {
@@ -1138,15 +1150,24 @@
     },
     "loading": "Se analizează...",
     "noResults": "Nicio cerere găsită",
-    "error": {
-      "unknown": "A apărut o eroare necunoscută"
-    },
     "ok": "Importă",
-    "cancel": "Anulează",
-    "dropZone": "Zonă de plasare",
-    "addAuth": "Adaugă o rută de autentificare",
-    "detachAuth": "Dezatașează ruta de autentificare",
-    "editAuth": "Editează ruta de autentificare"
+    "okN": "{{action}} ({{count}})",
+    "preview": {
+      "noDocumentation": "Nu există documentație analizată pentru această sursă."
+    },
+    "refreshTitle": "Reîmprospătare din sursă",
+    "searchPlaceholder": "Filtrează rute / foldere…",
+    "selectAll": "Selectează tot",
+    "selectNone": "Deselectează tot",
+    "source": {
+      "label": "Lipiți ceva aici!",
+      "placeholder": "Introduceți calea fișierului, URL-ul sau lipiți o comandă curl/PowerShell..."
+    },
+    "tabs": {
+      "routes": "Rute",
+      "documentation": "Documentație"
+    },
+    "title": "Importă cereri"
   },
   "emptyBench": {
     "importCard": {

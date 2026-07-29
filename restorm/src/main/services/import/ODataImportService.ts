@@ -729,7 +729,7 @@ function edmFormatHint(type: string): string | undefined {
  * OData adapter, but we re-sniff here so the service is usable
  * stand-alone (unit tests, direct callers) without that gate.
  */
-function parseODataMetadata(content: string): EdmSchema {
+export function parseODataMetadata(content: string): EdmSchema {
   const trimmed = content.trim()
   if (trimmed.startsWith('{')) {
     let json: unknown

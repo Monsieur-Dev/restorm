@@ -1008,10 +1008,22 @@
     "requestFormat.powershell": "PowerShell (Invoke-RestMethod)"
   },
   "import": {
-    "title": "Importo kërkesa",
-    "source": {
-      "label": "Ngjit diçka këtu!",
-      "placeholder": "Fut shtegun e skedarit, URL-në ose ngjit një komandë curl/PowerShell..."
+    "addAuth": "Shto një rrugë vërtetimi",
+    "applyFailedTitle": "Rifreskimi nga burimi dështoi",
+    "applyUpdate": "Zbato përditësimin",
+    "authenticatedVia": "I vërtetuar përmes {{name}}",
+    "cancel": "Anulo",
+    "customHeadersAdd": "Shto kokë",
+    "customHeadersBtn": "Shto kokë të personalizuara",
+    "customHeadersBtnTitle": "Bashkëngjit kokë njëpërdorimshe në marrjen e specifikimit (ruhen te dosja e importuar për riimportime)",
+    "customHeadersDone": "U krye",
+    "customHeadersHint": "Kokët ruhen te dosja e importuar, kështu që një rifreskim i ardhshëm nga burimi i përsërit. Për rrjedha hyrjeje me rrotullim tokenash, përdorni më mirë rrugën e vërtetimit më sipër.",
+    "customHeadersTitle": "Kokë të personalizuara",
+    "detachAuth": "Shkëput rrugën e vërtetimit",
+    "dropZone": "Zona e lëshimit",
+    "editAuth": "Ndrysho rrugën e vërtetimit",
+    "error": {
+      "unknown": "Ndodhi një gabim i panjohur"
     },
     "formats": {
       "swagger": {
@@ -1137,15 +1149,24 @@
     },
     "loading": "Po analizohet...",
     "noResults": "Nuk u gjet asnjë kërkesë",
-    "error": {
-      "unknown": "Ndodhi një gabim i panjohur"
-    },
     "ok": "Importo",
-    "cancel": "Anulo",
-    "dropZone": "Zona e lëshimit",
-    "addAuth": "Shto një rrugë vërtetimi",
-    "detachAuth": "Shkëput rrugën e vërtetimit",
-    "editAuth": "Ndrysho rrugën e vërtetimit"
+    "okN": "{{action}} ({{count}})",
+    "preview": {
+      "noDocumentation": "Asnjë dokumentacion i analizuar për këtë burim."
+    },
+    "refreshTitle": "Rifresko nga burimi",
+    "searchPlaceholder": "Filtro rrugët / dosjet…",
+    "selectAll": "Zgjidh të gjitha",
+    "selectNone": "Hiq të gjitha",
+    "source": {
+      "label": "Ngjit diçka këtu!",
+      "placeholder": "Fut shtegun e skedarit, URL-në ose ngjit një komandë curl/PowerShell..."
+    },
+    "tabs": {
+      "routes": "Rrugët",
+      "documentation": "Dokumentim"
+    },
+    "title": "Importo kërkesa"
   },
   "emptyBench": {
     "importCard": {

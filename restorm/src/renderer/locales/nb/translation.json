@@ -1008,10 +1008,22 @@
     "requestFormat.powershell": "PowerShell (Invoke-RestMethod)"
   },
   "import": {
-    "title": "Importer forespørsler",
-    "source": {
-      "label": "Lim inn noe her!",
-      "placeholder": "Skriv inn filsti, URL, eller lim inn curl/PowerShell-kommando..."
+    "addAuth": "Legg til en autentiseringsrute",
+    "applyFailedTitle": "Oppdatering fra kilde mislyktes",
+    "applyUpdate": "Bruk oppdatering",
+    "authenticatedVia": "Autentisert via {{name}}",
+    "cancel": "Avbryt",
+    "customHeadersAdd": "Legg til header",
+    "customHeadersBtn": "Legg til egendefinerte headere",
+    "customHeadersBtnTitle": "Legg engangs-headere til hentingen av spesifikasjonen (lagres på den importerte mappen for nye importer)",
+    "customHeadersDone": "Ferdig",
+    "customHeadersHint": "Headere lagres på den importerte mappen, slik at en senere oppdatering fra kilden gjentar dem. For innloggingsflyter med tokenrotasjon bør du heller bruke autentiseringsruten over.",
+    "customHeadersTitle": "Egendefinerte headere",
+    "detachAuth": "Koble fra autentiseringsrute",
+    "dropZone": "Slippsone",
+    "editAuth": "Rediger autentiseringsrute",
+    "error": {
+      "unknown": "En ukjent feil oppstod"
     },
     "formats": {
       "swagger": {
@@ -1137,15 +1149,24 @@
     },
     "loading": "Analyserer...",
     "noResults": "Ingen forespørsler funnet",
-    "error": {
-      "unknown": "En ukjent feil oppstod"
-    },
     "ok": "Importer",
-    "cancel": "Avbryt",
-    "dropZone": "Slippsone",
-    "addAuth": "Legg til en autentiseringsrute",
-    "detachAuth": "Koble fra autentiseringsrute",
-    "editAuth": "Rediger autentiseringsrute"
+    "okN": "{{action}} ({{count}})",
+    "preview": {
+      "noDocumentation": "Ingen parset dokumentasjon for denne kilden."
+    },
+    "refreshTitle": "Oppdater fra kilde",
+    "searchPlaceholder": "Filtrer ruter / mapper…",
+    "selectAll": "Velg alle",
+    "selectNone": "Velg ingen",
+    "source": {
+      "label": "Lim inn noe her!",
+      "placeholder": "Skriv inn filsti, URL, eller lim inn curl/PowerShell-kommando..."
+    },
+    "tabs": {
+      "routes": "Ruter",
+      "documentation": "Dokumentasjon"
+    },
+    "title": "Importer forespørsler"
   },
   "emptyBench": {
     "importCard": {

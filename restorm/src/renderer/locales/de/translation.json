@@ -1008,10 +1008,22 @@
     "requestFormat.powershell": "PowerShell (Invoke-RestMethod)"
   },
   "import": {
-    "title": "Anfragen importieren",
-    "source": {
-      "label": "Fügen Sie hier etwas ein!",
-      "placeholder": "Dateipfad, URL oder curl/PowerShell-Befehl eingeben..."
+    "addAuth": "Authentifizierungsroute hinzufügen",
+    "applyFailedTitle": "Aktualisierung aus der Quelle fehlgeschlagen",
+    "applyUpdate": "Aktualisierung anwenden",
+    "authenticatedVia": "Authentifiziert über {{name}}",
+    "cancel": "Abbrechen",
+    "customHeadersAdd": "Header hinzufügen",
+    "customHeadersBtn": "Benutzerdefinierte Header hinzufügen",
+    "customHeadersBtnTitle": "Einmalige Header an den Spezifikations-Abruf anhängen (werden für erneute Importe im importierten Ordner gespeichert)",
+    "customHeadersDone": "Fertig",
+    "customHeadersHint": "Header werden im importierten Ordner gespeichert, damit eine spätere Aktualisierung aus der Quelle sie erneut sendet. Für Anmeldeabläufe mit Token-Rotation verwenden Sie stattdessen die Authentifizierungsroute oben.",
+    "customHeadersTitle": "Benutzerdefinierte Header",
+    "detachAuth": "Authentifizierungsroute trennen",
+    "dropZone": "Ablagezone",
+    "editAuth": "Authentifizierungsroute bearbeiten",
+    "error": {
+      "unknown": "Ein unbekannter Fehler ist aufgetreten"
     },
     "formats": {
       "swagger": {
@@ -1137,15 +1149,24 @@
     },
     "loading": "Analyse läuft...",
     "noResults": "Keine Anfragen gefunden",
-    "error": {
-      "unknown": "Ein unbekannter Fehler ist aufgetreten"
-    },
     "ok": "Importieren",
-    "cancel": "Abbrechen",
-    "dropZone": "Ablagezone",
-    "addAuth": "Authentifizierungsroute hinzufügen",
-    "detachAuth": "Authentifizierungsroute trennen",
-    "editAuth": "Authentifizierungsroute bearbeiten"
+    "okN": "{{action}} ({{count}})",
+    "preview": {
+      "noDocumentation": "Für diese Quelle wurde keine Dokumentation analysiert."
+    },
+    "refreshTitle": "Aus Quelle aktualisieren",
+    "searchPlaceholder": "Routen / Ordner filtern…",
+    "selectAll": "Alle auswählen",
+    "selectNone": "Nichts auswählen",
+    "source": {
+      "label": "Fügen Sie hier etwas ein!",
+      "placeholder": "Dateipfad, URL oder curl/PowerShell-Befehl eingeben..."
+    },
+    "tabs": {
+      "routes": "Routen",
+      "documentation": "Dokumentation"
+    },
+    "title": "Anfragen importieren"
   },
   "emptyBench": {
     "importCard": {

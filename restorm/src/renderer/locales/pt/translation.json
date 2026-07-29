@@ -1008,10 +1008,22 @@
     "requestFormat.powershell": "PowerShell (Invoke-RestMethod)"
   },
   "import": {
-    "title": "Importar pedidos",
-    "source": {
-      "label": "Cole aqui qualquer coisa!",
-      "placeholder": "Introduza o caminho do ficheiro, URL ou cole um comando curl/PowerShell..."
+    "addAuth": "Adicionar uma rota de autenticação",
+    "applyFailedTitle": "Falha ao atualizar a partir da origem",
+    "applyUpdate": "Aplicar atualização",
+    "authenticatedVia": "Autenticado via {{name}}",
+    "cancel": "Cancelar",
+    "customHeadersAdd": "Adicionar cabeçalho",
+    "customHeadersBtn": "Adicionar cabeçalhos personalizados",
+    "customHeadersBtnTitle": "Anexar cabeçalhos pontuais à obtenção da especificação (guardados na pasta importada para reimportações)",
+    "customHeadersDone": "Concluído",
+    "customHeadersHint": "Os cabeçalhos são guardados na pasta importada para que uma futura atualização a partir da origem os repita. Para fluxos de início de sessão com rotação de tokens, use antes a rota de autenticação acima.",
+    "customHeadersTitle": "Cabeçalhos personalizados",
+    "detachAuth": "Desconectar rota de autenticação",
+    "dropZone": "Zona de largar",
+    "editAuth": "Editar rota de autenticação",
+    "error": {
+      "unknown": "Ocorreu um erro desconhecido"
     },
     "formats": {
       "swagger": {
@@ -1137,15 +1149,24 @@
     },
     "loading": "A analisar...",
     "noResults": "Nenhum pedido encontrado",
-    "error": {
-      "unknown": "Ocorreu um erro desconhecido"
-    },
     "ok": "Importar",
-    "cancel": "Cancelar",
-    "dropZone": "Zona de largar",
-    "addAuth": "Adicionar uma rota de autenticação",
-    "detachAuth": "Desconectar rota de autenticação",
-    "editAuth": "Editar rota de autenticação"
+    "okN": "{{action}} ({{count}})",
+    "preview": {
+      "noDocumentation": "Não há documentação analisada para esta fonte."
+    },
+    "refreshTitle": "Atualizar a partir da origem",
+    "searchPlaceholder": "Filtrar rotas / pastas…",
+    "selectAll": "Selecionar tudo",
+    "selectNone": "Não selecionar nada",
+    "source": {
+      "label": "Cole aqui qualquer coisa!",
+      "placeholder": "Introduza o caminho do ficheiro, URL ou cole um comando curl/PowerShell..."
+    },
+    "tabs": {
+      "routes": "Rotas",
+      "documentation": "Documentação"
+    },
+    "title": "Importar pedidos"
   },
   "emptyBench": {
     "importCard": {
