@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.1.19
+
+- Linux: AppImage giờ đây khởi động ổn định và áp dụng bản cập nhật mà không bị treo, kể cả trên các bản phân phối có sandbox được tăng cường.
+- macOS: Bản dựng cho Intel giờ đây đã có sẵn bên cạnh Apple Silicon.
+
 ## v0.1.17
 
 - Ghi chú phát hành giờ đây được hiển thị bằng ngôn ngữ của bạn.

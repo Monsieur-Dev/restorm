@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.1.19
+
+- Linux: AppImage uruchamia się teraz niezawodnie i instaluje aktualizacje bez zawieszania się, również w dystrybucjach ze wzmocnioną piaskownicą.
+- macOS: oprócz Apple Silicon dostępne są teraz również wersje dla Intela.
+
 ## v0.1.17
 
 - Informacje o wydaniu są teraz wyświetlane w Twoim języku.

@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.1.19
+
+- Linux: de AppImage start nu betrouwbaar en past updates toe zonder vast te lopen, ook op distributies met een verscherpte sandbox.
+- macOS: naast Apple Silicon zijn er nu ook builds voor Intel beschikbaar.
+
 ## v0.1.17
 
 - Release-opmerkingen worden nu in uw taal weergegeven.

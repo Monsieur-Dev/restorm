@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.1.19
+
+- Linux: AppImage artık güvenilir şekilde başlıyor ve takılmadan güncellemeleri uyguluyor; güçlendirilmiş sandbox'a sahip dağıtımlar dahil.
+- macOS: Intel sürümleri artık Apple Silicon'ın yanı sıra kullanılabiliyor.
+
 ## v0.1.17
 
 - Sürüm notları artık kendi dilinizde gösteriliyor.

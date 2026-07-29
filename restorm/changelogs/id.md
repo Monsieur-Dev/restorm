@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.1.19
+
+- Linux: AppImage kini berjalan dengan andal dan menerapkan pembaruan tanpa macet, termasuk pada distribusi dengan sandbox yang diperketat.
+- macOS: versi Intel kini tersedia bersama Apple Silicon.
+
 ## v0.1.17
 
 - Catatan rilis kini ditampilkan dalam bahasa Anda.

@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.1.19
+
+- Linux : l'AppImage se lance de façon fiable et applique les mises à jour sans rester bloquée, y compris sur les distributions au bac à sable renforcé.
+- macOS : des versions pour Mac Intel sont désormais disponibles, en plus d'Apple Silicon.
+
 ## v0.1.17
 
 - Les notes de version s'affichent désormais dans votre langue.

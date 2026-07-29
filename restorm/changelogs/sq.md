@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.1.19
+
+- Linux: AppImage tani niset në mënyrë të besueshme dhe i aplikon përditësimet pa ngecur, përfshirë në shpërndarjet me sandbox të forcuar.
+- macOS: Ndërtimet për Intel tani janë të disponueshme krahas Apple Silicon.
+
 ## v0.1.17
 
 - Shënimet e versionit tani shfaqen në gjuhën tuaj.

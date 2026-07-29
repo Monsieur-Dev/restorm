@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.1.19
+
+- Linux：AppImage 現在能可靠啟動並順利套用更新，即使在具有強化沙箱的發行版上也不會卡住。
+- macOS：現在除了 Apple Silicon 外，也提供 Intel 版本。
+
 ## v0.1.17
 
 - 發行說明現在會以您的語言顯示。

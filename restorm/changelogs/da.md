@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.1.19
+
+- Linux: AppImage starter nu pålideligt og installerer opdateringer uden at gå i stå, også på distributioner med en hærdet sandkasse.
+- macOS: Intel-versioner er nu tilgængelige ved siden af Apple Silicon.
+
 ## v0.1.17
 
 - Udgivelsesnoter vises nu på dit sprog.

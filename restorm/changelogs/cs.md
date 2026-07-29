@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.1.19
+
+- Linux: AppImage se nyní spouští spolehlivě a instaluje aktualizace bez zaseknutí, a to i na distribucích se zpřísněným sandboxem.
+- macOS: vedle Apple Silicon jsou nyní k dispozici i sestavení pro Intel.
+
 ## v0.1.17
 
 - Poznámky k verzi se nyní zobrazují ve vašem jazyce.

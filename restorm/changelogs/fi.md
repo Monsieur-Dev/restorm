@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.1.19
+
+- Linux: AppImage käynnistyy nyt luotettavasti ja asentaa päivitykset jumittumatta, myös jakeluissa, joissa on vahvistettu hiekkalaatikko.
+- macOS: Apple Siliconin rinnalla on nyt saatavilla myös Intel-versiot.
+
 ## v0.1.17
 
 - Julkaisutiedot näytetään nyt omalla kielelläsi.

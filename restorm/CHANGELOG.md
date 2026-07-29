@@ -10,6 +10,12 @@ release-communication copy, written per release — not generated from tickets. 
 [docs/contributing/release-notes.md](docs/contributing/release-notes.md) for the
 per-release process.
 
+## v0.1.19
+
+- Linux: the AppImage now starts reliably and applies updates without getting
+  stuck, including on distributions with a hardened sandbox.
+- macOS: Intel builds are now available alongside Apple Silicon.
+
 ## v0.1.17
 
 - Release notes are now shown in your language.

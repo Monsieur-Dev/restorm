@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.1.19
+
+- Linux: az AppImage mostantól megbízhatóan indul, és elakadás nélkül telepíti a frissítéseket, még a megerősített sandboxszal rendelkező disztribúciókon is.
+- macOS: az Apple Silicon mellett mostantól Intel-változatok is elérhetők.
+
 ## v0.1.17
 
 - A kiadási megjegyzések mostantól az Ön nyelvén jelennek meg.
