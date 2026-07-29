@@ -30,6 +30,18 @@ export const CONSENT_SETTING_KEYS: Record<ConsentGateId, string> = {
 }
 
 /**
+ * "Show me each crash report before it is sent."
+ *
+ * Not a consent gate — consent decides WHETHER anything may be sent, this
+ * decides whether the user is shown each one first. Default ON: the consent
+ * prompt tells the user they will see every report, so the only way that
+ * promise stops holding is if they turn it off themselves. It lives in the
+ * privacy settings so a waiver made inside a crash dialog can be undone
+ * somewhere reachable without crashing again.
+ */
+export const CRASH_REVIEW_SETTING_KEY = 'privacy:crashReportReview'
+
+/**
  * Version of the privacy policy the consent UI presents. Stamped into every
  * recorded decision so a later policy change is detectable ("consented to an
  * older version") instead of being retroactively applied to a choice the user

@@ -2557,6 +2557,20 @@
       "body": "Cuando Restorm falla, se puede enviar un informe anónimo para que el fallo pueda corregirse. Contiene la traza técnica del error y el contexto de diagnóstico (versión de la aplicación, actividad reciente). Las URL, los tokens, los cuerpos de solicitud y respuesta y los datos personales se eliminan antes de que salga de su equipo. Verá exactamente lo que se envía antes de cada informe.",
       "save": "Guardar mis preferencias",
       "learnMore": "Más información"
+    },
+    "crashReportReviewTitle": "Mostrar cada informe de fallo antes de enviarlo",
+    "crashReportReviewDescription": "Le muestra el contenido exacto de un informe de fallo y pide su confirmación antes de enviarlo. Desactívelo para enviar los informes automáticamente, sin preguntar cada vez.",
+    "reportDialog": {
+      "title": "¿Enviar este informe de fallo?",
+      "intro": "Restorm ha encontrado un problema. Esto es exactamente lo que se enviaría.",
+      "includedError": "El error técnico y el punto del código donde se produjo",
+      "includedVersion": "La versión de la aplicación y su sistema operativo",
+      "includedActivity": "Lo que la aplicación estaba haciendo justo antes del fallo",
+      "removed": "Las URL, los tokens, los cuerpos de solicitud y respuesta y los datos personales ya se han eliminado.",
+      "viewFull": "Ver el informe completo",
+      "waive": "Enviar automáticamente los próximos informes, sin mostrármelos",
+      "send": "Enviar",
+      "discard": "No enviar"
     }
   }
 }

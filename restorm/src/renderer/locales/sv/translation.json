@@ -2557,6 +2557,20 @@
       "body": "När Restorm kraschar kan en anonym rapport skickas så att felet kan åtgärdas. Den innehåller det tekniska felspåret och diagnostisk kontext (appversion, senaste aktivitet). URL:er, tokens, begärans- och svarsinnehåll samt personuppgifter tas bort innan den lämnar din dator. Du ser exakt vad som skickas före varje rapport.",
       "save": "Spara mina inställningar",
       "learnMore": "Läs mer"
+    },
+    "crashReportReviewTitle": "Visa varje kraschrapport före sändning",
+    "crashReportReviewDescription": "Visar dig det exakta innehållet i en kraschrapport och frågar innan den skickas. Stäng av för att skicka rapporter automatiskt utan att bli tillfrågad varje gång.",
+    "reportDialog": {
+      "title": "Skicka den här kraschrapporten?",
+      "intro": "Restorm har stött på ett problem. Detta är exakt vad som skulle skickas.",
+      "includedError": "Det tekniska felet och var i koden det uppstod",
+      "includedVersion": "Din appversion och ditt operativsystem",
+      "includedActivity": "Vad appen gjorde precis innan felet",
+      "removed": "URL:er, tokens, begärans- och svarsinnehåll samt personuppgifter har redan tagits bort.",
+      "viewFull": "Visa hela rapporten",
+      "waive": "Skicka framtida rapporter automatiskt, utan att visa mig dem",
+      "send": "Skicka",
+      "discard": "Skicka inte"
     }
   }
 }

@@ -2556,6 +2556,20 @@
       "body": "Khi Restorm gặp sự cố, một báo cáo ẩn danh có thể được gửi đi để lỗi được khắc phục. Báo cáo chứa dấu vết lỗi kỹ thuật và bối cảnh chẩn đoán (phiên bản ứng dụng, hoạt động gần đây). Các URL, mã thông báo, nội dung yêu cầu và phản hồi cùng dữ liệu cá nhân đều được loại bỏ trước khi rời khỏi máy của bạn. Bạn sẽ thấy chính xác những gì được gửi trước mỗi báo cáo.",
       "save": "Lưu tùy chọn của tôi",
       "learnMore": "Tìm hiểu thêm"
+    },
+    "crashReportReviewTitle": "Hiển thị từng báo cáo sự cố trước khi gửi",
+    "crashReportReviewDescription": "Hiển thị nội dung chính xác của báo cáo sự cố và hỏi trước khi gửi. Tắt để tự động gửi báo cáo mà không hỏi mỗi lần.",
+    "reportDialog": {
+      "title": "Gửi báo cáo sự cố này?",
+      "intro": "Restorm đã gặp sự cố. Đây chính xác là những gì sẽ được gửi đi.",
+      "includedError": "Lỗi kỹ thuật và vị trí trong mã nơi lỗi xảy ra",
+      "includedVersion": "Phiên bản ứng dụng và hệ điều hành của bạn",
+      "includedActivity": "Ứng dụng đang làm gì ngay trước khi xảy ra lỗi",
+      "removed": "Các URL, mã thông báo, nội dung yêu cầu và phản hồi cùng dữ liệu cá nhân đã được loại bỏ.",
+      "viewFull": "Xem báo cáo đầy đủ",
+      "waive": "Tự động gửi các báo cáo sau mà không hiển thị cho tôi",
+      "send": "Gửi",
+      "discard": "Không gửi"
     }
   }
 }

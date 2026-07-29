@@ -2557,6 +2557,20 @@
       "body": "Kur Restorm rrëzohet, mund të dërgohet një raport anonim që defekti të riparohet. Ai përmban gjurmën teknike të gabimit dhe kontekstin diagnostikues (versionin e aplikacionit, veprimtarinë e fundit). URL-të, token-ët, trupat e kërkesave dhe përgjigjeve dhe të dhënat personale hiqen përpara se raporti të largohet nga pajisja juaj. Do të shihni saktësisht çfarë dërgohet përpara çdo raporti.",
       "save": "Ruaj preferencat e mia",
       "learnMore": "Mësoni më shumë"
+    },
+    "crashReportReviewTitle": "Shfaq çdo raport para dërgimit",
+    "crashReportReviewDescription": "Ju tregon përmbajtjen e saktë të një raporti rrëzimi dhe kërkon konfirmim para dërgimit. Çaktivizojeni për t'i dërguar raportet automatikisht, pa pyetur çdo herë.",
+    "reportDialog": {
+      "title": "Të dërgohet ky raport rrëzimi?",
+      "intro": "Restorm hasi një problem. Ja saktësisht çfarë do të dërgohej.",
+      "includedError": "Gabimi teknik dhe vendi në kod ku ndodhi",
+      "includedVersion": "Versioni i aplikacionit dhe sistemi juaj operativ",
+      "includedActivity": "Çfarë po bënte aplikacioni pak para dështimit",
+      "removed": "URL-të, token-ët, trupat e kërkesave dhe përgjigjeve dhe të dhënat personale janë hequr tashmë.",
+      "viewFull": "Shiko raportin e plotë",
+      "waive": "Dërgo automatikisht raportet e ardhshme, pa m'i shfaqur",
+      "send": "Dërgo",
+      "discard": "Mos e dërgo"
     }
   }
 }

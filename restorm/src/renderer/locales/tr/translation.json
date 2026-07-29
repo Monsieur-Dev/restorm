@@ -2557,6 +2557,20 @@
       "body": "Restorm çöktüğünde, arızanın giderilebilmesi için anonim bir rapor gönderilebilir. Rapor, teknik hata izini ve tanılama bağlamını (uygulama sürümü, son etkinlikler) içerir. URL'ler, belirteçler, istek ve yanıt gövdeleri ve kişisel veriler, rapor cihazınızdan ayrılmadan önce kaldırılır. Her rapordan önce tam olarak ne gönderildiğini göreceksiniz.",
       "save": "Tercihlerimi kaydet",
       "learnMore": "Daha fazla bilgi"
+    },
+    "crashReportReviewTitle": "Göndermeden önce her çökme raporunu göster",
+    "crashReportReviewDescription": "Bir çökme raporunun tam içeriğini gösterir ve göndermeden önce onay ister. Her seferinde sorulmadan raporların otomatik gönderilmesi için kapatın.",
+    "reportDialog": {
+      "title": "Bu çökme raporu gönderilsin mi?",
+      "intro": "Restorm bir sorunla karşılaştı. Gönderilecek olan tam olarak şudur.",
+      "includedError": "Teknik hata ve kodun hangi noktasında oluştuğu",
+      "includedVersion": "Uygulama sürümünüz ve işletim sisteminiz",
+      "includedActivity": "Hatadan hemen önce uygulamanın ne yaptığı",
+      "removed": "URL'ler, belirteçler, istek ve yanıt gövdeleri ve kişisel veriler zaten kaldırıldı.",
+      "viewFull": "Raporun tamamını görüntüle",
+      "waive": "Sonraki raporları bana göstermeden otomatik gönder",
+      "send": "Gönder",
+      "discard": "Gönderme"
     }
   }
 }

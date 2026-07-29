@@ -2557,6 +2557,20 @@
       "body": "Quando o Restorm falha, pode ser enviado um relatório anónimo para que a falha seja corrigida. Contém o rastreio técnico do erro e o contexto de diagnóstico (versão da aplicação, atividade recente). URLs, tokens, corpos de pedido e resposta e dados pessoais são removidos antes de sair do seu computador. Verá exatamente o que é enviado antes de cada relatório.",
       "save": "Guardar as minhas preferências",
       "learnMore": "Saber mais"
+    },
+    "crashReportReviewTitle": "Mostrar cada relatório de falha antes de enviar",
+    "crashReportReviewDescription": "Mostra-lhe o conteúdo exato de um relatório de falha e pede confirmação antes de o enviar. Desative para enviar os relatórios automaticamente, sem perguntar de cada vez.",
+    "reportDialog": {
+      "title": "Enviar este relatório de falha?",
+      "intro": "O Restorm encontrou um problema. Isto é exatamente o que seria enviado.",
+      "includedError": "O erro técnico e o ponto do código onde ocorreu",
+      "includedVersion": "A versão da aplicação e o seu sistema operativo",
+      "includedActivity": "O que a aplicação estava a fazer imediatamente antes da falha",
+      "removed": "URLs, tokens, corpos de pedido e resposta e dados pessoais já foram removidos.",
+      "viewFull": "Ver o relatório completo",
+      "waive": "Enviar automaticamente os próximos relatórios, sem mos mostrar",
+      "send": "Enviar",
+      "discard": "Não enviar"
     }
   }
 }

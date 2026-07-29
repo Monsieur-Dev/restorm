@@ -2556,6 +2556,20 @@
       "body": "Saat Restorm mengalami crash, laporan anonim dapat dikirim agar kegagalan tersebut dapat diperbaiki. Laporan berisi jejak galat teknis dan konteks diagnostik (versi aplikasi, aktivitas terakhir). URL, token, isi permintaan dan respons, serta data pribadi dihapus sebelum meninggalkan perangkat Anda. Anda akan melihat persis apa yang dikirim sebelum setiap laporan.",
       "save": "Simpan preferensi saya",
       "learnMore": "Pelajari lebih lanjut"
+    },
+    "crashReportReviewTitle": "Tampilkan setiap laporan crash sebelum mengirim",
+    "crashReportReviewDescription": "Menampilkan isi persis sebuah laporan crash dan meminta konfirmasi sebelum mengirim. Matikan untuk mengirim laporan secara otomatis tanpa ditanya setiap kali.",
+    "reportDialog": {
+      "title": "Kirim laporan crash ini?",
+      "intro": "Restorm mengalami masalah. Inilah persis yang akan dikirim.",
+      "includedError": "Galat teknis dan lokasi dalam kode tempat terjadinya",
+      "includedVersion": "Versi aplikasi dan sistem operasi Anda",
+      "includedActivity": "Apa yang sedang dilakukan aplikasi tepat sebelum gagal",
+      "removed": "URL, token, isi permintaan dan respons, serta data pribadi sudah dihapus.",
+      "viewFull": "Lihat laporan lengkap",
+      "waive": "Kirim laporan berikutnya secara otomatis, tanpa menampilkannya",
+      "send": "Kirim",
+      "discard": "Jangan kirim"
     }
   }
 }

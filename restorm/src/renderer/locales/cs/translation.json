@@ -2559,6 +2559,20 @@
       "body": "Když Restorm spadne, může být odeslána anonymní zpráva, aby bylo možné chybu opravit. Obsahuje technický výpis chyby a diagnostický kontext (verzi aplikace, nedávnou činnost). Adresy URL, tokeny, těla požadavků a odpovědí a osobní údaje jsou odstraněny dříve, než zpráva opustí vaše zařízení. Před každou zprávou uvidíte přesně, co se odesílá.",
       "save": "Uložit mé předvolby",
       "learnMore": "Zjistit více"
+    },
+    "crashReportReviewTitle": "Zobrazit každou zprávu o pádu před odesláním",
+    "crashReportReviewDescription": "Ukáže vám přesný obsah zprávy o pádu a před odesláním se zeptá. Vypnutím budou zprávy odesílány automaticky bez dotazu.",
+    "reportDialog": {
+      "title": "Odeslat tuto zprávu o pádu?",
+      "intro": "Restorm narazil na problém. Toto je přesně to, co by bylo odesláno.",
+      "includedError": "Technická chyba a místo v kódu, kde nastala",
+      "includedVersion": "Verze aplikace a váš operační systém",
+      "includedActivity": "Co aplikace dělala těsně před selháním",
+      "removed": "Adresy URL, tokeny, těla požadavků a odpovědí a osobní údaje již byly odstraněny.",
+      "viewFull": "Zobrazit celou zprávu",
+      "waive": "Odesílat další zprávy automaticky, bez zobrazování",
+      "send": "Odeslat",
+      "discard": "Neodesílat"
     }
   }
 }

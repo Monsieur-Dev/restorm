@@ -153,6 +153,7 @@ import { RestormTitlebar } from './components/MainView/Titlebar/RestormTitlebar'
 import { StatusbarMcpIndicator } from './components/MainView/StatusbarMcpIndicator'
 import { UpdateNotifications } from './components/UpdateNotifications'
 import { CrashConsentPrompt } from './components/Privacy/CrashConsentPrompt'
+import { CrashReportReviewHost } from './components/Privacy/CrashReportReviewHost'
 import { StatusbarGitIndicator } from './components/MainView/StatusbarGitIndicator'
 import { StatusbarPathActionsHost } from './components/MainView/StatusbarPathActions'
 import { useGitPendingFlags } from './hooks/useGitPendingFlags'
@@ -3259,6 +3260,7 @@ const App: React.FC = () => {
        * modal those toasts (and the Help menu) open. */}
       <UpdateNotifications />
       <CrashConsentPrompt />
+      <CrashReportReviewHost />
 
       {/* Fullscreen git-history modal (statusbar source-control icon). */}
       <Modal

@@ -2557,6 +2557,20 @@
       "body": "Wenn Restorm abstürzt, kann ein anonymer Bericht gesendet werden, damit der Fehler behoben werden kann. Er enthält die technische Fehlerspur und den Diagnosekontext (App-Version, letzte Aktivitäten). URLs, Token, Anfrage- und Antwortinhalte sowie personenbezogene Daten werden entfernt, bevor er Ihr Gerät verlässt. Sie sehen vor jedem Bericht genau, was gesendet wird.",
       "save": "Meine Einstellungen speichern",
       "learnMore": "Mehr erfahren"
+    },
+    "crashReportReviewTitle": "Jeden Absturzbericht vor dem Senden anzeigen",
+    "crashReportReviewDescription": "Zeigt Ihnen den genauen Inhalt eines Absturzberichts und fragt vor dem Senden nach. Deaktivieren Sie dies, um Berichte automatisch ohne Nachfrage zu senden.",
+    "reportDialog": {
+      "title": "Diesen Absturzbericht senden?",
+      "intro": "Restorm hat ein Problem festgestellt. Dies ist genau das, was gesendet würde.",
+      "includedError": "Der technische Fehler und die Stelle im Code, an der er auftrat",
+      "includedVersion": "Ihre App-Version und Ihr Betriebssystem",
+      "includedActivity": "Was die App unmittelbar vor dem Fehler getan hat",
+      "removed": "URLs, Token, Anfrage- und Antwortinhalte sowie personenbezogene Daten wurden bereits entfernt.",
+      "viewFull": "Vollständigen Bericht anzeigen",
+      "waive": "Künftige Berichte automatisch senden, ohne sie mir zu zeigen",
+      "send": "Senden",
+      "discard": "Nicht senden"
     }
   }
 }

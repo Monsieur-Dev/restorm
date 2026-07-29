@@ -20,7 +20,11 @@ export const CRASH_IPC = {
   /** main → renderer broadcast, fired whenever the consent answer moves. */
   CONSENT_STATE_CHANGED: 'crash:consent-state-changed',
   /** The ONLY write on this surface. Records the user's own answer. */
-  SET_CONSENT: 'crash:set-consent'
+  SET_CONSENT: 'crash:set-consent',
+  /** main → renderer: a scrubbed report is waiting for a send/discard answer. */
+  REVIEW_REQUESTED: 'crash:review-requested',
+  /** renderer → main: the user's answer for one report. */
+  RESOLVE_REVIEW: 'crash:resolve-review'
 } as const
 
 /**
@@ -75,4 +79,22 @@ export interface CrashConsentState {
   shouldPrompt: boolean
   /** The answer in force right now — the pre-checked value for the prompt. */
   granted: boolean
+}
+
+/**
+ * One crash report, waiting for the user to allow or refuse the send.
+ *
+ * `payload` is the REAL post-scrub event that would go on the wire, serialised
+ * — never a representative example. The consent prompt promises the user they
+ * will see exactly what is sent, and only the actual event can honour that. It
+ * is captured after the scrubbing gate has passed, so what is shown is what
+ * survived scrubbing, not what arrived at it.
+ */
+export interface CrashReviewRequest {
+  /** Correlates the answer with the report; not shown to the user. */
+  id: string
+  /** Short stable identity for the failure, used only for logging + dedup. */
+  fingerprint: string
+  /** Serialised scrubbed event, pretty-printed for reading. */
+  payload: string
 }

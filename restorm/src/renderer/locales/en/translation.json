@@ -2557,6 +2557,20 @@
       "body": "When Restorm crashes, an anonymous report can be sent so the failure can be fixed. It carries the technical error trace and diagnostic context (app version, recent activity). URLs, tokens, request and response bodies and personal data are removed before it leaves your machine. You will see exactly what is sent before each report.",
       "save": "Save my preferences",
       "learnMore": "Learn more"
+    },
+    "crashReportReviewTitle": "Show each crash report before sending",
+    "crashReportReviewDescription": "Show you the exact content of a crash report and ask before sending it. Turn this off to send reports automatically without being asked each time.",
+    "reportDialog": {
+      "title": "Send this crash report?",
+      "intro": "Restorm has encountered a problem. Here is exactly what would be sent.",
+      "includedError": "The technical error and where in the code it happened",
+      "includedVersion": "Your app version and operating system",
+      "includedActivity": "What the app was doing just before it failed",
+      "removed": "URLs, tokens, request and response bodies and personal data have already been removed.",
+      "viewFull": "View the full report",
+      "waive": "Send future reports automatically, without showing me each one",
+      "send": "Send",
+      "discard": "Don't send"
     }
   }
 }

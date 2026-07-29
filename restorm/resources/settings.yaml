@@ -141,6 +141,17 @@ groups:
           # is an explanation of why the free tier cannot switch it off. Name the
           # reason instead.
           capabilityLockedLabelKey: "privacy.crashReportsLockedLabel"
+      # Not a consent gate — consent decides whether anything may be sent, this
+      # decides whether each report is shown first. Default ON because the
+      # consent prompt tells the user they will see every report; it lives here
+      # so a waiver made inside a crash dialog can be undone without having to
+      # crash again to reach that dialog.
+      - setting:
+          id: "crashReportReview"
+          titleKey: "privacy.crashReportReviewTitle"
+          descriptionKey: "privacy.crashReportReviewDescription"
+          type: "toggle"
+          default: true
       - setting:
           id: "telemetry"
           titleKey: "privacy.telemetryTitle"

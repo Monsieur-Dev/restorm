@@ -2556,6 +2556,20 @@
       "body": "當 Restorm 當機時，可以傳送匿名報告，以便修復該問題。報告包含技術錯誤堆疊與診斷內容（應用程式版本、近期操作）。URL、權杖、要求與回應內容以及個人資料會在離開您的裝置前移除。每次傳送報告前，您都會看到實際傳送的內容。",
       "save": "儲存我的偏好設定",
       "learnMore": "瞭解更多"
+    },
+    "crashReportReviewTitle": "傳送前顯示每份當機報告",
+    "crashReportReviewDescription": "向您顯示當機報告的確切內容，並在傳送前詢問。關閉後將自動傳送報告，不再每次詢問。",
+    "reportDialog": {
+      "title": "傳送此當機報告？",
+      "intro": "Restorm 遇到問題。以下是將要傳送的確切內容。",
+      "includedError": "技術錯誤及其在程式碼中發生的位置",
+      "includedVersion": "您的應用程式版本與作業系統",
+      "includedActivity": "發生錯誤前應用程式正在執行的操作",
+      "removed": "URL、權杖、要求與回應內容以及個人資料均已移除。",
+      "viewFull": "檢視完整報告",
+      "waive": "日後自動傳送報告，不再顯示給我",
+      "send": "傳送",
+      "discard": "不要傳送"
     }
   }
 }

@@ -2557,6 +2557,20 @@
       "body": "Når Restorm går ned, kan der sendes en anonym rapport, så fejlen kan rettes. Den indeholder det tekniske fejlspor og diagnostisk kontekst (appversion, seneste aktivitet). URL'er, tokens, anmodnings- og svarindhold samt personoplysninger fjernes, før den forlader din maskine. Du kan se præcis, hvad der sendes, før hver rapport.",
       "save": "Gem mine præferencer",
       "learnMore": "Læs mere"
+    },
+    "crashReportReviewTitle": "Vis hver nedbrudsrapport før afsendelse",
+    "crashReportReviewDescription": "Viser dig det præcise indhold af en nedbrudsrapport og spørger, før den sendes. Slå fra for at sende rapporter automatisk uden at blive spurgt hver gang.",
+    "reportDialog": {
+      "title": "Send denne nedbrudsrapport?",
+      "intro": "Restorm er stødt på et problem. Dette er præcis, hvad der ville blive sendt.",
+      "includedError": "Den tekniske fejl og hvor i koden den opstod",
+      "includedVersion": "Din appversion og dit styresystem",
+      "includedActivity": "Hvad appen lavede lige før fejlen",
+      "removed": "URL'er, tokens, anmodnings- og svarindhold samt personoplysninger er allerede fjernet.",
+      "viewFull": "Vis hele rapporten",
+      "waive": "Send fremtidige rapporter automatisk uden at vise mig dem",
+      "send": "Send",
+      "discard": "Send ikke"
     }
   }
 }

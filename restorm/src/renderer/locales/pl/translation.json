@@ -2559,6 +2559,20 @@
       "body": "Gdy Restorm ulegnie awarii, może zostać wysłany anonimowy raport, aby można było naprawić usterkę. Zawiera techniczny ślad błędu i kontekst diagnostyczny (wersja aplikacji, ostatnie działania). Adresy URL, tokeny, treści żądań i odpowiedzi oraz dane osobowe są usuwane, zanim raport opuści Twoje urządzenie. Przed każdym raportem zobaczysz dokładnie, co zostanie wysłane.",
       "save": "Zapisz moje preferencje",
       "learnMore": "Dowiedz się więcej"
+    },
+    "crashReportReviewTitle": "Pokazuj każdy raport przed wysłaniem",
+    "crashReportReviewDescription": "Pokazuje dokładną zawartość raportu o awarii i prosi o potwierdzenie przed wysłaniem. Wyłącz, aby wysyłać raporty automatycznie, bez pytania za każdym razem.",
+    "reportDialog": {
+      "title": "Wysłać ten raport o awarii?",
+      "intro": "Restorm napotkał problem. Oto dokładnie to, co zostałoby wysłane.",
+      "includedError": "Błąd techniczny i miejsce w kodzie, w którym wystąpił",
+      "includedVersion": "Wersja aplikacji i Twój system operacyjny",
+      "includedActivity": "Co aplikacja robiła tuż przed awarią",
+      "removed": "Adresy URL, tokeny, treści żądań i odpowiedzi oraz dane osobowe zostały już usunięte.",
+      "viewFull": "Pokaż pełny raport",
+      "waive": "Wysyłaj kolejne raporty automatycznie, bez pokazywania mi ich",
+      "send": "Wyślij",
+      "discard": "Nie wysyłaj"
     }
   }
 }

@@ -2557,6 +2557,20 @@
       "body": "Quando Restorm si arresta in modo anomalo, è possibile inviare un rapporto anonimo affinché il problema venga corretto. Contiene la traccia tecnica dell'errore e il contesto diagnostico (versione dell'app, attività recenti). URL, token, corpi di richiesta e risposta e dati personali vengono rimossi prima che lasci il tuo computer. Vedrai esattamente cosa viene inviato prima di ogni rapporto.",
       "save": "Salva le mie preferenze",
       "learnMore": "Scopri di più"
+    },
+    "crashReportReviewTitle": "Mostra ogni rapporto prima dell'invio",
+    "crashReportReviewDescription": "Ti mostra il contenuto esatto di un rapporto di arresto anomalo e chiede conferma prima di inviarlo. Disattivalo per inviare i rapporti automaticamente, senza chiedere ogni volta.",
+    "reportDialog": {
+      "title": "Inviare questo rapporto di arresto anomalo?",
+      "intro": "Restorm ha riscontrato un problema. Ecco esattamente ciò che verrebbe inviato.",
+      "includedError": "L'errore tecnico e il punto del codice in cui si è verificato",
+      "includedVersion": "La versione dell'app e il tuo sistema operativo",
+      "includedActivity": "Cosa stava facendo l'app poco prima del problema",
+      "removed": "URL, token, corpi di richiesta e risposta e dati personali sono già stati rimossi.",
+      "viewFull": "Visualizza il rapporto completo",
+      "waive": "Invia automaticamente i prossimi rapporti, senza mostrarmeli",
+      "send": "Invia",
+      "discard": "Non inviare"
     }
   }
 }

@@ -23,6 +23,8 @@ import { CrashReportingService, type CrashSdkPort } from './CrashReportingServic
 import { makeBeforeSend, makeBeforeBreadcrumb } from './sentryScrub'
 import { withoutUnscrubbableIntegrations } from './sentryIntegrations'
 import { observeWindowCrashes } from './windowCrashObserver'
+import { reviewCrashReport } from './crashReviewComposition'
+import { toReviewRequest } from './crashReviewRequest'
 
 let instance: CrashReportingService | null = null
 
@@ -97,10 +99,21 @@ function makeSentryPort(): CrashSdkPort {
         // withdrawal into a delay. The cost is a crash that happens while
         // offline, which is the cheaper half of the trade here.
         transport: Sentry.makeElectronTransport,
-        // The scrubbing gate. Both hooks return `null` to DROP, so an event that
-        // cannot be proven clean is discarded rather than sent.
-        beforeSend: (event) =>
-          options.beforeSend(event as unknown as Record<string, unknown>) as unknown as typeof event,
+        // The scrubbing gate, then the user's own decision. Both can DROP.
+        //
+        // `beforeSend` may return a promise, so the user's answer IS the return
+        // value: the event is held until they allow or refuse it. That keeps the
+        // consent promise literal — nothing is sent that they were not shown —
+        // without a parallel queue of reports in a state the consent model does
+        // not describe. Review only asks when their consent was their own
+        // choice; a plan-mandated account is not offered a refusal it does not
+        // have, and both paths still pass the scrubber first.
+        beforeSend: async (event) => {
+          const scrubbed = options.beforeSend(event as unknown as Record<string, unknown>)
+          if (scrubbed === null) return null
+          const allowed = await reviewCrashReport(toReviewRequest(scrubbed))
+          return allowed ? (scrubbed as unknown as typeof event) : null
+        },
         beforeBreadcrumb: (breadcrumb) =>
           options.beforeBreadcrumb(breadcrumb as unknown as Record<string, unknown>) as unknown as typeof breadcrumb,
         // No performance tracing: it samples ordinary requests, which is exactly

@@ -2556,6 +2556,20 @@
       "body": "当 Restorm 崩溃时，可以发送匿名报告，以便修复该故障。报告包含技术错误堆栈和诊断上下文（应用版本、近期操作）。URL、令牌、请求与响应正文以及个人数据会在离开您的设备之前被移除。每次发送报告前，您都会看到具体发送的内容。",
       "save": "保存我的偏好设置",
       "learnMore": "了解更多"
+    },
+    "crashReportReviewTitle": "发送前显示每份崩溃报告",
+    "crashReportReviewDescription": "向您展示崩溃报告的确切内容，并在发送前询问。关闭后将自动发送报告，不再每次询问。",
+    "reportDialog": {
+      "title": "发送此崩溃报告？",
+      "intro": "Restorm 遇到了问题。以下是将要发送的确切内容。",
+      "includedError": "技术错误及其在代码中发生的位置",
+      "includedVersion": "您的应用版本和操作系统",
+      "includedActivity": "出错前应用正在执行的操作",
+      "removed": "URL、令牌、请求与响应正文以及个人数据均已移除。",
+      "viewFull": "查看完整报告",
+      "waive": "今后自动发送报告，不再向我展示",
+      "send": "发送",
+      "discard": "不发送"
     }
   }
 }

@@ -2558,6 +2558,20 @@
       "body": "Kada se Restorm sruši, može se poslati anonimno izvješće kako bi se kvar ispravio. Sadrži tehnički trag pogreške i dijagnostički kontekst (verziju aplikacije, nedavne radnje). URL-ovi, tokeni, tijela zahtjeva i odgovora te osobni podaci uklanjaju se prije nego što izvješće napusti vaše računalo. Prije svakog izvješća vidjet ćete točno što se šalje.",
       "save": "Spremi moje postavke",
       "learnMore": "Saznajte više"
+    },
+    "crashReportReviewTitle": "Prikaži svako izvješće prije slanja",
+    "crashReportReviewDescription": "Prikazuje točan sadržaj izvješća o rušenju i traži potvrdu prije slanja. Isključite za automatsko slanje bez pitanja.",
+    "reportDialog": {
+      "title": "Poslati ovo izvješće o rušenju?",
+      "intro": "Restorm je naišao na problem. Ovo je točno ono što bi bilo poslano.",
+      "includedError": "Tehnička pogreška i mjesto u kodu gdje se dogodila",
+      "includedVersion": "Verzija aplikacije i vaš operativni sustav",
+      "includedActivity": "Što je aplikacija radila neposredno prije kvara",
+      "removed": "URL-ovi, tokeni, tijela zahtjeva i odgovora te osobni podaci već su uklonjeni.",
+      "viewFull": "Prikaži cijelo izvješće",
+      "waive": "Automatski šalji buduća izvješća, bez prikazivanja",
+      "send": "Pošalji",
+      "discard": "Ne šalji"
     }
   }
 }

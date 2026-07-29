@@ -1,0 +1,53 @@
+/* Layout for the "what will be sent" dialog. Spacing and the payload's
+ * monospace treatment only — every control is a themed component. */
+
+.crash-report-dialog {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+}
+
+.crash-report-dialog-intro,
+.crash-report-dialog-removed {
+  margin: 0;
+  line-height: 1.45;
+}
+
+.crash-report-dialog-included {
+  margin: 0;
+  padding-left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  line-height: 1.45;
+}
+
+.crash-report-dialog-expander {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  user-select: none;
+  width: fit-content;
+}
+
+.crash-report-dialog-expander:focus-visible {
+  outline: 1px solid var(--vscode-focusBorder);
+  outline-offset: 2px;
+}
+
+.crash-report-dialog-payload {
+  margin: 0;
+  padding: 8px;
+  font-family: var(--vscode-editor-font-family, monospace);
+  font-size: 12px;
+  line-height: 1.4;
+  white-space: pre;
+}
+
+.crash-report-dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}

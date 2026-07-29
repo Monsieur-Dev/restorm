@@ -2557,6 +2557,20 @@
       "body": "Ha a Restorm összeomlik, névtelen jelentés küldhető, hogy a hiba javítható legyen. Tartalmazza a hiba technikai nyomkövetését és a diagnosztikai környezetet (alkalmazásverzió, legutóbbi tevékenység). Az URL-ek, tokenek, kérés- és válasz-tartalmak, valamint a személyes adatok eltávolításra kerülnek, mielőtt elhagyná a gépét. Minden jelentés előtt pontosan látni fogja, mi kerül elküldésre.",
       "save": "Beállításaim mentése",
       "learnMore": "További információ"
+    },
+    "crashReportReviewTitle": "Minden jelentés megjelenítése küldés előtt",
+    "crashReportReviewDescription": "Megmutatja az összeomlási jelentés pontos tartalmát, és küldés előtt megerősítést kér. Kapcsolja ki a jelentések automatikus, kérdés nélküli küldéséhez.",
+    "reportDialog": {
+      "title": "Elküldi ezt az összeomlási jelentést?",
+      "intro": "A Restorm hibába ütközött. Pontosan ez kerülne elküldésre.",
+      "includedError": "A technikai hiba és a kód helye, ahol történt",
+      "includedVersion": "Az alkalmazás verziója és az Ön operációs rendszere",
+      "includedActivity": "Mit csinált az alkalmazás közvetlenül a hiba előtt",
+      "removed": "Az URL-ek, tokenek, kérés- és válasz-tartalmak, valamint a személyes adatok már eltávolításra kerültek.",
+      "viewFull": "Teljes jelentés megtekintése",
+      "waive": "A további jelentések automatikus küldése, megjelenítés nélkül",
+      "send": "Küldés",
+      "discard": "Ne küldje"
     }
   }
 }

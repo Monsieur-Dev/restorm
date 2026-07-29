@@ -54,7 +54,7 @@ import {
   type UpdateSettings,
   type UpdateState
 } from '../../shared/update/updateTypes'
-import { CRASH_IPC, type CrashArmedState, type CrashConsentState } from '../../shared/crash/crashTypes'
+import { CRASH_IPC, type CrashArmedState, type CrashConsentState, type CrashReviewRequest } from '../../shared/crash/crashTypes'
 import { hookupIpc as hookupSentryIpc } from '@sentry/electron/preload-namespaced'
 
 // Expose the crash SDK's renderer↔main IPC conduit (`window.__SENTRY_IPC__`).
@@ -275,6 +275,16 @@ contextBridge.exposeInMainWorld('api', {
     /** Record the user's own answer. Cannot override what their plan mandates. */
     setConsent: async (granted: boolean): Promise<CrashConsentState> => {
       return (await ipcRenderer.invoke(CRASH_IPC.SET_CONSENT, granted)) as CrashConsentState
+    },
+    /** A scrubbed report is waiting for a send/discard answer. */
+    onReviewRequested: (callback: (request: CrashReviewRequest) => void): (() => void) => {
+      const handler = (_event: unknown, request: CrashReviewRequest): void => { callback(request) }
+      ipcRenderer.on(CRASH_IPC.REVIEW_REQUESTED, handler)
+      return (): void => { ipcRenderer.off(CRASH_IPC.REVIEW_REQUESTED, handler) }
+    },
+    /** Answer one pending review. Fire-and-forget: main owns the outcome. */
+    resolveReview: (id: string, send: boolean): void => {
+      ipcRenderer.send(CRASH_IPC.RESOLVE_REVIEW, id, send)
     }
   }
 })

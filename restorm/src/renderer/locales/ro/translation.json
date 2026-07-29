@@ -2558,6 +2558,20 @@
       "body": "Când Restorm se blochează, poate fi trimis un raport anonim pentru ca defecțiunea să fie remediată. Acesta conține urma tehnică a erorii și contextul de diagnosticare (versiunea aplicației, activitatea recentă). Adresele URL, jetoanele, corpurile cererilor și răspunsurilor și datele personale sunt eliminate înainte ca raportul să părăsească dispozitivul dumneavoastră. Veți vedea exact ce se trimite înaintea fiecărui raport.",
       "save": "Salvează preferințele mele",
       "learnMore": "Aflați mai multe"
+    },
+    "crashReportReviewTitle": "Afișează fiecare raport înainte de trimitere",
+    "crashReportReviewDescription": "Vă arată conținutul exact al unui raport de blocare și cere confirmarea înainte de trimitere. Dezactivați pentru a trimite rapoartele automat, fără a fi întrebat de fiecare dată.",
+    "reportDialog": {
+      "title": "Trimiteți acest raport de blocare?",
+      "intro": "Restorm a întâmpinat o problemă. Iată exact ce ar fi trimis.",
+      "includedError": "Eroarea tehnică și locul din cod unde s-a produs",
+      "includedVersion": "Versiunea aplicației și sistemul dumneavoastră de operare",
+      "includedActivity": "Ce făcea aplicația chiar înainte de eroare",
+      "removed": "Adresele URL, jetoanele, corpurile cererilor și răspunsurilor și datele personale au fost deja eliminate.",
+      "viewFull": "Vedeți raportul complet",
+      "waive": "Trimite automat rapoartele viitoare, fără a mi le arăta",
+      "send": "Trimite",
+      "discard": "Nu trimite"
     }
   }
 }

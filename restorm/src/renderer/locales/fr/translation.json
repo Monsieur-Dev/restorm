@@ -2557,6 +2557,20 @@
       "body": "Lorsque Restorm plante, un rapport anonyme peut nous être envoyé afin que la panne soit corrigée. Il contient la trace technique de l'erreur et le contexte de diagnostic (version de l'application, dernières actions). Les URL, jetons, corps de requête et de réponse et données personnelles en sont retirés avant qu'il ne quitte votre machine. Vous verrez exactement ce qui est envoyé avant chaque rapport.",
       "save": "Enregistrer mes préférences",
       "learnMore": "En savoir plus"
+    },
+    "crashReportReviewTitle": "Afficher chaque rapport de plantage avant l'envoi",
+    "crashReportReviewDescription": "Vous montre le contenu exact d'un rapport de plantage et demande votre accord avant de l'envoyer. Désactivez cette option pour envoyer les rapports automatiquement, sans confirmation.",
+    "reportDialog": {
+      "title": "Envoyer ce rapport de plantage ?",
+      "intro": "Restorm a rencontré un problème. Voici exactement ce qui serait envoyé.",
+      "includedError": "L'erreur technique et l'endroit du code où elle s'est produite",
+      "includedVersion": "La version de l'application et votre système d'exploitation",
+      "includedActivity": "Ce que l'application faisait juste avant la panne",
+      "removed": "Les URL, jetons, corps de requête et de réponse et données personnelles en ont déjà été retirés.",
+      "viewFull": "Voir le rapport complet",
+      "waive": "Envoyer automatiquement les prochains rapports, sans me les montrer",
+      "send": "Envoyer",
+      "discard": "Ne pas envoyer"
     }
   }
 }
