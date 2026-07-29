@@ -92,8 +92,20 @@ jobs:
       - name: Build distributables (electron-builder)
         run: |
           cd restorm
-          NODE_OPTIONS="--max-old-space-size=4096" pnpm run dist
+          NODE_OPTIONS="$NODE_HEAP" pnpm run dist
         env:
+          # Source-map generation roughly doubles the renderer build's peak heap,
+          # so the limit tracks whether maps are being produced at all — which is
+          # itself decided by whether the crash-report upload is configured. The
+          # 4 GB path is the long-standing default and stays the cost until the
+          # credentials exist; without this the first credentialed release would
+          # OOM instead of publishing.
+          NODE_HEAP: ${{ secrets.SENTRY_AUTH_TOKEN && '--max-old-space-size=8192' || '--max-old-space-size=4096' }}
+          # Crash-report source maps: absent ⇒ the build emits none and the
+          # upload step is skipped, and the build stays green either way.
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
+          SENTRY_PROJECT: ${{ secrets.SENTRY_PROJECT }}
           # generic publish provider → electron-builder generates latest*.yml
           # (the auto-update feed) without uploading; we upload to R2 below.
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
