@@ -24,6 +24,7 @@ import { makeBeforeSend, makeBeforeBreadcrumb } from './sentryScrub'
 import { withoutUnscrubbableIntegrations } from './sentryIntegrations'
 import { observeWindowCrashes } from './windowCrashObserver'
 import { reviewCrashReport } from './crashReviewComposition'
+import { allowCrashReport } from './crashLimitComposition'
 import { toReviewRequest } from './crashReviewRequest'
 
 let instance: CrashReportingService | null = null
@@ -111,7 +112,14 @@ function makeSentryPort(): CrashSdkPort {
         beforeSend: async (event) => {
           const scrubbed = options.beforeSend(event as unknown as Record<string, unknown>)
           if (scrubbed === null) return null
-          const allowed = await reviewCrashReport(toReviewRequest(scrubbed))
+          const request = toReviewRequest(scrubbed)
+          // Budget BEFORE review, deliberately. A report that will be held back
+          // must never raise a dialog: asking someone to approve a send that is
+          // then discarded wastes their attention and misdescribes what is
+          // happening. It also means a crash loop cannot bury the user under
+          // prompts for reports that were never going to leave.
+          if (!allowCrashReport(request.fingerprint)) return null
+          const allowed = await reviewCrashReport(request)
           return allowed ? (scrubbed as unknown as typeof event) : null
         },
         beforeBreadcrumb: (breadcrumb) =>
