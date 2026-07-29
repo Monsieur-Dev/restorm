@@ -1536,6 +1536,33 @@
   border-radius: 3px;
 }
 
+/* The outline entries are rendered as ECUI Buttons, so they inherit the
+ * standard button fill (`--button-background`). That token is a muted colour on
+ * dark themes but an olive/khaki on some light themes (e.g. Solarized Light),
+ * which reads as a heavy block behind every entry. A navigation outline is not
+ * a row of action buttons, so strip the fill entirely — the sidebar scope
+ * (two classes) out-specifies the single-class ECUI button rule regardless of
+ * stylesheet order, and the hover surlignage below is the only background. */
+.documentation-host-sidebar .documentation-host-sidebar__overview-link,
+.documentation-host-sidebar .documentation-host-sidebar__section-title--button,
+.documentation-host-sidebar .documentation-host-sidebar__group-header,
+.documentation-host-sidebar .documentation-host-sidebar__op-link,
+.documentation-host-sidebar .documentation-host-sidebar__model-link,
+.documentation-host-sidebar .documentation-host-sidebar__enum-model,
+.documentation-host-sidebar .documentation-host-sidebar__enum-prop-link {
+  background: transparent;
+}
+
+.documentation-host-sidebar .documentation-host-sidebar__overview-link:hover,
+.documentation-host-sidebar .documentation-host-sidebar__section-title--button:hover,
+.documentation-host-sidebar .documentation-host-sidebar__group-header:hover,
+.documentation-host-sidebar .documentation-host-sidebar__op-link:hover,
+.documentation-host-sidebar .documentation-host-sidebar__model-link:hover,
+.documentation-host-sidebar .documentation-host-sidebar__enum-model:hover,
+.documentation-host-sidebar .documentation-host-sidebar__enum-prop-link:hover {
+  background: var(--list-hover-background, rgba(127, 127, 127, 0.1));
+}
+
 .documentation-host-sidebar__group-list,
 .documentation-host-sidebar__op-list,
 .documentation-host-sidebar__model-list,
