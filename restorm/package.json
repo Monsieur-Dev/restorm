@@ -273,7 +273,8 @@
     "publish": [
       {
         "provider": "generic",
-        "url": "https://dl.restorm.app"
+        "url": "https://dl.restorm.app",
+        "useMultipleRangeRequest": false
       }
     ]
   }
