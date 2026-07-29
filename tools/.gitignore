@@ -1,0 +1,5 @@
+# Local QA-VM working artifacts — installers, ISOs, feed files and VM disks
+# are downloaded/created at runtime and must never be committed.
+*/shared/*
+!*/shared/.gitkeep
+*/storage/

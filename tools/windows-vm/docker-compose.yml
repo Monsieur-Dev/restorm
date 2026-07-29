@@ -1,0 +1,51 @@
+# Windows QA sandbox (KVM-accelerated, via dockur/windows).
+#
+# Purpose: install + launch the Windows NSIS installer (.exe) and exercise the
+# in-app auto-update against a LOCAL feed (see tools/local-feed/), without owning
+# a Windows box. NOT a build/release path — release .exe artifacts are built on
+# the Windows runner in .github/workflows/release.yml.
+#
+# Unlike the macOS VM, dockur/windows performs a FULLY UNATTENDED install: it
+# downloads the ISO, answers the setup wizard, creates the user below, and boots
+# to a ready desktop. No click-through. First boot takes a while (ISO download +
+# Windows setup) — watch `docker logs -f restorm-windows-vm`.
+#
+# Start:  docker --context default compose up -d      <-- context matters (KVM!)
+# View:   http://localhost:8006          (web viewer, noVNC)
+# RDP:    xfreerdp /v:localhost /u:restorm /p:password    (crisper than noVNC)
+# Files:  the ./shared folder appears in the guest as \\host.lan\Data
+services:
+  windows:
+    image: dockurr/windows
+    container_name: restorm-windows-vm
+    environment:
+      # 11 = Windows 11 Pro. "11e"/"10" also available; 11 matches our target.
+      VERSION: "11"
+      USERNAME: "restorm"
+      PASSWORD: "password"
+      # Windows 11 needs headroom; 4G installs but is sluggish. 8G/4 is comfy.
+      RAM_SIZE: "8G"
+      CPU_CORES: "4"
+      DISK_SIZE: "64G"
+      # Region/keyboard — French to mirror Yoann's setup (optional).
+      LANGUAGE: "French"
+      KEYBOARD: "fr-FR"
+    devices:
+      - /dev/kvm
+      - /dev/net/tun
+    cap_add:
+      - NET_ADMIN
+    ports:
+      - "8006:8006"        # web viewer (noVNC)
+      - "3389:3389/tcp"    # RDP
+      - "3389:3389/udp"
+    volumes:
+      - windows_storage:/storage
+      # Drop the freshly-built .exe + local-feed files here; in the guest they
+      # show up at \\host.lan\Data (map it to a drive letter once).
+      - ./shared:/data
+    stop_grace_period: 2m
+    restart: "no"
+
+volumes:
+  windows_storage:

@@ -1,0 +1,55 @@
+# Debian/Ubuntu QA sandbox (KVM-accelerated, via qemux/qemu — a full VM with its
+# OWN kernel, so it faithfully reproduces host-kernel policy such as
+# `kernel.apparmor_restrict_unprivileged_userns=1`, the Ubuntu 24.04+ default
+# that SIGTRAPs Chromium's sandbox and is exactly why the AppImage needs
+# --no-sandbox).
+#
+# Purpose: install + launch the .deb / .AppImage on a PRISTINE desktop (no dev
+# toolchain) and exercise in-app auto-update against a LOCAL feed
+# (see tools/local-feed/). NOT a build/release path.
+#
+# A full VM (not a container) is deliberate: a container shares the host kernel
+# AND inherits docker's own AppArmor/seccomp, so it would NOT reproduce the
+# sandbox behaviour a real user hits. QEMU boots a real guest kernel.
+#
+# Unlike macOS, a Linux guest gives us back the two things that made the mac VM
+# painful: a working shared folder (Samba: //host.lan/Data) and reliable
+# SSH-driving (VNC keyboard mangling is irrelevant — drive over SSH).
+#
+# Start:  docker --context default compose up -d     <-- context matters (KVM!)
+# View:   http://localhost:8006         (web viewer — do the OS install here)
+# SSH:    ssh -p 2222 restorm@localhost (after installing openssh-server)
+services:
+  linux:
+    image: qemux/qemu
+    container_name: restorm-linux-vm
+    environment:
+      # ISO to install from. Default: Ubuntu 24.04 desktop (GNOME "App Center"
+      # shows .deb metadata; has the userns restriction). Alternatives:
+      #   Kubuntu 24.04  → KDE Discover, mirrors Yoann's host exactly
+      #   Debian 13 live → the other apt target
+      # Point BOOT at any ISO URL, or drop an .iso in ./storage and use its name.
+      BOOT: "https://releases.ubuntu.com/24.04/ubuntu-24.04.3-desktop-amd64.iso"
+      RAM_SIZE: "6G"
+      CPU_CORES: "4"
+      DISK_SIZE: "32G"
+    devices:
+      - /dev/kvm
+      - /dev/net/tun
+    cap_add:
+      - NET_ADMIN
+    ports:
+      - "8006:8006"        # web viewer (noVNC) — run the installer here
+      - "5900:5900/tcp"    # raw VNC — vncdotool screenshots/clicks
+      - "5900:5900/udp"
+      - "2222:22"          # SSH (install openssh-server in the guest first)
+    volumes:
+      - linux_storage:/storage
+      # Built artifacts + local-feed land here; in the guest reach them via the
+      # Samba share //host.lan/Data (mount -t cifs) — no dev tree in the VM.
+      - ./shared:/data
+    stop_grace_period: 2m
+    restart: "no"
+
+volumes:
+  linux_storage:
