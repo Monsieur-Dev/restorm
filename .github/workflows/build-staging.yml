@@ -11,6 +11,12 @@ on:
   push:
     branches:
       - main
+    paths-ignore:
+      - restorm/CHANGELOG.md
+      - restorm/changelogs/**
+      - restorm/docs/**
+      - electron-core-ui/docs/**
+      - '**/*.md'
   workflow_dispatch: {}
 
 # Avoid piling up builds if several merges land quickly.
