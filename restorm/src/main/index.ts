@@ -317,8 +317,11 @@ function createWindow(): MainWindow | undefined {
           void getFileService().open(targetPath).then(async (result) => {
             if (result.success) {
               logger.info('File opened successfully on startup')
-              const format = (result as { format?: string }).format ?? 'yaml'
-              await attachDraftStoreForFile(targetPath, format as PersistenceFormat)
+              // A `.restorm` project file is YAML on disk, and `open()`
+              // reports no format of its own, so the draft store reads and
+              // writes YAML too. Give it a different serializer only once
+              // single-file projects can be something else.
+              await attachDraftStoreForFile(targetPath, 'yaml')
             } else {
               logger.error('Failed to open file on startup:', { path: targetPath })
             }
@@ -456,9 +459,22 @@ logger.info('File Service initialized')
 // opened in file mode. File mode and folder mode must behave identically
 // with respect to dirty-state tracking and draft recovery — the only
 // difference between them is the on-disk layout of the user's saved
-// content. Folder mode wires the draft store through the dedicated
-// `restorm:open-path` / command-line paths above; this listener covers
-// the regular `file:open` IPC which goes straight to FileService.
+// content.
+//
+// This listener is a SAFETY NET, not the complement of the explicit
+// callers: it fires for EVERY file-mode open, including the ones that
+// already call `attachDraftStoreForFile` themselves (`restorm:open-path`,
+// the command-line / reopen-last-file startup path). `FileService.open()`
+// publishes the new path synchronously, so this runs before the awaiting
+// caller's own call and the two overlap. That's fine, and deliberately
+// so: `attachDraftStore` de-duplicates per project, so however many
+// callers converge on one open, the drafts are read once and the
+// "unsaved work restored" toast fires once. Its value is covering the
+// paths that DON'T attach explicitly — the plain `file:open` IPC — without
+// each new call site having to remember to.
+//
+// Folder-mode opens never reach here (the path is a directory, filtered
+// out below); they attach through `attachDraftStoreForFolder` only.
 {
   let lastFilePath: string | null = null
   getFileService().onStateChanged((state) => {

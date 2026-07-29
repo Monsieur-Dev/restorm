@@ -9,7 +9,6 @@ import { miniBrowserService } from './services/MiniBrowserService'
 import { assertPathWithinParent, isPathContained, resolveOpenedFolderBoundary } from './utils/pathSecurity'
 import { secretHydrationService } from './services/secrets/SecretHydrationService'
 import { saveFolderStructure, loadFolderStructure, attachDraftStoreForFolder, attachDraftStoreForFile } from './FileOperations'
-import type { PersistenceFormat } from 'electron-core-ui'
 import { resolveRequestURL, type URLResolutionInput } from './services/request/HTTPRequestService'
 import { httpExecutionService, type HTTPExecutionInput } from './services/HTTPExecutionService'
 import { authPrefetchOneShot, resolveProducedHeaders } from './services/AuthenticationPrefetch'
@@ -649,9 +648,10 @@ export function registerRestormIPC(deps: {
           // Attach the crash-recovery draft store for file mode — the
           // per-unit dirty state / draft writes must behave the same as
           // in folder mode (only the on-disk layout of saved content
-          // differs).
-          const format = (fileResult as { format?: string }).format ?? 'yaml'
-          await attachDraftStoreForFile(path, format as PersistenceFormat)
+          // differs). A `.restorm` project file is YAML on disk, and
+          // `open()` reports no format of its own, so the draft store
+          // reads and writes YAML too.
+          await attachDraftStoreForFile(path, 'yaml')
         }
         return fileResult
       }
