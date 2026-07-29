@@ -1,6 +1,7 @@
 import { describe, it, expect, vi } from 'vitest'
 import { CrashReportingService, type CrashSdkPort, type CrashSdkInitOptions } from './CrashReportingService'
 import type { ConsentDecision } from 'electron-core-ui/main'
+import type { CrashArmedState } from '../../../shared/crash/crashTypes'
 import type { WindowCrashReport } from './windowCrashObserver'
 
 const DSN = 'https://k@o4507.ingest.de.sentry.io/1'
@@ -35,6 +36,7 @@ function consent(overrides: Partial<ConsentDecision> = {}): ConsentDecision {
 function build(overrides: {
   dsn?: string | undefined
   readConsent?: () => ConsentDecision | null
+  onArmedChanged?: (state: CrashArmedState) => void
 } = {}): { service: CrashReportingService; sdk: ReturnType<typeof makeSdk> } {
   const sdk = makeSdk()
   const service = new CrashReportingService({
@@ -43,7 +45,8 @@ function build(overrides: {
     release: 'restorm@0.1.19',
     beforeSend: (e) => e,
     beforeBreadcrumb: (b) => b,
-    readConsent: overrides.readConsent ?? ((): ConsentDecision => consent())
+    readConsent: overrides.readConsent ?? ((): ConsentDecision => consent()),
+    onArmedChanged: overrides.onArmedChanged
   })
   return { service, sdk }
 }
@@ -190,6 +193,62 @@ describe('CrashReportingService — idempotence', () => {
     // Disarmed regardless: a failed flush must not leave us believing we are
     // still permitted to send.
     expect(service.isArmed()).toBe(false)
+  })
+
+  it('announces the armed state so the renderer can follow it', async () => {
+    const states: CrashArmedState[] = []
+    let decision = consent({ source: 'default' })
+    const { service } = build({
+      readConsent: () => decision,
+      onArmedChanged: (state) => { states.push(state) }
+    })
+
+    await service.sync()
+    decision = consent({ source: 'user', granted: true })
+    await service.sync()
+    decision = consent({ source: 'user', granted: false })
+    await service.sync()
+
+    expect(states).toEqual([
+      { armed: false, reason: 'consent-unanswered' },
+      { armed: true, reason: 'consent-granted' },
+      { armed: false, reason: 'consent-declined' }
+    ])
+  })
+
+  it('announces a reason change even when the armed state itself is unchanged', async () => {
+    // A plan transition can move `plan-mandatory` to `consent-granted` while
+    // `armed` stays true. Not announcing it would leave the renderer logging a
+    // reason that is no longer why reporting is on.
+    const states: CrashArmedState[] = []
+    let decision = consent({ source: 'forced-on' })
+    const { service } = build({
+      readConsent: () => decision,
+      onArmedChanged: (state) => { states.push(state) }
+    })
+
+    await service.sync()
+    decision = consent({ source: 'user', granted: true })
+    await service.sync()
+
+    expect(states).toEqual([
+      { armed: true, reason: 'plan-mandatory' },
+      { armed: true, reason: 'consent-granted' }
+    ])
+  })
+
+  it('does not announce anything when nothing changed', async () => {
+    const onArmedChanged = vi.fn()
+    const { service } = build({ onArmedChanged })
+    await service.sync()
+    await service.sync()
+    await service.sync()
+    expect(onArmedChanged).toHaveBeenCalledTimes(1)
+  })
+
+  it('reports not-armed before the first sync, so an early reader fails closed', () => {
+    const { service } = build()
+    expect(service.getArmedState()).toEqual({ armed: false, reason: 'no-gate' })
   })
 
   it('logs the reason on each transition', async () => {

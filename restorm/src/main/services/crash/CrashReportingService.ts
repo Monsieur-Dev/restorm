@@ -18,6 +18,7 @@ import {
   shouldInitCrashReporting,
   type CrashReportingDecision
 } from './crashReportingDecision'
+import type { CrashArmedState, CrashReportingReason } from '../../../shared/crash/crashTypes'
 import type { WindowCrashReport } from './windowCrashObserver'
 
 /** Options handed to the SDK at init. Structural, so the port stays testable. */
@@ -55,11 +56,24 @@ export interface CrashReportingServiceOptions {
   /** Reads the live consent decision. Called on every re-evaluation, so it must
    * reflect the CURRENT state rather than a snapshot. */
   readConsent: () => ConsentDecision | null
+  /**
+   * Announces every change to the armed state. The renderer subscribes through
+   * this so its own SDK follows the main process rather than re-deriving the
+   * policy — one rule, one place, and no window in which the two disagree.
+   */
+  onArmedChanged?: ((state: CrashArmedState) => void) | undefined
   log?: ((message: string, fields?: Record<string, unknown>) => void) | undefined
 }
 
 export class CrashReportingService {
   private armed = false
+  /**
+   * Reason behind the CURRENT armed state. Seeded with `no-gate` because that
+   * is literally true before the first `sync()` — nothing has been resolved
+   * yet — and it is the fail-closed value, so a renderer that somehow asks
+   * early is told "not armed" rather than being left to guess.
+   */
+  private reason: CrashReportingReason = 'no-gate'
   /** Serialises teardown so a burst of consent changes can't interleave an
    * `init` with an in-flight `close`. */
   private closing: Promise<void> | null = null
@@ -69,6 +83,11 @@ export class CrashReportingService {
   /** True when the SDK is currently initialised. */
   isArmed(): boolean {
     return this.armed
+  }
+
+  /** The armed state as the renderer sees it. */
+  getArmedState(): CrashArmedState {
+    return { armed: this.armed, reason: this.reason }
   }
 
   /**
@@ -93,6 +112,7 @@ export class CrashReportingService {
    * just what happened.
    */
   async sync(): Promise<CrashReportingDecision> {
+    const wasArmed = this.armed
     const decision = shouldInitCrashReporting({
       dsn: this.options.dsn,
       consent: this.options.readConsent()
@@ -120,6 +140,16 @@ export class CrashReportingService {
       await this.closing
       this.closing = null
       this.options.log?.('Crash reporting disarmed', { reason: decision.reason })
+    }
+
+    // Announce AFTER the SDK has actually been armed or torn down, so a
+    // listener can never observe a state the SDK has not reached yet. The
+    // reason is announced too — it changes on its own (a plan transition can
+    // move `plan-mandatory` to `consent-granted` without moving `armed`), and a
+    // stale reason turns a diagnostic log line into a misleading one.
+    if (this.armed !== wasArmed || this.reason !== decision.reason) {
+      this.reason = decision.reason
+      this.options.onArmedChanged?.(this.getArmedState())
     }
     return decision
   }

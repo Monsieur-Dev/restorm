@@ -88,6 +88,7 @@ import { existsSync, statSync } from 'fs'
 import { spawn } from 'node:child_process'
 import { searchIndexService, contextService, responseHistoryService, requestUsageService, scenarioUsageService, authenticationCacheService, updateService } from './services'
 import { registerUpdateIpc } from './ipc/updateHandlers'
+import { registerCrashIpc } from './ipc/crashHandlers'
 import { registerRestormMcp } from './mcp'
 import { isHeadlessHost as isHeadlessHostPure, isMcpEnabledForLaunch, shouldLaunchInactive } from './mcp/mcpEnablement'
 import { readAutoSaveOn, type InstanceLifecycleHost } from './mcp/tools/instances'
@@ -1185,6 +1186,11 @@ registerRestormIPC({ editorWindows, closeAllWindows })
 
 // Auto-update IPC (window.api.update.*)
 registerUpdateIpc()
+
+// Crash-reporting IPC (window.api.crash.*). Read-only: it lets the renderer
+// discover whether reporting is armed so its own SDK can follow, and offers no
+// way to arm it — that stays a main-process decision behind the consent gate.
+registerCrashIpc()
 
 // Wire the scenario execution engine's IPC bridge unconditionally — the Run /
 // Debug / Step controls in the scenario editor drive it, so it must exist in

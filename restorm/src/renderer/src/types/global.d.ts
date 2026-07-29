@@ -16,6 +16,7 @@ import type {
 import type { ResponseHistoryDetail, ResponseHistoryEntry } from '../../../shared/types/collections'
 import type { AuthState, CheckoutResult, PortalResult } from '../../../shared/auth/authState'
 import type { UpdateState, UpdateSettings, ReleaseNoteSection } from '../../../shared/update/updateTypes'
+import type { CrashArmedState } from '../../../shared/crash/crashTypes'
 
 declare global {
   interface Window {
@@ -111,6 +112,12 @@ declare global {
         getLastSeenVersion: () => Promise<string | null>
         markVersionSeen: (version: string) => Promise<void>
         onStateChanged: (callback: (state: UpdateState) => void) => (() => void)
+      }
+      /** Crash reporting, read-only (see `src/main/services/crash/`). The
+       * renderer follows the main process's armed state; it cannot change it. */
+      crash: {
+        getArmedState: () => Promise<CrashArmedState>
+        onArmedStateChanged: (callback: (state: CrashArmedState) => void) => (() => void)
       }
       /** electron-core-ui's Git plumbing — see `electron-core-ui/docs/Git/README.md`.
        * Mirrors `WindowApiGit` in electron-core-ui's own `global.d.ts`; restorm

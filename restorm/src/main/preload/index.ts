@@ -54,6 +54,19 @@ import {
   type UpdateSettings,
   type UpdateState
 } from '../../shared/update/updateTypes'
+import { CRASH_IPC, type CrashArmedState } from '../../shared/crash/crashTypes'
+import { hookupIpc as hookupSentryIpc } from '@sentry/electron/preload-namespaced'
+
+// Expose the crash SDK's renderer↔main IPC conduit (`window.__SENTRY_IPC__`).
+//
+// This is plumbing, not an armed SDK: a set of `ipcRenderer.send` wrappers with
+// no client behind them. Nothing calls them unless the renderer SDK has been
+// initialised, which only happens once the main process reports crash reporting
+// armed; and until the main process arms, it has registered no listener at the
+// other end, so a message would go nowhere. The conduit is exposed
+// unconditionally because a preload cannot wait for an async consent answer —
+// the gate lives where it can be enforced, one layer up.
+hookupSentryIpc()
 
 // Expose core-ui APIs (imported from core-ui preload modules) and extend with restorm project API
 const coreUIAPI = createCoreUIAPI()
@@ -234,6 +247,20 @@ contextBridge.exposeInMainWorld('api', {
       const handler = (_event: unknown, state: UpdateState): void => { callback(state) }
       ipcRenderer.on(UPDATE_IPC.STATE_CHANGED, handler)
       return (): void => { ipcRenderer.off(UPDATE_IPC.STATE_CHANGED, handler) }
+    }
+  },
+  // Crash reporting, read-only. The renderer learns whether reporting is armed
+  // so its own SDK can follow the main process; it is given no way to arm it.
+  crash: {
+    /** The resolved armed state — the only input to the renderer's SDK gate. */
+    getArmedState: async (): Promise<CrashArmedState> => {
+      return (await ipcRenderer.invoke(CRASH_IPC.GET_ARMED_STATE)) as CrashArmedState
+    },
+    /** Subscribe to arm/disarm transitions. Returns an unsubscribe fn. */
+    onArmedStateChanged: (callback: (state: CrashArmedState) => void): (() => void) => {
+      const handler = (_event: unknown, state: CrashArmedState): void => { callback(state) }
+      ipcRenderer.on(CRASH_IPC.ARMED_STATE_CHANGED, handler)
+      return (): void => { ipcRenderer.off(CRASH_IPC.ARMED_STATE_CHANGED, handler) }
     }
   }
 })

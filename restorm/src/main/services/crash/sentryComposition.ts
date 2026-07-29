@@ -13,15 +13,37 @@
  * the SDK even briefly.
  */
 
-import { app } from 'electron'
+import { app, BrowserWindow } from 'electron'
 import { logger } from 'electron-core-ui/main'
 import { crashDsn } from '../../../shared/config/observability'
+import { CRASH_IPC, type CrashArmedState } from '../../../shared/crash/crashTypes'
 import { getConsentService } from '../privacy/consentComposition'
 import { CrashReportingService, type CrashSdkPort } from './CrashReportingService'
 import { makeBeforeSend, makeBeforeBreadcrumb } from './sentryScrub'
+import { withoutUnscrubbableIntegrations } from './sentryIntegrations'
 import { observeWindowCrashes } from './windowCrashObserver'
 
 let instance: CrashReportingService | null = null
+
+/**
+ * Push the armed state to every live window.
+ *
+ * Broadcast rather than targeted: a renderer that has just been created still
+ * reads the state itself over `GET_ARMED_STATE`, so this only has to reach the
+ * windows that already exist. Destroyed windows are skipped — a `webContents`
+ * that has gone away throws, and the whole point of this subsystem is that it
+ * cannot be the thing that breaks the app.
+ */
+function broadcastArmedState(state: CrashArmedState): void {
+  for (const window of BrowserWindow.getAllWindows()) {
+    if (window.isDestroyed()) continue
+    try {
+      window.webContents.send(CRASH_IPC.ARMED_STATE_CHANGED, state)
+    } catch {
+      // A window can be torn down between the check and the send.
+    }
+  }
+}
 
 /**
  * The real SDK, loaded LAZILY.
@@ -38,6 +60,33 @@ function makeSentryPort(): CrashSdkPort {
       Sentry.init({
         dsn: options.dsn,
         release: options.release,
+        // Renderer↔main transport: Electron IPC ONLY, never the SDK's custom
+        // protocol. This is a hard requirement, not a preference. The SDK's
+        // default (`IPCMode.Both`) registers a privileged URL scheme, which
+        // Electron only permits before the `ready` event — the SDK throws
+        // outright if `init` runs later. But arming is gated on a consent answer
+        // that is not resolved until after `ready`, so the default mode and the
+        // privacy contract are mutually exclusive, and the contract wins.
+        //
+        // Classic mode registers `ipcMain` listeners instead, which have no
+        // lifecycle constraint. The renderer reaches them through the bridge the
+        // preload exposes; with the protocol scheme unregistered, the SDK's
+        // fetch fallback has nowhere to go, so IPC is the only path — which is
+        // also the path that keeps the renderer entirely off the network.
+        ipcMode: Sentry.IPCMode.Classic,
+        // Remove the two default integrations whose payload rides as an
+        // ATTACHMENT — native minidumps and crash screenshots. `beforeSend`
+        // never sees attachment bytes, so neither can be scrubbed nor dropped by
+        // the gate every other payload passes. See `sentryIntegrations.ts`.
+        integrations: (defaults) => withoutUnscrubbableIntegrations(defaults),
+        // A transport that does NOT queue to disk. The SDK's default is an
+        // offline store that writes undelivered envelopes to disk and flushes
+        // them at the NEXT startup — so a crash captured before a revocation
+        // would be sent after it, once the user re-granted. That is
+        // drop-don't-queue inverted: a queue that outlives the decision turns a
+        // withdrawal into a delay. The cost is a crash that happens while
+        // offline, which is the cheaper half of the trade here.
+        transport: Sentry.makeElectronTransport,
         // The scrubbing gate. Both hooks return `null` to DROP, so an event that
         // cannot be proven clean is discarded rather than sent.
         beforeSend: (event) =>
@@ -103,18 +152,37 @@ export function initCrashReporting(): CrashReportingService | null {
       onDropped: (message, fields) => { logger.warn(message, fields) }
     }),
     readConsent: () => getConsentService()?.getDecision('crash') ?? null,
+    onArmedChanged: broadcastArmedState,
     log: (message, fields) => { logger.info(message, fields) }
   })
 
-  void service.sync().then((decision) => {
-    logger.info('Crash reporting resolved', { armed: decision.init, reason: decision.reason })
-  })
+  void service
+    .sync()
+    .then((decision) => {
+      logger.info('Crash reporting resolved', { armed: decision.init, reason: decision.reason })
+    })
+    // Arming touches the SDK, and the SDK can throw for reasons that have
+    // nothing to do with us (a malformed DSN, an Electron version it refuses).
+    // Without this, such a failure would be an unhandled rejection: crash
+    // reporting would silently never arm, and the one subsystem whose job is to
+    // tell us something broke would be the one failing in silence.
+    .catch((error: unknown) => {
+      logger.error('Crash reporting failed to arm; it stays disarmed', {
+        message: error instanceof Error ? error.message : String(error)
+      })
+    })
 
   // Re-evaluate whenever consent moves. Covers both halves of AC-level
   // behaviour: a hot opt-out disarms immediately, and a grant arms without a
   // restart. Plan changes reach here too — `consentComposition` re-syncs the
   // gate on every auth broadcast.
-  consentService?.onChange(() => { void service.sync() })
+  consentService?.onChange(() => {
+    void service.sync().catch((error: unknown) => {
+      logger.error('Crash reporting failed to re-sync after a consent change', {
+        message: error instanceof Error ? error.message : String(error)
+      })
+    })
+  })
 
   // Witness renderer deaths for EVERY window, including the splash — a
   // `data:text/html` document with no script context, so nothing inside it

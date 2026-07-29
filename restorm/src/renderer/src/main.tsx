@@ -14,12 +14,47 @@ import { CapabilityGateHost } from './components/CapabilityGateHost'
 import { initializeGraphQL } from './services/GraphQLIntegration'
 import { registerRendererSources } from './secrets/registerRendererSources'
 import { UpdateActionsRenderer } from './components/Settings/UpdateActionsRenderer'
+import { initRendererCrashReporting } from './crash/initRendererCrashReporting'
+import { initRendererSentry } from './crash/rendererSentry'
 import { DEFAULT_UI_DELAY_MS } from '../../shared/config/constants'
 
 // Populate the renderer's copy of the value-source registry (descriptors only;
 // resolvers stay main-side). Synchronous + idempotent — done once at module
 // load so the type-pick menu can enumerate secret sources before first render.
 registerRendererSources()
+
+// Crash reporting, as early as this module runs — but armed only if the main
+// process says consent allows it, which is an async answer. Started here rather
+// than after i18n/GraphQL so the request is in flight while those initialise,
+// which is the difference between covering a mount-time error and missing it.
+// The catastrophic case (the renderer process dying outright) needs no help
+// from here: it is witnessed from the main process, which is the only thing
+// left alive to witness it.
+// Guarded: this runs at module load, before anything is rendered, so an
+// exception here is a blank window rather than a missing crash report. The
+// namespace is checked rather than assumed because a preload that loaded from a
+// stale build would otherwise take the whole renderer down — an absurd way to
+// lose the app to a subsystem whose entire purpose is to observe it failing.
+try {
+  // `window.api` is DECLARED as always carrying the bridge, but the declaration
+  // describes the preload we build, not necessarily the one that loaded. Widen
+  // deliberately so the check below is a real question rather than one the type
+  // system has already answered.
+  const crashApi = (window.api as Partial<Window['api']> | undefined)?.crash
+  if (crashApi === undefined) {
+    ElectronCoreUi.logger.warn('Crash reporting bridge missing; renderer reporting stays off')
+  } else {
+    initRendererCrashReporting({
+      api: crashApi,
+      initSdk: initRendererSentry,
+      log: (message, fields) => { ElectronCoreUi.logger.info(message, fields) }
+    })
+  }
+} catch (error) {
+  ElectronCoreUi.logger.warn('Crash reporting failed to start; the app continues without it', {
+    error: error instanceof Error ? error.message : String(error)
+  })
+}
 
 // Custom settings renderer for the "Updates" group (version + live status +
 // "Check now"), bound to the `update-actions` setting type in settings.yaml.

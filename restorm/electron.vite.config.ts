@@ -92,7 +92,14 @@ export default defineConfig({
     // electron-vite emits a bare `require('zod/v4')` that fails to resolve at
     // preload load → the module throws before `contextBridge.exposeInMainWorld`
     // runs → `window.restorm` is undefined → the renderer never signals ready.
-    plugins: [externalizeDepsPlugin({ exclude: ['zod'] })],
+    //
+    // `@sentry/electron` is excluded for the same reason: the preload exposes
+    // the crash SDK's IPC conduit, and a bare `require` of it at preload load is
+    // the same single point of failure — one that would take the whole window
+    // down to serve a subsystem that is supposed to be invisible. The bundled
+    // module is a few dozen lines of `ipcRenderer.send` wrappers, so inlining it
+    // costs nothing and removes the resolution question entirely.
+    plugins: [externalizeDepsPlugin({ exclude: ['zod', '@sentry/electron'] })],
     build: {
       // Output next to main/renderer under dist/ (electron-vite's default is
       // out/preload). electron-builder only packages dist/**, and in prod the

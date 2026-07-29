@@ -13,24 +13,12 @@
  */
 
 import type { ConsentDecision } from 'electron-core-ui/main'
+import type { CrashReportingReason } from '../../../shared/crash/crashTypes'
 
-/** Why crash reporting is or isn't armed. Surfaced in logs so an operator can
- * tell "the user said no" from "nobody configured a DSN" without guessing. */
-export type CrashReportingReason =
-  /** No DSN is configured — crash reporting is not provisioned in this build. */
-  | 'no-dsn'
-  /** The consent gate isn't declared (service not initialised). Fails closed. */
-  | 'no-gate'
-  /** The account's plan mandates reporting; the stored value cannot override it. */
-  | 'plan-mandatory'
-  /** The plan forbids reporting outright. */
-  | 'plan-forbidden'
-  /** The user has not answered yet. See {@link shouldInitCrashReporting}. */
-  | 'consent-unanswered'
-  /** The user explicitly said yes. */
-  | 'consent-granted'
-  /** The user explicitly said no. */
-  | 'consent-declined'
+// The reason vocabulary lives in `shared/` because the renderer is told it too
+// (see `shared/crash/crashTypes.ts`). Re-exported here so main-side callers keep
+// importing it from the module that produces it.
+export type { CrashReportingReason }
 
 export interface CrashReportingDecision {
   /** `true` ⇒ the SDK may be initialised and events may be sent. */
