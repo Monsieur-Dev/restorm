@@ -60,11 +60,23 @@ combined one.
 2. Bump the version (the release tooling / `manual-release.yml` creates the
    version bump + tag). `scripts/ship.sh --release <patch|minor|major>` does this
    automatically right after the merge.
-3. The release CI (`release.yml`) builds on each platform, signs where configured,
-   and uploads the artifacts + `latest-*.yml` + `.blockmap` to the generic feed.
-   `AppImage` is a required Linux target (the only auto-updatable Linux format).
-4. Confirm the feed has the new `latest-linux.yml` / `latest.yml` /
-   `latest-mac.yml` and the matching installers.
+3. `manual-release.yml` then **calls `release.yml` itself**, in the same run —
+   nothing to trigger by hand. (It has to: a tag pushed by CI carries the
+   `GITHUB_TOKEN`, and GitHub never starts a workflow from a `GITHUB_TOKEN`
+   event, so `release.yml`'s own `on: push: tags` trigger stays silent for it. A
+   tag pushed by a human does trigger it directly.)
+4. `release.yml` builds on each platform, signs where configured, and uploads the
+   artifacts + `latest-*.yml` + `.blockmap` to the generic feed. `AppImage` is a
+   required Linux target (the only auto-updatable Linux format). The feed is the
+   **only** distribution channel — no GitHub Release is published, and nothing is
+   downloadable from the repository. A final job
+   mirrors the **release notes** next to them: `CHANGELOG.md`,
+   `changelogs/<locale>.md` for every locale (English included, as
+   `changelogs/en.md`), and this version's section alone as
+   `release-notes/vX.Y.Z.md` — so any consumer reads the notes from the feed
+   without needing access to this repository.
+5. Confirm the feed has the new `latest-linux.yml` / `latest.yml` /
+   `latest-mac.yml`, the matching installers, and `release-notes/vX.Y.Z.md`.
 
 ## Exercising auto-update locally (dev mock)
 

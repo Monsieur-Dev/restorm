@@ -378,10 +378,10 @@ echo "🎉 Shipped: ${BRANCH} merged into ${BASE} (took $(elapsed)). Remote bran
 
 # ── Optional release (--release) ───────────────────────────────────────
 # Only reached after a real merge (the --no-merge guard above rejects the
-# combination). Bumps + tags via manual-release.yml, then kicks the platform
-# build (release.yml) — its tag, pushed with GITHUB_TOKEN, doesn't self-trigger
-# the `on: push: tags` build, so we launch it explicitly. Never fails the ship:
-# the merge already landed; a release hiccup just prints the manual commands.
+# combination). Bumps + tags via manual-release.yml, which chains the platform
+# build (release.yml) into the same run itself — we only wait for the tag to
+# confirm the bump landed. Never fails the ship: the merge already landed; a
+# release hiccup just prints the manual commands.
 if [ -n "${RELEASE_TYPE}" ]; then
   echo "🚀 Launching ${RELEASE_TYPE} release…"
   git fetch origin --tags --quiet 2>/dev/null || true
@@ -407,10 +407,10 @@ if [ -n "${RELEASE_TYPE}" ]; then
         if git rev-parse -q --verify "refs/tags/${NEW_TAG}" >/dev/null 2>&1; then TAGGED=1; break; fi
         sleep 15
       done
-      if [ "${TAGGED}" -eq 1 ] && gh workflow run release.yml --ref "${NEW_TAG}"; then
-        echo "🚀 Release build launched for ${NEW_TAG}. Watch: gh run watch \$(gh run list --workflow=release.yml --limit 1 --json databaseId -q '.[0].databaseId')"
+      if [ "${TAGGED}" -eq 1 ]; then
+        echo "🚀 ${NEW_TAG} tagged; the release build is chained to the same run. Watch: gh run watch \$(gh run list --workflow=manual-release.yml --limit 1 --json databaseId -q '.[0].databaseId')"
       else
-        echo "⚠️  ${NEW_TAG} not built automatically; run: gh workflow run release.yml --ref ${NEW_TAG}" >&2
+        echo "⚠️  ${NEW_TAG} still not tagged; check: gh run list --workflow=manual-release.yml --limit 1" >&2
       fi
     fi
   fi

@@ -5,7 +5,8 @@ name: Build (staging artifacts)
 # access). These are NOT public releases; they let us grab the latest main build
 # for testing without cutting a version.
 #
-# MVP scope: Linux only, unsigned (same as release.yml; Windows/macOS = TASK-63).
+# MVP scope: Linux only, unsigned (same as release.yml — signed Windows/macOS
+# staging builds are still to come).
 
 on:
   push:

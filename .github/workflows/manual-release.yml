@@ -1,9 +1,9 @@
 name: Manual Release (production)
 
 # On-demand PRODUCTION release. Pick patch/minor/major → this bumps
-# restorm/package.json, commits, creates the tag vX.Y.Z and pushes it. The tag
-# then triggers release.yml, which builds the distributables and publishes them
-# to the PUBLIC bucket (dl.restorm.app) + a GitHub Release.
+# restorm/package.json, commits, creates the tag vX.Y.Z and pushes it, then calls
+# release.yml, which builds the distributables and publishes them + the release
+# notes to the PUBLIC bucket (dl.restorm.app) — the only distribution channel.
 #
 # (Preview builds, by contrast, happen automatically on every merge to main via
 # build-staging.yml → the private restorm-builds bucket.)
@@ -28,6 +28,8 @@ jobs:
   bump-and-tag:
     name: Bump version and tag
     runs-on: ubuntu-latest
+    outputs:
+      new_version: ${{ steps.bump.outputs.new_version }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -65,3 +67,19 @@ jobs:
           git tag "v${{ steps.bump.outputs.new_version }}"
           git push origin HEAD:main
           git push origin "v${{ steps.bump.outputs.new_version }}"
+
+  release:
+    name: Build and publish
+    needs: bump-and-tag
+    # The tag above is pushed with GITHUB_TOKEN, and GitHub deliberately never
+    # starts a workflow from a GITHUB_TOKEN event (anti-recursion) — so the
+    # `on: push: tags` trigger in release.yml does NOT fire for it. Calling
+    # release.yml as a reusable workflow chains the build into this same run
+    # instead: nothing to trigger by hand, and no long-lived token to create,
+    # rotate, or silently let expire. A tag pushed by a human still triggers
+    # release.yml on its own.
+    uses: ./.github/workflows/release.yml
+    with:
+      tag: v${{ needs.bump-and-tag.outputs.new_version }}
+    # R2 credentials + GITHUB_TOKEN for the build and the uploads.
+    secrets: inherit
