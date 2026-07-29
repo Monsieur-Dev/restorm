@@ -2574,5 +2574,14 @@
       "send": "Wyślij",
       "discard": "Nie wysyłaj"
     }
+  },
+  "crashRecovery": {
+    "message": "Restorm napotkał problem i musi zostać uruchomiony ponownie.",
+    "relaunch": "Uruchom ponownie Restorm",
+    "notice": {
+      "title": "Plik nie został ponownie otwarty",
+      "body": "Plik {{file}} nie został ponownie otwarty: Restorm uległ awarii podczas jego otwierania przy poprzednim uruchomieniu. Plik jest nienaruszony — można go otworzyć z ostatnio używanych plików.",
+      "bodyUnnamed": "Ostatni plik nie został ponownie otwarty: Restorm uległ awarii podczas jego otwierania przy poprzednim uruchomieniu. Plik jest nienaruszony — można go otworzyć z ostatnio używanych plików."
+    }
   }
 }

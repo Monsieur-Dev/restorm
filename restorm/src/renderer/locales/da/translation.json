@@ -2572,5 +2572,14 @@
       "send": "Send",
       "discard": "Send ikke"
     }
+  },
+  "crashRecovery": {
+    "message": "Restorm stødte på et problem og skal genstartes.",
+    "relaunch": "Genstart Restorm",
+    "notice": {
+      "title": "Filen blev ikke genåbnet",
+      "body": "{{file}} blev ikke genåbnet: Restorm gik ned, mens den blev åbnet ved forrige opstart. Din fil er intakt — du kan åbne den igen fra de seneste filer.",
+      "bodyUnnamed": "Den seneste fil blev ikke genåbnet: Restorm gik ned, mens den blev åbnet ved forrige opstart. Din fil er intakt — du kan åbne den igen fra de seneste filer."
+    }
   }
 }

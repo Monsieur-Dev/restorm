@@ -2572,5 +2572,14 @@
       "send": "Enviar",
       "discard": "Não enviar"
     }
+  },
+  "crashRecovery": {
+    "message": "O Restorm encontrou um problema e precisa de ser reiniciado.",
+    "relaunch": "Reiniciar o Restorm",
+    "notice": {
+      "title": "Ficheiro não reaberto",
+      "body": "{{file}} não foi reaberto: o Restorm falhou ao abri-lo no arranque anterior. O seu ficheiro está intacto — pode reabri-lo a partir dos ficheiros recentes.",
+      "bodyUnnamed": "O último ficheiro não foi reaberto: o Restorm falhou ao abri-lo no arranque anterior. O seu ficheiro está intacto — pode reabri-lo a partir dos ficheiros recentes."
+    }
   }
 }

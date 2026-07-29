@@ -2572,5 +2572,14 @@
       "send": "Envoyer",
       "discard": "Ne pas envoyer"
     }
+  },
+  "crashRecovery": {
+    "message": "Restorm a rencontré un problème et doit être relancé.",
+    "relaunch": "Relancer Restorm",
+    "notice": {
+      "title": "Fichier non rouvert",
+      "body": "{{file}} n'a pas été rouvert : Restorm a planté en l'ouvrant lors du lancement précédent. Votre fichier est intact — vous pouvez le rouvrir depuis les fichiers récents.",
+      "bodyUnnamed": "Le dernier fichier n'a pas été rouvert : Restorm a planté en l'ouvrant lors du lancement précédent. Votre fichier est intact — vous pouvez le rouvrir depuis les fichiers récents."
+    }
   }
 }

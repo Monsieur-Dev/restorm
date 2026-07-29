@@ -2572,5 +2572,14 @@
       "send": "Invia",
       "discard": "Non inviare"
     }
+  },
+  "crashRecovery": {
+    "message": "Restorm ha riscontrato un problema e deve essere riavviato.",
+    "relaunch": "Riavvia Restorm",
+    "notice": {
+      "title": "File non riaperto",
+      "body": "{{file}} non è stato riaperto: Restorm si è arrestato durante la sua apertura all'avvio precedente. Il file è intatto: può riaprirlo dai file recenti.",
+      "bodyUnnamed": "L'ultimo file non è stato riaperto: Restorm si è arrestato durante la sua apertura all'avvio precedente. Il file è intatto: può riaprirlo dai file recenti."
+    }
   }
 }

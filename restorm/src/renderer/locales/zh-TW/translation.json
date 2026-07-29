@@ -2571,5 +2571,14 @@
       "send": "傳送",
       "discard": "不要傳送"
     }
+  },
+  "crashRecovery": {
+    "message": "Restorm 發生問題，需要重新啟動。",
+    "relaunch": "重新啟動 Restorm",
+    "notice": {
+      "title": "未重新開啟檔案",
+      "body": "未重新開啟 {{file}}：上次啟動時 Restorm 在開啟它的過程中當機了。您的檔案完好無損，可從最近的檔案中重新開啟。",
+      "bodyUnnamed": "未重新開啟上次的檔案：上次啟動時 Restorm 在開啟它的過程中當機了。您的檔案完好無損，可從最近的檔案中重新開啟。"
+    }
   }
 }

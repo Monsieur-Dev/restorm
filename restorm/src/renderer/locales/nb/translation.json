@@ -2572,5 +2572,14 @@
       "send": "Send",
       "discard": "Ikke send"
     }
+  },
+  "crashRecovery": {
+    "message": "Restorm støtte på et problem og må startes på nytt.",
+    "relaunch": "Start Restorm på nytt",
+    "notice": {
+      "title": "Filen ble ikke åpnet på nytt",
+      "body": "{{file}} ble ikke åpnet på nytt: Restorm krasjet da den ble åpnet ved forrige oppstart. Filen din er uskadd — du kan åpne den på nytt fra de siste filene.",
+      "bodyUnnamed": "Den siste filen ble ikke åpnet på nytt: Restorm krasjet da den ble åpnet ved forrige oppstart. Filen din er uskadd — du kan åpne den på nytt fra de siste filene."
+    }
   }
 }

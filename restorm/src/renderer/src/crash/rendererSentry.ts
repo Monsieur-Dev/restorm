@@ -22,6 +22,9 @@
  * process's `beforeSend` / `beforeBreadcrumb` gate before anything is sent, so
  * there is exactly one place where a payload is proven clean.
  */
+
+import { setRendererCrashCapture } from './rendererCrashCapture'
+
 export async function initRendererSentry(): Promise<() => Promise<void>> {
   const Sentry = await import('@sentry/electron/renderer')
 
@@ -32,7 +35,21 @@ export async function initRendererSentry(): Promise<() => Promise<void>> {
     sendDefaultPii: false
   })
 
+  // Give the error boundary a way in. An error a boundary CATCHES never reaches
+  // the SDK's global handlers — React handles it and the process lives on — so
+  // without this the white-screen case would be the one crash that goes
+  // unreported, which is the opposite of what a user seeing a white screen
+  // needs. Only the error is sent: React's component stack carries source file
+  // paths, and the scrubbing gate is fail-closed, so attaching it would trade a
+  // little context for whole reports being silently dropped.
+  setRendererCrashCapture((error) => {
+    Sentry.captureException(error, { tags: { crash_boundary: 'renderer-root' } })
+  })
+
   return async () => {
+    // Emptied FIRST: after this returns the SDK may no longer send, and a
+    // boundary firing mid-teardown must not find a live capture path.
+    setRendererCrashCapture(null)
     // Closing stops the client processing and forwarding events. The main
     // process is torn down independently on the same revocation, so this is the
     // near half of a gate that is closed at both ends.

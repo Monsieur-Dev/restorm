@@ -2572,5 +2572,14 @@
       "send": "Verzenden",
       "discard": "Niet verzenden"
     }
+  },
+  "crashRecovery": {
+    "message": "Restorm heeft een probleem ondervonden en moet opnieuw worden gestart.",
+    "relaunch": "Restorm opnieuw starten",
+    "notice": {
+      "title": "Bestand niet opnieuw geopend",
+      "body": "{{file}} is niet opnieuw geopend: Restorm liep vast bij het openen ervan tijdens de vorige start. Uw bestand is intact — u kunt het openen via de recente bestanden.",
+      "bodyUnnamed": "Het laatste bestand is niet opnieuw geopend: Restorm liep vast bij het openen ervan tijdens de vorige start. Uw bestand is intact — u kunt het openen via de recente bestanden."
+    }
   }
 }

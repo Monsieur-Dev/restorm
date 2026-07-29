@@ -24,7 +24,17 @@ export const CRASH_IPC = {
   /** main → renderer: a scrubbed report is waiting for a send/discard answer. */
   REVIEW_REQUESTED: 'crash:review-requested',
   /** renderer → main: the user's answer for one report. */
-  RESOLVE_REVIEW: 'crash:resolve-review'
+  RESOLVE_REVIEW: 'crash:resolve-review',
+  /**
+   * renderer → main: the user has read the recovery message and wants the app
+   * restarted. The main process records what to reopen and restarts; nothing
+   * comes back, because there is no longer a process to come back to.
+   */
+  RECOVER_RELAUNCH: 'crash:recover-relaunch',
+  /** Whether this launch withheld a file, for a renderer that mounted late. */
+  GET_RECOVERY_NOTICE: 'crash:get-recovery-notice',
+  /** main → renderer: a file was just withheld from this launch. */
+  RECOVERY_NOTICE: 'crash:recovery-notice'
 } as const
 
 /**
@@ -90,6 +100,22 @@ export interface CrashConsentState {
  * is captured after the scrubbing gate has passed, so what is shown is what
  * survived scrubbing, not what arrived at it.
  */
+/**
+ * Whether this launch deliberately did NOT reopen the last file.
+ *
+ * The crash-loop protection is invisible when it works — the app simply starts
+ * empty — and an empty app is indistinguishable from one that lost the user's
+ * work. So the protection announces itself: this is what turns a silence into
+ * a reassurance.
+ */
+export interface CrashRecoveryNotice {
+  /** True when a file was withheld because the previous launch died opening it. */
+  fileWithheld: boolean
+  /** The withheld file, when it is known. Named to the user — recognising the
+   * file is most of the reassurance. Never leaves the machine. */
+  withheldPath: string | null
+}
+
 export interface CrashReviewRequest {
   /** Correlates the answer with the report; not shown to the user. */
   id: string

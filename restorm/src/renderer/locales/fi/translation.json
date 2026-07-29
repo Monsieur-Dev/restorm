@@ -2572,5 +2572,14 @@
       "send": "Lähetä",
       "discard": "Älä lähetä"
     }
+  },
+  "crashRecovery": {
+    "message": "Restormissa tapahtui virhe, ja se on käynnistettävä uudelleen.",
+    "relaunch": "Käynnistä Restorm uudelleen",
+    "notice": {
+      "title": "Tiedostoa ei avattu uudelleen",
+      "body": "{{file}} jätettiin avaamatta: Restorm kaatui sitä avatessaan edellisellä käynnistyskerralla. Tiedostosi on ehjä — voit avata sen uudelleen viimeisimmistä tiedostoista.",
+      "bodyUnnamed": "Viimeisin tiedosto jätettiin avaamatta: Restorm kaatui sitä avatessaan edellisellä käynnistyskerralla. Tiedostosi on ehjä — voit avata sen uudelleen viimeisimmistä tiedostoista."
+    }
   }
 }

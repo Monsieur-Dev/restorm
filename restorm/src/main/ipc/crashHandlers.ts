@@ -8,19 +8,26 @@
  * process, and a channel that could flip it would be a way around the consent
  * gate.
  *
- * The one write records the user's OWN answer, and it cannot defeat the plan
+ * One write records the user's OWN answer, and it cannot defeat the plan
  * either: the consent layer applies the plan override AFTER the stored value, so
  * a Community client asking to opt out still resolves to granted. The write
  * expresses a choice; it does not grant a right the plan withholds.
+ *
+ * The other acts on a choice rather than recording one — the relaunch the
+ * recovery surface offers after a crash. It carries no arguments and no policy:
+ * the main process decides what to reopen, because it is the side that knows
+ * which file was open and whether reopening it is what broke the last launch.
  */
 import { z } from 'zod/v4'
 import { validatedHandle } from 'electron-core-ui'
 import {
   CRASH_IPC,
   type CrashArmedState,
-  type CrashConsentState
+  type CrashConsentState,
+  type CrashRecoveryNotice
 } from '../../shared/crash/crashTypes'
 import { getCrashReportingService } from '../services/crash/sentryComposition'
+import { recoverAndRelaunch, readRecoveryNotice } from '../services/crash/crashRecoveryComposition'
 import { getConsentService } from '../services/privacy/consentComposition'
 import { readCrashConsentState } from '../services/crash/crashConsentState'
 import { noArgs } from './schemas'
@@ -58,5 +65,17 @@ export function registerCrashIpc(): void {
       getConsentService()?.setGranted('crash', granted)
       return readCrashConsentState()
     }
+  )
+
+  validatedHandle(
+    CRASH_IPC.RECOVER_RELAUNCH,
+    noArgs,
+    (): void => { recoverAndRelaunch() }
+  )
+
+  validatedHandle(
+    CRASH_IPC.GET_RECOVERY_NOTICE,
+    noArgs,
+    (): CrashRecoveryNotice => readRecoveryNotice()
   )
 }

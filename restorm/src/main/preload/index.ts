@@ -54,7 +54,7 @@ import {
   type UpdateSettings,
   type UpdateState
 } from '../../shared/update/updateTypes'
-import { CRASH_IPC, type CrashArmedState, type CrashConsentState, type CrashReviewRequest } from '../../shared/crash/crashTypes'
+import { CRASH_IPC, type CrashArmedState, type CrashConsentState, type CrashRecoveryNotice, type CrashReviewRequest } from '../../shared/crash/crashTypes'
 import { hookupIpc as hookupSentryIpc } from '@sentry/electron/preload-namespaced'
 
 // Expose the crash SDK's renderer↔main IPC conduit (`window.__SENTRY_IPC__`).
@@ -285,6 +285,25 @@ contextBridge.exposeInMainWorld('api', {
     /** Answer one pending review. Fire-and-forget: main owns the outcome. */
     resolveReview: (id: string, send: boolean): void => {
       ipcRenderer.send(CRASH_IPC.RESOLVE_REVIEW, id, send)
+    },
+    /**
+     * Restart the app after a crash, reopening what the user was working on.
+     * The returned promise never settles in practice — the process is gone
+     * before a reply could be sent — so callers must not await it.
+     */
+    recoverRelaunch: async (): Promise<void> => {
+      await ipcRenderer.invoke(CRASH_IPC.RECOVER_RELAUNCH)
+    },
+    /** Whether this launch withheld a file, for a renderer that mounted late. */
+    getRecoveryNotice: async (): Promise<CrashRecoveryNotice> => {
+      return (await ipcRenderer.invoke(CRASH_IPC.GET_RECOVERY_NOTICE)) as CrashRecoveryNotice
+    },
+    /** Told when a file is withheld. The decision lands well after this window
+     * loads, so the push — not the read — is what usually delivers it. */
+    onRecoveryNotice: (callback: (notice: CrashRecoveryNotice) => void): (() => void) => {
+      const handler = (_event: unknown, notice: CrashRecoveryNotice): void => { callback(notice) }
+      ipcRenderer.on(CRASH_IPC.RECOVERY_NOTICE, handler)
+      return (): void => { ipcRenderer.off(CRASH_IPC.RECOVERY_NOTICE, handler) }
     }
   }
 })

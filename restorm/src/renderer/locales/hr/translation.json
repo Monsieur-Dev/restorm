@@ -2573,5 +2573,14 @@
       "send": "Pošalji",
       "discard": "Ne šalji"
     }
+  },
+  "crashRecovery": {
+    "message": "Restorm je naišao na problem i mora se ponovno pokrenuti.",
+    "relaunch": "Ponovno pokreni Restorm",
+    "notice": {
+      "title": "Datoteka nije ponovno otvorena",
+      "body": "{{file}} nije ponovno otvorena: Restorm se srušio pri njezinu otvaranju tijekom prethodnog pokretanja. Vaša je datoteka netaknuta — možete je ponovno otvoriti iz nedavnih datoteka.",
+      "bodyUnnamed": "Posljednja datoteka nije ponovno otvorena: Restorm se srušio pri njezinu otvaranju tijekom prethodnog pokretanja. Vaša je datoteka netaknuta — možete je ponovno otvoriti iz nedavnih datoteka."
+    }
   }
 }

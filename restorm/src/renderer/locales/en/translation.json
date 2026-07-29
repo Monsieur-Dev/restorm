@@ -2572,5 +2572,14 @@
       "send": "Send",
       "discard": "Don't send"
     }
+  },
+  "crashRecovery": {
+    "message": "Restorm ran into a problem and needs to be restarted.",
+    "relaunch": "Restart Restorm",
+    "notice": {
+      "title": "File not reopened",
+      "body": "{{file}} was not reopened: Restorm crashed while opening it on the previous launch. Your file is intact — you can reopen it from the recent files.",
+      "bodyUnnamed": "The last file was not reopened: Restorm crashed while opening it on the previous launch. Your file is intact — you can reopen it from the recent files."
+    }
   }
 }

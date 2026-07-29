@@ -2571,5 +2571,14 @@
       "send": "Gửi",
       "discard": "Không gửi"
     }
+  },
+  "crashRecovery": {
+    "message": "Restorm đã gặp sự cố và cần được khởi động lại.",
+    "relaunch": "Khởi động lại Restorm",
+    "notice": {
+      "title": "Không mở lại tệp",
+      "body": "{{file}} không được mở lại: Restorm đã gặp sự cố khi mở tệp này ở lần khởi động trước. Tệp của bạn vẫn nguyên vẹn — bạn có thể mở lại từ các tệp gần đây.",
+      "bodyUnnamed": "Tệp gần nhất không được mở lại: Restorm đã gặp sự cố khi mở tệp này ở lần khởi động trước. Tệp của bạn vẫn nguyên vẹn — bạn có thể mở lại từ các tệp gần đây."
+    }
   }
 }

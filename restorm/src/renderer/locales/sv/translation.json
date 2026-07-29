@@ -2572,5 +2572,14 @@
       "send": "Skicka",
       "discard": "Skicka inte"
     }
+  },
+  "crashRecovery": {
+    "message": "Restorm stötte på ett problem och måste startas om.",
+    "relaunch": "Starta om Restorm",
+    "notice": {
+      "title": "Filen öppnades inte igen",
+      "body": "{{file}} öppnades inte igen: Restorm kraschade när den öppnades vid föregående start. Din fil är oskadd — du kan öppna den från de senaste filerna.",
+      "bodyUnnamed": "Den senaste filen öppnades inte igen: Restorm kraschade när den öppnades vid föregående start. Din fil är oskadd — du kan öppna den från de senaste filerna."
+    }
   }
 }

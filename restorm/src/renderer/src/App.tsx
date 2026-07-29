@@ -153,7 +153,7 @@ import { RestormTitlebar } from './components/MainView/Titlebar/RestormTitlebar'
 import { StatusbarMcpIndicator } from './components/MainView/StatusbarMcpIndicator'
 import { UpdateNotifications } from './components/UpdateNotifications'
 import { CrashConsentPrompt } from './components/Privacy/CrashConsentPrompt'
-import { CrashReportReviewHost } from './components/Privacy/CrashReportReviewHost'
+import { CrashRecoveryNotice } from './components/CrashRecovery/CrashRecoveryNotice'
 import { StatusbarGitIndicator } from './components/MainView/StatusbarGitIndicator'
 import { StatusbarPathActionsHost } from './components/MainView/StatusbarPathActions'
 import { useGitPendingFlags } from './hooks/useGitPendingFlags'
@@ -3260,7 +3260,13 @@ const App: React.FC = () => {
        * modal those toasts (and the Help menu) open. */}
       <UpdateNotifications />
       <CrashConsentPrompt />
-      <CrashReportReviewHost />
+      {/* Headless: says so when the crash-loop protection withheld a file, so
+       * an app that starts empty on purpose is not mistaken for one that lost
+       * the user's work. */}
+      <CrashRecoveryNotice />
+      {/* The crash-report reviewer is NOT here: it is mounted alongside the
+       * root error boundary, so it survives a crash in this tree and can still
+       * show the report for the crash that just happened. */}
 
       {/* Fullscreen git-history modal (statusbar source-control icon). */}
       <Modal

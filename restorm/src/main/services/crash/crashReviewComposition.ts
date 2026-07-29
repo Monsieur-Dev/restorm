@@ -14,16 +14,33 @@ import { CRASH_REVIEW_SETTING_KEY } from '../../../shared/config/observability'
 import { getConsentService } from '../privacy/consentComposition'
 import { CrashReviewService, type CrashReviewPort } from './CrashReviewService'
 import { crashReviewMode } from './crashReviewDecision'
+import { pickReviewWindow } from './crashReviewWindow'
 
 let instance: CrashReviewService | null = null
 /** Resolvers for reviews currently on screen, keyed by request id. */
 const waiting = new Map<string, (send: boolean) => void>()
 let listening = false
 
-/** The window that gets asked: the focused one, else the first that is visible. */
+/**
+ * The window that gets asked: the focused one, else the first that can still
+ * render and answer.
+ *
+ * A window whose renderer PROCESS has died is excluded even though it is
+ * neither destroyed nor hidden — see `crashReviewWindow.ts` for why that case
+ * is the one that matters and what it would otherwise wedge.
+ */
 function reviewWindow(): BrowserWindow | null {
-  const windows = BrowserWindow.getAllWindows().filter((w) => !w.isDestroyed() && w.isVisible())
-  return BrowserWindow.getFocusedWindow() ?? windows[0] ?? null
+  return pickReviewWindow(
+    BrowserWindow.getAllWindows(),
+    BrowserWindow.getFocusedWindow(),
+    (window) => ({
+      destroyed: window.isDestroyed(),
+      // A destroyed window throws on every accessor, so nothing further is
+      // read once that is true.
+      visible: window.isDestroyed() ? false : window.isVisible(),
+      crashed: window.isDestroyed() ? true : window.webContents.isCrashed()
+    })
+  )
 }
 
 /**
@@ -61,6 +78,11 @@ function makePort(): CrashReviewPort {
         }
         window.once('closed', abandon)
         window.webContents.once('destroyed', abandon)
+        // The other half of the same problem: a window that is alive when asked
+        // and whose renderer dies while the question is on screen. Without
+        // this, `destroyed` never fires (the window outlives its renderer) and
+        // the review would hang exactly as if it had been asked of a corpse.
+        window.webContents.once('render-process-gone', abandon)
         try {
           window.webContents.send(CRASH_IPC.REVIEW_REQUESTED, request)
         } catch {

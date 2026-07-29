@@ -2571,5 +2571,14 @@
       "send": "Kirim",
       "discard": "Jangan kirim"
     }
+  },
+  "crashRecovery": {
+    "message": "Restorm mengalami masalah dan perlu dimulai ulang.",
+    "relaunch": "Mulai ulang Restorm",
+    "notice": {
+      "title": "Berkas tidak dibuka kembali",
+      "body": "{{file}} tidak dibuka kembali: Restorm mengalami crash saat membukanya pada peluncuran sebelumnya. Berkas Anda utuh — Anda dapat membukanya kembali dari berkas terkini.",
+      "bodyUnnamed": "Berkas terakhir tidak dibuka kembali: Restorm mengalami crash saat membukanya pada peluncuran sebelumnya. Berkas Anda utuh — Anda dapat membukanya kembali dari berkas terkini."
+    }
   }
 }

@@ -2573,5 +2573,14 @@
       "send": "Trimite",
       "discard": "Nu trimite"
     }
+  },
+  "crashRecovery": {
+    "message": "Restorm a întâmpinat o problemă și trebuie repornit.",
+    "relaunch": "Repornește Restorm",
+    "notice": {
+      "title": "Fișierul nu a fost redeschis",
+      "body": "{{file}} nu a fost redeschis: Restorm s-a blocat în timp ce îl deschidea la lansarea anterioară. Fișierul dumneavoastră este intact — îl puteți redeschide din fișierele recente.",
+      "bodyUnnamed": "Ultimul fișier nu a fost redeschis: Restorm s-a blocat în timp ce îl deschidea la lansarea anterioară. Fișierul dumneavoastră este intact — îl puteți redeschide din fișierele recente."
+    }
   }
 }

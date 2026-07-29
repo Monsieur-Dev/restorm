@@ -2572,5 +2572,14 @@
       "send": "Gönder",
       "discard": "Gönderme"
     }
+  },
+  "crashRecovery": {
+    "message": "Restorm bir sorunla karşılaştı ve yeniden başlatılması gerekiyor.",
+    "relaunch": "Restorm'u yeniden başlat",
+    "notice": {
+      "title": "Dosya yeniden açılmadı",
+      "body": "{{file}} yeniden açılmadı: Restorm önceki başlatmada bu dosyayı açarken çöktü. Dosyanız sağlam — son kullanılan dosyalardan yeniden açabilirsiniz.",
+      "bodyUnnamed": "Son dosya yeniden açılmadı: Restorm önceki başlatmada bu dosyayı açarken çöktü. Dosyanız sağlam — son kullanılan dosyalardan yeniden açabilirsiniz."
+    }
   }
 }

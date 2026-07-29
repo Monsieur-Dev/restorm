@@ -102,6 +102,7 @@ import { registerRestormIPC } from './IPCHandlers'
 import { initEntitlementService, getEntitlementService, stopEntitlementAutoRefresh, makeBackendFetch, resolveBackendVersion } from './services/auth/authComposition'
 import { initConsentService } from './services/privacy/consentComposition'
 import { initCrashReporting } from './services/crash/sentryComposition'
+import { getCrashRecovery, scheduleSurvivalMark, recordRecoveryNotice } from './services/crash/crashRecoveryComposition'
 import { createEntitlementEvaluator } from './services/entitlement/entitlementStrategy'
 import { installScenarioEngineIPC } from './scenarioEngine/ipcBridge'
 import { registerBuiltinSources } from './services/secrets/mainSourceRegistry'
@@ -345,20 +346,33 @@ function createWindow(): MainWindow | undefined {
       }
 
       // Open on startup via dom-ready (fires reliably with the app:// protocol).
-      // Command-line path wins; otherwise honour the reopen-last-file setting.
+      // Command-line path wins; otherwise a file left by a crash relaunch, else
+      // the reopen-last-file setting — and NOTHING at all if the previous
+      // launch died with a file open (see `crashRecovery.ts`).
       mainWindow.webContents.on('dom-ready', () => {
         // Wait for the renderer React app to be fully initialized and hooks mounted.
         setTimeout(() => {
-          if (fileToOpenOnStart) {
-            logger.info('Opening from command line', { path: fileToOpenOnStart })
-            openPathOnStart(fileToOpenOnStart)
+          // The plan is asked for ONCE and it arms the crash-loop marker as it
+          // answers, so there is no order in which a file gets opened without
+          // the marker having been written first.
+          const plan = getCrashRecovery().planStartupOpen({
+            cliPath: fileToOpenOnStart ?? null,
+            reopenPath: resolveReopenLastFilePath()
+          })
+          if (plan.path === null) {
+            if (plan.loopFallback) {
+              logger.warn('Not reopening a file: the previous launch crashed with one open')
+              // The protection is invisible when it works — the app just starts
+              // empty, which looks exactly like losing the user's file. Say so.
+              recordRecoveryNotice({ fileWithheld: true, withheldPath: plan.withheldPath })
+            }
             return
           }
-          const reopenPath = resolveReopenLastFilePath()
-          if (reopenPath) {
-            logger.info('Reopening last opened file', { path: reopenPath })
-            openPathOnStart(reopenPath)
-          }
+          logger.info('Opening on startup', { path: plan.path, source: plan.source })
+          openPathOnStart(plan.path)
+          // Nothing clears the marker until the launch has lasted long enough
+          // to show that the file it opened is not what kills it.
+          scheduleSurvivalMark()
         }, DEFAULT_UI_DELAY_MS)
       })
     }

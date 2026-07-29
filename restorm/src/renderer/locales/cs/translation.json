@@ -2574,5 +2574,14 @@
       "send": "Odeslat",
       "discard": "Neodesílat"
     }
+  },
+  "crashRecovery": {
+    "message": "V aplikaci Restorm došlo k problému a je nutné ji restartovat.",
+    "relaunch": "Restartovat Restorm",
+    "notice": {
+      "title": "Soubor nebyl znovu otevřen",
+      "body": "Soubor {{file}} nebyl znovu otevřen: Restorm při jeho otevírání během předchozího spuštění spadl. Váš soubor je neporušený — můžete jej otevřít z nedávných souborů.",
+      "bodyUnnamed": "Poslední soubor nebyl znovu otevřen: Restorm při jeho otevírání během předchozího spuštění spadl. Váš soubor je neporušený — můžete jej otevřít z nedávných souborů."
+    }
   }
 }

@@ -2572,5 +2572,14 @@
       "send": "Dërgo",
       "discard": "Mos e dërgo"
     }
+  },
+  "crashRecovery": {
+    "message": "Restorm hasi një problem dhe duhet të riniset.",
+    "relaunch": "Rinis Restorm",
+    "notice": {
+      "title": "Skedari nuk u rihap",
+      "body": "{{file}} nuk u rihap: Restorm u rrëzua duke e hapur në nisjen e mëparshme. Skedari juaj është i paprekur — mund ta rihapni nga skedarët e fundit.",
+      "bodyUnnamed": "Skedari i fundit nuk u rihap: Restorm u rrëzua duke e hapur në nisjen e mëparshme. Skedari juaj është i paprekur — mund ta rihapni nga skedarët e fundit."
+    }
   }
 }

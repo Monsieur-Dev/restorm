@@ -2572,5 +2572,14 @@
       "send": "Enviar",
       "discard": "No enviar"
     }
+  },
+  "crashRecovery": {
+    "message": "Restorm ha encontrado un problema y debe reiniciarse.",
+    "relaunch": "Reiniciar Restorm",
+    "notice": {
+      "title": "Archivo no reabierto",
+      "body": "{{file}} no se ha reabierto: Restorm falló al abrirlo en el inicio anterior. Su archivo está intacto: puede reabrirlo desde los archivos recientes.",
+      "bodyUnnamed": "El último archivo no se ha reabierto: Restorm falló al abrirlo en el inicio anterior. Su archivo está intacto: puede reabrirlo desde los archivos recientes."
+    }
   }
 }

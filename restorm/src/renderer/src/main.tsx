@@ -16,6 +16,8 @@ import { registerRendererSources } from './secrets/registerRendererSources'
 import { UpdateActionsRenderer } from './components/Settings/UpdateActionsRenderer'
 import { initRendererCrashReporting } from './crash/initRendererCrashReporting'
 import { initRendererSentry } from './crash/rendererSentry'
+import { RendererErrorBoundary } from './components/CrashRecovery/RendererErrorBoundary'
+import { CrashReportReviewHost } from './components/Privacy/CrashReportReviewHost'
 import { DEFAULT_UI_DELAY_MS } from '../../shared/config/constants'
 
 // Populate the renderer's copy of the value-source registry (descriptors only;
@@ -429,9 +431,22 @@ void Promise.all([initI18n(), graphqlReady])
         <CapabilityGateHost>
           {(capabilityGate) => (
             <ElectronCoreUiProvider fontAliasing="auto" data-testid="electron-core-ui-provider" capabilityGate={capabilityGate}>
-              <Suspense fallback={<LoadingScreen />}>
-                <App />
-              </Suspense>
+              {/* Outside the boundary on purpose. The main process holds a
+                  crashed report open until this answers, and if the reviewer
+                  went down with the tree it was reviewing, the question would
+                  be sent to nobody: the report would never be sent AND the
+                  single review slot would stay occupied for the life of the
+                  process. It is also the report the user most wants to see. */}
+              <CrashReportReviewHost />
+              <RendererErrorBoundary onError={(error) => {
+                logger.error('Renderer crashed; showing the recovery surface', {
+                  error: error instanceof Error ? error.message : String(error)
+                })
+              }}>
+                <Suspense fallback={<LoadingScreen />}>
+                  <App />
+                </Suspense>
+              </RendererErrorBoundary>
             </ElectronCoreUiProvider>
           )}
         </CapabilityGateHost>

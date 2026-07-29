@@ -2572,5 +2572,14 @@
       "send": "Küldés",
       "discard": "Ne küldje"
     }
+  },
+  "crashRecovery": {
+    "message": "A Restorm hibába ütközött, és újra kell indítani.",
+    "relaunch": "Restorm újraindítása",
+    "notice": {
+      "title": "A fájl nem lett újra megnyitva",
+      "body": "A(z) {{file}} nem lett újra megnyitva: a Restorm összeomlott a megnyitása közben az előző indításkor. A fájl sértetlen — újra megnyithatja a legutóbbi fájlok közül.",
+      "bodyUnnamed": "A legutóbbi fájl nem lett újra megnyitva: a Restorm összeomlott a megnyitása közben az előző indításkor. A fájl sértetlen — újra megnyithatja a legutóbbi fájlok közül."
+    }
   }
 }

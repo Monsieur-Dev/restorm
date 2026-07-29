@@ -2572,5 +2572,14 @@
       "send": "Senden",
       "discard": "Nicht senden"
     }
+  },
+  "crashRecovery": {
+    "message": "Restorm ist auf ein Problem gestoßen und muss neu gestartet werden.",
+    "relaunch": "Restorm neu starten",
+    "notice": {
+      "title": "Datei nicht erneut geöffnet",
+      "body": "{{file}} wurde nicht erneut geöffnet: Restorm ist beim letzten Start beim Öffnen abgestürzt. Ihre Datei ist unversehrt – Sie können sie über die zuletzt verwendeten Dateien erneut öffnen.",
+      "bodyUnnamed": "Die letzte Datei wurde nicht erneut geöffnet: Restorm ist beim letzten Start beim Öffnen abgestürzt. Ihre Datei ist unversehrt – Sie können sie über die zuletzt verwendeten Dateien erneut öffnen."
+    }
   }
 }

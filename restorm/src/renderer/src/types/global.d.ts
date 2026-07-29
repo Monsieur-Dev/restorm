@@ -16,7 +16,7 @@ import type {
 import type { ResponseHistoryDetail, ResponseHistoryEntry } from '../../../shared/types/collections'
 import type { AuthState, CheckoutResult, PortalResult } from '../../../shared/auth/authState'
 import type { UpdateState, UpdateSettings, ReleaseNoteSection } from '../../../shared/update/updateTypes'
-import type { CrashArmedState, CrashConsentState, CrashReviewRequest } from '../../../shared/crash/crashTypes'
+import type { CrashArmedState, CrashConsentState, CrashRecoveryNotice, CrashReviewRequest } from '../../../shared/crash/crashTypes'
 
 declare global {
   interface Window {
@@ -123,6 +123,10 @@ declare global {
         setConsent: (granted: boolean) => Promise<CrashConsentState>
         onReviewRequested: (callback: (request: CrashReviewRequest) => void) => (() => void)
         resolveReview: (id: string, send: boolean) => void
+        /** Restart, reopening the last file. Never settles — do not await. */
+        recoverRelaunch: () => Promise<void>
+        getRecoveryNotice: () => Promise<CrashRecoveryNotice>
+        onRecoveryNotice: (callback: (notice: CrashRecoveryNotice) => void) => (() => void)
       }
       /** electron-core-ui's Git plumbing — see `electron-core-ui/docs/Git/README.md`.
        * Mirrors `WindowApiGit` in electron-core-ui's own `global.d.ts`; restorm
