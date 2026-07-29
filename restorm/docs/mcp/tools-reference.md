@@ -29,7 +29,7 @@ Tools that focus the UI on a specific item — useful when the AI wants the user
 
 | Tool | Summary |
 |---|---|
-| `open_tab` | Open (or focus) the workbench tab for `{ itemId, kind }`. Same effect as the user double-clicking the sidebar row. |
+| `open_tab` | Open (or focus) the workbench tab for `{ itemId, kind }`. Same effect as the user double-clicking the sidebar row. Blocks until the workbench confirms it opened the tab (retrying internally for up to 5 s, so it is safe to call right after creating the item) and returns an explicit error if it never does — never a silent no-op. |
 | `reveal_in_tree` | Expand the sidebar tree to make `itemId` visible + flash a highlight. |
 | `close_tab` | Close the workbench tab for `itemId`. No-op if the tab isn't open. |
 

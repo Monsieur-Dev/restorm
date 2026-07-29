@@ -2056,11 +2056,24 @@ contextBridge.exposeInMainWorld('restorm', {
     }): void => {
       ipcRenderer.send('mcp:active-state-bootstrap', payload)
     },
-    /** Subscribe to MCP `open_tab` requests. Payload `{itemId, kind}`. */
-    onMcpOpenTab: (callback: (payload: { itemId: string; kind: 'request' | 'folder' | 'env-folder' | 'scenario' }) => void): (() => void) => {
-      const handler = (_e: unknown, payload: unknown): void => { callback(payload as { itemId: string; kind: 'request' | 'folder' | 'env-folder' | 'scenario' }) }
+    /** Subscribe to MCP `open_tab` requests. Payload `{requestId?, itemId, kind}`.
+     * `requestId` is present when the call came from the `open_tab` MCP tool
+     * (which awaits an ack, see `replyMcpOpenTab`) and absent for the other
+     * internal senders (e.g. `run_request`'s tab-open side effect), which
+     * stay fire-and-forget. */
+    onMcpOpenTab: (callback: (payload: { requestId?: string; itemId: string; kind: 'request' | 'folder' | 'env-folder' | 'scenario' }) => void): (() => void) => {
+      const handler = (_e: unknown, payload: unknown): void => { callback(payload as { requestId?: string; itemId: string; kind: 'request' | 'folder' | 'env-folder' | 'scenario' }) }
       ipcRenderer.on('mcp:open-tab', handler)
       return () => { ipcRenderer.off('mcp:open-tab', handler) }
+    },
+    /** Ack an `mcp:open-tab` request back to main. `opened` reports whether
+     * this window actually found the item and opened its tab — main only
+     * settles the `open_tab` MCP call successful on a positive ack (or
+     * times out and reports an explicit error otherwise). Never send when
+     * the triggering payload had no `requestId` — there's nothing waiting
+     * on the other end. */
+    replyMcpOpenTab: (payload: { requestId: string; opened: boolean }): void => {
+      ipcRenderer.send('mcp:open-tab-result', payload)
     },
     /** Subscribe to MCP `reveal_in_tree` requests. */
     onMcpRevealInTree: (callback: (payload: { itemId: string; kind: 'request' | 'folder' | 'env-folder' | 'scenario' }) => void): (() => void) => {

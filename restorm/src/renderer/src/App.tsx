@@ -1797,7 +1797,7 @@ const App: React.FC = () => {
   const closeTabByItemIdStable = useCallback((itemId: string) => { closeTabByItemIdRef.current(itemId) }, [])
   useMcpNavigation({
     enabled: mcpEnabled,
-    rootItems,
+    rootItemsRef,
     setExpandedIds,
     setSelectedItemId,
     openFolderTab,
@@ -1825,7 +1825,7 @@ const App: React.FC = () => {
   const pruneOrphanTabsStable = useCallback((existingIds: Set<string>): void => {
     setWorkbenchTree((prevTree) => ({ ...prevTree, groups: pruneOrphanTabs(prevTree.groups, existingIds) }))
   }, [setWorkbenchTree])
-  useMcpTreeReplace({ setRootItems, mcpDrivenRef, lastMcpVersionRef, bumpAllTabContentVersions: bumpAllTabContentVersionsStable, pruneOrphanTabs: pruneOrphanTabsStable })
+  useMcpTreeReplace({ setRootItems, rootItemsRef, mcpDrivenRef, lastMcpVersionRef, bumpAllTabContentVersions: bumpAllTabContentVersionsStable, pruneOrphanTabs: pruneOrphanTabsStable })
   useMcpRunRequest({ enabled: mcpEnabled })
   // Read-only e2e automation hook: exposes window.__restormSuggestions to pull
   // each action's inspector data suggestion for a scenario from the running app.

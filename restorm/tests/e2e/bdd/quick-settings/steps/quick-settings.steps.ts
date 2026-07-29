@@ -463,29 +463,13 @@ When(
   'I open its tab and save a quick config named {string}',
   async ({ callMcpTool }, configName: string) => {
     if (discovery === null || page === null) throw new Error('launch first')
-    // The request was just created via MCP; the renderer's tree projection
-    // lags the create broadcast, so a single `open_tab` can race ahead of the
-    // node existing in the renderer and silently no-op (the workbench stays on
-    // the empty bench). Re-issue `open_tab` until `get_current_tab` reflects
-    // our request id, mirroring the mcp-server suite's open-then-poll recipe.
-    // That same lag can also make `open_tab` itself report a transient error
-    // (the item is not projected yet), so a single failed attempt must not be
-    // fatal — the loop is the retry, and only the final `opened` assertion
-    // decides the step.
-    const deadline = Date.now() + 15_000
-    let opened = false
-    while (Date.now() < deadline) {
-      const openReply = await callMcpTool(discovery, 'open_tab', { itemId: requestId })
-      if (!(openReply.isError ?? false)) {
-        const cur = parsedReply(await callMcpTool(discovery, 'get_current_tab', {})) as { itemId?: string | null; tabId?: string | null }
-        if (cur.itemId === requestId && typeof cur.tabId === 'string' && cur.tabId.length > 0) {
-          opened = true
-          break
-        }
-      }
-      await page.waitForTimeout(250)
-    }
-    expect(opened, 'open_tab never surfaced the request as the current tab').toBe(true)
+    // `open_tab` itself guarantees the tab is genuinely open (or reports an
+    // explicit error) before it replies — it awaits the renderer's ack of
+    // the item actually appearing in the workbench, bounded internally, so
+    // a single call replaces what used to be a retry loop here tolerating
+    // transient errors/no-ops on the request just created via MCP.
+    const openReply = await callMcpTool(discovery, 'open_tab', { itemId: requestId })
+    expect(openReply.isError ?? false).toBe(false)
     // Wait for the smartbar quick-settings button to render in the active tab.
     await page.locator(vis('quick-settings-open-button')).waitFor({ state: 'visible', timeout: 15_000 })
     await page.locator(vis('quick-settings-open-button')).click()
@@ -699,41 +683,23 @@ Given(
   }
 )
 
-/** Open `itemId` in a workbench tab (retrying past the empty-project settle
- * race) and then wait for every exclusivity trigger that renders on that
- * surface to be mounted. A trigger that never mounts would otherwise surface as
- * a confusing click timeout mid-scenario rather than a clear setup failure. */
+/** Open `itemId` in a workbench tab, then wait for every exclusivity trigger
+ * that renders on that surface to be mounted. A trigger that never mounts
+ * would otherwise surface as a confusing click timeout mid-scenario rather
+ * than a clear setup failure. */
 async function openTabAndAwaitTriggers(
   callMcpTool: (d: McpDiscovery, n: string, a?: Record<string, unknown>) => Promise<McpToolReply>,
   itemId: string,
   keys: ExclusivePopoverKey[]
 ): Promise<void> {
   if (discovery === null || page === null) throw new Error('launch first')
-  const disco = discovery
   const pg = page
-  const deadline = Date.now() + 15_000
-  let opened = false
-  while (Date.now() < deadline) {
-    // `open_tab` can transiently report an error while the project is still
-    // settling (the empty-project bootstrap can land after the create), so a
-    // single failed attempt is not fatal — this loop IS the retry. Only the
-    // final `opened` assertion decides the step, otherwise one transient
-    // error defeats the very polling it sits inside.
-    const openReply = await callMcpTool(disco, 'open_tab', { itemId })
-    if (!(openReply.isError ?? false)) {
-      const cur = parsedReply(await callMcpTool(disco, 'get_current_tab', {})) as { itemId?: string | null; tabId?: string | null }
-      // Container tabs (env-folder in particular) report `itemId: null` from
-      // get_current_tab — only `tabId` carries the id, as `<kind>-id:<itemId>`.
-      // Match on the tabId suffix, which holds for every tab kind (requests
-      // included) rather than on `itemId`, which is null for env-folder tabs.
-      if (typeof cur.tabId === 'string' && cur.tabId.endsWith(itemId)) {
-        opened = true
-        break
-      }
-    }
-    await pg.waitForTimeout(250)
-  }
-  expect(opened, 'open_tab never surfaced the item as the current tab').toBe(true)
+  // `open_tab` itself guarantees the tab is genuinely open (or reports an
+  // explicit error) before it replies — the request was already confirmed
+  // stable by the setup step's own settle loop, so a single call here
+  // replaces what used to be a retry-and-tolerate-transient-errors loop.
+  const openReply = await callMcpTool(discovery, 'open_tab', { itemId })
+  expect(openReply.isError ?? false).toBe(false)
   for (const key of keys) {
     await pg.locator(EXCLUSIVE_POPOVER_BUTTON[key])
       .waitFor({ state: 'visible', timeout: 15_000 })

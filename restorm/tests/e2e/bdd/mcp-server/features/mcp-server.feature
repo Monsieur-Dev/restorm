@@ -101,3 +101,15 @@ Feature: MCP server end-to-end
     When I open the first imported request as a workbench tab via MCP
     And I delete the open request via MCP
     Then no workbench tab references the deleted request
+
+    # ── Create → open_tab race (renderer projection lag) ──
+    # A client that creates an item and immediately opens its tab must
+    # never see a transient error or a silent no-op. `open_tab` itself
+    # guarantees the tab is open (or reports why not) before it replies,
+    # so no artificial delay belongs between the two calls — none is
+    # inserted here.
+    When I create a folder named "Race folder" via MCP
+    And I create a request named "Race request" via MCP in that folder
+    And I open the newly created request's tab via MCP with no delay in between
+    Then the MCP open_tab reply should report the tab opened
+    And the workbench should show a tab for the newly created request

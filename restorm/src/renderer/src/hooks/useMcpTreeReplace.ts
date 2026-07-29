@@ -40,6 +40,23 @@ interface RestormTreeBridge {
 export interface UseMcpTreeReplaceInput {
   setRootItems: React.Dispatch<React.SetStateAction<FolderItem[]>>
   /**
+   * Mutable ref this hook writes with the fresh tree the INSTANT an
+   * `mcp:tree-replace` message is processed — synchronously, before
+   * `setRootItems` is even called. `setRootItems` only *schedules* a
+   * re-render; a same-tick follow-up IPC message (e.g. the `mcp:open-tab`
+   * a create's caller sends right after) is handled by a plain
+   * `ipcRenderer.on` callback that runs before React gets a chance to
+   * commit, so anything reading the `rootItems` *state* (or a ref synced
+   * from it via a `useEffect`) still sees the pre-replace tree in that
+   * window. Consumers that need the freshest tree inside another IPC
+   * handler (`useMcpNavigation`'s `open_tab`/`reveal_in_tree`/`close_tab`)
+   * must read `rootItemsRef.current` instead of the `rootItems` prop —
+   * this ref is the only thing guaranteed current at that exact moment,
+   * because Electron delivers IPC messages FIFO per `webContents` and
+   * this write happens synchronously inside the message handler itself.
+   */
+  rootItemsRef: { current: FolderItem[] }
+  /**
    * Mutable ref the renderer flips to `true` immediately before applying
    * an MCP-driven tree replacement, and reads inside the downstream
    * `setCollections` effect so it can pass `source: 'mcp'` (which the
@@ -108,7 +125,7 @@ export function readTreeReplacePayload(payload: unknown): { items: unknown[]; mc
 }
 
 export function useMcpTreeReplace(input: UseMcpTreeReplaceInput): void {
-  const { setRootItems, mcpDrivenRef, lastMcpVersionRef, bumpAllTabContentVersions, pruneOrphanTabs } = input
+  const { setRootItems, rootItemsRef, mcpDrivenRef, lastMcpVersionRef, bumpAllTabContentVersions, pruneOrphanTabs } = input
 
   useEffect(() => {
     const root = window as { restorm?: { runtime?: RestormTreeBridge } }
@@ -130,6 +147,9 @@ export function useMcpTreeReplace(input: UseMcpTreeReplaceInput): void {
       // `source: 'mcp'` (skipping the main-side mirror). Resetting
       // happens on the same effect after the call lands.
       mcpDrivenRef.current = true
+      // Synchronous, ahead of `setRootItems` — see the prop doc on
+      // `rootItemsRef` for why this can't wait for a render.
+      rootItemsRef.current = next
       setRootItems(next)
       // Close any tab whose backing item vanished in this replacement
       // (e.g. an MCP `delete_item`) — the main-driven path doesn't go
@@ -142,5 +162,5 @@ export function useMcpTreeReplace(input: UseMcpTreeReplaceInput): void {
       bumpAllTabContentVersions()
     })
     return off
-  }, [setRootItems, mcpDrivenRef, lastMcpVersionRef, bumpAllTabContentVersions, pruneOrphanTabs])
+  }, [setRootItems, rootItemsRef, mcpDrivenRef, lastMcpVersionRef, bumpAllTabContentVersions, pruneOrphanTabs])
 }

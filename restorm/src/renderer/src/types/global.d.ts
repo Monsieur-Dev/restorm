@@ -503,7 +503,8 @@ declare global {
           tab: { tabId: string | null; itemId: string | null; kind: 'request' | 'folder' | 'env-folder' | 'scenario' | null }
           envByFolder: Record<string, string | null>
         }) => void
-        onMcpOpenTab: (callback: (payload: { itemId: string; kind: 'request' | 'folder' | 'env-folder' | 'scenario' }) => void) => () => void
+        onMcpOpenTab: (callback: (payload: { requestId?: string; itemId: string; kind: 'request' | 'folder' | 'env-folder' | 'scenario' }) => void) => () => void
+        replyMcpOpenTab: (payload: { requestId: string; opened: boolean }) => void
         onMcpRevealInTree: (callback: (payload: { itemId: string; kind: 'request' | 'folder' | 'env-folder' | 'scenario' }) => void) => () => void
         onMcpTreeReplace: (callback: (payload: unknown) => void) => () => void
         onMcpCloseTab: (callback: (payload: { itemId: string; kind: 'request' | 'folder' | 'env-folder' | 'scenario' }) => void) => () => void
