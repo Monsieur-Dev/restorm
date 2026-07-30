@@ -2528,7 +2528,7 @@
     "checkFailedBody": "Tidak dapat memeriksa pembaruan. Silakan coba lagi nanti.",
     "upToDateTitle": "Anda sudah versi terbaru",
     "upToDateBody": "Anda menggunakan versi terbaru ({{version}}).",
-    "whatsNewTitle": "Yang baru di {{version}}",
+    "whatsNewTitle": "Apa yang baru?",
     "status": {
       "idle": "Terbaru",
       "checking": "Memeriksa…",
@@ -2553,7 +2553,7 @@
     "crashReportsLockedLabel": "Dapat diubah mulai paket Pro. Pada paket gratis, laporan crash diperlukan untuk menjaga kualitas.",
     "consentToast": {
       "title": "Bantu kami meningkatkan Restorm",
-      "body": "Saat Restorm mengalami crash, laporan anonim dapat dikirim agar kegagalan tersebut dapat diperbaiki. Laporan berisi jejak galat teknis dan konteks diagnostik (versi aplikasi, aktivitas terakhir). URL, token, isi permintaan dan respons, serta data pribadi dihapus sebelum meninggalkan perangkat Anda. Anda akan melihat persis apa yang dikirim sebelum setiap laporan.",
+      "body": "Jika terjadi kesalahan yang tidak terduga, Restorm dapat mengirimi kami laporan anonim untuk membantu kami memperbaiki masalahnya. Laporan berisi jejak galat teknis dan konteks diagnostik (versi aplikasi, aktivitas terakhir). URL, token, isi permintaan dan respons, serta data pribadi dihapus sebelum meninggalkan perangkat Anda. Anda akan melihat persis apa yang dikirim sebelum setiap laporan.",
       "save": "Simpan preferensi saya",
       "learnMore": "Pelajari lebih lanjut"
     },

@@ -2529,7 +2529,7 @@
     "checkFailedBody": "Nuk u kontrolluan dot përditësimet. Ju lutemi provoni sërish më vonë.",
     "upToDateTitle": "Jeni të përditësuar",
     "upToDateBody": "Po përdorni versionin më të fundit ({{version}}).",
-    "whatsNewTitle": "Çfarë ka të re në {{version}}",
+    "whatsNewTitle": "Ç'ka të re?",
     "status": {
       "idle": "I përditësuar",
       "checking": "Duke kontrolluar…",
@@ -2554,7 +2554,7 @@
     "crashReportsLockedLabel": "I ndryshueshëm nga plani Pro. Në planin falas, raportet e rrëzimeve janë të nevojshme për ruajtjen e cilësisë.",
     "consentToast": {
       "title": "Na ndihmoni ta përmirësojmë Restorm",
-      "body": "Kur Restorm rrëzohet, mund të dërgohet një raport anonim që defekti të riparohet. Ai përmban gjurmën teknike të gabimit dhe kontekstin diagnostikues (versionin e aplikacionit, veprimtarinë e fundit). URL-të, token-ët, trupat e kërkesave dhe përgjigjeve dhe të dhënat personale hiqen përpara se raporti të largohet nga pajisja juaj. Do të shihni saktësisht çfarë dërgohet përpara çdo raporti.",
+      "body": "Në rast të një gabimi të papritur, Restorm mund të na dërgojë një raport anonim për të na ndihmuar të rregullojmë problemin. Ai përmban gjurmën teknike të gabimit dhe kontekstin diagnostikues (versionin e aplikacionit, veprimtarinë e fundit). URL-të, token-ët, trupat e kërkesave dhe përgjigjeve dhe të dhënat personale hiqen përpara se raporti të largohet nga pajisja juaj. Do të shihni saktësisht çfarë dërgohet përpara çdo raporti.",
       "save": "Ruaj preferencat e mia",
       "learnMore": "Mësoni më shumë"
     },

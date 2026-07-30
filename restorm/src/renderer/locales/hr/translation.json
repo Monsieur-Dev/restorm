@@ -2530,7 +2530,7 @@
     "checkFailedBody": "Ažuriranja nije moguće provjeriti. Pokušajte ponovno kasnije.",
     "upToDateTitle": "Imate najnoviju verziju",
     "upToDateBody": "Koristite najnoviju verziju ({{version}}).",
-    "whatsNewTitle": "Novosti u verziji {{version}}",
+    "whatsNewTitle": "Što je novo?",
     "status": {
       "idle": "Ažurirano",
       "checking": "Provjera…",
@@ -2555,7 +2555,7 @@
     "crashReportsLockedLabel": "Promjenjivo od Pro plana. U besplatnom planu izvješća o rušenju potrebna su za održavanje kvalitete.",
     "consentToast": {
       "title": "Pomozite nam poboljšati Restorm",
-      "body": "Kada se Restorm sruši, može se poslati anonimno izvješće kako bi se kvar ispravio. Sadrži tehnički trag pogreške i dijagnostički kontekst (verziju aplikacije, nedavne radnje). URL-ovi, tokeni, tijela zahtjeva i odgovora te osobni podaci uklanjaju se prije nego što izvješće napusti vaše računalo. Prije svakog izvješća vidjet ćete točno što se šalje.",
+      "body": "U slučaju neočekivane pogreške, Restorm nam može poslati anonimnu prijavu kako bismo ispravili problem. Sadrži tehnički trag pogreške i dijagnostički kontekst (verziju aplikacije, nedavne radnje). URL-ovi, tokeni, tijela zahtjeva i odgovora te osobni podaci uklanjaju se prije nego što izvješće napusti vaše računalo. Prije svakog izvješća vidjet ćete točno što se šalje.",
       "save": "Spremi moje postavke",
       "learnMore": "Saznajte više"
     },

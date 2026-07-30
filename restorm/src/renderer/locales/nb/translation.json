@@ -2529,7 +2529,7 @@
     "checkFailedBody": "Kunne ikke se etter oppdateringer. Prøv igjen senere.",
     "upToDateTitle": "Du er oppdatert",
     "upToDateBody": "Du bruker den nyeste versjonen ({{version}}).",
-    "whatsNewTitle": "Nyheter i {{version}}",
+    "whatsNewTitle": "Hva er nytt?",
     "status": {
       "idle": "Oppdatert",
       "checking": "Ser etter…",
@@ -2554,7 +2554,7 @@
     "crashReportsLockedLabel": "Kan endres fra Pro-abonnementet. I gratisabonnementet er krasjrapporter nødvendige for å opprettholde kvaliteten.",
     "consentToast": {
       "title": "Hjelp oss med å forbedre Restorm",
-      "body": "Når Restorm krasjer, kan det sendes en anonym rapport slik at feilen kan rettes. Den inneholder det tekniske feilsporet og diagnostisk kontekst (appversjon, nylig aktivitet). URL-er, tokener, forespørsels- og svarinnhold og personopplysninger fjernes før den forlater maskinen din. Du ser nøyaktig hva som sendes før hver rapport.",
+      "body": "Hvis det oppstår en uventet feil, kan Restorm sende oss en anonym rapport slik at vi kan rette problemet. Den inneholder det tekniske feilsporet og diagnostisk kontekst (appversjon, nylig aktivitet). URL-er, tokener, forespørsels- og svarinnhold og personopplysninger fjernes før den forlater maskinen din. Du ser nøyaktig hva som sendes før hver rapport.",
       "save": "Lagre innstillingene mine",
       "learnMore": "Finn ut mer"
     },

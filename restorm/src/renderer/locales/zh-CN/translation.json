@@ -2528,7 +2528,7 @@
     "checkFailedBody": "无法检查更新，请稍后重试。",
     "upToDateTitle": "已是最新版本",
     "upToDateBody": "您正在使用最新版本（{{version}}）。",
-    "whatsNewTitle": "{{version}} 新功能",
+    "whatsNewTitle": "新功能",
     "status": {
       "idle": "最新",
       "checking": "正在检查…",
@@ -2553,7 +2553,7 @@
     "crashReportsLockedLabel": "自 Pro 套餐起可更改。在免费套餐中，崩溃报告是保持质量所必需的。",
     "consentToast": {
       "title": "帮助我们改进 Restorm",
-      "body": "当 Restorm 崩溃时，可以发送匿名报告，以便修复该故障。报告包含技术错误堆栈和诊断上下文（应用版本、近期操作）。URL、令牌、请求与响应正文以及个人数据会在离开您的设备之前被移除。每次发送报告前，您都会看到具体发送的内容。",
+      "body": "如果发生意外错误，Restorm 可以向我们发送匿名报告，帮助我们修复问题。报告包含技术错误堆栈和诊断上下文（应用版本、近期操作）。URL、令牌、请求与响应正文以及个人数据会在离开您的设备之前被移除。每次发送报告前，您都会看到具体发送的内容。",
       "save": "保存我的偏好设置",
       "learnMore": "了解更多"
     },

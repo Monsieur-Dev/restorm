@@ -2529,7 +2529,7 @@
     "checkFailedBody": "Couldn't check for updates. Please try again later.",
     "upToDateTitle": "You're up to date",
     "upToDateBody": "You're running the latest version ({{version}}).",
-    "whatsNewTitle": "What's new in {{version}}",
+    "whatsNewTitle": "What's new?",
     "status": {
       "idle": "Up to date",
       "checking": "Checking…",
@@ -2554,7 +2554,7 @@
     "crashReportsLockedLabel": "Changeable from the Pro plan. On the free plan, crash reports are what keep quality up.",
     "consentToast": {
       "title": "Help us improve Restorm",
-      "body": "When Restorm crashes, an anonymous report can be sent so the failure can be fixed. It carries the technical error trace and diagnostic context (app version, recent activity). URLs, tokens, request and response bodies and personal data are removed before it leaves your machine. You will see exactly what is sent before each report.",
+      "body": "If something goes unexpectedly wrong, Restorm can send us an anonymous report to help us fix the problem. It carries the technical error trace and diagnostic context (app version, recent activity). URLs, tokens, request and response bodies and personal data are removed before it leaves your machine. You will see exactly what is sent before each report.",
       "save": "Save my preferences",
       "learnMore": "Learn more"
     },

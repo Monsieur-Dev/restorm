@@ -25,14 +25,19 @@
 	margin: 0;
 }
 
-/* The post-update note is a TEASER, and the toaster CLIPS at its max-height
- * (`.toast` is `overflow: hidden`, it does not scroll). Left uncapped, a long
- * changelog — or one carrying a screenshot — pushes the "see release notes"
- * link past the clip and the user can never reach it. Cap the note and fade its
- * last few pixels so the truncation reads as intentional; the full history is
- * one click away in the modal the link opens. */
-.whats-new-toast > .markdown-viewer {
-	max-height: min(40vh, 220px);
-	overflow: hidden;
-	mask-image: linear-gradient(to bottom, rgb(0, 0, 0) calc(100% - 24px), transparent 100%);
+/* The note covers every version released since the user last ran the app, so it
+ * can be arbitrarily long, and the toaster CLIPS at its max-height (`.toast` is
+ * `overflow: hidden`, it does not scroll). Left uncapped, a long changelog — or
+ * one carrying a screenshot — pushes the "see release notes" link past the clip
+ * and the user can never reach it. So the note gets its own capped scroll
+ * container: every version stays readable in place, and the link below it stays
+ * reachable. `fitContent` on the scrollable keeps a short note at its natural
+ * height instead of padding it out to the cap.
+ *
+ * The height cap itself lives on the component's `style` prop rather than here —
+ * `fitContent` forwards `style.maxHeight` to the element that actually scrolls,
+ * and a cap applied from this stylesheet would only clip the outer wrapper,
+ * leaving nothing for the wheel to scroll. */
+.whats-new-toast__note {
+	min-width: 0;
 }

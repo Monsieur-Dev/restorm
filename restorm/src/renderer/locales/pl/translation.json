@@ -2531,7 +2531,7 @@
     "checkFailedBody": "Nie można sprawdzić aktualizacji. Spróbuj ponownie później.",
     "upToDateTitle": "Masz najnowszą wersję",
     "upToDateBody": "Używasz najnowszej wersji ({{version}}).",
-    "whatsNewTitle": "Co nowego w {{version}}",
+    "whatsNewTitle": "Co nowego?",
     "status": {
       "idle": "Aktualne",
       "checking": "Sprawdzanie…",
@@ -2556,7 +2556,7 @@
     "crashReportsLockedLabel": "Możliwe do zmiany od planu Pro. W planie bezpłatnym raporty o awariach są niezbędne do utrzymania jakości.",
     "consentToast": {
       "title": "Pomóż nam ulepszyć Restorm",
-      "body": "Gdy Restorm ulegnie awarii, może zostać wysłany anonimowy raport, aby można było naprawić usterkę. Zawiera techniczny ślad błędu i kontekst diagnostyczny (wersja aplikacji, ostatnie działania). Adresy URL, tokeny, treści żądań i odpowiedzi oraz dane osobowe są usuwane, zanim raport opuści Twoje urządzenie. Przed każdym raportem zobaczysz dokładnie, co zostanie wysłane.",
+      "body": "W razie nieoczekiwanego błędu Restorm może wysłać nam anonimowy raport, aby pomóc nam naprawić problem. Zawiera techniczny ślad błędu i kontekst diagnostyczny (wersja aplikacji, ostatnie działania). Adresy URL, tokeny, treści żądań i odpowiedzi oraz dane osobowe są usuwane, zanim raport opuści Twoje urządzenie. Przed każdym raportem zobaczysz dokładnie, co zostanie wysłane.",
       "save": "Zapisz moje preferencje",
       "learnMore": "Dowiedz się więcej"
     },

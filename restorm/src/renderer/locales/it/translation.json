@@ -2529,7 +2529,7 @@
     "checkFailedBody": "Impossibile controllare gli aggiornamenti. Riprova più tardi.",
     "upToDateTitle": "Sei aggiornato",
     "upToDateBody": "Stai usando l'ultima versione ({{version}}).",
-    "whatsNewTitle": "Novità della versione {{version}}",
+    "whatsNewTitle": "Cosa c'è di nuovo?",
     "status": {
       "idle": "Aggiornato",
       "checking": "Controllo…",
@@ -2554,7 +2554,7 @@
     "crashReportsLockedLabel": "Modificabile a partire dal piano Pro. Nel piano gratuito i rapporti di arresto anomalo sono necessari per mantenere la qualità.",
     "consentToast": {
       "title": "Aiutaci a migliorare Restorm",
-      "body": "Quando Restorm si arresta in modo anomalo, è possibile inviare un rapporto anonimo affinché il problema venga corretto. Contiene la traccia tecnica dell'errore e il contesto diagnostico (versione dell'app, attività recenti). URL, token, corpi di richiesta e risposta e dati personali vengono rimossi prima che lasci il tuo computer. Vedrai esattamente cosa viene inviato prima di ogni rapporto.",
+      "body": "In caso di errore inatteso, Restorm può inviarci un rapporto anonimo per aiutarci a correggere il problema. Contiene la traccia tecnica dell'errore e il contesto diagnostico (versione dell'app, attività recenti). URL, token, corpi di richiesta e risposta e dati personali vengono rimossi prima che lasci il tuo computer. Vedrai esattamente cosa viene inviato prima di ogni rapporto.",
       "save": "Salva le mie preferenze",
       "learnMore": "Scopri di più"
     },

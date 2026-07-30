@@ -2529,7 +2529,7 @@
     "checkFailedBody": "Kan niet op updates controleren. Probeer het later opnieuw.",
     "upToDateTitle": "Je bent up-to-date",
     "upToDateBody": "Je gebruikt de nieuwste versie ({{version}}).",
-    "whatsNewTitle": "Nieuw in {{version}}",
+    "whatsNewTitle": "Wat is er nieuw?",
     "status": {
       "idle": "Up-to-date",
       "checking": "Controleren…",
@@ -2554,7 +2554,7 @@
     "crashReportsLockedLabel": "Aanpasbaar vanaf het Pro-abonnement. In het gratis abonnement zijn crashrapporten nodig om de kwaliteit te bewaken.",
     "consentToast": {
       "title": "Help ons Restorm te verbeteren",
-      "body": "Wanneer Restorm vastloopt, kan er een anoniem rapport worden verzonden zodat de fout kan worden hersteld. Het bevat het technische foutspoor en de diagnostische context (app-versie, recente activiteit). URL's, tokens, aanvraag- en antwoordinhoud en persoonsgegevens worden verwijderd voordat het uw apparaat verlaat. U ziet precies wat er wordt verzonden vóór elk rapport.",
+      "body": "Als er een onverwachte fout optreedt, kan Restorm ons een anoniem rapport sturen om het probleem te verhelpen. Het bevat het technische foutspoor en de diagnostische context (app-versie, recente activiteit). URL's, tokens, aanvraag- en antwoordinhoud en persoonsgegevens worden verwijderd voordat het uw apparaat verlaat. U ziet precies wat er wordt verzonden vóór elk rapport.",
       "save": "Mijn voorkeuren opslaan",
       "learnMore": "Meer informatie"
     },

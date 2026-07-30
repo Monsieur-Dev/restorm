@@ -18,6 +18,31 @@ vi.mock('electron-core-ui/renderer', () => ({
     createElement('button', { onClick: props.onClick }, props.children),
   MarkdownViewer: (props: { value?: string }): ReactNode =>
     createElement('div', { 'data-testid': 'md' }, props.value),
+  // Surfaces the scroll options so a test can assert the note actually scrolls
+  // rather than merely being wrapped in something.
+  ScrollableElement: (props: {
+    children?: ReactNode
+    className?: string
+    style?: { maxHeight?: string | number }
+    options?: { vertical?: string; horizontal?: string; fitContent?: boolean }
+  }): ReactNode =>
+    createElement(
+      'div',
+      {
+        'data-testid': 'scrollable',
+        'data-vertical': props.options?.vertical ?? '',
+        'data-horizontal': props.options?.horizontal ?? '',
+        'data-fit-content': props.options?.fitContent ? 'true' : 'false',
+        // Under `fitContent` the component copies `style.maxHeight` onto the
+        // element that actually scrolls, so the cap MUST arrive this way — a
+        // stylesheet cap leaves the scrolling element uncapped and the wheel
+        // dead. Surfaced here so a regression fails the test instead of only
+        // showing up under a live mouse wheel.
+        'data-max-height': String(props.style?.maxHeight ?? ''),
+        className: props.className
+      },
+      props.children
+    ),
   ReleaseNotesModal: (props: {
     isOpen?: boolean
     loading?: boolean
@@ -41,11 +66,16 @@ vi.mock('electron-core-ui/renderer', () => ({
   }
 }))
 
-// t returns the key so assertions can match on it directly. `i18n.language`
-// feeds the localized "What's new" lookup.
+// t echoes the key, and appends any interpolation options so a test can tell
+// "titled by key alone" apart from "titled with a version interpolated in".
+// `i18n.language` feeds the localized "What's new" lookup.
 vi.mock('react-i18next', () => ({
-  useTranslation: (): { t: (key: string) => string; i18n: { language: string } } => ({
-    t: (key: string) => key,
+  useTranslation: (): {
+    t: (key: string, opts?: Record<string, unknown>) => string
+    i18n: { language: string }
+  } => ({
+    t: (key: string, opts?: Record<string, unknown>) =>
+      opts ? `${key} ${JSON.stringify(opts)}` : key,
     i18n: { language: 'en' }
   })
 }))
@@ -116,6 +146,11 @@ function findToast(pred: (input: ToastInput) => boolean): ToastInput {
   const call = pushMock.mock.calls.find((c) => pred(c[1] as ToastInput))
   if (!call) throw new Error('expected toast was not pushed')
   return call[1] as ToastInput
+}
+
+/** Render a captured toast body so its structure can be queried. */
+function renderToastBody(input: ToastInput): HTMLElement {
+  return render(input.body as ReactNode).container
 }
 
 function pushedTitle(title: string): boolean {
@@ -314,5 +349,47 @@ describe('UpdateNotifications', () => {
     await waitFor(() => {
       expect(view.getByTestId('release-notes-modal').getAttribute('data-initial-count')).toBe('10')
     })
+  })
+
+  it('puts the note in a vertical scroll container so a long span stays readable', async () => {
+    installApi({
+      lastSeen: '1.0.0',
+      changelog: '## v1.2.0\n\n- a\n\n## v1.1.0\n\n- b\n\n## v1.0.5\n\n- c\n'
+    })
+    render(<UpdateNotifications />)
+    await waitFor(() => {
+      expect(pushedId('restorm:whats-new')).toBe(true)
+    })
+
+    const body = renderToastBody(findToast((i) => i.id === 'restorm:whats-new'))
+    const scrollable = body.querySelector('[data-testid="scrollable"]')
+    expect(scrollable).not.toBeNull()
+    expect(scrollable?.getAttribute('data-vertical')).toBe('auto')
+    expect(scrollable?.getAttribute('data-horizontal')).toBe('hidden')
+    // A short note must sit at its natural height, not padded out to the cap.
+    expect(scrollable?.getAttribute('data-fit-content')).toBe('true')
+    // The cap must reach the component as a style, or the scrolling element is
+    // never capped and the wheel has nothing to move.
+    expect(scrollable?.getAttribute('data-max-height')).toBe('min(40vh, 220px)')
+
+    // Every version since the last run stays in the note...
+    const md = scrollable?.querySelector('[data-testid="md"]')
+    expect(md?.textContent).toContain('- a')
+    expect(md?.textContent).toContain('- b')
+    expect(md?.textContent).toContain('- c')
+    // ...and the modal link sits OUTSIDE the scroll area, so scrolling can never
+    // put it out of reach the way the previous clipped layout could.
+    expect(scrollable?.textContent).not.toContain('updates.seeReleaseNotes')
+    expect(body.textContent).toContain('updates.seeReleaseNotes')
+  })
+
+  it('titles the note without a version number', async () => {
+    installApi({ lastSeen: '1.1.0', changelog: '## v1.2.0\n- New' })
+    render(<UpdateNotifications />)
+    await waitFor(() => {
+      expect(pushedId('restorm:whats-new')).toBe(true)
+    })
+    // t echoes interpolation options, so a re-added version would show up here.
+    expect(findToast((i) => i.id === 'restorm:whats-new').title).toBe('updates.whatsNewTitle')
   })
 })

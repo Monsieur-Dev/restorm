@@ -2529,7 +2529,7 @@
     "checkFailedBody": "Impossible de vérifier les mises à jour. Veuillez réessayer plus tard.",
     "upToDateTitle": "Vous êtes à jour",
     "upToDateBody": "Vous utilisez la dernière version ({{version}}).",
-    "whatsNewTitle": "Nouveautés de la version {{version}}",
+    "whatsNewTitle": "Quoi de neuf ?",
     "status": {
       "idle": "À jour",
       "checking": "Vérification…",
@@ -2554,7 +2554,7 @@
     "crashReportsLockedLabel": "Modifiable à partir de l'offre Pro. Sur l'offre gratuite, les rapports de plantage sont nécessaires au maintien de la qualité.",
     "consentToast": {
       "title": "Aidez-nous à améliorer Restorm",
-      "body": "Lorsque Restorm plante, un rapport anonyme peut nous être envoyé afin que la panne soit corrigée. Il contient la trace technique de l'erreur et le contexte de diagnostic (version de l'application, dernières actions). Les URL, jetons, corps de requête et de réponse et données personnelles en sont retirés avant qu'il ne quitte votre machine. Vous verrez exactement ce qui est envoyé avant chaque rapport.",
+      "body": "En cas d'erreur inattendue, Restorm peut nous envoyer un rapport anonyme pour nous aider à corriger le problème. Il contient la trace technique de l'erreur et le contexte de diagnostic (version de l'application, dernières actions). Les URL, jetons, corps de requête et de réponse et données personnelles en sont retirés avant qu'il ne quitte votre machine. Vous verrez exactement ce qui est envoyé avant chaque rapport.",
       "save": "Enregistrer mes préférences",
       "learnMore": "En savoir plus"
     },

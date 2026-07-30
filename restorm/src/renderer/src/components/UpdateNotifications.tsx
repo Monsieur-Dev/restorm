@@ -4,6 +4,7 @@ import {
   Button,
   MarkdownViewer,
   ReleaseNotesModal,
+  ScrollableElement,
   eventBus,
   logger,
   toasterService
@@ -167,11 +168,22 @@ export function UpdateNotifications(): React.JSX.Element {
       if (md.trim().length > 0) {
         toasterService.push('app', {
           id: WHATS_NEW_TOAST_ID,
-          title: t('updates.whatsNewTitle', { version: current }),
+          title: t('updates.whatsNewTitle'),
           durationMs: undefined,
           body: (
             <div className="whats-new-toast">
-              <MarkdownViewer compact value={md} />
+              <ScrollableElement
+                className="whats-new-toast__note"
+                // The cap has to travel via `style`, not CSS: with `fitContent`
+                // the scrollable copies `style.maxHeight` onto the element that
+                // actually scrolls. Capping it from a stylesheet instead leaves
+                // that element uncapped, so it grows to its full content height
+                // and the wheel has nothing to scroll.
+                style={{ maxHeight: 'min(40vh, 220px)' }}
+                options={{ vertical: 'auto', horizontal: 'hidden', fitContent: true }}
+              >
+                <MarkdownViewer compact value={md} />
+              </ScrollableElement>
               <Button
                 link
                 onClick={() => { openerRef.current?.('recent') }}

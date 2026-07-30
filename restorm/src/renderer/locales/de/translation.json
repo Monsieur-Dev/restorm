@@ -2529,7 +2529,7 @@
     "checkFailedBody": "Nach Updates konnte nicht gesucht werden. Bitte später erneut versuchen.",
     "upToDateTitle": "Sie sind auf dem neuesten Stand",
     "upToDateBody": "Sie verwenden die neueste Version ({{version}}).",
-    "whatsNewTitle": "Neuheiten in {{version}}",
+    "whatsNewTitle": "Was ist neu?",
     "status": {
       "idle": "Aktuell",
       "checking": "Suche…",
@@ -2554,7 +2554,7 @@
     "crashReportsLockedLabel": "Ab dem Pro-Tarif änderbar. Im kostenlosen Tarif sind Absturzberichte nötig, um die Qualität zu sichern.",
     "consentToast": {
       "title": "Helfen Sie uns, Restorm zu verbessern",
-      "body": "Wenn Restorm abstürzt, kann ein anonymer Bericht gesendet werden, damit der Fehler behoben werden kann. Er enthält die technische Fehlerspur und den Diagnosekontext (App-Version, letzte Aktivitäten). URLs, Token, Anfrage- und Antwortinhalte sowie personenbezogene Daten werden entfernt, bevor er Ihr Gerät verlässt. Sie sehen vor jedem Bericht genau, was gesendet wird.",
+      "body": "Wenn ein unerwarteter Fehler auftritt, kann Restorm uns einen anonymen Bericht senden, damit wir das Problem beheben können. Er enthält die technische Fehlerspur und den Diagnosekontext (App-Version, letzte Aktivitäten). URLs, Token, Anfrage- und Antwortinhalte sowie personenbezogene Daten werden entfernt, bevor er Ihr Gerät verlässt. Sie sehen vor jedem Bericht genau, was gesendet wird.",
       "save": "Meine Einstellungen speichern",
       "learnMore": "Mehr erfahren"
     },
