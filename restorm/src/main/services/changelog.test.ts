@@ -90,7 +90,9 @@ describe('localized changelogs', () => {
   const dir = join(process.cwd(), 'changelogs')
 
   it('every locale changelog parses to the latest version section', () => {
-    if (!existsSync(dir)) return // hand-written per-locale release notes
+    // The per-locale notes are hand-maintained and committed, so an absent
+    // directory is a regression, not a reason to skip the assertions below.
+    expect(existsSync(dir), `${dir} must be committed`).toBe(true)
     const files = readdirSync(dir).filter((f) => f.endsWith('.md'))
     expect(files.length).toBeGreaterThan(0)
     for (const f of files) {

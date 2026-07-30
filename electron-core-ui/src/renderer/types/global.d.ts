@@ -27,6 +27,9 @@ interface WindowApiTheme {
 
 interface WindowApiI18n {
   setLanguage: (language: string) => Promise<boolean>
+  /** The language the user EXPLICITLY chose, or `''` when they never have.
+   * Callers read `''` as "fall back to the OS locale", so an implementation
+   * must never substitute a guess of its own here. */
   getLanguage: () => Promise<string>
 }
 

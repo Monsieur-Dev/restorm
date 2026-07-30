@@ -1008,10 +1008,22 @@
     "requestFormat.powershell": "PowerShell (Invoke-RestMethod)"
   },
   "import": {
-    "title": "Tuo pyyntöjä",
-    "source": {
-      "label": "Liitä jotain tähän!",
-      "placeholder": "Anna tiedostopolku, URL tai liitä curl/PowerShell-komento..."
+    "addAuth": "Lisää todennusreitti",
+    "applyFailedTitle": "Päivitys lähteestä epäonnistui",
+    "applyUpdate": "Käytä päivitystä",
+    "authenticatedVia": "Todennettu kohteella {{name}}",
+    "cancel": "Peruuta",
+    "customHeadersAdd": "Lisää otsake",
+    "customHeadersBtn": "Lisää mukautetut otsakkeet",
+    "customHeadersBtnTitle": "Liitä kertaluonteiset otsakkeet määrityksen noutoon (tallennetaan tuotuun kansioon uudelleentuonteja varten)",
+    "customHeadersDone": "Valmis",
+    "customHeadersHint": "Otsakkeet tallennetaan tuotuun kansioon, joten tuleva päivitys lähteestä toistaa ne. Käytä kirjautumisvirtoihin, joissa token vaihtuu, mieluummin yllä olevaa todennusreittiä.",
+    "customHeadersTitle": "Mukautetut otsakkeet",
+    "detachAuth": "Irrota todennusreitti",
+    "dropZone": "Pudotusalue",
+    "editAuth": "Muokkaa todennusreittiä",
+    "error": {
+      "unknown": "Tapahtui tuntematon virhe"
     },
     "formats": {
       "swagger": {
@@ -1137,15 +1149,24 @@
     },
     "loading": "Analysoidaan...",
     "noResults": "Pyyntöjä ei löytynyt",
-    "error": {
-      "unknown": "Tapahtui tuntematon virhe"
-    },
     "ok": "Tuo",
-    "cancel": "Peruuta",
-    "dropZone": "Pudotusalue",
-    "addAuth": "Lisää todennusreitti",
-    "detachAuth": "Irrota todennusreitti",
-    "editAuth": "Muokkaa todennusreittiä"
+    "okN": "{{action}} ({{count}})",
+    "preview": {
+      "noDocumentation": "Tälle lähteelle ei ole jäsennettyä dokumentaatiota."
+    },
+    "refreshTitle": "Päivitä lähteestä",
+    "searchPlaceholder": "Suodata reitit / kansiot…",
+    "selectAll": "Valitse kaikki",
+    "selectNone": "Tyhjennä valinnat",
+    "source": {
+      "label": "Liitä jotain tähän!",
+      "placeholder": "Anna tiedostopolku, URL tai liitä curl/PowerShell-komento..."
+    },
+    "tabs": {
+      "routes": "Reitit",
+      "documentation": "Dokumentaatio"
+    },
+    "title": "Tuo pyyntöjä"
   },
   "emptyBench": {
     "importCard": {
@@ -2493,6 +2514,7 @@
     "recoverFailedTitle": "Palautus epäonnistui"
   },
   "updates": {
+    "seeReleaseNotes": "Näytä julkaisutiedot",
     "settingsTitle": "Päivitykset",
     "autoCheckTitle": "Tarkista päivitykset automaattisesti",
     "autoCheckDescription": "Tarkistaa päivitykset taustalla käynnistyksen yhteydessä ja säännöllisesti.",
@@ -2501,19 +2523,63 @@
     "currentVersion": "Versio {{version}}",
     "checkNow": "Tarkista nyt",
     "readyTitle": "Päivitys valmis",
-    "readyBody": "Versio {{version}} asennetaan, kun käynnistät sovelluksen uudelleen.",
+    "readyBody": "Versio {{version}} on valmis asennettavaksi.",
     "restartNow": "Käynnistä uudelleen nyt",
     "checkFailedTitle": "Päivitysten tarkistus epäonnistui",
     "checkFailedBody": "Päivityksiä ei voitu tarkistaa. Yritä myöhemmin uudelleen.",
     "upToDateTitle": "Sovellus on ajan tasalla",
     "upToDateBody": "Käytössäsi on uusin versio ({{version}}).",
-    "whatsNewTitle": "Mitä uutta versiossa {{version}}",
+    "whatsNewTitle": "Mitä uutta?",
     "status": {
       "idle": "Ajan tasalla",
       "checking": "Tarkistetaan…",
       "downloading": "Ladataan… {{percent}} %",
       "downloaded": "Päivitys valmis asennettavaksi ({{version}})",
       "error": "Tarkistus epäonnistui"
+    }
+  },
+  "privacy": {
+    "settingsTitle": "Yksityisyys",
+    "crashReportsTitle": "Lähetä kaatumisraportit",
+    "crashReportsDescription": "Lähettää anonymisoidun raportin, kun Restorm kaatuu, jotta vika voidaan korjata. Raporteista poistetaan URL-osoitteet, tunnisteet, pyyntöjen sisällöt ja henkilötiedot ennen kuin ne lähtevät koneeltasi. Sisältyy ilmaiseen tilaukseen; maksullisessa tilauksessa sen voi kytkeä pois. Kaikki tiedot: https://restorm.app/privacy",
+    "telemetryTitle": "Lähetä käyttötilastot",
+    "telemetryDescription": "Lähettää anonyymejä tilastoja siitä, mitä ominaisuuksia käytetään, kehityksen suuntaamiseksi. Oletuksena pois päältä eikä koskaan käytössä ilman nimenomaista suostumustasi. Ei sisällä pyyntödataa, URL-osoitteita eikä henkilötietoja. Kaikki tiedot: https://restorm.app/privacy",
+    "outbound": {
+      "purpose": {
+        "crash": "Kaatumisraportit (vain suostumuksellasi)",
+        "telemetry": "Anonyymit käyttötilastot (vain suostumuksellasi)",
+        "backend": "Tili, lisenssi ja tilaus"
+      }
+    },
+    "crashReportsLockedLabel": "Muutettavissa Pro-tilauksesta alkaen. Maksuttomassa tilauksessa kaatumisraportit ovat tarpeen laadun ylläpitämiseksi.",
+    "consentToast": {
+      "title": "Auta meitä parantamaan Restormia",
+      "body": "Jos tapahtuu odottamaton virhe, Restorm voi lähettää meille anonyymin raportin, jotta voimme korjata ongelman. Se sisältää teknisen virhejäljen ja diagnostiikkatiedot (sovelluksen version, viimeaikaisen toiminnan). URL-osoitteet, tunnisteet, pyyntöjen ja vastausten sisällöt sekä henkilötiedot poistetaan ennen kuin raportti lähtee laitteeltasi. Näet tarkalleen, mitä lähetetään ennen jokaista raporttia.",
+      "save": "Tallenna asetukseni",
+      "learnMore": "Lue lisää"
+    },
+    "crashReportReviewTitle": "Näytä jokainen kaatumisraportti ennen lähetystä",
+    "crashReportReviewDescription": "Näyttää kaatumisraportin tarkan sisällön ja kysyy ennen lähettämistä. Poista käytöstä, jos haluat lähettää raportit automaattisesti ilman kysymystä.",
+    "reportDialog": {
+      "title": "Lähetetäänkö tämä kaatumisraportti?",
+      "intro": "Restorm kohtasi ongelman. Tämä on täsmälleen se, mitä lähetettäisiin.",
+      "includedError": "Tekninen virhe ja kohta koodissa, jossa se tapahtui",
+      "includedVersion": "Sovelluksen versio ja käyttöjärjestelmäsi",
+      "includedActivity": "Mitä sovellus teki juuri ennen virhettä",
+      "removed": "URL-osoitteet, tunnisteet, pyyntöjen ja vastausten sisällöt sekä henkilötiedot on jo poistettu.",
+      "viewFull": "Näytä koko raportti",
+      "waive": "Lähetä tulevat raportit automaattisesti näyttämättä niitä minulle",
+      "send": "Lähetä",
+      "discard": "Älä lähetä"
+    }
+  },
+  "crashRecovery": {
+    "message": "Restormissa tapahtui virhe, ja se on käynnistettävä uudelleen.",
+    "relaunch": "Käynnistä Restorm uudelleen",
+    "notice": {
+      "title": "Tiedostoa ei avattu uudelleen",
+      "body": "{{file}} jätettiin avaamatta: Restorm kaatui sitä avatessaan edellisellä käynnistyskerralla. Tiedostosi on ehjä — voit avata sen uudelleen viimeisimmistä tiedostoista.",
+      "bodyUnnamed": "Viimeisin tiedosto jätettiin avaamatta: Restorm kaatui sitä avatessaan edellisellä käynnistyskerralla. Tiedostosi on ehjä — voit avata sen uudelleen viimeisimmistä tiedostoista."
     }
   }
 }

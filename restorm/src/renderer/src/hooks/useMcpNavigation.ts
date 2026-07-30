@@ -2,7 +2,7 @@
  * Bridge MCP navigation IPC events into the workbench. The main
  * process broadcasts `mcp:open-tab` / `mcp:reveal-in-tree` whenever an
  * MCP client invokes the matching tool; this hook listens for those,
- * resolves the item against the live `rootItems`, and routes through
+ * resolves the item against the live tree, and routes through
  * the *same* navigation side-effects a sidebar click would trigger —
  * sidebar selection, ancestor expansion, MRU/alt-tab history, plus
  * the tab open. Anything less and the workbench tab opens but the
@@ -10,7 +10,25 @@
  *
  * Disabled outside MCP mode — when `mcpEnabled` is false the listeners
  * are never registered, so the renderer pays no cost in the common
- * non-MCP case.
+ * non-MCP case. `mcpEnabled` only flips once the config read resolves, so
+ * during the first instants after launch nothing here is listening and an
+ * `open_tab` gets no ack; main retries within its own budget and then
+ * reports an explicit error, which is the intended outcome — the window
+ * genuinely wasn't ready to show anything yet.
+ *
+ * Resolves items via `rootItemsRef.current` rather than a `rootItems`
+ * state prop, and deliberately does NOT list the tree as an effect
+ * dependency. A client that just created the item it's opening can have
+ * its `mcp:open-tab` broadcast delivered (Electron IPC is FIFO per
+ * `webContents`) before React gets a chance to commit the preceding
+ * `mcp:tree-replace`'s `setRootItems` and re-run this effect with a fresh
+ * `rootItems` closure — reading the STATE in that window returns the
+ * pre-create tree and the item is genuinely not there yet, from this
+ * effect's point of view. `rootItemsRef` sidesteps that entirely: it's
+ * written synchronously, in the SAME tick, by `useMcpTreeReplace`'s
+ * `mcp:tree-replace` handler (see that hook's prop doc), so by the time
+ * this handler runs, it always reads the tree as of the most recent IPC
+ * message actually processed — never a stale render.
  */
 
 import { useEffect } from 'react'
@@ -24,14 +42,17 @@ import type { OpenTabOptions } from './useWorkbenchTabs'
 type ActiveKind = 'request' | 'folder' | 'env-folder' | 'scenario'
 
 interface RestormNavBridge {
-  onMcpOpenTab: (cb: (payload: { itemId: string; kind: ActiveKind }) => void) => () => void
+  onMcpOpenTab: (cb: (payload: { requestId?: string; itemId: string; kind: ActiveKind }) => void) => () => void
   onMcpRevealInTree: (cb: (payload: { itemId: string; kind: ActiveKind }) => void) => () => void
   onMcpCloseTab: (cb: (payload: { itemId: string; kind: ActiveKind }) => void) => () => void
+  /** Ack an `mcp:open-tab` request back to main — see `replyMcpOpenTab`'s
+   * doc in the preload bridge. */
+  replyMcpOpenTab: (payload: { requestId: string; opened: boolean }) => void
 }
 
 export interface UseMcpNavigationInput {
   enabled: boolean
-  rootItems: FolderItem[]
+  rootItemsRef: { current: FolderItem[] }
   setExpandedIds: (updater: (prev: string[]) => string[]) => void
   setSelectedItemId: (next: string | null) => void
   openFolderTab: (folder: Folder, breadcrumbs: BreadcrumbItem[], options?: OpenTabOptions) => void
@@ -68,7 +89,7 @@ function navTypeForRequest(req: Request): string {
 export function useMcpNavigation(input: UseMcpNavigationInput): void {
   const {
     enabled,
-    rootItems,
+    rootItemsRef,
     setExpandedIds,
     setSelectedItemId,
     openFolderTab,
@@ -91,50 +112,61 @@ export function useMcpNavigation(input: UseMcpNavigationInput): void {
      * it too — a select without expansion is invisible if the parent
      * folder happens to be collapsed.
      */
-    const expandAncestors = (itemId: string): void => {
-      const { breadcrumbs } = findItemWithBreadcrumbs(rootItems, itemId)
+    const expandAncestors = (itemId: string, items: FolderItem[]): void => {
+      const { breadcrumbs } = findItemWithBreadcrumbs(items, itemId)
       const ancestorIds = breadcrumbs.map((b) => b.id).filter((id) => id !== itemId)
       if (ancestorIds.length === 0) return
       setExpandedIds((prev) => Array.from(new Set([...prev, ...ancestorIds])))
     }
 
-    const offOpen = api.onMcpOpenTab(({ itemId, kind }) => {
-      const { breadcrumbs } = findItemWithBreadcrumbs(rootItems, itemId)
+    const offOpen = api.onMcpOpenTab(({ requestId, itemId, kind }) => {
+      // Read the ref, not the closed-over `rootItemsRef` prop's identity —
+      // `.current` is always the freshest tree at the moment this handler
+      // actually runs. See the hook's module doc for why that matters.
+      const items = rootItemsRef.current
+      const ack = (opened: boolean): void => {
+        if (requestId) api.replyMcpOpenTab({ requestId, opened })
+      }
+      const { breadcrumbs } = findItemWithBreadcrumbs(items, itemId)
       if (kind === 'request') {
-        const req = findRequestById(rootItems, itemId)
-        if (!req) return
-        const envs = getNearestEnvironmentsForBreadcrumbs(rootItems, breadcrumbs)
+        const req = findRequestById(items, itemId)
+        if (!req) { ack(false); return }
+        const envs = getNearestEnvironmentsForBreadcrumbs(items, breadcrumbs)
         openAnyRequestTab(req, breadcrumbs, envs)
         setSelectedItemId(itemId)
-        expandAncestors(itemId)
+        expandAncestors(itemId, items)
         navigationService.navigateTo(itemId, 'mcp', { type: navTypeForRequest(req) })
+        ack(true)
       } else if (kind === 'env-folder') {
-        const f = findEnvironmentFolderById(rootItems, itemId)
-        if (!f) return
+        const f = findEnvironmentFolderById(items, itemId)
+        if (!f) { ack(false); return }
         openEnvironmentFolderTab(f, breadcrumbs)
         setSelectedItemId(itemId)
-        expandAncestors(itemId)
+        expandAncestors(itemId, items)
         navigationService.navigateTo(itemId, 'mcp', { type: 'environment-folder' })
+        ack(true)
       } else if (kind === 'scenario') {
-        const s = findScenarioById(rootItems, itemId)
-        if (!s) return
+        const s = findScenarioById(items, itemId)
+        if (!s) { ack(false); return }
         openScenarioEditorTab(s, breadcrumbs)
         setSelectedItemId(itemId)
-        expandAncestors(itemId)
+        expandAncestors(itemId, items)
         navigationService.navigateTo(itemId, 'mcp', { type: 'scenario-editor' })
+        ack(true)
       } else {
         // kind === 'folder' (only remaining union arm — ActiveKind is exhaustive).
-        const f = findFolderById(rootItems, itemId)
-        if (!f) return
+        const f = findFolderById(items, itemId)
+        if (!f) { ack(false); return }
         openFolderTab(f, breadcrumbs)
         setSelectedItemId(itemId)
-        expandAncestors(itemId)
+        expandAncestors(itemId, items)
         navigationService.navigateTo(itemId, 'mcp', { type: 'folder' })
+        ack(true)
       }
     })
 
     const offReveal = api.onMcpRevealInTree(({ itemId }) => {
-      expandAncestors(itemId)
+      expandAncestors(itemId, rootItemsRef.current)
     })
 
     const offClose = api.onMcpCloseTab(({ itemId }) => {
@@ -146,5 +178,5 @@ export function useMcpNavigation(input: UseMcpNavigationInput): void {
       offReveal()
       offClose()
     }
-  }, [enabled, rootItems, setExpandedIds, setSelectedItemId, openFolderTab, openEnvironmentFolderTab, openAnyRequestTab, openScenarioEditorTab, closeTabByItemId])
+  }, [enabled, rootItemsRef, setExpandedIds, setSelectedItemId, openFolderTab, openEnvironmentFolderTab, openAnyRequestTab, openScenarioEditorTab, closeTabByItemId])
 }

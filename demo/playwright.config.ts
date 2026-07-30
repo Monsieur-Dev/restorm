@@ -332,7 +332,15 @@ export default defineConfig({
   use: {
     /* Base URL to use in actions like `await page.goto('/')`. */
     baseURL: 'http://localhost:5173',
-    
+
+    /* Pin the UI language. The i18n bootstrap defaults to the browser locale
+       whenever nothing is explicitly stored — which is every run here, since
+       each context starts with an empty localStorage — so an unpinned context
+       inherits the host's locale and runs the suite in whatever language the
+       developer's machine uses while CI runs it in another. This is the web
+       counterpart of `withE2ELocaleEnv` for Electron launches. */
+    locale: 'en-US',
+
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
     

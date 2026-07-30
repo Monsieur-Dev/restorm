@@ -1010,10 +1010,22 @@
     "requestFormat.powershell": "PowerShell (Invoke-RestMethod)"
   },
   "import": {
-    "title": "Importuj żądania",
-    "source": {
-      "label": "Wklej tutaj coś!",
-      "placeholder": "Wprowadź ścieżkę pliku, URL lub wklej polecenie curl/PowerShell..."
+    "addAuth": "Dodaj trasę uwierzytelniania",
+    "applyFailedTitle": "Odświeżanie ze źródła nie powiodło się",
+    "applyUpdate": "Zastosuj aktualizację",
+    "authenticatedVia": "Uwierzytelniono przez {{name}}",
+    "cancel": "Anuluj",
+    "customHeadersAdd": "Dodaj nagłówek",
+    "customHeadersBtn": "Dodaj własne nagłówki",
+    "customHeadersBtnTitle": "Dołącz jednorazowe nagłówki do pobrania specyfikacji (zapisywane w zaimportowanym folderze na potrzeby ponownych importów)",
+    "customHeadersDone": "Gotowe",
+    "customHeadersHint": "Nagłówki są zapisywane w zaimportowanym folderze, więc przyszłe odświeżenie ze źródła je powtórzy. W przypadku logowania z rotacją tokenów użyj raczej trasy uwierzytelniania powyżej.",
+    "customHeadersTitle": "Własne nagłówki",
+    "detachAuth": "Odłącz trasę uwierzytelniania",
+    "dropZone": "Strefa upuszczania",
+    "editAuth": "Edytuj trasę uwierzytelniania",
+    "error": {
+      "unknown": "Wystąpił nieznany błąd"
     },
     "formats": {
       "swagger": {
@@ -1139,15 +1151,24 @@
     },
     "loading": "Analizowanie...",
     "noResults": "Nie znaleziono żądań",
-    "error": {
-      "unknown": "Wystąpił nieznany błąd"
-    },
     "ok": "Importuj",
-    "cancel": "Anuluj",
-    "dropZone": "Strefa upuszczania",
-    "addAuth": "Dodaj trasę uwierzytelniania",
-    "detachAuth": "Odłącz trasę uwierzytelniania",
-    "editAuth": "Edytuj trasę uwierzytelniania"
+    "okN": "{{action}} ({{count}})",
+    "preview": {
+      "noDocumentation": "Brak przeanalizowanej dokumentacji dla tego źródła."
+    },
+    "refreshTitle": "Odśwież ze źródła",
+    "searchPlaceholder": "Filtruj trasy / foldery…",
+    "selectAll": "Zaznacz wszystko",
+    "selectNone": "Odznacz wszystko",
+    "source": {
+      "label": "Wklej tutaj coś!",
+      "placeholder": "Wprowadź ścieżkę pliku, URL lub wklej polecenie curl/PowerShell..."
+    },
+    "tabs": {
+      "routes": "Trasy",
+      "documentation": "Dokumentacja"
+    },
+    "title": "Importuj żądania"
   },
   "emptyBench": {
     "importCard": {
@@ -2495,6 +2516,7 @@
     "recoverFailedTitle": "Przywracanie nie powiodło się"
   },
   "updates": {
+    "seeReleaseNotes": "Zobacz informacje o wydaniu",
     "settingsTitle": "Aktualizacje",
     "autoCheckTitle": "Automatycznie sprawdzaj aktualizacje",
     "autoCheckDescription": "Sprawdza aktualizacje w tle przy uruchomieniu i okresowo.",
@@ -2503,19 +2525,63 @@
     "currentVersion": "Wersja {{version}}",
     "checkNow": "Sprawdź teraz",
     "readyTitle": "Aktualizacja gotowa",
-    "readyBody": "Wersja {{version}} zostanie zainstalowana przy następnym uruchomieniu.",
+    "readyBody": "Wersja {{version}} jest gotowa do zainstalowania.",
     "restartNow": "Uruchom ponownie teraz",
     "checkFailedTitle": "Sprawdzanie aktualizacji nie powiodło się",
     "checkFailedBody": "Nie można sprawdzić aktualizacji. Spróbuj ponownie później.",
     "upToDateTitle": "Masz najnowszą wersję",
     "upToDateBody": "Używasz najnowszej wersji ({{version}}).",
-    "whatsNewTitle": "Co nowego w {{version}}",
+    "whatsNewTitle": "Co nowego?",
     "status": {
       "idle": "Aktualne",
       "checking": "Sprawdzanie…",
       "downloading": "Pobieranie… {{percent}} %",
       "downloaded": "Aktualizacja gotowa do instalacji ({{version}})",
       "error": "Sprawdzanie nie powiodło się"
+    }
+  },
+  "privacy": {
+    "settingsTitle": "Prywatność",
+    "crashReportsTitle": "Wysyłaj raporty o awariach",
+    "crashReportsDescription": "Wysyła zanonimizowany raport, gdy Restorm ulegnie awarii, aby usterkę można było naprawić. Raporty są oczyszczane z adresów URL, tokenów, treści żądań i danych osobowych, zanim opuszczą Twój komputer. Wliczone w plan bezpłatny; plan płatny pozwala to wyłączyć. Pełne informacje: https://restorm.app/privacy",
+    "telemetryTitle": "Wysyłaj statystyki użycia",
+    "telemetryDescription": "Wysyła anonimowe statystyki dotyczące używanych funkcji, aby ukierunkować dalszy rozwój. Domyślnie wyłączone i nigdy nie włączane bez Twojej wyraźnej zgody. Nie zawiera danych żądań, adresów URL ani danych osobowych. Pełne informacje: https://restorm.app/privacy",
+    "outbound": {
+      "purpose": {
+        "crash": "Raporty o awariach (tylko za Twoją zgodą)",
+        "telemetry": "Anonimowe statystyki użycia (tylko za Twoją zgodą)",
+        "backend": "Konto, licencja i subskrypcja"
+      }
+    },
+    "crashReportsLockedLabel": "Możliwe do zmiany od planu Pro. W planie bezpłatnym raporty o awariach są niezbędne do utrzymania jakości.",
+    "consentToast": {
+      "title": "Pomóż nam ulepszyć Restorm",
+      "body": "W razie nieoczekiwanego błędu Restorm może wysłać nam anonimowy raport, aby pomóc nam naprawić problem. Zawiera techniczny ślad błędu i kontekst diagnostyczny (wersja aplikacji, ostatnie działania). Adresy URL, tokeny, treści żądań i odpowiedzi oraz dane osobowe są usuwane, zanim raport opuści Twoje urządzenie. Przed każdym raportem zobaczysz dokładnie, co zostanie wysłane.",
+      "save": "Zapisz moje preferencje",
+      "learnMore": "Dowiedz się więcej"
+    },
+    "crashReportReviewTitle": "Pokazuj każdy raport przed wysłaniem",
+    "crashReportReviewDescription": "Pokazuje dokładną zawartość raportu o awarii i prosi o potwierdzenie przed wysłaniem. Wyłącz, aby wysyłać raporty automatycznie, bez pytania za każdym razem.",
+    "reportDialog": {
+      "title": "Wysłać ten raport o awarii?",
+      "intro": "Restorm napotkał problem. Oto dokładnie to, co zostałoby wysłane.",
+      "includedError": "Błąd techniczny i miejsce w kodzie, w którym wystąpił",
+      "includedVersion": "Wersja aplikacji i Twój system operacyjny",
+      "includedActivity": "Co aplikacja robiła tuż przed awarią",
+      "removed": "Adresy URL, tokeny, treści żądań i odpowiedzi oraz dane osobowe zostały już usunięte.",
+      "viewFull": "Pokaż pełny raport",
+      "waive": "Wysyłaj kolejne raporty automatycznie, bez pokazywania mi ich",
+      "send": "Wyślij",
+      "discard": "Nie wysyłaj"
+    }
+  },
+  "crashRecovery": {
+    "message": "Restorm napotkał problem i musi zostać uruchomiony ponownie.",
+    "relaunch": "Uruchom ponownie Restorm",
+    "notice": {
+      "title": "Plik nie został ponownie otwarty",
+      "body": "Plik {{file}} nie został ponownie otwarty: Restorm uległ awarii podczas jego otwierania przy poprzednim uruchomieniu. Plik jest nienaruszony — można go otworzyć z ostatnio używanych plików.",
+      "bodyUnnamed": "Ostatni plik nie został ponownie otwarty: Restorm uległ awarii podczas jego otwierania przy poprzednim uruchomieniu. Plik jest nienaruszony — można go otworzyć z ostatnio używanych plików."
     }
   }
 }

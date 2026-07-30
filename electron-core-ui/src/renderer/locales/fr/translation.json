@@ -1,4 +1,10 @@
 {
+  "releaseNotesModal": {
+    "title": "Nouveautés",
+    "showMore": "Voir plus",
+    "loading": "Chargement des notes de version…",
+    "empty": "Aucune note de version à afficher."
+  },
   "common": {
     "opened": "Ouverts",
     "refresh": "Actualiser",
@@ -29,7 +35,8 @@
     "removeFromFavorites": "Retirer des favoris",
     "confirmRemoveFavorite": "Voulez-vous vraiment retirer \"{{fileName}}\" des favoris ?",
     "favoritesLandmarkLabel": "Liste des favoris",
-    "recentsLandmarkLabel": "Liste des fichiers récents"
+    "recentsLandmarkLabel": "Liste des fichiers récents",
+    "openContainingFolder": "Ouvrir le dossier contenant"
   },
   "welcomeScreen": {
     "landmarkLabel": "Accueil"
@@ -390,7 +397,10 @@
     "listInstances": "Lister les instances MCP",
     "listThemes": "Lister les thèmes disponibles",
     "getCurrentTheme": "Obtenir le thème actuel",
-    "switchTheme": "Changer le thème actif"
+    "getSettings": "Lister les paramètres de l'application",
+    "setSetting": "Modifier un paramètre",
+    "patchSettings": "Modifier plusieurs paramètres à la fois",
+    "resetSetting": "Réinitialiser un paramètre"
   },
   "customWco": {
     "minimize": "Réduire",
@@ -401,7 +411,20 @@
   "firewall": {
     "addOrigin": "Ajouter un origin",
     "removeOrigin": "Retirer {{origin}}",
-    "noEntries": "Aucune entrée pour l'instant."
+    "noEntries": "Aucune entrée pour l'instant.",
+    "outbound": {
+      "title": "Services sortants",
+      "intro": "Destinations que cette application peut contacter de sa propre initiative. Elles sont déclarées dans le code et ne sont pas modifiables ici — celles qui exigent votre consentement restent désactivées tant que vous ne l'avez pas accordé dans les Préférences.",
+      "empty": "Cette application ne déclare aucune destination sortante qui lui soit propre.",
+      "hostUnset": "non configuré",
+      "stateConsented": "Autorisé — vous avez donné votre consentement",
+      "stateNoConsent": "Bloqué — aucun consentement donné",
+      "stateRequired": "Autorisé — nécessaire au fonctionnement de l'application",
+      "stateInactive": "Inactif — non utilisé actuellement",
+      "purpose": {
+        "avatar": "Photo de profil du compte connecté"
+      }
+    }
   },
   "bookmarkRibbon": {
     "addBookmark": "Ajouter un signet"

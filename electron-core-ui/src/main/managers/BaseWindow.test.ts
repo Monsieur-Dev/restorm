@@ -372,6 +372,66 @@ describe('BaseWindow', () => {
       fireWebContentsOnce(win, 'did-finish-load')
       expect(cb).toHaveBeenCalledTimes(1)
     })
+
+    it('reveals the window anyway when the renderer never signals ready', () => {
+      // A renderer that never mounts would otherwise leave the window hidden
+      // forever: a live process with nothing on screen, which the user can
+      // neither use nor close.
+      vi.useFakeTimers()
+      try {
+        mockStorageGet.mockReturnValue(undefined)
+        const win = new TestWindow({ ...defaultConfig, showWhenReady: true })
+        const cb = vi.fn()
+        win.onReadyToShow(cb)
+        const bw = win.getWindow() as unknown as InstanceType<typeof MockBrowserWindow>
+
+        vi.advanceTimersByTime(29_000)
+        expect(bw.show).not.toHaveBeenCalled()
+
+        vi.advanceTimersByTime(1_000)
+        expect(cb).toHaveBeenCalledTimes(1)
+        expect(bw.show).toHaveBeenCalledTimes(1)
+      } finally {
+        vi.useRealTimers()
+      }
+    })
+
+    it('does not reveal twice when the renderer signals after the safety deadline', () => {
+      vi.useFakeTimers()
+      try {
+        mockStorageGet.mockReturnValue(undefined)
+        const win = new TestWindow({ ...defaultConfig, showWhenReady: true })
+        const cb = vi.fn()
+        win.onReadyToShow(cb)
+        const bw = win.getWindow() as unknown as InstanceType<typeof MockBrowserWindow>
+
+        vi.advanceTimersByTime(30_000)
+        expect(bw.show).toHaveBeenCalledTimes(1)
+
+        fireRendererReady()
+        expect(bw.show).toHaveBeenCalledTimes(1)
+        expect(cb).toHaveBeenCalledTimes(1)
+      } finally {
+        vi.useRealTimers()
+      }
+    })
+
+    it('cancels the safety reveal once the renderer signalled ready', () => {
+      vi.useFakeTimers()
+      try {
+        mockStorageGet.mockReturnValue(undefined)
+        const win = new TestWindow({ ...defaultConfig, showWhenReady: true })
+        const bw = win.getWindow() as unknown as InstanceType<typeof MockBrowserWindow>
+
+        fireRendererReady()
+        expect(bw.show).toHaveBeenCalledTimes(1)
+
+        vi.advanceTimersByTime(60_000)
+        expect(bw.show).toHaveBeenCalledTimes(1)
+      } finally {
+        vi.useRealTimers()
+      }
+    })
   })
 
   describe('revealInactive (no-focus reveal)', () => {
@@ -426,6 +486,25 @@ describe('BaseWindow', () => {
       expect(bw.showInactive).toHaveBeenCalledTimes(1)
       expect(bw.show).not.toHaveBeenCalled()
       expect(bw.isFocused()).toBe(false)
+    })
+
+    it('the safety reveal honours revealInactive too (no focus steal)', () => {
+      // The renderer never signals: the window is revealed by the safety
+      // deadline instead — and must still not steal focus.
+      vi.useFakeTimers()
+      try {
+        mockStorageGet.mockReturnValue(undefined)
+        const win = new TestWindow({ ...defaultConfig, showWhenReady: true, revealInactive: true })
+        const bw = win.getWindow() as unknown as InstanceType<typeof MockBrowserWindow>
+
+        vi.advanceTimersByTime(30_000)
+
+        expect(bw.showInactive).toHaveBeenCalledTimes(1)
+        expect(bw.show).not.toHaveBeenCalled()
+        expect(bw.isFocused()).toBe(false)
+      } finally {
+        vi.useRealTimers()
+      }
     })
 
     it('an explicit revealInactive:false wins over the --inactive-window flag', () => {

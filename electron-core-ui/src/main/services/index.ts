@@ -188,6 +188,21 @@ export type {
   FirewallConfig
 } from './firewall'
 
+// ── Privacy / consent ──────────────────────────────────────────────────────
+// ConsentService — the single main-process answer to "may we send this?", plus
+// the scrubber every outbound diagnostic payload must pass through and the
+// firewall exemption that follows consent on and off.
+// See docs/Architecture/Privacy.md.
+export { ConsentService } from './privacy/ConsentService'
+export type {
+  ConsentServiceOptions,
+  ConsentSettingsPort,
+  ConsentStorePort
+} from './privacy/ConsentService'
+export { makeConsentFileStore } from './privacy/consentFileStore'
+export { ConsentFirewallExemption } from './privacy/ConsentFirewallExemption'
+export type { ConsentGatedEndpoint } from './privacy/ConsentFirewallExemption'
+
 // ── Auth / entitlement ─────────────────────────────────────────────────────
 // Shared auth types (AuthState, AUTH_IPC, CheckoutResult, PlanTier …)
 export type { AuthState, CheckoutResult, PlanTier } from '../../shared/auth/authState'

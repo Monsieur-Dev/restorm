@@ -1007,10 +1007,22 @@
     "requestFormat.powershell": "PowerShell (Invoke-RestMethod)"
   },
   "import": {
-    "title": "Nhập yêu cầu",
-    "source": {
-      "label": "Dán gì đó vào đây!",
-      "placeholder": "Nhập đường dẫn tệp, URL, hoặc dán lệnh curl/PowerShell..."
+    "addAuth": "Thêm tuyến xác thực",
+    "applyFailedTitle": "Làm mới từ nguồn thất bại",
+    "applyUpdate": "Áp dụng cập nhật",
+    "authenticatedVia": "Đã xác thực qua {{name}}",
+    "cancel": "Hủy",
+    "customHeadersAdd": "Thêm header",
+    "customHeadersBtn": "Thêm header tùy chỉnh",
+    "customHeadersBtnTitle": "Đính kèm header dùng một lần vào lượt tải đặc tả (được lưu trên thư mục đã nhập để nhập lại)",
+    "customHeadersDone": "Xong",
+    "customHeadersHint": "Header được lưu trên thư mục đã nhập nên lần làm mới từ nguồn sau sẽ gửi lại chúng. Với luồng đăng nhập có xoay vòng token, hãy dùng tuyến xác thực ở trên.",
+    "customHeadersTitle": "Header tùy chỉnh",
+    "detachAuth": "Tách tuyến xác thực",
+    "dropZone": "Vùng thả",
+    "editAuth": "Chỉnh sửa tuyến xác thực",
+    "error": {
+      "unknown": "Đã xảy ra lỗi không xác định"
     },
     "formats": {
       "swagger": {
@@ -1136,15 +1148,24 @@
     },
     "loading": "Đang phân tích...",
     "noResults": "Không tìm thấy yêu cầu",
-    "error": {
-      "unknown": "Đã xảy ra lỗi không xác định"
-    },
     "ok": "Nhập",
-    "cancel": "Hủy",
-    "dropZone": "Vùng thả",
-    "addAuth": "Thêm tuyến xác thực",
-    "detachAuth": "Tách tuyến xác thực",
-    "editAuth": "Chỉnh sửa tuyến xác thực"
+    "okN": "{{action}} ({{count}})",
+    "preview": {
+      "noDocumentation": "Không có tài liệu được phân tích cho nguồn này."
+    },
+    "refreshTitle": "Làm mới từ nguồn",
+    "searchPlaceholder": "Lọc tuyến / thư mục…",
+    "selectAll": "Chọn tất cả",
+    "selectNone": "Bỏ chọn tất cả",
+    "source": {
+      "label": "Dán gì đó vào đây!",
+      "placeholder": "Nhập đường dẫn tệp, URL, hoặc dán lệnh curl/PowerShell..."
+    },
+    "tabs": {
+      "routes": "Tuyến",
+      "documentation": "Tài liệu"
+    },
+    "title": "Nhập yêu cầu"
   },
   "emptyBench": {
     "importCard": {
@@ -2492,6 +2513,7 @@
     "recoverFailedTitle": "Khôi phục thất bại"
   },
   "updates": {
+    "seeReleaseNotes": "Xem ghi chú phát hành",
     "settingsTitle": "Cập nhật",
     "autoCheckTitle": "Tự động kiểm tra cập nhật",
     "autoCheckDescription": "Kiểm tra cập nhật ở chế độ nền khi khởi động và theo định kỳ.",
@@ -2500,19 +2522,63 @@
     "currentVersion": "Phiên bản {{version}}",
     "checkNow": "Kiểm tra ngay",
     "readyTitle": "Bản cập nhật đã sẵn sàng",
-    "readyBody": "Phiên bản {{version}} sẽ được cài đặt trong lần khởi động lại tiếp theo.",
+    "readyBody": "Phiên bản {{version}} đã sẵn sàng để cài đặt.",
     "restartNow": "Khởi động lại ngay",
     "checkFailedTitle": "Kiểm tra cập nhật thất bại",
     "checkFailedBody": "Không thể kiểm tra cập nhật. Vui lòng thử lại sau.",
     "upToDateTitle": "Bạn đang dùng bản mới nhất",
     "upToDateBody": "Bạn đang chạy phiên bản mới nhất ({{version}}).",
-    "whatsNewTitle": "Có gì mới trong {{version}}",
+    "whatsNewTitle": "Có gì mới?",
     "status": {
       "idle": "Đã cập nhật",
       "checking": "Đang kiểm tra…",
       "downloading": "Đang tải xuống… {{percent}} %",
       "downloaded": "Bản cập nhật sẵn sàng để cài đặt ({{version}})",
       "error": "Kiểm tra thất bại"
+    }
+  },
+  "privacy": {
+    "settingsTitle": "Quyền riêng tư",
+    "crashReportsTitle": "Gửi báo cáo sự cố",
+    "crashReportsDescription": "Gửi một báo cáo đã ẩn danh khi Restorm gặp sự cố, để lỗi có thể được khắc phục. Báo cáo được loại bỏ URL, mã thông báo, nội dung yêu cầu và dữ liệu cá nhân trước khi rời khỏi máy của bạn. Bao gồm trong gói miễn phí; gói trả phí cho phép tắt tính năng này. Chi tiết đầy đủ: https://restorm.app/privacy",
+    "telemetryTitle": "Gửi thống kê sử dụng",
+    "telemetryDescription": "Gửi thống kê ẩn danh về những tính năng được sử dụng, nhằm định hướng phát triển tiếp theo. Mặc định tắt và không bao giờ bật nếu không có sự đồng ý rõ ràng của bạn. Không chứa dữ liệu yêu cầu, URL hay dữ liệu cá nhân. Chi tiết đầy đủ: https://restorm.app/privacy",
+    "outbound": {
+      "purpose": {
+        "crash": "Báo cáo sự cố (chỉ khi bạn đồng ý)",
+        "telemetry": "Thống kê sử dụng ẩn danh (chỉ khi bạn đồng ý)",
+        "backend": "Tài khoản, giấy phép và gói đăng ký"
+      }
+    },
+    "crashReportsLockedLabel": "Có thể thay đổi từ gói Pro. Ở gói miễn phí, báo cáo sự cố là cần thiết để duy trì chất lượng.",
+    "consentToast": {
+      "title": "Hãy giúp chúng tôi cải thiện Restorm",
+      "body": "Nếu xảy ra lỗi không mong muốn, Restorm có thể gửi cho chúng tôi một báo cáo ẩn danh để giúp chúng tôi khắc phục sự cố. Báo cáo chứa dấu vết lỗi kỹ thuật và bối cảnh chẩn đoán (phiên bản ứng dụng, hoạt động gần đây). Các URL, mã thông báo, nội dung yêu cầu và phản hồi cùng dữ liệu cá nhân đều được loại bỏ trước khi rời khỏi máy của bạn. Bạn sẽ thấy chính xác những gì được gửi trước mỗi báo cáo.",
+      "save": "Lưu tùy chọn của tôi",
+      "learnMore": "Tìm hiểu thêm"
+    },
+    "crashReportReviewTitle": "Hiển thị từng báo cáo sự cố trước khi gửi",
+    "crashReportReviewDescription": "Hiển thị nội dung chính xác của báo cáo sự cố và hỏi trước khi gửi. Tắt để tự động gửi báo cáo mà không hỏi mỗi lần.",
+    "reportDialog": {
+      "title": "Gửi báo cáo sự cố này?",
+      "intro": "Restorm đã gặp sự cố. Đây chính xác là những gì sẽ được gửi đi.",
+      "includedError": "Lỗi kỹ thuật và vị trí trong mã nơi lỗi xảy ra",
+      "includedVersion": "Phiên bản ứng dụng và hệ điều hành của bạn",
+      "includedActivity": "Ứng dụng đang làm gì ngay trước khi xảy ra lỗi",
+      "removed": "Các URL, mã thông báo, nội dung yêu cầu và phản hồi cùng dữ liệu cá nhân đã được loại bỏ.",
+      "viewFull": "Xem báo cáo đầy đủ",
+      "waive": "Tự động gửi các báo cáo sau mà không hiển thị cho tôi",
+      "send": "Gửi",
+      "discard": "Không gửi"
+    }
+  },
+  "crashRecovery": {
+    "message": "Restorm đã gặp sự cố và cần được khởi động lại.",
+    "relaunch": "Khởi động lại Restorm",
+    "notice": {
+      "title": "Không mở lại tệp",
+      "body": "{{file}} không được mở lại: Restorm đã gặp sự cố khi mở tệp này ở lần khởi động trước. Tệp của bạn vẫn nguyên vẹn — bạn có thể mở lại từ các tệp gần đây.",
+      "bodyUnnamed": "Tệp gần nhất không được mở lại: Restorm đã gặp sự cố khi mở tệp này ở lần khởi động trước. Tệp của bạn vẫn nguyên vẹn — bạn có thể mở lại từ các tệp gần đây."
     }
   }
 }

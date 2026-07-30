@@ -101,6 +101,30 @@ describe('scenario MCP tools', () => {
     expect(cx).toBeGreaterThan(bx)
   })
 
+  it('arrange_scenario orders the downstream boxes by their source-port order', async () => {
+    // An HTTP mock server: `connected` and `served` are rendered in that order,
+    // then the implicit `done` at the bottom of the box. The three boxes they
+    // feed are created in the REVERSE order on purpose — that creation order is
+    // what a port-blind layout falls back to, and it's what used to cross the
+    // links.
+    const server = parse(mcp.invoke('create_scenario_node', { scenarioId: 's1', kind: 'httpListen' }))
+    const onDone = parse(mcp.invoke('create_scenario_node', { scenarioId: 's1', kind: 'log' }))
+    const onServed = parse(mcp.invoke('create_scenario_node', { scenarioId: 's1', kind: 'log' }))
+    const onConnected = parse(mcp.invoke('create_scenario_node', { scenarioId: 's1', kind: 'log' }))
+    mcp.invoke('connect_scenario_nodes', { scenarioId: 's1', fromNodeId: server['nodeId'], fromPortId: 'done', toNodeId: onDone['nodeId'], toPortId: 'in' })
+    mcp.invoke('connect_scenario_nodes', { scenarioId: 's1', fromNodeId: server['nodeId'], fromPortId: 'served', toNodeId: onServed['nodeId'], toPortId: 'data' })
+    mcp.invoke('connect_scenario_nodes', { scenarioId: 's1', fromNodeId: server['nodeId'], fromPortId: 'connected', toNodeId: onConnected['nodeId'], toPortId: 'in' })
+
+    const res = parse(await Promise.resolve(mcp.invoke('arrange_scenario', { scenarioId: 's1' })))
+    expect(res['moved']).toBeGreaterThan(0)
+
+    const byId = new Map(scenario.nodes.map((n) => [n.id, n.position]))
+    const y = (node: Record<string, unknown>): number => byId.get(node['nodeId'] as string)?.y ?? Number.NaN
+    // Top output's box on top, bottom output's box at the bottom.
+    expect(y(onConnected)).toBeLessThan(y(onServed))
+    expect(y(onServed)).toBeLessThan(y(onDone))
+  })
+
   it('create_scenario_node with arrange=true repositions the whole graph', async () => {
     mcp.invoke('create_scenario_node', { scenarioId: 's1', kind: 'now' })
     const res = parse(await Promise.resolve(mcp.invoke('create_scenario_node', { scenarioId: 's1', kind: 'log', arrange: true, config: {} })))

@@ -36,7 +36,7 @@ import { SCENARIO_NODE_CATALOGUE, SCENARIO_SUBMENU_CATEGORIES, scenarioNodeMeta,
 import { scenarioEdgeToFlowEdge, flowEdgeToScenarioEdge, edgeColorForHandle } from './scenarioGraphMapping'
 import { ScenarioNodeView, type ScenarioNodeBoxData } from './nodes'
 import { setScenarioClipboard, getScenarioClipboard, hasScenarioClipboard, nextPasteDelta } from './scenarioActionClipboard'
-import { defaultPortsForKind, isValidScenarioConnection, deriveRunScenarioPorts, inputPortFlow, outputPortFlow } from './scenarioNodePorts'
+import { defaultPortsForKind, isValidScenarioConnection, deriveRunScenarioPorts, inputPortFlow, outputPortFlow, socketioConnectEventPorts } from './scenarioNodePorts'
 import { isDataLink } from './scenarioPathTree'
 import { linkPaletteEntries } from './scenarioLinkPalette'
 // Side-effect: registers the env → { name, variables } resolver used by the
@@ -45,7 +45,8 @@ import './scenarioEnvPreview'
 // Side-effect: registers the secret → plaintext resolver (async cache) so the
 // inspector's static preview resolves a SecretValue operand to its live value.
 import { useSecretPreviewVersion } from './scenarioSecretPreview'
-import { layoutScenarioGraph, scenarioGraphNeedsPlacement, SCENARIO_NODE_FALLBACK_WIDTH, SCENARIO_NODE_FALLBACK_HEIGHT } from '../../../../shared/scenarioGraphLayout'
+import { layoutScenarioGraph, scenarioGraphNeedsPlacement, SCENARIO_NODE_FALLBACK_WIDTH, SCENARIO_NODE_FALLBACK_HEIGHT, type LayoutEdgeInput, type LayoutNodeInput } from '../../../../shared/scenarioGraphLayout'
+import { hasDonePort, hasErrorPort } from '../../../../shared/scenarioNodeCapabilities'
 import { addMenuEntryBadge, scenarioAddBadgedNodeIcon, SCENARIO_ADD_GRAPHQL_SUB_ACTIONS, SCENARIO_ADD_REDIS_COMMAND, SCENARIO_ADD_SOAP_REQUEST, SCENARIO_ADD_SOCKETIO_ACTIONS, SCENARIO_ADD_SOCKETIO_SERVER_ACTIONS, SCENARIO_ADD_WEBSOCKET_ACTIONS, SCENARIO_ADD_WEBSOCKET_SERVER_ACTIONS, SCENARIO_ADD_STOMP_ACTIONS, SCENARIO_ADD_SSE_ACTIONS, SCENARIO_ADD_MQTT_ACTIONS, SCENARIO_ADD_AMQP_ACTIONS, SCENARIO_ADD_REDIS_ACTIONS, SCENARIO_ADD_KAFKA_ACTIONS, SCENARIO_ADD_GRPC_ACTIONS, SCENARIO_ADD_HTTP_ACTIONS, SCENARIO_ADD_GRPC_SERVER_ACTIONS, SCENARIO_ADD_SOAP_ACTIONS, SCENARIO_ADD_ODATA_ACTIONS, SCENARIO_ADD_GRAPHQL_ACTIONS, scenarioAddSocketioIcon, scenarioAddWebsocketIcon, scenarioAddStompIcon, scenarioAddSseIcon, scenarioAddMqttIcon, scenarioAddAmqpIcon, scenarioAddRedisIcon, scenarioAddKafkaIcon, scenarioAddGrpcIcon, scenarioAddHttpIcon, scenarioAddSoapIcon, scenarioAddGraphqlIcon } from './scenarioChildPalette'
 import { RegistryBadge } from '../common/RegistryBadge'
 import type { AddChildKind, AddMenuRequestEntry } from '../MainView/Sidebar/contextMenuBuilder'
@@ -625,6 +626,20 @@ function chooseColorTooltipPlacement(rect: DOMRect): { placement: 'above' | 'bel
   return { placement: 'below', side: 'auto' }
 }
 
+/** A canvas edge → auto-layout input: the box-to-box link plus the handles it
+ * hangs off, so the layout can order the downstream boxes by source port. A
+ * handle-less link (none in a normal graph, but the type allows it) degrades to
+ * a plain box-to-box relationship. */
+function layoutEdgeOf(e: Edge): LayoutEdgeInput {
+  return {
+    id: e.id,
+    source: e.source,
+    target: e.target,
+    ...(e.sourceHandle ? { sourcePort: e.sourceHandle } : {}),
+    ...(e.targetHandle ? { targetPort: e.targetHandle } : {})
+  }
+}
+
 const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tabId, projectUuid, onScenarioChange, resolveBoundItem, resolveRequestEnv, resolveSyntheticPreview, onOpenItem, onCreateRequest, onCreateChild, hideInspector = false }) => {
   const { t } = useTranslation()
   const { screenToFlowPosition, fitView, getNode, getViewport } = useReactFlow()
@@ -1007,6 +1022,46 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
     })
   }, [onScenarioChange, scenario.id])
 
+  // Resolve a scenario reference (a runScenario's sub-scenario) to derive its
+  // ports — for orphan-edge detection and the derived call-signature ports.
+  const resolveScenario = useCallback((sid: string): Scenario | null => {
+    const it = resolveBoundItem?.(sid) ?? null
+    return it && isScenario(it) ? it : null
+  }, [resolveBoundItem])
+
+  // Ports a runScenario node derives from its bound sub-scenario (one per named
+  // input/output node, plus a `done` trigger when it returns nothing) — null for
+  // any other kind. Accepts both the stored `ScenarioNode` and the flow node's
+  // `data`, since both carry `{ kind, config }`.
+  const derivedPortsOf = useCallback((node: { kind: ScenarioNodeKind; config?: Record<string, unknown> } | undefined) => {
+    if (node?.kind !== 'runScenario') return null
+    const sid = typeof node.config?.['scenarioId'] === 'string' ? node.config['scenarioId'] : undefined
+    return deriveRunScenarioPorts(sid ? resolveScenario(sid) : null)
+  }, [resolveScenario])
+
+  // The vertical order a box renders its ports in, as port ids — what the ELK
+  // layout needs to keep a node's successors in its output order rather than an
+  // arbitrary one. Mirrors the box: the model's port arrays first (a `switch`'s
+  // cases and an `object`'s properties live there), then the ports derived from
+  // config (a runScenario's call signature, a socketioConnect's listened
+  // events), then the implicit `error` / `done` handles, which draw at the
+  // bottom of the box. A port that isn't in this list — a request box's
+  // per-slot inputs, minted by the box itself — simply keeps a box-level link.
+  const layoutPortOrderOf = useCallback((data: NodeData): { inputs: string[]; outputs: string[] } => {
+    const derived = derivedPortsOf(data)
+    const events = data.kind === 'socketioConnect' ? socketioConnectEventPorts(data.config ?? {}) : []
+    return {
+      inputs: [...data.inputs.map((p) => p.id), ...(derived?.inputs ?? []).map((p) => p.id)],
+      outputs: [
+        ...data.outputs.map((p) => p.id),
+        ...(derived?.outputs ?? []).map((p) => p.id),
+        ...events.map((p) => p.id),
+        ...(hasErrorPort(data.kind) ? ['error'] : []),
+        ...(hasDonePort(data.kind) ? ['done'] : [])
+      ]
+    }
+  }, [derivedPortsOf])
+
   // ── Auto-layout (INITIAL PLACEMENT only) ─────────────────────────────────────
   // Auto-layout runs ONLY for the initial placement of an un-positioned graph,
   // on its first open, and NEVER again. A scenario built while the editor was
@@ -1096,16 +1151,17 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
         // sentinel) — a graph where every box has a real position is left
         // exactly as saved.
         if (!scenarioGraphNeedsPlacement(current)) return
-        const rectOf = (n: Node<NodeData>): { id: string; width: number; height: number } => {
+        const rectOf = (n: Node<NodeData>): LayoutNodeInput => {
           const m = (n as { measured?: { width?: number; height?: number } }).measured
           return {
             id: n.id,
             width: m?.width ?? n.width ?? SCENARIO_NODE_FALLBACK_WIDTH,
-            height: m?.height ?? n.height ?? SCENARIO_NODE_FALLBACK_HEIGHT
+            height: m?.height ?? n.height ?? SCENARIO_NODE_FALLBACK_HEIGHT,
+            ...layoutPortOrderOf(n.data)
           }
         }
         const inputNodes = current.map(rectOf)
-        const inputEdges = edgesRef.current.map((e) => ({ id: e.id, source: e.source, target: e.target }))
+        const inputEdges = edgesRef.current.map(layoutEdgeOf)
         const positions = await layoutScenarioGraph(inputNodes, inputEdges)
         if (cancelled || positions.size === 0) return
         const before = nodesRef.current
@@ -1127,7 +1183,7 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
     // Intentionally NOT depending on `edges`: an edge add/remove must not
     // trigger a re-layout. After the first-open claim the body returns early, so
     // the `nodes` dep only matters for the initial load burst.
-  }, [nodes, scenario.id, setNodes, persist, fitView])
+  }, [nodes, scenario.id, setNodes, persist, fitView, layoutPortOrderOf])
 
   // ── Manual re-arrange (palette action) ─────────────────────────────────────
   // Runs the same ELK layout as the auto-layout, but unconditionally (no
@@ -1136,12 +1192,12 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
   const runManualLayout = useCallback((): void => {
     const current = nodesRef.current
     if (current.length === 0) return
-    const rectOf = (n: Node<NodeData>): { id: string; width: number; height: number } => {
+    const rectOf = (n: Node<NodeData>): LayoutNodeInput => {
       const m = (n as { measured?: { width?: number; height?: number } }).measured
-      return { id: n.id, width: m?.width ?? n.width ?? SCENARIO_NODE_FALLBACK_WIDTH, height: m?.height ?? n.height ?? SCENARIO_NODE_FALLBACK_HEIGHT }
+      return { id: n.id, width: m?.width ?? n.width ?? SCENARIO_NODE_FALLBACK_WIDTH, height: m?.height ?? n.height ?? SCENARIO_NODE_FALLBACK_HEIGHT, ...layoutPortOrderOf(n.data) }
     }
     const inputNodes = current.map(rectOf)
-    const inputEdges = edgesRef.current.map((e) => ({ id: e.id, source: e.source, target: e.target }))
+    const inputEdges = edgesRef.current.map(layoutEdgeOf)
     void layoutScenarioGraph(inputNodes, inputEdges).then((positions) => {
       if (positions.size === 0) return
       const before = nodesRef.current
@@ -1162,7 +1218,7 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
         void fitView({ duration: 300, padding: 0.2 })
       })
     })
-  }, [animateNodePositions, persist, fitView])
+  }, [animateNodePositions, persist, fitView, layoutPortOrderOf])
 
   // The JSON-path selector on a data link reads + writes that edge's `selector`
   // through this api; the write mutates the authoritative edge store, mirrors it
@@ -1263,13 +1319,6 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
     // drag ticks — only `resolveBoundItem` actually parameterizes it.
   }), [resolveBoundItem])
 
-  // Resolve a scenario reference (a runScenario's sub-scenario) to derive its
-  // ports — for orphan-edge detection and the derived call-signature ports.
-  const resolveScenario = useCallback((sid: string): Scenario | null => {
-    const it = resolveBoundItem?.(sid) ?? null
-    return it && isScenario(it) ? it : null
-  }, [resolveBoundItem])
-
   // A run-log row click. Same-scenario node → pan-zoom + flash it in place.
   // A node from a SUB-scenario (the entry carries that scenario's id, and it's
   // not in this graph) → pop a read-only preview of that sub-scenario to the
@@ -1286,16 +1335,6 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
     }
     focusAndFlashNode(nodeId)
   }, [scenario.id, getNode, resolveScenario, focusAndFlashNode])
-
-  // Ports a runScenario node derives from its bound sub-scenario (one per named
-  // input/output node, plus a `done` trigger when it returns nothing) — null for
-  // any other kind. Accepts both the stored `ScenarioNode` and the flow node's
-  // `data`, since both carry `{ kind, config }`.
-  const derivedPortsOf = useCallback((node: { kind: ScenarioNodeKind; config?: Record<string, unknown> } | undefined) => {
-    if (node?.kind !== 'runScenario') return null
-    const sid = typeof node.config?.['scenarioId'] === 'string' ? node.config['scenarioId'] : undefined
-    return deriveRunScenarioPorts(sid ? resolveScenario(sid) : null)
-  }, [resolveScenario])
 
   // Whether an edge endpoint still resolves to a live port on a runScenario
   // node. A runScenario's ports are derived from its sub-scenario's input /

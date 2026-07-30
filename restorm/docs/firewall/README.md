@@ -96,7 +96,60 @@ Singleton workbench tab. Built end-to-end with `electron-core-ui` primitives:
 - Each row is a full-width `<ControlGroup>` with a read-only origin label + an icon-only trash button.
 - The "add" row at the top of each tab takes free-form `scheme://host:port` text.
 
+- Above the tabs, a read-only **Services sortants** section (see below).
+
 The panel mirrors the `View → Console` pattern: one tab, no specific group placement, persists across project reloads.
+
+---
+
+## Outbound services — what Restorm itself contacts
+
+The whitelist / blacklist govern *your* API traffic. Restorm also makes a handful
+of calls of its own, and those bypass the user firewall by design — otherwise
+signing in would prompt you to whitelist your own licence server. Left
+unadvertised they would be the one class of outbound call the panel cannot
+account for, which is exactly what a firewall is supposed to rule out. So every
+one of them is declared in
+[`src/shared/config/observability.ts`](../../src/shared/config/observability.ts)
+(or at its own composition root) and rendered as a read-only row at the top of
+the Firewall panel — **including the rows that are currently switched off**.
+
+| Row | Host | Consent gate | How it gets through |
+|-----|------|--------------|---------------------|
+| `backend` | the channel's Supabase Edge Functions host | none — the app cannot manage your licence without it | call-scoped bypass around the guarded fetch |
+| `avatar` | the signed-in account's photo CDN (`lh3.googleusercontent.com`, …) | none — display asset, and only while signed in | system allowlist, registered on login and dropped on logout |
+| `crash` | the crash-report ingest | `privacy:crashReports` | system allowlist, registered only while consent is active |
+| `telemetry` | the product-analytics ingest | `privacy:telemetry` | system allowlist, registered only while consent is active |
+
+Each row shows the exact host, why it is contacted, and its live state. The state
+is **computed from the firewall**, not from a flag the sender sets: a row reads
+"Allowed" only while the host is genuinely exempt. That is what makes revocation
+enforceable — turn `privacy:telemetry` off in **Preferences → Privacy**
+and the host leaves the allowlist, so a queued event retried afterwards hits the
+same prompt-or-block path as any unknown tracker would.
+
+Hosts are always matched **exactly** and over **https** only. There is no
+wildcard form here — a `*.ingest.example.com` exemption would cover every other
+tenant of a shared provider.
+
+The section is read-only on purpose. These entries are declared in code and
+governed by the Privacy settings; letting the panel delete one would create a
+state where the app believes it may phone home and the firewall disagrees.
+
+### Consent
+
+Two toggles under **Preferences → Privacy**, both resolved by the
+main-process `ConsentService` (`src/main/services/privacy/consentComposition.ts`):
+
+- **`privacy:crashReports`** — plan-modulated. Mandatory for Community (free)
+  accounts, where the control renders visible-but-locked with an upsell; every
+  paid plan can turn it off. `canSend('crash')` applies the same rule, so the
+  locked control can never disagree with what is actually sent.
+- **`privacy:telemetry`** — opt-in, default off, for everyone.
+
+Each decision is stamped with a timestamp and the privacy-policy version in force
+at the time, in `<userData>/privacy/consent.json`. See the generic model in
+[`electron-core-ui/docs/Architecture/Privacy.md`](../../../electron-core-ui/docs/Architecture/Privacy.md).
 
 ---
 
@@ -154,3 +207,11 @@ Unit tests live alongside the sources in `electron-core-ui`:
 - [`protocolDetect.test.ts`](../../electron-core-ui/src/main/services/firewall/protocolDetect.test.ts)
 
 Run them from the `electron-core-ui` package with `npx vitest run src/main/services/firewall`.
+
+The consent + outbound-visibility half is covered by
+[`ConsentService.test.ts`](../../electron-core-ui/src/main/services/privacy/ConsentService.test.ts),
+[`ConsentFirewallExemption.test.ts`](../../electron-core-ui/src/main/services/privacy/ConsentFirewallExemption.test.ts),
+[`scrub.test.ts`](../../electron-core-ui/src/shared/privacy/scrub.test.ts) and
+[`observability.test.ts`](../../src/shared/config/observability.test.ts), plus the
+`firewall-outbound` E2E project which drives the real panel across a consent
+grant and revocation.

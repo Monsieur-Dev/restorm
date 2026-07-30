@@ -1,4 +1,10 @@
 {
+  "releaseNotesModal": {
+    "title": "What's new",
+    "showMore": "Show more",
+    "loading": "Loading release notes…",
+    "empty": "No release notes to show."
+  },
   "common": {
     "opened": "Opened",
     "refresh": "Refresh",
@@ -29,7 +35,8 @@
     "removeFromFavorites": "Remove from favorites",
     "confirmRemoveFavorite": "Are you sure you want to remove \"{{fileName}}\" from favorites?",
     "favoritesLandmarkLabel": "Favorites list",
-    "recentsLandmarkLabel": "Recent files list"
+    "recentsLandmarkLabel": "Recent files list",
+    "openContainingFolder": "Open containing folder"
   },
   "welcomeScreen": {
     "landmarkLabel": "Welcome"
@@ -390,7 +397,10 @@
     "listInstances": "List MCP instances",
     "listThemes": "List available themes",
     "getCurrentTheme": "Get the current theme",
-    "switchTheme": "Switch the active theme"
+    "getSettings": "List the application settings",
+    "setSetting": "Set an application setting",
+    "patchSettings": "Set several settings at once",
+    "resetSetting": "Reset an application setting"
   },
   "customWco": {
     "minimize": "Minimize",
@@ -401,7 +411,20 @@
   "firewall": {
     "addOrigin": "Add origin",
     "removeOrigin": "Remove {{origin}}",
-    "noEntries": "No entries yet."
+    "noEntries": "No entries yet.",
+    "outbound": {
+      "title": "Outbound services",
+      "intro": "Destinations this application may contact on its own initiative. They are declared in code and cannot be edited here — the ones that require your consent stay switched off until you grant it in Preferences.",
+      "empty": "This application declares no outbound destination of its own.",
+      "hostUnset": "not configured",
+      "stateConsented": "Allowed — you granted consent",
+      "stateNoConsent": "Blocked — no consent given",
+      "stateRequired": "Allowed — required by the application",
+      "stateInactive": "Inactive — not in use right now",
+      "purpose": {
+        "avatar": "Profile picture of the signed-in account"
+      }
+    }
   },
   "bookmarkRibbon": {
     "addBookmark": "Add bookmark"

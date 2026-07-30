@@ -1007,10 +1007,22 @@
     "requestFormat.powershell": "PowerShell（Invoke-RestMethod）"
   },
   "import": {
-    "title": "匯入請求",
-    "source": {
-      "label": "把內容貼到這裡！",
-      "placeholder": "輸入檔案路徑、URL，或貼上 curl / PowerShell 命令..."
+    "addAuth": "新增驗證路由",
+    "applyFailedTitle": "從來源重新整理失敗",
+    "applyUpdate": "套用更新",
+    "authenticatedVia": "透過 {{name}} 驗證",
+    "cancel": "取消",
+    "customHeadersAdd": "新增標頭",
+    "customHeadersBtn": "新增自訂標頭",
+    "customHeadersBtnTitle": "為規格擷取附加一次性標頭（儲存在已匯入的資料夾中，供重新匯入時使用）",
+    "customHeadersDone": "完成",
+    "customHeadersHint": "標頭會儲存在已匯入的資料夾中，以便日後從來源重新整理時重送。若登入流程會輪替權杖，請改用上方的驗證路由附加。",
+    "customHeadersTitle": "自訂標頭",
+    "detachAuth": "分離驗證路由",
+    "dropZone": "拖放區",
+    "editAuth": "編輯驗證路由",
+    "error": {
+      "unknown": "發生未知的錯誤"
     },
     "formats": {
       "swagger": {
@@ -1136,15 +1148,24 @@
     },
     "loading": "正在分析...",
     "noResults": "找不到請求",
-    "error": {
-      "unknown": "發生未知的錯誤"
-    },
     "ok": "匯入",
-    "cancel": "取消",
-    "dropZone": "拖放區",
-    "addAuth": "新增驗證路由",
-    "detachAuth": "分離驗證路由",
-    "editAuth": "編輯驗證路由"
+    "okN": "{{action}} ({{count}})",
+    "preview": {
+      "noDocumentation": "此來源沒有可解析的文件。"
+    },
+    "refreshTitle": "從來源重新整理",
+    "searchPlaceholder": "篩選路由 / 資料夾…",
+    "selectAll": "全選",
+    "selectNone": "全不選",
+    "source": {
+      "label": "把內容貼到這裡！",
+      "placeholder": "輸入檔案路徑、URL，或貼上 curl / PowerShell 命令..."
+    },
+    "tabs": {
+      "routes": "路由",
+      "documentation": "文件"
+    },
+    "title": "匯入請求"
   },
   "emptyBench": {
     "importCard": {
@@ -2492,6 +2513,7 @@
     "recoverFailedTitle": "復原失敗"
   },
   "updates": {
+    "seeReleaseNotes": "查看發行說明",
     "settingsTitle": "更新",
     "autoCheckTitle": "自動檢查更新",
     "autoCheckDescription": "在啟動時及定期於背景檢查更新。",
@@ -2500,19 +2522,63 @@
     "currentVersion": "版本 {{version}}",
     "checkNow": "立即檢查",
     "readyTitle": "更新已就緒",
-    "readyBody": "版本 {{version}} 將在下次重新啟動時安裝。",
+    "readyBody": "版本 {{version}} 已準備好安裝。",
     "restartNow": "立即重新啟動",
     "checkFailedTitle": "檢查更新失敗",
     "checkFailedBody": "無法檢查更新，請稍後再試。",
     "upToDateTitle": "已是最新版本",
     "upToDateBody": "您正在使用最新版本（{{version}}）。",
-    "whatsNewTitle": "{{version}} 的新功能",
+    "whatsNewTitle": "新功能",
     "status": {
       "idle": "最新",
       "checking": "正在檢查…",
       "downloading": "正在下載… {{percent}}%",
       "downloaded": "更新已準備好安裝（{{version}}）",
       "error": "檢查失敗"
+    }
+  },
+  "privacy": {
+    "settingsTitle": "隱私",
+    "crashReportsTitle": "傳送當機報告",
+    "crashReportsDescription": "在 Restorm 當機時傳送匿名化報告，以便修復故障。報告在離開您的裝置前會清除 URL、權杖、請求內容與個人資料。免費方案包含此功能；付費方案可將其關閉。 完整說明：https://restorm.app/privacy",
+    "telemetryTitle": "傳送使用統計",
+    "telemetryDescription": "傳送關於使用了哪些功能的匿名統計，用於引導後續開發。預設關閉，未經您明確同意絕不啟用。不含任何請求資料、URL 或個人資料。 完整說明：https://restorm.app/privacy",
+    "outbound": {
+      "purpose": {
+        "crash": "當機報告（僅在您同意時）",
+        "telemetry": "匿名使用統計（僅在您同意時）",
+        "backend": "帳戶、授權與訂閱"
+      }
+    },
+    "crashReportsLockedLabel": "自 Pro 方案起可變更。在免費方案中，當機報告是維持品質所必需的。",
+    "consentToast": {
+      "title": "協助我們改進 Restorm",
+      "body": "如果發生意外錯誤，Restorm 可以向我們傳送匿名報告，協助我們修正問題。報告包含技術錯誤堆疊與診斷內容（應用程式版本、近期操作）。URL、權杖、要求與回應內容以及個人資料會在離開您的裝置前移除。每次傳送報告前，您都會看到實際傳送的內容。",
+      "save": "儲存我的偏好設定",
+      "learnMore": "瞭解更多"
+    },
+    "crashReportReviewTitle": "傳送前顯示每份當機報告",
+    "crashReportReviewDescription": "向您顯示當機報告的確切內容，並在傳送前詢問。關閉後將自動傳送報告，不再每次詢問。",
+    "reportDialog": {
+      "title": "傳送此當機報告？",
+      "intro": "Restorm 遇到問題。以下是將要傳送的確切內容。",
+      "includedError": "技術錯誤及其在程式碼中發生的位置",
+      "includedVersion": "您的應用程式版本與作業系統",
+      "includedActivity": "發生錯誤前應用程式正在執行的操作",
+      "removed": "URL、權杖、要求與回應內容以及個人資料均已移除。",
+      "viewFull": "檢視完整報告",
+      "waive": "日後自動傳送報告，不再顯示給我",
+      "send": "傳送",
+      "discard": "不要傳送"
+    }
+  },
+  "crashRecovery": {
+    "message": "Restorm 發生問題，需要重新啟動。",
+    "relaunch": "重新啟動 Restorm",
+    "notice": {
+      "title": "未重新開啟檔案",
+      "body": "未重新開啟 {{file}}：上次啟動時 Restorm 在開啟它的過程中當機了。您的檔案完好無損，可從最近的檔案中重新開啟。",
+      "bodyUnnamed": "未重新開啟上次的檔案：上次啟動時 Restorm 在開啟它的過程中當機了。您的檔案完好無損，可從最近的檔案中重新開啟。"
     }
   }
 }

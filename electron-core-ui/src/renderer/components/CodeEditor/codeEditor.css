@@ -21,3 +21,14 @@
 .ecui-code-editor .monaco-editor .monaco-scrollable-element > .scrollbar > .slider.active {
   background: var(--scrollbarSlider-activeBackground);
 }
+
+/* Handlebars constructs in a template-aware editor (`tolerateHandlebars`).
+ * The colour arrives as a decoration rather than a token because no language
+ * tokenizer can reach a `{{ … }}` nested in a JSON string. `--hljs-variable` is
+ * the palette entry every theme already defines for a variable in highlighted
+ * code, so the constructs track the active theme with no colour of our own.
+ * Monaco writes its own token colours as single-class `.mtkN` rules, which this
+ * three-class selector outranks without `!important`. */
+.ecui-code-editor .monaco-editor .ecui-handlebars-construct {
+  color: var(--hljs-variable, #bd63c5);
+}

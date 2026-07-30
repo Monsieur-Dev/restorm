@@ -1007,10 +1007,22 @@
     "requestFormat.powershell": "PowerShell (Invoke-RestMethod)"
   },
   "import": {
-    "title": "Impor permintaan",
-    "source": {
-      "label": "Tempel sesuatu di sini!",
-      "placeholder": "Masukkan jalur file, URL, atau tempel perintah curl/PowerShell..."
+    "addAuth": "Tambahkan rute autentikasi",
+    "applyFailedTitle": "Gagal menyegarkan dari sumber",
+    "applyUpdate": "Terapkan pembaruan",
+    "authenticatedVia": "Diautentikasi melalui {{name}}",
+    "cancel": "Batal",
+    "customHeadersAdd": "Tambah header",
+    "customHeadersBtn": "Tambah header kustom",
+    "customHeadersBtnTitle": "Lampirkan header sekali pakai ke pengambilan spesifikasi (disimpan di folder yang diimpor untuk impor ulang)",
+    "customHeadersDone": "Selesai",
+    "customHeadersHint": "Header disimpan di folder yang diimpor sehingga penyegaran dari sumber berikutnya mengulanginya. Untuk alur login dengan rotasi token, gunakan rute autentikasi di atas.",
+    "customHeadersTitle": "Header kustom",
+    "detachAuth": "Lepaskan rute autentikasi",
+    "dropZone": "Zona lepas",
+    "editAuth": "Edit rute autentikasi",
+    "error": {
+      "unknown": "Terjadi kesalahan yang tidak diketahui"
     },
     "formats": {
       "swagger": {
@@ -1136,15 +1148,24 @@
     },
     "loading": "Menganalisis...",
     "noResults": "Tidak ada permintaan ditemukan",
-    "error": {
-      "unknown": "Terjadi kesalahan yang tidak diketahui"
-    },
     "ok": "Impor",
-    "cancel": "Batal",
-    "dropZone": "Zona lepas",
-    "addAuth": "Tambahkan rute autentikasi",
-    "detachAuth": "Lepaskan rute autentikasi",
-    "editAuth": "Edit rute autentikasi"
+    "okN": "{{action}} ({{count}})",
+    "preview": {
+      "noDocumentation": "Tidak ada dokumentasi yang diuraikan untuk sumber ini."
+    },
+    "refreshTitle": "Segarkan dari sumber",
+    "searchPlaceholder": "Filter rute / folder…",
+    "selectAll": "Pilih semua",
+    "selectNone": "Kosongkan pilihan",
+    "source": {
+      "label": "Tempel sesuatu di sini!",
+      "placeholder": "Masukkan jalur file, URL, atau tempel perintah curl/PowerShell..."
+    },
+    "tabs": {
+      "routes": "Rute",
+      "documentation": "Dokumentasi"
+    },
+    "title": "Impor permintaan"
   },
   "emptyBench": {
     "importCard": {
@@ -2492,6 +2513,7 @@
     "recoverFailedTitle": "Pemulihan gagal"
   },
   "updates": {
+    "seeReleaseNotes": "Lihat catatan rilis",
     "settingsTitle": "Pembaruan",
     "autoCheckTitle": "Periksa pembaruan secara otomatis",
     "autoCheckDescription": "Memeriksa pembaruan di latar belakang saat memulai dan secara berkala.",
@@ -2500,19 +2522,63 @@
     "currentVersion": "Versi {{version}}",
     "checkNow": "Periksa sekarang",
     "readyTitle": "Pembaruan siap",
-    "readyBody": "Versi {{version}} akan dipasang saat Anda memulai ulang berikutnya.",
+    "readyBody": "Versi {{version}} siap dipasang.",
     "restartNow": "Mulai ulang sekarang",
     "checkFailedTitle": "Gagal memeriksa pembaruan",
     "checkFailedBody": "Tidak dapat memeriksa pembaruan. Silakan coba lagi nanti.",
     "upToDateTitle": "Anda sudah versi terbaru",
     "upToDateBody": "Anda menggunakan versi terbaru ({{version}}).",
-    "whatsNewTitle": "Yang baru di {{version}}",
+    "whatsNewTitle": "Apa yang baru?",
     "status": {
       "idle": "Terbaru",
       "checking": "Memeriksa…",
       "downloading": "Mengunduh… {{percent}} %",
       "downloaded": "Pembaruan siap dipasang ({{version}})",
       "error": "Pemeriksaan gagal"
+    }
+  },
+  "privacy": {
+    "settingsTitle": "Privasi",
+    "crashReportsTitle": "Kirim laporan kerusakan",
+    "crashReportsDescription": "Mengirim laporan yang dianonimkan saat Restorm mengalami kerusakan, agar masalahnya dapat diperbaiki. Laporan dibersihkan dari URL, token, isi permintaan, dan data pribadi sebelum meninggalkan komputer Anda. Termasuk dalam paket gratis; paket berbayar dapat mematikannya. Detail lengkap: https://restorm.app/privacy",
+    "telemetryTitle": "Kirim statistik penggunaan",
+    "telemetryDescription": "Mengirim statistik anonim tentang fitur mana yang digunakan, untuk mengarahkan pengembangan berikutnya. Mati secara bawaan dan tidak pernah aktif tanpa persetujuan tegas Anda. Tidak berisi data permintaan, URL, maupun data pribadi. Detail lengkap: https://restorm.app/privacy",
+    "outbound": {
+      "purpose": {
+        "crash": "Laporan kerusakan (hanya dengan persetujuan Anda)",
+        "telemetry": "Statistik penggunaan anonim (hanya dengan persetujuan Anda)",
+        "backend": "Akun, lisensi, dan langganan"
+      }
+    },
+    "crashReportsLockedLabel": "Dapat diubah mulai paket Pro. Pada paket gratis, laporan crash diperlukan untuk menjaga kualitas.",
+    "consentToast": {
+      "title": "Bantu kami meningkatkan Restorm",
+      "body": "Jika terjadi kesalahan yang tidak terduga, Restorm dapat mengirimi kami laporan anonim untuk membantu kami memperbaiki masalahnya. Laporan berisi jejak galat teknis dan konteks diagnostik (versi aplikasi, aktivitas terakhir). URL, token, isi permintaan dan respons, serta data pribadi dihapus sebelum meninggalkan perangkat Anda. Anda akan melihat persis apa yang dikirim sebelum setiap laporan.",
+      "save": "Simpan preferensi saya",
+      "learnMore": "Pelajari lebih lanjut"
+    },
+    "crashReportReviewTitle": "Tampilkan setiap laporan crash sebelum mengirim",
+    "crashReportReviewDescription": "Menampilkan isi persis sebuah laporan crash dan meminta konfirmasi sebelum mengirim. Matikan untuk mengirim laporan secara otomatis tanpa ditanya setiap kali.",
+    "reportDialog": {
+      "title": "Kirim laporan crash ini?",
+      "intro": "Restorm mengalami masalah. Inilah persis yang akan dikirim.",
+      "includedError": "Galat teknis dan lokasi dalam kode tempat terjadinya",
+      "includedVersion": "Versi aplikasi dan sistem operasi Anda",
+      "includedActivity": "Apa yang sedang dilakukan aplikasi tepat sebelum gagal",
+      "removed": "URL, token, isi permintaan dan respons, serta data pribadi sudah dihapus.",
+      "viewFull": "Lihat laporan lengkap",
+      "waive": "Kirim laporan berikutnya secara otomatis, tanpa menampilkannya",
+      "send": "Kirim",
+      "discard": "Jangan kirim"
+    }
+  },
+  "crashRecovery": {
+    "message": "Restorm mengalami masalah dan perlu dimulai ulang.",
+    "relaunch": "Mulai ulang Restorm",
+    "notice": {
+      "title": "Berkas tidak dibuka kembali",
+      "body": "{{file}} tidak dibuka kembali: Restorm mengalami crash saat membukanya pada peluncuran sebelumnya. Berkas Anda utuh — Anda dapat membukanya kembali dari berkas terkini.",
+      "bodyUnnamed": "Berkas terakhir tidak dibuka kembali: Restorm mengalami crash saat membukanya pada peluncuran sebelumnya. Berkas Anda utuh — Anda dapat membukanya kembali dari berkas terkini."
     }
   }
 }

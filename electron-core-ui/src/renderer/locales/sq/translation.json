@@ -1,4 +1,10 @@
 {
+  "releaseNotesModal": {
+    "title": "Të rejat",
+    "showMore": "Shfaq më shumë",
+    "loading": "Po ngarkohen shënimet e versionit…",
+    "empty": "Nuk ka shënime versioni për të shfaqur."
+  },
   "common": {
     "opened": "U hap",
     "refresh": "Rifresko",
@@ -29,7 +35,8 @@
     "removeFromFavorites": "Hiq nga të preferuarat",
     "confirmRemoveFavorite": "Jeni i sigurt se doni të hiqni \"{{fileName}}\" nga të preferuarat?",
     "favoritesLandmarkLabel": "Lista e të preferuarave",
-    "recentsLandmarkLabel": "Lista e skedarëve të fundit"
+    "recentsLandmarkLabel": "Lista e skedarëve të fundit",
+    "openContainingFolder": "Hap dosjen që përmban skedarin"
   },
   "welcomeScreen": {
     "landmarkLabel": "Mirësevini"
@@ -390,7 +397,10 @@
     "listInstances": "Listo instancat MCP",
     "listThemes": "Lista e temave të disponueshme",
     "getCurrentTheme": "Merr temën aktuale",
-    "switchTheme": "Ndrysho temën aktive"
+    "getSettings": "Listo cilësimet e aplikacionit",
+    "setSetting": "Ndrysho një cilësim",
+    "patchSettings": "Ndrysho disa cilësime njëherësh",
+    "resetSetting": "Rivendos një cilësim"
   },
   "customWco": {
     "minimize": "Minimizo",
@@ -401,7 +411,20 @@
   "firewall": {
     "addOrigin": "Shto origjinën",
     "removeOrigin": "Hiq {{origin}}",
-    "noEntries": "Ende nuk ka hyrje."
+    "noEntries": "Ende nuk ka hyrje.",
+    "outbound": {
+      "title": "Shërbime dalëse",
+      "intro": "Destinacione që ky aplikacion mund të kontaktojë me nismën e vet. Janë të deklaruara në kod dhe nuk mund të ndryshohen këtu — ato që kërkojnë pëlqimin tuaj mbeten të çaktivizuara derisa ta jepni te Preferencat.",
+      "empty": "Ky aplikacion nuk deklaron asnjë destinacion dalës të vetin.",
+      "hostUnset": "i pakonfiguruar",
+      "stateConsented": "I lejuar — keni dhënë pëlqimin",
+      "stateNoConsent": "I bllokuar — nuk është dhënë pëlqim",
+      "stateRequired": "I lejuar — i domosdoshëm për aplikacionin",
+      "stateInactive": "Joaktiv — nuk përdoret për momentin",
+      "purpose": {
+        "avatar": "Fotoja e profilit të llogarisë së kyçur"
+      }
+    }
   },
   "bookmarkRibbon": {
     "addBookmark": "Shto faqeshënues"

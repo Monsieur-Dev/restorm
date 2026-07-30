@@ -1009,10 +1009,22 @@
     "requestFormat.powershell": "PowerShell (Invoke-RestMethod)"
   },
   "import": {
-    "title": "Uvezi zahteve",
-    "source": {
-      "label": "Nalepite nešto ovde!",
-      "placeholder": "Unesite putanju datoteke, URL ili nalepite curl/PowerShell komandu..."
+    "addAuth": "Додај руту за аутентификацију",
+    "applyFailedTitle": "Osvežavanje iz izvora nije uspelo",
+    "applyUpdate": "Primeni ažuriranje",
+    "authenticatedVia": "Autentifikovano preko {{name}}",
+    "cancel": "Otkaži",
+    "customHeadersAdd": "Dodaj zaglavlje",
+    "customHeadersBtn": "Dodaj prilagođena zaglavlja",
+    "customHeadersBtnTitle": "Priloži jednokratna zaglavlja preuzimanju specifikacije (čuvaju se u uvezenoj fascikli za ponovne uvoze)",
+    "customHeadersDone": "Gotovo",
+    "customHeadersHint": "Zaglavlja se čuvaju u uvezenoj fascikli, pa ih buduće osvežavanje iz izvora ponavlja. Za prijave sa rotacijom tokena radije koristite rutu za autentifikaciju iznad.",
+    "customHeadersTitle": "Prilagođena zaglavlja",
+    "detachAuth": "Одвоји руту за аутентификацију",
+    "dropZone": "Zona za ispuštanje",
+    "editAuth": "Уреди руту за аутентификацију",
+    "error": {
+      "unknown": "Došlo je do nepoznate greške"
     },
     "formats": {
       "swagger": {
@@ -1138,15 +1150,24 @@
     },
     "loading": "Analiziranje...",
     "noResults": "Nije pronađen nijedan zahtev",
-    "error": {
-      "unknown": "Došlo je do nepoznate greške"
-    },
     "ok": "Uvezi",
-    "cancel": "Otkaži",
-    "dropZone": "Zona za ispuštanje",
-    "addAuth": "Додај руту за аутентификацију",
-    "detachAuth": "Одвоји руту за аутентификацију",
-    "editAuth": "Уреди руту за аутентификацију"
+    "okN": "{{action}} ({{count}})",
+    "preview": {
+      "noDocumentation": "Za ovaj izvor nije analizirana nikakva dokumentacija."
+    },
+    "refreshTitle": "Osveži iz izvora",
+    "searchPlaceholder": "Filtriraj rute / fascikle…",
+    "selectAll": "Izaberi sve",
+    "selectNone": "Poništi izbor",
+    "source": {
+      "label": "Nalepite nešto ovde!",
+      "placeholder": "Unesite putanju datoteke, URL ili nalepite curl/PowerShell komandu..."
+    },
+    "tabs": {
+      "routes": "Rute",
+      "documentation": "Документација"
+    },
+    "title": "Uvezi zahteve"
   },
   "emptyBench": {
     "importCard": {
@@ -2494,6 +2515,7 @@
     "recoverFailedTitle": "Враћање није успело"
   },
   "updates": {
+    "seeReleaseNotes": "Погледај белешке о издању",
     "settingsTitle": "Ажурирања",
     "autoCheckTitle": "Аутоматски проверавај ажурирања",
     "autoCheckDescription": "Проверава ажурирања у позадини при покретању и повремено.",
@@ -2502,19 +2524,63 @@
     "currentVersion": "Верзија {{version}}",
     "checkNow": "Провери сада",
     "readyTitle": "Ажурирање је спремно",
-    "readyBody": "Верзија {{version}} биће инсталирана при следећем поновном покретању.",
+    "readyBody": "Верзија {{version}} је спремна за инсталацију.",
     "restartNow": "Поново покрени сада",
     "checkFailedTitle": "Провера ажурирања није успела",
     "checkFailedBody": "Није могуће проверити ажурирања. Покушајте поново касније.",
     "upToDateTitle": "Имате најновију верзију",
     "upToDateBody": "Користите најновију верзију ({{version}}).",
-    "whatsNewTitle": "Шта је ново у верзији {{version}}",
+    "whatsNewTitle": "Шта је ново?",
     "status": {
       "idle": "Ажурирано",
       "checking": "Провера…",
       "downloading": "Преузимање… {{percent}} %",
       "downloaded": "Ажурирање спремно за инсталацију ({{version}})",
       "error": "Провера није успела"
+    }
+  },
+  "privacy": {
+    "settingsTitle": "Приватност",
+    "crashReportsTitle": "Слање извештаја о паду",
+    "crashReportsDescription": "Шаље анонимизовани извештај када се Restorm сруши, како би квар могао да се исправи. Извештаји се чисте од URL адреса, токена, тела захтева и личних података пре него што напусте ваш рачунар. Укључено у бесплатни план; плаћени план омогућава искључивање. Сви детаљи: https://restorm.app/privacy",
+    "telemetryTitle": "Слање статистике коришћења",
+    "telemetryDescription": "Шаље анонимну статистику о томе које се функције користе, ради усмеравања будућег развоја. Подразумевано искључено и никада укључено без вашег изричитог пристанка. Не садржи податке захтева, URL адресе ни личне податке. Сви детаљи: https://restorm.app/privacy",
+    "outbound": {
+      "purpose": {
+        "crash": "Извештаји о паду (само уз ваш пристанак)",
+        "telemetry": "Анонимна статистика коришћења (само уз ваш пристанак)",
+        "backend": "Налог, лиценца и претплата"
+      }
+    },
+    "crashReportsLockedLabel": "Може се мењати од Pro плана. У бесплатном плану извештаји о рушењу су неопходни за одржавање квалитета.",
+    "consentToast": {
+      "title": "Помозите нам да побољшамо Restorm",
+      "body": "У случају неочекиване грешке, Restorm нам може послати анонимну пријаву како бисмо исправили проблем. Садржи технички траг грешке и дијагностички контекст (верзију апликације, недавне радње). URL адресе, токени, тела захтева и одговора и лични подаци уклањају се пре него што извештај напусти ваш уређај. Пре сваког извештаја видећете тачно шта се шаље.",
+      "save": "Сачувај моја подешавања",
+      "learnMore": "Сазнајте више"
+    },
+    "crashReportReviewTitle": "Прикажи сваки извештај пре слања",
+    "crashReportReviewDescription": "Приказује тачан садржај извештаја о рушењу и тражи потврду пре слања. Искључите за аутоматско слање без питања.",
+    "reportDialog": {
+      "title": "Послати овај извештај о рушењу?",
+      "intro": "Restorm је наишао на проблем. Ово је тачно оно што би било послато.",
+      "includedError": "Техничка грешка и место у коду где се догодила",
+      "includedVersion": "Верзија апликације и ваш оперативни систем",
+      "includedActivity": "Шта је апликација радила непосредно пре квара",
+      "removed": "URL адресе, токени, тела захтева и одговора и лични подаци су већ уклоњени.",
+      "viewFull": "Прикажи цео извештај",
+      "waive": "Аутоматски шаљи будуће извештаје, без приказивања",
+      "send": "Пошаљи",
+      "discard": "Не шаљи"
+    }
+  },
+  "crashRecovery": {
+    "message": "Restorm је наишао на проблем и мора поново да се покрене.",
+    "relaunch": "Поново покрени Restorm",
+    "notice": {
+      "title": "Датотека није поново отворена",
+      "body": "{{file}} није поново отворена: Restorm се срушио док ју је отварао при претходном покретању. Ваша датотека је неоштећена — можете је поново отворити из недавних датотека.",
+      "bodyUnnamed": "Последња датотека није поново отворена: Restorm се срушио док ју је отварао при претходном покретању. Ваша датотека је неоштећена — можете је поново отворити из недавних датотека."
     }
   }
 }

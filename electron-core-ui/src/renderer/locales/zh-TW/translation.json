@@ -1,4 +1,10 @@
 {
+  "releaseNotesModal": {
+    "title": "新功能",
+    "showMore": "顯示更多",
+    "loading": "正在載入版本資訊…",
+    "empty": "沒有可顯示的發行說明。"
+  },
   "common": {
     "opened": "已開啟",
     "refresh": "重新整理",
@@ -29,7 +35,8 @@
     "removeFromFavorites": "從我的最愛移除",
     "confirmRemoveFavorite": "確定要將 \"{{fileName}}\" 從我的最愛中移除嗎？",
     "favoritesLandmarkLabel": "我的最愛清單",
-    "recentsLandmarkLabel": "最近檔案清單"
+    "recentsLandmarkLabel": "最近檔案清單",
+    "openContainingFolder": "開啟所在資料夾"
   },
   "welcomeScreen": {
     "landmarkLabel": "歡迎"
@@ -390,7 +397,10 @@
     "listInstances": "列出 MCP 執行個體",
     "listThemes": "列出可用佈景主題",
     "getCurrentTheme": "取得目前佈景主題",
-    "switchTheme": "切換活躍佈景主題"
+    "getSettings": "列出應用程式設定",
+    "setSetting": "修改設定",
+    "patchSettings": "一次修改多個設定",
+    "resetSetting": "重設設定"
   },
   "customWco": {
     "minimize": "最小化",
@@ -401,7 +411,20 @@
   "firewall": {
     "addOrigin": "新增來源",
     "removeOrigin": "移除 {{origin}}",
-    "noEntries": "目前沒有條目。"
+    "noEntries": "目前沒有條目。",
+    "outbound": {
+      "title": "對外服務",
+      "intro": "本應用程式可能主動連線的目標位址。它們在程式碼中宣告，無法在此編輯——需要您同意的目標在您於「偏好設定」中授權之前將維持關閉。",
+      "empty": "本應用程式未宣告任何自身的對外目標位址。",
+      "hostUnset": "未設定",
+      "stateConsented": "已允許——您已授予同意",
+      "stateNoConsent": "已封鎖——未取得同意",
+      "stateRequired": "已允許——應用程式運作所必需",
+      "stateInactive": "未啟用——目前未使用",
+      "purpose": {
+        "avatar": "已登入帳戶的大頭貼"
+      }
+    }
   },
   "bookmarkRibbon": {
     "addBookmark": "新增書籤"

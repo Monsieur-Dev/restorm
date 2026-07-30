@@ -33,6 +33,9 @@ let currentTabId: string | null = null
 // Set as a side effect of the "I set the MCP env variable …" When, then
 // consumed by the list / delete env-variable steps that follow it.
 let selectedEnvId: string | null = null
+// The items the create → open_tab race steps build, at the bottom of the file.
+let raceFolderId: string | null = null
+let raceRequestId: string | null = null
 
 function parsedReply(reply: McpToolReply): unknown {
   const text = reply.content?.[0]?.text ?? ''
@@ -116,6 +119,8 @@ Given(
     _app = launched.app
     page = launched.page
     discovery = launched.discovery
+    raceFolderId = null
+    raceRequestId = null
   }
 )
 
@@ -699,5 +704,66 @@ Then(
     }).toPass({ timeout: 10_000 })
     // The sidebar row is gone too (the invariant's other half).
     await expect(page.locator(`[data-testid="sidebar-listview"] [data-item-id="${deletedId}"]`)).toHaveCount(0)
+  }
+)
+
+// ── Create → open_tab race: no artificial delay between the two calls ──
+
+When(
+  'I create a folder named {string} via MCP',
+  async ({ callMcpTool }, name: string) => {
+    if (!discovery) throw new Error('launch first')
+    lastReply = await callMcpTool(discovery, 'create_folder', { name })
+    lastReplyPayload = parsedReply(lastReply)
+    expect(lastReply.isError ?? false).toBe(false)
+    raceFolderId = (lastReplyPayload as { id: string }).id
+  }
+)
+
+When(
+  'I create a request named {string} via MCP in that folder',
+  async ({ callMcpTool }, name: string) => {
+    if (!discovery || !raceFolderId) throw new Error('create the folder first')
+    lastReply = await callMcpTool(discovery, 'create_request', { parentFolderId: raceFolderId, name, protocol: 'http' })
+    lastReplyPayload = parsedReply(lastReply)
+    expect(lastReply.isError ?? false).toBe(false)
+    raceRequestId = (lastReplyPayload as { id: string }).id
+  }
+)
+
+When(
+  "I open the newly created request's tab via MCP with no delay in between",
+  async ({ callMcpTool }) => {
+    if (!discovery || !raceRequestId) throw new Error('create the request first')
+    // The load-bearing absence: no `waitForTimeout` / sleep between the
+    // create call above and this one. `open_tab` itself is responsible
+    // for the renderer's tree projection catching up (bounded, internal)
+    // — a caller that has to add its own delay here would mean the fix
+    // regressed back to a test-side workaround.
+    lastReply = await callMcpTool(discovery, 'open_tab', { itemId: raceRequestId })
+    lastReplyPayload = parsedReply(lastReply)
+  }
+)
+
+Then(
+  'the MCP open_tab reply should report the tab opened',
+  async () => {
+    if (!lastReply) throw new Error('open the tab first')
+    // Carry the reply into the assertion message: a bare `expected false,
+    // received true` on `isError` says nothing about WHICH failure mode hit
+    // (unknown id vs. the workbench never confirming), and those want
+    // opposite fixes.
+    const detail = JSON.stringify(lastReply)
+    // A successful tool reply omits `isError` entirely — absent means OK.
+    expect(lastReply.isError ?? false, `open_tab replied: ${detail}`).toBe(false)
+    expect((lastReplyPayload as { opened?: boolean } | undefined)?.opened, `open_tab replied: ${detail}`).toBe(true)
+  }
+)
+
+Then(
+  'the workbench should show a tab for the newly created request',
+  async () => {
+    if (!page || !raceRequestId) throw new Error('open the race request tab first')
+    await expect(page.locator(`[data-testid*="tab-request-id:${raceRequestId}"]`).first()).toBeVisible({ timeout: 5_000 })
   }
 )

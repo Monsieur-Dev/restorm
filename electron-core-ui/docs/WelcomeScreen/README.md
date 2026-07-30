@@ -36,6 +36,8 @@ export interface WelcomeScreenProps {
   onOpenFile: (path: string) => void
   /** Optional confirm hook for removing a favorite — passed through to RecentFilesVignette. */
   confirmRemoveFavorite?: (fileName: string) => boolean | Promise<boolean>
+  /** Optional "open containing folder" handler — passed through to RecentFilesVignette, which offers it on a row's right-click menu only when supplied. */
+  onRevealInFolder?: (path: string) => void
   /** Wallpaper pattern. Defaults to `'random'`. */
   wallpaperPattern?: WallpaperPattern
   /** Wordmark animation effect. Defaults to `'random'`. */
@@ -118,6 +120,20 @@ export const Welcome: React.FC<{ onNew: () => void; onOpen: () => void }> = ({ o
   …
 </WelcomeScreen>
 ```
+
+##### Offering "open containing folder" on a file row
+
+```tsx
+<WelcomeScreen
+  name="Acme"
+  onOpenFile={openPath}
+  onRevealInFolder={(path) => { void window.api.file.revealInFolder(path) }}
+>
+  …
+</WelcomeScreen>
+```
+
+The surface never touches the OS shell itself — it reports the row the user picked, and the privileged call stays in your main process. See [RecentFilesVignette](../RecentFilesVignette/README.md) for the row-level behaviour.
 
 ##### Pinning a specific pattern / effect / decoration
 

@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState, type JSX } from 'react'
 import { useTranslation } from 'react-i18next'
-import ReactMarkdown from 'react-markdown'
+import ReactMarkdown, { defaultUrlTransform, type UrlTransform } from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import rehypeRaw from 'rehype-raw'
 import rehypeHighlight from 'rehype-highlight'
@@ -101,6 +101,16 @@ export interface MarkdownViewerProps {
   /** Tighten margins/padding — for rendering a small snippet (e.g. a single
    * code block) inline, without the document-style block spacing. */
   compact?: boolean
+  /**
+   * Render ONLY self-contained inline `data:` images — any image the renderer
+   * would have to fetch over the network (`![](https://…)`, a reference-style
+   * image, a `<picture><source srcset>`) is dropped instead of displayed.
+   *
+   * For contexts whose outbound traffic is firewalled or simply unavailable, so
+   * a remote image would hang, prompt, or leak a request rather than render.
+   * Off by default — normal documents keep loading their images.
+   */
+  inlineImagesOnly?: boolean
   /** Optional test id applied to the MarkdownViewer root element. */
   'data-testid'?: string
   /** Optional additional CSS class name */
@@ -212,6 +222,39 @@ function normalizeCodeText(value: string): string {
   return value.replace(/\n$/, '')
 }
 
+/** Raster image types allowed as an inline `data:` URI. Deliberately excludes
+ * `image/svg+xml`: an SVG is a document, and while an `<img>` renders it in a
+ * non-scripted context, keeping it off the list means no future widening of the
+ * attribute check can turn it into a script vector. The trailing `[;,]` matches
+ * both data-URI forms — `;base64,…` and a bare `,…` percent-encoded payload —
+ * while still requiring the media type to END there, so a longer type that
+ * merely starts with an allowed one cannot slip through. */
+const INLINE_IMAGE_DATA_URI = /^data:image\/(?:png|jpeg|jpg|gif|webp|avif|bmp)[;,]/i
+
+/** Render nothing — used by `inlineImagesOnly` to remove resource-loading tags. */
+function dropNode(): null {
+  return null
+}
+
+/**
+ * Allow inline `data:image/…` URIs **on `<img src>` only** (react-markdown's
+ * default transform strips every `data:` URL for safety). Self-contained images
+ * render without any network fetch — the only image kind an outbound-firewalled
+ * context can safely display.
+ *
+ * The element/attribute check is load-bearing, not defensive tidiness:
+ * `urlTransform` runs for every URL attribute react-markdown knows about
+ * (`object[data]`, `embed[src]`, `iframe[src]`, `source[src]`, `video[poster]`,
+ * …). A `data:` URL on `object`/`embed`/`iframe` loads as a *document* — and
+ * since this viewer runs `rehypeRaw` (raw HTML passes through) with no
+ * sanitiser, permitting one there would let authored markdown execute script.
+ * Everything that is not an `<img src>` keeps the default transform.
+ */
+const markdownUrlTransform: UrlTransform = (url, key, node) => {
+  if (node.tagName === 'img' && key === 'src' && INLINE_IMAGE_DATA_URI.test(url)) return url
+  return defaultUrlTransform(url)
+}
+
 function parseMarkdownViewerValue(markdown: string): { codeBlocks: string[]; mermaidBlocks: string[]; httpLinks: string[] } {
   const codeBlocks: string[] = []
   const mermaidBlocks: string[] = []
@@ -242,7 +285,7 @@ function parseMarkdownViewerValue(markdown: string): { codeBlocks: string[]; mer
   return { codeBlocks, mermaidBlocks, httpLinks }
 }
 
-export const MarkdownViewer: React.FC<MarkdownViewerProps> = ({ value, allowMermaid = true, compact = false, className, style, 'data-testid': dataTestId }) => {
+export const MarkdownViewer: React.FC<MarkdownViewerProps> = ({ value, allowMermaid = true, compact = false, inlineImagesOnly = false, className, style, 'data-testid': dataTestId }) => {
   const isDark = useIsDarkTheme()
   const parsed = React.useMemo(() => parseMarkdownViewerValue(value), [value])
   const rootClassName = [
@@ -265,6 +308,7 @@ export const MarkdownViewer: React.FC<MarkdownViewerProps> = ({ value, allowMerm
       })}
     >
       <ReactMarkdown
+        urlTransform={markdownUrlTransform}
         remarkPlugins={[remarkGfm]}
         rehypePlugins={[rehypeRaw, rehypeHighlight]}
         components={{
@@ -340,7 +384,47 @@ export const MarkdownViewer: React.FC<MarkdownViewerProps> = ({ value, allowMerm
                 {children}
               </a>
             )
-          }
+          },
+          // `inlineImagesOnly`: drop every element that would make the renderer
+          // FETCH something, keeping only self-contained inline `data:` images.
+          //
+          // Enforced here rather than by scrubbing the markdown text, because by
+          // this point the tree is fully resolved — reference-style images
+          // (`![alt][ref]` + a `[ref]: https://…` definition elsewhere in the
+          // document) have become plain `img` nodes, and a regex over the source
+          // text does not see them. Returning null means React never creates the
+          // element, so no request is issued.
+          //
+          // The non-`img` tags below are dropped wholesale: `rehypeRaw` lets raw
+          // HTML through, and each of these loads a remote resource by itself.
+          // They carry no meaning this viewer's callers need, so removing them
+          // costs nothing and keeps the "renders nothing fetchable" guarantee
+          // true rather than approximately true.
+          ...(inlineImagesOnly && {
+            img(imgProps: React.JSX.IntrinsicElements['img']) {
+              const { src } = imgProps
+              if (typeof src !== 'string' || !INLINE_IMAGE_DATA_URI.test(src)) return null
+              // Two attributes survive `src` being safe and would still fetch:
+              // `srcSet` (which the browser PREFERS over `src`, and which
+              // `urlTransform` never sees — it is absent from react-markdown's
+              // URL-attribute map) and `style` (`background-image: url(…)`).
+              const { style: _style, srcSet: _srcSet, ...rest } = imgProps
+              return <img {...rest} />
+            },
+            // `<input type="image" src>` fetches like an image. Only that type
+            // is dropped — plain inputs are GFM task-list checkboxes.
+            input(inputProps: React.JSX.IntrinsicElements['input']) {
+              if (inputProps.type === 'image') return null
+              return <input {...inputProps} />
+            },
+            source: dropNode,
+            video: dropNode,
+            audio: dropNode,
+            iframe: dropNode,
+            embed: dropNode,
+            object: dropNode,
+            track: dropNode
+          })
         }}
       >
         {value}

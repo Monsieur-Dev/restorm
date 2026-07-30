@@ -1,4 +1,10 @@
 {
+  "releaseNotesModal": {
+    "title": "Có gì mới",
+    "showMore": "Xem thêm",
+    "loading": "Đang tải ghi chú phát hành…",
+    "empty": "Không có ghi chú phát hành để hiển thị."
+  },
   "common": {
     "opened": "Đã mở",
     "refresh": "Làm mới",
@@ -29,7 +35,8 @@
     "removeFromFavorites": "Xóa khỏi mục yêu thích",
     "confirmRemoveFavorite": "Bạn có chắc chắn muốn xóa \"{{fileName}}\" khỏi mục yêu thích không?",
     "favoritesLandmarkLabel": "Danh sách yêu thích",
-    "recentsLandmarkLabel": "Danh sách tệp gần đây"
+    "recentsLandmarkLabel": "Danh sách tệp gần đây",
+    "openContainingFolder": "Mở thư mục chứa tệp"
   },
   "welcomeScreen": {
     "landmarkLabel": "Chào mừng"
@@ -390,7 +397,10 @@
     "listInstances": "Liệt kê các phiên bản MCP",
     "listThemes": "Liệt kê các chủ đề có sẵn",
     "getCurrentTheme": "Lấy chủ đề hiện tại",
-    "switchTheme": "Chuyển chủ đề đang hoạt động"
+    "getSettings": "Liệt kê cài đặt ứng dụng",
+    "setSetting": "Thay đổi một cài đặt",
+    "patchSettings": "Thay đổi nhiều cài đặt cùng lúc",
+    "resetSetting": "Đặt lại một cài đặt"
   },
   "customWco": {
     "minimize": "Thu nhỏ",
@@ -401,7 +411,20 @@
   "firewall": {
     "addOrigin": "Thêm nguồn gốc",
     "removeOrigin": "Xóa {{origin}}",
-    "noEntries": "Chưa có mục nào."
+    "noEntries": "Chưa có mục nào.",
+    "outbound": {
+      "title": "Dịch vụ gửi đi",
+      "intro": "Các đích đến mà ứng dụng này có thể tự liên hệ. Chúng được khai báo trong mã nguồn và không thể chỉnh sửa tại đây — những đích cần bạn đồng ý sẽ vẫn tắt cho đến khi bạn cấp quyền trong Tùy chọn.",
+      "empty": "Ứng dụng này không khai báo đích đến gửi đi nào của riêng nó.",
+      "hostUnset": "chưa cấu hình",
+      "stateConsented": "Được phép — bạn đã đồng ý",
+      "stateNoConsent": "Bị chặn — chưa có sự đồng ý",
+      "stateRequired": "Được phép — cần thiết cho ứng dụng",
+      "stateInactive": "Không hoạt động — hiện không được dùng",
+      "purpose": {
+        "avatar": "Ảnh đại diện của tài khoản đã đăng nhập"
+      }
+    }
   },
   "bookmarkRibbon": {
     "addBookmark": "Thêm dấu trang"

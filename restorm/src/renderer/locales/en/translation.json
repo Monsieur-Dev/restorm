@@ -1008,10 +1008,22 @@
     "requestFormat.powershell": "PowerShell (Invoke-RestMethod)"
   },
   "import": {
-    "title": "Import Requests",
-    "source": {
-      "label": "Paste something in there!",
-      "placeholder": "Enter file path, URL, or paste curl/PowerShell command..."
+    "addAuth": "Add an authentication route",
+    "applyFailedTitle": "Refresh from source failed",
+    "applyUpdate": "Apply update",
+    "authenticatedVia": "Authenticated via {{name}}",
+    "cancel": "Cancel",
+    "customHeadersAdd": "Add header",
+    "customHeadersBtn": "Add custom headers",
+    "customHeadersBtnTitle": "Attach one-shot headers to the spec fetch (saved on the imported folder for re-imports)",
+    "customHeadersDone": "Done",
+    "customHeadersHint": "Headers are stored on the imported folder so a future Refresh-from-source replays them. For login flows with token rotation, use the Auth-route attach above instead.",
+    "customHeadersTitle": "Custom headers",
+    "detachAuth": "Detach authentication route",
+    "dropZone": "Drop zone",
+    "editAuth": "Edit authentication route",
+    "error": {
+      "unknown": "An unknown error occurred"
     },
     "formats": {
       "swagger": {
@@ -1137,15 +1149,24 @@
     },
     "loading": "Analyzing...",
     "noResults": "No requests found",
-    "error": {
-      "unknown": "An unknown error occurred"
-    },
     "ok": "Import",
-    "cancel": "Cancel",
-    "dropZone": "Drop zone",
-    "addAuth": "Add an authentication route",
-    "detachAuth": "Detach authentication route",
-    "editAuth": "Edit authentication route"
+    "okN": "{{action}} ({{count}})",
+    "preview": {
+      "noDocumentation": "No parsed documentation for this source."
+    },
+    "refreshTitle": "Refresh from source",
+    "searchPlaceholder": "Filter routes / folders…",
+    "selectAll": "Select all",
+    "selectNone": "Select none",
+    "source": {
+      "label": "Paste something in there!",
+      "placeholder": "Enter file path, URL, or paste curl/PowerShell command..."
+    },
+    "tabs": {
+      "routes": "Routes",
+      "documentation": "Documentation"
+    },
+    "title": "Import Requests"
   },
   "emptyBench": {
     "importCard": {
@@ -2493,6 +2514,7 @@
     "recoverFailedTitle": "Recovery failed"
   },
   "updates": {
+    "seeReleaseNotes": "See release notes",
     "settingsTitle": "Updates",
     "autoCheckTitle": "Check for updates automatically",
     "autoCheckDescription": "Check for updates in the background on launch and periodically.",
@@ -2501,19 +2523,63 @@
     "currentVersion": "Version {{version}}",
     "checkNow": "Check now",
     "readyTitle": "Update ready",
-    "readyBody": "Version {{version}} will be installed the next time you restart.",
+    "readyBody": "Version {{version}} is ready to install.",
     "restartNow": "Restart now",
     "checkFailedTitle": "Update check failed",
     "checkFailedBody": "Couldn't check for updates. Please try again later.",
     "upToDateTitle": "You're up to date",
     "upToDateBody": "You're running the latest version ({{version}}).",
-    "whatsNewTitle": "What's new in {{version}}",
+    "whatsNewTitle": "What's new?",
     "status": {
       "idle": "Up to date",
       "checking": "Checking…",
       "downloading": "Downloading… {{percent}}%",
       "downloaded": "Update ready to install ({{version}})",
       "error": "Update check failed"
+    }
+  },
+  "privacy": {
+    "settingsTitle": "Privacy",
+    "crashReportsTitle": "Send crash reports",
+    "crashReportsDescription": "Send an anonymised report when Restorm crashes, so the failure can be fixed. Reports are scrubbed of URLs, tokens, request bodies and personal data before leaving your machine. Included with the free plan; a paid plan can turn it off. Full details: https://restorm.app/privacy",
+    "telemetryTitle": "Send usage analytics",
+    "telemetryDescription": "Send anonymous statistics on which features are used, to guide what gets built next. Off by default and never enabled without your explicit consent. Contains no request data, no URLs and no personal data. Full details: https://restorm.app/privacy",
+    "outbound": {
+      "purpose": {
+        "crash": "Crash reports (only with your consent)",
+        "telemetry": "Anonymous usage analytics (only with your consent)",
+        "backend": "Account, licence and subscription"
+      }
+    },
+    "crashReportsLockedLabel": "Changeable from the Pro plan. On the free plan, crash reports are what keep quality up.",
+    "consentToast": {
+      "title": "Help us improve Restorm",
+      "body": "If something goes unexpectedly wrong, Restorm can send us an anonymous report to help us fix the problem. It carries the technical error trace and diagnostic context (app version, recent activity). URLs, tokens, request and response bodies and personal data are removed before it leaves your machine. You will see exactly what is sent before each report.",
+      "save": "Save my preferences",
+      "learnMore": "Learn more"
+    },
+    "crashReportReviewTitle": "Show each crash report before sending",
+    "crashReportReviewDescription": "Show you the exact content of a crash report and ask before sending it. Turn this off to send reports automatically without being asked each time.",
+    "reportDialog": {
+      "title": "Send this crash report?",
+      "intro": "Restorm has encountered a problem. Here is exactly what would be sent.",
+      "includedError": "The technical error and where in the code it happened",
+      "includedVersion": "Your app version and operating system",
+      "includedActivity": "What the app was doing just before it failed",
+      "removed": "URLs, tokens, request and response bodies and personal data have already been removed.",
+      "viewFull": "View the full report",
+      "waive": "Send future reports automatically, without showing me each one",
+      "send": "Send",
+      "discard": "Don't send"
+    }
+  },
+  "crashRecovery": {
+    "message": "Restorm ran into a problem and needs to be restarted.",
+    "relaunch": "Restart Restorm",
+    "notice": {
+      "title": "File not reopened",
+      "body": "{{file}} was not reopened: Restorm crashed while opening it on the previous launch. Your file is intact — you can reopen it from the recent files.",
+      "bodyUnnamed": "The last file was not reopened: Restorm crashed while opening it on the previous launch. Your file is intact — you can reopen it from the recent files."
     }
   }
 }

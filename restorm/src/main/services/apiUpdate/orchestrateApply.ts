@@ -5,6 +5,7 @@ import { assertSafeFetchUrl } from '../../utils/urlSecurity'
 import type { ApiUpdateConfig, ImportSourceType } from '../../../shared/types/baseTypes'
 import { collectionStore, PUBSUB_TOPICS, pubsub } from '../CollectionStore'
 import { importFrom } from '../import/ImportManager'
+import { parseODataMetadata } from '../import/ODataImportService'
 import { applyApiUpdate } from './applyApiUpdate'
 import { swaggerImportAdapter } from '../import/idempotent/SwaggerAdapter'
 import { graphqlImportAdapter } from '../import/idempotent/GraphQLAdapter'
@@ -71,9 +72,49 @@ const ADAPTER_BY_SOURCE: Partial<Record<ImportSourceType, typeof swaggerImportAd
   openrpc: openrpcImportAdapter
 }
 
-function isImportSource(value: string | undefined): value is ImportSourceType {
+/**
+ * Sources a folder can legitimately carry that have no idempotent
+ * adapter — one-shot imports (a pasted cURL / PowerShell command, a
+ * bare URL) with no re-fetchable spec behind them. They stay
+ * recognised so the apply fails on the precise
+ * `No idempotent adapter for …` instead of the misleading
+ * `has no importSource`.
+ */
+const SOURCES_WITHOUT_ADAPTER: readonly ImportSourceType[] = ['curl', 'powershell', 'url']
+
+/**
+ * Every source the apply path recognises. Derived from
+ * `ADAPTER_BY_SOURCE` rather than restated as a literal: a
+ * hand-maintained copy silently drifts from the adapter map, and a
+ * source missing here resolves to `null` and throws
+ * `has no importSource` — a refresh that fails for a format the app
+ * demonstrably knows how to refresh.
+ */
+const RECOGNISED_IMPORT_SOURCES: ReadonlySet<string> = new Set<string>([
+  ...Object.keys(ADAPTER_BY_SOURCE),
+  ...SOURCES_WITHOUT_ADAPTER
+])
+
+export function isImportSource(value: string | undefined): value is ImportSourceType {
   if (!value) return false
-  return ['swagger', 'graphql', 'grpc', 'wsdl', 'asyncapi', 'postman', 'insomnia', 'bruno', 'curl', 'powershell', 'url', 'smithy', 'openrpc'].includes(value)
+  return RECOGNISED_IMPORT_SOURCES.has(value)
+}
+
+/**
+ * Turn the raw spec body into the shape the format's idempotent
+ * adapter expects.
+ *
+ * Most formats ship a JSON / YAML document the adapter reads
+ * directly, and `yaml.parse` covers both (JSON is a YAML subset).
+ * OData is the exception: its source is an EDMX / JSON-CSDL
+ * `$metadata` document, and `odataImportAdapter` consumes the
+ * `EdmSchema` the CSDL parser produces — never the raw document.
+ * Running EDMX through `yaml.parse` yields a bare string, which the
+ * adapter reads as "no entity sets, no operations".
+ */
+function parseSpecText(rawSpecText: string, importSource: ImportSourceType): unknown {
+  if (importSource === 'odata') return parseODataMetadata(rawSpecText)
+  return yaml.parse(rawSpecText)
 }
 
 function extractStringValue(v: unknown): string | undefined {
@@ -176,16 +217,21 @@ export async function runApiUpdateApply(folderId: string, selection?: ApiUpdateA
   // post-apply `payloadChecksum` can hash the exact body the
   // refresh-fetch handler would see on the next round-trip.
   const rawSpecText = await fetchText(url, headers)
-  // Format-aware parse: specs are commonly served as YAML, and a bare
-  // `JSON.parse` of a YAML body throws straight out of the IPC handler.
-  // `yaml.parse` accepts JSON too (JSON is a YAML subset).
   let parsedSpec: unknown
   try {
-    parsedSpec = yaml.parse(rawSpecText)
+    parsedSpec = parseSpecText(rawSpecText, importSource)
   } catch (err) {
     throw new Error(`Failed to parse spec from ${url}: ${err instanceof Error ? err.message : String(err)}`)
   }
   const fullSpec = adapter.extractNormalizedSpec(parsedSpec, {})
+  // A spec that normalises to nothing means the payload never reached
+  // the adapter in a shape it understands. Applying it would walk the
+  // "operation vanished from the spec" branch for every request the
+  // folder owns and flag the whole tree `removed: true` — so refuse
+  // loudly instead of silently gutting the user's collection.
+  if (fullSpec.operations.length === 0) {
+    throw new Error(`Spec fetched from ${url} declares no ${importSource} operations — refusing to apply an empty update`)
+  }
 
   // The renderer's `include` set carries ImportSelectionTree keys
   // (`request:http:METHOD {{baseUrl}}/path/{{id}}`); the pipeline

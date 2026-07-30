@@ -1,4 +1,10 @@
 {
+  "releaseNotesModal": {
+    "title": "Nyheder",
+    "showMore": "Vis mere",
+    "loading": "Indlæser udgivelsesnoter…",
+    "empty": "Ingen udgivelsesnoter at vise."
+  },
   "common": {
     "opened": "Åbnet",
     "refresh": "Opdatér",
@@ -29,7 +35,8 @@
     "removeFromFavorites": "Fjern fra favoritter",
     "confirmRemoveFavorite": "Er du sikker på, at du vil fjerne \"{{fileName}}\" fra favoritter?",
     "favoritesLandmarkLabel": "Favoritliste",
-    "recentsLandmarkLabel": "Liste over seneste filer"
+    "recentsLandmarkLabel": "Liste over seneste filer",
+    "openContainingFolder": "Åbn indeholdende mappe"
   },
   "welcomeScreen": {
     "landmarkLabel": "Velkomst"
@@ -390,7 +397,10 @@
     "listInstances": "Liste MCP-instanser",
     "listThemes": "Vis tilgængelige temaer",
     "getCurrentTheme": "Vis aktuelt tema",
-    "switchTheme": "Skift aktivt tema"
+    "getSettings": "Vis programmets indstillinger",
+    "setSetting": "Ændr en indstilling",
+    "patchSettings": "Ændr flere indstillinger på én gang",
+    "resetSetting": "Nulstil en indstilling"
   },
   "customWco": {
     "minimize": "Minimer",
@@ -401,7 +411,20 @@
   "firewall": {
     "addOrigin": "Tilføj origin",
     "removeOrigin": "Fjern {{origin}}",
-    "noEntries": "Ingen poster endnu."
+    "noEntries": "Ingen poster endnu.",
+    "outbound": {
+      "title": "Udgående tjenester",
+      "intro": "Destinationer, som denne applikation kan kontakte på eget initiativ. De er erklæret i koden og kan ikke redigeres her — de, der kræver dit samtykke, forbliver slået fra, indtil du giver det under Indstillinger.",
+      "empty": "Denne applikation erklærer ingen egen udgående destination.",
+      "hostUnset": "ikke konfigureret",
+      "stateConsented": "Tilladt — du har givet samtykke",
+      "stateNoConsent": "Blokeret — der er ikke givet samtykke",
+      "stateRequired": "Tilladt — påkrævet af applikationen",
+      "stateInactive": "Inaktiv — bruges ikke lige nu",
+      "purpose": {
+        "avatar": "Profilbillede for den tilmeldte konto"
+      }
+    }
   },
   "bookmarkRibbon": {
     "addBookmark": "Tilføj bogmærke"

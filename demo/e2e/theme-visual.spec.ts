@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test'
 import { _electron as electron, type ElectronApplication, type Page } from 'playwright'
 import { join } from 'path'
+import { withE2ELocaleEnv } from 'electron-core-ui/testing'
 
 let electronApp: ElectronApplication
 let page: Page
@@ -9,10 +10,7 @@ test.beforeAll(async () => {
   // Launch Electron app
   electronApp = await electron.launch({
     args: [join(__dirname, '../dist/main/index.js')],
-    env: {
-      ...process.env,
-      NODE_ENV: 'development'
-    }
+    env: withE2ELocaleEnv(process.env, { NODE_ENV: 'development' })
   })
 
   // Get the first window

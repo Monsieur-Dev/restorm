@@ -237,6 +237,12 @@ const monacoSuggestDismissTestDir = defineBddConfig({
   outputDir: '.features-gen/monaco-suggest-dismiss'
 })
 
+const monacoHandlebarsBodyTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/monaco-handlebars-body/features/**/*.feature',
+  steps: ['tests/e2e/bdd/monaco-handlebars-body/steps/**/*.ts', 'tests/e2e/bdd/fixtures/mcp-server.fixture.ts'],
+  outputDir: '.features-gen/monaco-handlebars-body'
+})
+
 const trpcExecutionTestDir = defineBddConfig({
   features: 'tests/e2e/bdd/trpc-execution/features/**/*.feature',
   steps: ['tests/e2e/bdd/trpc-execution/steps/**/*.ts', 'tests/e2e/bdd/fixtures/mcp-server.fixture.ts'],
@@ -349,6 +355,15 @@ const settingsTabTestDir = defineBddConfig({
     'tests/e2e/bdd/fixtures/settings-tab.fixture.ts'
   ],
   outputDir: '.features-gen/settings-tab'
+})
+
+const firewallOutboundTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/firewall-outbound/features/**/*.feature',
+  steps: [
+    'tests/e2e/bdd/firewall-outbound/steps/**/*.ts',
+    'tests/e2e/bdd/fixtures/firewall-outbound.fixture.ts'
+  ],
+  outputDir: '.features-gen/firewall-outbound'
 })
 
 const autoUpdateTestDir = defineBddConfig({
@@ -720,6 +735,11 @@ export default defineConfig({
       timeout: 120 * 1000
     },
     {
+      name: 'monaco-handlebars-body',
+      testDir: monacoHandlebarsBodyTestDir,
+      timeout: 120 * 1000
+    },
+    {
       name: 'trpc-execution',
       testDir: trpcExecutionTestDir,
       timeout: 180 * 1000
@@ -775,6 +795,11 @@ export default defineConfig({
       name: 'settings-tab',
       testDir: settingsTabTestDir,
       timeout: 120 * 1000
+    },
+    {
+      name: 'firewall-outbound',
+      testDir: firewallOutboundTestDir,
+      timeout: 120 * 1000 // opens the Firewall tab, flips consent, re-reads the exemptions
     },
     {
       name: 'auto-update',

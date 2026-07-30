@@ -20,7 +20,8 @@ import {
   FIREWALL_REQUEST_RECORD_CHANNEL,
   type FirewallOrigin,
   type FirewallPromptPayload,
-  type RequestRecord
+  type RequestRecord,
+  type SystemEndpointStatus
 } from '../../../../electron-core-ui/src/types/firewall'
 import {
   httpExecuteResultSchema,
@@ -47,7 +48,25 @@ import {
 } from '../ipc/schemas'
 import type { z } from 'zod/v4'
 import { AUTH_IPC, type AuthState, type CheckoutResult, type PortalResult } from '../../shared/auth/authState'
-import { UPDATE_IPC, type UpdateSettings, type UpdateState } from '../../shared/update/updateTypes'
+import {
+  UPDATE_IPC,
+  type ReleaseNoteSection,
+  type UpdateSettings,
+  type UpdateState
+} from '../../shared/update/updateTypes'
+import { CRASH_IPC, type CrashArmedState, type CrashConsentState, type CrashRecoveryNotice, type CrashReviewRequest } from '../../shared/crash/crashTypes'
+import { hookupIpc as hookupSentryIpc } from '@sentry/electron/preload-namespaced'
+
+// Expose the crash SDK's renderer↔main IPC conduit (`window.__SENTRY_IPC__`).
+//
+// This is plumbing, not an armed SDK: a set of `ipcRenderer.send` wrappers with
+// no client behind them. Nothing calls them unless the renderer SDK has been
+// initialised, which only happens once the main process reports crash reporting
+// armed; and until the main process arms, it has registered no listener at the
+// other end, so a message would go nowhere. The conduit is exposed
+// unconditionally because a preload cannot wait for an async consent answer —
+// the gate lives where it can be enforced, one layer up.
+hookupSentryIpc()
 
 // Expose core-ui APIs (imported from core-ui preload modules) and extend with restorm project API
 const coreUIAPI = createCoreUIAPI()
@@ -106,6 +125,29 @@ contextBridge.exposeInMainWorld('api', {
      * permission check. */
     setProjectOrigins: async (origins: FirewallOrigin[]): Promise<void> => {
       await ipcRenderer.invoke(FIREWALL_IPC.SET_PROJECT_ORIGINS, origins)
+    },
+    /** Read-only inventory of the destinations the APP itself may contact
+     * (licensing backend, avatar CDN, consent-gated crash / telemetry ingest).
+     * No mutating counterpart by design — these are declared in code and
+     * governed by the Privacy settings, not editable from the panel. */
+    listSystemEndpoints: async (): Promise<SystemEndpointStatus[]> => {
+      const result: unknown = await ipcRenderer.invoke(FIREWALL_IPC.LIST_SYSTEM_ENDPOINTS)
+      return Array.isArray(result) ? (result as SystemEndpointStatus[]) : []
+    },
+    /** The hosts the firewall currently exempts as system / display assets —
+     * the actual input to the permission check, as opposed to the descriptive
+     * rows above. Read-only introspection; the panel does not use it, but it is
+     * what lets a test assert on enforcement rather than on presentation. */
+    listSystemAllowedHosts: async (): Promise<string[]> => {
+      const result: unknown = await ipcRenderer.invoke(FIREWALL_IPC.LIST_SYSTEM_ALLOWED_HOSTS)
+      return Array.isArray(result) ? (result as string[]) : []
+    },
+    /** Push notification that the outbound inventory moved (consent granted or
+     * revoked, a host resolved on login) so an open panel re-reads it live. */
+    onSystemEndpointsChanged: (cb: () => void): (() => void) => {
+      const handler = (): void => { cb() }
+      ipcRenderer.on(FIREWALL_IPC.SYSTEM_ENDPOINTS_CHANGED, handler)
+      return (): void => { ipcRenderer.off(FIREWALL_IPC.SYSTEM_ENDPOINTS_CHANGED, handler) }
     },
     onPromptShow: (cb: (payload: FirewallPromptPayload) => void): (() => void) => {
       const handler = (_event: unknown, payload: FirewallPromptPayload): void => { cb(payload) }
@@ -187,6 +229,11 @@ contextBridge.exposeInMainWorld('api', {
     getChangelogSince: async (fromVersion: string, locale?: string): Promise<string> => {
       return (await ipcRenderer.invoke(UPDATE_IPC.GET_CHANGELOG_SINCE, fromVersion, locale)) as string
     },
+    /** All release-note sections (newest first) for the release-notes modal,
+     * fetched from the feed with a bundled fallback, localized to `locale`. */
+    getReleaseNotes: async (locale?: string): Promise<ReleaseNoteSection[]> => {
+      return (await ipcRenderer.invoke(UPDATE_IPC.GET_RELEASE_NOTES, locale)) as ReleaseNoteSection[]
+    },
     /** The version the "What's new" note was last shown for (or install seed). */
     getLastSeenVersion: async (): Promise<string | null> => {
       return (await ipcRenderer.invoke(UPDATE_IPC.GET_LAST_SEEN_VERSION)) as string | null
@@ -200,6 +247,63 @@ contextBridge.exposeInMainWorld('api', {
       const handler = (_event: unknown, state: UpdateState): void => { callback(state) }
       ipcRenderer.on(UPDATE_IPC.STATE_CHANGED, handler)
       return (): void => { ipcRenderer.off(UPDATE_IPC.STATE_CHANGED, handler) }
+    }
+  },
+  // Crash reporting, read-only. The renderer learns whether reporting is armed
+  // so its own SDK can follow the main process; it is given no way to arm it.
+  crash: {
+    /** The resolved armed state — the only input to the renderer's SDK gate. */
+    getArmedState: async (): Promise<CrashArmedState> => {
+      return (await ipcRenderer.invoke(CRASH_IPC.GET_ARMED_STATE)) as CrashArmedState
+    },
+    /** Subscribe to arm/disarm transitions. Returns an unsubscribe fn. */
+    onArmedStateChanged: (callback: (state: CrashArmedState) => void): (() => void) => {
+      const handler = (_event: unknown, state: CrashArmedState): void => { callback(state) }
+      ipcRenderer.on(CRASH_IPC.ARMED_STATE_CHANGED, handler)
+      return (): void => { ipcRenderer.off(CRASH_IPC.ARMED_STATE_CHANGED, handler) }
+    },
+    /** Whether the user still owes an answer, and the answer in force. */
+    getConsentState: async (): Promise<CrashConsentState> => {
+      return (await ipcRenderer.invoke(CRASH_IPC.GET_CONSENT_STATE)) as CrashConsentState
+    },
+    /** Subscribe to consent transitions. Returns an unsubscribe fn. */
+    onConsentStateChanged: (callback: (state: CrashConsentState) => void): (() => void) => {
+      const handler = (_event: unknown, state: CrashConsentState): void => { callback(state) }
+      ipcRenderer.on(CRASH_IPC.CONSENT_STATE_CHANGED, handler)
+      return (): void => { ipcRenderer.off(CRASH_IPC.CONSENT_STATE_CHANGED, handler) }
+    },
+    /** Record the user's own answer. Cannot override what their plan mandates. */
+    setConsent: async (granted: boolean): Promise<CrashConsentState> => {
+      return (await ipcRenderer.invoke(CRASH_IPC.SET_CONSENT, granted)) as CrashConsentState
+    },
+    /** A scrubbed report is waiting for a send/discard answer. */
+    onReviewRequested: (callback: (request: CrashReviewRequest) => void): (() => void) => {
+      const handler = (_event: unknown, request: CrashReviewRequest): void => { callback(request) }
+      ipcRenderer.on(CRASH_IPC.REVIEW_REQUESTED, handler)
+      return (): void => { ipcRenderer.off(CRASH_IPC.REVIEW_REQUESTED, handler) }
+    },
+    /** Answer one pending review. Fire-and-forget: main owns the outcome. */
+    resolveReview: (id: string, send: boolean): void => {
+      ipcRenderer.send(CRASH_IPC.RESOLVE_REVIEW, id, send)
+    },
+    /**
+     * Restart the app after a crash, reopening what the user was working on.
+     * The returned promise never settles in practice — the process is gone
+     * before a reply could be sent — so callers must not await it.
+     */
+    recoverRelaunch: async (): Promise<void> => {
+      await ipcRenderer.invoke(CRASH_IPC.RECOVER_RELAUNCH)
+    },
+    /** Whether this launch withheld a file, for a renderer that mounted late. */
+    getRecoveryNotice: async (): Promise<CrashRecoveryNotice> => {
+      return (await ipcRenderer.invoke(CRASH_IPC.GET_RECOVERY_NOTICE)) as CrashRecoveryNotice
+    },
+    /** Told when a file is withheld. The decision lands well after this window
+     * loads, so the push — not the read — is what usually delivers it. */
+    onRecoveryNotice: (callback: (notice: CrashRecoveryNotice) => void): (() => void) => {
+      const handler = (_event: unknown, notice: CrashRecoveryNotice): void => { callback(notice) }
+      ipcRenderer.on(CRASH_IPC.RECOVERY_NOTICE, handler)
+      return (): void => { ipcRenderer.off(CRASH_IPC.RECOVERY_NOTICE, handler) }
     }
   }
 })
@@ -2056,11 +2160,24 @@ contextBridge.exposeInMainWorld('restorm', {
     }): void => {
       ipcRenderer.send('mcp:active-state-bootstrap', payload)
     },
-    /** Subscribe to MCP `open_tab` requests. Payload `{itemId, kind}`. */
-    onMcpOpenTab: (callback: (payload: { itemId: string; kind: 'request' | 'folder' | 'env-folder' | 'scenario' }) => void): (() => void) => {
-      const handler = (_e: unknown, payload: unknown): void => { callback(payload as { itemId: string; kind: 'request' | 'folder' | 'env-folder' | 'scenario' }) }
+    /** Subscribe to MCP `open_tab` requests. Payload `{requestId?, itemId, kind}`.
+     * `requestId` is present when the call came from the `open_tab` MCP tool
+     * (which awaits an ack, see `replyMcpOpenTab`) and absent for the other
+     * internal senders (e.g. `run_request`'s tab-open side effect), which
+     * stay fire-and-forget. */
+    onMcpOpenTab: (callback: (payload: { requestId?: string; itemId: string; kind: 'request' | 'folder' | 'env-folder' | 'scenario' }) => void): (() => void) => {
+      const handler = (_e: unknown, payload: unknown): void => { callback(payload as { requestId?: string; itemId: string; kind: 'request' | 'folder' | 'env-folder' | 'scenario' }) }
       ipcRenderer.on('mcp:open-tab', handler)
       return () => { ipcRenderer.off('mcp:open-tab', handler) }
+    },
+    /** Ack an `mcp:open-tab` request back to main. `opened` reports whether
+     * this window actually found the item and opened its tab — main only
+     * settles the `open_tab` MCP call successful on a positive ack (or
+     * times out and reports an explicit error otherwise). Never send when
+     * the triggering payload had no `requestId` — there's nothing waiting
+     * on the other end. */
+    replyMcpOpenTab: (payload: { requestId: string; opened: boolean }): void => {
+      ipcRenderer.send('mcp:open-tab-result', payload)
     },
     /** Subscribe to MCP `reveal_in_tree` requests. */
     onMcpRevealInTree: (callback: (payload: { itemId: string; kind: 'request' | 'folder' | 'env-folder' | 'scenario' }) => void): (() => void) => {

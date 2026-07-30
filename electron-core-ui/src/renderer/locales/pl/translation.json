@@ -1,4 +1,10 @@
 {
+  "releaseNotesModal": {
+    "title": "Nowości",
+    "showMore": "Pokaż więcej",
+    "loading": "Wczytywanie informacji o wydaniu…",
+    "empty": "Brak informacji o wydaniu do wyświetlenia."
+  },
   "common": {
     "opened": "Otwarte",
     "refresh": "Odśwież",
@@ -29,7 +35,8 @@
     "removeFromFavorites": "Usuń z ulubionych",
     "confirmRemoveFavorite": "Czy na pewno chcesz usunąć „{{fileName}}” z ulubionych?",
     "favoritesLandmarkLabel": "Lista ulubionych",
-    "recentsLandmarkLabel": "Lista ostatnich plików"
+    "recentsLandmarkLabel": "Lista ostatnich plików",
+    "openContainingFolder": "Otwórz folder zawierający plik"
   },
   "welcomeScreen": {
     "landmarkLabel": "Witamy"
@@ -390,7 +397,10 @@
     "listInstances": "Lista instancji MCP",
     "listThemes": "Lista dostępnych motywów",
     "getCurrentTheme": "Pobierz bieżący motyw",
-    "switchTheme": "Przełącz aktywny motyw"
+    "getSettings": "Wyświetl ustawienia aplikacji",
+    "setSetting": "Zmień ustawienie",
+    "patchSettings": "Zmień kilka ustawień naraz",
+    "resetSetting": "Przywróć ustawienie"
   },
   "customWco": {
     "minimize": "Minimalizuj",
@@ -401,7 +411,20 @@
   "firewall": {
     "addOrigin": "Dodaj origin",
     "removeOrigin": "Usuń {{origin}}",
-    "noEntries": "Brak wpisów."
+    "noEntries": "Brak wpisów.",
+    "outbound": {
+      "title": "Usługi wychodzące",
+      "intro": "Miejsca docelowe, z którymi ta aplikacja może się skontaktować z własnej inicjatywy. Są zadeklarowane w kodzie i nie można ich tu edytować — te, które wymagają Twojej zgody, pozostają wyłączone, dopóki nie udzielisz jej w Preferencjach.",
+      "empty": "Ta aplikacja nie deklaruje żadnego własnego miejsca docelowego.",
+      "hostUnset": "nieskonfigurowane",
+      "stateConsented": "Dozwolone — udzielono zgody",
+      "stateNoConsent": "Zablokowane — brak zgody",
+      "stateRequired": "Dozwolone — wymagane przez aplikację",
+      "stateInactive": "Nieaktywne — obecnie nieużywane",
+      "purpose": {
+        "avatar": "Zdjęcie profilowe zalogowanego konta"
+      }
+    }
   },
   "bookmarkRibbon": {
     "addBookmark": "Dodaj zakładkę"

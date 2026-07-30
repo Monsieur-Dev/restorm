@@ -90,6 +90,8 @@ Renderer A                  Main                        Renderer B
 | [Persistence](./Persistence.md) | Single-file and folder-based serialization with decorator-driven structure |
 | [Events](./Events.md) | EventBus (main/renderer), Document Events, GraphQL PubSub |
 | [Error Handling](./ErrorHandling.md) | Typed error classes with codes and cause chains |
+| [I18n](./I18n.md) | Renderer/main translation split, initial-language resolution (stored choice → OS locale → English), the `i18n:get-language`/`i18n:set-language` IPC contract |
+| [Privacy](./Privacy.md) | Consent gates + audit trail, the fail-closed payload scrubber, consent-driven firewall exemptions |
 
 ## Service Initialization Order
 

@@ -1008,10 +1008,22 @@
     "requestFormat.powershell": "PowerShell (Invoke-RestMethod)"
   },
   "import": {
-    "title": "Importer forespørsler",
-    "source": {
-      "label": "Lim inn noe her!",
-      "placeholder": "Skriv inn filsti, URL, eller lim inn curl/PowerShell-kommando..."
+    "addAuth": "Legg til en autentiseringsrute",
+    "applyFailedTitle": "Oppdatering fra kilde mislyktes",
+    "applyUpdate": "Bruk oppdatering",
+    "authenticatedVia": "Autentisert via {{name}}",
+    "cancel": "Avbryt",
+    "customHeadersAdd": "Legg til header",
+    "customHeadersBtn": "Legg til egendefinerte headere",
+    "customHeadersBtnTitle": "Legg engangs-headere til hentingen av spesifikasjonen (lagres på den importerte mappen for nye importer)",
+    "customHeadersDone": "Ferdig",
+    "customHeadersHint": "Headere lagres på den importerte mappen, slik at en senere oppdatering fra kilden gjentar dem. For innloggingsflyter med tokenrotasjon bør du heller bruke autentiseringsruten over.",
+    "customHeadersTitle": "Egendefinerte headere",
+    "detachAuth": "Koble fra autentiseringsrute",
+    "dropZone": "Slippsone",
+    "editAuth": "Rediger autentiseringsrute",
+    "error": {
+      "unknown": "En ukjent feil oppstod"
     },
     "formats": {
       "swagger": {
@@ -1137,15 +1149,24 @@
     },
     "loading": "Analyserer...",
     "noResults": "Ingen forespørsler funnet",
-    "error": {
-      "unknown": "En ukjent feil oppstod"
-    },
     "ok": "Importer",
-    "cancel": "Avbryt",
-    "dropZone": "Slippsone",
-    "addAuth": "Legg til en autentiseringsrute",
-    "detachAuth": "Koble fra autentiseringsrute",
-    "editAuth": "Rediger autentiseringsrute"
+    "okN": "{{action}} ({{count}})",
+    "preview": {
+      "noDocumentation": "Ingen parset dokumentasjon for denne kilden."
+    },
+    "refreshTitle": "Oppdater fra kilde",
+    "searchPlaceholder": "Filtrer ruter / mapper…",
+    "selectAll": "Velg alle",
+    "selectNone": "Velg ingen",
+    "source": {
+      "label": "Lim inn noe her!",
+      "placeholder": "Skriv inn filsti, URL, eller lim inn curl/PowerShell-kommando..."
+    },
+    "tabs": {
+      "routes": "Ruter",
+      "documentation": "Dokumentasjon"
+    },
+    "title": "Importer forespørsler"
   },
   "emptyBench": {
     "importCard": {
@@ -2493,6 +2514,7 @@
     "recoverFailedTitle": "Gjenoppretting mislyktes"
   },
   "updates": {
+    "seeReleaseNotes": "Se versjonsmerknader",
     "settingsTitle": "Oppdateringer",
     "autoCheckTitle": "Se etter oppdateringer automatisk",
     "autoCheckDescription": "Ser etter oppdateringer i bakgrunnen ved oppstart og jevnlig.",
@@ -2501,19 +2523,63 @@
     "currentVersion": "Versjon {{version}}",
     "checkNow": "Se etter nå",
     "readyTitle": "Oppdatering klar",
-    "readyBody": "Versjon {{version}} installeres neste gang du starter på nytt.",
+    "readyBody": "Versjon {{version}} er klar til å installeres.",
     "restartNow": "Start på nytt nå",
     "checkFailedTitle": "Kunne ikke se etter oppdateringer",
     "checkFailedBody": "Kunne ikke se etter oppdateringer. Prøv igjen senere.",
     "upToDateTitle": "Du er oppdatert",
     "upToDateBody": "Du bruker den nyeste versjonen ({{version}}).",
-    "whatsNewTitle": "Nyheter i {{version}}",
+    "whatsNewTitle": "Hva er nytt?",
     "status": {
       "idle": "Oppdatert",
       "checking": "Ser etter…",
       "downloading": "Laster ned… {{percent}} %",
       "downloaded": "Oppdatering klar til installering ({{version}})",
       "error": "Sjekken mislyktes"
+    }
+  },
+  "privacy": {
+    "settingsTitle": "Personvern",
+    "crashReportsTitle": "Send krasjrapporter",
+    "crashReportsDescription": "Sender en anonymisert rapport når Restorm krasjer, slik at feilen kan rettes. Rapporter renses for URL-er, tokener, forespørselsinnhold og personopplysninger før de forlater maskinen din. Inkludert i gratisplanen; en betalt plan lar deg slå det av. Alle detaljer: https://restorm.app/privacy",
+    "telemetryTitle": "Send bruksstatistikk",
+    "telemetryDescription": "Sender anonym statistikk om hvilke funksjoner som brukes, for å styre videre utvikling. Av som standard, og aldri slått på uten ditt uttrykkelige samtykke. Inneholder ingen forespørselsdata, ingen URL-er og ingen personopplysninger. Alle detaljer: https://restorm.app/privacy",
+    "outbound": {
+      "purpose": {
+        "crash": "Krasjrapporter (kun med ditt samtykke)",
+        "telemetry": "Anonym bruksstatistikk (kun med ditt samtykke)",
+        "backend": "Konto, lisens og abonnement"
+      }
+    },
+    "crashReportsLockedLabel": "Kan endres fra Pro-abonnementet. I gratisabonnementet er krasjrapporter nødvendige for å opprettholde kvaliteten.",
+    "consentToast": {
+      "title": "Hjelp oss med å forbedre Restorm",
+      "body": "Hvis det oppstår en uventet feil, kan Restorm sende oss en anonym rapport slik at vi kan rette problemet. Den inneholder det tekniske feilsporet og diagnostisk kontekst (appversjon, nylig aktivitet). URL-er, tokener, forespørsels- og svarinnhold og personopplysninger fjernes før den forlater maskinen din. Du ser nøyaktig hva som sendes før hver rapport.",
+      "save": "Lagre innstillingene mine",
+      "learnMore": "Finn ut mer"
+    },
+    "crashReportReviewTitle": "Vis hver krasjrapport før sending",
+    "crashReportReviewDescription": "Viser deg det nøyaktige innholdet i en krasjrapport og spør før den sendes. Slå av for å sende rapporter automatisk uten å bli spurt hver gang.",
+    "reportDialog": {
+      "title": "Sende denne krasjrapporten?",
+      "intro": "Restorm har støtt på et problem. Dette er nøyaktig hva som ville blitt sendt.",
+      "includedError": "Den tekniske feilen og hvor i koden den oppsto",
+      "includedVersion": "Appversjonen din og operativsystemet ditt",
+      "includedActivity": "Hva appen gjorde rett før feilen",
+      "removed": "URL-er, tokener, forespørsels- og svarinnhold og personopplysninger er allerede fjernet.",
+      "viewFull": "Vis hele rapporten",
+      "waive": "Send fremtidige rapporter automatisk, uten å vise meg dem",
+      "send": "Send",
+      "discard": "Ikke send"
+    }
+  },
+  "crashRecovery": {
+    "message": "Restorm støtte på et problem og må startes på nytt.",
+    "relaunch": "Start Restorm på nytt",
+    "notice": {
+      "title": "Filen ble ikke åpnet på nytt",
+      "body": "{{file}} ble ikke åpnet på nytt: Restorm krasjet da den ble åpnet ved forrige oppstart. Filen din er uskadd — du kan åpne den på nytt fra de siste filene.",
+      "bodyUnnamed": "Den siste filen ble ikke åpnet på nytt: Restorm krasjet da den ble åpnet ved forrige oppstart. Filen din er uskadd — du kan åpne den på nytt fra de siste filene."
     }
   }
 }

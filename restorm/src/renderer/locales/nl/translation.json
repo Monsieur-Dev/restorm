@@ -1008,10 +1008,22 @@
     "requestFormat.powershell": "PowerShell (Invoke-RestMethod)"
   },
   "import": {
-    "title": "Verzoeken importeren",
-    "source": {
-      "label": "Plak hier iets!",
-      "placeholder": "Voer bestandspad of URL in, of plak een curl/PowerShell-commando..."
+    "addAuth": "Een authenticatieroute toevoegen",
+    "applyFailedTitle": "Vernieuwen vanaf bron mislukt",
+    "applyUpdate": "Update toepassen",
+    "authenticatedVia": "Geauthenticeerd via {{name}}",
+    "cancel": "Annuleren",
+    "customHeadersAdd": "Header toevoegen",
+    "customHeadersBtn": "Aangepaste headers toevoegen",
+    "customHeadersBtnTitle": "Eenmalige headers meesturen bij het ophalen van de specificatie (opgeslagen op de geïmporteerde map voor herimports)",
+    "customHeadersDone": "Klaar",
+    "customHeadersHint": "Headers worden opgeslagen op de geïmporteerde map, zodat een latere vernieuwing vanaf de bron ze opnieuw verstuurt. Gebruik voor loginflows met tokenrotatie liever de authenticatieroute hierboven.",
+    "customHeadersTitle": "Aangepaste headers",
+    "detachAuth": "Authenticatieroute loskoppelen",
+    "dropZone": "Sleepzone",
+    "editAuth": "Authenticatieroute bewerken",
+    "error": {
+      "unknown": "Er is een onbekende fout opgetreden"
     },
     "formats": {
       "swagger": {
@@ -1137,15 +1149,24 @@
     },
     "loading": "Analyseren...",
     "noResults": "Geen verzoeken gevonden",
-    "error": {
-      "unknown": "Er is een onbekende fout opgetreden"
-    },
     "ok": "Importeren",
-    "cancel": "Annuleren",
-    "dropZone": "Sleepzone",
-    "addAuth": "Een authenticatieroute toevoegen",
-    "detachAuth": "Authenticatieroute loskoppelen",
-    "editAuth": "Authenticatieroute bewerken"
+    "okN": "{{action}} ({{count}})",
+    "preview": {
+      "noDocumentation": "Geen geparseerde documentatie voor deze bron."
+    },
+    "refreshTitle": "Vernieuwen vanaf bron",
+    "searchPlaceholder": "Routes / mappen filteren…",
+    "selectAll": "Alles selecteren",
+    "selectNone": "Niets selecteren",
+    "source": {
+      "label": "Plak hier iets!",
+      "placeholder": "Voer bestandspad of URL in, of plak een curl/PowerShell-commando..."
+    },
+    "tabs": {
+      "routes": "Routes",
+      "documentation": "Documentatie"
+    },
+    "title": "Verzoeken importeren"
   },
   "emptyBench": {
     "importCard": {
@@ -2493,6 +2514,7 @@
     "recoverFailedTitle": "Herstellen mislukt"
   },
   "updates": {
+    "seeReleaseNotes": "Release-opmerkingen bekijken",
     "settingsTitle": "Updates",
     "autoCheckTitle": "Automatisch op updates controleren",
     "autoCheckDescription": "Controleert bij het starten en periodiek op de achtergrond op updates.",
@@ -2501,19 +2523,63 @@
     "currentVersion": "Versie {{version}}",
     "checkNow": "Nu controleren",
     "readyTitle": "Update gereed",
-    "readyBody": "Versie {{version}} wordt bij de volgende herstart geïnstalleerd.",
+    "readyBody": "Versie {{version}} is klaar om te installeren.",
     "restartNow": "Nu herstarten",
     "checkFailedTitle": "Controle op updates mislukt",
     "checkFailedBody": "Kan niet op updates controleren. Probeer het later opnieuw.",
     "upToDateTitle": "Je bent up-to-date",
     "upToDateBody": "Je gebruikt de nieuwste versie ({{version}}).",
-    "whatsNewTitle": "Nieuw in {{version}}",
+    "whatsNewTitle": "Wat is er nieuw?",
     "status": {
       "idle": "Up-to-date",
       "checking": "Controleren…",
       "downloading": "Downloaden… {{percent}} %",
       "downloaded": "Update klaar om te installeren ({{version}})",
       "error": "Controle mislukt"
+    }
+  },
+  "privacy": {
+    "settingsTitle": "Privacy",
+    "crashReportsTitle": "Crashrapporten verzenden",
+    "crashReportsDescription": "Verzendt een geanonimiseerd rapport wanneer Restorm crasht, zodat de storing verholpen kan worden. Rapporten worden ontdaan van URL's, tokens, aanvraaginhoud en persoonsgegevens voordat ze uw machine verlaten. Inbegrepen bij het gratis abonnement; met een betaald abonnement kunt u dit uitschakelen. Alle details: https://restorm.app/privacy",
+    "telemetryTitle": "Gebruiksstatistieken verzenden",
+    "telemetryDescription": "Verzendt anonieme statistieken over welke functies gebruikt worden, om te sturen wat er hierna gebouwd wordt. Standaard uit en nooit ingeschakeld zonder uw uitdrukkelijke toestemming. Bevat geen aanvraaggegevens, geen URL's en geen persoonsgegevens. Alle details: https://restorm.app/privacy",
+    "outbound": {
+      "purpose": {
+        "crash": "Crashrapporten (alleen met uw toestemming)",
+        "telemetry": "Anonieme gebruiksstatistieken (alleen met uw toestemming)",
+        "backend": "Account, licentie en abonnement"
+      }
+    },
+    "crashReportsLockedLabel": "Aanpasbaar vanaf het Pro-abonnement. In het gratis abonnement zijn crashrapporten nodig om de kwaliteit te bewaken.",
+    "consentToast": {
+      "title": "Help ons Restorm te verbeteren",
+      "body": "Als er een onverwachte fout optreedt, kan Restorm ons een anoniem rapport sturen om het probleem te verhelpen. Het bevat het technische foutspoor en de diagnostische context (app-versie, recente activiteit). URL's, tokens, aanvraag- en antwoordinhoud en persoonsgegevens worden verwijderd voordat het uw apparaat verlaat. U ziet precies wat er wordt verzonden vóór elk rapport.",
+      "save": "Mijn voorkeuren opslaan",
+      "learnMore": "Meer informatie"
+    },
+    "crashReportReviewTitle": "Elk crashrapport tonen vóór verzending",
+    "crashReportReviewDescription": "Toont u de exacte inhoud van een crashrapport en vraagt om bevestiging voordat het wordt verzonden. Schakel dit uit om rapporten automatisch te verzenden zonder telkens te vragen.",
+    "reportDialog": {
+      "title": "Dit crashrapport verzenden?",
+      "intro": "Restorm heeft een probleem ondervonden. Dit is precies wat er verzonden zou worden.",
+      "includedError": "De technische fout en waar in de code die optrad",
+      "includedVersion": "Uw app-versie en besturingssysteem",
+      "includedActivity": "Wat de app deed vlak voor de fout",
+      "removed": "URL's, tokens, aanvraag- en antwoordinhoud en persoonsgegevens zijn al verwijderd.",
+      "viewFull": "Volledig rapport weergeven",
+      "waive": "Toekomstige rapporten automatisch verzenden, zonder ze mij te tonen",
+      "send": "Verzenden",
+      "discard": "Niet verzenden"
+    }
+  },
+  "crashRecovery": {
+    "message": "Restorm heeft een probleem ondervonden en moet opnieuw worden gestart.",
+    "relaunch": "Restorm opnieuw starten",
+    "notice": {
+      "title": "Bestand niet opnieuw geopend",
+      "body": "{{file}} is niet opnieuw geopend: Restorm liep vast bij het openen ervan tijdens de vorige start. Uw bestand is intact — u kunt het openen via de recente bestanden.",
+      "bodyUnnamed": "Het laatste bestand is niet opnieuw geopend: Restorm liep vast bij het openen ervan tijdens de vorige start. Uw bestand is intact — u kunt het openen via de recente bestanden."
     }
   }
 }

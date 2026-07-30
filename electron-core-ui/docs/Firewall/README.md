@@ -147,6 +147,8 @@ interface FirewallConfig {
 - `addToWhitelist / removeFromWhitelist / addToBlacklist / removeFromBlacklist(origin)`
 - `setProjectOrigins(origins: FirewallOrigin[]): void`
 - `setInfraPorts(patch: Partial<InfraPorts>): void` / `getInfraPorts(): InfraPorts`
+- `addSystemAllowedHost(host) / removeSystemAllowedHost(host) / listSystemAllowedHosts(): string[]`
+- `declareSystemEndpoint(declaration: SystemEndpointDeclaration): void` / `undeclareSystemEndpoint(id)` / `listSystemEndpoints(): SystemEndpointStatus[]`
 - `listPendingPrompts(): PendingPromptSnapshot[]`
 - `resolvePrompt(promptId, verdict, persist = true): void`
 - `denyAllPending(): void`
@@ -176,7 +178,51 @@ interface InfraPorts { graphqlPort: number | null; mcpPort: number | null; viteD
 
 ### Shared types
 
-`FirewallOrigin`, `FirewallPromptPayload`, `FirewallPromptResolution`, `RequestRecord`, `RequestRecordSource`, `RequestRecordVerdict`, `RequestRecordProtocol`, and the constants `FIREWALL_IPC`, `FIREWALL_REQUEST_RECORD_CHANNEL`.
+`FirewallOrigin`, `FirewallPromptPayload`, `FirewallPromptResolution`, `RequestRecord`, `RequestRecordSource`, `RequestRecordVerdict`, `RequestRecordProtocol`, `SystemEndpointDeclaration`, `SystemEndpointStatus`, `SystemEndpointExemption`, and the constants `FIREWALL_IPC`, `FIREWALL_REQUEST_RECORD_CHANNEL`.
+
+## Outbound services — the app's own traffic
+
+The whitelist / blacklist govern the USER's API traffic. The host application
+also makes calls of its own (a licensing backend, the signed-in account's avatar
+CDN, an opt-in crash or telemetry ingest), and those bypass the user firewall by
+design. Left undeclared they are the one class of outbound call the panel cannot
+account for — which is exactly the thing a firewall is supposed to rule out.
+
+Declare each one and the panel renders a read-only row for it, **including the
+rows that are currently switched off**:
+
+```typescript
+permissionService.declareSystemEndpoint({
+  id: 'telemetry',                          // stable; also the upsert key
+  host: 'eu.i.example.com',                 // EXACT host, or null when unresolved
+  purposeKey: 'privacy.outbound.purpose.telemetry', // i18n key, resolved renderer-side
+  consentGate: 'telemetry',                 // null when the app cannot work without it
+  exemption: 'system-allowlist'             // or 'call-scoped-bypass'
+})
+```
+
+Two exemption mechanisms, and the distinction matters to the UI:
+
+| `exemption` | How the call gets through | When `active` is true |
+| --- | --- | --- |
+| `system-allowlist` | its host sits in `systemAllowedHosts` | while the host is registered |
+| `call-scoped-bypass` | a guarded fetch wraps its own call-chain in `withFirewallBypass` | as soon as the host is known |
+
+`active` is **computed**, never stored — dropping the host with
+`removeSystemAllowedHost` flips the row immediately, which is how consent
+revocation is enforced by the firewall rather than promised by the sender.
+
+Renderers read the list over `FIREWALL_IPC.LIST_SYSTEM_ENDPOINTS` (read-only —
+there is no mutating counterpart, these are declared in code) and receive a
+payload-free `FIREWALL_IPC.SYSTEM_ENDPOINTS_CHANGED` push whenever the inventory
+moves, so an open panel reflects a consent change without being re-mounted. Host
+apps should expose both through their preload bridge as
+`window.api.firewall.listSystemEndpoints()` and
+`window.api.firewall.onSystemEndpointsChanged(cb)`; `useFirewallControl()` wires
+itself to both when present and degrades to an empty, non-live list when absent.
+
+See [`docs/Architecture/Privacy.md`](../Architecture/Privacy.md) for the consent
+model that drives the gated rows.
 
 ## Rule matching
 

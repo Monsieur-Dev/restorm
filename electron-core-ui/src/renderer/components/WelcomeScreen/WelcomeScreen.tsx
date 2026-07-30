@@ -30,6 +30,12 @@ export interface WelcomeScreenProps {
    * straight through to `RecentFilesVignette`.
    */
   confirmRemoveFavorite?: (fileName: string) => boolean | Promise<boolean>
+  /**
+   * Optional "open containing folder" handler — passed straight through
+   * to `RecentFilesVignette`, which offers it on a row's right-click menu
+   * only when supplied.
+   */
+  onRevealInFolder?: (path: string) => void
   /** Wallpaper pattern. Defaults to `'random'`. */
   wallpaperPattern?: WallpaperPattern
   /** Wordmark animation effect. Defaults to `'random'`. */
@@ -67,6 +73,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
   children,
   onOpenFile,
   confirmRemoveFavorite,
+  onRevealInFolder,
   wallpaperPattern = 'random',
   wordmarkEffect = 'random',
   wordmarkStartDelay = 2000,
@@ -113,6 +120,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
         decoration={recentFilesVignetteDecoration}
         className="ecu-welcome-screen-recent-files-vignette"
         {...(confirmRemoveFavorite ? { confirmRemoveFavorite } : {})}
+        {...(onRevealInFolder ? { onRevealInFolder } : {})}
       />
     </main>
   )

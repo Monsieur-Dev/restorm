@@ -1008,10 +1008,22 @@
     "requestFormat.powershell": "PowerShell (Invoke-RestMethod)"
   },
   "import": {
-    "title": "Importo kërkesa",
-    "source": {
-      "label": "Ngjit diçka këtu!",
-      "placeholder": "Fut shtegun e skedarit, URL-në ose ngjit një komandë curl/PowerShell..."
+    "addAuth": "Shto një rrugë vërtetimi",
+    "applyFailedTitle": "Rifreskimi nga burimi dështoi",
+    "applyUpdate": "Zbato përditësimin",
+    "authenticatedVia": "I vërtetuar përmes {{name}}",
+    "cancel": "Anulo",
+    "customHeadersAdd": "Shto kokë",
+    "customHeadersBtn": "Shto kokë të personalizuara",
+    "customHeadersBtnTitle": "Bashkëngjit kokë njëpërdorimshe në marrjen e specifikimit (ruhen te dosja e importuar për riimportime)",
+    "customHeadersDone": "U krye",
+    "customHeadersHint": "Kokët ruhen te dosja e importuar, kështu që një rifreskim i ardhshëm nga burimi i përsërit. Për rrjedha hyrjeje me rrotullim tokenash, përdorni më mirë rrugën e vërtetimit më sipër.",
+    "customHeadersTitle": "Kokë të personalizuara",
+    "detachAuth": "Shkëput rrugën e vërtetimit",
+    "dropZone": "Zona e lëshimit",
+    "editAuth": "Ndrysho rrugën e vërtetimit",
+    "error": {
+      "unknown": "Ndodhi një gabim i panjohur"
     },
     "formats": {
       "swagger": {
@@ -1137,15 +1149,24 @@
     },
     "loading": "Po analizohet...",
     "noResults": "Nuk u gjet asnjë kërkesë",
-    "error": {
-      "unknown": "Ndodhi një gabim i panjohur"
-    },
     "ok": "Importo",
-    "cancel": "Anulo",
-    "dropZone": "Zona e lëshimit",
-    "addAuth": "Shto një rrugë vërtetimi",
-    "detachAuth": "Shkëput rrugën e vërtetimit",
-    "editAuth": "Ndrysho rrugën e vërtetimit"
+    "okN": "{{action}} ({{count}})",
+    "preview": {
+      "noDocumentation": "Asnjë dokumentacion i analizuar për këtë burim."
+    },
+    "refreshTitle": "Rifresko nga burimi",
+    "searchPlaceholder": "Filtro rrugët / dosjet…",
+    "selectAll": "Zgjidh të gjitha",
+    "selectNone": "Hiq të gjitha",
+    "source": {
+      "label": "Ngjit diçka këtu!",
+      "placeholder": "Fut shtegun e skedarit, URL-në ose ngjit një komandë curl/PowerShell..."
+    },
+    "tabs": {
+      "routes": "Rrugët",
+      "documentation": "Dokumentim"
+    },
+    "title": "Importo kërkesa"
   },
   "emptyBench": {
     "importCard": {
@@ -2493,6 +2514,7 @@
     "recoverFailedTitle": "Rikthimi dështoi"
   },
   "updates": {
+    "seeReleaseNotes": "Shiko shënimet e versionit",
     "settingsTitle": "Përditësimet",
     "autoCheckTitle": "Kontrollo automatikisht për përditësime",
     "autoCheckDescription": "Kontrollon për përditësime në sfond gjatë nisjes dhe periodikisht.",
@@ -2501,19 +2523,63 @@
     "currentVersion": "Versioni {{version}}",
     "checkNow": "Kontrollo tani",
     "readyTitle": "Përditësimi është gati",
-    "readyBody": "Versioni {{version}} do të instalohet herën tjetër që rinisni.",
+    "readyBody": "Versioni {{version}} është gati për instalim.",
     "restartNow": "Rinis tani",
     "checkFailedTitle": "Kontrolli i përditësimeve dështoi",
     "checkFailedBody": "Nuk u kontrolluan dot përditësimet. Ju lutemi provoni sërish më vonë.",
     "upToDateTitle": "Jeni të përditësuar",
     "upToDateBody": "Po përdorni versionin më të fundit ({{version}}).",
-    "whatsNewTitle": "Çfarë ka të re në {{version}}",
+    "whatsNewTitle": "Ç'ka të re?",
     "status": {
       "idle": "I përditësuar",
       "checking": "Duke kontrolluar…",
       "downloading": "Duke shkarkuar… {{percent}} %",
       "downloaded": "Përditësimi gati për instalim ({{version}})",
       "error": "Kontrolli dështoi"
+    }
+  },
+  "privacy": {
+    "settingsTitle": "Privatësia",
+    "crashReportsTitle": "Dërgo raportet e rrëzimit",
+    "crashReportsDescription": "Dërgon një raport të anonimizuar kur Restorm rrëzohet, që defekti të mund të riparohet. Raportet pastrohen nga URL-të, çelësat, trupat e kërkesave dhe të dhënat personale para se të largohen nga makina juaj. E përfshirë në planin falas; një plan me pagesë lejon çaktivizimin. Detajet e plota: https://restorm.app/privacy",
+    "telemetryTitle": "Dërgo statistikat e përdorimit",
+    "telemetryDescription": "Dërgon statistika anonime për funksionet e përdorura, për të orientuar zhvillimet e ardhshme. E çaktivizuar si parazgjedhje dhe kurrë e aktivizuar pa pëlqimin tuaj të shprehur. Nuk përmban të dhëna kërkesash, as URL, as të dhëna personale. Detajet e plota: https://restorm.app/privacy",
+    "outbound": {
+      "purpose": {
+        "crash": "Raporte rrëzimi (vetëm me pëlqimin tuaj)",
+        "telemetry": "Statistika anonime përdorimi (vetëm me pëlqimin tuaj)",
+        "backend": "Llogaria, licenca dhe abonimi"
+      }
+    },
+    "crashReportsLockedLabel": "I ndryshueshëm nga plani Pro. Në planin falas, raportet e rrëzimeve janë të nevojshme për ruajtjen e cilësisë.",
+    "consentToast": {
+      "title": "Na ndihmoni ta përmirësojmë Restorm",
+      "body": "Në rast të një gabimi të papritur, Restorm mund të na dërgojë një raport anonim për të na ndihmuar të rregullojmë problemin. Ai përmban gjurmën teknike të gabimit dhe kontekstin diagnostikues (versionin e aplikacionit, veprimtarinë e fundit). URL-të, token-ët, trupat e kërkesave dhe përgjigjeve dhe të dhënat personale hiqen përpara se raporti të largohet nga pajisja juaj. Do të shihni saktësisht çfarë dërgohet përpara çdo raporti.",
+      "save": "Ruaj preferencat e mia",
+      "learnMore": "Mësoni më shumë"
+    },
+    "crashReportReviewTitle": "Shfaq çdo raport para dërgimit",
+    "crashReportReviewDescription": "Ju tregon përmbajtjen e saktë të një raporti rrëzimi dhe kërkon konfirmim para dërgimit. Çaktivizojeni për t'i dërguar raportet automatikisht, pa pyetur çdo herë.",
+    "reportDialog": {
+      "title": "Të dërgohet ky raport rrëzimi?",
+      "intro": "Restorm hasi një problem. Ja saktësisht çfarë do të dërgohej.",
+      "includedError": "Gabimi teknik dhe vendi në kod ku ndodhi",
+      "includedVersion": "Versioni i aplikacionit dhe sistemi juaj operativ",
+      "includedActivity": "Çfarë po bënte aplikacioni pak para dështimit",
+      "removed": "URL-të, token-ët, trupat e kërkesave dhe përgjigjeve dhe të dhënat personale janë hequr tashmë.",
+      "viewFull": "Shiko raportin e plotë",
+      "waive": "Dërgo automatikisht raportet e ardhshme, pa m'i shfaqur",
+      "send": "Dërgo",
+      "discard": "Mos e dërgo"
+    }
+  },
+  "crashRecovery": {
+    "message": "Restorm hasi një problem dhe duhet të riniset.",
+    "relaunch": "Rinis Restorm",
+    "notice": {
+      "title": "Skedari nuk u rihap",
+      "body": "{{file}} nuk u rihap: Restorm u rrëzua duke e hapur në nisjen e mëparshme. Skedari juaj është i paprekur — mund ta rihapni nga skedarët e fundit.",
+      "bodyUnnamed": "Skedari i fundit nuk u rihap: Restorm u rrëzua duke e hapur në nisjen e mëparshme. Skedari juaj është i paprekur — mund ta rihapni nga skedarët e fundit."
     }
   }
 }

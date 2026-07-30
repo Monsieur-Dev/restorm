@@ -1008,10 +1008,22 @@
     "requestFormat.powershell": "PowerShell (Invoke-RestMethod)"
   },
   "import": {
-    "title": "Importer des requêtes",
-    "source": {
-      "label": "Collez quelque chose ici !",
-      "placeholder": "Saisir le chemin du fichier, l'URL, ou coller une commande curl/PowerShell..."
+    "addAuth": "Ajouter une route d'authentification",
+    "applyFailedTitle": "Échec de l'actualisation depuis la source",
+    "applyUpdate": "Appliquer la mise à jour",
+    "authenticatedVia": "Authentifié via {{name}}",
+    "cancel": "Annuler",
+    "customHeadersAdd": "Ajouter un header",
+    "customHeadersBtn": "Ajouter des headers personnalisés",
+    "customHeadersBtnTitle": "Joindre des headers ponctuels à la récupération de la spécification (enregistrés sur le dossier importé pour les réimports)",
+    "customHeadersDone": "Terminé",
+    "customHeadersHint": "Les headers sont enregistrés sur le dossier importé afin qu'une future actualisation depuis la source les rejoue. Pour les flux de connexion avec rotation de jeton, utilisez plutôt la route d'authentification ci-dessus.",
+    "customHeadersTitle": "Headers personnalisés",
+    "detachAuth": "Détacher la route d'authentification",
+    "dropZone": "Drop zone",
+    "editAuth": "Modifier la route d'authentification",
+    "error": {
+      "unknown": "Une erreur inconnue s'est produite"
     },
     "formats": {
       "swagger": {
@@ -1137,15 +1149,24 @@
     },
     "loading": "Analyse en cours...",
     "noResults": "Aucune requête trouvée",
-    "error": {
-      "unknown": "Une erreur inconnue s'est produite"
-    },
     "ok": "Importer",
-    "cancel": "Annuler",
-    "dropZone": "Drop zone",
-    "addAuth": "Ajouter une route d'authentification",
-    "detachAuth": "Détacher la route d'authentification",
-    "editAuth": "Modifier la route d'authentification"
+    "okN": "{{action}} ({{count}})",
+    "preview": {
+      "noDocumentation": "Aucune documentation analysée pour cette source."
+    },
+    "refreshTitle": "Actualiser depuis la source",
+    "searchPlaceholder": "Filtrer les routes / dossiers…",
+    "selectAll": "Tout sélectionner",
+    "selectNone": "Tout désélectionner",
+    "source": {
+      "label": "Collez quelque chose ici !",
+      "placeholder": "Saisir le chemin du fichier, l'URL, ou coller une commande curl/PowerShell..."
+    },
+    "tabs": {
+      "routes": "Routes",
+      "documentation": "Documentation"
+    },
+    "title": "Importer des requêtes"
   },
   "emptyBench": {
     "importCard": {
@@ -2493,6 +2514,7 @@
     "recoverFailedTitle": "Échec de la récupération"
   },
   "updates": {
+    "seeReleaseNotes": "Voir les notes de mise à jour",
     "settingsTitle": "Mises à jour",
     "autoCheckTitle": "Vérifier les mises à jour automatiquement",
     "autoCheckDescription": "Vérifie les mises à jour en arrière-plan au démarrage et périodiquement.",
@@ -2501,19 +2523,63 @@
     "currentVersion": "Version {{version}}",
     "checkNow": "Vérifier maintenant",
     "readyTitle": "Mise à jour prête",
-    "readyBody": "La version {{version}} sera installée au prochain redémarrage.",
+    "readyBody": "La version {{version}} est prête à être installée.",
     "restartNow": "Redémarrer maintenant",
     "checkFailedTitle": "Échec de la vérification des mises à jour",
     "checkFailedBody": "Impossible de vérifier les mises à jour. Veuillez réessayer plus tard.",
     "upToDateTitle": "Vous êtes à jour",
     "upToDateBody": "Vous utilisez la dernière version ({{version}}).",
-    "whatsNewTitle": "Nouveautés de la version {{version}}",
+    "whatsNewTitle": "Quoi de neuf ?",
     "status": {
       "idle": "À jour",
       "checking": "Vérification…",
       "downloading": "Téléchargement… {{percent}} %",
       "downloaded": "Mise à jour prête à installer ({{version}})",
       "error": "Échec de la vérification"
+    }
+  },
+  "privacy": {
+    "settingsTitle": "Confidentialité",
+    "crashReportsTitle": "Envoyer les rapports de plantage",
+    "crashReportsDescription": "Envoie un rapport anonymisé lorsque Restorm plante, afin que la panne puisse être corrigée. Les rapports sont expurgés des URL, jetons, corps de requête et données personnelles avant de quitter votre machine. Inclus dans l'offre gratuite ; une offre payante permet de le désactiver. Détails complets : https://restorm.app/privacy",
+    "telemetryTitle": "Envoyer les statistiques d'utilisation",
+    "telemetryDescription": "Envoie des statistiques anonymes sur les fonctionnalités utilisées, pour orienter les développements à venir. Désactivé par défaut et jamais activé sans votre consentement explicite. Ne contient aucune donnée de requête, aucune URL et aucune donnée personnelle. Détails complets : https://restorm.app/privacy",
+    "outbound": {
+      "purpose": {
+        "crash": "Rapports de plantage (uniquement avec votre consentement)",
+        "telemetry": "Statistiques d'utilisation anonymes (uniquement avec votre consentement)",
+        "backend": "Compte, licence et abonnement"
+      }
+    },
+    "crashReportsLockedLabel": "Modifiable à partir de l'offre Pro. Sur l'offre gratuite, les rapports de plantage sont nécessaires au maintien de la qualité.",
+    "consentToast": {
+      "title": "Aidez-nous à améliorer Restorm",
+      "body": "En cas d'erreur inattendue, Restorm peut nous envoyer un rapport anonyme pour nous aider à corriger le problème. Il contient la trace technique de l'erreur et le contexte de diagnostic (version de l'application, dernières actions). Les URL, jetons, corps de requête et de réponse et données personnelles en sont retirés avant qu'il ne quitte votre machine. Vous verrez exactement ce qui est envoyé avant chaque rapport.",
+      "save": "Enregistrer mes préférences",
+      "learnMore": "En savoir plus"
+    },
+    "crashReportReviewTitle": "Afficher chaque rapport de plantage avant l'envoi",
+    "crashReportReviewDescription": "Vous montre le contenu exact d'un rapport de plantage et demande votre accord avant de l'envoyer. Désactivez cette option pour envoyer les rapports automatiquement, sans confirmation.",
+    "reportDialog": {
+      "title": "Envoyer ce rapport de plantage ?",
+      "intro": "Restorm a rencontré un problème. Voici exactement ce qui serait envoyé.",
+      "includedError": "L'erreur technique et l'endroit du code où elle s'est produite",
+      "includedVersion": "La version de l'application et votre système d'exploitation",
+      "includedActivity": "Ce que l'application faisait juste avant la panne",
+      "removed": "Les URL, jetons, corps de requête et de réponse et données personnelles en ont déjà été retirés.",
+      "viewFull": "Voir le rapport complet",
+      "waive": "Envoyer automatiquement les prochains rapports, sans me les montrer",
+      "send": "Envoyer",
+      "discard": "Ne pas envoyer"
+    }
+  },
+  "crashRecovery": {
+    "message": "Restorm a rencontré un problème et doit être relancé.",
+    "relaunch": "Relancer Restorm",
+    "notice": {
+      "title": "Fichier non rouvert",
+      "body": "{{file}} n'a pas été rouvert : Restorm a planté en l'ouvrant lors du lancement précédent. Votre fichier est intact — vous pouvez le rouvrir depuis les fichiers récents.",
+      "bodyUnnamed": "Le dernier fichier n'a pas été rouvert : Restorm a planté en l'ouvrant lors du lancement précédent. Votre fichier est intact — vous pouvez le rouvrir depuis les fichiers récents."
     }
   }
 }

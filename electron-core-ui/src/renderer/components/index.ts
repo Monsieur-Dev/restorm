@@ -61,6 +61,21 @@ export type { VariableInputBoxProps, VariableDefinition } from './VariableInputB
 // CodeEditor exports
 export { CodeEditor, bootstrapMonaco } from './CodeEditor'
 export type { CodeEditorProps, CodeEditorRef } from './CodeEditor'
+export {
+  findHandlebarsSpans,
+  maskHandlebarsForJson,
+  isJsonValidIgnoringHandlebars,
+  filterHandlebarsMarkers
+} from './CodeEditor'
+export type {
+  HandlebarsSpan,
+  HandlebarsSpanOptions,
+  HandlebarsMaskVariant,
+  HandlebarsToleranceOptions,
+  MarkerRangeLike
+} from './CodeEditor'
+export { findHandlebarsHighlightRanges, HANDLEBARS_INLINE_CLASS } from './CodeEditor'
+export type { HandlebarsHighlightRange } from './CodeEditor'
 
 // MiniBrowser exports
 export { MiniBrowserPanel } from './MiniBrowser'
@@ -280,6 +295,8 @@ export { Modal } from './Modal'
 export type { ModalProps } from './Modal'
 export { PushModal } from './PushModal'
 export type { PushModalProps, PushModalLanguageOption } from './PushModal'
+export { ReleaseNotesModal } from './ReleaseNotesModal'
+export type { ReleaseNotesModalProps, ReleaseNoteSection } from './ReleaseNotesModal'
 export { ConflictResolutionView, fieldDiffStyle, ReadOnlyOverlay } from './ConflictResolutionView'
 export { GitHistoryView, computeLaneLayout } from './GitHistoryView'
 export type { GitHistoryViewProps, GitHistoryCommit, LaneRow } from './GitHistoryView'

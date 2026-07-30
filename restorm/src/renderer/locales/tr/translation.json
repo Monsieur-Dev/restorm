@@ -1008,10 +1008,22 @@
     "requestFormat.powershell": "PowerShell (Invoke-RestMethod)"
   },
   "import": {
-    "title": "İstekleri içe aktar",
-    "source": {
-      "label": "Buraya bir şey yapıştırın!",
-      "placeholder": "Dosya yolu, URL girin veya curl/PowerShell komutu yapıştırın..."
+    "addAuth": "Kimlik doğrulama rotası ekle",
+    "applyFailedTitle": "Kaynaktan yenileme başarısız",
+    "applyUpdate": "Güncellemeyi uygula",
+    "authenticatedVia": "{{name}} ile kimlik doğrulandı",
+    "cancel": "İptal",
+    "customHeadersAdd": "Başlık ekle",
+    "customHeadersBtn": "Özel başlıklar ekle",
+    "customHeadersBtnTitle": "Spesifikasyon indirmesine tek seferlik başlıklar ekleyin (yeniden içe aktarmalar için içe aktarılan klasöre kaydedilir)",
+    "customHeadersDone": "Bitti",
+    "customHeadersHint": "Başlıklar içe aktarılan klasöre kaydedilir, böylece ileride kaynaktan yenileme bunları yeniden gönderir. Token döndürmeli oturum açma akışları için bunun yerine yukarıdaki kimlik doğrulama rotasını kullanın.",
+    "customHeadersTitle": "Özel başlıklar",
+    "detachAuth": "Kimlik doğrulama rotasını ayır",
+    "dropZone": "Bırakma alanı",
+    "editAuth": "Kimlik doğrulama rotasını düzenle",
+    "error": {
+      "unknown": "Bilinmeyen bir hata oluştu"
     },
     "formats": {
       "swagger": {
@@ -1137,15 +1149,24 @@
     },
     "loading": "Analiz ediliyor...",
     "noResults": "İstek bulunamadı",
-    "error": {
-      "unknown": "Bilinmeyen bir hata oluştu"
-    },
     "ok": "İçe aktar",
-    "cancel": "İptal",
-    "dropZone": "Bırakma alanı",
-    "addAuth": "Kimlik doğrulama rotası ekle",
-    "detachAuth": "Kimlik doğrulama rotasını ayır",
-    "editAuth": "Kimlik doğrulama rotasını düzenle"
+    "okN": "{{action}} ({{count}})",
+    "preview": {
+      "noDocumentation": "Bu kaynak için ayrıştırılmış belge yok."
+    },
+    "refreshTitle": "Kaynaktan yenile",
+    "searchPlaceholder": "Rotaları / klasörleri filtrele…",
+    "selectAll": "Tümünü seç",
+    "selectNone": "Hiçbirini seçme",
+    "source": {
+      "label": "Buraya bir şey yapıştırın!",
+      "placeholder": "Dosya yolu, URL girin veya curl/PowerShell komutu yapıştırın..."
+    },
+    "tabs": {
+      "routes": "Rotalar",
+      "documentation": "Belgeler"
+    },
+    "title": "İstekleri içe aktar"
   },
   "emptyBench": {
     "importCard": {
@@ -2493,6 +2514,7 @@
     "recoverFailedTitle": "Geri yükleme başarısız"
   },
   "updates": {
+    "seeReleaseNotes": "Sürüm notlarını görüntüle",
     "settingsTitle": "Güncellemeler",
     "autoCheckTitle": "Güncellemeleri otomatik denetle",
     "autoCheckDescription": "Başlangıçta ve düzenli olarak arka planda güncellemeleri denetler.",
@@ -2501,19 +2523,63 @@
     "currentVersion": "Sürüm {{version}}",
     "checkNow": "Şimdi denetle",
     "readyTitle": "Güncelleme hazır",
-    "readyBody": "{{version}} sürümü bir sonraki yeniden başlatmada yüklenecek.",
+    "readyBody": "{{version}} sürümü yüklenmeye hazır.",
     "restartNow": "Şimdi yeniden başlat",
     "checkFailedTitle": "Güncelleme denetimi başarısız",
     "checkFailedBody": "Güncellemeler denetlenemedi. Lütfen daha sonra tekrar deneyin.",
     "upToDateTitle": "Günceldesiniz",
     "upToDateBody": "En son sürümü kullanıyorsunuz ({{version}}).",
-    "whatsNewTitle": "{{version}} sürümündeki yenilikler",
+    "whatsNewTitle": "Neler yeni?",
     "status": {
       "idle": "Güncel",
       "checking": "Denetleniyor…",
       "downloading": "İndiriliyor… %{{percent}}",
       "downloaded": "Güncelleme yüklemeye hazır ({{version}})",
       "error": "Denetim başarısız"
+    }
+  },
+  "privacy": {
+    "settingsTitle": "Gizlilik",
+    "crashReportsTitle": "Çökme raporları gönder",
+    "crashReportsDescription": "Restorm çöktüğünde arızanın giderilebilmesi için anonimleştirilmiş bir rapor gönderir. Raporlar makinenizden ayrılmadan önce URL'lerden, belirteçlerden, istek gövdelerinden ve kişisel verilerden arındırılır. Ücretsiz plana dahildir; ücretli bir plan bunu kapatmanıza izin verir. Tüm ayrıntılar: https://restorm.app/privacy",
+    "telemetryTitle": "Kullanım istatistikleri gönder",
+    "telemetryDescription": "Hangi özelliklerin kullanıldığına dair anonim istatistikler gönderir, böylece sıradaki geliştirmeler yönlendirilir. Varsayılan olarak kapalıdır ve açık onayınız olmadan asla etkinleştirilmez. İstek verisi, URL veya kişisel veri içermez. Tüm ayrıntılar: https://restorm.app/privacy",
+    "outbound": {
+      "purpose": {
+        "crash": "Çökme raporları (yalnızca onayınızla)",
+        "telemetry": "Anonim kullanım istatistikleri (yalnızca onayınızla)",
+        "backend": "Hesap, lisans ve abonelik"
+      }
+    },
+    "crashReportsLockedLabel": "Pro planından itibaren değiştirilebilir. Ücretsiz planda, kaliteyi korumak için çökme raporları gereklidir.",
+    "consentToast": {
+      "title": "Restorm'u geliştirmemize yardımcı olun",
+      "body": "Beklenmeyen bir hata olduğunda Restorm, sorunu düzeltmemize yardımcı olmak için bize anonim bir rapor gönderebilir. Rapor, teknik hata izini ve tanılama bağlamını (uygulama sürümü, son etkinlikler) içerir. URL'ler, belirteçler, istek ve yanıt gövdeleri ve kişisel veriler, rapor cihazınızdan ayrılmadan önce kaldırılır. Her rapordan önce tam olarak ne gönderildiğini göreceksiniz.",
+      "save": "Tercihlerimi kaydet",
+      "learnMore": "Daha fazla bilgi"
+    },
+    "crashReportReviewTitle": "Göndermeden önce her çökme raporunu göster",
+    "crashReportReviewDescription": "Bir çökme raporunun tam içeriğini gösterir ve göndermeden önce onay ister. Her seferinde sorulmadan raporların otomatik gönderilmesi için kapatın.",
+    "reportDialog": {
+      "title": "Bu çökme raporu gönderilsin mi?",
+      "intro": "Restorm bir sorunla karşılaştı. Gönderilecek olan tam olarak şudur.",
+      "includedError": "Teknik hata ve kodun hangi noktasında oluştuğu",
+      "includedVersion": "Uygulama sürümünüz ve işletim sisteminiz",
+      "includedActivity": "Hatadan hemen önce uygulamanın ne yaptığı",
+      "removed": "URL'ler, belirteçler, istek ve yanıt gövdeleri ve kişisel veriler zaten kaldırıldı.",
+      "viewFull": "Raporun tamamını görüntüle",
+      "waive": "Sonraki raporları bana göstermeden otomatik gönder",
+      "send": "Gönder",
+      "discard": "Gönderme"
+    }
+  },
+  "crashRecovery": {
+    "message": "Restorm bir sorunla karşılaştı ve yeniden başlatılması gerekiyor.",
+    "relaunch": "Restorm'u yeniden başlat",
+    "notice": {
+      "title": "Dosya yeniden açılmadı",
+      "body": "{{file}} yeniden açılmadı: Restorm önceki başlatmada bu dosyayı açarken çöktü. Dosyanız sağlam — son kullanılan dosyalardan yeniden açabilirsiniz.",
+      "bodyUnnamed": "Son dosya yeniden açılmadı: Restorm önceki başlatmada bu dosyayı açarken çöktü. Dosyanız sağlam — son kullanılan dosyalardan yeniden açabilirsiniz."
     }
   }
 }

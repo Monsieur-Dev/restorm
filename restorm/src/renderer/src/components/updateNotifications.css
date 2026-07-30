@@ -1,0 +1,43 @@
+/* Update toast bodies. Both stack their content vertically and end with the
+ * "see release notes" link that opens the release-notes modal — the gap keeps
+ * that link off the block above it (the restart CTA on the update-ready toast,
+ * the inline "What's new" note on the post-update one). Items stay stretched so
+ * the full-width rainbow CTA keeps its width. */
+
+.update-ready-toast,
+.whats-new-toast {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+/* The link button only LOOKS label-sized — it is left-aligned inside a box the
+ * column stretches to full width, so without this the entire toast-width row is
+ * a click target. Shrink the wrapper to the label so the hit area matches what
+ * the user sees. */
+.update-ready-toast > .button-container:last-child,
+.whats-new-toast > .button-container:last-child {
+	align-self: flex-start;
+}
+
+/* The toast already provides the outer padding. */
+.update-ready-toast > p {
+	margin: 0;
+}
+
+/* The note covers every version released since the user last ran the app, so it
+ * can be arbitrarily long, and the toaster CLIPS at its max-height (`.toast` is
+ * `overflow: hidden`, it does not scroll). Left uncapped, a long changelog — or
+ * one carrying a screenshot — pushes the "see release notes" link past the clip
+ * and the user can never reach it. So the note gets its own capped scroll
+ * container: every version stays readable in place, and the link below it stays
+ * reachable. `fitContent` on the scrollable keeps a short note at its natural
+ * height instead of padding it out to the cap.
+ *
+ * The height cap itself lives on the component's `style` prop rather than here —
+ * `fitContent` forwards `style.maxHeight` to the element that actually scrolls,
+ * and a cap applied from this stylesheet would only clip the outer wrapper,
+ * leaving nothing for the wheel to scroll. */
+.whats-new-toast__note {
+	min-width: 0;
+}

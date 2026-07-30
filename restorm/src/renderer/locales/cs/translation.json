@@ -1010,10 +1010,22 @@
     "requestFormat.powershell": "PowerShell (Invoke-RestMethod)"
   },
   "import": {
-    "title": "Importovat požadavky",
-    "source": {
-      "label": "Sem něco vložte!",
-      "placeholder": "Zadejte cestu k souboru, URL nebo vložte příkaz curl/PowerShell..."
+    "addAuth": "Přidat ověřovací trasu",
+    "applyFailedTitle": "Aktualizace ze zdroje selhala",
+    "applyUpdate": "Použít aktualizaci",
+    "authenticatedVia": "Ověřeno přes {{name}}",
+    "cancel": "Zrušit",
+    "customHeadersAdd": "Přidat hlavičku",
+    "customHeadersBtn": "Přidat vlastní hlavičky",
+    "customHeadersBtnTitle": "Připojit jednorázové hlavičky k načtení specifikace (uloží se do importované složky pro další importy)",
+    "customHeadersDone": "Hotovo",
+    "customHeadersHint": "Hlavičky se ukládají do importované složky, takže je budoucí aktualizace ze zdroje zopakuje. Pro přihlašovací postupy s rotací tokenů použijte raději připojení ověřovací trasy výše.",
+    "customHeadersTitle": "Vlastní hlavičky",
+    "detachAuth": "Odebrat ověřovací trasu",
+    "dropZone": "Zóna pro vložení",
+    "editAuth": "Upravit ověřovací trasu",
+    "error": {
+      "unknown": "Došlo k neznámé chybě"
     },
     "formats": {
       "swagger": {
@@ -1139,15 +1151,24 @@
     },
     "loading": "Probíhá analýza...",
     "noResults": "Nebyly nalezeny žádné požadavky",
-    "error": {
-      "unknown": "Došlo k neznámé chybě"
-    },
     "ok": "Importovat",
-    "cancel": "Zrušit",
-    "dropZone": "Zóna pro vložení",
-    "addAuth": "Přidat ověřovací trasu",
-    "detachAuth": "Odebrat ověřovací trasu",
-    "editAuth": "Upravit ověřovací trasu"
+    "okN": "{{action}} ({{count}})",
+    "preview": {
+      "noDocumentation": "Pro tento zdroj nebyla analyzována žádná dokumentace."
+    },
+    "refreshTitle": "Aktualizovat ze zdroje",
+    "searchPlaceholder": "Filtrovat trasy / složky…",
+    "selectAll": "Vybrat vše",
+    "selectNone": "Zrušit výběr",
+    "source": {
+      "label": "Sem něco vložte!",
+      "placeholder": "Zadejte cestu k souboru, URL nebo vložte příkaz curl/PowerShell..."
+    },
+    "tabs": {
+      "routes": "Trasy",
+      "documentation": "Dokumentace"
+    },
+    "title": "Importovat požadavky"
   },
   "emptyBench": {
     "importCard": {
@@ -2495,6 +2516,7 @@
     "recoverFailedTitle": "Obnovení se nezdařilo"
   },
   "updates": {
+    "seeReleaseNotes": "Zobrazit poznámky k vydání",
     "settingsTitle": "Aktualizace",
     "autoCheckTitle": "Automaticky kontrolovat aktualizace",
     "autoCheckDescription": "Kontroluje aktualizace na pozadí při spuštění a pravidelně.",
@@ -2503,19 +2525,63 @@
     "currentVersion": "Verze {{version}}",
     "checkNow": "Zkontrolovat nyní",
     "readyTitle": "Aktualizace připravena",
-    "readyBody": "Verze {{version}} se nainstaluje při příštím restartu.",
+    "readyBody": "Verze {{version}} je připravena k instalaci.",
     "restartNow": "Restartovat nyní",
     "checkFailedTitle": "Kontrola aktualizací selhala",
     "checkFailedBody": "Aktualizace se nepodařilo zkontrolovat. Zkuste to prosím později.",
     "upToDateTitle": "Máte aktuální verzi",
     "upToDateBody": "Používáte nejnovější verzi ({{version}}).",
-    "whatsNewTitle": "Novinky ve verzi {{version}}",
+    "whatsNewTitle": "Co je nového?",
     "status": {
       "idle": "Aktuální",
       "checking": "Kontrola…",
       "downloading": "Stahování… {{percent}} %",
       "downloaded": "Aktualizace připravena k instalaci ({{version}})",
       "error": "Kontrola selhala"
+    }
+  },
+  "privacy": {
+    "settingsTitle": "Soukromí",
+    "crashReportsTitle": "Odesílat hlášení o pádech",
+    "crashReportsDescription": "Odešle anonymizované hlášení, když Restorm spadne, aby bylo možné závadu opravit. Hlášení jsou před odesláním z vašeho počítače zbavena URL, tokenů, těl požadavků a osobních údajů. Součást bezplatného tarifu; placený tarif umožňuje odesílání vypnout. Úplné informace: https://restorm.app/privacy",
+    "telemetryTitle": "Odesílat statistiky používání",
+    "telemetryDescription": "Odesílá anonymní statistiky o tom, které funkce se používají, aby bylo možné nasměrovat další vývoj. Ve výchozím stavu vypnuto a nikdy zapnuto bez vašeho výslovného souhlasu. Neobsahuje data požadavků, URL ani osobní údaje. Úplné informace: https://restorm.app/privacy",
+    "outbound": {
+      "purpose": {
+        "crash": "Hlášení o pádech (pouze s vaším souhlasem)",
+        "telemetry": "Anonymní statistiky používání (pouze s vaším souhlasem)",
+        "backend": "Účet, licence a předplatné"
+      }
+    },
+    "crashReportsLockedLabel": "Lze změnit od tarifu Pro. V bezplatném tarifu jsou zprávy o pádech nutné pro udržení kvality.",
+    "consentToast": {
+      "title": "Pomozte nám vylepšit Restorm",
+      "body": "Pokud dojde k neočekávané chybě, Restorm nám může poslat anonymní hlášení, které nám pomůže problém opravit. Obsahuje technický výpis chyby a diagnostický kontext (verzi aplikace, nedávnou činnost). Adresy URL, tokeny, těla požadavků a odpovědí a osobní údaje jsou odstraněny dříve, než zpráva opustí vaše zařízení. Před každou zprávou uvidíte přesně, co se odesílá.",
+      "save": "Uložit mé předvolby",
+      "learnMore": "Zjistit více"
+    },
+    "crashReportReviewTitle": "Zobrazit každou zprávu o pádu před odesláním",
+    "crashReportReviewDescription": "Ukáže vám přesný obsah zprávy o pádu a před odesláním se zeptá. Vypnutím budou zprávy odesílány automaticky bez dotazu.",
+    "reportDialog": {
+      "title": "Odeslat tuto zprávu o pádu?",
+      "intro": "Restorm narazil na problém. Toto je přesně to, co by bylo odesláno.",
+      "includedError": "Technická chyba a místo v kódu, kde nastala",
+      "includedVersion": "Verze aplikace a váš operační systém",
+      "includedActivity": "Co aplikace dělala těsně před selháním",
+      "removed": "Adresy URL, tokeny, těla požadavků a odpovědí a osobní údaje již byly odstraněny.",
+      "viewFull": "Zobrazit celou zprávu",
+      "waive": "Odesílat další zprávy automaticky, bez zobrazování",
+      "send": "Odeslat",
+      "discard": "Neodesílat"
+    }
+  },
+  "crashRecovery": {
+    "message": "V aplikaci Restorm došlo k problému a je nutné ji restartovat.",
+    "relaunch": "Restartovat Restorm",
+    "notice": {
+      "title": "Soubor nebyl znovu otevřen",
+      "body": "Soubor {{file}} nebyl znovu otevřen: Restorm při jeho otevírání během předchozího spuštění spadl. Váš soubor je neporušený — můžete jej otevřít z nedávných souborů.",
+      "bodyUnnamed": "Poslední soubor nebyl znovu otevřen: Restorm při jeho otevírání během předchozího spuštění spadl. Váš soubor je neporušený — můžete jej otevřít z nedávných souborů."
     }
   }
 }

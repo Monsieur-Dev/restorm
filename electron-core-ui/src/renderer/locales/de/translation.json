@@ -1,4 +1,10 @@
 {
+  "releaseNotesModal": {
+    "title": "Neuigkeiten",
+    "showMore": "Mehr anzeigen",
+    "loading": "Versionshinweise werden geladen…",
+    "empty": "Keine Versionshinweise vorhanden."
+  },
   "common": {
     "opened": "Geöffnet",
     "refresh": "Aktualisieren",
@@ -29,7 +35,8 @@
     "removeFromFavorites": "Aus Favoriten entfernen",
     "confirmRemoveFavorite": "Möchten Sie „{{fileName}}“ wirklich aus den Favoriten entfernen?",
     "favoritesLandmarkLabel": "Favoritenliste",
-    "recentsLandmarkLabel": "Liste der zuletzt verwendeten Dateien"
+    "recentsLandmarkLabel": "Liste der zuletzt verwendeten Dateien",
+    "openContainingFolder": "Enthaltenden Ordner öffnen"
   },
   "welcomeScreen": {
     "landmarkLabel": "Willkommen"
@@ -390,7 +397,10 @@
     "listInstances": "MCP-Instanzen auflisten",
     "listThemes": "Verfügbare Themes auflisten",
     "getCurrentTheme": "Aktuelles Theme anzeigen",
-    "switchTheme": "Aktives Theme wechseln"
+    "getSettings": "Anwendungseinstellungen auflisten",
+    "setSetting": "Eine Einstellung ändern",
+    "patchSettings": "Mehrere Einstellungen auf einmal ändern",
+    "resetSetting": "Eine Einstellung zurücksetzen"
   },
   "customWco": {
     "minimize": "Minimieren",
@@ -401,7 +411,20 @@
   "firewall": {
     "addOrigin": "Origin hinzufügen",
     "removeOrigin": "{{origin}} entfernen",
-    "noEntries": "Noch keine Einträge."
+    "noEntries": "Noch keine Einträge.",
+    "outbound": {
+      "title": "Ausgehende Dienste",
+      "intro": "Ziele, die diese Anwendung von sich aus kontaktieren kann. Sie sind im Code deklariert und hier nicht bearbeitbar — jene, die Ihre Einwilligung erfordern, bleiben deaktiviert, bis Sie sie in den Einstellungen erteilen.",
+      "empty": "Diese Anwendung deklariert kein eigenes ausgehendes Ziel.",
+      "hostUnset": "nicht konfiguriert",
+      "stateConsented": "Erlaubt — Sie haben eingewilligt",
+      "stateNoConsent": "Blockiert — keine Einwilligung erteilt",
+      "stateRequired": "Erlaubt — für die Anwendung erforderlich",
+      "stateInactive": "Inaktiv — derzeit nicht in Verwendung",
+      "purpose": {
+        "avatar": "Profilbild des angemeldeten Kontos"
+      }
+    }
   },
   "bookmarkRibbon": {
     "addBookmark": "Lesezeichen hinzufügen"

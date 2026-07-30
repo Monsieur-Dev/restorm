@@ -29,7 +29,7 @@ Tools that focus the UI on a specific item — useful when the AI wants the user
 
 | Tool | Summary |
 |---|---|
-| `open_tab` | Open (or focus) the workbench tab for `{ itemId, kind }`. Same effect as the user double-clicking the sidebar row. |
+| `open_tab` | Open (or focus) the workbench tab for `{ itemId, kind }`. Same effect as the user double-clicking the sidebar row. Blocks until the workbench confirms it opened the tab (retrying internally for up to 5 s, so it is safe to call right after creating the item) and returns an explicit error if it never does — never a silent no-op. |
 | `reveal_in_tree` | Expand the sidebar tree to make `itemId` visible + flash a highlight. |
 | `close_tab` | Close the workbench tab for `itemId`. No-op if the tab isn't open. |
 
@@ -176,9 +176,14 @@ These ship with every `McpService` consumer (Restorm + the demo app). Documented
 | `list-instances` | List every MCP-accepting instance (open `fileName`, `projectPath`, `name`, `pid`, `endpoint`). See [Instances](#instances-multi-instance-lifecycle). |
 | `list_themes` | List all available color themes with their `id`, `name`, and `family` (`dark`/`light`/`hcDark`/`hcLight`). |
 | `get_current_theme` | Return the `id`, `name`, and `family` of the currently active color theme. |
-| `switch_theme` | Switch to a theme by `themeId`. Persists the choice and broadcasts it live to all windows. Returns an error for unknown ids. |
+| `get_settings` | List every application setting at a `scope` (`user`, the default, or `workspace`), each with its current value, its accepted values (type / enum members / numeric range) and a description of what it does. Optional `query` filter. |
+| `set_setting` | Set one setting by `key`, validated against its accepted values. Applies live — this is how the theme and the UI language are changed. |
+| `patch_settings` | Set several settings at once from a `values` object. All-or-nothing: one invalid value refuses the whole batch and lists every rejection. |
+| `reset_setting` | Drop a setting's value at a `scope` so it falls back to the layer beneath (workspace → user → default). |
 
 These are intentionally generic. Restorm's domain tools layer above them, but the AI can drop down to these for ad-hoc work that the domain tools don't cover.
+
+The settings routes are dynamic: they enumerate the same registry that builds the Settings page — electron-core-ui's own settings plus the ones Restorm registers in `resources/settings.yaml` — so a setting added there is readable and writable over MCP with no further work. Both scopes are covered: `user` is the global layer, `workspace` is the per-project overlay in `<project>/.restorm/settings.json` (available only while a project is open, and never for a `userOnly` setting such as the UI language). Full request / reply shapes are in the [electron-core-ui McpService doc](../../../electron-core-ui/docs/McpService/README.md#settings-routes).
 
 ## Error envelope
 

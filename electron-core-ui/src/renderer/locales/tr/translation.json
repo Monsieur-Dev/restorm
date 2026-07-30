@@ -1,4 +1,10 @@
 {
+  "releaseNotesModal": {
+    "title": "Yenilikler",
+    "showMore": "Daha fazla göster",
+    "loading": "Sürüm notları yükleniyor…",
+    "empty": "Gösterilecek sürüm notu yok."
+  },
   "common": {
     "opened": "Açıldı",
     "refresh": "Yenile",
@@ -29,7 +35,8 @@
     "removeFromFavorites": "Favorilerden çıkar",
     "confirmRemoveFavorite": "\"{{fileName}}\" dosyasını favorilerden çıkarmak istediğinize emin misiniz?",
     "favoritesLandmarkLabel": "Favoriler listesi",
-    "recentsLandmarkLabel": "Son kullanılan dosyalar listesi"
+    "recentsLandmarkLabel": "Son kullanılan dosyalar listesi",
+    "openContainingFolder": "İçeren klasörü aç"
   },
   "welcomeScreen": {
     "landmarkLabel": "Hoş geldiniz"
@@ -390,7 +397,10 @@
     "listInstances": "MCP örneklerini listele",
     "listThemes": "Mevcut temaları listele",
     "getCurrentTheme": "Geçerli temayı al",
-    "switchTheme": "Etkin temayı değiştir"
+    "getSettings": "Uygulama ayarlarını listele",
+    "setSetting": "Bir ayarı değiştir",
+    "patchSettings": "Birden fazla ayarı aynı anda değiştir",
+    "resetSetting": "Bir ayarı sıfırla"
   },
   "customWco": {
     "minimize": "Küçült",
@@ -401,7 +411,20 @@
   "firewall": {
     "addOrigin": "Kaynak ekle",
     "removeOrigin": "{{origin}} kaldır",
-    "noEntries": "Henüz girdi yok."
+    "noEntries": "Henüz girdi yok.",
+    "outbound": {
+      "title": "Giden servisler",
+      "intro": "Bu uygulamanın kendi inisiyatifiyle bağlanabileceği hedefler. Kodda tanımlıdır ve burada düzenlenemez — onayınızı gerektirenler, Tercihler'de onay verene kadar kapalı kalır.",
+      "empty": "Bu uygulama kendine ait bir giden hedef tanımlamıyor.",
+      "hostUnset": "yapılandırılmadı",
+      "stateConsented": "İzin verildi — onay verdiniz",
+      "stateNoConsent": "Engellendi — onay verilmedi",
+      "stateRequired": "İzin verildi — uygulama için gerekli",
+      "stateInactive": "Etkin değil — şu anda kullanılmıyor",
+      "purpose": {
+        "avatar": "Oturum açmış hesabın profil fotoğrafı"
+      }
+    }
   },
   "bookmarkRibbon": {
     "addBookmark": "Yer işareti ekle"

@@ -1008,10 +1008,22 @@
     "requestFormat.powershell": "PowerShell (Invoke-RestMethod)"
   },
   "import": {
-    "title": "Anfragen importieren",
-    "source": {
-      "label": "Fügen Sie hier etwas ein!",
-      "placeholder": "Dateipfad, URL oder curl/PowerShell-Befehl eingeben..."
+    "addAuth": "Authentifizierungsroute hinzufügen",
+    "applyFailedTitle": "Aktualisierung aus der Quelle fehlgeschlagen",
+    "applyUpdate": "Aktualisierung anwenden",
+    "authenticatedVia": "Authentifiziert über {{name}}",
+    "cancel": "Abbrechen",
+    "customHeadersAdd": "Header hinzufügen",
+    "customHeadersBtn": "Benutzerdefinierte Header hinzufügen",
+    "customHeadersBtnTitle": "Einmalige Header an den Spezifikations-Abruf anhängen (werden für erneute Importe im importierten Ordner gespeichert)",
+    "customHeadersDone": "Fertig",
+    "customHeadersHint": "Header werden im importierten Ordner gespeichert, damit eine spätere Aktualisierung aus der Quelle sie erneut sendet. Für Anmeldeabläufe mit Token-Rotation verwenden Sie stattdessen die Authentifizierungsroute oben.",
+    "customHeadersTitle": "Benutzerdefinierte Header",
+    "detachAuth": "Authentifizierungsroute trennen",
+    "dropZone": "Ablagezone",
+    "editAuth": "Authentifizierungsroute bearbeiten",
+    "error": {
+      "unknown": "Ein unbekannter Fehler ist aufgetreten"
     },
     "formats": {
       "swagger": {
@@ -1137,15 +1149,24 @@
     },
     "loading": "Analyse läuft...",
     "noResults": "Keine Anfragen gefunden",
-    "error": {
-      "unknown": "Ein unbekannter Fehler ist aufgetreten"
-    },
     "ok": "Importieren",
-    "cancel": "Abbrechen",
-    "dropZone": "Ablagezone",
-    "addAuth": "Authentifizierungsroute hinzufügen",
-    "detachAuth": "Authentifizierungsroute trennen",
-    "editAuth": "Authentifizierungsroute bearbeiten"
+    "okN": "{{action}} ({{count}})",
+    "preview": {
+      "noDocumentation": "Für diese Quelle wurde keine Dokumentation analysiert."
+    },
+    "refreshTitle": "Aus Quelle aktualisieren",
+    "searchPlaceholder": "Routen / Ordner filtern…",
+    "selectAll": "Alle auswählen",
+    "selectNone": "Nichts auswählen",
+    "source": {
+      "label": "Fügen Sie hier etwas ein!",
+      "placeholder": "Dateipfad, URL oder curl/PowerShell-Befehl eingeben..."
+    },
+    "tabs": {
+      "routes": "Routen",
+      "documentation": "Dokumentation"
+    },
+    "title": "Anfragen importieren"
   },
   "emptyBench": {
     "importCard": {
@@ -2493,6 +2514,7 @@
     "recoverFailedTitle": "Wiederherstellung fehlgeschlagen"
   },
   "updates": {
+    "seeReleaseNotes": "Versionshinweise anzeigen",
     "settingsTitle": "Updates",
     "autoCheckTitle": "Automatisch nach Updates suchen",
     "autoCheckDescription": "Sucht beim Start und regelmäßig im Hintergrund nach Updates.",
@@ -2501,19 +2523,63 @@
     "currentVersion": "Version {{version}}",
     "checkNow": "Jetzt suchen",
     "readyTitle": "Update bereit",
-    "readyBody": "Version {{version}} wird beim nächsten Neustart installiert.",
+    "readyBody": "Version {{version}} ist bereit zur Installation.",
     "restartNow": "Jetzt neu starten",
     "checkFailedTitle": "Update-Suche fehlgeschlagen",
     "checkFailedBody": "Nach Updates konnte nicht gesucht werden. Bitte später erneut versuchen.",
     "upToDateTitle": "Sie sind auf dem neuesten Stand",
     "upToDateBody": "Sie verwenden die neueste Version ({{version}}).",
-    "whatsNewTitle": "Neuheiten in {{version}}",
+    "whatsNewTitle": "Was ist neu?",
     "status": {
       "idle": "Aktuell",
       "checking": "Suche…",
       "downloading": "Wird heruntergeladen… {{percent}} %",
       "downloaded": "Update installationsbereit ({{version}})",
       "error": "Update-Suche fehlgeschlagen"
+    }
+  },
+  "privacy": {
+    "settingsTitle": "Datenschutz",
+    "crashReportsTitle": "Absturzberichte senden",
+    "crashReportsDescription": "Sendet einen anonymisierten Bericht, wenn Restorm abstürzt, damit der Fehler behoben werden kann. Berichte werden vor dem Verlassen Ihres Rechners von URLs, Tokens, Anfrage-Inhalten und personenbezogenen Daten bereinigt. Im kostenlosen Tarif enthalten; ein kostenpflichtiger Tarif erlaubt das Abschalten. Alle Einzelheiten: https://restorm.app/privacy",
+    "telemetryTitle": "Nutzungsstatistiken senden",
+    "telemetryDescription": "Sendet anonyme Statistiken darüber, welche Funktionen genutzt werden, um die Weiterentwicklung zu steuern. Standardmäßig aus und niemals ohne Ihre ausdrückliche Einwilligung aktiv. Enthält keine Anfragedaten, keine URLs und keine personenbezogenen Daten. Alle Einzelheiten: https://restorm.app/privacy",
+    "outbound": {
+      "purpose": {
+        "crash": "Absturzberichte (nur mit Ihrer Einwilligung)",
+        "telemetry": "Anonyme Nutzungsstatistiken (nur mit Ihrer Einwilligung)",
+        "backend": "Konto, Lizenz und Abonnement"
+      }
+    },
+    "crashReportsLockedLabel": "Ab dem Pro-Tarif änderbar. Im kostenlosen Tarif sind Absturzberichte nötig, um die Qualität zu sichern.",
+    "consentToast": {
+      "title": "Helfen Sie uns, Restorm zu verbessern",
+      "body": "Wenn ein unerwarteter Fehler auftritt, kann Restorm uns einen anonymen Bericht senden, damit wir das Problem beheben können. Er enthält die technische Fehlerspur und den Diagnosekontext (App-Version, letzte Aktivitäten). URLs, Token, Anfrage- und Antwortinhalte sowie personenbezogene Daten werden entfernt, bevor er Ihr Gerät verlässt. Sie sehen vor jedem Bericht genau, was gesendet wird.",
+      "save": "Meine Einstellungen speichern",
+      "learnMore": "Mehr erfahren"
+    },
+    "crashReportReviewTitle": "Jeden Absturzbericht vor dem Senden anzeigen",
+    "crashReportReviewDescription": "Zeigt Ihnen den genauen Inhalt eines Absturzberichts und fragt vor dem Senden nach. Deaktivieren Sie dies, um Berichte automatisch ohne Nachfrage zu senden.",
+    "reportDialog": {
+      "title": "Diesen Absturzbericht senden?",
+      "intro": "Restorm hat ein Problem festgestellt. Dies ist genau das, was gesendet würde.",
+      "includedError": "Der technische Fehler und die Stelle im Code, an der er auftrat",
+      "includedVersion": "Ihre App-Version und Ihr Betriebssystem",
+      "includedActivity": "Was die App unmittelbar vor dem Fehler getan hat",
+      "removed": "URLs, Token, Anfrage- und Antwortinhalte sowie personenbezogene Daten wurden bereits entfernt.",
+      "viewFull": "Vollständigen Bericht anzeigen",
+      "waive": "Künftige Berichte automatisch senden, ohne sie mir zu zeigen",
+      "send": "Senden",
+      "discard": "Nicht senden"
+    }
+  },
+  "crashRecovery": {
+    "message": "Restorm ist auf ein Problem gestoßen und muss neu gestartet werden.",
+    "relaunch": "Restorm neu starten",
+    "notice": {
+      "title": "Datei nicht erneut geöffnet",
+      "body": "{{file}} wurde nicht erneut geöffnet: Restorm ist beim letzten Start beim Öffnen abgestürzt. Ihre Datei ist unversehrt – Sie können sie über die zuletzt verwendeten Dateien erneut öffnen.",
+      "bodyUnnamed": "Die letzte Datei wurde nicht erneut geöffnet: Restorm ist beim letzten Start beim Öffnen abgestürzt. Ihre Datei ist unversehrt – Sie können sie über die zuletzt verwendeten Dateien erneut öffnen."
     }
   }
 }

@@ -1,7 +1,8 @@
 import { resolve } from 'path'
 import { defineConfig, externalizeDepsPlugin } from 'electron-vite'
 import react from '@vitejs/plugin-react'
-import { copyFileSync, mkdirSync, readdirSync, statSync } from 'fs'
+import { sentryVitePlugin } from '@sentry/vite-plugin'
+import { copyFileSync, mkdirSync, readdirSync, readFileSync, statSync } from 'fs'
 import { createInstrumenter } from 'istanbul-lib-instrument'
 
 // Plugin to copy templates to dist (recursively, preserving subdirectories)
@@ -61,9 +62,109 @@ function rendererCoverageInstrumentationPlugin() {
   }
 }
 
+/**
+ * Is a crash-report source-map upload configured for this build?
+ *
+ * The upload is what makes source maps worth generating. They are stripped from
+ * the shipped package unconditionally (a negated glob in package.json's
+ * `build.files`), so a map that is not uploaded is a file nobody can ever read:
+ * not in the package, not on the symbol server, pure build cost.
+ *
+ * Reads the same variables the Sentry tooling reads, so there is no separate
+ * switch to forget: set the release pipeline's credentials and maps start being
+ * produced and uploaded together.
+ */
+const sentryUploadConfigured =
+  (process.env.SENTRY_AUTH_TOKEN ?? '') !== '' &&
+  (process.env.SENTRY_ORG ?? '') !== '' &&
+  (process.env.SENTRY_PROJECT ?? '') !== ''
+
+/**
+ * Source-map emission, for every bundle.
+ *
+ * Deliberately NOT unconditional. Generating maps for the renderer costs more
+ * heap than an ordinary build has: the coverage script next door already has to
+ * raise Node to 8 GB to survive it, while CI builds run at 4 GB. Turning maps on
+ * for every build would therefore break the release and staging pipelines, and
+ * would do so to produce files those builds strip and never upload.
+ *
+ * So emission follows the upload: the release build that has credentials
+ * produces maps and ships them to the symbol server, and every other build stays
+ * exactly as cheap as it was. Nothing is lost by that — an unuploaded map is
+ * unreadable either way — and the coupling is the point, since maps and upload
+ * are only ever useful together.
+ *
+ * `'hidden'` writes the `.map` files but omits the `//# sourceMappingURL=`
+ * comment from the bundles, which is the right pairing for "upload, then strip":
+ * a comment pointing at a file that has been stripped would leave every bundle
+ * referencing a 404. Sentry matches maps by debug ID injected into both sides,
+ * not by that comment, so nothing is lost.
+ *
+ * Coverage keeps the plain `true` it always had: istanbul's remapping reads the
+ * sourceMappingURL comment, so `'hidden'` would quietly break coverage.
+ */
+const sourcemapMode =
+  process.env.VITE_COVERAGE === 'true' ? true : sentryUploadConfigured ? ('hidden' as const) : false
+
+/**
+ * The release name stacks are attributed to. Must match what the crash reporter
+ * sets at runtime (`restorm@<version>` in `services/crash/sentryComposition.ts`)
+ * — a mismatch uploads the maps under a name no event ever carries, which fails
+ * silently: reports still arrive, just permanently unsymbolicated.
+ *
+ * Read from package.json rather than `npm_package_version`, which is only
+ * populated when the build runs through a package script. A direct build would
+ * otherwise upload under `restorm@undefined` and symbolicate nothing.
+ */
+const appVersion = (JSON.parse(
+  readFileSync(resolve(__dirname, 'package.json'), 'utf8')
+) as { version: string }).version
+const releaseName = `restorm@${appVersion}`
+
+/**
+ * Source-map upload, per bundle. Returns an empty list when no credentials are
+ * configured, so an ordinary build simply has no upload step rather than a
+ * failing one.
+ *
+ * Deliberately NOT a hard failure when unconfigured. Crash reporting is inert
+ * without a Sentry org anyway, and a build that refuses to produce an installer
+ * because an optional diagnostic pipeline is unprovisioned has broken something
+ * far more important than it protected.
+ *
+ * The plugin is told to delete NOTHING after uploading. Letting it clean up
+ * would make the maps' removal a side effect of a step that only runs when
+ * credentials exist, so an unconfigured build would ship them. Stripping is
+ * instead unconditional, in package.json's `build.files`, and therefore holds
+ * however this function resolves.
+ */
+function sentrySourcemapUpload(bundle: string): ReturnType<typeof sentryVitePlugin>[] {
+  if (!sentryUploadConfigured) {
+    console.log(`[sentry] source-map upload skipped for ${bundle}: no upload credentials configured`)
+    return []
+  }
+  return [
+    sentryVitePlugin({
+      org: process.env.SENTRY_ORG,
+      project: process.env.SENTRY_PROJECT,
+      authToken: process.env.SENTRY_AUTH_TOKEN,
+      release: { name: releaseName },
+      // Debug IDs are injected into both the bundle and its map, so a stack
+      // frame is matched by identity rather than by guessing a URL. That is what
+      // lets the maps be stripped from the package: nothing at runtime needs to
+      // find them, Sentry resolves them server-side.
+      sourcemaps: { filesToDeleteAfterUpload: [] },
+      telemetry: false
+    })
+  ]
+}
+
 export default defineConfig({
   main: {
-    plugins: [externalizeDepsPlugin({ exclude: ['electron-core-ui'] }), copyTemplatesPlugin()],
+    plugins: [
+      externalizeDepsPlugin({ exclude: ['electron-core-ui'] }),
+      copyTemplatesPlugin(),
+      ...sentrySourcemapUpload('main')
+    ],
     resolve: {
       alias: {
         // In dev & build, use core-ui main sources directly.
@@ -77,7 +178,7 @@ export default defineConfig({
     },
     build: {
       outDir: 'dist/main',
-      sourcemap: process.env.VITE_COVERAGE === 'true',
+      sourcemap: sourcemapMode,
       rollupOptions: {
         input: {
           index: resolve(__dirname, 'src/main/index.ts')
@@ -92,7 +193,17 @@ export default defineConfig({
     // electron-vite emits a bare `require('zod/v4')` that fails to resolve at
     // preload load → the module throws before `contextBridge.exposeInMainWorld`
     // runs → `window.restorm` is undefined → the renderer never signals ready.
-    plugins: [externalizeDepsPlugin({ exclude: ['zod'] })],
+    //
+    // `@sentry/electron` is excluded for the same reason: the preload exposes
+    // the crash SDK's IPC conduit, and a bare `require` of it at preload load is
+    // the same single point of failure — one that would take the whole window
+    // down to serve a subsystem that is supposed to be invisible. The bundled
+    // module is a few dozen lines of `ipcRenderer.send` wrappers, so inlining it
+    // costs nothing and removes the resolution question entirely.
+    plugins: [
+      externalizeDepsPlugin({ exclude: ['zod', '@sentry/electron'] }),
+      ...sentrySourcemapUpload('preload')
+    ],
     build: {
       // Output next to main/renderer under dist/ (electron-vite's default is
       // out/preload). electron-builder only packages dist/**, and in prod the
@@ -100,7 +211,7 @@ export default defineConfig({
       // out/preload leaves it out of the package, so window.restorm is never
       // exposed and the (showWhenReady) window never appears. Keep it in dist/.
       outDir: 'dist/preload',
-      sourcemap: process.env.VITE_COVERAGE === 'true',
+      sourcemap: sourcemapMode,
       rollupOptions: {
         input: {
           index: resolve(__dirname, 'src/main/preload/index.ts')
@@ -112,7 +223,7 @@ export default defineConfig({
     root: resolve(__dirname, 'src/renderer'),
     build: {
       outDir: 'dist/renderer',
-      sourcemap: process.env.VITE_COVERAGE === 'true',
+      sourcemap: sourcemapMode,
       rollupOptions: {
         input: {
           index: resolve(__dirname, 'src/renderer/index.html'),
@@ -132,7 +243,7 @@ export default defineConfig({
         'electron-core-ui/renderer': resolve(__dirname, '../electron-core-ui/src/renderer/index.ts')
       }
     },
-    plugins: [react(), rendererCoverageInstrumentationPlugin()],
+    plugins: [react(), rendererCoverageInstrumentationPlugin(), ...sentrySourcemapUpload('renderer')],
     optimizeDeps: {
       // Ne pas optimiser electron-core-ui
       exclude: ['electron-core-ui']

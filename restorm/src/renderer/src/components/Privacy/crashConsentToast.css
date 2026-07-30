@@ -1,0 +1,25 @@
+/* Layout for the crash-reporting consent prompt's toast body. Spacing only —
+ * every control inside is a themed component, so nothing here sets colour. */
+
+.crash-consent-toast {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.crash-consent-toast-text {
+  margin: 0;
+  line-height: 1.45;
+}
+
+.crash-consent-toast-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+/* Pushes the save action to the trailing edge when the link wraps away. */
+.crash-consent-toast-actions .crash-consent-toast-learn-more {
+  margin-right: auto;
+}

@@ -1,4 +1,10 @@
 {
+  "releaseNotesModal": {
+    "title": "Újdonságok",
+    "showMore": "Több megjelenítése",
+    "loading": "Kiadási megjegyzések betöltése…",
+    "empty": "Nincsenek megjeleníthető kiadási megjegyzések."
+  },
   "common": {
     "opened": "Megnyitva",
     "refresh": "Frissítés",
@@ -29,7 +35,8 @@
     "removeFromFavorites": "Eltávolítás a kedvencekből",
     "confirmRemoveFavorite": "Biztosan eltávolítja a(z) \"{{fileName}}\" elemet a kedvencek közül?",
     "favoritesLandmarkLabel": "Kedvencek listája",
-    "recentsLandmarkLabel": "Legutóbbi fájlok listája"
+    "recentsLandmarkLabel": "Legutóbbi fájlok listája",
+    "openContainingFolder": "Tartalmazó mappa megnyitása"
   },
   "welcomeScreen": {
     "landmarkLabel": "Üdvözöljük"
@@ -390,7 +397,10 @@
     "listInstances": "MCP-példányok listázása",
     "listThemes": "Elérhető témák listázása",
     "getCurrentTheme": "Jelenlegi téma lekérése",
-    "switchTheme": "Aktív téma váltása"
+    "getSettings": "Alkalmazásbeállítások listázása",
+    "setSetting": "Beállítás módosítása",
+    "patchSettings": "Több beállítás módosítása egyszerre",
+    "resetSetting": "Beállítás visszaállítása"
   },
   "customWco": {
     "minimize": "Kis méret",
@@ -401,7 +411,20 @@
   "firewall": {
     "addOrigin": "Eredet hozzáadása",
     "removeOrigin": "{{origin}} eltávolítása",
-    "noEntries": "Még nincsenek bejegyzések."
+    "noEntries": "Még nincsenek bejegyzések.",
+    "outbound": {
+      "title": "Kimenő szolgáltatások",
+      "intro": "Célpontok, amelyekhez ez az alkalmazás saját kezdeményezésére kapcsolódhat. A kódban vannak deklarálva, és itt nem szerkeszthetők — amelyek az Ön hozzájárulását igénylik, kikapcsolva maradnak, amíg meg nem adja a Beállításokban.",
+      "empty": "Ez az alkalmazás nem deklarál saját kimenő célpontot.",
+      "hostUnset": "nincs beállítva",
+      "stateConsented": "Engedélyezve — hozzájárulást adott",
+      "stateNoConsent": "Letiltva — nincs hozzájárulás",
+      "stateRequired": "Engedélyezve — az alkalmazás működéséhez szükséges",
+      "stateInactive": "Inaktív — jelenleg nincs használatban",
+      "purpose": {
+        "avatar": "A bejelentkezett fiók profilképe"
+      }
+    }
   },
   "bookmarkRibbon": {
     "addBookmark": "Könyvjelző hozzáadása"

@@ -103,6 +103,8 @@ groups:
 | `featureDisabledDefault` | No | Value substituted when `feature` is disabled. Required when `feature` is set |
 | `userOnly` | No | When `true`, only the user layer may set this — a workspace overlay can never override it |
 | `capability` | No | Entitlement capability id (the host's Pro/plan system, distinct from `feature`) that gates this setting — see "Capability-gated settings" below |
+| `capabilityLockedValue` | No | Value to DISPLAY while `capability` reports the setting locked, instead of the stored one — see "Capability-gated settings" below |
+| `capabilityLockedLabelKey` | No | i18n key for the lock tooltip's text, replacing the generic "Pro version" upsell — see "Capability-gated settings" below |
 
 ### Groups / Settings Hierarchy
 
@@ -228,6 +230,55 @@ Omitting `capabilityGate` entirely (a host with no capability/entitlement concep
       values: [...]
 ```
 
+#### `capabilityLockedValue` — when the lock exists because a value is forced
+
+A locked control is greyed but still renders its STORED value. That is fine when
+the lock merely means "you can't change this", and a lie when the lock exists
+because the host is forcing a different value than the one on disk — a plan that
+mandates a setting the user had previously turned off, say. The user then reads a
+greyed OFF while the app behaves as ON.
+
+`capabilityLockedValue` gives the definition a value to display while locked:
+
+```yaml
+- setting:
+    id: "crashReports"
+    titleKey: "privacy.crashReportsTitle"
+    type: "toggle"
+    default: true
+    capability: "crash.optOut"
+    capabilityLockedValue: true   # what the runtime actually enforces while locked
+```
+
+It changes only what is RENDERED. The stored value is untouched, so the user's
+own choice survives and takes effect again the moment the lock lifts. The host
+must make its runtime honour the same override the lock implies — this field
+keeps the UI honest about it, it does not enforce it.
+
+#### `capabilityLockedLabelKey` — when the lock is not an upsell
+
+The lock tooltip says "Pro version" and offers a Subscribe link. That is right
+when the lock exists because a feature is sold separately, and wrong when it
+exists because the host imposes the value for a reason of its own — a setting a
+plan *mandates* rather than withholds. Telling someone to subscribe in order to
+keep sending crash reports they cannot turn off explains nothing.
+
+`capabilityLockedLabelKey` replaces that label with wording the host chooses:
+
+```yaml
+- setting:
+    id: "crashReports"
+    titleKey: "privacy.crashReportsTitle"
+    type: "toggle"
+    default: true
+    capability: "crash.optOut"
+    capabilityLockedValue: true
+    capabilityLockedLabelKey: "privacy.crashReportsLockedLabel"
+```
+
+The key is resolved with the app's `t()`, so it lives in the host's locale files
+like any other string. Left unset, the generic upsell label is used unchanged.
+
 ## SettingsService API (Main Process)
 
 ### Initialization
@@ -245,7 +296,8 @@ isSettingsServiceInitialized(): boolean
 | `get(storageKey)` | Get current value (persisted or default) |
 | `set(storageKey, value)` | Persist value, broadcast `settings:changed` to all windows |
 | `resetSetting(storageKey)` | Delete persisted value, broadcast default value |
-| `getAll()` | Flattened list of `ResolvedSetting` with current values |
+| `getAll()` | Flattened list of `ResolvedSetting` with current values, **including** feature-gated settings whose flag is off |
+| `getFiltered()` | Same, minus the feature-gated settings the UI hides — use this whenever a consumer must mirror what the settings page actually shows |
 | `getGroups()` | Raw group hierarchy |
 
 ### Runtime Mutations
@@ -467,6 +519,26 @@ The `SettingsProvider` applies side effects when certain settings change:
 | `appearance:language` | Calls `i18n.changeLanguage(value)` and `window.api.i18n.setLanguage(value)` |
 | `appearance:theme` | Calls `window.api.theme.set(value)` |
 | `files:autoSave` / `files:autoSaveDelay` | Drive the in-process `AutoSaveController` (see below) |
+
+Because these hang off the `settings:changed` broadcast — not off the settings
+page's click handler — they fire for **any** writer that goes through
+`SettingsService.set()` / `setWorkspaceValue()`, at either scope. That is what
+lets the MCP settings routes (below) change the theme or the UI language without
+a line of per-setting code. It also means the side effect needs a live renderer:
+with no window open the value is persisted but only takes effect on the next
+launch.
+
+## MCP settings routes
+
+`McpService` exposes the whole registry to external tooling through four generic
+routes — `get_settings`, `set_setting`, `patch_settings`, `reset_setting` —
+covering both scopes. They flatten `getFiltered()` and derive each setting's
+accepted values from its declared `type` + `params`, so a setting added to any
+YAML config (this library's defaults or the app's own) becomes readable and
+writable with no code change. The derivation, validation and per-scope write
+helpers live in `main/services/settingsCatalog.ts`; the route definitions live in
+`McpService`. See the [McpService doc](../McpService/README.md#settings-routes)
+for the wire shapes.
 
 ## Subscribing from the main process
 

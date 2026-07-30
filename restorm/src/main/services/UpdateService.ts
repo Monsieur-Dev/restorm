@@ -6,9 +6,9 @@
  * engine wired via an env flag, for e2e) without a real release feed.
  *
  * State machine: idle → checking → (idle | available) → downloading → downloaded,
- * plus a terminal-ish `error`. Downloads are automatic (`autoDownload`) and the
- * install is applied on the next app quit (`autoInstallOnAppQuit`); the renderer
- * offers a "Restart now" shortcut. Checks fire at launch, every 4 h, and on a
+ * plus a terminal-ish `error`. Downloads are automatic (`autoDownload`) but the
+ * install is NEVER applied on quit (`autoInstallOnAppQuit` stays off): the
+ * renderer's "Restart now" button is the only way in. Checks fire at launch, every 4 h, and on a
  * manual button — all sharing this one machine. Auto-check errors are silent;
  * manual-check errors surface. Download errors retry 3× with exponential backoff
  * then go quiet until the next check.
@@ -31,10 +31,13 @@ import {
   getStorageService,
   withFirewallBypass
 } from 'electron-core-ui/main'
-import { parseChangelogSince } from './changelog'
+import { parseChangelogSince, parseReleaseSections } from './changelog'
 import { createMockUpdaterEngine } from './mockUpdaterEngine'
 import {
+  LOCALE_TAG_PATTERN,
+  RELEASE_FEED_BASE,
   UPDATE_IPC,
+  type ReleaseNoteSection,
   type UpdateSettings,
   type UpdateState,
   type UpdateTrigger
@@ -45,6 +48,10 @@ import {
  * toggle and this service read/write the SAME value. */
 const AUTO_CHECK_SETTING_KEY = 'updates:autoCheckEnabled'
 const LAST_SEEN_VERSION_KEY = 'updates:lastSeenVersion'
+
+/** Abort the remote changelog fetch if the feed is slow/unreachable, so the
+ * modal falls back to the bundled changelog quickly rather than hanging. */
+const REMOTE_CHANGELOG_TIMEOUT_MS = 4_000
 
 /** Background re-check cadence. */
 const CHECK_INTERVAL_MS = 4 * 60 * 60 * 1000 // 4 h
@@ -59,7 +66,7 @@ export interface UpdaterEngine {
   autoInstallOnAppQuit: boolean
   checkForUpdates(): Promise<unknown>
   downloadUpdate(): Promise<unknown>
-  quitAndInstall(): void
+  quitAndInstall(isSilent?: boolean, isForceRunAfter?: boolean): void
   on(event: string, listener: (...args: unknown[]) => void): void
 }
 
@@ -130,7 +137,6 @@ export class UpdateService {
     try {
       const engine = this.#getEngine()
       engine.autoDownload = true
-      engine.autoInstallOnAppQuit = true
       this.#attachListeners(engine)
     } catch (err) {
       logger.warn('UpdateService: engine init failed', {
@@ -213,7 +219,14 @@ export class UpdateService {
 
   quitAndInstall(): void {
     try {
-      this.#getEngine().quitAndInstall()
+      // The button this comes from says "restart now", so the app has to come
+      // BACK. With `isSilent: false` electron-updater resolves the force-run
+      // flag from its own `autoRunAppAfterInstall` (default `true`) and
+      // discards the one passed here — so the relaunch already holds. The
+      // explicit `isForceRunAfter` is belt-and-braces: it is the operative
+      // argument only on the silent path (the install-on-quit route, which we
+      // never take).
+      this.#getEngine().quitAndInstall(false, true)
     } catch (err) {
       logger.warn('UpdateService: quitAndInstall failed', {
         message: err instanceof Error ? err.message : String(err)
@@ -239,6 +252,19 @@ export class UpdateService {
     return parseChangelogSince(md, fromVersion, app.getVersion())
   }
 
+  /**
+   * All release-note sections (newest first) for the release-notes modal. Fetches
+   * the localized changelog from the release feed so an OLD running build sees
+   * notes for versions it doesn't bundle; falls back to the bundled changelog
+   * when the feed is unreachable, and to English when the locale is missing.
+   * Returns `[]` when no changelog can be resolved.
+   */
+  async getReleaseNotes(locale?: string): Promise<ReleaseNoteSection[]> {
+    const md = (await this.#fetchRemoteChangelog(locale)) ?? this.#readChangelog(locale)
+    if (!md) return []
+    return parseReleaseSections(md)
+  }
+
   /** The last version we showed "What's new" for (or seeded at install). */
   getLastSeenVersion(): string | null {
     return this.#readLastSeenVersion()
@@ -259,7 +285,27 @@ export class UpdateService {
   // ---- internals ----------------------------------------------------------
 
   #getEngine(): UpdaterEngine {
-    if (!this.#engine) this.#engine = this.#engineFactory()
+    if (!this.#engine) {
+      this.#engine = this.#engineFactory()
+      // An update NEVER installs itself on quit. electron-updater's quit-time
+      // installer runs from the `quit` handler — after every window is already
+      // gone — and on some platforms it is a BLOCKING child process behind a
+      // graphical privilege prompt. A prompt with no window to belong to, on a
+      // main thread that can no longer process anything, is how the app ends up
+      // as a process the user can neither see nor stop. An update is applied
+      // only when the user asks for it, with the app still on screen.
+      //
+      // macOS caveat for whoever enables signing/notarization: there this flag
+      // ALSO gates whether Squirrel ever stages the payload (`MacUpdater` only
+      // calls the native `checkForUpdates()` when it is on), so with it off the
+      // staging happens at button-press time and the user waits through it.
+      //
+      // Set HERE, not at the call site: an engine acquired outside `initialize`
+      // (a manual check on a build where init bailed out early) would otherwise
+      // carry electron-updater's default and register that handler behind our
+      // back.
+      this.#engine.autoInstallOnAppQuit = false
+    }
     return this.#engine
   }
 
@@ -378,25 +424,84 @@ export class UpdateService {
     getStorageService().set(LAST_SEEN_VERSION_KEY, version)
   }
 
+  /** Locale-ordered remote changelog URLs on the feed: the exact locale, then the
+   * base language, then the English `CHANGELOG.md` — same fallback order as the
+   * bundled reader. English (in any region form) goes straight to
+   * `CHANGELOG.md`: the feed ships no `changelogs/en*.md`, so trying one would
+   * only buy a guaranteed 404 against the timeout budget. A locale that is not a
+   * plausible language tag is ignored rather than interpolated into the URL. */
+  #remoteChangelogUrls(locale?: string): string[] {
+    const urls: string[] = []
+    const norm = (locale ?? '').trim()
+    const base = norm.split('-')[0] ?? ''
+    if (LOCALE_TAG_PATTERN.test(norm) && base.toLowerCase() !== 'en') {
+      const names = base && base !== norm ? [norm, base] : [norm]
+      for (const name of names) urls.push(`${RELEASE_FEED_BASE}/changelogs/${name}.md`)
+    }
+    urls.push(`${RELEASE_FEED_BASE}/CHANGELOG.md`)
+    return urls
+  }
+
+  /** Fetch the first available remote changelog for `locale`, within the firewall
+   * bypass (the feed request is a background system operation the user's firewall
+   * would otherwise prompt on). Returns null when the feed is unreachable or
+   * empty, so the caller falls back to the bundled changelog.
+   *
+   * The timeout is ONE budget shared by every candidate URL, not one per URL: a
+   * black-holed feed would otherwise stall the modal for the sum of them, and
+   * the caller is a user-facing click. */
+  async #fetchRemoteChangelog(locale?: string): Promise<string | null> {
+    const urls = this.#remoteChangelogUrls(locale)
+    return withFirewallBypass(async () => {
+      const controller = new AbortController()
+      const timer = setTimeout(() => { controller.abort() }, REMOTE_CHANGELOG_TIMEOUT_MS)
+      try {
+        for (const url of urls) {
+          try {
+            const res = await fetch(url, { signal: controller.signal })
+            if (res.ok) {
+              const text = await res.text()
+              if (text.trim().length > 0) return text
+            }
+          } catch {
+            // Unreachable / aborted / non-OK — try the next candidate. Once the
+            // shared deadline has fired the signal stays aborted, so the
+            // remaining candidates fail immediately rather than hanging again.
+          }
+        }
+        return null
+      } finally {
+        clearTimeout(timer)
+      }
+    })
+  }
+
   #readChangelog(locale?: string): string | null {
     // Localized "What's new": prefer changelogs/<locale>.md (exact, then the base
     // language), and fall back to the English CHANGELOG.md. English (or an unknown
     // locale) reads CHANGELOG.md directly — no changelogs/en.md duplication.
+    // Packaged resources live under `process.resourcesPath/restorm-resources`;
+    // skip it when undefined (non-Electron contexts like unit tests) so the join
+    // never throws — dev/tests fall through to app path + cwd.
+    const resRoot =
+      typeof process.resourcesPath === 'string'
+        ? join(process.resourcesPath, 'restorm-resources')
+        : null
     const localeCandidates: string[] = []
     const norm = (locale ?? '').trim()
     if (norm && norm.toLowerCase() !== 'en') {
       const base = norm.split('-')[0]
       const names = base && base !== norm ? [norm, base] : [norm]
       for (const name of names) {
+        if (resRoot) localeCandidates.push(join(resRoot, 'changelogs', `${name}.md`))
         localeCandidates.push(
-          join(process.resourcesPath, 'restorm-resources', 'changelogs', `${name}.md`),
           join(app.getAppPath(), 'changelogs', `${name}.md`),
           join(process.cwd(), 'changelogs', `${name}.md`)
         )
       }
     }
     const englishCandidates = [
-      join(process.resourcesPath, 'restorm-resources', 'CHANGELOG.md'),
+      ...(resRoot ? [join(resRoot, 'CHANGELOG.md')] : []),
       join(app.getAppPath(), 'CHANGELOG.md'),
       join(process.cwd(), 'CHANGELOG.md')
     ]

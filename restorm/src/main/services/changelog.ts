@@ -11,6 +11,11 @@
  * `## v…`-looking lines inside fenced code blocks must NOT be mistaken for
  * version boundaries.
  */
+import {
+  compareVersionTuples,
+  parseVersionTuple,
+  type VersionTuple
+} from '../../shared/update/releaseNotes'
 
 /** Match a release heading at line start: `## v1.2.3` (suffix after the patch
  * number is ignored). Capture the dotted core. */
@@ -19,24 +24,9 @@ const VERSION_HEADING = /^##\s+v(\d+)\.(\d+)\.(\d+)/
 interface Section {
   version: string
   /** major.minor.patch tuple for comparison. */
-  tuple: [number, number, number]
+  tuple: VersionTuple
   /** Full markdown of the section (heading + body), trailing-trimmed. */
   markdown: string
-}
-
-/** Compare two `[major,minor,patch]` tuples. */
-function cmp(a: [number, number, number], b: [number, number, number]): number {
-  for (let i = 0; i < 3; i++) {
-    if (a[i] !== b[i]) return a[i] < b[i] ? -1 : 1
-  }
-  return 0
-}
-
-/** Parse `X.Y.Z` (ignoring any prerelease/build suffix) → tuple, or null. */
-function toTuple(version: string): [number, number, number] | null {
-  const m = /^v?(\d+)\.(\d+)\.(\d+)/.exec(version.trim())
-  if (!m) return null
-  return [Number(m[1]), Number(m[2]), Number(m[3])]
 }
 
 /** Split changelog markdown into release sections, ignoring code fences. */
@@ -83,6 +73,19 @@ function splitSections(markdown: string): Section[] {
 }
 
 /**
+ * Split changelog markdown into `{ version, markdown }` sections, newest first
+ * (file order), ignoring `## v…` lines inside fenced code blocks. Feeds the
+ * release-notes modal, which renders every version rather than a `since` slice.
+ *
+ * The `tuple` each section carries internally is dropped: it exists only for
+ * ordering here, and this result crosses IPC to the renderer, which has no use
+ * for it.
+ */
+export function parseReleaseSections(markdown: string): { version: string; markdown: string }[] {
+  return splitSections(markdown).map((s) => ({ version: s.version, markdown: s.markdown }))
+}
+
+/**
  * Return the markdown of releases in `(fromVersion, currentVersion]`, newest
  * first, joined by blank lines. Empty string when there is nothing to show or
  * inputs are unparseable.
@@ -92,12 +95,12 @@ export function parseChangelogSince(
   fromVersion: string,
   currentVersion: string
 ): string {
-  const from = toTuple(fromVersion)
-  const current = toTuple(currentVersion)
+  const from = parseVersionTuple(fromVersion)
+  const current = parseVersionTuple(currentVersion)
   if (!from || !current) return ''
 
   const picked = splitSections(markdown).filter(
-    (s) => cmp(s.tuple, from) > 0 && cmp(s.tuple, current) <= 0
+    (s) => compareVersionTuples(s.tuple, from) > 0 && compareVersionTuples(s.tuple, current) <= 0
   )
   return picked.map((s) => s.markdown).join('\n\n').trim()
 }

@@ -32,10 +32,11 @@ async function importViaModal(source: string): Promise<void> {
   await expect(importModal).toBeVisible({ timeout: 5000 })
   const input = importModal.locator('[data-testid="source-input-input"]')
   await input.fill(source)
-  // The import source field always resolves its value as a file path / URL
-  // (ImportManager.importFrom reads it from disk) — there is no raw-content-
-  // paste flow. The heavier IDL grammar can also take longer than the JSON
-  // parsers this pattern was cloned from, hence the generous timeout.
+  // A `.smithy` path is resolved off disk (`ImportManager.importFrom` also
+  // accepts a URL or raw pasted content, but Smithy is detected by
+  // extension, so it needs the real path). The heavier IDL grammar can
+  // take longer than the JSON parsers this pattern was cloned from, hence
+  // the generous timeout.
   await expect(importModal.locator('.import-preview-section')).toBeVisible({ timeout: 30000 })
   const importButton = importModal.locator('[role="button"]:has-text("Import")[aria-disabled="false"]')
   await expect(importButton).toBeVisible({ timeout: 15000 })

@@ -15,7 +15,8 @@ import type {
 } from 'electron-core-ui/types'
 import type { ResponseHistoryDetail, ResponseHistoryEntry } from '../../../shared/types/collections'
 import type { AuthState, CheckoutResult, PortalResult } from '../../../shared/auth/authState'
-import type { UpdateState, UpdateSettings } from '../../../shared/update/updateTypes'
+import type { UpdateState, UpdateSettings, ReleaseNoteSection } from '../../../shared/update/updateTypes'
+import type { CrashArmedState, CrashConsentState, CrashRecoveryNotice, CrashReviewRequest } from '../../../shared/crash/crashTypes'
 
 declare global {
   interface Window {
@@ -107,9 +108,25 @@ declare global {
         quitAndInstall: () => Promise<void>
         setAutoCheckEnabled: (enabled: boolean) => Promise<UpdateSettings>
         getChangelogSince: (fromVersion: string, locale?: string) => Promise<string>
+        getReleaseNotes: (locale?: string) => Promise<ReleaseNoteSection[]>
         getLastSeenVersion: () => Promise<string | null>
         markVersionSeen: (version: string) => Promise<void>
         onStateChanged: (callback: (state: UpdateState) => void) => (() => void)
+      }
+      /** Crash reporting, read-only (see `src/main/services/crash/`). The
+       * renderer follows the main process's armed state; it cannot change it. */
+      crash: {
+        getArmedState: () => Promise<CrashArmedState>
+        onArmedStateChanged: (callback: (state: CrashArmedState) => void) => (() => void)
+        getConsentState: () => Promise<CrashConsentState>
+        onConsentStateChanged: (callback: (state: CrashConsentState) => void) => (() => void)
+        setConsent: (granted: boolean) => Promise<CrashConsentState>
+        onReviewRequested: (callback: (request: CrashReviewRequest) => void) => (() => void)
+        resolveReview: (id: string, send: boolean) => void
+        /** Restart, reopening the last file. Never settles — do not await. */
+        recoverRelaunch: () => Promise<void>
+        getRecoveryNotice: () => Promise<CrashRecoveryNotice>
+        onRecoveryNotice: (callback: (notice: CrashRecoveryNotice) => void) => (() => void)
       }
       /** electron-core-ui's Git plumbing — see `electron-core-ui/docs/Git/README.md`.
        * Mirrors `WindowApiGit` in electron-core-ui's own `global.d.ts`; restorm
@@ -503,7 +520,8 @@ declare global {
           tab: { tabId: string | null; itemId: string | null; kind: 'request' | 'folder' | 'env-folder' | 'scenario' | null }
           envByFolder: Record<string, string | null>
         }) => void
-        onMcpOpenTab: (callback: (payload: { itemId: string; kind: 'request' | 'folder' | 'env-folder' | 'scenario' }) => void) => () => void
+        onMcpOpenTab: (callback: (payload: { requestId?: string; itemId: string; kind: 'request' | 'folder' | 'env-folder' | 'scenario' }) => void) => () => void
+        replyMcpOpenTab: (payload: { requestId: string; opened: boolean }) => void
         onMcpRevealInTree: (callback: (payload: { itemId: string; kind: 'request' | 'folder' | 'env-folder' | 'scenario' }) => void) => () => void
         onMcpTreeReplace: (callback: (payload: unknown) => void) => () => void
         onMcpCloseTab: (callback: (payload: { itemId: string; kind: 'request' | 'folder' | 'env-folder' | 'scenario' }) => void) => () => void

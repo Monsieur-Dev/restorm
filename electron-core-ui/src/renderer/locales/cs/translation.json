@@ -1,4 +1,10 @@
 {
+  "releaseNotesModal": {
+    "title": "Novinky",
+    "showMore": "Zobrazit více",
+    "loading": "Načítání poznámek k vydání…",
+    "empty": "Žádné poznámky k vydání k zobrazení."
+  },
   "common": {
     "opened": "Otevřeno",
     "refresh": "Obnovit",
@@ -29,7 +35,8 @@
     "removeFromFavorites": "Odebrat z oblíbených",
     "confirmRemoveFavorite": "Opravdu chcete odebrat „{{fileName}}“ z oblíbených?",
     "favoritesLandmarkLabel": "Seznam oblíbených",
-    "recentsLandmarkLabel": "Seznam naposledy otevřených souborů"
+    "recentsLandmarkLabel": "Seznam naposledy otevřených souborů",
+    "openContainingFolder": "Otevřít obsahující složku"
   },
   "welcomeScreen": {
     "landmarkLabel": "Úvodní obrazovka"
@@ -390,7 +397,10 @@
     "listInstances": "Vypsat instance MCP",
     "listThemes": "Vypsat dostupná témata",
     "getCurrentTheme": "Zobrazit aktuální téma",
-    "switchTheme": "Přepnout aktivní téma"
+    "getSettings": "Zobrazit nastavení aplikace",
+    "setSetting": "Změnit nastavení",
+    "patchSettings": "Změnit několik nastavení najednou",
+    "resetSetting": "Obnovit nastavení"
   },
   "customWco": {
     "minimize": "Minimalizovat",
@@ -401,7 +411,20 @@
   "firewall": {
     "addOrigin": "Přidat origin",
     "removeOrigin": "Odebrat {{origin}}",
-    "noEntries": "Zatím žádné záznamy."
+    "noEntries": "Zatím žádné záznamy.",
+    "outbound": {
+      "title": "Odchozí služby",
+      "intro": "Cíle, které může tato aplikace kontaktovat z vlastní iniciativy. Jsou deklarovány v kódu a nelze je zde upravovat — ty, které vyžadují váš souhlas, zůstávají vypnuté, dokud jej neudělíte v Předvolbách.",
+      "empty": "Tato aplikace nedeklaruje žádný vlastní odchozí cíl.",
+      "hostUnset": "nenakonfigurováno",
+      "stateConsented": "Povoleno — udělili jste souhlas",
+      "stateNoConsent": "Blokováno — souhlas nebyl udělen",
+      "stateRequired": "Povoleno — nezbytné pro aplikaci",
+      "stateInactive": "Neaktivní — momentálně se nepoužívá",
+      "purpose": {
+        "avatar": "Profilový obrázek přihlášeného účtu"
+      }
+    }
   },
   "bookmarkRibbon": {
     "addBookmark": "Přidat záložku"

@@ -1,4 +1,10 @@
 {
+  "releaseNotesModal": {
+    "title": "Новости",
+    "showMore": "Прикажи више",
+    "loading": "Учитавање напомена о издању…",
+    "empty": "Нема белешки о издању за приказ."
+  },
   "common": {
     "opened": "Otvoreno",
     "refresh": "Osveži",
@@ -29,7 +35,8 @@
     "removeFromFavorites": "Ukloni iz omiljenog",
     "confirmRemoveFavorite": "Da li ste sigurni da želite da uklonite \"{{fileName}}\" iz omiljenog?",
     "favoritesLandmarkLabel": "Lista omiljenog",
-    "recentsLandmarkLabel": "Lista nedavnih datoteka"
+    "recentsLandmarkLabel": "Lista nedavnih datoteka",
+    "openContainingFolder": "Otvori fasciklu koja sadrži datoteku"
   },
   "welcomeScreen": {
     "landmarkLabel": "Dobrodošli"
@@ -390,7 +397,10 @@
     "listInstances": "Листа MCP инстанци",
     "listThemes": "Листа доступних тема",
     "getCurrentTheme": "Добави тренутну тему",
-    "switchTheme": "Промени активну тему"
+    "getSettings": "Прикажи подешавања апликације",
+    "setSetting": "Промени подешавање",
+    "patchSettings": "Промени више подешавања одједном",
+    "resetSetting": "Врати подешавање на подразумевано"
   },
   "customWco": {
     "minimize": "Минимизирај",
@@ -401,7 +411,20 @@
   "firewall": {
     "addOrigin": "Додај origin",
     "removeOrigin": "Уклони {{origin}}",
-    "noEntries": "Нема уноса."
+    "noEntries": "Нема уноса.",
+    "outbound": {
+      "title": "Одлазни сервиси",
+      "intro": "Одредишта која ова апликација може да контактира на сопствену иницијативу. Декларисана су у коду и не могу се уређивати овде — она која захтевају вашу сагласност остају искључена док је не дате у Подешавањима.",
+      "empty": "Ова апликација не декларише ниједно сопствено одлазно одредиште.",
+      "hostUnset": "није подешено",
+      "stateConsented": "Дозвољено — дали сте сагласност",
+      "stateNoConsent": "Блокирано — сагласност није дата",
+      "stateRequired": "Дозвољено — неопходно за апликацију",
+      "stateInactive": "Неактивно — тренутно се не користи",
+      "purpose": {
+        "avatar": "Слика профила пријављеног налога"
+      }
+    }
   },
   "bookmarkRibbon": {
     "addBookmark": "Додај обележивач"

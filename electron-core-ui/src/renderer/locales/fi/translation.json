@@ -1,4 +1,10 @@
 {
+  "releaseNotesModal": {
+    "title": "Uutta",
+    "showMore": "Näytä lisää",
+    "loading": "Ladataan julkaisutietoja…",
+    "empty": "Ei näytettäviä julkaisutietoja."
+  },
   "common": {
     "opened": "Avatut",
     "refresh": "Päivitä",
@@ -29,7 +35,8 @@
     "removeFromFavorites": "Poista suosikeista",
     "confirmRemoveFavorite": "Haluatko varmasti poistaa kohteen \"{{fileName}}\" suosikeista?",
     "favoritesLandmarkLabel": "Suosikkilista",
-    "recentsLandmarkLabel": "Viimeisimpien tiedostojen lista"
+    "recentsLandmarkLabel": "Viimeisimpien tiedostojen lista",
+    "openContainingFolder": "Avaa sisältävä kansio"
   },
   "welcomeScreen": {
     "landmarkLabel": "Tervetuloa"
@@ -390,7 +397,10 @@
     "listInstances": "Listaa MCP-instanssit",
     "listThemes": "Luettele käytettävissä olevat teemat",
     "getCurrentTheme": "Hae nykyinen teema",
-    "switchTheme": "Vaihda aktiivinen teema"
+    "getSettings": "Näytä sovelluksen asetukset",
+    "setSetting": "Muuta asetusta",
+    "patchSettings": "Muuta useita asetuksia kerralla",
+    "resetSetting": "Palauta asetus"
   },
   "customWco": {
     "minimize": "Pienennä",
@@ -401,7 +411,20 @@
   "firewall": {
     "addOrigin": "Lisää alkuperä",
     "removeOrigin": "Poista {{origin}}",
-    "noEntries": "Ei merkintöjä vielä."
+    "noEntries": "Ei merkintöjä vielä.",
+    "outbound": {
+      "title": "Lähtevät palvelut",
+      "intro": "Kohteet, joihin tämä sovellus voi ottaa yhteyttä omasta aloitteestaan. Ne on määritelty koodissa eikä niitä voi muokata täällä — suostumustasi vaativat kohteet pysyvät poissa käytöstä, kunnes annat suostumuksen Asetuksissa.",
+      "empty": "Tämä sovellus ei määrittele omia lähteviä kohteita.",
+      "hostUnset": "ei määritetty",
+      "stateConsented": "Sallittu — annoit suostumuksen",
+      "stateNoConsent": "Estetty — suostumusta ei annettu",
+      "stateRequired": "Sallittu — sovelluksen toiminnan edellytys",
+      "stateInactive": "Ei aktiivinen — ei tällä hetkellä käytössä",
+      "purpose": {
+        "avatar": "Kirjautuneen tilin profiilikuva"
+      }
+    }
   },
   "bookmarkRibbon": {
     "addBookmark": "Lisää kirjanmerkki"

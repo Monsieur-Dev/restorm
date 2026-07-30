@@ -1,4 +1,10 @@
 {
+  "releaseNotesModal": {
+    "title": "Novità",
+    "showMore": "Mostra altro",
+    "loading": "Caricamento delle note di rilascio…",
+    "empty": "Nessuna nota di rilascio da mostrare."
+  },
   "common": {
     "opened": "Aperti",
     "refresh": "Aggiorna",
@@ -29,7 +35,8 @@
     "removeFromFavorites": "Rimuovi dai preferiti",
     "confirmRemoveFavorite": "Vuoi davvero rimuovere \"{{fileName}}\" dai preferiti?",
     "favoritesLandmarkLabel": "Elenco dei preferiti",
-    "recentsLandmarkLabel": "Elenco dei file recenti"
+    "recentsLandmarkLabel": "Elenco dei file recenti",
+    "openContainingFolder": "Apri cartella contenitore"
   },
   "welcomeScreen": {
     "landmarkLabel": "Benvenuto"
@@ -390,7 +397,10 @@
     "listInstances": "Elenca istanze MCP",
     "listThemes": "Elenca i temi disponibili",
     "getCurrentTheme": "Ottieni il tema corrente",
-    "switchTheme": "Cambia il tema attivo"
+    "getSettings": "Elencare le impostazioni dell'applicazione",
+    "setSetting": "Modificare un'impostazione",
+    "patchSettings": "Modificare più impostazioni insieme",
+    "resetSetting": "Ripristinare un'impostazione"
   },
   "customWco": {
     "minimize": "Riduci a icona",
@@ -401,7 +411,20 @@
   "firewall": {
     "addOrigin": "Aggiungi origine",
     "removeOrigin": "Rimuovi {{origin}}",
-    "noEntries": "Nessuna voce ancora."
+    "noEntries": "Nessuna voce ancora.",
+    "outbound": {
+      "title": "Servizi in uscita",
+      "intro": "Destinazioni che questa applicazione può contattare di propria iniziativa. Sono dichiarate nel codice e non sono modificabili qui: quelle che richiedono il suo consenso restano disattivate finché non lo concede nelle Preferenze.",
+      "empty": "Questa applicazione non dichiara alcuna destinazione in uscita propria.",
+      "hostUnset": "non configurato",
+      "stateConsented": "Consentito — ha dato il consenso",
+      "stateNoConsent": "Bloccato — nessun consenso fornito",
+      "stateRequired": "Consentito — necessario all'applicazione",
+      "stateInactive": "Inattivo — non in uso al momento",
+      "purpose": {
+        "avatar": "Immagine del profilo dell'account connesso"
+      }
+    }
   },
   "bookmarkRibbon": {
     "addBookmark": "Aggiungi segnalibro"

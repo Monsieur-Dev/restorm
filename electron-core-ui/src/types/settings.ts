@@ -69,6 +69,33 @@ export interface SettingDefinition {
    * disabled" gating convention (`GatedControl`'s own contract).
    */
   capability?: string | undefined
+  /**
+   * Value to DISPLAY while `capability` reports the setting locked, overriding
+   * whatever is stored.
+   *
+   * A locked control is greyed but still shows its stored value, which is a lie
+   * whenever the lock exists precisely because the host is forcing a different
+   * value — e.g. a plan that mandates a setting the user had previously turned
+   * off. Left unset, the stored value shows through (the historical behaviour).
+   *
+   * This only changes what is RENDERED. The stored value is untouched, so the
+   * user's own choice survives and takes effect again the moment the lock lifts.
+   * The host must make its runtime honour the same override the lock implies —
+   * this field keeps the UI honest about it, it does not enforce it.
+   */
+  capabilityLockedValue?: SettingValue | undefined
+  /**
+   * i18n key for the text shown in the lock tooltip, replacing the generic
+   * "Pro version" label.
+   *
+   * The default wording is an upsell, which is right when the lock exists
+   * because a feature is sold separately. It is wrong when the lock exists
+   * because the host imposes the value for a reason of its own — a setting a
+   * plan mandates rather than withholds. Naming the reason is the difference
+   * between "you are missing something you could buy" and "here is why this is
+   * decided for you", and only the host knows which it is.
+   */
+  capabilityLockedLabelKey?: string | undefined
 }
 
 // ==========================================================================

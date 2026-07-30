@@ -1008,10 +1008,22 @@
     "requestFormat.powershell": "PowerShell (Invoke-RestMethod)"
   },
   "import": {
-    "title": "Importa richieste",
-    "source": {
-      "label": "Incolla qualcosa qui!",
-      "placeholder": "Inserisci il percorso del file, l'URL, o incolla un comando curl/PowerShell..."
+    "addAuth": "Aggiungi una route di autenticazione",
+    "applyFailedTitle": "Aggiornamento dalla sorgente non riuscito",
+    "applyUpdate": "Applica aggiornamento",
+    "authenticatedVia": "Autenticato tramite {{name}}",
+    "cancel": "Annulla",
+    "customHeadersAdd": "Aggiungi header",
+    "customHeadersBtn": "Aggiungi header personalizzati",
+    "customHeadersBtnTitle": "Allega header una tantum al recupero della specifica (salvati sulla cartella importata per le reimportazioni)",
+    "customHeadersDone": "Fatto",
+    "customHeadersHint": "Gli header vengono salvati sulla cartella importata, così un futuro aggiornamento dalla sorgente li ripete. Per i flussi di login con rotazione dei token, usa invece la route di autenticazione sopra.",
+    "customHeadersTitle": "Header personalizzati",
+    "detachAuth": "Scollega route di autenticazione",
+    "dropZone": "Area di rilascio",
+    "editAuth": "Modifica route di autenticazione",
+    "error": {
+      "unknown": "Si è verificato un errore sconosciuto"
     },
     "formats": {
       "swagger": {
@@ -1137,15 +1149,24 @@
     },
     "loading": "Analisi in corso...",
     "noResults": "Nessuna richiesta trovata",
-    "error": {
-      "unknown": "Si è verificato un errore sconosciuto"
-    },
     "ok": "Importa",
-    "cancel": "Annulla",
-    "dropZone": "Area di rilascio",
-    "addAuth": "Aggiungi una route di autenticazione",
-    "detachAuth": "Scollega route di autenticazione",
-    "editAuth": "Modifica route di autenticazione"
+    "okN": "{{action}} ({{count}})",
+    "preview": {
+      "noDocumentation": "Nessuna documentazione analizzata per questa sorgente."
+    },
+    "refreshTitle": "Aggiorna dalla sorgente",
+    "searchPlaceholder": "Filtra route / cartelle…",
+    "selectAll": "Seleziona tutto",
+    "selectNone": "Deseleziona tutto",
+    "source": {
+      "label": "Incolla qualcosa qui!",
+      "placeholder": "Inserisci il percorso del file, l'URL, o incolla un comando curl/PowerShell..."
+    },
+    "tabs": {
+      "routes": "Route",
+      "documentation": "Documentazione"
+    },
+    "title": "Importa richieste"
   },
   "emptyBench": {
     "importCard": {
@@ -2493,6 +2514,7 @@
     "recoverFailedTitle": "Ripristino non riuscito"
   },
   "updates": {
+    "seeReleaseNotes": "Vedi le note di rilascio",
     "settingsTitle": "Aggiornamenti",
     "autoCheckTitle": "Controlla automaticamente gli aggiornamenti",
     "autoCheckDescription": "Controlla gli aggiornamenti in background all'avvio e periodicamente.",
@@ -2501,19 +2523,63 @@
     "currentVersion": "Versione {{version}}",
     "checkNow": "Controlla ora",
     "readyTitle": "Aggiornamento pronto",
-    "readyBody": "La versione {{version}} verrà installata al prossimo riavvio.",
+    "readyBody": "La versione {{version}} è pronta per l'installazione.",
     "restartNow": "Riavvia ora",
     "checkFailedTitle": "Controllo aggiornamenti non riuscito",
     "checkFailedBody": "Impossibile controllare gli aggiornamenti. Riprova più tardi.",
     "upToDateTitle": "Sei aggiornato",
     "upToDateBody": "Stai usando l'ultima versione ({{version}}).",
-    "whatsNewTitle": "Novità della versione {{version}}",
+    "whatsNewTitle": "Cosa c'è di nuovo?",
     "status": {
       "idle": "Aggiornato",
       "checking": "Controllo…",
       "downloading": "Download… {{percent}} %",
       "downloaded": "Aggiornamento pronto per l'installazione ({{version}})",
       "error": "Controllo non riuscito"
+    }
+  },
+  "privacy": {
+    "settingsTitle": "Privacy",
+    "crashReportsTitle": "Inviare i rapporti di arresto anomalo",
+    "crashReportsDescription": "Invia un rapporto anonimizzato quando Restorm si arresta, così il problema può essere corretto. I rapporti vengono ripuliti da URL, token, corpi delle richieste e dati personali prima di lasciare il suo computer. Incluso nel piano gratuito; un piano a pagamento consente di disattivarlo. Tutti i dettagli: https://restorm.app/privacy",
+    "telemetryTitle": "Inviare le statistiche di utilizzo",
+    "telemetryDescription": "Invia statistiche anonime sulle funzionalità utilizzate, per orientare gli sviluppi futuri. Disattivato per impostazione predefinita e mai attivato senza il suo consenso esplicito. Non contiene dati delle richieste, né URL, né dati personali. Tutti i dettagli: https://restorm.app/privacy",
+    "outbound": {
+      "purpose": {
+        "crash": "Rapporti di arresto anomalo (solo con il suo consenso)",
+        "telemetry": "Statistiche di utilizzo anonime (solo con il suo consenso)",
+        "backend": "Account, licenza e abbonamento"
+      }
+    },
+    "crashReportsLockedLabel": "Modificabile a partire dal piano Pro. Nel piano gratuito i rapporti di arresto anomalo sono necessari per mantenere la qualità.",
+    "consentToast": {
+      "title": "Aiutaci a migliorare Restorm",
+      "body": "In caso di errore inatteso, Restorm può inviarci un rapporto anonimo per aiutarci a correggere il problema. Contiene la traccia tecnica dell'errore e il contesto diagnostico (versione dell'app, attività recenti). URL, token, corpi di richiesta e risposta e dati personali vengono rimossi prima che lasci il tuo computer. Vedrai esattamente cosa viene inviato prima di ogni rapporto.",
+      "save": "Salva le mie preferenze",
+      "learnMore": "Scopri di più"
+    },
+    "crashReportReviewTitle": "Mostra ogni rapporto prima dell'invio",
+    "crashReportReviewDescription": "Ti mostra il contenuto esatto di un rapporto di arresto anomalo e chiede conferma prima di inviarlo. Disattivalo per inviare i rapporti automaticamente, senza chiedere ogni volta.",
+    "reportDialog": {
+      "title": "Inviare questo rapporto di arresto anomalo?",
+      "intro": "Restorm ha riscontrato un problema. Ecco esattamente ciò che verrebbe inviato.",
+      "includedError": "L'errore tecnico e il punto del codice in cui si è verificato",
+      "includedVersion": "La versione dell'app e il tuo sistema operativo",
+      "includedActivity": "Cosa stava facendo l'app poco prima del problema",
+      "removed": "URL, token, corpi di richiesta e risposta e dati personali sono già stati rimossi.",
+      "viewFull": "Visualizza il rapporto completo",
+      "waive": "Invia automaticamente i prossimi rapporti, senza mostrarmeli",
+      "send": "Invia",
+      "discard": "Non inviare"
+    }
+  },
+  "crashRecovery": {
+    "message": "Restorm ha riscontrato un problema e deve essere riavviato.",
+    "relaunch": "Riavvia Restorm",
+    "notice": {
+      "title": "File non riaperto",
+      "body": "{{file}} non è stato riaperto: Restorm si è arrestato durante la sua apertura all'avvio precedente. Il file è intatto: può riaprirlo dai file recenti.",
+      "bodyUnnamed": "L'ultimo file non è stato riaperto: Restorm si è arrestato durante la sua apertura all'avvio precedente. Il file è intatto: può riaprirlo dai file recenti."
     }
   }
 }

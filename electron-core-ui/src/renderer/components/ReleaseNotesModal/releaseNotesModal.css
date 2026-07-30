@@ -1,0 +1,38 @@
+/* Release-notes modal: a scrollable stack of per-version markdown sections with
+ * a bottom "show more" that reveals older versions one at a time. The scrollable
+ * fills the modal body (full width + height) so long changelogs scroll inside
+ * the dialog rather than overflowing it. */
+
+.ecu-release-notes-scroll {
+	flex: 1;
+	min-height: 0;
+	width: 100%;
+}
+
+.ecu-release-notes-body {
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+	padding: 4px 12px 12px;
+	box-sizing: border-box;
+}
+
+/* Separate consecutive version sections with a hairline so the boundary between
+ * "the new version" and the ones before it reads clearly. */
+.ecu-release-notes-section + .ecu-release-notes-section {
+	border-top: 1px solid var(--panel-border);
+	padding-top: 16px;
+}
+
+.ecu-release-notes-more {
+	display: flex;
+	justify-content: center;
+	padding: 4px 0 8px;
+}
+
+/* Stand-in body shown while the sections load, and when there are none. */
+.ecu-release-notes-placeholder {
+	padding: 24px 12px;
+	text-align: center;
+	color: var(--descriptionForeground);
+}

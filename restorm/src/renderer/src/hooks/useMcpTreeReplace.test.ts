@@ -1,14 +1,17 @@
-// @vitest-environment node
-import { describe, it, expect, vi } from 'vitest'
+// @vitest-environment jsdom
+import { describe, it, expect, vi, afterEach } from 'vitest'
+import { renderHook, cleanup } from '@testing-library/react'
+import { useRef } from 'react'
 
-// Mock the reactive reifier so the test runs in a plain node env without
-// pulling the electron-core-ui renderer bridge. It records what it was
-// handed and echoes it back, so the test can assert reifyItem delegated
-// (and never took the old `'items' in r` folder shortcut for a scenario).
+// Mock the reactive reifier so the test runs without pulling the
+// electron-core-ui renderer bridge. It records what it was handed and
+// echoes it back, so the test can assert reifyItem delegated (and never
+// took the old `'items' in r` folder shortcut for a scenario).
 const makeReactiveFolderItem = vi.hoisted(() => vi.fn((item: unknown) => item))
 vi.mock('../types/reactive', () => ({ makeReactiveFolderItem }))
 
-import { reifyItem, readTreeReplacePayload } from './useMcpTreeReplace'
+import { reifyItem, readTreeReplacePayload, useMcpTreeReplace } from './useMcpTreeReplace'
+import type { FolderItem } from '../../../shared/types/collections'
 
 describe('readTreeReplacePayload', () => {
   it('reads the versioned `{ items, mcpVersion }` payload', () => {
@@ -50,5 +53,53 @@ describe('reifyItem', () => {
     expect(reifyItem(null)).toBeNull()
     expect(reifyItem('nope')).toBeNull()
     expect(reifyItem({ random: true })).toBeNull()
+  })
+})
+
+describe('useMcpTreeReplace — rootItemsRef synchronous write', () => {
+  type TreeReplaceCb = (payload: unknown) => void
+  let treeReplaceCb: TreeReplaceCb | null = null
+
+  afterEach(() => {
+    cleanup()
+    treeReplaceCb = null
+    ;(window as unknown as { restorm?: unknown }).restorm = undefined
+  })
+
+  function mountHook(): { rootItemsRef: { current: FolderItem[] }; setRootItems: ReturnType<typeof vi.fn> } {
+    const setRootItems = vi.fn()
+    const { result } = renderHook(() => {
+      const rootItemsRef = useRef<FolderItem[]>([])
+      useMcpTreeReplace({
+        setRootItems,
+        rootItemsRef,
+        mcpDrivenRef: useRef(false),
+        lastMcpVersionRef: useRef(0),
+        bumpAllTabContentVersions: vi.fn(),
+        pruneOrphanTabs: vi.fn()
+      })
+      return rootItemsRef
+    })
+    return { rootItemsRef: result.current, setRootItems }
+  }
+
+  it('writes the fresh tree into rootItemsRef.current synchronously, inside the same handler call that also invokes setRootItems', () => {
+    ;(window as unknown as { restorm: unknown }).restorm = {
+      runtime: {
+        onMcpTreeReplace: (cb: TreeReplaceCb) => { treeReplaceCb = cb; return () => { treeReplaceCb = null } }
+      }
+    }
+    const { rootItemsRef, setRootItems } = mountHook()
+    expect(treeReplaceCb).not.toBeNull()
+    expect(rootItemsRef.current).toEqual([])
+
+    treeReplaceCb?.({ items: [{ id: 'r1', name: 'r1', type: 'http' }], mcpVersion: 1 })
+
+    // `renderHook` never re-rendered (no `rerender()` call, no `act()` needed
+    // to flush a commit) — reading `.current` right after the handler
+    // returns is the whole point: a same-tick `mcp:open-tab` consumer would
+    // see exactly this.
+    expect(rootItemsRef.current).toEqual([{ id: 'r1', name: 'r1', type: 'http' }])
+    expect(setRootItems).toHaveBeenCalledWith([{ id: 'r1', name: 'r1', type: 'http' }])
   })
 })

@@ -68,7 +68,7 @@ installHardenInterceptor()
 import { app, BrowserWindow, ipcMain, shell } from 'electron'
 import { randomBytes } from 'node:crypto'
 import { MainWindow } from './windows/MainWindow'
-import { initializeApp, logger, initFileService, getFileService, isFileServiceInitialized, i18nService, initPersistenceService, isPersistenceServiceInitialized, FileService, getSettingsService, isSettingsServiceInitialized, getStorageService, initAutoSaveController, McpService, resolveMcpDiscoveryDir, writeMcpDiscoveryFile, cleanupMcpDiscoveryFile, firewallService, permissionService, registerFirewallIpc, installWorkerPatcher, getGitService, initGitSemiPullController } from 'electron-core-ui'
+import { initializeApp, logger, initFileService, getFileService, isFileServiceInitialized, i18nService, initPersistenceService, isPersistenceServiceInitialized, FileService, getSettingsService, isSettingsServiceInitialized, getStorageService, initAutoSaveController, McpService, resolveMcpDiscoveryDir, writeMcpDiscoveryFile, cleanupMcpDiscoveryFile, firewallService, permissionService, registerFirewallIpc, installWorkerPatcher, getGitService, initGitSemiPullController, getGitSemiPullController } from 'electron-core-ui'
 import { REOPEN_LAST_FILE_SETTING_KEY, REOPEN_LAST_FILE_STORAGE_KEY } from '../shared/config/reopenLastFile'
 import { resolveChannel, endpointUrl } from '../shared/config/backend'
 import { entitlementPublicKeyPem, isEntitlementPublicKeyConfigured } from './services/entitlement/keys'
@@ -88,6 +88,7 @@ import { existsSync, statSync } from 'fs'
 import { spawn } from 'node:child_process'
 import { searchIndexService, contextService, responseHistoryService, requestUsageService, scenarioUsageService, authenticationCacheService, updateService } from './services'
 import { registerUpdateIpc } from './ipc/updateHandlers'
+import { registerCrashIpc } from './ipc/crashHandlers'
 import { registerRestormMcp } from './mcp'
 import { isHeadlessHost as isHeadlessHostPure, isMcpEnabledForLaunch, shouldLaunchInactive } from './mcp/mcpEnablement'
 import { readAutoSaveOn, type InstanceLifecycleHost } from './mcp/tools/instances'
@@ -98,7 +99,10 @@ import { clearUserSettings, parseCliArgs } from './cli/args'
 import { checkHeadlessEntitlement } from './cli/headlessEntitlementFetch'
 import { setupGraphQL } from './GraphQLSetup'
 import { registerRestormIPC } from './IPCHandlers'
-import { initEntitlementService, stopEntitlementAutoRefresh, makeBackendFetch, resolveBackendVersion } from './services/auth/authComposition'
+import { initEntitlementService, getEntitlementService, stopEntitlementAutoRefresh, makeBackendFetch, resolveBackendVersion } from './services/auth/authComposition'
+import { initConsentService } from './services/privacy/consentComposition'
+import { initCrashReporting } from './services/crash/sentryComposition'
+import { getCrashRecovery, scheduleSurvivalMark, recordRecoveryNotice } from './services/crash/crashRecoveryComposition'
 import { createEntitlementEvaluator } from './services/entitlement/entitlementStrategy'
 import { installScenarioEngineIPC } from './scenarioEngine/ipcBridge'
 import { registerBuiltinSources } from './services/secrets/mainSourceRegistry'
@@ -109,6 +113,8 @@ import { amqpExecutionService } from './services/AMQPExecutionService'
 import { redisExecutionService } from './services/RedisExecutionService'
 import { grpcMockServerService } from './services/GRPCMockServerService'
 import { odataMockServerService } from './services/ODataMockServerService'
+import { stompExecutionService } from './services/StompExecutionService'
+import { kafkaExecutionService } from './services/KafkaExecutionService'
 import { registerApiUpdateIPC } from './services/apiUpdate/registerApiUpdateIPC'
 import { runApiUpdateApply } from './services/apiUpdate/orchestrateApply'
 import { loadFolderStructure, loadProjectIntoStore, attachDraftStoreForFolder, attachDraftStoreForFile, getDraftsRootDir } from './FileOperations'
@@ -315,8 +321,11 @@ function createWindow(): MainWindow | undefined {
           void getFileService().open(targetPath).then(async (result) => {
             if (result.success) {
               logger.info('File opened successfully on startup')
-              const format = (result as { format?: string }).format ?? 'yaml'
-              await attachDraftStoreForFile(targetPath, format as PersistenceFormat)
+              // A `.restorm` project file is YAML on disk, and `open()`
+              // reports no format of its own, so the draft store reads and
+              // writes YAML too. Give it a different serializer only once
+              // single-file projects can be something else.
+              await attachDraftStoreForFile(targetPath, 'yaml')
             } else {
               logger.error('Failed to open file on startup:', { path: targetPath })
             }
@@ -337,20 +346,33 @@ function createWindow(): MainWindow | undefined {
       }
 
       // Open on startup via dom-ready (fires reliably with the app:// protocol).
-      // Command-line path wins; otherwise honour the reopen-last-file setting.
+      // Command-line path wins; otherwise a file left by a crash relaunch, else
+      // the reopen-last-file setting — and NOTHING at all if the previous
+      // launch died with a file open (see `crashRecovery.ts`).
       mainWindow.webContents.on('dom-ready', () => {
         // Wait for the renderer React app to be fully initialized and hooks mounted.
         setTimeout(() => {
-          if (fileToOpenOnStart) {
-            logger.info('Opening from command line', { path: fileToOpenOnStart })
-            openPathOnStart(fileToOpenOnStart)
+          // The plan is asked for ONCE and it arms the crash-loop marker as it
+          // answers, so there is no order in which a file gets opened without
+          // the marker having been written first.
+          const plan = getCrashRecovery().planStartupOpen({
+            cliPath: fileToOpenOnStart ?? null,
+            reopenPath: resolveReopenLastFilePath()
+          })
+          if (plan.path === null) {
+            if (plan.loopFallback) {
+              logger.warn('Not reopening a file: the previous launch crashed with one open')
+              // The protection is invisible when it works — the app just starts
+              // empty, which looks exactly like losing the user's file. Say so.
+              recordRecoveryNotice({ fileWithheld: true, withheldPath: plan.withheldPath })
+            }
             return
           }
-          const reopenPath = resolveReopenLastFilePath()
-          if (reopenPath) {
-            logger.info('Reopening last opened file', { path: reopenPath })
-            openPathOnStart(reopenPath)
-          }
+          logger.info('Opening on startup', { path: plan.path, source: plan.source })
+          openPathOnStart(plan.path)
+          // Nothing clears the marker until the launch has lasted long enough
+          // to show that the file it opened is not what kills it.
+          scheduleSurvivalMark()
         }, DEFAULT_UI_DELAY_MS)
       })
     }
@@ -422,12 +444,17 @@ function getSettingsConfigPath(): string {
   return join(process.resourcesPath, 'restorm-resources/settings.yaml')
 }
 
-// Initialize I18n Service for main process translations
-// Default to system locale or 'en', will be synchronized with renderer via IPC
-const systemLocale = app.getLocale().split('-')[0] ?? 'en'
-const supportedLocales = ['en', 'fr']
-const defaultLocale = supportedLocales.includes(systemLocale) ? systemLocale : 'en'
-i18nService.initialize('', defaultLocale)
+// Initialize I18n Service for main process translations. The UI's default
+// language — including OS/system-locale detection — is resolved by the
+// renderer's i18n bootstrap (electron-core-ui's `initializeI18n`, which can
+// read the full shipped language list + `navigator.language`, unlike this
+// early main-process call) and synchronized back here over IPC moments
+// after boot. This only seeds the main-process translator (native dialogs)
+// for the brief window before that first sync, so a plain 'en' default is
+// fine; calling `app.getLocale()` here would also be unreliable, since
+// Electron only guarantees a correct result once `app.whenReady()` fires,
+// well after this module-level code runs.
+i18nService.initialize('')
 // Layer Restorm's renderer translations onto ECUI's built-ins so
 // settings-yaml `titleKey` / `descriptionKey` lookups (e.g.
 // `behavior.dateTimeFormat`, `behavior.syncSidebarWithTabs`) resolve
@@ -435,7 +462,7 @@ i18nService.initialize('', defaultLocale)
 // immediately after.
 i18nService.addTranslations('en', restormEnTranslation as Record<string, unknown>)
 i18nService.addTranslations('fr', restormFrTranslation as Record<string, unknown>)
-logger.info('I18n Service initialized', { locale: defaultLocale })
+logger.info('I18n Service initialized', { language: i18nService.getLanguage() })
 
 // Initialize File Service for .restorm files with YAML serialization.
 // `uuidKey` tells FileService which top-level field to preserve across
@@ -454,9 +481,22 @@ logger.info('File Service initialized')
 // opened in file mode. File mode and folder mode must behave identically
 // with respect to dirty-state tracking and draft recovery — the only
 // difference between them is the on-disk layout of the user's saved
-// content. Folder mode wires the draft store through the dedicated
-// `restorm:open-path` / command-line paths above; this listener covers
-// the regular `file:open` IPC which goes straight to FileService.
+// content.
+//
+// This listener is a SAFETY NET, not the complement of the explicit
+// callers: it fires for EVERY file-mode open, including the ones that
+// already call `attachDraftStoreForFile` themselves (`restorm:open-path`,
+// the command-line / reopen-last-file startup path). `FileService.open()`
+// publishes the new path synchronously, so this runs before the awaiting
+// caller's own call and the two overlap. That's fine, and deliberately
+// so: `attachDraftStore` de-duplicates per project, so however many
+// callers converge on one open, the drafts are read once and the
+// "unsaved work restored" toast fires once. Its value is covering the
+// paths that DON'T attach explicitly — the plain `file:open` IPC — without
+// each new call site having to remember to.
+//
+// Folder-mode opens never reach here (the path is a directory, filtered
+// out below); they attach through `attachDraftStoreForFolder` only.
 {
   let lastFilePath: string | null = null
   getFileService().onStateChanged((state) => {
@@ -588,6 +628,18 @@ app.on('before-quit', () => {
   grpcMockServerService.closeAll()
   // Same for any hosted OData mock service (its routes on the shared HTTP host).
   odataMockServerService.closeAll()
+  // Same for any live STOMP connection (no port to release, just DISCONNECT +
+  // close the socket, and drop its outgoing heart-beat interval) — was only
+  // wired on file-close, so it survived a quit that skipped that path (closing
+  // the window directly rather than closing the file first).
+  stompExecutionService.closeAll()
+  // Same for any live Kafka browse peek / long-lived consumer — same gap as
+  // STOMP above (file-close only, not app-quit).
+  void kafkaExecutionService.closeAll()
+  // Stop the git semi-pull CRON poll: clears its interval AND detaches its
+  // settings-change subscription (see `GitSemiPullController` in
+  // electron-core-ui), neither of which should outlive the process.
+  getGitSemiPullController()?.stop()
 })
 
 // Initialize Search Index Service (listens to document events from renderer)
@@ -709,7 +761,40 @@ void app.whenReady().then(() => {
 // `app.getPath('userData')` (the encrypted token cache) and `safeStorage` are
 // resolvable. Registers its own IPC and restores a cached session internally.
 void app.whenReady().then(() => {
+  // Consent first: it declares the phone-home endpoints and reconciles the
+  // firewall exemptions, so nothing optional can reach the network in the window
+  // before it exists (`canSend` answers `false` until then). The plan is read
+  // lazily — the entitlement service is built on the next line and restores its
+  // cached session asynchronously, so before that lands the plan is genuinely
+  // UNKNOWN, which suppresses the plan override rather than guessing at it.
+  //
+  // Wrapped: consent is not a prerequisite of signing in, so a failure here must
+  // not stop `initEntitlementService` on the next line from running.
+  try {
+    initConsentService(() => {
+      try {
+        return getEntitlementService().getState().plan
+      } catch {
+        return 'unknown'
+      }
+    })
+  } catch (error) {
+    logger.error('ConsentService failed to initialize; optional sending stays disabled', {
+      message: error instanceof Error ? error.message : String(error)
+    })
+  }
   const entitlementService = initEntitlementService()
+  // Crash reporting, AFTER consent: the service reads the gate on construction,
+  // so an unconsented launch never arms the SDK even briefly. It also subscribes
+  // to consent changes, so a later grant arms it and a revocation tears it down
+  // without a restart. Inert while no DSN is configured.
+  try {
+    initCrashReporting()
+  } catch (error) {
+    logger.error('Crash reporting failed to initialize; it stays disarmed', {
+      message: error instanceof Error ? error.message : String(error)
+    })
+  }
   // Register the 'Entitlement' custom strategy so features.yaml entries that
   // declare `Type: Entitlement` / `RequiredCapabilities: [...]` are evaluated
   // against the live auth state. `setupIPC` (called inside `initializeApp`'s
@@ -1115,6 +1200,11 @@ registerRestormIPC({ editorWindows, closeAllWindows })
 
 // Auto-update IPC (window.api.update.*)
 registerUpdateIpc()
+
+// Crash-reporting IPC (window.api.crash.*). Read-only: it lets the renderer
+// discover whether reporting is armed so its own SDK can follow, and offers no
+// way to arm it — that stays a main-process decision behind the consent gate.
+registerCrashIpc()
 
 // Wire the scenario execution engine's IPC bridge unconditionally — the Run /
 // Debug / Step controls in the scenario editor drive it, so it must exist in

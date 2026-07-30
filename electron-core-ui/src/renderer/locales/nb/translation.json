@@ -1,4 +1,10 @@
 {
+  "releaseNotesModal": {
+    "title": "Nyheter",
+    "showMore": "Vis mer",
+    "loading": "Laster inn versjonsmerknader…",
+    "empty": "Ingen versjonsmerknader å vise."
+  },
   "common": {
     "opened": "Åpnet",
     "refresh": "Oppdater",
@@ -29,7 +35,8 @@
     "removeFromFavorites": "Fjern fra favoritter",
     "confirmRemoveFavorite": "Er du sikker på at du vil fjerne «{{fileName}}» fra favoritter?",
     "favoritesLandmarkLabel": "Favorittliste",
-    "recentsLandmarkLabel": "Liste over nylige filer"
+    "recentsLandmarkLabel": "Liste over nylige filer",
+    "openContainingFolder": "Åpne mappen som inneholder filen"
   },
   "welcomeScreen": {
     "landmarkLabel": "Velkommen"
@@ -390,7 +397,10 @@
     "listInstances": "Liste MCP-instanser",
     "listThemes": "Vis tilgjengelige temaer",
     "getCurrentTheme": "Hent gjeldende tema",
-    "switchTheme": "Bytt aktivt tema"
+    "getSettings": "Vis programmets innstillinger",
+    "setSetting": "Endre en innstilling",
+    "patchSettings": "Endre flere innstillinger samtidig",
+    "resetSetting": "Tilbakestill en innstilling"
   },
   "customWco": {
     "minimize": "Minimer",
@@ -401,7 +411,20 @@
   "firewall": {
     "addOrigin": "Legg til opprinnelse",
     "removeOrigin": "Fjern {{origin}}",
-    "noEntries": "Ingen oppføringer ennå."
+    "noEntries": "Ingen oppføringer ennå.",
+    "outbound": {
+      "title": "Utgående tjenester",
+      "intro": "Destinasjoner denne applikasjonen kan kontakte på eget initiativ. De er deklarert i koden og kan ikke redigeres her — de som krever ditt samtykke, forblir avslått til du gir det under Innstillinger.",
+      "empty": "Denne applikasjonen deklarerer ingen egen utgående destinasjon.",
+      "hostUnset": "ikke konfigurert",
+      "stateConsented": "Tillatt — du har gitt samtykke",
+      "stateNoConsent": "Blokkert — samtykke er ikke gitt",
+      "stateRequired": "Tillatt — nødvendig for applikasjonen",
+      "stateInactive": "Inaktiv — ikke i bruk akkurat nå",
+      "purpose": {
+        "avatar": "Profilbilde for den innloggede kontoen"
+      }
+    }
   },
   "bookmarkRibbon": {
     "addBookmark": "Legg til bokmerke"

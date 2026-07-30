@@ -37,6 +37,10 @@ export function registerFirewallIpc(): void {
 
 	ipcMain.handle(FIREWALL_IPC.LIST_WHITELIST, () => permissionService.listWhitelist())
 	ipcMain.handle(FIREWALL_IPC.LIST_BLACKLIST, () => permissionService.listBlacklist())
+	// Read-only on purpose: the app's own outbound destinations are declared in
+	// code and governed by consent, never edited from the panel.
+	ipcMain.handle(FIREWALL_IPC.LIST_SYSTEM_ENDPOINTS, () => permissionService.listSystemEndpoints())
+	ipcMain.handle(FIREWALL_IPC.LIST_SYSTEM_ALLOWED_HOSTS, () => permissionService.listSystemAllowedHosts())
 
 	ipcMain.handle(FIREWALL_IPC.ADD_WHITELIST, (_event, origin: unknown) => {
 		const o = asOrigin(origin)

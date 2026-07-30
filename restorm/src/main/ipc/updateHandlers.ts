@@ -9,6 +9,7 @@ import {
   noArgs,
   updateChangelogSinceArgs,
   updateChangelogSinceLocaleArgs,
+  updateReleaseNotesArgs,
   updateSetAutoCheckArgs
 } from './schemas'
 
@@ -23,6 +24,11 @@ export function registerUpdateIpc(): void {
   })
 
   validatedHandle(UPDATE_IPC.QUIT_AND_INSTALL, noArgs, () => {
+    // Blocking on purpose where the installer needs elevation: the handler
+    // doesn't return until the privilege prompt is answered, so the window is
+    // briefly unresponsive. That is the trade for having the prompt appear
+    // while the app is still on screen and attributable to a button the user
+    // just pressed, rather than after the last window is gone.
     updateService.quitAndInstall()
   })
 
@@ -35,6 +41,10 @@ export function registerUpdateIpc(): void {
     UPDATE_IPC.GET_CHANGELOG_SINCE,
     updateChangelogSinceLocaleArgs,
     (_event, [fromVersion, locale]) => updateService.getChangelogSince(fromVersion, locale)
+  )
+
+  validatedHandle(UPDATE_IPC.GET_RELEASE_NOTES, updateReleaseNotesArgs, (_event, [locale]) =>
+    updateService.getReleaseNotes(locale)
   )
 
   validatedHandle(UPDATE_IPC.GET_LAST_SEEN_VERSION, noArgs, () =>

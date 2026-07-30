@@ -77,7 +77,16 @@ export const SettingItem: React.FC<SettingItemProps> = ({
     setting.isModified ? 'setting-item--modified' : ''
   ].filter(Boolean).join(' ')
 
-  const rendererProps = { setting, value, onChange: handleChange }
+  // A locked control renders greyed but still SHOWS its stored value, which is
+  // wrong whenever the lock exists because the host is overriding that value.
+  // `capabilityLockedValue` lets the definition say what is actually in force,
+  // so a setting the user cannot change can never display the opposite of what
+  // the app is doing — the failure mode that matters most for a privacy toggle.
+  const effectiveValue = capabilityLocked && setting.capabilityLockedValue !== undefined
+    ? setting.capabilityLockedValue
+    : value
+
+  const rendererProps = { setting, value: effectiveValue, onChange: handleChange }
 
   const renderControl = (): React.ReactNode => {
     switch (setting.type) {
@@ -136,6 +145,9 @@ export const SettingItem: React.FC<SettingItemProps> = ({
           <GatedControl
             locked={capabilityLocked}
             {...(capabilityGate ? { onSubscribe: capabilityGate.onSubscribe } : {})}
+            {...(setting.capabilityLockedLabelKey
+              ? { proLabel: t(setting.capabilityLockedLabelKey) }
+              : {})}
             data-testid={`setting-gate-${setting.storageKey}`}
           >
             {control}

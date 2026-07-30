@@ -1,4 +1,10 @@
 {
+  "releaseNotesModal": {
+    "title": "Nyheter",
+    "showMore": "Visa mer",
+    "loading": "Läser in versionsinformation…",
+    "empty": "Inga versionsanteckningar att visa."
+  },
   "common": {
     "opened": "Öppnade",
     "refresh": "Uppdatera",
@@ -29,7 +35,8 @@
     "removeFromFavorites": "Ta bort från favoriter",
     "confirmRemoveFavorite": "Vill du verkligen ta bort \"{{fileName}}\" från favoriter?",
     "favoritesLandmarkLabel": "Favoritlista",
-    "recentsLandmarkLabel": "Lista över senaste filer"
+    "recentsLandmarkLabel": "Lista över senaste filer",
+    "openContainingFolder": "Öppna mappen som innehåller filen"
   },
   "welcomeScreen": {
     "landmarkLabel": "Välkommen"
@@ -390,7 +397,10 @@
     "listInstances": "Lista MCP-instanser",
     "listThemes": "Lista tillgängliga teman",
     "getCurrentTheme": "Hämta aktuellt tema",
-    "switchTheme": "Byt aktivt tema"
+    "getSettings": "Visa programmets inställningar",
+    "setSetting": "Ändra en inställning",
+    "patchSettings": "Ändra flera inställningar samtidigt",
+    "resetSetting": "Återställ en inställning"
   },
   "customWco": {
     "minimize": "Minimera",
@@ -401,7 +411,20 @@
   "firewall": {
     "addOrigin": "Lägg till origin",
     "removeOrigin": "Ta bort {{origin}}",
-    "noEntries": "Inga poster ännu."
+    "noEntries": "Inga poster ännu.",
+    "outbound": {
+      "title": "Utgående tjänster",
+      "intro": "Destinationer som den här applikationen kan kontakta på eget initiativ. De är deklarerade i koden och kan inte redigeras här — de som kräver ditt samtycke förblir avstängda tills du ger det i Inställningar.",
+      "empty": "Den här applikationen deklarerar ingen egen utgående destination.",
+      "hostUnset": "inte konfigurerad",
+      "stateConsented": "Tillåten — du har gett ditt samtycke",
+      "stateNoConsent": "Blockerad — inget samtycke givet",
+      "stateRequired": "Tillåten — krävs av applikationen",
+      "stateInactive": "Inaktiv — används inte just nu",
+      "purpose": {
+        "avatar": "Profilbild för det inloggade kontot"
+      }
+    }
   },
   "bookmarkRibbon": {
     "addBookmark": "Lägg till bokmärke"

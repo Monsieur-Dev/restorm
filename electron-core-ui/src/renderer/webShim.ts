@@ -242,8 +242,13 @@ export function ensureCoreUiWebApiShim(): void {
     }
   }
 
-  // I18n shim for web builds (no-op, language is handled by i18next directly)
-  let webCurrentLanguage = 'en'
+  // I18n shim for web builds (no-op, language is handled by i18next directly).
+  // Starts EMPTY, matching the IPC contract this shim stands in for: an empty
+  // result means "the user has never explicitly chosen a language", which is
+  // what lets the i18n bootstrap fall back to the OS/browser locale. Seeding
+  // it with a language would read as an explicit choice and pin every web
+  // build to that language.
+  let webCurrentLanguage = ''
   const i18nApi: CoreUiI18nApi = {
     setLanguage: (language: string): Promise<boolean> => {
       webCurrentLanguage = language

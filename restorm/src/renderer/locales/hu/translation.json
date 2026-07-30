@@ -1008,10 +1008,22 @@
     "requestFormat.powershell": "PowerShell (Invoke-RestMethod)"
   },
   "import": {
-    "title": "Kérések importálása",
-    "source": {
-      "label": "Illesszen be valamit ide!",
-      "placeholder": "Adja meg a fájl elérési útját, URL-t, vagy illesszen be egy curl/PowerShell parancsot..."
+    "addAuth": "Hitelesítési útvonal hozzáadása",
+    "applyFailedTitle": "A forrásból való frissítés sikertelen",
+    "applyUpdate": "Frissítés alkalmazása",
+    "authenticatedVia": "Hitelesítve ezzel: {{name}}",
+    "cancel": "Mégse",
+    "customHeadersAdd": "Fejléc hozzáadása",
+    "customHeadersBtn": "Egyéni fejlécek hozzáadása",
+    "customHeadersBtnTitle": "Egyszeri fejlécek csatolása a specifikáció letöltéséhez (az importált mappára mentve az újraimportáláshoz)",
+    "customHeadersDone": "Kész",
+    "customHeadersHint": "A fejlécek az importált mappára mentődnek, így egy későbbi, forrásból történő frissítés újra elküldi őket. Tokenrotációval működő bejelentkezéshez inkább a fenti hitelesítési útvonalat használja.",
+    "customHeadersTitle": "Egyéni fejlécek",
+    "detachAuth": "Hitelesítési útvonal leválasztása",
+    "dropZone": "Bedobási terület",
+    "editAuth": "Hitelesítési útvonal szerkesztése",
+    "error": {
+      "unknown": "Ismeretlen hiba történt"
     },
     "formats": {
       "swagger": {
@@ -1137,15 +1149,24 @@
     },
     "loading": "Elemzés...",
     "noResults": "Nem található kérés",
-    "error": {
-      "unknown": "Ismeretlen hiba történt"
-    },
     "ok": "Importálás",
-    "cancel": "Mégse",
-    "dropZone": "Bedobási terület",
-    "addAuth": "Hitelesítési útvonal hozzáadása",
-    "detachAuth": "Hitelesítési útvonal leválasztása",
-    "editAuth": "Hitelesítési útvonal szerkesztése"
+    "okN": "{{action}} ({{count}})",
+    "preview": {
+      "noDocumentation": "Ehhez a forráshoz nincs elemzett dokumentáció."
+    },
+    "refreshTitle": "Frissítés a forrásból",
+    "searchPlaceholder": "Útvonalak / mappák szűrése…",
+    "selectAll": "Összes kijelölése",
+    "selectNone": "Kijelölés törlése",
+    "source": {
+      "label": "Illesszen be valamit ide!",
+      "placeholder": "Adja meg a fájl elérési útját, URL-t, vagy illesszen be egy curl/PowerShell parancsot..."
+    },
+    "tabs": {
+      "routes": "Útvonalak",
+      "documentation": "Dokumentáció"
+    },
+    "title": "Kérések importálása"
   },
   "emptyBench": {
     "importCard": {
@@ -2493,6 +2514,7 @@
     "recoverFailedTitle": "A visszaállítás sikertelen"
   },
   "updates": {
+    "seeReleaseNotes": "Kiadási megjegyzések megtekintése",
     "settingsTitle": "Frissítések",
     "autoCheckTitle": "Frissítések automatikus keresése",
     "autoCheckDescription": "Frissítéseket keres a háttérben indításkor és rendszeresen.",
@@ -2501,19 +2523,63 @@
     "currentVersion": "{{version}} verzió",
     "checkNow": "Keresés most",
     "readyTitle": "A frissítés kész",
-    "readyBody": "A(z) {{version}} verzió a következő újraindításkor települ.",
+    "readyBody": "A(z) {{version}} verzió telepítésre kész.",
     "restartNow": "Újraindítás most",
     "checkFailedTitle": "A frissítéskeresés sikertelen",
     "checkFailedBody": "Nem sikerült frissítéseket keresni. Kérjük, próbálja újra később.",
     "upToDateTitle": "Naprakész",
     "upToDateBody": "A legújabb verziót használja ({{version}}).",
-    "whatsNewTitle": "Újdonságok a(z) {{version}} verzióban",
+    "whatsNewTitle": "Mi újság?",
     "status": {
       "idle": "Naprakész",
       "checking": "Keresés…",
       "downloading": "Letöltés… {{percent}} %",
       "downloaded": "A frissítés telepítésre kész ({{version}})",
       "error": "A keresés sikertelen"
+    }
+  },
+  "privacy": {
+    "settingsTitle": "Adatvédelem",
+    "crashReportsTitle": "Összeomlási jelentések küldése",
+    "crashReportsDescription": "Anonimizált jelentést küld, amikor a Restorm összeomlik, hogy a hiba javítható legyen. A jelentésekből az URL-ek, tokenek, kéréstörzsek és személyes adatok eltávolításra kerülnek, mielőtt elhagynák a gépét. Az ingyenes csomag része; fizetős csomaggal kikapcsolható. Teljes tájékoztató: https://restorm.app/privacy",
+    "telemetryTitle": "Használati statisztikák küldése",
+    "telemetryDescription": "Névtelen statisztikát küld arról, mely funkciókat használják, hogy a további fejlesztés irányt kapjon. Alapértelmezetten kikapcsolva, és kifejezett hozzájárulása nélkül soha nem aktív. Nem tartalmaz kérésadatokat, URL-eket vagy személyes adatokat. Teljes tájékoztató: https://restorm.app/privacy",
+    "outbound": {
+      "purpose": {
+        "crash": "Összeomlási jelentések (kizárólag az Ön hozzájárulásával)",
+        "telemetry": "Névtelen használati statisztikák (kizárólag az Ön hozzájárulásával)",
+        "backend": "Fiók, licenc és előfizetés"
+      }
+    },
+    "crashReportsLockedLabel": "A Pro csomagtól módosítható. Az ingyenes csomagban az összeomlási jelentések a minőség fenntartásához szükségesek.",
+    "consentToast": {
+      "title": "Segítsen nekünk a Restorm fejlesztésében",
+      "body": "Váratlan hiba esetén a Restorm anonim jelentést küldhet nekünk, hogy kijavíthassuk a problémát. Tartalmazza a hiba technikai nyomkövetését és a diagnosztikai környezetet (alkalmazásverzió, legutóbbi tevékenység). Az URL-ek, tokenek, kérés- és válasz-tartalmak, valamint a személyes adatok eltávolításra kerülnek, mielőtt elhagyná a gépét. Minden jelentés előtt pontosan látni fogja, mi kerül elküldésre.",
+      "save": "Beállításaim mentése",
+      "learnMore": "További információ"
+    },
+    "crashReportReviewTitle": "Minden jelentés megjelenítése küldés előtt",
+    "crashReportReviewDescription": "Megmutatja az összeomlási jelentés pontos tartalmát, és küldés előtt megerősítést kér. Kapcsolja ki a jelentések automatikus, kérdés nélküli küldéséhez.",
+    "reportDialog": {
+      "title": "Elküldi ezt az összeomlási jelentést?",
+      "intro": "A Restorm hibába ütközött. Pontosan ez kerülne elküldésre.",
+      "includedError": "A technikai hiba és a kód helye, ahol történt",
+      "includedVersion": "Az alkalmazás verziója és az Ön operációs rendszere",
+      "includedActivity": "Mit csinált az alkalmazás közvetlenül a hiba előtt",
+      "removed": "Az URL-ek, tokenek, kérés- és válasz-tartalmak, valamint a személyes adatok már eltávolításra kerültek.",
+      "viewFull": "Teljes jelentés megtekintése",
+      "waive": "A további jelentések automatikus küldése, megjelenítés nélkül",
+      "send": "Küldés",
+      "discard": "Ne küldje"
+    }
+  },
+  "crashRecovery": {
+    "message": "A Restorm hibába ütközött, és újra kell indítani.",
+    "relaunch": "Restorm újraindítása",
+    "notice": {
+      "title": "A fájl nem lett újra megnyitva",
+      "body": "A(z) {{file}} nem lett újra megnyitva: a Restorm összeomlott a megnyitása közben az előző indításkor. A fájl sértetlen — újra megnyithatja a legutóbbi fájlok közül.",
+      "bodyUnnamed": "A legutóbbi fájl nem lett újra megnyitva: a Restorm összeomlott a megnyitása közben az előző indításkor. A fájl sértetlen — újra megnyithatja a legutóbbi fájlok közül."
     }
   }
 }

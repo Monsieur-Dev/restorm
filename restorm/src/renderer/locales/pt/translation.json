@@ -1008,10 +1008,22 @@
     "requestFormat.powershell": "PowerShell (Invoke-RestMethod)"
   },
   "import": {
-    "title": "Importar pedidos",
-    "source": {
-      "label": "Cole aqui qualquer coisa!",
-      "placeholder": "Introduza o caminho do ficheiro, URL ou cole um comando curl/PowerShell..."
+    "addAuth": "Adicionar uma rota de autenticação",
+    "applyFailedTitle": "Falha ao atualizar a partir da origem",
+    "applyUpdate": "Aplicar atualização",
+    "authenticatedVia": "Autenticado via {{name}}",
+    "cancel": "Cancelar",
+    "customHeadersAdd": "Adicionar cabeçalho",
+    "customHeadersBtn": "Adicionar cabeçalhos personalizados",
+    "customHeadersBtnTitle": "Anexar cabeçalhos pontuais à obtenção da especificação (guardados na pasta importada para reimportações)",
+    "customHeadersDone": "Concluído",
+    "customHeadersHint": "Os cabeçalhos são guardados na pasta importada para que uma futura atualização a partir da origem os repita. Para fluxos de início de sessão com rotação de tokens, use antes a rota de autenticação acima.",
+    "customHeadersTitle": "Cabeçalhos personalizados",
+    "detachAuth": "Desconectar rota de autenticação",
+    "dropZone": "Zona de largar",
+    "editAuth": "Editar rota de autenticação",
+    "error": {
+      "unknown": "Ocorreu um erro desconhecido"
     },
     "formats": {
       "swagger": {
@@ -1137,15 +1149,24 @@
     },
     "loading": "A analisar...",
     "noResults": "Nenhum pedido encontrado",
-    "error": {
-      "unknown": "Ocorreu um erro desconhecido"
-    },
     "ok": "Importar",
-    "cancel": "Cancelar",
-    "dropZone": "Zona de largar",
-    "addAuth": "Adicionar uma rota de autenticação",
-    "detachAuth": "Desconectar rota de autenticação",
-    "editAuth": "Editar rota de autenticação"
+    "okN": "{{action}} ({{count}})",
+    "preview": {
+      "noDocumentation": "Não há documentação analisada para esta fonte."
+    },
+    "refreshTitle": "Atualizar a partir da origem",
+    "searchPlaceholder": "Filtrar rotas / pastas…",
+    "selectAll": "Selecionar tudo",
+    "selectNone": "Não selecionar nada",
+    "source": {
+      "label": "Cole aqui qualquer coisa!",
+      "placeholder": "Introduza o caminho do ficheiro, URL ou cole um comando curl/PowerShell..."
+    },
+    "tabs": {
+      "routes": "Rotas",
+      "documentation": "Documentação"
+    },
+    "title": "Importar pedidos"
   },
   "emptyBench": {
     "importCard": {
@@ -2493,6 +2514,7 @@
     "recoverFailedTitle": "Falha na recuperação"
   },
   "updates": {
+    "seeReleaseNotes": "Ver as notas de versão",
     "settingsTitle": "Atualizações",
     "autoCheckTitle": "Procurar atualizações automaticamente",
     "autoCheckDescription": "Procura atualizações em segundo plano ao iniciar e periodicamente.",
@@ -2501,19 +2523,63 @@
     "currentVersion": "Versão {{version}}",
     "checkNow": "Procurar agora",
     "readyTitle": "Atualização pronta",
-    "readyBody": "A versão {{version}} será instalada no próximo reinício.",
+    "readyBody": "A versão {{version}} está pronta para ser instalada.",
     "restartNow": "Reiniciar agora",
     "checkFailedTitle": "Falha ao procurar atualizações",
     "checkFailedBody": "Não foi possível procurar atualizações. Tente novamente mais tarde.",
     "upToDateTitle": "Está atualizado",
     "upToDateBody": "Está a usar a versão mais recente ({{version}}).",
-    "whatsNewTitle": "Novidades da versão {{version}}",
+    "whatsNewTitle": "O que há de novo?",
     "status": {
       "idle": "Atualizado",
       "checking": "A procurar…",
       "downloading": "A transferir… {{percent}} %",
       "downloaded": "Atualização pronta para instalar ({{version}})",
       "error": "Falha na verificação"
+    }
+  },
+  "privacy": {
+    "settingsTitle": "Privacidade",
+    "crashReportsTitle": "Enviar relatórios de falha",
+    "crashReportsDescription": "Envia um relatório anonimizado quando o Restorm falha, para que o problema possa ser corrigido. Os relatórios são limpos de URL, tokens, corpos de pedido e dados pessoais antes de saírem do seu computador. Incluído no plano gratuito; um plano pago permite desativá-lo. Todos os detalhes: https://restorm.app/privacy",
+    "telemetryTitle": "Enviar estatísticas de utilização",
+    "telemetryDescription": "Envia estatísticas anónimas sobre as funcionalidades utilizadas, para orientar o que será desenvolvido a seguir. Desativado por predefinição e nunca ativado sem o seu consentimento explícito. Não contém dados de pedidos, nem URL, nem dados pessoais. Todos os detalhes: https://restorm.app/privacy",
+    "outbound": {
+      "purpose": {
+        "crash": "Relatórios de falha (apenas com o seu consentimento)",
+        "telemetry": "Estatísticas de utilização anónimas (apenas com o seu consentimento)",
+        "backend": "Conta, licença e subscrição"
+      }
+    },
+    "crashReportsLockedLabel": "Alterável a partir do plano Pro. No plano gratuito, os relatórios de falha são necessários para manter a qualidade.",
+    "consentToast": {
+      "title": "Ajude-nos a melhorar o Restorm",
+      "body": "Em caso de erro inesperado, o Restorm pode enviar-nos um relatório anónimo para nos ajudar a corrigir o problema. Contém o rastreio técnico do erro e o contexto de diagnóstico (versão da aplicação, atividade recente). URLs, tokens, corpos de pedido e resposta e dados pessoais são removidos antes de sair do seu computador. Verá exatamente o que é enviado antes de cada relatório.",
+      "save": "Guardar as minhas preferências",
+      "learnMore": "Saber mais"
+    },
+    "crashReportReviewTitle": "Mostrar cada relatório de falha antes de enviar",
+    "crashReportReviewDescription": "Mostra-lhe o conteúdo exato de um relatório de falha e pede confirmação antes de o enviar. Desative para enviar os relatórios automaticamente, sem perguntar de cada vez.",
+    "reportDialog": {
+      "title": "Enviar este relatório de falha?",
+      "intro": "O Restorm encontrou um problema. Isto é exatamente o que seria enviado.",
+      "includedError": "O erro técnico e o ponto do código onde ocorreu",
+      "includedVersion": "A versão da aplicação e o seu sistema operativo",
+      "includedActivity": "O que a aplicação estava a fazer imediatamente antes da falha",
+      "removed": "URLs, tokens, corpos de pedido e resposta e dados pessoais já foram removidos.",
+      "viewFull": "Ver o relatório completo",
+      "waive": "Enviar automaticamente os próximos relatórios, sem mos mostrar",
+      "send": "Enviar",
+      "discard": "Não enviar"
+    }
+  },
+  "crashRecovery": {
+    "message": "O Restorm encontrou um problema e precisa de ser reiniciado.",
+    "relaunch": "Reiniciar o Restorm",
+    "notice": {
+      "title": "Ficheiro não reaberto",
+      "body": "{{file}} não foi reaberto: o Restorm falhou ao abri-lo no arranque anterior. O seu ficheiro está intacto — pode reabri-lo a partir dos ficheiros recentes.",
+      "bodyUnnamed": "O último ficheiro não foi reaberto: o Restorm falhou ao abri-lo no arranque anterior. O seu ficheiro está intacto — pode reabri-lo a partir dos ficheiros recentes."
     }
   }
 }

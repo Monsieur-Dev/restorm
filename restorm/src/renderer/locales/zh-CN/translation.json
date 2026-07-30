@@ -1007,10 +1007,22 @@
     "requestFormat.powershell": "PowerShell（Invoke-RestMethod）"
   },
   "import": {
-    "title": "导入请求",
-    "source": {
-      "label": "在此粘贴内容！",
-      "placeholder": "输入文件路径、URL，或粘贴 curl/PowerShell 命令..."
+    "addAuth": "添加认证路由",
+    "applyFailedTitle": "从源刷新失败",
+    "applyUpdate": "应用更新",
+    "authenticatedVia": "通过 {{name}} 认证",
+    "cancel": "取消",
+    "customHeadersAdd": "添加请求头",
+    "customHeadersBtn": "添加自定义请求头",
+    "customHeadersBtnTitle": "为规范抓取附加一次性请求头（保存在已导入的文件夹中，供重新导入时使用）",
+    "customHeadersDone": "完成",
+    "customHeadersHint": "请求头会保存在已导入的文件夹中，以便日后从源刷新时重放。对于会轮换令牌的登录流程，请改用上方的认证路由附加。",
+    "customHeadersTitle": "自定义请求头",
+    "detachAuth": "分离认证路由",
+    "dropZone": "拖放区",
+    "editAuth": "编辑认证路由",
+    "error": {
+      "unknown": "发生未知错误"
     },
     "formats": {
       "swagger": {
@@ -1136,15 +1148,24 @@
     },
     "loading": "正在分析...",
     "noResults": "未找到请求",
-    "error": {
-      "unknown": "发生未知错误"
-    },
     "ok": "导入",
-    "cancel": "取消",
-    "dropZone": "拖放区",
-    "addAuth": "添加认证路由",
-    "detachAuth": "分离认证路由",
-    "editAuth": "编辑认证路由"
+    "okN": "{{action}} ({{count}})",
+    "preview": {
+      "noDocumentation": "此来源没有可解析的文档。"
+    },
+    "refreshTitle": "从源刷新",
+    "searchPlaceholder": "筛选路由 / 文件夹…",
+    "selectAll": "全选",
+    "selectNone": "全不选",
+    "source": {
+      "label": "在此粘贴内容！",
+      "placeholder": "输入文件路径、URL，或粘贴 curl/PowerShell 命令..."
+    },
+    "tabs": {
+      "routes": "路由",
+      "documentation": "文档"
+    },
+    "title": "导入请求"
   },
   "emptyBench": {
     "importCard": {
@@ -2492,6 +2513,7 @@
     "recoverFailedTitle": "恢复失败"
   },
   "updates": {
+    "seeReleaseNotes": "查看发行说明",
     "settingsTitle": "更新",
     "autoCheckTitle": "自动检查更新",
     "autoCheckDescription": "在启动时及定期在后台检查更新。",
@@ -2500,19 +2522,63 @@
     "currentVersion": "版本 {{version}}",
     "checkNow": "立即检查",
     "readyTitle": "更新已就绪",
-    "readyBody": "版本 {{version}} 将在下次重启时安装。",
+    "readyBody": "版本 {{version}} 已准备好安装。",
     "restartNow": "立即重启",
     "checkFailedTitle": "检查更新失败",
     "checkFailedBody": "无法检查更新，请稍后重试。",
     "upToDateTitle": "已是最新版本",
     "upToDateBody": "您正在使用最新版本（{{version}}）。",
-    "whatsNewTitle": "{{version}} 新功能",
+    "whatsNewTitle": "新功能",
     "status": {
       "idle": "最新",
       "checking": "正在检查…",
       "downloading": "正在下载… {{percent}}%",
       "downloaded": "更新已准备好安装（{{version}}）",
       "error": "检查失败"
+    }
+  },
+  "privacy": {
+    "settingsTitle": "隐私",
+    "crashReportsTitle": "发送崩溃报告",
+    "crashReportsDescription": "在 Restorm 崩溃时发送匿名化报告，以便修复故障。报告在离开您的设备前会清除 URL、令牌、请求正文和个人数据。免费版包含此功能；付费版可将其关闭。 完整说明：https://restorm.app/privacy",
+    "telemetryTitle": "发送使用统计",
+    "telemetryDescription": "发送关于使用了哪些功能的匿名统计，用于指导后续开发。默认关闭，未经您明确同意绝不启用。不含任何请求数据、URL 或个人数据。 完整说明：https://restorm.app/privacy",
+    "outbound": {
+      "purpose": {
+        "crash": "崩溃报告（仅在您同意时）",
+        "telemetry": "匿名使用统计（仅在您同意时）",
+        "backend": "账户、许可证与订阅"
+      }
+    },
+    "crashReportsLockedLabel": "自 Pro 套餐起可更改。在免费套餐中，崩溃报告是保持质量所必需的。",
+    "consentToast": {
+      "title": "帮助我们改进 Restorm",
+      "body": "如果发生意外错误，Restorm 可以向我们发送匿名报告，帮助我们修复问题。报告包含技术错误堆栈和诊断上下文（应用版本、近期操作）。URL、令牌、请求与响应正文以及个人数据会在离开您的设备之前被移除。每次发送报告前，您都会看到具体发送的内容。",
+      "save": "保存我的偏好设置",
+      "learnMore": "了解更多"
+    },
+    "crashReportReviewTitle": "发送前显示每份崩溃报告",
+    "crashReportReviewDescription": "向您展示崩溃报告的确切内容，并在发送前询问。关闭后将自动发送报告，不再每次询问。",
+    "reportDialog": {
+      "title": "发送此崩溃报告？",
+      "intro": "Restorm 遇到了问题。以下是将要发送的确切内容。",
+      "includedError": "技术错误及其在代码中发生的位置",
+      "includedVersion": "您的应用版本和操作系统",
+      "includedActivity": "出错前应用正在执行的操作",
+      "removed": "URL、令牌、请求与响应正文以及个人数据均已移除。",
+      "viewFull": "查看完整报告",
+      "waive": "今后自动发送报告，不再向我展示",
+      "send": "发送",
+      "discard": "不发送"
+    }
+  },
+  "crashRecovery": {
+    "message": "Restorm 遇到问题，需要重新启动。",
+    "relaunch": "重新启动 Restorm",
+    "notice": {
+      "title": "未重新打开文件",
+      "body": "未重新打开 {{file}}：上次启动时 Restorm 在打开它的过程中崩溃了。您的文件完好无损，可从最近的文件中重新打开。",
+      "bodyUnnamed": "未重新打开上次的文件：上次启动时 Restorm 在打开它的过程中崩溃了。您的文件完好无损，可从最近的文件中重新打开。"
     }
   }
 }

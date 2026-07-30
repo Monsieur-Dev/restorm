@@ -1,4 +1,10 @@
 {
+  "releaseNotesModal": {
+    "title": "Novedades",
+    "showMore": "Ver más",
+    "loading": "Cargando notas de la versión…",
+    "empty": "No hay notas de versión para mostrar."
+  },
   "common": {
     "opened": "Abiertos",
     "refresh": "Actualizar",
@@ -29,7 +35,8 @@
     "removeFromFavorites": "Quitar de favoritos",
     "confirmRemoveFavorite": "¿Seguro que quieres quitar \"{{fileName}}\" de favoritos?",
     "favoritesLandmarkLabel": "Lista de favoritos",
-    "recentsLandmarkLabel": "Lista de archivos recientes"
+    "recentsLandmarkLabel": "Lista de archivos recientes",
+    "openContainingFolder": "Abrir carpeta contenedora"
   },
   "welcomeScreen": {
     "landmarkLabel": "Bienvenida"
@@ -390,7 +397,10 @@
     "listInstances": "Listar instancias MCP",
     "listThemes": "Listar temas disponibles",
     "getCurrentTheme": "Obtener el tema actual",
-    "switchTheme": "Cambiar el tema activo"
+    "getSettings": "Listar los ajustes de la aplicación",
+    "setSetting": "Cambiar un ajuste",
+    "patchSettings": "Cambiar varios ajustes a la vez",
+    "resetSetting": "Restablecer un ajuste"
   },
   "customWco": {
     "minimize": "Minimizar",
@@ -401,7 +411,20 @@
   "firewall": {
     "addOrigin": "Agregar origen",
     "removeOrigin": "Eliminar {{origin}}",
-    "noEntries": "Aún no hay entradas."
+    "noEntries": "Aún no hay entradas.",
+    "outbound": {
+      "title": "Servicios salientes",
+      "intro": "Destinos que esta aplicación puede contactar por iniciativa propia. Están declarados en el código y no se pueden editar aquí; los que requieren su consentimiento permanecen desactivados hasta que lo conceda en Preferencias.",
+      "empty": "Esta aplicación no declara ningún destino saliente propio.",
+      "hostUnset": "sin configurar",
+      "stateConsented": "Permitido: usted dio su consentimiento",
+      "stateNoConsent": "Bloqueado: no se dio consentimiento",
+      "stateRequired": "Permitido: necesario para la aplicación",
+      "stateInactive": "Inactivo: no se usa en este momento",
+      "purpose": {
+        "avatar": "Foto de perfil de la cuenta con sesión iniciada"
+      }
+    }
   },
   "bookmarkRibbon": {
     "addBookmark": "Añadir marcador"

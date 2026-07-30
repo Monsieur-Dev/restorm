@@ -152,6 +152,8 @@ import { Onboarding } from './components/MainView/Workbench/Onboarding'
 import { RestormTitlebar } from './components/MainView/Titlebar/RestormTitlebar'
 import { StatusbarMcpIndicator } from './components/MainView/StatusbarMcpIndicator'
 import { UpdateNotifications } from './components/UpdateNotifications'
+import { CrashConsentPrompt } from './components/Privacy/CrashConsentPrompt'
+import { CrashRecoveryNotice } from './components/CrashRecovery/CrashRecoveryNotice'
 import { StatusbarGitIndicator } from './components/MainView/StatusbarGitIndicator'
 import { StatusbarPathActionsHost } from './components/MainView/StatusbarPathActions'
 import { useGitPendingFlags } from './hooks/useGitPendingFlags'
@@ -380,6 +382,28 @@ const App: React.FC = () => {
       body: t('app.draftsRestoredBody', { count: payload.count })
     })
   })
+
+  // "Open containing folder" on a welcome-screen recent/favorite row.
+  // The panel is a generic library component, so it only reports which
+  // file the user picked; handing a path to the OS shell is this app's
+  // job. Main refuses anything it doesn't already track (the open project
+  // or one of its own recent files), and the OS call can fail on its own
+  // when the file moved since it was listed — either way the user is
+  // told, because a menu entry that silently does nothing reads as broken.
+  // The failure strings are shared with the statusbar's identical action:
+  // they name no surface, so they are reused rather than duplicated.
+  const revealPathInFolder = useCallback((path: string): void => {
+    void window.restorm?.file.revealInFolder(path)
+      .then((result) => {
+        if (result.success) return
+        toasterService.push('app', {
+          title: t('statusbar.contextMenu.revealFailedTitle'),
+          body: t('statusbar.contextMenu.revealFailedBody'),
+          durationMs: 5000
+        })
+      })
+      .catch(() => { /* channel unavailable — no-op */ })
+  }, [t])
 
   // Surface every firewall pending-permission prompt as a toast in
   // the global app toaster. The four action buttons (Allow once /
@@ -1797,7 +1821,7 @@ const App: React.FC = () => {
   const closeTabByItemIdStable = useCallback((itemId: string) => { closeTabByItemIdRef.current(itemId) }, [])
   useMcpNavigation({
     enabled: mcpEnabled,
-    rootItems,
+    rootItemsRef,
     setExpandedIds,
     setSelectedItemId,
     openFolderTab,
@@ -1825,7 +1849,7 @@ const App: React.FC = () => {
   const pruneOrphanTabsStable = useCallback((existingIds: Set<string>): void => {
     setWorkbenchTree((prevTree) => ({ ...prevTree, groups: pruneOrphanTabs(prevTree.groups, existingIds) }))
   }, [setWorkbenchTree])
-  useMcpTreeReplace({ setRootItems, mcpDrivenRef, lastMcpVersionRef, bumpAllTabContentVersions: bumpAllTabContentVersionsStable, pruneOrphanTabs: pruneOrphanTabsStable })
+  useMcpTreeReplace({ setRootItems, rootItemsRef, mcpDrivenRef, lastMcpVersionRef, bumpAllTabContentVersions: bumpAllTabContentVersionsStable, pruneOrphanTabs: pruneOrphanTabsStable })
   useMcpRunRequest({ enabled: mcpEnabled })
   // Read-only e2e automation hook: exposes window.__restormSuggestions to pull
   // each action's inspector data suggestion for a scenario from the running app.
@@ -3152,6 +3176,7 @@ const App: React.FC = () => {
                 ariaLabel={t('welcome.landmarkLabel')}
                 onOpenFile={(path) => { void window.restorm?.file.openPath(path) }}
                 confirmRemoveFavorite={(fileName) => window.confirm(t('welcome.confirmRemoveFavorite', { fileName }))}
+                onRevealInFolder={(path) => { revealPathInFolder(path) }}
               >
                 <Button
                   appearance="rainbow"
@@ -3230,9 +3255,18 @@ const App: React.FC = () => {
       {/* Global toaster anchored to the bottom-right, toggled by the statusbar bell. */}
       <Toaster id="app" position="bottom-right" data-testid="app-toaster" />
 
-      {/* Headless: turns auto-update transitions into app-toaster notifications
-       * + shows "What's new" on the first run after an update. */}
+      {/* Turns auto-update transitions into app-toaster notifications, shows
+       * "What's new" on the first run after an update, and owns the release-notes
+       * modal those toasts (and the Help menu) open. */}
       <UpdateNotifications />
+      <CrashConsentPrompt />
+      {/* Headless: says so when the crash-loop protection withheld a file, so
+       * an app that starts empty on purpose is not mistaken for one that lost
+       * the user's work. */}
+      <CrashRecoveryNotice />
+      {/* The crash-report reviewer is NOT here: it is mounted alongside the
+       * root error boundary, so it survives a crash in this tree and can still
+       * show the report for the crash that just happened. */}
 
       {/* Fullscreen git-history modal (statusbar source-control icon). */}
       <Modal

@@ -60,6 +60,28 @@ function isPortFree(port: number): Promise<boolean> {
   })
 }
 
+/**
+ * Wait until the OS has actually released `port`.
+ *
+ * Closing a listening socket returns before the kernel has finished releasing
+ * it, and how long that takes depends on machine load. A fixed sleep sized on an
+ * idle machine is too short once the suite runs its workers in parallel under
+ * load, which makes the assertion fail for a reason that has nothing to do with
+ * the code under test.
+ *
+ * Polling waits exactly as long as this machine needs and no longer, and still
+ * fails fast on a genuine leak because the bound is short — a port that is truly
+ * still held stays held for the whole two seconds.
+ */
+async function waitForPortFree(port: number, timeoutMs = 2000): Promise<boolean> {
+  const deadline = Date.now() + timeoutMs
+  for (;;) {
+    if (await isPortFree(port)) return true
+    if (Date.now() >= deadline) return false
+    await new Promise((resolve) => setTimeout(resolve, 25))
+  }
+}
+
 describe('WebSocketExecutionService — HTTP mock route dispatcher', () => {
   beforeEach(async () => {
     await websocketExecutionService.closeAll()
@@ -168,8 +190,6 @@ describe('WebSocketExecutionService — HTTP mock route dispatcher', () => {
 
     // Stop the last: the port frees.
     websocketExecutionService.disconnect('mock-4b')
-    // Give the OS a tick to release the socket.
-    await new Promise((r) => setTimeout(r, 50))
-    expect(await isPortFree(port)).toBe(true)
+    expect(await waitForPortFree(port)).toBe(true)
   })
 })

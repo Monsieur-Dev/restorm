@@ -1,4 +1,10 @@
 {
+  "releaseNotesModal": {
+    "title": "Nieuw",
+    "showMore": "Meer tonen",
+    "loading": "Release-opmerkingen laden…",
+    "empty": "Geen release-opmerkingen om te tonen."
+  },
   "common": {
     "opened": "Geopend",
     "refresh": "Vernieuwen",
@@ -29,7 +35,8 @@
     "removeFromFavorites": "Verwijderen uit favorieten",
     "confirmRemoveFavorite": "Weet je zeker dat je \"{{fileName}}\" uit favorieten wilt verwijderen?",
     "favoritesLandmarkLabel": "Lijst met favorieten",
-    "recentsLandmarkLabel": "Lijst met recente bestanden"
+    "recentsLandmarkLabel": "Lijst met recente bestanden",
+    "openContainingFolder": "Bevattende map openen"
   },
   "welcomeScreen": {
     "landmarkLabel": "Welkom"
@@ -390,7 +397,10 @@
     "listInstances": "MCP-instanties weergeven",
     "listThemes": "Beschikbare thema's weergeven",
     "getCurrentTheme": "Huidig thema ophalen",
-    "switchTheme": "Actief thema wisselen"
+    "getSettings": "Applicatie-instellingen weergeven",
+    "setSetting": "Een instelling wijzigen",
+    "patchSettings": "Meerdere instellingen tegelijk wijzigen",
+    "resetSetting": "Een instelling herstellen"
   },
   "customWco": {
     "minimize": "Minimaliseren",
@@ -401,7 +411,20 @@
   "firewall": {
     "addOrigin": "Oorsprong toevoegen",
     "removeOrigin": "{{origin}} verwijderen",
-    "noEntries": "Nog geen vermeldingen."
+    "noEntries": "Nog geen vermeldingen.",
+    "outbound": {
+      "title": "Uitgaande diensten",
+      "intro": "Bestemmingen die deze applicatie op eigen initiatief kan benaderen. Ze zijn in de code vastgelegd en hier niet te bewerken — de bestemmingen die uw toestemming vereisen blijven uitgeschakeld totdat u die in Voorkeuren geeft.",
+      "empty": "Deze applicatie declareert geen eigen uitgaande bestemming.",
+      "hostUnset": "niet geconfigureerd",
+      "stateConsented": "Toegestaan — u hebt toestemming gegeven",
+      "stateNoConsent": "Geblokkeerd — geen toestemming gegeven",
+      "stateRequired": "Toegestaan — vereist door de applicatie",
+      "stateInactive": "Inactief — momenteel niet in gebruik",
+      "purpose": {
+        "avatar": "Profielfoto van het aangemelde account"
+      }
+    }
   },
   "bookmarkRibbon": {
     "addBookmark": "Bladwijzer toevoegen"

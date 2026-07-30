@@ -47,6 +47,12 @@ export type { GitSemiPullFrequency, GitSemiPullControllerOptions } from './servi
 export { renderCommitMessage } from '../shared/CommitMessageEngine'
 export type { CommitMessageTemplates, RenderedCommitMessage } from '../shared/CommitMessageEngine'
 
+// OS-locale matching — also process-neutral, and also exported from both:
+// the renderer resolves its initial UI language with it, and a host that
+// wants the main-process translator to follow the OS locale needs the same
+// matching rules rather than a second, divergent implementation.
+export { matchSupportedLocale } from '../shared/localeMatch'
+
 // GraphQL runtime
 export {
   graphQLService,
@@ -138,8 +144,51 @@ export type {
   RequestRecord,
   RequestRecordSource,
   RequestRecordVerdict,
-  RequestRecordProtocol
+  RequestRecordProtocol,
+  SystemEndpointDeclaration,
+  SystemEndpointStatus,
+  SystemEndpointExemption
 } from '../types/firewall'
+
+// Privacy / consent — the main-process consent authority, its persistence
+// adapter, and the firewall exemption that follows consent on and off.
+export {
+  ConsentService,
+  makeConsentFileStore,
+  ConsentFirewallExemption
+} from './services'
+export type {
+  ConsentServiceOptions,
+  ConsentSettingsPort,
+  ConsentStorePort,
+  ConsentGatedEndpoint
+} from './services'
+
+// Privacy / consent shared model + the fail-closed payload scrubber.
+export type {
+  ConsentDecision,
+  ConsentGateDefinition,
+  ConsentOverride,
+  ConsentSource,
+  PersistedConsentFile,
+  PersistedConsentEntry
+} from '../shared/privacy/consent'
+export {
+  scrubPayload,
+  scrubString,
+  assertScrubbed,
+  findScrubViolations,
+  PayloadNotScrubbedError,
+  REDACTED,
+  REDACTED_URL,
+  REDACTED_EMAIL,
+  REDACTED_IP,
+  REDACTED_TOKEN,
+  REDACTED_BODY,
+  REDACTED_DEPTH,
+  REDACTED_CIRCULAR
+} from '../shared/privacy/scrub'
+export type { ScrubOptions, ScrubViolation, UrlPolicy } from '../shared/privacy/scrub'
 
 // Save-unit / draft-store (file service v2)
 export {

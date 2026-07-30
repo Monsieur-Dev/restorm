@@ -31,6 +31,11 @@
     "src/shared",
     "../electron-core-ui/src/main/**/*",
     "../electron-core-ui/src/preload/**/*",
+    // ECUI's process-agnostic layer, reached from its main barrel (auth state,
+    // privacy/consent model, the payload scrubber). A `composite` project must
+    // list every file it pulls in, so importing one of these transitively from
+    // `electron-core-ui/main` fails with TS6307 unless the tree is included.
+    "../electron-core-ui/src/shared/**/*",
     "../electron-core-ui/types/**/*"
   ]
 }
