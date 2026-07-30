@@ -2,7 +2,10 @@
  * ImportManager - Orchestrates all import services
  *
  * This service:
- * - Reads files from filesystem or fetches from URLs
+ * - Resolves an import `source` into raw content: fetches a URL, reads a
+ *   file off disk, or takes the string itself as the payload when the user
+ *   pasted / dropped content rather than naming a location
+ *   (see `classifyImportSource`)
  * - Detects the format via the provider registry (each *ImportService.ts
  *   self-registers a canImport + parse pair; zero hardcoded branches here)
  * - Dispatches to the matching provider's parse()
@@ -61,6 +64,91 @@ export interface ImportOptions {
 // ============================================================================
 // Safe redirect-following fetch
 // ============================================================================
+
+// ============================================================================
+// Source Classification
+// ============================================================================
+
+/**
+ * How an import `source` string resolves into raw content:
+ *
+ * - `url`     — fetch it (`http://` / `https://`).
+ * - `file`    — read it off disk.
+ * - `content` — the string IS the payload. The import modal's source
+ *   field doubles as a paste area, and its drop handler falls back to
+ *   `text/plain` for a dragged selection, so a curl command / a Postman
+ *   collection / an SDL document can arrive here verbatim.
+ */
+export type ImportSourceKind = 'url' | 'file' | 'content'
+
+/**
+ * Upper bound on what can plausibly be a filesystem path. Linux caps a
+ * path at 4096 bytes (`PATH_MAX`) and every other platform we ship on is
+ * stricter, so anything longer is a payload and never worth a syscall.
+ */
+const MAX_PATH_LENGTH = 4096
+
+function isUrlSource(input: string): boolean {
+  return input.startsWith('http://') || input.startsWith('https://')
+}
+
+/**
+ * `true` when `input` could be handed to `fs.stat` at all. A pasted
+ * document is multi-line and/or far past `PATH_MAX`, so this rejects it
+ * without paying for a syscall that would only throw (`ENAMETOOLONG`,
+ * or `ERR_INVALID_ARG_VALUE` on an embedded NUL).
+ */
+function couldBePath(input: string): boolean {
+  if (input.length === 0 || input.length > MAX_PATH_LENGTH) return false
+  return !/[\n\r\0]/.test(input)
+}
+
+/**
+ * `true` when `input` is unambiguously path-SHAPED: a single
+ * whitespace-free token anchored at a filesystem root — POSIX absolute
+ * (`/etc/x`), explicitly relative (`./x`, `../x`), home (`~/x`), a
+ * Windows drive (`C:\x`, `C:/x`), or a UNC share (`\\host\share`).
+ *
+ * Deliberately narrower than "might be a path": a bare `openapi.json`
+ * also names a file, but it's equally plausible as the first token of
+ * something pasted, so it only counts as a path when it actually exists
+ * on disk (see `classifyImportSource`).
+ */
+function isPathShaped(input: string): boolean {
+  if (!couldBePath(input)) return false
+  if (/\s/.test(input)) return false
+  return /^[/~]/.test(input) || input.startsWith('./') || input.startsWith('../') ||
+    /^[A-Za-z]:[\\/]/.test(input) || input.startsWith('\\\\')
+}
+
+/**
+ * Decide how to resolve an import `source`.
+ *
+ * The file check is a real `stat` rather than a syntactic guess, because
+ * the two candidate readings genuinely overlap: `collection.json` is a
+ * plausible filename AND a plausible first line of something pasted.
+ * Existence on disk is the only signal that settles it.
+ *
+ * A path-shaped input that does NOT exist still classifies as `file` on
+ * purpose: the user typo'd a location, and the honest answer is the
+ * errno naming the file they meant, not the "could not detect format"
+ * they'd get from parsing the path string as a document.
+ *
+ * Exported for unit-test coverage; production call sites stay inside
+ * this module (`readImportSource`).
+ */
+export async function classifyImportSource(input: string): Promise<ImportSourceKind> {
+  if (isUrlSource(input)) return 'url'
+  if (couldBePath(input)) {
+    try {
+      if ((await fs.stat(input)).isFile()) return 'file'
+    } catch {
+      // Not readable / not there — fall through to the shape check.
+    }
+  }
+  if (isPathShaped(input)) return 'file'
+  return 'content'
+}
 
 // ============================================================================
 // Format Detection
@@ -152,7 +240,16 @@ function disableEmptyKeyValuesInTree(folder: EnvironmentFolder): void {
   for (const child of folder.items) visit(child)
 }
 
-/** Import from a given content string with detected or specified format */
+/**
+ * Import from a given content string with detected or specified format.
+ *
+ * `filePath` must be passed whenever `source` is a real on-disk path —
+ * it's what a provider whose own compiler needs disk locality reads
+ * (`ImportProvider.parse`'s `opts.filePath`), and what TypeSpec's
+ * file-only gate keys off. It is NOT derived from `source` here: a
+ * `source` that isn't a URL can equally be pasted content, and guessing
+ * would hand a provider a payload where it expects a path.
+ */
 export async function importFromContent(
   content: string,
   format: string,
@@ -173,12 +270,9 @@ export async function importFromContent(
       }
     }
 
-    // filePath: prefer the explicit param (Thrift threads it); else derive from
-    // `source` for non-URL imports (compiler-based formats e.g. TypeSpec need disk locality).
-    const isUrlSource = source.startsWith('http://') || source.startsWith('https://')
     const opts = {
       ...(sourceUrl !== undefined ? { sourceUrl } : {}),
-      ...(filePath !== undefined ? { filePath } : !isUrlSource ? { filePath: source } : {})
+      ...(filePath !== undefined ? { filePath } : {})
     }
     // Await the parse result so this function stays genuinely async — callers
     // can rely on the Promise-based API even if all current parsers are sync.
@@ -215,7 +309,8 @@ export async function importFromContent(
 interface ReadSourceResult {
   success: true
   content: string
-  isUrl: boolean
+  /** How `input` was resolved — see `classifyImportSource`. */
+  kind: ImportSourceKind
 }
 
 interface ReadSourceError {
@@ -226,18 +321,31 @@ interface ReadSourceError {
 }
 
 /**
- * Fetch (URL) or read (file path) the raw content behind an import
- * `source`. Shared by `importFrom` (initial parse) and `runPostImportSeed`
- * (re-reads the same source once the imported items have their final ids,
- * to recover the exact bytes a format's `postImportSeed` needs — see
- * `ImportProvider.postImportSeed` in `registry.ts`).
+ * Resolve an import `source` into raw content — fetch a URL, read a file,
+ * or take the string itself when it's pasted content. Shared by
+ * `importFrom` (initial parse) and `runPostImportSeed` (re-reads the same
+ * source once the imported items have their final ids, to recover the
+ * exact bytes a format's `postImportSeed` needs — see
+ * `ImportProvider.postImportSeed` in `registry.ts`; for pasted content
+ * that re-read is the paste itself, so its checksum still matches).
  */
 async function readImportSource(
   input: string,
   extraHeaders?: Record<string, string>
 ): Promise<ReadSourceResult | ReadSourceError> {
-  const isUrl = input.startsWith('http://') || input.startsWith('https://')
-  if (isUrl) {
+  const kind = await classifyImportSource(input)
+
+  if (kind === 'content') {
+    // The source string IS the payload: a curl command, a collection, an
+    // SDL document the user pasted into the modal's source field or
+    // dropped on it as a text selection. Nothing to read — handing this
+    // to the file branch below is what surfaces an ENOENT quoting the
+    // user's own paste back at them.
+    logger.info('[ImportManager] Source is pasted content', { length: input.length })
+    return { success: true, content: input, kind }
+  }
+
+  if (kind === 'url') {
     let lastStatusCode: number | undefined
     try {
       // SSRF guard. The top-level import URL is EXPLICIT (the user/agent
@@ -287,7 +395,7 @@ async function readImportSource(
           error: `HTTP ${response.status}: ${response.statusText}`
         }
       }
-      return { success: true, content: await response.text(), isUrl: true }
+      return { success: true, content: await response.text(), kind }
     } catch (error) {
       logger.error(`[ImportManager] Failed to fetch URL:`, error)
       return {
@@ -298,10 +406,9 @@ async function readImportSource(
     }
   }
 
-  // Treat as file path
   logger.info(`[ImportManager] Reading from file: ${input}`)
   try {
-    return { success: true, content: await fs.readFile(input, 'utf-8'), isUrl: false }
+    return { success: true, content: await fs.readFile(input, 'utf-8'), kind }
   } catch (error) {
     logger.error(`[ImportManager] Failed to read file:`, error)
     return { success: false, error: error instanceof Error ? error.message : String(error) }
@@ -326,10 +433,17 @@ export async function importFrom(
         error: read.error
       }
     }
-    const { content, isUrl } = read
+    const { content, kind } = read
+
+    // `filePath` is the real on-disk location or nothing — never the raw
+    // source string. Passing pasted content as a path would let
+    // `detectFormat`'s extension-anchored first pass sniff the payload as
+    // a filename, and would defeat the file-only gates downstream
+    // providers implement against `opts.filePath`.
+    const filePath = kind === 'file' ? input : undefined
 
     // Detect format
-    const detectedFormat = detectFormat(content, input)
+    const detectedFormat = detectFormat(content, filePath)
 
     if (!detectedFormat) {
       logger.warn(`[ImportManager] Could not detect format for: ${source}`)
@@ -342,7 +456,7 @@ export async function importFrom(
     }
 
     // Import using detected format
-    const result = await importFromContent(content, detectedFormat, source, isUrl ? input : undefined, isUrl ? undefined : input)
+    const result = await importFromContent(content, detectedFormat, source, kind === 'url' ? input : undefined, filePath)
     if (result.success) {
       // Stamp the payload checksum on every successful import — the
       // env folder's `apiUpdate.payloadChecksum` is what the Refresh
@@ -427,47 +541,30 @@ export async function runPostImportSeed(
 /** Try all import services in parallel (for preview/dry-run) */
 export async function tryAllImports(
   input: string,
-  _options: ImportOptions = {}
+  options: ImportOptions = {}
 ): Promise<ImportResult[]> {
   logger.info(`[ImportManager] Trying all import formats for: ${input}`)
 
-  // Try to determine if it's a URL or file path
-  let content: string
-  let source: string
-  const isUrl = input.startsWith('http://') || input.startsWith('https://')
-
-  try {
-    if (isUrl) {
-      source = input
-      // Same firewall bypass rationale as `importFrom` above — user
-      // typed / dropped the URL, that's the authorisation signal, and
-      // it's an EXPLICIT top-level import URL so loopback/private hosts
-      // (a local dev API server) are a legitimate target. The SSRF guard
-      // still blocks link-local / cloud-metadata (bypass ≠ unrestricted).
-      assertSafeFetchUrl(input, { allowPrivateHosts: true })
-      const response = await withFirewallBypass(() => fetch(input))
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`)
-      }
-      content = await response.text()
-    } else {
-      source = input
-      content = await fs.readFile(input, 'utf-8')
-    }
-  } catch (error) {
+  // Same three-way source resolution `importFrom` uses, so a pasted
+  // payload is tried against every format instead of being read as a
+  // path. Also inherits the URL branch's redirect-checked fetch.
+  const read = await readImportSource(input, options.extraHeaders)
+  if (!read.success) {
     return [{
       success: false,
       items: [],
       source: input,
-      error: error instanceof Error ? error.message : String(error)
+      error: read.error
     }]
   }
+  const { content, kind } = read
+  const filePath = kind === 'file' ? input : undefined
 
   // Try all registered formats in parallel (registration order = detection priority)
   const formats = importProviders.map(p => p.format)
 
   const results = await Promise.all(
-    formats.map(format => importFromContent(content, format, source, isUrl ? input : undefined, isUrl ? undefined : input))
+    formats.map(format => importFromContent(content, format, input, kind === 'url' ? input : undefined, filePath))
   )
 
   // Return only successful results
