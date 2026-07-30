@@ -20,6 +20,7 @@ import type { ScenarioNode, ScenarioEdge, ScenarioNodeKind, ScenarioPort } from 
 import { SCENARIO_KINDS } from '../../../shared/scenarioKindRegistry'
 import { defaultPortsForKind, isValidScenarioConnection, outputPortFlow, inputPortFlow, deriveRunScenarioPorts, socketioConnectEventPorts } from '../../../shared/scenarioNodePorts'
 import { layoutScenarioGraph, SCENARIO_NODE_FALLBACK_WIDTH, SCENARIO_NODE_FALLBACK_HEIGHT } from '../../../shared/scenarioGraphLayout'
+import { hasDonePort, hasErrorPort } from '../../../shared/scenarioNodeCapabilities'
 import { SCENARIO_KIND_DOCS, VALUE_TYPE_DOCS } from '../../../shared/scenarioKindDocs'
 import { STATIC_PREVIEW_KINDS, staticScenarioPreview, singleDeepPath, singleTopLevelKey, portPreviewValue, expectsObjectInput, type StaticPreviewEdge } from '../../../shared/utils/scenarioStaticPreview'
 import { broadcastTreeReplace } from './import'
@@ -172,15 +173,23 @@ function describeScenarioKind(kind: ScenarioNodeKind): Record<string, unknown> {
 async function arrangeScenario(scenario: Scenario): Promise<number> {
   const rects = layoutCache.get(scenario.id)
   const inputNodes = scenario.nodes.map((n) => {
+    const { inputs, outputs } = effectivePorts(n)
+    // The vertical order the editor renders the ports in, so the layout can keep
+    // each box's successors in its output order: the port arrays (derived ports
+    // already appended by `effectivePorts`), then the implicit `error` / `done`
+    // handles, which draw at the bottom of the box.
+    const order = {
+      inputs: inputs.map((p) => p.id),
+      outputs: [...outputs.map((p) => p.id), ...(hasErrorPort(n.kind) ? ['error'] : []), ...(hasDonePort(n.kind) ? ['done'] : [])]
+    }
     const measured = rects?.[n.id]
     if (measured && measured.width > 0 && measured.height > 0) {
-      return { id: n.id, width: measured.width, height: measured.height }
+      return { id: n.id, width: measured.width, height: measured.height, ...order }
     }
-    const { inputs, outputs } = effectivePorts(n)
     const rows = Math.max(inputs.length, outputs.length, 1)
-    return { id: n.id, width: SCENARIO_NODE_FALLBACK_WIDTH, height: Math.max(SCENARIO_NODE_FALLBACK_HEIGHT, 56 + rows * 34) }
+    return { id: n.id, width: SCENARIO_NODE_FALLBACK_WIDTH, height: Math.max(SCENARIO_NODE_FALLBACK_HEIGHT, 56 + rows * 34), ...order }
   })
-  const inputEdges = scenario.edges.map((e) => ({ id: e.id, source: e.from.nodeId, target: e.to.nodeId }))
+  const inputEdges = scenario.edges.map((e) => ({ id: e.id, source: e.from.nodeId, target: e.to.nodeId, sourcePort: e.from.portId, targetPort: e.to.portId }))
   const positions = await layoutScenarioGraph(inputNodes, inputEdges)
   let moved = 0
   for (const n of scenario.nodes) {
