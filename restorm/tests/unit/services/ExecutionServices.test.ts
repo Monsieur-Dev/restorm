@@ -43,6 +43,12 @@ vi.mock('../../../src/main/services/ContextService', () => {
       getResolvedUrl: vi.fn(),
       getRequestContext: vi.fn(),
       resolveValue: resolveValueMock,
+      // Body path: the executor resolves a text body through the
+      // Content-Type-aware entry point. These fixtures declare no JSON
+      // Content-Type, so it behaves exactly like `resolveValue` — and
+      // reusing the same mock keeps `resolveValue.mockImplementation`
+      // overrides in existing tests effective on the body too.
+      resolveBodyValue: vi.fn((v: string) => resolveValueMock(v)),
       // Type-aware header path: HTTPExecutionService now calls
       // `resolveKeyValueForRequest(kv)` instead of
       // `resolveValue(kv.value)` so it can gate substitution on

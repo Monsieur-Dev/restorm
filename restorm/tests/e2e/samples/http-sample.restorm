@@ -32,6 +32,23 @@ collections:
             value:
               type: string
               value: /home/yoann/git/restorm-master/restorm-wt/task-238/restorm/tests/e2e/samples/fixtures/upload.txt
+          - key: hbId
+            enabled: true
+            value:
+              type: string
+              value: '42'
+          - key: hbName
+            enabled: true
+            value:
+              type: string
+              value: |-
+                Rex "the\dog"
+                line2
+          - key: hbTag
+            enabled: true
+            value:
+              type: string
+              value: good boy
         id: 8c25de44-9643-47e1-b557-af39e245e119
         name: Default
     items:
@@ -519,6 +536,25 @@ collections:
         pathParams: []
         deprecated: false
         type: http
+      - id: d737f2bc-7dc3-4c14-8815-2e5ce4fa7483
+        name: Handlebars JSON body
+        type: http
+        method: POST
+        url: '{{util}}/echo'
+        body:
+          type: text
+          content: '{"name":"{{hbName}}","nested":{"tag":"{{hbTag}}"},"id":{{hbId}}}'
+        deprecated: false
+        documentation: ''
+        headers:
+          - key: Content-Type
+            enabled: true
+            value:
+              type: string
+              value: application/json
+        params: []
+        pathParams: []
+        tags: []
       - type: scenario
         tags: []
         params: []

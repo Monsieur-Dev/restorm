@@ -321,4 +321,103 @@ describe('ContextService', () => {
       cleanup()
     })
   });
+
+  describe('body resolution gated on the Content-Type', () => {
+    const reqId = 'req-json-body'
+
+    function seed(variables: Record<string, string>): void {
+      contextService.registerRequest(reqId, null, { id: reqId, headers: [], params: [], pathParams: [] })
+      contextService.setScenarioVariables(reqId, variables)
+    }
+
+    function cleanup(): void {
+      contextService.unregisterRequest(reqId)
+    }
+
+    it('resolves a tight-brace variable and escapes a string value when the body is JSON', () => {
+      seed({ petId: '42', name: 'a"b' })
+      const out = contextService.resolveBodyValue(
+        '{"id":{{petId}},"name":"{{name}}"}',
+        reqId,
+        'application/json; charset=utf-8'
+      )
+      expect(out).toBe('{"id":42,"name":"a\\"b"}')
+      expect(JSON.parse(out)).toEqual({ id: 42, name: 'a"b' })
+      cleanup()
+    })
+
+    it('keeps the raw whole-template substitution for a non-JSON content type', () => {
+      seed({ name: 'a"b' })
+      // XML / plain text keep today's behaviour: substituted verbatim, no escaping.
+      expect(contextService.resolveBodyValue('<n>{{name}}</n>', reqId, 'application/xml')).toBe('<n>a"b</n>')
+      // …and a JSON-looking body without a JSON content type still hits the
+      // whole-template compile, whose parse error leaves the body untouched.
+      expect(contextService.resolveBodyValue('{"id":{{petId}}}', reqId, undefined)).toBe('{"id":{{petId}}}')
+      cleanup()
+    })
+
+    it('returns the body untouched when the request has no context', () => {
+      expect(contextService.resolveBodyValue('{"id":{{petId}}}', 'unknown-request', 'application/json')).toBe(
+        '{"id":{{petId}}}'
+      )
+    })
+  });
+
+  describe('JSON body resolution against a scenario variable overlay', () => {
+    // The scenario engine dispatches through the same executor as the panel,
+    // but its variables come from the per-run `setVariable` overlay rather than
+    // the environment. The overlay has to reach the JSON body resolver — and
+    // win over an environment variable of the same name.
+    const envId = 'env-scenario-body'
+    const reqId = 'req-scenario-body'
+    const svc = contextService as unknown as {
+      handleEnvironmentCreated: (payload: unknown) => void
+    }
+
+    function seed(): void {
+      const request = {
+        type: 'http', id: reqId, name: 'r', method: 'POST', url: '{{baseUrl}}/x',
+        headers: [], params: [], pathParams: [], tags: []
+      } as unknown as HTTPRequest
+      const folder = {
+        folderType: 'environment', fileFormatVersion: 1, id: 'folder-scenario-body', name: 'F',
+        tags: [], configuration: {}, items: [request],
+        environments: [{ id: envId, name: 'E', variables: [] }]
+      } as unknown as EnvironmentFolder
+      collectionStore.setCollections([folder])
+      svc.handleEnvironmentCreated({
+        id: envId, type: 'environment', parentFolderId: 'folder-scenario-body',
+        document: {
+          id: envId,
+          name: 'E',
+          variables: [
+            { key: 'petId', value: { type: 'string', value: '1' } },
+            { key: 'petName', value: { type: 'string', value: 'from-env' } }
+          ]
+        }
+      })
+      contextService.registerRequest(reqId, envId, { id: reqId, headers: [], params: [], pathParams: [] })
+    }
+
+    function cleanup(): void {
+      contextService.setScenarioVariables(reqId, undefined)
+      contextService.unregisterRequest(reqId)
+      collectionStore.setCollections([])
+    }
+
+    it('resolves a JSON body from the run overlay, which wins over the environment', () => {
+      seed()
+      const template = '{"name":"{{petName}}","id":{{petId}}}'
+      // Without an overlay the environment supplies the values.
+      expect(contextService.resolveBodyValue(template, reqId, 'application/json')).toBe(
+        '{"name":"from-env","id":1}'
+      )
+
+      contextService.setScenarioVariables(reqId, { petId: '42', petName: 'Rex "the\\dog"' })
+      const out = contextService.resolveBodyValue(template, reqId, 'application/json')
+
+      expect(JSON.parse(out)).toEqual({ name: 'Rex "the\\dog"', id: 42 })
+      cleanup()
+    })
+  });
 });

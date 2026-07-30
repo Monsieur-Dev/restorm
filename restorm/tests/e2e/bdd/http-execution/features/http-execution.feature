@@ -217,6 +217,12 @@ Feature: HTTP/REST execution end-to-end
     Then the response status is "200"
     And the response body matches a handlebars uuid for header "x-request-id"
 
+  Scenario: A JSON body resolves its variables without breaking the JSON
+    When I open the "Handlebars JSON body" request tab via MCP
+    And I click Send
+    Then the response status is "200"
+    And the server received the body as valid resolved JSON
+
   Scenario: Execution records a history entry that can be replayed
     When I open the "GET echo" request tab via MCP
     And I click Send
