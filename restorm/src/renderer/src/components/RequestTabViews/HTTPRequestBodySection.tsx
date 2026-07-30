@@ -11,6 +11,7 @@ import { RestormKeyValueTable, type KeyValueTableHandle } from '../RestormKeyVal
 import type { HTTPRequest, AuthenticationRequest, KeyValue } from '../../../../shared/types/collections'
 import type { TranslatedHelperDefinition } from '../../utils/handlebarsHelpersDefinitions'
 import { resolveFilePickerPath } from '../../utils/filePicker'
+import { detectBodyEditorLanguage } from '../../utils/bodyEditorLanguage'
 
 export type BodyMode = 'text' | 'form-data' | 'x-www-form-urlencoded' | 'file'
 
@@ -121,6 +122,8 @@ export const HTTPRequestBodySection: React.FC<HTTPRequestBodySectionProps> = ({
     if (file) onBodyFilePathChange(resolveFilePickerPath(file))
   }, [onBodyFilePathChange])
 
+  const bodyLanguage = useMemo(() => detectBodyEditorLanguage(body), [body])
+
   const radioItems = useMemo(() => ({
     items: BODY_MODES.map((mode) => ({ text: mode, isActive: bodyMode === mode, disabled }))
   }), [bodyMode, disabled])
@@ -137,7 +140,11 @@ export const HTTPRequestBodySection: React.FC<HTTPRequestBodySectionProps> = ({
           <div style={editorContainerStyle}>
             <CodeEditor
               height="100%"
-              language="json"
+              language={bodyLanguage}
+              // The body is a Handlebars template as much as a payload: `{{id}}`,
+              // `{{{raw}}}` and a one-line `{{#each}}` must not squiggle, while a
+              // genuinely malformed payload still must.
+              tolerateHandlebars
               value={body}
               onChange={(value) => { onBodyChange(value ?? '') }}
               options={{ minimap: { enabled: false }, wordWrap: 'on', scrollBeyondLastLine: false, automaticLayout: true, readOnly: disabled }}

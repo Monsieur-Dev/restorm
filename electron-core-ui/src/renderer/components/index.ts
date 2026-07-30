@@ -61,6 +61,18 @@ export type { VariableInputBoxProps, VariableDefinition } from './VariableInputB
 // CodeEditor exports
 export { CodeEditor, bootstrapMonaco } from './CodeEditor'
 export type { CodeEditorProps, CodeEditorRef } from './CodeEditor'
+export {
+  findHandlebarsSpans,
+  maskHandlebarsForJson,
+  isJsonValidIgnoringHandlebars,
+  filterHandlebarsMarkers
+} from './CodeEditor'
+export type {
+  HandlebarsSpan,
+  HandlebarsMaskVariant,
+  HandlebarsToleranceOptions,
+  MarkerRangeLike
+} from './CodeEditor'
 
 // MiniBrowser exports
 export { MiniBrowserPanel } from './MiniBrowser'

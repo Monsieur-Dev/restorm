@@ -237,6 +237,12 @@ const monacoSuggestDismissTestDir = defineBddConfig({
   outputDir: '.features-gen/monaco-suggest-dismiss'
 })
 
+const monacoHandlebarsBodyTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/monaco-handlebars-body/features/**/*.feature',
+  steps: ['tests/e2e/bdd/monaco-handlebars-body/steps/**/*.ts', 'tests/e2e/bdd/fixtures/mcp-server.fixture.ts'],
+  outputDir: '.features-gen/monaco-handlebars-body'
+})
+
 const trpcExecutionTestDir = defineBddConfig({
   features: 'tests/e2e/bdd/trpc-execution/features/**/*.feature',
   steps: ['tests/e2e/bdd/trpc-execution/steps/**/*.ts', 'tests/e2e/bdd/fixtures/mcp-server.fixture.ts'],
@@ -726,6 +732,11 @@ export default defineConfig({
     {
       name: 'monaco-suggest-dismiss',
       testDir: monacoSuggestDismissTestDir,
+      timeout: 120 * 1000
+    },
+    {
+      name: 'monaco-handlebars-body',
+      testDir: monacoHandlebarsBodyTestDir,
       timeout: 120 * 1000
     },
     {

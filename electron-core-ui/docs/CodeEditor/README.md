@@ -7,6 +7,7 @@
 - Synchronizes the Monaco theme with the app theme (`document.documentElement[data-theme]`) when `theme` is not provided.
 - Supports a debounced `onChange` via `changeDebounceMs`.
 - Adds a custom action "Go to definition" that extracts a Handlebars variable name from `{{variableName}}` at the cursor position and calls `onGoToDefinition(variableName)`.
+- Optionally tolerates Handlebars syntax in an otherwise-validated document (`tolerateHandlebars`), so a template that is also a JSON/XML payload does not squiggle. See [Handlebars tolerance](#handlebars-tolerance).
 
 ## Component location
 
@@ -24,6 +25,7 @@
 - `onEditorMount?: OnMount`: alias of `onMount`.
 - `onGoToDefinition?: (variableName: string) => void`: called when the user triggers "Go to definition" (Ctrl/Cmd+F12 by default) on a Handlebars variable `{{...}}`.
 - `goToDefinitionLabel?: string`: label used in the editor action/context menu. By default it uses i18n key `codeEditor.goToDefinition`.
+- `tolerateHandlebars?: boolean`: treat the document as a Handlebars template as well as a payload, so template syntax stops producing error markers. Default `false`. See [Handlebars tolerance](#handlebars-tolerance).
 - `data-testid?: string`: stable E2E hook applied to the root element.
 
 ### Ref
@@ -32,6 +34,73 @@
 
 - `editor`: Monaco editor instance
 - `monaco`: Monaco namespace
+
+## Handlebars tolerance
+
+A field can legitimately hold a document that is BOTH a template and a
+structured payload — a request body like
+`{"id": {{petId}}, "raw": "{{{name}}}"}` is a valid Handlebars template. Monaco
+validates JSON in a web worker that knows nothing about `{{ … }}`, so it reports
+the template as broken and paints the payload red.
+
+`tolerateHandlebars` fixes that without weakening validation: the worker still
+runs, and the markers it publishes are pruned afterwards.
+
+```tsx
+<CodeEditor
+  language="json"
+  value={body}
+  onChange={(v) => setBody(v ?? '')}
+  tolerateHandlebars
+/>
+```
+
+What it accepts:
+
+- `{{var}}`, `{{helper arg}}`, including quoted arguments that contain `}}`
+- `{{{var}}}` (triple-brace, unescaped)
+- a `{{#if}} … {{/if}}` / `{{#each}} … {{/each}}` block whose two halves are on
+  the SAME line — including the classic list prefix `[{{#each pets}}1,{{/each}}0]`
+- a construct in a bare value position (`{"id": {{petId}}}`, so the type
+  survives) as well as inside a string (`{"n": "Hi {{first}}"}`)
+
+What it still reports:
+
+- every syntax error that is not explained by the template — a missing value, a
+  trailing comma, an unquoted key, a stray brace. Positions are unchanged,
+  because the check masks each construct with a placeholder of the same width.
+- an unterminated `{{`, which is a typo rather than a construct.
+
+Two deliberate limits:
+
+- **A block spanning several lines** (`{{#each}}` on one line, `{{/each}}` on
+  another) cannot be masked into a single JSON value, so only the markers sitting
+  ON its tags are dropped; errors the block induces elsewhere still squiggle.
+- **Errors inside a construct are not reported** — between the braces the
+  Handlebars grammar applies, and the JSON validator's opinion there is noise.
+
+Only `json` / `jsonc` models get the mask-and-reparse pass; any other language
+(e.g. `xml`, which Monaco ships without a validator) gets the
+markers-on-the-construct filtering only.
+
+Leave the prop off for any editor showing a document the user does NOT template:
+a response body, a schema, a config file. Tolerance is opt-in per editor and
+never changes Monaco's global defaults, so two editors in the same window can
+disagree about it.
+
+### Reusable helpers
+
+The decision logic is pure text arithmetic, exported for consumers that need to
+reason about the same spans (validation badges, a "resolve preview", tests):
+
+- `findHandlebarsSpans(text): HandlebarsSpan[]` — every construct as a
+  `{ start, end, kind }` triple (`kind: 'expression' | 'block'`).
+- `maskHandlebarsForJson(text, spans?, variant?): string` — the same document with
+  every construct replaced by a same-width JSON-legal placeholder.
+- `isJsonValidIgnoringHandlebars(text, spans?): boolean` — would this parse if its
+  constructs were plain values?
+- `filterHandlebarsMarkers(text, markers, { languageId }): Marker[]` — the marker
+  set to keep; accepts anything with Monaco's 1-based range fields.
 
 ## Testing
 

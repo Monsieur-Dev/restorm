@@ -322,6 +322,8 @@ export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({
             key={`body-${transportEpoch}`}
             height="100%"
             language="xml"
+            // The envelope is a Handlebars template as much as a document.
+            tolerateHandlebars
             value={body}
             onChange={(v) => { setBody(v ?? '') }}
             options={{ minimap: { enabled: false }, wordWrap: 'on', automaticLayout: true }}

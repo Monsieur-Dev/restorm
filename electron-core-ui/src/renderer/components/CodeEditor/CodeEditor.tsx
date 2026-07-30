@@ -4,6 +4,7 @@ import Editor, { type EditorProps, type OnMount } from '@monaco-editor/react'
 import type * as monacoEditor from 'monaco-editor'
 import './codeEditor.css'
 import { bootstrapMonaco } from './monacoBootstrap'
+import { filterHandlebarsMarkers } from './handlebarsTolerance'
 
 // Configure Monaco to use the locally-bundled package + locally-
 // bundled web workers. Without this, `@monaco-editor/react`'s
@@ -82,6 +83,20 @@ export interface CodeEditorProps extends Omit<EditorProps, 'theme'> {
    * @default Uses i18n translation key 'codeEditor.goToDefinition'
    */
   goToDefinitionLabel?: string
+
+  /**
+   * Opt in to Handlebars-tolerant validation: the document is treated as a
+   * TEMPLATE as well as a payload, so `{{var}}`, `{{{raw}}}` and single-line
+   * `{{#each}}` blocks stop producing error markers even though Monaco's own
+   * validator cannot parse them. Genuine syntax errors are still reported.
+   *
+   * OFF by default — every editor showing a fixed document (a response body, a
+   * schema, a config) must keep strict validation. Turn it on only where the user
+   * legitimately writes a template.
+   *
+   * @default false
+   */
+  tolerateHandlebars?: boolean
 }
 
 /**
@@ -155,6 +170,7 @@ export const CodeEditor = forwardRef<CodeEditorRef, CodeEditorProps>(function Co
     onEditorMount,
     onGoToDefinition,
     goToDefinitionLabel,
+    tolerateHandlebars = false,
     'data-testid': dataTestId,
     ...props
   },
@@ -297,6 +313,48 @@ export const CodeEditor = forwardRef<CodeEditorRef, CodeEditorProps>(function Co
       observer.disconnect()
     }
   }, [theme])
+
+  // Handlebars tolerance. Monaco's validators live in web workers that know
+  // nothing about `{{ … }}`, and they can't be taught it — so the markers they
+  // publish are pruned after the fact: whatever only exists because the document
+  // is also a template is removed, everything else is left to squiggle.
+  useEffect(() => {
+    if (!tolerateHandlebars) return
+    if (!editorInstance || !monacoInstance) return
+
+    const prune = (): void => {
+      const model = editorInstance.getModel()
+      if (!model) return
+      const markers = monacoInstance.editor.getModelMarkers({ resource: model.uri })
+      if (markers.length === 0) return
+      const kept = filterHandlebarsMarkers(model.getValue(), markers, { languageId: model.getLanguageId() })
+      if (kept.length === markers.length) return
+      // `setModelMarkers` replaces ONE owner's whole set and a model can carry
+      // several owners at once, so rewrite each owner with its own survivors.
+      // This re-enters the listener below, but that pass filters an already
+      // filtered set down to itself and bails on the length check above — so it
+      // settles after exactly one extra round, no loop.
+      for (const owner of new Set(markers.map((marker) => marker.owner))) {
+        monacoInstance.editor.setModelMarkers(model, owner, kept.filter((marker) => marker.owner === owner))
+      }
+    }
+
+    const subscription = monacoInstance.editor.onDidChangeMarkers((resources) => {
+      const model = editorInstance.getModel()
+      if (!model) return
+      const uri = model.uri.toString()
+      // The event is global to the Monaco instance: ignore the other editors'.
+      if (!resources.some((resource) => resource.toString() === uri)) return
+      prune()
+    })
+
+    // The first validation may already have landed before this effect ran.
+    prune()
+
+    return () => {
+      subscription.dispose()
+    }
+  }, [tolerateHandlebars, editorInstance, monacoInstance])
 
   // Expose ref
   React.useImperativeHandle(ref, () => ({
