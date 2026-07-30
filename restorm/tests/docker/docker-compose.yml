@@ -250,7 +250,9 @@ services:
     ports:
       - "61614:61614"
     healthcheck:
-      test: ["CMD", "sh", "-c", "exec 3<>/dev/tcp/localhost/61614 && echo -en 'GET / HTTP/1.1\\r\\nHost: localhost\\r\\n\\r\\n' >&3"]
+      # This image's /bin/sh is dash, which lacks the /dev/tcp pseudo-device;
+      # bash (present in the image) is required for the socket probe below.
+      test: ["CMD", "bash", "-c", "exec 3<>/dev/tcp/localhost/61614 && echo -en 'GET / HTTP/1.1\\r\\nHost: localhost\\r\\n\\r\\n' >&3"]
       interval: 3s
       timeout: 3s
       retries: 15
@@ -274,9 +276,10 @@ services:
     ports:
       - "5110:5110"
     healthcheck:
-      # `wget` / `curl` aren't in the dotnet/aspnet:9.0-alpine runtime
-      # image, so poll `/health` via /dev/tcp as we do for odata-petstore.
-      test: ["CMD", "sh", "-c", "exec 3<>/dev/tcp/localhost/5110 && echo -e 'GET /health HTTP/1.1\\r\\nHost: localhost\\r\\n\\r\\n' >&3 && grep -q 200 <&3"]
+      # The dotnet/aspnet:9.0-alpine runtime ships busybox `wget`; probe
+      # /health with it. Use 127.0.0.1, not `localhost`: the service binds
+      # IPv4 0.0.0.0 only, while `localhost` may resolve to the unbound ::1.
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:5110/health"]
       interval: 5s
       timeout: 3s
       retries: 10
@@ -354,11 +357,10 @@ services:
     ports:
       - "5100:5100"
     healthcheck:
-      # `wget` / `curl` aren't in the dotnet/aspnet:9.0-alpine runtime
-      # image, so use the `dotnet` binary that ships with it to perform
-      # a tiny HTTP probe. `pnpm docker:wait` also polls /health
-      # externally, so the compose healthcheck is mostly informational.
-      test: ["CMD", "sh", "-c", "exec 3<>/dev/tcp/localhost/5100 && echo -e 'GET /health HTTP/1.1\\r\\nHost: localhost\\r\\n\\r\\n' >&3 && grep -q 200 <&3"]
+      # The dotnet/aspnet:9.0-alpine runtime ships busybox `wget`; probe
+      # /health with it. Use 127.0.0.1, not `localhost`: the service binds
+      # IPv4 0.0.0.0 only, while `localhost` may resolve to the unbound ::1.
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:5100/health"]
       interval: 5s
       timeout: 3s
       retries: 10
