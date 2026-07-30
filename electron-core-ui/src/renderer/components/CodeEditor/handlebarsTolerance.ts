@@ -68,6 +68,16 @@ export interface MarkerRangeLike {
   endColumn: number
 }
 
+export interface HandlebarsSpanOptions {
+  /**
+   * Whether a block opening and closing on the SAME line is returned as one
+   * span covering its content (`true`, the default — what masking needs) or as
+   * its two tags separately (`false` — what a caller interested in the template
+   * SYNTAX needs, since the block's content is ordinary document text).
+   */
+  mergeSameLineBlocks?: boolean
+}
+
 export interface HandlebarsToleranceOptions {
   /**
    * Monaco language id of the model the markers belong to. `json` / `jsonc`
@@ -102,8 +112,16 @@ interface HandlebarsTag {
  * a single JSON literal; a block spanning several lines yields its two tags
  * separately. An unterminated `{{` is not a construct — it is a typo, and the
  * validator is right to complain about it.
+ *
+ * Pass `mergeSameLineBlocks: false` to get every tag on its own instead, which
+ * is what a caller that treats the spans as SYNTAX (rather than as one value to
+ * stand in for) wants — the text a block wraps is not template syntax.
  */
-export function findHandlebarsSpans(text: string): HandlebarsSpan[] {
+export function findHandlebarsSpans(
+  text: string,
+  options: HandlebarsSpanOptions = {}
+): HandlebarsSpan[] {
+  const mergeSameLineBlocks = options.mergeSameLineBlocks ?? true
   const spans: HandlebarsSpan[] = []
   /** Open blocks awaiting their close tag, with the span count at open time so a
    * same-line close can replace everything it wraps with one merged span. */
@@ -132,7 +150,7 @@ export function findHandlebarsSpans(text: string): HandlebarsSpan[] {
       if (open !== undefined) {
         // Everything up to and including this close tag belongs to the block.
         openBlocks.length = openIndex
-        if (!text.slice(open.start, tag.end).includes('\n')) {
+        if (mergeSameLineBlocks && !text.slice(open.start, tag.end).includes('\n')) {
           spans.length = open.spanCount
           spans.push({ start: open.start, end: tag.end, kind: 'block' })
           continue
@@ -332,8 +350,11 @@ function maskSpan(raw: string, inString: boolean, variant: HandlebarsMaskVariant
   return `"${FILLER.repeat(raw.length - 2)}"`
 }
 
-/** Offset of the first character of each 1-based line. */
-function computeLineStarts(text: string): number[] {
+/**
+ * Offset of the first character of each 1-based line. Shared with the
+ * colouring pass, which converts the same spans into editor positions.
+ */
+export function computeLineStarts(text: string): number[] {
   const starts = [0]
   for (let i = 0; i < text.length; i += 1) {
     if (text[i] === '\n') starts.push(i + 1)

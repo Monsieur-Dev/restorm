@@ -1,4 +1,4 @@
-Feature: Handlebars in a request body does not squiggle
+Feature: Handlebars in a request body is tolerated and coloured
 
   A request body is a Handlebars template as much as it is a payload, but Monaco
   validates JSON in a web worker that knows nothing about `{{ … }}` — so a body
@@ -52,3 +52,18 @@ Feature: Handlebars in a request body does not squiggle
     Then the request body editor shows "hbBroken" and reports at least one error marker
     When I open the "Handlebars XML" request tab via MCP
     Then the request body editor shows "hbXml" and reports no error marker
+
+  Scenario: A construct nested in a quoted string is coloured as template syntax
+    A `{{ … }}` inside a JSON string is out of reach of every language grammar —
+    to the JSON tokenizer `"{{petId}}"` is a string and its content is string
+    text. The colouring therefore comes from a decoration, and this case is the
+    one that proves it: the construct must be painted the theme's variable colour
+    while the quotes around it stay string-coloured.
+
+    Given a request "Handlebars in a string" whose text body is:
+      """
+      {"case": "hbColour", "petid": "{{petId}}"}
+      """
+    When I open the "Handlebars in a string" request tab via MCP
+    Then the request body editor shows "hbColour" and reports no error marker
+    And the request body editor colours "{{petId}}" with the theme variable colour

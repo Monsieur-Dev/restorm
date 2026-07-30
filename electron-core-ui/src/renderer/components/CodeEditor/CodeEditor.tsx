@@ -5,6 +5,7 @@ import type * as monacoEditor from 'monaco-editor'
 import './codeEditor.css'
 import { bootstrapMonaco } from './monacoBootstrap'
 import { filterHandlebarsMarkers } from './handlebarsTolerance'
+import { findHandlebarsHighlightRanges, HANDLEBARS_INLINE_CLASS } from './handlebarsHighlight'
 
 // Configure Monaco to use the locally-bundled package + locally-
 // bundled web workers. Without this, `@monaco-editor/react`'s
@@ -85,14 +86,18 @@ export interface CodeEditorProps extends Omit<EditorProps, 'theme'> {
   goToDefinitionLabel?: string
 
   /**
-   * Opt in to Handlebars-tolerant validation: the document is treated as a
-   * TEMPLATE as well as a payload, so `{{var}}`, `{{{raw}}}` and single-line
-   * `{{#each}}` blocks stop producing error markers even though Monaco's own
-   * validator cannot parse them. Genuine syntax errors are still reported.
+   * Treat the document as a Handlebars TEMPLATE as well as a payload. Two
+   * effects, both driven by the same construct finder:
+   *
+   * - `{{var}}`, `{{{raw}}}` and single-line `{{#each}}` blocks stop producing
+   *   error markers even though Monaco's own validator cannot parse them.
+   *   Genuine syntax errors are still reported.
+   * - every construct is COLOURED, including one nested in a quoted string
+   *   (`"{{petId}}"`), which no language tokenizer can reach.
    *
    * OFF by default — every editor showing a fixed document (a response body, a
-   * schema, a config) must keep strict validation. Turn it on only where the user
-   * legitimately writes a template.
+   * schema, a config) must keep strict validation and its language's own
+   * colours. Turn it on only where the user legitimately writes a template.
    *
    * @default false
    */
@@ -353,6 +358,58 @@ export const CodeEditor = forwardRef<CodeEditorRef, CodeEditorProps>(function Co
 
     return () => {
       subscription.dispose()
+    }
+  }, [tolerateHandlebars, editorInstance, monacoInstance])
+
+  // Handlebars colouring. Monaco colours text through the model language's
+  // tokenizer, and neither candidate can do this job: to the JSON grammar
+  // `"{{petId}}"` is string text, and swapping in a Handlebars grammar would
+  // stop the payload being validated at all. Decorations are applied by RANGE,
+  // so they are language-agnostic — the constructs get their own colour on top
+  // of whatever the language already painted, in a JSON body and an XML envelope
+  // alike.
+  useEffect(() => {
+    if (!tolerateHandlebars) return
+    if (!editorInstance || !monacoInstance) return
+
+    const decorations = editorInstance.createDecorationsCollection([])
+
+    const paint = (): void => {
+      const model = editorInstance.getModel()
+      if (!model) {
+        decorations.clear()
+        return
+      }
+      decorations.set(
+        findHandlebarsHighlightRanges(model.getValue()).map((range) => ({
+          range: new monacoInstance.Range(
+            range.startLineNumber,
+            range.startColumn,
+            range.endLineNumber,
+            range.endColumn
+          ),
+          options: {
+            description: 'handlebars-construct',
+            inlineClassName: HANDLEBARS_INLINE_CLASS,
+            // The colour belongs to the construct as written. Typing at either
+            // edge must not stretch the decoration over the neighbouring text
+            // in the instant before the repaint below lands.
+            stickiness: monacoInstance.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges
+          }
+        }))
+      )
+    }
+
+    // Every mutation repaints, including the imperative `setValue` an external
+    // value override goes through.
+    const contentSubscription = editorInstance.onDidChangeModelContent(paint)
+    const modelSubscription = editorInstance.onDidChangeModel(paint)
+    paint()
+
+    return () => {
+      contentSubscription.dispose()
+      modelSubscription.dispose()
+      decorations.clear()
     }
   }, [tolerateHandlebars, editorInstance, monacoInstance])
 

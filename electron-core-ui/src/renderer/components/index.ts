@@ -69,10 +69,13 @@ export {
 } from './CodeEditor'
 export type {
   HandlebarsSpan,
+  HandlebarsSpanOptions,
   HandlebarsMaskVariant,
   HandlebarsToleranceOptions,
   MarkerRangeLike
 } from './CodeEditor'
+export { findHandlebarsHighlightRanges, HANDLEBARS_INLINE_CLASS } from './CodeEditor'
+export type { HandlebarsHighlightRange } from './CodeEditor'
 
 // MiniBrowser exports
 export { MiniBrowserPanel } from './MiniBrowser'

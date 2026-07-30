@@ -7,7 +7,11 @@
  *
  * `.squiggly-error` is the class Monaco puts on an Error-severity marker's
  * decoration, so counting it is the closest a test can get to "what the user sees
- * as a red underline" without reaching into the editor's model.
+ * as a red underline" without reaching into the editor's model. The colouring is
+ * read the same way — off `.ecui-handlebars-construct`, the class the editor's
+ * own decoration stamps on a construct — and compared against the colour the
+ * active theme resolves for a variable, so the assertion is about the rendered
+ * pixels rather than about the code that asked for them.
  *
  * Inactive request tabs stay MOUNTED (the tab slot only toggles `display:none`),
  * so every opened request keeps a body editor in the DOM: everything here is
@@ -33,6 +37,8 @@ let sampleFolderId: string | null = null
 
 const BODY_EDITOR = '[data-testid="http-request-body-editor"]:visible'
 const ERROR_MARKER = `${BODY_EDITOR} .squiggly-error`
+/** The inline class the editor's Handlebars colouring stamps on a construct. */
+const HANDLEBARS_SPAN = `${BODY_EDITOR} .ecui-handlebars-construct`
 /**
  * How long the JSON worker gets to publish its verdict before "no error marker"
  * is believed. The worker validates asynchronously, so an immediately-empty
@@ -139,5 +145,45 @@ Then(
     // empty — the previous case proved a broken document does light one up.
     await p.waitForTimeout(VALIDATION_SETTLE_MS)
     await expect(p.locator(ERROR_MARKER)).toHaveCount(0)
+  }
+)
+
+Then(
+  'the request body editor colours {string} with the theme variable colour',
+  async ({}, construct: string) => {
+    const p = requirePage()
+    const spans = p.locator(HANDLEBARS_SPAN)
+    await expect.poll(async () => spans.count(), { timeout: 20_000 }).toBeGreaterThan(0)
+    // The colouring must cover the construct and nothing else — the quotes it
+    // sits between belong to the payload and keep the string colour. Joined
+    // rather than compared element-wise: Monaco splits a rendered line into
+    // spans on its own terms, and how many it uses here is not the contract.
+    expect((await spans.allInnerTexts()).join('')).toBe(construct)
+
+    // Resolve `--hljs-variable` the way the browser does, so the comparison is
+    // against a real rgb() triple rather than the raw hex in the theme file.
+    const { raw, colour: expected } = await p.evaluate(() => {
+      const value = getComputedStyle(document.documentElement)
+        .getPropertyValue('--hljs-variable')
+        .trim()
+      const probe = document.createElement('span')
+      probe.style.color = value
+      document.body.appendChild(probe)
+      const resolved = getComputedStyle(probe).color
+      probe.remove()
+      return { raw: value, colour: resolved }
+    })
+    // An undefined variable would resolve the probe to the inherited colour, and
+    // the assertion below would then be comparing against something arbitrary.
+    expect(raw, '--hljs-variable is not defined for the active theme').not.toBe('')
+    await expect
+      .poll(
+        async () =>
+          spans.evaluateAll((nodes) => [
+            ...new Set(nodes.map((node) => getComputedStyle(node).color))
+          ]),
+        { timeout: 10_000 }
+      )
+      .toEqual([expected])
   }
 )

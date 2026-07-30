@@ -9,7 +9,10 @@ export {
 } from './handlebarsTolerance'
 export type {
   HandlebarsSpan,
+  HandlebarsSpanOptions,
   HandlebarsMaskVariant,
   HandlebarsToleranceOptions,
   MarkerRangeLike
 } from './handlebarsTolerance'
+export { findHandlebarsHighlightRanges, HANDLEBARS_INLINE_CLASS } from './handlebarsHighlight'
+export type { HandlebarsHighlightRange } from './handlebarsHighlight'

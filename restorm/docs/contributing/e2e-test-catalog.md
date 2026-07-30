@@ -104,7 +104,7 @@ server; — = pure UI/in-process.
 | fully-documented-petstore | 1 | Fully-documented Petstore fixture builder | — |
 | theme-carousel-a11y | 1 | Theme preview cards keep Tab on the card only, never the abstract preview | — |
 | monaco-suggest-dismiss | 1 | A `{{...}}` suggest popup opened in one request is gone after switching tabs, and still opens in the now-active field | 🔌 |
-| monaco-handlebars-body | 1 | Handlebars in a request body produces no Monaco error marker (double / triple brace, single-line block, XML), while a genuinely broken payload still does | 🔌 |
+| monaco-handlebars-body | 2 | Handlebars in a request body produces no Monaco error marker (double / triple brace, single-line block, XML), while a genuinely broken payload still does; a construct nested in a quoted string is coloured as template syntax | 🔌 |
 
 ## MCP surface
 

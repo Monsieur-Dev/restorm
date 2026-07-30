@@ -8,6 +8,7 @@
 - Supports a debounced `onChange` via `changeDebounceMs`.
 - Adds a custom action "Go to definition" that extracts a Handlebars variable name from `{{variableName}}` at the cursor position and calls `onGoToDefinition(variableName)`.
 - Optionally tolerates Handlebars syntax in an otherwise-validated document (`tolerateHandlebars`), so a template that is also a JSON/XML payload does not squiggle. See [Handlebars tolerance](#handlebars-tolerance).
+- Colours the Handlebars constructs of such a document, including those nested in a quoted string, which no language tokenizer can reach. See [Handlebars colouring](#handlebars-colouring).
 
 ## Component location
 
@@ -25,7 +26,7 @@
 - `onEditorMount?: OnMount`: alias of `onMount`.
 - `onGoToDefinition?: (variableName: string) => void`: called when the user triggers "Go to definition" (Ctrl/Cmd+F12 by default) on a Handlebars variable `{{...}}`.
 - `goToDefinitionLabel?: string`: label used in the editor action/context menu. By default it uses i18n key `codeEditor.goToDefinition`.
-- `tolerateHandlebars?: boolean`: treat the document as a Handlebars template as well as a payload, so template syntax stops producing error markers. Default `false`. See [Handlebars tolerance](#handlebars-tolerance).
+- `tolerateHandlebars?: boolean`: treat the document as a Handlebars template as well as a payload — template syntax stops producing error markers and is coloured. Default `false`. See [Handlebars tolerance](#handlebars-tolerance) and [Handlebars colouring](#handlebars-colouring).
 - `data-testid?: string`: stable E2E hook applied to the root element.
 
 ### Ref
@@ -93,14 +94,55 @@ disagree about it.
 The decision logic is pure text arithmetic, exported for consumers that need to
 reason about the same spans (validation badges, a "resolve preview", tests):
 
-- `findHandlebarsSpans(text): HandlebarsSpan[]` — every construct as a
-  `{ start, end, kind }` triple (`kind: 'expression' | 'block'`).
+- `findHandlebarsSpans(text, options?): HandlebarsSpan[]` — every construct as a
+  `{ start, end, kind }` triple (`kind: 'expression' | 'block'`). A block whose
+  two halves sit on one line is returned as ONE span covering its content, which
+  is what masking needs; pass `{ mergeSameLineBlocks: false }` for its two tags
+  on their own, which is what a caller interested in the SYNTAX needs.
 - `maskHandlebarsForJson(text, spans?, variant?): string` — the same document with
   every construct replaced by a same-width JSON-legal placeholder.
 - `isJsonValidIgnoringHandlebars(text, spans?): boolean` — would this parse if its
   constructs were plain values?
 - `filterHandlebarsMarkers(text, markers, { languageId }): Marker[]` — the marker
   set to keep; accepts anything with Monaco's 1-based range fields.
+- `findHandlebarsHighlightRanges(text): HandlebarsHighlightRange[]` — the same
+  constructs as editor ranges (1-based line/column, end-exclusive), ready to hand
+  to a decoration; blocks unmerged, so only the tags are covered.
+- `HANDLEBARS_INLINE_CLASS` — the CSS class the colouring stamps on a construct,
+  for a host stylesheet or a test that needs to name it.
+
+## Handlebars colouring
+
+`tolerateHandlebars` also gives the constructs their own colour, and the reason
+it takes a decoration rather than a tokenizer is worth stating: Monaco colours
+text through the model language's grammar, and neither candidate grammar can do
+this job. To the JSON grammar, `"{{petId}}"` is a string and the construct inside
+it is ordinary string text; swapping in a Handlebars grammar would colour it, but
+then the payload is no longer validated as JSON at all.
+
+Decorations are applied by RANGE, so they are language-agnostic. Every construct
+`findHandlebarsSpans` reports gets an inline class on top of whatever the language
+already painted — so a construct is coloured wherever it is excused from
+validation, in a value position (`{"id": {{petId}}}`), inside a quoted string
+(`{"petid": "{{petId}}"}`) and inside an XML element
+(`<id>{{petId}}</id>`) alike.
+
+The colour is `var(--hljs-variable)` — the palette entry every theme already
+defines for a variable in highlighted code — so the constructs track the active
+theme and no new theme variable is introduced. Override it for one host by
+re-styling the class:
+
+```css
+.my-template-editor .monaco-editor .ecui-handlebars-construct {
+  color: var(--my-template-colour);
+}
+```
+
+A block's TAGS are coloured, not the payload they wrap: in
+`[{{#each pets}}"{{this}}",{{/each}}]` the three tags light up and the `","`
+between them stays string-coloured. The document is repainted on every content
+change, including the imperative `setValue` an external `value` override goes
+through.
 
 ## Testing
 
