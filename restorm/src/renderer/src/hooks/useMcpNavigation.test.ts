@@ -6,7 +6,8 @@ import { useRef } from 'react'
 // The real 'electron-core-ui/renderer' barrel drags Monaco into jsdom; this
 // hook only needs `navigationService.navigateTo` to exist.
 vi.mock('electron-core-ui/renderer', () => ({
-  navigationService: { navigateTo: vi.fn() }
+  navigationService: { navigateTo: vi.fn() },
+  logger: { error: vi.fn(), warn: vi.fn(), debug: vi.fn(), info: vi.fn() }
 }))
 
 // Stand in for the preload bridge. Captures the callbacks the hook
@@ -105,6 +106,35 @@ describe('useMcpNavigation — open_tab race fix', () => {
     openCb?.({ itemId: 'r1', kind: 'request' })
     expect(input.openAnyRequestTab).toHaveBeenCalledTimes(1)
     expect(replyMcpOpenTab).not.toHaveBeenCalled()
+  })
+
+  it('does not throw when the preload bridge lacks replyMcpOpenTab (stale bundle) — the tab still opens, the MCP channel is not wedged', () => {
+    // An out-of-date preload can expose a bridge missing newer methods. Calling
+    // an absent method would throw and, uncaught in this IPC handler, wedge the
+    // whole renderer-bound MCP channel. The handler must guard against it.
+    const strippedRuntime = {
+      onMcpOpenTab: (cb: OpenCb) => { openCb = cb; return () => { openCb = null } },
+      onMcpRevealInTree: (cb: RevealCb) => { revealCb = cb; return () => { revealCb = null } },
+      onMcpCloseTab: (cb: CloseCb) => { closeCb = cb; return () => { closeCb = null } }
+      // deliberately no replyMcpOpenTab
+    }
+    ;(window as unknown as { restorm: unknown }).restorm = { runtime: strippedRuntime }
+
+    const { rootItemsRef, input } = setup([])
+    rootItemsRef.current = [fakeRequest('r1')]
+
+    expect(() => openCb?.({ requestId: 'ack-stale', itemId: 'r1', kind: 'request' })).not.toThrow()
+    // Handler ran to completion instead of wedging on the missing ack.
+    expect(input.openAnyRequestTab).toHaveBeenCalledTimes(1)
+  })
+
+  it('acks opened:false and does not throw when opening the tab fails mid-handler (no MCP-channel wedge)', () => {
+    const { rootItemsRef, input } = setup([])
+    rootItemsRef.current = [fakeRequest('r1')]
+    ;(input.openAnyRequestTab as ReturnType<typeof vi.fn>).mockImplementationOnce(() => { throw new Error('boom') })
+
+    expect(() => openCb?.({ requestId: 'ack-boom', itemId: 'r1', kind: 'request' })).not.toThrow()
+    expect(replyMcpOpenTab).toHaveBeenCalledWith({ requestId: 'ack-boom', opened: false })
   })
 
   it('reveal_in_tree reads the same live ref written after mount (no stale-tree miss)', () => {

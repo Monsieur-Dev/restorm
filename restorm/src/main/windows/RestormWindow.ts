@@ -32,12 +32,16 @@ export class RestormWindow extends BaseWindow {
       // __dirname is dist/main, so go up 2 levels to get restorm project root
       const projectRoot = join(__dirname, '../..')
       
-      // Priority order: out/ (electron-vite default), then dist/, then dev
+      // Resolve to `dist/preload` only. The build emits the preload to
+      // `dist/preload` (electron-builder packages `dist/**`); the older
+      // `out/preload` output was abandoned. A leftover `out/preload/index.js`
+      // from a build made under the old config must NOT be preferred — a
+      // stale bundle there shadows the current one and silently loads an
+      // out-of-date preload (e.g. missing `replyMcpOpenTab`, which wedges the
+      // renderer-bound MCP channel). So `out/preload` is deliberately absent.
       const paths = [
-        join(projectRoot, 'out', 'preload', 'index.js'),
         join(__dirname, '../preload/index.js'),
         join(projectRoot, 'dist', 'preload', 'index.js'),
-        join(appRoot, 'out', 'preload', 'index.js'),
         join(appRoot, 'dist', 'preload', 'index.js'),
         join(appRoot, '.electron-vite', 'dev', 'preload', 'index.mjs')
       ]
