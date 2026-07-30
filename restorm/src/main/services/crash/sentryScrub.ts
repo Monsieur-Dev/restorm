@@ -58,6 +58,16 @@ export function crashScrubOptions(overrides: ScrubOptions = {}): ScrubOptions {
   return {
     urlPolicy: 'strip',
     homeDir: safeHomedir(),
+    // Sentry's own structural identifiers are 32-hex random ids — the exact
+    // shape the entropy catch-all treats as a secret. Redacting them corrupts
+    // the identifiers the ingest endpoint validates: an event whose `event_id`
+    // is `[redacted-token]` is rejected with HTTP 400, so scrubbing them drops
+    // EVERY crash report instead of protecting anything. They are SDK-generated
+    // ids, not user content, so they pass through verbatim. `span_id` is 16-hex
+    // (below the catch-all's 32-char floor) but is listed for parity so the
+    // policy reads as "the Sentry trace identifiers", not "the ones that happen
+    // to trip the rule today".
+    preserveKeys: ['event_id', 'trace_id', 'span_id'],
     ...overrides
   }
 }

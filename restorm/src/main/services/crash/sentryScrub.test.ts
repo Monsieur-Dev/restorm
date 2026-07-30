@@ -138,4 +138,29 @@ describe('crashScrubOptions — the declared policy', () => {
     expect(opts.urlPolicy).toBe('host')
     expect(opts.homeDir).toBe(crashScrubOptions().homeDir)
   })
+
+  it('preserves Sentry\'s structural identifiers so the ingest does not reject the event', () => {
+    expect(crashScrubOptions().preserveKeys).toEqual(['event_id', 'trace_id', 'span_id'])
+  })
+})
+
+describe('beforeSend — Sentry\'s own identifiers survive the scrub', () => {
+  // Regression: Sentry's event_id / trace_id are 32-hex, the exact shape the
+  // entropy catch-all treats as a token. Redacting them yields an invalid
+  // event_id and the ingest endpoint rejects the whole event with HTTP 400 —
+  // so a scrub that "cleans" them silently drops every crash report.
+  it('keeps a 32-hex event_id and trace_id verbatim while still redacting a real token', () => {
+    const eventId = '36a8ee150f1a443da01e6a6018d79244'
+    const traceId = '4cef6038a11343c09026b35a09aa4505'
+    const secret = 'sk_live_'.padEnd(40, 'z')
+    const out = makeBeforeSend()({
+      event_id: eventId,
+      contexts: { trace: { trace_id: traceId, span_id: 'b61eedba07102474' } },
+      message: `boom with ${secret}`
+    }) as Record<string, unknown>
+    expect(out['event_id']).toBe(eventId)
+    expect((out['contexts'] as { trace: { trace_id: string } }).trace.trace_id).toBe(traceId)
+    // The carve-out is exact: a genuine secret in free text is still redacted.
+    expect(JSON.stringify(out)).not.toContain(secret)
+  })
 })

@@ -77,6 +77,23 @@ export interface ScrubOptions {
    * caught even when they carry no recognisable shape.
    */
   redactValues?: readonly string[] | undefined
+  /**
+   * Object keys whose STRING value is a structural identifier the transport
+   * requires verbatim, not free content — a Sentry `event_id` / `trace_id`, a
+   * correlation id, a request id. Their values pass through untouched, exempt
+   * from every string detector (matched loosely, like {@link redactKeys}).
+   *
+   * The narrow exception to the fail-closed posture, and deliberately narrow:
+   * only a STRING under one of these exact keys is exempted — a nested object is
+   * still walked in full, so this cannot be used to smuggle a subtree past the
+   * gate. It exists because the entropy catch-all cannot tell a 32-hex random id
+   * from a 32-hex secret, and redacting the former corrupts the very identifier
+   * the ingest endpoint validates: an event with a redacted `event_id` is
+   * rejected outright, so scrubbing it drops EVERY report rather than protecting
+   * anything. Name only keys whose value the producer generates and the consumer
+   * requires — never a key that could carry user content.
+   */
+  preserveKeys?: readonly string[] | undefined
   /** URL rewrite policy. Defaults to `'strip'`. */
   urlPolicy?: UrlPolicy | undefined
   /**
@@ -199,6 +216,22 @@ function isBodyKey(key: string): boolean {
   const n = normaliseKey(key)
   if (n === '') return false
   return (BODY_KEY_FRAGMENTS as readonly string[]).includes(n)
+}
+
+/**
+ * Whether `key` is one the caller marked as a verbatim structural identifier.
+ * Exact match on the normalised form (unlike the substring rules), because a
+ * preserve entry is a precise carve-out, not a broad category — `trace_id`
+ * exempts `trace_id`, never `trace_id_secret`.
+ */
+function isPreservedKey(key: string, preserve: readonly string[]): boolean {
+  if (preserve.length === 0) return false
+  const n = normaliseKey(key)
+  if (n === '') return false
+  for (const raw of preserve) {
+    if (normaliseKey(raw) === n) return true
+  }
+  return false
 }
 
 // ---------------------------------------------------------------------------
@@ -497,7 +530,12 @@ function walkRecord(
   seen: WeakSet<object>
 ): Record<string, unknown> {
   const out: Record<string, unknown> = {}
+  const preserve = options.preserveKeys ?? []
   for (const key of Object.keys(record)) {
+    // Preserve wins over every rule below: a caller naming a key here has
+    // asserted its string value is a structural identifier, not content. Scoped
+    // to strings so a nested object under the same key is still walked in full.
+    if (isPreservedKey(key, preserve) && typeof record[key] === 'string') { out[key] = record[key]; continue }
     if (isBodyKey(key)) { out[key] = REDACTED_BODY; continue }
     if (isSensitiveKey(key, options.redactKeys ?? [])) { out[key] = REDACTED; continue }
     out[key] = walk(record[key], options, maxDepth, depth + 1, seen)
@@ -619,9 +657,14 @@ function inspectRecord(
   seen: WeakSet<object>,
   out: ScrubViolation[]
 ): void {
+  const preserve = options.preserveKeys ?? []
   for (const key of Object.keys(record)) {
     const child = record[key]
     const childPath = `${path}.${key}`
+    // Mirror walkRecord: a preserved key's string value is exempt, so the gate
+    // agrees the scrubbed payload is clean rather than throwing on the very
+    // identifier that walkRecord deliberately kept.
+    if (isPreservedKey(key, preserve) && typeof child === 'string') continue
     if (isBodyKey(key)) {
       if (child !== REDACTED_BODY) out.push({ path: childPath, rule: 'body-key' })
       continue

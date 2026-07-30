@@ -165,6 +165,7 @@ subtree.
 | Home directory in a path or `file://` URL | → `~` (keeps the rest of the frame) |
 | E-mail addresses, IPv4 literals | → `[redacted-email]` / `[redacted-ip]` |
 | Caller-supplied `redactValues` | → `[redacted]` wherever they appear |
+| Caller-supplied `preserveKeys` | STRING value under an exact-named key passes **verbatim**, exempt from every rule above |
 
 Two calibrated choices. `author` is **not** treated as a credential even though
 it contains `auth` — bare `auth` would swallow a legitimate field, and `token` /
@@ -179,10 +180,23 @@ field back should rename it rather than loosen the rule. And file paths keep the
 than being blanked: the username is the PII, the rest of the path is the whole
 value of a stack trace.
 
-`ScrubOptions`: `redactKeys`, `redactValues`, `urlPolicy`, `homeDir`, `maxDepth`
-(default 8). True cycles collapse to `[circular]` — a merely REPEATED reference
-does not, so a payload that points at the same `user` object twice keeps both.
-Over-deep values collapse to `[redacted-depth]`.
+`ScrubOptions`: `redactKeys`, `redactValues`, `preserveKeys`, `urlPolicy`,
+`homeDir`, `maxDepth` (default 8). True cycles collapse to `[circular]` — a merely
+REPEATED reference does not, so a payload that points at the same `user` object
+twice keeps both. Over-deep values collapse to `[redacted-depth]`.
+
+`preserveKeys` is the one calibrated hole in the fail-closed posture, and it is
+deliberately narrow. Some transports carry structural identifiers that LOOK like
+secrets: a Sentry `event_id` / `trace_id` is 32 hex characters, the exact shape
+the entropy catch-all treats as a token. Redacting them is not merely
+over-cautious — it corrupts the field the ingest endpoint validates, so an event
+with a `[redacted-token]` `event_id` is rejected with HTTP 400 and the whole
+report is dropped. `preserveKeys` names such keys (matched loosely, like
+`redactKeys`) so their **string** value passes untouched and `assertScrubbed`
+agrees. It is scoped to strings only: a nested object under a preserved key is
+still walked in full, so it cannot be used to smuggle a subtree past the gate.
+Name only keys whose value the producer generates and the consumer requires
+verbatim — never one that could carry user content.
 
 Under `urlPolicy: 'host'` the surviving `scheme://host` is left alone by the IP
 and high-entropy rules, so an IP-literal destination stays readable. That is the

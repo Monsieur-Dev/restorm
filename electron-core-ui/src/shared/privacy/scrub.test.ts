@@ -162,6 +162,42 @@ describe('scrubPayload — structural rules', () => {
     const out = scrubPayload({ n: 42, b: true, z: null }) as Record<string, unknown>
     expect(out).toEqual({ n: 42, b: true, z: null })
   })
+
+  it('keeps a preserved key\'s string value verbatim even though it looks like a token', () => {
+    // A 32-hex id trips the entropy catch-all and would become REDACTED_TOKEN.
+    const id = 'a'.repeat(32)
+    const opts = { preserveKeys: ['event_id', 'trace_id'] }
+    const out = scrubPayload({ event_id: id, trace_id: id, other_id: id }, opts) as Record<string, string>
+    expect(out['event_id']).toBe(id)
+    expect(out['trace_id']).toBe(id)
+    // A key NOT on the preserve list is still redacted — the carve-out is exact.
+    expect(out['other_id']).toBe(REDACTED_TOKEN)
+    // And the scrubbed result passes the fail-closed gate with the same options.
+    expect(() => { assertScrubbed(out, opts) }).not.toThrow()
+  })
+
+  it('matches a preserved key loosely on casing / separators but only exactly, not as a substring', () => {
+    const id = 'b'.repeat(40)
+    const out = scrubPayload(
+      { 'Event-Id': id, eventIdentifier: id },
+      { preserveKeys: ['event_id'] }
+    ) as Record<string, string>
+    // `Event-Id` normalises to the same token as `event_id` → preserved.
+    expect(out['Event-Id']).toBe(id)
+    // `eventIdentifier` normalises to `eventidentifier` ≠ `eventid` → still redacted.
+    expect(out['eventIdentifier']).toBe(REDACTED_TOKEN)
+  })
+
+  it('only exempts a preserved key\'s STRING value — a nested object is still walked', () => {
+    const out = scrubPayload(
+      { trace_id: { note: 'call https://api.example.com/x', password: 'hunter2' } },
+      { preserveKeys: ['trace_id'] }
+    ) as { trace_id: { note: string; password: string } }
+    // The object under a preserved key is NOT smuggled past the gate: its own
+    // fields still go through the URL rule and the sensitive-key rule.
+    expect(out.trace_id.note).toBe(`call ${REDACTED_URL}`)
+    expect(out.trace_id.password).toBe(REDACTED)
+  })
 })
 
 describe('assertScrubbed — fail closed', () => {
