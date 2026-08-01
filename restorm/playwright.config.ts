@@ -509,25 +509,24 @@ export default defineConfig({
    * (editors, browsers, parallel agents), and 4 vs 8 differ by under 1 GB.
    * What binds now is CPU, and the suite's own load-sensitivity.
    *
-   * Measured full-suite wall time: 1 worker ~52 min, 4 workers 19 min, 8
+   * Measured full-suite wall time: 1 worker ~52 min, 4 workers ~18 min, 8
    * workers 15 min. The tail is long-pole projects that stay serial inside
    * themselves (scenario-runlog, scenario-code-deps, exhaustive-doc-viewer,
    * full-workflow), so the suite floors around 13-14 min regardless — 8 buys
    * only ~19% over 4 while doubling the failures (11 vs 5). 4 is the useful
    * target; higher is not worth the instability.
    *
-   * Kept at 1 by DEFAULT even so, because `test:e2e` is what the pre-push hook
-   * runs with no env set: a handful of tests still fail reproducibly at 4 under
-   * concurrent load, so defaulting higher would red the push gate for everyone.
-   * Raise the default only once those pass at 4. Known offenders: a few
-   * MCP-driven suites where the tool returns an error reply under load, and
-   * kafka-execution, whose >5s blocking `docker exec` topic reseed outlives the
-   * MCP HTTP server's 5s keep-alive timeout — the harness then reuses a socket
-   * the server already closed and reports `TypeError: fetch failed`.
+   * 4 is the VALIDATED default: two consecutive full runs at 4 came back
+   * 353/353 with zero flaky and zero retries fired. Getting there took fixing
+   * what the parallelism was exposing rather than tuning the number — a
+   * renderer→main mirror that could wipe the collections tree during project
+   * load, a harness socket reused after the host's keep-alive closed it, and an
+   * ack budget too small for a loaded machine. Those were real defects that
+   * merely happened to surface under load; the worker count was never the bug.
    *
-   * `PW_WORKERS` opts in meanwhile: `PW_WORKERS=4` for the ~2.7x speed-up on a
-   * run you are watching, or a lower pin on a smaller CI runner. */
-  workers: process.env.PW_WORKERS ? Number(process.env.PW_WORKERS) : 1,
+   * `PW_WORKERS` overrides it either way — raise it on an idle host, or pin
+   * `PW_WORKERS=1` to serialise when debugging a single suite. */
+  workers: process.env.PW_WORKERS ? Number(process.env.PW_WORKERS) : 4,
 
   /* Reporter */
   reporter: [
