@@ -67,11 +67,24 @@ export interface UseMcpTreeReplaceInput {
   /**
    * Mutable ref the hook writes with the `mcpVersion` carried by each
    * `mcp:tree-replace` payload — the last main-side tree version this renderer
-   * has APPLIED. The renderer's autosave-mirror path (`setCollections` →
-   * `syncCollections`) stamps its call with this value so the main store can
-   * refuse a mirror that predates a newer MCP mutation (stale-write guard).
+   * has APPLIED. Read by same-tick IPC handlers that need the freshest value
+   * before React commits, for the same reason as `rootItemsRef`.
    */
   lastMcpVersionRef: { current: number }
+  /**
+   * Publish that same version as STATE, dispatched in this handler alongside
+   * `setRootItems` so React commits both in one render.
+   *
+   * The autosave mirror (`setCollections` → `syncCollections`) has to stamp
+   * each mirror with the version the mirrored tree was BUILT from, and it is
+   * sent from an effect that runs after that render. Reading the ref there
+   * would stamp a tree rendered before a replace with the version that arrived
+   * after it — and main only refuses a strictly OLDER stamp, so the stale tree
+   * would be accepted and would overwrite (potentially empty) the
+   * authoritative one. Pairing tree and version in the same commit makes that
+   * unrepresentable.
+   */
+  onVersionApplied?: (version: number) => void
   /**
    * Invalidate every workbench tab's content cache after `setRootItems`.
    * `EditorWorkbench` caches each tab's rendered React element keyed
@@ -125,7 +138,7 @@ export function readTreeReplacePayload(payload: unknown): { items: unknown[]; mc
 }
 
 export function useMcpTreeReplace(input: UseMcpTreeReplaceInput): void {
-  const { setRootItems, rootItemsRef, mcpDrivenRef, lastMcpVersionRef, bumpAllTabContentVersions, pruneOrphanTabs } = input
+  const { setRootItems, rootItemsRef, mcpDrivenRef, lastMcpVersionRef, onVersionApplied, bumpAllTabContentVersions, pruneOrphanTabs } = input
 
   useEffect(() => {
     const root = window as { restorm?: { runtime?: RestormTreeBridge } }
@@ -142,6 +155,10 @@ export function useMcpTreeReplace(input: UseMcpTreeReplaceInput): void {
       // Record the applied main-side version so the downstream autosave
       // mirror stamps `syncCollections` with it (stale-write guard).
       lastMcpVersionRef.current = parsed.mcpVersion
+      // Same handler call as `setRootItems` below, so React commits the version
+      // and the tree together — the mirror effect then stamps each tree with
+      // the version it was actually built from.
+      onVersionApplied?.(parsed.mcpVersion)
       // Flip the flag BEFORE setRootItems. The downstream zustand
       // `setCollections` effect reads it on the next render to pick
       // `source: 'mcp'` (skipping the main-side mirror). Resetting
@@ -162,5 +179,5 @@ export function useMcpTreeReplace(input: UseMcpTreeReplaceInput): void {
       bumpAllTabContentVersions()
     })
     return off
-  }, [setRootItems, rootItemsRef, mcpDrivenRef, lastMcpVersionRef, bumpAllTabContentVersions, pruneOrphanTabs])
+  }, [setRootItems, rootItemsRef, mcpDrivenRef, lastMcpVersionRef, onVersionApplied, bumpAllTabContentVersions, pruneOrphanTabs])
 }

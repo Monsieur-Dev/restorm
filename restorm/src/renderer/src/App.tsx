@@ -131,6 +131,7 @@ import { CONSOLE_TAB_ID, FIREWALL_TAB_ID, MINI_BROWSER_TAB_ID, SETTINGS_TAB_ID, 
 import { findGroupIdForTab, hasGroupWithId, updateGroupById } from './utils/workbenchHelpers'
 import { pruneOrphanTabs } from './utils/workbenchTabs'
 import { findTopLevelEnvironment } from './utils/envSaveUnit'
+import { snapshotMirrorPayload } from './utils/mirrorPayload'
 
 /**
  * Match a workbench tab by the underlying item id (request / folder /
@@ -1841,6 +1842,9 @@ const App: React.FC = () => {
   // the autosave mirror (`setCollections` → `syncCollections`) so main can
   // refuse a mirror that predates a newer MCP mutation (stale-write guard).
   const lastMcpVersionRef = useRef(0)
+  // The same version as STATE, so it travels with the tree it describes. See
+  // `snapshotMirrorPayload` for why the mirror must never read the ref late.
+  const [appliedMcpVersion, setAppliedMcpVersion] = useState(0)
   const bumpAllTabContentVersionsRef = useRef<() => void>(() => { /* not yet wired */ })
   const bumpAllTabContentVersionsStable = useCallback((): void => { bumpAllTabContentVersionsRef.current() }, [])
   // Prune workbench tabs orphaned by a main-driven tree replacement (MCP
@@ -1849,7 +1853,7 @@ const App: React.FC = () => {
   const pruneOrphanTabsStable = useCallback((existingIds: Set<string>): void => {
     setWorkbenchTree((prevTree) => ({ ...prevTree, groups: pruneOrphanTabs(prevTree.groups, existingIds) }))
   }, [setWorkbenchTree])
-  useMcpTreeReplace({ setRootItems, rootItemsRef, mcpDrivenRef, lastMcpVersionRef, bumpAllTabContentVersions: bumpAllTabContentVersionsStable, pruneOrphanTabs: pruneOrphanTabsStable })
+  useMcpTreeReplace({ setRootItems, rootItemsRef, mcpDrivenRef, lastMcpVersionRef, onVersionApplied: setAppliedMcpVersion, bumpAllTabContentVersions: bumpAllTabContentVersionsStable, pruneOrphanTabs: pruneOrphanTabsStable })
   useMcpRunRequest({ enabled: mcpEnabled })
   // Read-only e2e automation hook: exposes window.__restormSuggestions to pull
   // each action's inspector data suggestion for a scenario from the running app.
@@ -2394,11 +2398,27 @@ const App: React.FC = () => {
     })()
   }, [workbenchId, rootItems, hasRestoredWorkbenchRef, workbenchRef])
 
-  // Memoize environment folder collections to avoid creating new arrays on every render
-  const environmentFolderCollections = useMemo(
-    () => rootItems.filter(isEnvironmentFolder),
-    [rootItems]
+  // Memoize environment folder collections to avoid creating new arrays on every
+  // render — PAIRED with the main-side tree version this particular tree was
+  // built from.
+  //
+  // The pairing is the whole point, and it must happen HERE rather than where
+  // the mirror is sent. `lastMcpVersionRef` advances the moment an
+  // `mcp:tree-replace` arrives; if the mirror effect below read it at effect
+  // time, a tree rendered BEFORE that replace would be sent stamped with the
+  // version that arrived AFTER it. Main's guard only refuses a strictly OLDER
+  // stamp, so such a payload passes (`3 < 3` is false) and a stale — possibly
+  // empty — tree overwrites the authoritative one.
+  //
+  // Reading the ref inside this memo is correct because `useMcpTreeReplace`
+  // assigns it BEFORE calling `setRootItems`: by the time this memo recomputes
+  // for a given `rootItems`, the ref already describes THAT tree. A tree that
+  // predates the replace keeps the older version and is correctly refused.
+  const mirrorPayload = useMemo(
+    () => snapshotMirrorPayload(rootItems, appliedMcpVersion),
+    [rootItems, appliedMcpVersion]
   )
+  const environmentFolderCollections = mirrorPayload.collections
 
   // Lookup callbacks passed down to RestormWorkbench → EditorGroupView,
   // which resolve a tab's request/folder/scenario by id and RENDER it.
@@ -2437,10 +2457,13 @@ const App: React.FC = () => {
   useEffect(() => {
     const source = mcpDrivenRef.current ? 'mcp' : 'user'
     if (mcpDrivenRef.current) mcpDrivenRef.current = false
-    // Stamp the mirror with the last applied main-side version so a stale
-    // `'user'` mirror (rootItems lagging an MCP mutation) is refused main-side.
-    setCollections(environmentFolderCollections, source, lastMcpVersionRef.current)
-  }, [environmentFolderCollections, setCollections])
+    // Stamp the mirror with the version THIS tree was built from — never with
+    // `lastMcpVersionRef.current`, which may already have advanced past it (see
+    // `mirrorPayload`). A stale `'user'` mirror is then refused main-side
+    // because its stamp is genuinely older, instead of sneaking through on a
+    // stamp it never earned.
+    setCollections(mirrorPayload.collections, source, mirrorPayload.builtFromVersion)
+  }, [mirrorPayload, setCollections])
 
   // Listen to test events for E2E tests (only in dev/test mode)
   // Expose handleFileOpened directly on window for E2E tests
