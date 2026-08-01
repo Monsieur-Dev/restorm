@@ -1776,7 +1776,10 @@ export class McpService {
           'race conditions in tool-chains: `dispatch-event` click → `wait-for` modal appears → `screenshot`. ' +
           'Conditions: `present` (selector matches at least one element), `absent` (no match), ' +
           '`text-equals` (matched element\'s textContent === value), `text-contains` (textContent includes value), ' +
-          '`attribute-equals` (matched element\'s getAttribute(name) === value).',
+          '`attribute-equals` (matched element\'s getAttribute(name) === value). The reply reports `matchCount` ' +
+          '(how many elements the selector matched) and the `windowId` polled — check both before trusting a ' +
+          'pass: `absent` succeeding and `present` succeeding both read as `ok: true`, and with several windows ' +
+          'open the polled window may not be the one you screenshot. An invalid CSS selector is a hard error.',
         inputSchema: {
           selector: z.string().min(1).describe('CSS selector to watch.'),
           condition: z.enum(['present', 'absent', 'text-equals', 'text-contains', 'attribute-equals']).describe(
@@ -1809,11 +1812,20 @@ export class McpService {
         // Single-shot poll loop in the renderer — avoids the round-trip
         // overhead of N executeJavaScript calls. Returns as soon as the
         // condition matches or the deadline passes.
+        // The reply reports what the renderer actually SAW — `matchCount` and
+        // the window that was polled. A bare `ok: true` is indistinguishable
+        // from a satisfied `absent`, or from a match found in a window other
+        // than the one the caller went on to screenshot, and a caller that
+        // misreads either ships the wrong result silently.
         const code = `(async (sel, cond, val, attr, timeoutMs, pollMs) => { ` +
           `const start = Date.now(); ` +
           `const deadline = start + timeoutMs; ` +
+          `let matchCount = 0; ` +
           `const check = () => { ` +
-            `const el = document.querySelector(sel); ` +
+            `let nodes; ` +
+            `try { nodes = document.querySelectorAll(sel) } catch (e) { return { bad: String(e && e.message || e) } } ` +
+            `matchCount = nodes.length; ` +
+            `const el = nodes[0] || null; ` +
             `if (cond === 'present') return !!el; ` +
             `if (cond === 'absent') return !el; ` +
             `if (!el) return false; ` +
@@ -1823,22 +1835,36 @@ export class McpService {
             `return false; ` +
           `}; ` +
           `while (Date.now() < deadline) { ` +
-            `if (check()) return { ok: true, elapsedMs: Date.now() - start }; ` +
-            `await new Promise(r => setTimeout(r, pollMs)); ` +
+            `const r = check(); ` +
+            `if (r && r.bad) return { ok: false, invalidSelector: true, message: r.bad }; ` +
+            `if (r) return { ok: true, elapsedMs: Date.now() - start, matchCount, condition: cond, selector: sel }; ` +
+            `await new Promise(r2 => setTimeout(r2, pollMs)); ` +
           `} ` +
-          `return { ok: false, timedOut: true, condition: cond, selector: sel }; ` +
+          `return { ok: false, timedOut: true, matchCount, condition: cond, selector: sel }; ` +
           `})(${JSON.stringify(selector)}, ${JSON.stringify(condition)}, ${JSON.stringify(value)}, ${JSON.stringify(attribute)}, ${timeoutMs}, ${pollMs})`
 
         const result = (await win.webContents.executeJavaScript(code, true)) as
-          | { ok: true; elapsedMs: number }
-          | { ok: false; timedOut: true; condition: string; selector: string }
+          | { ok: true; elapsedMs: number; matchCount: number; condition: string; selector: string }
+          | { ok: false; timedOut?: true; invalidSelector?: true; message?: string; matchCount?: number }
         if (!result.ok) {
+          if (result.invalidSelector === true) {
+            return {
+              content: [{ type: 'text', text: `wait-for: "${selector}" is not a valid CSS selector (${result.message ?? '?'})` }],
+              isError: true
+            }
+          }
           return {
-            content: [{ type: 'text', text: `wait-for timed out after ${String(timeoutMs)}ms — condition "${condition}" still false on selector ${selector}` }],
+            content: [{
+              type: 'text',
+              text: `wait-for timed out after ${String(timeoutMs)}ms — condition "${condition}" still false on selector ${selector} ` +
+                `(windowId ${String(win.webContents.id)}, ${String(result.matchCount ?? 0)} element(s) matched)`
+            }],
             isError: true
           }
         }
-        return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] }
+        return {
+          content: [{ type: 'text', text: JSON.stringify({ ...result, windowId: win.webContents.id }, null, 2) }]
+        }
       }
     )
 
