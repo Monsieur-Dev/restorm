@@ -503,22 +503,31 @@ export default defineConfig({
    * internally — `fullyParallel: false`), so the long-pole projects (scenario
    * run-log, full-workflow) overlap instead of summing.
    *
-   * Capped at 2 workers: each Electron worker is a full Chromium instance
-   * (~300-500 MB), so 4 in parallel — on top of the build, a running restorm
-   * and a browser — exhausts physical RAM on a 16 GB host and pushes it into
-   * heavy swap. Swap thrashing intermittently starves renderer timers, which
-   * surfaces as flaky `waitFor`/`toBeVisible` timeouts on menu/submenu
-   * rendering (the failure mode was NOT CPU-bound — load stayed ~11%). Two
-   * workers keep the peak resident set within physical RAM; a full run is
-   * slower than at 4 but stable. CI runners with dedicated RAM can raise this.
+   * RAM is NOT the constraint any more, whatever the history below says: peak
+   * resident stayed at 25-27 GB with ~37 GB free and swap at ZERO bytes at
+   * every worker count measured — the peak is dominated by ambient load
+   * (editors, browsers, parallel agents), and 4 vs 8 differ by under 1 GB.
+   * What binds now is CPU, and the suite's own load-sensitivity.
    *
-   * Dropped to 1 (serial) on this RAM-constrained no-swap host: even 2 workers
-   * intermittently thrashed and starved renderer timers, surfacing as flaky
-   * `waitFor` timeouts on the MCP-driven "open the request tab via MCP" steps
-   * (kafka/jsonrpc lost the lottery on different pushes). Serial is ~2x slower
-   * but deterministic — no cross-worker MCP contention. Raise again (or make
-   * env-conditional for CI) once the host has more RAM. */
-  workers: 1,
+   * Measured full-suite wall time: 1 worker ~52 min, 4 workers 19 min, 8
+   * workers 15 min. The tail is long-pole projects that stay serial inside
+   * themselves (scenario-runlog, scenario-code-deps, exhaustive-doc-viewer,
+   * full-workflow), so the suite floors around 13-14 min regardless — 8 buys
+   * only ~19% over 4 while doubling the failures (11 vs 5). 4 is the useful
+   * target; higher is not worth the instability.
+   *
+   * Kept at 1 by DEFAULT even so, because `test:e2e` is what the pre-push hook
+   * runs with no env set: a handful of tests still fail reproducibly at 4 under
+   * concurrent load, so defaulting higher would red the push gate for everyone.
+   * Raise the default only once those pass at 4. Known offenders: a few
+   * MCP-driven suites where the tool returns an error reply under load, and
+   * kafka-execution, whose >5s blocking `docker exec` topic reseed outlives the
+   * MCP HTTP server's 5s keep-alive timeout — the harness then reuses a socket
+   * the server already closed and reports `TypeError: fetch failed`.
+   *
+   * `PW_WORKERS` opts in meanwhile: `PW_WORKERS=4` for the ~2.7x speed-up on a
+   * run you are watching, or a lower pin on a smaller CI runner. */
+  workers: process.env.PW_WORKERS ? Number(process.env.PW_WORKERS) : 1,
 
   /* Reporter */
   reporter: [
