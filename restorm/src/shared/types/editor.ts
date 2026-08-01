@@ -299,6 +299,22 @@ export const SETTINGS_TAB_ID = 'settings:singleton'
  * key from this stable id keeps the tab in the Ctrl+Tab MRU ordering. */
 export const MCP_LOGS_TAB_ID = 'mcp-logs:singleton'
 
+/** Every stable singleton tab id. These tabs have no entry in the project
+ * tree, so anything that addresses a tab by item id has to recognise them
+ * separately. */
+export const SINGLETON_TAB_IDS = [
+  CONSOLE_TAB_ID,
+  FIREWALL_TAB_ID,
+  MINI_BROWSER_TAB_ID,
+  SETTINGS_TAB_ID,
+  MCP_LOGS_TAB_ID
+] as const
+
+/** `true` when `id` is one of the singleton workbench tabs. */
+export function isSingletonTabId(id: string): boolean {
+  return (SINGLETON_TAB_IDS as readonly string[]).includes(id)
+}
+
 /** @deprecated Use RestormEditorTab instead */
 export type restormEditorTab = RestormEditorTab
 

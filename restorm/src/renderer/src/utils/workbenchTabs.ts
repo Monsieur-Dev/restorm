@@ -1,5 +1,6 @@
 import { isContainerNode, isTabGroupNode } from 'electron-core-ui/renderer'
 import type { GroupNode, EditorTab } from 'electron-core-ui/renderer'
+import { isSingletonTabId } from '../../../shared/types/editor'
 export { collectTreeItemIds } from './treeItemIds'
 
 /**
@@ -49,6 +50,22 @@ export function tabReferencesItem(tab: EditorTab, itemId: string): boolean {
   if (t.scenario?.id === itemId) return true
   if (t.breadcrumbs?.some((bc) => bc.id === itemId)) return true
   return false
+}
+
+/**
+ * True when a workbench tab IS the tab addressed by `itemId` — the narrower
+ * sibling of {@link tabReferencesItem}, which also matches breadcrumb
+ * ancestors. Used by the close / activate / reveal handlers, where matching an
+ * ancestor would act on the wrong tab.
+ *
+ * A singleton tab (Console, Settings, Firewall, Mini browser, MCP logs) backs
+ * onto no tree item at all, so its own stable tab id is the only handle a
+ * caller has for it — match that directly, or those tabs are unaddressable.
+ */
+export function tabMatchesItem(tab: EditorTab, itemId: string): boolean {
+  if (isSingletonTabId(itemId)) return tab.id === itemId
+  const t = tab as ItemBackedTab
+  return t.request?.id === itemId || t.folder?.id === itemId || t.scenario?.id === itemId
 }
 
 /**

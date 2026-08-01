@@ -123,31 +123,15 @@ const classForDocument = (type: 'folder' | 'request' | 'environment', doc: Recor
   return FolderClass
 }
 import { DocumentEvents, type DocumentChangedPayload, type DocumentDeletedPayload } from './services/DocumentEvents'
-import type { EditorTab, WorkbenchTree, GroupNode, TabGroupNode, ContainerGroupNode } from 'electron-core-ui/renderer'
+import type { WorkbenchTree, GroupNode, TabGroupNode, ContainerGroupNode } from 'electron-core-ui/renderer'
 import { isContainerNode, isTabGroupNode, loadWorkbenchTabIds, useSetting, LIST_VIEW_DRAG_MIME } from 'electron-core-ui/renderer'
 import type { SplitDirection } from 'electron-core-ui/renderer'
 import { REOPEN_LAST_FILE_STORAGE_KEY, REOPEN_LAST_FILE_SETTING_KEY } from '../../shared/config/reopenLastFile'
 import { CONSOLE_TAB_ID, FIREWALL_TAB_ID, MINI_BROWSER_TAB_ID, SETTINGS_TAB_ID, MCP_LOGS_TAB_ID, type ConsoleTab, type FirewallTab, type MiniBrowserTab, type SettingsTab, type McpLogsTab } from '../../shared/types/editor'
 import { findGroupIdForTab, hasGroupWithId, updateGroupById } from './utils/workbenchHelpers'
-import { pruneOrphanTabs } from './utils/workbenchTabs'
+import { pruneOrphanTabs, tabMatchesItem } from './utils/workbenchTabs'
 import { findTopLevelEnvironment } from './utils/envSaveUnit'
 
-/**
- * Match a workbench tab by the underlying item id (request / folder /
- * env-folder id stored in `rootItems`). The tab's own `.id` is a
- * synthetic key (e.g. `request-idx:0.1.5`) and never appears in
- * `rootItems`. The Open documents + Favorites panes address rows by
- * the underlying id, so close handlers triggered from those panes
- * must look through to `tab.request?.id` / `tab.folder?.id`.
- */
-type ItemBackedTab = EditorTab & { request?: { id?: string }; folder?: { id?: string }; scenario?: { id?: string } }
-const tabMatchesItem = (tab: EditorTab, itemId: string): boolean => {
-  const t = tab as ItemBackedTab
-  // A tab is backed by a request, a (env-)folder, OR a scenario — match all
-  // three so MCP open/close/reveal-by-id works for scenario tabs too (their id
-  // lives on `scenario`, not `request`/`folder`).
-  return t.request?.id === itemId || t.folder?.id === itemId || t.scenario?.id === itemId
-}
 import { Onboarding } from './components/MainView/Workbench/Onboarding'
 import { RestormTitlebar } from './components/MainView/Titlebar/RestormTitlebar'
 import { StatusbarMcpIndicator } from './components/MainView/StatusbarMcpIndicator'
