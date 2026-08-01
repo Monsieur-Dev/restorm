@@ -2050,18 +2050,18 @@
   },
   "mqtt": {
     "qos": "QoS",
-    "retain": "Retain",
+    "retain": "Giữ lại",
     "subscribeOnConnect": "Đăng ký khi kết nối",
-    "clientId": "Client ID",
+    "clientId": "ID máy khách",
     "clientIdPlaceholder": "tự động tạo nếu để trống",
-    "username": "Username",
-    "password": "Password",
+    "username": "Tên người dùng",
+    "password": "Mật khẩu",
     "keepalive": "Keepalive (s)",
     "lwt": "Di chúc cuối cùng (LWT)",
-    "topic": "Topic",
-    "lwtTopicPlaceholder": "will/topic",
-    "lwtPayload": "Payload",
-    "lwtPayloadPlaceholder": "will message"
+    "topic": "Chủ đề",
+    "lwtTopicPlaceholder": "chu-de/di-chuc",
+    "lwtPayload": "Dữ liệu",
+    "lwtPayloadPlaceholder": "thông điệp di chúc"
   },
   "amqp": {
     "urlPlaceholder": "URL AMQP (amqp:// hoặc amqps://)",

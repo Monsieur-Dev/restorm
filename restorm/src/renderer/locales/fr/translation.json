@@ -2055,11 +2055,11 @@
     "subscribeOnConnect": "S’abonner à la connexion",
     "clientId": "ID client",
     "clientIdPlaceholder": "auto-généré si vide",
-    "username": "Nom d’utilisateur",
+    "username": "Nom d'utilisateur",
     "password": "Mot de passe",
     "keepalive": "Keepalive (s)",
     "lwt": "Dernière volonté (LWT)",
-    "topic": "Sujet",
+    "topic": "Topic",
     "lwtTopicPlaceholder": "sujet/volonté",
     "lwtPayload": "Charge utile",
     "lwtPayloadPlaceholder": "message de volonté"

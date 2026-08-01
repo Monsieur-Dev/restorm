@@ -2050,18 +2050,18 @@
   },
   "mqtt": {
     "qos": "QoS",
-    "retain": "Retain",
+    "retain": "Simpan",
     "subscribeOnConnect": "Berlangganan saat terhubung",
-    "clientId": "Client ID",
+    "clientId": "ID klien",
     "clientIdPlaceholder": "dibuat otomatis jika kosong",
-    "username": "Username",
-    "password": "Password",
+    "username": "Nama pengguna",
+    "password": "Kata sandi",
     "keepalive": "Keepalive (s)",
     "lwt": "Wasiat Terakhir (LWT)",
-    "topic": "Topic",
-    "lwtTopicPlaceholder": "will/topic",
-    "lwtPayload": "Payload",
-    "lwtPayloadPlaceholder": "will message"
+    "topic": "Topik",
+    "lwtTopicPlaceholder": "topik/wasiat",
+    "lwtPayload": "Muatan",
+    "lwtPayloadPlaceholder": "pesan wasiat"
   },
   "amqp": {
     "urlPlaceholder": "URL AMQP (amqp:// atau amqps://)",

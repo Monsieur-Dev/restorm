@@ -2051,18 +2051,18 @@
   },
   "mqtt": {
     "qos": "QoS",
-    "retain": "Retain",
+    "retain": "Retener",
     "subscribeOnConnect": "Suscribirse al conectar",
-    "clientId": "Client ID",
+    "clientId": "ID de cliente",
     "clientIdPlaceholder": "se genera automáticamente si está vacío",
-    "username": "Username",
-    "password": "Password",
+    "username": "Nombre de usuario",
+    "password": "Contraseña",
     "keepalive": "Keepalive (s)",
     "lwt": "Última voluntad (LWT)",
     "topic": "Topic",
-    "lwtTopicPlaceholder": "will/topic",
-    "lwtPayload": "Payload",
-    "lwtPayloadPlaceholder": "will message"
+    "lwtTopicPlaceholder": "topic/testamento",
+    "lwtPayload": "Carga útil",
+    "lwtPayloadPlaceholder": "mensaje de testamento"
   },
   "amqp": {
     "urlPlaceholder": "URL de AMQP (amqp:// o amqps://)",

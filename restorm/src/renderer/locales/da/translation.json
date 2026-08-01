@@ -2051,18 +2051,18 @@
   },
   "mqtt": {
     "qos": "QoS",
-    "retain": "Retain",
+    "retain": "Behold",
     "subscribeOnConnect": "Abonnér ved forbindelse",
-    "clientId": "Client ID",
+    "clientId": "Klient-id",
     "clientIdPlaceholder": "genereres automatisk hvis tom",
-    "username": "Username",
-    "password": "Password",
+    "username": "Brugernavn",
+    "password": "Adgangskode",
     "keepalive": "Keepalive (s)",
     "lwt": "Sidste vilje (LWT)",
-    "topic": "Topic",
-    "lwtTopicPlaceholder": "will/topic",
-    "lwtPayload": "Payload",
-    "lwtPayloadPlaceholder": "will message"
+    "topic": "Emne",
+    "lwtTopicPlaceholder": "emne/testamente",
+    "lwtPayload": "Nyttelast",
+    "lwtPayloadPlaceholder": "testamentebesked"
   },
   "amqp": {
     "urlPlaceholder": "AMQP-URL (amqp:// eller amqps://)",

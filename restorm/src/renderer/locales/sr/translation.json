@@ -2052,18 +2052,18 @@
   },
   "mqtt": {
     "qos": "QoS",
-    "retain": "Retain",
+    "retain": "Задржи",
     "subscribeOnConnect": "Претплати се при повезивању",
-    "clientId": "Client ID",
+    "clientId": "ID клијента",
     "clientIdPlaceholder": "аутоматски генерисано ако је празно",
-    "username": "Username",
-    "password": "Password",
+    "username": "Корисничко име",
+    "password": "Лозинка",
     "keepalive": "Keepalive (s)",
     "lwt": "Последња воља (LWT)",
-    "topic": "Topic",
-    "lwtTopicPlaceholder": "will/topic",
-    "lwtPayload": "Payload",
-    "lwtPayloadPlaceholder": "will message"
+    "topic": "Тема",
+    "lwtTopicPlaceholder": "тема/тестамента",
+    "lwtPayload": "Садржај",
+    "lwtPayloadPlaceholder": "порука тестамента"
   },
   "amqp": {
     "urlPlaceholder": "AMQP URL (amqp:// ili amqps://)",

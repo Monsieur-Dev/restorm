@@ -2051,18 +2051,18 @@
   },
   "mqtt": {
     "qos": "QoS",
-    "retain": "Retain",
+    "retain": "Sakla",
     "subscribeOnConnect": "Bağlanırken abone ol",
-    "clientId": "Client ID",
+    "clientId": "İstemci Kimliği",
     "clientIdPlaceholder": "boşsa otomatik oluşturulur",
-    "username": "Username",
-    "password": "Password",
+    "username": "Kullanıcı Adı",
+    "password": "Parola",
     "keepalive": "Keepalive (s)",
     "lwt": "Son Vasiyet (LWT)",
-    "topic": "Topic",
-    "lwtTopicPlaceholder": "will/topic",
-    "lwtPayload": "Payload",
-    "lwtPayloadPlaceholder": "will message"
+    "topic": "Konu",
+    "lwtTopicPlaceholder": "konu/vasiyet",
+    "lwtPayload": "Yük",
+    "lwtPayloadPlaceholder": "vasiyet mesajı"
   },
   "amqp": {
     "urlPlaceholder": "AMQP URL'si (amqp:// veya amqps://)",

@@ -2051,18 +2051,18 @@
   },
   "mqtt": {
     "qos": "QoS",
-    "retain": "Retain",
+    "retain": "Beibehalten",
     "subscribeOnConnect": "Beim Verbinden abonnieren",
-    "clientId": "Client ID",
+    "clientId": "Client-ID",
     "clientIdPlaceholder": "automatisch generiert, wenn leer",
-    "username": "Username",
-    "password": "Password",
+    "username": "Benutzername",
+    "password": "Passwort",
     "keepalive": "Keepalive (s)",
     "lwt": "Letzter Wille (LWT)",
     "topic": "Topic",
     "lwtTopicPlaceholder": "will/topic",
-    "lwtPayload": "Payload",
-    "lwtPayloadPlaceholder": "will message"
+    "lwtPayload": "Nutzdaten",
+    "lwtPayloadPlaceholder": "Will-Nachricht"
   },
   "amqp": {
     "urlPlaceholder": "AMQP-URL (amqp:// oder amqps://)",

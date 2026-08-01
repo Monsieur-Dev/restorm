@@ -2051,18 +2051,18 @@
   },
   "mqtt": {
     "qos": "QoS",
-    "retain": "Retain",
+    "retain": "Megtartás",
     "subscribeOnConnect": "Feliratkozás csatlakozáskor",
-    "clientId": "Client ID",
+    "clientId": "Kliensazonosító",
     "clientIdPlaceholder": "automatikusan generált, ha üres",
-    "username": "Username",
-    "password": "Password",
+    "username": "Felhasználónév",
+    "password": "Jelszó",
     "keepalive": "Keepalive (s)",
     "lwt": "Utolsó akarat (LWT)",
-    "topic": "Topic",
-    "lwtTopicPlaceholder": "will/topic",
-    "lwtPayload": "Payload",
-    "lwtPayloadPlaceholder": "will message"
+    "topic": "Téma",
+    "lwtTopicPlaceholder": "vegrendelet/tema",
+    "lwtPayload": "Hasznos adat",
+    "lwtPayloadPlaceholder": "végrendelet üzenete"
   },
   "amqp": {
     "urlPlaceholder": "AMQP URL (amqp:// vagy amqps://)",

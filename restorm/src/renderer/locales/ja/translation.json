@@ -2050,18 +2050,18 @@
   },
   "mqtt": {
     "qos": "QoS",
-    "retain": "Retain",
+    "retain": "保持",
     "subscribeOnConnect": "接続時に購読する",
-    "clientId": "Client ID",
+    "clientId": "クライアントID",
     "clientIdPlaceholder": "空の場合は自動生成されます",
-    "username": "Username",
-    "password": "Password",
+    "username": "ユーザー名",
+    "password": "パスワード",
     "keepalive": "Keepalive (s)",
     "lwt": "最終遺言メッセージ (LWT)",
-    "topic": "Topic",
+    "topic": "トピック",
     "lwtTopicPlaceholder": "will/topic",
-    "lwtPayload": "Payload",
-    "lwtPayloadPlaceholder": "will message"
+    "lwtPayload": "ペイロード",
+    "lwtPayloadPlaceholder": "遺言メッセージ"
   },
   "amqp": {
     "urlPlaceholder": "AMQP URL（amqp:// または amqps://）",

@@ -2051,18 +2051,18 @@
   },
   "mqtt": {
     "qos": "QoS",
-    "retain": "Retain",
+    "retain": "Ruaj",
     "subscribeOnConnect": "Abonohu gjatë lidhjes",
-    "clientId": "Client ID",
+    "clientId": "ID i klientit",
     "clientIdPlaceholder": "gjenerohet automatikisht nëse është bosh",
-    "username": "Username",
-    "password": "Password",
+    "username": "Emri i përdoruesit",
+    "password": "Fjalëkalimi",
     "keepalive": "Keepalive (s)",
     "lwt": "Dëshira e fundit (LWT)",
-    "topic": "Topic",
-    "lwtTopicPlaceholder": "will/topic",
-    "lwtPayload": "Payload",
-    "lwtPayloadPlaceholder": "will message"
+    "topic": "Tema",
+    "lwtTopicPlaceholder": "tema/testamentit",
+    "lwtPayload": "Ngarkesa",
+    "lwtPayloadPlaceholder": "mesazhi i testamentit"
   },
   "amqp": {
     "urlPlaceholder": "URL AMQP (amqp:// ose amqps://)",

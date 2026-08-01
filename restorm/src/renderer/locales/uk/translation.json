@@ -2053,18 +2053,18 @@
   },
   "mqtt": {
     "qos": "QoS",
-    "retain": "Retain",
+    "retain": "Зберігати",
     "subscribeOnConnect": "Підписатися під час підключення",
-    "clientId": "Client ID",
+    "clientId": "ID клієнта",
     "clientIdPlaceholder": "генерується автоматично, якщо порожнє",
-    "username": "Username",
-    "password": "Password",
+    "username": "Ім’я користувача",
+    "password": "Пароль",
     "keepalive": "Keepalive (s)",
     "lwt": "Остання воля (LWT)",
-    "topic": "Topic",
-    "lwtTopicPlaceholder": "will/topic",
-    "lwtPayload": "Payload",
-    "lwtPayloadPlaceholder": "will message"
+    "topic": "Тема",
+    "lwtTopicPlaceholder": "тема/заповіту",
+    "lwtPayload": "Корисне навантаження",
+    "lwtPayloadPlaceholder": "повідомлення заповіту"
   },
   "amqp": {
     "urlPlaceholder": "URL-адреса AMQP (amqp:// або amqps://)",

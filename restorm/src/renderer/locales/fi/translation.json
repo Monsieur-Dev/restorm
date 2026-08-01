@@ -2051,18 +2051,18 @@
   },
   "mqtt": {
     "qos": "QoS",
-    "retain": "Retain",
+    "retain": "Säilytä",
     "subscribeOnConnect": "Tilaa yhdistettäessä",
-    "clientId": "Client ID",
+    "clientId": "Asiakastunnus",
     "clientIdPlaceholder": "luodaan automaattisesti, jos tyhjä",
-    "username": "Username",
-    "password": "Password",
+    "username": "Käyttäjätunnus",
+    "password": "Salasana",
     "keepalive": "Keepalive (s)",
     "lwt": "Viimeinen tahto (LWT)",
-    "topic": "Topic",
-    "lwtTopicPlaceholder": "will/topic",
-    "lwtPayload": "Payload",
-    "lwtPayloadPlaceholder": "will message"
+    "topic": "Aihe",
+    "lwtTopicPlaceholder": "aihe/testamentti",
+    "lwtPayload": "Hyötykuorma",
+    "lwtPayloadPlaceholder": "testamenttiviesti"
   },
   "amqp": {
     "urlPlaceholder": "AMQP-URL (amqp:// tai amqps://)",

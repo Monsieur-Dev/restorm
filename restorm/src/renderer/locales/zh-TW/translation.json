@@ -2050,18 +2050,18 @@
   },
   "mqtt": {
     "qos": "QoS",
-    "retain": "Retain",
+    "retain": "保留",
     "subscribeOnConnect": "連線時訂閱",
-    "clientId": "Client ID",
+    "clientId": "客戶端 ID",
     "clientIdPlaceholder": "為空時自動產生",
-    "username": "Username",
-    "password": "Password",
+    "username": "使用者名稱",
+    "password": "密碼",
     "keepalive": "Keepalive (s)",
     "lwt": "遺囑訊息 (LWT)",
-    "topic": "Topic",
+    "topic": "主題",
     "lwtTopicPlaceholder": "will/topic",
-    "lwtPayload": "Payload",
-    "lwtPayloadPlaceholder": "will message"
+    "lwtPayload": "負載",
+    "lwtPayloadPlaceholder": "遺囑訊息"
   },
   "amqp": {
     "urlPlaceholder": "AMQP URL（amqp:// 或 amqps://）",

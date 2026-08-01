@@ -2050,18 +2050,18 @@
   },
   "mqtt": {
     "qos": "QoS",
-    "retain": "Retain",
+    "retain": "保留",
     "subscribeOnConnect": "连接时订阅",
-    "clientId": "Client ID",
+    "clientId": "客户端 ID",
     "clientIdPlaceholder": "为空时自动生成",
-    "username": "Username",
-    "password": "Password",
+    "username": "用户名",
+    "password": "密码",
     "keepalive": "Keepalive (s)",
     "lwt": "遗嘱消息 (LWT)",
-    "topic": "Topic",
+    "topic": "主题",
     "lwtTopicPlaceholder": "will/topic",
-    "lwtPayload": "Payload",
-    "lwtPayloadPlaceholder": "will message"
+    "lwtPayload": "负载",
+    "lwtPayloadPlaceholder": "遗嘱消息"
   },
   "amqp": {
     "urlPlaceholder": "AMQP URL（amqp:// 或 amqps://）",

@@ -30,7 +30,7 @@ import { BaseRequestTabView } from './BaseRequestTabView'
 import { ResponseHistoryModal } from '../Modals/ResponseHistoryModal'
 import { useRestormStore } from '../../store/restormStore'
 import { buildRequestPath } from '../../utils/requestPath'
-import { updateReactiveProperty } from './requestTabViewUtils'
+import { updateReactiveProperty, inlineFieldLabelStyle } from './requestTabViewUtils'
 import { DEFAULT_WS_TIMEOUT_MS } from '../../../../shared/config/constants'
 import { SendButtonEnvSwitcher } from './SendButtonEnvSwitcher'
 import { useIsStompListening } from '../../services/stompListeningStore'
@@ -333,7 +333,7 @@ export const StompRequestTabView: React.FC<StompRequestTabViewProps> = ({
       <Pane title={t('stomp.tabs.connect', 'Connect')} initialSize={0.34} minSize={100} data-testid="stomp-connect-pane">
         <div style={{ height: '100%', display: 'flex', flexDirection: 'column', gap: 8, padding: 4 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <span style={{ fontSize: 12 }}>{t('stomp.version', 'STOMP version')}:</span>
+            <span style={inlineFieldLabelStyle}>{t('stomp.version', 'STOMP version')}:</span>
             <div style={{ width: 90 }}>
               <SelectBox
                 id={`stomp-version-${request.id}`}
@@ -418,7 +418,7 @@ export const StompRequestTabView: React.FC<StompRequestTabViewProps> = ({
       <Pane title={t('stomp.tabs.send', 'Send')} initialSize={0.33} minSize={120} data-testid="stomp-send-pane">
         <div style={{ height: '100%', display: 'flex', flexDirection: 'column', gap: 8, padding: 4 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <span style={{ fontSize: 12 }}>{t('stomp.sendDestination', 'Destination')}:</span>
+            <span style={inlineFieldLabelStyle}>{t('stomp.sendDestination', 'Destination')}:</span>
             <div style={{ flex: 1 }}>
               <RestormVariableInputBox
                 value={sendDestination}

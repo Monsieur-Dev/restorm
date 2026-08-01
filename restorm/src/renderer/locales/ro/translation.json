@@ -2052,18 +2052,18 @@
   },
   "mqtt": {
     "qos": "QoS",
-    "retain": "Retain",
+    "retain": "Păstrează",
     "subscribeOnConnect": "Abonare la conectare",
-    "clientId": "Client ID",
+    "clientId": "ID client",
     "clientIdPlaceholder": "generat automat dacă este gol",
-    "username": "Username",
-    "password": "Password",
+    "username": "Nume de utilizator",
+    "password": "Parolă",
     "keepalive": "Keepalive (s)",
     "lwt": "Ultima dorință (LWT)",
-    "topic": "Topic",
-    "lwtTopicPlaceholder": "will/topic",
-    "lwtPayload": "Payload",
-    "lwtPayloadPlaceholder": "will message"
+    "topic": "Subiect",
+    "lwtTopicPlaceholder": "subiect/testament",
+    "lwtPayload": "Conținut",
+    "lwtPayloadPlaceholder": "mesaj de testament"
   },
   "amqp": {
     "urlPlaceholder": "URL AMQP (amqp:// sau amqps://)",

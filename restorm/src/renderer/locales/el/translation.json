@@ -2051,18 +2051,18 @@
   },
   "mqtt": {
     "qos": "QoS",
-    "retain": "Retain",
+    "retain": "Διατήρηση",
     "subscribeOnConnect": "Εγγραφή κατά τη σύνδεση",
-    "clientId": "Client ID",
+    "clientId": "Αναγνωριστικό πελάτη",
     "clientIdPlaceholder": "δημιουργείται αυτόματα αν είναι κενό",
-    "username": "Username",
-    "password": "Password",
+    "username": "Όνομα χρήστη",
+    "password": "Κωδικός πρόσβασης",
     "keepalive": "Keepalive (s)",
     "lwt": "Τελευταία βούληση (LWT)",
-    "topic": "Topic",
-    "lwtTopicPlaceholder": "will/topic",
-    "lwtPayload": "Payload",
-    "lwtPayloadPlaceholder": "will message"
+    "topic": "Θέμα",
+    "lwtTopicPlaceholder": "θέμα/διαθήκης",
+    "lwtPayload": "Ωφέλιμο φορτίο",
+    "lwtPayloadPlaceholder": "μήνυμα διαθήκης"
   },
   "amqp": {
     "urlPlaceholder": "URL AMQP (amqp:// ή amqps://)",

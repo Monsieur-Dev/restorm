@@ -2051,18 +2051,18 @@
   },
   "mqtt": {
     "qos": "QoS",
-    "retain": "Retain",
+    "retain": "Behouden",
     "subscribeOnConnect": "Abonneren bij verbinden",
-    "clientId": "Client ID",
+    "clientId": "Client-ID",
     "clientIdPlaceholder": "automatisch gegenereerd indien leeg",
-    "username": "Username",
-    "password": "Password",
+    "username": "Gebruikersnaam",
+    "password": "Wachtwoord",
     "keepalive": "Keepalive (s)",
     "lwt": "Laatste wens (LWT)",
-    "topic": "Topic",
-    "lwtTopicPlaceholder": "will/topic",
+    "topic": "Onderwerp",
+    "lwtTopicPlaceholder": "onderwerp/testament",
     "lwtPayload": "Payload",
-    "lwtPayloadPlaceholder": "will message"
+    "lwtPayloadPlaceholder": "testamentbericht"
   },
   "amqp": {
     "urlPlaceholder": "AMQP-URL (amqp:// of amqps://)",

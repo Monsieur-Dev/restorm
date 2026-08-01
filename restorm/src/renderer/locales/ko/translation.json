@@ -2050,18 +2050,18 @@
   },
   "mqtt": {
     "qos": "QoS",
-    "retain": "Retain",
+    "retain": "유지",
     "subscribeOnConnect": "연결 시 구독",
-    "clientId": "Client ID",
+    "clientId": "클라이언트 ID",
     "clientIdPlaceholder": "비어 있으면 자동 생성됨",
-    "username": "Username",
-    "password": "Password",
+    "username": "사용자 이름",
+    "password": "비밀번호",
     "keepalive": "Keepalive (s)",
     "lwt": "유언 메시지 (LWT)",
-    "topic": "Topic",
+    "topic": "주제",
     "lwtTopicPlaceholder": "will/topic",
-    "lwtPayload": "Payload",
-    "lwtPayloadPlaceholder": "will message"
+    "lwtPayload": "페이로드",
+    "lwtPayloadPlaceholder": "유언 메시지"
   },
   "amqp": {
     "urlPlaceholder": "AMQP URL (amqp:// 또는 amqps://)",

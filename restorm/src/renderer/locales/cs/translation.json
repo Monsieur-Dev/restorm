@@ -2053,18 +2053,18 @@
   },
   "mqtt": {
     "qos": "QoS",
-    "retain": "Retain",
+    "retain": "Ponechat",
     "subscribeOnConnect": "Přihlásit se k odběru při připojení",
-    "clientId": "Client ID",
+    "clientId": "ID klienta",
     "clientIdPlaceholder": "automaticky generováno, pokud je prázdné",
-    "username": "Username",
-    "password": "Password",
+    "username": "Uživatelské jméno",
+    "password": "Heslo",
     "keepalive": "Keepalive (s)",
     "lwt": "Poslední vůle (LWT)",
-    "topic": "Topic",
-    "lwtTopicPlaceholder": "will/topic",
-    "lwtPayload": "Payload",
-    "lwtPayloadPlaceholder": "will message"
+    "topic": "Téma",
+    "lwtTopicPlaceholder": "téma/závěti",
+    "lwtPayload": "Data",
+    "lwtPayloadPlaceholder": "zpráva závěti"
   },
   "amqp": {
     "urlPlaceholder": "URL AMQP (amqp:// nebo amqps://)",
