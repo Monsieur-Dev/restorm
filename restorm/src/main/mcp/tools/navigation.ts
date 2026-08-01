@@ -42,8 +42,20 @@ function broadcast(channel: string, payload: unknown): void {
   }
 }
 
-/** Overall budget an `open_tab` call spends waiting for the workbench. */
-const OPEN_TAB_ACK_TIMEOUT_MS = 5000
+/**
+ * Overall budget an `open_tab` call spends waiting for the workbench.
+ *
+ * Deliberately generous: this is a ceiling for a machine under load, not a
+ * latency target. The call returns the instant the renderer acks, so a healthy
+ * desktop still answers in milliseconds and pays nothing for the headroom —
+ * only a genuinely missing item waits out the full budget. Sizing it tight
+ * buys nothing and costs correctness: a workbench that is merely slow to
+ * project the item (a busy machine, several app instances, a large tree) then
+ * gets reported as `opened: false`, which is indistinguishable from "the item
+ * does not exist" to every MCP client. Reporting a successful open as a
+ * failure is the worse error, so the budget is sized for the slow case.
+ */
+export const OPEN_TAB_ACK_TIMEOUT_MS = 15_000
 /** Pause between two attempts once every window has said "not in my tree". */
 const OPEN_TAB_RETRY_DELAY_MS = 100
 

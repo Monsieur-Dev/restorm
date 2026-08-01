@@ -44,7 +44,7 @@ vi.mock('../../services/CollectionStore', () => ({
   }
 }))
 
-import { registerNavigationTools } from './navigation'
+import { registerNavigationTools, OPEN_TAB_ACK_TIMEOUT_MS } from './navigation'
 
 class FakeMcpService {
   private handlers = new Map<string, McpToolHandler>()
@@ -176,7 +176,7 @@ describe('navigation tools — open_tab', () => {
     vi.useFakeTimers()
     try {
       const invokePromise = mcp.invoke('open_tab', { itemId: 'r1' })
-      await vi.advanceTimersByTimeAsync(5000)
+      await vi.advanceTimersByTimeAsync(OPEN_TAB_ACK_TIMEOUT_MS)
       const { isError, text } = parseReply(await invokePromise)
       expect(isError).toBe(true)
       expect(text).toContain('r1')
@@ -194,7 +194,7 @@ describe('navigation tools — open_tab', () => {
     vi.useFakeTimers()
     try {
       const invokePromise = mcp.invoke('open_tab', { itemId: 'r1' })
-      await vi.advanceTimersByTimeAsync(5000)
+      await vi.advanceTimersByTimeAsync(OPEN_TAB_ACK_TIMEOUT_MS)
       const { isError } = parseReply(await invokePromise)
       expect(isError).toBe(true)
       // A negative ack ends its attempt at once (no waiting out the whole
@@ -216,7 +216,7 @@ describe('navigation tools — open_tab', () => {
     vi.useFakeTimers()
     try {
       const invokePromise = mcp.invoke('open_tab', { itemId: 'r1' })
-      await vi.advanceTimersByTimeAsync(5000)
+      await vi.advanceTimersByTimeAsync(OPEN_TAB_ACK_TIMEOUT_MS)
       const { isError, payload } = parseReply(await invokePromise)
       expect(isError).toBe(false)
       expect(payload).toEqual({ itemId: 'r1', kind: 'request', opened: true })
