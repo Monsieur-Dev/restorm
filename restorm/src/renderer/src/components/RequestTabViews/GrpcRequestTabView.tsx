@@ -524,6 +524,7 @@ const GrpcClientTabView: React.FC<GrpcRequestTabViewProps> = ({
             onRowsChange={handleMetadataChange}
             persistenceId={`grpc-metadata:${request.id}`}
             data-testid="grpc-metadata-table"
+            variableAware
           />
         </div>
       </Pane>

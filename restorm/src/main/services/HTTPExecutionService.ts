@@ -241,13 +241,16 @@ class HTTPExecutionService {
               continue
             }
             if (h.key) {
-              // Type-aware resolution: only `ExpressionValue` rows
-              // get handlebars-substituted; a `StringValue` row
-              // ships verbatim. The old `resolveValue(h.value, …)`
+              // The KEY resolves unconditionally through Handlebars, same as
+              // a path/query param key or the URL itself — a header name has
+              // no "type" to gate on. The VALUE stays type-aware: only
+              // `ExpressionValue` rows get handlebars-substituted; a
+              // `StringValue` row ships verbatim. The old `resolveValue(h.value, …)`
               // path always ran the resolver regardless of type,
               // so a user who handcrafted `{{token}}` as a plain
               // string saw it silently expanded on send.
-              headers[h.key] = contextService.resolveKeyValueForRequest(h, requestId)
+              const resolvedKey = contextService.resolveValue(h.key, requestId)
+              headers[resolvedKey] = contextService.resolveKeyValueForRequest(h, requestId)
             }
           }
         }
@@ -641,14 +644,17 @@ class HTTPExecutionService {
     const fullData = requestContext?.fullData
     const status = fullData?.mockStatus ?? 200
 
-    // Resolve headers (type-aware, like the client Send path): only expression
-    // rows are Handlebars-substituted; verbatim string rows ship as-is.
+    // Resolve headers (like the client Send path): the KEY resolves
+    // unconditionally through Handlebars (same as a param key / the URL);
+    // the VALUE stays type-aware — only expression rows are
+    // Handlebars-substituted, verbatim string rows ship as-is.
     const headers: Record<string, string> = {}
     const headersGroup = requestContext?.keyValueGroups.get('headers')
     if (headersGroup) {
       for (const h of headersGroup) {
         if (h.enabled === false || !h.key) continue
-        headers[h.key] = contextService.resolveKeyValueForRequest(h, requestId)
+        const resolvedKey = contextService.resolveValue(h.key, requestId)
+        headers[resolvedKey] = contextService.resolveKeyValueForRequest(h, requestId)
       }
     }
 

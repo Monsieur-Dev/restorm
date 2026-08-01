@@ -214,6 +214,28 @@ describe('HTTPExecutionService', () => {
     expect(sentBody).toBe('{"hello":"world"}')
   })
 
+  it('resolves a Handlebars header KEY, not just the value — unconditionally, like a query/path param key', async () => {
+    setupResolvedUrl('http://example.com/api')
+    setupRequestContext({
+      keyValueGroups: new Map([['headers', [{ key: '{{headerNameVar}}', value: 'templated-value', enabled: true }]]])
+    })
+    // Header KEYS have no ValueType to gate on (unlike the value), so —
+    // same as the URL and the path/query param keys — the substitution is
+    // unconditional, not opt-in via an ExpressionValue.
+    mockedContextService.resolveValue.mockImplementation((v: string) => v.replace('{{headerNameVar}}', 'X-Templated-Header'))
+
+    undiciRequestSpy.mockImplementation((_url, opts) => {
+      expect(opts.headers).toHaveProperty('X-Templated-Header', 'templated-value')
+      expect(opts.headers).not.toHaveProperty('{{headerNameVar}}')
+      return Promise.resolve(buildUndiciResponse(200, ''))
+    })
+
+    const result = await httpExecutionService.execute({ requestId: 'r-header-key', method: 'GET' })
+
+    expect(result.success).toBe(true)
+    expect(undiciRequestSpy).toHaveBeenCalled()
+  })
+
   it('handles network errors gracefully', async () => {
     setupResolvedUrl('http://example.com/api')
     setupRequestContext()
@@ -533,6 +555,35 @@ describe('GRPCExecutionService', () => {
     expect(result.error).toContain('unary')
     // The mismatch is caught before any grpc-js call is made.
     expect(fakeClient.Subscribe).not.toHaveBeenCalled()
+  })
+
+  it('resolves a Handlebars metadata KEY, not just the value — unconditionally, like a header key', async () => {
+    // gRPC metadata is registered under the request's `headers` KeyValue
+    // group; the KEY has no ValueType to gate on, so it resolves
+    // unconditionally through Handlebars (same as an HTTP header key).
+    setupResolvedUrl('grpc://localhost:50051')
+    setupRequestContext({
+      fullData: { service: 'pkg.Svc', grpcMethod: 'SayHello', callType: 'unary', requestMessage: '{}' },
+      keyValueGroups: new Map([['headers', [{ key: '{{metaKeyVar}}', value: 'templated-value', enabled: true }]]])
+    })
+    mockedContextService.resolveValue.mockImplementation((v: string) => v.replace('{{metaKeyVar}}', 'x-templated-meta'))
+
+    let capturedMetadata: { get: (k: string) => string[] } | undefined
+    const fakeClient = {
+      SayHello: vi.fn((_req: unknown, metadata: { get: (k: string) => string[] }, _opts: unknown, cb: (err: null, res: object) => void) => {
+        capturedMetadata = metadata
+        cb(null, {})
+        return { cancel: vi.fn() }
+      }),
+      close: vi.fn()
+    }
+    resolveGrpcMethodMock.mockReturnValueOnce({ client: fakeClient as never, requestStream: false, responseStream: false })
+
+    const result = await grpcExecutionService.execute({ requestId: 'g-meta-key' })
+
+    expect(result.success).toBe(true)
+    expect(capturedMetadata?.get('x-templated-meta')).toEqual(['templated-value'])
+    expect(capturedMetadata?.get('{{metaKeyVar}}')).toEqual([])
   })
 
   it('connectStreaming: uses the proto-reconciled callType, not the stale request callType', async () => {

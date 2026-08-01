@@ -341,27 +341,30 @@ Given('a remote has diverged on the request\'s headers', async ({ seedFreshRepo,
 
 Then('the headers section is expanded in the your-version panel', async () => {
   const p = requirePage()
-  // A collapsed pane renders no body, so a visible header key-input proves
-  // the conflicting section auto-expanded. Double `-input` suffix: InputBox
-  // renders a hidden state-probe div at the bare testid and the real
-  // <input> one level deeper (same convention as the push-modal fields).
-  const keyInput = conflictPaneBySide(p, 'user').locator('[data-testid="http-request-headers-table-key-input-input"]').first()
-  await expect(keyInput).toBeVisible({ timeout: 10000 })
+  // A collapsed pane renders no body, so a visible header key cell proves the
+  // conflicting section auto-expanded. The header key cell is the
+  // Handlebars-aware VariableInputBox (a Monaco editor); its root carries the
+  // bare testid (no `-input`/`-container` suffix — that's the plain
+  // InputBox's own convention, not shared by the variable-aware editor).
+  const keyCell = conflictPaneBySide(p, 'user').locator('[data-testid="http-request-headers-table-key-input"]').first()
+  await expect(keyCell).toBeVisible({ timeout: 10000 })
 })
 
 Then('the changed header row is highlighted but the unchanged one is not', async () => {
   const p = requirePage()
+  // Each row's key cell is wrapped in an explicit `-key-diff` div (only
+  // rendered inside the conflict view) that carries the diff border directly
+  // — read its own computed border rather than walking parent elements. The
+  // cell's text lives in Monaco's `.view-line` spans (a Handlebars-aware
+  // VariableInputBox, not a plain `<input>`).
   const cells = await conflictPaneBySide(p, 'user')
-    .locator('[data-testid="http-request-headers-table-key-input-container"]')
+    .locator('[data-testid="http-request-headers-table-key-diff"]')
     .evaluateAll((els) =>
       els.map((el) => {
-        const field = el.querySelector('input, textarea')
-        const value = field instanceof HTMLInputElement || field instanceof HTMLTextAreaElement ? field.value : ''
-        // container → InputBox root → the per-row diff wrapper div that
-        // carries the border (the bare-testid element is a hidden probe with
-        // no input inside and the wrong parent chain).
-        const wrapper = el.parentElement?.parentElement
-        const borderColor = wrapper ? getComputedStyle(wrapper).borderColor : ''
+        const value = Array.from(el.querySelectorAll('.view-line'))
+          .map((line) => line.textContent.trim())
+          .join('')
+        const borderColor = getComputedStyle(el).borderColor
         return { value, borderColor }
       })
     )

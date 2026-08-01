@@ -9,6 +9,7 @@ import {
   type VariableDefinition
 } from 'electron-core-ui/renderer'
 import { TypedValueField } from '../TypedValueField'
+import { RestormVariableInputBox } from '../RestormVariableInputBox'
 import { useAllEnvValueTypeGroups } from '../../hooks/useAllEnvValueTypeGroups'
 import type { TranslatedHelperDefinition } from '../../utils/handlebarsHelpersDefinitions'
 import type { KeyValue, ValueType } from '../../../../shared/types/collections'
@@ -47,6 +48,19 @@ export interface RestormKeyValueTableProps {
    * field-diff border (`fieldDiffStyle`). Left `undefined` outside the conflict
    * view, in which case no per-cell wrapper is rendered at all. */
   highlightRowKeys?: readonly string[]
+  /**
+   * Render the KEY cell (and a plain-`StringValue` VALUE cell) with the
+   * Handlebars-aware editor — syntax highlighting + `{{}}` autocomplete
+   * suggestions, the same experience the request URL field already has —
+   * instead of a bare `InputBox`. Off by default: only the header / param
+   * (path+query) / metadata tables opt in; every other consumer of this
+   * table (env-folder variables, the body form-fields table, …) is
+   * unaffected. When the cell is locked (`disabled`), the plain `InputBox`
+   * is kept regardless — the variable-aware editor has no disabled/read-only
+   * mode of its own, so the locked-row visual falls back rather than losing
+   * the "greyed out" affordance.
+   */
+  variableAware?: boolean
 }
 
 /** Reserve a transparent 1px border on the cell so toggling the diff border on
@@ -65,7 +79,8 @@ const RestormKeyValueTableInner = React.forwardRef<KeyValueTableHandle, RestormK
     persistenceId,
     'data-testid': dataTestId,
     disabled = false,
-    highlightRowKeys
+    highlightRowKeys,
+    variableAware = false
   },
   ref
 ) => {
@@ -202,10 +217,29 @@ const RestormKeyValueTableInner = React.forwardRef<KeyValueTableHandle, RestormK
     onRowsChange(next)
   }, [onRowsChange])
 
-  // Simple InputBox renderer for keys (no variable resolution needed for keys)
+  // Key cell renderer: a plain InputBox by default, or the Handlebars-aware
+  // VariableInputBox when `variableAware` opts in (header / param / metadata
+  // tables) — see the `variableAware` prop doc. A locked (disabled) row
+  // always keeps the plain InputBox: the variable-aware editor has no
+  // disabled affordance of its own.
   const KeyCellRenderer = useCallback<React.FC<CellRendererProps>>(
     ({ value, onChange, disabled: cellDisabled }) => {
-      const cell = (
+      const cell = (variableAware && !cellDisabled) ? (
+        <RestormVariableInputBox
+          value={value}
+          onChange={onChange}
+          variables={variablesRef.current}
+          helpers={helpersRef.current}
+          // No `variableId`: that wires up the per-row "resolved value"
+          // tooltip (`useVariableTransform`), which the backend only ever
+          // populates from the row's VALUE (`ContextService.resolveKeyValue`
+          // reads `kv.value`, never `kv.key`). Passing the row id here would
+          // pop the VALUE's resolved preview while hovering the KEY field —
+          // wrong content, mislabeled. The key only needs suggestions
+          // (`variables`/`helpers`), not a resolved-value subscription.
+          {...(dataTestId && { 'data-testid': `${dataTestId}-key-input` })}
+        />
+      ) : (
         <InputBox
           value={value}
           onChange={onChange}
@@ -217,9 +251,16 @@ const RestormKeyValueTableInner = React.forwardRef<KeyValueTableHandle, RestormK
       // The key cell's `value` IS the row key — highlight the whole row's key
       // cell when that key differs from the other side.
       if (!highlightActive) return cell
-      return <div style={cellDiffStyle(highlightKeySet.has(value))}>{cell}</div>
+      return (
+        <div
+          style={cellDiffStyle(highlightKeySet.has(value))}
+          {...(dataTestId && { 'data-testid': `${dataTestId}-key-diff` })}
+        >
+          {cell}
+        </div>
+      )
     },
-    [dataTestId, highlightActive, highlightKeySet]
+    [dataTestId, highlightActive, highlightKeySet, variableAware]
   )
 
   // Value cell: resolve the row's authoritative ValueType (id ref →
@@ -272,7 +313,10 @@ const RestormKeyValueTableInner = React.forwardRef<KeyValueTableHandle, RestormK
       const rowKey = id ? tableInitialRowsRef.current?.find((tr) => tr.id === id)?.key : undefined
       const diffStyle = highlightActive ? cellDiffStyle(rowKey ? highlightKeySet.has(rowKey) : false) : undefined
       return (
-        <div style={{ ...diffStyle, ...(cellDisabled ? { opacity: 0.6, pointerEvents: 'none' } : {}) }}>
+        <div
+          style={{ ...diffStyle, ...(cellDisabled ? { opacity: 0.6, pointerEvents: 'none' } : {}) }}
+          {...(highlightActive && dataTestId && { 'data-testid': `${dataTestId}-value-diff` })}
+        >
           <TypedValueField
             value={resolved}
             onChange={(next) => {
@@ -297,11 +341,12 @@ const RestormKeyValueTableInner = React.forwardRef<KeyValueTableHandle, RestormK
             valueTypeGroups={valueTypeGroupsRef.current}
             {...(id !== undefined && { expressionVariableId: id })}
             {...(dataTestId && { dataTestId })}
+            stringVariableAware={variableAware}
           />
         </div>
       )
     },
-    [dataTestId, highlightActive, highlightKeySet]
+    [dataTestId, highlightActive, highlightKeySet, variableAware]
   )
 
   return (

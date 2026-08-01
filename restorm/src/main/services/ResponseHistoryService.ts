@@ -10,6 +10,7 @@ import {
 } from './DocumentEvents'
 import { collectionStore } from './CollectionStore'
 import { contextService } from './ContextService'
+import type { KeyValue } from '../../shared/models'
 import {
   getHistoryArchivePath,
   readHistoryArchive,
@@ -1059,22 +1060,22 @@ class ResponseHistoryService {
       if (!this.isRecord(kv)) continue
       if (kv.enabled === false) continue
       if (typeof kv.key !== 'string' || !kv.key) continue
-      const rawValue = kv.value
-      let valueStr = ''
-      if (typeof rawValue === 'string') {
-        valueStr = rawValue
-      } else if (this.isRecord(rawValue)) {
-        const rawValueInner = rawValue.value
-        if (typeof rawValueInner === 'string') {
-          valueStr = rawValueInner
-        } else if (typeof rawValueInner === 'number') {
-          valueStr = String(rawValueInner)
-        }
-      }
-      const resolved = contextService.resolveValue(valueStr, requestId)
+      // Mirror the live dispatch resolution exactly (HTTP / GraphQL / gRPC /
+      // WebSocket execution services, and the path/query param composer) so
+      // this history / MCP echo never shows a substitution that didn't
+      // actually happen on the wire, or the reverse: the KEY resolves
+      // unconditionally through Handlebars (same as a param key or the URL —
+      // a header/metadata name has no "type" to gate on); the VALUE stays
+      // type-aware — only an `ExpressionValue` row is Handlebars-substituted,
+      // a `StringValue` ships verbatim. `keyValueGroups` entries are the same
+      // registered `KeyValue` instances the execution services resolve
+      // against, so the cast mirrors `resolveKeyValueForRequest`'s existing
+      // callers exactly.
+      const resolvedKey = contextService.resolveValue(kv.key, requestId)
+      const resolvedValue = contextService.resolveKeyValueForRequest(kv as unknown as KeyValue, requestId)
       values.push({
-        key: kv.key,
-        value: resolved,
+        key: resolvedKey,
+        value: resolvedValue,
         enabled: typeof kv.enabled === 'boolean' ? kv.enabled : undefined
       })
     }

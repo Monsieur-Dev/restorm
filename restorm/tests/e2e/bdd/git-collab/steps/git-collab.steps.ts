@@ -295,7 +295,9 @@ When('{string} sets the path parameter value to {string}', async ({ collab }, ac
   const p = collab.pageOf(actor)
   const table = p.locator('[data-testid="http-request-path-params-table"]:visible')
   // td layout: [drag, enabled, key, value, mode, description, trash]; the
-  // plain "abc" mode renders a regular <input> for the value cell.
+  // swagger importer casts the petstore's `petId` to a Numeric value (a
+  // spinbutton `<input>`, not the Handlebars-aware editor a default string
+  // value would get).
   const input = table.locator('tbody tr').first().locator('td').nth(3).locator('input').first()
   await expect(input).toBeVisible({ timeout: 10000 })
   await input.fill(value)

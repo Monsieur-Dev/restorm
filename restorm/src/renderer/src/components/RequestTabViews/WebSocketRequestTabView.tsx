@@ -515,6 +515,7 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
             onRowsChange={handleHeadersChange}
             persistenceId={`websocket-headers:${request.id}`}
             data-testid="websocket-headers-table"
+            variableAware
           />
         </div>
       </Pane>

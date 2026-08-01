@@ -1283,8 +1283,11 @@ class WebSocketExecutionService {
       for (const h of headersGroup) {
         if (h.enabled === false) continue
         if (h.key) {
-          // Type-aware: see `HTTPExecutionService`.
-          headers[h.key] = contextService.resolveKeyValueForRequest(h, requestId)
+          // The KEY resolves unconditionally through Handlebars, same as a
+          // path/query param key or the URL. The VALUE stays type-aware —
+          // see `HTTPExecutionService`.
+          const resolvedKey = contextService.resolveValue(h.key, requestId)
+          headers[resolvedKey] = contextService.resolveKeyValueForRequest(h, requestId)
         }
       }
     }

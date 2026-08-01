@@ -56,13 +56,20 @@ async function expectSurfaceContains(p: Page, testid: string, needle: string): P
   }).toBe(true)
 }
 
-// A RestormKeyValueTable renders each row's key as an ECUI InputBox, so the
-// key lives in an `<input>` VALUE, not as table text.
+// A RestormKeyValueTable renders each row's key as either an ECUI InputBox
+// (key lives in an `<input>` VALUE) or, on the header/param/metadata tables,
+// the Handlebars-aware VariableInputBox (a Monaco editor whose text lives in
+// `.view-line` spans, not an input value) — read both surfaces.
 async function expectKvTableKey(p: Page, tableTestid: string, key: string): Promise<void> {
-  const inputs = p.locator(`[data-testid="${tableTestid}"]:visible input`)
   await expect.poll(async () => {
-    const values = await inputs.evaluateAll((els) => els.map((e) => (e as HTMLInputElement).value))
-    return values.includes(key)
+    return p.evaluate(({ tid, k }) => {
+      const table = Array.from(document.querySelectorAll(`[data-testid="${tid}"]`))
+        .find((el) => (el as HTMLElement).offsetParent !== null)
+      if (!table) return false
+      const inputValues = Array.from(table.querySelectorAll('input, textarea')).map((e) => (e as HTMLInputElement | HTMLTextAreaElement).value)
+      const monacoLineTexts = Array.from(table.querySelectorAll('.view-line')).map((e) => e.textContent.trim())
+      return inputValues.includes(k) || monacoLineTexts.includes(k)
+    }, { tid: tableTestid, k: key })
   }, { timeout: 20_000, message: `${tableTestid} should have a row whose input value is "${key}"` }).toBe(true)
 }
 

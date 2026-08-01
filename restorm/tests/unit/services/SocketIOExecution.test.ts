@@ -305,6 +305,28 @@ describe('WebSocketExecutionService — Socket.IO', () => {
     expect(result.error).toContain('No resolved URL')
   })
 
+  it('resolves a Handlebars header KEY, not just the value, before connecting (WS/SIO/MQTT share this funnel)', async () => {
+    mockedContextService.getResolvedUrl.mockReturnValue({ resolvedUrl: baseUrl, resolvedParts: [] } as never)
+    mockedContextService.getRequestContext.mockReturnValue({
+      fullData: { protocol: 'socketio', event: 'echo', message: '{}' },
+      keyValueGroups: new Map([['headers', [{ key: '{{headerNameVar}}', value: 'templated-header-value', enabled: true }]]])
+    } as never)
+    // The header KEY has no ValueType to gate on, so — same as an HTTP
+    // header key or a query/path param key — it resolves unconditionally.
+    mockedContextService.resolveValue.mockImplementation((v: string) => v.replace('{{headerNameVar}}', 'x-templated-header'))
+
+    let capturedHeaders: Record<string, unknown> | undefined
+    io.once('connection', (socket) => { capturedHeaders = socket.handshake.headers })
+
+    const run = websocketExecutionService.execute({ requestId: 'sio-header-key' })
+    await waitFor(() => websocketExecutionService.isActive('sio-header-key'))
+    websocketExecutionService.disconnect('sio-header-key')
+    await run
+
+    expect(capturedHeaders?.['x-templated-header']).toBe('templated-header-value')
+    expect(capturedHeaders?.['{{headernamevar}}']).toBeUndefined()
+  })
+
   it('isActive() returns false for an unknown request', () => {
     expect(websocketExecutionService.isActive('nope')).toBe(false)
   })
