@@ -42,7 +42,17 @@ export interface RestormState {
   // Event source tracking
   currentEventSource: EventSource
   
+  /**
+   * Last main-side tree version this renderer has applied. Kept here so that
+   * callers which re-mirror without one (they hold a fresh tree but no access
+   * to the version) are still STAMPED rather than sending an unstamped mirror
+   * — main's guard ignores `clientVersion: undefined` entirely, so an
+   * unstamped mirror bypasses the stale-write check completely.
+   */
+  lastMcpVersion: number
+
   // Actions
+  setLastMcpVersion: (version: number) => void
   setCollections: (collections: EnvironmentFolder[], source?: EventSource, mcpVersion?: number) => void
   updateCollection: (id: string, updates: Partial<EnvironmentFolder>, source?: EventSource) => void
   
@@ -245,6 +255,9 @@ export const useRestormStore = create<RestormState>()(
     editingState: null,
     focusedItemId: null,
     currentEventSource: 'user',
+    lastMcpVersion: 0,
+
+    setLastMcpVersion: (version) => { set({ lastMcpVersion: version }) },
     
     // Set collections
     setCollections: (collections, source = 'user', mcpVersion) => {
@@ -272,7 +285,14 @@ export const useRestormStore = create<RestormState>()(
         // applied; main refuses the mirror if it predates a newer MCP mutation
         // (stale-write guard) — preventing a lagging autosave from clobbering
         // freshly-created scenario nodes / requests in the main store.
-        void api.syncCollections(cloneForEventBus(collections) as unknown[], mcpVersion)
+        // Fall back to the last applied version when the caller has none:
+        // main IGNORES its stale-write guard for an unstamped mirror
+        // (`clientVersion !== undefined`), so sending `undefined` would let
+        // this mirror overwrite a newer tree unconditionally. Callers that DO
+        // know the version their tree was built from must pass it — that is
+        // strictly better than this fallback, which can only assert "as fresh
+        // as the last replace we saw".
+        void api.syncCollections(cloneForEventBus(collections) as unknown[], mcpVersion ?? get().lastMcpVersion)
       }
     },
     

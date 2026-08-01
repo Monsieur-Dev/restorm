@@ -343,6 +343,7 @@ const App: React.FC = () => {
   }), [t])
   const { isEnabled: navigationEnabled } = useFeature('navigation')
   const setCollections = useRestormStore((state) => state.setCollections)
+  const setLastMcpVersion = useRestormStore((state) => state.setLastMcpVersion)
   const {
     state: fileState,
     fileName,
@@ -1845,6 +1846,14 @@ const App: React.FC = () => {
   // The same version as STATE, so it travels with the tree it describes. See
   // `snapshotMirrorPayload` for why the mirror must never read the ref late.
   const [appliedMcpVersion, setAppliedMcpVersion] = useState(0)
+  // Publish the applied version to BOTH: the local state that pairs with the
+  // tree for this component's mirror, and the store, so re-mirrors raised
+  // elsewhere (which hold a fresh tree but no version) are stamped instead of
+  // bypassing main's guard as unstamped.
+  const publishAppliedMcpVersion = useCallback((version: number): void => {
+    setAppliedMcpVersion(version)
+    setLastMcpVersion(version)
+  }, [setLastMcpVersion])
   const bumpAllTabContentVersionsRef = useRef<() => void>(() => { /* not yet wired */ })
   const bumpAllTabContentVersionsStable = useCallback((): void => { bumpAllTabContentVersionsRef.current() }, [])
   // Prune workbench tabs orphaned by a main-driven tree replacement (MCP
@@ -1853,7 +1862,7 @@ const App: React.FC = () => {
   const pruneOrphanTabsStable = useCallback((existingIds: Set<string>): void => {
     setWorkbenchTree((prevTree) => ({ ...prevTree, groups: pruneOrphanTabs(prevTree.groups, existingIds) }))
   }, [setWorkbenchTree])
-  useMcpTreeReplace({ setRootItems, rootItemsRef, mcpDrivenRef, lastMcpVersionRef, onVersionApplied: setAppliedMcpVersion, bumpAllTabContentVersions: bumpAllTabContentVersionsStable, pruneOrphanTabs: pruneOrphanTabsStable })
+  useMcpTreeReplace({ setRootItems, rootItemsRef, mcpDrivenRef, lastMcpVersionRef, onVersionApplied: publishAppliedMcpVersion, bumpAllTabContentVersions: bumpAllTabContentVersionsStable, pruneOrphanTabs: pruneOrphanTabsStable })
   useMcpRunRequest({ enabled: mcpEnabled })
   // Read-only e2e automation hook: exposes window.__restormSuggestions to pull
   // each action's inspector data suggestion for a scenario from the running app.
@@ -2456,14 +2465,27 @@ const App: React.FC = () => {
   // the up-to-date tree. Reset the ref on the same tick.
   useEffect(() => {
     const source = mcpDrivenRef.current ? 'mcp' : 'user'
+    // Consume the flag BEFORE the loading bail-out below, so it can't leak
+    // into the next mirror and wrongly mark a user edit as MCP-driven.
     if (mcpDrivenRef.current) mcpDrivenRef.current = false
+    // Never mirror while the project is still being read. In that window the
+    // renderer's tree is transient — typically empty, because nothing has been
+    // loaded into it yet — while main already holds the authoritative tree it
+    // just read from disk. Mirroring here can only clobber it, and the version
+    // stamp cannot save us: an empty tree carrying the CURRENT version passes
+    // main's strictly-older check and wipes the store to zero collections while
+    // the file on disk still holds them. Suppressing the mirror cannot lose
+    // anything (main is authoritative here, not the renderer), and
+    // `isFileServiceLoading` is in the deps so the mirror is sent once loading
+    // completes and the real tree has landed.
+    if (isFileServiceLoading) return
     // Stamp the mirror with the version THIS tree was built from — never with
     // `lastMcpVersionRef.current`, which may already have advanced past it (see
     // `mirrorPayload`). A stale `'user'` mirror is then refused main-side
     // because its stamp is genuinely older, instead of sneaking through on a
     // stamp it never earned.
     setCollections(mirrorPayload.collections, source, mirrorPayload.builtFromVersion)
-  }, [mirrorPayload, setCollections])
+  }, [mirrorPayload, setCollections, isFileServiceLoading])
 
   // Listen to test events for E2E tests (only in dev/test mode)
   // Expose handleFileOpened directly on window for E2E tests
