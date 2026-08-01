@@ -158,6 +158,31 @@ function triggerSave(): void {
 // amqp / jsonrpc / trpc / …) is creatable through the API — a hardcoded list
 // here silently lagged each new protocol family.
 
+/**
+ * Socket.IO and MQTT are not request TYPES: both are `websocket` requests
+ * carrying a transport discriminator. Callers reach for them by name anyway
+ * (they are separate tabs in the UI), and without them here those two tabs had
+ * no MCP creation route at all — the caller had to know to create a
+ * `websocket` and then patch `protocol`.
+ */
+const WEBSOCKET_VARIANTS = ['socketio', 'mqtt'] as const
+type WebSocketVariant = (typeof WEBSOCKET_VARIANTS)[number]
+
+const CREATABLE_PROTOCOLS = [...REQUEST_TYPES, ...WEBSOCKET_VARIANTS] as [string, ...string[]]
+type CreatableProtocol = (typeof REQUEST_TYPES)[number] | WebSocketVariant
+
+function isWebSocketVariant(protocol: CreatableProtocol): protocol is WebSocketVariant {
+  return (WEBSOCKET_VARIANTS as readonly string[]).includes(protocol)
+}
+
+/** Map a caller-facing protocol onto the request type + optional transport. */
+function resolveCreatableProtocol(
+  protocol: CreatableProtocol
+): { type: (typeof REQUEST_TYPES)[number]; wsProtocol: WebSocketVariant | null } {
+  if (isWebSocketVariant(protocol)) return { type: 'websocket', wsProtocol: protocol }
+  return { type: protocol, wsProtocol: null }
+}
+
 export function registerWriteTools(mcp: McpService): void {
   mcp.registerTool(
     'create_folder',
@@ -202,30 +227,39 @@ export function registerWriteTools(mcp: McpService): void {
       title: 'Create request',
       description:
         'Create a new request in a folder. `protocol` picks the request type (http / graphql / ' +
-        'grpc / soap / websocket / sse / odata / auth). Returns `{ id, name, protocol, parentId }`. The ' +
-        'created request is bare — fill in URL / method / headers via `update_request` or ' +
-        'in the UI.',
+        'grpc / soap / websocket / sse / odata / auth). `socketio` and `mqtt` are also accepted: ' +
+        'they are not separate request types but WebSocket requests carrying that transport ' +
+        'discriminator, and naming them here creates the matching tab directly. Returns ' +
+        '`{ id, name, protocol, parentId }`. The created request is bare — fill in URL / method / ' +
+        'headers via `update_request` or in the UI.',
       inputSchema: {
         parentFolderId: z.string().min(1).describe('Folder or env-folder id to create the request in.'),
         name: z.string().min(1).describe('Request name as it appears in the sidebar.'),
-        protocol: z.enum(REQUEST_TYPES).describe('Request type (one of the supported protocols).')
+        protocol: z.enum(CREATABLE_PROTOCOLS).describe(
+          'Request type, or a WebSocket transport variant (`socketio` / `mqtt`).'
+        )
       } as Record<string, unknown>
     },
     (args) => {
       const argRecord = args
       const parentFolderId = typeof argRecord['parentFolderId'] === 'string' ? argRecord['parentFolderId'] : ''
       const name = typeof argRecord['name'] === 'string' ? argRecord['name'] : ''
-      const protocol = typeof argRecord['protocol'] === 'string' ? argRecord['protocol'] as typeof REQUEST_TYPES[number] : null
+      const protocol = typeof argRecord['protocol'] === 'string' ? argRecord['protocol'] as CreatableProtocol : null
       if (!parentFolderId) return errorReply('parentFolderId is required')
       if (!name) return errorReply('name is required')
-      if (protocol === null || !REQUEST_TYPES.includes(protocol)) {
-        return errorReply(`protocol must be one of: ${REQUEST_TYPES.join(', ')}`)
+      if (protocol === null || !(CREATABLE_PROTOCOLS as readonly string[]).includes(protocol)) {
+        return errorReply(`protocol must be one of: ${CREATABLE_PROTOCOLS.join(', ')}`)
       }
       const parent = collectionStore.findById(parentFolderId)
       if (!parent || !isAnyFolder(parent)) {
         return errorReply(`parentFolderId ${parentFolderId} doesn't point at a folder`)
       }
-      const created = collectionStore.createRequest(parentFolderId, { type: protocol, name })
+      const { type, wsProtocol } = resolveCreatableProtocol(protocol)
+      const created = collectionStore.createRequest(parentFolderId, {
+        type,
+        name,
+        ...(wsProtocol !== null && { protocol: wsProtocol })
+      } as Parameters<typeof collectionStore.createRequest>[1])
       broadcastTreeReplace()
       triggerSave()
       return jsonReply({ id: created.id, name: created.name, protocol, parentId: parentFolderId })

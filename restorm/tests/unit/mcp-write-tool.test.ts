@@ -33,6 +33,12 @@ const store = {
   item: new StompRequest({ id: 'unset' })
 }
 
+/** A folder `isAnyFolder` accepts, so create_request's parent check passes. */
+const folder = { id: 'folder-1', name: 'Collection', items: [] }
+
+/** Last payload handed to `collectionStore.createRequest`. */
+let created: Record<string, unknown> | null = null
+
 vi.mock('electron', () => ({
   BrowserWindow: {
     getAllWindows: () => [{
@@ -44,7 +50,14 @@ vi.mock('electron', () => ({
 
 vi.mock('../../src/main/services/CollectionStore', () => ({
   collectionStore: {
-    findById: (id: string): unknown => (store.item.id === id ? store.item : null),
+    findById: (id: string): unknown => {
+      if (id === folder.id) return folder
+      return store.item.id === id ? store.item : null
+    },
+    createRequest: (_parentId: string, data: Record<string, unknown>): unknown => {
+      created = data
+      return { id: 'new-1', name: data['name'], type: data['type'] }
+    },
     // Mirrors the real store: assign the patch, then serialize for the update
     // event. The serialization is what a non-reified array blows up on.
     updateRequest: (id: string, updates: Record<string, unknown>): unknown => {
@@ -171,5 +184,52 @@ describe('update_request key-value reification', () => {
     expect(store.item.subscriptions).toBe(before)
     // …and the request is readable again, not wedged.
     expect(() => store.item.toPlainObject()).not.toThrow()
+  })
+})
+
+describe('create_request protocol', () => {
+  let fakeService: FakeMcpService
+
+  beforeEach(() => {
+    fakeService = new FakeMcpService()
+    created = null
+    registerWriteTools(fakeService as unknown as Parameters<typeof registerWriteTools>[0])
+  })
+
+  it.each([
+    ['socketio', 'websocket', 'socketio'],
+    ['mqtt', 'websocket', 'mqtt']
+  ])('creates %s as a websocket request carrying that transport', (protocol, type, wsProtocol) => {
+    const result = fakeService.invoke('create_request', {
+      parentFolderId: 'folder-1',
+      name: 'Live feed',
+      protocol
+    }) as ToolReply
+
+    expect(result.isError).toBeUndefined()
+    expect(replyJson(result)['protocol']).toBe(protocol)
+    expect(created).toEqual({ type, name: 'Live feed', protocol: wsProtocol })
+  })
+
+  it('creates a plain websocket request without a transport override', () => {
+    const result = fakeService.invoke('create_request', {
+      parentFolderId: 'folder-1',
+      name: 'Socket',
+      protocol: 'websocket'
+    }) as ToolReply
+
+    expect(result.isError).toBeUndefined()
+    expect(created).toEqual({ type: 'websocket', name: 'Socket' })
+  })
+
+  it('rejects a protocol that is neither a request type nor a transport', () => {
+    const result = fakeService.invoke('create_request', {
+      parentFolderId: 'folder-1',
+      name: 'Nope',
+      protocol: 'carrier-pigeon'
+    }) as ToolReply
+
+    expect(result.isError).toBe(true)
+    expect(result.content[0].text).toContain('protocol must be one of')
   })
 })
