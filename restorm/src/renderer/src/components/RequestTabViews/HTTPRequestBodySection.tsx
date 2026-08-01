@@ -12,6 +12,7 @@ import type { HTTPRequest, AuthenticationRequest, KeyValue } from '../../../../s
 import type { TranslatedHelperDefinition } from '../../utils/handlebarsHelpersDefinitions'
 import { resolveFilePickerPath } from '../../utils/filePicker'
 import { detectBodyEditorLanguage } from '../../utils/bodyEditorLanguage'
+import { HeaderHoverTooltip } from '../MainView/HeaderHoverTooltip'
 
 export type BodyMode = 'text' | 'form-data' | 'x-www-form-urlencoded' | 'file'
 
@@ -66,19 +67,19 @@ const BodyFieldsTable: React.FC<BodyFieldsTableProps> = ({
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 4, height: '100%', minHeight: 0 }}>
       <div style={{ display: 'flex' }}>
-        <Button
-          small
-          icon="add"
-          disabled={disabled}
-          options={{
-            ariaLabel: t('requestTab.body.addField', 'Add field'),
-            title: t('requestTab.body.addField', 'Add field')
-          }}
-          onClick={() => { tableRef.current?.addRow() }}
-          data-testid="http-request-body-add-field-button"
-        >
-          {t('requestTab.body.addField', 'Add field')}
-        </Button>
+        {/* Icon-only: a small button clips a text label mid-word. The name
+            lives on the tooltip (hover) and the aria-label (screen reader). */}
+        <HeaderHoverTooltip label={t('requestTab.body.addField', 'Add field')}>
+          <Button
+            secondary
+            small
+            icon="add"
+            disabled={disabled}
+            options={{ ariaLabel: t('requestTab.body.addField', 'Add field') }}
+            onClick={() => { tableRef.current?.addRow() }}
+            data-testid="http-request-body-add-field-button"
+          />
+        </HeaderHoverTooltip>
       </div>
       <div style={{ flex: 1, minHeight: 0 }}>
         <RestormKeyValueTable

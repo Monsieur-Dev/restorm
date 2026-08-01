@@ -66,8 +66,13 @@ describe('useMcpTreeReplace — rootItemsRef synchronous write', () => {
     ;(window as unknown as { restorm?: unknown }).restorm = undefined
   })
 
-  function mountHook(): { rootItemsRef: { current: FolderItem[] }; setRootItems: ReturnType<typeof vi.fn> } {
+  function mountHook(): {
+    rootItemsRef: { current: FolderItem[] }
+    setRootItems: ReturnType<typeof vi.fn>
+    onVersionApplied: ReturnType<typeof vi.fn>
+  } {
     const setRootItems = vi.fn()
+    const onVersionApplied = vi.fn()
     const { result } = renderHook(() => {
       const rootItemsRef = useRef<FolderItem[]>([])
       useMcpTreeReplace({
@@ -75,12 +80,13 @@ describe('useMcpTreeReplace — rootItemsRef synchronous write', () => {
         rootItemsRef,
         mcpDrivenRef: useRef(false),
         lastMcpVersionRef: useRef(0),
+        onVersionApplied,
         bumpAllTabContentVersions: vi.fn(),
         pruneOrphanTabs: vi.fn()
       })
       return rootItemsRef
     })
-    return { rootItemsRef: result.current, setRootItems }
+    return { rootItemsRef: result.current, setRootItems, onVersionApplied }
   }
 
   it('writes the fresh tree into rootItemsRef.current synchronously, inside the same handler call that also invokes setRootItems', () => {
@@ -101,5 +107,39 @@ describe('useMcpTreeReplace — rootItemsRef synchronous write', () => {
     // see exactly this.
     expect(rootItemsRef.current).toEqual([{ id: 'r1', name: 'r1', type: 'http' }])
     expect(setRootItems).toHaveBeenCalledWith([{ id: 'r1', name: 'r1', type: 'http' }])
+  })
+
+  // The applied version has to reach React in the SAME handler call as the
+  // tree, so both land in one commit and the autosave mirror can stamp each
+  // tree with the version it was actually built from. Publish them apart and
+  // a tree rendered before this replace goes out wearing the version that
+  // arrived after it — which main's strictly-older guard accepts, letting a
+  // stale (possibly empty) tree overwrite the authoritative one.
+  it('publishes the applied version in the same handler call as the tree', () => {
+    ;(window as unknown as { restorm: unknown }).restorm = {
+      runtime: {
+        onMcpTreeReplace: (cb: TreeReplaceCb) => { treeReplaceCb = cb; return () => { treeReplaceCb = null } }
+      }
+    }
+    const { setRootItems, onVersionApplied } = mountHook()
+
+    treeReplaceCb?.({ items: [{ id: 'r1', name: 'r1', type: 'http' }], mcpVersion: 7 })
+
+    expect(onVersionApplied).toHaveBeenCalledWith(7)
+    expect(onVersionApplied).toHaveBeenCalledTimes(1)
+    expect(setRootItems).toHaveBeenCalledTimes(1)
+  })
+
+  it('publishes version 0 for a bare-array payload, so an unversioned sender cannot inflate the stamp', () => {
+    ;(window as unknown as { restorm: unknown }).restorm = {
+      runtime: {
+        onMcpTreeReplace: (cb: TreeReplaceCb) => { treeReplaceCb = cb; return () => { treeReplaceCb = null } }
+      }
+    }
+    const { onVersionApplied } = mountHook()
+
+    treeReplaceCb?.([{ id: 'r1', name: 'r1', type: 'http' }])
+
+    expect(onVersionApplied).toHaveBeenCalledWith(0)
   })
 })

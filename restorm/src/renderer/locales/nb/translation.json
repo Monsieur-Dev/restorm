@@ -32,6 +32,7 @@
     "resolveError": "Kunne ikke løse hemmeligheten",
     "resolveErrorEnv": "Minst én variabel kunne ikke hentes og er i feiltilstand.",
     "resolveErrorItem": "Minst én av hemmelighetene til dette elementet kunne ikke hentes.",
+    "resolveErrorItemVars": "Uløste miljøvariabler: {{vars}}",
     "fetchFailed": "Henting mislyktes",
     "retrievalModal": {
       "title": "Henting av hemmelighet",
@@ -995,17 +996,21 @@
     "title": "Atferd",
     "syncSidebarWithTabs": "Synkroniser sidefeltvalg med aktiv fane",
     "syncSidebarWithTabsDescription": "Når du bytter fane i arbeidsområdet, velges og vises tilsvarende element automatisk i sidefeltet",
-    "dateTimeFormat": "Dato/tid-format",
-    "dateTimeFormatDescription": "Format som brukes for å vise datoer og tider i applikasjonen",
-    "dateTimeFormat.us": "US-format (MM/DD/ÅÅÅÅ, 12t)",
-    "dateTimeFormat.iso": "ISO-format (ÅÅÅÅ-MM-DD, 24t)"
+    "dateTimeFormatTitle": "Dato/tid-format",
+    "dateTimeFormat": {
+      "us": "US-format (MM/DD/ÅÅÅÅ, 12t)",
+      "iso": "ISO-format (ÅÅÅÅ-MM-DD, 24t)"
+    },
+    "dateTimeFormatDescription": "Format som brukes for å vise datoer og tider i applikasjonen"
   },
   "console": {
     "title": "Konsoll",
-    "requestFormat": "Forespørselsformat",
-    "requestFormatDescription": "Standard shell-stil for å vise utgående forespørsler i Konsoll-fanen. Hver rad er en kommandolinje du kan kopiere; vippeknappen i Konsoll-verktøylinjen overstyrer denne standarden for gjeldende fane.",
-    "requestFormat.curl": "curl (Unix-stil)",
-    "requestFormat.powershell": "PowerShell (Invoke-RestMethod)"
+    "requestFormatTitle": "Forespørselsformat",
+    "requestFormat": {
+      "curl": "curl (Unix-stil)",
+      "powershell": "PowerShell (Invoke-RestMethod)"
+    },
+    "requestFormatDescription": "Standard shell-stil for å vise utgående forespørsler i Konsoll-fanen. Hver rad er en kommandolinje du kan kopiere; vippeknappen i Konsoll-verktøylinjen overstyrer denne standarden for gjeldende fane."
   },
   "import": {
     "addAuth": "Legg til en autentiseringsrute",
@@ -2047,18 +2052,18 @@
   },
   "mqtt": {
     "qos": "QoS",
-    "retain": "Retain",
+    "retain": "Behold",
     "subscribeOnConnect": "Abonner ved tilkobling",
-    "clientId": "Client ID",
+    "clientId": "Klient-ID",
     "clientIdPlaceholder": "genereres automatisk hvis tom",
-    "username": "Username",
-    "password": "Password",
+    "username": "Brukernavn",
+    "password": "Passord",
     "keepalive": "Keepalive (s)",
     "lwt": "Siste vilje (LWT)",
-    "topic": "Topic",
-    "lwtTopicPlaceholder": "will/topic",
-    "lwtPayload": "Payload",
-    "lwtPayloadPlaceholder": "will message"
+    "topic": "Emne",
+    "lwtTopicPlaceholder": "emne/testament",
+    "lwtPayload": "Nyttelast",
+    "lwtPayloadPlaceholder": "testamentmelding"
   },
   "amqp": {
     "urlPlaceholder": "AMQP-URL (amqp:// eller amqps://)",

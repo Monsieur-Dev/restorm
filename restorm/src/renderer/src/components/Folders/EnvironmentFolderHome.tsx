@@ -1,6 +1,6 @@
 import React, { useCallback, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useFileService, ContextMenu, Table, type ContextMenuItem, type TableColumn } from 'electron-core-ui/renderer'
+import { useFileService, ContextMenu, MarkdownViewer, Table, type ContextMenuItem, type TableColumn } from 'electron-core-ui/renderer'
 import { addFavorite, getFavorites, isFavorite as isFavoriteCheck, removeFavorite, reorderFavorites } from '../../services/favoritesStore'
 import { PROJECT_UUID_KEY } from '../../../../shared/config/projectUuid'
 import type { EnvironmentFolder, FolderItem } from '../../../../shared/types/collections'
@@ -189,11 +189,14 @@ const EnvironmentFolderHome: React.FC<Props> = ({ folder, onSwitchTab, onRequest
 
       {/* ── Description ── */}
       {apiDoc?.api.description && (
-        <p className="home-description">
-          {apiDoc.api.description.length > 400
-            ? `${apiDoc.api.description.slice(0, 400)}…`
-            : apiDoc.api.description}
-        </p>
+        <div className="home-description" data-testid="folder-home-description">
+          {/* Markdown, like the Docs tab renders the same string — a plain
+              text node showed link syntax literally. The old 400-character
+              truncation is gone with it: cutting markdown mid-token can split
+              a link and leave the raw source visible, so the summary is capped
+              by height in CSS instead. */}
+          <MarkdownViewer value={apiDoc.api.description} />
+        </div>
       )}
 
       {/* ── Big action buttons ── */}

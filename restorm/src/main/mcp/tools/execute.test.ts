@@ -35,6 +35,9 @@ const mockState = {
   wsDisconnect: vi.fn<(id: string) => boolean>(),
   wsGetMessages: vi.fn<(id: string, after?: number) => unknown>(),
   wsIsActive: vi.fn<(id: string) => boolean>(),
+  sseDisconnect: vi.fn<(id: string) => boolean>(),
+  sseGetMessages: vi.fn<(id: string, after?: number) => unknown>(),
+  sseIsActive: vi.fn<(id: string) => boolean>(),
   webSend: vi.fn<(channel: string, payload: unknown) => void>()
 }
 
@@ -81,6 +84,14 @@ vi.mock('../../services/WebSocketExecutionService', () => ({
     disconnect: (id: string) => mockState.wsDisconnect(id),
     getMessages: (id: string, after?: number) => mockState.wsGetMessages(id, after),
     isActive: (id: string) => mockState.wsIsActive(id)
+  }
+}))
+
+vi.mock('../../services/SseExecutionService', () => ({
+  sseExecutionService: {
+    disconnect: (id: string) => mockState.sseDisconnect(id),
+    getMessages: (id: string, after?: number) => mockState.sseGetMessages(id, after),
+    isActive: (id: string) => mockState.sseIsActive(id)
   }
 }))
 
@@ -486,6 +497,13 @@ describe('execute tools — run_request_batch', () => {
 // ---------------------------------------------------------------------------
 
 describe('execute tools — read_stream', () => {
+  // A continuation token is only ever issued for a request in the project, and
+  // the tool reads THAT request's protocol buffer — so the store has to resolve
+  // it. Default every id to a websocket request; the SSE cases override.
+  beforeEach(() => {
+    mockState.findById.mockImplementation((id: string) => ({ id, name: id, type: 'websocket' }))
+  })
+
   it('returns the next slice of frames + advances the cursor', async () => {
     const all = [
       { direction: 'received', data: 'm1', timestamp: 't1' },
@@ -629,5 +647,78 @@ describe('execute tools — get_response', () => {
     registerExecutionTools(mcp as unknown as McpService)
     const { isError } = parseReply(await mcp.invoke('get_response', { historyEntryId: 'ghost' }))
     expect(isError).toBe(true)
+  })
+})
+
+// ---------------------------------------------------------------------------
+// Streaming protocols other than WebSocket — the buffer must be the
+// request's OWN, and the reported protocol must be the request's own.
+// ---------------------------------------------------------------------------
+
+describe('execute tools — streaming reads the request\'s own protocol buffer', () => {
+  const SSE_REQUEST = { id: 'sse1', name: 'Events', type: 'sse' }
+  const SSE_FRAMES = [
+    { direction: 'received', data: 'ping 1', timestamp: 't1' },
+    { direction: 'received', data: 'ping 2', timestamp: 't2' }
+  ]
+
+  it('run_request streams an SSE request and reports protocol "sse"', async () => {
+    // The WebSocket buffer stays empty throughout: reading it for an SSE
+    // request is what produced `{ frameCount: 0, protocol: 'websocket' }` on a
+    // connection that was streaming fine.
+    mockState.findById.mockReturnValue(SSE_REQUEST)
+    mockState.wsGetMessages.mockReturnValue({ frames: [], total: 0 })
+    mockState.wsIsActive.mockReturnValue(false)
+    mockState.sseGetMessages.mockReturnValue({ frames: SSE_FRAMES, total: SSE_FRAMES.length })
+    mockState.sseIsActive.mockReturnValue(true)
+
+    const mcp = new FakeMcpService()
+    registerExecutionTools(mcp as unknown as McpService)
+    vi.useFakeTimers()
+    const promise = mcp.invoke('run_request', { id: 'sse1' }) as Promise<unknown>
+    await vi.runAllTimersAsync()
+    const { payload } = parseReply(await promise) as {
+      payload: { protocol: string; frameCount: number; success: boolean; continuationToken: string }
+    }
+
+    expect(payload.protocol).toBe('sse')
+    expect(payload.frameCount).toBe(2)
+    expect(payload.success).toBe(true)
+    expect(payload.continuationToken).toBe('2#sse1')
+  })
+
+  it('read_stream pulls from the SSE buffer, not the WebSocket one', async () => {
+    mockState.findById.mockReturnValue(SSE_REQUEST)
+    mockState.wsGetMessages.mockReturnValue({ frames: [], total: 0 })
+    mockState.wsIsActive.mockReturnValue(false)
+    mockState.sseGetMessages.mockImplementation((_id: string, after?: number) => ({
+      frames: SSE_FRAMES.slice(after ?? 0),
+      total: SSE_FRAMES.length
+    }))
+    mockState.sseIsActive.mockReturnValue(true)
+
+    const mcp = new FakeMcpService()
+    registerExecutionTools(mcp as unknown as McpService)
+    const { payload } = parseReply(await mcp.invoke('read_stream', { continuationToken: '1#sse1' })) as {
+      payload: { frameCount: number; done: boolean; continuationToken: string }
+    }
+
+    expect(payload.frameCount).toBe(1)
+    expect(payload.done).toBe(false)
+    expect(payload.continuationToken).toBe('2#sse1')
+    expect(mockState.wsGetMessages).not.toHaveBeenCalled()
+  })
+
+  it('read_stream reports no live buffer for a protocol that has none wired', async () => {
+    mockState.findById.mockReturnValue({ id: 'http1', name: 'Get', type: 'http' })
+    const mcp = new FakeMcpService()
+    registerExecutionTools(mcp as unknown as McpService)
+    const { payload } = parseReply(await mcp.invoke('read_stream', { continuationToken: '0#http1' })) as {
+      payload: { frameCount: number; done: boolean; note: string }
+    }
+
+    expect(payload.frameCount).toBe(0)
+    expect(payload.done).toBe(true)
+    expect(payload.note).toContain('No live frame buffer')
   })
 })

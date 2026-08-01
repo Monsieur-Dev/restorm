@@ -32,6 +32,7 @@
     "resolveError": "Vyřešení tajemství selhalo",
     "resolveErrorEnv": "Alespoň jednu proměnnou se nepodařilo načíst a je v chybovém stavu.",
     "resolveErrorItem": "Alespoň jedno z tajemství této položky se nepodařilo načíst.",
+    "resolveErrorItemVars": "Nevyřešené proměnné prostředí: {{vars}}",
     "fetchFailed": "Načtení selhalo",
     "retrievalModal": {
       "title": "Načtení tajemství",
@@ -997,17 +998,21 @@
     "title": "Chování",
     "syncSidebarWithTabs": "Synchronizovat výběr v postranním panelu s aktivní záložkou",
     "syncSidebarWithTabsDescription": "Při přepínání záložek v pracovním prostoru automaticky vybrat a zvýraznit odpovídající položku v postranním panelu",
-    "dateTimeFormat": "Formát data a času",
-    "dateTimeFormatDescription": "Formát používaný pro zobrazování dat a časů v aplikaci",
-    "dateTimeFormat.us": "Formát US (MM/DD/RRRR, 12h)",
-    "dateTimeFormat.iso": "Formát ISO (RRRR-MM-DD, 24h)"
+    "dateTimeFormatTitle": "Formát data a času",
+    "dateTimeFormat": {
+      "us": "Formát US (MM/DD/RRRR, 12h)",
+      "iso": "Formát ISO (RRRR-MM-DD, 24h)"
+    },
+    "dateTimeFormatDescription": "Formát používaný pro zobrazování dat a časů v aplikaci"
   },
   "console": {
     "title": "Konzole",
-    "requestFormat": "Formát požadavků",
-    "requestFormatDescription": "Výchozí typ shellu pro vykreslení odchozích požadavků v záložce Konzole. Každý řádek je příkaz k zkopírování; přepínač v nástrojové liště konzole tento výchozí přepíše pro aktuální záložku.",
-    "requestFormat.curl": "curl (styl Unix)",
-    "requestFormat.powershell": "PowerShell (Invoke-RestMethod)"
+    "requestFormatTitle": "Formát požadavků",
+    "requestFormat": {
+      "curl": "curl (styl Unix)",
+      "powershell": "PowerShell (Invoke-RestMethod)"
+    },
+    "requestFormatDescription": "Výchozí typ shellu pro vykreslení odchozích požadavků v záložce Konzole. Každý řádek je příkaz k zkopírování; přepínač v nástrojové liště konzole tento výchozí přepíše pro aktuální záložku."
   },
   "import": {
     "addAuth": "Přidat ověřovací trasu",
@@ -2049,18 +2054,18 @@
   },
   "mqtt": {
     "qos": "QoS",
-    "retain": "Retain",
+    "retain": "Ponechat",
     "subscribeOnConnect": "Přihlásit se k odběru při připojení",
-    "clientId": "Client ID",
+    "clientId": "ID klienta",
     "clientIdPlaceholder": "automaticky generováno, pokud je prázdné",
-    "username": "Username",
-    "password": "Password",
+    "username": "Uživatelské jméno",
+    "password": "Heslo",
     "keepalive": "Keepalive (s)",
     "lwt": "Poslední vůle (LWT)",
-    "topic": "Topic",
-    "lwtTopicPlaceholder": "will/topic",
-    "lwtPayload": "Payload",
-    "lwtPayloadPlaceholder": "will message"
+    "topic": "Téma",
+    "lwtTopicPlaceholder": "téma/závěti",
+    "lwtPayload": "Data",
+    "lwtPayloadPlaceholder": "zpráva závěti"
   },
   "amqp": {
     "urlPlaceholder": "URL AMQP (amqp:// nebo amqps://)",

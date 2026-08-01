@@ -418,7 +418,22 @@ Polls the renderer DOM until a condition is met (or `timeoutMs` elapses). Elimin
 | `text-contains` | `textContent` includes `value` |
 | `attribute-equals` | `getAttribute(attribute) === value` |
 
-Default `timeoutMs` is 5000 (max 60000), `pollMs` 100 (min 20, max 2000). Returns `isError: true` on timeout with a descriptive message.
+Default `timeoutMs` is 5000 (max 60000), `pollMs` 100 (min 20, max 2000). Returns `isError: true` on timeout with a descriptive message, and on an invalid CSS selector — which is a hard error rather than a condition that polls to a timeout.
+
+A successful reply reports what the renderer actually saw:
+
+```jsonc
+{
+  "ok": true,
+  "elapsedMs": 42,
+  "matchCount": 1,        // elements the selector matched
+  "condition": "present",
+  "selector": ".modal",
+  "windowId": 1           // the window that was polled
+}
+```
+
+Check both before trusting a pass. `ok: true` alone is ambiguous — a satisfied `absent` and a satisfied `present` are indistinguishable without `matchCount` — and with more than one window open, `windowId` tells you whether the window polled is the one you go on to screenshot (omit `windowId` in the request and the active window is picked).
 
 ### `keyboard-shortcut`
 
@@ -513,6 +528,8 @@ Block for `ms` milliseconds. Use only when nothing else fits — prefer `wait-fo
 
 Chains multiple MCP tool calls into a single request. Runs each step in order; the next step only fires after the previous one resolves **and** the renderer has had an implicit "1 frame + 1 microtask" settle (override per step with `waitFor`, or skip globally via `skipImplicitSettle`). Aborts on the first step that throws or returns `isError: true` — subsequent steps are skipped.
 
+The implicit settle is **bounded** (1000 ms). Chromium produces no frames at all for a window that is unfocused, minimised or occluded, so an unbounded frame wait would never resolve there and every batch would hang — including one whose steps never touch the DOM. On timeout the batch continues, the step carries `"settle": "timed-out"`, and the envelope gains a `settleNote`. Pass `skipImplicitSettle: true` when driving a background window, or a per-step `waitFor` to wait on something real.
+
 ```jsonc
 {
   "steps": [
@@ -543,8 +560,11 @@ Per-step `waitFor` overrides the implicit settle. Pick one shape:
   "abortedAt": null,
   "results": [
     { "index": 0, "name": "dispatch-event", "ok": true },
-    { "index": 1, "name": "screenshot", "ok": true }
-  ]
+    // `settle` appears only when the implicit settle did not complete
+    { "index": 1, "name": "screenshot", "ok": true, "settle": "timed-out" }
+  ],
+  // present only when at least one step's settle timed out
+  "settleNote": "One or more implicit settles timed out after 1000ms — …"
 }
 ```
 
@@ -924,3 +944,15 @@ const listReply = await postMcpJsonRpc(discovery, { method: 'tools/list' })
 ```
 
 `postMcpJsonRpc` handles both the plain-JSON and SSE-framed (`event: message\ndata: …`) reply shapes the Streamable-HTTP transport can return, transparently. Consuming apps build their own Playwright fixture around these primitives (launch the host, resolve the discovery file, expose `callMcpTool`/`rawJsonRpc` as fixtures) — see restorm's `tests/e2e/bdd/fixtures/mcp-server.fixture.ts` for a worked example.
+
+### Long synchronous gaps between calls
+
+`postMcpJsonRpc` retries **once**, and only when the pooled TCP connection turned out to be dead. This matters for any suite whose steps block the event loop for several seconds between two MCP calls — a `docker exec`, a build, any synchronous `execSync`:
+
+- the host's HTTP server is a `node:http` server, whose `keepAliveTimeout` defaults to **5 s**;
+- a blocking step longer than that loses the socket from both ends at once — the server (a separate process, never blocked) closes the idle connection on schedule, while the caller's own expiry timer *cannot* fire because its loop is blocked;
+- the next call then writes to a socket that is already gone, and `fetch` rejects with a bare `TypeError: fetch failed` (cause: `UND_ERR_SOCKET` / "other side closed") within a few milliseconds.
+
+The retry is safe for exactly this error and no other: the socket was closed *before* the request reached the server, so nothing was executed and a mutating `tools/call` cannot be double-applied. Any other failure — a refused connection, a broken host — propagates on the first attempt, so real outages still fail fast instead of being retried into a green.
+
+A test that fails this way is not a flake to paper over; if you see it outside a long blocking step, suspect a genuinely unreachable host.

@@ -32,6 +32,7 @@
     "resolveError": "Salaisuuden ratkaiseminen epäonnistui",
     "resolveErrorEnv": "Ainakin yhtä muuttujaa ei voitu noutaa ja se on virhetilassa.",
     "resolveErrorItem": "Ainakin yhtä tämän kohteen salaisuutta ei voitu noutaa.",
+    "resolveErrorItemVars": "Ratkaisemattomat ympäristömuuttujat: {{vars}}",
     "fetchFailed": "Nouto epäonnistui",
     "retrievalModal": {
       "title": "Salaisuuden nouto",
@@ -995,17 +996,21 @@
     "title": "Toiminta",
     "syncSidebarWithTabs": "Synkronoi sivupalkin valinta aktiivisen välilehden kanssa",
     "syncSidebarWithTabsDescription": "Kun vaihdat välilehteä työtilassa, valitse ja näytä automaattisesti vastaava kohde sivupalkissa",
-    "dateTimeFormat": "Päivämäärän/ajan muoto",
-    "dateTimeFormatDescription": "Sovelluksessa käytetty muoto päivämäärien ja aikojen näyttämiseen",
-    "dateTimeFormat.us": "Yhdysvaltain muoto (KK/PP/VVVV, 12h)",
-    "dateTimeFormat.iso": "ISO-muoto (VVVV-KK-PP, 24h)"
+    "dateTimeFormatTitle": "Päivämäärän/ajan muoto",
+    "dateTimeFormat": {
+      "us": "Yhdysvaltain muoto (KK/PP/VVVV, 12h)",
+      "iso": "ISO-muoto (VVVV-KK-PP, 24h)"
+    },
+    "dateTimeFormatDescription": "Sovelluksessa käytetty muoto päivämäärien ja aikojen näyttämiseen"
   },
   "console": {
     "title": "Konsoli",
-    "requestFormat": "Pyyntömuoto",
-    "requestFormatDescription": "Oletuskuoritapa, jota käytetään lähtevien pyyntöjen näyttämiseen Konsoli-välilehdellä. Jokainen rivi on kopioitavissa oleva komentorivi; Konsolin työkalupalkin valitsin ohittaa tämän oletuksen nykyiselle välilehdelle.",
-    "requestFormat.curl": "curl (Unix-tyyli)",
-    "requestFormat.powershell": "PowerShell (Invoke-RestMethod)"
+    "requestFormatTitle": "Pyyntömuoto",
+    "requestFormat": {
+      "curl": "curl (Unix-tyyli)",
+      "powershell": "PowerShell (Invoke-RestMethod)"
+    },
+    "requestFormatDescription": "Oletuskuoritapa, jota käytetään lähtevien pyyntöjen näyttämiseen Konsoli-välilehdellä. Jokainen rivi on kopioitavissa oleva komentorivi; Konsolin työkalupalkin valitsin ohittaa tämän oletuksen nykyiselle välilehdelle."
   },
   "import": {
     "addAuth": "Lisää todennusreitti",
@@ -2047,18 +2052,18 @@
   },
   "mqtt": {
     "qos": "QoS",
-    "retain": "Retain",
+    "retain": "Säilytä",
     "subscribeOnConnect": "Tilaa yhdistettäessä",
-    "clientId": "Client ID",
+    "clientId": "Asiakastunnus",
     "clientIdPlaceholder": "luodaan automaattisesti, jos tyhjä",
-    "username": "Username",
-    "password": "Password",
+    "username": "Käyttäjätunnus",
+    "password": "Salasana",
     "keepalive": "Keepalive (s)",
     "lwt": "Viimeinen tahto (LWT)",
-    "topic": "Topic",
-    "lwtTopicPlaceholder": "will/topic",
-    "lwtPayload": "Payload",
-    "lwtPayloadPlaceholder": "will message"
+    "topic": "Aihe",
+    "lwtTopicPlaceholder": "aihe/testamentti",
+    "lwtPayload": "Hyötykuorma",
+    "lwtPayloadPlaceholder": "testamenttiviesti"
   },
   "amqp": {
     "urlPlaceholder": "AMQP-URL (amqp:// tai amqps://)",

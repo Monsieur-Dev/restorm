@@ -32,7 +32,7 @@
  */
 
 import { useEffect } from 'react'
-import { navigationService } from 'electron-core-ui/renderer'
+import { navigationService, logger } from 'electron-core-ui/renderer'
 import type { FolderItem, Folder, EnvironmentFolder, Request, Environment, Scenario } from '../../../shared/types/collections'
 import { isHTTPRequest, isGraphQLRequest, isGrpcRequest, isSoapRequest, isWebSocketRequest, isSseRequest, isStompRequest, isODataRequest, isJsonRpcRequest, isJsonRpcBatchRequest, isTrpcRequest, isAmqpRequest, isRedisRequest, isKafkaRequest } from '../../../shared/types/collections'
 import { findFolderById, findEnvironmentFolderById, findRequestById, findScenarioById, findItemWithBreadcrumbs, getNearestEnvironmentsForBreadcrumbs } from '../utils/treeSearch'
@@ -125,43 +125,57 @@ export function useMcpNavigation(input: UseMcpNavigationInput): void {
       // actually runs. See the hook's module doc for why that matters.
       const items = rootItemsRef.current
       const ack = (opened: boolean): void => {
-        if (requestId) api.replyMcpOpenTab({ requestId, opened })
+        // Defensive: an out-of-date preload bundle may not expose
+        // `replyMcpOpenTab`. Calling a missing method throws, and an uncaught
+        // throw in this IPC handler wedges the whole renderer-bound MCP
+        // channel (every later `evaluate` / `dom-query` hangs). Never let a
+        // bad or absent ack escape.
+        if (requestId && typeof api.replyMcpOpenTab === 'function') {
+          api.replyMcpOpenTab({ requestId, opened })
+        }
       }
-      const { breadcrumbs } = findItemWithBreadcrumbs(items, itemId)
-      if (kind === 'request') {
-        const req = findRequestById(items, itemId)
-        if (!req) { ack(false); return }
-        const envs = getNearestEnvironmentsForBreadcrumbs(items, breadcrumbs)
-        openAnyRequestTab(req, breadcrumbs, envs)
-        setSelectedItemId(itemId)
-        expandAncestors(itemId, items)
-        navigationService.navigateTo(itemId, 'mcp', { type: navTypeForRequest(req) })
-        ack(true)
-      } else if (kind === 'env-folder') {
-        const f = findEnvironmentFolderById(items, itemId)
-        if (!f) { ack(false); return }
-        openEnvironmentFolderTab(f, breadcrumbs)
-        setSelectedItemId(itemId)
-        expandAncestors(itemId, items)
-        navigationService.navigateTo(itemId, 'mcp', { type: 'environment-folder' })
-        ack(true)
-      } else if (kind === 'scenario') {
-        const s = findScenarioById(items, itemId)
-        if (!s) { ack(false); return }
-        openScenarioEditorTab(s, breadcrumbs)
-        setSelectedItemId(itemId)
-        expandAncestors(itemId, items)
-        navigationService.navigateTo(itemId, 'mcp', { type: 'scenario-editor' })
-        ack(true)
-      } else {
-        // kind === 'folder' (only remaining union arm — ActiveKind is exhaustive).
-        const f = findFolderById(items, itemId)
-        if (!f) { ack(false); return }
-        openFolderTab(f, breadcrumbs)
-        setSelectedItemId(itemId)
-        expandAncestors(itemId, items)
-        navigationService.navigateTo(itemId, 'mcp', { type: 'folder' })
-        ack(true)
+      try {
+        const { breadcrumbs } = findItemWithBreadcrumbs(items, itemId)
+        if (kind === 'request') {
+          const req = findRequestById(items, itemId)
+          if (!req) { ack(false); return }
+          const envs = getNearestEnvironmentsForBreadcrumbs(items, breadcrumbs)
+          openAnyRequestTab(req, breadcrumbs, envs)
+          setSelectedItemId(itemId)
+          expandAncestors(itemId, items)
+          navigationService.navigateTo(itemId, 'mcp', { type: navTypeForRequest(req) })
+          ack(true)
+        } else if (kind === 'env-folder') {
+          const f = findEnvironmentFolderById(items, itemId)
+          if (!f) { ack(false); return }
+          openEnvironmentFolderTab(f, breadcrumbs)
+          setSelectedItemId(itemId)
+          expandAncestors(itemId, items)
+          navigationService.navigateTo(itemId, 'mcp', { type: 'environment-folder' })
+          ack(true)
+        } else if (kind === 'scenario') {
+          const s = findScenarioById(items, itemId)
+          if (!s) { ack(false); return }
+          openScenarioEditorTab(s, breadcrumbs)
+          setSelectedItemId(itemId)
+          expandAncestors(itemId, items)
+          navigationService.navigateTo(itemId, 'mcp', { type: 'scenario-editor' })
+          ack(true)
+        } else {
+          // kind === 'folder' (only remaining union arm — ActiveKind is exhaustive).
+          const f = findFolderById(items, itemId)
+          if (!f) { ack(false); return }
+          openFolderTab(f, breadcrumbs)
+          setSelectedItemId(itemId)
+          expandAncestors(itemId, items)
+          navigationService.navigateTo(itemId, 'mcp', { type: 'folder' })
+          ack(true)
+        }
+      } catch (err) {
+        // A failure resolving/opening the item must not wedge the MCP
+        // channel: log it and ack not-opened so main settles the call.
+        logger.error('[mcp:open-tab] handler failed; acking not-opened', { error: String(err) })
+        ack(false)
       }
     })
 

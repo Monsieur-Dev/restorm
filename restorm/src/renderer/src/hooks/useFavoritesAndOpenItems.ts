@@ -148,17 +148,23 @@ export function useFavoritesAndOpenItems(
     void favoritesVersion; void renameVersion; void updateCount
     if (!projectUuid) return []
     const ids = getFavorites(projectUuid)
+    // Resolve only once the tree exists. On a project load this memo runs
+    // before `rootItems` is populated, so EVERY favorite looks unknown — the
+    // list renders empty for a beat and the log claims each id is dangling.
+    // The stored ids are never touched by this pass, so nothing is lost, but
+    // on a slow load the empty list is what the user sees.
+    if (ids.length > 0 && rootItems.length === 0) return []
+
     const rows: ListViewItemData[] = []
     let warnedOnce = false
     for (const id of ids) {
       const row = itemToRow(id)
       if (!row) {
         if (!warnedOnce) {
-          // Debug-level: a dangling favorite isn't actionable for the
-          // end user (it just won't appear in the Favorites view).
-          // Surfacing it at WARN added noise on every refresh; downgrade
-          // means it still surfaces with verbose logging when we need
-          // to debug a stale persistence file.
+          // Reached only with a loaded tree, so this really is a dangling
+          // favorite (a stale persistence file), not a load race. Debug-level:
+          // it isn't actionable for the end user — the entry just doesn't
+          // appear in the Favorites view.
           logger.debug('Favorite id refers to an unknown item — skipping', { id })
           warnedOnce = true
         }
@@ -175,7 +181,7 @@ export function useFavoritesAndOpenItems(
     }
     return rows
   }, [
-    projectUuid, itemToRow, updateCount, renameVersion, favoritesVersion, t,
+    projectUuid, itemToRow, rootItems, updateCount, renameVersion, favoritesVersion, t,
     onRenameFavoriteItem, onCloneItem, onDeleteItem, onUnfavorite
   ])
 

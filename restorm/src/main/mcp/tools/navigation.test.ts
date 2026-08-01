@@ -44,7 +44,8 @@ vi.mock('../../services/CollectionStore', () => ({
   }
 }))
 
-import { registerNavigationTools } from './navigation'
+import { registerNavigationTools, OPEN_TAB_ACK_TIMEOUT_MS } from './navigation'
+import { SINGLETON_TAB_IDS } from '../../../shared/types/editor'
 
 class FakeMcpService {
   private handlers = new Map<string, McpToolHandler>()
@@ -176,7 +177,7 @@ describe('navigation tools — open_tab', () => {
     vi.useFakeTimers()
     try {
       const invokePromise = mcp.invoke('open_tab', { itemId: 'r1' })
-      await vi.advanceTimersByTimeAsync(5000)
+      await vi.advanceTimersByTimeAsync(OPEN_TAB_ACK_TIMEOUT_MS)
       const { isError, text } = parseReply(await invokePromise)
       expect(isError).toBe(true)
       expect(text).toContain('r1')
@@ -194,7 +195,7 @@ describe('navigation tools — open_tab', () => {
     vi.useFakeTimers()
     try {
       const invokePromise = mcp.invoke('open_tab', { itemId: 'r1' })
-      await vi.advanceTimersByTimeAsync(5000)
+      await vi.advanceTimersByTimeAsync(OPEN_TAB_ACK_TIMEOUT_MS)
       const { isError } = parseReply(await invokePromise)
       expect(isError).toBe(true)
       // A negative ack ends its attempt at once (no waiting out the whole
@@ -216,7 +217,7 @@ describe('navigation tools — open_tab', () => {
     vi.useFakeTimers()
     try {
       const invokePromise = mcp.invoke('open_tab', { itemId: 'r1' })
-      await vi.advanceTimersByTimeAsync(5000)
+      await vi.advanceTimersByTimeAsync(OPEN_TAB_ACK_TIMEOUT_MS)
       const { isError, payload } = parseReply(await invokePromise)
       expect(isError).toBe(false)
       expect(payload).toEqual({ itemId: 'r1', kind: 'request', opened: true })
@@ -290,5 +291,17 @@ describe('navigation tools — close_tab', () => {
     expect(isError).toBe(true)
     expect(text).toContain('No item with id ghost')
     expect(broadcasts).toHaveLength(0)
+  })
+
+  // The singleton tabs have no project-tree entry, so a tree-only lookup left
+  // no MCP route to close them at all.
+  it.each(SINGLETON_TAB_IDS)('broadcasts mcp:close-tab for the singleton tab %s', async (tabId) => {
+    mockState.findById.mockReturnValue(null)
+    windowsState.push(silentWindow())
+    const mcp = new FakeMcpService()
+    registerNavigationTools(mcp as unknown as McpService)
+    const { isError } = parseReply(await mcp.invoke('close_tab', { itemId: tabId }))
+    expect(isError).toBe(false)
+    expect(broadcasts).toEqual([{ channel: 'mcp:close-tab', payload: { itemId: tabId, kind: 'singleton' } }])
   })
 })

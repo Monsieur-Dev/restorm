@@ -42,11 +42,10 @@ const fixtures: Record<string, { content: string; filePath?: string }> = {
     content: readFileSync(join(UNIT, 'insomnia-petstore.json'), 'utf-8')
   },
   bruno: {
-    // bruno-petstore.json has version+name but no top-level type:'collection';
-    // the provider also accepts any valid JSON with version+name when the file
-    // extension is .json — so we pass the real filename as filePath.
-    content: readFileSync(join(UNIT, 'bruno-petstore.json'), 'utf-8'),
-    filePath: 'bruno-petstore.json'
+    // No filePath on purpose: a Bruno export has neither a top-level
+    // `type: 'collection'` nor a filename when it arrives from a URL or a
+    // paste, so the provider has to recognise the collection's own shape.
+    content: readFileSync(join(UNIT, 'bruno-petstore.json'), 'utf-8')
   },
   asyncapi: {
     content: readFileSync(join(UNIT, 'asyncapi-petstore.yaml'), 'utf-8')

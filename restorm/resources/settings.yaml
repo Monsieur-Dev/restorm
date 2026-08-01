@@ -4,7 +4,7 @@ groups:
     items:
       - setting:
           id: "dateTimeFormat"
-          titleKey: "behavior.dateTimeFormat"
+          titleKey: "behavior.dateTimeFormatTitle"
           descriptionKey: "behavior.dateTimeFormatDescription"
           type: "enum"
           default: "us"
@@ -25,7 +25,7 @@ groups:
     items:
       - setting:
           id: "requestFormat"
-          titleKey: "console.requestFormat"
+          titleKey: "console.requestFormatTitle"
           descriptionKey: "console.requestFormatDescription"
           type: "enum"
           default: "curl"

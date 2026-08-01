@@ -597,32 +597,41 @@ async function runUnaryRequest(req: Request, timeoutMs: number): Promise<unknown
 }
 
 /**
- * Open the WS connection via the renderer (Connect button), poll the
- * service's message buffer until a frame lands or the deadline hits,
- * then return whatever is buffered + a continuation token. Polling
- * (rather than a flat sleep) keeps the MCP channel responsive even
- * when the user passes a large `firstWaitMs` for a slow handshake.
+ * Open the connection via the renderer (Connect / Send button), poll the
+ * protocol's own message buffer until a frame lands or the deadline hits,
+ * then return whatever is buffered + a continuation token. Polling (rather
+ * than a flat sleep) keeps the MCP channel responsive even when the user
+ * passes a large `firstWaitMs` for a slow handshake.
+ *
+ * The buffer comes from the request's own executor. Reading
+ * `websocketExecutionService` for every streaming protocol meant an SSE run
+ * polled the WebSocket buffer: zero frames and `success: false` on a
+ * connection that was streaming perfectly, mislabelled `websocket` on top.
  */
-async function runStreamingWebsocketRequest(req: Request, firstWaitMs: number): Promise<unknown> {
+async function runStreamingRequest(req: Request, firstWaitMs: number): Promise<unknown> {
+  const source = PROTOCOL_EXECUTORS[req.type].stream
+  if (!source) {
+    return { error: { code: 'NO_STREAM_SOURCE', message: `${req.type} has no live frame buffer wired for MCP streaming` } }
+  }
   broadcastOpenTab(req.id)
   await delay(400)
   dispatchSendInRenderer(req.id)
   const deadline = Date.now() + firstWaitMs
-  let snapshot = websocketExecutionService.getMessages(req.id) ?? { frames: [], total: 0 }
+  let snapshot = source.getMessages(req.id) ?? { frames: [], total: 0 }
   while (Date.now() < deadline) {
     if (snapshot.frames.length > 0) break
     await delay(100)
-    snapshot = websocketExecutionService.getMessages(req.id) ?? snapshot
+    snapshot = source.getMessages(req.id) ?? snapshot
   }
   return {
     requestId: req.id,
-    protocol: 'websocket',
+    protocol: req.type,
     streaming: true,
-    success: websocketExecutionService.isActive(req.id),
+    success: source.isActive(req.id),
     frameCount: snapshot.frames.length,
     frames: snapshot.frames,
     continuationToken: encodeStreamToken(req.id, snapshot.total),
-    note: 'WebSocket connection is live. Use `read_stream(continuationToken)` to pull more frames; `cancel_request(id)` to disconnect.'
+    note: 'Connection is live. Use `read_stream(continuationToken)` to pull more frames; `cancel_request(id)` to disconnect.'
   }
 }
 
@@ -666,7 +675,7 @@ export function registerExecutionTools(mcp: McpService): void {
       const executor = PROTOCOL_EXECUTORS[req.type]
       return jsonReply(
         executor.streaming
-          ? await runStreamingWebsocketRequest(req, timeoutMs ?? 2_000)
+          ? await runStreamingRequest(req, timeoutMs ?? 2_000)
           : await runUnaryRequest(req, timeoutMs ?? 30_000)
       )
     }
@@ -745,7 +754,7 @@ export function registerExecutionTools(mcp: McpService): void {
         const req = target
         const executor = PROTOCOL_EXECUTORS[req.type]
         const result: unknown = executor.streaming
-          ? await runStreamingWebsocketRequest(req, 2_000)
+          ? await runStreamingRequest(req, 2_000)
           : await runUnaryRequest(req, timeoutMs ?? 30_000)
         results.push(result)
       }
@@ -763,8 +772,8 @@ export function registerExecutionTools(mcp: McpService): void {
         '`continuationToken` returned by `run_request` (or by the previous `read_stream` call). ' +
         'Returns the next batch of frames + a fresh `continuationToken` for the call after that. ' +
         'When `done` is `true` (connection closed) the cursor stays valid — call again to ' +
-        'confirm no late frames slipped in. WebSocket today; gRPC streaming when the gRPC ' +
-        'service grows real streaming support.',
+        'confirm no late frames slipped in. Serves whichever streaming protocol the request is ' +
+        '(WebSocket / SSE today); gRPC streaming when the gRPC service grows real streaming support.',
       inputSchema: {
         continuationToken: z.string().min(1).describe('Opaque token returned by `run_request` or `read_stream`.'),
         maxFrames: z.coerce.number().int().min(1).max(500).optional().describe(
@@ -786,10 +795,29 @@ export function registerExecutionTools(mcp: McpService): void {
 
       const { requestId, cursor } = decoded
 
-      interface Snap { snap: { frames: import('../../services/WebSocketExecutionService').WebSocketMessage[]; total: number } | null; active: boolean }
+      // Read the buffer of the request's OWN protocol. Hardcoding the
+      // WebSocket service here made `read_stream` return an empty buffer for
+      // every other streaming protocol, indistinguishable from a closed
+      // connection.
+      const streamTarget = collectionStore.findById(requestId)
+      const source = streamTarget !== null && isRequest(streamTarget)
+        ? PROTOCOL_EXECUTORS[streamTarget.type].stream
+        : undefined
+      if (!source) {
+        return jsonReply({
+          requestId,
+          frameCount: 0,
+          frames: [],
+          done: true,
+          continuationToken: token,
+          note: 'No live frame buffer for this request. Use `get_response_history` for the persisted record.'
+        })
+      }
+
+      interface Snap { snap: { frames: unknown[]; total: number } | null; active: boolean }
       const sample = (): Snap => ({
-        snap: websocketExecutionService.getMessages(requestId, cursor),
-        active: websocketExecutionService.isActive(requestId)
+        snap: source.getMessages(requestId, cursor),
+        active: source.isActive(requestId)
       })
 
       let { snap, active } = sample()
@@ -812,7 +840,7 @@ export function registerExecutionTools(mcp: McpService): void {
           frames: [],
           done: true,
           continuationToken: token,
-          note: 'WebSocket connection closed; no live buffer available. Use `get_response_history` for the persisted record.'
+          note: 'Connection closed; no live buffer available. Use `get_response_history` for the persisted record.'
         })
       }
 

@@ -32,6 +32,7 @@
     "resolveError": "Не вдалося розв’язати секрет",
     "resolveErrorEnv": "Принаймні одну змінну не вдалося отримати, і вона має помилку.",
     "resolveErrorItem": "Не вдалося отримати принаймні один із секретів цього елемента.",
+    "resolveErrorItemVars": "Нерозв’язані змінні середовища: {{vars}}",
     "fetchFailed": "Не вдалося отримати",
     "retrievalModal": {
       "title": "Отримання секрету",
@@ -997,17 +998,21 @@
     "title": "Поведінка",
     "syncSidebarWithTabs": "Синхронізувати виділення бічної панелі з активною вкладкою",
     "syncSidebarWithTabsDescription": "Під час перемикання вкладок у робочому просторі автоматично вибирати та показувати відповідний елемент у бічній панелі",
-    "dateTimeFormat": "Формат дати/часу",
-    "dateTimeFormatDescription": "Формат, який використовується для відображення дати й часу в застосунку",
-    "dateTimeFormat.us": "Формат США (MM/DD/YYYY, 12 год)",
-    "dateTimeFormat.iso": "Формат ISO (YYYY-MM-DD, 24 год)"
+    "dateTimeFormatTitle": "Формат дати/часу",
+    "dateTimeFormat": {
+      "us": "Формат США (MM/DD/YYYY, 12 год)",
+      "iso": "Формат ISO (YYYY-MM-DD, 24 год)"
+    },
+    "dateTimeFormatDescription": "Формат, який використовується для відображення дати й часу в застосунку"
   },
   "console": {
     "title": "Консоль",
-    "requestFormat": "Формат запиту",
-    "requestFormatDescription": "Стандартний різновид оболонки, який використовується для відображення вихідних запитів на вкладці Консоль. Кожен рядок — це готовий для копіювання командний рядок; перемикач на панелі інструментів Консолі перевизначає це значення за замовчуванням для поточної вкладки.",
-    "requestFormat.curl": "curl (стиль Unix)",
-    "requestFormat.powershell": "PowerShell (Invoke-RestMethod)"
+    "requestFormatTitle": "Формат запиту",
+    "requestFormat": {
+      "curl": "curl (стиль Unix)",
+      "powershell": "PowerShell (Invoke-RestMethod)"
+    },
+    "requestFormatDescription": "Стандартний різновид оболонки, який використовується для відображення вихідних запитів на вкладці Консоль. Кожен рядок — це готовий для копіювання командний рядок; перемикач на панелі інструментів Консолі перевизначає це значення за замовчуванням для поточної вкладки."
   },
   "import": {
     "addAuth": "Додати маршрут аутентифікації",
@@ -2049,18 +2054,18 @@
   },
   "mqtt": {
     "qos": "QoS",
-    "retain": "Retain",
+    "retain": "Зберігати",
     "subscribeOnConnect": "Підписатися під час підключення",
-    "clientId": "Client ID",
+    "clientId": "ID клієнта",
     "clientIdPlaceholder": "генерується автоматично, якщо порожнє",
-    "username": "Username",
-    "password": "Password",
+    "username": "Ім’я користувача",
+    "password": "Пароль",
     "keepalive": "Keepalive (s)",
     "lwt": "Остання воля (LWT)",
-    "topic": "Topic",
-    "lwtTopicPlaceholder": "will/topic",
-    "lwtPayload": "Payload",
-    "lwtPayloadPlaceholder": "will message"
+    "topic": "Тема",
+    "lwtTopicPlaceholder": "тема/заповіту",
+    "lwtPayload": "Корисне навантаження",
+    "lwtPayloadPlaceholder": "повідомлення заповіту"
   },
   "amqp": {
     "urlPlaceholder": "URL-адреса AMQP (amqp:// або amqps://)",

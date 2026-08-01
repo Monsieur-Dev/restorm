@@ -32,6 +32,7 @@
     "resolveError": "A titok feloldása sikertelen",
     "resolveErrorEnv": "Legalább egy változót nem sikerült lekérni, és hibás állapotban van.",
     "resolveErrorItem": "Az elem titkai közül legalább egyet nem sikerült lekérni.",
+    "resolveErrorItemVars": "Feloldatlan környezeti változók: {{vars}}",
     "fetchFailed": "A lekérés sikertelen",
     "retrievalModal": {
       "title": "Titok lekérése",
@@ -995,17 +996,21 @@
     "title": "Viselkedés",
     "syncSidebarWithTabs": "Oldalsáv kijelölésének szinkronizálása az aktív füllel",
     "syncSidebarWithTabsDescription": "Amikor a munkaterületen fület vált, automatikusan kijelöli és megjeleníti a megfelelő elemet az oldalsávon",
-    "dateTimeFormat": "Dátum/idő formátum",
-    "dateTimeFormatDescription": "A dátumok és időpontok megjelenítéséhez használt formátum az alkalmazásban",
-    "dateTimeFormat.us": "US-formátum (HH/NN/ÉÉÉÉ, 12 órás)",
-    "dateTimeFormat.iso": "ISO-formátum (ÉÉÉÉ-HH-NN, 24 órás)"
+    "dateTimeFormatTitle": "Dátum/idő formátum",
+    "dateTimeFormat": {
+      "us": "US-formátum (HH/NN/ÉÉÉÉ, 12 órás)",
+      "iso": "ISO-formátum (ÉÉÉÉ-HH-NN, 24 órás)"
+    },
+    "dateTimeFormatDescription": "A dátumok és időpontok megjelenítéséhez használt formátum az alkalmazásban"
   },
   "console": {
     "title": "Konzol",
-    "requestFormat": "Kérés formátuma",
-    "requestFormatDescription": "A Konzol fülön a kimenő kérések megjelenítéséhez használt alapértelmezett shell-stílus. Minden sor egy másolható-beilleszthető parancssor; a Konzol eszköztárában lévő váltó felülírja ezt az alapértelmezést az aktuális fülön.",
-    "requestFormat.curl": "curl (Unix-stílusú)",
-    "requestFormat.powershell": "PowerShell (Invoke-RestMethod)"
+    "requestFormatTitle": "Kérés formátuma",
+    "requestFormat": {
+      "curl": "curl (Unix-stílusú)",
+      "powershell": "PowerShell (Invoke-RestMethod)"
+    },
+    "requestFormatDescription": "A Konzol fülön a kimenő kérések megjelenítéséhez használt alapértelmezett shell-stílus. Minden sor egy másolható-beilleszthető parancssor; a Konzol eszköztárában lévő váltó felülírja ezt az alapértelmezést az aktuális fülön."
   },
   "import": {
     "addAuth": "Hitelesítési útvonal hozzáadása",
@@ -2047,18 +2052,18 @@
   },
   "mqtt": {
     "qos": "QoS",
-    "retain": "Retain",
+    "retain": "Megtartás",
     "subscribeOnConnect": "Feliratkozás csatlakozáskor",
-    "clientId": "Client ID",
+    "clientId": "Kliensazonosító",
     "clientIdPlaceholder": "automatikusan generált, ha üres",
-    "username": "Username",
-    "password": "Password",
+    "username": "Felhasználónév",
+    "password": "Jelszó",
     "keepalive": "Keepalive (s)",
     "lwt": "Utolsó akarat (LWT)",
-    "topic": "Topic",
-    "lwtTopicPlaceholder": "will/topic",
-    "lwtPayload": "Payload",
-    "lwtPayloadPlaceholder": "will message"
+    "topic": "Téma",
+    "lwtTopicPlaceholder": "vegrendelet/tema",
+    "lwtPayload": "Hasznos adat",
+    "lwtPayloadPlaceholder": "végrendelet üzenete"
   },
   "amqp": {
     "urlPlaceholder": "AMQP URL (amqp:// vagy amqps://)",

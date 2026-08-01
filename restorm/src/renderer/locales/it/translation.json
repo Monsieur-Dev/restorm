@@ -32,6 +32,7 @@
     "resolveError": "Risoluzione del segreto non riuscita",
     "resolveErrorEnv": "Almeno una variabile non è stato possibile recuperarla ed è in errore.",
     "resolveErrorItem": "Non è stato possibile recuperare almeno uno dei segreti di questo elemento.",
+    "resolveErrorItemVars": "Variabili di ambiente non risolte: {{vars}}",
     "fetchFailed": "Recupero non riuscito",
     "retrievalModal": {
       "title": "Recupero del segreto",
@@ -995,17 +996,21 @@
     "title": "Comportamento",
     "syncSidebarWithTabs": "Sincronizza la selezione della barra laterale con la scheda attiva",
     "syncSidebarWithTabsDescription": "Al cambio di scheda nell'area di lavoro, seleziona e mostra automaticamente l'elemento corrispondente nella barra laterale",
-    "dateTimeFormat": "Formato data/ora",
-    "dateTimeFormatDescription": "Formato usato per mostrare date e orari nell'applicazione",
-    "dateTimeFormat.us": "Formato US (MM/GG/AAAA, 12 h)",
-    "dateTimeFormat.iso": "Formato ISO (AAAA-MM-GG, 24 h)"
+    "dateTimeFormatTitle": "Formato data/ora",
+    "dateTimeFormat": {
+      "us": "Formato US (MM/GG/AAAA, 12 h)",
+      "iso": "Formato ISO (AAAA-MM-GG, 24 h)"
+    },
+    "dateTimeFormatDescription": "Formato usato per mostrare date e orari nell'applicazione"
   },
   "console": {
     "title": "Console",
-    "requestFormat": "Formato delle richieste",
-    "requestFormatDescription": "Stile di shell usato di default per visualizzare le richieste uscenti nella scheda Console. Ogni riga è un comando copiabile; l'interruttore nella toolbar della Console sovrascrive questo default per la scheda corrente.",
-    "requestFormat.curl": "curl (stile Unix)",
-    "requestFormat.powershell": "PowerShell (Invoke-RestMethod)"
+    "requestFormatTitle": "Formato delle richieste",
+    "requestFormat": {
+      "curl": "curl (stile Unix)",
+      "powershell": "PowerShell (Invoke-RestMethod)"
+    },
+    "requestFormatDescription": "Stile di shell usato di default per visualizzare le richieste uscenti nella scheda Console. Ogni riga è un comando copiabile; l'interruttore nella toolbar della Console sovrascrive questo default per la scheda corrente."
   },
   "import": {
     "addAuth": "Aggiungi una route di autenticazione",
@@ -2047,18 +2052,18 @@
   },
   "mqtt": {
     "qos": "QoS",
-    "retain": "Retain",
+    "retain": "Conserva",
     "subscribeOnConnect": "Iscriviti alla connessione",
-    "clientId": "Client ID",
+    "clientId": "ID client",
     "clientIdPlaceholder": "generato automaticamente se vuoto",
-    "username": "Username",
+    "username": "Nome utente",
     "password": "Password",
     "keepalive": "Keepalive (s)",
     "lwt": "Ultima volontà (LWT)",
     "topic": "Topic",
-    "lwtTopicPlaceholder": "will/topic",
+    "lwtTopicPlaceholder": "topic/testamento",
     "lwtPayload": "Payload",
-    "lwtPayloadPlaceholder": "will message"
+    "lwtPayloadPlaceholder": "messaggio di testamento"
   },
   "amqp": {
     "urlPlaceholder": "URL AMQP (amqp:// o amqps://)",

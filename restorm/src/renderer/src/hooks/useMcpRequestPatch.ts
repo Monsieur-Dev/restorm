@@ -39,7 +39,30 @@ export interface UseMcpRequestPatchInput {
   bumpTabContentVersionFor: (itemId: string) => void
 }
 
-const KEYVALUE_FIELDS = new Set(['headers', 'params', 'pathParams', 'metadata'])
+// Mirrors the main-side reify list (`src/main/mcp/tools/write.ts`) — a name
+// missing here leaves plain objects on the request where the KV tables and the
+// serializer expect `KeyValue` instances.
+const KEYVALUE_FIELDS = new Set([
+  'headers',
+  'params',
+  'pathParams',
+  'metadata',
+  'producedHeaders',
+  'connectHeaders',
+  'sendHeaders'
+])
+
+/**
+ * `params` is a key-value array on the HTTP-shaped requests but a raw JSON
+ * SOURCE STRING on JSON-RPC, so the field name alone cannot decide how to
+ * apply the patch. Only an array value takes the key-value path: coercing a
+ * string through the key-value reifier yielded `[]`, which wiped the editor's
+ * source and then crashed the whole workbench — the code editor hands its
+ * value straight to Monaco, which throws on anything that is not a string.
+ */
+function isKeyValuePatch(key: string, value: unknown): boolean {
+  return KEYVALUE_FIELDS.has(key) && Array.isArray(value)
+}
 
 function reifyKeyValueArray(arr: unknown): KeyValue[] {
   if (!Array.isArray(arr)) return []
@@ -119,7 +142,7 @@ export function useMcpRequestPatch(input: UseMcpRequestPatchInput): void {
       const req = findRequestById(rootItems, itemId)
       if (!req) return
       for (const [key, value] of Object.entries(patch)) {
-        if (KEYVALUE_FIELDS.has(key)) {
+        if (isKeyValuePatch(key, value)) {
           // Per-KV in-place mutation — see helper for why a wholesale
           // array swap doesn't refresh the row inputs.
           const reified = reifyKeyValueArray(value)

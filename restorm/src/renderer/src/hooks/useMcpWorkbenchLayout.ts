@@ -29,6 +29,7 @@ import {
 import type { RestormEditorTab } from '../../../shared/types/editor'
 import {
   CONSOLE_TAB_ID,
+  MCP_LOGS_TAB_ID,
   FIREWALL_TAB_ID,
   MINI_BROWSER_TAB_ID,
   SETTINGS_TAB_ID
@@ -52,14 +53,19 @@ function tabItemId(tab: RestormEditorTab): string | null {
   return null
 }
 
-/** The singleton special tab types, keyed to their stable ids. Extend
- * this map (one line) when a new singleton tab is added (e.g. mcp-logs).
+/** The singleton special tab types, keyed to their stable ids. Must cover
+ * every singleton `handleRebuildTab` can rebuild: a tab type missing here has
+ * no `itemId` to fall back on, so `resolveRebuildTabId` returns null and the
+ * tab is dropped from the reconstructed layout without a word — taking its
+ * group with it when it was the only tab in one. Extend this map (one line)
+ * when a new singleton tab is added.
  */
 const SPECIAL_TAB_IDS: Record<string, string> = {
   console: CONSOLE_TAB_ID,
   firewall: FIREWALL_TAB_ID,
   'mini-browser': MINI_BROWSER_TAB_ID,
-  settings: SETTINGS_TAB_ID
+  settings: SETTINGS_TAB_ID,
+  'mcp-logs': MCP_LOGS_TAB_ID
 }
 
 /** Map a request `tabType` to the tab-id prefix `parseTabId` understands. */

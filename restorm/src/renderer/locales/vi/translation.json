@@ -32,6 +32,7 @@
     "resolveError": "Phân giải bí mật thất bại",
     "resolveErrorEnv": "Có ít nhất một biến không thể truy xuất và đang ở trạng thái lỗi.",
     "resolveErrorItem": "Không thể truy xuất ít nhất một trong các bí mật của mục này.",
+    "resolveErrorItemVars": "Biến môi trường chưa phân giải: {{vars}}",
     "fetchFailed": "Truy xuất thất bại",
     "retrievalModal": {
       "title": "Truy xuất bí mật",
@@ -994,17 +995,21 @@
     "title": "Hành vi",
     "syncSidebarWithTabs": "Đồng bộ lựa chọn thanh bên với tab đang hoạt động",
     "syncSidebarWithTabsDescription": "Khi chuyển tab trong không gian làm việc, tự động chọn và hiển thị mục tương ứng trong thanh bên",
-    "dateTimeFormat": "Định dạng ngày/giờ",
-    "dateTimeFormatDescription": "Định dạng được sử dụng để hiển thị ngày và giờ trong ứng dụng",
-    "dateTimeFormat.us": "Định dạng Mỹ (MM/DD/YYYY, 12h)",
-    "dateTimeFormat.iso": "Định dạng ISO (YYYY-MM-DD, 24h)"
+    "dateTimeFormatTitle": "Định dạng ngày/giờ",
+    "dateTimeFormat": {
+      "us": "Định dạng Mỹ (MM/DD/YYYY, 12h)",
+      "iso": "Định dạng ISO (YYYY-MM-DD, 24h)"
+    },
+    "dateTimeFormatDescription": "Định dạng được sử dụng để hiển thị ngày và giờ trong ứng dụng"
   },
   "console": {
     "title": "Bảng điều khiển",
-    "requestFormat": "Định dạng yêu cầu",
-    "requestFormatDescription": "Kiểu shell mặc định được sử dụng để hiển thị các yêu cầu đi trong tab Bảng điều khiển. Mỗi dòng là một dòng lệnh có thể sao chép-dán; nút chuyển trong thanh công cụ Bảng điều khiển ghi đè mặc định này cho tab hiện tại.",
-    "requestFormat.curl": "curl (kiểu Unix)",
-    "requestFormat.powershell": "PowerShell (Invoke-RestMethod)"
+    "requestFormatTitle": "Định dạng yêu cầu",
+    "requestFormat": {
+      "curl": "curl (kiểu Unix)",
+      "powershell": "PowerShell (Invoke-RestMethod)"
+    },
+    "requestFormatDescription": "Kiểu shell mặc định được sử dụng để hiển thị các yêu cầu đi trong tab Bảng điều khiển. Mỗi dòng là một dòng lệnh có thể sao chép-dán; nút chuyển trong thanh công cụ Bảng điều khiển ghi đè mặc định này cho tab hiện tại."
   },
   "import": {
     "addAuth": "Thêm tuyến xác thực",
@@ -2046,18 +2051,18 @@
   },
   "mqtt": {
     "qos": "QoS",
-    "retain": "Retain",
+    "retain": "Giữ lại",
     "subscribeOnConnect": "Đăng ký khi kết nối",
-    "clientId": "Client ID",
+    "clientId": "ID máy khách",
     "clientIdPlaceholder": "tự động tạo nếu để trống",
-    "username": "Username",
-    "password": "Password",
+    "username": "Tên người dùng",
+    "password": "Mật khẩu",
     "keepalive": "Keepalive (s)",
     "lwt": "Di chúc cuối cùng (LWT)",
-    "topic": "Topic",
-    "lwtTopicPlaceholder": "will/topic",
-    "lwtPayload": "Payload",
-    "lwtPayloadPlaceholder": "will message"
+    "topic": "Chủ đề",
+    "lwtTopicPlaceholder": "chu-de/di-chuc",
+    "lwtPayload": "Dữ liệu",
+    "lwtPayloadPlaceholder": "thông điệp di chúc"
   },
   "amqp": {
     "urlPlaceholder": "URL AMQP (amqp:// hoặc amqps://)",

@@ -27,6 +27,7 @@ import { BrowserWindow, ipcMain, type IpcMainEvent } from 'electron'
 import { McpService } from 'electron-core-ui'
 import { collectionStore } from '../../services/CollectionStore'
 import { isAnyFolder, isEnvironmentFolder, isRequest, isScenario } from '../../../shared/models'
+import { SINGLETON_TAB_IDS, isSingletonTabId } from '../../../shared/types/editor'
 
 function jsonReply(value: unknown): { content: { type: 'text'; text: string }[] } {
   return { content: [{ type: 'text', text: JSON.stringify(value, null, 2) }] }
@@ -42,8 +43,20 @@ function broadcast(channel: string, payload: unknown): void {
   }
 }
 
-/** Overall budget an `open_tab` call spends waiting for the workbench. */
-const OPEN_TAB_ACK_TIMEOUT_MS = 5000
+/**
+ * Overall budget an `open_tab` call spends waiting for the workbench.
+ *
+ * Deliberately generous: this is a ceiling for a machine under load, not a
+ * latency target. The call returns the instant the renderer acks, so a healthy
+ * desktop still answers in milliseconds and pays nothing for the headroom —
+ * only a genuinely missing item waits out the full budget. Sizing it tight
+ * buys nothing and costs correctness: a workbench that is merely slow to
+ * project the item (a busy machine, several app instances, a large tree) then
+ * gets reported as `opened: false`, which is indistinguishable from "the item
+ * does not exist" to every MCP client. Reporting a successful open as a
+ * failure is the worse error, so the budget is sized for the slow case.
+ */
+export const OPEN_TAB_ACK_TIMEOUT_MS = 15_000
 /** Pause between two attempts once every window has said "not in my tree". */
 const OPEN_TAB_RETRY_DELAY_MS = 100
 
@@ -204,19 +217,27 @@ export function registerNavigationTools(mcp: McpService): void {
       titleKey: 'mcpToolTitles.closeTab',
       title: 'Close a workbench tab',
       description:
-        'Close the workbench tab showing the given item. Validates the id against the open ' +
-        'project; returns a clean error when unknown so the AI knows it picked the wrong reference. ' +
-        'No-op when the item isn\'t currently open in any workbench tab — the renderer\'s close ' +
-        'handler is forgiving on misses.',
+        'Close the workbench tab showing the given item. Accepts a project-tree id (folder / ' +
+        'env-folder / request / scenario) or one of the singleton tab ids — ' +
+        `${SINGLETON_TAB_IDS.join(', ')}. Returns a clean error for an id that is neither, so the ` +
+        'AI knows it picked the wrong reference. No-op when the tab isn\'t currently open — the ' +
+        'renderer\'s close handler is forgiving on misses.',
       inputSchema: {
-        itemId: z.string().min(1).describe('Folder / env-folder / request / scenario id whose tab to close.')
+        itemId: z.string().min(1).describe(
+          'Folder / env-folder / request / scenario id whose tab to close, or a singleton tab id ' +
+          `(${SINGLETON_TAB_IDS.join(' | ')}).`
+        )
       } as Record<string, unknown>
     },
     (args) => {
       const argRecord = args
       const itemId = typeof argRecord['itemId'] === 'string' ? argRecord['itemId'] : ''
       if (!itemId) return errorReply('itemId is required')
-      const kind = describeKind(itemId)
+      // The singleton tabs (Console, Settings, Firewall, Mini browser, MCP
+      // logs) have no project-tree entry, so the tree lookup can't be the only
+      // gate — it used to reject them outright, leaving no MCP route to close
+      // them at all.
+      const kind = isSingletonTabId(itemId) ? 'singleton' : describeKind(itemId)
       if (!kind) return errorReply(`No item with id ${itemId}`)
       broadcast('mcp:close-tab', { itemId, kind })
       return jsonReply({ itemId, kind, queued: true })

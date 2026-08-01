@@ -32,6 +32,7 @@
     "resolveError": "Gagal menyelesaikan rahasia",
     "resolveErrorEnv": "Setidaknya satu variabel tidak dapat diambil dan dalam keadaan galat.",
     "resolveErrorItem": "Setidaknya satu rahasia item ini tidak dapat diambil.",
+    "resolveErrorItemVars": "Variabel lingkungan yang tidak terselesaikan: {{vars}}",
     "fetchFailed": "Pengambilan gagal",
     "retrievalModal": {
       "title": "Pengambilan rahasia",
@@ -994,17 +995,21 @@
     "title": "Perilaku",
     "syncSidebarWithTabs": "Sinkronkan pilihan sidebar dengan tab aktif",
     "syncSidebarWithTabsDescription": "Saat berpindah tab di ruang kerja, otomatis pilih dan tampilkan item yang sesuai di sidebar",
-    "dateTimeFormat": "Format tanggal/waktu",
-    "dateTimeFormatDescription": "Format yang digunakan untuk menampilkan tanggal dan waktu dalam aplikasi",
-    "dateTimeFormat.us": "Format AS (MM/DD/YYYY, 12 jam)",
-    "dateTimeFormat.iso": "Format ISO (YYYY-MM-DD, 24 jam)"
+    "dateTimeFormatTitle": "Format tanggal/waktu",
+    "dateTimeFormat": {
+      "us": "Format AS (MM/DD/YYYY, 12 jam)",
+      "iso": "Format ISO (YYYY-MM-DD, 24 jam)"
+    },
+    "dateTimeFormatDescription": "Format yang digunakan untuk menampilkan tanggal dan waktu dalam aplikasi"
   },
   "console": {
     "title": "Konsol",
-    "requestFormat": "Format permintaan",
-    "requestFormatDescription": "Jenis shell default yang digunakan untuk menampilkan permintaan keluar di tab Konsol. Setiap baris adalah baris perintah yang dapat disalin-tempel; tombol di toolbar Konsol menggantikan default ini untuk tab saat ini.",
-    "requestFormat.curl": "curl (gaya Unix)",
-    "requestFormat.powershell": "PowerShell (Invoke-RestMethod)"
+    "requestFormatTitle": "Format permintaan",
+    "requestFormat": {
+      "curl": "curl (gaya Unix)",
+      "powershell": "PowerShell (Invoke-RestMethod)"
+    },
+    "requestFormatDescription": "Jenis shell default yang digunakan untuk menampilkan permintaan keluar di tab Konsol. Setiap baris adalah baris perintah yang dapat disalin-tempel; tombol di toolbar Konsol menggantikan default ini untuk tab saat ini."
   },
   "import": {
     "addAuth": "Tambahkan rute autentikasi",
@@ -2046,18 +2051,18 @@
   },
   "mqtt": {
     "qos": "QoS",
-    "retain": "Retain",
+    "retain": "Simpan",
     "subscribeOnConnect": "Berlangganan saat terhubung",
-    "clientId": "Client ID",
+    "clientId": "ID klien",
     "clientIdPlaceholder": "dibuat otomatis jika kosong",
-    "username": "Username",
-    "password": "Password",
+    "username": "Nama pengguna",
+    "password": "Kata sandi",
     "keepalive": "Keepalive (s)",
     "lwt": "Wasiat Terakhir (LWT)",
-    "topic": "Topic",
-    "lwtTopicPlaceholder": "will/topic",
-    "lwtPayload": "Payload",
-    "lwtPayloadPlaceholder": "will message"
+    "topic": "Topik",
+    "lwtTopicPlaceholder": "topik/wasiat",
+    "lwtPayload": "Muatan",
+    "lwtPayloadPlaceholder": "pesan wasiat"
   },
   "amqp": {
     "urlPlaceholder": "URL AMQP (amqp:// atau amqps://)",

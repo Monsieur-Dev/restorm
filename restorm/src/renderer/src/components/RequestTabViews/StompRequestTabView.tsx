@@ -30,7 +30,7 @@ import { BaseRequestTabView } from './BaseRequestTabView'
 import { ResponseHistoryModal } from '../Modals/ResponseHistoryModal'
 import { useRestormStore } from '../../store/restormStore'
 import { buildRequestPath } from '../../utils/requestPath'
-import { updateReactiveProperty } from './requestTabViewUtils'
+import { updateReactiveProperty, inlineFieldLabelStyle } from './requestTabViewUtils'
 import { DEFAULT_WS_TIMEOUT_MS } from '../../../../shared/config/constants'
 import { SendButtonEnvSwitcher } from './SendButtonEnvSwitcher'
 import { useIsStompListening } from '../../services/stompListeningStore'
@@ -333,7 +333,7 @@ export const StompRequestTabView: React.FC<StompRequestTabViewProps> = ({
       <Pane title={t('stomp.tabs.connect', 'Connect')} initialSize={0.34} minSize={100} data-testid="stomp-connect-pane">
         <div style={{ height: '100%', display: 'flex', flexDirection: 'column', gap: 8, padding: 4 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <span style={{ fontSize: 12 }}>{t('stomp.version', 'STOMP version')}:</span>
+            <span style={inlineFieldLabelStyle}>{t('stomp.version', 'STOMP version')}:</span>
             <div style={{ width: 90 }}>
               <SelectBox
                 id={`stomp-version-${request.id}`}
@@ -344,6 +344,20 @@ export const StompRequestTabView: React.FC<StompRequestTabViewProps> = ({
                 data-testid="stomp-version-select"
               />
             </div>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', padding: '0 4px 4px' }}>
+            <span style={inlineFieldLabelStyle}>{t('requestTab.tabs.headers', 'Headers')}</span>
+            <div style={{ flex: 1 }} />
+            <HeaderHoverTooltip label={t('requestTab.addHeader', 'Add header')}>
+              <Button
+                secondary
+                small
+                icon="add"
+                options={{ ariaLabel: t('requestTab.addHeader', 'Add header') }}
+                onClick={() => { connectHeadersRef.current?.addRow() }}
+                data-testid="stomp-add-connect-header-button"
+              />
+            </HeaderHoverTooltip>
           </div>
           <div style={{ flex: 1, minHeight: 0 }}>
             <RestormKeyValueTable
@@ -418,7 +432,7 @@ export const StompRequestTabView: React.FC<StompRequestTabViewProps> = ({
       <Pane title={t('stomp.tabs.send', 'Send')} initialSize={0.33} minSize={120} data-testid="stomp-send-pane">
         <div style={{ height: '100%', display: 'flex', flexDirection: 'column', gap: 8, padding: 4 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <span style={{ fontSize: 12 }}>{t('stomp.sendDestination', 'Destination')}:</span>
+            <span style={inlineFieldLabelStyle}>{t('stomp.sendDestination', 'Destination')}:</span>
             <div style={{ flex: 1 }}>
               <RestormVariableInputBox
                 value={sendDestination}
@@ -440,6 +454,20 @@ export const StompRequestTabView: React.FC<StompRequestTabViewProps> = ({
               options={{ minimap: { enabled: false }, wordWrap: 'on', automaticLayout: true }}
               data-testid="stomp-send-body-editor"
             />
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', padding: '0 4px 4px' }}>
+            <span style={inlineFieldLabelStyle}>{t('requestTab.tabs.headers', 'Headers')}</span>
+            <div style={{ flex: 1 }} />
+            <HeaderHoverTooltip label={t('requestTab.addHeader', 'Add header')}>
+              <Button
+                secondary
+                small
+                icon="add"
+                options={{ ariaLabel: t('requestTab.addHeader', 'Add header') }}
+                onClick={() => { sendHeadersRef.current?.addRow() }}
+                data-testid="stomp-add-send-header-button"
+              />
+            </HeaderHoverTooltip>
           </div>
           <div style={{ height: 130 }}>
             <RestormKeyValueTable

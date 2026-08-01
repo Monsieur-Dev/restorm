@@ -503,22 +503,30 @@ export default defineConfig({
    * internally — `fullyParallel: false`), so the long-pole projects (scenario
    * run-log, full-workflow) overlap instead of summing.
    *
-   * Capped at 2 workers: each Electron worker is a full Chromium instance
-   * (~300-500 MB), so 4 in parallel — on top of the build, a running restorm
-   * and a browser — exhausts physical RAM on a 16 GB host and pushes it into
-   * heavy swap. Swap thrashing intermittently starves renderer timers, which
-   * surfaces as flaky `waitFor`/`toBeVisible` timeouts on menu/submenu
-   * rendering (the failure mode was NOT CPU-bound — load stayed ~11%). Two
-   * workers keep the peak resident set within physical RAM; a full run is
-   * slower than at 4 but stable. CI runners with dedicated RAM can raise this.
+   * RAM is NOT the constraint any more, whatever the history below says: peak
+   * resident stayed at 25-27 GB with ~37 GB free and swap at ZERO bytes at
+   * every worker count measured — the peak is dominated by ambient load
+   * (editors, browsers, parallel agents), and 4 vs 8 differ by under 1 GB.
+   * What binds now is CPU, and the suite's own load-sensitivity.
    *
-   * Dropped to 1 (serial) on this RAM-constrained no-swap host: even 2 workers
-   * intermittently thrashed and starved renderer timers, surfacing as flaky
-   * `waitFor` timeouts on the MCP-driven "open the request tab via MCP" steps
-   * (kafka/jsonrpc lost the lottery on different pushes). Serial is ~2x slower
-   * but deterministic — no cross-worker MCP contention. Raise again (or make
-   * env-conditional for CI) once the host has more RAM. */
-  workers: 1,
+   * Measured full-suite wall time: 1 worker ~52 min, 4 workers ~18 min, 8
+   * workers 15 min. The tail is long-pole projects that stay serial inside
+   * themselves (scenario-runlog, scenario-code-deps, exhaustive-doc-viewer,
+   * full-workflow), so the suite floors around 13-14 min regardless — 8 buys
+   * only ~19% over 4 while doubling the failures (11 vs 5). 4 is the useful
+   * target; higher is not worth the instability.
+   *
+   * 4 is the VALIDATED default: two consecutive full runs at 4 came back
+   * 353/353 with zero flaky and zero retries fired. Getting there took fixing
+   * what the parallelism was exposing rather than tuning the number — a
+   * renderer→main mirror that could wipe the collections tree during project
+   * load, a harness socket reused after the host's keep-alive closed it, and an
+   * ack budget too small for a loaded machine. Those were real defects that
+   * merely happened to surface under load; the worker count was never the bug.
+   *
+   * `PW_WORKERS` overrides it either way — raise it on an idle host, or pin
+   * `PW_WORKERS=1` to serialise when debugging a single suite. */
+  workers: process.env.PW_WORKERS ? Number(process.env.PW_WORKERS) : 4,
 
   /* Reporter */
   reporter: [
