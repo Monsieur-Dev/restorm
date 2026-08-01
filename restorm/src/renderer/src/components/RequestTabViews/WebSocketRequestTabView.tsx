@@ -34,7 +34,7 @@ import { BaseRequestTabView } from './BaseRequestTabView'
 import { ResponseHistoryModal } from '../Modals/ResponseHistoryModal'
 import { useRestormStore } from '../../store/restormStore'
 import { buildRequestPath } from '../../utils/requestPath'
-import { updateReactiveProperty } from './requestTabViewUtils'
+import { updateReactiveProperty, inlineFieldLabelStyle } from './requestTabViewUtils'
 import { useApiDocumentationFromRequest } from '../../hooks/useApiDocumentationFromRequest'
 import { DocumentationHost } from '../documentation/DocumentationHost'
 import { findOperationForRoute } from '../../../../shared/utils/findOperationForRoute'
@@ -453,7 +453,9 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
         <div style={{ height: '100%', display: 'flex', flexDirection: 'column', gap: 8 }}>
           {(request.protocol === 'socketio' || request.protocol === 'mqtt') && (
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '0 4px' }}>
-              <span style={{ fontSize: 12 }}>{request.protocol === 'mqtt' ? t('websocket.topic') : t('websocket.event')}:</span>
+              <span style={inlineFieldLabelStyle}>
+                {request.protocol === 'mqtt' ? t('websocket.topic') : t('websocket.event')}:
+              </span>
               <div style={{ flex: 1 }}>
                 <RestormVariableInputBox
                   key={`event-${transportEpoch}`}

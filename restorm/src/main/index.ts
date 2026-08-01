@@ -457,7 +457,7 @@ function getSettingsConfigPath(): string {
 i18nService.initialize('')
 // Layer Restorm's renderer translations onto ECUI's built-ins so
 // settings-yaml `titleKey` / `descriptionKey` lookups (e.g.
-// `behavior.dateTimeFormat`, `behavior.syncSidebarWithTabs`) resolve
+// `behavior.dateTimeFormatTitle`, `behavior.syncSidebarWithTabs`) resolve
 // during the SettingsService search-index rebuild that runs
 // immediately after.
 i18nService.addTranslations('en', restormEnTranslation as Record<string, unknown>)

@@ -11,7 +11,7 @@ vi.mock('electron-core-ui/renderer', () => ({
 }))
 
 import { resolveRebuildTabId } from './useMcpWorkbenchLayout'
-import { CONSOLE_TAB_ID, FIREWALL_TAB_ID, MINI_BROWSER_TAB_ID, SETTINGS_TAB_ID } from '../../../shared/types/editor'
+import { CONSOLE_TAB_ID, FIREWALL_TAB_ID, MINI_BROWSER_TAB_ID, SETTINGS_TAB_ID, MCP_LOGS_TAB_ID, SINGLETON_TAB_IDS } from '../../../shared/types/editor'
 
 describe('resolveRebuildTabId', () => {
   it('maps singleton specials to their stable ids by tabType', () => {
@@ -19,6 +19,7 @@ describe('resolveRebuildTabId', () => {
     expect(resolveRebuildTabId({ id: 'x', tabType: 'firewall', title: '', itemId: null })).toBe(FIREWALL_TAB_ID)
     expect(resolveRebuildTabId({ id: 'x', tabType: 'mini-browser', title: '', itemId: null })).toBe(MINI_BROWSER_TAB_ID)
     expect(resolveRebuildTabId({ id: 'x', tabType: 'settings', title: '', itemId: null })).toBe(SETTINGS_TAB_ID)
+    expect(resolveRebuildTabId({ id: 'x', tabType: 'mcp-logs', title: '', itemId: null })).toBe(MCP_LOGS_TAB_ID)
   })
 
   it('maps tree-backed tabs to the legacy <type>-id:<itemId> form', () => {
@@ -39,5 +40,19 @@ describe('resolveRebuildTabId', () => {
     expect(resolveRebuildTabId({ id: 'x', tabType: 'http-request', title: '', itemId: null })).toBeNull()
     expect(resolveRebuildTabId({ id: 'x', tabType: 'mystery', title: '', itemId: 'r1' })).toBeNull()
     expect(resolveRebuildTabId({ id: 'x', title: '', itemId: 'r1' })).toBeNull()
+  })
+})
+
+describe('resolveRebuildTabId singleton coverage', () => {
+  // A singleton tab carries no `itemId`, so its tab type is the ONLY handle
+  // the layout reconstructor has. One missing from the map resolves to null
+  // and the tab is dropped silently — with its group, when it was alone in
+  // one — while the layout snapshot still reports the group.
+  it('resolves every singleton tab id the workbench can rebuild', () => {
+    const resolved = SINGLETON_TAB_IDS.map((id) => {
+      const tabType = id.replace(':singleton', '')
+      return resolveRebuildTabId({ id: 'x', tabType, title: '', itemId: null })
+    })
+    expect(resolved).toEqual([...SINGLETON_TAB_IDS])
   })
 })

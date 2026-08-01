@@ -45,6 +45,7 @@ vi.mock('../../services/CollectionStore', () => ({
 }))
 
 import { registerNavigationTools, OPEN_TAB_ACK_TIMEOUT_MS } from './navigation'
+import { SINGLETON_TAB_IDS } from '../../../shared/types/editor'
 
 class FakeMcpService {
   private handlers = new Map<string, McpToolHandler>()
@@ -290,5 +291,17 @@ describe('navigation tools — close_tab', () => {
     expect(isError).toBe(true)
     expect(text).toContain('No item with id ghost')
     expect(broadcasts).toHaveLength(0)
+  })
+
+  // The singleton tabs have no project-tree entry, so a tree-only lookup left
+  // no MCP route to close them at all.
+  it.each(SINGLETON_TAB_IDS)('broadcasts mcp:close-tab for the singleton tab %s', async (tabId) => {
+    mockState.findById.mockReturnValue(null)
+    windowsState.push(silentWindow())
+    const mcp = new FakeMcpService()
+    registerNavigationTools(mcp as unknown as McpService)
+    const { isError } = parseReply(await mcp.invoke('close_tab', { itemId: tabId }))
+    expect(isError).toBe(false)
+    expect(broadcasts).toEqual([{ channel: 'mcp:close-tab', payload: { itemId: tabId, kind: 'singleton' } }])
   })
 })

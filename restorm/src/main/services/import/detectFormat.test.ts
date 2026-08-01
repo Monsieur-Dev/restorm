@@ -1,5 +1,7 @@
 // @vitest-environment node
 import { describe, it, expect, vi } from 'vitest'
+import { readFileSync } from 'node:fs'
+import { join } from 'node:path'
 import { detectFormat } from './ImportManager'
 
 describe('detectFormat — operator grouping (gRPC / SOAP)', () => {
@@ -84,5 +86,37 @@ describe('detectFormat — JSON parsed once per pass, not once per JSON-capable 
     } finally {
       spy.mockRestore()
     }
+  })
+})
+
+describe('detectFormat — Bruno collections arriving without a filename', () => {
+  // A Bruno export pasted into the import dialog or fetched from a URL has no
+  // filename to anchor on, and Bruno's own exports carry no top-level
+  // `type: 'collection'` — only the collection shape itself identifies it.
+  const brunoCollection = readFileSync(
+    join(__dirname, '../../../../tests/unit/bruno-petstore.json'),
+    'utf-8'
+  )
+
+  it('detects a Bruno collection from its content alone', () => {
+    expect(detectFormat(brunoCollection)).toBe('bruno')
+  })
+
+  it('still detects it when the filename is present', () => {
+    expect(detectFormat(brunoCollection, '/x/bruno-petstore.json')).toBe('bruno')
+  })
+
+  it('does not claim a Postman collection', () => {
+    const postman = JSON.stringify({
+      info: { name: 'Petstore', schema: 'https://schema.getpostman.com/json/collection/v2.1.0/collection.json' },
+      item: [{ name: 'List pets', request: { method: 'GET', url: 'https://example.com/pets' } }]
+    })
+    expect(detectFormat(postman)).toBe('postman')
+  })
+
+  it('does not claim a name+version JSON document that is not a collection', () => {
+    // A package manifest has both discriminators the old check keyed on.
+    const packageJson = JSON.stringify({ name: 'my-app', version: '1.0.0', dependencies: {} })
+    expect(detectFormat(packageJson)).not.toBe('bruno')
   })
 })

@@ -32,6 +32,7 @@
     "resolveError": "Gizli bilgi çözümlenemedi",
     "resolveErrorEnv": "En az bir değişken alınamadı ve hata durumunda.",
     "resolveErrorItem": "Bu öğenin gizli bilgilerinden en az biri alınamadı.",
+    "resolveErrorItemVars": "Çözümlenemeyen ortam değişkenleri: {{vars}}",
     "fetchFailed": "Alma başarısız",
     "retrievalModal": {
       "title": "Gizli bilgi alma",
@@ -995,17 +996,21 @@
     "title": "Davranış",
     "syncSidebarWithTabs": "Kenar çubuğu seçimini etkin sekmeyle senkronize et",
     "syncSidebarWithTabsDescription": "Çalışma alanında sekme değiştirilirken kenar çubuğunda ilgili öğeyi otomatik olarak seç ve göster",
-    "dateTimeFormat": "Tarih/saat biçimi",
-    "dateTimeFormatDescription": "Uygulamada tarihleri ve saatleri görüntülemek için kullanılan biçim",
-    "dateTimeFormat.us": "ABD biçimi (AA/GG/YYYY, 12 saat)",
-    "dateTimeFormat.iso": "ISO biçimi (YYYY-AA-GG, 24 saat)"
+    "dateTimeFormatTitle": "Tarih/saat biçimi",
+    "dateTimeFormat": {
+      "us": "ABD biçimi (AA/GG/YYYY, 12 saat)",
+      "iso": "ISO biçimi (YYYY-AA-GG, 24 saat)"
+    },
+    "dateTimeFormatDescription": "Uygulamada tarihleri ve saatleri görüntülemek için kullanılan biçim"
   },
   "console": {
     "title": "Konsol",
-    "requestFormat": "İstek biçimi",
-    "requestFormatDescription": "Konsol sekmesinde giden istekleri göstermek için varsayılan kabuk türü. Her satır kopyalanıp yapıştırılabilen bir komut satırıdır; Konsol araç çubuğundaki anahtar, geçerli sekme için bu varsayılanı geçersiz kılar.",
-    "requestFormat.curl": "curl (Unix tarzı)",
-    "requestFormat.powershell": "PowerShell (Invoke-RestMethod)"
+    "requestFormatTitle": "İstek biçimi",
+    "requestFormat": {
+      "curl": "curl (Unix tarzı)",
+      "powershell": "PowerShell (Invoke-RestMethod)"
+    },
+    "requestFormatDescription": "Konsol sekmesinde giden istekleri göstermek için varsayılan kabuk türü. Her satır kopyalanıp yapıştırılabilen bir komut satırıdır; Konsol araç çubuğundaki anahtar, geçerli sekme için bu varsayılanı geçersiz kılar."
   },
   "import": {
     "addAuth": "Kimlik doğrulama rotası ekle",
@@ -2047,18 +2052,18 @@
   },
   "mqtt": {
     "qos": "QoS",
-    "retain": "Retain",
+    "retain": "Sakla",
     "subscribeOnConnect": "Bağlanırken abone ol",
-    "clientId": "Client ID",
+    "clientId": "İstemci Kimliği",
     "clientIdPlaceholder": "boşsa otomatik oluşturulur",
-    "username": "Username",
-    "password": "Password",
+    "username": "Kullanıcı Adı",
+    "password": "Parola",
     "keepalive": "Keepalive (s)",
     "lwt": "Son Vasiyet (LWT)",
-    "topic": "Topic",
-    "lwtTopicPlaceholder": "will/topic",
-    "lwtPayload": "Payload",
-    "lwtPayloadPlaceholder": "will message"
+    "topic": "Konu",
+    "lwtTopicPlaceholder": "konu/vasiyet",
+    "lwtPayload": "Yük",
+    "lwtPayloadPlaceholder": "vasiyet mesajı"
   },
   "amqp": {
     "urlPlaceholder": "AMQP URL'si (amqp:// veya amqps://)",

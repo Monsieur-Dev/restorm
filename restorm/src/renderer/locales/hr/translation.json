@@ -32,6 +32,7 @@
     "resolveError": "Rješavanje tajne nije uspjelo",
     "resolveErrorEnv": "Najmanje jednu varijablu nije bilo moguće dohvatiti i u stanju je pogreške.",
     "resolveErrorItem": "Najmanje jednu tajnu ove stavke nije bilo moguće dohvatiti.",
+    "resolveErrorItemVars": "Neriješene varijable okruženja: {{vars}}",
     "fetchFailed": "Dohvaćanje nije uspjelo",
     "retrievalModal": {
       "title": "Dohvaćanje tajne",
@@ -996,17 +997,21 @@
     "title": "Ponašanje",
     "syncSidebarWithTabs": "Sinkroniziraj odabir bočne trake s aktivnom karticom",
     "syncSidebarWithTabsDescription": "Pri prebacivanju kartica u radnom prostoru automatski odaberi i prikaži odgovarajuću stavku u bočnoj traci",
-    "dateTimeFormat": "Format datuma/vremena",
-    "dateTimeFormatDescription": "Format koji se koristi za prikaz datuma i vremena u aplikaciji",
-    "dateTimeFormat.us": "Američki format (MM/DD/GGGG, 12 h)",
-    "dateTimeFormat.iso": "ISO format (GGGG-MM-DD, 24 h)"
+    "dateTimeFormatTitle": "Format datuma/vremena",
+    "dateTimeFormat": {
+      "us": "Američki format (MM/DD/GGGG, 12 h)",
+      "iso": "ISO format (GGGG-MM-DD, 24 h)"
+    },
+    "dateTimeFormatDescription": "Format koji se koristi za prikaz datuma i vremena u aplikaciji"
   },
   "console": {
     "title": "Konzola",
-    "requestFormat": "Format zahtjeva",
-    "requestFormatDescription": "Zadani tip ljuske koji se koristi za prikaz odlaznih zahtjeva u kartici Konzola. Svaki redak je naredba koja se može kopirati i zalijepiti; prekidač u alatnoj traci Konzole nadjačava ovaj zadani za trenutnu karticu.",
-    "requestFormat.curl": "curl (u stilu Unixa)",
-    "requestFormat.powershell": "PowerShell (Invoke-RestMethod)"
+    "requestFormatTitle": "Format zahtjeva",
+    "requestFormat": {
+      "curl": "curl (u stilu Unixa)",
+      "powershell": "PowerShell (Invoke-RestMethod)"
+    },
+    "requestFormatDescription": "Zadani tip ljuske koji se koristi za prikaz odlaznih zahtjeva u kartici Konzola. Svaki redak je naredba koja se može kopirati i zalijepiti; prekidač u alatnoj traci Konzole nadjačava ovaj zadani za trenutnu karticu."
   },
   "import": {
     "addAuth": "Dodaj rutu provjere autentičnosti",
@@ -2048,18 +2053,18 @@
   },
   "mqtt": {
     "qos": "QoS",
-    "retain": "Retain",
+    "retain": "Zadrži",
     "subscribeOnConnect": "Pretplati se pri povezivanju",
-    "clientId": "Client ID",
+    "clientId": "ID klijenta",
     "clientIdPlaceholder": "automatski generirano ako je prazno",
-    "username": "Username",
-    "password": "Password",
+    "username": "Korisničko ime",
+    "password": "Lozinka",
     "keepalive": "Keepalive (s)",
     "lwt": "Posljednja volja (LWT)",
-    "topic": "Topic",
-    "lwtTopicPlaceholder": "will/topic",
-    "lwtPayload": "Payload",
-    "lwtPayloadPlaceholder": "will message"
+    "topic": "Tema",
+    "lwtTopicPlaceholder": "tema/oporuke",
+    "lwtPayload": "Sadržaj",
+    "lwtPayloadPlaceholder": "poruka oporuke"
   },
   "amqp": {
     "urlPlaceholder": "AMQP URL (amqp:// ili amqps://)",

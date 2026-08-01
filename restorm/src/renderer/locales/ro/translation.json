@@ -32,6 +32,7 @@
     "resolveError": "Rezolvarea secretului a eșuat",
     "resolveErrorEnv": "Cel puțin o variabilă nu a putut fi preluată și este în eroare.",
     "resolveErrorItem": "Cel puțin unul dintre secretele acestui element nu a putut fi preluat.",
+    "resolveErrorItemVars": "Variabile de mediu nerezolvate: {{vars}}",
     "fetchFailed": "Preluarea a eșuat",
     "retrievalModal": {
       "title": "Preluarea secretului",
@@ -996,17 +997,21 @@
     "title": "Comportament",
     "syncSidebarWithTabs": "Sincronizează selecția barei laterale cu fila activă",
     "syncSidebarWithTabsDescription": "La schimbarea filei în spațiul de lucru, selectează și afișează automat elementul corespunzător în bara laterală",
-    "dateTimeFormat": "Format dată/oră",
-    "dateTimeFormatDescription": "Format folosit pentru a afișa datele și orele în aplicație",
-    "dateTimeFormat.us": "Format SUA (LL/ZZ/AAAA, 12h)",
-    "dateTimeFormat.iso": "Format ISO (AAAA-LL-ZZ, 24h)"
+    "dateTimeFormatTitle": "Format dată/oră",
+    "dateTimeFormat": {
+      "us": "Format SUA (LL/ZZ/AAAA, 12h)",
+      "iso": "Format ISO (AAAA-LL-ZZ, 24h)"
+    },
+    "dateTimeFormatDescription": "Format folosit pentru a afișa datele și orele în aplicație"
   },
   "console": {
     "title": "Consolă",
-    "requestFormat": "Format al cererilor",
-    "requestFormatDescription": "Stilul de shell folosit implicit pentru afișarea cererilor de ieșire în fila Consolă. Fiecare rând este o linie de comandă ce poate fi copiată; comutatorul din bara de unelte a Consolei suprascrie acest implicit pentru fila curentă.",
-    "requestFormat.curl": "curl (stil Unix)",
-    "requestFormat.powershell": "PowerShell (Invoke-RestMethod)"
+    "requestFormatTitle": "Format al cererilor",
+    "requestFormat": {
+      "curl": "curl (stil Unix)",
+      "powershell": "PowerShell (Invoke-RestMethod)"
+    },
+    "requestFormatDescription": "Stilul de shell folosit implicit pentru afișarea cererilor de ieșire în fila Consolă. Fiecare rând este o linie de comandă ce poate fi copiată; comutatorul din bara de unelte a Consolei suprascrie acest implicit pentru fila curentă."
   },
   "import": {
     "addAuth": "Adaugă o rută de autentificare",
@@ -2048,18 +2053,18 @@
   },
   "mqtt": {
     "qos": "QoS",
-    "retain": "Retain",
+    "retain": "Păstrează",
     "subscribeOnConnect": "Abonare la conectare",
-    "clientId": "Client ID",
+    "clientId": "ID client",
     "clientIdPlaceholder": "generat automat dacă este gol",
-    "username": "Username",
-    "password": "Password",
+    "username": "Nume de utilizator",
+    "password": "Parolă",
     "keepalive": "Keepalive (s)",
     "lwt": "Ultima dorință (LWT)",
-    "topic": "Topic",
-    "lwtTopicPlaceholder": "will/topic",
-    "lwtPayload": "Payload",
-    "lwtPayloadPlaceholder": "will message"
+    "topic": "Subiect",
+    "lwtTopicPlaceholder": "subiect/testament",
+    "lwtPayload": "Conținut",
+    "lwtPayloadPlaceholder": "mesaj de testament"
   },
   "amqp": {
     "urlPlaceholder": "URL AMQP (amqp:// sau amqps://)",

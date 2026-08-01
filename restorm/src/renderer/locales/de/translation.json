@@ -32,6 +32,7 @@
     "resolveError": "Auflösung des Geheimnisses fehlgeschlagen",
     "resolveErrorEnv": "Mindestens eine Variable konnte nicht abgerufen werden und ist fehlerhaft.",
     "resolveErrorItem": "Mindestens ein Geheimnis dieses Elements konnte nicht abgerufen werden.",
+    "resolveErrorItemVars": "Nicht aufgelöste Umgebungsvariablen: {{vars}}",
     "fetchFailed": "Abruf fehlgeschlagen",
     "retrievalModal": {
       "title": "Geheimnis-Abruf",
@@ -995,17 +996,21 @@
     "title": "Verhalten",
     "syncSidebarWithTabs": "Auswahl der Seitenleiste mit dem aktiven Tab synchronisieren",
     "syncSidebarWithTabsDescription": "Beim Wechsel der Tabs im Arbeitsbereich automatisch das entsprechende Element in der Seitenleiste auswählen und anzeigen",
-    "dateTimeFormat": "Datum/Uhrzeit-Format",
-    "dateTimeFormatDescription": "Format zur Anzeige von Datum und Uhrzeit in der Anwendung",
-    "dateTimeFormat.us": "US-Format (MM/TT/JJJJ, 12 h)",
-    "dateTimeFormat.iso": "ISO-Format (JJJJ-MM-TT, 24 h)"
+    "dateTimeFormatTitle": "Datum/Uhrzeit-Format",
+    "dateTimeFormat": {
+      "us": "US-Format (MM/TT/JJJJ, 12 h)",
+      "iso": "ISO-Format (JJJJ-MM-TT, 24 h)"
+    },
+    "dateTimeFormatDescription": "Format zur Anzeige von Datum und Uhrzeit in der Anwendung"
   },
   "console": {
     "title": "Konsole",
-    "requestFormat": "Anfrageformat",
-    "requestFormatDescription": "Standardmäßiger Shell-Stil zur Darstellung ausgehender Anfragen im Konsolen-Tab. Jede Zeile ist eine kopierbare Kommandozeile; der Umschalter in der Konsolen-Toolbar überschreibt diesen Standard für den aktuellen Tab.",
-    "requestFormat.curl": "curl (Unix-Stil)",
-    "requestFormat.powershell": "PowerShell (Invoke-RestMethod)"
+    "requestFormatTitle": "Anfrageformat",
+    "requestFormat": {
+      "curl": "curl (Unix-Stil)",
+      "powershell": "PowerShell (Invoke-RestMethod)"
+    },
+    "requestFormatDescription": "Standardmäßiger Shell-Stil zur Darstellung ausgehender Anfragen im Konsolen-Tab. Jede Zeile ist eine kopierbare Kommandozeile; der Umschalter in der Konsolen-Toolbar überschreibt diesen Standard für den aktuellen Tab."
   },
   "import": {
     "addAuth": "Authentifizierungsroute hinzufügen",
@@ -2047,18 +2052,18 @@
   },
   "mqtt": {
     "qos": "QoS",
-    "retain": "Retain",
+    "retain": "Beibehalten",
     "subscribeOnConnect": "Beim Verbinden abonnieren",
-    "clientId": "Client ID",
+    "clientId": "Client-ID",
     "clientIdPlaceholder": "automatisch generiert, wenn leer",
-    "username": "Username",
-    "password": "Password",
+    "username": "Benutzername",
+    "password": "Passwort",
     "keepalive": "Keepalive (s)",
     "lwt": "Letzter Wille (LWT)",
     "topic": "Topic",
     "lwtTopicPlaceholder": "will/topic",
-    "lwtPayload": "Payload",
-    "lwtPayloadPlaceholder": "will message"
+    "lwtPayload": "Nutzdaten",
+    "lwtPayloadPlaceholder": "Will-Nachricht"
   },
   "amqp": {
     "urlPlaceholder": "AMQP-URL (amqp:// oder amqps://)",

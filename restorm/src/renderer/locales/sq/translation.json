@@ -32,6 +32,7 @@
     "resolveError": "Zgjidhja e sekretit dështoi",
     "resolveErrorEnv": "Të paktën një variabël nuk mund të merrej dhe është në gabim.",
     "resolveErrorItem": "Të paktën një nga sekretet e këtij elementi nuk mund të merrej.",
+    "resolveErrorItemVars": "Variabla mjedisi të pazgjidhura: {{vars}}",
     "fetchFailed": "Marrja dështoi",
     "retrievalModal": {
       "title": "Marrja e sekretit",
@@ -995,17 +996,21 @@
     "title": "Sjellja",
     "syncSidebarWithTabs": "Sinkronizo zgjedhjen e shiritit anësor me skedën aktive",
     "syncSidebarWithTabsDescription": "Kur ndërroni skedat në hapësirën e punës, zgjidh dhe shfaq automatikisht elementin përkatës në shiritin anësor",
-    "dateTimeFormat": "Formati data/ora",
-    "dateTimeFormatDescription": "Formati i përdorur për shfaqjen e datave dhe orëve në aplikacion",
-    "dateTimeFormat.us": "Format US (MM/DD/VVVV, 12 orë)",
-    "dateTimeFormat.iso": "Format ISO (VVVV-MM-DD, 24 orë)"
+    "dateTimeFormatTitle": "Formati data/ora",
+    "dateTimeFormat": {
+      "us": "Format US (MM/DD/VVVV, 12 orë)",
+      "iso": "Format ISO (VVVV-MM-DD, 24 orë)"
+    },
+    "dateTimeFormatDescription": "Formati i përdorur për shfaqjen e datave dhe orëve në aplikacion"
   },
   "console": {
     "title": "Konsola",
-    "requestFormat": "Formati i kërkesës",
-    "requestFormatDescription": "Lloji i parazgjedhur i shell-it i përdorur për të paraqitur kërkesat dalëse në skedën Konsola. Çdo rresht është një linjë komande që mund të kopjohet; ndërruesi në shiritin e veglave të Konsolës e mbivendos këtë parazgjedhje për skedën aktuale.",
-    "requestFormat.curl": "curl (në stil Unix)",
-    "requestFormat.powershell": "PowerShell (Invoke-RestMethod)"
+    "requestFormatTitle": "Formati i kërkesës",
+    "requestFormat": {
+      "curl": "curl (në stil Unix)",
+      "powershell": "PowerShell (Invoke-RestMethod)"
+    },
+    "requestFormatDescription": "Lloji i parazgjedhur i shell-it i përdorur për të paraqitur kërkesat dalëse në skedën Konsola. Çdo rresht është një linjë komande që mund të kopjohet; ndërruesi në shiritin e veglave të Konsolës e mbivendos këtë parazgjedhje për skedën aktuale."
   },
   "import": {
     "addAuth": "Shto një rrugë vërtetimi",
@@ -2047,18 +2052,18 @@
   },
   "mqtt": {
     "qos": "QoS",
-    "retain": "Retain",
+    "retain": "Ruaj",
     "subscribeOnConnect": "Abonohu gjatë lidhjes",
-    "clientId": "Client ID",
+    "clientId": "ID i klientit",
     "clientIdPlaceholder": "gjenerohet automatikisht nëse është bosh",
-    "username": "Username",
-    "password": "Password",
+    "username": "Emri i përdoruesit",
+    "password": "Fjalëkalimi",
     "keepalive": "Keepalive (s)",
     "lwt": "Dëshira e fundit (LWT)",
-    "topic": "Topic",
-    "lwtTopicPlaceholder": "will/topic",
-    "lwtPayload": "Payload",
-    "lwtPayloadPlaceholder": "will message"
+    "topic": "Tema",
+    "lwtTopicPlaceholder": "tema/testamentit",
+    "lwtPayload": "Ngarkesa",
+    "lwtPayloadPlaceholder": "mesazhi i testamentit"
   },
   "amqp": {
     "urlPlaceholder": "URL AMQP (amqp:// ose amqps://)",

@@ -23,6 +23,7 @@ import { useEnvVariables } from '../../hooks/useEnvVariables'
 import { useHandlebarsHelpers } from '../../hooks/useHandlebarsHelpers'
 import { useTransportReplaced } from '../../hooks/useTransportReplaced'
 import { updateReactiveProperty } from './requestTabViewUtils'
+import { HeaderHoverTooltip } from '../MainView/HeaderHoverTooltip'
 
 const containerStyle: CSSProperties = {
   display: 'flex',
@@ -115,18 +116,19 @@ export const AuthenticationConfigurationTab: React.FC<AuthenticationConfiguratio
           )}
         </span>
         <div style={{ display: 'flex' }}>
-          <Button
-            small
-            icon="add"
-            options={{
-              ariaLabel: t('authRequestTab.addProducedHeader', 'Add produced header'),
-              title: t('authRequestTab.addProducedHeader', 'Add produced header')
-            }}
-            onClick={() => { producedHeadersRef.current?.addRow() }}
-            data-testid="auth-request-add-produced-header-button"
-          >
-            {t('authRequestTab.addProducedHeader', 'Add produced header')}
-          </Button>
+          {/* Icon-only: a small button is sized for a codicon, and the label
+              text was being clipped mid-word by its fixed height. The name
+              lives on the tooltip (hover) and the aria-label (screen reader). */}
+          <HeaderHoverTooltip label={t('authRequestTab.addProducedHeader', 'Add produced header')}>
+            <Button
+              secondary
+              small
+              icon="add"
+              options={{ ariaLabel: t('authRequestTab.addProducedHeader', 'Add produced header') }}
+              onClick={() => { producedHeadersRef.current?.addRow() }}
+              data-testid="auth-request-add-produced-header-button"
+            />
+          </HeaderHoverTooltip>
         </div>
         <div style={{ boxSizing: 'border-box', border: '1px solid transparent', ...fieldDiffStyle(!!fieldDiff?.producedHeaders) }}>
           <RestormKeyValueTable
