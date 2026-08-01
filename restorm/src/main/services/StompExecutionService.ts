@@ -168,7 +168,13 @@ class StompExecutionService {
       const out: Record<string, string> = {}
       for (const h of rows ?? []) {
         if (h.enabled === false || !h.key) continue
-        out[h.key] = contextService.resolveKeyValueForRequest(h as Parameters<typeof contextService.resolveKeyValueForRequest>[0], requestId)
+        // The KEY resolves unconditionally through Handlebars, same as the
+        // destination or the URL — a frame header name has no ValueType to
+        // gate on. The VALUE stays type-aware: only `ExpressionValue` rows
+        // get substituted, a `StringValue` row ships verbatim. See
+        // `HTTPExecutionService`.
+        const resolvedKey = contextService.resolveValue(h.key, requestId)
+        out[resolvedKey] = contextService.resolveKeyValueForRequest(h as Parameters<typeof contextService.resolveKeyValueForRequest>[0], requestId)
       }
       return out
     }

@@ -101,6 +101,8 @@ function registerStompRequest(requestId: string, input: {
   subscriptions?: { id: string; destination: string; ackMode?: string }[]
   sendDestination?: string
   sendBody?: string
+  connectHeaders?: { key: string; value: unknown; enabled?: boolean }[]
+  sendHeaders?: { key: string; value: unknown; enabled?: boolean }[]
 }): void {
   contextService.registerRequest(requestId, null, { id: requestId, headers: [] })
   contextService.updateFullRequestData(requestId, {
@@ -109,11 +111,11 @@ function registerStompRequest(requestId: string, input: {
     url: input.url,
     headers: [],
     stompVersion: input.stompVersion ?? '1.2',
-    connectHeaders: [],
+    connectHeaders: input.connectHeaders ?? [],
     subscriptions: input.subscriptions ?? [],
     sendDestination: input.sendDestination ?? '',
     sendBody: input.sendBody ?? '',
-    sendHeaders: []
+    sendHeaders: input.sendHeaders ?? []
   })
 }
 
@@ -185,6 +187,38 @@ describe('StompExecutionService', () => {
     expect(receivedMessage?.subscription).toBe('sub-0')
     expect(receivedMessage?.destination).toBe('/topic/test')
     expect(receivedMessage?.body).toBe('{"hello":"world"}')
+
+    contextService.unregisterRequest(requestId)
+  })
+
+  it('resolves a Handlebars header KEY on the CONNECT and SEND frames, not just the value', async () => {
+    // A frame header NAME has no ValueType to gate on, so — like the
+    // destination and the URL — the substitution is unconditional. Left
+    // unresolved, `{{…}}` reaches the broker as the literal header token.
+    const requestId = 'stomp-header-key-resolution'
+    registerStompRequest(requestId, {
+      url: `ws://127.0.0.1:${broker.port}`,
+      connectHeaders: [{ key: '{{connectHeaderName}}', value: 'connect-value', enabled: true }],
+      subscriptions: [{ id: 'sub-0', destination: '/topic/keys', ackMode: 'auto' }],
+      sendDestination: '/topic/keys',
+      sendBody: 'payload',
+      sendHeaders: [{ key: '{{sendHeaderName}}', value: 'send-value', enabled: true }]
+    })
+    contextService.setScenarioVariables(requestId, {
+      connectHeaderName: 'x-tenant',
+      sendHeaderName: 'x-trace'
+    })
+
+    const result = await stompExecutionService.execute({ requestId, timeout: 2000 })
+
+    expect(result.connected).toBe(true)
+    const connectFrame = broker.received.find((f) => f.command === 'CONNECT')
+    expect(connectFrame?.headers['x-tenant']).toBe('connect-value')
+    expect(connectFrame?.headers).not.toHaveProperty('{{connectHeaderName}}')
+
+    const sendFrame = broker.received.find((f) => f.command === 'SEND')
+    expect(sendFrame?.headers['x-trace']).toBe('send-value')
+    expect(sendFrame?.headers).not.toHaveProperty('{{sendHeaderName}}')
 
     contextService.unregisterRequest(requestId)
   })

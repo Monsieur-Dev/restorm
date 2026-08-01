@@ -1245,6 +1245,12 @@ class HTTPExecutionService {
     for (const h of headerSource) {
       if (h.enabled === false) continue
       if (!h.key) continue
+      // The KEY resolves unconditionally through Handlebars, same as the auth
+      // URL above and the url-encoded body field keys below — a header name
+      // has no ValueType to gate on. `resolveForAuth` picks whichever context
+      // the VALUE resolution uses (the auth route's own env, the parent's
+      // under inheritance, verbatim when neither is registered).
+      const resolvedKey = resolveForAuth(h.key)
       // When the auth request IS registered with ContextService, use
       // the type-aware path (gates substitution on `ExpressionValue`
       // vs `StringValue`, same invariant as the main request headers).
@@ -1253,11 +1259,11 @@ class HTTPExecutionService {
       // with a real `ValueType` to gate on anyway (the renderer-import
       // path lands here for spec-fetch auth).
       if (contextService.getRequestContext(resolutionRequestId)) {
-        headers[h.key] = contextService.resolveKeyValueForRequest(h, resolutionRequestId)
+        headers[resolvedKey] = contextService.resolveKeyValueForRequest(h, resolutionRequestId)
       } else if (parentRequestId && contextService.getRequestContext(parentRequestId)) {
-        headers[h.key] = contextService.resolveKeyValueForRequest(h, parentRequestId)
+        headers[resolvedKey] = contextService.resolveKeyValueForRequest(h, parentRequestId)
       } else {
-        headers[h.key] = extractString(h.value)
+        headers[resolvedKey] = extractString(h.value)
       }
     }
 
@@ -1305,7 +1311,8 @@ class HTTPExecutionService {
         // run here. Extract the string payload manually.
         for (const field of authBody.fields) {
           if (!field.key) continue
-          params.append(field.key, resolveForAuth(extractString(field.value)))
+          // The KEY resolves too — same as on the ContextService path above.
+          params.append(resolveForAuth(field.key), resolveForAuth(extractString(field.value)))
         }
         body = params.toString()
         headers['Content-Type'] ??= 'application/x-www-form-urlencoded'

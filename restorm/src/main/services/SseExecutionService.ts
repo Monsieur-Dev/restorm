@@ -531,7 +531,13 @@ class SseExecutionService {
       for (const h of headersGroup) {
         if (h.enabled === false) continue
         if (h.key) {
-          headers[h.key] = contextService.resolveKeyValueForRequest(h, requestId)
+          // The KEY resolves unconditionally through Handlebars, same as a
+          // path/query param key or the URL — a header name has no ValueType
+          // to gate on. The VALUE stays type-aware: only `ExpressionValue`
+          // rows get substituted, a `StringValue` row ships verbatim. See
+          // `HTTPExecutionService`.
+          const resolvedKey = contextService.resolveValue(h.key, requestId)
+          headers[resolvedKey] = contextService.resolveKeyValueForRequest(h, requestId)
         }
       }
     }
