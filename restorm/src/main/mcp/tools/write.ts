@@ -67,25 +67,52 @@ function validateSecretValue(value: unknown): string | null {
 }
 
 /**
- * Walk a `update_request` patch and convert any plain-object key-value
- * entries (headers / params / pathParams / metadata / producedHeaders) into
- * real `KeyValue` class instances. Without this, `request.toPlainObject()`
- * crashes when the next event emit walks the array — `p.toPlainObject`
- * is undefined on a plain object.
+ * Field names that hold a `KeyValue[]` on at least one request kind. Covers the
+ * case where the target's current array is empty, so the runtime probe below
+ * has nothing to learn the element kind from.
  */
-function reifyKeyValueArrays(patch: Record<string, unknown>): Record<string, unknown> {
-  const out: Record<string, unknown> = { ...patch }
-  for (const field of ['headers', 'params', 'pathParams', 'metadata', 'producedHeaders']) {
-    const arr = out[field]
-    if (Array.isArray(arr)) {
-      out[field] = arr.map((entry: unknown): unknown => {
-        if (entry instanceof KeyValue) return entry
-        if (entry !== null && typeof entry === 'object') {
-          return KeyValue.fromPlain(entry as Parameters<typeof KeyValue.fromPlain>[0])
-        }
-        return entry
-      })
+const KEY_VALUE_ARRAY_FIELDS = [
+  'headers',
+  'params',
+  'pathParams',
+  'metadata',
+  'producedHeaders',
+  // STOMP carries its CONNECT / SEND frame headers under its own names.
+  'connectHeaders',
+  'sendHeaders'
+] as const
+
+function toKeyValueArray(arr: unknown[]): unknown[] {
+  return arr.map((entry: unknown): unknown => {
+    if (entry instanceof KeyValue) return entry
+    if (entry !== null && typeof entry === 'object') {
+      return KeyValue.fromPlain(entry as Parameters<typeof KeyValue.fromPlain>[0])
     }
+    return entry
+  })
+}
+
+/**
+ * Walk an `update_request` patch and convert any plain-object key-value entries
+ * into real `KeyValue` class instances. Without this, `request.toPlainObject()`
+ * crashes when the next event emit walks the array — `p.toPlainObject` is
+ * undefined on a plain object.
+ *
+ * Two detectors, so a protocol that names its key-value array something new
+ * isn't silently missed: the static list above, plus a probe of the live value
+ * on `target` — any array field whose current entries are `KeyValue` instances
+ * gets the same treatment whatever it is called.
+ */
+function reifyKeyValueArrays(patch: Record<string, unknown>, target?: object): Record<string, unknown> {
+  const out: Record<string, unknown> = { ...patch }
+  const current = (target ?? {}) as Record<string, unknown>
+  for (const [field, value] of Object.entries(out)) {
+    if (!Array.isArray(value)) continue
+    const currentValue = current[field]
+    const holdsKeyValues =
+      (KEY_VALUE_ARRAY_FIELDS as readonly string[]).includes(field) ||
+      (Array.isArray(currentValue) && currentValue.some((entry) => entry instanceof KeyValue))
+    if (holdsKeyValues) out[field] = toKeyValueArray(value)
   }
   return out
 }
@@ -387,8 +414,30 @@ export function registerWriteTools(mcp: McpService): void {
           )
         }
       }
-      const safePatch = reifyKeyValueArrays(rawSafePatch)
-      const updated = collectionStore.updateRequest(id, safePatch as Partial<Request>)
+      const safePatch = reifyKeyValueArrays(rawSafePatch, target)
+      // Snapshot the live value of every patched field before mutating. The
+      // store assigns the patch onto the stored instance, so a patch that
+      // leaves the model unserializable (a plain object where the class
+      // expects an instance) would otherwise stay on the model and make every
+      // later `get_request` / `update_request` on this id throw too.
+      const rollback: Record<string, unknown> = {}
+      const targetRecord = target as unknown as Record<string, unknown>
+      for (const field of Object.keys(safePatch)) rollback[field] = targetRecord[field]
+      let updated: ReturnType<typeof collectionStore.updateRequest>
+      try {
+        updated = collectionStore.updateRequest(id, safePatch as Partial<Request>)
+        // The store's own update event already serializes the request, but an
+        // update that changes nothing observable would not — assert it here so
+        // the rollback covers both paths.
+        updated?.toPlainObject()
+      } catch (err) {
+        Object.assign(targetRecord, rollback)
+        const reason = err instanceof Error ? err.message : String(err)
+        return errorReply(
+          `patch rejected — the request would no longer be serializable (${reason}); ` +
+          `the request is unchanged. Patched fields: ${Object.keys(safePatch).join(', ')}`
+        )
+      }
       if (!updated) return errorReply(`updateRequest failed for ${id}`)
       // Patch the renderer's reactive request proxy in place too — without
       // this, an open workbench tab keeps showing the pre-patch values
