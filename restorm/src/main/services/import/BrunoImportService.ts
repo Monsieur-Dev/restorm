@@ -1031,13 +1031,40 @@ export function importBrunoFromJson(
 
 import { importProviders } from './registry'
 
+/** Item kinds a Bruno collection's `items` array is built from. */
+const BRUNO_ITEM_TYPES = new Set(['folder', 'http', 'graphql'])
+
+/**
+ * A Bruno collection export carries `name` + `version` at the root and an
+ * `items` array whose entries are tagged with a Bruno item type. That shape is
+ * the only reliable signal when the payload arrives from a URL or a paste:
+ * there is no filename to read an extension off, and the root `type` field the
+ * older check relied on is absent from the format's own exports.
+ */
+function looksLikeBrunoCollection(json: Record<string, unknown>): boolean {
+  if (typeof json.name !== 'string') return false
+  if (!('version' in json)) return false
+  const items = json.items
+  if (!Array.isArray(items) || items.length === 0) return false
+  return items.every(
+    (item) =>
+      typeof item === 'object' &&
+      item !== null &&
+      BRUNO_ITEM_TYPES.has((item as Record<string, unknown>).type as string)
+  )
+}
+
 function canImport(content: string, filePath?: string, parsed?: unknown): boolean {
   if (filePath?.endsWith('.bru')) return true
   try {
     const json: unknown = parsed !== undefined ? parsed : JSON.parse(content.trim())
     if (typeof json === 'object' && json !== null && 'version' in json && 'name' in json) {
       const jsonObj = json as Record<string, unknown>
-      return jsonObj.type === 'collection' || filePath?.endsWith('.json') === true
+      return (
+        jsonObj.type === 'collection' ||
+        filePath?.endsWith('.json') === true ||
+        looksLikeBrunoCollection(jsonObj)
+      )
     }
   } catch { /* not JSON */ }
   return false
