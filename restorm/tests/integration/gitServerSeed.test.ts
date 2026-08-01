@@ -3,14 +3,20 @@ import { execSync } from 'child_process'
 import { existsSync, mkdtempSync, rmSync, writeFileSync } from 'fs'
 import { tmpdir } from 'os'
 import { join } from 'path'
-import { isGitServerSeeded, seedGitServer, seedFreshRepo, resetGitServerSeed, gitEnv, GIT_SERVER_URL, SEED_REPO_NAME } from './gitServerSeed'
+import { isGitServerSeeded, seedGitServer, seedFreshRepo, resetGitServerSeed, resolveReposDir, gitEnv, GIT_SERVER_URL, SEED_REPO_NAME } from './gitServerSeed'
 
-const BARE_REPO_PATH = join(__dirname, '../docker/git-server/repos', SEED_REPO_NAME)
+// Every call below injects this throwaway directory. The DEFAULT is the
+// directory the git-server container is actually serving (see
+// `resolveReposDir`), which a concurrent e2e run may be mid-clone against —
+// and `resetGitServerSeed` would delete its seed out from under it. Nothing
+// here may touch the real mount.
+let reposDir: string
+let bareRepoPath: string
 
 // No docker involved — `seedGitServer` is pure host-side git CLI + filesystem
-// against the SAME bind-mounted path the `git-server` container also serves.
-// This test proves the seeding logic itself is correct; the container's role
-// (serving that same directory over git://) is exercised by the e2e suite.
+// against a bind-mounted path; here we point it at a throwaway one. This test
+// proves the seeding logic itself is correct; the container's role (serving
+// that directory over git://) is exercised by the e2e suite.
 //
 // Every `execSync` here passes `{ env: gitEnv() }` for the same reason
 // `gitServerSeed.ts`'s own `run()` does: when this file runs under the
@@ -20,59 +26,106 @@ const BARE_REPO_PATH = join(__dirname, '../docker/git-server/repos', SEED_REPO_N
 // the bare repo path it was explicitly pointed at — corrupting both the
 // setup AND the assertions in this file, not just `seedGitServer` itself.
 //
-// `isGitServerSeeded`/`seedGitServer` check REAL FILESYSTEM state at the
-// default `REPOS_DIR` — the same bind-mounted directory the e2e suite's
-// `global-setup.ts` unconditionally seeds on every `pnpm test:e2e` run. No
-// amount of test-runner process/module isolation protects against that: an
-// e2e run on this host any time before `test:all` leaves `seed-project.git`
-// sitting there, and "is not seeded before the first call" would fail on a
-// dirty start it has no way to detect. Reset BEFORE every test too (not
-// just after) so this suite is self-contained regardless of what ran on
-// this host earlier.
-beforeEach(() => { resetGitServerSeed() })
-afterEach(() => { resetGitServerSeed() })
+// A fresh directory per test also makes "is not seeded before the first
+// call" honest: it can no longer be perturbed by whatever an earlier e2e run
+// on this host left behind in the real mount.
+beforeEach(() => {
+  reposDir = mkdtempSync(join(tmpdir(), 'restorm-git-seed-unit-'))
+  bareRepoPath = join(reposDir, SEED_REPO_NAME)
+})
+afterEach(() => { rmSync(reposDir, { recursive: true, force: true }) })
 
 describe('gitServerSeed', () => {
   it('is not seeded before the first call', () => {
-    expect(isGitServerSeeded()).toBe(false)
+    expect(isGitServerSeeded(reposDir)).toBe(false)
   })
 
   it('creates a bare repo with a seed commit on the main branch', () => {
-    seedGitServer()
-    expect(isGitServerSeeded()).toBe(true)
-    expect(existsSync(BARE_REPO_PATH)).toBe(true)
+    seedGitServer(reposDir)
+    expect(isGitServerSeeded(reposDir)).toBe(true)
+    expect(existsSync(bareRepoPath)).toBe(true)
 
-    const branch = execSync(`git -C "${BARE_REPO_PATH}" symbolic-ref --short HEAD`, { encoding: 'utf-8', env: gitEnv() }).trim()
+    const branch = execSync(`git -C "${bareRepoPath}" symbolic-ref --short HEAD`, { encoding: 'utf-8', env: gitEnv() }).trim()
     expect(branch).toBe('main')
 
-    const log = execSync(`git -C "${BARE_REPO_PATH}" log --oneline`, { encoding: 'utf-8', env: gitEnv() })
+    const log = execSync(`git -C "${bareRepoPath}" log --oneline`, { encoding: 'utf-8', env: gitEnv() })
     expect(log).toContain('Seed project')
   })
 
   it('the seed commit contains a valid single-file project with the seeded entities', () => {
-    seedGitServer()
-    const rawYaml = execSync(`git -C "${BARE_REPO_PATH}" show main:api.restorm`, { encoding: 'utf-8', env: gitEnv() })
+    seedGitServer(reposDir)
+    const rawYaml = execSync(`git -C "${bareRepoPath}" show main:api.restorm`, { encoding: 'utf-8', env: gitEnv() })
     expect(rawYaml).toContain('_projectUuid:')
     expect(rawYaml).toContain('folderType: environment')
     expect(rawYaml).toContain('Find pet by ID')
   })
 
   it('is idempotent — a second call is a no-op on an already-seeded repo', () => {
-    seedGitServer()
-    const firstLog = execSync(`git -C "${BARE_REPO_PATH}" log --oneline`, { encoding: 'utf-8', env: gitEnv() })
-    seedGitServer()
-    const secondLog = execSync(`git -C "${BARE_REPO_PATH}" log --oneline`, { encoding: 'utf-8', env: gitEnv() })
+    seedGitServer(reposDir)
+    const firstLog = execSync(`git -C "${bareRepoPath}" log --oneline`, { encoding: 'utf-8', env: gitEnv() })
+    seedGitServer(reposDir)
+    const secondLog = execSync(`git -C "${bareRepoPath}" log --oneline`, { encoding: 'utf-8', env: gitEnv() })
     expect(secondLog).toBe(firstLog)
   })
 
   it('resetGitServerSeed wipes the repo so the next call re-seeds from scratch', () => {
-    seedGitServer()
-    resetGitServerSeed()
-    expect(isGitServerSeeded()).toBe(false)
+    seedGitServer(reposDir)
+    resetGitServerSeed(reposDir)
+    expect(isGitServerSeeded(reposDir)).toBe(false)
   })
 
   it('exposes a clone URL matching the seeded repo name', () => {
     expect(GIT_SERVER_URL).toBe(`git://localhost:9418/${SEED_REPO_NAME}`)
+  })
+})
+
+describe('resolveReposDir — must target the directory the container SERVES, not this checkout', () => {
+  // The compose bind is relative and the container name is global, so exactly
+  // one checkout's directory is served host-wide. Resolving from `__dirname`
+  // makes every run launched from a linked worktree seed a directory nothing
+  // serves — clones then fail with "no such repository" while the seeder's
+  // existsSync idempotence check reports success. These guard that.
+  const savedOverride = process.env.RESTORM_GITSERVER_REPOS_DIR
+  afterEach(() => {
+    if (savedOverride === undefined) delete process.env.RESTORM_GITSERVER_REPOS_DIR
+    else process.env.RESTORM_GITSERVER_REPOS_DIR = savedOverride
+  })
+
+  it('honours an explicit RESTORM_GITSERVER_REPOS_DIR override', () => {
+    process.env.RESTORM_GITSERVER_REPOS_DIR = '/tmp/some-explicitly-served-dir'
+    expect(resolveReposDir()).toBe('/tmp/some-explicitly-served-dir')
+  })
+
+  it('ignores an empty override rather than seeding into the filesystem root', () => {
+    process.env.RESTORM_GITSERVER_REPOS_DIR = ''
+    expect(resolveReposDir()).not.toBe('')
+  })
+
+  it('resolves to the running container bind-mount source, or this checkout when docker has none', () => {
+    delete process.env.RESTORM_GITSERVER_REPOS_DIR
+
+    // Derived independently of the implementation: read the whole Mounts
+    // array as JSON and pick the entry ourselves, rather than reusing the
+    // implementation's own --format template (which would be tautological).
+    let servedSource: string | undefined
+    try {
+      const rawMounts = execSync("docker inspect restorm-git-server --format '{{json .Mounts}}'", {
+        encoding: 'utf-8',
+        stdio: ['ignore', 'pipe', 'ignore']
+      }).trim()
+      const mounts = JSON.parse(rawMounts) as { Source: string; Destination: string }[]
+      servedSource = mounts.find((m) => m.Destination === '/srv/git')?.Source
+    } catch {
+      servedSource = undefined
+    }
+
+    if (servedSource === undefined) {
+      // Docker down / container absent: fall back to this checkout's own
+      // directory, which is what a `compose up` from here would bind.
+      expect(resolveReposDir()).toBe(join(__dirname, '../docker/git-server/repos'))
+    } else {
+      expect(resolveReposDir()).toBe(servedSource)
+    }
   })
 })
 

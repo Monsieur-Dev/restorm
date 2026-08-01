@@ -12,9 +12,13 @@
  * is a no-op, since the bare repo already exists.
  *
  * The ephemeral CLONE workdir (used to write + commit + push the seed
- * content into the bare repo) lives in the OS temp dir, NOT under
- * `REPOS_DIR` — kept as secondary hygiene, but NOT the real fix (see
- * below).
+ * content into the bare repo) lives in the OS temp dir, NOT under the repos
+ * directory — kept as secondary hygiene, but NOT the real fix (see below).
+ *
+ * WHICH directory that is, is decided by `resolveReposDir()` — never by this
+ * file's own location. See its doc comment: the served path belongs to
+ * whichever checkout started the container, so a `__dirname`-relative guess
+ * silently breaks every run launched from a linked worktree.
  *
  * REAL incident cause: a git HOOK (pre-commit/pre-push) exports `GIT_DIR`
  * + `GIT_INDEX_FILE` (+ `GIT_WORK_TREE`) into its environment; vitest run
@@ -42,7 +46,60 @@ export function gitEnv(): NodeJS.ProcessEnv {
   return Object.fromEntries(Object.entries(process.env).filter(([key]) => !key.startsWith('GIT_')))
 }
 
-const REPOS_DIR = join(__dirname, '../docker/git-server/repos')
+/** Fallback only — see `resolveReposDir()` for why this is NOT the default. */
+const CHECKOUT_REPOS_DIR = join(__dirname, '../docker/git-server/repos')
+
+/** `container_name` of the git daemon in tests/docker/docker-compose.yml. */
+const GIT_SERVER_CONTAINER = 'restorm-git-server'
+
+/** Bind-mount destination the daemon serves (`--base-path=/srv/git`). */
+const GIT_SERVER_MOUNT_DESTINATION = '/srv/git'
+
+/** The mount source docker reports for the running git-server, or
+ * `undefined` when docker is unavailable / the container doesn't exist. */
+function servedReposDirFromDocker(): string | undefined {
+  try {
+    const format = `{{range .Mounts}}{{if eq .Destination "${GIT_SERVER_MOUNT_DESTINATION}"}}{{.Source}}{{end}}{{end}}`
+    const source = execSync(`docker inspect ${GIT_SERVER_CONTAINER} --format '${format}'`, {
+      encoding: 'utf-8',
+      stdio: ['ignore', 'pipe', 'ignore']
+    }).trim()
+    return source.length > 0 ? source : undefined
+  } catch {
+    return undefined
+  }
+}
+
+let dockerReposDir: string | undefined
+
+/**
+ * The directory the `git-server` container ACTUALLY serves over git://.
+ *
+ * The compose bind is relative (`./git-server/repos:/srv/git`) and the
+ * container name is global, so exactly ONE checkout's directory is served
+ * host-wide: whichever ran `docker compose up` last. Deriving this path from
+ * `__dirname` therefore breaks every git run launched from a different
+ * checkout (any linked worktree) — the seed lands somewhere nothing serves,
+ * `git clone git://…` answers "no such repository", and the existsSync
+ * idempotence check in `seedGitServer` silently no-ops because it inspects
+ * the same wrong directory it just wrote. Ask docker where the mount points
+ * instead: that is the only answer that holds from ANY checkout.
+ *
+ * Order: explicit env override → the running container's mount source →
+ * this checkout's own directory (docker down, or a `compose up` from here
+ * about to bind exactly that path).
+ *
+ * The docker lookup is cached per process, not per call: a single collab
+ * scenario creates dozens of remotes, and the mount cannot move without
+ * recreating the container.
+ */
+export function resolveReposDir(): string {
+  const override = process.env.RESTORM_GITSERVER_REPOS_DIR
+  if (override !== undefined && override.length > 0) return override
+  dockerReposDir ??= servedReposDirFromDocker() ?? CHECKOUT_REPOS_DIR
+  return dockerReposDir
+}
+
 export const SEED_REPO_NAME = 'seed-project.git'
 
 /** The clone URL the e2e suite's git-remote fixture hands to restorm for
@@ -123,21 +180,23 @@ function seedRepoAt(reposDir: string, bareRepoPath: string): void {
   }
 }
 
-/** `reposDir` is injectable (defaults to the real bind-mounted path) so
- * tests can point every function at a throwaway directory instead of the
- * real docker mount — see `gitServerSeed.test.ts`'s isolation guard test. */
-export function isGitServerSeeded(reposDir: string = REPOS_DIR): boolean {
+/** `reposDir` is injectable (defaults to the served bind-mount path, see
+ * `resolveReposDir`) so tests can point every function at a throwaway
+ * directory instead of the real docker mount — see `gitServerSeed.test.ts`.
+ * Unit tests MUST inject: the default is a directory a concurrent e2e run
+ * may be serving, and `resetGitServerSeed` would delete its seed. */
+export function isGitServerSeeded(reposDir: string = resolveReposDir()): boolean {
   return existsSync(bareRepoPathFor(reposDir, SEED_REPO_NAME))
 }
 
-export function seedGitServer(reposDir: string = REPOS_DIR): void {
+export function seedGitServer(reposDir: string = resolveReposDir()): void {
   if (isGitServerSeeded(reposDir)) return
   seedRepoAt(reposDir, bareRepoPathFor(reposDir, SEED_REPO_NAME))
 }
 
 /** Test-only: wipe the seed repo so a test can re-seed from a clean slate
  * (e.g. after a suite that intentionally corrupts the remote). */
-export function resetGitServerSeed(reposDir: string = REPOS_DIR): void {
+export function resetGitServerSeed(reposDir: string = resolveReposDir()): void {
   rmSync(bareRepoPathFor(reposDir, SEED_REPO_NAME), { recursive: true, force: true })
 }
 
@@ -160,7 +219,7 @@ export function gitServerUrlFor(repoName: string): string {
  * not a hypothetical: it's what caused the first live run of the push/pull
  * suite to fail on stale collaborator-renamed content.
  */
-export function seedFreshRepo(repoName: string, reposDir: string = REPOS_DIR): string {
+export function seedFreshRepo(repoName: string, reposDir: string = resolveReposDir()): string {
   const bareRepoPath = bareRepoPathFor(reposDir, `${repoName}.git`)
   rmSync(bareRepoPath, { recursive: true, force: true })
   seedRepoAt(reposDir, bareRepoPath)
@@ -174,7 +233,7 @@ export function seedFreshRepo(repoName: string, reposDir: string = REPOS_DIR): s
  * harness. Always re-created, same contamination rationale as
  * `seedFreshRepo`.
  */
-export function createEmptyRemote(repoName: string, reposDir: string = REPOS_DIR): string {
+export function createEmptyRemote(repoName: string, reposDir: string = resolveReposDir()): string {
   const bareRepoPath = bareRepoPathFor(reposDir, `${repoName}.git`)
   rmSync(bareRepoPath, { recursive: true, force: true })
   mkdirSync(reposDir, { recursive: true })
