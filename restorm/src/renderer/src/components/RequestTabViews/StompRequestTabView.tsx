@@ -345,6 +345,20 @@ export const StompRequestTabView: React.FC<StompRequestTabViewProps> = ({
               />
             </div>
           </div>
+          <div style={{ display: 'flex', alignItems: 'center', padding: '0 4px 4px' }}>
+            <span style={inlineFieldLabelStyle}>{t('requestTab.tabs.headers', 'Headers')}</span>
+            <div style={{ flex: 1 }} />
+            <HeaderHoverTooltip label={t('requestTab.addHeader', 'Add header')}>
+              <Button
+                secondary
+                small
+                icon="add"
+                options={{ ariaLabel: t('requestTab.addHeader', 'Add header') }}
+                onClick={() => { connectHeadersRef.current?.addRow() }}
+                data-testid="stomp-add-connect-header-button"
+              />
+            </HeaderHoverTooltip>
+          </div>
           <div style={{ flex: 1, minHeight: 0 }}>
             <RestormKeyValueTable
               key={`connect-headers-${transportEpoch}`}
@@ -440,6 +454,20 @@ export const StompRequestTabView: React.FC<StompRequestTabViewProps> = ({
               options={{ minimap: { enabled: false }, wordWrap: 'on', automaticLayout: true }}
               data-testid="stomp-send-body-editor"
             />
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', padding: '0 4px 4px' }}>
+            <span style={inlineFieldLabelStyle}>{t('requestTab.tabs.headers', 'Headers')}</span>
+            <div style={{ flex: 1 }} />
+            <HeaderHoverTooltip label={t('requestTab.addHeader', 'Add header')}>
+              <Button
+                secondary
+                small
+                icon="add"
+                options={{ ariaLabel: t('requestTab.addHeader', 'Add header') }}
+                onClick={() => { sendHeadersRef.current?.addRow() }}
+                data-testid="stomp-add-send-header-button"
+              />
+            </HeaderHoverTooltip>
           </div>
           <div style={{ height: 130 }}>
             <RestormKeyValueTable

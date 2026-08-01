@@ -63,3 +63,20 @@ describe('small buttons in the request tab views', () => {
     expect(button).not.toContain('title:')
   })
 })
+
+describe('add-row affordances', () => {
+  // A key-value table with no add-row control caps the user at the rows the
+  // model happens to start with — STOMP was stuck at one CONNECT header.
+  it.each([
+    ['StompRequestTabView.tsx', 'stomp-add-connect-header-button'],
+    ['StompRequestTabView.tsx', 'stomp-add-send-header-button'],
+    ['SseRequestTabView.tsx', 'sse-add-header-button']
+  ])('%s exposes %s', (name, testId) => {
+    const source = sources.find((f) => f.name === name)?.source ?? ''
+    // Exact attribute match — a substring check would still pass on a renamed
+    // testid like `<id>-x`, which is precisely what breaks an e2e selector.
+    const button = buttonElements(source).find((el) => el.includes(`data-testid="${testId}"`))
+    expect(button).toBeDefined()
+    expect(button).toContain('addRow()')
+  })
+})
