@@ -1,5 +1,5 @@
 import { useCallback, useSyncExternalStore } from 'react'
-import type { FirewallOrigin, SystemEndpointStatus } from '../../../types/firewall'
+import type { FirewallOrigin } from '../../../types/firewall'
 
 /**
  * Renderer-side mutator hook for the firewall control plane. Reads
@@ -20,13 +20,6 @@ interface FirewallControlApi {
 	listBlacklist: () => Promise<FirewallOrigin[]>
 	addToBlacklist: (origin: FirewallOrigin) => Promise<void>
 	removeFromBlacklist: (origin: FirewallOrigin) => Promise<void>
-	/** Read-only: the app's own outbound destinations. Optional so a host app
-	 * that hasn't wired the channel yet degrades to an empty list rather than
-	 * throwing. */
-	listSystemEndpoints?: () => Promise<SystemEndpointStatus[]>
-	/** Main → renderer push fired when the outbound inventory moves. Optional
-	 * for the same reason; without it the list is simply not live. */
-	onSystemEndpointsChanged?: (cb: () => void) => () => void
 }
 
 function getFirewallApi(): FirewallControlApi | null {
@@ -37,12 +30,11 @@ function getFirewallApi(): FirewallControlApi | null {
 interface FirewallSnapshot {
 	whitelist: FirewallOrigin[]
 	blacklist: FirewallOrigin[]
-	systemEndpoints: SystemEndpointStatus[]
 	ready: boolean
 }
 
 class FirewallControlStore {
-	private snapshot: FirewallSnapshot = { whitelist: [], blacklist: [], systemEndpoints: [], ready: false }
+	private snapshot: FirewallSnapshot = { whitelist: [], blacklist: [], ready: false }
 	private listeners = new Set<() => void>()
 	private fetchInFlight: Promise<void> | null = null
 	/** Set when a change lands while a fetch is already running; drives one
@@ -51,31 +43,17 @@ class FirewallControlStore {
 
 	getSnapshot = (): FirewallSnapshot => this.snapshot
 
-	/** Detaches the main→renderer push subscription; held while at least one
-	 * component is mounted. */
-	private offEndpointsChanged: (() => void) | null = null
-
 	subscribe = (listener: () => void): (() => void) => {
 		this.listeners.add(listener)
-		// Attach the outbound-inventory push once, on the first mount: consent
-		// is granted or revoked in Preferences, not here, so without it an open
-		// panel would keep showing a stale exemption state.
-		this.offEndpointsChanged ??= getFirewallApi()?.onSystemEndpointsChanged?.(() => { void this.refresh() }) ?? null
 		void this.refresh()
-		return () => {
-			this.listeners.delete(listener)
-			if (this.listeners.size === 0) {
-				this.offEndpointsChanged?.()
-				this.offEndpointsChanged = null
-			}
-		}
+		return () => { this.listeners.delete(listener) }
 	}
 
 	refresh = async (): Promise<void> => {
 		// Coalesce, but never DROP: a change that lands mid-fetch schedules one
 		// more read once the current one settles. Without the re-run flag a
-		// consent revocation racing the mount fetch would leave the panel
-		// showing the pre-revocation state until the next remount.
+		// rule added by another panel instance mid-fetch would stay invisible
+		// until the next remount.
 		if (this.fetchInFlight !== null) {
 			this.rerunQueued = true
 			return this.fetchInFlight
@@ -84,12 +62,11 @@ class FirewallControlStore {
 		if (api === null) return
 		this.fetchInFlight = (async () => {
 			try {
-				const [whitelist, blacklist, systemEndpoints] = await Promise.all([
+				const [whitelist, blacklist] = await Promise.all([
 					api.listWhitelist(),
-					api.listBlacklist(),
-					api.listSystemEndpoints?.() ?? Promise.resolve<SystemEndpointStatus[]>([])
+					api.listBlacklist()
 				])
-				this.snapshot = { whitelist, blacklist, systemEndpoints, ready: true }
+				this.snapshot = { whitelist, blacklist, ready: true }
 				this.notify()
 			} finally {
 				this.fetchInFlight = null
@@ -125,8 +102,6 @@ export async function refreshFirewallControl(): Promise<void> {
 interface UseFirewallControlResult {
 	whitelist: FirewallOrigin[]
 	blacklist: FirewallOrigin[]
-	/** The app's own outbound destinations — read-only, no mutator counterpart. */
-	systemEndpoints: SystemEndpointStatus[]
 	ready: boolean
 	addToWhitelist: (origin: FirewallOrigin) => Promise<void>
 	removeFromWhitelist: (origin: FirewallOrigin) => Promise<void>
@@ -173,7 +148,6 @@ export function useFirewallControl(): UseFirewallControlResult {
 	return {
 		whitelist: snapshot.whitelist,
 		blacklist: snapshot.blacklist,
-		systemEndpoints: snapshot.systemEndpoints,
 		ready: snapshot.ready,
 		addToWhitelist,
 		removeFromWhitelist,

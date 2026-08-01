@@ -2549,13 +2549,6 @@
     "crashReportsDescription": "Restorm çöktüğünde arızanın giderilebilmesi için anonimleştirilmiş bir rapor gönderir. Raporlar makinenizden ayrılmadan önce URL'lerden, belirteçlerden, istek gövdelerinden ve kişisel verilerden arındırılır. Ücretsiz plana dahildir; ücretli bir plan bunu kapatmanıza izin verir. Tüm ayrıntılar: https://restorm.app/privacy",
     "telemetryTitle": "Kullanım istatistikleri gönder",
     "telemetryDescription": "Hangi özelliklerin kullanıldığına dair anonim istatistikler gönderir, böylece sıradaki geliştirmeler yönlendirilir. Varsayılan olarak kapalıdır ve açık onayınız olmadan asla etkinleştirilmez. İstek verisi, URL veya kişisel veri içermez. Tüm ayrıntılar: https://restorm.app/privacy",
-    "outbound": {
-      "purpose": {
-        "crash": "Çökme raporları (yalnızca onayınızla)",
-        "telemetry": "Anonim kullanım istatistikleri (yalnızca onayınızla)",
-        "backend": "Hesap, lisans ve abonelik"
-      }
-    },
     "crashReportsLockedLabel": "Pro planından itibaren değiştirilebilir. Ücretsiz planda, kaliteyi korumak için çökme raporları gereklidir.",
     "consentToast": {
       "title": "Restorm'u geliştirmemize yardımcı olun",

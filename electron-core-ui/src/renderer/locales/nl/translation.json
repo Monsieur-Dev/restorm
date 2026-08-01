@@ -411,20 +411,7 @@
   "firewall": {
     "addOrigin": "Oorsprong toevoegen",
     "removeOrigin": "{{origin}} verwijderen",
-    "noEntries": "Nog geen vermeldingen.",
-    "outbound": {
-      "title": "Uitgaande diensten",
-      "intro": "Bestemmingen die deze applicatie op eigen initiatief kan benaderen. Ze zijn in de code vastgelegd en hier niet te bewerken — de bestemmingen die uw toestemming vereisen blijven uitgeschakeld totdat u die in Voorkeuren geeft.",
-      "empty": "Deze applicatie declareert geen eigen uitgaande bestemming.",
-      "hostUnset": "niet geconfigureerd",
-      "stateConsented": "Toegestaan — u hebt toestemming gegeven",
-      "stateNoConsent": "Geblokkeerd — geen toestemming gegeven",
-      "stateRequired": "Toegestaan — vereist door de applicatie",
-      "stateInactive": "Inactief — momenteel niet in gebruik",
-      "purpose": {
-        "avatar": "Profielfoto van het aangemelde account"
-      }
-    }
+    "noEntries": "Nog geen vermeldingen."
   },
   "bookmarkRibbon": {
     "addBookmark": "Bladwijzer toevoegen"

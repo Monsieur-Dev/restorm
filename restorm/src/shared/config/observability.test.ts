@@ -30,7 +30,7 @@ describe('observability endpoint declarations', () => {
     }
   })
 
-  it('backs every gate with a settings key and carries a purpose key for the firewall panel', () => {
+  it('backs every gate with a settings key and carries a purpose key for the firewall declaration', () => {
     for (const endpoint of resolveObservabilityEndpoints()) {
       expect(CONSENT_SETTING_KEYS[endpoint.consentGate]).toMatch(/^privacy:/)
       expect(endpoint.purposeKey).toMatch(/^privacy\.outbound\.purpose\./)

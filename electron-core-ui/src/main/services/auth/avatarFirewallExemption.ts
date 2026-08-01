@@ -19,18 +19,17 @@ import type { AuthState } from '../../../shared/auth/authState'
 import type { SystemEndpointDeclaration } from '../../../types/firewall'
 
 /** The slice of the firewall PermissionService this needs — register / drop a
- * system-exempted host, and (optionally) declare it so the firewall panel can
- * show it. Mirrors `permissionService`'s methods; the declaration half is
- * optional so a test fake can implement the allowlist alone. */
+ * system-exempted host, and (optionally) declare it so it appears in the
+ * outbound inventory. Mirrors `permissionService`'s methods; the declaration
+ * half is optional so a test fake can implement the allowlist alone. */
 export interface SystemHostAllowlist {
   addSystemAllowedHost(host: string): void
   removeSystemAllowedHost(host: string): void
   declareSystemEndpoint?(declaration: SystemEndpointDeclaration): void
 }
 
-/** Declaration id + purpose key under which the avatar CDN exemption is listed
- * in the firewall panel. Stable across logins — the host changes, the row
- * doesn't. */
+/** Declaration id + purpose key under which the avatar CDN exemption is
+ * declared. Stable across logins — the host changes, the entry doesn't. */
 const AVATAR_ENDPOINT_ID = 'avatar'
 const AVATAR_PURPOSE_KEY = 'firewall.outbound.purpose.avatar'
 
@@ -89,10 +88,10 @@ export class AvatarFirewallExemption {
   }
 
   /**
-   * Mirror the exemption into the firewall panel's read-only outbound-services
-   * list. The row is declared even when signed out (`host: null`, rendered
-   * inactive) so the user can see that the app WOULD reach an avatar CDN once
-   * they log in, rather than discovering it after the fact.
+   * Mirror the exemption into the firewall's outbound inventory. The entry is
+   * declared even when signed out (`host: null`, reported inactive) so an audit
+   * shows that the app WOULD reach an avatar CDN once the user logs in, rather
+   * than surfacing it only after the fact.
    */
   private declare(host: string | null): void {
     this.allowlist.declareSystemEndpoint?.({

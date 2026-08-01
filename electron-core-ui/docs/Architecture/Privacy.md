@@ -231,5 +231,5 @@ two owners registering the same host would clobber each other on removal. Give
 each owner distinct hosts.
 
 Pair it with `permissionService.declareSystemEndpoint(...)` so each host also
-appears in the firewall panel's read-only outbound-services list, switched-off
-rows included. See [`docs/Firewall/README.md`](../Firewall/README.md#outbound-services--the-apps-own-traffic).
+appears in the firewall's auditable outbound inventory, switched-off entries
+included. See [`docs/Firewall/README.md`](../Firewall/README.md#outbound-services--the-apps-own-traffic).

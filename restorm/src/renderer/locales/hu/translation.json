@@ -2549,13 +2549,6 @@
     "crashReportsDescription": "Anonimizált jelentést küld, amikor a Restorm összeomlik, hogy a hiba javítható legyen. A jelentésekből az URL-ek, tokenek, kéréstörzsek és személyes adatok eltávolításra kerülnek, mielőtt elhagynák a gépét. Az ingyenes csomag része; fizetős csomaggal kikapcsolható. Teljes tájékoztató: https://restorm.app/privacy",
     "telemetryTitle": "Használati statisztikák küldése",
     "telemetryDescription": "Névtelen statisztikát küld arról, mely funkciókat használják, hogy a további fejlesztés irányt kapjon. Alapértelmezetten kikapcsolva, és kifejezett hozzájárulása nélkül soha nem aktív. Nem tartalmaz kérésadatokat, URL-eket vagy személyes adatokat. Teljes tájékoztató: https://restorm.app/privacy",
-    "outbound": {
-      "purpose": {
-        "crash": "Összeomlási jelentések (kizárólag az Ön hozzájárulásával)",
-        "telemetry": "Névtelen használati statisztikák (kizárólag az Ön hozzájárulásával)",
-        "backend": "Fiók, licenc és előfizetés"
-      }
-    },
     "crashReportsLockedLabel": "A Pro csomagtól módosítható. Az ingyenes csomagban az összeomlási jelentések a minőség fenntartásához szükségesek.",
     "consentToast": {
       "title": "Segítsen nekünk a Restorm fejlesztésében",

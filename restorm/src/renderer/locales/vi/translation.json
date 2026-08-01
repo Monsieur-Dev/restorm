@@ -2548,13 +2548,6 @@
     "crashReportsDescription": "Gửi một báo cáo đã ẩn danh khi Restorm gặp sự cố, để lỗi có thể được khắc phục. Báo cáo được loại bỏ URL, mã thông báo, nội dung yêu cầu và dữ liệu cá nhân trước khi rời khỏi máy của bạn. Bao gồm trong gói miễn phí; gói trả phí cho phép tắt tính năng này. Chi tiết đầy đủ: https://restorm.app/privacy",
     "telemetryTitle": "Gửi thống kê sử dụng",
     "telemetryDescription": "Gửi thống kê ẩn danh về những tính năng được sử dụng, nhằm định hướng phát triển tiếp theo. Mặc định tắt và không bao giờ bật nếu không có sự đồng ý rõ ràng của bạn. Không chứa dữ liệu yêu cầu, URL hay dữ liệu cá nhân. Chi tiết đầy đủ: https://restorm.app/privacy",
-    "outbound": {
-      "purpose": {
-        "crash": "Báo cáo sự cố (chỉ khi bạn đồng ý)",
-        "telemetry": "Thống kê sử dụng ẩn danh (chỉ khi bạn đồng ý)",
-        "backend": "Tài khoản, giấy phép và gói đăng ký"
-      }
-    },
     "crashReportsLockedLabel": "Có thể thay đổi từ gói Pro. Ở gói miễn phí, báo cáo sự cố là cần thiết để duy trì chất lượng.",
     "consentToast": {
       "title": "Hãy giúp chúng tôi cải thiện Restorm",

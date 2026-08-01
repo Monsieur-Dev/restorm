@@ -2549,13 +2549,6 @@
     "crashReportsDescription": "Envía un informe anonimizado cuando Restorm falla, para que el problema pueda corregirse. Los informes se depuran de URL, tokens, cuerpos de petición y datos personales antes de salir de su equipo. Incluido en el plan gratuito; un plan de pago permite desactivarlo. Todos los detalles: https://restorm.app/privacy",
     "telemetryTitle": "Enviar estadísticas de uso",
     "telemetryDescription": "Envía estadísticas anónimas sobre qué funciones se usan, para orientar lo que se desarrollará a continuación. Desactivado por defecto y nunca activado sin su consentimiento explícito. No contiene datos de peticiones, ni URL, ni datos personales. Todos los detalles: https://restorm.app/privacy",
-    "outbound": {
-      "purpose": {
-        "crash": "Informes de fallos (solo con su consentimiento)",
-        "telemetry": "Estadísticas de uso anónimas (solo con su consentimiento)",
-        "backend": "Cuenta, licencia y suscripción"
-      }
-    },
     "crashReportsLockedLabel": "Modificable a partir del plan Pro. En el plan gratuito, los informes de fallos son necesarios para mantener la calidad.",
     "consentToast": {
       "title": "Ayúdenos a mejorar Restorm",

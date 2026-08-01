@@ -2549,13 +2549,6 @@
     "crashReportsDescription": "Envoie un rapport anonymisé lorsque Restorm plante, afin que la panne puisse être corrigée. Les rapports sont expurgés des URL, jetons, corps de requête et données personnelles avant de quitter votre machine. Inclus dans l'offre gratuite ; une offre payante permet de le désactiver. Détails complets : https://restorm.app/privacy",
     "telemetryTitle": "Envoyer les statistiques d'utilisation",
     "telemetryDescription": "Envoie des statistiques anonymes sur les fonctionnalités utilisées, pour orienter les développements à venir. Désactivé par défaut et jamais activé sans votre consentement explicite. Ne contient aucune donnée de requête, aucune URL et aucune donnée personnelle. Détails complets : https://restorm.app/privacy",
-    "outbound": {
-      "purpose": {
-        "crash": "Rapports de plantage (uniquement avec votre consentement)",
-        "telemetry": "Statistiques d'utilisation anonymes (uniquement avec votre consentement)",
-        "backend": "Compte, licence et abonnement"
-      }
-    },
     "crashReportsLockedLabel": "Modifiable à partir de l'offre Pro. Sur l'offre gratuite, les rapports de plantage sont nécessaires au maintien de la qualité.",
     "consentToast": {
       "title": "Aidez-nous à améliorer Restorm",

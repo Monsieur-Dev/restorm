@@ -411,20 +411,7 @@
   "firewall": {
     "addOrigin": "Adaugă origine",
     "removeOrigin": "Elimină {{origin}}",
-    "noEntries": "Nicio intrare încă.",
-    "outbound": {
-      "title": "Servicii de ieșire",
-      "intro": "Destinații pe care această aplicație le poate contacta din proprie inițiativă. Sunt declarate în cod și nu pot fi editate aici — cele care necesită consimțământul dumneavoastră rămân dezactivate până când îl acordați în Preferințe.",
-      "empty": "Această aplicație nu declară nicio destinație de ieșire proprie.",
-      "hostUnset": "neconfigurat",
-      "stateConsented": "Permis — ați acordat consimțământul",
-      "stateNoConsent": "Blocat — niciun consimțământ acordat",
-      "stateRequired": "Permis — necesar aplicației",
-      "stateInactive": "Inactiv — nu este utilizat în acest moment",
-      "purpose": {
-        "avatar": "Fotografia de profil a contului conectat"
-      }
-    }
+    "noEntries": "Nicio intrare încă."
   },
   "bookmarkRibbon": {
     "addBookmark": "Adaugă marcaj"

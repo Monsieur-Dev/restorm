@@ -411,20 +411,7 @@
   "firewall": {
     "addOrigin": "Aggiungi origine",
     "removeOrigin": "Rimuovi {{origin}}",
-    "noEntries": "Nessuna voce ancora.",
-    "outbound": {
-      "title": "Servizi in uscita",
-      "intro": "Destinazioni che questa applicazione può contattare di propria iniziativa. Sono dichiarate nel codice e non sono modificabili qui: quelle che richiedono il suo consenso restano disattivate finché non lo concede nelle Preferenze.",
-      "empty": "Questa applicazione non dichiara alcuna destinazione in uscita propria.",
-      "hostUnset": "non configurato",
-      "stateConsented": "Consentito — ha dato il consenso",
-      "stateNoConsent": "Bloccato — nessun consenso fornito",
-      "stateRequired": "Consentito — necessario all'applicazione",
-      "stateInactive": "Inattivo — non in uso al momento",
-      "purpose": {
-        "avatar": "Immagine del profilo dell'account connesso"
-      }
-    }
+    "noEntries": "Nessuna voce ancora."
   },
   "bookmarkRibbon": {
     "addBookmark": "Aggiungi segnalibro"

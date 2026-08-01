@@ -211,16 +211,16 @@ class PermissionService {
 	 * deliberately narrow exemption that never auto-allows plaintext http
 	 * to the host.
 	 *
-	 * Not user-deletable is not the same as invisible: pair every entry
-	 * with a `declareSystemEndpoint` declaration so it shows up in the
-	 * panel's read-only outbound-services list. An exemption nobody can
-	 * see is the thing this firewall exists to prevent.
+	 * Not user-deletable is not the same as unaccounted for: pair every
+	 * entry with a `declareSystemEndpoint` declaration so it shows up in
+	 * the outbound inventory. An exemption nobody can audit is the thing
+	 * this firewall exists to prevent.
 	 */
 	private readonly systemAllowedHosts = new Set<string>()
 
 	/**
-	 * The app's OWN outbound destinations, declared in code and rendered
-	 * read-only in the firewall panel. Keyed by declaration id so a
+	 * The app's OWN outbound destinations, declared in code and readable
+	 * over `LIST_SYSTEM_ENDPOINTS`. Keyed by declaration id so a
 	 * re-declaration (an avatar host swapping on login, a telemetry host
 	 * resolving after config load) upserts rather than duplicates.
 	 *
@@ -467,16 +467,16 @@ class PermissionService {
 	}
 
 	/**
-	 * Declare (or re-declare) one of the app's own outbound destinations so
-	 * the firewall panel can list it. Upserts by `id` — call it again with a
-	 * new `host` when the destination resolves or changes (login swapping the
+	 * Declare (or re-declare) one of the app's own outbound destinations so it
+	 * appears in the auditable inventory. Upserts by `id` — call it again with
+	 * a new `host` when the destination resolves or changes (login swapping the
 	 * avatar CDN, a config load filling in a telemetry host).
 	 *
 	 * Declaring does NOT grant access; pair it with `addSystemAllowedHost` (or
 	 * a call-scoped bypass) for that. Keeping the two separate is what lets a
-	 * consent-gated endpoint stay VISIBLE while switched off — the row renders
-	 * with `active: false` instead of vanishing, so "we are not sending this"
-	 * is something the user can read rather than infer.
+	 * consent-gated endpoint stay DECLARED while switched off — the entry
+	 * reports `active: false` instead of vanishing, so "we are not sending
+	 * this" is something that can be verified rather than inferred.
 	 */
 	declareSystemEndpoint(declaration: SystemEndpointDeclaration): void {
 		const host = declaration.host === null ? null : declaration.host.trim().toLowerCase()
@@ -495,11 +495,11 @@ class PermissionService {
 	}
 
 	/**
-	 * Tell every renderer the outbound inventory moved, so an open firewall
-	 * panel reflects a consent change (or a login resolving the avatar host)
-	 * without being re-mounted. Payload-free: the renderer re-reads the list,
-	 * which collapses a burst of declare/allow calls into one consistent read
-	 * and keeps the panel's source of truth main-side.
+	 * Tell every renderer the outbound inventory moved, so a subscriber
+	 * reflects a consent change (or a login resolving the avatar host) without
+	 * re-polling. Payload-free: the listener re-reads the list, which collapses
+	 * a burst of declare/allow calls into one consistent read and keeps the
+	 * source of truth main-side.
 	 */
 	private broadcastSystemEndpoints(): void {
 		// Declarations legitimately happen at module scope, before `whenReady` —
@@ -513,7 +513,7 @@ class PermissionService {
 
 	/**
 	 * Every declared outbound destination with its live state, sorted by id for
-	 * a stable UI order. `active` is computed, never stored: an allowlist-backed
+	 * a stable order. `active` is computed, never stored: an allowlist-backed
 	 * endpoint is live only while its host is actually registered, so a revoked
 	 * consent flips the row the moment the exemption is dropped.
 	 */

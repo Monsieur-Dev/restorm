@@ -2548,13 +2548,6 @@
     "crashReportsDescription": "在 Restorm 崩溃时发送匿名化报告，以便修复故障。报告在离开您的设备前会清除 URL、令牌、请求正文和个人数据。免费版包含此功能；付费版可将其关闭。 完整说明：https://restorm.app/privacy",
     "telemetryTitle": "发送使用统计",
     "telemetryDescription": "发送关于使用了哪些功能的匿名统计，用于指导后续开发。默认关闭，未经您明确同意绝不启用。不含任何请求数据、URL 或个人数据。 完整说明：https://restorm.app/privacy",
-    "outbound": {
-      "purpose": {
-        "crash": "崩溃报告（仅在您同意时）",
-        "telemetry": "匿名使用统计（仅在您同意时）",
-        "backend": "账户、许可证与订阅"
-      }
-    },
     "crashReportsLockedLabel": "自 Pro 套餐起可更改。在免费套餐中，崩溃报告是保持质量所必需的。",
     "consentToast": {
       "title": "帮助我们改进 Restorm",

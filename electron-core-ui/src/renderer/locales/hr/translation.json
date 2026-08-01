@@ -411,20 +411,7 @@
   "firewall": {
     "addOrigin": "Dodaj origin",
     "removeOrigin": "Ukloni {{origin}}",
-    "noEntries": "Nema još unosa.",
-    "outbound": {
-      "title": "Odlazne usluge",
-      "intro": "Odredišta koja ova aplikacija može kontaktirati na vlastitu inicijativu. Deklarirana su u kodu i ovdje se ne mogu uređivati — ona koja zahtijevaju vaš pristanak ostaju isključena dok ga ne date u Postavkama.",
-      "empty": "Ova aplikacija ne deklarira nijedno vlastito odlazno odredište.",
-      "hostUnset": "nije konfigurirano",
-      "stateConsented": "Dopušteno — dali ste pristanak",
-      "stateNoConsent": "Blokirano — pristanak nije dan",
-      "stateRequired": "Dopušteno — nužno za aplikaciju",
-      "stateInactive": "Neaktivno — trenutačno se ne koristi",
-      "purpose": {
-        "avatar": "Profilna slika prijavljenog računa"
-      }
-    }
+    "noEntries": "Nema još unosa."
   },
   "bookmarkRibbon": {
     "addBookmark": "Dodaj oznaku"

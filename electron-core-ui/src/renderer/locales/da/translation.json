@@ -411,20 +411,7 @@
   "firewall": {
     "addOrigin": "Tilføj origin",
     "removeOrigin": "Fjern {{origin}}",
-    "noEntries": "Ingen poster endnu.",
-    "outbound": {
-      "title": "Udgående tjenester",
-      "intro": "Destinationer, som denne applikation kan kontakte på eget initiativ. De er erklæret i koden og kan ikke redigeres her — de, der kræver dit samtykke, forbliver slået fra, indtil du giver det under Indstillinger.",
-      "empty": "Denne applikation erklærer ingen egen udgående destination.",
-      "hostUnset": "ikke konfigureret",
-      "stateConsented": "Tilladt — du har givet samtykke",
-      "stateNoConsent": "Blokeret — der er ikke givet samtykke",
-      "stateRequired": "Tilladt — påkrævet af applikationen",
-      "stateInactive": "Inaktiv — bruges ikke lige nu",
-      "purpose": {
-        "avatar": "Profilbillede for den tilmeldte konto"
-      }
-    }
+    "noEntries": "Ingen poster endnu."
   },
   "bookmarkRibbon": {
     "addBookmark": "Tilføj bogmærke"

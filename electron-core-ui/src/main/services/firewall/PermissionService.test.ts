@@ -332,7 +332,7 @@ describe('PermissionService — declared outbound endpoints (the app\'s own traf
 		expect(permissionService.listSystemEndpoints().map((e) => e.id)).toEqual(['avatar', 'backend', 'telemetry'])
 	})
 
-	it('gates a consent-declared host at the VERDICT, not just in the panel', () => {
+	it('gates a consent-declared host at the VERDICT, not just in the declaration', () => {
 		// The point of tying the exemption to consent: with consent off the host
 		// is classified exactly like any unknown destination, so an SDK that kept
 		// a queued event around and retried it is stopped by the firewall rather

@@ -2549,13 +2549,6 @@
     "crashReportsDescription": "Dërgon një raport të anonimizuar kur Restorm rrëzohet, që defekti të mund të riparohet. Raportet pastrohen nga URL-të, çelësat, trupat e kërkesave dhe të dhënat personale para se të largohen nga makina juaj. E përfshirë në planin falas; një plan me pagesë lejon çaktivizimin. Detajet e plota: https://restorm.app/privacy",
     "telemetryTitle": "Dërgo statistikat e përdorimit",
     "telemetryDescription": "Dërgon statistika anonime për funksionet e përdorura, për të orientuar zhvillimet e ardhshme. E çaktivizuar si parazgjedhje dhe kurrë e aktivizuar pa pëlqimin tuaj të shprehur. Nuk përmban të dhëna kërkesash, as URL, as të dhëna personale. Detajet e plota: https://restorm.app/privacy",
-    "outbound": {
-      "purpose": {
-        "crash": "Raporte rrëzimi (vetëm me pëlqimin tuaj)",
-        "telemetry": "Statistika anonime përdorimi (vetëm me pëlqimin tuaj)",
-        "backend": "Llogaria, licenca dhe abonimi"
-      }
-    },
     "crashReportsLockedLabel": "I ndryshueshëm nga plani Pro. Në planin falas, raportet e rrëzimeve janë të nevojshme për ruajtjen e cilësisë.",
     "consentToast": {
       "title": "Na ndihmoni ta përmirësojmë Restorm",

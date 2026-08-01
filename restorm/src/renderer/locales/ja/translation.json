@@ -2548,13 +2548,6 @@
     "crashReportsDescription": "Restorm がクラッシュしたときに匿名化されたレポートを送信し、不具合を修正できるようにします。レポートは端末を離れる前に URL、トークン、リクエスト本文、個人データが除去されます。無料プランに含まれます。有料プランでは無効にできます。 詳細: https://restorm.app/privacy",
     "telemetryTitle": "利用状況の統計を送信",
     "telemetryDescription": "どの機能が使われているかの匿名統計を送信し、今後の開発方針に役立てます。既定ではオフで、明示的な同意なしに有効になることはありません。リクエストデータ、URL、個人データは一切含みません。 詳細: https://restorm.app/privacy",
-    "outbound": {
-      "purpose": {
-        "crash": "クラッシュレポート（同意した場合のみ）",
-        "telemetry": "匿名の利用状況統計（同意した場合のみ）",
-        "backend": "アカウント、ライセンス、サブスクリプション"
-      }
-    },
     "crashReportsLockedLabel": "Pro プラン以上で変更できます。無料プランでは、品質を保つためにクラッシュレポートが必要です。",
     "consentToast": {
       "title": "Restorm の改善にご協力ください",

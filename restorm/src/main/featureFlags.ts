@@ -21,20 +21,6 @@ interface FeatureServiceLike {
  */
 export const TAB_DETACH_FEATURE = 'workbench.tabDetach'
 
-/** Flag for the Firewall panel's "Test outbound to google.com" button.
- * Backed by an `Environment: [dev]` strategy in `features.yaml` so the
- * CTA only appears in unpackaged builds — packaged users would see a
- * button that does nothing meaningful and could even raise concerns
- * about the app initiating outbound traffic.
- *
- * Passed to the generic ECUI `FirewallPanel` as its `testButtonFeature`
- * prop (the panel is app-agnostic and only shows the CTA when a flag
- * name is supplied + enabled).
- *
- * @see restorm/resources/features.yaml
- */
-export const FIREWALL_TEST_BUTTON_FEATURE = 'firewall.testButton'
-
 /**
  * Whether the workbench tab-detach pathway is enabled.
  *

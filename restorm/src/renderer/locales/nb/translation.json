@@ -2549,13 +2549,6 @@
     "crashReportsDescription": "Sender en anonymisert rapport når Restorm krasjer, slik at feilen kan rettes. Rapporter renses for URL-er, tokener, forespørselsinnhold og personopplysninger før de forlater maskinen din. Inkludert i gratisplanen; en betalt plan lar deg slå det av. Alle detaljer: https://restorm.app/privacy",
     "telemetryTitle": "Send bruksstatistikk",
     "telemetryDescription": "Sender anonym statistikk om hvilke funksjoner som brukes, for å styre videre utvikling. Av som standard, og aldri slått på uten ditt uttrykkelige samtykke. Inneholder ingen forespørselsdata, ingen URL-er og ingen personopplysninger. Alle detaljer: https://restorm.app/privacy",
-    "outbound": {
-      "purpose": {
-        "crash": "Krasjrapporter (kun med ditt samtykke)",
-        "telemetry": "Anonym bruksstatistikk (kun med ditt samtykke)",
-        "backend": "Konto, lisens og abonnement"
-      }
-    },
     "crashReportsLockedLabel": "Kan endres fra Pro-abonnementet. I gratisabonnementet er krasjrapporter nødvendige for å opprettholde kvaliteten.",
     "consentToast": {
       "title": "Hjelp oss med å forbedre Restorm",
