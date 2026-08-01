@@ -995,17 +995,21 @@
     "title": "Beteende",
     "syncSidebarWithTabs": "Synka sidofältets val med aktiv flik",
     "syncSidebarWithTabsDescription": "Vid byte av flik i arbetsytan, välj och visa motsvarande objekt i sidofältet automatiskt",
-    "dateTimeFormat": "Datum/tid-format",
-    "dateTimeFormatDescription": "Format som används för att visa datum och tid i applikationen",
-    "dateTimeFormat.us": "US-format (MM/DD/ÅÅÅÅ, 12h)",
-    "dateTimeFormat.iso": "ISO-format (ÅÅÅÅ-MM-DD, 24h)"
+    "dateTimeFormatTitle": "Datum/tid-format",
+    "dateTimeFormat": {
+      "us": "US-format (MM/DD/ÅÅÅÅ, 12h)",
+      "iso": "ISO-format (ÅÅÅÅ-MM-DD, 24h)"
+    },
+    "dateTimeFormatDescription": "Format som används för att visa datum och tid i applikationen"
   },
   "console": {
     "title": "Konsol",
-    "requestFormat": "Förfrågansformat",
-    "requestFormatDescription": "Standardvariant av skal som används för att rendera utgående förfrågningar i Konsol-fliken. Varje rad är en kopiebar kommandorad; växeln i Konsol-verktygsfältet åsidosätter detta standardval för den aktuella fliken.",
-    "requestFormat.curl": "curl (Unix-stil)",
-    "requestFormat.powershell": "PowerShell (Invoke-RestMethod)"
+    "requestFormatTitle": "Förfrågansformat",
+    "requestFormat": {
+      "curl": "curl (Unix-stil)",
+      "powershell": "PowerShell (Invoke-RestMethod)"
+    },
+    "requestFormatDescription": "Standardvariant av skal som används för att rendera utgående förfrågningar i Konsol-fliken. Varje rad är en kopiebar kommandorad; växeln i Konsol-verktygsfältet åsidosätter detta standardval för den aktuella fliken."
   },
   "import": {
     "addAuth": "Lägg till en autentiseringsrutt",

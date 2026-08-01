@@ -995,17 +995,21 @@
     "title": "Comportamento",
     "syncSidebarWithTabs": "Sincronizar a seleção da barra lateral com o separador ativo",
     "syncSidebarWithTabsDescription": "Ao mudar de separador na área de trabalho, selecionar e revelar automaticamente o item correspondente na barra lateral",
-    "dateTimeFormat": "Formato de data/hora",
-    "dateTimeFormatDescription": "Formato utilizado para apresentar datas e horas na aplicação",
-    "dateTimeFormat.us": "Formato EUA (MM/DD/AAAA, 12h)",
-    "dateTimeFormat.iso": "Formato ISO (AAAA-MM-DD, 24h)"
+    "dateTimeFormatTitle": "Formato de data/hora",
+    "dateTimeFormat": {
+      "us": "Formato EUA (MM/DD/AAAA, 12h)",
+      "iso": "Formato ISO (AAAA-MM-DD, 24h)"
+    },
+    "dateTimeFormatDescription": "Formato utilizado para apresentar datas e horas na aplicação"
   },
   "console": {
     "title": "Consola",
-    "requestFormat": "Formato do pedido",
-    "requestFormatDescription": "Tipo de shell utilizado por defeito para apresentar os pedidos enviados no separador Consola. Cada linha é uma linha de comando que pode ser copiada e colada; o interruptor na barra de ferramentas da Consola substitui este valor predefinido para o separador atual.",
-    "requestFormat.curl": "curl (estilo Unix)",
-    "requestFormat.powershell": "PowerShell (Invoke-RestMethod)"
+    "requestFormatTitle": "Formato do pedido",
+    "requestFormat": {
+      "curl": "curl (estilo Unix)",
+      "powershell": "PowerShell (Invoke-RestMethod)"
+    },
+    "requestFormatDescription": "Tipo de shell utilizado por defeito para apresentar os pedidos enviados no separador Consola. Cada linha é uma linha de comando que pode ser copiada e colada; o interruptor na barra de ferramentas da Consola substitui este valor predefinido para o separador atual."
   },
   "import": {
     "addAuth": "Adicionar uma rota de autenticação",

@@ -994,17 +994,21 @@
     "title": "Perilaku",
     "syncSidebarWithTabs": "Sinkronkan pilihan sidebar dengan tab aktif",
     "syncSidebarWithTabsDescription": "Saat berpindah tab di ruang kerja, otomatis pilih dan tampilkan item yang sesuai di sidebar",
-    "dateTimeFormat": "Format tanggal/waktu",
-    "dateTimeFormatDescription": "Format yang digunakan untuk menampilkan tanggal dan waktu dalam aplikasi",
-    "dateTimeFormat.us": "Format AS (MM/DD/YYYY, 12 jam)",
-    "dateTimeFormat.iso": "Format ISO (YYYY-MM-DD, 24 jam)"
+    "dateTimeFormatTitle": "Format tanggal/waktu",
+    "dateTimeFormat": {
+      "us": "Format AS (MM/DD/YYYY, 12 jam)",
+      "iso": "Format ISO (YYYY-MM-DD, 24 jam)"
+    },
+    "dateTimeFormatDescription": "Format yang digunakan untuk menampilkan tanggal dan waktu dalam aplikasi"
   },
   "console": {
     "title": "Konsol",
-    "requestFormat": "Format permintaan",
-    "requestFormatDescription": "Jenis shell default yang digunakan untuk menampilkan permintaan keluar di tab Konsol. Setiap baris adalah baris perintah yang dapat disalin-tempel; tombol di toolbar Konsol menggantikan default ini untuk tab saat ini.",
-    "requestFormat.curl": "curl (gaya Unix)",
-    "requestFormat.powershell": "PowerShell (Invoke-RestMethod)"
+    "requestFormatTitle": "Format permintaan",
+    "requestFormat": {
+      "curl": "curl (gaya Unix)",
+      "powershell": "PowerShell (Invoke-RestMethod)"
+    },
+    "requestFormatDescription": "Jenis shell default yang digunakan untuk menampilkan permintaan keluar di tab Konsol. Setiap baris adalah baris perintah yang dapat disalin-tempel; tombol di toolbar Konsol menggantikan default ini untuk tab saat ini."
   },
   "import": {
     "addAuth": "Tambahkan rute autentikasi",

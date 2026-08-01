@@ -994,17 +994,21 @@
     "title": "行為",
     "syncSidebarWithTabs": "側邊欄選取項目與作用中的索引標籤同步",
     "syncSidebarWithTabsDescription": "在工作區切換索引標籤時，自動於側邊欄選取並顯示對應的項目",
-    "dateTimeFormat": "日期／時間格式",
-    "dateTimeFormatDescription": "應用程式顯示日期與時間所使用的格式",
-    "dateTimeFormat.us": "美式格式（MM/DD/YYYY，12 小時制）",
-    "dateTimeFormat.iso": "ISO 格式（YYYY-MM-DD，24 小時制）"
+    "dateTimeFormatTitle": "日期／時間格式",
+    "dateTimeFormat": {
+      "us": "美式格式（MM/DD/YYYY，12 小時制）",
+      "iso": "ISO 格式（YYYY-MM-DD，24 小時制）"
+    },
+    "dateTimeFormatDescription": "應用程式顯示日期與時間所使用的格式"
   },
   "console": {
     "title": "主控台",
-    "requestFormat": "請求格式",
-    "requestFormatDescription": "主控台索引標籤中呈現外送請求所使用的預設 shell 風格。每一列都是可複製貼上的命令列；主控台工具列上的切換鈕會為目前索引標籤覆寫此預設值。",
-    "requestFormat.curl": "curl（Unix 風格）",
-    "requestFormat.powershell": "PowerShell（Invoke-RestMethod）"
+    "requestFormatTitle": "請求格式",
+    "requestFormat": {
+      "curl": "curl（Unix 風格）",
+      "powershell": "PowerShell（Invoke-RestMethod）"
+    },
+    "requestFormatDescription": "主控台索引標籤中呈現外送請求所使用的預設 shell 風格。每一列都是可複製貼上的命令列；主控台工具列上的切換鈕會為目前索引標籤覆寫此預設值。"
   },
   "import": {
     "addAuth": "新增驗證路由",

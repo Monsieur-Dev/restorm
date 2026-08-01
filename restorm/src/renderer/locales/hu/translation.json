@@ -995,17 +995,21 @@
     "title": "Viselkedés",
     "syncSidebarWithTabs": "Oldalsáv kijelölésének szinkronizálása az aktív füllel",
     "syncSidebarWithTabsDescription": "Amikor a munkaterületen fület vált, automatikusan kijelöli és megjeleníti a megfelelő elemet az oldalsávon",
-    "dateTimeFormat": "Dátum/idő formátum",
-    "dateTimeFormatDescription": "A dátumok és időpontok megjelenítéséhez használt formátum az alkalmazásban",
-    "dateTimeFormat.us": "US-formátum (HH/NN/ÉÉÉÉ, 12 órás)",
-    "dateTimeFormat.iso": "ISO-formátum (ÉÉÉÉ-HH-NN, 24 órás)"
+    "dateTimeFormatTitle": "Dátum/idő formátum",
+    "dateTimeFormat": {
+      "us": "US-formátum (HH/NN/ÉÉÉÉ, 12 órás)",
+      "iso": "ISO-formátum (ÉÉÉÉ-HH-NN, 24 órás)"
+    },
+    "dateTimeFormatDescription": "A dátumok és időpontok megjelenítéséhez használt formátum az alkalmazásban"
   },
   "console": {
     "title": "Konzol",
-    "requestFormat": "Kérés formátuma",
-    "requestFormatDescription": "A Konzol fülön a kimenő kérések megjelenítéséhez használt alapértelmezett shell-stílus. Minden sor egy másolható-beilleszthető parancssor; a Konzol eszköztárában lévő váltó felülírja ezt az alapértelmezést az aktuális fülön.",
-    "requestFormat.curl": "curl (Unix-stílusú)",
-    "requestFormat.powershell": "PowerShell (Invoke-RestMethod)"
+    "requestFormatTitle": "Kérés formátuma",
+    "requestFormat": {
+      "curl": "curl (Unix-stílusú)",
+      "powershell": "PowerShell (Invoke-RestMethod)"
+    },
+    "requestFormatDescription": "A Konzol fülön a kimenő kérések megjelenítéséhez használt alapértelmezett shell-stílus. Minden sor egy másolható-beilleszthető parancssor; a Konzol eszköztárában lévő váltó felülírja ezt az alapértelmezést az aktuális fülön."
   },
   "import": {
     "addAuth": "Hitelesítési útvonal hozzáadása",

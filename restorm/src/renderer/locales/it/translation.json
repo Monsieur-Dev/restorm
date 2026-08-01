@@ -995,17 +995,21 @@
     "title": "Comportamento",
     "syncSidebarWithTabs": "Sincronizza la selezione della barra laterale con la scheda attiva",
     "syncSidebarWithTabsDescription": "Al cambio di scheda nell'area di lavoro, seleziona e mostra automaticamente l'elemento corrispondente nella barra laterale",
-    "dateTimeFormat": "Formato data/ora",
-    "dateTimeFormatDescription": "Formato usato per mostrare date e orari nell'applicazione",
-    "dateTimeFormat.us": "Formato US (MM/GG/AAAA, 12 h)",
-    "dateTimeFormat.iso": "Formato ISO (AAAA-MM-GG, 24 h)"
+    "dateTimeFormatTitle": "Formato data/ora",
+    "dateTimeFormat": {
+      "us": "Formato US (MM/GG/AAAA, 12 h)",
+      "iso": "Formato ISO (AAAA-MM-GG, 24 h)"
+    },
+    "dateTimeFormatDescription": "Formato usato per mostrare date e orari nell'applicazione"
   },
   "console": {
     "title": "Console",
-    "requestFormat": "Formato delle richieste",
-    "requestFormatDescription": "Stile di shell usato di default per visualizzare le richieste uscenti nella scheda Console. Ogni riga è un comando copiabile; l'interruttore nella toolbar della Console sovrascrive questo default per la scheda corrente.",
-    "requestFormat.curl": "curl (stile Unix)",
-    "requestFormat.powershell": "PowerShell (Invoke-RestMethod)"
+    "requestFormatTitle": "Formato delle richieste",
+    "requestFormat": {
+      "curl": "curl (stile Unix)",
+      "powershell": "PowerShell (Invoke-RestMethod)"
+    },
+    "requestFormatDescription": "Stile di shell usato di default per visualizzare le richieste uscenti nella scheda Console. Ogni riga è un comando copiabile; l'interruttore nella toolbar della Console sovrascrive questo default per la scheda corrente."
   },
   "import": {
     "addAuth": "Aggiungi una route di autenticazione",

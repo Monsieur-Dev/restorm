@@ -995,17 +995,21 @@
     "title": "Davranış",
     "syncSidebarWithTabs": "Kenar çubuğu seçimini etkin sekmeyle senkronize et",
     "syncSidebarWithTabsDescription": "Çalışma alanında sekme değiştirilirken kenar çubuğunda ilgili öğeyi otomatik olarak seç ve göster",
-    "dateTimeFormat": "Tarih/saat biçimi",
-    "dateTimeFormatDescription": "Uygulamada tarihleri ve saatleri görüntülemek için kullanılan biçim",
-    "dateTimeFormat.us": "ABD biçimi (AA/GG/YYYY, 12 saat)",
-    "dateTimeFormat.iso": "ISO biçimi (YYYY-AA-GG, 24 saat)"
+    "dateTimeFormatTitle": "Tarih/saat biçimi",
+    "dateTimeFormat": {
+      "us": "ABD biçimi (AA/GG/YYYY, 12 saat)",
+      "iso": "ISO biçimi (YYYY-AA-GG, 24 saat)"
+    },
+    "dateTimeFormatDescription": "Uygulamada tarihleri ve saatleri görüntülemek için kullanılan biçim"
   },
   "console": {
     "title": "Konsol",
-    "requestFormat": "İstek biçimi",
-    "requestFormatDescription": "Konsol sekmesinde giden istekleri göstermek için varsayılan kabuk türü. Her satır kopyalanıp yapıştırılabilen bir komut satırıdır; Konsol araç çubuğundaki anahtar, geçerli sekme için bu varsayılanı geçersiz kılar.",
-    "requestFormat.curl": "curl (Unix tarzı)",
-    "requestFormat.powershell": "PowerShell (Invoke-RestMethod)"
+    "requestFormatTitle": "İstek biçimi",
+    "requestFormat": {
+      "curl": "curl (Unix tarzı)",
+      "powershell": "PowerShell (Invoke-RestMethod)"
+    },
+    "requestFormatDescription": "Konsol sekmesinde giden istekleri göstermek için varsayılan kabuk türü. Her satır kopyalanıp yapıştırılabilen bir komut satırıdır; Konsol araç çubuğundaki anahtar, geçerli sekme için bu varsayılanı geçersiz kılar."
   },
   "import": {
     "addAuth": "Kimlik doğrulama rotası ekle",

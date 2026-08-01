@@ -995,17 +995,21 @@
     "title": "Adfærd",
     "syncSidebarWithTabs": "Synkronisér sidepanelets valg med den aktive fane",
     "syncSidebarWithTabsDescription": "Når du skifter fane i arbejdsområdet, vælges og fremhæves det tilsvarende element automatisk i sidepanelet",
-    "dateTimeFormat": "Dato/tid-format",
-    "dateTimeFormatDescription": "Format der bruges til at vise datoer og tider i applikationen",
-    "dateTimeFormat.us": "US-format (MM/DD/ÅÅÅÅ, 12h)",
-    "dateTimeFormat.iso": "ISO-format (ÅÅÅÅ-MM-DD, 24h)"
+    "dateTimeFormatTitle": "Dato/tid-format",
+    "dateTimeFormat": {
+      "us": "US-format (MM/DD/ÅÅÅÅ, 12h)",
+      "iso": "ISO-format (ÅÅÅÅ-MM-DD, 24h)"
+    },
+    "dateTimeFormatDescription": "Format der bruges til at vise datoer og tider i applikationen"
   },
   "console": {
     "title": "Konsol",
-    "requestFormat": "Anmodningsformat",
-    "requestFormatDescription": "Standard shell-stil til at vise udgående anmodninger i Konsol-fanen. Hver linje er en kopierbar kommandolinje; vippeknappen i Konsol-værktøjslinjen tilsidesætter denne standard for den aktuelle fane.",
-    "requestFormat.curl": "curl (Unix-stil)",
-    "requestFormat.powershell": "PowerShell (Invoke-RestMethod)"
+    "requestFormatTitle": "Anmodningsformat",
+    "requestFormat": {
+      "curl": "curl (Unix-stil)",
+      "powershell": "PowerShell (Invoke-RestMethod)"
+    },
+    "requestFormatDescription": "Standard shell-stil til at vise udgående anmodninger i Konsol-fanen. Hver linje er en kopierbar kommandolinje; vippeknappen i Konsol-værktøjslinjen tilsidesætter denne standard for den aktuelle fane."
   },
   "import": {
     "addAuth": "Tilføj en godkendelsesrute",

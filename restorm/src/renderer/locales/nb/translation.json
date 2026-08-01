@@ -995,17 +995,21 @@
     "title": "Atferd",
     "syncSidebarWithTabs": "Synkroniser sidefeltvalg med aktiv fane",
     "syncSidebarWithTabsDescription": "Når du bytter fane i arbeidsområdet, velges og vises tilsvarende element automatisk i sidefeltet",
-    "dateTimeFormat": "Dato/tid-format",
-    "dateTimeFormatDescription": "Format som brukes for å vise datoer og tider i applikasjonen",
-    "dateTimeFormat.us": "US-format (MM/DD/ÅÅÅÅ, 12t)",
-    "dateTimeFormat.iso": "ISO-format (ÅÅÅÅ-MM-DD, 24t)"
+    "dateTimeFormatTitle": "Dato/tid-format",
+    "dateTimeFormat": {
+      "us": "US-format (MM/DD/ÅÅÅÅ, 12t)",
+      "iso": "ISO-format (ÅÅÅÅ-MM-DD, 24t)"
+    },
+    "dateTimeFormatDescription": "Format som brukes for å vise datoer og tider i applikasjonen"
   },
   "console": {
     "title": "Konsoll",
-    "requestFormat": "Forespørselsformat",
-    "requestFormatDescription": "Standard shell-stil for å vise utgående forespørsler i Konsoll-fanen. Hver rad er en kommandolinje du kan kopiere; vippeknappen i Konsoll-verktøylinjen overstyrer denne standarden for gjeldende fane.",
-    "requestFormat.curl": "curl (Unix-stil)",
-    "requestFormat.powershell": "PowerShell (Invoke-RestMethod)"
+    "requestFormatTitle": "Forespørselsformat",
+    "requestFormat": {
+      "curl": "curl (Unix-stil)",
+      "powershell": "PowerShell (Invoke-RestMethod)"
+    },
+    "requestFormatDescription": "Standard shell-stil for å vise utgående forespørsler i Konsoll-fanen. Hver rad er en kommandolinje du kan kopiere; vippeknappen i Konsoll-verktøylinjen overstyrer denne standarden for gjeldende fane."
   },
   "import": {
     "addAuth": "Legg til en autentiseringsrute",

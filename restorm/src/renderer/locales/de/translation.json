@@ -995,17 +995,21 @@
     "title": "Verhalten",
     "syncSidebarWithTabs": "Auswahl der Seitenleiste mit dem aktiven Tab synchronisieren",
     "syncSidebarWithTabsDescription": "Beim Wechsel der Tabs im Arbeitsbereich automatisch das entsprechende Element in der Seitenleiste auswählen und anzeigen",
-    "dateTimeFormat": "Datum/Uhrzeit-Format",
-    "dateTimeFormatDescription": "Format zur Anzeige von Datum und Uhrzeit in der Anwendung",
-    "dateTimeFormat.us": "US-Format (MM/TT/JJJJ, 12 h)",
-    "dateTimeFormat.iso": "ISO-Format (JJJJ-MM-TT, 24 h)"
+    "dateTimeFormatTitle": "Datum/Uhrzeit-Format",
+    "dateTimeFormat": {
+      "us": "US-Format (MM/TT/JJJJ, 12 h)",
+      "iso": "ISO-Format (JJJJ-MM-TT, 24 h)"
+    },
+    "dateTimeFormatDescription": "Format zur Anzeige von Datum und Uhrzeit in der Anwendung"
   },
   "console": {
     "title": "Konsole",
-    "requestFormat": "Anfrageformat",
-    "requestFormatDescription": "Standardmäßiger Shell-Stil zur Darstellung ausgehender Anfragen im Konsolen-Tab. Jede Zeile ist eine kopierbare Kommandozeile; der Umschalter in der Konsolen-Toolbar überschreibt diesen Standard für den aktuellen Tab.",
-    "requestFormat.curl": "curl (Unix-Stil)",
-    "requestFormat.powershell": "PowerShell (Invoke-RestMethod)"
+    "requestFormatTitle": "Anfrageformat",
+    "requestFormat": {
+      "curl": "curl (Unix-Stil)",
+      "powershell": "PowerShell (Invoke-RestMethod)"
+    },
+    "requestFormatDescription": "Standardmäßiger Shell-Stil zur Darstellung ausgehender Anfragen im Konsolen-Tab. Jede Zeile ist eine kopierbare Kommandozeile; der Umschalter in der Konsolen-Toolbar überschreibt diesen Standard für den aktuellen Tab."
   },
   "import": {
     "addAuth": "Authentifizierungsroute hinzufügen",

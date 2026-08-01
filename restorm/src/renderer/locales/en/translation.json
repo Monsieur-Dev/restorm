@@ -995,17 +995,21 @@
     "title": "Behavior",
     "syncSidebarWithTabs": "Sync sidebar selection with active tab",
     "syncSidebarWithTabsDescription": "When switching tabs in the workspace, automatically select and reveal the corresponding item in the sidebar",
-    "dateTimeFormat": "Date/time format",
-    "dateTimeFormatDescription": "Format used to display dates and times in the application",
-    "dateTimeFormat.us": "US format (MM/DD/YYYY, 12h)",
-    "dateTimeFormat.iso": "ISO format (YYYY-MM-DD, 24h)"
+    "dateTimeFormatTitle": "Date/time format",
+    "dateTimeFormat": {
+      "us": "US format (MM/DD/YYYY, 12h)",
+      "iso": "ISO format (YYYY-MM-DD, 24h)"
+    },
+    "dateTimeFormatDescription": "Format used to display dates and times in the application"
   },
   "console": {
     "title": "Console",
-    "requestFormat": "Request format",
-    "requestFormatDescription": "Default shell flavor used to render outgoing requests in the Console tab. Each row is a copy-pasteable command line; the toggle in the Console toolbar overrides this default for the current tab.",
-    "requestFormat.curl": "curl (Unix-style)",
-    "requestFormat.powershell": "PowerShell (Invoke-RestMethod)"
+    "requestFormatTitle": "Request format",
+    "requestFormat": {
+      "curl": "curl (Unix-style)",
+      "powershell": "PowerShell (Invoke-RestMethod)"
+    },
+    "requestFormatDescription": "Default shell flavor used to render outgoing requests in the Console tab. Each row is a copy-pasteable command line; the toggle in the Console toolbar overrides this default for the current tab."
   },
   "import": {
     "addAuth": "Add an authentication route",

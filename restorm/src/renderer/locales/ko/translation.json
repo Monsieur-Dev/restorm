@@ -994,17 +994,21 @@
     "title": "동작",
     "syncSidebarWithTabs": "사이드바 선택을 활성 탭과 동기화",
     "syncSidebarWithTabsDescription": "워크스페이스에서 탭을 전환할 때, 대응하는 항목을 사이드바에서 자동으로 선택하고 표시합니다",
-    "dateTimeFormat": "날짜/시간 형식",
-    "dateTimeFormatDescription": "애플리케이션에서 날짜와 시간을 표시할 때 사용하는 형식",
-    "dateTimeFormat.us": "미국식 형식(MM/DD/YYYY, 12시간)",
-    "dateTimeFormat.iso": "ISO 형식(YYYY-MM-DD, 24시간)"
+    "dateTimeFormatTitle": "날짜/시간 형식",
+    "dateTimeFormat": {
+      "us": "미국식 형식(MM/DD/YYYY, 12시간)",
+      "iso": "ISO 형식(YYYY-MM-DD, 24시간)"
+    },
+    "dateTimeFormatDescription": "애플리케이션에서 날짜와 시간을 표시할 때 사용하는 형식"
   },
   "console": {
     "title": "콘솔",
-    "requestFormat": "요청 형식",
-    "requestFormatDescription": "콘솔 탭에서 외부로 보내는 요청을 표현할 때 사용하는 기본 셸 스타일입니다. 각 행은 복사하여 붙여넣을 수 있는 명령줄이며, 콘솔 도구 모음의 토글을 사용하면 현재 탭에 한해 이 기본값을 재정의할 수 있습니다.",
-    "requestFormat.curl": "curl(Unix 스타일)",
-    "requestFormat.powershell": "PowerShell(Invoke-RestMethod)"
+    "requestFormatTitle": "요청 형식",
+    "requestFormat": {
+      "curl": "curl(Unix 스타일)",
+      "powershell": "PowerShell(Invoke-RestMethod)"
+    },
+    "requestFormatDescription": "콘솔 탭에서 외부로 보내는 요청을 표현할 때 사용하는 기본 셸 스타일입니다. 각 행은 복사하여 붙여넣을 수 있는 명령줄이며, 콘솔 도구 모음의 토글을 사용하면 현재 탭에 한해 이 기본값을 재정의할 수 있습니다."
   },
   "import": {
     "addAuth": "인증 경로 추가",

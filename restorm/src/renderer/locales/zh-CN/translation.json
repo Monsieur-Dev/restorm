@@ -994,17 +994,21 @@
     "title": "行为",
     "syncSidebarWithTabs": "侧边栏选中项与当前标签同步",
     "syncSidebarWithTabsDescription": "在工作区切换标签时，自动选中并在侧边栏中显示对应的项",
-    "dateTimeFormat": "日期/时间格式",
-    "dateTimeFormatDescription": "应用程序中显示日期和时间所使用的格式",
-    "dateTimeFormat.us": "美式格式 (MM/DD/YYYY, 12 小时制)",
-    "dateTimeFormat.iso": "ISO 格式 (YYYY-MM-DD, 24 小时制)"
+    "dateTimeFormatTitle": "日期/时间格式",
+    "dateTimeFormat": {
+      "us": "美式格式 (MM/DD/YYYY, 12 小时制)",
+      "iso": "ISO 格式 (YYYY-MM-DD, 24 小时制)"
+    },
+    "dateTimeFormatDescription": "应用程序中显示日期和时间所使用的格式"
   },
   "console": {
     "title": "控制台",
-    "requestFormat": "请求格式",
-    "requestFormatDescription": "用于在控制台标签中呈现外发请求的默认 shell 风格。每行都是一条可复制粘贴的命令；控制台工具栏中的开关会为当前标签覆盖此默认值。",
-    "requestFormat.curl": "curl（Unix 风格）",
-    "requestFormat.powershell": "PowerShell（Invoke-RestMethod）"
+    "requestFormatTitle": "请求格式",
+    "requestFormat": {
+      "curl": "curl（Unix 风格）",
+      "powershell": "PowerShell（Invoke-RestMethod）"
+    },
+    "requestFormatDescription": "用于在控制台标签中呈现外发请求的默认 shell 风格。每行都是一条可复制粘贴的命令；控制台工具栏中的开关会为当前标签覆盖此默认值。"
   },
   "import": {
     "addAuth": "添加认证路由",

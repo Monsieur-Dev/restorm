@@ -995,17 +995,21 @@
     "title": "Comportement",
     "syncSidebarWithTabs": "Synchroniser la sélection du panneau latéral avec l'onglet actif",
     "syncSidebarWithTabsDescription": "Lors du changement d'onglet dans l'espace de travail, sélectionner et afficher automatiquement l'élément correspondant dans le panneau latéral",
-    "dateTimeFormat": "Format date/heure",
-    "dateTimeFormatDescription": "Format utilisé pour afficher les dates et heures dans l'application",
-    "dateTimeFormat.us": "Format US (MM/JJ/AAAA, 12h)",
-    "dateTimeFormat.iso": "Format ISO (AAAA-MM-JJ, 24h)"
+    "dateTimeFormatTitle": "Format date/heure",
+    "dateTimeFormat": {
+      "us": "Format US (MM/JJ/AAAA, 12h)",
+      "iso": "Format ISO (AAAA-MM-JJ, 24h)"
+    },
+    "dateTimeFormatDescription": "Format utilisé pour afficher les dates et heures dans l'application"
   },
   "console": {
     "title": "Console",
-    "requestFormat": "Format des requêtes",
-    "requestFormatDescription": "Type de shell utilisé par défaut pour afficher les requêtes sortantes dans l'onglet Console. Chaque ligne est une commande copiable ; le toggle de la toolbar Console surcharge ce défaut pour la session courante.",
-    "requestFormat.curl": "curl (style Unix)",
-    "requestFormat.powershell": "PowerShell (Invoke-RestMethod)"
+    "requestFormatTitle": "Format des requêtes",
+    "requestFormat": {
+      "curl": "curl (style Unix)",
+      "powershell": "PowerShell (Invoke-RestMethod)"
+    },
+    "requestFormatDescription": "Type de shell utilisé par défaut pour afficher les requêtes sortantes dans l'onglet Console. Chaque ligne est une commande copiable ; le toggle de la toolbar Console surcharge ce défaut pour la session courante."
   },
   "import": {
     "addAuth": "Ajouter une route d'authentification",

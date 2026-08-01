@@ -997,17 +997,21 @@
     "title": "Chování",
     "syncSidebarWithTabs": "Synchronizovat výběr v postranním panelu s aktivní záložkou",
     "syncSidebarWithTabsDescription": "Při přepínání záložek v pracovním prostoru automaticky vybrat a zvýraznit odpovídající položku v postranním panelu",
-    "dateTimeFormat": "Formát data a času",
-    "dateTimeFormatDescription": "Formát používaný pro zobrazování dat a časů v aplikaci",
-    "dateTimeFormat.us": "Formát US (MM/DD/RRRR, 12h)",
-    "dateTimeFormat.iso": "Formát ISO (RRRR-MM-DD, 24h)"
+    "dateTimeFormatTitle": "Formát data a času",
+    "dateTimeFormat": {
+      "us": "Formát US (MM/DD/RRRR, 12h)",
+      "iso": "Formát ISO (RRRR-MM-DD, 24h)"
+    },
+    "dateTimeFormatDescription": "Formát používaný pro zobrazování dat a časů v aplikaci"
   },
   "console": {
     "title": "Konzole",
-    "requestFormat": "Formát požadavků",
-    "requestFormatDescription": "Výchozí typ shellu pro vykreslení odchozích požadavků v záložce Konzole. Každý řádek je příkaz k zkopírování; přepínač v nástrojové liště konzole tento výchozí přepíše pro aktuální záložku.",
-    "requestFormat.curl": "curl (styl Unix)",
-    "requestFormat.powershell": "PowerShell (Invoke-RestMethod)"
+    "requestFormatTitle": "Formát požadavků",
+    "requestFormat": {
+      "curl": "curl (styl Unix)",
+      "powershell": "PowerShell (Invoke-RestMethod)"
+    },
+    "requestFormatDescription": "Výchozí typ shellu pro vykreslení odchozích požadavků v záložce Konzole. Každý řádek je příkaz k zkopírování; přepínač v nástrojové liště konzole tento výchozí přepíše pro aktuální záložku."
   },
   "import": {
     "addAuth": "Přidat ověřovací trasu",

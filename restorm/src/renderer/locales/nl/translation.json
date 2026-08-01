@@ -995,17 +995,21 @@
     "title": "Gedrag",
     "syncSidebarWithTabs": "Selectie in zijbalk synchroniseren met actief tabblad",
     "syncSidebarWithTabsDescription": "Bij het wisselen van tabbladen in de werkruimte automatisch het overeenkomstige item in de zijbalk selecteren en tonen",
-    "dateTimeFormat": "Datum-/tijdnotatie",
-    "dateTimeFormatDescription": "Notatie die wordt gebruikt om datums en tijden in de toepassing weer te geven",
-    "dateTimeFormat.us": "Amerikaanse notatie (MM/DD/JJJJ, 12h)",
-    "dateTimeFormat.iso": "ISO-notatie (JJJJ-MM-DD, 24h)"
+    "dateTimeFormatTitle": "Datum-/tijdnotatie",
+    "dateTimeFormat": {
+      "us": "Amerikaanse notatie (MM/DD/JJJJ, 12h)",
+      "iso": "ISO-notatie (JJJJ-MM-DD, 24h)"
+    },
+    "dateTimeFormatDescription": "Notatie die wordt gebruikt om datums en tijden in de toepassing weer te geven"
   },
   "console": {
     "title": "Console",
-    "requestFormat": "Verzoekformaat",
-    "requestFormatDescription": "Standaard shell-variant voor het weergeven van uitgaande verzoeken op het Console-tabblad. Elke rij is een commandoregel die je kunt kopiëren en plakken; de schakelaar in de Console-werkbalk overschrijft deze standaard voor het huidige tabblad.",
-    "requestFormat.curl": "curl (Unix-stijl)",
-    "requestFormat.powershell": "PowerShell (Invoke-RestMethod)"
+    "requestFormatTitle": "Verzoekformaat",
+    "requestFormat": {
+      "curl": "curl (Unix-stijl)",
+      "powershell": "PowerShell (Invoke-RestMethod)"
+    },
+    "requestFormatDescription": "Standaard shell-variant voor het weergeven van uitgaande verzoeken op het Console-tabblad. Elke rij is een commandoregel die je kunt kopiëren en plakken; de schakelaar in de Console-werkbalk overschrijft deze standaard voor het huidige tabblad."
   },
   "import": {
     "addAuth": "Een authenticatieroute toevoegen",

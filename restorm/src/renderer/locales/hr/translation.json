@@ -996,17 +996,21 @@
     "title": "Ponašanje",
     "syncSidebarWithTabs": "Sinkroniziraj odabir bočne trake s aktivnom karticom",
     "syncSidebarWithTabsDescription": "Pri prebacivanju kartica u radnom prostoru automatski odaberi i prikaži odgovarajuću stavku u bočnoj traci",
-    "dateTimeFormat": "Format datuma/vremena",
-    "dateTimeFormatDescription": "Format koji se koristi za prikaz datuma i vremena u aplikaciji",
-    "dateTimeFormat.us": "Američki format (MM/DD/GGGG, 12 h)",
-    "dateTimeFormat.iso": "ISO format (GGGG-MM-DD, 24 h)"
+    "dateTimeFormatTitle": "Format datuma/vremena",
+    "dateTimeFormat": {
+      "us": "Američki format (MM/DD/GGGG, 12 h)",
+      "iso": "ISO format (GGGG-MM-DD, 24 h)"
+    },
+    "dateTimeFormatDescription": "Format koji se koristi za prikaz datuma i vremena u aplikaciji"
   },
   "console": {
     "title": "Konzola",
-    "requestFormat": "Format zahtjeva",
-    "requestFormatDescription": "Zadani tip ljuske koji se koristi za prikaz odlaznih zahtjeva u kartici Konzola. Svaki redak je naredba koja se može kopirati i zalijepiti; prekidač u alatnoj traci Konzole nadjačava ovaj zadani za trenutnu karticu.",
-    "requestFormat.curl": "curl (u stilu Unixa)",
-    "requestFormat.powershell": "PowerShell (Invoke-RestMethod)"
+    "requestFormatTitle": "Format zahtjeva",
+    "requestFormat": {
+      "curl": "curl (u stilu Unixa)",
+      "powershell": "PowerShell (Invoke-RestMethod)"
+    },
+    "requestFormatDescription": "Zadani tip ljuske koji se koristi za prikaz odlaznih zahtjeva u kartici Konzola. Svaki redak je naredba koja se može kopirati i zalijepiti; prekidač u alatnoj traci Konzole nadjačava ovaj zadani za trenutnu karticu."
   },
   "import": {
     "addAuth": "Dodaj rutu provjere autentičnosti",

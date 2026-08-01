@@ -997,17 +997,21 @@
     "title": "Zachowanie",
     "syncSidebarWithTabs": "Synchronizuj zaznaczenie panelu bocznego z aktywną kartą",
     "syncSidebarWithTabsDescription": "Podczas zmiany karty w obszarze roboczym automatycznie zaznaczaj i wyświetlaj odpowiadający element w panelu bocznym",
-    "dateTimeFormat": "Format daty/godziny",
-    "dateTimeFormatDescription": "Format używany do wyświetlania dat i godzin w aplikacji",
-    "dateTimeFormat.us": "Format US (MM/DD/RRRR, 12h)",
-    "dateTimeFormat.iso": "Format ISO (RRRR-MM-DD, 24h)"
+    "dateTimeFormatTitle": "Format daty/godziny",
+    "dateTimeFormat": {
+      "us": "Format US (MM/DD/RRRR, 12h)",
+      "iso": "Format ISO (RRRR-MM-DD, 24h)"
+    },
+    "dateTimeFormatDescription": "Format używany do wyświetlania dat i godzin w aplikacji"
   },
   "console": {
     "title": "Konsola",
-    "requestFormat": "Format żądań",
-    "requestFormatDescription": "Domyślny rodzaj powłoki używany do renderowania wychodzących żądań w karcie Konsola. Każdy wiersz to gotowy do skopiowania wiersz polecenia; przełącznik na pasku narzędzi Konsoli nadpisuje ten domyślny wybór dla bieżącej karty.",
-    "requestFormat.curl": "curl (styl Unix)",
-    "requestFormat.powershell": "PowerShell (Invoke-RestMethod)"
+    "requestFormatTitle": "Format żądań",
+    "requestFormat": {
+      "curl": "curl (styl Unix)",
+      "powershell": "PowerShell (Invoke-RestMethod)"
+    },
+    "requestFormatDescription": "Domyślny rodzaj powłoki używany do renderowania wychodzących żądań w karcie Konsola. Każdy wiersz to gotowy do skopiowania wiersz polecenia; przełącznik na pasku narzędzi Konsoli nadpisuje ten domyślny wybór dla bieżącej karty."
   },
   "import": {
     "addAuth": "Dodaj trasę uwierzytelniania",

@@ -995,17 +995,21 @@
     "title": "Toiminta",
     "syncSidebarWithTabs": "Synkronoi sivupalkin valinta aktiivisen välilehden kanssa",
     "syncSidebarWithTabsDescription": "Kun vaihdat välilehteä työtilassa, valitse ja näytä automaattisesti vastaava kohde sivupalkissa",
-    "dateTimeFormat": "Päivämäärän/ajan muoto",
-    "dateTimeFormatDescription": "Sovelluksessa käytetty muoto päivämäärien ja aikojen näyttämiseen",
-    "dateTimeFormat.us": "Yhdysvaltain muoto (KK/PP/VVVV, 12h)",
-    "dateTimeFormat.iso": "ISO-muoto (VVVV-KK-PP, 24h)"
+    "dateTimeFormatTitle": "Päivämäärän/ajan muoto",
+    "dateTimeFormat": {
+      "us": "Yhdysvaltain muoto (KK/PP/VVVV, 12h)",
+      "iso": "ISO-muoto (VVVV-KK-PP, 24h)"
+    },
+    "dateTimeFormatDescription": "Sovelluksessa käytetty muoto päivämäärien ja aikojen näyttämiseen"
   },
   "console": {
     "title": "Konsoli",
-    "requestFormat": "Pyyntömuoto",
-    "requestFormatDescription": "Oletuskuoritapa, jota käytetään lähtevien pyyntöjen näyttämiseen Konsoli-välilehdellä. Jokainen rivi on kopioitavissa oleva komentorivi; Konsolin työkalupalkin valitsin ohittaa tämän oletuksen nykyiselle välilehdelle.",
-    "requestFormat.curl": "curl (Unix-tyyli)",
-    "requestFormat.powershell": "PowerShell (Invoke-RestMethod)"
+    "requestFormatTitle": "Pyyntömuoto",
+    "requestFormat": {
+      "curl": "curl (Unix-tyyli)",
+      "powershell": "PowerShell (Invoke-RestMethod)"
+    },
+    "requestFormatDescription": "Oletuskuoritapa, jota käytetään lähtevien pyyntöjen näyttämiseen Konsoli-välilehdellä. Jokainen rivi on kopioitavissa oleva komentorivi; Konsolin työkalupalkin valitsin ohittaa tämän oletuksen nykyiselle välilehdelle."
   },
   "import": {
     "addAuth": "Lisää todennusreitti",

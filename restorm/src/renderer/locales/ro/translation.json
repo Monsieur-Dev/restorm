@@ -996,17 +996,21 @@
     "title": "Comportament",
     "syncSidebarWithTabs": "Sincronizează selecția barei laterale cu fila activă",
     "syncSidebarWithTabsDescription": "La schimbarea filei în spațiul de lucru, selectează și afișează automat elementul corespunzător în bara laterală",
-    "dateTimeFormat": "Format dată/oră",
-    "dateTimeFormatDescription": "Format folosit pentru a afișa datele și orele în aplicație",
-    "dateTimeFormat.us": "Format SUA (LL/ZZ/AAAA, 12h)",
-    "dateTimeFormat.iso": "Format ISO (AAAA-LL-ZZ, 24h)"
+    "dateTimeFormatTitle": "Format dată/oră",
+    "dateTimeFormat": {
+      "us": "Format SUA (LL/ZZ/AAAA, 12h)",
+      "iso": "Format ISO (AAAA-LL-ZZ, 24h)"
+    },
+    "dateTimeFormatDescription": "Format folosit pentru a afișa datele și orele în aplicație"
   },
   "console": {
     "title": "Consolă",
-    "requestFormat": "Format al cererilor",
-    "requestFormatDescription": "Stilul de shell folosit implicit pentru afișarea cererilor de ieșire în fila Consolă. Fiecare rând este o linie de comandă ce poate fi copiată; comutatorul din bara de unelte a Consolei suprascrie acest implicit pentru fila curentă.",
-    "requestFormat.curl": "curl (stil Unix)",
-    "requestFormat.powershell": "PowerShell (Invoke-RestMethod)"
+    "requestFormatTitle": "Format al cererilor",
+    "requestFormat": {
+      "curl": "curl (stil Unix)",
+      "powershell": "PowerShell (Invoke-RestMethod)"
+    },
+    "requestFormatDescription": "Stilul de shell folosit implicit pentru afișarea cererilor de ieșire în fila Consolă. Fiecare rând este o linie de comandă ce poate fi copiată; comutatorul din bara de unelte a Consolei suprascrie acest implicit pentru fila curentă."
   },
   "import": {
     "addAuth": "Adaugă o rută de autentificare",

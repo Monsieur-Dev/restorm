@@ -995,17 +995,21 @@
     "title": "Comportamiento",
     "syncSidebarWithTabs": "Sincronizar la selección de la barra lateral con la pestaña activa",
     "syncSidebarWithTabsDescription": "Al cambiar de pestaña en el espacio de trabajo, seleccionar y mostrar automáticamente el elemento correspondiente en la barra lateral",
-    "dateTimeFormat": "Formato de fecha/hora",
-    "dateTimeFormatDescription": "Formato utilizado para mostrar fechas y horas en la aplicación",
-    "dateTimeFormat.us": "Formato US (MM/DD/AAAA, 12 h)",
-    "dateTimeFormat.iso": "Formato ISO (AAAA-MM-DD, 24 h)"
+    "dateTimeFormatTitle": "Formato de fecha/hora",
+    "dateTimeFormat": {
+      "us": "Formato US (MM/DD/AAAA, 12 h)",
+      "iso": "Formato ISO (AAAA-MM-DD, 24 h)"
+    },
+    "dateTimeFormatDescription": "Formato utilizado para mostrar fechas y horas en la aplicación"
   },
   "console": {
     "title": "Consola",
-    "requestFormat": "Formato de las peticiones",
-    "requestFormatDescription": "Tipo de shell utilizado por defecto para mostrar las peticiones salientes en la pestaña Consola. Cada línea es un comando copiable; el conmutador de la barra de herramientas de la Consola sustituye este valor por defecto en la pestaña actual.",
-    "requestFormat.curl": "curl (estilo Unix)",
-    "requestFormat.powershell": "PowerShell (Invoke-RestMethod)"
+    "requestFormatTitle": "Formato de las peticiones",
+    "requestFormat": {
+      "curl": "curl (estilo Unix)",
+      "powershell": "PowerShell (Invoke-RestMethod)"
+    },
+    "requestFormatDescription": "Tipo de shell utilizado por defecto para mostrar las peticiones salientes en la pestaña Consola. Cada línea es un comando copiable; el conmutador de la barra de herramientas de la Consola sustituye este valor por defecto en la pestaña actual."
   },
   "import": {
     "addAuth": "Agregar una ruta de autenticación",

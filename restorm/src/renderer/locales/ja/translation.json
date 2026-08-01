@@ -994,17 +994,21 @@
     "title": "動作",
     "syncSidebarWithTabs": "サイドバーの選択をアクティブなタブと同期する",
     "syncSidebarWithTabsDescription": "ワークスペースでタブを切り替えた際に、対応する項目を自動でサイドバーで選択・表示します",
-    "dateTimeFormat": "日付／時刻の形式",
-    "dateTimeFormatDescription": "アプリケーション内で日付と時刻を表示する際に使用する形式",
-    "dateTimeFormat.us": "米国形式（MM/DD/YYYY、12 時間制）",
-    "dateTimeFormat.iso": "ISO 形式（YYYY-MM-DD、24 時間制）"
+    "dateTimeFormatTitle": "日付／時刻の形式",
+    "dateTimeFormat": {
+      "us": "米国形式（MM/DD/YYYY、12 時間制）",
+      "iso": "ISO 形式（YYYY-MM-DD、24 時間制）"
+    },
+    "dateTimeFormatDescription": "アプリケーション内で日付と時刻を表示する際に使用する形式"
   },
   "console": {
     "title": "コンソール",
-    "requestFormat": "リクエスト形式",
-    "requestFormatDescription": "コンソールタブで外向きリクエストを表示する際の既定のシェル風スタイルです。各行はコピーして実行できるコマンドラインで、コンソールのツールバーのトグルが現在のタブの既定値を上書きします。",
-    "requestFormat.curl": "curl（Unix スタイル）",
-    "requestFormat.powershell": "PowerShell（Invoke-RestMethod）"
+    "requestFormatTitle": "リクエスト形式",
+    "requestFormat": {
+      "curl": "curl（Unix スタイル）",
+      "powershell": "PowerShell（Invoke-RestMethod）"
+    },
+    "requestFormatDescription": "コンソールタブで外向きリクエストを表示する際の既定のシェル風スタイルです。各行はコピーして実行できるコマンドラインで、コンソールのツールバーのトグルが現在のタブの既定値を上書きします。"
   },
   "import": {
     "addAuth": "認証ルートを追加",
