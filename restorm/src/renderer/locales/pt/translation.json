@@ -32,6 +32,7 @@
     "resolveError": "Falha ao resolver o segredo",
     "resolveErrorEnv": "Pelo menos uma variável não pôde ser obtida e está em erro.",
     "resolveErrorItem": "Não foi possível obter pelo menos um dos segredos deste item.",
+    "resolveErrorItemVars": "Variáveis de ambiente não resolvidas: {{vars}}",
     "fetchFailed": "Falha na obtenção",
     "retrievalModal": {
       "title": "Obtenção de segredo",

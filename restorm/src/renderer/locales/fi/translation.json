@@ -32,6 +32,7 @@
     "resolveError": "Salaisuuden ratkaiseminen epäonnistui",
     "resolveErrorEnv": "Ainakin yhtä muuttujaa ei voitu noutaa ja se on virhetilassa.",
     "resolveErrorItem": "Ainakin yhtä tämän kohteen salaisuutta ei voitu noutaa.",
+    "resolveErrorItemVars": "Ratkaisemattomat ympäristömuuttujat: {{vars}}",
     "fetchFailed": "Nouto epäonnistui",
     "retrievalModal": {
       "title": "Salaisuuden nouto",

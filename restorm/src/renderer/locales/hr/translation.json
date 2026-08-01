@@ -32,6 +32,7 @@
     "resolveError": "Rješavanje tajne nije uspjelo",
     "resolveErrorEnv": "Najmanje jednu varijablu nije bilo moguće dohvatiti i u stanju je pogreške.",
     "resolveErrorItem": "Najmanje jednu tajnu ove stavke nije bilo moguće dohvatiti.",
+    "resolveErrorItemVars": "Neriješene varijable okruženja: {{vars}}",
     "fetchFailed": "Dohvaćanje nije uspjelo",
     "retrievalModal": {
       "title": "Dohvaćanje tajne",

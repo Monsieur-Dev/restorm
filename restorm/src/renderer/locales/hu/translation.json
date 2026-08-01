@@ -32,6 +32,7 @@
     "resolveError": "A titok feloldása sikertelen",
     "resolveErrorEnv": "Legalább egy változót nem sikerült lekérni, és hibás állapotban van.",
     "resolveErrorItem": "Az elem titkai közül legalább egyet nem sikerült lekérni.",
+    "resolveErrorItemVars": "Feloldatlan környezeti változók: {{vars}}",
     "fetchFailed": "A lekérés sikertelen",
     "retrievalModal": {
       "title": "Titok lekérése",

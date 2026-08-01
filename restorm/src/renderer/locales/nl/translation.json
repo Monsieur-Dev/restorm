@@ -32,6 +32,7 @@
     "resolveError": "Oplossen van geheim mislukt",
     "resolveErrorEnv": "Ten minste één variabele kon niet worden opgehaald en bevat een fout.",
     "resolveErrorItem": "Ten minste één van de geheimen van dit item kon niet worden opgehaald.",
+    "resolveErrorItemVars": "Onopgeloste omgevingsvariabelen: {{vars}}",
     "fetchFailed": "Ophalen mislukt",
     "retrievalModal": {
       "title": "Geheim ophalen",

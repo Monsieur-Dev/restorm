@@ -32,6 +32,7 @@
     "resolveError": "Gagal menyelesaikan rahasia",
     "resolveErrorEnv": "Setidaknya satu variabel tidak dapat diambil dan dalam keadaan galat.",
     "resolveErrorItem": "Setidaknya satu rahasia item ini tidak dapat diambil.",
+    "resolveErrorItemVars": "Variabel lingkungan yang tidak terselesaikan: {{vars}}",
     "fetchFailed": "Pengambilan gagal",
     "retrievalModal": {
       "title": "Pengambilan rahasia",

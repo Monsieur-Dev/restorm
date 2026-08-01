@@ -32,6 +32,7 @@
     "resolveError": "비밀 해결 실패",
     "resolveErrorEnv": "하나 이상의 변수를 가져올 수 없어 오류 상태입니다.",
     "resolveErrorItem": "이 항목의 비밀 중 하나 이상을 가져올 수 없습니다.",
+    "resolveErrorItemVars": "확인되지 않은 환경 변수: {{vars}}",
     "fetchFailed": "가져오기 실패",
     "retrievalModal": {
       "title": "비밀 가져오기",

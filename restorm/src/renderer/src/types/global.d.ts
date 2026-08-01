@@ -208,8 +208,8 @@ declare global {
         onEnvSecretsResolving: (callback: (result: { environmentId: string; resolving: boolean }) => void) => (() => void)
         getErroredEnvironments: () => Promise<string[]>
         onEnvSecretsError: (callback: (result: { environmentId: string; hasError: boolean }) => void) => (() => void)
-        getItemSecretStatuses: () => Promise<{ itemId: string; resolving: boolean; error: boolean }[]>
-        onItemSecretsStatus: (callback: (result: { itemId: string; resolving: boolean; error: boolean }) => void) => (() => void)
+        getItemSecretStatuses: () => Promise<{ itemId: string; resolving: boolean; error: boolean; errorVars?: string[] }[]>
+        onItemSecretsStatus: (callback: (result: { itemId: string; resolving: boolean; error: boolean; errorVars?: string[] }) => void) => (() => void)
         onVariableTransformed: (callback: (result: VariableTransformResult) => void) => (() => void)
         registerRequest: (
           requestId: string,

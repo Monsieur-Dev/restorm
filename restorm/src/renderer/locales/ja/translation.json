@@ -32,6 +32,7 @@
     "resolveError": "シークレットの解決に失敗しました",
     "resolveErrorEnv": "少なくとも 1 つの変数を取得できず、エラー状態です。",
     "resolveErrorItem": "この項目のシークレットのうち少なくとも 1 つを取得できませんでした。",
+    "resolveErrorItemVars": "解決できない環境変数: {{vars}}",
     "fetchFailed": "取得に失敗しました",
     "retrievalModal": {
       "title": "シークレットの取得",

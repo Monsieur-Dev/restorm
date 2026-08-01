@@ -1187,7 +1187,7 @@ class ContextService {
   /** Every item we've walked (for a full recompute when an env toggles). */
   private readonly knownItemIds = new Set<string>()
   /** Last effective status broadcast per item, to dedupe re-broadcasts. */
-  private readonly itemEffectiveStatus = new Map<string, { resolving: boolean; error: boolean }>()
+  private readonly itemEffectiveStatus = new Map<string, { resolving: boolean; error: boolean; errorVars: string[] }>()
   /** Per-env secret VARIABLE names currently resolving / left in error — the
    * reference-aware counterpart of `resolvingEnvironments`/`erroredEnvironments`
    * (which stay per-env booleans for the env-folder's own blanket badge). */
@@ -1230,20 +1230,32 @@ class ContextService {
    * DIRECT (a secret the item holds in its own fields) ∪ INHERITED-and-REFERENCED
    * (a secret variable of the item's active env chain that the item actually
    * references via `{{…}}`). The inherited half is reference-aware: an env having
-   * a failing secret does NOT light an item that doesn't use it. */
+   * a failing secret does NOT light an item that doesn't use it.
+   *
+   * The broadcast also carries the environment VARIABLE NAMES behind an
+   * inherited failure. One unresolvable variable legitimately puts the badge on
+   * every request that references it, so without the names the user sees a tree
+   * of broken-looking requests and no hint that a single variable explains all
+   * of them. */
   private computeItemEffectiveStatus(itemId: string): void {
     const chain = this.getInheritedEnvChainForItem(itemId)
     const refs = this.itemReferencedVars.get(itemId)
-    const referencesAny = (envVars: Set<string> | undefined): boolean =>
-      envVars !== undefined && refs !== undefined && [...envVars].some((v) => refs.has(v))
-    const inheritedResolving = chain.some((e) => referencesAny(this.resolvingEnvSecretVars.get(e)))
-    const inheritedError = chain.some((e) => referencesAny(this.erroredEnvSecretVars.get(e)))
+    const referencedIn = (envVars: Set<string> | undefined): string[] =>
+      envVars === undefined || refs === undefined ? [] : [...envVars].filter((v) => refs.has(v))
+    const inheritedResolving = chain.some((e) => referencedIn(this.resolvingEnvSecretVars.get(e)).length > 0)
+    const errorVars = [
+      ...new Set(chain.flatMap((e) => referencedIn(this.erroredEnvSecretVars.get(e))))
+    ].sort()
     const resolving = this.directResolvingItems.has(itemId) || inheritedResolving
-    const error = this.directErroredItems.has(itemId) || inheritedError
+    const error = this.directErroredItems.has(itemId) || errorVars.length > 0
     const prev = this.itemEffectiveStatus.get(itemId)
-    if (prev?.resolving === resolving && prev.error === error) return
-    this.itemEffectiveStatus.set(itemId, { resolving, error })
-    this.broadcastToRenderer('context:item-secrets-status', { itemId, resolving, error })
+    if (
+      prev?.resolving === resolving &&
+      prev.error === error &&
+      prev.errorVars.join('\u0000') === errorVars.join('\u0000')
+    ) return
+    this.itemEffectiveStatus.set(itemId, { resolving, error, errorVars })
+    this.broadcastToRenderer('context:item-secrets-status', { itemId, resolving, error, errorVars })
   }
 
   /** Recompute every known item — used when an env's status flips or the
@@ -1254,8 +1266,10 @@ class ContextService {
   }
 
   /** Snapshot of every item's effective secret status (initial UI sync). */
-  getItemSecretStatuses(): { itemId: string; resolving: boolean; error: boolean }[] {
-    return [...this.itemEffectiveStatus].map(([itemId, s]) => ({ itemId, resolving: s.resolving, error: s.error }))
+  getItemSecretStatuses(): { itemId: string; resolving: boolean; error: boolean; errorVars: string[] }[] {
+    return [...this.itemEffectiveStatus].map(([itemId, s]) => ({
+      itemId, resolving: s.resolving, error: s.error, errorVars: s.errorVars
+    }))
   }
 
   /**
@@ -1327,7 +1341,7 @@ class ContextService {
     this.itemReferencedVars.delete(itemId)
     secretHydrationService.clearScope(itemId)
     if (this.itemEffectiveStatus.delete(itemId)) {
-      this.broadcastToRenderer('context:item-secrets-status', { itemId, resolving: false, error: false })
+      this.broadcastToRenderer('context:item-secrets-status', { itemId, resolving: false, error: false, errorVars: [] })
     }
   }
 

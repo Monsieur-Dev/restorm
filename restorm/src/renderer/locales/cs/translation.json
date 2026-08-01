@@ -32,6 +32,7 @@
     "resolveError": "Vyřešení tajemství selhalo",
     "resolveErrorEnv": "Alespoň jednu proměnnou se nepodařilo načíst a je v chybovém stavu.",
     "resolveErrorItem": "Alespoň jedno z tajemství této položky se nepodařilo načíst.",
+    "resolveErrorItemVars": "Nevyřešené proměnné prostředí: {{vars}}",
     "fetchFailed": "Načtení selhalo",
     "retrievalModal": {
       "title": "Načtení tajemství",

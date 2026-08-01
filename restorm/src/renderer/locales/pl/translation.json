@@ -32,6 +32,7 @@
     "resolveError": "Nie udało się rozwiązać sekretu",
     "resolveErrorEnv": "Co najmniej jednej zmiennej nie udało się pobrać i jest w stanie błędu.",
     "resolveErrorItem": "Nie udało się pobrać co najmniej jednego z sekretów tego elementu.",
+    "resolveErrorItemVars": "Nierozwiązane zmienne środowiskowe: {{vars}}",
     "fetchFailed": "Pobieranie nie powiodło się",
     "retrievalModal": {
       "title": "Pobieranie sekretu",

@@ -32,6 +32,7 @@
     "resolveError": "Gizli bilgi çözümlenemedi",
     "resolveErrorEnv": "En az bir değişken alınamadı ve hata durumunda.",
     "resolveErrorItem": "Bu öğenin gizli bilgilerinden en az biri alınamadı.",
+    "resolveErrorItemVars": "Çözümlenemeyen ortam değişkenleri: {{vars}}",
     "fetchFailed": "Alma başarısız",
     "retrievalModal": {
       "title": "Gizli bilgi alma",

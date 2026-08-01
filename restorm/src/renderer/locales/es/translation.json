@@ -32,6 +32,7 @@
     "resolveError": "Error al resolver el secreto",
     "resolveErrorEnv": "No se pudo recuperar al menos una variable y está en error.",
     "resolveErrorItem": "No se pudo recuperar al menos uno de los secretos de este elemento.",
+    "resolveErrorItemVars": "Variables de entorno sin resolver: {{vars}}",
     "fetchFailed": "Error de recuperación",
     "retrievalModal": {
       "title": "Recuperación de secreto",

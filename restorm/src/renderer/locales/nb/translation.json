@@ -32,6 +32,7 @@
     "resolveError": "Kunne ikke løse hemmeligheten",
     "resolveErrorEnv": "Minst én variabel kunne ikke hentes og er i feiltilstand.",
     "resolveErrorItem": "Minst én av hemmelighetene til dette elementet kunne ikke hentes.",
+    "resolveErrorItemVars": "Uløste miljøvariabler: {{vars}}",
     "fetchFailed": "Henting mislyktes",
     "retrievalModal": {
       "title": "Henting av hemmelighet",

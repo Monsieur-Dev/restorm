@@ -32,6 +32,7 @@
     "resolveError": "密鑰解析失敗",
     "resolveErrorEnv": "至少有一個變數無法擷取並處於錯誤狀態。",
     "resolveErrorItem": "此項目的密鑰中至少有一個無法擷取。",
+    "resolveErrorItemVars": "無法解析的環境變數：{{vars}}",
     "fetchFailed": "擷取失敗",
     "retrievalModal": {
       "title": "密鑰擷取",

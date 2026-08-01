@@ -32,6 +32,7 @@
     "resolveError": "Auflösung des Geheimnisses fehlgeschlagen",
     "resolveErrorEnv": "Mindestens eine Variable konnte nicht abgerufen werden und ist fehlerhaft.",
     "resolveErrorItem": "Mindestens ein Geheimnis dieses Elements konnte nicht abgerufen werden.",
+    "resolveErrorItemVars": "Nicht aufgelöste Umgebungsvariablen: {{vars}}",
     "fetchFailed": "Abruf fehlgeschlagen",
     "retrievalModal": {
       "title": "Geheimnis-Abruf",

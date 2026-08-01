@@ -32,6 +32,7 @@
     "resolveError": "Phân giải bí mật thất bại",
     "resolveErrorEnv": "Có ít nhất một biến không thể truy xuất và đang ở trạng thái lỗi.",
     "resolveErrorItem": "Không thể truy xuất ít nhất một trong các bí mật của mục này.",
+    "resolveErrorItemVars": "Biến môi trường chưa phân giải: {{vars}}",
     "fetchFailed": "Truy xuất thất bại",
     "retrievalModal": {
       "title": "Truy xuất bí mật",

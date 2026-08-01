@@ -32,6 +32,7 @@
     "resolveError": "Zgjidhja e sekretit dështoi",
     "resolveErrorEnv": "Të paktën një variabël nuk mund të merrej dhe është në gabim.",
     "resolveErrorItem": "Të paktën një nga sekretet e këtij elementi nuk mund të merrej.",
+    "resolveErrorItemVars": "Variabla mjedisi të pazgjidhura: {{vars}}",
     "fetchFailed": "Marrja dështoi",
     "retrievalModal": {
       "title": "Marrja e sekretit",

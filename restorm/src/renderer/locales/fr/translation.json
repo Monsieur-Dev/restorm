@@ -22,6 +22,7 @@
     "resolveError": "Échec de résolution du secret",
     "resolveErrorEnv": "Au moins une variable n'a pas pu être récupérée et est en erreur.",
     "resolveErrorItem": "Au moins un secret de cet élément n'a pas pu être récupéré.",
+    "resolveErrorItemVars": "Variable(s) d'environnement non résolue(s) : {{vars}}",
     "fetchFailed": "Récupération impossible",
     "source": {
       "envVar": "Variable d'environnement",

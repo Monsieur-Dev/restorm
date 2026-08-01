@@ -32,6 +32,7 @@
     "resolveError": "Rezolvarea secretului a eșuat",
     "resolveErrorEnv": "Cel puțin o variabilă nu a putut fi preluată și este în eroare.",
     "resolveErrorItem": "Cel puțin unul dintre secretele acestui element nu a putut fi preluat.",
+    "resolveErrorItemVars": "Variabile de mediu nerezolvate: {{vars}}",
     "fetchFailed": "Preluarea a eșuat",
     "retrievalModal": {
       "title": "Preluarea secretului",

@@ -23,7 +23,7 @@ export interface ItemSecretBadgesProps {
  */
 export const ItemSecretBadges: React.FC<ItemSecretBadgesProps> = ({ itemId, 'data-testid': dataTestId }) => {
   const { t } = useTranslation()
-  const { resolving, error } = useItemSecretStatus(itemId)
+  const { resolving, error, errorVars } = useItemSecretStatus(itemId)
   if (!resolving && !error) return null
   return (
     <>
@@ -38,7 +38,17 @@ export const ItemSecretBadges: React.FC<ItemSecretBadgesProps> = ({ itemId, 'dat
       )}
       {error && !resolving && (
         <HeaderHoverTooltip
-          label={t('secrets.resolveErrorItem', "Au moins un secret de cet élément n'a pas pu être récupéré.")}
+          label={
+            // Name the failing variables when the failure is inherited: one
+            // unresolvable variable badges every request that references it,
+            // and the generic wording reads as N independent breakages.
+            errorVars.length > 0
+              ? t('secrets.resolveErrorItemVars', {
+                  defaultValue: "Variable(s) d'environnement non résolue(s) : {{vars}}",
+                  vars: errorVars.join(', ')
+                })
+              : t('secrets.resolveErrorItem', "Au moins un secret de cet élément n'a pas pu être récupéré.")
+          }
         >
           <span
             className="secret-error-indicator"
