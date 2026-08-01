@@ -2438,7 +2438,9 @@ export class McpService {
         description:
           'Run a sequence of MCP tool calls in order, with an implicit "1 frame + 1 microtask" ' +
           'settle in the renderer between each step (override per step with `waitFor`, or skip ' +
-          'globally via `skipImplicitSettle`). Aborts on the first step that throws or returns ' +
+          'globally via `skipImplicitSettle`). That settle is bounded: a window that paints no ' +
+          'frames (unfocused / minimised / occluded) times out and the batch continues, with a ' +
+          '`settleNote` in the envelope. Aborts on the first step that throws or returns ' +
           '`isError: true`; subsequent steps are skipped. The response aggregates every step\'s ' +
           '`content` parts in order (so embedded images / resources reach the client inline) plus ' +
           'a final text part with the structured envelope `{ ranCount, totalCount, aborted, ' +
@@ -2482,7 +2484,7 @@ export class McpService {
         const steps: Step[] = stepsRaw.map((s) => s as Step)
 
         const aggregatedContent: Record<string, unknown>[] = []
-        const envelope: { index: number; name: string; ok: boolean; error?: string }[] = []
+        const envelope: { index: number; name: string; ok: boolean; error?: string; settle?: SettleOutcome }[] = []
         let aborted = false
         let abortedAt: number | null = null
 
@@ -2594,7 +2596,14 @@ export class McpService {
               break
             }
           } else if (!skipImplicitSettle) {
-            await runImplicitSettle(windowId)
+            const outcome = await runImplicitSettle(windowId)
+            // Recorded, never fatal: an unfocused window legitimately paints
+            // no frames, and failing the batch there would make `batch`
+            // unusable exactly where automation needs it most.
+            if (outcome !== 'settled') {
+              const entry = envelope[envelope.length - 1]
+              if (entry) entry.settle = outcome
+            }
           }
         }
 
@@ -2605,7 +2614,16 @@ export class McpService {
             totalCount: steps.length,
             aborted,
             abortedAt,
-            results: envelope
+            results: envelope,
+            ...(envelope.some((e) => e.settle === 'timed-out')
+              ? {
+                  settleNote:
+                    `One or more implicit settles timed out after ${String(IMPLICIT_SETTLE_TIMEOUT_MS)}ms — ` +
+                    'the window produced no frame, which is normal when it is unfocused, minimised or ' +
+                    'occluded. The steps still ran; pass `skipImplicitSettle: true` to drop the wait, or ' +
+                    'a per-step `waitFor` to wait on something real.'
+                }
+              : {})
           }, null, 2)
         })
 
@@ -3729,24 +3747,51 @@ function executeInMiniBrowser(
   })
 }
 
+/** How long the implicit between-steps settle waits for a frame before
+ * giving up and letting the batch continue. */
+export const IMPLICIT_SETTLE_TIMEOUT_MS = 1000
+
+export type SettleOutcome = 'settled' | 'timed-out' | 'no-window'
+
 /**
  * One frame of paint + one microtask flush in the target renderer. Used
  * by the `batch` tool between steps so the next call sees the DOM after
- * React has reconciled the previous step's effects. Silent no-op when
- * no window is available (main-process-only tool chains still benefit
+ * React has reconciled the previous step's effects. Reports `'no-window'`
+ * when no window is available (main-process-only tool chains still benefit
  * from the awaitable boundary).
+ *
+ * The frame is only ever WAITED FOR, never required: Chromium produces no
+ * frames at all for a window that is unfocused, minimised or occluded, so
+ * an unbounded `requestAnimationFrame` wait never resolves there and every
+ * batch — even one whose steps touch no DOM — hangs forever. The renderer
+ * therefore races the frame against its own timer, and main caps the whole
+ * call in case the renderer itself is unresponsive.
  */
-async function runImplicitSettle(windowId: number | undefined): Promise<void> {
+async function runImplicitSettle(
+  windowId: number | undefined,
+  timeoutMs: number = IMPLICIT_SETTLE_TIMEOUT_MS
+): Promise<SettleOutcome> {
   const win = pickWindow(windowId)
-  if (!win || win.isDestroyed()) return
+  if (!win || win.isDestroyed()) return 'no-window'
+  const code =
+    `new Promise((resolve) => { ` +
+      `let done = false; ` +
+      `const finish = (outcome) => { if (!done) { done = true; resolve(outcome) } }; ` +
+      `const timer = setTimeout(() => finish('timed-out'), ${String(timeoutMs)}); ` +
+      `requestAnimationFrame(() => setTimeout(() => { clearTimeout(timer); finish('settled') }, 0)); ` +
+    `})`
+  // Second line of defence: a renderer that never answers at all (wedged,
+  // mid-navigation) would leave the renderer-side timer unreachable too.
+  const capped = new Promise<SettleOutcome>((resolve) => {
+    setTimeout(() => { resolve('timed-out') }, timeoutMs + 250)
+  })
   try {
-    await win.webContents.executeJavaScript(
-      `new Promise((resolve) => requestAnimationFrame(() => setTimeout(() => resolve(null), 0)))`,
-      true
-    )
+    const settle = win.webContents.executeJavaScript(code, true) as Promise<SettleOutcome>
+    return await Promise.race([settle, capped])
   } catch {
     // Renderer torn down mid-batch — let the next step's executeJavaScript
     // surface the real error rather than masking it here.
+    return 'no-window'
   }
 }
 

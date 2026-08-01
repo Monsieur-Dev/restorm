@@ -778,7 +778,9 @@ function rawForward(jsonRpcText) {
       // the 'error' event below; the tag lets `forward()` force a rediscovery.
       const err = new Error(
         `MCP forward timed out: restorm (port ${currentPort}) sent no response within ${FORWARD_IDLE_TIMEOUT_MS}ms. ` +
-          'The instance may be wedged — retry, or restart restorm.'
+          'The tool call is still running or the instance is wedged — a long-running tool (a batch, ' +
+          'a streaming request, a wait) can outlast this cap on a healthy instance. Retry, and only ' +
+          'restart restorm if a trivial call (evaluate 1+1) also times out.'
       )
       err.forwardTimeout = true
       req.destroy(err)

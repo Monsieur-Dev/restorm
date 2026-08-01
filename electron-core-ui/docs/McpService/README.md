@@ -513,6 +513,8 @@ Block for `ms` milliseconds. Use only when nothing else fits — prefer `wait-fo
 
 Chains multiple MCP tool calls into a single request. Runs each step in order; the next step only fires after the previous one resolves **and** the renderer has had an implicit "1 frame + 1 microtask" settle (override per step with `waitFor`, or skip globally via `skipImplicitSettle`). Aborts on the first step that throws or returns `isError: true` — subsequent steps are skipped.
 
+The implicit settle is **bounded** (1000 ms). Chromium produces no frames at all for a window that is unfocused, minimised or occluded, so an unbounded frame wait would never resolve there and every batch would hang — including one whose steps never touch the DOM. On timeout the batch continues, the step carries `"settle": "timed-out"`, and the envelope gains a `settleNote`. Pass `skipImplicitSettle: true` when driving a background window, or a per-step `waitFor` to wait on something real.
+
 ```jsonc
 {
   "steps": [
@@ -543,8 +545,11 @@ Per-step `waitFor` overrides the implicit settle. Pick one shape:
   "abortedAt": null,
   "results": [
     { "index": 0, "name": "dispatch-event", "ok": true },
-    { "index": 1, "name": "screenshot", "ok": true }
-  ]
+    // `settle` appears only when the implicit settle did not complete
+    { "index": 1, "name": "screenshot", "ok": true, "settle": "timed-out" }
+  ],
+  // present only when at least one step's settle timed out
+  "settleNote": "One or more implicit settles timed out after 1000ms — …"
 }
 ```
 
