@@ -9,6 +9,7 @@ import {
   TreatEmptyAsUndefined
 } from 'electron-core-ui/decorators'
 import { BaseRequest } from './BaseRequest'
+import { pickImportMarkers, type ImportMarkerFields } from './importMarkers'
 import type { AmqpMode, RequestType, RuntimeId, Icon } from '../types'
 import type { QuickConfig } from '../../types/requests/QuickConfig'
 
@@ -129,7 +130,7 @@ export class AmqpRequest extends BaseRequest {
     username?: string
     password?: string
     quickConfigs?: QuickConfig[]
-  }): AmqpRequest {
+  } & ImportMarkerFields): AmqpRequest {
     return new AmqpRequest({
       ...(obj.id !== undefined && { id: obj.id }),
       name: obj.name ?? '',
@@ -138,6 +139,7 @@ export class AmqpRequest extends BaseRequest {
       ...(obj.notes !== undefined && { notes: obj.notes }),
       tags: obj.tags ?? [],
       ...(obj.authenticationRequestId !== undefined && { authenticationRequestId: obj.authenticationRequestId }),
+      ...pickImportMarkers(obj),
       url: obj.url ?? '',
       ...(obj.vhost !== undefined && { vhost: obj.vhost }),
       mode: obj.mode ?? 'publish',
@@ -167,6 +169,7 @@ export class AmqpRequest extends BaseRequest {
       notes: this.notes,
       tags: this.tags,
       ...(this.authenticationRequestId !== undefined && { authenticationRequestId: this.authenticationRequestId }),
+      ...pickImportMarkers(this),
       url: this.url,
       ...(this.vhost !== undefined && { vhost: this.vhost }),
       mode: this.mode,

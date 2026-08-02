@@ -9,6 +9,7 @@ import {
   TreatEmptyAsUndefined
 } from 'electron-core-ui/decorators'
 import { BaseRequest } from './BaseRequest'
+import { pickImportMarkers, type ImportMarkerFields } from './importMarkers'
 import { KeyValue } from '../KeyValue'
 import type { RequestType, RuntimeId, Icon } from '../types'
 import type { KafkaMode, KafkaFromOffset, KafkaSaslMechanism } from '../../types/requests/KafkaRequest'
@@ -151,7 +152,7 @@ export class KafkaRequest extends BaseRequest {
     saslPassword?: string
     tlsEnabled?: boolean
     quickConfigs?: QuickConfig[]
-  }): KafkaRequest {
+  } & ImportMarkerFields): KafkaRequest {
     return new KafkaRequest({
       ...(obj.id !== undefined && { id: obj.id }),
       name: obj.name ?? '',
@@ -160,6 +161,7 @@ export class KafkaRequest extends BaseRequest {
       ...(obj.notes !== undefined && { notes: obj.notes }),
       tags: obj.tags ?? [],
       ...(obj.authenticationRequestId !== undefined && { authenticationRequestId: obj.authenticationRequestId }),
+      ...pickImportMarkers(obj),
       url: obj.url ?? '',
       clientId: obj.clientId ?? '',
       mode: obj.mode ?? 'produce',
@@ -194,6 +196,7 @@ export class KafkaRequest extends BaseRequest {
       notes: this.notes,
       tags: this.tags,
       ...(this.authenticationRequestId !== undefined && { authenticationRequestId: this.authenticationRequestId }),
+      ...pickImportMarkers(this),
       url: this.url,
       clientId: this.clientId,
       mode: this.mode,

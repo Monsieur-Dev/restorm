@@ -9,6 +9,7 @@ import {
   TreatEmptyAsUndefined
 } from 'electron-core-ui/decorators'
 import { BaseRequest } from './BaseRequest'
+import { pickImportMarkers, type ImportMarkerFields } from './importMarkers'
 import { KeyValue } from '../KeyValue'
 import type { RequestType, RuntimeId, Icon } from '../types'
 import type { SoapMockOperation } from '../../types/requests/SoapRequest'
@@ -109,7 +110,7 @@ export class SoapRequest extends BaseRequest {
     server?: boolean
     mockOperations?: SoapMockOperation[]
     quickConfigs?: QuickConfig[]
-  }): SoapRequest {
+  } & ImportMarkerFields): SoapRequest {
     return new SoapRequest({
       ...(obj.id !== undefined && { id: obj.id }),
       name: obj.name ?? '',
@@ -118,6 +119,7 @@ export class SoapRequest extends BaseRequest {
       ...(obj.notes !== undefined && { notes: obj.notes }),
       tags: obj.tags ?? [],
       ...(obj.authenticationRequestId !== undefined && { authenticationRequestId: obj.authenticationRequestId }),
+      ...pickImportMarkers(obj),
       url: obj.url ?? '',
       soapAction: obj.soapAction ?? '',
       service: obj.service ?? '',
@@ -143,6 +145,7 @@ export class SoapRequest extends BaseRequest {
       notes: this.notes,
       tags: this.tags,
       ...(this.authenticationRequestId !== undefined && { authenticationRequestId: this.authenticationRequestId }),
+      ...pickImportMarkers(this),
       url: this.url,
       soapAction: this.soapAction,
       service: this.service,

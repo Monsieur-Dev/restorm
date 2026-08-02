@@ -14,6 +14,7 @@ import {
   graphqlField
 } from 'electron-core-ui/decorators'
 import { BaseRequest } from './BaseRequest'
+import { pickImportMarkers, type ImportMarkerFields } from './importMarkers'
 import { KeyValue } from '../KeyValue'
 import type { RequestType, RuntimeId, Icon, ODataVersion } from '../types'
 import type { QuickConfig } from '../../types/requests/QuickConfig'
@@ -177,7 +178,7 @@ export class ODataRequest extends BaseRequest {
 
   /** Whether this endpoint is deprecated. */
   @graphqlField({ type: 'Boolean', nullable: true })
-  deprecated = false
+  override deprecated = false
 
   /** When true, restorm ACTS AS a local OData v4 mock service: it hosts the
    * `mockMetadata` CSDL + the `mockData` entity collections on
@@ -245,7 +246,7 @@ export class ODataRequest extends BaseRequest {
     mockMetadata?: string
     mockData?: Record<string, Record<string, unknown>[]>
     quickConfigs?: QuickConfig[]
-  }): ODataRequest {
+  } & ImportMarkerFields): ODataRequest {
     return new ODataRequest({
       ...(obj.id !== undefined && { id: obj.id }),
       name: obj.name ?? '',
@@ -254,6 +255,7 @@ export class ODataRequest extends BaseRequest {
       ...(obj.notes !== undefined && { notes: obj.notes }),
       tags: obj.tags ?? [],
       ...(obj.authenticationRequestId !== undefined && { authenticationRequestId: obj.authenticationRequestId }),
+      ...pickImportMarkers(obj),
       url: obj.url ?? '',
       odataVersion: obj.odataVersion ?? 'v4',
       operationKind: obj.operationKind ?? 'entity-set',
@@ -269,7 +271,6 @@ export class ODataRequest extends BaseRequest {
       ...(obj.entitySetProperties !== undefined && { entitySetProperties: obj.entitySetProperties }),
       ...(obj.navigationProperties !== undefined && { navigationProperties: obj.navigationProperties }),
       ...(obj.operationParameters !== undefined && { operationParameters: obj.operationParameters }),
-      deprecated: obj.deprecated ?? false,
       ...(obj.server !== undefined && { server: obj.server }),
       ...(obj.mockMetadata !== undefined && { mockMetadata: obj.mockMetadata }),
       ...(obj.mockData !== undefined && { mockData: obj.mockData }),
@@ -287,6 +288,7 @@ export class ODataRequest extends BaseRequest {
       notes: this.notes,
       tags: this.tags,
       ...(this.authenticationRequestId !== undefined && { authenticationRequestId: this.authenticationRequestId }),
+      ...pickImportMarkers(this),
       url: this.url,
       odataVersion: this.odataVersion,
       operationKind: this.operationKind,
@@ -302,7 +304,6 @@ export class ODataRequest extends BaseRequest {
       ...(this.entitySetProperties !== undefined && { entitySetProperties: this.entitySetProperties }),
       ...(this.navigationProperties !== undefined && { navigationProperties: this.navigationProperties }),
       ...(this.operationParameters !== undefined && { operationParameters: this.operationParameters }),
-      deprecated: this.deprecated,
       ...(this.server !== undefined && { server: this.server }),
       ...(this.mockMetadata !== undefined && { mockMetadata: this.mockMetadata }),
       ...(this.mockData !== undefined && { mockData: this.mockData }),

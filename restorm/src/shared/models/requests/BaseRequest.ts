@@ -9,6 +9,7 @@ import {
   TreatEmptyAsUndefined
 } from 'electron-core-ui/decorators'
 import type { RuntimeId, Icon, RequestType } from '../types'
+import type { ImportOrigin } from '../../types/requests/BaseRequest'
 
 /**
  * Abstract base class for all request types.
@@ -56,6 +57,23 @@ export abstract class BaseRequest {
    * folder at run time; the id itself is the only field persisted. */
   @graphqlField({ type: 'String', nullable: true })
   authenticationRequestId?: RuntimeId
+
+  /** Link back to the spec operation this request was materialised
+   * from. Absent on user-created requests, which the idempotent
+   * refresh pipeline leaves strictly alone. Subclasses inherit it
+   * rather than redeclaring it — see `./importMarkers`. */
+  importOrigin?: ImportOrigin
+
+  /** `true` once the source spec marks the operation deprecated.
+   * Subclasses that expose it to GraphQL redeclare it with a
+   * `@graphqlField`; the field itself lives here so every protocol
+   * persists it. */
+  deprecated?: boolean
+
+  /** `true` once the operation stopped appearing in the fetched
+   * spec. The request is kept and stays executable — the sidebar
+   * renders it struck-through. */
+  removed?: boolean
 
   constructor(init?: Partial<BaseRequest>) {
     if (init) {

@@ -71,10 +71,29 @@ export interface AddedRequest {
   parentPath: string[]
 }
 
+/**
+ * A lifecycle marker the pipeline flipped on a request that already
+ * existed in the target folder, keyed by the request's persisted id
+ * so a consumer holding its own copy of the tree can find the same
+ * node. Only `deprecated` / `removed` travel: the pipeline owns those
+ * two fields exclusively, so replaying them onto another copy of the
+ * tree can't clobber a user edit.
+ */
+export interface MarkedRequest {
+  id: string
+  deprecated?: boolean
+  removed?: boolean
+}
+
 export interface ApplyApiUpdateResult {
   diff: ImportDiff
   appliedHash: string
   appliedVersion?: string
+  /** Requests whose `deprecated` / `removed` flag the pipeline
+   * changed. The renderer replays them onto its own tree so the
+   * dimming / strike-through actually renders — and so its next
+   * mirror back to main doesn't undo the marking. */
+  markedRequests: MarkedRequest[]
   /** The brand-new request instances the pipeline appended for each
    * `added` operation, paired with the folder breadcrumb that places
    * them under the same tag / group folder a fresh import would have
@@ -173,6 +192,10 @@ export function applyApiUpdate(input: ApplyApiUpdateInput): ApplyApiUpdateResult
   const freshIndex = indexFreshFolderByNaturalKey(input.freshFolder)
 
   const addedRequests: AddedRequest[] = []
+  // Keyed by request id so a request marked twice in one run (e.g. an
+  // op that both un-removes and deprecates) contributes one entry
+  // carrying its final state.
+  const markedById = new Map<string, Request>()
   const options: RunIdempotentImportOptions = {
     target: input.target,
     spec: input.spec,
@@ -207,6 +230,9 @@ export function applyApiUpdate(input: ApplyApiUpdateInput): ApplyApiUpdateResult
       }
       const parentItems = ensureParentItems(target, fromFresh.parentPath)
       parentItems.push(request)
+    },
+    onRequestMarked: (request: Request): void => {
+      markedById.set(request.id, request)
     }
   }
 
@@ -223,8 +249,14 @@ export function applyApiUpdate(input: ApplyApiUpdateInput): ApplyApiUpdateResult
   if (fresh.apiDocumentation) target.apiDocumentation = fresh.apiDocumentation
   if (fresh.enumDefinitions) target.enumDefinitions = fresh.enumDefinitions
 
+  const markedRequests: MarkedRequest[] = [...markedById.values()].map((request) => ({
+    id: request.id,
+    ...(request.deprecated !== undefined && { deprecated: request.deprecated }),
+    ...(request.removed !== undefined && { removed: request.removed })
+  }))
+
   const appliedHash = input.fetchedHash ?? computeSpecHash(input.spec)
-  const result: ApplyApiUpdateResult = { diff, appliedHash, addedRequests }
+  const result: ApplyApiUpdateResult = { diff, appliedHash, addedRequests, markedRequests }
   if (input.fetchedVersion !== undefined) result.appliedVersion = input.fetchedVersion
   logger.info(
     `[applyApiUpdate] applied to ${input.target.id}: +${diff.added.length} ⤓${diff.deprecated.length} ⌽${diff.removed.length} ↻${diff.merged.length}`
