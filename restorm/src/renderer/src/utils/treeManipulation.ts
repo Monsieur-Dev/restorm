@@ -22,9 +22,29 @@ function childrenArray(container: { items?: FolderItem[] }): FolderItem[] {
   return container.items
 }
 
+/** Every container key `reassignTreeIds` descends into. A flat list applied to
+ * EVERY visited node — a key absent on a given node (e.g. a request has no
+ * `environments`) is a no-op, so one list safely covers every `FolderItem`
+ * kind (folder / environment folder / environment / enum definition /
+ * custom value list / request / scenario).
+ *
+ * Kept as its own named export so the coverage test below can enumerate every
+ * id-bearing container type known to the type system and assert each one's
+ * key is actually in this list — the failure mode this guards is exactly how
+ * this list went stale before: three container keys (`enumDefinitions`,
+ * `subEnvironments`, `entries`) were added to the persisted types over time
+ * without a matching entry here, and nothing caught it. */
+export const REASSIGNED_ID_CONTAINER_KEYS = [
+  'items', 'environments', 'customValueLists',
+  'enumDefinitions', 'subEnvironments', 'entries'
+] as const
+
 /** Give a fresh id to this object and to every descendant that carries one and
  * could collide in the tree: child `items` (folders / scenarios / requests),
- * an environment folder's `environments` and `customValueLists`. Records every
+ * an environment folder's `environments`, `customValueLists` and
+ * `enumDefinitions`, an environment's `subEnvironments` (recursively — each
+ * nested `Environment` re-enters this same function, so N levels of nesting
+ * need no dedicated code), and a custom value list's `entries`. Records every
  * old→new mapping so references can be remapped afterwards. Scenario graph
  * node/edge ids are left untouched — they are scenario-scoped and the deep copy
  * already unshared them (edges keep referencing their own nodes). */
@@ -37,7 +57,7 @@ function reassignTreeIds(node: unknown, idMap: Map<string, string>): void {
     idMap.set(id, next)
     rec['id'] = next
   }
-  for (const key of ['items', 'environments', 'customValueLists']) {
+  for (const key of REASSIGNED_ID_CONTAINER_KEYS) {
     const arr = rec[key]
     if (Array.isArray(arr)) for (const child of arr) reassignTreeIds(child, idMap)
   }

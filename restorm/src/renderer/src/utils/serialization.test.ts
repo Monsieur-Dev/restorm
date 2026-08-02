@@ -254,6 +254,82 @@ describe('generateIds — the backfill is derived from the document, never rando
   })
 })
 
+/**
+ * `EnumDefinition` (`values[]` + `matchingRules[]`, see `idPathSegment` in
+ * `shared/utils/stableId.ts`) follows the same backfill/dedup contract as
+ * every other recognised shape — these tests mirror the request-type ones
+ * above, scoped to the shape this ticket adds.
+ */
+describe('generateIds — EnumDefinition', () => {
+  const treeWith = (enumDefinitions: unknown[]): unknown => ({
+    collections: [
+      { name: 'Root', configuration: {}, folderType: 'environment', items: [], enumDefinitions }
+    ]
+  })
+  const enumDefsOf = (loaded: unknown): Record<string, unknown>[] =>
+    (loaded as { collections: { enumDefinitions: Record<string, unknown>[] }[] }).collections[0]?.enumDefinitions ?? []
+
+  it('backfills a missing id deterministically, and never touches an id the file already carries', () => {
+    const tree = treeWith([
+      { name: 'Status', values: ['open', 'closed'], matchingRules: [] },
+      { id: 'persisted-enum', name: 'Kind', values: ['a'], matchingRules: [] }
+    ])
+    const first = enumDefsOf(processAfterDeserialization(structuredClone(tree)))
+    const second = enumDefsOf(processAfterDeserialization(structuredClone(tree)))
+
+    expect(typeof first[0]?.['id']).toBe('string')
+    expect((first[0]?.['id'] as string).length).toBeGreaterThan(0)
+    // Deterministic: the same document backfills the same id on every independent load.
+    expect(second[0]?.['id']).toBe(first[0]?.['id'])
+    // An id already in the file is never modified.
+    expect(first[1]?.['id']).toBe('persisted-enum')
+    expect(second[1]?.['id']).toBe('persisted-enum')
+  })
+
+  it('when two EnumDefinitions share a persisted id, an EnumValue.enumDefinitionId pointing at it keeps resolving to whichever one kept the id — never the void', () => {
+    // Same corollary as the odata/auth "duplicate id" test above, extended to
+    // a REFERENCE that targets the duplicated entity: generateIds never
+    // remaps a cross-reference (no way to tell, post-hoc, which of the two
+    // original entities a reference meant), so `enumDefinitionId` stays
+    // exactly as persisted and simply follows whichever EnumDefinition wins
+    // the id — the first one encountered in document order.
+    const tree = {
+      collections: [
+        { name: 'Root', configuration: {}, folderType: 'environment', items: [
+          { name: 'Pet', configuration: {}, items: [
+            { name: 'Find', type: 'http', headers: [
+              { key: 'status', value: { type: 'enum', value: 'open', enumDefinitionId: 'dup-enum' } }
+            ] }
+          ] }
+        ],
+        enumDefinitions: [
+          { id: 'dup-enum', name: 'StatusA', values: ['open'], matchingRules: [] },
+          { id: 'dup-enum', name: 'StatusB', values: ['open'], matchingRules: [] }
+        ] }
+      ]
+    }
+
+    const loaded = processAfterDeserialization(structuredClone(tree)) as {
+      collections: {
+        enumDefinitions: { id: string, name: string }[]
+        items: { items: { headers: { value: { enumDefinitionId: string } }[] }[] }[]
+      }[]
+    }
+    const [winner, loser] = loaded.collections[0]?.enumDefinitions ?? []
+    const resolvedId = loaded.collections[0]?.items[0]?.items[0]?.headers[0]?.value.enumDefinitionId
+
+    // The two definitions no longer share an id...
+    expect(winner?.id).not.toBe(loser?.id)
+    // ...the first one in document order keeps the persisted id...
+    expect(winner?.id).toBe('dup-enum')
+    expect(winner?.name).toBe('StatusA')
+    // ...and the untouched reference still resolves to it — never to the
+    // loser, and never to an id nothing carries anymore.
+    expect(resolvedId).toBe('dup-enum')
+    expect(resolvedId).toBe(winner?.id)
+  })
+})
+
 describe('generateIds — determinism on the committed reference samples', () => {
   const SAMPLES_DIR = join(__dirname, '../../../../tests/e2e/samples')
   const SAMPLES = readdirSync(SAMPLES_DIR, { withFileTypes: true })
