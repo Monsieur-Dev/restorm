@@ -1,46 +1,46 @@
 {
   "account": {
-    "tooltip": "Налог",
-    "connected": "Пријављен",
-    "signIn": "Пријава",
-    "signOut": "Одјава",
-    "manageSubscription": "Управљај претплатом",
-    "upgradeToPro": "Пређи на Pro",
-    "dashboard": "Контролна табла",
+    "tooltip": "Nalog",
+    "connected": "Prijavljen",
+    "signIn": "Prijava",
+    "signOut": "Odjava",
+    "manageSubscription": "Upravljaj pretplatom",
+    "upgradeToPro": "Pređi na Pro",
+    "dashboard": "Kontrolna tabla",
     "signOutConfirm": {
-      "message": "Да ли сте сигурни да желите да се одјавите?",
-      "confirm": "Да",
-      "cancel": "Откажи"
+      "message": "Da li ste sigurni da želite da se odjavite?",
+      "confirm": "Da",
+      "cancel": "Otkaži"
     }
   },
   "secrets": {
-    "others": "Остало",
-    "refresh": "Освежи тајну",
+    "others": "Ostalo",
+    "refresh": "Osveži tajnu",
     "source": {
-      "envVar": "Променљива окружења",
-      "envFileSecret": "Тајна из env датотеке",
-      "envFileSecretPlaceholder": "Вредност тајне",
-      "envFileSecretLabel": "Вредност тајне"
+      "envVar": "Promenljiva okruženja",
+      "envFileSecret": "Tajna iz env datoteke",
+      "envFileSecretPlaceholder": "Vrednost tajne",
+      "envFileSecretLabel": "Vrednost tajne"
     },
     "param": {
-      "envVarName": "Назив променљиве",
+      "envVarName": "Naziv promenljive",
       "envVarNamePlaceholder": "MY_API_KEY"
     },
-    "editRetrieval": "Уреди преузимање",
-    "envVarUnresolved": "(неразрешено)",
-    "resolving": "Разрешавање…",
-    "resolveError": "Разрешавање тајне није успело",
-    "resolveErrorEnv": "Најмање једну променљиву није било могуће преузети и у стању је грешке.",
-    "resolveErrorItem": "Најмање једну тајну ове ставке није било могуће преузети.",
-    "resolveErrorItemVars": "Неразрешене променљиве окружења: {{vars}}",
-    "fetchFailed": "Преузимање није успело",
+    "editRetrieval": "Uredi preuzimanje",
+    "envVarUnresolved": "(nerazrešeno)",
+    "resolving": "Razrešavanje…",
+    "resolveError": "Razrešavanje tajne nije uspelo",
+    "resolveErrorEnv": "Najmanje jednu promenljivu nije bilo moguće preuzeti i u stanju je greške.",
+    "resolveErrorItem": "Najmanje jednu tajnu ove stavke nije bilo moguće preuzeti.",
+    "resolveErrorItemVars": "Nerazrešene promenljive okruženja: {{vars}}",
+    "fetchFailed": "Preuzimanje nije uspelo",
     "retrievalModal": {
-      "title": "Преузимање тајне",
-      "value": "вредност:",
-      "fetch": "Преузми",
-      "fetchFailed": "Преузимање није успело",
-      "ok": "У реду",
-      "cancel": "Откажи"
+      "title": "Preuzimanje tajne",
+      "value": "vrednost:",
+      "fetch": "Preuzmi",
+      "fetchFailed": "Preuzimanje nije uspelo",
+      "ok": "U redu",
+      "cancel": "Otkaži"
     }
   },
   "app": {
@@ -57,9 +57,9 @@
       "applyToAll": "Primeni na sve zahteve"
     },
     "auth": {
-      "noAuth": "Без аутентификације",
-      "popoverLabel": "Рута аутентификације",
-      "unnamed": "Без назива"
+      "noAuth": "Bez autentifikacije",
+      "popoverLabel": "Ruta autentifikacije",
+      "unnamed": "Bez naziva"
     },
     "contextMenu": {
       "revealInFolder": "Otvori fasciklu koja sadrži datoteku",
@@ -70,130 +70,130 @@
     }
   },
   "tips": {
-    "cardTitle": "Савети и трикови",
+    "cardTitle": "Saveti i trikovi",
     "maximizeTab": {
-      "title": "Увећајте картицу једним кликом",
-      "body": "Двоструко кликните било коју картицу радне површине да бисте је приказали преко целог екрана. Притисните Esc за повратак на претходни распоред."
+      "title": "Uvećajte karticu jednim klikom",
+      "body": "Dvostruko kliknite bilo koju karticu radne površine da biste je prikazali preko celog ekrana. Pritisnite Esc za povratak na prethodni raspored."
     },
     "mcpControl": {
-      "title": "Управљајте restorm-ом помоћу вештачке интелигенције",
-      "body": "Restorm укључује MCP сервер, тако да AI асистенти попут Claude Code-а могу да приказују, отварају, уређују и извршавају ваше захтеве, прегледају одговоре и програмски управљају радним простором — без напуштања разговора."
+      "title": "Upravljajte restorm-om pomoću veštačke inteligencije",
+      "body": "Restorm uključuje MCP server, tako da AI asistenti poput Claude Code-a mogu da prikazuju, otvaraju, uređuju i izvršavaju vaše zahteve, pregledaju odgovore i programski upravljaju radnim prostorom — bez napuštanja razgovora."
     },
     "envSwitch": {
-      "title": "Мењајте окружења лако!",
-      "body": "Промените окружење тренутног захтева или свих захтева вашег API-ја кликом на дугме у траци стања, или десним кликом на дугме за слање захтева."
+      "title": "Menjajte okruženja lako!",
+      "body": "Promenite okruženje trenutnog zahteva ili svih zahteva vašeg API-ja klikom na dugme u traci stanja, ili desnim klikom na dugme za slanje zahteva."
     },
     "authRequests": {
-      "title": "Треба да се аутентификујете да бисте користили свој API?",
-      "body": "Уместо да сваки пут шаљете захтев за добијање токена и копирате га свуда, користите захтеве за аутентификацију. Када позив не успе (401, 403, …) или истекне рок токена, захтев за аутентификацију се аутоматски поново извршава како би се токен извукао и поново користио. Практично!"
+      "title": "Treba da se autentifikujete da biste koristili svoj API?",
+      "body": "Umesto da svaki put šaljete zahtev za dobijanje tokena i kopirate ga svuda, koristite zahteve za autentifikaciju. Kada poziv ne uspe (401, 403, …) ili istekne rok tokena, zahtev za autentifikaciju se automatski ponovo izvršava kako bi se token izvukao i ponovo koristio. Praktično!"
     },
     "supplyChain": {
-      "title": "Заштитите се!",
-      "body": "Као и сваки софтвер, Restorm користи библиотеке трећих страна. Да би се спречили напади на ланац снабдевања, сви одлазни позиви се пресрећу на најнижем нивоу, и обавештавамо вас ако библиотека треће стране покуша да украде ваше личне податке!"
+      "title": "Zaštitite se!",
+      "body": "Kao i svaki softver, Restorm koristi biblioteke trećih strana. Da bi se sprečili napadi na lanac snabdevanja, svi odlazni pozivi se presreću na najnižem nivou, i obaveštavamo vas ako biblioteka treće strane pokuša da ukrade vaše lične podatke!"
     },
     "codeSnippets": {
-      "title": "Restorm вам помаже да пишете код!",
-      "body": "Пронађите исечке кода на сваком захтеву како бисте их лакше интегрисали у свој софтвер. Доступно је много језика: curl, PowerShell, TypeScript, C# и још много других!"
+      "title": "Restorm vam pomaže da pišete kod!",
+      "body": "Pronađite isečke koda na svakom zahtevu kako biste ih lakše integrisali u svoj softver. Dostupno je mnogo jezika: curl, PowerShell, TypeScript, C# i još mnogo drugih!"
     },
     "workbenchLayout": {
-      "title": "Организујте свој радни простор",
-      "body": "Имате велики екран и пуно захтева? Поставите их једну поред друге, једну испод друге или како год желите — само превуците картицу тамо где је желите. Све за ваш комфор!"
+      "title": "Organizujte svoj radni prostor",
+      "body": "Imate veliki ekran i puno zahteva? Postavite ih jednu pored druge, jednu ispod druge ili kako god želite — samo prevucite karticu tamo gde je želite. Sve za vaš komfor!"
     },
     "persistState": {
-      "title": "Пронађите га онаквим какав сте оставили!",
-      "body": "Ако затворите Restorm и поново га отворите, пронаћи ћете га у потпуно истом стању у којем сте га оставили."
+      "title": "Pronađite ga onakvim kakav ste ostavili!",
+      "body": "Ako zatvorite Restorm i ponovo ga otvorite, pronaći ćete ga u potpuno istom stanju u kojem ste ga ostavili."
     },
     "favorites": {
-      "title": "Неки су вам ближи срцу од других…",
-      "body": "Имате захтеве до којих вам је више стало? Додајте их у омиљене!"
+      "title": "Neki su vam bliži srcu od drugih…",
+      "body": "Imate zahteve do kojih vam je više stalo? Dodajte ih u omiljene!"
     },
     "console": {
-      "title": "Видите шта се дешава",
-      "body": "Конзола вам приказује позиве ка вашим API-има док шаљете захтеве. Згодно за копирање у терминал када вам затреба! Шта више волите: curl или PowerShell?"
+      "title": "Vidite šta se dešava",
+      "body": "Konzola vam prikazuje pozive ka vašim API-ima dok šaljete zahteve. Zgodno za kopiranje u terminal kada vam zatreba! Šta više volite: curl ili PowerShell?"
     },
     "miniBrowser": {
-      "title": "Уморни од сталног пребацивања прозора?",
-      "body": "Restorm укључује уграђени мини веб прегледач. Згодно када ваша апликација визуелно реагује на API позиве."
+      "title": "Umorni od stalnog prebacivanja prozora?",
+      "body": "Restorm uključuje ugrađeni mini veb pregledač. Zgodno kada vaša aplikacija vizuelno reaguje na API pozive."
     },
     "apiDocs": {
-      "title": "Документација — одмах овде",
-      "body": "Више нема пребацивања између Restorm-а и документације вашег API-ја. Ако ваш API нуди спецификацију (Swagger, OpenAPI, …), увози се у Restorm и можете је читати директно овде."
+      "title": "Dokumentacija — odmah ovde",
+      "body": "Više nema prebacivanja između Restorm-a i dokumentacije vašeg API-ja. Ako vaš API nudi specifikaciju (Swagger, OpenAPI, …), uvozi se u Restorm i možete je čitati direktno ovde."
     },
     "secrets": {
-      "title": "Заштитите своје тајне",
-      "body": "Ваше лозинке и ауторизацијски токени се не чувају директно у Restorm фајлу. Зато Restorm чува тајне и историјат захтева у одвојеним фајловима. На вама је да их не качите на GitHub. Restorm може да преузме тајне и са AWS-а, GitHub-а и других извора."
+      "title": "Zaštitite svoje tajne",
+      "body": "Vaše lozinke i autorizacijski tokeni se ne čuvaju direktno u Restorm fajlu. Zato Restorm čuva tajne i istorijat zahteva u odvojenim fajlovima. Na vama je da ih ne kačite na GitHub. Restorm može da preuzme tajne i sa AWS-a, GitHub-a i drugih izvora."
     },
     "themes": {
-      "title": "Ваше боје, ваше расположење",
-      "body": "Restorm долази са неколико шема боја. Изаберите ону која одговара вашем расположењу."
+      "title": "Vaše boje, vaše raspoloženje",
+      "body": "Restorm dolazi sa nekoliko šema boja. Izaberite onu koja odgovara vašem raspoloženju."
     },
     "search": {
-      "title": "Пронађите све, брзо",
-      "body": "Видели сте врх овог прозора? Restorm укључује претраживач — нема више сатима тражења ТОГ захтева."
+      "title": "Pronađite sve, brzo",
+      "body": "Videli ste vrh ovog prozora? Restorm uključuje pretraživač — nema više satima traženja TOG zahteva."
     },
     "multiEnv": {
-      "title": "Исти захтеви, различита окружења",
-      "body": "Имате dev, prod и staging? Исти захтеви, само не баш исти URL-ови и не баш исти токени… Користите окружења и променљиве да се пребацујете једним кликом. Свако окружење можете обележити својом бојом и иконом, како бисте избегли петачке вечерње панике у продукцији!"
+      "title": "Isti zahtevi, različita okruženja",
+      "body": "Imate dev, prod i staging? Isti zahtevi, samo ne baš isti URL-ovi i ne baš isti tokeni… Koristite okruženja i promenljive da se prebacujete jednim klikom. Svako okruženje možete obeležiti svojom bojom i ikonom, kako biste izbegli petačke večernje panike u produkciji!"
     },
     "protocols": {
-      "title": "Више од обичног REST-а",
-      "body": "Restorm говори REST… и много више! GraphQL, gRPC, SOAP, OData, WebSocket — сви ти протоколи на дохват руке, без мењања алата."
+      "title": "Više od običnog REST-a",
+      "body": "Restorm govori REST… i mnogo više! GraphQL, gRPC, SOAP, OData, WebSocket — svi ti protokoli na dohvat ruke, bez menjanja alata."
     },
     "responseTree": {
-      "title": "Визуелизујте одговоре свог API-ја",
-      "body": "Да ли сте знали да одговоре свог API-ја можете прегледати у графичкијем облику? Restorm их приказује као интерактивно стабло које можете да обилазите, склапате и расклапате."
+      "title": "Vizuelizujte odgovore svog API-ja",
+      "body": "Da li ste znali da odgovore svog API-ja možete pregledati u grafičkijem obliku? Restorm ih prikazuje kao interaktivno stablo koje možete da obilazite, sklapate i rasklapate."
     },
     "responseHistory": {
-      "title": "Историјат захтева",
-      "body": "Можете прегледати историјат свих позива ка вашим API-јима. Згодно када треба да откријете шта се заиста догодило."
+      "title": "Istorijat zahteva",
+      "body": "Možete pregledati istorijat svih poziva ka vašim API-jima. Zgodno kada treba da otkrijete šta se zaista dogodilo."
     },
     "multiLanguage": {
-      "title": "27 језика!",
-      "body": "Restorm говори 27 језика. Енглески, француски, шпански, немачки, италијански, јапански, кинески, корејски и многи други — изаберите свој у подешавањима!"
+      "title": "27 jezika!",
+      "body": "Restorm govori 27 jezika. Engleski, francuski, španski, nemački, italijanski, japanski, kineski, korejski i mnogi drugi — izaberite svoj u podešavanjima!"
     },
     "fromPostman": {
-      "title": "Долазите са Postman-а или Bruno-а?",
-      "body": "Помажемо вам да пређете на Restorm — ваш прелазак учињен лаким ;)"
+      "title": "Dolazite sa Postman-a ili Bruno-a?",
+      "body": "Pomažemo vam da pređete na Restorm — vaš prelazak učinjen lakim ;)"
     },
     "chainRequests": {
-      "title": "Више захтева за надовезивање?",
-      "body": "Користите своје захтеве унутар сценарија, додајте услове и чак угнездите сценарије унутар других сценарија."
+      "title": "Više zahteva za nadovezivanje?",
+      "body": "Koristite svoje zahteve unutar scenarija, dodajte uslove i čak ugnezdite scenarije unutar drugih scenarija."
     },
     "stepByStep": {
-      "title": "Прођите кроз своје сценарије корак по корак",
-      "body": "Корак по корак, да видите тачно шта се дешава. Можете чак и да поставите тачке прекида."
+      "title": "Prođite kroz svoje scenarije korak po korak",
+      "body": "Korak po korak, da vidite tačno šta se dešava. Možete čak i da postavite tačke prekida."
     },
     "cicd": {
-      "title": "Покрећите своје сценарије у својим CI/CD процедурама",
-      "body": "Покрените Restorm у headless режиму да бисте извршили сценарио без интерфејса и прикупили његове записе — аутоматизовани тестови, изграђени визуелно."
+      "title": "Pokrećite svoje scenarije u svojim CI/CD procedurama",
+      "body": "Pokrenite Restorm u headless režimu da biste izvršili scenario bez interfejsa i prikupili njegove zapise — automatizovani testovi, izgrađeni vizuelno."
     },
     "nestedScenarios": {
-      "title": "Погледајте шта се дешава у сценарију",
-      "body": "Један сценарио може да позове други. У инспектору прочитајте сваки запис и скочите право на сценарио из ког потиче."
+      "title": "Pogledajte šta se dešava u scenariju",
+      "body": "Jedan scenario može da pozove drugi. U inspektoru pročitajte svaki zapis i skočite pravo na scenario iz kog potiče."
     },
     "scenarioHistory": {
-      "title": "Али шта се управо догодило?",
-      "body": "Прегледајте историјат извршавања својих сценарија. Неки од њих се у међувремену променио? Без бриге — сачували смо његову конфигурацију."
+      "title": "Ali šta se upravo dogodilo?",
+      "body": "Pregledajte istorijat izvršavanja svojih scenarija. Neki od njih se u međuvremenu promenio? Bez brige — sačuvali smo njegovu konfiguraciju."
     },
     "codeSandbox": {
-      "title": "Сценарији и безбедност",
-      "body": "Можете писати код у својим сценаријима — али он се извршава у безбедном sandbox-у, без приступа вашим локалним фајловима и без директног приступа интернету. Најсигурнији начин да останете заштићени!"
+      "title": "Scenariji i bezbednost",
+      "body": "Možete pisati kod u svojim scenarijima — ali on se izvršava u bezbednom sandbox-u, bez pristupa vašim lokalnim fajlovima i bez direktnog pristupa internetu. Najsigurniji način da ostanete zaštićeni!"
     },
     "codeLanguages": {
-      "title": "Имате вољу да напишете мало кода?",
-      "body": "Пишите код директно у својим сценаријима — на TypeScript, JavaScript, Python, Lua, Ruby, C# или R!"
+      "title": "Imate volju da napišete malo koda?",
+      "body": "Pišite kod direktno u svojim scenarijima — na TypeScript, JavaScript, Python, Lua, Ruby, C# ili R!"
     },
     "scenarioAi": {
-      "title": "Сценарији којима управља вештачка интелигенција",
-      "body": "Claude, Cursor, Copilot… познају ваш код: затражите од њих сценарије по мери. Све је изложено преко MCP-а за креирање, уређивање и извршавање сценарија."
+      "title": "Scenariji kojima upravlja veštačka inteligencija",
+      "body": "Claude, Cursor, Copilot… poznaju vaš kod: zatražite od njih scenarije po meri. Sve je izloženo preko MCP-a za kreiranje, uređivanje i izvršavanje scenarija."
     },
     "interactiveScenarios": {
-      "title": "Интерактивни сценарији!",
-      "body": "Учините своје сценарије параметризованим и чак питајте корисника шта да ради помоћу дијалошких прозора."
+      "title": "Interaktivni scenariji!",
+      "body": "Učinite svoje scenarije parametrizovanim i čak pitajte korisnika šta da radi pomoću dijaloških prozora."
     },
     "customValueLists": {
-      "title": "Листе вредности за поновну употребу",
-      "body": "Дефинишите своје листе вредности и поново их користите како у својим захтевима тако и у својим сценаријима."
+      "title": "Liste vrednosti za ponovnu upotrebu",
+      "body": "Definišite svoje liste vrednosti i ponovo ih koristite kako u svojim zahtevima tako i u svojim scenarijima."
     }
   },
   "authFailureToast": {
@@ -237,13 +237,13 @@
     "exportOpenApi": "Izvezi u OpenAPI",
     "clearAuthCache": "Očisti keš autentifikacije",
     "openLogsFolder": "Otvori fasciklu zapisa",
-    "mcpLogs": "MCP записи",
+    "mcpLogs": "MCP zapisi",
     "git": "Git",
     "gitPush": "Pošalji",
     "gitPull": "Preuzmi",
     "gitRefresh": "Osveži",
     "gitHistory": "Istorija",
-    "gitResetToServer": "Врати на верзију сервера"
+    "gitResetToServer": "Vrati na verziju servera"
   },
   "sidebar": {
     "addRequest": "Dodaj zahtev",
@@ -255,7 +255,7 @@
     "contextMenu": {
       "delete": "Obriši",
       "clone": "Kloniraj",
-      "copySuffix": "копија",
+      "copySuffix": "kopija",
       "rename": "Preimenuj",
       "addToFavorites": "Dodaj u omiljeno",
       "removeFromFavorites": "Ukloni iz omiljenog",
@@ -272,31 +272,31 @@
         "httpPut": "HTTP – PUT zahtev",
         "httpPatch": "HTTP – PATCH zahtev",
         "httpDelete": "HTTP – DELETE zahtev",
-        "httpServer": "HTTP сервер",
+        "httpServer": "HTTP server",
         "graphql": "GraphQL zahtev",
         "grpc": "gRPC zahtev",
-        "grpcServerStream": "gRPC server-streaming захтев",
-        "grpcClientStream": "gRPC client-streaming захтев",
-        "grpcBidi": "Двосмерни gRPC захтев",
+        "grpcServerStream": "gRPC server-streaming zahtev",
+        "grpcClientStream": "gRPC client-streaming zahtev",
+        "grpcBidi": "Dvosmerni gRPC zahtev",
         "soap": "SOAP zahtev",
         "websocket": "WebSocket zahtev",
         "odata": "OData zahtev",
         "auth": "HTTP zahtev za autentifikaciju",
-        "scenario": "Сценарио",
-        "socketioServer": "Socket.IO сервер",
-        "websocketServer": "WebSocket сервер",
-        "socketio": "Socket.IO захтев",
-        "mqtt": "MQTT request",
-        "mqttServer": "MQTT сервер",
+        "scenario": "Scenario",
+        "socketioServer": "Socket.IO server",
+        "websocketServer": "WebSocket server",
+        "socketio": "Socket.IO zahtev",
+        "mqtt": "MQTT zahtev",
+        "mqttServer": "MQTT server",
         "sse": "SSE zahtev",
-        "grpcServer": "gRPC сервер",
-        "soapServer": "SOAP сервер",
-        "graphqlServer": "GraphQL сервер",
-        "odataServer": "OData сервер",
+        "grpcServer": "gRPC server",
+        "soapServer": "SOAP server",
+        "graphqlServer": "GraphQL server",
+        "odataServer": "OData server",
         "trpc": "tRPC zahtev",
         "amqp": "AMQP zahtev",
         "redis": "Redis zahtev",
-        "stomp": "STOMP захтев",
+        "stomp": "STOMP zahtev",
         "kafkaProduce": "Kafka zahtev – Proizvedi",
         "kafkaConsume": "Kafka zahtev – Potroši",
         "httpHead": "HTTP – HEAD zahtev",
@@ -324,12 +324,12 @@
       "cancel": "Otkaži"
     },
     "scenarioDelete": {
-      "title": "Избриши захтев који користе сценарији",
-      "message": "„{{name}}“ се користи у следећим сценаријима. Шта желите да урадите?",
-      "belongsTag": "припада овом сценарију",
-      "moveInto": "Премести у овај сценарио",
-      "affectsNote": "Брисање овог захтева уклониће га и из ових сценарија.",
-      "deleteAnyway": "Свеједно избриши"
+      "title": "Izbriši zahtev koji koriste scenariji",
+      "message": "„{{name}}“ se koristi u sledećim scenarijima. Šta želite da uradite?",
+      "belongsTag": "pripada ovom scenariju",
+      "moveInto": "Premesti u ovaj scenario",
+      "affectsNote": "Brisanje ovog zahteva ukloniće ga i iz ovih scenarija.",
+      "deleteAnyway": "Svejedno izbriši"
     }
   },
   "environment": {
@@ -347,7 +347,7 @@
     "selectEnvironment": "Izaberite okruženje za prikaz promenljivih",
     "tabs": {
       "docs": "Dokumentacija",
-      "environments": "Окружења",
+      "environments": "Okruženja",
       "notes": "Beleške",
       "customValues": "Custom variables"
     },
@@ -382,14 +382,14 @@
     "customValues": {
       "lists": "Lists",
       "values": "Values",
-      "addList": "Додај листу",
-      "newListName": "New list",
-      "addEntry": "Додај вредност",
+      "addList": "Dodaj listu",
+      "newListName": "Nova lista",
+      "addEntry": "Dodaj vrednost",
       "label": "Label",
       "value": "Value",
-      "noEntries": "Још нема вредности",
-      "selectList": "Изаберите листу",
-      "enabled": "Омогућено"
+      "noEntries": "Još nema vrednosti",
+      "selectList": "Izaberite listu",
+      "enabled": "Omogućeno"
     }
   },
   "requestTab": {
@@ -402,7 +402,7 @@
     "addParam": "Dodaj parametar",
     "environmentSelector": {
       "noEnvironment": "Bez okruženja",
-      "switchTooltip": "Промени окружење"
+      "switchTooltip": "Promeni okruženje"
     },
     "body": {
       "fileLabel": "Datoteka:",
@@ -427,7 +427,7 @@
         "graph": "Graf"
       },
       "loading": "Slanje zahteva...",
-      "noResponseBody": "Нема тела одговора — погледајте Infos за детаље",
+      "noResponseBody": "Nema tela odgovora — pogledajte Infos za detalje",
       "noResponse": "Kliknite Pošalji da biste izvršili zahtev",
       "history": {
         "list": "Lista istorije odgovora",
@@ -437,8 +437,8 @@
         "unpin": "Otkači odgovor"
       }
     },
-    "followRedirects": "Прати преусмеравања",
-    "timeoutLabel": "Временско ограничење (ms)"
+    "followRedirects": "Prati preusmeravanja",
+    "timeoutLabel": "Vremensko ograničenje (ms)"
   },
   "workbench": {
     "tabContextMenu": {
@@ -461,13 +461,13 @@
       "expression": "Izraz",
       "boolean": "Bulova vrednost",
       "null": "Null",
-      "list": "Листа",
-      "variables": "Променљиве",
-      "environment": "Окружење"
+      "list": "Lista",
+      "variables": "Promenljive",
+      "environment": "Okruženje"
     },
     "apiEnums": "Tipovi definisani u API-ju",
-    "customLists": "Прилагођени типови",
-    "listSuffix": "листа"
+    "customLists": "Prilagođeni tipovi",
+    "listSuffix": "lista"
   },
   "graphql": {
     "send": "Pošalji",
@@ -479,34 +479,34 @@
       "headers": "Zaglavlja"
     },
     "server": {
-      "schema": "Шема (SDL)",
-      "resolvers": "Резолвери (унапред задати)",
-      "startListening": "Почни слушање",
-      "stopListening": "Заустави слушање",
-      "served": "Слуша — опслужено {{count}} операција",
-      "notListening": "Не слуша",
-      "listenFailed": "Покретање mock сервера није успело"
+      "schema": "Šema (SDL)",
+      "resolvers": "Rezolveri (unapred zadati)",
+      "startListening": "Počni slušanje",
+      "stopListening": "Zaustavi slušanje",
+      "served": "Sluša — opsluženo {{count}} operacija",
+      "notListening": "Ne sluša",
+      "listenFailed": "Pokretanje mock servera nije uspelo"
     },
     "subscription": {
-      "subscribe": "Претплати се",
-      "stop": "Заустави",
-      "waiting": "Претплаћено — чекање на догађаје…",
-      "noEvents": "Још нема догађаја. Претплатите се да започнете стримовање.",
-      "idle": "Без претплате",
-      "streaming": "Стримовање — примљено {{count}} догађаја",
-      "eventLabel": "Догађај {{index}}"
+      "subscribe": "Pretplati se",
+      "stop": "Zaustavi",
+      "waiting": "Pretplaćeno — čekanje na događaje…",
+      "noEvents": "Još nema događaja. Pretplatite se da započnete strimovanje.",
+      "idle": "Bez pretplate",
+      "streaming": "Strimovanje — primljeno {{count}} događaja",
+      "eventLabel": "Događaj {{index}}"
     }
   },
   "grpc": {
     "send": "Pozovi",
-    "urlPlaceholder": "gRPC сервер (host:port)",
+    "urlPlaceholder": "gRPC server (host:port)",
     "tabs": {
       "message": "Poruka",
       "metadata": "Metapodaci"
     },
     "connect": "Connect",
     "disconnect": "Disconnect",
-    "noFrames": "Још нема оквира.",
+    "noFrames": "Još nema okvira.",
     "callType": {
       "unary": "Unary",
       "serverStream": "Server streaming",
@@ -517,26 +517,26 @@
       "grpc": "gRPC",
       "grpcWeb": "gRPC-Web",
       "connect": "Connect",
-      "streamingUnsupported": "Овај транспорт не подржава клијентски или двосмерни стриминг преко HTTP/1.1. Уместо тога користите нативни gRPC транспорт."
+      "streamingUnsupported": "Ovaj transport ne podržava klijentski ili dvosmerni striming preko HTTP/1.1. Umesto toga koristite nativni gRPC transport."
     },
     "server": {
       "proto": "Proto",
-      "methods": "Mock методе",
-      "addMethod": "Додај методу",
-      "removeMethod": "Уклони методу",
-      "noMethods": "Још нема метода",
-      "servicePlaceholder": "пакет.Сервис",
-      "methodPlaceholder": "Метода",
-      "statusCode": "Статусни код",
-      "statusMessagePlaceholder": "Статусна порука (за код који није OK)",
-      "responseLabel": "Порука одговора (JSON)",
-      "reflection": "Рефлексија",
-      "startListening": "Покрени сервер",
-      "stopListening": "Заустави сервер",
-      "served": "Слуша — опслужено {{count}} позива",
-      "notListening": "Не слуша",
-      "listenFailed": "Покретање gRPC сервера није успело",
-      "snippetsUnavailable": "Исечци кода нису доступни за mock сервер."
+      "methods": "Mock metode",
+      "addMethod": "Dodaj metodu",
+      "removeMethod": "Ukloni metodu",
+      "noMethods": "Još nema metoda",
+      "servicePlaceholder": "paket.Servis",
+      "methodPlaceholder": "Metoda",
+      "statusCode": "Statusni kod",
+      "statusMessagePlaceholder": "Statusna poruka (za kod koji nije OK)",
+      "responseLabel": "Poruka odgovora (JSON)",
+      "reflection": "Refleksija",
+      "startListening": "Pokreni server",
+      "stopListening": "Zaustavi server",
+      "served": "Sluša — opsluženo {{count}} poziva",
+      "notListening": "Ne sluša",
+      "listenFailed": "Pokretanje gRPC servera nije uspelo",
+      "snippetsUnavailable": "Isečci koda nisu dostupni za mock server."
     },
     "reflection": {
       "refresh": "Osveži iz reflectiona",
@@ -554,21 +554,21 @@
     },
     "malformedXmlError": "Nevažeći XML odgovor",
     "server": {
-      "startListening": "Покрени SOAP mock сервер",
-      "stopListening": "Заустави SOAP mock сервер",
-      "notListening": "Не слуша",
-      "served": "Слуша — опслужено {{count}} захтева",
-      "listenFailed": "SOAP mock сервер није могуће покренути",
-      "portLabel": "Порт",
-      "routeLabel": "Рута",
-      "operationNameLabel": "Назив операције",
-      "operationNamePlaceholder": "Назив операције",
+      "startListening": "Pokreni SOAP mock server",
+      "stopListening": "Zaustavi SOAP mock server",
+      "notListening": "Ne sluša",
+      "served": "Sluša — opsluženo {{count}} zahteva",
+      "listenFailed": "SOAP mock server nije moguće pokrenuti",
+      "portLabel": "Port",
+      "routeLabel": "Ruta",
+      "operationNameLabel": "Naziv operacije",
+      "operationNamePlaceholder": "Naziv operacije",
       "soapActionLabel": "SOAPAction",
-      "soapActionPlaceholder": "SOAPAction (опционо)",
-      "faultLabel": "Грешка",
-      "removeOperation": "Уклони операцију",
-      "addOperation": "Додај операцију",
-      "noCodeSnippets": "SOAP mock сервер нема исечак клијентског кода."
+      "soapActionPlaceholder": "SOAPAction (opciono)",
+      "faultLabel": "Greška",
+      "removeOperation": "Ukloni operaciju",
+      "addOperation": "Dodaj operaciju",
+      "noCodeSnippets": "SOAP mock server nema isečak klijentskog koda."
     }
   },
   "websocket": {
@@ -583,44 +583,44 @@
       "message": "Poruka",
       "headers": "Zaglavlja"
     },
-    "acknowledged": "Потврђено",
-    "disconnect": "Прекини везу",
-    "startListening": "Почни слушање",
-    "stopListening": "Заустави слушање",
-    "routePlaceholder": "Рута (опционо)",
-    "clientsConnected": "{{count}} клијент(а) повезано",
-    "notListening": "Не слуша"
+    "acknowledged": "Potvrđeno",
+    "disconnect": "Prekini vezu",
+    "startListening": "Počni slušanje",
+    "stopListening": "Zaustavi slušanje",
+    "routePlaceholder": "Ruta (opciono)",
+    "clientsConnected": "{{count}} klijent(a) povezano",
+    "notListening": "Ne sluša"
   },
   "jsonrpc": {
     "send": "Pošalji",
-    "urlPlaceholder": "URL JSON-RPC крајње тачке",
-    "methodPlaceholder": "метода",
-    "idPlaceholder": "ид (аутоматски)",
-    "notificationModeTooltip": "Режим обавештења — без ид-а, без очекиваног одговора",
+    "urlPlaceholder": "URL JSON-RPC krajnje tačke",
+    "methodPlaceholder": "metoda",
+    "idPlaceholder": "id (automatski)",
+    "notificationModeTooltip": "Režim obaveštenja — bez id-a, bez očekivanog odgovora",
     "tabs": {
       "params": "Parametri",
       "headers": "Zaglavlja"
     },
     "response": {
-      "notificationSent": "Обавештење послато",
-      "errorLabel": "JSON-RPC грешка {{code}}:"
+      "notificationSent": "Obaveštenje poslato",
+      "errorLabel": "JSON-RPC greška {{code}}:"
     }
   },
   "jsonrpcBatch": {
-    "send": "Пошаљи пакет",
+    "send": "Pošalji paket",
     "tabs": {
-      "calls": "Позиви"
+      "calls": "Pozivi"
     },
-    "empty": "Још нема позива. Додајте један испод.",
-    "methodPlaceholder": "метода",
-    "idPlaceholder": "ид (аутоматски)",
-    "moveUp": "Помери горе",
-    "moveDown": "Помери доле",
-    "remove": "Уклони позив",
-    "paramsLabel": "Параметри (JSON)",
-    "add": "Додај позив",
+    "empty": "Još nema poziva. Dodajte jedan ispod.",
+    "methodPlaceholder": "metoda",
+    "idPlaceholder": "id (automatski)",
+    "moveUp": "Pomeri gore",
+    "moveDown": "Pomeri dole",
+    "remove": "Ukloni poziv",
+    "paramsLabel": "Parametri (JSON)",
+    "add": "Dodaj poziv",
     "response": {
-      "unmatched": "Нема одговарајућег уноса одговора."
+      "unmatched": "Nema odgovarajućeg unosa odgovora."
     }
   },
   "sse": {
@@ -707,7 +707,7 @@
     "noMessages": "Još nema poruka",
     "connected": "Povezano",
     "disconnected": "Prekinuto",
-    "consumeError": "Грешка потрошача",
+    "consumeError": "Greška potrošača",
     "producedTo": "Proizvedeno u",
     "offset": "Offset",
     "messages": "Poruke"
@@ -862,7 +862,7 @@
   "common": {
     "cancel": "Otkaži",
     "save": "Sačuvaj",
-    "remove": "Уклони",
+    "remove": "Ukloni",
     "ok": "OK"
   },
   "helpers": {
@@ -1015,7 +1015,7 @@
     "requestFormatDescription": "Podrazumevani tip školjke koji se koristi za prikaz odlaznih zahteva u kartici Konzola. Svaki red je naredba koja se može kopirati i nalepiti; prekidač u alatnoj traci Konzole prevazilazi ovu podrazumevanu vrednost za trenutnu karticu."
   },
   "import": {
-    "addAuth": "Додај руту за аутентификацију",
+    "addAuth": "Dodaj rutu za autentifikaciju",
     "applyFailedTitle": "Osvežavanje iz izvora nije uspelo",
     "applyUpdate": "Primeni ažuriranje",
     "authenticatedVia": "Autentifikovano preko {{name}}",
@@ -1026,9 +1026,9 @@
     "customHeadersDone": "Gotovo",
     "customHeadersHint": "Zaglavlja se čuvaju u uvezenoj fascikli, pa ih buduće osvežavanje iz izvora ponavlja. Za prijave sa rotacijom tokena radije koristite rutu za autentifikaciju iznad.",
     "customHeadersTitle": "Prilagođena zaglavlja",
-    "detachAuth": "Одвоји руту за аутентификацију",
+    "detachAuth": "Odvoji rutu za autentifikaciju",
     "dropZone": "Zona za ispuštanje",
-    "editAuth": "Уреди руту за аутентификацију",
+    "editAuth": "Uredi rutu za autentifikaciju",
     "error": {
       "unknown": "Došlo je do nepoznate greške"
     },
@@ -1140,7 +1140,7 @@
       }
     },
     "grpcReflection": {
-      "title": "gRPC server (Рефлексија)",
+      "title": "gRPC server (Refleksija)",
       "hint": "Ispitajte reflection servis pokrenutog gRPC servera da otkrijete njegove servise i metode bez .proto fajla.",
       "addressLabel": "Adresa servera (host:port)",
       "addressPlaceholder": "localhost:9000",
@@ -1171,52 +1171,52 @@
     },
     "tabs": {
       "routes": "Rute",
-      "documentation": "Документација"
+      "documentation": "Dokumentacija"
     },
     "title": "Uvezi zahteve"
   },
   "emptyBench": {
     "importCard": {
-      "title": "Увези свој API",
-      "body": "Донеси OpenAPI / Swagger спецификацију, GraphQL шему, Postman / Bruno / Insomnia колекцију или налепи curl / PowerShell команду. Restorm то парсира, гради структуру фасцикли и слеће са сваким endpoint-ом спремним."
+      "title": "Uvezi svoj API",
+      "body": "Donesi OpenAPI / Swagger specifikaciju, GraphQL šemu, Postman / Bruno / Insomnia kolekciju ili nalepi curl / PowerShell komandu. Restorm to parsira, gradi strukturu fascikli i sleće sa svakim endpoint-om spremnim."
     },
     "recentActivity": {
-      "title": "Недавна активност",
-      "empty": "Пошаљите свој први захтев да бисте га видели овде."
+      "title": "Nedavna aktivnost",
+      "empty": "Pošaljite svoj prvi zahtev da biste ga videli ovde."
     },
     "apiCard": {
-      "favorites": "Омиљени",
-      "topUsed": "Топ 10 најкоришћенијих",
-      "recent": "Последњи захтеви",
-      "description": "Опис",
-      "version": "Верзија",
+      "favorites": "Omiljeni",
+      "topUsed": "Top 10 najkorišćenijih",
+      "recent": "Poslednji zahtevi",
+      "description": "Opis",
+      "version": "Verzija",
       "quickLinks": {
-        "environments": "Окружења",
-        "docs": "Документација",
-        "notes": "Белешке"
+        "environments": "Okruženja",
+        "docs": "Dokumentacija",
+        "notes": "Beleške"
       }
     }
   },
   "documentation": {
     "find": {
-      "placeholder": "Пронађи у документу",
-      "previousMatch": "Претходно подударање",
-      "nextMatch": "Следеће подударање",
-      "close": "Затвори"
+      "placeholder": "Pronađi u dokumentu",
+      "previousMatch": "Prethodno podudaranje",
+      "nextMatch": "Sledeće podudaranje",
+      "close": "Zatvori"
     }
   },
   "scenario": {
     "editor": {
-      "emptyTitle": "Овде је празно…",
-      "emptyDragDrop": "Превуците ставку из стабла лево у свој сценарио да бисте је овде користили. Можете чак увести један сценарио у други!",
-      "emptyRightClick": "Десним кликом на празно место додајте акције у свој сценарио"
+      "emptyTitle": "Ovde je prazno…",
+      "emptyDragDrop": "Prevucite stavku iz stabla levo u svoj scenario da biste je ovde koristili. Možete čak uvesti jedan scenario u drugi!",
+      "emptyRightClick": "Desnim klikom na prazno mesto dodajte akcije u svoj scenario"
     },
     "pathSelector": {
-      "placeholder": "JSON путања",
-      "ariaLabel": "Бирач JSON путање",
-      "pick": "Изабери из резултата",
-      "loading": "Учитавање…",
-      "noResult": "Покрените изворну радњу да изаберете својство из њеног резултата."
+      "placeholder": "JSON putanja",
+      "ariaLabel": "Birač JSON putanje",
+      "pick": "Izaberi iz rezultata",
+      "loading": "Učitavanje…",
+      "noResult": "Pokrenite izvornu radnju da izaberete svojstvo iz njenog rezultata."
     },
     "tab": {
       "graph": "Scenario",
@@ -1224,420 +1224,420 @@
     },
     "node": {
       "menu": {
-        "changeColor": "Промени боју",
-        "resetColor": "Врати боју",
-        "addNote": "Додај/измени белешку",
-        "runOnEachEvent": "Покрени при сваком примљеном догађају",
-        "duplicate": "Дуплирај",
-        "delete": "Обриши",
+        "changeColor": "Promeni boju",
+        "resetColor": "Vrati boju",
+        "addNote": "Dodaj/izmeni belešku",
+        "runOnEachEvent": "Pokreni pri svakom primljenom događaju",
+        "duplicate": "Dupliraj",
+        "delete": "Obriši",
         "deleteShortcut": "Del",
-        "copy": "Копирај",
-        "paste": "Налепи"
+        "copy": "Kopiraj",
+        "paste": "Nalepi"
       },
-      "expand": "Прошири",
-      "collapse": "Сажми"
+      "expand": "Proširi",
+      "collapse": "Sažmi"
     },
     "edge": {
       "menu": {
-        "changeColor": "Промени боју",
-        "resetColor": "Врати боју",
-        "delete": "Обриши"
+        "changeColor": "Promeni boju",
+        "resetColor": "Vrati boju",
+        "delete": "Obriši"
       }
     },
-    "locked": "Уређивање закључано док се сценарио извршава",
+    "locked": "Uređivanje zaključano dok se scenario izvršava",
     "switch": {
-      "addCase": "Додај случај",
-      "removeCase": "Уклони случај",
-      "case": "случај"
+      "addCase": "Dodaj slučaj",
+      "removeCase": "Ukloni slučaj",
+      "case": "slučaj"
     },
     "forEach": {
-      "items": "ставке",
-      "each": "сваки",
-      "done": "готово",
-      "parallelism": "паралелизам"
+      "items": "stavke",
+      "each": "svaki",
+      "done": "gotovo",
+      "parallelism": "paralelizam"
     },
     "aggregate": {
-      "items": "ставке",
-      "result": "резултат",
-      "field": "поље",
-      "separator": "раздвајач",
+      "items": "stavke",
+      "result": "rezultat",
+      "field": "polje",
+      "separator": "razdvajač",
       "op": {
-        "count": "Број",
-        "sum": "Збир",
-        "min": "Мин",
-        "max": "Макс",
-        "average": "Просек",
-        "join": "Спајање"
+        "count": "Broj",
+        "sum": "Zbir",
+        "min": "Min",
+        "max": "Maks",
+        "average": "Prosek",
+        "join": "Spajanje"
       }
     },
     "filter": {
-      "items": "ставке",
-      "rejected": "одбачени",
-      "kept": "задржани",
-      "keepWhere": "задржи ако"
+      "items": "stavke",
+      "rejected": "odbačeni",
+      "kept": "zadržani",
+      "keepWhere": "zadrži ako"
     },
     "wait": {
-      "then": "затим",
-      "duration": "трајање"
+      "then": "zatim",
+      "duration": "trajanje"
     },
     "waitUntil": {
-      "until": "до",
-      "then": "затим"
+      "until": "do",
+      "then": "zatim"
     },
     "arithmetic": {
-      "result": "резултат"
+      "result": "rezultat"
     },
     "nodes": {
-      "arithmetic": "Аритметика",
-      "httpRequest": "HTTP захтев",
-      "soapRequest": "SOAP захтев",
-      "runScenario": "Покрени сценарио",
-      "wait": "Чекај",
-      "waitUntil": "Чекај до",
-      "now": "Сада",
-      "comparator": "Упоређивач",
-      "setVariable": "Постави променљиву",
-      "getVariable": "Узми променљиву",
-      "addToList": "Додај на листу",
-      "removeFromList": "Уклони са листе",
-      "cast": "Претвори",
+      "arithmetic": "Aritmetika",
+      "httpRequest": "HTTP zahtev",
+      "soapRequest": "SOAP zahtev",
+      "runScenario": "Pokreni scenario",
+      "wait": "Čekaj",
+      "waitUntil": "Čekaj do",
+      "now": "Sada",
+      "comparator": "Upoređivač",
+      "setVariable": "Postavi promenljivu",
+      "getVariable": "Uzmi promenljivu",
+      "addToList": "Dodaj na listu",
+      "removeFromList": "Ukloni sa liste",
+      "cast": "Pretvori",
       "regex": "Regex",
       "json": "JSON",
       "xml": "XML",
       "yaml": "YAML",
-      "crypto": "Крипто",
+      "crypto": "Kripto",
       "jwt": "JWT",
-      "datetime": "Рачунање са датумима",
-      "objectOp": "Операције над објектима",
+      "datetime": "Računanje sa datumima",
+      "objectOp": "Operacije nad objektima",
       "url": "URL",
-      "random": "Насумично",
-      "throw": "Баци грешку",
-      "retry": "Понови",
-      "listOp": "Операције над листама",
+      "random": "Nasumično",
+      "throw": "Baci grešku",
+      "retry": "Ponovi",
+      "listOp": "Operacije nad listama",
       "csv": "CSV",
-      "math": "Математика",
-      "schema": "Провери шему",
-      "readFile": "Прочитај датотеку",
-      "writeFile": "Упиши датотеку",
-      "timer": "Тајмер",
-      "code": "Кôд",
+      "math": "Matematika",
+      "schema": "Proveri šemu",
+      "readFile": "Pročitaj datoteku",
+      "writeFile": "Upiši datoteku",
+      "timer": "Tajmer",
+      "code": "Kôd",
       "socketioConnect": "Socket.IO veza",
-      "socketioSend": "Socket.IO слање",
-      "socketioClose": "Затвори Socket.IO везу",
-      "socketioServerClose": "Затвори Socket.IO сервер",
+      "socketioSend": "Socket.IO slanje",
+      "socketioClose": "Zatvori Socket.IO vezu",
+      "socketioServerClose": "Zatvori Socket.IO server",
       "websocketConnect": "WebSocket veza",
       "sseConnect": "SSE veza",
-      "websocketSend": "WebSocket слање",
-      "websocketClose": "Затвори WebSocket везу",
-      "websocketServerClose": "Затвори WebSocket сервер",
-      "sseClose": "Затвори SSE везу",
-      "grpcConnect": "gRPC веза",
-      "grpcSend": "gRPC слање",
-      "grpcClose": "Затвори gRPC везу",
-      "mqttConnect": "MQTT веза",
-      "mqttSend": "MQTT објава",
-      "mqttClose": "Затвори MQTT везу",
+      "websocketSend": "WebSocket slanje",
+      "websocketClose": "Zatvori WebSocket vezu",
+      "websocketServerClose": "Zatvori WebSocket server",
+      "sseClose": "Zatvori SSE vezu",
+      "grpcConnect": "gRPC veza",
+      "grpcSend": "gRPC slanje",
+      "grpcClose": "Zatvori gRPC vezu",
+      "mqttConnect": "MQTT veza",
+      "mqttSend": "MQTT objava",
+      "mqttClose": "Zatvori MQTT vezu",
       "amqpConnect": "AMQP veza",
       "amqpPublish": "AMQP objava",
-      "amqpClose": "Затвори AMQP везу",
-      "redisSubscribe": "Redis претплата",
-      "redisClose": "Затвори Redis везу",
-      "redisCommand": "Redis команда",
-      "httpListen": "HTTP сервер",
-      "httpClose": "Затвори HTTP сервер",
-      "grpcServerClose": "Затвори gRPC сервер",
-      "soapListen": "SOAP сервер",
-      "soapClose": "Затвори SOAP сервер",
-      "graphqlListen": "GraphQL сервер",
-      "graphqlClose": "Затвори GraphQL сервер",
-      "odataListen": "OData сервер",
-      "odataClose": "Затвори OData сервер",
-      "graphqlSubscribe": "GraphQL претплата",
-      "graphqlUnsubscribe": "Откажи GraphQL претплату",
-      "stompConnect": "STOMP веза",
-      "stompSend": "STOMP слање",
-      "stompClose": "Затвори STOMP везу",
-      "kafkaProduce": "Kafka производња",
-      "kafkaConsume": "Kafka конзумирање",
-      "kafkaClose": "Затвори Kafka везу",
-      "grpcListen": "gRPC сервер"
+      "amqpClose": "Zatvori AMQP vezu",
+      "redisSubscribe": "Redis pretplata",
+      "redisClose": "Zatvori Redis vezu",
+      "redisCommand": "Redis komanda",
+      "httpListen": "HTTP server",
+      "httpClose": "Zatvori HTTP server",
+      "grpcServerClose": "Zatvori gRPC server",
+      "soapListen": "SOAP server",
+      "soapClose": "Zatvori SOAP server",
+      "graphqlListen": "GraphQL server",
+      "graphqlClose": "Zatvori GraphQL server",
+      "odataListen": "OData server",
+      "odataClose": "Zatvori OData server",
+      "graphqlSubscribe": "GraphQL pretplata",
+      "graphqlUnsubscribe": "Otkaži GraphQL pretplatu",
+      "stompConnect": "STOMP veza",
+      "stompSend": "STOMP slanje",
+      "stompClose": "Zatvori STOMP vezu",
+      "kafkaProduce": "Kafka proizvodnja",
+      "kafkaConsume": "Kafka konzumiranje",
+      "kafkaClose": "Zatvori Kafka vezu",
+      "grpcListen": "gRPC server"
     },
     "comparator": {
-      "result": "резултат"
+      "result": "rezultat"
     },
     "boolean": {
-      "result": "резултат"
+      "result": "rezultat"
     },
     "map": {
-      "items": "ставке",
-      "mapped": "трансформисано"
+      "items": "stavke",
+      "mapped": "transformisano"
     },
     "log": {
-      "message": "порука",
-      "data": "подаци"
+      "message": "poruka",
+      "data": "podaci"
     },
     "assert": {
-      "message": "порука",
-      "operator": "оператор",
+      "message": "poruka",
+      "operator": "operator",
       "op": {
-        "eq": "једнако",
-        "ne": "није једнако",
-        "lt": "мање од",
-        "lte": "мање или једнако",
-        "gt": "веће од",
-        "gte": "веће или једнако",
-        "contains": "садржи",
-        "isString": "је низ знакова",
-        "isNumber": "је број",
-        "isBoolean": "је логичка вредност",
-        "isArray": "је листа",
-        "isObject": "је објекат",
-        "isNull": "је null",
-        "exists": "постоји",
-        "isEmpty": "је празно",
-        "matchesRegex": "одговара регексу",
-        "isOneOf": "једно је од",
-        "deepEquals": "дубока једнакост",
-        "lengthEq": "дужина ==",
-        "lengthGt": "дужина >",
-        "lengthLt": "дужина <"
+        "eq": "jednako",
+        "ne": "nije jednako",
+        "lt": "manje od",
+        "lte": "manje ili jednako",
+        "gt": "veće od",
+        "gte": "veće ili jednako",
+        "contains": "sadrži",
+        "isString": "je niz znakova",
+        "isNumber": "je broj",
+        "isBoolean": "je logička vrednost",
+        "isArray": "je lista",
+        "isObject": "je objekat",
+        "isNull": "je null",
+        "exists": "postoji",
+        "isEmpty": "je prazno",
+        "matchesRegex": "odgovara regeksu",
+        "isOneOf": "jedno je od",
+        "deepEquals": "duboka jednakost",
+        "lengthEq": "dužina ==",
+        "lengthGt": "dužina >",
+        "lengthLt": "dužina <"
       }
     },
-    "editRequest": "Уреди захтев",
-    "editScenario": "Уреди сценарио",
+    "editRequest": "Uredi zahtev",
+    "editScenario": "Uredi scenario",
     "object": {
-      "addProperty": "Додај својство",
-      "removeProperty": "Уклони својство",
-      "propertyName": "Назив својства",
-      "propertyValue": "вредност"
+      "addProperty": "Dodaj svojstvo",
+      "removeProperty": "Ukloni svojstvo",
+      "propertyName": "Naziv svojstva",
+      "propertyValue": "vrednost"
     },
     "output": {
-      "outputName": "Назив излаза",
-      "addOutput": "Додај излаз",
-      "removeOutput": "Уклони"
+      "outputName": "Naziv izlaza",
+      "addOutput": "Dodaj izlaz",
+      "removeOutput": "Ukloni"
     },
     "input": {
-      "name": "Назив",
-      "defaultType": "Подразумевано / тип",
-      "addParam": "Додај параметар",
-      "removeParam": "Уклони"
+      "name": "Naziv",
+      "defaultType": "Podrazumevano / tip",
+      "addParam": "Dodaj parametar",
+      "removeParam": "Ukloni"
     },
     "runScenario": {
-      "orphanInput": "Нема одговарајућег параметра „{{name}}“ у подсценарију",
-      "orphanOutput": "Нема одговарајућег излаза „{{name}}“ у подсценарију",
-      "then": "затим"
+      "orphanInput": "Nema odgovarajućeg parametra „{{name}}“ u podscenariju",
+      "orphanOutput": "Nema odgovarajućeg izlaza „{{name}}“ u podscenariju",
+      "then": "zatim"
     },
     "validation": {
-      "duplicateName": "Назив „{{name}}“ већ користи друга акција.",
-      "panelTitle": "Грешке акција: {{count}}",
-      "runBlocked": "Исправите {{count}} грешака радње пре покретања",
-      "focusBox": "Иди на ову акцију",
-      "showErrors": "Прикажи грешке",
+      "duplicateName": "Naziv „{{name}}“ već koristi druga akcija.",
+      "panelTitle": "Greške akcija: {{count}}",
+      "runBlocked": "Ispravite {{count}} grešaka radnje pre pokretanja",
+      "focusBox": "Idi na ovu akciju",
+      "showErrors": "Prikaži greške",
       "input": {
-        "missingName": "Овај улазни параметар мора имати назив."
+        "missingName": "Ovaj ulazni parametar mora imati naziv."
       },
       "dataLink": {
-        "emptyPath": "Долазна веза података захтева путању (JSON path).",
-        "badPath": "JSON путања „{{path}}“ везе података је неважећа."
+        "emptyPath": "Dolazna veza podataka zahteva putanju (JSON path).",
+        "badPath": "JSON putanja „{{path}}“ veze podataka je nevažeća."
       },
       "output": {
-        "missingName": "Овај излаз мора имати назив.",
-        "duplicateName": "Назив „{{name}}“ већ користи други излаз."
+        "missingName": "Ovaj izlaz mora imati naziv.",
+        "duplicateName": "Naziv „{{name}}“ već koristi drugi izlaz."
       },
       "getVariable": {
-        "noSelection": "Мора се изабрати променљива.",
-        "unknown": "Променљива „{{name}}“ не постоји у сценарију."
+        "noSelection": "Mora se izabrati promenljiva.",
+        "unknown": "Promenljiva „{{name}}“ ne postoji u scenariju."
       },
       "setVariable": {
-        "missingName": "Променљива која се поставља мора имати назив."
+        "missingName": "Promenljiva koja se postavlja mora imati naziv."
       },
       "object": {
-        "propMissingName": "Свако својство мора имати назив.",
-        "propDuplicate": "Назив својства „{{name}}“ је дуплиран."
+        "propMissingName": "Svako svojstvo mora imati naziv.",
+        "propDuplicate": "Naziv svojstva „{{name}}“ je dupliran."
       },
       "arithmetic": {
-        "divisionByZero": "Дељење нулом није могуће."
+        "divisionByZero": "Deljenje nulom nije moguće."
       },
       "switch": {
-        "caseDuplicate": "Вредност случаја „{{value}}“ је дуплирана."
+        "caseDuplicate": "Vrednost slučaja „{{value}}“ je duplirana."
       },
       "transform": {
-        "emptyTemplate": "Шаблон не сме бити празан.",
-        "valueRequired": "Улаз \"value\" мора бити повезан када шаблон референцира {{…}}."
+        "emptyTemplate": "Šablon ne sme biti prazan.",
+        "valueRequired": "Ulaz \"value\" mora biti povezan kada šablon referencira {{…}}."
       },
       "request": {
-        "missing": "Повезани захтев више не постоји."
+        "missing": "Povezani zahtev više ne postoji."
       },
       "runScenario": {
-        "missing": "Повезани сценарио више не постоји."
+        "missing": "Povezani scenario više ne postoji."
       },
       "file": {
-        "missingPath": "Потребна је путања датотеке."
+        "missingPath": "Potrebna je putanja datoteke."
       },
       "connection": {
-        "missingName": "Назив везе је обавезан."
+        "missingName": "Naziv veze je obavezan."
       }
     },
     "usage": {
-      "button": "Сценарији који користе овај захтев",
-      "title": "Овај захтев се користи у сценаријима:"
+      "button": "Scenariji koji koriste ovaj zahtev",
+      "title": "Ovaj zahtev se koristi u scenarijima:"
     },
     "inspector": {
-      "run": "Покрени",
-      "debug": "Отклањање грешака",
-      "undo": "Поништи",
-      "redo": "Понови",
-      "step": "Корак по корак",
-      "previewInfo": "Пример података на основу претходних резултата захтева.",
-      "pause": "Пауза",
+      "run": "Pokreni",
+      "debug": "Otklanjanje grešaka",
+      "undo": "Poništi",
+      "redo": "Ponovi",
+      "step": "Korak po korak",
+      "previewInfo": "Primer podataka na osnovu prethodnih rezultata zahteva.",
+      "pause": "Pauza",
       "noRunsHint": "Nema skorašnjeg izvršavanja ovog zahteva — pokreni ga odavde da popuniš pregled scenarija.",
       "syntheticInfo": "Primer podataka generisan iz dokumentacije ovog zahteva.",
       "syntheticRunHint": "Primer podataka — pokrenite zahtev da ih zamenite stvarnim rezultatom.",
       "stop": "Zaustavi",
-      "logsTitle": "Записи извршавања",
-      "copyLogs": "Копирај записе",
-      "copyThisLog": "Копирај овај запис",
-      "clearLogs": "Очисти записе",
-      "logsShowAll": "Прикажи све логове",
-      "showLevelLogs": "Прикажи {{level}} логове",
-      "showLevelOnly": "Десни клик: само овај ниво",
-      "noUserLogs": "Нема корисничких логова (уноса из радње Log) у овом извршавању.",
-      "helpTitle": "Шта ова радња ради"
+      "logsTitle": "Zapisi izvršavanja",
+      "copyLogs": "Kopiraj zapise",
+      "copyThisLog": "Kopiraj ovaj zapis",
+      "clearLogs": "Očisti zapise",
+      "logsShowAll": "Prikaži sve logove",
+      "showLevelLogs": "Prikaži {{level}} logove",
+      "showLevelOnly": "Desni klik: samo ovaj nivo",
+      "noUserLogs": "Nema korisničkih logova (unosa iz radnje Log) u ovom izvršavanju.",
+      "helpTitle": "Šta ova radnja radi"
     },
     "now": {
-      "timezone": "Временска зона",
-      "formatLabel": "Формат",
+      "timezone": "Vremenska zona",
+      "formatLabel": "Format",
       "format": {
-        "datetime": "Датум/време",
+        "datetime": "Datum/vreme",
         "epoch": "Epoch",
-        "string": "Низ знакова"
+        "string": "Niz znakova"
       }
     },
     "callers": {
-      "button": "Сценарији који позивају овај сценарио",
-      "title": "Овај сценарио позивају:"
+      "button": "Scenariji koji pozivaju ovaj scenario",
+      "title": "Ovaj scenario pozivaju:"
     },
     "runPrompt": {
-      "title": "Параметри извршавања",
-      "run": "Покрени",
+      "title": "Parametri izvršavanja",
+      "run": "Pokreni",
       "midRunTitle": "Potreban unos"
     },
     "runHistory": {
-      "title": "Историја извршавања",
-      "tooltip": "Историја извршавања",
-      "empty": "Још нема забележених извршавања",
-      "noLogs": "Нема записа за ово извршавање",
-      "logsTab": "Записи",
-      "graphTab": "Граф",
-      "noGraph": "Нема снимка сценарија за ово извршавање",
-      "pin": "Закачи",
-      "unpin": "Откачи"
+      "title": "Istorija izvršavanja",
+      "tooltip": "Istorija izvršavanja",
+      "empty": "Još nema zabeleženih izvršavanja",
+      "noLogs": "Nema zapisa za ovo izvršavanje",
+      "logsTab": "Zapisi",
+      "graphTab": "Graf",
+      "noGraph": "Nema snimka scenarija za ovo izvršavanje",
+      "pin": "Zakači",
+      "unpin": "Otkači"
     },
     "for": {
-      "from": "од",
-      "to": "до",
-      "step": "корак",
-      "index": "индекс",
-      "done": "готово"
+      "from": "od",
+      "to": "do",
+      "step": "korak",
+      "index": "indeks",
+      "done": "gotovo"
     },
     "while": {
-      "body": "тело"
+      "body": "telo"
     },
     "doWhile": {
-      "loop": "петља"
+      "loop": "petlja"
     },
     "loop": {
-      "done": "готово"
+      "done": "gotovo"
     },
     "breakpoint": {
-      "add": "Додај тачку прекида",
-      "remove": "Уклони тачку прекида",
-      "toggle": "Укључи/искључи тачку прекида (F9)",
-      "reached": "Достигнута тачка прекида — ова радња још није извршена. Притисните F5 за наставак или F7 за корак.",
+      "add": "Dodaj tačku prekida",
+      "remove": "Ukloni tačku prekida",
+      "toggle": "Uključi/isključi tačku prekida (F9)",
+      "reached": "Dostignuta tačka prekida — ova radnja još nije izvršena. Pritisnite F5 za nastavak ili F7 za korak.",
       "shortcut": "F9"
     },
     "minimap": {
-      "toggle": "Укључи/искључи минимапу"
+      "toggle": "Uključi/isključi minimapu"
     },
     "listMutation": {
-      "list": "листа",
-      "values": "вредности",
-      "result": "резултат",
-      "addValue": "Додај вредност",
-      "removeValue": "Уклони вредност",
-      "updateVariable": "Ажурирај изворну променљиву"
+      "list": "lista",
+      "values": "vrednosti",
+      "result": "rezultat",
+      "addValue": "Dodaj vrednost",
+      "removeValue": "Ukloni vrednost",
+      "updateVariable": "Ažuriraj izvornu promenljivu"
     },
     "cast": {
-      "value": "вредност",
-      "targetType": "претвори у",
-      "result": "резултат",
+      "value": "vrednost",
+      "targetType": "pretvori u",
+      "result": "rezultat",
       "type": {
-        "number": "број",
-        "string": "низ знакова",
-        "boolean": "логичка вредност",
-        "date": "датум",
-        "list": "листа"
+        "number": "broj",
+        "string": "niz znakova",
+        "boolean": "logička vrednost",
+        "date": "datum",
+        "list": "lista"
       }
     },
     "regex": {
-      "value": "вредност",
-      "operation": "операција",
-      "pattern": "образац",
-      "flags": "заставице",
-      "replacement": "замена",
-      "result": "резултат",
+      "value": "vrednost",
+      "operation": "operacija",
+      "pattern": "obrazac",
+      "flags": "zastavice",
+      "replacement": "zamena",
+      "result": "rezultat",
       "op": {
-        "extract": "издвоји",
-        "extractAll": "издвоји све",
-        "test": "тестирај",
-        "replace": "замени",
-        "split": "раздвоји"
+        "extract": "izdvoji",
+        "extractAll": "izdvoji sve",
+        "test": "testiraj",
+        "replace": "zameni",
+        "split": "razdvoji"
       },
       "flag": {
-        "i": "Без разлике великих и малих слова",
-        "m": "Вишередни (^ и $ одговарају преломима редова)",
-        "s": "Dotall (. одговара новим редовима)"
+        "i": "Bez razlike velikih i malih slova",
+        "m": "Višeredni (^ i $ odgovaraju prelomima redova)",
+        "s": "Dotall (. odgovara novim redovima)"
       }
     },
     "json": {
-      "value": "вредност",
-      "operation": "операција",
-      "indent": "увлачење",
-      "result": "резултат",
+      "value": "vrednost",
+      "operation": "operacija",
+      "indent": "uvlačenje",
+      "result": "rezultat",
       "op": {
-        "parse": "парсирај",
-        "stringify": "серијализуј"
+        "parse": "parsiraj",
+        "stringify": "serijalizuj"
       }
     },
     "xml": {
-      "value": "вредност",
-      "operation": "операција",
-      "indent": "увлачење",
-      "result": "резултат",
+      "value": "vrednost",
+      "operation": "operacija",
+      "indent": "uvlačenje",
+      "result": "rezultat",
       "op": {
-        "parse": "парсирај",
-        "stringify": "серијализуј"
+        "parse": "parsiraj",
+        "stringify": "serijalizuj"
       }
     },
     "yaml": {
-      "value": "вредност",
-      "operation": "операција",
-      "indent": "увлачење",
-      "result": "резултат",
+      "value": "vrednost",
+      "operation": "operacija",
+      "indent": "uvlačenje",
+      "result": "rezultat",
       "op": {
-        "parse": "парсирај",
-        "stringify": "серијализуј"
+        "parse": "parsiraj",
+        "stringify": "serijalizuj"
       }
     },
     "crypto": {
-      "value": "вредност",
-      "operation": "операција",
-      "key": "кључ",
-      "keyPlaceholder": "тајна",
-      "result": "резултат",
+      "value": "vrednost",
+      "operation": "operacija",
+      "key": "ključ",
+      "keyPlaceholder": "tajna",
+      "result": "rezultat",
       "op": {
-        "base64Encode": "кодирај base64",
-        "base64Decode": "декодирај base64",
+        "base64Encode": "kodiraj base64",
+        "base64Decode": "dekodiraj base64",
         "md5": "MD5",
         "sha1": "SHA-1",
         "sha256": "SHA-256",
@@ -1647,425 +1647,425 @@
       }
     },
     "jwt": {
-      "value": "токен",
-      "result": "резултат"
+      "value": "token",
+      "result": "rezultat"
     },
     "datetime": {
-      "value": "датум",
-      "operation": "операција",
-      "amount": "количина",
-      "unitLabel": "јединица",
-      "format": "формат",
-      "other": "други датум",
-      "result": "резултат",
+      "value": "datum",
+      "operation": "operacija",
+      "amount": "količina",
+      "unitLabel": "jedinica",
+      "format": "format",
+      "other": "drugi datum",
+      "result": "rezultat",
       "op": {
-        "add": "додај",
-        "subtract": "одузми",
-        "format": "форматирај",
-        "diff": "разлика"
+        "add": "dodaj",
+        "subtract": "oduzmi",
+        "format": "formatiraj",
+        "diff": "razlika"
       },
       "unit": {
-        "milliseconds": "милисекунде",
-        "seconds": "секунде",
-        "minutes": "минути",
-        "hours": "сати",
-        "days": "дани",
-        "weeks": "недеље",
-        "months": "месеци",
-        "years": "године"
+        "milliseconds": "milisekunde",
+        "seconds": "sekunde",
+        "minutes": "minuti",
+        "hours": "sati",
+        "days": "dani",
+        "weeks": "nedelje",
+        "months": "meseci",
+        "years": "godine"
       }
     },
     "objectOp": {
-      "value": "објекат",
-      "operation": "операција",
-      "path": "путања",
-      "keys": "кључеви",
-      "setValue": "вредност",
-      "mergeWith": "споји са",
-      "result": "резултат",
+      "value": "objekat",
+      "operation": "operacija",
+      "path": "putanja",
+      "keys": "ključevi",
+      "setValue": "vrednost",
+      "mergeWith": "spoji sa",
+      "result": "rezultat",
       "op": {
-        "get": "прочитај",
-        "set": "упиши",
-        "merge": "споји",
-        "pick": "задржи",
-        "omit": "уклони",
-        "keys": "кључеви",
-        "values": "вредности"
+        "get": "pročitaj",
+        "set": "upiši",
+        "merge": "spoji",
+        "pick": "zadrži",
+        "omit": "ukloni",
+        "keys": "ključevi",
+        "values": "vrednosti"
       }
     },
     "url": {
-      "value": "вредност",
-      "operation": "операција",
-      "result": "резултат",
+      "value": "vrednost",
+      "operation": "operacija",
+      "result": "rezultat",
       "op": {
-        "encode": "кодирај",
-        "decode": "декодирај",
-        "parseQuery": "парсирај упит",
-        "buildQuery": "изгради упит",
-        "parseUrl": "парсирај URL"
+        "encode": "kodiraj",
+        "decode": "dekodiraj",
+        "parseQuery": "parsiraj upit",
+        "buildQuery": "izgradi upit",
+        "parseUrl": "parsiraj URL"
       }
     },
     "random": {
-      "operation": "операција",
-      "min": "мин",
-      "max": "макс",
-      "length": "дужина",
-      "items": "ставке",
-      "seed": "семе (опционо)",
-      "seedPlaceholder": "поновљиво",
-      "result": "резултат",
+      "operation": "operacija",
+      "min": "min",
+      "max": "maks",
+      "length": "dužina",
+      "items": "stavke",
+      "seed": "seme (opciono)",
+      "seedPlaceholder": "ponovljivo",
+      "result": "rezultat",
       "op": {
-        "int": "цео број",
-        "float": "децимални број",
-        "string": "низ знакова",
-        "boolean": "логичка вредност",
-        "pick": "изабери"
+        "int": "ceo broj",
+        "float": "decimalni broj",
+        "string": "niz znakova",
+        "boolean": "logička vrednost",
+        "pick": "izaberi"
       }
     },
     "throw": {
-      "message": "порука"
+      "message": "poruka"
     },
     "retry": {
-      "maxAttempts": "макс. покушаја",
-      "backoff": "стратегија чекања",
-      "delay": "одлагање",
-      "factor": "фактор",
-      "retryOnError": "понови при грешци",
-      "retryOnStatus": "понови при HTTP статусу",
-      "retryOnFailure": "понови при сваком non-2xx",
-      "attempt": "покушај",
-      "exhausted": "исцрпљено",
+      "maxAttempts": "maks. pokušaja",
+      "backoff": "strategija čekanja",
+      "delay": "odlaganje",
+      "factor": "faktor",
+      "retryOnError": "ponovi pri grešci",
+      "retryOnStatus": "ponovi pri HTTP statusu",
+      "retryOnFailure": "ponovi pri svakom non-2xx",
+      "attempt": "pokušaj",
+      "exhausted": "iscrpljeno",
       "backoffOpt": {
-        "fixed": "фиксно",
-        "linear": "линеарно",
-        "exponential": "експоненцијално"
+        "fixed": "fiksno",
+        "linear": "linearno",
+        "exponential": "eksponencijalno"
       }
     },
     "menuGroups": {
-      "lists": "Листе",
-      "math": "Математика",
-      "dataFormats": "Формати података",
-      "encoding": "Кодирање",
-      "time": "Тајминг",
-      "algorithmie": "Алгоритми",
+      "lists": "Liste",
+      "math": "Matematika",
+      "dataFormats": "Formati podataka",
+      "encoding": "Kodiranje",
+      "time": "Tajming",
+      "algorithmie": "Algoritmi",
       "ux": "UX"
     },
     "listOp": {
-      "value": "листа",
-      "operation": "операција",
-      "result": "резултат",
-      "key": "кључ",
-      "order": "редослед",
-      "depth": "дубина",
-      "size": "величина",
-      "start": "почетак",
-      "end": "крај",
+      "value": "lista",
+      "operation": "operacija",
+      "result": "rezultat",
+      "key": "ključ",
+      "order": "redosled",
+      "depth": "dubina",
+      "size": "veličina",
+      "start": "početak",
+      "end": "kraj",
       "op": {
-        "sort": "сортирај",
-        "unique": "јединствени",
-        "reverse": "обрни",
-        "flatten": "поравнај",
-        "chunk": "подели на делове",
-        "slice": "исеци",
-        "groupBy": "групиши по"
+        "sort": "sortiraj",
+        "unique": "jedinstveni",
+        "reverse": "obrni",
+        "flatten": "poravnaj",
+        "chunk": "podeli na delove",
+        "slice": "iseci",
+        "groupBy": "grupiši po"
       }
     },
     "csv": {
-      "value": "вредност",
-      "operation": "операција",
-      "result": "резултат",
-      "delimiter": "раздвојник",
-      "header": "ред заглавља",
+      "value": "vrednost",
+      "operation": "operacija",
+      "result": "rezultat",
+      "delimiter": "razdvojnik",
+      "header": "red zaglavlja",
       "op": {
-        "parse": "парсирај",
-        "stringify": "серијализуј"
+        "parse": "parsiraj",
+        "stringify": "serijalizuj"
       }
     },
     "math": {
-      "a": "вредност",
-      "operation": "операција",
-      "result": "резултат",
-      "b": "са",
-      "min": "мин",
-      "max": "макс",
-      "precision": "прецизност",
+      "a": "vrednost",
+      "operation": "operacija",
+      "result": "rezultat",
+      "b": "sa",
+      "min": "min",
+      "max": "maks",
+      "precision": "preciznost",
       "op": {
-        "round": "заокружи",
-        "floor": "заокружи наниже",
-        "ceil": "заокружи навише",
-        "trunc": "скрати",
-        "abs": "апсолутна вредност",
-        "sign": "знак",
-        "sqrt": "квадратни корен",
-        "min": "мин",
-        "max": "макс",
-        "clamp": "ограничи"
+        "round": "zaokruži",
+        "floor": "zaokruži naniže",
+        "ceil": "zaokruži naviše",
+        "trunc": "skrati",
+        "abs": "apsolutna vrednost",
+        "sign": "znak",
+        "sqrt": "kvadratni koren",
+        "min": "min",
+        "max": "maks",
+        "clamp": "ograniči"
       }
     },
     "schema": {
-      "value": "вредност",
-      "schema": "JSON шема",
-      "valid": "важеће",
-      "invalid": "неважеће",
-      "errors": "грешке",
-      "editTitle": "Измени JSON Schema"
+      "value": "vrednost",
+      "schema": "JSON šema",
+      "valid": "važeće",
+      "invalid": "nevažeće",
+      "errors": "greške",
+      "editTitle": "Izmeni JSON Schema"
     },
     "readFile": {
-      "path": "путања",
-      "content": "садржај"
+      "path": "putanja",
+      "content": "sadržaj"
     },
     "writeFile": {
-      "path": "путања",
-      "mode": "режим",
-      "content": "садржај"
+      "path": "putanja",
+      "mode": "režim",
+      "content": "sadržaj"
     },
     "codeField": {
-      "title": "Уреди",
-      "edit": "Отвори уређивач",
-      "moreLines": "+{{count}} редова",
-      "editTemplate": "Уреди шаблон"
+      "title": "Uredi",
+      "edit": "Otvori uređivač",
+      "moreLines": "+{{count}} redova",
+      "editTemplate": "Uredi šablon"
     },
     "timer": {
-      "mode": "режим",
+      "mode": "režim",
       "modeOpt": {
-        "frequency": "фреквенција",
+        "frequency": "frekvencija",
         "cron": "cron"
       },
-      "frequency": "фреквенција",
-      "unit": "јединица",
+      "frequency": "frekvencija",
+      "unit": "jedinica",
       "cron": "cron",
-      "stop": "заустави након",
+      "stop": "zaustavi nakon",
       "stopOpt": {
-        "none": "никад",
-        "duration": "трајање",
-        "endDate": "датум завршетка"
+        "none": "nikad",
+        "duration": "trajanje",
+        "endDate": "datum završetka"
       },
-      "duration": "трајање",
-      "endDate": "датум завршетка",
-      "tick": "откуцај"
+      "duration": "trajanje",
+      "endDate": "datum završetka",
+      "tick": "otkucaj"
     },
     "code": {
-      "input": "улаз",
-      "language": "Језик",
-      "code": "кôд",
-      "modalTitle": "Уреди кôд",
-      "result": "резултат",
-      "timeout": "Временско ограничење (s)",
+      "input": "ulaz",
+      "language": "Jezik",
+      "code": "kôd",
+      "modalTitle": "Uredi kôd",
+      "result": "rezultat",
+      "timeout": "Vremensko ograničenje (s)",
       "deps": {
-        "downloading": "Преузимање {{count}} пакета: {{packages}}"
+        "downloading": "Preuzimanje {{count}} paketa: {{packages}}"
       },
       "packages": {
-        "title": "Пакети",
-        "caption": "Зависности",
-        "manage": "Управљање пакетима",
-        "count": "{{count}} зав.",
-        "addShort": "Додај",
-        "hint": "Закачени спољни пакети, разрешени и кеширани при првом покретању, а затим учитани ван мреже. Подржани су само чисто језички пакети (Python: чисти Python wheel-ови); закачите тачну верзију.",
-        "empty": "Још нема додатих пакета.",
-        "remove": "Уклони {{package}}",
-        "name": "Назив пакета",
-        "namePlaceholder": "назив пакета",
-        "version": "Верзија",
-        "versionPlaceholder": "верзија",
-        "add": "Додај пакет"
+        "title": "Paketi",
+        "caption": "Zavisnosti",
+        "manage": "Upravljanje paketima",
+        "count": "{{count}} zav.",
+        "addShort": "Dodaj",
+        "hint": "Zakačeni spoljni paketi, razrešeni i keširani pri prvom pokretanju, a zatim učitani van mreže. Podržani su samo čisto jezički paketi (Python: čisti Python wheel-ovi); zakačite tačnu verziju.",
+        "empty": "Još nema dodatih paketa.",
+        "remove": "Ukloni {{package}}",
+        "name": "Naziv paketa",
+        "namePlaceholder": "naziv paketa",
+        "version": "Verzija",
+        "versionPlaceholder": "verzija",
+        "add": "Dodaj paket"
       }
     },
     "help": {
-      "input": "Убацује улазне параметре сценарија и константе у граф.",
-      "output": "Декларише један од именованих резултата сценарија, који чита надређени Run-scenario.",
-      "if": "Грана ток на then / else упоређујући два операнда.",
-      "switch": "Усмерава улаз на одговарајући случај или на default.",
-      "httpRequest": "Извршава сачувани API захтев и емитује његов одговор.",
-      "soapRequest": "Покреће сачувани SOAP захтев и емитује своју рашчлањену одговор. SOAP грешка приказује се у одговору; неуспели позив усмерава се на порт `error`.",
-      "runScenario": "Покреће други сценарио као поново употребљив подкорак.",
-      "forEach": "Извршава тело једном по ставци колекције, затим наставља.",
-      "for": "Пролази кроз опсег бројева, извршавајући тело за сваку вредност.",
-      "while": "Понавља тело док услов важи (прво се тестира).",
-      "doWhile": "Понавља тело док услов важи (извршава се бар једном).",
-      "aggregate": "Своди колекцију на једну вредност (count, sum, min, max, average, join).",
-      "map": "Претвара сваку ставку колекције у нову листу.",
-      "filter": "Задржава ставке које испуњавају услов; остале усмерава у страну.",
-      "addToList": "Додаје вредности на листу.",
-      "removeFromList": "Уклања са листе одговарајуће вредности.",
-      "wait": "Паузира на одређено време, затим наставља.",
-      "waitUntil": "Паузира до задатог датума/времена, затим наставља.",
-      "now": "Емитује тренутни датум и време.",
-      "timer": "Активира своје тело у понављајућем интервалу или према cron распореду.",
-      "arithmetic": "Израчунава а + − × ÷ … два броја.",
-      "comparator": "Упоређује две вредности и емитује тачно или нетачно.",
-      "boolean": "Комбинује логичке вредности помоћу and / or / xor / not.",
-      "object": "Гради објекат из својих именованих улаза.",
-      "setVariable": "Чува вредност у променљиву извршавања.",
-      "getVariable": "Чита вредност променљиве извршавања.",
-      "transform": "Рендерује Handlebars шаблон из улаза и променљивих извршавања.",
-      "code": "Покреће ваш код (TypeScript, JavaScript, Python, Lua, Ruby или R) у sandbox-у и враћа резултат.",
-      "cast": "Претвара вредност у други тип (број, ниска, boolean, датум, листа).",
-      "regex": "Проналази, издваја, замењује или дели текст регуларним изразом.",
-      "json": "Парсира JSON ниску или серијализује вредност у JSON.",
-      "xml": "Парсира XML ниску или серијализује вредност у XML.",
-      "yaml": "Парсира YAML ниску или серијализује вредност у YAML.",
-      "crypto": "Хешира или кодира низ знакова (base64, md5, sha…, hmac, uuid).",
-      "jwt": "Декодира JWT токен у header, payload и signature.",
-      "datetime": "Помера, форматира или упоређује датум.",
-      "retry": "Поново покреће своје тело до успеха, уз backoff политику.",
-      "objectOp": "Преобликује објекат (get/set путање, merge, pick, omit, keys, values).",
-      "url": "Кодира, декодира или анализира URL-ове и query strings.",
-      "random": "Генерише случајан број, ниску, boolean или избор.",
-      "listOp": "Преобликује листу (sort, unique, reverse, flatten, chunk, slice, groupBy).",
-      "csv": "Парсира CSV ниску или серијализује листу у CSV.",
-      "math": "Извршава скаларну операцију (заокружи, апсолутна, корен, мин, макс, ограничи…).",
-      "schema": "Проверава вредност према JSON Schema.",
-      "readFile": "Чита текстуални садржај датотеке.",
-      "writeFile": "Уписује или додаје текст у датотеку.",
-      "throw": "Намерно не успева са поруком (за гране грешака и тестове).",
-      "log": "Уписује поруку у дневник извршавања и пропушта вредност даље.",
-      "assert": "Проверава услов (chai стил) и усмерава на успех или неуспех.",
-      "socketioConnect": "Отвара Socket.IO везу и поново емитује сваки примљени догађај на свом порту.",
-      "socketioSend": "Шаље поруку на већ отвореној Socket.IO вези.",
-      "socketioClose": "Затвара већ отворену Socket.IO везу.",
-      "socketioServerClose": "Зауставља већ активни лажни Socket.IO сервер (декларисан чвором Socket.IO server) и ослобађа његов порт.",
-      "websocketConnect": "Отвара сирову WebSocket везу и поново емитује сваку примљену поруку на свом порту.",
+      "input": "Ubacuje ulazne parametre scenarija i konstante u graf.",
+      "output": "Deklariše jedan od imenovanih rezultata scenarija, koji čita nadređeni Run-scenario.",
+      "if": "Grana tok na then / else upoređujući dva operanda.",
+      "switch": "Usmerava ulaz na odgovarajući slučaj ili na default.",
+      "httpRequest": "Izvršava sačuvani API zahtev i emituje njegov odgovor.",
+      "soapRequest": "Pokreće sačuvani SOAP zahtev i emituje svoju raščlanjenu odgovor. SOAP greška prikazuje se u odgovoru; neuspeli poziv usmerava se na port `error`.",
+      "runScenario": "Pokreće drugi scenario kao ponovo upotrebljiv podkorak.",
+      "forEach": "Izvršava telo jednom po stavci kolekcije, zatim nastavlja.",
+      "for": "Prolazi kroz opseg brojeva, izvršavajući telo za svaku vrednost.",
+      "while": "Ponavlja telo dok uslov važi (prvo se testira).",
+      "doWhile": "Ponavlja telo dok uslov važi (izvršava se bar jednom).",
+      "aggregate": "Svodi kolekciju na jednu vrednost (count, sum, min, max, average, join).",
+      "map": "Pretvara svaku stavku kolekcije u novu listu.",
+      "filter": "Zadržava stavke koje ispunjavaju uslov; ostale usmerava u stranu.",
+      "addToList": "Dodaje vrednosti na listu.",
+      "removeFromList": "Uklanja sa liste odgovarajuće vrednosti.",
+      "wait": "Pauzira na određeno vreme, zatim nastavlja.",
+      "waitUntil": "Pauzira do zadatog datuma/vremena, zatim nastavlja.",
+      "now": "Emituje trenutni datum i vreme.",
+      "timer": "Aktivira svoje telo u ponavljajućem intervalu ili prema cron rasporedu.",
+      "arithmetic": "Izračunava a + − × ÷ … dva broja.",
+      "comparator": "Upoređuje dve vrednosti i emituje tačno ili netačno.",
+      "boolean": "Kombinuje logičke vrednosti pomoću and / or / xor / not.",
+      "object": "Gradi objekat iz svojih imenovanih ulaza.",
+      "setVariable": "Čuva vrednost u promenljivu izvršavanja.",
+      "getVariable": "Čita vrednost promenljive izvršavanja.",
+      "transform": "Renderuje Handlebars šablon iz ulaza i promenljivih izvršavanja.",
+      "code": "Pokreće vaš kod (TypeScript, JavaScript, Python, Lua, Ruby ili R) u sandbox-u i vraća rezultat.",
+      "cast": "Pretvara vrednost u drugi tip (broj, niska, boolean, datum, lista).",
+      "regex": "Pronalazi, izdvaja, zamenjuje ili deli tekst regularnim izrazom.",
+      "json": "Parsira JSON nisku ili serijalizuje vrednost u JSON.",
+      "xml": "Parsira XML nisku ili serijalizuje vrednost u XML.",
+      "yaml": "Parsira YAML nisku ili serijalizuje vrednost u YAML.",
+      "crypto": "Hešira ili kodira niz znakova (base64, md5, sha…, hmac, uuid).",
+      "jwt": "Dekodira JWT token u header, payload i signature.",
+      "datetime": "Pomera, formatira ili upoređuje datum.",
+      "retry": "Ponovo pokreće svoje telo do uspeha, uz backoff politiku.",
+      "objectOp": "Preoblikuje objekat (get/set putanje, merge, pick, omit, keys, values).",
+      "url": "Kodira, dekodira ili analizira URL-ove i query strings.",
+      "random": "Generiše slučajan broj, nisku, boolean ili izbor.",
+      "listOp": "Preoblikuje listu (sort, unique, reverse, flatten, chunk, slice, groupBy).",
+      "csv": "Parsira CSV nisku ili serijalizuje listu u CSV.",
+      "math": "Izvršava skalarnu operaciju (zaokruži, apsolutna, koren, min, maks, ograniči…).",
+      "schema": "Proverava vrednost prema JSON Schema.",
+      "readFile": "Čita tekstualni sadržaj datoteke.",
+      "writeFile": "Upisuje ili dodaje tekst u datoteku.",
+      "throw": "Namerno ne uspeva sa porukom (za grane grešaka i testove).",
+      "log": "Upisuje poruku u dnevnik izvršavanja i propušta vrednost dalje.",
+      "assert": "Proverava uslov (chai stil) i usmerava na uspeh ili neuspeh.",
+      "socketioConnect": "Otvara Socket.IO vezu i ponovo emituje svaki primljeni događaj na svom portu.",
+      "socketioSend": "Šalje poruku na već otvorenoj Socket.IO vezi.",
+      "socketioClose": "Zatvara već otvorenu Socket.IO vezu.",
+      "socketioServerClose": "Zaustavlja već aktivni lažni Socket.IO server (deklarisan čvorom Socket.IO server) i oslobađa njegov port.",
+      "websocketConnect": "Otvara sirovu WebSocket vezu i ponovo emituje svaku primljenu poruku na svom portu.",
       "sseConnect": "Otvara dugotrajnu SSE (Server-Sent Events) vezu i ponovo emituje svaki primljeni okvir na svom portu.",
-      "websocketSend": "Шаље payload на већ отвореној WebSocket вези.",
-      "websocketClose": "Затвара већ отворену WebSocket везу.",
-      "websocketServerClose": "Зауставља већ активни лажни WebSocket сервер (декларисан чвором WebSocket server) и ослобађа његов порт.",
+      "websocketSend": "Šalje payload na već otvorenoj WebSocket vezi.",
+      "websocketClose": "Zatvara već otvorenu WebSocket vezu.",
+      "websocketServerClose": "Zaustavlja već aktivni lažni WebSocket server (deklarisan čvorom WebSocket server) i oslobađa njegov port.",
       "sseClose": "Zatvara već otvorenu SSE vezu.",
-      "grpcConnect": "Отвара streaming gRPC позив и поново емитује сваки примљени оквир на свом message порту.",
-      "grpcSend": "Уписује поруку захтева у већ отворен streaming gRPC позив.",
-      "grpcClose": "Делимично затвара (half-close) већ отворен streaming gRPC позив.",
-      "socketioConnectServer": "Покреће Socket.IO сервер (порт + рута); потврђује сваки примљени догађај и поново га емитује на свом порту. Слање емитује повезаним клијентима.",
-      "socketioSendServer": "Емитује поруку свим клијентима повезаним на наведени Socket.IO сервер.",
-      "socketioCloseServer": "Зауставља наведени Socket.IO сервер и прекида везу са његовим клијентима.",
-      "websocketConnectServer": "Покреће сирови WebSocket сервер (порт + путања); бележи сваки примљени frame и поново га емитује на свом message порту. Слање емитује повезаним клијентима.",
-      "websocketSendServer": "Емитује frame свим клијентима повезаним на наведени WebSocket сервер.",
-      "websocketCloseServer": "Зауставља наведени WebSocket сервер и прекида везу са његовим клијентима.",
-      "mqttConnect": "Отвара дуготрајну MQTT везу из повезаног захтева и претплаћује се на његову тему; поново емитује сваку примљену поруку на свом `message` порту.",
-      "mqttSend": "Објављује payload на већ отвореној MQTT вези (на њену тему).",
-      "mqttClose": "Затвара већ отворену MQTT везу.",
+      "grpcConnect": "Otvara streaming gRPC poziv i ponovo emituje svaki primljeni okvir na svom message portu.",
+      "grpcSend": "Upisuje poruku zahteva u već otvoren streaming gRPC poziv.",
+      "grpcClose": "Delimično zatvara (half-close) već otvoren streaming gRPC poziv.",
+      "socketioConnectServer": "Pokreće Socket.IO server (port + ruta); potvrđuje svaki primljeni događaj i ponovo ga emituje na svom portu. Slanje emituje povezanim klijentima.",
+      "socketioSendServer": "Emituje poruku svim klijentima povezanim na navedeni Socket.IO server.",
+      "socketioCloseServer": "Zaustavlja navedeni Socket.IO server i prekida vezu sa njegovim klijentima.",
+      "websocketConnectServer": "Pokreće sirovi WebSocket server (port + putanja); beleži svaki primljeni frame i ponovo ga emituje na svom message portu. Slanje emituje povezanim klijentima.",
+      "websocketSendServer": "Emituje frame svim klijentima povezanim na navedeni WebSocket server.",
+      "websocketCloseServer": "Zaustavlja navedeni WebSocket server i prekida vezu sa njegovim klijentima.",
+      "mqttConnect": "Otvara dugotrajnu MQTT vezu iz povezanog zahteva i pretplaćuje se na njegovu temu; ponovo emituje svaku primljenu poruku na svom `message` portu.",
+      "mqttSend": "Objavljuje payload na već otvorenoj MQTT vezi (na njenu temu).",
+      "mqttClose": "Zatvara već otvorenu MQTT vezu.",
       "amqpConnect": "Otvara trajnu AMQP vezu iz povezanog zahteva i konzumira njegov red čekanja; ponovo emituje svaku primljenu poruku na portu `message`.",
       "amqpPublish": "Objavljuje sadržaj na već otvorenoj AMQP vezi (na exchange/routing key povezanog zahteva).",
       "amqpClose": "Zatvara već otvorenu AMQP vezu.",
-      "mqttConnectServer": "Покреће локални MQTT broker (порт + филтер теме); претплаћује се на његов филтер теме и поново емитује сваку примљену поруку на свом `message` порту. Слање објављује повезаним претплатницима.",
-      "mqttSendServer": "Објављује поруку сваком претплатнику референцираног MQTT broker-а.",
-      "mqttCloseServer": "Зауставља референцирани MQTT broker и прекида везу са његовим клијентима.",
-      "redisSubscribe": "Отвара дуготрајну Redis претплатничку везу из повезаног захтева и слуша његове канале; поново емитује сваку примљену поруку на свом `message` порту.",
-      "redisClose": "Затвара већ отворену Redis претплатничку везу.",
-      "redisCommand": "Извршава повезану Redis команду (једна команда на новој вези, затим прекид) и емитује њен одговор.",
-      "toast": "Приказује toast обавештење у Restorm интерфејсу током извршавања сценарија.",
-      "httpListen": "Хостује локални лажни HTTP сервер и слуша неограничено. `connected` се активира чим почне да слуша; сваки послужени захтев поново емитује своје податке на порту `served`. Сервер остаје активан до HTTP затварања (или Stop-а), након чега се активира `done`. Нема response излаза — послужује, не позива споља.",
-      "httpClose": "Зауставља већ активни лажни HTTP сервер (декларисан чвором HTTP server) и ослобађа његов порт.",
-      "grpcListen": "Хостује локални лажни gRPC сервер и слуша неограничено. `connected` се активира чим почне да слуша; сваки послужени позив поново емитује своје податке на порту `served`. Сервер остаје активан до затварања gRPC сервера (или Stop-а), након чега се активира `done`. Нема response излаза — послужује, не позива споља.",
-      "grpcServerClose": "Зауставља већ активни лажни gRPC сервер (декларисан чвором gRPC server) и ослобађа његов порт.",
-      "soapListen": "Хостује локални SOAP mock сервер и слуша неограничено. Сваки долазни захтев усмерава се ка конфигурисаној операцији (према његовој SOAPAction или називу операције у телу) и одговара му се унапред дефинисаном SOAP ковертом (операција грешке враћа `<soap:Fault>`). `connected` се активира чим сервер слуша; сваки опслужени захтев поново емитује своје податке на порту `served`. Сервер остаје активан до SOAP затварања (или заустављања), а затим се активира `done`.",
-      "soapClose": "Зауставља SOAP mock сервер који већ слуша (декларисан SOAP серверским чвором) и ослобађа његов порт.",
-      "graphqlListen": "Хостује локални лажни GraphQL сервер и слуша неограничено. `connected` се активира чим почне да слуша; свака послужена операција поново емитује своје податке на порту `served`. Сервер остаје активан до GraphQL затварања (или Stop-а), након чега се активира `done`. Нема response излаза — послужује, не позива споља.",
-      "graphqlClose": "Зауставља већ активни лажни GraphQL сервер (декларисан чвором GraphQL server) и ослобађа његов порт.",
-      "odataListen": "Хостује локалну лажну OData v4 услугу и слуша неограничено. `connected` се активира чим почне да слуша; сваки опслужени захтев поново емитује своје податке на порту `served`. Сервер остаје активан до OData затварања (или заустављања), након чега се активира `done`. Без response излаза — опслужује, не позива ка споља.",
-      "odataClose": "Зауставља лажну OData услугу која већ слуша (декларисану OData серверским чвором) и ослобађа њен порт.",
-      "graphqlSubscribe": "Отвара дуготрајну GraphQL претплату као клијент преко SSE и слуша. `connected` се покреће чим се ток отвори; сваки примљени терет се поново емитује на порту `message` (претплата само прима, без именованих догађаја). Ток остаје отворен до отказивања GraphQL претплате (или заустављања), или док га сервер не доврши, а затим се покреће `done`.",
-      "graphqlUnsubscribe": "Зауставља већ отворену GraphQL претплату (декларисану GraphQL претплатним чвором) и затвара њен SSE ток.",
-      "stompConnect": "Отвара дуготрајну STOMP везу преко WebSocket-а: обавља CONNECT/CONNECTED руковање, затим се претплаћује на свако конфигурисано одредиште и поново емитује сваки примљени оквир на свом порту.",
-      "stompSend": "Шаље SEND оквир на већ отвореној STOMP вези.",
-      "stompClose": "Шаље DISCONNECT и затвара већ отворену STOMP везу.",
-      "kafkaProduce": "Покреће повезани Kafka захтев као једнократну производњу и емитује резултат (тема/партиција/offset) као `response`.",
-      "kafkaConsume": "Отвара дуготрајног Kafka потрошача из повезаног захтева и поново емитује сваку примљену поруку на свом `message` порту.",
-      "kafkaClose": "Затвара већ отвореног Kafka потрошача."
+      "mqttConnectServer": "Pokreće lokalni MQTT broker (port + filter teme); pretplaćuje se na njegov filter teme i ponovo emituje svaku primljenu poruku na svom `message` portu. Slanje objavljuje povezanim pretplatnicima.",
+      "mqttSendServer": "Objavljuje poruku svakom pretplatniku referenciranog MQTT broker-a.",
+      "mqttCloseServer": "Zaustavlja referencirani MQTT broker i prekida vezu sa njegovim klijentima.",
+      "redisSubscribe": "Otvara dugotrajnu Redis pretplatničku vezu iz povezanog zahteva i sluša njegove kanale; ponovo emituje svaku primljenu poruku na svom `message` portu.",
+      "redisClose": "Zatvara već otvorenu Redis pretplatničku vezu.",
+      "redisCommand": "Izvršava povezanu Redis komandu (jedna komanda na novoj vezi, zatim prekid) i emituje njen odgovor.",
+      "toast": "Prikazuje toast obaveštenje u Restorm interfejsu tokom izvršavanja scenarija.",
+      "httpListen": "Hostuje lokalni lažni HTTP server i sluša neograničeno. `connected` se aktivira čim počne da sluša; svaki posluženi zahtev ponovo emituje svoje podatke na portu `served`. Server ostaje aktivan do HTTP zatvaranja (ili Stop-a), nakon čega se aktivira `done`. Nema response izlaza — poslužuje, ne poziva spolja.",
+      "httpClose": "Zaustavlja već aktivni lažni HTTP server (deklarisan čvorom HTTP server) i oslobađa njegov port.",
+      "grpcListen": "Hostuje lokalni lažni gRPC server i sluša neograničeno. `connected` se aktivira čim počne da sluša; svaki posluženi poziv ponovo emituje svoje podatke na portu `served`. Server ostaje aktivan do zatvaranja gRPC servera (ili Stop-a), nakon čega se aktivira `done`. Nema response izlaza — poslužuje, ne poziva spolja.",
+      "grpcServerClose": "Zaustavlja već aktivni lažni gRPC server (deklarisan čvorom gRPC server) i oslobađa njegov port.",
+      "soapListen": "Hostuje lokalni SOAP mock server i sluša neograničeno. Svaki dolazni zahtev usmerava se ka konfigurisanoj operaciji (prema njegovoj SOAPAction ili nazivu operacije u telu) i odgovara mu se unapred definisanom SOAP kovertom (operacija greške vraća `<soap:Fault>`). `connected` se aktivira čim server sluša; svaki opsluženi zahtev ponovo emituje svoje podatke na portu `served`. Server ostaje aktivan do SOAP zatvaranja (ili zaustavljanja), a zatim se aktivira `done`.",
+      "soapClose": "Zaustavlja SOAP mock server koji već sluša (deklarisan SOAP serverskim čvorom) i oslobađa njegov port.",
+      "graphqlListen": "Hostuje lokalni lažni GraphQL server i sluša neograničeno. `connected` se aktivira čim počne da sluša; svaka poslužena operacija ponovo emituje svoje podatke na portu `served`. Server ostaje aktivan do GraphQL zatvaranja (ili Stop-a), nakon čega se aktivira `done`. Nema response izlaza — poslužuje, ne poziva spolja.",
+      "graphqlClose": "Zaustavlja već aktivni lažni GraphQL server (deklarisan čvorom GraphQL server) i oslobađa njegov port.",
+      "odataListen": "Hostuje lokalnu lažnu OData v4 uslugu i sluša neograničeno. `connected` se aktivira čim počne da sluša; svaki opsluženi zahtev ponovo emituje svoje podatke na portu `served`. Server ostaje aktivan do OData zatvaranja (ili zaustavljanja), nakon čega se aktivira `done`. Bez response izlaza — opslužuje, ne poziva ka spolja.",
+      "odataClose": "Zaustavlja lažnu OData uslugu koja već sluša (deklarisanu OData serverskim čvorom) i oslobađa njen port.",
+      "graphqlSubscribe": "Otvara dugotrajnu GraphQL pretplatu kao klijent preko SSE i sluša. `connected` se pokreće čim se tok otvori; svaki primljeni teret se ponovo emituje na portu `message` (pretplata samo prima, bez imenovanih događaja). Tok ostaje otvoren do otkazivanja GraphQL pretplate (ili zaustavljanja), ili dok ga server ne dovrši, a zatim se pokreće `done`.",
+      "graphqlUnsubscribe": "Zaustavlja već otvorenu GraphQL pretplatu (deklarisanu GraphQL pretplatnim čvorom) i zatvara njen SSE tok.",
+      "stompConnect": "Otvara dugotrajnu STOMP vezu preko WebSocket-a: obavlja CONNECT/CONNECTED rukovanje, zatim se pretplaćuje na svako konfigurisano odredište i ponovo emituje svaki primljeni okvir na svom portu.",
+      "stompSend": "Šalje SEND okvir na već otvorenoj STOMP vezi.",
+      "stompClose": "Šalje DISCONNECT i zatvara već otvorenu STOMP vezu.",
+      "kafkaProduce": "Pokreće povezani Kafka zahtev kao jednokratnu proizvodnju i emituje rezultat (tema/particija/offset) kao `response`.",
+      "kafkaConsume": "Otvara dugotrajnog Kafka potrošača iz povezanog zahteva i ponovo emituje svaku primljenu poruku na svom `message` portu.",
+      "kafkaClose": "Zatvara već otvorenog Kafka potrošača."
     },
     "legend": {
-      "title": "Легенда",
-      "portsTitle": "Улазне тачке",
-      "entryEventTrigger": "Улазна тачка покренута догађајем",
-      "entryDataTrigger": "Улазна тачка покренута податком",
-      "runWhenAllReceived": "Акције се извршавају чим се приме сви догађаји и сви подаци",
-      "runOnLaunchNoPredecessor": "Акције без претходника извршавају се чим се сценарио покрене",
-      "outPortsTitle": "Излазне тачке",
-      "outEmit": "Емитује окидачки догађај и шаље податке",
-      "outEmitSignalOnly": "Емитује окидачки догађај без слања података",
-      "genericOutPortsTitle": "Опште излазне тачке",
-      "outDone": "Окидачки догађај емитован када је акција завршена",
-      "outError": "Окидачки догађај покренут у случају грешке у акцији",
-      "navTitle": "Навигација",
-      "zoom": "зумирање",
-      "pan": "помери",
-      "boxSelect": "правоугаони избор",
-      "select": "изабери / вишеструки избор"
+      "title": "Legenda",
+      "portsTitle": "Ulazne tačke",
+      "entryEventTrigger": "Ulazna tačka pokrenuta događajem",
+      "entryDataTrigger": "Ulazna tačka pokrenuta podatkom",
+      "runWhenAllReceived": "Akcije se izvršavaju čim se prime svi događaji i svi podaci",
+      "runOnLaunchNoPredecessor": "Akcije bez prethodnika izvršavaju se čim se scenario pokrene",
+      "outPortsTitle": "Izlazne tačke",
+      "outEmit": "Emituje okidački događaj i šalje podatke",
+      "outEmitSignalOnly": "Emituje okidački događaj bez slanja podataka",
+      "genericOutPortsTitle": "Opšte izlazne tačke",
+      "outDone": "Okidački događaj emitovan kada je akcija završena",
+      "outError": "Okidački događaj pokrenut u slučaju greške u akciji",
+      "navTitle": "Navigacija",
+      "zoom": "zumiranje",
+      "pan": "pomeri",
+      "boxSelect": "pravougaoni izbor",
+      "select": "izaberi / višestruki izbor"
     },
     "cli": {
-      "title": "Покрени из командне линије",
-      "intro": "Покрените овај сценарио без отварања апликације (CI, cron, скрипта):",
-      "byId": "Одреди по id-у",
-      "allLogs": "Сви записи",
-      "note": "`--out file` уписује run-log и у датотеку.",
-      "projectPlaceholder": "<пројекат.restorm>",
+      "title": "Pokreni iz komandne linije",
+      "intro": "Pokrenite ovaj scenario bez otvaranja aplikacije (CI, cron, skripta):",
+      "byId": "Odredi po id-u",
+      "allLogs": "Svi zapisi",
+      "note": "`--out file` upisuje run-log i u datoteku.",
+      "projectPlaceholder": "<projekat.restorm>",
       "tokenPlaceholder": "<vaš_token>",
       "tokenNote": "Headless pokretanje zahteva Restorm Pro plan i CI token.",
       "tokenLink": "Dohvati token"
     },
     "socketio": {
-      "connectionNameLabel": "Назив везе",
-      "connectionNamePlaceholder": "назив везе",
-      "eventPlaceholder": "догађај",
-      "addEvent": "Додај догађај",
-      "connected": "повезано",
-      "others": "остали",
-      "connection": "веза",
-      "pickConnection": "— изабери везу —",
-      "channelLabel": "Назив канала",
-      "payload": "пејлоуд",
-      "payloadModalTitle": "Уреди пејлоуд",
-      "started": "покренуто"
+      "connectionNameLabel": "Naziv veze",
+      "connectionNamePlaceholder": "naziv veze",
+      "eventPlaceholder": "događaj",
+      "addEvent": "Dodaj događaj",
+      "connected": "povezano",
+      "others": "ostali",
+      "connection": "veza",
+      "pickConnection": "— izaberi vezu —",
+      "channelLabel": "Naziv kanala",
+      "payload": "pejloud",
+      "payloadModalTitle": "Uredi pejloud",
+      "started": "pokrenuto"
     },
     "websocket": {
-      "message": "порука"
+      "message": "poruka"
     },
     "sse": {
-      "message": "порука"
+      "message": "poruka"
     },
     "grpc": {
-      "message": "порука"
+      "message": "poruka"
     },
     "palette": {
-      "arrangeActions": "Преуреди акције"
+      "arrangeActions": "Preuredi akcije"
     },
     "port": {
-      "in": "улаз",
-      "error": "грешка",
-      "done": "готово"
+      "in": "ulaz",
+      "error": "greška",
+      "done": "gotovo"
     },
     "toast": {
-      "title": "наслов",
-      "message": "порука",
-      "duration": "трајање (s)"
+      "title": "naslov",
+      "message": "poruka",
+      "duration": "trajanje (s)"
     },
     "http": {
-      "served": "послужено"
+      "served": "posluženo"
     },
     "actionOverride": {
-      "configMissingShort": "Конфигурација недостаје",
+      "configMissingShort": "Konfiguracija nedostaje",
       "configSelector": {
-        "label": "Основна конфигурација",
-        "none": "Ниједна (подразумеване вредности захтева)"
+        "label": "Osnovna konfiguracija",
+        "none": "Nijedna (podrazumevane vrednosti zahteva)"
       },
-      "configMissing": "Изабрана конфигурација је обрисана; примењују се подразумеване вредности захтева.",
+      "configMissing": "Izabrana konfiguracija je obrisana; primenjuju se podrazumevane vrednosti zahteva.",
       "fields": {
-        "env": "Окружење"
+        "env": "Okruženje"
       }
     }
   },
   "mqtt": {
     "qos": "QoS",
-    "retain": "Задржи",
-    "subscribeOnConnect": "Претплати се при повезивању",
-    "clientId": "ID клијента",
-    "clientIdPlaceholder": "аутоматски генерисано ако је празно",
-    "username": "Корисничко име",
-    "password": "Лозинка",
+    "retain": "Zadrži",
+    "subscribeOnConnect": "Pretplati se pri povezivanju",
+    "clientId": "ID klijenta",
+    "clientIdPlaceholder": "automatski generisano ako je prazno",
+    "username": "Korisničko ime",
+    "password": "Lozinka",
     "keepalive": "Keepalive (s)",
-    "lwt": "Последња воља (LWT)",
-    "topic": "Тема",
-    "lwtTopicPlaceholder": "тема/тестамента",
-    "lwtPayload": "Садржај",
-    "lwtPayloadPlaceholder": "порука тестамента"
+    "lwt": "Poslednja volja (LWT)",
+    "topic": "Tema",
+    "lwtTopicPlaceholder": "tema/testamenta",
+    "lwtPayload": "Sadržaj",
+    "lwtPayloadPlaceholder": "poruka testamenta"
   },
   "amqp": {
     "urlPlaceholder": "AMQP URL (amqp:// ili amqps://)",
@@ -2088,7 +2088,7 @@
     "browsePeekCount": "Broj za pregled",
     "connect": "Poveži",
     "connecting": "Povezivanje…",
-    "disconnect": "Прекини везу",
+    "disconnect": "Prekini vezu",
     "connected": "Povezano",
     "disconnected": "Prekinuto",
     "send": "Pošalji",
@@ -2098,27 +2098,27 @@
     "messages": "Poruke"
   },
   "mcpLogs": {
-    "title": "MCP евиденције",
-    "empty": "Још нема забележених MCP позива.",
-    "clear": "Очисти",
-    "tool": "Алат",
-    "time": "Време",
-    "payload": "Садржај",
-    "truncated": "(скраћено)",
-    "screenshot": "Снимак екрана",
-    "screencast": "Снимак екрана (видео)",
-    "captureEvicted": "Снимак више није доступан",
-    "copy": "Копирај",
-    "closePreview": "Затвори",
-    "captureImageTitle": "MCP снимак екрана",
-    "captureVideoTitle": "MCP снимак екрана (видео)"
+    "title": "MCP evidencije",
+    "empty": "Još nema zabeleženih MCP poziva.",
+    "clear": "Očisti",
+    "tool": "Alat",
+    "time": "Vreme",
+    "payload": "Sadržaj",
+    "truncated": "(skraćeno)",
+    "screenshot": "Snimak ekrana",
+    "screencast": "Snimak ekrana (video)",
+    "captureEvicted": "Snimak više nije dostupan",
+    "copy": "Kopiraj",
+    "closePreview": "Zatvori",
+    "captureImageTitle": "MCP snimak ekrana",
+    "captureVideoTitle": "MCP snimak ekrana (video)"
   },
   "mcp": {
     "title": "MCP",
-    "logsRetentionCap": "Чување евиденције MCP позива",
-    "logsRetentionCapDescription": "Максималан број услужених MCP позива који се чувају у меморији за прегледач MCP евиденција. Старији позиви се одбацују када се достигне граница; 0 онемогућава чување.",
-    "captureRetentionCap": "Задржавање MCP снимака",
-    "captureRetentionCapDescription": "Колико недавних MCP позива задржава свој снимак екрана / видео (у меморији и на диску). По достизању ограничења старији снимци губе медиј, а њихова привремена видео датотека се брише; 0 искључује задржавање.",
+    "logsRetentionCap": "Čuvanje evidencije MCP poziva",
+    "logsRetentionCapDescription": "Maksimalan broj usluženih MCP poziva koji se čuvaju u memoriji za pregledač MCP evidencija. Stariji pozivi se odbacuju kada se dostigne granica; 0 onemogućava čuvanje.",
+    "captureRetentionCap": "Zadržavanje MCP snimaka",
+    "captureRetentionCapDescription": "Koliko nedavnih MCP poziva zadržava svoj snimak ekrana / video (u memoriji i na disku). Po dostizanju ograničenja stariji snimci gube medij, a njihova privremena video datoteka se briše; 0 isključuje zadržavanje.",
     "enabled": "Omogući MCP server",
     "enabledDescription": "Pokreće ugrađeni MCP server pri pokretanju kako bi se AI alati mogli povezati s ovom instancom. Onemogućite da spriječite MCP veze.",
     "proUpsell": {
@@ -2127,205 +2127,205 @@
     }
   },
   "mcpToolTitles": {
-    "answerScenarioInput": "Одговори на унос сценарија",
-    "arrangeScenario": "Аутоматски распореди сценарио",
-    "cancelRequest": "Откажи захтев",
-    "cancelScenarioNode": "Откажи чвор сценарија",
-    "closeTab": "Затвори картицу",
-    "connectScenarioNodes": "Повежи чворове сценарија",
-    "createCustomValueList": "Направи листу вредности",
-    "createEnvironment": "Направи окружење",
-    "createFolder": "Направи фасциклу",
-    "createProject": "Направи пројекат",
-    "createRequest": "Направи захтев",
-    "createScenario": "Направи сценарио",
-    "createScenarioNode": "Направи чвор сценарија",
-    "defineParam": "Дефиниши параметар",
-    "deleteCustomValueList": "Избриши листу вредности",
-    "deleteEnvironment": "Избриши окружење",
-    "deleteEnvVariable": "Избриши променљиву окружења",
-    "deleteItem": "Избриши ставку",
-    "deleteScenarioNode": "Избриши чвор сценарија",
-    "describeScenarioKinds": "Излистај врсте чворова сценарија",
-    "disconnectScenarioNodes": "Прекини везу чворова сценарија",
-    "firewallAllow": "Дозволи захтев заштитног зида",
-    "firewallDeny": "Одбиј захтев заштитног зида",
-    "firewallListPendingPrompts": "Излистај чекајуће упите заштитног зида",
-    "firewallListRules": "Излистај правила заштитног зида",
-    "firewallResolvePrompt": "Реши упит заштитног зида",
-    "getActiveEnv": "Преузми активно окружење",
-    "getCurrentTab": "Преузми тренутну картицу",
-    "getRequest": "Преузми захтев",
-    "getResponse": "Преузми одговор",
-    "getResponseHistory": "Преузми историју одговора",
-    "getScenario": "Преузми сценарио",
-    "getScenarioNodeResult": "Преузми резултат чвора сценарија",
-    "getScenarioNodeStatus": "Преузми статус чвора сценарија",
-    "getScenarioRunStatus": "Преузми статус извршавања сценарија",
-    "gitCommitPush": "Прегледај commit пре пуша",
-    "gitConfirmPush": "Потврди и пошаљи commit",
-    "gitPull": "Преузми најновије измене",
-    "gitResolveConflicts": "Реши конфликт при преузимању",
-    "importFromUrl": "Увези са URL-а",
-    "listCustomValueLists": "Излистај листе вредности",
-    "listEnvironments": "Излистај окружења",
-    "listEnvVariables": "Излистај променљиве окружења",
-    "listFavorites": "Излистај омиљене",
-    "listFolders": "Излистај фасцикле",
-    "listRecentProjects": "Излистај недавне пројекте",
-    "listRequests": "Излистај захтеве",
-    "listScenarioNodes": "Излистај чворове сценарија",
-    "listScenarioRuns": "Излистај извршавања сценарија",
-    "listScenarios": "Излистај сценарије",
-    "listValueSources": "Излистај изворе вредности",
-    "moveScenarioNode": "Премести чвор сценарија",
-    "openFirewall": "Отвори заштитни зид",
-    "openProject": "Отвори пројекат",
-    "openTab": "Отвори картицу",
-    "readStream": "Читај ток",
-    "refreshEnvironment": "Освежи окружење",
-    "renameEnvironment": "Преименуј окружење",
-    "moveItem": "Премести ставку",
-    "listQuickConfigs": "Прикажи брзе конфигурације",
-    "addQuickConfig": "Додај брзу конфигурацију",
-    "updateQuickConfig": "Ажурирај брзу конфигурацију",
-    "deleteQuickConfig": "Избриши брзу конфигурацију",
-    "describeQuickConfigSchema": "Опиши поља брзе конфигурације",
-    "renameItem": "Преименуј ставку",
-    "revealInTree": "Прикажи у стаблу",
-    "runRequest": "Покрени захтев",
-    "runRequestBatch": "Покрени групу захтева",
-    "runScenario": "Покрени сценарио",
-    "runScenarioNode": "Покрени чвор сценарија",
-    "saveProject": "Сачувај пројекат",
-    "search": "Претражи",
-    "sendMessage": "Пошаљи поруку",
-    "setEdgeSelector": "Постави селектор ивице",
-    "setEnvVariable": "Постави променљиву окружења",
-    "setFavorite": "Постави омиљено",
-    "stopScenarioRun": "Заустави извршавање сценарија",
-    "updateCustomValueList": "Ажурирај листу вредности",
-    "updateEnvironment": "Ажурирај окружење",
-    "updateFolder": "Ажурирај фасциклу",
-    "updateRequest": "Ажурирај захтев",
-    "updateScenario": "Ажурирај сценарио",
-    "updateScenarioNode": "Ажурирај чвор сценарија",
-    "createInstance": "Направи нову инстанцу",
-    "terminateInstance": "Затвори инстанцу"
+    "answerScenarioInput": "Odgovori na unos scenarija",
+    "arrangeScenario": "Automatski rasporedi scenario",
+    "cancelRequest": "Otkaži zahtev",
+    "cancelScenarioNode": "Otkaži čvor scenarija",
+    "closeTab": "Zatvori karticu",
+    "connectScenarioNodes": "Poveži čvorove scenarija",
+    "createCustomValueList": "Napravi listu vrednosti",
+    "createEnvironment": "Napravi okruženje",
+    "createFolder": "Napravi fasciklu",
+    "createProject": "Napravi projekat",
+    "createRequest": "Napravi zahtev",
+    "createScenario": "Napravi scenario",
+    "createScenarioNode": "Napravi čvor scenarija",
+    "defineParam": "Definiši parametar",
+    "deleteCustomValueList": "Izbriši listu vrednosti",
+    "deleteEnvironment": "Izbriši okruženje",
+    "deleteEnvVariable": "Izbriši promenljivu okruženja",
+    "deleteItem": "Izbriši stavku",
+    "deleteScenarioNode": "Izbriši čvor scenarija",
+    "describeScenarioKinds": "Izlistaj vrste čvorova scenarija",
+    "disconnectScenarioNodes": "Prekini vezu čvorova scenarija",
+    "firewallAllow": "Dozvoli zahtev zaštitnog zida",
+    "firewallDeny": "Odbij zahtev zaštitnog zida",
+    "firewallListPendingPrompts": "Izlistaj čekajuće upite zaštitnog zida",
+    "firewallListRules": "Izlistaj pravila zaštitnog zida",
+    "firewallResolvePrompt": "Reši upit zaštitnog zida",
+    "getActiveEnv": "Preuzmi aktivno okruženje",
+    "getCurrentTab": "Preuzmi trenutnu karticu",
+    "getRequest": "Preuzmi zahtev",
+    "getResponse": "Preuzmi odgovor",
+    "getResponseHistory": "Preuzmi istoriju odgovora",
+    "getScenario": "Preuzmi scenario",
+    "getScenarioNodeResult": "Preuzmi rezultat čvora scenarija",
+    "getScenarioNodeStatus": "Preuzmi status čvora scenarija",
+    "getScenarioRunStatus": "Preuzmi status izvršavanja scenarija",
+    "gitCommitPush": "Pregledaj commit pre puša",
+    "gitConfirmPush": "Potvrdi i pošalji commit",
+    "gitPull": "Preuzmi najnovije izmene",
+    "gitResolveConflicts": "Reši konflikt pri preuzimanju",
+    "importFromUrl": "Uvezi sa URL-a",
+    "listCustomValueLists": "Izlistaj liste vrednosti",
+    "listEnvironments": "Izlistaj okruženja",
+    "listEnvVariables": "Izlistaj promenljive okruženja",
+    "listFavorites": "Izlistaj omiljene",
+    "listFolders": "Izlistaj fascikle",
+    "listRecentProjects": "Izlistaj nedavne projekte",
+    "listRequests": "Izlistaj zahteve",
+    "listScenarioNodes": "Izlistaj čvorove scenarija",
+    "listScenarioRuns": "Izlistaj izvršavanja scenarija",
+    "listScenarios": "Izlistaj scenarije",
+    "listValueSources": "Izlistaj izvore vrednosti",
+    "moveScenarioNode": "Premesti čvor scenarija",
+    "openFirewall": "Otvori zaštitni zid",
+    "openProject": "Otvori projekat",
+    "openTab": "Otvori karticu",
+    "readStream": "Čitaj tok",
+    "refreshEnvironment": "Osveži okruženje",
+    "renameEnvironment": "Preimenuj okruženje",
+    "moveItem": "Premesti stavku",
+    "listQuickConfigs": "Prikaži brze konfiguracije",
+    "addQuickConfig": "Dodaj brzu konfiguraciju",
+    "updateQuickConfig": "Ažuriraj brzu konfiguraciju",
+    "deleteQuickConfig": "Izbriši brzu konfiguraciju",
+    "describeQuickConfigSchema": "Opiši polja brze konfiguracije",
+    "renameItem": "Preimenuj stavku",
+    "revealInTree": "Prikaži u stablu",
+    "runRequest": "Pokreni zahtev",
+    "runRequestBatch": "Pokreni grupu zahteva",
+    "runScenario": "Pokreni scenario",
+    "runScenarioNode": "Pokreni čvor scenarija",
+    "saveProject": "Sačuvaj projekat",
+    "search": "Pretraži",
+    "sendMessage": "Pošalji poruku",
+    "setEdgeSelector": "Postavi selektor ivice",
+    "setEnvVariable": "Postavi promenljivu okruženja",
+    "setFavorite": "Postavi omiljeno",
+    "stopScenarioRun": "Zaustavi izvršavanje scenarija",
+    "updateCustomValueList": "Ažuriraj listu vrednosti",
+    "updateEnvironment": "Ažuriraj okruženje",
+    "updateFolder": "Ažuriraj fasciklu",
+    "updateRequest": "Ažuriraj zahtev",
+    "updateScenario": "Ažuriraj scenario",
+    "updateScenarioNode": "Ažuriraj čvor scenarija",
+    "createInstance": "Napravi novu instancu",
+    "terminateInstance": "Zatvori instancu"
   },
   "odataFilter": {
     "detail": {
-      "property": "својство",
-      "navigation": "навигација",
-      "operator": "оператор",
-      "logical": "логички оператор",
-      "function": "функција",
-      "enumValue": "enum вредност"
+      "property": "svojstvo",
+      "navigation": "navigacija",
+      "operator": "operator",
+      "logical": "logički operator",
+      "function": "funkcija",
+      "enumValue": "enum vrednost"
     },
     "validation": {
-      "unknownProperty": "Непознато својство",
-      "wrongTypeOperator": "Оператор није применљив на овај тип својства"
+      "unknownProperty": "Nepoznato svojstvo",
+      "wrongTypeOperator": "Operator nije primenljiv na ovaj tip svojstva"
     }
   },
   "odataRequestTab": {
-    "send": "Пошаљи",
-    "loadNextPage": "Учитај следећу страницу",
-    "batchFormatLabel": "Формат групе",
+    "send": "Pošalji",
+    "loadNextPage": "Učitaj sledeću stranicu",
+    "batchFormatLabel": "Format grupe",
     "batchFormatMultipart": "multipart/mixed",
-    "batchFormatJson": "JSON група",
-    "versionMismatchWarning": "Овај захтев је означен као {{requestVersion}}, али одговор изгледа као {{responseVersion}}. Промените верзију захтева да одговара серверу.",
-    "orderbyPropertyPickerPlaceholder": "Изаберите…",
+    "batchFormatJson": "JSON grupa",
+    "versionMismatchWarning": "Ovaj zahtev je označen kao {{requestVersion}}, ali odgovor izgleda kao {{responseVersion}}. Promenite verziju zahteva da odgovara serveru.",
+    "orderbyPropertyPickerPlaceholder": "Izaberite…",
     "batchAllowGetInChangeSet": "Dozvoli GET u change-setu",
     "batchAllowGetInChangeSetTooltip": "OData specifikacija zabranjuje GET unutar change-seta; mnogi serveri će odbiti takve pakete. Omogućite ovu opciju samo ako je vaš server eksplicitno podržava.",
     "batchGetInChangeSetWarning": "GET unutar change-seta možda neće biti prihvaćen od svih servera (nije dozvoljeno prema OData specifikaciji).",
     "batchForceIncludeInChangeSet": "Ipak uključi",
-    "batchForceAbsoluteBatchUrls": "Принуди апсолутне URL-ове у серији (v4.01)",
-    "batchForceAbsoluteBatchUrlsTooltip": "OData v4.01 снажно преферира релативне URL-ове у под-захтевима. Омогућите ово да задржите апсолутне URL-ове (за сервере који то захтевају).",
-    "getDelta": "Преузми делту",
-    "deltaHint": "@odata.deltaLink доступан — кликните да замените овај одговор најновијим скупом промена.",
-    "deltaChanged": "{{count}} промењено",
-    "deltaRemoved": "{{count}} уклоњено",
-    "actionBody": "Тело акције (JSON)",
-    "actionParameters": "Параметри акције (из метаподатака)",
-    "applyPlaceholder": "groupby((Status),aggregate($count as Укупно))",
-    "batchAdd": "Додај под-захтев",
-    "batchAtomicityPlaceholder": "скуп измена (опционо)",
-    "batchBody": "Под-захтеви групе",
-    "batchBodyLabel": "Тело (JSON)",
-    "batchEmpty": "Још нема под-захтева. Додајте један испод.",
-    "batchMoveDown": "Помери надоле",
-    "batchMoveUp": "Помери нагоре",
-    "batchRemove": "Уклони под-захтев",
-    "batchUrlPlaceholder": "Pets(1) — релативно у односу на корен услуге",
-    "expandAdd": "Додај проширење",
-    "expandCollapseOptions": "Сакриј опције",
-    "expandEmpty": "Још нема проширења. Додајте једно испод.",
-    "expandMoveDown": "Помери надоле",
-    "expandMoveUp": "Помери нагоре",
-    "expandNested": "Угнежђени $expand",
+    "batchForceAbsoluteBatchUrls": "Prinudi apsolutne URL-ove u seriji (v4.01)",
+    "batchForceAbsoluteBatchUrlsTooltip": "OData v4.01 snažno preferira relativne URL-ove u pod-zahtevima. Omogućite ovo da zadržite apsolutne URL-ove (za servere koji to zahtevaju).",
+    "getDelta": "Preuzmi deltu",
+    "deltaHint": "@odata.deltaLink dostupan — kliknite da zamenite ovaj odgovor najnovijim skupom promena.",
+    "deltaChanged": "{{count}} promenjeno",
+    "deltaRemoved": "{{count}} uklonjeno",
+    "actionBody": "Telo akcije (JSON)",
+    "actionParameters": "Parametri akcije (iz metapodataka)",
+    "applyPlaceholder": "groupby((Status),aggregate($count as Ukupno))",
+    "batchAdd": "Dodaj pod-zahtev",
+    "batchAtomicityPlaceholder": "skup izmena (opciono)",
+    "batchBody": "Pod-zahtevi grupe",
+    "batchBodyLabel": "Telo (JSON)",
+    "batchEmpty": "Još nema pod-zahteva. Dodajte jedan ispod.",
+    "batchMoveDown": "Pomeri nadole",
+    "batchMoveUp": "Pomeri nagore",
+    "batchRemove": "Ukloni pod-zahtev",
+    "batchUrlPlaceholder": "Pets(1) — relativno u odnosu na koren usluge",
+    "expandAdd": "Dodaj proširenje",
+    "expandCollapseOptions": "Sakrij opcije",
+    "expandEmpty": "Još nema proširenja. Dodajte jedno ispod.",
+    "expandMoveDown": "Pomeri nadole",
+    "expandMoveUp": "Pomeri nagore",
+    "expandNested": "Ugnežđeni $expand",
     "expandOrderbyPlaceholder": "Name asc",
-    "expandPropertyPlaceholder": "Навигационо својство (нпр. Tags)",
-    "expandRemove": "Уклони",
-    "expandSelectPlaceholder": "Id, Name (раздвојено зарезима)",
-    "expandShowOptions": "Прикажи опције",
+    "expandPropertyPlaceholder": "Navigaciono svojstvo (npr. Tags)",
+    "expandRemove": "Ukloni",
+    "expandSelectPlaceholder": "Id, Name (razdvojeno zarezima)",
+    "expandShowOptions": "Prikaži opcije",
     "expandSkipPlaceholder": "0",
     "expandTopPlaceholder": "5",
-    "filterPlaceholder": "Name eq 'Ана' and Age gt 21",
+    "filterPlaceholder": "Name eq 'Ana' and Age gt 21",
     "formatPlaceholder": "json",
-    "functionParameters": "Параметри функције (из метаподатака)",
-    "navigationPropertiesHint": "Навигациона својства:",
-    "orderbyAdd": "Додај сортирање",
-    "orderbyEmpty": "Још нема сортирања. Додајте својство испод.",
-    "orderbyMoveDown": "Помери надоле",
-    "orderbyMoveUp": "Помери нагоре",
+    "functionParameters": "Parametri funkcije (iz metapodataka)",
+    "navigationPropertiesHint": "Navigaciona svojstva:",
+    "orderbyAdd": "Dodaj sortiranje",
+    "orderbyEmpty": "Još nema sortiranja. Dodajte svojstvo ispod.",
+    "orderbyMoveDown": "Pomeri nadole",
+    "orderbyMoveUp": "Pomeri nagore",
     "orderbyPropertyPlaceholder": "Name",
-    "orderbyRemove": "Уклони",
-    "paginatedHint": "@odata.nextLink доступан — кликните да бисте додали следећу страницу овом одговору.",
-    "paramsApply": "Примени параметре",
-    "paramsApplyToBody": "Примени на тело",
-    "paramsApplyToUrl": "Примени на URL",
-    "paramsNone": "Не очекују се параметри.",
-    "propertiesHint": "Својства:",
-    "propertyPickerPlaceholder": "Изаберите својство…",
-    "responseEmpty": "Нема тела одговора",
+    "orderbyRemove": "Ukloni",
+    "paginatedHint": "@odata.nextLink dostupan — kliknite da biste dodali sledeću stranicu ovom odgovoru.",
+    "paramsApply": "Primeni parametre",
+    "paramsApplyToBody": "Primeni na telo",
+    "paramsApplyToUrl": "Primeni na URL",
+    "paramsNone": "Ne očekuju se parametri.",
+    "propertiesHint": "Svojstva:",
+    "propertyPickerPlaceholder": "Izaberite svojstvo…",
+    "responseEmpty": "Nema tela odgovora",
     "searchPlaceholder": "puppy",
-    "selectPlaceholder": "Id, Name, Email (раздвојено зарезима)",
+    "selectPlaceholder": "Id, Name, Email (razdvojeno zarezima)",
     "skipPlaceholder": "0",
     "topPlaceholder": "50",
     "urlPlaceholder": "https://service/odata/EntitySet",
-    "urlPreview": "Преглед URL-а (пре разрешавања)",
-    "versionV2NotYet": "v2 (извршавање још није подржано)",
-    "versionV3NotYet": "v3 (извршавање још није подржано)",
-    "operationKindEntitySet": "Скуп ентитета (GET)",
-    "operationKindFunction": "Функција (GET са уграђеним параметрима)",
-    "operationKindAction": "Акција (POST са JSON телом)",
-    "operationKindBatch": "Група ($batch — multipart/mixed)",
-    "version": "OData верзија",
-    "operationKind": "Врста операције"
+    "urlPreview": "Pregled URL-a (pre razrešavanja)",
+    "versionV2NotYet": "v2 (izvršavanje još nije podržano)",
+    "versionV3NotYet": "v3 (izvršavanje još nije podržano)",
+    "operationKindEntitySet": "Skup entiteta (GET)",
+    "operationKindFunction": "Funkcija (GET sa ugrađenim parametrima)",
+    "operationKindAction": "Akcija (POST sa JSON telom)",
+    "operationKindBatch": "Grupa ($batch — multipart/mixed)",
+    "version": "OData verzija",
+    "operationKind": "Vrsta operacije"
   },
   "typedValue": {
     "list": {
-      "add": "Додај вредност"
+      "add": "Dodaj vrednost"
     }
   },
   "http": {
     "server": {
-      "startListening": "Почни слушање",
-      "stopListening": "Заустави слушање",
-      "notListening": "Не слуша",
-      "served": "Слуша — опслужено {{count}} захтева",
-      "listenFailed": "Покретање mock сервера није успело"
+      "startListening": "Počni slušanje",
+      "stopListening": "Zaustavi slušanje",
+      "notListening": "Ne sluša",
+      "served": "Sluša — opsluženo {{count}} zahteva",
+      "listenFailed": "Pokretanje mock servera nije uspelo"
     }
   },
   "odata": {
     "server": {
-      "startListening": "Почни слушање",
-      "stopListening": "Заустави слушање",
-      "notListening": "Не слуша",
-      "served": "Слуша — опслужено {{count}} захтева",
-      "listenFailed": "Покретање mock OData сервера није успело",
+      "startListening": "Počni slušanje",
+      "stopListening": "Zaustavi slušanje",
+      "notListening": "Ne sluša",
+      "served": "Sluša — opsluženo {{count}} zahteva",
+      "listenFailed": "Pokretanje mock OData servera nije uspelo",
       "metadataLabel": "$metadata (CSDL)",
-      "dataLabel": "Опслужени подаци ентитета (по скупу ентитета)"
+      "dataLabel": "Opsluženi podaci entiteta (po skupu entiteta)"
     }
   },
   "quickSettings": {
@@ -2350,8 +2350,8 @@
     "deleteConfirm": {
       "title": "Obriši konfiguraciju",
       "message": "Da li želite da obrišete konfiguraciju „{{name}}\"?",
-      "usedByScenarios_one": "Користи је сценарио {{scenarios}}.",
-      "usedByScenarios_other": "Користе је сценарији {{scenarios}}."
+      "usedByScenarios_one": "Koristi je scenario {{scenarios}}.",
+      "usedByScenarios_other": "Koriste je scenariji {{scenarios}}."
     },
     "confirm": {
       "ok": "OK",
@@ -2360,12 +2360,12 @@
   },
   "subscription": {
     "checkout": {
-      "forbidden": "Замолите администратора своје организације да се претплати.",
-      "error": "Претплату није могуће покренути. Покушајте поново."
+      "forbidden": "Zamolite administratora svoje organizacije da se pretplati.",
+      "error": "Pretplatu nije moguće pokrenuti. Pokušajte ponovo."
     },
     "portal": {
-      "noSubscription": "Нема активне претплате за управљање.",
-      "error": "Портал за претплату није могуће отворити. Покушајте поново."
+      "noSubscription": "Nema aktivne pretplate za upravljanje.",
+      "error": "Portal za pretplatu nije moguće otvoriti. Pokušajte ponovo."
     }
   },
   "trpc": {
@@ -2382,36 +2382,36 @@
     }
   },
   "stomp": {
-    "connect": "Повежи",
-    "disconnect": "Прекини везу",
-    "connected": "Повезано",
-    "disconnected": "Није повезано",
-    "noMessages": "Још нема оквира",
-    "version": "STOMP верзија",
+    "connect": "Poveži",
+    "disconnect": "Prekini vezu",
+    "connected": "Povezano",
+    "disconnected": "Nije povezano",
+    "noMessages": "Još nema okvira",
+    "version": "STOMP verzija",
     "tabs": {
-      "connect": "Веза",
-      "subscriptions": "Претплате",
-      "send": "Пошаљи"
+      "connect": "Veza",
+      "subscriptions": "Pretplate",
+      "send": "Pošalji"
     },
     "ackMode": {
       "auto": "auto",
       "client": "client",
       "clientIndividual": "client-individual"
     },
-    "subscriptionIdLabel": "ID претплате",
-    "removeSubscription": "Уклони претплату",
-    "addSubscription": "Додај претплату",
-    "sendDestination": "Одредиште",
+    "subscriptionIdLabel": "ID pretplate",
+    "removeSubscription": "Ukloni pretplatu",
+    "addSubscription": "Dodaj pretplatu",
+    "sendDestination": "Odredište",
     "ack": "ACK",
     "nack": "NACK"
   },
   "server": {
-    "configLockedWhileRunning": "Конфигурација закључана док се сервер извршава"
+    "configLockedWhileRunning": "Konfiguracija zaključana dok se server izvršava"
   },
   "git": {
     "pullFailedTitle": "Preuzimanje nije uspelo",
     "pullFailedBody": "Nije moguće preuzeti najnovije izmene.",
-    "pullSaveFailedBody": "Ваше измене није могуће сачувати пре повлачења.",
+    "pullSaveFailedBody": "Vaše izmene nije moguće sačuvati pre povlačenja.",
     "pushFailedTitle": "Slanje nije uspelo",
     "pushFailedBody": "Nije moguće poslati izmene.",
     "pushSucceededTitle": "Poslato",
@@ -2424,10 +2424,10 @@
     "historyTitle": "Git istorija",
     "conflictCancel": "Otkaži",
     "conflictFinish": "Završi",
-    "conflictReadOnlyEntityNotice": "Овај тип ентитета не може се уређивати овде. Изнад изаберите своју или њихову верзију.",
-    "quickConfigConflictTitle": "Брзе конфигурације у сукобу",
-    "quickConfigOurs": "Ваша",
-    "quickConfigTheirs": "Њихова",
+    "conflictReadOnlyEntityNotice": "Ovaj tip entiteta ne može se uređivati ovde. Iznad izaberite svoju ili njihovu verziju.",
+    "quickConfigConflictTitle": "Brze konfiguracije u sukobu",
+    "quickConfigOurs": "Vaša",
+    "quickConfigTheirs": "Njihova",
     "settingsTitle": "Git",
     "applyCommitMessageLanguageByDefaultTitle": "Primeni ovaj jezik poruke commita kao podrazumevani",
     "applyCommitMessageLanguageByDefaultDescription": "Kada je uključeno, jezik izabran u prozoru slanja postaje podrazumevani za buduća slanja.",
@@ -2444,12 +2444,12 @@
       "addedEnvironmentFolder": "Dodata fascikla okruženja „{{name}}”",
       "modifiedEnvironmentFolder": "Izmenjena fascikla okruženja „{{name}}”",
       "deletedEnvironmentFolder": "Uklonjena fascikla okruženja „{{name}}”",
-      "movedRequest": "Премештен захтев \"{{name}}\"",
-      "movedScenario": "Премештен сценарио \"{{name}}\"",
-      "movedFolder": "Премештена фасцикла \"{{name}}\"",
-      "movedEnvironmentFolder": "Премештена фасцикла окружења \"{{name}}\"",
-      "reorderedFolder": "Промењен редослед ставки у фасцикли „{{name}}“",
-      "reorderedEnvironmentFolder": "Промењен редослед ставки у фасцикли окружења „{{name}}“"
+      "movedRequest": "Premešten zahtev \"{{name}}\"",
+      "movedScenario": "Premešten scenario \"{{name}}\"",
+      "movedFolder": "Premeštena fascikla \"{{name}}\"",
+      "movedEnvironmentFolder": "Premeštena fascikla okruženja \"{{name}}\"",
+      "reorderedFolder": "Promenjen redosled stavki u fascikli „{{name}}“",
+      "reorderedEnvironmentFolder": "Promenjen redosled stavki u fascikli okruženja „{{name}}“"
     },
     "commitTitle": {
       "singleRequest": "Ažuriranje zahteva „{{name}}”",
@@ -2466,120 +2466,120 @@
       "countEnvironmentFolder_other": "{{count}} fascikli okruženja",
       "multiple": "Ažuriranje: {{parts}}"
     },
-    "semiPullFrequencyTitle": "Учесталост аутоматске провере ажурирања",
-    "semiPullFrequencyDescription": "Колико често Restorm у позадини проверава да ли постоји новија верзија ове датотеке у репозиторијуму (само преузимање и поређење — никада аутоматско спајање).",
+    "semiPullFrequencyTitle": "Učestalost automatske provere ažuriranja",
+    "semiPullFrequencyDescription": "Koliko često Restorm u pozadini proverava da li postoji novija verzija ove datoteke u repozitorijumu (samo preuzimanje i poređenje — nikada automatsko spajanje).",
     "semiPullFrequency": {
-      "off": "Искључено",
-      "15m": "Сваких 15 минута",
-      "30m": "Сваких 30 минута",
-      "1h": "Сваки сат",
-      "4h": "Свака 4 сата",
-      "12h": "Сваких 12 сати",
-      "24h": "Сваких 24 сата"
+      "off": "Isključeno",
+      "15m": "Svakih 15 minuta",
+      "30m": "Svakih 30 minuta",
+      "1h": "Svaki sat",
+      "4h": "Svaka 4 sata",
+      "12h": "Svakih 12 sati",
+      "24h": "Svakih 24 sata"
     },
     "gate": {
-      "initGitFolder": "Иницијализујте свој git фолдер да бисте користили ову функцију."
+      "initGitFolder": "Inicijalizujte svoj git folder da biste koristili ovu funkciju."
     },
-    "conflictChooseVersion": "Изаберите верзију",
-    "conflictChooseVersionHint": "Кликните на <0></0> на врху своје верзије или верзије сервера — затим можете уредити свако поље пре чувања.",
-    "conflictFinishBlocked": "Неки сукоби још увек чекају решавање.",
-    "conflictOnQuickConfig": "Сукоб се односи на брзо подешавање захтева: {{name}}",
-    "conflictNameField": "Назив",
-    "conflictTagsEmpty": "Нема ознака на овој страни.",
-    "conflictTagName": "Назив ознаке",
-    "conflictTagRemove": "Уклони ову ознаку",
-    "conflictTagAdd": "Додај ознаку",
+    "conflictChooseVersion": "Izaberite verziju",
+    "conflictChooseVersionHint": "Kliknite na <0></0> na vrhu svoje verzije ili verzije servera — zatim možete urediti svako polje pre čuvanja.",
+    "conflictFinishBlocked": "Neki sukobi još uvek čekaju rešavanje.",
+    "conflictOnQuickConfig": "Sukob se odnosi na brzo podešavanje zahteva: {{name}}",
+    "conflictNameField": "Naziv",
+    "conflictTagsEmpty": "Nema oznaka na ovoj strani.",
+    "conflictTagName": "Naziv oznake",
+    "conflictTagRemove": "Ukloni ovu oznaku",
+    "conflictTagAdd": "Dodaj oznaku",
     "conflictTagNew": "nova-oznaka",
-    "conflictTagsTab": "Ознаке",
-    "conflictTreeStructure": "Структура стабла"
+    "conflictTagsTab": "Oznake",
+    "conflictTreeStructure": "Struktura stabla"
   },
   "gitUpdate": {
-    "title": "Потребно је ажурирање",
-    "message": "На удаљеном серверу постоји новија верзија датотеке. Морате ажурирати своју верзију пре него што наставите. Ако постоје сукоби између ваше верзије и верзије сервера, помоћи ћемо вам да их решите.",
-    "conflictCount_one": "{{count}} ставка се разликује између ваше верзије и верзије сервера.",
-    "conflictCount_other": "Број ставки које се разликују између ваше верзије и верзије сервера: {{count}}.",
-    "cancel": "Откажи",
-    "discardMine": "Одбаци моје измене",
-    "keepMineOverwriting": "Задржи моју верзију (преписује измене сервера)",
-    "updateFailedTitle": "Ажурирање није успело",
-    "updateFailedBody": "Није било могуће преузети верзију са удаљеног сервера.",
-    "discardedTitle": "Измене одбачене",
-    "discardedBody": "Сада сте на најновијој верзији са сервера.",
-    "updatedTitle": "Пројекат ажуриран",
-    "updatedBody": "Сада сте на најновијој верзији са сервера, а ваше измене су задржане.",
-    "keepServerVersion": "Задржи верзију сервера",
-    "resolveConflicts": "Реши сукобе",
-    "resetConfirmTitle": "Вратити на верзију сервера?",
-    "resetConfirmBody": "Све ваше локалне измене биће трајно обрисане и замењене верзијом сервера."
+    "title": "Potrebno je ažuriranje",
+    "message": "Na udaljenom serveru postoji novija verzija datoteke. Morate ažurirati svoju verziju pre nego što nastavite. Ako postoje sukobi između vaše verzije i verzije servera, pomoći ćemo vam da ih rešite.",
+    "conflictCount_one": "{{count}} stavka se razlikuje između vaše verzije i verzije servera.",
+    "conflictCount_other": "Broj stavki koje se razlikuju između vaše verzije i verzije servera: {{count}}.",
+    "cancel": "Otkaži",
+    "discardMine": "Odbaci moje izmene",
+    "keepMineOverwriting": "Zadrži moju verziju (prepisuje izmene servera)",
+    "updateFailedTitle": "Ažuriranje nije uspelo",
+    "updateFailedBody": "Nije bilo moguće preuzeti verziju sa udaljenog servera.",
+    "discardedTitle": "Izmene odbačene",
+    "discardedBody": "Sada ste na najnovijoj verziji sa servera.",
+    "updatedTitle": "Projekat ažuriran",
+    "updatedBody": "Sada ste na najnovijoj verziji sa servera, a vaše izmene su zadržane.",
+    "keepServerVersion": "Zadrži verziju servera",
+    "resolveConflicts": "Reši sukobe",
+    "resetConfirmTitle": "Vratiti na verziju servera?",
+    "resetConfirmBody": "Sve vaše lokalne izmene biće trajno obrisane i zamenjene verzijom servera."
   },
   "gitHistory": {
-    "recoverConfirmTitle": "Вратити ову верзију?",
-    "recoverConfirmBody": "Тренутни садржај отворене датотеке биће замењен верзијом овог комита. Промена се не комитује — можете је сами комитовати и погурати ако желите да је задржите.",
-    "recoverConfirmAction": "Врати",
-    "recoveredTitle": "Верзија враћена",
-    "recoveredBody": "Датотека сада садржи садржај изабраног комита, некомитован.",
-    "recoverFailedTitle": "Враћање није успело"
+    "recoverConfirmTitle": "Vratiti ovu verziju?",
+    "recoverConfirmBody": "Trenutni sadržaj otvorene datoteke biće zamenjen verzijom ovog komita. Promena se ne komituje — možete je sami komitovati i pogurati ako želite da je zadržite.",
+    "recoverConfirmAction": "Vrati",
+    "recoveredTitle": "Verzija vraćena",
+    "recoveredBody": "Datoteka sada sadrži sadržaj izabranog komita, nekomitovan.",
+    "recoverFailedTitle": "Vraćanje nije uspelo"
   },
   "updates": {
-    "seeReleaseNotes": "Погледај белешке о издању",
-    "settingsTitle": "Ажурирања",
-    "autoCheckTitle": "Аутоматски проверавај ажурирања",
-    "autoCheckDescription": "Проверава ажурирања у позадини при покретању и повремено.",
-    "statusTitle": "Статус ажурирања",
-    "statusDescription": "Тренутна верзија и статус ажурирања, уз ручну проверу.",
-    "currentVersion": "Верзија {{version}}",
-    "checkNow": "Провери сада",
-    "readyTitle": "Ажурирање је спремно",
-    "readyBody": "Верзија {{version}} је спремна за инсталацију.",
-    "restartNow": "Поново покрени сада",
-    "checkFailedTitle": "Провера ажурирања није успела",
-    "checkFailedBody": "Није могуће проверити ажурирања. Покушајте поново касније.",
-    "upToDateTitle": "Имате најновију верзију",
-    "upToDateBody": "Користите најновију верзију ({{version}}).",
-    "whatsNewTitle": "Шта је ново?",
+    "seeReleaseNotes": "Pogledaj beleške o izdanju",
+    "settingsTitle": "Ažuriranja",
+    "autoCheckTitle": "Automatski proveravaj ažuriranja",
+    "autoCheckDescription": "Proverava ažuriranja u pozadini pri pokretanju i povremeno.",
+    "statusTitle": "Status ažuriranja",
+    "statusDescription": "Trenutna verzija i status ažuriranja, uz ručnu proveru.",
+    "currentVersion": "Verzija {{version}}",
+    "checkNow": "Proveri sada",
+    "readyTitle": "Ažuriranje je spremno",
+    "readyBody": "Verzija {{version}} je spremna za instalaciju.",
+    "restartNow": "Ponovo pokreni sada",
+    "checkFailedTitle": "Provera ažuriranja nije uspela",
+    "checkFailedBody": "Nije moguće proveriti ažuriranja. Pokušajte ponovo kasnije.",
+    "upToDateTitle": "Imate najnoviju verziju",
+    "upToDateBody": "Koristite najnoviju verziju ({{version}}).",
+    "whatsNewTitle": "Šta je novo?",
     "status": {
-      "idle": "Ажурирано",
-      "checking": "Провера…",
-      "downloading": "Преузимање… {{percent}} %",
-      "downloaded": "Ажурирање спремно за инсталацију ({{version}})",
-      "error": "Провера није успела"
+      "idle": "Ažurirano",
+      "checking": "Provera…",
+      "downloading": "Preuzimanje… {{percent}} %",
+      "downloaded": "Ažuriranje spremno za instalaciju ({{version}})",
+      "error": "Provera nije uspela"
     }
   },
   "privacy": {
-    "settingsTitle": "Приватност",
-    "crashReportsTitle": "Слање извештаја о паду",
-    "crashReportsDescription": "Шаље анонимизовани извештај када се Restorm сруши, како би квар могао да се исправи. Извештаји се чисте од URL адреса, токена, тела захтева и личних података пре него што напусте ваш рачунар. Укључено у бесплатни план; плаћени план омогућава искључивање. Сви детаљи: https://restorm.app/privacy",
-    "telemetryTitle": "Слање статистике коришћења",
-    "telemetryDescription": "Шаље анонимну статистику о томе које се функције користе, ради усмеравања будућег развоја. Подразумевано искључено и никада укључено без вашег изричитог пристанка. Не садржи податке захтева, URL адресе ни личне податке. Сви детаљи: https://restorm.app/privacy",
-    "crashReportsLockedLabel": "Може се мењати од Pro плана. У бесплатном плану извештаји о рушењу су неопходни за одржавање квалитета.",
+    "settingsTitle": "Privatnost",
+    "crashReportsTitle": "Slanje izveštaja o padu",
+    "crashReportsDescription": "Šalje anonimizovani izveštaj kada se Restorm sruši, kako bi kvar mogao da se ispravi. Izveštaji se čiste od URL adresa, tokena, tela zahteva i ličnih podataka pre nego što napuste vaš računar. Uključeno u besplatni plan; plaćeni plan omogućava isključivanje. Svi detalji: https://restorm.app/privacy",
+    "telemetryTitle": "Slanje statistike korišćenja",
+    "telemetryDescription": "Šalje anonimnu statistiku o tome koje se funkcije koriste, radi usmeravanja budućeg razvoja. Podrazumevano isključeno i nikada uključeno bez vašeg izričitog pristanka. Ne sadrži podatke zahteva, URL adrese ni lične podatke. Svi detalji: https://restorm.app/privacy",
+    "crashReportsLockedLabel": "Može se menjati od Pro plana. U besplatnom planu izveštaji o rušenju su neophodni za održavanje kvaliteta.",
     "consentToast": {
-      "title": "Помозите нам да побољшамо Restorm",
-      "body": "У случају неочекиване грешке, Restorm нам може послати анонимну пријаву како бисмо исправили проблем. Садржи технички траг грешке и дијагностички контекст (верзију апликације, недавне радње). URL адресе, токени, тела захтева и одговора и лични подаци уклањају се пре него што извештај напусти ваш уређај. Пре сваког извештаја видећете тачно шта се шаље.",
-      "save": "Сачувај моја подешавања",
-      "learnMore": "Сазнајте више"
+      "title": "Pomozite nam da poboljšamo Restorm",
+      "body": "U slučaju neočekivane greške, Restorm nam može poslati anonimnu prijavu kako bismo ispravili problem. Sadrži tehnički trag greške i dijagnostički kontekst (verziju aplikacije, nedavne radnje). URL adrese, tokeni, tela zahteva i odgovora i lični podaci uklanjaju se pre nego što izveštaj napusti vaš uređaj. Pre svakog izveštaja videćete tačno šta se šalje.",
+      "save": "Sačuvaj moja podešavanja",
+      "learnMore": "Saznajte više"
     },
-    "crashReportReviewTitle": "Прикажи сваки извештај пре слања",
-    "crashReportReviewDescription": "Приказује тачан садржај извештаја о рушењу и тражи потврду пре слања. Искључите за аутоматско слање без питања.",
+    "crashReportReviewTitle": "Prikaži svaki izveštaj pre slanja",
+    "crashReportReviewDescription": "Prikazuje tačan sadržaj izveštaja o rušenju i traži potvrdu pre slanja. Isključite za automatsko slanje bez pitanja.",
     "reportDialog": {
-      "title": "Послати овај извештај о рушењу?",
-      "intro": "Restorm је наишао на проблем. Ово је тачно оно што би било послато.",
-      "includedError": "Техничка грешка и место у коду где се догодила",
-      "includedVersion": "Верзија апликације и ваш оперативни систем",
-      "includedActivity": "Шта је апликација радила непосредно пре квара",
-      "removed": "URL адресе, токени, тела захтева и одговора и лични подаци су већ уклоњени.",
-      "viewFull": "Прикажи цео извештај",
-      "waive": "Аутоматски шаљи будуће извештаје, без приказивања",
-      "send": "Пошаљи",
-      "discard": "Не шаљи"
+      "title": "Poslati ovaj izveštaj o rušenju?",
+      "intro": "Restorm je naišao na problem. Ovo je tačno ono što bi bilo poslato.",
+      "includedError": "Tehnička greška i mesto u kodu gde se dogodila",
+      "includedVersion": "Verzija aplikacije i vaš operativni sistem",
+      "includedActivity": "Šta je aplikacija radila neposredno pre kvara",
+      "removed": "URL adrese, tokeni, tela zahteva i odgovora i lični podaci su već uklonjeni.",
+      "viewFull": "Prikaži ceo izveštaj",
+      "waive": "Automatski šalji buduće izveštaje, bez prikazivanja",
+      "send": "Pošalji",
+      "discard": "Ne šalji"
     }
   },
   "crashRecovery": {
-    "message": "Restorm је наишао на проблем и мора поново да се покрене.",
-    "relaunch": "Поново покрени Restorm",
+    "message": "Restorm je naišao na problem i mora ponovo da se pokrene.",
+    "relaunch": "Ponovo pokreni Restorm",
     "notice": {
-      "title": "Датотека није поново отворена",
-      "body": "{{file}} није поново отворена: Restorm се срушио док ју је отварао при претходном покретању. Ваша датотека је неоштећена — можете је поново отворити из недавних датотека.",
-      "bodyUnnamed": "Последња датотека није поново отворена: Restorm се срушио док ју је отварао при претходном покретању. Ваша датотека је неоштећена — можете је поново отворити из недавних датотека."
+      "title": "Datoteka nije ponovo otvorena",
+      "body": "{{file}} nije ponovo otvorena: Restorm se srušio dok ju je otvarao pri prethodnom pokretanju. Vaša datoteka je neoštećena — možete je ponovo otvoriti iz nedavnih datoteka.",
+      "bodyUnnamed": "Poslednja datoteka nije ponovo otvorena: Restorm se srušio dok ju je otvarao pri prethodnom pokretanju. Vaša datoteka je neoštećena — možete je ponovo otvoriti iz nedavnih datoteka."
     }
   }
 }
