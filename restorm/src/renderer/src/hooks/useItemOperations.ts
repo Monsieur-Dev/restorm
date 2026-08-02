@@ -442,7 +442,20 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
     // so the search index — whose FOLDER_DELETED handler removes only the
     // named id, not descendants — clears the whole subtree. A scenario is
     // not itself indexed, but its descendant requests are, so we recurse
-    // into scenarios and announce those.
+    // into scenarios and announce those. An env-folder's `environments`
+    // (variables, not tree children — never reached via `.items`) get
+    // their own ENVIRONMENT_DELETED per env + sub-env, so ContextService /
+    // the search index drop them too instead of keeping a stale entry for
+    // an env-folder id that no longer resolves to anything.
+    const announceEnvironmentDeleted = (env: Environment, envFolderId: string, parentEnvironmentId: string | undefined): void => {
+      emitBothBuses(DocumentEvents.ENVIRONMENT_DELETED, {
+        id: env.id,
+        type: 'environment',
+        parentFolderId: envFolderId,
+        ...(parentEnvironmentId !== undefined ? { parentEnvironmentId } : {})
+      } as DocumentDeletedPayload)
+      for (const sub of env.subEnvironments ?? []) announceEnvironmentDeleted(sub, envFolderId, env.id)
+    }
     const announceDeleted = (node: FolderItem, parentId: string | undefined): void => {
       if (isRequest(node)) {
         emitBothBuses(DocumentEvents.REQUEST_DELETED, {
@@ -459,6 +472,9 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
             type: 'folder',
             ...(parentId !== undefined ? { parentFolderId: parentId } : {})
           } as DocumentDeletedPayload)
+        }
+        if (isEnvironmentFolder(node)) {
+          for (const env of node.environments) announceEnvironmentDeleted(env, node.id, undefined)
         }
         for (const child of (node as FolderItem & { items?: FolderItem[] }).items ?? []) {
           announceDeleted(child, node.id)
