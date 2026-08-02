@@ -1476,6 +1476,10 @@
       },
       "connection": {
         "missingName": "Naziv veze je obavezan."
+      },
+      "reachability": {
+        "unreachable": "Ova radnja nikada ne može da se izvrši: do nje ne dolazi nijedna veza iz radnje koja pokreće scenario.",
+        "cycle": "Ova radnja je deo petlje veza koju ništa ne pokreće, pa nikada ne može da se izvrši. Povežite sa njom radnju izvan petlje."
       }
     },
     "usage": {

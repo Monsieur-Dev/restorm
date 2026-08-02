@@ -1475,6 +1475,10 @@
       },
       "connection": {
         "missingName": "O nome da ligação é obrigatório."
+      },
+      "reachability": {
+        "unreachable": "Esta ação nunca pode ser executada: nenhuma ligação chega até ela a partir de uma ação que inicie o cenário.",
+        "cycle": "Esta ação faz parte de um ciclo de ligações que nada inicia, pelo que nunca pode ser executada. Ligue-lhe uma ação exterior ao ciclo."
       }
     },
     "usage": {

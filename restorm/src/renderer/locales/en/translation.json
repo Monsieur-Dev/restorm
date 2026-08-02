@@ -1475,6 +1475,10 @@
       },
       "connection": {
         "missingName": "A connection name is required."
+      },
+      "reachability": {
+        "unreachable": "This action can never run: no connection reaches it from an action that starts the scenario.",
+        "cycle": "This action sits in a loop of connections that nothing starts, so it can never run. Connect an action from outside the loop into it."
       }
     },
     "usage": {

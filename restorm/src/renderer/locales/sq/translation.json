@@ -1475,6 +1475,10 @@
       },
       "connection": {
         "missingName": "Emri i lidhjes është i detyrueshëm."
+      },
+      "reachability": {
+        "unreachable": "Ky veprim nuk mund të ekzekutohet kurrë: asnjë lidhje nuk arrin tek ai nga një veprim që nis skenarin.",
+        "cycle": "Ky veprim është pjesë e një cikli lidhjesh që nuk e nis asgjë, prandaj nuk mund të ekzekutohet kurrë. Lidhni me të një veprim jashtë ciklit."
       }
     },
     "usage": {

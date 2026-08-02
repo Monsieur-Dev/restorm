@@ -374,6 +374,105 @@ export function validateScenarioNode(node: ValidationNode, ctx: ScenarioValidati
   }
 }
 
+/** One wired connection, reduced to what the reachability analysis needs. */
+export interface ScenarioGraphEdge {
+  fromNodeId: string
+  toNodeId: string
+  toPortId: string
+}
+
+/**
+ * The nodes that can never execute, whatever the run does.
+ *
+ * The engine seeds every node with NO incoming edge and then fires a node once
+ * its wired inputs have arrived, so "can this ever run?" is a reachability
+ * question: start from the seeded roots and keep adding any node one of whose
+ * wired input ports could receive from a node already known to run. Whatever
+ * the fixpoint never reaches has no way to start.
+ *
+ * A port counts as feedable when ANY of its sources can run, deliberately —
+ * not all of them. A port fed by several branches where one branch is dead
+ * still leaves that branch's own nodes flagged, which is the useful pointer;
+ * adding the join to the report would repeat the same finding one hop later.
+ * Erring towards silence matters here because these errors block Play, so a
+ * false positive costs the user a scenario they could actually run.
+ */
+function findUnrunnableNodes(nodes: ValidationNode[], edges: ScenarioGraphEdge[]): { unrunnable: Set<string>; inCycle: Set<string> } {
+  const known = new Set(nodes.map((n) => n.id))
+  const sourcesByNodePort = new Map<string, Map<string, string[]>>()
+  const successors = new Map<string, Set<string>>()
+  for (const e of edges) {
+    // An edge naming a node that no longer exists is ignored, which can leave
+    // its target looking like a starting point even though the engine would not
+    // seed it. That under-reports rather than over-reports, and dangling edges
+    // are pruned when the scenario loads — the other way round would paint a red
+    // border on a box the user can still run.
+    if (!known.has(e.fromNodeId) || !known.has(e.toNodeId)) continue
+    const byPort = sourcesByNodePort.get(e.toNodeId) ?? new Map<string, string[]>()
+    byPort.set(e.toPortId, [...(byPort.get(e.toPortId) ?? []), e.fromNodeId])
+    sourcesByNodePort.set(e.toNodeId, byPort)
+    const succ = successors.get(e.fromNodeId) ?? new Set<string>()
+    succ.add(e.toNodeId)
+    successors.set(e.fromNodeId, succ)
+  }
+
+  // Seeded roots: no incoming edge at all.
+  const runnable = new Set<string>()
+  for (const n of nodes) if (!sourcesByNodePort.has(n.id)) runnable.add(n.id)
+
+  let changed = true
+  while (changed) {
+    changed = false
+    for (const n of nodes) {
+      if (runnable.has(n.id)) continue
+      const byPort = sourcesByNodePort.get(n.id)
+      if (!byPort) continue
+      let everyPortFeedable = true
+      for (const sources of byPort.values()) {
+        if (!sources.some((src) => runnable.has(src))) { everyPortFeedable = false; break }
+      }
+      if (everyPortFeedable) { runnable.add(n.id); changed = true }
+    }
+  }
+
+  const unrunnable = new Set<string>()
+  for (const n of nodes) if (!runnable.has(n.id)) unrunnable.add(n.id)
+
+  // Of those, the ones sitting on a loop nothing enters — worth saying so,
+  // because the fix ("connect something into the loop") differs from the fix
+  // for a node whose upstream is simply dead.
+  const inCycle = new Set<string>()
+  for (const id of unrunnable) {
+    const seen = new Set<string>()
+    const stack = [...(successors.get(id) ?? [])]
+    while (stack.length > 0) {
+      const cur = stack.pop()
+      if (cur === undefined) continue
+      if (cur === id) { inCycle.add(id); break }
+      if (seen.has(cur)) continue
+      seen.add(cur)
+      for (const next of successors.get(cur) ?? []) stack.push(next)
+    }
+  }
+  return { unrunnable, inCycle }
+}
+
+/** Flag every box that no run can ever reach. These block Play: a scenario
+ * carrying one cannot execute as drawn, and the alternative is discovering it
+ * as a box that silently never runs. */
+function validateReachability(nodes: ValidationNode[], edges: ScenarioGraphEdge[], t: TFunction): Map<string, ScenarioNodeError[]> {
+  const byNode = new Map<string, ScenarioNodeError[]>()
+  const { unrunnable, inCycle } = findUnrunnableNodes(nodes, edges)
+  for (const id of unrunnable) {
+    byNode.set(id, [
+      inCycle.has(id)
+        ? { code: 'unreachable-cycle', message: t('scenario.validation.reachability.cycle', 'This action sits in a loop of connections that nothing starts, so it can never run. Connect an action from outside the loop into it.') }
+        : { code: 'unreachable', message: t('scenario.validation.reachability.unreachable', 'This action can never run: no connection reaches it from an action that starts the scenario.') }
+    ])
+  }
+  return byNode
+}
+
 /** An incoming data link (a value/both output wired into a data input),
  * carrying the JSON-path selector applied to the value in transit. */
 export interface ScenarioDataLink {
@@ -426,18 +525,26 @@ function validateDataLinks(dataLinks: ScenarioDataLink[], t: TFunction): Map<str
 /** Validate every box; returns a map of node id → errors (only boxes in error
  * are present). `dataLinks` carries the incoming data links + their selectors
  * for the generic empty/malformed-path rule. */
-export function validateScenarioGraph(nodes: ValidationNode[], dataLinks: ScenarioDataLink[], connectedTargets: Set<string>, t: TFunction): Map<string, ScenarioNodeError[]> {
+export function validateScenarioGraph(
+  nodes: ValidationNode[],
+  dataLinks: ScenarioDataLink[],
+  connectedTargets: Set<string>,
+  t: TFunction,
+  edges: ScenarioGraphEdge[] = []
+): Map<string, ScenarioNodeError[]> {
   const ctx: ScenarioValidationContext = { nodes, connectedTargets, t }
   const byNode = new Map<string, ScenarioNodeError[]>()
-  for (const node of nodes) {
-    const errors = validateScenarioNode(node, ctx)
-    if (errors.length > 0) byNode.set(node.id, errors)
-  }
-  for (const [nodeId, errors] of validateDataLinks(dataLinks, t)) {
+  const add = (nodeId: string, errors: ScenarioNodeError[]): void => {
     const existing = byNode.get(nodeId)
     if (existing) existing.push(...errors)
     else byNode.set(nodeId, errors)
   }
+  for (const node of nodes) {
+    const errors = validateScenarioNode(node, ctx)
+    if (errors.length > 0) byNode.set(node.id, errors)
+  }
+  for (const [nodeId, errors] of validateDataLinks(dataLinks, t)) add(nodeId, errors)
+  for (const [nodeId, errors] of validateReachability(nodes, edges, t)) add(nodeId, errors)
   return byNode
 }
 
@@ -474,5 +581,8 @@ export function validateScenarioModel(scenario: Pick<Scenario, 'nodes' | 'edges'
     if (!(inFlow === 'value' && outFlow !== 'signal')) continue
     dataLinks.push({ targetNodeId: e.to.nodeId, targetPort: e.to.portId, selector: e.selector })
   }
-  return validateScenarioGraph(nodes, dataLinks, connectedTargets, t)
+  const graphEdges: ScenarioGraphEdge[] = scenario.edges
+    .filter((e) => e.from.nodeId && e.to.nodeId && e.to.portId)
+    .map((e) => ({ fromNodeId: e.from.nodeId, toNodeId: e.to.nodeId, toPortId: e.to.portId }))
+  return validateScenarioGraph(nodes, dataLinks, connectedTargets, t, graphEdges)
 }

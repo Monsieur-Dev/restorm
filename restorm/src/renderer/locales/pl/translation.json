@@ -1477,6 +1477,10 @@
       },
       "connection": {
         "missingName": "Nazwa połączenia jest wymagana."
+      },
+      "reachability": {
+        "unreachable": "Ta akcja nigdy się nie wykona: nie prowadzi do niej żadne połączenie od akcji rozpoczynającej scenariusz.",
+        "cycle": "Ta akcja należy do pętli połączeń, której nic nie uruchamia, więc nigdy się nie wykona. Podłącz do niej akcję spoza pętli."
       }
     },
     "usage": {

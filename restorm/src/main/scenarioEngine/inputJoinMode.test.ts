@@ -70,13 +70,19 @@ describe('`in` fan-in join mode', () => {
 
 // One producer feeds a log node on TWO ports at once: its `response` value into
 // the log's `data` port, and its universal `done` signal into the log's `in`
-// port. `done` fires only after the producer's whole data subtree drains — and
-// that subtree includes the log (via `response → data`). With a default
-// AND-join the log ALSO waits on `in`, so `done` waits for the log and the log
-// waits for `done`: a silent completion-cycle deadlock, the log never fires.
-// `runOnEachEvent` must fire the log per arriving event (each incoming wire is
-// an independent OR trigger), so the `response` event fires it regardless of
-// the never-yet-delivered `in`, which then lets the cycle resolve.
+// port. This is the everyday "fetch, then act on the response" wiring.
+//
+// `done` fires once the producer's data subtree has drained, but a consumer
+// gated on that very `done` is NOT part of the subtree — it runs on the `done`
+// CONTINUATION. So the producer's `done` does not wait for the log, the log
+// gets its trigger, and it fires ONCE holding both the routed value and the
+// trigger. (Counting such a token as a subtree obligation instead makes `done`
+// wait for a consumer that is itself waiting for `done` — a circular wait that
+// silently strands every node downstream.)
+//
+// `runOnEachEvent` keeps its own, different meaning: each incoming wire is an
+// independent OR trigger, so the log fires once per arriving token rather than
+// joining them into a single activation.
 function completionCycleScenario(logConfig: Record<string, unknown>): ScenarioModel {
   return buildScenario(
     [
@@ -102,12 +108,12 @@ async function countLogRuns(scenario: ScenarioModel): Promise<number> {
   return runs
 }
 
-describe('`runOnEachEvent` with a completion-cycle wire (response → data + done → in)', () => {
-  it('default AND-join silently deadlocks: the log never fires', async () => {
-    expect(await countLogRuns(completionCycleScenario({}))).toBe(0)
+describe('a value wire and a `done` wire into the same consumer (response → data + done → in)', () => {
+  it('default AND-join fires the consumer ONCE, joining the value with the trigger', async () => {
+    expect(await countLogRuns(completionCycleScenario({}))).toBe(1)
   })
 
-  it('runOnEachEvent fires the log on each event, breaking the cycle', async () => {
+  it('runOnEachEvent fires the log on each event instead of joining them', async () => {
     // `response → data` fires it once; the log then completes, the producer
     // subtree drains, `done → in` arrives and fires it a second time.
     expect(await countLogRuns(completionCycleScenario({ runOnEachEvent: true }))).toBe(2)

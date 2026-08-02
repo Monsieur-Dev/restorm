@@ -1474,6 +1474,10 @@
       },
       "connection": {
         "missingName": "Tên kết nối là bắt buộc."
+      },
+      "reachability": {
+        "unreachable": "Hành động này không bao giờ chạy được: không có kết nối nào dẫn tới nó từ một hành động khởi động kịch bản.",
+        "cycle": "Hành động này nằm trong một vòng lặp kết nối mà không có gì khởi động, nên không bao giờ chạy được. Hãy nối một hành động bên ngoài vòng lặp vào nó."
       }
     },
     "usage": {

@@ -1475,6 +1475,10 @@
       },
       "connection": {
         "missingName": "Ett anslutningsnamn krävs."
+      },
+      "reachability": {
+        "unreachable": "Den här åtgärden kan aldrig köras: ingen anslutning når fram till den från en åtgärd som startar scenariot.",
+        "cycle": "Den här åtgärden ingår i en slinga av anslutningar som ingenting startar, så den kan aldrig köras. Anslut en åtgärd utanför slingan till den."
       }
     },
     "usage": {

@@ -1475,6 +1475,10 @@
       },
       "connection": {
         "missingName": "Le nom de la connexion est obligatoire."
+      },
+      "reachability": {
+        "unreachable": "Cette action ne peut jamais s'exécuter : aucune connexion ne l'atteint depuis une action qui démarre le scénario.",
+        "cycle": "Cette action fait partie d'une boucle de connexions que rien ne démarre, elle ne peut donc jamais s'exécuter. Reliez-y une action extérieure à la boucle."
       }
     },
     "usage": {

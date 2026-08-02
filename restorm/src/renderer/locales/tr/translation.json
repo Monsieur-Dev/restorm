@@ -1475,6 +1475,10 @@
       },
       "connection": {
         "missingName": "Bağlantı adı zorunludur."
+      },
+      "reachability": {
+        "unreachable": "Bu eylem hiçbir zaman çalışamaz: senaryoyu başlatan bir eylemden ona ulaşan bağlantı yok.",
+        "cycle": "Bu eylem, hiçbir şeyin başlatmadığı bir bağlantı döngüsünün parçası olduğundan hiçbir zaman çalışamaz. Döngü dışından bir eylemi buna bağlayın."
       }
     },
     "usage": {

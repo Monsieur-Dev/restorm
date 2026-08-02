@@ -1476,6 +1476,10 @@
       },
       "connection": {
         "missingName": "Numele conexiunii este obligatoriu."
+      },
+      "reachability": {
+        "unreachable": "Această acțiune nu se poate executa niciodată: nicio conexiune nu ajunge la ea dintr-o acțiune care pornește scenariul.",
+        "cycle": "Această acțiune face parte dintr-o buclă de conexiuni pe care nimic nu o pornește, deci nu se poate executa niciodată. Conectați la ea o acțiune din afara buclei."
       }
     },
     "usage": {

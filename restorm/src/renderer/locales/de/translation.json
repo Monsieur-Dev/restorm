@@ -1475,6 +1475,10 @@
       },
       "connection": {
         "missingName": "Ein Verbindungsname ist erforderlich."
+      },
+      "reachability": {
+        "unreachable": "Diese Aktion kann nie ausgeführt werden: Keine Verbindung erreicht sie von einer Aktion aus, die das Szenario startet.",
+        "cycle": "Diese Aktion liegt in einer Verbindungsschleife, die durch nichts gestartet wird, und kann daher nie ausgeführt werden. Verbinden Sie eine Aktion von außerhalb der Schleife mit ihr."
       }
     },
     "usage": {

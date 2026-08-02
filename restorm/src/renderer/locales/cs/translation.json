@@ -1477,6 +1477,10 @@
       },
       "connection": {
         "missingName": "Název připojení je povinný."
+      },
+      "reachability": {
+        "unreachable": "Tato akce se nikdy nespustí: nevede k ní žádné spojení od akce, která scénář zahajuje.",
+        "cycle": "Tato akce je součástí smyčky spojení, kterou nic nespouští, takže se nikdy nespustí. Připojte k ní akci zvenčí smyčky."
       }
     },
     "usage": {

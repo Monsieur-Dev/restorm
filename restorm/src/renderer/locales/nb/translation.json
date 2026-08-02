@@ -1475,6 +1475,10 @@
       },
       "connection": {
         "missingName": "Et tilkoblingsnavn er påkrevd."
+      },
+      "reachability": {
+        "unreachable": "Denne handlingen kan aldri kjøre: ingen forbindelse når fram til den fra en handling som starter scenariet.",
+        "cycle": "Denne handlingen inngår i en løkke av forbindelser som ingenting starter, så den kan aldri kjøre. Koble en handling utenfor løkken til den."
       }
     },
     "usage": {

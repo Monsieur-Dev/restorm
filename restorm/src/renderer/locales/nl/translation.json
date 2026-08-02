@@ -1475,6 +1475,10 @@
       },
       "connection": {
         "missingName": "Een verbindingsnaam is verplicht."
+      },
+      "reachability": {
+        "unreachable": "Deze actie kan nooit worden uitgevoerd: er loopt geen verbinding naartoe vanaf een actie die het scenario start.",
+        "cycle": "Deze actie maakt deel uit van een lus van verbindingen die door niets wordt gestart en kan daarom nooit worden uitgevoerd. Verbind er een actie van buiten de lus mee."
       }
     },
     "usage": {

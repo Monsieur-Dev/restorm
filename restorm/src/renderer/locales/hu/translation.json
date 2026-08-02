@@ -1475,6 +1475,10 @@
       },
       "connection": {
         "missingName": "A kapcsolat neve kötelező."
+      },
+      "reachability": {
+        "unreachable": "Ez a művelet soha nem futhat le: nem vezet hozzá kapcsolat a forgatókönyvet indító művelettől.",
+        "cycle": "Ez a művelet olyan kapcsolati hurok része, amelyet semmi nem indít el, ezért soha nem futhat le. Kössön hozzá egy hurkon kívüli műveletet."
       }
     },
     "usage": {

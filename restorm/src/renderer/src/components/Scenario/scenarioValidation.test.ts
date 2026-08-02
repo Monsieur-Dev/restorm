@@ -7,7 +7,8 @@ import {
   targetKey,
   type ValidationNode,
   type ScenarioNodeError,
-  type ScenarioDataLink
+  type ScenarioDataLink,
+  type ScenarioGraphEdge
 } from '../../../../shared/scenarioValidation'
 
 // Identity-ish translator: return the default text so message assertions read
@@ -22,8 +23,13 @@ function node(id: string, kind: ValidationNode['kind'], config: Record<string, u
   return { id, kind, config }
 }
 
-function run(nodes: ValidationNode[], opts?: { dataLinks?: ScenarioDataLink[]; connected?: string[] }): Map<string, ScenarioNodeError[]> {
-  return validateScenarioGraph(nodes, opts?.dataLinks ?? [], new Set(opts?.connected ?? []), t)
+function run(nodes: ValidationNode[], opts?: { dataLinks?: ScenarioDataLink[]; connected?: string[]; edges?: ScenarioGraphEdge[] }): Map<string, ScenarioNodeError[]> {
+  return validateScenarioGraph(nodes, opts?.dataLinks ?? [], new Set(opts?.connected ?? []), t, opts?.edges ?? [])
+}
+
+/** `a.out -> b.in` shorthand for the reachability cases. */
+function edge(fromNodeId: string, toNodeId: string, toPortId = 'in'): ScenarioGraphEdge {
+  return { fromNodeId, toNodeId, toPortId }
 }
 
 function codes(map: Map<string, { code: string }[]>, id: string): string[] {
@@ -324,5 +330,64 @@ describe('validateScenarioModel — engine/MCP gate from the persisted model', (
       edges: [{ id: 'e', from: { nodeId: 'src', portId: 'value' }, to: { nodeId: 'a', portId: 'b' }, selector: '.' }]
     }
     expect(validateScenarioModel(scenario as never, t).has('a')).toBe(false)
+  })
+})
+
+describe('scenarioValidation — boxes no run can ever reach', () => {
+  it('accepts a plain chain: the first box seeds the run, the rest follow', () => {
+    const errs = run([node('a', 'now'), node('b', 'log'), node('c', 'log')], {
+      edges: [edge('a', 'b'), edge('b', 'c')]
+    })
+    expect(codes(errs, 'a')).toEqual([])
+    expect(codes(errs, 'b')).toEqual([])
+    expect(codes(errs, 'c')).toEqual([])
+  })
+
+  it('accepts a box fed only on a data port, with no trigger wire', () => {
+    // A wired data input is enough to fire a box — it must not be mistaken for
+    // an unreachable one just because nothing lands on `in`.
+    const errs = run([node('a', 'now'), node('b', 'log')], { edges: [edge('a', 'b', 'data')] })
+    expect(codes(errs, 'b')).toEqual([])
+  })
+
+  it('accepts a loop-back wire, which reaches its target the long way round', () => {
+    const errs = run([node('a', 'now'), node('b', 'log'), node('c', 'log')], {
+      edges: [edge('a', 'b'), edge('b', 'c'), edge('c', 'b')]
+    })
+    expect(codes(errs, 'b')).toEqual([])
+    expect(codes(errs, 'c')).toEqual([])
+  })
+
+  it('flags a box whose only upstream can never run', () => {
+    // dead -> orphan: `dead` sits in an entryless pair with `ghost`, so nothing
+    // downstream of it can start either.
+    const errs = run([node('root', 'now'), node('dead', 'log'), node('ghost', 'log'), node('orphan', 'log')], {
+      edges: [edge('dead', 'ghost'), edge('ghost', 'dead'), edge('dead', 'orphan'), edge('root', 'root', 'unused')]
+    })
+    expect(codes(errs, 'orphan')).toContain('unreachable')
+  })
+
+  it('flags a cycle nothing enters, and says it is a loop', () => {
+    const errs = run([node('x', 'log'), node('y', 'log')], { edges: [edge('x', 'y'), edge('y', 'x')] })
+    expect(codes(errs, 'x')).toContain('unreachable-cycle')
+    expect(codes(errs, 'y')).toContain('unreachable-cycle')
+    expect((errs.get('x') ?? [])[0]?.message).toContain('loop')
+  })
+
+  it('leaves a scenario with no wires at all alone — every box is a starting point', () => {
+    const errs = run([node('a', 'now'), node('b', 'log')])
+    expect(codes(errs, 'a')).toEqual([])
+    expect(codes(errs, 'b')).toEqual([])
+  })
+
+  it('does not flag a fan-in where only one branch is live', () => {
+    // `join` is fed by a live branch and a dead one. The dead branch's own
+    // boxes carry the error; repeating it on the join would just be noise, and
+    // the join genuinely does run.
+    const errs = run([node('root', 'now'), node('live', 'log'), node('deadA', 'log'), node('deadB', 'log'), node('join', 'log')], {
+      edges: [edge('root', 'live'), edge('deadA', 'deadB'), edge('deadB', 'deadA'), edge('live', 'join'), edge('deadB', 'join')]
+    })
+    expect(codes(errs, 'join')).toEqual([])
+    expect(codes(errs, 'deadA')).toContain('unreachable-cycle')
   })
 })

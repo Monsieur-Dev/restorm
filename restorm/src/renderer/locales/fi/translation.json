@@ -1475,6 +1475,10 @@
       },
       "connection": {
         "missingName": "Yhteyden nimi vaaditaan."
+      },
+      "reachability": {
+        "unreachable": "Tämä toiminto ei voi koskaan suorittua: siihen ei johda yhteyttä skenaarion aloittavasta toiminnosta.",
+        "cycle": "Tämä toiminto on yhteyssilmukassa, jota mikään ei käynnistä, joten se ei voi koskaan suorittua. Yhdistä siihen toiminto silmukan ulkopuolelta."
       }
     },
     "usage": {
